@@ -1,0 +1,8 @@
+institution_id: evergreen_retirement
+display_name: Evergreen Retirement
+type: retirement_provider
+brand_voice: traditional
+domains:
+- retirement
+placeholder: true
+schema_version: v0.1

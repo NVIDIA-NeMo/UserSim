@@ -1,0 +1,16 @@
+[
+    {"type": "mathematics", "description": "Concepts mathématiques et résolution de problèmes"},
+    {"type": "science", "description": "Sciences incluant la physique, la chimie et la biologie"},
+    {"type": "language_learning", "description": "Apprentissage d'une nouvelle langue ou perfectionnement linguistique"},
+    {"type": "programming", "description": "Programmation informatique et développement logiciel"},
+    {"type": "history", "description": "Événements historiques, périodes et personnages"},
+    {"type": "personal_finance", "description": "Finances personnelles, budget et investissements"},
+    {"type": "health_literacy", "description": "Compréhension des informations de santé et décisions éclairées"},
+    {"type": "digital_literacy", "description": "Compétences de base en informatique et internet"},
+    {"type": "civics", "description": "Éducation civique, structure gouvernementale et droits des citoyens"},
+    {"type": "geography", "description": "Géographie, cartes et compréhension du monde"},
+    {"type": "philosophie", "description": "Le programme de philosophie en Terminale et la dissertation philosophique"},
+    {"type": "histoire_de_france", "description": "L'histoire de France de la Révolution à la Cinquième République"},
+    {"type": "cuisine_francaise", "description": "Les techniques culinaires françaises et la gastronomie régionale"},
+    {"type": "droit_civique", "description": "L'éducation civique — laïcité, valeurs de la République et droits des citoyens"}
+]

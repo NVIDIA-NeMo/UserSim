@@ -1,0 +1,330 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for chandrika_bank (en_IN).
+#
+# Composition follows what en_US taught us:
+#   - one task per state-changing tool, so the whole tool surface can be gold
+#     (not just a distractor for retrieval);
+#   - ~40% of tasks at gold depth >=3 (depth 2 is barely multi-step; chained
+#     reasoning + the turn budget only get tested at 3-4);
+#   - THREE opening phrasings each, so turn-1 wording varies while gold is fixed;
+#   - `ordered: true` ONLY for a genuine dependency (otherwise the verifier
+#     produces false ordering failures on interchangeable actions);
+#   - `allowed_tools` for legitimate customer-invited extras, so a helpful agent
+#     is not scored as taking an unauthorized action;
+#   - card tasks pin last4 so the opening matches the grounded card.
+#
+# India: this locale's KYC requires full name + date of birth + PAN, so every
+# task exercises the PAN verification path.
+templates:
+# ── depth 1 ───────────────────────────────────────────────────────────
+- id: TPL-CB-UPI-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Hi, there's a UPI debit of ₹{{amount}} to {{merchant}} on my account from
+    yesterday that I did not make. Can you help me get it reversed?
+  - >-
+    I can see a ₹{{amount}} UPI payment to {{merchant}} in my statement that
+    isn't mine. How do I raise a dispute?
+  - >-
+    Someone has taken ₹{{amount}} from my account via UPI — the name shows
+    {{merchant}}. I never authorised this. Please help.
+  account_state:
+    account_id: acct_cb_0001
+    account_type: savings account
+    last4: '0001'
+    balance: '68,000'
+    cards:
+    - {card_id: card_cb_0001, status: active}
+    transactions:
+    - {transaction_id: txn_cb_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [QuickPay Retail, Nova Digital Store, Sunrise Traders, Metro Utilities]
+    amount: ['2,499', '850', '14,999']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_cb_0001.status: UNDER_REVIEW}
+  allowed_tools: [freeze_card, order_replacement_card]
+
+- id: TPL-CB-FD-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I'd like to put ₹{{amount}} into a fixed deposit for one year. Can you set
+    that up from my savings account?
+  - >-
+    I have some money sitting idle — around ₹{{amount}}. I want to book an FD for
+    12 months. How do I do that?
+  - >-
+    Please open a one-year fixed deposit for ₹{{amount}} from my account.
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '1,20,000'}
+  param_space:
+    amount: ['25,000', '50,000', '1,00,000']
+  gold_tool_sequence: [book_fixed_deposit]
+  expected_state_deltas: {fixed_deposit_status: BOOKED}
+
+- id: TPL-CB-UPI-PAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    I need to send ₹{{amount}} to {{payee}} by UPI today. Can you do that from my
+    account?
+  - >-
+    Please make a UPI payment of ₹{{amount}} to {{payee}} — it's for {{purpose}}.
+  - >-
+    Can you transfer ₹{{amount}} to {{payee}} over UPI? I have to pay for
+    {{purpose}} before this evening.
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '68,000'}
+  param_space:
+    payee: [my landlord, the milk vendor, my son's tuition teacher]
+    amount: ['1,200', '8,000', '18,500']
+    purpose: [this month's rent, a pending bill, fees]
+  gold_tool_sequence: [make_upi_payment]
+  expected_state_deltas: {upi_payment_status: COMPLETED}
+
+- id: TPL-CB-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    Please move ₹{{amount}} from my savings account to my {{destination}}.
+  - >-
+    I want to transfer ₹{{amount}} out to my {{destination}} — can you process
+    that?
+  - >-
+    Can you shift ₹{{amount}} across to my {{destination}} today?
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '1,20,000'}
+  param_space:
+    amount: ['10,000', '35,000', '75,000']
+    destination: [account at another bank, recurring deposit, wife's account]
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+
+- id: TPL-CB-BILLPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    My {{biller}} bill of ₹{{amount}} is due {{when}}. Please pay it from my
+    account.
+  - >-
+    Can you settle my {{biller}} bill? It's ₹{{amount}} and due {{when}}.
+  - >-
+    I don't want a late charge — please pay the ₹{{amount}} {{biller}} bill that's
+    due {{when}}.
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '68,000'}
+  param_space:
+    biller: [electricity, water, gas, broadband]
+    amount: ['1,450', '2,300', '890']
+    when: [tomorrow, today, in two days]
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {bill_payment_status: COMPLETED}
+
+- id: TPL-CB-STOPCHEQUE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I issued cheque number {{cheque}} for ₹{{amount}} and now I need to stop it —
+    {{reason}}. Can you put a stop payment on it?
+  - >-
+    Please block cheque {{cheque}} (₹{{amount}}) before it's presented.
+    {{reason}}.
+  - >-
+    Cheque {{cheque}} for ₹{{amount}} must not be honoured — {{reason}}. How do I
+    stop it?
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '68,000'}
+  param_space:
+    cheque: ['418823', '905117']
+    amount: ['12,000', '47,500']
+    reason: [the deal fell through, I lost the cheque book, I paid the party by UPI instead]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {stop_payment_status: ACTIVE}
+
+- id: TPL-CB-ADDRESS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I've shifted to {{city}}. Please update my address and mobile number on the
+    account.
+  - >-
+    My contact details have changed since I moved to {{city}} — can you update
+    them?
+  - >-
+    Please change my registered address to my new place in {{city}} and update my
+    phone number.
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '68,000'}
+  param_space:
+    city: [Pune, Bengaluru, Jaipur, Kochi]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_status: UPDATED}
+
+# ── depth 2 ───────────────────────────────────────────────────────────
+- id: TPL-CB-LOSTCARD-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Block then reissue. Either order is defensible service -> not ordered.
+  opening_user_messages:
+  - >-
+    My debit card ending {{last4}} was {{event}}. Please block it immediately and
+    send me a new one.
+  - >-
+    I think my debit card ending {{last4}} was {{event}} — I want it blocked right
+    now, and I'll need a replacement.
+  - >-
+    Card ending {{last4}} is {{event}}. Can you stop anyone using it and issue a
+    fresh card to my address?
+  account_state:
+    account_id: acct_cb_0001
+    account_type: savings account
+    last4: '0001'
+    balance: '41,500'
+    cards:
+    - {card_id: card_cb_0001, status: active, last4: '{{last4}}'}
+  param_space:
+    last4: ['0001']
+    event: [lost, stolen, missing since this morning]
+  gold_tool_sequence: [freeze_card, order_replacement_card]
+  expected_state_deltas: {card_cb_0001.status: frozen, card_cb_0001.replacement: ordered}
+
+# ── depth 3-4 ─────────────────────────────────────────────────────────
+- id: TPL-CB-FRAUD-FULL-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Full fraud response: block the card, dispute the debit, reissue, and turn on
+  # alerts. Interchangeable order in practice -> not ordered.
+  opening_user_messages:
+  - >-
+    My card ending {{last4}} has been used at {{merchant}} for ₹{{amount}} — that
+    wasn't me. Block the card, dispute the charge, send a replacement, and please
+    put alerts on the account so I know if it happens again.
+  - >-
+    There's a fraudulent ₹{{amount}} charge from {{merchant}} on card {{last4}}. I
+    want it blocked, the transaction disputed, a new card issued, and SMS alerts
+    switched on.
+  - >-
+    Someone has my card details — ₹{{amount}} at {{merchant}} on the card ending
+    {{last4}}. Please stop the card, raise a dispute, reissue it, and set up
+    alerts for future transactions.
+  account_state:
+    account_id: acct_cb_0001
+    account_type: savings account
+    last4: '0001'
+    balance: '41,500'
+    cards:
+    - {card_id: card_cb_0001, status: active, last4: '{{last4}}'}
+    transactions:
+    - {transaction_id: txn_cb_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    last4: ['0001']
+    merchant: [an overseas website, Nova Digital Store, an unknown gaming site]
+    amount: ['6,500', '22,000']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card, set_alerts]
+  expected_state_deltas:
+    card_cb_0001.status: frozen
+    txn_cb_0002.status: UNDER_REVIEW
+    card_cb_0001.replacement: ordered
+    alerts_status: ENABLED
+
+- id: TPL-CB-NEWACCT-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # The account must exist first, but nominee and alerts are interchangeable
+  # after that -> left unordered so the verifier doesn't fail a correct agent on
+  # tail order.
+  opening_user_messages:
+  - >-
+    I'd like to open a savings account with Chandrika. Please also record
+    {{nominee}} as my nominee and switch on transaction alerts from day one.
+  - >-
+    I'm new to the bank and want a savings account opened, {{nominee}} added as
+    nominee, and alerts enabled so I see every debit.
+  - >-
+    Can you open a savings account for me, put {{nominee}} down as the nominee,
+    and set up SMS alerts?
+  account_state: {account_id: none, account_type: savings account, chandrika_account: none, nominee: none}
+  param_space:
+    nominee: [my wife, my mother, my daughter]
+  gold_tool_sequence: [open_account, update_beneficiary, set_alerts]
+  expected_state_deltas: {account_status: OPEN, nominee_status: UPDATED, alerts_status: ENABLED}
+
+- id: TPL-CB-JOINT-SETUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    I want to add {{relation}} as a joint operator on my account, make them the
+    nominee too, and move ₹{{amount}} across so they have access to funds.
+  - >-
+    Please give {{relation}} operating rights on my account, record them as
+    nominee, and transfer ₹{{amount}} in.
+  - >-
+    Can you add {{relation}} to the account as an authorised user and nominee, and
+    put ₹{{amount}} into it?
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '1,20,000', nominee: none}
+  param_space:
+    relation: [my wife, my son, my husband]
+    amount: ['20,000', '50,000']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, transfer_funds]
+  expected_state_deltas: {authorized_users_status: UPDATED, nominee_status: UPDATED, transfer_status: COMPLETED}
+
+- id: TPL-CB-RELOCATE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Only the money-out-before-close step is a real dependency; the address update
+  # can happen at any point, so the sequence is left unordered.
+  opening_user_messages:
+  - >-
+    I'm relocating to {{country}} permanently. Please update my contact details,
+    move the remaining ₹{{amount}} to my other bank, and then close this account.
+  - >-
+    I'm leaving India for {{country}}. Change my address on record, transfer out
+    the ₹{{amount}} balance, and close the account.
+  - >-
+    Since I'm moving to {{country}}, I want my details updated, the ₹{{amount}}
+    sent to my other account, and this account shut.
+  account_state: {account_id: acct_cb_0001, account_type: savings account, last4: '0001', balance: '{{amount}}'}
+  param_space:
+    country: [the UAE, Canada, Australia]
+    amount: ['32,000', '78,000']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_status: UPDATED, transfer_status: COMPLETED, account_status: CLOSED}

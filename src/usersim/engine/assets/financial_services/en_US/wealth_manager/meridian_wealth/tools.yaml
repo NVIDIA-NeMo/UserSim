@@ -1,0 +1,110 @@
+# Discoverable domain tools intentionally carry an EMPTY description /
+# parameters here. Their real schema (signature + args) lives in each tool's
+# discoverable_tool_doc in corpus.yaml -- the assistant learns a tool + its
+# arguments by RETRIEVING that doc via kb_search, then calls it through the
+# call_tool gate (the tau-Banking discoverable-tool mechanic). Putting schemas
+# here would defeat that discovery challenge. Only the always-offered
+# primitives (kb_search / verify_identity) carry a schema; side_effect_class
+# is always set (the scorer uses it).
+schema_version: v0.1
+tools:
+- name: kb_search
+  description: Search this institution's knowledge base and return the most relevant
+    documents (product details, policies, and tool documentation). Use it to look
+    up how to handle the customer's request and to discover the specialized tools
+    you need — a discoverable tool only becomes callable after you have retrieved
+    the document that documents it.
+  discoverable: false
+  side_effect_class: read_only
+  parameters:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Natural-language description of what to find, e.g. 'dispute an
+          unauthorized debit card transaction' or 'roll over a 401(k) to an IRA'.
+    required:
+    - query
+- name: verify_identity
+  description: Verify the customer's identity before taking any account action. Collect
+    every REQUIRED field listed below from the customer first (an account/card last-4
+    is optional extra signal). Verification fails if any required field is missing.
+  discoverable: false
+  side_effect_class: read_only
+  parameters:
+    type: object
+    properties:
+      full_name:
+        type: string
+      date_of_birth:
+        type: string
+      account_or_card_last4:
+        type: string
+    required:
+    - full_name
+    - date_of_birth
+- name: get_portfolio
+  description: ''
+  discoverable: true
+  side_effect_class: read_only
+  parameters: {}
+- name: update_risk_profile
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: schedule_advisor_meeting
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: get_accounts
+  description: ''
+  discoverable: true
+  side_effect_class: read_only
+  parameters: {}
+- name: open_account
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: close_account
+  description: ''
+  discoverable: true
+  side_effect_class: irreversible
+  parameters: {}
+- name: update_contact_info
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: get_statements
+  description: ''
+  discoverable: true
+  side_effect_class: read_only
+  parameters: {}
+- name: update_beneficiary
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: set_alerts
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: fund_account
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}
+- name: generate_financial_plan
+  description: ''
+  discoverable: true
+  side_effect_class: read_only
+  parameters: {}
+- name: manage_authorized_users
+  description: ''
+  discoverable: true
+  side_effect_class: state_changing
+  parameters: {}

@@ -1,0 +1,9 @@
+institution_id: tarang_invest
+display_name: Tarang Invest
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+display_name_local: तरंग इन्वेस्ट
+schema_version: v0.1

@@ -1,0 +1,16 @@
+[
+    {"type": "mathematics", "description": "数学の概念と問題解決"},
+    {"type": "science", "description": "物理、化学、生物学を含む科学"},
+    {"type": "language_learning", "description": "新しい言語の学習や語学力の向上"},
+    {"type": "programming", "description": "プログラミングとソフトウェア開発"},
+    {"type": "history", "description": "歴史上の出来事、時代、人物"},
+    {"type": "personal_finance", "description": "家計管理、予算管理、投資の理解"},
+    {"type": "health_literacy", "description": "健康情報の理解と適切な健康判断"},
+    {"type": "digital_literacy", "description": "パソコンとインターネットの基本スキル"},
+    {"type": "civics", "description": "公民教育、政府の仕組み、市民の権利"},
+    {"type": "geography", "description": "地理、地図、世界の理解"},
+    {"type": "earthquake_preparedness", "description": "地震への備えと防災対策"},
+    {"type": "keigo", "description": "敬語の使い方とビジネスマナー"},
+    {"type": "nenkin_pension", "description": "日本の年金制度の仕組みと手続き"},
+    {"type": "national_health_insurance", "description": "国民健康保険の制度と利用方法"}
+]

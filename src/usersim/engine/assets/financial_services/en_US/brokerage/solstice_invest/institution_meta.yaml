@@ -1,0 +1,8 @@
+institution_id: solstice_invest
+display_name: Solstice Invest
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+schema_version: v0.1

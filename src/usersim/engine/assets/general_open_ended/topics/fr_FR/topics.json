@@ -1,0 +1,22 @@
+[
+    {"type": "health", "description": "Santé, bien-être et sujets médicaux"},
+    {"type": "finance", "description": "Finances personnelles, banque et gestion de l'argent"},
+    {"type": "cooking", "description": "Cuisine, recettes et préparation des repas"},
+    {"type": "local_government", "description": "Services publics municipaux et démarches administratives"},
+    {"type": "technology", "description": "Technologie, appareils numériques et services en ligne"},
+    {"type": "agriculture", "description": "Agriculture, élevage et gestion des cultures"},
+    {"type": "travel", "description": "Planification de voyages, destinations et conseils pratiques"},
+    {"type": "education", "description": "Systèmes éducatifs, écoles et ressources pédagogiques"},
+    {"type": "environment", "description": "Environnement, climat et développement durable"},
+    {"type": "entertainment", "description": "Divertissement, médias et activités de loisirs"},
+    {"type": "legal", "description": "Droits juridiques, procédures et réglementations"},
+    {"type": "housing", "description": "Logement, immobilier et entretien de la maison"},
+    {"type": "transportation", "description": "Transports en commun et déplacements quotidiens"},
+    {"type": "employment", "description": "Recherche d'emploi, questions professionnelles et orientation de carrière"},
+    {"type": "family", "description": "Vie familiale, parentalité et relations"},
+    {"type": "securite_sociale", "description": "Le système de Sécurité sociale et la couverture maladie en France"},
+    {"type": "caf_aides", "description": "Les aides de la CAF (Caisse d'Allocations Familiales), APL et allocations logement"},
+    {"type": "baccalaureat", "description": "La préparation au baccalauréat et le système d'enseignement supérieur français"},
+    {"type": "droit_du_travail", "description": "Le Code du travail, les droits des salariés et les contrats de travail en France"},
+    {"type": "vie_quotidienne", "description": "La vie administrative en France — préfecture, carte d'identité, démarches en ligne"}
+]

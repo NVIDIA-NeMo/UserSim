@@ -1,0 +1,14 @@
+[
+    {"type": "mathematics", "description": "Ganit ki avdharnaayein aur samasya samadhan"},
+    {"type": "science", "description": "Bhautiki, rasayan vigyan aur jeev vigyan sahit vigyan"},
+    {"type": "language_learning", "description": "Nayi bhasha seekhna ya bhasha kaushal mein sudhaar"},
+    {"type": "programming", "description": "Computer programming aur software vikas"},
+    {"type": "history", "description": "Aitihasik ghatnaayein, kaal aur pramukh vyakti"},
+    {"type": "personal_finance", "description": "Vyaktigat vitt, budget banana aur nivesh ki samajh"},
+    {"type": "health_literacy", "description": "Swasthya jaankari ki samajh aur soch-samajhkar swasthya nirnay"},
+    {"type": "digital_literacy", "description": "Computer aur internet ke buniyadi kaushal"},
+    {"type": "civics", "description": "Nagrik shiksha, sarkar ki sanrachna aur nagrik adhikar"},
+    {"type": "geography", "description": "Bhugol, naksha aur duniya ki samajh"},
+    {"type": "hindi_sahitya", "description": "Hindi sahitya — kavita, kahani aur upanyas"},
+    {"type": "bharatiya_sanvidhan", "description": "Bhartiya Samvidhan, maulik adhikar aur kartavya"}
+]

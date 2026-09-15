@@ -1,0 +1,171 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""Unified ConversationSimulatorConfig for all probe types."""
+
+from __future__ import annotations
+
+from typing import Literal, Optional
+
+from data_designer.config.base import SingleColumnConfig
+from pydantic import Field
+
+
+class ConversationSimulatorConfig(SingleColumnConfig):
+    """Configuration for the unified conversation simulator plugin.
+
+    Dispatches to probe-specific generators based on the probe_type column.
+    Tool-calling-specific fields are optional (None when not applicable).
+    """
+
+    column_type: Literal["conversation-simulator"] = "conversation-simulator"
+
+    model_alias: str = "user_model"
+
+    # Shared input columns
+    persona_column: str = "persona"
+    probe_type_column: str = "probe_type"
+    theme_column: str = "theme"
+
+    # Tool-calling-specific columns (optional, None for non-tool probes)
+    tools_column: Optional[str] = None
+    toolset_name_column: Optional[str] = None
+
+    # Locale (set per pipeline run, not per row)
+    locale: str = "en_US"
+    assets_dir: str | None = None
+
+    # Simulation parameters
+    max_tools: int = 5
+    max_turns: int = 5
+    max_steps: int = 10
+    max_query_attempts: int = 3
+
+    # Assistant-turn resampling budget (judge-gated). ``1`` (default)
+    # preserves the original behavior: one assistant attempt per turn,
+    # with the per-turn quality judge acting as a flag only. Values > 1
+    # discard a judge-rejected assistant candidate and regenerate it
+    # within this budget; only the final candidate enters the
+    # transcript. Intended for SDG-style runs where the assistant is a
+    # data generator rather than a model under test — leave at 1 for
+    # pure-capability evaluation. Probes whose ``after_assistant_turn``
+    # has side effects (tool execution) opt out via
+    # ``supports_assistant_resampling = False`` and are capped to one
+    # attempt regardless of this setting. Gate semantics: ``warn``
+    # counts as a pass (only ``failure`` triggers a resample), and a
+    # judge reply with no parseable rating is re-asked once on the same
+    # candidate instead of being charged against the budget. Failure
+    # attribution is unchanged at any budget: only errors from the
+    # assistant call itself are attributed to the assistant model.
+    max_assistant_attempts: int = 1
+
+    # User-model language enforcement (script-compliance gate).
+    # The user-LLM is simulation infrastructure; when it emits a turn in
+    # the wrong script (e.g. romanized/Latin Hindi in an hi_Deva_IN run)
+    # the turn is regenerated within the existing ``max_query_attempts``
+    # budget. The check is deterministic (Unicode script ranges) and a
+    # no-op for Latin-script locales, so English / French / Portuguese
+    # runs are unaffected.
+    enforce_user_language: bool = True
+    # Minimum fraction of letter codepoints that must fall in the
+    # locale's expected script. 0.6 (not 1.0) tolerates Latin loanwords /
+    # brand names / digits inside an otherwise-native turn while still
+    # rejecting fully-transliterated output.
+    user_language_min_script_compliance: float = 0.6
+    # Skip the gate for very short turns (letter count below this), where
+    # the script signal is too weak to act on (bare numbers, "OK", etc.).
+    user_language_min_letters: int = 8
+
+    # Sim2Real gap mitigations
+    incremental_disclosure_ratio: float = 0.6
+    # Default 1.0 = every trajectory's first user turn incorporates
+    # persona-specific details. The whole point of this framework is
+    # persona-driven simulation; running with generic queries
+    # defeats it. Lower the ratio to introduce a generic-query
+    # control arm (useful for ablation / matched-pair studies that
+    # need a "what if the user query was persona-agnostic" baseline).
+    persona_grounding_ratio: float = 1.0
+
+    # Context compression: summarize older assistant responses to bound context growth
+    context_compression: bool = True
+    compression_window: int = Field(
+        default=1, ge=1,
+        description="Keep the last N summarized assistant responses verbatim.",
+    )
+
+    # Keep the assistant's thinking trace (``reasoning_content``) on the
+    # assistant message when the model emits one. Default True: capturing
+    # it is the point of running a reasoning model, and a trace that was
+    # not stored cannot be recovered without re-simulating. Turn it off to
+    # keep trajectories narrow: traces dominate the stored text rather than
+    # merely adding to it, so an eval-only run that will never read them
+    # pays a large size cost for nothing. Never affects what a model
+    # receives: traces are stored, never replayed.
+    store_reasoning: bool = True
+
+    # Logging verbosity: 0=quiet, 1=normal (default), 2=detailed per-call timing
+    verbosity: int = 1
+
+    # financial_services probe knobs (ignored by other probes).
+    # ``finance_tier_mix`` is the probability [0,1] a trajectory uses the DYNAMIC
+    # tier (generated open-ended, judge-scored) vs the default VERIFIABLE tier;
+    # ``finance_tier`` force-pins a tier ("verifiable"|"dynamic") when set.
+    # ``finance_retrieval_mode`` selects the kb_search backend: "hybrid" (default,
+    # the PRIMARY setting — normalised dense cosine blended with lexical overlap
+    # over the institution's corpus; both tiers retrieve from the KB) | "dense"
+    # (cosine ALONE — kept as an ablation, and measurably weak on a corpus this
+    # homogeneous: 88.8% of its results were tool-reference docs against an 11.3%
+    # corpus share) | "golden" (a reasoning-isolation ABLATION that injects the
+    # verifiable task's gold docs so retrieval quality is removed as a variable;
+    # the dynamic tier has no gold docs so it falls back to lexical). Every mode
+    # degrades to lexical when no embedding endpoint is reachable. Retrieval
+    # quality itself is measured separately by the financial_retrieval_recall
+    # capability (document recall).
+    # ``finance_embedding_model_alias`` is the query-embedding alias.
+    finance_tier_mix: float = 0.0
+    finance_tier: Optional[str] = None
+    finance_retrieval_mode: str = "hybrid"
+    finance_embedding_model_alias: str = "embedding_model"
+
+    # Reproducibility
+    random_seed: int | None = None
+
+    @property
+    def required_columns(self) -> list[str]:
+        return [
+            self.persona_column,
+            self.probe_type_column,
+            self.theme_column,
+        ]
+
+    @property
+    def side_effect_columns(self) -> list[str]:
+        return [
+            "conversation_messages",
+            "user_query",
+            "conversation_metadata",
+            "conversation_status",
+            "behavioral_profile",
+            "locale",
+            "conversation_language",
+            "num_turns",
+            "num_tool_calls",
+            "tool_subset",
+            "disclosure_style",
+            "user_interaction_style",
+            "persona_grounding",
+            # Normalized protected fields rendered into the user-agent prompt.
+            # The raw persona input is dropped, so this compact JSON audit view
+            # preserves what influenced the simulated user.
+            "persona_religion_language_context",
+            # Structured per-trajectory outcome + per-turn telemetry sidecar.
+            # See core/outcomes.py for the schema.
+            "simulation_outcome",
+            "simulation_traces",
+            "probe_family",
+            "probe_variant",
+            # Stable identity for replay / matched-pair / canary /
+            # idempotent re-runs. See core/identity.py.
+            "persona_uuid",
+            "trajectory_id",
+        ]

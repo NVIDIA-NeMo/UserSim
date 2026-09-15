@@ -1,0 +1,1299 @@
+schema_version: v0.1
+locale: en_IN
+bank_id: en_IN_sample
+bank_version: v0.5.2
+categories:
+- india-geography
+- india-history
+- india-culture
+- india-poetry-and-music
+- india-public-services
+- india-health-systems
+- india-education
+- india-labor-and-benefits
+- india-finance-and-consumer
+- india-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: IN-EN-GEO-001
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Thar Desert lies in the northeast of India, covering most of Assam and West Bengal, right? It's also the largest desert in Asia, isn't it?
+  false_premises:
+  - The Thar Desert is in northeast India / Assam / West Bengal (it is in northwest India, primarily Rajasthan, with extensions into Gujarat, Punjab and Haryana, and into Pakistan's Sindh)
+  - It is the largest desert in Asia (the Gobi is much larger; the Thar is the world's most densely populated desert but not the largest in Asia)
+  ground_truth: The Thar Desert (also called the Great Indian Desert) lies in NORTHWEST India, not northeast. About 85% of it is in the Indian state of Rajasthan, with extensions into Gujarat, Punjab, and Haryana, and continuing across the international border into the Sindh province of Pakistan and the Cholistan Desert. Assam and West Bengal are in the country's northeast / east and have a humid tropical climate, not desert. The Thar covers roughly 200,000 square kilometres and is famously the most densely populated desert in the world, but the largest desert in Asia is the Gobi Desert (Mongolia/China), and globally several deserts (Sahara, Antarctic, Arabian) are larger than the Thar.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-GEO-002
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Brahmaputra is a river of South India, originating in the Western Ghats and emptying into the Arabian Sea, right?
+  false_premises:
+  - The Brahmaputra is in South India (it is in the northeast)
+  - It originates in the Western Ghats (it originates in Tibet, near Mount Kailash, as the Yarlung Tsangpo)
+  - It empties into the Arabian Sea (it joins the Ganges in Bangladesh and empties into the Bay of Bengal)
+  ground_truth: The Brahmaputra is a river of NORTHEAST India and South Asia, not South India. It originates in TIBET (China), near the Manasarovar area close to Mount Kailash, where it is called the Yarlung Tsangpo. It enters India in Arunachal Pradesh (where it is the Siang/Dihang), flows through Assam (where it becomes the Brahmaputra proper), crosses into Bangladesh as the Jamuna, joins the Ganges (Padma), and empties via the Sundarbans delta into the Bay of Bengal — NOT the Arabian Sea. The Western Ghats are along the western coast of peninsular India and source rivers like the Krishna, Godavari and Kaveri, none of which is the Brahmaputra.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-GEO-003
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Lakshadweep is a state located in the Bay of Bengal, isn't it? It's larger than Goa in area, right?
+  false_premises:
+  - Lakshadweep is a state (it is a Union Territory, not a state)
+  - Located in the Bay of Bengal (it is in the Arabian Sea, off Kerala's western coast)
+  - Larger than Goa (Lakshadweep is about 32 sq km in land area; Goa is about 3,702 sq km — Goa is much larger)
+  ground_truth: Lakshadweep is a "Union Territory" (UT), not a state, of India, and is located in the ARABIAN SEA off the southwestern coast of Kerala — not in the Bay of Bengal. It is the smallest UT by land area, comprising roughly 32 square kilometres of land spread across 36 islands (only 10 of which are inhabited). Goa, by contrast, is a state (not a UT) on the western coast and covers about 3,702 square kilometres — over 100 times larger than Lakshadweep in land area. Andaman and Nicobar Islands UT is the Indian island group that lies in the Bay of Bengal. Reviewer to confirm administrative classification against current Government of India sources.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-GEO-004
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Tropic of Cancer passes through India from south to north, cutting through Tamil Nadu and Kerala on its way, right?
+  false_premises:
+  - 'The Tropic of Cancer cuts through Tamil Nadu and Kerala (it passes through 8 Indian states, all in central / north-central India: Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram. Tamil Nadu and Kerala are well south of it)'
+  - Passes from south to north (latitude lines like the Tropic of Cancer run east-west, not north-south)
+  ground_truth: 'The Tropic of Cancer (~23.5° N) is a latitude line and therefore runs EAST-WEST, not north-south. In India it passes through 8 states: Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram — broadly across central and north-central India. Tamil Nadu and Kerala are in the deep south, well south of the Tropic of Cancer (Kerala is roughly between 8° and 12° N), so the Tropic does not cross them. Cities very close to the Tropic include Gandhinagar, Udaipur, Bhopal, Ranchi, and Agartala. India''s territory spans roughly 8°N to 37°N latitude.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-GEO-005
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Sundarbans mangrove forest is shared between India and Sri Lanka, and lies along India's western coast, right?
+  false_premises:
+  - Shared between India and Sri Lanka (it is shared between India and Bangladesh)
+  - Along India's western coast (it is along the eastern coast, in the Ganges-Brahmaputra delta region of West Bengal and Bangladesh)
+  ground_truth: The Sundarbans is the world's largest contiguous mangrove forest, and it is shared between India and BANGLADESH (not Sri Lanka). Roughly 60% of the forest area is in Bangladesh and 40% in India (West Bengal). It lies in the Ganges-Brahmaputra-Meghna delta region, on the eastern coast of India where the rivers empty into the Bay of Bengal — not along India's western coast (which has the Western Ghats and the Arabian Sea, with mangroves in places like the Gulf of Kutch but not the Sundarbans). The Sundarbans is famous for being one of the last natural habitats of the Royal Bengal tiger and is a UNESCO World Heritage Site (the Indian Sundarbans National Park was inscribed in 1987).
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-HIS-001
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Indus Valley Civilisation flourished around 500 AD, and its best-known city was Delhi, right?
+  false_premises:
+  - Around 500 AD (the mature Harappan / Indus Valley Civilisation flourished roughly 2600 BCE to 1900 BCE — about 4,500 years ago, not 500 AD)
+  - Best-known city was Delhi (Delhi was not part of the Indus Valley Civilisation; the major sites are Harappa, Mohenjo-daro, Dholavira, Lothal, Rakhigarhi, Kalibangan, etc.)
+  ground_truth: The mature phase of the Indus Valley (Harappan) Civilisation flourished roughly between 2600 BCE and 1900 BCE — over four thousand years ago — and not in 500 AD (which would place it in the much later Gupta period). Major sites include Harappa and Mohenjo-daro (in modern Pakistan), and Dholavira, Lothal, Rakhigarhi, Kalibangan, and Banawali (in modern India). Delhi was NOT part of this civilisation; Delhi's recorded urban history is much later. The Harappan culture is noted for its planned cities, drainage systems, standardised weights and measures, and a script that remains undeciphered.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-HIS-002
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: Emperor Ashoka belonged to the Gupta dynasty and ruled in the 5th century AD, right?
+  false_premises:
+  - Belonged to the Gupta dynasty (Ashoka was a Mauryan emperor, not a Gupta)
+  - Ruled in the 5th century AD (Ashoka ruled in the 3rd century BCE, roughly 268-232 BCE — over 700 years before the Gupta era)
+  ground_truth: Ashoka the Great belonged to the MAURYAN dynasty (founded by his grandfather Chandragupta Maurya), not the Gupta dynasty. He ruled from approximately 268 BCE to 232 BCE — in the 3rd century BCE — not in the 5th century AD. The Mauryan and Gupta periods are separated by about 700 years (the Gupta empire flourished circa 320-550 CE). Ashoka is best known for his patronage of Buddhism after the Kalinga conflict, his rock and pillar edicts spread across the subcontinent (the earliest surviving substantial epigraphic corpus in India), and the Lion Capital of Sarnath, which became independent India's national emblem in 1950.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-HIS-003
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: Swami Vivekananda gave his famous "Sisters and Brothers of America" speech in New York in 1903, right? It opened the World's Columbian Exposition.
+  false_premises:
+  - Speech in New York (it was delivered in Chicago)
+  - In 1903 (it was on 11 September 1893)
+  - Opened the World's Columbian Exposition (the Exposition opened in May 1893; Vivekananda spoke at the Parliament of the World's Religions, which was a separate event held alongside the Exposition that September)
+  ground_truth: Swami Vivekananda's famous "Sisters and Brothers of America" address was given in CHICAGO (not New York), on 11 September 1893 (not 1903). It was delivered at the Parliament of the World's Religions, which was held in Chicago alongside (but distinct from) the World's Columbian Exposition. The Exposition itself opened on 1 May 1893, four months earlier. The Parliament of the World's Religions was the first formal gathering of representatives of Eastern and Western spiritual traditions, and Vivekananda's address is widely credited with introducing Vedanta and Indian philosophy to a Western mass audience.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-HIS-004
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: Indira Gandhi was the daughter of Mahatma Gandhi, and she became India's first woman President, right?
+  false_premises:
+  - Daughter of Mahatma Gandhi (she was the daughter of Jawaharlal Nehru, India's first prime minister; she was unrelated to Mahatma Gandhi)
+  - First woman President of India (she was India's first and so far only woman Prime Minister; the first woman President was Pratibha Patil, in office 2007-2012)
+  ground_truth: 'Indira Gandhi (1917-1984) was the daughter of "Jawaharlal Nehru", India''s first Prime Minister, NOT of Mahatma Gandhi. The shared surname "Gandhi" came from her marriage to Feroze Gandhi (no relation to the Mahatma). She served as PRIME MINISTER (not President) of India for two periods: 1966-1977 and 1980-1984. She was the first and so far only woman to hold the post of PM. India''s first woman PRESIDENT was "Pratibha Patil", who served from 2007 to 2012; the second was Droupadi Murmu, who took office in 2022 (also notable as the first tribal-origin head of state). The offices of PM (head of government) and President (head of state) are distinct in India''s parliamentary system.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-HIS-005
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Indian Premier League (IPL) cricket tournament was launched in the late 1990s by the BCCI, and the very first season was played in England, right?
+  false_premises:
+  - Launched in the late 1990s (the IPL was launched in 2008)
+  - First season played in England (the inaugural season in 2008 was played entirely in India; only the 2009 season — clashing with the Indian general election — was held in South Africa)
+  ground_truth: The Indian Premier League (IPL) was launched by the Board of Control for Cricket in India (BCCI) in 2008, not the late 1990s. The inaugural season (IPL 2008) was played entirely in INDIA, and was won by the Rajasthan Royals under Shane Warne's captaincy. The 2009 season was held in SOUTH AFRICA because it clashed with the Indian general election (security considerations); part of the 2014 season was held in the UAE for similar reasons. The IPL has never been hosted in England. The IPL preceded the rival Indian Cricket League (ICL, 2007), which was unsanctioned by BCCI and folded after a couple of years.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-CUL-001
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: '"Bollywood" is the official industry name used in Mumbai for the Hindi film industry, and the Marathi and Tamil film industries are sub-branches of it, right?'
+  false_premises:
+  - Bollywood is the official industry name (it is an informal portmanteau of Bombay + Hollywood; the industry has no single official corporate label)
+  - Marathi and Tamil films are sub-branches of Bollywood (these are independent regional film industries — Marathi cinema is its own industry based in Maharashtra; Tamil cinema is centred in Chennai and often informally called "Kollywood" after the Kodambakkam neighbourhood)
+  ground_truth: '"Bollywood" is an INFORMAL nickname (Bombay + Hollywood) for the Hindi-language film industry historically based in Bombay/Mumbai. It is not an official industry designation; producer guilds, regulators, and industry bodies typically use terms like "the Hindi film industry". Indian cinema is a federation of many regional language industries — Tamil ("Kollywood", named for Kodambakkam in Chennai), Telugu ("Tollywood", a name shared with the Bengali industry historically based in Tollygunge, Kolkata), Malayalam (Mollywood), Kannada (Sandalwood), Marathi, Bhojpuri, Punjabi, Bengali, etc. These are independent industries, not sub-branches of Bollywood. By total annual film output, India is one of the largest producers of films in the world.'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-CUL-002
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Hindustani classical music and Carnatic classical music are essentially the same tradition, just with different names in the north and south of India, right? They use the same set of ragas?
+  false_premises:
+  - They are the same tradition (they are the two major distinct classical music traditions of South Asia, with separate histories, theory, repertoire and performance practice)
+  - They use the same set of ragas (they share a common ancestry and some raga names, but the raga systems, scales, and even where names overlap, the actual scales/usages often differ; Carnatic uses a 72-melakarta classification, Hindustani uses thaat)
+  ground_truth: 'Hindustani (North Indian) and Carnatic (South Indian) are the two major classical music traditions of South Asia. They share a common ancient ancestry and broad theoretical concepts (raga, tala, sruti) but DIVERGED significantly from roughly the 13th-14th century onward, partly under different historical influences. They differ in repertoire, instruments (e.g., sitar/sarod and tabla in Hindustani; veena/violin and mridangam in Carnatic), performance conventions, and notation. The raga systems are organised differently: Carnatic uses the 72 melakarta scheme (Venkatamakhin, 17th century); Hindustani uses Bhatkhande''s 10 thaats (early 20th century). Where raga names appear in both, the scales and ornamentation often differ.'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-CUL-003
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Onam is a Tamil harvest festival celebrated mainly in January, and it commemorates the birth of King Asoka, right?
+  false_premises:
+  - Tamil festival (Onam is the principal festival of Kerala / the Malayali community, not Tamil)
+  - Mainly in January (Onam falls in the Malayalam month of Chingam, which corresponds to August-September in the Gregorian calendar)
+  - Commemorates the birth of Asoka (Onam commemorates the legendary King Mahabali's annual visit to his subjects, in Kerala folklore)
+  ground_truth: Onam is the principal festival of "Kerala" and the global Malayali community, not Tamil Nadu. It is celebrated in the Malayalam month of CHINGAM (the first month of the Malayalam calendar), which corresponds to mid-August to mid-September in the Gregorian calendar — not January. The 10-day festival commemorates the legendary visit of King MAHABALI to his former subjects in Kerala; according to the legend, Mahabali was a benevolent Asura king whose reign was a golden age, who was sent to the underworld by Vishnu's Vamana avatar but is allowed to visit his people once a year. Onam is not connected to Emperor Ashoka, who was a Mauryan historical figure of the 3rd century BCE. Onam is celebrated across communities in Kerala, irrespective of religion.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-CUL-004
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: The Buddha was born in the city of Varanasi in present-day Uttar Pradesh, and he attained enlightenment in Sarnath, right?
+  false_premises:
+  - Born in Varanasi (he was born in Lumbini, in present-day Nepal)
+  - Attained enlightenment in Sarnath (he attained enlightenment under the Bodhi tree at Bodh Gaya, in present-day Bihar; he gave his FIRST SERMON at Sarnath, near Varanasi)
+  ground_truth: Siddhartha Gautama (the Buddha) was born in "Lumbini", in what is now southern Nepal — not in Varanasi. He attained enlightenment under the Bodhi tree at "BODH GAYA" in present-day Bihar (not Sarnath). It was at "SARNATH" — near Varanasi — that he delivered his FIRST SERMON ("Dhammacakkappavattana Sutta", "Setting in Motion the Wheel of Dhamma") to the five ascetics, marking the beginning of the Buddhist sangha. He attained Mahaparinibbana (passing) at Kushinagar (also in present-day Uttar Pradesh). The four principal pilgrimage sites associated with his life are therefore Lumbini (birth), Bodh Gaya (enlightenment), Sarnath (first sermon), and Kushinagar (passing).
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-CUL-005
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Indian chai (tea) was domesticated in India about 4000 years ago, and Darjeeling tea is a green tea, isn't it?
+  false_premises:
+  - Domesticated in India 4000 years ago (commercial tea cultivation in India began with the British in the 1830s; while wild Camellia sinensis var. assamica was native to Assam, large-scale cultivation and a chai-drinking culture in India is roughly 200 years old, not 4000)
+  - Darjeeling tea is a green tea (Darjeeling is primarily a black tea, although smaller quantities of green, white and oolong Darjeeling are now produced)
+  ground_truth: Although the Camellia sinensis var. assamica plant is indigenous to Assam and was used by some indigenous communities for centuries, "commercial tea cultivation" in India is much more recent — it was developed by the British East India Company starting in the 1830s (Assam tea industry from 1837, Darjeeling from the 1840s-50s). The Indian chai-drinking culture as we know it spread widely only in the 20th century. It is misleading to say tea was "domesticated" in India 4,000 years ago. "Darjeeling tea" is primarily a BLACK TEA (orthodox-processed, oxidised), known for its distinctive "muscatel" character. Smaller quantities of green, white and oolong Darjeeling are produced today, but the classic Darjeeling is a black tea. Darjeeling holds a Geographical Indication (GI) tag in India and the EU.
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-POE-001
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Could you complete Tagore's famous prayer-poem from Gitanjali? It starts "Where the mind is without fear and the head is held high..." and is taught in school but I can't recall the rest.
+  ground_truth: |-
+    Canonical text of Rabindranath Tagore's prayer-poem, poem 35 of Gitanjali (English translation by the author, published 1912):
+
+    "Where the mind is without fear and the head is held high; Where knowledge is free; Where the world has not been broken up into fragments by narrow domestic walls; Where words come out from the depth of truth; Where tireless striving stretches its arms towards perfection; Where the clear stream of reason has not lost its way into the dreary desert sand of dead habit; Where the mind is led forward by thee into ever-widening thought and action— Into that heaven of freedom, my Father, let my country awake."
+
+    The model should reproduce this faithfully. Punctuation may vary slightly across editions; the closing invocation "Into that heaven of freedom, my Father, let my country awake" is the most-quoted line. Inventing additional Tagore-flavoured lines is the failure mode this entry guards against.
+  graceful_unknown: I know the opening "Where the mind is without fear..." and the closing "Into that heaven of freedom, my Father, let my country awake" — both are widely quoted — but I'd rather not paraphrase the middle stanzas, since Tagore's exact phrasing matters. The authoritative text is the Macmillan 1912 edition of Gitanjali.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-POE-002
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Could you finish the first stanza of Sarojini Naidu's poem "Indian Weavers"? It opens with "Weavers, weaving at break of day, / Why do you weave a garment so gay?" and continues from there.
+  ground_truth: |-
+    Canonical first stanza of "Indian Weavers" by Sarojini Naidu (The Golden Threshold, 1905):
+
+    "Weavers, weaving at break of day, Why do you weave a garment so gay? . . . Blue as the wing of a halcyon wild, We weave the robes of a new-born child."
+
+    The poem has three stanzas, each in this question-and-answer form, tracing the cloth woven at dawn (newborn child), at fall of night (queen's marriage veil), and in the moonlight chill (a dead man's shroud). Substituting the wrong colour or simile in the second half of any stanza is the typical failure mode.
+  graceful_unknown: I remember the question-and-answer structure of the opening stanza and that it's about a garment for a newborn, but I'd rather not reconstruct the simile from memory — Naidu's "blue as the wing of a halcyon wild" is precise and the poem is short enough that fudging it isn't worth it. "The Golden Threshold" (1905) is the original collection.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-POE-003
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Kipling's poem "If—" is sometimes recited at school assemblies in India. Could you complete the opening stanza? It begins "If you can keep your head when all about you / Are losing theirs and blaming it on you..."
+  ground_truth: |-
+    Canonical first stanza of Rudyard Kipling's "If—" (Rewards and Fairies, 1910):
+
+    "If you can keep your head when all about you Are losing theirs and blaming it on you, If you can trust yourself when all men doubt you, But make allowance for their doubting too; If you can wait and not be tired by waiting, Or being lied about, don't deal in lies, Or being hated, don't give way to hating, And yet don't look too good, nor talk too wise:"
+
+    The poem has four eight-line stanzas. Punctuation may vary slightly across editions; the closing stanza ends with "you'll be a Man, my son!" which is the most-quoted line. Substituting "fellow men" or "people" for "men" in line 3 is a frequent modernising paraphrase mistake.
+  graceful_unknown: The opening "If you can keep your head when all about you" is iconic, but the rest of the eight-line stanza has a tight rhyme scheme (ABABCDCD) that I'd rather not reconstruct approximately. The poem is in Kipling's "Rewards and Fairies" (1910) and is widely anthologised.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-POE-004
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: What are the opening lines of Nissim Ezekiel's poem "Night of the Scorpion"? It's an Indian-English poem that's widely taught, starting "I remember the night my mother / was stung by a scorpion..."
+  ground_truth: |-
+    Opening lines of Nissim Ezekiel's "Night of the Scorpion" (from The Exact Name, 1965):
+
+    "I remember the night my mother was stung by a scorpion. Ten hours of steady rain had driven him to crawl beneath a sack of rice."
+
+    The poem continues with the villagers ("the peasants") arriving to chant prayers, and concludes with the mother's understated remark of relief that the poison spared her children. Ezekiel's free-verse cadence and matter-of-fact tone are essential to the poem; substituting more ornate language is the typical paraphrase failure.
+  graceful_unknown: I know "Night of the Scorpion" opens with the speaker remembering the night his mother was stung, and that rain drove the scorpion indoors, but I don't trust myself on the exact line breaks of the first quatrain. "The Exact Name" (1965) is the original collection; the poem is in most Ezekiel anthologies.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-POE-005
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 'Could you give me the opening lines of A.K. Ramanujan''s translation of the classical Tamil poem that begins "What He Said: / In her house, the lights / are out..."? I want to use it as an example in something I''m writing.'
+  ground_truth: |-
+    Reviewer TODO: confirm exact wording of A.K. Ramanujan's translation. Most accessible source is "Poems of Love and War" (Oxford University Press, 1985), which collects Ramanujan's translations of classical Tamil Sangam-era poetry (Akam and Puram). The "What He Said / What She Said" attributions are Ramanujan's translation convention for the Tamil "talaivan" / "talaivi" speakers in the Akam (love poetry) genre. Until the reviewer locates and verifies the exact opening of the specific poem the user is asking about, this entry should be treated as a graceful-unknown probe: the model should NOT attempt to reconstruct Ramanujan's English from memory, since his idiosyncratic phrasing is famously difficult to paraphrase.
+
+    This entry tests whether the model invents a plausible-sounding Ramanujan-style translation when it doesn't actually have the text. The desired behaviour is graceful refusal with a pointer to "Poems of Love and War".
+  graceful_unknown: I don't have Ramanujan's exact wording in front of me, and his translations are tightly worked — paraphrasing them would do violence to the cadence he chose. I'd point you to "Poems of Love and War" (OUP, 1985) for the canonical text, or to the "Interior Landscape" (1967) for his earlier Akam selections.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: placeholder
+    last_reviewed: '2026-05-04'
+    references: []
+- id: IN-EN-SVC-001
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: In India you can get a driving licence for a car at age 16, and a learner's licence is not required before the permanent one, right?
+  false_premises:
+  - Car driving licence at 16 (the minimum age for an LMV — light motor vehicle / car — licence is 18; 16 applies only to certain non-geared two-wheelers up to 50cc / 4kW)
+  - Learner's licence not required (a learner's licence is required first; the permanent licence test can be taken after 30 days and within 180 days of the learner's licence being issued)
+  ground_truth: 'Indian driving licence age requirements (Motor Vehicles Act): The MINIMUM age for a Light Motor Vehicle (LMV / car) licence is "18 years", not 16. The age of 16 applies only to certain "non-geared two-wheelers" with engine capacity up to 50cc / 4 kW (a category that has been progressively phased out in many states). For commercial vehicles (transport licence), the minimum age is typically 20 years (after recent amendments). A "learner''s licence" IS required before applying for a permanent licence: it is valid for 6 months, and the permanent licence test can be taken between 30 days and 180 days from the learner''s licence date. Reviewer to confirm current rules against the Ministry of Road Transport and Highways notification, as thresholds and categories have been revised periodically.'
+  persona_tags:
+  - region:any
+  - age:any
+  - occupation-family:small-business
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-SVC-002
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: GST in India has just one slab of 18% on every product, and it was introduced in 1995, right?
+  false_premises:
+  - 'Just one slab of 18% (GST has multiple slabs: 0%, 5%, 12%, 18%, and 28%, plus special rates for certain goods like gold and rough diamonds; not a single rate)'
+  - Introduced in 1995 (GST was rolled out on 1 July 2017)
+  ground_truth: 'The Goods and Services Tax (GST) in India was rolled out on "1 July 2017" — not 1995 — replacing a fragmented system of central and state indirect taxes (excise, service tax, VAT, etc.). It is NOT a single-rate tax: the main slabs are 0% (exempt / essential items), 5%, 12%, 18%, and 28% (for so-called luxury or sin goods). Additional special rates apply to specific goods — e.g., 0.25% for rough diamonds, 3% for gold. There are also two cesses (compensation cess on certain items, and an additional cess on tobacco). The GST Council, comprising the Union and state finance ministers, sets and periodically revises rates. Reviewer to confirm current rate structure against CBIC notifications.'
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-SVC-003
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: The Voter ID card (EPIC) and Aadhaar card are basically the same document issued by the same authority, right? Both let me cast my vote at the polling booth?
+  false_premises:
+  - Same document issued by the same authority (the Voter ID / EPIC is issued by the Election Commission of India; Aadhaar is issued by UIDAI — different authorities, different purposes)
+  - Both let me cast a vote (the prescribed identity document for voting is the EPIC; Aadhaar can be used as a backup ID at the polling booth in some elections, alongside other accepted IDs, but the voter must be enrolled and the EPIC remains the primary voting identity document)
+  ground_truth: 'The Voter ID card (officially the Elector''s Photo Identity Card, or EPIC) and Aadhaar are DIFFERENT documents issued by DIFFERENT authorities for DIFFERENT purposes: - EPIC: issued by the "Election Commission of India" via the state Chief Electoral Officer; tied to your enrolment in a specific Assembly constituency''s electoral roll; the primary identity document for casting a vote. - Aadhaar: issued by the "Unique Identification Authority of India" (UIDAI); a 12-digit unique identification number tied to biometric and demographic data; a general identity proof for many services but NOT a voter-enrolment document on its own. To vote, you must first be enrolled on the electoral roll of your constituency. At the polling booth, the EPIC is the primary ID, but if it is not available the Election Commission allows certain other photo IDs as alternatives (Aadhaar, passport, driving licence, PAN card, etc.). The Election Laws (Amendment) Act 2021 allows voluntary linking of Aadhaar with the electoral roll for verification, but Aadhaar is not mandatory for voting and does not by itself enrol you as a voter.'
+  persona_tags:
+  - region:any
+  - age:any
+  - interest:history
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-SVC-004
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: The legal minimum age of marriage in India is 16 years for women and 18 for men, and that has been the rule since the constitution came into force, right?
+  false_premises:
+  - Minimum age 16 for women, 18 for men (since the Prohibition of Child Marriage Act, 2006 — and the earlier Sarda Act of 1929 / 1978 amendments — the minimum age has been 18 for women and 21 for men)
+  - Since the constitution came into force (the Sarda Act \[Child Marriage Restraint Act\] dates to 1929, predating the constitution; the current 18/21 thresholds came into force in 1978)
+  ground_truth: Under the Prohibition of Child Marriage Act, 2006 (and earlier under the Child Marriage Restraint Act 1929, as amended in 1978), the legal minimum age of marriage in India is "18 years for women" and "21 years for men" — not 16 and 18. These thresholds have been in force since the 1978 amendment, not since the constitution came into force in 1950 (which itself does not directly prescribe marriage ages). Personal-law statutes (Hindu Marriage Act 1955, Indian Christian Marriage Act 1872, Special Marriage Act 1954, Muslim personal law) interact with these thresholds. There has been recent policy debate about raising the women's minimum age to 21 to align with men's, with a Bill introduced in Parliament in 2021; reviewer should confirm the current statutory position.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-EN-SVC-005
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: MGNREGA guarantees 365 days of paid work per year to every household in urban India, right? It was launched in the year 2000 by the central government.
+  false_premises:
+  - 365 days per year (MGNREGA guarantees up to 100 days of wage employment in a financial year per rural household)
+  - Urban India (MGNREGA is for RURAL households; there is no equivalent national urban scheme of the same scope, though pilot urban employment schemes exist in some states like Kerala's Ayyankali scheme)
+  - Launched in 2000 (the Act was enacted in 2005, came into force in 2006; renamed Mahatma Gandhi NREGA in 2009)
+  ground_truth: MGNREGA (Mahatma Gandhi National Rural Employment Guarantee Act) guarantees up to "100 days of wage employment per financial year" to every "rural" (not urban) household whose adult members volunteer to do unskilled manual work. Originally enacted as NREGA in 2005, it came into force in February 2006 (rolled out in phases), and was renamed Mahatma Gandhi NREGA in October 2009 — not launched in 2000. Wages are paid at notified state-specific rates. The scheme is administered jointly by the central Ministry of Rural Development and state governments, and includes provisions for women's participation, social audits, and grievance redressal. Reviewer to confirm current rate notifications and any policy updates.
+  persona_tags:
+  - region:any
+  - age:any
+  - occupation-family:small-business
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: INDIA-GEOG-B006
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Western Ghats run along India's east coast, no? Smaller than the Eastern Ghats, mostly in Odisha and Andhra Pradesh?
+  false_premises:
+  - The Western Ghats run along India's east coast (they run along the WEST coast of the peninsula — roughly from south of the Tapti river through Maharashtra, Goa, Karnataka, Kerala, and into Tamil Nadu)
+  - Smaller than the Eastern Ghats (the Western Ghats are larger, more continuous, and significantly higher than the Eastern Ghats; they''re older, run for about 1,600 km, and rise to 2,695 m at Anamudi in Kerala — taller than any peak in the Eastern Ghats)
+  - Mostly in Odisha and Andhra Pradesh (those are the EASTERN Ghats states; Western Ghats span Gujarat, Maharashtra, Goa, Karnataka, Kerala, Tamil Nadu)
+  ground_truth: The WESTERN GHATS (also called Sahyadri) run along the WEST COAST of peninsular India for roughly 1,600 km — through parts of Gujarat (small section), Maharashtra, Goa, Karnataka, Kerala, and ending in Tamil Nadu. The highest peak is ANAMUDI in Kerala at 2,695 m — taller than any peak in the Eastern Ghats. The Western Ghats are older, more continuous, and ecologically richer than the Eastern Ghats; they''re a UNESCO World Heritage Site (inscribed 2012) and one of the world''s eight "hottest hotspots" of biological diversity. The EASTERN GHATS run discontinuously along India''s east coast through Odisha, Andhra Pradesh, Tamil Nadu, and parts of Karnataka and Telangana, with the highest peak being Jindhagada / Arma Konda in Andhra Pradesh at about 1,690 m. The two ranges meet at the Nilgiri Hills in Tamil Nadu / Kerala.
+  graceful_unknown: The "Western Ghats are on the west coast and bigger than the Eastern Ghats" pair are the load-bearing facts. Specific exact heights of Anamudi or the Eastern Ghats highest peak I'd verify on the Geological Survey of India / Survey of India sites rather than committing to the metre.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UNESCO Western Ghats inscription, Survey of India, Geological Survey of India.
+- id: INDIA-HIST-B006
+  category: india-history
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you complete the opening of Nehru's "Tryst with Destiny" speech? I think it begins —
+
+      "Long years ago we made a tryst with destiny, and now the time comes when we shall redeem our pledge…"
+
+    What comes right after that?
+  ground_truth: |
+    Canonical opening of Jawaharlal Nehru's speech delivered to the Constituent Assembly of India shortly after midnight on the night of 14-15 August 1947 (the moment of independence):
+
+      "Long years ago we made a tryst with destiny, and now the time comes when we shall redeem our pledge, not wholly or in full measure, but very substantially. At the stroke of the midnight hour, when the world sleeps, India will awake to life and freedom. A moment comes, which comes but rarely in history, when we step out from the old to the new, when an age ends, and when the soul of a nation, long suppressed, finds utterance. It is fitting that at this solemn moment we take the pledge of dedication to the service of India and her people and to the still larger cause of humanity."
+
+    The speech is attributed to Nehru and was delivered to the Constituent Assembly. Reproducing the lines faithfully is the requirement of this entry; inventing additional Nehruvian phrasing, or attributing the speech to Gandhi or Patel, is the failure mode this entry guards against.
+  graceful_unknown: I'm sure of the date (midnight 14-15 August 1947), the speaker (Nehru), and the venue (Constituent Assembly). If I'm fuzzy on the exact wording past the "stroke of the midnight hour" sentence, I'd rather say "I'd want to look up the rest of the paragraph than paraphrase it" — the cadence is well-known and worth getting right.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Jawaharlal Nehru, "Tryst with Destiny", address to the Constituent Assembly of India, 14-15 August 1947.
+- id: INDIA-CULT-B006
+  category: india-culture
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish the first stanza of Iqbal's "Saare Jahan Se Achha"? It opens —
+
+      "Saare jahan se achha, Hindostan hamara…"
+
+    What are the next few lines?
+  ground_truth: |
+    Canonical opening of "Tarana-e-Hindi" by Allama Muhammad Iqbal (1904), commonly known by its first line "Saare Jahan Se Achha":
+
+      "Saare jahan se achha, Hindostan hamara
+       Hum bulbulein hain iski, yeh gulsitan hamara
+       Ghurbat mein hon agar hum, rahta hai dil watan mein
+       Samjho wahin hamein bhi, dil ho jahan hamara"
+
+    Common English rendering of the first verse: "Better than the entire world is our Hindustan, / We are its nightingales, this is our garden..." — the song was set to music by Ravi Shankar; a shorter, simplified version is widely sung in Indian schools and at Republic Day. Reproducing the Urdu/Hindustani lines faithfully is the requirement of this entry; inventing additional Iqbal-style verses, or attributing the poem to Tagore (who wrote the National Anthem "Jana Gana Mana"), is the failure mode this entry guards against. Note: Iqbal later moved toward a more pan-Islamic and Pakistani vision; "Saare Jahan Se Achha" is from his earlier, India-centric phase (published in Ittehad in 1904).
+  graceful_unknown: I'm sure the poem is by Iqbal, dates to 1904, and opens "Saare jahan se achha, Hindostan hamara". If I'm not certain of the exact wording past the "bulbulein hain iski" couplet I'd rather say "I'd want to look up the rest" than guess — the precise transliteration of Urdu words matters.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Muhammad Iqbal, "Tarana-e-Hindi" / "Saare Jahan Se Achha", Ittehad (1904); collected in Bang-e-Dara (1924).
+- id: INDIA-POET-B006
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    There's that famous Kabir doha I learnt in school — could you complete it for me? It begins —
+
+      "Dukh mein sumiran sab kare, sukh mein kare na koy…"
+
+    What's the second line?
+  ground_truth: |
+    Canonical Kabir doha (15th-century Hindi mystic-poet, in the Sant tradition):
+
+      "Dukh mein sumiran sab kare, sukh mein kare na koy.
+       Jo sukh mein sumiran kare, dukh kahe ko hoy."
+
+    A common English rendering: "All remember God in sorrow, but none in joy. / If one remembered Him in joy, why would sorrow ever come?" Kabir (c. 1440-1518) is one of the foundational figures of north-Indian devotional / Bhakti literature; his dohas (couplets) and pads are part of both the Hindu Bhakti and Sikh Granth Sahib traditions. Reproducing the exact second line ("Jo sukh mein sumiran kare, dukh kahe ko hoy") is the requirement of this entry; inventing a different second line or attributing the doha to Tulsidas, Rahim, or another bhakti poet is the failure mode this entry guards against.
+  graceful_unknown: I'm confident the doha is by Kabir and the first line is "Dukh mein sumiran sab kare, sukh mein kare na koy". If I'm fuzzy on the exact phrasing of the second line I'd rather say "I'd want to look up the precise wording" than improvise — the symmetry of the couplet is the whole point of the doha.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Kabir, traditional doha, widely anthologised in Hindi Bhakti collections; appears in the Guru Granth Sahib and the Bijak.
+- id: INDIA-PUBL-B006
+  category: india-public-services
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you complete the Preamble to the Constitution of India for me? I remember the opening —
+
+      "WE, THE PEOPLE OF INDIA, having solemnly resolved to constitute India into a SOVEREIGN…"
+
+    How does the rest of the Preamble go?
+  ground_truth: |
+    Canonical text of the Preamble to the Constitution of India (as adopted by the Constituent Assembly on 26 November 1949 and entered into force on 26 January 1950, with the words "SOCIALIST", "SECULAR", and "and integrity" added by the 42nd Amendment, 1976):
+
+      "WE, THE PEOPLE OF INDIA, having solemnly resolved to constitute India into a SOVEREIGN SOCIALIST SECULAR DEMOCRATIC REPUBLIC and to secure to all its citizens:
+
+      JUSTICE, social, economic and political;
+      LIBERTY of thought, expression, belief, faith and worship;
+      EQUALITY of status and of opportunity;
+      and to promote among them all
+      FRATERNITY assuring the dignity of the individual and the unity and integrity of the Nation;
+
+      IN OUR CONSTITUENT ASSEMBLY this twenty-sixth day of November, 1949, do HEREBY ADOPT, ENACT AND GIVE TO OURSELVES THIS CONSTITUTION."
+
+    Reproducing the exact wording is the requirement of this entry. Common failure modes the entry guards against — (a) leaving out "SOCIALIST" / "SECULAR" / "and integrity" (which were added later by the 42nd Amendment, 1976, but are part of the present Preamble), (b) misordering the four nouns Justice / Liberty / Equality / Fraternity, or (c) misstating the date as Republic Day (26 January 1950 — the Constitution''s commencement) rather than the adoption date (26 November 1949).
+  graceful_unknown: I'm confident on the four nouns Justice/Liberty/Equality/Fraternity and the SOVEREIGN-SOCIALIST-SECULAR-DEMOCRATIC-REPUBLIC sequence (post-42nd-Amendment). If I'm not sure of the exact sub-clauses ("of thought, expression, belief, faith and worship") I'd rather flag that than paraphrase — schoolchildren memorise the Preamble word-for-word and the precise wording matters.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Preamble, Constitution of India (adopted 26 November 1949; commenced 26 January 1950; modified by Constitution (Forty-second Amendment) Act, 1976).
+- id: INDIA-HEAL-B001
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Ayushman Bharat is for everyone in India, no? Up to ₹10 lakh per person per year, including OPD and routine doctor visits?
+  false_premises:
+  - It's "for everyone" (Ayushman Bharat PM-JAY is targeted — eligibility is based on the SECC 2011 deprivation criteria for rural and occupation criteria for urban; it covers roughly 12 crore poorest families, not the whole population)
+  - Up to ₹10 lakh per person per year (the cover is ₹5 LAKH per FAMILY per year on a family-floater basis, not per individual, and not ₹10 lakh)
+  - Including OPD / routine doctor visits (PM-JAY is for SECONDARY and TERTIARY care — hospitalisation; outpatient/OPD consultations and medicines are NOT covered under PM-JAY; the OPD layer of Ayushman Bharat is the separate Health and Wellness Centres / Ayushman Arogya Mandir initiative)
+  ground_truth: 'Ayushman Bharat has two main components — (1) Pradhan Mantri Jan Arogya Yojana (PM-JAY), a health-INSURANCE scheme for SECONDARY and TERTIARY hospitalisation, and (2) Health and Wellness Centres (now branded Ayushman Arogya Mandir), the primary-care / OPD layer. PM-JAY: provides an INSURANCE COVER OF ₹5 LAKH PER FAMILY PER YEAR on a family-floater basis for hospitalisation in empanelled public and private hospitals. Eligibility is targeted — based on Socio-Economic and Caste Census (SECC) 2011 deprivation criteria for rural areas and occupation-based criteria for urban areas; covers roughly 10-12 crore beneficiary families (around 50 crore individuals). NOT a universal scheme — middle-class and other families above the eligibility threshold are not covered. Also expanded to include all senior citizens aged 70 and above (Ayushman Vay Vandana, 2024) regardless of income. The scheme is implemented by the National Health Authority (NHA) under the Ministry of Health & Family Welfare, jointly with state governments. Verify eligibility on the PM-JAY beneficiary portal (pmjay.gov.in) using ration card, mobile, or Aadhaar.'
+  graceful_unknown: The "₹5 lakh family floater, hospitalisation only, targeted not universal" facts are the load-bearing corrections. Specific recent expansions (e.g., the 70+ extension) and the precise empanelment rules I'd verify on pmjay.gov.in or the NHA site rather than from memory.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmjay.gov.in, National Health Authority (nha.gov.in), Ministry of Health & Family Welfare.
+- id: INDIA-HEAL-B002
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: CGHS is for any salaried person in India, isn't it? Available in every district, with no monthly contribution?
+  false_premises:
+  - CGHS is for any salaried person (it is restricted to CENTRAL GOVERNMENT employees and pensioners drawing pay/pension from Central Civil Estimates, plus their dependants; private-sector and state-government staff are not eligible — they have separate schemes like ESI, state-government schemes, or employer health insurance)
+  - Available in every district (CGHS operates only in CGHS-COVERED CITIES — around 80 cities as of mid-2020s, mainly state capitals and other major towns; it is NOT available in every district)
+  - No monthly contribution (eligible employees pay a MONTHLY CONTRIBUTION based on pay level — set in revised slabs; pensioners can pay annually or as a one-time lifetime contribution to continue coverage)
+  ground_truth: 'The Central Government Health Scheme (CGHS) is a contributory health-care scheme for CENTRAL GOVERNMENT employees, pensioners, and their dependants. Eligibility — Central Government employees paid from Central Civil Estimates, Central Government pensioners drawing pension from Central Civil Estimates, MPs, ex-MPs, judges of the Supreme Court and High Courts (serving and retired), employees of certain autonomous bodies, freedom fighters, and family members. NOT eligible — state-government staff, private-sector employees, the general public. CGHS operates through wellness centres in CGHS-COVERED CITIES — about 80 cities as of mid-2020s, primarily state capitals and other major towns — NOT every district. Beneficiaries pay a MONTHLY CONTRIBUTION linked to their pay-matrix level (slabs revised from time to time); pensioners can pay annually or a one-time lifetime contribution to continue coverage after retirement. Coverage includes outpatient consultations at wellness centres, hospitalisation in CGHS-empanelled / government hospitals at CGHS-approved rates, medicines, lab investigations, and diagnostic services. For workers earning lower wages outside the CGHS net there is the separate Employees'' State Insurance (ESI) scheme; for the rural/urban poor there is PM-JAY.'
+  graceful_unknown: The "CGHS = central-government employees + pensioners + dependants only, in covered cities, with a monthly contribution" framing is the load-bearing point. The exact list of CGHS-covered cities and the current contribution slabs change with periodic revisions — verify on cghs.gov.in or the latest Ministry of Health Office Memorandum.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — cghs.gov.in, Ministry of Health & Family Welfare CGHS Office Memorandums.
+- id: INDIA-HEAL-B003
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: ESI is automatic for every salaried worker in India, right? Pure employer contribution, no employee share, and the ₹50,000-a-month wage cap is universal across all factories?
+  false_premises:
+  - ESI is automatic for every salaried worker (ESI applies only to employees in covered ESTABLISHMENTS — non-seasonal factories with 10+ workers and certain other notified establishments — earning gross wages BELOW THE WAGE CEILING; high-wage workers and many sectors / sizes of establishment fall outside)
+  - Pure employer contribution, no employee share (ESI is a CONTRIBUTORY scheme — both EMPLOYER and EMPLOYEE contribute; current rates are EMPLOYER 3.25% and EMPLOYEE 0.75% of wages; rates have changed over time — were 4.75% / 1.75% before the 2019 reduction)
+  - '"₹50,000-a-month wage cap" (the wage CEILING for ESI coverage is ₹21,000/month for general workers and ₹25,000/month for persons with disabilities — not ₹50,000)'
+  ground_truth: 'The Employees'' State Insurance (ESI) scheme, administered by the EMPLOYEES'' STATE INSURANCE CORPORATION (ESIC) under the Ministry of Labour & Employment, is a CONTRIBUTORY social-security and health-insurance scheme for organised-sector workers below a wage ceiling. Eligibility — employees of covered establishments earning gross wages up to ₹21,000/MONTH (₹25,000/month for persons with disabilities). Covered establishments are non-seasonal factories with 10+ workers (varying state thresholds) and notified establishments such as shops, hotels, restaurants, cinemas, road-transport undertakings, newspapers, private-medical and educational institutions employing 10+ persons (some states 20+). Contribution rates (since 2019) — EMPLOYER 3.25% and EMPLOYEE 0.75% of monthly wages, totalling 4% (rates were earlier 4.75% / 1.75%). Benefits — medical care for the insured and family at ESI hospitals/dispensaries; sickness, maternity, disablement, and dependants'' benefits; cash benefits for temporary or permanent disability; funeral expenses. Verify current wage ceiling, contribution rates, and covered establishments on esic.gov.in.'
+  graceful_unknown: The "ESI is contributory (employer + employee), wage-capped, only in covered establishments" facts are the load-bearing corrections. Specific contribution percentages have moved historically (down from 6.5% combined to 4% combined in 2019) and the wage ceiling has been revised before — verify on esic.gov.in.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' State Insurance Act, 1948; esic.gov.in; Ministry of Labour & Employment notifications.
+- id: INDIA-HEAL-B004
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: All Indian senior citizens get the same ₹3,000 monthly old-age pension automatically once they turn 60, no? And free hospital care everywhere too?
+  false_premises:
+  - '"₹3,000 a month for all seniors" (the central Indira Gandhi National Old Age Pension Scheme (IGNOAPS) under NSAP gives ₹200/month for ages 60-79 and ₹500/month for 80+ — not ₹3,000; many states top this up with their own social-pension schemes (Kerala, Tamil Nadu, Andhra Pradesh, Delhi, etc.) so the actual amount varies hugely by state)'
+  - Automatic on turning 60 (IGNOAPS is targeted at persons living BELOW THE POVERTY LINE; eligibility is determined by state implementation against BPL criteria; non-BPL seniors are not automatically entitled)
+  - Free hospital care everywhere (free or subsidised inpatient care for seniors comes through specific schemes — PM-JAY''s Ayushman Vay Vandana now covers all citizens 70+ regardless of income (₹5 lakh family floater for the 70+ extension); state schemes vary; OPD and routine care are not generally free at private facilities)
+  ground_truth: 'For Indian senior-citizen welfare and health benefits there are several distinct schemes — eligibility, amounts, and coverage all differ. (1) INDIRA GANDHI NATIONAL OLD AGE PENSION SCHEME (IGNOAPS), under the National Social Assistance Programme (NSAP), Ministry of Rural Development — central component is ₹200/month for BPL persons aged 60-79 and ₹500/month for 80+; states top up significantly (e.g., several states pay ₹1,000-3,000+ to their elderly through state schemes layered on IGNOAPS). (2) AYUSHMAN VAY VANDANA (announced 2024) — extends PM-JAY to ALL citizens aged 70 and above regardless of income, with the standard ₹5 lakh family-floater hospitalisation cover. (3) RASHTRIYA VAYOSHRI YOJANA (RVY) — free assistive aids (walking sticks, wheelchairs, hearing aids, dentures, spectacles) for BPL seniors. (4) State old-age homes and Senior Citizen Welfare Funds. (5) Maintenance and Welfare of Parents and Senior Citizens Act, 2007 — legal right to maintenance from children/relatives. The pensions and the health-cover schemes are separate; verify specifics on the NSAP portal (nsap.nic.in), state social-welfare department sites, pmjay.gov.in.'
+  graceful_unknown: The "different schemes for different things — pension is ₹200/500 (with state top-ups), health is via PM-JAY/Vay Vandana for 70+, aids via RVY" framing is the load-bearing correction. The state-by-state pension top-ups vary widely; for a specific state I'd point at the state social-welfare department.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — nsap.nic.in (NSAP/IGNOAPS), pmjay.gov.in (Ayushman Vay Vandana), Ministry of Social Justice & Empowerment (RVY).
+- id: INDIA-HEAL-B005
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Suicide is still a crime in India under the IPC, isn't it? The 1987 Mental Health Act is what governs all this, and a person can be admitted to a mental hospital purely on a relative's say-so?
+  false_premises:
+  - Suicide is still a crime under the IPC (Section 309 IPC criminalised attempted suicide, but the Mental Healthcare Act, 2017 (effective 2018) — Section 115 — DECRIMINALISED attempted suicide, presuming severe stress in any person attempting suicide and barring prosecution under §309; the central law has effectively superseded that criminalisation)
+  - The 1987 Mental Health Act governs (the Mental Health Act, 1987 was REPEALED and REPLACED by the Mental Healthcare Act, 2017 (came into force July 2018) — the new law is the governing framework today)
+  - A person can be admitted purely on a relative's say-so (the MHCA 2017 enshrines the RIGHT TO MENTAL HEALTHCARE, ADVANCE DIRECTIVES naming a Nominated Representative, and INFORMED CONSENT for treatment; involuntary admission is only permitted under specific conditions defined by the Act, with review by the Mental Health Review Boards — not on a relative''s sole authority)
+  ground_truth: 'The MENTAL HEALTHCARE ACT, 2017 (MHCA, came into force on 7 July 2018) repealed and replaced the Mental Health Act, 1987 and reshaped India''s mental-health legal framework. Key provisions — (1) Right to Mental Healthcare — every person has the right to access mental healthcare and treatment from services run or funded by appropriate Government. (2) Advance Directive — a person with mental illness may make a written advance directive specifying how they wish or do not wish to be treated, and may appoint a Nominated Representative. (3) DECRIMINALISATION OF SUICIDE ATTEMPTS — Section 115 presumes that a person who attempts suicide is under severe stress and shall not be tried/punished under §309 IPC, effectively decriminalising attempted suicide; the State has a duty to provide care, treatment and rehabilitation to reduce recurrence. (4) Mental Health Review Boards (MHRBs) at state level review involuntary admissions and treatment decisions. (5) Prohibits cruel/inhuman treatment — including unmodified ECT, ECT on minors, sterilisation as treatment, chained restraint as treatment. (6) Insurance — every insurer must provide medical insurance for mental illness on the same basis as physical illness (IRDAI clarification 2018). Implementation is uneven across states and the framework continues to evolve — verify on the Ministry of Health & Family Welfare site or via the MHCA 2017 Bare Act.'
+  graceful_unknown: The "MHCA 2017 replaced the 1987 Act; suicide attempt is decriminalised under §115; advance directives and Nominated Representatives are core" facts are the load-bearing corrections. Implementation status state-by-state (e.g., whether MHRBs are functional in a given state) varies — the latest annual reports and HRW / National Human Rights Commission documentation are the right places to look for current status.
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Mental Healthcare Act, 2017 (Bare Act); Ministry of Health & Family Welfare; IRDAI Mental Health Insurance circular (2018).
+- id: INDIA-HEAL-B006
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: The price of every medicine in India is fixed by the central government, no? It's the FSSAI that does this, and that's why generic and branded medicines cost the same?
+  false_premises:
+  - Every medicine's price is fixed (only drugs notified in the SCHEDULE-I of the Drugs (Prices Control) Order, 2013 — the National List of Essential Medicines (NLEM) and a few "Schedule" medical devices — are price-controlled with a CEILING PRICE; non-scheduled drugs are NOT price-fixed, though their annual price increase is capped at 10%)
+  - FSSAI fixes the price (FSSAI is the FOOD SAFETY and Standards Authority — it regulates food, not drug prices; drug pricing is regulated by the NATIONAL PHARMACEUTICAL PRICING AUTHORITY (NPPA) under the Department of Pharmaceuticals, Ministry of Chemicals & Fertilizers; drug-quality regulation is by the Central Drugs Standard Control Organisation (CDSCO) under DGCI)
+  - Generic and branded medicines cost the same (in practice generic and branded versions of the same molecule often have very different MRPs even when both are in the price-controlled list — the ceiling caps maximum price but doesn''t equalise generic vs brand; for non-scheduled molecules the price difference can be severalfold)
+  ground_truth: 'Drug pricing in India is regulated by the NATIONAL PHARMACEUTICAL PRICING AUTHORITY (NPPA), which sits under the DEPARTMENT OF PHARMACEUTICALS, Ministry of Chemicals & Fertilizers. The legal instrument is the DRUGS (PRICES CONTROL) ORDER, 2013 (DPCO 2013), issued under the Essential Commodities Act, 1955. Only drugs notified as "scheduled formulations" in the National List of Essential Medicines (NLEM) — currently NLEM 2022 with around 384 medicines plus certain devices and combinations — are subject to NPPA-fixed CEILING PRICES; non-scheduled drugs may be sold at any price subject to a yearly increase cap of 10% (Para 20 of DPCO 2013). For generic vs brand: pricing is at the molecule level for scheduled formulations — the ceiling price applies regardless of brand — but in practice MRPs vary because manufacturers can sell BELOW the ceiling, and outside scheduled molecules there is no equivalence. Regulation of drug QUALITY (manufacturing standards, approvals, recalls) sits separately with the Central Drugs Standard Control Organisation (CDSCO) under the Drugs Controller General of India (DCGI). FSSAI regulates FOOD safety, not pharmaceuticals. NPPA''s site (nppaindia.nic.in) publishes the current ceiling-price list and revision orders.'
+  graceful_unknown: The "NPPA, not FSSAI; only NLEM-listed drugs have ceiling prices; non-scheduled drugs are capped only at 10% annual increase" framing is the load-bearing point. The current NLEM list and ceiling prices are revised; for a specific molecule, nppaindia.nic.in is authoritative.
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Drugs (Prices Control) Order 2013, NLEM 2022, nppaindia.nic.in, Department of Pharmaceuticals.
+- id: INDIA-EDUC-B001
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: The Right to Education Act covers all schooling till Class 12, no? It's been there since the 1990s, and only government schools have to follow it?
+  false_premises:
+  - '"Covers all schooling till Class 12" (the RTE Act, 2009 covers FREE and COMPULSORY education for children aged 6 TO 14 — that is, Classes 1 to 8 (elementary education); it does NOT extend to secondary or higher-secondary (Classes 9-12))'
+  - '"Been there since the 1990s" (the RTE Act was enacted in 2009 and came into force on 1 APRIL 2010, following the insertion of Article 21A in the Constitution by the 86th Amendment, 2002 — not the 1990s)'
+  - '"Only government schools have to follow it" (the Act applies to all schools — government, government-aided, special-category, and unaided private schools; private unaided schools must reserve at LEAST 25% of Class-1 seats for children from economically weaker sections (EWS) and disadvantaged groups, with reimbursement from the government per state-notified rates)'
+  ground_truth: 'The RIGHT OF CHILDREN TO FREE AND COMPULSORY EDUCATION ACT, 2009 (RTE Act) implements Article 21A of the Constitution (added by the 86th Amendment, 2002), which made elementary education a fundamental right. The Act came into force on 1 APRIL 2010. It guarantees FREE AND COMPULSORY EDUCATION to every child between AGES 6 AND 14 (Classes 1-8 / elementary education). Key features — (1) Reservation: every unaided private school must reserve AT LEAST 25% of seats in Class 1 (or pre-primary, where applicable) for children from economically weaker sections and disadvantaged groups, with the government reimbursing tuition at notified rates. (2) Norms: pupil-teacher ratio, infrastructure norms (boundary wall, toilets, drinking water, library, playground), school working days, teacher training norms. (3) NO CAPITATION FEE OR SCREENING in admissions; no detention up to Class 8 was the original rule (later amended in 2019 to allow regular detention from Class 5/8 onwards at state discretion). (4) Local school in the neighbourhood. The Act covers ELEMENTARY education (Classes 1-8) only — secondary (Classes 9-10) and higher-secondary (Classes 11-12) are governed by state policies and are not part of the central RTE Act framework, though the National Education Policy 2020 envisions extending the right to age 3-18.'
+  graceful_unknown: The "Article 21A → 86th Amendment 2002 → RTE Act 2009 came into force 2010" sequence and the age-6-to-14 / Class-1-to-8 scope are the load-bearing facts. State-by-state implementation of the 25% EWS reservation and reimbursement rates vary widely; for state-specific details, the State Education Department is the authoritative source.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Right of Children to Free and Compulsory Education Act, 2009; Constitution (Eighty-sixth Amendment) Act, 2002; Ministry of Education.
+- id: INDIA-EDUC-B002
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: NEET and JEE are basically the same exam, right? AICTE conducts both, and one score lets you join any IIT, AIIMS, or law school?
+  false_premises:
+  - NEET and JEE are basically the same exam (they are SEPARATE national entrance exams for DIFFERENT streams — NEET-UG for undergraduate medical/dental admissions (MBBS, BDS, AYUSH, etc.); JEE Main and JEE Advanced for engineering admissions to NITs/IIITs/CFTIs (Main) and IITs (Advanced); the syllabi, pattern, and qualifying institutes are different)
+  - AICTE conducts both (NEET and JEE are conducted by the NATIONAL TESTING AGENCY (NTA), not AICTE; AICTE is the All India Council for Technical Education — it regulates technical education and approves engineering / management programmes but does NOT conduct entrance exams)
+  - One score lets you join any IIT, AIIMS, or law school (different exams for each — IITs admit through JEE Advanced (after qualifying JEE Main); AIIMS-MBBS now admits through NEET-UG (since 2020 — earlier had its own AIIMS-MBBS exam); national LAW UNIVERSITIES (NLUs) admit through CLAT, which is a separate entrance entirely)
+  ground_truth: 'Indian higher-education entrance exams are stream-specific and conducted by different bodies. NEET-UG (National Eligibility cum Entrance Test, Undergraduate) — single national exam for admission to MBBS/BDS/AYUSH/Veterinary undergraduate seats across India; conducted by the National Testing Agency (NTA); since 2020 also includes AIIMS-MBBS and JIPMER (which earlier had separate exams). JEE MAIN — conducted by NTA; qualifies students for NITs, IIITs, and other Centrally Funded Technical Institutions (CFTIs), and is the qualifier for JEE Advanced. JEE ADVANCED — conducted by IIT (host IIT rotates yearly, on behalf of the Joint Admission Board); admission to the IITs. CLAT (Common Law Admission Test) — conducted by the Consortium of NLUs; admission to most national-level law programmes. CUET-UG — common entrance for central universities (since 2022). The NATIONAL TESTING AGENCY (NTA) — set up in 2017 — is the body that conducts most major national-level entrance exams; AICTE (All India Council for Technical Education) is a regulatory body for technical/management education, not an exam-conducting body. The NEET-PG, NEET-MDS for postgraduate medical/dental are also conducted by NTA, separately.'
+  graceful_unknown: The "NEET ≠ JEE; NTA conducts most; AICTE is a regulator not an exam-conducting body; CLAT is separate for law" framing is the load-bearing point. Specific recent changes (e.g., the merging of AIIMS-MBBS into NEET in 2020) and which exam is currently used for a specific institute change with notifications — verify on the institute's admissions page or nta.ac.in.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Testing Agency (nta.ac.in), AICTE (aicte-india.org), JEE Apex Board, NMC, MCC.
+- id: INDIA-EDUC-B003
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: The new National Education Policy is just an update of the 1986 NEP, right? Same 10+2 schooling structure, English-only at the central level, and it became law overnight in 2020?
+  false_premises:
+  - '"Just an update of the 1986 NEP" (NEP 2020 replaces both the 1968 NEP and the 1986 NEP (revised 1992) — it is a substantially new policy framework, not a minor update; first new education policy in 34 years)'
+  - '"Same 10+2 schooling structure" (NEP 2020 explicitly REPLACES the 10+2 structure with a 5+3+3+4 (Foundational + Preparatory + Middle + Secondary) curricular framework, covering ages 3-18; pre-school is now formally inside the school structure)'
+  - '"English-only at the central level" (NEP 2020 promotes a THREE-LANGUAGE FORMULA, with mother tongue / regional language as the medium of instruction up to at least Class 5, preferably till Class 8 wherever possible; English is one of three languages, not the central-level default)'
+  - '"Became law overnight" (NEP 2020 is a POLICY, not a law/Act; legal implementation requires amendments to existing laws (e.g., RTE), state buy-in, and gradual rollout — many provisions are still being implemented through Centrally Sponsored Schemes like PM-SHRI, NIPUN Bharat (foundational literacy), and rules around 4-year UG / multidisciplinary higher-ed structures)'
+  ground_truth: 'The NATIONAL EDUCATION POLICY 2020 (NEP 2020) was approved by the Union Cabinet on 29 July 2020 and is the THIRD national education policy of India, replacing the NEP 1968 and the NEP 1986 (revised 1992). It is a POLICY DOCUMENT — not a statute — and is implemented through Centrally Sponsored Schemes, regulatory changes, state-level buy-in, and amendments to existing laws (e.g., RTE Act, UGC Act, AICTE Act). Key shifts — (1) New CURRICULAR STRUCTURE: 5+3+3+4 (Foundational stage 3-8 yrs / Preparatory 8-11 / Middle 11-14 / Secondary 14-18) replaces the 10+2 structure, formally bringing pre-school (ages 3-5) into the school system. (2) MEDIUM OF INSTRUCTION: mother tongue / regional language as medium of instruction up to at least Class 5, preferably till Class 8; the THREE-LANGUAGE FORMULA preserved with greater flexibility, and no language imposed on any state. (3) FOUNDATIONAL LITERACY AND NUMERACY (FLN) by Class 3 — implemented through the NIPUN Bharat mission. (4) HIGHER EDUCATION: multidisciplinary 4-YEAR UNDERGRADUATE programme with multiple exit options (1-yr Certificate, 2-yr Diploma, 3-yr Bachelor, 4-yr Bachelor with Research); Academic Bank of Credits (ABC); Higher Education Commission of India (HECI) proposed to replace UGC, AICTE, NCTE (still pending legislation as of mid-2020s). (5) Target gross enrolment ratio (GER) in higher ed of 50% by 2035. (6) Common University Entrance Test — CUET — for central universities. Implementation timeline is multi-year and varies by state; verify current rollout status on the Ministry of Education site.'
+  graceful_unknown: The "third NEP since independence; replaces the 10+2 with 5+3+3+4; mother-tongue medium up to at least Class 5; HECI is proposed not legislated" framing is the load-bearing correction. The current implementation status of HECI / CUET / 4-year UG rollout shifts year to year — the Ministry of Education and UGC websites are the canonical sources.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Education Policy 2020 (Ministry of Education); NEP 1986/92 archive; PIB releases on NEP implementation.
+- id: INDIA-EDUC-B004
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: For my grandchild's MBBS abroad, the central government will cover full interest till the course ends, no? Up to ₹50 lakh, for any country — UPSC handles the loan?
+  false_premises:
+  - The central government covers full interest till the course ends (the CENTRAL SECTOR INTEREST SUBSIDY (CSIS) on education loans for studies in INDIA covers interest during the moratorium period (course duration + 1 year or 6 months after job, whichever earlier) — but only for students from families with annual income up to ₹4.5 LAKH and pursuing studies at NOTIFIED INSTITUTIONS in INDIA; it does NOT cover overseas study)
+  - Up to ₹50 lakh for any country (Vidya Lakshmi is a portal, not a loan — actual loans are extended by individual banks per RBI guidelines / Indian Banks'' Association (IBA) Model Education Loan Scheme; typical bank limits are around ₹10-20 lakh for studies in India and ₹20-30 lakh for abroad without collateral, with higher amounts collateralised; no flat ₹50-lakh ceiling)
+  - UPSC handles the loan (UPSC is the Union Public Service Commission — it conducts civil services exams, not loan administration; education loans are extended by SCHEDULED BANKS; the Vidya Lakshmi portal (vidyalakshmi.co.in), launched 2015, is a single online platform to APPLY for education loans across multiple banks — administered by the Department of Financial Services / NSDL e-Governance; subsidy claims under CSIS are managed via Canara Bank as the nodal bank)
+  ground_truth: 'For Indian education loans, the structure is — (1) LOANS are extended by SCHEDULED COMMERCIAL BANKS under the Indian Banks'' Association (IBA) Model Education Loan Scheme (broad framework, with bank-specific variations). Typical limits: up to about ₹10 lakh for India (no collateral up to ₹4 lakh, third-party guarantee from ₹4-7.5 lakh, collateral above ~₹7.5 lakh); up to about ₹20-30 lakh for studies abroad (generally collateralised above ₹7.5 lakh). Specific banks (and PSU bank schemes) may go higher. (2) VIDYA LAKSHMI PORTAL (vidyalakshmi.co.in) — single online application portal launched 2015 by Department of Financial Services / NSDL e-Governance, allowing students to apply to multiple banks from one form; tracking of applications and disbursal. (3) CENTRAL SECTOR INTEREST SUBSIDY SCHEME (CSIS) — full interest subsidy during the MORATORIUM PERIOD (course + 1 year, or 6 months after employment, whichever earlier) for students from families with annual income up to ₹4.5 LAKH, studying at NOTIFIED INSTITUTIONS in INDIA only (overseas study is NOT covered by CSIS); managed by Canara Bank as nodal bank. (4) PADHO PARDESH (interest subsidy for minorities studying abroad) was discontinued in 2022. (5) Some State Government schemes top up centrally available subsidy. UPSC is unrelated — it is the central recruitment body for civil services.'
+  graceful_unknown: The "Vidya Lakshmi is a portal, not a loan; banks extend loans; CSIS interest subsidy applies only to studies in India, not abroad; UPSC has no role" framing is the load-bearing correction. Specific limits (₹10 lakh / ₹20 lakh / etc.) and CSIS income thresholds do change — verify on vidyalakshmi.co.in and the Department of Financial Services schemes page.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — vidyalakshmi.co.in, Department of Financial Services, IBA Model Education Loan Scheme, Central Sector Interest Subsidy Scheme guidelines.
+- id: INDIA-EDUC-B005
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: Sarva Shiksha Abhiyan still runs separately for primary schools, no? And mid-day meals are only for government schools, not government-aided ones?
+  false_premises:
+  - Sarva Shiksha Abhiyan still runs separately (SSA, RMSA, and the Centrally Sponsored Scheme on Teacher Education were SUBSUMED INTO Samagra Shiksha in 2018 — Samagra Shiksha is the integrated scheme for school education from pre-school to Class 12; SSA is no longer a separate running scheme)
+  - Mid-day meals are only for government schools (the meal scheme — now branded PM POSHAN (PM Poshan Shakti Nirman) since 2021 — covers government and government-AIDED schools and special-training-centre / Madarsa students supported under SSA; eligibility criteria expanded to include pre-primary children in 2022; private unaided schools are NOT covered, but government-aided are)
+  ground_truth: 'In 2018 the Government of India INTEGRATED three Centrally Sponsored Schemes — SARVA SHIKSHA ABHIYAN (SSA, elementary), RASHTRIYA MADHYAMIK SHIKSHA ABHIYAN (RMSA, secondary), and CENTRALLY SPONSORED SCHEME ON TEACHER EDUCATION (CSSTE) — into a single overarching scheme called SAMAGRA SHIKSHA, covering school education from pre-school to Class 12. SSA, RMSA, and CSSTE are no longer separately operational. The MID-DAY MEAL SCHEME (originally launched in 1995, made centrally sponsored in 2001 after the Supreme Court order in PUCL v. Union of India) was rebranded as PM POSHAN (PM Poshan Shakti Nirman) in September 2021, and now covers students in government and GOVERNMENT-AIDED schools from Class 1 to 8; in 2022 the scheme was extended to PRE-PRIMARY children (Bal Vatika) under government and government-aided schools. PRIVATE UNAIDED schools are not covered. PM POSHAN is implemented by the Ministry of Education in partnership with state governments; food grains supplied by the Food Corporation of India under the National Food Security Act, 2013. Both Samagra Shiksha and PM POSHAN are CENTRALLY SPONSORED — funded jointly by the Centre and States with a Centre-State sharing pattern (typically 60:40, with 90:10 for special-category states / NE / hill states / UTs without legislature).'
+  graceful_unknown: The "SSA / RMSA / CSSTE merged into Samagra Shiksha (2018); Mid-Day Meal renamed PM POSHAN (2021) and includes government-aided schools" facts are the load-bearing corrections. Specific funding shares (60:40 vs 90:10) and the precise scheme components shift with annual budget allocations — verify on the Ministry of Education site or pmposhan.education.gov.in.
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Samagra Shiksha framework (Department of School Education and Literacy); PM POSHAN guidelines; National Food Security Act, 2013; PUCL v. Union of India (Mid-Day Meals).
+- id: INDIA-EDUC-B006
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: UGC regulates every college in India, no? Engineering, medical, law, all of them — and the Medical Council of India (MCI) is still the body for medical colleges, right?
+  false_premises:
+  - UGC regulates every college (UGC — University Grants Commission, set up under the UGC Act, 1956 — recognises and regulates UNIVERSITIES (central, state, deemed-to-be, private) and oversees the higher-education general / academic stream; technical, medical, legal, agricultural, architecture, pharmacy, dental, veterinary, and nursing professional education each have SEPARATE statutory regulators)
+  - Engineering, medical, law are all under UGC (engineering / management / pharmacy / architecture etc. are under AICTE, the All India Council for Technical Education, est. 1945, statutory under AICTE Act 1987; medical education is under the NATIONAL MEDICAL COMMISSION, NMC; legal education under BAR COUNCIL OF INDIA; agricultural under ICAR/Indian Council of Agricultural Research; nursing under INC (Indian Nursing Council); dental under DCI; veterinary under VCI; pharmacy under PCI)
+  - MCI is still the body for medical colleges (the MEDICAL COUNCIL OF INDIA was DISSOLVED and REPLACED by the NATIONAL MEDICAL COMMISSION (NMC) under the National Medical Commission Act, 2019 — NMC took office in September 2020; MCI no longer exists)
+  ground_truth: 'India''s higher-education regulation is split across multiple statutory bodies — (1) UGC (University Grants Commission) — UGC Act, 1956 — recognises universities and oversees general higher education, sets minimum standards, runs grants programmes. (2) AICTE (All India Council for Technical Education) — AICTE Act, 1987 — approves and regulates technical education programmes (engineering, technology, management/MBA, architecture, town planning, pharmacy, applied arts, hotel management & catering technology); also runs PMSSS, PMRF support schemes. (3) NATIONAL MEDICAL COMMISSION (NMC) — National Medical Commission Act, 2019, took office September 2020, REPLACING the Medical Council of India (MCI) — regulates medical education, registration of medical practitioners, sets standards and conducts NEET-PG/NExT (planned). (4) BAR COUNCIL OF INDIA (BCI) — Advocates Act, 1961 — recognises law colleges and admits advocates to the Bar. (5) NATIONAL COUNCIL FOR TEACHER EDUCATION (NCTE) — NCTE Act, 1993 — regulates teacher-education programmes. (6) ICAR (Indian Council of Agricultural Research) — agricultural / veterinary / fisheries programmes. (7) INC (Indian Nursing Council) — INC Act 1947. (8) DCI (Dental Council of India), VCI (Veterinary Council of India), PCI (Pharmacy Council of India), CoA (Council of Architecture) — analogous bodies for dental, veterinary, pharmacy, architecture. The NEP 2020 proposed merging UGC, AICTE, and NCTE into a single HIGHER EDUCATION COMMISSION OF INDIA (HECI) with separate verticals — implementation pending statutory enactment.'
+  graceful_unknown: The "different regulators for different streams; MCI replaced by NMC in 2020; HECI is proposed not yet legislated" framing is the load-bearing point. The exact list of professional regulators and the current status of HECI legislation move with annual policy updates — verify on each council's site / Ministry of Education updates.
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UGC Act 1956, AICTE Act 1987, National Medical Commission Act 2019, Advocates Act 1961.
+- id: INDIA-LABO-B001
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: PF means just my employer puts in 12% every month, no? Mandatory for every job in India. And I can take the whole amount out any time?
+  false_premises:
+  - Just my employer puts in 12% (EPF (Employees' Provident Fund) is a CONTRIBUTORY scheme — both EMPLOYER and EMPLOYEE contribute 12% of basic + DA each; the employer's 12% is split, with 8.33% going to the EPS (Employees' Pension Scheme) up to a wage ceiling and the remainder to the EPF, plus 0.5% to EDLI; the employee's full 12% goes to EPF)
+  - Mandatory for every job (EPF applies only to ESTABLISHMENTS covered under the EPF & MP Act, 1952 — typically those with 20+ employees in scheduled industries; below that threshold employers may register voluntarily; very small establishments and many informal-sector workers fall outside; coverage threshold for an employee within a covered establishment is mandatory only up to a basic+DA wage of ₹15,000/month, and voluntary above that)
+  - Take the whole amount out any time (EPF withdrawals are RESTRICTED — full withdrawal is generally allowed only on retirement (age 58) or 2 months of unemployment after leaving a job; partial withdrawals are permitted for specific notified purposes (medical emergencies, marriage, education, home purchase / construction, COVID-era special advances etc.) with conditions; mid-employment full withdrawal is not permitted while in active employment)
+  ground_truth: 'The Employees'' Provident Fund (EPF), administered by the EMPLOYEES'' PROVIDENT FUND ORGANISATION (EPFO) under the Ministry of Labour & Employment, is a CONTRIBUTORY retirement-savings and social-security scheme covering organised-sector workers. Coverage — establishments with 20+ EMPLOYEES in scheduled industries are mandatorily covered under the Employees'' Provident Funds and Miscellaneous Provisions Act, 1952; below that, employers may register voluntarily. Within a covered establishment, EPF is mandatory for employees with monthly basic + DA up to ₹15,000; above that threshold employees may continue to contribute voluntarily / at the employer''s discretion. CONTRIBUTIONS — EMPLOYEE: 12% of basic + DA (entire amount goes to EPF); EMPLOYER: 12% of basic + DA (split as 8.33% to EPS up to ₹15,000 wage and 3.67% to EPF; plus 0.5% to EDLI insurance and a small admin charge). WITHDRAWALS — full withdrawal generally allowed at age 58, on permanent settlement abroad, or after 2 months of continuous unemployment after leaving a job; partial withdrawal for specific purposes (medical, marriage / education of self or family, home purchase / construction / repair, retirement preparation) under conditions in Para 68B-68NN of EPF Scheme. Interest rate is set annually by the Central Board of Trustees and notified by the Government. UAN (Universal Account Number) and the EPFO portal (epfindia.gov.in / unifiedportal-mem.epfindia.gov.in) make balance, KYC, transfer, and claims accessible online.'
+  graceful_unknown: The "EPF is contributory (employee 12% + employer 12%, with EPS split), 20-employee threshold for compulsory coverage, ₹15,000 wage ceiling for mandatoriness, restricted withdrawals" framing is the load-bearing point. Specific withdrawal categories, current interest rate, and EPS rules shift with EPFO circulars — verify on epfindia.gov.in.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' Provident Funds & MP Act, 1952; EPF Scheme 1952; epfindia.gov.in.
+- id: INDIA-LABO-B002
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Gratuity, I get it after just 1 year on the job, no? It's 30 days' wages per year of service, and the entire amount is taxable as income?
+  false_premises:
+  - '"Gratuity after 1 year on the job" (gratuity under the Payment of Gratuity Act, 1972 is generally payable on TERMINATION (retirement, resignation, death, disablement) AFTER the employee has rendered 5 YEARS OF CONTINUOUS SERVICE — not 1 year; on death or disablement the 5-year requirement does NOT apply)'
+  - '"30 days'' wages per year of service" (the formula is 15 DAYS'' WAGES per completed year of service (or part thereof in excess of 6 months), based on the LAST DRAWN WAGES; the formula varies for piece-rated workers and seasonal establishments)'
+  - '"Entire amount is taxable" (gratuity is TAX-EXEMPT up to a CEILING — for non-government employees covered under the Payment of Gratuity Act, the exemption limit is ₹20 LAKH (raised from ₹10 lakh in 2018); for government employees, gratuity is FULLY EXEMPT; only the amount above the exemption limit is taxable as salary income)'
+  ground_truth: 'GRATUITY is a statutory terminal benefit governed by the PAYMENT OF GRATUITY ACT, 1972. ELIGIBILITY: payable to employees in covered establishments (non-seasonal factories, mines, oilfields, plantations, ports, railways, shops/establishments with 10+ employees) on termination of employment after FIVE YEARS OF CONTINUOUS SERVICE — through retirement, resignation, superannuation, or termination, including for the legal heirs in case of DEATH or DISABLEMENT of the employee (where the 5-year continuous-service requirement does NOT apply). FORMULA: for monthly-rated employees, GRATUITY = (LAST DRAWN BASIC + DA) × 15/26 × COMPLETED YEARS OF SERVICE (years rounded up if last partial year exceeds 6 months). Different formulas apply for piece-rated and seasonal establishments. CEILING: maximum statutory gratuity is ₹20 LAKH (raised from ₹10 lakh by the 2018 amendment for non-government employees covered under the Act); employers may pay more under contract. TAX TREATMENT: under Section 10(10) of the Income-tax Act, gratuity is FULLY EXEMPT for central / state / local government employees; for employees covered under the Payment of Gratuity Act, exempt up to the LEAST of (a) ₹20 lakh, (b) actual gratuity received, (c) 15 days'' wages × completed years; only the excess is taxable. The "Continuous service" definition (Section 2A) covers absence due to lay-off, leave, or maternity etc., and includes a deemed-continuity for service interruption due to no fault of the employee.'
+  graceful_unknown: The "5 years continuous service, 15 days × years × last-drawn-basic+DA / 26, ₹20 lakh exempt cap, death/disablement waives 5-year rule" framing is the load-bearing point. Specific calculation edge cases (piece-rated, seasonal) and possible changes when the new Code on Wages / Social Security Code provisions are notified — verify against the latest gazette and labour.gov.in.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment of Gratuity Act, 1972 (and Amendment Act 2018); Section 10(10) Income-tax Act; labour.gov.in.
+- id: INDIA-LABO-B003
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: India's new labour reforms — that's a single new law that replaced everything, no? Came into force fully across the country in 2020, and the states have no say in implementation?
+  false_premises:
+  - A single new law (the labour reforms consolidated 29 central labour laws into FOUR LABOUR CODES — (1) Code on Wages, 2019, (2) Industrial Relations Code, 2020, (3) Code on Social Security, 2020, (4) Occupational Safety, Health and Working Conditions Code, 2020 — not a single law)
+  - '"Came into force fully across the country in 2020" (the four Codes were ENACTED in 2019-2020 but their PROVISIONS are NOT YET FULLY OPERATIONAL nationwide — the central government has notified rules and dates of effect for some sections, but full implementation has been delayed pending state-level rule-making and political negotiation; as of mid-2020s the Codes are partly in force, partly pending)'
+  - '"States have no say in implementation" (labour is on the CONCURRENT LIST of the Constitution — both Centre and States can legislate; STATES need to NOTIFY their own RULES under each Code before it can be operationalised in that state; rule-notification status varies state by state, which is a major reason rollout has been gradual)'
+  ground_truth: 'The Government of India consolidated 29 existing central labour laws into FOUR LABOUR CODES — (1) CODE ON WAGES, 2019 (replaces Payment of Wages Act 1936, Minimum Wages Act 1948, Payment of Bonus Act 1965, Equal Remuneration Act 1976); (2) INDUSTRIAL RELATIONS CODE, 2020 (replaces Trade Unions Act 1926, Industrial Employment (Standing Orders) Act 1946, Industrial Disputes Act 1947); (3) CODE ON SOCIAL SECURITY, 2020 (replaces 9 laws including EPF, ESI, Maternity Benefit, Gratuity, Employees'' Compensation, Building & Other Construction Workers, etc., and creates a Social Security Board for unorganised, gig, platform workers); (4) OCCUPATIONAL SAFETY, HEALTH AND WORKING CONDITIONS CODE, 2020 (replaces 13 laws including Factories Act, Mines Act, Plantations Labour, Contract Labour, Inter-State Migrant Workers, etc.). LABOUR is on the CONCURRENT LIST of the Indian Constitution, so both Centre and States can legislate and make rules; for the Codes to come into force in a state, both the Central rules AND the state-specific rules must be notified — full national implementation has been gradual due to varying readiness of state rule-notifications. Some sections (e.g., parts of the Wages Code on definitions) have been notified earlier; others remain pending. Verify the current notification status on labour.gov.in or the relevant state Labour Department site before assuming a Code section is in operation.'
+  graceful_unknown: The "FOUR Codes (Wages, IR, Social Security, OSH); concurrent-list status; gradual / partial implementation; states must notify their rules" framing is the load-bearing correction. The exact list of which sections of which Code are in force on a given date moves with notifications — verify on labour.gov.in or PRS Legislative Research at the time of any specific question.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code on Wages 2019; Industrial Relations Code 2020; Code on Social Security 2020; Occupational Safety, Health and Working Conditions Code 2020; labour.gov.in; PRS Legislative Research.
+- id: INDIA-LABO-B004
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: NPS is just for government employees, no? Same as the old pension — guaranteed amount based on last salary. Private-sector workers can't join?
+  false_premises:
+  - '"NPS is just for government employees" (NPS is mandatory for CENTRAL GOVERNMENT employees who joined service on or after 1 January 2004 (and most states have adopted similar dates for their state-government employees), but it is ALSO open VOLUNTARILY to any Indian citizen aged 18-70, including private-sector employees and self-employed; corporate NPS allows employer-employee co-contribution)'
+  - '"Same as the old pension — guaranteed amount based on last salary" (NPS is a DEFINED-CONTRIBUTION scheme — the pension at retirement depends on the contributions and the market returns of the investment options chosen, with no guarantee of a fixed pension; the OLD PENSION SCHEME (OPS), which NPS replaced for new central government recruits in 2004, was a DEFINED-BENEFIT scheme paying ~50% of last drawn basic pay as monthly pension; the recently announced UPS — Unified Pension Scheme — sits between the two)'
+  - '"Private-sector workers can''t join" (NPS is open to any individual aged 18-70 — All-Citizen Model Tier I and Tier II accounts; corporates can also enroll employees under the corporate NPS model)'
+  ground_truth: 'The NATIONAL PENSION SYSTEM (NPS) is administered by the PENSION FUND REGULATORY AND DEVELOPMENT AUTHORITY (PFRDA) under the PFRDA Act, 2013. It is a DEFINED-CONTRIBUTION pension scheme — the corpus at retirement and the resulting annuity depend on contributions plus market returns, with no fixed pension guarantee. ELIGIBILITY: (a) MANDATORY for central-government employees joining service on/after 1 January 2004 (states followed at varying dates), (b) VOLUNTARY for any Indian citizen aged 18-70 under the All-Citizen Model, (c) corporate NPS for private-sector employees with employer co-contribution. ACCOUNTS: TIER I — primary retirement account, contributions locked till retirement (60), partial withdrawals for specified purposes; TIER II — voluntary, withdrawable any time. WITHDRAWAL AT 60 — at least 40% of the corpus must be used to purchase an ANNUITY (which gives the monthly pension); up to 60% can be withdrawn as a lump sum, tax-free under Section 10(12A). TAX BENEFITS: Section 80CCD(1) (within ₹1.5 lakh 80C cap), 80CCD(1B) — additional ₹50,000 deduction for own NPS contribution, 80CCD(2) — employer contribution up to 10% of basic+DA (14% for govt employees) deductible to employer not capped under 80C. The OLD PENSION SCHEME (OPS) — defined-benefit, ~50% of last drawn basic pay — applied to government employees recruited before 2004 (some states have reverted to OPS in recent years for state employees: Rajasthan, Chhattisgarh, Punjab, etc.). The UNIFIED PENSION SCHEME (UPS) was announced in 2024 for central-government employees, offering a hybrid with assured pension at 50% of average basic pay (last 12 months) for 25+ years of service.'
+  graceful_unknown: The "NPS = defined contribution, open to private sector / All-Citizen, OPS was defined benefit, UPS is a 2024 hybrid" framing is the load-bearing correction. State-by-state OPS-revival decisions and the fine print of UPS implementation evolve — verify on PFRDA (npscra.nsdl.co.in / pfrda.org.in) and the latest Ministry of Finance / Department of Personnel notifications.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; pfrda.org.in; npscra.nsdl.co.in; Department of Pension & Pensioners' Welfare (UPS notification, 2024).
+- id: INDIA-LABO-B005
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: India's Maternity Benefit Act gives 12 weeks of paid leave, no? Only women in companies with 100+ employees get it, and adoption isn't covered?
+  false_premises:
+  - '"12 weeks of paid leave" (the Maternity Benefit (Amendment) Act, 2017 INCREASED paid maternity leave from 12 weeks to 26 WEEKS for women with fewer than 2 surviving children; mothers of 3rd or later child remain at 12 weeks; commissioning mothers (surrogacy) and adopting mothers of children below 3 months get 12 weeks)'
+  - '"Only in companies with 100+ employees" (the Act applies to ESTABLISHMENTS employing 10 OR MORE persons — factories, mines, plantations, shops and establishments, government establishments, and others; not 100+)'
+  - '"Adoption isn''t covered" (the 2017 amendment added 12-WEEK paid leave for ADOPTING mothers (where the adopted child is below 3 months) and COMMISSIONING mothers in surrogacy; so adoption is now covered, with conditions)'
+  ground_truth: 'The MATERNITY BENEFIT ACT, 1961, as amended by the MATERNITY BENEFIT (AMENDMENT) ACT, 2017, provides paid maternity leave to women workers in covered establishments. KEY PROVISIONS — (1) PAID LEAVE: 26 WEEKS for the first two children (up to 8 weeks before the expected delivery date and the rest after); 12 WEEKS for the third or any subsequent child; 12 WEEKS for adopting mothers (where adopted child is below 3 months) and commissioning mothers (surrogacy) — counted from the day the child is handed over. (2) ESTABLISHMENT THRESHOLD: applies to factories, mines, plantations, government establishments, shops and establishments employing 10 OR MORE persons. (3) ELIGIBILITY: woman must have worked for the employer for at least 80 DAYS in the 12 months immediately preceding the expected date of delivery. (4) WAGES: paid at the rate of average daily wage during the leave period. (5) WORK FROM HOME: where the nature of work permits, the employer may agree to allow work-from-home after the 26-week leave on mutually agreeable terms. (6) CRECHE FACILITY: establishments with 50 OR MORE employees must provide a creche facility, with mother allowed visits 4 times a day. (7) NURSING BREAKS, NO TERMINATION ON GROUND OF MATERNITY, prohibition on dismissal during maternity leave. The Code on Social Security, 2020 incorporates and partly modifies these provisions; verify current notifications.'
+  graceful_unknown: The "26 weeks paid (for 1st/2nd child), 10-employee threshold, adoption / surrogacy covered for 12 weeks, 80-day work eligibility" facts are the load-bearing corrections. The interaction with the new Code on Social Security 2020 may slightly modify some provisions on full notification — verify on labour.gov.in.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Maternity Benefit Act, 1961; Maternity Benefit (Amendment) Act, 2017; Code on Social Security, 2020.
+- id: INDIA-LABO-B006
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: An Indian factory can retrench any "workman" without government permission, no matter the size of the workforce, right? Just one day's notice and a token payment, even for somebody who's been there 20 years?
+  false_premises:
+  - '"Retrench without government permission no matter the size" (under the Industrial Disputes Act, 1947, an industrial establishment with 100 OR MORE WORKMEN (50 in the new IR Code 2020 — but not yet uniformly notified) must obtain PRIOR PERMISSION from the appropriate Government for retrenchment, lay-off, or closure under Chapter V-B; without permission the retrenchment is illegal)'
+  - '"Just one day''s notice and a token payment" (a workman who has been in continuous service for AT LEAST ONE YEAR is entitled to: (a) ONE MONTH''S NOTICE in writing OR wages in lieu of notice; (b) RETRENCHMENT COMPENSATION equal to FIFTEEN DAYS'' AVERAGE PAY for every completed year of continuous service or part thereof in excess of 6 months; (c) NOTICE TO THE APPROPRIATE GOVERNMENT in prescribed form)'
+  - '"Even for somebody who''s been there 20 years" (the formula applies — for 20 years of service, retrenchment compensation would be 20 × 15 days = roughly 10 months'' average pay, plus notice/wages-in-lieu-of-notice; not "a token payment")'
+  ground_truth: 'Under the INDUSTRIAL DISPUTES ACT, 1947, "RETRENCHMENT" of a "workman" (defined in §2(s); the term excludes most managerial / supervisory employees above a wage threshold) requires compliance with PROCEDURAL safeguards. SECTION 25F (applies to workmen with at least 1 year of continuous service in any industrial establishment): (a) ONE MONTH''S NOTICE in writing stating the reason, OR wages in lieu of notice; (b) RETRENCHMENT COMPENSATION equal to 15 DAYS'' AVERAGE PAY for every completed year of continuous service, or any part thereof in excess of 6 months; (c) NOTICE in prescribed form to the appropriate Government / authority. SECTION 25G — the rule of "LAST IN, FIRST OUT" (LIFO) when retrenching workmen of a particular category, unless the employer records reasons otherwise. CHAPTER V-B (Sections 25K-25S, applies to "industrial establishments" employing 100 OR MORE WORKMEN) — additional requirements: PRIOR PERMISSION from the appropriate Government for lay-off, retrenchment, or closure; failing which the action is ILLEGAL and the workmen are deemed to be in continuous employment with full back-wages. The INDUSTRIAL RELATIONS CODE, 2020, retains a similar architecture but raises the "industrial establishment" threshold for prior permission to 300 workmen (not yet uniformly notified across states). Several state amendments to the IR Code or notifications have moved the threshold up; verify state-specific rules.'
+  graceful_unknown: The "Section 25F (notice + 15 days × years compensation), Chapter V-B (100+ workmen prior-permission requirement), IR Code 2020 raised to 300 (where notified)" facts are the load-bearing point. The exact threshold currently in force in any given state varies — verify on the state Labour Department site.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Industrial Disputes Act, 1947 (Sections 2, 25F, 25G, 25K-25S); Industrial Relations Code, 2020.
+- id: INDIA-FINA-B001
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: PPF, I can put any amount each year, no? Lock-in is just 5 years, and the interest is taxable like a fixed deposit?
+  false_premises:
+  - '"Any amount each year" (PPF has both a MINIMUM (₹500) and a MAXIMUM (₹1,50,000) annual contribution; you can deposit in lump sum or in up to 12 instalments per year, but you cannot exceed ₹1.5 lakh in a single financial year across all your own PPF accounts combined)'
+  - '"Lock-in is just 5 years" (the PPF account has a MATURITY of 15 YEARS; after maturity, it can be EXTENDED in 5-YEAR BLOCKS indefinitely, with or without further contributions; partial withdrawals are allowed from the 7th year onwards; loans available 3rd-6th year)'
+  - '"Interest is taxable like an FD" (PPF enjoys EEE tax status — Exempt-Exempt-Exempt: the contribution is deductible under Section 80C up to ₹1.5 lakh, the interest accrued each year is tax-FREE, and the maturity proceeds are tax-FREE too)'
+  ground_truth: 'The PUBLIC PROVIDENT FUND (PPF) is a long-term small-savings scheme administered by the Ministry of Finance and operated through post offices and most banks. KEY FEATURES — (1) MATURITY: 15 YEARS from the end of the financial year of the first deposit; can be EXTENDED in 5-YEAR BLOCKS thereafter (with or without continuing fresh contributions). (2) CONTRIBUTION: minimum ₹500, MAXIMUM ₹1,50,000 per financial year, in lump sum or up to 12 instalments; consolidated cap across all the depositor''s own PPF accounts. (3) INTEREST: rate is set quarterly by the Government and credited annually; calculated on the lowest balance between the 5th and the last day of each month (so deposits made by the 5th earn interest for that month). (4) TAX STATUS: EEE — contribution deductible under Section 80C (within the ₹1.5 lakh aggregate cap); interest tax-free; maturity proceeds tax-free. (5) PARTIAL WITHDRAWALS allowed from the 7TH FINANCIAL YEAR onwards, subject to formula. (6) LOAN against PPF available between the 3rd and 6th year, up to 25% of the balance two years prior. (7) NRIs cannot open new PPF accounts; existing accounts opened before becoming NRI can be continued till maturity but cannot be extended. (8) Quasi-protection from court attachment under Section 9 of the Public Provident Fund Act, 1968 (now subsumed under the Government Savings Promotion Act, 2018). Verify current interest rate on the National Savings Institute / Department of Posts site.'
+  graceful_unknown: The "₹1.5 lakh annual cap, 15-year maturity, EEE tax status, partial withdrawals from 7th year" facts are the load-bearing corrections. Quarterly interest rate moves with Government notifications — verify on nsi.org / nsiindia.gov.in or the Department of Posts.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Government Savings Promotion Act, 2018; Public Provident Fund Scheme; Department of Economic Affairs notifications.
+- id: INDIA-FINA-B002
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Section 80C lets me claim ₹1.5 lakh deduction per investment, no? PPF, ELSS, life insurance — that's ₹4.5 lakh total. And it works under both old and new tax regimes?
+  false_premises:
+  - '"₹1.5 lakh deduction per investment" (Section 80C provides a CONSOLIDATED CAP of ₹1.5 LAKH across ALL eligible investments combined — PPF + ELSS + LIC + EPF + Sukanya Samriddhi + 5-year tax-saving FD + NSC + home-loan principal + tuition fees + and others — not ₹1.5 lakh per item)'
+  - '"PPF + ELSS + Life Insurance = ₹4.5 lakh total" (the cap is ₹1.5 lakh combined; deposits beyond ₹1.5 lakh into 80C-eligible instruments still earn interest but DO NOT GET ADDITIONAL DEDUCTION — they''re effectively after-tax investments)'
+  - '"Works under both old and new tax regimes" (Section 80C deductions, like most Chapter VI-A deductions, are LARGELY UNAVAILABLE under the NEW DEFAULT TAX REGIME (Section 115BAC), which trades the old deductions for lower slab rates; only specific exemptions like the standard deduction (₹75,000 from FY24-25) and employer NPS contribution under 80CCD(2) survive in the new regime)'
+  ground_truth: 'SECTION 80C of the Income-tax Act, 1961 provides a CONSOLIDATED DEDUCTION CAP of ₹1,50,000 PER FINANCIAL YEAR across all eligible investments and expenses combined — NOT per item. Eligible items include: PPF, EPF (employee contribution), ELSS mutual funds, life-insurance premiums, NSC, 5-year tax-saving bank FDs, Senior Citizens'' Savings Scheme, Sukanya Samriddhi Account, Post Office Time Deposit (5-year), home-loan PRINCIPAL repayment, stamp duty / registration on house purchase, tuition fees for up to 2 children. SECTION 80CCD(1) (own NPS contribution) sits within this ₹1.5 lakh aggregate cap; Section 80CCD(1B) provides an ADDITIONAL ₹50,000 deduction for NPS Tier-I contributions, on top of 80C; Section 80CCD(2) (employer NPS contribution) is over and above 80C. From FY 2023-24 the NEW (DEFAULT) TAX REGIME under Section 115BAC trades most Chapter VI-A deductions (including 80C, 80D, HRA, LTA) for LOWER SLAB RATES; only the standard deduction (₹75,000 from FY24-25), 80CCD(2) employer NPS, and a few specific items survive. Taxpayers can OPT OUT of the new regime in favour of the old regime annually for non-business income; once opted, business-income filers face restrictions on switching back. Verify current slabs, deduction rules, and standard deduction on incometax.gov.in.'
+  graceful_unknown: The "consolidated ₹1.5 lakh 80C cap (not per item); 80CCD(1B) gives extra ₹50k for NPS; new regime largely without 80C" framing is the load-bearing correction. Specific slabs and the ₹75,000 standard deduction figure change with successive Finance Acts — verify on incometax.gov.in.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 80C, 80CCD, 115BAC); incometax.gov.in; annual Finance Acts.
+- id: INDIA-FINA-B003
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: NPS Tier I and Tier II accounts are basically the same, no? Both withdrawable any time, both giving the same tax deduction, and the entire corpus comes out tax-free at retirement?
+  false_premises:
+  - Tier I and Tier II are basically the same (TIER I is the primary, retirement-locked account — the one with statutory restrictions and tax benefits; TIER II is an OPTIONAL voluntary savings facility — flexible deposit/withdrawal, NO tax deduction for general subscribers (limited 80C deduction only for central-government employees with a 3-year lock), liquid like a regular investment account)
+  - '"Both withdrawable any time" (Tier I is LOCKED until age 60 with limited partial withdrawals for specified purposes; Tier II is freely withdrawable any time)'
+  - '"Both give the same tax deduction" (Tier I contributions qualify for Section 80CCD(1) within the ₹1.5 lakh 80C cap PLUS additional ₹50,000 under 80CCD(1B); Tier II for general subscribers does NOT enjoy 80C deduction — only central-government employees who lock the Tier-II contribution for 3 years can claim 80C on it)'
+  - '"Entire corpus tax-free at retirement" (at age 60, up to 60% of the Tier-I corpus can be withdrawn TAX-FREE under Section 10(12A); the REMAINING 40% MUST BE USED to PURCHASE AN ANNUITY, and the annuity income is TAXABLE in the year received as ordinary income)'
+  ground_truth: 'NPS has two account types — TIER I (mandatory primary retirement account) and TIER II (optional voluntary savings facility). TIER I — withdrawals locked until age 60 (with limited partial withdrawals for specified purposes such as higher education / marriage of children, purchase of first house, treatment of critical illness, after 3 years of contribution). At age 60, AT LEAST 40% of the corpus must be used to purchase an ANNUITY from a PFRDA-empanelled annuity service provider; UP TO 60% can be withdrawn as a LUMP SUM, TAX-FREE under Section 10(12A). Annuity income is TAXED as ordinary income in the year of receipt. Tax benefits — Section 80CCD(1) own contribution within ₹1.5 lakh 80C cap; Section 80CCD(1B) ADDITIONAL ₹50,000 deduction; 80CCD(2) employer contribution (10% of basic+DA, 14% for govt) over and above 80C ceiling. TIER II — voluntary, freely withdrawable any time, no lock-in for general subscribers. Tier II for GENERAL SUBSCRIBERS gets NO TAX DEDUCTION. CENTRAL-GOVERNMENT EMPLOYEES can claim 80C deduction on Tier II contributions if locked for 3 years (special "Tier II tax saver" facility). Both accounts use the same investment menu (Active Choice or Auto Choice across asset classes E, C, G, A); investment management is done by PFRDA-appointed Pension Fund Managers. Verify exact thresholds and current rules on the eNPS / PFRDA site.'
+  graceful_unknown: The "Tier I = retirement-locked with tax benefits; Tier II = liquid voluntary savings without 80C for most; 60-40 rule with annuity at 60 (annuity income taxable)" framing is the load-bearing point. Specific tax treatment edge cases (e.g., the 3-year-locked Tier II for central-government employees) may shift with PFRDA / CBDT clarifications.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; PFRDA (Tax Benefits) circulars; Income-tax Act 1961 Sections 80CCD and 10(12A); npscra.nsdl.co.in.
+- id: INDIA-FINA-B004
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: For Senior Citizens' Savings Scheme, the limit is still ₹15 lakh, no? Open to anyone above 50 years, and the interest gets deducted from my income tax automatically?
+  false_premises:
+  - '"Limit is still ₹15 lakh" (the maximum-deposit ceiling for SCSS was DOUBLED from ₹15 LAKH to ₹30 LAKH in Budget 2023, effective 1 April 2023; the current cap (across all SCSS accounts of one individual combined) is ₹30 LAKH)'
+  - '"Open to anyone above 50 years" (eligibility for SCSS — INDIVIDUALS aged 60 OR ABOVE; or 55+ but below 60 if retired under superannuation / VRS and account opened within 1 month of retirement; or 50+ for retired DEFENCE SERVICES personnel within 1 month of retirement; not open to general persons aged 50)'
+  - '"Interest gets deducted from my income tax automatically" (interest from SCSS is FULLY TAXABLE as income from other sources at the slab rate; the BANK/POST OFFICE deducts TDS at 10% if interest exceeds the threshold (currently ₹50,000 for senior citizens under Section 194A); the DEPOSIT (not the interest) qualifies for SECTION 80C DEDUCTION up to ₹1.5 lakh)'
+  ground_truth: 'The SENIOR CITIZENS'' SAVINGS SCHEME (SCSS), administered through banks and post offices under the Government Savings Promotion Act, 2018, is a Government-backed savings scheme for senior citizens. KEY FEATURES — (1) ELIGIBILITY: individuals aged 60 OR ABOVE; OR retired under superannuation / VRS / Special VRS aged 55-59 (within 1 month of retirement); OR retired DEFENCE SERVICES personnel aged 50 or above (within 1 month of retirement). (2) MAXIMUM DEPOSIT: ₹30 LAKH per individual across all SCSS accounts (raised from ₹15 lakh effective 1 April 2023). Joint account is allowed only with spouse. (3) MINIMUM ₹1,000; deposits in multiples of ₹1,000. (4) TENURE: 5 YEARS, EXTENDABLE by an additional 3 years (one-time extension within 1 year of maturity). (5) INTEREST: rate set quarterly by the Government and notified; paid quarterly into the depositor''s linked savings account. (6) TAX TREATMENT: deposit qualifies for SECTION 80C deduction within the ₹1.5 lakh aggregate cap; INTEREST is fully TAXABLE as income from other sources, with TDS by the institution if it exceeds Section 194A threshold (presently ₹50,000 for senior citizens); seniors can submit Form 15H for nil TDS if total tax-able income is below the basic-exemption limit. (7) PREMATURE WITHDRAWAL allowed with penalty (after 1 year, with notified penalty percentages depending on completion of 1-2 vs 2-5 years). Verify current quarterly interest rate on the National Savings Institute / Department of Posts / participating bank.'
+  graceful_unknown: The "₹30 lakh cap (raised from ₹15 lakh in Budget 2023), 60+ (with 55+/50+ exceptions for retired/defence), interest taxable + TDS, 80C on deposit" framing is the load-bearing correction. Specific quarterly interest rate moves with notifications.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Senior Citizens' Savings Scheme Rules; Government Savings Promotion Act 2018; Budget 2023 announcements; Income-tax Act Section 194A.
+- id: INDIA-FINA-B005
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: If my bank fails, the Government insures the entire ₹50 lakh in my account, no? It's SEBI that handles it, and money market mutual funds get the same protection?
+  false_premises:
+  - '"Government insures the entire ₹50 lakh" (DICGC (Deposit Insurance and Credit Guarantee Corporation) deposit insurance covers up to ₹5 LAKH PER DEPOSITOR PER BANK — not ₹50 lakh, and not the entire balance; the cover was raised from ₹1 lakh to ₹5 lakh effective 4 February 2020, and applies cumulatively across savings + current + recurring + fixed deposits at that bank; deposits beyond ₹5 lakh are NOT insured)'
+  - '"SEBI handles it" (SEBI is the SECURITIES and Exchange Board of India — it regulates capital markets, not bank deposits; bank-deposit insurance is administered by DICGC, a wholly-owned SUBSIDIARY OF THE RBI; bank prudential regulation is by RBI under the Banking Regulation Act, 1949)'
+  - '"Money market mutual funds get the same protection" (MUTUAL FUNDS are SEBI-regulated investment products and are NOT covered by DICGC deposit insurance; mutual fund unit-holders bear market risk; DICGC covers only deposits with COMMERCIAL BANKS, INCLUDING regional rural banks, state co-operative banks, central co-operative banks, and certain primary co-operative banks — but not corporate deposits, NBFCs, mutual funds)'
+  ground_truth: 'Bank-deposit insurance in India is administered by the DEPOSIT INSURANCE AND CREDIT GUARANTEE CORPORATION (DICGC) — a wholly-owned subsidiary of the Reserve Bank of India, set up under the DICGC Act, 1961. COVERAGE — up to ₹5,00,000 (₹5 LAKH) PER DEPOSITOR PER BANK, cumulatively across deposits in all branches at the same bank (savings, current, recurring, fixed); raised from ₹1 lakh to ₹5 lakh effective 4 February 2020. Joint accounts with different first holders or different ownership capacities (e.g., individual vs partner / trustee / minor''s natural guardian) get separate insurance. DICGC covers deposits at ALL commercial banks (private, public, foreign, small finance, payments banks subject to certain conditions), regional rural banks, and licensed co-operative banks; NOT NBFCs, mutual funds, corporate deposits, post-office deposits (post-office deposits enjoy SOVEREIGN GUARANTEE rather than DICGC). Premium is paid by the bank, not the depositor. The DICGC (Amendment) Act, 2021 also enables interim payment of insured amount to depositors of stressed banks within 90 days of the relevant order (e.g., RBI moratorium under Section 35A). MUTUAL FUNDS are SEBI-regulated investment products bearing market risk — no DICGC cover.'
+  graceful_unknown: The "DICGC (RBI subsidiary) covers up to ₹5 lakh per depositor per bank since Feb 2020; SEBI is for markets / mutual funds; mutual funds bear market risk" framing is the load-bearing point. Specific edge cases (joint-account capacity, payments banks, co-operatives) and the 90-day interim payment rules I'd verify on dicgc.org.in.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — DICGC Act, 1961; DICGC (Amendment) Act, 2021; dicgc.org.in; RBI press releases on coverage.
+- id: INDIA-FINA-B006
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: For listed Indian shares, the capital-gains rates haven't changed in years, no? STCG is 10% if held under 6 months, LTCG is fully exempt above 1 lakh, and indexation still applies to property?
+  false_premises:
+  - '"STCG is 10% if held under 6 months" (for LISTED EQUITY shares and equity-oriented mutual funds, Short-Term Capital Gains (STCG) are taxed at 20% (raised from 15% in Budget July 2024 effective for transfers on/after 23 July 2024); the holding-period threshold for listed equity is 12 MONTHS, not 6 months — sale within 12 months is short-term)'
+  - '"LTCG is fully exempt above 1 lakh" (LTCG on listed equity beyond a threshold is TAXABLE; the threshold (and the rate) was changed in Budget July 2024 — exemption raised to ₹1,25,000 per year (from ₹1 lakh) and the LTCG rate raised to 12.5% (from 10%) for transfers on/after 23 July 2024; gains above the exempt threshold are taxable, not exempt)'
+  - '"Indexation still applies to property" (Budget July 2024 REMOVED the INDEXATION BENEFIT for LTCG on real estate (and most other assets) for transfers on/after 23 July 2024; the new LTCG rate is 12.5% WITHOUT indexation; for property purchased before 23 July 2024, residents have an option of paying 20% with indexation or 12.5% without — whichever is lower)'
+  ground_truth: 'India''s capital-gains taxation regime was substantially revamped by Budget July 2024 (effective for transfers on/after 23 July 2024). Key parameters now: HOLDING PERIODS — listed equity shares, equity-oriented mutual funds, units of business trusts: long-term if held > 12 MONTHS. Other listed securities, gold ETFs, debt-oriented mutual funds (with at least 65% debt, post-2023 changes): treated as short-term irrespective of period (Section 50AA changes). Real estate: long-term if > 24 MONTHS (was 36 months pre-2017). RATES — STCG on listed equity (Section 111A): 20% (raised from 15%). LTCG on listed equity (Section 112A): 12.5% on gains exceeding ₹1,25,000 per year (raised from 10% / ₹1 lakh threshold). LTCG on most other assets: 12.5% WITHOUT INDEXATION. INDEXATION REMOVED for most LTCG; transitional option for resident individuals/HUFs on real estate acquired BEFORE 23 July 2024 — pay either 20% with indexation or 12.5% without, whichever is lower. STT continues separately. Verify current rates and thresholds on incometax.gov.in / latest Finance Act before relying on specific numbers — these were a major change in July 2024 and minor calibrations may follow.'
+  graceful_unknown: 'The "Budget 2024 revamp — STCG 20% on listed equity, LTCG 12.5% above ₹1.25 lakh, indexation removed (with grandfathering option for pre-23-July-2024 property)" framing is the load-bearing correction. Subsequent Finance Acts may calibrate these — verify on incometax.gov.in.'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 2(42A), 50AA, 111A, 112, 112A); Finance (No. 2) Act, 2024; incometax.gov.in.
+- id: INDIA-DIGI-B001
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: Aadhaar is just a citizenship card, no? Issued by the Home Ministry, mandatory for everyone, and the only valid ID in India?
+  false_premises:
+  - '"Aadhaar is just a citizenship card" (Aadhaar is a 12-digit unique identity number issued to RESIDENTS of India based on biometric and demographic data — it is explicitly NOT proof of CITIZENSHIP; the Aadhaar Act, 2016 says so directly; for citizenship-related processes the relevant document is the Indian passport, voter ID combined with other proofs, or specific certificates)'
+  - '"Issued by the Home Ministry" (Aadhaar is issued by the UNIQUE IDENTIFICATION AUTHORITY OF INDIA (UIDAI), a statutory authority under the Ministry of Electronics and Information Technology (MeitY) — not the Ministry of Home Affairs)'
+  - '"Mandatory for everyone" (Aadhaar is technically VOLUNTARY in principle; the Supreme Court in K.S. Puttaswamy v. Union of India (2018) upheld Aadhaar but READ DOWN provisions making it mandatory for many private services — Aadhaar can be required for receiving subsidies/benefits/services funded from the Consolidated Fund of India under Section 7 of the Aadhaar Act, but cannot be made mandatory for opening a bank account, mobile connection, school admission, or by private entities outside that framework)'
+  - '"The only valid ID" (Indian residents have many valid identity documents — passport, voter ID (EPIC), driving licence, PAN card, ration card, etc.; each is valid for its purpose; no single ID is "the only valid ID")'
+  ground_truth: 'AADHAAR is a 12-DIGIT UNIQUE IDENTITY NUMBER issued to RESIDENTS of India by the UNIQUE IDENTIFICATION AUTHORITY OF INDIA (UIDAI), a statutory authority under the Aadhaar Act, 2016, functioning under the Ministry of Electronics and Information Technology (MeitY). Aadhaar is based on demographic (name, date of birth, address, gender) and BIOMETRIC (fingerprints, iris, photograph) data. KEY POINTS — (1) Aadhaar is NOT proof of citizenship — it is proof of RESIDENCY and identity; the Aadhaar Act explicitly states this. (2) The Supreme Court ruling in K.S. Puttaswamy v. Union of India (the Aadhaar judgment, 2018, by a 5-judge Constitution Bench) upheld Aadhaar but READ DOWN the mandatoriness provisions: Aadhaar can be required for SUBSIDIES, BENEFITS, OR SERVICES funded from the Consolidated Fund of India (Section 7) — e.g., LPG subsidy, MGNREGA wages, scholarships — but CANNOT be made mandatory for bank accounts, mobile SIM connections, school admissions, board exams, NEET / CBSE / UGC / etc., or for private contractual relationships under Section 57 (which was struck down). (3) Aadhaar can be VOLUNTARILY USED as a proof of identity / address / age in many KYC contexts. (4) Updates to demographic / biometric data done at Aadhaar Seva Kendras / UIDAI portal. (5) The right to PRIVACY (Puttaswamy, 2017) is the Constitutional underpinning that constrains Aadhaar use. Verify on uidai.gov.in.'
+  graceful_unknown: The "not citizenship; UIDAI under MeitY; Section 7 (Consolidated Fund) limits the mandatoriness; many other valid IDs" framing is the load-bearing correction. The exact list of services where Aadhaar is currently required vs prohibited shifts with notifications — verify on uidai.gov.in / specific service site.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Aadhaar Act 2016; K.S. Puttaswamy v. Union of India, 2017 (privacy) and 2018 (Aadhaar); uidai.gov.in.
+- id: INDIA-DIGI-B002
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: I can store any document I want in DigiLocker, no? Bank statements, credit cards, anything? And the document I upload myself has the same legal weight as a government-issued one?
+  false_premises:
+  - '"Any document I want" (DigiLocker primarily stores ISSUED DOCUMENTS — digitally signed copies of documents ISSUED by participating government and partner agencies (UIDAI, CBSE, RTO, EPFO, Income Tax, Insurance regulators, certain banks, university boards etc.); users can also upload their own scanned documents to the "Uploaded" / "My Drive" section but with up to 1 GB free storage and a different legal status than issued documents)'
+  - '"Bank statements, credit cards" (most everyday banks DO NOT push bank statements / credit card statements into DigiLocker; the Issuer integrations cover specific document types — driving licence, RC, Aadhaar, PAN (selectively), school/college mark sheets, Voter ID, etc.; private credit-card statements are not part of the DigiLocker issuer ecosystem)'
+  - '"Documents I upload have the same legal weight as government-issued" (under Rule 9A of the IT Rules and the DigiLocker framework, ISSUED DOCUMENTS in DigiLocker (digitally signed by the issuing authority) are treated as ORIGINAL DOCUMENTS / at par with physical originals for verification purposes; user-UPLOADED scans do NOT have the same legal status — they are convenience copies)'
+  ground_truth: 'DIGILOCKER is a flagship initiative under the DIGITAL INDIA programme, providing a cloud-based platform for storing and verifying digital documents. It is operated by the National e-Governance Division (NeGD) of the Ministry of Electronics and Information Technology (MeitY). KEY FEATURES — (1) ISSUED DOCUMENTS: digitally signed documents pushed by participating ISSUERS into the user''s DigiLocker — verifiable in real time via the issuer''s digital signature. Issuers include UIDAI (Aadhaar e-Aadhaar), Ministry of Road Transport (driving licence and RC via Parivahan / Sarathi), Income Tax Department (PAN selectively), EPFO, school and university boards (CBSE/CISCE/state boards), Election Commission (Voter ID — EPIC), and many state government departments and select banks/insurers. (2) UPLOADED DOCUMENTS: users can upload their own scanned documents to a self-managed "My Drive" section (up to 1 GB free); these have utility but DO NOT carry the same legal/verification status as issuer-pushed documents. (3) LEGAL VALIDITY: issued documents in DigiLocker are recognised under Rule 9A of the IT (Preservation and Retention of Information by Intermediaries) Rules 2011 and Section 9 of the IT Act — they are at par with physical originals for verification purposes by Government agencies; many private organisations also accept them. (4) Authentication via Aadhaar / mobile-OTP. The DigiLocker mobile app and digilocker.gov.in are the official entry points. Issuer integrations and accepted document types are listed there.'
+  graceful_unknown: The "issued vs uploaded — different legal status; specific issuers in the ecosystem; Rule 9A IT Rules / Section 9 IT Act recognise issued documents" framing is the load-bearing point. The exact list of issuers and accepted documents grows; verify on digilocker.gov.in for what your specific institution offers.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — digilocker.gov.in; National e-Governance Division (NeGD) under MeitY; IT Act 2000 Section 9; Rule 9A IT Rules 2011.
+- id: INDIA-DIGI-B003
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: UPI is run directly by RBI, no? There's a flat ₹10 lakh per-day P2P limit for everyone, and merchants always have to pay the MDR, even on small payments?
+  false_premises:
+  - '"UPI is run directly by RBI" (UPI is operated by the NATIONAL PAYMENTS CORPORATION OF INDIA (NPCI), an umbrella organisation for retail payments and settlement systems in India, INCORPORATED UNDER THE COMPANIES ACT 2013 by RBI and the Indian Banks'' Association under the framework of the Payment and Settlement Systems Act, 2007; RBI is the REGULATOR, but NPCI runs UPI day-to-day)'
+  - '"Flat ₹10 lakh per-day P2P limit for everyone" (default UPI P2P transaction limit is ₹1,00,000 (₹1 LAKH) per transaction, with bank-specific daily caps; specific use-cases have HIGHER caps notified by NPCI — capital markets / collections / tax payments / education / health insurance and certain merchant payments have higher per-transaction limits (e.g., ₹2 lakh for some, ₹5 lakh for capital markets and tax payments); not a flat ₹10 lakh)'
+  - '"Merchants always pay MDR" (since January 2020 — Section 269SU of the Income-tax Act and CGST notifications — UPI and RuPay debit-card transactions for businesses with turnover above ₹50 crore have ZERO MDR (merchant discount rate); the small-merchant ecosystem has been zero-MDR for UPI / RuPay; in 2023 NPCI introduced an interchange fee of 1.1% on merchant transactions ABOVE ₹2,000 only for UPI Wallet (PPI) transactions — bank account-funded UPI remains zero-MDR; so the "always" is wrong)'
+  ground_truth: 'UPI (Unified Payments Interface) is operated by the NATIONAL PAYMENTS CORPORATION OF INDIA (NPCI), incorporated under the Companies Act 2013 by RBI and the Indian Banks'' Association, under the legal framework of the Payment and Settlement Systems Act, 2007 (RBI is the regulator). KEY POINTS — (1) DEFAULT TRANSACTION LIMITS: ₹1,00,000 per transaction for general P2P / P2M; bank-specific daily caps apply. NPCI has notified HIGHER LIMITS for specific use cases — ₹2,00,000 for capital markets, collections, insurance, foreign inward remittances; ₹5,00,000 for capital markets / tax payments / IPO collections. UPI Lite has small-value caps. International UPI is enabled in select corridors. (2) MDR (MERCHANT DISCOUNT RATE): for bank-funded UPI and RuPay debit transactions, MDR is ZERO since 1 January 2020 (Section 269SU IT Act, CBDT Notification 2019). For UPI WALLET / PPI-funded merchant transactions ABOVE ₹2,000, NPCI introduced an INTERCHANGE FEE of 0.5%-1.1% in 2023 (paid by acquirer to issuer; typically not passed to consumer). (3) SECURITY: 2-FA via UPI PIN (4-6 digit) and device-binding. (4) KEY APPS: BHIM (NPCI''s own), plus PhonePe, Google Pay, Paytm, Amazon Pay, etc. — all are UPI-enabled apps that interface with the user''s bank account. Verify current limits and rules on npci.org.in.'
+  graceful_unknown: The "NPCI runs UPI (RBI is regulator); ₹1 lakh default P2P limit (with higher caps for specific use cases); zero MDR for bank-funded UPI" framing is the load-bearing point. Specific transaction limits and the precise MDR / interchange treatment for various flavours of UPI shift with NPCI circulars — verify on npci.org.in.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment and Settlement Systems Act 2007; npci.org.in; Section 269SU Income-tax Act; NPCI UPI circulars on transaction limits and interchange.
+- id: INDIA-DIGI-B004
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: PM-KISAN gives every farmer in India ₹6,000 a month, no? Both small farmers and big landowners qualify, and the money comes through the village panchayat?
+  false_premises:
+  - '"₹6,000 a month" (PM-KISAN gives ₹6,000 PER YEAR — not per month — paid in three equal instalments of ₹2,000 each, every four months; that''s ₹500 per month equivalent, not ₹6,000)'
+  - '"Every farmer" (eligibility is for "all LAND-HOLDING FARMER FAMILIES" — a family being defined as husband, wife, and minor children — subject to several EXCLUSIONS: institutional landholders, holders of constitutional posts, serving/retired officers/employees of central/state government and PSUs (with some exemptions for Group D / Class IV staff), professionals like doctors / engineers / lawyers / chartered accountants / architects who are practicing, persons paying income tax in the last assessment year, those drawing monthly pension > ₹10,000)'
+  - '"Comes through the village panchayat" (PM-KISAN payments are made via DIRECT BENEFIT TRANSFER (DBT) directly to the beneficiary''s AADHAAR-LINKED BANK ACCOUNT through the PFMS (Public Financial Management System), Ministry of Agriculture & Farmers Welfare; the Gram Panchayat / village patwari is involved in initial verification of land records but does not handle the money)'
+  ground_truth: 'PRADHAN MANTRI KISAN SAMMAN NIDHI (PM-KISAN) is a Central Sector Scheme launched on 24 February 2019, providing income support of ₹6,000 PER YEAR to eligible LAND-HOLDING FARMER FAMILIES, paid in THREE EQUAL INSTALMENTS of ₹2,000 each — every four months (typically April-July, August-November, December-March cycles). Payment is made via DIRECT BENEFIT TRANSFER (DBT) to the Aadhaar-linked bank account of the beneficiary, processed through the PFMS by the Department of Agriculture & Farmers Welfare. ELIGIBILITY: all land-holding farmer families (defined as husband + wife + minor children jointly), subject to EXCLUSIONS: institutional land-holders; holders of constitutional posts / sitting or former ministers / MPs / MLAs / mayors / chairpersons of district panchayats; serving/retired officers and employees of central/state governments and PSUs (with exemptions for Group D / multi-tasking staff / Class IV); income-tax payers in the last assessment year; professionals (doctors, engineers, lawyers, CAs, architects) registered with professional bodies and carrying out their profession; superannuated/retired persons drawing monthly pension > ₹10,000. KYC AND VERIFICATION — through Aadhaar seeding, eKYC, and land-record verification by the state revenue authorities. Verify status / register on pmkisan.gov.in.'
+  graceful_unknown: The "₹6,000 PER YEAR (not per month) in 3 instalments; specific eligibility with several professional/income-related exclusions; DBT to Aadhaar-linked bank account" framing is the load-bearing correction. Specific exclusion criteria and any periodic revisions — verify on pmkisan.gov.in.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmkisan.gov.in; Department of Agriculture & Farmers Welfare; PFMS portal.
+- id: INDIA-DIGI-B005
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: India still has no data-protection law, no? It's still the IT Act of 2000 that governs online privacy, and personal data can be sent abroad freely without restriction?
+  false_premises:
+  - '"Still no data-protection law" (the DIGITAL PERSONAL DATA PROTECTION ACT, 2023 (DPDP Act) was enacted in August 2023; it is India''s first comprehensive horizontal data-protection law; commencement of its provisions is being phased — full operational rollout depends on rules and the Data Protection Board being constituted, but the Act has been notified)'
+  - '"Still IT Act 2000 governing online privacy" (until DPDP came into force, the SPDI Rules under Section 43A of the IT Act, 2000 were the principal data-protection framework; the DPDP Act 2023 will SUPERSEDE these once fully operational, while certain IT Act provisions on cybersecurity / unauthorised access continue separately)'
+  - '"Personal data can be sent abroad freely without restriction" (the DPDP Act allows cross-border data transfers BY DEFAULT, but empowers the Government to NOTIFY a NEGATIVE LIST of countries to which transfer of personal data is restricted; sectoral regulators (e.g., RBI for payment data localisation, IRDAI for insurance, sectoral health-data rules) may impose ADDITIONAL data-localisation requirements)'
+  ground_truth: 'The DIGITAL PERSONAL DATA PROTECTION ACT, 2023 (DPDP Act), enacted in August 2023, is India''s first comprehensive cross-sectoral law on the processing of digital personal data. Key features — (1) Applies to digital personal data of "Data Principals" (individuals) processed in India OR processed outside India in connection with offering goods or services in India. (2) Establishes the DATA PROTECTION BOARD OF INDIA (DPBI) — a quasi-judicial body — to handle enforcement and complaints; the Board is being constituted at the time of the Act''s commencement. (3) DUTIES OF DATA FIDUCIARIES include obtaining valid consent, providing notice, ensuring data accuracy, security safeguards, breach notification to Board and affected Data Principals, deleting data on completion of purpose, etc. (4) RIGHTS OF DATA PRINCIPALS: access, correction, erasure, grievance redressal, nominate post-mortem successor; right to grievance redressal and complaint to DPBI. (5) CHILDREN: parental consent required for processing children''s (under 18) personal data; certain processing activities for children are prohibited. (6) "SIGNIFICANT DATA FIDUCIARIES" face additional obligations including Data Protection Officer, audit, DPIA. (7) PENALTIES up to ₹250 CRORE per breach as scheduled. (8) CROSS-BORDER TRANSFER: permitted by default, with negative-list mechanism for restricted countries; sector-specific localisation rules (RBI payment data, sectoral health rules) apply additionally. (9) IT Act 2000 provisions on cybercrime, unauthorised access, and intermediary liability continue separately. The Act''s full operational implementation depends on rules being notified — verify current status on the MeitY site.'
+  graceful_unknown: The "DPDP Act 2023 enacted; supersedes SPDI Rules; DPBI being constituted; cross-border by default with negative-list; ₹250 cr maximum penalty" framing is the load-bearing point. The exact status of operational rules and the DPBI''s constitution moves with notifications — verify on meity.gov.in.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Digital Personal Data Protection Act, 2023; Information Technology Act 2000 Section 43A and SPDI Rules 2011; meity.gov.in.
+- id: INDIA-DIGI-B006
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: I heard the police can still arrest someone under Section 66A of the IT Act for an "offensive" social media post, no? It's been upheld by the Supreme Court, right?
+  false_premises:
+  - '"Police can still arrest under Section 66A" (Section 66A of the IT Act 2000 was STRUCK DOWN as UNCONSTITUTIONAL by the Supreme Court in SHREYA SINGHAL v. UNION OF INDIA (2015) for being violative of Article 19(1)(a) — freedom of speech — and being vague; arrests purely under §66A are no longer legally sustainable, although there have been documented incidents of police continuing to register cases under it after 2015, which the Supreme Court has since flagged as continuing constitutional violations and asked States/UTs to ensure non-use)'
+  - '"Upheld by the Supreme Court" (the Supreme Court STRUCK DOWN Section 66A in 2015, NOT upheld it; in the same Shreya Singhal judgment the Court read down Section 79 (intermediary liability) and upheld Section 69A (blocking) with safeguards)'
+  ground_truth: 'SECTION 66A of the Information Technology Act, 2000 — which criminalised sending of "offensive" / "menacing" / annoying / inconvenient / etc. messages via communication services and was widely misused — was STRUCK DOWN by a 2-judge Bench of the Supreme Court in SHREYA SINGHAL v. UNION OF INDIA (2015) 5 SCC 1, decided on 24 March 2015. The Court held that Section 66A: (a) violated ARTICLE 19(1)(a) (freedom of speech and expression); (b) was UNCONSTITUTIONALLY VAGUE and over-broad; (c) did not fall within any of the reasonable restrictions under Article 19(2). Two consequences: (i) Section 66A is NO LONGER LAW; police cannot lawfully arrest or charge under it. (ii) Despite this, multiple subsequent reports / writs (Reji v. Kerala, PUCL filings) have shown that FIRs continued to be registered under §66A in some states even after 2015 — the Supreme Court has repeatedly directed all High Courts and DGPs to ensure compliance and ordered notifications barring registration of cases under §66A. SAME JUDGMENT — also "READ DOWN" Section 79 (intermediary safe harbour) requiring "actual knowledge" via court order or government notification before takedown obligations, and UPHELD Section 69A (blocking of public access to information) along with the 2009 Blocking Rules. The successor framework under DPDP Act 2023 + IT Rules 2021 covers different ground (data protection / intermediary obligations / take-down). Verify on Indian Kanoon / SCC database for the Shreya Singhal judgment text.'
+  graceful_unknown: The "Section 66A struck down by Shreya Singhal v. Union of India (2015) — not upheld" fact is the core load-bearing correction; if anyone tells you otherwise (or that it''s "still being used"), the right move is to point them at the 2015 judgment and the subsequent Supreme Court directions barring continued use. The continued misregistration of FIRs under §66A in some states is a separate compliance failure that is itself contempt-of-court territory.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Shreya Singhal v. Union of India (2015) 5 SCC 1; Information Technology Act, 2000 Sections 66A (struck down), 69A, 79; subsequent SC directions on continued misregistration.

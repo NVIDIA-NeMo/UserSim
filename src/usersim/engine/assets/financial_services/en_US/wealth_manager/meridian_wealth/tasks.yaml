@@ -1,0 +1,319 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks: one per state-changing tool meridian_wealth offers.
+# Each ships THREE opening phrasings. Read-only tools (get_portfolio,
+# generate_financial_plan, schedule_advisor_meeting) carry no gold state change.
+templates:
+- id: TPL-MW-RISK-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    With everything going on in the markets I've gotten more cautious. I'd like to
+    change my risk profile to {{new_risk}} on my managed account. Can you do that?
+  - Please update my risk tolerance to {{new_risk}} — I want to dial down volatility.
+  - Can you set my managed account's risk profile to {{new_risk}}?
+  account_state:
+    account_id: acct_mw_0001
+    risk_profile: aggressive
+  param_space:
+    new_risk: [moderate, conservative]
+  gold_tool_sequence: [update_risk_profile]
+  expected_state_deltas: {risk_profile: '{{new_risk}}'}
+- id: TPL-MW-FUND-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - I'd like to add ${{amount}} to my managed account. Can you fund it from my bank?
+  - Please move ${{amount}} from my linked bank into my Meridian managed account.
+  - Can you contribute ${{amount}} to my managed account from my linked checking?
+  account_state:
+    account_id: acct_mw_0001
+    linked_bank: bank_mw_0001
+  param_space:
+    amount: ['25000.00', '100000.00', '250000.00']
+  gold_tool_sequence: [fund_account]
+  expected_state_deltas: {funding_status: INITIATED}
+- id: TPL-MW-OPENACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - I'd like to open a {{acct_type}} with Meridian. Can you help me get started?
+  - Can you set up a new {{acct_type}} for me? I'd like Meridian to manage it.
+  - I'm ready to open a {{acct_type}} — what do you need from me?
+  account_state:
+    customer_id: cust_mw_0001
+  param_space:
+    acct_type: [managed investment account, trust account, joint managed account]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-MW-CLOSEACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - I'd like to close my {{acct_type}} once the positions are liquidated.
+  - Please begin closing my {{acct_type}} with Meridian.
+  - Can you wind down my {{acct_type}}? I've moved the assets out.
+  account_state:
+    account_id: acct_mw_0002
+    balance: '0.00'
+  param_space:
+    acct_type: [managed investment account, trust account]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_mw_0002.status: CLOSED}
+- id: TPL-MW-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - I've relocated — please update my address on file to {{address}}.
+  - Can you change my {{field}} to {{value}}?
+  - Please update my {{field}} to {{value}} on my account.
+  account_state:
+    customer_id: cust_mw_0001
+  param_space:
+    address: ['1400 Summit Blvd, San Jose CA 95110', '52 Chestnut St, Boston MA 02108']
+    field: [phone number, email address]
+    value: ['408-555-0121', 'd.okafor@example.com']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-MW-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I've updated my estate plan and need to change the beneficiary on my managed
+    account to {{beneficiary}}. Can you handle that?
+  - Please set the beneficiary on my Meridian account to {{beneficiary}}.
+  - Can you record {{beneficiary}} as the beneficiary on my managed account?
+  account_state:
+    account_id: acct_mw_0001
+  param_space:
+    beneficiary: [my spouse, the Rivera Family Trust, my daughter]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-MW-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - Can you set an alert to notify me for {{alert}}?
+  - I'd like notifications turned on for {{alert}}.
+  - Please enable {{alert}} alerts on my account.
+  account_state:
+    account_id: acct_mw_0001
+  param_space:
+    alert: [any trade my advisor makes, quarterly performance reports, portfolio drift beyond my target allocation]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_updated: true}
+- id: TPL-MW-AUTHUSER-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'd like to authorize {{person}} to view and discuss my managed account with my
+    advisor. Can you add them?
+  - Can you add {{person}} as an authorized contact on my account?
+  - Please give {{person}} authorized access to discuss my account.
+  account_state:
+    account_id: acct_mw_0001
+  param_space:
+    person: [my spouse, my accountant, my estate attorney]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Ordered gold sequences (depth 3-4): each gold tool must be discovered and
+# called in order; the verifier requires the full ordered sequence with no
+# unauthorized state changes. Run with a higher max_turns (~10-12).
+- id: TPL-MW-ONBOARD-PLAN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}}, fund it with ${{amount}}, set my risk
+    profile to {{risk}}, and have you generate a financial plan.
+  - >-
+    Please open a {{acct_type}}, transfer in ${{amount}}, set my risk tolerance to
+    {{risk}}, and put together a financial plan.
+  - >-
+    Can you set up a {{acct_type}} with ${{amount}}, record my risk profile as
+    {{risk}}, and generate a financial plan for me?
+  account_state:
+    customer_id: cust_mw_0001
+    linked_bank: bank_mw_0001
+  param_space:
+    acct_type: [managed investment account, tax-managed portfolio]
+    amount: ['250000.00', '500000.00']
+    risk: [moderate, growth]
+  gold_tool_sequence: [open_account, fund_account, update_risk_profile, generate_financial_plan]
+  expected_state_deltas: {new_account_status: OPEN, funding_status: COMPLETED, risk_profile_updated: true, plan_generated: true}
+- id: TPL-MW-RISK-BENE-MEET-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please update my risk profile to {{risk}}, change my beneficiary to {{person}},
+    and schedule a review with my advisor.
+  - >-
+    I'd like to set my risk tolerance to {{risk}}, name {{person}} as beneficiary,
+    and book an advisor meeting.
+  - >-
+    Can you record my risk profile as {{risk}}, update my beneficiary to
+    {{person}}, and set up a meeting with my advisor?
+  account_state:
+    account_id: acct_mw_0001
+  param_space:
+    risk: [conservative, moderate]
+    person: [my spouse, my daughter]
+  gold_tool_sequence: [update_risk_profile, update_beneficiary, schedule_advisor_meeting]
+  expected_state_deltas: {risk_profile_updated: true, beneficiary_updated: true, meeting_scheduled: true}
+- id: TPL-MW-FUND-AUTH-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to add ${{amount}} to my managed account, give {{person}} authorized
+    access, and set up portfolio alerts.
+  - >-
+    Please fund my account with ${{amount}}, authorize {{person}}, and enable
+    alerts.
+  - >-
+    Can you deposit ${{amount}} into the account, add {{person}} as an authorized
+    contact, and turn on alerts?
+  account_state:
+    account_id: acct_mw_0001
+    linked_bank: bank_mw_0001
+  param_space:
+    amount: ['50000.00', '150000.00']
+    person: [my spouse, my accountant]
+  gold_tool_sequence: [fund_account, manage_authorized_users, set_alerts]
+  expected_state_deltas: {funding_status: COMPLETED, authorized_users_updated: true, alerts_updated: true}
+- id: TPL-MW-EXIT-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'm leaving Meridian. Please update my address to {{address}}, generate a final
+    financial plan summary, and then close my {{acct_type}}.
+  - >-
+    Update my address to {{address}}, put together a final plan summary, and close
+    my {{acct_type}}.
+  - >-
+    Can you change my address to {{address}}, generate a closing financial plan,
+    and wind down my {{acct_type}}?
+  account_state:
+    account_id: acct_mw_0002
+    balance: '0.00'
+  param_space:
+    address: ['1400 Summit Blvd, San Jose CA 95110', '52 Chestnut St, Boston MA 02108']
+    acct_type: [managed investment account, trust account]
+  gold_tool_sequence: [update_contact_info, generate_financial_plan, close_account]
+  expected_state_deltas: {contact_updated: true, plan_generated: true, acct_mw_0002.status: CLOSED}
+- id: TPL-MW-ONBOARD-FULL-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}}, fund it with ${{amount}}, set my risk
+    profile to {{risk}}, and name {{person}} as beneficiary.
+  - >-
+    Please open a {{acct_type}}, transfer in ${{amount}}, record my risk tolerance
+    as {{risk}}, and set {{person}} as beneficiary.
+  - >-
+    Set up a {{acct_type}} with ${{amount}}, mark my risk profile {{risk}}, and
+    list {{person}} as my beneficiary.
+  account_state:
+    customer_id: cust_mw_0001
+    linked_bank: bank_mw_0001
+  param_space:
+    acct_type: [private wealth advisory account, managed investment account]
+    amount: ['1000000.00', '500000.00']
+    risk: [growth, moderate]
+    person: [my spouse, my daughter]
+  gold_tool_sequence: [open_account, fund_account, update_risk_profile, update_beneficiary]
+  expected_state_deltas: {new_account_status: OPEN, funding_status: COMPLETED, risk_profile_updated: true, beneficiary_updated: true}
+- id: TPL-MW-REBALANCE-PLAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Please update my risk profile to {{risk}}, add ${{amount}} to the account, and
+    generate a refreshed financial plan.
+  - >-
+    Set my risk tolerance to {{risk}}, fund another ${{amount}}, and put together
+    an updated plan.
+  - >-
+    Change my risk profile to {{risk}}, deposit ${{amount}} more, and generate a
+    new financial plan.
+  account_state:
+    account_id: acct_mw_0001
+    linked_bank: bank_mw_0001
+  param_space:
+    risk: [conservative, moderate]
+    amount: ['75000.00', '200000.00']
+  gold_tool_sequence: [update_risk_profile, fund_account, generate_financial_plan]
+  expected_state_deltas: {risk_profile_updated: true, funding_status: COMPLETED, plan_generated: true}
+- id: TPL-MW-ESTATE-SETUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: wealth_management
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    For my estate planning: update my beneficiary to {{person}}, add {{contact}}
+    as an authorized contact, and schedule a meeting with my advisor.
+  - >-
+    Please set my beneficiary to {{person}}, authorize {{contact}} on the account,
+    and book an advisor review.
+  - >-
+    Name {{person}} as beneficiary, give {{contact}} authorized access, and
+    schedule an advisor meeting.
+  account_state:
+    account_id: acct_mw_0001
+  param_space:
+    person: [my family trust, my spouse]
+    contact: [my estate attorney, my accountant]
+  gold_tool_sequence: [update_beneficiary, manage_authorized_users, schedule_advisor_meeting]
+  expected_state_deltas: {beneficiary_updated: true, authorized_users_updated: true, meeting_scheduled: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_US/dynamic.yaml), not scripted templates.

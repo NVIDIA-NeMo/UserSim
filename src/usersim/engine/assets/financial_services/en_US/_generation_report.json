@@ -1,0 +1,768 @@
+{
+  "generated_at": "2026-07-30T05:28:27.364200+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.4",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "northwind_bank": {
+      "n_documents": 238,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 8,
+          "produced": 8,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "Northwind Bank provides financial education and product comparisons but does not provide individualized tax, legal, or investment advice. We hold a standard of suitability, recommending products based on the customer's stated goals and financial profile.",
+        "brand_voice_guide": "Our voice is professional, reassuring, and accessible (8th-grade reading level), using the first-person plural 'we'. We avoid heavy financial jargon and use clear bullet points for fees, always pairing offers with concise, legally mandated disclaimers.",
+        "dispute_and_fraud_handling": "We prioritize the rapid resolution of unauthorized transactions in strict accordance with Regulation E timelines. Our philosophy is to protect the consumer first while conducting thorough internal investigations.",
+        "fee_philosophy": "We maintain a low-friction pricing model where fees are designed to discourage account misuse rather than generate revenue. Most fees, such as those on everyday_checking, are easily waived through simple minimum balance requirements.",
+        "key_terms_glossary": "[{'definition': 'Annual Percentage Yield; the real rate of return earned on a deposit including the effect of compounding interest.', 'term': 'APY'}\n {'definition': \"The federal rule governing electronic fund transfers and the consumer's rights regarding unauthorized transactions.\", 'term': 'Regulation E'}\n {'definition': 'A deficit in a bank account caused by drawing more money than the account holds.', 'term': 'Overdraft'}]",
+        "positioning": "Northwind Bank is a consumer-centric financial institution targeting retail savers and everyday spenders. We compete on transparency, competitive APY for deposits, and a streamlined digital-first banking experience.",
+        "product_positionings": "[{'one_liner': 'The foundational, low-cost hub for daily spending and liquidity.', 'product_id': 'everyday_checking'}\n {'one_liner': 'An accessible, no-annual-fee credit option for simple, everyday rewards.', 'product_id': 'horizon_cashback_card'}\n {'one_liner': 'A high-growth liquid account for emergency funds and short-term goals.', 'product_id': 'high_yield_savings'}\n {'one_liner': 'A secure, fixed-rate vehicle for guaranteed returns over a one-year term.', 'product_id': 'anchor_cd_12mo'}\n {'one_liner': 'A premium rewards card tailored for frequent travelers and international spenders.', 'product_id': 'summit_travel_card'}]",
+        "risk_and_compliance_posture": "We strictly adhere to CFPB, Federal Reserve, and FDIC guidelines to ensure fair treatment and data privacy. All retail deposits are FDIC-insured, and we prioritize transparency in all Regulation Z and Regulation E disclosures.",
+        "security_and_verification": "Multi-factor authentication and rigorous identity verification are mandatory before any state-changing action or disclosure of PII. No account modifications are permitted without successful identity validation.",
+        "service_model": "Support is available via secure chat, email, and phone during Eastern Time (ET) business hours. Complex issues are escalated from first-tier agents to specialized domain leads in retail banking or credit cards."
+      }
+    },
+    "solstice_invest": {
+      "n_documents": 195,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 5,
+          "produced": 5,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "Following Regulation Best Interest, we provide educational resources and suitable product recommendations but never offer individualized tax or legal advice. We hold a strict standard of care that prohibits guaranteeing returns or ignoring material risks.",
+        "brand_voice_guide": "Our voice is professional, empowering, and clear, written at a high-school reading level to ensure accessibility. We avoid unnecessary jargon and use structured formatting with bolded key terms and concise, standardized legal disclaimers.",
+        "dispute_and_fraud_handling": "We treat fraud reports with immediate urgency and follow a standardized investigation timeline to resolve disputes fairly. Clients are notified of progress through secure channels throughout the resolution process.",
+        "fee_philosophy": "We believe in low-friction investing, offering $0 stock commissions to democratize market access. Fees are applied only to specific administrative actions or specialized credit services to maintain platform stability and regulatory compliance.",
+        "key_terms_glossary": "[{'definition': 'The process by which a trade is finalized and the transfer of securities and cash is completed.', 'term': 'Settlement'}\n {'definition': 'Borrowing money from Solstice Invest to purchase securities, using the account equity as collateral.', 'term': 'Margin'}\n {'definition': 'The SEC standard requiring broker-dealers to act in the best interest of the retail customer.', 'term': 'Regulation Best Interest'}]",
+        "positioning": "Solstice Invest is a modern, transparent brokerage targeting retail investors from beginners to sophisticated traders. We compete on cost-efficiency, ease of access, and a commitment to the best interest of the client.",
+        "product_positionings": "[{'one_liner': 'The foundational account for solo investors seeking low-cost market entry.', 'product_id': 'individual_brokerage'}\n {'one_liner': 'Collaborative investing for partners with added support for options trading.', 'product_id': 'joint_brokerage'}\n {'one_liner': 'A zero-cost entry point designed to build long-term wealth for minors.', 'product_id': 'custodial_brokerage'}\n {'one_liner': 'An advanced tool for experienced investors to leverage their equity for increased buying power.', 'product_id': 'margin_account'}]",
+        "risk_and_compliance_posture": "We operate under SEC and FINRA frameworks, prioritizing transparency regarding market risk and settlement timing. All communications emphasize that returns are never guaranteed and maintain strict data privacy and fair treatment standards.",
+        "security_and_verification": "Strict multi-factor authentication and identity verification are required before any state-changing action or fund transfer. No sensitive account modifications occur without a verified secure session.",
+        "service_model": "Support is provided via secure in-app messaging and phone lines during ET business hours. Requests are handled by generalists and escalated to licensed specialists for complex brokerage inquiries."
+      }
+    },
+    "evergreen_retirement": {
+      "n_documents": 229,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide comprehensive educational resources on contribution limits and RMDs, but we do not provide individualized tax or legal advice. Our standard of care is to guide clients toward product suitability while deferring specific tax strategies to certified CPAs.",
+        "brand_voice_guide": "The tone is professional, reassuring, and authoritative, using first-person plural ('we') and a 10th-grade reading level. We avoid unnecessary jargon but use precise industry terms, ensuring all tax warnings are clearly formatted and accompanied by standard regulatory disclaimers.",
+        "dispute_and_fraud_handling": "We treat all fraud reports with immediate urgency, initiating a freeze on affected assets within one business hour. Disputes are handled through a formal review process with a goal of resolution within 15 business days.",
+        "fee_philosophy": "We maintain a lean, transparent fee structure to maximize client compound growth. Fees are primarily tied to active asset management, while basic account maintenance—such as for the rollover_ira—is often waived to encourage portfolio consolidation.",
+        "key_terms_glossary": "[{'definition': 'Required Minimum Distribution; the minimum amount the IRS requires account holders to withdraw annually after reaching a certain age.', 'term': 'RMD'}\n {'definition': 'Additional annual contributions allowed by the IRS for individuals aged 50 and older.', 'term': 'Catch-up Contribution'}\n {'definition': 'A tax penalty (typically 10%) imposed by the IRS for taking distributions before age 59½, unless an exception applies.', 'term': 'Early Withdrawal Penalty'}]",
+        "positioning": "Evergreen Retirement is a premium, stability-focused provider targeting mid-to-late career professionals and small business owners. We compete on transparency, regulatory precision, and a seamless transition from accumulation to distribution.",
+        "product_positionings": "[{'one_liner': 'High-limit, employer-sponsored savings designed for maximum pre-tax accumulation.', 'product_id': 'traditional_401k'}\n {'one_liner': 'After-tax contributions for those seeking tax-free growth and qualified withdrawals.', 'product_id': 'roth_ira'}\n {'one_liner': 'A flexible, individual pre-tax account for those without employer-sponsored plans or seeking additional savings.', 'product_id': 'traditional_ira'}\n {'one_liner': 'A high-capacity retirement solution tailored specifically for self-employed individuals and small business owners.', 'product_id': 'sep_ira'}\n {'one_liner': 'A zero-fee consolidation vehicle for transferring assets from previous employer plans into a single managed account.', 'product_id': 'rollover_ira'}]",
+        "risk_and_compliance_posture": "We adhere strictly to DOL and IRS frameworks, emphasizing ERISA compliance across all retirement products. Our posture prioritizes the fair treatment of investors and the absolute privacy of PII, ensuring all disclosures regarding RMDs and penalties are prominent.",
+        "security_and_verification": "Multi-factor authentication (MFA) and rigorous identity verification are mandatory before any state-changing action, such as contribution changes or distributions. No account modifications are permitted without a verified secure session.",
+        "service_model": "Support is provided via secure chat and phone from 8 AM to 8 PM EST, Monday through Friday. Complex regulatory inquiries are escalated to our Senior Compliance Officers for final review."
+      }
+    },
+    "meridian_wealth": {
+      "n_documents": 189,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide holistic investment strategy and asset allocation based on a fiduciary standard of care; however, we defer specific legal and tax filing advice to certified external professionals. All product recommendations are rooted in the client's documented risk profile and financial goals.",
+        "brand_voice_guide": "Maintain a sophisticated, poised, and authoritative tone using the first-person plural ('we'). Use a collegiate reading level with moderate industry jargon, ensuring all complex terms are clarified. Disclaimers must be prominent, clear, and integrated seamlessly into the flow of communication.",
+        "dispute_and_fraud_handling": "We approach disputes with a philosophy of rapid investigation and fair resolution. Initial reviews are conducted within 5-10 business days, with formal written determinations provided upon conclusion.",
+        "fee_philosophy": "We employ a transparent advisory fee structure to align our success with the growth of client assets. Fees are based on the specific complexity and active management required for each product and are non-negotiable to ensure equitable treatment across our client base.",
+        "key_terms_glossary": "[{'definition': \"The legal and ethical obligation to act solely in the client's best interest.\", 'term': 'Fiduciary Duty'}\n {'definition': 'The annual percentage charged for professional portfolio management and financial guidance.', 'term': 'Advisory Fee'}\n {'definition': \"The process of evaluating a client's ability and willingness to lose principal in exchange for potential returns.\", 'term': 'Risk Profiling'}]",
+        "positioning": "Meridian Wealth is a premier fiduciary wealth manager targeting high-net-worth individuals and institutional clients. We compete on transparency, rigorous risk-profiling, and a steadfast commitment to the client's best interest.",
+        "product_positionings": "[{'one_liner': 'Our foundational investment solution for those seeking professional management with a balanced risk approach.', 'product_id': 'managed_portfolio'}\n {'one_liner': 'An advanced strategy specifically optimized to minimize tax liabilities for high-income earners.', 'product_id': 'tax_managed_portfolio'}\n {'one_liner': 'Designed for investors seeking to align their financial growth with environmental, social, and governance impact.', 'product_id': 'esg_portfolio'}\n {'one_liner': 'Our most exclusive tier, offering bespoke, high-touch strategies for ultra-high-net-worth portfolios.', 'product_id': 'private_wealth_advisory'}]",
+        "risk_and_compliance_posture": "Our operations strictly adhere to SEC regulations and the fiduciary standards of the Advisers Act. We prioritize full disclosure of conflicts and risk-profiling, framing data privacy as a cornerstone of the trust-based investor relationship.",
+        "security_and_verification": "Multi-factor authentication (MFA) and rigorous identity verification are mandatory before any state-changing action or movement of funds. We maintain a zero-trust posture regarding account modifications via unverified channels.",
+        "service_model": "Support is provided via secure client portals, email, and scheduled phone consultations during EST business hours. Issues are escalated from dedicated Relationship Managers to Senior Portfolio Strategists for complex resolution."
+      }
+    }
+  }
+}

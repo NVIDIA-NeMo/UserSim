@@ -1,0 +1,17 @@
+[
+    {"type": "health", "description": "건강, 웰빙, 의료 서비스에 관한 일상적인 주제"},
+    {"type": "finance", "description": "가계 관리, 은행 업무, 저축과 지출 계획"},
+    {"type": "cooking", "description": "요리, 레시피, 식재료 손질과 식생활"},
+    {"type": "local_government", "description": "지방자치단체 민원, 행정 서비스, 생활 절차"},
+    {"type": "technology", "description": "기술, 디지털 서비스, 스마트폰과 온라인 계정"},
+    {"type": "agriculture", "description": "농업, 축산, 작물 관리와 지역 먹거리"},
+    {"type": "travel", "description": "여행 계획, 국내 관광지, 교통과 숙박 팁"},
+    {"type": "education", "description": "교육 제도, 학교, 시험 준비와 학습 자원"},
+    {"type": "environment", "description": "환경 문제, 기후 변화, 재활용과 지속가능성"},
+    {"type": "entertainment", "description": "엔터테인먼트, 미디어, 여가 활동"},
+    {"type": "legal", "description": "법적 권리, 절차, 규정과 생활 법률"},
+    {"type": "housing", "description": "주거, 부동산, 전월세와 집 관리"},
+    {"type": "transportation", "description": "교통수단, 출퇴근, 대중교통 이용"},
+    {"type": "employment", "description": "취업, 직장 문제, 커리어 상담"},
+    {"type": "family", "description": "가족 생활, 육아, 돌봄과 인간관계"}
+]

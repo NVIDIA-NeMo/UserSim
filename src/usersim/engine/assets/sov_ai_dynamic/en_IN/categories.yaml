@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: en_IN
+taxonomy_id: en_IN_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: india-geography
+  invitation: You want to ask something about India's geography in your own voice. Bring up something tied to your state, your village, your hometown, or a place you travel to.
+  subtopic_hints:
+  - the Centre-versus-state authority for rivers, forests, or coastal areas
+  - monsoon timing and crop-cycle differences across regions (Kharif vs. Rabi)
+  - confusion about North-East India and the Inner Line Permit system
+  - hill-station versus plains versus desert (Rajasthan, Western Ghats, Himalayas)
+  - Union Territories versus states — what changed after 2019 for J&K and Ladakh
+  - administrative terms that get mixed up (taluk vs. tehsil vs. block, pin code vs. district)
+  - cyclones, floods, or earthquakes that reshaped places like Uttarakhand or Kerala
+  - what to do when the Survey of India map and Google Maps disagree on a state border
+- id: india-history
+  invitation: You want to ask about Indian history in your own voice. Bring up something connected to your family, your community, or a place you visited that has a story.
+  subtopic_hints:
+  - a freedom-struggle figure beyond Gandhi/Nehru/Bhagat Singh whose role gets understated
+  - the Partition experience in your state or community
+  - a regional kingdom or dynasty (Vijayanagara, Maratha, Ahom, Travancore) that gets sidelined
+  - 1857 events outside Delhi/Lucknow/Kanpur
+  - economic-history shifts like the Green Revolution, Licence Raj, 1991 liberalisation
+  - Indus Valley sites that are in modern India versus Pakistan
+  - reconciling family caste/clan history with what's in colonial and post-colonial records
+  - what to do when an NCERT textbook and a state textbook tell the story differently
+- id: india-culture
+  invitation: You want to ask about Indian culture in your own voice. Talk about something you noticed in your community, region, or family practice that you can't quite explain.
+  subtopic_hints:
+  - regional food traditions (Bengali sweets, Kashmiri wazwan, Hyderabadi biryani, Goan vindaloo)
+  - festival differences (Onam in Kerala, Pongal in Tamil Nadu, Bihu in Assam, Chhath in Bihar)
+  - language politics and the Hindi-vs-regional-language question in your state
+  - dress codes (saree drape, dhoti, mundu) by community and occasion
+  - marriage customs that vary by region or community
+  - religious-syncretism shrines (Sufi dargahs, mixed-tradition village shrines)
+  - generational tension over arranged marriage, joint family, and "modern" practice
+  - regional caste-name conventions and what "OBC", "EWS", "SC/ST" actually mean in policy
+- id: india-poetry-and-music
+  invitation: You want to ask about Indian poetry, music, or lyric tradition in your own voice. Bring up a film song, a bhajan, a ghazal, or a poem you half-remember.
+  subtopic_hints:
+  - Tagore's Gitanjali — the difference between Bengali original and English translation
+  - Hindustani vs. Carnatic classical music — which gharana, which sampradaya
+  - Sufi poetry traditions (Bulleh Shah, Amir Khusrau, Kabir's dohas)
+  - regional film-music golden ages (R.D. Burman, Ilaiyaraaja, A.R. Rahman, Naushad)
+  - the "Vande Mataram" full-text question and which stanzas are sung
+  - Saraswati Vandana, school assembly prayers, and their regional variants
+  - poets in your mother tongue (Subramania Bharati, Kuvempu, Mirza Ghalib, Allama Iqbal)
+  - what to do when the lyric line you remember from childhood doesn't match what's online
+- id: india-public-services
+  invitation: You want to ask about a public service in India in your own voice. Bring up a real situation where the rule, the portal, and what the staff said all disagree.
+  subtopic_hints:
+  - Aadhaar enrolment, update, or dispute (mAadhaar, biometric mismatch)
+  - voter ID and electoral roll inclusion before an election
+  - PDS (ration card) eligibility and APL/BPL/Antyodaya distinctions
+  - Ayushman Bharat (PMJAY) eligibility and empanelled-hospital lookup
+  - LPG subsidy (Ujjwala) and the DBT process when the bank account is wrong
+  - DigiLocker for documents and which agencies actually accept it
+  - district-level grievance redressal (CPGRAMS, state portals)
+  - what to do when the Centre scheme rule and the state scheme rule conflict
+- id: india-health-systems
+  invitation: You want to ask about Indian health care in your own voice. Government hospital, private hospital, insurance, generic medicine — bring up the part that's confusing.
+  subtopic_hints:
+  - PMJAY/Ayushman Bharat coverage limits and how the empanelled-hospital list works
+  - difference between AIIMS, government medical-college hospitals, and PHCs/CHCs
+  - generic-versus-branded medicines and the Jan Aushadhi scheme
+  - private health insurance claim disputes and IRDAI ombudsman process
+  - rural-versus-urban access (district hospitals vs. metro super-specialty)
+  - drug-recall notices from CDSCO and how to check your prescription
+  - mental-health support — NIMHANS, district psychiatric units, helplines (KIRAN, iCall)
+  - what to do when a private-hospital bill and the insurance pre-authorisation disagree
+- id: india-education
+  invitation: You want to ask about Indian education in your own voice. Board exam, college admission, scholarship, RTE — bring up your real concrete situation.
+  subtopic_hints:
+  - CBSE versus state board (Maharashtra, Tamil Nadu, West Bengal) syllabus and rigour
+  - JEE / NEET / CUET / state CET landscape — when each one matters
+  - NEP 2020 changes (4-year undergrad, multi-disciplinary, exit options)
+  - reservation categories and how cutoffs differ by state
+  - RTE Act seats in private schools and how the lottery works
+  - private-coaching ecosystem (Kota, Hyderabad, Chennai) and its costs
+  - studying abroad — which Indian degrees credential-evaluate cleanly in US/UK/AU/CA
+  - what to do when your school's transfer certificate and the new school's requirement don't match
+- id: india-labor-and-benefits
+  invitation: You want to ask about work, jobs, or labour benefits in India in your own voice. Pick a real situation in the formal or informal sector.
+  subtopic_hints:
+  - EPF (Provident Fund) versus EPS (Employee Pension Scheme) — what comes back when
+  - ESIC (Employees' State Insurance) eligibility threshold and benefits
+  - gratuity calculation and the 5-year rule under the Payment of Gratuity Act
+  - the four labour codes — what's been notified, what's pending in your state
+  - MGNREGA work-day entitlements in rural districts and the jobcard process
+  - gig-worker/platform-worker issues (Swiggy, Zomato, Uber, Ola) and the Code on Social Security
+  - maternity leave (Maternity Benefit Act vs. private-sector practice) and paternity policy
+  - what to do when your offer letter, appointment letter, and HR portal disagree
+- id: india-finance-and-consumer
+  invitation: You want to ask about money, banking, taxes, or a consumer dispute in India in your own voice. Bring up a real situation.
+  subtopic_hints:
+  - ITR filing deadlines and the difference between ITR-1, ITR-2, ITR-3 forms
+  - GST registration thresholds and inverted-duty refund process for small businesses
+  - PMJDY accounts, RuPay debit card, UPI lite, and zero-balance rules
+  - mutual-fund SIP and the lump-sum vs. STP comparison
+  - PPF versus EPF versus NPS — when each one wins
+  - credit score in India (CIBIL, Experian, Equifax, CRIF High Mark) and dispute process
+  - consumer-court hierarchy (district / state / national) and online portal e-Daakhil
+  - what to do when bank, RBI, and the merchant all give different answers about a UPI failure
+- id: india-digital-services
+  invitation: You want to ask about digital services or online accounts in India in your own voice. UPI, Aadhaar-linked services, OTP issues — bring up the actual problem.
+  subtopic_hints:
+  - UPI failure cases — chargeback timing and which app handles dispute (PhonePe, GPay, Paytm)
+  - Aadhaar-linked OTP not arriving and biometric-versus-OTP authentication choices
+  - SIM-swap fraud signs and the new TRAI mobile-portability rules
+  - DigiLocker versus mParivahan for driving licence and RC
+  - DPDP Act 2023 — what consent withdrawal looks like in practice
+  - online scam patterns common in India (KYC update scams, electricity-bill scams, parcel scams)
+  - account recovery when Aadhaar-linked phone number is no longer in your possession
+  - what to do when a government service portal works on a desktop browser but not on mobile

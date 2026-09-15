@@ -1,0 +1,323 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for tarang_invest (en_IN) — demat + mutual funds, the
+# shape of Indian retail investing (SIP culture, ELSS under 80C). Composition
+# mirrors en_US: one task per state-changing tool, ~1/3 at gold depth >=3, three
+# openings each, `ordered` only for real dependencies.
+templates:
+# ── depth 1 ───────────────────────────────────────────────────────────
+- id: TPL-TI-SIP-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I want to start a monthly SIP of ₹{{amount}} into {{fund}}. Can you set it up
+    from my account?
+  - >-
+    Please begin a SIP for me — ₹{{amount}} every month into {{fund}}, starting
+    this month if possible.
+  - >-
+    I'd like to invest ₹{{amount}} a month systematically instead of a lump sum.
+    Set up a SIP in {{fund}}.
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '18,500', sips: []}
+  param_space:
+    amount: ['500', '2,500', '10,000']
+    fund: [the flexi-cap fund, the index fund, the balanced advantage fund]
+  gold_tool_sequence: [start_sip]
+  expected_state_deltas: {sip_status: ACTIVE}
+
+- id: TPL-TI-REDEEM-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I need ₹{{amount}} for {{purpose}}. Please redeem that much from my mutual
+    fund holdings.
+  - >-
+    Can you sell ₹{{amount}} worth of my mutual fund units? I need the money for
+    {{purpose}}.
+  - >-
+    Please process a redemption of ₹{{amount}} from my funds — it's for
+    {{purpose}}.
+  account_state:
+    account_id: acct_ti_0001
+    account_type: demat account
+    last4: '0042'
+    balance: '2,40,000'
+    holdings:
+    - {fund: flexi-cap fund, units: 1200, value: '2,40,000'}
+  param_space:
+    amount: ['25,000', '60,000', '1,00,000']
+    purpose: [a medical expense, my child's school fees, a home repair]
+  gold_tool_sequence: [redeem_mutual_fund]
+  expected_state_deltas: {redemption_status: PROCESSING}
+  allowed_tools: [withdraw_funds]
+
+- id: TPL-TI-DEPOSIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Please add ₹{{amount}} to my trading account — I got {{source}} and want it
+    ready to invest.
+  - >-
+    I want to fund my account with ₹{{amount}} from {{source}}. How do I transfer
+    it in?
+  - >-
+    Can you credit ₹{{amount}} into my Tarang account? The money is from
+    {{source}}.
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '18,500'}
+  param_space:
+    amount: ['15,000', '50,000', '2,00,000']
+    source: [my annual bonus, a maturing deposit, savings]
+  gold_tool_sequence: [deposit_funds]
+  expected_state_deltas: {deposit_status: COMPLETED}
+
+- id: TPL-TI-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    Please withdraw ₹{{amount}} of the settled cash in my account to my bank
+    account.
+  - >-
+    I want to take out ₹{{amount}} that's lying idle as cash. Send it to my bank.
+  - >-
+    Can you move ₹{{amount}} of my available balance out to my bank account?
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '78,000'}
+  param_space:
+    amount: ['12,000', '40,000', '65,000']
+  gold_tool_sequence: [withdraw_funds]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+
+- id: TPL-TI-CANCEL-ORDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I placed an order this morning that hasn't executed yet and I've changed my
+    mind — {{reason}}. Please cancel it.
+  - >-
+    Can you cancel my pending order? {{reason}} and I don't want it to go through.
+  - >-
+    There's an open order on my account I no longer want — {{reason}}. Cancel it
+    before it fills.
+  account_state:
+    account_id: acct_ti_0001
+    account_type: demat account
+    last4: '0042'
+    balance: '18,500'
+    orders:
+    - {order_id: ord_ti_0001, status: pending}
+  param_space:
+    reason: [the price has moved against me, I need the money elsewhere, I entered the wrong quantity]
+  gold_tool_sequence: [cancel_order]
+  expected_state_deltas: {ord_ti_0001.status: CANCELLED}
+
+- id: TPL-TI-DIS-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I need to transfer my shares out to {{destination}}. Please process the
+    delivery instruction.
+  - >-
+    Can you initiate a delivery instruction to move my holdings to
+    {{destination}}?
+  - >-
+    Please raise the paperwork to shift my demat holdings across to
+    {{destination}}.
+  account_state:
+    account_id: acct_ti_0001
+    account_type: demat account
+    last4: '0042'
+    balance: '2,40,000'
+    holdings:
+    - {fund: flexi-cap fund, units: 1200, value: '2,40,000'}
+  param_space:
+    destination: [another broker, my joint demat account, my spouse's demat account]
+  gold_tool_sequence: [initiate_dis]
+  expected_state_deltas: {dis_status: SUBMITTED}
+
+- id: TPL-TI-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I've moved to {{city}} — please update my address and phone number on the
+    demat account.
+  - >-
+    My contact details changed after relocating to {{city}}. Can you update the
+    records?
+  - >-
+    Please change my registered address to {{city}} and update my mobile number.
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '18,500'}
+  param_space:
+    city: [Hyderabad, Ahmedabad, Chandigarh, Indore]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_status: UPDATED}
+
+# ── depth 2 ───────────────────────────────────────────────────────────
+- id: TPL-TI-REDEEM-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any]
+  # Genuine dependency: units must be redeemed before the proceeds can be paid out.
+  opening_user_messages:
+  - >-
+    I need ₹{{amount}} in my bank account by {{when}} for {{purpose}}. Please
+    redeem that much from my funds and then send it to my bank.
+  - >-
+    Redeem ₹{{amount}} of my holdings and transfer the money to my bank — I need
+    it by {{when}} for {{purpose}}.
+  - >-
+    Please sell ₹{{amount}} worth of units and withdraw the proceeds; {{purpose}}
+    and I need it by {{when}}.
+  account_state:
+    account_id: acct_ti_0001
+    account_type: demat account
+    last4: '0042'
+    balance: '2,40,000'
+    holdings:
+    - {fund: flexi-cap fund, units: 1200, value: '2,40,000'}
+  param_space:
+    amount: ['40,000', '90,000']
+    when: [Friday, the end of the month]
+    purpose: [a hospital bill is due, the admission deadline is close]
+  gold_tool_sequence: [redeem_mutual_fund, withdraw_funds]
+  ordered: true
+  expected_state_deltas: {redemption_status: PROCESSING, withdrawal_status: PROCESSING}
+
+# ── depth 3-4 ─────────────────────────────────────────────────────────
+- id: TPL-TI-ONBOARD-SIP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Genuine dependency: no demat account exists, so it must be opened and funded
+  # before a SIP can be registered against it.
+  opening_user_messages:
+  - >-
+    I'm new to investing and don't have a demat account yet. I'd like to open one,
+    put ₹{{seed}} in, and start a ₹{{amount}} monthly SIP in {{fund}}.
+  - >-
+    I don't have an account with Tarang yet. Open one for me, fund it with
+    ₹{{seed}}, and begin a SIP of ₹{{amount}} into {{fund}}.
+  - >-
+    Please help me open a demat account, add ₹{{seed}}, and set up a ₹{{amount}}
+    SIP in {{fund}} — this would be my first investment.
+  account_state: {account_id: none, account_type: demat account, tarang_account: none, sips: []}
+  param_space:
+    seed: ['5,000', '25,000']
+    amount: ['500', '1,000', '5,000']
+    fund: [the index fund, the flexi-cap fund]
+  gold_tool_sequence: [open_account, deposit_funds, start_sip]
+  ordered: true
+  expected_state_deltas: {account_status: OPEN, deposit_status: COMPLETED, sip_status: ACTIVE}
+
+- id: TPL-TI-TAXSAVE-SETUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I want to use my 80C limit properly this year. Please fund my account with
+    ₹{{seed}}, start a ₹{{amount}} monthly SIP into the tax-saver fund, and add
+    {{nominee}} as nominee.
+  - >-
+    For tax saving: add ₹{{seed}} to my account, begin a ₹{{amount}} SIP in ELSS,
+    and record {{nominee}} as my nominee.
+  - >-
+    Please put ₹{{seed}} in, set up a ₹{{amount}} SIP into the tax-saver fund, and
+    make {{nominee}} the nominee on the account.
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '18,500', nominee: none, sips: []}
+  param_space:
+    seed: ['12,500', '50,000']
+    amount: ['2,500', '12,500']
+    nominee: [my wife, my son, my mother]
+  gold_tool_sequence: [deposit_funds, start_sip, update_beneficiary]
+  expected_state_deltas: {deposit_status: COMPLETED, sip_status: ACTIVE, nominee_status: UPDATED}
+
+- id: TPL-TI-JOINT-ACCESS-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    Please give {{relation}} operating access to my demat account, record them as
+    nominee, and switch on alerts for every trade.
+  - >-
+    I want {{relation}} added as an authorised person and nominee, with
+    transaction alerts enabled.
+  - >-
+    Can you authorise {{relation}} on the account, make them my nominee, and turn
+    on trade alerts?
+  account_state: {account_id: acct_ti_0001, account_type: demat account, last4: '0042', balance: '18,500', nominee: none}
+  param_space:
+    relation: [my wife, my daughter, my husband]
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, set_alerts]
+  expected_state_deltas: {authorized_users_status: UPDATED, nominee_status: UPDATED, alerts_status: ENABLED}
+
+- id: TPL-TI-EXIT-FULL-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Genuine dependency chain: stop the recurring SIP, liquidate, pay out, then
+  # close — doing these out of order leaves money or a live mandate behind.
+  opening_user_messages:
+  - >-
+    I'm {{reason}}. Please cancel my pending order, redeem all my holdings, send
+    the money to my bank, and close the account.
+  - >-
+    I want to exit Tarang completely — cancel the open order, liquidate my funds,
+    withdraw the proceeds, and shut the demat account.
+  - >-
+    Please close my account: cancel the pending order first, then redeem
+    everything, transfer the money out, and terminate the account.
+  account_state:
+    account_id: acct_ti_0001
+    account_type: demat account
+    last4: '0042'
+    balance: '2,40,000'
+    orders:
+    - {order_id: ord_ti_0001, status: pending}
+    holdings:
+    - {fund: flexi-cap fund, units: 1200, value: '2,40,000'}
+  param_space:
+    reason: [consolidating brokers, moving abroad]
+  gold_tool_sequence: [cancel_order, redeem_mutual_fund, withdraw_funds, close_account]
+  ordered: true
+  expected_state_deltas:
+    ord_ti_0001.status: CANCELLED
+    redemption_status: PROCESSING
+    withdrawal_status: PROCESSING
+    account_status: CLOSED

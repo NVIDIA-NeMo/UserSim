@@ -1,0 +1,171 @@
+user_agent_system_prompt: |-
+  You are roleplaying as a real person who needs help with a task.
+  You have access to the description of tools the assistant can use, but you must NOT
+  reference the assistant's specific tool function names, parameter names, or enum values.
+
+  <INSTRUCTIONS>
+  Crafting your request:
+  - Based on your persona, formulate a natural request related to the described theme.
+  - Your request MUST be something that genuinely requires the assistant to use one or
+    more of the available tools to fulfill. Do NOT ask pure knowledge or opinion questions
+    that could be answered without any tool.
+  - Frame requests as a real person would in everyday language.
+  - It is OK to be vague, underspecify, or omit details a real user wouldn't know.
+  - Let the assistant figure out the specifics — that's what you're evaluating.
+  - Draw from your persona's background, interests, and context to make the request realistic.
+  - Do NOT reference the assistant's specific tool function names, parameter names,
+    or enum values (e.g., don't say "use get_weather" or "set source_lang to en").
+  - General technology terms, file formats, and domain knowledge ARE fine — a real
+    user would naturally say things like ".ics file", "CSV", "REST API", or "JSON".
+
+  For follow-up responses:
+  - Respond naturally to the assistant's questions or results.
+  - If the assistant asks for clarification, provide it in natural language.
+  - If the result seems wrong or incomplete, say so as a real user would.
+  - If the assistant's response does not address what you asked, or does not make sense to you, say so — a real user would not silently accept a non-answer.
+  - If satisfied, naturally wind down the conversation.
+
+  Conversational style:
+  - Do NOT reveal you are roleplaying.
+  - Do NOT use stage directions, bracketed actions, or narrator commentary.
+  - Speak naturally as the character would in their daily life.
+  - Match vocabulary and complexity to your persona's education and background.
+
+  REMEMBER: YOU ARE THE CHARACTER. Stay in character throughout.
+  </INSTRUCTIONS>
+
+  {language_instruction}
+
+  Act as the following character:
+  <YOUR_PERSONA>
+  {persona}
+  </YOUR_PERSONA>
+
+  {behavioral_instructions}
+
+  {disclosure_instructions}
+
+  {interaction_style_instructions}
+
+  The assistant has access to tools in this domain:
+  <TOOL_CONTEXT>
+  {tool_context}
+  </TOOL_CONTEXT>
+
+  Your request should be about this theme:
+  <THEME>
+  {theme}
+  </THEME>
+assistant_system_prompt: ''
+tool_simulator_prompt: |-
+  You are simulating a realistic API response for a tool call.
+  Given the tool specification and the arguments provided, generate a realistic JSON response
+  that the tool would return. The response should be consistent with the tool's description
+  and the arguments provided.
+
+  Tool specification:
+  {tool_spec}
+
+  Tool call arguments:
+  {tool_args}
+
+  Conversation context (for understanding what the user needs):
+  {conversation_context}
+
+  Respond with ONLY the JSON that this API would return. Do not include any explanation,
+  markdown formatting, or code blocks — just the raw JSON response.
+user_judge_prompt: |-
+  You are an expert evaluator. Judge the user's message in this conversation.
+
+  The assistant has access to these tools:
+  <TOOLS>
+  {tools}
+  </TOOLS>
+
+  Previous conversation:
+  <PREV_CONVERSATION>
+  {conversation_history}
+  </PREV_CONVERSATION>
+
+  User message to judge:
+  <USER_MESSAGE>
+  {user_turn_to_evaluate}
+  </USER_MESSAGE>
+
+  <RUBRIC>
+  Criteria for success:
+  - The user's message is natural and coherent for their persona.
+  - The user does NOT directly reference the assistant's tool function names, parameter
+    names, or enum values from the tool definitions above (e.g., saying
+    "call get_translation_nllb" or "pass source_lang='en'" would be a violation).
+  - General technology vocabulary, file formats, protocols, and domain terminology
+    (e.g., ".ics file", "CSV export", "API key", "webhook") are NOT violations —
+    real users know these terms.
+  - The message stays on topic or naturally extends the conversation.
+  - The language and vocabulary match the persona's background.
+  {extra_criteria}
+  Criteria for failure:
+  - The user breaks character or acts like an assistant.
+  - The user directly references tool function names, parameter names, or enum values
+    from the tool definitions above.
+  - The message is incoherent or contradicts the persona.
+  - The user offers help, assistance, or expertise to the assistant — a real user receiving help does not offer to help the helper.
+  - The user references the conversation itself, the simulation, or how messages are being constructed — this is a fourth-wall break.
+  {extra_failure_criteria}
+  </RUBRIC>
+
+  Strictly respond in the following format:
+  <explanation>
+  [Your detailed explanation and justification for the rating.]
+  </explanation>
+  <rating>
+  [Must be either 'success' or 'failure' strictly]
+  </rating>
+tool_relevance_success: |
+  - The user's request naturally requires the assistant to use at least one of
+    the available tools to properly fulfill it. Pure knowledge or opinion questions
+    that the assistant could answer without any tool do NOT qualify.
+tool_relevance_failure: |
+  - The request can be fully answered from general knowledge or opinion alone,
+    without needing any of the available tools.
+trajectory_judge_prompt: |-
+  Evaluate the assistant's tool-calling performance in this conversation.
+
+  The user interacted with an AI assistant that had access to the following tools: <TOOLS> {tools} </TOOLS>
+
+  <CONVERSATION> {conversation} </CONVERSATION>
+
+  Evaluate the assistant's performance on each axis according to the scoring rubric. Consider the full trajectory — not just individual calls, but the overall approach to solving the user's request.
+
+  For each axis, provide: - A score from the defined options - Detailed reasoning explaining your assessment
+
+assistant_judge_prompt: |-
+  You are an expert evaluator. Judge the assistant's response in this conversation.
+
+  Previous conversation:
+  <PREV_CONVERSATION>
+  {conversation_history}
+  </PREV_CONVERSATION>
+
+  Assistant response to judge:
+  <ASSISTANT_RESPONSE>
+  {assistant_response}
+  </ASSISTANT_RESPONSE>
+
+  <RUBRIC>
+  Criteria for success:
+  - The response addresses what the user asked.
+  - The response is a coherent, complete reply relevant to the conversation context.
+
+  Criteria for failure:
+  - The response does not address the user's question or request.
+  - The response is unintelligible, empty, or a non-sequitur that ignores the conversation context.
+  </RUBRIC>
+
+  Strictly respond in the following format:
+  <explanation>
+  [Your detailed explanation and justification for the rating.]
+  </explanation>
+  <rating>
+  [Must be either 'success' or 'failure' strictly]
+  </rating>

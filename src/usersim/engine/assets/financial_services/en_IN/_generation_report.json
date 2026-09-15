@@ -1,0 +1,977 @@
+{
+  "generated_at": "2026-07-30T15:47:45.197069+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.4",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "chandrika_bank": {
+      "n_documents": 243,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 3,
+          "produced": 3,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide financial education and product information but do not offer individualised tax, legal, or investment advice. Our standard of care is to recommend products based on stated customer needs without coercive upselling.",
+        "brand_voice_guide": "The tone is professional, reassuring, and transparent, using first-person plural ('We') in English (India). Content should be written at a high-school reading level with minimal jargon; legal disclaimers must be clearly demarcated and presented in a non-obtrusive yet legible format.",
+        "dispute_and_fraud_handling": "Disputes are handled according to the RBI's harmonised turn-around-time (TAT) framework to ensure prompt resolution and compensation. Fraudulent activity is routed through a dedicated reporting path to minimise customer liability based on reporting timelines.",
+        "fee_philosophy": "Fees are structured to ensure account sustainability and encourage disciplined financial habits, such as maintaining the Monthly Average Balance (MAB). We offer waivers based on loyalty and spending milestones to reward active customers.",
+        "key_terms_glossary": "[{'definition': 'The average amount of funds maintained in a savings account over a calendar month.', 'term': 'Monthly Average Balance (MAB)'}\n {'definition': 'Deposit insurance provided by the Deposit Insurance and Credit Guarantee Corporation covering up to ₹5,00,000.', 'term': 'DICGC Insurance'}\n {'definition': 'The act of closing a fixed or recurring deposit before the agreed tenure, usually incurring a penalty.', 'term': 'Premature Withdrawal'}\n {'definition': 'The underlying technical infrastructure (UPI, IMPS, NEFT) managed by the National Payments Corporation of India.', 'term': 'NPCI Rails'}]",
+        "positioning": "Chandrika Bank is a trust-centric retail institution targeting middle-income Indian households and salaried professionals. We compete on the stability of our traditional deposit products and the seamless integration of modern UPI-led payment rails.",
+        "product_positionings": "[{'one_liner': 'A foundational liquid account for daily banking with a focus on maintaining MAB for fee-free utility.', 'product_id': 'savings_regular'}\n {'one_liner': 'A low-risk, high-yield investment for guaranteed returns over a twelve-month horizon.', 'product_id': 'fixed_deposit_1yr'}\n {'one_liner': 'A disciplined monthly saving tool designed to build a corpus over time with competitive interest.', 'product_id': 'recurring_deposit'}\n {'one_liner': 'A versatile spending tool offering rewards and credit flexibility for everyday lifestyle expenses.', 'product_id': 'chandrika_credit_card'}\n {'one_liner': 'An instant, digital-first payment suite leveraging NPCI rails for seamless P2P and P2M transactions.', 'product_id': 'upi_and_bill_payments'}]",
+        "risk_and_compliance_posture": "We adhere strictly to RBI and NPCI frameworks, ensuring fair treatment and transparency in all disclosures. Customer deposits are protected by the DICGC insurance scheme up to ₹5,00,000 per depositor.",
+        "security_and_verification": "A strict 'Verify First' policy is enforced, requiring PAN-based KYC and multi-factor authentication before any state-changing action or disclosure. Agents are prohibited from requesting sensitive credentials like UPI PINs, OTPs, or CVVs.",
+        "service_model": "Support is available via omnichannel digital platforms and branch visits during IST business hours. Issues are escalated from front-line agents to nodal officers, eventually leading to the RBI Integrated Ombudsman Scheme if unresolved."
+      }
+    },
+    "paysetu": {
+      "n_documents": 203,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 3,
+          "produced": 3,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "PaySetu provides financial literacy and product education, not individualised tax, legal, or investment advice. We hold a standard of care based on suitability and transparency, ensuring customers understand product terms before onboarding.",
+        "brand_voice_guide": "The tone is professional yet accessible (English India), using a helpful, 'digital-native' persona with a reading level suited for a general audience. Avoid heavy banking jargon; use clean formatting with bolded key terms and clear, legally-compliant disclaimers at the foot of all communications.",
+        "dispute_and_fraud_handling": "We follow a 'fair-and-fast' philosophy, adhering to RBI's harmonised turn-around-time (TAT) for failed transactions and refunds. Suspected fraud is immediately routed through the formal reporting and chargeback path to limit customer liability.",
+        "fee_philosophy": "We maintain a lean pricing model where core banking is free, and fees are applied only to recover direct costs for specialised services like forex or convenience. Fees are transparently listed and may be waived for high-balance users or promotional cohorts.",
+        "key_terms_glossary": "[{'definition': 'The completion of comprehensive identity verification (PAN/Aadhaar) allowing for higher wallet limits and full banking features.', 'term': 'Full-KYC'}\n {'definition': 'A basic verification tier that allows limited wallet functionality and lower balance caps.', 'term': 'Minimum-KYC'}\n {'definition': 'The underlying infrastructure (e.g., UPI, IMPS, NEFT) used to move money between accounts.', 'term': 'Payment Rail'}\n {'definition': 'A customer-authorised instruction to allow automated debits for recurring payments.', 'term': 'Mandate'}]",
+        "positioning": "PaySetu is a digital-first, payments-led neobank targeting tech-savvy Indian millennials and Gen Z who seek seamless financial orchestration. We compete on the friction-less nature of our UPI-centric ecosystem and a transparent, zero-barrier entry to digital banking.",
+        "product_positionings": "[{'one_liner': 'The secure, interest-bearing foundation for your digital wealth.', 'product_id': 'digital_savings'}\n {'one_liner': 'The high-velocity hub for daily spends and instant UPI transfers.', 'product_id': 'upi_wallet'}\n {'one_liner': 'A borderless spending tool for seamless international travel.', 'product_id': 'prepaid_forex_card'}\n {'one_liner': \"The 'set-it-and-forget-it' utility for automated recurring payments.\", 'product_id': 'bill_autopay'}]",
+        "risk_and_compliance_posture": "Compliance is framed as customer protection, strictly adhering to RBI and NPCI frameworks regarding KYC and PPI limits. All retail deposits are framed as secure and insured by the DICGC up to ₹5,00,000 per depositor.",
+        "security_and_verification": "A strict 'verify-before-action' stance is maintained, requiring multi-factor authentication or KYC-tier validation before any state-changing operation. Agents must never request sensitive credentials like UPI PINs, OTPs, or CVVs.",
+        "service_model": "Support is provided via an in-app chat and email, operating 24/7 IST. Escalations follow a tiered path from first-level digital support to a dedicated Grievance Redressal Officer, and finally to the RBI Integrated Ombudsman Scheme."
+      }
+    },
+    "tarang_invest": {
+      "n_documents": 197,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 7,
+          "produced": 7,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide educational resources and product information but strictly defer individualized tax, legal, or financial planning advice. We hold a standard of transparency, meaning we never project or guarantee returns on any investment.",
+        "brand_voice_guide": "Tone is professional, encouraging, and transparent, using first-person plural ('we') and English (India). Reading level is accessible (Grade 10), avoiding excessive jargon; all financial terms must be explained. Disclaimers must be prominent, specifically including mandatory market-risk language for mutual funds.",
+        "dispute_and_fraud_handling": "We maintain a zero-tolerance policy towards fraud, with a structured dispute resolution process. Most queries are acknowledged within 24 hours and resolved within a standard 7-15 business day window.",
+        "fee_philosophy": "We believe in 'cost-visibility,' charging only for essential infrastructure and regulatory requirements. Charges like DP fees and intraday brokerage are fixed to ensure operational sustainability without hidden costs.",
+        "key_terms_glossary": "[{'definition': 'Depository Participant charges levied per sell transaction for processing the transfer of shares from the demat account.', 'term': 'DP Charges'}\n {'definition': 'A fee charged when an investor redeems mutual fund units within a specific timeframe, typically 365 days.', 'term': 'Exit Load'}\n {'definition': 'Systematic Investment Plan; a method of investing a fixed sum regularly in a mutual fund.', 'term': 'SIP'}\n {'definition': 'A mandatory window during which the invested capital cannot be withdrawn, as seen in ELSS funds.', 'term': 'Lock-in Period'}]",
+        "positioning": "Tarang Invest is a modern, transparent brokerage targeting retail investors and active traders in India. We compete on a lean cost structure, combining zero-brokerage delivery with institutional-grade trading tools.",
+        "product_positionings": "[{'one_liner': 'The foundational gateway for equity investing, offering ₹0 delivery brokerage and streamlined DP operations.', 'product_id': 'demat_trading_account'}\n {'one_liner': 'A disciplined wealth-building tool with flexible pause options and low entry barriers for long-term growth.', 'product_id': 'mutual_fund_sip'}\n {'one_liner': 'A strategic investment for tax deduction under Section 80C, featuring a mandatory 3-year statutory lock-in.', 'product_id': 'elss_tax_saver'}\n {'one_liner': 'A leverage tool for active traders to amplify their buying power through pledged securities.', 'product_id': 'margin_trading_facility'}]",
+        "risk_and_compliance_posture": "Compliance is steered by SEBI, AMFI, NSE, and BSE frameworks, prioritising investor protection and fair treatment. All communications must emphasize that investments are subject to market risks and adhere to strict data privacy norms.",
+        "security_and_verification": "Multi-factor authentication (MFA) and e-KYC are mandatory before any state-changing action, such as fund withdrawals or portfolio changes. Identity verification is strictly enforced to prevent unauthorised account access.",
+        "service_model": "Support is available via digital chat, email, and phone during IST business hours (9:00 AM to 6:00 PM). Issues are escalated from frontline support to the Compliance Officer or Grievance Redressal Officer."
+      }
+    },
+    "abhaya_insurance": {
+      "n_documents": 191,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 0.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 1,
+          "produced": 1,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide product education and suitability guidance but defer specific legal or tax advice to qualified professionals. We hold ourselves to a high standard of care, ensuring no insurance product is misrepresented as a guaranteed-return investment.",
+        "brand_voice_guide": "The tone is professional, empathetic, and reassuring, using first-person plural ('We') and a reading level accessible to a general graduate. Jargon should be minimal and always explained; disclaimers must be prominent, clear, and presented in a structured format.",
+        "dispute_and_fraud_handling": "We treat all disputes with neutrality and speed, aiming for resolution within defined IRDAI timelines. Fraudulent claims are handled with a zero-tolerance policy, involving rigorous investigation and reporting to regulatory authorities.",
+        "fee_philosophy": "Our pricing is competitive and risk-aligned, with premiums reflecting the actual cost of risk and administrative overhead. Fees like fund management charges exist to ensure professional portfolio stewardship and operational sustainability.",
+        "key_terms_glossary": "[{'definition': 'A specified window (e.g., 15 days) during which a policyholder can review the terms and return the policy for a refund.', 'term': 'Free-look Period'}\n {'definition': 'Any condition diagnosed or treated prior to the policy inception, subject to a mandatory waiting period before coverage applies.', 'term': 'Pre-existing Disease (PED)'}\n {'definition': 'A cap on the amount payable for a specific treatment or service, such as room rent, regardless of the total sum insured.', 'term': 'Sub-limit'}\n {'definition': 'The formal process of notifying Abhaya Insurance about a loss or event to trigger the settlement workflow.', 'term': 'Claim Intimation'}]",
+        "positioning": "Abhaya Insurance is a trusted, mid-market provider focusing on the Indian middle-class and emerging professionals. We compete on transparency, fair underwriting, and a comprehensive suite of protection and wealth products.",
+        "product_positionings": "[{'one_liner': 'High-value pure protection designed for maximum family security at an affordable cost.', 'product_id': 'term_life_cover'}\n {'one_liner': 'Comprehensive medical coverage for the family with structured waiting periods and room-rent caps.', 'product_id': 'health_indemnity'}\n {'one_liner': 'A hybrid vehicle combining life cover with market-linked wealth creation and a mandatory lock-in period.', 'product_id': 'ulip_wealth_plan'}\n {'one_liner': 'Essential vehicle protection against accidental damage, featuring a rewarding no-claim bonus.', 'product_id': 'motor_own_damage'}]",
+        "risk_and_compliance_posture": "We adhere strictly to IRDAI regulations, prioritizing the 'Protection of Policyholders' Interests' through mandatory disclosures of exclusions and sub-limits. We emphasize the free-look window, precise nominee capture, and transparent data privacy practices.",
+        "security_and_verification": "Multi-factor authentication (MFA) and KYC verification are mandatory before any state-changing action, such as fund withdrawals or policy amendments. We maintain a zero-trust stance regarding identity validation for claim settlements.",
+        "service_model": "Support is available via a 24/7 digital portal and a dedicated helpline during IST business hours. Escalations follow a tiered path from customer support to the Grievance Redressal Officer, and finally to the Insurance Ombudsman."
+      }
+    },
+    "kalash_finserv": {
+      "n_documents": 232,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 2,
+          "produced": 2,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "advice_boundaries": "We provide financial education and product information but do not offer individualized tax, legal, or investment advice. Our standard of care is to recommend products based on the customer's expressed needs and credit eligibility without guaranteeing specific financial outcomes.",
+        "brand_voice_guide": "The voice is professional, empathetic, and transparent, using an active first-person plural ('We') and English (India). Keep reading levels accessible to a general audience with minimal jargon; use bolding for key terms and ensure all regulatory disclaimers are clearly demarcated and conspicuous.",
+        "dispute_and_fraud_handling": "Complaints are handled with a 'customer-first' philosophy, following RBI's harmonised turn-around-time (TAT) framework for refunds and resolutions. Fraudulent activity must be reported immediately through the official chargeback path to initiate a formal investigation.",
+        "fee_philosophy": "Fees are structured to cover operational costs and risk management, ensuring the long-term sustainability of our lending pool. We maintain a 'no hidden charges' policy, where all costs are disclosed upfront and waivers are granted only under exceptional, documented circumstances.",
+        "key_terms_glossary": "[{'definition': 'A standardized document providing the all-in cost of the loan, including interest and all fees, before the loan is sanctioned.', 'term': 'Key Fact Statement (KFS)'}\n {'definition': 'The maximum percentage of the appraised value of the gold collateral that can be provided as a loan.', 'term': 'Loan-to-Value (LTV)'}\n {'definition': 'A penalty fee levied when a scheduled Equated Monthly Instalment repayment fails due to insufficient funds or mandate issues.', 'term': 'EMI Bounce Charge'}\n {'definition': 'The fee applied when a borrower pays off the entire remaining loan balance before the end of the tenure.', 'term': 'Foreclosure Charge'}]",
+        "positioning": "Kalash Finserv is a digitally-forward NBFC serving the emerging middle class and salaried professionals in India. We compete on transparency, speed of sanction, and a customer-centric approach to credit accessibility.",
+        "product_positionings": "[{'one_liner': 'Flexible, unsecured funding for diverse personal needs with a transparent 60-month tenure.', 'product_id': 'personal_loan'}\n {'one_liner': 'Quick liquidity against gold assets with strict LTV caps and secure collateral custody.', 'product_id': 'gold_loan'}\n {'one_liner': 'Accessible financing for mobility with a structured down-payment requirement.', 'product_id': 'two_wheeler_loan'}\n {'one_liner': 'Interest-free short-term credit to make essential electronics and appliances affordable.', 'product_id': 'consumer_durable_emi'}\n {'one_liner': 'The automated payment engine ensuring timely repayments and managing bounce charge notifications.', 'product_id': 'emi_repayment_mandate'}]",
+        "risk_and_compliance_posture": "We adhere strictly to the RBI Fair Practices Code, the Digital Lending Guidelines, and Scale Based Regulation, ensuring non-coercive collection practices. We emphasize that Kalash Finserv takes no deposits and mandates the provision of a Key Fact Statement (KFS) disclosing the all-in annualised cost of credit, including interest, processing fees, and foreclosure charges.",
+        "security_and_verification": "Multi-factor authentication (MFA) and KYC verification are mandatory before any state-changing action or fund disbursement. Agents are strictly prohibited from asking for UPI PINs, OTPs, or CVVs, aligning with RBI and NPCI security protocols.",
+        "service_model": "Support is available via digital channels and phone from 9:00 AM to 7:00 PM IST, Monday to Saturday. Issues are routed through a tiered support system, escalating from first-level agents to a designated Nodal Officer for unresolved grievances."
+      }
+    }
+  }
+}

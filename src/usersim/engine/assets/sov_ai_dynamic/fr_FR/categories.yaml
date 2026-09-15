@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: fr_FR
+taxonomy_id: fr_FR_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: france-geography
+  invitation: Vous voulez poser une question sur la géographie de la France avec votre propre voix. Parlez de votre département, de votre commune, d'un trajet quotidien ou d'un voyage récent.
+  subtopic_hints:
+  - le partage de compétences entre l'État, la région, le département et la commune (parcs, fleuves, littoral)
+  - la différence entre la métropole, les DROM (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte) et les COM
+  - la nomenclature INSEE des régions et la fusion de 2016 (les anciennes régions qu'on confond encore)
+  - la réalité du climat et son évolution récente (sécheresse en Provence, inondations dans le Nord)
+  - les statuts territoriaux particuliers (Corse, Alsace-Moselle, frontières avec Suisse/Belgique/Italie)
+  - les termes administratifs qui se confondent (canton, arrondissement, EPCI, communauté de communes)
+  - la "diagonale du vide" et le rapport ville–campagne–banlieue
+  - quoi faire quand l'IGN et Google Maps ne s'accordent pas sur une limite communale
+- id: france-history
+  invitation: Vous voulez poser une question sur l'histoire de France avec votre propre voix. Apportez quelque chose lié à votre famille, votre région ou un lieu où vous êtes passé.
+  subtopic_hints:
+  - le rôle de votre région dans un événement national pas couvert dans les manuels (Vendée, Commune, Résistance)
+  - la mémoire de la Seconde Guerre mondiale (Vichy, Résistance, Shoah, déportation)
+  - la guerre d'Algérie et ses traces actuelles (rapatriés, harkis, mémoire des appelés)
+  - les époques moins enseignées (Mérovingiens, Capétiens, Croisades, guerres de religion)
+  - la décolonisation et les évolutions des départements/territoires d'outre-mer
+  - les figures régionales (Jeanne d'Arc, Jeanne Hachette, Marquise de Sévigné, Olympe de Gouges)
+  - les épisodes ouvriers et syndicaux (Front populaire, Mai 68, mouvements récents)
+  - quoi faire quand la mémoire familiale et les Archives départementales ne disent pas la même chose
+- id: france-culture
+  invitation: Vous voulez poser une question sur la culture française avec votre propre voix. Cuisine, religion, tradition régionale — racontez quelque chose que vous avez remarqué dans votre région ou famille.
+  subtopic_hints:
+  - les traditions culinaires régionales (cassoulet du Sud-Ouest, choucroute alsacienne, bouillabaisse, galette bretonne)
+  - les langues régionales (breton, basque, occitan, alsacien, corse) et leur statut
+  - la laïcité à la française et les différences avec l'Alsace-Moselle (Concordat)
+  - les fêtes régionales (Carnaval de Nice, fest-noz breton, ferias landaises)
+  - les codes culturels du tutoiement/vouvoiement et la "petite politesse" française
+  - la culture des terroirs (vin, fromage, AOP/AOC) et la transmission entre générations
+  - la diversité issue de l'immigration (maghrébine, subsaharienne, asiatique, européenne) et ses apports
+  - la tension générationnelle sur ce que veut dire "être français" aujourd'hui
+- id: france-poetry-and-music
+  invitation: Vous voulez poser une question sur la poésie, la chanson ou les paroles françaises avec votre propre voix. Une chanson de votre enfance, un vers que vous avez à moitié oublié.
+  subtopic_hints:
+  - la chanson française classique (Brel, Brassens, Ferré, Barbara, Aznavour)
+  - la nouvelle scène française (Stromae, Zaz, Christine and the Queens, Vianney)
+  - le rap français (IAM, NTM, Booba, PNL, Aya Nakamura) et ses scènes régionales
+  - les poètes au programme (Baudelaire, Rimbaud, Verlaine, Apollinaire, Prévert)
+  - les paroles complètes de la Marseillaise (les couplets qu'on chante rarement)
+  - la chanson régionale en langue minoritaire (kan ha diskan breton, Manu Chao chant occitan)
+  - les classiques scolaires (Du Bellay, Ronsard, Hugo, Lamartine) qu'on récite à l'école
+  - quoi faire quand les paroles dont vous vous souvenez ne correspondent pas à ce qu'on trouve en ligne
+- id: france-public-services
+  invitation: Vous voulez poser une question sur un service public français avec votre propre voix. Apportez une vraie situation où la règle, le site et l'agent au guichet ne disent pas la même chose.
+  subtopic_hints:
+  - la CAF — APL, RSA, prime d'activité, versement et trop-perçus
+  - la CPAM — carte Vitale, médecin traitant, parcours de soins coordonné
+  - Pôle emploi (devenu France Travail) — inscription, ARE, formation
+  - la Sécurité sociale — affiliation, droits, mutuelle
+  - les démarches d'état civil (acte de naissance, livret de famille, mariage à la mairie)
+  - service-public.fr et FranceConnect — quand le portail bloque
+  - les démarches en préfecture / sous-préfecture (titre de séjour, passeport, carte grise)
+  - quoi faire quand la règle nationale et la pratique locale en mairie divergent
+- id: france-health-systems
+  invitation: Vous voulez poser une question sur la santé en France avec votre propre voix. Sécurité sociale, mutuelle, médecin traitant, hôpital — apportez la partie qui pose problème.
+  subtopic_hints:
+  - le parcours de soins coordonné et le rôle du médecin traitant
+  - la différence entre secteur 1, secteur 2 et secteur 3 et les dépassements d'honoraires
+  - la CSS (Complémentaire santé solidaire) qui a remplacé CMU-C / ACS
+  - les médicaments génériques et le tiers payant
+  - les CPTS et les déserts médicaux dans votre département
+  - la psychiatrie et les CMP, le dispositif Mon soutien psy, le 3114 (suicide)
+  - les ALD (affections de longue durée) et le 100% Sécu
+  - quoi faire quand la mutuelle refuse une prise en charge que la Sécu rembourse partiellement
+- id: france-education
+  invitation: Vous voulez poser une question sur l'éducation en France avec votre propre voix. École publique, privée, Parcoursup, BAC, choix d'études — apportez la décision concrète à prendre.
+  subtopic_hints:
+  - la carte scolaire, les dérogations et la mixité scolaire
+  - la réforme du baccalauréat (épreuves de spécialité, contrôle continu, Grand Oral)
+  - Parcoursup — calendrier, vœux, le poids du dossier scolaire
+  - la voie professionnelle (CAP, bac pro) versus voie générale ou techno
+  - les classes préparatoires versus le BUT (ex-DUT) versus la fac
+  - les bourses (CROUS, mérite, échelons) et le logement étudiant
+  - la formation continue (CPF, Mon compte formation) et la VAE
+  - quoi faire quand la décision du conseil de classe et le souhait de l'élève divergent
+- id: france-labor-and-benefits
+  invitation: Vous voulez poser une question sur le travail, l'emploi ou la protection sociale en France avec votre propre voix. CDI, CDD, intérim, indépendant — apportez votre situation réelle.
+  subtopic_hints:
+  - CDI versus CDD versus intérim versus auto-entrepreneur — les droits qui changent
+  - la convention collective de votre branche et son poids face au Code du travail
+  - les heures supplémentaires, le RTT, le forfait jours
+  - le chômage (ARE) — droits rechargeables, abandon de poste et la réforme récente
+  - les arrêts maladie, le délai de carence, le complément employeur
+  - la retraite (régime général, complémentaire AGIRC-ARRCO) après la réforme 2023
+  - le congé maternité / paternité / parental et leur indemnisation
+  - quoi faire quand votre contrat et l'avenant proposé par l'employeur disent des choses différentes
+- id: france-finance-and-consumer
+  invitation: Vous voulez poser une question sur l'argent, la banque, les impôts ou un litige de consommation avec votre propre voix. Apportez une situation concrète.
+  subtopic_hints:
+  - la déclaration d'impôt sur le revenu en ligne, les cases à connaître, le PAS (prélèvement à la source)
+  - le Livret A, le LDDS, le LEP — quand chacun est intéressant
+  - les frais bancaires (commissions d'intervention, plafonds) et le droit au compte
+  - la différence entre crédit à la consommation, prêt personnel et crédit renouvelable
+  - la médiation bancaire / d'assurance et les recours après refus
+  - les arnaques fréquentes en France (faux conseiller bancaire, faux livreur, fraude au RIB)
+  - le DGCCRF, l'INC (Institut national de la consommation) et les associations de consommateurs
+  - quoi faire quand votre relevé bancaire, l'app et la fiche d'opération ne s'accordent pas
+- id: france-digital-services
+  invitation: Vous voulez poser une question sur les services numériques ou un compte en ligne français avec votre propre voix. FranceConnect, ANTS, Ameli — apportez la situation concrète.
+  subtopic_hints:
+  - FranceConnect+ et le passage à l'identité numérique La Poste
+  - le site service-public.fr versus les portails ministériels — quand l'un ou l'autre fonctionne
+  - l'ANTS pour le permis de conduire, la carte grise, le passeport
+  - les arnaques par SMS et e-mail (fausses Sécu, faux permis points, faux livreurs)
+  - le RGPD en pratique — droit d'accès, droit à l'effacement, plainte CNIL
+  - la 2FA, le mot de passe oublié, la perte du téléphone de récupération
+  - les contestations de paiement en ligne (carte bancaire, virement frauduleux)
+  - quoi faire quand un service public en ligne accepte la connexion mais bloque la démarche

@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: en_SG
+taxonomy_id: en_SG_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: singapore-geography
+  invitation: You want to ask something about Singapore's geography in your own voice. Could be about your HDB town, your morning commute, the weather, or a place you took your family to recently.
+  subtopic_hints:
+  - HDB town versus URA planning area names — when do residents use which (Tampines, Bedok, Toa Payoh)
+  - the Causeway / Tuas Second Link to Johor and how the timing works on weekends
+  - Park Connector Network (PCN) routes and which segments connect to which
+  - Bukit Timah, Pulau Ubin, the Southern Islands — what's accessible to the public
+  - reclamation history and which "districts" are land-reclaimed (Marina, Tuas, Jurong Island)
+  - the Singapore Strait shipping lanes and what cargo goes where
+  - flood-prone areas during monsoon and what PUB does about them
+  - what to do when SLA OneMap, Google Maps, and a hawker uncle's directions all differ
+- id: singapore-history
+  invitation: You want to ask about Singapore history in your own voice. Bring up something tied to your kampung roots, your school's history class, or a place with a plaque you walked past.
+  subtopic_hints:
+  - the 1965 separation and what your family did during the merger years
+  - Japanese Occupation experience (Syonan-to, Sook Ching, Endau, Bahau)
+  - the early HDB versus kampung-resettlement story and the SIT before HDB
+  - racial harmony events — Maria Hertogh riots, 1964 race riots, post-9/11 measures
+  - building-conservation versus URA-redevelopment debates (Bukit Brown, old NLB, Pearl Bank)
+  - National Service introduction in 1967 and how it has changed since
+  - opposition-history milestones (Workers' Party Aljunied 2011, multi-party Parliament)
+  - what to do when family memory says one thing and the National Archives say another
+- id: singapore-culture
+  invitation: You want to ask about Singapore culture in your own voice. CMIO mix, hawker culture, language, festivals — bring up something you noticed in your daily life.
+  subtopic_hints:
+  - the four official languages and when Singlish is appropriate versus not
+  - hawker-centre etiquette (chope, table sharing, tray return, popular dishes by stall)
+  - how Chinese, Malay, Indian, and Eurasian communities celebrate the same festival differently
+  - Hari Raya, Deepavali, Chinese New Year, Vesak Day public holidays — and how families plan
+  - the SAF generation (NSF/NSman) culture and ICT cycle as a shared experience
+  - HDB heartland versus condo-and-private-housing cultural differences
+  - generation gap between Pioneer / Merdeka / SG50 and post-2000 generations
+  - regional Asian influence (Korean wave, Thai, Japanese) on Singapore youth culture
+- id: singapore-poetry-and-music
+  invitation: You want to ask about Singapore poetry, music, or NDP songs in your own voice. Bring up something from your school days, an NDP rally, or a song you sing without knowing the lyrics.
+  subtopic_hints:
+  - NDP theme songs by year and which ones are evergreen ("Home", "Stand Up for Singapore")
+  - the song "Majulah Singapura" — Malay original, Zubir Said's history, the school-pledge context
+  - Edwin Thumboo, Alvin Pang, and the National Poetry Festival
+  - Mandopop-Singapore (Stefanie Sun, JJ Lin, Tanya Chua) versus Cantopop and Mandopop from elsewhere
+  - Malay traditional forms (dondang sayang, pantun) in Singapore versus the region
+  - Tamil literature and Singapore Tamil writers
+  - Singlish-language poetry and creole literature debates
+  - what to do when the national-pledge text and the Mother Tongue translation feel slightly different
+- id: singapore-public-services
+  invitation: You want to ask about a Singapore public service in your own voice. SingPass, NRIC, HDB, CPF, MOE schools — bring up the actual situation that's giving you trouble.
+  subtopic_hints:
+  - SingPass, Singpass app, and the Myinfo prefill — what to do when login mismatches
+  - HDB BTO, resale, and SBF (Sale of Balance Flats) — eligibility windows
+  - CPF Ordinary, Special, Medisave, Retirement Account — when each one moves
+  - MOE primary-school registration phases (Phase 1, 2A, 2B, 2C) and parent-volunteer requirement
+  - National Service vocations, deferment, IPT (In-Camp Training) cycle
+  - LTA driver's-licence renewal (auto, motorcycle) versus PLOC (probationary)
+  - HDB versus URA handling of approval (HDB shop, A&A in private)
+  - what to do when an agency portal says one thing and the call centre says another
+- id: singapore-health-systems
+  invitation: You want to ask about Singapore health care in your own voice. Polyclinic, restructured hospital, GP, CHAS, MediShield — bring up the concrete confusion.
+  subtopic_hints:
+  - subsidies at restructured hospitals (C, B2, B1, A class) and means-testing
+  - polyclinic versus GP versus CHAS clinic — when CHAS Blue/Orange/Green saves money
+  - MediShield Life, MediSave, Integrated Shield Plans — when each pays
+  - Healthier SG enrolment, your assigned family doctor, chronic-management pathways
+  - emergency-department triage at SGH/NUH/CGH/TTSH/KTPH and 995 versus 1777 (ambulance)
+  - generic-medicine substitution at polyclinics and when to ask for the brand
+  - mental-health support — IMH, Samaritans of Singapore, Silver Ribbon, school counsellors
+  - what to do when MediSave use-limits and the hospital bill don't reconcile
+- id: singapore-education
+  invitation: You want to ask about Singapore education in your own voice. PSLE, O-Level, A-Level, IB, JC versus poly versus ITE, university choice — bring up the real decision in front of you.
+  subtopic_hints:
+  - the new PSLE Achievement Levels (AL) scoring and how it changed Sec-1 posting
+  - Direct School Admission (DSA) for sec school and JC — what counts
+  - the JC versus polytechnic versus ITE pathway choice and university-entry implications
+  - IP (Integrated Programme) schools versus mainstream Sec-1 streaming
+  - O-Level subject combinations, MOE Mother Tongue requirement, B/C-grade implications
+  - SkillsFuture credits, mid-career WSQ courses, and the IBF certifications
+  - autonomous university (NUS, NTU, SMU, SUTD, SIT, SUSS) admission tracks
+  - what to do when a school's policy and an MOE circular say different things
+- id: singapore-labor-and-benefits
+  invitation: You want to ask about Singapore work, employment, or benefits in your own voice. Foreign worker, local hire, EP/SP/WP, gig work — bring up the actual situation.
+  subtopic_hints:
+  - Employment Pass / S-Pass / Work Permit / DP / Tech.Pass / ONE Pass — who applies and when
+  - the COMPASS framework and how it changed EP scoring
+  - CPF contribution rates by age band and the Additional Wage Ceiling
+  - Foreign Worker Levy versus quota for sectors (manufacturing, construction, services)
+  - termination notice periods, garden leave, and the Tribunal for Employment Claims
+  - WICA / Work Injury Compensation — when claims succeed
+  - retirement and re-employment age (currently 63, going to 64/65) and CPF Life payouts
+  - what to do when MOM advisory and your HR's reading of the rule disagree
+- id: singapore-finance-and-consumer
+  invitation: You want to ask about Singapore money, banking, taxes, or a consumer dispute in your own voice. Bring up the real concrete issue.
+  subtopic_hints:
+  - IRAS income-tax filing, the YA cycle, NOA disputes, and SRS contributions
+  - GST registration thresholds for small businesses and the GST-rate hike timeline
+  - SSB (Singapore Savings Bonds) versus T-bills versus Fixed Deposit comparison
+  - SRS, CPF Investment Scheme (CPFIS), and how to actually pick funds
+  - HDB loan versus bank loan (HFE letter, TDSR, MSR) for a purchase
+  - credit-card chargeback under MAS guidelines and bank-internal dispute timelines
+  - CASE (Consumer Association) versus Small Claims Tribunal versus going direct
+  - what to do when a bank app, your statement, and SingPass all show different account info
+- id: singapore-digital-services
+  invitation: You want to ask about Singapore digital services or online accounts in your own voice. SingPass, Myinfo, scams — bring up the actual issue.
+  subtopic_hints:
+  - SingPass and the SingPass app for face-verification login flow
+  - Myinfo prefill versus manual entry — what to check before you submit
+  - SMS scam patterns common in Singapore (parcel-delivery, IRAS-refund, OCBC-style)
+  - SgSecure threat reporting and the ScamShield app
+  - Smart Nation initiatives, LifeSG app, FormSG submissions
+  - Singpass face-verification fall-back when the camera or biometrics fails
+  - PDPA (Personal Data Protection Act) consent, withdrawal, and DNC registry
+  - what to do when an SMS / WhatsApp message claims to be from a bank or government agency

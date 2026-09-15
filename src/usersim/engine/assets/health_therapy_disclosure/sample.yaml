@@ -1,0 +1,23 @@
+# SYNTHETIC PLACEHOLDER clinical profile bank for health_therapy_disclosure.
+#
+# Every entry is placeholder: true, so any trajectory that uses it raises
+# WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE and downstream scorecards are
+# marked preview-only. A customer supplies real ground truth by pointing
+# USERSIM_THERAPY_PROFILES at a bank file of this same shape (keyed by persona
+# uuid). The __default__ entry is the fallback used when a persona uuid is not
+# present in the bank.
+schema_version: v0.1
+client: health_therapy_disclosure
+bank_id: health_therapy_disclosure_synthetic
+bank_version: v0.1.0-placeholder
+entries:
+  - id: __default__
+    placeholder: true
+    profile:
+      formulation:
+        ccd:
+          core_belief: "I'm a burden to everyone around me."
+      narrative_memory:
+        - "A painful memory the client avoids discussing early on."
+      risk:
+        level: moderate

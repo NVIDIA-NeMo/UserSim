@@ -1,0 +1,463 @@
+# Structured region_spec for en_IN — the INDIA REGION MODEL and the source of
+# truth every Indian language surface inherits (generation INPUT: data, not code).
+# Validated against asset_gen/financial_services/spec.py.
+#
+# A region_spec is keyed by LOCALE, but institutions, products, tools and
+# regulators are properties of the REGION — identical whether the conversation is
+# in English, Hindi or a romanized twin. So this file holds the model and each
+# language variant overlays only what differs via `extends: en_IN`
+# (see hi_Deva_IN.yaml). Generating this locale directly yields an English-India
+# bank, which is also the base the India language-variant stop-gap falls back to.
+#
+# The institution set is chosen by INDIAN RETAIL PREVALENCE, not carried over
+# from en_US. India's highest-frequency financial touchpoints are a bank, a
+# UPI-first payments app, an insurer, a demat + mutual-fund platform, and an
+# NBFC lender (consumer EMI / gold loans). The US set's standalone retirement
+# provider and wealth manager are deliberately absent: in India those products
+# are reached THROUGH a bank (NPS point-of-presence, PPF) or a broker (ELSS),
+# and mass-retail advisory on them belongs in the dynamic tier rather than in a
+# dedicated institution.
+#
+# Fictional brands only. Values are illustrative and internally consistent, not
+# scraped from any real Indian institution's schedule of charges.
+schema_version: v0.1
+region: IN
+locale: en_IN
+currency: INR
+currency_symbol: "₹"
+language: English (India)
+number_format: en_IN
+privacy_regime: DPDP Act 2023
+
+# KYC ("Know Your Customer") contract. India's RBI KYC norms lean on PAN
+# (Permanent Account Number, the income-tax identifier) for financial identity,
+# so an agent here must collect it in addition to name + date of birth. The set
+# is advertised in the offered verify_identity schema AND enforced by the gate,
+# and the simulated customer is grounded with a (fictional) PAN.
+identity_verification:
+  required_fields: [full_name, date_of_birth, pan]
+
+# What this market calls the account a read tool reports back, per domain. India
+# has no "checking account" -- retail deposits are savings (or current) accounts,
+# and a UPI-first neobank holds a wallet -- so naming it wrongly reads as the
+# wrong institution to the customer.
+account_labels:
+  retail_banking: savings account
+  payments: wallet account
+
+# Document genres the generator may emit (subset of ontology.DOCUMENT_TYPES).
+document_types:
+# Product-scoped genres (one set per product, see pipeline.build_product_doc_plan).
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+# Institution-scoped genres (generated once per institution, so they cannot drift
+# between products, see pipeline.build_shared_doc_plan). Relationship-level topics
+# -- PAN/Aadhaar KYC evidence, dormancy and closure, nominee vs legal heir, UPI and
+# NEFT/IMPS limits, ombudsman escalation -- are answered PER PRODUCT instead, by the
+# `required documentation` / `set up and activate` / `cancel, close, or downgrade` /
+# `a failed or pending action` angles the product plan guarantees, because they
+# genuinely differ per product here (a demat account's KYC is not a wallet's, and
+# transfer limits are product variables).
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated brief. India-specific framing
+# lives here so the shared prompt stays region-neutral (and so US instruments
+# like RMDs or Regulation Best Interest never reach this corpus).
+concept_guidance:
+  bank: >-
+    Emphasize savings/current accounts and monthly average balance rules,
+    fixed and recurring deposits with premature-withdrawal penalties, UPI and
+    NEFT/IMPS payment rails, debit-card controls, DICGC deposit insurance, and
+    the RBI grievance-redressal path. Reference PAN-based KYC for account
+    actions.
+  neobank: >-
+    Emphasize digital-first onboarding and KYC tiers (minimum-KYC vs full-KYC
+    wallet limits), UPI as the default payment rail (per-transaction and daily
+    caps, UPI Lite, autopay mandates), transaction failures and refund
+    timelines, and that this is a payments-led institution rather than a
+    lender.
+  brokerage: >-
+    Emphasize the demat + trading account pair, depository (DP) charges,
+    brokerage per order, SIP mechanics and exit loads, ELSS lock-in, and the
+    mandatory market-risk language for mutual funds. Never project or guarantee
+    returns.
+  insurer: >-
+    Emphasize underwriting and disclosure duties, the free-look window, waiting
+    periods and pre-existing-disease clauses, room-rent and sub-limits,
+    exclusions, nominee assignment, and the claim intimation/settlement path.
+  nbfc: >-
+    Emphasize that this lender takes no deposits, the Key Fact Statement and
+    all-in cost of credit (interest, processing fee, foreclosure/prepayment
+    charges), gold-loan loan-to-value limits and collateral custody, repayment
+    mandates and EMI bounce charges, and the RBI Fair Practices Code including
+    non-coercive collections.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain. EVERY domain any
+# institution below offers must appear here (enforced at load time).
+domain_regulators:
+  retail_banking:
+    regulators: [RBI, DICGC]
+    regulator_text: >-
+      Indian retail banking is regulated by the Reserve Bank of India. RBI KYC
+      Master Directions govern customer identification (PAN/Aadhaar-based) before
+      account actions; deposits are insured by DICGC up to ₹5,00,000 per
+      depositor per bank; unauthorised electronic transactions follow RBI's
+      limited-liability circular with reporting-time-based liability; unresolved
+      complaints escalate to the RBI Integrated Ombudsman Scheme. Agents must
+      verify identity before disclosing or changing account state and must not
+      misstate deposit-insurance cover.
+  cards:
+    regulators: [RBI]
+    regulator_text: >-
+      Debit and credit cards follow RBI's Master Direction on Credit and Debit
+      Cards. Billing disputes, chargeback timelines, card-on-file tokenisation,
+      and explicit customer consent for limit changes or add-on features all
+      apply. Agents must not misstate interest (quoted monthly AND annualised),
+      fees, or dispute rights, and must not upgrade or upsell a card without
+      consent.
+  payments:
+    regulators: [RBI, NPCI]
+    regulator_text: >-
+      Payments run on NPCI-operated rails (UPI, IMPS, NEFT, AePS) under RBI
+      oversight, with the Prepaid Payment Instruments Master Direction governing
+      wallets and KYC-tiered limits. Failed-transaction refunds follow RBI's
+      harmonised turn-around-time framework with compensation for delays.
+      Agents must never ask for a UPI PIN, OTP, or card CVV, and must direct
+      suspected fraud to the reporting and chargeback path.
+  lending_mortgage:
+    regulators: [RBI]
+    regulator_text: >-
+      Non-banking lenders follow RBI's Scale Based Regulation, the Fair
+      Practices Code, and the Digital Lending Guidelines: a Key Fact Statement
+      disclosing the all-in annualised cost before sanction, no hidden charges,
+      transparent foreclosure/prepayment terms, and non-coercive collection
+      with defined hours and escalation. Gold loans are subject to a
+      loan-to-value ceiling and documented collateral custody/auction rules.
+      Agents must not misstate interest, fees, or repossession consequences.
+  brokerage_investing:
+    regulators: [SEBI, AMFI, NSE, BSE]
+    regulator_text: >-
+      Securities activity is regulated by SEBI with exchange-level conduct rules
+      (NSE/BSE) and AMFI conventions for mutual-fund distribution. Mutual-fund
+      communications must carry market-risk language ("subject to market risks,
+      read all scheme related documents carefully"); ELSS carries a statutory
+      lock-in; demat operations follow depository rules. Agents must not
+      guarantee or project returns, must disclose brokerage and depository
+      charges, and must not give individualized tax advice.
+  insurance:
+    regulators: [IRDAI]
+    regulator_text: >-
+      Insurance is regulated by IRDAI under the Protection of Policyholders'
+      Interests regulations: a free-look window to return a policy, disclosure
+      of waiting periods, exclusions and sub-limits before sale, defined claim
+      intimation and settlement timelines, mandatory nominee capture, and a
+      grievance path escalating to the Insurance Ombudsman. Agents must not
+      misstate coverage or claim eligibility and must not present insurance as a
+      guaranteed-return investment.
+
+institutions:
+# ── 1. Retail bank ────────────────────────────────────────────────────
+# Deposits + cards + UPI, and the channel through which mass-retail customers
+# reach PPF/NPS — which is why India needs no standalone retirement provider.
+- id: chandrika_bank
+  display_name: Chandrika Bank
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, payments]
+  products:
+  - id: savings_regular
+    display_name: Regular Savings Account
+    domain: retail_banking
+    variables:
+      monthly_average_balance: {type: money, value: 10000}
+      below_mab_charge: {type: money, value: 500}
+      free_atm_transactions_per_month: {type: int, value: 5}
+      debit_card_annual_fee: {type: money, value: 250}
+      savings_interest_rate: {type: percent, value: 3.5}
+  - id: fixed_deposit_1yr
+    display_name: 1-Year Fixed Deposit
+    domain: retail_banking
+    variables:
+      tenure_months: {type: int, value: 12}
+      interest_rate: {type: percent, value: 7.1}
+      senior_citizen_extra_rate: {type: percent, value: 0.5}
+      minimum_deposit: {type: money, value: 10000}
+      premature_withdrawal_penalty: {type: percent, value: 1}
+  - id: recurring_deposit
+    display_name: Recurring Deposit
+    domain: retail_banking
+    variables:
+      minimum_monthly_installment: {type: money, value: 500}
+      tenure_months: {type: int, value: 24}
+      interest_rate: {type: percent, value: 6.8}
+      missed_installment_penalty: {type: money, value: 10}
+  - id: chandrika_credit_card
+    display_name: Chandrika Everyday Credit Card
+    domain: cards
+    variables:
+      joining_fee: {type: money, value: 500}
+      annual_fee: {type: money, value: 500}
+      annual_fee_waiver_spend: {type: money, value: 150000}
+      finance_charge_monthly: {type: percent, value: 3.5}
+      finance_charge_annualised: {type: percent, value: 42}
+      reward_rate: {type: percent, value: 1}
+  - id: upi_and_bill_payments
+    display_name: UPI & Bill Payments
+    domain: payments
+    variables:
+      upi_per_transaction_limit: {type: money, value: 100000}
+      upi_daily_limit: {type: money, value: 100000}
+      upi_lite_per_transaction_limit: {type: money, value: 500}
+      autopay_mandate_without_afa_cap: {type: money, value: 15000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: make_upi_payment, discoverable: true, side_effect_class: state_changing}
+  - {name: book_fixed_deposit, discoverable: true, side_effect_class: state_changing}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  # get_accounts, open/close_account, update_contact_info, get_statements,
+  # update_beneficiary, set_alerts + the deposit servicing set (transfer_funds,
+  # order_replacement_card, stop_payment, pay_bill, activate_card,
+  # dispute_status, manage_authorized_users) are injected by the
+  # common-operations layer; no need to list them here.
+  task_templates:
+  - {id: TPL-CB-DISPUTE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_transaction_dispute]}
+  - {id: TPL-CB-FD-001, tier: verifiable, task_type: transactional, persona_tags: [region:any], gold_tool_sequence: [book_fixed_deposit]}
+  - {id: TPL-CB-MAB-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Neobank / UPI-first payments ───────────────────────────────────
+# India's highest-frequency financial surface, and the touchpoint the US-derived
+# institution set had no equivalent for.
+- id: paysetu
+  display_name: PaySetu
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards, payments]
+  products:
+  - id: digital_savings
+    display_name: PaySetu Digital Savings
+    domain: retail_banking
+    variables:
+      minimum_balance: {type: money, value: 0}
+      savings_interest_rate: {type: percent, value: 3.5}
+      full_kyc_completion_days: {type: int, value: 30}
+  - id: upi_wallet
+    display_name: PaySetu Wallet & UPI
+    domain: payments
+    variables:
+      min_kyc_wallet_balance_cap: {type: money, value: 10000}
+      full_kyc_wallet_balance_cap: {type: money, value: 200000}
+      upi_per_transaction_limit: {type: money, value: 100000}
+      failed_refund_turnaround_days: {type: int, value: 5}
+  - id: prepaid_forex_card
+    display_name: PaySetu Prepaid Forex Card
+    domain: cards
+    variables:
+      issuance_fee: {type: money, value: 150}
+      reload_fee: {type: money, value: 100}
+      cross_currency_markup: {type: percent, value: 2}
+      atm_withdrawal_fee_abroad: {type: money, value: 200}
+  - id: bill_autopay
+    display_name: Bill Autopay
+    domain: payments
+    variables:
+      mandate_cap_without_afa: {type: money, value: 15000}
+      mandate_pre_debit_notification_hours: {type: int, value: 24}
+      late_bill_convenience_fee: {type: money, value: 20}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: make_upi_payment, discoverable: true, side_effect_class: state_changing}
+  - {name: add_upi_mandate, discoverable: true, side_effect_class: state_changing}
+  - {name: load_wallet, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_upi, discoverable: true, side_effect_class: state_changing}
+  task_templates:
+  - {id: TPL-PS-UPI-FRAUD-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_upi]}
+  - {id: TPL-PS-MANDATE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any], gold_tool_sequence: [add_upi_mandate]}
+  - {id: TPL-PS-KYC-LIMITS-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any, financial-literacy:low]}
+
+# ── 3. Brokerage / mutual-fund platform ───────────────────────────────
+# Demat + SIP in one app, the shape of India's retail-investing boom. ELSS is
+# where 80C tax-saving advisory lands (no separate retirement institution).
+- id: tarang_invest
+  display_name: Tarang Invest
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: demat_trading_account
+    display_name: Demat & Trading Account
+    domain: brokerage_investing
+    variables:
+      annual_maintenance_charge: {type: money, value: 300}
+      dp_charge_per_sell: {type: money, value: 13.5}
+      equity_delivery_brokerage: {type: money, value: 0}
+      intraday_brokerage_per_order: {type: money, value: 20}
+  - id: mutual_fund_sip
+    display_name: Mutual Fund SIP
+    domain: brokerage_investing
+    variables:
+      minimum_sip_amount: {type: money, value: 500}
+      exit_load_within_365_days: {type: percent, value: 1}
+      sip_pause_max_months: {type: int, value: 6}
+  - id: elss_tax_saver
+    display_name: ELSS Tax-Saver Fund
+    domain: brokerage_investing
+    variables:
+      lock_in_years: {type: int, value: 3}
+      minimum_investment: {type: money, value: 500}
+      section_80c_deduction_cap: {type: money, value: 150000}
+  - id: margin_trading_facility
+    display_name: Margin Trading Facility
+    domain: brokerage_investing
+    variables:
+      interest_rate_annual: {type: percent, value: 14.99}
+      minimum_margin: {type: percent, value: 25}
+      pledge_charge_per_scrip: {type: money, value: 20}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: start_sip, discoverable: true, side_effect_class: state_changing}
+  - {name: redeem_mutual_fund, discoverable: true, side_effect_class: state_changing}
+  - {name: initiate_dis, discoverable: true, side_effect_class: state_changing}
+  task_templates:
+  - {id: TPL-TI-SIP-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, interest:finance], gold_tool_sequence: [start_sip]}
+  - {id: TPL-TI-REDEEM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any], gold_tool_sequence: [redeem_mutual_fund]}
+  - {id: TPL-TI-ELSS-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any, financial-literacy:high]}
+
+# ── 4. Insurer ────────────────────────────────────────────────────────
+# Life + health cover is culturally central in India and has no counterpart in
+# the US institution set this probe started from.
+- id: abhaya_insurance
+  display_name: Abhaya Insurance
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: term_life_cover
+    display_name: Abhaya Term Life Cover
+    domain: insurance
+    variables:
+      sum_assured: {type: money, value: 10000000}
+      annual_premium: {type: money, value: 12000}
+      policy_term_years: {type: int, value: 30}
+      free_look_days: {type: int, value: 15}
+      grace_period_days: {type: int, value: 30}
+  - id: health_indemnity
+    display_name: Family Health Indemnity
+    domain: insurance
+    variables:
+      sum_insured: {type: money, value: 500000}
+      annual_premium: {type: money, value: 9500}
+      initial_waiting_period_days: {type: int, value: 30}
+      pre_existing_waiting_months: {type: int, value: 36}
+      room_rent_cap_pct_of_si: {type: percent, value: 1}
+  - id: ulip_wealth_plan
+    display_name: ULIP Wealth Plan
+    domain: insurance
+    variables:
+      annual_premium: {type: money, value: 50000}
+      lock_in_years: {type: int, value: 5}
+      fund_management_charge: {type: percent, value: 1.35}
+      premium_allocation_charge: {type: percent, value: 3}
+  - id: motor_own_damage
+    display_name: Motor Own-Damage Cover
+    domain: insurance
+    variables:
+      annual_premium: {type: money, value: 7500}
+      compulsory_deductible: {type: money, value: 1000}
+      no_claim_bonus_first_year: {type: percent, value: 20}
+      claim_settlement_days: {type: int, value: 30}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_policy_details, discoverable: true, side_effect_class: read_only}
+  - {name: renew_policy, discoverable: true, side_effect_class: state_changing}
+  - {name: add_nominee, discoverable: true, side_effect_class: state_changing}
+  - {name: pay_premium, discoverable: true, side_effect_class: state_changing}
+  # file_claim / get_claim_status / update_policy are injected by the
+  # common-operations layer for the insurer type.
+  task_templates:
+  - {id: TPL-AI-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-AI-NOMINEE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any], gold_tool_sequence: [add_nominee]}
+  - {id: TPL-AI-WAITING-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any, financial-literacy:low]}
+
+# ── 5. NBFC / lender ──────────────────────────────────────────────────
+# Consumer EMI and gold loans: a dominant Indian retail-credit channel with no
+# US analogue, hence the new `nbfc` institution type (deposit-less lender).
+- id: kalash_finserv
+  display_name: Kalash Finserv
+  type: nbfc
+  brand_voice: traditional
+  domains: [lending_mortgage, payments]
+  products:
+  - id: personal_loan
+    display_name: Personal Loan
+    domain: lending_mortgage
+    variables:
+      interest_rate_annual: {type: percent, value: 14.5}
+      processing_fee: {type: percent, value: 2}
+      foreclosure_charge: {type: percent, value: 4}
+      tenure_months: {type: int, value: 60}
+      emi_bounce_charge: {type: money, value: 500}
+  - id: gold_loan
+    display_name: Gold Loan
+    domain: lending_mortgage
+    variables:
+      loan_to_value_cap: {type: percent, value: 75}
+      interest_rate_annual: {type: percent, value: 11.5}
+      processing_fee: {type: money, value: 500}
+      tenure_months: {type: int, value: 12}
+      minimum_loan_amount: {type: money, value: 25000}
+  - id: two_wheeler_loan
+    display_name: Two-Wheeler Loan
+    domain: lending_mortgage
+    variables:
+      interest_rate_annual: {type: percent, value: 12.9}
+      down_payment_pct: {type: percent, value: 15}
+      tenure_months: {type: int, value: 36}
+      processing_fee: {type: money, value: 1500}
+  - id: consumer_durable_emi
+    display_name: Consumer Durable EMI
+    domain: lending_mortgage
+    variables:
+      tenure_months: {type: int, value: 9}
+      processing_fee: {type: money, value: 499}
+      interest_rate_annual: {type: percent, value: 0}
+      late_payment_charge: {type: money, value: 350}
+  - id: emi_repayment_mandate
+    display_name: EMI Repayment Mandate
+    domain: payments
+    variables:
+      mandate_pre_debit_notification_hours: {type: int, value: 24}
+      bounce_charge: {type: money, value: 500}
+      mandate_amendment_processing_days: {type: int, value: 3}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_repayment_schedule, discoverable: true, side_effect_class: read_only}
+  - {name: request_gold_loan_topup, discoverable: true, side_effect_class: state_changing}
+  # get_loan_details / apply_loan / pay_emi / foreclose_loan /
+  # update_repayment_mandate are injected by the common-operations layer for the
+  # nbfc type (deliberately NOT the deposit servicing set — no deposits here).
+  task_templates:
+  - {id: TPL-KF-FORECLOSE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [foreclose_loan]}
+  - {id: TPL-KF-TOPUP-001, tier: verifiable, task_type: transactional, persona_tags: [region:any], gold_tool_sequence: [request_gold_loan_topup]}
+  - {id: TPL-KF-COST-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any, financial-literacy:low]}

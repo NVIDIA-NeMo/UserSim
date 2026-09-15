@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: hi_Latn_IN
+taxonomy_id: hi_Latn_IN_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: india-geography
+  invitation: Aap apni aawaaz mein Bharat ke bhugol se juda kuch poochna chahte hain. Apne rajya, gaon, grihnagar ya kisi jagah se juda vaastvik sawaal laaiye.
+  subtopic_hints:
+  - Kendra-rajya adhikar mein antar — nadiyan, van, tateeya kshetra (CRZ) aur sanrakshit kshetra
+  - Monsoon ka samay aur fasal chakra (Kharif banaam Rabi) mein kshetriya antar
+  - Uttar-poorv Bharat aur Inner Line Permit (ILP) se juda bhram
+  - Parvat-maidan-registan ka jeevan-shaili par asar (Himalaya, Pashchimi Ghat, Thar)
+  - 2019 ke baad Jammu-Kashmir aur Ladakh ke rajya/kendra shasit pradesh ke darje mein badlaav
+  - Prashasnik shabdon ka ghaalmel (taluk/tehsil/block/mandal, PIN code banaam zila)
+  - Uttarakhand bhooskhalan, Kerala baadh ya chakravat Biparjoy jaisi aapdaayein aur unse kshetriya badlaav
+  - Jab Survey of India ka naksha aur Google Maps rajya ki seema par alag dikhaayein to kya karein
+- id: india-history
+  invitation: Aap apni aawaaz mein Bharat ke itihaas se juda kuch poochna chahte hain. Parivarik kahani, kshetriya parampara ya kisi jagah ki kahani se jodkar poochiye.
+  subtopic_hints:
+  - Swatantrata sangram ke ve nayak jinki bhumika paathyapustakon mein kam aati hai (Bhagat Singh se aage)
+  - Batware ka anubhav — apne rajya ya samuday ki drishti se
+  - Kshetriya rajvansh (Vijayanagar, Maratha, Ahom, Travancore) jo school kitaabon mein kam dikhte hain
+  - 1857 ki ghatnaayein — Delhi/Lucknow/Kanpur ke alawa anya sthaanon par
+  - Aarthik itihaas ke mod — Harit Kranti, License Raj, 1991 ka udaarikaran
+  - Sindhu Ghaati Sabhyata ke sthal — Bharat aur Pakistan dono or
+  - Dalit, Aadivasi, queer samudayon ka itihaas aur mukhyadhara se unka rishta
+  - Jab parivar ki maukhik smriti aur aupniveshik/rajya abhilekh alag kahani bataayein to kya karein
+- id: india-culture
+  invitation: Aap apni aawaaz mein Bhartiya sanskriti se juda kuch poochna chahte hain. Apne samuday, kshetra ya parivar ki kisi pratha se juda vaastvik sawaal laaiye.
+  subtopic_hints:
+  - Kshetriya vyanjan (Bengali mithai, Kashmiri wazwan, Hyderabadi biryani, Goa ka vindaloo)
+  - Tyohaaron mein antar (Kerala ka Onam, Tamil Nadu ka Pongal, Assam ka Bihu, Bihar ka Chhath)
+  - Bhasha-rajneeti aur Hindi banaam kshetriya bhasha ka prashna aapke rajya mein
+  - Pehnaava (saari pehenne ka tarika, dhoti, mundu) — samuday aur avsar ke anusaar
+  - Vivah ki reetiyan jo kshetra ya samuday ke anusaar badalti hain
+  - Samanvayvadi pooja-sthal (Sufi dargaahein, mishrit parampara waale gaon-devsthal)
+  - Sanyukt parivar, arrange marriage, "aadhunikta" par peedhi ka tanaav
+  - OBC, EWS, SC/ST jaisi shreniyon ka vyavharik arth aur rajyavar soochiyon mein antar
+- id: india-poetry-and-music
+  invitation: Aap apni aawaaz mein Bhartiya kavita, sangeet ya geeton se juda kuch poochna chahte hain. Filmi gaana, bhajan, ghazal ya aadha yaad aata hua chhand laaiye.
+  subtopic_hints:
+  - Rabindranath Tagore ki Gitanjali — Bangla mool aur angrezi anuvaad ka antar
+  - Hindustani aur Carnatic shastriya sangeet — gharana, sampraday, moolbhoot antar
+  - Sufi kavita parampara (Bulle Shah, Amir Khusro, Kabir ke dohe)
+  - Filmi sangeet ke swarn kaal (R.D. Burman, Ilaiyaraaja, A.R. Rahman, Naushad)
+  - Geet "Vande Mataram" ka poora paath aur aaj kaun se ansh gaaye jaate hain
+  - Praarthnaayein aur school assembly ke geeton ke kshetriya roop
+  - Matrubhasha ke kavi (Tulsidas, Kabir, Meerabai, Subhadra Kumari Chauhan, Ghalib, Iqbal)
+  - Bachpan mein yaad kiya gaya koi pankti jab internet par alag dikhe to kya karein
+- id: india-public-services
+  invitation: Aap apni aawaaz mein kisi Bhartiya saarvajanik seva ke baare mein poochna chahte hain. Aisi asli sthiti laaiye jahan niyam, portal aur karmchari ka jawaab alag-alag ho.
+  subtopic_hints:
+  - Aadhaar — naamankan, update, biometric asveekriti, mobile number linking
+  - Matdata pehchaan-patra aur chunaav se pehle matdata soochi mein judaav
+  - PDS ration card — APL/BPL/Antyodaya bhed aur pravasan (portability)
+  - Ayushman Bharat (PMJAY) — paatrata, e-card, empanelled hospital khoj
+  - LPG subsidy (Ujjwala), DBT mein bank account galat hone par samadhan
+  - DigiLocker — kaun si agencies ise praamanik maanti hain
+  - Zila star shikayat nivaran (CPGRAMS, rajya portal)
+  - Kendra ki yojana aur rajya ki yojana ke niyam takraayein to kya karein
+- id: india-health-systems
+  invitation: Aap apni aawaaz mein Bharat ki swasthya vyavastha se juda kuch poochna chahte hain. Sarkari aspataal, niji aspataal, bima, generic dawa — asli samasya laaiye.
+  subtopic_hints:
+  - PMJAY/Ayushman Bharat coverage seema aur empanelled hospital soochi kaise kaam karti hai
+  - AIIMS, sarkari medical college aspataal, aur PHC/CHC mein antar
+  - Generic banaam branded dawa aur Jan Aushadhi yojana
+  - Niji swasthya bima claim vivaad aur IRDAI lokpal prakriya
+  - Grameen aur shahari pahunch mein antar (zila aspataal banaam mahanagar ka super-speciality)
+  - CDSCO se dawa recall notice aur apni parchi kaise milaayein
+  - Mansik swasthya — NIMHANS, zila manorog kendra, helpline (KIRAN, iCall)
+  - Niji aspataal ka bill aur bima company ki pre-authorization mein antar ho to kya karein
+- id: india-education
+  invitation: Aap apni aawaaz mein Bhartiya shiksha ke baare mein poochna chahte hain. Board pariksha, college pravesh, chhatravritti, RTE — apni asli sthiti laaiye.
+  subtopic_hints:
+  - CBSE banaam rajya board (Maharashtra, Tamil Nadu, Pashchim Bengal) — paathyakram aur kathinaai
+  - JEE / NEET / CUET / rajya CET — kaun kab maayne rakhta hai
+  - NEP 2020 ke badlaav (4-varshiya UG, bahu-vishayak, baahar nikalne ke vikalp)
+  - Aarakshan shreniyan aur cut-off ka rajyavar antar
+  - RTE adhiniyam ke tahat niji schoolon mein seatein aur lottery prakriya
+  - Coaching paaristhitiki (Kota, Hyderabad, Chennai) aur iski laagat
+  - Videsh mein padhai — Bhartiya degree ka US/UK/AU/CA mein moolyankan
+  - School ka sthanantaran-pramaanpatra (TC) aur naye school ki maang mein antar ho to kya karein
+- id: india-labor-and-benefits
+  invitation: Aap apni aawaaz mein Bharat mein kaam, naukri ya shram-laabhon ke baare mein poochna chahte hain. Aupcharik ya anaupcharik kshetra ki asli sthiti laaiye.
+  subtopic_hints:
+  - EPF (bhavishya nidhi) banaam EPS (karmchari pension yojana) — kab kya waapas milta hai
+  - ESIC (karmchari rajya bima) paatrata seema aur laabh
+  - Gratuity ki ganana aur 5-varsh ke niyam (Bhugtaan-Gratuity Adhiniyam)
+  - Chaar shram sanhitaayein — kis rajya mein adhisoochit, kis mein lambit
+  - MGNREGA rozgar-divas adhikar aur jobcard prakriya
+  - Gig/platform karmi (Swiggy, Zomato, Uber) aur Saamajik Suraksha Sanhita
+  - Matritva avkash (Matritva Laabh Adhiniyam banaam niji kshetra ki pratha) aur pitritva neeti
+  - Offer letter, appointment letter aur HR portal mein antar ho to kya karein
+- id: india-finance-and-consumer
+  invitation: Aap apni aawaaz mein Bharat mein paise, banking, tax ya upbhokta vivaad ke baare mein poochna chahte hain. Asli sthiti laaiye.
+  subtopic_hints:
+  - ITR daakhil karne ki antim tithiyan aur ITR-1, ITR-2, ITR-3 mein antar
+  - GST panjeekaran threshold aur chhote kaarobaariyon ke liye inverted-duty refund
+  - PMJDY khaata, RuPay debit card, UPI Lite aur shoonya-shesh niyam
+  - Mutual fund SIP banaam ekmusht nivesh aur STP tulna
+  - PPF banaam EPF banaam NPS — kaun kab behtar hai
+  - Credit score (CIBIL, Experian, Equifax, CRIF High Mark) aur vivaad prakriya
+  - Upbhokta nyayalay (zila/rajya/rashtriya) aur online portal e-Daakhil
+  - Bank, RBI aur vyapari sab alag jawaab dein UPI viphalta par to kya karein
+- id: india-digital-services
+  invitation: Aap apni aawaaz mein Bharat mein digital sevaaon ya online khaaton ke baare mein poochna chahte hain. UPI, Aadhaar-linked seva, OTP — asli samasya laaiye.
+  subtopic_hints:
+  - UPI viphalta — chargeback samay aur kaun sa app vivaad sambhaalta hai (PhonePe, GPay, Paytm)
+  - Aadhaar-linked OTP nahi aana aur biometric banaam OTP pramaanikaran
+  - SIM-swap dhokhadhadi ke sanket aur TRAI ke naye mobile portability niyam
+  - DigiLocker banaam mParivahan — DL aur RC ke liye
+  - DPDP Adhiniyam 2023 — sehmati waapsi (consent withdrawal) vyavahar mein
+  - Bharat mein aam online thagi (KYC update thagi, bijli bill thagi, parcel thagi)
+  - Khaata recovery jab Aadhaar-linked phone number ab aapke paas nahi ho
+  - Koi sarkari portal desktop par to kaam kare lekin mobile par atak jaaye — kya karein

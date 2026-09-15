@@ -1,0 +1,22 @@
+[
+    {"type": "health", "description": "Swasthya, kalyan aur chikitsa vishay"},
+    {"type": "finance", "description": "Vyaktigat vitt, banking aur paison ka prabandhan"},
+    {"type": "cooking", "description": "Khana banana, recipe aur bhojan taiyar karna"},
+    {"type": "local_government", "description": "Sthaniya sarkari sevaayein aur nagrik prakriyaayein"},
+    {"type": "technology", "description": "Takneek, gadget aur digital sevaayein"},
+    {"type": "agriculture", "description": "Krishi, kheti aur fasal prabandhan"},
+    {"type": "travel", "description": "Yatra ki yojana, gantavya aur sujhaav"},
+    {"type": "education", "description": "Shiksha pranali, school aur seekhne ke sansaadhan"},
+    {"type": "environment", "description": "Paryavaran, jalvayu aur satat vikas"},
+    {"type": "entertainment", "description": "Manoranjan, media aur fursat ki gatividhiyan"},
+    {"type": "legal", "description": "Kanooni adhikar, prakriyaayein aur niyam"},
+    {"type": "housing", "description": "Aawas, real estate aur ghar ki dekhbhaal"},
+    {"type": "transportation", "description": "Parivahan ke vikalp aur aavagaman"},
+    {"type": "employment", "description": "Naukri ki talaash, karyasthal ki samasyaayein aur career salaah"},
+    {"type": "family", "description": "Parivarik jeevan, paalan-poshan aur rishte"},
+    {"type": "aadhaar", "description": "Aadhaar card, PAN card aur sarkari pehchaan patra ki prakriya"},
+    {"type": "ration_card", "description": "Ration card aur Sarvajanik Vitaran Pranali (PDS)"},
+    {"type": "ayushman_bharat", "description": "Ayushman Bharat yojana aur sarkari swasthya bima"},
+    {"type": "upi_digital_payments", "description": "UPI, digital bhugtaan aur online banking"},
+    {"type": "kisan_farming", "description": "Kisan Samman Nidhi aur krishi se judi sarkari yojanaayein"}
+]

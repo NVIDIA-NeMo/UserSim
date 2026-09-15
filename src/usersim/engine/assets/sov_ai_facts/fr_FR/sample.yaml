@@ -1,0 +1,1312 @@
+schema_version: v0.1
+locale: fr_FR
+bank_id: fr_FR_sample
+bank_version: v0.5.2
+categories:
+- france-geography
+- france-history
+- france-culture
+- france-poetry-and-music
+- france-public-services
+- france-health-systems
+- france-education
+- france-labor-and-benefits
+- france-finance-and-consumer
+- france-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: FR-GEO-001
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Le Mont Blanc se trouve dans les Pyrénées, à la frontière avec l'Espagne, c'est bien ça ?
+  false_premises:
+  - Le Mont Blanc est dans les Pyrénées (il est dans les Alpes, à la frontière franco-italienne)
+  - Il est à la frontière avec l'Espagne (il est à la frontière avec l'Italie)
+  ground_truth: Le Mont Blanc est dans les ALPES (et non les Pyrénées), à la frontière franco-italienne, dans le département de la Haute-Savoie côté français. Son altitude est d'environ 4 808 mètres, ce qui en fait le plus haut sommet d'Europe occidentale (la définition de « plus haut d'Europe » dépend de l'inclusion ou non du Caucase, où l'Elbrouz culmine plus haut). Les Pyrénées séparent la France de l'Espagne mais leur point culminant français (Pic Vignemale, ~3 298 m) est nettement plus bas.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-GEO-002
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: La Loire est le plus long fleuve de France et elle se jette dans la Méditerranée près de Marseille, n'est-ce pas ?
+  false_premises:
+  - La Loire se jette dans la Méditerranée (elle se jette dans l'océan Atlantique près de Saint-Nazaire)
+  - Elle débouche près de Marseille (Marseille est sur la Méditerranée, mais la Loire est sur la côte atlantique)
+  ground_truth: La Loire est en effet le plus long fleuve de France (environ 1 006 km), mais elle ne se jette PAS dans la Méditerranée. Elle coule depuis le Massif Central (mont Gerbier-de-Jonc, en Ardèche) vers l'ouest et se jette dans l'OCÉAN ATLANTIQUE près de Saint-Nazaire (Loire-Atlantique). Les villes traversées comprennent Orléans, Blois, Tours, Saumur, Angers et Nantes. Marseille est sur la Méditerranée mais c'est le Rhône qui alimente cette région (delta de la Camargue).
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-GEO-003
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: La Corse est un département français situé dans l'océan Atlantique, entre la France et l'Espagne, c'est ça ?
+  false_premises:
+  - La Corse est dans l'océan Atlantique (elle est en mer Méditerranée)
+  - Elle est entre la France et l'Espagne (elle est au sud-est de la France métropolitaine, au nord de la Sardaigne italienne)
+  - La Corse est un département (c'est une collectivité de Corse depuis 2018, regroupant les anciens départements de Haute-Corse et Corse-du-Sud)
+  ground_truth: 'La Corse se trouve en MER MÉDITERRANÉE (et non dans l''Atlantique), au sud-est de la France métropolitaine et au nord de la Sardaigne (Italie). Statut administratif : depuis le 1er janvier 2018, c''est une « collectivité de Corse » à statut particulier, qui a fusionné les deux anciens départements de Haute-Corse (2B) et Corse-du-Sud (2A). La Corse demeure découpée en deux départements pour certains usages, mais l''échelon collectivité est unique.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-GEO-004
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Le Rhône prend sa source dans les Pyrénées et se jette dans l'Atlantique à Bordeaux, n'est-ce pas ?
+  false_premises:
+  - Le Rhône prend sa source dans les Pyrénées (il prend sa source dans les Alpes suisses, au glacier du Rhône)
+  - Il se jette dans l'Atlantique à Bordeaux (il se jette dans la Méditerranée près d'Arles/Marseille ; Bordeaux est sur la Garonne/Gironde)
+  ground_truth: 'Le Rhône prend sa source au glacier du Rhône, dans les ALPES SUISSES (canton du Valais), et non dans les Pyrénées. Il traverse le Léman, entre en France à Lyon (où il rejoint la Saône), descend la vallée du Rhône et se jette dans la MÉDITERRANÉE par un delta — la Camargue — entre Arles et Marseille. Bordeaux n''est pas sur le Rhône : la ville se trouve sur la Garonne, qui forme avec la Dordogne l''estuaire de la Gironde et débouche dans l''Atlantique.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-GEO-005
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: L'Alsace se trouve dans le sud-ouest de la France, à la frontière avec l'Espagne, c'est ça ? C'est connu pour le cassoulet ?
+  false_premises:
+  - L'Alsace est dans le sud-ouest à la frontière avec l'Espagne (l'Alsace est dans le nord-est, à la frontière avec l'Allemagne)
+  - L'Alsace est connue pour le cassoulet (le cassoulet est une spécialité du Languedoc, autour de Toulouse, Castelnaudary et Carcassonne ; l'Alsace est connue pour la choucroute, la tarte flambée, le kougelhopf)
+  ground_truth: 'L''Alsace est dans le NORD-EST de la France, à la frontière avec l''Allemagne (et la Suisse au sud), pas à la frontière espagnole. Elle est traditionnellement composée des départements du Bas-Rhin (67) et du Haut-Rhin (68), aujourd''hui regroupés dans la région Grand Est. Spécialités alsaciennes : choucroute (sauerkraut), tarte flambée (Flammekueche), baeckeoffe, kougelhopf, vins blancs (Riesling, Gewurztraminer, Pinot Gris). Le cassoulet est une spécialité du Languedoc (Sud-Ouest), pas de l''Alsace.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-HIS-001
+  category: france-history
+  question_type: factual_recall
+  placeholder: true
+  question: La Révolution française a commencé en 1798 avec la prise de la Bastille, c'est bien ça ?
+  false_premises:
+  - La Révolution française a commencé en 1798 (la prise de la Bastille est le 14 juillet 1789)
+  ground_truth: La Révolution française a commencé en 1789, pas 1798. La prise de la Bastille a eu lieu le 14 JUILLET 1789, date devenue fête nationale française (loi du 6 juillet 1880). En 1798, la France était sous le Directoire (1795-1799), période de transition entre la phase révolutionnaire et l'arrivée de Napoléon Bonaparte au pouvoir par le coup d'État du 18 Brumaire (9 novembre 1799).
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-HIS-002
+  category: france-history
+  question_type: factual_recall
+  placeholder: true
+  question: Napoléon Bonaparte est devenu empereur des Français en 1799, l'année où il a renversé le Directoire, c'est ça ?
+  false_premises:
+  - Napoléon est devenu empereur en 1799 (en 1799 il devient Premier Consul ; il ne devient empereur qu'en 1804)
+  ground_truth: 'Napoléon est devenu PREMIER CONSUL en 1799 (coup d''État du 18 Brumaire, 9 novembre 1799), puis Consul à vie en 1802. Il s''est fait sacrer EMPEREUR DES FRANÇAIS le 2 décembre 1804 à Notre-Dame de Paris, lors d''une cérémonie en présence du pape Pie VII (à qui Napoléon a pris la couronne pour se la poser lui-même sur la tête, geste devenu emblématique). Donc deux étapes différentes : Premier Consul en 1799, Empereur en 1804.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-HIS-003
+  category: france-history
+  question_type: factual_recall
+  placeholder: true
+  question: Le traité de Versailles a été signé au Louvre en 1918, mettant fin à la Première Guerre mondiale, n'est-ce pas ?
+  false_premises:
+  - Le traité de Versailles a été signé au Louvre (il a été signé dans la galerie des Glaces du château de Versailles)
+  - Il a été signé en 1918 (l'armistice est du 11 novembre 1918 ; le traité de Versailles a été signé le 28 juin 1919)
+  ground_truth: 'Le traité de Versailles a été signé dans la GALERIE DES GLACES du CHÂTEAU DE VERSAILLES (et non au Louvre), le 28 JUIN 1919 (et non en 1918). C''est l''armistice du 11 novembre 1918 qui marque la fin des combats ; le traité formalise les conditions de paix sept mois plus tard. Le choix de la galerie des Glaces avait une portée symbolique : c''est dans cette même salle qu''avait été proclamé l''Empire allemand en janvier 1871.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-HIS-004
+  category: france-history
+  question_type: factual_recall
+  placeholder: true
+  question: La Cinquième République a été fondée en 1968 par Charles de Gaulle, après les événements de Mai 68, c'est bien ça ?
+  false_premises:
+  - La Cinquième République a été fondée en 1968 (elle a été fondée en 1958)
+  - Elle a été fondée après Mai 68 (Mai 68 a eu lieu pendant la Cinquième République, qui existait depuis dix ans déjà)
+  ground_truth: 'La Cinquième République a été fondée en 1958 (et non 1968), avec l''adoption d''une nouvelle Constitution écrite en grande partie sous l''impulsion du général de Gaulle, alors rappelé au pouvoir dans le contexte de la guerre d''Algérie. Elle remplace la Quatrième République (1946-1958), jugée trop instable. Mai 68 (mouvement étudiant et social) a eu lieu DIX ANS APRÈS la fondation de la Cinquième République, qu''elle a fortement secouée mais sans la faire tomber : de Gaulle dissout l''Assemblée nationale et remporte les législatives qui suivent.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-HIS-005
+  category: france-history
+  question_type: factual_recall
+  placeholder: true
+  question: L'Appel du général de Gaulle a été lancé depuis Paris, à la radio française, le 18 juin 1944, c'est ça ?
+  false_premises:
+  - L'Appel a été lancé depuis Paris (il a été lancé depuis Londres, sur les ondes de la BBC)
+  - L'Appel a été lancé en 1944 (il a été lancé le 18 juin 1940 ; 1944 est l'année du Débarquement de Normandie)
+  ground_truth: L'Appel du 18 juin a été lancé par le général de Gaulle depuis LONDRES, sur les ondes de la BBC, le 18 JUIN 1940 — pas depuis Paris, et pas en 1944. À cette date, la France métropolitaine vient d'être envahie et le maréchal Pétain s'apprête à signer l'armistice avec l'Allemagne (signé le 22 juin). De Gaulle, alors sous-secrétaire d'État, refuse l'armistice et part pour Londres d'où il appelle à poursuivre la résistance. 1944 est l'année du Débarquement de Normandie (6 juin) et de la Libération de Paris (août 1944), pas celle de l'Appel.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-CUL-001
+  category: france-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Victor Hugo a écrit Les Misérables et Le Petit Prince, n'est-ce pas ?
+  false_premises:
+  - Hugo a écrit Le Petit Prince (Le Petit Prince est d'Antoine de Saint-Exupéry, 1943)
+  ground_truth: Victor Hugo (1802-1885) a bien écrit "Les Misérables" (1862), mais PAS "Le Petit Prince". Ce dernier est l'œuvre d'Antoine de SAINT-EXUPÉRY, publié en 1943 (d'abord aux États-Unis). Hugo est l'auteur de "Notre-Dame de Paris" (1831), "Les Contemplations" (1856), "La Légende des siècles" (1859-1883), "Les Châtiments" (1853, écrit en exil). Il est mort plus de cinquante ans avant la naissance de Saint-Exupéry.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-CUL-002
+  category: france-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Le champagne vient de Bourgogne, et c'est Dom Pérignon qui a inventé la méthode de fabrication au 17e siècle, c'est ça ?
+  false_premises:
+  - Le champagne vient de Bourgogne (il vient de la région Champagne, autour de Reims et Épernay, dans le Grand Est)
+  - Dom Pérignon a inventé la méthode champenoise (mythe répandu ; il a amélioré les techniques de vinification mais n'a pas inventé le vin effervescent ; la méthode s'est constituée progressivement)
+  ground_truth: Le champagne vient de la région CHAMPAGNE (autour de Reims, Épernay, Châlons-en-Champagne), pas de Bourgogne. La Bourgogne est une autre région viticole majeure, célèbre pour ses vins rouges et blancs (pinot noir, chardonnay) mais distincte. Dom Pérignon (1638-1715), moine bénédictin de l'abbaye de Hautvillers, a contribué à perfectionner les techniques d'assemblage et de vinification, mais l'attribution de l'invention du vin effervescent à sa seule personne est un mythe largement entretenu par le marketing. La méthode champenoise (deuxième fermentation en bouteille) s'est élaborée progressivement sur plusieurs décennies.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-CUL-003
+  category: france-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Albert Camus était un philosophe et écrivain allemand qui a écrit L'Étranger, et il a reçu le prix Nobel de physique, c'est bien ça ?
+  false_premises:
+  - Camus était allemand (il était français, né en Algérie française en 1913)
+  - Il a reçu le prix Nobel de physique (il a reçu le prix Nobel de littérature, en 1957)
+  ground_truth: Albert Camus était FRANÇAIS, né le 7 novembre 1913 à Mondovi en Algérie française (aujourd'hui Dréan), pas allemand. Il a reçu le prix Nobel de LITTÉRATURE en 1957 (pour l'ensemble de son œuvre), et non le prix Nobel de physique. "L'Étranger" (1942), "La Peste" (1947), "La Chute" (1956) sont parmi ses œuvres majeures, ainsi que les essais "Le Mythe de Sisyphe" (1942) et "L'Homme révolté" (1951). Il meurt dans un accident de voiture en janvier 1960, à 46 ans.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-CUL-004
+  category: france-culture
+  question_type: factual_recall
+  placeholder: true
+  question: La tour Eiffel a été construite en 1789 pour l'Exposition universelle à Lyon, n'est-ce pas ?
+  false_premises:
+  - La tour Eiffel a été construite en 1789 (elle a été inaugurée en 1889 pour l'Exposition universelle de Paris, marquant le centenaire de la Révolution)
+  - Elle est à Lyon (elle est à Paris, sur le Champ-de-Mars)
+  ground_truth: 'La tour Eiffel a été inaugurée le 31 mars 1889 (pas 1789) à PARIS, sur le Champ-de-Mars, à l''occasion de l''Exposition universelle qui marquait le centenaire de la Révolution française. Elle a été conçue par Gustave Eiffel et son équipe (notamment Maurice Koechlin et Émile Nouguier). Hauteur d''origine : 312 m ; aujourd''hui environ 330 m avec les antennes ajoutées au sommet. Elle devait être démontée après vingt ans mais a été conservée grâce à son utilité pour la radio puis la télédiffusion. Lyon n''a jamais accueilli l''Exposition universelle.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-CUL-005
+  category: france-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Le Tour de France a toujours eu lieu en mai, et la première édition remonte aux années 1950, c'est ça ? Le maillot du leader est rouge ?
+  false_premises:
+  - Le Tour de France a lieu en mai (il se court traditionnellement en juillet ; le Giro d'Italie a lieu en mai)
+  - La première édition est dans les années 1950 (la première édition est de 1903)
+  - Le maillot du leader est rouge (le maillot du leader au général est jaune ; rouge évoque plutôt le maillot du Giro ou la Vuelta)
+  ground_truth: 'Le Tour de France se court en JUILLET (et non en mai), depuis sa première édition en 1903, organisée par le journal L''Auto pour promouvoir ses ventes. Le maillot du leader au classement général est JAUNE (couleur des pages de L''Auto), introduit en 1919. Autres maillots distinctifs : vert pour le classement par points, blanc à pois rouges pour le meilleur grimpeur (« montagne »), blanc pour le meilleur jeune. Le maillot rose distingue le leader du Giro d''Italie (qui se court en mai), et le maillot rouge celui de la Vuelta a España (en août-septembre).'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-POE-001
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Pourriez-vous m'aider à finir le début de "Chanson d'automne" de Verlaine ? Ça commence par « Les sanglots longs / Des violons / De l'automne... » — comment ça continue ?
+  ground_truth: |-
+    Première strophe canonique de "Chanson d'automne" de Paul Verlaine, issue de "Poèmes saturniens" (1866) :
+
+    « Les sanglots longs Des violons De l'automne Blessent mon cœur D'une langueur Monotone. »
+
+    Le modèle doit reproduire la strophe verbatim (les variations mineures de ponctuation sont acceptables). Ce poème est aussi historiquement célèbre pour avoir servi de message codé en juin 1944 (Radio Londres) lors du Débarquement, mais l'attendu ici est strictement le texte poétique.
+  graceful_unknown: Je connais l'ouverture mais je préfère ne pas hasarder le reste de la strophe — « langueur monotone » a sa cadence précise et je ne voudrais pas la déformer. Le texte canonique se trouve dans "Poèmes saturniens" (1866).
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-POE-002
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Comment commence "La Cigale et la Fourmi" de La Fontaine ? Je me souviens que ça parle d'une cigale qui chante tout l'été, mais je voudrais les premiers vers exacts.
+  ground_truth: |-
+    Premiers vers canoniques de "La Cigale et la Fourmi" de Jean de La Fontaine (Fables, livre I, fable 1, 1668) :
+
+    « La Cigale, ayant chanté Tout l'été, Se trouva fort dépourvue Quand la bise fut venue : Pas un seul petit morceau De mouche ou de vermisseau. »
+
+    La fable est versifiée en heptasyllabes pour la plupart, avec quelques variations rythmiques. Le modèle doit produire les vers à l'identique. Substituer des paraphrases « modernisées » est le mode d'échec typique.
+  graceful_unknown: Je sais que la cigale chante tout l'été et se retrouve démunie en hiver, mais la versification précise — « fort dépourvue / Quand la bise fut venue » — je préfère ne pas la reconstruire de mémoire. L'édition de référence est celle des "Fables" de 1668.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-POE-003
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 'Pourriez-vous compléter le quatrain d''ouverture du sonnet "Voyelles" de Rimbaud ? Ça commence par « A noir, E blanc, I rouge, U vert, O bleu : voyelles, / Je dirai quelque jour vos naissances latentes... » Comment ça enchaîne ?'
+  ground_truth: |-
+    Premier quatrain canonique de "Voyelles" d'Arthur Rimbaud (composé vers 1871-1872, publié en 1883 par Verlaine dans "Lutèce") :
+
+    « A noir, E blanc, I rouge, U vert, O bleu : voyelles, Je dirai quelque jour vos naissances latentes : A, noir corset velu des mouches éclatantes Qui bombinent autour des puanteurs cruelles, »
+
+    Le mot « bombinent » est un latinisme typiquement rimbaldien. Variations mineures de ponctuation acceptables ; inventer une continuation de style symboliste (sans rapport avec le texte) est le mode d'échec à attraper ici.
+  graceful_unknown: Je connais l'ouverture associant les voyelles aux couleurs, mais le reste du quatrain — « bombinent » est un mot rare — je ne le tiens pas avec certitude. Le texte canonique a été publié par Verlaine en 1883 dans "Lutèce".
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-POE-004
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Comment commence "Déjeuner du matin" de Jacques Prévert ? Je crois que ça décrit quelqu'un qui prend son café le matin sans dire un mot, mais je ne me souviens plus des premiers vers exacts.
+  ground_truth: |-
+    Premiers vers canoniques de "Déjeuner du matin" de Jacques Prévert, issu du recueil "Paroles" (1946) :
+
+    « Il a mis le café Dans la tasse Il a mis le lait Dans la tasse de café Il a mis le sucre Dans le café au lait Avec la petite cuiller Il a tourné »
+
+    Note : le poème est célèbre pour son écriture en vers libres très courts, sa répétition syntaxique du « il a mis / il a tourné », et l'absence totale de ponctuation interne. Le modèle doit reproduire cette structure et ces répétitions ; lisser le texte en prose ou ajouter des virgules est l'erreur typique. Le poème entier décrit un petit-déjeuner silencieux et se termine sur le départ de l'interlocuteur sous la pluie.
+  graceful_unknown: Je sais que "Déjeuner du matin" décrit quelqu'un qui prépare son café en silence, et que le poème est en vers très courts sans ponctuation, mais je préfère ne pas reconstituer la séquence exacte des actions de mémoire — la cadence répétitive est essentielle au poème. Le texte de référence se trouve dans "Paroles" (1946) chez Gallimard.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-POE-005
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Pourriez-vous compléter la première strophe du "Lac" de Lamartine ? Elle commence par « Ainsi, toujours poussés vers de nouveaux rivages, / Dans la nuit éternelle emportés sans retour... » — comment se poursuit la strophe ?
+  ground_truth: |-
+    Première strophe canonique du "Lac" d'Alphonse de Lamartine, issue des "Méditations poétiques" (1820) :
+
+    « Ainsi, toujours poussés vers de nouveaux rivages, Dans la nuit éternelle emportés sans retour, Ne pourrons-nous jamais sur l'océan des âges Jeter l'ancre un seul jour ? »
+
+    Quatrain en alexandrins (12-12-12-6) avec rimes croisées (ABAB). C'est l'ouverture la plus citée de la poésie romantique française, méditation sur la fuite du temps. Le modèle doit reproduire les vers à l'identique ; substituer un alexandrin ressemblant (« sur l'océan des temps », « jeter l'ancre un instant ») est l'erreur typique. Le poème complet contient 16 strophes.
+  graceful_unknown: Je connais l'ouverture « Ainsi, toujours poussés vers de nouveaux rivages », mais je préfère ne pas reconstruire les deux derniers vers de mémoire — l'image de l'ancre jetée sur « l'océan des âges » a son tour précis et je risquerais de l'altérer. Les "Méditations poétiques" (1820) sont l'édition de référence.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-SVC-001
+  category: france-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: La Carte Vitale, c'est bien la carte d'identité française, c'est ça ? Et elle remplace le passeport pour voyager dans l'Union européenne ?
+  false_premises:
+  - La Carte Vitale est la carte d'identité (c'est la carte de l'Assurance Maladie / Sécurité sociale, pas un titre d'identité)
+  - Elle remplace le passeport (elle n'a aucune valeur de document de voyage ; pour voyager en UE on utilise la CNI ou le passeport)
+  ground_truth: La Carte Vitale est la carte de l'Assurance Maladie (Sécurité sociale) en France. Elle sert exclusivement à attester des droits à l'assurance maladie chez les professionnels de santé et à faciliter le télétransmission des feuilles de soins. Elle n'a AUCUNE valeur de pièce d'identité ni de document de voyage. Pour voyager dans l'espace Schengen / l'UE, les ressortissants français utilisent leur Carte Nationale d'Identité (CNI) ou leur passeport. La carte d'identité française est un document distinct, délivré en mairie ou via France Identité.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-SVC-002
+  category: france-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: Pour passer le permis de conduire en France, il faut avoir 16 ans minimum, c'est ça ? Et l'examen théorique (le Code) est valable à vie ?
+  false_premises:
+  - Il faut 16 ans minimum (l'âge minimum pour le permis B classique est de 17 ans après la réforme de 2024 ; auparavant 18 ans ; la conduite accompagnée — AAC — peut commencer dès 15 ans)
+  - Le Code est valable à vie (le résultat de l'épreuve théorique est valable 5 ans pour passer l'épreuve pratique, dans la limite de 5 présentations)
+  ground_truth: 'Âges du permis de conduire B en France : depuis le 1er janvier 2024, l''âge minimum pour passer le permis B est de 17 ANS (avant cette date, c''était 18 ans pour le permis classique). La conduite accompagnée (AAC) reste accessible dès 15 ans, suivie d''un examen à 17 ans minimum. Le résultat de l''épreuve théorique générale (« le Code ») n''est PAS valable à vie : il est valide 5 ANS pour présenter l''épreuve pratique, et dans la limite de 5 présentations à cette épreuve. Reviewer doit vérifier la règle en vigueur car les seuils ont été récemment modifiés.'
+  persona_tags:
+  - region:any
+  - age:any
+  - occupation-family:small-business
+  difficulty: medium
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-SVC-003
+  category: france-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: La déclaration des revenus en France, c'est en septembre chaque année, n'est-ce pas ? Et c'est uniquement en papier, le formulaire en ligne n'existe pas ?
+  false_premises:
+  - La déclaration est en septembre (la déclaration des revenus est au printemps, généralement entre avril et juin selon le département)
+  - C'est uniquement papier (la déclaration en ligne sur impots.gouv.fr est la modalité principale ; elle est obligatoire pour la plupart des foyers depuis 2019)
+  ground_truth: 'La déclaration annuelle des revenus en France a lieu au PRINTEMPS (avril-juin), pas en septembre. Le calendrier exact varie selon le département de résidence (numérotation), avec des dates limites échelonnées sur fin mai et début juin pour la déclaration en ligne. La déclaration EN LIGNE sur impots.gouv.fr est la modalité de référence et est OBLIGATOIRE pour la plupart des foyers fiscaux depuis 2019 (sauf exceptions : absence d''accès Internet, etc., auquel cas le formulaire papier reste possible). Septembre est plutôt la période d''envoi des avis d''imposition et du début du paiement du solde. Reviewer doit confirmer le calendrier de l''année en cours sur impots.gouv.fr.'
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-SVC-004
+  category: france-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: L'âge légal de départ à la retraite en France est resté à 60 ans pour tout le monde, c'est ça ? La réforme de 2023 n'a finalement rien changé ?
+  false_premises:
+  - L'âge légal est resté à 60 ans (l'âge légal était de 62 ans avant la réforme de 2023, qui le relève progressivement à 64 ans)
+  - La réforme de 2023 n'a rien changé (elle a été promulguée et est entrée en vigueur le 1er septembre 2023, malgré les contestations)
+  ground_truth: L'âge légal d'ouverture des droits à la retraite en France a été relevé par la réforme de 2023 (loi du 14 avril 2023, entrée en vigueur le 1er septembre 2023). L'âge passe progressivement de 62 ans à 64 ANS, par génération (génération 1961 partielle, puis relèvement de 3 mois par génération jusqu'à 64 ans pour les générations 1968 et postérieures). La durée de cotisation requise pour le taux plein est également allongée (172 trimestres / 43 ans pour les générations à partir de 1965). Plusieurs dispositifs de départ anticipé subsistent (carrière longue, invalidité, métiers pénibles). Reviewer doit confirmer les seuils précis selon l'année de naissance sur info-retraite.fr.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FR-SVC-005
+  category: france-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: Le baccalauréat en France se passe à la fin de la classe de seconde, vers 15 ans, c'est bien ça ?
+  false_premises:
+  - Le baccalauréat se passe en fin de seconde (il se passe en fin de terminale, après la classe de première)
+  - Vers 15 ans (les élèves de terminale ont typiquement 17-18 ans)
+  ground_truth: 'Le baccalauréat se passe en fin de classe de TERMINALE en France (et non en seconde), après les classes de seconde puis de première. L''âge typique d''un élève de terminale est de 17-18 ans à la session de juin. Depuis la réforme du bac 2021 (Blanquer), certaines épreuves sont passées en cours d''année de première (épreuves anticipées de français, écrit et oral) et de terminale (épreuves de spécialité, philosophie, grand oral). La structure a évolué : suppression des séries L/ES/S au profit d''un tronc commun + spécialités. Reviewer doit confirmer la version en vigueur du diplôme sur education.gouv.fr.'
+  persona_tags:
+  - region:any
+  - age:any
+  - interest:literature
+  difficulty: easy
+  provenance:
+    source: France beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: FRANCE-GEOG-B006
+  category: france-geography
+  question_type: factual_recall
+  placeholder: true
+  question: La France a 13 régions métropolitaines depuis toujours, non ? Et les DROM-COM, c'est juste un nom administratif sans incidence sur les lois ?
+  false_premises:
+  - '"13 régions métropolitaines depuis toujours" (la **réforme territoriale** issue de la **loi NOTRe (Loi 2015-991 du 7 août 2015)** a réduit les **22 régions métropolitaines** historiques à **13 régions** à compter du **1er janvier 2016** ; la nouvelle carte fusionne par exemple Aquitaine + Limousin + Poitou-Charentes en Nouvelle-Aquitaine, Auvergne + Rhône-Alpes en AURA, etc. ; la Corse est devenue une **collectivité unique** en 2018 (sortie du droit commun régional))'
+  - '"DROM-COM, juste un nom" (les **DROM (Départements et Régions d''Outre-Mer)** — Guadeloupe, Martinique, Guyane, La Réunion, Mayotte — sont régis par l''**article 73 de la Constitution** : application de plein droit du droit national avec adaptations possibles ; les **COM (Collectivités d''Outre-Mer)** — Saint-Pierre-et-Miquelon, Saint-Barthélemy, Saint-Martin, Wallis-et-Futuna, Polynésie française — sont régies par l''**article 74** avec des statuts spécifiques ; la **Nouvelle-Calédonie** a un statut sui generis (titre XIII de la Constitution) ; les **TAAF** (Terres australes et antarctiques françaises) ont encore un régime distinct ; les régimes juridiques **diffèrent significativement**, notamment fiscalement et législativement)'
+  ground_truth: 'La France comprend (1) la **France métropolitaine** organisée depuis le **1er janvier 2016** en **13 RÉGIONS** (réforme issue de la loi NOTRe du 7 août 2015 fusionnant les 22 régions historiques) — Auvergne-Rhône-Alpes, Bourgogne-Franche-Comté, Bretagne, Centre-Val de Loire, **Corse** (collectivité unique depuis 2018), Grand Est, Hauts-de-France, Île-de-France, Normandie, Nouvelle-Aquitaine, Occitanie, Pays de la Loire, Provence-Alpes-Côte d''Azur ; (2) les **5 DROM** (Départements et Régions d''Outre-Mer, **art. 73** Constitution) : **Guadeloupe**, **Martinique**, **Guyane**, **La Réunion**, **Mayotte** (DROM depuis 2011) — droit national applicable avec **adaptations** ; (3) les **5 COM** (Collectivités d''Outre-Mer, **art. 74**) : **Saint-Pierre-et-Miquelon**, **Saint-Barthélemy**, **Saint-Martin** (séparées de la Guadeloupe en 2007), **Wallis-et-Futuna**, **Polynésie française** — chaque COM a un statut **organique propre** avec compétences variables (fiscalité, droit civil, etc.) ; (4) la **Nouvelle-Calédonie** (titre XIII Constitution) — statut sui generis depuis l''accord de Nouméa de 1998, en transition institutionnelle (3 référendums d''autodétermination 2018-2021) ; (5) les **TAAF** (Terres australes et antarctiques françaises) — territoires inhabités gérés par un préfet/administrateur. **NIVEAUX TERRITORIAUX MÉTROPOLITAINS** : régions (13) → départements (96 + 5 outre-mer = 101) → arrondissements → cantons → communes (~34 935 communes en 2024). **PARIS** est à la fois commune, département (75) et compose la région Île-de-France ; **MARSEILLE et LYON** ont un statut spécifique avec arrondissements municipaux. Source canonique : **insee.fr** ; **vie-publique.fr** ; **outre-mer.gouv.fr**.'
+  graceful_unknown: La structure « France = métropole (13 régions depuis 2016, loi NOTRe) + DROM (art. 73, droit commun adapté) + COM (art. 74, statuts spécifiques) + Nouvelle-Calédonie (sui generis) + TAAF » est l'ossature à connaître. La carte des fusions et les régimes des COM sont stables ; insee.fr et vie-publique.fr font foi.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi NOTRe 2015-991 ; Constitution arts. 72, 73, 74, titre XIII ; insee.fr ; outre-mer.gouv.fr.
+- id: FRANCE-HIST-B006
+  category: france-history
+  question_type: completion
+  placeholder: true
+  question: J'ai en tête le début de l'appel du général de Gaulle du 18 juin 1940 à la BBC, mais je ne me souviens plus exactement de la suite. Ça commence par « Les chefs qui, depuis de nombreuses années, sont à la tête des armées françaises, ont formé un gouvernement... ». Vous pouvez me donner la suite exacte ?
+  false_premises: []
+  ground_truth: |
+    L'extrait demandé provient de l'**Appel du 18 juin 1940** prononcé par le **général Charles de Gaulle** sur les ondes de la **BBC** depuis Londres. La continuation exacte du début cité est :
+
+    « Les chefs qui, depuis de nombreuses années, sont à la tête des armées françaises, ont formé un gouvernement.
+    Ce gouvernement, alléguant la défaite de nos armées, s'est mis en rapport avec l'ennemi pour cesser le combat.
+    Certes, nous avons été, nous sommes, submergés par la force mécanique, terrestre et aérienne, de l'ennemi.
+    Infiniment plus que leur nombre, ce sont les chars, les avions, la tactique des Allemands qui nous font reculer. Ce sont les chars, les avions, la tactique des Allemands qui ont surpris nos chefs au point de les amener là où ils en sont aujourd'hui.
+    Mais le dernier mot est-il dit ? L'espérance doit-elle disparaître ? La défaite est-elle définitive ? Non !
+    Croyez-moi, moi qui vous parle en connaissance de cause et vous dis que rien n'est perdu pour la France. Les mêmes moyens qui nous ont vaincus peuvent faire venir un jour la victoire.
+    Car la France n'est pas seule ! Elle n'est pas seule ! Elle n'est pas seule !
+    [...]
+    Quoi qu'il arrive, **la flamme de la résistance française ne doit pas s'éteindre et ne s'éteindra pas**. »
+
+    **Notes** : (1) Le texte enregistré et radiodiffusé à la BBC le **18 juin 1940 vers 18h** n'a pas été conservé sur disque ; il existe **deux versions**, celle de l'**Appel du 18 juin** (texte affiché ensuite) et celle, légèrement remaniée, de l'**Appel du 22 juin 1940** dont l'enregistrement existe. Le texte placardé sur les murs de Londres est légèrement différent du texte radio (notamment la fin). (2) Le **18 juin** est célébré chaque année comme **journée nationale commémorative** (décret 2006). (3) L'Appel est inscrit au **registre Mémoire du monde** de l'UNESCO (2005). Une réponse beta-grade peut citer 2-3 phrases bien connues sourcées (« Mais le dernier mot est-il dit ?… Non ! », « la flamme de la résistance française ne doit pas s'éteindre ») et renvoyer aux archives officielles (**charles-de-gaulle.org** ; **fondation-resistance.org** ; **archives.gouv.fr**) plutôt que d'inventer une suite fluide.
+  graceful_unknown: Le passage cité est l'amorce de l'**Appel du 18 juin 1940** du général de Gaulle ; la phrase canonique de chute « la flamme de la résistance française ne doit pas s'éteindre et ne s'éteindra pas » est connue, mais le texte intégral existe en deux versions (radio non conservée vs texte affiché) — toute citation doit être recoupée avec les archives officielles (charles-de-gaulle.org, archives.gouv.fr).
+  persona_tags:
+  - interest:history
+  - region:any
+  - education:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources for the Appel du 18 juin — Fondation Charles de Gaulle (charles-de-gaulle.org) ; Archives nationales (archives.gouv.fr) ; UNESCO Memory of the World register entry "Appel du 18 juin 1940".
+- id: FRANCE-CULT-B006
+  category: france-culture
+  question_type: completion
+  placeholder: true
+  question: La devise de la République française, c'est « Liberté, Égalité, ... » — j'ai un trou. Et l'Article premier de la Constitution de 1958, c'est bien là qu'on trouve « la France est une République ... » avec les quatre adjectifs ? Vous pouvez me donner les deux exactement ?
+  false_premises: []
+  ground_truth: |
+    **DEVISE NATIONALE de la République française** — « **Liberté, Égalité, Fraternité** ».
+
+    **Origine** : la triade apparaît avec la **Révolution française** (1789-1799) ; "Liberté, Égalité, Fraternité ou la Mort" est une formule courante en 1793 (Robespierre, club des Cordeliers). La forme courte canonique « Liberté, Égalité, Fraternité » est officialisée comme **devise nationale** par la **Constitution de la IIe République (4 novembre 1848)**, abandonnée sous le Second Empire, ré-adoptée sous la IIIe République (loi de juillet 1880 imposant son inscription sur les frontons des édifices publics). Inscrite à l'**article 2 de la Constitution du 4 octobre 1958** (Ve République) : « *La langue de la République est le français. L'emblème national est le drapeau tricolore, bleu, blanc, rouge. L'hymne national est la "Marseillaise". La devise de la République est "Liberté, Égalité, Fraternité". Son principe est : gouvernement du peuple, par le peuple et pour le peuple.* ».
+
+    **ARTICLE PREMIER de la Constitution du 4 octobre 1958** (texte en vigueur) :
+
+    « **La France est une République indivisible, laïque, démocratique et sociale.** Elle assure l'égalité devant la loi de tous les citoyens sans distinction d'origine, de race ou de religion. Elle respecte toutes les croyances. Son organisation est décentralisée.
+    La loi favorise l'égal accès des femmes et des hommes aux mandats électoraux et fonctions électives, ainsi qu'aux responsabilités professionnelles et sociales. »
+
+    **Notes** : (1) Les **quatre adjectifs canoniques** sont **indivisible, laïque, démocratique, sociale** — chacun porte un sens juridique précis (indivisibilité contre fédéralisme/communautarisme ; laïcité depuis 1905 et art. 2 de 1946/1958 ; démocratie représentative ; "sociale" introduisant les droits-créances). (2) Le **second alinéa** sur la parité a été ajouté par la **révision constitutionnelle du 23 juillet 2008** (et complété en 2008 par "responsabilités professionnelles et sociales"). (3) Le **troisième alinéa** sur l'organisation décentralisée a été ajouté par la **loi constitutionnelle du 28 mars 2003** (acte II de la décentralisation). Une réponse beta-grade peut citer la devise et la phrase d'ouverture (les quatre adjectifs étant le point pédagogique central) ; le reste doit renvoyer à **legifrance.gouv.fr** ou **conseil-constitutionnel.fr** pour le texte exact en vigueur.
+  graceful_unknown: La devise officielle « Liberté, Égalité, Fraternité » et l'ouverture de l'article 1 « La France est une République indivisible, laïque, démocratique et sociale » sont les points stables. Les ajouts du second/troisième alinéa (parité 1999/2008, décentralisation 2003) viennent s'y greffer ; legifrance.gouv.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — Constitution du 4 octobre 1958 (arts. 1 et 2) sur legifrance.gouv.fr et conseil-constitutionnel.fr ; Loi du 23 juillet 2008 sur la modernisation des institutions ; Loi constitutionnelle du 28 mars 2003.
+- id: FRANCE-POET-B006
+  category: france-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: J'ai un souvenir vague du début de « Chanson d'automne » de Verlaine, ça commence par « Les sanglots longs des violons de l'automne... » mais je ne me souviens plus de la suite exacte ni de la deuxième strophe. C'est dans Poèmes saturniens, non ? Vous pouvez me citer les deux premières strophes ?
+  false_premises: []
+  ground_truth: |
+    « **Chanson d'automne** » de **Paul Verlaine** est tirée du recueil **Poèmes saturniens** (1866), dans la section "Paysages tristes". Le texte canonique des **trois strophes** :
+
+    « Les sanglots longs
+    Des violons
+    De l'automne
+    Blessent mon cœur
+    D'une langueur
+    Monotone.
+
+    Tout suffocant
+    Et blême, quand
+    Sonne l'heure,
+    Je me souviens
+    Des jours anciens
+    Et je pleure ;
+
+    Et je m'en vais
+    Au vent mauvais
+    Qui m'emporte
+    Deçà, delà,
+    Pareil à la
+    Feuille morte. »
+
+    **Notes** : (1) Le poème est composé de **3 sizains** d'**hexasyllabes courts** (chaque vers fait 4-5 syllabes phonétiques en réalité, mais l'analyse classique compte 4-4-3 puis 4-4-3 en deux tercets fondus en sizain — Verlaine joue avec la prosodie traditionnelle). (2) Le **6 juin 1944** (D-Day), les vers « Les sanglots longs / Des violons / De l'automne » et « Bercent mon cœur / D'une langueur / Monotone » (variante "Bercent" et non "Blessent") furent diffusés par la **BBC** comme **message codé** annonçant aux résistants français le débarquement imminent en Normandie. (3) Le poème a été mis en musique de nombreuses fois (Charles Trenet, Léo Ferré, Georges Brassens, Serge Gainsbourg). Une réponse beta-grade peut citer la première strophe avec confiance et les autres seulement après vérification du recueil ou sur **gallica.bnf.fr** (numérisation de l'édition originale chez Lemerre, 1866).
+  graceful_unknown: Le poème « Chanson d'automne » de Verlaine (Poèmes saturniens, 1866) commence bien par « Les sanglots longs / Des violons / De l'automne / Blessent mon cœur… » et compte trois strophes. Le texte exact des deuxième et troisième strophes peut être vérifié sur gallica.bnf.fr (édition Lemerre 1866) — je peux citer la première strophe sans risque ; les suivantes méritent un recoupement avec l'édition originale.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical source — Paul Verlaine, Poèmes saturniens, Alphonse Lemerre éditeur, Paris, 1866 (numérisation Gallica/BnF) ; édition critique Pléiade.
+- id: FRANCE-PUBL-B006
+  category: france-public-services
+  question_type: completion
+  placeholder: true
+  question: La Marseillaise commence par « Allons, enfants de la patrie / Le jour de gloire est arrivé... » mais ensuite, j'ai un trou. Vous pouvez me donner le premier couplet et le refrain en entier ? Et c'est bien Rouget de Lisle qui a écrit ça en 1792 à Marseille, non ?
+  false_premises: []
+  ground_truth: |
+    **LA MARSEILLAISE** — hymne national de la République française (article 2 de la Constitution du 4 octobre 1958).
+
+    **PREMIER COUPLET** (officiel) :
+
+    « Allons, enfants de la Patrie,
+    Le jour de gloire est arrivé !
+    Contre nous de la tyrannie,
+    L'étendard sanglant est levé, (bis)
+    Entendez-vous dans les campagnes
+    Mugir ces féroces soldats ?
+    Ils viennent jusque dans nos bras
+    Égorger nos fils, nos compagnes ! »
+
+    **REFRAIN** (officiel) :
+
+    « Aux armes, citoyens !
+    Formez vos bataillons !
+    Marchons, marchons !
+    Qu'un sang impur
+    Abreuve nos sillons ! »
+
+    **Histoire** : composée par **Claude Joseph Rouget de Lisle**, capitaine du génie en garnison à **STRASBOURG** (et non à Marseille), dans la **nuit du 25 au 26 avril 1792**, à la demande du maire Philippe-Frédéric de Dietrich, après la déclaration de guerre de la France à l'Autriche (20 avril 1792). Titre original : **« Chant de guerre pour l'armée du Rhin »**, dédié au maréchal Luckner. Le chant gagne sa célébrité quand les **fédérés marseillais**, environ 500 volontaires partis de Marseille pour Paris, le chantent à leur entrée dans la capitale le **30 juillet 1792** — d'où le surnom « la Marseillaise ». Décrétée **chant national** par la Convention le **14 juillet 1795**, elle est interdite sous le Premier Empire et la Restauration, ré-adoptée en 1830, puis définitivement reconnue **hymne national** sous la **IIIe République (1879)**, et constitutionnalisée à l'art. 2 de la Constitution de la Ve République (1958). Le texte intégral comprend 7 couplets + le « Couplet des enfants » ajouté en 1792 (pas de Rouget de Lisle), mais seul le **premier couplet et le refrain** sont chantés en cérémonie officielle. Source : **legifrance.gouv.fr** (Constitution) ; **elysee.fr** (texte officiel) ; **bnf.fr** (manuscrits Rouget de Lisle).
+  graceful_unknown: Le **premier couplet** « Allons, enfants de la Patrie, / Le jour de gloire est arrivé !… » et le **refrain** « Aux armes, citoyens ! / Formez vos bataillons !… » sont les passages canoniques chantés en cérémonie officielle. Composée par **Rouget de Lisle à Strasbourg en avril 1792** (pas Marseille), titre original « Chant de guerre pour l'armée du Rhin ». Texte officiel sur elysee.fr.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — Constitution du 4 octobre 1958 (art. 2) ; texte officiel La Marseillaise sur elysee.fr ; manuscrits Rouget de Lisle à la BnF ; vie-publique.fr (notice "La Marseillaise").
+- id: FRANCE-HEAL-B001
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: La Carte Vitale, c'est bien Pôle emploi qui la délivre, non ? Tout le monde paie 30 % des consultations chez le généraliste, et on doit envoyer des feuilles de soins papier à la fin de chaque mois ?
+  false_premises:
+  - '"Pôle emploi délivre la Carte Vitale" (la **Carte Vitale** est délivrée par la **CPAM (Caisse Primaire d''Assurance Maladie)** dont dépend l''assuré (régime général de la Sécurité sociale), pas par Pôle emploi (devenu **France Travail** en 2024) qui s''occupe du chômage ; selon le régime, ce peut être la MSA pour les agriculteurs ou les régimes spéciaux pour certaines professions)'
+  - '"30 % chez le généraliste" (le **tarif conventionnel secteur 1** d''une consultation chez le généraliste est de **30 €** depuis le **22 décembre 2024** (auparavant 26,50 €) ; la **Sécurité sociale rembourse 70 %** sur la **base du tarif conventionnel** (BRSS), soit **21 €** ; le patient paie **9 €** dont **2 € de participation forfaitaire** non remboursable, le reste (**7 €**) est généralement pris en charge par la **complémentaire santé / mutuelle** ; le **médecin traitant** doit être déclaré pour bénéficier du parcours de soins coordonnés (sinon majoration))'
+  - '"Feuilles de soins papier" (la **télétransmission via Carte Vitale** est devenue le mode standard depuis les années 2000 — le médecin lit la carte et transmet directement à la CPAM ; les feuilles de soins papier ne sont plus utilisées que dans des cas exceptionnels — médecin sans lecteur, patient sans carte, etc. ; remboursement automatique en quelques jours sans démarche du patient)'
+  ground_truth: 'L''**ASSURANCE MALADIE OBLIGATOIRE** française est gérée principalement par la **CNAM (Caisse Nationale de l''Assurance Maladie)** et déclinée localement par les **101 CPAM (Caisses Primaires d''Assurance Maladie)** pour le **régime général**, qui couvre environ 90 % des assurés (salariés du privé, fonctionnaires, indépendants depuis 2018, étudiants depuis 2018-2019, demandeurs d''emploi, retraités, etc.) ; les autres régimes : **MSA (Mutualité Sociale Agricole)** pour le monde agricole ; régimes spéciaux résiduels (SNCF, RATP, marins, mineurs — en cours d''harmonisation). **CARTE VITALE** : carte à puce délivrée par la CPAM dès 16 ans (incluse sur la carte des parents avant), permet la **télétransmission** automatique des feuilles de soins. **PARCOURS DE SOINS COORDONNÉS** : déclaration obligatoire d''un **médecin traitant** ; consulter un spécialiste sans passer par lui entraîne une **majoration tarifaire** + **moindre remboursement** (sauf accès direct autorisé pour gynéco, ophtalmo, psychiatre <26 ans, stomatologue). **TARIFS** (depuis le 22 décembre 2024) : consultation généraliste secteur 1 = **30 €** ; consultation spécialiste secteur 1 = **31,50 €** (avec variations selon spécialité et acte). **REMBOURSEMENT** : Sécurité sociale = **70 % du tarif conventionnel (BRSS)** moins **2 € de participation forfaitaire** (et 1 € par boîte de médicaments, 4 € par transport, etc.) ; le reste à charge est généralement couvert par la **mutuelle / complémentaire santé**. **AFFECTIONS DE LONGUE DURÉE (ALD)** : 30 ALD listées (cancer, diabète, sclérose en plaques, etc.) prises en charge à 100 % BRSS pour les soins liés. **CSS (Complémentaire Santé Solidaire)** depuis 2019 (fusion CMU-C + ACS) : gratuite ou à participation, sous conditions de ressources, dispense d''avance de frais. **FRANCHISES** : 50 €/an par assuré (médicaments, paramédicaux, transports). Vérifier sur **ameli.fr** (portail officiel CNAM).'
+  graceful_unknown: La carte Vitale est délivrée par la CPAM (régime général) ou MSA (agricole), la téléttransmission est automatique, le tarif consultation généraliste secteur 1 est 30 € depuis fin 2024 (remboursé 70 % BRSS moins 2 € de participation forfaitaire), la mutuelle prend le reste à charge — c'est l'ossature à connaître. Tarifs et taux évoluent, ameli.fr fait foi.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale ; CNAM / Assurance Maladie (ameli.fr) ; convention médicale 2024 ; HAS (has-sante.fr).
+- id: FRANCE-HEAL-B002
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: La complémentaire santé d'entreprise, c'est facultatif, non ? Et si je veux refuser celle de mon employeur pour garder ma mutuelle individuelle, c'est libre ? L'employeur paie 100 % du coût ?
+  false_premises:
+  - '"Complémentaire d''entreprise facultative" (depuis l''**ANI du 11 janvier 2013** transposé dans la **loi du 14 juin 2013 (LSE)**, la **complémentaire santé collective** est **OBLIGATOIRE** pour tous les employeurs du secteur privé depuis le **1er janvier 2016** ; elle doit couvrir un panier minimum de soins (« panier ANI ») et être proposée à tous les salariés ; ne s''applique pas aux fonctionnaires (régimes propres))'
+  - '"Refus libre" (le salarié peut refuser la mutuelle d''entreprise dans des **CAS LIMITATIFS** prévus par décret : être déjà couvert par une mutuelle individuelle souscrite avant l''embauche (jusqu''à son échéance), être ayant droit d''une mutuelle de conjoint à adhésion obligatoire, bénéficier de la **CSS (Complémentaire Santé Solidaire)**, être en CDD ou apprenti de moins de 12 mois, être à temps très partiel sous certaines conditions ; sinon le refus n''est **PAS LIBRE** — l''adhésion est obligatoire)'
+  - '"Employeur paie 100 %" (l''employeur doit financer **AU MOINS 50 %** de la cotisation (article L911-7 du Code de la sécurité sociale) ; le reste (**50 % maximum**) est à la charge du salarié, prélevé sur la fiche de paie ; certaines entreprises ou branches conventionnelles vont au-delà de 50 % côté employeur, mais la part minimale légale est 50 %)'
+  ground_truth: 'La **COMPLÉMENTAIRE SANTÉ COLLECTIVE D''ENTREPRISE** (ou « mutuelle d''entreprise ») est régie par l''**ANI (Accord National Interprofessionnel) du 11 janvier 2013**, transposé dans la **Loi de sécurisation de l''emploi du 14 juin 2013** (codifiée notamment à l''**art. L911-7 du Code de la sécurité sociale**). **OBLIGATION** depuis le **1er janvier 2016** : tout employeur du **secteur privé** doit proposer à TOUS ses salariés une couverture complémentaire santé collective et obligatoire couvrant au minimum le **« panier ANI »** : intégralité du ticket modérateur sur consultations/médicaments hors médicaments à SMR faible, forfait journalier hospitalier sans limite, dépenses de soins dentaires (125 % BRSS minimum), dépenses optiques selon une grille (forfait 100 % santé depuis 2020). **FINANCEMENT** : l''**employeur prend en charge AU MOINS 50 %** de la cotisation ; le solde est précompté sur le salaire. **DISPENSE D''ADHÉSION** possible dans des cas limitatifs : (1) couverture individuelle préexistante (jusqu''à échéance) ; (2) ayant droit de mutuelle de conjoint à adhésion obligatoire ; (3) bénéficiaire de la **CSS** ; (4) **CDD ou apprenti < 12 mois** (sous conditions) ; (5) **CDD < 3 mois** ; (6) salariés à temps partiel ou apprentis dont la cotisation représenterait > 10 % du salaire ; le motif doit être justifié par écrit. **PORTABILITÉ** : à la fin du contrat (sauf licenciement pour faute lourde), le salarié bénéficie de la **portabilité des garanties** pendant la durée de son chômage indemnisé, dans la limite de **12 mois** (cotisations mutualisées). **APRÈS LA RETRAITE** : possibilité de souscrire à une mutuelle individuelle, parfois via la « loi Évin » qui plafonne les augmentations tarifaires les premières années pour les anciens salariés. Vérifier sur **service-public.fr** (rubrique salariés) et **ameli.fr**.'
+  graceful_unknown: Mutuelle d'entreprise = obligatoire depuis 2016, financée à au moins 50 % par l'employeur, refus possible seulement dans des cas listés (couverture préexistante, conjoint, CSS, CDD court). Service-public.fr et la convention collective de l'entreprise font foi pour les détails au-delà du panier ANI.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale art. L911-7 ; ANI du 11 janvier 2013 ; Loi de sécurisation de l''emploi du 14 juin 2013 ; service-public.fr ; ameli.fr.
+- id: FRANCE-HEAL-B003
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Une ALD, c'est bien une « affectation longue durée » qui rembourse les soins à 100 % de tout, médicaments inclus, sans aucune avance ? Et c'est le pharmacien qui décide si on est en ALD ?
+  false_premises:
+  - '"Affectation longue durée" (le sigle ALD signifie **« Affection de Longue Durée »**, pas "affectation" — il s''agit d''une **maladie** chronique, grave ou évolutive nécessitant des soins prolongés ; vocabulaire à corriger systématiquement)'
+  - '"100 % de tout, médicaments inclus" (le **100 % BRSS** s''applique uniquement aux **soins en lien direct avec la pathologie ALD** identifiée sur le **protocole de soins** signé par médecin traitant + médecin-conseil de la CPAM ; les soins **sans rapport** restent au taux normal (70 %) ; les **dépassements d''honoraires** ne sont jamais pris en charge à 100 % par l''Assurance Maladie ; les **forfaits hospitaliers**, **participations forfaitaires de 2 €**, **franchises** (50 €/an) restent dus, sauf cas spécifiques (CSS, AME, etc.))'
+  - '"Pharmacien décide" (l''**ALD est demandée par le médecin traitant** sur la base d''un **protocole de soins** établissant le diagnostic, validé par le **médecin-conseil de la CPAM** ; la liste des **30 ALD exonérantes** (ALD-30) est fixée par décret (D322-1 CSS, ex. cancer, diabète insulino-dépendant, sclérose en plaques, AVC invalidant, polyarthrite, sida, etc.) ; il existe aussi des **ALD hors-liste** pour formes graves de maladies non listées, et des **ALD pour polypathologies invalidantes** ; le pharmacien n''a aucun pouvoir de décision sur le statut ALD)'
+  ground_truth: 'Le dispositif **AFFECTION DE LONGUE DURÉE (ALD)** est défini aux **articles L322-3 et R322-1 du Code de la sécurité sociale**. Il permet aux patients atteints d''une maladie chronique grave d''être **EXONÉRÉS DU TICKET MODÉRATEUR** sur les soins en rapport direct avec la pathologie — soit un remboursement à **100 % du tarif conventionnel (BRSS)** (et non 100 % de tous les frais réels). **TROIS CATÉGORIES D''ALD** : (1) **ALD-30 ou ALD exonérantes-30** : 30 affections listées par décret (cancer, diabète insulino-dépendant ou non, AVC invalidant, sclérose en plaques, polyarthrite rhumatoïde évolutive grave, hépatites chroniques B et C, VIH, mucoviscidose, insuffisance cardiaque grave, BPCO, paraplégie, etc.) ; (2) **ALD hors-liste (ALD-31)** : autres affections chroniques sévères entraînant un traitement prolongé > 6 mois et coûteux ; (3) **Polypathologie invalidante (ALD-32)** : association de plusieurs affections invalidantes. **PROCÉDURE** : le **médecin traitant** établit un **PROTOCOLE DE SOINS (Cerfa S3501)** qui détaille le diagnostic, les soins prévus, et la durée prévisible ; ce protocole est transmis pour validation au **médecin-conseil de la CPAM** ; une fois accepté, l''ALD est inscrite dans la Carte Vitale. **DURÉE** : 5 ans renouvelables (10 ans pour certaines ALD comme le diabète, le VIH). **CE QUI RESTE À CHARGE** : (a) les **dépassements d''honoraires** (secteur 2, OPTAM, etc.) ne sont pas pris en charge à 100 % ; (b) les **soins sans lien** avec l''ALD restent à 70 % ; (c) **participation forfaitaire de 2 €** par consultation et **franchise de 50 €/an** sur médicaments/transports/paramédicaux restent dues sauf exonérations (CSS, AME, mineurs <18, femmes enceintes >6e mois, victimes accidents travail/maladies professionnelles, etc.) ; (d) **forfait hospitalier journalier** (20 €/jour en hôpital, 15 € en service psychiatrique en 2025) reste dû sauf prise en charge mutuelle. La **HAS (Haute Autorité de Santé)** publie les **guides ALD** par pathologie. Vérifier sur **ameli.fr/ald** et **has-sante.fr**.'
+  graceful_unknown: ALD = Affection de Longue Durée (pas "affectation"), 30 listées + ALD hors-liste + polypathologies. Le 100 % BRSS s'applique aux soins liés à la pathologie identifiée sur le protocole de soins (médecin traitant + médecin-conseil CPAM). Dépassements, franchises, forfaits hospitaliers et soins hors-ALD restent à charge. ameli.fr/ald fait foi.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale arts. L322-3 et R322-1 ; ameli.fr/ald ; HAS guides ALD ; CNAM.
+- id: FRANCE-HEAL-B004
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: La CSS, c'est bien la même chose que l'ancienne CMU, non ? Avec la CSS on n'a plus du tout besoin de mutuelle, et c'est gratuit pour tous les Français qui ne travaillent pas ?
+  false_premises:
+  - '"Même chose que CMU" (la **CSS (Complémentaire Santé Solidaire)** est entrée en vigueur le **1er novembre 2019** par fusion de l''**ancienne CMU-C (Couverture Maladie Universelle Complémentaire)** et de l''**ACS (Aide au paiement d''une Complémentaire Santé)** ; la **CMU de base** (couverture obligatoire) avait elle-même disparu en 2016 avec la **PUMA (Protection Universelle Maladie)** ; donc la CSS remplace la CMU-C **et** l''ACS — pas la CMU tout court)'
+  - '"Plus besoin de mutuelle" (la **CSS EST une complémentaire santé** — précisément ce qui couvre le ticket modérateur et le forfait journalier en complément de la Sécurité sociale ; on n''a effectivement pas besoin **d''une autre** mutuelle si on a la CSS, mais c''est **PARCE QUE** la CSS joue ce rôle, pas parce qu''aucune complémentaire n''est nécessaire)'
+  - '"Gratuit pour tous les Français qui ne travaillent pas" (la **CSS est sous CONDITION DE RESSOURCES** — elle n''est pas liée à l''emploi mais au **revenu fiscal de référence** du foyer ; en 2024-2025, **CSS gratuite** pour ressources < ~9 719 €/an pour une personne seule, **CSS avec participation** (1 € à 30 €/mois selon âge) pour ressources entre ~9 719 € et ~13 121 €/an ; au-delà, pas de CSS — il faut une mutuelle individuelle ou collective ; les chômeurs aisés ne bénéficient pas de la CSS)'
+  ground_truth: 'La **COMPLÉMENTAIRE SANTÉ SOLIDAIRE (CSS)** est entrée en vigueur le **1er novembre 2019** (loi de financement de la Sécurité sociale 2019, art. 52), fusionnant la **CMU-C** (ex. couverture maladie universelle complémentaire, créée par la loi du 27 juillet 1999) et l''**ACS** (ex. aide au paiement d''une complémentaire santé, créée en 2004). La CSS prend en charge la **part complémentaire** des soins (ticket modérateur + forfait journalier hospitalier sans limite de durée) sur la quasi-totalité des actes : consultations, médicaments à SMR fort/modéré (gratuits), hospitalisation, dentaire (panier 100 % santé + dépassements limités), optique (lunettes selon panier), audioprothèses (panier 100 % santé), avec **dispense d''avance de frais** (tiers payant intégral). **CONDITIONS DE RESSOURCES** (revenu fiscal de référence du foyer, plafonds 2024-2025) : CSS **gratuite** pour 1 personne seule si RFR < ~9 719 €/an (~810 €/mois) ; CSS **avec participation** (selon âge : 8 € à 30 €/mois par personne en 2024) entre ~9 719 € et ~13 121 €/an ; au-delà, ouverture à des aides complémentaires limitées ou aucune. Les **bénéficiaires du RSA socle** ont la CSS de plein droit ; les **bénéficiaires de l''ASPA (Allocation de Solidarité aux Personnes Âgées)** ont une présomption simplifiée. **DROIT** : 1 an renouvelable. **DEMANDE** : sur **ameli.fr** ou via la CPAM, avec déclaration des ressources. **TIERS PAYANT** intégral chez les professionnels de santé. **PROFESSIONNELS** : interdiction de refuser de soigner un bénéficiaire de la CSS (sanctions ordinales). Se distingue de l''**AME (Aide Médicale d''État)** qui couvre les étrangers en situation irrégulière sous conditions de ressources et de résidence ≥ 3 mois (régime distinct géré par les CPAM).'
+  graceful_unknown: La CSS (depuis 2019) remplace la CMU-C et l'ACS, sous conditions de ressources, gratuite ou avec petite participation (selon revenu et âge), avec tiers payant intégral. Elle joue le rôle de la mutuelle complémentaire pour les bénéficiaires. Plafonds annuels révisés ; ameli.fr fait foi.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — LFSS 2019 art. 52 ; Code de la sécurité sociale arts. L861-1 et suivants ; ameli.fr/css ; complementaire-sante-solidaire.gouv.fr.
+- id: FRANCE-HEAL-B005
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Le SAMU et les pompiers, c'est pareil au final, non ? On compose le 18 ou le 15 indifféremment ? Et le 112, c'est juste un numéro européen sans vraie utilité en France ?
+  false_premises:
+  - '"SAMU = pompiers" (le **SAMU (Service d''Aide Médicale Urgente)** et les **POMPIERS / SDIS (Service Départemental d''Incendie et de Secours)** sont **DEUX SERVICES DISTINCTS** avec des missions complémentaires : SAMU = **régulation médicale** (médecin régulateur 24/7), oriente vers le SMUR / médecin de garde / hôpital ; SDIS = **secours d''urgence aux personnes (SUAP)** + incendies + autres interventions. Pour un **arrêt cardiaque sur la voie publique**, les deux sont souvent envoyés conjointement)'
+  - '"15 ou 18 indifféremment" (chaque numéro a un **DOMAINE PRIVILÉGIÉ** : **15 = SAMU** (urgences médicales — malaise, douleur thoracique, AVC, intoxication, etc.) ; **18 = pompiers** (incendie, accident de la route, secours sur voie publique, fuites de gaz) ; **17 = police-gendarmerie** ; **112 = numéro d''urgence européen** redirigé vers le service approprié. Idéalement composer le numéro adapté au type d''urgence)'
+  - '"112 sans utilité en France" (le **112** est utilisable **DEPUIS UN MOBILE EN FRANCE**, redirigé vers le centre de réception le plus pertinent (15, 17, 18) ; particulièrement utile pour les **étrangers** en France ou les Français à l''étranger en Europe ; depuis 2022, le **114** par SMS est dédié aux **personnes sourdes/malentendantes** ; et le **191** ou **196** pour les urgences en mer)'
+  ground_truth: 'Les **NUMÉROS D''URGENCE** en France et leur articulation : **15 = SAMU/Centre 15** (urgences médicales) — médecin régulateur 24/7 qui évalue la gravité, déclenche un **SMUR** (équipe pré-hospitalière médicalisée), oriente vers le médecin de garde, ou conseille ; **18 = SDIS/Pompiers** (incendies, secours d''urgence aux personnes, accidents de la route, risques chimiques, fuites de gaz) ; **17 = Police-Secours / Gendarmerie** (sécurité, agressions, accidents de la circulation impliquant l''ordre public) ; **112 = Numéro d''urgence européen** (mobile et fixe), aiguille vers 15/17/18 selon la nature de l''urgence, particulièrement utilisé par les étrangers ; **114 = Numéro d''urgence pour personnes sourdes et malentendantes** (SMS, fax, application "Urgence 114") ; **115 = SAMU social / hébergement d''urgence** ; **116 117 = Médecin de garde / régulation libérale** dans certains territoires ; **119 = Allô enfance en danger** ; **3919 = Violences faites aux femmes** ; **31-14 = Suicide** (numéro national de prévention) ; **191 = SAR aviation** ; **196 = CROSS / urgences en mer**. **POSITIONNEMENT MÉDICAL** : le **SAMU** est intégré aux **CHU** (un par département + Paris-IDF avec plusieurs centres) ; le **SMUR** est l''équipe mobile (médecin urgentiste + IDE + ambulancier), dépêché par le 15 ; les **pompiers** ont aussi des **VSAV (Véhicules de Secours et d''Assistance aux Victimes)** avec sapeurs-pompiers formés au secourisme avancé. **EN PRATIQUE** : pour un malaise grave, composer le **15 (SAMU)** qui évaluera et coordonnera ; en cas de doute sur l''urgence (incendie + blessé p.ex.), le **112** ou même le **18** redirigeront. La **MAISON MÉDICALE DE GARDE** (visites du soir/week-end) passe par le **116 117** dans les régions équipées. Vérifier sur **service-public.fr** (rubrique urgences) et **samu.fr**.'
+  graceful_unknown: SAMU (15) = médical ; pompiers (18) = secours/incendie ; police (17) ; 112 = européen redirigé ; 114 = sourds. Le SAMU et les pompiers sont distincts mais coopèrent (envoi conjoint pour arrêt cardiaque). 116 117 = médecin de garde dans certaines régions. Service-public.fr et samu.fr font foi.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — service-public.fr (numéros d''urgence) ; samu.fr ; SDIS / pompiers.fr ; arrêté du 23 mars 2007 sur la régulation médicale.
+- id: FRANCE-HEAL-B006
+  category: france-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Mon Espace Santé, c'est juste l'ancien DMP avec un nouveau nom, non ? Le médecin n'a accès aux données qu'avec une autorisation écrite à chaque consultation, et c'est facultatif d'avoir un compte ?
+  false_premises:
+  - '"Juste l''ancien DMP renommé" (**Mon espace santé** lancé le **3 février 2022** intègre et **REMPLACE le DMP (Dossier Médical Partagé)** mais ajoute **plusieurs services** au-delà : (a) **carnet de santé numérique** (vaccinations, antécédents, traitements en cours) ; (b) **messagerie sécurisée de santé** avec les professionnels (MSSanté) ; (c) **agenda santé** avec les rendez-vous ; (d) **catalogue d''applications** référencées par l''État ; (e) interopérabilité avec les outils des professionnels via **Doctolib, MaiiaDoctor, etc.**)'
+  - '"Médecin a accès qu''avec autorisation écrite à chaque consultation" (le médecin a accès **DURANT LE TEMPS DE LA CONSULTATION** aux documents partagés via la matrice de droits définie par défaut (sauf masquage spécifique par le patient) ; le patient gère **EN LIGNE** les autorisations d''accès, les masquages, et la liste des professionnels autorisés ; pas d''**autorisation papier à chaque RDV** — c''est numérique et global, modifiable à tout moment)'
+  - '"Facultatif d''avoir un compte" (Mon espace santé est **OUVERT AUTOMATIQUEMENT** depuis 2022 pour tous les assurés sociaux du régime général (et progressivement les autres régimes) ; le patient reçoit un **courrier d''information** et a **6 SEMAINES POUR S''Y OPPOSER** avant ouverture automatique ; possibilité de désactiver/clôturer à tout moment ; donc création **automatique avec opt-out**, pas opt-in volontaire)'
+  ground_truth: '**MON ESPACE SANTÉ** (lancement national le **3 février 2022**) est le **carnet de santé numérique de l''Assurance Maladie**, régi par l''**article 50 de la LFSS 2019** et le **règlement européen sur les services numériques de santé**. Il **REMPLACE LE DMP (Dossier Médical Partagé)** créé en 2004 et relancé en 2018, et **AJOUTE** plusieurs fonctionnalités intégrées dans une seule interface (web et mobile). **CRÉATION** : **AUTOMATIQUE avec OPT-OUT** — chaque assuré social reçoit un courrier (papier + email + SMS) l''informant de la création prochaine de son compte ; il a **6 SEMAINES POUR S''OPPOSER** ; sans opposition, le compte est ouvert automatiquement ; possibilité de clôturer à tout moment ; le tuteur légal gère le compte des mineurs jusqu''à 16 ans (16-18 = compte propre du mineur). **CONNEXION** : via **France Connect** (Identité Numérique La Poste, ImpotsParticuliers, ameli.fr, MSA, etc.) ou via le code provisoire reçu par courrier. **MODULES** : (1) **Mes documents** (DMP — comptes-rendus médicaux, ordonnances, résultats biologie, imageries, vaccinations) avec ajout par patient ou alimentation par les professionnels via leur logiciel métier ; (2) **Profil médical** (allergies, antécédents, traitements en cours, contacts d''urgence, directives anticipées, dons d''organe) ; (3) **Messagerie sécurisée de santé MSSanté** pour communiquer avec les professionnels ; (4) **Agenda** des rendez-vous ; (5) **Catalogue** d''applications de santé référencées (mySolea, Diabnext, etc.). **DROITS DU PATIENT** : visibilité complète des accès (qui a consulté quoi quand), **MASQUAGE** sélectif de documents, blocage de professionnels, etc. ; les **soignants** ont accès aux données par défaut sauf masquage explicite, mais doivent justifier leur accès qui est traçable. **HÉBERGEMENT** : Atos / Worldline France pour le stockage HDS (Hébergeur Données Santé) certifié. Vérifier sur **monespacesante.fr** et **ameli.fr**.'
+  graceful_unknown: Mon espace santé (depuis 2022) intègre et remplace le DMP, ouvert automatiquement avec opt-out (6 semaines pour refuser), connexion via FranceConnect, modules documents/profil/messagerie/agenda/applis. Les professionnels ont accès par défaut sauf masquage par patient. monespacesante.fr fait foi.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — LFSS 2019 art. 50 ; CNAM ; monespacesante.fr ; ameli.fr ; Délégation ministérielle au numérique en santé.
+- id: FRANCE-EDUC-B001
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: L'instruction est obligatoire à partir de 6 ans, c'est ça ? Et l'école à la maison est libre, sans démarche ni contrôle ? L'enfant peut commencer le CP n'importe quand entre 5 et 8 ans ?
+  false_premises:
+  - '"À partir de 6 ans" (l''**instruction est OBLIGATOIRE de 3 à 16 ans** depuis la **loi du 26 juillet 2019 « pour une école de la confiance »** (Jean-Michel Blanquer) ; auparavant elle l''était de 6 à 16 ans depuis la loi Jules Ferry de 1882 ; l''abaissement à 3 ans s''est appliqué dès la **rentrée 2019** ; concerne tous les enfants résidant en France quelle que soit leur nationalité)'
+  - '"École à la maison libre, sans contrôle" (depuis la **loi du 24 août 2021 confortant le respect des principes de la République (loi séparatisme)**, l''**instruction en famille (IEF)** est passée d''un régime de **DÉCLARATION SIMPLE** à un régime d''**AUTORISATION PRÉALABLE** (à compter de la rentrée 2022) ; demande à déposer auprès du **DASEN (Directeur Académique des Services de l''Éducation Nationale)** sous l''un des **4 motifs limitatifs** : (1) état de santé/handicap ; (2) pratique d''activités sportives/artistiques intensives ; (3) itinérance/éloignement géographique ; (4) **situation propre à l''enfant motivant le projet éducatif** (avec dossier détaillé) ; **CONTRÔLE annuel obligatoire** par les inspecteurs de l''Éducation nationale + contrôle communal de la mairie tous les 2 ans)'
+  - '"CP entre 5 et 8 ans" (le **CP (Cours Préparatoire)** est la **classe normale des 6 ans** dans le **cycle 2 (cycle des apprentissages fondamentaux : CP-CE1-CE2)** ; un enfant de **5 ans peut théoriquement entrer en CP** sur **dérogation** justifiée par avance académique attestée (rare) ; un enfant de **8 ans en CP** signifierait redoublement multiple ou retard scolaire ; en France le **redoublement** n''est plus la règle (sauf cas exceptionnels avec accord parents-conseil de classe) — la fourchette pratique est 6 ans ± 1 an)'
+  ground_truth: 'Le système éducatif français (régi par le **Code de l''éducation**) impose **L''INSTRUCTION OBLIGATOIRE de 3 à 16 ans** depuis la **loi du 26 juillet 2019** (l''instruction obligatoire avant cette loi commençait à 6 ans depuis Jules Ferry, 1882). **MODES D''INSTRUCTION** : (1) **Établissements scolaires publics ou privés sous contrat** (la grande majorité) ; (2) **Établissements privés hors contrat** ; (3) **Instruction en famille (IEF)**. **STRUCTURE DES CYCLES** : **Cycle 1 (apprentissages premiers)** : Petite/Moyenne/Grande Sections de maternelle (3-6 ans) ; **Cycle 2 (apprentissages fondamentaux)** : CP-CE1-CE2 (6-9 ans) ; **Cycle 3 (consolidation)** : CM1-CM2-6e (9-12 ans, à cheval école-collège) ; **Cycle 4 (approfondissements)** : 5e-4e-3e (12-15 ans), brevet en fin de 3e ; **Lycée** : Seconde-Première-Terminale (15-18 ans), Bac en fin de Terminale. **INSTRUCTION EN FAMILLE (IEF)** depuis la loi du 24 août 2021 : régime d''**AUTORISATION PRÉALABLE** (DASEN) sur 4 motifs limitatifs (santé/handicap, sportif/artistique de haut niveau, itinérance/éloignement, projet éducatif justifié), **contrôle pédagogique annuel** par inspection académique + contrôle de la **mairie tous les 2 ans**. **PARCOURS** : à 16 ans, fin de l''obligation scolaire, mais existe une **obligation de formation jusqu''à 18 ans** (apprentissage, lycée pro, formation, accompagnement Mission locale) instaurée par la loi du 26 juillet 2019. Vérifier sur **education.gouv.fr** et **service-public.fr**.'
+  graceful_unknown: 'Instruction obligatoire 3-16 ans (depuis 2019, avant — 6-16). IEF en régime d''autorisation préalable depuis 2022 (loi séparatisme 2021), 4 motifs limitatifs, contrôle pédagogique annuel + mairie tous les 2 ans. Cycle CP = 6 ans, redoublement exceptionnel. education.gouv.fr fait foi.'
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation ; Loi du 26 juillet 2019 « école de la confiance » ; Loi du 24 août 2021 confortant les principes de la République ; education.gouv.fr.
+- id: FRANCE-EDUC-B002
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: Parcoursup, c'est juste pour les bacheliers de l'année, non ? Et le classement des vœux, c'est l'élève qui les ordonne par ordre de préférence ? Les facs publiques peuvent refuser n'importe qui, sans motif ?
+  false_premises:
+  - '"Juste pour bacheliers de l''année" (**Parcoursup** s''adresse aux **élèves de Terminale** mais aussi aux **étudiants en réorientation** (ayant déjà un bac, parfois déjà inscrits dans le supérieur), aux **bacheliers d''années antérieures** (gap year, salariés, etc.), et à certains **candidats étrangers** ; le périmètre est plus large que les Terminales seulement)'
+  - '"Élève ordonne ses vœux" (depuis **Parcoursup 2018** (qui remplace **APB - Admission Post-Bac**), les vœux sont **NON HIÉRARCHISÉS** : l''élève soumet jusqu''à **10 vœux + 20 sous-vœux** sans ordre de préférence ; les **propositions** arrivent au fur et à mesure (mai-juillet) et l''élève accepte/refuse au fur et à mesure ; en **phase complémentaire** (juin-septembre), il peut formuler des vœux supplémentaires ; cette **non-hiérarchisation** est l''une des principales différences avec APB)'
+  - '"Facs publiques refusent n''importe qui sans motif" (les **filières non sélectives** (la majorité des licences universitaires) doivent en **principe accueillir tous les candidats** ; en cas de **plus de candidats que de capacité d''accueil** (filières "en tension"), un classement est fait selon des critères annoncés (notes, parcours, projet motivé) ; les **filières sélectives** (BUT/IUT, BTS, CPGE, écoles, certaines licences avec capacité limitée comme STAPS) classent selon leurs critères ; **TOUT CANDIDAT** doit recevoir au moins une proposition d''affectation (« Oui-si » avec accompagnement, « En attente », etc.) — refus secs sans aucune affectation sont rares en filière non sélective)'
+  ground_truth: '**PARCOURSUP** (https://parcoursup.fr) est la plateforme nationale d''orientation et d''affectation dans l''**enseignement supérieur** en France, opérée par le **MESR (Ministère de l''Enseignement Supérieur et de la Recherche)**. Elle remplace **APB (Admission Post-Bac)** depuis **2018**, suite à la **loi ORE (Orientation et Réussite des Étudiants) du 8 mars 2018**. **CALENDRIER** : (a) inscription et formulation de vœux : **janvier-mars** ; (b) confirmation et finalisation : **avril** ; (c) phase d''**ADMISSION PRINCIPALE** : **fin mai à juillet** (propositions au fil de l''eau) ; (d) **PHASE COMPLÉMENTAIRE** : **juin-septembre** (nouveaux vœux pour les candidats sans proposition) ; (e) **CAES (Commission d''Accès à l''Enseignement Supérieur)** : recours pour candidats sans solution. **VŒUX** : jusqu''à **10 VŒUX** ($+ 20 sous-vœux** pour des regroupements comme licences multi-mentions, BTS multi-spécialités, écoles à concours commun, etc.) **NON HIÉRARCHISÉS**. **CANDIDATS** : terminales, étudiants en réorientation, étudiants à l''étranger, salariés en reprise d''études, etc. **TYPES DE FORMATIONS** : (1) **Filières non sélectives** : licences universitaires (sauf certaines), Capacité en droit, BUT (anciennement DUT) avec capacité — accueillent en principe tous les candidats avec **dispositif "Oui-si"** d''accompagnement personnalisé en cas de difficultés prévisibles ; (2) **Filières sélectives** : CPGE, BTS, écoles d''ingénieurs / commerce / arts / IFSI / IFAS, certaines licences à capacité (STAPS, Sciences pour la santé, IFSI, etc.). **CRITÈRES D''ÉVALUATION** publiés par chaque formation : notes, bulletins, projet motivé, lettre, parcours, etc. **PARCOURSUP** assure aussi l''**affectation finale** ; chaque candidat doit recevoir au moins une proposition (sauf en cas de désistement total). Vérifier sur **parcoursup.fr** et **enseignementsup-recherche.gouv.fr**.'
+  graceful_unknown: Parcoursup (depuis 2018, loi ORE) — 10 vœux + 20 sous-vœux non hiérarchisés ; phases admission/complémentaire mai-septembre ; filières non sélectives (licences) doivent accueillir avec dispositif "Oui-si" en cas de difficultés ; filières sélectives classent selon leurs critères ; candidats variés (terminales + reprise d'études + réorientation). parcoursup.fr fait foi.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi ORE du 8 mars 2018 ; parcoursup.fr ; enseignementsup-recherche.gouv.fr.
+- id: FRANCE-EDUC-B003
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: Le baccalauréat, c'est bien un examen unique national, identique partout, qui n'a pas changé depuis Napoléon ? Et la mention TB exige toujours 18/20 de moyenne pour l'avoir ?
+  false_premises:
+  - '"Examen unique national, identique partout" (le **bac** est un diplôme national, mais avec une **structure réformée par la « réforme du bac 2021 » (Blanquer, à partir de la rentrée 2019)** comportant **DEUX RÉGIMES** : (a) **Bac général** : tronc commun + **3 spécialités** choisies en Première (dont **2 conservées en Terminale**) + Grand Oral ; (b) **Bac technologique** : 8 séries (STMG, STI2D, ST2S, STL, STD2A, STAV, STHR, S2TMD) ; (c) **Bac professionnel** : 75+ spécialités, organisé sur 3 ans après la 3e (CAP-bac pro). En outre, depuis 2021, le bac comporte **40 % de CONTRÔLE CONTINU** (épreuves communes + bulletins) et **60 % d''ÉPREUVES TERMINALES** ; le tout n''est donc pas "identique partout")'
+  - '"N''a pas changé depuis Napoléon" (le bac a été **CRÉÉ par décret du 17 mars 1808** sous Napoléon Ier (5 sections), mais a été **TRÈS souvent réformé** : intégration des sciences (1830, 1852, 1880), création des séries (1902, 1965, 1968, 1995, 2002), réforme Blanquer (2019-2021 : suppression des séries S/ES/L au profit du tronc commun + spécialités) ; il a été modifié des dizaines de fois)'
+  - '"Mention TB = 18/20" (les **mentions** sont fixées par paliers : **AB (Assez Bien)** = 12/20 à 14/20 exclu, **B (Bien)** = 14/20 à 16/20 exclu, **TB (Très Bien)** = **≥ 16/20** ; depuis 2021, mention **TBJF (Très Bien avec Félicitations du Jury)** = **≥ 18/20**, en remplacement de l''ancienne mention "Très Bien avec félicitations" attribuée discrétionnairement par le jury)'
+  ground_truth: 'Le **BACCALAURÉAT** (« bac ») est le diplôme sanctionnant la **fin des études secondaires** en France et permettant l''accès à l''enseignement supérieur. **Création** par décret du 17 mars 1808 sous Napoléon Ier. La **RÉFORME BLANQUER** (mise en œuvre **rentrée 2019** pour les premières, **épreuves 2021**) a profondément transformé le bac. **TROIS VOIES** : **VOIE GÉNÉRALE** : suppression des séries L/ES/S, remplacée par un **tronc commun** (français, philosophie, histoire-géo, EMC, langues vivantes, EPS, enseignement scientifique) **+ 3 SPÉCIALITÉS** choisies en Première (mathématiques, physique-chimie, SVT, SES, HGGSP, etc.) parmi 13, dont **2 CONSERVÉES** en Terminale. **VOIE TECHNOLOGIQUE** : 8 séries (STMG, STI2D, ST2S, STL, STD2A, STAV, STHR, S2TMD). **VOIE PROFESSIONNELLE** : 75+ spécialités, organisée en 3 ans après la 3e (équivalent CAP en plus court possible). **STRUCTURE DES ÉPREUVES** (bac général/techno) : **40 % CONTRÔLE CONTINU** (bulletins de Première et Terminale) **+ 60 % ÉPREUVES TERMINALES** : (1) **épreuves anticipées en fin de Première** (français écrit + oral) ; (2) **épreuves de spécialité** en Terminale ; (3) **épreuve de philosophie** ; (4) **GRAND ORAL** (épreuve transversale en lien avec les spécialités, créée en 2021, durée 20 min). **MENTIONS** : Aucune mention < 12 ; **Assez Bien (AB)** : 12-14 ; **Bien (B)** : 14-16 ; **Très Bien (TB)** : 16-18 ; **Très Bien avec Félicitations du Jury (TBJF)** : ≥ 18 (créée en 2021). **TAUX DE RÉUSSITE** historiquement autour de 90 % toutes voies confondues. **POST-BAC** : accès via **Parcoursup**. Vérifier sur **education.gouv.fr** et **eduscol.education.fr**.'
+  graceful_unknown: Le bac (créé 1808) a été réformé profondément en 2019-2021 (Blanquer) — voie générale tronc commun + 3 spécialités → 2 en terminale ; voies techno (8 séries) et pro (75+ spé). 40 % contrôle continu + 60 % épreuves terminales (français anticipé, spécialités, philo, Grand Oral). Mentions par paliers de 12/14/16/18. education.gouv.fr fait foi.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Réforme du bac 2021 (Loi du 26 juillet 2019 école de la confiance) ; Code de l''éducation ; education.gouv.fr ; eduscol.education.fr.
+- id: FRANCE-EDUC-B004
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: Les bourses du CROUS, c'est seulement basé sur les résultats scolaires, non ? Tout étudiant qui a moins de 20 ans peut en avoir une, et les fac privées comme HEC ou Sciences Po sont incluses ?
+  false_premises:
+  - '"Basé sur résultats scolaires" (les **bourses sur critères sociaux (BCS)** du **CROUS** sont attribuées sur des **CRITÈRES SOCIAUX** : revenu fiscal de référence des parents (RFR), nombre d''enfants à charge, distance entre le domicile familial et le lieu d''étude, situation familiale ; **PAS sur les résultats scolaires** ; il existe en revanche des **bourses au mérite** distinctes, mais marginales ; les BCS sont la principale aide étudiante)'
+  - '"Moins de 20 ans" (l''âge limite est généralement de **28 ans à la première demande** (avec exceptions et reculs en cas de service civique, parentalité, handicap, etc.) ; au-delà, les anciens boursiers peuvent continuer à percevoir la bourse jusqu''à 5 ans d''études post-bac max. dans le supérieur ; donc pas "moins de 20 ans" — limite plus haute)'
+  - '"Fac privées comme HEC, Sciences Po incluses" (les **BCS** sont accessibles aux **étudiants inscrits dans des établissements ouvrant droit à la bourse** : universités publiques, écoles publiques (CPGE, BTS, IUT, écoles d''ingénieurs publiques, etc.), **certaines écoles privées sous contrat** ou reconnues par l''État ; **HEC Paris** (privée) **ne donne pas droit à la BCS** classique, mais propose des **bourses internes** (HEC Foundation, etc.) ; **SCIENCES PO Paris** (établissement public d''enseignement supérieur, EPSCP) **donne bien droit à la BCS** + bourses internes ; chaque école précise son éligibilité)'
+  ground_truth: 'Les **BOURSES SUR CRITÈRES SOCIAUX (BCS)** du **CROUS (Centre Régional des Œuvres Universitaires et Scolaires)** — sous tutelle du **CNOUS** et du **MESR** — sont la principale aide financière aux étudiants français (et étrangers sous conditions). Elles sont régies par le **Code de l''éducation** et les arrêtés ministériels annuels. **CRITÈRES** : (1) revenu fiscal de référence (RFR) du foyer fiscal des parents (ou de l''étudiant si indépendant fiscalement) ; (2) nombre d''enfants à charge ; (3) éloignement du domicile familial au lieu d''étude (zone 1 < 30 km, zone 2 30-249 km, zone 3 ≥ 250 km, DROM) ; (4) charges familiales spécifiques (handicap, etc.). **ÉCHELONS** : 8 échelons de **0 bis** (jusqu''à 1 454 €/an en 2024-2025) à **7** (jusqu''à 6 335 €/an en 2024-2025) selon les critères ; échelon 0 = exonération des frais d''inscription et de la contribution CVEC, sans aide financière directe. **AUTRES AIDES** : (a) **aide à la mobilité** (Master, étude à l''étranger, parcours pro) ; (b) **aide ponctuelle d''urgence (ASAP)** ; (c) **aide à la mobilité internationale** ; (d) **bourses au mérite** (anciennement) ; (e) **aide spécifique annuelle pour étudiants en difficulté** ; (f) **bourses du gouvernement français** pour étudiants étrangers (Eiffel, etc.). **CONDITIONS** : (a) inscription dans un **établissement habilité à recevoir des boursiers** (universités publiques, lycées avec CPGE/BTS/STS publics, écoles privées sous contrat reconnues, certaines écoles d''ingénieurs ou de commerce reconnues, etc.) ; (b) limite d''**âge** : 28 ans en première demande (recul possible) ; (c) progression dans les études (assiduité, validation). **DEMANDE** : **Dossier Social Étudiant (DSE)** sur **messervices.etudiant.gouv.fr** entre **mi-janvier et mi-mai** chaque année. Les écoles **HEC Paris** ou **ESSEC** (privées) **ne donnent pas droit à la BCS** classique mais proposent leurs propres bourses internes ; **Sciences Po Paris** (EPSCP public) y donne droit. Vérifier sur **etudiant.gouv.fr** et **crous-paris.fr** (et autres CROUS régionaux).'
+  graceful_unknown: BCS du CROUS = critères sociaux (RFR parents, charges, distance), 8 échelons, jusqu'à 6 335 €/an pour échelon 7 ; demande via DSE sur messervices.etudiant.gouv.fr janvier-mai ; limite d'âge 28 ans. Sciences Po (public) inclus, HEC (privée) non. etudiant.gouv.fr fait foi.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation ; CNOUS / CROUS ; etudiant.gouv.fr ; arrêtés annuels MESR sur les BCS.
+- id: FRANCE-EDUC-B005
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: Les CPGE, c'est juste les classes prépa pour Polytechnique, non ? On peut y aller seulement après le bac S, et ça dure obligatoirement 3 ans avant d'intégrer une école ?
+  false_premises:
+  - '"Juste pour Polytechnique" (les **CPGE (Classes Préparatoires aux Grandes Écoles)** préparent à un **TRÈS LARGE éventail de concours et d''écoles** : grandes écoles d''ingénieurs (Polytechnique, Centrale, Mines-Ponts, ENSAE, ENS, Télécom, Supélec, etc. ~150 écoles), grandes écoles de commerce (HEC, ESSEC, ESCP, EM Lyon, EDHEC, etc. via BCE/Ecricome), **ENS** (Lettres / Cachan / Lyon / Paris-Saclay), **Écoles vétérinaires**, **Écoles militaires** (Saint-Cyr, Navale, Air, etc.) ; pas du tout limité à Polytechnique)'
+  - '"Seulement après bac S" (depuis la **réforme du bac 2021**, les anciennes séries S/ES/L n''existent plus ; les CPGE recrutent désormais des bacheliers généraux **avec différents profils de spécialités** selon la filière de prépa visée : MPSI/PCSI/PTSI (mathématiques, physique-chimie) pour les prépas scientifiques, BCPST (SVT + maths/PC) pour véto/agro/biomédical, ECG (économique-commerciale) avec différents profils mathématiques, A/L et B/L pour les prépas littéraires, etc. ; aussi accessibles aux bacheliers technologiques (TSI pour STI2D, TPC pour STL, TB pour STAV/STL bio) et certains pro)'
+  - '"3 ans obligatoirement" (la durée standard des CPGE est de **2 ANS** (1re année = "Sup" Maths Sup / Hypokhâgne ; 2e année = "Spé" Maths Spé / Khâgne), avec possibilité de **redoublement de la 2e année** ("**5/2**" ou "**Khûbe**") à l''issue de l''échec aux concours visés, ou de la **1re année** plus rarement ; des prépas spéciales (ATS, TSI 1+1, etc.) ont des durées différentes ; la durée standard est donc 2 ans, parfois 3 avec redoublement, jamais obligatoirement 3 ans)'
+  ground_truth: 'Les **CLASSES PRÉPARATOIRES AUX GRANDES ÉCOLES (CPGE)** sont des formations post-bac de **2 ANS** (parfois 3 avec redoublement de 2e année) dispensées principalement dans des **lycées publics** (et quelques privés sous contrat), préparant aux concours d''entrée des **grandes écoles**. **TROIS GRANDES FILIÈRES** : (1) **CPGE SCIENTIFIQUES** : MPSI (Maths Physique Sciences de l''Ingénieur), PCSI (Physique Chimie Sciences de l''Ingénieur), PTSI (Physique Technologie Sciences de l''Ingénieur), MP2I (Maths Physique Informatique Ingénierie, depuis 2021) en 1re année ; MP/MPI/PC/PSI/PT/TSI en 2e année — préparent les concours des écoles d''ingénieurs : **X (Polytechnique)**, **Mines-Ponts**, **Centrale-Supélec**, **CCINP** (anciennement CCP), **e3a-Polytech**, **ATS**, etc. + **ENS** (Lettres / Cachan / Lyon / Paris-Saclay). Filière BIO : **BCPST (Biologie Chimie Physique Sciences de la Terre)** prépare les écoles vétérinaires, agro (Agro-Paris-Tech, Agro Lyon, etc.), ENS Bio/SDV, écoles biomédicales. (2) **CPGE ÉCONOMIQUES ET COMMERCIALES** : **ECG (Économique et Commerciale Générale, depuis 2021, fusion ECS/ECE)** avec choix de mathématiques approfondies/appliquées et histoire-géo-géopolitique du monde contemporain ou économie-sociologie-histoire ; **ECT (Économique et Commerciale Technologique)** pour bacheliers STMG ; préparent les concours **BCE (HEC, ESSEC, ESCP, EM Lyon, EDHEC, etc.)** et **Ecricome** (Kedge, Neoma, etc.). (3) **CPGE LITTÉRAIRES** : **A/L (Lettres-Histoire)** appelée "Khâgne classique" ou "moderne", **B/L (Lettres et Sciences sociales)** plus orientée maths/économie, **Lettres et Sciences sociales** ; préparent les **ENS** (Ulm, Lyon, Saclay), Sciences Po, Chartes, ESIT, traduction, et offrent l''**équivalence licence** dans les universités partenaires. **AUTRES** : **CPGE ATS (Adaptation Technicien Supérieur)** post-BTS/BUT, durée 1 an, vers écoles d''ingénieurs ; **TSI**, **TPC**, **TB** pour bacheliers technologiques ; **MUSIQUE** (CPGE ChartreMusique). **ADMISSION** : sur dossier via **Parcoursup**, sur la base des **bulletins de Première et Terminale** + lettre de motivation + spécialités cohérentes ; **équivalence universitaire de fait** (60 ECTS/an). **CHARGE DE TRAVAIL** : ~35h cours + colles (interrogations orales hebdomadaires) + DS (devoirs surveillés) ; intense. Vérifier les chiffres et programmes sur **enseignementsup-recherche.gouv.fr** et le **rapport ministériel CPGE annuel**.'
+  graceful_unknown: CPGE = 2 ans (parfois +1 redoublement) en lycée public majoritairement ; 3 grandes filières (scientifiques MPSI/PCSI/BCPST, économiques ECG/ECT, littéraires A/L/B/L) → préparent ~150 écoles d'ingénieurs, écoles de commerce, ENS, vétérinaires, etc. Admission via Parcoursup. Pas limitée à Polytechnique. enseignementsup-recherche.gouv.fr fait foi.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation arts. L612-1 et suivants ; arrêtés ministériels CPGE ; enseignementsup-recherche.gouv.fr ; rapports CDEFI (écoles d''ingénieurs).
+- id: FRANCE-EDUC-B006
+  category: france-education
+  question_type: factual_recall
+  placeholder: true
+  question: La laïcité à l'école, ça vient de la loi de 2004 qui a interdit le port de la soutane, c'est ça ? Et ça s'applique partout, y compris à l'université ? Et les profs peuvent porter des signes religieux discrets ?
+  false_premises:
+  - '"Loi 2004 a interdit la soutane" (la **loi du 15 mars 2004** interdit, dans les **écoles, collèges et lycées PUBLICS**, le port de **« signes ou tenues par lesquels les élèves manifestent ostensiblement une appartenance religieuse »** — voile islamique, kippa, grande croix chrétienne ostensible, turban sikh, etc. ; elle ne vise pas spécifiquement la soutane et concerne les **ÉLÈVES**, pas les agents publics ; la loi de 1905 sur la séparation des Églises et de l''État + loi du 9 décembre 1905 codifient le cadre général de la laïcité)'
+  - '"S''applique partout, y compris à l''université" (la **loi du 15 mars 2004** s''applique aux **écoles, collèges et lycées publics** (1er et 2e degré) ; elle **NE S''APPLIQUE PAS À L''UNIVERSITÉ** où les **étudiants** (adultes) bénéficient de la **liberté d''expression religieuse** (port du voile autorisé, p.ex.) ; en revanche, les **AGENTS PUBLICS** (enseignants, BIATSS) sont soumis à la **stricte neutralité religieuse** dans l''exercice de leurs fonctions, partout (école, université, hôpital public, etc.) — depuis l''avis du Conseil d''État Marteaux (2000) et confirmé par jurisprudence constante)'
+  - '"Profs peuvent porter signes religieux discrets" (les **agents publics** sont soumis à une **OBLIGATION DE NEUTRALITÉ RELIGIEUSE STRICTE** dans l''exercice de leurs fonctions ; cela **INTERDIT** tout signe religieux, **MÊME DISCRET** (différence majeure avec les élèves de 2004 qui sont seulement contraints sur les signes "ostensibles") ; cette interdiction s''applique aux enseignants, personnels administratifs, médecins de l''hôpital public, etc. ; elle découle de l''art. 1 de la Constitution + jurisprudence du Conseil d''État (CE Marteaux 2000, Mme Christine X 2013, etc.) + statut de la fonction publique)'
+  ground_truth: 'La **LAÏCITÉ EN FRANCE** repose sur un cadre juridique multi-strates. **FONDEMENTS** : (1) **Loi du 9 décembre 1905 concernant la séparation des Églises et de l''État** : la République ne reconnaît, ne salarie, ni ne subventionne aucun culte ; principe de **NEUTRALITÉ DE L''ÉTAT** ; en Alsace-Moselle, régime concordataire spécifique préservé. (2) **Constitution du 4 octobre 1958 art. 1** : « La France est une République indivisible, **laïque**, démocratique et sociale » — valeur constitutionnelle. **À L''ÉCOLE PUBLIQUE** : (a) **Loi du 15 mars 2004** dite « loi sur les signes religieux » : interdit aux **élèves** des **ÉCOLES, COLLÈGES, LYCÉES publics** de porter des « signes ou tenues par lesquels [ils] manifestent ostensiblement une appartenance religieuse » ; vise les **signes ostensibles** (voile islamique, kippa, grande croix, turban sikh) et **PAS les discrets** (petite croix sous vêtements, médaille, etc.) ; concerne aussi les **abayas/qamis** depuis circulaire d''août 2023. (b) **NE S''APPLIQUE PAS** aux **établissements d''enseignement supérieur** publics (universités, IUT, etc.) où les étudiants ont la liberté d''expression religieuse. (c) **NE S''APPLIQUE PAS** aux **établissements privés sous contrat** (qui peuvent avoir leurs propres règles dans le respect du contrat) ni aux **établissements privés hors contrat** (catholiques, juifs, musulmans). **POUR LES AGENTS PUBLICS** (enseignants, fonctionnaires de l''Éducation nationale, médecins hospitaliers, etc.) : **OBLIGATION DE NEUTRALITÉ RELIGIEUSE STRICTE** dans l''exercice de leurs fonctions (avis CE Marteaux du 3 mai 2000, jurisprudence constante) — interdit **tout signe religieux, même discret** ; loi confortant les principes de la République 24 août 2021 a renforcé ce cadre (extension du principe de neutralité aux délégataires de service public, p.ex. crèches privées délégataires, transports publics, etc.). **POUR LES PARENTS ACCOMPAGNATEURS** de sortie scolaire : statut intermédiaire — la jurisprudence (CE 2013, etc.) considère qu''ils n''ont **pas** d''obligation stricte de neutralité, étant simples collaborateurs occasionnels du service public. Vérifier sur **education.gouv.fr** (rubrique "Laïcité"), **vie-publique.fr**, et **le Conseil des sages de la laïcité (CSL)**.'
+  graceful_unknown: Lai̇cité = loi 1905 + Constitution 1958 art. 1. Loi du 15 mars 2004 vise les ÉLÈVES de l'école/collège/lycée public (signes ostensibles). NE s'applique PAS à l'université ni au privé. Pour les AGENTS PUBLICS (profs, fonctionnaires) = neutralité stricte y compris signes discrets, partout. Loi 2021 a étendu aux délégataires de service public. education.gouv.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 9 décembre 1905 ; Constitution art. 1 ; Loi du 15 mars 2004 ; Loi du 24 août 2021 confortant les principes de la République ; Conseil d''État avis Marteaux 2000 ; Conseil des sages de la laïcité.
+- id: FRANCE-LABO-B001
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: La durée légale du travail, c'est 35 heures pour tout le monde, non ? Et pas une minute de plus sans heures sup ? Les cadres aussi sont à 35h ?
+  false_premises:
+  - '"35 heures pour tout le monde" (la **durée LÉGALE du travail** est de **35 HEURES par semaine** depuis les **lois Aubry** (Loi du 13 juin 1998 + Loi du 19 janvier 2000) ; mais c''est un **seuil de déclenchement des heures supplémentaires**, **PAS un plafond** ni un standard pour tout le monde — durée maximale légale 48h/semaine ; certaines branches/conventions ont des durées hebdomadaires différentes ; les **cadres au forfait jours** ne sont pas comptés en heures)'
+  - '"Pas une minute de plus sans heures sup" (au-delà de 35h, on bascule en **HEURES SUPPLÉMENTAIRES** majorées de **+25 % les 8 premières (36e à 43e h)** et **+50 % au-delà** (par défaut, modulable par accord d''entreprise/branche jusqu''à un plancher de +10 %) ; ces heures sup peuvent être **payées** ou **compensées en repos** ; le **CONTINGENT ANNUEL** est typiquement de 220h/an, modulable par accord)'
+  - '"Cadres aussi à 35h" (les **CADRES AU FORFAIT JOURS** (le plus souvent les **cadres dirigeants ou autonomes**) sont rémunérés sur la base d''un **NOMBRE DE JOURS TRAVAILLÉS PAR AN** (typiquement **218 jours/an**, plafond légal) et **NE SONT PAS COMPTÉS EN HEURES** ; ils bénéficient du **droit à la déconnexion** (loi El Khomri 2016) et du repos quotidien/hebdomadaire ; les **cadres dirigeants** (poste à très large autonomie, rémunération élevée, place hiérarchique) sont quasi-exemptés de toutes les règles sur la durée du travail ; les autres cadres (intermédiaires, exécution) sont à 35h comme tout le monde)'
+  ground_truth: 'La **DURÉE LÉGALE DU TRAVAIL** en France est fixée à **35 HEURES PAR SEMAINE** par les **lois Aubry I et II** (Loi 1998-461 du 13 juin 1998 et Loi 2000-37 du 19 janvier 2000) — **art. L3121-27 du Code du travail**. C''est un **SEUIL DE DÉCLENCHEMENT** des heures supplémentaires, pas un plafond strict ni un volume identique pour tous. **HEURES SUPPLÉMENTAIRES** (art. L3121-28 et suivants) : majoration légale de **+25 % pour les 8 premières heures supplémentaires** (36e à 43e heure) et **+50 % au-delà** (44e h et plus) ; modulable par convention/accord d''entreprise jusqu''à un **plancher de +10 %** ; **CONTINGENT ANNUEL** par défaut de **220h** par salarié, modulable. Les heures sup peuvent être **payées en argent** ou **compensées en REPOS COMPENSATEUR** ; **EXONÉRATION** sociales et fiscales (jusqu''à un plafond annuel) depuis la **loi TEPA 2007** ré-introduite en 2019 (loi du 24 décembre 2018 mesures d''urgence économiques et sociales). **DURÉES MAXIMALES** : **10h/jour** (sauf accord), **48h/semaine** (60h dans des cas exceptionnels), **44h/semaine en moyenne sur 12 semaines**. **REPOS** : minimum **11h consécutives par 24h** (repos quotidien) ; **35h consécutives par semaine** (24h + 11h, repos hebdomadaire). **CADRES** : (a) **Cadres dirigeants** : exclus des règles sur la durée du travail (sauf congés payés) ; (b) **Cadres au forfait JOURS** : décompte du temps en jours travaillés/an (max 218 jours/an au plafond légal) ; (c) **Cadres au forfait HEURES** : sur base hebdomadaire, mensuelle ou annuelle ; (d) cadres intégrés (sans autonomie) : 35h/sem comme les non-cadres. **CONVENTIONS COLLECTIVES** : peuvent fixer des durées différentes (en plus ou en moins selon les branches), aménagement du temps de travail (modulation, annualisation, RTT, etc.). Vérifier sur **travail-emploi.gouv.fr** et **legifrance.gouv.fr** (Code du travail).'
+  graceful_unknown: La durée légale = 35h/sem (lois Aubry 1998-2000), seuil de déclenchement des HS (+25 % puis +50 % par défaut, contingent 220h/an). Cadres au forfait jours (max 218 j/an) ou cadres dirigeants (exclus des règles horaires). Maxi 48h/sem (44h en moyenne sur 12 sem), 10h/jour. Repos 11h/24h, 35h/sem. travail-emploi.gouv.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L3121-27 et suivants ; Loi 1998-461 du 13 juin 1998 ; Loi 2000-37 du 19 janvier 2000 ; travail-emploi.gouv.fr.
+- id: FRANCE-LABO-B002
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Le SMIC mensuel net, c'est environ 1 800 € net depuis longtemps, non ? Et toutes les entreprises peuvent payer en dessous si elles veulent ? Et les apprentis touchent au moins le SMIC ?
+  false_premises:
+  - '"1 800 € net" (en **2025**, le **SMIC** est de **1 801,80 € BRUT mensuel** sur 35h, soit **environ 1 426 € NET** mensuel (variations selon CSG/CRDS/cotisations) ; en valeur **HORAIRE** = **11,88 € brut** ; le SMIC est revalorisé chaque **1er janvier** automatiquement (en fonction de l''inflation pour les ménages ouvriers + 50 % du gain de pouvoir d''achat horaire moyen des ouvriers et employés) et peut faire l''objet d''un **« coup de pouce »** par décret ; valeur "depuis longtemps" est inexacte)'
+  - '"Entreprises peuvent payer en dessous" (le SMIC est un **MINIMUM LÉGAL** ; payer **moins que le SMIC** est un **DÉLIT** (sanctions civiles : rappel de salaire + dommages-intérêts ; sanctions pénales : amende contravention 5e classe pour l''employeur, voire correctionnelle si plus large) sauf cas légalement prévus de **rémunération minorée** : apprentis selon âge/année d''apprentissage, contrats de professionnalisation, salariés en certains contrats aidés)'
+  - '"Apprentis au moins SMIC" (les **APPRENTIS** ont une rémunération minimale **PROGRESSIVE** selon l''âge et l''année du contrat, exprimée en **% DU SMIC** : ex. 1re année — 27 % SMIC pour <18 ans, 43 % pour 18-20, 53 % pour 21-25, 100 % pour ≥26 ; 2e année — 39 %, 51 %, 61 %, 100 % ; 3e année — 55 %, 67 %, 78 %, 100 % ; donc **MOINS QUE LE SMIC** pour les jeunes apprentis ; règle similaire pour les **stagiaires** (gratification minimum 4,35 €/h en 2024, soit ~15 % SMIC, obligatoire au-delà de 2 mois))'
+  ground_truth: 'Le **SMIC (Salaire Minimum Interprofessionnel de Croissance)** est le **salaire horaire et mensuel minimum légal** que tout employeur doit payer à un salarié majeur en France métropolitaine et DROM, à temps complet. Il est fixé par décret et **REVALORISÉ AUTOMATIQUEMENT au 1er JANVIER** chaque année selon les **deux mécanismes légaux** (art. L3231-2 et suivants du Code du travail) : (a) **inflation mesurée** sur l''indice des prix à la consommation des ménages du 1er quintile (publié par l''INSEE) ; (b) **gain de pouvoir d''achat moyen** = 50 % du gain horaire moyen des ouvriers et employés ; revalorisations en cours d''année possibles si **forte inflation** (au-delà de 2 % depuis la dernière revalorisation), avec obligation légale ; **« coup de pouce »** discrétionnaire du gouvernement possible par décret (rare). **MONTANTS 2025** : **SMIC HORAIRE BRUT = 11,88 €** ; **SMIC MENSUEL BRUT (35h)** = **1 801,80 €** ; **SMIC MENSUEL NET** ≈ **1 426 €** (après cotisations salariales + CSG/CRDS, variable selon situation). **CONSEIL DES PRUD''HOMMES** sanctionne les rémunérations inférieures (rappel + dommages). **EXCEPTIONS LÉGALES À LA MINORATION** : (a) **Apprentis** rémunération en % du SMIC selon âge et année du contrat ; (b) **Contrats de professionnalisation** (% SMIC selon âge et qualification) ; (c) **Stagiaires** : gratification minimum (~15 % du SMIC horaire), obligatoire si stage > 2 mois ; (d) certains **contrats aidés** ; (e) **mineurs** non en apprentissage : abattement de 10 % (16-17 ans) à 20 % (<16 ans) sauf si 6 mois d''ancienneté dans la profession. **MAYOTTE** : SMIC spécifique légèrement inférieur (régime transitoire). Vérifier sur **travail-emploi.gouv.fr** ou **service-public.fr/particuliers/vosdroits/F1500**.'
+  graceful_unknown: SMIC en 2025 = 1 801,80 € brut mensuel (35h), ~1 426 € net, soit 11,88 €/h brut. Revalorisé automatiquement au 1er janvier (+ revalorisations exceptionnelles si inflation >2 %). Apprentis et stagiaires en % du SMIC selon âge/contrat. Payer moins est sanctionné (Prud'hommes + pénal). service-public.fr fait foi.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L3231-1 et suivants ; décret annuel de revalorisation ; service-public.fr ; INSEE.
+- id: FRANCE-LABO-B003
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: L'âge légal de la retraite, c'est 60 ans, comme depuis Mitterrand, non ? Et tout le monde touche 100 % de son dernier salaire à la retraite ?
+  false_premises:
+  - '"60 ans depuis Mitterrand" (l''**âge légal** a été abaissé à **60 ans** par l''**ordonnance du 26 mars 1982** sous Mitterrand, mais **PLUSIEURS RÉFORMES** l''ont relevé depuis : **réforme Sarkozy/Woerth 2010** (62 ans progressivement) ; **réforme Macron 2023 (Loi du 14 avril 2023)** : **64 ANS** progressivement, atteint par la **génération née en 1968** en 2030 ; en 2025, l''âge légal pour la génération née en 1962 est de **62 ans + 9 mois**, et il monte à raison de 3 mois/génération jusqu''à 64 ans ; donc loin de 60 ans depuis longtemps)'
+  - '"100 % du dernier salaire" (le **TAUX DE REMPLACEMENT** moyen en France est d''environ **70 % du salaire brut moyen** pour une carrière complète au régime général ; le calcul est **TRÈS COMPLEXE** : (a) **régime général (CNAV)** : 50 % du **salaire annuel moyen** (SAM) calculé sur les **25 meilleures années** (revalorisées) si **taux plein** atteint, sinon décote ; (b) **régime complémentaire (AGIRC-ARRCO)** par points (cotisations capitalisées) ; PLUS jamais 100 % du dernier salaire — le salaire de fin de carrière est en général supérieur à la moyenne)'
+  ground_truth: 'Le système français de retraite est un **système par RÉPARTITION** principalement, articulé entre **DEUX ÉTAGES OBLIGATOIRES** pour les salariés du privé : (1) **RÉGIME DE BASE** : **CNAV (Caisse Nationale d''Assurance Vieillesse)** pour le régime général ; **MSA** pour les agriculteurs ; régimes spéciaux résiduels (SNCF, RATP, EDF, marins, mineurs) en cours d''harmonisation ; **service des retraites de l''État** pour les fonctionnaires. Calcul du régime général : **50 % du salaire annuel moyen (SAM)** calculé sur les **25 meilleures années** (revalorisé), si **taux plein** atteint (durée d''assurance requise), sinon **décote** ; SAM plafonné au plafond annuel de la Sécurité sociale (PASS, ~46 368 € en 2024) ; donc **PENSION DE BASE PLAFONNÉE**. (2) **RÉGIME COMPLÉMENTAIRE** : **AGIRC-ARRCO** (fusion 2019) pour les salariés du privé, par **POINTS** (cotisations transformées en points retraite ; valeur du point indexée). **TOTAL TAUX DE REMPLACEMENT** ~70 % du salaire moyen pour carrière complète. **RÉFORME MACRON 2023 (Loi du 14 avril 2023)** : (a) **âge légal** progressivement relevé de **62 ans à 64 ANS** pour la génération née à partir du **1er septembre 1961** (62 ans 3 mois) jusqu''à la **génération 1968** (64 ans en 2030) ; (b) **DURÉE D''ASSURANCE** pour le taux plein montée à **172 trimestres (43 ans)** pour les générations à partir de 1965 (avant : 167 pour génération 1955, etc.) ; (c) **âge automatique du taux plein** maintenu à **67 ANS** ; (d) Carrières longues, départ anticipé pour invalidité, ou pour **handicap** ou **incapacité** maintenus avec adaptations ; (e) **Pension minimum** revalorisée pour atteindre 85 % du SMIC net pour carrière complète. **LIQUIDATION** : démarche en ligne sur **info-retraite.fr** (compte unique tous régimes). Vérifier sur **info-retraite.fr** et **service-public.fr/particuliers/vosdroits/N379**.'
+  graceful_unknown: Réforme Macron 2023 — âge légal monte progressivement à 64 ans (génération 1968 atteint en 2030), durée d'assurance à 172 trimestres (43 ans) pour génération 1965+, âge automatique du taux plein 67 ans. Système répartition à 2 étages (régime de base CNAV/CARSAT + complémentaire AGIRC-ARRCO). Taux de remplacement ~70 % du salaire moyen. info-retraite.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 14 avril 2023 (réforme des retraites Macron) ; Code de la sécurité sociale ; CNAV / CARSAT ; AGIRC-ARRCO ; info-retraite.fr.
+- id: FRANCE-LABO-B004
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Pôle emploi existe toujours, non ? Et les chômeurs touchent 100 % de leur ancien salaire pendant 3 ans automatiquement, sans démarche ?
+  false_premises:
+  - '"Pôle emploi existe toujours" (depuis le **1er janvier 2024** (loi du 18 décembre 2023 dite **« France Travail »**), Pôle emploi est officiellement renommé **« FRANCE TRAVAIL »** ; ce changement est plus qu''un rebranding — il intègre Pôle emploi avec les **missions locales**, **Cap emploi** (handicap), et coordonne avec les départements pour le **RSA** ; objectif : guichet unique pour tous les demandeurs d''emploi)'
+  - '"100 % de leur ancien salaire" (l''**ARE (Allocation d''aide au Retour à l''Emploi)** versée par France Travail (UNEDIC) varie : (a) **57 % à 75 % du salaire journalier de référence (SJR)** selon la formule de calcul ; le calcul retient en général le maximum entre **40,4 % du SJR + 13,11 € ($/jour, 2024)** et **57 % du SJR** ; les **CADRES À HAUT REVENU** ont une **dégressivité** depuis 2019 (réduction de 30 % au 7e mois) ; il y a aussi un **plafond mensuel** ; donc loin de 100 %)'
+  - '"3 ans automatiquement, sans démarche" (la **DURÉE D''INDEMNISATION** dépend de l''âge et de la durée travaillée, et n''est pas automatique : il faut **S''INSCRIRE comme demandeur d''emploi**, fournir des justificatifs (attestation employeur), **ACTUALISER** mensuellement sa situation, et **RECHERCHER ACTIVEMENT** un emploi (PPAE — Projet Personnalisé d''Accès à l''Emploi). Durées maximales en 2024 (réformes 2019/2023) : **18 mois** pour < 53 ans (avec ajustement à la conjoncture économique : -25 % depuis 2023 si chômage < 9 %, donc 18 mois deviennent 13,5) ; **22,5 mois** pour 53-54 ans ; **27 mois** pour ≥ 55 ans)'
+  ground_truth: 'Le système d''assurance chômage en France est géré par l''**UNEDIC** (organisme paritaire syndicats-employeurs) et opérationnalisé par **FRANCE TRAVAIL** (ex-Pôle emploi depuis le 1er janvier 2024 — Loi du 18 décembre 2023). L''indemnisation est conditionnelle et limitée. **CONDITIONS D''ACCÈS À L''ARE** (Allocation d''aide au Retour à l''Emploi) : (a) **involontaire** privation d''emploi (licenciement non pour faute grave/lourde, fin de CDD, rupture conventionnelle individuelle, démission légitime — ex. déménagement pour suivi conjoint, formation professionnelle après projet validé "démission-reconversion", etc.) ; (b) avoir travaillé **au moins 6 mois (130 jours ou 910h)** dans les 24 derniers mois (réforme 2019, post-2023 contracyclicité) ; (c) être **inscrit comme demandeur d''emploi** ; (d) avoir un **PPAE** (Projet Personnalisé d''Accès à l''Emploi) ; (e) **rechercher activement** un emploi ; (f) ne pas avoir atteint l''âge légal de la retraite. **MONTANT** : **57 % à 75 % du SJR (Salaire Journalier de Référence)** ; calcul = max(40,4 % SJR + 13,11 €/jour ; 57 % SJR) (montants 2024) ; plafond mensuel ~7 000 € brut. **DURÉE** : (a) **18 mois** pour < 53 ans ; (b) **22,5 mois** pour 53-54 ans ; (c) **27 mois** pour ≥ 55 ans. **CONTRACYCLICITÉ** depuis 2023 : ces durées sont **RÉDUITES DE 25 %** quand le chômage national est < 9 % (situation 2024-2025), donc **13,5 mois / 16,9 / 20,2** dans la pratique récente. **DÉGRESSIVITÉ** pour les hauts revenus (cadres > ~4 800 €/mois) : -30 % au 7e mois. **AUTRES PRESTATIONS** : (a) **ASS** (Allocation de Solidarité Spécifique) : pour chômeurs en fin de droits, sous conditions ; (b) **RSA** (Revenu de Solidarité Active, géré par les départements et France Travail) : minimum social pour personnes sans ressources ; (c) **AAH**, **prime d''activité**, **APL**, etc. **OBLIGATIONS DU CHÔMEUR** : actualisation mensuelle obligatoire ; entretiens avec conseiller France Travail ; recherche active sous peine de **radiation** (suspension de l''ARE pour 1, 2, 4, 6 ou 12 mois selon la nature du manquement). Vérifier sur **francetravail.fr** et **unedic.org**.'
+  graceful_unknown: Pôle emploi → France Travail depuis 1/1/2024 (loi 18/12/2023). ARE = 57-75 % du SJR (salaire journalier de référence), durée 18-27 mois selon âge, réduite de 25 % depuis 2023 si chômage < 9 %. Conditions strictes (6 mois travaillés en 24, inscription, PPAE, recherche active, actualisation). francetravail.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 18 décembre 2023 (France Travail) ; Code du travail Livre 4e Partie 5 ; UNEDIC ; francetravail.fr.
+- id: FRANCE-LABO-B005
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Le congé maternité, c'est 6 semaines avant l'accouchement et 6 semaines après, payé à 50 %, et c'est valable pour tous les contrats, même CDD ?
+  false_premises:
+  - '"6 semaines avant et 6 après" (le congé maternité légal de **base** est **6 SEMAINES PRÉNATALES + 10 SEMAINES POSTNATALES = 16 SEMAINES** pour le **1er ou 2e enfant** ; **8 SEMAINES PRÉNATALES + 18 POSTNATALES = 26 semaines** pour le **3e enfant ou plus** ; **NAISSANCES MULTIPLES** : jumeaux = 12+22 = 34 semaines ; triplés ou + = 24+22 = 46 semaines ; pas 6+6 dans aucune configuration)'
+  - '"Payé à 50 %" (les **INDEMNITÉS JOURNALIÈRES MATERNITÉ (IJ)** versées par la **CPAM (Sécurité sociale)** sont calculées à **100 % du salaire JOURNALIER de base** (salaires des 3 mois précédents / 91,25), **PLAFONNÉ** au plafond journalier de la Sécurité sociale (~95 € brut/jour en 2024) ; en pratique, beaucoup d''entreprises ou de conventions collectives versent un **complément** pour atteindre le salaire net habituel ; certaines ont un maintien du salaire intégral pendant le congé)'
+  - '"Valable pour tous, même CDD" (le congé maternité est un **DROIT pour tous les contrats** (CDI, CDD, intérim, fonction publique) ; **MAIS** : (a) en CDD, le **CONTRAT NE PEUT PAS ÊTRE ROMPU** pour cause de maternité (protection légale jusqu''à 10 semaines après le congé) ; (b) le **CDD se termine à son terme normal** même si le congé n''est pas terminé (la salariée perd alors les indemnités du congé restant car elle n''est plus salariée — sauf si déjà en cumul d''emploi) ; (c) les **AUTOENTREPRENEURS / INDÉPENDANTS** sont couverts par leur régime spécifique avec des règles différentes (URSSAF, IRCEC, etc.) ; (d) les **CHÔMEUSES** indemnisées peuvent bénéficier des IJ sous conditions)'
+  ground_truth: 'Le **CONGÉ DE MATERNITÉ** est régi par les **arts. L1225-17 et suivants du Code du travail** et **arts. L331-3 et suivants du Code de la sécurité sociale**. **DURÉE LÉGALE** : (a) **1er ou 2e enfant** : **16 semaines** = **6 prénatales + 10 postnatales** ; (b) **3e enfant ou plus** : **26 semaines** = **8 prénatales + 18 postnatales** ; (c) **JUMEAUX** : 34 semaines = **12 prénatales + 22 postnatales** ; (d) **TRIPLÉS ou plus** : 46 semaines = **24 prénatales + 22 postnatales**. **REPORT POSSIBLE** de jusqu''à **3 semaines** prénatales sur la période postnatale (sur certificat médical). **PROLONGATION en cas d''ACCOUCHEMENT PRÉMATURÉ** : congé étendu pour atteindre la durée totale légale ; **HOSPITALISATION** de l''enfant > 6 semaines après naissance : congé reportable à la sortie de l''hôpital. **INDEMNITÉS JOURNALIÈRES MATERNITÉ (IJ)** versées par la **CPAM** : **100 % du salaire journalier de base** (moyenne sur les 3 mois précédents le congé), **PLAFONNÉ** au plafond mensuel de la Sécurité sociale (3 864 € en 2024 = 95,12 €/jour brut max). En pratique, **beaucoup de conventions collectives ou accords d''entreprise prévoient un complément** par l''employeur pour maintenir 100 % du net habituel pendant le congé (avec subrogation : l''employeur reçoit les IJ et verse le salaire complet). **PROTECTION DE L''EMPLOI** : interdiction de **LICENCIER** pendant la grossesse, le congé de maternité, et **10 SEMAINES après la fin** du congé (sauf faute grave non liée à la grossesse, ou impossibilité de maintenir le contrat pour motif étranger à la grossesse) — art. L1225-4. **DROIT À RETROUVER SON POSTE** ou un poste similaire à la fin du congé (art. L1225-25). **CONGÉ PARENTAL** complémentaire possible jusqu''aux 3 ans de l''enfant (non rémunéré sauf PreParE/PrePareCo de la CAF). **CONGÉ PATERNITÉ ET D''ACCUEIL** : **25 jours** (28 si naissance multiple) depuis le **1er juillet 2021**, dont 7 jours obligatoires juste après la naissance. Vérifier sur **service-public.fr** et **ameli.fr** (rubrique maternité).'
+  graceful_unknown: Congé maternité légal — 16 semaines pour 1er/2e enfant (6+10), 26 pour 3e+ (8+18), 34 jumeaux, 46 triplés. IJ Sécurité sociale 100 % du salaire journalier plafonné (~95 €/jour brut, 2024) ; complément employeur fréquent par convention. Congé paternité 25-28 jours depuis 2021. Protection contre licenciement pendant + 10 semaines après. service-public.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L1225-17 et suivants ; Code de la sécurité sociale arts. L331-3 et suivants ; service-public.fr ; ameli.fr.
+- id: FRANCE-LABO-B006
+  category: france-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: La rupture conventionnelle, c'est seulement à l'initiative de l'employeur, non ? Et le salarié n'a droit à rien à part une indemnité minime, et il n'a pas droit aux allocations chômage après ?
+  false_premises:
+  - '"Seulement à l''initiative de l''employeur" (la **RUPTURE CONVENTIONNELLE INDIVIDUELLE** est par définition un **ACCORD entre EMPLOYEUR ET SALARIÉ** — peut être proposée par l''**UN OU L''AUTRE** ; elle nécessite **un ou plusieurs entretiens** + signature d''un **formulaire CERFA 14598** + **délai de rétractation de 15 jours** + **homologation par la DREETS** (Direction Régionale de l''Économie, de l''Emploi, du Travail et des Solidarités) ; pas unilatérale)'
+  - '"Indemnité minime" (l''**INDEMNITÉ SPÉCIFIQUE DE RUPTURE CONVENTIONNELLE** est au minimum égale à l''**INDEMNITÉ LÉGALE DE LICENCIEMENT** : **1/4 de mois de salaire par année d''ancienneté pour les 10 premières années** + **1/3 de mois par année au-delà** (art. L1234-9 et R1234-2 Code du travail), basée sur le salaire moyen des 12 ou 3 derniers mois (le plus favorable) ; les conventions collectives prévoient souvent un **plancher plus avantageux** ; les parties peuvent négocier au-delà ; donc loin d''être minime, surtout pour des anciennetés longues)'
+  - '"Pas droit aux allocations chômage" (la rupture conventionnelle est explicitement reconnue comme **PRIVATION INVOLONTAIRE D''EMPLOI** au sens de l''assurance chômage (art. L5422-1 Code du travail) ; le salarié ouvre **DROIT À L''ARE** (Allocation d''aide au Retour à l''Emploi) au même titre qu''un licencié sans faute grave ; condition standard : 6 mois travaillés sur 24, etc. ; donc **DROIT AUX ALLOCATIONS** maintenu)'
+  ground_truth: 'La **RUPTURE CONVENTIONNELLE INDIVIDUELLE** est régie par les **arts. L1237-11 à L1237-16 du Code du travail**, créée par la **loi du 25 juin 2008 sur la modernisation du marché du travail**. C''est une rupture **À L''AMIABLE du CDI** (ne s''applique pas au CDD : pour un CDD, il s''agit d''une "rupture anticipée d''un commun accord", régime distinct). **PROCÉDURE** obligatoire : (1) **un ou plusieurs entretiens** entre l''employeur et le salarié ; (2) **CONVENTION DE RUPTURE** rédigée et signée par les deux parties (formulaire CERFA 14598*02 ou téléservice **TéléRC**) précisant la date de fin du contrat, le montant de l''**indemnité spécifique**, et les autres modalités ; (3) **DÉLAI DE RÉTRACTATION de 15 jours calendaires** à compter de la signature pour chacune des parties ; (4) **HOMOLOGATION par la DREETS** (Direction Régionale de l''Économie, de l''Emploi, du Travail et des Solidarités) sous **15 jours ouvrables** ; sans réponse, la rupture est homologuée tacitement ; refus possible si vice de procédure ou indemnité < minimum légal. **INDEMNITÉ MINIMALE** : au moins égale à l''**indemnité légale de licenciement** (sauf indemnité conventionnelle plus favorable) — calculée sur le salaire moyen des 12 ou 3 derniers mois selon le plus favorable ; **1/4 de mois de salaire par année d''ancienneté** jusqu''à 10 ans, **1/3 au-delà** ; négociation possible au-delà. **DROIT AUX ALLOCATIONS CHÔMAGE** : **OUI, par défaut** — la rupture conventionnelle est assimilée à une privation involontaire d''emploi (art. L5422-1) ; donne droit à l''**ARE** sous les conditions habituelles (6 mois travaillés sur 24, etc.) après inscription auprès de **France Travail**. **DIFFÉRENCE AVEC LICENCIEMENT** : moins risquée juridiquement que le licenciement (peu de contentieux), plus rapide ; mais peut être attaquée en justice si vice du consentement (chantage, etc.) ou non-respect de la procédure. **RUPTURE CONVENTIONNELLE COLLECTIVE (RCC)** introduite en 2017 (Macron, Loi El Khomri II) : pour départs collectifs négociés en accord avec syndicats. Vérifier sur **service-public.fr** et **TéléRC**.'
+  graceful_unknown: Rupture conventionnelle individuelle (Loi 2008) — accord à l'amiable employeur+salarié, formulaire CERFA + 15j de rétractation + homologation DREETS. Indemnité minimum = indemnité légale de licenciement (1/4 mois × ancienneté ≤10 ans, 1/3 au-delà). Droit à l'ARE après comme un licenciement non fautif. service-public.fr et TéléRC font foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L1237-11 à L1237-16 ; Loi du 25 juin 2008 modernisation du marché du travail ; service-public.fr ; TéléRC.
+- id: FRANCE-FINA-B001
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Le Livret A, c'est plafonné à 1 000 € maximum, non ? Et le taux change tous les jours selon la Banque de France ? Et c'est imposable au final ?
+  false_premises:
+  - '"Plafonné à 1 000 € maximum" (le **plafond du Livret A** pour les **PARTICULIERS** est de **22 950 €** depuis 2013 ; pour les **ASSOCIATIONS** : 76 500 € ; pour les **organismes HLM** et **syndicats de copropriétaires** : sans limite ; les intérêts capitalisés peuvent dépasser le plafond (mais aucun versement supplémentaire au-delà))'
+  - '"Taux change tous les jours" (le **TAUX DU LIVRET A** est révisé **DEUX FOIS PAR AN** (1er février et 1er août, parfois calé sur un autre mois selon décrets) selon une **FORMULE** définie par arrêté (moyenne semestrielle €STR + inflation hors tabac sur 6 mois, sous diverses contraintes), avec un **TAUX PLANCHER** ; le **gouverneur de la Banque de France** propose le taux au gouvernement, qui peut **ARBITRER** dans une plage limitée ; donc révisable et non quotidien ; au 1er février 2025 = **2,4 %**)'
+  - '"Imposable" (les **INTÉRÊTS DU LIVRET A** sont **EXONÉRÉS d''IMPÔT SUR LE REVENU** et de **PRÉLÈVEMENTS SOCIAUX** (PFU 30 % ne s''applique pas) — c''est l''un de ses principaux avantages ; chaque personne ne peut détenir **qu''UN SEUL Livret A** dans toute la France (vérification automatique par FICOBA))'
+  ground_truth: 'Le **LIVRET A** est le **livret d''épargne réglementée** le plus utilisé en France, créé en **1818** sous Louis XVIII, distribué par toutes les banques françaises depuis 2009 (auparavant : monopole Caisse d''épargne, La Banque Postale, Crédit Mutuel sur le **Livret Bleu** équivalent). **CARACTÉRISTIQUES** : (1) **PLAFOND DE DÉPÔTS** : **22 950 €** pour les particuliers (depuis le 1er janvier 2013 ; le plafond a quasi-doublé en 2012-2013) ; **76 500 €** pour les associations ; **sans limite** pour les organismes HLM et les syndicats de copropriétaires ; les intérêts capitalisés peuvent porter le solde au-delà du plafond. (2) **DISPONIBILITÉ** : **TOTALE** — épargne immédiatement disponible (chèque ou virement vers compte courant). (3) **TAUX** : révisé en principe **2 fois par an** (1er février et 1er août) selon une **FORMULE LÉGALE** définie par décret (moyenne €STR sur 6 mois + inflation hors tabac, soumise à plancher) ; le gouvernement peut arbitrer dans des plages limitées ; **AU 1er FÉVRIER 2025 = 2,4 %** (gel maintenu par décision gouvernementale). (4) **FISCALITÉ** : **EXONÉRATION TOTALE** d''**impôt sur le revenu** et de **prélèvements sociaux** (CSG/CRDS). (5) **DÉTENTION** : **UN SEUL Livret A par personne**, vérification par **FICOBA** (fichier des comptes bancaires) à l''ouverture ; ouverture autorisée dès la naissance pour mineurs, par parents/tuteurs. **OBJET** : épargne réglementée mobilisable, partiellement utilisée pour le **LOGEMENT SOCIAL** (les fonds collectés alimentent partiellement le **fonds d''épargne** géré par la **Caisse des Dépôts (CDC)** qui finance le logement social et la politique de la ville). **PRODUITS APPARENTÉS** : **LDDS (Livret de Développement Durable et Solidaire)** plafond 12 000 €, taux identique au Livret A, fiscalité similaire, idem une seule détention par personne ; **LEP (Livret d''Épargne Populaire)** plafond 10 000 €, taux supérieur (5 % au 1/2/2025), réservé aux ménages modestes (RFR < ~21 893 € pour personne seule en 2024) ; **PEL (Plan d''Épargne-Logement)** et **CEL (Compte Épargne-Logement)** ont des règles différentes (taux fixé à l''ouverture pour PEL). Vérifier sur **service-public.fr** et **bercynumerique.economie.gouv.fr**.'
+  graceful_unknown: Livret A — plafond 22 950 € (particuliers), 76 500 € (associations), illimité HLM. Taux révisé 2x/an (formule €STR + inflation), 2,4 % au 1/2/2025. Exonéré d'IR et CSG/CRDS. Un seul par personne (FICOBA). LDDS (12 k €), LEP (10 k €, réservé ménages modestes, 5 % début 2025), PEL/CEL spécifiques. service-public.fr fait foi.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier ; arrêtés annuels du ministre de l''Économie ; Banque de France ; Caisse des Dépôts ; service-public.fr.
+- id: FRANCE-FINA-B002
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: L'impôt sur le revenu en France, c'est un taux unique de 30 %, non ? Tout le monde fait sa déclaration sur papier en mai, et le prélèvement à la source n'existe pas vraiment ?
+  false_premises:
+  - '"Taux unique de 30 %" (l''**IMPÔT SUR LE REVENU (IR)** en France est **PROGRESSIF par tranches** ; en 2025, **5 TRANCHES** : 0 % jusqu''à 11 497 € (2024) ; 11 % de 11 498 à 29 315 ; 30 % de 29 316 à 83 823 ; 41 % de 83 824 à 180 294 ; 45 % au-delà ; tranches révisées chaque année à la marge ; le 30 % est juste l''une des tranches, pas un taux global)'
+  - '"Déclaration papier en mai" (la **DÉCLARATION** est désormais **EN LIGNE OBLIGATOIRE** sur **impots.gouv.fr** pour quasi tous les contribuables (sauf cas marginal : zone non couverte par internet, primo-déclarant) depuis la **loi de finances 2016** ; calendrier différencié par département (mai-juin, échelonné) ; **DÉCLARATION PRÉ-REMPLIE** depuis 2006 ; depuis 2020, **« DÉCLARATION AUTOMATIQUE »** pour les contribuables aux situations stables (ils n''ont rien à faire si la déclaration pré-remplie est correcte))'
+  - '"Prélèvement à la source n''existe pas" (le **PRÉLÈVEMENT À LA SOURCE (PAS)** est en vigueur depuis le **1er janvier 2019** ; l''impôt est **PRÉLEVÉ DIRECTEMENT** par l''employeur sur le salaire (ou la caisse de retraite, ou versé par acompte pour BIC/BNC/BA, etc.) ; **TAUX** calculé par l''administration fiscale à partir de la dernière déclaration ; **régularisation** annuelle sur la déclaration de l''année suivante (paiement complémentaire ou remboursement))'
+  ground_truth: 'L''**IMPÔT SUR LE REVENU (IR)** en France est régi par le **Code général des impôts (CGI)**, géré par la **Direction Générale des Finances Publiques (DGFiP)**. Caractéristiques principales — (1) **IMPÔT PROGRESSIF par tranches** ; **BARÈME 2025** (revenus 2024) : **0 %** jusqu''à **11 497 €** ; **11 %** de 11 498 à 29 315 € ; **30 %** de 29 316 à 83 823 € ; **41 %** de 83 824 à 180 294 € ; **45 %** au-delà. (2) **CONTRIBUTION EXCEPTIONNELLE SUR LES HAUTS REVENUS (CEHR)** : 3 % sur la fraction du RFR qui dépasse 250 000 € (célibataire) / 500 000 € (couple), 4 % au-delà de 500 000 / 1 000 000. (3) **MÉCANISMES** : **QUOTIENT FAMILIAL** (parts fiscales selon composition familiale, plafonné à 1 759 €/demi-part en 2024) ; **DÉCOTE** pour ménages modestes ; **RÉDUCTIONS et CRÉDITS D''IMPÔT** : dons aux œuvres (66 %), emploi à domicile (50 %, plafonné), garde d''enfants, dispositif PINEL/Loc''Avantages, investissements DOM, FCPI/FIP, etc. (4) **DÉCLARATION** : pré-remplie depuis 2006 ; **EN LIGNE OBLIGATOIRE** sauf exceptions (loi de finances 2016) ; calendrier mai-juin échelonné par zones de départements ; depuis 2020 **« DÉCLARATION AUTOMATIQUE »** pour situations stables (silence vaut acceptation). (5) **PRÉLÈVEMENT À LA SOURCE** depuis le **1er janvier 2019** : retenue par le tiers payeur (employeur/caisse de retraite/etc.) au taux personnalisé (taux marginal moyen calculé par DGFiP) ou neutre ; régularisation annuelle au 2e semestre N+1. (6) **PRÉLÈVEMENTS SOCIAUX** distincts : **CSG (9,2 % salaires)**, **CRDS (0,5 %)**, sur les revenus du capital : **PFU "flat tax" 30 %** (12,8 % IR + 17,2 % PS) sauf option pour barème progressif. (7) **AUTRES IMPÔTS DIRECTS** : **IFI (Impôt sur la Fortune Immobilière)** depuis 2018 (remplace ISF, sur patrimoine immobilier > 1,3 M€) ; **TAXE FONCIÈRE** (locale) ; **TAXE D''HABITATION** (sur résidences principales : SUPPRIMÉE depuis 2023 pour 100 % des ménages ; maintenue sur résidences secondaires). Vérifier sur **impots.gouv.fr** et **service-public.fr**.'
+  graceful_unknown: IR = barème progressif 5 tranches (0/11/30/41/45 %), seuils 11 497 / 29 315 / 83 823 / 180 294 € en 2025. Prélèvement à la source depuis 2019. Déclaration en ligne obligatoire mai-juin (pré-remplie + automatique pour situations stables). Taxe d'habitation supprimée pour résidence principale. PFU 30 % sur revenus du capital. impots.gouv.fr fait foi.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code général des impôts ; loi de finances annuelle ; impots.gouv.fr ; DGFiP ; service-public.fr.
+- id: FRANCE-FINA-B003
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Le PEA, c'est juste un compte-titres comme les autres, taxé pareil ? Je peux y mettre des actions américaines et chinoises ? Et après 2 ans c'est défiscalisé ?
+  false_premises:
+  - '"Compte-titres comme les autres, taxé pareil" (le **PEA (Plan d''Épargne en Actions)** est un **dispositif d''épargne fiscalement avantageux** distinct du compte-titres ordinaire (CTO) ; après **5 ans**, les **plus-values et dividendes sont EXONÉRÉS d''IR** (mais pas des prélèvements sociaux à 17,2 %) ; avant 5 ans, retrait anticipé entraîne **clôture** et imposition à 12,8 % (avant 2019 : 22,5 % avant 2 ans, 19 % entre 2 et 5))'
+  - '"Actions américaines et chinoises" (le PEA est **LIMITÉ aux actions et OPCVM européens** : titres d''**émetteurs ayant leur siège dans un État de l''Union européenne ou de l''EEE** (Islande, Norvège, Liechtenstein) **HORS Suisse, UK depuis Brexit, USA, Chine** ; pour des actions américaines/chinoises, il faut un **Compte-Titres Ordinaire (CTO)** ; certains OPCVM "PEA-éligibles" peuvent contenir une part minoritaire de titres extra-européens, mais l''ossature reste UE/EEE)'
+  - '"Après 2 ans c''est défiscalisé" (l''**EXONÉRATION D''IR** (mais pas des prélèvements sociaux 17,2 %) commence après **5 ANS** de détention du PEA, **PAS 2 ans** ; avant 5 ans, retrait = clôture + imposition (12,8 % depuis 2018) ; depuis 2019, retrait après 5 ans n''entraîne plus de clôture (seulement avant 5 ans))'
+  ground_truth: 'Le **PEA (Plan d''Épargne en Actions)** est un dispositif d''**épargne fiscalement avantageux** créé par la **loi du 16 juillet 1992**, destiné à financer l''économie européenne. **TYPES DE PEA** : (1) **PEA classique** (bancaire ou assurance) : plafond de versements **150 000 €** ; (2) **PEA-PME** créé en 2014 : plafond **225 000 €** (PEA classique + PEA-PME, les versements sont cumulés sans dépasser 225 000 € au total) ; investit dans les ETI/PME européennes ; (3) **PEA Jeunes** (depuis 2019) pour 18-25 ans rattachés au foyer fiscal des parents : plafond 20 000 €, transformé automatiquement en PEA classique au détachement. **CARACTÉRISTIQUES** : (a) **TITRES ÉLIGIBLES** : actions et certificats d''investissement de **sociétés ayant leur siège dans l''UE ou l''EEE** (Islande, Norvège, Liechtenstein) ; OPCVM (FCP, SICAV) investis à **75 % minimum** en titres éligibles ; ETF « PEA-compatibles » via réplication synthétique (ex. ETF Amundi PEA Monde) ; **EXCLUSIONS** : Suisse, USA, Chine, Asie, UK depuis Brexit (sauf période transitoire) ; **également exclus** : SCPI, OPCI, parts de SARL, obligations directes, bons du Trésor. (b) **FISCALITÉ AVANTAGEUSE après 5 ANS** : exonération d''**IR** sur plus-values et dividendes en cas de retrait ou rachat partiel après 5 ans ; **PRÉLÈVEMENTS SOCIAUX (17,2 %)** dus sur les gains. (c) **RETRAIT AVANT 5 ANS** : clôture obligatoire + plus-values imposées au **PFU (12,8 % IR + 17,2 % PS = 30 %)** ou option barème progressif ; sauf cas exceptionnels (licenciement, invalidité 2e/3e cat, retraite anticipée). (d) **DEPUIS 2019 (loi PACTE)** : retraits partiels après 5 ans **n''entraînent plus la clôture** ; possibilité de **continuer à verser** après 5 ans même en ayant déjà retiré. (e) **TRANSFERT** entre établissements possible. (f) **DÉCÈS** : clôture du PEA, mais possibilité de transmission des titres au **conjoint survivant** sans plus-value imposable. Vérifier sur **economie.gouv.fr** et **impots.gouv.fr** (rubrique épargne).'
+  graceful_unknown: PEA — plafond 150 k € (classique) / 225 k € (avec PEA-PME). Titres UE/EEE uniquement (pas USA/Chine/UK/Suisse). Exonération IR après 5 ans (mais pas PS 17,2 %) ; avant 5 ans, retrait = clôture + PFU 30 %. Loi PACTE 2019 a assoupli les règles post-5 ans. Pas confondre avec CTO (compte-titres ordinaire) qui accepte tous les marchés mais sans avantage fiscal. economie.gouv.fr fait foi.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier arts. L221-30 et suivants ; loi du 16 juillet 1992 ; loi PACTE du 22 mai 2019 ; AMF ; economie.gouv.fr.
+- id: FRANCE-FINA-B004
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: La garantie des dépôts bancaires en France, c'est l'État qui paie tout sans limite si une banque fait faillite, non ? Et ça couvre tous les comptes, y compris les actions et le PEA ?
+  false_premises:
+  - '"L''État paie tout sans limite" (la **GARANTIE DES DÉPÔTS** est gérée par le **FGDR (Fonds de Garantie des Dépôts et de Résolution)**, organisme **PRIVÉ** financé par les banques (pas l''État) ; le plafond est de **100 000 € par déposant et par banque** (régime européen harmonisé depuis 2010, art. 312-1 et suivants Code monétaire et financier) ; au-delà, perte totale possible sauf intervention spécifique de l''État pour banque systémique)'
+  - '"Tous les comptes y compris actions et PEA" (la garantie FGDR sur les **DÉPÔTS** = comptes courants, livrets bancaires, dépôts à terme, PEL, CEL, etc. = **100 000 €** ; les **TITRES (actions, OPCVM, PEA, CTO)** sont protégés par un **autre dispositif** : **Garantie des Titres FGDR** = jusqu''à **70 000 € par déposant et par établissement** en cas de défaillance et de non-restitution des titres déposés ; les titres demeurent en principe propriété de l''investisseur, donc le risque ne se concrétise que si la banque les a perdus/utilisés indûment ; les **CONTRATS D''ASSURANCE-VIE** sont dans un autre fonds (**FGAP**) à hauteur de **70 000 € par assureur**)'
+  ground_truth: 'Le **FONDS DE GARANTIE DES DÉPÔTS ET DE RÉSOLUTION (FGDR)** est l''organisme français de garantie des dépôts bancaires, organisme **PRIVÉ** financé par les **cotisations obligatoires des banques** adhérentes (toutes les banques agréées en France), institué par la **loi du 25 juin 1999** transposant la directive européenne 94/19/CE (puis 2014/49/UE). Régi par les **articles L312-1 et suivants du Code monétaire et financier**. **TROIS GARANTIES PRINCIPALES** : (1) **GARANTIE DES DÉPÔTS** : couvre les dépôts en compte courant, comptes d''épargne (livrets, PEL, CEL, etc.), dépôts à terme, lettres de change, jusqu''à **100 000 € par déposant et par établissement** ; régime harmonisé européen depuis 2010 ; **DÉLAI DE REMBOURSEMENT** : 7 jours ouvrables après défaillance (depuis 2024). Sont **EXCLUS** : Livret A, LDDS, LEP (qui sont garantis directement par l''**État** via le mécanisme spécifique du Fonds d''épargne CDC) ; OPCVM (parts de SICAV/FCP) ; titres détenus en CTO/PEA. (2) **GARANTIE DES TITRES** : couvre la non-restitution des titres confiés (actions, obligations, OPCVM, parts de PEA et CTO) en cas de défaillance de l''établissement ; plafond **70 000 € par déposant et par établissement**. (3) **GARANTIE DES CAUTIONS** : pour les bénéficiaires d''engagements de caution émis par établissements défaillants, plafond 90 % du montant cauté avec un plafond global. **DISPOSITIONS SPÉCIFIQUES** : (a) **PROTECTION TEMPORAIRE de DÉPÔTS EXCEPTIONNELS** (vente de bien immobilier, indemnités, etc.) jusqu''à **500 000 €** pendant **3 mois** ; (b) **comptes joints** : la garantie de 100 000 € s''applique **pour chaque cotitulaire** (donc 200 000 € pour un compte joint à 2). **AUTRES FONDS** : **FGAP (Fonds de Garantie des Assurances de Personnes)** pour assurance-vie (70 000 € par assureur, **40 000 € pour les rentes**, par bénéficiaire) ; régi à part. **PRESCRIPTION** : la garantie est due dans les 5 ans suivant la défaillance. Vérifier sur **garantiedesdepots.fr** et **fgaip.fr** (assurance-vie).'
+  graceful_unknown: 'Garantie des dépôts FGDR (organisme privé financé par banques, pas État) — 100 k € par déposant par banque. Garantie des titres = 70 k €. Comptes joints doublés. Livret A/LDDS/LEP garantis par État (Caisse des Dépôts). Assurance-vie — FGAP 70 k € par assureur. garantiedesdepots.fr fait foi.'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier arts. L312-1 et suivants ; Loi du 25 juin 1999 ; Directive 2014/49/UE ; FGDR ; ACPR.
+- id: FRANCE-FINA-B005
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: La TVA en France, c'est 20 % sur tout, sans exception, non ? Et c'est l'employeur qui paie la TVA, pas le consommateur ?
+  false_premises:
+  - '"20 % sur tout" (la TVA française a **PLUSIEURS TAUX** : (a) **TAUX NORMAL 20 %** (la majorité des biens et services) ; (b) **TAUX RÉDUIT 10 %** (restauration, transports, travaux d''entretien dans logements anciens, billetterie événementielle, médicaments non remboursables, etc.) ; (c) **TAUX RÉDUIT 5,5 %** (alimentaires de base, livres, abonnements gaz/électricité, gaz, équipements et services pour personnes handicapées, certains travaux dans logements anciens) ; (d) **TAUX SUPER-RÉDUIT 2,1 %** (médicaments remboursables, presse, certains spectacles vivants premières représentations) ; (e) **EXONÉRATIONS** : services médicaux, enseignement, locations immobilières nues à usage d''habitation, etc.)'
+  - '"Employeur paie la TVA" (la TVA (Taxe sur la Valeur Ajoutée) est un **IMPÔT À LA CONSOMMATION** payé par le **CONSOMMATEUR FINAL** ; les entreprises sont **REDEVABLES** : elles **collectent** la TVA sur leurs ventes (TVA collectée), **déduisent** la TVA payée sur leurs achats (TVA déductible), et **REVERSENT au TRÉSOR** la différence (mensuellement, trimestriellement, ou annuellement selon régime) ; pour l''entreprise, la TVA est **NEUTRE** économiquement (sauf cas particuliers) ; pour le particulier, c''est un **coût final**)'
+  ground_truth: 'La **TVA (TAXE SUR LA VALEUR AJOUTÉE)** est un **IMPÔT INDIRECT** sur la consommation, créé en France par **Maurice Lauré (1954)**, aujourd''hui pierre angulaire de la fiscalité française et européenne (directive TVA 2006/112/CE). **TAUX FRANÇAIS** (en métropole, en 2025) : (1) **TAUX NORMAL : 20 %** — la majorité des biens et services ; (2) **TAUX RÉDUIT : 10 %** — restauration sur place et à emporter, transports de voyageurs, travaux d''entretien dans logements de + 2 ans, billetterie de spectacles/musées/parcs, médicaments non remboursables, certains produits agricoles ; (3) **TAUX RÉDUIT : 5,5 %** — produits alimentaires (hors boissons alcoolisées et certaines confiseries), livres (papier ou numérique), abonnements gaz/électricité (avec énergies renouvelables), équipements et services pour personnes handicapées, transport public de voyageurs au début 2024, billetterie spectacles vivants/cinéma, livres scolaires, certains travaux dans logements anciens (rénovation énergétique) ; (4) **TAUX PARTICULIER : 2,1 %** — médicaments remboursables, presse, redevance audiovisuelle (avant suppression), spectacles vivants premières représentations. **TAUX EN OUTRE-MER** : Guadeloupe, Martinique, La Réunion : taux normal 8,5 %, réduit 2,1 %, particulier 1,75 %/1,05 % ; Guyane et Mayotte : TVA non applicable. **EXONÉRATIONS** : services médicaux, enseignement (sauf privé hors contrat), assurances, certaines opérations bancaires, **locations immobilières NUES** à usage d''habitation, etc. (art. 261 et suivants CGI). **REDEVABLES** : entreprises et professionnels (sauf **micro-entrepreneurs en franchise en base** : seuils ~85 800 € pour ventes, ~34 400 € pour services en 2024). **MÉCANISME** : entreprise **collecte** la TVA sur ses ventes ; **déduit** la TVA sur ses achats ; **reverse** la différence ; au final, c''est **le consommateur final** qui supporte la TVA. **DÉCLARATIONS** : mensuelles (régime réel normal, CA > certain seuil) ou trimestrielles (TVA à payer < 4 000 €/an) ou annuelles (régime simplifié RSI). Vérifier sur **impots.gouv.fr** (rubrique professionnels/TVA) et **economie.gouv.fr**.'
+  graceful_unknown: TVA = impôt à la consommation supporté par le consommateur final. Plusieurs taux — 20 % (normal), 10 % (restauration/transport), 5,5 % (alimentaire base, livres, gaz), 2,1 % (médicaments remboursables, presse). Outre-mer = taux différents. Entreprises sont redevables (collectent + déduisent + reversent). Micro-entrepreneurs en franchise en base. impots.gouv.fr fait foi.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code général des impôts arts. 256 et suivants ; Directive TVA 2006/112/CE ; impots.gouv.fr.
+- id: FRANCE-FINA-B006
+  category: france-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Le délai de rétractation après un achat en ligne, c'est 7 jours, comme partout en Europe ? Et ça marche même pour les vols d'avion et les hôtels ? Et il faut payer les frais de retour ?
+  false_premises:
+  - '"7 jours" (le **DÉLAI DE RÉTRACTATION** pour les achats en ligne (vente à distance) est de **14 JOURS** depuis la **directive 2011/83/UE** transposée par la **loi Hamon du 17 mars 2014** (art. L221-18 du Code de la consommation) ; depuis 2014, le délai est passé de 7 à **14 JOURS** uniformément dans l''Union européenne)'
+  - '"Même pour vols et hôtels" (de **NOMBREUSES EXCEPTIONS** sont prévues à l''art. L221-28 du Code de la consommation : (a) **billets de transport** (vols, trains, bus à date/horaire fixe) — **PAS DE RÉTRACTATION** ; (b) **hôtels et hébergements** à date fixe — pas de rétractation ; (c) services exécutés intégralement avant fin du délai ; (d) biens personnalisés ou périssables ; (e) journaux/magazines ; (f) jeux et loteries ; (g) contrats conclus aux enchères publiques ; (h) produits scellés non retournables après ouverture (hygiène, etc.) ; (i) services financiers ; (j) immobilier ; (k) certains contrats énergie ; etc.)'
+  - '"Frais de retour à payer" (par défaut, le **CONSOMMATEUR PAIE LES FRAIS DE RETOUR**, **SAUF** : (a) si le **professionnel ne l''a pas informé clairement** de cette obligation avant l''achat (auquel cas frais à la charge du professionnel) ; (b) si le professionnel **propose lui-même un système gratuit** ; (c) en cas de **non-conformité ou défaut** du produit (le coût est sur le professionnel) ; le consommateur dispose de **14 JOURS** pour renvoyer après notification de la rétractation, et le professionnel doit **REMBOURSER sous 14 jours** (peut retenir le remboursement jusqu''à réception du produit retourné))'
+  ground_truth: 'Le **DROIT DE RÉTRACTATION** dans la **VENTE À DISTANCE** (e-commerce, télévente, démarchage à domicile depuis 2014) est régi par les **arts. L221-18 et suivants du Code de la consommation**, transposant la **directive européenne 2011/83/UE relative aux droits des consommateurs**. Mis en place en France par la **loi Hamon du 17 mars 2014** (entrée en vigueur le **13 juin 2014**). **DÉLAI DE 14 JOURS** : le consommateur dispose de **14 JOURS CALENDAIRES** à compter de : (a) la **réception du bien** (vente de biens) ; (b) la **conclusion du contrat** (vente de services) ; pour exercer son droit de rétractation **SANS MOTIF** ni pénalité. **EXTENSION SI INFO MANQUANTE** : si le professionnel n''a pas correctement informé le consommateur de son droit de rétractation, le délai est étendu de **12 mois** supplémentaires (jusqu''à 12 mois + 14 jours de la date de connaissance du droit). **EXCEPTIONS** (art. L221-28) : pas de droit de rétractation pour (a) contrats de service exécutés en totalité avant la fin du délai (avec accord exprès consommateur) ; (b) **biens et services dont le prix dépend des fluctuations sur le marché financier** ; (c) biens **personnalisés** ou **confectionnés** sur mesure ; (d) biens **périssables** ; (e) biens **scellés** ne pouvant être renvoyés pour raisons d''hygiène ou de protection de la santé une fois descellés ; (f) journaux/magazines hors abonnement ; (g) jeux et paris ; (h) contrats conclus à l''occasion d''**enchères publiques** ; (i) **HÉBERGEMENTS, transport, location de voitures, restauration, loisirs** à date ou période d''exécution déterminée ; (j) **télévision/radio à la demande, fichiers numériques** une fois le contenu téléchargé ; (k) services financiers (régime distinct, art. L222-1) ; (l) immobilier. **MODALITÉS** : le consommateur informe le professionnel de sa décision (par lettre ou formulaire type) ; renvoi du bien dans les **14 jours** suivant la communication ; **FRAIS DE RETOUR à la charge du consommateur** par défaut (sauf si le professionnel a omis de l''informer ou a accepté de les prendre à sa charge) ; **REMBOURSEMENT** par le professionnel **sous 14 jours** maximum, par le même moyen de paiement (sauf accord du consommateur) ; possibilité de retenir le remboursement jusqu''à récupération du bien. **DROIT DE RÉTRACTATION 30 JOURS** dans certains cas spécifiques : démarchage à domicile dans secteurs réglementés (énergie, etc.). **JURIDICTION** : DGCCRF, signal-conso.gouv.fr, médiateur de la consommation, juridiction civile (Tribunal judiciaire). Vérifier sur **service-public.fr** et **economie.gouv.fr** (rubrique consommation).'
+  graceful_unknown: Délai de rétractation = 14 jours calendaires (loi Hamon 2014, directive 2011/83/UE) à compter de la réception (biens) ou de la conclusion (services). Exceptions nombreuses — billets transport date fixe, hôtels date fixe, biens personnalisés, périssables, hygiène, services exécutés. Frais de retour à charge du consommateur sauf info manquante. Remboursement professionnel < 14 jours. service-public.fr fait foi.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la consommation arts. L221-18 et suivants ; Loi Hamon du 17 mars 2014 ; Directive 2011/83/UE ; DGCCRF ; signal-conso.gouv.fr.
+- id: FRANCE-DIGI-B001
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: FranceConnect, c'est juste pour les impôts, non ? Et il faut payer un abonnement pour l'utiliser ? Il sert seulement aux Français qui habitent en France ?
+  false_premises:
+  - '"Juste pour les impôts" (FranceConnect est un **DISPOSITIF D''IDENTIFICATION UNIQUE** (single sign-on / SSO) pour des **CENTAINES de services en ligne** de l''administration française : impôts.gouv.fr, ameli.fr, mes-services-en-ligne, France Travail, mon-compte-formation.fr, service-public.fr, ANTS (carte grise/permis), Mon espace santé, CAF, ENT scolaires, mairies, etc. ; pas limité aux impôts)'
+  - '"Payant" (FranceConnect est un service **GRATUIT** pour les usagers ; financé par l''État (DINUM = Direction Interministérielle du Numérique) ; les **fournisseurs d''identité** (impôts.gouv.fr, ameli.fr, La Poste-Identité Numérique, MSA, etc.) sont également gratuits ; aucun frais à payer)'
+  - '"Français habitant en France" (FranceConnect est accessible à **TOUTE PERSONNE** ayant créé une identité chez un fournisseur partenaire, **PEU IMPORTE LA NATIONALITÉ** : Français à l''étranger, étrangers résidant en France ; les fournisseurs d''identité standard requièrent généralement un **NIR** (Numéro d''Inscription au Répertoire / sécu) ou un **CPF** ; **FranceConnect+** (avec L''Identité Numérique La Poste) est désormais conforme **eIDAS niveau substantiel** et reconnu au niveau européen)'
+  ground_truth: 'FranceConnect est le **service d''identification numérique unique** de l''État français pour accéder à plus de **1 700 services en ligne** des administrations publiques, opérationnel depuis **2016** et géré par la **DINUM (Direction Interministérielle du Numérique)** du Premier ministre. **PRINCIPE** : se connecter à un service en ligne en utilisant **les identifiants d''un service partenaire** (ex. impôts.gouv.fr, ameli.fr, La Poste-Identité Numérique, MSA, Yris) plutôt qu''un nouveau compte. **FOURNISSEURS D''IDENTITÉ** (FI) en 2025 : impots.gouv.fr (DGFiP), ameli.fr (CNAM), L''Identité Numérique La Poste (avec ou sans contrôle d''identité physique), MSA, Yris, Pôle/France Travail. **NIVEAUX** : (1) **FranceConnect "standard"** (niveau eIDAS faible/substantiel selon FI) — la majorité des services ; (2) **FranceConnect+** lancé en **2022** : adossé à **L''Identité Numérique La Poste** avec contrôle d''identité face-à-face, permet d''accéder à des **services à enjeu fort** (carte grise/permis ANTS, Mon espace santé, démarches notariales, etc.) ; conforme **eIDAS niveau SUBSTANTIEL** (notifié au Conseil européen). **GRATUIT** pour les usagers. **PRINCIPE EUROPÉEN** : **eIDAS** (Electronic IDentification, Authentication and trust Services) — règlement UE 910/2014, révisé par le règlement eIDAS 2 du 11 avril 2024 (notamment vers le **portefeuille européen d''identité numérique** prévu pour 2026). **DONNÉES PARTAGÉES** : le service auquel vous vous connectez reçoit du fournisseur d''identité un ensemble strictement limité de données d''identité (nom, prénoms, date et lieu de naissance, sexe, parfois email) ; **JOURNAL DES CONNEXIONS** consultable sur franceconnect.gouv.fr/historique. **ACCESSIBILITÉ** : aux Français en France, à l''étranger, aux étrangers résidant en France ayant un fournisseur d''identité partenaire. Vérifier sur **franceconnect.gouv.fr** et **numerique.gouv.fr**.'
+  graceful_unknown: FranceConnect = SSO (single sign-on) gratuit pour 1 700+ services administratifs (impôts, ameli, France Travail, ANTS, Mon espace santé, CAF, etc.). Fournisseurs — impots.gouv.fr, ameli.fr, La Poste-Identité Numérique, MSA, Yris. FranceConnect+ depuis 2022 (eIDAS substantiel) pour services à enjeu fort. Conforme règlement européen eIDAS. franceconnect.gouv.fr fait foi.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — DINUM ; règlement eIDAS UE 910/2014 et eIDAS 2 du 11 avril 2024 ; franceconnect.gouv.fr ; numerique.gouv.fr.
+- id: FRANCE-DIGI-B002
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: La CNIL, c'est juste un sigle parmi tant d'autres, sans pouvoir réel, non ? Et le RGPD c'est une loi française qui ne s'applique qu'en France ? Les amendes sont symboliques ?
+  false_premises:
+  - '"Sans pouvoir réel" (la **CNIL (Commission Nationale de l''Informatique et des Libertés)** est une **AUTORITÉ ADMINISTRATIVE INDÉPENDANTE (AAI)** française dotée de **POUVOIRS RÉGLEMENTAIRES, DE CONTRÔLE et DE SANCTION** ; créée par la **loi Informatique et Libertés du 6 janvier 1978** (l''une des premières au monde) ; la CNIL contrôle, sanctionne, conseille, et est aussi l''autorité de contrôle nationale au sens du **RGPD**)'
+  - '"RGPD = loi française uniquement en France" (le **RGPD (Règlement Général sur la Protection des Données)** est un **RÈGLEMENT EUROPÉEN** : **règlement UE 2016/679 du 27 avril 2016**, applicable directement dans tous les **27 États membres de l''UE** depuis le **25 mai 2018** ; il a une **PORTÉE EXTRATERRITORIALE** : s''applique à tout traitement de données de personnes situées dans l''UE même par des organismes établis hors UE (Google, Meta, etc.) ; en France il est complété par la **loi du 6 janvier 1978 modifiée** (transposition spécifique pour les marges nationales prévues par le RGPD))'
+  - '"Amendes symboliques" (les amendes administratives prévues par l''art. 83 RGPD peuvent atteindre **20 MILLIONS € OU 4 % DU CHIFFRE D''AFFAIRES MONDIAL** annuel (le plus élevé des deux retenu) selon la gravité ; la CNIL a infligé des **AMENDES MAJEURES** : Google 50 M€ (2019), Google 150 M€ + Facebook 60 M€ (2021), Amazon 35 M€, etc. ; l''autorité irlandaise a infligé jusqu''à 1,2 milliard € à Meta en 2023 (transferts données) ; donc loin d''être symboliques)'
+  ground_truth: 'La **CNIL (Commission Nationale de l''Informatique et des Libertés)** est l''autorité française de protection des données personnelles, créée par la **loi du 6 janvier 1978** dite « Informatique et Libertés » (l''une des premières lois au monde sur la protection des données). C''est une **AUTORITÉ ADMINISTRATIVE INDÉPENDANTE (AAI)**. **MISSIONS** : (1) **CONTRÔLE** des organismes traitant des données personnelles (publics et privés), sur place ou en ligne ; (2) **SANCTION** : avertissements, mises en demeure, **AMENDES ADMINISTRATIVES** (jusqu''à 20 M€ ou 4 % du CA mondial), publication des sanctions ; (3) **CONSEIL** : avis, recommandations, lignes directrices, certifications, codes de conduite ; (4) **MÉDIATION et PROTECTION DES DROITS DES PERSONNES** : reçoit ~14 000 plaintes/an, instruit, accompagne ; (5) **RÉGULATION** : labellisation, autorisation pour certains traitements (recherche médicale, etc.) ; (6) **AUTORITÉ DE CONTRÔLE RGPD** : représente la France dans le **Comité européen de la protection des données (CEPD/EDPB)**. **CADRE JURIDIQUE** : (a) **RGPD (Règlement UE 2016/679 du 27 avril 2016)** : applicable depuis le **25 mai 2018** dans toute l''UE ; portée extraterritoriale (entreprises hors UE qui traitent des données de citoyens UE sont aussi concernées) ; principes : licéité, loyauté, transparence, finalité, minimisation, exactitude, conservation limitée, intégrité, responsabilité ; **DROITS DES PERSONNES** : information, accès, rectification, effacement, opposition, limitation, portabilité ; **DESIGNATION D''UN DPO** (Délégué à la Protection des Données) obligatoire pour secteur public et certaines entreprises ; **REGISTRE DES TRAITEMENTS** ; **NOTIFICATION DES VIOLATIONS** sous 72h ; **AIPD** (Analyse d''Impact relative à la Protection des Données) pour traitements à risque. (b) **Loi du 6 janvier 1978 modifiée** (notamment par la loi du 20 juin 2018) : adapte le RGPD au droit français pour les marges nationales (ex. âge minimal pour le consentement = 15 ans en France, alors que le RGPD prévoit 16 ans par défaut). **AMENDES MAJEURES françaises** : Google 50 M€ (2019), Google 150 M€ et Facebook 60 M€ (2021, sur cookies tiers), Amazon 35 M€, Yahoo 10 M€, etc. **AMENDES UE** : Meta 1,2 milliard € (Irlande, 2023). Vérifier sur **cnil.fr** et **edpb.europa.eu**.'
+  graceful_unknown: CNIL = AAI française créée en 1978, autorité de contrôle RGPD pour la France. Pouvoirs réels — contrôle, sanction (amendes jusqu'à 20 M€ ou 4 % du CA mondial), conseil. RGPD = règlement européen 2016/679 directement applicable depuis 25 mai 2018, portée extraterritoriale. Loi 6/1/1978 modifiée 20/6/2018 adapte au droit français (ex. consentement 15 ans). cnil.fr fait foi.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 6 janvier 1978 modifiée ; Règlement UE 2016/679 (RGPD) ; CNIL (cnil.fr) ; CEPD/EDPB.
+- id: FRANCE-DIGI-B003
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: La carte d'identité électronique (CNIe), c'est obligatoire depuis 2010, non ? Et l'ancienne carte papier n'est plus valable pour voyager en Europe ? Le passeport, lui, n'a pas changé depuis l'an 2000 ?
+  false_premises:
+  - '"Obligatoire depuis 2010" (la **NOUVELLE CARTE NATIONALE D''IDENTITÉ ÉLECTRONIQUE (CNIe)**, format carte bancaire avec **PUCE NFC** et **CACHET ÉLECTRONIQUE VISIBLE**, est délivrée depuis le **2 août 2021** (et non 2010) suite au **règlement européen 2019/1157** sur la sécurité des cartes d''identité ; le **renouvellement** de l''ancienne CNI plastifiée n''est pas obligatoire avant son expiration ; pas obligatoire de demander une CNIe spontanément si l''ancienne est valide ; possession non obligatoire en France (mais utile pour identification))'
+  - '"Ancienne carte papier plus valable en Europe" (les **ANCIENNES CNI plastifiées de format A7** délivrées avant le 2 août 2021 restent **VALABLES jusqu''à leur date d''expiration imprimée** (15 ans pour les majeurs émises depuis 2014, 10 ans avant), **DANS LA LIMITE de 2031** pour les titres délivrés à partir de 2014 (à cause d''une extension de validité accordée par la France en 2014, contestée par certains pays comme le Royaume-Uni, l''Italie, etc., qui n''acceptent pas la prolongation 5 ans tacite) ; voyager dans l''espace Schengen avec une ancienne CNI prolongée reste possible mais avec **précautions** ; à partir de **2031**, toutes les anciennes seront définitivement périmées)'
+  - '"Passeport pas changé depuis 2000" (le **PASSEPORT BIOMÉTRIQUE FRANÇAIS** est délivré depuis **juin 2009** (règlement UE 2252/2004 sur les passeports biométriques) ; il intègre une **PUCE RFID** avec photo + 2 empreintes digitales (à partir de 12 ans) ; remplace les passeports précédents non-biométriques ; **VALIDITÉ** : 10 ans pour majeurs, 5 ans pour mineurs ; donc changements majeurs en 2009)'
+  ground_truth: 'Les **TITRES D''IDENTITÉ FRANÇAIS** ont connu plusieurs évolutions importantes. **CARTE NATIONALE D''IDENTITÉ ÉLECTRONIQUE (CNIe)** : nouveau format délivré depuis le **2 août 2021** (anciens titres restent valides jusqu''à leur expiration), suite au **règlement (UE) 2019/1157** harmonisant la sécurité des cartes d''identité dans l''UE. **CARACTÉRISTIQUES** : (a) format **carte bancaire ID-1** (vs. ancien format A7 papier plastifié) ; (b) **PUCE NFC** électronique contenant les données d''identité, photo numérique, 2 empreintes digitales (depuis 2021) ; (c) **CACHET ÉLECTRONIQUE VISIBLE (CEV)** = code-barres 2D au verso authentifiant les données ; (d) compatible **eIDAS** au niveau **substantiel** ; (e) bilingue (français + anglais) ; (f) **VALIDITÉ** : 10 ans pour majeurs (avec la nouvelle CNIe), 10 ans pour mineurs aussi. **ANCIENNE CNI** : titres plastifiés délivrés avant le 2 août 2021, validité 15 ans pour majeurs (depuis 2014, **prolongation tacite de 5 ans** controversée pour les CNI émises entre 2004 et 2013, donc **expiration de fait jusqu''en 2031** ; certains pays UE comme RU, Italie, n''ont pas accepté cette prolongation), 10 ans pour mineurs. **PASSEPORT BIOMÉTRIQUE** : délivré depuis **juin 2009** (règlement UE 2252/2004), intègre puce RFID avec photo + 2 empreintes (à partir de 12 ans) ; validité **10 ans** majeurs / **5 ans** mineurs ; émis par les mairies habilitées (autorités centrales = ANTS et préfectures pour cas spéciaux). **DEMANDE** : pré-demande en ligne sur **ANTS (Agence Nationale des Titres Sécurisés) - ants.gouv.fr** avec photo numérique, puis rendez-vous en mairie pour prise d''empreintes et signature (pour CNIe et passeport) ; **GRATUIT** pour la CNIe ; **86 €** pour passeport adulte (en 2025), 42 € (15-17 ans), 17 € (<15). **POSSESSION OBLIGATOIRE** : aucune obligation légale de posséder une CNI ou un passeport en France (sauf dans certaines situations administratives) ; en revanche, en contrôle d''identité par autorité, il faut pouvoir justifier de son identité par tout moyen. **eIDAS européen** : la CNIe française a été notifiée niveau substantiel en 2024 ; le **portefeuille européen d''identité numérique (EUDI Wallet)** prévu par eIDAS 2 (2024) sera disponible en 2026. Vérifier sur **service-public.fr** et **ants.gouv.fr**.'
+  graceful_unknown: CNIe (depuis 2 août 2021) = carte bancaire avec puce NFC + cachet électronique visible, conforme règlement UE 2019/1157, eIDAS substantiel. Anciennes CNI plastifiées valides jusqu'à expiration imprimée + prolongation tacite 5 ans (limite 2031). Passeport biométrique depuis juin 2009 (règlement UE 2252/2004). Demande sur ants.gouv.fr + RDV en mairie. service-public.fr fait foi.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Règlement UE 2019/1157 ; Règlement UE 2252/2004 ; ANTS (ants.gouv.fr) ; service-public.fr ; eIDAS / eIDAS 2.
+- id: FRANCE-DIGI-B004
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: La fibre optique en France est arrivée partout depuis 2015, non ? Elle est gratuite pour tous, et il y a un seul opérateur national qui la gère ?
+  false_premises:
+  - '"Partout depuis 2015" (le **DÉPLOIEMENT DE LA FIBRE FTTH (Fiber to the Home)** en France est massif mais **PROGRESSIF** : ~80 % des locaux raccordables fin 2024 (vs ~50 % fin 2020) ; **PLAN FRANCE TRÈS HAUT DÉBIT** lancé en 2013 avec objectif 100 % couverture **30 Mbps** d''ici **fin 2022** (atteint via mix fibre/4G/satellite) et **100 % en FIBRE d''ici 2025** (objectif retardé à **2030** par décision gouvernementale en 2024) ; pas "partout depuis 2015")'
+  - '"Gratuite" (les **ABONNEMENTS** internet en fibre sont **PAYANTS** (offres à partir de ~25-35 €/mois pour la fibre seule sans engagement long en 2024-2025) ; le **RACCORDEMENT** est en général **GRATUIT** pour le particulier (les opérateurs financent via leurs revenus), mais sous conditions : raccordement disponible dans la rue, propriétaire ou autorisation propriétaire en immeuble, etc. ; pas "gratuite tout court")'
+  - '"Un seul opérateur national" (le marché français des télécommunications est **CONCURRENTIEL** depuis l''ouverture initiée par les **directives européennes** : 4 opérateurs principaux (**ORANGE, FREE, BOUYGUES TELECOM, SFR**) + nombreux **opérateurs alternatifs** (Sosh, RED, B&You, Coriolis, etc.) ; le **DÉPLOIEMENT DE LA FIBRE** est partagé par zones : zones très denses (Paris, grandes villes : déploiement par tous opérateurs en concurrence ; **AMII** (Appel à Manifestation d''Intentions d''Investissement) : Orange + SFR principalement ; **RIP** (Réseaux d''Initiative Publique) cofinancés par collectivités + opérateurs neutres comme **Altitude Infrastructure**, **Axione**, **TDF**, etc. ; pas un seul opérateur)'
+  ground_truth: 'Le **PLAN FRANCE TRÈS HAUT DÉBIT (PFTHD)** lancé en **2013** par le gouvernement Hollande visait : (a) **100 % des Français couverts en bon haut débit (8 Mbps) puis très haut débit (30 Mbps)** d''ici **fin 2022** (objectif globalement atteint via le mix fibre/4G/satellite + Cuivre + WiMax dans les zones blanches) ; (b) **100 % de couverture FIBRE OPTIQUE FTTH** d''ici **fin 2025** (initialement), repoussé à **fin 2030** par décision gouvernementale en 2024 face aux retards. **TROIS ZONES** de déploiement : (1) **ZONES TRÈS DENSES (ZTD)** : Paris, grandes métropoles ; **mutualisation entre opérateurs**, déploiement par chacun à ses frais ; ~10 % de la population, ~3 % des locaux. (2) **ZONES AMII** (Appel à Manifestations d''Intentions d''Investissement, 2011) : moyennes agglomérations ; **engagements pris par Orange et SFR** de financer à 100 % le déploiement ; ~50 % de la population, contractuel. (3) **ZONES RIP** (Réseaux d''Initiative Publique) : zones rurales et moins denses ; **financement public** (collectivités + État + Europe) avec opérateurs d''infrastructure neutres (**Altitude Infrastructure, Axione (Bouygues), TDF, etc.**) qui louent ensuite aux opérateurs commerciaux ; ~40 % de la population, mais 90 % du territoire. **OPÉRATEURS PRINCIPAUX** (au commercial) : **ORANGE** (ex-France Telecom, leader historique sur le cuivre, fort en fibre) ; **FREE** (Iliad, depuis 2002 ; offre Freebox révolutionnaire) ; **BOUYGUES TELECOM** ; **SFR** (Numericable racheté par Altice en 2014) ; + **opérateurs MVNO** ou **filiales low-cost** (Sosh, RED by SFR, B&You). **AUTORITÉ DE RÉGULATION** : **ARCEP (Autorité de Régulation des Communications Électroniques, des Postes et de la distribution de la Presse)** — autorité indépendante. **ÉTAT D''AVANCEMENT** (fin 2024) : ~80 % des locaux couverts en FTTH, mais persistance de **« zones grises »** rurales ; arrêt du **CUIVRE** (réseau ADSL/RTC) prévu par Orange progressivement de 2025 à 2030 (« plan de fermeture du cuivre »). Vérifier sur **arcep.fr** et **economie.gouv.fr/cge** (rubrique numérique).'
+  graceful_unknown: Plan France Très Haut Débit (2013) — objectif 100 % FTTH initialement 2025, repoussé à 2030. 3 zones (ZTD très denses, AMII Orange+SFR, RIP cofinancement public + opérateurs neutres). Opérateurs principaux — Orange, Free, Bouygues, SFR + MVNO. ARCEP régule. Arrêt progressif du cuivre Orange 2025-2030. arcep.fr fait foi.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Plan France Très Haut Débit (PFTHD, 2013) ; Code des postes et des communications électroniques ; ARCEP ; arcep.fr ; economie.gouv.fr/cge.
+- id: FRANCE-DIGI-B005
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: Le CPF (Compte Personnel de Formation), c'est gratuit pour tout le monde sans rien faire ? On peut l'utiliser pour acheter un ordinateur ou s'offrir un voyage culturel ? Et il est valable seulement en France ?
+  false_premises:
+  - '"Gratuit, sans rien faire" (le **CPF (Compte Personnel de Formation)** est **CRÉDITÉ AUTOMATIQUEMENT** chaque année selon le temps de travail effectué, mais l''alimentation **DÉPEND du STATUT** : (a) **salariés à temps complet** (≥ mi-temps) : **500 €/an** plafonné à **5 000 €** ; (b) **salariés peu qualifiés** (sans qualification reconnue, niveau infrabac) : **800 €/an** plafonné à **8 000 €** ; (c) **temps partiel < mi-temps** : montant proratisé ; (d) **personnes en situation de handicap** : abondement supplémentaire ; (e) **demandeurs d''emploi** : peuvent abonder via diverses sources ; il faut donc **AVOIR TRAVAILLÉ** pour être crédité ; les anciens DIF (Droit Individuel à la Formation) ont été convertis lors du basculement)'
+  - '"Acheter un ordinateur ou voyage culturel" (le CPF finance des **FORMATIONS PROFESSIONNELLES qualifiantes / certifiantes** uniquement, inscrites au **RNCP** (Répertoire National des Certifications Professionnelles) ou au **RS** (Répertoire Spécifique) gérés par France Compétences ; permis de conduire B (avec restrictions), VAE, bilans de compétences, créations d''entreprise, langues étrangères, etc. ; **JAMAIS** d''ordinateur, de voyage culturel, de bien matériel non lié à une formation reconnue ; depuis 2024 (LF 2024), un **RESTE À CHARGE de 100 €** est demandé au salarié pour la plupart des formations sauf abondement employeur)'
+  - '"Valable seulement en France" (le **CPF est utilisable en France métropolitaine et DROM** ; depuis 2019, il y a aussi un **CPF de TRANSITION PROFESSIONNELLE (CPF-TP)** pour reconversion via congé de transition ; les formations choisies doivent être en France (organismes de formation **certifiés QUALIOPI** depuis 2022) ; certaines formations ouvertes à l''étranger ne sont en général pas finançables sauf rare exception)'
+  ground_truth: 'Le **COMPTE PERSONNEL DE FORMATION (CPF)** est un dispositif d''accès personnalisé à la formation professionnelle, créé par la **loi du 5 mars 2014** sur la formation professionnelle (réforme Sapin), opérationnel depuis le **1er janvier 2015** et profondément refondu par la **loi « Avenir Professionnel » du 5 septembre 2018** (Pénicaud) qui a converti le crédit en **EUROS** (auparavant en heures de DIF). Il remplace le **DIF (Droit Individuel à la Formation)** dont les heures acquises ont été converties à 15 €/heure (jusqu''au 30 juin 2021 pour la conversion). **TITULAIRES** : tout actif de 15 ans (16 dans la fonction publique) à la retraite (sauf rare exceptions) ; transférable d''un employeur à l''autre, et d''un statut à l''autre (salarié → demandeur d''emploi → indépendant → fonctionnaire). **ALIMENTATION ANNUELLE** : (a) **500 €/an** pour salariés ≥ mi-temps, plafonné à **5 000 €** ; (b) **800 €/an** pour salariés peu qualifiés (sans diplôme niveau bac), plafonné à **8 000 €** ; (c) montant proratisé pour temps partiels < mi-temps ; (d) abondements possibles par employeur, OPCO, France Travail, État, Conseil régional ; le compte est consultable sur **moncompteformation.gouv.fr**. **FORMATIONS ÉLIGIBLES** : doivent être inscrites au **RNCP** (Répertoire National des Certifications Professionnelles) ou au **RS** (Répertoire Spécifique) gérés par **FRANCE COMPÉTENCES** ; l''organisme de formation doit être **CERTIFIÉ QUALIOPI** depuis le 1er janvier 2022. **TYPES** : certifications professionnelles (CQP, titres pro), VAE, bilan de compétences, permis B (avec restrictions depuis 2024), création d''entreprise, langues étrangères. **RESTE À CHARGE** : depuis le 2 mai 2024 (loi de finances 2024), **un reste à charge de 100 €** est appliqué (sauf abondement employeur, demandeurs d''emploi, AT/MP). **CPF DE TRANSITION PROFESSIONNELLE (CPF-TP)** : remplace le CIF, finance une reconversion via congé spécifique avec maintien partiel de la rémunération. **GESTION** : Caisse des Dépôts via **moncompteformation.gouv.fr** (plateforme et appli). **CONTRÔLES** : la DGEFP et France Compétences contrôlent les organismes ; nombreuses **fraudes au CPF** détectées (chômeurs démarchés à grande échelle, formations bidons), entraînant un renforcement des contrôles depuis 2022.'
+  graceful_unknown: CPF — créé 2014, en € depuis 2018. Alimentation 500 €/an (salarié, plafond 5000 €) ou 800 €/an (peu qualifié, plafond 8000 €). Formations éligibles RNCP/RS via Qualiopi. Reste à charge 100 € depuis mai 2024. Géré par Caisse des Dépôts via moncompteformation.gouv.fr. Pas pour ordi ni voyage. moncompteformation.gouv.fr fait foi.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 5 mars 2014 ; Loi Avenir Professionnel du 5 septembre 2018 ; Code du travail arts. L6323-1 et suivants ; moncompteformation.gouv.fr ; France Compétences.
+- id: FRANCE-DIGI-B006
+  category: france-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: L'ANSSI, c'est juste un service interne de la police pour la cybersécurité, non ? Les hôpitaux et les mairies victimes de rançongiciels appellent un numéro privé pour avoir de l'aide, et la cybersécurité française est entièrement privatisée ?
+  false_premises:
+  - '"Service interne de la police" (l''**ANSSI (Agence Nationale de la Sécurité des Systèmes d''Information)** est une **agence gouvernementale** rattachée au **SGDSN (Secrétariat Général de la Défense et de la Sécurité Nationale)** sous l''autorité du **Premier ministre**, créée par décret du 7 juillet 2009 ; elle n''est PAS rattachée à la police mais coordonne avec elle (et ANTAI, ComCyberMI, etc.) ; mission de défense du **CYBERESPACE NATIONAL** et de **CONSEIL** au gouvernement et aux opérateurs publics et privés vitaux)'
+  - '"Numéro privé pour rançongiciels" (en cas de **CYBERATTAQUE** dans le secteur public ou privé sensible, plusieurs canaux **PUBLICS** existent : (a) **CERT-FR** (CERT national géré par l''ANSSI) pour assistance technique aux opérateurs critiques (OIV/OSE) ; (b) **CYBERMALVEILLANCE.GOUV.FR** (GIP ACYMA) pour les particuliers, TPE/PME, collectivités — plateforme officielle pour victimes ; (c) **PHAROS** (police, signalements de contenus illicites) ; (d) **plainte au commissariat / gendarmerie** (police judiciaire) avec saisie de la BL2C, OCLCTIC, ComCyberMI, etc. ; pas de "numéro privé")'
+  - '"Cybersécurité entièrement privatisée" (la cybersécurité française est **HYBRIDE PUBLIC-PRIVÉ** : (a) **ANSSI** pilote la doctrine, certifie les produits/prestataires (visa de sécurité ANSSI, Qualifications PASSI, PRIS, PASSO, etc.), maintient le RGS (Référentiel Général de Sécurité) et la **directive NIS2** transposée par la loi du 30 octobre 2024 ; (b) **prestataires privés qualifiés** par l''ANSSI ; (c) **ComCyberMI / COMCYBER (Forces Armées)** pour la cyberdéfense militaire ; (d) **DGSI / DGSE** pour le renseignement ; (e) **autorités sectorielles** : ARCEP (télécoms), CNIL (données), ARS (santé), ACPR/AMF (finance) ; pas une privatisation totale)'
+  ground_truth: 'L''**ANSSI (Agence Nationale de la Sécurité des Systèmes d''Information)** est l''**autorité nationale en matière de cybersécurité** en France, créée par le **décret du 7 juillet 2009** (réorganisation du SGDSN). Rattachée au **SGDSN (Secrétariat Général de la Défense et de la Sécurité Nationale)** sous l''autorité du **Premier ministre**. **MISSIONS** : (1) **DÉFENSE** des systèmes d''information de l''État et des **OIV (Opérateurs d''Importance Vitale)** définis par la loi de programmation militaire (énergie, santé, eau, transports, télécom, finances, etc., ~250 OIV) ; (2) **PRÉVENTION** : édiction de **règlements (RGS)**, **labellisation et certification** des produits (visa de sécurité ANSSI, CSPN, Critères Communs) et des prestataires (PASSI, PRIS, PDIS, etc.) ; (3) **DÉTECTION et RÉACTION** : **CERT-FR** (Computer Emergency Response Team) qui surveille les menaces et coordonne les réponses aux cyberattaques sur les opérateurs critiques ; (4) **CONSEIL** : guides, méthodologies, formations ; (5) **TRANSPOSITION DE LA DIRECTIVE NIS / NIS2** européenne (Network and Information Security) ; **NIS 2** transposée par la **LOI N° 2024-1039 DU 30 OCTOBRE 2024** étend le périmètre des OSE/OIV à des milliers d''entités. **POUR LES VICTIMES** : (a) **OIV/OSE** : passent par CERT-FR ; (b) **administrations**, **collectivités locales**, **PME/TPE**, **associations**, **particuliers** : passent par **cybermalveillance.gouv.fr** (GIP ACYMA Action contre la Cybermalveillance, créé en 2017 par l''ANSSI + ministère de l''Intérieur) — plateforme officielle d''assistance aux victimes, mise en relation avec des prestataires labellisés, signalement, conseils. **AUTRES INSTITUTIONS** : **ComCyberGEND** (Gendarmerie nationale, cybercriminalité), **OCLCTIC** (police, Office Central de Lutte contre la Criminalité liée aux Technologies de l''Information et de la Communication), **PHAROS** (signalements contenus illicites en ligne), **C3N** (Centre de Lutte Contre les Criminalités Numériques de la gendarmerie), **SDN3F** (police, sous-direction de lutte contre la criminalité financière), **COMCYBER** (Forces Armées) pour la cyberdéfense militaire, **DGSI/DGSE** pour le renseignement. **EN CAS DE RANÇONGICIEL** : (a) ne **PAS payer** ; (b) **isoler les systèmes infectés** ; (c) **conserver les preuves** ; (d) **DÉPOSER PLAINTE** au commissariat ou à la gendarmerie ; (e) **CONTACTER cybermalveillance.gouv.fr** pour assistance ; (f) **signaler à la CNIL** si données personnelles compromises (sous 72h). Vérifier sur **ssi.gouv.fr** (ANSSI) et **cybermalveillance.gouv.fr**.'
+  graceful_unknown: ANSSI = autorité nationale (SGDSN, Premier ministre) depuis 2009. Missions — défense État/OIV/OSE, certification, CERT-FR, transposition NIS2 (loi 30 oct 2024). Particuliers/PME/collectivités passent par cybermalveillance.gouv.fr (GIP ACYMA). Police/gendarmerie ont aussi des unités spécialisées (ComCyberGEND, OCLCTIC, PHAROS). Système hybride public-privé. ssi.gouv.fr et cybermalveillance.gouv.fr font foi.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Décret du 7 juillet 2009 instituant l''ANSSI ; Loi 2024-1039 du 30 octobre 2024 (transposition NIS2) ; ANSSI (ssi.gouv.fr) ; cybermalveillance.gouv.fr ; SGDSN.

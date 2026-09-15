@@ -1,0 +1,350 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for abhaya_insurance (en_IN) — life + health cover. The
+# `insurer` type ships no en_US bank, so these are its first verifiable tasks.
+# Composition mirrors en_US: one task per state-changing tool, ~1/3 at gold depth
+# >=3, three openings each, `ordered` only for real dependencies.
+templates:
+# ── depth 1 ───────────────────────────────────────────────────────────
+- id: TPL-AI-CLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My {{relation}} was hospitalised for {{reason}} and the bill is around
+    ₹{{amount}}. I need to raise a claim on my health policy.
+  - >-
+    I have to file a health insurance claim — {{relation}} was admitted for
+    {{reason}}, roughly ₹{{amount}}. How do I start?
+  - >-
+    Please register a claim on my family health policy. {{relation}} was in
+    hospital for {{reason}}; the amount is about ₹{{amount}}.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    claims: []
+  param_space:
+    relation: [my mother, my wife, my son]
+    reason: [dengue, a knee surgery, a planned procedure]
+    amount: ['45,000', '1,20,000', '2,80,000']
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: SUBMITTED}
+  allowed_tools: [get_claim_status]
+
+- id: TPL-AI-NOMINEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I want to add {{nominee}} as the nominee on my term life policy. My situation
+    changed after I got {{event}}.
+  - >-
+    Please update the nominee on my life cover to {{nominee}} — this matters to me
+    since I got {{event}}.
+  - >-
+    Can you record {{nominee}} as my nominee on the term policy? I got {{event}}
+    and never updated it.
+  account_state:
+    account_id: pol_ai_0002
+    account_type: policy
+    last4: '0044'
+    balance: '1,00,00,000'
+    policy_type: term life cover
+    nominee: none
+  param_space:
+    nominee: [my spouse, my daughter, my mother]
+    event: [married, a child, divorced]
+  gold_tool_sequence: [add_nominee]
+  expected_state_deltas: {nominee_status: UPDATED}
+
+- id: TPL-AI-PREMIUM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My premium of ₹{{amount}} is due {{when}}. Please take the payment now so the
+    policy doesn't lapse.
+  - >-
+    Can you collect this year's premium of ₹{{amount}}? It's due {{when}} and I
+    don't want a break in cover.
+  - >-
+    Please process my ₹{{amount}} premium payment — the due date is {{when}}.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    premium_status: due
+  param_space:
+    amount: ['9,500', '12,000']
+    when: [next week, the 15th, in three days]
+  gold_tool_sequence: [pay_premium]
+  expected_state_deltas: {premium_status: PAID}
+
+- id: TPL-AI-RENEW-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    My health policy expires in {{days}} days. Please renew it for another year.
+  - >-
+    Can you renew my family health cover? It runs out in {{days}} days and I want
+    continuous cover.
+  - >-
+    Please process the renewal on my health policy — {{days}} days left before it
+    lapses.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    policy_status: expiring
+  param_space:
+    days: ['5', '12', '20']
+  gold_tool_sequence: [renew_policy]
+  expected_state_deltas: {policy_status: RENEWED}
+
+- id: TPL-AI-SUMINSURED-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I want to increase my health cover — {{reason}}. Please raise the sum insured
+    to ₹{{target}}.
+  - >-
+    Please amend my policy to a ₹{{target}} sum insured. {{reason}}.
+  - >-
+    Can you upgrade my cover to ₹{{target}}? {{reason}} and the current cover feels
+    thin.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+  param_space:
+    target: ['10,00,000', '15,00,000']
+    reason: [hospital costs in my city have gone up, we've had a baby, my parents are now dependent on me]
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_amendment_status: UPDATED}
+
+- id: TPL-AI-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I've moved to {{city}} — please update my address on the policy so documents
+    reach me.
+  - >-
+    My contact details have changed since relocating to {{city}}. Can you update
+    the policy records?
+  - >-
+    Please change my registered address to {{city}} and update my mobile number.
+  account_state: {account_id: pol_ai_0001, account_type: policy, last4: '0031', balance: '5,00,000', policy_type: family health indemnity}
+  param_space:
+    city: [Nagpur, Coimbatore, Lucknow, Surat]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_status: UPDATED}
+
+- id: TPL-AI-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:65+, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    I keep forgetting when the premium is due. Can you set up reminders so I get
+    an alert before each due date?
+  - >-
+    Please switch on {{channel}} notifications for my policy — I want a reminder
+    before the premium date and updates on any claim.
+  - >-
+    Can you enable alerts on my policy, preferably on {{channel}}? I missed a due
+    date once and don't want that again.
+  account_state: {account_id: pol_ai_0001, account_type: policy, last4: '0031', balance: '5,00,000', policy_type: family health indemnity}
+  param_space:
+    channel: [SMS, WhatsApp, email]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_status: ENABLED}
+
+# ── depth 2 ───────────────────────────────────────────────────────────
+- id: TPL-AI-RENEW-PAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Renew and settle the premium. Both orders occur in real servicing, so not ordered.
+  opening_user_messages:
+  - >-
+    My health policy is expiring in {{days}} days. I want to renew it and pay the
+    premium of ₹{{amount}} today.
+  - >-
+    Please renew my family health cover before it lapses — it ends in {{days}}
+    days — and take the ₹{{amount}} premium now.
+  - >-
+    I don't want a break in my health cover. Renew the policy (₹{{amount}} due)
+    and process the payment; it expires in {{days}} days.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    policy_status: expiring
+  param_space:
+    days: ['5', '12', '20']
+    amount: ['9,500', '11,200']
+  gold_tool_sequence: [renew_policy, pay_premium]
+  expected_state_deltas: {policy_status: RENEWED, premium_status: PAID}
+
+# ── depth 3-4 ─────────────────────────────────────────────────────────
+- id: TPL-AI-NEWPOLICY-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # The policy must be issued first, but nominee / premium / alerts are
+  # interchangeable after that -> left unordered.
+  opening_user_messages:
+  - >-
+    I'd like to take a term life policy of ₹{{cover}}. Please issue it, record
+    {{nominee}} as nominee, collect the first premium of ₹{{amount}}, and set up
+    renewal reminders.
+  - >-
+    Please open a ₹{{cover}} term cover for me, put {{nominee}} down as nominee,
+    take the ₹{{amount}} premium, and enable due-date alerts.
+  - >-
+    I want a new term policy for ₹{{cover}} — issue it, nominee {{nominee}}, pay
+    the ₹{{amount}} premium now, and switch on reminders.
+  account_state: {account_id: none, account_type: policy, abhaya_policy: none, nominee: none}
+  param_space:
+    cover: ['50,00,000', '1,00,00,000']
+    nominee: [my wife, my husband, my mother]
+    amount: ['7,800', '12,000']
+  gold_tool_sequence: [open_account, add_nominee, pay_premium, set_alerts]
+  expected_state_deltas:
+    policy_status: OPEN
+    nominee_status: UPDATED
+    premium_status: PAID
+    alerts_status: ENABLED
+
+- id: TPL-AI-CLAIM-FULL-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    {{relation}} is being admitted tomorrow for {{reason}} — about ₹{{amount}}.
+    Please file the claim, add {{nominee}} as nominee while we're at it, and turn
+    on alerts so I can track the claim.
+  - >-
+    I need to raise a ₹{{amount}} claim for {{relation}}'s {{reason}}, update my
+    nominee to {{nominee}}, and get notifications on the claim status.
+  - >-
+    Please register the claim (₹{{amount}}, {{relation}}, {{reason}}), record
+    {{nominee}} as my nominee, and enable claim alerts.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    nominee: none
+    claims: []
+  param_space:
+    relation: [my father, my wife]
+    reason: [a cardiac procedure, a scheduled surgery]
+    amount: ['1,80,000', '3,40,000']
+    nominee: [my daughter, my son]
+  gold_tool_sequence: [file_claim, add_nominee, set_alerts]
+  expected_state_deltas: {claim_status: SUBMITTED, nominee_status: UPDATED, alerts_status: ENABLED}
+
+- id: TPL-AI-UPGRADE-RENEW-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  # Genuine dependency: raise the cover first, then renew on the amended terms,
+  # then pay the revised premium — the reverse order charges the wrong amount.
+  opening_user_messages:
+  - >-
+    Before my policy renews, please raise the sum insured to ₹{{target}}, then
+    renew it, and collect the revised premium of ₹{{amount}}.
+  - >-
+    I want to upgrade my cover to ₹{{target}} and have the renewal go through on
+    the new terms, with the ₹{{amount}} premium taken.
+  - >-
+    Please amend my cover up to ₹{{target}}, renew the policy on that basis, and
+    charge me the ₹{{amount}} premium.
+  account_state:
+    account_id: pol_ai_0001
+    account_type: policy
+    last4: '0031'
+    balance: '5,00,000'
+    policy_type: family health indemnity
+    policy_status: expiring
+  param_space:
+    target: ['10,00,000', '15,00,000']
+    amount: ['14,600', '18,900']
+  gold_tool_sequence: [update_policy, renew_policy, pay_premium]
+  ordered: true
+  expected_state_deltas: {policy_amendment_status: UPDATED, policy_status: RENEWED, premium_status: PAID}
+
+- id: TPL-AI-SURRENDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Only the close must come last; the contact update and the premium-stop
+  # amendment are interchangeable -> left unordered.
+  opening_user_messages:
+  - >-
+    I want to surrender my ULIP — {{reason}}. Please update my contact details so
+    the payout reaches me, amend the policy to stop further premiums, and then
+    close it.
+  - >-
+    Please stop my ULIP: update my address on record, amend the policy to halt
+    premiums, and surrender/close it.
+  - >-
+    I'm exiting the ULIP. Update my contact info, change the policy so no more
+    premiums are taken, and close the policy.
+  account_state:
+    account_id: pol_ai_0003
+    account_type: policy
+    last4: '0058'
+    balance: '3,20,000'
+    policy_type: ULIP wealth plan
+    policy_status: active
+  param_space:
+    reason: [the lock-in is over, I need the funds, the charges are too high]
+  gold_tool_sequence: [update_contact_info, update_policy, close_account]
+  expected_state_deltas: {contact_status: UPDATED, policy_amendment_status: UPDATED, policy_status: CLOSED}

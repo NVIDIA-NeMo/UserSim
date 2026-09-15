@@ -1,0 +1,473 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks: one per state-changing tool northwind_bank offers.
+# Each ships THREE opening phrasings (build_instance picks one per trajectory) so
+# the assistant sees varied turn-1 wording while the gold stays fixed. Read-only
+# tools (get_account_transactions, get_statements, dispute_status) have no
+# verifiable task -- they carry no gold state change.
+templates:
+- id: TPL-NB-DISPUTE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Hi, I'm looking at my account and there's a charge I don't recognize —
+    ${{amount}} at {{merchant}}. I never made that purchase. Can you help me?
+  - >-
+    There's a ${{amount}} transaction from {{merchant}} on my statement that
+    isn't mine. How do I get that reversed?
+  - >-
+    I think I've been charged for something I didn't buy — {{merchant}} for
+    ${{amount}}. Can you dispute it?
+  account_state:
+    account_id: acct_nb_0001
+    cards:
+    - {card_id: card_nb_0001, status: active}
+    transactions:
+    - {transaction_id: txn_nb_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [QuickStream Media, Apex Fitness Group, Nova Electronics, Harborview Utilities]
+    amount: ['89.99', '250.00', '1499.00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_nb_0001.status: UNDER_REVIEW}
+  # freezing the compromised card and ordering a replacement are legitimate
+  # actions a customer often requests during a fraud dispute — permitted (not
+  # required).
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-NB-FREEZECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I think my debit card was {{event}} — can you freeze it right now so no one
+    can use it?
+  - >-
+    Please put a hold on my card ending 0001; it was {{event}} and I'm worried
+    about fraud.
+  - >-
+    Something feels off — my card was {{event}}. Can you lock card ending 0001
+    immediately while I sort this out?
+  account_state:
+    account_id: acct_nb_0001
+    # openings reference "card ending 0001"; pin last4 so the account grounding
+    # the user is given matches (no divergent number for the model to conflate).
+    last4: '0001'
+    cards:
+    - {card_id: card_nb_0001, status: active}
+  param_space:
+    event: [lost, misplaced, stolen]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_nb_0001.status: frozen}
+- id: TPL-NB-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Hi, can you move ${{amount}} from my checking account into my savings account?
+  - >-
+    I'd like to transfer ${{amount}} out of checking and into my savings. Can you
+    set that up?
+  - Please move ${{amount}} from checking to savings for me.
+  account_state:
+    account_id: acct_nb_0001
+    savings_account_id: acct_nb_sav_0001
+    checking_balance: '10000.00'
+  param_space:
+    amount: ['250.00', '1000.00', '5000.00']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-NB-REPLACECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - My debit card ending 0001 was {{reason}} — can you send me a replacement?
+  - >-
+    I need a new debit card; my current one was {{reason}}. Can you order one to my
+    address on file?
+  - >-
+    Can you cancel my current debit card and mail me a new one? Mine was {{reason}}.
+  account_state:
+    account_id: acct_nb_0001
+    # openings reference "card ending 0001"; pin last4 so the account grounding
+    # the user is given matches (no divergent number for the model to conflate).
+    last4: '0001'
+    cards:
+    - {card_id: card_nb_0001, status: active}
+  param_space:
+    reason: [lost, stolen, damaged]
+  gold_tool_sequence: [order_replacement_card]
+  # blocking the lost/stolen card first is a legitimate protective step — permitted.
+  allowed_tools: [freeze_card]
+  expected_state_deltas: {card_nb_0001.replacement: ordered}
+- id: TPL-NB-STOPPAYMENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I wrote a check (#{{check_no}}) to {{payee}} that I need to cancel before it
+    clears. Can you put a stop payment on it?
+  - Can you stop a pending payment of ${{amount}} to {{payee}} on my account?
+  - >-
+    Before check #{{check_no}} to {{payee}} goes through, I need it stopped — can
+    you take care of that?
+  account_state:
+    account_id: acct_nb_0001
+    pending_payments:
+    - {payment_id: pay_nb_0001, payee: '{{payee}}', amount: '{{amount}}', check_no: '{{check_no}}'}
+  param_space:
+    payee: [Cedar Ridge Property Mgmt, Summit Insurance, Brightway Auto]
+    amount: ['320.00', '1200.00']
+    check_no: ['1042', '1058']
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {pay_nb_0001.status: STOPPED}
+- id: TPL-NB-PAYBILL-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Can you pay my {{payee}} bill — ${{amount}} — from my checking account?
+  - >-
+    I need to pay {{payee}} ${{amount}} today. Can you process that from my
+    checking?
+  - Please schedule a ${{amount}} payment to {{payee}} out of my checking account.
+  account_state:
+    account_id: acct_nb_0001
+    payees:
+    - {payee_id: payee_nb_0001, name: '{{payee}}'}
+  param_space:
+    payee: [Pacific Gas & Electric, Citywide Water, Northstar Telecom]
+    amount: ['84.50', '156.00', '412.30']
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {payment_status: SCHEDULED}
+- id: TPL-NB-ACTIVATECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - My new debit card just arrived in the mail — can you activate it for me?
+  - I got my replacement card. How do I activate it? Can you do it on your end?
+  - My replacement card is here — please turn it on so I can start using it.
+  account_state:
+    account_id: acct_nb_0001
+    cards:
+    - {card_id: card_nb_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_nb_0002.status: active}
+- id: TPL-NB-OPENACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}} account with Northwind. Can you help me get
+    that started?
+  - Can I open a new {{acct_type}} account? I'm already a customer.
+  - I want to add a {{acct_type}} account to my profile — what do I need to do?
+  account_state:
+    customer_id: cust_nb_0001
+  param_space:
+    acct_type: [savings, second checking, money market]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-NB-CLOSEACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to close my {{acct_type}} account — I'm not using it anymore. Can you
+    take care of that?
+  - Please close my {{acct_type}} account; move any remaining balance to my checking.
+  - I no longer need my {{acct_type}} account — please shut it down for me.
+  account_state:
+    account_id: acct_nb_sav_0001
+    balance: '0.00'
+  param_space:
+    acct_type: [savings, money market]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_nb_sav_0001.status: CLOSED}
+  # one opening asks to sweep the remaining balance to checking before closing --
+  # a legitimate, customer-requested action (permitted, not required).
+  allowed_tools: [transfer_funds]
+- id: TPL-NB-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I just moved — can you update my address on file to {{address}}?
+  - I need to change my {{field}} on my account. The new one is {{value}}.
+  - Please update my {{field}} to {{value}} on my profile.
+  account_state:
+    customer_id: cust_nb_0001
+  param_space:
+    address: ['482 Elmwood Ave, Portland OR 97201', '19 Lakeshore Dr, Madison WI 53703']
+    field: [phone number, email address]
+    value: ['503-555-0142', 'j.rivera@example.com']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-NB-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to add {{beneficiary}} as the payable-on-death beneficiary on my
+    account. Can you update that?
+  - Can you set the beneficiary on my checking account to {{beneficiary}}?
+  - Please record {{beneficiary}} as the beneficiary on my account.
+  account_state:
+    account_id: acct_nb_0001
+  param_space:
+    beneficiary: [my daughter, my brother, my spouse]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-NB-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Can you set up an alert to text me whenever my balance drops below
+    ${{threshold}}?
+  - I'd like to turn on notifications for {{alert}}. Can you enable that?
+  - Please switch on {{alert}} alerts for my account.
+  account_state:
+    account_id: acct_nb_0001
+  param_space:
+    threshold: ['100', '500']
+    alert: [large purchases over $200, every direct deposit, low balance warnings]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_updated: true}
+- id: TPL-NB-AUTHUSER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to add {{person}} as an authorized user on my account. What do you
+    need from me?
+  - Can you add {{person}} as a joint authorized user so they can access the account?
+  - Please give {{person}} authorized access to my account.
+  account_state:
+    account_id: acct_nb_0001
+  param_space:
+    person: [my wife, my son]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Ordered gold sequences (depth 3-4): each gold tool must be discovered (its
+# tool-doc retrieved) and called in order. The verifier requires the full
+# ordered sequence with no unauthorized state changes. Run these with a higher
+# max_turns (~10-12) so the multi-step flow can complete.
+- id: TPL-NB-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I lost my wallet with my debit card ending 0001 in it, and I just saw a
+    ${{amount}} charge from {{merchant}} I never made. Can you freeze the card,
+    dispute that charge, and send me a replacement?
+  - >-
+    My card ending 0001 is gone and there's a bogus ${{amount}} charge from
+    {{merchant}}. Please lock it, contest the charge, and mail me a new card.
+  - >-
+    Someone may have my card ending 0001 — freeze it, open a dispute on the
+    ${{amount}} {{merchant}} charge, and order me a replacement.
+  account_state:
+    account_id: acct_nb_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_nb_0001, status: active}
+    transactions:
+    - {transaction_id: txn_nb_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Apex Fitness Group, Nova Electronics, QuickStream Media]
+    amount: ['129.99', '480.00']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_nb_0001.status: frozen, txn_nb_0002.status: UNDER_REVIEW, card_nb_0001.replacement: ordered}
+- id: TPL-NB-NEWACCT-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}}, add {{person}} as an authorized user on it,
+    and turn on low-balance alerts. Can you set all that up?
+  - >-
+    Please open a {{acct_type}} for me, give {{person}} authorized access, and
+    switch on balance alerts.
+  - >-
+    Can you get me a new {{acct_type}}, add {{person}} to it, and set up alerts so
+    I know when the balance runs low?
+  account_state:
+    account_id: acct_nb_0001
+  param_space:
+    acct_type: [second checking account, money market account]
+    person: [my wife, my son]
+  gold_tool_sequence: [open_account, manage_authorized_users, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, authorized_users_updated: true, alerts_updated: true}
+- id: TPL-NB-REORG-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I want to reorganize my accounts: move the ${{amount}} balance out of my old
+    savings into my checking, close that savings, then open a new high-yield
+    savings and set a low-balance alert on it.
+  - >-
+    Please sweep the ${{amount}} from my savings to checking, close the old
+    savings, open a new high-yield savings, and turn on alerts for it.
+  - >-
+    Let's clean things up — empty my savings (${{amount}}) into checking, shut it
+    down, open a fresh high-yield savings, and add a balance alert.
+  account_state:
+    account_id: acct_nb_sav_0001
+    last4: '0001'
+    balance: '{{amount}}'
+    checking_account_id: acct_nb_0001
+  param_space:
+    amount: ['2500.00', '8000.00']
+  gold_tool_sequence: [transfer_funds, close_account, open_account, set_alerts]
+  expected_state_deltas: {acct_nb_sav_0001.status: CLOSED, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-NB-DISPUTE-STOP-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Two things went wrong: please stop payment on check #{{check_no}} that I sent
+    by mistake, dispute the duplicate ${{amount}} {{merchant}} charge, and then
+    pay my {{payee}} bill correctly.
+  - >-
+    I need you to stop check #{{check_no}}, contest the double ${{amount}} charge
+    from {{merchant}}, and make the correct payment to {{payee}}.
+  - >-
+    Can you put a stop payment on check #{{check_no}}, open a dispute on that
+    ${{amount}} {{merchant}} double-charge, and pay {{payee}}?
+  account_state:
+    account_id: acct_nb_0001
+    payments:
+    - {payment_id: pay_nb_0002, payee: '{{payee}}', amount: '{{amount}}', check_no: '{{check_no}}'}
+    transactions:
+    - {transaction_id: txn_nb_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    check_no: ['1042', '1071']
+    amount: ['85.00', '240.00']
+    merchant: [Harborview Utilities, Nova Electronics]
+    payee: [City Water, Summit Insurance]
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, pay_bill]
+  expected_state_deltas: {pay_nb_0002.status: STOPPED, txn_nb_0003.status: UNDER_REVIEW, bill_paid: true}
+- id: TPL-NB-MOVE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm switching banks. Please update my address to {{address}}, move my balance
+    into savings, and then close my checking.
+  - >-
+    Update my address to {{address}}, sweep my checking balance to savings, and
+    close the checking account.
+  - >-
+    I've moved to {{address}} — change it on file, transfer my checking balance to
+    savings, then close checking.
+  account_state:
+    account_id: acct_nb_0001
+    savings_account_id: acct_nb_sav_0001
+  param_space:
+    address: ['482 Elmwood Ave, Portland OR 97201', '19 Lakeshore Dr, Madison WI 53703']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_updated: true, transfer_status: COMPLETED, acct_nb_0001.status: CLOSED}
+- id: TPL-NB-DIVORCE-SPLIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    After my divorce I need to remove {{ex}} as an authorized user, change my
+    beneficiary to {{person}}, and update my address to {{address}}.
+  - >-
+    Please take {{ex}} off as authorized user, set my beneficiary to {{person}},
+    and update my address to {{address}}.
+  - >-
+    Remove {{ex}}'s access, name {{person}} as my beneficiary, and change my
+    address to {{address}}.
+  account_state:
+    account_id: acct_nb_0001
+  param_space:
+    ex: [my former spouse, my ex-partner]
+    person: [my daughter, my brother]
+    address: ['482 Elmwood Ave, Portland OR 97201', '19 Lakeshore Dr, Madison WI 53703']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, update_contact_info]
+  expected_state_deltas: {authorized_users_updated: true, beneficiary_updated: true, contact_updated: true}
+- id: TPL-NB-TRAVEL-PREP-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm traveling soon — my card ending 0001 is worn out, so order a replacement,
+    turn on travel/large-purchase alerts, and pay my {{payee}} bill early.
+  - >-
+    Before my trip: send a new card to replace the worn one ending 0001, set up
+    alerts, and pay {{payee}} now.
+  - >-
+    Can you order a replacement for my worn card ending 0001, enable travel
+    alerts, and pay my {{payee}} bill ahead of time?
+  account_state:
+    account_id: acct_nb_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_nb_0001, status: active}
+  param_space:
+    payee: [City Water, Summit Insurance]
+  gold_tool_sequence: [order_replacement_card, set_alerts, pay_bill]
+  expected_state_deltas: {card_nb_0001.replacement: ordered, alerts_updated: true, bill_paid: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_US/dynamic.yaml), not scripted templates.

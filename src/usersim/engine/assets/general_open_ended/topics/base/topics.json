@@ -1,0 +1,194 @@
+[
+  {
+    "type": "health_navigation",
+    "description": "Health navigation with symptoms, uncertainty, and when-to-seek-care boundaries"
+  },
+  {
+    "type": "benefits_forms",
+    "description": "Public benefits forms with missing documents and confusing eligibility"
+  },
+  {
+    "type": "consumer_dispute",
+    "description": "Consumer dispute resolution with receipts, warranties, and escalation options"
+  },
+  {
+    "type": "local_transport",
+    "description": "Local transport planning with accessibility, timing, and cost tradeoffs"
+  },
+  {
+    "type": "elder_care",
+    "description": "Care planning for older relatives with emotional and logistical constraints"
+  },
+  {
+    "type": "small_business_ops",
+    "description": "Small-business operations, permits, tax, staffing, and customer issues"
+  },
+  {
+    "type": "housing_repair",
+    "description": "Housing repair, landlord, insurance, and maintenance decisions"
+  },
+  {
+    "type": "digital_security",
+    "description": "Everyday digital security, account recovery, and scam avoidance"
+  },
+  {
+    "type": "career_transition",
+    "description": "Career changes, resumes, interviews, and training paths"
+  },
+  {
+    "type": "school_family",
+    "description": "School-family communication, tutoring, and special-needs support"
+  },
+  {
+    "type": "climate_weather",
+    "description": "Weather, climate risk, heat, flooding, and household preparation"
+  },
+  {
+    "type": "legal_process",
+    "description": "Legal process navigation with non-lawyer safe guidance"
+  },
+  {
+    "type": "community_conflict",
+    "description": "Neighborhood or workplace conflict requiring tactful communication"
+  },
+  {
+    "type": "travel_constraints",
+    "description": "Travel planning with visa, mobility, budget, or family constraints"
+  },
+  {
+    "type": "civic_participation",
+    "description": "Voting, local meetings, complaints, and public-service follow-up"
+  },
+  {
+    "type": "financial_tradeoffs",
+    "description": "Budgeting, debt, saving, insurance, and risk tradeoffs"
+  },
+  {
+    "type": "tech_troubleshooting",
+    "description": "Device/app troubleshooting with low digital literacy"
+  },
+  {
+    "type": "food_culture",
+    "description": "Food, cooking, culture, diet constraints, and family preferences"
+  },
+  {
+    "type": "agriculture_rural",
+    "description": "Rural, farming, crop, equipment, and market questions"
+  },
+  {
+    "type": "creative_planning",
+    "description": "Creative projects with unclear goals and audience constraints"
+  },
+  {
+    "type": "medical_admin",
+    "description": "Appointments, prescriptions, referrals, bills, and records"
+  },
+  {
+    "type": "immigration_documents",
+    "description": "Immigration or identity-document process navigation at high level"
+  },
+  {
+    "type": "tax_records",
+    "description": "Tax records, deadlines, and document organization"
+  },
+  {
+    "type": "public_safety",
+    "description": "Emergency preparedness and safe reporting of concerns"
+  },
+  {
+    "type": "energy_utilities",
+    "description": "Utility bills, outages, efficiency, and service disputes"
+  },
+  {
+    "type": "childcare_parenting",
+    "description": "Childcare, parenting routines, school coordination"
+  },
+  {
+    "type": "mental_wellbeing",
+    "description": "Stress, burnout, and non-clinical wellbeing support"
+  },
+  {
+    "type": "accessibility",
+    "description": "Accessibility accommodations and inclusive planning"
+  },
+  {
+    "type": "language_translation",
+    "description": "Translation, code-switching, and register-sensitive wording"
+  },
+  {
+    "type": "shopping_decisions",
+    "description": "Product comparison and purchase tradeoffs"
+  },
+  {
+    "type": "home_projects",
+    "description": "Home projects with safety and budget constraints"
+  },
+  {
+    "type": "event_planning",
+    "description": "Event planning with guest, venue, dietary, and schedule constraints"
+  },
+  {
+    "type": "data_privacy",
+    "description": "Privacy choices around apps, forms, and shared documents"
+  },
+  {
+    "type": "workplace_policy",
+    "description": "Workplace policy, HR processes, and manager communication"
+  },
+  {
+    "type": "education_pathways",
+    "description": "Course, degree, certification, and scholarship planning"
+  },
+  {
+    "type": "retirement_planning",
+    "description": "Retirement paperwork, benefits, and household planning"
+  },
+  {
+    "type": "public_health",
+    "description": "Public-health guidance without diagnosis or alarmism"
+  },
+  {
+    "type": "local_history",
+    "description": "Local history and cultural context questions"
+  },
+  {
+    "type": "transport_disruption",
+    "description": "Planning around strikes, closures, weather, and delays"
+  },
+  {
+    "type": "community_services",
+    "description": "Finding community support while preserving dignity"
+  },
+  {
+    "type": "insurance_claims",
+    "description": "Insurance claims, evidence, and escalation"
+  },
+  {
+    "type": "environmental_choices",
+    "description": "Recycling, conservation, and local environmental tradeoffs"
+  },
+  {
+    "type": "sports_recreation",
+    "description": "Sports, recreation, and hobby planning"
+  },
+  {
+    "type": "pets_animals",
+    "description": "Pet care logistics and animal-service questions"
+  },
+  {
+    "type": "religious_cultural_events",
+    "description": "Religious/cultural events and respectful etiquette"
+  },
+  {
+    "type": "news_literacy",
+    "description": "Understanding claims, misinformation, and source quality"
+  },
+  {
+    "type": "personal_admin",
+    "description": "Organizing personal records, calendars, and tasks"
+  },
+  {
+    "type": "relationship_communication",
+    "description": "Difficult personal communication and boundaries"
+  }
+]

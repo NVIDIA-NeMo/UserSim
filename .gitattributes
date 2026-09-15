@@ -1,0 +1,4 @@
+# uv.lock is generated. Never hand-merge it -- a line-level merge produces a
+# lockfile that resolves to nothing coherent. On conflict, regenerate with
+# `uv lock`. linguist-generated keeps the 600KB+ diff collapsed in review.
+uv.lock merge=binary linguist-generated=true

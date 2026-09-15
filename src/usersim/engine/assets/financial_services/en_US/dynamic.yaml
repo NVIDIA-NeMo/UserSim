@@ -1,0 +1,198 @@
+schema_version: v0.1
+locale: en_US
+taxonomy_id: en_US_financial_services_dynamic
+taxonomy_version: v0.3.0
+placeholder: true
+# Dynamic-tier taxonomy: authored open-ended topic neighborhoods for the
+# `dynamic` tier. Categories are tagged by the institution TYPE(s) they apply
+# to (bank | brokerage | retirement_provider | wealth_manager); at runtime the
+# probe scopes categories to the single institution the conversation is
+# grounded in. Invitations set a topic boundary in the persona's voice (NOT a
+# question); subtopic_hints are neighborhoods (NOT questions). >=2 hints each.
+# Some hints are deliberately COMPARATIVE / MULTI-DOCUMENT ("how X, Y, and Z
+# compare on ...") so a grounded answer requires synthesizing across several
+# knowledge-base documents (multiple kb_search calls) rather than one lookup --
+# this drives retrieval depth without turning the advisory tier transactional.
+# Optional persona_affinities SOFT-WEIGHT selection toward ecologically-valid
+# personas (persona tags like age:65+ / financial-literacy:low); a soft prior
+# only (never a hard filter), so coverage of every category is preserved.
+categories:
+- id: banking-account-fit
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to talk through which of the bank's everyday deposit accounts actually fits how you manage money, in your own words.
+  subtopic_hints:
+  - checking vs. savings vs. money-market fit for how you actually spend
+  - how balance minimums and monthly fees interact with your cash flow
+  - when a higher-yield account is worth the strings attached
+  - overdraft protection options and what each one really costs
+  - keeping an emergency buffer separate from spending money
+  - what changes if a second person is on the account
+  - how the everyday checking, high-yield savings, and money-market accounts compare side by side on fees, minimums, and access
+  - the whole overdraft picture at once — each protection option, its cost, and how it interacts with your balance minimums
+- id: banking-fees-and-disputes
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to work through a fee, a charge, or a card problem on your account and understand what your options are.
+  subtopic_hints:
+  - which fees can be waived or avoided and how
+  - the difference between disputing a charge and reporting fraud
+  - what happens to a card while a dispute is open
+  - provisional credit timelines and what to expect
+  - how to stop a recurring charge you no longer want
+  - what documentation helps when you escalate
+  - the end-to-end dispute path — which fees are at stake, how disputing differs from reporting fraud, and what happens to the card throughout
+  - every avoidable fee on the account compared with the specific waiver path for each
+- id: brokerage-account-choice
+  applies_to_types: [brokerage]
+  persona_affinities: [age:18-24, age:25-34, financial-literacy:high]
+  invitation: You want to think out loud about which brokerage account type makes sense for your situation.
+  subtopic_hints:
+  - taxable brokerage vs. a tax-advantaged account for your goal
+  - individual vs. joint vs. custodial ownership trade-offs
+  - what a cash account gives up compared with a margin account
+  - how account choice interacts with the timeline for the money
+  - what paperwork or eligibility a given account type needs
+  - moving an existing account over vs. starting fresh
+  - the individual, joint, custodial, and margin accounts compared side by side on eligibility, costs, and what each is for
+  - how account type, ownership, and the money's timeline together point to one choice
+- id: brokerage-costs-and-mechanics
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: You want to understand how the brokerage's costs and trade mechanics would actually apply to you.
+  subtopic_hints:
+  - which activities carry commissions, fees, or interest
+  - when margin costs kick in and how they compound
+  - what settlement means for when your cash is usable
+  - how the firm decides which lots you sell for tax purposes
+  - what a corporate action does to your position
+  - what happens to fractional shares if you transfer out
+  - how commissions, margin interest, and settlement timing stack together for an active trader
+  - the full cost of a margin position over time — interest, maintenance requirements, and settlement
+- id: retirement-contribution-strategy
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: You want to talk through how to approach contributing to your retirement account, in your own words.
+  subtopic_hints:
+  - Roth vs. traditional treatment and what drives the choice
+  - how the employer match and vesting schedule affect timing
+  - contribution limits and catch-up rules as you get older
+  - balancing this account against other savings goals
+  - what a pre-tax vs. after-tax dollar means for take-home pay
+  - how a job change affects contributions in flight
+  - how Roth vs. traditional treatment, the employer match, and the annual limits interact for one contribution plan
+  - the combined limit picture — regular limits, catch-up rules, and how the employer match counts against them
+- id: retirement-rollover-and-withdrawal
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: You want to work through moving money into or out of a retirement account and understand the guardrails.
+  subtopic_hints:
+  - direct vs. indirect rollover and the 60-day trap
+  - what triggers early-withdrawal penalties and the exceptions
+  - how required minimum distributions work once they start
+  - rolling an old workplace plan into an IRA vs. leaving it
+  - what a hardship withdrawal actually allows
+  - keeping pre-tax and Roth money from getting commingled
+  - the full rollover picture at once — direct vs. indirect rules, the 60-day and penalty traps, and how RMDs fit later
+  - staying in-plan vs. rolling to an IRA vs. cashing out, compared on taxes, penalties, and timing
+- id: wealth-portfolio-fit
+  applies_to_types: [wealth_manager]
+  persona_affinities: [financial-literacy:high]
+  invitation: You want to talk through which managed portfolio approach fits your goals and comfort with risk.
+  subtopic_hints:
+  - how a stated risk tolerance maps to a portfolio mix
+  - active vs. passive management trade-offs for your goal
+  - what tax-managed or ESG options change about the approach
+  - how rebalancing is handled and how often
+  - what a given minimum gets you in service level
+  - how the portfolio would shift as you near your goal
+  - the managed, tax-managed, and ESG portfolios compared together on approach, minimums, and fees
+  - how risk tolerance, account minimums, and fee tier together determine the service level you'd get
+- id: wealth-advisory-costs-and-planning
+  applies_to_types: [wealth_manager]
+  persona_affinities: [financial-literacy:high, age:55-64]
+  invitation: You want to understand what the advisory relationship costs and what planning it actually covers.
+  subtopic_hints:
+  - how advisory fees are charged and what they include
+  - the difference between planning advice and product sales
+  - what a financial plan covers beyond investments
+  - how often you'd meet and what reviews look like
+  - what a fiduciary standard means for the advice you get
+  - which decisions still need a tax or legal professional
+  - the total cost-and-value picture — how advisory fees are charged, what planning covers, and the fiduciary standard behind it
+  - what the advisory relationship includes compared with what costs extra or needs an outside professional
+# ── Cross-cutting servicing neighborhoods (span multiple institution types) ──
+- id: account-lifecycle
+  applies_to_types: [bank, brokerage, retirement_provider, wealth_manager]
+  invitation: You want to think through opening a new account here or closing one you no longer need, and what's involved.
+  subtopic_hints:
+  - what to have ready to open an account and how long it takes
+  - whether to open a new account or add to an existing one
+  - what happens to automatic transfers and links when you close an account
+  - moving a balance out cleanly before closing
+  - fees, tax forms, or minimums tied to opening or closing
+  - what an account type change means vs. opening a fresh one
+  - the full close-out sequence — settling the balance, tax forms, and what happens to linked transfers — versus just switching account types
+  - opening compared with closing end to end on requirements, timelines, fees, and paperwork
+- id: beneficiaries-and-estate
+  applies_to_types: [bank, brokerage, retirement_provider, wealth_manager]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: You want to work through who inherits this account and how to set that up correctly.
+  subtopic_hints:
+  - naming or changing a beneficiary and why it matters
+  - payable-on-death / transfer-on-death vs. going through a will
+  - primary vs. contingent beneficiaries and splitting shares
+  - keeping beneficiaries current after a life change
+  - how account titling interacts with an estate plan
+  - which pieces still need an estate attorney
+  - how beneficiary designations, account titling, and POD/TOD rules fit together across your accounts
+  - primary vs. contingent beneficiaries, share splits, and how each interacts with a will, all at once
+- id: authorized-access
+  applies_to_types: [bank, brokerage, wealth_manager]
+  invitation: You want to understand how to let someone else help with or access this account, and the limits of that.
+  subtopic_hints:
+  - adding an authorized user vs. a joint owner
+  - what an authorized person can and cannot do
+  - giving an advisor or family member view-only access
+  - removing access when circumstances change
+  - what a power of attorney changes here
+  - how liability and ownership differ across these options
+  - authorized user vs. joint owner vs. power of attorney compared on what each can do and who's liable
+  - the full access picture — what each arrangement grants, its limits, and how to unwind it
+- id: money-movement
+  applies_to_types: [bank, brokerage]
+  invitation: You want to talk through moving money in, out, or between accounts and what to expect on timing and limits.
+  subtopic_hints:
+  - internal transfers vs. external / ACH and how long each takes
+  - deposit and withdrawal limits and holds on new funds
+  - when moved money is actually available to use
+  - linking an outside bank account for transfers
+  - recurring vs. one-time transfers
+  - what a stopped or returned transfer means
+  - internal, ACH, and wire transfers compared together on timing, limits, and holds
+  - the whole timing picture — holds on new funds, when money is available, and limits across each transfer method
+- id: card-and-payments
+  applies_to_types: [bank]
+  invitation: You want to sort out something about your card or a payment on your account.
+  subtopic_hints:
+  - replacing a lost, stolen, or damaged card and the timeline
+  - activating a new card and setting a PIN
+  - stopping a payment vs. disputing one that already posted
+  - setting up or changing autopay and bill payments
+  - what a temporary freeze does vs. cancelling a card
+  - travel or merchant blocks and how to lift them
+  - the replace-and-secure flow end to end — freeze vs. cancel, ordering and activating a replacement, and updating autopay so nothing bounces
+  - how stopping a payment, disputing a posted charge, and setting up autopay differ and connect
+- id: account-security
+  applies_to_types: [bank, brokerage]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: You want to make sure your account is protected and understand how to spot and respond to fraud.
+  subtopic_hints:
+  - recognizing scams and phishing that target account holders
+  - steps to take right away if you think you were compromised
+  - alerts and controls that reduce unauthorized-use risk
+  - how the institution verifies it's really you
+  - what protections cover unauthorized transactions
+  - keeping login and contact info secure and current
+  - the full compromise-response playbook — immediate steps, the alerts and verification controls, and what protections cover unauthorized transactions
+  - how alerts, identity verification, and transaction protections work together to reduce risk

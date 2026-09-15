@@ -1,0 +1,17 @@
+[
+    {"type": "health", "description": "健康、ウェルネス、医療に関する話題"},
+    {"type": "finance", "description": "家計管理、銀行、お金のやりくり"},
+    {"type": "cooking", "description": "料理、レシピ、食材の下ごしらえ"},
+    {"type": "local_government", "description": "市区町村の行政サービスと手続き"},
+    {"type": "technology", "description": "テクノロジー、ガジェット、デジタルサービス"},
+    {"type": "agriculture", "description": "農業、畜産、作物の管理"},
+    {"type": "travel", "description": "旅行の計画、観光地、旅のコツ"},
+    {"type": "education", "description": "教育制度、学校、学習リソース"},
+    {"type": "environment", "description": "環境問題、気候変動、持続可能性"},
+    {"type": "entertainment", "description": "エンターテインメント、メディア、余暇活動"},
+    {"type": "legal", "description": "法律上の権利、手続き、規制"},
+    {"type": "housing", "description": "住宅、不動産、家の管理"},
+    {"type": "transportation", "description": "交通手段と通勤・通学"},
+    {"type": "employment", "description": "就職活動、職場の問題、キャリア相談"},
+    {"type": "family", "description": "家族生活、子育て、人間関係"}
+]

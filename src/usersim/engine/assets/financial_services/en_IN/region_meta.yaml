@@ -1,0 +1,81 @@
+locale: en_IN
+region: IN
+currency: INR
+currency_symbol: ₹
+bank_id: en_IN_financial_services
+bank_version: v0.1.0
+task_contract_version: v0.1.0
+domain_regulators:
+  retail_banking:
+    regulators:
+    - RBI
+    - DICGC
+    regulator_text: Indian retail banking is regulated by the Reserve Bank of India.
+      RBI KYC Master Directions govern customer identification (PAN/Aadhaar-based)
+      before account actions; deposits are insured by DICGC up to ₹5,00,000 per depositor
+      per bank; unauthorised electronic transactions follow RBI's limited-liability
+      circular with reporting-time-based liability; unresolved complaints escalate
+      to the RBI Integrated Ombudsman Scheme. Agents must verify identity before disclosing
+      or changing account state and must not misstate deposit-insurance cover.
+  cards:
+    regulators:
+    - RBI
+    regulator_text: Debit and credit cards follow RBI's Master Direction on Credit
+      and Debit Cards. Billing disputes, chargeback timelines, card-on-file tokenisation,
+      and explicit customer consent for limit changes or add-on features all apply.
+      Agents must not misstate interest (quoted monthly AND annualised), fees, or
+      dispute rights, and must not upgrade or upsell a card without consent.
+  payments:
+    regulators:
+    - RBI
+    - NPCI
+    regulator_text: Payments run on NPCI-operated rails (UPI, IMPS, NEFT, AePS) under
+      RBI oversight, with the Prepaid Payment Instruments Master Direction governing
+      wallets and KYC-tiered limits. Failed-transaction refunds follow RBI's harmonised
+      turn-around-time framework with compensation for delays. Agents must never ask
+      for a UPI PIN, OTP, or card CVV, and must direct suspected fraud to the reporting
+      and chargeback path.
+  lending_mortgage:
+    regulators:
+    - RBI
+    regulator_text: 'Non-banking lenders follow RBI''s Scale Based Regulation, the
+      Fair Practices Code, and the Digital Lending Guidelines: a Key Fact Statement
+      disclosing the all-in annualised cost before sanction, no hidden charges, transparent
+      foreclosure/prepayment terms, and non-coercive collection with defined hours
+      and escalation. Gold loans are subject to a loan-to-value ceiling and documented
+      collateral custody/auction rules. Agents must not misstate interest, fees, or
+      repossession consequences.'
+  brokerage_investing:
+    regulators:
+    - SEBI
+    - AMFI
+    - NSE
+    - BSE
+    regulator_text: Securities activity is regulated by SEBI with exchange-level conduct
+      rules (NSE/BSE) and AMFI conventions for mutual-fund distribution. Mutual-fund
+      communications must carry market-risk language ("subject to market risks, read
+      all scheme related documents carefully"); ELSS carries a statutory lock-in;
+      demat operations follow depository rules. Agents must not guarantee or project
+      returns, must disclose brokerage and depository charges, and must not give individualized
+      tax advice.
+  insurance:
+    regulators:
+    - IRDAI
+    regulator_text: 'Insurance is regulated by IRDAI under the Protection of Policyholders''
+      Interests regulations: a free-look window to return a policy, disclosure of
+      waiting periods, exclusions and sub-limits before sale, defined claim intimation
+      and settlement timelines, mandatory nominee capture, and a grievance path escalating
+      to the Insurance Ombudsman. Agents must not misstate coverage or claim eligibility
+      and must not present insurance as a guaranteed-return investment.'
+identity_verification:
+  required_fields:
+  - full_name
+  - date_of_birth
+  - pan
+placeholder: true
+account_labels:
+  retail_banking: savings account
+  payments: wallet account
+number_format: en_IN
+privacy_regime: DPDP Act 2023
+schema_version: v0.1

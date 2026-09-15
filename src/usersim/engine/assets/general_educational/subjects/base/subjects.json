@@ -1,0 +1,162 @@
+[
+  {
+    "type": "basic_math_word_problems",
+    "description": "Basic arithmetic and word problems with step-by-step scaffolding"
+  },
+  {
+    "type": "algebra_functions",
+    "description": "Algebra, functions, and graph interpretation"
+  },
+  {
+    "type": "statistics_data_literacy",
+    "description": "Statistics, averages, uncertainty, and chart reading"
+  },
+  {
+    "type": "physics_everyday",
+    "description": "Everyday physics with intuition and equations when useful"
+  },
+  {
+    "type": "chemistry_safety",
+    "description": "Chemistry concepts with lab-safety boundaries"
+  },
+  {
+    "type": "biology_health_literacy",
+    "description": "Biology and health literacy without medical diagnosis"
+  },
+  {
+    "type": "computer_basics",
+    "description": "Computer basics for low digital literacy learners"
+  },
+  {
+    "type": "programming_debugging",
+    "description": "Programming concepts and debugging strategy"
+  },
+  {
+    "type": "ai_literacy",
+    "description": "AI literacy, limitations, privacy, and prompt clarity"
+  },
+  {
+    "type": "reading_comprehension",
+    "description": "Reading comprehension and summarization"
+  },
+  {
+    "type": "writing_revision",
+    "description": "Writing, revision, tone, and audience"
+  },
+  {
+    "type": "language_learning_practice",
+    "description": "Language learning practice with corrections"
+  },
+  {
+    "type": "history_sources",
+    "description": "History using primary/secondary source reasoning"
+  },
+  {
+    "type": "civics_government",
+    "description": "Civics, rights, institutions, and participation"
+  },
+  {
+    "type": "financial_literacy",
+    "description": "Budgeting, interest, credit, and tradeoffs"
+  },
+  {
+    "type": "career_skills",
+    "description": "Career skills, resumes, interviews, workplace writing"
+  },
+  {
+    "type": "study_skills",
+    "description": "Study plans, memory, and exam preparation"
+  },
+  {
+    "type": "adult_basic_education",
+    "description": "Adult basic education with respectful scaffolding"
+  },
+  {
+    "type": "vocational_healthcare",
+    "description": "Healthcare-adjacent vocational concepts"
+  },
+  {
+    "type": "vocational_trades",
+    "description": "Trades math, measurement, and safety reasoning"
+  },
+  {
+    "type": "entrepreneurship",
+    "description": "Entrepreneurship, pricing, inventory, and customers"
+  },
+  {
+    "type": "environmental_science",
+    "description": "Environmental science and local impacts"
+  },
+  {
+    "type": "geography_maps",
+    "description": "Maps, geography, and spatial reasoning"
+  },
+  {
+    "type": "media_literacy",
+    "description": "Media literacy and misinformation checks"
+  },
+  {
+    "type": "logic_arguments",
+    "description": "Logic, fallacies, and argument quality"
+  },
+  {
+    "type": "probability_risk",
+    "description": "Probability, risk, and decision-making"
+  },
+  {
+    "type": "spreadsheet_skills",
+    "description": "Spreadsheet formulas and data organization"
+  },
+  {
+    "type": "public_speaking",
+    "description": "Public speaking and presentation structure"
+  },
+  {
+    "type": "teacher_support",
+    "description": "Explaining concepts to a child or peer"
+  },
+  {
+    "type": "advanced_math",
+    "description": "Advanced math intuition and proof sketches"
+  },
+  {
+    "type": "data_analysis",
+    "description": "Data analysis workflow and interpretation"
+  },
+  {
+    "type": "cyber_hygiene",
+    "description": "Cyber hygiene and account safety basics"
+  },
+  {
+    "type": "legal_literacy",
+    "description": "Legal literacy at a non-lawyer educational level"
+  },
+  {
+    "type": "health_systems_literacy",
+    "description": "How health systems, referrals, and insurance work"
+  },
+  {
+    "type": "local_language_literature",
+    "description": "Local literature and language arts"
+  },
+  {
+    "type": "science_experiment_design",
+    "description": "Designing simple safe experiments"
+  },
+  {
+    "type": "engineering_design",
+    "description": "Engineering design and tradeoffs"
+  },
+  {
+    "type": "art_music_theory",
+    "description": "Art and music theory fundamentals"
+  },
+  {
+    "type": "critical_thinking",
+    "description": "Critical thinking across sources"
+  },
+  {
+    "type": "learning_plan",
+    "description": "Personalized learning plan design"
+  }
+]

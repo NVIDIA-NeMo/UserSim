@@ -1,0 +1,313 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for paysetu (en_IN) — a UPI-first payments neobank, an
+# institution type with no en_US counterpart. Composition mirrors en_US: one task
+# per state-changing tool, ~1/3 at gold depth >=3, three openings each, `ordered`
+# only for real dependencies, `allowed_tools` for customer-invited extras.
+templates:
+# ── depth 1 ───────────────────────────────────────────────────────────
+- id: TPL-PS-UPI-FRAUD-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I got an OTP call and I think someone has access to my UPI — there's a
+    ₹{{amount}} debit I didn't make. Please freeze my UPI right now.
+  - >-
+    Someone is making UPI payments from my PaySetu account without my permission.
+    ₹{{amount}} is already gone. Stop UPI on my account immediately.
+  - >-
+    My UPI is compromised — a ₹{{amount}} transfer went out that wasn't me. Can
+    you disable UPI before anything else goes?
+  account_state:
+    account_id: acct_ps_0001
+    account_type: wallet account
+    last4: '0007'
+    balance: '12,400'
+    upi_status: active
+    transactions:
+    - {transaction_id: txn_ps_0001, merchant: unknown payee, amount: '{{amount}}', status: posted}
+  param_space:
+    amount: ['4,999', '9,500', '25,000']
+  gold_tool_sequence: [freeze_upi]
+  expected_state_deltas: {upi_status: frozen}
+  allowed_tools: [set_alerts]
+
+- id: TPL-PS-MANDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I want my {{biller}} bill paid automatically every month, up to ₹{{cap}}. Can
+    you set up an autopay mandate?
+  - >-
+    Please set up a UPI autopay for my {{biller}} bill with a limit of ₹{{cap}} so
+    I stop missing due dates.
+  - >-
+    Can I put my {{biller}} payment on autopay? Cap it at ₹{{cap}} per month.
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '8,900', mandates: []}
+  param_space:
+    biller: [electricity, mobile postpaid, broadband, gas]
+    cap: ['1,500', '3,000', '5,000']
+  gold_tool_sequence: [add_upi_mandate]
+  expected_state_deltas: {mandate_status: ACTIVE}
+
+- id: TPL-PS-WALLET-TOPUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    I need to add ₹{{amount}} to my PaySetu wallet — my balance is too low to pay
+    for {{purpose}}. How do I top it up?
+  - >-
+    Please load ₹{{amount}} into my wallet from my bank account. I have to pay for
+    {{purpose}} today.
+  - >-
+    Can you put ₹{{amount}} in my wallet? I want to use it for {{purpose}}.
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '150'}
+  param_space:
+    amount: ['500', '2,000', '5,000']
+    purpose: [an auto ride, a grocery order, a recharge]
+  gold_tool_sequence: [load_wallet]
+  expected_state_deltas: {wallet_load_status: COMPLETED}
+
+- id: TPL-PS-UPI-PAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    Please send ₹{{amount}} to {{payee}} on UPI — it's for {{purpose}}.
+  - >-
+    Can you pay {{payee}} ₹{{amount}} by UPI right now? {{purpose}}.
+  - >-
+    I need ₹{{amount}} to go to {{payee}} today for {{purpose}}. Use UPI.
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '12,400'}
+  param_space:
+    payee: [my brother, the tiffin service, my scooter mechanic]
+    amount: ['300', '1,750', '6,200']
+    purpose: [I owe him for yesterday, it's this month's dues, the repair is done]
+  gold_tool_sequence: [make_upi_payment]
+  expected_state_deltas: {upi_payment_status: COMPLETED}
+
+- id: TPL-PS-BILLPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    My {{biller}} bill is ₹{{amount}} and due {{when}}. Please pay it from my
+    wallet.
+  - >-
+    Can you clear my {{biller}} bill of ₹{{amount}}? It's due {{when}}.
+  - >-
+    Please settle the ₹{{amount}} {{biller}} bill before {{when}} so I don't get a
+    penalty.
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '8,900'}
+  param_space:
+    biller: [mobile postpaid, electricity, DTH, broadband]
+    amount: ['499', '1,299', '2,150']
+    when: [tomorrow, the 5th, this weekend]
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {bill_payment_status: COMPLETED}
+
+- id: TPL-PS-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    Please move ₹{{amount}} from my PaySetu balance to my {{destination}}.
+  - >-
+    I want ₹{{amount}} sent out to my {{destination}} — can you transfer it?
+  - >-
+    Can you push ₹{{amount}} across to my {{destination}} today?
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '12,400'}
+  param_space:
+    amount: ['2,000', '7,500', '11,000']
+    destination: [salary account at another bank, wife's account, savings account]
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+
+- id: TPL-PS-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I've changed my mobile number to a new {{operator}} connection. Please update
+    it on my PaySetu account.
+  - >-
+    My old number is gone — I moved to {{operator}}. Update my registered mobile
+    and email.
+  - >-
+    Please change my contact number on record; I've switched to {{operator}}.
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '8,900'}
+  param_space:
+    operator: [a new prepaid, a postpaid, a different]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_status: UPDATED}
+
+# ── depth 2 ───────────────────────────────────────────────────────────
+- id: TPL-PS-CARD-REISSUE-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any]
+  # Genuine dependency: a replacement card must be issued before it can be
+  # activated, so order is enforced.
+  opening_user_messages:
+  - >-
+    My prepaid forex card ending {{last4}} has expired. Please send a replacement
+    and activate it so I can use it on my trip to {{country}}.
+  - >-
+    I need a new forex card — the one ending {{last4}} is expired — and it should
+    be active before I travel to {{country}}.
+  - >-
+    Please reissue my card ending {{last4}} and switch the new one on; I fly to
+    {{country}} soon.
+  account_state:
+    account_id: acct_ps_0001
+    account_type: wallet account
+    last4: '0007'
+    balance: '8,900'
+    cards:
+    - {card_id: card_ps_0001, status: expired, last4: '{{last4}}'}
+  param_space:
+    last4: ['0007']
+    country: [Singapore, Dubai, Thailand]
+  gold_tool_sequence: [order_replacement_card, activate_card]
+  ordered: true
+  expected_state_deltas: {card_ps_0001.replacement: ordered, card_ps_0001.status: active}
+
+# ── depth 3-4 ─────────────────────────────────────────────────────────
+- id: TPL-PS-SIMSWAP-FULL-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # SIM-swap fraud response: kill UPI, move the registered number, reissue the
+  # card, turn on alerts. Interchangeable order -> not ordered.
+  opening_user_messages:
+  - >-
+    My SIM was swapped and ₹{{amount}} went out over UPI. Freeze UPI, change my
+    registered number to my new SIM, reissue my card, and put alerts on
+    everything.
+  - >-
+    Someone ported my mobile number and drained ₹{{amount}} through UPI. I need
+    UPI stopped, my new number registered, a new card, and alerts enabled.
+  - >-
+    SIM-swap fraud — ₹{{amount}} is gone via UPI. Please disable UPI, update my
+    contact number, send a fresh card, and switch on transaction alerts.
+  account_state:
+    account_id: acct_ps_0001
+    account_type: wallet account
+    last4: '0007'
+    balance: '3,100'
+    upi_status: active
+    cards:
+    - {card_id: card_ps_0001, status: active, last4: '0007'}
+  param_space:
+    amount: ['18,000', '42,000']
+  gold_tool_sequence: [freeze_upi, update_contact_info, order_replacement_card, set_alerts]
+  expected_state_deltas:
+    upi_status: frozen
+    contact_status: UPDATED
+    card_ps_0001.replacement: ordered
+    alerts_status: ENABLED
+
+- id: TPL-PS-ONBOARD-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # The account must exist first, but funding and alerts are interchangeable
+  # after that -> left unordered.
+  opening_user_messages:
+  - >-
+    I want to open a PaySetu digital account, load ₹{{amount}} into it to start,
+    and have alerts on from the beginning.
+  - >-
+    Please set me up with a new PaySetu account, put ₹{{amount}} in the wallet, and
+    enable notifications for every transaction.
+  - >-
+    I'm new — can you open an account, add ₹{{amount}} to the wallet, and turn on
+    alerts?
+  account_state: {account_id: none, account_type: wallet account, paysetu_account: none}
+  param_space:
+    amount: ['500', '2,000', '5,000']
+  gold_tool_sequence: [open_account, load_wallet, set_alerts]
+  expected_state_deltas: {account_status: OPEN, wallet_load_status: COMPLETED, alerts_status: ENABLED}
+
+- id: TPL-PS-FAMILY-ACCESS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    I'd like {{relation}} to be able to operate this account, be my nominee, and
+    I want to move ₹{{amount}} in so they can use it.
+  - >-
+    Please add {{relation}} as an authorised user and nominee, and transfer
+    ₹{{amount}} into the account.
+  - >-
+    Can you give {{relation}} access to the account, record them as nominee, and
+    put ₹{{amount}} in?
+  account_state: {account_id: acct_ps_0001, account_type: wallet account, last4: '0007', balance: '12,400', nominee: none}
+  param_space:
+    relation: [my son, my wife, my mother]
+    amount: ['3,000', '9,000']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, transfer_funds]
+  expected_state_deltas: {authorized_users_status: UPDATED, nominee_status: UPDATED, transfer_status: COMPLETED}
+
+- id: TPL-PS-EXIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any]
+  # Both the mandate cancellation and the payout must precede the close, but they
+  # are interchangeable with each other -> left unordered.
+  opening_user_messages:
+  - >-
+    I'm not using PaySetu any more. Please cancel my {{biller}} autopay, send the
+    remaining ₹{{amount}} to my bank account, and close the account.
+  - >-
+    Stop the recurring {{biller}} mandate, transfer out the ₹{{amount}} balance,
+    and shut my PaySetu account.
+  - >-
+    I want to leave. Cancel the {{biller}} autopay, move ₹{{amount}} to my bank,
+    then close this account.
+  account_state:
+    account_id: acct_ps_0001
+    account_type: wallet account
+    last4: '0007'
+    balance: '{{amount}}'
+    mandates:
+    - {mandate_id: mnd_ps_0001, biller: '{{biller}}', status: active}
+  param_space:
+    biller: [electricity, broadband]
+    amount: ['1,850', '6,400']
+  gold_tool_sequence: [stop_payment, transfer_funds, close_account]
+  expected_state_deltas: {stop_payment_status: ACTIVE, transfer_status: COMPLETED, account_status: CLOSED}

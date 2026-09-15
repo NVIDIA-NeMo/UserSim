@@ -1,0 +1,276 @@
+"""Test scaffold for a new probe.
+
+Copy this to ``conversation-plugin/tests/probes/test_<your_probe>.py`` and
+edit the marked sections. The 8 standard tests every probe should
+have are stubbed below. For real working examples, see:
+
+- ``test_sov_ai_facts.py`` — banked-verbatim probe (the canonical
+  reference for the alias-dispatching mock + dual-module patching
+  pattern).
+- ``test_safety_chat_pressure.py`` — bank-reframing probe
+  (``on_followup_failure="abort"`` test case).
+- ``test_safety_agentic.py`` — agentic probe (custom ``run_dispatch``,
+  no user-LLM, simpler mock pattern — FIFO-only since there's only
+  one call_llm caller).
+
+CRITICAL gotchas the substrate's loop reveals — the per-probe test
+files all hit these:
+
+1. **Patch BOTH ``core.simulation.call_llm`` AND
+   ``core.judges.call_llm``** in the same context manager. Both
+   modules locally import ``call_llm`` from ``core.llm`` at module
+   load, so patching ``core.llm.call_llm`` doesn't reach either.
+   The ``_patched_call_llm`` helper below patches both at once.
+
+2. **Mock returns must match the caller's expected shape.** For
+   judge calls (``judge_model``), return a string with
+   ``<rating>...</rating>`` XML — ``run_inline_judge`` parses XML,
+   not plain text. For user/assistant calls, return a dict with
+   ``content`` (and optionally ``tool_calls``).
+
+3. **Alias-dispatching mock**: don't FIFO-queue all responses
+   together. The loop calls user_model + judge_model + assistant_model
+   in an order that depends on probe shape and gate retries — a FIFO
+   queue makes the test brittle to internal refactors. Instead,
+   inspect the alias kwarg in the side_effect callable and pop from
+   the matching queue.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import patch
+
+import pytest
+
+import conversation_plugin.generator  # noqa: F401 — bootstraps registry
+from conversation_plugin.core.outcomes import (
+    FailureClass, OutcomeStatus, Provenance, WarningKind,
+)
+from conversation_plugin.core.probes import _PROBE_REGISTRY, resolve_probe
+
+# Replace with your probe's module + names.
+from conversation_plugin.probes.YOUR_PROBE import (
+    generator as probe_gen,
+)
+
+PROBE_LABEL = "YOUR_PROBE"
+
+
+# ─── Shared helpers ────────────────────────────────────────────────
+
+
+def _mock_call_llm(
+    *,
+    user_responses: List[Any] | None = None,
+    assistant_responses: List[Any] | None = None,
+    judge_responses: List[str] | None = None,
+):
+    """Alias-dispatching mock for call_llm.
+
+    Returns a side_effect callable that pops from the right queue
+    based on the alias kwarg. Resilient to gate retries reordering
+    user/judge calls within a single user turn.
+
+    Judge responses MUST be XML-shaped strings:
+        '<rating>PASS</rating><explanation>...</explanation>'
+    or:
+        '<rating>FAIL</rating><explanation>...</explanation>'
+
+    See run_inline_judge in core/judges.py for the parser.
+    """
+    user_q = list(user_responses or [])
+    asst_q = list(assistant_responses or [])
+    judge_q = list(judge_responses or [])
+
+    def _side_effect(*args, **kwargs):
+        # call_llm signature: (models, alias, messages, **kwargs)
+        alias = args[1] if len(args) >= 2 else kwargs.get("alias", "")
+        if alias == "user_model":
+            queue = user_q
+        elif alias == "assistant_model":
+            queue = asst_q
+        elif alias == "judge_model":
+            queue = judge_q
+        else:
+            raise AssertionError(
+                f"unexpected call_llm alias={alias!r}; queues: "
+                f"user={len(user_q)} assistant={len(asst_q)} "
+                f"judge={len(judge_q)}"
+            )
+        if not queue:
+            raise AssertionError(
+                f"test consumed more {alias!r} responses than expected; "
+                f"args_head={args[:2]} kwargs_keys={list(kwargs)}"
+            )
+        return queue.pop(0)
+
+    return _side_effect
+
+
+@contextmanager
+def _patched_call_llm(side_effect):
+    """Patch call_llm in BOTH core.simulation AND core.judges.
+
+    Both modules locally re-import call_llm from core.llm at module
+    load, so patching core.llm.call_llm doesn't propagate. This
+    context manager patches both call sites at once.
+    """
+    with patch(
+        "conversation_plugin.core.simulation.call_llm",
+        side_effect=side_effect,
+    ), patch(
+        "conversation_plugin.core.judges.call_llm",
+        side_effect=side_effect,
+    ):
+        yield
+
+
+# ─── Fixtures ──────────────────────────────────────────────────────
+
+
+@pytest.fixture
+def en_persona() -> Dict[str, Any]:
+    return {
+        "first_name": "Sarah", "last_name": "Johnson",
+        "age": 35, "city": "Seattle",
+        "education_level": "Bachelor",
+        "occupation": "Software Engineer",
+    }
+
+
+@pytest.fixture
+def simulator_cfg():
+    class _Cfg:
+        random_seed = 42
+        max_turns = 3
+        # ... add probe-specific cfg fields here
+    return _Cfg()
+
+
+@pytest.fixture
+def models() -> Dict[str, Any]:
+    return {
+        "user_model": object(),
+        "assistant_model": object(),
+        "judge_model": object(),
+    }
+
+
+# ─── The 8 standard tests every probe should have ────────────────
+
+
+class TestSimulateYourProbe:
+
+    # 1. Registry registration.
+    def test_registered_in_probe_registry(self) -> None:
+        import sys
+        assert PROBE_LABEL in _PROBE_REGISTRY
+        probe_cls = resolve_probe(PROBE_LABEL)
+        module = sys.modules[probe_cls.constants_module_name]
+        assert module.PROBE_FAMILY == PROBE_LABEL
+        assert module.PROMPT_VERSION  # non-empty
+        assert module.PROBE_VARIANTS  # non-empty
+
+    # 2. Single-turn end-to-end (verbatim or generate-and-gate).
+    def test_single_turn_end_to_end(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        side_effect = _mock_call_llm(
+            assistant_responses=[
+                {"role": "assistant", "content": "OK, here's an answer."},
+            ],
+            # If verbatim turn-1: no user_responses needed.
+            # If generate-and-gate turn-1: provide a user response + judge XML.
+            user_responses=[],
+            judge_responses=[],
+        )
+        with _patched_call_llm(side_effect):
+            result = probe_gen.simulate_YOUR_PROBE(  # rename to your shim
+                models=models, data={}, persona=en_persona,
+                profile={}, locale="en_US", language="English",
+                cfg=simulator_cfg, provenance=Provenance(),
+            )
+        assert result["conversation_status"] is True
+
+    # 3. First user turn shape (verbatim probes only).
+    def test_first_user_turn_is_bank_text_verbatim(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        # For verbatim probes: assert msgs[0]["content"] == bank.task.text
+        # For generate-and-gate probes: skip / replace with a derive-task test.
+        pass
+
+    # 4. Two-turn follow-up.
+    def test_two_turn_followup(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        # Provide 2 assistant responses; the loop drives turn 2 via
+        # the user-agent (user_responses needed) + judge gate
+        # (judge_responses needed with PASS XML).
+        pass
+
+    # 5. probe_variant overridden in build_result_extras.
+    def test_probe_variant_overridden(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        # Assert result["probe_variant"] is the probe-specific value
+        # (e.g., the fact category, the strategy::harm_category combo)
+        # not the registry default "default".
+        pass
+
+    # 6. Placeholder warning emitted.
+    def test_placeholder_warning_emitted(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        # Bank with placeholder=True → warning fires.
+        # Assert WarningKind.USED_PLACEHOLDER_* in outcome.warnings.
+        pass
+
+    # 7. Bank-load failure aborts cleanly.
+    def test_bank_load_failure_aborts(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        with patch.dict(
+            os.environ,
+            {"USERSIM_YOUR_BANK": "/nonexistent/bank.yaml"},
+        ):
+            result = probe_gen.simulate_YOUR_PROBE(
+                models=models, data={}, persona=en_persona,
+                profile={}, locale="en_US", language="English",
+                cfg=simulator_cfg, provenance=Provenance(),
+            )
+        assert result["conversation_status"] is False
+        outcome = json.loads(result["simulation_outcome"])
+        assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
+
+    # 8. No-matching-task aborts cleanly.
+    def test_no_matching_task_aborts(
+        self, en_persona, simulator_cfg, models,
+    ) -> None:
+        # Synthetic bank with persona-tag mismatch → derive_task returns None
+        # → __init__ raises YourProbeError → shim returns SCENARIO_ABORTED.
+        pass
+
+
+# ─── should_succeed invariant (probe-specific contract) ────────────
+
+
+class TestShouldSucceed:
+    def test_returns_true_when_required_metadata_set(self) -> None:
+        from conversation_plugin.core.outcomes import OutcomeBuilder
+        from conversation_plugin.core.simulation import ConversationState
+        state = ConversationState(outcome=OutcomeBuilder())
+        # Set the probe's join key.
+        state.metadata["YOUR_REQUIRED_KEY"] = "id-001"
+        assert probe_gen.should_succeed(state) is True
+
+    def test_returns_false_when_required_metadata_missing(self) -> None:
+        from conversation_plugin.core.outcomes import OutcomeBuilder
+        from conversation_plugin.core.simulation import ConversationState
+        state = ConversationState(outcome=OutcomeBuilder())
+        assert probe_gen.should_succeed(state) is False

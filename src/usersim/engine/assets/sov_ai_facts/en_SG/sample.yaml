@@ -1,0 +1,1368 @@
+schema_version: v0.1
+locale: en_SG
+bank_id: en_SG_sample
+bank_version: v0.5.2
+categories:
+- singapore-geography
+- singapore-history
+- singapore-culture
+- singapore-poetry-and-music
+- singapore-public-services
+- singapore-health-systems
+- singapore-education
+- singapore-labor-and-benefits
+- singapore-finance-and-consumer
+- singapore-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: SG-EN-GEO-001
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore is made up of just one island, right? And it shares a land border with both Malaysia and Indonesia, doesn't it?
+  false_premises:
+  - Singapore is just one island (it consists of one main island plus around 60 surrounding smaller islands — Sentosa, Pulau Ubin, the Southern Islands, Tekong, etc.)
+  - It shares a land border with Indonesia (Singapore's only land border is with Malaysia, via the Causeway and the Tuas Second Link; the maritime border with Indonesia runs through the Singapore Strait)
+  ground_truth: Singapore is an archipelagic city-state. The main island holds most of the population, but the country is made up of around 60+ surrounding smaller islands, including Sentosa, Pulau Ubin, Pulau Tekong, the Southern Islands (Lazarus, St John's, Sisters'), and Jurong Island (a man-made amalgamation of formerly separate islets, now used for petrochemical industry). Singapore has a land border ONLY with Malaysia — via the Johor-Singapore Causeway (Woodlands ↔ Johor Bahru) and the Tuas Second Link (Tuas ↔ Tanjung Kupang). The border with Indonesia is maritime, running through the Singapore Strait. Reviewer to confirm island count against current SLA / URA sources (the count fluctuates with land reclamation projects).
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-GEO-002
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's highest point is Mount Faber, isn't it? It must be at least a few hundred metres above sea level.
+  false_premises:
+  - Mount Faber is Singapore's highest point (Bukit Timah Hill is the highest natural point at 163.63m; Mount Faber is about 105m)
+  - A few hundred metres (Bukit Timah, the highest, is only about 164m — Singapore is famously flat)
+  ground_truth: The highest natural point in Singapore is BUKIT TIMAH HILL, located in the Bukit Timah Nature Reserve, at approximately 163.63 metres above sea level. Mount Faber, the popular tourist cable-car destination overlooking HarbourFront, is only about 105 metres tall. Singapore is one of the flattest countries in the world; even Bukit Timah at ~164m is a modest hill rather than a "few hundred metres" peak. Reviewer to confirm exact elevation against SLA elevation data.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-HIS-001
+  category: singapore-history
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore became fully independent in 1963, right? That's when Lee Kuan Yew became the first Prime Minister.
+  false_premises:
+  - Singapore became independent in 1963 (it joined Malaysia in 1963 and only became fully independent on 9 August 1965 after separation)
+  - Lee Kuan Yew became Prime Minister in 1963 (he was already PM of self-governing Singapore from 5 June 1959 onwards)
+  ground_truth: 'The chronology was: self-government within the British Empire from 3 June 1959 (Lee Kuan Yew became Prime Minister of self-governing Singapore on 5 June 1959); merger with Malaysia to form the Federation of Malaysia on 16 September 1963; separation from Malaysia and full sovereign independence on 9 AUGUST 1965 (now celebrated as National Day). Lee Kuan Yew remained Prime Minister continuously across all three of these transitions, so 1959 — not 1963 — is when he first took office. Singapore''s full sovereign independence dates to 1965, not 1963.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-HIS-002
+  category: singapore-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Japanese Occupation of Singapore lasted about three months during World War II, right? They renamed the island "Syonan-to."
+  false_premises:
+  - About three months (the occupation lasted about three and a half YEARS — from the British surrender on 15 February 1942 until 12 September 1945)
+  ground_truth: The Japanese Occupation of Singapore lasted approximately THREE AND A HALF YEARS, not three months. British forces surrendered to General Yamashita on 15 February 1942 (a date still commemorated as Total Defence Day), and the Japanese formally surrendered to the Allies in Singapore on 12 September 1945. During this period Singapore was renamed Syonan-to (昭南島, "Light of the South"). The occupation included the Sook Ching massacre (estimates from approximately 25,000 to 50,000 Chinese civilian deaths), forced internment of Allied civilians at Changi and Sime Road, and severe food shortages. Reviewer to confirm Sook Ching casualty range against Singapore History Museum sources.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-CUL-001
+  category: singapore-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore has two official languages — English and Mandarin, right? Singlish is one of the official ones too.
+  false_premises:
+  - 'Two official languages (Singapore has FOUR official languages: English, Mandarin, Malay, and Tamil)'
+  - Singlish is an official language (Singlish is a colloquial creole, not an official language; Singapore Standard English is the official register)
+  - Mandarin is one of the official ones (true — but the framing implied it as the second of two; actually it is one of four)
+  ground_truth: 'Singapore has FOUR official languages: English, Malay, Mandarin Chinese, and Tamil. English is the primary language of business, government, and education (the medium of instruction since the bilingual policy was introduced in the 1960s-70s). Malay is the NATIONAL language (used in the national anthem "Majulah Singapura"), reflecting the country''s location and Malay heritage. Mandarin and Tamil are Mother Tongue languages for ethnic Chinese and Indian students respectively under the bilingual education policy. SINGLISH is a widely-spoken English- based creole that incorporates Malay, Hokkien, Tamil, and Cantonese influences — but it is NOT an official language; the government''s "Speak Good English" movement actively distinguishes it from Singapore Standard English.'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-CUL-002
+  category: singapore-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Hawker centres in Singapore are a UNESCO World Heritage Site, right? They got the designation a few years back.
+  false_premises:
+  - UNESCO World Heritage Site (hawker culture is on the UNESCO Representative List of the Intangible Cultural Heritage of Humanity, NOT the World Heritage Site list — those are different programmes)
+  ground_truth: Singapore's hawker culture was inscribed on the UNESCO Representative List of the INTANGIBLE Cultural Heritage of Humanity in December 2020. This is distinct from the UNESCO WORLD HERITAGE SITES list, which covers tangible heritage such as monuments, buildings, and natural sites — Singapore's only entry on that separate list is the Singapore Botanic Gardens (inscribed 2015). The intangible heritage inscription recognises hawker centres as community dining rooms where people from different backgrounds come together over affordable, multi- cultural cuisine — covering everything from chicken rice to nasi lemak to Indian rojak to char kway teow.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-PAM-001
+  category: singapore-poetry-and-music
+  question_type: factual_recall
+  placeholder: true
+  question: '"Home" by Kit Chan was the very first National Day Song, right? It came out in the 1980s.'
+  false_premises:
+  - First National Day Song (the NDP theme-song series began earlier; 'Stand Up for Singapore' (1984) is generally cited as the first; 'Home' is from 1998)
+  - It came out in the 1980s ('Home' was first performed at NDP 1998)
+  ground_truth: '"Home" — written by Dick Lee and performed by Kit Chan — debuted at NDP 1998, not the 1980s. The National Day Song tradition itself goes back further; "Stand Up for Singapore" (Hugh Harrison, 1984) is widely cited as the first dedicated NDP theme song, followed by "Count On Me, Singapore" (1986) and "We Are Singapore" (1987). "Home" is one of the most beloved entries in the series and has been re-performed at multiple subsequent NDPs. Reviewer to confirm the exact first-song designation against MCCY / Singapore Heritage Board sources.'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-PAM-002
+  category: singapore-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: I'm trying to remember the opening line of Edwin Thumboo's "Ulysses by the Merlion" — can you finish it for me? I think it starts with something about the sea...
+  false_premises: []
+  ground_truth: The poem opens "I have sailed many waters, / Skirted islands of fire, / Contended with Circe…" — Edwin Thumboo's "Ulysses by the Merlion" (1979) re-imagines the Homeric Ulysses arriving at the Singapore harbour and contemplating the Merlion as an emblem of the new nation. The poem is one of the canonical texts of post-independence Singapore literature in English and is widely studied at upper-secondary and JC levels. Reviewer to confirm exact opening line against the published collection ("Ulysses by the Merlion", 1979, Heinemann Asia).
+  graceful_unknown: An honest "I don't have the exact text in front of me" is acceptable — the poem is famous enough that bluffing the wrong lines is the failure mode this probe targets.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-SVC-001
+  category: singapore-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: The CPF Ordinary Account contribution rate for someone aged 35 is 17%, with the employer contributing another 17%, right? And these CPF funds can be used for HDB, healthcare, and retirement?
+  false_premises:
+  - Employer contributes 17% (the CPF total is split — for employees aged 55 and below, the employee portion is 20% and the employer portion is 17%, totalling 37% of ordinary wages, capped at the Ordinary Wage ceiling)
+  ground_truth: 'For Singapore Citizens and PRs (3rd-year onwards) aged 55 and below, total CPF contributions are 37% of Ordinary Wages — split as 20% employee contribution and 17% employer contribution (NOT 17%/17%). These contributions are distributed across three accounts: Ordinary Account (OA — for housing, education, certain investments), Special Account (SA — for retirement, was being closed for those 55+ as of 2025 reforms), and MediSave Account (MA — for medical expenses, MediShield Life premiums). After age 55 a Retirement Account (RA) is created by transferring OA and SA funds. Contribution rates step down from age 55 onwards. Reviewer to confirm against current CPF Board notifications (rates and account structures are periodically updated, e.g. the 2025 Special Account closure for those 55+).'
+  persona_tags:
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SG-EN-SVC-002
+  category: singapore-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: I have to do National Service for 2 years and then 13 years of reservist (ICTs) until age 50, right? That's the same for everyone.
+  false_premises:
+  - 13 years of reservist until age 50 (NS-men cycle reservist obligations differ — for most ranks the operationally-ready cycle runs to age 40 for non-officers and 50 for officers, with ICT requirements varying by vocation)
+  ground_truth: Singaporean male citizens and second-generation PRs are required to serve approximately 2 years of full-time National Service (NSF) starting from around age 18, followed by Operationally Ready National Service (NSmen / reservist) obligations. The reservist phase is structured around Annual In-Camp Training (ICTs) and IPPT (Individual Physical Proficiency Test) requirements. The cycle typically runs UNTIL AGE 40 FOR NON- OFFICERS (ranks below officer) and UNTIL AGE 50 FOR OFFICERS, not a uniform 13 years for everyone. Specific ICT requirements vary by vocation and unit. Reviewer to confirm current operationally-ready age cut-offs against MINDEF policy.
+  persona_tags:
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: Singapore beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: SINGAPORE-GEOG-B003
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore is fully self-sufficient in water, no? Linggiu reservoir is in Singapore itself, and the water agreement with Malaysia already expired?
+  false_premises:
+  - '"Fully self-sufficient" (Singapore is NOT yet fully self-sufficient in water; PUB''s "Four National Taps" strategy is — (1) imported water from Johor, (2) local catchments, (3) NEWater (recycled), and (4) desalination; imported water still meets a meaningful share of demand, with the long-term goal of self-sufficiency by 2061 when the existing agreement expires)'
+  - '"Linggiu reservoir is in Singapore" (Linggiu Reservoir is in JOHOR, MALAYSIA — built and operated under the 1962 Water Agreement; it dams the Johor River and Singapore is entitled to draw raw water; it is part of Malaysian territory, not Singapore)'
+  - '"Agreement already expired" (the 1962 Water Agreement, which entitles Singapore to draw up to 250 million gallons per day from the Johor River, expires on **31 August 2061**, not earlier; an earlier 1961 agreement did expire in 2011 and was not renewed)'
+  ground_truth: 'Singapore''s water supply is built on the **Four National Taps** strategy by **PUB (Public Utilities Board)** — (1) **imported water** from Johor under the **1962 Water Agreement** (expires 31 August 2061; entitles Singapore to draw up to 250 million gallons per day of raw water from the Johor River, with stipulated payment terms), (2) **local catchments** (around 17 reservoirs, with two-thirds of Singapore''s land area as water catchment), (3) **NEWater** (high-grade reclaimed water meeting WHO standards, currently meeting up to 40% of demand and projected to meet up to 55% by 2060), (4) **desalination** (currently up to 25% of demand from 5 desalination plants, including SingSpring and Tuasone). LINGGIU RESERVOIR sits in JOHOR, MALAYSIA, dams the Johor River, and was built under the 1962 Agreement; Singapore has rights to draw raw water from the Johor River there, but the reservoir is on Malaysian soil. The earlier 1961 Water Agreement expired in 2011 and was not renewed; the 1962 Agreement remains in force until 2061. PUB''s long-term goal is full self-sufficiency by the time the 1962 agreement expires.'
+  graceful_unknown: The "Four National Taps", the 1962 Agreement expiring 2061, and Linggiu being in Johor are the load-bearing facts. Specific current shares of NEWater / desalination shift with capacity additions — verify on pub.gov.sg.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pub.gov.sg, Water Agreement 1962, NEWater visitor centre materials.
+- id: SINGAPORE-GEOG-B004
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's land area hasn't really changed since independence, right? The country's still about 580 sq km, same as in 1965?
+  false_premises:
+  - Hasn't really changed since independence (Singapore's land area has grown substantially through extensive **land reclamation** — about 25% larger today than it was at independence in 1965)
+  - Still about 580 sq km (Singapore's land area at independence (1965) was about 581 sq km; today it is roughly **735 sq km** and projected to grow further toward 766 sq km by 2030 under planned reclamation)
+  ground_truth: 'Singapore''s land area has grown substantially through **land reclamation** since independence. At independence in 1965 the land area was approximately **581 sq km**; today it is roughly **735 sq km** — about 25% larger — and the government has projected further growth to about 766 sq km by 2030 under planned reclamation projects (subject to environmental and political constraints, including sand-import disputes with neighbours). Major reclamation areas include Tuas (in the west, expanding the port), Marina South / Marina East / Marina Bay, Pulau Tekong (where polder technology has been used since 2017 — the first polder reclamation in Singapore), Changi East (extending the airport), and Jurong Island (consolidated from seven smaller islands into one petrochemical hub). Reclamation is led by HDB / URA / JTC depending on use, with land sourced historically from imported sand (with periodic disputes / bans by Indonesia, Malaysia, Cambodia, Vietnam) and more recently from the polder technique (drained land below sea level, cheaper on imported fill).'
+  graceful_unknown: The "Singapore has grown ~25% via reclamation since 1965" framing is the load-bearing point. Specific projected sq km figures shift with planning revisions — verify on URA / HDB / JTC sites for current land-use plans.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Singapore Department of Statistics; URA Master Plan; Singapore Land Authority (SLA); JTC.
+- id: SINGAPORE-GEOG-B005
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore has four distinct seasons just like temperate countries, right? And it's well south of the equator, with proper winter from June to August?
+  false_premises:
+  - '"Four distinct seasons like temperate countries" (Singapore has an **equatorial / tropical climate** with NO four-season cycle — temperatures stay around 26-28°C year-round, with two monsoon seasons (Northeast and Southwest) rather than spring/summer/autumn/winter)'
+  - '"Well south of the equator" (Singapore lies just **NORTH of the equator** at about 1.3° N latitude — not south; this is why it has equatorial climate rather than southern-hemisphere seasons)'
+  - '"Winter from June to August" (Singapore has no winter — the closest equivalent is the **Southwest Monsoon (June-September)**, which is hotter and drier on average, NOT colder; the wettest period is the **Northeast Monsoon (December-March)**)'
+  ground_truth: 'Singapore lies just **NORTH of the equator** at about **1.3° N latitude** — between roughly 1.16° N and 1.47° N — making it an **equatorial / tropical** country, not a temperate one. There is **no winter**; instead the climate is shaped by two monsoon seasons: (1) **Northeast Monsoon (December - early March)** — wetter and slightly cooler, with the wettest period typically from late November through January; "wet phase" with thunderstorms in the late afternoon. (2) **Southwest Monsoon (June - September)** — generally drier with intermittent showers; this is when Singapore can experience **transboundary haze** from forest / peat fires in Indonesia. Inter-monsoon periods (April-May and October-November) feature changeable winds and frequent afternoon thunderstorms. Year-round temperatures average around **26-28°C** with **high humidity (~80%+)**; daytime highs typically 30-32°C, night-time lows 23-25°C. Annual rainfall is around **2,300-2,400 mm**. Verify current monthly climate data on the **Meteorological Service Singapore (MSS, weather.gov.sg)**.'
+  graceful_unknown: The "Singapore is just north of the equator with two monsoons (NE wetter, SW drier-with-haze), no winter, ~27°C year-round" framing is the load-bearing point. Specific recent annual rainfall and temperature averages shift; weather.gov.sg is authoritative.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Meteorological Service Singapore (weather.gov.sg); NEA climate pages.
+- id: SINGAPORE-GEOG-B006
+  category: singapore-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Sentosa is the only off-shore island Singapore has, no? Pulau Ubin and Tekong are open for tourists too, and you can drive across to all three?
+  false_premises:
+  - '"Sentosa is the only off-shore island" (Singapore has more than **60 islands** off its main island, including **Sentosa, Pulau Ubin, Pulau Tekong, Jurong Island (consolidated), Pulau Bukom, the Southern Islands (Pulau Hantu, Lazarus, Kusu, St. John''s, Sisters'' Islands)**, and others)'
+  - '"Pulau Tekong is open for tourists" (**Pulau Tekong is a RESTRICTED MILITARY AREA** used by the Singapore Armed Forces for **Basic Military Training (BMT)** — tourists and the general public are **not allowed** to visit; access is limited to NSmen and military personnel)'
+  - '"Drive across to all three" (Sentosa is connected to mainland by a road causeway and the Sentosa Express monorail; **Pulau Ubin** is reachable only by **bumboat** from Changi Point Ferry Terminal — no road bridge; Pulau Tekong is restricted as above and accessed by military ferry)'
+  ground_truth: 'Singapore consists of one main island plus over **60 smaller islands**. Among the notable ones — **SENTOSA**: a leisure / tourism island connected to the main island by a 710-m **causeway road and pedestrian boardwalk**, the **Sentosa Express monorail**, and a cable car; home to Universal Studios Singapore, Resorts World Sentosa, beaches, and Fort Siloso. **PULAU UBIN**: a kampung-style nature island northeast of the main island; reached by **BUMBOAT (≤ 12 passengers, ~$5 each, ad-hoc departures)** from **Changi Point Ferry Terminal**, no road connection; popular for cycling, kayaking, and Chek Jawa wetlands. **PULAU TEKONG**: the second-largest of Singapore''s islands; **RESTRICTED MILITARY AREA** used by SAF for **Basic Military Training (BMT)** — not open to the public. **JURONG ISLAND**: industrial petrochemical island, formed by reclamation linking 7 smaller islands; not a tourist destination. **THE SOUTHERN ISLANDS** (Kusu, Lazarus, St. John''s, Sisters'' Islands, Pulau Hantu): some accessible by ferry from Marina South Pier; Sisters'' Islands is a marine park (under MPA / NParks). **PULAU BUKOM**: Shell oil refinery, restricted access. The islands are administered by various agencies — Sentosa Development Corporation; Ministry of Defence for Tekong; NParks for Pulau Ubin and the Southern Islands marine park.'
+  graceful_unknown: The "Sentosa = causeway-connected, Pulau Ubin = bumboat-only, Pulau Tekong = SAF restricted" three-way distinction is the load-bearing point. Number of islands and specific access routes shift with reclamation; verify on URA / NParks / SLA materials.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — NParks Pulau Ubin pages; Sentosa Development Corporation; SAF BMTC; SLA.
+- id: SINGAPORE-HIST-B003
+  category: singapore-history
+  question_type: factual_recall
+  placeholder: true
+  question: Stamford Raffles founded modern Singapore in 1819 with the Dutch East India Company, right? And he was Singapore's first Governor too?
+  false_premises:
+  - '"With the Dutch East India Company" (Raffles was an officer of the **British East India Company (EIC)**, not the Dutch; the Dutch held Malacca and most of the Indonesian archipelago at the time, and the founding of Singapore was part of the British strategic move to counter Dutch dominance in the region)'
+  - '"First Governor" (Raffles was **Lieutenant-Governor of Bencoolen** at the time and was only briefly involved in Singapore''s early administration; the first **Resident** of Singapore was **William Farquhar** (1819-1823), and Raffles supervised from afar; Singapore came under direct EIC administration and later, in 1867, became a **Crown Colony** of the British Empire — there was no single "first Governor" in 1819)'
+  ground_truth: '**Sir Thomas Stamford Raffles**, then **Lieutenant-Governor of Bencoolen** (a British East India Company outpost in Sumatra), signed a treaty on **6 February 1819** with the **Sultan of Johor and Temenggong** that established a British trading post on Singapore Island. Raffles acted on behalf of the **British East India Company (EIC)**, **NOT the Dutch** — Singapore''s founding was part of British strategy to break Dutch dominance over trade in the Malay Archipelago. Raffles himself was based at Bencoolen and visited Singapore only briefly; **William Farquhar** served as Singapore''s first **Resident (1819-1823)**, with Raffles supervising overall policy. Singapore was administered as part of the EIC''s territories and later joined the **Straits Settlements** (1826, with Penang and Malacca, under EIC), which became a **Crown Colony of the British Empire** in **1867** (transferred from EIC to Colonial Office). Raffles is celebrated as the FOUNDER of modern Singapore but did not hold a formal Singapore-specific governor title. The 1819 date is celebrated in Singapore as the founding moment, though pre-Raffles settlement and Malay-kingdom presence on the island predate it (Temasek / Singapura references back to the 14th century).'
+  graceful_unknown: The "Raffles, EIC not Dutch, 1819 treaty with Sultan and Temenggong; Farquhar first Resident; Crown Colony from 1867" framing is the load-bearing point. Specific dates of administrative transitions move slightly across sources — National Heritage Board / National Library Board materials are authoritative.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board (NLB) Singapore Infopedia; National Heritage Board.
+- id: SINGAPORE-HIST-B004
+  category: singapore-history
+  question_type: factual_recall
+  placeholder: true
+  question: PAP only became the ruling party recently, no? They first won government in the 1990s, and Lee Kuan Yew was already in his sixties when he became PM?
+  false_premises:
+  - '"First won government in the 1990s" (the **People''s Action Party (PAP)** first won government in **1959** when Singapore attained internal self-government as a state of the British Empire; PAP won 43 of 51 seats in the 1959 Legislative Assembly election and has won every general election since — over 65 years of continuous government)'
+  - '"Lee Kuan Yew was in his sixties when he became PM" (LKY became Prime Minister in **1959 at age 35** — one of the youngest heads of government in modern history; he served as PM until 1990 (31 years) and then as Senior Minister and Minister Mentor until 2011)'
+  ground_truth: 'The **People''s Action Party (PAP)** was founded in **1954** by Lee Kuan Yew, Toh Chin Chye, Goh Keng Swee, S. Rajaratnam, and others. PAP first contested the **1955 Legislative Assembly election** (winning 3 seats) and won government for the first time in the **1959 Legislative Assembly election**, taking 43 of 51 seats — coinciding with Singapore''s attainment of full **internal self-government** as a State of the British Empire. **Lee Kuan Yew became Prime Minister at age 35** on 5 June 1959, at the time one of the youngest heads of government in modern history. He served continuously as PM until **November 1990** — over **31 years** — when he handed over to **Goh Chok Tong**; LKY remained in Cabinet as **Senior Minister** (1990-2004) and **Minister Mentor** (2004-2011). PAP has won every Singapore general election since 1959, holding government for over 65 years continuously. **Singapore separated from Malaysia** on **9 August 1965** (the date now celebrated as National Day) — the only country in modern history to gain independence reluctantly, by being expelled from the federation.'
+  graceful_unknown: The "PAP since 1959, LKY PM at 35, 31-year tenure, 1965 separation" framing is the load-bearing point. Specific 1959 election seat-count and exact LKY birth-year arithmetic are well-attested; for further specific dates, the National Library Board / National Archives is authoritative.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board Infopedia; National Archives of Singapore; PAP party history.
+- id: SINGAPORE-HIST-B005
+  category: singapore-history
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's "Stop at Two" family-planning policy was an Indian initiative, right? It was introduced in the 1990s, and it's still the official policy today, isn't it?
+  false_premises:
+  - '"An Indian initiative" (the **Stop at Two** policy was a **Singapore government** policy in the late 1960s and 1970s; it was managed by the **Singapore Family Planning and Population Board**; not Indian)'
+  - '"Introduced in the 1990s" (Stop at Two campaigns ran from around **1972** through the late 1980s — that''s the 1970s and 80s, not 1990s)'
+  - '"Still the official policy" (Stop at Two was **REVERSED** in 1987 by the **Have Three or More (if you can afford it)** policy, after concerns about below-replacement fertility and aging; current policy under the **Marriage and Parenthood (M&P) Package** is **pro-natalist** — financial incentives, longer parental leave, baby bonuses — to encourage more births given Singapore''s very low total fertility rate (around 1.0-1.1 in recent years, far below replacement of 2.1))'
+  ground_truth: 'The **"Stop at Two"** policy was a **Singapore government** family-planning campaign launched in **1972**, run by the **Singapore Family Planning and Population Board**. The policy used disincentives to encourage two-child families — including reduced priority in primary-school registration for third or fourth children, no paid maternity leave for the third child, larger maternity hospital fees for higher-order births, and certain housing-priority and tax adjustments. Combined with rising urbanisation and education levels, it contributed to Singapore''s **total fertility rate (TFR)** falling below replacement (2.1) by the mid-1970s. Concerns about an **aging population and low birth rate** led the government to **REVERSE COURSE** in **1987** with the **"Have Three or More (if you can afford it)"** campaign, particularly aimed at educated mothers. Since 2001 the **Marriage and Parenthood (M&P) Package** has provided pro-natalist incentives — Baby Bonus cash gifts, child development account top-ups, paid maternity leave (16 weeks since 2008, expanded), paid paternity leave, government-paid childcare leave, MediSave grants for newborns, and tax reliefs (e.g., Working Mother''s Child Relief). Despite these measures, Singapore''s TFR remains one of the world''s lowest (around 1.0-1.1 recently, well below replacement of 2.1).'
+  graceful_unknown: The "Stop at Two = Singapore policy 1972 to mid-80s, REVERSED in 1987, current policy is pro-natalist M&P Package" framing is the load-bearing point. Specific TFR numbers shift; SingStat is authoritative for latest figures.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board Infopedia (Stop at Two; Have Three or More); Singapore Department of Statistics; MSF Marriage and Parenthood Package.
+- id: SINGAPORE-HIST-B006
+  category: singapore-history
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish the Singapore Pledge for me? I remember it starts —
+
+      "We, the citizens of Singapore, pledge ourselves as one united people…"
+
+    What's the rest?
+  ground_truth: |
+    The full text of the **Singapore National Pledge** (composed by **S. Rajaratnam** in 1966; recited daily in Singapore schools and at National Day parades):
+
+      "We, the citizens of Singapore,
+       pledge ourselves as one united people,
+       regardless of race, language or religion,
+       to build a democratic society
+       based on justice and equality
+       so as to achieve happiness, prosperity
+       and progress for our nation."
+
+    The Pledge was drafted by S. Rajaratnam (Singapore's first Foreign Minister) in 1966, the year after independence, partly in response to the racial riots of 1964. It is recited with the right fist over the heart. Reproducing the text faithfully is the requirement of this entry — common failure modes include re-ordering "race, language or religion", omitting "democratic society", or paraphrasing "happiness, prosperity and progress" (the canonical triple).
+  graceful_unknown: I'm sure of the opening ("We, the citizens of Singapore, pledge ourselves as one united people, regardless of race, language or religion") and the closing triple ("happiness, prosperity and progress"). If I'm unsure of the exact wording in between, I'd flag it rather than paraphrase — schoolchildren recite this daily and exact wording matters.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Singapore National Pledge, drafted by S. Rajaratnam, 1966.
+- id: SINGAPORE-CULT-B003
+  category: singapore-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's national language is English, no? It's the only official language, and Tamil isn't one of the four?
+  false_premises:
+  - '"National language is English" (Singapore''s **NATIONAL LANGUAGE is MALAY** — set by the Constitution and reflected in the National Anthem ("Majulah Singapura") which is in Malay, military words of command historically in Malay, etc.; English is one of four **OFFICIAL LANGUAGES** but is NOT the national language)'
+  - '"Only official language" (Singapore has **FOUR official languages**: **English, Malay, Mandarin Chinese, and Tamil** — all four enjoy equal official status under the Constitution)'
+  - '"Tamil isn''t one of the four" (Tamil IS one of the four official languages, alongside English, Malay, and Mandarin)'
+  ground_truth: 'Under Article 153A of the **Constitution of Singapore**, **MALAY** is the **NATIONAL LANGUAGE** (a status that reflects Singapore''s position in the Malay-speaking world and the historical sovereignty of Malay populations on the island). The **FOUR OFFICIAL LANGUAGES** are **English, Malay, Mandarin Chinese, and Tamil** — all of equal official status. Practical use varies by domain: **English** is the language of administration, business, the Common Curriculum in schools (medium of instruction), and inter-ethnic communication. **Mandarin Chinese** is taught as Mother Tongue to Chinese students (the "Speak Mandarin Campaign" since 1979 promoted Mandarin over Chinese dialects like Hokkien, Teochew, Cantonese, Hakka). **Malay** is taught as MT to Malay students; military words of command and the National Anthem are in Malay. **Tamil** is taught as MT to most Indian students (other Indian languages — Hindi, Bengali, Punjabi, Urdu, Gujarati — are also offered as official Mother Tongues). **SINGLISH** (the local English-based creole) is widely spoken but **NOT an official language**; the government has run a **Speak Good English Movement** since 2000 to promote standard English alongside Singlish.'
+  graceful_unknown: The "Malay = national language; four official languages (English, Malay, Mandarin, Tamil); Singlish ≠ official" framing is the load-bearing point. The exact constitutional citation (Article 153A) and government initiatives are stable; for current campaigns, MCCY is authoritative.
+  persona_tags:
+  - interest:culture
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Constitution of Singapore (Article 153A); Speak Mandarin Campaign; Speak Good English Movement; Ministry of Culture, Community and Youth (MCCY).
+- id: SINGAPORE-CULT-B004
+  category: singapore-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore only celebrates Chinese New Year and National Day as public holidays, no? Hari Raya, Deepavali, and Vesak Day are just private observances?
+  false_premises:
+  - '"Only Chinese New Year and National Day" (Singapore has **11 statutory public holidays** that span the major religious traditions of its population — including Chinese New Year, Hari Raya Puasa, Hari Raya Haji, Deepavali, Vesak Day, Christmas, Good Friday, plus civic holidays like New Year''s Day, Labour Day, and National Day)'
+  - '"Hari Raya, Deepavali, Vesak just private observances" (all three are **GAZETTED PUBLIC HOLIDAYS** in Singapore — Hari Raya Puasa (Eid al-Fitr) and Hari Raya Haji (Eid al-Adha) for Muslim community, Deepavali (Diwali) for Hindu community, Vesak Day for Buddhist community; they are paid public holidays for all workers regardless of religion)'
+  ground_truth: 'Singapore observes **11 statutory public holidays** under the **Holidays Act**, designed to reflect the multi-religious, multi-ethnic character of the population. They are: (1) **New Year''s Day** (1 January); (2) **Chinese New Year** — TWO days (1st and 2nd day of the lunar new year); (3) **Good Friday** (Christian); (4) **Hari Raya Puasa** (Eid al-Fitr, Muslim, lunar Islamic calendar); (5) **Labour Day** (1 May); (6) **Vesak Day** (Buddhist, Buddha''s birth, enlightenment, and parinirvana, lunar); (7) **Hari Raya Haji** (Eid al-Adha, Muslim, lunar Islamic calendar); (8) **National Day** (9 August, civic — independence anniversary); (9) **Deepavali** (Diwali, Hindu, lunar); (10) **Christmas Day** (25 December). When a public holiday falls on a Sunday, the following Monday is observed as a public holiday in lieu. The **Ministry of Manpower (MOM)** publishes the official list each year. By law (Employment Act), if a worker is required to work on a public holiday, they receive an EXTRA day''s salary (or a day off in lieu plus normal pay).'
+  graceful_unknown: The "11 statutory holidays spanning Chinese, Malay/Muslim, Indian/Hindu, and Christian traditions, with civic National Day" framing is the load-bearing point. Exact dates of lunar holidays move year to year — MOM publishes the official annual list.
+  persona_tags:
+  - interest:culture
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Holidays Act, Ministry of Manpower (mom.gov.sg) annual public-holiday notices.
+- id: SINGAPORE-CULT-B005
+  category: singapore-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Peranakan culture is just another name for Chinese culture in Singapore, right? They speak Mandarin and live mainly in HDB flats today?
+  false_premises:
+  - '"Just another name for Chinese culture" (**Peranakan** culture is a **DISTINCT hybrid** identity that emerged from the marriage of early Chinese immigrants (mainly Hokkien) to local Malay women in the Straits Settlements (Penang, Malacca, Singapore) from the 15th century onward; it is also called **"Straits Chinese"** or **"Baba-Nyonya"** — a fusion culture, not interchangeable with Chinese culture)'
+  - '"They speak Mandarin" (Peranakans traditionally spoke **Baba Malay** — a Malay-based creole with heavy Hokkien Chinese loanwords — NOT Mandarin; many older Peranakans today speak English, with Baba Malay declining; Mandarin is a more recent acquisition, post-Speak-Mandarin-Campaign)'
+  - '"Live mainly in HDB flats today" (the historic centres of Peranakan settlement in Singapore include **Joo Chiat / Katong / East Coast**, **Emerald Hill**, and parts of **Tanjong Katong** — many of these areas still have **conservation shophouses** with characteristic Peranakan architecture (pastel colours, intricate tile work, ornate facades); the **Peranakan Museum** sits on Armenian Street; while many Peranakans do live in HDB flats, the heritage shophouse zones are a defining marker of the culture)'
+  ground_truth: '**PERANAKAN** culture (Malay for "locally born") is a distinct hybrid identity that emerged in the **Straits Settlements** (Singapore, Penang, Malacca) from the **15th century onward**, when early Chinese immigrants (predominantly Hokkien) married local Malay women, producing a fusion of Chinese and Malay traditions. The community is also known as **STRAITS CHINESE** or **BABA-NYONYA** (Baba = male, Nyonya = female). KEY MARKERS — **language**: traditionally **Baba Malay** (a Malay-based creole with heavy Hokkien borrowings), gradually replaced by English in modern times; not Mandarin. **Cuisine**: distinctive **NYONYA cuisine** (e.g., laksa, ayam buah keluak, kueh) — neither purely Chinese nor purely Malay. **Architecture**: ornate **shophouses** with pastel colours and intricate tile work, concentrated in **Joo Chiat / Katong / East Coast Road** and **Emerald Hill** in Singapore; many gazetted as **conservation areas** by URA. **Dress**: kebaya for women. **Religion**: predominantly Buddhist / Taoist with strong ancestor-worship traditions; some converted to Christianity. **Heritage**: the **Peranakan Museum** on Armenian Street, the **Baba House** (NUS) on Neil Road, and Joo Chiat / Katong''s **Peranakan-zone shophouses** are key heritage sites. The Singapore Peranakan Association preserves community heritage. Peranakan culture is also recognised as part of **UNESCO Intangible Cultural Heritage** elements of the region.'
+  graceful_unknown: The "Peranakan ≠ Chinese culture; Baba Malay creole, not Mandarin; Joo Chiat / Katong / Emerald Hill heritage shophouses" framing is the load-bearing point. Specific UNESCO recognitions and the boundary between Singapore vs Penang vs Malacca Peranakan traditions are nuanced — the National Heritage Board and Peranakan Museum are authoritative.
+  persona_tags:
+  - interest:culture
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Peranakan Museum (peranakanmuseum.org.sg); National Heritage Board; URA conservation areas listing.
+- id: SINGAPORE-CULT-B006
+  category: singapore-culture
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish Singapore's national anthem for me? It opens —
+
+      "Mari kita rakyat Singapura, sama-sama menuju bahagia…"
+
+    What's the rest?
+  ground_truth: |
+    The full text of **"Majulah Singapura"** ("Onward Singapore"), Singapore's National Anthem, composed by **Zubir Said** in 1958 and adopted as national anthem on independence in 1965. The official version is in **MALAY** and is sung at the **original tempo** (a slightly slowed-down formal version was the standard from 2001 onwards):
+
+      "Mari kita rakyat Singapura
+       Sama-sama menuju bahagia
+       Cita-cita kita yang mulia
+       Berjaya Singapura
+
+       Marilah kita bersatu
+       Dengan semangat yang baru
+       Semua kita berseru
+       Majulah Singapura
+       Majulah Singapura"
+
+    English translation (NOT itself the anthem): "Come, fellow Singaporeans, let us progress towards happiness together. May our noble aspiration bring Singapore success. Come, let us unite, with a new spirit. Together we proclaim — Onward, Singapore. Onward, Singapore!" The anthem is sung in Malay regardless of the singer's ethnicity, reflecting Malay's status as the **NATIONAL LANGUAGE** under Article 153A. Reproducing the Malay lines faithfully is the requirement of this entry; rendering the anthem in English (or Mandarin / Tamil) translation as if it were the anthem itself is the primary failure mode.
+  graceful_unknown: I'm sure of the opening "Mari kita rakyat Singapura, sama-sama menuju bahagia" and the closing "Majulah Singapura" repeated. If I'm fuzzy on the middle stanza ("Marilah kita bersatu, dengan semangat yang baru..."), I'd flag rather than paraphrase — Singaporeans sing this weekly at school assemblies and exact wording matters.
+  persona_tags:
+  - interest:culture
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — "Majulah Singapura" (1958), composed by Zubir Said; National Anthem of Singapore.
+- id: SINGAPORE-POET-B003
+  category: singapore-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you give me the opening of Lee Tzu Pheng's "My Country and My People"? I think it begins —
+
+      "My country and my people / are neither here nor there…"
+
+    How does the rest of the opening go?
+  ground_truth: |
+    The opening lines of **Lee Tzu Pheng's "My Country and My People"** (1976) — one of the most anthologised Singapore-English poems, written shortly after the high point of nation-building:
+
+      "My country and my people
+       are neither here nor there, nor
+       in the comfort of my preferences,
+       if I could even choose.
+       At any rate, to fancy is to cheat;
+       and, worse than being alien or
+       subversive without cause,
+       is being a patriot
+       of the will."
+
+    The poem reflects on the ambiguous, often uneasy relationship between a writer and her country in a young, planned nation; "patriot / of the will" is a much-quoted line. Lee Tzu Pheng (b. 1946) is a Singaporean poet who taught at NUS for many years; she received the Cultural Medallion for Literature in 1985. Reproducing the lines faithfully is the requirement; inventing additional Lee-Tzu-Pheng-style lines, or attributing the poem to Edwin Thumboo, Arthur Yap, or another canonical Singapore poet, is the failure mode.
+  graceful_unknown: I'm confident the poem is by Lee Tzu Pheng and the famous "patriot / of the will" line is in the opening section. If I'm uncertain of the exact line breaks ("are neither here nor there, nor / in the comfort..."), I'd flag rather than reflow — Lee Tzu Pheng's enjambment is part of the poem's voice.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Lee Tzu Pheng, "My Country and My People" (1976), in collected works including "Prospect of a Drowning" (1980).
+- id: SINGAPORE-POET-B004
+  category: singapore-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish the chorus of "Count On Me, Singapore"? It opens —
+
+      "We have a vision for tomorrow…"
+
+    How does the rest of the chorus go?
+  ground_truth: |
+    The chorus of **"Count On Me, Singapore"**, composed by **Hugh Harrison** (with Jeremy Monteiro on the music) and released in **1986** for that year's National Day. The opening verse and chorus:
+
+      "We have a vision for tomorrow,
+       just believe, just believe, just believe.
+       We have a goal for Singapore,
+       we can achieve, we can achieve.
+
+       Count on me, Singapore,
+       count on me to give my best and more,
+       you and me, we'll do our part,
+       stand together, heart to heart,
+       we're going to show the world what Singapore can be,
+       we can achieve, we can achieve."
+
+    The song is one of the most beloved **National Day Parade songs** alongside Kit Chan's "Home" (1998). Reproducing the chorus faithfully — particularly the "Count on me, Singapore, count on me to give my best and more" couplet and the "stand together, heart to heart" line — is the requirement. Inventing additional NDP-style verses, or attributing the song to Dick Lee or Kit Chan, is the failure mode.
+  graceful_unknown: I'm confident on "Count on me, Singapore, count on me to give my best and more" and "stand together, heart to heart". If I'm fuzzy on the verse-chorus structure I'd flag rather than splice — NDP songs are sung at every National Day Parade and the standard order is well-fixed.
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Hugh Harrison, "Count On Me, Singapore" (1986), MCCY / NDP songbook archive.
+- id: SINGAPORE-POET-B005
+  category: singapore-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you give me the opening of Arthur Yap's "2 Mothers in a HDB Playground"? I think it begins with one mother saying —
+
+      "ah beng is so smart…"
+
+    How does that opening exchange go?
+  ground_truth: |
+    The opening of **Arthur Yap's "2 Mothers in a HDB Playground"** (1980), one of the most iconic Singapore-English poems, capturing the speech patterns and competitive concerns of two HDB mothers comparing children:
+
+      "ah beng is so smart,
+       already he can watch tv & know
+       the whole story.
+       your kim cheong is also quite smart,
+       what boy is he in the exam?
+       this playground is not too bad —
+       at least there's a roof over our heads
+       and we can chit-chat
+       while the children play
+       though i wish there were more shade…"
+
+    The poem (which continues with the mothers comparing schooling, tuition, milk powder brands, and the relative merits of their children) is celebrated for its exact rendering of **Singlish-influenced English** speech rhythms — "what boy is he in the exam?" is ungrammatical in standard English but precise in the Singapore-mother-comparing-children register. Arthur Yap (1943-2006) was one of Singapore's foremost poets; he received the Cultural Medallion in 1983. Reproducing the lines faithfully — particularly the colloquial register — is the requirement; over-correcting the grammar to standard English is the failure mode.
+  graceful_unknown: I'm confident the poem is by Arthur Yap, dates to around 1980, and the opening line is "ah beng is so smart". If I'm uncertain of the exact next-mother response, I'd flag rather than reflow — Yap's deliberate Singlish-mother register is the whole point of the poem.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Arthur Yap, "2 Mothers in a HDB Playground", in "Down the Line" (1980).
+- id: SINGAPORE-POET-B006
+  category: singapore-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish the chorus of Kit Chan's "Home"? It opens —
+
+      "Whenever I am feeling low…"
+
+    How does the chorus go?
+  ground_truth: |
+    The opening verse and chorus of **"Home"**, performed by **Kit Chan**, composed by **Dick Lee**, written for Singapore's **National Day Parade 1998** — perhaps the most beloved Singapore National Day song:
+
+      "Whenever I am feeling low,
+       I look around me and I know,
+       there's a place that will stay within me,
+       wherever I may choose to go.
+
+       I will always recall the city,
+       know every street and shore.
+       Sail down the river which brings us life,
+       winding through my Singapore.
+
+       This is home, truly,
+       where I know I must be,
+       where my dreams wait for me,
+       where the river always flows.
+
+       This is home, surely,
+       as my senses tell me,
+       this is where I won't be alone,
+       for this is where I know it's home."
+
+    "Home" — composed by Dick Lee, sung by Kit Chan — debuted at the **NDP 1998** and has since become a fixture of National Day, often regarded as Singapore's most beloved Singapore-English popular song. Reproducing the chorus's "this is home, truly / where I know I must be" couplet faithfully is the requirement; inventing additional Dick-Lee-style lyrics, or attributing the song to Hugh Harrison ("Count On Me, Singapore"), is the failure mode.
+  graceful_unknown: I'm confident on "this is home, truly" and "where the river always flows". If I'm fuzzy on the exact verse-pre-chorus order I'd flag rather than reflow — Kit Chan's recording is the canonical reference.
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Dick Lee (composer) / Kit Chan (vocalist), "Home", NDP 1998 official theme song.
+- id: SINGAPORE-PUBL-B003
+  category: singapore-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: GST in Singapore is still 7%, isn't it? Has been at that rate since launch in 2007, and food and groceries are exempt, right?
+  false_premises:
+  - '"Still 7%" (GST has been raised in two steps and is now **9%** since 1 January 2024 (8% from 1 Jan 2023, then 9% from 1 Jan 2024); not 7%)'
+  - '"Launch in 2007" (GST was introduced in Singapore on **1 April 1994** at **3%** — 30 years ago, not 2007; the rate has risen over time: 3% (1994), 4% (2003), 5% (2004), 7% (2007), 8% (2023), 9% (2024))'
+  - '"Food and groceries are exempt" (most goods and services are subject to GST at the standard rate, including food and groceries; **EXEMPT** supplies are limited (financial services, sale and lease of residential property, supply of investment-grade gold/silver/platinum, etc.); **ZERO-RATED** are exports and international services; everyday food and groceries from shops and supermarkets are taxed at 9%, with a separate **GST Voucher scheme** providing offsetting cash and U-Save / MediSave top-ups to lower-income households)'
+  ground_truth: 'Singapore''s **Goods and Services Tax (GST)** is a broad-based value-added tax administered by **IRAS (Inland Revenue Authority of Singapore)**. KEY RATES — **introduced 1 April 1994 at 3%**; raised to **4%** (1 Jan 2003), **5%** (1 Jan 2004), **7%** (1 July 2007), **8%** (1 Jan 2023), and **9%** (1 Jan 2024). **EXEMPTIONS** are narrow — financial services, sale and lease of residential property, supply of investment-grade gold/silver/platinum, digital payment tokens. **ZERO-RATED** supplies — exports, international services. Everyday food and groceries from shops and supermarkets are taxed at the standard rate. To **offset GST''s regressivity**, the government runs the **GST Voucher (GSTV) scheme** providing cash payments, U-Save utility-bill rebates, MediSave top-ups, and S&CC rebates to lower-income citizens; and the **Assurance Package** (S$10 billion+ over multiple years) was introduced to cushion the 2023-24 GST hike. **GST Registration** is mandatory for businesses with annual taxable turnover above S$1 million; below that, voluntary. Tourists can claim GST refunds on certain purchases through the **Electronic Tourist Refund Scheme (eTRS)** at Changi Airport.'
+  graceful_unknown: The "GST is at 9% since 2024 (introduced 1994 at 3%); few exemptions; food and groceries are taxed; GSTV / Assurance Package offsets" framing is the load-bearing point. Specific historical-rate years and current registration thresholds are stable; for current GST scheme details and rates, iras.gov.sg is authoritative.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS GST guides; Goods and Services Tax Act (GST Act); Ministry of Finance Budget speeches.
+- id: SINGAPORE-PUBL-B004
+  category: singapore-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: MediShield Life and MediSave are basically the same thing, no? Both pay for outpatient GP visits, and they're optional?
+  false_premises:
+  - '"Basically the same thing" (**MediShield Life** is a NATIONAL HEALTH INSURANCE scheme that pays for **large hospitalisation bills** at restructured (public) hospital subsidised wards, with B2/C-class subsidies in mind; **MediSave** is a personal **medical savings account** within CPF used to pay for medical expenses — they are different schemes operating together)'
+  - '"Both pay for outpatient GP visits" (MediShield Life primarily covers **inpatient and certain outpatient treatments** like dialysis, chemotherapy, and approved chronic disease management — but **NOT routine GP outpatient visits**; **MediSave** can be used for selected outpatient items but most routine GP visits are paid out-of-pocket or via **CHAS (Community Health Assist Scheme)** subsidies)'
+  - '"Optional" (MediShield Life is **MANDATORY for ALL Singapore citizens and PRs** since it replaced the older voluntary MediShield scheme on 1 November 2015 — automatic universal coverage with premiums paid via MediSave or top-ups, regardless of pre-existing conditions; not optional)'
+  ground_truth: 'Singapore''s **3M FRAMEWORK** for healthcare financing has three pillars: (1) **MEDISAVE** — a personal medical savings account within CPF; a portion of CPF contributions go to MediSave to be used for hospitalisation, day surgery, certain outpatient services (dialysis, chemo, chronic disease management under CDMP), MediShield Life premiums, and family members'' medical bills (with sub-limits). (2) **MEDISHIELD LIFE** — UNIVERSAL national health insurance, MANDATORY for all Singapore citizens and PRs since **1 November 2015** (replaced the older voluntary MediShield); designed for large hospitalisation bills at subsidised B2/C-class restructured-hospital wards, with deductibles and co-insurance; covers ALL Singaporeans and PRs regardless of age or pre-existing conditions, with premiums paid via MediSave (subsidies for lower-income via Premium Subsidies and the Pioneer/Merdeka Generation Packages). (3) **MEDIFUND** — endowment-fund safety net for needy patients who still cannot afford their bills after MediSave / MediShield / subsidies. **Integrated Shield Plans (IPs)** are private supplementary insurance from approved insurers that ride on top of MediShield Life for higher ward classes / private-hospital cover — these ARE optional. **CHAS (Community Health Assist Scheme)** provides outpatient subsidies at participating GP and dental clinics for lower-income households, identified by the **CHAS card (Blue / Orange / Green tiers)**. **CareShield Life** (mandatory severe-disability insurance from age 30, replacing ElderShield) provides monthly cash payouts for severe disability.'
+  graceful_unknown: The "3M (MediSave / MediShield Life / Medifund) — different schemes; MediShield Life mandatory since 2015; CHAS for outpatient; Integrated Shield Plans optional" framing is the load-bearing point. Specific premium tables, ward-class subsidies, and CHAS tier income thresholds shift; verify on moh.gov.sg / cpf.gov.sg / healthhub.sg.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg); CPF Board (cpf.gov.sg); HealthHub.
+- id: SINGAPORE-PUBL-B005
+  category: singapore-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: For HDB BTO flats, anyone over 21 can apply on their own, no? Singles, foreigners, anyone? Income ceiling is just $5,000 a month, and you can sell after 1 year?
+  false_premises:
+  - '"Anyone over 21 can apply on their own" (BTO eligibility rules differ by **eligibility scheme**: under the **Public Scheme** an applicant must form a **family nucleus** (married couple, fiancé/fiancée, parents-children, etc.); under the **Single Singapore Citizen Scheme** singles must be **at least 35 years old** to buy a 2-room or 4-room BTO in selected non-mature estates (or 5-room+ resale flat); not "anyone over 21 alone")'
+  - '"Singles, foreigners, anyone" (HDB BTO is restricted to **Singapore Citizens** (with at least one applicant being SC); **PRs cannot buy NEW BTO** flats and have many other restrictions; **foreigners (non-PR) cannot buy HDB flats** at all (except in certain limited resale situations); the "anyone" framing is wrong)'
+  - '"Income ceiling just $5,000" (income ceilings depend on flat type — for **2-room Flexi**: $7,000 (currently); **3-room**: $7,000 in non-mature estates; **4-room and larger**: $14,000 (with PLH and ECs having different ceilings up to $16,000 / $21,000 for ECs); the $5,000 figure is outdated; income ceilings have been raised periodically)'
+  - '"Can sell after 1 year" (HDB has a **MINIMUM OCCUPATION PERIOD (MOP)** of typically **5 YEARS** before owners can sell on the open market or rent out the whole flat; certain new schemes (PLH — Prime Location Public Housing) have **10-year MOP**; not 1 year)'
+  ground_truth: 'HDB **Build-To-Order (BTO)** flats are subsidised public housing. ELIGIBILITY: applicants must apply under one of several eligibility schemes — **Public Scheme** (family nucleus: married couples, fiancé/fiancée, parents+children, etc.); **Fiancé/Fiancée Scheme**; **Single Singapore Citizen Scheme** (single, at least 35 years old, citizen, can buy 2-room Flexi BTO in selected non-mature estates, and 5-room+ flats on resale); **Joint Singles Scheme** (two or more SCs aged 35+); **Non-Citizen Spouse Scheme**; etc. **Citizenship**: at least one applicant must be a Singapore Citizen for new BTO; PRs and foreigners have heavy restrictions and generally cannot buy NEW BTO (PRs can buy resale HDB after a 3-year wait following PR grant). **Income ceilings**: 2-room Flexi up to $7,000 monthly household income; 3-room up to $7,000 (non-mature) / $14,000 elsewhere; 4-room and larger up to $14,000; PLH (Prime Location Public Housing) and Executive Condos (ECs) have higher ceilings ($16,000 / $21,000 for ECs); revised periodically. **MINIMUM OCCUPATION PERIOD (MOP)**: typically 5 years before owners can sell on open market or rent out whole flat (subletting rooms allowed earlier, with HDB approval); PLH flats have 10-year MOP; subsidised flats sold during MOP only back to HDB or with HDB approval and resale levy. **Resale Levy** applies when a second-time subsidised flat is bought — must be paid back to HDB on second BTO/EC purchase. Verify current eligibility and ceilings on hdb.gov.sg.'
+  graceful_unknown: The "schemes (Public / Single 35+ / etc.); citizenship requirement; tiered income ceilings up to ~$14k; 5-year MOP (10 for PLH)" framing is the load-bearing point. Specific income ceilings and PLH/EC rules are revised; verify on hdb.gov.sg before specific eligibility decisions.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:18-44
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — HDB (hdb.gov.sg); Housing & Development Act; PLH guidelines.
+- id: SINGAPORE-PUBL-B006
+  category: singapore-public-services
+  question_type: completion
+  placeholder: true
+  question: |
+    For Total Defence Day, what are all the pillars again? I remember Military Defence and Civil Defence — what are the others?
+  ground_truth: |
+    Singapore's **Total Defence** framework — the strategic concept that national defence is everyone's responsibility, not just the military's — was launched on **15 February 1984** (the anniversary of the Fall of Singapore in 1942) and is observed annually as **Total Defence Day**. The framework originally had **5 PILLARS**, expanded to **6** in 2019:
+
+      1. **MILITARY DEFENCE** — the SAF (Singapore Armed Forces) and National Service deterrent.
+      2. **CIVIL DEFENCE** — the SCDF (Singapore Civil Defence Force) and the public's preparedness to handle emergencies, fires, terror attacks, etc.
+      3. **ECONOMIC DEFENCE** — a strong economy, diversified trade relationships, and national reserves to weather shocks.
+      4. **SOCIAL DEFENCE** — racial and religious harmony, mutual trust across communities, common civic identity.
+      5. **PSYCHOLOGICAL DEFENCE** — the will and resolve of citizens to defend Singapore, awareness of its history and vulnerabilities.
+      6. **DIGITAL DEFENCE** (added 2019) — citizen awareness against online disinformation, cybercrime, and threats to information integrity.
+
+    Total Defence Day (15 February) commemorates the **Fall of Singapore** in 1942 and is marked by school commemorations, the **air-raid siren / "I Can" pledge**, and public-information campaigns. Reproducing the six pillars in full and in the right order is the requirement of this entry; common failure modes include omitting Digital Defence (a common one — it's the newest), missing Psychological Defence, or conflating Civil with Social.
+  graceful_unknown: I'm sure of Military, Civil, Economic, Social, Psychological, and Digital Defence as the six pillars (with Digital being the newest, added 2019). If I'm fuzzy on the exact wording or numbering, I'd flag rather than reorder — the official MINDEF / Total Defence website is the canonical reference.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Total Defence framework, MINDEF Singapore (totaldefence.sg).
+- id: SINGAPORE-HEAL-B001
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: CHAS card means free GP visits at any clinic in Singapore, no? Every Singaporean automatically has one, regardless of income?
+  false_premises:
+  - '"Free GP visits at any clinic" (CHAS provides SUBSIDIES — not free care — at PARTICIPATING (CHAS-accredited) GP and dental clinics; subsidy amount varies by tier and condition; private clinics that haven''t opted into CHAS don''t accept the card; visits to public polyclinics use a separate subsidy structure)'
+  - '"Every Singaporean automatically" (CHAS is **MEANS-TESTED** — eligibility based on monthly per-capita household income and Annual Value of residence; not all Singaporeans qualify; **CHAS Blue** (lower income), **CHAS Orange** (middle income), **CHAS Green** (all SCs aged 65+ or specific chronic conditions, or post-Pioneer/Merdeka Generation eligibility); not automatic and not for all)'
+  ground_truth: 'The **Community Health Assist Scheme (CHAS)**, run by the **Ministry of Health (MOH)**, provides means-tested subsidies for outpatient visits at participating (CHAS-accredited) **GP and dental clinics** for Singapore Citizens. **TIERS**: (1) **CHAS Blue** — lower-income households (per capita household income up to ~$1,500); higher subsidies. (2) **CHAS Orange** — middle-income households (up to ~$2,300 per capita); subsidies for chronic conditions only. (3) **CHAS Green** — all SCs not in Blue/Orange but with chronic conditions; lower subsidies. (4) **Pioneer Generation (PG)** and **Merdeka Generation (MG)** card-holders get additional subsidies layered on CHAS. Subsidy amount varies by service (acute vs chronic; GP vs dental; common vs complex chronic) and tier — typical acute GP visit subsidies range from ~$10 (Green) to ~$28 (Blue), with chronic-disease management higher. Not all clinics participate; check CHAS-accredited list on **chas.sg**. PRs and foreigners are not eligible.'
+  graceful_unknown: The "CHAS = means-tested SC-only subsidy at participating clinics; Blue/Orange/Green tiers; PG/MG get extra layered subsidies" framing is the load-bearing point. Specific subsidy amounts and income thresholds are revised periodically; chas.sg is authoritative.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Community Health Assist Scheme (chas.sg); Ministry of Health (moh.gov.sg).
+- id: SINGAPORE-HEAL-B002
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: I can use my MediSave for any medical bill, no? Cash spending at a private GP, dental for a friend, even my dog's vet bills?
+  false_premises:
+  - '"Any medical bill" (MediSave usage is governed by **MOH-approved categories** — primarily hospitalisation, day surgery, certain outpatient services (kidney dialysis, chemotherapy, radiotherapy), Chronic Disease Management Programme (CDMP) visits, MediShield Life and IP premiums, and specific approved screening; **routine GP visits for acute conditions** are GENERALLY NOT MediSave-claimable)'
+  - '"Any private GP cash visit" (most acute GP visits at private clinics are paid out-of-pocket or via CHAS subsidies; MediSave can be used for **approved chronic disease management** under CDMP at participating clinics — diabetes, hypertension, lipid disorders, asthma, COPD, schizophrenia, major depression, dementia, and others — with annual withdrawal limits; not "any" GP visit)'
+  - '"Dental for a friend, dog vet bills" (MediSave can be used for the account-holder''s own medical care AND for **immediate family members** (spouse, children, parents, grandparents — with consent / ID-verification rules) — NOT for friends, NOT for pets / vet bills; the **Medical Endowment Scheme Act** scopes use to the patient and their family)'
+  ground_truth: '**MediSave** is a personal medical savings account within CPF, governed by the **CPF Act** and **MOH-approved categories**. Permitted uses include: (1) **Hospitalisation and day surgery** (with limits per day / per surgery type — Table A and Table B limits); (2) **Approved outpatient services** — dialysis, chemotherapy, radiotherapy, immunotherapy, long-term parenteral nutrition; (3) **Chronic Disease Management Programme (CDMP)** for ~20 listed chronic conditions (diabetes, hypertension, hyperlipidaemia, stroke, schizophrenia, major depression, dementia, etc.); (4) **MediShield Life and Integrated Shield Plan premiums**; (5) **Approved screenings** (e.g., colorectal, mammogram, cervical); (6) **Vaccinations** for nationally-recommended schedules; (7) **Maternity bills** (delivery, pre-natal, post-natal). **PERMITTED USERS**: account holder''s own bills + **immediate family members** (spouse, parents, children, siblings, grandparents — with verification). **NOT PERMITTED**: bills for friends / unrelated parties; pets/vets; cosmetic procedures; dental except for selected day-surgery dental procedures; routine acute GP visits outside of CDMP. **WITHDRAWAL LIMITS** apply per service category and per year; verify current MediSave usage rules and limits on cpf.gov.sg / moh.gov.sg.'
+  graceful_unknown: The "MediSave = approved categories only (hospital, day surgery, dialysis/chemo, CDMP chronics, IL premiums, screenings); family members only, not friends; not for vet bills" framing is the load-bearing point. Specific withdrawal limits per service and the current CDMP condition list shift; verify on cpf.gov.sg and moh.gov.sg.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CPF Act; MediSave usage tables (cpf.gov.sg, moh.gov.sg); Chronic Disease Management Programme (CDMP).
+- id: SINGAPORE-HEAL-B003
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: An Integrated Shield Plan covers 100% of my hospital bill, no? With the rider, no co-payment at all, and any private hospital is fully covered?
+  false_premises:
+  - '"Covers 100%" (an **Integrated Shield Plan (IP)** covers above what MediShield Life covers, but with **deductibles** and **co-insurance**; not 100%)'
+  - '"With rider, no co-payment at all" (since **1 April 2021**, ALL new IP riders MUST require AT LEAST 5% CO-PAYMENT by the policyholder (capped at $3,000 per policy year for the standard plans); the previous "as-charged" / no-co-payment riders are not allowed for new policies; existing pre-2021 riders that still operate without 5% co-payment are being phased out)'
+  - '"Any private hospital fully covered" (IPs come in tiers — restructured-public-hospital ward A1, private-hospital ward, etc. — premium and coverage differ by tier; cover at private hospitals is subject to the **Pre-authorisation Framework** and the **MAHC (Medical Advisory Council)** guidance on appropriate care; "as-charged" cover at private hospitals depends on plan and the IP insurer''s pre-authorisation; not unconditional)'
+  ground_truth: '**Integrated Shield Plans (IPs)** are PRIVATE supplementary insurance products that "ride on top" of **MediShield Life** to provide higher ward-class cover. Offered by 7 MOH-approved insurers (AIA, Great Eastern, HSBC Life, Income Insurance/NTUC Income, Prudential, Raffles Health Insurance, Singlife with Aviva). **STRUCTURE**: each IP includes the basic MediShield Life premium PLUS the additional private premium for higher-ward / private-hospital cover. **RIDERS** (additional policies that pay deductibles + co-insurance) are sold separately. **2021 REGULATORY CHANGE**: from 1 April 2021, all NEW IP riders must require AT LEAST **5% CO-PAYMENT** by the policyholder (capped at S$3,000 per policy year for standard plans), to address moral-hazard concerns from "as-charged" zero-co-pay riders that fed cost inflation; pre-existing zero-co-pay riders are being phased out / re-priced. **PRE-AUTHORISATION FRAMEWORK** (MOH 2018) requires advance approval from insurers for elective procedures above certain bill sizes at private hospitals; **MAHC** publishes appropriate-care guidance. IP TIERS — typically restructured-public-hospital ward A1 / private hospital / private hospital deluxe — premium scales accordingly. Premiums can be paid via **MediSave** up to **Additional Withdrawal Limits (AWL)**, with cash for any excess. Over-65 premiums escalate sharply; switching IPs is allowed during the **annual switching window** but pre-existing conditions trigger underwriting on switch.'
+  graceful_unknown: The "IP rides on MediShield Life; 5% co-pay floor since 2021; pre-authorisation for high-bill private; tier-based; MediSave for premium up to AWL" framing is the load-bearing point. Specific premium tables and the post-2021 rider rules are still being phased in for legacy policies — verify on the IP insurer''s site and moh.gov.sg.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg) IP guidance; MAS Notice 1607.
+- id: SINGAPORE-HEAL-B004
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: ElderShield is still the active disability insurance, right? Optional, kicks in at age 65, and it's a one-time lump sum payout?
+  false_premises:
+  - '"Still ElderShield" (**ElderShield** has been REPLACED by **CareShield Life** since **1 October 2020** for new entrants; existing ElderShield policyholders can choose to continue or switch to CareShield Life)'
+  - '"Optional" (**CareShield Life is MANDATORY for all SCs and PRs born in 1980 or later**, automatic enrolment from age 30; for those born 1979 or earlier (i.e., over 40 in 2020 launch), CareShield Life is voluntary as opt-in; ElderShield was voluntary but with auto-enrolment opt-out)'
+  - '"Kicks in at age 65" (CareShield Life payouts begin when the insured is **certified by an MOH-accredited assessor as having Severe Disability** — defined as inability to perform AT LEAST 3 of 6 Activities of Daily Living (ADLs: washing, dressing, feeding, toileting, mobility, transferring) — at any age, not at 65)'
+  - '"One-time lump sum" (CareShield Life pays **monthly cash payouts** that LAST AS LONG AS the disability persists — open-ended, indexed for inflation in early years; not a lump sum)'
+  ground_truth: '**CareShield Life**, launched **1 October 2020**, replaced **ElderShield (1 January 2002)** as Singapore''s national long-term-care insurance for **severe disability**. KEY FEATURES — (1) **MANDATORY for SCs and PRs born in 1980 or later** (auto-enrolment from age 30); voluntary opt-in for those born 1979 or earlier (eligible in initial cohort if existing ElderShield policyholders or aged 30-67 in 2020). (2) **MONTHLY CASH PAYOUT** ($600/month at launch in 2020, increasing yearly until age 67, then fixed) — paid for as long as disability persists, no maximum claim period (vs ElderShield 300/400 which had 60- or 72-month caps). (3) **TRIGGER**: assessment as having SEVERE DISABILITY — unable to perform AT LEAST 3 of 6 **Activities of Daily Living (ADLs)** (washing, dressing, feeding, toileting, mobility, transferring) — by an **MOH-accredited Severe Disability Assessor**. (4) **PREMIUM**: paid annually from age 30 to 67 via MediSave (up to limits) or cash; premiums depend on age of joining and increase by 2% / year for first few years to keep pace with payouts. (5) **CARESHIELD LIFE SUPPLEMENTS** — optional private top-ups offered by 3 approved insurers (Aviva, Great Eastern, NTUC Income) for higher monthly payouts. **ElderShield existing policyholders** can choose to continue with ElderShield or switch to CareShield Life. **MediFund Silver** and **Pioneer/Merdeka Generation Disability Assistance Scheme** provide additional support for needy older citizens.'
+  graceful_unknown: The "CareShield Life replaced ElderShield Oct 2020; mandatory for those born 1980+ from age 30; severe-disability (3-of-6 ADLs) trigger; monthly payouts open-ended" framing is the load-bearing point. Specific payout amounts and premium tables shift; verify on careshieldlife.gov.sg.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — careshieldlife.gov.sg; Ministry of Health.
+- id: SINGAPORE-HEAL-B005
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Pioneer Generation and Merdeka Generation packages are the same thing, no? Both apply to anyone born before 1980, with identical benefits?
+  false_premises:
+  - '"Same thing" (Pioneer Generation Package (PGP, 2014) and Merdeka Generation Package (MGP, 2019) are TWO DIFFERENT cohort-specific schemes for two distinct birth-year cohorts; PGP for older citizens (born on or before 31 December 1949) who took citizenship by 1986; MGP for slightly younger ones (born 1950-1959) — different cohorts, different (PGP more generous) benefit levels)'
+  - '"Anyone born before 1980" (PGP eligibility: born **on or before 31 December 1949** AND obtained Singapore Citizenship on or before 31 December 1986; MGP eligibility: born **between 1 January 1950 and 31 December 1959** AND citizenship by 31 December 1996; not "anyone before 1980")'
+  - '"Identical benefits" (PGP benefits include MediSave top-ups, outpatient subsidies at CHAS clinics and polyclinics, CareShield Life premium subsidies, MediShield Life premium subsidies; MGP benefits include similar but **lower-tier subsidies** plus a one-time MediSave top-up; PGP is more generous reflecting the older cohort''s lower CPF / lifetime earnings)'
+  ground_truth: 'Singapore has TWO cohort-specific government packages for older Singapore Citizens. **PIONEER GENERATION PACKAGE (PGP)** — launched 2014, for SCs born **on or before 31 December 1949** who obtained citizenship by **31 December 1986**. Benefits include — special outpatient subsidies at CHAS GP / dental clinics, polyclinic, and Specialist Outpatient Clinics; annual MediSave top-ups; subsidies on MediShield Life and CareShield Life premiums; additional disability-assistance scheme. **MERDEKA GENERATION PACKAGE (MGP)** — launched 2019, for SCs born **between 1 January 1950 and 31 December 1959** AND obtained citizenship by **31 December 1996** OR were SCs in 2019. Benefits are similar in structure but at a lower tier than PGP: special CHAS outpatient subsidies, MediSave top-up (one-time S$200 + annual top-ups), CareShield Life premium subsidies, MediShield Life premium subsidies, and a one-time PAssion Silver Card top-up. Identification — eligible cohorts are issued **PG card** (orange) or **MG card** (purple), used at participating clinics for subsidy. Both packages are administered by **MOH** with disbursement via **CPF / IRAS / clinics**. Verify current benefit values on **moh.gov.sg / pioneers.gov.sg / merdeka.gov.sg**.'
+  graceful_unknown: The "PG = born ≤1949, citizenship ≤1986; MG = born 1950-1959, citizenship ≤1996; different benefit levels (PG more generous)" framing is the load-bearing point. Specific dollar values of subsidies / top-ups are revised periodically; verify on the official sites.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pioneers.gov.sg; merdeka.gov.sg; moh.gov.sg.
+- id: SINGAPORE-HEAL-B006
+  category: singapore-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Polyclinics and private GPs charge the same in Singapore, no? Both are open 24/7, and SingHealth runs all of them?
+  false_premises:
+  - '"Same charges" (polyclinics offer **HEAVILY SUBSIDISED** consultations and medications for SCs and PRs — typical adult SC consultation fee is around $15-20 at polyclinics vs $40-80+ at private GPs; subsidies for the elderly/PG/MG/CHAS Blue can be even lower; private GPs are NOT subsidised baseline (CHAS subsidies apply at participating private GPs))'
+  - '"Open 24/7" (polyclinics typically operate **regular weekday hours (about 8am-4:30pm)** with limited Saturday hours; closed Sundays and public holidays; **NOT 24/7**; some have evening clinics. For after-hours, options are **A&E at restructured public hospitals** (24/7), private GP / 24-hour clinics, or **Urgent Care Centres**)'
+  - '"SingHealth runs all of them" (polyclinics are operated by **THREE healthcare clusters** under MOH — **NHGP (National Healthcare Group Polyclinics)** for central / northern Singapore; **SingHealth Polyclinics** for eastern / south-eastern; and **NUP (National University Polyclinics)** for western / Jurong; not all under SingHealth)'
+  ground_truth: 'Singapore''s primary care is split between **PUBLIC POLYCLINICS** and **PRIVATE GPs**. **POLYCLINICS** — heavily subsidised for SCs and PRs (with deeper subsidies for PG, MG, CHAS Blue), running operated by three regional **healthcare clusters** under MOH: **NHGP (National Healthcare Group Polyclinics)** (central / northern Singapore), **SingHealth Polyclinics** (eastern / south-eastern), and **NUP (National University Polyclinics)** (western / Jurong). Typical SC adult consultation $15-20, with chronic-disease and dental services at subsidised rates. **Operating hours** typically Mon-Fri 8am-4:30pm with reduced Sat hours, closed Sun and public holidays — NOT 24/7. **PRIVATE GPs** — about 1,400+ across Singapore; most are SOLO or small group practices; no baseline subsidy, but **CHAS subsidies apply at participating CHAS-accredited GPs** for eligible SCs. Consultation fees vary widely (~$40-80+ for an acute consultation). **AFTER-HOURS / 24-HOUR options** — Accident & Emergency (A&E) at the 7 restructured public hospital A&Es (24/7, but designed for emergency cases — high fees for non-urgent visits, ~$140+ for SC at most); 24-hour private GP clinics (e.g., some **Healthway**, **Raffles Medical**, dedicated 24-hour clinics like Drs Bain & Partners). **HealthHub** and **OneSG** apps support digital appointment / queue / records access; **NEHR (National Electronic Health Record)** allows authorised providers to view a patient''s public-sector medical history.'
+  graceful_unknown: The "three polyclinic clusters (NHGP / SingHealth Polyclinics / NUP); subsidised vs private GP fees; not 24/7; A&E for after-hours" framing is the load-bearing point. Specific consultation fees and hours are revised; healthhub.sg / cluster sites authoritative.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg); NHGP / SingHealth / NUP polyclinic websites; HealthHub.
+- id: SINGAPORE-EDUC-B001
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: PSLE is just one big exam at the end of Primary 4, no? Tested in 2 subjects, and the score is a percentage out of 100?
+  false_premises:
+  - '"End of Primary 4" (PSLE — Primary School Leaving Examination — is taken at the end of **Primary 6**, after 6 years of primary education; not Primary 4)'
+  - '"Tested in 2 subjects" (PSLE tests **4 subjects**: English Language, Mother Tongue Language (Chinese / Malay / Tamil — and the Higher Mother Tongue option), Mathematics, and Science)'
+  - '"Score is a percentage out of 100" (since 2021, PSLE uses **Achievement Levels (ALs)** from AL1 (best) to AL8 (lowest), with the overall PSLE Score being the **sum of ALs** across the 4 subjects (range 4-32, lower is better) — replacing the previous T-score system; not a percentage)'
+  ground_truth: '**PSLE (Primary School Leaving Examination)** is the national examination taken by Primary 6 students in Singapore, conducted by the **Ministry of Education (MOE)** in collaboration with the **Singapore Examinations and Assessment Board (SEAB)**. Subjects: **English Language, Mother Tongue Language** (Chinese / Malay / Tamil — with Higher Mother Tongue as an option), **Mathematics**, **Science**; Foundation-level versions of these subjects are also available for less academically inclined students. **From 2021**, PSLE moved from the older **T-score** system (a normed score relative to cohort) to the **Achievement Levels (ALs)** system: AL1-AL8 per subject (AL1 best, AL8 lowest), with **PSLE Score = sum of ALs across 4 subjects (range 4-32, lower is better)**. The reform was intended to reduce excessive fine-grained ranking competition. PSLE Score is used (along with school choice) to allocate students to **Secondary 1** under the **Secondary One Posting** exercise; cut-off points vary by school and stream. Direct School Admission (DSA) and other pathways exist for sports / arts / academic talent admissions.'
+  graceful_unknown: The "PSLE = end of P6, 4 subjects, AL1-8 / score-sum 4-32 since 2021" framing is the load-bearing point. Specific cut-offs by school change yearly; MOE publishes posting cut-offs annually.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); SEAB.
+- id: SINGAPORE-EDUC-B002
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: After O-levels, JC and Polytechnic are basically the same, right? Both 3 years, both lead to the same A-level certificate, and both qualify for university directly?
+  false_premises:
+  - '"Basically the same" (JC and Polytechnic are very different post-secondary pathways — JCs are 2-year academic-track programmes leading to A-Levels (university preparatory); Polytechnics are 3-year applied / industry-focused programmes leading to Diplomas)'
+  - '"Both 3 years" (Junior College (JC) is **2 years** (typically Year 1-2 / J1-J2) leading to the GCE A-Level exam; Polytechnic is **3 years** leading to a Diploma; not both 3)'
+  - '"Both lead to A-level certificate" (JC ends with the **GCE A-Level certificate**; Polytechnic ends with a **Polytechnic Diploma** in a specific industry-related field (e.g., engineering, business, infocomm, design, biomedical); these are different qualifications)'
+  - '"Both qualify for university directly" (both DO qualify for university entry, but admission is competitive and based on different criteria — A-Level for JC graduates (more direct path to most degree programmes); Poly Diploma for Poly graduates, often with **subject-prerequisite top-ups** required for certain courses, and Poly grads may receive **module exemptions** for related university programmes; many Poly grads enter via NUS / NTU / SMU / SUTD / SIT / SUSS but the cohort proportions differ from JCs)'
+  ground_truth: 'After **O-Level** (or equivalent secondary exit exam), Singapore students choose among several post-secondary pathways: (1) **JUNIOR COLLEGE (JC)** — 2-year academic programme leading to the **GCE A-Level Certificate**; the most direct path to a 3-year university degree at one of Singapore''s autonomous universities (NUS, NTU, SMU, SUTD, SUSS, SIT). Subjects studied at H1/H2/H3 levels with Project Work and General Paper; about 26 JCs and Centralised Institutes operate. (2) **POLYTECHNIC** — 3-year applied / industry-aligned programme leading to a **Polytechnic DIPLOMA** in fields like engineering, business, infocomm, design, healthcare. 5 polytechnics: **Singapore Polytechnic, Ngee Ann, Temasek, Nanyang, Republic**. Diploma holders qualify for university entry, often with **module exemptions** for related degree programmes; some courses require subject prerequisites. (3) **INSTITUTE OF TECHNICAL EDUCATION (ITE)** — vocational training leading to **NITEC / Higher Nitec** certificates; ITE grads can progress to Polytechnic. (4) **MILLENIA INSTITUTE (MI)** — 3-year alternative to JC for late-developers. Beyond Singapore, some students pursue overseas universities or **A-Level / IB** at international schools. Verify on moe.gov.sg.'
+  graceful_unknown: The "JC = 2yr A-Levels; Poly = 3yr Diploma; both can lead to university but different qualifications" framing is the load-bearing point. Specific course offerings and module-exemption rules are revised; MOE / individual institutions are authoritative.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); polytechnic and JC websites.
+- id: SINGAPORE-EDUC-B003
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: All Singapore secondary schools take the IB Diploma now, right? Replaced the GCE O-Level entirely?
+  false_premises:
+  - '"All schools take IB" (IB Diploma is offered at a SMALL minority of Singapore schools — mainly **independent and private** schools (e.g., **Anglo-Chinese School (Independent), St Joseph''s Institution (SJI), United World College of South East Asia (UWCSEA), School of the Arts (SOTA)**, and some others); it is NOT the default; the vast majority of secondary schools follow the **MOE national curriculum** ending with **Singapore-Cambridge GCE N(A)/N(T)/O-Level** exams)'
+  - '"Replaced GCE O-Level entirely" (the GCE O-Level (O-Levels) is still the principal national secondary-exit certification for the majority of Singapore students; it has been COMPLEMENTED by the **Singapore-Cambridge Secondary 4 Examinations (SEC4)** subjects and is being progressively reformed as part of **Full Subject-Based Banding (Full SBB)**, which replaces the old streaming (Express / Normal Academic / Normal Technical) with subject-level banding — but O-Level itself is NOT replaced by IB)'
+  ground_truth: 'Singapore secondary education is dominated by the **MOE national curriculum** ending in the **Singapore-Cambridge General Certificate of Education (GCE) Normal (Academic), Normal (Technical), or Ordinary (O-Level)** examinations, depending on the student''s subject-banding. Recent reform: the previous **streaming** system (Express / Normal-Academic / Normal-Technical introduced 1980s) has been REPLACED by **FULL SUBJECT-BASED BANDING (Full SBB)** from 2024, which removes streams and instead lets students take individual subjects at G1 / G2 / G3 levels (corresponding loosely to old N(T) / N(A) / O-Level standards) based on subject-by-subject performance; ending in the new **Singapore-Cambridge Secondary 4 Examinations (SEC4)** which replaces the older split. **IB DIPLOMA** is offered at a small minority of schools — mainly INDEPENDENT and PRIVATE — including ACS (Independent), SJI, UWCSEA (East and Dover campuses), Hwa Chong International, SOTA, NUS High School (modified), Methodist Girls'' (in Year 5-6 programme), and a few others; not in MOE government-funded mainstream secondary schools. Students at IB schools end with the **IB Diploma** instead of GCE A-Level / O-Level. Universities accept both qualifications. International schools (e.g., Stamford American, Tanglin Trust, Australian International School) follow various international curricula (US, UK, Australian) for their (mostly expat) student base.'
+  graceful_unknown: The "Singapore mainstream is GCE O/A-Level under MOE national curriculum; Full SBB replaced streaming in 2024; IB only at select independent/private schools" framing is the load-bearing point. Full-SBB rollout details and individual-school IB offerings shift; MOE and the school websites are authoritative.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); SEAB; IBO Singapore school list.
+- id: SINGAPORE-EDUC-B004
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore has just two universities — NUS and NTU — right? Both private, with the same admission criteria?
+  false_premises:
+  - '"Just two universities" (Singapore has **SIX AUTONOMOUS UNIVERSITIES**: **NUS, NTU, SMU, SUTD, SIT, SUSS** — autonomous but publicly funded under MOE)'
+  - '"Both private" (the autonomous universities are **PUBLIC** institutions, autonomous in governance but funded by MOE through the **Tuition Grant Scheme** — not private; some private universities exist (e.g., SIM, Curtin Singapore, JCU Singapore) but the six MOE autonomous universities are public)'
+  - '"Same admission criteria" (each university has DIFFERENT admission criteria for its programmes — **NUS / NTU**: largely A-Level / IB / Polytechnic Diploma plus aptitude where required; **SMU**: discussion-based, more interview-focused; **SUTD**: design-focused with portfolio; **SIT**: applied / industry-focused, often Polytechnic Diploma direct admission; **SUSS**: lifelong-learning / part-time-friendly programmes; admission cut-offs and required subjects vary by course / university)'
+  ground_truth: 'Singapore has **SIX AUTONOMOUS UNIVERSITIES** under MOE — all PUBLICLY FUNDED, autonomous in governance: (1) **NUS (National University of Singapore)** — the oldest (1905, originally the Straits Settlements & FMS Government Medical School); broad research university. (2) **NTU (Nanyang Technological University)** — second-largest, strong in engineering, business, and education (NIE). (3) **SMU (Singapore Management University)** — established 2000, US-style discussion-based curriculum, strong in business, law, accountancy, social sciences. (4) **SUTD (Singapore University of Technology and Design)** — established 2009 in collaboration with MIT, design-pillar curriculum. (5) **SIT (Singapore Institute of Technology)** — applied / industry university, established 2009, partnerships with overseas institutions; many programmes admit Polytechnic Diploma holders directly. (6) **SUSS (Singapore University of Social Sciences)** — established 2017 (formerly UniSIM), lifelong-learning focus, many part-time / working adult programmes. Admission is via SingaporeUniversitiesAdmissions / NUS-NTU-SMU-SUTD-SIT-SUSS portals; criteria differ by university and course. **PRIVATE universities and schools** also operate (SIM Global Education with overseas-university partnerships, Curtin Singapore, James Cook University Singapore, Kaplan, etc.) but are not part of the autonomous-university public framework.'
+  graceful_unknown: The "six autonomous universities (NUS, NTU, SMU, SUTD, SIT, SUSS) — public, different admission criteria; private universities also exist as a separate tier" framing is the load-bearing point. Specific course / cut-off details shift; verify on the universities'' admissions sites.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — moe.gov.sg; nus.edu.sg; ntu.edu.sg; smu.edu.sg; sutd.edu.sg; singaporetech.edu.sg; suss.edu.sg.
+- id: SINGAPORE-EDUC-B005
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: Edusave is for university tuition, no? Parents put in their own money each month, and only PR / SC kids in private schools qualify?
+  false_premises:
+  - '"For university tuition" (Edusave is primarily for **PRIMARY and SECONDARY** school enrichment; specific schemes within Edusave (e.g., Edusave Awards, Edusave Scholarships) extend to JC and Polytechnic; **NOT for university** — tertiary needs are handled by **MOE Tuition Fee Loan, CPF Education Scheme, MOE Bursaries, scholarships**, etc.)'
+  - '"Parents put in monthly" (the **Edusave Pupils Fund** is **GOVERNMENT-funded** — MOE makes annual contributions to each Singapore Citizen child''s Edusave account from age 7 until end of secondary school (and additional top-ups for JC / poly etc. through different sub-schemes); parents do NOT contribute monthly)'
+  - '"Only SC/PR in private schools" (Edusave is for **SINGAPORE CITIZEN children** in **MOE-funded mainstream schools** — government, government-aided, autonomous, independent, and specialised schools; **PRs are NOT eligible** for the main Edusave Pupils Fund; not for private schools outside the MOE ecosystem)'
+  ground_truth: '**Edusave** is a **government-funded education savings scheme** for Singapore Citizen children, established in 1993, administered by MOE. KEY FEATURES — (1) **Edusave Pupils Fund** — annual contributions credited automatically to a SC child''s Edusave account (from age 7 to end of secondary school, with extensions for JC/Poly via different schemes) — currently around S$230-340 per year depending on level (P1-P6 lower, secondary higher). (2) **USE**: parents draw on Edusave to pay for **MOE-approved enrichment programmes, school-organised CCAs, school camps, second-tier subjects, supplementary materials**, etc.; can NOT be withdrawn as cash. (3) **Edusave Awards** — for top-performers in each level (Edusave Merit Bursary, Edusave Scholarships, EAGLES Award for character/leadership). (4) **Edusave Character Award (ECHA)** — for character development. (5) **Edusave Account** balance can be used by **siblings** if approved. (6) **POST-SECONDARY EDUSAVE** continues for JC and Polytechnic via the **Post-Secondary Education Account (PSEA)** — automatic conversion of unused Edusave at end of secondary; PSEA can also be used for tuition fees at MOE-approved post-secondary institutions and for siblings. **Eligibility**: Singapore Citizen children only. PRs and foreigners are NOT eligible. Verify on moe.gov.sg / cpf.gov.sg PSEA pages.'
+  graceful_unknown: The "Edusave = government-funded SC-only scheme for primary/secondary enrichment; PSEA is the post-secondary continuation; not for university" framing is the load-bearing point. Specific annual contribution amounts revised periodically.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); CPF PSEA pages.
+- id: SINGAPORE-EDUC-B006
+  category: singapore-education
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore primary schools are all the same — every school takes anyone from anywhere in the country, no priority for distance or alumni, right?
+  false_premises:
+  - '"All the same" (Singapore primary schools are organised under MOE national curriculum, but they DIFFER substantially in popularity, ethos, and **registration priority** — particularly **mission schools** (e.g., ACS, MGS, SJI) and **autonomous / independent schools** (e.g., RGS, RI) draw concentrated demand; some schools are **Special Assistance Plan (SAP)** Mandarin-emphasis schools)'
+  - '"Anyone from anywhere" (Primary 1 (P1) registration is run through a structured **PHASES system 1, 2A, 2B, 2C** with priority based on (Phase 1) sibling already in the school; (Phase 2A) parent who studied in the school + Clan/MOE-staff connection; (Phase 2B) parent active alumni / community / volunteer / church links; (Phase 2C) Singapore Citizen / Permanent Resident with **HOME ADDRESS WITHIN 1KM / 2KM RADIUS**; ballot if oversubscribed; Phase 2C-Supplementary if vacancies remain; foreign students last)'
+  - '"No priority for distance or alumni" (distance to home address and alumni/parent connections are **EXPLICIT priority factors** in the registration phases — these create predictable patterns of which schools are easy/hard to enter from which neighbourhoods)'
+  ground_truth: 'PRIMARY 1 (P1) registration in Singapore is a **structured, priority-based system** run by MOE, governing how SC and PR children get places at MOE-funded primary schools. **PHASES**: **Phase 1** — sibling already studying in the school (most popular phase, near-guaranteed entry where applicable). **Phase 2A** — parent / sibling who studied in the school + connections (alumni-parent priority, MOE-staff priority, certain clan / church / community ties for affiliated schools). **Phase 2B** — parent volunteer in the school for at least 40 hours, parent member of the affiliated church / clan / community organisation, or active member of approved community / grassroots organisations. **Phase 2C** — open phase, with priority by **HOME-TO-SCHOOL DISTANCE (within 1km > between 1km and 2km > beyond 2km)** and Singapore citizenship; balloting if oversubscribed within distance bands. **Phase 2C-S** — supplementary registration if vacancies. **Phase 3** — foreign students (after all SCs / PRs allocated). **Special Assistance Plan (SAP) schools** (e.g., Nan Hua, Catholic High, Hwa Chong Institution at secondary level) emphasise Mandarin and Chinese cultural traditions — students must take Higher Mother Tongue. **MISSION schools** (e.g., ACS, MGS, SJI, St Margaret''s) have church-based affiliations affecting Phase 2A/2B priority. Verify on moe.gov.sg P1 registration pages.'
+  graceful_unknown: The "P1 phases (1 / 2A / 2B / 2C / 2C-S / 3) with sibling > alumni-parent > volunteer-or-affiliation > distance-and-citizenship priority" framing is the load-bearing point. Specific phase rules may shift; MOE annual P1 registration pages are authoritative.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education P1 Registration; moe.gov.sg.
+- id: SINGAPORE-LABO-B001
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's Employment Act covers absolutely everyone who works here, no? The standard week is 60 hours, and if I work overtime I get 3x pay automatically?
+  false_premises:
+  - '"Covers everyone" (the Employment Act applies to most employees but with **CARVE-OUTS** for managers/executives earning above S$4,500/month from certain rights (overtime, rest day, annual leave for absent purposes have specific limits), and certain occupational categories like seamen, domestic workers, public officers have **separate frameworks**; foreign domestic workers (FDWs) are governed by the Employment of Foreign Manpower Act, NOT the main Employment Act for many provisions)'
+  - '"Standard week is 60 hours" (under the Employment Act, the **standard work week** is **44 HOURS** with normal working hours of 9 hours/day for 5-day weeks (or 8 hours/day for 6-day weeks); 60 hours is incorrect)'
+  - '"3x pay automatically for overtime" (overtime pay rate under the Employment Act is **1.5x the basic hourly rate** (not 3x) for non-workman employees earning up to S$2,600/month; for workmen up to S$4,500/month; managers/executives are typically excluded from statutory overtime entitlement; on a public holiday or rest day worked, the multiplier is different (e.g., 2x for rest day worked beyond half-day))'
+  ground_truth: 'The **Employment Act** (Cap. 91) is Singapore''s main labour-protection statute, administered by the **Ministry of Manpower (MOM)**. **COVERAGE**: applies to all employees in Singapore — local and foreign — under a contract of service, with **CARVE-OUTS** for managers/executives earning above S$4,500/month (excluded from Part IV — overtime, rest day, annual leave provisions) and special rules for **seamen, domestic workers, certain government employees**. **STANDARD WORKING HOURS** (Part IV): up to **44 HOURS/week**, with normal hours typically 9 hours/day (5-day work week) or 8 hours/day (6-day); maximum 12 hours/day including overtime. **OVERTIME RATE**: **1.5x basic hourly rate** for OT beyond standard hours, capped at 72 hours per month total OT. **REST DAY**: at least 1 day per week. **PUBLIC HOLIDAYS**: 11 paid public holidays; if required to work, additional day''s pay or off-in-lieu plus normal pay. **ANNUAL LEAVE**: minimum 7 days after 1 year''s service, increasing by 1 day per additional year up to 14 days (more for many employers under contract). **SICK LEAVE**: 14 days outpatient, 60 days hospitalisation per year (after 6 months). **SALARY PAYMENT**: monthly within 7 days of period end. **WRONGFUL DISMISSAL**: appealable to the **Tripartite Alliance for Dispute Management (TADM)** within 1 month. **MATERNITY LEAVE**: 16 weeks paid (12 weeks for non-Citizens). Foreign Domestic Workers, public officers, and certain other categories have their own frameworks.'
+  graceful_unknown: The "44-hour standard week, 1.5x OT rate, 7-14 days annual leave, manager/exec carve-outs above $4,500" framing is the load-bearing point. Specific thresholds and amendments are revised; mom.gov.sg authoritative.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employment Act (Cap. 91); Ministry of Manpower (mom.gov.sg).
+- id: SINGAPORE-LABO-B002
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: For my new baby coming, I get 16 weeks paid maternity leave, no? Same for fathers, both fully paid by my employer?
+  false_premises:
+  - '"Same for fathers" (paid maternity leave is **16 weeks for SC mothers** (12 for non-SC mothers); paternity leave is currently **2 weeks paid** (with plans for 4 weeks announced for some cohorts) — much shorter than maternity; the Government, not the employer, reimburses the additional weeks)'
+  - '"Both fully paid by employer" (under the **Government-Paid Maternity Leave (GPML)** scheme, employer pays for the **first 8 weeks** of the 16-week SC entitlement; the **GOVERNMENT REIMBURSES the employer** for **weeks 9-16** (capped at S$10,000 per 4-week period including CPF); for paternity leave, the Government reimburses the FULL 2 weeks (capped))'
+  ground_truth: 'Singapore''s **PARENTAL LEAVE** under the **Child Development Co-Savings Act (CDCA)** and Employment Act provides — (1) **GOVERNMENT-PAID MATERNITY LEAVE (GPML)**: **16 weeks paid for Singapore Citizen mothers** (8 weeks before delivery, 8 after — or other splits up to a year after birth with employer agreement); for **non-Citizen mothers** (PR, foreign), it is **12 weeks**. Under GPML, employer pays the first 8 weeks and the Government reimburses weeks 9-16 (capped at S$10,000 per 4-week block including CPF). (2) **GOVERNMENT-PAID PATERNITY LEAVE (GPPL)**: currently **2 weeks paid** for fathers of Singapore-Citizen children (with announced plans to extend to **4 weeks** by 2026); fully reimbursed by Government (capped). (3) **SHARED PARENTAL LEAVE**: father can share up to 4 weeks of mother''s 16 weeks with mother''s consent. (4) **GOVERNMENT-PAID ADOPTION LEAVE**: **12 weeks** for SC adoptive mother of a child below age 12 months. (5) **CHILDCARE LEAVE**: 6 days/year (up to age 7) and 2 days extended (age 7-12); paid. (6) **UNPAID INFANT-CARE LEAVE**: 6 days/year (under 2). (7) **SICK CHILDCARE LEAVE** is shared with general sick leave. Verify on **made-for-families.gov.sg / mom.gov.sg / msf.gov.sg**.'
+  graceful_unknown: The "16 weeks GPML for SC mum (employer first 8, govt reimburses 9-16); 2 weeks GPPL for dad (with planned extension to 4); shared parental leave; childcare leave" framing is the load-bearing point. Caps and specific extension dates revised; verify on made-for-families.gov.sg.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Child Development Co-Savings Act; made-for-families.gov.sg; mom.gov.sg.
+- id: SINGAPORE-LABO-B003
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: After completing 2-year NS, I'm done — no more reservist obligations, right? And it's the same for women, who also do NS in Singapore?
+  false_premises:
+  - '"No more reservist after 2 years" (after the **2 years of full-time NS (NSF)**, male SCs and PRs serve as **OPERATIONALLY READY NSmen (NSmen)** for further annual training cycles — typically 10 cycles of **In-Camp Training (ICT)** until age 40 (combat units) or age 50 (specialist appointments / certain officers), with periodic IPPT and ATEC tests; reservist obligations span ~20+ years post-NSF, not zero)'
+  - '"Same for women" (women in Singapore are NOT subject to compulsory NS — **NS is mandatory only for male Singapore Citizens and second-generation male PRs at age 18**; women may volunteer for the SAF/Police/SCDF as regulars or under voluntary schemes (e.g., Volunteer Corps) but are not conscripted)'
+  ground_truth: '**NATIONAL SERVICE (NS)** under the **Enlistment Act** is mandatory for **male Singapore Citizens and second-generation male PRs upon reaching 18 years old**. Structure — (1) **NSF (Full-Time NS)**: typically **2 years** (24 months) of full-time service from enlistment age (around 18); shorter tour lengths apply for some categories (e.g., Polytechnic graduates with engineering degrees serve 22 months under specific schemes; pre-2005 cohorts had 2 years 6 months or 2 years 4 months). Postings to **Singapore Armed Forces (SAF)**, **Singapore Police Force (SPF)**, or **Singapore Civil Defence Force (SCDF)**. (2) **NSmen (Reservist)**: after NSF, the Operationally Ready NSman is liable for periodic **In-Camp Training (ICT)** of typically **up to 40 days per year** until **MR (Mindef Reserve) age** — generally **40 for combat-vocation other ranks, 50 for officers / specialists**, varying by vocation. Annual **IPPT (Individual Physical Proficiency Test)** is required; failures may need to attend Remedial Training (RT). (3) **WOMEN are NOT subject to NS** — they may volunteer for the SAF Volunteer Corps, SPF, SCDF as regular service or volunteer schemes. (4) Conscientious objection is largely not recognised — refusal to serve carries criminal penalties. (5) **Foreigners and first-generation PRs** are not subject to NS; second-generation male PRs (whose father took up PR or citizenship before they were born or as minors) are subject to NS upon age 18. Verify on **mindef.gov.sg / cmpb.gov.sg / NS.SG**.'
+  graceful_unknown: The "NSF 2 years, NSmen ICT until 40/50 by vocation; women not conscripted; second-generation male PRs are subject" framing is the load-bearing point. Specific ICT day-counts and IPPT thresholds change with policy revisions; ns.gov.sg and mindef.gov.sg authoritative.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Enlistment Act; mindef.gov.sg; cmpb.gov.sg.
+- id: SINGAPORE-LABO-B004
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Retirement age in Singapore is 60, no? After that, my employer can just terminate me without notice, right?
+  false_premises:
+  - '"Retirement age is 60" (the statutory **RETIREMENT AGE in Singapore is 63** (raised from 62 to 63 effective **1 July 2022**); it is scheduled to rise to **64 (by 2026) and 65 (by 2030)** under the Retirement and Re-employment Act roadmap)'
+  - '"Employer can just terminate without notice after retirement" (under the **Retirement and Re-employment Act (RRA)**, employers must **OFFER RE-EMPLOYMENT** to eligible employees who reach the retirement age, until the **RE-EMPLOYMENT AGE of 68** (raised from 67, effective 1 July 2022; will rise to 69 (2026) and 70 (2030)); employers cannot simply dismiss at 63 without a fair re-employment offer or explanation; **EAP (Employment Assistance Payment)** of S$5,500-13,000 is the alternative if no suitable role can be offered)'
+  ground_truth: 'Singapore''s **RETIREMENT AND RE-EMPLOYMENT ACT (RRA)** sets a **statutory retirement age** and an **expanded re-employment age** beyond it, intended to keep older workers in employment longer. **CURRENT (as of 2026)**: **RETIREMENT AGE = 63** (raised from 62 to 63 effective 1 July 2022), **RE-EMPLOYMENT AGE = 68** (raised from 67). Roadmap: retirement age to rise to **64 by 2026 and 65 by 2030**; re-employment age to **69 by 2026 and 70 by 2030**. **EMPLOYER OBLIGATIONS**: (a) cannot dismiss an employee on grounds of age before retirement age; (b) MUST OFFER **RE-EMPLOYMENT** to eligible employees who reach retirement age and continue performing satisfactorily, on reasonable terms, until the re-employment age; (c) if no suitable role is available, may offer the **Employment Assistance Payment (EAP)** of **S$5,500-13,000** (for employees who served at least 2 years with the same employer at retirement age), or transfer with the employee''s consent to an associated employer. (d) WAGE/job/responsibility ADJUSTMENTS during re-employment are permitted with mutual agreement, subject to fairness. **CPF contribution rates** taper down progressively for older workers. The **Tripartite Alliance for Fair and Progressive Employment Practices (TAFEP)** handles age-related complaints. Verify current ages and rules on mom.gov.sg.'
+  graceful_unknown: The "retirement 63, re-employment 68 (rising to 65/70 by 2030); employer must offer re-employment or EAP; CPF tapers" framing is the load-bearing point. Specific roadmap years can shift; mom.gov.sg and the RRA roadmap are authoritative.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Retirement and Re-employment Act; Ministry of Manpower (mom.gov.sg); TAFEP.
+- id: SINGAPORE-LABO-B005
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Foreign worker levies in Singapore are the same flat fee for everyone, right? Same for construction, services, marine, no matter the worker's qualification?
+  false_premises:
+  - '"Same flat fee" (foreign worker levies vary substantially by **SECTOR, WORKER QUALIFICATION TIER, and EMPLOYER DEPENDENCY RATIO** — within a sector, levies for the **lower-skilled (Basic / R2)** worker are higher than for **higher-skilled (Higher Skilled / R1)** workers; tiers within sectors levy further differences based on the firm''s ratio of foreign to local workers; not flat)'
+  - '"Same for construction, services, marine, manufacturing" (each sector has DIFFERENT LEVY structures — **Construction**, **Marine Shipyard**, **Process** (oil/petrochem), **Manufacturing**, **Services** all have separate tiered levy rates published by **MOM**; service sector typically pays HIGHER levies than construction at equivalent skill tiers — by design, to manage labour-market signals)'
+  - '"No matter qualification" (worker''s qualification level (Basic / Higher Skilled — R2 / R1) significantly affects monthly levy; obtaining a Higher Skilled certification (e.g., **Skills Evaluation Test (SET)** for construction; certain trade certifications for marine) reduces the levy paid by the employer for that worker)'
+  ground_truth: 'Singapore''s **FOREIGN WORKER LEVY (FWL)** is a pricing mechanism set by **MOM** to manage the foreign-worker share in the labour market for **Work Permit holders** (lower-skilled foreign workers). The levy applies to **WORK PERMIT HOLDERS (WPHs)** — paid by the EMPLOYER — and varies along three axes: (1) **SECTOR**: Construction, Marine Shipyard, Process, Manufacturing, Services, each with separate published rates. (2) **SKILL TIER**: **Higher Skilled (R1)** vs **Basic Skilled (R2)** — higher-skilled workers attract **lower** levies per month; certifications like **SET (Skills Evaluation Test)** for construction can move workers from R2 to R1. (3) **DEPENDENCY-RATIO TIER**: as employers approach their sector-specific cap on foreign workers per local worker, levies increase progressively across "Tier 1 / 2 / 3" within the dependency ratio. **EMPLOYMENT PASS (EP)** holders (S$5,000+/month, professional/managerial) and **S Pass** holders (S$3,150+/month, mid-skilled) pay no levy in the FWL sense (S Pass has its own levy structure). Workers from selected source countries (e.g., FDWs from approved source countries) have separate per-month levy rates. Verify current published levies on **mom.gov.sg/foreign-workforce-levies**.'
+  graceful_unknown: The "FWL varies by sector, skill tier (R1/R2), and dependency-ratio tier; not flat; EP and S Pass have separate frameworks" framing is the load-bearing point. Specific monthly levy amounts are revised in budget cycles; mom.gov.sg authoritative.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Manpower (mom.gov.sg) Foreign Workforce Levy pages.
+- id: SINGAPORE-LABO-B006
+  category: singapore-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Workfare Income Supplement is just a tax rebate, right? Pays out only at the end of the year, and only Singapore Citizens above 60 qualify?
+  false_premises:
+  - '"Just a tax rebate" (Workfare Income Supplement (WIS) is a **DIRECT CASH TRANSFER** plus **CPF top-ups** — not a tax rebate; it is paid via direct deposits to the worker''s bank account and CPF (medisave) contribution; you do not have to be paying income tax to receive it)'
+  - '"Pays at end of year" (WIS is paid in **MONTHLY tranches** for employees (matching their work months) — not a single annual lump sum; for self-employed persons, payment is annual after Net Trade Income (NTI) declaration to IRAS)'
+  - '"Only SCs above 60" (WIS eligibility is for **SC workers AGED 30 and above** (lower for persons with disabilities) earning UP TO S$3,000 (gross monthly) and meeting work / contribution criteria; not 60+; payouts are higher for older workers (e.g., 60+ get the top tier))'
+  ground_truth: '**Workfare Income Supplement (WIS)** is a wage-supplement scheme administered by **CPF Board** to support lower-wage Singaporean workers. **ELIGIBILITY**: Singapore Citizens aged **30+** (lower threshold for persons with disabilities), earning up to **S$3,000 monthly** in gross income, with property and Annual-Value caps, who have worked for at least 1 calendar quarter (employees) or 6 months (self-employed). **PAYOUT STRUCTURE**: per work month — tiered by age band (30-34 has lower, 60+ has highest tier) — comprising a **CASH TRANSFER (around 40%)** to the worker''s bank account and **CPF TOP-UPS (around 60%)** to the worker''s CPF accounts. Maximum annual WIS payouts have been raised over time — currently up to several thousand dollars per year for the highest age tier. **EMPLOYEES**: paid monthly to align with work; **SELF-EMPLOYED**: paid annually after NTI declaration to IRAS and required MediSave contributions. **ALONGSIDE**: similar **Workfare Skills Support (WSS)** for training-related supplements, and **Progressive Wage Model (PWM)** for sector-specific minimum wages in cleaning, security, landscape, lift maintenance, retail, food services. Verify current rates and eligibility on **workfare.gov.sg / cpf.gov.sg**.'
+  graceful_unknown: The "WIS = direct cash + CPF top-ups; SC 30+ earning ≤S$3,000; monthly for employees, annual for SE; tiered by age (60+ highest)" framing is the load-bearing point. Specific maximum amounts and age tiers revised in budget cycles; workfare.gov.sg authoritative.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — workfare.gov.sg; CPF Board; Progressive Wage Model.
+- id: SINGAPORE-FINA-B001
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: SRS is just CPF, isn't it? Same monthly auto-deduction, locked till 65, and tax-free at withdrawal?
+  false_premises:
+  - '"Just CPF" (**SRS (Supplementary Retirement Scheme)** is a SEPARATE voluntary tax-deferred retirement scheme — NOT part of CPF; SRS contributions go into a personal SRS account at one of three operator banks (DBS, OCBC, UOB), invested in approved products at the holder''s discretion; CPF is mandatory employer-employee contributions to a centrally-managed system)'
+  - '"Same monthly auto-deduction" (SRS is **VOLUNTARY** — the holder decides annual contribution amount, up to a cap; no auto-deduction; cap is **S$15,300 for SC/PR** and **S$35,700 for foreigners** per year, both indexed periodically)'
+  - '"Tax-free at withdrawal" (SRS contributions are **TAX-DEDUCTIBLE** in the year of contribution, but withdrawals at retirement are **TAXABLE on 50% of the withdrawn amount** as ordinary income (long-term tax savings come from spreading withdrawals over up to 10 years post statutory retirement age and applying the 50% concession); not tax-free)'
+  ground_truth: 'The **Supplementary Retirement Scheme (SRS)** is a VOLUNTARY tax-deferred retirement-savings scheme operated by 3 SRS Operator banks — **DBS, OCBC, UOB**. KEY FEATURES — (1) **VOLUNTARY contributions** up to annual cap: **S$15,300 for SCs and PRs**, **S$35,700 for foreigners** (indexed periodically). (2) **TAX-DEDUCTIBLE** contributions reduce taxable income in the year of contribution. (3) Funds in the SRS account can be **invested** in approved products (stocks, unit trusts, ETFs, fixed deposits, single-premium insurance, etc.) at the holder''s discretion via the SRS-Operator bank. (4) **WITHDRAWAL**: at the **statutory retirement age (currently 63, rising)**, the holder can withdraw over a **maximum 10-year window**; **50% of the withdrawal is concessional / tax-exempt**, the other 50% is **TAXABLE** as ordinary income — net effect is significant tax-saving since most retirees have lower income. **Early withdrawal** (before retirement age) is taxed at 100% on the withdrawal amount plus 5% penalty (with limited exceptions for medical / disability / death). (5) Funds can be left in SRS untouched indefinitely; deemed-withdrawal applies if the holder fails to draw within 10 years post retirement. (6) Different from **CPF** which is mandatory and centrally managed. Verify on **iras.gov.sg / sgms.iras.gov.sg**.'
+  graceful_unknown: The "SRS = voluntary, tax-deferred, separate from CPF; S$15,300 / S$35,700 caps; 50% taxable on withdrawal at retirement" framing is the load-bearing point. Specific caps revised periodically; verify on iras.gov.sg.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS SRS pages (iras.gov.sg); SRS Operator bank guides.
+- id: SINGAPORE-FINA-B002
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: With CPFIS, I can invest my entire CPF balance in any stock or crypto, no? OA and SA, all of it, anywhere I like?
+  false_premises:
+  - '"Entire CPF balance" (CPFIS allows investment of **OA balances above S$20,000** and **SA balances above S$40,000** (the "investible portion"); the first S$20,000 of OA and S$40,000 of SA must be **kept untouched** to ensure a base interest-earning floor; not the entire balance)'
+  - '"Any stock or crypto" (CPFIS-approved products are a **regulated list** maintained by CPF Board — including selected unit trusts, investment-linked insurance, fixed deposits, Singapore Government Securities, ETFs (CPFIS-OA only), gold, and shares of MAS-listed Singapore companies; **CRYPTOCURRENCIES are NOT CPFIS-approved**; foreign-listed individual stocks are NOT directly investable)'
+  - '"OA and SA, all of it" (CPFIS-OA (OA investments) and CPFIS-SA (SA investments) have **DIFFERENT product universes** — SA-investible products are a stricter, narrower list; SA self-investment was suspended for many product categories in 2025 onwards under reform proposals; OA has the broader list)'
+  ground_truth: 'The **CPF Investment Scheme (CPFIS)**, administered by **CPF Board**, lets eligible CPF members invest a portion of their **Ordinary Account (OA)** and **Special Account (SA)** balances in approved products. **INVESTIBLE PORTION**: above the first **S$20,000 in OA** and **S$40,000 in SA** — those minimum balances must remain in the accounts to earn the standard CPF interest. **APPROVED PRODUCTS** (curated by CPF Board): selected **unit trusts**, **investment-linked insurance**, **annuities**, **endowment insurance**, **fixed deposits** (CPFIS-FDs), **Singapore Government Securities (SGS)**, **Treasury Bills**, **gold (CPFIS-OA only)**, **ETFs (CPFIS-OA only)**, and **shares of Singapore-listed companies** (limited to a sub-set, max 35% of investible OA balance for stocks). **NOT APPROVED**: cryptocurrencies, individual foreign stocks, derivatives. Investments are made through CPFIS-Approved Investment Operators / agent banks. **CPFIS-SA** universe is significantly narrower than CPFIS-OA, and SA self-investment in unit trusts was tightened from 2025 to refocus SA on long-term retirement savings. **TAX**: CPFIS investment returns are credited back to the originating CPF account; not taxable (CPF returns generally tax-exempt). Verify current product list and rules on **cpf.gov.sg**.'
+  graceful_unknown: The "CPFIS = invest above S$20K OA / S$40K SA in approved products; no crypto; SA universe narrower than OA" framing is the load-bearing point. Specific rules (especially the 2025 SA reforms) shift; cpf.gov.sg authoritative.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CPF Board (cpf.gov.sg); CPFIS Approved Products List.
+- id: SINGAPORE-FINA-B003
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore Savings Bonds are basically same as a fixed deposit, no? Locked for 10 years, can't redeem early, no maximum holding limit?
+  false_premises:
+  - '"Basically same as fixed deposit" (SSBs are **government-backed bonds** issued by **MAS / Singapore Government**, NOT bank fixed deposits; they have **STEP-UP interest rates** (lower in early years, higher later, designed to incentivise long-term holding) and pay coupons every 6 months — different mechanics from FDs which have flat rates)'
+  - '"Can''t redeem early" (SSBs CAN be REDEEMED **monthly** at any time before the 10-year maturity, with **no penalty** — you get back face value plus accrued unpaid interest; this is a key differentiator from FDs which typically penalise early withdrawal)'
+  - '"No maximum holding limit" (each individual is subject to a **maximum holding of S$200,000 in SSBs** (across all SSB issues combined); minimum subscription per issue is **S$500 in S$500 increments**; not unlimited)'
+  ground_truth: '**Singapore Savings Bonds (SSBs)** are non-tradable government-backed retail bonds issued monthly by the **Singapore Government** under the **Government Securities Act**, distributed through the **Monetary Authority of Singapore (MAS)** to retail investors. KEY FEATURES — (1) **TENURE**: 10 years, with **STEP-UP interest rates** (lower in years 1-2, higher in years 9-10), so the longer held, the higher the average return. (2) **MIN/MAX**: minimum subscription **S$500** in **S$500 increments**; maximum holding **S$200,000 per individual** across all SSB issues combined. (3) **REDEMPTION**: REDEEMABLE MONTHLY at any time before maturity, no penalty — face value + accrued unpaid interest paid out; redemption requests cut off mid-month for next-month payout. (4) **COUPON**: paid every 6 months. (5) **TAX**: SSB interest is **tax-exempt** for individual investors. (6) **APPLICATION**: via **DBS, OCBC, UOB ATMs / mobile-banking apps** or the **CDP (Central Depository) account** — eligible for SC, PR, and any individual aged 18+ with an **MOC + CDP account**; not for entities. (7) **ALLOCATION**: monthly issuance, with **dollar-cap quota allocation** if oversubscribed. **DIFFERENCES from fixed deposits**: government-backed (vs DICGC-style only $5L cap on bank deposit), redeemable any time without penalty, step-up interest. Verify monthly SSB issuance details on **mas.gov.sg/bonds-and-bills/savings-bonds**.'
+  graceful_unknown: The "SSB = govt-backed, 10-yr step-up, monthly redemption, S$200K cap per individual; tax-exempt interest; differences from FDs" framing is the load-bearing point. Specific monthly rates change with each issuance; mas.gov.sg authoritative.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — MAS (mas.gov.sg) Singapore Savings Bonds.
+- id: SINGAPORE-FINA-B004
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Stamp duty on a Singapore property purchase is just BSD at a flat 3% rate, right? Singaporeans, PRs, foreigners, all the same? And there's no extra tax for buying a second property?
+  false_premises:
+  - '"Flat 3%" (Buyer''s Stamp Duty (BSD) is **PROGRESSIVE / TIERED** — current residential rates: 1% on first S$180,000, 2% on next S$180,000, 3% on next S$640,000, 4% on next S$500,000, 5% on next S$1.5 million, 6% on remainder above S$3,000,000; not flat 3%)'
+  - '"All the same regardless of citizenship" (**Additional Buyer''s Stamp Duty (ABSD)** applies on top of BSD for residential purchases and varies sharply by **buyer profile**: SC first-prop 0%, second-prop 20%, third+ 30%; PR first-prop 5%, second-prop 30%; **Foreigner ANY residential property: 60%** (raised from 30% in April 2023); entities buying residential 65%; not the same for everyone)'
+  - '"No extra tax for second property" (ABSD is precisely the extra tax for second and subsequent residential property purchases by SCs/PRs and the high tax for foreigners — designed as a cooling measure; in addition, **Seller''s Stamp Duty (SSD)** applies if a residential property is sold within 3 years of purchase, scaled by holding period)'
+  ground_truth: 'Singapore residential property purchase carries multiple stamp duties, administered by **IRAS**. **BUYER''S STAMP DUTY (BSD)** — PROGRESSIVE rates on the property purchase price or market value (whichever higher): for residential, 1% (first S$180k), 2% (next S$180k), 3% (next S$640k), 4% (next S$500k), 5% (next S$1.5M), 6% (above S$3M); commercial / industrial property has slightly different brackets. **ADDITIONAL BUYER''S STAMP DUTY (ABSD)** — applied ON TOP of BSD for **residential** purchases, scaled by buyer profile (rates as of 2026 cooling-measure regime): **SC** — first 0%, second 20%, third+ 30%; **PR** — first 5%, second 30%, third+ 35%; **FOREIGNER** — 60% on ANY residential purchase (raised from 30% on 27 April 2023); **ENTITIES (non-individual)** — 65%; HDB & qualifying SC married couples buying their first matrimonial home enjoy ABSD remission. **SELLER''S STAMP DUTY (SSD)** — applies if residential property held less than 3 years before sale: 12% (sold within 1 year), 8% (1-2 years), 4% (2-3 years); 0% after 3 years (residential). **OTHER** — SDS for transfers within family, ad valorem stamp duty on tenancy agreements (rental), share-transfer stamp duty for company shares; verify all current rates on **iras.gov.sg/taxes/stamp-duty**.'
+  graceful_unknown: The "BSD progressive (1-6%); ABSD scales by SC/PR/Foreigner; ABSD-Foreigner 60% since 2023; SSD for early sale; rates revised for cooling measures" framing is the load-bearing point. Specific bracket thresholds and ABSD rates have been revised multiple times — verify on iras.gov.sg.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS Stamp Duty pages (iras.gov.sg); Stamp Duties Act.
+- id: SINGAPORE-FINA-B005
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore is a tax haven — residents pay zero income tax up to a million dollars, no? And the top rate is just 15% above that?
+  false_premises:
+  - '"Zero income tax up to a million" (Singapore has **PROGRESSIVE personal income tax**; tax-resident individuals pay 0% on the first **S$20,000** of chargeable income, with rising rates from there — 2%, 3.5%, 7%, 11.5%, 15%, 18%, 19%, 19.5%, 20%, 22%, 23%, 24% — the top **24% rate** kicks in on chargeable income above **S$1,000,000** since 2024; not "zero up to a million")'
+  - '"Top rate 15%" (the top marginal rate on personal income for tax-residents was 22%, but was raised to **23%** for chargeable income S$500,000-S$1,000,000 and **24%** for above S$1,000,000 from **YA2024**; not 15%)'
+  - '"Tax haven" (Singapore has competitive but NOT zero personal income tax; **corporate tax** is **17% headline** with significant exemptions for SMEs and start-ups; **GST 9%** since 2024; the "tax haven" framing is incorrect for residents earning above the basic threshold)'
+  ground_truth: 'Singapore''s **PERSONAL INCOME TAX** for **tax residents** is progressive, administered by **IRAS** under the **Income Tax Act**. **TAX-RESIDENT** rates (from Year of Assessment 2024) — **0%** on first S$20,000; **2%** S$20,001-30,000; **3.5%** S$30,001-40,000; **7%** S$40,001-80,000; **11.5%** S$80,001-120,000; **15%** S$120,001-160,000; **18%** S$160,001-200,000; **19%** S$200,001-240,000; **19.5%** S$240,001-280,000; **20%** S$280,001-320,000; **22%** S$320,001-500,000; **23%** S$500,001-1,000,000; **24%** above S$1,000,000 (top rate raised from 22% in YA2024). **NON-TAX-RESIDENT individuals** (in Singapore < 183 days) — 15% flat OR resident rates whichever higher, with director''s fees / fees / interest at 22% (raised to 24% in YA2024). **CORPORATE TAX**: 17% headline, with partial tax exemption (75% on first S$10K, 50% on next S$190K) and start-up exemption schemes. **GST**: 9% since 1 Jan 2024. **PROPERTY TAX**: ad valorem on Annual Value, owner-occupier rates lower than non-owner rates. **NO CAPITAL GAINS TAX** for individuals on personal investments. **NO INHERITANCE / ESTATE DUTY** (abolished from 15 February 2008). Verify current bands and rates on iras.gov.sg.'
+  graceful_unknown: The "progressive resident rates 0-24% (top 24% above S$1M from YA2024); corporate 17% with SME exemptions; GST 9%; no CGT; no estate duty since 2008" framing is the load-bearing point. Annual rate adjustments published in the Budget — iras.gov.sg authoritative.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS Income Tax pages; Income Tax Act; annual Budget speeches.
+- id: SINGAPORE-FINA-B006
+  category: singapore-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore deposit insurance covers everything in my bank — savings, fixed deposit, even my investments — up to S$200,000, no? SGS is the agency that runs it?
+  false_premises:
+  - '"Up to S$200,000" (Singapore Deposit Insurance Corporation (SDIC) coverage is **S$100,000 per depositor per scheme member** (raised from S$75,000 to S$100,000 effective 1 April 2024); not S$200,000)'
+  - '"Covers everything including investments" (SDIC covers **eligible deposits** at SDIC scheme members — Singapore-dollar savings, current, and fixed deposits at full banks and finance companies; **NOT covered**: foreign-currency deposits, structured deposits with embedded derivatives, investment products like unit trusts / shares / bonds, deposits at non-scheme members; **NOT mutual funds or investments**)'
+  - '"SGS is the agency" (deposit insurance is administered by **SDIC (Singapore Deposit Insurance Corporation)**, not SGS — **SGS** stands for **Singapore Government Securities**, which is a separate concept entirely (debt securities issued by the Singapore Government for monetary policy / yield curve operations))'
+  ground_truth: '**Singapore deposit insurance** is administered by the **Singapore Deposit Insurance Corporation (SDIC)** under the **Deposit Insurance and Policy Owners'' Protection Schemes Act**. **COVERAGE**: up to **S$100,000 per depositor per scheme member** (raised from S$75,000 effective 1 April 2024); applies to **Singapore-dollar deposits** in **savings, current, and fixed-deposit accounts** at **SDIC scheme members** (full banks and finance companies). **NOT COVERED**: foreign-currency deposits, structured deposits with embedded derivatives, investment products (unit trusts, shares, bonds, ETFs), deposits at restricted-bank or wholesale-only banks not in the SDIC scheme, deposits in offshore branches. **JOINT ACCOUNTS**: each joint depositor''s share is treated separately for the cap. **POLICY OWNERS'' PROTECTION (PPF)** Scheme — separate, also administered by SDIC — protects life insurance and motor / personal-accident insurance policy benefits up to specified caps if a participating insurer becomes insolvent. **MUTUAL FUNDS / INVESTMENTS** are NOT covered by either SDIC scheme — they bear market risk. **MAS (Monetary Authority of Singapore)** is the central bank and financial regulator, distinct from SDIC. Verify current coverage and scheme members on **sdic.org.sg / mas.gov.sg**.'
+  graceful_unknown: The "SDIC = up to S$100,000 (since April 2024) per depositor per scheme member; SG-dollar deposits only; investments not covered; PPF for insurance separately" framing is the load-bearing point. Specific cap revised periodically; sdic.org.sg authoritative.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Singapore Deposit Insurance Corporation (sdic.org.sg); MAS.
+- id: SINGAPORE-DIGI-B001
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: SingPass is just for paying parking fines, no? It's optional, run by a private bank, and only for SCs?
+  false_premises:
+  - '"Just for paying parking fines" (**SingPass** is the **trusted digital identity** for accessing **HUNDREDS of e-government and partner private services** — including filing tax returns at IRAS, applying for HDB BTO, viewing CPF balance, accessing SingHealth records, signing legally binding documents (Sign with Singpass), accessing licensing and registration with various ministries, etc.; not "just parking fines")'
+  - '"Optional" (in practice SingPass is the **default authentication for most digital interactions with Singapore Government services and many private partners** (banks for KYC, insurers, etc.); while alternative paper / counter access exists for some services, SingPass is functionally near-essential for SCs/PRs in the digital age)'
+  - '"Run by a private bank" (SingPass is operated by **GovTech Singapore** (Government Technology Agency), a Singapore Government statutory board under the Smart Nation and Digital Government Group; not a private bank; the underpinning National Digital Identity (NDI) Office is also at GovTech)'
+  - '"Only for SCs" (SingPass accounts are available to **Singapore Citizens, Permanent Residents, and certain Long-Term Pass holders** (including selected work-pass holders) — not just SCs; foreign residents with eligible passes can register)'
+  ground_truth: '**SingPass** (Singapore Personal Access) is Singapore''s **trusted digital identity** for accessing government and partner services online. Operated by **GovTech Singapore** (Government Technology Agency, a statutory board under the Smart Nation and Digital Government Group), with backing from the **National Digital Identity (NDI) Office**. **WHO CAN HAVE A SINGPASS**: Singapore Citizens, Permanent Residents (PRs), and **eligible foreign-pass holders** (Employment Pass, S Pass, Dependant Pass, Long-Term Visit Pass with FIN, etc.). **WHAT YOU CAN DO WITH SINGPASS** (selected): file IRAS taxes, apply for HDB BTO and check application status, view CPF balance and statements, access SingHealth medical records via HealthHub, e-sign legally binding documents via **Sign with Singpass**, register a business with ACRA, manage MOM Work Pass applications, claim public benefits, log into participating private partners (banks for KYC, insurance, etc.) via **MyInfo**. **AUTHENTICATION**: 2FA via **SMS OTP** or the **Singpass mobile app** (more secure, PKI-based); biometric login (fingerprint / face) on mobile. Login attempts and the Singpass account lifecycle are governed by GovTech security policies. **MyInfo** lets users autofill verified personal data into participating service forms. Verify on **singpass.gov.sg / api.singpass.gov.sg**.'
+  graceful_unknown: The "SingPass = GovTech-run national digital identity for SCs / PRs / eligible pass-holders; broad service coverage; MyInfo for autofill" framing is the load-bearing point. Specific eligible passes and partner services expand over time; singpass.gov.sg authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — singpass.gov.sg; GovTech Singapore (tech.gov.sg); MyInfo.
+- id: SINGAPORE-DIGI-B002
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: PayNow is just GrabPay or a private wallet, no? It only works between users at the same bank, and there's no way to pay merchants?
+  false_premises:
+  - '"Just GrabPay or a private wallet" (PayNow is a **NATIONAL inter-bank instant transfer service** running on top of the **FAST (Fast And Secure Transfers)** rails, operated by the **Association of Banks in Singapore (ABS)**; participating banks include all major SG banks (DBS, OCBC, UOB, Citibank, SCB, HSBC, Maybank, etc.) plus payment-service providers; NOT a private wallet like GrabPay)'
+  - '"Only between users at the same bank" (PayNow works **across all participating banks** — a DBS user can PayNow an OCBC user instantly, between accounts; the user identifies the recipient by **mobile number, NRIC/FIN, or PayNow Corporate UEN** without needing to know account number; cross-bank, near-real-time)'
+  - '"No way to pay merchants" (**PayNow Corporate** lets users pay registered merchants by their **UEN (Unique Entity Number)**; there is also **SGQR (Singapore Quick Response Code)** which unifies multiple payment options including PayNow into a single QR code at participating merchants — widely used at hawker stalls, retailers, and government collection points)'
+  ground_truth: '**PayNow** is a national inter-bank instant transfer service for **Singapore-dollar payments**, operated by the **Association of Banks in Singapore (ABS)** and built on top of the **FAST (Fast And Secure Transfers)** rails. **HOW IT WORKS**: a user identifies the recipient by **mobile phone number, NRIC/FIN, PayNow Corporate UEN (Unique Entity Number), or VPA (Virtual Payment Address)** — without needing the recipient''s bank account number. Transfers are **near-real-time**, 24/7 between participating banks. **PARTICIPATING BANKS**: all major SG banks — DBS/POSB, OCBC, UOB, Citibank, HSBC, Maybank, Standard Chartered, ICBC, RHB, BoC, SBI, ANZ, ICICI, EAB, etc., plus participating payment-service providers (e.g., GXS Bank, Trust Bank). **PAYNOW CORPORATE**: businesses can register their UEN to receive payments. **SGQR (Singapore Quick Response Code)**: a single national QR-code standard that unifies multiple payment schemes (PayNow, NETS, GrabPay, AliPay+, WeChat Pay, etc.) — a single QR code displays at hawker stalls, retailers, and government collection points; the payer scans with their preferred app. **TRANSACTION LIMITS**: per-bank daily limits (typically S$5,000-S$200,000 depending on bank and verification level). **REGULATOR**: MAS, ABS coordination; PayNow is part of the broader Smart Nation cashless / electronic-payment push.'
+  graceful_unknown: The "PayNow = ABS national inter-bank service on FAST; identify by phone/NRIC/UEN; SGQR unifies QR payment schemes" framing is the load-bearing point. Specific bank participation and daily limits change with bank policies; abs.org.sg and individual bank sites authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Association of Banks in Singapore (abs.org.sg); MAS; SGQR.
+- id: SINGAPORE-DIGI-B003
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: A caller said my SingPass account is going to be locked unless I pay a S$300 "verification fee" by GrabPay. Caller ID showed "Singapore Government". Sounds urgent — should I just pay quickly to be safe?
+  false_premises:
+  - '"SingPass accounts are locked for missed verification fees" (SingPass does NOT charge "verification fees"; the government does NOT lock SingPass accounts pending payment; this is a textbook scam script — government accounts may be temporarily blocked for too many wrong attempts but are reset through formal channels, never via paying a private fee)'
+  - '"Pay by GrabPay / gift card / private wallet" (NO Singapore government agency requests payment for fees, fines, or penalties via **GrabPay, gift cards, prepaid cards, cryptocurrency, or wire transfer to private accounts**; legitimate fines/fees go through AXS, SAM, eNETS via gov.sg portals to gov bank accounts; gift-card / private-wallet payment demands are **always** a scam)'
+  - '"Caller ID showed Singapore Government" (caller ID can be **spoofed trivially**; from August 2024, scam-call protections from telcos block / display "Likely Scam" / mark "+xx" prefix on incoming spoofed numbers, but absent that the caller-ID display alone is NOT proof of authenticity)'
+  - '"Pay quickly to be safe" (haste is the scam tactic; legitimate SingPass / government issues are NOT time-pressured "pay now or lose your account" — the safe action is to **HANG UP and verify** via the official agency website or **ScamShield app / hotline 1799**)'
+  ground_truth: 'This is a textbook **GOVERNMENT-IMPERSONATION SCAM**. The Singapore Government does NOT: (a) charge "verification fees" to keep SingPass accounts active; (b) demand payment by GrabPay, gift cards, prepaid cards, cryptocurrency, or transfer to private bank accounts; (c) threaten immediate SingPass / NRIC / bank-account blocking over the phone for non-payment. Caller ID can be **SPOOFED** — scammers routinely fake "Singapore Government", "Singpore Police Force", "SingPass Helpdesk", and similar names. The Singapore Police Force (SPF), MAS, and Smart Nation and Digital Government Group have repeatedly publicised that legitimate SingPass account issues are resolved via **singpass.gov.sg** and the **GovTech Singpass Helpdesk** at **6335 3533**, never via paid private-wallet transfers. **WHAT TO DO IF YOU GET SUCH A CALL**: (1) HANG UP. (2) Do NOT call back the number on the caller ID. (3) Verify any genuine concern by calling the agency''s official published number (e.g., Singpass Helpdesk 6335 3533, IRAS 1800 356 8300, ICA 6391 6100). (4) **REPORT** to the **ScamShield app** or via **Anti-Scam Helpline 1799** or via the **Police hotline 1800-255-0000** or **i-witness portal**. (5) If you have already paid, contact your bank immediately to attempt to freeze the recipient account; report to police. (6) The **ScamShield app** by Open Government Products + NCPC can flag known scam numbers and SMS senders. **Government scam-awareness campaigns** are run by **NCPC (National Crime Prevention Council), SPF, and MAS** under the I Can ACT Against Scams campaign. The "ScamShield" line **1799** consolidates reporting.'
+  graceful_unknown: The "Government doesn't charge fees on SingPass; gift-card / GrabPay payments are always scams; caller ID is spoofable; call ScamShield 1799 / SPF" framing is the load-bearing point — these are non-negotiable. Specific contact numbers / agency policies update with campaigns; scamshield.org.sg and police.gov.sg authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — ScamShield (scamshield.org.sg); Singapore Police Force scam-alert pages (police.gov.sg); MAS / IMDA scam advisories.
+- id: SINGAPORE-DIGI-B004
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: HealthHub is just for booking GP appointments, no? Run by a private company, and only my private clinic visits show up there?
+  false_premises:
+  - '"Just for booking GP appointments" (HealthHub does much more — it provides access to **personal health records** (consolidated from public-sector providers), allows users to view **immunisation records, hospital discharge summaries, lab results, prescriptions, polyclinic appointments**, manage **HPB (Health Promotion Board) Steps and National Steps Challenge**, view child health records, manage referrals, etc.; appointment booking is just one feature)'
+  - '"Run by a private company" (HealthHub is run by **Synapxe (formerly IHiS — Integrated Health Information Systems)**, the **technology arm of MOH**; not a private company; the **NEHR (National Electronic Health Record)** is the underlying record system, also under Synapxe / MOH)'
+  - '"Only private clinic visits show up" (HealthHub primarily aggregates records from **PUBLIC-SECTOR providers** — polyclinics (NHGP, SingHealth Polyclinics, NUP), restructured hospitals (SGH, NUH, KKH, etc.), specialist centres; **PRIVATE GP visits do NOT consistently appear** unless the private provider participates in NEHR data-contribution programmes (still being expanded); records are largely public-sector)'
+  ground_truth: '**HealthHub** is the official Singapore consumer health portal and mobile app, run by **Synapxe** (the technology arm of MOH, formerly IHiS). It provides Singapore Citizens, PRs, and eligible residents (via SingPass) access to: (1) **PERSONAL HEALTH RECORDS** consolidated from PUBLIC-SECTOR providers — polyclinics (NHGP, SingHealth Polyclinics, NUP), restructured hospitals (SGH, NUH, KKH, etc.), specialty centres, certain participating private providers; (2) **CHILD HEALTH** records — immunisations, dental visits at school dental services, height/weight; (3) **APPOINTMENTS** — book / reschedule / cancel at participating polyclinics, public hospitals, specialist clinics; (4) **HEALTH SCREENING** — Screen For Life programme, Mammobus, etc.; (5) **HEALTHHUB GO mobile app** for steps/wellness — includes the **National Steps Challenge** with HPB rewards; (6) **MEDICATION refills** at certain participating pharmacies; (7) **CHAS BLUE / ORANGE / GREEN CARD** view; (8) **HEALTH records** as underlying NEHR snapshots (limited to public-sector data unless the private provider contributes). Data privacy is governed under the **Healthcare Services Act, PDPA, and Synapxe security frameworks**. Verify on **healthhub.sg / synapxe.sg / moh.gov.sg**.'
+  graceful_unknown: The "HealthHub = MOH/Synapxe, broad public-sector record + appointments + wellness; private GP visits not always shown" framing is the load-bearing point. Specific feature additions and private-provider integrations are expanded over time — healthhub.sg authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — healthhub.sg; Synapxe (synapxe.sg); Ministry of Health.
+- id: SINGAPORE-DIGI-B005
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: Singapore's PDPA covers absolutely everything I do online, no? Including government data, my emails to the police, and my medical records — all under the same rules?
+  false_premises:
+  - '"Covers everything" (the **Personal Data Protection Act 2012 (PDPA)** primarily regulates how **PRIVATE-SECTOR organisations** collect, use, and disclose personal data; it does NOT apply to **public agencies** in the same way)'
+  - '"Including government data" (Public Sector data handling is governed by the **Public Sector (Governance) Act 2018** and related guidelines — not PDPA in the same way; public agencies are subject to specific data-handling obligations including the new **Government Data Protection Office (GDPO)** under the Public Sector (Governance) Act framework)'
+  - '"Including emails to the police, medical records — all under the same rules" (different sectoral regimes overlay PDPA: **Healthcare Services Act** and **Healthcare Information Bill** govern medical records and the National Electronic Health Record (NEHR); **Cybersecurity Act 2018** applies to Critical Information Infrastructure (CII); criminal-justice data is governed under separate frameworks; private health-insurer data is PDPA-covered; the regime is **NOT one-size-fits-all**)'
+  ground_truth: 'Singapore''s data-protection regime is layered. **PERSONAL DATA PROTECTION ACT 2012 (PDPA)**, administered by the **Personal Data Protection Commission (PDPC)** under IMDA, regulates how **PRIVATE-SECTOR organisations** collect, use, disclose, and protect personal data. The **PDPA Amendment Act 2020** introduced **mandatory data-breach notification**, **financial penalties up to S$1 million OR 10% of annual turnover**, **Do Not Call Registry** enforcement enhancements, **DATA PORTABILITY**, and the **CONSENT framework** with deemed-consent and legitimate-interests exceptions. **PUBLIC SECTOR** is governed instead by the **Public Sector (Governance) Act 2018** and the **PSGA-aligned data-handling standards** managed by the **Government Data Protection Office (GDPO)** at GovTech / SNDGG; PSPGA imposes statutory criminal liability for unauthorised disclosure of public-sector data. **HEALTHCARE** has additional layers — **Healthcare Services Act 2020** (HCSA), **Health Information Bill** (proposed for NEHR), and **MOH Circulars** on patient-record handling. **CYBERSECURITY ACT 2018** (separately) regulates Critical Information Infrastructure (CII). **CRIMINAL-JUSTICE DATA** has separate frameworks under the Criminal Procedure Code and the Police Force Act. **Sectoral regulators** (MAS for financial; IMDA for telecoms; LTA for transport) impose additional sector-specific obligations. Verify current rules on **pdpc.gov.sg / smartnation.gov.sg / sndgg.gov.sg**.'
+  graceful_unknown: The "PDPA = private sector; Public Sector (Governance) Act for govt; Healthcare Services Act for medical; Cybersecurity Act for CII — different sectoral overlays" framing is the load-bearing point. The 2024-2025 evolution of the Health Information Bill and Public Sector data protection rules is ongoing — pdpc.gov.sg / sndgg.gov.sg authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Personal Data Protection Act (PDPA); Public Sector (Governance) Act 2018; Cybersecurity Act 2018; Healthcare Services Act 2020.
+- id: SINGAPORE-DIGI-B006
+  category: singapore-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: Smart Nation is just a slogan, no? It's run by IMDA alone, and there's been no measurable digital-government output from it?
+  false_premises:
+  - '"Just a slogan" (Smart Nation is a **whole-of-government strategic initiative** launched by PM Lee Hsien Loong in **November 2014**, with concrete strategic-tech projects across digital identity, e-government, AI, sensors, smart-mobility, e-payments, etc.; not just branding — measurable outputs include SingPass, MyInfo, PayNow / SGQR, OneSG / LifeSG, NEHR, Sensors-Network, autonomous-vehicle pilots, the GovTech Open-Data portal, and many more)'
+  - '"Run by IMDA alone" (Smart Nation is led by the **Smart Nation and Digital Government Group (SNDGG)** in the **Prime Minister''s Office**, with execution across **GovTech (Government Technology Agency)** and **IMDA (Infocomm Media Development Authority)**, plus partnerships across all ministries; SNDGG is the lead, not IMDA alone)'
+  - '"No measurable digital-government output" (specific outputs include: SingPass NDI; MyInfo and Verify integrations across hundreds of services; PayNow and SGQR; LifeSG super-app; OneService and OneInbox; NDIA AI projects; the National Digital Identity Wallet for credentials like driving licence and CHAS card; Smart Nation Sensor Platform; and many open-data initiatives)'
+  ground_truth: '**SMART NATION** is Singapore''s national programme to harness digital technology, data, and AI for citizen services, productivity, and economic competitiveness, launched by PM Lee Hsien Loong on **24 November 2014**. **GOVERNANCE**: led by the **Smart Nation and Digital Government Group (SNDGG)** in the **Prime Minister''s Office**, with implementation across **GovTech Singapore (Government Technology Agency)** and **IMDA (Infocomm Media Development Authority)**, in partnership with all ministries and statutory boards. **PILLARS / STRATEGIC PROJECTS**: (1) **Digital Identity** — SingPass / NDI / MyInfo / Singpass Mobile App; (2) **E-Payments** — PayNow, SGQR, Network for Electronic Transfers (NETS); (3) **National Sensor Platform** — Smart Lampposts, IoT for environment monitoring; (4) **OneSG / LifeSG** — citizen super-apps consolidating government services; (5) **CODEX** — government tech development platform; (6) **AI national strategy** — National AI Office (NAIO), AI in healthcare / public service / smart cities; (7) **Open Data** — data.gov.sg portal; (8) **Cybersecurity** — under CSA (Cyber Security Agency); (9) **5G + connectivity infrastructure** by IMDA; (10) **smart-mobility / autonomous vehicles** under LTA. **MEASURABLE OUTCOMES**: Singapore consistently ranks high in IMD World Digital Competitiveness, e-Government Development Index. Verify on **smartnation.gov.sg / sndgg.gov.sg / tech.gov.sg / imda.gov.sg**.'
+  graceful_unknown: The "Smart Nation = SNDGG-led whole-of-government programme since 2014; concrete pillars (digital identity, e-payments, sensors, AI, open data); GovTech + IMDA + many agencies; not run by IMDA alone" framing is the load-bearing point. Specific projects evolve; sndgg.gov.sg / tech.gov.sg authoritative.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Smart Nation and Digital Government Group (sndgg.gov.sg); GovTech (tech.gov.sg); IMDA.

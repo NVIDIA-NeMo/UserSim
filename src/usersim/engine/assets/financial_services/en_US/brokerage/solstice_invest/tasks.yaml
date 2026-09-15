@@ -1,0 +1,388 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks: one per state-changing tool solstice_invest offers.
+# Each ships THREE opening phrasings. Read-only tools (get_positions,
+# get_order_status) carry no gold state change.
+templates:
+- id: TPL-SI-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Hi — I'd like to move my brokerage account over to Solstice from
+    {{from_broker}}. Can you help me start that transfer?
+  - >-
+    I want to bring my investments over from {{from_broker}}. How do I initiate an
+    account transfer to Solstice?
+  - Can you start an ACAT transfer of my {{from_broker}} account into Solstice?
+  account_state:
+    account_id: acct_si_0001
+    delivering_firm: '{{from_broker}}'
+    transfer_status: none
+  param_space:
+    from_broker: [Fidelity, Vanguard, Charles Schwab]
+  gold_tool_sequence: [initiate_acat_transfer]
+  expected_state_deltas: {transfer_status: IN_PROGRESS}
+# NOTE: a place_trade task is intentionally omitted — place_trade's dedicated
+# tool-doc did not generate in this bank (it is only referenced in product
+# sheets), so gold-doc auto-derivation (which requires a policy_procedure /
+# discoverable_tool_doc) can't resolve it. Regenerate solstice to restore its
+# tool-doc, then add TPL-SI-TRADE-001 (gold: [place_trade]).
+- id: TPL-SI-CANCELORDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I placed an order for {{ticker}} earlier that hasn't filled yet — can you
+    cancel it?
+  - Please cancel my open {{ticker}} order before it executes.
+  - Can you kill my pending {{ticker}} order? I changed my mind.
+  account_state:
+    account_id: acct_si_0001
+    open_orders:
+    - {order_id: ord_si_0001, ticker: '{{ticker}}', status: open}
+  param_space:
+    ticker: [AAPL, MSFT, VTI]
+  gold_tool_sequence: [cancel_order]
+  expected_state_deltas: {ord_si_0001.status: CANCELLED}
+- id: TPL-SI-DEPOSIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I'd like to deposit ${{amount}} into my brokerage cash account.
+  - Can you pull ${{amount}} from my linked bank into my Solstice account?
+  - Please add ${{amount}} to my account from my linked checking.
+  account_state:
+    account_id: acct_si_0001
+    linked_bank: bank_si_0001
+  param_space:
+    amount: ['1000.00', '5000.00', '20000.00']
+  gold_tool_sequence: [deposit_funds]
+  expected_state_deltas: {deposit_status: INITIATED}
+- id: TPL-SI-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Can you withdraw ${{amount}} from my brokerage account to my linked bank?
+  - >-
+    I need to take ${{amount}} in cash out of my Solstice account and send it to my
+    checking.
+  - Please move ${{amount}} of cash out to my bank account.
+  account_state:
+    account_id: acct_si_0001
+    cash_balance: '30000.00'
+    linked_bank: bank_si_0001
+  param_space:
+    amount: ['2000.00', '10000.00']
+  gold_tool_sequence: [withdraw_funds]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-SI-TRANSFERCASH-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Move ${{amount}} from my brokerage cash into my linked checking, please.
+  - Can you transfer ${{amount}} of my settled cash out to my bank account?
+  - I'd like to sweep ${{amount}} of cash from my brokerage over to my bank.
+  account_state:
+    account_id: acct_si_0001
+    cash_balance: '30000.00'
+  param_space:
+    amount: ['500.00', '3000.00']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-SI-OPENACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I'd like to open a {{acct_type}} brokerage account with Solstice.
+  - Can you set up a new {{acct_type}} account for me?
+  - I'm ready to open a {{acct_type}} account — what do you need from me?
+  account_state:
+    customer_id: cust_si_0001
+  param_space:
+    acct_type: [individual taxable, Roth IRA, joint taxable]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-SI-CLOSEACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I'd like to close my {{acct_type}} account once the balance is settled.
+  - Please close out my {{acct_type}} account with Solstice.
+  - Can you shut down my {{acct_type}} account? It's empty now.
+  account_state:
+    account_id: acct_si_0002
+    balance: '0.00'
+  param_space:
+    acct_type: [individual taxable, joint taxable]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_si_0002.status: CLOSED}
+- id: TPL-SI-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I moved recently — please update my mailing address to {{address}}.
+  - Can you change my {{field}} on file to {{value}}?
+  - Please update my {{field}} to {{value}}.
+  account_state:
+    customer_id: cust_si_0001
+  param_space:
+    address: ['77 Harbor St, Seattle WA 98101', '210 Maple Ct, Austin TX 78701']
+    field: [phone number, email address]
+    value: ['206-555-0173', 'a.torres@example.com']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-SI-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Can you set the transfer-on-death beneficiary on my account to {{beneficiary}}?
+  - I'd like to name {{beneficiary}} as my beneficiary on the brokerage account.
+  - Please record {{beneficiary}} as the TOD beneficiary on my account.
+  account_state:
+    account_id: acct_si_0001
+  param_space:
+    beneficiary: [my spouse, my daughter]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-SI-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Can you set an alert to notify me when {{ticker}} moves more than {{pct}}%?
+  - I'd like notifications for {{alert}}. Can you turn those on?
+  - Please enable {{alert}} notifications on my account.
+  account_state:
+    account_id: acct_si_0001
+  param_space:
+    ticker: [AAPL, VTI]
+    pct: ['5', '10']
+    alert: [any order that fills, large cash withdrawals, monthly statements]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_updated: true}
+- id: TPL-SI-AUTHUSER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I'd like to give {{person}} authorized access to view my brokerage account.
+  - Can you add {{person}} as an authorized user on the account?
+  - Please authorize {{person}} to access my account.
+  account_state:
+    account_id: acct_si_0001
+  param_space:
+    person: [my financial advisor, my spouse]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Ordered gold sequences (depth 3): each gold tool must be discovered and called
+# in order; the verifier requires the full ordered sequence with no unauthorized
+# state changes. Run with a higher max_turns (~10-12).
+- id: TPL-SI-ONBOARD-FUND-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}} brokerage account, deposit ${{amount}} into
+    it, and name {{person}} as the beneficiary.
+  - >-
+    Can you open a {{acct_type}} account, fund it with ${{amount}}, and set
+    {{person}} as beneficiary?
+  - >-
+    Please set up a {{acct_type}} account, deposit ${{amount}}, and list {{person}}
+    as my beneficiary.
+  account_state:
+    account_id: acct_si_0001
+    linked_bank: bank_si_0001
+  param_space:
+    acct_type: [individual taxable, Roth IRA]
+    amount: ['5000.00', '25000.00']
+    person: [my brother, my spouse]
+  gold_tool_sequence: [open_account, deposit_funds, update_beneficiary]
+  expected_state_deltas: {new_account_status: OPEN, deposit_status: COMPLETED, beneficiary_updated: true}
+- id: TPL-SI-ACAT-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I want to open a {{acct_type}} account, transfer in my holdings from
+    {{other_broker}} via ACATS, and set price alerts.
+  - >-
+    Please open a {{acct_type}} account, initiate an ACAT transfer from
+    {{other_broker}}, and turn on alerts.
+  - >-
+    Can you set up a {{acct_type}} account, move my portfolio over from
+    {{other_broker}}, and enable price alerts?
+  account_state:
+    account_id: acct_si_0001
+  param_space:
+    acct_type: [individual taxable, joint taxable]
+    other_broker: [my old brokerage, a competitor broker]
+  gold_tool_sequence: [open_account, initiate_acat_transfer, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, acat_status: INITIATED, alerts_updated: true}
+- id: TPL-SI-CANCEL-WITHDRAW-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please cancel my open order, withdraw the ${{amount}} cash balance to my bank,
+    and then close the account.
+  - >-
+    I want to cancel my pending order, pull out the ${{amount}}, and close my
+    account.
+  - >-
+    Can you cancel the open order, withdraw ${{amount}} to my linked bank, and shut
+    the account down?
+  account_state:
+    account_id: acct_si_0002
+    cash_balance: '{{amount}}'
+    orders:
+    - {order_id: ord_si_0002, ticker: '{{ticker}}', status: open}
+  param_space:
+    amount: ['3000.00', '12000.00']
+    ticker: [VTI, AAPL]
+  gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
+  # strict chain: cancel the open order to free the cash, withdraw it, THEN close.
+  ordered: true
+  expected_state_deltas: {ord_si_0002.status: CANCELLED, withdrawal_status: COMPLETED, acct_si_0002.status: CLOSED}
+- id: TPL-SI-DEPOSIT-AUTH-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to deposit ${{amount}}, add {{person}} as an authorized user, and set
+    {{person}} as my beneficiary too.
+  - >-
+    Can you fund my account with ${{amount}}, give {{person}} authorized access,
+    and name them beneficiary?
+  - >-
+    Please deposit ${{amount}}, authorize {{person}} on the account, and update my
+    beneficiary to {{person}}.
+  account_state:
+    account_id: acct_si_0001
+    linked_bank: bank_si_0001
+  param_space:
+    amount: ['2000.00', '9000.00']
+    person: [my spouse, my brother]
+  gold_tool_sequence: [deposit_funds, manage_authorized_users, update_beneficiary]
+  expected_state_deltas: {deposit_status: COMPLETED, authorized_users_updated: true, beneficiary_updated: true}
+- id: TPL-SI-TRANSFER-IN-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'd like to open a {{acct_type}} account, transfer my holdings in from
+    {{other_broker}} via ACATS, name {{person}} as beneficiary, and set alerts.
+  - >-
+    Open a {{acct_type}} account, move my portfolio over from {{other_broker}},
+    set {{person}} as beneficiary, and enable alerts.
+  - >-
+    Set up a {{acct_type}} account, initiate an ACAT transfer from
+    {{other_broker}}, list {{person}} as beneficiary, and turn on alerts.
+  account_state:
+    account_id: acct_si_0001
+  param_space:
+    acct_type: [joint taxable, individual taxable]
+    other_broker: [my old brokerage, a competitor broker]
+    person: [my spouse, my brother]
+  gold_tool_sequence: [open_account, initiate_acat_transfer, update_beneficiary, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, acat_status: INITIATED, beneficiary_updated: true, alerts_updated: true}
+- id: TPL-SI-CASH-OUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please cancel my open order, withdraw the ${{amount}} cash to my bank, and
+    update my address to {{address}}.
+  - >-
+    Cancel my pending order, pull out ${{amount}}, and change my address to
+    {{address}}.
+  - >-
+    Can you cancel the open order, withdraw ${{amount}} to my linked bank, and
+    update my address to {{address}}?
+  account_state:
+    account_id: acct_si_0001
+    cash_balance: '{{amount}}'
+    orders:
+    - {order_id: ord_si_0003, ticker: '{{ticker}}', status: open}
+  param_space:
+    amount: ['4000.00', '15000.00']
+    ticker: [VTI, MSFT]
+    address: ['77 Harbor St, Seattle WA 98101', '210 Maple Ct, Austin TX 78701']
+  gold_tool_sequence: [cancel_order, withdraw_funds, update_contact_info]
+  expected_state_deltas: {ord_si_0003.status: CANCELLED, withdrawal_status: COMPLETED, contact_updated: true}
+- id: TPL-SI-FUND-AUTH-ALERT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to deposit ${{amount}}, add {{person}} as an authorized user, and set
+    price alerts.
+  - >-
+    Please fund my account with ${{amount}}, authorize {{person}}, and turn on
+    alerts.
+  - >-
+    Deposit ${{amount}}, give {{person}} authorized access, and enable price
+    alerts.
+  account_state:
+    account_id: acct_si_0001
+    linked_bank: bank_si_0001
+  param_space:
+    amount: ['3000.00', '11000.00']
+    person: [my financial advisor, my spouse]
+  gold_tool_sequence: [deposit_funds, manage_authorized_users, set_alerts]
+  expected_state_deltas: {deposit_status: COMPLETED, authorized_users_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_US/dynamic.yaml), not scripted templates.

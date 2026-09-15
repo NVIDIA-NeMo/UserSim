@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: pt_BR
+taxonomy_id: pt_BR_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: brazil-geography
+  invitation: Você quer perguntar algo sobre a geografia do Brasil com a sua própria voz. Pode ser sobre o seu estado, sua cidade, uma viagem que você fez ou que pretende fazer.
+  subtopic_hints:
+  - a divisão entre União, estado e município para rios, terras indígenas ou unidades de conservação
+  - diferenças regionais de clima e safra (Sul, Cerrado, Caatinga, Amazônia, Pantanal)
+  - confusão sobre o que conta como Norte, Nordeste, Centro-Oeste, Sudeste e Sul nos dados do IBGE
+  - a Amazônia Legal versus a região Norte e por que as duas não são a mesma coisa
+  - o pertencimento de Fernando de Noronha, ilhas oceânicas e os limites marítimos
+  - termos administrativos que se confundem (microrregião, mesorregião, RIDE, área metropolitana)
+  - desastres recentes (Brumadinho, Petrópolis, enchentes no RS) e como reorganizaram o território
+  - o que fazer quando o mapa do IBGE e o do Google Maps mostram divisas diferentes
+- id: brazil-history
+  invitation: Você quer perguntar algo sobre a história do Brasil com a sua própria voz. Traga algo ligado à sua família, à sua região ou a algo que você ouviu mas não fechou.
+  subtopic_hints:
+  - o papel do seu estado em um momento da história nacional que aparece pouco no livro didático
+  - histórias de imigração por década (italianos, japoneses, alemães, sírio-libaneses)
+  - dinastias e movimentos regionais (Inconfidência Mineira, Cabanagem, Farroupilha, Balaiada)
+  - escravidão e abolição — diferenças regionais e o que veio depois de 1888
+  - ditadura militar (1964–1985) — eventos no seu estado, comissão da verdade local
+  - histórias indígenas e quilombolas das terras onde está sua cidade
+  - mudanças econômicas (ciclo do café, industrialização de SP, plano Cruzado, Plano Real)
+  - o que fazer quando a memória da família e o registro do arquivo público não batem
+- id: brazil-culture
+  invitation: Você quer perguntar algo sobre a cultura brasileira com a sua própria voz. Festividades, comida, sotaque, religião — fale sobre algo que percebeu na sua região.
+  subtopic_hints:
+  - culinárias regionais (acarajé baiano, pão de queijo mineiro, churrasco gaúcho, tacacá paraense)
+  - festas regionais (Festa Junina, Boi-Bumbá, Carnaval do RJ vs SP vs Recife/Olinda)
+  - religiosidade (catolicismo popular, evangélicos, candomblé, umbanda, espiritismo) por região
+  - sotaques e regionalismos (carioca, paulistano, gaúcho, nordestino, mineiro)
+  - tradições do povo do sertão, do litoral, da Amazônia ribeirinha
+  - tensão geracional sobre o que é "ser brasileiro" hoje
+  - influência de comunidades imigrantes (italiana em SP, alemã no Sul, japonesa no PR/SP)
+  - relação entre cultura popular e indústria cultural (TV Globo, novela, MPB, sertanejo)
+- id: brazil-poetry-and-music
+  invitation: Você quer perguntar sobre poesia, música ou letras de canção brasileiras com a sua própria voz. Traga uma música que você cresceu ouvindo, um verso que você quase lembra.
+  subtopic_hints:
+  - bossa nova (João Gilberto, Tom Jobim) versus tropicália (Caetano, Gil) — o que distingue
+  - MPB clássica, Chico Buarque, Elis Regina e a censura nos anos 70
+  - sertanejo (raiz versus universitário) e a distinção forró pé-de-serra versus eletrônico
+  - hip-hop nacional (Racionais MC's, Emicida) e funk (carioca, ostentação, 150 BPM)
+  - poesia de cordel, repente nordestino, embolada
+  - poetas do modernismo (Drummond, Bandeira, Cecília Meireles, Mário de Andrade)
+  - hinos cívicos e o texto completo do Hino Nacional Brasileiro (estrofes pouco cantadas)
+  - o que fazer quando a letra que você lembra desde criança não bate com o que está na internet
+- id: brazil-public-services
+  invitation: Você quer perguntar sobre um serviço público brasileiro com a sua própria voz. Traga uma situação real em que a regra, o site e o atendente disseram coisas diferentes.
+  subtopic_hints:
+  - SUS — diferença entre UBS, UPA, hospital de referência e regulação para especialidade
+  - INSS — aposentadoria por idade, por tempo, BPC/LOAS e perícia
+  - Bolsa Família / Auxílio Brasil — Cadastro Único e regras de inclusão/exclusão
+  - emissão e renovação de documentos (RG novo CIN, CPF, CNH, CTPS digital)
+  - regras eleitorais — biometria, justificativa de ausência, voto em trânsito
+  - portal gov.br, prova de vida do INSS, login único
+  - serviço de DETRAN (transferência de veículo, multa, recurso) por estado
+  - o que fazer quando uma regra federal e uma regra estadual sobre o mesmo benefício se contradizem
+- id: brazil-health-systems
+  invitation: Você quer perguntar sobre saúde no Brasil com a sua própria voz. SUS, plano de saúde, medicamento — traga a parte concreta que está te confundindo.
+  subtopic_hints:
+  - SUS — atenção primária (UBS), média (UPA, ambulatório) e alta complexidade (hospital de referência)
+  - regulação no SUS — fila de exame, espera, judicialização (mandado de segurança)
+  - planos de saúde regulados pela ANS — carência, cobertura mínima e rol obrigatório
+  - genéricos, similares e medicamentos de referência — preço e Programa Farmácia Popular
+  - vacinação no SUS, calendário do PNI, requisitos de viagem
+  - saúde mental — CAPS, internações compulsórias, telessaúde, CVV (188)
+  - direito a acompanhante hospitalar e atendimento prioritário (idoso, gestante, PCD)
+  - o que fazer quando o atendimento do plano nega cobertura que a ANS lista como obrigatória
+- id: brazil-education
+  invitation: Você quer perguntar sobre educação no Brasil com a sua própria voz. ENEM, vestibular, FIES, Prouni, escola pública versus particular — traga sua situação concreta.
+  subtopic_hints:
+  - ENEM como porta de entrada e a diferença entre nota de corte SISU, ProUni e FIES
+  - cotas no ensino superior — racial, escola pública, baixa renda, PCD
+  - rede pública (estadual versus federal) — diferenças de qualidade e tempo integral
+  - educação infantil, creche e a obrigatoriedade do ensino a partir dos 4 anos
+  - reforma do Ensino Médio — itinerários formativos, BNCC, Novo Ensino Médio
+  - educação a distância (EaD) — credenciamento MEC, qualidade e mercado de trabalho
+  - revalidação de diploma estrangeiro pelo Carolina Bori, plataforma do MEC
+  - o que fazer quando o histórico escolar e a exigência da nova escola não conferem
+- id: brazil-labor-and-benefits
+  invitation: Você quer perguntar sobre trabalho, emprego ou direitos trabalhistas no Brasil com a sua própria voz. CLT, MEI, autônomo, PJ — traga a situação real.
+  subtopic_hints:
+  - diferença entre CLT, PJ, MEI, autônomo e cooperativado — direitos e tributação
+  - FGTS — saque-aniversário, saque-rescisão, multa de 40%
+  - Reforma Trabalhista de 2017 e o que mudou na prática para férias, jornada e banco de horas
+  - INSS — contribuição mínima do MEI versus do contribuinte individual
+  - acordo coletivo versus convenção coletiva — qual prevalece
+  - aviso prévio (trabalhado, indenizado, proporcional) e cálculo da rescisão
+  - regras de teletrabalho na CLT pós-pandemia e o controle de jornada
+  - o que fazer quando o contrato e a CTPS digital têm informações diferentes
+- id: brazil-finance-and-consumer
+  invitation: Você quer perguntar sobre dinheiro, bancos, impostos ou direitos do consumidor no Brasil com a sua própria voz. Traga uma situação concreta sua.
+  subtopic_hints:
+  - declaração de Imposto de Renda — quem é obrigado, deduções legais, malha fina
+  - poupança versus CDB versus Tesouro Direto — quando cada um faz sentido
+  - Pix — chargeback, devolução em caso de fraude, golpe da falsa central
+  - score de crédito (Serasa, SPC, Boa Vista) e como contestar inscrição indevida
+  - cartão de crédito — rotativo versus parcelado da fatura, regulamentação do BC
+  - direito de arrependimento, garantia legal versus garantia estendida (CDC)
+  - Procon — quando faz sentido versus juizado especial cível e ação direta
+  - o que fazer quando o aplicativo do banco, o extrato impresso e a consulta no SPB mostram saldos diferentes
+- id: brazil-digital-services
+  invitation: Você quer perguntar sobre serviços digitais ou contas online no Brasil com a sua própria voz. Pix, gov.br, golpe, cadastro — traga a situação real.
+  subtopic_hints:
+  - gov.br — níveis bronze, prata, ouro e o que cada um destrava
+  - golpes comuns no Brasil (falso boleto, falsa central de banco, golpe do PIX errado)
+  - Pix — limite, chave, devolução, MED (Mecanismo Especial de Devolução)
+  - LGPD na prática — direito de acesso, eliminação e portabilidade
+  - autenticação em dois fatores, validador, app gov.br, biometria do TSE
+  - chip clonado / SIM-swap — passos para recuperar contas vinculadas ao número
+  - WhatsApp clonado e as fraudes derivadas (golpe do parente, golpe do boleto)
+  - o que fazer quando o app do governo aceita o login pelo desktop mas falha no celular

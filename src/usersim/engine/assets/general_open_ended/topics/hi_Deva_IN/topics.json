@@ -1,0 +1,22 @@
+[
+    {"type": "health", "description": "स्वास्थ्य, कल्याण और चिकित्सा विषय"},
+    {"type": "finance", "description": "व्यक्तिगत वित्त, बैंकिंग और पैसों का प्रबंधन"},
+    {"type": "cooking", "description": "खाना बनाना, रेसिपी और भोजन तैयार करना"},
+    {"type": "local_government", "description": "स्थानीय सरकारी सेवाएं और नागरिक प्रक्रियाएं"},
+    {"type": "technology", "description": "तकनीक, गैजेट और डिजिटल सेवाएं"},
+    {"type": "agriculture", "description": "कृषि, खेती और फसल प्रबंधन"},
+    {"type": "travel", "description": "यात्रा की योजना, गंतव्य और सुझाव"},
+    {"type": "education", "description": "शिक्षा प्रणाली, स्कूल और सीखने के संसाधन"},
+    {"type": "environment", "description": "पर्यावरण, जलवायु और सतत विकास"},
+    {"type": "entertainment", "description": "मनोरंजन, मीडिया और फुरसत की गतिविधियां"},
+    {"type": "legal", "description": "कानूनी अधिकार, प्रक्रियाएं और नियम"},
+    {"type": "housing", "description": "आवास, रियल एस्टेट और घर की देखभाल"},
+    {"type": "transportation", "description": "परिवहन के विकल्प और आवागमन"},
+    {"type": "employment", "description": "नौकरी की तलाश, कार्यस्थल की समस्याएं और करियर सलाह"},
+    {"type": "family", "description": "पारिवारिक जीवन, पालन-पोषण और रिश्ते"},
+    {"type": "aadhaar", "description": "आधार कार्ड, पैन कार्ड और सरकारी पहचान पत्र की प्रक्रिया"},
+    {"type": "ration_card", "description": "राशन कार्ड और सार्वजनिक वितरण प्रणाली (PDS)"},
+    {"type": "ayushman_bharat", "description": "आयुष्मान भारत योजना और सरकारी स्वास्थ्य बीमा"},
+    {"type": "upi_digital_payments", "description": "UPI, डिजिटल भुगतान और ऑनलाइन बैंकिंग"},
+    {"type": "kisan_farming", "description": "किसान सम्मान निधि और कृषि से जुड़ी सरकारी योजनाएं"}
+]

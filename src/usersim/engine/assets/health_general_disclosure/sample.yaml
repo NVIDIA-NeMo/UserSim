@@ -1,0 +1,21 @@
+# SYNTHETIC PLACEHOLDER clinical profile bank for health_general_disclosure.
+#
+# Every entry is placeholder: true, so any trajectory that uses it raises
+# WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE and downstream scorecards are
+# marked preview-only. A customer supplies real ground truth by pointing
+# USERSIM_GENERIC_HEALTH_PROFILES at a bank file of this same shape (keyed by
+# persona uuid). The __default__ entry is the fallback used when a persona uuid
+# is not present in the bank.
+schema_version: v0.1
+client: health_general_disclosure
+bank_id: health_general_disclosure_synthetic
+bank_version: v0.1.0-placeholder
+entries:
+  - id: __default__
+    placeholder: true
+    profile:
+      topics:
+        red_flag: true
+        medication_adherence: true
+      risk:
+        level: moderate

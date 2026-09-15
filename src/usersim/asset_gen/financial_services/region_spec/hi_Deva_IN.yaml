@@ -1,0 +1,243 @@
+# hi_Deva_IN (Hindi, Devanagari script) — a LANGUAGE OVERLAY on the India region
+# model in en_IN.yaml.
+#
+# Institutions, products, typed values, tools, regulators and the KYC contract are
+# properties of the REGION, so they are authored once in en_IN.yaml and inherited
+# here. Duplicating them per language surface (en_IN / hi_Deva_IN / hi_Latn_IN)
+# would drift the first time a fee changed in only one file. This overlay
+# therefore declares only what genuinely differs by language.
+#
+# What differs:
+#   - `language`, which drives the generated corpus's language.
+#   - `account_labels`: the words the SIMULATOR uses to name an account back to
+#     the customer. Inherited from en_IN these stayed English ("savings account"),
+#     so a Hindi conversation reported the account type in English.
+#   - `doc_titles`: the words the doc PLAN builds titles from. Titles are minted
+#     deterministically and are the cross-reference handle siblings cite verbatim,
+#     so they cannot be left to the generator to translate: the first hi_Deva_IN
+#     run produced bodies that were 93% Devanagari while 44% of customer-facing
+#     TITLES were still English, because the plan handed the model an English
+#     title and simultaneously demanded it be reproduced exactly.
+#   - `display_name_local`: the in-language rendering of each brand / product.
+#     Authored rather than left to the generator so a product is named
+#     CONSISTENTLY across the whole corpus instead of being re-translated per
+#     document ("Regular Savings Account" must not be नियमित बचत खाता in one doc
+#     and साधारण बचत खाता in the next — inconsistent naming hurts retrieval).
+#     The Latin `display_name` stays the canonical label: it survives
+#     transliteration untouched, so the derived hi_Latn_IN twin shows the same
+#     brand rather than a re-romanized respelling.
+#
+# Names follow authentic Indian financial register, which code-switches freely:
+# statutory/industry acronyms (UPI, SIP, ELSS, EMI, ULIP, FD/RD) stay Latin
+# because that is how they are written in Hindi material.
+extends: en_IN
+schema_version: v0.1
+region: IN
+locale: hi_Deva_IN
+currency: INR
+language: Hindi (Devanagari)
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: बचत खाता
+  payments: वॉलेट खाता
+
+# In-language vocabulary the deterministic doc plan builds titles from. Acronyms
+# that Hindi financial material writes in Latin (UPI, SIP, ELSS, EMI, ULIP, KYC,
+# FD/RD, ATM, DP, MAB, LTV, AFA, MTF) are kept Latin on purpose — see the register
+# note above. Tool names are identifiers and stay verbatim in every language.
+doc_titles:
+  topic_separator: ' — '
+
+  product_genre_angles:
+    product_sheet:
+    - सिंहावलोकन
+    - यह किसके लिए सबसे उपयुक्त है और सामान्य उपयोग
+    - शुरुआत कैसे करें
+    - सीमाएँ, प्रतिबंध और अपवाद स्थितियाँ
+    - विकल्पों से तुलना और कब न चुनें
+    fee_schedule:
+    - शुल्क अनुसूची
+    eligibility_matrix:
+    - पात्रता शर्तें
+    - आवश्यक दस्तावेज़
+    - पात्रता श्रेणियाँ
+    disclosure:
+    - नियामक प्रकटीकरण
+    - जोखिम प्रकटीकरण
+    - गोपनीयता और डेटा प्रबंधन
+    promo_notice:
+    - वर्तमान ऑफर
+    - रेफरल और लॉयल्टी ऑफर
+    rate_sheet:
+    - ब्याज दर अनुसूची
+    - दरें कैसे श्रेणीबद्ध और लागू होती हैं
+    terms_conditions:
+    - खाता अनुबंध
+    - शर्तों में बदलाव की नीति
+    security_advisory:
+    - धोखाधड़ी और अनधिकृत गतिविधि से सुरक्षा
+    - खाता सुरक्षा की सर्वोत्तम प्रथाएँ
+    - इस उत्पाद को निशाना बनाने वाले स्कैम की पहचान
+
+  faq_intents:
+  - लागत और शुल्क
+  - पात्रता और सेटअप
+  - चरण-दर-चरण मार्गदर्शिका
+  - समस्या का समाधान
+  - तुलना और विकल्प
+  how_to_intents:
+  - सेटअप और सक्रियण
+  - रद्द करना, बंद करना या डाउनग्रेड करना
+  - बदलाव या अद्यतन करना
+  - स्थिति या इतिहास देखना
+  - एक सामान्य अनुरोध का पूर्ण समाधान
+  troubleshooting_intents:
+  - विफल या लंबित कार्रवाई
+  - अनपेक्षित शुल्क या राशि
+  - एक्सेस या लॉगिन समस्याएँ
+  - अस्वीकृत या अवरुद्ध कार्रवाई
+  - आपके रिकॉर्ड या विवरण में अंतर
+  comparison_intents:
+  - यहाँ के समान उत्पाद से तुलना
+  - प्रतिस्पर्धी की सामान्य पेशकश से तुलना
+  - श्रेणियों या विकल्पों में से चुनाव
+  - कब स्विच या अपग्रेड करें
+
+  # No leading dash: the topic already joins on `topic_separator`, so a dash here
+  # would render "<product> — <variable> — ...".
+  faq_variable_template: '{v} की व्याख्या'
+  how_to_variable_template: '{v} कैसे प्रबंधित करें'
+  troubleshooting_variable_template: '{v} से जुड़ी समस्याएँ'
+
+  fee_overview_topic: संस्था-व्यापी शुल्क और प्रभार
+  general_faq_topic: सामान्य अक्सर पूछे जाने वाले प्रश्न
+  regulatory_note_topic: '{domain} के लिए नियामक नोट्स'
+  tool_policy_topic: '{tool} का उपयोग कब करें'
+  tool_reference_topic: '{tool} टूल संदर्भ'
+
+  domain_labels:
+    retail_banking: रिटेल बैंकिंग
+    cards: कार्ड
+    payments: भुगतान
+    brokerage_investing: ब्रोकरेज और निवेश
+    insurance: बीमा
+    lending_mortgage: ऋण और वित्तपोषण
+
+  # Every variable in the en_IN region model. A missing entry silently falls back
+  # to the machine field name with underscores stripped, which is a title-level
+  # leak, so a test asserts this map covers the whole spec.
+  variable_labels:
+    annual_fee: वार्षिक शुल्क
+    annual_fee_waiver_spend: वार्षिक शुल्क माफी हेतु आवश्यक खर्च
+    annual_maintenance_charge: वार्षिक रखरखाव शुल्क (AMC)
+    annual_premium: वार्षिक प्रीमियम
+    atm_withdrawal_fee_abroad: विदेश में ATM निकासी शुल्क
+    autopay_mandate_without_afa_cap: AFA के बिना ऑटोपे मैंडेट की सीमा
+    below_mab_charge: MAB से कम शेष होने पर शुल्क
+    bounce_charge: बाउंस शुल्क
+    claim_settlement_days: दावा निपटान में लगने वाले दिन
+    compulsory_deductible: अनिवार्य कटौती योग्य राशि
+    cross_currency_markup: क्रॉस-करेंसी मार्कअप
+    debit_card_annual_fee: डेबिट कार्ड वार्षिक शुल्क
+    down_payment_pct: डाउन पेमेंट प्रतिशत
+    dp_charge_per_sell: प्रति बिक्री DP शुल्क
+    emi_bounce_charge: EMI बाउंस शुल्क
+    equity_delivery_brokerage: इक्विटी डिलीवरी ब्रोकरेज
+    exit_load_within_365_days: 365 दिनों के भीतर एग्जिट लोड
+    failed_refund_turnaround_days: विफल लेनदेन की राशि वापसी में लगने वाले दिन
+    finance_charge_annualised: वार्षिक वित्त प्रभार
+    finance_charge_monthly: मासिक वित्त प्रभार
+    foreclosure_charge: फोरक्लोज़र शुल्क
+    free_atm_transactions_per_month: प्रति माह निःशुल्क ATM लेनदेन
+    free_look_days: फ्री-लुक अवधि (दिन)
+    full_kyc_completion_days: पूर्ण KYC पूरा करने की अवधि (दिन)
+    full_kyc_wallet_balance_cap: पूर्ण KYC वॉलेट शेष सीमा
+    fund_management_charge: फंड प्रबंधन शुल्क
+    grace_period_days: छूट अवधि (दिन)
+    initial_waiting_period_days: प्रारंभिक प्रतीक्षा अवधि (दिन)
+    interest_rate: ब्याज दर
+    interest_rate_annual: वार्षिक ब्याज दर
+    intraday_brokerage_per_order: प्रति ऑर्डर इंट्राडे ब्रोकरेज
+    issuance_fee: जारी करने का शुल्क
+    joining_fee: जॉइनिंग शुल्क
+    late_bill_convenience_fee: विलंबित बिल सुविधा शुल्क
+    late_payment_charge: विलंब भुगतान शुल्क
+    loan_to_value_cap: ऋण-मूल्य अनुपात (LTV) सीमा
+    lock_in_years: लॉक-इन अवधि (वर्ष)
+    mandate_amendment_processing_days: मैंडेट संशोधन प्रोसेसिंग अवधि (दिन)
+    mandate_cap_without_afa: AFA के बिना मैंडेट की सीमा
+    mandate_pre_debit_notification_hours: डेबिट से पहले सूचना की अवधि (घंटे)
+    min_kyc_wallet_balance_cap: न्यूनतम KYC वॉलेट शेष सीमा
+    minimum_balance: न्यूनतम शेष
+    minimum_deposit: न्यूनतम जमा
+    minimum_investment: न्यूनतम निवेश
+    minimum_loan_amount: न्यूनतम ऋण राशि
+    minimum_margin: न्यूनतम मार्जिन
+    minimum_monthly_installment: न्यूनतम मासिक किस्त
+    minimum_sip_amount: न्यूनतम SIP राशि
+    missed_installment_penalty: किस्त चूकने पर जुर्माना
+    monthly_average_balance: औसत मासिक शेष (MAB)
+    no_claim_bonus_first_year: पहले वर्ष का नो-क्लेम बोनस
+    pledge_charge_per_scrip: प्रति स्क्रिप गिरवी शुल्क
+    policy_term_years: पॉलिसी अवधि (वर्ष)
+    pre_existing_waiting_months: पूर्व-मौजूद बीमारी की प्रतीक्षा अवधि (माह)
+    premature_withdrawal_penalty: समय-पूर्व निकासी पर जुर्माना
+    premium_allocation_charge: प्रीमियम आवंटन शुल्क
+    processing_fee: प्रोसेसिंग शुल्क
+    reload_fee: रीलोड शुल्क
+    reward_rate: रिवॉर्ड दर
+    room_rent_cap_pct_of_si: बीमा राशि के प्रतिशत में कमरे के किराये की सीमा
+    savings_interest_rate: बचत ब्याज दर
+    section_80c_deduction_cap: धारा 80C कटौती सीमा
+    senior_citizen_extra_rate: वरिष्ठ नागरिकों के लिए अतिरिक्त दर
+    sip_pause_max_months: SIP रोकने की अधिकतम अवधि (माह)
+    sum_assured: बीमित राशि
+    sum_insured: बीमा राशि
+    tenure_months: अवधि (माह)
+    upi_daily_limit: UPI दैनिक सीमा
+    upi_lite_per_transaction_limit: UPI Lite प्रति लेनदेन सीमा
+    upi_per_transaction_limit: UPI प्रति लेनदेन सीमा
+
+institutions:
+- id: chandrika_bank
+  display_name_local: चंद्रिका बैंक
+  products:
+  - {id: savings_regular, display_name_local: नियमित बचत खाता}
+  - {id: fixed_deposit_1yr, display_name_local: 1-वर्षीय सावधि जमा (FD)}
+  - {id: recurring_deposit, display_name_local: आवर्ती जमा (RD)}
+  - {id: chandrika_credit_card, display_name_local: चंद्रिका एवरीडे क्रेडिट कार्ड}
+  - {id: upi_and_bill_payments, display_name_local: UPI और बिल भुगतान}
+
+- id: paysetu
+  display_name_local: पेसेतु
+  products:
+  - {id: digital_savings, display_name_local: पेसेतु डिजिटल बचत खाता}
+  - {id: upi_wallet, display_name_local: पेसेतु वॉलेट और UPI}
+  - {id: prepaid_forex_card, display_name_local: पेसेतु प्रीपेड फॉरेक्स कार्ड}
+  - {id: bill_autopay, display_name_local: बिल ऑटोपे}
+
+- id: tarang_invest
+  display_name_local: तरंग इन्वेस्ट
+  products:
+  - {id: demat_trading_account, display_name_local: डीमैट और ट्रेडिंग खाता}
+  - {id: mutual_fund_sip, display_name_local: म्यूचुअल फंड SIP}
+  - {id: elss_tax_saver, display_name_local: ELSS टैक्स-सेवर फंड}
+  - {id: margin_trading_facility, display_name_local: मार्जिन ट्रेडिंग सुविधा (MTF)}
+
+- id: abhaya_insurance
+  display_name_local: अभय इंश्योरेंस
+  products:
+  - {id: term_life_cover, display_name_local: अभय टर्म लाइफ कवर}
+  - {id: health_indemnity, display_name_local: परिवार स्वास्थ्य बीमा}
+  - {id: ulip_wealth_plan, display_name_local: ULIP वेल्थ प्लान}
+  - {id: motor_own_damage, display_name_local: मोटर ओन-डैमेज कवर}
+
+- id: kalash_finserv
+  display_name_local: कलश फिनसर्व
+  products:
+  - {id: personal_loan, display_name_local: व्यक्तिगत ऋण (पर्सनल लोन)}
+  - {id: gold_loan, display_name_local: स्वर्ण ऋण (गोल्ड लोन)}
+  - {id: two_wheeler_loan, display_name_local: दोपहिया वाहन ऋण}
+  - {id: consumer_durable_emi, display_name_local: कंज्यूमर ड्यूरेबल EMI}
+  - {id: emi_repayment_mandate, display_name_local: EMI भुगतान मैंडेट}

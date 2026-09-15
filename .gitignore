@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test + coverage output (`make coverage` writes these; CI uploads coverage.xml
+# as an artifact rather than committing it)
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LLM debug transcripts. Opt-in (USERSIM_DEBUG_LOG) and defaulted under
+# output/, but match them anywhere: they hold full prompts, completions,
+# and reasoning content.
+debug_llm_responses.jsonl
+debug_litellm_requests.jsonl
+
+# Credentials
+.env
+.env.*
+
+# Data artifacts
+data/
+artifacts/
+output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local DataDesigner branch checkout
+.dd-branch/
+
+# uv lockfiles. The lock is COMMITTED: CI installs from it with --locked so
+# dependency drift is a build failure rather than a silent re-resolution.
+
+# Cursor
+.cursor/

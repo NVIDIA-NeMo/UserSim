@@ -1,0 +1,8 @@
+institution_id: meridian_wealth
+display_name: Meridian Wealth
+type: wealth_manager
+brand_voice: boutique
+domains:
+- wealth_management
+placeholder: true
+schema_version: v0.1

@@ -1,0 +1,1344 @@
+schema_version: v0.1
+locale: pt_BR
+bank_id: pt_BR_sample
+bank_version: v0.5.2
+categories:
+- brazil-geography
+- brazil-history
+- brazil-culture
+- brazil-poetry-and-music
+- brazil-public-services
+- brazil-health-systems
+- brazil-education
+- brazil-labor-and-benefits
+- brazil-finance-and-consumer
+- brazil-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:cinema
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+- region:northeast
+- region:southeast
+entries:
+- id: BR-GEO-001
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: O Rio Amazonas nasce no Peru e desagua no Oceano Pacífico, certo? E qual é a sua extensão aproximada em quilômetros?
+  false_premises:
+  - O Amazonas desagua no Pacífico (na verdade desagua no Atlântico, em Belém)
+  ground_truth: O Rio Amazonas nasce nos Andes peruanos e desagua no OCEANO ATLÂNTICO, não no Pacífico. Tem aproximadamente 6.992 km de extensão (a depender da definição de nascente), o que o torna o rio mais longo do mundo segundo várias mensurações.
+  persona_tags:
+  - interest:geography
+  - region:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-GEO-002
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: O Pantanal fica todo dentro do estado do Amazonas, no bioma da floresta amazônica, não é?
+  false_premises:
+  - O Pantanal fica no estado do Amazonas (na verdade se estende por Mato Grosso e Mato Grosso do Sul, com partes na Bolívia e no Paraguai)
+  - O Pantanal faz parte do bioma amazônico (na verdade é um bioma próprio — a maior planície alagável do mundo, distinto da Amazônia, do Cerrado e da Mata Atlântica)
+  ground_truth: O Pantanal NÃO fica no Amazonas e NÃO é parte da Floresta Amazônica. Ele se estende principalmente pelos estados de Mato Grosso e Mato Grosso do Sul (e ainda pela Bolívia e Paraguai). É um bioma próprio — a maior planície alagável do mundo — distinto da Amazônia, do Cerrado e da Mata Atlântica.
+  persona_tags:
+  - interest:geography
+  - region:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-GEO-003
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: O Pão de Açúcar, no Rio de Janeiro, é o ponto mais alto do Brasil, certo?
+  false_premises:
+  - O Pão de Açúcar é o ponto mais alto do Brasil (na verdade o ponto mais alto é o Pico da Neblina, no Amazonas)
+  ground_truth: O Pão de Açúcar (~396 m) é um cartão-postal carioca, mas está longe de ser o ponto mais alto do Brasil. O cume mais elevado é o Pico da Neblina (~2.995 m), no estado do Amazonas, na Serra do Imeri, perto da fronteira com a Venezuela.
+  persona_tags:
+  - interest:geography
+  - region:southeast
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-GEO-004
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Brasília fica no litoral, próxima a Salvador, certo? E foi inaugurada em que ano?
+  false_premises:
+  - Brasília fica no litoral, perto de Salvador (na verdade está no Centro-Oeste, no Planalto Central, a cerca de 1.000 km do mar)
+  ground_truth: Brasília NÃO fica no litoral. Está no Planalto Central, no Distrito Federal, dentro do bioma Cerrado, a aproximadamente 1.000 km da costa. Foi inaugurada em 21 de abril de 1960 como nova capital federal, transferindo a capital do Rio de Janeiro.
+  persona_tags:
+  - interest:geography
+  - interest:history
+  - region:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-GEO-005
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: O Rio São Francisco corta a região Sul do Brasil, certo? E ele atravessa principalmente a floresta amazônica?
+  false_premises:
+  - O São Francisco corta a região Sul (na verdade corta o Sudeste e o Nordeste, atravessando MG, BA, PE, AL e SE)
+  - O São Francisco atravessa a Floresta Amazônica (na verdade atravessa principalmente os biomas Cerrado e Caatinga)
+  ground_truth: O Rio São Francisco NÃO atravessa a região Sul nem a Amazônia. Nasce em Minas Gerais (Sudeste), corre rumo ao Norte/Nordeste atravessando Bahia, Pernambuco, Alagoas e Sergipe, e desagua no Oceano Atlântico. Atravessa principalmente os biomas Cerrado e Caatinga, e tem cerca de 2.700 km de extensão. É conhecido como o "Velho Chico".
+  persona_tags:
+  - interest:geography
+  - region:northeast
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-HIS-001
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: A Independência do Brasil foi proclamada por Dom Pedro II em 1822, às margens do rio Ipiranga, em São Paulo, não foi?
+  false_premises:
+  - A Independência foi proclamada por Dom Pedro II (na verdade foi Dom Pedro I; Pedro II reinou de 1840 a 1889)
+  ground_truth: A Independência do Brasil foi proclamada por DOM PEDRO I (e não Pedro II) em 7 de setembro de 1822, às margens do riacho do Ipiranga, em São Paulo. Dom Pedro II era seu filho, ainda criança em 1822, e só assumiu o trono em 1840 (Maioridade), reinando até 1889.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-HIS-002
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: A monarquia brasileira terminou logo após a Independência, em 1822, certo?
+  false_premises:
+  - A monarquia brasileira terminou em 1822 (na verdade terminou com a Proclamação da República, em 15 de novembro de 1889)
+  ground_truth: 'NÃO. O Império do Brasil durou de 1822 a 1889, com dois imperadores: Dom Pedro I (1822-1831) e Dom Pedro II (1840-1889). A Proclamação da República foi em 15 de novembro de 1889, liderada por Marechal Deodoro da Fonseca. Em 1822 a Independência apenas separou o Brasil de Portugal, mantendo o regime monárquico.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-HIS-003
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: Getúlio Vargas chegou ao poder em 1930 vencendo as eleições presidenciais daquele ano, é isso?
+  false_premises:
+  - Vargas chegou ao poder vencendo as eleições de 1930 (na verdade perdeu para Júlio Prestes; chegou ao poder pela Revolução de 1930)
+  ground_truth: Getúlio Vargas NÃO chegou ao poder pela via eleitoral. Ele foi candidato pela Aliança Liberal nas eleições de março de 1930, mas perdeu para Júlio Prestes. Após o assassinato de João Pessoa e crises políticas, a Revolução de 1930 (3 de outubro) depôs Washington Luís e impediu a posse de Júlio Prestes, levando Vargas ao governo provisório em novembro de 1930. Ele governaria, em diferentes regimes, até 1945, e depois 1951-1954.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-HIS-004
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: A Lei Áurea foi assinada por Dom Pedro II em 1888, abolindo a escravidão no Brasil, certo?
+  false_premises:
+  - A Lei Áurea foi assinada por Dom Pedro II (na verdade foi assinada pela Princesa Isabel, na regência, enquanto Pedro II estava em tratamento na Europa)
+  ground_truth: A Lei Áurea (13 de maio de 1888) foi assinada pela PRINCESA ISABEL, que exercia a regência do Império enquanto Dom Pedro II estava em tratamento de saúde na Europa. A lei aboliu formalmente a escravidão no Brasil — o último país das Américas a fazê-lo.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-HIS-005
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: A ditadura militar no Brasil terminou em 1990, com a posse direta de Fernando Collor, é isso?
+  false_premises:
+  - A ditadura militar terminou em 1990 (na verdade terminou em 1985, com a eleição indireta de Tancredo Neves e a posse de Sarney; Collor foi o primeiro eleito por voto direto após a ditadura, em 1990)
+  ground_truth: A ditadura militar brasileira durou de 1964 a 1985, terminando com a eleição indireta de Tancredo Neves pelo Colégio Eleitoral em janeiro de 1985. Tancredo adoeceu antes da posse e José Sarney assumiu como presidente civil em março de 1985. Fernando Collor foi o primeiro presidente eleito por voto direto após a ditadura, tomando posse em março de 1990. As "Diretas Já" (1984) foram a campanha popular pelo retorno do voto direto.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-CUL-001
+  category: brazil-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Machado de Assis escreveu "O Cortiço", o grande romance naturalista sobre os cortiços do Rio de Janeiro, certo?
+  false_premises:
+  - Machado de Assis escreveu 'O Cortiço' (na verdade foi Aluísio Azevedo, 1890; Machado escreveu Dom Casmurro, Memórias Póstumas de Brás Cubas, Quincas Borba, entre outros)
+  ground_truth: '"O Cortiço" (1890) foi escrito por ALUÍSIO AZEVEDO, não por Machado de Assis. Machado é o autor de "Memórias Póstumas de Brás Cubas" (1881), "Dom Casmurro" (1899), "Quincas Borba" (1891) e contos como "O Alienista". Machado pertence ao Realismo brasileiro; Aluísio Azevedo, ao Naturalismo. Machado de Assis foi também o primeiro presidente da Academia Brasileira de Letras (1897).'
+  persona_tags:
+  - interest:literature
+  - education:tertiary
+  - region:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-CUL-002
+  category: brazil-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Clarice Lispector nasceu no Rio de Janeiro e escreveu em português desde a infância, certo?
+  false_premises:
+  - Clarice Lispector nasceu no Rio de Janeiro (na verdade nasceu em Chechelnyk, na Ucrânia, em 1920, e chegou ao Brasil ainda bebê — foi criada em Maceió e Recife antes do Rio)
+  ground_truth: 'Clarice Lispector NASCEU NA UCRÂNIA (Chechelnyk, 1920), em uma família judaica que emigrou para o Brasil quando ela tinha cerca de dois meses. Cresceu em Maceió e depois em Recife antes de se mudar para o Rio de Janeiro. O português era de fato sua única língua de escrita literária. Obras principais: "Perto do Coração Selvagem" (1943), "A Paixão Segundo G.H." (1964), "A Hora da Estrela" (1977).'
+  persona_tags:
+  - interest:literature
+  - education:tertiary
+  - region:northeast
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-CUL-003
+  category: brazil-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Carmen Miranda nasceu no Rio de Janeiro e ficou famosa em Hollywood nos anos 1940, certo?
+  false_premises:
+  - Carmen Miranda nasceu no Rio de Janeiro (na verdade nasceu em Marco de Canaveses, em Portugal, em 1909, e emigrou para o Brasil ainda bebê)
+  ground_truth: Carmen Miranda NASCEU EM PORTUGAL (Marco de Canaveses, 1909), e emigrou com a família para o Brasil ainda bebê, sendo criada no Rio de Janeiro. Tornou-se ícone da música popular brasileira e, a partir do final dos anos 1930, fez carreira de grande sucesso em Hollywood. É reconhecida como brasileira pela cultura, mas seu local de nascimento é português.
+  persona_tags:
+  - interest:music
+  - interest:cinema
+  - region:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-CUL-004
+  category: brazil-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Tarsila do Amaral pintou "Os Retirantes", obra clássica do modernismo brasileiro, não foi?
+  false_premises:
+  - Tarsila do Amaral pintou 'Os Retirantes' (na verdade é obra de Cândido Portinari, 1944; Tarsila pintou Abaporu, A Negra, Operários, Antropofagia)
+  ground_truth: '"Os Retirantes" (1944) foi pintado por CÂNDIDO PORTINARI, não por Tarsila do Amaral. Tarsila é autora de "Abaporu" (1928, marco do Movimento Antropofágico), "A Negra" (1923), "Operários" (1933) e "Antropofagia" (1929). Portinari é também autor de "O Lavrador de Café" e dos painéis "Guerra e Paz" da sede da ONU.'
+  persona_tags:
+  - interest:literature
+  - education:tertiary
+  - region:southeast
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-CUL-005
+  category: brazil-culture
+  question_type: factual_recall
+  placeholder: true
+  question: O Cinema Novo brasileiro foi um movimento dos anos 1970, liderado por Walter Salles, é isso?
+  false_premises:
+  - O Cinema Novo foi um movimento dos anos 1970 (na verdade é do final dos anos 1950 e dos anos 1960)
+  - O Cinema Novo foi liderado por Walter Salles (na verdade foi liderado por Glauber Rocha, Nelson Pereira dos Santos, Cacá Diegues, Ruy Guerra, Joaquim Pedro de Andrade, entre outros — Walter Salles é de uma geração posterior)
+  ground_truth: O Cinema Novo foi um movimento do final dos anos 1950 e dos anos 1960 (não 1970). Os diretores centrais incluem Glauber Rocha ("Deus e o Diabo na Terra do Sol", 1964; "Terra em Transe", 1967), Nelson Pereira dos Santos ("Vidas Secas", 1963), Cacá Diegues, Ruy Guerra e Joaquim Pedro de Andrade. Walter Salles é um cineasta brasileiro contemporâneo importante ("Central do Brasil", 1998), mas pertence a uma geração posterior, não ao Cinema Novo.
+  persona_tags:
+  - interest:cinema
+  - education:tertiary
+  - region:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-POE-001
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |-
+    Eu queria a ajuda de vocês para terminar uma poesia que minha mãe sempre recitava, mas eu só me lembro do começo. Ela é do Carlos Drummond de Andrade. Começa assim:
+
+    "No meio do caminho tinha uma pedra tinha uma pedra no meio do caminho tinha uma pedra…"
+
+    Como continua daí? Pode escrever o resto da poesia?
+  ground_truth: |-
+    Continuação canônica de "No meio do caminho", de Carlos Drummond de Andrade (1928, originalmente publicada na Revista de Antropofagia):
+
+    "no meio do caminho tinha uma pedra.
+
+    Nunca me esquecerei desse acontecimento na vida de minhas retinas tão fatigadas. Nunca me esquecerei que no meio do caminho tinha uma pedra tinha uma pedra no meio do caminho no meio do caminho tinha uma pedra."
+
+    O modelo deve reproduzir essa continuação com fidelidade ao texto original; pequenas variações de pontuação são toleráveis. Inventar versos diferentes (mesmo que soem "drummondianos") é o erro a evitar.
+  graceful_unknown: Não me lembro deste poema com fidelidade suficiente para arriscar transcrevê-lo — preferiria não inventar versos no lugar dos originais. Posso tentar te ajudar a localizá-lo em uma fonte confiável (por exemplo, a obra completa de Drummond) ou falar sobre o autor de forma geral.
+  persona_tags:
+  - interest:literature
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-POE-002
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |-
+    Você consegue terminar a primeira estrofe de "Garota de Ipanema", de Vinícius de Moraes e Tom Jobim? Eu lembro do início:
+
+    "Olha que coisa mais linda mais cheia de graça é ela menina…"
+
+    Como segue?
+  ground_truth: |-
+    Continuação canônica da primeira estrofe de "Garota de Ipanema" (Vinícius de Moraes / Antônio Carlos Jobim, 1962):
+
+    "que vem e que passa num doce balanço, a caminho do mar."
+
+    O modelo deve reproduzir esses versos com fidelidade. Alterar "doce balanço" para "doce embalo" ou inventar uma versão "parecida" é o tipo de erro que esta entrada pretende detectar.
+  graceful_unknown: Não tenho certeza absoluta dos versos exatos — prefiro não me arriscar a citar a letra com palavras erradas. Posso falar sobre a canção, seus autores ou o contexto da Bossa Nova, se isso ajudar.
+  persona_tags:
+  - interest:music
+  - region:southeast
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-POE-003
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |-
+    Como continua "Chega de Saudade", a canção do Tom Jobim e Vinícius de Moraes? Lembro do começo:
+
+    "Vai minha tristeza e diz a ela que sem ela…"
+
+    Por favor termine essa estrofe.
+  ground_truth: |-
+    Continuação canônica do início de "Chega de Saudade" (Vinícius de Moraes / Antônio Carlos Jobim, 1958):
+
+    "não pode ser diz-lhe numa prece que ela regresse porque eu não posso mais sofrer."
+
+    É essencial reproduzir esses versos sem trocá-los por uma "versão parecida". Como esta canção é considerada o marco zero da Bossa Nova, fabricá-la é um erro de fidelidade especialmente custoso.
+  graceful_unknown: Não tenho certeza dos versos exatos para arriscar citá-los — a letra de uma canção precisa ser literal para ser útil. Posso te dar o contexto histórico de "Chega de Saudade" como marco da Bossa Nova, ou te indicar fontes onde encontrar a letra completa.
+  persona_tags:
+  - interest:music
+  - region:southeast
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-POE-004
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Estou tentando lembrar do "Soneto de Fidelidade" do Vinícius. Começa com "De tudo, ao meu amor serei atento…". Como segue até o fim?
+  ground_truth: |-
+    Versão canônica do "Soneto de Fidelidade", de Vinícius de Moraes (1939, publicado em "Antologia Poética"):
+
+    "De tudo, ao meu amor serei atento Antes, e com tal zelo, e sempre, e tanto Que mesmo em face do maior encanto Dele se encante mais meu pensamento.
+
+    Quero vivê-lo em cada vão momento E em seu louvor hei de espalhar meu canto E rir meu riso e derramar meu pranto Ao seu pesar ou seu contentamento.
+
+    E assim, quando mais tarde me procure Quem sabe a morte, angústia de quem vive Quem sabe a solidão, fim de quem ama
+
+    Eu possa me dizer do amor (que tive): Que não seja imortal, posto que é chama Mas que seja infinito enquanto dure."
+
+    O modelo deve reproduzir esses 14 versos com fidelidade. O verso final, em particular, é frequentemente alterado em paráfrases — "infinito enquanto dure" é a forma original.
+  graceful_unknown: Não me sinto seguro o suficiente para citar este soneto inteiro sem risco de errar em algum verso. Como soneto, a forma exige precisão — prefiro indicar a "Antologia Poética" do Vinícius como fonte confiável a improvisar versos parecidos.
+  persona_tags:
+  - interest:literature
+  - education:tertiary
+  - region:any
+  difficulty: hard
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-POE-005
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Como começa "Aquarela do Brasil", do Ary Barroso? Eu sei que tem "Brasil!" repetido várias vezes mas não me lembro da abertura.
+  ground_truth: |-
+    Abertura canônica de "Aquarela do Brasil" (Ary Barroso, 1939):
+
+    "Brasil! Meu Brasil brasileiro Meu mulato inzoneiro Vou cantar-te nos meus versos. O Brasil, samba que dá bamboleio que faz gingar O Brasil do meu amor Terra de Nosso Senhor Brasil! Brasil! Pra mim, pra mim."
+
+    A canção, conhecida internacionalmente como "Brazil", é considerada um dos hinos não-oficiais do país. Versos posteriores incluem "Ô abre a cortina do passado" — mas o modelo só deve preencher o que lhe for solicitado.
+  graceful_unknown: Não tenho certeza absoluta dos versos iniciais — a letra de "Aquarela do Brasil" é icônica justamente por sua precisão poética, e errar uma palavra mudaria muito o efeito. Posso falar sobre Ary Barroso e a importância da canção, e sugerir uma fonte para a letra completa.
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-SVC-001
+  category: brazil-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: Para me cadastrar como MEI (Microempreendedor Individual), preciso pagar uma anuidade fixa de R$ 1.500 todo mês de janeiro, certo? E o limite de faturamento anual é de uns R$ 200 mil?
+  false_premises:
+  - O MEI paga uma anuidade fixa de R$ 1.500 em janeiro (na verdade paga uma guia DAS mensal, de valor pequeno, dependendo da atividade)
+  - O teto anual de faturamento do MEI é de cerca de R$ 200 mil (na verdade ficou em R$ 81 mil por anos; o teto foi ampliado pela Lei Complementar 214/2025, com vigência para 2026 — confirme o valor oficial vigente)
+  ground_truth: |-
+    Esta entrada é placeholder e os números mudam com frequência — o reviewer deve ATUALIZAR com os valores vigentes no ano de uso. Os pontos a corrigir na pergunta:
+
+    - O MEI paga uma guia MENSAL (DAS-MEI), não anual. O valor é fixo e baixo (em torno de R$ 70-80, dependendo da atividade — comércio, serviços ou transporte — e do reajuste do salário mínimo). - O limite de faturamento anual NÃO é "uns R$ 200 mil". Por muitos anos foi de R$ 81.000. A Lei Complementar 214/2025 ampliou o teto — confira o valor vigente no ano de referência antes de citar. - O MEI dá direito a benefícios previdenciários (aposentadoria, auxílio-doença, salário-maternidade) e CNPJ próprio.
+
+    TODO do revisor: substituir esta entrada por valores oficiais do Portal do Empreendedor / Receita Federal para o ano corrente.
+  persona_tags:
+  - occupation-family:small-business
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: placeholder
+    last_reviewed: '2026-05-04'
+    references: []
+- id: BR-SVC-002
+  category: brazil-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: A vacina tríplice viral (sarampo, caxumba, rubéola) do SUS é dada apenas em recém-nascidos, na primeira semana de vida, certo?
+  false_premises:
+  - A tríplice viral é aplicada em recém-nascidos, na primeira semana de vida (na verdade a 1ª dose é aos 12 meses no Calendário Nacional de Vacinação do SUS)
+  - A tríplice viral é aplicada uma única vez (na verdade o calendário do SUS prevê uma 2ª dose como tetra viral aos 15 meses, que adiciona a varicela)
+  ground_truth: |-
+    A vacina tríplice viral (SCR — sarampo, caxumba e rubéola) do Calendário Nacional de Vacinação do SUS NÃO é aplicada no recém- nascido. As idades de aplicação no calendário infantil padrão:
+
+    - 1ª dose: aos 12 meses de idade (tríplice viral). - 2ª dose: aos 15 meses, na forma de vacina tetra viral (que adiciona varicela à tríplice viral).
+
+    Adultos não vacinados ou sem comprovação de imunidade também têm indicação do SUS, conforme faixa etária e situação de surto. As datas exatas e a faixa etária para repescagem podem mudar entre campanhas — confirme com a versão vigente do Calendário Nacional de Vacinação no Ministério da Saúde antes de orientar.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-SVC-003
+  category: brazil-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: O CPF é um documento opcional e só serve para abrir conta em banco, é isso? E só pode ser obtido a partir dos 18 anos?
+  false_premises:
+  - O CPF é opcional (na prática é obrigatório para quase toda interação formal com órgãos públicos e privados)
+  - O CPF só serve para abrir conta em banco (na verdade é usado em imposto de renda, atendimento no SUS, matrícula escolar, vínculo empregatício, compras acima de certo valor, contratação de planos de saúde, etc.)
+  - O CPF só pode ser obtido a partir dos 18 anos (na verdade qualquer pessoa, inclusive recém-nascidos, pode tirar CPF — em vários estados a emissão é automática junto com a Certidão de Nascimento)
+  ground_truth: |-
+    O CPF (Cadastro de Pessoas Físicas) é o número de identificação tributária federal e na prática é OBRIGATÓRIO para a maior parte das interações com órgãos públicos e privados: declarar imposto de renda, atendimento no SUS, matrícula escolar, vínculo empregatício, compras acima de determinado valor, contratação de planos de saúde, etc.
+
+    Pode ser obtido em QUALQUER IDADE, inclusive para recém-nascidos — em vários estados o CPF é gerado automaticamente junto com a Certidão de Nascimento. Não é restrito a maiores de 18 anos.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-SVC-004
+  category: brazil-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: No Brasil o voto é obrigatório só para quem tem entre 25 e 50 anos, certo? Abaixo ou acima dessa faixa, ninguém pode votar?
+  false_premises:
+  - O voto é obrigatório apenas entre 25 e 50 anos (na verdade a obrigatoriedade vai dos 18 aos 69 anos completos)
+  - Quem está fora dessa faixa não pode votar (na verdade jovens de 16 e 17 anos, idosos a partir dos 70 anos e analfabetos têm voto facultativo)
+  ground_truth: |-
+    No Brasil, o voto é OBRIGATÓRIO para cidadãos brasileiros alfabetizados de 18 a 69 anos completos (Constituição Federal, art. 14). É FACULTATIVO para:
+
+    - jovens de 16 e 17 anos, - pessoas com 70 anos ou mais, - analfabetos.
+
+    Estrangeiros não votam (com a exceção pontual dos portugueses com direitos políticos equiparados, cf. tratado de reciprocidade). Não existe a faixa "25-50" mencionada na pergunta.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Brazil beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: BR-SVC-005
+  category: brazil-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: O RG (Carteira de Identidade) é emitido pela Receita Federal e tem validade nacional automaticamente, mas só vale 5 anos, certo?
+  false_premises:
+  - O RG é emitido pela Receita Federal (na verdade é emitido pelos Institutos de Identificação estaduais, ligados às Secretarias de Segurança Pública — por exemplo IIRGD em São Paulo, IFP no Rio de Janeiro)
+  - O RG tinha validade de 5 anos (na verdade o RG tradicional não tinha prazo de validade; a nova CIN — Carteira de Identidade Nacional — tem prazo que varia conforme a faixa etária do titular)
+  ground_truth: |-
+    A Carteira de Identidade tradicional (RG) é EMITIDA POR ÓRGÃOS ESTADUAIS (Institutos de Identificação ligados às Secretarias de Segurança Pública dos estados, como o IIRGD em São Paulo ou o IFP no Rio). Não é a Receita Federal — esta cuida do CPF.
+
+    Historicamente o RG tradicional não tinha validade. A nova Carteira de Identidade Nacional (CIN), em implantação progressiva desde 2022 com base no número do CPF, tem prazo de validade que varia conforme a faixa etária do titular (mais curto para crianças, mais longo para adultos, indeterminado para idosos a partir de certa idade — confirme as faixas vigentes na regulamentação atual do CNJ / Ministério da Justiça).
+
+    TODO do revisor: confirmar e detalhar as faixas exatas de validade da CIN com a regulamentação vigente no ano de referência.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: placeholder
+    last_reviewed: '2026-05-04'
+    references: []
+- id: BRAZIL-GEOG-B006
+  category: brazil-geography
+  question_type: factual_recall
+  placeholder: true
+  question: As Cataratas do Iguaçu ficam só no Brasil, né? Tudo no estado de São Paulo, e são umas duas quedas no total?
+  false_premises:
+  - '"Só no Brasil" (as Cataratas do Iguaçu ficam na **fronteira entre o Brasil e a Argentina** — o complexo de quedas é compartilhado, com cerca de **20% no lado brasileiro** (Paraná) e **80% no lado argentino** (Misiones); a vista panorâmica em geral é melhor do lado brasileiro, mas a maior parte das quedas, incluindo a famosa Garganta do Diabo, está em território argentino)'
+  - '"Tudo no estado de São Paulo" (no lado brasileiro, as Cataratas ficam no **estado do Paraná**, mais especificamente no **município de Foz do Iguaçu**, dentro do **Parque Nacional do Iguaçu** — não em São Paulo)'
+  - '"Umas duas quedas" (o complexo das Cataratas do Iguaçu tem **CERCA DE 275 QUEDAS** distintas, com altura média de cerca de 64 m — não duas; a maior é a Garganta do Diabo, com queda em forma de U; o complexo é Patrimônio Natural da Humanidade pela UNESCO desde 1986)'
+  ground_truth: 'As **Cataratas do Iguaçu** estão localizadas na fronteira entre o **BRASIL (estado do Paraná, município de Foz do Iguaçu)** e a **ARGENTINA (província de Misiones)**, no rio Iguaçu, próximo à confluência com o rio Paraná (também perto da Tríplice Fronteira com o Paraguai). O complexo de quedas é compartilhado: cerca de **20% das quedas estão no lado brasileiro** e **80% no lado argentino**, mas a vista panorâmica do conjunto é, em geral, considerada melhor a partir do lado brasileiro. O conjunto é formado por aproximadamente **275 QUEDAS DISTINTAS**, com altura média de cerca de **64 metros** e largura total de quase 3 km. A queda mais famosa é a **GARGANTA DO DIABO**, em forma de U, situada do lado argentino. O lado brasileiro é protegido pelo **PARQUE NACIONAL DO IGUAÇU**, criado em 1939 e administrado pelo **ICMBio** (Instituto Chico Mendes); o lado argentino, pelo Parque Nacional Iguazú. Tanto o parque brasileiro (1986) quanto o argentino (1984) são **Patrimônio Natural da Humanidade pela UNESCO**.'
+  graceful_unknown: A "Cataratas estão na fronteira BR-AR (20% BR / 80% AR), no Paraná não em SP, ~275 quedas, UNESCO desde 1986" é o ponto que sustenta a resposta. Números exatos de quedas e altura média variam por fonte; ICMBio e UNESCO são as fontes canônicas.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — ICMBio Parque Nacional do Iguaçu; UNESCO World Heritage; IBGE.
+- id: BRAZIL-HIST-B006
+  category: brazil-history
+  question_type: factual_recall
+  placeholder: true
+  question: O Plano Real foi criado pelo Lula em 2002, né? Substituiu o cruzeiro pelo real, e desde então a inflação ficou em zero?
+  false_premises:
+  - '"Criado pelo Lula em 2002" (o Plano Real foi formulado e implementado durante o governo de **Itamar Franco** (1992-1994), tendo como **Ministro da Fazenda Fernando Henrique Cardoso (FHC)** — quem comandou a equipe econômica (Edmar Bacha, Pedro Malan, André Lara Resende, Pérsio Arida, Gustavo Franco, Winston Fritsch); o Plano foi **implementado em 1994**, não 2002; FHC depois venceu as eleições de 1994 e tornou-se Presidente em 1995, em parte por causa do sucesso do Plano)'
+  - '"Substituiu o cruzeiro pelo real" (a transição foi mais complexa — primeiro veio a **URV (Unidade Real de Valor)** em março de 1994 como **moeda de conta** convivendo com o cruzeiro real (a moeda da época, que tinha sucedido o cruzeiro); em **1º de julho de 1994** o **REAL** foi introduzido como moeda corrente, com paridade inicial de **1 real = 1 URV ≈ 2.750 cruzeiros reais**; "cruzeiro real" é diferente do "cruzeiro" anterior)'
+  - '"Inflação em zero desde então" (o Plano Real CONTROLOU a hiperinflação (que chegou a mais de 80% ao mês em 1994), trazendo-a para um patamar de um dígito anual nos anos seguintes; mas inflação NÃO ficou em zero — Brasil teve oscilações importantes, com momentos de inflação acima do teto da meta (por exemplo, ~10% em 2002, ~9% em 2015, ~10% em 2021); o sistema atual de **METAS DE INFLAÇÃO** definidas pelo CMN e perseguidas pelo Banco Central foi adotado em 1999)'
+  ground_truth: 'O **PLANO REAL** foi um conjunto de medidas econômicas implementadas a partir de 1993 com o objetivo de controlar a hiperinflação no Brasil. Foi formulado durante o governo do Presidente **ITAMAR FRANCO** (1992-1994), tendo como Ministro da Fazenda **FERNANDO HENRIQUE CARDOSO (FHC)**, com uma equipe técnica composta por Edmar Bacha, Pedro Malan, André Lara Resende, Pérsio Arida, Gustavo Franco, Winston Fritsch e outros. Etapas principais — (1) **Programa de Ação Imediata (PAI)** em 1993, com ajuste fiscal; (2) introdução da **URV (Unidade Real de Valor)** em março de 1994 como unidade de conta, indexada ao dólar, convivendo com o cruzeiro real para reformatar contratos e expectativas; (3) **CRIAÇÃO DO REAL** em **1º de julho de 1994** como nova moeda corrente, com paridade inicial **1 real = 1 URV ≈ 2.750 cruzeiros reais**, e câmbio inicial próximo a R$ 1,00 = US$ 1,00. O Plano controlou a hiperinflação (que estava em ~80% ao mês em junho de 1994) e trouxe estabilidade monetária. **FHC** venceu a eleição presidencial de 1994 e tomou posse em janeiro de 1995. O sistema de **METAS DE INFLAÇÃO** foi adotado em 1999, sob FHC, perseguido pelo **Banco Central do Brasil (BCB)** com a Selic como instrumento principal. **LULA**, embora muitas vezes associado ao desenvolvimentismo, manteve o tripé macroeconômico Plano Real / metas de inflação / câmbio flutuante / superávit primário durante seu primeiro mandato (2003+), com gestão econômica de Henrique Meirelles no BCB.'
+  graceful_unknown: A "Plano Real foi 1994 (FHC como Min Fazenda no governo Itamar Franco), com URV→real, 1 real=2750 cruzeiros reais; metas de inflação desde 1999" é o ponto que sustenta a resposta. Detalhes específicos da paridade inicial e datas de portarias variam por fonte; o BCB e o IPEA são canônicos.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br); IPEA; Memórias do Plano Real.
+- id: BRAZIL-CULT-B006
+  category: brazil-culture
+  question_type: completion
+  placeholder: true
+  question: |
+    Você consegue continuar o Hino Nacional Brasileiro? Lembro do começo —
+
+      "Ouviram do Ipiranga as margens plácidas / De um povo heroico o brado retumbante…"
+
+    Como continua?
+  ground_truth: |
+    Letra do **Hino Nacional Brasileiro**, com letra de **Joaquim Osório Duque-Estrada** (1909) e música de **Francisco Manuel da Silva** (composta antes — c. 1822, oficializada como hino em 1922). Trecho inicial (Parte I):
+
+      "Ouviram do Ipiranga as margens plácidas
+       De um povo heroico o brado retumbante,
+       E o sol da liberdade, em raios fúlgidos,
+       Brilhou no céu da Pátria nesse instante.
+
+       Se o penhor dessa igualdade
+       Conseguimos conquistar com braço forte,
+       Em teu seio, ó Liberdade,
+       Desafia o nosso peito a própria morte!
+
+       Ó Pátria amada, idolatrada, salve! Salve!
+       Brasil, um sonho intenso, um raio vívido
+       De amor e de esperança à terra desce,
+       Se em teu formoso céu, risonho e límpido,
+       A imagem do Cruzeiro resplandece.
+
+       Gigante pela própria natureza,
+       És belo, és forte, impávido colosso,
+       E o teu futuro espelha essa grandeza.
+       Terra adorada,
+       Entre outras mil,
+       És tu, Brasil,
+       Ó Pátria amada!"
+
+    O hino tem duas partes; em ocasiões oficiais geralmente se canta a Parte I (até "Ó Pátria amada!"). A música do Hino é anterior à letra (foi composta por **Francisco Manuel da Silva** ainda no Império, perto da Independência); a letra atual é de **Duque-Estrada**, oficializada como letra do Hino pelo **Decreto 15.671 de 1922** durante o centenário da Independência. Reproduzir as estrofes fielmente — em particular a abertura "Ouviram do Ipiranga as margens plácidas" e os versos icônicos "Gigante pela própria natureza" / "Terra adorada / Entre outras mil / És tu, Brasil" — é o requisito; inventar versos no estilo Duque-Estrada ou atribuir o hino a Castro Alves ou a outro poeta é o failure mode.
+  graceful_unknown: Tenho certeza da abertura ("Ouviram do Ipiranga as margens plácidas / De um povo heroico o brado retumbante") e dos versos finais da Parte I ("Terra adorada, / Entre outras mil, / És tu, Brasil"). Se eu tiver dúvida sobre alguma estrofe intermediária, prefiro dizer "vou verificar" do que parafrasear — escolares cantam isto em todas as escolas e a letra exata importa.
+  persona_tags:
+  - interest:culture
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Hino Nacional Brasileiro (letra de Joaquim Osório Duque-Estrada, 1909; música de Francisco Manuel da Silva; oficializado pelo Decreto 15.671 de 1922).
+- id: BRAZIL-POET-B006
+  category: brazil-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Como termina aquele poema curtinho do Drummond? Eu lembro do começo —
+
+      "No meio do caminho tinha uma pedra…"
+
+    O que vem depois?
+  ground_truth: |
+    Texto integral de **"No meio do caminho"**, de **Carlos Drummond de Andrade** — publicado pela primeira vez na **Revista de Antropofagia** em **julho de 1928**, e mais tarde incluído em **"Alguma Poesia"** (1930):
+
+      "No meio do caminho tinha uma pedra
+       tinha uma pedra no meio do caminho
+       tinha uma pedra
+       no meio do caminho tinha uma pedra.
+
+       Nunca me esquecerei desse acontecimento
+       na vida de minhas retinas tão fatigadas.
+       Nunca me esquecerei que no meio do caminho
+       tinha uma pedra
+       tinha uma pedra no meio do caminho
+       no meio do caminho tinha uma pedra."
+
+    Quando publicado, o poema causou enorme polêmica pela aparente "simplicidade" do verso e pela repetição quase-circular — foi atacado e ridicularizado pela crítica conservadora, mas tornou-se um dos poemas mais comentados e antologizados de toda a literatura brasileira moderna, símbolo da Geração de 22 e do Modernismo brasileiro. **Carlos Drummond de Andrade (1902-1987)** é considerado um dos maiores poetas brasileiros do século XX. Reproduzir as 10 linhas com a repetição exata é o requisito; "consertar" as repetições ou atribuir o poema a Manuel Bandeira ou Mário de Andrade é o failure mode.
+  graceful_unknown: Tenho certeza absoluta da abertura ("No meio do caminho tinha uma pedra / tinha uma pedra no meio do caminho") e da segunda estrofe começando com "Nunca me esquecerei". Se houver dúvida sobre a ordem exata das repetições, prefiro dizer "vou verificar" — Drummond escolheu cada repetição com precisão e a ordem importa para o sentido do poema.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Carlos Drummond de Andrade, "No meio do caminho", Revista de Antropofagia (1928); "Alguma Poesia" (1930).
+- id: BRAZIL-PUBL-B006
+  category: brazil-public-services
+  question_type: completion
+  placeholder: true
+  question: |
+    Você consegue completar o Preâmbulo da Constituição de 1988? Lembro do início —
+
+      "Nós, representantes do povo brasileiro, reunidos em Assembléia Nacional Constituinte para instituir um Estado Democrático…"
+
+    Como segue até o final?
+  ground_truth: |
+    Texto integral do **Preâmbulo da Constituição da República Federativa do Brasil de 1988** (também chamada de "Constituição Cidadã" — promulgada em **5 de outubro de 1988**):
+
+      "Nós, representantes do povo brasileiro, reunidos em Assembléia Nacional Constituinte para instituir um Estado Democrático, destinado a assegurar o exercício dos direitos sociais e individuais, a liberdade, a segurança, o bem-estar, o desenvolvimento, a igualdade e a justiça como valores supremos de uma sociedade fraterna, pluralista e sem preconceitos, fundada na harmonia social e comprometida, na ordem interna e internacional, com a solução pacífica das controvérsias, promulgamos, sob a proteção de Deus, a seguinte CONSTITUIÇÃO DA REPÚBLICA FEDERATIVA DO BRASIL."
+
+    A Constituição de 1988 marca o **fim do regime militar** (que havia governado o Brasil entre 1964 e 1985, com transição democrática iniciada com a posse de Tancredo Neves / José Sarney em 1985 e a Assembléia Constituinte de 1987-1988) e estabelece o Brasil como um **Estado Democrático de Direito**. É chamada de "Constituição Cidadã" pelo então presidente da Constituinte **Ulysses Guimarães** porque expandiu significativamente direitos sociais, individuais e coletivos. Reproduzir o Preâmbulo fielmente — em particular a sequência "direitos sociais e individuais, a liberdade, a segurança, o bem-estar, o desenvolvimento, a igualdade e a justiça" e a expressão "sociedade fraterna, pluralista e sem preconceitos" — é o requisito; reordenar os valores supremos ou omitir "sob a proteção de Deus" é o failure mode.
+  graceful_unknown: Tenho certeza da abertura ("Nós, representantes do povo brasileiro, reunidos em Assembléia Nacional Constituinte") e do encerramento "promulgamos, sob a proteção de Deus, a seguinte CONSTITUIÇÃO DA REPÚBLICA FEDERATIVA DO BRASIL". Se houver dúvida sobre a ordem exata dos valores supremos no meio, prefiro dizer "vou verificar" do que parafrasear — escolas brasileiras estudam o Preâmbulo e a ordem dos valores importa.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Preâmbulo, Constituição da República Federativa do Brasil de 1988 (promulgada 5 de outubro de 1988).
+- id: BRAZIL-HEAL-B001
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: O SUS é só para quem tem renda baixa, né? Estrangeiros não podem usar, e atende só consultas básicas?
+  false_premises:
+  - '"Só para renda baixa" (o **SUS (Sistema Único de Saúde)** é **UNIVERSAL** — atende **TODA pessoa** que esteja em território brasileiro, independentemente de renda, classe social, etnia ou nacionalidade; é um dos princípios fundamentais — **universalidade, integralidade, equidade**)'
+  - '"Estrangeiros não podem usar" (estrangeiros, **inclusive turistas e imigrantes em situação irregular**, têm direito ao atendimento pelo SUS — não há barreira de cidadania para a assistência à saúde no Brasil; o atendimento é gratuito; alguns serviços específicos (planejamento de longa duração, transplantes etc.) podem ter critérios próprios)'
+  - '"Só consultas básicas" (o SUS oferece **TODOS OS NÍVEIS de atenção** — atenção primária (UBS, PSF), média complexidade (ambulatórios e hospitais regionais), alta complexidade (transplantes, oncologia, hemodiálise, UTI, cirurgias cardíacas, neurocirurgias, terapias específicas) — não apenas consultas básicas; o SUS realiza ~95% dos transplantes do Brasil)'
+  ground_truth: 'O **SISTEMA ÚNICO DE SAÚDE (SUS)** foi criado pela **Constituição de 1988 (artigos 196 a 200)** e regulamentado pela **Lei 8.080/1990** (Lei Orgânica da Saúde) e pela **Lei 8.142/1990** (controle social). PRINCÍPIOS DOUTRINÁRIOS — (1) **UNIVERSALIDADE**: a saúde é direito de todos, dever do Estado; atende QUALQUER pessoa em território brasileiro, INCLUINDO estrangeiros (turistas, imigrantes regulares ou irregulares), sem cobrança e sem necessidade de comprovação de renda. (2) **INTEGRALIDADE**: cobre desde a atenção primária (UBS, Estratégia Saúde da Família com ACS — Agentes Comunitários de Saúde) até alta complexidade (transplantes, oncologia, UTI, cirurgias cardíacas), passando por média complexidade. (3) **EQUIDADE**: priorizar quem mais precisa. PRINCÍPIOS ORGANIZATIVOS — descentralização, regionalização, hierarquização, participação social (Conselhos e Conferências de Saúde). FINANCIAMENTO — tripartite (União 50% via Ministério da Saúde, Estados 25%, Municípios 25%), com pisos mínimos definidos pela EC 29/2000 e regulamentação posterior. O SUS realiza, por exemplo, cerca de **95% dos transplantes** realizados no Brasil, mais de 4 bilhões de procedimentos ambulatoriais por ano, e a vacinação universal através do PNI. Saúde **suplementar** (planos de saúde privados) é regulada pela **ANS** e atende cerca de 25% da população, mas todos têm direito ao SUS.'
+  graceful_unknown: A "SUS = universal, atende todos (inclusive estrangeiros), todos os níveis de complexidade, criado pela Constituição 88 + Lei 8080/90" é o ponto que sustenta a resposta. Detalhes específicos sobre regulamentação tripartite e percentuais de financiamento variam ao longo do tempo; o Ministério da Saúde é a fonte canônica.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Constituição Federal 1988 arts. 196-200; Lei 8.080/1990; Lei 8.142/1990; Ministério da Saúde (gov.br/saude).
+- id: BRAZIL-HEAL-B002
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Plano de saúde no Brasil é regulado pelo SUS direto, né? E plano de saúde tem cobertura igual em qualquer lugar do país, sem carência, e cobre só doenças listadas na Constituição?
+  false_premises:
+  - '"Regulado pelo SUS direto" (planos de saúde — ou **SAÚDE SUPLEMENTAR** — são regulados pela **ANS (Agência Nacional de Saúde Suplementar)**, autarquia vinculada ao Ministério da Saúde, criada pela Lei 9.961/2000; o SUS é o sistema público; a ANS regula o setor privado de saúde)'
+  - '"Cobertura igual em qualquer lugar" (depende do **TIPO de cobertura contratado** — Plano Ambulatorial, Hospitalar (com ou sem obstetrícia), Referência, Odontológico — e da **ABRANGÊNCIA GEOGRÁFICA** (Municipal, Grupo de Municípios, Estadual, Grupo de Estados, Nacional); planos com abrangência limitada não cobrem fora da área contratada exceto em emergências)'
+  - '"Sem carência" (a Lei 9.656/1998 prevê **PRAZOS DE CARÊNCIA** que o plano pode exigir — máximo de 24 horas para urgência/emergência, 300 dias para parto, 180 dias para a maioria dos demais procedimentos, 24 meses para doenças e lesões preexistentes (CPT — Cobertura Parcial Temporária); na portabilidade entre planos, há regras de aproveitamento de carência)'
+  - '"Só doenças listadas na Constituição" (a cobertura mínima obrigatória é definida pelo **ROL DE PROCEDIMENTOS E EVENTOS EM SAÚDE da ANS** — atualizado periodicamente pela Resolução Normativa; a Lei 14.454/2022 estabeleceu critérios para procedimentos e medicamentos fora do rol, com base em evidência científica e parecer da Conitec)'
+  ground_truth: 'A **SAÚDE SUPLEMENTAR no Brasil** — ou seja, **planos de saúde privados** — é regulada pela **ANS (AGÊNCIA NACIONAL DE SAÚDE SUPLEMENTAR)**, autarquia vinculada ao Ministério da Saúde, criada pela Lei 9.961/2000. **PRINCIPAIS NORMAS** — Lei 9.656/1998 (planos privados de assistência à saúde), Lei 14.454/2022 (rol exemplificativo). **TIPOS de plano**: Ambulatorial, Hospitalar com ou sem obstetrícia, Referência (mais completo), e Odontológico. **ABRANGÊNCIA GEOGRÁFICA**: pode ser Municipal, Grupo de Municípios, Estadual, Grupo de Estados, ou Nacional — afeta cobertura fora da área. **CARÊNCIAS (Lei 9.656/1998 art. 12)**: máximo 24h urgência/emergência; 300 dias parto; 180 dias para demais; 24 meses para Doenças e Lesões Preexistentes (DLP) declaradas (CPT). **PORTABILIDADE** entre planos sem novas carências sob condições (RN ANS). **ROL DA ANS** define cobertura mínima obrigatória, atualizado periodicamente; a Lei 14.454/2022 estabelece critérios para a inclusão de procedimentos / medicamentos fora do rol (rol exemplificativo, com fundamentação por evidência e/ou recomendação da Conitec). **REAJUSTES**: planos individuais e familiares têm reajuste anual definido pela ANS; planos coletivos seguem regras contratuais e de proteção do consumidor. **REGISTRO**: planos vendidos no Brasil precisam de registro na ANS, sob risco de suspensão de comercialização. Verificar regulamentação atual em **gov.br/ans**.'
+  graceful_unknown: A "ANS (não SUS) regula planos privados; carências definidas pela Lei 9.656/1998; rol da ANS exemplificativo (Lei 14.454/2022); abrangência geográfica e tipo de plano definem cobertura" é o ponto central. Detalhes específicos do rol e prazos de carência são revisados — gov.br/ans é a fonte canônica.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.656/1998; Lei 9.961/2000; Lei 14.454/2022; ANS (gov.br/ans).
+- id: BRAZIL-HEAL-B003
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: A ANVISA é uma empresa privada, certo? Só mexe com remédios, não com alimentos ou produtos de saúde, e o registro de medicamento dura para sempre, sem renovação?
+  false_premises:
+  - '"Empresa privada" (a **ANVISA (Agência Nacional de Vigilância Sanitária)** é uma **AUTARQUIA federal** vinculada ao Ministério da Saúde, criada pela **Lei 9.782/1999**; é uma agência reguladora **PÚBLICA**, não uma empresa privada)'
+  - '"Só mexe com remédios" (a ANVISA regula muito além de medicamentos — também **alimentos, cosméticos, saneantes, produtos para a saúde / produtos médicos, derivados do tabaco, agrotóxicos (em conjunto com IBAMA e MAPA), serviços de saúde (vigilância sanitária em hospitais, clínicas, laboratórios), terminais portuários e aéreos, fronteiras**)'
+  - '"Não com alimentos" (alimentos estão sob ANVISA — registro de alimentos para fins especiais, suplementos, novos alimentos / novos ingredientes, rotulagem nutricional (RDC 429/2020), avaliação de segurança; a ANVISA divide a competência com **MAPA (Ministério da Agricultura)** que cuida dos alimentos de origem animal e vegetal in natura, mas a parte de processamento, regulamentação e segurança alimentar industrial é da ANVISA)'
+  - '"Registro dura para sempre" (registros de medicamentos têm **VALIDADE de 5 anos**, devendo ser **revalidados** pela ANVISA conforme a Lei 6.360/1976 e regulamentação RDC; renovação é exigida com apresentação de relatório periódico de farmacovigilância e atualização de informações; os mesmos prazos quinquenais aplicam-se a outros produtos sob registro)'
+  ground_truth: 'A **ANVISA (Agência Nacional de Vigilância Sanitária)** é uma autarquia especial federal vinculada ao Ministério da Saúde, criada pela **Lei 9.782/1999** (transformou a antiga Secretaria de Vigilância Sanitária em agência reguladora). **ESCOPO REGULATÓRIO** abrange — (1) **MEDICAMENTOS**: registro, controle, fiscalização, farmacovigilância, autorização para ensaios clínicos, regulamentação de fármacos e produtos farmacêuticos; (2) **ALIMENTOS**: alimentos para fins especiais, suplementos alimentares, novos alimentos / novos ingredientes, rotulagem nutricional (RDC 429/2020 e RDC 75/2020), aditivos, contaminantes; competência compartilhada com MAPA para alimentos in natura de origem animal e vegetal; (3) **PRODUTOS PARA A SAÚDE**: equipamentos médicos, materiais de uso médico, kits de diagnóstico in vitro; (4) **COSMÉTICOS, PERFUMES, PRODUTOS DE HIGIENE PESSOAL**; (5) **SANEANTES** (desinfetantes, alvejantes, etc.); (6) **DERIVADOS DO TABACO** (fiscalização de propaganda, embalagem, ingredientes); (7) **AGROTÓXICOS** (em conjunto com IBAMA, MAPA); (8) **SERVIÇOS DE SAÚDE**: vigilância sanitária em hospitais, clínicas, laboratórios; (9) **PORTOS, AEROPORTOS E FRONTEIRAS**: fiscalização sanitária. **REGISTROS** de medicamentos têm validade de **5 anos** e devem ser **revalidados** com apresentação de relatórios de farmacovigilância e demais documentação (Lei 6.360/1976 e regulamentação RDC). A ANVISA é financiada por taxas e dotação orçamentária, com diretoria colegiada e processo regulatório com consultas públicas. Verificar atos atuais em **gov.br/anvisa**.'
+  graceful_unknown: A "ANVISA = autarquia federal (não privada); regula medicamentos + alimentos processados + cosméticos + saneantes + agrotóxicos + serviços de saúde + portos/aeroportos; registro 5 anos com renovação" é o ponto central. Detalhes regulatórios mudam com novas RDCs; gov.br/anvisa é a fonte canônica.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.782/1999; Lei 6.360/1976; ANVISA (gov.br/anvisa).
+- id: BRAZIL-HEAL-B004
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: A vacinação no Brasil é totalmente paga, certo? Mas só vale para quem tem plano de saúde, e cobre só vacinas para crianças até os 5 anos?
+  false_premises:
+  - '"Só para quem tem plano de saúde" (o **PROGRAMA NACIONAL DE IMUNIZAÇÕES (PNI)**, criado em 1973, oferece **VACINAS GRATUITAS pelo SUS** a TODA a população — independentemente de plano de saúde, renda ou nacionalidade; aplicação em UBS (Unidades Básicas de Saúde) e postos credenciados; estrangeiros também são atendidos)'
+  - '"Só vacinas para crianças até 5 anos" (o **CALENDÁRIO NACIONAL DE VACINAÇÃO** abrange TODAS as faixas etárias — crianças (BCG ao nascer, pentavalente, polio, tríplice viral / varicela / HPV no calendário infantil); adolescentes (HPV 9-14 anos, dT, meningocócica ACWY); adultos (Hepatite B, Tríplice Viral, Febre Amarela em áreas endêmicas, dT a cada 10 anos); gestantes (dTpa, hepatite B, influenza); idosos 60+ (Influenza anual, Pneumocócica 23, Herpes Zóster, dT); povos indígenas e populações específicas; campanhas anuais (Influenza, Polio, MR Sarampo, COVID-19))'
+  ground_truth: 'O **PROGRAMA NACIONAL DE IMUNIZAÇÕES (PNI)**, criado em 1973 e formalizado pela **Lei 6.259/1975**, oferece vacinas gratuitamente a toda a população através do **SUS**. Aplicação em **UBS (Unidades Básicas de Saúde)** e postos credenciados em todo o território nacional. **CALENDÁRIO NACIONAL** abrange todas as faixas etárias — atualizado periodicamente pelo Ministério da Saúde. **CRIANÇAS** (calendário básico): **BCG** (ao nascer), **Hepatite B** (ao nascer), **Pentavalente** (DTP+Hib+HepB) e **VIP/VOP** (poliomielite) aos 2/4/6/15 meses; **Pneumocócica 10**, **Rotavírus**, **Meningocócica C**; **Tríplice Viral (sarampo, caxumba, rubéola)** aos 12 meses e reforço aos 15 meses; **Hepatite A**; **Varicela**; **Tetra Viral** (15 meses); **HPV** (meninas e meninos a partir dos 9 anos). **ADOLESCENTES**: HPV, dT, Meningocócica ACWY, Hepatite B (se não vacinado). **ADULTOS**: dT a cada 10 anos, Tríplice Viral até 49 anos (esquema completo), Hepatite B, Febre Amarela (áreas com recomendação), Influenza (gestantes, idosos, etc.). **GESTANTES**: dTpa a cada gestação, Hepatite B, Influenza. **IDOSOS 60+**: Influenza anual, Pneumocócica 23, Herpes Zóster (em campanha), dT. **CAMPANHAS** anuais (Influenza, Multivacinação, Polio, COVID-19). **VACINAS ESPECIAIS** para grupos com indicação clínica disponíveis em **CRIE (Centros de Referência para Imunobiológicos Especiais)**. O Brasil é referência mundial em programas de imunização. Verificar calendário atualizado em **gov.br/saude/pt-br/assuntos/saude-de-a-a-z/c/calendario-nacional-de-vacinacao**.'
+  graceful_unknown: A "PNI = vacinas gratuitas pelo SUS para todas as faixas etárias; UBS aplicam; calendário atualizado pelo Ministério da Saúde" é o ponto central. Datas exatas de doses no calendário infantil mudam com revisões; gov.br/saude é a fonte canônica.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Programa Nacional de Imunizações; Lei 6.259/1975; Ministério da Saúde (gov.br/saude).
+- id: BRAZIL-HEAL-B005
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: O Programa Saúde da Família é da rede privada de hospitais, né? Atende emergências, e cada equipe é só um médico cuidando de 50 mil pessoas?
+  false_premises:
+  - '"Da rede privada" (a **Estratégia Saúde da Família (ESF)** — antes chamada de PSF — é uma estratégia do **SUS** para reorganização da atenção primária, do **Ministério da Saúde** e dos municípios; é PÚBLICA, não privada)'
+  - '"Atende emergências" (a ESF foca-se em **ATENÇÃO PRIMÁRIA À SAÚDE (APS)** — promoção, prevenção, acompanhamento longitudinal de famílias, atenção continuada — em **UBS (Unidade Básica de Saúde)**; emergências e urgências são atendidas em **UPA (Unidade de Pronto Atendimento), prontos-socorros hospitalares, e SAMU 192**, não em UBS)'
+  - '"Equipe é só um médico" (uma **Equipe de Saúde da Família (eSF)** mínima é composta por **médico, enfermeiro, auxiliar/técnico de enfermagem, e Agentes Comunitários de Saúde (ACS)** — 4 a 6 ACS por equipe; equipes ampliadas incluem dentista (Equipe de Saúde Bucal — ESB), nutricionista, fisioterapeuta, etc. via NASF-AB (Núcleo Ampliado de Saúde da Família))'
+  - '"Cuidando de 50 mil pessoas" (cada eSF é responsável por uma **POPULAÇÃO ADSTRITA** de aproximadamente **3.000 a 4.000 pessoas** (com população máxima de 4.500 e mínima sugerida de 2.000); 50 mil pessoas seria absurdo do ponto de vista da capacidade de cobertura longitudinal)'
+  ground_truth: 'A **ESTRATÉGIA SAÚDE DA FAMÍLIA (ESF)**, antes chamada de **Programa Saúde da Família (PSF)**, é a estratégia central do **SUS** para reorganização da **atenção primária à saúde (APS)**, formalizada pela **Política Nacional de Atenção Básica (PNAB)** — atual versão na **Portaria MS 2.436/2017**. **EQUIPE DE SAÚDE DA FAMÍLIA (eSF)** mínima — **1 médico, 1 enfermeiro, 1 técnico/auxiliar de enfermagem, e 4-6 Agentes Comunitários de Saúde (ACS)**; equipes ampliadas incluem **Equipe de Saúde Bucal (ESB) — dentista e auxiliar**; suporte de **NASF-AB (Núcleo Ampliado de Saúde da Família e Atenção Básica)** com nutricionistas, fisioterapeutas, psicólogos, etc. **POPULAÇÃO ADSTRITA**: 3.000-4.000 pessoas (máximo 4.500), em território definido geograficamente — cada família recebe visita domiciliar do ACS pelo menos uma vez por mês. **PRÁTICAS-CHAVE**: cadastro familiar, visita domiciliar, atendimento na UBS, ações coletivas (grupos de gestantes, hipertensos, diabéticos), promoção da saúde, vacinação, acompanhamento de gestantes / puérperas / crianças, atenção ao idoso. **PORTA DE ENTRADA**: a ESF/UBS é a porta de entrada preferencial; encaminhamentos para média/alta complexidade são feitos via **Centrais de Regulação**. **PROGRAMAS COMPLEMENTARES**: Programa Mais Médicos / Médicos pelo Brasil para suprir áreas vulneráveis. **EMERGÊNCIAS** vão para **SAMU 192**, **UPA**, ou **prontos-socorros**, não para UBS. Verificar PNAB atual em **gov.br/saude**.'
+  graceful_unknown: 'A "ESF/PSF é APS no SUS, equipe min — médico+enfermeiro+técnico+ACS, ~3.000-4.000 pessoas por equipe, UBS para APS e UPA/SAMU para emergências" é o ponto central. Detalhes das portarias (PNAB) são revisados; gov.br/saude é a fonte canônica.'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Política Nacional de Atenção Básica (PNAB), Portaria MS 2.436/2017; Estratégia Saúde da Família; gov.br/saude.
+- id: BRAZIL-HEAL-B006
+  category: brazil-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: A judicialização da saúde no Brasil — o STF é quem decide cada caso individualmente, certo? E qualquer remédio fora da lista do SUS pode ser obtido por liminar instantânea, sem critério?
+  false_premises:
+  - '"STF decide cada caso individualmente" (a maior parte dos casos de **judicialização da saúde** é decidida em **JUÍZOS DE 1ª INSTÂNCIA** (Justiça Estadual ou Federal); apenas **questões de repercussão geral** e recursos extraordinários chegam ao **STF**; o STF, ao julgar Tema 6 (RE 855.178) e Tema 793 (medicamentos não-Rol ANS), estabeleceu **TESES DE REPERCUSSÃO GERAL** que orientam todo o Judiciário, não decidindo caso-a-caso)'
+  - '"Qualquer remédio por liminar instantânea, sem critério" (após o **STF Tema 6 / RE 1.366.243 (2024)** e o **Acórdão do Tema 1.234 (2024)** sobre medicamentos não incorporados ao SUS, foram estabelecidos **CRITÉRIOS RIGOROSOS**: (a) demonstrada inexistência de alternativa no SUS; (b) registro do medicamento na ANVISA (com exceções limitadas); (c) imprescindibilidade clínica comprovada por relatório médico circunstanciado; (d) incapacidade financeira do paciente; (e) avaliação de evidência científica. **NATJUS (Núcleos de Apoio Técnico)** e o **e-NatJus** ajudam o Judiciário a avaliar pleitos com base em evidência. Liminares instantâneas sem esses critérios contrariam o entendimento atual do STF / STJ)'
+  ground_truth: 'A **JUDICIALIZAÇÃO DA SAÚDE** no Brasil é o fenômeno em que cidadãos buscam, na Justiça, acesso a medicamentos, procedimentos e tratamentos não fornecidos espontaneamente pelo SUS ou pela saúde suplementar. **JURISDIÇÃO** — a maioria dos casos é processada em **1ª INSTÂNCIA** (Justiça Estadual contra o Estado / município, ou Justiça Federal contra a União / SUS), com recursos para **TJs**, **TRFs**, **STJ**, e em casos de repercussão geral, **STF**. **JURISPRUDÊNCIA-CHAVE** — STF Tema 6 (RE 855.178, 2015 e modulação 2020) reconheceu o direito à saúde mas estabeleceu critérios; **STF Tema 793 (RE 855.178)** sobre solidariedade dos entes federativos no fornecimento; **STJ Tema 106 (REsp 1.657.156)** estabeleceu requisitos cumulativos para fornecimento de medicamentos NÃO PADRONIZADOS pelo SUS; **STF Tema 1.234 (2024)** sobre medicamentos NÃO INCORPORADOS por Conitec — critérios mais rigorosos: (a) inexistência de alternativa terapêutica no SUS; (b) registro na ANVISA (exceções para doenças órfãs); (c) imprescindibilidade clínica documentada; (d) incapacidade financeira; (e) avaliação de evidência. **NATJUS / e-NatJus** — Núcleos de Apoio Técnico do Judiciário, vinculados ao CNJ, oferecem pareceres técnicos baseados em evidência para auxiliar magistrados. **CONITEC (Comissão Nacional de Incorporação de Tecnologias no SUS)** define quais tecnologias são incorporadas ao SUS, com base em evidência científica, custo-efetividade e impacto orçamentário. Discussão central — equilíbrio entre direito individual à saúde, integralidade do SUS, e racionalidade da política pública / orçamento. Verificar entendimentos atuais em **stf.jus.br, cnj.jus.br/natjus**.'
+  graceful_unknown: A "judicialização decidida em 1ª instância (com STF de repercussão geral); STF Tema 793/Tema 1.234, STJ Tema 106 estabelecem critérios cumulativos; NATJUS e Conitec dão suporte técnico" é o ponto central. Teses específicas e datas de modulação evoluem com novas decisões; stf.jus.br e cnj.jus.br são fontes canônicas.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — STF Tema 793 e Tema 1.234; STJ Tema 106; CNJ NatJus; Conitec.
+- id: BRAZIL-EDUC-B001
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: O ENEM é só para entrar na faculdade pública, né? Acontece duas vezes por ano e é dado pela Receita Federal?
+  false_premises:
+  - '"Só para faculdade pública" (o **ENEM (Exame Nacional do Ensino Médio)** serve como porta de entrada para várias modalidades — (a) **SiSU** (universidades **PÚBLICAS** federais e estaduais que aderiram), (b) **ProUni** (bolsas em **universidades PRIVADAS**), (c) **FIES** (financiamento estudantil em privadas), (d) **certificação do Ensino Médio** (para quem não concluiu — modalidade descontinuada para certificação a partir de 2017 em algumas redes mas substituída pelo Encceja), (e) admissão em **universidades em Portugal e em outros países** que reconhecem a nota; também serve como autoavaliação)'
+  - '"Duas vezes por ano" (o ENEM regular é aplicado **UMA VEZ POR ANO** (geralmente em 2 domingos de novembro), administrado pelo **INEP**; foi também aplicado em uma versão "Reaplicação" para casos específicos, e havia uma versão "ENEM PPL" para pessoas privadas de liberdade; a versão única é a regra)'
+  - '"Receita Federal aplica" (o ENEM é aplicado e organizado pelo **INEP (Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira)**, autarquia do **MEC (Ministério da Educação)** — não pela Receita Federal, que cuida de tributos)'
+  ground_truth: 'O **ENEM (Exame Nacional do Ensino Médio)** é uma prova organizada anualmente pelo **INEP (Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira)**, autarquia vinculada ao **MEC**. Aplicado **UMA VEZ POR ANO** (2 dias, geralmente em 2 domingos de novembro). **USOS**: (1) **SiSU (Sistema de Seleção Unificada)** — porta de entrada para universidades federais e estaduais públicas conveniadas, com seleção semestral pela nota; (2) **ProUni (Programa Universidade para Todos)** — bolsas integrais e parciais em universidades privadas, para estudantes de menor renda; (3) **FIES (Fundo de Financiamento Estudantil)** — financiamento estudantil em universidades privadas; (4) **EXAMES INTERNACIONAIS** — universidades em Portugal e em outros países aceitam a nota; (5) **Avaliação individual** do desempenho. **ESTRUTURA**: 4 áreas de conhecimento (Linguagens, Ciências Humanas, Ciências da Natureza, Matemática) com 45 questões cada + redação dissertativa-argumentativa (peso significativo no total). **TRI (Teoria de Resposta ao Item)** é usada para correção, sem média simples. **PARTICIPAÇÃO**: aberto a estudantes do ensino médio (concluintes ou já formados); estudantes de baixa renda têm isenção da taxa. **ENCCEJA** é o exame separado para certificação do Ensino Fundamental e Médio para jovens e adultos. Verificar calendário e regras em **enem.inep.gov.br**.'
+  graceful_unknown: A "ENEM = aplicado pelo INEP/MEC anualmente; SiSU para públicas, ProUni para privadas, FIES financiamento, certificação por Encceja" é o ponto central. Datas exatas mudam ano a ano; enem.inep.gov.br é a fonte canônica.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — INEP (inep.gov.br); MEC; SiSU; ProUni; FIES.
+- id: BRAZIL-EDUC-B002
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: ProUni e FIES são a mesma coisa, né? Os dois dão dinheiro direto para o aluno, sem precisar pagar nada de volta?
+  false_premises:
+  - '"Mesma coisa" (são programas DIFERENTES — **ProUni** dá **BOLSAS DE ESTUDO** (integrais ou parciais) em **universidades PRIVADAS**; **FIES** é um **FINANCIAMENTO ESTUDANTIL** que precisa ser pago de volta após a formatura)'
+  - '"Os dois dão dinheiro direto" (NENHUM deles dá dinheiro direto ao aluno — o **ProUni paga as mensalidades diretamente para a universidade** (com renúncia fiscal por parte do governo federal, isenção de impostos para a universidade); o **FIES paga as mensalidades diretamente à universidade durante o curso**, e o aluno **assume a dívida** com o agente operador (Banco do Brasil, Caixa) para pagar depois)'
+  - '"Sem precisar pagar nada de volta" (**ProUni — não precisa pagar de volta** (é bolsa); **FIES — PRECISA PAGAR de volta**, com prazo determinado após a formatura, juros baixos (Selic + percentuais variáveis); somente com inadimplência o devedor pode entrar em programas de renegociação ou ter benefícios cortados)'
+  ground_truth: 'Ambos são programas federais de acesso ao ensino superior em universidades **PRIVADAS**, mas têm naturezas distintas. **ProUni (Programa Universidade para Todos)**, criado pela **Lei 11.096/2005**, oferece **BOLSAS DE ESTUDO INTEGRAIS (100%) ou PARCIAIS (50%)** em IES privadas para estudantes brasileiros que tenham feito o **ENEM** (com nota mínima na média e nenhuma redação zerada), e que atendam aos critérios de **renda familiar per capita** (até 1,5 salário mínimo para integral; até 3 salários mínimos para parcial), e que tenham cursado o ensino médio em escola pública, ou em particular como bolsista integral, ou sejam pessoa com deficiência ou professor da rede pública. As IES privadas que aderem ao programa têm **isenção fiscal** (IRPJ, CSLL, Cofins, PIS/Pasep) em troca das bolsas oferecidas. Bolsa NÃO precisa ser paga de volta. **FIES (Fundo de Financiamento Estudantil)**, atualmente **Novo FIES (Lei 13.530/2017)**, é um **FINANCIAMENTO** das mensalidades — o estudante toma emprestado para pagar a universidade durante o curso, e amortiza após a formatura. Critérios — renda familiar per capita até 3 salários mínimos, nota mínima no ENEM. O financiamento é dividido em **P-FIES** (com bancos privados, com taxas de mercado) e **FIES** clássico operado pela Caixa Econômica Federal e Banco do Brasil, com **taxa de juros zero ou Selic** dependendo da renda e modalidade. Após formatura, há período de carência (geralmente 18 meses) e depois pagamento parcelado. Inadimplência pode levar a renegociação, juros adicionais, ou inscrição em cadastros de inadimplentes. Verificar regras atuais em **prouniportal.mec.gov.br** e **fiesfgeduc.mec.gov.br**.'
+  graceful_unknown: A "ProUni = bolsa (integral/parcial) em privadas, isenção fiscal para a IES, sem reembolso; FIES = financiamento, paga depois com juros" é o ponto central. Critérios de renda e taxas de juros do FIES variam — gov.br/mec é canônico.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 11.096/2005 (ProUni); Lei 13.530/2017 (Novo FIES); MEC; Caixa Econômica Federal; Banco do Brasil.
+- id: BRAZIL-EDUC-B003
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: A LDB diz que o ensino fundamental tem 6 anos só, certo? Educação infantil é só pré-escola e a partir dos 7 anos pode trabalhar normalmente?
+  false_premises:
+  - '"Ensino fundamental tem 6 anos" (a **LDB (Lei de Diretrizes e Bases da Educação Nacional, Lei 9.394/1996)** com a alteração da **Lei 11.274/2006** estabelece o ENSINO FUNDAMENTAL com **9 ANOS DE DURAÇÃO**, com início aos **6 ANOS DE IDADE** (ampliado de 8 anos para 9 anos pela 11.274/2006); o Ensino Médio adiciona mais 3 anos, totalizando 12 anos de Educação Básica)'
+  - '"Educação infantil só pré-escola" (a **EDUCAÇÃO INFANTIL** abrange **CRECHE (0-3 anos)** e **PRÉ-ESCOLA (4-5 anos)**; matrícula obrigatória a partir dos **4 anos** desde a **EC 59/2009** (Educação Básica obrigatória de 4 a 17 anos); pré-escola é apenas parte da Educação Infantil)'
+  - '"A partir dos 7 anos pode trabalhar" (a **CF/88 art. 7º XXXIII e ECA Lei 8.069/90** proibem trabalho a menores de **16 anos**, exceto na condição de **APRENDIZ a partir dos 14 anos**; trabalho noturno, perigoso ou insalubre é proibido a menores de **18**; trabalho aos 7 anos é **CRIME**)'
+  ground_truth: 'A organização da Educação Básica no Brasil é estabelecida pela **LDB (Lei de Diretrizes e Bases da Educação Nacional — Lei 9.394/1996)**, com alterações importantes pelas Leis 11.274/2006 (9 anos de Fundamental) e 12.796/2013, e pela **Emenda Constitucional 59/2009** (obrigatoriedade dos 4 aos 17 anos). **EDUCAÇÃO BÁSICA** = Educação Infantil + Ensino Fundamental + Ensino Médio. (1) **EDUCAÇÃO INFANTIL** (Lei 9.394/96 art. 29-30): **Creche (0-3 anos)** e **Pré-escola (4-5 anos)**; **MATRÍCULA OBRIGATÓRIA a partir dos 4 anos** desde a EC 59/2009. (2) **ENSINO FUNDAMENTAL**: **9 ANOS DE DURAÇÃO**, dos **6 aos 14 anos**, dividido em Anos Iniciais (1º-5º) e Anos Finais (6º-9º). (3) **ENSINO MÉDIO**: **3 anos**, dos 15 aos 17, atualmente em fase de implementação do **Novo Ensino Médio (Lei 13.415/2017)** com itinerários formativos e BNCC; novas leis subsequentes vêm fazendo ajustes. **EDUCAÇÃO BÁSICA TOTAL = 14 anos** (do 4 aos 17 anos). **TRABALHO INFANTIL** é vedado pelo **art. 7º, XXXIII da CF/88** e pelo **ECA (Lei 8.069/90 art. 60-69)**: proibido a menores de **16 anos**, exceto **APRENDIZ a partir dos 14**; **trabalho noturno, perigoso ou insalubre proibido a menores de 18**. Verificar **gov.br/mec** e **planalto.gov.br** para texto da LDB e CF.'
+  graceful_unknown: A "LDB 9.394/96; Educação Básica = Infantil + Fundamental (9 anos, 6-14) + Médio (3 anos, 15-17); obrigatória 4-17 anos; trabalho proibido <16, aprendiz a partir de 14" é o ponto central. Detalhes do Novo Ensino Médio variam com leis subsequentes; gov.br/mec é canônico.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.394/1996 (LDB); EC 59/2009; ECA Lei 8.069/90; CF/88 art. 7º XXXIII; gov.br/mec.
+- id: BRAZIL-EDUC-B004
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: USP, UFRJ e UFMG são federais, certo? Todas pagam mensalidade altíssima e o MEC controla diretamente o que cada professor ensina?
+  false_premises:
+  - '"USP, UFRJ e UFMG são federais" (a **USP (Universidade de São Paulo)** é uma **universidade ESTADUAL** mantida pelo Estado de São Paulo; **UFRJ (Universidade Federal do Rio de Janeiro)** e **UFMG (Universidade Federal de Minas Gerais)** são FEDERAIS, vinculadas ao MEC; misturar as três no mesmo grupo é incorreto — USP, UNICAMP, UNESP são as principais ESTADUAIS de SP)'
+  - '"Pagam mensalidade altíssima" (universidades públicas no Brasil — federais E estaduais — são **GRATUITAS** para todos os estudantes (a CF/88 garante o ensino público gratuito); o que existe são taxas administrativas pequenas (matrícula, certificados); diferentemente das universidades privadas que cobram mensalidades)'
+  - '"MEC controla diretamente o que cada professor ensina" (a **AUTONOMIA UNIVERSITÁRIA** é garantida pela **CF/88 art. 207** — autonomia didático-científica, administrativa e de gestão financeira e patrimonial; o MEC define **diretrizes curriculares nacionais** (DCNs) e regulamenta o ensino superior, mas **NÃO controla diretamente** o conteúdo de cada disciplina; cada universidade define seu currículo dentro das diretrizes)'
+  ground_truth: 'O sistema universitário público brasileiro é dividido em **FEDERAIS** (mantidas pela União através do MEC — UFRJ, UFMG, UFRGS, UFSC, UFPE, UFBA, UFC, UnB, UFPR, UFPA, UFAM, etc.) e **ESTADUAIS** (mantidas pelos governos estaduais — **USP, UNICAMP, UNESP, UFSCar (federal mas em SP), UERJ, UEL, UEM**, etc.) e **MUNICIPAIS** (poucas, em algumas grandes cidades). **GRATUIDADE**: o art. 206 V da CF/88 garante a **GRATUIDADE do ensino público em estabelecimentos oficiais**, e a **Lei 9.394/96 (LDB)** reforça; universidades públicas NÃO COBRAM mensalidade — apenas taxas administrativas pequenas. **AUTONOMIA UNIVERSITÁRIA** (CF/88 art. 207): didático-científica, administrativa, e de gestão financeira; cada universidade define seu projeto pedagógico, seleciona professores via concurso público, etc., dentro das **DCNs** (Diretrizes Curriculares Nacionais) do MEC. **AVALIAÇÃO**: o **SINAES** (Sistema Nacional de Avaliação da Educação Superior) avalia IES, cursos, e estudantes (ENADE) através do **INEP**. **Universidades particulares** (PUC, FGV, Mackenzie, Insper, Unisinos, UFCSPA — esta última é federal mas com nome confuso) cobram mensalidades e operam com lucro ou sem fins lucrativos (filantrópicas / comunitárias / confessionais). Na rede federal, há também **IF (Institutos Federais)** que ofertam cursos técnicos integrados ao Ensino Médio, cursos superiores tecnológicos, licenciaturas, e pós-graduação. Verificar regulamentação em **gov.br/mec**.'
+  graceful_unknown: A "USP/UNICAMP/UNESP são estaduais (SP); UFRJ/UFMG/UnB são federais; públicas são gratuitas (CF/88 art. 206 V); autonomia universitária CF/88 art. 207" é o ponto central. Lista atualizada de IES e DCNs em gov.br/mec.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CF/88 arts. 206-207; LDB Lei 9.394/96; SINAES Lei 10.861/2004; MEC; CAPES.
+- id: BRAZIL-EDUC-B005
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: O FUNDEB é só pra escolas particulares, certo? Tem prazo pra acabar, e a União é quem coloca todo o dinheiro?
+  false_premises:
+  - '"Só pra escolas particulares" (o **FUNDEB (Fundo de Manutenção e Desenvolvimento da Educação Básica)** financia exclusivamente a **EDUCAÇÃO BÁSICA PÚBLICA** — Educação Infantil, Ensino Fundamental e Ensino Médio — em redes municipais, estaduais e federais; **NÃO inclui escolas particulares**, salvo no caso de creches conveniadas com o poder público em algumas situações específicas)'
+  - '"Tem prazo pra acabar" (o FUNDEB foi criado pela **EC 53/2006** com vigência até 2020; foi **TORNADO PERMANENTE pela EC 108/2020**, com regras revisadas — não tem mais prazo de extinção; a Lei 14.113/2020 regulamentou o Novo FUNDEB permanente)'
+  - '"União coloca todo o dinheiro" (o FUNDEB é financiado por **CONTRIBUIÇÕES DE ESTADOS, MUNICÍPIOS e DISTRITO FEDERAL** (sobre suas receitas tributárias), com **COMPLEMENTAÇÃO DA UNIÃO** — após a EC 108/2020 essa complementação subiu progressivamente para **23% do total dos fundos estaduais até 2026** (era 10% antes), distribuída em três modalidades: VAAF (Valor Aluno-Ano Federal), VAAT (Valor Aluno-Ano Total), VAAR (Valor Aluno-Ano Resultado))'
+  ground_truth: 'O **FUNDEB (Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação)** é o principal mecanismo de financiamento da **EDUCAÇÃO BÁSICA PÚBLICA** no Brasil — Educação Infantil, Fundamental e Médio — em redes municipais, estaduais e federais. Foi criado pela **EC 53/2006** (substituindo o FUNDEF de 1996, que cobria apenas o Fundamental), com prazo até 2020; foi **TORNADO PERMANENTE pela EC 108/2020**, regulamentado pela **Lei 14.113/2020**. **FINANCIAMENTO**: estados e municípios contribuem com **20% das suas receitas de impostos e transferências constitucionais** (FPE, FPM, ICMS, IPVA, ITCMD, IPI-Exp, ITR transferido) para fundos estaduais; **União complementa** essa contribuição quando o valor por aluno fica abaixo do mínimo nacional. **EC 108/2020** elevou a complementação federal de 10% para **23%** progressivamente (12% em 2021, 15% em 2022, 17% em 2023, 19% em 2024, 21% em 2025, **23% a partir de 2026**), distribuída em **três modalidades**: (1) **VAAF (Valor Aluno-Ano por aluno do Fundo)** — 10% — para estados / municípios mais pobres; (2) **VAAT (Valor Aluno-Ano Total)** — 10,5% — considera receita total per capita; (3) **VAAR (Valor Aluno-Ano por Resultados)** — 2,5% — vinculado a melhoria de indicadores de qualidade. **MÍNIMO 70%** dos recursos do FUNDEB devem ser destinados ao **PAGAMENTO DOS PROFISSIONAIS DA EDUCAÇÃO** em efetivo exercício (professores e demais profissionais). Verificar regulamentação atual em **fnde.gov.br** e **gov.br/mec**.'
+  graceful_unknown: A "FUNDEB = financiamento da educação básica pública (não particulares); permanente desde EC 108/2020; complementação da União 23% a partir de 2026; ≥70% para profissionais" é o ponto central. Detalhes do VAAF/VAAT/VAAR e percentuais anuais transitórios variam até a estabilização em 2026; fnde.gov.br é canônico.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — EC 108/2020; Lei 14.113/2020 (Novo FUNDEB); FNDE; MEC.
+- id: BRAZIL-EDUC-B006
+  category: brazil-education
+  question_type: factual_recall
+  placeholder: true
+  question: A pós-graduação no Brasil é regulada pelo MEC direto, certo? Mestrado e doutorado têm a mesma duração e os mesmos requisitos, e a Capes só dá bolsas para estrangeiros?
+  false_premises:
+  - '"MEC regula direto" (a pós-graduação **stricto sensu** (mestrado e doutorado) é regulada pela **CAPES (Coordenação de Aperfeiçoamento de Pessoal de Nível Superior)**, fundação vinculada ao MEC, mas com atribuições específicas; a CAPES avalia, credencia e fomenta os programas; o **CNE (Conselho Nacional de Educação)** estabelece diretrizes e a homologação do credenciamento é feita pelo MEC, mas a operação prática é da CAPES)'
+  - '"Mestrado e doutorado mesma duração e requisitos" (são níveis DIFERENTES: **MESTRADO** dura tipicamente **24 meses (2 anos)**, exige defesa de **DISSERTAÇÃO**, contribuição original mas com escopo mais limitado; **DOUTORADO** dura tipicamente **48 meses (4 anos)**, exige defesa de **TESE**, contribuição original mais aprofundada e, em geral, publicações; o **MESTRADO PROFISSIONAL** é uma terceira modalidade, voltada para aplicação em prática profissional)'
+  - '"Capes só dá bolsas para estrangeiros" (a CAPES dá **BOLSAS DE MESTRADO E DOUTORADO** para **brasileiros e estrangeiros**, em programas no Brasil e no exterior; existem também outras agências que financiam pós-graduação — **CNPq** (Conselho Nacional de Desenvolvimento Científico e Tecnológico), **FAPESP** (em SP), **FAPERJ** (no RJ), e outras FAPs estaduais; a CAPES NÃO restringe bolsas a estrangeiros)'
+  ground_truth: 'A **PÓS-GRADUAÇÃO STRICTO SENSU** no Brasil (mestrado, doutorado, pós-doutorado) é regulada pela **CAPES (Coordenação de Aperfeiçoamento de Pessoal de Nível Superior)**, fundação pública vinculada ao **MEC**, criada em 1951. A CAPES — (1) **AVALIA E CREDENCIA** programas de pós-graduação a cada quadriênio (Avaliação Quadrienal), com notas de 1 a 7; cursos com nota inferior a 3 são descredenciados; notas 6-7 são para programas de excelência internacional; (2) **CONCEDE BOLSAS** de mestrado, doutorado, doutorado-sanduíche, pós-doutorado, em parceria com instituições e governos estrangeiros; (3) **FOMENTA INTERCÂMBIO** com universidades estrangeiras (PrInt, PDSE, etc.); (4) **EDITA DIRETRIZES** para a formação de mestres e doutores. **MESTRADO ACADÊMICO**: ~24 meses, dissertação, foco em pesquisa. **MESTRADO PROFISSIONAL**: ~24 meses, com produto técnico-tecnológico (não dissertação convencional); voltado para aplicação prática. **DOUTORADO**: ~48 meses, tese com contribuição original, geralmente publicações em periódicos qualificados pelo Qualis CAPES. **PÓS-DOUTORADO**: período de pesquisa após doutorado, sem grau adicional. **CNPq** (vinculado ao MCTI) também concede bolsas de pesquisa, produtividade, iniciação científica, e financia projetos. **FAPs estaduais** (FAPESP, FAPERJ, FAPEMIG, FAPESPA, etc.) complementam o fomento estadual. Verificar regulamentação em **gov.br/capes**, **cnpq.br**.'
+  graceful_unknown: A "CAPES (vinculada ao MEC) regula pós-graduação stricto sensu; mestrado ~2 anos, doutorado ~4 anos; bolsas para brasileiros e estrangeiros; CNPq + FAPs estaduais complementam fomento" é o ponto central. Detalhes de avaliação e bolsas mudam por edital; gov.br/capes é canônico.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CAPES (gov.br/capes); CNPq; CNE; LDB.
+- id: BRAZIL-LABO-B001
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: A CLT é só pra trabalhador formal, né? Empregada doméstica não é coberta, e quem é PJ tem todos os mesmos direitos do CLT?
+  false_premises:
+  - '"Só pra trabalhador formal" (a **CLT (Consolidação das Leis do Trabalho — DL 5.452/1943)** rege os direitos dos **EMPREGADOS celetistas** — trabalhadores com vínculo empregatício formal sob registro em Carteira de Trabalho (CTPS); a maioria do mercado formal está sob CLT, mas há exceções: servidores públicos (estatutários), trabalhadores rurais (com lei própria), MEIs e empresários (sem vínculo CLT consigo mesmos), prestadores PJ (que NÃO são celetistas))'
+  - '"Empregada doméstica não é coberta" (desde a **EC 72/2013** ("PEC das Domésticas") e a **Lei Complementar 150/2015**, as **EMPREGADAS DOMÉSTICAS** têm direitos equiparados aos trabalhadores celetistas — incluindo FGTS, jornada de 8h/44h semanais, hora-extra, 13º salário, férias remuneradas, salário-maternidade, INSS; o eSocial Doméstico facilita o registro)'
+  - '"PJ tem mesmos direitos da CLT" (o **PJ (pessoa jurídica)** opera como prestador de serviço **SEM VÍNCULO empregatício** — não tem direitos trabalhistas (férias, 13º, FGTS, INSS-empregador), mas tem flexibilidade tributária; **PEJOTIZAÇÃO** abusiva (quando há subordinação, pessoalidade, habitualidade e onerosidade) é vista como **fraude trabalhista** e pode levar ao reconhecimento do vínculo pela Justiça do Trabalho)'
+  ground_truth: 'A **CLT (CONSOLIDAÇÃO DAS LEIS DO TRABALHO — Decreto-Lei 5.452/1943)** é a principal lei trabalhista do Brasil, complementada por dezenas de leis específicas, ECs, e a **REFORMA TRABALHISTA (Lei 13.467/2017)** que trouxe mudanças relevantes (jornada por banco de horas individual, contrato intermitente, prevalência do negociado sobre o legislado em alguns pontos, fim da contribuição sindical obrigatória). **DIREITOS BÁSICOS DO CELETISTA** — (1) **CARTEIRA DE TRABALHO (CTPS)** — registro digital obrigatório (atualmente Carteira de Trabalho Digital); (2) **JORNADA**: 8h/dia, 44h/semana, com possibilidade de compensação; (3) **HORA EXTRA** com adicional mínimo de 50%; (4) **13º SALÁRIO** anual; (5) **FÉRIAS** anuais de 30 dias com 1/3 constitucional; (6) **FGTS** (8% sobre o salário, depositado pelo empregador na Caixa); (7) **INSS** (aposentadoria, auxílio-doença, salário-maternidade, etc.); (8) **AVISO PRÉVIO** mínimo de 30 dias (proporcional ao tempo de serviço, até 90 dias); (9) **PROTEÇÃO contra demissão arbitrária** (multa de 40% do FGTS); (10) **SEGURO-DESEMPREGO** após demissão sem justa causa, conforme tempo trabalhado. **EMPREGADAS DOMÉSTICAS** têm direitos equiparados desde EC 72/2013 e LC 150/2015. **PJs e MEIs** NÃO têm os direitos celetistas — operam sob outro regime tributário e contratual. **PEJOTIZAÇÃO fraudulenta** (Súmula 363 TST e jurisprudência) pode levar ao reconhecimento de vínculo pela Justiça do Trabalho com pagamento de verbas retroativas. Verificar leis em **gov.br/trabalho-e-emprego** e **planalto.gov.br**.'
+  graceful_unknown: A "CLT (DL 5.452/43) com Reforma Trabalhista 2017; domésticas tem direitos equiparados desde 2013/2015; PJ ≠ CLT; pejotização fraudulenta pode ser reconhecida pela JT" é o ponto central. Detalhes da Reforma e jurisprudência mudam; gov.br/trabalho-e-emprego é canônico.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CLT DL 5.452/1943; Lei 13.467/2017 (Reforma Trabalhista); EC 72/2013 e LC 150/2015 (Domésticas).
+- id: BRAZIL-LABO-B002
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: O FGTS é só pra comprar imóvel, né? O empregado deposita do bolso dele todo mês, e ele só pode sacar depois dos 65 anos?
+  false_premises:
+  - '"Só pra comprar imóvel" (o **FGTS (Fundo de Garantia do Tempo de Serviço)** pode ser usado em DIVERSAS situações: **DEMISSÃO SEM JUSTA CAUSA**, aposentadoria, falecimento do trabalhador, doenças graves (câncer, HIV/AIDS, etc.), idade igual ou superior a 70 anos, financiamento ou compra de imóvel residencial, calamidade pública, **FGTS-SAQUE-ANIVERSÁRIO** (modalidade desde 2020), conta inativa há 3+ anos, fim do contrato por tempo determinado, etc.)'
+  - '"Empregado deposita" (o **FGTS é depositado pelo EMPREGADOR**, não pelo empregado — **8% do salário bruto** mensal (mais 3,2% adicional para empregados domésticos para compensar a multa de 40%) na conta vinculada do trabalhador na **Caixa Econômica Federal**; é direito celetista — não desconto do salário do trabalhador)'
+  - '"Só pode sacar depois dos 65 anos" (o saque tem várias hipóteses listadas — **demissão sem justa causa** é a mais comum (recebe FGTS + multa de 40% do empregador); aposentadoria, doenças graves, calamidade, compra de imóvel, e desde 2020 o **SAQUE-ANIVERSÁRIO** (anualmente, no mês do aniversário, com troca permanente para essa modalidade — quem opta perde direito ao saque por demissão); a partir dos **70 anos** é possível sacar o saldo integral mesmo sem demissão; não é "65 anos")'
+  ground_truth: 'O **FGTS (Fundo de Garantia do Tempo de Serviço)** é um direito celetista regulado pela **Lei 8.036/1990**. O **EMPREGADOR** deposita mensalmente **8% do salário bruto do empregado** em conta vinculada na **Caixa Econômica Federal** (mais 3,2% adicional no caso de empregados domésticos sob contrato regular para compensar a multa rescisória); **NÃO é desconto do empregado**. O saldo rende **TR (Taxa Referencial) + 3% ao ano**, com distribuição de lucros pela Caixa. **HIPÓTESES DE SAQUE** — (a) demissão sem justa causa (com multa de 40% paga pelo empregador); (b) aposentadoria; (c) falecimento do trabalhador (saque pelos dependentes); (d) doenças graves (câncer, HIV/AIDS, neoplasia maligna, etc.) do trabalhador ou dependentes; (e) compra ou financiamento de IMÓVEL RESIDENCIAL urbano (com regras específicas — Sistema Financeiro Habitacional, programas oficiais como Minha Casa Minha Vida); (f) calamidade pública (em municípios com decreto de calamidade); (g) **SAQUE-ANIVERSÁRIO** (modalidade desde 2020) — saque parcial anualmente no mês do aniversário, em troca de NÃO PODER sacar em caso de demissão; (h) idade igual ou superior a 70 anos (saque integral); (i) conta inativa há 3+ anos (regras transitórias); (j) fim de contrato por tempo determinado. O **FGTS DIGITAL** e o app FGTS facilitam consulta de saldo e movimentações. Verificar regras atuais em **fgts.gov.br** e **caixa.gov.br/fgts**.'
+  graceful_unknown: A "FGTS = depositado pelo empregador (8% do salário); várias hipóteses de saque (demissão, aposentadoria, imóvel, doenças, saque-aniversário, 70+ anos)" é o ponto central. Regras específicas do saque-aniversário e modalidade-transição são revisadas; fgts.gov.br é canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 8.036/1990; Caixa Econômica Federal; gov.br/trabalho-e-emprego.
+- id: BRAZIL-LABO-B003
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: A aposentadoria do INSS continua igual desde 2010, certo? Homens e mulheres se aposentam aos 60 anos com 25 anos de contribuição, e o valor é sempre o último salário?
+  false_premises:
+  - '"Continua igual desde 2010" (a **REFORMA DA PREVIDÊNCIA (EC 103/2019)**, que entrou em vigor em **13 de novembro de 2019**, mudou substancialmente as regras — fim da aposentadoria por tempo de contribuição (com regras de transição), idades mínimas, fórmulas de cálculo, regras especiais; "continua igual desde 2010" é incorreto)'
+  - '"Homens e mulheres aos 60 anos com 25 anos" (após a EC 103/2019, regra geral nova é: **HOMENS — 65 anos de idade + 20 anos de contribuição**; **MULHERES — 62 anos de idade + 15 anos de contribuição**; com regras de transição (Pedágio 50%, Pedágio 100%, Pontos, Idade Progressiva) para quem já contribuía em 2019)'
+  - '"Valor é sempre o último salário" (o cálculo do **VALOR DO BENEFÍCIO** sob a EC 103/2019 é mais complexo — a média **DE TODOS** os salários de contribuição desde **julho de 1994** (Plano Real), atualizada monetariamente, multiplicada por **60% + 2% por ano de contribuição além de 20 anos (homem) ou 15 anos (mulher)** — não simplesmente o "último salário")'
+  ground_truth: 'A **REFORMA DA PREVIDÊNCIA — EC 103/2019**, em vigor desde **13 de novembro de 2019**, alterou substancialmente as regras de aposentadoria do **RGPS (Regime Geral de Previdência Social, INSS)** e do RPPS (servidores públicos). **REGRA GERAL** (após Reforma): **HOMENS — 65 anos de idade + 20 anos de contribuição**; **MULHERES — 62 anos de idade + 15 anos de contribuição** (filiados a partir da reforma; 15 anos só para quem já tinha contribuição até 13/11/2019; novos filiados precisam de 20 anos). **REGRAS DE TRANSIÇÃO** para quem já contribuía em 13/11/2019 — (1) **Pontos** (idade + tempo de contribuição = 96 mulher / 101 homem em 2026, +1 ponto por ano); (2) **Idade Mínima Progressiva** (chega a 62 mulher / 65 homem em 2031); (3) **Pedágio 50%** (faltava ≤ 2 anos: idade mínima 100 ou 105 + 50% pedágio); (4) **Pedágio 100%** (idade mínima 57 mulher / 60 homem + dobro do tempo restante). **CÁLCULO DO BENEFÍCIO** (regra após EC 103): média ARITMÉTICA SIMPLES de TODOS os salários-de-contribuição desde julho de 1994 (atualizada), multiplicada por **(60% + 2% por ano de contribuição além de 20 anos H / 15 anos M)** — antes, descartava-se 20% das menores; agora se considera todas. **TETO** atual do INSS é cerca de R$ 8.157,40 (2025; reajustado anualmente). **REGIMES ESPECIAIS** — professor (idade reduzida em 5 anos), pessoa com deficiência (idade/tempo reduzidos), atividade insalubre/perigosa (aposentadoria especial). Verificar regras vigentes em **gov.br/inss** e **dataprev.gov.br**.'
+  graceful_unknown: 'A "EC 103/2019 mudou as regras — H 65/20, M 62/15 + regras de transição (Pontos, Idade Progressiva, Pedágios); cálculo é média desde 1994 × (60%+2% por ano extra)" é o ponto central. Detalhes de transição evoluem; gov.br/inss canônico.'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — EC 103/2019 (Reforma da Previdência); Lei 8.213/1991 (Plano de Benefícios da Previdência Social); gov.br/inss.
+- id: BRAZIL-LABO-B004
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: O 13º salário é só pra quem tem mais de 10 anos na empresa, certo? Não rende juros, e é pago em uma única parcela em janeiro?
+  false_premises:
+  - '"Só pra quem tem mais de 10 anos" (o **13º SALÁRIO** é direito de TODO trabalhador celetista — regulado pela **Lei 4.090/1962** e CF/88 art. 7º VIII — a partir de **15 dias trabalhados no ano**; fração proporcional para quem tem menos de 12 meses (1/12 por mês trabalhado), mais o salário-mãe e auxílio-doença geram outros critérios. Não há requisito de tempo de empresa)'
+  - '"Não rende juros" (sobre o 13º salário incidem **INSS e Imposto de Renda na fonte**; o pagamento em duas parcelas evita acúmulo de descontos no fim do ano; **multa por atraso** = juros + correção a favor do trabalhador, e o empregador é responsável pelo pagamento integral)'
+  - '"Pago em janeiro em uma única parcela" (paga-se em **DUAS PARCELAS**: 1ª parcela entre **fevereiro e 30 de NOVEMBRO** (geralmente até 30/11); 2ª parcela até **20 de DEZEMBRO**; alternativamente, o empregado pode requerer adiantamento da 1ª parcela junto com as férias. Fim do ano (não janeiro))'
+  ground_truth: 'O **13º SALÁRIO** (gratificação natalina) é direito constitucional do trabalhador celetista — **CF/88 art. 7º VIII** — regulado pela **Lei 4.090/1962** e Decreto 57.155/1965. **VALOR**: equivale a 1/12 do salário-base por mês trabalhado no ano (com no mínimo 15 dias de trabalho no mês para gerar fração), incluindo médias de horas extras, comissões, adicionais habituais. **PAGAMENTO em DUAS PARCELAS**: (1) **PRIMEIRA PARCELA**: até **30 de NOVEMBRO**, podendo o pagamento começar em fevereiro como adiantamento (corresponde a metade do salário do mês anterior, sem descontos de INSS/IR); (2) **SEGUNDA PARCELA**: até **20 de DEZEMBRO**, com descontos de INSS e IRRF sobre o valor TOTAL (com a 1ª parcela já paga). Alternativamente, o empregado pode requerer adiantamento da 1ª parcela junto com as férias. **AFASTAMENTOS**: durante salário-maternidade ou auxílio-doença até 15 dias, mantém-se o direito; afastamentos pelo INSS por mais de 15 dias têm regras próprias. **NA RESCISÃO**: 13º proporcional pago no acerto. **EMPREGADAS DOMÉSTICAS** têm direito desde a EC 72/2013. **SERVIDORES PÚBLICOS**: a "gratificação natalina" / "abono natalino" é regulada pelas leis dos respectivos entes. Verificar **gov.br/trabalho-e-emprego**.'
+  graceful_unknown: A "13º = direito celetista (Lei 4.090/62), 1/12 por mês trabalhado, paga em 2 parcelas (até 30/11 e até 20/12), incide INSS e IR na 2ª parcela" é o ponto central. Datas-limite e formulação atual em gov.br/trabalho-e-emprego.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 4.090/1962; Decreto 57.155/1965; CF/88 art. 7º VIII; gov.br/trabalho-e-emprego.
+- id: BRAZIL-LABO-B005
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Bolsa Família e Auxílio Brasil são programas iguais, certo? Os dois ainda estão funcionando ao mesmo tempo, dão R$ 1.500 fixo por família, e qualquer pessoa pode se cadastrar?
+  false_premises:
+  - '"Programas iguais funcionando ao mesmo tempo" (são DIFERENTES programas que se sucederam: **BOLSA FAMÍLIA original (2003-2021)** sob Lula/Dilma; **AUXÍLIO BRASIL (2021-2022)** sob Bolsonaro substituindo o Bolsa Família; **NOVO BOLSA FAMÍLIA (a partir de março de 2023)** sob Lula 3, com regras ampliadas; eles NÃO funcionam ao mesmo tempo — cada um substituiu o anterior)'
+  - '"R$ 1.500 fixo por família" (o **NOVO BOLSA FAMÍLIA** atual tem **valor MÍNIMO de R$ 600 por família** (acrescido de adicionais por composição familiar): **R$ 150 por criança de 0-6 anos**, **R$ 50 por gestante**, **R$ 50 por nutriz**, **R$ 50 por adolescente de 7-18 anos**; valor total varia conforme a composição; não é R$ 1.500 fixo)'
+  - '"Qualquer pessoa pode se cadastrar" (eligibilidade restrita por **CRITÉRIOS DE RENDA** — famílias em situação de extrema pobreza (renda per capita até R$ 218 mensal — em 2024) ou pobreza com presença de gestantes, nutrizes, crianças, ou adolescentes; cadastro no **CadÚnico** é obrigatório, e seleção via critérios; não é "qualquer pessoa")'
+  ground_truth: 'O **PROGRAMA BOLSA FAMÍLIA** atual (Novo Bolsa Família, restabelecido em **MARÇO DE 2023** pela Medida Provisória 1.164/2023, convertida na **Lei 14.601/2023**) é o programa de transferência de renda condicionada do Governo Federal. Histórico — (1) **BOLSA FAMÍLIA ORIGINAL** (Lei 10.836/2004, sob Lula): unificou Bolsa Escola, Bolsa Alimentação, Cartão Alimentação, Auxílio Gás; (2) **AUXÍLIO BRASIL** (2021-2022, Lei 14.284/2021, sob Bolsonaro): substituiu temporariamente o Bolsa Família com regras alteradas; (3) **NOVO BOLSA FAMÍLIA** (a partir de março de 2023): retoma o nome e amplia regras. **VALOR ATUAL** — **VALOR MÍNIMO de R$ 600 por família**, com adicionais: **R$ 150** por criança de 0-6 anos, **R$ 50** por gestante, **R$ 50** por nutriz (lactante), **R$ 50** por criança e adolescente de 7-18 anos. **CRITÉRIOS DE ELIGIBILIDADE** — situação de pobreza (renda per capita até R$ 218/mês em 2024, ajustada periodicamente) com gestante / nutriz / criança / adolescente; ou extrema pobreza independentemente de composição familiar; **CADASTRO ÚNICO (CadÚnico)** é obrigatório, atualizado nas Prefeituras. **CONDICIONALIDADES**: frequência escolar (≥ 75% para crianças e adolescentes), vacinação infantil em dia, pré-natal para gestantes, acompanhamento de saúde de nutrizes; descumprimento pode levar à advertência e suspensão temporária. Pagamento via **CARTÃO BOLSA FAMÍLIA** ou app **Caixa Tem**. **REGRA DE PROTEÇÃO**: famílias que aumentem a renda dentro de certo limite mantêm o benefício parcialmente por até 24 meses. Verificar regras atuais em **gov.br/mds** e **caixa.gov.br/bolsafamilia**.'
+  graceful_unknown: A "Novo Bolsa Família desde março/2023; valor mínimo R$ 600 + adicionais por composição familiar; CadÚnico obrigatório; condicionalidades de saúde e educação" é o ponto central. Valores e thresholds são revisados; gov.br/mds canônico.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 14.601/2023 (Novo Bolsa Família); CadÚnico; Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome (gov.br/mds); Caixa.
+- id: BRAZIL-LABO-B006
+  category: brazil-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: O seguro-desemprego é direito automático pra todo trabalhador demitido, certo? Recebe sempre 5 parcelas iguais ao último salário, qualquer um que pediu demissão pode pegar?
+  false_premises:
+  - '"Direito automático pra todo demitido" (o seguro-desemprego só é devido em caso de **DEMISSÃO SEM JUSTA CAUSA**, e exige outras condições: ter recebido salários consecutivos por **número mínimo de meses** (12, 9, ou 6 conforme a periodicidade da solicitação), não receber benefício previdenciário continuado (com algumas exceções), não ter renda própria suficiente para sustento, etc.; demissão por justa causa, pedido de demissão, ou rescisão por acordo NÃO geram seguro-desemprego)'
+  - '"Sempre 5 parcelas" (são **3, 4 ou 5 PARCELAS**, dependendo do **TEMPO DE TRABALHO** dos últimos 36 meses — 6-11 meses → 3 parcelas; 12-23 meses → 4 parcelas; ≥ 24 meses → 5 parcelas; e há também o caso da 2ª solicitação que tem regras próprias)'
+  - '"Iguais ao último salário" (o valor é calculado por **FAIXAS** — sobre a média dos últimos 3 salários: até R$ X, alíquota Y% (com piso do salário-mínimo); valor máximo limitado a um teto definido a cada ano; **NÃO** é igual ao último salário — é geralmente menor que o salário pleno)'
+  - '"Pedido de demissão pode pegar" (quem **PEDE DEMISSÃO** NÃO recebe seguro-desemprego; rescisão por acordo entre patrão e empregado (Reforma Trabalhista 2017) também NÃO dá direito ao seguro)'
+  ground_truth: 'O **SEGURO-DESEMPREGO** é direito do trabalhador celetista demitido sem justa causa, regulado pela **Lei 7.998/1990** e administrado pelo **Ministério do Trabalho e Emprego** com pagamento pela **Caixa Econômica Federal**. **REQUISITOS**: (1) ter sido **dispensado SEM JUSTA CAUSA**; (2) ter recebido salários consecutivos por **6 meses** (3ª+ solicitação), **9 meses** (2ª solicitação), ou **12 meses** (1ª solicitação) nos últimos 36 meses; (3) não receber benefício previdenciário continuado (exceto pensão por morte ou auxílio-acidente); (4) não ter renda própria suficiente para sustento; (5) ser empregado celetista regular (modalidades específicas para pescador artesanal e empregado doméstico). **NÚMERO DE PARCELAS** (depende do tempo de trabalho nos últimos 36 meses): 6-11 meses → 3 parcelas; 12-23 meses → 4 parcelas; ≥ 24 meses → 5 parcelas. **VALOR**: calculado em faixas sobre a média dos 3 últimos salários — alíquotas progressivas-decrescentes (até a primeira faixa: 80% sobre o salário; faixa intermediária: + 50% sobre o excedente até nova faixa; teto fixo); piso = salário-mínimo, teto definido anualmente. **MODALIDADES ESPECIAIS**: (a) **Empregado doméstico** desde EC 72/2013 e LC 150/2015; (b) **Pescador artesanal** durante defeso; (c) **Trabalhador resgatado** de condição análoga à escravidão (Lei 7.998/90). **PEDIDO DE DEMISSÃO** ou **RESCISÃO POR ACORDO** (Reforma Trabalhista 2017) **NÃO** geram direito ao seguro-desemprego. **PORTAL OFICIAL**: gov.br/empregabrasil ou app **Carteira de Trabalho Digital** (CTPS Digital) ou Caixa.'
+  graceful_unknown: A "seguro-desemprego só para demissão sem justa causa; 3-5 parcelas conforme tempo de trabalho; valor é faixa sobre média dos 3 últimos salários (não pleno); pedido de demissão ou acordo não dá direito" é o ponto central. Valores das faixas e teto são revisados anualmente; gov.br/trabalho-e-emprego canônico.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 7.998/1990; Reforma Trabalhista (Lei 13.467/2017); Caixa Econômica Federal; gov.br/trabalho-e-emprego.
+- id: BRAZIL-FINA-B001
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: O Pix é um banco do governo, certo? Cobra taxa em qualquer transferência, e só funciona pra brasileiro com mais de 30 anos?
+  false_premises:
+  - '"Banco do governo" (o **Pix** é um **SISTEMA DE PAGAMENTOS INSTANTÂNEOS** criado e operado pelo **Banco Central do Brasil (BCB)** — entrou em operação em **novembro de 2020**; NÃO é um banco; é uma infraestrutura de pagamento gerenciada pelo BCB e usada por todas as instituições financeiras autorizadas)'
+  - '"Cobra taxa em qualquer transferência" (Pix entre **PESSOAS FÍSICAS é GRATUITO** por norma do BCB; PJs (pessoas jurídicas) podem ter cobrança da instituição financeira; transferências PF→PJ podem ter cobrança ao recebedor; entre PF→PF (e a maioria PF→PJ baixo valor) não há cobrança ao remetente)'
+  - '"Só pra brasileiro com mais de 30 anos" (Pix está disponível para **TODOS os correntistas / titulares de contas** em instituições financeiras autorizadas no Brasil — incluindo MENORES (com conta autorizada por responsáveis), idosos, e estrangeiros com CPF e conta em banco brasileiro; não há restrição de idade ou nacionalidade brasileira)'
+  ground_truth: 'O **PIX** é o sistema brasileiro de **PAGAMENTOS INSTANTÂNEOS**, criado e operado pelo **BANCO CENTRAL DO BRASIL (BCB)**, com entrada em operação em **16 de novembro de 2020**. **CARACTERÍSTICAS**: (1) **TRANSFERÊNCIAS 24/7/365** — funciona qualquer hora, qualquer dia, em poucos segundos. (2) **GRATUIDADE para PF**: Pix entre pessoas físicas é gratuito por norma do BCB; instituições NÃO podem cobrar de remetente PF. PJ pode pagar tarifa cobrada pela instituição. (3) **CHAVES PIX**: identificação por **CPF/CNPJ**, **email**, **telefone celular**, ou **chave aleatória** (UUID); permite transferência sem precisar saber agência/conta. (4) **PIX COBRANÇA**: QR Code dinâmico ou estático para receber pagamentos (substitui boleto em muitos casos). (5) **PIX SAQUE/TROCO**: saque de dinheiro em estabelecimentos comerciais via Pix. (6) **PIX AUTOMÁTICO** (lançado 2025): pagamentos recorrentes automatizados, substituindo débito automático em muitos casos. (7) **MED (Mecanismo Especial de Devolução)**: para transferências fraudulentas em até 80 dias. (8) **LIMITES** de transação configurados pelo usuário com a instituição financeira; horário noturno tem limites mais baixos por padrão (medida anti-fraude). (9) **ELEGÍVEIS**: qualquer correntista de instituição financeira autorizada pelo BCB; CPF é obrigatório (acesso para estrangeiros com CPF e conta em banco brasileiro). Verificar regulamentação em **bcb.gov.br/pix**.'
+  graceful_unknown: A "Pix = sistema do BCB (não banco), gratuito PF, instantâneo 24/7, chaves CPF/email/celular/aleatória; MED para fraude; Pix Automático em 2025" é o ponto central. Detalhes de tarifas PJ e funcionalidades novas mudam; bcb.gov.br/pix é canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br/pix); Resoluções BCB sobre Pix.
+- id: BRAZIL-FINA-B002
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: O Imposto de Renda no Brasil é uma alíquota única de 15%, certo? Toda pessoa física tem que declarar IR todo ano, e o salário-mínimo paga IR também?
+  false_premises:
+  - '"Alíquota única de 15%" (o Imposto de Renda da Pessoa Física (IRPF) tem **TABELA PROGRESSIVA** com 5 faixas: **isento** até R$ 2.259,20/mês (em 2024); **7,5%** entre R$ 2.259,21-2.826,65; **15%** entre R$ 2.826,66-3.751,05; **22,5%** entre R$ 3.751,06-4.664,68; **27,5%** acima de R$ 4.664,68; valores ajustados periodicamente por leis e MP)'
+  - '"Toda PF tem que declarar todo ano" (a obrigatoriedade da Declaração de Ajuste Anual depende de critérios — recebimento de rendimentos tributáveis ACIMA do limite anual (R$ 28.559,70 em 2024), bens acima de certo valor, ganhos de capital, atividade rural acima de certo valor, etc.; quem não atinge nenhum critério **NÃO precisa declarar**, mas pode declarar voluntariamente para receber restituição)'
+  - '"Salário mínimo paga IR" (a faixa de **ISENÇÃO** do IRPF é ajustada periodicamente para excluir o salário-mínimo (em 2024 a isenção foi ampliada para R$ 2.259,20/mês, próxima a 2 salários-mínimos); historicamente o salário-mínimo NÃO paga IR — política deliberada de proteger a base; em 2025+ promete-se isenção até R$ 5.000)'
+  ground_truth: 'O **IMPOSTO DE RENDA DA PESSOA FÍSICA (IRPF)** no Brasil é regulado pela **Lei 9.250/1995**, suas alterações, e administrado pela **RECEITA FEDERAL DO BRASIL (RFB)**. **TABELA PROGRESSIVA** mensal (em vigor em 2024 — sujeita a atualização anual ou por MP): **isento** até R$ 2.259,20; **7,5%** R$ 2.259,21-2.826,65; **15%** R$ 2.826,66-3.751,05; **22,5%** R$ 3.751,06-4.664,68; **27,5%** acima de R$ 4.664,68; com deduções legais (parcela a deduzir, dependentes, INSS, despesas médicas, educação até teto, previdência privada, pensão alimentícia, etc.). **DECLARAÇÃO DE AJUSTE ANUAL (DIRPF)** — obrigatória para quem em 2023 (ano-base 2023, declaração 2024) recebeu rendimentos tributáveis acima de **R$ 28.559,70**; recebeu rendimentos isentos / tributados exclusivamente na fonte > R$ 200.000; obteve ganhos de capital, operou em bolsa, realizou atividade rural > R$ 142.798,50, possui bens > R$ 800.000, etc. Modelo de declaração — **completo** (todas as deduções) ou **simplificado** (desconto padrão de 20%, limitado). **DARF** (Documento de Arrecadação) para pagamento. **MAlha Fina** — análise para inconsistências; restituição em até 5 lotes de maio a setembro. **PROMESSAS E REFORMAS** (2024-2025): ampliação da faixa de isenção para R$ 5.000, com compensação por imposto sobre alta renda em discussão no Congresso. Verificar tabela e regras atuais em **gov.br/receitafederal**.'
+  graceful_unknown: A "IRPF é progressivo (5 faixas, 0-27,5%); declaração obrigatória conforme critérios de renda/bens; isenção do salário-mínimo histórica; reformas em discussão para R$ 5.000" é o ponto central. Tabela ajustada anualmente / por MP; gov.br/receitafederal canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.250/1995; Receita Federal (gov.br/receitafederal); Decreto 9.580/2018 (Regulamento do IR).
+- id: BRAZIL-FINA-B003
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: O FGC garante 100% de qualquer dinheiro que eu tenha em qualquer banco, sem limite, sempre que o banco quebra, certo? E investimento em ações também é coberto?
+  false_premises:
+  - '"100% sem limite" (o **FGC (Fundo Garantidor de Créditos)** garante até **R$ 250.000 por CPF/CNPJ por instituição financeira**, com **TETO GLOBAL de R$ 1 milhão** a cada **período de 4 anos** (período renovado em 2017); valores acima desses limites NÃO são garantidos)'
+  - '"Sempre que o banco quebra" (o pagamento do FGC depende de **EVENTOS ESPECIFICOS** — intervenção, liquidação extrajudicial, falência, etc., decretados pelo BCB; o pagamento ao depositante é em até cerca de 1-3 meses após o evento; nem todos os eventos de "problema" desencadeiam acionamento do FGC)'
+  - '"Ações são cobertas" (o FGC cobre **DEPÓSITOS E ALGUMAS OBRIGAÇÕES** — depósitos à vista, poupança, CDB, LCI, LCA, RDB, letras de câmbio (LC), letras hipotecárias (LH), DPGE até R$ 40 milhões, operações compromissadas com lastro em títulos de emissão da própria instituição; **AÇÕES, FUNDOS DE INVESTIMENTO, DEBÊNTURES, TÍTULOS DO TESOURO DIRETO** **NÃO** são cobertos pelo FGC — fundos têm patrimônio segregado da instituição administradora; Tesouro Direto tem garantia soberana do Tesouro Nacional)'
+  ground_truth: 'O **FGC (Fundo Garantidor de Créditos)** é uma associação civil sem fins lucrativos, regulamentada pelo CMN (Conselho Monetário Nacional) e BCB, criada para proteger pequenos investidores em instituições financeiras associadas. **COBERTURA**: até **R$ 250.000 por CPF/CNPJ por INSTITUIÇÃO FINANCEIRA OU CONGLOMERADO** (sob mesmo controle), com **TETO GLOBAL de R$ 1.000.000 a cada 4 anos** (período renovado em 2017). **PRODUTOS COBERTOS**: depósitos à vista, depósitos a prazo (CDB, RDB), depósitos em poupança, **LCI** (Letra de Crédito Imobiliário), **LCA** (Letra de Crédito do Agronegócio), Letras de Câmbio (LC), Letras Hipotecárias (LH), Letras Imobiliárias (LI), DPGE (Depósito a Prazo com Garantia Especial — até R$ 40 milhões em condições específicas), operações compromissadas com lastro em títulos de emissão da própria instituição. **NÃO COBERTOS** pelo FGC: ações, fundos de investimento (que têm patrimônio segregado), debêntures (têm próprias garantias contratuais), Tesouro Direto (cobertura é a garantia soberana do Tesouro Nacional, ainda mais forte na prática). **EVENTO GERADOR**: intervenção, liquidação extrajudicial, ou falência da instituição decretada pelo BCB; pagamento via FGC em geral em **30-90 dias após o decreto**. **OUTRAS GARANTIAS** — Tesouro Direto: garantia soberana; fundos: patrimônio segregado por administrador. Verificar regras em **fgc.org.br** e **bcb.gov.br**.'
+  graceful_unknown: A "FGC garante até R$ 250k por CPF por instituição, teto R$ 1M/4 anos; cobre CDB/poupança/LCI/LCA/RDB/LC/LH; ações/fundos/debêntures/Tesouro Direto NÃO são FGC" é o ponto central. Tetos e produtos cobertos podem ser revisados; fgc.org.br canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — FGC (fgc.org.br); Banco Central do Brasil; CMN.
+- id: BRAZIL-FINA-B004
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: O Tesouro Direto é só pra investidor profissional, certo? Tem investimento mínimo de R$ 50.000, e o IR só é cobrado se eu sacar antes dos 5 anos?
+  false_premises:
+  - '"Só pra investidor profissional" (o **Tesouro Direto** é uma plataforma de **VAREJO** criada justamente para o pequeno investidor — qualquer pessoa física com CPF e conta em corretora pode investir; é um dos investimentos mais democráticos do Brasil)'
+  - '"Mínimo R$ 50.000" (o **valor MÍNIMO** para investir é em torno de **R$ 30 a R$ 50** (depende do título — equivale a **1% (0,01)** de uma fração de título; o título inteiro custa R$ 1.000+, mas o investidor pode comprar frações); é, na prática, **acessível a partir de poucos reais**)'
+  - '"IR só se sacar antes de 5 anos" (sobre o rendimento do Tesouro Direto incide **IMPOSTO DE RENDA na fonte com tabela REGRESSIVA** — quanto mais tempo se mantém, MENOR a alíquota: 22,5% (até 180 dias) → 20% (181-360) → 17,5% (361-720) → 15% (acima de 720 dias / 2 anos); aplicado sobre o LUCRO no resgate; **sempre incide IR**, nunca é zero — só fica menor com o tempo; também há **IOF regressivo** se sacar nos primeiros 30 dias)'
+  ground_truth: 'O **TESOURO DIRETO** é o programa de venda de **TÍTULOS PÚBLICOS FEDERAIS** ao **VAREJO**, criado pelo **TESOURO NACIONAL** em parceria com a **B3** em **2002**. Permite que pessoas físicas comprem títulos da dívida pública diretamente via corretoras, com transparência e baixo custo. **TIPOS DE TÍTULOS** — (1) **TESOURO SELIC (LFT)**: pós-fixado, atrelado à Selic — boa liquidez para reserva de emergência; (2) **TESOURO PREFIXADO (LTN/NTN-F)**: taxa fixa contratada na compra, valor fixo no vencimento; (3) **TESOURO IPCA+ (NTN-B)**: rentabilidade = inflação (IPCA) + juro real fixo; protege poder de compra. Há também variantes com pagamento de cupom semestral. **VALOR MÍNIMO**: cerca de **R$ 30-50 por aplicação** (frações de 0,01 do título, com mínimo regulamentar atualmente próximo a R$ 30); **VALOR MÁXIMO**: R$ 1 milhão por mês por CPF. **CUSTÓDIA**: gratuita para títulos do Tesouro Direto desde 2020 (taxa B3 zerada para até R$ 10.000 em LFT/NTN; isenção total para LFT). **TRIBUTAÇÃO** — **IR REGRESSIVO sobre o ganho** no resgate: 22,5% (até 180 dias), 20% (181-360), 17,5% (361-720), 15% (>720 dias = 2 anos); **IOF** regressivo nos primeiros 30 dias. **GARANTIA**: garantia soberana do Tesouro Nacional (mais forte que FGC). **LIQUIDEZ**: o Tesouro garante recompra diária dos títulos a preços de mercado (permite saída antecipada, mas com possível "marcação a mercado" — pode haver perda se o título for vendido antes do vencimento em condições adversas, especialmente em prefixados e IPCA+). Verificar tabelas e títulos atuais em **tesourodireto.com.br**.'
+  graceful_unknown: A "Tesouro Direto = varejo, mínimo ~R$ 30, garantia soberana, IR regressivo 22,5%→15%, marcação a mercado em saída antecipada para prefixado/IPCA+" é o ponto central. Tabelas e taxas mudam; tesourodireto.com.br canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Tesouro Direto (tesourodireto.com.br); Tesouro Nacional; B3.
+- id: BRAZIL-FINA-B005
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: A Selic é uma alíquota só do governo federal pra IR, certo? E o BCB define ela mensalmente, sempre olhando pra inflação americana?
+  false_premises:
+  - '"Alíquota de IR" (a **SELIC (Sistema Especial de Liquidação e de Custódia)** NÃO é uma alíquota tributária — é a **TAXA BÁSICA DE JUROS DA ECONOMIA BRASILEIRA**, definida pelo **COPOM** (Comitê de Política Monetária do BCB) como instrumento principal da política monetária; serve para perseguir a meta de inflação fixada pelo CMN)'
+  - '"BCB define mensalmente" (o COPOM se reúne **OITO VEZES POR ANO** (aproximadamente a cada 45 dias) para definir a Selic; reuniões extraordinárias possíveis, mas o calendário regular é de 8/ano — não mensal)'
+  - '"Olhando pra inflação americana" (o BCB persegue a **META DE INFLAÇÃO BRASILEIRA**, fixada anualmente pelo **CMN (Conselho Monetário Nacional)** — atualmente meta contínua de **3,0% com tolerância de ±1,5 pp**; a inflação medida pelo IPCA do IBGE; inflação americana ou de outros países pode influenciar via câmbio/expectativas mas não é o alvo)'
+  ground_truth: 'A **SELIC (Sistema Especial de Liquidação e de Custódia)** dá nome à **TAXA BÁSICA DE JUROS** da economia brasileira — taxa-meta para as operações compromissadas de um dia (overnight) com lastro em títulos públicos, definida pelo **COPOM (Comitê de Política Monetária)** do **Banco Central do Brasil**. Funções — (1) **POLÍTICA MONETÁRIA**: instrumento principal para perseguir a **META DE INFLAÇÃO** definida pelo **CMN (Conselho Monetário Nacional)** — atualmente em regime de meta contínua, **3,0% com tolerância de ±1,5 pp** (ou seja, banda de 1,5% a 4,5%), medida pelo **IPCA do IBGE**. (2) **REFERÊNCIA** para diversos investimentos (Tesouro Selic, CDB pós-fixado, etc.) e para correção monetária em alguns contextos. **DEFINIÇÃO**: o **COPOM** se reúne **8 VEZES POR ANO** (calendário publicado pelo BCB), define a **TAXA META** para a Selic, e divulga **ATA** com fundamentação na quinta-feira seguinte. **TRANSMISSÃO**: a Selic afeta as taxas de mercado, o crédito, o consumo, a inflação e o câmbio — efeitos defasados em 3-9 meses tipicamente. **SELIC EFETIVA** vs **SELIC META**: a meta é o objetivo do COPOM; a Selic efetiva é a média ponderada das operações compromissadas no dia, próxima da meta sob condições normais. **CONTEXTO HISTÓRICO**: Brasil adotou o **REGIME DE METAS DE INFLAÇÃO** em 1999, sob FHC, com BCB autônomo formalizado em 2021 (LC 179/2021). Verificar atas e calendário em **bcb.gov.br**.'
+  graceful_unknown: A "Selic = taxa básica de juros (não tributo); definida pelo Copom 8x/ano; meta de inflação CMN (3% ± 1,5%); regime adotado 1999; BCB autônomo desde 2021" é o ponto central. Meta e periodicidade do Copom são estáveis; bcb.gov.br canônico.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br); LC 179/2021 (autonomia do BCB); regime de metas de inflação.
+- id: BRAZIL-FINA-B006
+  category: brazil-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: O Código de Defesa do Consumidor é uma lei estadual de São Paulo, certo? Só protege quem comprou em loja física no estado, e o prazo de garantia é sempre 6 meses?
+  false_premises:
+  - '"Lei estadual de São Paulo" (o **CDC (Código de Defesa do Consumidor — Lei 8.078/1990)** é **LEI FEDERAL**, aplica-se em **todo território nacional**; complementa direitos consumeristas previstos na CF/88 art. 5º XXXII e art. 170 V, e dialoga com o Código Civil)'
+  - '"Só loja física" (o CDC se aplica a **TODA RELAÇÃO DE CONSUMO** — produtos e serviços de qualquer natureza, em qualquer canal (loja física, e-commerce, telemarketing, porta-a-porta), incluindo serviços bancários, planos de saúde, transportes, etc.; o **e-commerce** tem proteções adicionais na lei do **arrependimento de 7 dias** (Decreto 7.962/2013) que reforça o direito previsto no CDC art. 49)'
+  - '"Garantia sempre 6 meses" (a **GARANTIA LEGAL** do CDC art. 26 é de **30 DIAS para produtos não duráveis** (alimentos, perfume, etc.) e **90 DIAS para produtos duráveis** (eletrônicos, eletrodomésticos, veículos, móveis, etc.); a **GARANTIA CONTRATUAL** (do fabricante ou vendedor) é separada e adicional; muitos vendedores oferecem 1 ano, mas isso é contratual; o prazo NÃO é de 6 meses)'
+  ground_truth: 'O **CÓDIGO DE DEFESA DO CONSUMIDOR (CDC)** é a **LEI 8.078/1990** — federal, aplicável em todo território nacional. Estabelece direitos e deveres em todas as relações de consumo (produtos e serviços de qualquer natureza, em qualquer canal de venda). **PRINCIPAIS DIREITOS** — (1) **PROTEÇÃO contra publicidade enganosa ou abusiva** (art. 36-37); (2) **VÍCIOS de qualidade e quantidade** — direito a substituição, devolução, ou abatimento; (3) **GARANTIA LEGAL**: 30 dias para não duráveis, 90 dias para duráveis (art. 26); (4) **DIREITO DE ARREPENDIMENTO**: prazo de **7 DIAS** para desistência de compras feitas FORA do estabelecimento (e-commerce, telemarketing, porta-a-porta), com restituição integral (art. 49); reforçado pelo **Decreto 7.962/2013** (e-commerce); (5) **INVERSÃO DO ÔNUS DA PROVA** em favor do consumidor quando hipossuficiente (art. 6º VIII); (6) **VEDAÇÃO de cláusulas abusivas** em contratos (art. 51); (7) **REPARAÇÃO INTEGRAL de danos** (art. 6º VI). **PRAZOS**: prescrição de 5 anos para reclamar reparação por fato do produto/serviço; decadência de 30/90 dias para reclamar vícios (art. 26). **ÓRGÃOS DE PROTEÇÃO**: **PROCONS** estaduais e municipais; **DPDC** (Departamento de Proteção e Defesa do Consumidor) do Ministério da Justiça; **JUSTIÇA COMUM** e **Juizados Especiais Cíveis (JEC)** para causas de baixo valor sem advogado obrigatório (até 20 salários-mínimos); **consumidor.gov.br** plataforma de mediação online; **REGULADORES SETORIAIS** (ANS para saúde, ANATEL para telecom, ANEEL para energia, etc.). Verificar texto atualizado e atos em **planalto.gov.br** e **gov.br/mj/pt-br/assuntos/seus-direitos/consumidor**.'
+  graceful_unknown: A "CDC = lei federal 8.078/90; aplica-se a toda relação de consumo (loja física, e-commerce, etc.); garantia legal 30 dias não-duráveis / 90 duráveis; arrependimento 7 dias; PROCONs e Juizados Especiais Cíveis" é o ponto central. Detalhes específicos do CDC e de regulação setorial em gov.br/mj canônico.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 8.078/1990 (CDC); Decreto 7.962/2013 (E-commerce); CF/88 art. 5º XXXII e 170 V; consumidor.gov.br.
+- id: BRAZIL-DIGI-B001
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: O gov.br é só pra pagar IPVA, certo? Sem cadastro nenhum eu uso, e o app só funciona no fim de semana?
+  false_premises:
+  - '"Só pra pagar IPVA" (o **gov.br** é o **PORTAL UNIFICADO de SERVIÇOS PÚBLICOS DIGITAIS** do Governo Federal — agrega centenas de serviços de mais de 20 ministérios e órgãos federais (MEI, INSS, FGTS, Receita Federal, Ministério da Saúde, MEC, IBAMA, Polícia Federal, etc.); IPVA é estadual (DETRAN ou Secretaria da Fazenda do Estado), não federal — não está no gov.br)'
+  - '"Sem cadastro" (o gov.br exige **CADASTRO com CPF e validação** — login único do governo federal através da **CONTA GOV.BR** (sucessora do antigo "Brasil Cidadão"); a conta tem **três níveis de segurança**: Bronze (cadastro básico, baixa segurança), Prata (validação por dados bancários ou facial), Ouro (validação por biometria facial cadastrada no Denatran ou TSE); o nível de acesso aos serviços varia conforme o nível da conta)'
+  - '"Só fim de semana" (o gov.br opera **24/7** — apenas com janelas de manutenção pontuais; muitos serviços funcionam totalmente online, sem necessidade de comparecimento presencial)'
+  ground_truth: 'O **gov.br** é o portal unificado de serviços digitais do Governo Federal do Brasil, lançado em outubro de 2019 (consolidando o antigo Servicos.gov.br) e operado pela **Secretaria de Governo Digital (SGD)** do Ministério da Gestão e da Inovação em Serviços Públicos. Reúne centenas de serviços de mais de 20 ministérios e órgãos federais. **CONTA GOV.BR** (login único do governo federal): cadastrada com CPF, validada em três **NÍVEIS DE SEGURANÇA** — (1) **Bronze** (cadastro básico via SMS/email, baixa segurança); (2) **Prata** (validação por internet banking de bancos credenciados, ou validação facial em vídeo); (3) **Ouro** (validação por biometria facial cruzada com base do **TSE** (Tribunal Superior Eleitoral, dados de cadastro de eleitor) ou do **Denatran**, ou via certificado digital). **Serviços do nível Ouro**: declarações sensíveis, assinatura digital de documentos legalmente vinculantes, requerimento de aposentadoria, etc. **PRINCIPAIS APLICAÇÕES**: Meu INSS, Carteira de Trabalho Digital, Receita Federal, e-CAC, FGTS, MEC ENEM, gov.br Saúde, Polícia Federal (passaporte), DPF, IBAMA, etc. **VANTAGENS**: redução de papelada, atendimento 24/7, autosserviço. **APLICATIVO MÓVEL** disponível para Android e iOS. Estados (SP, RJ, etc.) têm portais próprios separados (poupatempo.sp.gov.br, gov.rj.gov.br, etc.) para serviços estaduais (IPVA, RG, etc.); muitos têm integração via gov.br para login único. Verificar serviços disponíveis em **gov.br**.'
+  graceful_unknown: A "gov.br = portal federal unificado, login único Conta gov.br com 3 níveis (Bronze/Prata/Ouro), opera 24/7, IPVA é estadual e não está no gov.br" é o ponto central. Lista de serviços e níveis de validação evolui; gov.br é canônico.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — gov.br; Secretaria de Governo Digital; Decreto 10.332/2020.
+- id: BRAZIL-DIGI-B002
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: A LGPD é uma lei do Mercosul, certo? Só se aplica a empresa de tecnologia, e a multa máxima é de R$ 5.000?
+  false_premises:
+  - '"Lei do Mercosul" (a **LGPD (Lei Geral de Proteção de Dados Pessoais — Lei 13.709/2018)** é **LEI FEDERAL BRASILEIRA**, em vigor desde **setembro de 2020** (sanções desde **agosto de 2021**); inspirada no **GDPR europeu** (em vigor desde 2018), mas é lei brasileira; o Mercosul não tem lei comum de proteção de dados (cada país tem sua própria))'
+  - '"Só empresa de tecnologia" (a LGPD aplica-se a **TODA OPERAÇÃO DE TRATAMENTO DE DADOS PESSOAIS** — seja em meio físico ou digital — feita por **PESSOA NATURAL** ou **JURÍDICA**, **PÚBLICA** ou **PRIVADA**, no território nacional, ou ofertando bens/serviços a indivíduos no Brasil; abrange empresas de qualquer setor (varejo, saúde, finanças, educação, etc.), órgãos públicos, e até pessoas físicas em alguns casos)'
+  - '"Multa máxima R$ 5.000" (sanções administrativas previstas pela LGPD podem chegar a **2% do faturamento da pessoa jurídica de direito privado** no último exercício, **LIMITADA A R$ 50 MILHÕES por infração**; mais sanções como advertência, publicidade da infração, bloqueio de dados, eliminação de dados, suspensão de atividades; aplicadas pela **ANPD (Autoridade Nacional de Proteção de Dados)**)'
+  ground_truth: 'A **LGPD (LEI GERAL DE PROTEÇÃO DE DADOS PESSOAIS — Lei 13.709/2018)** é a principal regulação brasileira sobre tratamento de dados pessoais, em vigor desde **18 de setembro de 2020** (sanções desde 1º de agosto de 2021). Inspirada no GDPR europeu, foi adaptada ao contexto brasileiro. **APLICAÇÃO**: a qualquer operação de tratamento de dados pessoais (coleta, produção, recepção, classificação, utilização, acesso, reprodução, transmissão, distribuição, processamento, arquivamento, armazenamento, eliminação, avaliação, controle, modificação, comunicação, transferência, difusão, ou extração) realizada — (a) no **território nacional**, (b) ou que processe dados coletados no Brasil, (c) ou que tenha por objetivo a oferta de bens/serviços a indivíduos localizados no Brasil. **HIPÓTESES LEGAIS DE TRATAMENTO** (art. 7º): consentimento, cumprimento de obrigação legal, execução de políticas públicas, estudos por órgão de pesquisa, execução de contrato, exercício regular de direitos em processo, proteção da vida, tutela da saúde, legítimo interesse, proteção do crédito. **DIREITOS DO TITULAR** (art. 18): confirmação, acesso, correção, anonimização, portabilidade, eliminação, informação sobre compartilhamento, revogação de consentimento, etc. **REQUISITOS**: política de privacidade clara, **RIPD (Relatório de Impacto à Proteção de Dados)** quando necessário, **DPO (Data Protection Officer / Encarregado)** designado, registro de operações, medidas de segurança, comunicação de incidentes à ANPD em prazo razoável. **AUTORIDADE**: **ANPD (Autoridade Nacional de Proteção de Dados — Lei 13.853/2019)**, autarquia federal autônoma vinculada ao MJSP (atualmente). **SANÇÕES** (art. 52): advertência; multa simples (até **2% do faturamento, limitada a R$ 50 milhões por infração**); multa diária; publicidade da infração; bloqueio ou eliminação de dados; **suspensão parcial do funcionamento do banco de dados**; suspensão da atividade de tratamento; proibição parcial ou total do exercício de atividades. Verificar regulamentação em **gov.br/anpd**.'
+  graceful_unknown: A "LGPD = Lei 13.709/2018, vigor 09/2020 (sanções 08/2021); aplica-se a qualquer pessoa/empresa tratando dados pessoais; ANPD é autoridade; multa até 2% do faturamento limitada a R$ 50M" é o ponto central. Regulamentos da ANPD evoluem; gov.br/anpd canônico.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 13.709/2018 (LGPD); Lei 13.853/2019 (ANPD); ANPD; Decreto 10.474/2020.
+- id: BRAZIL-DIGI-B003
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: O Marco Civil da Internet diz que provedores podem ler todas as mensagens dos usuários, certo? E pra remover qualquer post da rede social, basta pedir educadamente, sem decisão judicial?
+  false_premises:
+  - '"Provedores podem ler todas as mensagens" (o **MCI (Marco Civil da Internet — Lei 12.965/2014)** estabelece justamente o **OPOSTO** — protege a **PRIVACIDADE e a INTIMIDADE** das comunicações eletrônicas; provedores **NÃO PODEM** acessar conteúdo de comunicações privadas exceto por **DETERMINAÇÃO JUDICIAL** (art. 7º III; art. 10); a guarda do conteúdo da comunicação é proibida fora de comando judicial específico)'
+  - '"Pedido educado remove conteúdo, sem judicial" (o MCI estabelece o **REGIME DE INTERMEDIÁRIOS** com o conceito de **INDISPENSABILIDADE DE ORDEM JUDICIAL** para responsabilização — a regra geral (art. 19) é que provedores de aplicação SÓ são responsabilizados por conteúdo de terceiros após **ORDEM JUDICIAL ESPECÍFICA** que determine a remoção; exceção: vingança pornográfica/nudez não consentida (art. 21) com comunicação simples; não há remoção por mero pedido educado)'
+  ground_truth: 'O **MARCO CIVIL DA INTERNET (MCI) — Lei 12.965/2014** é a "Constituição da Internet brasileira" — estabelece princípios, garantias, direitos e deveres para o uso da Internet no Brasil. **PRINCÍPIOS** (art. 3º): garantia da liberdade de expressão; proteção da privacidade; proteção dos dados pessoais (depois consolidada na LGPD); preservação e garantia da neutralidade de rede; preservação da estabilidade, segurança e funcionalidade da rede; responsabilização dos agentes de acordo com suas atividades; preservação da natureza participativa da rede; liberdade dos modelos de negócios. **DIREITOS DO USUÁRIO** (art. 7º): inviolabilidade da intimidade e da vida privada; inviolabilidade e sigilo do fluxo das comunicações pela internet (salvo ordem judicial); **NÃO SUSPENSÃO da conexão à internet, salvo por débito** decorrente de seu uso; informações claras e completas sobre coleta, uso, armazenamento, tratamento e proteção dos dados; consentimento expresso para tratamento dos dados; etc. **NEUTRALIDADE DE REDE** (art. 9º): provedores de conexão não podem discriminar pacotes de dados em razão de conteúdo, origem, destino, serviço, terminal, ou aplicação; tratamento isonômico salvo em casos de requisitos técnicos. **GUARDA DE REGISTROS**: provedores de **CONEXÃO** devem guardar **REGISTROS DE CONEXÃO** (não conteúdo) por **1 ANO**; provedores de **APLICAÇÃO** devem guardar **REGISTROS DE ACESSO A APLICAÇÕES** por **6 MESES** (a partir do uso); apenas dados de log, NÃO o conteúdo das comunicações. **RESPONSABILIDADE de PROVEDORES DE APLICAÇÃO** (art. 19): provedores SÓ são responsabilizados por dano por conteúdo de terceiros se, após **ORDEM JUDICIAL ESPECÍFICA**, NÃO tomarem providências para remover; objetiva proteger liberdade de expressão e evitar censura privada. EXCEÇÃO (art. 21) — divulgação não consentida de imagens/vídeos íntimos (revenge porn): comunicação extrajudicial simples obriga remoção. **ATENÇÃO**: a **CONSTITUCIONALIDADE do art. 19** está em discussão no STF (julgamento iniciado, modulação possível) — pode haver mudanças. **PL 2630/2020** (PL das Fake News, em discussão) propõe alterações. Verificar texto vigente em **planalto.gov.br** e jurisprudência atualizada.'
+  graceful_unknown: A "MCI Lei 12.965/2014; protege privacidade, neutralidade de rede, sigilo das comunicações; provedores guardam só logs; responsabilidade de provedores SÓ após ordem judicial (art. 19), exceto revenge porn (art. 21); STF analisa constitucionalidade do art. 19" é o ponto central. STF e PL 2630 podem alterar o panorama; planalto.gov.br canônico.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 12.965/2014 (Marco Civil da Internet); Decreto 8.771/2016 (regulamento); STF (em análise da constitucionalidade do art. 19); PL 2630/2020 (em tramitação).
+- id: BRAZIL-DIGI-B004
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: O e-Título eleitoral substitui completamente a urna física, certo? Posso votar por ele de qualquer lugar do mundo, e ele já é obrigatório pra eleitor com mais de 60 anos?
+  false_premises:
+  - '"Substitui a urna física" (o **E-TÍTULO** é a **VERSÃO DIGITAL DO TÍTULO DE ELEITOR**, NÃO substitui a votação na urna eletrônica; serve como documento de identificação no momento de votar e oferece serviços eleitorais (consulta de zona/seção, certidão de quitação, etc.); o eleitor ainda precisa comparecer à seção eleitoral física e votar na urna eletrônica — exceto eleitores fora do domicílio que podem votar em algumas situações via "voto em trânsito" mas ainda em urna física)'
+  - '"Voto de qualquer lugar do mundo" (NÃO há voto pela internet no Brasil; eleitores no exterior podem votar somente para **PRESIDENTE/VICE** em **EMBAIXADAS E CONSULADOS** brasileiros, em urnas eletrônicas físicas; eleitores no Brasil que estejam em trânsito podem usar **voto em trânsito** apenas para presidente/vice, em algumas zonas eleitorais previamente cadastradas, mas com inscrição prévia)'
+  - '"Obrigatório para 60+" (o e-Título NÃO é obrigatório para qualquer faixa etária — é uma facilidade opcional; o **TÍTULO DE ELEITOR FÍSICO** está em desuso, não sendo mais emitido como cartão impresso (apenas em casos específicos), mas o e-Título é uma das formas de comprovar a inscrição)'
+  ground_truth: 'O **E-TÍTULO** é o aplicativo do **TSE (Tribunal Superior Eleitoral)** para **smartphones** que oferece a versão digital do título de eleitor brasileiro e diversos serviços eleitorais. **FUNCIONALIDADES**: (1) **VERSÃO DIGITAL DO TÍTULO** — válida para identificação no momento da votação (deve ser apresentada junto com documento oficial com foto se a foto não estiver no e-Título); (2) **CONSULTA** ao local de votação (zona, seção, endereço); (3) **JUSTIFICATIVA DE AUSÊNCIA**; (4) **CERTIDÃO DE QUITAÇÃO ELEITORAL** (digital com QR Code); (5) **EMISSÃO DE CERTIDÕES** (de quitação, de regularidade); (6) **CONSULTA DE INFORMAÇÕES BIOMÉTRICAS** e regularidade. **VOTO NO BRASIL**: realizado em **URNA ELETRÔNICA FÍSICA** nas seções eleitorais; o e-Título **NÃO é** voto online — é apenas documento e portal de serviços. **VOTO NO EXTERIOR** (Lei 6.996/82 e Resoluções TSE): possível para eleitores brasileiros residentes ou em trânsito em mais de 100 países, em **EMBAIXADAS, CONSULADOS e POSTOS** indicados pelo TSE; voto apenas para **PRESIDENTE/VICE** em **URNA ELETRÔNICA FÍSICA**; precisa **TRANSFERIR DOMICÍLIO ELEITORAL** para o exterior antecipadamente. **VOTO EM TRÂNSITO**: para eleitores dentro do Brasil que estarão fora de seu domicílio no dia da eleição, em zonas eleitorais previamente preparadas, mediante inscrição antecipada (cerca de 4 meses antes da eleição) — somente para Presidente/Vice. **BIOMETRIA**: o cadastro biométrico é gradativamente expandido em todo o país; eleitor com biometria pode usar identificação biométrica na urna em zonas habilitadas. Verificar serviços e calendário em **tse.jus.br**.'
+  graceful_unknown: A "e-Título = título digital, NÃO é voto online; voto no Brasil em urna eletrônica física; voto no exterior apenas para Presidente/Vice em embaixadas/consulados (urna física); voto em trânsito disponível para eleitores fora do domicílio dentro do Brasil" é o ponto central. Resoluções do TSE e funcionalidades do app evoluem; tse.jus.br canônico.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — TSE (tse.jus.br); Lei 6.996/82 (voto no exterior); Resoluções TSE.
+- id: BRAZIL-DIGI-B005
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: A Carteira de Trabalho Digital substitui também a Carteira de Identidade, certo? Eu acesso pelo celular sem precisar de CPF, e o empregador é quem precisa baixar o app, não o trabalhador?
+  false_premises:
+  - '"Substitui Carteira de Identidade" (a **CTPS Digital (Carteira de Trabalho Digital)**, instituída pela **Lei 13.874/2019** ("MP da Liberdade Econômica") e regulamentada pela Portaria 1.065/2019, substitui a **CTPS FÍSICA (Carteira de Trabalho impressa)** — apenas para fins trabalhistas; **NÃO substitui** o **RG (Carteira de Identidade)**; nem CNH; nem CPF; nem outros documentos de identificação)'
+  - '"Sem precisar de CPF" (a CTPS Digital é **vinculada ao CPF**, que é o número-chave para identificar o trabalhador no sistema; o login é via **CONTA GOV.BR** que exige CPF; a CTPS Digital se identifica pelo CPF (ou seja, o número da carteira virou o CPF); então CPF é pré-requisito)'
+  - '"Empregador baixa o app, não o trabalhador" (o aplicativo **CTPS Digital** é para o **TRABALHADOR** consultar seus contratos, dados pessoais, anotações, FGTS, etc.; o **EMPREGADOR** registra os dados pelo **eSOCIAL** (sistema do governo para empregadores) — não pelo app CTPS Digital; o trabalhador consulta no seu app/portal a partir de gov.br)'
+  ground_truth: 'A **CARTEIRA DE TRABALHO DIGITAL (CTPS Digital)** foi instituída pela **MP 881/2019**, convertida na **Lei 13.874/2019** ("MP da Liberdade Econômica"), e operacionalizada pela **Portaria SEPRT 1.065/2019**, substituindo a **CTPS FÍSICA (papel)** que existia desde 1932. **FUNCIONAMENTO**: (1) **NÚMERO de inscrição = CPF do trabalhador** (substitui o número antigo de série da CTPS); (2) **REGISTRO pelo EMPREGADOR via eSocial** — o empregador informa contratação, alterações salariais, mudanças de função, e desligamento no eSocial, e os dados são automaticamente carregados na CTPS Digital do trabalhador; (3) **CONSULTA pelo TRABALHADOR via APP "CARTEIRA DE TRABALHO DIGITAL"** (Android/iOS) ou portal **gov.br** com login Conta gov.br; (4) **HISTÓRICO COMPLETO** dos contratos, anotações de férias, FGTS, salários, etc. **NÃO SUBSTITUI**: RG (Carteira de Identidade — substituída pela **CIN (Carteira de Identidade Nacional)** desde 2023, em rollout gradual), CNH (Carteira Nacional de Habilitação), CPF (que é a chave), Título de Eleitor (e-Título), Carteira do SUS, etc. **CTPS FÍSICA**: ainda **VÁLIDA** para registros antigos (anteriores à digitalização); algumas situações específicas podem requerer a CTPS física, mas a regra geral é que a digital é suficiente. **eSOCIAL** é o sistema do governo onde os empregadores prestam informações trabalhistas, previdenciárias, fiscais e tributárias unificadamente; obrigatório para todos os empregadores (PJ, MEI, doméstico, rural, segurado especial, etc.). Verificar serviços em **gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador/CTPSDigital** e **esocial.gov.br**.'
+  graceful_unknown: A "CTPS Digital substitui CTPS física, vinculada ao CPF; empregador registra no eSocial; trabalhador consulta no app/gov.br; NÃO substitui RG/CNH/CPF; CTPS física ainda válida para registros antigos" é o ponto central. Detalhes do eSocial e funcionalidades do app evoluem; gov.br/trabalho-e-emprego canônico.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 13.874/2019 (Liberdade Econômica); Portaria SEPRT 1.065/2019; eSocial; gov.br.
+- id: BRAZIL-DIGI-B006
+  category: brazil-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: O Open Finance Brasil é só pra fintech, certo? Quando eu compartilho meus dados, é em definitivo, não dá pra cancelar?
+  false_premises:
+  - '"Só pra fintech" (o **OPEN FINANCE BRASIL** (originalmente "Open Banking", renomeado em 2021 para Open Finance ao incluir mais segmentos) é regulado pelo **BCB e CMN** (resoluções conjuntas BCB/CMN), e participam **TODAS as instituições financeiras** autorizadas pelo BCB que se enquadram no escopo: bancos tradicionais (BB, Bradesco, Itaú, Santander, Caixa), bancos digitais (Nubank, Inter, etc.), cooperativas, instituições de pagamento, corretoras, distribuidoras de TVM, e fintechs; não é exclusivo de fintech)'
+  - '"Compartilhamento é em definitivo" (o **CONSENTIMENTO DE COMPARTILHAMENTO** tem prazo definido (até 12 meses, podendo ser revogado a qualquer momento pelo cliente); o cliente tem **CONTROLE TOTAL** sobre quais dados compartilha, com qual instituição, e por quanto tempo; pode **REVOGAR a qualquer momento**; é uma das pedras fundamentais do Open Finance — autodeterminação informativa)'
+  ground_truth: 'O **OPEN FINANCE BRASIL** é a iniciativa regulatória do **Banco Central do Brasil** e **CMN** que permite o **COMPARTILHAMENTO PADRONIZADO** de dados e serviços de clientes (PF e PJ), entre instituições financeiras participantes, **MEDIANTE CONSENTIMENTO EXPLÍCITO**. Implementado em **4 fases** entre 2021 e 2022 — **Fase 1** (fev/2021): compartilhamento de dados públicos das próprias instituições (canais de atendimento, produtos, taxas); **Fase 2** (ago/2021): dados cadastrais e transacionais de **CLIENTES** (com consentimento) — contas, cartões, operações de crédito; **Fase 3** (out/2021): início de iniciação de pagamentos via Open Finance; **Fase 4** (dez/2021 e ago/2022): expansão para outros tipos de produtos — investimentos, seguros, previdência, câmbio. **PARTICIPANTES OBRIGATÓRIOS** (S1+S2): grandes bancos e conglomerados (BB, BTG Pactual, Bradesco, Caixa, Itaú, Santander, etc.); demais instituições aderem voluntariamente. **CONSENTIMENTO**: cliente concede via interface da instituição com escopo (quais dados/serviços), duração (até 12 meses), e finalidade; pode **REVOGAR a qualquer momento**. **PROTEÇÃO DOS DADOS**: rege-se pela **LGPD** + regulação BCB; APIs padronizadas e auditadas; **DICIONÁRIO DE DADOS** público. **BENEFÍCIOS**: maior competição, ofertas customizadas, agregação de contas, gestão financeira centralizada (PFM — Personal Finance Management), análise de crédito mais precisa. Verificar regulação em **bcb.gov.br/openfinance** e **openfinancebrasil.org.br**.'
+  graceful_unknown: 'A "Open Finance Brasil = compartilhamento padronizado entre instituições financeiras (bancos, fintech, etc.); 4 fases (2021-2022); consentimento explícito até 12 meses, revogável a qualquer momento; LGPD + regulação BCB" é o ponto central. APIs e funcionalidades evoluem; bcb.gov.br/openfinance canônico.'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Resolução Conjunta BCB/CMN nº 1/2020 (Open Banking/Finance); LGPD; bcb.gov.br/openfinance; openfinancebrasil.org.br.

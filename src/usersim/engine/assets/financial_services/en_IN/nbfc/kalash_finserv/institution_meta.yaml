@@ -1,0 +1,9 @@
+institution_id: kalash_finserv
+display_name: Kalash Finserv
+type: nbfc
+brand_voice: traditional
+domains:
+- lending_mortgage
+- payments
+placeholder: true
+schema_version: v0.1

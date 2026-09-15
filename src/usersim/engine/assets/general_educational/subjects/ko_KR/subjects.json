@@ -1,0 +1,16 @@
+[
+    {"type": "mathematics", "description": "수학 개념과 문제 해결"},
+    {"type": "science", "description": "물리, 화학, 생물 등 과학 전반"},
+    {"type": "language_learning", "description": "외국어 학습과 의사소통 능력 향상"},
+    {"type": "programming", "description": "프로그래밍과 소프트웨어 개발"},
+    {"type": "history", "description": "역사적 사건, 시대, 인물 이해"},
+    {"type": "personal_finance", "description": "개인 재무, 예산 관리, 투자 기초"},
+    {"type": "health_literacy", "description": "건강 정보 이해와 올바른 의료 판단"},
+    {"type": "digital_literacy", "description": "컴퓨터, 인터넷, 온라인 서비스 기본 역량"},
+    {"type": "civics", "description": "시민 교육, 정부 구조, 시민의 권리와 의무"},
+    {"type": "geography", "description": "지리, 지도, 지역과 세계 이해"},
+    {"type": "disaster_preparedness", "description": "태풍, 폭우, 지진 등 재난 대비"},
+    {"type": "honorifics", "description": "한국어 높임말, 직장 예절, 공손한 표현"},
+    {"type": "national_pension", "description": "국민연금 제도와 노후 준비"},
+    {"type": "national_health_insurance", "description": "국민건강보험 제도와 이용 방법"}
+]

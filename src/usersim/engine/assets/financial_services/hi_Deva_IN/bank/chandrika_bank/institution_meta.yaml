@@ -1,0 +1,11 @@
+institution_id: chandrika_bank
+display_name: Chandrika Bank
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- cards
+- payments
+placeholder: true
+display_name_local: चंद्रिका बैंक
+schema_version: v0.1

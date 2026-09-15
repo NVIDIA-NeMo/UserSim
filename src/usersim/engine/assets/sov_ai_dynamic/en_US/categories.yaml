@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: en_US
+taxonomy_id: en_US_sov_ai_dynamic
+taxonomy_version: v0.5.1
+placeholder: false
+categories:
+- id: usa-geography
+  invitation: You want to ask something about US geography in your own voice. Stay practical — what affects where you live, where your family is from, or somewhere you have to travel to.
+  subtopic_hints:
+  - a state-versus-federal authority difference for parks, lands, or waterways
+  - a regional climate pattern (Tornado Alley, Pacific Northwest rain, Gulf hurricane season)
+  - confusion about Census-region definitions (what counts as "Midwest" or "Mountain West")
+  - a coastal-versus-interior contrast in housing, agriculture, or commute
+  - cross-state border issues (interstate compacts, drivers-license reciprocity, tax differences)
+  - geographic terms that get confused (county vs. parish vs. borough; township vs. precinct)
+  - how recent disasters reshape an area (Hurricane Helene, Maui fires, Mississippi flooding)
+  - what to do when a state DOT map and a federal map show different boundaries
+- id: usa-history
+  invitation: You want to ask about US history in your own voice. Bring up whatever connects to your family, your region, or something you keep hearing about that doesn't quite add up.
+  subtopic_hints:
+  - a state's role in a national event that gets skipped in textbooks
+  - a local monument controversy, rename, or removal
+  - immigration-history nuances by decade (Ellis Island, Angel Island, post-1965 shifts)
+  - a frontier or westward-expansion detail specific to your state
+  - civil-rights-era events outside the well-known Selma / Montgomery cities
+  - economic-history shifts (Rust Belt decline, oil booms, dot-com cycles, post-NAFTA)
+  - the local Indigenous nation whose land your town sits on
+  - reconciling family stories with what the archival record says
+- id: usa-culture
+  invitation: You want to ask about US culture in your own voice. Talk about something you noticed in your region or community that you can't quite explain.
+  subtopic_hints:
+  - regional food traditions (Tex-Mex, Cajun, Pacific Northwest, New England seafood)
+  - sports-culture differences by city (NFL Sunday, SEC football, Hockey Belt)
+  - religion or denomination patterns (Mormon West, Protestant South, Catholic Northeast)
+  - dialect or accent recognition without stereotyping
+  - holiday traditions that vary (Juneteenth in Texas, Mardi Gras in NOLA, Pride month)
+  - workplace etiquette differences (East Coast directness, Midwest indirectness, Southern formality)
+  - generational tension over what "American culture" means now
+  - how immigrant communities reshape neighborhoods within one or two generations
+- id: usa-poetry-and-music
+  invitation: You want to ask about US poetry, music, or lyric traditions in your own voice. Bring up a song you grew up with, a poem you half-remember, or something you heard at a wedding or funeral.
+  subtopic_hints:
+  - the difference between Delta blues, Chicago blues, and Mississippi hill-country blues
+  - country versus bluegrass versus Americana — when did the lines move
+  - hymns and gospel traditions in Black church versus white evangelical settings
+  - a regional folk genre (Tejano, zydeco, Appalachian ballad, Hawaiian slack-key)
+  - hip-hop's regional schools (East Coast, West Coast, Dirty South, Midwest)
+  - a Walt Whitman, Langston Hughes, or Maya Angelou passage you want to find
+  - poetry on currency, monuments, or government documents
+  - what to do when the lyrics you remember don't match anything online
+- id: usa-public-services
+  invitation: You want to ask about a US public service in your own voice. Bring up something where the rule, the website, and what someone told you on the phone all disagree.
+  subtopic_hints:
+  - DMV process variations between states (REAL ID, road test waivers, fee schedules)
+  - voter registration and ID requirements that just changed in your state
+  - SNAP, WIC, or Medicaid eligibility around income cutoffs and household composition
+  - Social Security retirement-age rules and the 70/67/62 trade-off
+  - VA benefits process for a family member who served
+  - USPS service issues (PO Box pickup, certified mail, lost packages)
+  - public library systems (interlibrary loan, card reciprocity across counties)
+  - what to do when a federal benefit and a state benefit conflict
+- id: usa-health-systems
+  invitation: You want to ask about US health care in your own voice. Insurance, billing, eligibility, what counts as "in network" — bring up whatever has gotten confusing.
+  subtopic_hints:
+  - the difference between Medicare A, B, C (Advantage), and D
+  - how Medicaid eligibility shifts at the state line
+  - in-network versus out-of-network billing and how to dispute a surprise bill
+  - the Affordable Care Act marketplace open-enrollment cycle and special-enrollment events
+  - prescription costs (generic vs. brand, Costco/Mark Cuban Cost Plus, GoodRx)
+  - emergency-room billing versus urgent care versus telehealth
+  - mental-health parity rules and what "MHPAEA" means in practice
+  - what to do when the insurance website says one thing and the provider says another
+- id: usa-education
+  invitation: You want to ask about US education in your own voice. School-district choice, college admissions, financial aid — pick something concrete to your family or yours.
+  subtopic_hints:
+  - district boundaries and open-enrollment / school-choice rules in your state
+  - the SAT-versus-ACT-versus-test-optional landscape post-2020
+  - FAFSA changes and what's different about the simplified form
+  - in-state versus out-of-state tuition rules for the public flagship
+  - community college transfer pathways and articulation agreements
+  - 529 plan rules and how they interact with FAFSA aid
+  - special-education / IEP / 504 plan distinctions and parent rights
+  - what to do when your kid's school and the state department disagree on a rule
+- id: usa-labor-and-benefits
+  invitation: You want to ask about US work, employment, or labor benefits in your own voice. Hourly vs. salary, gig work, severance, unemployment — pick what's relevant.
+  subtopic_hints:
+  - federal versus state minimum wage and tipped-wage rules
+  - how unemployment-insurance eligibility differs by state
+  - 1099 contractor versus W-2 employee classification — what tells you which
+  - employer-sponsored health insurance and COBRA continuation
+  - 401(k) vesting schedules, employer match, and Roth-vs.-traditional choice
+  - FMLA leave (federal) versus state paid family leave (CA, NY, NJ, MA, etc.)
+  - non-compete clauses and the FTC ban — what's currently enforceable
+  - what to do when the HR handbook and your offer letter disagree
+- id: usa-finance-and-consumer
+  invitation: You want to ask about US money, credit, taxes, or a consumer dispute in your own voice. Bring up a real situation rather than a textbook case.
+  subtopic_hints:
+  - the federal versus state tax-filing deadline and what an extension actually buys you
+  - credit-score factors (FICO vs. VantageScore, why they show different numbers)
+  - HSA versus FSA versus HRA — which one is on offer at your job
+  - savings versus money-market versus brokerage account FDIC/SIPC limits
+  - how to dispute a fraudulent charge under Reg E (debit) versus Reg Z (credit)
+  - student-loan repayment plans (SAVE, IDR, PSLF) and where they stand right now
+  - mortgage points, rate locks, and the Loan Estimate vs. Closing Disclosure
+  - what to do when your bank app, your statement, and the IRS all show different numbers
+- id: usa-digital-services
+  invitation: You want to ask about digital services or online accounts in your own voice. Logins, account recovery, scam patterns, settings you can't find — bring up what's actually happening.
+  subtopic_hints:
+  - account recovery when the recovery phone or email is no longer accessible
+  - difference between SIM-swap, account-takeover, and phishing-link compromises
+  - two-factor authentication options (SMS, app-based, hardware key) and which is safer
+  - what to do when an app's privacy policy changes and you only learn from the news
+  - online-marketplace disputes (eBay, Etsy, Amazon, Facebook Marketplace)
+  - the difference between USPS Informed Delivery alerts and "package delivery" scams
+  - what your data does after you delete an account in California (CCPA) vs. other states
+  - what to do when a service account is locked and customer support sends only form replies

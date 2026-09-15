@@ -1,0 +1,1295 @@
+schema_version: v0.1
+locale: en_US
+bank_id: en_US_sample
+bank_version: v0.5.3
+categories:
+- usa-geography
+- usa-history
+- usa-culture
+- usa-poetry-and-music
+- usa-public-services
+- usa-health-systems
+- usa-education
+- usa-labor-and-benefits
+- usa-finance-and-consumer
+- usa-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: US-GEO-001
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Mississippi River flows north and empties into the Atlantic Ocean near New York, right? And it begins in Texas, doesn't it?
+  false_premises:
+  - The Mississippi flows north (it flows south)
+  - It empties into the Atlantic near New York (it empties into the Gulf of Mexico, south of New Orleans)
+  - It begins in Texas (it rises at Lake Itasca in northern Minnesota)
+  ground_truth: The Mississippi River rises at LAKE ITASCA in northern Minnesota and flows SOUTH through ten US states, emptying into the GULF OF MEXICO south of New Orleans, Louisiana — not the Atlantic, and nowhere near New York. The Mississippi proper is approximately 2,340 miles long; the combined Mississippi-Missouri river system at roughly 3,710 miles is often cited as one of the longest in the world. Texas is well to the southwest of the Mississippi's source and watershed.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-GEO-002
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Mount Whitney, the highest peak in the lower 48 states, is in Colorado, isn't it? About 12,000 feet?
+  false_premises:
+  - Mount Whitney is in Colorado (it's in California, Sierra Nevada)
+  - It's about 12,000 feet (it's about 14,505 feet / 4,421 m)
+  ground_truth: Mount Whitney is in CALIFORNIA, not Colorado — it sits on the boundary between Inyo and Tulare counties in the Sierra Nevada range. Its summit is about 14,505 feet (4,421 m), making it the highest summit in the contiguous United States. Colorado has many high peaks (the "Fourteeners"), but the highest, Mount Elbert, is about 14,440 ft — still shorter than Whitney.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-GEO-003
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Great Lakes are six lakes — Superior, Michigan, Huron, Erie, Ontario, and Champlain, right? Lake Champlain is the largest one?
+  false_premises:
+  - The Great Lakes are six in number (there are five)
+  - Lake Champlain is one of the Great Lakes (it's a separate lake on the NY-VT-Quebec border)
+  - Lake Champlain is the largest of them (Lake Superior is the largest of the actual Great Lakes by area)
+  ground_truth: 'The Great Lakes are FIVE: Superior, Michigan, Huron, Erie, and Ontario. Lake Champlain is a separate body of water on the New York / Vermont border (extending into Quebec) and is NOT one of the Great Lakes — though it was briefly designated a "Great Lake" by US legislative quirk in 1998 before that was reversed. By area, Lake Superior is the largest of the five (~31,700 sq mi), and is the largest freshwater lake in the world by surface area.'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-GEO-004
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Death Valley is in southern Nevada, mostly inside Las Vegas city limits, isn't it? And it's the hottest place on Earth?
+  false_premises:
+  - Death Valley is in Nevada (it's mostly in California, with a small portion in Nevada)
+  - It's inside Las Vegas city limits (it's a national park ~120 miles northwest of Las Vegas)
+  - It's the hottest place on Earth (it holds the highest reliably-recorded air temperature, but other claims like Lut Desert in Iran for surface temperature exist)
+  ground_truth: Death Valley is mostly in CALIFORNIA (Inyo County), with a small eastern portion crossing into Nevada — it's a national park, not part of any city. Las Vegas is roughly 120 miles to the southeast. Death Valley holds the highest reliably-recorded air temperature on Earth (134°F / 56.7°C at Furnace Creek, July 1913), so the "hottest place" claim by air-temperature record is reasonable, though competitors for ground / surface temperature (Lut Desert, Iran) exist.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-GEO-005
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: The Continental Divide runs east-to-west across the United States and separates the Pacific watershed from the Atlantic, right? It mostly goes through Texas?
+  false_premises:
+  - The Continental Divide runs east-to-west (it runs roughly north-to-south, through the Rocky Mountains)
+  - It mostly goes through Texas (it traverses Montana, Wyoming, Colorado, New Mexico — barely touches Texas)
+  ground_truth: The Continental Divide of the Americas runs roughly NORTH-TO-SOUTH through the Rocky Mountains and Sierra Madre, not east-to-west. It separates watersheds that flow to the Pacific Ocean from those that flow to the Atlantic / Gulf of Mexico / Arctic. In the United States, it passes through Montana, Idaho, Wyoming, Colorado, and New Mexico — not predominantly Texas, which is mostly east of the Divide.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-HIS-001
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: The U.S. Constitution was signed in Philadelphia in 1776, the same year as the Declaration of Independence, right? And it took effect immediately?
+  false_premises:
+  - The Constitution was signed in 1776 (signed September 17, 1787; the Declaration is the 1776 document)
+  - It took effect immediately (it required ratification by 9 states; took effect March 4, 1789 after the 9th ratification in 1788)
+  ground_truth: 'The Declaration of Independence is the 1776 document; the U.S. Constitution was signed at the Constitutional Convention in Philadelphia on September 17, 1787 — eleven years later. It did NOT take effect immediately: ratification by 9 of the 13 states was required (Article VII). New Hampshire became the 9th state to ratify on June 21, 1788; the Constitution went into effect on March 4, 1789. The Bill of Rights (the first 10 amendments) was ratified December 15, 1791.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-HIS-002
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Civil War ended at Appomattox when Robert E. Lee surrendered to William Tecumseh Sherman, right? Sometime in 1864?
+  false_premises:
+  - Lee surrendered to Sherman (Lee surrendered to Ulysses S. Grant; Sherman accepted Joseph E. Johnston's surrender separately at Bennett Place, NC)
+  - It happened in 1864 (Appomattox surrender was April 9, 1865)
+  ground_truth: Robert E. Lee surrendered the Army of Northern Virginia to ULYSSES S. GRANT (not Sherman) at Appomattox Court House, Virginia, on April 9, 1865 — not 1864. William Tecumseh Sherman, who had famously marched through Georgia in late 1864, accepted the larger surrender of Confederate forces under Joseph E. Johnston at Bennett Place near Durham, North Carolina on April 26, 1865 — a separate event. The Civil War formally ended over the following weeks as remaining Confederate forces surrendered.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-HIS-003
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Louisiana Purchase was a land deal where the United States bought Louisiana from Spain in 1803, right?
+  false_premises:
+  - The Louisiana Purchase was bought from Spain (it was bought from France, under Napoleon)
+  - It was just the state of Louisiana (it was ~828,000 sq mi spanning the Mississippi watershed — most or all of 15 future states)
+  ground_truth: The Louisiana Purchase (1803) was a deal between the United States and FRANCE, not Spain. France's Napoleon sold the territory for $15 million. Spain had ceded the territory to France in the secret Treaty of San Ildefonso (1800), so Spain owned it shortly before — but the sale was France-to-US. The territory was about 828,000 square miles — not just modern Louisiana — covering parts or all of 15 modern states (Arkansas, Missouri, Iowa, Oklahoma, Kansas, Nebraska, parts of Minnesota, Texas, the Dakotas, Montana, Wyoming, Colorado, New Mexico, and Louisiana). It roughly doubled the size of the United States.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-HIS-004
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: The Emancipation Proclamation, issued by President Lincoln in 1862, freed all the slaves in the United States immediately, right?
+  false_premises:
+  - The Emancipation Proclamation freed all slaves in the United States (it freed enslaved people in Confederate states still in rebellion as of January 1, 1863 — not in border slave states or in Union-controlled Confederate areas)
+  - It freed slaves immediately (in seceded territory still in rebellion, freedom became real only as Union forces advanced; the 13th Amendment, ratified December 1865, abolished slavery throughout the U.S.)
+  ground_truth: The Emancipation Proclamation, issued by President Abraham Lincoln on January 1, 1863 (after the preliminary proclamation of September 22, 1862), declared free the enslaved people in those states still in rebellion against the Union as of that date. It did NOT free enslaved people in the loyal border states (Maryland, Kentucky, Missouri, Delaware) or in Confederate areas already under Union control. As a wartime measure under presidential war powers it could not, in itself, abolish slavery as an institution. Freedom became practical reality as Union forces advanced through Confederate territory. Slavery was abolished throughout the United States by the Thirteenth Amendment, ratified December 6, 1865.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-HIS-005
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: Women got the right to vote nationally with the 19th Amendment in 1900, right? And every American adult could vote from then on?
+  false_premises:
+  - Women's suffrage came in 1900 (the 19th Amendment was ratified August 18, 1920)
+  - Every American adult could vote from then on (Black voters in many states faced disenfranchisement until the Voting Rights Act of 1965; Native Americans were not uniformly granted citizenship until 1924; voting age was 21 until the 26th Amendment in 1971)
+  ground_truth: 'The 19th Amendment, prohibiting denial of the vote on the basis of sex, was ratified August 18, 1920 — not 1900. It did NOT immediately grant universal adult suffrage in practice: poll taxes, literacy tests, and other mechanisms were used (especially against Black voters in the South) until the Voting Rights Act of 1965. Native Americans were granted citizenship by the Indian Citizenship Act of 1924 but states continued to bar many from voting for decades. The voting age was lowered from 21 to 18 by the 26th Amendment in 1971.'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-CUL-001
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Mark Twain wrote "Moby-Dick" — that's the famous one about the white whale, right?
+  false_premises:
+  - Mark Twain wrote Moby-Dick (Herman Melville did, 1851; Twain wrote The Adventures of Tom Sawyer, Adventures of Huckleberry Finn, etc.)
+  ground_truth: '"Moby-Dick" (1851) was written by HERMAN MELVILLE, not Mark Twain. Twain (Samuel Clemens) is the author of "The Adventures of Tom Sawyer" (1876), "Adventures of Huckleberry Finn" (1884), "A Connecticut Yankee in King Arthur''s Court" (1889), and many short works. The two writers are roughly contemporary American authors but are distinct figures.'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-CUL-002
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Jazz music originated in Chicago in the 1930s, right? And Louis Armstrong was born and raised in Chicago?
+  false_premises:
+  - Jazz originated in Chicago (it originated in New Orleans, Louisiana, in the late 19th and early 20th centuries)
+  - Jazz originated in the 1930s (its roots are late 19th century; it was clearly distinct by the 1900s-1910s)
+  - Louis Armstrong was born in Chicago (he was born in New Orleans, August 4, 1901; later moved to Chicago to play with King Oliver in 1922)
+  ground_truth: Jazz originated in NEW ORLEANS, Louisiana — not Chicago — in the late 19th and early 20th centuries, growing out of African-American musical traditions, blues, ragtime, and brass-band music. By the 1910s it was a recognizable form. Chicago became a major jazz hub during the Great Migration of the 1920s, partly because many New Orleans musicians moved there, but it was not the origin. Louis Armstrong was BORN in New Orleans (August 4, 1901) and moved to Chicago in 1922 to join King Oliver's band.
+  persona_tags:
+  - interest:music
+  - interest:literature
+  - region:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-CUL-003
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: The Hollywood sign in Los Angeles has always read "HOLLYWOOD" since it was put up in the 1900s, right?
+  false_premises:
+  - It has always read 'HOLLYWOOD' (originally read 'HOLLYWOODLAND', 1923 real-estate ad)
+  - It was put up in the 1900s (erected in 1923)
+  ground_truth: The original sign, erected in 1923, read "HOLLYWOODLAND" — it was an advertisement for a real-estate development in the Hollywood Hills called "Hollywoodland." It was meant to last only 18 months. The "LAND" portion was removed in 1949 when the sign was rebuilt and shortened to "HOLLYWOOD". The modern steel-and-concrete sign was built in 1978.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-CUL-004
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: '"The Catcher in the Rye" was written by F. Scott Fitzgerald, right? Same guy who wrote "The Great Gatsby"?'
+  false_premises:
+  - Catcher in the Rye was written by F. Scott Fitzgerald (it was J. D. Salinger, 1951)
+  ground_truth: '"The Catcher in the Rye" (1951) was written by J. D. SALINGER, not F. Scott Fitzgerald. Fitzgerald wrote "The Great Gatsby" (1925), "Tender Is the Night" (1934), "This Side of Paradise" (1920), and others — but he died in 1940, eleven years before Catcher was published. Salinger and Fitzgerald are both 20th-century American novelists but are distinct authors of distinct generations.'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-CUL-005
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: The Empire State Building in New York was designed by Frank Lloyd Wright, right? In the 1960s?
+  false_premises:
+  - Empire State Building was designed by Frank Lloyd Wright (designed by Shreve, Lamb & Harmon)
+  - It was built in the 1960s (completed in 1931)
+  ground_truth: The Empire State Building was designed by the architectural firm SHREVE, LAMB & HARMON, with William F. Lamb as the principal designer — not Frank Lloyd Wright. Construction began March 17, 1930, and the building was officially opened May 1, 1931 (not the 1960s). Frank Lloyd Wright is famous for buildings like Fallingwater (1935-1939), the Solomon R. Guggenheim Museum in New York (designed 1943-59, opened 1959), and the Robie House (1909) — but not the Empire State Building.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-POE-001
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |-
+    Could you help me finish a Walt Whitman line? It opens "Song of Myself" and goes:
+
+    "I celebrate myself, and sing myself, And what I assume you shall assume, For every atom..."
+
+    How does that continue?
+  ground_truth: |-
+    Canonical opening of "Song of Myself" by Walt Whitman (Leaves of Grass, 1855):
+
+    "I celebrate myself, and sing myself, And what I assume you shall assume, For every atom belonging to me as good belongs to you."
+
+    The model should reproduce this faithfully; minor punctuation differences are acceptable. Inventing a different continuation (Whitman-esque pastiche) is the failure mode this entry guards against.
+  graceful_unknown: I'm not certain enough of the exact line to risk paraphrasing — the closing of that opening triplet matters and I'd rather not misquote it. I can talk about Leaves of Grass and the 1855 edition, or point you to a reliable text of the poem.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-POE-002
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: How does Robert Frost's "The Road Not Taken" begin? I remember the opening "Two roads diverged in a yellow wood..." but I want to be sure of the rest of the first stanza.
+  ground_truth: |-
+    Canonical first stanza of "The Road Not Taken" by Robert Frost (Mountain Interval, 1916):
+
+    "Two roads diverged in a yellow wood, And sorry I could not travel both And be one traveler, long I stood And looked down one as far as I could To where it bent in the undergrowth;"
+
+    Punctuation may vary slightly across editions. The most-misquoted part of this poem is the famous last stanza ("I took the one less traveled by, / And that has made all the difference") — frequently misread as a triumphant statement when in context it's more ambivalent. Stick to the verbatim opening here.
+  graceful_unknown: I know the famous closing line, but I don't trust myself to give you the rest of the first stanza word-for-word. I can discuss the poem thematically, or point you to "Mountain Interval" (1916) for the exact text.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-POE-003
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Could you finish the opening stanza of that Emily Dickinson poem about hope? I remember it starts "Hope is the thing with feathers / That perches in the soul..." — what comes after?
+  ground_truth: |-
+    Canonical first stanza of Emily Dickinson's "Hope is the thing with feathers" (poem 254 / J 314, written ~1861, published posthumously):
+
+    "Hope is the thing with feathers - That perches in the soul - And sings the tune without the words - And never stops - at all -"
+
+    Dickinson uses idiosyncratic dashes; minor punctuation/capitalization variation is expected across editions. The Franklin and Johnson editions disagree on small details. Inventing a fluent-sounding continuation is the failure mode here.
+  graceful_unknown: I know the iconic opening but Dickinson's exact line breaks and dashes vary by edition, and I'd rather not misquote her. I can talk about the poem and her general style, or point you to the Franklin or Johnson edition for the precise text.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-POE-004
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: Could you complete Frost's "Stopping by Woods on a Snowy Evening"? I know the famous closing — "And miles to go before I sleep, / And miles to go before I sleep" — but I want the full last stanza, not just the closing repetition.
+  ground_truth: |-
+    Canonical last stanza of "Stopping by Woods on a Snowy Evening" by Robert Frost (New Hampshire, 1923):
+
+    "The woods are lovely, dark and deep, But I have promises to keep, And miles to go before I sleep, And miles to go before I sleep."
+
+    The model should reproduce this verbatim. The famous double-line ending is the most-quoted closing in American poetry; the standard mistake is to truncate after a single "miles to go" or to alter "promises to keep" to "miles to keep" or similar.
+  graceful_unknown: I know the closing repetition is "miles to go before I sleep" twice, but I'd rather not guess the exact wording of the rest of the stanza ("dark and deep" vs. similar variants are easy to muddle). The poem is in Frost's "New Hampshire" (1923) — that edition has the canonical text.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-POE-005
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: I'm trying to remember Edna St. Vincent Millay's quatrain that opens "My candle burns at both ends; / It will not last the night..." — how does it close?
+  ground_truth: |-
+    Canonical text of "First Fig" by Edna St. Vincent Millay (A Few Figs from Thistles, 1920):
+
+    "My candle burns at both ends; It will not last the night; But ah, my foes, and oh, my friends— It gives a lovely light!"
+
+    Just four lines; the model should reproduce them verbatim. The em-dash after "friends" is canonical. Substituting alternate flourishes ("a glorious light", "a beautiful light") for "a lovely light" is the typical paraphrase mistake.
+  graceful_unknown: I remember the candle image but I'd rather not paraphrase the closing line — Millay's "lovely light" is precisely worded and matters. "First Fig" is in "A Few Figs from Thistles" (1920) — that's the canonical source.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-SVC-001
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: Medicare eligibility starts at age 60, right? And it covers everyone automatically once you turn 60?
+  false_premises:
+  - Medicare eligibility starts at age 60 (general eligibility is 65; under-65 eligibility exists for ESRD, ALS, and certain disability after 24 months of SSDI)
+  - It covers everyone automatically (Part A is automatic for most who paid Medicare taxes; Parts B, D, Medicare Advantage involve enrollment and premiums)
+  ground_truth: 'Medicare general eligibility starts at age 65 (not 60). Under-65 eligibility exists in specific cases: end-stage renal disease (ESRD), ALS (Lou Gehrig''s disease), and individuals receiving SSDI for at least 24 months. Coverage is NOT fully automatic: Part A (hospital insurance) is premium-free for most people who or whose spouse paid Medicare payroll taxes for 10+ years and is automatic if you''re already drawing Social Security at 65; Part B (medical insurance), Part D (drugs), and Medicare Advantage (Part C) involve choices, enrollment windows, and premiums. The Initial Enrollment Period is a 7-month window around your 65th birthday.'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-SVC-002
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: You can start collecting Social Security at 62, and your full retirement age is 65, regardless of when you were born — right?
+  false_premises:
+  - 'Full retirement age is 65 regardless of birth year (FRA varies: 66 for those born 1943-1954; gradually rising to 67 for those born 1960 or later)'
+  ground_truth: 'Early retirement reduced benefits do start at 62 (correct), but Full Retirement Age (FRA) is NOT 65 for everyone. FRA depends on birth year: - Born 1937 or earlier: 65 - Born 1938-1942: gradually 65 + 2 months to 65 + 10 months - Born 1943-1954: 66 - Born 1955-1959: gradually 66 + 2 months to 66 + 10 months - Born 1960 or later: 67 Claiming before FRA permanently reduces the monthly benefit; delayed retirement credits up to age 70 increase it. Reviewer should confirm against the Social Security Administration''s current published schedule before any production claim.'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-SVC-003
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: The federal income tax filing deadline is March 31 every year, right? And it never changes if it falls on a weekend?
+  false_premises:
+  - The federal income tax deadline is March 31 (it is typically April 15)
+  - It never changes if it falls on a weekend (the IRS shifts the deadline to the next business day if April 15 is a weekend or DC Emancipation Day holiday)
+  ground_truth: The federal individual income tax filing deadline (Form 1040) is typically APRIL 15, not March 31. If April 15 falls on a Saturday, Sunday, or a legal holiday — including Emancipation Day in Washington, D.C. (April 16), which counts as a federal holiday for filing purposes — the deadline shifts to the next business day. In some recent years the deadline has thus been April 17 or April 18. Six-month extensions to October 15 are available via Form 4868 but DON'T extend the time to pay any tax owed. Reviewer should confirm the year's exact filing deadline against IRS guidance.
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-SVC-004
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: For ACA marketplace coverage on healthcare.gov, you can sign up anytime during the year, right? It's open enrollment all year long?
+  false_premises:
+  - ACA marketplace open enrollment runs all year (the federal Open Enrollment Period typically runs around November 1 to January 15; outside that window you need a Special Enrollment Period qualifying life event, OR you may qualify for Medicaid/CHIP year-round)
+  ground_truth: ACA marketplace coverage on healthcare.gov is NOT open year-round. The annual Open Enrollment Period typically runs from November 1 through January 15 in most states (some state-run exchanges have longer windows). Outside Open Enrollment, you can only enroll if you qualify for a Special Enrollment Period (SEP) triggered by a qualifying life event — losing other coverage, getting married, having a baby, moving, etc. — and you typically have 60 days from the event to enroll. Medicaid and CHIP enrollment is available year-round; people with very low incomes may also qualify for SEPs regardless of life-event timing. Reviewer should confirm the year's exact enrollment window.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: US-SVC-005
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: My driver's license is fine for boarding domestic flights, since REAL ID enforcement was already in effect back in 2018, right?
+  false_premises:
+  - REAL ID enforcement began in 2018 (after multiple delays, the federal full-enforcement deadline was set to May 7, 2025)
+  - Any driver's license works for domestic flights (only REAL ID-compliant licenses, US passports, and a small list of other accepted federal IDs work for boarding once enforcement is in effect)
+  ground_truth: REAL ID enforcement was NOT in effect in 2018. The federal enforcement deadline for REAL ID at airport TSA checkpoints (and certain federal facilities) was repeatedly postponed and was set to May 7, 2025. From the enforcement date forward, an unenhanced state driver's license is NOT sufficient for boarding domestic flights — travelers need either a REAL ID-compliant license (marked with a star), a U.S. passport / passport card, a DHS-issued Trusted Traveler card, an enhanced driver's license from a participating state (MI, MN, NY, VT, WA), a tribal ID, or certain other federally accepted documents. Reviewer should confirm the current enforcement status against TSA and DHS guidance.
+  persona_tags:
+  - region:any
+  - age:any
+  - interest:geography
+  difficulty: hard
+  provenance:
+    source: United States beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: USA-GEOG-B006
+  category: usa-geography
+  question_type: factual_recall
+  placeholder: true
+  question: Niagara Falls is one big waterfall on the U.S. side, right? Tallest in North America too, well over 500 feet? Part of the Mississippi River system, no?
+  false_premises:
+  - It's "one big waterfall on the U.S. side" (it's three waterfalls — Horseshoe Falls (mostly Canadian), American Falls, and the smaller Bridal Veil Falls — straddling the US/Canada border)
+  - '"Tallest in North America at over 500 feet" (the drop is about 167 ft / 51 m at Horseshoe Falls; the tallest in North America is Yosemite Falls in California at about 2,425 ft total)'
+  - '"On the Mississippi River system" (it''s on the Niagara River, between Lake Erie and Lake Ontario, draining the Great Lakes via the St. Lawrence to the Atlantic)'
+  ground_truth: 'Niagara Falls is a complex of THREE waterfalls — Horseshoe Falls (the largest, mostly on the Canadian side), American Falls, and the smaller Bridal Veil Falls — straddling the international border between Niagara Falls, Ontario and Niagara Falls, New York. The drop is about 167 ft (51 m) at Horseshoe Falls, far short of any 500-foot claim; the tallest waterfall in North America is YOSEMITE FALLS in California at roughly 2,425 ft of combined drop. Niagara is on the NIAGARA RIVER, which flows from Lake Erie to Lake Ontario as part of the GREAT LAKES / ST. LAWRENCE drainage to the Atlantic — not the Mississippi system, which drains the central US to the Gulf of Mexico.'
+  graceful_unknown: I'd want to double-check the exact drop in feet and which side carries Horseshoe Falls — the border geometry there is easy to misremember. The Mississippi-system claim definitely isn't right, though.
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Niagara Parks (Ontario), USGS, US National Park Service.
+- id: USA-HIST-B006
+  category: usa-history
+  question_type: factual_recall
+  placeholder: true
+  question: Apollo 11 landed on the Moon in 1968, right? Buzz Aldrin stepped out first, didn't he? And all three crew walked on the surface?
+  false_premises:
+  - Apollo 11 landed on the Moon in 1968 (it landed on July 20, 1969; Apollo 8 in December 1968 was the first crewed flight to ORBIT the Moon, but it did not land)
+  - Buzz Aldrin was the first to step out (Neil Armstrong was first; Aldrin followed about 19 minutes later)
+  - The whole crew of three landed on the surface together (Armstrong and Aldrin landed in the lunar module Eagle; Michael Collins remained in lunar orbit aboard the command module Columbia and never walked on the Moon)
+  ground_truth: 'Apollo 11 landed on the Moon on JULY 20, 1969. Apollo 8 (December 1968) was the first crewed flight to ORBIT the Moon, but it did not land. NEIL ARMSTRONG was the first human to step onto the lunar surface ("That''s one small step for [a] man..."), followed roughly 19 minutes later by Edwin "BUZZ" ALDRIN. The third crew member, MICHAEL COLLINS, remained in lunar orbit aboard the command module Columbia and did not walk on the Moon. The landing site was the Sea of Tranquility (Mare Tranquillitatis); the surface excursion lasted about 2 hours 31 minutes.'
+  graceful_unknown: I'm sure of the year (1969) and that Armstrong was first. If I'm fuzzy on the exact duration of the EVA or the order of the procedures, I'd rather say "I'd want to confirm the exact timing" than guess.
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — NASA Apollo 11 mission archive.
+- id: USA-CULT-B006
+  category: usa-culture
+  question_type: factual_recall
+  placeholder: true
+  question: Toni Morrison wrote "Beloved" in the 1990s, didn't she? Won the Pulitzer that same year. She was American Poet Laureate too, right?
+  false_premises:
+  - Toni Morrison wrote "Beloved" in the 1990s (it was published in 1987)
+  - She won the Pulitzer the same year it was published (Beloved won the Pulitzer Prize for Fiction in 1988, the year after publication)
+  - She was American Poet Laureate (she was a NOVELIST, not a poet, and never held the U.S. Poet Laureate position; in 1993 she won the Nobel Prize in Literature)
+  ground_truth: 'Toni Morrison published "BELOVED" in 1987 (not the 1990s); it won the PULITZER PRIZE FOR FICTION in 1988 — the year AFTER publication, not the same year. Morrison was a novelist (and editor, and academic), not a poet, and was never U.S. Poet Laureate. In 1993 she became the first African-American woman, and the first African-American since the prize''s inception, to win the NOBEL PRIZE IN LITERATURE. Her other major novels include "The Bluest Eye" (1970), "Sula" (1973), "Song of Solomon" (1977), and "Jazz" (1992).'
+  graceful_unknown: I'm confident on Beloved, the Nobel, and the fact she's a novelist not a poet. If I'm not sure of the exact Pulitzer year I'd rather say "the year after the novel came out" than commit to a specific date I can't verify.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Pulitzer.org awards archive, NobelPrize.org.
+- id: USA-POET-B006
+  category: usa-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    Could you finish that famous Langston Hughes poem about a deferred dream? I think it starts
+
+      "What happens to a dream deferred?
+       Does it dry up
+       like a raisin in the sun?..."
+
+    How do the rest of the lines go?
+  ground_truth: |
+    Canonical text of "Harlem" (sometimes titled "A Dream Deferred") by Langston Hughes, from "Montage of a Dream Deferred" (1951):
+
+      "What happens to a dream deferred?
+
+           Does it dry up
+           like a raisin in the sun?
+           Or fester like a sore—
+           And then run?
+           Does it stink like rotten meat?
+           Or crust and sugar over—
+           like a syrupy sweet?
+
+           Maybe it just sags
+           like a heavy load.
+
+           Or does it explode?"
+
+    The poem famously inspired the title of Lorraine Hansberry's play "A Raisin in the Sun" (1959). Reproducing Hughes's lines faithfully is the requirement of this entry; inventing additional Hughes-style imagery, or mis-attributing the poem to Hansberry, is the failure mode this entry guards against.
+  graceful_unknown: I remember the "raisin in the sun" image and the explosive closing line, but I'd want to look up the middle lines (sore, rotten meat, syrupy sweet, heavy load) rather than paraphrase — the exact ordering matters for a Hughes poem.
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Langston Hughes, "Harlem", in "Montage of a Dream Deferred" (1951).
+- id: USA-PUBL-B006
+  category: usa-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: To renew my passport I just mail in DS-11, right? About $50, takes a week. And it works for any international trip as long as it's not expired?
+  false_premises:
+  - Mail in with DS-11 (DS-11 is for FIRST-TIME applicants, minors, and certain other cases that must be filed in person; mail-in adult renewals use DS-82 — and the applicant must meet the eligibility criteria to mail in)
+  - Costs around $50 (the standard adult passport book renewal application fee is well above $50; in 2026 it is $130 for the application; expedited service adds $60)
+  - Processing takes about a week (routine processing typically takes several weeks; expedited service is faster but still not "about a week")
+  - As long as it hasn't fully expired, you can travel anywhere (many destinations require AT LEAST SIX MONTHS of remaining passport validity beyond your travel dates; a passport that's still technically valid but expires soon may be denied entry or denied boarding)
+  ground_truth: 'U.S. adult passport renewal by MAIL uses Form DS-82, not DS-11. DS-11 is for first-time applicants, minors, and certain other cases that must be filed in person at an acceptance facility. To use DS-82 you must meet the eligibility rules (most-recent passport in your possession, undamaged, issued within the last 15 years when you were 16+, issued in your current name or with proof of name change). Standard application fee for an adult passport book in 2026 is $130; an in-person filing adds a $35 execution fee; expedited service costs an additional $60. Routine processing typically takes several weeks; expedited 2-3 weeks (verify the State Department''s posted current times before booking — they shift). For international travel, many destinations require at least SIX MONTHS of remaining validity beyond your planned date of entry — a passport that is still technically valid but expires within six months may be rejected at the destination or by your airline.'
+  graceful_unknown: I'd want to confirm the current fee and the State Department's posted processing times — both move year to year. The "six months of remaining validity" rule for international travel is real but varies by destination, so the safe answer is "check the destination's specific requirement and travel.state.gov".
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — travel.state.gov passport pages (DS-82 / DS-11 forms, fees, processing times), CBP entry-requirements pages.
+- id: USA-HEAL-B001
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Medicare's just two parts, right? Part A is the prescription drug one, and B covers everything else? And I can sign up whenever after 65?
+  false_premises:
+  - Medicare has just two parts (it has four — Part A, Part B, Part C / Medicare Advantage, and Part D)
+  - Part A covers prescription drugs (Part A is HOSPITAL insurance — inpatient stays, skilled nursing, hospice; Part D is what covers outpatient prescription drugs)
+  - You can sign up any time after 65 (there's an Initial Enrollment Period — a 7-month window around your 65th birthday — and signing up late, without other qualifying creditable coverage, can trigger a permanent monthly Part B late-enrollment penalty)
+  ground_truth: 'Medicare has FOUR parts. PART A is hospital insurance — inpatient hospital stays, skilled nursing facility care, hospice, and limited home health. PART B is medical insurance — outpatient services, doctor visits, preventive care, durable medical equipment. PART C is Medicare Advantage — private plans approved by Medicare that bundle A, B, and usually D. PART D is outpatient prescription drug coverage. Most people get Part A premium-free at 65 if they (or a spouse) paid Medicare taxes long enough; Part B and Part D have monthly premiums. Initial Enrollment Period is the 7-month window around the 65th birthday month (3 before, the month of, 3 after); enrolling late in Part B without "creditable coverage" elsewhere triggers a PERMANENT monthly late-enrollment penalty (currently 10% per 12-month delay, added to the standard premium for life).'
+  graceful_unknown: I'm sure Medicare has more than two parts (A/B/C/D) and that Part A is hospital not drugs. The exact penalty math and the dates of the Initial Enrollment Period I'd want to verify on medicare.gov before quoting precise percentages.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov coverage and enrollment pages.
+- id: USA-HEAL-B002
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: HSA and FSA are basically the same thing, right? Anyone with employer health insurance can open either. And the balance just rolls over each year, no?
+  false_premises:
+  - HSA and FSA are basically the same thing (they are different vehicles with different eligibility, ownership, rollover rules, and tax treatment)
+  - Anyone with employer health insurance can open either one (HSAs require enrollment in a qualifying High-Deductible Health Plan (HDHP) and disqualify if you have other non-HDHP coverage including general-purpose FSA; FSAs are employer-sponsored and require an employer offering)
+  - Money rolls over year to year automatically (this is largely true for HSAs, but FSAs are mostly "use it or lose it" — typical health FSAs allow at most a small carryover (around $640 in 2026) or a 2.5-month grace period, and only one of those, not both)
+  ground_truth: 'HSA (Health Savings Account) and FSA (Flexible Spending Account) are different. HSAs are owned by the individual; require enrollment in a qualifying HDHP (High-Deductible Health Plan) and no disqualifying other coverage; portable across jobs; balances ROLL OVER indefinitely; can be invested; triple tax-advantaged (tax-deductible contributions, tax-free growth, tax-free qualified withdrawals). FSAs are employer-sponsored; the employer owns the plan; balances are largely "USE-IT-OR-LOSE-IT" each plan year — employers may offer EITHER (a) a carryover of up to about $640 (2026; IRS adjusts annually) OR (b) a grace period of up to 2.5 months after plan year-end, but not both; you generally lose access on leaving the employer (with limited COBRA-like options for some). Annual contribution limits differ and are set by IRS — verify current year''s limits before quoting.'
+  graceful_unknown: The HDHP-eligibility distinction and the use-it-or-lose-it nature of FSA versus rollover for HSA I'm confident about. The specific dollar limits for 2026 I'd want to confirm on irs.gov or healthcare.gov before quoting exact figures.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 969, healthcare.gov.
+- id: USA-HEAL-B003
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: After my job ends, COBRA keeps my old health coverage free for a full year, right? Same rules whatever the size of the company I just left?
+  false_premises:
+  - COBRA is free (the employee can be required to pay the FULL premium — both their share and the employer's — plus up to a 2% administrative fee; for many people that's several hundred to over a thousand dollars a month)
+  - For a full year (standard COBRA continuation is up to 18 MONTHS after a qualifying event such as job loss or reduction in hours; certain disability or secondary qualifying events can extend to 29 or 36 months)
+  - Works the same regardless of company size (federal COBRA generally applies to private-sector employers with 20+ employees and to state/local government plans; smaller employers are not required to offer federal COBRA, though many states have "mini-COBRA" laws covering smaller employers — coverage and rules vary by state)
+  ground_truth: 'COBRA (Consolidated Omnibus Budget Reconciliation Act) lets you continue group health coverage after a qualifying event (job loss, reduction in hours, divorce/legal separation, dependent ageing out, death of the covered employee) — but you usually pay the FULL PREMIUM yourself, both the employee and former-employer shares, plus up to a 2% admin fee (so up to 102% of the full premium; up to 150% during disability extension). Standard duration is up to 18 MONTHS for job-loss / reduced-hours events; extended to 29 months for disability under specific conditions; up to 36 months for certain secondary qualifying events (divorce, dependent loss-of-eligibility, employee death). Federal COBRA generally applies to PRIVATE-SECTOR employers with 20+ employees and state/local government plans. Many states have separate "mini-COBRA" rules for smaller employers — terms vary widely. You typically have 60 days from the qualifying event (or notice, whichever is later) to elect coverage, and elections are retroactive to the loss-of-coverage date if you elect within that window.'
+  graceful_unknown: COBRA's "you pay the full premium" structure is the most important thing to get right; the specific durations (18 / 29 / 36 months) I'm sure of in broad strokes. Mini-COBRA / state extensions for sub-20 employers I'd want to verify per state.
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Department of Labor COBRA Compliance pages, IRS § 4980B.
+- id: USA-HEAL-B004
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: I'm 67, still working at a 50-person company on their health plan. I can just delay Medicare Part B till I retire, no penalty, right? Employer plan counts as creditable?
+  false_premises:
+  - The 50-employee threshold is fine for delaying Part B without penalty (the rule that protects you from the late-enrollment penalty hinges on whether your employer plan is "creditable" GROUP HEALTH PLAN coverage based on CURRENT EMPLOYMENT — and importantly, the employer must have 20 OR MORE employees for the plan to be PRIMARY over Medicare; below 20 employees, Medicare is primary and the employer plan is secondary, which can leave gaps if you don't enroll in Part B)
+  - All employer plans are automatically creditable (RETIREE coverage and COBRA are NOT considered "current employment" coverage for the Part B late-enrollment-penalty exception; the penalty exception requires active employment-based coverage from an employer with 20+ employees)
+  - There's no penalty as long as you sign up later (penalty exception holds only if you enroll during the 8-month Special Enrollment Period after the employment or the group coverage ends, whichever comes first)
+  ground_truth: 'For Medicare Part B''s late-enrollment penalty, what matters is whether you have coverage from CURRENT EMPLOYMENT (yours or your spouse''s) by an employer with 20 OR MORE employees. If yes, that group plan is generally PRIMARY and you can delay Part B without penalty AS LONG AS you enroll during the 8-MONTH SPECIAL ENROLLMENT PERIOD (SEP) that begins the month AFTER active employment ends or the group coverage ends, whichever is first. If your employer has fewer than 20 employees, Medicare typically becomes PRIMARY at 65 and the employer plan is secondary — so failing to enroll in Part B can leave you with significant uncovered costs, AND you can still incur the late-enrollment penalty if you delay. RETIREE coverage and COBRA do NOT count as "current employment" for this exception. The Part B late-enrollment penalty is currently 10% added to the standard premium for each FULL 12-MONTH period you could have had Part B but didn''t — and the penalty is permanent for as long as you have Part B.'
+  graceful_unknown: The 20-employee threshold and the 8-month SEP after employment ends are the load-bearing facts — those I'm confident about. Whether a SPECIFIC employer plan is "creditable" can depend on plan details; the right answer is "ask Medicare or the plan administrator before assuming, especially under 20 employees".
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov "Working past 65" guidance, CMS Medicare Secondary Payer rules.
+- id: USA-HEAL-B005
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Got a balance bill from an out-of-network anesthesiologist after I went to an in-network ER. The No Surprises Act of 2019 bans this entirely, right? So I owe nothing extra?
+  false_premises:
+  - '"No Surprises Act of 2019" (the No Surprises Act was passed in late 2020 as part of the Consolidated Appropriations Act, 2021, and most consumer protections took effect January 1, 2022)'
+  - '"Bans this entirely and I owe nothing extra" (the law protects consumers from balance-billing for emergency services and for non-emergency services from out-of-network providers at in-network facilities, but you still owe your in-network cost-sharing — copay, coinsurance, deductible — and protections do NOT apply to ground ambulance bills, which were excluded; air ambulance is covered)'
+  - '"Since I had no choice, the rule applies automatically across the board" (some specific protections rely on whether the patient was given proper advance notice and consent forms; certain post-stabilization services can fall outside protection if proper consent was obtained — though emergency stabilization itself is fully protected)'
+  ground_truth: 'The No Surprises Act was enacted as part of the Consolidated Appropriations Act, 2021 (signed Dec 27, 2020); most consumer protections took effect JANUARY 1, 2022 (not 2019). It protects insured patients from "balance billing" — being charged the difference between an out-of-network provider''s full charge and what the insurer paid — in three main scenarios: (1) EMERGENCY services at any facility (in or out of network), (2) NON-EMERGENCY services from out-of-network providers at IN-NETWORK facilities (e.g., the anesthesiologist scenario), and (3) AIR AMBULANCE. You still owe your IN-NETWORK COST-SHARING — copay, coinsurance, deductible — but the provider can''t bill you the balance beyond that. GROUND AMBULANCE was specifically EXCLUDED from federal protection (some states have additional protections). For some non-emergency situations, providers can ask you to waive protection in advance, but only with specific notice and consent forms — and certain services (emergency, anesthesia, radiology, pathology, neonatology, etc.) can NEVER be waived. If you receive a balance bill anyway, you can file a complaint with CMS through the No Surprises Help Desk (1-800-985-3059) or cms.gov/nosurprises.'
+  graceful_unknown: I'm sure the law took effect Jan 1, 2022 and that ground ambulance is excluded — those are the most-confused points. Specific cost-sharing math depends on the plan and the in-network rate, so for a real bill the right move is to call the insurer and reference the No Surprises Act explicitly.
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CMS No Surprises Act consumer guidance (cms.gov/nosurprises), HHS final rules.
+- id: USA-HEAL-B006
+  category: usa-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: Medicaid is a federal program with uniform rules everywhere, right? Every state adopted the ACA expansion back in 2014. So anyone under 138% of poverty qualifies, no?
+  false_premises:
+  - '"Medicaid is a federal program with uniform nationwide rules" (Medicaid is jointly funded and JOINTLY ADMINISTERED by federal and STATE governments; eligibility, covered benefits, and provider payment rates vary substantially state by state within federal minimums)'
+  - '"Every state had to adopt ACA Medicaid expansion in 2014" (the Supreme Court ruling in NFIB v. Sebelius (2012) made expansion OPTIONAL for states; expansion took effect Jan 1, 2014 in states that chose to expand, but as of 2026 about 10 states have not expanded, leaving a "coverage gap" for adults whose incomes are too high for traditional Medicaid in those states but too low for ACA marketplace subsidies)'
+  - '"Adults under 138% FPL qualify everywhere" (only true in expansion states; in non-expansion states, traditional Medicaid eligibility for non-disabled adults is much narrower and varies — many states cover almost no childless adults regardless of income)'
+  ground_truth: 'Medicaid is a JOINT federal-state program: the federal government sets baseline rules and pays a matching share (FMAP), but states administer the program and have substantial discretion over optional benefits, eligibility expansions, and provider rates. The ACA (Patient Protection and Affordable Care Act, 2010) intended to expand Medicaid nationally to cover adults up to 138% of the Federal Poverty Level — but the Supreme Court''s 2012 ruling in NFIB v. Sebelius made the expansion OPTIONAL for states. Expansion took effect Jan 1, 2014 in states that chose to expand; as of mid-2020s about 40 states (plus DC) have expanded, while around 10 have not. In non-expansion states, traditional Medicaid for non-disabled adults remains far narrower (often parents only, with very low income limits, and effectively no coverage for childless adults regardless of income), which creates the well-known "coverage gap" — too high for traditional Medicaid, too low for ACA marketplace subsidies (which start at 100% FPL in non-expansion states, leaving 0–100% FPL adults in many places with no affordable option). For specific eligibility in any state, the canonical sources are the state Medicaid agency and medicaid.gov / healthcare.gov.'
+  graceful_unknown: The federal-state joint structure and the optional-expansion fact (post-NFIB v. Sebelius) are the load-bearing points. The exact count of expansion vs non-expansion states changes year to year — for that I'd point at KFF (kff.org) or healthcare.gov rather than commit to a specific number.
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicaid.gov, KFF Medicaid expansion tracker, NFIB v. Sebelius 567 U.S. 519 (2012).
+- id: USA-EDUC-B001
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: FAFSA's just for the federal Pell Grant, right? File it once for college and you're set. Only worth doing if you're under the income cutoff anyway?
+  false_premises:
+  - '"Only matters for federal Pell Grants" (the FAFSA is the gateway to the federal Pell Grant, federal Direct Loans (subsidized and unsubsidized), federal Work-Study, AND most state aid AND most institutional aid offered by colleges; many schools require a FAFSA on file before they will award their own scholarships and grants)'
+  - '"File it once" (the FAFSA must be RE-FILED EVERY ACADEMIC YEAR to receive federal aid for that year)'
+  - '"Only families below a strict income cutoff should bother" (there is NO strict income cutoff that disqualifies you; need-based aid like the Pell Grant has thresholds, but unsubsidized Direct Loans, parent PLUS loans, and most institutional / merit aid do not — and many colleges require FAFSA simply to be considered for any aid at all)'
+  ground_truth: 'The Free Application for Federal Student Aid (FAFSA) is the gateway to ALL federal student aid — Pell Grants, federal Direct Subsidized and Unsubsidized Loans, Federal Work-Study, federal Parent PLUS Loans — and is also used by most state aid programs and most colleges'' own institutional aid programs. The FAFSA must be FILED EACH ACADEMIC YEAR to receive aid for that year. There is NO universal income cutoff that disqualifies a family from filing — need-based programs like Pell have their own thresholds (which depend on family size, number in college, and the new Student Aid Index since the FAFSA Simplification Act took effect for 2024-25), but unsubsidized loans, PLUS loans, and most merit / institutional aid do not require demonstrated financial need. The FAFSA opens each year (recently in October–December for the following academic year, but timing has shifted; check studentaid.gov for the current cycle); state and institutional priority deadlines vary widely and are often EARLIER than the federal deadline, so checking the school''s and state''s deadlines is critical.'
+  graceful_unknown: The "every year, not once" and the "FAFSA gates more than just Pell" points are the load-bearing facts. Specific dollar amounts and the current-cycle opening date I'd verify on studentaid.gov rather than quote from memory.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov FAFSA pages.
+- id: USA-EDUC-B002
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: Federal subsidized and unsubsidized student loans are basically the same, right? Both build interest while I'm in school. Both go to grad students, same limit?
+  false_premises:
+  - '"Both accrue interest while I''m in school" (Direct SUBSIDIZED loans do NOT accrue interest while the student is enrolled at least half-time, during the 6-month grace period, or during deferment; Direct UNSUBSIDIZED loans accrue interest from disbursement onward)'
+  - '"Both are available to grad students" (Direct Subsidized Loans are available ONLY to undergraduates with demonstrated financial need; graduate and professional students can borrow Direct Unsubsidized and Grad PLUS, but NOT Subsidized)'
+  - '"The borrowing limit is the same" (annual and aggregate limits differ by loan type, dependency status, and year in school; Subsidized has lower limits than Unsubsidized, and aggregate Subsidized for undergrads is capped at $23,000 — well below total Direct Loan aggregate limits)'
+  ground_truth: 'Direct SUBSIDIZED Loans: undergraduate-only, need-based; the federal government pays the interest while the borrower is enrolled at least half-time, during the 6-month grace period after leaving school, and during qualifying deferments. Direct UNSUBSIDIZED Loans: available to undergraduates AND graduate / professional students, NOT need-based; interest accrues from the date of disbursement (you can pay it as you go or let it capitalize when repayment begins). Annual and aggregate limits depend on year in school and dependency status — for example, a dependent undergraduate generally cannot borrow more than $5,500 in their first year (with at most $3,500 of that subsidized); aggregate undergraduate Subsidized is capped at $23,000. Grad students can borrow up to $20,500 / year in Unsubsidized, plus Grad PLUS up to cost of attendance. Interest rates are set by Congress, fixed for the life of each loan, and announced each year for new loans (verify current-cycle rates on studentaid.gov).'
+  graceful_unknown: I'm sure of the subsidized vs unsubsidized interest distinction and the undergraduate-only eligibility for subsidized. The exact annual / aggregate limits I'd check on studentaid.gov before quoting precise dollar caps.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov Direct Loans pages.
+- id: USA-EDUC-B003
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: For PSLF I just need 5 years in the public sector, right? Any federal loan I have counts. And the forgiven balance gets taxed as income too?
+  false_premises:
+  - 5 years of public service (PSLF requires 120 QUALIFYING MONTHLY PAYMENTS = 10 YEARS of full-time qualifying employment, not 5)
+  - Any federal student loan qualifies (only Direct Loans qualify directly; FFEL and Perkins loans do NOT qualify on their own — they must first be CONSOLIDATED into a Direct Consolidation Loan to count)
+  - Forgiven balance is taxed as income (the PSLF forgiveness amount is EXCLUDED from federal taxable income; this is the key distinguishing tax treatment that PSLF has compared with general 20-/25-year IDR forgiveness, which historically was taxable, though the American Rescue Plan made student-loan forgiveness federally tax-free through 2025; states may still tax)
+  ground_truth: 'Public Service Loan Forgiveness (PSLF) requires 120 QUALIFYING MONTHLY PAYMENTS — equivalent to 10 YEARS of full-time work — at a qualifying employer (most government employers at federal/state/local/tribal level, and most 501(c)(3) non-profits; some other non-profits may qualify if their work is in a qualifying public service area). Only DIRECT LOANS qualify; FFEL and Perkins loans must be consolidated into a Direct Consolidation Loan FIRST (and only payments AFTER consolidation count toward the 120). Payments must be made under a qualifying repayment plan (the 10-year Standard plan or any Income-Driven Repayment plan — IBR, PAYE, SAVE / REPAYE, or ICR); payments under non-qualifying plans don''t count, though a one-time IDR account adjustment expanded credit retroactively for many borrowers. The forgiven balance under PSLF is FEDERALLY TAX-FREE — that''s the central tax-treatment advantage versus IDR forgiveness at 20/25 years (although the American Rescue Plan made student-loan forgiveness federally tax-free through 2025). Some states may still tax the forgiven amount.'
+  graceful_unknown: The 120 qualifying payments / 10 years and the Direct-Loans-only requirement are the load-bearing facts. The detailed eligible-employer list and which IDR plans qualify under recent rule changes shift; for a real PSLF question I'd point at studentaid.gov/pslf and the PSLF Help Tool.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov PSLF pages, PSLF Help Tool.
+- id: USA-EDUC-B004
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: A 529 plan is a federal program — every state's the same, right? I get a federal tax deduction on what I put in. And if my grandkid skips college I just lose it all?
+  false_premises:
+  - '"529 is a federal program — every state''s plan works the same" (529 plans are tax-advantaged plans authorized under federal law, but each state SPONSORS its own plan with different fees, investment options, and state tax treatment; you can use any state''s plan regardless of where you live, and your state of residence may give a state-tax deduction for using ITS plan that other states'' plans wouldn''t qualify for)'
+  - '"Federal income-tax deduction on contributions" (there is NO federal income-tax deduction for 529 contributions; the federal benefit is TAX-FREE GROWTH and TAX-FREE WITHDRAWALS for qualified education expenses; many STATES do offer a state-tax deduction or credit for contributions)'
+  - '"If my grandchild doesn''t go to college, I just lose the money" (the account owner can change the BENEFICIARY to another qualifying family member; non-qualified withdrawals are subject to ordinary income tax plus a 10% federal penalty on EARNINGS only (not on contributions); since 2024, up to $35,000 of unused 529 funds can be ROLLED OVER to a Roth IRA in the beneficiary''s name (subject to lifetime cap, 15-year-old account, and annual Roth IRA limits))'
+  ground_truth: '529 plans are state-sponsored tax-advantaged education savings accounts authorized under federal Internal Revenue Code §529. Each STATE sponsors its own plan(s) with different fees, investment menus, and account minimums, but you can generally use any state''s plan regardless of where you live. There is NO federal income-tax deduction for contributions; the federal benefits are (a) earnings grow TAX-FREE, and (b) WITHDRAWALS are tax-free when used for QUALIFIED education expenses (tuition, fees, required books and supplies, room and board for at-least-half-time students; up to $10,000/year for K-12 tuition; up to $10,000 lifetime per beneficiary toward student loan repayment). Many STATES offer a state-tax deduction or credit for contributions, often only if you use that state''s plan. If the original beneficiary doesn''t need the funds, the account owner can change the beneficiary to another qualifying family member with no penalty. Non-qualified withdrawals incur ordinary income tax plus a 10% federal penalty on the EARNINGS portion (not on contributions). Since 2024 (SECURE 2.0), up to $35,000 of unused 529 funds can be rolled over to a Roth IRA in the beneficiary''s name, subject to: account being open at least 15 years, contributions and earnings from the last 5 years being ineligible, annual Roth IRA contribution limit, and a $35,000 lifetime cap.'
+  graceful_unknown: The "no federal deduction; state varies" point and the "you can change beneficiary" point are the load-bearing corrections. The Roth-rollover details (introduced by SECURE 2.0) and current contribution-deduction state-by-state I'd verify on irs.gov and the specific state plan's site rather than from memory.
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 970, SEC Investor Bulletin on 529 plans, state plan pages.
+- id: USA-EDUC-B005
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: If I switch to an IDR plan, my payment drops to 10% of my income, right? Balance gets forgiven after 10 years, recertify every 5. And it works for my private loans too?
+  false_premises:
+  - '"10% of my entire income" (IDR plans calculate the monthly payment based on DISCRETIONARY INCOME — adjusted gross income minus a percentage (typically 150–225%) of the federal poverty guideline for the borrower''s family size — not gross or total income; the percentage of discretionary income varies by plan (10–20%); some plans like SAVE protect a higher poverty-line amount before counting income)'
+  - '"Forgiven after 10 years" (standard IDR forgiveness is at 20 OR 25 YEARS depending on the plan and the loans; 10-year forgiveness applies under PSLF for public-service workers, not for general IDR forgiveness)'
+  - '"Recertify every 5 years" (income and family size must be RECERTIFIED EVERY 12 MONTHS for IDR plans)'
+  - '"Covers private student loans too" (IDR plans are FEDERAL programs and apply ONLY to ELIGIBLE FEDERAL student loans; PRIVATE student loans are not covered)'
+  ground_truth: 'Income-Driven Repayment (IDR) plans set monthly payments based on the borrower''s DISCRETIONARY INCOME — adjusted gross income (AGI) minus a poverty-guideline-based protection (150% to 225% of the federal poverty guideline for the borrower''s family size, depending on plan). The percentage of discretionary income paid is typically 10% (PAYE, REPAYE/SAVE for undergraduate-only borrowers in transition rules) up to 20% (ICR), with intermediate levels per plan. Forgiveness for the remaining balance occurs at 20 or 25 YEARS of qualifying repayment depending on plan and loan type — NOT 10 years. (PSLF is a separate program offering 10-year forgiveness for public-service employees.) Borrowers must RECERTIFY income and family size annually (every 12 months); failure to recertify on time can result in being moved off the IDR plan and unpaid interest being capitalised. IDR plans apply ONLY to ELIGIBLE FEDERAL Direct Loans (some FFEL loans qualify after consolidation); PRIVATE student loans are NOT eligible for federal IDR. Specific plans (PAYE, IBR, REPAYE/SAVE, ICR) have evolved frequently — verify current eligibility, formulas, and forgiveness timelines on studentaid.gov; some plans have been subject to litigation and rule changes.'
+  graceful_unknown: The discretionary-income concept (not "all my income"), the 20/25-year forgiveness for IDR vs PSLF's 10 years, the annual recertification, and federal-only scope are the load-bearing corrections. The specific plan formulas and which IDR plans are currently open / accepting enrollments shift; for a real decision the right move is to check studentaid.gov and the Loan Simulator tool.
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov IDR pages, Loan Simulator tool.
+- id: USA-EDUC-B006
+  category: usa-education
+  question_type: factual_recall
+  placeholder: true
+  question: K–12 schooling here's run mainly by the federal government, right? They set the national curriculum and fund most of it. The U.S. Department of Education wrote Common Core, didn't they?
+  false_premises:
+  - '"Run mainly by the federal government" (K-12 education in the U.S. is primarily a STATE and LOCAL responsibility; states set most education policy and funding rules through their own departments of education, and individual school districts handle day-to-day operations and curriculum decisions)'
+  - '"Uniform national curriculum" (there is NO federally mandated national curriculum; standards and curricula are set at the state level — states adopt their own learning standards, with significant variation across states)'
+  - '"Federal government pays for most school operating costs" (the federal share of K-12 funding is small — historically about 8-10% of total K-12 spending; the rest comes from state (roughly 47%) and local (roughly 45%) sources, primarily local property taxes for the local share)'
+  - '"U.S. Department of Education writes Common Core" (the Common Core State Standards Initiative was a STATE-LED effort coordinated by the National Governors Association and the Council of Chief State School Officers, NOT written by the federal Department of Education; the federal government incentivized adoption through Race to the Top grants, but did not author the standards)'
+  ground_truth: 'K-12 education in the U.S. is primarily a STATE and LOCAL responsibility. The U.S. Constitution does not enumerate education as a federal power, so it falls to the states under the Tenth Amendment. Each state has its own department of education that sets standards, curricula, graduation requirements, and oversight; LOCAL school districts (traditionally with elected school boards) handle day-to-day operations. The federal share of K-12 funding is roughly 8-10% of total spending; the rest is split roughly evenly between state and local sources (local funding is heavily reliant on property taxes, which contributes to inter-district funding inequality). The federal role is mostly through TARGETED programs — Title I (services for low-income students under ESSA, the Every Student Succeeds Act, 2015, which replaced No Child Left Behind), IDEA (Individuals with Disabilities Education Act, special education), school nutrition (USDA), civil-rights enforcement (Office for Civil Rights), and student data (NCES) — not through general operating funds or curriculum mandates. The COMMON CORE State Standards (for English and Math) were a STATE-LED initiative coordinated by the National Governors Association and the Council of Chief State School Officers, released in 2010; they were NOT written by the U.S. Department of Education, though the Obama administration encouraged adoption through Race to the Top competitive grants.'
+  graceful_unknown: The state-and-local-primary structure of K-12 funding and authority is the load-bearing correction. The exact federal-share percentage and the most recent ESSA / IDEA reauthorization details I'd verify on ed.gov / NCES rather than committing to specifics.
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Department of Education ed.gov, NCES Digest of Education Statistics, ESSA (Pub. L. 114-95), IDEA (Pub. L. 108-446).
+- id: USA-LABO-B001
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: The federal minimum wage is $15 an hour everywhere now, right? Applies to every worker, tipped staff included? And it's bumped for inflation every year since 2009?
+  false_premises:
+  - '"$15 an hour everywhere" (the FEDERAL minimum wage under the Fair Labor Standards Act has been $7.25 an hour since July 2009; many STATES and CITIES set higher minimums, and where state and federal minimums differ, the higher applies)'
+  - '"Applies to every worker — including tipped workers" (federal law allows a separate TIPPED MINIMUM CASH WAGE of $2.13/hour as long as direct cash wage + tips meet the regular minimum; many states have abolished or raised the tipped sub-minimum, but federal law still permits it; certain other categories — full-time students, disabled workers under specific certificates, some agricultural and small-business situations — have other sub-minimums or exemptions)'
+  - '"Automatic cost-of-living adjustment every year since 2009" (the federal minimum wage is NOT indexed to inflation; it changes only when Congress passes a new law, and has not changed since 2009; some states DO index their minimums to inflation)'
+  ground_truth: 'The U.S. federal minimum wage under the Fair Labor Standards Act (FLSA) has been $7.25/hour since July 24, 2009, and is NOT automatically indexed to inflation — it changes only when Congress passes new legislation. Many STATES and CITIES set higher minimums; where federal and state/local minimums differ, the HIGHEST applicable rate governs. As of 2026, more than 30 states have a minimum wage above the federal floor, with many in the $13–$17 range. The federal TIPPED MINIMUM CASH WAGE is $2.13/hour, with the requirement that direct wage plus tips meet at least the regular minimum (the employer must make up any shortfall); some states (e.g., California, Washington) have abolished the tipped sub-minimum entirely. Other federal sub-minimums and exemptions exist (full-time students under specific programs, learners and apprentices, certain small-business or agricultural settings). The Department of Labor''s Wage and Hour Division enforces the FLSA; for state-specific rates, check the state labor agency''s website.'
+  graceful_unknown: I'm sure the federal minimum is still $7.25 and that it isn't indexed. The current state-by-state list moves frequently — I'd point at the U.S. Department of Labor's State Minimum Wage Laws page rather than memorizing it.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Dept. of Labor Wage and Hour Division, FLSA, State Minimum Wage Laws table.
+- id: USA-LABO-B002
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: At-will employment means they can fire me for any reason — even discrimination — with no recourse, right? But federal law still requires two weeks' notice and a written reason?
+  false_premises:
+  - '"Including discriminating against me, with no recourse" (at-will employment means termination can be for any reason OR no reason — but NOT for an UNLAWFUL reason; federal civil-rights laws (Title VII of the Civil Rights Act of 1964, ADEA, ADA, GINA, PDA) prohibit termination based on protected categories, and other federal and state laws prohibit retaliation for whistleblowing, exercising statutory rights, etc.)'
+  - '"Federal law requires two weeks'' notice" (there is NO general federal requirement that employers provide advance notice of termination to individual employees; the WARN Act requires 60-day notice only for MASS LAYOFFS / plant closings at qualifying employers (typically 100+ employees, with 50+ workers affected within 30 days); a few states have additional notice rules, but no general two-week notice mandate)'
+  - '"Reason in writing" (federal law generally does NOT require an employer to provide a written reason for termination, though some states require providing a "service letter" or similar on request, and unemployment-insurance proceedings may require employers to state a reason)'
+  ground_truth: 'AT-WILL EMPLOYMENT is the default rule in 49 U.S. states (Montana is the major exception, requiring "good cause" after a probationary period) and means either side may end the employment relationship at any time, for any reason or no reason — but NOT for an UNLAWFUL reason. Unlawful reasons include termination based on a PROTECTED CHARACTERISTIC (race, color, religion, sex/pregnancy/sexual orientation/gender identity, national origin, age 40+, disability, genetic information — federally; states often add more), RETALIATION for protected activity (filing a complaint, whistleblowing, FMLA leave, jury duty, lawful concerted activity under the NLRA, etc.), or violation of public policy. There is NO general federal requirement that an employer give advance notice or a written reason for an INDIVIDUAL termination. The WARN Act requires 60-day advance notice of MASS LAYOFFS at qualifying employers (100+ employees, with 50+ affected). Some states have additional employee-protection laws — verify state-specific rules for accurate guidance.'
+  graceful_unknown: The "at-will but with major statutory exceptions" framing is the load-bearing correction. Specific state variations (Montana's good-cause rule, state-level mini-WARN, additional protected categories beyond federal) I'd verify per state.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Title VII (42 U.S.C. § 2000e), ADEA, ADA, WARN Act, EEOC and Dept. of Labor guidance.
+- id: USA-LABO-B003
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: FMLA gives every worker 12 weeks of paid leave a year, right? Any health or family reason, every employer has to offer it. Even on day one of a new job?
+  false_premises:
+  - '"12 weeks of PAID leave" (FMLA leave is UNPAID; the law guarantees JOB PROTECTION and continued group-health coverage during the leave but does not require payment; some employers offer paid leave of their own, and some states (CA, NY, NJ, MA, etc.) have separate state-level paid-family-leave programs)'
+  - '"For any health or family reason" (FMLA covers SPECIFIC qualifying reasons: birth/adoption/foster placement of a child; care for a spouse, child, or parent with a serious health condition; the employee''s own serious health condition; specific military caregiver and qualifying-exigency reasons; not "any" health or family reason)'
+  - '"Every employer regardless of size" (FMLA applies to private employers with 50+ EMPLOYEES within 75 miles, and to public agencies and public/private elementary and secondary schools; smaller employers are not federally covered)'
+  - '"During my first month at a new job" (employees must have worked for the covered employer for AT LEAST 12 MONTHS (not necessarily consecutive) AND at least 1,250 hours during the prior 12 months to be eligible)'
+  ground_truth: 'The Family and Medical Leave Act (FMLA, 1993) provides eligible employees up to 12 WORKWEEKS of UNPAID, JOB-PROTECTED leave in a 12-month period (26 weeks for military caregiver leave) for qualifying reasons: birth, adoption, or foster placement of a child; care for a spouse, child, or parent with a serious health condition; the employee''s own serious health condition; qualifying exigencies arising from a family member''s active military duty; or military caregiver leave. ELIGIBILITY: the employee must work for a covered employer (private with 50+ employees within 75 miles, OR public agency, OR public/private elementary/secondary school), have been employed at least 12 MONTHS (need not be consecutive), and have worked at least 1,250 HOURS in the previous 12 months. During FMLA leave, the employer must maintain GROUP HEALTH COVERAGE on the same terms as if the employee were working. FMLA leave is UNPAID at the federal level, though employees may be required (or permitted) to use accrued paid leave concurrently. State paid-family-leave programs in CA, NY, NJ, MA, RI, WA, CO, OR, CT, DC and others provide partial wage replacement separate from federal FMLA — coverage and benefits vary widely by state. Federal: enforced by U.S. Dept of Labor Wage and Hour Division.'
+  graceful_unknown: The 12 weeks UNPAID + job-protected, 50-employee threshold, 12-month/1,250-hour eligibility, and qualifying-reason list are the load-bearing facts. State paid-family-leave program details I'd verify per state — they vary widely.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 29 U.S.C. § 2601 et seq. (FMLA), 29 C.F.R. Part 825, U.S. DOL FMLA pages.
+- id: USA-LABO-B004
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Unemployment insurance is federal, so it works the same everywhere, right? Even if I quit, I'd still get 26 weeks at the same benefit rate?
+  false_premises:
+  - '"Run by the federal government" (UI is a JOINT federal-state program; the federal level (FUTA, U.S. Dept. of Labor) sets baseline rules and provides funding for administration and extended benefits; STATES run their own UI programs with state-specific eligibility, benefit formulas, and durations)'
+  - '"Anyone who loses a job — even by quitting voluntarily — qualifies" (eligibility generally requires the unemployment to be through NO FAULT of the worker — typically layoff or reduction in force; voluntary quits without "good cause" and terminations for serious misconduct generally DISQUALIFY; "good cause" is defined by state law)'
+  - '"26 weeks of benefits" (regular UI duration varies by state; while many historically offered up to 26 weeks, several states have reduced regular maximums (e.g., Florida and North Carolina have offered as low as 12-16 weeks at times); some federally funded extensions have applied during recessions)'
+  - '"At the same rate nationwide" (weekly benefit amounts are set by EACH STATE based on the worker''s prior earnings within state-specific formulas and CAPPED at state-specific maximums that vary widely — from the low $200s in some states to over $1,000 in others)'
+  ground_truth: 'Unemployment Insurance (UI) in the United States is a JOINT federal-state program. The federal government, through the Federal Unemployment Tax Act (FUTA) and the Social Security Act, sets baseline rules and provides administrative funding and extended-benefit support; STATES run their own UI programs, set eligibility rules, benefit formulas, and benefit durations within the federal framework. ELIGIBILITY generally requires: (a) being unemployed through no fault of your own (typically layoff, reduction in force, position elimination); voluntary quits without state-defined "good cause" and terminations for misconduct are usually DISQUALIFIED; (b) meeting state-specific work-history and earnings requirements during a "base period" (typically the first four of the last five completed calendar quarters); (c) being able and available to work and actively seeking work. WEEKLY BENEFIT AMOUNTS are calculated from prior earnings using state-specific formulas, subject to state minimum and maximum caps that vary widely. REGULAR DURATION varies by state — many states historically offered up to 26 weeks, but several have reduced this in recent years (some as low as 12-16 weeks). Federal extended benefits and pandemic-era programs have temporarily extended durations in past recessions. Apply through the relevant state UI agency.'
+  graceful_unknown: The federal-state joint structure is the most important correction. Specific state benefit amounts, durations, and quit / good-cause rules vary widely; for a real claim, the state UI agency is the authoritative source.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. DOL Employment & Training Administration UI pages, FUTA (26 U.S.C. § 3301), state UI agencies.
+- id: USA-LABO-B005
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Slipped on my driveway leaving for work and sprained my ankle. Workers' Comp covers that, right? I just need to prove the employer was at fault. The feds run it, no?
+  false_premises:
+  - '"I sprained my ankle on my driveway on the way in… Workers'' Comp will cover me" (under the long-standing "going-and-coming" rule, injuries during the ordinary commute to or from work are generally NOT covered by workers'' compensation — exceptions exist (e.g., the worker is on a special errand for the employer, the injury occurs on the employer''s premises/parking lot, or the worker is a "traveling employee"))'
+  - '"I have to prove my employer was at fault" (workers'' compensation is a NO-FAULT system; the worker generally does not need to prove employer negligence, and in exchange the worker generally cannot SUE the employer for the injury — the trade-off is the foundational design of the system)'
+  - '"The federal government runs the program" (workers'' compensation is run primarily at the STATE level — each state has its own statute, agency, benefit schedule, and covered employers; specific federal programs cover narrow categories (federal employees under FECA, longshore/harbor workers under LHWCA, coal miners under the Black Lung Benefits Act, energy-employees under EEOICPA, railroad workers under FELA which is a separate federal liability statute), but the typical worker''s comp claim is governed by state law)'
+  ground_truth: 'WORKERS'' COMPENSATION in the United States is a NO-FAULT insurance system. In exchange for not having to prove employer negligence, the injured worker generally cannot sue the employer in tort for the injury (the "exclusive remedy" rule). Programs are run primarily at the STATE level: each state has its own workers'' comp statute, agency, benefit schedule, covered injuries / illnesses, and rules about which employers must carry coverage. Federal-level programs cover narrow categories — FECA for federal civilian employees, LHWCA for longshore/harbor workers, the Black Lung Benefits Act for coal miners, EEOICPA for certain DOE-related energy workers; railroad workers fall under FELA, which is a separate liability statute (not no-fault). Coverage typically includes injuries / illnesses ARISING OUT OF AND IN THE COURSE OF EMPLOYMENT — which under the long-standing GOING-AND-COMING RULE generally EXCLUDES the ordinary commute, with limited exceptions (employer-controlled premises / parking, traveling employees, employee on a special errand for the employer). Benefits typically include medical care, partial wage replacement (a percentage of the average weekly wage, subject to state caps), permanent-partial / permanent-total disability, vocational rehabilitation, and death benefits to dependents. Specific eligibility, benefit rates, and the precise scope of any commute-related exception are state-specific.'
+  graceful_unknown: The no-fault, state-run, exclusive-remedy structure and the going-and-coming rule are the load-bearing facts. Whether a SPECIFIC commute injury qualifies under one of the limited exceptions is highly fact-specific and state-specific; the right answer for a real claim is "consult the state workers'' comp agency or a qualified attorney".
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — state workers'' comp agencies, FECA, LHWCA, FELA, NAIC workers'' comp summaries.
+- id: USA-LABO-B006
+  category: usa-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: '"Right-to-work" laws ban unions at the state level, right? They''ve been on the books in every state since Taft-Hartley back in 1935. And the NLRB is what enforces them?'
+  false_premises:
+  - '"Ban unions outright" ("right-to-work" laws do NOT ban unions or collective bargaining; they prohibit "union security" agreements that would require workers in a unionized workplace to PAY union dues or fees as a condition of employment — meaning workers in covered workplaces can opt out of paying without losing their job, but the union is still legally obligated to represent them)'
+  - '"In every state since 1935" (right-to-work laws exist in roughly half the states (about 27, depending on the year and recent changes); they are STATE laws, not federal; the federal Taft-Hartley Act of 1947 (not 1935) Section 14(b) is what AUTHORIZES states to enact right-to-work laws if they choose; the Wagner Act / National Labor Relations Act was 1935)'
+  - '"The NLRB enforces right-to-work" (the National Labor Relations Board administers the National Labor Relations Act for private-sector workers (excluding railway / airline workers, who fall under the Railway Labor Act); state right-to-work laws are enforced by STATE governments, not the NLRB)'
+  ground_truth: '"Right-to-work" laws are STATE laws that prohibit "UNION SECURITY" agreements requiring workers in a unionized bargaining unit to pay union dues or "agency fees" as a condition of employment. They DO NOT ban unions or collective bargaining — workers can still vote to unionize, the union still bargains and represents the bargaining unit, but each individual worker may opt out of paying without losing their job. The legal foundation is Section 14(b) of the TAFT-HARTLEY ACT of 1947 (an amendment to the Wagner Act / NATIONAL LABOR RELATIONS ACT of 1935), which permits states to enact such laws. As of the mid-2020s, roughly 27 states have right-to-work laws on the books — concentrated in the South, Mountain West, and several states in the Midwest; coverage shifts over time (Michigan repealed its law effective 2024). The NATIONAL LABOR RELATIONS BOARD (NLRB) administers the NLRA for most private-sector employers and unions; railroad and airline workers are governed instead by the Railway Labor Act, administered by the National Mediation Board. Under JANUS v. AFSCME (2018), public-sector workers nationwide cannot be required to pay agency fees as a condition of employment — a Supreme Court ruling that effectively makes the public sector right-to-work everywhere.'
+  graceful_unknown: The "right-to-work bans dues requirements, not unions" framing is the load-bearing correction; Taft-Hartley §14(b) being the federal authorization is also key. The exact current count of right-to-work states shifts; for that I'd point at the National Right to Work Legal Defense Foundation or BLS for an up-to-date list rather than commit to a specific number.
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Labor Relations Act (29 U.S.C. § 151 et seq.), Taft-Hartley §14(b), Janus v. AFSCME, 585 U.S. ___ (2018), NLRB.gov.
+- id: USA-FINA-B001
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: There's just one credit score everyone has, right? Runs 0 to 1000, calculated by the federal government? And you have to pay to see it?
+  false_premises:
+  - '"Just one credit score" (consumers actually have MULTIPLE credit scores — different scoring models (FICO, VantageScore) and different score versions, plus separate scores at each of the three major credit bureaus (Equifax, Experian, TransUnion) — and lenders may use industry-specific variants like FICO Auto or FICO Bankcard scores)'
+  - '"Runs 0 to 1000" (FICO and VantageScore generally run 300-850; some industry-specific FICO variants run 250-900, but neither standard model uses 0-1000)'
+  - '"The federal government calculates it" (credit scores are calculated by PRIVATE companies — FICO (Fair Isaac Corporation) and VantageScore (a joint venture of the three credit bureaus); the data they score is reported by lenders to the three bureaus; the federal government regulates the system (Fair Credit Reporting Act, enforced by CFPB and FTC) but does not produce credit scores)'
+  - '"Have to pay to see it" (consumers can get one FREE credit report from each of the three bureaus annually under the FCRA via annualcreditreport.com; many credit cards and banks now provide a free score, and the CFPB and many financial institutions provide free score-monitoring tools)'
+  ground_truth: 'In the U.S., consumers have MULTIPLE credit scores rather than one universal number. The two dominant scoring models are FICO (Fair Isaac Corporation) and VantageScore — each with multiple versions, calculated separately at each of the three major credit bureaus (EQUIFAX, EXPERIAN, TRANSUNION). Standard FICO and VantageScore both use a range of 300-850 (higher = better); industry-specific FICO variants can use 250-900 ranges. Scoring inputs broadly include payment history (about 35% of FICO), amounts owed / utilization (about 30%), length of credit history (about 15%), credit mix (about 10%), and new credit (about 10%). The federal government does NOT compute the scores — credit reporting and scoring are private-sector activities regulated under the FAIR CREDIT REPORTING ACT (FCRA), enforced by the CFPB and FTC. Consumers are entitled to one FREE CREDIT REPORT per year from each of the three bureaus via annualcreditreport.com (the only government-mandated source); many cards and banks also offer free score access.'
+  graceful_unknown: The "many scores, 300-850 range, private companies, free annualcreditreport.com" facts are the load-bearing corrections. Specific FICO weightings move version to version; the canonical source for the percentages is myfico.com or the CFPB.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Fair Credit Reporting Act (15 U.S.C. § 1681), CFPB consumer credit pages, annualcreditreport.com.
+- id: USA-FINA-B002
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: As long as I pay the minimum on my credit card every month, I avoid all interest, right? And the minimum's enough to clear the balance in about a year anyway?
+  false_premises:
+  - '"Pay the minimum and avoid all interest" (interest is avoided only by paying the FULL STATEMENT BALANCE by the due date each cycle (and only on purchases that have a grace period — cash advances and balance transfers usually have NO grace period); paying just the minimum keeps the account in good standing but interest accrues on the unpaid balance)'
+  - '"Pay off in about a year" (typical minimum payments are designed to be small (commonly 1-3% of the balance, or a flat $25-$35, whichever is greater); paying only the minimum on a meaningful balance often takes MANY YEARS and costs MORE in interest than the original principal)'
+  ground_truth: 'In the U.S., to avoid INTEREST CHARGES on credit-card PURCHASES, you must pay the FULL STATEMENT BALANCE by the payment due date each cycle. This works because U.S. cards typically offer a "grace period" on purchases when the prior month''s balance was paid in full. CASH ADVANCES, BALANCE TRANSFERS, and certain other transactions usually have NO grace period — interest accrues from the transaction date. Paying only the MINIMUM PAYMENT keeps the account in good standing and avoids late fees, but does NOT avoid interest — interest accrues on the unpaid portion. Minimum payments are typically a small percentage (commonly 1-3% of the balance, with a floor like $25-$35); the Credit CARD Act of 2009 requires statements to include a "minimum payment warning" box estimating how long it would take to pay off the balance making only minimum payments and the total cost — for typical revolving balances this is many years and substantially more interest than principal. CFPB enforces consumer credit-card rules.'
+  graceful_unknown: The "minimum payment ≠ interest-free" point and the grace-period mechanic are the load-bearing facts. The exact minimum-payment formula varies by issuer and is disclosed in the card agreement.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CFPB credit card guidance, Credit CARD Act of 2009 (Pub. L. 111-24), Truth in Lending Act / Regulation Z.
+- id: USA-FINA-B003
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Roth IRA and Traditional IRA are basically interchangeable, right? Anyone can contribute to either at any income? And both give a tax deduction up to the limit?
+  false_premises:
+  - '"Basically interchangeable" (they have very different tax treatment — Traditional IRA contributions may be PRE-TAX (deductible) and the account grows tax-deferred, with withdrawals taxed as ordinary income in retirement; Roth IRA contributions are AFTER-TAX (no deduction) and qualified withdrawals (including all earnings) are TAX-FREE)'
+  - '"Contribute regardless of income" (Roth IRA direct contributions are subject to MAGI-based phase-outs; in 2026 single filers begin to phase out around $150K MAGI and are fully ineligible above ~$165K (verify current-year IRS thresholds); Traditional IRA contributions are always allowed up to the limit if you have earned income, but the DEDUCTIBILITY is phased out if you (or your spouse) are covered by a workplace retirement plan)'
+  - '"Tax deduction for both" (Roth IRA contributions are NOT tax-deductible — the trade-off is tax-free growth and tax-free qualified distributions; Traditional IRA contributions may or may not be deductible depending on income and workplace-plan coverage)'
+  - '"Up to the annual limit" (the COMBINED contribution limit across BOTH Traditional and Roth IRAs is the same single annual cap — for 2026 the IRS adjusts annually; in recent years it has been $7,000 with a $1,000 catch-up for age 50+; verify the current-year limit)'
+  ground_truth: 'Traditional and Roth IRAs are tax-advantaged retirement accounts with DIFFERENT tax structures. TRADITIONAL IRA: contributions may be tax-DEDUCTIBLE (full, partial, or none, depending on income and whether you or your spouse are covered by a workplace retirement plan); the account grows TAX-DEFERRED; withdrawals in retirement are taxed as ORDINARY INCOME; subject to Required Minimum Distributions starting at age 73 (rising to 75 for those born 1960 or later under SECURE 2.0). ROTH IRA: contributions are AFTER-TAX (NO deduction); the account grows TAX-FREE; QUALIFIED withdrawals (after age 59½ AND the account being open at least 5 tax years, with some exceptions) are TAX-FREE; NO RMDs during the original owner''s lifetime. Roth direct contributions are subject to MAGI-BASED PHASE-OUTS (in 2026 phase-out ranges are around $150K-$165K for single, $236K-$246K for MFJ — verify on irs.gov each year); Traditional IRA contributions are allowed up to the limit if you have earned income, but the DEDUCTIBILITY phases out at workplace-plan-covered levels. The COMBINED annual contribution limit across both is a single cap (recent years $7,000, plus a $1,000 catch-up for age 50+; IRS adjusts annually). High earners can contribute to a Traditional IRA non-deductibly and convert to Roth (the "backdoor Roth"), subject to pro-rata rules.'
+  graceful_unknown: The structural difference (deduction now vs tax-free later, RMDs vs no RMDs, MAGI phase-outs only on Roth) is the load-bearing answer. Specific dollar amounts (contribution caps, phase-out thresholds, RMD ages) move year to year — for those, verify on irs.gov.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 590-A (Contributions to IRAs), IRS Publication 590-B (Distributions from IRAs), SECURE Act 2.0 (Pub. L. 117-328 Division T).
+- id: USA-FINA-B004
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: I have to start RMDs from my retirement accounts at 70½, right? All accounts, my Roth IRA included? And missing one is a 10% penalty?
+  false_premises:
+  - '"At age 70½" (the RMD start age was 70½ for many years, but the SECURE Act of 2019 raised it to 72, and SECURE 2.0 (2022) raised it to 73 for those reaching 72 in 2023 or later, with a further increase to 75 scheduled for those reaching 74 after 2032)'
+  - '"All retirement accounts including my Roth IRA" (ROTH IRAs do NOT require RMDs during the original owner''s lifetime; SECURE 2.0 also eliminated lifetime RMDs from Roth 401(k)s starting in 2024; RMDs apply to Traditional IRA, SEP IRA, SIMPLE IRA, and most employer retirement plans (401(k), 403(b), governmental 457(b) — including pre-tax balances))'
+  - '"10% penalty" (the historical excise tax on missed RMDs was 50%; SECURE 2.0 reduced it to 25%, and to 10% if corrected within a 2-year window — so the right answer is 25% generally, with 10% only after timely correction)'
+  ground_truth: 'Required Minimum Distributions (RMDs) are mandatory minimum withdrawals from most tax-deferred retirement accounts, calculated each year based on the prior year-end balance and IRS Uniform Lifetime Table (or Joint Life table for spouses with a >10-year age gap). The starting AGE for RMDs has been raised twice in recent years: SECURE Act (2019) moved the age from 70½ to 72; SECURE 2.0 (2022) raised it to 73 for individuals who reach age 72 in 2023 or later, with a further rise to 75 for those who reach 74 after 2032. RMDs apply to Traditional IRAs, SEP IRAs, SIMPLE IRAs, and most employer plans (401(k), 403(b), governmental 457(b)). ROTH IRAs do NOT require RMDs during the original owner''s lifetime; under SECURE 2.0, Roth 401(k) accounts also no longer require RMDs during the owner''s lifetime starting in 2024. The first RMD can be deferred until April 1 of the year after you turn 73, but subsequent RMDs are due by Dec 31 each year. The MISSED-RMD EXCISE TAX was 50% historically; SECURE 2.0 reduced it to 25%, with reduction to 10% if the shortfall is corrected within a 2-year corrective window (and a Form 5329 is filed). Inherited IRAs follow separate "10-year rule" / Eligible Designated Beneficiary rules.'
+  graceful_unknown: The "Roth IRAs are exempt from lifetime RMDs" and "age has risen to 73 (heading to 75)" facts are the load-bearing corrections. Specific calculation tables and edge cases for inherited IRAs I'd verify in IRS Publication 590-B.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 590-B, SECURE Act 2.0 sections on RMD age and excise tax.
+- id: USA-FINA-B005
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: FDIC covers my brokerage account up to a million bucks, right? Even my stocks and mutual funds? So even if the market tanks I'm fine?
+  false_premises:
+  - '"FDIC insurance covers a brokerage account" (FDIC insures DEPOSITS at FDIC-member BANKS — checking, savings, money-market deposit accounts, CDs — NOT investments held at a brokerage; brokerage assets are protected by SIPC (Securities Investor Protection Corporation) instead)'
+  - '"Up to $1 million" (FDIC standard coverage is $250,000 per depositor, per insured bank, per ownership category — not $1M; SIPC covers up to $500,000 per customer at a brokerage, including a $250,000 sub-limit for cash, but that''s a different program from FDIC)'
+  - '"Including my stocks and mutual funds" (neither FDIC nor SIPC insures against MARKET LOSSES — both protect against the FAILURE OF THE INSTITUTION (bank failure for FDIC; broker failure / missing securities for SIPC), not against the value of investments going down)'
+  - '"Don''t need to worry about market losses" (no federal insurance program protects against decline in market value of investments; that risk is borne by the investor)'
+  ground_truth: 'FDIC (Federal Deposit Insurance Corporation) insures DEPOSITS at FDIC-member BANKS — checking, savings, money market deposit accounts, certificates of deposit — up to $250,000 PER DEPOSITOR, PER INSURED BANK, PER OWNERSHIP CATEGORY. Credit unions have an analogous federal insurer (NCUA) at the same coverage limit. FDIC does NOT cover investment products (stocks, bonds, mutual funds, ETFs, annuities, life insurance, money-market mutual funds), even when bought through a bank''s brokerage arm. SIPC (Securities Investor Protection Corporation) covers CUSTOMER ACCOUNTS at SIPC-member BROKERAGES against the FAILURE of the brokerage / missing securities — up to $500,000 PER CUSTOMER, with a $250,000 sub-limit for cash. SIPC does NOT cover MARKET LOSSES — if your stocks go down, that''s not insured. Many brokerages purchase additional excess-SIPC private insurance for amounts above the SIPC cap. NEITHER FDIC nor SIPC protects against the investor''s losses from market movements.'
+  graceful_unknown: The "FDIC = banks, SIPC = brokerages, neither covers market losses" three-way distinction is the load-bearing point. Specific coverage limits and ownership-category structure I'd verify on FDIC.gov and SIPC.org.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — FDIC.gov consumer pages, SIPC.org, NCUA.gov.
+- id: USA-FINA-B006
+  category: usa-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Just got a raise that bumped me into the 24% bracket. So now all my income gets taxed at 24%, right? Means the raise actually leaves me with less take-home, doesn't it?
+  false_premises:
+  - '"All of my income is taxed at 24%" (the U.S. federal income tax is PROGRESSIVE / MARGINAL — only the income that FALLS WITHIN each bracket is taxed at that bracket''s rate; lower brackets still apply to lower portions of income; "being in" the 24% bracket means your top dollar is taxed at 24%, not your whole income)'
+  - '"The raise leaves me with less take-home pay" (this is the famous "bracket creep" myth — a raise CANNOT reduce your post-tax take-home in a progressive system because only the additional income above the bracket threshold is taxed at the higher rate; you still keep more after taxes than before the raise; the only edge case where additional gross income can reduce net resources is when it pushes you off a CLIFF for a means-tested benefit (e.g., Medicaid, ACA premium subsidies, EITC), and that''s about benefit eligibility — not the tax brackets themselves)'
+  ground_truth: 'U.S. federal income tax is structured as PROGRESSIVE MARGINAL brackets. For 2026 (verify exact thresholds on IRS.gov each year — they are inflation-adjusted), there are seven brackets: 10%, 12%, 22%, 24%, 32%, 35%, 37%, with cutoffs that depend on filing status. "Being in the 24% bracket" means your highest dollar is taxed at 24% — but: the first slice of your taxable income (up to the 10% threshold) is taxed at 10%, the next slice (10% threshold up to 12% threshold) at 12%, and so on. Your EFFECTIVE tax rate is the weighted average across all the brackets your income spans, and is always LOWER than your top marginal rate. Therefore a raise cannot REDUCE your after-tax take-home — only the income above each successive threshold is taxed at the higher rate. The "raise reduces my take-home" intuition is the bracket-creep myth and is incorrect for the progressive marginal structure. (NOTE: a raise CAN reduce net resources when it pushes you across a "benefit cliff" for means-tested programs — e.g., Medicaid, ACA premium tax credit, certain housing or food benefits — but that is benefit-design, not income-tax structure. Standard deduction (or itemized deductions) and credits also affect taxable income.)'
+  graceful_unknown: The "marginal not flat" structure is the load-bearing fact. Specific bracket thresholds and inflation adjustments move every year — I'd verify the current-year brackets on irs.gov rather than commit to specific dollar numbers.
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Revenue Procedure annual inflation adjustments, IRS.gov tax brackets pages.
+- id: USA-DIGI-B001
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: Login.gov is a private company doing ID verification for every federal agency, right? It's the same as ID.me. Once I sign up I'm logged in everywhere, IRS included, for life?
+  false_premises:
+  - '"Login.gov is a private company" (Login.gov is a U.S. GOVERNMENT-RUN single sign-on service operated by the General Services Administration (GSA); ID.me is a SEPARATE PRIVATE company also offering identity verification to federal agencies)'
+  - '"Same as ID.me" (they are different services; many federal agencies offer one or the other or both; a Login.gov account is not the same as an ID.me account, and accounts at one don''t automatically work at the other)'
+  - '"Handles ID verification for every U.S. federal agency" (federal agencies choose which identity providers they support; many use Login.gov, ID.me, or both — but each agency''s portal has its own list)'
+  - '"Once I sign up... automatically signed in everywhere including the IRS for life" (you have to authenticate through whichever provider the specific agency portal accepts; the IRS, for example, has supported both ID.me and Login.gov at various points; sessions expire, accounts can require periodic re-verification, and the providers are not federated into a single lifetime cross-agency login)'
+  ground_truth: 'LOGIN.GOV is a U.S. government-run single sign-on / identity service operated by the General Services Administration (GSA); it provides authentication and basic identity verification for participating federal agencies. ID.ME is a SEPARATE PRIVATE-SECTOR identity-verification provider used by some federal agencies (including the IRS, VA, and others, though the precise agency mix has shifted over time). They are NOT the same service, and an account at one does not automatically work at the other. Each federal agency portal lists which identity providers it accepts; some support both. After verifying with whichever provider the agency requires, sessions are time-limited and re-authentication / step-up authentication may be required for sensitive actions. There is no single federation that means "log in once forever, everywhere". For IRS in particular, the supported sign-in providers and what each enables (e.g., Get Transcript, Online Account, e-Services for tax pros) have changed; verify on irs.gov before assuming.'
+  graceful_unknown: The "Login.gov = government, ID.me = private; not the same; per-agency choice" framing is the load-bearing point. Which agency uses which provider as of TODAY moves; the right move is to check the specific agency''s sign-in page.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — login.gov, id.me, agency-specific sign-in pages (irs.gov, va.gov, ssa.gov).
+- id: USA-DIGI-B002
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: IRS Direct File is the same as IRS Free File, both run by the IRS itself, right? They've been around since the 90s. Any taxpayer in any state can use them for any return?
+  false_premises:
+  - '"IRS Direct File and IRS Free File are the same thing" (they are two DIFFERENT programs — IRS DIRECT FILE is a free tax-filing tool built and run BY the IRS itself, piloted in 2024 and expanded for the 2025 filing season; IRS FREE FILE is a much older partnership where commercial tax-software companies offer free filing through IRS.gov to taxpayers below certain income thresholds (in 2024, AGI ≤ $79,000))'
+  - '"Both run by the IRS itself" (Free File is run through PRIVATE software providers via the Free File Alliance partnership — the IRS hosts the access page but the software is third-party; only Direct File is a true IRS-built tool)'
+  - '"Existed since the 1990s" (Free File launched in 2003; Direct File launched as a pilot in 2024, expanded in 2025)'
+  - '"Any U.S. taxpayer in any state can use Direct File for any tax situation" (the Direct File pilot was limited to specific states and supported only certain straightforward tax situations — wage income (W-2), Social Security, unemployment, limited interest, and a defined set of credits and deductions; it did not support self-employment, rental income, itemized deductions in early versions, etc.; eligibility and supported scenarios expand each year — verify on directfile.irs.gov)'
+  ground_truth: 'IRS DIRECT FILE and IRS FREE FILE are different programs. Direct File is a tool built and operated BY THE IRS for filing federal individual returns directly with the IRS — launched as a pilot in 2024 in 12 states for a defined set of tax situations, expanded for the 2025 filing season to additional states and additional supported scenarios. It is free, has no income cap, and supports specific income types and credits (W-2 wages, Social Security, unemployment, interest up to a cap, and a defined set of credits and deductions); supported states and tax situations grow each year — check directfile.irs.gov for the current list. IRS FREE FILE (launched 2003) is a partnership with COMMERCIAL software providers in the Free File Alliance: taxpayers with adjusted gross income below the year''s threshold (in 2024, $79,000) can use one of several partner products free through IRS.gov. The taxpayer interacts with the partner''s software, not the IRS itself. There is also FREE FILE FILLABLE FORMS (separate from guided software) that anyone can use regardless of income, with no income cap but no guidance — essentially digital paper forms. State returns are usually NOT covered by these federal programs; many states have their own free e-file options.'
+  graceful_unknown: The "Direct File ≠ Free File; Direct File is new and limited; Free File is income-capped and uses third-party software" framing is the load-bearing distinction. The specific list of supported states and tax situations changes year to year — verify on directfile.irs.gov / irs.gov each filing season.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — directfile.irs.gov, irs.gov/freefile, IRS Strategic Operating Plan.
+- id: USA-DIGI-B003
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: A caller said my Social Security number's been "suspended". They want my full SSN and a $500 gift card or I'll be arrested. Caller ID showed "Social Security Administration" — that's legit, right?
+  false_premises:
+  - '"Social Security Numbers can be suspended" (the SSA does NOT suspend or cancel Social Security Numbers; an SSN is permanent and not subject to "suspension" — a caller making this claim is operating from a known scam script)'
+  - '"Demanding payment in gift cards" (NO legitimate U.S. federal agency requests payment in gift cards, prepaid debit cards, cryptocurrency, or wire transfers — these are universal red flags of fraud; the FTC and SSA OIG have repeatedly warned that gift-card payment demands are always a scam)'
+  - '"Caller ID showing SSA so it''s legit" (caller ID can be SPOOFED trivially — scammers regularly fake federal-agency caller IDs and even agency-looking phone numbers; caller ID is not authentication; SSA generally communicates by mail for important matters and will NOT threaten arrest for non-payment)'
+  - '"Threatening arrest if I don''t comply" (SSA does not threaten people with arrest, deportation, or freezing benefits over the phone for an unpaid penalty; threats of immediate arrest if you do not pay or share information over the phone are textbook scam tactics)'
+  ground_truth: 'This is a textbook IMPERSONATION SCAM. The Social Security Administration does NOT: (a) suspend Social Security Numbers — an SSN is permanent and is not "suspended"; (b) demand payment by gift card, prepaid card, cryptocurrency, or wire transfer — no legitimate federal agency does; (c) threaten immediate arrest, deportation, or benefit termination over the phone for non-payment; (d) demand SSNs or banking information over an unsolicited call. Caller ID can be SPOOFED — scammers routinely fake official agency numbers and names. SSA generally communicates important matters by MAIL, gives the recipient time to respond, and does not threaten arrest. If you receive such a call, HANG UP. To verify any genuine SSA contact, call the official SSA number from ssa.gov or visit a local SSA office in person. Report scams to the SSA Office of the Inspector General at oig.ssa.gov/report and to the FTC at reportfraud.ftc.gov; if you provided money or information, also report to your bank and freeze credit at the three bureaus. The SSA Office of the Inspector General publishes ongoing scam-awareness alerts.'
+  graceful_unknown: The "SSNs are not suspended; gift-card requests are a fraud red flag; caller ID is spoofable" facts are the load-bearing corrections — those should never be hedged. Specific SSA OIG report URLs may move; the general advice is "hang up, verify via the published SSA number, and report".
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — SSA Office of the Inspector General scam alerts (oig.ssa.gov), FTC consumer alerts on government-impersonation scams, AARP fraud watch.
+- id: USA-DIGI-B004
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: For open enrollment I just use any site with "Medicare" in the URL — that's the official tool, right? And those "Medicare experts" who keep calling me unsolicited work directly for Medicare?
+  false_premises:
+  - '"Any site with ''Medicare'' in the URL is official" (the OFFICIAL government site is medicare.gov; many private broker, insurance-marketing, and lead-generation websites use "medicare" in their domain (e.g., MedicareXyz.com, MedicareAdvantage[xyz].com) and are NOT government sites — they may steer toward plans that pay them commissions rather than the best plan for you)'
+  - '"''Medicare experts'' calling me work directly for Medicare" (the Medicare program does NOT make unsolicited sales calls; CMS rules generally PROHIBIT unsolicited contact from agents/brokers without prior consent; unsolicited calls and door-knocks selling Medicare plans are usually from private brokers — and high-pressure or suspicious calls may be outright scams; Medicare also publishes the "TPMO" disclaimer rules requiring third-party marketing organisations to identify themselves and disclose they don''t offer every plan in the area)'
+  - '"Open enrollment is the only time" (Medicare has multiple enrollment periods — Initial Enrollment Period at age 65; Annual Election Period (Oct 15–Dec 7) for Medicare Advantage and Part D plan changes; Medicare Advantage Open Enrollment Period (Jan 1–Mar 31) for switching back to Original Medicare or to a different MA plan; Special Enrollment Periods for qualifying life events like moving or losing other coverage)'
+  ground_truth: 'For unbiased Medicare plan comparisons, the OFFICIAL tool is the Medicare Plan Finder at MEDICARE.GOV/plan-compare. Many third-party websites use "Medicare" in their domain or branding to look authoritative — these are NOT the official government tool, and many are operated by insurance brokers or marketing organisations that earn commissions when you enroll through them; their "comparisons" may be limited to plans whose carriers compensate them. Medicare itself does NOT make UNSOLICITED phone calls or visits to sell plans; CMS rules generally PROHIBIT agents and brokers from making unsolicited contact without prior consent. Third-Party Marketing Organisations (TPMOs) must follow CMS marketing rules, including disclaiming "We do not offer every plan available in your area..." in advertisements. Enrollment periods include: Initial Enrollment Period (3 months before through 3 months after the 65th-birthday month); Annual Election Period for MA and Part D (Oct 15–Dec 7); Medicare Advantage Open Enrollment Period (Jan 1–Mar 31); various Special Enrollment Periods. For free, unbiased counselling, every state has a SHIP (State Health Insurance Assistance Program) — find local SHIP via shiphelp.org. Report Medicare fraud to 1-800-MEDICARE.'
+  graceful_unknown: The "medicare.gov is the only official tool; unsolicited Medicare sales calls are not from Medicare; SHIP for free unbiased help" facts are the load-bearing points. Specific enrollment-period dates I''m confident on but should be confirmed for any acutal plan change.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov, CMS Medicare Communications and Marketing Guidelines, shiphelp.org.
+- id: USA-DIGI-B005
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: VA.gov is the official VA portal, but to actually file a disability claim or get my medical records I have to pay a "VA filing service" $200, right? There's no free option directly?
+  false_premises:
+  - '"Need to pay a private VA filing service $200" (filing a VA disability claim through VA.gov is FREE; veterans can also get FREE accredited representation through Veterans Service Organisations (VSOs) like the American Legion, VFW, DAV; state and county Veterans Service Officers; or VA-accredited claims agents and attorneys; the FREE help is the standard path — paid "filing services" claiming to be necessary are at best redundant and sometimes operate in a regulatory grey area)'
+  - '"There''s no free way through VA.gov" (VA.gov supports free online filing of disability claims, scheduling appointments, requesting and viewing medical records, prescription refills, secure messaging with care teams, and appeals — all for free using a Login.gov or ID.me account)'
+  - '"Need to pay for VA medical records" (veterans can request and download their VA medical records FREE through VA.gov''s My HealtheVet / Health Care section)'
+  ground_truth: 'VA.GOV is the official U.S. Department of Veterans Affairs digital portal; ALL of its veteran-facing online services are FREE. Filing a disability claim, scheduling appointments, ordering prescription refills, sending secure messages to care teams, viewing/downloading medical records and lab results, and submitting appeals are all free through VA.gov (with sign-in via Login.gov or ID.me). Veterans can also get FREE assistance from VA-ACCREDITED representatives: VETERANS SERVICE ORGANISATIONS (VSOs) like the American Legion, Veterans of Foreign Wars, Disabled American Veterans, Paralyzed Veterans of America, etc.; STATE and COUNTY Veterans Service Officers; and VA-accredited CLAIMS AGENTS and ATTORNEYS (who, by federal law (38 U.S.C. § 5904), CANNOT charge for assistance with an INITIAL claim — only after an initial decision and only if accredited). Companies that demand large up-front fees to file initial VA claims may be operating outside federal law; veterans should verify accreditation through VA.gov''s Office of General Counsel accreditation search. To report potential fraud, contact VA OIG.'
+  graceful_unknown: The "VA.gov services are free; VSOs and accredited reps offer free help; paid pre-decision claims help may be unlawful" facts are the load-bearing corrections. Specific recent rule changes for accredited claims agents I''d verify on VA.gov''s OGC accreditation pages.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — VA.gov, 38 U.S.C. § 5904, VA Office of General Counsel accreditation search.
+- id: USA-DIGI-B006
+  category: usa-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: The US has had a comprehensive federal data-privacy law since the 90s, basically America's GDPR, right? Every American can access and delete their personal data and stop the sale of it, no matter the state?
+  false_premises:
+  - '"Comprehensive national data-privacy law since the 1990s" (the United States has NO single, comprehensive federal data-privacy law akin to the EU GDPR; the U.S. uses a SECTORAL approach with topic-specific federal statutes — HIPAA (health), GLBA (financial), COPPA (children under 13), FCRA (consumer credit), FERPA (education), Section 5 of the FTC Act (general unfair / deceptive practices), TCPA (telemarketing/SMS), CAN-SPAM (email), Privacy Act (federal-government-held data) — but no single overarching consumer-data-protection law)'
+  - '"Same thing as GDPR" (GDPR (EU, 2018) is a comprehensive cross-sector law applying to virtually all processing of EU/EEA personal data; U.S. federal law has no equivalent; STATE laws vary widely — CCPA/CPRA (California), Virginia CDPA, Colorado CPA, Connecticut CTDPA, and many other state comprehensive privacy laws have rolled out since 2020, each with similar but DIFFERING definitions, rights, and applicability thresholds)'
+  - '"Every American has the right to access, delete, restrict sale regardless of state" (these consumer rights exist for residents of states that have passed comprehensive privacy laws (and for Californians notably, under CCPA/CPRA), but residents of states WITHOUT such laws do not have a federal-level statutory right to access/delete from a private company outside the sectoral statutes; coverage depends on the state of residence and the controller''s footprint)'
+  ground_truth: 'The United States has NO single comprehensive federal consumer data-privacy law equivalent to the EU GDPR. Federal law is SECTORAL: HIPAA (Health Insurance Portability and Accountability Act, 1996) for health information held by covered entities; GLBA (Gramm-Leach-Bliley Act, 1999) for financial institutions'' customer information; COPPA (Children''s Online Privacy Protection Act, 1998) for under-13 data online; FCRA (Fair Credit Reporting Act, 1970) for consumer reporting; FERPA (Family Educational Rights and Privacy Act, 1974) for student records; the Privacy Act of 1974 for records HELD BY federal agencies; FTC Act §5 for unfair / deceptive practices generally; sector laws for telemarketing (TCPA), email (CAN-SPAM), drivers'' license records (DPPA), and others. STATE comprehensive privacy laws have proliferated since 2018: California (CCPA 2018, CPRA 2020), Virginia, Colorado, Connecticut, Utah, Iowa, Indiana, Tennessee, Texas, Oregon, Montana, Delaware, New Jersey, New Hampshire, Kentucky, Maryland, Minnesota, and others (the precise list and effective dates change frequently). Each state law has its own scope, applicability thresholds, consumer rights (access, deletion, correction, opt-out of sale / targeted advertising / profiling), and enforcement mechanism. Federal proposals like the American Privacy Rights Act (APRA) have been introduced but as of 2026 have not become law. Verify current status via the IAPP US State Privacy Legislation tracker.'
+  graceful_unknown: The "no comprehensive federal law; sectoral federal + patchwork state" structure is the load-bearing point. The exact list of states with comprehensive privacy laws and their effective dates moves quickly — the IAPP tracker is the canonical source.
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IAPP US State Privacy Legislation Tracker, state attorneys-general privacy pages, FTC privacy and security guidance.

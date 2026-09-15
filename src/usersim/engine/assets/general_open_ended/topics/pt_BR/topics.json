@@ -1,0 +1,22 @@
+[
+    {"type": "health", "description": "Saúde, bem-estar e temas médicos"},
+    {"type": "finance", "description": "Finanças pessoais, bancos e gestão de dinheiro"},
+    {"type": "cooking", "description": "Culinária, receitas e preparo de alimentos"},
+    {"type": "local_government", "description": "Serviços públicos municipais e processos cívicos"},
+    {"type": "technology", "description": "Tecnologia, aparelhos eletrônicos e serviços digitais"},
+    {"type": "agriculture", "description": "Agricultura, pecuária e gestão de cultivos"},
+    {"type": "travel", "description": "Planejamento de viagens, destinos e dicas"},
+    {"type": "education", "description": "Sistemas educacionais, escolas e recursos de aprendizagem"},
+    {"type": "environment", "description": "Meio ambiente, clima e sustentabilidade"},
+    {"type": "entertainment", "description": "Entretenimento, mídia e atividades de lazer"},
+    {"type": "legal", "description": "Direitos legais, processos jurídicos e regulamentações"},
+    {"type": "housing", "description": "Moradia, mercado imobiliário e manutenção do lar"},
+    {"type": "transportation", "description": "Opções de transporte e deslocamento diário"},
+    {"type": "employment", "description": "Busca de emprego, questões trabalhistas e carreira"},
+    {"type": "family", "description": "Vida familiar, criação de filhos e relacionamentos"},
+    {"type": "sus_healthcare", "description": "O Sistema Único de Saúde (SUS) e o acesso à saúde pública no Brasil"},
+    {"type": "bolsa_familia", "description": "O programa Bolsa Família e os benefícios sociais do governo federal"},
+    {"type": "inss_pension", "description": "O sistema de previdência social do INSS e aposentadoria no Brasil"},
+    {"type": "enem_exam", "description": "Preparação para o ENEM e o processo de ingresso no ensino superior"},
+    {"type": "clt_labor_law", "description": "Direitos trabalhistas e a Consolidação das Leis do Trabalho (CLT)"}
+]

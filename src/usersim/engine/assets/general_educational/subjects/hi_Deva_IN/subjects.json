@@ -1,0 +1,14 @@
+[
+    {"type": "mathematics", "description": "गणित की अवधारणाएं और समस्या समाधान"},
+    {"type": "science", "description": "भौतिकी, रसायन विज्ञान और जीव विज्ञान सहित विज्ञान"},
+    {"type": "language_learning", "description": "नई भाषा सीखना या भाषा कौशल में सुधार"},
+    {"type": "programming", "description": "कंप्यूटर प्रोग्रामिंग और सॉफ्टवेयर विकास"},
+    {"type": "history", "description": "ऐतिहासिक घटनाएं, काल और प्रमुख व्यक्ति"},
+    {"type": "personal_finance", "description": "व्यक्तिगत वित्त, बजट बनाना और निवेश की समझ"},
+    {"type": "health_literacy", "description": "स्वास्थ्य जानकारी की समझ और सोच-समझकर स्वास्थ्य निर्णय"},
+    {"type": "digital_literacy", "description": "कंप्यूटर और इंटरनेट के बुनियादी कौशल"},
+    {"type": "civics", "description": "नागरिक शिक्षा, सरकार की संरचना और नागरिक अधिकार"},
+    {"type": "geography", "description": "भूगोल, नक्शे और दुनिया की समझ"},
+    {"type": "hindi_sahitya", "description": "हिंदी साहित्य — कविता, कहानी और उपन्यास"},
+    {"type": "bharatiya_sanvidhan", "description": "भारतीय संविधान, मौलिक अधिकार और कर्तव्य"}
+]

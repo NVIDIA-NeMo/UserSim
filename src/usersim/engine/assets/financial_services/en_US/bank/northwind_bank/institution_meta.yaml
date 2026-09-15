@@ -1,0 +1,9 @@
+institution_id: northwind_bank
+display_name: Northwind Bank
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- cards
+placeholder: true
+schema_version: v0.1

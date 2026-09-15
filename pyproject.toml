@@ -1,0 +1,195 @@
+[project]
+name = "nemo-usersim"
+version = "0.1.0"
+description = "Population-grounded user simulation for evaluating conversational LLMs"
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = [
+    "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
+]
+license = "Apache-2.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    # ``>=0.5.8`` for ``RunConfig.jinja_rendering_engine`` and the
+    # ko_KR Nemotron-Personas locale support required by the simulator. The
+    # ``NATIVE`` mode is what lets us use the standard Jinja ``select`` /
+    # ``join`` filters in expression columns (the older ``SECURE`` mode
+    # ships a narrow filter allowlist that excludes both). See
+    # ``cli/_pipeline.py`` for the opt-in.
+    #
+    # ``<0.6`` because 0.6.0 makes the async engine the default and hands
+    # column-generator plugins async-mode ``HttpModelClient``s (0.7.0+
+    # then hardcodes async). The simulator's synchronous
+    # ``facade.completion()`` call (``core/llm.py``) raises
+    # ``SyncClientUnavailableError`` against an async-mode client, so every
+    # live model call fails. 0.6.x offers only deprecated sync fallbacks
+    # (an ``allow_resize=True`` column or ``DATA_DESIGNER_ASYNC_ENGINE=0``),
+    # neither of which this pipeline uses — so 0.5.x is the last fully
+    # sync-compatible line. Lift the cap once the plugin's LLM path is
+    # async-aware (or forces SYNC clients at model-registry construction).
+    "data-designer>=0.5.9,<0.6",
+    # Language detection for the language_compliance scorer. Pure Python,
+    # MIT, accurate on short conversational text. Pinned to a major version
+    # to keep CI deterministic -- bump deliberately.
+    "lingua-language-detector>=2.0,<3.0",
+    # YAML-backed prompt and bank assets are loaded at runtime.
+    "PyYAML>=6.0",
+    # The engine's config models are Pydantic; core/preview.py renders with
+    # Rich. Every third-party import must be declared here so the package
+    # installs standalone; tests/test_packaging_contract.py enforces it.
+    "pydantic>=2.0",
+    "rich",
+    "pandas",
+    "pyarrow",
+    "seaborn",
+    "matplotlib",
+    "langdetect",
+    # NOTE: ipykernel is deliberately NOT a runtime dependency. The only
+    # IPython use in shipped code is a guarded `from IPython import
+    # get_ipython` probe in core/manifest.py, so requiring a Jupyter kernel
+    # of every install would pull in 23 packages to satisfy an optional
+    # branch. The `dev` extra's `jupyter` covers notebook execution.
+    # tiktoken powers the post-hoc reasoning-token estimator
+    # (``reporting/_reasoning.py``). Currently transitive via ``data-designer``;
+    # pinned explicitly so the report-build path stays decoupled from
+    # data-designer dep churn. ``cl100k_base`` encoding ships with all 0.7+.
+    "tiktoken>=0.7,<1.0",
+    # Reached directly rather than through another package's public API, so
+    # declared even though each also arrives transitively today: a transitive
+    # pin can be dropped by its parent without warning.
+    #   httpx           -- cli/_models.py probes model endpoints
+    #   huggingface_hub -- selection/io.py publishes dataset cards
+    #   numpy           -- asset_gen near-duplicate detection
+    "httpx",
+    "huggingface-hub",
+    "numpy",
+]
+[project.urls]
+Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
+Repository = "https://github.com/NVIDIA-NeMo/UserSim"
+Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "pytest>=8.0",
+    # Lint + format. Pinned to a minor range because ruff's default rule
+    # behaviour shifts between minors and CI must agree with pre-commit.
+    "ruff>=0.14,<0.15",
+    "pytest-cov>=7.0,<8",
+    "pre-commit>=4.0,<5",
+    # Distributes the ~2,900 tests across cores. The suite is CPU-bound with
+    # every LLM call mocked, so it parallelises well; CI spends ~6 minutes of
+    # its test job on execution.
+    "pytest-xdist>=3.6,<4",
+    # Sets USERSIM_DISABLE_EXTENSIONS before conftest files load. A root
+    # conftest.py would run after any earlier one that imports a registry,
+    # which is too late to keep discovery out of the suite.
+    "pytest-env>=1.1,<2",
+]
+
+[dependency-groups]
+# Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
+# so this group exists only to scope an isolated environment holding the
+# locked runtime set and no dev tooling.
+license-check = []
+
+[project.scripts]
+usersim = "usersim.cli:main"
+
+[project.entry-points."data_designer.plugins"]
+conversation-simulator = "usersim.engine.plugin:conversation_simulator"
+trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
+
+[tool.uv]
+override-dependencies = [
+    # Keep the upper cap in sync with the ``dependencies`` pin above
+    # (0.6.0 makes async-mode clients the default, breaking the
+    # synchronous LLM path).
+    "data-designer>=0.5.9,<0.6",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["usersim*"]
+
+[tool.setuptools.package-data]
+"usersim.cli" = [
+    # Every shipped models TOML, not just the default: smoke validates all of
+    # them against the catalog, and an unshipped one silently reduces what an
+    # installed package can resolve.
+    "models_*.toml",
+]
+"usersim.engine" = [
+    # The asset banks. Hatchling shipped the whole package tree implicitly;
+    # setuptools needs them named, and a wheel without them fails every
+    # probe at asset resolution. `make check-wheel` counts these.
+    "assets/**/*.yaml",
+    "assets/**/*.yml",
+    "assets/**/*.json",
+    "assets/**/*.parquet",
+    "assets/**/*.md",
+    "**/*.yaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# An extension installed in a developer's virtualenv would otherwise register
+# itself into the probe, scorer, and domain registries and change what the
+# suite sees, making results depend on the machine. Tests that exercise
+# discovery clear this deliberately.
+#
+# Deliberately NOT setting DISABLE_DATA_DESIGNER_PLUGINS: that would hide our
+# own two DataDesigner plugins and make the entry-point resolution test vacuous.
+env = [
+    "USERSIM_DISABLE_EXTENSIONS=1",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py312"
+# Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
+# committed outputs, so linting them means noise and rewritten cells. Excluding
+# them keeps a bare `ruff check` equivalent to `make lint`.
+extend-exclude = ["notebooks", "output", "artifacts", "public"]
+
+[tool.ruff.lint]
+# Deliberately narrow for now. `I` (import sorting) plus the `UP` typing
+# modernizations (List[x] -> list[x], Optional[x] -> x | None) account for
+# ~1,983 of the 2,261 violations the full rule set reports, and `ruff format`
+# rewrites 208 of 250 files. Landing those alongside a lint gate would bury
+# every in-flight branch in conflicts, so they arrive as one separate
+# mechanical commit once the open MRs merge -- at which point this list grows
+# to match DataDesigner's (W, F, I, ICN, PIE, TID, UP006, UP007, UP045).
+select = [
+    "F",   # pyflakes: real bugs (undefined names, unused imports)
+    "W",   # pycodestyle warnings
+    "PIE", # flake8-pie: misc correctness lints
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

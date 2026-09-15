@@ -1,0 +1,346 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for kalash_finserv (en_IN) — a deposit-less NBFC lender
+# (consumer EMI, gold loans), a dominant Indian retail-credit channel with no
+# en_US counterpart. Composition mirrors en_US: one task per state-changing tool,
+# ~1/3 at gold depth >=3, three openings each, `ordered` only for real
+# dependencies.
+templates:
+# ── depth 1 ───────────────────────────────────────────────────────────
+- id: TPL-KF-FORECLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I got {{windfall}} and want to close my personal loan early. The outstanding
+    is about ₹{{amount}} — what does foreclosing cost me?
+  - >-
+    Please foreclose my personal loan. I have ₹{{amount}} to settle it after
+    {{windfall}} and I don't want to keep paying interest.
+  - >-
+    I'd like to pay off my loan in full and be done with it — around ₹{{amount}}
+    outstanding. I received {{windfall}}.
+  account_state:
+    account_id: loan_kf_0001
+    account_type: loan account
+    last4: '0019'
+    loan_type: personal loan
+    outstanding: '{{amount}}'
+    balance: '{{amount}}'
+    loan_status: active
+  param_space:
+    windfall: [my annual bonus, a maturity payout, some family support]
+    amount: ['85,000', '1,40,000', '2,10,000']
+  gold_tool_sequence: [foreclose_loan]
+  expected_state_deltas: {loan_status: CLOSED}
+  allowed_tools: [get_repayment_schedule]
+
+- id: TPL-KF-GOLD-TOPUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I already have a gold loan with you and need another ₹{{amount}} for
+    {{purpose}}. Can I get a top-up on the same pledged gold?
+  - >-
+    Please process a top-up on my existing gold loan — I need about ₹{{amount}}
+    more for {{purpose}}.
+  - >-
+    Is a top-up possible on my gold loan? I need ₹{{amount}} for {{purpose}} and
+    would rather not pledge anything new.
+  account_state:
+    account_id: loan_kf_0002
+    account_type: loan account
+    last4: '0027'
+    loan_type: gold loan
+    outstanding: '1,10,000'
+    balance: '1,10,000'
+    loan_status: active
+  param_space:
+    amount: ['30,000', '50,000', '75,000']
+    purpose: [a wedding in the family, my daughter's admission fees, working capital for my shop]
+  gold_tool_sequence: [request_gold_loan_topup]
+  expected_state_deltas: {topup_status: SUBMITTED}
+
+- id: TPL-KF-PAY-EMI-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    My EMI of ₹{{amount}} didn't go through this month. Please take the payment
+    now so I don't get more charges.
+  - >-
+    I want to pay the pending ₹{{amount}} EMI today — the auto-debit failed.
+  - >-
+    Can you collect my ₹{{amount}} EMI manually? The bank debit bounced.
+  account_state:
+    account_id: loan_kf_0001
+    account_type: loan account
+    last4: '0019'
+    loan_type: personal loan
+    balance: '96,000'
+    emi_status: bounced
+  param_space:
+    amount: ['4,800', '7,300', '11,500']
+  gold_tool_sequence: [pay_emi]
+  expected_state_deltas: {emi_status: PAID}
+
+- id: TPL-KF-APPLY-LOAN-001
+  tier: verifiable
+  task_type: eligibility
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need a loan of ₹{{amount}} for {{purpose}}. Please start an application for
+    me.
+  - >-
+    Can you apply for a ₹{{amount}} loan on my behalf? It's for {{purpose}}.
+  - >-
+    I'd like to borrow ₹{{amount}} for {{purpose}} — please put through the
+    application.
+  account_state: {account_id: none, account_type: loan account, kalash_loan: none}
+  param_space:
+    amount: ['50,000', '1,50,000', '4,00,000']
+    purpose: [my sister's wedding, a two-wheeler, home renovation, medical treatment]
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {application_status: SUBMITTED}
+
+- id: TPL-KF-MANDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    My salary only arrives on the {{new}} but my EMI is debited on the {{old}}.
+    Please change the auto-debit date.
+  - >-
+    Can you move my EMI mandate from the {{old}} to the {{new}}? I keep getting
+    bounce charges.
+  - >-
+    Please shift my repayment date to the {{new}} — the {{old}} is before I get
+    paid.
+  account_state:
+    account_id: loan_kf_0001
+    account_type: loan account
+    last4: '0019'
+    loan_type: personal loan
+    balance: '96,000'
+    mandate_day: '{{old}}'
+  param_space:
+    old: [2nd, 5th]
+    new: [10th, 12th]
+  gold_tool_sequence: [update_repayment_mandate]
+  expected_state_deltas: {mandate_status: UPDATED}
+
+- id: TPL-KF-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any]
+  opening_user_messages:
+  - >-
+    I've shifted to {{city}} — please update my address and phone on the loan
+    account so notices reach me.
+  - >-
+    My contact details changed after moving to {{city}}. Can you update them?
+  - >-
+    Please change my registered address to {{city}} and update my mobile number.
+  account_state: {account_id: loan_kf_0001, account_type: loan account, last4: '0019', loan_type: personal loan, balance: '96,000'}
+  param_space:
+    city: [Patna, Bhopal, Vadodara, Mysuru]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_status: UPDATED}
+
+- id: TPL-KF-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    Please set up reminders before each EMI date — I've been charged for a bounce
+    twice and want a warning.
+  - >-
+    Can you enable {{channel}} alerts so I know a day or two before the EMI is
+    debited?
+  - >-
+    I want notifications before every repayment so I can keep the balance ready.
+  account_state: {account_id: loan_kf_0001, account_type: loan account, last4: '0019', loan_type: personal loan, balance: '96,000'}
+  param_space:
+    channel: [SMS, WhatsApp]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_status: ENABLED}
+
+# ── depth 2 ───────────────────────────────────────────────────────────
+- id: TPL-KF-EMI-MANDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  # Clear the missed EMI and move the mandate. Either order is defensible.
+  opening_user_messages:
+  - >-
+    My EMI bounced this month because the money left my account on the {{old}}.
+    I want to pay the pending ₹{{amount}} now and shift the auto-debit to the
+    {{new}}, after my salary comes in.
+  - >-
+    The ₹{{amount}} EMI failed — my salary only arrives on the {{new}} but the
+    debit is on the {{old}}. Please take the payment now and change the mandate
+    date.
+  - >-
+    I keep getting bounce charges. Can you collect the ₹{{amount}} that's pending
+    and move my EMI date from the {{old}} to the {{new}}?
+  account_state:
+    account_id: loan_kf_0001
+    account_type: loan account
+    last4: '0019'
+    loan_type: personal loan
+    balance: '96,000'
+    emi_status: bounced
+    mandate_day: '{{old}}'
+  param_space:
+    amount: ['4,800', '7,300', '11,500']
+    old: [2nd, 5th]
+    new: [10th, 12th]
+  gold_tool_sequence: [pay_emi, update_repayment_mandate]
+  expected_state_deltas: {emi_status: PAID, mandate_status: UPDATED}
+
+# ── depth 3-4 ─────────────────────────────────────────────────────────
+- id: TPL-KF-NEWLOAN-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # The application and account opening come first, but the mandate and alerts
+  # are interchangeable after that -> left unordered.
+  opening_user_messages:
+  - >-
+    I need a ₹{{amount}} loan for {{purpose}}. Please put through the application,
+    open the loan account, set the auto-debit for the {{day}}, and enable
+    reminders.
+  - >-
+    Apply for a ₹{{amount}} loan for {{purpose}}, open the account, register the
+    repayment mandate on the {{day}}, and switch on EMI alerts.
+  - >-
+    Please process a ₹{{amount}} loan application ({{purpose}}), set up the
+    account, put the EMI mandate on the {{day}}, and turn on reminders.
+  account_state: {account_id: none, account_type: loan account, kalash_loan: none}
+  param_space:
+    amount: ['80,000', '2,50,000']
+    purpose: [a two-wheeler, home renovation, my shop's stock]
+    day: [10th, 12th]
+  gold_tool_sequence: [apply_loan, open_account, update_repayment_mandate, set_alerts]
+  expected_state_deltas:
+    application_status: SUBMITTED
+    account_status: OPEN
+    mandate_status: UPDATED
+    alerts_status: ENABLED
+
+- id: TPL-KF-GOLD-TOPUP-FULL-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any]
+  # Genuine dependency: the arrear must be cleared before a top-up is sanctioned,
+  # and the mandate then updated for the revised EMI.
+  opening_user_messages:
+  - >-
+    I need ₹{{amount}} more on my gold loan for {{purpose}}. I know one EMI is
+    pending — please take that ₹{{emi}} first, then process the top-up, and update
+    my auto-debit for the new EMI.
+  - >-
+    Clear my pending ₹{{emi}} EMI, sanction a ₹{{amount}} top-up on the gold loan
+    for {{purpose}}, and revise my repayment mandate.
+  - >-
+    Please settle the overdue ₹{{emi}}, give me a ₹{{amount}} top-up against the
+    same gold, and change the mandate to match the new instalment.
+  account_state:
+    account_id: loan_kf_0002
+    account_type: loan account
+    last4: '0027'
+    loan_type: gold loan
+    outstanding: '1,10,000'
+    balance: '1,10,000'
+    emi_status: bounced
+    loan_status: active
+  param_space:
+    amount: ['40,000', '60,000']
+    emi: ['3,900', '6,200']
+    purpose: [my daughter's fees, a medical bill]
+  gold_tool_sequence: [pay_emi, request_gold_loan_topup, update_repayment_mandate]
+  ordered: true
+  expected_state_deltas: {emi_status: PAID, topup_status: SUBMITTED, mandate_status: UPDATED}
+
+- id: TPL-KF-NOMINEE-SETUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    Please record {{relation}} against my loan account for correspondence, update
+    my address to {{city}}, and put reminders on so we both know the EMI dates.
+  - >-
+    I want {{relation}} added on the account records, my address changed to
+    {{city}}, and EMI alerts switched on.
+  - >-
+    Can you add {{relation}} to my loan records, update my address to {{city}}, and
+    enable repayment reminders?
+  account_state: {account_id: loan_kf_0001, account_type: loan account, last4: '0019', loan_type: personal loan, balance: '96,000', nominee: none}
+  param_space:
+    relation: [my wife, my son, my husband]
+    city: [Raipur, Kanpur, Thrissur]
+  gold_tool_sequence: [update_beneficiary, update_contact_info, set_alerts]
+  expected_state_deltas: {nominee_status: UPDATED, contact_status: UPDATED, alerts_status: ENABLED}
+
+- id: TPL-KF-CLOSE-FULL-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # Genuine dependency chain: clear the arrear, foreclose, then close the account —
+  # any other order leaves the loan or the mandate live.
+  opening_user_messages:
+  - >-
+    I want to be completely done with this loan. One EMI of ₹{{emi}} is pending —
+    take that, then foreclose the ₹{{amount}} outstanding, and close the account.
+  - >-
+    Please collect the overdue ₹{{emi}}, settle the remaining ₹{{amount}} as a
+    foreclosure, and shut the loan account.
+  - >-
+    Settle everything: the pending ₹{{emi}} EMI, then full foreclosure of
+    ₹{{amount}}, then close the account so no mandate stays active.
+  account_state:
+    account_id: loan_kf_0001
+    account_type: loan account
+    last4: '0019'
+    loan_type: personal loan
+    outstanding: '{{amount}}'
+    balance: '{{amount}}'
+    emi_status: bounced
+    loan_status: active
+  param_space:
+    emi: ['4,800', '7,300']
+    amount: ['62,000', '1,05,000']
+  gold_tool_sequence: [pay_emi, foreclose_loan, close_account]
+  ordered: true
+  expected_state_deltas: {emi_status: PAID, loan_status: CLOSED, account_status: CLOSED}

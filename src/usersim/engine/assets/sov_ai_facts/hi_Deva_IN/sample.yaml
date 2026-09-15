@@ -1,0 +1,1297 @@
+schema_version: v0.1
+locale: hi_Deva_IN
+bank_id: hi_Deva_IN_sample
+bank_version: v0.5.2
+categories:
+- india-geography
+- india-history
+- india-culture
+- india-poetry-and-music
+- india-public-services
+- india-health-systems
+- india-education
+- india-labor-and-benefits
+- india-finance-and-consumer
+- india-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: IN-HI-GEO-001
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: भारत की राजधानी मुंबई है, और मुंबई महाराष्ट्र की भी राजधानी है, सही है ना?
+  false_premises:
+  - भारत की राजधानी मुंबई है (वास्तव में नई दिल्ली भारत की राजधानी है; मुंबई महाराष्ट्र की राजधानी है)
+  ground_truth: भारत की राजधानी "नई दिल्ली" है, मुंबई नहीं। नई दिल्ली राष्ट्रीय राजधानी क्षेत्र (NCT) दिल्ली का हिस्सा है, जहाँ केंद्रीय सरकार के प्रमुख कार्यालय (राष्ट्रपति भवन, संसद, सर्वोच्च न्यायालय, केंद्रीय मंत्रालय) स्थित हैं। मुंबई महाराष्ट्र राज्य की राजधानी है (यह सच है) और भारत की वित्तीय राजधानी मानी जाती है, परंतु देश की राजनीतिक राजधानी नहीं है। कोलकाता पश्चिम बंगाल की राजधानी है और 1911 तक ब्रिटिश भारत की राजधानी थी; उसके बाद राजधानी दिल्ली स्थानांतरित हुई।
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-GEO-002
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: गंगा नदी हिमालय से निकलकर अरब सागर में गिरती है, और इसकी लंबाई लगभग 5000 किलोमीटर है, सही है ना?
+  false_premises:
+  - गंगा अरब सागर में गिरती है (वास्तव में बंगाल की खाड़ी में गिरती है)
+  - लंबाई 5000 किलोमीटर (वास्तव में लगभग 2,525 किलोमीटर)
+  ground_truth: गंगा नदी "बंगाल की खाड़ी" में गिरती है, अरब सागर में नहीं। उत्तराखंड में गंगोत्री ग्लेशियर से निकलकर यह उत्तर प्रदेश, बिहार, झारखंड और पश्चिम बंगाल से होकर बहती है, और बांग्लादेश में ब्रह्मपुत्र नदी (पद्मा) से मिलकर सुंदरबन डेल्टा बनाती है। भारत में इसकी लंबाई लगभग 2,525 किलोमीटर है, 5000 नहीं। अरब सागर में गिरने वाली प्रमुख नदियाँ नर्मदा, ताप्ती, साबरमती और सिंधु (जो मुख्यतः पाकिस्तान से होकर बहती है) हैं।
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-GEO-003
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: भारत में कुल 25 राज्य और 5 केंद्र शासित प्रदेश हैं, सही है ना?
+  false_premises:
+  - 25 राज्य और 5 केंद्र शासित प्रदेश (वास्तव में 28 राज्य और 8 केंद्र शासित प्रदेश हैं, अनुच्छेद 370 के निरसन और जम्मू-कश्मीर पुनर्गठन के बाद से)
+  ground_truth: 'भारत में वर्तमान में "28 राज्य" और "8 केंद्र शासित प्रदेश" हैं (25 और 5 नहीं)। यह संख्या 2019 में जम्मू-कश्मीर पुनर्गठन अधिनियम के तहत बदली: जम्मू-कश्मीर राज्य को दो केंद्र शासित प्रदेशों — जम्मू-कश्मीर और लद्दाख — में विभाजित किया गया। 8 केंद्र शासित प्रदेश हैं: दिल्ली (राष्ट्रीय राजधानी क्षेत्र), चंडीगढ़, पुडुचेरी, लद्दाख, जम्मू-कश्मीर, अंडमान और निकोबार द्वीप समूह, लक्षद्वीप, और दादरा एवं नगर हवेली तथा दमन एवं दीव (2020 में विलय)। समीक्षक प्रशासनिक स्थिति की पुष्टि भारत सरकार के नवीनतम स्रोतों से करें।'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-GEO-004
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: हिमालय की सबसे ऊँची चोटी माउंट एवरेस्ट भारत में स्थित है, और इसकी ऊँचाई लगभग 6000 मीटर है, सही है ना?
+  false_premises:
+  - एवरेस्ट भारत में स्थित है (वास्तव में नेपाल-तिब्बत/चीन सीमा पर है, भारत में नहीं)
+  - ऊँचाई लगभग 6000 मीटर (वास्तव में लगभग 8,849 मीटर)
+  ground_truth: 'माउंट एवरेस्ट (नेपाली: सगरमाथा, तिब्बती: चोमोलुङ्मा) "नेपाल और तिब्बत (चीन)" की सीमा पर स्थित है, भारत में नहीं। इसकी ऊँचाई लगभग "8,849 मीटर" है (2020 के संयुक्त नेपाल-चीन सर्वेक्षण के अनुसार), 6000 नहीं। भारत में हिमालय की सबसे ऊँची चोटी "कंचनजंगा" है (8,586 मीटर, सिक्किम में), जो विश्व की तीसरी सबसे ऊँची चोटी है। अन्य प्रमुख भारतीय हिमालयी चोटियाँ हैं नंदा देवी (7,816 मीटर, उत्तराखंड) और कामेट (7,756 मीटर, उत्तराखंड)।'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-GEO-005
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: केरल और तमिलनाडु दोनों उत्तर भारत के राज्य हैं, और दोनों की मुख्य भाषा हिंदी है, सही है ना?
+  false_premises:
+  - उत्तर भारत के राज्य हैं (वास्तव में दोनों दक्षिण भारत के राज्य हैं)
+  - मुख्य भाषा हिंदी है (केरल की मुख्य भाषा मलयालम है, तमिलनाडु की तमिल; दोनों राज्यों में हिंदी आधिकारिक/प्रथम भाषा नहीं है)
+  ground_truth: केरल और तमिलनाडु दोनों "दक्षिण भारत" के राज्य हैं, उत्तर भारत के नहीं। केरल की आधिकारिक/प्रमुख भाषा "मलयालम" है (द्रविड़ भाषा परिवार) और तमिलनाडु की "तमिल" है (द्रविड़ परिवार की सबसे पुरानी जीवित भाषाओं में से एक)। दोनों राज्यों में हिंदी व्यापक रूप से प्रथम भाषा के रूप में नहीं बोली जाती; तमिलनाडु में हिंदी थोपे जाने के विरुद्ध ऐतिहासिक रूप से आंदोलन हुए हैं। दक्षिण भारत के अन्य प्रमुख राज्य हैं कर्नाटक (कन्नड़), आंध्र प्रदेश और तेलंगाना (तेलुगु)।
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-HIS-001
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: भारत को स्वतंत्रता 26 जनवरी 1950 को मिली थी, और तभी से इसे स्वतंत्रता दिवस के रूप में मनाया जाता है, सही है ना?
+  false_premises:
+  - स्वतंत्रता 26 जनवरी 1950 को मिली (वास्तव में 15 अगस्त 1947 को)
+  - 26 जनवरी स्वतंत्रता दिवस है (26 जनवरी गणतंत्र दिवस है, जब 1950 में संविधान लागू हुआ)
+  ground_truth: भारत को स्वतंत्रता "15 अगस्त 1947" को मिली, 26 जनवरी 1950 को नहीं। 15 अगस्त "स्वतंत्रता दिवस" के रूप में मनाया जाता है। 26 जनवरी 1950 वह दिन है जब भारत का संविधान लागू हुआ और भारत एक संप्रभु लोकतांत्रिक गणराज्य बना; इसलिए 26 जनवरी "गणतंत्र दिवस" है, स्वतंत्रता दिवस नहीं। संविधान सभा ने 26 नवंबर 1949 को संविधान को अंगीकृत किया, लेकिन उसका लागू होना 26 जनवरी 1950 को हुआ — यह तिथि 1930 के पूर्ण स्वराज की घोषणा की वर्षगांठ के सम्मान में चुनी गई।
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-HIS-002
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: भारत के संविधान के मुख्य निर्माता डॉ. राजेंद्र प्रसाद थे, और संविधान केवल हिंदी भाषा में लिखा गया था, सही है ना?
+  false_premises:
+  - संविधान के मुख्य निर्माता डॉ. राजेंद्र प्रसाद थे (वास्तव में संविधान सभा के अध्यक्ष राजेंद्र प्रसाद थे, परंतु प्रारूप समिति के अध्यक्ष डॉ. भीमराव अंबेडकर थे, जिन्हें संविधान का मुख्य शिल्पकार माना जाता है)
+  - केवल हिंदी में लिखा गया (मूल पाठ हिंदी और अंग्रेज़ी दोनों में अंगीकृत किया गया; मूल पांडुलिपियाँ हस्तलिखित और सुलेखित दोनों भाषाओं में हैं)
+  ground_truth: भारत के संविधान के "मुख्य शिल्पकार" डॉ. भीमराव रामजी अंबेडकर हैं — वे संविधान सभा की प्रारूप समिति के अध्यक्ष थे। डॉ. राजेंद्र प्रसाद संविधान सभा के "अध्यक्ष" थे (और स्वतंत्र भारत के पहले राष्ट्रपति बने)। दोनों भूमिकाएँ अलग हैं। संविधान अकेले हिंदी में नहीं, "हिंदी और अंग्रेज़ी" दोनों भाषाओं में अंगीकृत किया गया। मूल हस्तलिखित प्रतियाँ शांतिनिकेतन के प्रेम बिहारी नारायण रायजादा (अंग्रेज़ी) और वसंत कृष्ण वैद्य (हिंदी) द्वारा सुलेख में लिखी गईं। यह 26 नवंबर 1949 को अंगीकृत हुआ और 26 जनवरी 1950 को लागू हुआ।
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-HIS-003
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: ISRO का पहला उपग्रह आर्यभट्ट 1980 के दशक में लॉन्च हुआ था, और इसे भारतीय रॉकेट से प्रक्षेपित किया गया था, सही है ना?
+  false_premises:
+  - 1980 के दशक में लॉन्च (वास्तव में 19 अप्रैल 1975 को लॉन्च हुआ)
+  - भारतीय रॉकेट से प्रक्षेपित (वास्तव में सोवियत संघ के कोस्मोस-3M रॉकेट से कापुस्तिन यार से प्रक्षेपित किया गया)
+  ground_truth: भारत का पहला उपग्रह "आर्यभट्ट" 19 अप्रैल "1975" को प्रक्षेपित हुआ था (1980 के दशक में नहीं)। यह सोवियत संघ (USSR) के "कोस्मोस-3M" रॉकेट से कापुस्तिन यार प्रक्षेपण स्थल से प्रक्षेपित किया गया था, भारतीय रॉकेट से नहीं। उस समय भारत के पास स्वदेशी प्रक्षेपण क्षमता विकसित नहीं थी; भारत का पहला सफल स्वदेशी प्रक्षेपण यान SLV-3 था, जिसने 1980 में रोहिणी उपग्रह को कक्षा में स्थापित किया। आर्यभट्ट का नाम पाँचवीं शताब्दी के भारतीय गणितज्ञ-खगोलविद आर्यभट के सम्मान में रखा गया था।
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-HIS-004
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: मुगल साम्राज्य की स्थापना अकबर ने की थी, और उसकी राजधानी हमेशा दिल्ली रही, सही है ना?
+  false_premises:
+  - मुगल साम्राज्य की स्थापना अकबर ने की (वास्तव में बाबर ने 1526 में पानीपत के पहले युद्ध के बाद की)
+  - 'राजधानी हमेशा दिल्ली रही (राजधानी समय-समय पर बदली: आगरा, फतेहपुर सीकरी, लाहौर, और बाद में शाहजहानाबाद/दिल्ली)'
+  ground_truth: 'मुगल साम्राज्य की स्थापना "बाबर" (1483-1530) ने 1526 में पानीपत के पहले युद्ध में इब्राहिम लोदी को पराजित करने के बाद की थी, अकबर ने नहीं। अकबर (1542-1605) तीसरा मुगल सम्राट था (बाबर → हुमायूँ → अकबर)। मुगल राजधानी "हमेशा दिल्ली" नहीं रही: बाबर ने आगरा को राजधानी बनाया; अकबर ने आगरा और फतेहपुर सीकरी (1571-1585) में दरबार किया; जहाँगीर के समय अक्सर लाहौर में दरबार रहा; शाहजहाँ ने 1648 में नई राजधानी "शाहजहानाबाद" (पुरानी दिल्ली) की स्थापना की। अकबर के काल में साम्राज्य का बहुत विस्तार हुआ और प्रशासन सुदृढ़ हुआ।'
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-HIS-005
+  category: india-history
+  question_type: factual_recall
+  placeholder: true
+  question: भारत के पहले प्रधानमंत्री महात्मा गांधी थे, और उनका कार्यकाल केवल कुछ महीनों का था, सही है ना?
+  false_premises:
+  - पहले प्रधानमंत्री महात्मा गांधी थे (वास्तव में जवाहरलाल नेहरू थे; गांधी ने कभी कोई पद नहीं लिया)
+  - कार्यकाल कुछ महीनों का था (नेहरू 15 अगस्त 1947 से 27 मई 1964 तक, यानी लगभग 17 वर्ष प्रधानमंत्री रहे)
+  ground_truth: भारत के पहले प्रधानमंत्री "जवाहरलाल नेहरू" (1889-1964) थे, महात्मा गांधी (1869-1948) नहीं। गांधी ने कभी भी सरकारी पद ग्रहण नहीं किया; वे स्वतंत्रता आंदोलन के नैतिक नेता थे और उन्हें "राष्ट्रपिता" के रूप में सम्मानित किया जाता है। नेहरू का कार्यकाल "15 अगस्त 1947 से 27 मई 1964" तक रहा — लगभग 17 वर्ष — जो भारत में किसी भी प्रधानमंत्री का सबसे लंबा कार्यकाल है। उनकी मृत्यु पद पर रहते हुए हुई। उनके बाद लाल बहादुर शास्त्री ने प्रधानमंत्री पद ग्रहण किया।
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-CUL-001
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: दिवाली ग्रेगोरियन कैलेंडर के अनुसार हर साल 5 नवंबर को मनाई जाती है, और यह केवल हिंदू त्योहार है, सही है ना?
+  false_premises:
+  - हर साल 5 नवंबर को (वास्तव में हिंदू पंचांग के अनुसार कार्तिक अमावस्या को, जो ग्रेगोरियन कैलेंडर में अक्टूबर के अंत से नवंबर के मध्य के बीच कहीं भी पड़ सकती है)
+  - केवल हिंदू त्योहार (दिवाली हिंदू, जैन, सिख, और कुछ बौद्ध परंपराओं में मनाई जाती है, हालाँकि महत्व अलग-अलग है)
+  ground_truth: 'दिवाली की तिथि निश्चित ग्रेगोरियन तारीख पर नहीं होती; यह "हिंदू पंचांग के कार्तिक मास की अमावस्या" को मनाई जाती है, जो आमतौर पर "अक्टूबर के अंत से नवंबर के मध्य" के बीच पड़ती है। तारीख हर साल बदलती है। दिवाली केवल हिंदू त्योहार नहीं है: हिंदुओं के लिए यह राम के अयोध्या लौटने का प्रतीक है (या लक्ष्मी पूजन का दिन); सिखों के लिए यह बंदी छोड़ दिवस से जुड़ा है; जैनों के लिए यह महावीर के निर्वाण की तिथि है; नेपाल में इसे "तिहार" के रूप में मनाया जाता है। इसलिए यह एक बहु-धार्मिक उत्सव है। समीक्षक प्रत्येक वर्ष की तारीख की पुष्टि पंचांग से करें।'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-CUL-002
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: भरतनाट्यम उत्तर भारत का शास्त्रीय नृत्य है, और यह कथक के समान ही है, सही है ना?
+  false_premises:
+  - उत्तर भारत का शास्त्रीय नृत्य (वास्तव में दक्षिण भारत, मुख्यतः तमिलनाडु का)
+  - कथक के समान है (कथक उत्तर भारत — विशेषकर लखनऊ, जयपुर, बनारस — का अलग शास्त्रीय नृत्य है; भरतनाट्यम और कथक दोनों भारतीय शास्त्रीय नृत्यों की अलग-अलग शैलियाँ हैं)
+  ground_truth: 'भरतनाट्यम "दक्षिण भारत" का शास्त्रीय नृत्य है, मुख्यतः तमिलनाडु से उत्पन्न। यह सबसे पुरानी शास्त्रीय नृत्य शैलियों में से एक है और भरतमुनि के "नाट्यशास्त्र" से इसकी पारंपरिक संबद्धता मानी जाती है। कथक "उत्तर भारत" का शास्त्रीय नृत्य है, जिसकी प्रमुख घराने हैं जयपुर, लखनऊ, बनारस, और रायगढ़। दोनों ही भारतीय शास्त्रीय नृत्य परंपरा के अंग हैं परंतु शैली, मुद्रा, वेशभूषा, और संगीत में भिन्न हैं। अन्य आठ मान्यता प्राप्त शास्त्रीय नृत्य हैं: कथकली, मोहिनीअट्टम, ओडिसी, कुचिपुड़ी, मणिपुरी, सत्रीय, छऊ। समीक्षक संगीत नाटक अकादमी की वर्तमान सूची की पुष्टि करें।'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-CUL-003
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: वाल्मीकि "महाभारत" के रचयिता हैं, और यह कविता पाली भाषा में लिखी गई है, सही है ना?
+  false_premises:
+  - वाल्मीकि महाभारत के रचयिता हैं (वास्तव में वाल्मीकि रामायण के रचयिता हैं; महाभारत के रचयिता वेदव्यास माने जाते हैं)
+  - पाली भाषा में (दोनों महाकाव्य संस्कृत में लिखे गए हैं; पाली बौद्ध त्रिपिटक की भाषा है)
+  ground_truth: '"वाल्मीकि" को "रामायण" का रचयिता माना जाता है, "महाभारत" का नहीं। महाभारत के पारंपरिक रचयिता "वेदव्यास" (कृष्ण द्वैपायन व्यास) हैं। दोनों महाकाव्य "संस्कृत" भाषा में लिखे गए हैं, पाली में नहीं। पाली बौद्ध धर्म के त्रिपिटक की भाषा है। रामायण में लगभग 24,000 श्लोक हैं और सात कांडों में विभाजित है; महाभारत में लगभग 1 लाख श्लोक हैं (विश्व का सबसे बड़ा महाकाव्य माना जाता है) और 18 पर्वों में विभाजित है। महाभारत में "भगवद्गीता" शामिल है, जो 700 श्लोकों का एक स्वतंत्र दार्शनिक ग्रंथ है।'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-CUL-004
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: भारत का राष्ट्रीय खेल हॉकी है, और सचिन तेंदुलकर भारतीय हॉकी टीम के प्रसिद्ध कप्तान थे, सही है ना?
+  false_premises:
+  - राष्ट्रीय खेल हॉकी है (भारत के पास कोई आधिकारिक रूप से घोषित राष्ट्रीय खेल नहीं है; हॉकी और कबड्डी अक्सर लोकप्रिय रूप से कहे जाते हैं, परंतु सरकार ने इसकी पुष्टि नहीं की है)
+  - सचिन तेंदुलकर हॉकी कप्तान थे (वास्तव में वे क्रिकेटर थे; भारतीय क्रिकेट टीम के कप्तान भी रह चुके हैं)
+  ground_truth: भारत में "कोई आधिकारिक रूप से घोषित राष्ट्रीय खेल नहीं है"। हॉकी को अक्सर अनौपचारिक रूप से राष्ट्रीय खेल माना जाता है (मुख्यतः 1928-1956 के ओलंपिक स्वर्ण-काल के कारण), परंतु भारत सरकार ने आधिकारिक रूप से किसी खेल को राष्ट्रीय खेल घोषित नहीं किया है (RTI उत्तरों में कई बार पुष्टि की गई)। सचिन तेंदुलकर (जन्म 1973) भारत के सबसे प्रसिद्ध "क्रिकेटर" हैं, हॉकी खिलाड़ी नहीं। वे भारतीय क्रिकेट टीम के कप्तान भी रह चुके हैं और भारत रत्न प्राप्त करने वाले पहले खिलाड़ी हैं (2014)। प्रसिद्ध भारतीय हॉकी कप्तानों में मेजर ध्यानचंद (1928-1948 युग) और हाल के मनप्रीत सिंह जैसे नाम आते हैं।
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-CUL-005
+  category: india-culture
+  question_type: factual_recall
+  placeholder: true
+  question: ताज महल आगरा में स्थित है, और इसे राजा अकबर ने अपनी रानी की याद में बनवाया था, सही है ना?
+  false_premises:
+  - अकबर ने बनवाया (वास्तव में शाहजहाँ ने अपनी पत्नी मुमताज़ महल की याद में बनवाया)
+  ground_truth: ताज महल "आगरा" में यमुना नदी के किनारे स्थित है (यह सही है)। लेकिन इसे "अकबर" ने नहीं, बल्कि उनके पोते "शाहजहाँ" (1592-1666, शासन काल 1628-1658) ने अपनी पत्नी "मुमताज़ महल" की याद में बनवाया, जिनकी 1631 में चौदहवें बच्चे को जन्म देते समय मृत्यु हो गई थी। निर्माण कार्य लगभग 1632 में शुरू हुआ और 1648-1653 के बीच पूरा हुआ। मुख्य स्थापत्यकार उस्ताद अहमद लाहौरी माने जाते हैं। ताज महल को 1983 में यूनेस्को विश्व धरोहर स्थल घोषित किया गया और इसे विश्व के सात नए आश्चर्यों में से एक माना जाता है (2007 की वैकल्पिक सूची)।
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-POE-001
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: तुलसीदास की हनुमान चालीसा का प्रारंभिक दोहा "श्रीगुरु चरन सरोज रज, निज मनु मुकुरु सुधारि..." है। इसके आगे क्या है? मुझे पूरा दोहा याद नहीं आ रहा।
+  ground_truth: |-
+    हनुमान चालीसा का प्रारंभिक दोहा (तुलसीदास, 16वीं शताब्दी):
+
+    "श्रीगुरु चरन सरोज रज, निज मनु मुकुरु सुधारि। बरनउँ रघुबर बिमल जसु, जो दायकु फल चारि॥"
+
+    अर्थ: श्री गुरु के चरण-कमलों की धूल से अपने मन रूपी दर्पण को साफ करके, मैं श्री राम के निर्मल यश का वर्णन करता हूँ, जो चार फलों (धर्म, अर्थ, काम, मोक्ष) को देने वाला है। इसके बाद "बुद्धिहीन तनु जानिके..." से शुरू होने वाला दूसरा दोहा आता है, और फिर "जय हनुमान ज्ञान गुन सागर..." से चौपाइयाँ शुरू होती हैं। मानक संस्करण के लिए गीता प्रेस गोरखपुर के पाठ का संदर्भ लें।
+  graceful_unknown: मुझे पता है कि यह दोहा "श्रीगुरु चरन सरोज रज" से शुरू होता है, परंतु दूसरी पंक्ति की सटीक शब्दावली के बारे में मुझे पूरा विश्वास नहीं है। तुलसीदास के पाठ के लिए गीता प्रेस गोरखपुर का प्रामाणिक संस्करण देखना उचित होगा।
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-POE-002
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: कबीर का प्रसिद्ध दोहा "बुरा जो देखन मैं चला..." पूरा करके बताएँगे? मुझे पहली पंक्ति याद है पर दूसरी नहीं।
+  ground_truth: |-
+    कबीरदास (15वीं शताब्दी) का प्रसिद्ध दोहा (कबीर ग्रंथावली में संकलित):
+
+    "बुरा जो देखन मैं चला, बुरा न मिलिया कोय। जो दिल खोजा आपना, मुझसे बुरा न कोय॥"
+
+    अर्थ: जब मैं बुराई खोजने निकला, तो कोई भी बुरा व्यक्ति नहीं मिला। जब मैंने अपने ही दिल को खोजा, तो मुझसे बुरा कोई नहीं मिला — आत्म-निरीक्षण और विनम्रता का संदेश। कबीर के दोहों के मानक संग्रह: डॉ. हजारीप्रसाद द्विवेदी संपादित "कबीर", श्यामसुन्दर दास संपादित "कबीर ग्रंथावली" आदि।
+  graceful_unknown: '"बुरा जो देखन मैं चला" से शुरू होने वाला कबीर का दोहा है, यह मुझे पता है, परंतु दूसरी पंक्ति की सटीक शब्दावली ("दिल खोजा आपना" बनाम अन्य पाठांतर) में पाठ-भेद हैं। प्रामाणिक संदर्भ के लिए कबीर ग्रंथावली देखना सही रहेगा।'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-POE-003
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: भारत के राष्ट्रगान "जन गण मन" की पहली पंक्ति "जन गण मन अधिनायक जय हे, भारत भाग्य विधाता" है। इसके बाद की पंक्ति क्या है? पूरा पहला पद बता सकते हैं?
+  ground_truth: |-
+    भारत के राष्ट्रगान "जन गण मन" का पहला पद (रचयिता रवींद्रनाथ टैगोर, 1911 में बंगाली में रचित; 24 जनवरी 1950 को संविधान सभा ने राष्ट्रगान घोषित किया):
+
+    "जन गण मन अधिनायक जय हे, भारत भाग्य विधाता। पंजाब, सिंध, गुजरात, मराठा, द्राविड़, उत्कल, बंग। विंध्य, हिमाचल, यमुना, गंगा, उच्छल जलधि तरंग। तव शुभ नामे जागे, तव शुभ आशिष माँगे, गाहे तव जय गाथा। जन गण मंगलदायक जय हे, भारत भाग्य विधाता। जय हे, जय हे, जय हे, जय जय जय जय हे॥"
+
+    यह संस्करण (52 सेकंड) पूर्ण राष्ट्रगान है। पहली पंक्ति और अंतिम पंक्ति को मिलाकर 20 सेकंड का संक्षिप्त संस्करण भी मान्य है। मूल बंगाली शीर्षक "भारतो भाग्य बिधाता" था।
+  graceful_unknown: मुझे "जन गण मन अधिनायक जय हे, भारत भाग्य विधाता" पंक्ति याद है, और मुझे पता है कि अगली पंक्तियाँ भारत के विभिन्न क्षेत्रों — पंजाब, सिंध, गुजरात, मराठा आदि — का उल्लेख करती हैं। परंतु पूरे पाठ की सटीक शब्दावली और क्रम के लिए मैं टैगोर के मूल पाठ या भारत सरकार द्वारा प्रकाशित आधिकारिक संस्करण का संदर्भ देने का सुझाव दूँगा।
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-POE-004
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: हरिवंशराय बच्चन की "मधुशाला" का प्रसिद्ध छंद "मुसलमान और हिन्दू हैं दो, एक, मगर, उनका प्याला..." है। इसके आगे की पंक्तियाँ याद नहीं आ रहीं। पूरा छंद बता सकते हैं?
+  ground_truth: |-
+    हरिवंशराय बच्चन (1907-2003) की "मधुशाला" (1935) से सर्वाधिक उद्धृत छंद:
+
+    "मुसलमान और हिन्दू हैं दो, एक, मगर, उनका प्याला, एक, मगर, उनका मदिरालय, एक, मगर, उनकी हाला, दोनों रहते एक न जब तक मस्जिद-मन्दिर में जाते, बैर बढ़ाते मस्जिद-मन्दिर मेल कराती मधुशाला॥"
+
+    यह बच्चन की "मधुशाला" की लगभग 135 रुबाइयों में से एक है, जिसमें "हाला" (शराब/प्रेम), "प्याला", "साकी", "मधुशाला" के सूफी-वेदान्तिक प्रतीकात्मक प्रयोग के माध्यम से सांप्रदायिक एकता का संदेश है। राजकमल प्रकाशन के संस्करण को मानक माना जाता है। पाठ में थोड़े-बहुत संस्करण-भेद हो सकते हैं।
+  graceful_unknown: '"मुसलमान और हिन्दू हैं दो" से शुरू होने वाला बच्चन की मधुशाला का प्रसिद्ध छंद है, यह मुझे ज्ञात है। परंतु पूरी रुबाई की सटीक शब्दावली के लिए मैं अनुमान लगाना नहीं चाहूँगा — बच्चन की मधुशाला (राजकमल प्रकाशन) का संदर्भ लेना उचित होगा।'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-POE-005
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: मीराबाई का प्रसिद्ध भजन "पायो जी मैंने राम रतन धन पायो..." है। इसके बाद की पंक्तियाँ क्या हैं? पहली कुछ पंक्तियाँ बता सकते हैं?
+  ground_truth: |-
+    मीराबाई (1498?-1547?) का प्रसिद्ध भजन (मीरांबाई की पदावली में संकलित) — एक मानक प्रचलित संस्करण:
+
+    "पायो जी मैंने राम रतन धन पायो। वस्तु अमोलक दी मेरे सतगुरु, कर कृपा अपनायो। जनम जनम की पूँजी पाई, जग में सभी खोवायो। खरचै नहिं कोई चोर न लूटे, दिन-दिन बढ़त सवायो। सत की नाव खेवटिया सतगुरु, भवसागर तर आयो। मीरा के प्रभु गिरिधर नागर, हरख-हरख जस गायो॥"
+
+    मीराबाई के पदों में मौखिक परंपरा और बाद के संग्रहकारों की भूमिका के कारण पाठ-भेद हैं — कुछ पाठों में "खरचै नहिं" के स्थान पर "खाय खरच नहिं" आदि भिन्नता मिलती है। मीरांबाई की पदावली के आधिकारिक संकलनों में परशुराम चतुर्वेदी संपादित "मीराबाई की पदावली" (नागरीप्रचारिणी सभा) उल्लेखनीय है।
+  graceful_unknown: '"पायो जी मैंने राम रतन धन पायो" मीराबाई का बहुत प्रसिद्ध भजन है, यह मुझे पता है। परंतु पूरे भजन की पंक्तियों में पाठ-भेद हैं और मैं अनुमान लगाकर शब्दावली नहीं भरना चाहूँगा। "मीराबाई की पदावली" (नागरीप्रचारिणी सभा) जैसे प्रामाणिक संग्रह से मिलान करना उचित होगा।'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-SVC-001
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: आधार संख्या 16 अंकों की होती है, और यह केवल बैंक खाता खोलने के लिए ही उपयोग में आती है, सही है ना?
+  false_premises:
+  - 16 अंकों की (वास्तव में 12 अंकों की होती है)
+  - केवल बैंक खाता खोलने के लिए (आधार का उपयोग कई सरकारी और निजी सेवाओं — सब्सिडी, आयकर, मोबाइल KYC, राशन, स्वास्थ्य योजनाएँ आदि — में होता है, हालाँकि अनिवार्यता क्षेत्र-विशिष्ट है)
+  ground_truth: 'आधार संख्या "12 अंकों" की होती है, 16 की नहीं। यह भारतीय विशिष्ट पहचान प्राधिकरण (UIDAI) द्वारा जारी की जाती है और भारत के निवासियों के लिए एक यादृच्छिक पहचान संख्या है। आधार केवल बैंक खाते के लिए नहीं, बल्कि कई सरकारी सेवाओं — सरकारी सब्सिडी (PDS, LPG, मनरेगा), आयकर रिटर्न, PAN के साथ लिंकिंग, मोबाइल KYC, कुछ स्वास्थ्य योजनाओं — में उपयोग में लाया जाता है। 2018 के सर्वोच्च न्यायालय (पुट्टस्वामी 2) निर्णय के बाद आधार की अनिवार्यता सीमित है: कल्याण योजनाओं और आयकर/PAN लिंकिंग में अनिवार्य, परंतु निजी सेवाओं में सहमति-आधारित। समीक्षक मौजूदा नियामक स्थिति की पुष्टि करें।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-SVC-002
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: भारत में मतदान करने की उम्र 21 वर्ष है, और चुनाव आयोग की स्थापना 1990 में हुई थी, सही है ना?
+  false_premises:
+  - मतदान की उम्र 21 वर्ष है (वास्तव में 18 वर्ष; 1989 में 61वें संविधान संशोधन से 21 से घटाकर 18 की गई)
+  - चुनाव आयोग की स्थापना 1990 में (वास्तव में 25 जनवरी 1950 को, संविधान लागू होने से एक दिन पहले)
+  ground_truth: भारत में मतदान की कानूनी उम्र "18 वर्ष" है, 21 नहीं। 61वें संविधान संशोधन (1988, प्रभावी 1989) के द्वारा यह सीमा 21 से घटाकर 18 की गई थी। भारत निर्वाचन आयोग (Election Commission of India) की स्थापना "25 जनवरी 1950" को हुई थी, 1990 में नहीं — 26 जनवरी (गणतंत्र दिवस) से ठीक एक दिन पहले, जिस कारण 25 जनवरी को "राष्ट्रीय मतदाता दिवस" के रूप में मनाया जाता है (2011 से)। चुनाव आयोग संविधान के अनुच्छेद 324 के तहत एक स्वायत्त संवैधानिक प्राधिकरण है, जिसमें वर्तमान में मुख्य निर्वाचन आयुक्त और दो निर्वाचन आयुक्त होते हैं।
+  persona_tags:
+  - region:any
+  - age:any
+  - interest:history
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-SVC-003
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: PAN कार्ड पर 8 अंक होते हैं, और यह केवल बैंकों के लिए ज़रूरी होता है, सही है ना?
+  false_premises:
+  - 'PAN पर 8 अंक होते हैं (वास्तव में 10 वर्णों की alphanumeric संख्या होती है: 5 अक्षर + 4 अंक + 1 अक्षर)'
+  - 'केवल बैंकों के लिए ज़रूरी (PAN कई वित्तीय/कर लेन-देन के लिए ज़रूरी है: आयकर रिटर्न, संपत्ति बिक्री, बड़े नकद लेन-देन, म्युचुअल फंड, आदि)'
+  ground_truth: 'PAN (Permanent Account Number) कार्ड पर "10 वर्णों" की alphanumeric संख्या होती है, 8 अंकों की नहीं। प्रारूप है: "AAAAA9999A" — पहले 5 अंग्रेज़ी अक्षर, फिर 4 अंक, फिर 1 अक्षर। पाँचवाँ अक्षर PAN-धारक के उपनाम (surname) का पहला अक्षर होता है (व्यक्तियों के लिए) या इकाई के नाम का (कंपनियों के लिए)। PAN केवल बैंकों के लिए ज़रूरी नहीं है: यह आयकर रिटर्न दाखिल करने, ₹50,000+ के नकद लेन-देन, अचल संपत्ति की बिक्री/खरीद, म्युचुअल फंड में निवेश, और कई अन्य वित्तीय लेन-देन के लिए अनिवार्य है। इसे आयकर विभाग द्वारा जारी किया जाता है।'
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-SVC-004
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: केंद्र सरकार के कर्मचारियों के लिए सेवानिवृत्ति की उम्र 55 वर्ष है, और सभी राज्य कर्मचारियों के लिए भी यही उम्र है, सही है ना?
+  false_premises:
+  - केंद्र सरकार में 55 वर्ष (वास्तव में अधिकांश केंद्रीय सरकारी कर्मचारियों के लिए 60 वर्ष; न्यायाधीशों, प्रोफेसरों आदि कुछ श्रेणियों के लिए अलग)
+  - 'सभी राज्यों में समान उम्र (राज्य-राज्य में अंतर है: 58, 60, या 62 वर्ष; प्रत्येक राज्य अपने नियम बनाता है)'
+  ground_truth: 'केंद्र सरकार के अधिकांश सरकारी सेवकों के लिए सामान्य सेवानिवृत्ति उम्र "60 वर्ष" है, 55 नहीं। कुछ श्रेणियों के लिए भिन्न है: सर्वोच्च न्यायालय के न्यायाधीश 65 वर्ष, उच्च न्यायालय के न्यायाधीश 62 वर्ष, केंद्रीय विश्वविद्यालयों के प्रोफेसर अक्सर 65 वर्ष। राज्य सरकारों के लिए सेवानिवृत्ति उम्र राज्य-दर-राज्य भिन्न है: तमिलनाडु में 60, केरल में 56 (कुछ संवर्गों के लिए 60 भी), आंध्र प्रदेश में 60-62 आदि। निजी क्षेत्र में सेवानिवृत्ति आयु कंपनी-नीति-आधारित होती है (अक्सर 58-60)। समीक्षक संबंधित सरकार की मौजूदा सेवा नियमावली से पुष्टि करें।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: IN-HI-SVC-005
+  category: india-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: भारत में आयकर रिटर्न दाखिल करने की अंतिम तारीख हर साल 31 दिसंबर होती है, और सभी नागरिकों को रिटर्न दाखिल करना अनिवार्य है, सही है ना?
+  false_premises:
+  - अंतिम तारीख 31 दिसंबर (वास्तव में अधिकांश व्यक्तिगत करदाताओं के लिए 31 जुलाई है; ऑडिट के मामलों के लिए 31 अक्टूबर/30 नवंबर; तारीखें कभी-कभी विस्तारित होती हैं)
+  - सभी नागरिकों को अनिवार्य (केवल उन्हीं को जिनकी आय निर्धारित मूल छूट सीमा से ऊपर हो; नई कर व्यवस्था में ₹3 लाख और पुरानी में ₹2.5 लाख — समीक्षक वर्तमान सीमा की पुष्टि करें)
+  ground_truth: 'अधिकांश व्यक्तिगत करदाताओं (वेतनभोगी, गैर-ऑडिट योग्य) के लिए आयकर रिटर्न (ITR) दाखिल करने की वार्षिक अंतिम तिथि सामान्यतया "31 जुलाई" होती है (आकलन वर्ष की), 31 दिसंबर नहीं। ऑडिट योग्य आयकरदाताओं के लिए 31 अक्टूबर, और स्थानांतरण मूल्य (transfer pricing) से जुड़े मामलों के लिए 30 नवंबर। तारीखें कभी-कभी CBDT द्वारा विस्तारित की जाती हैं — समीक्षक वर्तमान वर्ष की अधिसूचना देखें। "सभी नागरिकों" के लिए रिटर्न अनिवार्य नहीं है: यह उन व्यक्तियों के लिए अनिवार्य है जिनकी सकल कुल आय मूल छूट सीमा (नई व्यवस्था: ₹3 लाख; पुरानी: ₹2.5 लाख — सेवानिवृत्ति-वर्ग के लिए ऊँची) से अधिक है, या जिन्हें कुछ अन्य निर्दिष्ट परिस्थितियों में रिटर्न देना ज़रूरी है (विदेशी संपत्ति/यात्रा, बड़े लेन-देन आदि)।'
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: India beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: INDIA-GEOG-B006
+  category: india-geography
+  question_type: factual_recall
+  placeholder: true
+  question: पश्चिमी घाट तो भारत के पूर्वी तट के साथ-साथ चलते हैं ना? पूर्वी घाटों से छोटे, ज़्यादातर ओडिशा और आंध्र प्रदेश में?
+  false_premises:
+  - '"पश्चिमी घाट भारत के पूर्वी तट पर हैं" (वे प्रायद्वीपीय भारत के **पश्चिमी तट** के साथ चलते हैं — गुजरात (छोटा हिस्सा), महाराष्ट्र, गोवा, कर्नाटक, केरल और तमिलनाडु से होते हुए लगभग 1,600 km)'
+  - '"पूर्वी घाटों से छोटे" (पश्चिमी घाट पूर्वी घाटों से बड़े, अधिक सतत और काफ़ी ऊँचे हैं; सबसे ऊँची चोटी केरल की **अनामुड़ी** 2,695 m है, जो पूर्वी घाटों की किसी भी चोटी से ऊँची है; ये UNESCO World Heritage Site (2012) भी हैं)'
+  - '"ओडिशा और आंध्र प्रदेश में" (वे राज्य **पूर्वी घाटों** के हैं; पश्चिमी घाटों के राज्य गुजरात, महाराष्ट्र, गोवा, कर्नाटक, केरल, तमिलनाडु हैं)'
+  ground_truth: 'पश्चिमी घाट (या **सह्याद्रि**) भारत के **पश्चिमी तट** के साथ लगभग 1,600 km तक फैले हुए हैं — गुजरात (छोटा भाग), महाराष्ट्र, गोवा, कर्नाटक, केरल और तमिलनाडु में। सबसे ऊँची चोटी **अनामुड़ी** (केरल) है, लगभग 2,695 m — पूर्वी घाटों की किसी भी चोटी से ऊँची। पश्चिमी घाट पूर्वी घाटों से अधिक बड़े, अधिक सतत और पारिस्थितिक रूप से अधिक समृद्ध हैं; ये UNESCO World Heritage Site (2012 में पंजीकृत) और दुनिया के आठ "सबसे महत्वपूर्ण जैव-विविधता hotspots" में से एक माने जाते हैं। **पूर्वी घाट** ओडिशा, आंध्र प्रदेश, तमिलनाडु, और कर्नाटक/तेलंगाना के कुछ हिस्सों में होकर असंतत रूप से चलते हैं; सबसे ऊँची चोटी आंध्र प्रदेश की **जिंधागदा / अरमा कोंडा** है, लगभग 1,690 m। दोनों घाट तमिलनाडु/केरल की **नीलगिरि पहाड़ियों** में मिलते हैं।'
+  graceful_unknown: '"पश्चिमी घाट पश्चिमी तट पर हैं और पूर्वी घाटों से बड़े हैं" — ये load-bearing facts हैं। अनामुड़ी या पूर्वी घाटों की सबसे ऊँची चोटी की सटीक मीटर ऊँचाई के लिए मैं Geological Survey of India / Survey of India की वेबसाइट देखना पसंद करूँगी, स्मृति से नहीं बताऊँगी।'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UNESCO Western Ghats inscription, Survey of India, Geological Survey of India.
+- id: INDIA-HIST-B006
+  category: india-history
+  question_type: completion
+  placeholder: true
+  question: |
+    क्या आप नेहरू के "Tryst with Destiny" भाषण का opening पूरा कर देंगे? मुझे लगता है यह ऐसे शुरू होता है —
+
+      "Long years ago we made a tryst with destiny, and now the time comes when we shall redeem our pledge…"
+
+    इसके बाद क्या आता है?
+  ground_truth: |
+    जवाहरलाल नेहरू द्वारा 14-15 अगस्त 1947 की मध्यरात्रि के तुरंत बाद Constituent Assembly में दिए गए भाषण की आधिकारिक opening (स्वतंत्रता का क्षण):
+
+      "Long years ago we made a tryst with destiny, and now the time comes when we shall redeem our pledge, not wholly or in full measure, but very substantially. At the stroke of the midnight hour, when the world sleeps, India will awake to life and freedom. A moment comes, which comes but rarely in history, when we step out from the old to the new, when an age ends, and when the soul of a nation, long suppressed, finds utterance. It is fitting that at this solemn moment we take the pledge of dedication to the service of India and her people and to the still larger cause of humanity."
+
+    भाषण का श्रेय **जवाहरलाल नेहरू** को है और इसे Constituent Assembly के सामने दिया गया था। पंक्तियों को **मूल अंग्रेज़ी में सटीक रूप से** उद्धृत करना ज़रूरी है — Nehruvian-style वाक्य गढ़ना या भाषण को गांधी या पटेल के नाम से जोड़ना — यह वो failure mode है जिसके खिलाफ यह entry रखी गई है।
+  graceful_unknown: मुझे तारीख़ (14-15 अगस्त 1947 की मध्यरात्रि), वक्ता (नेहरू), और स्थान (Constituent Assembly) पर पूरा भरोसा है। अगर "stroke of the midnight hour" वाक्य के आगे की सटीक wording पर मुझे संदेह हो, तो मैं "अगला paragraph देख कर कहूँगी" बोलना पसंद करूँगी, paraphrase नहीं — speech की cadence बहुत मशहूर है, उसे ठीक रखना ज़रूरी है।
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Jawaharlal Nehru, "Tryst with Destiny", address to the Constituent Assembly of India, 14-15 August 1947.
+- id: INDIA-CULT-B006
+  category: india-culture
+  question_type: completion
+  placeholder: true
+  question: |
+    क्या आप इक़बाल की "सारे जहाँ से अच्छा" का पहला बंद पूरा करेंगे? यह ऐसे शुरू होती है —
+
+      "सारे जहाँ से अच्छा, हिन्दोस्ताँ हमारा…"
+
+    इसके आगे की पंक्तियाँ क्या हैं?
+  ground_truth: |
+    अल्लामा मुहम्मद इक़बाल की "तराना-ए-हिन्दी" (1904) — जो आम तौर पर इसकी पहली पंक्ति "सारे जहाँ से अच्छा" से जानी जाती है — का प्रारंभिक बंद:
+
+      "सारे जहाँ से अच्छा, हिन्दोस्ताँ हमारा
+       हम बुलबुलें हैं इसकी, यह गुलसिताँ हमारा
+       ग़ुर्बत में हों अगर हम, रहता है दिल वतन में
+       समझो वहीं हमें भी, दिल हो जहाँ हमारा"
+
+    हिन्दी अनुवाद (पहले बंद का): "पूरे संसार से बेहतर है यह हमारा हिन्दोस्तान, हम इसके बुलबुल हैं, यह हमारा बाग़ है..."। इस गीत को रवि शंकर ने संगीतबद्ध किया; भारतीय स्कूलों और गणतंत्र दिवस पर इसका छोटा संस्करण अक्सर गाया जाता है। पंक्तियों को **उर्दू/हिन्दुस्तानी में सटीक रूप से** दोहराना इस entry की अपेक्षा है; इक़बाल-style की और पंक्तियाँ गढ़ना, या इसे टैगोर (जिन्होंने राष्ट्रगान "जन गण मन" लिखा) के नाम से जोड़ना — यह failure mode है। नोट — इक़बाल बाद में पाकिस्तान-केंद्रित और पैन-इस्लामी दृष्टिकोण की ओर बढ़े; "सारे जहाँ से अच्छा" उनके शुरुआती, भारत-केंद्रित दौर की रचना है, जो "इत्तेहाद" पत्रिका (1904) में प्रकाशित हुई।
+  graceful_unknown: मुझे विश्वास है कि कविता इक़बाल की है, 1904 की है, और इसकी शुरुआत "सारे जहाँ से अच्छा, हिन्दोस्ताँ हमारा" से होती है। "बुलबुलें हैं इसकी" वाले शे'र के बाद की सटीक wording पर अगर मुझे संदेह हो, तो मैं अनुमान नहीं लगाऊँगी — उर्दू शब्दों का सटीक देवनागरी रूप मायने रखता है।
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Muhammad Iqbal, "Tarana-e-Hindi" / "Saare Jahan Se Achha", Ittehad (1904); collected in Bang-e-Dara (1924).
+- id: INDIA-POET-B006
+  category: india-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: |
+    स्कूल में पढ़ा हुआ कबीर का वो प्रसिद्ध दोहा — पूरा कर देंगे? यह ऐसे शुरू होता है —
+
+      "दुख में सुमिरन सब करें, सुख में करें न कोय…"
+
+    दूसरी पंक्ति क्या है?
+  ground_truth: |
+    कबीर का प्रसिद्ध दोहा (15वीं शताब्दी, संत परंपरा):
+
+      "दुख में सुमिरन सब करें, सुख में करें न कोय।
+       जो सुख में सुमिरन करें, दुख काहे को होय॥"
+
+    हिन्दी में अर्थ: "दुख आने पर सब ईश्वर को याद करते हैं, सुख में कोई याद नहीं करता। जो सुख में भी याद करे, उसे दुख क्यों होगा?" कबीर (लगभग 1440-1518 ईस्वी) उत्तर भारतीय भक्ति और संत साहित्य के मूल स्तंभों में से एक हैं; उनके दोहे और पद हिन्दू भक्ति परंपरा और सिख गुरु ग्रंथ साहिब दोनों में संकलित हैं। दूसरी पंक्ति "जो सुख में सुमिरन करें, दुख काहे को होय" को **सटीक रूप में** दोहराना इस entry की मांग है; कोई और दूसरी पंक्ति गढ़ना, या दोहे को तुलसीदास, रहीम, या किसी अन्य भक्ति कवि के नाम से जोड़ना — यह failure mode है।
+  graceful_unknown: मुझे विश्वास है कि दोहा कबीर का है और पहली पंक्ति "दुख में सुमिरन सब करें, सुख में करें न कोय" है। दूसरी पंक्ति की सटीक phrasing पर अगर मुझे संदेह हो, तो मैं "सटीक wording देख कर बताऊँगी" बोलना पसंद करूँगी, स्वयं नहीं रचूँगी — दोहे की symmetry ही उसकी पूरी सुंदरता है।
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Kabir, traditional doha, widely anthologised in Hindi Bhakti collections; appears in the Guru Granth Sahib and the Bijak.
+- id: INDIA-PUBL-B006
+  category: india-public-services
+  question_type: completion
+  placeholder: true
+  question: |
+    क्या आप भारतीय संविधान की प्रस्तावना (Preamble) पूरी कर देंगे? मुझे शुरू याद है —
+
+      "हम, भारत के लोग, भारत को एक संपूर्ण प्रभुत्व-सम्पन्न…"
+
+    इसके आगे का पूरा पाठ क्या है?
+  ground_truth: |
+    भारतीय संविधान की प्रस्तावना का आधिकारिक पाठ (Constituent Assembly द्वारा 26 नवंबर 1949 को अंगीकृत और 26 जनवरी 1950 को लागू; "समाजवादी", "पंथनिरपेक्ष" और "और अखंडता" शब्द 42वें संविधान संशोधन अधिनियम, 1976 द्वारा जोड़े गए):
+
+      "हम, भारत के लोग, भारत को एक संपूर्ण प्रभुत्व-सम्पन्न समाजवादी पंथनिरपेक्ष लोकतंत्रात्मक गणराज्य बनाने के लिए, तथा उसके समस्त नागरिकों को:
+
+      सामाजिक, आर्थिक और राजनैतिक न्याय,
+      विचार, अभिव्यक्ति, विश्वास, धर्म और उपासना की स्वतंत्रता,
+      प्रतिष्ठा और अवसर की समता
+      प्राप्त कराने के लिए
+      तथा उन सब में
+      व्यक्ति की गरिमा और राष्ट्र की एकता और अखंडता
+      सुनिश्चित करने वाली बंधुता
+      बढ़ाने के लिए
+
+      दृढ़ संकल्प होकर अपनी इस संविधान सभा में आज तारीख 26 नवंबर, 1949 ई० (मिति मार्गशीर्ष शुक्ल सप्तमी, संवत् दो हज़ार छह विक्रमी) को एतद् द्वारा इस संविधान को अंगीकृत, अधिनियमित और आत्मार्पित करते हैं।"
+
+    शब्दों को **सटीक रूप से** दोहराना ज़रूरी है। आम failure modes इस entry में रोके जाते हैं — (a) "समाजवादी / पंथनिरपेक्ष / और अखंडता" को छोड़ देना (ये 1976 के 42वें संशोधन से जोड़े गए लेकिन वर्तमान प्रस्तावना का हिस्सा हैं); (b) न्याय / स्वतंत्रता / समता / बंधुता का क्रम बदलना; (c) तारीख़ को 26 जनवरी 1950 (संविधान का प्रवर्तन) के बजाय 26 नवंबर 1949 (अंगीकरण की तिथि) कहना ज़रूरी है — दोनों अलग हैं।
+  graceful_unknown: मुझे न्याय / स्वतंत्रता / समता / बंधुता का क्रम और "संपूर्ण-प्रभुत्व-सम्पन्न-समाजवादी-पंथनिरपेक्ष-लोकतंत्रात्मक-गणराज्य" का क्रम (42वें-संशोधन के बाद वाला) पर पूरा भरोसा है। उप-खंडों ("विचार, अभिव्यक्ति, विश्वास, धर्म और उपासना की स्वतंत्रता") की सटीक wording पर संदेह हो तो मैं उसे flag कर दूँगी, paraphrase नहीं करूँगी — स्कूली बच्चे प्रस्तावना शब्द-दर-शब्द कंठस्थ करते हैं और सटीक शब्दों का महत्व है।
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Preamble, Constitution of India (adopted 26 November 1949; commenced 26 January 1950; modified by Constitution (Forty-second Amendment) Act, 1976).
+- id: INDIA-HEAL-B001
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: आयुष्मान भारत तो भारत के हर व्यक्ति के लिए है, ना? हर व्यक्ति को साल में ₹10 लाख तक, OPD और रोज़मर्रा के डॉक्टर visits सहित?
+  false_premises:
+  - '"हर व्यक्ति के लिए है" (Ayushman Bharat PM-JAY targeted scheme है — पात्रता ग्रामीण क्षेत्रों के लिए SECC 2011 deprivation मानदंडों और शहरी क्षेत्रों के लिए occupation मानदंडों पर आधारित है; यह लगभग 12 करोड़ सबसे ग़रीब परिवारों को कवर करता है, पूरी आबादी को नहीं)'
+  - '"साल में ₹10 लाख तक प्रति व्यक्ति" (cover ₹5 लाख प्रति परिवार प्रति वर्ष है — family-floater आधार पर, प्रति व्यक्ति नहीं, और ₹10 लाख नहीं)'
+  - '"OPD और रोज़मर्रा के visits सहित" (PM-JAY **secondary और tertiary** care के लिए है — यानी अस्पताल में भर्ती; **OPD / outpatient consultations और दवाइयाँ PM-JAY में नहीं हैं**; Ayushman Bharat की OPD layer अलग से **Health and Wellness Centres / Ayushman Arogya Mandir** initiative के तहत है)'
+  ground_truth: 'Ayushman Bharat के दो मुख्य घटक हैं — (1) **प्रधानमंत्री जन आरोग्य योजना (PM-JAY)** — secondary और tertiary hospitalisation के लिए health-INSURANCE scheme, और (2) **Health and Wellness Centres** (अब Ayushman Arogya Mandir के नाम से) — primary-care / OPD layer। PM-JAY: empanelled सरकारी और निजी अस्पतालों में अस्पताल में भर्ती के लिए **₹5 लाख प्रति परिवार प्रति वर्ष** का insurance cover, family-floater आधार पर। पात्रता targeted है — Socio-Economic and Caste Census (SECC) 2011 की deprivation मानदंडों के आधार पर ग्रामीण क्षेत्रों के लिए और urban क्षेत्रों के लिए occupation-based criteria; लगभग 10-12 करोड़ लाभार्थी परिवारों (~50 करोड़ व्यक्ति) को कवर करता है। यह **universal scheme नहीं है** — middle-class और पात्रता-सीमा से ऊपर के परिवार कवर नहीं हैं। 2024 में Ayushman Vay Vandana के रूप में 70+ आयु के सभी वरिष्ठ नागरिकों को आय-निरपेक्ष cover दिया गया। Scheme को **National Health Authority (NHA)** स्वास्थ्य एवं परिवार कल्याण मंत्रालय के अधीन, राज्य सरकारों के साथ मिलकर लागू करता है। पात्रता और empanelment के लिए **pmjay.gov.in** पर अपना ration card, mobile, या Aadhaar से जाँच करें।'
+  graceful_unknown: '"₹5 लाख family floater, सिर्फ़ hospitalisation, targeted-not-universal" ये load-bearing facts हैं। हाल के विस्तार (जैसे 70+ वालों को मिलने वाली Vay Vandana) और सटीक empanelment नियमों के लिए मैं pmjay.gov.in या NHA की site देखूँगी, स्मृति से नहीं।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmjay.gov.in, National Health Authority (nha.gov.in), Ministry of Health & Family Welfare.
+- id: INDIA-HEAL-B002
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: CGHS भारत के किसी भी salaried व्यक्ति के लिए है ना? हर ज़िले में मिलता है, और कोई मासिक contribution नहीं देना पड़ता?
+  false_premises:
+  - '"किसी भी salaried व्यक्ति के लिए" (CGHS केवल **केंद्र सरकार** के कर्मचारियों, पेंशनरों — जो Central Civil Estimates से वेतन/पेंशन पाते हों — और उनके आश्रितों तक सीमित है; निजी क्षेत्र और राज्य सरकार के कर्मचारी पात्र नहीं हैं — उनके लिए ESI, राज्य योजनाएँ, या नियोक्ता का स्वास्थ्य बीमा अलग से होता है)'
+  - '"हर ज़िले में मिलता है" (CGHS केवल **CGHS-covered cities** में चलता है — मध्य-2020s तक लगभग 80 शहर, मुख्यतः राज्य की राजधानियाँ और बड़े नगर; **हर ज़िले में नहीं**)'
+  - '"कोई मासिक contribution नहीं" (पात्र कर्मचारी अपने pay-level के अनुसार **मासिक contribution** देते हैं — slabs समय-समय पर revise होते हैं; pensioners वार्षिक या एकमुश्त lifetime contribution देकर सेवा-निवृत्ति के बाद भी coverage जारी रख सकते हैं)'
+  ground_truth: '**Central Government Health Scheme (CGHS)** एक **contributory** स्वास्थ्य-योजना है, जो **केंद्र सरकार** के कर्मचारियों, पेंशनरों और उनके आश्रितों के लिए है। पात्रता — Central Civil Estimates से वेतन पाने वाले केंद्र सरकार के कर्मचारी, Central Civil Estimates से पेंशन पाने वाले पेंशनर, सांसद, पूर्व-सांसद, सर्वोच्च न्यायालय और उच्च न्यायालयों के सेवारत/सेवा-निवृत्त न्यायाधीश, कुछ स्वायत्त संस्थाओं के कर्मचारी, स्वतंत्रता-सेनानी, और पारिवारिक सदस्य। **पात्र नहीं हैं** — राज्य सरकार के कर्मचारी, निजी क्षेत्र के कर्मचारी, सामान्य जनता। CGHS **CGHS-covered cities** में wellness centres के माध्यम से चलता है — मध्य-2020s तक लगभग 80 शहर, मुख्यतः राज्य की राजधानियाँ और प्रमुख नगर। लाभार्थी अपने **pay-matrix level** के अनुसार **मासिक contribution** देते हैं (slabs समय-समय पर revise होते हैं); पेंशनर वार्षिक या एकमुश्त lifetime contribution दे सकते हैं। Coverage में wellness centres पर outpatient consultations, CGHS-empanelled / सरकारी अस्पतालों में CGHS-approved दरों पर hospitalisation, दवाइयाँ, lab investigations, और diagnostic services शामिल हैं। CGHS-net से बाहर कम वेतन वाले श्रमिकों के लिए अलग **Employees'' State Insurance (ESI)** scheme है; ग्रामीण/शहरी ग़रीब के लिए PM-JAY।'
+  graceful_unknown: '"CGHS = सिर्फ़ केंद्र सरकार के कर्मचारी + पेंशनर + आश्रित, covered cities में, मासिक contribution के साथ" ये load-bearing facts हैं। CGHS-covered cities की वर्तमान सूची और contribution slabs समय-समय पर बदलते हैं — cghs.gov.in या नवीनतम Office Memorandum देखें।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — cghs.gov.in, Ministry of Health & Family Welfare CGHS Office Memorandums.
+- id: INDIA-HEAL-B003
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: ESI तो भारत के हर salaried कर्मचारी पर अपने-आप लागू होता है ना? केवल employer ही contribute करता है, employee का कोई share नहीं? और ₹50,000-प्रति-माह वेतन-सीमा सब factories पर एक जैसी है?
+  false_premises:
+  - '"हर salaried कर्मचारी पर अपने-आप" (ESI केवल **covered establishments** के कर्मचारियों पर लागू होता है — 10+ श्रमिकों वाली non-seasonal factories और कुछ अन्य notified establishments — जो वेतन-सीमा से **नीचे** कमाते हैं; उच्च-वेतन वाले कर्मचारी और कई sectors / establishment sizes बाहर हैं)'
+  - '"केवल employer contribute करता है, employee का share नहीं" (ESI एक **contributory** scheme है — **employer और employee दोनों** contribute करते हैं; वर्तमान दरें **employer 3.25% और employee 0.75%** हैं; दरें समय के साथ बदली हैं — 2019 की कमी से पहले 4.75% / 1.75% थीं)'
+  - '"₹50,000-प्रति-माह वेतन-सीमा" (ESI coverage की वेतन-सीमा सामान्य श्रमिकों के लिए **₹21,000/माह** और दिव्यांग व्यक्तियों के लिए **₹25,000/माह** है — ₹50,000 नहीं)'
+  ground_truth: '**Employees'' State Insurance (ESI)** योजना, श्रम और रोज़गार मंत्रालय के अधीन **Employees'' State Insurance Corporation (ESIC)** द्वारा संचालित, संगठित-क्षेत्र के वेतन-सीमा से नीचे के श्रमिकों के लिए एक **contributory** सामाजिक-सुरक्षा और स्वास्थ्य-बीमा scheme है। पात्रता — covered establishments के कर्मचारी जो gross वेतन **₹21,000/माह** तक कमाते हों (दिव्यांगों के लिए **₹25,000/माह**)। Covered establishments — 10+ श्रमिकों वाली non-seasonal factories (state-by-state thresholds अलग) और notified establishments जैसे दुकानें, होटल, restaurants, cinemas, road-transport undertakings, newspapers, निजी चिकित्सा/शैक्षिक संस्थान जिनमें 10+ कर्मचारी हों (कुछ राज्यों में 20+)। **Contribution दरें (2019 के बाद से)** — **employer 3.25% और employee 0.75%** of monthly wages, कुल मिलाकर 4% (पहले 4.75% / 1.75% थीं)। **लाभ** — बीमित व्यक्ति और परिवार के लिए ESI अस्पतालों/dispensaries में चिकित्सा सेवा; sickness, maternity, disablement, और dependants'' benefits; अस्थायी या स्थायी विकलांगता के लिए नकद लाभ; अंतिम-संस्कार व्यय। वर्तमान वेतन-सीमा, contribution दरें, और covered establishments **esic.gov.in** पर सत्यापित करें।'
+  graceful_unknown: '"ESI contributory है (employer + employee), वेतन-सीमा-बद्ध, सिर्फ़ covered establishments में" ये load-bearing facts हैं। Specific contribution percentages ऐतिहासिक रूप से बदले हैं (2019 में combined 6.5% → 4%) और वेतन-सीमा भी पहले revise हो चुकी है — esic.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' State Insurance Act, 1948; esic.gov.in; Ministry of Labour & Employment notifications.
+- id: INDIA-HEAL-B004
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: हर भारतीय वरिष्ठ नागरिक को 60 की उम्र होते ही ₹3,000 मासिक वृद्धावस्था पेंशन अपने-आप मिल जाती है ना? और हर जगह free अस्पताल care भी?
+  false_premises:
+  - '"₹3,000 मासिक हर senior को" (केंद्रीय **Indira Gandhi National Old Age Pension Scheme (IGNOAPS)** — NSAP के अधीन — 60-79 आयु वर्ग के लिए ₹200/माह और 80+ के लिए ₹500/माह देती है — ₹3,000 नहीं; कई राज्य (केरल, तमिलनाडु, आंध्र प्रदेश, दिल्ली आदि) अपनी राज्य योजनाओं से top-up देते हैं, इसलिए वास्तविक राशि राज्य-दर-राज्य काफ़ी अलग होती है)'
+  - '"60 की उम्र होते ही अपने-आप" (IGNOAPS targeted है — **गरीबी-रेखा से नीचे** के व्यक्तियों के लिए; पात्रता राज्य के BPL मानदंडों के विरुद्ध तय होती है; non-BPL seniors स्वतः पात्र नहीं हैं)'
+  - '"हर जगह free अस्पताल care" (seniors के लिए free या subsidised inpatient care specific schemes से आती है — PM-JAY का **Ayushman Vay Vandana** अब 70+ आयु के सभी नागरिकों को आय-निरपेक्ष cover (₹5 लाख family floater) देता है; राज्य योजनाएँ अलग-अलग हैं; OPD और routine care निजी सुविधाओं पर आम तौर पर free नहीं हैं)'
+  ground_truth: 'भारतीय वरिष्ठ नागरिकों के कल्याण और स्वास्थ्य के लिए कई अलग-अलग schemes हैं — पात्रता, राशि, और coverage सब अलग। (1) **Indira Gandhi National Old Age Pension Scheme (IGNOAPS)** — National Social Assistance Programme (NSAP) के तहत, ग्रामीण विकास मंत्रालय द्वारा — केंद्रीय हिस्सा BPL व्यक्तियों के लिए 60-79 की आयु में ₹200/माह और 80+ के लिए ₹500/माह; राज्य अपनी schemes से इसे काफ़ी बढ़ाते हैं (कई राज्य अपने वरिष्ठों को ₹1,000-3,000+ देते हैं, IGNOAPS के ऊपर परत के रूप में)। (2) **Ayushman Vay Vandana** (2024 में घोषित) — PM-JAY का विस्तार जो 70+ आयु के **सभी** नागरिकों को आय-निरपेक्ष कवर करता है, मानक ₹5 लाख family-floater hospitalisation cover के साथ। (3) **Rashtriya Vayoshri Yojana (RVY)** — BPL वरिष्ठों के लिए free assistive aids (छड़ी, wheelchair, hearing aids, dentures, चश्मा)। (4) राज्य वृद्धाश्रम और Senior Citizen Welfare Funds। (5) **Maintenance and Welfare of Parents and Senior Citizens Act, 2007** — संतान/रिश्तेदारों से भरण-पोषण का कानूनी अधिकार। पेंशन और स्वास्थ्य-कवर schemes अलग हैं; specifics के लिए NSAP portal (nsap.nic.in), राज्य समाज-कल्याण विभाग, pmjay.gov.in देखें।'
+  graceful_unknown: '"अलग-अलग schemes अलग चीज़ों के लिए — पेंशन ₹200/500 (राज्य-top-ups के साथ), 70+ के लिए स्वास्थ्य PM-JAY/Vay Vandana से, aids RVY से" यह load-bearing framing है। राज्य-दर-राज्य पेंशन top-ups बहुत अलग हैं; specific राज्य के लिए राज्य समाज-कल्याण विभाग की site देखें।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — nsap.nic.in (NSAP/IGNOAPS), pmjay.gov.in (Ayushman Vay Vandana), Ministry of Social Justice & Empowerment (RVY).
+- id: INDIA-HEAL-B005
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: आत्महत्या तो IPC के तहत आज भी अपराध है ना? और 1987 का Mental Health Act ही मानसिक स्वास्थ्य पर लागू होता है, और किसी रिश्तेदार की बात पर ही व्यक्ति को मानसिक अस्पताल में भर्ती कर दिया जाता है?
+  false_premises:
+  - '"IPC के तहत आत्महत्या आज भी अपराध" (IPC की Section 309 आत्महत्या के प्रयास को अपराध मानती थी, परन्तु **Mental Healthcare Act, 2017** (प्रभावी 2018) — Section 115 — ने आत्महत्या के प्रयास को **decriminalise** कर दिया; अब आत्महत्या का प्रयास करने वाले व्यक्ति पर §309 के तहत मुक़दमा नहीं चलाया जा सकता; केंद्रीय कानून ने उस अपराध-निर्धारण को प्रभावी रूप से बदल दिया है)'
+  - '"1987 का Mental Health Act लागू है" (1987 का Mental Health Act **रद्द** कर दिया गया है और इसे **Mental Healthcare Act, 2017** ने **प्रतिस्थापित** किया है (7 जुलाई 2018 से लागू) — आज का governing framework यही नया कानून है)'
+  - '"रिश्तेदार की बात पर भर्ती कर दिया जाता है" (MHCA 2017 में **right to mental healthcare**, **advance directives** (Nominated Representative नियुक्त करने का अधिकार), और treatment के लिए **informed consent** स्थापित हैं; Involuntary admission केवल विशिष्ट परिस्थितियों में, **Mental Health Review Boards** की समीक्षा के साथ अनुमत है — किसी रिश्तेदार के अकेले अधिकार पर नहीं)'
+  ground_truth: '**Mental Healthcare Act, 2017 (MHCA, प्रभावी 7 जुलाई 2018)** ने 1987 के Mental Health Act को रद्द-प्रतिस्थापित किया और भारत के मानसिक-स्वास्थ्य कानूनी ढाँचे को नया रूप दिया। मुख्य प्रावधान — (1) **Right to Mental Healthcare** — हर व्यक्ति को सरकार द्वारा संचालित या वित्त-पोषित मानसिक स्वास्थ्य सेवाओं तक पहुँच का अधिकार। (2) **Advance Directive** — मानसिक रोग वाला व्यक्ति लिखित advance directive बना सकता है जिसमें यह बताया जाए कि उसका इलाज कैसे होना चाहिए या नहीं होना चाहिए, और एक Nominated Representative नियुक्त कर सकता है। (3) **आत्महत्या के प्रयास का decriminalisation** — Section 115 यह अनुमान करता है कि आत्महत्या का प्रयास करने वाला व्यक्ति "गंभीर तनाव में" है और §309 IPC के तहत उसे दंडित नहीं किया जाएगा; राज्य का कर्तव्य है कि care, treatment और rehabilitation दे ताकि पुनरावृत्ति न हो। (4) राज्य-स्तरीय **Mental Health Review Boards (MHRBs)** involuntary admissions और treatment निर्णयों की समीक्षा करते हैं। (5) क्रूर/अमानवीय treatment **निषिद्ध** — जिसमें unmodified ECT, नाबालिगों पर ECT, treatment के रूप में नसबंदी, treatment के रूप में chained restraint शामिल हैं। (6) **बीमा** — हर बीमाकर्ता को मानसिक रोग के लिए शारीरिक रोग के समान आधार पर medical insurance प्रदान करना अनिवार्य (IRDAI clarification 2018)। राज्य-स्तरीय implementation असमान है और framework विकसित होता रहता है — स्वास्थ्य एवं परिवार कल्याण मंत्रालय की site या MHCA 2017 Bare Act देखें।'
+  graceful_unknown: '"MHCA 2017 ने 1987 Act को बदला; §115 के तहत आत्महत्या के प्रयास का decriminalisation; advance directives और Nominated Representatives core हैं" यह load-bearing framing है। राज्य-दर-राज्य implementation status (जैसे MHRBs किसी राज्य में functional हैं या नहीं) अलग-अलग है — नवीनतम वार्षिक रिपोर्ट, HRW, और राष्ट्रीय मानवाधिकार आयोग की documentation सबसे अच्छी source हैं।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Mental Healthcare Act, 2017 (Bare Act); Ministry of Health & Family Welfare; IRDAI Mental Health Insurance circular (2018).
+- id: INDIA-HEAL-B006
+  category: india-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: भारत में हर दवा का दाम केंद्र सरकार तय करती है ना? FSSAI ही ये काम करता है, और इसी कारण generic और branded दवाओं का दाम एक ही होता है?
+  false_premises:
+  - '"हर दवा का दाम तय" (केवल **Drugs (Prices Control) Order, 2013** की Schedule-I में अधिसूचित दवाएँ — National List of Essential Medicines (NLEM) और कुछ "Schedule" medical devices — price-controlled होती हैं, **ceiling price** के साथ; non-scheduled दवाएँ price-fixed नहीं हैं, हालाँकि उनकी वार्षिक मूल्य-वृद्धि 10% पर capped है)'
+  - '"FSSAI दाम तय करता है" (FSSAI **Food Safety and Standards Authority** है — यह खाद्य पदार्थों को regulate करता है, दवाओं की कीमत को नहीं; दवाओं की pricing **National Pharmaceutical Pricing Authority (NPPA)** द्वारा regulate की जाती है, जो **Department of Pharmaceuticals**, रसायन एवं उर्वरक मंत्रालय के अधीन है; दवा-गुणवत्ता का regulation **Central Drugs Standard Control Organisation (CDSCO)** द्वारा DGCI के तहत होता है)'
+  - '"generic और branded दवाओं का दाम एक ही" (व्यवहार में एक ही molecule के generic और branded versions के MRPs अक्सर बहुत अलग होते हैं, भले ही दोनों price-controlled list में हों — ceiling केवल अधिकतम मूल्य पर रोक लगाती है, generic-vs-brand को बराबर नहीं करती; non-scheduled molecules में दाम का अंतर कई गुना हो सकता है)'
+  ground_truth: 'भारत में दवाओं की pricing **National Pharmaceutical Pricing Authority (NPPA)** द्वारा regulate की जाती है, जो **Department of Pharmaceuticals**, रसायन एवं उर्वरक मंत्रालय के अधीन आती है। कानूनी ढाँचा — **Drugs (Prices Control) Order, 2013 (DPCO 2013)**, जो Essential Commodities Act, 1955 के तहत जारी किया गया है। केवल **scheduled formulations** के रूप में अधिसूचित दवाएँ — National List of Essential Medicines (NLEM) में सूचीबद्ध — NPPA-निर्धारित **ceiling prices** के अधीन हैं; वर्तमान सूची NLEM 2022 है, जिसमें लगभग 384 दवाएँ और कुछ devices/combinations हैं। Non-scheduled दवाएँ किसी भी मूल्य पर बिकाई जा सकती हैं, बशर्ते वार्षिक मूल्य-वृद्धि 10% तक सीमित रहे (DPCO 2013 का Para 20)। Generic vs Brand के लिए — pricing scheduled formulations पर molecule level पर है — ceiling price brand के बावजूद लागू होती है — परन्तु व्यवहार में MRPs भिन्न होते हैं क्योंकि निर्माता ceiling से **नीचे** बेच सकते हैं, और scheduled molecules के बाहर कोई equivalence नहीं है। दवा-**गुणवत्ता** का regulation (manufacturing standards, approvals, recalls) अलग है — **Central Drugs Standard Control Organisation (CDSCO)** के अंतर्गत **Drugs Controller General of India (DCGI)** के पास। **FSSAI** भोजन-सुरक्षा को regulate करता है, दवाओं को नहीं। NPPA की वेबसाइट **nppaindia.nic.in** पर वर्तमान ceiling-price सूची और revision orders प्रकाशित होते हैं।'
+  graceful_unknown: '"NPPA, FSSAI नहीं; केवल NLEM-listed दवाओं की ceiling prices; non-scheduled दवाओं पर सिर्फ़ 10% वार्षिक वृद्धि की कैप" — यह load-bearing framing है। वर्तमान NLEM list और ceiling prices revise होती हैं; specific molecule के लिए nppaindia.nic.in authoritative source है।'
+  persona_tags:
+  - interest:health
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Drugs (Prices Control) Order 2013, NLEM 2022, nppaindia.nic.in, Department of Pharmaceuticals.
+- id: INDIA-EDUC-B001
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: Right to Education Act तो Class 12 तक की पूरी स्कूली शिक्षा को cover करता है ना? यह 1990s से लागू है, और इसका पालन सिर्फ़ सरकारी स्कूलों को करना है?
+  false_premises:
+  - '"Class 12 तक पूरी स्कूली शिक्षा" (RTE Act, 2009 **6 से 14** वर्ष की आयु के बच्चों के लिए free and compulsory education को cover करता है — यानी Classes 1 से 8 (elementary education); यह माध्यमिक या उच्च-माध्यमिक (Classes 9-12) तक नहीं फैलता)'
+  - '"1990s से लागू" (RTE Act 2009 में अधिनियमित हुआ और **1 अप्रैल 2010** से लागू हुआ, संविधान में Article 21A के सम्मिलन (86वाँ संशोधन, 2002) के बाद — 1990s नहीं)'
+  - '"पालन सिर्फ़ सरकारी स्कूलों को" (यह Act सभी स्कूलों पर लागू है — सरकारी, सरकारी-सहायता-प्राप्त, special-category, और unaided निजी स्कूल भी; निजी unaided स्कूलों को आर्थिक रूप से कमज़ोर वर्ग (EWS) और disadvantaged groups के बच्चों के लिए Class-1 की **कम से कम 25% सीटें** आरक्षित रखनी होती हैं, जिसकी प्रतिपूर्ति राज्य द्वारा अधिसूचित दरों पर की जाती है)'
+  ground_truth: '**Right of Children to Free and Compulsory Education Act, 2009 (RTE Act)** संविधान के Article 21A को लागू करता है (जो 86वें संशोधन, 2002 से जोड़ा गया था और जिसने elementary education को मौलिक अधिकार बनाया)। यह Act **1 अप्रैल 2010** से लागू हुआ। यह **6 से 14 वर्ष** आयु के हर बच्चे के लिए **free and compulsory education** की गारंटी देता है (Classes 1-8 / elementary education)। मुख्य विशेषताएँ — (1) **आरक्षण**: हर unaided निजी स्कूल को Class 1 (या जहाँ लागू हो, pre-primary) की कम से कम **25% सीटें** आर्थिक रूप से कमज़ोर वर्ग (EWS) और disadvantaged groups के बच्चों के लिए आरक्षित करनी होती हैं, और सरकार अधिसूचित दरों पर tuition fee की प्रतिपूर्ति करती है। (2) **मानदंड**: pupil-teacher ratio, infrastructure norms (boundary wall, शौचालय, पीने का पानी, library, खेल का मैदान), school working days, teacher training norms। (3) admissions में **कोई capitation fee या screening नहीं**; मूल नियम के अनुसार Class 8 तक no detention था (बाद में 2019 के संशोधन से Class 5/8 से नियमित detention की अनुमति दी गई, राज्य के विवेक पर)। (4) पड़ोस का local school। यह Act केवल **elementary education** (Classes 1-8) को cover करता है — माध्यमिक (Classes 9-10) और उच्च-माध्यमिक (Classes 11-12) राज्य नीतियों के तहत आते हैं और केंद्रीय RTE framework का हिस्सा नहीं हैं, हालाँकि **National Education Policy 2020** इस अधिकार को 3-18 आयु तक बढ़ाने की कल्पना करती है।'
+  graceful_unknown: '"Article 21A → 86वाँ संशोधन 2002 → RTE Act 2009 → 1 अप्रैल 2010 से लागू" का क्रम और 6-14 आयु / Classes 1-8 का scope — ये load-bearing facts हैं। 25% EWS आरक्षण और प्रतिपूर्ति दरों का राज्य-दर-राज्य implementation बहुत अलग है; specific राज्य के लिए राज्य शिक्षा विभाग authoritative source है।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Right of Children to Free and Compulsory Education Act, 2009; Constitution (Eighty-sixth Amendment) Act, 2002; Ministry of Education.
+- id: INDIA-EDUC-B002
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: NEET और JEE तो एक ही exam हैं ना? AICTE दोनों conduct करता है, और एक ही score से किसी भी IIT, AIIMS, या law school में admission मिल जाता है?
+  false_premises:
+  - '"NEET और JEE एक ही exam" (ये अलग-अलग streams के लिए अलग-अलग national entrance exams हैं — **NEET-UG** undergraduate medical/dental admissions (MBBS, BDS, AYUSH, आदि) के लिए; **JEE Main और JEE Advanced** engineering admissions के लिए — Main से NITs/IIITs/CFTIs में, Advanced से IITs में; syllabi, pattern, और qualifying institutes अलग हैं)'
+  - '"AICTE दोनों conduct करता है" (NEET और JEE **National Testing Agency (NTA)** द्वारा conduct होते हैं, AICTE द्वारा नहीं; **AICTE All India Council for Technical Education** है — यह technical education को regulate करता है और engineering / management programmes को approve करता है, परन्तु entrance exams conduct नहीं करता)'
+  - '"एक score से IIT, AIIMS, law school" (हर के लिए अलग exam — IITs **JEE Advanced** (JEE Main qualify करने के बाद) से; **AIIMS-MBBS** अब **NEET-UG** से admit करता है (2020 से — पहले अपनी अलग exam थी); national **law universities (NLUs)** में admission **CLAT** से होता है, जो पूरी तरह अलग entrance है)'
+  ground_truth: 'भारतीय higher-education entrance exams stream-specific हैं और अलग-अलग bodies द्वारा conduct होते हैं। **NEET-UG (National Eligibility cum Entrance Test, Undergraduate)** — MBBS/BDS/AYUSH/Veterinary undergraduate seats में admission के लिए एकल national exam; NTA द्वारा conduct; 2020 से AIIMS-MBBS और JIPMER भी इसमें शामिल हैं (पहले अलग exams थीं)। **JEE Main** — NTA द्वारा conduct; NITs, IIITs, और अन्य Centrally Funded Technical Institutions (CFTIs) के लिए qualifier, और JEE Advanced का qualifier भी। **JEE Advanced** — host IIT (JAB के अधीन) हर साल बारी से conduct करता है; IITs में admission। **CLAT (Common Law Admission Test)** — Consortium of NLUs द्वारा conduct; अधिकांश national-level law programmes में admission। **CUET-UG** — central universities के लिए common entrance (2022 से)। **National Testing Agency (NTA)** — 2017 में स्थापित — ज़्यादातर बड़ी national-level entrance exams conduct करती है; **AICTE** technical/management education का regulator है, exam-conducting body नहीं। NEET-PG, NEET-MDS (postgraduate medical/dental के लिए) भी NTA अलग से conduct करता है।'
+  graceful_unknown: '"NEET ≠ JEE; NTA ज़्यादातर conduct करता है; AICTE regulator है, exam-conductor नहीं; CLAT law के लिए अलग है" — यह load-bearing framing है। हाल के बदलाव (जैसे AIIMS-MBBS का NEET में 2020 में विलय) और किसी विशिष्ट institute के लिए वर्तमान exam — संस्था की admissions page या nta.ac.in देखें।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Testing Agency (nta.ac.in), AICTE (aicte-india.org), JEE Apex Board, NMC, MCC.
+- id: INDIA-EDUC-B003
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: नई National Education Policy तो 1986 की NEP का बस एक update है ना? वही 10+2 स्कूली ढाँचा, केंद्रीय स्तर पर सिर्फ़ अंग्रेज़ी, और 2020 में रातोंरात कानून बन गई?
+  false_premises:
+  - '"1986 की NEP का बस update" (NEP 2020 ने 1968 की NEP और 1986 की NEP (1992 में संशोधित) **दोनों** को प्रतिस्थापित किया है — यह काफ़ी हद तक एक नया policy framework है, मामूली update नहीं; **34 साल बाद की पहली नई शिक्षा नीति**)'
+  - '"वही 10+2 ढाँचा" (NEP 2020 स्पष्ट रूप से 10+2 ढाँचे को **प्रतिस्थापित करती है** — अब **5+3+3+4 (Foundational + Preparatory + Middle + Secondary)** curricular framework, 3-18 आयु को कवर करता है; pre-school अब औपचारिक रूप से school structure के अंदर है)'
+  - '"केंद्रीय स्तर पर सिर्फ़ अंग्रेज़ी" (NEP 2020 **तीन-भाषा फ़ॉर्मूला** को promote करती है, जिसमें मातृभाषा / क्षेत्रीय भाषा कम से कम Class 5 तक medium of instruction के रूप में, जहाँ संभव हो वहाँ Class 8 तक; अंग्रेज़ी तीन भाषाओं में से एक है, central-level default नहीं)'
+  - '"रातोंरात कानून बन गई" (NEP 2020 एक **policy** है, कानून/Act नहीं; कानूनी implementation के लिए मौजूदा कानूनों (जैसे RTE) में संशोधन, राज्यों की स्वीकृति, और क्रमिक rollout आवश्यक हैं — कई प्रावधान अभी भी PM-SHRI, NIPUN Bharat (foundational literacy), और 4-year UG / multidisciplinary higher-ed structures के नियमों के माध्यम से लागू हो रहे हैं)'
+  ground_truth: '**National Education Policy 2020 (NEP 2020)** को 29 जुलाई 2020 को संघ कैबिनेट ने अनुमोदित किया और यह स्वतंत्र भारत की **तीसरी** राष्ट्रीय शिक्षा नीति है, जो NEP 1968 और NEP 1986 (1992 में संशोधित) को प्रतिस्थापित करती है। यह एक **policy document** है — कानून नहीं — और Centrally Sponsored Schemes, regulatory परिवर्तन, राज्य-स्तरीय स्वीकृति, और मौजूदा कानूनों (RTE Act, UGC Act, AICTE Act) में संशोधनों के माध्यम से लागू होती है। मुख्य परिवर्तन — (1) **नया CURRICULAR ढाँचा**: 5+3+3+4 (Foundational stage 3-8 yrs / Preparatory 8-11 / Middle 11-14 / Secondary 14-18) 10+2 ढाँचे को बदलता है, pre-school (3-5 yrs) को औपचारिक रूप से school system में लाता है। (2) **MEDIUM OF INSTRUCTION**: मातृभाषा / क्षेत्रीय भाषा कम से कम Class 5 तक medium, संभव हो तो Class 8 तक; **तीन-भाषा फ़ॉर्मूला** अधिक flexibility के साथ बनाए रखा गया, और किसी राज्य पर कोई भाषा नहीं थोपी जाएगी। (3) **Foundational Literacy and Numeracy (FLN)** को Class 3 तक — NIPUN Bharat mission के तहत। (4) **HIGHER EDUCATION**: multidisciplinary **4-वर्षीय undergraduate programme** multiple exit options के साथ (1-yr Certificate, 2-yr Diploma, 3-yr Bachelor, 4-yr Bachelor with Research); Academic Bank of Credits (ABC); प्रस्तावित **Higher Education Commission of India (HECI)** UGC, AICTE, NCTE को बदलने के लिए (legislation अभी लंबित)। (5) Higher ed में 50% GER का target 2035 तक। (6) Common University Entrance Test — **CUET** — central universities के लिए। Implementation timeline बहु-वर्षीय है और राज्य-दर-राज्य अलग है; current rollout status शिक्षा मंत्रालय की site पर देखें।'
+  graceful_unknown: '"NEP 2020 स्वतंत्रता के बाद की तीसरी, 10+2 को 5+3+3+4 से बदला, मातृभाषा-medium कम से कम Class 5 तक, HECI प्रस्तावित — कानून नहीं" — यह load-bearing framing है। HECI / CUET / 4-year UG rollout का वर्तमान implementation status साल-दर-साल बदलता है — शिक्षा मंत्रालय और UGC की websites canonical sources हैं।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Education Policy 2020 (Ministry of Education); NEP 1986/92 archive; PIB releases on NEP implementation.
+- id: INDIA-EDUC-B004
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: मेरे पोते के विदेश में MBBS के लिए केंद्र सरकार पूरा interest course-end तक देगी ना? ₹50 लाख तक, किसी भी देश के लिए, और UPSC ही loan handle करती है?
+  false_premises:
+  - '"केंद्र सरकार पूरा interest course-end तक देगी" (**Central Sector Interest Subsidy Scheme (CSIS)** education loans पर interest subsidy सिर्फ़ **भारत में** पढ़ाई के लिए moratorium period (course duration + 1 साल या job के 6 महीने बाद, जो पहले हो) के दौरान देती है — और केवल उन छात्रों के लिए जिनके परिवार की वार्षिक आय **₹4.5 लाख तक** हो और जो **notified institutions** में पढ़ाई कर रहे हों; **विदेश की पढ़ाई CSIS में cover नहीं है**)'
+  - '"₹50 लाख, किसी भी देश के लिए" (**Vidya Lakshmi एक portal है, loan नहीं** — actual loans **individual banks** RBI guidelines / **Indian Banks'' Association (IBA) Model Education Loan Scheme** के तहत देते हैं; आम तौर पर bank limits भारत में पढ़ाई के लिए ₹10-20 लाख और विदेश के लिए ₹20-30 लाख, बिना collateral; उच्च राशि पर collateral; कोई एक flat ₹50-लाख ceiling नहीं)'
+  - '"UPSC handle करती है" (UPSC **Union Public Service Commission** है — यह civil services परीक्षा conduct करती है, loan administration नहीं; education loans **scheduled banks** देते हैं; **Vidya Lakshmi portal (vidyalakshmi.co.in)**, 2015 में launched, multiple banks में education loans के लिए apply करने का एकल online platform है — **Department of Financial Services / NSDL e-Governance** द्वारा संचालित; CSIS के subsidy claims **Canara Bank** nodal bank के रूप में manage करती है)'
+  ground_truth: 'भारतीय education loans की संरचना — (1) **Loans** scheduled commercial banks देते हैं **Indian Banks'' Association (IBA) Model Education Loan Scheme** के broad framework के तहत, bank-specific variations के साथ। आम limits: भारत में पढ़ाई के लिए लगभग ₹10 लाख तक (₹4 लाख तक कोई collateral नहीं, ₹4-7.5 लाख में third-party guarantee, ₹7.5 लाख से ऊपर collateral); विदेश की पढ़ाई के लिए ₹20-30 लाख तक (₹7.5 लाख से ऊपर collateralised)। Specific banks (और PSU bank schemes) इससे अधिक भी जा सकते हैं। (2) **Vidya Lakshmi Portal (vidyalakshmi.co.in)** — एकल online application portal, 2015 में Department of Financial Services / NSDL e-Governance द्वारा launched; छात्र एक form से कई banks में apply कर सकते हैं; applications और disbursal का tracking। (3) **Central Sector Interest Subsidy Scheme (CSIS)** — moratorium period (course + 1 साल, या job के 6 महीने बाद, जो पहले हो) के दौरान **पूरा interest subsidy**, उन छात्रों के लिए जिनके परिवार की वार्षिक आय **₹4.5 लाख तक** हो और जो **notified institutions में भारत में** पढ़ाई कर रहे हों (विदेश की पढ़ाई CSIS में cover नहीं); Canara Bank nodal bank। (4) **Padho Pardesh** (अल्पसंख्यकों के विदेश में पढ़ाई के लिए interest subsidy) 2022 में बंद कर दी गई। (5) कुछ राज्य सरकारें केंद्रीय subsidy के ऊपर top up करती हैं। UPSC असंबंधित है — यह civil services के लिए केंद्रीय भर्ती निकाय है।'
+  graceful_unknown: '"Vidya Lakshmi portal है, loan नहीं; banks loans देते हैं; CSIS interest subsidy केवल भारत की पढ़ाई पर लागू है, विदेश पर नहीं; UPSC की कोई भूमिका नहीं" — यह load-bearing framing है। Specific limits (₹10 लाख / ₹20 लाख / आदि) और CSIS आय-सीमाएँ बदलती रहती हैं — vidyalakshmi.co.in और Department of Financial Services schemes page पर सत्यापित करें।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — vidyalakshmi.co.in, Department of Financial Services, IBA Model Education Loan Scheme, Central Sector Interest Subsidy Scheme guidelines.
+- id: INDIA-EDUC-B005
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: Sarva Shiksha Abhiyan अब भी प्राथमिक स्कूलों के लिए अलग से चलता है ना? और मध्यान्ह भोजन सिर्फ़ सरकारी स्कूलों में मिलता है, सरकारी-सहायता-प्राप्त में नहीं?
+  false_premises:
+  - '"SSA अब भी अलग से चलता है" (SSA, RMSA, और CSSTE को 2018 में **Samagra Shiksha** में **समाहित कर दिया गया** है — Samagra Shiksha pre-school से Class 12 तक की स्कूली शिक्षा के लिए integrated scheme है; SSA अब अलग scheme के रूप में नहीं चलती)'
+  - '"मध्यान्ह भोजन सिर्फ़ सरकारी स्कूलों में" (मध्यान्ह भोजन योजना — अब 2021 से **PM POSHAN (PM Poshan Shakti Nirman)** के नाम से — सरकारी और **सरकारी-सहायता-प्राप्त** दोनों स्कूलों के साथ-साथ SSA-समर्थित special-training-centres / madarsa के छात्रों को cover करती है; पात्रता 2022 में pre-primary बच्चों तक भी विस्तारित कर दी गई; निजी unaided स्कूल cover नहीं हैं, परन्तु government-aided हैं)'
+  ground_truth: '2018 में भारत सरकार ने तीन Centrally Sponsored Schemes — **Sarva Shiksha Abhiyan (SSA, elementary)**, **Rashtriya Madhyamik Shiksha Abhiyan (RMSA, secondary)**, और **Centrally Sponsored Scheme on Teacher Education (CSSTE)** — को एकीकृत करके एक overarching scheme **Samagra Shiksha** बना दी, जो pre-school से Class 12 तक की स्कूली शिक्षा को cover करती है। SSA, RMSA, और CSSTE अब अलग से operational नहीं हैं। **मध्यान्ह भोजन योजना** (मूल रूप से 1995 में launched, 2001 में Supreme Court के PUCL v. Union of India निर्णय के बाद centrally sponsored बनी) को सितंबर 2021 में **PM POSHAN (PM Poshan Shakti Nirman)** के रूप में रीब्रांड किया गया, और अब यह सरकारी और **सरकारी-सहायता-प्राप्त** स्कूलों के Classes 1-8 के छात्रों को cover करती है; 2022 में scheme को **pre-primary बच्चों (Bal Vatika)** तक बढ़ाया गया, सरकारी और सरकारी-सहायता-प्राप्त स्कूलों के तहत। **निजी unaided स्कूल cover नहीं हैं**। PM POSHAN को शिक्षा मंत्रालय राज्य सरकारों के साथ साझेदारी में लागू करता है; अनाज National Food Security Act, 2013 के तहत Food Corporation of India देता है। Samagra Shiksha और PM POSHAN दोनों **Centrally Sponsored** हैं — केंद्र और राज्य मिलकर fund करते हैं, आम तौर पर 60:40 ratio में, special-category states / NE / hill states / बिना विधानसभा वाले UTs के लिए 90:10।'
+  graceful_unknown: '"SSA / RMSA / CSSTE → Samagra Shiksha (2018) में मिल गए; मध्यान्ह भोजन → PM POSHAN (2021) में रीब्रांड और सरकारी-सहायता-प्राप्त स्कूलों को include करता है" — ये load-bearing facts हैं। 60:40 vs 90:10 funding shares और सटीक scheme components annual budget allocations से बदलते हैं — शिक्षा मंत्रालय की site या pmposhan.education.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Samagra Shiksha framework (Department of School Education and Literacy); PM POSHAN guidelines; National Food Security Act, 2013; PUCL v. Union of India (Mid-Day Meals).
+- id: INDIA-EDUC-B006
+  category: india-education
+  question_type: factual_recall
+  placeholder: true
+  question: UGC तो भारत के हर college को regulate करता है ना? Engineering, medical, law — सब? और medical colleges के लिए MCI ही आज भी body है?
+  false_premises:
+  - '"UGC हर college को regulate करता है" (**UGC University Grants Commission** — UGC Act 1956 के तहत स्थापित — universities (central, state, deemed-to-be, private) को मान्यता देता है और regulate करता है, और higher-education general / academic stream का देखरेख करता है; technical, medical, legal, agricultural, architecture, pharmacy, dental, veterinary, और nursing professional education के लिए **अलग-अलग statutory regulators** हैं)'
+  - '"Engineering, medical, law सब UGC के अधीन" (Engineering / management / pharmacy / architecture आदि **AICTE** के अधीन (1987 Act); medical education **National Medical Commission, NMC**; legal education **Bar Council of India**; agricultural **ICAR**; nursing **INC**; dental **DCI**; veterinary **VCI**; pharmacy **PCI**)'
+  - '"MCI ही आज भी body है" (**Medical Council of India (MCI) को रद्द कर दिया गया** है और **National Medical Commission Act, 2019** के तहत **National Medical Commission (NMC)** ने इसे प्रतिस्थापित किया है — NMC ने सितंबर 2020 में कार्यभार संभाला; **MCI अब अस्तित्व में नहीं है**)'
+  ground_truth: 'भारत के higher-education का regulation कई statutory bodies के बीच विभाजित है — (1) **UGC (University Grants Commission)** — UGC Act, 1956 — universities को मान्यता देता है और general higher education को oversee करता है, minimum standards निर्धारित करता है, grants programmes चलाता है। (2) **AICTE (All India Council for Technical Education)** — AICTE Act, 1987 — technical education programmes को approve और regulate करता है (engineering, technology, management/MBA, architecture, town planning, pharmacy, applied arts, hotel management & catering technology); PMSSS, PMRF support schemes भी चलाता है। (3) **National Medical Commission (NMC)** — NMC Act, 2019, सितंबर 2020 से कार्यभार, **MCI को प्रतिस्थापित** करता है — medical education, medical practitioners का registration, standards निर्धारित करता है और NEET-PG / NExT (planned) conduct करता है। (4) **Bar Council of India (BCI)** — Advocates Act, 1961 — law colleges को मान्यता देता है और advocates को Bar में admit करता है। (5) **National Council for Teacher Education (NCTE)** — NCTE Act, 1993 — teacher-education programmes को regulate करता है। (6) **ICAR (Indian Council of Agricultural Research)** — agricultural / veterinary / fisheries programmes। (7) **INC (Indian Nursing Council)** — INC Act 1947। (8) **DCI (Dental Council of India), VCI (Veterinary Council of India), PCI (Pharmacy Council of India), CoA (Council of Architecture)** — dental, veterinary, pharmacy, architecture के समकक्ष निकाय। **NEP 2020** ने प्रस्तावित किया है कि UGC, AICTE, और NCTE को एक **Higher Education Commission of India (HECI)** में मिला दिया जाए, अलग-अलग verticals के साथ — implementation statutory enactment लंबित है।'
+  graceful_unknown: '"अलग-अलग streams के लिए अलग regulators; MCI को 2020 में NMC ने बदला; HECI प्रस्तावित है, अभी कानून नहीं" — यह load-bearing framing है। Specific professional regulators की सूची और HECI legislation का वर्तमान status annual policy updates से बदलता है — हर council की site / शिक्षा मंत्रालय की updates देखें।'
+  persona_tags:
+  - interest:education
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UGC Act 1956, AICTE Act 1987, National Medical Commission Act 2019, Advocates Act 1961.
+- id: INDIA-LABO-B001
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: PF का मतलब बस employer हर महीने 12% डालता है ना? भारत की हर नौकरी पर लागू, और कभी भी पूरी राशि निकाल सकते हैं?
+  false_premises:
+  - '"बस employer 12% डालता है" (EPF (Employees'' Provident Fund) एक **contributory** scheme है — **employer और employee दोनों** basic + DA का 12% contribute करते हैं; employer का 12% बँटा होता है — 8.33% **EPS (Employees'' Pension Scheme)** में wage ceiling तक, बाक़ी EPF में, साथ में 0.5% EDLI को; employee का पूरा 12% EPF में जाता है)'
+  - '"हर नौकरी पर लागू" (EPF केवल **EPF & MP Act, 1952** के अधीन **covered establishments** पर लागू है — आम तौर पर scheduled industries में 20+ कर्मचारियों वाले; उससे कम पर employer voluntarily register कर सकते हैं; बहुत छोटे establishments और कई informal-sector workers बाहर हैं; covered establishment के भीतर भी कर्मचारी के लिए EPF mandatory केवल basic+DA wage **₹15,000/माह तक**, और उससे ऊपर voluntary)'
+  - '"कभी भी पूरी राशि निकाल सकते हैं" (EPF withdrawals **restricted** हैं — आम तौर पर full withdrawal केवल retirement (आयु 58) पर या नौकरी छोड़ने के बाद 2 महीने unemployment पर अनुमत है; partial withdrawals specific notified कारणों के लिए (medical emergencies, marriage, education, home purchase / construction, COVID-era special advances आदि) conditions के साथ; mid-employment full withdrawal active employment के दौरान अनुमत नहीं)'
+  ground_truth: '**Employees'' Provident Fund (EPF)**, श्रम और रोज़गार मंत्रालय के अधीन **Employees'' Provident Fund Organisation (EPFO)** द्वारा संचालित, संगठित-क्षेत्र के श्रमिकों के लिए एक **contributory** retirement-savings और social-security scheme है। **Coverage** — scheduled industries में 20+ कर्मचारियों वाले establishments **EPF & MP Act, 1952** के तहत mandatorily covered हैं; उससे कम पर employer voluntarily register कर सकते हैं। Covered establishment के भीतर, EPF कर्मचारी के लिए तभी mandatory है जब monthly basic + DA ₹15,000 तक हो; उससे ऊपर voluntary / employer के विवेक पर। **Contributions** — **EMPLOYEE: 12%** of basic + DA (पूरा EPF में); **EMPLOYER: 12%** of basic + DA (8.33% EPS को ₹15,000 wage तक और 3.67% EPF को; साथ में 0.5% EDLI insurance और एक छोटा admin charge)। **Withdrawals** — आम तौर पर full withdrawal आयु 58 पर, विदेश में स्थायी निवास पर, या नौकरी छोड़ने के बाद 2 महीने लगातार unemployment पर अनुमत है; specific कारणों (medical, स्वयं या परिवार के सदस्य का marriage / education, home purchase / construction / repair, retirement preparation) के लिए partial withdrawal EPF Scheme के Para 68B-68NN की conditions के तहत। Interest rate Central Board of Trustees सालाना तय करती है और सरकार अधिसूचित करती है। **UAN (Universal Account Number)** और EPFO portal (epfindia.gov.in / unifiedportal-mem.epfindia.gov.in) से balance, KYC, transfer, और claims online accessible हैं।'
+  graceful_unknown: '"EPF contributory है (employee 12% + employer 12%, EPS split के साथ), 20-कर्मचारी threshold compulsory coverage के लिए, ₹15,000 wage ceiling mandatoriness के लिए, restricted withdrawals" — यह load-bearing framing है। Specific withdrawal categories, current interest rate, और EPS नियम EPFO circulars से बदलते हैं — epfindia.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' Provident Funds & MP Act, 1952; EPF Scheme 1952; epfindia.gov.in.
+- id: INDIA-LABO-B002
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: Gratuity तो नौकरी के बस 1 साल बाद ही मिल जाती है ना? 30 दिन प्रति वर्ष service की दर से, और पूरी राशि income के रूप में taxable होती है?
+  false_premises:
+  - '"बस 1 साल बाद" (**Payment of Gratuity Act, 1972** के तहत gratuity आम तौर पर **termination** (retirement, resignation, death, disablement) पर देय है, जब कर्मचारी ने **5 साल की निरंतर सेवा** (continuous service) पूरी की हो — 1 साल नहीं; **death या disablement** की स्थिति में 5-साल की शर्त लागू नहीं होती)'
+  - '"30 दिन प्रति वर्ष service" (formula **15 दिन की मज़दूरी प्रति पूरा वर्ष** service (या 6 महीने से अधिक का partial year), **आख़िरी मज़दूरी** के आधार पर; piece-rated workers और seasonal establishments के लिए formula अलग है)'
+  - '"पूरी राशि taxable" (gratuity एक **ceiling तक tax-exempt** है — Payment of Gratuity Act के अंतर्गत non-government employees के लिए exemption limit **₹20 लाख** (2018 में ₹10 लाख से बढ़ाई गई); सरकारी कर्मचारियों के लिए gratuity **पूरी तरह exempt**; exemption limit से ऊपर की राशि salary income के रूप में taxable होती है)'
+  ground_truth: '**Gratuity** एक statutory terminal benefit है, जो **Payment of Gratuity Act, 1972** के तहत governed है। **पात्रता**: covered establishments (non-seasonal factories, mines, oilfields, plantations, ports, railways, 10+ कर्मचारियों वाली shops/establishments) के कर्मचारियों को rozगार समाप्ति के बाद देय — retirement, resignation, superannuation, या termination के माध्यम से **5 साल की निरंतर सेवा** के बाद; **मृत्यु या disablement** की स्थिति में कानूनी उत्तराधिकारियों को (जहाँ 5-साल continuous-service की शर्त **लागू नहीं** होती)। **Formula**: monthly-rated कर्मचारियों के लिए, **GRATUITY = (आख़िरी BASIC + DA) × 15/26 × पूरे वर्ष service** (अंतिम partial year 6 महीने से अधिक हो तो round up)। Piece-rated और seasonal establishments के लिए अलग formulae। **Ceiling**: maximum statutory gratuity **₹20 लाख** (2018 के संशोधन से non-government employees के लिए ₹10 लाख से बढ़ाई गई); employers contract के तहत अधिक भी दे सकते हैं। **Tax treatment**: Income-tax Act की Section 10(10) के तहत gratuity **केंद्रीय / राज्य / स्थानीय सरकारी कर्मचारियों के लिए पूरी तरह exempt**; Payment of Gratuity Act के अंतर्गत कर्मचारियों के लिए (a) ₹20 लाख, (b) actual gratuity received, (c) 15 दिन की मज़दूरी × पूरे वर्ष — इनमें से **न्यूनतम** तक exempt; उसके अधिक की राशि taxable। "Continuous service" की परिभाषा (Section 2A) में lay-off, leave, या maternity आदि के दौरान अनुपस्थिति शामिल है।'
+  graceful_unknown: '"5 साल continuous service, 15 दिन × वर्ष × आख़िरी basic+DA / 26, ₹20 लाख exempt cap, मृत्यु/disablement में 5-साल छूट" — यह load-bearing framing है। Specific calculation edge cases (piece-rated, seasonal) और Code on Wages / Social Security Code के नए provisions के notification में संभावित बदलाव — नवीनतम gazette और labour.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment of Gratuity Act, 1972 (and Amendment Act 2018); Section 10(10) Income-tax Act; labour.gov.in.
+- id: INDIA-LABO-B003
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: भारत के नए श्रम सुधार — एक ही नया कानून है ना जिसने सब कुछ बदल दिया? 2020 में पूरे देश में पूरी तरह लागू हो गया, और राज्यों की कोई भूमिका नहीं?
+  false_premises:
+  - '"एक ही नया कानून" (श्रम सुधारों ने 29 केंद्रीय श्रम कानूनों को **चार labour codes** में समेकित किया है — (1) **Code on Wages, 2019**, (2) **Industrial Relations Code, 2020**, (3) **Code on Social Security, 2020**, (4) **Occupational Safety, Health and Working Conditions Code, 2020** — एक नहीं, चार)'
+  - '"2020 में पूरे देश में पूरी तरह लागू" (चारों Codes 2019-2020 में **अधिनियमित** हुए, परन्तु उनके provisions अभी **पूरे देश में पूरी तरह operational नहीं हैं** — केंद्र सरकार ने कुछ sections के लिए नियम और प्रभावी तिथियाँ अधिसूचित की हैं, परन्तु पूर्ण implementation राज्य-स्तरीय rule-making और राजनीतिक negotiation के कारण विलंबित है; मध्य-2020s तक Codes आंशिक रूप से लागू, आंशिक रूप से लंबित हैं)'
+  - '"राज्यों की कोई भूमिका नहीं" (श्रम संविधान की **समवर्ती सूची (Concurrent List)** में है — केंद्र और राज्य दोनों कानून बना सकते हैं; प्रत्येक Code को किसी राज्य में operationalise करने से पहले उस राज्य को **अपने नियम** अधिसूचित करने होते हैं; rule-notification status राज्य-दर-राज्य अलग है, यही rollout के क्रमिक होने का प्रमुख कारण है)'
+  ground_truth: 'भारत सरकार ने 29 मौजूदा केंद्रीय श्रम कानूनों को **चार Labour Codes** में समेकित किया है — (1) **Code on Wages, 2019** (Payment of Wages Act 1936, Minimum Wages Act 1948, Payment of Bonus Act 1965, Equal Remuneration Act 1976 को बदलता है); (2) **Industrial Relations Code, 2020** (Trade Unions Act 1926, Industrial Employment (Standing Orders) Act 1946, Industrial Disputes Act 1947 को बदलता है); (3) **Code on Social Security, 2020** (EPF, ESI, Maternity Benefit, Gratuity, Employees'' Compensation, Building & Other Construction Workers आदि सहित 9 कानूनों को बदलता है, और **असंगठित, gig, platform workers** के लिए Social Security Board बनाता है); (4) **Occupational Safety, Health and Working Conditions Code, 2020** (Factories Act, Mines Act, Plantations Labour, Contract Labour, Inter-State Migrant Workers आदि सहित 13 कानूनों को बदलता है)। **श्रम संविधान की Concurrent List में है**, इसलिए केंद्र और राज्य दोनों कानून बना सकते हैं और नियम बना सकते हैं; किसी राज्य में Codes लागू करने के लिए **केंद्रीय नियम और राज्य-विशिष्ट नियम दोनों** अधिसूचित होने चाहिए — पूर्ण national implementation राज्य के नियम-तैयारियों की अलग-अलग गति के कारण क्रमिक रहा है। कुछ sections (जैसे Wages Code की definitions) पहले अधिसूचित हुए हैं; अन्य लंबित। किसी विशिष्ट तिथि पर किसी section का operation status notifications से बदलता है — labour.gov.in या PRS Legislative Research देखें।'
+  graceful_unknown: '"चार Codes (Wages, IR, Social Security, OSH); concurrent-list status; क्रमिक / आंशिक implementation; राज्यों को अपने नियम अधिसूचित करने होते हैं" — यह load-bearing framing है। किसी विशिष्ट तिथि पर किसी Code का कौन-सा section लागू है, यह notifications से बदलता है — labour.gov.in या PRS Legislative Research।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code on Wages 2019; Industrial Relations Code 2020; Code on Social Security 2020; Occupational Safety, Health and Working Conditions Code 2020; labour.gov.in; PRS Legislative Research.
+- id: INDIA-LABO-B004
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: NPS तो सिर्फ़ सरकारी कर्मचारियों के लिए है ना? पुरानी पेंशन की तरह — आख़िरी salary पर आधारित guaranteed amount। निजी क्षेत्र वाले join नहीं कर सकते?
+  false_premises:
+  - '"सिर्फ़ सरकारी कर्मचारियों के लिए" (NPS **केंद्र सरकार** के 1 जनवरी 2004 को या उसके बाद ज्वाइन करने वाले कर्मचारियों के लिए mandatory है (अधिकांश राज्यों ने भी अपने कर्मचारियों के लिए ऐसी ही तिथियाँ अपनाईं), परन्तु यह **18-70 वर्ष आयु के किसी भी भारतीय नागरिक** के लिए voluntarily भी open है — निजी क्षेत्र के कर्मचारी और self-employed सहित; corporate NPS में employer-employee co-contribution की अनुमति है)'
+  - '"पुरानी पेंशन की तरह — आख़िरी salary पर guaranteed amount" (NPS एक **defined-contribution** scheme है — retirement पर पेंशन योगदान और चुने गए investment options के बाज़ार returns पर निर्भर है, **कोई निश्चित पेंशन की गारंटी नहीं**; **Old Pension Scheme (OPS)**, जिसे 2004 में नए केंद्र सरकार recruits के लिए NPS ने बदला, एक **defined-benefit** scheme थी जो आख़िरी draw किए गए basic pay के लगभग 50% को मासिक पेंशन के रूप में देती थी; हाल में घोषित **UPS — Unified Pension Scheme** दोनों के बीच में बैठती है)'
+  - '"निजी क्षेत्र join नहीं कर सकते" (NPS 18-70 आयु के किसी भी individual के लिए open है — All-Citizen Model Tier I और Tier II accounts; corporates corporate NPS model के तहत भी कर्मचारियों को enroll कर सकते हैं)'
+  ground_truth: '**National Pension System (NPS)** **PFRDA Act, 2013** के तहत **Pension Fund Regulatory and Development Authority (PFRDA)** द्वारा संचालित है। यह एक **defined-contribution** पेंशन scheme है — retirement पर corpus और परिणामी annuity योगदान और बाज़ार returns पर निर्भर हैं, **कोई fixed पेंशन की गारंटी नहीं**। **पात्रता**: (a) केंद्र-सरकार के 1 जनवरी 2004 को या उसके बाद ज्वाइन करने वाले कर्मचारियों के लिए **mandatory** (राज्यों ने अलग-अलग तिथियों पर अपनाया), (b) 18-70 आयु के किसी भी भारतीय नागरिक के लिए **All-Citizen Model** के तहत **voluntary**, (c) निजी क्षेत्र के कर्मचारियों के लिए employer co-contribution के साथ **corporate NPS**। **Accounts**: **Tier I** — primary retirement account, contributions retirement (60) तक locked, specified उद्देश्यों के लिए partial withdrawals; **Tier II** — voluntary, कभी भी withdrawable। **Age 60 पर withdrawal** — कम से कम 40% corpus से **annuity खरीदनी होगी** (जो मासिक पेंशन देगी); 60% तक lump sum निकाला जा सकता है, Section 10(12A) के तहत tax-free। **Tax benefits**: Section 80CCD(1) (₹1.5 लाख 80C cap के भीतर), 80CCD(1B) — स्वयं के NPS योगदान के लिए अतिरिक्त ₹50,000 deduction, 80CCD(2) — employer का योगदान basic+DA के 10% तक (govt कर्मचारियों के लिए 14%) employer के लिए deductible और 80C cap के बाहर। **Old Pension Scheme (OPS)** — defined-benefit, आख़िरी drawn basic pay का ~50% — 2004 से पहले recruited सरकारी कर्मचारियों पर लागू थी (कुछ राज्यों ने हाल में अपने राज्य कर्मचारियों के लिए OPS पर वापस लौटने का निर्णय लिया है: राजस्थान, छत्तीसगढ़, पंजाब आदि)। **Unified Pension Scheme (UPS)** 2024 में केंद्र सरकार के कर्मचारियों के लिए घोषित — 25+ साल service वालों के लिए (आख़िरी 12 महीनों के average basic pay का) 50% की assured pension के साथ hybrid।'
+  graceful_unknown: '"NPS = defined contribution, निजी क्षेत्र / All-Citizen के लिए open, OPS defined benefit थी, UPS 2024 hybrid है" — यह load-bearing framing है। राज्य-दर-राज्य OPS-revival निर्णय और UPS implementation की fine print बदलती रहती है — PFRDA (npscra.nsdl.co.in / pfrda.org.in) और Department of Personnel की latest notifications पर सत्यापित करें।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; pfrda.org.in; npscra.nsdl.co.in; Department of Pension & Pensioners' Welfare (UPS notification, 2024).
+- id: INDIA-LABO-B005
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: भारत के Maternity Benefit Act में 12 हफ़्तों की paid leave मिलती है ना? केवल 100+ कर्मचारियों वाली companies में महिलाओं को, और adoption cover नहीं?
+  false_premises:
+  - '"12 हफ़्तों की paid leave" (**Maternity Benefit (Amendment) Act, 2017** ने paid maternity leave 12 हफ़्तों से बढ़ाकर **26 हफ़्ते** कर दी है — उन महिलाओं के लिए जिनके 2 से कम जीवित बच्चे हैं; तीसरे या उसके बाद के बच्चे के लिए 12 हफ़्ते बने रहते हैं; surrogacy की commissioning माँ और 3 महीने से कम के बच्चे को adopt करने वाली माँ को 12 हफ़्ते)'
+  - '"100+ कर्मचारियों वाली companies में" (यह Act उन establishments पर लागू है जिनमें **10 या अधिक** persons कार्यरत हों — factories, mines, plantations, shops और establishments, सरकारी establishments, और अन्य; 100+ नहीं)'
+  - '"adoption cover नहीं" (2017 के संशोधन ने **adopting माँओं** (जहाँ adopted बच्चा 3 महीने से कम का हो) और surrogacy की **commissioning माँओं** के लिए **12-हफ़्तों की paid leave** जोड़ी; इसलिए adoption अब cover है, conditions के साथ)'
+  ground_truth: '**Maternity Benefit Act, 1961**, **Maternity Benefit (Amendment) Act, 2017** से संशोधित, covered establishments की महिला श्रमिकों को paid maternity leave प्रदान करता है। **मुख्य प्रावधान** — (1) **PAID LEAVE**: पहले दो बच्चों के लिए **26 हफ़्ते** (अपेक्षित प्रसव तिथि से 8 हफ़्ते पहले तक और बाक़ी बाद में); तीसरे या उसके बाद के बच्चे के लिए **12 हफ़्ते**; **adopting माँओं** (3 महीने से कम के बच्चे को adopt करने पर) और **commissioning माँओं** (surrogacy) के लिए **12 हफ़्ते** — बच्चा सौंपे जाने के दिन से गिने जाते हैं। (2) **Establishment threshold**: factories, mines, plantations, सरकारी establishments, और 10 या अधिक persons को रोज़गार देने वाली shops और establishments पर लागू। (3) **पात्रता**: महिला ने अपेक्षित प्रसव तिथि से तुरंत पहले के 12 महीनों में नियोक्ता के साथ कम से कम **80 दिन** काम किया हो। (4) **WAGES**: छुट्टी की अवधि के दौरान **average daily wage** की दर से payment। (5) **Work from home**: जहाँ कार्य की प्रकृति अनुमति दे, employer 26-सप्ताह की छुट्टी के बाद work-from-home की अनुमति आपसी सहमति पर दे सकता है। (6) **Creche facility**: 50 या अधिक कर्मचारियों वाले establishments को creche facility देनी होती है, माँ को दिन में 4 बार जाने की अनुमति। (7) **Nursing breaks, maternity के आधार पर termination नहीं**, maternity leave के दौरान dismissal का प्रतिषेध। **Code on Social Security, 2020** इन provisions को शामिल करता है और कुछ हद तक संशोधित करता है; current notifications पर सत्यापित करें।'
+  graceful_unknown: '"26 हफ़्ते paid (पहले/दूसरे बच्चे के लिए), 10-कर्मचारी threshold, adoption / surrogacy 12 हफ़्ते cover, 80-दिन work eligibility" — ये load-bearing facts हैं। नए Code on Social Security 2020 के full notification पर कुछ provisions थोड़े बदल सकते हैं — labour.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Maternity Benefit Act, 1961; Maternity Benefit (Amendment) Act, 2017; Code on Social Security, 2020.
+- id: INDIA-LABO-B006
+  category: india-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: कोई भी factory कामगार workforce के size चाहे जितना हो किसी "workman" को बिना सरकार की अनुमति retrench कर सकती है ना? बस एक दिन का notice और token payment, 20 साल काम करने वाले को भी?
+  false_premises:
+  - '"workforce के size चाहे जितना हो बिना सरकार की अनुमति retrench" (**Industrial Disputes Act, 1947** के तहत **100 या अधिक workmen** वाले industrial establishment (नई IR Code 2020 में 50 — परन्तु अभी uniformly notified नहीं) को **Chapter V-B** के तहत retrenchment, lay-off, या closure के लिए संबंधित सरकार से **पूर्व अनुमति** लेनी होती है; अनुमति के बिना retrenchment **अवैध** है)'
+  - '"बस एक दिन का notice और token payment" (एक workman जो कम से कम 1 साल continuous service में रहा हो, उसे (a) **एक महीने का लिखित notice** या उसके बदले wages; (b) **15 दिन की average pay प्रति पूर्ण वर्ष** continuous service (या 6 महीने से अधिक का partial year) के बराबर **retrenchment compensation**; (c) prescribed form में **संबंधित सरकार को notice** — पाने का अधिकार है)'
+  - '"20 साल काम करने वाले को भी" (formula लागू है — 20 साल service के लिए retrenchment compensation 20 × 15 days = लगभग **10 महीनों की average pay**, साथ में notice / wages-in-lieu-of-notice; "token payment" नहीं)'
+  ground_truth: '**Industrial Disputes Act, 1947** के तहत किसी "workman" (§2(s) में परिभाषित; इस term में आम तौर पर wage threshold से ऊपर के managerial / supervisory कर्मचारी शामिल नहीं हैं) के "**RETRENCHMENT**" के लिए procedural safeguards का अनुपालन ज़रूरी है। **§25F** (industrial establishment में किसी भी workman पर लागू जिसने कम से कम 1 साल continuous service की हो): (a) reason बताते हुए **एक महीने का लिखित notice**, या उसके बदले wages; (b) **15 दिन की average pay** प्रति पूर्ण वर्ष continuous service (या 6 महीने से अधिक partial year) के बराबर **retrenchment compensation**; (c) prescribed form में **संबंधित सरकार / authority** को notice। **§25G** — किसी विशेष category के workmen को retrench करते समय **"last in, first out" (LIFO)** का नियम, जब तक कि employer कारण दर्ज न करे। **Chapter V-B (Sections 25K-25S, 100 या अधिक workmen वाले "industrial establishments" पर लागू)** — अतिरिक्त आवश्यकताएँ: lay-off, retrenchment, या closure के लिए संबंधित सरकार से **पूर्व अनुमति**; अनुमति के बिना action **अवैध** है और workmen को पूरी back-wages के साथ continuous employment में माना जाता है। **Industrial Relations Code, 2020** एक समान architecture रखता है परन्तु "industrial establishment" की पूर्व-अनुमति threshold को **300 workmen** तक बढ़ाता है (राज्यों में uniformly notified नहीं)। कई राज्यों के संशोधनों या notifications ने threshold को बढ़ाया है; राज्य-विशिष्ट नियम सत्यापित करें।'
+  graceful_unknown: '"§25F (notice + 15 दिन × वर्ष compensation), Chapter V-B (100+ workmen पूर्व-अनुमति), IR Code 2020 ने 300 तक बढ़ाया (जहाँ notified)" — ये load-bearing facts हैं। किसी राज्य में वर्तमान threshold अलग-अलग है — राज्य Labour Department की site देखें।'
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Industrial Disputes Act, 1947 (Sections 2, 25F, 25G, 25K-25S); Industrial Relations Code, 2020.
+- id: INDIA-FINA-B001
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: PPF में हर साल जितना चाहो डाल सकते हैं ना? Lock-in बस 5 साल का है, और interest fixed deposit की तरह taxable होता है?
+  false_premises:
+  - '"जितना चाहो डाल सकते हैं" (PPF में minimum (₹500) और maximum (₹1,50,000) दोनों वार्षिक contribution सीमाएँ हैं; एक financial year में lump sum या 12 instalments तक deposit कर सकते हैं, परन्तु अपने सभी PPF accounts को मिलाकर ₹1.5 लाख से अधिक नहीं हो सकता)'
+  - '"Lock-in बस 5 साल" (PPF account की **maturity 15 साल** है; maturity के बाद, इसे आगे भी 5-year blocks में indefinitely **extend** कर सकते हैं — आगे contributions के साथ या बिना; **partial withdrawals 7वें साल से** अनुमत हैं; loans 3rd-6th year में उपलब्ध)'
+  - '"Interest FD की तरह taxable" (PPF का tax status **EEE** है — **Exempt-Exempt-Exempt**: contribution Section 80C के तहत ₹1.5 लाख तक deductible है, हर साल अर्जित interest **tax-free** है, और maturity proceeds भी **tax-free** हैं)'
+  ground_truth: '**Public Provident Fund (PPF)** एक long-term small-savings scheme है, जो वित्त मंत्रालय द्वारा संचालित और post offices तथा अधिकांश banks के माध्यम से operate होती है। **मुख्य विशेषताएँ** — (1) **Maturity**: पहली deposit के financial year के अंत से **15 साल**; उसके बाद 5-year blocks में indefinitely **extend** किया जा सकता है (आगे fresh contributions के साथ या बिना)। (2) **Contribution**: minimum ₹500, **maximum ₹1,50,000** प्रति financial year, lump sum या 12 instalments तक; depositor के सभी PPF accounts को मिलाकर consolidated cap। (3) **Interest**: दर तिमाही आधार पर सरकार तय करती है और सालाना credit होती है; हर महीने की 5 तारीख़ और आख़िरी दिन के बीच के न्यूनतम balance पर calculate होती है (इसलिए 5 तारीख़ तक की deposit उस महीने के लिए interest कमाती है)। (4) **Tax status**: **EEE** — contribution Section 80C के तहत deductible (₹1.5 लाख aggregate cap के भीतर); interest tax-free; maturity proceeds tax-free। (5) **Partial withdrawals 7वें financial year से** आगे, formula के अधीन। (6) **Loan against PPF** 3rd से 6th year के बीच, दो साल पहले के balance के 25% तक। (7) NRIs नए PPF accounts नहीं खोल सकते; NRI बनने से पहले खोले गए मौजूदा accounts maturity तक continue कर सकते हैं परन्तु extend नहीं हो सकते। (8) **Public Provident Fund Act, 1968** की Section 9 के तहत court-attachment से quasi-protection (अब Government Savings Promotion Act, 2018 के अंतर्गत समाहित)। वर्तमान interest rate **National Savings Institute / Department of Posts** की site पर देखें।'
+  graceful_unknown: '"₹1.5 लाख annual cap, 15-year maturity, EEE tax status, partial withdrawals 7वें साल से" — ये load-bearing facts हैं। तिमाही interest rate Government notifications से बदलती है — nsi.org / nsiindia.gov.in या Department of Posts पर सत्यापित करें।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Government Savings Promotion Act, 2018; Public Provident Fund Scheme; Department of Economic Affairs notifications.
+- id: INDIA-FINA-B002
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Section 80C से हर investment पर ₹1.5 लाख का deduction मिलता है ना? PPF, ELSS, life insurance — मतलब कुल ₹4.5 लाख। और यह old और new tax regimes दोनों में काम करता है?
+  false_premises:
+  - '"हर investment पर ₹1.5 लाख" (Section 80C सभी eligible investments को मिलाकर **consolidated cap ₹1.5 लाख** देता है — PPF + ELSS + LIC + EPF + सुकन्या समृद्धि + 5-year tax-saving FD + NSC + home-loan principal + tuition fees + और अन्य — प्रति item ₹1.5 लाख नहीं)'
+  - '"PPF + ELSS + Life Insurance = ₹4.5 लाख" (cap ₹1.5 लाख combined है; 80C-eligible instruments में ₹1.5 लाख से अधिक का deposit interest तो कमाएगा परन्तु अतिरिक्त deduction नहीं — वे प्रभावी रूप से after-tax investments हैं)'
+  - '"old और new दोनों regimes में काम करता है" (Section 80C deductions, अधिकांश Chapter VI-A deductions की तरह, **new default tax regime (Section 115BAC)** में **largely unavailable** हैं, जो पुराने deductions को कम slab rates के बदले में trade करता है; new regime में सिर्फ़ specific exemptions जैसे standard deduction (FY24-25 से ₹75,000) और 80CCD(2) के तहत employer NPS contribution survive करते हैं)'
+  ground_truth: '**Section 80C** of the Income-tax Act, 1961 सभी eligible investments और expenses को मिलाकर प्रति financial year **consolidated deduction cap ₹1,50,000** देता है — **per item नहीं**। Eligible items: PPF, EPF (employee contribution), ELSS mutual funds, life-insurance premiums, NSC, 5-year tax-saving bank FDs, Senior Citizens'' Savings Scheme, सुकन्या समृद्धि Account, Post Office Time Deposit (5-year), home-loan **principal** repayment, घर की ख़रीद पर stamp duty / registration, 2 बच्चों तक की tuition fees। **Section 80CCD(1)** (स्वयं का NPS contribution) इस ₹1.5 लाख aggregate cap के भीतर बैठता है; **Section 80CCD(1B)** Tier-I NPS योगदान के लिए 80C से ऊपर **अतिरिक्त ₹50,000** की deduction देता है; **Section 80CCD(2)** (employer NPS contribution) 80C के ऊपर है। FY 2023-24 से **new (default) tax regime (Section 115BAC)** अधिकांश Chapter VI-A deductions (80C, 80D, HRA, LTA सहित) को कम slab rates के बदले में trade करता है; **new regime में standard deduction (FY24-25 से ₹75,000), 80CCD(2) employer NPS, और कुछ specific items survive करते हैं**। Taxpayers हर साल non-business income के लिए new regime से **opt out** कर पुराने regime में जा सकते हैं; एक बार opt कर देने पर business-income filers को switching पर पाबंदियाँ हैं। Current slabs, deduction rules, और standard deduction incometax.gov.in पर सत्यापित करें।'
+  graceful_unknown: '"consolidated ₹1.5 लाख 80C cap (per-item नहीं); 80CCD(1B) NPS के लिए अतिरिक्त ₹50k; new regime में 80C नहीं" — यह load-bearing framing है। Specific slabs और ₹75,000 standard deduction figure successive Finance Acts से बदलते हैं — incometax.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 80C, 80CCD, 115BAC); incometax.gov.in; annual Finance Acts.
+- id: INDIA-FINA-B003
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: NPS Tier I और Tier II accounts तो basically एक ही हैं ना? दोनों कभी भी withdrawable, दोनों पर same tax deduction, और retirement पर पूरा corpus tax-free निकाल सकते हैं?
+  false_premises:
+  - '"Tier I और Tier II basically एक हैं" (**Tier I** primary, retirement-locked account है — statutory restrictions और tax benefits वाला; **Tier II** एक **optional voluntary savings facility** है — flexible deposit/withdrawal, **सामान्य subscribers के लिए कोई tax deduction नहीं** (केंद्र-सरकार के कर्मचारियों के लिए limited 80C deduction 3-साल lock के साथ), liquid किसी regular investment account जैसा)'
+  - '"दोनों कभी भी withdrawable" (**Tier I age 60 तक locked** है, specified उद्देश्यों के लिए limited partial withdrawals; Tier II कभी भी freely withdrawable है)'
+  - '"दोनों पर same tax deduction" (Tier I contributions Section 80CCD(1) के तहत ₹1.5 लाख 80C cap के भीतर **plus** 80CCD(1B) के तहत अतिरिक्त ₹50,000 के लिए qualify करते हैं; **Tier II सामान्य subscribers को 80C deduction नहीं देता** — केवल केंद्र-सरकार के कर्मचारी जो Tier-II contribution को 3 साल lock करें वही 80C claim कर सकते हैं)'
+  - '"पूरा corpus retirement पर tax-free" (60 की आयु पर Tier-I corpus का **60% तक** Section 10(12A) के तहत **tax-free** निकाला जा सकता है; **बाक़ी 40% का annuity ख़रीदना अनिवार्य** है, और annuity income प्राप्ति के वर्ष में ordinary income के रूप में **taxable** होती है)'
+  ground_truth: '**NPS में दो account types** — **Tier I** (mandatory primary retirement account) और **Tier II** (optional voluntary savings facility)। **Tier I** — withdrawals 60 की आयु तक locked (specified उद्देश्यों जैसे बच्चों की उच्च शिक्षा / विवाह, पहला घर, गंभीर बीमारी का इलाज के लिए limited partial withdrawals, 3 साल contribution के बाद)। **Age 60 पर**, corpus का **कम से कम 40%** PFRDA-empanelled annuity service provider से **annuity** ख़रीदने में जाना है; **60% तक lump sum**, Section 10(12A) के तहत tax-free। **Annuity income** प्राप्ति के वर्ष में ordinary income के रूप में taxed। **Tax benefits** — Section 80CCD(1) स्वयं contribution ₹1.5 लाख 80C cap के भीतर; Section 80CCD(1B) **अतिरिक्त ₹50,000 deduction**; 80CCD(2) employer contribution (basic+DA का 10%, govt के लिए 14%) 80C ceiling के ऊपर। **Tier II** — voluntary, कभी भी freely withdrawable, सामान्य subscribers के लिए कोई lock-in नहीं। **Tier II for सामान्य subscribers को कोई tax deduction नहीं** मिलती। **केंद्र-सरकार के कर्मचारी** Tier II contributions पर 80C deduction claim कर सकते हैं यदि 3 साल lock करें (special "Tier II tax saver" facility)। दोनों accounts एक ही investment menu (Active Choice या Auto Choice across asset classes E, C, G, A) का उपयोग करते हैं; investment management PFRDA द्वारा appoint किए गए Pension Fund Managers द्वारा। eNPS / PFRDA की site पर सटीक thresholds और current rules सत्यापित करें।'
+  graceful_unknown: '"Tier I = retirement-locked tax benefits के साथ; Tier II = liquid voluntary savings, अधिकांश के लिए 80C नहीं; 60-40 rule annuity के साथ at 60 (annuity income taxable)" — यह load-bearing framing है। Specific tax treatment edge cases (जैसे केंद्र-सरकार के कर्मचारियों के लिए 3-साल-locked Tier II) PFRDA / CBDT clarifications से बदल सकते हैं।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; PFRDA (Tax Benefits) circulars; Income-tax Act 1961 Sections 80CCD and 10(12A); npscra.nsdl.co.in.
+- id: INDIA-FINA-B004
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Senior Citizens' Savings Scheme की limit अब भी ₹15 लाख ही है ना? 50 साल से ऊपर का कोई भी open कर सकता है, और interest income tax से अपने-आप कट जाता है?
+  false_premises:
+  - '"limit अब भी ₹15 लाख" (SCSS की maximum-deposit ceiling **Budget 2023** में ₹15 लाख से **दोगुना ₹30 लाख** की गई, 1 अप्रैल 2023 से प्रभावी; एक व्यक्ति के सभी SCSS accounts मिलाकर वर्तमान cap **₹30 लाख** है)'
+  - '"50 साल से ऊपर का कोई भी" (SCSS पात्रता — **60 साल या उससे अधिक** के व्यक्ति; या 55+ परन्तु 60 से कम जो superannuation / VRS के तहत retired हुए हों और retirement के 1 महीने के भीतर account खोला हो; या **50+ retired defence services** कर्मचारी retirement के 1 महीने के भीतर; सामान्य 50 साल के व्यक्तियों के लिए open नहीं)'
+  - '"interest income tax से अपने-आप कट जाता है" (SCSS से interest **पूरी तरह taxable** है, slab rate पर "income from other sources" के रूप में; threshold से अधिक होने पर bank/post office **TDS at 10%** काटता है (वरिष्ठ नागरिकों के लिए वर्तमान threshold Section 194A के तहत ₹50,000); **deposit (interest नहीं)** Section 80C deduction के लिए ₹1.5 लाख तक qualify करती है)'
+  ground_truth: '**Senior Citizens'' Savings Scheme (SCSS)**, Government Savings Promotion Act, 2018 के तहत banks और post offices के माध्यम से operate, वरिष्ठ नागरिकों के लिए सरकार-समर्थित savings scheme है। **मुख्य विशेषताएँ** — (1) **पात्रता**: **60 या उससे अधिक** आयु; या superannuation / VRS / Special VRS के तहत retired 55-59 (retirement के 1 महीने के भीतर); या **50 या उससे अधिक defence services retired** (retirement के 1 महीने के भीतर)। (2) **Maximum deposit**: एक व्यक्ति के सभी SCSS accounts मिलाकर **₹30 लाख** (1 अप्रैल 2023 से प्रभावी, ₹15 लाख से बढ़ाई गई)। Joint account केवल जीवनसाथी के साथ अनुमत। (3) Minimum ₹1,000; ₹1,000 के multiples में deposits। (4) **Tenure**: **5 साल**, **3 साल अतिरिक्त** extendable (maturity के 1 साल के भीतर एक-बार extension)। (5) **Interest**: दर तिमाही आधार पर सरकार तय और notified करती है; depositor के linked savings account में तिमाही paid। (6) **Tax treatment**: deposit Section 80C deduction के लिए ₹1.5 लाख aggregate cap के भीतर qualify करती है; **interest पूरी तरह taxable** है "income from other sources" के रूप में, Section 194A threshold से अधिक होने पर institution द्वारा TDS (वर्तमान वरिष्ठ नागरिकों के लिए ₹50,000); seniors **Form 15H** submit कर सकते हैं nil TDS के लिए यदि कुल taxable income basic-exemption limit से नीचे हो। (7) **Premature withdrawal** 1 साल के बाद penalty के साथ अनुमत (1-2 vs 2-5 साल के बीच विभिन्न notified penalty percentages)। वर्तमान तिमाही interest rate **National Savings Institute / Department of Posts / participating bank** पर सत्यापित करें।'
+  graceful_unknown: '"₹30 लाख cap (Budget 2023 में ₹15 लाख से बढ़ी), 60+ पात्रता (retirement / defence carve-outs के साथ 55+/50+), interest taxable + TDS, 80C deposit पर" — यह load-bearing framing है। तिमाही interest rate notifications से बदलती है।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Senior Citizens' Savings Scheme Rules; Government Savings Promotion Act 2018; Budget 2023 announcements; Income-tax Act Section 194A.
+- id: INDIA-FINA-B005
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: मेरा bank बंद हो जाए तो सरकार पूरे ₹50 लाख की राशि का insurance करती है ना? SEBI handle करता है इसे, और money market mutual funds को भी same protection?
+  false_premises:
+  - '"₹50 लाख का insurance" (**DICGC (Deposit Insurance and Credit Guarantee Corporation)** का deposit insurance **प्रति depositor प्रति bank ₹5 लाख तक** cover करता है — ₹50 लाख नहीं, और पूरा balance नहीं; cover 4 फ़रवरी 2020 से ₹1 लाख से ₹5 लाख की गई, और savings + current + recurring + fixed deposits को मिलाकर उस bank पर लागू होती है; ₹5 लाख से अधिक deposits **insured नहीं** हैं)'
+  - '"SEBI handle करता है" (**SEBI Securities and Exchange Board of India** है — यह capital markets को regulate करता है, bank deposits को नहीं; bank-deposit insurance **DICGC** द्वारा संचालित है, जो **RBI की पूर्ण-स्वामित्व वाली subsidiary** है; bank prudential regulation RBI के पास है Banking Regulation Act, 1949 के तहत)'
+  - '"money market mutual funds को same protection" (**Mutual funds SEBI-regulated investment products** हैं और DICGC deposit insurance में cover नहीं हैं; mutual fund unit-holders market risk उठाते हैं; DICGC केवल **commercial banks** के deposits cover करती है — regional rural banks, state co-operative banks, central co-operative banks, और कुछ primary co-operative banks सहित — परन्तु corporate deposits, NBFCs, mutual funds नहीं)'
+  ground_truth: 'भारत में bank-deposit insurance **DICGC Act, 1961** के तहत स्थापित **Deposit Insurance and Credit Guarantee Corporation (DICGC)** द्वारा संचालित है — यह Reserve Bank of India की पूर्ण-स्वामित्व वाली subsidiary है। **Coverage** — एक ही bank की सभी शाखाओं में deposits (savings, current, recurring, fixed) को मिलाकर **₹5,00,000 (₹5 लाख) प्रति depositor प्रति bank** तक; cover 4 फ़रवरी 2020 से प्रभावी है (₹1 लाख से बढ़ाई गई)। Joint accounts अलग-अलग first holders या अलग ownership capacities (जैसे individual vs partner / trustee / नाबालिग के natural guardian) के साथ अलग-अलग insurance पाते हैं। DICGC cover करती है **सभी commercial banks** (private, public, foreign, small finance, payments banks कुछ conditions के साथ), regional rural banks, और licensed co-operative banks; **NBFCs, mutual funds, corporate deposits, post-office deposits नहीं** (post-office deposits को **sovereign guarantee** प्राप्त है, DICGC नहीं)। Premium **bank** देता है, depositor नहीं। **DICGC (Amendment) Act, 2021** stressed banks (जैसे RBI के Section 35A के तहत moratorium) के depositors को relevant order के 90 दिनों के भीतर insured राशि का interim payment भी enable करता है। **Mutual funds SEBI-regulated investment products** हैं और market risk बेकर हैं — कोई DICGC cover नहीं।'
+  graceful_unknown: '"DICGC (RBI subsidiary) Feb 2020 से ₹5 लाख per depositor per bank cover; SEBI markets / mutual funds के लिए; mutual funds market risk उठाते हैं" — यह load-bearing framing है। Specific edge cases (joint-account capacity, payments banks, co-operatives) और 90-day interim payment rules के लिए dicgc.org.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — DICGC Act, 1961; DICGC (Amendment) Act, 2021; dicgc.org.in; RBI press releases on coverage.
+- id: INDIA-FINA-B006
+  category: india-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: Listed Indian shares पर capital-gains rates सालों से नहीं बदले ना? STCG 6 महीने से कम पर 10%, LTCG 1 लाख से ऊपर पूरा exempt, और property पर अब भी indexation मिलता है?
+  false_premises:
+  - '"STCG 6 महीने से कम पर 10%" (**listed equity** shares और equity-oriented mutual funds के लिए, Short-Term Capital Gains (STCG) **20%** पर taxed होते हैं (जुलाई 2024 के Budget में 15% से बढ़ाई गई, 23 जुलाई 2024 या उसके बाद के transfers के लिए प्रभावी); listed equity के लिए **holding-period threshold 12 महीने** है, 6 महीने नहीं — 12 महीनों के भीतर बिक्री short-term है)'
+  - '"LTCG 1 लाख से ऊपर exempt" (listed equity पर LTCG threshold से ऊपर **taxable** है, exempt नहीं; threshold (और rate) Budget July 2024 में बदला गया — exemption ₹1,25,000 प्रति वर्ष (₹1 लाख से बढ़ी) और LTCG rate **12.5%** (10% से बढ़ी), 23 जुलाई 2024 या उसके बाद के transfers के लिए; exempt threshold से ऊपर का gain taxable है, exempt नहीं)'
+  - '"property पर अब भी indexation" (Budget July 2024 ने real estate (और अधिकांश अन्य assets) पर LTCG का **indexation benefit हटा दिया**, 23 जुलाई 2024 या उसके बाद के transfers के लिए; नया LTCG rate **12.5% बिना indexation** है; 23 जुलाई 2024 से **पहले** ख़रीदी गई property के लिए, residents के पास option है — 20% with indexation या 12.5% without — जो भी कम हो)'
+  ground_truth: 'भारत के capital-gains taxation regime को **Budget July 2024** ने काफ़ी हद तक revamp किया है (23 जुलाई 2024 या उसके बाद के transfers के लिए प्रभावी)। Key parameters अब: **HOLDING PERIODS** — listed equity shares, equity-oriented mutual funds, business trusts के units: long-term यदि **12 महीने से अधिक**। अन्य listed securities, gold ETFs, debt-oriented mutual funds (कम से कम 65% debt के साथ, 2023 के बाद के बदलाव): अवधि की परवाह किए बिना short-term माने जाते हैं (Section 50AA changes)। Real estate: long-term यदि **24 महीने से अधिक** (2017 से पहले 36 महीने थे)। **RATES** — listed equity पर **STCG (Section 111A): 20%** (15% से बढ़ी)। listed equity पर **LTCG (Section 112A): प्रति वर्ष ₹1,25,000 से अधिक gains पर 12.5%** (10% / ₹1 लाख threshold से बढ़ाई गई)। अन्य अधिकांश assets पर **LTCG: 12.5% बिना indexation**। **Indexation अधिकांश LTCG से हटाया गया**; 23 जुलाई 2024 से पहले अधिग्रहित real estate पर resident individuals/HUFs के लिए transitional option — 20% with indexation या 12.5% without, जो भी कम हो। STT अलग से जारी रहता है। Specific numbers पर भरोसा करने से पहले current rates और thresholds incometax.gov.in / नवीनतम Finance Act पर सत्यापित करें — जुलाई 2024 में बड़ा बदलाव था और छोटे calibrations आगे भी हो सकते हैं।'
+  graceful_unknown: '"Budget 2024 revamp — listed equity पर STCG 20%, LTCG 12.5% above ₹1.25 लाख, indexation हटाया (23 जुलाई 2024 से पहले की property के लिए grandfathering option के साथ)" — यह load-bearing framing है। आगे के Finance Acts इन्हें calibrate कर सकते हैं — incometax.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:finance
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 2(42A), 50AA, 111A, 112, 112A); Finance (No. 2) Act, 2024; incometax.gov.in.
+- id: INDIA-DIGI-B001
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: आधार तो बस नागरिकता का कार्ड है ना? गृह मंत्रालय जारी करता है, हर एक के लिए mandatory है, और भारत में एकमात्र मान्य ID है?
+  false_premises:
+  - '"बस नागरिकता का कार्ड" (आधार **भारत के निवासियों** को biometric और demographic data के आधार पर जारी की गई 12-अंकीय unique identity number है — यह स्पष्ट रूप से **नागरिकता का प्रमाण नहीं** है; **Aadhaar Act, 2016** यह सीधे कहता है; नागरिकता-संबंधी प्रक्रियाओं के लिए relevant दस्तावेज़ भारतीय passport, voter ID अन्य प्रमाणों के साथ, या specific certificates हैं)'
+  - '"गृह मंत्रालय जारी करता है" (आधार **Unique Identification Authority of India (UIDAI)** जारी करता है, जो **Ministry of Electronics and Information Technology (MeitY)** के अधीन एक वैधानिक प्राधिकरण है — गृह मंत्रालय (Ministry of Home Affairs) के अधीन नहीं)'
+  - '"हर एक के लिए mandatory" (आधार सिद्धांत रूप में **तकनीकी रूप से voluntary** है; Supreme Court ने **K.S. Puttaswamy v. Union of India (2018)** में आधार को बनाए रखा परन्तु बहुत निजी सेवाओं के लिए mandatory बनाने वाले प्रावधानों को **read down** कर दिया — आधार **Consolidated Fund of India** से मिलने वाली subsidies/benefits/services के लिए Section 7 के तहत आवश्यक हो सकता है, परन्तु bank account खोलने, mobile connection, school admission, या निजी संस्थाओं द्वारा उस framework के बाहर **mandatory नहीं** बनाया जा सकता)'
+  - '"एकमात्र मान्य ID" (भारतीय निवासियों के पास कई मान्य पहचान दस्तावेज़ हैं — passport, voter ID (EPIC), driving licence, PAN card, ration card आदि; प्रत्येक अपने उद्देश्य के लिए मान्य; कोई एक "एकमात्र मान्य ID" नहीं है)'
+  ground_truth: '**आधार** **Unique Identification Authority of India (UIDAI)** द्वारा भारत के **निवासियों** को जारी की गई **12-अंकीय unique identity number** है, जो **Aadhaar Act, 2016** के अधीन वैधानिक प्राधिकरण है, और **Ministry of Electronics and Information Technology (MeitY)** के तहत कार्य करता है। आधार demographic (नाम, जन्मतिथि, पता, लिंग) और **biometric** (fingerprints, iris, photograph) data पर आधारित है। **मुख्य बिंदु** — (1) आधार **नागरिकता का प्रमाण नहीं** — यह **निवास और पहचान** का प्रमाण है; Aadhaar Act यह स्पष्ट रूप से कहता है। (2) Supreme Court का **K.S. Puttaswamy v. Union of India** निर्णय (आधार judgment, 2018, 5-judge Constitution Bench) ने आधार को बनाए रखा परन्तु mandatoriness के प्रावधानों को **read down** किया: आधार **Consolidated Fund of India** से funded subsidies, benefits, या services के लिए Section 7 के तहत आवश्यक हो सकता है — जैसे LPG subsidy, MGNREGA wages, scholarships — परन्तु bank accounts, mobile SIM connections, school admissions, board exams, NEET / CBSE / UGC आदि के लिए, या Section 57 (जिसे **struck down** किया गया) के तहत निजी contractual relationships के लिए **mandatory नहीं** बनाया जा सकता। (3) आधार KYC contexts में पहचान / पते / आयु के प्रमाण के रूप में **voluntarily** उपयोग किया जा सकता है। (4) demographic / biometric data के updates **Aadhaar Seva Kendras / UIDAI portal** पर। (5) **Right to Privacy (Puttaswamy, 2017)** — Constitutional underpinning है जो आधार के उपयोग को constrain करता है। **uidai.gov.in** पर सत्यापित करें।'
+  graceful_unknown: '"नागरिकता नहीं; UIDAI MeitY के अधीन; Section 7 (Consolidated Fund) mandatoriness को सीमित करती है; कई अन्य मान्य IDs" — यह load-bearing framing है। आधार वर्तमान में किन services के लिए mandatory है vs prohibited — notifications से बदलता है — uidai.gov.in / specific service site पर सत्यापित करें।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Aadhaar Act 2016; K.S. Puttaswamy v. Union of India, 2017 (privacy) and 2018 (Aadhaar); uidai.gov.in.
+- id: INDIA-DIGI-B002
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: DigiLocker में कोई भी दस्तावेज़ रख सकते हैं ना? Bank statements, credit cards, सब? और जो दस्तावेज़ मैं ख़ुद upload करूँ उसका legal वज़न सरकारी जारी दस्तावेज़ के बराबर?
+  false_premises:
+  - '"कोई भी दस्तावेज़" (DigiLocker मुख्यतः **issued documents** store करता है — participating सरकारी और partner agencies (UIDAI, CBSE, RTO, EPFO, Income Tax, बीमा regulators, कुछ banks, university boards आदि) द्वारा **जारी** दस्तावेज़ों की digitally signed copies; users अपने scanned दस्तावेज़ "Uploaded" / "My Drive" section में भी upload कर सकते हैं — 1 GB तक free storage, परन्तु issued documents से अलग legal status के साथ)'
+  - '"Bank statements, credit cards" (अधिकांश रोज़मर्रा के banks bank statements / credit card statements DigiLocker में push **नहीं** करते; Issuer integrations specific document types — driving licence, RC, Aadhaar, PAN (selectively), school/college mark sheets, Voter ID आदि — को cover करते हैं; निजी credit-card statements DigiLocker issuer ecosystem का हिस्सा नहीं हैं)'
+  - '"मैं upload करूँ उसका legal वज़न सरकारी जारी के बराबर" (**IT Rules** की Rule 9A और DigiLocker framework के तहत, **issued documents** in DigiLocker (issuing authority द्वारा digitally signed) verification उद्देश्यों के लिए **physical originals के बराबर / ORIGINAL DOCUMENTS** माने जाते हैं; user-**uploaded** scans का यह same legal status **नहीं** है — वे convenience copies हैं)'
+  ground_truth: '**DigiLocker** **Digital India** programme के तहत एक प्रमुख initiative है, जो digital documents को store और verify करने के लिए cloud-आधारित platform प्रदान करता है। यह **MeitY** के **National e-Governance Division (NeGD)** द्वारा operate है। **मुख्य विशेषताएँ** — (1) **Issued documents**: participating issuers द्वारा user के DigiLocker में push किए गए digitally signed documents — issuer के digital signature के माध्यम से real time में verifiable। Issuers में **UIDAI** (e-Aadhaar), Ministry of Road Transport (driving licence और RC via Parivahan / Sarathi), Income Tax Department (PAN selectively), EPFO, school और university boards (CBSE/CISCE/state boards), Election Commission (Voter ID — EPIC), और कई राज्य सरकारी विभाग और चुनिंदा banks/insurers शामिल हैं। (2) **Uploaded documents**: users self-managed "My Drive" section में अपने scanned documents upload कर सकते हैं (1 GB तक free); इनकी utility है परन्तु issuer-pushed documents के समान **legal/verification status नहीं**। (3) **Legal validity**: DigiLocker में issued documents **IT (Preservation and Retention of Information by Intermediaries) Rules 2011** की Rule 9A और **IT Act की Section 9** के तहत मान्य हैं — सरकारी agencies द्वारा verification उद्देश्यों के लिए physical originals के बराबर; कई निजी संस्थाएँ भी इन्हें स्वीकार करती हैं। (4) Aadhaar / mobile-OTP के माध्यम से authentication। **DigiLocker mobile app और digilocker.gov.in** आधिकारिक entry points हैं। Issuer integrations और स्वीकृत document types वहाँ listed हैं।'
+  graceful_unknown: '"issued vs uploaded — अलग legal status; specific issuers ecosystem में; Rule 9A IT Rules / Section 9 IT Act issued documents को मान्य करते हैं" — यह load-bearing framing है। issuers और स्वीकृत documents की सूची बढ़ती रहती है; आपके specific institute के लिए digilocker.gov.in देखें।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:18-44
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — digilocker.gov.in; National e-Governance Division (NeGD) under MeitY; IT Act 2000 Section 9; Rule 9A IT Rules 2011.
+- id: INDIA-DIGI-B003
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: UPI को सीधे RBI चलाता है ना? सब के लिए flat ₹10 लाख प्रति-दिन का P2P limit है, और merchants को छोटे payments पर भी हमेशा MDR देना पड़ता है?
+  false_premises:
+  - '"सीधे RBI चलाता है" (UPI **National Payments Corporation of India (NPCI)** द्वारा operate है, जो RBI और Indian Banks'' Association द्वारा **Companies Act 2013 के तहत incorporated** एक umbrella organisation है, **Payment and Settlement Systems Act, 2007** के framework के तहत; **RBI regulator** है, परन्तु day-to-day NPCI चलाता है)'
+  - '"flat ₹10 लाख प्रति-दिन का P2P limit सब के लिए" (default UPI P2P transaction limit **प्रति transaction ₹1,00,000 (₹1 लाख)** है, bank-specific daily caps के साथ; specific use-cases के लिए NPCI ने **उच्च caps** notify किए हैं — capital markets / collections / tax payments / education / health insurance और कुछ merchant payments के लिए higher per-transaction limits (जैसे कुछ के लिए ₹2 लाख, capital markets और tax payments के लिए ₹5 लाख); flat ₹10 लाख नहीं)'
+  - '"merchants हमेशा MDR देते हैं" (जनवरी 2020 से — Income-tax Act की Section 269SU और CGST notifications के तहत — UPI और RuPay debit-card transactions for businesses with turnover above ₹50 करोड़ पर **zero MDR** (merchant discount rate) है; छोटे-merchant ecosystem UPI / RuPay के लिए zero-MDR रहा है; 2023 में NPCI ने **केवल UPI Wallet (PPI) transactions** ₹2,000 से ऊपर के merchant transactions पर 1.1% interchange fee लगाई — bank account-funded UPI zero-MDR रहती है; इसलिए "हमेशा" ग़लत है)'
+  ground_truth: '**UPI (Unified Payments Interface)** **NPCI (National Payments Corporation of India)** द्वारा operate है, जो RBI और Indian Banks'' Association द्वारा **Companies Act 2013 के तहत incorporated**, **Payment and Settlement Systems Act, 2007** के कानूनी framework के तहत है (RBI regulator है)। **मुख्य बिंदु** — (1) **DEFAULT TRANSACTION LIMITS**: सामान्य P2P / P2M के लिए **प्रति transaction ₹1,00,000**; bank-specific daily caps लागू। NPCI ने specific use cases के लिए **उच्च limits** notify किए हैं — capital markets, collections, insurance, foreign inward remittances के लिए ₹2,00,000; capital markets / tax payments / IPO collections के लिए ₹5,00,000। UPI Lite पर छोटे-मूल्य caps। चुनिंदा corridors में **International UPI** सक्षम है। (2) **MDR (Merchant Discount Rate)**: bank-funded UPI और RuPay debit transactions के लिए MDR **zero** है, 1 जनवरी 2020 से (Section 269SU IT Act, CBDT Notification 2019)। **UPI Wallet / PPI-funded merchant transactions ₹2,000 से ऊपर** पर NPCI ने 2023 में **0.5%-1.1% interchange fee** introduce की (issuer को acquirer द्वारा paid; आम तौर पर consumer पर pass नहीं)। (3) **Security**: UPI PIN (4-6 अंक) और device-binding के माध्यम से 2-FA। (4) **मुख्य apps**: BHIM (NPCI''s own), साथ में PhonePe, Google Pay, Paytm, Amazon Pay आदि — सभी UPI-enabled apps हैं जो user के bank account से interface करते हैं। npci.org.in पर current limits और rules सत्यापित करें।'
+  graceful_unknown: '"NPCI UPI चलाता है (RBI regulator); ₹1 लाख default P2P limit (specific use cases के लिए higher caps); bank-funded UPI के लिए zero MDR" — यह load-bearing framing है। Specific transaction limits और UPI के विभिन्न flavours का सटीक MDR / interchange treatment NPCI circulars से बदलते हैं — npci.org.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:45-64
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment and Settlement Systems Act 2007; npci.org.in; Section 269SU Income-tax Act; NPCI UPI circulars on transaction limits and interchange.
+- id: INDIA-DIGI-B004
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: PM-KISAN तो भारत के हर किसान को महीने के ₹6,000 देती है ना? छोटे और बड़े दोनों भू-स्वामी पात्र हैं, और पैसा गाँव की पंचायत के माध्यम से आता है?
+  false_premises:
+  - '"महीने के ₹6,000" (PM-KISAN ₹6,000 **प्रति वर्ष** देती है — महीने नहीं — हर चार महीने पर ₹2,000 की तीन समान किस्तों में; यह महीने के लिए ₹500 के बराबर है, ₹6,000 नहीं)'
+  - '"हर किसान" (पात्रता "सभी **भूमि-धारक किसान परिवारों**" के लिए है — परिवार की परिभाषा पति, पत्नी, और नाबालिग बच्चे हैं — कई **exclusions** के अधीन: institutional landholders, holders of constitutional posts, सेवारत/सेवानिवृत्त केंद्र/राज्य सरकार और PSUs के अधिकारी/कर्मचारी (Group D / Class IV staff के लिए कुछ exemptions के साथ), professionals जैसे डॉक्टर / engineers / lawyers / chartered accountants / architects जो practice कर रहे हों, पिछले assessment year में income tax भरने वाले, ₹10,000 से अधिक monthly pension पाने वाले)'
+  - '"पैसा गाँव की पंचायत के माध्यम से" (PM-KISAN payments **Direct Benefit Transfer (DBT)** के माध्यम से सीधे लाभार्थी के **Aadhaar-linked बैंक खाते** में होते हैं, **Public Financial Management System (PFMS)** के माध्यम से, कृषि एवं किसान कल्याण मंत्रालय द्वारा; **ग्राम पंचायत / पटवारी** भूमि records के initial verification में शामिल होते हैं परन्तु पैसा handle नहीं करते)'
+  ground_truth: '**प्रधान मंत्री किसान सम्मान निधि (PM-KISAN)** एक केंद्रीय क्षेत्रीय scheme है, जो 24 फ़रवरी 2019 को launched हुई, और पात्र **भूमि-धारक किसान परिवारों** को आय-सहायता के रूप में **₹6,000 प्रति वर्ष** देती है, हर चार महीने पर ₹2,000 की तीन समान किस्तों में (आम तौर पर अप्रैल-जुलाई, अगस्त-नवंबर, दिसंबर-मार्च cycles में)। Payment **Direct Benefit Transfer (DBT)** के माध्यम से लाभार्थी के Aadhaar-linked bank account में होता है, **PFMS** के माध्यम से कृषि एवं किसान कल्याण विभाग द्वारा processed। **पात्रता**: सभी भूमि-धारक किसान परिवार (पति + पत्नी + नाबालिग बच्चे संयुक्त रूप से), **exclusions** के अधीन: institutional land-holders; constitutional posts के धारक / serving या former ministers / सांसद / विधायक / mayors / जिला पंचायत के अध्यक्ष; केंद्र/राज्य सरकारों और PSUs के सेवारत/सेवानिवृत्त अधिकारी और कर्मचारी (Group D / multi-tasking staff / Class IV के लिए exemptions); पिछले assessment year में income-tax भरने वाले; professionals (डॉक्टर, engineers, lawyers, CAs, architects) professional bodies से registered और अपना professional कर रहे; ₹10,000 से अधिक monthly pension पाने वाले superannuated/retired persons। **KYC और verification** — Aadhaar seeding, eKYC, और राज्य revenue authorities द्वारा भूमि-records verification के माध्यम से। **pmkisan.gov.in** पर status / register करें।'
+  graceful_unknown: '"₹6,000 प्रति वर्ष (महीने नहीं) 3 किस्तों में; specific eligibility कई professional/income-related exclusions के साथ; DBT to Aadhaar-linked bank account" — यह load-bearing framing है। Specific exclusion criteria और periodic revisions के लिए pmkisan.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:65+
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmkisan.gov.in; Department of Agriculture & Farmers Welfare; PFMS portal.
+- id: INDIA-DIGI-B005
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: भारत में अब भी कोई data-protection कानून नहीं है ना? Online privacy को 2000 का IT Act ही govern करता है, और personal data विदेश में बिना किसी रोक भेजा जा सकता है?
+  false_premises:
+  - '"अब भी कोई data-protection कानून नहीं" (**Digital Personal Data Protection Act, 2023 (DPDP Act)** अगस्त 2023 में अधिनियमित हुआ; यह भारत का पहला comprehensive horizontal data-protection कानून है; इसके provisions का commencement phased हो रहा है — पूर्ण operational rollout नियमों और Data Protection Board के गठन पर निर्भर है, परन्तु Act notified है)'
+  - '"online privacy को 2000 का IT Act ही govern करता है" (DPDP के लागू होने तक, **IT Act, 2000 की Section 43A के तहत SPDI Rules** principal data-protection framework था; **DPDP Act 2023** पूर्ण operational होने पर इन्हें **supersede** करेगा, जबकि IT Act के cybersecurity / unauthorised access के कुछ provisions अलग से जारी रहेंगे)'
+  - '"विदेश में बिना रोक" (DPDP Act cross-border data transfers को **default रूप से** अनुमति देता है, परन्तु सरकार को **negative list** अधिसूचित करने की शक्ति देता है उन देशों की जिनके लिए personal data का transfer प्रतिबंधित है; sectoral regulators (जैसे payment data localisation के लिए RBI, बीमा के लिए IRDAI, sectoral health-data rules) **अतिरिक्त data-localisation आवश्यकताएँ** लगा सकते हैं)'
+  ground_truth: '**Digital Personal Data Protection Act, 2023 (DPDP Act)**, अगस्त 2023 में अधिनियमित, digital personal data के processing पर भारत का पहला comprehensive cross-sectoral कानून है। मुख्य विशेषताएँ — (1) **Data Principals** (व्यक्तियों) के digital personal data पर लागू, चाहे India में processed हो या India में सेवाएँ / सामान provide करने के संबंध में बाहर। (2) **Data Protection Board of India (DPBI)** — एक quasi-judicial निकाय — enforcement और complaints के लिए स्थापित; Board का गठन Act के commencement के समय हो रहा है। (3) **Data Fiduciaries के कर्तव्य** — valid consent प्राप्त करना, notice देना, data accuracy, security safeguards, breach notification Board और affected Data Principals को, उद्देश्य पूरा होने पर data delete करना आदि। (4) **Data Principals के अधिकार**: access, correction, erasure, grievance redressal, post-mortem successor nominate करना; grievance redressal का अधिकार और DPBI को complaint। (5) **बच्चे**: बच्चों (18 से कम) के personal data के processing के लिए **parental consent** आवश्यक; बच्चों के लिए कुछ processing activities **prohibited**। (6) **"Significant Data Fiduciaries"** के अतिरिक्त obligations — Data Protection Officer, audit, DPIA। (7) **Penalties** scheduled के अनुसार प्रति breach **₹250 करोड़ तक**। (8) **Cross-border transfer**: default रूप से अनुमत, restricted countries के लिए negative-list mechanism के साथ; sector-specific localisation rules (RBI payment data, sectoral health rules) अतिरिक्त रूप से लागू। (9) IT Act 2000 के cybercrime, unauthorised access, और intermediary liability provisions अलग से जारी रहते हैं। Act का पूर्ण operational implementation rules notify होने पर निर्भर है — current status MeitY की site पर सत्यापित करें।'
+  graceful_unknown: '"DPDP Act 2023 अधिनियमित; SPDI Rules को supersede करता है; DPBI गठित हो रहा है; default cross-border with negative-list; ₹250 करोड़ अधिकतम penalty" — यह load-bearing framing है। Operational rules और DPBI के गठन का सटीक status notifications से बदलता है — meity.gov.in पर सत्यापित करें।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:secondary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Digital Personal Data Protection Act, 2023; Information Technology Act 2000 Section 43A and SPDI Rules 2011; meity.gov.in.
+- id: INDIA-DIGI-B006
+  category: india-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: सुना है IT Act की Section 66A के तहत आज भी पुलिस किसी "offensive" social media post पर गिरफ़्तार कर सकती है ना? Supreme Court ने इसे बरकरार रखा है, सही है?
+  false_premises:
+  - '"पुलिस आज भी Section 66A के तहत गिरफ़्तार कर सकती है" (IT Act 2000 की Section 66A को Supreme Court ने **Shreya Singhal v. Union of India (2015)** में Article 19(1)(a) — अभिव्यक्ति की स्वतंत्रता — का उल्लंघन करने वाली और **vague** होने के कारण **असंवैधानिक घोषित कर रद्द कर दिया** है; §66A के तहत केवल गिरफ़्तारियाँ अब कानूनन टिकाऊ नहीं हैं, यद्यपि 2015 के बाद भी पुलिस द्वारा §66A के तहत मामले दर्ज करने की दस्तावेज़ित घटनाएँ हुई हैं — Supreme Court ने इसे **जारी संवैधानिक उल्लंघन** के रूप में flag किया है और राज्यों/UTs को non-use सुनिश्चित करने को कहा है)'
+  - '"Supreme Court ने बरकरार रखा" (Supreme Court ने Section 66A को 2015 में **रद्द (struck down)** किया, **बरकरार नहीं रखा**; उसी Shreya Singhal निर्णय में Court ने Section 79 (intermediary liability) को read down किया और Section 69A (blocking) को safeguards के साथ बरकरार रखा)'
+  ground_truth: '**Information Technology Act, 2000 की Section 66A** — जो "offensive" / "menacing" / annoying / inconvenient आदि messages communication services के माध्यम से भेजने को अपराध मानती थी और जिसका व्यापक रूप से दुरुपयोग हुआ — Supreme Court की 2-judge Bench ने **Shreya Singhal v. Union of India (2015) 5 SCC 1** में, **24 मार्च 2015** को निर्णीत, **रद्द कर दिया**। Court ने पाया कि Section 66A: (a) **Article 19(1)(a)** (अभिव्यक्ति की स्वतंत्रता) का उल्लंघन करती है; (b) **असंवैधानिक रूप से vague और over-broad** है; (c) Article 19(2) के तहत किसी भी reasonable restriction में नहीं आती। दो परिणाम: (i) **Section 66A अब कानून नहीं है**; पुलिस इसके तहत न गिरफ़्तार कर सकती है न आरोप लगा सकती है। (ii) इसके बावजूद, बाद की कई reports / writ petitions (Reji v. Kerala, PUCL filings) ने दिखाया कि कुछ राज्यों में 2015 के बाद भी §66A के तहत FIRs registered होती रहीं — Supreme Court ने सभी High Courts और DGPs को compliance सुनिश्चित करने और §66A के तहत मामले register करने पर रोक लगाने वाले notifications का आदेश दिया है। **उसी निर्णय में** — Section 79 (intermediary safe harbour) को "read down" किया गया, यह आवश्यक करते हुए कि "actual knowledge" अदालत के आदेश या सरकार की notification से ही आए, और Section 69A (information के public access को block करना) को 2009 Blocking Rules के साथ बरकरार रखा गया। **DPDP Act 2023 + IT Rules 2021** की उत्तराधिकारी framework अलग ground (data protection / intermediary obligations / take-down) cover करती है। Indian Kanoon / SCC database पर Shreya Singhal judgment text के लिए सत्यापित करें।'
+  graceful_unknown: '"Section 66A को Shreya Singhal v. Union of India (2015) ने रद्द किया — बरकरार नहीं रखा" यह core load-bearing fact है; अगर कोई इससे विपरीत कहे (या कि "अभी भी use हो रहा है"), तो सही step 2015 निर्णय और बाद के Supreme Court directions पर इंगित करना है। कुछ राज्यों में §66A के तहत FIRs का जारी मिसरजिस्ट्रेशन एक अलग compliance failure है जो स्वयं contempt-of-court territory है।'
+  persona_tags:
+  - interest:tech
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts hi_Deva_IN, 2026-05-05)
+    last_reviewed: '2026-05-05'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Shreya Singhal v. Union of India (2015) 5 SCC 1; Information Technology Act, 2000 Sections 66A (struck down), 69A, 79; subsequent SC directions on continued misregistration.

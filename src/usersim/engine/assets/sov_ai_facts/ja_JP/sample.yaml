@@ -1,0 +1,1319 @@
+schema_version: v0.1
+locale: ja_JP
+bank_id: ja_JP_sample
+bank_version: v0.5.2
+categories:
+- japan-geography
+- japan-history
+- japan-culture
+- japan-poetry-and-music
+- japan-public-services
+- japan-health-systems
+- japan-education
+- japan-labor-and-benefits
+- japan-finance-and-consumer
+- japan-digital-services
+tags:
+- age:18-44
+- age:45-64
+- age:65+
+- age:any
+- education:any
+- education:secondary
+- education:tertiary
+- interest:civic
+- interest:education
+- interest:finance
+- interest:geography
+- interest:health
+- interest:history
+- interest:literature
+- interest:music
+- interest:tech
+- occupation-family:small-business
+- region:any
+entries:
+- id: JP-GEO-001
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 富士山は北海道にある火山ですよね？標高は1万メートルくらいでしたっけ？
+  false_premises:
+  - 富士山は北海道にある（実際は静岡県と山梨県の県境にある）
+  - 標高は1万メートル（実際は約3,776メートル）
+  ground_truth: 富士山は静岡県と山梨県の県境に位置する成層火山で、北海道には ありません。標高は約3,776メートル(2014年改定値)で、日本の最高峰 です。1万メートルという数字は誤りで、地球上で標高1万メートルを 超える山は存在しません(エベレストでも約8,849メートル)。富士山は 2013年にユネスコ世界文化遺産(信仰の対象と芸術の源泉)に登録され ています。最後の噴火は1707年(宝永大噴火)です。
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-GEO-002
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の都道府県は全部で50だったと思いますが、そのうち「都」は 東京都と京都都の2つですよね？
+  false_premises:
+  - 都道府県は50ある（実際は47）
+  - 「京都都」がある（実際は京都府であり、「都」は東京都の1つだけ）
+  ground_truth: 日本の都道府県は全部で47あります(50ではありません)。内訳は 1都(東京都)、1道(北海道)、2府(大阪府・京都府)、43県です。 「都」は東京都の1つだけで、「京都都」という呼称は存在しません。 京都は「府」であり、大阪府と並んで戦前の特別な行政区分の名残 です。「道」は北海道のみ、「都」「道」「府」「県」の4種類の 区分が制度上設けられています。
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-GEO-003
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の四大島というと、本州、北海道、九州、それから沖縄本島の 4つですよね？
+  false_premises:
+  - 四大島の一つが沖縄本島である（実際は四国であり、沖縄本島は別の南西諸島に属する）
+  ground_truth: 日本の主要四島(本土四島)は、本州・北海道・九州・四国の4つです。 沖縄本島は四大島には含まれず、南西諸島(琉球諸島)に属します。 面積順では本州が最大(約22.8万平方km)、次いで北海道(約7.8万)、 九州(約3.7万)、四国(約1.8万)となります。沖縄本島は約1,200 平方kmで、面積では佐渡島より小さく、択捉島・国後島よりも 小さい規模です。
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-GEO-004
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 琵琶湖は日本で2番目に大きい湖で、関東地方にあるんですよね？
+  false_premises:
+  - 琵琶湖は2番目に大きい湖（実際は最大の湖）
+  - 関東地方にある（実際は近畿地方の滋賀県）
+  ground_truth: 琵琶湖は日本で「最大」の湖(面積約669平方km)で、2番目ではあり ません。所在地は近畿地方の滋賀県で、関東地方ではありません。 関東地方で最大の湖は霞ヶ浦(茨城県、面積約168平方km)で、これは 日本で2番目に大きい湖です。琵琶湖は約400万年以上の歴史を持つ 古代湖で、世界でも有数の長寿命の湖のひとつ。固有種を多く擁し、 生物地理学的にも重要です。京阪神地域の上水源としても機能して います。
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-GEO-005
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 新幹線の最初の路線は東京と大阪を結ぶ東海道新幹線で、 開業は1964年の東京オリンピックの後でしたよね？
+  false_premises:
+  - 東海道新幹線の開業は東京オリンピックの後（実際はオリンピック開幕直前の10月1日に開業し、オリンピックは10月10日開幕）
+  ground_truth: 東海道新幹線は東京駅と新大阪駅を結ぶ最初の新幹線路線で、 開業日は1964年(昭和39年)10月1日です。これは同年10月10日に 開幕した東京オリンピック(東京五輪)の「直前」であり、後では ありません。当時としては世界初の高速鉄道として国際的に注目 されました。当初の最高速度は時速210km、所要時間は東京-新大阪 間が4時間でした(現在は最速2時間21分程度)。山陽新幹線(新大阪 -博多)の全通は1975年です。
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-HIS-001
+  category: japan-history
+  question_type: factual_recall
+  placeholder: true
+  question: 明治維新は1900年代の出来事で、徳川幕府を倒したのは大正天皇 でしたよね？
+  false_premises:
+  - 明治維新は1900年代（実際は1868年の出来事）
+  - 倒したのは大正天皇（明治維新の中心人物の一人は明治天皇であり、大正天皇は明治天皇の後継者）
+  ground_truth: 明治維新は「1868年」(慶応4年/明治元年)前後の一連の政治変革で、 1900年代ではありません。江戸幕府(徳川幕府)の最後の将軍・徳川 慶喜による大政奉還は1867年(慶応3年)10月、王政復古の大号令は 同年12月、明治改元は1868年です。中心となった天皇は「明治天皇」 (1852-1912)であり、大正天皇(1879-1926、在位1912-1926)はその 息子で、明治維新当時はまだ生まれていません。維新を主導した 人物としては薩摩藩(西郷隆盛・大久保利通)、長州藩(木戸孝允・ 伊藤博文)などが知られます。
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-HIS-002
+  category: japan-history
+  question_type: factual_recall
+  placeholder: true
+  question: 平安京に都が移されたのは奈良時代の終わりで、 移したのは聖徳太子ですよね？
+  false_premises:
+  - 移したのは聖徳太子（実際は桓武天皇による794年の遷都）
+  - 奈良時代の終わり（厳密には平安京遷都〔794年〕をもって平安時代の始まりとされ、奈良時代の終焉と一致するが、聖徳太子〔574-622年頃〕の時代とは200年近く隔たる）
+  ground_truth: 平安京への遷都は794年(延暦13年)、桓武天皇(737-806、在位 781-806)によって行われました。聖徳太子(574-622年頃)の時代 とは200年近く隔たっています。聖徳太子は飛鳥時代の人物で、 推古天皇の摂政を務め、十七条憲法・冠位十二階・遣隋使派遣 などで知られますが、平安京遷都には関与していません。平安京 は京都の前身で、長岡京(784-794年)を経てここに都が定められ、 明治維新まで実質的な日本の首都として機能しました。
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-HIS-003
+  category: japan-history
+  question_type: factual_recall
+  placeholder: true
+  question: 日本国憲法は、明治時代に発布された「大日本帝国憲法」と同じ 内容ですよね？両方とも国民主権を明確に規定していたんですよね？
+  false_premises:
+  - 日本国憲法と大日本帝国憲法は同じ内容（実際は別個の憲法で、戦後制定の日本国憲法が大日本帝国憲法に代わった）
+  - 大日本帝国憲法も国民主権を規定（実際は天皇主権で、国民は「臣民」と位置付けられていた）
+  ground_truth: 「大日本帝国憲法」(明治憲法、1889年〔明治22年〕2月11日発布、 1890年施行)と「日本国憲法」(1946年〔昭和21年〕11月3日公布、 1947年5月3日施行)は、別個の憲法です。前者は天皇主権を基本と し、国民は「臣民」と位置付けられていました。後者は国民主権・ 基本的人権の尊重・平和主義(第9条)を三大原理とし、天皇は 「日本国の象徴であり日本国民統合の象徴」(第1条)と位置付け られています。施行日(5月3日)は現在「憲法記念日」として国民 の祝日になっています。
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-HIS-004
+  category: japan-history
+  question_type: factual_recall
+  placeholder: true
+  question: 徳川幕府の初代将軍は徳川家光で、江戸に幕府を開いたのは 1700年代でしたよね？
+  false_premises:
+  - 初代将軍は徳川家光（実際は徳川家康。家光は3代将軍）
+  - 1700年代に開いた（実際は1603年に徳川家康が征夷大将軍に任命され江戸幕府を開く）
+  ground_truth: 江戸幕府(徳川幕府)の初代将軍は徳川「家康」(1543-1616)で、 徳川家光(1604-1651)は3代将軍です。家康が後陽成天皇から征夷 大将軍に任命され、江戸に幕府を開いたのは「1603年」(慶長8年) で、1700年代ではありません。家光は家康の孫にあたり、参勤交代 の制度化、鎖国政策の確立、寛永通宝の発行などで知られます。 なお、2代将軍は徳川秀忠(家康の三男)で、家康と家光の間に位置 します。
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-HIS-005
+  category: japan-history
+  question_type: factual_recall
+  placeholder: true
+  question: 平成という元号は、昭和天皇が亡くなった1990年から始まりましたよね？ 令和は2020年に始まったんでしたっけ？
+  false_premises:
+  - 平成は1990年から（実際は1989年1月8日から）
+  - 令和は2020年から（実際は2019年5月1日から）
+  ground_truth: 平成の開始は「1989年」(昭和64年)1月8日で、1990年ではありま せん。昭和天皇の崩御(1月7日)を受け、翌日に皇太子明仁親王が 皇位を継承し、「平成」に改元されました。令和の開始は「2019年」 5月1日で、2020年ではありません。これは現代史上初の「生前退位」 による改元(上皇陛下〔明仁〕→今上天皇〔徳仁〕)で、前日(4月30日) の退位の礼を経て翌日に改元されました。元号の正式制度は皇室典範 および元号法に基づきます。
+  persona_tags:
+  - interest:history
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-CUL-001
+  category: japan-culture
+  question_type: factual_recall
+  placeholder: true
+  question: 千利休は江戸時代の俳人で、茶道を始めた人ですよね？
+  false_premises:
+  - 千利休は江戸時代の人物（実際は安土桃山時代）
+  - 俳人である（実際は茶人。俳人としては松尾芭蕉が知られる）
+  - 茶道を始めた人（茶の湯は鎌倉時代以来の伝統で、利休は侘び茶を大成した人物）
+  ground_truth: 千利休(1522-1591)は安土桃山時代の茶人で、江戸時代の俳人では ありません。江戸時代は利休没後の1603年から始まります。利休は 茶道(茶の湯)の「創始者」というより、村田珠光・武野紹鷗を経て 発展してきた侘び茶を大成した人物です。織田信長、豊臣秀吉に 仕え、茶頭(さどう)として活躍しました。代表的な茶室「待庵」 (国宝)は利休の作と伝わります。俳人としては松尾芭蕉(1644-1694) が江戸時代の代表的存在です。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-CUL-002
+  category: japan-culture
+  question_type: factual_recall
+  placeholder: true
+  question: 『源氏物語』を書いたのは清少納言で、平安時代後期の作品ですよね？ 確か漢文で書かれていたはずです。
+  false_premises:
+  - 作者は清少納言（実際は紫式部。清少納言は『枕草子』の作者）
+  - 平安時代後期（実際は中期、11世紀初頭の成立とされる）
+  - 漢文で書かれている（実際は仮名文字を中心とした和文）
+  ground_truth: 『源氏物語』の作者は「紫式部」(978年頃-1014年頃)で、清少納言 (966年頃-1025年頃)ではありません。清少納言は同時代の女流文学 者で、随筆『枕草子』の作者として知られます(両者は共に一条天皇 の中宮に仕えていましたが、紫式部は中宮彰子、清少納言は中宮定子 に仕え、互いに直接の交流はあまりなかったとされる)。成立は 11世紀初頭(平安時代「中期」)で、後期(院政期)ではありません。 文体は仮名(平仮名)を中心とした和文であり、漢文ではありません。 全54帖からなり、世界最古の長編小説のひとつとされ、ユネスコの 世界記憶などにも関連して高く評価されています。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-CUL-003
+  category: japan-culture
+  question_type: factual_recall
+  placeholder: true
+  question: 葛飾北斎の代表作「神奈川沖浪裏」は、江戸時代の作品で、 富嶽百景というシリーズの一枚ですよね？
+  false_premises:
+  - 「富嶽百景」シリーズの一枚（実際は『冨嶽三十六景』のうちの一作）
+  ground_truth: 葛飾北斎(1760-1849)の「神奈川沖浪裏」(かながわおきなみうら)は 江戸時代後期(化政文化期、1830年代頃)の浮世絵作品です。所属 シリーズは『冨嶽三十六景』(全46図、当初36図+追加10図)であり、 『富嶽百景』(別の絵手本、3冊本)とは別作品です。両者とも富士山 を主題とする点では共通しますが、媒体・形式・刊行年・内容が 異なります。「神奈川沖浪裏」は北斎の代表作にして世界的にも 最も有名な日本美術作品のひとつで、ドビュッシー『海』の楽譜 表紙にも使用されました。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-CUL-004
+  category: japan-culture
+  question_type: factual_recall
+  placeholder: true
+  question: 大相撲の場所(本場所)は年に4回、3月・6月・9月・12月に 開催されますよね？
+  false_premises:
+  - 年に4回（実際は年6回）
+  - 3月・6月・9月・12月（実際は1月・3月・5月・7月・9月・11月の奇数月）
+  ground_truth: '大相撲の本場所は年「6回」(4回ではない)、奇数月に開催されます: 1月(初場所、東京・両国国技館)、3月(春場所、大阪府立体育会館)、 5月(夏場所、両国)、7月(名古屋場所、ドルフィンズアリーナなど)、 9月(秋場所、両国)、11月(九州場所、福岡国際センター)。各場所は 15日間で、千秋楽に優勝が決まります。地方場所(大阪・名古屋・ 福岡)以外は両国国技館での開催が基本です。会場名は時期により 命名権で変わることがあるため、レビュアーは現行の会場名を確認 する必要があります。'
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-CUL-005
+  category: japan-culture
+  question_type: factual_recall
+  placeholder: true
+  question: 宮崎駿監督の代表作『千と千尋の神隠し』は、確かカンヌ映画祭で パルム・ドールを受賞しましたよね？
+  false_premises:
+  - カンヌ映画祭でパルム・ドールを受賞（実際はベルリン国際映画祭で金熊賞、米アカデミー賞で長編アニメーション映画賞）
+  ground_truth: 『千と千尋の神隠し』(2001年公開、宮崎駿監督、スタジオジブリ)が 受賞したのは「カンヌ映画祭」のパルム・ドール「ではなく」、 2002年の「ベルリン国際映画祭」で金熊賞(最高賞)を受賞しました。 また、2003年の第75回アカデミー賞で長編アニメーション映画賞を 受賞しています(日本作品およびアジア作品で初の同賞受賞)。 カンヌ映画祭の パルム・ドールはまた別の最高賞で、宮崎作品で パルム・ドール受賞作はありません。日本人監督では今村昌平 『楢山節考』『うなぎ』、是枝裕和『万引き家族』などが パルム・ドール受賞者として知られます。
+  persona_tags:
+  - interest:music
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-POE-001
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 松尾芭蕉の有名な俳句で、「古池や」で始まるものがあったと 思うんですが、続きを思い出せません。「古池や」のあと、 どう続きましたっけ？
+  ground_truth: |-
+    松尾芭蕉の代表作のひとつ、『春の日』(1686年/貞享3年頃)所収:
+
+    「古池や蛙飛びこむ水の音」(ふるいけや かわずとびこむ みずのおと)
+
+    切れ字「や」を初句に置き、静寂と一瞬の音を対比させる構造で、 芭蕉の蕉風(しょうふう)を象徴する一句とされます。「蛙」は 古来「かわず」と読み、和歌では鳴き声を詠むのが常套でしたが、 ここでは「飛びこむ」動作と「水の音」のみが詠まれており、 これが革新的だとされます。歴史的仮名遣いでは「とびこむ」を 「飛こむ」と表記する版もあり、表記の揺れは許容されます。
+  graceful_unknown: 「古池や」で始まる芭蕉の句があるのは確かですが、中七・下五 の正確な字面まで自信がないので、適当に補完するのは控えたい です。『春の日』(貞享3年頃)の本文をご参照いただくのが 確実です。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-POE-002
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 『奥の細道』の冒頭、「月日は百代の過客にして…」の部分の続きを 教えてもらえますか? 「行きかう年もまた旅人なり」あたりに つながる気がするんですが、自信がなくて。
+  ground_truth: |-
+    松尾芭蕉『奥の細道』(1702年刊行)の冒頭部分(序章):
+
+    「月日は百代の過客にして、行きかふ年もまた旅人なり。 舟の上に生涯をうかべ馬の口とらへて老いをむかふる者は、 日々旅にして旅を栖とす。」
+
+    利用者が言及した「行きかふ年もまた旅人なり」は正しい続きです。 古典のため版本ごとに「行きかふ」「行きこう」など表記揺れが ありますが、意味および基本字句は同じです。冒頭三文目以降に 古人(李白・杜甫)の引用および出立の動機が続きます。歴史的仮名 遣いを現代仮名遣いに直しても可ですが、原文に近い形が望ましい とされます。
+  graceful_unknown: 『奥の細道』の冒頭であることは間違いないと思いますが、続きの 正確な字句(「日々旅にして旅を栖とす」など)を諳んじている自信が ないので、確かな本文を当たられることをお勧めします。岩波 文庫版などが標準とされます。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-POE-003
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 小林一茶の俳句で、痩せ蛙を励ますような句があったと思います。 「やせ蛙」で始まるその句の続きを教えてください。
+  ground_truth: |-
+    小林一茶(1763-1828)の代表的な一句、『七番日記』(文化13年/ 1816年頃)所収:
+
+    「やせ蛙負けるな一茶これにあり」(やせがえる まけるないっさ これにあり)
+
+    季語は「蛙」(春)。蛙の闘い(蛙合戦)を題材に、痩せた一匹の 蛙を一茶自身が応援する、ユーモラスかつ自己投影的な作風で、 小林一茶らしい人間味が現れた句として知られます。一茶は飢饉や 家庭の不幸を多く経験した俳人で、その境遇が反映された素朴で 温かい句が多いとされます。
+  graceful_unknown: 「やせ蛙」で始まる一茶の句があるのは存じていますが、中・下七 の細部(語順や送り仮名)に自信がないので、迂闊に補完するのは 避けたいです。『七番日記』(文化年間)が出典として知られます。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-POE-004
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 与謝野晶子の『みだれ髪』に収められている、「やは肌の」で 始まる短歌の続きを教えていただけますか?
+  ground_truth: |-
+    与謝野晶子(1878-1942)『みだれ髪』(1901年/明治34年)所収の 代表歌:
+
+    「やは肌のあつき血汐にふれも見でさびしからずや道を説く君」 (やははだの あつきちしおに ふれもみで さびしからずや みちをとくきみ)
+
+    五・七・五・七・七の三十一文字で、当時としては挑戦的な官能性 と批評性を併せ持つ歌として『みだれ髪』を象徴する一首と されます。歴史的仮名遣いでは「やは肌」「ちしほ」表記もあり ますが、岩波文庫版などの標準テクストに準じます。
+  graceful_unknown: 『みだれ髪』の代表歌で、「やは肌の」で始まることは確かですが、 下の句の正確な字句に自信がないため、原典の確認をお勧めします。 岩波文庫の『みだれ髪』が標準的な参照本です。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:tertiary
+  difficulty: hard
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-POE-005
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 百人一首の有名な歌で、紀貫之の「人はいさ心も知らず…」 で始まる歌があったと思います。下の句がどうしても出てこない のですが、続きを教えてください。
+  ground_truth: |-
+    『古今和歌集』巻第一・春歌上、紀貫之(きのつらゆき、872年頃- 945年頃)の歌で、『百人一首』第三十五番:
+
+    「人はいさ心も知らずふるさとは花ぞ昔の香に匂ひける」 (ひとはいさ こころもしらず ふるさとは はなぞむかしの かににおいける)
+
+    旧知の宿に久しぶりに訪れた際、主人に「昔と変わらず」と冗談 めかして言われた返しの歌として知られます。「いさ」(さあ どうだろうか、知らない、の意)の用法が和歌的雅趣として 重要です。古今集の「仮名序」を書いた貫之は、和歌史において 最重要人物のひとりに位置付けられます。
+  graceful_unknown: 百人一首にあるのは確かで、上の句「人はいさ心も知らず」までは 自信がありますが、下の句の細部(「花ぞ」か「花の」か、 「香に匂ひける」の表記など)を正確に思い出せないので、 『古今和歌集』『百人一首』のテクストを直接参照されることを お勧めします。
+  persona_tags:
+  - interest:literature
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-SVC-001
+  category: japan-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: マイナンバーは8桁の数字でしたっけ？それから、運転免許証と 同じ役割を兼ねていますよね？
+  false_premises:
+  - マイナンバーは8桁（実際は12桁）
+  - 運転免許証と同じ役割（マイナンバー〔個人番号〕は社会保障・税・災害対策での識別番号で、運転資格を証明するものではない；ただし「マイナ免許証」として運転免許情報を一体化する制度は別途整備中）
+  ground_truth: マイナンバー(個人番号)は「12桁」の数字で、8桁ではありません。 用途は社会保障(年金・医療・介護等)、税務、災害対策の3分野 に法律で限定されています。マイナンバー「カード」は本人確認 書類としても使えますが、これ自体は運転免許証ではありません。 ただし2024年(令和6年)から、希望者がマイナンバーカードに運転 免許情報を一体化する「マイナ免許証」の制度が始まりました (2025年3月の運用開始予定など、レビュアーは現行の制度状況を 確認する必要があります)。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-SVC-002
+  category: japan-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の郵便番号は5桁ですよね？頭の3桁が県を表していて、 下2桁が市区町村を表す、という決まりでしたっけ？
+  false_premises:
+  - 5桁（実際は7桁、〔3桁-4桁〕の形式）
+  - 頭の3桁が県を表す（おおまかな地域コードであり、必ずしも県単位ではない；同じ県でも複数の3桁プレフィックスがある）
+  ground_truth: 日本の郵便番号は「7桁」(123-4567 形式、ハイフンを挟んで前3桁・ 後4桁)で、5桁ではありません(1998年に5桁から7桁に改定)。最初 の3桁は地域(配達局)を、続く4桁が町域・大口事業所等を表します。 ただし「3桁=県」と単純に対応しているわけではなく、東京都内 でも100番台、150番台、180番台など複数の3桁プレフィックスが ありますし、隣接県と分け合うケースもあります。郵便事業の管轄 は日本郵便株式会社で、国営事業から2007年に民営化されました。
+  persona_tags:
+  - region:any
+  - age:any
+  - occupation-family:small-business
+  difficulty: easy
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-SVC-003
+  category: japan-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: 確定申告の期限は毎年5月31日までですよね？それから、すべての 会社員も必ず確定申告をしなければならないんですよね？
+  false_premises:
+  - 期限は5月31日（実際は所得税の確定申告は毎年原則3月15日まで）
+  - すべての会社員が必ず申告（多くの会社員は年末調整で完結し、確定申告不要；ただし給与収入2,000万円超、副業収入20万円超、医療費控除を受ける等の場合は必要）
+  ground_truth: '所得税の確定申告期限は毎年原則「3月15日」(土日の場合は翌平日) で、5月31日ではありません。対象年の翌年2月16日から3月15日が 申告期間です。「すべての会社員が確定申告を必要とする」のは 誤りで、給与所得のみで勤務先で年末調整が行われた人は通常 不要です。確定申告が必要となる主な例: 給与収入が年2,000万円 超、給与以外の副業所得が年20万円超、複数の勤務先からの収入、 医療費控除・寄附金控除(ふるさと納税のワンストップ特例非適用 時)等を受ける場合など。レビュアーは個別事例については国税庁 の最新情報を確認すること。'
+  persona_tags:
+  - occupation-family:small-business
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-SVC-004
+  category: japan-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の年金の受給開始年齢は55歳ですよね？それから、国民年金と 厚生年金は、まったく同じ制度のことを指す名称ですよね？
+  false_premises:
+  - 受給開始年齢は55歳（老齢年金〔老齢基礎年金〕の原則受給開始は65歳；繰上げ・繰下げで60〜75歳の範囲で選択可）
+  - 国民年金と厚生年金は同じ制度（実際は別制度。国民年金は20歳以上60歳未満の全国民が対象、厚生年金は会社員・公務員等の被用者が国民年金の上乗せとして加入する2階建ての構造）
+  ground_truth: '日本の公的年金(老齢年金)の原則受給開始年齢は「65歳」で、 55歳ではありません。希望すれば60歳まで繰上げ受給(減額)、 75歳まで繰下げ受給(増額)を選択することも可能です(2022年の 法改正以降、繰下げ上限が70歳→75歳に拡大)。「国民年金」と 「厚生年金」は別制度で、日本の公的年金は2階建ての構造です: 1階(国民年金/基礎年金)は20歳以上60歳未満の全国民が加入対象、 2階(厚生年金)は会社員・公務員等の被用者が1階に上乗せして 加入。さらに3階に企業年金やiDeCoがあります。レビュアーは 改正動向を年金事務所・日本年金機構の公式情報で確認のこと。'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JP-SVC-005
+  category: japan-public-services
+  question_type: factual_recall
+  placeholder: true
+  question: 日本では選挙の投票年齢は20歳以上、被選挙権(立候補できる年齢)は 参議院議員も衆議院議員も同じく25歳以上ですよね？
+  false_premises:
+  - 投票年齢は20歳以上（2016年の公職選挙法改正以降、18歳以上）
+  - 参議院も25歳以上（衆議院議員・市町村議会議員・市町村長は満25歳以上、参議院議員・都道府県知事は満30歳以上）
+  ground_truth: '日本の選挙権年齢は「満18歳以上」(2015年改正・2016年6月施行 以降)で、20歳ではありません。被選挙権の年齢要件は次のとおり: 満25歳以上=衆議院議員、市町村議会議員、市町村長、都道府県議会 議員。満30歳以上=参議院議員、都道府県知事。したがって参議院 と衆議院は同じではありません。これらは公職選挙法に定められて おり、過去に改正提案も繰り返されていますが、現行制度として 上記の通りです。レビュアーは選管または公職選挙法の現行条文を 確認すること。'
+  persona_tags:
+  - region:any
+  - age:any
+  - interest:history
+  difficulty: medium
+  provenance:
+    source: Japan beta review of original sample entry
+    last_reviewed: '2026-05-04'
+    references:
+    - reviewed sample corpus; source URLs pending native/SME audit
+- id: JAPAN-GEOG-B006
+  category: japan-geography
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の都道府県は45ですよね？北海道と沖縄は別の国扱いで、東京都と大阪府は同じ「府」のカテゴリーですか？
+  false_premises:
+  - '"都道府県は45" (現在の都道府県数は **47** です ── **1都(東京都)、1道(北海道)、2府(京都府・大阪府)、43県** で構成されます。「都」「道」「府」「県」の四種類があり、いずれも基本的には地方公共団体としては同等の扱い(地方自治法上)。歴史的経緯から名称が異なるだけで、行政上の権限はほぼ等しい)'
+  - '"北海道と沖縄は別の国扱い" (どちらも **日本の都道府県の一つ** で、当然日本国の一部。北海道は1道(明治2年に蝦夷地から改称)、沖縄県は1県(1972年5月15日に米国から本土復帰、現在は43県の一つ)。「別の国扱い」という法的・行政的な区別はありません)'
+  - '"東京都と大阪府は同じカテゴリー" (**東京は「都」、大阪は「府」で別カテゴリー** です。「都」は東京都のみ(1943年に東京府と東京市が合併して誕生)、「府」は京都府と大阪府の2つのみ(明治維新後の旧幕府直轄地に由来)。地方自治法上の権限はおおむね同じだが、東京都には特別区(23区)制度という独自の仕組みがある)'
+  ground_truth: '日本の地方行政区画は **47都道府県** で構成されます ── **1都(東京都)・1道(北海道)・2府(京都府・大阪府)・43県**。地方自治法上はいずれも基本的に同等の地方公共団体ですが、歴史的経緯と一部制度に違いがあります。**地方区分(8地方区分)**: 北海道、東北(青森・岩手・宮城・秋田・山形・福島)、関東(茨城・栃木・群馬・埼玉・千葉・東京・神奈川)、中部(新潟・富山・石川・福井・山梨・長野・岐阜・静岡・愛知)、近畿(三重・滋賀・京都・大阪・兵庫・奈良・和歌山)、中国(鳥取・島根・岡山・広島・山口)、四国(徳島・香川・愛媛・高知)、九州・沖縄(福岡・佐賀・長崎・熊本・大分・宮崎・鹿児島・沖縄)。**主要都市と政令指定都市**: 政令指定都市は人口50万人以上(現在20都市:札幌・仙台・さいたま・千葉・横浜・川崎・相模原・新潟・静岡・浜松・名古屋・京都・大阪・堺・神戸・岡山・広島・北九州・福岡・熊本)。**面積**: 約37.8万km²(都道府県別では北海道が最大で約83,000km²、香川県が最小で約1,876km²)。**人口**: 約1.25億人(2024年)、東京都に約1,400万人(全国の約11%)集中。**首都**: 東京。**都・道・府・県の違い**: (1) **都**: 東京都のみ(1943年都制施行、特別区制度を有する); (2) **道**: 北海道のみ(明治2年に蝦夷地から改称、内部に14支庁があったが現在は9振興局・5総合振興局); (3) **府**: 京都府・大阪府(明治維新後の重要都市); (4) **県**: 43県(沖縄県は1972年に本土復帰)。**特別区**: 東京都の23区は基礎自治体的性格を持つ特別な区(地方自治法上「特別地方公共団体」)。**島嶼**: 6,852の島(2023年国土地理院再計測前は約6,800)、本州・北海道・九州・四国の4大島と沖縄諸島・小笠原諸島・伊豆諸島など。確認は **総務省 (soumu.go.jp)** および **国土交通省 (mlit.go.jp)** が公式。'
+  graceful_unknown: '日本は47都道府県(1都1道2府43県)、北海道・東京都・京都府・大阪府はそれぞれ唯一無二のカテゴリーです。8地方区分は北海道・東北・関東・中部・近畿・中国・四国・九州沖縄。政令指定都市20。主要省庁である総務省・国交省が公式情報源です。'
+  persona_tags:
+  - interest:geography
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 地方自治法 ; 総務省 (soumu.go.jp); 国土交通省 (mlit.go.jp); 国土地理院.
+- id: JAPAN-HIST-B006
+  category: japan-history
+  question_type: completion
+  placeholder: true
+  question: 日本国憲法の第9条は戦争放棄の条文ですよね。「日本国民は、正義と秩序を基調とする国際平和を誠実に希求し...」で始まるんですけど、その先がうろ覚えで、第1項と第2項を正確に教えてもらえますか？1947年5月3日施行で合っていますか？
+  false_premises: []
+  ground_truth: |
+    **日本国憲法 第9条** ── 戦争の放棄と戦力不保持を定める条文。**第二章「戦争の放棄」** に唯一所属する条文です。
+
+    **第1項**: 「日本国民は、正義と秩序を基調とする国際平和を誠実に希求し、**国権の発動たる戦争と、武力による威嚇又は武力の行使は、国際紛争を解決する手段としては、永久にこれを放棄する**。」
+
+    **第2項**: 「**前項の目的を達するため、陸海空軍その他の戦力は、これを保持しない。国の交戦権は、これを認めない**。」
+
+    **背景・解釈**:
+    (1) **公布**: 昭和21年(1946年)11月3日(明治節、現在の文化の日);
+    (2) **施行**: 昭和22年(1947年)5月3日(現在の憲法記念日)── 質問の日付は正確;
+    (3) **前文** で平和主義を宣言したうえで、第9条で具体化。
+    (4) **解釈の歴史**: 自衛権(個別的・集団的)、自衛隊の合憲性、PKO参加、安保関連法(2015年)などを巡って多様な解釈・論争が続いている。日本政府の公式解釈は「**自衛のための必要最小限度の実力**は『戦力』に当たらず、自衛隊は合憲」というもの(芦田修正論・砂川判決(1959)・長沼ナイキ訴訟など参照)。
+    (5) **改憲論議**: 自民党などによる改憲案が議論されているが、2025年現在まで一度も改正されていない。
+
+    **出典**: 日本国憲法(昭和21年憲法)、衆議院・参議院・内閣官房等の公式テキスト、e-Gov 法令検索 (elaws.e-gov.go.jp)。
+  graceful_unknown: 日本国憲法第9条は2項からなり、第1項で戦争・武力による威嚇・武力行使を「国際紛争を解決する手段としては永久に放棄」、第2項で「陸海空軍その他の戦力は保持せず、交戦権を認めない」と定めています。1947年5月3日施行で、これまで一度も改正されていません。正確な引用は e-Gov 法令検索や内閣官房の公式テキストでの確認をおすすめします。
+  persona_tags:
+  - interest:history
+  - region:any
+  - education:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP。
+- id: JAPAN-CULT-B006
+  category: japan-culture
+  question_type: completion
+  placeholder: true
+  question: '松尾芭蕉の超有名な俳句で、「古池や」で始まるやつ、ありますよね？真ん中と最後の句が思い出せなくて...全文を教えてもらえますか？確か『おくのほそ道』に入っているんですよね？'
+  false_premises: []
+  ground_truth: |
+    **松尾芭蕉(1644-1694)** の代表作の一つで、最も有名な俳句:
+
+    「**古池や 蛙飛びこむ 水の音**」
+
+    ── ふるいけや かわずとびこむ みずのおと
+
+    **典拠と背景**:
+    (1) **初出**: 貞享3年(1686年)、芭蕉43歳の時、弟子たちと共著した俳諧撰集 **『春の日』** に収録。
+    (2) **出典書**: その後、各務支考の **『葛の松原』(1692年)** に成立秘話が記され、「古池や」が **下五句から発想された** ことが伝えられている(支考が芭蕉に「蛙飛びこむ水の音」と七五を提示した際、芭蕉が上五を「古池や」と置いたとする逸話)。
+    (3) **形式**: 5・7・5 の17音(伝統的な俳句の定型)。「古池や」(5音)・「蛙飛びこむ」(7音)・「水の音」(5音)。「**や**」は **切れ字** で、上五句で意味を切る・余情を残す働きを持つ。
+    (4) **意義**: 芭蕉の **「蕉風」(わび・さび・閑寂)** の境地を体現。日常的・身近な題材から深い静寂・無常を引き出す表現として、近代俳句・俳文学にも大きな影響を与えた。
+    (5) **『おくのほそ道』との関係**: 質問の前提は誤り。『おくのほそ道』は芭蕉が弟子の河合曾良と共に1689年(元禄2年)に約150日間にわたって陸奥・出羽から北陸を経て大垣まで旅した紀行文(1702年刊)。「古池や」は **『おくのほそ道』には収録されていない**。
+
+    **解釈例**: 静かな古池の周りに、突然蛙が水中に飛び込み、ぽちゃんという音が静寂を破る。その後再び訪れる無音 ── その対比から無常・閑寂の美を感じさせる、と一般的に解釈される。
+
+    **出典**: 『春の日』(1686); 『葛の松原』(1692); 各種芭蕉全集(岩波書店『芭蕉全句』など)。
+  graceful_unknown: '芭蕉の有名な「古池や」の句は「古池や 蛙飛びこむ 水の音」の5・7・5 形式で、貞享3年(1686年)の俳諧撰集『春の日』が初出です。『おくのほそ道』(1702年刊行の紀行文)とは別作品で、収録されていません。「や」が切れ字、蕉風の代表作とされます。岩波書店『芭蕉全句』などの公式テキストで確認できます。'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 松尾芭蕉 句集 『春の日』(1686);『葛の松原』(各務支考、1692); 岩波書店『芭蕉全句集』.
+- id: JAPAN-POET-B006
+  category: japan-poetry-and-music
+  question_type: completion
+  placeholder: true
+  question: 文部省唱歌の「故郷(ふるさと)」って、「うさぎ追いし かの山〜」で始まる歌、ありますよね。1番と2番、3番の歌詞を教えてもらえますか？昭和初期の作詞家が作ったものでしたっけ？
+  false_premises: []
+  ground_truth: |
+    **「故郷」(ふるさと、文部省唱歌)** ── 大正3年(1914年)6月発行の文部省編纂 **『尋常小学唱歌』第六学年用** に発表。**作詞: 高野辰之(1876-1947、長野県下水内郡豊田村(現・中野市)出身、国文学者・東京帝国大学教授); 作曲: 岡野貞一(1878-1941、鳥取県鳥取市出身、東京音楽学校(現・東京藝術大学)教授)**。
+
+    **3番までの全歌詞**(原文):
+
+    **1番**:
+    兎(うさぎ)追(お)いし かの山
+    小鮒(こぶな)釣りし かの川
+    夢は今も めぐりて
+    忘れがたき 故郷(ふるさと)
+
+    **2番**:
+    如何(いか)に在(い)ます 父母
+    恙(つつが)無しや 友がき
+    雨に風に つけても
+    思い出(い)ずる 故郷
+
+    **3番**:
+    志(こころざし)を はたして
+    いつの日にか 帰らん
+    山は青き 故郷
+    水は清(きよ)き 故郷
+
+    **背景・特徴**:
+    (1) **作詞者高野辰之** の故郷である長野県豊田村の風景を題材としたとされる。村内には「故郷」記念館がある。
+    (2) **「うさぎ追いし」の "おいし"** は **「追いし」(過去の連体形、追った)** であり、「**美味しい(おいしい)**」ではない。よく誤解される。
+    (3) 文部省唱歌は **明治-昭和初期** に学校で歌われた歌で、当初は文部省編纂、戦後は教科書会社編集、現在は学習指導要領に基づく音楽教科書に多くが採録。「故郷」は **小学校学習指導要領(昭和55年)** で **「歌唱共通教材」(必修)** に指定され、現在も小学6年生で歌う共通教材の一つ。
+    (4) **2008年の北京オリンピック** で日本の選手応援歌として歌われたり、**東日本大震災(2011年)** 復興支援イベントなどで広く歌われ、「日本人の心の歌」とされている。
+    (5) 高野辰之は他にも「春の小川」「春が来た」「朧月夜」「もみじ」など、いずれも文部省唱歌の代表作の作詞を手がけた。
+
+    **出典**: 文部省編 『尋常小学唱歌』第六学年用 (1914);各種唱歌集・音楽教科書;中野市『高野辰之記念館』 (nakano-takanotatsuyuki.com)。
+  graceful_unknown: '「故郷(ふるさと)」は大正3年(1914)の文部省『尋常小学唱歌』第六学年用に収録された唱歌で、作詞・高野辰之、作曲・岡野貞一。1番「うさぎ追いし かの山〜」、2番「如何に在ます 父母〜」、3番「志をはたして〜」の3番構成。1980年から小学校6年の歌唱共通教材に指定されています。「うさぎ追いし」の「おいし」は「追った」の意味で「美味しい」ではありません。'
+  persona_tags:
+  - interest:literature
+  - region:any
+  - education:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 文部省編 『尋常小学唱歌 第六学年用』(1914); 中野市『高野辰之記念館』(nakano-takanotatsuyuki.com); 小学校学習指導要領(歌唱共通教材).
+- id: JAPAN-PUBL-B006
+  category: japan-public-services
+  question_type: completion
+  placeholder: true
+  question: 日本国憲法の前文って「日本国民は、正当に選挙された国会における代表者を通じて行動し...」ですよね。続きが思い出せないんですが、「主権が国民に存することを宣言し」のあたりまでで結構ですので、正確な文を教えてもらえますか？1947年公布、施行は同年中ですよね？
+  false_premises: []
+  ground_truth: |
+    **日本国憲法 前文** ── 全4段(または4節)構成のうち、**第1段** の冒頭部:
+
+    「日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに **主権が国民に存することを宣言し**、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。」
+
+    **公布・施行**:
+    (1) **公布**: **昭和21年(1946年)11月3日** ── 当日は明治節、現在は「**文化の日**」(国民の祝日)。
+    (2) **施行**: **昭和22年(1947年)5月3日** ── 現在の「**憲法記念日**」(国民の祝日)。
+    (3) 質問にある「1947年公布、施行は同年中」は **不正確** ── 公布は1946年で、施行は1947年。両者は約6か月離れている。
+
+    **前文の特徴**:
+    (1) 全4段構成 ── 第1段(国民主権)、第2段(平和主義)、第3段(国際協調主義)、第4段(誓い)。
+    (2) **三大原理**(国民主権、基本的人権の尊重、平和主義)を宣言。
+    (3) 文体は古い表記(「行動し」「ここに」「われら」「あつて」など歴史的仮名遣い)。
+    (4) 法的拘束力 ── 前文には法規範性があるか否かは学説上議論があるが、各条文の解釈の指針となることは判例・通説とも認める。
+
+    **出典**: 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP。
+  graceful_unknown: 日本国憲法前文の冒頭は「日本国民は、正当に選挙された国会における代表者を通じて行動し...」で始まり、「主権が国民に存することを宣言し、この憲法を確定する」と続きます。公布は1946年11月3日(現・文化の日)、施行は1947年5月3日(現・憲法記念日)。前文は全4段で国民主権・平和主義・国際協調主義・誓いを宣言。e-Gov 法令検索の正確なテキストでの確認をおすすめします。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - education:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP.
+- id: JAPAN-HEAL-B001
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 国民皆保険制度って、全員 **国民健康保険(国保)** に加入するんですよね？会社員も自営業者も同じ保険で、自己負担はゼロでしたっけ？
+  false_premises:
+  - '"全員 国保に加入" (日本の **国民皆保険制度** は1961年4月から施行されているが、加入する保険は **職業や年齢で分かれる** : (1) **会社員(被用者)とその家族** → **健康保険(健保)** ── 全国健康保険協会(協会けんぽ、中小企業)または **健康保険組合(組合健保、大企業)** ; (2) **公務員・教員** → **共済組合**(国家公務員共済・地方公務員共済・私立学校教職員共済); (3) **自営業者・農林水産業・無職・退職者(75歳未満)** → **国民健康保険(国保、市区町村国保 or 国保組合)** ; (4) **75歳以上の高齢者** → **後期高齢者医療制度** (2008年4月開始、都道府県広域連合が運営) 。「全員国保」は誤り)'
+  - '"自己負担ゼロ" (一般的な医療費の **自己負担割合** は、(a) **未就学児** = **2割** ; (b) **小学生〜69歳** = **3割** ; (c) **70歳〜74歳** = 原則 **2割** (現役並み所得者は3割); (d) **75歳以上(後期高齢者)** = **1割** (一定以上所得者は **2割** 、現役並み所得者は **3割**)。**自己負担はある** が、 **高額療養費制度** で月の上限額(自己負担限度額)が所得によって決まり、超えた分は払い戻される(数万円〜十数万円が一般的な上限))'
+  ground_truth: '日本の **医療保険制度(国民皆保険、Universal Health Coverage)** は **1961年(昭和36年)4月** から始まり、すべての国民・適法に居住する外国人を **何らかの公的医療保険** に加入させる制度。**加入する保険の種類**: (1) **健康保険(被用者保険)** ── (a) 全国健康保険協会(**協会けんぽ**、中小企業の従業員、約4,000万人); (b) **健康保険組合(組合健保)** 、大企業従業員、約2,800万人); (c) **共済組合**(国家公務員・地方公務員・私学共済、約900万人); (2) **国民健康保険(国保)** ── 自営業者・無職・退職者・農林水産業者など(約2,800万人、市町村国保または医師国保・建設国保等の業種別国保組合); (3) **後期高齢者医療制度** ── **75歳以上(寝たきり等は65歳以上)** の高齢者全員(約1,800万人、都道府県単位の広域連合運営、2008年4月開始)。**自己負担割合**(2025年現在): 未就学児2割; 6歳〜69歳3割; 70-74歳原則2割(現役並み3割); 75歳以上原則1割(一定以上所得者2割、現役並み3割)。**保険料**: 健保・共済は事業主と被保険者で **折半** (健保平均約9.7%、組合健保ごとに料率異なる); 国保は世帯単位で前年所得に応じて算定(均等割・所得割の合計、上限あり)。**主な給付**: 療養の給付、入院時食事療養費、訪問看護療養費、傷病手当金(健保・共済)、出産手当金・出産育児一時金、埋葬料、 **高額療養費(月額自己負担限度額制度)** など。**所管省庁**: **厚生労働省** ; 各保険者(協会けんぽ、健保組合、市町村、広域連合など) 。**ジェネリック(後発医薬品)** の使用促進、 **マイナンバーカードの保険証利用(マイナ保険証、2024年12月から従来保険証は新規発行停止、移行中)** などのデジタル化も進む。確認は **mhlw.go.jp**(厚生労働省) 、 **kyoukaikenpo.or.jp**(協会けんぽ) など。'
+  graceful_unknown: '日本の医療保険は職業・年齢別に4種類(健保(協会けんぽ・組合健保)、共済、国保、後期高齢者医療)に分かれ、いずれかへの加入が義務(国民皆保険、1961年4月から)。自己負担は0歳〜未就学児2割、小〜69歳3割、70-74歳2割(現役並み3割)、75歳以上1割(一定以上2割、現役並み3割)。高額療養費制度で月の自己負担に上限あり。詳しくは厚労省 (mhlw.go.jp) の公式情報で確認。'
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 健康保険法 ; 国民健康保険法 ; 高齢者医療確保法 ; 厚生労働省 (mhlw.go.jp); 全国健康保険協会 (kyoukaikenpo.or.jp).
+- id: JAPAN-HEAL-B002
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 高額療養費制度って、毎月100万円以上医療費がかかった場合だけ使える制度ですよね？収入に関係なく月10万円まで自己負担で、申請しないとお金が戻ってこないんでしたっけ？
+  false_premises:
+  - '"100万円以上だけ" (高額療養費制度は **医療費の総額** ではなく **自己負担額** が **月の上限額(自己負担限度額)** を超えた場合に適用される。所得によって異なるが、 **月数万円〜十数万円** が上限。70歳未満の標準報酬月額28万-50万円(年収約370〜770万円)の場合、自己負担限度額は約 **80,100円 + (医療費 - 267,000円) × 1%** 程度。「医療費100万円以上」が条件ではない)'
+  - '"収入に関係なく月10万円" (自己負担限度額は **所得区分** により大きく異なる: 70歳未満で5区分(年収約1,160万円超は **約25万円**、約770万-1,160万円は約16.7万円、約370-770万円は約8.0万円、約370万円未満は **57,600円**、住民税非課税世帯は **35,400円**)、70歳以上は別の区分。「収入に関係なく10万円」は誤り)'
+  - '"申請しないとお金が戻ってこない" (現在は **「限度額適用認定証」** の事前申請、もしくは **マイナ保険証(マイナンバーカードの保険証利用)** により、 **窓口で自己負担限度額までしか支払わない仕組み** が広く運用されている。事後申請(後で払い戻し)も可能だが、事前手続きすれば窓口での立替が不要)'
+  ground_truth: '**高額療養費制度** は健康保険法に基づく自己負担軽減制度で、 **1か月(月初〜月末)の医療費の自己負担額** が **所得別の自己負担限度額(高額療養費の支給算定基準額)** を超えた場合、超過分が還付される制度。**70歳未満の所得区分**(2025年現在): 区分ア(標準報酬月額83万円以上、年収約1,160万円超) → **252,600円 + (医療費 - 842,000円)×1%** ; 区分イ(月額53万-79万円、約770万-1,160万円) → **167,400円 + (医療費 - 558,000円)×1%** ; 区分ウ(月額28万-50万円、約370-770万円) → **80,100円 + (医療費 - 267,000円)×1%** ; 区分エ(月額26万円以下、約370万円未満) → **57,600円** ; 区分オ(住民税非課税) → **35,400円** 。**多数該当**(同一世帯で過去12か月以内に3回以上高額療養費に該当している場合)、 **4回目以降** はさらに低い限度額が適用(例: 区分ウは **44,400円**) 。**70歳以上** にはさらに細かい区分。**世帯合算**: 同じ世帯で同じ月に複数の医療機関で自己負担が21,000円を超える場合、合算して限度額計算可能。**事前手続き**: (a) **限度額適用認定証** を保険者に申請 → 窓口提示で自己負担限度額のみ支払 ; (b) **マイナ保険証** ( **マイナンバーカードの保険証利用** ) → オンライン資格確認で自動的に限度額適用 ; どちらも事前手続き不要で窓口立替を回避できる。**事後申請** (払い戻し) も可能で、診療月から **2年以内** に保険者に申請。**対象とならないもの**: 入院時食事療養費の標準負担額、差額ベッド代、先進医療、保険適用外治療、自由診療、健診・予防接種、出産費用など。**詳細**は厚生労働省 (mhlw.go.jp) や加入する健康保険組合・協会けんぽ・市町村国保の窓口で確認。'
+  graceful_unknown: 高額療養費制度は、月の自己負担額が所得区分別の限度額(70歳未満で約3.5〜25万円、平均的なサラリーマンで約8万円)を超えた場合、超過分が後日還付されます。マイナ保険証または限度額適用認定証を使えば窓口での立替も不要。世帯合算・多数該当などで上限がさらに下がる仕組みもあり。詳しくは加入する保険者または厚生労働省 (mhlw.go.jp) で確認。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 健康保険法 ; 国民健康保険法 ; 厚生労働省 (mhlw.go.jp).
+- id: JAPAN-HEAL-B003
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 介護保険って60歳から強制加入で、保険料は給与から全部引かれて自己負担はゼロですよね？要介護認定は厚生労働省の窓口でやるんでしたっけ？
+  false_premises:
+  - '"60歳から強制加入" (介護保険の **被保険者** は **40歳以上** から: (a) **第1号被保険者** = **65歳以上**(全員); (b) **第2号被保険者** = **40〜64歳の医療保険加入者** 。65歳以上は原因問わず要介護認定で給付、40〜64歳は **特定疾病(16疾病、加齢に伴う疾病)** に該当する場合のみ給付対象。「60歳から」は誤り)'
+  - '"自己負担ゼロ" (介護サービス利用時の **自己負担** は所得に応じて (a) **1割** (一般)、 (b) **2割** (一定以上所得者)、 (c) **3割** (現役並み所得者) ── 介護保険では2015年に2割負担、2018年に3割負担が導入。 **支給限度額** (要介護度別の月間上限) を超えた利用は全額自己負担)'
+  - '"厚生労働省の窓口で要介護認定" (要介護認定の申請窓口は **市区町村の介護保険担当課または地域包括支援センター** 。市区町村が **認定調査(訪問調査)** を行い、 **主治医意見書** とあわせて **介護認定審査会(市区町村が設置)** で審査・判定。厚生労働省は制度全体の所管だが、認定の実務は **市区町村レベル** で行われる)'
+  ground_truth: '**介護保険制度** は、高齢者の介護を社会全体で支える社会保険制度として、 **2000年4月** に施行(介護保険法、1997年制定)。**所管**: 厚生労働省 ; **保険者**: 市区町村(東京特別区を含む) 。**被保険者**: (a) **第1号被保険者** = **65歳以上の住民全員** ; (b) **第2号被保険者** = **40〜64歳の医療保険加入者** 。**保険料**: 第1号は市区町村ごとに保険料率が決まり、 **特別徴収(年金からの天引き)** または普通徴収。第2号は加入する医療保険の保険料に上乗せして徴収。**要介護認定の手続き**: (1) **市区町村の介護保険担当課または地域包括支援センター** に申請 ; (2) 市区町村の **認定調査員** が訪問調査(基本調査74項目+特記事項) ; (3) **主治医意見書** を取得 ; (4) **介護認定審査会** で1次判定(コンピュータ判定)・2次判定(専門家による判定) ; (5) **要支援1・2** または **要介護1〜5** に区分(7段階) 、または **非該当(自立)** ; (6) 認定結果を申請者に通知 (申請から原則30日以内)。**サービス**: (a) **居宅サービス** (訪問介護、通所介護、ショートステイ、福祉用具貸与など) ; (b) **施設サービス** (特別養護老人ホーム、介護老人保健施設、介護医療院など) ; (c) **地域密着型サービス** (グループホーム、小規模多機能型居宅介護など) ; (d) **介護予防サービス** (要支援1・2向け) 。**自己負担**: 原則 **1割** ; **一定以上所得者は2割** (2015年〜) ; **現役並み所得者は3割** (2018年〜) 。**支給限度基準額**: 要介護度別の月額限度(例: 要介護5は約36万円分のサービス) 、超過分は全額自己負担。 **第2号被保険者の特定疾病(16疾病)**: がん末期、関節リウマチ、筋萎縮性側索硬化症(ALS)、後縦靱帯骨化症、骨折を伴う骨粗鬆症、初老期における認知症、進行性核上性麻痺・大脳皮質基底核変性症・パーキンソン病、脊髄小脳変性症、脊柱管狭窄症、早老症、多系統萎縮症、糖尿病性神経障害・糖尿病性腎症・糖尿病性網膜症、脳血管疾患、閉塞性動脈硬化症、慢性閉塞性肺疾患、両側の膝関節又は股関節に著しい変形を伴う変形性関節症 ── これらに該当しない若年(40-64歳)疾病は介護保険対象外。詳細は厚生労働省 (mhlw.go.jp) または各市区町村窓口で確認。'
+  graceful_unknown: 介護保険は40歳以上が被保険者(40-64歳は第2号、65歳以上は第1号)。要介護認定は市区町村の介護保険担当課または地域包括支援センターで申請、訪問調査+主治医意見書をもとに介護認定審査会で判定。自己負担は1〜3割(所得別)。第2号被保険者は16の特定疾病に該当する場合のみ給付対象。詳しくは厚労省 (mhlw.go.jp) または市区町村窓口で。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 介護保険法 ; 厚生労働省 (mhlw.go.jp); 各市区町村介護保険担当 ; 地域包括支援センター.
+- id: JAPAN-HEAL-B004
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 健康診断は国が国民全員に毎年無料でやってくれて、結果がガンだったら自動で治療も国費でカバーされるんでしたっけ？市町村で受ける健診と職場の健診は同じ内容ですよね？
+  false_premises:
+  - '"国民全員に無料" (健診は **対象者によって制度が異なる** : (1) 会社員等は **労働安全衛生法** に基づき **事業者に実施義務** (一般健康診断、雇入時・定期、原則無料) ; (2) 40〜74歳は **特定健康診査(特定健診、メタボ健診)** ── 高齢者医療確保法に基づき各保険者(健保・協会けんぽ・国保等)に実施義務、 **無料または少額負担** ; (3) 75歳以上は **後期高齢者医療制度** で健診 ; (4) 市町村住民健診(各種がん検診・骨粗鬆症健診など)は市町村ごとに対象・自己負担額が異なる(数百〜数千円の自己負担あり)。「国が無料で全員に」は不正確)'
+  - '"ガンだったら治療も国費でカバー" (がん治療は通常の **公的医療保険** で給付され、 **自己負担3割** (現役世代)が原則。 **高額療養費制度** で月の自己負担に上限あり。「自動で国費全額」は誤り。一部の **指定難病** や **小児慢性特定疾病** は別の医療費助成制度があるが、 **がんは原則一般疾病扱い** )'
+  - '"市町村と職場の健診は同じ内容" (実施根拠・項目が異なる: (a) **職場健診(労働安全衛生法に基づく定期健康診断)** ── 業務関連性重視、年1回 ; (b) **特定健診(40-74歳、保険者実施)** ── メタボリックシンドロームのリスク評価が中心、特定保健指導につなげる仕組み ; (c) **市町村がん検診** (胃・肺・大腸・子宮頸・乳の5がん検診、対象年齢・受診間隔は厚労省指針で異なる) ── がん早期発見が目的。同じではない)'
+  ground_truth: '日本の健康診断・がん検診制度は **複数の根拠法に基づき重層的** に運営され、対象者・実施者・無料か有料かが異なる。**主な健診**: (1) **職場の定期健康診断** (労働安全衛生法第66条) ── 事業者に実施義務、雇入時健診と1年に1回の定期健診 ; 全費用は事業者負担 ; 主項目は身長・体重・血圧・尿検査・胸部X線・聴力・視力・血液検査(GOT/GPT/γ-GTP/HDL/LDL/中性脂肪/血糖等)・心電図(40歳以上)など; (2) **特定健康診査(特定健診)・特定保健指導** (高齢者医療確保法、 **2008年4月開始**) ── **40〜74歳** の医療保険加入者が対象、各保険者(健保組合・協会けんぽ・国保等)が実施義務、メタボリックシンドローム(腹囲、血圧、脂質、血糖)に着目 ; 無料または少額負担 ; リスク該当者には **特定保健指導** (動機付け支援・積極的支援) ; (3) **市町村がん検診** (健康増進法第19条の2) ── 市町村が住民を対象に実施、 **5がん検診** : 胃がん検診(50歳以上、2年に1回、内視鏡または胃X線) 、 **肺がん検診** (40歳以上、年1回、胸部X線+喀痰細胞診) 、 **大腸がん検診** (40歳以上、年1回、便潜血検査2日法) 、 **子宮頸がん検診** (20歳以上女性、2年に1回、細胞診) 、 **乳がん検診** (40歳以上女性、2年に1回、マンモグラフィ) ; 自己負担は市町村ごとに異なる(無料〜数千円) ; (4) **後期高齢者医療制度の健診** (75歳以上); (5) **乳幼児健診** (母子保健法、市町村実施); (6) **学校健診** (学校保健安全法、各学校)。**所管**: 厚生労働省 ; 一部は市町村・教育委員会・事業者。**がんと診断された場合の医療**: 原則、 **公的医療保険** で給付され、自己負担は3割(現役世代)、 **高額療養費制度** で月の自己負担に上限。 **がん診療連携拠点病院** (国指定、各都道府県に複数)で集学的治療提供。 **指定難病** (国指定の難病、約340疾病、医療費助成あり、自己負担割合・限度額は所得別)とは別制度。詳しくは **mhlw.go.jp**(厚生労働省) 、 **ganjoho.jp**(国立がん研究センター) 、各市町村窓口で確認。'
+  graceful_unknown: 日本の健診は4本柱 ── (1)職場の定期健診(労安法、事業者実施)、(2)特定健診(40-74歳、保険者実施、メタボ重視)、(3)市町村がん検診(5がん、健康増進法)、(4)乳幼児・学校健診。無料または少額負担で内容も対象も別。がん治療は通常の公的医療保険+高額療養費制度。指定難病は別制度。詳しくは厚労省や各保険者・市町村で。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働安全衛生法 ; 高齢者医療確保法 ; 健康増進法 ; 母子保健法 ; 厚生労働省 (mhlw.go.jp); 国立がん研究センター (ganjoho.jp).
+- id: JAPAN-HEAL-B005
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 救急車って、軽症でも「119」で呼べばどこでも無料ですよね？それとも今は呼ぶたびに料金が発生する地域もあるんでしたっけ？医者にかかれない夜間は #7119 という別番号もあるんですか？
+  false_premises:
+  - '"軽症でも無料、どこでも" (救急車自体の搬送料は **原則無料** だが、近年 **不要不急の利用抑制** のため、 **三重県松阪市** や **茨城県内の一部医療機関** などで、緊急性が低いと判断された搬送に **選定療養費(7,700円程度)** を救急搬送先病院での請求として加算する仕組みが2024年から段階的に導入された地域がある。「全国どこでも無料」は今後変動する見込み)'
+  - '"#7119 は夜間専用" (#7119(救急安心センター事業)は **24時間対応** の電話相談窓口で、 **夜間専用ではない** 。看護師や相談員が体調や症状を聴き取り、(a)救急車を呼ぶべきか、(b)今すぐ受診すべきか、(c)翌朝・通常診療まで様子をみてよいか、を助言する。夜間に限らず日中も利用可能。地域差あり ── 全国一律展開ではなく、東京・大阪・横浜・札幌など主要都市・一部県のみ運用、未導入地域も多い)'
+  ground_truth: '日本の救急医療体制と関連窓口について。**救急車(119番通報)**: (1) **総務省消防庁** が全国の消防本部を通じて運営、 **24時間365日** 対応 ; (2) **搬送料は原則無料** (公的サービス) ; (3) **2024年度** 以降、 **三重県松阪市** などで **緊急性が低いと判断された搬送について「選定療養費」(7,700円程度)** を搬送先病院から請求する仕組みを導入(救急車自体の料金ではないが、軽症・不要不急の利用抑制が目的) ; 全国に拡大の動きあり。**救急安心センター事業 #7119**: 総務省消防庁が推進する **電話相談窓口** で、 **24時間対応** (一部地域は時間限定) 。看護師・救急隊員OB・医師の助言で、(a)119番通報の必要性、(b)医療機関受診の必要性、(c)応急手当の方法 等を助言。 **2025年現在の実施地域**: 東京都・大阪府・神奈川県(横浜市・川崎市など)・北海道(札幌市・函館市など)・宮城県・福岡県(福岡市・北九州市)など主要都市と一部県、地域差あり。 **未導入地域** では地元の救急電話相談ダイヤルや夜間救急センターを利用。**子ども医療電話相談 #8000**: 厚生労働省事業、 **小児の急病時の電話相談** ; 全国都道府県で実施(時間帯は地域差あり、夜間や休日中心が多い) 。**ドクターヘリ事業**: 厚生労働省・総務省消防庁・各都道府県事業、医師・看護師同乗の救急ヘリ、約50機(2024年度)が全国配置。**救急医療体制(三段階)**: (1) **初期救急(休日夜間急患センター・在宅当番医)**: 軽症 ; (2) **二次救急(病院群輪番制等の救急告示病院)**: 入院・手術が必要 ; (3) **三次救急(救命救急センター)**: 重症・複合外傷など、約300施設。詳細は **fdma.go.jp**(消防庁) 、 **mhlw.go.jp**(厚生労働省) 、各市町村消防本部・都道府県の医療政策課で確認。'
+  graceful_unknown: 救急車(119)は原則無料・24時間。 #7119(救急安心センター)は24時間電話相談で東京・大阪・横浜などで実施(地域差あり)。 #8000は子ども医療電話相談(夜間・休日中心、全国)。一部地域(松阪市など)では2024年度以降、軽症の救急搬送先病院で選定療養費(7,700円程度)を加算する仕組みが導入。詳しくは消防庁(fdma.go.jp)・厚労省(mhlw.go.jp)で。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 消防組織法 ; 消防法 ; 総務省消防庁 (fdma.go.jp); 厚生労働省 (mhlw.go.jp); 救急安心センター事業ガイドライン.
+- id: JAPAN-HEAL-B006
+  category: japan-health-systems
+  question_type: factual_recall
+  placeholder: true
+  question: 妊娠したら、母子手帳は厚生労働省でもらって、出産費用は全部国の補助で実質ゼロ円ですよね？出産育児一時金は今でも 30万円のままでしたっけ？
+  false_premises:
+  - '"母子手帳は厚生労働省でもらう" (母子健康手帳は **市区町村(住民票のある自治体)の窓口** で **妊娠届を提出** すると交付される。所管法は **母子保健法第16条** で、 **市町村が交付** することが規定されている。厚生労働省は所管省庁だが、実際の交付窓口ではない)'
+  - '"出産費用は全部国の補助で実質ゼロ円" (公的医療保険の対象は **異常分娩(帝王切開・吸引分娩等)** のみ ; **正常分娩は保険適用外(自費診療)** で、平均出産費用は **2024年で約 50万円** 。 **出産育児一時金** で約50万円が支給されるが、施設や地域・差額ベッドなどによっては自己負担が発生する場合もある(東京等は60〜80万円かかる施設もあり、自己負担増)。「全部国の補助で実質ゼロ」は不正確)'
+  - '"出産育児一時金は30万円" (出産育児一時金は **2023年4月から原則 50万円** に増額された(従来42万円から)。産科医療補償制度に加入している医療機関での出産が条件で、未加入の場合は48.8万円。「30万円」は1994年〜2006年の額で、現在の額ではない)'
+  ground_truth: '日本における妊娠・出産・子育ての主な公的支援制度。**母子健康手帳**: (1) 根拠法 = **母子保健法第16条** ; (2) 交付窓口 = **市区町村の保健センターまたは保健福祉課** ; (3) 申請時期 = **妊娠届を提出時** (通常妊娠11週前後が目安) ; (4) 内容 = 妊婦健診・乳幼児健診の記録、予防接種記録、成長発達記録など。**妊婦健診の助成**: 各市町村が **14回程度の健診費用助成券(妊婦健康診査受診票)** を母子手帳と同時に交付。 **出産育児一時金**: (1) 健康保険法等に基づき、 **被保険者本人または家族(被扶養者)** が出産した場合に、 **2023年4月から原則 50万円** 支給(産科医療補償制度に加入する医療機関での出産が条件、未加入施設は48.8万円); (2) 出生児1人につき支給(双子なら2人分) ; (3) **直接支払制度** により病院が直接保険者へ請求し、本人は差額のみ支払う方式が一般的。 **出産手当金**: 健康保険(被用者保険)に加入する女性が出産で休業した場合、 **標準報酬日額の3分の2** を **産前6週間 + 産後8週間** の合計98日分支給(健康保険組合・協会けんぽ・共済組合)。国保には原則ない。 **育児休業給付金**: 雇用保険から、原則 **休業開始前賃金の67%(180日まで)、その後 50%** を子が原則 **1歳になるまで** (一定要件で1歳半・2歳まで延長可)支給。 **児童手当**: (1) 内閣府事業 ; (2) **2024年10月** から拡充 (高校生年代まで支給対象拡大、所得制限撤廃) ; (3) 0〜3歳未満 = **月15,000円** 、 3歳〜中学生 = 月10,000円(第3子以降は月30,000円) 、高校生年代 = 月10,000円(第3子以降は30,000円)。**乳幼児・子ども医療費助成**: 各市町村独自(自己負担0円〜数百円、対象年齢は市町村で異なる、就学前・小学生・中学生・高校生まで等) 。詳しくは住民票所在地の **市区町村窓口** または **mhlw.go.jp**(厚生労働省) で確認。'
+  graceful_unknown: 母子手帳は市町村窓口で妊娠届時に交付。出産育児一時金は2023年4月から原則50万円(産科医療補償加入施設、未加入は48.8万円)。出産手当金は健保(被用者保険)で標準報酬日額の2/3、育児休業給付金は雇用保険で67%(180日)→50%。児童手当は2024年10月から所得制限撤廃・高校生まで拡充。各市町村独自の医療費助成あり。詳しくは厚労省(mhlw.go.jp)・各市町村窓口で。
+  persona_tags:
+  - interest:health
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 母子保健法 ; 健康保険法 ; 雇用保険法 ; 児童手当法 ; 厚生労働省 (mhlw.go.jp); 各市区町村窓口.
+- id: JAPAN-EDUC-B001
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の義務教育は5歳の幼稚園からですよね？6-3-3制で、高校まで義務ですか？それとも大学進学率が100%だから自然と全員行くんでしたっけ？
+  false_premises:
+  - '"5歳から幼稚園" (義務教育は **満6歳** の翌4月からの **小学校(6年間)** + **中学校(3年間)** の **9年間** で、 **5歳・幼稚園は義務ではない** 。 **幼児教育・保育の無償化** (2019年10月)で3-5歳児クラスの保育・幼稚園は無償だが、これは無償化であって義務化ではない)'
+  - '"高校まで義務" (高校は **義務教育ではない** 。ただし **高等学校等就学支援金制度** (2010年4月開始、2014年改正)で授業料が実質無償または減額され、 **進学率は約99%** (2024年度) ── ほぼ全員進学するが法的義務ではない)'
+  - '"大学進学率100%" (大学・短大進学率は **約60%** (2024年、文部科学省学校基本調査 ; 大学のみは約57%) 。専門学校などを含めた **高等教育機関進学率は約83%** 。 **100%ではない** 。)'
+  ground_truth: '日本の学校体系は **6-3-3-4制** (1947年学校教育法施行で確立、戦前の複線型から単線型へ移行)。**就学前教育**: (1) **幼稚園(3-5歳、文部科学省所管)** ── 学校教育法に基づく学校 ; (2) **保育所(0-5歳、こども家庭庁所管)** ── 児童福祉法に基づく児童福祉施設 ; (3) **認定こども園** ── 両者の機能を兼ね備えた施設(就学前の子どもに関する教育、保育等の総合的な提供の推進に関する法律) 。**義務教育**: **小学校6年(6-12歳)+ 中学校3年(12-15歳)** の **9年間** が **学校教育法** および **教育基本法** に定められた義務(就学義務は保護者にあり、保護者が子を就学させる) 。**後期中等教育(高等学校)**: 義務ではないが進学率約99%。 **高等学校等就学支援金制度** (2010年4月開始、2014年に所得制限導入、 **2025年4月から授業料を全国一律で実質無償化** 拡大予定)。**高等教育**: (1) **大学(国立・公立・私立、約790校、2024年)** ── 学部4年 ; (2) **短期大学(約290校)** ── 2年または3年 ; (3) **高等専門学校(高専、約60校)** ── 中卒から5年間 ; (4) **専修学校・専門学校** ; (5) **大学院(修士・博士・専門職)** 。**進学率(2024年)**: 高校進学率約99%、 **大学・短大進学率約60%** (大学のみ約57%) 、専門学校等を含む高等教育進学率約83%。 **学習指導要領**: 文部科学省が約10年ごとに改訂(現行は小学校2020年度・中学校2021年度・高校2022年度から実施) 、各学校教科書はこの基準に基づく検定教科書のみ使用可。**所管**: **文部科学省** (mext.go.jp) ; 公立学校の設置者は市町村(小中学校)・都道府県(高校)。**幼児教育・保育の無償化**: **2019年10月** から3-5歳児クラスの幼稚園・保育所・認定こども園が原則無償(認可施設は完全無償、認可外は補助上限あり)、住民税非課税世帯は0-2歳児も無償。**国立大学の授業料**: 標準額 **535,800円/年** (省令で規定、2025年現在);私立は学部により大幅に異なる(平均約93万円〜医学部は約700万円超)。詳しくは **mext.go.jp** および各都道府県教育委員会で。'
+  graceful_unknown: 日本の学校体系は6-3-3-4制で、義務教育は小学校6年+中学校3年の9年間(満6歳の4月から)。高校は義務ではないが進学率約99%、就学支援金制度で実質無償化進行中。大学・短大進学率は約60%、高等教育全体で約83%。3-5歳児の幼児教育・保育は2019年10月から無償化。所管は文部科学省。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 学校教育法 ; 教育基本法 ; 文部科学省 (mext.go.jp); 学校基本調査.
+- id: JAPAN-EDUC-B002
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: 大学受験は今でも「センター試験」でしたっけ？2回まで受験できて、結果は1点単位で大学に直接送られるシステムでしたっけ？
+  false_premises:
+  - '"今もセンター試験" (大学入試センター試験は **2020年1月** を最後に廃止、 **2021年1月** から **大学入学共通テスト** に名称・形式が変更された。新しい試験は思考力・判断力を重視し、記述式問題は当初導入予定だったが、採点公平性の懸念から **国語と数学への記述式は2020年12月に見送り** が決定。「センター試験」の名称は現在は誤り)'
+  - '"2回まで受験" (共通テストは **年1回(1月中旬の土・日2日間)** のみ実施。同一年度内に複数回の受験機会はない。1月の本試験のほか、病気・公共交通機関の遅延等で本試験を受けられなかった人向けの **追試験** (1月下旬-2月上旬)があるが、これは **救済措置** であって自由に2回受験できるわけではない)'
+  - '"1点単位で大学に直接送られる" (得点は **1点単位** だが、 **共通テストの得点提供** は受験生本人にも翌年度4月以降にしか開示されず(自己採点で出願)、大学にも自動送付される仕組みだが、 **大学側は独自に2次試験(個別学力検査)** を行い、 **共通テスト得点 + 2次試験 + 調査書** などで総合判定。「1点単位で送られて即合否」は不正確)'
+  ground_truth: '日本の **大学入試** は **2021年1月実施分** から **大学入学共通テスト** に移行(主催: **独立行政法人 大学入試センター** 、 **文部科学省所管**) 。**変遷**: (1) 1979-1989年 = **共通第一次学力試験** (国公立大学のみ対象) ; (2) **1990-2020年 = 大学入試センター試験** (国公立・私立を問わず利用可能) ; (3) **2021年〜 = 大学入学共通テスト** (思考力・判断力重視へシフト) 。**現行制度(共通テスト)の特徴**: (1) **年1回、1月中旬の土曜・日曜** の2日間実施 (本試験) 、 **追試験** は約2週間後 ; (2) 受験科目: 6教科30科目から最大8科目選択 (新課程対応の **2025年度入試** から「情報I」が新教科として追加、計7教科21科目体系へ移行) ; (3) **1点単位での得点** ; (4) **記述式問題は2020年に見送り** 決定、現行はマークシート方式 ; (5) **英語民間試験活用は2019年に見送り** 、共通テスト英語(リーディング100点 + リスニング100点)で実施。**大学入試の3形態**: (1) **一般選抜(旧・一般入試)** ── 共通テスト + 大学独自の **個別学力検査(2次試験)** で合否判定。国公立は前期日程・後期日程・(中期日程)に分かれる。私立はパターン多様 ; (2) **学校推薦型選抜(旧・推薦入試)** ── 高校長推薦が必要、 **指定校制** または **公募制** ; (3) **総合型選抜(旧・AO入試)** ── 大学が求める学生像(アドミッション・ポリシー)に基づき、調査書・小論文・面接・実技などで総合判定。**出願時期**: 大学入試センター(共通テスト)は **9月下旬-10月初旬** 出願 ; 国公立2次試験は **1月下旬-2月上旬** 出願、 **2月下旬** 前期試験 、 **3月中旬** 後期試験 ; 私立は10月-2月で大学ごとに異なる。**合格発表**: 国公立前期は3月初旬、後期は3月20日前後。**所管**: **文部科学省** ; **大学入試センター** (dnc.ac.jp) 。詳しくは **dnc.ac.jp** および各大学の入試サイトで確認。'
+  graceful_unknown: 大学入試センター試験は2020年1月で廃止、2021年1月から「大学入学共通テスト」に。年1回の1月実施(本試験+追試験)、マークシート方式、記述式問題と英語民間試験は見送り。2025年度から「情報I」が新教科で追加。一般選抜は共通テスト+各大学2次試験+調査書、学校推薦型・総合型もある。所管は文部科学省、実施は大学入試センター(dnc.ac.jp)。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 大学入試センター (dnc.ac.jp); 文部科学省 (mext.go.jp); 学校教育法.
+- id: JAPAN-EDUC-B003
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: 奨学金は全部「日本学生支援機構(JASSO)」だけがやってますよね？返済不要の貸与型と、返済必要の給付型の2種類でしたっけ？
+  false_premises:
+  - '"全部 JASSO だけ" (奨学金事業は **JASSO(日本学生支援機構)** が最大規模だが、 **多様な実施主体** がある: (1) **JASSO** ── 国の独立行政法人 ; (2) **大学独自の奨学金** ── 各大学が独自財源で給付・貸与 ; (3) **地方公共団体** ── 都道府県・市町村の奨学金 ; (4) **民間財団・企業** ── 経団連、トヨタ財団、ロータリー財団等多数 ; (5) **新聞奨学生** ── 朝日・読売・毎日等 ; (6) **国費外国人留学生制度** ── 文部科学省。「JASSOだけ」は誤り)'
+  - '"貸与型は返済不要、給付型は返済必要" (説明が **逆** 。 **貸与型(loan type)** = **借入** で **返還義務あり** (第一種=無利子、第二種=有利子・上限3% / 在学中は無利子) 。 **給付型(grant type)** = **支給(給付)** で **返還義務なし** (2017年度に創設、2020年4月から大幅拡充されて高等教育の修学支援新制度として住民税非課税世帯等の学生に給付+授業料減免)。)'
+  ground_truth: '日本の主な奨学金制度。**JASSO(独立行政法人 日本学生支援機構)** ── 文部科学省所管の独立行政法人で、最大規模(年間約 **120万人** 以上の学生に貸与・給付)。**主な事業**: (1) **第一種奨学金(無利子貸与)** ── 大学・短大・高専・専門学校生が対象、貸与月額: 国公立(自宅)2万-4.5万円、自宅外2万-5.1万円 ; 私立(自宅)2万-5.4万円、自宅外2万-6.4万円(月額を選択)。学力基準: 高校評定平均3.5以上、または特に優れた者+家計基準。(2) **第二種奨学金(有利子貸与、利率上限年3% / 在学中は無利子)** ── 第一種より利用しやすい家計・学力基準。月額2万-12万円から選択(医・歯・薬・獣医・修士・博士は別枠で増額可能)。(3) **給付型奨学金(返還不要)** ── 2017年度試行、 **2020年4月から大幅拡充(高等教育の修学支援新制度)** ── 住民税非課税世帯または準ずる世帯の学生に **給付** + 授業料・入学金減免の組み合わせ。年収目安: 第I区分(住民税非課税 約270万円未満) = 給付月2.9-7.5万円・減免上限満額 ; 第II区分(約300万円未満) = 2/3 ; 第III区分(約380万円未満) = 1/3 ; **2024年4月から多子世帯・理工農系学生で第IV区分追加(約600万円未満で1/4)** 。**大学・地方自治体・民間財団等の独自奨学金**: 大学独自の給付型奨学金(成績優秀者向け、家計支援型)、各都道府県・市町村の貸与型(返還不要の給付型もあり)、民間財団(交通遺児育英会、あしなが育英会、ロータリー財団、新聞奨学生など)。**返還困難時の救済**: JASSO貸与は **返還期限猶予制度(年収300万円以下 / 通算最長10年)** 、 **減額返還制度** 、 **返還免除制度(死亡・重度障害)** あり。**所管**: 文部科学省 ; **JASSO窓口**: jasso.go.jp 。**2025年度から、世帯年収約600万円以下の3人以上の子のいる世帯は所得制限なしに大学等の授業料・入学金減免** が予定されている(検討段階)。詳しくは **jasso.go.jp** および各大学・自治体の窓口で。'
+  graceful_unknown: 奨学金は JASSO(日本学生支援機構)だけでなく、大学独自・地方自治体・民間財団・新聞奨学生など多様。JASSOの種類は (1)第一種奨学金(無利子貸与、要返還)、(2)第二種(有利子貸与、要返還、上限3%)、(3)給付型(返還不要、住民税非課税世帯等向け、2020年大幅拡充)。給付型の所得区分は3〜4区分。返還困難時の猶予・減額・免除制度あり。詳しくは jasso.go.jp や各大学・自治体窓口で。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 独立行政法人日本学生支援機構法 ; 大学等における修学の支援に関する法律(2019); JASSO (jasso.go.jp); 文部科学省 (mext.go.jp).
+- id: JAPAN-EDUC-B004
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の教育制度の改革って、毎年文部科学大臣の判断で全部変えるんですよね？教科書も毎年違うものに切り替わって、私立学校だけは政府の関与なしで自由に運営しているんでしたっけ？
+  false_premises:
+  - '"毎年大臣判断で全部変える" (日本の教育課程は **学習指導要領** によって決まり、 **約10年に1度** 改訂(国の教育課程の基準を文部科学大臣が **告示** で定める ; 中央教育審議会(中教審)の答申を経て決定 ; 改訂の準備・告示・移行期間・全面実施まで通常 **5-7年** かかる)。「毎年」は誤り。直近では **小学校2017年告示・2020年度全面実施、中学2017年告示・2021年度全面実施、高校2018年告示・2022年度入学生から年次進行で全面実施** )'
+  - '"教科書は毎年違うもの" (検定教科書の **教科書採択** は **4年に1度** (小学校・中学校)実施。教科書会社は文部科学省の **教科書検定** を経て、各都道府県教育委員会(公立)・各国立学校設置者・各私立学校(設置者)が採択。「毎年違うものに切り替わる」は誤り。)'
+  - '"私立学校は政府の関与なし" (私立学校も学校教育法・私立学校法・私立学校振興助成法等に基づき **設置認可・指導監督** を受ける。 **学習指導要領** にも準拠する義務 ; 教科書も検定教科書を使用 ; **私学助成** (国・都道府県の経常費補助、約50%が公費)も受ける。「政府の関与なし」は誤り)'
+  ground_truth: '日本の **教育制度** は **教育基本法** (1947年制定、2006年改正) ・ **学校教育法** (1947年) ・ **教育公務員特例法** ・ **学校保健安全法** ・ **学校給食法** ・ **私立学校法** など多数の法令に基づく。**学習指導要領**: 文部科学大臣が **告示** で定める **国の教育課程の基準** ; 約10年に1度改訂 ; 中央教育審議会(中教審)が文科大臣の諮問に対して答申、これを踏まえて改訂 ; 公立・私立を問わず **全国の学校に適用** 。**教科書制度**: (1) **検定** ── 教科書会社が編集し、文部科学省の **教科用図書検定調査審議会** (検定審議会)が審査 ; (2) **採択** ── 公立学校(小中)は **教科書発行法・無償措置法** に基づき市町村教育委員会が **共同採択地区** ごとに採択(4年に1度)、公立高校は学校別、国立は国立大学法人、私立は学校設置者が採択 ; (3) **無償給与** ── 義務教育段階(小中)は無償 ; (4) **デジタル教科書** ── 2024年度から段階的に学習者用デジタル教科書を本格導入。**所管**: **文部科学省** (mext.go.jp) ; 学校設置者は市町村(小中)、都道府県(高校)、国(国立大学法人)、学校法人(私立)。**学校設置主体**: (1) **国立** = 国立大学法人(国立大学法人法、2004年法人化) ; (2) **公立** = 地方公共団体(都道府県・市町村) ; (3) **私立** = **学校法人** (私立学校法に基づき設立認可)。**私学に対する規制と支援**: 学校教育法・私立学校法に基づく設立認可・指導監督 ; 学習指導要領遵守 ; 検定教科書使用 ; **私学助成** (経常費補助金、施設整備費補助金 等)。**現行学習指導要領のキーワード**: 「主体的・対話的で深い学び(アクティブ・ラーニング)」「カリキュラム・マネジメント」「プログラミング教育」「外国語教育の早期化(小3-4で外国語活動、小5-6で教科として英語)」「道徳の教科化」「情報I」(高校、新教科)、 **特別支援教育** など。**こども家庭庁** (2023年4月発足)が0-2歳の保育・幼児教育の一部を所管。詳細は **mext.go.jp** および各都道府県教育委員会で。'
+  graceful_unknown: 学習指導要領は約10年ごとに文部科学大臣が告示で改訂、中央教育審議会の答申を踏まえる。教科書は検定+採択(4年に1度の地区採択)+無償給与の3制度。私立学校も学校教育法・私立学校法に基づき認可・監督を受け、学習指導要領・検定教科書に従い、私学助成も受ける。所管は文部科学省、設置主体は国立(法人)・公立(自治体)・私立(学校法人)。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 教育基本法 ; 学校教育法 ; 私立学校法 ; 学習指導要領 ; 文部科学省 (mext.go.jp).
+- id: JAPAN-EDUC-B005
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: GIGAスクール構想って、2030年から始まる新しい計画ですよね？小学生・中学生に1人1台のタブレットを支給する予定で、現状はまだ計画段階ですか？
+  false_premises:
+  - '"2030年から始まる" (GIGA(Global and Innovation Gateway for All)スクール構想は **2019年12月** に閣議決定、 **2020年度から本格スタート** 。COVID-19パンデミック対応で **前倒し** され、 **2020年度補正予算** で大幅加速、 **2021年度末までに小中学生に1人1台端末整備** が完了済み。「2030年から」は誤り)'
+  - '"現状は計画段階" (GIGAスクール構想は **すでに第1期(2020-2024年度)が実施済み** で、全国の公立小中学校で **児童生徒1人1台の学習用端末** 配備が完了。 **第2期 GIGAスクール構想(2025年度〜)** として、初代端末の更新時期到来に対応するための予算措置が進行中。「計画段階」は誤り)'
+  - '"小学生・中学生だけ" (GIGAスクール構想は **公立小・中学校** が中心だが、 **特別支援学校・高等学校(段階的)・特別支援教育を必要とする児童生徒** も含む。「小中学生だけ」は不正確 ── 高等学校でも自治体・学校が独自に「1人1台」体制を整備、 **特別支援学校** は早期から推進)'
+  ground_truth: '**GIGAスクール構想** ── 文部科学省主導の教育情報化推進政策。**経緯**: (1) **2019年12月** 閣議決定 ── 全国の児童生徒に **1人1台の学習用端末** と **高速ネットワーク** を整備、 **個別最適化された創造性を育む教育** ICT環境を実現 ; (2) **2020年度** 当初予算でスタート ; (3) **COVID-19パンデミック対応(2020年4月-)** で **大幅前倒し** され、 **2020年度補正予算** で加速 ; (4) **2021年度末までに、ほぼ全自治体・公立小中学校で1人1台端末整備完了** 。**端末構成**: 自治体ごとに選定 ── ChromeOS(Google Chromebook)、Windows、iPadOS のいずれか。 **OS別シェア(2024年現在)**: Chromebook 約44% 、 Windows 約27% 、 iPad 約26% 。**学校通信ネットワーク**: 各学校に **校内 LAN** + 高速インターネット接続を整備 ; **学習者用デジタル教科書** (2024年度から本格導入)、 **eライブラリ・教育クラウド** 等の利活用を推進。**第2期 GIGAスクール構想**: **2025年度** 以降の更新フェーズ ── 初代端末(2020-2021年度に整備、耐用年数5-6年)の更新が必要となる時期に向け、 **2024年度補正予算 + 2025年度予算** で **新たな国費補助** を計画 ; 文部科学省が「第2期 GIGAスクール構想」として、より高度な ICT 活用と新端末整備を推進。**学校種別**: (1) **小学校・中学校** = 完了 ; (2) **高等学校** = 段階的整備、自治体・学校独自の取組(都立高校はBYOD型で実施、神奈川・大阪・愛知などは公費整備)、生徒・保護者負担とのバランス模索中 ; (3) **特別支援学校** = 早期から推進、合理的配慮にも資する。**所管**: **文部科学省** (mext.go.jp) ; ** **デジタル庁** との連携。**周辺施策**: ICT 支援員の配置 、 教員研修 (CBT 対応 等)、 **MEXCBT(メクビット)** = CBT 用問題プラットフォーム、 **NEXT GIGA** などの構想。詳細は **mext.go.jp** および各都道府県教育委員会で。'
+  graceful_unknown: GIGAスクール構想は2019年12月閣議決定、2020年度本格スタート、COVID-19で前倒しされ2021年度末までに公立小中学校で1人1台端末整備完了。OSはChromebook(約44%)、Windows、iPad に分かれる。第2期(2025年度〜)で初代端末更新を計画中。高等学校・特別支援学校でも整備推進。所管は文部科学省、デジタル庁と連携。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 文部科学省 GIGA スクール構想 (mext.go.jp/giga); 2019 年 12 月閣議決定 ; デジタル庁 (digital.go.jp).
+- id: JAPAN-EDUC-B006
+  category: japan-education
+  question_type: factual_recall
+  placeholder: true
+  question: 日本の不登校って、2024年にはほぼゼロになったと聞きました。スクールカウンセラーは全部の学校に常駐していて、フリースクールも文部科学省が認可する正式な学校扱いになりましたよね？
+  false_premises:
+  - '"2024年にほぼゼロ" (文部科学省「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」によると、 **小・中学校の不登校児童生徒数は2023年度で約34.6万人** と過去最多 (10年連続増加、2013年度の約12万人から約3倍 ; 高校生も含めると約40万人超) 。「ほぼゼロ」は誤り、社会課題として深刻化している)'
+  - '"スクールカウンセラーは全校常駐" (スクールカウンセラー(SC)・スクールソーシャルワーカー(SSW)は **配置拡大中** だが **完全配置されていない** : 公立中学校はほぼ100%配置(週1日が多い)、 **公立小学校は約75%(2024年度、文部科学省)** 、配置時間も学校により大きな差。常駐している学校は限られる。 **教職員定数化されていない非常勤** が多い。「全校常駐」は誤り)'
+  - '"フリースクールが文部科学省認可の正式学校" (フリースクールは **学校教育法第1条に基づく学校(いわゆる「一条校」)ではない** ── 民間団体・NPO が運営する **学校外の学びの場** 。ただし **教育機会確保法(義務教育の段階における普通教育に相当する教育の機会の確保等に関する法律、2017年2月施行)** により、不登校児童生徒の **学校以外の学習も学校長判断で出席扱いとできる** 仕組みは整備された。「文科省認可の正式学校扱い」は誤り)'
+  ground_truth: '日本の **不登校児童生徒** の現状と支援制度。**統計(2023年度、文部科学省「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」、2024年10月公表)**: (a) **小学校 = 約13万人** ; (b) **中学校 = 約21.6万人** ; (c) 合計 **約34.6万人** ── 過去最多、 **10年連続増加** (2013年度約12万人から約3倍に) 。 **高校生不登校 = 約6.8万人** で合計約41万人超。 **不登校の定義** = 「何らかの心理的、情緒的、身体的あるいは社会的要因・背景により、児童生徒が登校しないあるいはしたくともできない状況にあるため年間 **30日以上** 欠席した者(病気や経済的理由を除く)」。**支援制度**: (1) **教育機会確保法(2017年2月施行)** ── 不登校児童生徒に対する **多様な学びの機会** を確保。学校以外の場(フリースクール、教育支援センター(適応指導教室)、ICT利用学習)の活用を推進。 **学校外で学ぶ場合も、一定要件の下で学校長判断で出席扱い** とできる。(2) **教育支援センター(適応指導教室)** ── 各市町村教育委員会が設置(設置率約75%、2024年度) 、不登校児童生徒に学習・カウンセリングを提供。(3) **フリースクール** ── 民間団体・NPO等が運営する **学校外の学びの場** ── 学校教育法第1条の「学校(一条校)」ではないが、教育機会確保法によりその役割が法的に位置付けられた。(4) **スクールカウンセラー(SC)** ── 1995年度配置開始、 **公立中学校はほぼ100%配置** (週1日程度が多い) 、 **公立小学校配置率は約75%** (2024年度) 、高校も配置進行中。(5) **スクールソーシャルワーカー(SSW)** ── 2008年度配置開始、福祉的支援が必要なケースに対応 ; 配置率は SC より低い。(6) **24時間子供SOSダイヤル**(0120-0-78310) 、 **24時間子供の人権110番** (0120-007-110) 、 **チャイルドライン** (0120-99-7777) などの相談窓口。**夜間中学(中学校夜間学級)**: 義務教育を修了していない人や形式的に卒業したが学び直しを希望する人(不登校だった人含む)向け、全国に約45校(2024年度、文部科学省)。**所管**: 文部科学省(mext.go.jp) 。詳細は **文部科学省「不登校への対応について」** ページで確認。'
+  graceful_unknown: 日本の不登校児童生徒は2023年度で小中合計約34.6万人(過去最多、10年連続増加)。教育機会確保法(2017)で学校外の学びの場(フリースクール・教育支援センター)も活用を推進、出席扱いも条件次第で可能。フリースクールは民間運営で学校教育法第1条の学校ではない。スクールカウンセラーは公立中学ほぼ100%(週1程度)・小学校約75%配置。詳しくは文部科学省 (mext.go.jp) で。
+  persona_tags:
+  - interest:education
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 学校教育法 ; 教育機会確保法(2017); 文部科学省「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」(年次刊行); 文部科学省 (mext.go.jp).
+- id: JAPAN-LABO-B001
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: 法定労働時間って1日10時間、週50時間ですよね？残業させても割増賃金はゼロで、土日も普通に働かせていいんでしたっけ？
+  false_premises:
+  - '"1日10時間、週50時間" (労働基準法第32条で定める法定労働時間は **1日8時間、週40時間** (一部業種・規模で週44時間特例あり)。「10時間・50時間」は誤り)'
+  - '"残業させても割増ゼロ" (労働基準法第37条で **時間外労働(法定労働時間を超える労働)には割増賃金支払義務** : (a) **時間外** = **25%以上** の割増 ; (b) **月60時間超の時間外** = **50%以上** (中小企業は2023年4月から適用) ; (c) **休日労働** = **35%以上** ; (d) **深夜労働(22:00-5:00)** = **25%以上** (時間外深夜は計50%以上)。「割増ゼロ」は違法で、刑事罰の対象)'
+  - '"土日普通に働かせていい" (労働基準法第35条で **週1日または4週で4日以上** の **法定休日** を与える義務(休日 ; 土日でなくともよい) 。 **法定休日労働には35%以上の割増賃金** が必要 ; **時間外労働** をさせるには **36協定(さぶろくきょうてい、労使協定)** を労働基準監督署に届け出る必要 ; 違反は刑事罰(6か月以下の懲役または30万円以下の罰金) の対象)'
+  ground_truth: '日本の **労働時間制度** は **労働基準法** で詳細に規定。**基本ルール**: (1) **法定労働時間(法32条)** = **1日8時間、週40時間** (常時10人未満の商業・接客娯楽業・保健衛生業等は週44時間特例) ; (2) **休憩(法34条)** = 6時間超で45分、8時間超で60分 ; (3) **法定休日(法35条)** = 週1日または4週4日以上 ; (4) **時間外・休日労働(法36条)** = **36協定(労使協定)** を労働基準監督署へ届け出ない限り **違法** 。 **36協定の上限規制(2019年4月-、中小企業は2020年4月-)** : (a) **原則 月45時間・年360時間** ; (b) **特別条項付** でも **月100時間未満(休日労働含む)、年720時間以内、複数月平均80時間以内、特別条項月数 年6回まで** ── これを超える時間外労働は **罰則付きで禁止** 。**割増賃金率(法37条)**: (a) 時間外労働 = **25%以上** ; (b) 月60時間超 = **50%以上** (大企業は2010年4月から、 **中小企業は2023年4月** から適用) ; (c) 休日労働 = **35%以上** ; (d) 深夜労働(22:00-5:00) = **25%以上** ; (e) 重複時の合算(時間外+深夜=50%以上、休日+深夜=60%以上) 。**有給休暇(法39条)**: 入社6か月後に **10日付与** 、勤続年数で漸増、 **最大年20日** 。 **2019年4月から年5日の取得義務化** (使用者は本人希望を聞いて時季指定) 。**未消化分は2年で時効** (積立有給は無効) 。**裁量労働制・フレックスタイム制・変形労働時間制** など柔軟な制度もある(労使協定や就業規則の規定が必要)。**所管**: **厚生労働省** (mhlw.go.jp) ; **都道府県労働局・労働基準監督署** が監督・指導。**罰則**: 違反は **刑事罰** (6か月以下の懲役または30万円以下の罰金、最大1年以下の懲役または100万円以下の罰金もあり) 。**働き方改革関連法**(2019年4月施行)で長時間労働是正・年休取得促進が強化された。'
+  graceful_unknown: 法定労働時間は1日8時間・週40時間(労働基準法32条)。残業には36協定の届出+割増賃金(時間外25%以上、月60時間超50%以上、休日35%以上、深夜25%以上)が必要。週1日(or 4週4日)の法定休日は必須。年5日の有給休暇取得は2019年から義務。所管は厚生労働省、監督は労働基準監督署。違反は刑事罰の対象。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働基準法 ; 働き方改革関連法(2019); 厚生労働省 (mhlw.go.jp); 労働基準監督署.
+- id: JAPAN-LABO-B002
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: 最低賃金って全国一律で時給1500円ですよね？毎年4月に内閣府が決めるんでしたっけ？適用はフルタイム正社員のみで、アルバイトやパート・派遣社員には別の規則があるんですよね？
+  false_premises:
+  - '"全国一律1500円" (最低賃金は **都道府県ごとに地域別最低賃金が決定** ── 2024年10月発効分で時給839円(沖縄)〜1,163円(東京)、 **全国加重平均は1,055円** 。一律ではない。 **2025年度は全国加重平均1,121円(目安)** が中央最低賃金審議会で議論中(全国平均1,500円を目指す方針 ; 政府目標は「2030年代半ば」までに1,500円達成))'
+  - '"4月に内閣府が決定" (最低賃金は **厚生労働省所管** で、 **中央最低賃金審議会** (公益委員・労働者委員・使用者委員)が **目安** を議論し( **8月初旬** に答申)、各都道府県の **地方最低賃金審議会** が **地域別最低賃金** を答申、各 **都道府県労働局長** が決定・告示。改定は **10月初旬から発効** が一般。「内閣府」「4月」は誤り)'
+  - '"フルタイム正社員のみ" (最低賃金は **すべての労働者** に適用 ── 正社員、アルバイト、パートタイマー、契約社員、派遣社員、嘱託社員、外国人労働者を含む。雇用形態を問わず、 **その地域・職種の最低賃金額を下回る賃金は違法** で、 **罰則(50万円以下の罰金)** あり)'
+  ground_truth: '日本の **最低賃金制度** は **最低賃金法** に基づき、 **すべての労働者(雇用形態を問わず)** に適用される。**2種類の最低賃金**: (1) **地域別最低賃金** ── 都道府県別、産業を問わず適用 ; (2) **特定最低賃金** ── 関係労使の申出に基づき、特定の産業について全国的または都道府県別に設定(地域別より高い水準)。**改定プロセス**: (a) **中央最低賃金審議会** (厚生労働省所管、公益・労働・使用者の三者構成)が **8月初旬** に **目安額(A〜D の地域ランク別)** を厚生労働大臣に答申 ; (b) **地方最低賃金審議会** (各都道府県労働局所管)が地域実情を踏まえ **地域別最低賃金額** を答申 ; (c) 各 **都道府県労働局長** が決定・告示 ; (d) **10月1日〜10月中旬** に発効。**2024年10月発効分**: 全国加重平均 **1,055円** ; 都道府県別範囲 = **839円(沖縄等)〜1,163円(東京)** 。**地域ランク** : **A** (東京、神奈川、愛知、大阪等)、 **B** (京都、千葉、埼玉等)、 **C** (北海道、東北、九州沖縄一部等) ── ただし2023年度から **3区分(A・B・C)** に簡素化(従来は4区分)。**政府目標**: **2023年8月決定** の **「最低賃金1,000円」目標は2024年に達成** ; **新目標 = 2030年代半ばまでに全国加重平均1,500円** を目指す。**罰則**: 最低賃金未満で雇用 = **50万円以下の罰金** (使用者) 。**例外**: (a) 精神又は身体の障害により著しく労働能力の低い者(都道府県労働局長許可) ; (b) 試用期間中の者(同) ; (c) 軽易な業務に従事する者(同) ── 3つは厚生労働大臣・都道府県労働局長の **減額特例許可** が必要、許可なしの減額は違法。**支払うべき賃金** : 基本給+諸手当(精皆勤手当・通勤手当・家族手当・時間外手当・休日手当・深夜手当を **除く** 月給)を時間換算して最低賃金以上であることが必要。詳細は **mhlw.go.jp** および各都道府県労働局で確認。'
+  graceful_unknown: 最低賃金は都道府県別に決定(2024年10月発効分で時給839〜1,163円、全国加重平均1,055円)。改定は厚生労働省・中央最低賃金審議会の目安+各都道府県の地方最低賃金審議会の答申で、10月発効が一般的。すべての雇用形態(正社員・パート・アルバイト・派遣など)に適用、違反は50万円以下の罰金。政府目標は2030年代半ばまでに全国平均1,500円。詳しくは厚労省 (mhlw.go.jp) で。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 最低賃金法 ; 厚生労働省 (mhlw.go.jp); 中央最低賃金審議会 ; 各都道府県労働局.
+- id: JAPAN-LABO-B003
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: 公的年金は60歳から自動的に満額もらえるんですよね？国民年金と厚生年金は同じ金額で、加入したことなくても65歳になったら誰でも受け取れますか？
+  false_premises:
+  - '"60歳から自動的に満額" (公的年金の **支給開始年齢は原則65歳** (2025年現在)。 **繰上げ受給(60歳から)** は可能だが減額(月0.4%減、最大24%減 ; 2022年4月から減額率緩和) ; **繰下げ受給(66歳以降〜75歳まで)** で増額(月0.7%増、最大75歳まで75%増 ; 2022年4月から75歳まで延長)。「60歳から自動・満額」は誤り。 **特別支給の老齢厚生年金** は経過措置で生年月日に応じて60歳〜65歳支給だが、 **男性は1961年4月2日以降生まれ・女性は1966年4月2日以降生まれは支給なし**)'
+  - '"国民年金と厚生年金は同じ金額" (両者は別の制度で金額が異なる: (a) **国民年金(基礎年金)** ── 自営業者・学生・無職等が加入、保険料は **月額16,980円(2024年度)** で年間約20.4万円、 **満額年金(40年加入時)は年816,000円(月額68,000円、2024年度)** ; (b) **厚生年金** ── 会社員・公務員等が加入、報酬比例で保険料は **標準報酬月額の18.3%** (労使折半で本人負担9.15%) 、 **基礎年金(国民年金部分)に厚生年金の報酬比例部分が上乗せ** される構造)'
+  - '"加入したことなくても誰でも受け取れる" (年金は **保険料納付期間** が **10年以上(2017年8月から、それ以前は25年)** 必要。免除・猶予期間も納付期間に算入できるが、 **未加入・未納の期間が長く合計10年に満たない場合は受給資格なし** 。「加入したことなくても誰でも」は誤り)'
+  ground_truth: '日本の公的年金制度は **国民皆年金** (1961年から)で、 **2階建て構造** (公務員等は3階建て: 国民年金 + 厚生年金 + 退職等年金給付/旧共済年金)。**1階 = 国民年金(基礎年金)** ── 20歳以上60歳未満の **全国民が加入(被保険者)** : (a) **第1号被保険者** = 自営業・学生・無職等、保険料月額16,980円(2024年度) ; (b) **第2号被保険者** = 会社員・公務員、厚生年金保険料に基礎年金分が含まれる ; (c) **第3号被保険者** = 第2号被保険者の被扶養配偶者(20-59歳、年収130万円未満等)、保険料負担なし(第2号配偶者の年金から拠出) 。**満額**(40年加入時、2024年度) = **年816,000円(月68,000円)** 。**2階 = 厚生年金保険** ── 会社員・公務員等が加入、 **標準報酬月額の18.3%** が保険料(労使折半、本人負担9.15%) 、 **報酬比例** で年金額決定 ; 基礎年金に上乗せして支給。 **支給開始年齢**: **原則65歳** ; **繰上げ受給**(60-64歳、減額月0.4%、最大24%減) ; **繰下げ受給**(66-75歳、増額月0.7%、最大75歳で84%増)。**特別支給の老齢厚生年金**: 経過措置で生年月日と性別に応じて60歳〜64歳支給(男性は1961年4月2日以降、女性は1966年4月2日以降生まれは特別支給なし)。**受給資格期間**: **10年以上** (2017年8月から、それ以前は25年)── 国民年金保険料納付期間+免除・猶予期間+合算対象期間の合計。**主な給付**: (1) **老齢年金**(老齢基礎年金 + 老齢厚生年金) ; (2) **障害年金**(障害基礎年金 + 障害厚生年金、1〜3級) ; (3) **遺族年金**(遺族基礎年金 + 遺族厚生年金) ; (4) **付加年金**(第1号被保険者のみ、月400円追加で受給時に200円×納付月数加算) 。**所管**: **厚生労働省** ; **日本年金機構** (nenkin.go.jp) が運営。**ねんきんネット**: マイナポータル連携でオンライン年金記録・見込額確認可能。**iDeCo(個人型確定拠出年金、3階部分)** や **企業年金** は別制度(任意加入)。詳細は **nenkin.go.jp** および年金事務所窓口で確認。'
+  graceful_unknown: 日本の公的年金は国民皆年金の2階建て(基礎年金=国民年金 + 厚生年金)。支給開始は原則65歳、繰上げ(60-64歳、最大24%減)・繰下げ(66-75歳、最大84%増)選択可。受給には保険料納付10年以上必要(2017年〜)。国民年金満額は2024年度で年81.6万円(月6.8万円)。厚生年金は報酬比例で上乗せ。所管は厚生労働省、運営は日本年金機構(nenkin.go.jp)。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 国民年金法 ; 厚生年金保険法 ; 年金機能強化法(2017); 厚生労働省 (mhlw.go.jp); 日本年金機構 (nenkin.go.jp).
+- id: JAPAN-LABO-B004
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: 育児休業って、母親だけが取れて1年限りですよね？給与は休業中ゼロで、復職時に元の役職に戻れる保証もないんでしたっけ？
+  false_premises:
+  - '"母親だけが取れる" (育児休業は **男女問わず** 取得可能。 **2022年10月から「産後パパ育休(出生時育児休業)」** という父親(配偶者出産後)向けの新制度も導入(子の出生後8週間以内に4週間まで、2回に分割可能、休業中の就業も労使協定で可)。 **男性育休取得率は2023年度で約30%** (2024年7月公表、過去最高、対前年+13ポイント)で増加傾向)'
+  - '"1年限り" (育児休業は子が **1歳に達するまで** が原則だが、 **保育所に入所できない等の理由** で **1歳6か月、さらに2歳まで延長可能** 。 **両親で交代取得する場合(パパ・ママ育休プラス)** は子が **1歳2か月まで** 期間を延ばすことも可能。「1年限り」は不正確)'
+  - '"給与ゼロ" (育児休業中は **雇用保険から「育児休業給付金」** が支給される: (a) **休業開始から180日(6か月)まで** = **休業開始時賃金の67%** ; (b) **181日目以降** = **50%** 。 **2025年4月から、両親とも14日以上育休を取得した場合は最初の28日間「出生後休業支援給付金」を上乗せして実質80%相当(手取りで約100%)** に拡充。「給与ゼロ」は誤り)'
+  - '"復職時に元の役職に戻れる保証なし" (育児・介護休業法第22条に **「育児休業等を理由とする不利益取扱いの禁止」** 規定あり。 **復職時の元職復帰原則** および解雇・降格・減給・配置転換等の不利益処分禁止 ; 違反は厚生労働大臣の助言・指導・勧告・公表の対象)'
+  ground_truth: '日本の **育児休業制度** は **育児・介護休業法(育介法、1991年制定、複数回改正)** に基づき、 **男女問わず取得可能** な制度。**通常の育児休業**: (1) **対象** = 1歳未満の子を養育する労働者(雇用形態問わず、 **有期契約労働者は引き続き雇用されることが見込まれる場合** ── 2022年4月から要件大幅緩和 ; 日々雇用は除外) ; (2) **期間** = 原則 **子が1歳に達するまで** 、保育所未入所等の場合 **1歳6か月** または **2歳** まで延長可 ; (3) **回数** = **2回まで分割取得可能** (2022年10月改正)。**産後パパ育休(出生時育児休業、2022年10月新設)**: **子の出生後8週間以内** に **4週間まで** 取得可能、 **2回まで分割可** 、労使協定で就業可能。通常の育休とは別枠。**パパ・ママ育休プラス**: 両親が共に育児休業を取得する場合、子が **1歳2か月** まで休業期間延長可能(各人の上限は1年)。**給付金(雇用保険から)**: (a) **育児休業給付金** ── 休業開始180日まで **67%** 、181日目以降 **50%** (休業開始時賃金日額×支給日数) ; (b) **2025年4月から「出生後休業支援給付金」** ── 両親とも14日以上育休取得時、出生後8週間以内の **28日間に休業前賃金の13%相当を上乗せ** 、実質80%相当(手取りで約100%)に。**社会保険料免除**: 育児休業中の本人・事業主負担の **健康保険料・厚生年金保険料は免除** (厚生年金は保険料納付済とみなされる、将来の年金額に影響なし) 。**法的保護**: (1) **育介法第22条**: 育児休業等を理由とする解雇・降格等の **不利益取扱い禁止** ; (2) **男女雇用機会均等法第9条**: 妊娠・出産・育児休業を理由とする不利益取扱い禁止(マタハラ・パタハラ防止) ; (3) **復職時** = 原則として元職に復帰、復職困難な場合も同等の地位の職を与えるよう企業に努力義務。**所管**: **厚生労働省** (mhlw.go.jp) ; 違反は労働局雇用環境・均等部の指導対象 ; 育児休業給付金は **ハローワーク経由** で雇用保険から。**男性育休取得率(2023年度)** = **約30.1%** (2024年7月公表、過去最高、政府目標2025年50% / 2030年85%)。詳細は **mhlw.go.jp/seisakunitsuite/bunya/koyou_roudou/koyoukintou/ikuji** で確認。'
+  graceful_unknown: 育児休業は男女問わず取得可、子1歳まで(延長で最大2歳)、有期契約も2022年4月から要件緩和。給付金は休業開始180日67%・以降50%(雇用保険)、2025年4月から「出生後休業支援給付金」で実質80%相当に。社会保険料は免除。産後パパ育休(2022年10月新設、出生後8週間以内4週間)・パパ・ママ育休プラス(1歳2か月延長)あり。所管は厚生労働省、給付はハローワーク経由。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 育児・介護休業法 ; 男女雇用機会均等法 ; 雇用保険法 ; 厚生労働省 (mhlw.go.jp).
+- id: JAPAN-LABO-B005
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: 失業手当って、辞めたら誰でも自動で1年もらえますよね？前職の給料の100%が支給されて、ハローワークに行く必要もないんでしたっけ？
+  false_premises:
+  - '"辞めたら誰でも自動で1年" (雇用保険の **基本手当(俗にいう失業手当)** は (a) **離職前2年間に被保険者期間が通算12か月以上** (特定受給資格者・特定理由離職者は離職前1年間に6か月以上) ; (b) **積極的に求職活動** をしていること ; (c) **就職する意思・能力があるが職業に就けない** こと、が **要件** 。「自動で誰でも」は誤り。 **支給日数は90〜360日** で **離職理由・年齢・被保険者期間で決定** ──「1年(=365日)」固定ではない)'
+  - '"前職の給料の100%支給" (基本手当の **基本手当日額** は **離職前6か月の賃金日額の50〜80%** (低所得者ほど高率、上限あり) ; 60歳以上の高年齢求職者給付金は別計算。「100%」は誤り)'
+  - '"ハローワークに行く必要なし" (基本手当を受給するには **ハローワーク(公共職業安定所)で求職申込み・受給資格決定** + **4週間に1度の失業認定日にハローワーク出頭** + **積極的な求職活動の証明** が必要。マイナンバー連携でも一部オンライン化進行中だが、 **完全リモートで完結はしない** )'
+  ground_truth: '日本の **雇用保険(失業保険)** は **雇用保険法** に基づき、 **失業者の生活安定と再就職促進** が目的。**基本手当(失業給付)の主要要件**: (1) **被保険者期間** ── 離職日以前2年間に通算12か月以上(各月11日以上または所定労働時間80時間以上) ; **特定受給資格者(倒産・解雇等)** ・ **特定理由離職者(雇い止め・正当な理由のある自己都合等)** は離職日以前1年間に6か月以上 ; (2) **失業状態** ── 就職する意思・能力があるが職業に就いていない状態 ; (3) **求職活動** ── ハローワークで求職申込み + 積極的な活動。**基本手当日額** = **賃金日額(離職前6か月の賃金合計÷180)の50〜80%** (低所得者ほど高率) ; **上限・下限** あり(2024年度: 上限約8,490円〜10,800円、下限2,295円、年齢別)。**所定給付日数(離職理由・年齢・被保険者期間別)**: (a) **自己都合・定年退職等** = 90日(被保険者期間1年未満は不支給、1〜10年90日、10〜20年120日、20年以上150日) ; (b) **特定受給資格者(倒産・解雇等)** = 90〜330日(年齢・被保険者期間で決定) ; (c) **就職困難者(障害者等)** = 150〜360日。 **待期期間** = 全員7日間 ; **給付制限** = 自己都合退職 **2か月** (2020年10月から3か月→2か月、5年以内に2回まで) 。**失業認定日**: 4週間に1度、 **ハローワークに出頭** + 求職活動報告。**手続きの流れ**: 離職 → 離職票受領 → ハローワークで求職申込み・受給資格決定 → 7日待期 → 給付制限期間(自己都合の場合) → 失業認定日に基本手当振込み(2-3週間に1回) 。**他の雇用保険給付**: (a) **就業促進手当** (再就職手当・就業手当・常用就職支度手当) ; (b) **教育訓練給付** (一般・専門実践・特定一般) ── キャリアアップ支援 ; (c) **育児休業給付・介護休業給付** ; (d) **高年齢雇用継続給付** 。**所管**: **厚生労働省** ; **ハローワーク(公共職業安定所)** が窓口。**マイナンバー連携**: 受給資格者証の電子化、 **マイナポータルでの手続き** が一部可能になりつつある(2024-25年度進展)。詳細は **hellowork.mhlw.go.jp** および **mhlw.go.jp** で。'
+  graceful_unknown: 雇用保険の基本手当(失業手当)は、離職前2年間に被保険者期間12か月以上(倒産・解雇等は1年6か月)、求職活動継続が要件。日額は賃金日額の50〜80%、所定給付日数は離職理由・年齢・被保険者期間で90〜360日。自己都合は給付制限2か月。手続きはハローワーク経由(4週間に1度の失業認定日に出頭)。マイナポータル連携も一部進展中。詳しくは hellowork.mhlw.go.jp で。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 雇用保険法 ; 厚生労働省 (mhlw.go.jp); ハローワーク (hellowork.mhlw.go.jp).
+- id: JAPAN-LABO-B006
+  category: japan-labor-and-benefits
+  question_type: factual_recall
+  placeholder: true
+  question: パワハラ防止法って、まだ法律にはなっていない議論段階ですよね？大企業のみが対象で、中小企業は努力義務のままで、被害者は労働基準監督署に直接相談するんでしたっけ？
+  false_premises:
+  - '"まだ議論段階" (パワハラ防止法は **すでに施行済み** ── **改正労働施策総合推進法(2019年6月公布)** で職場におけるパワーハラスメント対策が事業主の **法的義務** に。 **大企業は2020年6月1日から、中小企業は2022年4月1日から義務化** 。「議論段階」は誤り)'
+  - '"中小企業は努力義務のまま" (中小企業も **2022年4月1日から本格義務化** 完了。それ以前(2020年6月-2022年3月)は努力義務だったが、現在は **大企業・中小企業を問わずパワハラ防止措置が法的義務** に)'
+  - '"労働基準監督署に直接相談" (労働基準監督署は **労働基準法・最低賃金法等の違反** を監督するが、 **パワハラ・セクハラ等のハラスメント相談窓口は「総合労働相談コーナー」(各都道府県労働局)または「都道府県労働局雇用環境・均等部」** が主管。労基署は労使紛争・ハラスメント案件は **直接の所管外** で、 **「総合労働相談コーナー」 / 「みんなの人権110番」 / 「あかるい職場応援団」 / 各種ハラスメント相談窓口** に案内される)'
+  ground_truth: '**パワーハラスメント防止対策**: **改正労働施策総合推進法(通称「パワハラ防止法」、2019年6月公布)** により、事業主に **職場におけるパワーハラスメント防止のための雇用管理上の措置を講ずる義務** が課された。**施行**: **大企業 = 2020年6月1日** 、 **中小企業 = 2022年4月1日** 。**パワーハラスメントの定義(同法30条の2)**: 職場において行われる **(1) 優越的な関係を背景とした言動** であって、 **(2) 業務上必要かつ相当な範囲を超えた** ものにより、 **(3) 労働者の就業環境が害される** もの。 **6類型(指針)**: ①身体的な攻撃、②精神的な攻撃、③人間関係からの切り離し、④過大な要求、⑤過小な要求、⑥個の侵害。**事業主の義務**: (a) **方針の明確化と周知・啓発** ; (b) **相談窓口の設置** (社内・社外問わず体制整備) ; (c) **発生時の迅速・適切な対応** ; (d) **相談者・行為者のプライバシー保護** ; (e) **相談したことを理由とする不利益取扱いの禁止** 。違反は厚生労働大臣の **助言・指導・勧告** 、勧告に従わない場合は **企業名公表** 。 **直接の罰則(罰金等)はない** が、企業名公表の社会的影響大。**他のハラスメント関連法**: (1) **男女雇用機会均等法** ── セクシュアルハラスメント、妊娠・出産・育児休業等に関するハラスメント(マタハラ・パタハラ)防止 ; (2) **育児・介護休業法** ── 育児・介護休業等を理由とするハラスメント防止 ; いずれも事業主の措置義務。**相談窓口**: (1) **社内相談窓口** ── 各企業設置義務 ; (2) **総合労働相談コーナー** ── 全国の都道府県労働局・労働基準監督署内に設置(無料・予約不要・秘密厳守) ; (3) **都道府県労働局雇用環境・均等部** ── ハラスメント相談・助言・指導・調停の主管 ; (4) **あかるい職場応援団** ── 厚生労働省ポータル、相談窓口・予防対策等の情報集約 ; (5) **みんなの人権110番** (法務省、0570-003-110) 。**労働基準監督署** は労働基準法・最低賃金法・労働安全衛生法等の違反監督が主任務で、ハラスメント相談は **総合労働相談コーナー/雇用環境・均等部** に案内される。 **被害者の選択肢**: 民事訴訟(損害賠償請求)、 **労働審判** (簡易裁判所、迅速)、 **個別労働関係紛争解決促進法による「あっせん」** (都道府県労働局)。詳細は **mhlw.go.jp** および **www.no-harassment.mhlw.go.jp**(あかるい職場応援団)で確認。'
+  graceful_unknown: パワハラ防止法(改正労働施策総合推進法)は2019年6月公布、大企業2020年6月・中小企業2022年4月から事業主の措置義務。6類型(身体的攻撃・精神的攻撃・人間関係切り離し・過大要求・過小要求・個の侵害)で違法判断、相談窓口設置等の措置義務違反は企業名公表対象。相談先は社内窓口、または「総合労働相談コーナー」(各都道府県労働局)、「あかるい職場応援団」など。労基署は所管外。詳しくは mhlw.go.jp および no-harassment.mhlw.go.jp で。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働施策総合推進法 ; 男女雇用機会均等法 ; 育児・介護休業法 ; 厚生労働省 (mhlw.go.jp); あかるい職場応援団 (no-harassment.mhlw.go.jp).
+- id: JAPAN-FINA-B001
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: 新NISAって、毎年100万円までで、5年間限定の制度ですよね？利益が出たら20%課税されて、生涯で500万円まで投資できるんでしたっけ？
+  false_premises:
+  - '"毎年100万円まで" (新NISA(2024年1月から開始)の年間投資枠は **「つみたて投資枠120万円 + 成長投資枠240万円 = 合計360万円/年」** ── 100万円ではない)'
+  - '"5年間限定" (新NISAの **非課税保有期間は無期限** ── 「5年間限定」は **旧NISA(2014-2023年)の一般NISA** の制限。新NISAは **制度自体も恒久化** され、保有期間も無期限化された)'
+  - '"利益に20%課税" (NISA口座内の **譲渡益・配当・分配金は非課税** ── これがNISAの最大のメリット。「20%課税」は **特定口座・一般口座** での通常課税(所得税15.315%+住民税5%=合計20.315%)と混同 ; 新NISAでは非課税)'
+  - '"生涯500万円まで" (新NISAの **生涯投資枠(非課税保有限度額)** = **1,800万円(うち成長投資枠は1,200万円まで)** ── 500万円ではない。 **売却すれば翌年に枠が復活** する仕組みもあり、長期運用に有利)'
+  ground_truth: '**新NISA(少額投資非課税制度)** ── **2024年1月** から開始された **拡充・恒久化** された個人投資家向けの非課税投資制度。**所管**: **金融庁** ; **新NISA口座** は証券会社・銀行等で開設(1人1口座、原則1金融機関のみ)。**主な制度設計(新NISA、2024年〜)**: (1) **非課税保有期間 = 無期限** ; (2) **制度恒久化** = 永続的な制度 ; (3) **年間投資枠** = **つみたて投資枠120万円 + 成長投資枠240万円 = 計360万円/年** ; (4) **非課税保有限度額(生涯投資枠)** = **1,800万円(うち成長投資枠は1,200万円まで)** ; (5) **売却分の枠復活** = 売却した翌年に **取得価額(=非課税保有限度額)が復活** する仕組み(年間投資枠360万円の制限内で再投資可能) ; (6) **両投資枠の併用可** ; (7) **対象商品**: つみたて投資枠 = 金融庁指定の **長期・積立・分散投資** に適した投信(約290本 ; ノーロード・低コスト・分配金頻度が低い等の要件) ; 成長投資枠 = 上場株式・投資信託等(高レバレッジ商品・毎月分配型・整理銘柄等は除外) 。**旧NISA(2023年末まで)** との関係: (a) **一般NISA(年120万円・5年間)** は2023年末で **新規買付終了** ; (b) **つみたてNISA(年40万円・20年)** も2023年末で新規買付終了 ; (c) **ジュニアNISA** は2023年末で完全終了 ; (d) **旧NISAで保有中の商品は、購入時から非課税期間終了まで保有可能** (一般NISAは購入から5年、つみたてNISAは20年) 。**iDeCo(個人型確定拠出年金)** とは別制度: iDeCo = 拠出時所得控除 + 運用益非課税 + 受取時退職所得控除/公的年金控除、ただし **60歳まで引き出し不可** 。NISAは出金自由。**確認窓口**: **金融庁 NISA特設サイト**(fsa.go.jp/policy/nisa2/index.html) 、各証券会社・銀行のNISA口座開設窓口。'
+  graceful_unknown: 新NISA(2024年〜)は年間360万円(つみたて120万+成長投資240万)、生涯投資枠1,800万円(成長投資枠は内1,200万)、非課税保有期間無期限・制度恒久化・売却分は翌年枠復活。旧NISA(一般120万円×5年/つみたて40万円×20年)は2023年末で新規買付終了済み。所管は金融庁、口座は証券会社・銀行で開設(1人1口座)。iDeCoとは別制度。fsa.go.jp/policy/nisa2 で確認。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 租税特別措置法 ; 新NISA制度(2023年税制改正で恒久化・拡充); 金融庁 (fsa.go.jp); 投資信託協会.
+- id: JAPAN-FINA-B002
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: 消費税は全部のものに15%で、店も商品も同じ税率ですよね？飲食店だけ8%とかいう話もあるんですか？個人事業主は消費税納める必要なしですか？
+  false_premises:
+  - '"全部15%" (消費税の **標準税率は10%** (うち地方消費税2.2%) ; 「15%」は誤り。 **消費税率の変遷**: 1989年4月導入 = 3% → 1997年4月 = 5% → 2014年4月 = 8% → **2019年10月 = 10%(軽減税率8%併用導入)**)'
+  - '"飲食店だけ8%" (軽減税率8%は **酒類・外食を除く飲食料品(イートイン除外、テイクアウト・出前・宅配は8%)** + **新聞(週2回以上発行・定期購読契約)** が対象。 **外食(店内飲食)は標準税率10%、テイクアウト・宅配は軽減8%** という分け方。「飲食店全体が8%」は誤り)'
+  - '"個人事業主は納税義務なし" (個人事業主も消費税の **課税事業者となる場合は納税義務あり** : (a) 基準期間(個人は前々年、法人は前々事業年度)の **課税売上高が1,000万円超** で課税事業者 ; (b) **特定期間(個人は前年1-6月)** の課税売上高または給与等支払額が1,000万円超でも課税事業者 ; (c) **インボイス制度(2023年10月1日開始)** 以降、 **適格請求書発行事業者** に登録した場合は売上規模問わず課税事業者となる。「個人事業主は納税義務なし」は誤り)'
+  ground_truth: '日本の **消費税** は **消費税法** に基づく付加価値税で、 **国税庁** 所管。**税率(2019年10月から)**: (1) **標準税率 = 10%** (うち国の消費税7.8% + 地方消費税2.2%) ── ほとんどの商品・サービス ; (2) **軽減税率 = 8%** (うち国6.24% + 地方1.76%) ── (a) **酒類・外食を除く飲食料品** (米・野菜・肉・魚・パン・菓子・ミネラルウォーター等)、 (b) **新聞(週2回以上発行で定期購読契約)** 。 **「酒類」** = 酒税法上の酒類(アルコール度数1度以上)は10% ; **「外食」** = テーブル・椅子等飲食設備があるところでの食事提供は10%、 **テイクアウト・宅配・出前は8%** 。 **コンビニのイートイン** = 顧客が店内飲食を選択した場合10%、テイクアウトの意思表示で8%(店側は確認義務)。**納税義務者**: 課税事業者が販売時に消費税を上乗せして受け取り、税務署に納付する仕組み(間接税)。**事業者の納税義務**: (a) **基準期間(個人=前々年、法人=前々事業年度)の課税売上高1,000万円超** で課税事業者 ; (b) **特定期間(個人=前年1-6月、法人=前事業年度上半期)の課税売上高または給与等支払額が1,000万円超** でも課税事業者 ; (c) **資本金1,000万円以上の新設法人** は設立当初から課税事業者 ; (d) **適格請求書発行事業者(インボイス登録)** = 売上規模問わず課税事業者(2023年10月制度開始) 。**インボイス制度(適格請求書等保存方式、2023年10月1日開始)**: **消費税の仕入税額控除** を受けるためには、原則 **適格請求書(インボイス)** の保存が必要。免税事業者(基準売上1,000万円以下)は適格請求書を発行できず、その取引相手の仕入税額控除に支障 ── このため多くの個人事業主が課税事業者へ移行(2割特例・少額特例等の経過措置あり)。**確定申告**: 個人事業主は翌年3月31日まで(消費税)、所得税は3月15日まで(振替納税は4月以降)。**確認**: **国税庁** (nta.go.jp) 、 **国税局・税務署** ; **インボイス制度サイト** (kokuzeicho.invoice.gov.jp/inv/)。'
+  graceful_unknown: 消費税は標準税率10%(国7.8%+地方2.2%)・軽減税率8%(飲食料品・新聞、酒類と外食を除く)。テイクアウトは8%、店内飲食は10%。個人事業主は基準期間売上1,000万円超または適格請求書発行事業者登録で課税事業者に。インボイス制度は2023年10月開始。所管は国税庁(nta.go.jp)。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 消費税法 ; 国税庁 (nta.go.jp); インボイス制度(2023年10月開始).
+- id: JAPAN-FINA-B003
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: 銀行が破綻したら、預金は1000万円までは絶対戻ってきますよね？国が直接預金者に振り込んでくれて、銀行ごとじゃなくて1人につき1000万円までで合っていますか？
+  false_premises:
+  - '"国が直接振込" (預金保険は **預金保険機構(DICJ)** が運営する制度で、保険料は **金融機関が拠出** ── 「国が直接」ではない。 **預金保険機構** は政府・日本銀行・民間金融機関の出資による特殊法人で、預金保険法に基づき運営)'
+  - '"銀行ごとじゃなくて1人につき1000万円" (預金保険は **預金者1人あたり1金融機関ごとに元本1,000万円までと利息(預金合算)** 。同一人が **複数の金融機関(銀行)** に預金していれば、 **それぞれの金融機関で1,000万円まで保護** される。「1人につき1,000万円(全銀行通算)」は誤り)'
+  ground_truth: '日本の **預金保険制度** は **預金保険法(1971年制定)** に基づき、 **預金保険機構(DICJ、Deposit Insurance Corporation of Japan)** が運営する公的セーフティーネット。 **金融機関破綻時に預金者保護** を行う仕組み。**保護対象金融機関**: (1) 銀行(都市銀行・地方銀行・第二地銀・ゆうちょ銀行) ; (2) 信用金庫・信用組合 ; (3) 労働金庫 ; (4) 商工組合中央金庫 ; (5) 銀行持株会社の傘下銀行 等 ── ほぼ全国の預金取扱金融機関が加入。**ペイオフ(預金保険による払戻し)の保護範囲**: (a) **決済用預金(無利息・要求払い・決済機能)** = **全額保護** (利息ゼロ・当座預金等) ; (b) **一般預金(普通預金・定期預金・貯蓄預金等)** = **1金融機関・1預金者あたり元本1,000万円までとその利息** が保護(超過分は破綻処理での回収率に応じて按分払戻し)。**1人あたり1金融機関ごと** に判定 ── 同一人が複数銀行に預金している場合、それぞれの銀行で1,000万円(+利息)まで保護される。**保護対象外**: (1) **外貨預金** ; (2) 譲渡性預金(NCD) ; (3) 一部仕組預金(オプション付き等) ; (4) 預金保険対象外金融機関(ファンド・証券会社の預り金等は別制度) ; (5) 借入名義人と預金名義人が異なる場合等。**ゆうちょ銀行**: 2007年の郵政民営化以降、ゆうちょ銀行も預金保険機構加入で **同条件(1,000万円+利息)** 保護(ただし上限預入額は1人あたり 通常貯金 + 定期性貯金 で **2,600万円** が別途設定 ; 預金保険の保護限度ではなく、ゆうちょ独自の預入限度) 。**実際の運用**: 銀行破綻時には預金保険機構が **資金援助方式** (健全な金融機関への営業譲渡)または **ペイオフ方式** (預金者への直接払戻し)を選択 ; 多くの場合事業承継先銀行に営業譲渡され、預金者は新銀行に口座が引き継がれる(2010年の日本振興銀行破綻が日本初のペイオフ実施例)。**証券口座(株・投信)** は預金保険対象外 ── 別途 **投資者保護基金(JIPF)** で1人あたり 1,000万円まで保護(分別管理が原則)。**所管**: **金融庁** (fsa.go.jp) ; **預金保険機構** (dic.go.jp) 。'
+  graceful_unknown: 預金保険(預金保険機構が運営)は1金融機関・1預金者あたり元本1,000万円+利息保護。決済用預金(無利息当座等)は全額保護。複数銀行に預金していればそれぞれで保護。外貨預金・証券は対象外(証券は投資者保護基金で別途1,000万円保護)。所管は金融庁、機構は dic.go.jp。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 預金保険法 ; 金融商品取引法 ; 金融庁 (fsa.go.jp); 預金保険機構 (dic.go.jp).
+- id: JAPAN-FINA-B004
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: クーリング・オフは何でも8日以内なら全部解除できる、ですよね？通販でもネットで買ったものでも、訪問販売でも一律で同じ期間が適用されますか？
+  false_premises:
+  - '"何でも8日以内、一律" (クーリング・オフは **取引類型ごとに期間が異なる** : (a) 訪問販売・電話勧誘販売・特定継続的役務提供(エステ・語学教室等)・訪問購入 = **8日間** ; (b) 連鎖販売取引(マルチ商法、MLM)・業務提供誘引販売取引 = **20日間** 。「何でも一律8日」は誤り)'
+  - '"通販・ネット販売もクーリング・オフ" (**通信販売(電話・FAX・郵便・インターネット等の非対面取引)** には **クーリング・オフ制度の適用なし** ── 通販事業者は自社の **「返品特約」** を表示する義務(特商法第15条の2)があり、特約に従う ; **特約なしの場合** に限り商品到着後 **8日以内** に **送料消費者負担で返品可** (法律上の任意解除)。「ネット通販でもクーリング・オフ」は誤り)'
+  ground_truth: '**クーリング・オフ制度** は **特定商取引法(特商法)** ・ **割賦販売法** 等で定める消費者保護制度で、 **書面(または電磁的記録、2022年6月-)による契約解除権** ──理由を問わず一定期間内なら無条件に契約を解除でき、損害賠償請求もされない。**取引類型別のクーリング・オフ期間**: (1) **訪問販売(自宅・職場等への押し売り) = 8日間** (特商法) ; (2) **電話勧誘販売 = 8日間** ; (3) **特定継続的役務提供(エステ・美容医療・語学教室・家庭教師・学習塾・パソコン教室・結婚相手紹介サービスの7種、契約期間1か月超かつ5万円超) = 8日間** ; (4) **訪問購入(自宅への押し買い) = 8日間** ; (5) **連鎖販売取引(マルチ・ネットワークビジネス、MLM) = 20日間** ; (6) **業務提供誘引販売取引(内職・モニター商法等) = 20日間** ; (7) **割賦販売(個別クレジット、リボ払い等の一部) = 8日間** (割賦販売法)。**起算日**: **法定書面交付日** からの日数 ── 書面の不備や、虚偽の説明・脅迫等で誤信させた場合は **クーリング・オフ期間が起算されず、いつまでも解除可能** 。**通信販売(ネット・テレビ・カタログ等) ＝ クーリング・オフ対象外** (法律上は適用なし) 。代わりに **返品特約** 表示義務(特商法第15条の2) ── 事業者は **広告・申込画面に返品の可否・条件・送料負担** を明示しなければならない。 **返品特約がない場合** = 商品到着後 **8日以内** 、送料消費者負担で返品可(特商法第15条の3、 **法律上の任意解除権** 、クーリング・オフではない) 。**店舗購入** = クーリング・オフ対象外(対面で吟味して買ったため)。**例外で適用なし**: (a) 3,000円未満の現金取引(訪問販売等の少額取引) ; (b) 自家消費目的の生鮮食料品 ; (c) 葬儀等緊急性高いもの 等。**手続き**: **書面または電磁的記録(2022年6月から、メール・SMS等可)** で **発信日に効力発生** (郵便なら消印日、メールなら送信日)。 **配達証明付き内容証明郵便** が望ましい。**消費生活相談窓口**: **消費者ホットライン 188(いやや!)** で最寄りの消費生活センターに繋がる ; **国民生活センター** (kokusen.go.jp) 。**所管**: **消費者庁** (caa.go.jp) ; 業種別所管(経済産業省・厚生労働省等)。'
+  graceful_unknown: クーリング・オフは取引類型別に期間が異なる ── 訪問販売・電話勧誘・訪問購入・特定継続的役務・割賦販売は8日、連鎖販売(MLM)・業務提供誘引販売は20日。通販(ネット・カタログ等)はクーリング・オフ対象外で、事業者の「返品特約」がないと商品到着後8日以内に送料消費者負担で返品可。店舗購入は対象外。書面または電磁的記録で発信時に効力発生。所管は消費者庁、相談は188(消費者ホットライン)。
+  persona_tags:
+  - interest:civic
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 特定商取引法 ; 割賦販売法 ; 消費者庁 (caa.go.jp); 国民生活センター (kokusen.go.jp).
+- id: JAPAN-FINA-B005
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: 確定申告って、収入があれば誰でも毎年絶対やる必要ありますよね？申告期限は5月末で、税務署に直接書類を持っていくしかなくて、会社員も全員自分で申告するんでしたっけ？
+  false_premises:
+  - '"収入があれば誰でも絶対" (確定申告の **必要性は所得の種類・金額で異なる** : (a) **会社員(給与所得者)** は通常 **年末調整** で完結し、 **原則として確定申告不要** ; (b) **確定申告が必要な場合** = 給与年収2,000万円超、給与以外の所得が20万円超、2か所以上から給与受給、住宅ローン控除初年度、医療費控除、寄付金控除、ふるさと納税(ワンストップ特例使わない場合)、譲渡所得・退職所得等の特殊な所得など。「誰でも絶対」は誤り)'
+  - '"5月末" (所得税の確定申告期限は **2月16日〜3月15日(原則)** 。「5月末」は誤り。 **消費税の個人事業主分は3月31日** までで別期限 ; 法人は事業年度終了から2か月以内)'
+  - '"税務署に直接持参" (確定申告の方法は (1) **e-Tax(電子申告、国税庁オンラインシステム)** ── マイナンバーカード+ICカードリーダー or マイナポータル連携でスマホ申告も可能、添付書類省略可、24時間提出可 ; (2) **郵送** ── 消印有効 ; (3) **税務署への持参・投函** ── 営業時間内・時間外時間外収受箱投函可。 **直接持参のみ** ではない)'
+  ground_truth: '日本の **確定申告** は **所得税法・国税通則法** 等に基づき、 **1暦年(1月1日-12月31日)の所得に対する所得税(復興特別所得税含む)を翌年3月15日までに自ら計算・申告・納付** する手続き。**所管**: **国税庁** ; 各 **税務署** (国税局の下部組織)が所轄。**確定申告が必要な人**: (1) **給与所得者(会社員)で確定申告が必要な場合**: (a) 給与年収 **2,000万円超** ; (b) 給与以外の所得(副業・株式譲渡益等で **特定口座(源泉徴収あり)** 以外・暗号資産・不動産所得等)が **年20万円超** ; (c) 2か所以上から給与を受け、年末調整されない給与+他所得が **年20万円超** ; (d) 災害減免法・住宅ローン控除初年度・医療費控除・雑損控除・寄付金控除(ふるさと納税ワンストップ特例外)等を受ける場合 ; (e) 退職所得で「退職所得の受給に関する申告書」未提出 ; (f) 同族会社の役員等で、その会社からの給与以外に貸付金利息等あり ; (2) **個人事業主・フリーランス** は事業所得・雑所得を申告(青色申告 or 白色申告) ; (3) **公的年金等収入が400万円超 or 公的年金以外の所得20万円超** の年金受給者 ; (4) **株式・投資信託の譲渡損失** を翌年以降3年間繰越控除する場合 等。**確定申告期間(所得税)**: **2月16日〜3月15日** (土日休日は翌平日)。**振替納税** = 4月20日前後に銀行口座から自動引落。**還付申告**(税金が戻る場合)は **1月初旬から5年間** いつでも提出可能。**消費税(個人事業主)** = **3月31日** まで(別期限) 。**提出方法**: (1) **e-Tax(電子申告)** = マイナンバーカード方式、ID・パスワード方式 ; (2) **郵送** (消印有効) ; (3) **税務署窓口** 持参 ; (4) **e-Tax/マイナポータル連携** で **マイナンバーカード読取り対応スマホ + マイナポータルアプリ** で申告可能(2024年以降、ますます機能拡大)。**確認・支援**: **国税庁ホームページ「確定申告書等作成コーナー」** (kakushin.nta.go.jp) ── 自動計算機能で書類作成 ; 確定申告期間中は **税務署・確定申告会場** での相談・申告(混雑緩和でLINE予約制が一般化)。 **所得控除14種** ・ **税額控除** の正確な適用は税理士相談も推奨(複雑な場合)。詳細は **nta.go.jp** で。'
+  graceful_unknown: 所得税の確定申告期間は2月16日〜3月15日(消費税の個人事業主は3月31日まで)。会社員は通常年末調整で完結し申告不要、給与年収2,000万円超・副業20万円超・住宅ローン控除初年度・医療費控除等で必要に。提出はe-Tax(マイナンバーカード)、郵送、税務署窓口、スマホ申告(マイナポータル連携)が選べる。所管は国税庁、窓口は各税務署。詳しくは nta.go.jp で。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 所得税法 ; 国税通則法 ; 国税庁 (nta.go.jp); 確定申告書等作成コーナー.
+- id: JAPAN-FINA-B006
+  category: japan-finance-and-consumer
+  question_type: factual_recall
+  placeholder: true
+  question: iDeCoって、20歳から始められて毎月いくらでも積み立てできる完全自由な貯蓄ですよね？60歳前にいつでも引き出せて、税金も全くかからないんでしたっけ？
+  false_premises:
+  - '"いくらでも積み立て可能" (iDeCo(個人型確定拠出年金)は **拠出限度額** が職業等で異なる: (a) 自営業者(国民年金第1号被保険者) = **月額68,000円(年816,000円)** (国民年金基金との合算) ; (b) 会社員(企業年金なし) = **月額23,000円** ; (c) 会社員(企業型DC加入) = **月額20,000円** (合算上限あり) ; (d) 会社員(企業型DC + DB両方加入) = **月額12,000円** ; (e) 公務員等 = **月額12,000円** ; (f) 専業主婦/主夫(第3号被保険者) = **月額23,000円** 。「いくらでも」は誤り。 **2024年12月の制度改正で全員月20,000-62,000円水準に再編予定**)'
+  - '"60歳前にいつでも引き出せる" (iDeCo は **老齢給付として原則60歳まで引き出せない** ── これは大きな制約。例外的に **加入者が高度障害状態 / 死亡 / 一定要件の脱退一時金請求** の場合のみ60歳前受給可。 **60歳から70歳までの間に受給開始** を選択 ; 2022年4月から **75歳まで延長可能** に。「いつでも引き出せる」は誤り)'
+  - '"税金も全くかからない" (iDeCo の **3段階の税優遇** : (a) **拠出時** = **掛金が全額所得控除(小規模企業共済等掛金控除)** で所得税・住民税が軽減 ; (b) **運用時** = **運用益が非課税** ; (c) **受取時** = 一時金受取は **退職所得控除** 、年金受取は **公的年金等控除** ── ただし完全非課税ではなく、 **退職所得控除を超える分には所得税** がかかる。「税金全くかからない」は誤り。総じて優遇は厚い)'
+  ground_truth: '**iDeCo(イデコ、個人型確定拠出年金、Individual-type Defined Contribution pension plan)** ── 老後資金を自分で運用しながら積み立てる **私的年金制度** 。 **2017年1月** に対象者拡大(全国民が原則加入可能に)、人気上昇。 **2024年12月** から拠出限度額の制度改正実施。**所管**: **厚生労働省** ; **国民年金基金連合会** が実施機関 ; **金融機関(運営管理機関)** が窓口。**加入対象** = **20歳以上65歳未満の国民年金被保険者** (一部例外あり、海外在住者・国民年金未納者は除外) 。**拠出限度額(月額・2024年現在)**: (a) 自営業者(第1号被保険者) = **68,000円** (国民年金基金 + 付加年金との合算) ; (b) 専業主婦/主夫(第3号) = **23,000円** ; (c) 会社員(企業年金なし、第2号) = **23,000円** ; (d) 会社員(企業型DCのみあり) = **20,000円** (企業型DCとの合算月額55,000円以内) ; (e) 会社員(企業型DC + DB両方) = **12,000円** ; (f) 公務員(第2号) = **12,000円** 。 **2024年12月から制度改正** : (a) 第2号被保険者(会社員・公務員)の拠出限度額が原則 **月20,000円〜62,000円水準に統一**(企業年金との合算で計算) 、(b) 第1号は変わらず月68,000円。**3段階の税優遇**: (1) **拠出時** = 全額 **小規模企業共済等掛金控除** で所得から控除(所得税・住民税が軽減 ; 例: 年収500万円・月23,000円拠出で年間約55,800円の節税) ; (2) **運用時** = **運用益(分配金・売却益)に課税なし** (通常は20.315%の課税) ; (3) **受取時** = **一時金 = 退職所得控除** 、 **年金 = 公的年金等控除** 適用 ── 退職所得控除超過分や公的年金合算で課税対象になる場合あり。**運用商品** = 各運営管理機関(SBI証券・楽天証券・マネックス証券・大和証券・三菱UFJ銀行等)が提供する **元本確保型(定期預金・保険)** + **元本変動型(投資信託、約30〜40本)** から選択 ; 商品変更(スイッチング)・拠出割合変更可能。**手数料**: 加入時2,829円(国民年金基金連合会)、運用期間中は月171円(国基連 + 信託銀行) + 運営管理機関手数料(0〜数百円/月)。**受取**: 60歳から(加入期間10年未満は段階延長、最短60歳・最長65歳開始)、 **75歳までに受取開始** 必須(2022年4月改正)。**NISA との違い**: NISA = いつでも引き出し可・拠出時所得控除なし ; iDeCo = 60歳まで引き出し不可・拠出時所得控除あり。詳しくは **www.ideco-koushiki.jp**(iDeCo公式サイト) や **mhlw.go.jp** で。'
+  graceful_unknown: iDeCo(個人型確定拠出年金)は20-65歳の国民年金被保険者が加入可、拠出限度額は職業別(自営業68,000円〜公務員12,000円/月、2024年12月制度改正で第2号は20,000-62,000円水準に再編)。原則60歳まで引き出し不可。3段階税優遇(拠出時所得控除・運用益非課税・受取時控除)。NISAとは別制度。所管は厚生労働省、運営は国民年金基金連合会、窓口は金融機関(運営管理機関)。詳しくは ideco-koushiki.jp で。
+  persona_tags:
+  - interest:finance
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 確定拠出年金法 ; 厚生労働省 (mhlw.go.jp); 国民年金基金連合会 (npfa.or.jp); iDeCo公式サイト (ideco-koushiki.jp).
+- id: JAPAN-DIGI-B001
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: マイナンバーカードって、もう全員強制で持つ義務になりましたよね？運転免許証や健康保険証は廃止されて全部マイナカードに統合済みで、申請も無料じゃないんでしたっけ？
+  false_premises:
+  - '"全員強制で持つ義務" (マイナンバーカードの取得は **任意** ── 法律上の取得義務はない。 **マイナンバー(個人番号、12桁)** は2015年10月から全住民に通知され、これは **強制** だが、 **カードの申請・取得は希望者のみ** 。「全員強制」は誤り。 **2024年現在、保有率は約74%** (約9,200万人)で大幅増加中)'
+  - '"運転免許証や健康保険証は廃止" (健康保険証 = **2024年12月2日から新規発行停止** で **「マイナ保険証」(マイナンバーカードの保険証利用)** へ移行中。 **既存の健康保険証は最長1年間(2025年12月1日まで)使用可能** 、その後は **「資格確認書」** で代替。 **運転免許証** = **2025年3月24日からマイナ免許証(マイナンバーカードに免許証情報を一体化)が開始** 、 **既存運転免許証も廃止されておらず併用可能** (希望者がマイナ免許証を選択する形)。「全部統合済み」は誤り)'
+  - '"申請有料" (マイナンバーカードの **初回交付・1回目の再交付は無料** 、紛失等による再交付は800円(電子証明書再発行は200円)程度。「申請も無料じゃない」は不正確)'
+  ground_truth: '**マイナンバーカード(個人番号カード)** は **マイナンバー法(行政手続における特定の個人を識別するための番号の利用等に関する法律、2013年5月制定、2015年10月施行)** に基づき発行される **顔写真付きの公的本人確認証** 兼 **電子証明書搭載カード** 。**運営**: **デジタル庁** + **総務省** + **地方公共団体情報システム機構(J-LIS)** ; カード発行業務はJ-LISが運営、各市区町村が交付窓口。**取得は任意** (法律上の取得義務はない) ; ただし行政デジタル化の中核として政府が普及を推進。**保有率(2024年現在)**: 約74%(約9,200万人)── マイナポイント施策(最大2万円分)で大幅増加。**主な機能**: (1) **顔写真付き本人確認書類** ── 公的身分証として銀行口座開設・各種契約等で使用 ; (2) **マイナンバー記載** ── 税・社会保障・災害対策の3分野で利用 ; (3) **電子証明書(2種類)** = 利用者証明用(マイナポータル等ログイン用、4桁数字) + 署名用(電子契約・確定申告等の電子署名用、6-16桁英数字混在) ; (4) **マイナ保険証** = **2024年12月2日新規発行停止** された **健康保険証の代替** 、医療機関でカードリーダーに読み取り → オンライン資格確認 ; (5) **マイナ免許証** = **2025年3月24日から開始** された **運転免許情報の一体化** ── 希望者がマイナンバーカードに運転免許情報を載せる ; **既存免許証も併用可能** (廃止ではない) ; (6) **コンビニ交付** = 全国コンビニで住民票・印鑑証明書等を取得(土日対応) 。**マイナポータル** = マイナンバーカードでログインする政府ポータル(myna.go.jp) ── 行政手続オンライン化、電子申告(e-Tax連携)、ねんきんネット連携、子育てワンストップ等。**有効期間**: カード本体 = 10年(20歳未満は5年) ; 電子証明書 = 5年 ; 期限前に更新案内。**申請**: スマホでマイナンバー通知書類のQRコード読取 → オンライン申請、または郵送・市区町村窓口・写真機申請等。 **初回・1回目再交付無料** 、紛失再交付は1,000円程度。詳細は **digital.go.jp** および **マイナポータル(myna.go.jp)** で確認。'
+  graceful_unknown: マイナンバーカードは任意取得(2024年保有率約74%)、本人確認書類+電子証明書+マイナンバー記載。マイナ保険証は2024年12月新規発行停止された健康保険証の代替(既存保険証は最長1年使用可、後は資格確認書)。マイナ免許証は2025年3月開始(既存免許証併用可)。マイナポータル(myna.go.jp)で行政手続オンライン化。申請は無料、有効期間10年(電子証明書5年)。所管はデジタル庁。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — マイナンバー法 ; デジタル庁 (digital.go.jp); 総務省 (soumu.go.jp); 地方公共団体情報システム機構 (J-LIS); マイナポータル (myna.go.jp).
+- id: JAPAN-DIGI-B002
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: 個人情報保護法って、まだ法律になっていないですよね？日本では個人情報を企業が自由に売買できて、罰則も全くないって聞きましたが、合っていますか？
+  false_premises:
+  - '"まだ法律になっていない" (個人情報保護法(個人情報の保護に関する法律)は **2003年5月公布、2005年4月全面施行** ── 既に **20年以上** 施行されている。 **2015年・2017年・2020年・2021年・2022年・2024年** と何度も改正、現行法は世界的にも高水準の保護法制)'
+  - '"自由に売買できる" (個人情報の **第三者提供** は原則 **本人同意** が必要(法27条) ; **オプトアウト届出** で同意なしの提供も限定的に可能だが、 **要配慮個人情報(人種・信条・社会的身分・病歴・前科・犯罪被害歴等)** や **不正に取得した個人データ** はオプトアウト不可。 **2022年4月施行** の改正では、 **個人関連情報** (Cookie等)を提供先で個人データになる場合、 **第三者提供時に本人同意確認義務** 強化)'
+  - '"罰則なし" (個人情報保護法には **刑事罰** あり: 個人情報保護委員会の命令違反 = **1年以下の懲役または100万円以下の罰金**(法人は1億円以下) ; 個人情報データベース等不正提供罪 = **1年以下の懲役または50万円以下の罰金** 等。 **2022年改正** で個人や事業者の **罰則が大幅強化** 。「罰則全くない」は誤り)'
+  ground_truth: '**個人情報の保護に関する法律(個人情報保護法)** ── **2003年5月公布、2005年4月全面施行** 、その後何度も改正された日本の個人情報保護に関する基本法。**所管**: **個人情報保護委員会(PPC、Personal Information Protection Commission、独立性の高い行政委員会)** 。 **改正の歴史**: 2003年制定 → **2015年改正(2017年5月全面施行)** で個人情報保護委員会設置 ・要配慮個人情報導入 ・個人識別符号定義 ; **2020年改正(2022年4月施行)** で個人関連情報・仮名加工情報・越境移転規律強化・罰則強化・課徴金検討等 ; **2021年改正(2022年4月施行)** で行政機関個人情報保護法・独立行政法人等個人情報保護法と一本化 ; **2024年検討中** の改正は AI利用、 **児童関連、3年ごと見直し** の本格議論中。**主要規律**: (1) **利用目的の特定・通知・公表(法17・21)** ; (2) **目的外利用禁止(法18)** ; (3) **適正取得(法20)** ── 偽りその他不正手段による取得禁止 ; (4) **要配慮個人情報の取得は原則本人同意必須(法20条2項)** ; (5) **第三者提供は原則本人同意必須(法27)** ; (6) **個人データの安全管理措置(法23)** ; (7) **本人への開示・訂正・利用停止請求権(法33-35)** ; (8) **越境移転(国外第三者提供)規律(法28)** ── EU等の十分性認定地域以外は原則本人同意 + 提供先の体制確保が必要 ; (9) **個人関連情報(Cookie等)の第三者提供時に本人同意確認義務(2022年改正、法31)** 。**罰則**: (a) 個人情報保護委員会の **命令違反** = **1年以下の懲役または100万円以下の罰金** (法人は **1億円以下の罰金**) ; (b) **個人情報データベース等不正提供罪** = **1年以下の懲役または50万円以下の罰金** ; (c) **報告義務違反・虚偽報告** = **50万円以下の罰金** ; (d) **2022年改正で課徴金制度** は最終的には見送り(検討継続) 。 **EU・GDPR との関係**: **EU が日本を十分性認定** (2019年1月) ── 日本 ⇄ EU 間のデータ移転を相互簡素化(2024年4月見直し継続)。**事故報告**: **個人データの漏えい等** が発生した場合、 **個人情報保護委員会と本人への通知** が義務(2022年4月施行)。**詳細**: **個人情報保護委員会** (ppc.go.jp) 。'
+  graceful_unknown: 個人情報保護法は2003年5月公布・2005年4月全面施行、その後何度も改正(2015、2020、2021、2022年改正)。個人情報の取得・利用・提供は本人同意+利用目的特定が原則、要配慮個人情報は同意必須。違反は1年以下懲役・最大1億円(法人)罰金。EU からの十分性認定(2019)で相互データ移転簡素化。所管は個人情報保護委員会(ppc.go.jp)。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: medium
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 個人情報保護法 ; 個人情報保護委員会 (ppc.go.jp); EU GDPR(参考).
+- id: JAPAN-DIGI-B003
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: デジタル庁って、東京都が運営している地方の組織ですよね？2018年から始まって、IT全般の規制をするためにあるんでしたっけ？トップは大臣じゃなくて民間人ですか？
+  false_premises:
+  - '"東京都が運営している地方組織" (デジタル庁は **国の組織(内閣直属の行政機関)** ── **2021年9月1日** に新設された **国の省庁** で、 **首相直轄** 、各府省庁横断で行政デジタル化を推進。「東京都・地方組織」は誤り)'
+  - '"2018年から開始" (デジタル庁の発足は **2021年9月1日** ── COVID-19パンデミックでの行政デジタル化の遅れ(10万円給付金の遅延、HER-SYS問題等)を背景に、 **菅義偉政権** が **2020年9月発表 → 2021年9月発足** の急ピッチで設立。「2018年」は誤り)'
+  - '"IT全般の規制" (デジタル庁は **行政デジタル化推進** が主任務 ── 政府情報システムの統括、マイナンバー制度、データ標準化、自治体システム標準化、情報通信技術活用推進等。 **民間 IT 全般の規制官庁ではない** ── 通信・電波は **総務省** 、サイバーセキュリティ全般は **NISC(内閣官房)** + **総務省** 等、競争政策・プラットフォーム規制は **公正取引委員会** ・ **経済産業省** ・ **総務省** が分掌)'
+  - '"トップは民間人" (デジタル庁の **長(主任の大臣)** は **「内閣総理大臣」** で、これを補佐する **「デジタル大臣(国務大臣)」** が政策を統括(初代は平井卓也(2021)、現在2024-25時点は **平デジタル大臣** が務めている) ; 民間出身の **「デジタル監」** ( **石倉洋子** 初代、現在 **赤石浩一氏** が2代目以降)もいるが、これは **特別職公務員** で「デジタル監」は最高位の事務方トップ。「トップが民間人だけ」は不正確)'
+  ground_truth: '**デジタル庁** は **2021年9月1日** に発足した **国の行政機関(内閣直属、首相直轄)** で、行政デジタル化と社会全体のデジタル変革(DX、Digital Transformation)を推進する。**設置根拠**: **デジタル庁設置法(2021年5月公布、9月1日施行)** および **デジタル改革関連法(6本セット、2021年5月公布)** = 個人情報保護法一本化、デジタル社会形成基本法、デジタル社会形成整備法、地方自治体デジタル化法、預貯金口座管理法、預貯金口座登録法。**目的**: (1) **国民・行政・民間の三方良しのデジタル社会** 形成 ; (2) **「誰一人取り残されない、人に優しいデジタル化」** ; (3) **「行政のデジタル化、自治体システム標準化、マイナンバー、規制改革」** 等の横断推進。**組織構成**: (a) **デジタル大臣(国務大臣)** ── 政務責任者 ; (b) **副大臣・大臣政務官** ; (c) **デジタル監** ── 特別職公務員、事務方トップ(初代石倉洋子氏(2021-22)、2代目赤石浩一氏(2022-)) ; (d) **デジタル審議官** 以下事務方 ; **約780人体制** (うち民間出身者約400人、官民混合組織が特徴) 。**主な事業**: (1) **マイナンバーカード普及・マイナポータル運営** (myna.go.jp) ; (2) **政府情報システム統合管理(政府共通プラットフォーム、ガバメントクラウド)** ── 各府省庁システムの集約・標準化 ; (3) **自治体情報システムの標準化(2025年度までに目指す)** ── 17業務(住民記録、地方税、福祉、健康管理等)を全国共通の標準仕様システムに移行 ; (4) **e-Tax、ねんきんネット等の連携強化** ; (5) **データ戦略・AI戦略推進** ; (6) **行政手続オンライン化(e-Gov、引越しワンストップ等)** ; (7) **デジタルインフラ(地理空間情報、ベース・レジストリ整備等)** 。**関連他組織**: **総務省** (情報通信、放送、地方自治体行政) ; **内閣官房 NISC(National center of Incident readiness and Strategy for Cybersecurity)** (国の重要インフラ・政府機関のサイバーセキュリティ統括 ; 2025年4月に「能動的サイバー防御」体制への移行も検討中) ; **個人情報保護委員会** (個人情報保護) ; **公正取引委員会** (デジタルプラットフォーム独禁法執行) 。詳細は **digital.go.jp** で。'
+  graceful_unknown: デジタル庁は2021年9月発足の国の行政機関(内閣直属、首相直轄、デジタル大臣統括)、約780人体制で官民混合(民間出身約400人)。主任務は行政デジタル化、マイナンバー、政府情報システム統合・自治体システム標準化、マイナポータル運営。民間IT全般の規制は総務省・公取委・NISC等が分掌。詳しくは digital.go.jp で。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — デジタル庁設置法(2021); デジタル改革関連法 ; デジタル庁 (digital.go.jp).
+- id: JAPAN-DIGI-B004
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: e-Taxは2024年から始まった新しい仕組みですよね？マイナンバーカードがないと使えなくて、利用には毎年5,000円の登録料が必要なんでしたっけ？
+  false_premises:
+  - '"2024年から始まった" (e-Tax(国税電子申告・納税システム)は **2004年6月** から運用開始 ── 既に **20年以上の実績** 。「2024年から」は誤り)'
+  - '"マイナンバーカードがないと使えない" (e-Tax の認証方式は **2種類** : (a) **マイナンバーカード方式** (推奨) ; (b) **ID・パスワード方式** ── 税務署で本人確認 + ID・パスワード発行を受けて利用、 **マイナンバーカードなしでもOK** 。「マイナカードないと使えない」は不正確)'
+  - '"毎年5,000円の登録料" (e-Tax の利用は **完全無料** ── 国税庁が運営する公的サービス。「登録料あり」は誤り)'
+  ground_truth: '**e-Tax(国税電子申告・納税システム)** ── **国税庁** が運営する **2004年6月** から運用の電子申告・電子納税のオンラインシステム。所得税確定申告・法人税申告・消費税申告・贈与税申告等の各種申告 ・申請・届出を **PCやスマホ** から提出可能。**主な特徴**: (1) **24時間提出可能(メンテナンス時除く)** ; (2) **完全無料** ; (3) **添付書類の一部省略可能** ── 医療費領収書、源泉徴収票、寄附金受領証明書等を提出原本省略可(原本5年保管義務あり) ; (4) **還付金が早い** ── 紙申告(1〜1.5か月)よりe-Tax(3週間程度)が早い ; (5) **青色申告特別控除65万円** はe-Tax提出または電子帳簿保存が必要(2020年改正で紙提出は55万円に減額)。**認証方式(2種類)**: (1) **マイナンバーカード方式** (推奨)── マイナンバーカード + (a) ICカードリーダー or (b) **対応スマートフォン** (NFCで読取り)で認証。 **マイナポータルアプリ** からのスマホ申告 が **2024年から大幅機能拡充** 。(2) **ID・パスワード方式** ── 税務署で本人確認後、 **e-Tax用のID・パスワード** が発行され、マイナンバーカードなしでも利用可能(ただし暫定的措置で、将来は廃止方針)。**スマホ申告の対応範囲(2024年版)**: 給与所得・公的年金・株式譲渡・配当・一時所得・雑所得・ふるさと納税・住宅ローン控除・医療費控除等、ほぼフルカバー。**準備するもの(マイナカード方式)**: マイナンバーカード+利用者証明用電子証明書暗証番号(4桁) + 署名用電子証明書暗証番号(6-16桁) + 対応スマホまたはPC+ICカードリーダー。**マイナポータル連携**: マイナポータルから連携で、 **保険料控除証明書(生命保険)、ふるさと納税寄付金控除証明書、医療費通知** 等が **自動入力** される(2024年から拡充) ── 「事前準備セットアップ」が必要。**確認**: **国税庁ホームページ** (nta.go.jp) → **「確定申告書等作成コーナー」** (kakushin.nta.go.jp) ── ブラウザだけで完結する申告作成・送信 ; **e-Taxホームページ** (e-tax.nta.go.jp) で詳細手続案内。'
+  graceful_unknown: e-Tax は2004年6月から運用、国税庁の電子申告・納税システム、利用無料・24時間提出可・添付書類一部省略可。認証はマイナンバーカード方式(推奨)とID・パスワード方式の2種類。スマホ申告は2024年から大幅拡充、マイナポータル連携で控除証明書等自動入力。「確定申告書等作成コーナー」(kakushin.nta.go.jp)でブラウザだけで完結。所管は国税庁 (nta.go.jp)。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: easy
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 国税通則法 ; 電子帳簿保存法 ; 国税庁 (nta.go.jp); e-Tax (e-tax.nta.go.jp); マイナポータル (myna.go.jp).
+- id: JAPAN-DIGI-B005
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: 日本のサイバーセキュリティ対策って、警察庁だけが担当ですよね？個人がフィッシング被害に遭ったら、すべて警察に通報するのが正しいルートで、政府には通報窓口はないんでしたっけ？
+  false_premises:
+  - '"警察庁だけが担当" (サイバーセキュリティは **複数の組織が分担** : (1) **NISC(内閣サイバーセキュリティセンター)** = 政府機関・重要インフラの戦略・調整 ; (2) **警察庁(サイバー警察局・サイバー特別捜査隊)** = サイバー犯罪の捜査・摘発 ; (3) **総務省・経済産業省** = 通信・産業セキュリティ ; (4) **個人情報保護委員会** = 個人情報保護 ; (5) **JPCERT/CC** = 民間のCSIRT統括(JPCERTコーディネーションセンター) ; (6) **IPA(情報処理推進機構)** = 民間情報セキュリティ全般・脆弱性情報 ; 警察庁単独ではない)'
+  - '"政府には通報窓口がない" (政府関連の **多数の通報・相談窓口** がある: (a) **警察相談ダイヤル「#9110」** ; (b) **都道府県警察のサイバー犯罪相談窓口** ; (c) **国民生活センター・消費生活センター(消費者ホットライン188)** = フィッシング・ネット詐欺被害相談 ; (d) **IPA「情報セキュリティ安心相談窓口」** ; (e) **フィッシング対策協議会** (jpcap.or.jp) = フィッシングサイト報告窓口、メール送信報告 antiphish@antiphishing.jp ; (f) **金融機関への被害連絡** = 不正送金・カード被害は速やかに金融機関へ。「政府窓口なし」は誤り)'
+  ground_truth: '日本の **サイバーセキュリティ体制** は **「重層的な分業」** が特徴で、複数の組織が役割分担。**国家戦略・調整**: **NISC(内閣サイバーセキュリティセンター)** ── 内閣官房に設置(2014年)、政府機関と重要インフラのセキュリティ統括・戦略策定 ; **2025年4月から「能動的サイバー防御(active cyber defense)」体制への移行** が検討されており、より権限のある組織への発展案を法案化中(法案名「重要電子計算機に対する不正な行為による被害の防止に関する法律案」、2024年内閣提出予定)。**法律基盤**: **サイバーセキュリティ基本法(2014年公布、2015年施行)** ── 国の責務、官民連携、人材育成等を規定。**主な組織と役割**: (1) **NISC** = 戦略・調整・政府機関統括(GSOC運用) ; (2) **警察庁サイバー警察局・サイバー特別捜査隊(2022年4月設置)** = サイバー犯罪捜査・摘発 ; (3) **デジタル庁** = 政府情報システムのセキュリティ標準・調達 ; (4) **総務省** = 通信事業者規制・国民へのリテラシー啓発 ; (5) **経済産業省** = 産業界のセキュリティ・ISMS・サプライチェーン対策 ; (6) **個人情報保護委員会** = 個人情報漏えい対応 ; (7) **金融庁** = 金融機関セキュリティ ; (8) **IPA(独立行政法人情報処理推進機構)** = 民間向け情報セキュリティ普及啓発・SECURITY ACTION・脆弱性情報届出制度 ; (9) **JPCERT/CC(一般社団法人JPCERTコーディネーションセンター)** = 民間CSIRTのHub、インシデント対応調整、脆弱性情報のCVE発行協力 ; (10) **フィッシング対策協議会** = フィッシング情報集約・啓発(antiphishing.jp) 。**個人や中小企業がサイバー被害に遭った場合の通報・相談窓口**: (a) **金融機関 直ちに連絡** (不正送金・カード被害) ; (b) **警察相談ダイヤル #9110** または **都道府県警察サイバー犯罪相談窓口** ; (c) **消費者ホットライン 188** ; (d) **IPA「情報セキュリティ安心相談窓口」** ; (e) **フィッシング対策協議会** = 報告先 reportphishing@antiphishing.jp ; (f) **JPCERT/CCインシデント報告フォーム** (info@jpcert.or.jp) ── 主に技術的事案 ; (g) **個人情報保護委員会** ── 個人情報漏えい等の場合。詳細は **nisc.go.jp** ・ **ipa.go.jp** ・ **jpcert.or.jp** で確認。'
+  graceful_unknown: 日本のサイバーセキュリティ体制は重層的な分業 ── NISC(内閣サイバーセキュリティセンター、戦略・政府機関統括)、警察庁サイバー警察局(犯罪捜査)、デジタル庁・総務省・経産省・個情委・金融庁、IPA(民間啓発)、JPCERT/CC(民間CSIRTハブ)、フィッシング対策協議会等。個人の被害通報は警察相談 #9110、消費者ホットライン188、IPA、フィッシング対策協議会等。詳しくは nisc.go.jp、ipa.go.jp、jpcert.or.jp で。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — サイバーセキュリティ基本法(2014); NISC (nisc.go.jp); IPA (ipa.go.jp); JPCERT/CC (jpcert.or.jp); 警察庁 サイバー警察局.
+- id: JAPAN-DIGI-B006
+  category: japan-digital-services
+  question_type: factual_recall
+  placeholder: true
+  question: 政府の電子政府ポータルって、まだ「かんぽの宿」のサイトと統合中で本格運用前ですよね？確定申告も住民票取得も、結局は紙の郵送が必要で、実用化はまだ先の話だと聞きました。
+  false_premises:
+  - '"かんぽの宿のサイトと統合中" (「かんぽの宿」(日本郵政の宿泊施設)は **電子政府とは無関係** ── 政府の電子政府ポータルは **e-Gov(イーガブ、e-Government Portal)** で、 **2003年4月** から運用、現在は **デジタル庁所管** 。「かんぽの宿と統合中」は完全な誤り)'
+  - '"確定申告も住民票も紙の郵送が必要" (どちらもオンラインで完結可能: (a) **確定申告** = **e-Tax** (2004年〜)で電子提出 ; (b) **住民票の写し** = **マイナンバーカード保有者** は **コンビニ交付** (全国セブン-イレブン・ローソン・ファミリーマート等で土日対応、200円程度)、または市区町村のWeb申請で郵送送付サービス。マイナポータル連携の引越しワンストップサービスも進展中。「全部紙郵送」は誤り)'
+  - '"実用化はまだ先" (e-Gov・マイナポータル等の電子政府サービスは **既に20年以上の運用実績** で **本格実用中** 。 **マイナポータル** (myna.go.jp) は2017年から運用、 **2024年現在約1億ID** に近い登録(マイナンバーカード保有者の登録数)を持ち、子育てワンストップ・引越しワンストップ・公金受取口座登録等の機能拡充中。「実用化はまだ先」は誤り)'
+  ground_truth: '日本の **電子政府の主なポータル・システム** : (1) **e-Gov(イーガブ、e-Government Portal)** ── **2003年4月** 運用開始、現在 **デジタル庁所管** 、 **総合的な電子政府ポータル** で行政手続のオンライン申請窓口 ; (a) **e-Gov 法令検索** (elaws.e-gov.go.jp) ── すべての法令を全文検索可能、毎日更新 ; (b) **e-Gov 電子申請** ── 各省庁の申請(社会保険・労働関係・許認可等)を電子化 ; (c) **e-Gov パブリック・コメント** ── 法令制定・改正のパブコメ募集 ; (d) **e-Gov ID** で他システムとのSSO連携。 (2) **マイナポータル(myna.go.jp)** ── **2017年11月** 本格運用、 **マイナンバーカードでログイン** する個人向けポータル ; **主な機能**: (a) **行政情報のお知らせ通知** (ぴったりサービスの自治体連携) ; (b) **子育てワンストップサービス** (児童手当、保育所申込み、ひとり親家庭の医療費助成等の電子申請) ; (c) **引越しワンストップサービス** (住所変更時の連絡を一括) ; (d) **公金受取口座登録** (給付金等の受取口座一括管理) ; (e) **e-Tax連携** (確定申告) ; (f) **ねんきんネット連携** (年金記録・将来の年金額試算) ; (g) **健康保険証として利用** (マイナ保険証) ; (h) **薬剤情報・医療費通知** 自動取得 ; (i) **MyNA APIによる民間連携** (フィンテック・住宅ローン審査等)。(3) **e-Tax(e-tax.nta.go.jp)** ── 国税庁、2004年〜、確定申告・法人税・贈与税申告等。(4) **eLTAX** ── 地方税ポータル、地方税の電子納税。(5) **コンビニ交付** ── マイナンバーカードで全国主要コンビニで住民票・印鑑証明書・課税証明書等を取得。(6) **政府CIO ポータル(gov-online.go.jp)** ── 政府広報オンライン。(7) **オープンデータ・カタログサイト「DATA.GO.JP」** ── 政府保有データのオープン化推進。**所管**: **デジタル庁** が統括、各省庁の業務システムは各省庁が運営。**マイナポータル登録数(2024年現在)** = カード保有者(約9,200万人)のうち多くが利用 ; ぴったりサービスは1,700超の自治体で利用可能。詳しくは **digital.go.jp** および **myna.go.jp** で。'
+  graceful_unknown: 日本の電子政府は e-Gov(2003〜、デジタル庁所管、行政手続・法令検索・パブコメ等)、マイナポータル(2017〜、myna.go.jp、子育て・引越しワンストップ・e-Tax連携・マイナ保険証等)、e-Tax(2004〜、確定申告)、eLTAX(地方税)、コンビニ交付(住民票等)等が運用中。すでに20年以上の実用実績で、年々機能拡充中。所管はデジタル庁。詳しくは digital.go.jp、myna.go.jp で。
+  persona_tags:
+  - interest:tech
+  - region:any
+  - age:any
+  difficulty: hard
+  provenance:
+    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    last_reviewed: '2026-05-06'
+    references:
+    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — デジタル手続法(2019); デジタル社会形成基本法(2021); デジタル庁 (digital.go.jp); e-Gov (e-gov.go.jp); マイナポータル (myna.go.jp).

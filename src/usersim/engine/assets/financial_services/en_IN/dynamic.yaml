@@ -1,0 +1,256 @@
+schema_version: v0.1
+locale: en_IN
+taxonomy_id: en_IN_financial_services_dynamic
+taxonomy_version: v0.2.0
+placeholder: true
+# Dynamic-tier taxonomy for en_IN. Categories are tagged by the institution TYPE(s)
+# they apply to (bank | neobank | brokerage | insurer | nbfc); at runtime the probe
+# scopes categories to the single institution the conversation is grounded in.
+# Invitations set a topic boundary in the persona's voice (NOT a question);
+# subtopic_hints are neighbourhoods (NOT questions), >=2 each.
+#
+# Structure follows en_US: TWO type-specific categories per institution type plus a
+# CROSS-CUTTING layer that applies to several types. Every institution therefore
+# draws from ~8 categories rather than one, so the dynamic tier varies across
+# conversations grounded in the same institution.
+#
+# Some hints are deliberately COMPARATIVE / MULTI-DOCUMENT ("how X, Y and Z compare
+# on ...") so a grounded answer requires synthesizing across several knowledge-base
+# documents — several kb_search calls — rather than one lookup. That drives
+# retrieval depth without turning the advisory tier transactional.
+#
+# India note: retirement (NPS/PPF/EPF) and tax-saving (80C) advisory live HERE
+# rather than in a dedicated institution, because in India those products are
+# reached through a bank acting as a point-of-presence or through a broker (ELSS).
+# Optional persona_affinities SOFT-WEIGHT selection toward ecologically-valid
+# personas; a prior only, never a hard filter.
+categories:
+# ── bank ──────────────────────────────────────────────────────────────
+- id: india-deposit-and-tax-saving
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to think out loud about where to park money you don't need immediately, and whether any of it should go somewhere that also saves tax.
+  subtopic_hints:
+  - keeping a savings balance above the monthly average requirement without starving your spending
+  - when locking money into a deposit is worth losing access to it
+  - what actually happens if you break a deposit early
+  - saving tax under 80C versus simply earning more interest
+  - whether the interest you earn is itself taxed, and when tax gets deducted at source
+  - how a fixed deposit, a recurring deposit and the savings account compare side by side on rate, access and penalties
+  - the full cost of falling below the balance requirement — the charge, the interest you forgo, and what waives it
+  - how the tax-saving deposit, the public provident fund and the pension scheme compare on lock-in, returns and how the maturity amount is taxed
+
+- id: india-banking-fees-and-charges
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low, age:65+]
+  invitation: You want to go through the charges on your account that you don't fully understand, and work out which of them you can avoid.
+  subtopic_hints:
+  - charges that appear without any transaction on your part
+  - why a debit was reversed and then charged again
+  - what a bounced payment costs beyond the bank's own fee
+  - which services are free and which quietly are not
+  - what the annual card charge buys you and whether it can be waived
+  - how the cheque return charge, the failed auto-debit charge and the low-balance charge differ in what triggers them and what each costs
+  - the complete annual cost of running the account — maintenance, card fee, transaction charges beyond the free limit, and statement charges together
+  - disputing a charge you believe is wrong, and how long the bank has to respond
+
+# ── neobank ───────────────────────────────────────────────────────────
+- id: india-upi-safety-and-limits
+  applies_to_types: [neobank]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: You want to talk about staying safe on UPI and understanding why payments sometimes get blocked or fail, in your own words.
+  subtopic_hints:
+  - the difference between a payment that fails and money that is actually debited
+  - what a genuine support call will never ask you for
+  - why a transfer hits a ceiling and what raises it
+  - how long a refund takes when a payment fails midway
+  - what to do in the first hour after you realise money has gone to the wrong person
+  - how the wallet limits, the per-transaction ceiling and the autopay cap interact across the whole account
+  - what changes once KYC is fully completed — limits, features, and what stays restricted
+  - how a UPI payment, a wallet payment and a bank transfer differ in speed, reversibility and what protection you get if it goes wrong
+
+- id: india-digital-account-support
+  applies_to_types: [neobank]
+  persona_affinities: [age:25-34, financial-literacy:high]
+  invitation: You want to understand how a fully digital account differs from a branch bank, and what happens when something goes wrong and there's no branch to walk into.
+  subtopic_hints:
+  - what a digital-only account cannot do that a branch account can
+  - how your money is protected when the app is not itself a bank
+  - getting a real person on a problem that the app cannot resolve
+  - what happens to your balance and mandates if the account is frozen
+  - why autopay mandates fail even when the balance looks sufficient
+  - how the wallet balance, the linked bank balance and any credit line differ in who holds the money and what is insured
+  - the whole path of a complaint that the app cannot fix — the internal escalation, the timelines, and where you go after that
+  - keeping the account active — what counts as dormancy and how it is reversed
+
+# ── brokerage ─────────────────────────────────────────────────────────
+- id: india-investing-first-steps
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: You want to work through how to start investing sensibly, and what the charges and lock-ins really mean before you commit.
+  subtopic_hints:
+  - investing a fixed amount monthly versus waiting for the right moment
+  - what a lock-in genuinely prevents you from doing
+  - which charges are one-off and which recur every year
+  - why the value you see and the money you receive on selling differ
+  - pausing or stopping a monthly investment when money is tight
+  - how the tax-saving fund, the index fund and a plain deposit compare on lock-in, risk and what is guaranteed
+  - the complete cost of holding and selling — annual maintenance, per-sale depository charges, brokerage and exit load together
+  - what a demat account actually holds, and how that differs from units held with the fund house directly
+
+- id: india-market-taxes-and-records
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: You want to get clear on the tax and paperwork side of investing, because filing season is when it all catches up with you.
+  subtopic_hints:
+  - how long you must hold something before the tax treatment changes
+  - which statement you actually need at the time of filing
+  - why the gain shown in the app and the gain reported for tax differ
+  - what is deducted before the money reaches your bank account
+  - how dividends are treated compared with gains from selling
+  - how selling after one year, selling within a year and redeeming a tax-saving fund after lock-in compare on what tax you finally pay
+  - the full set of records for one financial year — the gains statement, the transaction statement, the holdings statement, and what each is used for
+  - keeping your tax identifier and bank details correct so payouts and reporting don't break
+
+# ── insurer ───────────────────────────────────────────────────────────
+- id: india-cover-and-claims
+  applies_to_types: [insurer]
+  persona_affinities: [age:45-54, financial-literacy:low]
+  invitation: You want to understand what your cover would and would not pay for before you ever need it, and how a claim actually works.
+  subtopic_hints:
+  - the waiting periods that apply before a condition is covered
+  - why a hospital bill can be partly rejected even with valid cover
+  - what the free-look window is for and when it ends
+  - keeping the nominee details current and why it matters
+  - the difference between a cashless hospital and paying first then claiming
+  - how term cover, health indemnity and a market-linked plan compare on what they pay, when, and to whom
+  - the whole claim path end to end — intimation, documents, the sub-limits that reduce the payout, and timelines
+  - what you must disclose when taking cover, and what happens at claim time if you didn't
+
+- id: india-policy-choice-and-renewal
+  applies_to_types: [insurer]
+  persona_affinities: [age:45-54, financial-literacy:high]
+  invitation: You want to work out whether the cover you hold is still the right size and shape for your family, and what happens around renewal time.
+  subtopic_hints:
+  - how much cover is actually enough for your situation
+  - what you lose if a policy lapses and you restart it later
+  - whether adding a parent to the family cover is worth it
+  - why the premium goes up at renewal even without a claim
+  - the grace period after a missed premium and what is covered during it
+  - how increasing the sum insured, adding a top-up cover and buying a separate second policy compare on cost and what they actually protect
+  - everything that changes at renewal — the premium, any no-claim benefit, the waiting periods already served, and what resets if you switch insurer
+  - moving your policy to another insurer without losing the waiting periods you have already served
+
+# ── nbfc ──────────────────────────────────────────────────────────────
+- id: india-cost-of-borrowing
+  applies_to_types: [nbfc]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to work out what a loan will really cost you in total, and what your options are if a repayment goes wrong.
+  subtopic_hints:
+  - the difference between the interest rate quoted and what you actually pay
+  - what happens the month a repayment bounces
+  - whether paying off early saves money once charges are counted
+  - pledging an asset versus borrowing without one
+  - what the lender can and cannot do if you fall behind
+  - how a personal loan, a gold loan and a no-cost consumer EMI compare on total cost, tenure and what is at risk
+  - the full picture of closing a loan early — the foreclosure charge, interest saved, and what you must collect afterwards
+  - restructuring a repayment you can no longer afford, and what it costs you later
+
+- id: india-credit-health-and-eligibility
+  applies_to_types: [nbfc]
+  persona_affinities: [age:25-34, financial-literacy:low]
+  invitation: You want to understand how lenders judge you, and why an application can be turned down or approved for less than you asked for.
+  subtopic_hints:
+  - what a lender looks at besides your income
+  - why an application was approved for a smaller amount than requested
+  - how much of your monthly income can realistically go to repayments
+  - what an enquiry on your credit record does and how long it stays
+  - the documents that decide how quickly an application moves
+  - how a secured loan, an unsecured loan and a co-applicant arrangement compare on the amount you can get, the rate, and the risk you take on
+  - the whole journey of one application — eligibility check, documents, sanction, disbursal, and what can still go wrong at each step
+  - repairing your standing after a missed payment, and how long that takes
+
+# ── cross-cutting ─────────────────────────────────────────────────────
+- id: india-kyc-and-documents
+  applies_to_types: [bank, neobank, brokerage, insurer, nbfc]
+  persona_affinities: [financial-literacy:low, age:65+]
+  invitation: You want to sort out the identity and address paperwork on your account, because something is out of date and it is starting to block you.
+  subtopic_hints:
+  - which documents count as proof of identity and of address
+  - what gets restricted while your records are pending an update
+  - why you are asked to re-verify even though nothing has changed
+  - updating your details after moving to a different city
+  - correcting a name that is spelled differently across your documents
+  - how verifying in person, verifying over video and submitting documents online compare on what they unlock and how long they take
+  - the complete re-verification process end to end — what triggers it, what you must submit, the timeline, and what happens if you ignore it
+  - what happens to the account if the paperwork is never completed
+
+- id: india-nominee-and-succession
+  applies_to_types: [bank, neobank, brokerage, insurer, nbfc]
+  persona_affinities: [age:45-54, age:65+]
+  invitation: You want to make sure the right person can actually reach this money or benefit if something happens to you.
+  subtopic_hints:
+  - who can be recorded as a nominee and who cannot
+  - the difference between the person you nominate and the person who legally inherits
+  - what your family must produce to make a claim
+  - changing the nominee after a change in your family
+  - whether a nominee needs to be informed or to consent
+  - how nominating one person, holding the account jointly and leaving a will compare on who ends up with the money and how quickly
+  - the whole claim journey for a family member — who they contact, what they submit, what is verified, and how long it takes
+  - what happens if no nominee was ever recorded
+
+- id: india-account-lifecycle
+  applies_to_types: [bank, neobank, brokerage, insurer, nbfc]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to understand what it takes to start, pause or end your relationship with this institution cleanly.
+  subtopic_hints:
+  - what you need in hand before you can open anything
+  - an account that has gone inactive and how it is revived
+  - what must be settled before something can be closed
+  - charges that keep running on something you thought you had stopped
+  - what you should receive as proof once it is closed
+  - how closing outright, letting it go dormant and simply stopping use compare on charges, records and what you can recover later
+  - everything involved in closing cleanly — the dues, the paperwork, the timeline, and the confirmation you should insist on
+  - reopening later, and whether your history and terms carry over
+
+- id: india-money-movement
+  applies_to_types: [bank, neobank, brokerage, nbfc]
+  persona_affinities: [financial-literacy:low, age:25-34]
+  invitation: You want to talk through how money actually gets in and out, and why it sometimes takes longer or costs more than you expected.
+  subtopic_hints:
+  - why money leaves instantly but takes days to arrive
+  - what a cut-off time means for something sent late in the day
+  - money that has left your account but not reached the other side
+  - the ceiling on how much can move in a single day
+  - what a payment costs once every charge is counted
+  - how an instant transfer, a same-day transfer and a scheduled instruction compare on speed, limits, cost and whether they can be recalled
+  - tracing a transfer that has not arrived — the reference to quote, who investigates, the timelines, and what you are owed if it fails
+  - setting up something recurring, and what happens the month the balance falls short
+
+- id: india-account-security
+  applies_to_types: [bank, neobank, brokerage, insurer, nbfc]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: You want to talk about protecting yourself from the scams you keep hearing about, and what to do in the moment if you think something has gone wrong.
+  subtopic_hints:
+  - what a genuine call from the institution will never ask you for
+  - the first thing to do when you suspect someone has access
+  - how quickly you must report something to be protected
+  - what you are liable for and what you are not
+  - keeping alerts switched on so you notice something early
+  - how a compromised password, a stolen card and a swapped mobile number compare on what an attacker can do and what you must do first in each case
+  - the full response to a fraud — freezing access, reporting it, the dispute, the investigation window, and when you get your money back
+  - warning signs that an app, a link or a caller is not genuine
+
+- id: india-grievance-and-escalation
+  applies_to_types: [bank, neobank, brokerage, insurer, nbfc]
+  persona_affinities: [age:45-54, financial-literacy:high]
+  invitation: You want to know how to push a complaint that isn't being resolved, and how far you can take it if the institution won't fix it.
+  subtopic_hints:
+  - what makes a complaint formal rather than just a phone call
+  - the reference you should always get and why it matters
+  - how long the institution has before you can go elsewhere
+  - who you approach once the internal route is exhausted
+  - what it costs you to escalate, if anything
+  - how the internal escalation, the industry ombudsman and the sector regulator's own complaint channel compare on what they handle, how long they take and what they can order
+  - a complaint followed all the way through — raising it, the acknowledgement, the deadline, the escalation, and the outcome you can expect
+  - what records to keep while a complaint is open

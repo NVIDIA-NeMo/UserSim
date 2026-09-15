@@ -1,0 +1,113 @@
+# Hub-routed support models for `usersim`.
+#
+# Routes every NON-MUT alias (user_model / api_response_model /
+# judge_model / summary_model / evaluator_model) through an
+# OpenAI-compatible multi-vendor inference endpoint of your own at https://inference.example.com/v1,
+# while pinning ``assistant_model`` (the model under test) to the
+# default ``nvidia`` provider that targets build.nvidia.com.
+#
+# The hub is OpenAI-API-compatible and fronts models from multiple
+# vendors -- OpenAI, Anthropic via AWS Bedrock, etc. Model strings
+# follow the ``<vendor>/<provider>/<model>`` convention, e.g.:
+#   - ``openai/openai/gpt-5.5``
+#   - ``aws/anthropic/bedrock-claude-opus-4-7``
+#
+# Per-model inference knobs (temperature, top_p, max_tokens, extra_body)
+# live in ``cli/model_catalog.py:INFERENCE_DEFAULTS``. Per-alias knobs
+# (max_parallel_requests, timeout) live below.
+#
+# Auth:
+#   - The hub provider reads the API key from the env var named in
+#     ``api_key`` (NVIDIA_INFERENCE_HUB_KEY). Data Designer resolves
+#     the env var at call time -- this field is the NAME, not the
+#     value.
+#   - The default ``nvidia`` provider continues to read NVIDIA_API_KEY.
+#
+# Use from the CLI:
+#   usersim simulate --models cli/models_hub_support.toml ...
+#   usersim eval     --models cli/models_hub_support.toml ...
+#
+# Both notebooks (01_simulate.ipynb / 02_evaluate_simulation.ipynb)
+# load this TOML by default.
+
+[[providers]]
+name = "nvidia-inference-hub"
+endpoint = "https://inference.example.com/v1"
+provider_type = "openai"
+api_key = "NVIDIA_INFERENCE_HUB_KEY"
+
+[[models]]
+alias = "user_model"
+model = "openai/openai/gpt-5.5"
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+
+[[models]]
+alias = "assistant_model"
+model = "openai/gpt-oss-120b"
+provider = "nvidia"
+# Bumped to 16 here (vs. 4 in cli/models_default.toml) because in this
+# hub-routing config ``nvidia`` is used by only one alias --
+# assistant_model -- so the per-provider rate budget isn't shared
+# across user/api_response/judge/summary the way it is in the
+# all-NVIDIA default. The DD client will auto-throttle (halving each
+# step) on sustained 429s, so this is a ceiling, not a floor.
+max_parallel_requests = 16
+timeout = 300
+
+[[models]]
+alias = "api_response_model"
+model = "openai/openai/gpt-5.5"
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+# api_response synthesizes short tool-call replies (JSON-shaped, ~few hundred
+# tokens). Override the catalog's 8192 default down to 2048 to keep
+# reasoning models from wandering into long thinking chains and timing out.
+max_tokens = 2048
+
+[[models]]
+alias = "judge_model"
+model = "openai/openai/gpt-5.5"
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+
+[[models]]
+alias = "summary_model"
+model = "openai/openai/gpt-5.5"
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+
+[[models]]
+alias = "evaluator_model"
+model = "openai/openai/gpt-5.5"
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+
+# Query embedder for the financial_services probe's semantic retrieval half. MUST be
+# the SAME model that produced the corpus vectors in each institution's
+# embeddings.parquet (see the asset_gen notebook's embedding_model override + the
+# corpus _generation_report.json), or query/doc vectors aren't comparable and
+# retrieval silently returns garbage (both models happen to be 1024-dim, so a
+# dimension check won't catch a mismatch). The finance corpus is generated with
+# qwen3-embedding-0.6b, so the query side must use it too. Without this alias at
+# all, retrieval silently degrades to pure lexical overlap.
+[[models]]
+alias = "embedding_model"
+model = "nvidia/qwen/qwen3-embedding-0.6b"
+# Same hub + inference key (NVIDIA_INFERENCE_HUB_KEY) as every other alias here.
+# MUST be the model that produced the corpus vectors (see the asset_gen notebook
+# override + _generation_report.json) or query/doc vectors aren't comparable.
+provider = "nvidia-inference-hub"
+max_parallel_requests = 16
+# NOTE: this hub route IGNORES input_type. Measured directly against the endpoint:
+# the same text embedded as query vs passage comes back at cosine 0.9999-1.0000, and
+# both reproduce the stored corpus vector at ~1.0. It is set to "query" only to
+# express intent should the route start honouring it; nothing depends on it, and no
+# query/passage asymmetry exists to get wrong. ``truncate`` is the load-bearing part.
+extra_body = { input_type = "query", truncate = "NONE" }
+
+# Example: route a support alias to Anthropic Claude via AWS Bedrock
+# (also fronted by the hub). Drop in by changing the ``model`` field on
+# any alias above.
+#
+#   model = "aws/anthropic/bedrock-claude-opus-4-7"

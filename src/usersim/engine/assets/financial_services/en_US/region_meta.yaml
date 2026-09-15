@@ -1,0 +1,58 @@
+locale: en_US
+region: US
+currency: USD
+currency_symbol: $
+bank_id: en_US_financial_services
+bank_version: v0.1.0
+task_contract_version: v0.1.0
+domain_regulators:
+  retail_banking:
+    regulators:
+    - CFPB
+    - Federal Reserve
+    - FDIC
+    regulator_text: US retail banking follows federal consumer-protection rules. Regulation
+      E (EFTA) governs electronic-transaction error resolution and unauthorized-transfer
+      liability; the CFPB supervises complaint handling; deposits are FDIC-insured.
+      Agents must verify identity before disclosing/changing account state and must
+      honor Regulation E dispute timelines.
+  cards:
+    regulators:
+    - CFPB
+    - Federal Reserve
+    regulator_text: Credit cards follow Regulation Z (TILA) disclosure rules and the
+      CARD Act. Billing-error and unauthorized-charge rights apply; agents must not
+      misstate APR, fees, or dispute rights.
+  brokerage_investing:
+    regulators:
+    - SEC
+    - FINRA
+    regulator_text: Brokerage follows SEC rules and FINRA conduct standards. Regulation
+      Best Interest governs recommendations to retail investors; agents must not guarantee
+      returns, must disclose material risks, and must not give individualized tax
+      advice.
+  retirement:
+    regulators:
+    - DOL
+    - IRS
+    regulator_text: 'Retirement accounts follow ERISA (DOL) and IRS rules: annual
+      contribution limits, RMDs, early-withdrawal penalties, and rollover rules. Agents
+      must not misstate limits/penalties and must flag tax consequences without giving
+      individualized tax advice.'
+  wealth_management:
+    regulators:
+    - SEC
+    regulator_text: 'Registered investment advisers owe a fiduciary duty under the
+      Advisers Act: act in the client''s best interest, disclose conflicts and fees.
+      Agents must not guarantee performance and must disclose the advisory fee schedule.'
+identity_verification:
+  required_fields:
+  - full_name
+  - date_of_birth
+placeholder: true
+account_labels:
+  retail_banking: checking account
+  payments: checking account
+number_format: en_US
+privacy_regime: GLBA
+schema_version: v0.1

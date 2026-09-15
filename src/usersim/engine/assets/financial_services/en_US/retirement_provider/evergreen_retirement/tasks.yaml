@@ -1,0 +1,369 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks: one per state-changing tool evergreen_retirement offers.
+# Each ships THREE opening phrasings. Read-only tools (get_retirement_accounts)
+# carry no gold state change.
+templates:
+- id: TPL-ER-ROLLOVER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # New-customer onboarding + rollover: no Evergreen account yet, so the correct
+  # flow is open the Rollover IRA first, THEN initiate the rollover into it.
+  opening_user_messages:
+  - >-
+    I left my job at {{former_employer}} and still have my old 401(k) there. I
+    don't have an account with Evergreen yet — I'd like to open a Rollover IRA and
+    move it over. Can you help me start that?
+  - >-
+    I'm new to Evergreen. I have a 401(k) at {{former_employer}} from a previous
+    job that I want to roll into an IRA with you. Where do we start?
+  - >-
+    Can you help me open a Rollover IRA and transfer my old {{former_employer}}
+    401(k) into it? I don't have an Evergreen account yet.
+  account_state:
+    source_account_id: acct_er_401k_0001
+    former_employer: '{{former_employer}}'
+    evergreen_account: none
+    rollover_status: none
+  param_space:
+    former_employer: [Brightwave Media, Cedar Ridge Logistics, Summit Health Partners]
+  gold_tool_sequence: [open_account, initiate_rollover]
+  # dependency chain: the account must be opened before the rollover can target it.
+  ordered: true
+  expected_state_deltas: {rollover_status: IN_PROGRESS}
+- id: TPL-ER-WITHDRAWAL-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to take a ${{amount}} withdrawal from my Evergreen IRA. Can you help me
+    process that distribution?
+  - Can you process a ${{amount}} distribution from my retirement account?
+  - I'd like to withdraw ${{amount}} from my IRA — what do you need to set that up?
+  account_state:
+    account_id: acct_er_ira_0001
+    balance: '50000.00'
+    withdrawal_status: none
+  param_space:
+    amount: ['2000.00', '10000.00', '25000.00']
+  gold_tool_sequence: [request_withdrawal]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-ER-CONTRIBUTION-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to change my monthly IRA contribution to ${{amount}}. Can you update
+    that?
+  - Can you set my recurring contribution to ${{amount}} a month?
+  - Please bump my automatic monthly contribution up to ${{amount}}.
+  account_state:
+    account_id: acct_er_ira_0001
+    current_contribution: '200.00'
+  param_space:
+    amount: ['300.00', '500.00', '750.00']
+  gold_tool_sequence: [update_contribution]
+  expected_state_deltas: {contribution_amount: '{{amount}}'}
+- id: TPL-ER-INVESTELECTION-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to change my investment election to the {{fund}} for future
+    contributions. Can you update that?
+  - Can you switch my contribution allocation over to the {{fund}}?
+  - Please direct my future contributions into the {{fund}}.
+  account_state:
+    account_id: acct_er_ira_0001
+    current_election: Target Date 2045 Fund
+  param_space:
+    fund: [Total Market Index Fund, Target Date 2050 Fund, Conservative Bond Fund]
+  gold_tool_sequence: [update_investment_election]
+  expected_state_deltas: {investment_election: '{{fund}}'}
+- id: TPL-ER-PLANLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Does my plan allow loans? I'd like to borrow ${{amount}} against my balance if
+    possible.
+  - I'm interested in taking a ${{amount}} loan from my retirement plan. Can you start that?
+  - Can you help me request a ${{amount}} loan against my 401(k)?
+  account_state:
+    account_id: acct_er_401k_active_0001
+    vested_balance: '80000.00'
+  param_space:
+    amount: ['5000.00', '15000.00']
+  gold_tool_sequence: [plan_loan]
+  expected_state_deltas: {loan_status: REQUESTED}
+- id: TPL-ER-OPENACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I'd like to open a new {{acct_type}} with Evergreen. Can you help me set it up?
+  - Can I open a {{acct_type}}? I want to start saving for retirement.
+  - I'm ready to open a {{acct_type}} — what's the process?
+  account_state:
+    customer_id: cust_er_0001
+  param_space:
+    acct_type: [Roth IRA, Traditional IRA, SEP IRA]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-ER-CLOSEACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've rolled everything out of my {{acct_type}} and want to close it. Can you do
+    that?
+  - Please close my empty {{acct_type}} account with Evergreen.
+  - Can you shut down my {{acct_type}}? The balance is zero now.
+  account_state:
+    account_id: acct_er_ira_old_0001
+    balance: '0.00'
+  param_space:
+    acct_type: [Traditional IRA, Roth IRA]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_er_ira_old_0001.status: CLOSED}
+- id: TPL-ER-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - I changed jobs and moved — can you update my address to {{address}}?
+  - Please update my {{field}} on file to {{value}}.
+  - Can you change my {{field}} to {{value}} on my account?
+  account_state:
+    customer_id: cust_er_0001
+  param_space:
+    address: ['915 Birch Ln, Denver CO 80203', '34 Cove Rd, Providence RI 02903']
+    field: [phone number, email address]
+    value: ['720-555-0198', 'l.okafor@example.com']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-ER-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to update the beneficiary on my IRA to {{beneficiary}} after a change in
+    my family. Can you do that?
+  - Can you set my IRA beneficiary to {{beneficiary}}?
+  - Please record {{beneficiary}} as the beneficiary on my retirement account.
+  account_state:
+    account_id: acct_er_ira_0001
+  param_space:
+    beneficiary: [my spouse, my two children equally, my brother]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-ER-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - Can you set up a reminder alert for {{alert}}?
+  - I'd like notifications turned on for {{alert}}. Can you enable that?
+  - Please switch on alerts for {{alert}}.
+  account_state:
+    account_id: acct_er_ira_0001
+  param_space:
+    alert: [when I'm approaching my annual contribution limit, each contribution posting, my required minimum distribution deadline]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Ordered gold sequences (depth 3-4): each gold tool must be discovered and
+# called in order; the verifier requires the full ordered sequence with no
+# unauthorized state changes. Run with a higher max_turns (~10-12).
+- id: TPL-ER-ROLLOVER-FULL-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I'm moving my old employer 401(k) to Evergreen. Please open a rollover IRA,
+    roll the 401(k) into it, name {{person}} as my beneficiary, and invest it in
+    the {{fund}}.
+  - >-
+    Can you set me up: open a rollover IRA, initiate the rollover of my old
+    401(k), set {{person}} as beneficiary, and put the money in the {{fund}}?
+  - >-
+    I'd like a rollover IRA opened, my previous 401(k) rolled in, {{person}} listed
+    as beneficiary, and the balance allocated to the {{fund}}.
+  account_state:
+    source_account_id: acct_er_401k_old_0001
+  param_space:
+    person: [my spouse, my daughter]
+    fund: [Target Date 2050 Fund, Total Market Index Fund]
+  gold_tool_sequence: [open_account, initiate_rollover, update_beneficiary, update_investment_election]
+  expected_state_deltas: {new_account_status: OPEN, rollover_status: IN_PROGRESS, beneficiary_updated: true, investment_election_updated: true}
+- id: TPL-ER-CONTRIB-REALLOC-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please raise my monthly contribution to ${{amount}}, switch my investments to
+    the {{fund}}, and update my beneficiary to {{person}}.
+  - >-
+    I want to bump contributions to ${{amount}}, move to the {{fund}}, and change
+    my beneficiary to {{person}}.
+  - >-
+    Can you set my contribution to ${{amount}}, reallocate to the {{fund}}, and
+    name {{person}} as beneficiary?
+  account_state:
+    account_id: acct_er_ira_0001
+  param_space:
+    amount: ['400.00', '750.00']
+    fund: [Conservative Bond Fund, Target Date 2045 Fund]
+    person: [my spouse, my son]
+  gold_tool_sequence: [update_contribution, update_investment_election, update_beneficiary]
+  expected_state_deltas: {contribution_updated: true, investment_election_updated: true, beneficiary_updated: true}
+- id: TPL-ER-LOAN-ADJUST-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to take a ${{amount}} loan against my 401(k), lower my contribution to
+    ${{contrib}} while I repay it, and set up alerts for the loan payments.
+  - >-
+    Can you start a ${{amount}} 401(k) loan, drop my contribution to ${{contrib}},
+    and turn on payment reminders?
+  - >-
+    Please set up a plan loan for ${{amount}}, reduce my contribution to
+    ${{contrib}}, and enable loan-payment alerts.
+  account_state:
+    account_id: acct_er_401k_active_0001
+    vested_balance: '90000.00'
+  param_space:
+    amount: ['10000.00', '20000.00']
+    contrib: ['150.00', '250.00']
+  gold_tool_sequence: [plan_loan, update_contribution, set_alerts]
+  expected_state_deltas: {loan_status: INITIATED, contribution_updated: true, alerts_updated: true}
+- id: TPL-ER-WITHDRAW-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    First update my address to {{address}}, then process a full withdrawal from my
+    old IRA, and once that's done close the account.
+  - >-
+    Please change my address to {{address}}, request a full withdrawal from my old
+    IRA, and then close it.
+  - >-
+    I've moved — update my address to {{address}}, withdraw everything from my old
+    IRA, and close the account out.
+  account_state:
+    account_id: acct_er_ira_old_0001
+    balance: '15000.00'
+  param_space:
+    address: ['915 Birch Ln, Denver CO 80203', '34 Cove Rd, Providence RI 02903']
+  gold_tool_sequence: [update_contact_info, request_withdrawal, close_account]
+  expected_state_deltas: {contact_updated: true, withdrawal_status: PROCESSING, acct_er_ira_old_0001.status: CLOSED}
+- id: TPL-ER-NEWJOB-ROLLOVER-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    I just started a new job. Please open a rollover IRA, roll in my old plan,
+    invest it in the {{fund}}, and turn on contribution-limit alerts.
+  - >-
+    Set me up after my job change: open a rollover IRA, initiate the rollover,
+    allocate to the {{fund}}, and enable alerts.
+  - >-
+    Open a rollover IRA, move my old 401(k) in, put it in the {{fund}}, and alert
+    me as I approach my contribution limit.
+  account_state:
+    source_account_id: acct_er_401k_prev_0001
+  param_space:
+    fund: [Target Date 2055 Fund, Total Market Index Fund]
+  gold_tool_sequence: [open_account, initiate_rollover, update_investment_election, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, rollover_status: IN_PROGRESS, investment_election_updated: true, alerts_updated: true}
+- id: TPL-ER-RMD-START-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm starting my required minimum distributions. Update my address to
+    {{address}}, set up the withdrawal, and turn on distribution alerts.
+  - >-
+    Please change my address to {{address}}, request my RMD withdrawal, and enable
+    alerts for each distribution.
+  - >-
+    Update my address to {{address}}, process my required withdrawal, and notify me
+    on each distribution.
+  account_state:
+    account_id: acct_er_ira_0001
+    balance: '120000.00'
+  param_space:
+    address: ['915 Birch Ln, Denver CO 80203', '34 Cove Rd, Providence RI 02903']
+  gold_tool_sequence: [update_contact_info, request_withdrawal, set_alerts]
+  expected_state_deltas: {contact_updated: true, withdrawal_status: PROCESSING, alerts_updated: true}
+- id: TPL-ER-DIVORCE-BENE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    After my divorce, please update my beneficiary to {{person}}, lower my monthly
+    contribution to ${{amount}}, and update my address to {{address}}.
+  - >-
+    Change my beneficiary to {{person}}, drop my contribution to ${{amount}}, and
+    update my address to {{address}}.
+  - >-
+    Set {{person}} as beneficiary, reduce my contribution to ${{amount}}, and
+    change my address to {{address}}.
+  account_state:
+    account_id: acct_er_ira_0001
+  param_space:
+    person: [my son, my daughter]
+    amount: ['200.00', '350.00']
+    address: ['915 Birch Ln, Denver CO 80203', '34 Cove Rd, Providence RI 02903']
+  gold_tool_sequence: [update_beneficiary, update_contribution, update_contact_info]
+  expected_state_deltas: {beneficiary_updated: true, contribution_updated: true, contact_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_US/dynamic.yaml), not scripted templates.

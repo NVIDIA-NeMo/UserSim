@@ -1,0 +1,12 @@
+[
+    {"type": "mathematics", "description": "Conceitos de matemática e resolução de problemas"},
+    {"type": "science", "description": "Ciências incluindo física, química e biologia"},
+    {"type": "language_learning", "description": "Aprender um novo idioma ou melhorar habilidades linguísticas"},
+    {"type": "programming", "description": "Programação de computadores e desenvolvimento de software"},
+    {"type": "history", "description": "Eventos históricos, períodos e personalidades"},
+    {"type": "personal_finance", "description": "Finanças pessoais, orçamento e investimentos"},
+    {"type": "health_literacy", "description": "Compreensão de informações de saúde e decisões informadas"},
+    {"type": "digital_literacy", "description": "Habilidades básicas de informática e internet"},
+    {"type": "civics", "description": "Educação cívica, estrutura governamental e direitos do cidadão"},
+    {"type": "geography", "description": "Geografia, mapas e compreensão do mundo"}
+]

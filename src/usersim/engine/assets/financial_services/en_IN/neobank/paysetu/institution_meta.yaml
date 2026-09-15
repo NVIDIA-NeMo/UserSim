@@ -1,0 +1,10 @@
+institution_id: paysetu
+display_name: PaySetu
+type: neobank
+brand_voice: neobank
+domains:
+- retail_banking
+- cards
+- payments
+placeholder: true
+schema_version: v0.1

@@ -1,0 +1,312 @@
+# Structured region_spec for en_US — the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# this into the committed per-institution assets/financial_services/en_US/ bank.
+# A locale is a SET of institutions; each spans one or more domains. Fictional
+# brands only; do not reuse tau-Banking's fictional bank or product names
+# (contamination-avoidance policy).
+schema_version: v0.1
+region: US
+locale: en_US
+currency: USD
+currency_symbol: "$"
+language: English (US)
+number_format: en_US
+privacy_regime: GLBA
+
+# KYC ("Know Your Customer") contract: what an agent must collect before acting
+# on an account. Stated explicitly even though these two ARE the default, because
+# this file is the reference template for new regions and the knob is otherwise
+# invisible. Regions with a national financial identifier add it here — e.g.
+# India appends `pan`. The set is advertised in the offered verify_identity
+# schema AND enforced by the simulator's gate, and the simulated customer is
+# grounded with a value for each field. Known fields: full_name, date_of_birth,
+# pan, aadhaar_last4, national_id_last4.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# What this market calls the account a read tool reports back, per domain. Only
+# needed where the local product name differs from the region-neutral default in
+# spec.DEFAULT_DOMAIN_ACCOUNT_LABELS ("deposit account", "payment account", ...).
+# "Checking account" is a US product, so it is authored HERE rather than being
+# baked into the engine where every locale would inherit it.
+account_labels:
+  retail_banking: checking account
+  payments: checking account
+
+# Document genres the generator may emit (subset of ontology.DOCUMENT_TYPES).
+document_types:
+# Product-scoped genres (one set per product, see pipeline.build_product_doc_plan).
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+# Institution-scoped genres (generated once per institution, so they cannot drift
+# between products, see pipeline.build_shared_doc_plan). Relationship-level topics
+# -- accepted ID evidence, opening/dormancy/closing, who inherits, how money moves,
+# how to escalate -- are answered PER PRODUCT instead, by the `required
+# documentation` / `set up and activate` / `cancel, close, or downgrade` / `a failed
+# or pending action` angles the product plan guarantees, because they genuinely
+# differ per product (a 401(k) needs an employer sponsorship letter; a checking
+# account does not).
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief. This is
+# where MARKET-SPECIFIC framing belongs: the concepts below (RMDs, Regulation
+# Best Interest, fiduciary duty under the Advisers Act) are US instruments, so
+# they live in the US region_spec rather than in the shared prompt — otherwise
+# every other locale's corpus inherits them. Types omitted here fall back to a
+# region-neutral default (see prompts.DEFAULT_TYPE_CONCEPT_GUIDANCE).
+concept_guidance:
+  bank: >-
+    Emphasize deposits, everyday banking, overdraft/fees, and
+    unauthorized-transaction dispute rights under Regulation E.
+  brokerage: >-
+    Emphasize suitability/best-interest (Regulation Best Interest), settlement
+    timing, market risk, and that returns are never guaranteed.
+  wealth_manager: >-
+    Emphasize fiduciary/advisory duty under the Advisers Act, advisory fees, and
+    risk-profiling.
+  retirement_provider: >-
+    Emphasize contribution limits, RMDs, early-withdrawal penalties, and flagging
+    tax consequences without giving individualized tax advice.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [CFPB, Federal Reserve, FDIC]
+    regulator_text: >-
+      US retail banking follows federal consumer-protection rules. Regulation E
+      (EFTA) governs electronic-transaction error resolution and unauthorized-transfer
+      liability; the CFPB supervises complaint handling; deposits are FDIC-insured.
+      Agents must verify identity before disclosing/changing account state and must
+      honor Regulation E dispute timelines.
+  cards:
+    regulators: [CFPB, Federal Reserve]
+    regulator_text: >-
+      Credit cards follow Regulation Z (TILA) disclosure rules and the CARD Act.
+      Billing-error and unauthorized-charge rights apply; agents must not misstate APR,
+      fees, or dispute rights.
+  brokerage_investing:
+    regulators: [SEC, FINRA]
+    regulator_text: >-
+      Brokerage follows SEC rules and FINRA conduct standards. Regulation Best Interest
+      governs recommendations to retail investors; agents must not guarantee returns,
+      must disclose material risks, and must not give individualized tax advice.
+  retirement:
+    regulators: [DOL, IRS]
+    regulator_text: >-
+      Retirement accounts follow ERISA (DOL) and IRS rules: annual contribution limits,
+      RMDs, early-withdrawal penalties, and rollover rules. Agents must not misstate
+      limits/penalties and must flag tax consequences without giving individualized tax advice.
+  wealth_management:
+    regulators: [SEC]
+    regulator_text: >-
+      Registered investment advisers owe a fiduciary duty under the Advisers Act:
+      act in the client's best interest, disclose conflicts and fees. Agents must not
+      guarantee performance and must disclose the advisory fee schedule.
+
+institutions:
+# ── 1. Retail bank ────────────────────────────────────────────────────
+- id: northwind_bank
+  display_name: Northwind Bank
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards]
+  products:
+  - id: everyday_checking
+    display_name: Everyday Checking
+    domain: retail_banking
+    variables:
+      monthly_maintenance_fee: {type: money, value: 0}
+      minimum_balance_to_waive_fee: {type: money, value: 500}
+      overdraft_fee: {type: money, value: 34}
+      atm_out_of_network_fee: {type: money, value: 2.5}
+  - id: horizon_cashback_card
+    display_name: Horizon Cashback Card
+    domain: cards
+    variables:
+      apr_purchase: {type: percent, value: 21.99}
+      annual_fee: {type: money, value: 0}
+      cashback_rate: {type: percent, value: 1.5}
+  - id: high_yield_savings
+    display_name: Northwind High-Yield Savings
+    domain: retail_banking
+    variables:
+      apy: {type: percent, value: 4.25}
+      minimum_opening_deposit: {type: money, value: 100}
+      monthly_withdrawal_limit: {type: int, value: 6}
+      excess_withdrawal_fee: {type: money, value: 10}
+  - id: anchor_cd_12mo
+    display_name: Anchor 12-Month CD
+    domain: retail_banking
+    variables:
+      term_months: {type: int, value: 12}
+      apy: {type: percent, value: 4.5}
+      minimum_deposit: {type: money, value: 1000}
+      early_withdrawal_penalty_days: {type: int, value: 90}
+  - id: summit_travel_card
+    display_name: Summit Travel Card
+    domain: cards
+    variables:
+      apr_purchase: {type: percent, value: 23.49}
+      annual_fee: {type: money, value: 95}
+      rewards_rate_travel: {type: percent, value: 3}
+      foreign_transaction_fee: {type: percent, value: 0}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  # open/close account, update_contact_info, get_statements (+ per-type
+  # transfer_funds, order_replacement_card) are injected by the common-operations
+  # layer (asset_gen/financial_services/spec.py); no need to list them here.
+  task_templates:
+  - {id: TPL-NB-DISPUTE-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_transaction_dispute]}
+  - {id: TPL-NB-FEES-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Brokerage ──────────────────────────────────────────────────────
+- id: solstice_invest
+  display_name: Solstice Invest
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: individual_brokerage
+    display_name: Individual Brokerage Account
+    domain: brokerage_investing
+    variables:
+      commission_stock_trade: {type: money, value: 0}
+      margin_rate: {type: percent, value: 8.5}
+      account_transfer_out_fee: {type: money, value: 75}
+  - id: joint_brokerage
+    display_name: Joint Brokerage Account
+    domain: brokerage_investing
+    variables:
+      commission_stock_trade: {type: money, value: 0}
+      options_contract_fee: {type: money, value: 0.65}
+      account_transfer_out_fee: {type: money, value: 75}
+  - id: custodial_brokerage
+    display_name: Custodial (UGMA) Brokerage
+    domain: brokerage_investing
+    variables:
+      commission_stock_trade: {type: money, value: 0}
+      minimum_opening_deposit: {type: money, value: 0}
+      account_maintenance_fee: {type: money, value: 0}
+  - id: margin_account
+    display_name: Margin Investing Account
+    domain: brokerage_investing
+    variables:
+      margin_rate: {type: percent, value: 8.5}
+      minimum_equity: {type: money, value: 2000}
+      maintenance_margin: {type: percent, value: 25}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - {name: initiate_acat_transfer, discoverable: true, side_effect_class: state_changing}
+  task_templates:
+  - {id: TPL-SI-TRANSFER-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, interest:finance], gold_tool_sequence: [initiate_acat_transfer]}
+  - {id: TPL-SI-COSTBASIS-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any, interest:finance]}
+
+# ── 3. Retirement provider (401k / IRA) ───────────────────────────────
+- id: evergreen_retirement
+  display_name: Evergreen Retirement
+  type: retirement_provider
+  brand_voice: traditional
+  domains: [retirement]
+  products:
+  - id: traditional_401k
+    display_name: Traditional 401(k)
+    domain: retirement
+    variables:
+      employee_contribution_limit: {type: money, value: 23500}
+      catch_up_limit_50plus: {type: money, value: 7500}
+      early_withdrawal_penalty: {type: percent, value: 10}
+  - id: roth_ira
+    display_name: Roth IRA
+    domain: retirement
+    variables:
+      annual_contribution_limit: {type: money, value: 7000}
+      income_phaseout_single_start: {type: money, value: 146000}
+  - id: traditional_ira
+    display_name: Traditional IRA
+    domain: retirement
+    variables:
+      annual_contribution_limit: {type: money, value: 7000}
+      catch_up_limit_50plus: {type: money, value: 1000}
+      early_withdrawal_penalty: {type: percent, value: 10}
+  - id: sep_ira
+    display_name: SEP IRA
+    domain: retirement
+    variables:
+      contribution_limit_pct_comp: {type: percent, value: 25}
+      annual_contribution_cap: {type: money, value: 70000}
+  - id: rollover_ira
+    display_name: Rollover IRA
+    domain: retirement
+    variables:
+      account_fee: {type: money, value: 0}
+      transfer_processing_days: {type: int, value: 7}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_retirement_accounts, discoverable: true, side_effect_class: read_only}
+  - {name: initiate_rollover, discoverable: true, side_effect_class: state_changing}
+  - {name: update_contribution, discoverable: true, side_effect_class: state_changing}
+  task_templates:
+  - {id: TPL-ER-ROLLOVER-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [initiate_rollover]}
+  - {id: TPL-ER-CONTRIB-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Wealth manager ─────────────────────────────────────────────────
+- id: meridian_wealth
+  display_name: Meridian Wealth
+  type: wealth_manager
+  brand_voice: boutique
+  domains: [wealth_management]
+  products:
+  - id: managed_portfolio
+    display_name: Managed Portfolio
+    domain: wealth_management
+    variables:
+      advisory_fee_annual: {type: percent, value: 0.85}
+      minimum_investment: {type: money, value: 250000}
+  - id: tax_managed_portfolio
+    display_name: Tax-Managed Portfolio
+    domain: wealth_management
+    variables:
+      advisory_fee_annual: {type: percent, value: 0.95}
+      minimum_investment: {type: money, value: 500000}
+  - id: esg_portfolio
+    display_name: ESG Impact Portfolio
+    domain: wealth_management
+    variables:
+      advisory_fee_annual: {type: percent, value: 0.9}
+      minimum_investment: {type: money, value: 250000}
+  - id: private_wealth_advisory
+    display_name: Private Wealth Advisory
+    domain: wealth_management
+    variables:
+      advisory_fee_annual: {type: percent, value: 0.75}
+      minimum_investment: {type: money, value: 1000000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_portfolio, discoverable: true, side_effect_class: read_only}
+  - {name: update_risk_profile, discoverable: true, side_effect_class: state_changing}
+  - {name: schedule_advisor_meeting, discoverable: true, side_effect_class: state_changing}
+  task_templates:
+  - {id: TPL-MW-RISK-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, financial-literacy:high], gold_tool_sequence: [update_risk_profile]}
+  - {id: TPL-MW-FEES-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

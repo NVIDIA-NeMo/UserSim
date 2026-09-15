@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "usersim-extension-fixture"
+version = "0.1.0"
+description = "Exercises every published extension seam against a real install."
+requires-python = ">=3.12"
+
+# One entry per published group. If a seam stops working, installing this
+# package and asking the CLI what it can see is what notices.
+[project.entry-points."usersim.probes"]
+fixture_probe = "usersim_extension_fixture.probe:FixtureProbe"
+
+[project.entry-points."usersim.scorers"]
+fixture_scorer = "usersim_extension_fixture.scorer"
+
+[project.entry-points."usersim.asset_domains"]
+fixture_domain = "usersim_extension_fixture.domain:DOMAIN"
+
+[project.entry-points."usersim.backends"]
+fixture_backend = "usersim_extension_fixture.backend:FixtureBackend"
+
+[project.entry-points."usersim.capabilities"]
+fixture_capability = "usersim_extension_fixture.capability:CAPABILITY"
+
+[project.entry-points."usersim.commands"]
+fixture-cmd = "usersim_extension_fixture.command:register"
+
+[tool.setuptools.packages.find]
+include = ["usersim_extension_fixture*"]
+
+[tool.setuptools.package-data]
+usersim_extension_fixture = ["assets/**/*.yaml"]

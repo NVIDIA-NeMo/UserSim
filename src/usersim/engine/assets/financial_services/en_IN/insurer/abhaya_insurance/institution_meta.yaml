@@ -1,0 +1,8 @@
+institution_id: abhaya_insurance
+display_name: Abhaya Insurance
+type: insurer
+brand_voice: traditional
+domains:
+- insurance
+placeholder: true
+schema_version: v0.1
