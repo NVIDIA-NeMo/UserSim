@@ -5,6 +5,7 @@ import argparse
 import re
 import subprocess
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -37,7 +38,12 @@ PRIVATE_TOP_LEVEL_PREFIX = "_"
 SKIP_FILES = frozenset(["_version.py"])
 
 # File extensions to process for license headers
-SUPPORTED_EXTENSIONS = frozenset([".py", ".sh"])
+SUPPORTED_EXTENSIONS = frozenset([".py", ".sh", ".template"])
+
+#: Files that the folder globs cannot reach: ``Makefile`` has no suffix, and
+#: ``conftest.py`` sits at the repository root rather than inside a package
+#: tree. Both carry `#` comments, so the standard header applies unchanged.
+ROOT_FILES = frozenset(["Makefile", "conftest.py"])
 
 # Maximum number of lines to search for SPDX license header
 MAX_HEADER_SEARCH_LINES = 10
@@ -255,7 +261,7 @@ def check_license_header_matches(file_path: Path, license_header: str) -> tuple[
 
 def should_process_file(file_path: Path) -> bool:
     """Determine if a file should be processed for license headers."""
-    if file_path.suffix not in SUPPORTED_EXTENSIONS:
+    if file_path.name not in ROOT_FILES and file_path.suffix not in SUPPORTED_EXTENSIONS:
         return False
 
     if file_path.name in SKIP_FILES:
@@ -339,47 +345,53 @@ def generate_license_header(copyright_year: str) -> str:
     )
 
 
-def main(path: Path, check_only: bool = False) -> tuple[int, int, int, list[Path]]:
-    """Process all supported files in a directory."""
+def main(
+    path: Path,
+    check_only: bool = False,
+    files: Iterable[Path] | None = None,
+) -> tuple[int, int, int, list[Path]]:
+    """Process supported files under ``path``, or an explicit ``files`` list."""
     current_year = datetime.now().year
 
     processed = updated = skipped = 0
     files_needing_update: list[Path] = []
 
-    for ext in SUPPORTED_EXTENSIONS:
-        for file_path in path.glob(f"**/*{ext}"):
-            if not file_path.is_file() or not should_process_file(file_path):
-                continue
+    if files is None:
+        files = (f for ext in SUPPORTED_EXTENSIONS for f in path.glob(f"**/*{ext}"))
 
-            processed += 1
+    for file_path in files:
+        if not file_path.is_file() or not should_process_file(file_path):
+            continue
 
-            # Read file and analyze existing header first (source of truth for start year)
-            try:
-                content = file_path.read_text(encoding="utf-8")
-                lines = content.splitlines(keepends=True)
-                analysis = _analyze_file_header(lines)
-                existing_header = analysis.existing_header
-            except (UnicodeDecodeError, PermissionError):
-                existing_header = ""
+        processed += 1
 
-            copyright_year = get_copyright_year_string(file_path, current_year, existing_header)
-            license_header = generate_license_header(copyright_year)
+        # Read file and analyze existing header first (source of truth for start year)
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            lines = content.splitlines(keepends=True)
+            analysis = _analyze_file_header(lines)
+            existing_header = analysis.existing_header
+        except (UnicodeDecodeError, PermissionError):
+            existing_header = ""
 
-            if check_only:
-                matches, _ = check_license_header_matches(file_path, license_header)
-                if matches:
-                    skipped += 1
-                else:
-                    files_needing_update.append(file_path)
-                    updated += 1
+        copyright_year = get_copyright_year_string(file_path, current_year, existing_header)
+        license_header = generate_license_header(copyright_year)
+
+        if check_only:
+            matches, _ = check_license_header_matches(file_path, license_header)
+            if matches:
+                skipped += 1
             else:
-                was_modified, reason = update_license_header_in_file(file_path, license_header)
-                if was_modified:
-                    action = "Added header to" if reason == "added" else "Updated header in"
-                    print(f"  {'✏️' if reason == 'added' else '🔄'} {action} {file_path}")
-                    updated += 1
-                else:
-                    skipped += 1
+                files_needing_update.append(file_path)
+                updated += 1
+        else:
+            was_modified, reason = update_license_header_in_file(file_path, license_header)
+            if was_modified:
+                action = "Added header to" if reason == "added" else "Updated header in"
+                print(f"  {'✏️' if reason == 'added' else '🔄'} {action} {file_path}")
+                updated += 1
+            else:
+                skipped += 1
 
     return processed, updated, skipped, files_needing_update
 
@@ -407,6 +419,27 @@ if __name__ == "__main__":
         print(f"\n📂 {action} {folder}/")
 
         processed, updated, skipped, files_needing_update = main(folder_path, check_only=args.check)
+
+        total_processed += processed
+        total_updated += updated
+        total_skipped += skipped
+        all_files_needing_update.extend(files_needing_update)
+
+        if args.check:
+            print(f"   ❌ Need update: {updated}")
+            print(f"   ✅ Up to date: {skipped}")
+        else:
+            print(f"   ✏️  Updated: {updated}")
+            print(f"   ⏭️  Skipped: {skipped}")
+
+    root_files = [repo_path / name for name in sorted(ROOT_FILES) if (repo_path / name).is_file()]
+    if root_files:
+        action = "Checking" if args.check else "Processing"
+        print(f"\n📂 {action} repository root")
+
+        processed, updated, skipped, files_needing_update = main(
+            repo_path, check_only=args.check, files=root_files
+        )
 
         total_processed += processed
         total_updated += updated
