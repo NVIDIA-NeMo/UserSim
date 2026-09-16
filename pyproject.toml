@@ -167,16 +167,9 @@ target-version = "py312"
 # Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
 # committed outputs, so linting them means noise and rewritten cells. Excluding
 # them keeps a bare `ruff check` equivalent to `make lint`.
-extend-exclude = ["notebooks", "output", "artifacts", "public"]
+extend-exclude = ["notebooks", "output", "artifacts"]
 
 [tool.ruff.lint]
-# Deliberately narrow for now. `I` (import sorting) plus the `UP` typing
-# modernizations (List[x] -> list[x], Optional[x] -> x | None) account for
-# ~1,983 of the 2,261 violations the full rule set reports, and `ruff format`
-# rewrites 208 of 250 files. Landing those alongside a lint gate would bury
-# every in-flight branch in conflicts, so they arrive as one separate
-# mechanical commit once the open MRs merge -- at which point this list grows
-# to match DataDesigner's (W, F, I, ICN, PIE, TID, UP006, UP007, UP045).
 select = [
     "F",   # pyflakes: real bugs (undefined names, unused imports)
     "W",   # pycodestyle warnings

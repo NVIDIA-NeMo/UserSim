@@ -6,22 +6,10 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Literal, Tuple
+from typing import Any, Dict, List, Tuple
 
-from pydantic import BaseModel, Field
 
 from usersim.engine.core.llm import call_llm
-
-
-class JudgmentResult(BaseModel):
-    """Structured output for user-query and trajectory-level judges."""
-
-    explanation: str = Field(
-        ..., description="Detailed explanation and justification for the rating"
-    )
-    rating: Literal["success", "warn", "failure"] = Field(
-        ..., description="Must be 'success', 'warn', or 'failure'"
-    )
 
 
 JUDGE_FOLLOWUP_PROMPT = """Please reformat your previous response to strictly follow this format:

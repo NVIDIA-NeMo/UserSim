@@ -93,10 +93,8 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-# format-check is deliberately absent for now. `ruff format` would rewrite 209
-# of 252 files, and enforcing that while MRs are in flight would bury them in
-# conflicts. It joins this target in the same commit as the mechanical reformat,
-# once the open MRs land. `make format` stays available in the meantime.
+# `format-check` is not yet part of `check-all`; run `make format` to apply
+# formatting in the meantime.
 check-all: lint  ## Run every static check CI enforces
 
 check-all-fix: lint-fix  ## Fix everything fixable, then you re-review

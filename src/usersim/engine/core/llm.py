@@ -11,7 +11,6 @@ import os
 import random as _random
 import threading
 import time
-from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -182,25 +181,6 @@ def get_call_stats() -> Dict[str, Dict[str, Any]]:
     """Return a snapshot of per-model call statistics."""
     with _CALL_LOCK:
         return {alias: dict(s) for alias, s in _MODEL_STATS.items()}
-
-
-def reset_call_stats() -> None:
-    with _CALL_LOCK:
-        _MODEL_STATS.clear()
-
-
-def reset_all_state() -> None:
-    """Reset all module-level state for a fresh simulation run.
-
-    Call this at the start of a pipeline run to ensure clean state,
-    especially when running multiple campaigns in the same process.
-    """
-    global _CALL_COUNTER
-    with _CALL_LOCK:
-        _MODEL_STATS.clear()
-        _RECORD_TIMES.clear()
-        _PENDING_RECORDS.clear()
-        _CALL_COUNTER = 0
 
 
 # ── Per-record timing (thread-safe) ──────────────────────────────────────
@@ -451,117 +431,3 @@ def call_llm(
 
     return result
 
-
-def call_llm_with_majority_vote(
-    models: Dict[str, Any],
-    alias: str,
-    messages: List[Dict[str, Any]],
-    tools: List[Dict[str, Any]],
-    n: int = 4,
-) -> Dict[str, Any]:
-    """Call assistant LLM n times and apply majority voting.
-
-    DD's ModelFacade returns a single completion per call, so we invoke
-    it n times and vote across the results.
-    """
-    openai_tools = []
-    for tool_data in tools:
-        if "tool" in tool_data:
-            openai_tools.append({"type": "function", "function": tool_data["tool"]["function"]})
-        else:
-            openai_tools.append(tool_data)
-
-    responses = [
-        call_llm(models, alias, messages, tools=openai_tools)
-        for _ in range(n)
-    ]
-
-    if len(responses) >= n:
-        return _apply_majority_vote(responses)
-    return responses[0] if responses else {}
-
-
-def _apply_majority_vote(responses: List[Dict[str, Any]]) -> Dict[str, Any]:
-    tool_call_responses = [r for r in responses if r.get("tool_calls")]
-    non_tool_call_responses = [r for r in responses if not r.get("tool_calls")]
-
-    if len(tool_call_responses) >= 3:
-        return _majority_vote_tool_calls(tool_call_responses)
-    if non_tool_call_responses:
-        return non_tool_call_responses[0]
-    return responses[0] if responses else {}
-
-
-def _majority_vote_tool_calls(tool_call_responses: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Apply per-parameter majority voting across multiple tool-call responses."""
-    base = tool_call_responses[0]
-    if not base.get("tool_calls"):
-        return base
-
-    num_calls_counter = Counter(len(r.get("tool_calls", [])) for r in tool_call_responses)
-    majority_num = num_calls_counter.most_common(1)[0][0]
-    matching = [r for r in tool_call_responses if len(r.get("tool_calls", [])) == majority_num]
-    if not matching:
-        return base
-
-    voted_calls = []
-    for i in range(majority_num):
-        call_candidates = [r["tool_calls"][i] for r in matching if i < len(r.get("tool_calls", []))]
-        if not call_candidates:
-            break
-        voted_call = _majority_vote_arguments(call_candidates)
-        voted_calls.append(voted_call)
-
-    result = dict(base)
-    result["tool_calls"] = voted_calls
-    return result
-
-
-def _majority_vote_arguments(call_candidates: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Majority vote on each argument key across candidate tool calls."""
-    base = call_candidates[0]
-    if len(call_candidates) < 2:
-        return base
-
-    name_counter = Counter(
-        c.get("function", {}).get("name", "") for c in call_candidates
-    )
-    voted_name = name_counter.most_common(1)[0][0]
-
-    all_args = []
-    for c in call_candidates:
-        raw = c.get("function", {}).get("arguments", "{}")
-        try:
-            parsed = json.loads(raw) if isinstance(raw, str) else raw
-        except (json.JSONDecodeError, TypeError):
-            parsed = {}
-        all_args.append(parsed)
-
-    all_keys = set()
-    for a in all_args:
-        if isinstance(a, dict):
-            all_keys.update(a.keys())
-
-    voted_args = {}
-    for key in all_keys:
-        values = []
-        for a in all_args:
-            if isinstance(a, dict) and key in a:
-                v = a[key]
-                values.append(json.dumps(v, sort_keys=True, default=str) if not isinstance(v, str) else v)
-        if values:
-            counter = Counter(values)
-            winner = counter.most_common(1)[0][0]
-            try:
-                voted_args[key] = json.loads(winner)
-            except (json.JSONDecodeError, TypeError):
-                voted_args[key] = winner
-
-    result = dict(base)
-    result["function"] = {
-        "name": voted_name,
-        "arguments": json.dumps(voted_args, ensure_ascii=False),
-    }
-    if "id" in base:
-        result["id"] = base["id"]
-    return result

@@ -104,10 +104,9 @@ def run(args: argparse.Namespace) -> int:
         print(f"usersim setup-ngc: {exc}", file=sys.stderr)
         return 2
     except urllib.error.URLError as exc:
-        # DNS / 5xx / 4xx / connection refused / timeout -- network is the
-        # most common failure mode on cluster nodes behind proxies, and
-        # the raw urllib traceback is unfriendly. Hint at proxy settings
-        # because that's the usual culprit.
+        # DNS / 5xx / 4xx / connection refused / timeout. A proxy is the
+        # usual culprit and the raw urllib traceback does not say so, so
+        # hint at the proxy environment variables.
         print(
             f"usersim setup-ngc: network error fetching NGC CLI release: {exc}. "
             f"If you're behind a corporate proxy, export http_proxy / https_proxy "

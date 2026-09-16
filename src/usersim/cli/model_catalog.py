@@ -16,11 +16,10 @@ appears in ``ModelSpec.model`` / ``[[models]] model = "..."``):
   Consumed by ``cli/_models.py:_to_model_spec`` to fill in any field the TOML
   omits. Explicit TOML values always win.
 
-- ``VLLM_DEFAULTS`` -- vLLM server-config defaults for self-hosted
-  models. Also decides self-hosted vs externally-hosted provider routing
-  in ``cli/_models.py``. Externally-hosted models
-  (e.g. via the NVIDIA inference hub) belong in ``INFERENCE_DEFAULTS`` only --
-  are called via HTTPS rather than by spinning up vLLM.
+- ``VLLM_DEFAULTS`` -- vLLM server-config defaults, for models you intend to
+  serve yourself. Membership also drives provider routing in
+  ``cli/_models.py``. A model reached over an HTTPS endpoint rather than a
+  local vLLM server belongs in ``INFERENCE_DEFAULTS`` only.
 
 What's intentionally NOT in this catalog:
 
@@ -78,12 +77,10 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
         # tokens; assistant under test runs at the same effort users expect.
         "extra_body": {"reasoning_effort": "high"},
     },
-    # Same gpt-oss-120b weights, but routed through the multi-vendor
-    # inference hub (nvidia-inference-hub provider) instead of build.nvidia.com.
-    # Useful when build.nvidia.com gates the model and you want to keep the
-    # model under test the same. The catalog's auto-routing picks
-    # ``nvidia-inference-hub`` automatically because this string is NOT in
-    # VLLM_DEFAULTS (the hub serves it; we don't self-host).
+    # Same gpt-oss-120b weights reached through a multi-vendor OpenAI-compatible
+    # gateway rather than build.nvidia.com, for when build.nvidia.com gates the
+    # model and you want the model under test to stay the same. Absent from
+    # VLLM_DEFAULTS, so routing resolves it to a gateway provider.
     "nvidia/openai/gpt-oss-120b": {
         "temperature": 1.0,
         "top_p": 1.0,

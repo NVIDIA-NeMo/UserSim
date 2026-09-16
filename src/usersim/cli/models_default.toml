@@ -56,12 +56,10 @@ max_parallel_requests = 4
 
 # ── asset_gen (usersim gen-assets --domain financial_services) ──────
 # Offline document generation for the financial_services probe. Not used by the
-# simulator/evaluator, EXCEPT that the embedding model must agree with the sim's (see
-# that entry). Both the doc-gen (gemma) and embedding (qwen) models run
-# on an OpenAI-compatible inference endpoint; it is an externally-routed
-# custom provider, so both are exempt from self-hosting (no vLLM entry).
-# Model ids use the hub's <vendor>/<family> namespace and match
-# cli/model_catalog.py:INFERENCE_DEFAULTS (e.g. nvidia/google/gemma-4-31b-it).
+# simulator/evaluator, EXCEPT that the embedding model must agree with the sim's
+# (see that entry). Both the doc-gen and embedding models are served over an
+# OpenAI-compatible endpoint, and their ids match
+# cli/model_catalog.py:INFERENCE_DEFAULTS.
 
 [[providers]]
 name = "nvidia_inference_hub"
@@ -125,13 +123,10 @@ temperature = 0.0
 
 [[models]]
 alias = "embedding_model"
-# MUST match the sim-side embedding_model in cli/models_hub_support.toml. This side
-# writes each institution's embeddings.parquet; that side embeds the kb_search query
-# against it. A mismatch is silent -- both candidates are 1024-dim, so no dimension
-# check fires and dense retrieval just returns near-arbitrary documents. It used to
-# say nemotron-3-embed-1b here while the simulator queried with qwen, and only the
-# asset notebook's `--model embedding_model=...` override kept the two aligned;
-# anyone running `usersim gen-assets` directly produced an unsearchable corpus.
+# MUST be the same model the simulator queries with. This side writes each
+# institution's embeddings.parquet; the sim side embeds the kb_search query
+# against it. A mismatch is silent: both candidates are 1024-dim, so no
+# dimension check fires and dense retrieval returns near-arbitrary documents.
 model = "nvidia/qwen/qwen3-embedding-0.6b"
 provider = "nvidia_inference_hub"
 max_parallel_requests = 16
