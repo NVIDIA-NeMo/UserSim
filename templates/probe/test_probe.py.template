@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 """Test scaffold for a new probe.
 
 Copy this to ``conversation-plugin/tests/probes/test_<your_probe>.py`` and
