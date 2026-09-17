@@ -1226,12 +1226,61 @@ class TestCatalogGapWarning:
         messages = self._warnings_for("some-vendor/not-a-real-model", caplog)
         assert any("INFERENCE_DEFAULTS" in m for m in messages), messages
 
+    def test_bundled_path_ignores_a_local_override(self, tmp_path, monkeypatch) -> None:
+        """``bundled_models_path`` must never follow a local file.
+
+        Tests and any assertion about what ships depend on this: a developer's
+        models.local.toml pointing at their own endpoint must not change what
+        the suite believes the project distributes.
+        """
+        from usersim.cli._models import bundled_models_path
+
+        (tmp_path / "models.local.toml").write_text("models = []\n")
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(tmp_path / "models.local.toml"))
+        assert bundled_models_path().name == "models_default.toml"
+
+    def test_default_path_resolution_order(self, tmp_path, monkeypatch) -> None:
+        """Env var, then a local file at or above cwd, then the bundled one."""
+        from usersim.cli._models import bundled_models_path, default_models_path
+
+        nested = tmp_path / "a" / "b"
+        nested.mkdir(parents=True)
+        monkeypatch.chdir(nested)
+        monkeypatch.delenv("USERSIM_MODELS_CONFIG", raising=False)
+
+        # Nothing local anywhere above: the bundled config.
+        assert default_models_path() == bundled_models_path()
+
+        # A local file in a parent is found by walking up.
+        local = tmp_path / "models.local.toml"
+        local.write_text("models = []\n")
+        assert default_models_path() == local
+
+        # The env var outranks it.
+        other = tmp_path / "elsewhere.toml"
+        other.write_text("models = []\n")
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(other))
+        assert default_models_path() == other
+
+    def test_unreadable_env_var_fails_loudly(self, tmp_path, monkeypatch) -> None:
+        """A typo in the variable must not silently fall back to the default."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._models import default_models_path
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(tmp_path / "absent.toml"))
+        with pytest.raises(ConfigError, match="USERSIM_MODELS_CONFIG"):
+            default_models_path()
+
     def test_shipped_default_config_is_warning_free(self, caplog) -> None:
         """A first run must not warn about the configuration it ships with."""
         import logging
 
-        from usersim.cli._models import default_models_path, load_models_config
+        # bundled_models_path, not default_models_path: this asserts what
+        # ships, and default_models_path honours a developer's local override.
+        from usersim.cli._models import bundled_models_path, load_models_config
 
         with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
-            load_models_config(default_models_path())
+            load_models_config(bundled_models_path())
         assert [r.getMessage() for r in caplog.records] == []

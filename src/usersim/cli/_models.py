@@ -114,6 +114,9 @@ class ProviderSpec:
 class ModelsConfig:
     providers: Tuple[ProviderSpec, ...]
     models: Tuple[ModelSpec, ...]
+    #: Where this came from, so callers can report it. ``None`` for configs
+    #: built in memory, such as in tests.
+    source_path: Optional[Path] = None
 
     def aliases(self) -> Tuple[str, ...]:
         return tuple(m.alias for m in self.models)
@@ -154,7 +157,7 @@ def load_models_config(path: str | Path) -> ModelsConfig:
         )
     models = tuple(_to_model_spec(d, source=p) for d in raw_models)
 
-    config = ModelsConfig(providers=providers, models=models)
+    config = ModelsConfig(providers=providers, models=models, source_path=p)
     aliases = set(config.aliases())
     if len(aliases) != len(models):
         raise ConfigError(f"{p} declares duplicate model aliases: {sorted(aliases)}")
@@ -685,9 +688,69 @@ def to_model_configs(config: ModelsConfig) -> List[Any]:
     return out
 
 
-def default_models_path() -> Path:
-    """Return the path to the bundled default models TOML."""
+#: Filename that, when present, overrides the bundled default config. Named
+#: ``*.local.toml`` so the gitignore rule covers it.
+LOCAL_MODELS_FILENAME = "models.local.toml"
+
+
+def bundled_models_path() -> Path:
+    """Return the path to the models TOML shipped inside the package."""
     return Path(__file__).resolve().parent / "models_default.toml"
+
+
+def local_models_path(start: Path | None = None) -> Optional[Path]:
+    """Return a ``models.local.toml`` found at or above ``start``, if any.
+
+    Lets a developer point every entry point at their own endpoint without
+    editing a tracked file. Returns ``None`` when there is none, which is the
+    normal case for a user who has not created one.
+    """
+    here = (start or Path.cwd()).resolve()
+    for directory in [here, *here.parents]:
+        candidate = directory / LOCAL_MODELS_FILENAME
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def default_models_path() -> Path:
+    """Return the models TOML to use when the caller named none.
+
+    Resolution order, first match wins:
+
+    1. ``$USERSIM_MODELS_CONFIG``, so one variable can redirect every command.
+    2. A ``models.local.toml`` in the working directory or any parent.
+    3. The bundled ``models_default.toml``.
+
+    An explicit ``--models`` path, or a path passed directly in a notebook,
+    bypasses all of this. Use :func:`describe_models_source` to report which
+    one won, since silently running against a different endpoint than you
+    expect is worth one line of output.
+    """
+    from_env = os.environ.get("USERSIM_MODELS_CONFIG")
+    if from_env:
+        path = Path(from_env).expanduser()
+        if not path.is_file():
+            raise ConfigError(
+                f"USERSIM_MODELS_CONFIG points at {str(path)!r}, which is not a "
+                f"file. Unset it or correct the path."
+            )
+        return path
+    return local_models_path() or bundled_models_path()
+
+
+def describe_models_source(path: Path) -> str:
+    """Return a one-line explanation of why ``path`` is the config in use."""
+    resolved = Path(path).resolve()
+    if os.environ.get("USERSIM_MODELS_CONFIG"):
+        env_path = Path(os.environ["USERSIM_MODELS_CONFIG"]).expanduser()
+        if env_path.is_file() and env_path.resolve() == resolved:
+            return f"{resolved} (from $USERSIM_MODELS_CONFIG)"
+    if resolved.name == LOCAL_MODELS_FILENAME:
+        return f"{resolved} (local override; the bundled default is unused)"
+    if resolved == bundled_models_path().resolve():
+        return f"{resolved} (bundled default)"
+    return str(resolved)
 
 
 # Built-in DD providers and the env vars they read from. Mirrors
@@ -955,6 +1018,8 @@ def print_resolved_models(config: ModelsConfig) -> None:
     before any inference call goes out.
     """
     used_providers = sorted({s.provider for s in config.models})
+    if config.source_path is not None:
+        print(f"Models config: {describe_models_source(config.source_path)}")
     print(
         f"Loaded {len(config.models)} models "
         f"(providers: {used_providers or '(builtins only)'})"

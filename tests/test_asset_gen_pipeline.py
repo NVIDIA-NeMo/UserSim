@@ -770,8 +770,10 @@ def test_default_models_config_declares_gen_aliases():
     credential needed is the one the default config already requires.
     """
     from usersim.asset_gen.financial_services.pipeline import validate_generation_models
-    from usersim.cli._models import default_models_path, load_models_config
-    cfg = load_models_config(default_models_path())
+    # bundled_models_path, not default_models_path: this asserts what ships,
+    # and default_models_path honours a developer's models.local.toml.
+    from usersim.cli._models import bundled_models_path, load_models_config
+    cfg = load_models_config(bundled_models_path())
     validate_generation_models(cfg)  # must not raise
 
     for alias in ("doc_gen_model", "asset_judge_model", "embedding_model"):
