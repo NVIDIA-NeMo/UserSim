@@ -127,5 +127,5 @@ dataset) promotes the language into the shipped-locale set above. See
 for the `asset_locale` / `persona_dataset_locale` resolution details.
 
 Persona datasets are pulled lazily on first use from NGC; `usersim setup-ngc`
-installs the NGC CLI into your venv so the download just works on cluster
-nodes. See the [README](../README.md#setup) for the setup walkthrough.
+installs the NGC CLI into your venv, so no administrator access is needed.
+See [`docs/personas.md`](personas.md) for setup and licensing.

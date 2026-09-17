@@ -218,8 +218,7 @@ def ensure_ngc_cli(
     # Make the install visible to the current process. .venv/bin is
     # usually on PATH already (since `source .venv/bin/activate`
     # prepended it), but a Jupyter kernel started outside the venv may
-    # not have it — same edge case docs/onboarding.md calls out for the
-    # `cli` import path.
+    # not have it.
     _prepend_path(target_dir)
 
     _verify_install()
@@ -279,7 +278,7 @@ def ensure_ngc_org() -> str | None:
             "https://org.ngc.nvidia.com/account/api-keys. Then run:\n"
             "    export NGC_CLI_API_KEY=\"<your-ngc-key>\"\n"
             "    usersim setup-ngc\n"
-            "See docs/onboarding.md §2 for details.",
+            "See docs/personas.md for details.",
             file=sys.stderr,
         )
         return None

@@ -30,9 +30,16 @@ instead samples from
 millions of synthetic individuals grounded in real census data, generated
 through probabilistic graphical models that enforce realistic correlations
 between attributes, and written natively in each region's language.
+Specifically, it samples an extended version of these datasets distributed
+through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
+which adds the OCEAN personality traits, names and further fields that the
+behavioural features depend on.
 
-The reasoning behind that design, and where it stops being trustworthy, is in
-[`docs/methodology.md`](docs/methodology.md).
+The datasets are downloaded on first use rather than bundled, and carry their
+own licence separate from this project's, including an AI ethics clause. See
+[`docs/personas.md`](docs/personas.md) for how to get them and what the terms
+allow. The reasoning behind the design, and where it stops being trustworthy,
+is in [`docs/methodology.md`](docs/methodology.md).
 
 What a single simulated trajectory looks like in practice:
 

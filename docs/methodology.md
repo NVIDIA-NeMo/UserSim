@@ -69,7 +69,8 @@ data are not a binary choice; both matter.
 
 NeMo UserSim brings this discipline to LLMs by combining
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas)
-(census-grounded synthetic personas carrying OCEAN personality traits) with a **general-purpose probe engine** that can simulate any
+(census-grounded synthetic personas; the extended NGC version carries the
+OCEAN personality traits this depends on) with a **general-purpose probe engine** that can simulate any
 interaction pattern: open-ended conversation, tutoring, multi-step tool use,
 agentic workflows, safety probing, and more.
 

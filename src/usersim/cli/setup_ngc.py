@@ -18,7 +18,7 @@ notebook persona-download cell auto-invokes the same helper
 runs that bypass the documented setup step self-heal on first use.
 
 This subcommand only installs the binary. NGC auth (``ngc config set``
-or ``$NGC_CLI_API_KEY``) is left to the user — see ``docs/onboarding.md``.
+or ``$NGC_CLI_API_KEY``) is left to the user; see ``docs/personas.md``.
 """
 
 from __future__ import annotations
@@ -130,6 +130,6 @@ def run(args: argparse.Namespace) -> int:
         print(
             "Next step: to download Nemotron-Personas, set NGC_CLI_API_KEY "
             "(generate at https://org.ngc.nvidia.com/account/api-keys) and "
-            "re-run. Not needed for `usersim smoke`. See docs/onboarding.md §2."
+            "re-run. Not needed for `usersim smoke`. See docs/personas.md."
         )
     return 0
