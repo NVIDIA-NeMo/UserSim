@@ -1931,7 +1931,7 @@ dependencies = [
     { name = "tiktoken" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "jupyter" },
     { name = "pre-commit" },
@@ -1947,28 +1947,29 @@ requires-dist = [
     { name = "data-designer", specifier = ">=0.5.9,<0.6" },
     { name = "httpx" },
     { name = "huggingface-hub" },
-    { name = "jupyter", marker = "extra == 'dev'" },
     { name = "langdetect" },
     { name = "lingua-language-detector", specifier = ">=2.0,<3.0" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0,<5" },
     { name = "pyarrow" },
     { name = "pydantic", specifier = ">=2.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.0,<8" },
-    { name = "pytest-env", marker = "extra == 'dev'", specifier = ">=1.1,<2" },
-    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.6,<4" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "rich" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.14,<0.15" },
     { name = "seaborn" },
     { name = "tiktoken", specifier = ">=0.7,<1.0" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
+dev = [
+    { name = "jupyter" },
+    { name = "pre-commit", specifier = ">=4.0,<5" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-cov", specifier = ">=7.0,<8" },
+    { name = "pytest-env", specifier = ">=1.1,<2" },
+    { name = "pytest-xdist", specifier = ">=3.6,<4" },
+    { name = "ruff", specifier = ">=0.14,<0.15" },
+]
 license-check = []
 
 [[package]]

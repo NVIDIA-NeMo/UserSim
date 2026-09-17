@@ -79,7 +79,11 @@ Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
 Repository = "https://github.com/NVIDIA-NeMo/UserSim"
 Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 
-[project.optional-dependencies]
+[dependency-groups]
+# A dependency group rather than an optional-dependency extra, so `uv sync`
+# installs it by default and `pip install nemo-usersim[dev]` cannot pull test
+# and lint tooling into a user's environment. `make test` and the hermeticity
+# guard in conftest.py both depend on this group being present.
 dev = [
     "jupyter",
     "pytest>=8.0",
@@ -88,17 +92,16 @@ dev = [
     "ruff>=0.14,<0.15",
     "pytest-cov>=7.0,<8",
     "pre-commit>=4.0,<5",
-    # Distributes the ~2,900 tests across cores. The suite is CPU-bound with
-    # every LLM call mocked, so it parallelises well; CI spends ~6 minutes of
-    # its test job on execution.
+    # Distributes the test suite across cores. It is CPU-bound with every LLM
+    # call mocked, so it parallelises well. `make test` passes -n and fails
+    # without this.
     "pytest-xdist>=3.6,<4",
-    # Sets USERSIM_DISABLE_EXTENSIONS before conftest files load. A root
-    # conftest.py would run after any earlier one that imports a registry,
-    # which is too late to keep discovery out of the suite.
+    # Applies the [tool.pytest.ini_options] env block below, which sets
+    # USERSIM_DISABLE_EXTENSIONS before any conftest loads. A root conftest.py
+    # would run after one that imports a registry, which is too late to keep
+    # discovery out of the suite. conftest.py fails the run if this is absent.
     "pytest-env>=1.1,<2",
 ]
-
-[dependency-groups]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
 # locked runtime set and no dev tooling.

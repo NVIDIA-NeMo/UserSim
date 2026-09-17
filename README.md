@@ -74,13 +74,10 @@ plug in through entry points without forking the repository.
 Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-# Resolve uv.lock and editable-install the project.
+# Resolve uv.lock and editable-install the project, with the dev tooling
+# and the Jupyter kernel the notebooks need.
 uv sync
 source .venv/bin/activate
-
-# For the notebooks, add the dev extra. It carries the Jupyter kernel,
-# which the runtime dependencies deliberately do not.
-uv sync --all-extras
 
 # Install the NGC CLI into .venv/bin/ngc (idempotent, sha256-verified).
 # Required to download the Nemotron-Personas datasets.

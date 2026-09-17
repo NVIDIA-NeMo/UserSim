@@ -2,10 +2,10 @@
 
 The `notebooks/` directory mirrors the CLI flow for interactive iteration.
 They need the Jupyter kernel, which the runtime dependencies deliberately do
-not carry:
+not carry. It comes with the dev group, which `uv sync` installs by default:
 
 ```bash
-uv sync --all-extras
+uv sync
 ```
 
 Outputs are stripped from the committed notebooks, so you will see source

@@ -62,8 +62,8 @@ help:  ## Show the available targets
 
 # --- setup -----------------------------------------------------------------
 
-install-dev:  ## Sync the workspace with dev extras and install pre-commit hooks
-	$(UV) sync --extra dev
+install-dev:  ## Sync the workspace with dev tooling and install pre-commit hooks
+	$(UV) sync
 	@if [ ! -f .git/hooks/pre-commit ]; then \
 		echo "Installing pre-commit hooks..."; \
 		$(UV) run pre-commit install; \
@@ -75,7 +75,7 @@ install-dev:  ## Sync the workspace with dev extras and install pre-commit hooks
 # dependency drift becomes a build failure rather than a silent
 # re-resolution. No pre-commit hooks -- CI has no working tree to guard.
 install-ci:  ## Sync exactly what CI needs, enforcing the lockfile
-	$(UV) sync --extra dev --locked
+	$(UV) sync --locked
 
 # --- lint / format ---------------------------------------------------------
 

@@ -78,7 +78,7 @@ it, start with the [README](README.md).
 Requires Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --all-extras
+uv sync                     # installs the dev group: pytest, ruff, jupyter
 uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
