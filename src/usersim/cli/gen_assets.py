@@ -15,8 +15,7 @@ import argparse
 from pathlib import Path
 
 from usersim.asset_gen.registry import domain_names, get_domain
-
-_ROOT = Path(__file__).resolve().parents[1]
+from usersim.engine.core._assets import packaged_assets_dir
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -78,7 +77,7 @@ def run(args: argparse.Namespace) -> int:
         print("  (dry run — no assets written)")
         return 0
 
-    out_dir = args.out or (_ROOT / "assets" / args.domain / args.locale)
+    out_dir = args.out or (packaged_assets_dir() / args.domain / args.locale)
     from usersim.cli._models import (
         apply_model_overrides, apply_parallel_overrides, default_models_path,
         load_models_config, parse_cli_model_overrides, parse_cli_parallel_overrides,
