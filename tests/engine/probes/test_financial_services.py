@@ -362,22 +362,47 @@ class TestHybridRetrieval:
     def test_hybrid_survives_a_dense_signal_that_points_at_tool_docs(self):
         """End-to-end guard on the actual defect, against the real en_IN corpus.
 
-        The query vector here is the centroid of the institution's OWN tool-doc
-        vectors, which reproduces the observed pathology in its strongest form:
-        cosine alone then ranks tool references top. Hybrid must still return a
-        genre mix close to the corpus. Passing ``query_embedding=None`` would make
-        this test vacuous, since hybrid would degrade to pure lexical.
+        Runs on the real corpus text with a SYNTHETIC vector set, because no
+        embeddings.parquet ships: vectors only compare within the space that
+        produced them, so shipping ours would pin users to one model.
+
+        The synthetic set reproduces the measured pathology by construction.
+        Tool docs get vectors in a tight cluster, everything else is spread out,
+        and the query is that cluster's centroid, so cosine alone ranks tool
+        references top. That is exactly the input hybrid has to survive.
+        Passing ``query_embedding=None`` would make this test vacuous, since
+        hybrid would degrade to pure lexical.
         """
+        import math
+        import random
         from collections import Counter
 
         bank = load_finance_bank_for_locale("en_IN")
         inst = bank.institution("chandrika_bank")
-        embeddings = inst.embeddings
+
+        def _unit(v):
+            n = math.sqrt(sum(x * x for x in v)) or 1.0
+            return tuple(x / n for x in v)
+
+        # Deterministic in doc id, so a corpus regeneration cannot make this
+        # flaky, and independent of any real embedding model. Every document
+        # shares a large component on axis 0, which is the corpus homogeneity
+        # the module docstring describes; tool docs lean on it slightly harder.
+        # Calibrated so dense returns tool docs for ~88% of results, matching
+        # the share measured on the real vectors.
+        def _vec(doc):
+            rng = random.Random(doc.id)
+            shared = 4.6 if doc.document_type == "discoverable_tool_doc" else 3.4
+            return _unit([shared] + [rng.gauss(0, 1.0) for _ in range(15)])
+
+        embeddings = {d.id: _vec(d) for d in inst.documents}
+        inst = dataclasses.replace(inst, embeddings=embeddings)
+
         tool_vecs = [
             embeddings[d.id] for d in inst.documents
-            if d.document_type == "discoverable_tool_doc" and d.id in embeddings
+            if d.document_type == "discoverable_tool_doc"
         ]
-        assert tool_vecs, "fixture needs an embedded corpus"
+        assert tool_vecs, "fixture needs tool docs to cluster"
         centroid = [sum(col) / len(tool_vecs) for col in zip(*tool_vecs)]
 
         corpus_share = sum(
@@ -438,17 +463,25 @@ def test_embed_query_soft_fails_to_none():
     assert embed_query({"embedding_model": _Boom()}, "embedding_model", "hi") is None
 
 
-def test_bank_loads_embeddings_sidecar():
-    """The committed en_US bank ships embeddings.parquet; the loader surfaces
-    per-doc vectors on the institution for dense retrieval."""
+def test_shipped_banks_carry_no_vectors_and_still_load():
+    """No locale ships an embeddings.parquet, and the banks work without one.
+
+    Vectors are only comparable within the embedding space that produced them,
+    so shipping ours would pin every user to one model. Users generate their
+    own via ``gen-assets``. The loader treats an absent sidecar as an empty map
+    and retrieval stays on the lexical path.
+    """
+    assets = packaged_assets_dir() / "financial_services"
+    assert not list(assets.rglob("embeddings.parquet"))
+
     bank = load_finance_bank_for_locale("en_US")
     inst = bank.institution("northwind_bank")
-    assert inst.embeddings, "expected embeddings.parquet to load"
-    # Every embedded id is a real corpus doc id; vectors are non-empty tuples.
-    corpus_ids = {d.id for d in inst.documents}
-    assert set(inst.embeddings) <= corpus_ids
-    any_vec = next(iter(inst.embeddings.values()))
-    assert isinstance(any_vec, tuple) and len(any_vec) > 0
+    assert inst.embeddings == {}
+    assert inst.documents, "corpus still loads without vectors"
+    # Retrieval with no query vector is the shipped path, and it ranks.
+    hits = R.retrieve(inst, "dispute a card charge", k=5, mode="hybrid",
+                      query_embedding=None)
+    assert hits and {d.id for d in hits} <= {d.id for d in inst.documents}
 
 
 _MODELS = {

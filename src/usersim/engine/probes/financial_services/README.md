@@ -137,11 +137,18 @@ realistic population mix rather than a uniform topic average.
 Whole documents only (no chunking), always scoped to the conversation's
 institution. Three interchangeable backends:
 
-- **`hybrid`** (default): normalised cosine similarity over precomputed
-  per-document embeddings (shipped as an `embeddings.parquet` sidecar) blended
-  evenly with normalised lexical overlap. **Both** tiers retrieve from the KB
-  like a production support agent. Falls back to pure lexical ranking when
-  embeddings or an endpoint are unavailable, so offline runs still work.
+- **`hybrid`** (default): normalised cosine similarity over per-document
+  embeddings, read from an `embeddings.parquet` sidecar, blended evenly with
+  normalised lexical overlap. **Both** tiers retrieve from the KB like a
+  production support agent. Falls back to pure lexical ranking when embeddings
+  or an endpoint are unavailable, so offline runs still work.
+
+  **No locale ships that sidecar.** Vectors are only comparable within the
+  embedding space that produced them, so shipping ours would silently pin every
+  user to one embedding model, and a user who picked a different one would get
+  near-arbitrary results rather than an error. Run `gen-assets` to build
+  vectors with the model you intend to query with. Until then retrieval is
+  lexical, which on this corpus is not a downgrade: see below.
 - **`dense`** (**ablation**): cosine alone. Kept so the contribution of each
   signal is measurable, not as a recommended setting: see below.
 - **`golden`** (reasoning-isolation **ablation**): injects the task's gold
@@ -299,6 +306,33 @@ load time. The authoring workflow lives in
 [finance_assets.ipynb](../../../asset_gen/notebooks/finance_assets.ipynb),
 and the asset contract in
 [SCHEMA.md](../../assets/financial_services/SCHEMA.md).
+
+### Tuning a generation run
+
+Generation batches documents into clusters: one model call emits a whole
+cluster as a single structured object, which is why `doc_gen_model` needs a
+large `max_tokens` and a generous `timeout`. `--docs-per-product` and
+`--max-docs-per-cluster` set how much each call produces, so raising either
+means raising `max_tokens` with it. Non-Latin locales tokenize two to three
+times denser than English, so a cluster size that fits for `en_US` may not for
+`ja_JP` or `hi_Deva_IN`.
+
+If the endpoint starts returning timeouts or 5xx, lower
+`--max-parallel doc_gen_model=N` before raising the timeout: the usual cause is
+too many heavy structured generations in flight, and a dropped call loses the
+whole cluster.
+
+`asset_judge_model` grades the output, so it is deliberately a different model
+family from `doc_gen_model` and runs at `temperature = 0.0`. That reduces
+run-to-run drift but does not remove it, since a reasoning model samples its
+own thinking whatever the output temperature says. Read corpus-wide means
+rather than any single document's score.
+
+The embedding model used here must be the same one the simulator queries with,
+or retrieval compares vectors from two different embedding spaces and silently
+returns near-arbitrary documents. Both aliases are set in the models config, so
+change them together. Choosing a different embedding model is fine; using two
+is not.
 
 ## Authoring a new locale
 
