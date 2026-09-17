@@ -118,11 +118,13 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--schema",
         type=str,
-        default="full",
+        default="standard",
         help=(
-            "Output column schema: a preset (full / compact), a comma-"
-            "separated column/group list, or 'full' (default = all columns). "
-            "Group tokens 'conversation' and 'persona' expand to their columns."
+            "Output column schema: a preset (standard / full / compact), or a "
+            "comma-separated column/group list. Default 'standard' is every "
+            "column except the persona fields copied verbatim from the source "
+            "dataset; 'full' adds those back. Group tokens 'conversation', "
+            "'persona' and 'persona_verbatim' expand to their columns."
         ),
     )
     p.add_argument(

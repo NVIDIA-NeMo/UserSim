@@ -285,7 +285,13 @@ def _dataset_card(repo_id: str, profile: SelectionProfile, manifest: dict) -> st
         "## Records by probe\n\n"
         f"{probe_table}\n"
         "## Columns\n\n"
-        f"{', '.join('`%s`' % c for c in manifest.get('schema', []))}\n"
+        f"{', '.join('`%s`' % c for c in manifest.get('schema', []))}\n\n"
+        "## Provenance\n\n"
+        "The simulated users are sampled from "
+        "[Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas), "
+        "which carries its own terms separate from NeMo UserSim's. Set the "
+        "`license` field above to whatever governs this dataset; `other` is "
+        "the placeholder, not an answer.\n"
     )
 
 

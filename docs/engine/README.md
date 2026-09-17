@@ -467,7 +467,7 @@ rationale):
 | `conversation_metadata` | str (JSON) | Loose per-turn judge / event log surfaced to interactive previews and the deep-dive analysis script. |
 | `conversation_status` | bool | True if the trajectory ran to completion (no gate exhaustion / no infrastructure failure) AND any optional `should_succeed(state)` hook returned True. |
 | `behavioral_profile` | str (JSON) | Computed behavioral parameters |
-| `persona_religion_language_context` | str (JSON) | Normalized audit view of the religion, ordered spoken languages, religious background, and linguistic background rendered into the user-agent prompt. Keys are present with null/empty values when the source persona has no such fields. Included in full trajectory/selection exports but excluded from the compact schema because these are protected attributes; review before sharing. |
+| `persona_religion_language_context` | str (JSON) | Normalized audit view of the religion, ordered spoken languages, religious background, and linguistic background rendered into the user-agent prompt. Keys are present with null/empty values when the source persona has no such fields. Written to the trajectory parquet, but protected attributes, so curated exports omit it unless you ask for it by name or with the `persona_protected` group (`--schema full` includes it). Review before sharing. |
 | `locale` | str | Locale for this row |
 | `conversation_language` | str | Language used |
 | `user_query` | str | Initial user query |

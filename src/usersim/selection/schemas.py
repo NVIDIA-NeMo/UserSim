@@ -3,13 +3,20 @@
 
 """Output schema projection for curated datasets.
 
-By default the curated parquet carries every trajectory column (minus the
-``run`` partition level). That is a lot of columns — most callers exporting a
+By default the curated parquet carries every trajectory column except the
+``run`` partition level and the persona fields copied verbatim from the source
+dataset. That is still a lot of columns — most callers exporting a
 training/eval dataset want a compact projection. A *schema* is either a named
 preset or an explicit column list; logical group tokens (``conversation``,
-``persona``) expand to the underlying columns, and any requested column that
-is absent from the frame is silently skipped (so ``num_turns`` "if available"
-just works).
+``persona``, ``persona_verbatim``) expand to the underlying columns, and any
+requested column that is absent from the frame is silently skipped (so
+``num_turns`` "if available" just works).
+
+Two sets of columns are opt-in rather than default: the persona fields copied
+from the source dataset, so publishing a curated dataset does not reproduce
+rows nobody asked to redistribute, and the protected attributes (religion,
+linguistic background). Ask for either with ``--schema full``, the
+``persona_verbatim`` / ``persona_protected`` group tokens, or by column name.
 
 The partition columns ``locale`` / ``probe_family`` are always retained
 (the partitioned writer needs them); ``run`` is included only when the schema
@@ -28,20 +35,37 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
         "conversation_metadata",
         "conversation_status",
     ),
+    # Fields UserSim computes about the simulated user: the bucketed age and
+    # the behavioural axes derived from the OCEAN traits. These describe how
+    # the user behaved, which is what a training or eval set is usually for.
     "persona": (
-        "persona_name",
-        "persona_age",
-        "persona_sex",
         "persona_age_bin",
-        "persona_education_level",
-        "persona_occupation",
-        "persona_location",
-        "persona_country",
         "behavioral_profile",
         "disclosure_style",
         "user_interaction_style",
         "persona_grounding",
         "conversation_language",
+    ),
+    # Fields copied from the persona dataset row, including ``persona``, which
+    # is the whole sampled person. Excluded from the default export: a curated
+    # dataset should carry the attributes a run turned on, not a reproduction
+    # of the source rows. Ask for them by name or with this token.
+    "persona_verbatim": (
+        "persona",
+        "persona_name",
+        "persona_age",
+        "persona_sex",
+        "persona_education_level",
+        "persona_occupation",
+        "persona_location",
+        "persona_country",
+    ),
+    # Protected attributes: religion, religious background, and spoken and
+    # linguistic background. Also excluded by default, and separate from
+    # ``persona_verbatim`` so that asking for one does not silently include
+    # the other. Review before sharing anything exported with this token.
+    "persona_protected": (
+        "persona_religion_language_context",
     ),
     # financial_services gold-metadata side channels the probe emits on every
     # trajectory (verifiable + dynamic). First-class here so curated
@@ -74,9 +98,20 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# Columns the default export leaves out. They still reach ``--schema full``,
+# an explicit column list, or their group token, so nothing is unreachable:
+# the point is that exporting them is a choice someone made.
+OPT_IN_ONLY: frozenset[str] = frozenset(
+    LOGICAL_GROUPS["persona_verbatim"] + LOGICAL_GROUPS["persona_protected"]
+)
+
 # Named presets. ``None`` is the sentinel for "all columns" (full).
 NAMED_SCHEMAS: dict[str, Optional[tuple[str, ...]]] = {
     "full": None,
+    # The default. Every column except the persona fields copied verbatim from
+    # the source dataset. Handled as an exclusion rather than a token list so
+    # it keeps picking up new columns the way ``full`` does.
+    "standard": None,
     "compact": (
         "run",
         "locale",
@@ -116,8 +151,9 @@ def _expand(tokens: Iterable[str]) -> list[str]:
 def resolve_columns(schema: Schema, available: Iterable[str]) -> list[str]:
     """Resolve a schema spec to a concrete, ordered, deduped column list.
 
-    - ``None`` / ``"full"`` → every available column except ``run``
-      (which is the partition-path level, not payload).
+    - ``None`` / ``"standard"`` → every available column except ``run`` (the
+      partition-path level, not payload) and the verbatim persona fields.
+    - ``"full"`` → every available column except ``run``.
     - a preset name → its token list, expanded.
     - a comma-separated string or a sequence → those tokens, expanded.
 
@@ -127,14 +163,22 @@ def resolve_columns(schema: Schema, available: Iterable[str]) -> list[str]:
     available = list(available)
     available_set = set(available)
 
-    if schema is None or schema == "full":
-        return [c for c in available if c != "run"]
+    def _everything(*, drop_opt_in: bool) -> list[str]:
+        return [
+            c for c in available
+            if c != "run" and not (drop_opt_in and c in OPT_IN_ONLY)
+        ]
+
+    if schema is None or schema == "standard":
+        return _everything(drop_opt_in=True)
+    if schema == "full":
+        return _everything(drop_opt_in=False)
 
     if isinstance(schema, str):
         if schema in NAMED_SCHEMAS:
             spec = NAMED_SCHEMAS[schema]
-            if spec is None:  # "full"
-                return [c for c in available if c != "run"]
+            if spec is None:  # "full" / "standard", handled above
+                return _everything(drop_opt_in=schema != "full")
             tokens: list[str] = list(spec)
         else:
             tokens = [t.strip() for t in schema.split(",") if t.strip()]
