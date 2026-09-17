@@ -119,9 +119,8 @@ class ModelIdentity:
     """One model alias as it ran for this run.
 
     ``api_key_env_var`` is the *name* of the env var the provider reads
-    its credential from (e.g. ``"NVIDIA_INFERENCE_HUB_KEY"``). The
-    resolved key value is NEVER stored — credentials must not leak into
-    artifacts.
+    its credential from (e.g. ``"NVIDIA_API_KEY"``). The resolved key
+    value is NEVER stored: credentials must not leak into artifacts.
     """
 
     alias: str

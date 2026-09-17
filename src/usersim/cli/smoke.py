@@ -220,11 +220,11 @@ def _check_models_config(report: SmokeReport) -> None:
 def _check_model_catalog(report: SmokeReport) -> None:
     """Verify every TOML in ``cli/`` resolves cleanly against the catalog.
 
-    Catches catalog drift: a model in MODELS that's not in
-    ``cli/model_catalog.py:INFERENCE_DEFAULTS``. Doesn't block local runs
-    (project-level fallbacks kick in) but signals that the catalog and the
-    shipped TOMLs have diverged. Rendered as a warning prefix in the
-    message; the check still passes.
+    Catches catalog drift: a model named in a shipped TOML that is absent
+    from ``cli/model_catalog.py:INFERENCE_DEFAULTS`` (or, for embedding
+    aliases, from the embedding catalog). Drift means a run silently falls
+    back to project defaults instead of the intended per-model parameters,
+    so this check fails rather than warning.
     """
     try:
         from usersim.cli._models import load_models_config

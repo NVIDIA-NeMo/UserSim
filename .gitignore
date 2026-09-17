@@ -31,6 +31,11 @@ debug_litellm_requests.jsonl
 .env
 .env.*
 
+# Local model configs. Keep private endpoints out of the repository: name any
+# models file carrying your own endpoint `models.local.toml`.
+models.local.toml
+*.local.toml
+
 # Data artifacts
 data/
 artifacts/

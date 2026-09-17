@@ -86,6 +86,45 @@ uv run usersim smoke        # offline self-check; no API key, no network
 model catalog, every probe's assets, and the plugin entry points without
 making a single model call.
 
+### Choosing models and providers
+
+Three providers are built in, each needing only a credential. Pick the shipped
+config that matches:
+
+| Provider | Credential | Config |
+|---|---|---|
+| `nvidia` (build.nvidia.com) | `NVIDIA_API_KEY` | `models_default.toml` |
+| `openai` | `OPENAI_API_KEY` | `models_openai.toml` |
+| `openrouter` | `OPENROUTER_API_KEY` | `models_openrouter.toml` |
+
+All three live in [`src/usersim/cli/`](src/usersim/cli/). Pass one with
+`--models`, or leave it off to get the default.
+
+To use any other OpenAI-compatible endpoint, copy one of those files, declare a
+provider, and pass it with `--models`. The `api_key` field is the *name* of an
+environment variable, never the key itself:
+
+```toml
+[[providers]]
+name = "my-endpoint"
+endpoint = "https://my-inference-endpoint.example/v1"
+provider_type = "openai"
+api_key = "MY_ENDPOINT_API_KEY"
+```
+
+**Keep your own endpoints out of the repository.** Name such a file
+`models.local.toml`, which is gitignored, so it cannot be committed by
+accident. If you would rather configure an endpoint once for every run instead
+of per file, add it to `~/.data-designer/model_providers.yaml`: Data Designer
+reads that file and UserSim merges it, and it sits outside any checkout.
+
+Adding a model means adding it to
+[`model_catalog.py`](src/usersim/cli/model_catalog.py) as well, so its sampling
+parameters resolve. `usersim smoke` fails if a shipped config names a model the
+catalog does not define. A model absent from `VLLM_DEFAULTS` also needs an
+explicitly declared provider: overriding an alias to one without a provider to
+route it to raises `ConfigError` rather than guessing an endpoint.
+
 ## Before you open a pull request
 
 ```bash

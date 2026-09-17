@@ -1,132 +1,37 @@
-# Default model configuration for `usersim`.
+# Default model configuration for `usersim`. Runs on build.nvidia.com through
+# the built-in `nvidia` provider, so `NVIDIA_API_KEY` is the only credential
+# needed.
 #
-# Six aliases are wired through the simulator and evaluator:
-#   - user_model         (drives the simulated user)
-#   - assistant_model    (model under test)
-#   - api_response_model (synthesizes API responses for tool-calling)
-#   - judge_model        (in-sim user-query gate / capitulation classifier)
-#   - summary_model      (context compression; optional but recommended)
-#   - evaluator_model    (rubric LLM for post-hoc trajectory evaluation)
+# `openai` and `openrouter` are also built in; see models_openai.toml and
+# models_openrouter.toml. For any other OpenAI-compatible endpoint, declare a
+# provider in your own file and pass `--models`. See CONTRIBUTING.md.
 #
-# Per-model knobs (temperature, top_p, max_tokens, extra_body) live in
-# ``cli/model_catalog.py:INFERENCE_DEFAULTS``. Per-alias knobs
-# (max_parallel_requests, timeout) live below.
+# Per-model sampling parameters live in cli/model_catalog.py. Per-alias knobs
+# (max_parallel_requests, timeout, max_tokens) go here and win over the catalog.
 #
-# Edit ``model``, ``provider``, max_parallel_requests / timeout to match
-# the model catalog you have access to. The shipped defaults target
-# build.nvidia.com via the default ``nvidia`` provider with
-# ``NVIDIA_API_KEY`` for auth.
+# Judges are a different model from `assistant_model` on purpose, so the model
+# under test is not scoring its own output.
 
-[[models]]
-alias = "user_model"
-model = "openai/gpt-oss-20b"
-provider = "nvidia"
-max_parallel_requests = 4
+models = [
+  { alias = "user_model",         model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # simulated user
+  { alias = "assistant_model",    model = "google/gemma-4-31b-it",                 provider = "nvidia", max_parallel_requests = 4, timeout = 300 },  # model under test
+  { alias = "api_response_model", model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # tool-call responses
+  { alias = "judge_model",        model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 4 },                 # in-sim gates
+  { alias = "summary_model",      model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # context compression
+  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 4 },                 # trajectory rubric
 
-[[models]]
-alias = "assistant_model"
-model = "openai/gpt-oss-120b"
-provider = "nvidia"
-max_parallel_requests = 4
-timeout = 300
+  # Used only by `usersim gen-assets`, which is a live, billable step. See
+  # probes/financial_services/README.md for the pipeline and its tuning knobs.
+  #
+  # `doc_gen_model` emits a whole document cluster per call, hence max_tokens.
+  # `asset_judge_model` grades that output, so it is a different family and
+  # runs at temperature 0 to keep scores stable between runs.
+  { alias = "doc_gen_model",      model = "google/gemma-4-31b-it",                 provider = "nvidia", max_parallel_requests = 8, timeout = 600, max_tokens = 16384 },
+  { alias = "asset_judge_model",  model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 8, temperature = 0.0 },
 
-[[models]]
-alias = "api_response_model"
-model = "openai/gpt-oss-20b"
-provider = "nvidia"
-max_parallel_requests = 4
-
-[[models]]
-alias = "judge_model"
-model = "openai/gpt-oss-120b"
-provider = "nvidia"
-max_parallel_requests = 4
-
-[[models]]
-alias = "summary_model"
-model = "openai/gpt-oss-20b"
-provider = "nvidia"
-max_parallel_requests = 4
-
-[[models]]
-alias = "evaluator_model"
-model = "openai/gpt-oss-120b"
-provider = "nvidia"
-max_parallel_requests = 4
-
-# ── asset_gen (usersim gen-assets --domain financial_services) ──────
-# Offline document generation for the financial_services probe. Not used by the
-# simulator/evaluator, EXCEPT that the embedding model must agree with the sim's
-# (see that entry). Both the doc-gen and embedding models are served over an
-# OpenAI-compatible endpoint, and their ids match
-# cli/model_catalog.py:INFERENCE_DEFAULTS.
-
-[[providers]]
-name = "nvidia_inference_hub"
-endpoint = "https://inference.example.com/v1"
-provider_type = "openai"
-api_key = "NVIDIA_API_KEY"
-
-# Offline batch generation, so parallelize harder than the sim's rate-limit-safe
-# 4 (each single-model inference column runs at its model's max_parallel_requests).
-[[models]]
-alias = "doc_gen_model"
-model = "nvidia/google/gemma-4-31b-it"
-provider = "nvidia_inference_hub"
-# 8 (not 16): each doc_set call is a heavy structured generation; too many in flight
-# stresses the hub and triggers 5xx/timeouts that drop clusters. Tune via the notebook
-# knob / `--max-parallel doc_gen_model=N`.
-max_parallel_requests = 8
-# Each doc_set call emits a whole cluster (up to max_docs_per_cluster docs) as one
-# structured object -> big generation. Generous headroom over DD's default request
-# timeout so large clusters don't get dropped mid-flight (word limits in the prompt
-# keep this bounded; drop concurrency first if the hub still times out).
-timeout = 600
-# Per-alias override of the catalog's uniform 8192 (see cli/model_catalog.py): a
-# doc_set cluster emits up to max_docs_per_cluster whole documents in ONE
-# structured object. Measured en_US bodies run ~240 tok/doc (cl100k), so a full
-# 10-doc cluster is ~3-5k tokens; non-ASCII locales (ja/hi/ko) tokenize ~2-3x
-# denser under the gemma tokenizer, so a heavy CJK/Indic cluster can reach ~10-12k.
-# 16k covers that worst case with headroom while halving 32k (whose long
-# generations were timing out / 5xx-ing on the hub). Thinking is off (see below),
-# so this is pure output budget -- scale it with max_docs_per_cluster.
-max_tokens = 16384
-# Thinking OFF for doc generation. Doc-gen is structured paraphrasing of the
-# provided authoritative values, not reasoning; with enable_thinking=True + 32k
-# the reasoning trace ballooned each cluster call to minutes and the hub returned
-# ModelInternalServerError (5xx) on most records. Empty extra_body overrides the
-# catalog's {chat_template_kwargs: {enable_thinking: true}} for this alias only
-# (sim/judge unaffected). Re-enable by removing this line if QC faithfulness drops.
-extra_body = {}
-
-# Asset QC/eval judge -- a family DISTINCT from the gemma doc-gen model (avoids
-# self-preference when grading generated docs), on a SEPARATE alias from the sim's
-# rate-limit-safe judge_model so asset generation parallelizes independently. Routed
-# through the SAME inference hub as doc-gen/embedding so the whole asset-gen pipeline
-# authenticates with one NVIDIA_API_KEY. Override per-run via `--model` / notebook knob.
-[[models]]
-alias = "asset_judge_model"
-model = "openai/openai/gpt-5.4"
-provider = "nvidia_inference_hub"
-max_parallel_requests = 16
-# This is a QC/eval JUDGE, not a generator, so pin the sampling temperature down from
-# the catalog's 1.0 -- without it the same cluster gets erratic 1-vs-4 faithfulness
-# scores run to run. It does NOT buy determinism, though, and the scorecard must not be
-# read as if it did: gpt-5.4 is a reasoning model (see model_catalog) and samples its
-# internal thinking whatever the output temperature says. Re-judging ONE unchanged
-# 1066-doc corpus moved 16-24% of per-axis scores by a full point, flipped 15% of
-# documents across the `any axis <=2` triage line, and shifted per-genre triage by
-# 5.4pt on average (20pt at worst, on identical text). Corpus-wide means are the
-# trustworthy read -- there the churn averages out to +/-0.014 -- while a single
-# genre's triage rate moves more from re-judging than from most prompt changes.
-temperature = 0.0
-
-[[models]]
-alias = "embedding_model"
-# MUST be the same model the simulator queries with. This side writes each
-# institution's embeddings.parquet; the sim side embeds the kb_search query
-# against it. A mismatch is silent: both candidates are 1024-dim, so no
-# dimension check fires and dense retrieval returns near-arbitrary documents.
-model = "nvidia/qwen/qwen3-embedding-0.6b"
-provider = "nvidia_inference_hub"
-max_parallel_requests = 16
+  # Query side of the financial_services probe's dense and hybrid retrieval.
+  # Must be the same model that produced the corpus vectors: vectors only
+  # compare within one embedding space, and a mismatch fails silently. Without
+  # it the probe retrieves lexically. See the probe README.
+  { alias = "embedding_model",    model = "nvidia/nemotron-3-embed-1b",            provider = "nvidia", max_parallel_requests = 8 },
+]
