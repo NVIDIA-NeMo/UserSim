@@ -120,7 +120,11 @@ class TestDeclaredDependencies:
         declared = self._declared(root / "pyproject.toml")
 
         # Distribution names differ from import names for a few packages.
-        aliases = {"yaml": "pyyaml", "lingua": "lingua_language_detector"}
+        aliases = {
+            "yaml": "pyyaml",
+            "lingua": "lingua_language_detector",
+            "dotenv": "python_dotenv",
+        }
         # Packages this distribution ships; they are not dependencies.
         first_party = {"usersim"}
         missing = {

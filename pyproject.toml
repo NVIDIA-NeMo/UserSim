@@ -73,6 +73,9 @@ dependencies = [
     "httpx",
     "huggingface-hub",
     "numpy",
+    # Reads credentials from a .env file so a run does not depend on what is
+    # exported in the calling shell. No required dependencies of its own.
+    "python-dotenv>=1.0,<2",
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
