@@ -9,12 +9,15 @@ text file (and pin it under version control) without touching Python.
 
 A model TOML looks like::
 
-    # Optional custom providers (rare; only needed for non-default endpoints).
+    # Optional custom providers, for any OpenAI-compatible endpoint that is
+    # not one of the built-in providers (``nvidia`` / ``openai`` /
+    # ``openrouter``). ``api_key`` is the NAME of an environment variable,
+    # never the key itself.
     [[providers]]
-    name = "nvidia-dev"
-    endpoint = "https://inference.example.com/v1"
+    name = "my-endpoint"
+    endpoint = "https://my-inference-endpoint.example/v1"
     provider_type = "openai"
-    api_key = "OPENAI_API_KEY"
+    api_key = "MY_ENDPOINT_API_KEY"
 
     [[models]]
     alias = "user_model"
@@ -111,6 +114,9 @@ class ProviderSpec:
 class ModelsConfig:
     providers: Tuple[ProviderSpec, ...]
     models: Tuple[ModelSpec, ...]
+    #: Where this came from, so callers can report it. ``None`` for configs
+    #: built in memory, such as in tests.
+    source_path: Optional[Path] = None
 
     def aliases(self) -> Tuple[str, ...]:
         return tuple(m.alias for m in self.models)
@@ -151,7 +157,7 @@ def load_models_config(path: str | Path) -> ModelsConfig:
         )
     models = tuple(_to_model_spec(d, source=p) for d in raw_models)
 
-    config = ModelsConfig(providers=providers, models=models)
+    config = ModelsConfig(providers=providers, models=models, source_path=p)
     aliases = set(config.aliases())
     if len(aliases) != len(models):
         raise ConfigError(f"{p} declares duplicate model aliases: {sorted(aliases)}")
@@ -209,10 +215,27 @@ def _to_model_spec(d: Dict[str, Any], *, source: Path) -> ModelSpec:
             source.name, alias, model,
         )
 
+    # TOML has no null literal, so a row cannot write ``temperature = None``
+    # to mean "send no temperature". ``drop_params`` is that expression: it
+    # names the parameters to leave out of the request entirely. Needed for
+    # reasoning models on a custom provider, which reject a non-default
+    # temperature and reject top_p outright, and which the catalog cannot
+    # cover because their ids are provider-specific.
+    dropped = {str(x) for x in d.get("drop_params", ())}
+    _DROPPABLE = {"temperature", "top_p", "max_tokens"}
+    if unknown_drop := dropped - _DROPPABLE:
+        raise ConfigError(
+            f"{source.name}: alias={alias!r} has drop_params "
+            f"{sorted(unknown_drop)}, which are not droppable. "
+            f"Choose from {sorted(_DROPPABLE)}."
+        )
+
     def pick(field: str, default: Any = None) -> Any:
         # TOML wins; otherwise catalog; otherwise hard-coded fallback.
         # NOTE: a catalog value of ``None`` is treated as "explicitly
         # drop this param" -- different from "field not in catalog".
+        if field in dropped:
+            return None
         if field in d:
             return d[field]
         if field in catalog:
@@ -360,11 +383,12 @@ def apply_model_overrides(
       self-hosted via vLLM), pick the first non-custom provider name
       that already appears in ``config.models`` (typically
       ``"nvidia"``).
-    - If the new model is NOT in ``VLLM_DEFAULTS`` (i.e. externally
-      served), pick the first custom provider declared in
-      ``config.providers`` (typically ``"nvidia-inference-hub"``).
-    - If neither rule matches, the override keeps the alias's original
-      provider (best-effort) and we log a warning.
+    - If the new model is NOT in ``VLLM_DEFAULTS`` (i.e. served over an
+      endpoint rather than a local vLLM), pick the first custom provider
+      declared in ``config.providers``.
+    - If neither rule matches, raise ``ConfigError``: there is no endpoint
+      known to serve the model, and silently keeping the alias's previous
+      provider would send the request somewhere that does not.
 
     Catalog re-resolution handles edge cases like swapping
     ``openai/gpt-oss-120b`` (catalog supplies
@@ -397,7 +421,11 @@ def apply_model_overrides(
 
     if not overrides:
         return config
-    from usersim.cli.model_catalog import resolve_inference_defaults, resolve_vllm_defaults
+    from usersim.cli.model_catalog import (
+        known_vllm_models,
+        resolve_inference_defaults,
+        resolve_vllm_defaults,
+    )
 
     have_aliases = set(config.aliases())
     unknown = [a for a in overrides if a not in have_aliases]
@@ -452,7 +480,7 @@ def apply_model_overrides(
         or "nvidia"
     )
     # Pre-compute the provider used by externally-routed (custom) aliases.
-    # First custom provider declared -- typically "nvidia-inference-hub".
+    # The first custom provider declared in the models config.
     external_provider: Optional[str] = (
         config.providers[0].name if config.providers else None
     )
@@ -499,14 +527,24 @@ def apply_model_overrides(
             # If extra_body IS in the dict-form override, the user is
             # taking explicit responsibility -- no warning needed.
 
-        # Provider inference: VLLM_DEFAULTS membership decides self-hosted
-        # vs external. Fall back to the alias's original provider if the
-        # config doesn't declare a matching tier.
+        # Provider inference: VLLM_DEFAULTS membership decides which tier
+        # serves the model. A model outside that set needs an explicitly
+        # declared provider; routing it to whatever the alias used before
+        # would send the request to an endpoint that does not serve it.
         is_self_hosted = bool(resolve_vllm_defaults(new_model))
         if is_self_hosted:
             new_provider = self_hosted_provider
+        elif external_provider is not None:
+            new_provider = external_provider
         else:
-            new_provider = external_provider or spec.provider
+            raise ConfigError(
+                f"cannot route model {new_model!r} for alias {spec.alias!r}: it is "
+                f"not served by the {self_hosted_provider!r} provider and the models "
+                f"config declares no custom provider to send it to. Add a "
+                f"[[providers]] block naming an OpenAI-compatible endpoint that "
+                f"serves it, or pick a model from: "
+                f"{', '.join(sorted(known_vllm_models()))}."
+            )
         if new_provider != spec.provider:
             logger.info(
                 "model override: alias=%r model=%r -> %r, "
@@ -667,9 +705,69 @@ def to_model_configs(config: ModelsConfig) -> List[Any]:
     return out
 
 
-def default_models_path() -> Path:
-    """Return the path to the bundled default models TOML."""
+#: Filename that, when present, overrides the bundled default config. Named
+#: ``*.local.toml`` so the gitignore rule covers it.
+LOCAL_MODELS_FILENAME = "models.local.toml"
+
+
+def bundled_models_path() -> Path:
+    """Return the path to the models TOML shipped inside the package."""
     return Path(__file__).resolve().parent / "models_default.toml"
+
+
+def local_models_path(start: Path | None = None) -> Optional[Path]:
+    """Return a ``models.local.toml`` found at or above ``start``, if any.
+
+    Lets a developer point every entry point at their own endpoint without
+    editing a tracked file. Returns ``None`` when there is none, which is the
+    normal case for a user who has not created one.
+    """
+    here = (start or Path.cwd()).resolve()
+    for directory in [here, *here.parents]:
+        candidate = directory / LOCAL_MODELS_FILENAME
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def default_models_path() -> Path:
+    """Return the models TOML to use when the caller named none.
+
+    Resolution order, first match wins:
+
+    1. ``$USERSIM_MODELS_CONFIG``, so one variable can redirect every command.
+    2. A ``models.local.toml`` in the working directory or any parent.
+    3. The bundled ``models_default.toml``.
+
+    An explicit ``--models`` path, or a path passed directly in a notebook,
+    bypasses all of this. Use :func:`describe_models_source` to report which
+    one won, since silently running against a different endpoint than you
+    expect is worth one line of output.
+    """
+    from_env = os.environ.get("USERSIM_MODELS_CONFIG")
+    if from_env:
+        path = Path(from_env).expanduser()
+        if not path.is_file():
+            raise ConfigError(
+                f"USERSIM_MODELS_CONFIG points at {str(path)!r}, which is not a "
+                f"file. Unset it or correct the path."
+            )
+        return path
+    return local_models_path() or bundled_models_path()
+
+
+def describe_models_source(path: Path) -> str:
+    """Return a one-line explanation of why ``path`` is the config in use."""
+    resolved = Path(path).resolve()
+    if os.environ.get("USERSIM_MODELS_CONFIG"):
+        env_path = Path(os.environ["USERSIM_MODELS_CONFIG"]).expanduser()
+        if env_path.is_file() and env_path.resolve() == resolved:
+            return f"{resolved} (from $USERSIM_MODELS_CONFIG)"
+    if resolved.name == LOCAL_MODELS_FILENAME:
+        return f"{resolved} (local override; the bundled default is unused)"
+    if resolved == bundled_models_path().resolve():
+        return f"{resolved} (bundled default)"
+    return str(resolved)
 
 
 # Built-in DD providers and the env vars they read from. Mirrors
@@ -860,12 +958,31 @@ def smoke_test_models(
                 "messages": [{"role": "user", "content": "Say hi briefly."}],
                 "max_tokens": 256,
             }
+            # Send the sampling parameters this alias resolved to, so the
+            # probe exercises what a real run sends. Without this the probe
+            # passes on a model that rejects the configured temperature or
+            # top_p, and the failure only appears later at the provider's
+            # health check. ``None`` means the config omits the parameter,
+            # so it is omitted here too.
+            if spec.temperature is not None:
+                payload["temperature"] = spec.temperature
+            if spec.top_p is not None:
+                payload["top_p"] = spec.top_p
+            if spec.extra_body:
+                payload.update(spec.extra_body)
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
         try:
             r = httpx.post(url, json=payload, headers=headers, timeout=timeout_sec)
+            if r.status_code == 400 and _rejects_max_tokens(r.text) and "max_tokens" in payload:
+                # Reasoning endpoints count hidden thinking tokens toward the
+                # output budget, so they take ``max_completion_tokens`` and
+                # reject ``max_tokens`` outright. Retry under the name this
+                # endpoint accepts rather than reporting a routing failure.
+                payload["max_completion_tokens"] = payload.pop("max_tokens")
+                r = httpx.post(url, json=payload, headers=headers, timeout=timeout_sec)
         except Exception as e:
             results[spec.alias] = (
                 False, f"{type(e).__name__}: {e}" + route_suffix,
@@ -889,6 +1006,20 @@ def smoke_test_models(
             )
 
     return results
+
+
+def _rejects_max_tokens(body: str) -> bool:
+    """Detect the 400 that fires when an endpoint refuses ``max_tokens``.
+
+    Reasoning endpoints replaced it with ``max_completion_tokens``, because
+    hidden thinking tokens are billed as output and the older field was
+    ambiguous about whether it capped them. Distinct from
+    :func:`_is_max_tokens_400`, which is the budget actually running out.
+    """
+    lower = body.lower()
+    return "max_completion_tokens" in lower and (
+        "unsupported" in lower or "not supported" in lower or "instead" in lower
+    )
 
 
 def _is_max_tokens_400(body: str) -> bool:
@@ -916,6 +1047,8 @@ def print_resolved_models(config: ModelsConfig) -> None:
     before any inference call goes out.
     """
     used_providers = sorted({s.provider for s in config.models})
+    if config.source_path is not None:
+        print(f"Models config: {describe_models_source(config.source_path)}")
     print(
         f"Loaded {len(config.models)} models "
         f"(providers: {used_providers or '(builtins only)'})"

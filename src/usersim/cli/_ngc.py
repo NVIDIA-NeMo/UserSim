@@ -8,10 +8,9 @@ pipeline consumes are hosted on NGC. ``data-designer download personas``
 shells out to the ``ngc`` binary and silently no-ops with a "NGC CLI not
 found" banner when the binary is missing (see
 ``data_designer.cli.utils.check_ngc_cli_available`` in the installed
-``data-designer`` package). On a fresh cluster node the binary doesn't
-exist on ``$PATH``, so the persona-download cell in
-``notebooks/01_simulate.ipynb`` fails for every locale until somebody
-installs NGC CLI manually.
+``data-designer`` package). On a machine where the binary is not on
+``$PATH``, the persona download therefore reports success while
+downloading nothing, once per locale.
 
 This module is the cross-platform installer that ``usersim setup-ngc``
 and the notebook auto-install path both call. It pins a known-good NGC
@@ -25,11 +24,10 @@ copy the per-zip ``sha256_base64`` (decode to hex) or run
 ``shasum -a 256`` on a freshly downloaded zip, and update
 :data:`NGC_VERSION` and :data:`_RELEASES`.
 
-Scope: Linux x86_64 + Linux aarch64 only (those are the cluster targets
-this project runs on). macOS is shipped upstream as ``.pkg`` installers
-that require ``sudo installer -pkg``, so it can't land in a venv without
-re-implementing pkg payload extraction; we error out with a friendly
-pointer instead. Same story for Windows.
+Scope: Linux x86_64 and Linux aarch64 only. Upstream ships macOS as
+``.pkg`` installers requiring ``sudo installer -pkg``, which cannot land
+in a virtualenv without re-implementing pkg payload extraction, so this
+errors out with a pointer to the manual install instead. Same for Windows.
 """
 
 from __future__ import annotations
@@ -220,8 +218,7 @@ def ensure_ngc_cli(
     # Make the install visible to the current process. .venv/bin is
     # usually on PATH already (since `source .venv/bin/activate`
     # prepended it), but a Jupyter kernel started outside the venv may
-    # not have it — same edge case docs/onboarding.md calls out for the
-    # `cli` import path.
+    # not have it.
     _prepend_path(target_dir)
 
     _verify_install()
@@ -281,7 +278,7 @@ def ensure_ngc_org() -> str | None:
             "https://org.ngc.nvidia.com/account/api-keys. Then run:\n"
             "    export NGC_CLI_API_KEY=\"<your-ngc-key>\"\n"
             "    usersim setup-ngc\n"
-            "See docs/onboarding.md §2 for details.",
+            "See docs/personas.md for details.",
             file=sys.stderr,
         )
         return None

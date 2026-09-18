@@ -1141,7 +1141,11 @@ class ToolExecutionMixin:
     def _recall_assistant(
         self, models: dict, state: Any, cfg: Any, *, with_tools: bool,
     ) -> Dict[str, Any]:
-        from usersim.engine.core.llm import call_llm
+        from usersim.engine.core.llm import (
+            NON_ASCII_TOKEN_SCALE,
+            call_llm,
+            scaled_max_tokens,
+        )
         from usersim.engine.core.simulation import _is_non_ascii_locale
 
         kwargs: Dict[str, Any] = {}
@@ -1149,7 +1153,9 @@ class ToolExecutionMixin:
         if tools:
             kwargs["tools"] = tools
         if _is_non_ascii_locale(getattr(self, "_locale", "en_US")):
-            kwargs.setdefault("max_tokens", 4096)
+            kwargs.update(
+                scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE)
+            )
         resp = call_llm(
             models, "assistant_model", self._synthesis_messages(state, cfg),
             **kwargs,

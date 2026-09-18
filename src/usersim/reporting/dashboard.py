@@ -1469,7 +1469,7 @@ function App() {{
   return h("main", {{className:"app"}},
     h("header", {{className:"hero"}},
       h("h1", null,
-        h("span", null, "USERSIM CAPABILITY REPORT"),
+        h("span", null, "NeMo UserSim Capability Report"),
         report.model_id ? h("span", {{className:"hero-model"}}, report.model_id) : null
       ),
       report.run_id

@@ -332,21 +332,21 @@ class TestResolveModels:
 
     def test_resolves_custom_provider(self) -> None:
         provider = _StubProviderSpec(
-            name="nvidia-inference-hub",
-            endpoint="https://inference.example.com/v1",
+            name="gateway",
+            endpoint="https://gateway.example/v1",
             provider_type="openai",
-            api_key="NVIDIA_INFERENCE_HUB_KEY",
+            api_key="GATEWAY_API_KEY",
         )
         spec = _StubModelSpec(
             alias="user_model",
             model="openai/openai/gpt-5.5",
-            provider="nvidia-inference-hub",
+            provider="gateway",
         )
         out = _resolve_models(model_specs=(spec,), provider_specs=(provider,))
         identity = out["user_model"]
-        assert identity.provider == "nvidia-inference-hub"
-        assert identity.endpoint == "https://inference.example.com/v1"
-        assert identity.api_key_env_var == "NVIDIA_INFERENCE_HUB_KEY"
+        assert identity.provider == "gateway"
+        assert identity.endpoint == "https://gateway.example/v1"
+        assert identity.api_key_env_var == "GATEWAY_API_KEY"
 
     def test_unknown_provider_yields_none_endpoint(self) -> None:
         spec = _StubModelSpec(
@@ -504,17 +504,17 @@ class TestBuildRunManifest:
         models_config = _StubModelsConfig(
             providers=(
                 _StubProviderSpec(
-                    name="nvidia-inference-hub",
-                    endpoint="https://inference.example.com/v1",
+                    name="gateway",
+                    endpoint="https://gateway.example/v1",
                     provider_type="openai",
-                    api_key="NVIDIA_INFERENCE_HUB_KEY",
+                    api_key="GATEWAY_API_KEY",
                 ),
             ),
             models=(
                 _StubModelSpec(
                     alias="assistant_model",
                     model="nvidia/nemotron-3-super-v3",
-                    provider="nvidia-inference-hub",
+                    provider="gateway",
                     temperature=1.0,
                     top_p=1.0,
                     max_tokens=8192,
@@ -563,8 +563,8 @@ class TestBuildRunManifest:
         assert manifest.asset_versions.prompt_versions == {"tool_calling": "v1.0"}
         identity = manifest.models["assistant_model"]
         assert identity.model == "nvidia/nemotron-3-super-v3"
-        assert identity.endpoint == "https://inference.example.com/v1"
-        assert identity.api_key_env_var == "NVIDIA_INFERENCE_HUB_KEY"
+        assert identity.endpoint == "https://gateway.example/v1"
+        assert identity.api_key_env_var == "GATEWAY_API_KEY"
         assert manifest.replay == ReplayInfo()  # reserved fields default null
 
     def test_empty_trajectory_df_renders_zeros(self) -> None:

@@ -52,7 +52,7 @@ COV_FAIL_UNDER ?= 84
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install-dev install-ci lint lint-fix format format-check check-all \
+.PHONY: help install-dev install-ci install-kernel lint lint-fix format format-check check-all \
         check-all-fix test test-fast coverage smoke check-wheel check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
@@ -62,8 +62,8 @@ help:  ## Show the available targets
 
 # --- setup -----------------------------------------------------------------
 
-install-dev:  ## Sync the workspace with dev extras and install pre-commit hooks
-	$(UV) sync --extra dev
+install-dev:  ## Sync the workspace with dev tooling and install pre-commit hooks
+	$(UV) sync
 	@if [ ! -f .git/hooks/pre-commit ]; then \
 		echo "Installing pre-commit hooks..."; \
 		$(UV) run pre-commit install; \
@@ -75,7 +75,7 @@ install-dev:  ## Sync the workspace with dev extras and install pre-commit hooks
 # dependency drift becomes a build failure rather than a silent
 # re-resolution. No pre-commit hooks -- CI has no working tree to guard.
 install-ci:  ## Sync exactly what CI needs, enforcing the lockfile
-	$(UV) sync --extra dev --locked
+	$(UV) sync --locked
 
 # --- lint / format ---------------------------------------------------------
 
@@ -93,10 +93,8 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-# format-check is deliberately absent for now. `ruff format` would rewrite 209
-# of 252 files, and enforcing that while MRs are in flight would bury them in
-# conflicts. It joins this target in the same commit as the mechanical reformat,
-# once the open MRs land. `make format` stays available in the meantime.
+# `format-check` is not yet part of `check-all`; run `make format` to apply
+# formatting in the meantime.
 check-all: lint  ## Run every static check CI enforces
 
 check-all-fix: lint-fix  ## Fix everything fixable, then you re-review
@@ -163,6 +161,13 @@ update-license-headers:  ## Add or refresh the SPDX header on every source file
 clean-notebooks:  ## Strip outputs from every notebook (source only)
 	@$(UV) run --with nbstripout nbstripout $$(git ls-files '*.ipynb' | grep -v '^_')
 	@echo "✓ notebook outputs stripped"
+
+# `uv run jupyter lab` already sees the kernel inside .venv. This registers a
+# NAMED one so editors that pick kernels system-wide can find this project's
+# environment rather than offering a bare "python3" per checkout.
+install-kernel:  ## Register a Jupyter kernel named for this project's venv
+	@$(UV) run python -m ipykernel install --user \
+		--name usersim --display-name "UserSim (.venv)"
 
 check-doc-links:  ## Fail on broken relative links in tracked markdown
 	@$(UV) run python scripts/check_doc_links.py

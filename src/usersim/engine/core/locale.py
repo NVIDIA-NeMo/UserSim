@@ -450,11 +450,6 @@ PERSONA_CORPUS_LANGUAGE: dict[str, dict[str, Any]] = {
 }
 
 
-def is_india_variant(locale: str) -> bool:
-    """True iff ``locale`` is a registered India language-variant."""
-    return locale in INDIA_VARIANT_LOCALES
-
-
 def india_variant(locale: str) -> "IndiaVariant | None":
     """Return the :class:`IndiaVariant` for ``locale``, or ``None``."""
     return INDIA_VARIANT_LOCALES.get(locale)

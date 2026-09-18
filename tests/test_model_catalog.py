@@ -73,6 +73,81 @@ def _cli_dir() -> Path:
 
     return Path(cli.__file__).resolve().parent
 
+
+def _shipped_model_tomls() -> list[Path]:
+    """Every models config that ships inside the package.
+
+    Discovered rather than listed so adding a provider config cannot skip
+    the regression locks below.
+    """
+    return sorted(_cli_dir().glob("models_*.toml"))
+
+
+_CUSTOM_PROVIDER_TOML = """
+[[providers]]
+name = "my-endpoint"
+endpoint = "https://my-endpoint.example/v1"
+provider_type = "openai"
+api_key = "MY_ENDPOINT_API_KEY"
+
+[[models]]
+alias = "user_model"
+model = "openai/openai/gpt-5.5"
+provider = "my-endpoint"
+
+[[models]]
+alias = "assistant_model"
+model = "openai/gpt-oss-120b"
+provider = "nvidia"
+timeout = 300
+
+[[models]]
+alias = "api_response_model"
+model = "openai/openai/gpt-5.5"
+provider = "my-endpoint"
+
+[[models]]
+alias = "judge_model"
+model = "openai/openai/gpt-5.5"
+provider = "my-endpoint"
+
+[[models]]
+alias = "summary_model"
+model = "openai/openai/gpt-5.5"
+provider = "my-endpoint"
+
+[[models]]
+alias = "evaluator_model"
+model = "openai/openai/gpt-5.5"
+provider = "my-endpoint"
+
+[[models]]
+alias = "embedding_model"
+model = "nvidia/qwen/qwen3-embedding-0.6b"
+provider = "my-endpoint"
+"""
+
+
+def _custom_provider_cfg() -> ModelsConfig:
+    """A config routing support aliases through a declared custom provider.
+
+    Written to a temp file and loaded through ``load_models_config`` so the
+    catalog fill-in applies exactly as it does for a real config. The shipped
+    configs all use built-in providers, while provider-routing behaviour needs
+    a custom provider to route to.
+    """
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".toml", delete=False, encoding="utf-8"
+    ) as fh:
+        fh.write(_CUSTOM_PROVIDER_TOML)
+        path = Path(fh.name)
+    try:
+        return load_models_config(path)
+    finally:
+        path.unlink(missing_ok=True)
+
     def test_qwen_embedding_defaults_supply_input_type_and_truncate(self):
         from usersim.cli._models import to_model_configs
         from usersim.cli.model_catalog import resolve_embedding_defaults
@@ -82,7 +157,7 @@ def _cli_dir() -> Path:
         cfg = ModelsConfig(providers=(), models=(
             ModelSpec(alias="embedding_model",
                       model="nvidia/qwen/qwen3-embedding-0.6b",
-                      provider="nvidia_inference_hub"),))
+                      provider="openai-compatible"),))
         ip = to_model_configs(cfg)[0].inference_parameters
         assert ip.extra_body == {"input_type": "passage", "truncate": "NONE"}
 
@@ -92,10 +167,10 @@ def _cli_dir() -> Path:
             providers=(),
             models=(
                 ModelSpec(alias="doc_gen_model", model="nvidia/google/gemma-4-31b-it",
-                          provider="nvidia_inference_hub"),
+                          provider="openai-compatible"),
                 ModelSpec(alias="embedding_model",
                           model="nvidia/nvidia/nemotron-3-embed-1b",
-                          provider="nvidia_inference_hub"),
+                          provider="openai-compatible"),
             ),
         )
         by_alias = {mc.alias: mc for mc in to_model_configs(cfg)}
@@ -125,7 +200,7 @@ def _cli_dir() -> Path:
     def test_known_models_helpers_are_sets(self):
         assert isinstance(known_inference_models(), set)
         assert isinstance(known_vllm_models(), set)
-        # The hub-served model should be in inference but NOT vllm.
+        # A gateway-served model belongs in inference but NOT vllm.
         assert "openai/openai/gpt-5.5" in known_inference_models()
         assert "openai/openai/gpt-5.5" not in known_vllm_models()
 
@@ -133,12 +208,12 @@ def _cli_dir() -> Path:
 class TestGemma4ThinkingTrigger:
     """Lock for the gemma-4-31b-it reasoning-mode trigger.
 
-    The NVIDIA inference hub gateway forwards ``chat_template_kwargs``
-    to vLLM, which is what gates Gemma's chat-template ``enable_thinking``
-    flag and turns on reasoning. Other documented triggers (Google API
-    top-level ``enable_thinking``, the model-card ``<|think|>`` system
-    token, OpenAI-style ``reasoning_effort``) all fail silently. See
-    ``tools/probe_gemma_thinking.py`` for the per-trigger evidence.
+    Gemma's reasoning is gated by its chat-template ``enable_thinking``
+    flag, which is reachable only by forwarding ``chat_template_kwargs``
+    through to vLLM. The other documented triggers (a top-level
+    ``enable_thinking``, the model-card ``<|think|>`` system token, and
+    OpenAI-style ``reasoning_effort``) all fail silently on an
+    OpenAI-compatible endpoint.
 
     A regression here would silently drop reasoning on every gemma run.
     """
@@ -151,15 +226,14 @@ class TestGemma4ThinkingTrigger:
 
     def test_thinking_trigger_uses_chat_template_kwargs(self):
         """The catalog MUST set ``extra_body.chat_template_kwargs.enable_thinking``
-        to ``True``. The other documented triggers don't fire on the
-        NVIDIA hub (probe-confirmed)."""
+        to ``True``; the other documented triggers do not fire over an
+        OpenAI-compatible endpoint."""
         defaults = INFERENCE_DEFAULTS[self.MODEL]
         assert defaults.get("extra_body") == {
             "chat_template_kwargs": {"enable_thinking": True}
         }, (
             "gemma-4-31b-it requires extra_body.chat_template_kwargs."
-            "enable_thinking=True to surface reasoning on the NVIDIA "
-            "inference hub. See tools/probe_gemma_thinking.py."
+            "enable_thinking=True to surface reasoning."
         )
 
     def test_does_not_use_dead_triggers(self):
@@ -169,7 +243,7 @@ class TestGemma4ThinkingTrigger:
         defaults = INFERENCE_DEFAULTS[self.MODEL]
         eb = defaults.get("extra_body") or {}
         # NOT a top-level enable_thinking (Google-API form -- doesn't
-        # round-trip through the NVIDIA gateway).
+        # round-trip through a hosted endpoint).
         assert "enable_thinking" not in eb
         # NOT reasoning_effort (OpenAI form -- silently ignored here).
         assert "reasoning_effort" not in eb
@@ -180,10 +254,10 @@ class TestGemma4ThinkingTrigger:
         defaults = INFERENCE_DEFAULTS[self.MODEL]
         assert defaults["temperature"] == 1.0
         assert defaults["top_p"] == 0.95
-        # max_tokens=8192 mirrors other thinking-capable entries; with
+        # max_tokens mirrors other thinking-capable entries; with
         # thinking enabled, completions can be ~2x the non-thinking
         # length on rubric-heavy turns (probe showed 881 vs 476).
-        assert defaults["max_tokens"] == 8192
+        assert defaults["max_tokens"] == 4096
 
     def test_extra_body_round_trips_through_loader(self, tmp_path: Path):
         """End-to-end: a TOML row that omits extra_body picks up the
@@ -278,33 +352,78 @@ class TestLoaderAutofill:
         )
 
     def test_shipped_default_toml_resolves_consistently(self):
-        # End-to-end check: cli/models_default.toml's slimmed rows pick up
-        # the per-model defaults (temperature / top_p / max_tokens /
-        # extra_body) from the catalog, and per-alias fields (timeout)
-        # from the TOML row itself.
-        cfg = load_models_config(
-            _cli_dir() / "models_default.toml"
-        )
-        assistant = cfg.get("assistant_model")
-        assert assistant.temperature == 1.0
-        assert assistant.top_p == 1.0
-        assert assistant.max_tokens == 8192             # catalog
-        assert assistant.timeout == 300                 # alias-specific (TOML)
-        assert assistant.extra_body == {"reasoning_effort": "high"}
+        """Slim TOML rows pick the catalog up, and TOML fields still win.
 
-    def test_shipped_hub_toml_resolves_consistently(self):
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
-        # gpt-5.5 model uses hub provider; no extra_body.
-        user = cfg.get("user_model")
-        assert user.model == "openai/openai/gpt-5.5"
-        assert user.provider == "nvidia-inference-hub"
-        assert user.extra_body is None
-        # assistant_model still on nvidia, with extra_body from catalog.
+        Asserts the resolution mechanism rather than specific model ids, which
+        change whenever a provider retires one.
+        """
+        cfg = load_models_config(_cli_dir() / "models_default.toml")
         assistant = cfg.get("assistant_model")
         assert assistant.provider == "nvidia"
-        assert assistant.extra_body == {"reasoning_effort": "high"}
+        # From the catalog: the TOML row sets none of these.
+        assert assistant.max_tokens == 4096
+        assert assistant.temperature is not None
+        assert assistant.top_p is not None
+        # From the TOML row, which the catalog must not override.
+        assert assistant.timeout == 300
+
+    def test_shipped_openai_toml_resolves_consistently(self):
+        cfg = load_models_config(_cli_dir() / "models_openai.toml")
+        for alias in ("user_model", "assistant_model", "judge_model"):
+            assert cfg.get(alias).provider == "openai"
+        # Reasoning models must not carry max_tokens: the OpenAI reasoning
+        # endpoints reject it outright in favour of max_completion_tokens.
+        assistant = cfg.get("assistant_model")
+        assert assistant.max_tokens is None, (
+            "a reasoning model must leave max_tokens unset, or every call 400s"
+        )
+        assert "reasoning_effort" in (assistant.extra_body or {})
+
+    def test_shipped_openrouter_toml_resolves_consistently(self):
+        cfg = load_models_config(_cli_dir() / "models_openrouter.toml")
+        for spec in cfg.models:
+            assert spec.provider == "openrouter", (
+                f"{spec.alias} should route through the built-in openrouter "
+                "provider"
+            )
+        # Every alias routes through the one built-in provider, so no
+        # custom [[providers]] block is needed.
+        assert cfg.providers == ()
+
+    def test_judge_is_not_the_model_under_test(self):
+        """No shipped config may judge a model with itself.
+
+        A judge that is the assistant scores its own output, which is the
+        clearest form of self-preference bias.
+        """
+        for toml_path in _shipped_model_tomls():
+            cfg = load_models_config(toml_path)
+            assistant = cfg.get("assistant_model")
+            if assistant is None:
+                continue
+            for alias in ("judge_model", "evaluator_model"):
+                other = cfg.get(alias)
+                if other is None:
+                    continue
+                assert other.model != assistant.model, (
+                    f"{toml_path.name}: {alias} is the same model as "
+                    f"assistant_model ({assistant.model})"
+                )
+
+    def test_every_shipped_toml_uses_only_builtin_providers(self):
+        """Shipped configs must not carry an endpoint.
+
+        A committed `[[providers]]` block would either name someone's private
+        endpoint or ship a placeholder that silently fails. Private endpoints
+        belong in an ignored `models.local.toml` or in
+        `~/.data-designer/model_providers.yaml`.
+        """
+        for toml_path in _shipped_model_tomls():
+            cfg = load_models_config(toml_path)
+            assert cfg.providers == (), (
+                f"{toml_path.name} declares a custom provider; shipped configs "
+                "must use only the built-in nvidia / openai / openrouter"
+            )
 
     def test_evaluator_model_alias_shipped_in_both_tomls(self):
         """Regression lock: both shipped model TOMLs must declare an
@@ -316,10 +435,9 @@ class TestLoaderAutofill:
 
         assert REQUIRED_EVALUATOR_ALIASES == ("evaluator_model",)
 
-        for toml_name in ("models_default.toml", "models_hub_support.toml"):
-            cfg = load_models_config(
-                _cli_dir() / toml_name
-            )
+        for toml_path in _shipped_model_tomls():
+            toml_name = toml_path.name
+            cfg = load_models_config(toml_path)
             assert cfg.get("evaluator_model") is not None, (
                 f"{toml_name} is missing the `evaluator_model` row"
             )
@@ -332,16 +450,14 @@ class TestLoaderAutofill:
         """Regression lock: both shipped model TOMLs must declare an
         `embedding_model` row. The financial_services probe embeds kb_search
         queries via this alias for dense retrieval; without it dense mode
-        SILENTLY degrades to lexical word-overlap (an entire run's retrieval
-        quietly ran on the wrong backend before this was caught). The alias
-        must resolve to an embedding model matching the corpus vectors.
+        SILENTLY degrades to lexical word-overlap. The alias must resolve to
+        an embedding model matching the corpus vectors.
         """
         from usersim.cli.model_catalog import is_embedding_model
 
-        for toml_name in ("models_default.toml", "models_hub_support.toml"):
-            cfg = load_models_config(
-                _cli_dir() / toml_name
-            )
+        for toml_path in _shipped_model_tomls():
+            toml_name = toml_path.name
+            cfg = load_models_config(toml_path)
             emb = cfg.get("embedding_model")
             assert emb is not None, (
                 f"{toml_name} is missing the `embedding_model` row -- "
@@ -363,10 +479,72 @@ class TestApplyModelOverrides:
     """Per-alias model swaps re-resolve catalog defaults."""
 
     def _cfg(self) -> ModelsConfig:
-        # Use the shipped default TOML so overrides have a realistic baseline.
-        return load_models_config(
-            _cli_dir() / "models_default.toml"
-        )
+        # A config with a custom provider declared, so overrides to a
+        # hosted-only model have somewhere to route. Overriding against a
+        # built-in-only config is covered by
+        # ``test_override_to_unroutable_model_raises`` below.
+        return _custom_provider_cfg()
+
+    def test_smoke_probe_retries_when_endpoint_rejects_max_tokens(self, monkeypatch):
+        """Reasoning endpoints take ``max_completion_tokens``, not ``max_tokens``.
+
+        They reject the older field with a 400 rather than ignoring it, so a
+        probe that only knows ``max_tokens`` reports a healthy model as a
+        routing failure. The probe must retry under the accepted name.
+        """
+        import httpx
+
+        calls: list[dict] = []
+
+        class _Resp:
+            def __init__(self, status: int, text: str) -> None:
+                self.status_code, self.text = status, text
+
+        def fake_post(url, json=None, headers=None, timeout=None):
+            calls.append(dict(json or {}))
+            if "max_tokens" in (json or {}):
+                return _Resp(
+                    400,
+                    '{"error": {"message": "Unsupported parameter: '
+                    "'max_tokens' is not supported with this model. Use "
+                    "'max_completion_tokens' instead.\"}}",
+                )
+            return _Resp(200, "{}")
+
+        monkeypatch.setattr(httpx, "post", fake_post)
+        monkeypatch.setenv("OPENAI_API_KEY", "stub-key")
+
+        cfg = load_models_config(_cli_dir() / "models_openai.toml")
+        results = smoke_test_models(cfg, aliases=["assistant_model"])
+
+        ok, msg = results["assistant_model"]
+        assert ok, f"probe should recover from the rename, got: {msg}"
+        assert len(calls) == 2, "expected one rejected call then one retry"
+        assert "max_tokens" in calls[0]
+        assert calls[1].get("max_completion_tokens") == calls[0]["max_tokens"]
+        assert "max_tokens" not in calls[1]
+
+    def test_override_to_unroutable_model_raises(self):
+        """A model no declared provider serves must not be routed anyway.
+
+        The shipped default config uses only built-in providers, so a model
+        outside ``VLLM_DEFAULTS`` has no endpoint to reach. Silently keeping
+        the alias's previous provider would send the request to an endpoint
+        that does not serve the model.
+        """
+        cfg = load_models_config(_cli_dir() / "models_default.toml")
+        assert cfg.providers == (), "fixture pre-condition: no custom provider"
+
+        with pytest.raises(ConfigError) as excinfo:
+            apply_model_overrides(
+                cfg, {"assistant_model": "openai/openai/gpt-5.5"}
+            )
+        msg = str(excinfo.value)
+        assert "openai/openai/gpt-5.5" in msg
+        assert "assistant_model" in msg
+        # The message must name a way forward.
+        assert "[[providers]]" in msg
+        assert "openai/gpt-oss-120b" in msg
 
     def test_empty_overrides_returns_same_config(self):
         cfg = self._cfg()
@@ -386,7 +564,7 @@ class TestApplyModelOverrides:
     def test_swap_preserves_per_alias_fields(self):
         # max_parallel_requests / timeout / provider belong to the alias;
         # they MUST survive a model swap. (max_tokens IS per-model in the
-        # catalog as of the 8192-uniform-cap landing -- it gets re-resolved
+        # catalog as of the uniform-cap landing -- it gets re-resolved
         # along with temperature / top_p / extra_body. The other test
         # `test_swap_to_model_with_different_extra_body_drops_old_extra`
         # covers the model-keyed re-resolution path.)
@@ -400,8 +578,9 @@ class TestApplyModelOverrides:
         assert summary.provider == "nvidia"             # alias-specific, kept
         # New model is in catalog -> reasoning_effort=high carries over.
         assert summary.extra_body == {"reasoning_effort": "high"}
-        # max_tokens is per-model in the catalog now (8192 uniformly).
-        assert summary.max_tokens == 8192
+        # max_tokens is per-model in the catalog now (4096 uniformly;
+        # non-ASCII locales get it scaled up at call time).
+        assert summary.max_tokens == 4096
 
     def test_other_aliases_unchanged_by_targeted_override(self):
         cfg = self._cfg()
@@ -421,29 +600,25 @@ class TestApplyModelOverrides:
         """Override to a non-catalog model must NOT inherit the old
         model's extra_body.
 
-        Regression: prior behavior inherited the old extra_body, which
-        meant swapping ``openai/gpt-oss-120b`` (catalog supplies
-        ``{"reasoning_effort": "high"}``) -> a non-catalog model would
-        carry the gpt-oss-only ``reasoning_effort`` knob across to the
-        new model. ``extra_body`` keys are model-family-specific
-        (gpt-oss ``reasoning_effort``, gemma ``chat_template_kwargs``,
-        anthropic ``thinking``); inheriting one family's knob across
-        silently risks 400s or unexpected behavior at the inference
-        layer. We now clear ``extra_body`` and surface a louder
-        warning that names the dropped keys.
+        ``extra_body`` keys are model-family-specific (gpt-oss
+        ``reasoning_effort``, gemma ``chat_template_kwargs``, anthropic
+        ``thinking``), so carrying one family's knob onto another model
+        risks a 400 or silently unexpected behaviour at the inference layer.
+        Clearing it and naming the dropped keys in a warning is what lets a
+        user re-add one deliberately.
         """
         cfg = self._cfg()
-        # Sanity: the user_model row is gpt-oss-120b which carries a
+        # Sanity: the assistant_model row is gpt-oss-120b, which carries a
         # gpt-oss-only extra_body knob.
-        original_extra = cfg.get("user_model").extra_body
+        original_extra = cfg.get("assistant_model").extra_body
         assert original_extra == {"reasoning_effort": "high"}, (
-            "fixture pre-condition: user_model is on gpt-oss-120b with "
+            "fixture pre-condition: assistant_model is on gpt-oss-120b with "
             "the gpt-oss-only reasoning_effort knob"
         )
 
         with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
             cfg2 = apply_model_overrides(
-                cfg, {"user_model": "vendor/unknown-model-99b"}
+                cfg, {"assistant_model": "vendor/unknown-model-99b"}
             )
 
         # Warning fires, names the model AND the dropped keys so a
@@ -455,16 +630,16 @@ class TestApplyModelOverrides:
             "knows what to re-add explicitly if it was intentional"
         )
 
-        user = cfg2.get("user_model")
-        assert user.model == "vendor/unknown-model-99b"
+        assistant = cfg2.get("assistant_model")
+        assert assistant.model == "vendor/unknown-model-99b"
         # The KEY assertion: extra_body is cleared, NOT inherited.
-        assert user.extra_body is None
+        assert assistant.extra_body is None
         # Sampling params (temperature / top_p / max_tokens) are still
-        # kept from the old spec -- they're generic, round-trip across
+        # kept from the old spec: they are generic and round-trip across
         # provider families.
-        assert user.temperature == cfg.get("user_model").temperature
-        assert user.top_p == cfg.get("user_model").top_p
-        assert user.max_tokens == cfg.get("user_model").max_tokens
+        assert assistant.temperature == cfg.get("assistant_model").temperature
+        assert assistant.top_p == cfg.get("assistant_model").top_p
+        assert assistant.max_tokens == cfg.get("assistant_model").max_tokens
 
     def test_swap_to_model_outside_catalog_no_old_extra_body_warns_briefly(self, caplog):
         """When the OLD spec had no extra_body to drop, the warning is
@@ -472,12 +647,10 @@ class TestApplyModelOverrides:
         add), but it doesn't pretend to name dropped keys."""
         # Build a config whose user_model has NO extra_body (e.g. on
         # claude or gpt-5.5, both of which set extra_body = None).
-        # Easiest path: load the hub TOML and swap user_model to claude
+        # Easiest path: take the custom-provider config and swap user_model to
         # via a first override (which clears extra_body to None per the
         # catalog), then test a SECOND override to a non-catalog model.
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        cfg = _custom_provider_cfg()
         # Step 1: swap user_model to claude -- catalog has no extra_body
         # for claude, so user.extra_body should land at None.
         cfg = apply_model_overrides(
@@ -500,36 +673,30 @@ class TestApplyModelOverrides:
         assert cfg2.get("user_model").extra_body is None
 
     def test_swap_to_self_hosted_model_routes_to_builtin_provider(self):
-        # Hub TOML has user_model on nvidia-inference-hub. Swapping to
+        # user_model sits on the custom provider. Swapping to
         # gpt-oss-20b (which IS in VLLM_DEFAULTS) should auto-route
         # provider back to "nvidia" (the built-in tier).
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        cfg = _custom_provider_cfg()
         cfg2 = apply_model_overrides(cfg, {"user_model": "openai/gpt-oss-20b"})
         user = cfg2.get("user_model")
         assert user.model == "openai/gpt-oss-20b"
-        assert user.provider == "nvidia"  # auto-routed off the hub
+        assert user.provider == "nvidia"  # auto-routed to the built-in tier
 
     def test_swap_to_external_model_routes_to_custom_provider(self):
         # Default TOML has assistant_model on nvidia. Swapping to
         # gpt-5.5 (NOT in VLLM_DEFAULTS) should auto-route to the
         # custom provider declared in MODELS.providers.
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        cfg = _custom_provider_cfg()
         cfg2 = apply_model_overrides(
             cfg, {"assistant_model": "openai/openai/gpt-5.5"}
         )
         assistant = cfg2.get("assistant_model")
         assert assistant.model == "openai/openai/gpt-5.5"
-        assert assistant.provider == "nvidia-inference-hub"  # auto-routed to hub
+        assert assistant.provider == "my-endpoint"  # auto-routed to the custom provider
 
     def test_swap_within_same_tier_keeps_provider(self):
         # gpt-oss-120b -> gpt-oss-20b: both self-hosted, provider unchanged.
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        cfg = _custom_provider_cfg()
         cfg2 = apply_model_overrides(
             cfg, {"assistant_model": "openai/gpt-oss-20b"}
         )
@@ -543,9 +710,7 @@ class TestApplyModelOverrides:
         # OMIT both from the DD inference params (regression guard).
         from usersim.cli._models import to_model_configs
 
-        cfg = load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        cfg = _custom_provider_cfg()
         cfg2 = apply_model_overrides(
             cfg, {"judge_model": "aws/anthropic/bedrock-claude-opus-4-7"}
         )
@@ -559,7 +724,7 @@ class TestApplyModelOverrides:
         sent = judge_mc.inference_parameters.generate_kwargs
         assert "temperature" not in sent  # would 400 on Opus 4.7 if present
         assert "top_p" not in sent        # would 400 on Opus 4.7 if present
-        assert sent["max_tokens"] == 8192
+        assert sent["max_tokens"] == 4096
 
 
 class TestApplyModelOverridesDictForm:
@@ -571,12 +736,10 @@ class TestApplyModelOverridesDictForm:
     override" so users can clear catalog defaults with ``None`` / ``{}``.
     """
 
-    def _hub_cfg(self):
-        # Hub TOML: assistant_model on gpt-oss-120b (gpt-oss-only
+    def _custom_cfg(self):
+        # assistant_model on gpt-oss-120b (gpt-oss-only
         # extra_body in catalog), used as the override-source baseline.
-        return load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        return _custom_provider_cfg()
 
     # ── ergonomics: the headline use-case --------------------------------
 
@@ -585,7 +748,7 @@ class TestApplyModelOverridesDictForm:
         default thinking trigger by passing ``extra_body={}``. This is
         the syntax for "rerun without reasoning" -- the chat_template_
         kwargs that the catalog would normally inject is not sent."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg,
             {
@@ -603,13 +766,13 @@ class TestApplyModelOverridesDictForm:
         # Sampling defaults still come from the gemma catalog entry.
         assert a.temperature == 1.0
         assert a.top_p == 0.95
-        assert a.max_tokens == 8192
+        assert a.max_tokens == 4096
 
     def test_dict_form_extra_body_explicit_none_clears_catalog(self):
         """``extra_body: None`` in the dict form is also a valid
         explicit clear (semantically equivalent to ``{}`` for our
         downstream serialiser, but distinct from "absent")."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg,
             {
@@ -624,7 +787,7 @@ class TestApplyModelOverridesDictForm:
     # ── per-knob precedence ---------------------------------------------
 
     def test_dict_form_temperature_wins_over_catalog(self):
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg,
             {
@@ -637,7 +800,7 @@ class TestApplyModelOverridesDictForm:
         assert cfg2.get("judge_model").temperature == 0.0
 
     def test_dict_form_max_tokens_wins_over_catalog(self):
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg,
             {
@@ -652,7 +815,7 @@ class TestApplyModelOverridesDictForm:
     def test_partial_dict_override_falls_through_to_catalog_for_other_keys(self):
         """Only ``extra_body`` is overridden; ``temperature`` / ``top_p``
         / ``max_tokens`` continue to come from the catalog."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg,
             {
@@ -675,7 +838,7 @@ class TestApplyModelOverridesDictForm:
     # ── validation ------------------------------------------------------
 
     def test_dict_form_requires_model_key(self):
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         with pytest.raises(ConfigError, match="must include a 'model' key"):
             apply_model_overrides(
                 cfg,
@@ -686,7 +849,7 @@ class TestApplyModelOverridesDictForm:
         """A typo (e.g. ``extar_body``) MUST raise rather than silently
         no-op. Catching it at config-load time is much friendlier than
         debugging why your "override" didn't apply."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         with pytest.raises(ConfigError, match="unknown key"):
             apply_model_overrides(
                 cfg,
@@ -699,7 +862,7 @@ class TestApplyModelOverridesDictForm:
             )
 
     def test_invalid_value_type_raises(self):
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         with pytest.raises(ConfigError, match="must be a str.*or a dict"):
             apply_model_overrides(
                 cfg,
@@ -711,7 +874,7 @@ class TestApplyModelOverridesDictForm:
     def test_string_form_still_works_unchanged(self):
         """Existing string-form overrides are unchanged: catalog
         defaults fill in everything not in the dict."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         cfg2 = apply_model_overrides(
             cfg, {"assistant_model": "nvidia/google/gemma-4-31b-it"}
         )
@@ -726,7 +889,7 @@ class TestApplyModelOverridesDictForm:
         """When the user explicitly pins ``extra_body`` via the dict
         form, we don't emit the catalog-miss warning -- the user is
         taking responsibility for the knob themselves."""
-        cfg = self._hub_cfg()
+        cfg = self._custom_cfg()
         with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
             apply_model_overrides(
                 cfg,
@@ -917,9 +1080,7 @@ class TestPrintResolvedModels:
     notebooks rely on this format to read which provider routing landed."""
 
     def _cfg(self) -> ModelsConfig:
-        return load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        return _custom_provider_cfg()
 
     def test_includes_alias_model_provider_per_row(self, capsys):
         cfg = self._cfg()
@@ -939,13 +1100,11 @@ class TestPromptForProviderKeys:
     should not prompt for providers that no current alias references."""
 
     def _cfg(self) -> ModelsConfig:
-        return load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        return _custom_provider_cfg()
 
     def test_no_prompt_when_env_var_set(self, monkeypatch):
         cfg = self._cfg()
-        monkeypatch.setenv("NVIDIA_INFERENCE_HUB_KEY", "stub-key")
+        monkeypatch.setenv("MY_ENDPOINT_API_KEY", "stub-key")
         called = {"n": 0}
 
         def _fake_getpass(prompt):
@@ -958,13 +1117,13 @@ class TestPromptForProviderKeys:
 
     def test_skips_providers_not_used_by_any_alias(self, monkeypatch):
         # Build a config whose only alias targets the built-in `nvidia`
-        # provider; the custom `nvidia-inference-hub` provider is declared
+        # provider; the custom `gateway` provider is declared
         # but unused. prompt_for_provider_keys must not prompt for the
         # unused provider's key.
         providers = (
             ProviderSpec(
-                name="nvidia-inference-hub",
-                endpoint="https://inference.example.com/v1",
+                name="gateway",
+                endpoint="https://gateway.example/v1",
                 provider_type="openai",
                 api_key="UNUSED_PROVIDER_KEY",
             ),
@@ -993,9 +1152,7 @@ class TestSmokeTestModelsOrRaise:
     """Thin wrapper around smoke_test_models that prints + raises on failure."""
 
     def _cfg(self) -> ModelsConfig:
-        return load_models_config(
-            _cli_dir() / "models_hub_support.toml"
-        )
+        return _custom_provider_cfg()
 
     def test_raises_when_any_alias_failed(self, monkeypatch, capsys):
         cfg = self._cfg()
@@ -1070,12 +1227,154 @@ class TestCatalogGapWarning:
         messages = self._warnings_for("some-vendor/not-a-real-model", caplog)
         assert any("INFERENCE_DEFAULTS" in m for m in messages), messages
 
+    def test_openai_reasoning_entries_omit_sampling_params(self) -> None:
+        """On api.openai.com, reasoning mode excludes sampling parameters.
+
+        Measured: gpt-5.4-nano accepts ``temperature`` on its own and rejects
+        it the moment ``reasoning_effort`` is sent alongside. So the trigger
+        is the request rather than the model, which makes the rule checkable
+        instead of a per-model list someone has to keep current.
+
+        Scoped to OpenAI's own API, which is what the un-namespaced ids are.
+        Other providers serving reasoning models accept sampling parameters
+        happily: ``openai/gpt-oss-20b`` on build.nvidia.com and the OpenRouter
+        ids both take ``reasoning_effort`` and ``temperature`` together, and
+        the live matrix passes for them.
+
+        ``None`` is required rather than an absent key: absent applies the
+        project fallbacks (0.7 / 0.95), which are then rejected.
+        """
+        from usersim.cli.model_catalog import INFERENCE_DEFAULTS
+
+        offenders = []
+        for model, entry in INFERENCE_DEFAULTS.items():
+            # A namespaced id (vendor/model) is routed to a gateway, not to
+            # api.openai.com, and is not subject to this restriction.
+            if "/" in model:
+                continue
+            if "reasoning_effort" not in (entry.get("extra_body") or {}):
+                continue
+            for field in ("temperature", "top_p"):
+                if entry.get(field, "absent") is not None:
+                    offenders.append(f"{model}.{field}")
+            if entry.get("max_tokens") is not None:
+                offenders.append(f"{model}.max_tokens")
+        assert not offenders, (
+            "OpenAI entries setting reasoning_effort must set temperature and "
+            f"top_p to None and omit max_tokens: {sorted(offenders)}"
+        )
+
+    def test_reasoning_models_send_no_sampling_params(self) -> None:
+        """Reasoning endpoints reject temperature and top_p with an HTTP 400.
+
+        Omitting the keys from the catalog is not enough: the project
+        fallbacks (0.7 / 0.95) would then apply and the request would be
+        rejected. The entries must say ``None`` explicitly. This shipped
+        broken once because the offline probe sends its own payload and never
+        exercised the parameters a real run sends.
+        """
+        from usersim.cli._models import load_models_config, to_model_configs
+
+        cfg = load_models_config(_cli_dir() / "models_openai.toml")
+        for model_config in to_model_configs(cfg):
+            params = model_config.inference_parameters
+            if getattr(params, "generation_type", None) == "embedding":
+                continue
+            assert getattr(params, "temperature", None) is None, (
+                f"{model_config.alias} ({model_config.model}) would send a "
+                f"temperature to a reasoning endpoint"
+            )
+            assert getattr(params, "top_p", None) is None, model_config.alias
+
+    def test_drop_params_omits_them(self, tmp_path) -> None:
+        """A TOML row can suppress a parameter, which null cannot express."""
+        from usersim.cli._models import load_models_config, to_model_configs
+
+        path = tmp_path / "m.toml"
+        path.write_text(
+            'models = [\n'
+            '  { alias = "user_model", model = "gpt-4.1", provider = "openai", '
+            'drop_params = ["temperature", "top_p"] },\n'
+            '  { alias = "judge_model", model = "gpt-4.1", provider = "openai" },\n'
+            ']\n'
+        )
+        cfg = load_models_config(path)
+        assert cfg.get("user_model").temperature is None
+        assert cfg.get("user_model").top_p is None
+        # The alias that did not ask keeps the catalog's values.
+        assert cfg.get("judge_model").temperature == 0.85
+
+        by_alias = {m.alias: m.inference_parameters for m in to_model_configs(cfg)}
+        assert getattr(by_alias["user_model"], "temperature", None) is None
+        assert getattr(by_alias["judge_model"], "temperature", None) == 0.85
+
+    def test_drop_params_rejects_unknown_fields(self, tmp_path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._models import load_models_config
+
+        path = tmp_path / "m.toml"
+        path.write_text(
+            'models = [{ alias = "user_model", model = "gpt-4.1", '
+            'provider = "openai", drop_params = ["provider"] }]\n'
+        )
+        with pytest.raises(ConfigError, match="not droppable"):
+            load_models_config(path)
+
+    def test_bundled_path_ignores_a_local_override(self, tmp_path, monkeypatch) -> None:
+        """``bundled_models_path`` must never follow a local file.
+
+        Tests and any assertion about what ships depend on this: a developer's
+        models.local.toml pointing at their own endpoint must not change what
+        the suite believes the project distributes.
+        """
+        from usersim.cli._models import bundled_models_path
+
+        (tmp_path / "models.local.toml").write_text("models = []\n")
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(tmp_path / "models.local.toml"))
+        assert bundled_models_path().name == "models_default.toml"
+
+    def test_default_path_resolution_order(self, tmp_path, monkeypatch) -> None:
+        """Env var, then a local file at or above cwd, then the bundled one."""
+        from usersim.cli._models import bundled_models_path, default_models_path
+
+        nested = tmp_path / "a" / "b"
+        nested.mkdir(parents=True)
+        monkeypatch.chdir(nested)
+        monkeypatch.delenv("USERSIM_MODELS_CONFIG", raising=False)
+
+        # Nothing local anywhere above: the bundled config.
+        assert default_models_path() == bundled_models_path()
+
+        # A local file in a parent is found by walking up.
+        local = tmp_path / "models.local.toml"
+        local.write_text("models = []\n")
+        assert default_models_path() == local
+
+        # The env var outranks it.
+        other = tmp_path / "elsewhere.toml"
+        other.write_text("models = []\n")
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(other))
+        assert default_models_path() == other
+
+    def test_unreadable_env_var_fails_loudly(self, tmp_path, monkeypatch) -> None:
+        """A typo in the variable must not silently fall back to the default."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._models import default_models_path
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("USERSIM_MODELS_CONFIG", str(tmp_path / "absent.toml"))
+        with pytest.raises(ConfigError, match="USERSIM_MODELS_CONFIG"):
+            default_models_path()
+
     def test_shipped_default_config_is_warning_free(self, caplog) -> None:
         """A first run must not warn about the configuration it ships with."""
         import logging
 
-        from usersim.cli._models import default_models_path, load_models_config
+        # bundled_models_path, not default_models_path: this asserts what
+        # ships, and default_models_path honours a developer's local override.
+        from usersim.cli._models import bundled_models_path, load_models_config
 
         with caplog.at_level(logging.WARNING, logger="usersim.cli._models"):
-            load_models_config(default_models_path())
+            load_models_config(bundled_models_path())
         assert [r.getMessage() for r in caplog.records] == []

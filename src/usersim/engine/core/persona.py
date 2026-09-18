@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import math
 import random
-from datetime import date, datetime
 from typing import Any, Dict, List
 
 
@@ -95,13 +94,10 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
         """The field's text, or ``""`` when the cell holds nothing."""
         return _field_text(persona, key, exempt)
 
+    # Read ``age`` directly. Deriving it from a birth date would make the
+    # rendered persona change with the calendar while ``trajectory_id``, which
+    # excludes age, stayed the same, so two runs would disagree under one id.
     age_str = f("age")
-    if not age_str and f("birth_date"):
-        try:
-            bd = datetime.fromisoformat(str(persona["birth_date"])).date()
-            age_str = str((date.today() - bd).days // 365)
-        except Exception:
-            age_str = ""
 
     name_parts = [
         f("first_name", _NAME_EXEMPT),

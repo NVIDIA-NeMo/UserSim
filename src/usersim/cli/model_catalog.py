@@ -16,11 +16,10 @@ appears in ``ModelSpec.model`` / ``[[models]] model = "..."``):
   Consumed by ``cli/_models.py:_to_model_spec`` to fill in any field the TOML
   omits. Explicit TOML values always win.
 
-- ``VLLM_DEFAULTS`` -- vLLM server-config defaults for self-hosted
-  models. Also decides self-hosted vs externally-hosted provider routing
-  in ``cli/_models.py``. Externally-hosted models
-  (e.g. via the NVIDIA inference hub) belong in ``INFERENCE_DEFAULTS`` only --
-  are called via HTTPS rather than by spinning up vLLM.
+- ``VLLM_DEFAULTS`` -- vLLM server-config defaults, for models you intend to
+  serve yourself. Membership also drives provider routing in
+  ``cli/_models.py``. A model reached over an HTTPS endpoint rather than a
+  local vLLM server belongs in ``INFERENCE_DEFAULTS`` only.
 
 What's intentionally NOT in this catalog:
 
@@ -29,11 +28,16 @@ What's intentionally NOT in this catalog:
 - ``max_parallel_requests`` -- per-alias rate budget. Lives in the TOML row.
 - ``provider`` -- per-deployment routing decision. Lives in the TOML row.
 
-``max_tokens`` is per-model in the catalog at a uniform 8192 rather than
-per-alias, to absorb non-ASCII tokenization variance: a tight per-job limit
-costs truncation on Japanese, Hindi and Korean locales. Override per-alias by
-setting ``max_tokens`` explicitly on the TOML row if a particular alias
-needs a different ceiling.
+``max_tokens`` is per-model in the catalog at a uniform 4096 rather than
+per-alias. Non-ASCII locales do not carry a smaller budget: the simulator
+scales this up for them at call time (see ``NON_ASCII_TOKEN_SCALE`` in
+``engine/core/llm.py``), because Japanese, Hindi and Korean tokenize far more
+densely than English for the same number of characters.
+
+Override per-alias by setting ``max_tokens`` on the TOML row when an alias
+needs a different ceiling. ``financial_services`` is the case that most often
+wants more: its answers quote knowledge-base documents, so 8192 is a better
+fit there than the default.
 
 Cluster-specific variants of ``extra_args`` are NOT modeled here yet. If we
 move to a second cluster with different memory ceilings, swap this for a
@@ -57,13 +61,11 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/gpt-oss-20b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        # 8192 max_tokens uniformly across the simulator -- non-ASCII locales
-        # (Japanese, Hindi, Korean, etc.) tokenize ~3x more densely than
-        # English in the OpenAI BPE family, so a 1024 / 2048 / 256 per-alias
-        # cap (the previous per-job tuning) can truncate responses mid-token
-        # for the same number of characters. A uniform high ceiling trades
-        # tighter generation budgets for safety against truncation.
-        "max_tokens": 8192,
+        # 4096 uniformly across the simulator. Non-ASCII locales (Japanese,
+        # Hindi, Korean) tokenize far more densely than English for the same
+        # number of characters, so they get a scaled-up budget at call time
+        # rather than a separate entry here. See NON_ASCII_TOKEN_SCALE.
+        "max_tokens": 4096,
         # reasoning_effort=high uniformly across aliases that use 20b.
         # Trade slower / more expensive calls for higher answer quality;
         # apply consistently to user_model + api_response_model + summary_model.
@@ -72,22 +74,20 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/gpt-oss-120b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # reasoning_effort=high for both 120b aliases (assistant + judge).
         # The judge benefits most -- harder rubric calls get more thinking
         # tokens; assistant under test runs at the same effort users expect.
         "extra_body": {"reasoning_effort": "high"},
     },
-    # Same gpt-oss-120b weights, but routed through the multi-vendor
-    # inference hub (nvidia-inference-hub provider) instead of build.nvidia.com.
-    # Useful when build.nvidia.com gates the model and you want to keep the
-    # model under test the same. The catalog's auto-routing picks
-    # ``nvidia-inference-hub`` automatically because this string is NOT in
-    # VLLM_DEFAULTS (the hub serves it; we don't self-host).
+    # Same gpt-oss-120b weights reached through a multi-vendor OpenAI-compatible
+    # gateway rather than build.nvidia.com, for when build.nvidia.com gates the
+    # model and you want the model under test to stay the same. Absent from
+    # VLLM_DEFAULTS, so routing resolves it to a gateway provider.
     "nvidia/openai/gpt-oss-120b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "extra_body": {"reasoning_effort": "high"},
     },
     # The double "openai/" prefix is intentional: the first segment is the
@@ -101,13 +101,13 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/openai/gpt-5.4": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "timeout": 300,
     },
     "openai/openai/gpt-5.5": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # gpt-5.5 is a reasoning model -- emits internal thinking tokens
         # before visible output. 5 minutes is generous for a single
         # reply; if the hub is slower than that, treat it as an infra
@@ -127,7 +127,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
         # default value"). Use prompting to guide behavior instead.
         "temperature": None,
         "top_p": None,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # Anthropic doesn't expose reasoning_effort; leave extra_body unset.
     },
     # Nemotron-3-Super-120B (LatentMoE, ~12B active params).
@@ -147,27 +147,24 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/nvidia/nemotron-3-super-v3": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     "nvidia/nemotron-3-super": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     # Gemma-4-31B-Instruct via the NVIDIA inference hub.
     # Reasoning is gated by the chat template's ``enable_thinking`` flag,
-    # which the hub forwards to vLLM via ``chat_template_kwargs`` only.
-    # Other documented triggers (Google API top-level ``enable_thinking``;
-    # the model-card ``<|think|>`` system token; OpenAI-style
-    # ``reasoning_effort``) all fail silently against this gateway --
-    # baseline calls return zero ``reasoning_content``. With this kwarg,
+    # reachable only by forwarding ``chat_template_kwargs`` through to
+    # vLLM. The other documented triggers (a top-level ``enable_thinking``,
+    # the model-card ``<|think|>`` system token, and OpenAI-style
+    # ``reasoning_effort``) fail silently over an OpenAI-compatible
+    # endpoint: calls return zero ``reasoning_content``. With this kwarg,
     # gemma emits ``message.reasoning_content`` separately from
-    # ``message.content`` and ``completion_tokens`` jumps from ~500 to
-    # ~880 on a multi-step word problem (1235 chars of reasoning vs
-    # ~zero on the baseline). See ``tools/probe_gemma_thinking.py`` for
-    # the per-trigger probe trace; the empirical evidence is the only
-    # reason we picked the chat-template-kwargs form -- the model card
-    # documents three triggers and only this one fires here.
+    # ``message.content`` and ``completion_tokens`` roughly doubles on a
+    # multi-step word problem. The model card documents three triggers and
+    # only this one takes effect, so do not simplify it away.
     #
     # Sampling defaults follow gemma-4-instruct's documented values
     # (temperature=1.0, top_p=0.95). max_tokens=8192 leaves room for
@@ -187,7 +184,90 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/google/gemma-4-31b-it": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
+        "extra_body": {"chat_template_kwargs": {"enable_thinking": True}},
+    },
+    # ── openai provider (api.openai.com) ──────────────────────────────
+    # Sampling values follow Data Designer's defaults for the same models,
+    # so a run that switches providers keeps comparable sampling.
+    "gpt-4.1": {
+        "temperature": 0.85,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+    },
+    # REASONING MODE AND SAMPLING PARAMETERS ARE MUTUALLY EXCLUSIVE.
+    #
+    # The trigger is the request, not the model: measured against
+    # api.openai.com, ``gpt-5.4-nano`` accepts ``temperature`` on its own and
+    # rejects it as soon as ``reasoning_effort`` is also sent. So any entry
+    # setting ``reasoning_effort`` must omit ``temperature``, ``top_p`` and
+    # ``max_tokens`` (the last replaced by ``max_completion_tokens``).
+    #
+    # ``None`` means "omit", which is NOT the same as leaving the key out:
+    # absent applies the project fallbacks (0.7 / 0.95) and the request is
+    # then rejected. Writing the documented default instead of omitting is
+    # the other trap, since it breaks when that default changes.
+    #
+    # test_reasoning_entries_omit_sampling_params enforces this across the
+    # whole map, so a new entry cannot get it wrong.
+    "gpt-5": {
+        "temperature": None,
+        "top_p": None,
+        "extra_body": {"reasoning_effort": "medium"},
+    },
+    "gpt-5.4-nano": {
+        "temperature": None,
+        "top_p": None,
+        "extra_body": {"reasoning_effort": "low"},
+    },
+    "gpt-5.6-luna": {
+        "temperature": None,
+        "top_p": None,
+        "extra_body": {"reasoning_effort": "medium"},
+    },
+    "gpt-5.6-terra": {
+        "temperature": None,
+        "top_p": None,
+        "extra_body": {"reasoning_effort": "medium"},
+    },
+    # ── openrouter provider (openrouter.ai) ───────────────────────────
+    # OpenRouter and build.nvidia.com name the same models differently, so
+    # both spellings appear here and the provider field in a TOML row decides
+    # which endpoint is used. These ids resolve on OpenRouter only.
+    "nvidia/nemotron-3-nano-30b-a3b": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 4096,
+    },
+    # build.nvidia.com spells the same model ``nemotron-3.5-lightning-30b-a3b``.
+    "nvidia/nemotron-3.5-lightning": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+    },
+    # ── build.nvidia.com (nvidia provider) ────────────────────────────
+    # The two chat models and the embedding model the default config uses.
+    # build.nvidia.com lists more than it serves, so verify against a real
+    # call rather than the model list before adding an id here.
+    "nvidia/nemotron-3-super-120b-a12b": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "extra_body": {"reasoning_effort": "medium"},
+    },
+    # OpenRouter spells the same model ``nemotron-3.5-lightning``.
+    "nvidia/nemotron-3.5-lightning-30b-a3b": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+    },
+    # Reasoning is gated by the chat template's ``enable_thinking`` flag; see
+    # the note on the gateway-namespaced entry above for why the other
+    # documented triggers do not fire.
+    "google/gemma-4-31b-it": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "max_tokens": 4096,
         "extra_body": {"chat_template_kwargs": {"enable_thinking": True}},
     },
 }
@@ -211,10 +291,9 @@ VLLM_DEFAULTS: dict[str, dict[str, Any]] = {
             "--max-num-seqs", "256",
         ],
     },
-    # gpt-5.5 (and any other hub-served model) NOT in this map -- it's
-    # externally hosted on the NVIDIA inference hub, never self-hosted.
-    # Excluding hub-served models here is intentional: membership in this
-    # registry is what marks a model as self-hostable.
+    # Models reachable only over a hosted endpoint are deliberately absent
+    # from this map: membership here is what marks a model as self-hostable,
+    # and it is what provider routing keys off.
     "nvidia/nemotron-3-super": {
         # vLLM ``--model`` (HF path) differs from the served name DD
         # references, so ``model_name`` is carried separately while
@@ -289,21 +368,41 @@ def resolve_vllm_defaults(model: str) -> dict[str, Any]:
 # model ids here; the ``embed`` substring is also treated as a fallback signal.
 EMBEDDING_MODELS: frozenset[str] = frozenset({
     "nvidia/nvidia/nemotron-3-embed-1b",
+    "nvidia/nemotron-3-embed-1b",
     "nvidia/qwen/qwen3-embedding-0.6b",
+    "text-embedding-3-large",
+    "text-embedding-3-small",
+    "openai/text-embedding-3-large",
+    "openai/text-embedding-3-small",
 })
 
 # Per-embedding-model request defaults applied by ``to_model_configs`` (in addition
 # to EmbeddingInferenceParams' own defaults: encoding_format=float). ``extra_body``
 # carries provider-specific top-level fields the /embeddings route requires.
 #
-# NOTE on asymmetric models (qwen3-embedding): the CORPUS is indexed as
-# ``input_type=passage``; the sim-time retriever embeds the user query ``query``-side.
+# NOTE on asymmetric models (qwen3-embedding, nemotron-3-embed): queries and
+# documents go through different sides of the model, so ``gen-assets`` embeds
+# documents ``passage``-side and the sim-time retriever embeds the user query
+# ``query``-side. Both sides must use the same model, or the vectors are not
+# comparable and retrieval fails silently rather than erroring.
 # ``truncate=NONE`` errors (rather than silently truncating) if a doc exceeds the
 # model's context, so over-long docs surface instead of being quietly clipped.
 EMBEDDING_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/qwen/qwen3-embedding-0.6b": {
         "extra_body": {"input_type": "passage", "truncate": "NONE"},
     },
+    # Asymmetric, like qwen3-embedding: the query side must say so.
+    "nvidia/nemotron-3-embed-1b": {
+        "extra_body": {"input_type": "query"},
+    },
+    # Symmetric models: one embedding space for queries and documents, so
+    # there is no input_type to set. The /embeddings route needs no
+    # provider-specific top-level fields beyond encoding_format, which
+    # EmbeddingInferenceParams already defaults to float.
+    "text-embedding-3-large": {},
+    "text-embedding-3-small": {},
+    "openai/text-embedding-3-large": {},
+    "openai/text-embedding-3-small": {},
 }
 
 

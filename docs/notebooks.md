@@ -2,10 +2,19 @@
 
 The `notebooks/` directory mirrors the CLI flow for interactive iteration.
 They need the Jupyter kernel, which the runtime dependencies deliberately do
-not carry:
+not carry. It comes with the dev group, which `uv sync` installs by default:
 
 ```bash
-uv sync --all-extras
+uv sync
+uv run jupyter lab      # sees the kernel inside .venv
+```
+
+If you open the notebooks in an editor that picks kernels system-wide rather
+than launching Jupyter yourself, register a named kernel once so this
+project's environment is selectable:
+
+```bash
+make install-kernel     # appears as "UserSim (.venv)"
 ```
 
 Outputs are stripped from the committed notebooks, so you will see source

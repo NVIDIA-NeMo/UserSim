@@ -1,0 +1,26 @@
+# OpenAI model configuration for `usersim`. Uses the built-in `openai`
+# provider, which reads `OPENAI_API_KEY`.
+#
+#   usersim simulate --models src/usersim/cli/models_openai.toml ...
+#
+# Per-model sampling parameters live in cli/model_catalog.py. Note the
+# reasoning models set no `max_tokens`: these endpoints reject it and expect
+# `max_completion_tokens` instead.
+#
+# Judges are a different model from `assistant_model` on purpose, so the model
+# under test is not scoring its own output.
+
+models = [
+  { alias = "user_model",         model = "gpt-5.4-nano", provider = "openai", max_parallel_requests = 8 },                 # simulated user
+  { alias = "assistant_model",    model = "gpt-5.6-luna", provider = "openai", max_parallel_requests = 8, timeout = 300 },  # model under test
+  { alias = "api_response_model", model = "gpt-5.4-nano", provider = "openai", max_parallel_requests = 8 },                 # tool-call responses
+  { alias = "judge_model",        model = "gpt-5.6-terra", provider = "openai", max_parallel_requests = 8 },                # in-sim gates
+  { alias = "summary_model",      model = "gpt-5.4-nano", provider = "openai", max_parallel_requests = 8 },                 # context compression
+  { alias = "evaluator_model",    model = "gpt-5.6-terra", provider = "openai", max_parallel_requests = 8 },                # trajectory rubric
+
+  # Query side of the financial_services probe's dense and hybrid retrieval.
+  # Must be the same model that produced the corpus vectors: vectors only
+  # compare within one embedding space, and a mismatch fails silently. Without
+  # it the probe retrieves lexically. See the probe README.
+  { alias = "embedding_model",    model = "text-embedding-3-small", provider = "openai", max_parallel_requests = 8 },
+]

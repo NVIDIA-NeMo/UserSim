@@ -78,13 +78,98 @@ it, start with the [README](README.md).
 Requires Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --all-extras
+uv sync                     # installs the dev group: pytest, ruff, jupyter
 uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
 model catalog, every probe's assets, and the plugin entry points without
 making a single model call.
+
+### Choosing models and providers
+
+Three providers are built in, each needing only a credential. Pick the shipped
+config that matches:
+
+| Provider | Credential | Config |
+|---|---|---|
+| `nvidia` (build.nvidia.com) | `NVIDIA_API_KEY` | `models_default.toml` |
+| `openai` | `OPENAI_API_KEY` | `models_openai.toml` |
+| `openrouter` | `OPENROUTER_API_KEY` | `models_openrouter.toml` |
+
+All three live in [`src/usersim/cli/`](src/usersim/cli/). Pass one with
+`--models`, or leave it off to get the default.
+
+To use any other OpenAI-compatible endpoint, copy one of those files, declare a
+provider, and pass it with `--models`. The `api_key` field is the *name* of an
+environment variable, never the key itself:
+
+```toml
+[[providers]]
+name = "my-endpoint"
+endpoint = "https://my-inference-endpoint.example/v1"
+provider_type = "openai"
+api_key = "MY_ENDPOINT_API_KEY"
+```
+
+**Keep your own endpoints out of the repository.** Name such a file
+`models.local.toml`: `.gitignore` covers it, along with anything matching
+`*.local.toml`, so it cannot be committed by accident.
+
+A `models.local.toml` is picked up automatically. When no config is named,
+resolution is:
+
+1. `$USERSIM_MODELS_CONFIG`, if set, which redirects every command at once.
+   A path that does not exist is an error rather than a silent fallback.
+2. The nearest `models.local.toml` in the working directory or any parent.
+3. The bundled `models_default.toml`.
+
+An explicit `--models` beats all three. Whichever wins is printed before any
+model call, so a run always says which config and which provider it used:
+
+```
+Models config: /path/to/models.local.toml (local override; the bundled default is unused)
+Loaded 9 models (providers: ['my-endpoint'])
+```
+
+If you would rather configure an endpoint once for every project rather than
+per checkout, add it to `~/.data-designer/model_providers.yaml`: Data Designer
+reads that file and UserSim merges it, and it sits outside any repository.
+
+### Credentials
+
+Every provider reads its key from an environment variable. Export them, or put
+them in a `.env.local` at the project root, which is gitignored:
+
+```bash
+NVIDIA_API_KEY=...
+OPENAI_API_KEY=...
+```
+
+`.env.local` then `.env` are read at startup, searching upward from the working
+directory. **Variables already set in your environment always win**, so the
+file fills gaps rather than overriding a deliberate export. Nothing is required:
+a missing file is normal, and the notebooks prompt for any key still missing.
+
+**Reasoning models reject sampling parameters.** Most return an HTTP 400 for
+any non-default `temperature`, and some reject `top_p` outright. Catalogued
+models handle this already. For one the catalog does not know, such as a model
+behind your own provider, name the parameters to leave out of the request.
+TOML has no null literal, so this is how a row says "send nothing here":
+
+```toml
+{ alias = "evaluator_model", model = "my-reasoning-model", provider = "my-endpoint", drop_params = ["temperature", "top_p"] }
+```
+
+Without it the project defaults (`temperature = 0.7`, `top_p = 0.95`) apply and
+the call fails. `max_tokens` is droppable the same way.
+
+Adding a model means adding it to
+[`model_catalog.py`](src/usersim/cli/model_catalog.py) as well, so its sampling
+parameters resolve. `usersim smoke` fails if a shipped config names a model the
+catalog does not define. A model absent from `VLLM_DEFAULTS` also needs an
+explicitly declared provider: overriding an alias to one without a provider to
+route it to raises `ConfigError` rather than guessing an endpoint.
 
 ## Before you open a pull request
 

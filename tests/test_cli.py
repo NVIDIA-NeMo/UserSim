@@ -138,42 +138,42 @@ class TestWarnIfMissingApiKey:
 
     def test_with_config_enumerates_custom_provider_env(self, monkeypatch):
         monkeypatch.setenv("NVIDIA_API_KEY", "sk-test")
-        monkeypatch.delenv("NVIDIA_INFERENCE_HUB_KEY", raising=False)
+        monkeypatch.delenv("GATEWAY_API_KEY", raising=False)
         cfg = self._make_cfg(
             providers=[
                 ProviderSpec(
-                    name="nvidia-inference-hub",
+                    name="gateway",
                     endpoint="https://example/v1",
                     provider_type="openai",
-                    api_key="NVIDIA_INFERENCE_HUB_KEY",
+                    api_key="GATEWAY_API_KEY",
                 ),
             ],
             models=[
                 ModelSpec(alias="assistant_model", model="x", provider="nvidia"),
-                ModelSpec(alias="user_model", model="y", provider="nvidia-inference-hub"),
-                ModelSpec(alias="judge_model", model="z", provider="nvidia-inference-hub"),
+                ModelSpec(alias="user_model", model="y", provider="gateway"),
+                ModelSpec(alias="judge_model", model="z", provider="gateway"),
             ],
         )
         msg = warn_if_missing_api_key(cfg)
         assert msg is not None
-        assert "NVIDIA_INFERENCE_HUB_KEY" in msg
-        assert "NVIDIA_API_KEY" not in msg  # NVIDIA_API_KEY is set; only the hub is missing
+        assert "GATEWAY_API_KEY" in msg
+        assert "NVIDIA_API_KEY" not in msg  # NVIDIA_API_KEY is set; only the gateway key is missing
 
     def test_with_config_silent_when_all_set(self, monkeypatch):
         monkeypatch.setenv("NVIDIA_API_KEY", "sk-test")
-        monkeypatch.setenv("NVIDIA_INFERENCE_HUB_KEY", "sk-hub")
+        monkeypatch.setenv("GATEWAY_API_KEY", "sk-hub")
         cfg = self._make_cfg(
             providers=[
                 ProviderSpec(
-                    name="nvidia-inference-hub",
+                    name="gateway",
                     endpoint="https://example/v1",
                     provider_type="openai",
-                    api_key="NVIDIA_INFERENCE_HUB_KEY",
+                    api_key="GATEWAY_API_KEY",
                 ),
             ],
             models=[
                 ModelSpec(alias="assistant_model", model="x", provider="nvidia"),
-                ModelSpec(alias="user_model", model="y", provider="nvidia-inference-hub"),
+                ModelSpec(alias="user_model", model="y", provider="gateway"),
             ],
         )
         assert warn_if_missing_api_key(cfg) is None
@@ -227,20 +227,20 @@ class TestToDataDesignerKwargs:
         cfg = ModelsConfig(
             providers=(
                 ProviderSpec(
-                    name="nvidia-inference-hub",
-                    endpoint="https://inference.example.com/v1",
+                    name="gateway",
+                    endpoint="https://gateway.example/v1",
                     provider_type="openai",
-                    api_key="NVIDIA_INFERENCE_HUB_KEY",
+                    api_key="GATEWAY_API_KEY",
                 ),
             ),
             models=(
                 ModelSpec(alias="assistant_model", model="x", provider="nvidia"),
-                ModelSpec(alias="user_model", model="y", provider="nvidia-inference-hub"),
+                ModelSpec(alias="user_model", model="y", provider="gateway"),
             ),
         )
         kwargs = to_data_designer_kwargs(cfg)
         names = {p.name for p in kwargs["model_providers"]}
-        assert "nvidia-inference-hub" in names  # custom provider preserved
+        assert "gateway" in names  # custom provider preserved
         assert "nvidia" in names                # built-in merged in for assistant_model
 
     def test_custom_provider_overrides_builtin_on_name_conflict(self):
@@ -730,6 +730,35 @@ class TestEvalCliJudgesDefault:
 # ---------------------------------------------------------------------------
 # Dry-run subcommands
 # ---------------------------------------------------------------------------
+
+
+class TestAssetCommandDefaults:
+    """The three asset commands must default to where the banks actually are.
+
+    Each resolved its default from a path relative to ``cli/``, which pointed
+    at a directory that does not exist, so running any of them without an
+    explicit ``--dir`` or ``--out`` failed to find the shipped banks. Nothing
+    caught it because every test passed a path.
+    """
+
+    @pytest.mark.parametrize("command", ["validate-assets", "evaluate-assets", "gen-assets"])
+    def test_default_asset_dir_exists(self, command):
+        from usersim.cli import evaluate_assets, gen_assets, validate_assets
+
+        module = {
+            "validate-assets": validate_assets,
+            "evaluate-assets": evaluate_assets,
+            "gen-assets": gen_assets,
+        }[command]
+        default = module.packaged_assets_dir() / "financial_services" / "en_US"
+        assert default.is_dir(), f"{command} default resolves to a missing dir: {default}"
+        assert (default / "region_meta.yaml").exists() or any(default.iterdir())
+
+    def test_validate_assets_finds_the_shipped_bank(self, capsys):
+        rc = cli.main(["validate-assets", "--domain", "financial_services", "--locale", "en_US"])
+        out = capsys.readouterr().out
+        assert "bank dir not found" not in out
+        assert rc == 0
 
 
 class TestDryRuns:

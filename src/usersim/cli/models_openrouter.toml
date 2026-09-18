@@ -1,0 +1,33 @@
+# OpenRouter model configuration for `usersim`. Uses the built-in `openrouter`
+# provider, which reads `OPENROUTER_API_KEY`.
+#
+#   usersim simulate --models src/usersim/cli/models_openrouter.toml ...
+#
+# Mirrors the model choices in models_default.toml. OpenRouter is a
+# multi-vendor gateway, so it is the easiest way to evaluate one vendor's model
+# using support models from another.
+#
+# Ids are namespaced `<vendor>/<model>` and do not always match another
+# provider's spelling for the same model, so add any id you use to
+# cli/model_catalog.py for its sampling parameters to resolve.
+#
+# Judges are a different model from `assistant_model` on purpose, so the model
+# under test is not scoring its own output.
+
+models = [
+  { alias = "user_model",         model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # simulated user
+  { alias = "assistant_model",    model = "google/gemma-4-31b-it",       provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # model under test
+  { alias = "api_response_model", model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # tool-call responses
+  { alias = "judge_model",        model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8 },               # in-sim gates
+  { alias = "summary_model",      model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # context compression
+  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8 },               # trajectory rubric
+
+  # Query side of the financial_services probe's dense and hybrid retrieval.
+  # Must be the same model that produced the corpus vectors: vectors only
+  # compare within one embedding space, and a mismatch fails silently. Without
+  # it the probe retrieves lexically. See the probe README.
+  #
+  # OpenRouter serves /embeddings but does not list embedding models in its
+  # /models response, so this id cannot be found in that listing.
+  { alias = "embedding_model",    model = "openai/text-embedding-3-small", provider = "openrouter", max_parallel_requests = 8 },
+]

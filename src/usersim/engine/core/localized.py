@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, ClassVar, Iterable, Mapping, Tuple
+from typing import Any, ClassVar, Mapping, Tuple
 
 logger = logging.getLogger("usersim.engine")
 
@@ -178,17 +178,3 @@ class LocalizedText:
         return len(self.renderings) > 1
 
 
-def merge_supported_locales(
-    fields: Iterable[LocalizedText],
-) -> Tuple[str, ...]:
-    """Return the union of locales across multiple ``LocalizedText``
-    fields.
-
-    Used by bank-load-time validators to surface a "this bank
-    ships en_US + pt_BR + ja_JP" summary even when individual
-    fields have partial coverage.
-    """
-    seen: set[str] = set()
-    for f in fields:
-        seen.update(f.renderings.keys())
-    return tuple(sorted(seen))

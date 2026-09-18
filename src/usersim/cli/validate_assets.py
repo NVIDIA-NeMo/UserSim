@@ -15,8 +15,7 @@ import argparse
 from pathlib import Path
 
 from usersim.asset_gen.registry import domain_names, get_domain
-
-_ROOT = Path(__file__).resolve().parents[1]
+from usersim.engine.core._assets import packaged_assets_dir
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -41,7 +40,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 def run(args: argparse.Namespace) -> int:
     dom = get_domain(args.domain)
-    bank_dir = args.dir or (_ROOT / "assets" / args.domain / args.locale)
+    bank_dir = args.dir or (packaged_assets_dir() / args.domain / args.locale)
     spec_path = args.region_spec or (dom.region_spec_dir / f"{args.locale}.yaml")
 
     print(f"usersim validate-assets [{args.domain}] — {args.locale}")

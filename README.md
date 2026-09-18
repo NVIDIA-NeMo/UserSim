@@ -30,9 +30,16 @@ instead samples from
 millions of synthetic individuals grounded in real census data, generated
 through probabilistic graphical models that enforce realistic correlations
 between attributes, and written natively in each region's language.
+Specifically, it samples an extended version of these datasets distributed
+through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
+which adds the OCEAN personality traits, names and further fields that the
+behavioural features depend on.
 
-The reasoning behind that design, and where it stops being trustworthy, is in
-[`docs/methodology.md`](docs/methodology.md).
+The datasets are downloaded on first use rather than bundled, and carry their
+own licence separate from this project's, including an AI ethics clause. See
+[`docs/personas.md`](docs/personas.md) for how to get them and what the terms
+allow. The reasoning behind the design, and where it stops being trustworthy,
+is in [`docs/methodology.md`](docs/methodology.md).
 
 What a single simulated trajectory looks like in practice:
 
@@ -74,13 +81,10 @@ plug in through entry points without forking the repository.
 Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-# Resolve uv.lock and editable-install the project.
+# Resolve uv.lock and editable-install the project, with the dev tooling
+# and the Jupyter kernel the notebooks need.
 uv sync
 source .venv/bin/activate
-
-# For the notebooks, add the dev extra. It carries the Jupyter kernel,
-# which the runtime dependencies deliberately do not.
-uv sync --all-extras
 
 # Install the NGC CLI into .venv/bin/ngc (idempotent, sha256-verified).
 # Required to download the Nemotron-Personas datasets.

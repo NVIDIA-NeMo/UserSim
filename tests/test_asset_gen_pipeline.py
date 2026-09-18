@@ -718,6 +718,8 @@ def test_serialize_bank_round_trips_through_loader(tmp_path: Path):
 def test_serialize_bank_writes_embedding_sidecar(tmp_path: Path):
     import pandas as pd
 
+    from usersim.engine.core.finance_bank import _load_embeddings
+
     region_meta = {"locale": "en_TT", "domain_regulators": {}}
     inst = InstitutionBank(
         institution_meta={"institution_id": "testbank", "type": "bank"},
@@ -734,6 +736,11 @@ def test_serialize_bank_writes_embedding_sidecar(tmp_path: Path):
     assert sidecar.exists()
     df = pd.read_parquet(sidecar)
     assert list(df["id"]) == ["D1"] and list(df.iloc[0]["embedding"]) == [0.1, 0.2, 0.3]
+
+    # Round-trip through the loader. No locale ships vectors, so this is the
+    # only coverage of the sidecar-present path: users who run gen-assets
+    # produce one, and it has to load.
+    assert _load_embeddings(sidecar) == {"D1": (0.1, 0.2, 0.3)}
 
 
 def test_cli_gen_assets_dry_run():
@@ -757,14 +764,28 @@ def test_generate_corpus_validates_endpoints_before_network():
 
 
 def test_default_models_config_declares_gen_aliases():
-    """The shipped models config declares the gen/embedding aliases + provider."""
+    """The shipped default config can run `gen-assets` as-is.
+
+    All three aliases resolve against a built-in provider, so the only
+    credential needed is the one the default config already requires.
+    """
     from usersim.asset_gen.financial_services.pipeline import validate_generation_models
-    from usersim.cli._models import default_models_path, load_models_config
-    cfg = load_models_config(default_models_path())
+    # bundled_models_path, not default_models_path: this asserts what ships,
+    # and default_models_path honours a developer's models.local.toml.
+    from usersim.cli._models import bundled_models_path, load_models_config
+    cfg = load_models_config(bundled_models_path())
     validate_generation_models(cfg)  # must not raise
-    assert any(p.name == "nvidia_inference_hub" for p in cfg.providers)
-    # doc-gen model id must match the catalog entry (hub vendor prefix, lowercase).
-    assert cfg.get("doc_gen_model").model == "nvidia/google/gemma-4-31b-it"
+
+    for alias in ("doc_gen_model", "asset_judge_model", "embedding_model"):
+        spec = cfg.get(alias)
+        assert spec is not None, f"default config is missing the {alias!r} row"
+        assert spec.provider == "nvidia", (
+            f"{alias} must resolve against a built-in provider so no endpoint "
+            "has to be configured before `gen-assets` runs"
+        )
+
+    # The QC judge must not be the same family as the generator it grades.
+    assert cfg.get("asset_judge_model").model != cfg.get("doc_gen_model").model
 
 
 def test_off_plan_doc_key_is_reported_not_silent(caplog):

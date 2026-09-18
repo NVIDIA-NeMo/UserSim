@@ -34,7 +34,12 @@ from usersim.selection.profiles import (
     applicable_gates,
 )
 from usersim.selection.io import parse_repo_id
-from usersim.selection.schemas import project, resolve_columns
+from usersim.selection.schemas import (
+    LOGICAL_GROUPS,
+    OPT_IN_ONLY,
+    project,
+    resolve_columns,
+)
 
 # Shared-fixture trajectory ids (see tests/conftest.py).
 T_OK = "t000000000000001"            # general_open_ended, ok, scored
@@ -395,29 +400,121 @@ class TestMaxPerLocale:
         assert res.summary.max_per_locale is None
 
 
+class TestGenerationModelProvenance:
+    """The dataset card's model must come from the run, not from a human.
+
+    A hand-entered value silently goes stale the first time someone switches
+    provider and forgets to update it, and the card is published.
+    """
+
+    @staticmethod
+    def _write_manifest(root, run_id: str, assistant: str) -> None:
+        from usersim.engine.core.manifest import manifest_path
+
+        p = manifest_path(root, run_id)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps({
+            "schema_version": 1,
+            "run_id": run_id,
+            "models": {
+                "assistant_model": {"alias": "assistant_model", "model": assistant},
+            },
+        }))
+
+    def test_reads_the_model_from_the_run_manifest(self, tmp_path):
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        assert resolve_generation_model(tmp_path, "111") == "gpt-5.6-luna"
+
+    def test_concatenated_runs_name_every_distinct_model(self, tmp_path):
+        """A card claiming one model for a mixed dataset would be wrong."""
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        self._write_manifest(tmp_path, "222", "gpt-5.6-luna")   # duplicate
+        self._write_manifest(tmp_path, "333", "google/gemma-4-31b-it")
+        got = resolve_generation_model(tmp_path, "111+222+333")
+        assert got == "gpt-5.6-luna, google/gemma-4-31b-it"
+
+    def test_explicit_value_wins(self, tmp_path):
+        """For runs whose manifest is absent or came from elsewhere."""
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        assert resolve_generation_model(tmp_path, "111", explicit="other") == "other"
+
+    def test_missing_manifest_is_not_fatal(self, tmp_path):
+        """Curation must not fail because a run predates the manifest."""
+        from usersim.selection import resolve_generation_model
+
+        assert resolve_generation_model(tmp_path, "nope") is None
+        assert resolve_generation_model(tmp_path, "") is None
+
+
 class TestSchema:
     def test_full_drops_run_keeps_rest(self):
         cols = resolve_columns("full", ["run", "locale", "probe_family", "trajectory_id", "x"])
         assert "run" not in cols
         assert set(cols) == {"locale", "probe_family", "trajectory_id", "x"}
 
+    @pytest.mark.parametrize("schema", [None, "standard", "compact"])
+    def test_default_export_omits_opt_in_columns(self, schema):
+        """Nothing about a person leaves by default that nobody asked for.
+
+        The verbatim fields reproduce rows of the source persona dataset, and
+        ``persona_religion_language_context`` carries protected attributes.
+        Both stay reachable, but only when named.
+        """
+        available = [
+            "run", "locale", "probe_family", "trajectory_id", "persona_uuid",
+            "conversation_messages", "persona_age_bin", "user_interaction_style",
+            *OPT_IN_ONLY,
+        ]
+        cols = resolve_columns(schema, available)
+        assert not (set(cols) & OPT_IN_ONLY), f"{schema} leaked {set(cols) & OPT_IN_ONLY}"
+        # The derived columns are the point of the export, so they stay.
+        assert "persona_age_bin" in cols
+        assert "user_interaction_style" in cols
+
+    @pytest.mark.parametrize(
+        "schema,expected",
+        [
+            ("full", OPT_IN_ONLY),
+            ("persona_verbatim", set(LOGICAL_GROUPS["persona_verbatim"])),
+            ("persona_protected", set(LOGICAL_GROUPS["persona_protected"])),
+            ("persona_name", {"persona_name"}),
+        ],
+    )
+    def test_opt_in_columns_are_reachable_when_named(self, schema, expected):
+        available = ["run", "locale", "probe_family", *OPT_IN_ONLY]
+        assert set(resolve_columns(schema, available)) & OPT_IN_ONLY == expected
+
+    def test_asking_for_verbatim_does_not_pull_in_protected(self):
+        """The two groups are separate so one cannot smuggle in the other."""
+        available = ["locale", "probe_family", *OPT_IN_ONLY]
+        cols = resolve_columns("persona_verbatim", available)
+        assert "persona_religion_language_context" not in cols
+
     def test_compact_expands_groups_and_skips_missing(self):
         available = [
             "run", "locale", "probe_family", "conversation_messages",
             "conversation_metadata", "conversation_status", "trajectory_id",
             "persona_uuid", "probe_type", "probe_variant", "theme",
-            "persona_name", "persona_age", "tools", "num_tools",
+            "persona_age_bin", "user_interaction_style", "tools", "num_tools",
+            "persona_name", "persona_age",  # verbatim; explicit opt-in
             # num_turns intentionally absent -> "if available" skip
             "simulation_traces", "assistant_eval",  # should be excluded
             "persona_religion_language_context",  # protected; explicit opt-in
         ]
         cols = resolve_columns("compact", available)
         assert "conversation_messages" in cols  # group expansion
-        assert "persona_name" in cols  # group expansion
+        assert "persona_age_bin" in cols  # group expansion
         assert "run" in cols  # compact keeps run
         assert "num_turns" not in cols  # absent -> skipped
         assert "simulation_traces" not in cols and "assistant_eval" not in cols
         assert "persona_religion_language_context" not in cols
+        assert "persona_name" not in cols and "persona_age" not in cols
 
     def test_compact_includes_finance_metadata_when_present(self):
         # financial_services gold-metadata is first-class in compact exports so

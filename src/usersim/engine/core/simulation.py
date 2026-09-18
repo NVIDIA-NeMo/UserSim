@@ -35,7 +35,13 @@ from usersim.engine.core.context import (
 )
 from usersim.engine.core.judges import run_inline_judge, run_inline_judge_ex
 from usersim.engine.core.language_detection import script_compliance_fraction
-from usersim.engine.core.llm import ContextWindowError, call_llm, _word_count
+from usersim.engine.core.llm import (
+    NON_ASCII_TOKEN_SCALE,
+    ContextWindowError,
+    call_llm,
+    scaled_max_tokens,
+    _word_count,
+)
 from usersim.engine.core.locale import (
     INDIA_VARIANT_LOCALES,
     expected_script_ranges,
@@ -1253,7 +1259,9 @@ class ConversationLoop:
             if tools:
                 call_kwargs["tools"] = tools
             if _is_non_ascii_locale(locale):
-                call_kwargs.setdefault("max_tokens", 4096)
+                call_kwargs.update(
+                    scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE)
+                )
             # 3b–3e2 generation: assistant call + per-turn quality judge,
             # with optional judge-gated resampling
             # (``cfg.max_assistant_attempts``; default 1 = single attempt,

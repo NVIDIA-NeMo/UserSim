@@ -2586,7 +2586,7 @@ function HeroPanel() {{
   }}, []);
   return h("header", {{className: "hero"}},
     h("h1", null,
-      h("span", null, "USERSIM MULTI-MODEL COMPARISON"),
+      h("span", null, "NeMo UserSim Multi-Model Comparison"),
       h("span", {{className: "hero-model"}}, `${{report.entries.length}} models · ${{report.locales.length}} locales`)
     ),
     h("div", {{className: "hero-runid"}}, `Comparison ID: ${{report.comparison_id}}`),

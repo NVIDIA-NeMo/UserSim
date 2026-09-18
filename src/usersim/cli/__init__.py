@@ -156,6 +156,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     _configure_logging(args.verbose)
+
+    # Before any command resolves credentials. Variables already exported win,
+    # so this only fills gaps. Logged at debug rather than printed: naming a
+    # file on every invocation is noise, but it is the first thing to check
+    # when a key is not picked up.
+    from usersim.cli._env import describe_loaded_env, load_local_env
+
+    logging.debug("env: %s", describe_loaded_env(load_local_env()))
+
     func = getattr(args, "func", None)
     if func is None:
         parser.print_help()

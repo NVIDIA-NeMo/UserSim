@@ -73,13 +73,20 @@ dependencies = [
     "httpx",
     "huggingface-hub",
     "numpy",
+    # Reads credentials from a .env file so a run does not depend on what is
+    # exported in the calling shell. No required dependencies of its own.
+    "python-dotenv>=1.0,<2",
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
 Repository = "https://github.com/NVIDIA-NeMo/UserSim"
 Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 
-[project.optional-dependencies]
+[dependency-groups]
+# A dependency group rather than an optional-dependency extra, so `uv sync`
+# installs it by default and `pip install nemo-usersim[dev]` cannot pull test
+# and lint tooling into a user's environment. `make test` and the hermeticity
+# guard in conftest.py both depend on this group being present.
 dev = [
     "jupyter",
     "pytest>=8.0",
@@ -88,17 +95,16 @@ dev = [
     "ruff>=0.14,<0.15",
     "pytest-cov>=7.0,<8",
     "pre-commit>=4.0,<5",
-    # Distributes the ~2,900 tests across cores. The suite is CPU-bound with
-    # every LLM call mocked, so it parallelises well; CI spends ~6 minutes of
-    # its test job on execution.
+    # Distributes the test suite across cores. It is CPU-bound with every LLM
+    # call mocked, so it parallelises well. `make test` passes -n and fails
+    # without this.
     "pytest-xdist>=3.6,<4",
-    # Sets USERSIM_DISABLE_EXTENSIONS before conftest files load. A root
-    # conftest.py would run after any earlier one that imports a registry,
-    # which is too late to keep discovery out of the suite.
+    # Applies the [tool.pytest.ini_options] env block below, which sets
+    # USERSIM_DISABLE_EXTENSIONS before any conftest loads. A root conftest.py
+    # would run after one that imports a registry, which is too late to keep
+    # discovery out of the suite. conftest.py fails the run if this is absent.
     "pytest-env>=1.1,<2",
 ]
-
-[dependency-groups]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
 # locked runtime set and no dev tooling.
@@ -167,16 +173,9 @@ target-version = "py312"
 # Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
 # committed outputs, so linting them means noise and rewritten cells. Excluding
 # them keeps a bare `ruff check` equivalent to `make lint`.
-extend-exclude = ["notebooks", "output", "artifacts", "public"]
+extend-exclude = ["notebooks", "output", "artifacts"]
 
 [tool.ruff.lint]
-# Deliberately narrow for now. `I` (import sorting) plus the `UP` typing
-# modernizations (List[x] -> list[x], Optional[x] -> x | None) account for
-# ~1,983 of the 2,261 violations the full rule set reports, and `ruff format`
-# rewrites 208 of 250 files. Landing those alongside a lint gate would bury
-# every in-flight branch in conflicts, so they arrive as one separate
-# mechanical commit once the open MRs merge -- at which point this list grows
-# to match DataDesigner's (W, F, I, ICN, PIE, TID, UP006, UP007, UP045).
 select = [
     "F",   # pyflakes: real bugs (undefined names, unused imports)
     "W",   # pycodestyle warnings

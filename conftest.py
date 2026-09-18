@@ -9,9 +9,17 @@ Lives at the repo root so it applies to both test roots declared in
 
 from __future__ import annotations
 
+import os
 import socket
 
+import pytest
+
 _ALLOWED_FAMILIES = {getattr(socket, "AF_UNIX", None)} - {None}
+
+# Applied by pytest-env from the [tool.pytest.ini_options] env block. Checked
+# rather than set here because a root conftest runs after any conftest that
+# already imported a registry, which is too late to keep discovery out.
+_HERMETIC_ENV_VAR = "USERSIM_DISABLE_EXTENSIONS"
 
 _BLOCKED_MESSAGE = (
     "Outbound network access is blocked during tests. Something under test "
@@ -24,6 +32,26 @@ _BLOCKED_MESSAGE = (
 
 class BlockedNetworkCall(RuntimeError):
     """Raised when a test attempts an outbound connection."""
+
+
+def _require_hermetic_env() -> None:
+    """Abort the run if the suite is not hermetic, naming the cause.
+
+    Without ``pytest-env`` installed, pytest emits only
+    ``PytestConfigWarning: Unknown config option: env`` and three tests then
+    fail for reasons that look unrelated to a missing package. Failing here
+    costs one clear message instead.
+    """
+    if os.environ.get(_HERMETIC_ENV_VAR):
+        return
+    raise pytest.UsageError(
+        f"{_HERMETIC_ENV_VAR} is not set, so an extension installed in this "
+        "environment could register itself into the probe, scorer and domain "
+        "registries and change what the suite sees. It is normally set by "
+        "pytest-env from the [tool.pytest.ini_options] env block in "
+        "pyproject.toml, so the usual cause is that the dev dependency group "
+        "is not installed. Run `uv sync` (or `make install-dev`) and retry."
+    )
 
 
 def pytest_configure(config) -> None:
@@ -42,6 +70,8 @@ def pytest_configure(config) -> None:
     stays a class and ``isinstance`` checks in third-party code keep working.
     AF_UNIX is left open because subprocess and multiprocessing IPC use it.
     """
+    _require_hermetic_env()
+
     real_connect = socket.socket.connect
     real_connect_ex = socket.socket.connect_ex
 

@@ -8,9 +8,10 @@ touching the others, which is the whole design in one sentence.
 <img src="../docs/images/pipeline_architecture.jpg" width="800">
 
 **Who** comes from [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
-synthetic individuals grounded in real census distributions, downloaded on
-first use. Swap in your own population source and everything downstream
-keeps working.
+synthetic individuals grounded in real census distributions, sampled from the
+extended NGC version that carries the OCEAN traits, and downloaded on first
+use. Swap in your own population source and everything downstream keeps
+working.
 
 **How** is behaviour. A persona's OCEAN traits become an interaction style, a
 disclosure pattern, and a tendency to push back when the assistant

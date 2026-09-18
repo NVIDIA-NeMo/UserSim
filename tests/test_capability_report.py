@@ -6,6 +6,10 @@
 from __future__ import annotations
 
 import json
+import re
+from pathlib import Path
+
+import pytest
 
 from usersim.taxonomy.capabilities import capability_by_id
 from usersim.reporting.dashboard import write_capability_dashboard_artifacts
@@ -14,6 +18,48 @@ from usersim.reporting.capability_report import (
     build_capability_report,
     render_capability_report_html,
 )
+
+
+@pytest.mark.parametrize(
+    "module",
+    ["dashboard.py", "capability_report.py", "comparison_dashboard.py"],
+)
+def test_report_chrome_uses_the_display_name(module: str) -> None:
+    """Reader-facing report text says "NeMo UserSim", never bare "UserSim".
+
+    The static HTML titles were rebranded but two React header strings were
+    not, so the same artifact carried both spellings: a correct ``<title>``
+    and a wrong banner. They sit inside a ~990-line JavaScript f-string,
+    which a sweep over HTML tags does not reach.
+
+    The casing is part of the name: "NeMo", never "NEMO" or "Nemo". An
+    all-caps banner cannot carry the brand, so the header is title case and
+    matches the static ``<h1>`` exactly rather than shouting.
+
+    Technical identifiers are deliberately exempt. ``USERSIM_*`` env vars,
+    the ``usersim`` command and ``usersim.*`` imports stay bare, and so do
+    code comments, which are developer prose rather than product chrome.
+    """
+    src = (Path("src/usersim/reporting") / module).read_text()
+    offenders = []
+    for line in src.splitlines():
+        code = line.split("#", 1)[0]
+        for literal in re.findall(r'"([^"]*)"|\'([^\']*)\'', code):
+            text = literal[0] or literal[1]
+            if not re.search(r"UserSim|USERSIM|Usersim", text, re.IGNORECASE):
+                continue
+            # Env vars, the CLI name, import paths, CSS class names and the
+            # repo URL are identifiers, not product chrome.
+            if re.search(
+                r"USERSIM_|usersim[./_-]|NVIDIA-NeMo/UserSim|\.usersim", text
+            ):
+                continue
+            if "NeMo UserSim" not in text:
+                offenders.append(text.strip()[:70])
+    assert not offenders, (
+        f"{module} has reader-facing text that is not exactly 'NeMo UserSim' "
+        f"(note the casing): {offenders}"
+    )
 
 
 def _eval_cell(*, helpfulness=4, language=1.0, tool_status=True):
