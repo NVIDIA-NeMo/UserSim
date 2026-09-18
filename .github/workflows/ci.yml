@@ -80,7 +80,10 @@ jobs:
       - run: make install-ci
 
       - name: Test suite
-        run: make test
+        # Durations are reported because a slow test is invisible until
+        # someone profiles the suite, and the runner is the only place that
+        # measures the hardware CI actually runs on.
+        run: make test PYTEST_ARGS="--durations=25"
 
       - name: Offline self-check
         run: make smoke

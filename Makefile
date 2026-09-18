@@ -104,8 +104,12 @@ check-all-fix: lint-fix format  ## Fix everything fixable, then you re-review
 
 # --- test ------------------------------------------------------------------
 
+# PYTEST_ARGS is a passthrough, so a one-off run does not need a new target:
+#   make test PYTEST_ARGS="--durations=25 -k financial"
+PYTEST_ARGS ?=
+
 test:  ## Run the full test suite (parallel)
-	$(UV) run pytest -n $(PYTEST_WORKERS)
+	$(UV) run pytest -n $(PYTEST_WORKERS) $(PYTEST_ARGS)
 
 test-fast:  ## Stop at the first failure, serially (tight debugging loop)
 	$(UV) run pytest -x -q
