@@ -165,6 +165,66 @@ class TestDeclaredDependencies:
             )
 
 
+class TestProbeTemplate:
+    """The probe scaffold is a contributor's first file; it must run.
+
+    It rotted silently through the package rename: every import still named
+    ``conversation_plugin``, a package that no longer exists, and it told the
+    reader to copy itself to a directory that had moved. Nothing caught it
+    because a ``.template`` is not collected by pytest and not linted.
+    """
+
+    TEMPLATE = _REPO_ROOT / "templates" / "probe" / "test_probe.py.template"
+
+    #: The scaffold's fill-in-the-blank probe module. Not expected to import.
+    PLACEHOLDER = "usersim.engine.probes.YOUR_PROBE"
+
+    def test_template_parses(self) -> None:
+        import ast
+
+        ast.parse(self.TEMPLATE.read_text())
+
+    def test_template_imports_resolve(self) -> None:
+        import importlib
+        import re
+
+        src = self.TEMPLATE.read_text()
+        modules = sorted(set(re.findall(r"^\s*(?:from|import)\s+(usersim[\w.]*)", src, re.M)))
+        assert modules, "template should import from usersim"
+        broken = []
+        for module in modules:
+            if module == self.PLACEHOLDER:
+                continue
+            try:
+                importlib.import_module(module)
+            except ImportError as e:
+                broken.append(f"{module}: {e}")
+        assert not broken, f"probe template imports do not resolve: {broken}"
+
+    def test_template_names_a_real_destination(self) -> None:
+        """The 'copy this to ...' path must exist, or step one fails."""
+        import re
+
+        src = self.TEMPLATE.read_text()
+        match = re.search(r"Copy this to ``([^`]+)``", src)
+        assert match, "template should say where to copy itself"
+        destination = (_REPO_ROOT / match.group(1)).parent
+        assert destination.is_dir(), f"template points at a missing dir: {destination}"
+
+    def test_referenced_examples_exist(self) -> None:
+        """It cites three probe tests as references; dead ones help nobody."""
+        import re
+
+        src = self.TEMPLATE.read_text()
+        cited = set(re.findall(r"``(test_\w+)\.py``", src))
+        assert cited, "template should cite worked examples"
+        missing = [
+            name for name in cited
+            if not (_REPO_ROOT / "tests" / "engine" / "probes" / f"{name}.py").is_file()
+        ]
+        assert not missing, f"template cites tests that do not exist: {sorted(missing)}"
+
+
 class TestProbeAssetPreflight:
     """A selected probe whose bank is absent must fail before any model call.
 

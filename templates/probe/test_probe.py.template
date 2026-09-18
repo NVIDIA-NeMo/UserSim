@@ -3,7 +3,7 @@
 
 """Test scaffold for a new probe.
 
-Copy this to ``conversation-plugin/tests/probes/test_<your_probe>.py`` and
+Copy this to ``tests/engine/probes/test_<your_probe>.py`` and
 edit the marked sections. The 8 standard tests every probe should
 have are stubbed below. For real working examples, see:
 
@@ -50,14 +50,14 @@ from unittest.mock import patch
 
 import pytest
 
-import conversation_plugin.generator  # noqa: F401 — bootstraps registry
-from conversation_plugin.core.outcomes import (
+import usersim.engine.generator  # noqa: F401 — bootstraps registry
+from usersim.engine.core.outcomes import (
     FailureClass, OutcomeStatus, Provenance, WarningKind,
 )
-from conversation_plugin.core.probes import _PROBE_REGISTRY, resolve_probe
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 
 # Replace with your probe's module + names.
-from conversation_plugin.probes.YOUR_PROBE import (
+from usersim.engine.probes.YOUR_PROBE import (
     generator as probe_gen,
 )
 
@@ -124,10 +124,10 @@ def _patched_call_llm(side_effect):
     context manager patches both call sites at once.
     """
     with patch(
-        "conversation_plugin.core.simulation.call_llm",
+        "usersim.engine.core.simulation.call_llm",
         side_effect=side_effect,
     ), patch(
-        "conversation_plugin.core.judges.call_llm",
+        "usersim.engine.core.judges.call_llm",
         side_effect=side_effect,
     ):
         yield
@@ -265,15 +265,15 @@ class TestSimulateYourProbe:
 
 class TestShouldSucceed:
     def test_returns_true_when_required_metadata_set(self) -> None:
-        from conversation_plugin.core.outcomes import OutcomeBuilder
-        from conversation_plugin.core.simulation import ConversationState
+        from usersim.engine.core.outcomes import OutcomeBuilder
+        from usersim.engine.core.simulation import ConversationState
         state = ConversationState(outcome=OutcomeBuilder())
         # Set the probe's join key.
         state.metadata["YOUR_REQUIRED_KEY"] = "id-001"
         assert probe_gen.should_succeed(state) is True
 
     def test_returns_false_when_required_metadata_missing(self) -> None:
-        from conversation_plugin.core.outcomes import OutcomeBuilder
-        from conversation_plugin.core.simulation import ConversationState
+        from usersim.engine.core.outcomes import OutcomeBuilder
+        from usersim.engine.core.simulation import ConversationState
         state = ConversationState(outcome=OutcomeBuilder())
         assert probe_gen.should_succeed(state) is False
