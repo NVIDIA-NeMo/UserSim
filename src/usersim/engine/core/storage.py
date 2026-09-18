@@ -49,7 +49,12 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
+
+if TYPE_CHECKING:
+    # pyarrow is imported inside functions to keep it off the import path of
+    # callers that only need the path helpers. Annotations still need the name.
+    import pyarrow as pa
 
 logger = logging.getLogger("usersim.engine")
 
@@ -343,7 +348,6 @@ def write_partitioned_dataset(
     import os
     import uuid
 
-    import pyarrow as pa
     import pyarrow.parquet as pq
 
     root_path = Path(root).resolve()
@@ -399,10 +403,44 @@ def write_partitioned_dataset(
             raise FileExistsError(out_path)
         # Subset to non-partition columns + write.
         sub_df = group_df[non_partition_cols]
-        table = pa.Table.from_pandas(sub_df, preserve_index=False)
+        table = _arrow_table_for_write(sub_df)
         pq.write_table(table, out_path)
 
     return root_path
+
+
+def _arrow_table_for_write(df) -> "pa.Table":
+    """Convert ``df`` to an Arrow table that plain ``pd.read_parquet`` can reopen.
+
+    pandas records each column's dtype in the file's metadata as a string. For
+    a pyarrow-backed *nested* column that string is something like
+    ``list<element: string>[pyarrow]``, which pandas cannot parse back into a
+    dtype, so reopening raises ``TypeError: data type ... not understood``. The
+    read fails on the metadata alone, so it happens even when the caller asks
+    for a handful of scalar columns.
+
+    Frames reaching the store are pyarrow-backed (DataDesigner's default), so
+    any probe emitting a list or dict column silently produced a trajectory
+    file that could be written but never read: the run completes and then
+    cannot be scored.
+
+    Casting those columns to ``object`` first leaves the on-disk Arrow type
+    untouched and only changes the recorded pandas hint, so values still
+    round-trip as sequences. Readers get a file pandas can open directly,
+    which matters because a trajectory parquet is a published artifact that
+    people will open themselves.
+    """
+    import pandas as pd
+    import pyarrow as pa
+
+    nested = [
+        name
+        for name, dtype in df.dtypes.items()
+        if isinstance(dtype, pd.ArrowDtype) and (pa.types.is_nested(dtype.pyarrow_dtype))
+    ]
+    if nested:
+        df = df.assign(**{name: df[name].astype(object) for name in nested})
+    return pa.Table.from_pandas(df, preserve_index=False)
 
 
 def _format_partition_value(value) -> str:
@@ -880,9 +918,7 @@ def materialize_to_temp_file(path: str | Path) -> Path:
     )
     tmp.close()
     out = Path(tmp.name)
-    import pyarrow as pa
-
-    table = pa.Table.from_pandas(df, preserve_index=False)
+    table = _arrow_table_for_write(df)
     pq.write_table(table, out)
     return out
 
