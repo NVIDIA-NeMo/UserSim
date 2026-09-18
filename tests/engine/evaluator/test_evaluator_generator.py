@@ -291,11 +291,18 @@ class TestPartialReRunSkip:
 
 
 class TestScorerDispatch:
+    # Snapshot and restore rather than leaving the registry empty: it is
+    # process-global, so a bare clear() in teardown makes every later test in
+    # the same worker see zero scorers. Under `pytest -n auto` that surfaces
+    # only when the affected files land on the same worker, which is why it
+    # read as a flake. Mirrors TestRegisterProbe in test_probes_substrate.py.
     def setup_method(self) -> None:
+        self._snapshot = dict(scorers_module._REGISTRY)
         scorers_module.clear_registry()
 
     def teardown_method(self) -> None:
         scorers_module.clear_registry()
+        scorers_module._REGISTRY.update(self._snapshot)
 
     def test_unknown_scorer_recorded_as_error_not_raised(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
@@ -403,10 +410,12 @@ class TestScorerColumnPassthrough:
     )
 
     def setup_method(self) -> None:
+        self._snapshot = dict(scorers_module._REGISTRY)
         scorers_module.clear_registry()
 
     def teardown_method(self) -> None:
         scorers_module.clear_registry()
+        scorers_module._REGISTRY.update(self._snapshot)
 
     def _make_data_with_probe_columns(self) -> dict:
         data = {
