@@ -50,6 +50,48 @@ class ContextWindowError(RuntimeError):
         )
 
 
+#: Multiplier applied to a model's configured ``max_tokens`` for locales whose
+#: script tokenizes more densely than English. 2.0 keeps the same amount of
+#: *text* within budget rather than the same number of tokens.
+#:
+#: This scales the configured value instead of substituting a constant. A
+#: constant silently became a CAP once the catalog default rose above it, so
+#: the locales meant to get more room got half of what English got, and the
+#: resulting truncation reads as a quality failure rather than a budget one.
+NON_ASCII_TOKEN_SCALE = 2.0
+
+
+def scaled_max_tokens(facade: Any, scale: float) -> Dict[str, int]:
+    """Return ``{"max_tokens": n}`` scaled from what ``facade`` is configured with.
+
+    Returns an empty dict when the model sets no budget, which is how
+    reasoning models are configured: substituting one here would reintroduce
+    the parameter they reject.
+    """
+    configured = None
+    try:
+        params = facade._model_config.inference_parameters
+        configured = getattr(params, "max_tokens", None)
+    except AttributeError:
+        return {}
+    if not configured:
+        return {}
+    return {"max_tokens": int(configured * scale)}
+
+
+def _rejects_max_tokens(error: Exception) -> bool:
+    """Detect the provider error meaning "send max_completion_tokens instead".
+
+    Reasoning endpoints refuse ``max_tokens`` outright rather than ignoring
+    it, so this is a permanent failure that retrying unchanged cannot fix.
+    Matched on substrings because the wording differs across providers.
+    """
+    text = str(error).lower()
+    return "max_completion_tokens" in text and (
+        "unsupported" in text or "not supported" in text or "instead" in text
+    )
+
+
 def _is_context_window_error(error: Exception) -> bool:
     """Recognize context failures through provider wrapper/cause chains."""
     pending: List[BaseException] = [error]
@@ -349,6 +391,19 @@ def call_llm(
         except Exception as e:
             if _is_context_window_error(e):
                 raise ContextWindowError(alias, e) from e
+            # Reasoning endpoints replaced ``max_tokens`` with
+            # ``max_completion_tokens`` because hidden thinking tokens are
+            # billed as output. Callers pass a budget without knowing which
+            # spelling the model takes, so translate once and retry rather
+            # than burning the backoff budget on an error that cannot
+            # resolve itself.
+            if _rejects_max_tokens(e) and "max_tokens" in kwargs:
+                kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
+                logger.debug(
+                    "  |-- %s rejects max_tokens; retrying with "
+                    "max_completion_tokens", alias,
+                )
+                continue
             if attempt >= _MAX_RETRIES:
                 raise
             delay = min(_BASE_DELAY * (2 ** attempt), _MAX_DELAY)
@@ -430,4 +485,3 @@ def call_llm(
         pass
 
     return result
-

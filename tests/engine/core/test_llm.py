@@ -40,6 +40,76 @@ class _Facade:
         )
 
 
+class _RejectsMaxTokensFacade:
+    """A reasoning endpoint: refuses ``max_tokens``, takes the other name."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def completion(self, messages, **kwargs):
+        self.calls.append(dict(kwargs))
+        if "max_tokens" in kwargs:
+            raise RuntimeError(
+                "ProviderError: Unsupported parameter: 'max_tokens' is not "
+                "supported with this model. Use 'max_completion_tokens' instead."
+            )
+        return SimpleNamespace(
+            message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
+            usage=SimpleNamespace(input_tokens=1, output_tokens=1),
+        )
+
+
+def test_non_ascii_budget_scales_up_never_down() -> None:
+    """Denser scripts must get MORE room than English, not less.
+
+    This was inverted: the call site substituted a constant 4096, which was a
+    raise when written and silently became a cap once the catalog default
+    rose above it. Japanese, Korean and Devanagari then ran on half of what
+    English got, and the resulting truncation reads as a model quality
+    failure rather than a budget one.
+    """
+    from usersim.engine.core.llm import NON_ASCII_TOKEN_SCALE, scaled_max_tokens
+
+    def facade(max_tokens):
+        return SimpleNamespace(
+            _model_config=SimpleNamespace(
+                inference_parameters=SimpleNamespace(max_tokens=max_tokens)
+            )
+        )
+
+    for configured in (2048, 4096, 8192):
+        scaled = scaled_max_tokens(facade(configured), NON_ASCII_TOKEN_SCALE)
+        assert scaled["max_tokens"] > configured, (
+            f"non-ASCII budget {scaled} must exceed the configured {configured}"
+        )
+
+    # A model that sets no budget must not acquire one: that is how reasoning
+    # models are configured, and they reject the parameter outright.
+    assert scaled_max_tokens(facade(None), NON_ASCII_TOKEN_SCALE) == {}
+
+
+def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
+    """Callers pass a token budget without knowing the model's spelling.
+
+    The engine injects ``max_tokens`` at the call site for non-ASCII locales,
+    where denser tokenization truncates replies. Reasoning endpoints reject
+    that field outright, which is a permanent error: retrying unchanged just
+    burned all three attempts and failed the turn.
+    """
+    facade = _RejectsMaxTokensFacade()
+    result = call_llm(
+        {"assistant_model": facade},
+        "assistant_model",
+        [{"role": "user", "content": "hi"}],
+        max_tokens=4096,
+    )
+    assert result["content"] == "ok"
+    assert len(facade.calls) == 2, "should retry once, not exhaust the backoff"
+    assert facade.calls[0]["max_tokens"] == 4096
+    assert facade.calls[1]["max_completion_tokens"] == 4096
+    assert "max_tokens" not in facade.calls[1]
+
+
 def test_call_llm_records_data_designer_usage_tokens() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
