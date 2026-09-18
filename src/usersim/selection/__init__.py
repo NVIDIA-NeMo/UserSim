@@ -41,6 +41,7 @@ from usersim.selection.io import (
     load_runs,
     parse_repo_id,
     push_to_hf,
+    resolve_generation_model,
     write_curated_dataset,
 )
 from usersim.selection.profiles import (
@@ -72,6 +73,7 @@ __all__ = [
     "available_profiles",
     "available_schemas",
     "build_manifest",
+    "resolve_generation_model",
     "evaluate_row",
     "get_profile",
     "load_run",

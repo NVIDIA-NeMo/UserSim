@@ -143,6 +143,50 @@ def _provenance(df: Any, eval_column: str) -> dict[str, Any]:
     return out
 
 
+def resolve_generation_model(
+    trajectories: Any,
+    run_label: str,
+    *,
+    explicit: Optional[str] = None,
+) -> Optional[str]:
+    """Return the model under test for ``run_label``, read from its manifest.
+
+    The assistant model is not a trajectory column, but every run records it
+    in ``_manifest.json``. Reading it there keeps the dataset card's
+    provenance correct by construction: a hand-entered value silently goes
+    stale the first time someone switches provider and forgets to update it,
+    and the card is a published artifact.
+
+    ``run_label`` may be several ids joined by ``+`` (what ``load_runs``
+    returns when concatenating). Every distinct model is reported rather than
+    the first, because a card claiming one model for a mixed dataset is worse
+    than one naming both.
+
+    ``explicit`` wins when given, for runs whose manifest predates this field
+    or was produced elsewhere. Returns ``None`` when nothing is recoverable,
+    which the card renders as "unspecified".
+    """
+    if explicit:
+        return explicit
+    # Deferred: keeps the selection layer importable without the engine, and
+    # matches how reporting reaches the same function.
+    from usersim.engine.core.manifest import load_run_manifest
+
+    found: list[str] = []
+    for run_id in str(run_label).split("+"):
+        run_id = run_id.strip()
+        if not run_id:
+            continue
+        try:
+            manifest = load_run_manifest(run_id, trajectories)
+        except Exception:  # a missing or unreadable manifest is not fatal
+            continue
+        identity = (manifest.models or {}).get("assistant_model") if manifest else None
+        if identity is not None and identity.model and identity.model not in found:
+            found.append(identity.model)
+    return ", ".join(found) or None
+
+
 def _profile_to_dict(profile: SelectionProfile) -> dict[str, Any]:
     d = dataclasses.asdict(profile)
     # axis_floors is a Mapping; ensure plain dict for JSON.

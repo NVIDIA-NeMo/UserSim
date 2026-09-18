@@ -400,6 +400,58 @@ class TestMaxPerLocale:
         assert res.summary.max_per_locale is None
 
 
+class TestGenerationModelProvenance:
+    """The dataset card's model must come from the run, not from a human.
+
+    A hand-entered value silently goes stale the first time someone switches
+    provider and forgets to update it, and the card is published.
+    """
+
+    @staticmethod
+    def _write_manifest(root, run_id: str, assistant: str) -> None:
+        from usersim.engine.core.manifest import manifest_path
+
+        p = manifest_path(root, run_id)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps({
+            "schema_version": 1,
+            "run_id": run_id,
+            "models": {
+                "assistant_model": {"alias": "assistant_model", "model": assistant},
+            },
+        }))
+
+    def test_reads_the_model_from_the_run_manifest(self, tmp_path):
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        assert resolve_generation_model(tmp_path, "111") == "gpt-5.6-luna"
+
+    def test_concatenated_runs_name_every_distinct_model(self, tmp_path):
+        """A card claiming one model for a mixed dataset would be wrong."""
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        self._write_manifest(tmp_path, "222", "gpt-5.6-luna")   # duplicate
+        self._write_manifest(tmp_path, "333", "google/gemma-4-31b-it")
+        got = resolve_generation_model(tmp_path, "111+222+333")
+        assert got == "gpt-5.6-luna, google/gemma-4-31b-it"
+
+    def test_explicit_value_wins(self, tmp_path):
+        """For runs whose manifest is absent or came from elsewhere."""
+        from usersim.selection import resolve_generation_model
+
+        self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
+        assert resolve_generation_model(tmp_path, "111", explicit="other") == "other"
+
+    def test_missing_manifest_is_not_fatal(self, tmp_path):
+        """Curation must not fail because a run predates the manifest."""
+        from usersim.selection import resolve_generation_model
+
+        assert resolve_generation_model(tmp_path, "nope") is None
+        assert resolve_generation_model(tmp_path, "") is None
+
+
 class TestSchema:
     def test_full_drops_run_keeps_rest(self):
         cols = resolve_columns("full", ["run", "locale", "probe_family", "trajectory_id", "x"])
