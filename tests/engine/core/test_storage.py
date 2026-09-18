@@ -72,22 +72,26 @@ class TestRoundTrip:
         assert sorted(out["trajectory_id"].tolist()) == ["T-001", "T-002"]
         assert set(out["locale"].astype(str)) == {"en_US", "pt_BR"}
         assert set(out["probe_family"].astype(str)) == {
-            "general_open_ended", "safety_chat_pressure",
+            "general_open_ended",
+            "safety_chat_pressure",
         }
 
     def test_creates_hive_partition_directories(self, tmp_path: Path) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         root = tmp_path / "trajs"
         write_partitioned_dataset(df, root)
         # The output uses Hive layout: locale=X/probe_family=Y/...
         assert (root / "locale=en_US" / "probe_family=general_open_ended").is_dir()
 
     def test_partition_columns_live_only_in_directory_names(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """The leaf parquet files must NOT contain the partition columns.
 
@@ -102,12 +106,14 @@ class TestRoundTrip:
         ``pq.read_metadata`` (which does NOT auto-promote partition
         columns the way ``pq.read_table`` does).
         """
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-            "score": 4.5,
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+                "score": 4.5,
+            }
+        )
         root = tmp_path / "trajs"
         write_partitioned_dataset(df, root)
         leaf = next(root.rglob("*.parquet"))
@@ -119,11 +125,13 @@ class TestRoundTrip:
         assert "score" in physical_schema_names
 
     def test_returns_resolved_root(self, tmp_path: Path) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         root = tmp_path / "trajs"
         returned = write_partitioned_dataset(df, root)
         assert returned == root.resolve()
@@ -150,11 +158,13 @@ class TestPolymorphicRead:
     def test_reads_single_file_parquet(self, tmp_path: Path) -> None:
         # Single-file fixture (not partitioned). The reader auto-detects
         # via Path.is_file() and falls through to pq.read_table.
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         path = tmp_path / "single.parquet"
         df.to_parquet(path, index=False)
         out = read_partitioned_dataset(path)
@@ -184,12 +194,14 @@ class TestPolymorphicRead:
             read_partitioned_dataset(tmp_path / "does_not_exist")
 
     def test_columns_projection(self, tmp_path: Path) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-            "extra_col": "junk",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+                "extra_col": "junk",
+            }
+        )
         root = tmp_path / "trajs"
         write_partitioned_dataset(df, root)
         # Project to a subset of columns; locale + probe_family come
@@ -222,23 +234,27 @@ class TestPolymorphicRead:
         # Older run: side_channel_x is all-NaN (object dtype with no
         # real string values, written as ``double`` by pyarrow's
         # NaN-inference behaviour).
-        old_df = pd.DataFrame([
-            {
-                "trajectory_id": "OLD-001",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-                "side_channel_x": float("nan"),
-            },
-        ])
+        old_df = pd.DataFrame(
+            [
+                {
+                    "trajectory_id": "OLD-001",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                    "side_channel_x": float("nan"),
+                },
+            ]
+        )
         # Newer run: side_channel_x is a real string.
-        new_df = pd.DataFrame([
-            {
-                "trajectory_id": "NEW-001",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-                "side_channel_x": "real_value",
-            },
-        ])
+        new_df = pd.DataFrame(
+            [
+                {
+                    "trajectory_id": "NEW-001",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                    "side_channel_x": "real_value",
+                },
+            ]
+        )
         root = tmp_path / "trajs"
         write_partitioned_dataset(old_df, root)
         write_partitioned_dataset(new_df, root)
@@ -249,10 +265,7 @@ class TestPolymorphicRead:
         assert len(out) == 2
         assert set(out["trajectory_id"].astype(str)) == {"OLD-001", "NEW-001"}
         assert "side_channel_x" in out.columns
-        assert (
-            out.loc[out["trajectory_id"] == "NEW-001", "side_channel_x"]
-            .iloc[0] == "real_value"
-        )
+        assert out.loc[out["trajectory_id"] == "NEW-001", "side_channel_x"].iloc[0] == "real_value"
         # The older row's cell is null (pandas-pyarrow ``<NA>``).
         assert out.loc[out["trajectory_id"] == "OLD-001", "side_channel_x"].isna().iloc[0]
 
@@ -282,11 +295,13 @@ class TestWriteLocalePartition:
         assert not (root / "locale=pt_BR").exists()
 
     def test_writes_nothing_when_locale_absent(self, tmp_path: Path) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         root = tmp_path / "trajs"
         # Filtering by an absent locale produces no output but does
         # not raise — the helper short-circuits cleanly.
@@ -318,10 +333,12 @@ class TestWriteLocalePartition:
         assert (root / "run=test_run" / "locale=pt_BR").is_dir()
 
     def test_raises_when_locale_column_missing(self, tmp_path: Path) -> None:
-        df = pd.DataFrame({
-            "trajectory_id": ["T-001"],
-            "probe_family": ["general_open_ended"],
-        })
+        df = pd.DataFrame(
+            {
+                "trajectory_id": ["T-001"],
+                "probe_family": ["general_open_ended"],
+            }
+        )
         with pytest.raises(ValueError, match="locale"):
             write_locale_partition(df, tmp_path / "trajs", locale="en_US", run_id="test_run")
 
@@ -331,25 +348,30 @@ class TestWriteLocalePartition:
 
 class TestSchemaUnion:
     def test_partitions_with_different_columns_union_on_read(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Write two partitions whose probes wrote different
         # side-channel columns. The unified read should surface the
         # union with None-filled cells where the column did not exist.
-        sov_df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "sov_ai_facts",
-            "facts_probed": ["FACT-001"],
-        })
+        sov_df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "sov_ai_facts",
+                "facts_probed": ["FACT-001"],
+            }
+        )
         write_partitioned_dataset(sov_df, tmp_path / "trajs")
 
-        agentic_df = _trajectory_frame({
-            "trajectory_id": "T-002",
-            "locale": "en_US",
-            "probe_family": "safety_agentic",
-            "action_request_id": "AR-001",
-        })
+        agentic_df = _trajectory_frame(
+            {
+                "trajectory_id": "T-002",
+                "locale": "en_US",
+                "probe_family": "safety_agentic",
+                "action_request_id": "AR-001",
+            }
+        )
         write_partitioned_dataset(agentic_df, tmp_path / "trajs")
 
         out = read_partitioned_dataset(tmp_path / "trajs")
@@ -368,11 +390,10 @@ class TestSchemaUnion:
         # facts_probed is a list-of-string column; missing-cell
         # representation may be None / NA / empty list depending on
         # the pyarrow → pandas type mapping.
-        assert pd.isna(agentic_row["facts_probed"]) or agentic_row[
-            "facts_probed"
-        ] is None or (
-            isinstance(agentic_row["facts_probed"], list)
-            and len(agentic_row["facts_probed"]) == 0
+        assert (
+            pd.isna(agentic_row["facts_probed"])
+            or agentic_row["facts_probed"] is None
+            or (isinstance(agentic_row["facts_probed"], list) and len(agentic_row["facts_probed"]) == 0)
         )
 
 
@@ -384,10 +405,12 @@ class TestExistingTrajectoryIds:
         assert existing_trajectory_ids(tmp_path / "missing") == set()
 
     def test_walks_single_file(self, tmp_path: Path) -> None:
-        df = pd.DataFrame({
-            "trajectory_id": ["T-001", "T-002", "T-003"],
-            "other": ["a", "b", "c"],
-        })
+        df = pd.DataFrame(
+            {
+                "trajectory_id": ["T-001", "T-002", "T-003"],
+                "other": ["a", "b", "c"],
+            }
+        )
         path = tmp_path / "single.parquet"
         df.to_parquet(path, index=False)
         assert existing_trajectory_ids(path) == {"T-001", "T-002", "T-003"}
@@ -421,14 +444,17 @@ class TestExistingTrajectoryIds:
         assert existing_trajectory_ids(path) == set()
 
     def test_partitioned_resume_after_partial_write(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Simulate a crash: only en_US's partition landed.
-        df_en = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df_en = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         root = tmp_path / "trajs"
         write_locale_partition(df_en, root, locale="en_US", run_id="test_run")
         # Resume sees the en_US trajectory but no pt_BR.
@@ -441,11 +467,13 @@ class TestExistingTrajectoryIds:
 
 class TestAuxiliaryHelpers:
     def test_is_partitioned_directory_true_for_dir(self, tmp_path: Path) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+            }
+        )
         root = tmp_path / "trajs"
         write_partitioned_dataset(df, root)
         assert is_partitioned_directory(root) is True
@@ -502,7 +530,8 @@ class TestAuxiliaryHelpers:
             # confirm it is a single-file parquet (not a directory).
             table = pq.read_table(temp)
             assert sorted(table.column("trajectory_id").to_pylist()) == [
-                "T-001", "T-002",
+                "T-001",
+                "T-002",
             ]
         finally:
             temp.unlink()
@@ -522,6 +551,7 @@ class TestRunHelpers:
 
     def test_new_run_id_default_is_current_epoch(self) -> None:
         import time
+
         before = int(time.time())
         rid = new_run_id()
         after = int(time.time())
@@ -535,7 +565,8 @@ class TestRunHelpers:
         assert list_runs(tmp_path / "trajs") == []
 
     def test_list_runs_returns_run_subdirs_oldest_first(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         root = tmp_path / "trajs"
         root.mkdir()
@@ -546,7 +577,8 @@ class TestRunHelpers:
         assert list_runs(root) == ["1700000000", "1714074853", "1800000000"]
 
     def test_list_runs_returns_legacy_for_bare_layout(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """A directory with bare ``locale=*/`` subdirs (the older flat
         layout, pre-run-partitioning) surfaces as a single synthetic
@@ -556,7 +588,8 @@ class TestRunHelpers:
         assert list_runs(root) == [LEGACY_RUN_ID]
 
     def test_list_runs_prefers_real_runs_over_legacy(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """When both ``run=*`` and bare ``locale=*/`` subdirs coexist
         (a partial migration), the real runs are returned and the
@@ -585,7 +618,8 @@ class TestRunHelpers:
         assert resolve_run(root, "latest") == "1714074853"
 
     def test_resolve_run_passes_through_explicit_id(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Note: resolve_run does NOT validate; the reader does. This
         # lets the caller pin a future-but-not-yet-written run id
@@ -598,7 +632,8 @@ class TestRunHelpers:
         assert run_subroot(tmp_path, "1714074853") == tmp_path / "run=1714074853"
 
     def test_run_subroot_for_legacy_returns_root_itself(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # The bare-layout legacy data lives directly under root, so
         # the "subroot" for the legacy sentinel is root itself.
@@ -610,32 +645,38 @@ class TestRunScopedReadAndWrite:
     multiple runs, default-to-latest, cross-run reads with run column."""
 
     def test_write_locale_partition_scopes_to_run_id(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
-        df = _trajectory_frame({
-            "trajectory_id": "T-001",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
         root = tmp_path / "trajs"
         write_locale_partition(df, root, locale="en_US", run_id="1714074853")
-        assert (root / "run=1714074853" / "locale=en_US" /
-                "probe_family=tool_calling").is_dir()
+        assert (root / "run=1714074853" / "locale=en_US" / "probe_family=tool_calling").is_dir()
         # The bare locale=*/ directory (legacy layout) is NOT created.
         assert not (root / "locale=en_US").is_dir()
 
     def test_read_default_picks_latest_run(self, tmp_path: Path) -> None:
         root = tmp_path / "trajs"
-        old = _trajectory_frame({
-            "trajectory_id": "OLD",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
-        new = _trajectory_frame({
-            "trajectory_id": "NEW",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
+        old = _trajectory_frame(
+            {
+                "trajectory_id": "OLD",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
+        new = _trajectory_frame(
+            {
+                "trajectory_id": "NEW",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
         write_locale_partition(old, root, locale="en_US", run_id="1700000000")
         write_locale_partition(new, root, locale="en_US", run_id="1800000000")
         df = read_partitioned_dataset(root)
@@ -643,16 +684,20 @@ class TestRunScopedReadAndWrite:
 
     def test_read_pinned_run_id(self, tmp_path: Path) -> None:
         root = tmp_path / "trajs"
-        old = _trajectory_frame({
-            "trajectory_id": "OLD",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
-        new = _trajectory_frame({
-            "trajectory_id": "NEW",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
+        old = _trajectory_frame(
+            {
+                "trajectory_id": "OLD",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
+        new = _trajectory_frame(
+            {
+                "trajectory_id": "NEW",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
         write_locale_partition(old, root, locale="en_US", run_id="1700000000")
         write_locale_partition(new, root, locale="en_US", run_id="1800000000")
         df = read_partitioned_dataset(root, run="1700000000")
@@ -661,46 +706,57 @@ class TestRunScopedReadAndWrite:
     def test_read_all_runs_includes_run_column(self, tmp_path: Path) -> None:
         root = tmp_path / "trajs"
         write_locale_partition(
-            _trajectory_frame({
-                "trajectory_id": "OLD",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-            }),
-            root, locale="en_US", run_id="1700000000",
+            _trajectory_frame(
+                {
+                    "trajectory_id": "OLD",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                }
+            ),
+            root,
+            locale="en_US",
+            run_id="1700000000",
         )
         write_locale_partition(
-            _trajectory_frame({
-                "trajectory_id": "NEW",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-            }),
-            root, locale="en_US", run_id="1800000000",
+            _trajectory_frame(
+                {
+                    "trajectory_id": "NEW",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                }
+            ),
+            root,
+            locale="en_US",
+            run_id="1800000000",
         )
         df = read_partitioned_dataset(root, run="all")
         assert "run" in df.columns
         # Both runs present, each tagged with its source id.
         assert sorted(df["trajectory_id"].astype(str).tolist()) == ["NEW", "OLD"]
-        run_to_traj = dict(zip(
-            df["trajectory_id"].astype(str), df["run"].astype(str)
-        ))
+        run_to_traj = dict(zip(df["trajectory_id"].astype(str), df["run"].astype(str)))
         assert run_to_traj["OLD"] == "1700000000"
         assert run_to_traj["NEW"] == "1800000000"
 
     def test_read_unknown_run_id_raises(self, tmp_path: Path) -> None:
         root = tmp_path / "trajs"
         write_locale_partition(
-            _trajectory_frame({
-                "trajectory_id": "T-001",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-            }),
-            root, locale="en_US", run_id="1714074853",
+            _trajectory_frame(
+                {
+                    "trajectory_id": "T-001",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                }
+            ),
+            root,
+            locale="en_US",
+            run_id="1714074853",
         )
         with pytest.raises(FileNotFoundError, match="run="):
             read_partitioned_dataset(root, run="9999999999")
 
     def test_read_empty_root_returns_empty_dataframe(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Empty root with no runs and no legacy layout should
         # short-circuit to an empty DataFrame so notebooks and CLI
@@ -711,40 +767,52 @@ class TestRunScopedReadAndWrite:
         assert df.empty
 
     def test_legacy_bare_layout_readable_through_reader(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Older datasets (no ``run=*`` partitions) keep working
         without manual migration."""
         root = tmp_path / "trajs"
         # Write the OLD way: directly under root, no run partition.
-        legacy_df = _trajectory_frame({
-            "trajectory_id": "LEGACY-001",
-            "locale": "en_US",
-            "probe_family": "tool_calling",
-        })
+        legacy_df = _trajectory_frame(
+            {
+                "trajectory_id": "LEGACY-001",
+                "locale": "en_US",
+                "probe_family": "tool_calling",
+            }
+        )
         write_partitioned_dataset(legacy_df, root)
         df = read_partitioned_dataset(root)
         assert set(df["trajectory_id"].astype(str)) == {"LEGACY-001"}
 
     def test_existing_trajectory_ids_scopes_to_run(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         root = tmp_path / "trajs"
         write_locale_partition(
-            _trajectory_frame({
-                "trajectory_id": "OLD",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-            }),
-            root, locale="en_US", run_id="1700000000",
+            _trajectory_frame(
+                {
+                    "trajectory_id": "OLD",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                }
+            ),
+            root,
+            locale="en_US",
+            run_id="1700000000",
         )
         write_locale_partition(
-            _trajectory_frame({
-                "trajectory_id": "NEW",
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-            }),
-            root, locale="en_US", run_id="1800000000",
+            _trajectory_frame(
+                {
+                    "trajectory_id": "NEW",
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                }
+            ),
+            root,
+            locale="en_US",
+            run_id="1800000000",
         )
         # Default = latest = NEW only.
         assert existing_trajectory_ids(root) == {"NEW"}
@@ -808,8 +876,7 @@ class TestWriteRunPartition:
         root = tmp_path / "evals"
         df = pd.DataFrame(
             [
-                {"trajectory_id": "T1", "locale": "en_US",
-                 "probe_family": "tool_calling", "score": 0.9},
+                {"trajectory_id": "T1", "locale": "en_US", "probe_family": "tool_calling", "score": 0.9},
             ]
         )
         subroot = write_run_partition(df, root, "1714074853")
@@ -820,18 +887,23 @@ class TestWriteRunPartition:
     def test_overwrite_replaces_existing_run(self, tmp_path: Path) -> None:
         root = tmp_path / "evals"
         write_run_partition(
-            pd.DataFrame([
-                {"trajectory_id": "OLD", "locale": "en_US",
-                 "probe_family": "tool_calling"},
-            ]),
-            root, "1714074853",
+            pd.DataFrame(
+                [
+                    {"trajectory_id": "OLD", "locale": "en_US", "probe_family": "tool_calling"},
+                ]
+            ),
+            root,
+            "1714074853",
         )
         write_run_partition(
-            pd.DataFrame([
-                {"trajectory_id": "NEW", "locale": "en_US",
-                 "probe_family": "tool_calling"},
-            ]),
-            root, "1714074853", overwrite=True,
+            pd.DataFrame(
+                [
+                    {"trajectory_id": "NEW", "locale": "en_US", "probe_family": "tool_calling"},
+                ]
+            ),
+            root,
+            "1714074853",
+            overwrite=True,
         )
         # Only the new partition survives -- OLD has been blasted.
         roundtripped = read_partitioned_dataset(root, run="1714074853")
@@ -841,9 +913,7 @@ class TestWriteRunPartition:
         # The kwarg is only consequential when the subroot already
         # exists; against a missing run it's a no-op + fresh write.
         root = tmp_path / "evals"
-        df = pd.DataFrame(
-            [{"trajectory_id": "T1", "locale": "en_US", "probe_family": "x"}]
-        )
+        df = pd.DataFrame([{"trajectory_id": "T1", "locale": "en_US", "probe_family": "x"}])
         write_run_partition(df, root, "1714074853", overwrite=False)
         assert (root / "run=1714074853").exists()
 
@@ -871,23 +941,30 @@ class TestWriteRunLocalesPartition:
         rows = []
         for locale in ("en_US", "ja_JP", "pt_BR"):
             for probe in ("tool_calling", "general_open_ended"):
-                rows.append({
-                    "trajectory_id": f"T-{locale}-{probe}",
-                    "locale": locale,
-                    "probe_family": probe,
-                    "score": 0.5,
-                })
+                rows.append(
+                    {
+                        "trajectory_id": f"T-{locale}-{probe}",
+                        "locale": locale,
+                        "probe_family": probe,
+                        "score": 0.5,
+                    }
+                )
         return pd.DataFrame(rows)
 
     def test_round_trip_single_locale(self, tmp_path: Path) -> None:
         """Sanity: targeted write of one locale's worth of rows lands
         cleanly with no other partitions written."""
         root = tmp_path / "evals"
-        df = pd.DataFrame([
-            {"trajectory_id": "T1", "locale": "en_US", "probe_family": "x"},
-        ])
+        df = pd.DataFrame(
+            [
+                {"trajectory_id": "T1", "locale": "en_US", "probe_family": "x"},
+            ]
+        )
         subroot = write_run_locales_partition(
-            df, root, "1714074853", locales=["en_US"],
+            df,
+            root,
+            "1714074853",
+            locales=["en_US"],
         )
         assert subroot == root / "run=1714074853"
         assert (subroot / "locale=en_US").exists()
@@ -896,7 +973,8 @@ class TestWriteRunLocalesPartition:
         assert siblings == ["locale=en_US"]
 
     def test_targeted_overwrite_preserves_other_locales(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """The headline use-case: re-eval en_US and confirm ja_JP /
         pt_BR partitions are byte-identical before and after."""
@@ -908,26 +986,25 @@ class TestWriteRunLocalesPartition:
         subroot = root / f"run={run_id}"
 
         # Capture other locales' partition contents BEFORE the targeted write.
-        before_ja = sorted(
-            (subroot / "locale=ja_JP").rglob("*.parquet")
-        )
-        before_pt = sorted(
-            (subroot / "locale=pt_BR").rglob("*.parquet")
-        )
+        before_ja = sorted((subroot / "locale=ja_JP").rglob("*.parquet"))
+        before_pt = sorted((subroot / "locale=pt_BR").rglob("*.parquet"))
         before_ja_bytes = {p.relative_to(subroot): p.read_bytes() for p in before_ja}
         before_pt_bytes = {p.relative_to(subroot): p.read_bytes() for p in before_pt}
         assert before_ja_bytes  # sanity
         assert before_pt_bytes
 
         # Re-eval just en_US with new content.
-        en_us_only = pd.DataFrame([
-            {"trajectory_id": "T-EN-NEW-1", "locale": "en_US",
-             "probe_family": "tool_calling", "score": 0.99},
-            {"trajectory_id": "T-EN-NEW-2", "locale": "en_US",
-             "probe_family": "general_open_ended", "score": 0.99},
-        ])
+        en_us_only = pd.DataFrame(
+            [
+                {"trajectory_id": "T-EN-NEW-1", "locale": "en_US", "probe_family": "tool_calling", "score": 0.99},
+                {"trajectory_id": "T-EN-NEW-2", "locale": "en_US", "probe_family": "general_open_ended", "score": 0.99},
+            ]
+        )
         write_run_locales_partition(
-            en_us_only, root, run_id, locales=["en_US"],
+            en_us_only,
+            root,
+            run_id,
+            locales=["en_US"],
         )
 
         # en_US has the NEW rows and ONLY the new rows (old en_US gone).
@@ -936,29 +1013,21 @@ class TestWriteRunLocalesPartition:
         assert en_us_ids == ["T-EN-NEW-1", "T-EN-NEW-2"]
         # ja_JP and pt_BR rows survive unchanged.
         assert set(rt[rt["locale"] == "ja_JP"]["trajectory_id"]) == {
-            "T-ja_JP-tool_calling", "T-ja_JP-general_open_ended",
+            "T-ja_JP-tool_calling",
+            "T-ja_JP-general_open_ended",
         }
         assert set(rt[rt["locale"] == "pt_BR"]["trajectory_id"]) == {
-            "T-pt_BR-tool_calling", "T-pt_BR-general_open_ended",
+            "T-pt_BR-tool_calling",
+            "T-pt_BR-general_open_ended",
         }
 
         # Strongest invariant: ja_JP / pt_BR parquet files are byte-
         # identical to before the targeted write. No accidental rewrite,
         # no metadata churn, no `_common_metadata` mutation.
-        after_ja_bytes = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=ja_JP").rglob("*.parquet")
-        }
-        after_pt_bytes = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=pt_BR").rglob("*.parquet")
-        }
-        assert after_ja_bytes == before_ja_bytes, (
-            "ja_JP partitions must be byte-identical after en_US re-eval"
-        )
-        assert after_pt_bytes == before_pt_bytes, (
-            "pt_BR partitions must be byte-identical after en_US re-eval"
-        )
+        after_ja_bytes = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=ja_JP").rglob("*.parquet")}
+        after_pt_bytes = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=pt_BR").rglob("*.parquet")}
+        assert after_ja_bytes == before_ja_bytes, "ja_JP partitions must be byte-identical after en_US re-eval"
+        assert after_pt_bytes == before_pt_bytes, "pt_BR partitions must be byte-identical after en_US re-eval"
 
     def test_additive_new_locale_keeps_existing(self, tmp_path: Path) -> None:
         """Workflow 2: an 8th locale gets added to a 7-locale run with
@@ -968,64 +1037,61 @@ class TestWriteRunLocalesPartition:
         run_id = "1714074853"
 
         # Initial run has en_US + ja_JP only.
-        initial = pd.DataFrame([
-            {"trajectory_id": "T-EN", "locale": "en_US",
-             "probe_family": "tool_calling", "score": 0.5},
-            {"trajectory_id": "T-JA", "locale": "ja_JP",
-             "probe_family": "tool_calling", "score": 0.6},
-        ])
+        initial = pd.DataFrame(
+            [
+                {"trajectory_id": "T-EN", "locale": "en_US", "probe_family": "tool_calling", "score": 0.5},
+                {"trajectory_id": "T-JA", "locale": "ja_JP", "probe_family": "tool_calling", "score": 0.6},
+            ]
+        )
         write_run_partition(initial, root, run_id)
         subroot = root / f"run={run_id}"
-        before_en = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=en_US").rglob("*.parquet")
-        }
-        before_ja = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=ja_JP").rglob("*.parquet")
-        }
+        before_en = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=en_US").rglob("*.parquet")}
+        before_ja = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=ja_JP").rglob("*.parquet")}
 
         # Add pt_BR (new locale) without touching en_US / ja_JP.
-        pt_br_only = pd.DataFrame([
-            {"trajectory_id": "T-PT", "locale": "pt_BR",
-             "probe_family": "tool_calling", "score": 0.7},
-        ])
+        pt_br_only = pd.DataFrame(
+            [
+                {"trajectory_id": "T-PT", "locale": "pt_BR", "probe_family": "tool_calling", "score": 0.7},
+            ]
+        )
         write_run_locales_partition(
-            pt_br_only, root, run_id, locales=["pt_BR"], overwrite=False,
+            pt_br_only,
+            root,
+            run_id,
+            locales=["pt_BR"],
+            overwrite=False,
         )
 
         rt = read_partitioned_dataset(root, run=run_id)
         assert set(rt["trajectory_id"]) == {"T-EN", "T-JA", "T-PT"}
 
         # Existing en_US + ja_JP partitions unchanged.
-        after_en = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=en_US").rglob("*.parquet")
-        }
-        after_ja = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=ja_JP").rglob("*.parquet")
-        }
+        after_en = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=en_US").rglob("*.parquet")}
+        after_ja = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=ja_JP").rglob("*.parquet")}
         assert after_en == before_en
         assert after_ja == before_ja
 
     def test_rejects_df_with_locale_outside_target(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Pre-condition: df rows must all be in the target locale set.
         Otherwise the helper would write rows that escape the targeted-
         overwrite contract -- e.g., a stray ja_JP row would land in
         the ja_JP partition of a "just en_US" call. Raise loudly."""
         root = tmp_path / "evals"
-        df_mixed = pd.DataFrame([
-            {"trajectory_id": "T-EN", "locale": "en_US",
-             "probe_family": "x", "score": 0.5},
-            {"trajectory_id": "T-JA", "locale": "ja_JP",
-             "probe_family": "x", "score": 0.5},
-        ])
+        df_mixed = pd.DataFrame(
+            [
+                {"trajectory_id": "T-EN", "locale": "en_US", "probe_family": "x", "score": 0.5},
+                {"trajectory_id": "T-JA", "locale": "ja_JP", "probe_family": "x", "score": 0.5},
+            ]
+        )
         with pytest.raises(ValueError, match="not in target locales"):
             write_run_locales_partition(
-                df_mixed, root, "r", locales=["en_US"],
+                df_mixed,
+                root,
+                "r",
+                locales=["en_US"],
             )
 
     def test_empty_locales_raises(self, tmp_path: Path) -> None:
@@ -1033,20 +1099,19 @@ class TestWriteRunLocalesPartition:
         helper (``write_run_partition``) for whole-run writes; reroute
         the user there rather than silently writing nothing."""
         root = tmp_path / "evals"
-        df = pd.DataFrame(
-            [{"trajectory_id": "T", "locale": "en_US", "probe_family": "x"}]
-        )
+        df = pd.DataFrame([{"trajectory_id": "T", "locale": "en_US", "probe_family": "x"}])
         with pytest.raises(ValueError, match="non-empty sequence"):
             write_run_locales_partition(df, root, "r", locales=[])
 
     def test_missing_locale_column_raises(self, tmp_path: Path) -> None:
         root = tmp_path / "evals"
-        df_no_locale = pd.DataFrame(
-            [{"trajectory_id": "T", "probe_family": "x", "score": 0.5}]
-        )
+        df_no_locale = pd.DataFrame([{"trajectory_id": "T", "probe_family": "x", "score": 0.5}])
         with pytest.raises(ValueError, match="missing 'locale' column"):
             write_run_locales_partition(
-                df_no_locale, root, "r", locales=["en_US"],
+                df_no_locale,
+                root,
+                "r",
+                locales=["en_US"],
             )
 
     def test_empty_df_is_no_op(self, tmp_path: Path) -> None:
@@ -1057,20 +1122,14 @@ class TestWriteRunLocalesPartition:
         run_id = "1714074853"
         write_run_partition(self._multi_locale_frame(), root, run_id)
         subroot = root / f"run={run_id}"
-        before_en = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=en_US").rglob("*.parquet")
-        }
+        before_en = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=en_US").rglob("*.parquet")}
 
         # Empty df targeting en_US.
         empty = pd.DataFrame(columns=["trajectory_id", "locale", "probe_family", "score"])
         write_run_locales_partition(empty, root, run_id, locales=["en_US"])
 
         # en_US partition untouched.
-        after_en = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=en_US").rglob("*.parquet")
-        }
+        after_en = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=en_US").rglob("*.parquet")}
         assert after_en == before_en
 
     def test_multi_locale_targeted_overwrite(self, tmp_path: Path) -> None:
@@ -1080,19 +1139,19 @@ class TestWriteRunLocalesPartition:
         run_id = "1714074853"
         write_run_partition(self._multi_locale_frame(), root, run_id)
         subroot = root / f"run={run_id}"
-        before_pt = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=pt_BR").rglob("*.parquet")
-        }
+        before_pt = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=pt_BR").rglob("*.parquet")}
 
-        new_data = pd.DataFrame([
-            {"trajectory_id": "T-EN-V2", "locale": "en_US",
-             "probe_family": "tool_calling", "score": 0.99},
-            {"trajectory_id": "T-JA-V2", "locale": "ja_JP",
-             "probe_family": "tool_calling", "score": 0.99},
-        ])
+        new_data = pd.DataFrame(
+            [
+                {"trajectory_id": "T-EN-V2", "locale": "en_US", "probe_family": "tool_calling", "score": 0.99},
+                {"trajectory_id": "T-JA-V2", "locale": "ja_JP", "probe_family": "tool_calling", "score": 0.99},
+            ]
+        )
         write_run_locales_partition(
-            new_data, root, run_id, locales=["en_US", "ja_JP"],
+            new_data,
+            root,
+            run_id,
+            locales=["en_US", "ja_JP"],
         )
 
         rt = read_partitioned_dataset(root, run=run_id)
@@ -1101,10 +1160,8 @@ class TestWriteRunLocalesPartition:
         assert set(rt[rt["locale"] == "ja_JP"]["trajectory_id"]) == {"T-JA-V2"}
         # pt_BR survives unchanged.
         assert set(rt[rt["locale"] == "pt_BR"]["trajectory_id"]) == {
-            "T-pt_BR-tool_calling", "T-pt_BR-general_open_ended",
+            "T-pt_BR-tool_calling",
+            "T-pt_BR-general_open_ended",
         }
-        after_pt = {
-            p.relative_to(subroot): p.read_bytes()
-            for p in (subroot / "locale=pt_BR").rglob("*.parquet")
-        }
+        after_pt = {p.relative_to(subroot): p.read_bytes() for p in (subroot / "locale=pt_BR").rglob("*.parquet")}
         assert after_pt == before_pt

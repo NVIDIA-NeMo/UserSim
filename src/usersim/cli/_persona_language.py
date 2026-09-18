@@ -20,13 +20,12 @@ from typing import Any, Mapping, Optional, Sequence
 
 logger = logging.getLogger("usersim.cli.persona_language")
 
-DEFAULT_PERSONA_DATASETS_DIR = (
-    Path.home() / ".data-designer" / "managed-assets" / "datasets"
-)
+DEFAULT_PERSONA_DATASETS_DIR = Path.home() / ".data-designer" / "managed-assets" / "datasets"
 
 
 def persona_language_for_locale(
-    locale: str, persona_locale: Optional[str] = None,
+    locale: str,
+    persona_locale: Optional[str] = None,
 ) -> Optional[str]:
     """Return the sampled corpus's language value for a conversation locale."""
     from usersim.engine.core.locale import (
@@ -124,11 +123,7 @@ class PersonaLanguagePopulation:
 
     @property
     def eligible_percent(self) -> float:
-        return (
-            100.0 * self.eligible_rows / self.total_rows
-            if self.total_rows
-            else 0.0
-        )
+        return 100.0 * self.eligible_rows / self.total_rows if self.total_rows else 0.0
 
 
 @lru_cache(maxsize=8)
@@ -175,8 +170,7 @@ def log_persona_language_population(
         return None
     if len(constraint) != 1:
         logger.warning(
-            "persona language population unavailable for locale=%s: "
-            "expected one corpus language constraint, got %s",
+            "persona language population unavailable for locale=%s: expected one corpus language constraint, got %s",
             conversation_locale,
             dict(constraint),
         )
@@ -185,15 +179,11 @@ def log_persona_language_population(
     column, raw_values = next(iter(constraint.items()))
     values = tuple(str(value) for value in raw_values)
     path = (Path(datasets_dir) / f"{persona_locale}.parquet").resolve()
-    english_india = (
-        conversation_locale == "en_IN"
-        and values == ("English",)
-    )
+    english_india = conversation_locale == "en_IN" and values == ("English",)
 
     if not path.is_file():
         logger.warning(
-            "persona language cohort count unavailable for locale=%s "
-            "(corpus=%s, %s=%s): %s is not present yet",
+            "persona language cohort count unavailable for locale=%s (corpus=%s, %s=%s): %s is not present yet",
             conversation_locale,
             persona_locale,
             column,

@@ -58,9 +58,7 @@ SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
 # NOT ship scripted templates, so committed tasks.yaml carry verifiable
 # templates only. ``dynamic`` is kept in the allow-set for forward-compat.
 ALLOWED_TIERS: FrozenSet[str] = frozenset({"verifiable", "dynamic"})
-ALLOWED_SIDE_EFFECTS: FrozenSet[str] = frozenset(
-    {"read_only", "state_changing", "irreversible"}
-)
+ALLOWED_SIDE_EFFECTS: FrozenSet[str] = frozenset({"read_only", "state_changing", "irreversible"})
 _PERSONA_TAG_RE = re.compile(
     r"^(region|age|occupation-family|education|interest|financial-literacy):"
     r"[a-zA-Z0-9_\-+]+$"
@@ -105,8 +103,7 @@ class ToolSpec:
             "function": {
                 "name": self.name,
                 "description": self.description,
-                "parameters": self.parameters
-                or {"type": "object", "properties": {}},
+                "parameters": self.parameters or {"type": "object", "properties": {}},
             },
         }
 
@@ -210,10 +207,7 @@ _IDENTITY_FIELD_SCHEMAS: Dict[str, Dict[str, Any]] = {
     },
     "aadhaar_last4": {
         "type": "string",
-        "description": (
-            "Last 4 digits of the customer's Aadhaar number. Never ask for "
-            "the full Aadhaar number."
-        ),
+        "description": ("Last 4 digits of the customer's Aadhaar number. Never ask for the full Aadhaar number."),
     },
     "national_id_last4": {
         "type": "string",
@@ -236,9 +230,7 @@ def verify_identity_schema(
     required = [f for f in required_fields if f in _IDENTITY_FIELD_SCHEMAS]
     if not required:
         required = list(DEFAULT_IDENTITY_REQUIRED_FIELDS)
-    props: Dict[str, Any] = {
-        f: dict(_IDENTITY_FIELD_SCHEMAS[f]) for f in required
-    }
+    props: Dict[str, Any] = {f: dict(_IDENTITY_FIELD_SCHEMAS[f]) for f in required}
     # Optional extra signal, always offered.
     props.setdefault("account_or_card_last4", {"type": "string"})
     pretty = " AND ".join(f.replace("_", " ") for f in required)
@@ -361,9 +353,7 @@ class Institution:
     def permanent_tools(self) -> Tuple[ToolSpec, ...]:
         return tuple(t for t in self.tools if not t.discoverable)
 
-    def matching_persona_tags(
-        self, tags: Iterable[str]
-    ) -> Tuple[TaskTemplate, ...]:
+    def matching_persona_tags(self, tags: Iterable[str]) -> Tuple[TaskTemplate, ...]:
         wanted = set(tags)
         return tuple(t for t in self.templates if _tags_match(t.persona_tags, wanted))
 
@@ -474,9 +464,7 @@ def load_finance_bank(locale_dir: str | Path) -> FinanceBank:
         raise FinanceBankError(f"{locale_dir}: bank directory not found")
 
     region_meta = _load_yaml(root / "region_meta.yaml")
-    schema_version = _require_str(
-        region_meta, "schema_version", str(root / "region_meta.yaml")
-    )
+    schema_version = _require_str(region_meta, "schema_version", str(root / "region_meta.yaml"))
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise FinanceBankError(
             f"{root}::schema_version: {schema_version!r} not supported; "
@@ -524,8 +512,11 @@ def load_finance_bank(locale_dir: str | Path) -> FinanceBank:
         logger.info(
             "finance_bank: loaded %s v%s (%d institutions, %d docs, "
             "%d placeholder) — downstream scorecards preview-only",
-            bank_id, bank_version, len(institutions),
-            sum(len(i.documents) for i in institutions), n_ph,
+            bank_id,
+            bank_version,
+            len(institutions),
+            sum(len(i.documents) for i in institutions),
+            n_ph,
         )
     return bank
 
@@ -539,17 +530,21 @@ def _build_institution(inst_dir: Path, *, src: str) -> Institution:
 
     documents = _build_documents(
         _load_yaml(inst_dir / "corpus.yaml"),
-        src=str(inst_dir / "corpus.yaml"), institution_id=iid,
+        src=str(inst_dir / "corpus.yaml"),
+        institution_id=iid,
     )
     tools = _build_tools(
         _load_yaml(inst_dir / "tools.yaml"),
-        src=str(inst_dir / "tools.yaml"), institution_id=iid,
+        src=str(inst_dir / "tools.yaml"),
+        institution_id=iid,
     )
     tool_names = {t.name for t in tools}
     templates = _build_templates(
         _load_yaml(inst_dir / "tasks.yaml"),
-        src=str(inst_dir / "tasks.yaml"), institution_id=iid,
-        documents=documents, tool_names=tool_names,
+        src=str(inst_dir / "tasks.yaml"),
+        institution_id=iid,
+        documents=documents,
+        tool_names=tool_names,
     )
     embeddings = _load_embeddings(inst_dir / "embeddings.parquet")
     return Institution(
@@ -609,6 +604,7 @@ _BANK_CACHE_LOCK = threading.Lock()
 
 def default_finance_bank_dir(locale: str) -> Path:
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("financial_services") / locale
 
 
@@ -630,9 +626,12 @@ def load_finance_bank_for_locale(locale: str) -> FinanceBank:
         bank = load_finance_bank(path)
         _BANK_CACHE[locale] = bank
         logger.info(
-            "finance_bank: loaded %s v%s (%d institutions) for "
-            "locale=%s from %s",
-            bank.bank_id, bank.bank_version, len(bank.institutions), locale, path,
+            "finance_bank: loaded %s v%s (%d institutions) for locale=%s from %s",
+            bank.bank_id,
+            bank.bank_version,
+            len(bank.institutions),
+            locale,
+            path,
         )
         return bank
 
@@ -650,6 +649,7 @@ def reset_finance_bank_cache() -> None:
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
     import yaml
+
     if not path.exists():
         raise FinanceBankError(f"{path}: file not found")
     try:
@@ -662,9 +662,7 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
     return doc
 
 
-def _build_documents(
-    doc: Dict[str, Any], *, src: str, institution_id: str
-) -> Tuple[Document, ...]:
+def _build_documents(doc: Dict[str, Any], *, src: str, institution_id: str) -> Tuple[Document, ...]:
     raw = doc.get("documents")
     if not isinstance(raw, list) or not raw:
         raise FinanceBankError(f"{src}::documents: must be a non-empty list")
@@ -680,24 +678,24 @@ def _build_documents(
         mentions = entry.get("mentions_tools", []) or []
         if not isinstance(mentions, list):
             raise FinanceBankError(f"{src}::{did}: mentions_tools must be a list")
-        out.append(Document(
-            id=did,
-            title=_require_str(entry, "title", src, ctx=did),
-            body=_require_str(entry, "body", src, ctx=did),
-            product_category=_require_str(entry, "product_category", src, ctx=did),
-            document_type=_require_str(entry, "document_type", src, ctx=did),
-            source_authority=str(entry.get("source_authority", "official")),
-            placeholder=_require_bool(entry, "placeholder", src, ctx=did),
-            mentions_tools=tuple(str(m) for m in mentions),
-            institution_id=institution_id,
-            domain=str(entry.get("domain", "")),
-        ))
+        out.append(
+            Document(
+                id=did,
+                title=_require_str(entry, "title", src, ctx=did),
+                body=_require_str(entry, "body", src, ctx=did),
+                product_category=_require_str(entry, "product_category", src, ctx=did),
+                document_type=_require_str(entry, "document_type", src, ctx=did),
+                source_authority=str(entry.get("source_authority", "official")),
+                placeholder=_require_bool(entry, "placeholder", src, ctx=did),
+                mentions_tools=tuple(str(m) for m in mentions),
+                institution_id=institution_id,
+                domain=str(entry.get("domain", "")),
+            )
+        )
     return tuple(out)
 
 
-def _build_tools(
-    doc: Dict[str, Any], *, src: str, institution_id: str
-) -> Tuple[ToolSpec, ...]:
+def _build_tools(doc: Dict[str, Any], *, src: str, institution_id: str) -> Tuple[ToolSpec, ...]:
     raw = doc.get("tools")
     if not isinstance(raw, list) or not raw:
         raise FinanceBankError(f"{src}::tools: must be a non-empty list")
@@ -713,20 +711,21 @@ def _build_tools(
         side_effect = str(entry.get("side_effect_class", "read_only"))
         if side_effect not in ALLOWED_SIDE_EFFECTS:
             raise FinanceBankError(
-                f"{src}::{name}: side_effect_class {side_effect!r} must be one "
-                f"of {sorted(ALLOWED_SIDE_EFFECTS)}"
+                f"{src}::{name}: side_effect_class {side_effect!r} must be one of {sorted(ALLOWED_SIDE_EFFECTS)}"
             )
         params = entry.get("parameters", {}) or {}
         if not isinstance(params, dict):
             raise FinanceBankError(f"{src}::{name}: parameters must be a mapping")
-        out.append(ToolSpec(
-            name=name,
-            description=str(entry.get("description", "")),
-            discoverable=_require_bool(entry, "discoverable", src, ctx=name),
-            side_effect_class=side_effect,
-            parameters=params,
-            institution_id=institution_id,
-        ))
+        out.append(
+            ToolSpec(
+                name=name,
+                description=str(entry.get("description", "")),
+                discoverable=_require_bool(entry, "discoverable", src, ctx=name),
+                side_effect_class=side_effect,
+                parameters=params,
+                institution_id=institution_id,
+            )
+        )
     return tuple(out)
 
 
@@ -734,8 +733,7 @@ def _build_tools(
 _TOOL_DOC_TYPES = ("policy_procedure", "discoverable_tool_doc")
 
 
-def _derive_gold_docs(gold_tools: Tuple[str, ...],
-                      documents: Tuple["Document", ...]) -> Tuple[str, ...]:
+def _derive_gold_docs(gold_tools: Tuple[str, ...], documents: Tuple["Document", ...]) -> Tuple[str, ...]:
     """Gold docs for a tool task = the docs that DOCUMENT its gold tool(s).
 
     Resolved from the corpus (``mentions_tools`` ∩ gold tools, restricted to the
@@ -744,15 +742,18 @@ def _derive_gold_docs(gold_tools: Tuple[str, ...],
     """
     tools = set(gold_tools)
     order = {t: i for i, t in enumerate(_TOOL_DOC_TYPES)}
-    hits = [d for d in documents
-            if set(d.mentions_tools) & tools and d.document_type in order]
+    hits = [d for d in documents if set(d.mentions_tools) & tools and d.document_type in order]
     hits.sort(key=lambda d: (order[d.document_type], d.id))
     return tuple(d.id for d in hits)
 
 
 def _build_templates(
-    doc: Dict[str, Any], *, src: str, institution_id: str,
-    documents: Tuple["Document", ...], tool_names: set,
+    doc: Dict[str, Any],
+    *,
+    src: str,
+    institution_id: str,
+    documents: Tuple["Document", ...],
+    tool_names: set,
 ) -> Tuple[TaskTemplate, ...]:
     raw = doc.get("templates")
     if not isinstance(raw, list) or not raw:
@@ -769,17 +770,14 @@ def _build_templates(
         seen.add(tid)
         tier = _require_str(entry, "tier", src, ctx=tid)
         if tier not in ALLOWED_TIERS:
-            raise FinanceBankError(
-                f"{src}::{tid}: tier {tier!r} must be one of {sorted(ALLOWED_TIERS)}"
-            )
+            raise FinanceBankError(f"{src}::{tid}: tier {tier!r} must be one of {sorted(ALLOWED_TIERS)}")
         persona_tags = entry.get("persona_tags", []) or []
         if not isinstance(persona_tags, list):
             raise FinanceBankError(f"{src}::{tid}: persona_tags must be a list")
         for t in persona_tags:
             if not isinstance(t, str) or not _PERSONA_TAG_RE.match(t):
                 raise FinanceBankError(
-                    f"{src}::{tid}: persona_tag {t!r} does not match the "
-                    "`<prefix>:<value>` schema (see SCHEMA.md)"
+                    f"{src}::{tid}: persona_tag {t!r} does not match the `<prefix>:<value>` schema (see SCHEMA.md)"
                 )
         gold_docs = tuple(str(d) for d in (entry.get("gold_document_ids", []) or []))
         gold_tools = tuple(str(t) for t in (entry.get("gold_tool_sequence", []) or []))
@@ -796,8 +794,7 @@ def _build_templates(
             for t in allowed_tools:
                 if t not in tool_names:
                     raise FinanceBankError(
-                        f"{src}::{tid}: allowed_tool {t!r} not in institution "
-                        f"{institution_id!r} tool taxonomy"
+                        f"{src}::{tid}: allowed_tool {t!r} not in institution {institution_id!r} tool taxonomy"
                     )
             if gold_docs:
                 # Explicit gold ids are an override -- must live in THIS corpus.
@@ -820,27 +817,26 @@ def _build_templates(
         param_space_raw = entry.get("param_space", {}) or {}
         if not isinstance(param_space_raw, dict):
             raise FinanceBankError(f"{src}::{tid}: param_space must be a mapping")
-        param_space = {
-            k: tuple(v) if isinstance(v, list) else (v,)
-            for k, v in param_space_raw.items()
-        }
-        out.append(TaskTemplate(
-            id=tid,
-            tier=tier,
-            task_type=_require_str(entry, "task_type", src, ctx=tid),
-            placeholder=_require_bool(entry, "placeholder", src, ctx=tid),
-            persona_tags=tuple(persona_tags),
-            opening_user_messages=_parse_openings(entry, src, tid),
-            account_state=entry.get("account_state", {}) or {},
-            param_space=param_space,
-            gold_document_ids=gold_docs,
-            gold_tool_sequence=gold_tools,
-            expected_state_deltas=entry.get("expected_state_deltas", {}) or {},
-            allowed_tools=allowed_tools,
-            ordered=bool(entry.get("ordered", False)),
-            institution_id=institution_id,
-            domain=str(entry.get("domain", "")),
-        ))
+        param_space = {k: tuple(v) if isinstance(v, list) else (v,) for k, v in param_space_raw.items()}
+        out.append(
+            TaskTemplate(
+                id=tid,
+                tier=tier,
+                task_type=_require_str(entry, "task_type", src, ctx=tid),
+                placeholder=_require_bool(entry, "placeholder", src, ctx=tid),
+                persona_tags=tuple(persona_tags),
+                opening_user_messages=_parse_openings(entry, src, tid),
+                account_state=entry.get("account_state", {}) or {},
+                param_space=param_space,
+                gold_document_ids=gold_docs,
+                gold_tool_sequence=gold_tools,
+                expected_state_deltas=entry.get("expected_state_deltas", {}) or {},
+                allowed_tools=allowed_tools,
+                ordered=bool(entry.get("ordered", False)),
+                institution_id=institution_id,
+                domain=str(entry.get("domain", "")),
+            )
+        )
     return tuple(out)
 
 
@@ -856,39 +852,26 @@ def _parse_openings(d: Dict[str, Any], src: str, tid: str) -> Tuple[str, ...]:
         single = d.get("opening_user_message")
         msgs = [single] if single is not None else []
     if not isinstance(msgs, list):
-        raise FinanceBankError(
-            f"{src}::{tid}: opening_user_messages must be a list of strings"
-        )
+        raise FinanceBankError(f"{src}::{tid}: opening_user_messages must be a list of strings")
     out = tuple(str(m).strip() for m in msgs if str(m).strip())
     if not out:
-        raise FinanceBankError(
-            f"{src}::{tid}: needs at least one opening_user_message(s)"
-        )
+        raise FinanceBankError(f"{src}::{tid}: needs at least one opening_user_message(s)")
     return out
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: Dict[str, Any], key: str, src: str, ctx: Optional[str] = None) -> str:
     loc = f"{src}::{ctx}" if ctx else src
     if key not in d:
         raise FinanceBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise FinanceBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise FinanceBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
-def _require_bool(
-    d: Dict[str, Any], key: str, src: str, ctx: Optional[str] = None
-) -> bool:
+def _require_bool(d: Dict[str, Any], key: str, src: str, ctx: Optional[str] = None) -> bool:
     loc = f"{src}::{ctx}" if ctx else src
     v = d.get(key, False)
     if not isinstance(v, bool):
-        raise FinanceBankError(
-            f"{loc}: field {key!r} must be a bool, got {type(v).__name__}"
-        )
+        raise FinanceBankError(f"{loc}: field {key!r} must be a bool, got {type(v).__name__}")
     return v

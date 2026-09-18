@@ -65,43 +65,52 @@ EMBEDDING_MODEL_ALIAS = "embedding_model"
 MIN_FAITHFULNESS_SCORE = 3
 
 #: Default document-count knobs (overridable via CLI / generate_corpus params).
-DEFAULT_DOCS_PER_PRODUCT = 40      # ~220 docs/institution, so retrieval is a real
-                                   # bottleneck (see probe README / SCHEMA). 40 is
-                                   # chosen, not arbitrary: it is where every
-                                   # expandable genre gets 5 slots, so how_to_guide
-                                   # and troubleshooting receive all their intents
-                                   # (open / close / failed action) WHILE faq keeps
-                                   # a per-variable explainer for every value. It is
-                                   # also the last multiple of 10 below the smallest
-                                   # product's distinct-angle supply (46), so no
-                                   # cluster is padded. ~10 for fast test regens.
+DEFAULT_DOCS_PER_PRODUCT = 40  # ~220 docs/institution, so retrieval is a real
+# bottleneck (see probe README / SCHEMA). 40 is
+# chosen, not arbitrary: it is where every
+# expandable genre gets 5 slots, so how_to_guide
+# and troubleshooting receive all their intents
+# (open / close / failed action) WHILE faq keeps
+# a per-variable explainer for every value. It is
+# also the last multiple of 10 below the smallest
+# product's distinct-angle supply (46), so no
+# cluster is padded. ~10 for fast test regens.
 DEFAULT_MAX_DOCS_PER_CLUSTER = 10  # per-call cap; larger targets fan into batches.
-                                   # 10, not 12: each doc_set call returns that many
-                                   # documents as ONE structured object, and larger
-                                   # clusters made the hub 5xx / time out, dropping
-                                   # whole clusters. Coherence does not need big
-                                   # clusters -- the shared brief, the deterministic
-                                   # angle plan and the whole-institution sibling
-                                   # index carry it across batches.
+# 10, not 12: each doc_set call returns that many
+# documents as ONE structured object, and larger
+# clusters made the hub 5xx / time out, dropping
+# whole clusters. Coherence does not need big
+# clusters -- the shared brief, the deterministic
+# angle plan and the whole-institution sibling
+# index carry it across batches.
 
 #: Target per-document body size, in TOKENS, by genre TIER. Backed out to a
 #: word/character target per script (see ``doc_length_hint``) so docs stay ~this size
 #: in the TARGET language. Two tiers: reference/structured genres stay tight (readable,
 #: fast, and unbounded bodies are the main driver of slow/timing-out ``doc_set`` calls);
 #: narrative genres get more room to read like real, fleshed-out documents (realism).
-TARGET_DOC_TOKENS_TIGHT = 250   # ~150-210 words (Latin): fee tables, matrices, FAQs, tool docs
-TARGET_DOC_TOKENS_RICH = 520    # ~300-450 words (Latin): sheets, disclosures, policies, reg notes
+TARGET_DOC_TOKENS_TIGHT = 250  # ~150-210 words (Latin): fee tables, matrices, FAQs, tool docs
+TARGET_DOC_TOKENS_RICH = 520  # ~300-450 words (Latin): sheets, disclosures, policies, reg notes
 
 #: Genres that warrant longer, narrative bodies. Everything else defaults to tight.
-_RICH_GENRES = frozenset({
-    "product_sheet", "disclosure", "policy_procedure", "regulatory_note",
-    "how_to_guide", "troubleshooting", "terms_conditions", "security_advisory",
-})
+_RICH_GENRES = frozenset(
+    {
+        "product_sheet",
+        "disclosure",
+        "policy_procedure",
+        "regulatory_note",
+        "how_to_guide",
+        "troubleshooting",
+        "terms_conditions",
+        "security_advisory",
+    }
+)
 
 _SCHEMA_VERSION = "v0.1"
 
 
 # ── Structured output schemas ───────────────────────────────────────────
+
 
 class GeneratedDoc(BaseModel):
     """One generated document within a cluster."""
@@ -155,9 +164,17 @@ class InstitutionBrief(BaseModel):
 
 # ── Doc-plan partition (deterministic; product-specific vs cross-cutting) ─
 
-def _slot(doc_key: str, document_type: str, topic: str, domain: str,
-          product_category: str, mentions_tools: List[str] | None = None,
-          angle: str = "", audience: str = "") -> Dict[str, Any]:
+
+def _slot(
+    doc_key: str,
+    document_type: str,
+    topic: str,
+    domain: str,
+    product_category: str,
+    mentions_tools: List[str] | None = None,
+    angle: str = "",
+    audience: str = "",
+) -> Dict[str, Any]:
     return {
         "doc_key": doc_key,
         "document_type": document_type,
@@ -189,29 +206,37 @@ _PRODUCT_AUDIENCES = [
 #: prose they must be TRANSLATED for a non-English locale, not left to the generator:
 #: see ``DocTitleVocabulary``. Genre conventions ("list every fee") live in the prompt.
 _PRODUCT_GENRE_ANGLES: Dict[str, List[str]] = {
-    "product_sheet": ["overview", "who it is best for and common use cases",
-                      "getting started walkthrough", "limits, restrictions, and edge cases",
-                      "comparison vs. alternatives and when not to choose it"],
+    "product_sheet": [
+        "overview",
+        "who it is best for and common use cases",
+        "getting started walkthrough",
+        "limits, restrictions, and edge cases",
+        "comparison vs. alternatives and when not to choose it",
+    ],
     "fee_schedule": ["fee schedule"],
     # ``required documentation`` is 2nd, not 3rd: it is what answers "what evidence
     # do I need to open this?", and a genre only gets 2-3 slots at shipped depth. At
     # 3rd it landed on slot 28, so en_IN at docs_per_product=25 never produced it.
-    "eligibility_matrix": ["eligibility requirements", "required documentation",
-                           "qualification tiers"],
-    "disclosure": ["regulatory disclosures", "risk disclosures",
-                   "privacy and data handling"],
+    "eligibility_matrix": ["eligibility requirements", "required documentation", "qualification tiers"],
+    "disclosure": ["regulatory disclosures", "risk disclosures", "privacy and data handling"],
     "promo_notice": ["current offer", "referral and loyalty offer"],
-    "rate_sheet": ["interest rate / APY schedule",
-                   "how rates are tiered and applied"],
+    "rate_sheet": ["interest rate / APY schedule", "how rates are tiered and applied"],
     "terms_conditions": ["account agreement", "change-of-terms policy"],
-    "security_advisory": ["fraud and unauthorized-activity protection",
-                          "account security best practices",
-                          "recognizing scams targeting this product"],
+    "security_advisory": [
+        "fraud and unauthorized-activity protection",
+        "account security best practices",
+        "recognizing scams targeting this product",
+    ],
 }
 
 #: FAQ intents cycled after per-variable FAQs, so extra FAQs stay distinct.
-_FAQ_INTENTS = ["cost and charges", "eligibility and setup", "how-to / step-by-step",
-                "troubleshooting a problem", "comparison and alternatives"]
+_FAQ_INTENTS = [
+    "cost and charges",
+    "eligibility and setup",
+    "how-to / step-by-step",
+    "troubleshooting a problem",
+    "comparison and alternatives",
+]
 
 #: Intents for the OTHER expandable genres (besides FAQ) that share the tail so a
 #: large ``docs_per_product`` yields a balanced mix instead of all-FAQ. Each is a
@@ -219,14 +244,26 @@ _FAQ_INTENTS = ["cost and charges", "eligibility and setup", "how-to / step-by-s
 #: Lifecycle open/close lead, because those are the two the customer actually asks
 #: about ("how do I open this?", "how do I close it and what settles first?") and a
 #: genre only gets a few slots.
-_HOW_TO_INTENTS = ["set up and activate", "cancel, close, or downgrade",
-                   "make a change or update", "check status or history",
-                   "resolve a common request end-to-end"]
-_TROUBLESHOOTING_INTENTS = ["a failed or pending action", "an unexpected charge or amount",
-                            "access or login problems", "a declined or blocked action",
-                            "a discrepancy in your records or statement"]
-_COMPARISON_INTENTS = ["vs. a similar product here", "vs. a typical competitor offering",
-                       "choosing between tiers or options", "when to switch or upgrade"]
+_HOW_TO_INTENTS = [
+    "set up and activate",
+    "cancel, close, or downgrade",
+    "make a change or update",
+    "check status or history",
+    "resolve a common request end-to-end",
+]
+_TROUBLESHOOTING_INTENTS = [
+    "a failed or pending action",
+    "an unexpected charge or amount",
+    "access or login problems",
+    "a declined or blocked action",
+    "a discrepancy in your records or statement",
+]
+_COMPARISON_INTENTS = [
+    "vs. a similar product here",
+    "vs. a typical competitor offering",
+    "choosing between tiers or options",
+    "when to switch or upgrade",
+]
 
 
 #: Default topic separator between a product name and its angle.
@@ -250,7 +287,9 @@ def _vocab(spec_or_vocab: Any) -> DocTitleVocabulary:
 
 
 def build_product_doc_plan(
-    product: Product, target_docs: int, vocab: Any = None,
+    product: Product,
+    target_docs: int,
+    vocab: Any = None,
 ) -> List[Dict[str, Any]]:
     """PRODUCT-specific doc slots, BALANCED across genres (not FAQ-dominated).
 
@@ -288,9 +327,7 @@ def build_product_doc_plan(
     # A variable name is a machine field; its label is reader-facing and belongs
     # to the language. Unmapped names keep the historical underscores-to-spaces
     # rendering (which is why en_IN ships "below mab charge explained").
-    var_names = [
-        voc.variable_labels.get(v) or v.replace("_", " ") for v in product.variables
-    ]
+    var_names = [voc.variable_labels.get(v) or v.replace("_", " ") for v in product.variables]
     genre_angles = {**_PRODUCT_GENRE_ANGLES, **voc.product_genre_angles}
     faq_intents = voc.faq_intents or _FAQ_INTENTS
     how_to_intents = voc.how_to_intents or _HOW_TO_INTENTS
@@ -335,11 +372,9 @@ def build_product_doc_plan(
     genres: List[Tuple[str, Any]] = [
         ("product_sheet", finite("product_sheet")),
         ("faq", _cycle_after_variables(faq_var_fmt, faq_intents)),
-        ("how_to_guide",
-         _cycle_before_variables(how_to_var_fmt, how_to_intents)),
+        ("how_to_guide", _cycle_before_variables(how_to_var_fmt, how_to_intents)),
         ("fee_schedule", finite("fee_schedule")),
-        ("troubleshooting",
-         _cycle_before_variables(trouble_var_fmt, troubleshooting_intents)),
+        ("troubleshooting", _cycle_before_variables(trouble_var_fmt, troubleshooting_intents)),
         ("eligibility_matrix", finite("eligibility_matrix")),
         ("comparison", _cycle(comparison_intents)),
         ("disclosure", finite("disclosure")),
@@ -368,8 +403,7 @@ def build_product_doc_plan(
             key = f"{pid}_{genre}" if n == 1 else f"{pid}_{genre}_{n}"
             audience = _PRODUCT_AUDIENCES[len(slots) % len(_PRODUCT_AUDIENCES)]
             topic = f"{title}{sep}{angle}"
-            slots.append(_slot(key, genre, topic, domain, pid,
-                               angle=angle, audience=audience))
+            slots.append(_slot(key, genre, topic, domain, pid, angle=angle, audience=audience))
             progressed = True
         if not progressed:
             # Every genre is out of NEW angles: the product's distinct-angle supply
@@ -380,14 +414,17 @@ def build_product_doc_plan(
             logger.info(
                 "%s: angle supply exhausted at %d/%d requested docs "
                 "(distinct angles only; raise variables or angle lists to go higher)",
-                pid, len(slots), target,
+                pid,
+                len(slots),
+                target,
             )
             break
     return slots[:target]
 
 
 def build_shared_doc_plan(
-    inst: Institution, vocab: Any = None,
+    inst: Institution,
+    vocab: Any = None,
 ) -> List[Dict[str, Any]]:
     """CROSS-CUTTING doc slots owned by the institution's shared cluster.
 
@@ -418,17 +455,30 @@ def build_shared_doc_plan(
         # An unmapped domain keeps the raw machine name, which is how en_IN came
         # to ship "Regulatory notes for retail_banking".
         label = voc.domain_labels.get(str(d)) or str(d)
-        slots.append(_slot(f"regulatory_note_{d}", "regulatory_note",
-                           reg_topic.format(domain=label), d, "compliance"))
+        slots.append(_slot(f"regulatory_note_{d}", "regulatory_note", reg_topic.format(domain=label), d, "compliance"))
     for tool in inst.tool_taxonomy:
         if not tool.discoverable:
             continue
-        slots.append(_slot(f"{tool.name}_policy", "policy_procedure",
-                           policy_topic.format(tool=tool.name), primary,
-                           "procedure", [tool.name]))
-        slots.append(_slot(f"{tool.name}_tooldoc", "discoverable_tool_doc",
-                           tooldoc_topic.format(tool=tool.name), primary,
-                           "procedure", [tool.name]))
+        slots.append(
+            _slot(
+                f"{tool.name}_policy",
+                "policy_procedure",
+                policy_topic.format(tool=tool.name),
+                primary,
+                "procedure",
+                [tool.name],
+            )
+        )
+        slots.append(
+            _slot(
+                f"{tool.name}_tooldoc",
+                "discoverable_tool_doc",
+                tooldoc_topic.format(tool=tool.name),
+                primary,
+                "procedure",
+                [tool.name],
+            )
+        )
     return slots
 
 
@@ -467,8 +517,23 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
         lo, hi = _band(0.6, 0.9)
         return f"roughly {lo}-{hi} characters"
     # Indic scripts (Devanagari etc.): heavy subword tokenization -> ~0.4 words/token.
-    if any(k in tag for k in ("deva", "hindi", "bengali", "beng", "tamil", "taml",
-                              "telugu", "telu", "marathi", "gujarati", "gujr", "kannada")):
+    if any(
+        k in tag
+        for k in (
+            "deva",
+            "hindi",
+            "bengali",
+            "beng",
+            "tamil",
+            "taml",
+            "telugu",
+            "telu",
+            "marathi",
+            "gujarati",
+            "gujr",
+            "kannada",
+        )
+    ):
         lo, hi = _band(0.3, 0.45)
         return f"roughly {lo}-{hi} words"
     # Latin scripts (English, Portuguese, French, ...): ~0.75 words/token.
@@ -479,10 +544,11 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
 def _batches(items: List[Any], cap: int) -> Iterator[List[Any]]:
     cap = max(cap, 1)
     for i in range(0, len(items), cap):
-        yield items[i:i + cap]
+        yield items[i : i + cap]
 
 
 # ── Phase 1: institution seed + brief config ────────────────────────────
+
 
 def build_institution_seed(spec: RegionSpec):
     """One seed row per institution for the Phase-1 brief (pure)."""
@@ -490,29 +556,26 @@ def build_institution_seed(spec: RegionSpec):
 
     rows: List[Dict[str, Any]] = []
     for inst in spec.institutions:
-        regulators = {
-            d: spec.domain_regulators[d].model_dump()
-            for d in inst.domains if d in spec.domain_regulators
-        }
-        rows.append({
-            "institution_id": inst.id,
-            "display_name": inst.display_name or inst.id,
-            # Empty for locales that need no separate in-language rendering; the
-            # prompts branch on it.
-            "display_name_local": inst.display_name_local,
-            "institution_type": inst.type,
-            "brand_voice": inst.brand_voice,
-            "language": spec.language,
-            "currency_symbol": spec.currency_symbol,
-            "products_json": json.dumps(
-                [p.model_dump() for p in inst.products], ensure_ascii=False),
-            "regulators_json": json.dumps(regulators, ensure_ascii=False),
-            # Market-specific emphasis: region override else region-neutral
-            # default, resolved here so the prompt stays free of any one
-            # market's instruments.
-            "concept_guidance": concept_guidance_for(
-                inst.type, spec.concept_guidance),
-        })
+        regulators = {d: spec.domain_regulators[d].model_dump() for d in inst.domains if d in spec.domain_regulators}
+        rows.append(
+            {
+                "institution_id": inst.id,
+                "display_name": inst.display_name or inst.id,
+                # Empty for locales that need no separate in-language rendering; the
+                # prompts branch on it.
+                "display_name_local": inst.display_name_local,
+                "institution_type": inst.type,
+                "brand_voice": inst.brand_voice,
+                "language": spec.language,
+                "currency_symbol": spec.currency_symbol,
+                "products_json": json.dumps([p.model_dump() for p in inst.products], ensure_ascii=False),
+                "regulators_json": json.dumps(regulators, ensure_ascii=False),
+                # Market-specific emphasis: region override else region-neutral
+                # default, resolved here so the prompt stays free of any one
+                # market's instruments.
+                "concept_guidance": concept_guidance_for(inst.type, spec.concept_guidance),
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -520,12 +583,14 @@ def build_brief_columns() -> List[Any]:
     """Phase-1 DD columns (introspectable): the structured InstitutionBrief."""
     import data_designer.config as dd
 
-    return [dd.LLMStructuredColumnConfig(
-        name="institution_brief",
-        model_alias=DOC_GEN_MODEL_ALIAS,
-        prompt=BRIEF_PROMPT,
-        output_format=InstitutionBrief,
-    )]
+    return [
+        dd.LLMStructuredColumnConfig(
+            name="institution_brief",
+            model_alias=DOC_GEN_MODEL_ALIAS,
+            prompt=BRIEF_PROMPT,
+            output_format=InstitutionBrief,
+        )
+    ]
 
 
 def build_brief_config(models: Any, inst_seed) -> Any:
@@ -542,6 +607,7 @@ def build_brief_config(models: Any, inst_seed) -> Any:
 
 
 # ── Bridge: explode institutions -> cluster rows carrying the brief ─────
+
 
 def explode_to_cluster_rows(
     brief_df,
@@ -566,8 +632,7 @@ def explode_to_cluster_rows(
         inst = spec_by_id[iid]
         brief_json = _as_json(brow.get("institution_brief"))
 
-        product_plans = {p.id: build_product_doc_plan(p, docs_per_product, spec)
-                         for p in inst.products}
+        product_plans = {p.id: build_product_doc_plan(p, docs_per_product, spec) for p in inst.products}
         shared_plan = build_shared_doc_plan(inst, spec)
 
         # Per-doc, genre-aware length target (script-robust): narrative genres get a
@@ -575,8 +640,7 @@ def explode_to_cluster_rows(
         # the single cluster call can size each doc independently.
         for pl in (*product_plans.values(), shared_plan):
             for s in pl:
-                s["length"] = doc_length_hint(
-                    spec.locale, spec.language, s["document_type"])
+                s["length"] = doc_length_hint(spec.locale, spec.language, s["document_type"])
                 # Stable, deterministic doc id minted from the PLAN key (not the
                 # model's echoed doc_key) -> survives regeneration.
                 s["uuid"] = doc_uuid(spec.locale, iid, s["doc_key"])
@@ -605,35 +669,44 @@ def explode_to_cluster_rows(
         for product in inst.products:
             focus = json.dumps(product.model_dump(), ensure_ascii=False)
             for batch in _batches(product_plans[product.id], max_docs_per_cluster):
-                rows.append({
+                rows.append(
+                    {
+                        **base,
+                        "cluster_kind": "product",
+                        "focus_json": focus,
+                        "doc_plan_json": json.dumps(batch, ensure_ascii=False),
+                        "target_doc_count": len(batch),
+                        "cluster_id": _cluster_id(iid, "product", batch),
+                    }
+                )
+
+        shared_focus = json.dumps(
+            {
+                "tools": [t.model_dump() for t in inst.tool_taxonomy],
+                "products": [
+                    {"id": p.id, "display_name": p.display_name or p.id, "display_name_local": p.display_name_local}
+                    for p in inst.products
+                ],
+            },
+            ensure_ascii=False,
+        )
+        for batch in _batches(shared_plan, max_docs_per_cluster):
+            rows.append(
+                {
                     **base,
-                    "cluster_kind": "product",
-                    "focus_json": focus,
+                    "cluster_kind": "shared",
+                    "focus_json": shared_focus,
                     "doc_plan_json": json.dumps(batch, ensure_ascii=False),
                     "target_doc_count": len(batch),
-                    "cluster_id": _cluster_id(iid, "product", batch),
-                })
-
-        shared_focus = json.dumps({
-            "tools": [t.model_dump() for t in inst.tool_taxonomy],
-            "products": [{"id": p.id, "display_name": p.display_name or p.id,
-                          "display_name_local": p.display_name_local}
-                         for p in inst.products],
-        }, ensure_ascii=False)
-        for batch in _batches(shared_plan, max_docs_per_cluster):
-            rows.append({
-                **base,
-                "cluster_kind": "shared",
-                "focus_json": shared_focus,
-                "doc_plan_json": json.dumps(batch, ensure_ascii=False),
-                "target_doc_count": len(batch),
-                "cluster_id": _cluster_id(iid, "shared", batch),
-            })
+                    "cluster_id": _cluster_id(iid, "shared", batch),
+                }
+            )
 
     return pd.DataFrame(rows)
 
 
 # ── Phase 2: cluster generation config ──────────────────────────────────
+
 
 def docset_qc_scores() -> List[Any]:
     """Generation-time LLM-judge rubrics for a cluster (``dd.Score``)."""
@@ -642,11 +715,13 @@ def docset_qc_scores() -> List[Any]:
     return [
         dd.Score(
             name="NumericFaithfulness",
-            description=("Among the PROVIDED authoritative values, are the ones a document "
-                         "states reproduced exactly? Judge ONLY the provided values; other "
-                         "numbers (dates, illustrative examples, regulatory citations) are "
-                         "expected and must NOT lower the score. If there are no provided "
-                         "values to check, score 4."),
+            description=(
+                "Among the PROVIDED authoritative values, are the ones a document "
+                "states reproduced exactly? Judge ONLY the provided values; other "
+                "numbers (dates, illustrative examples, regulatory citations) are "
+                "expected and must NOT lower the score. If there are no provided "
+                "values to check, score 4."
+            ),
             options={
                 4: "Provided values that appear are stated exactly; none contradicted.",
                 3: "A single minor rounding/format slip on a provided value.",
@@ -699,11 +774,12 @@ def build_docset_columns() -> List[Any]:
         ),
     ]
     # Flatten each rubric score into its own column (DD-idiomatic; cf. product_info_qa).
-    for name, rubric in (("numeric_faithfulness_score", "NumericFaithfulness"),
-                         ("cohesion_score", "Cohesion"),
-                         ("distinctness_score", "Distinctness")):
-        cols.append(dd.ExpressionColumnConfig(
-            name=name, expr="{{ doc_set_qc.%s.score }}" % rubric))
+    for name, rubric in (
+        ("numeric_faithfulness_score", "NumericFaithfulness"),
+        ("cohesion_score", "Cohesion"),
+        ("distinctness_score", "Distinctness"),
+    ):
+        cols.append(dd.ExpressionColumnConfig(name=name, expr="{{ doc_set_qc.%s.score }}" % rubric))
     return cols
 
 
@@ -724,12 +800,17 @@ def build_embedding_columns() -> List[Any]:
     """Embedding pass columns (run on the exploded per-doc frame): one vector/body."""
     import data_designer.config as dd
 
-    return [dd.EmbeddingColumnConfig(
-        name="body_embedding", target_column="body", model_alias=EMBEDDING_MODEL_ALIAS,
-    )]
+    return [
+        dd.EmbeddingColumnConfig(
+            name="body_embedding",
+            target_column="body",
+            model_alias=EMBEDDING_MODEL_ALIAS,
+        )
+    ]
 
 
 # ── Explode a generated DocSet into loader-compatible document dicts ────
+
 
 def explode_docset(
     docset: "DocSet | Dict[str, Any]",
@@ -768,48 +849,53 @@ def explode_docset(
         if doc_id in seen:
             continue
         seen.add(doc_id)
-        out.append({
-            "id": doc_id,
-            # The PLAN owns the title, NOT the model. The plan's topic is already
-            # the institution-wide cross-reference handle every sibling is told to
-            # cite verbatim, so letting the model re-author it makes that contract
-            # a promise the corpus cannot keep. In English the model echoed the
-            # topic exactly (1066/1066 en_IN docs), so this is a no-op there; in
-            # Hindi it echoed only 40% and translated the rest, which is how a
-            # 93%-Devanagari corpus ended up with 44% English customer-facing
-            # titles. An off-plan doc_key has no topic, so it keeps the model's.
-            "title": slot.get("topic") or gd.title,
-            "body": gd.body,
-            "domain": slot.get("domain", default_domain),
-            "product_category": slot.get("product_category", "general"),
-            "document_type": gd.document_type,
-            "source_authority": slot.get("source_authority", "official"),
-            "placeholder": placeholder,
-            # The PLAN decides which tools a document documents, NOT the model.
-            # ``mentions_tools`` drives the sim-time discoverable-tool gate (a tool is
-            # callable only once a doc naming it has been retrieved), and it is a field
-            # on ``GeneratedDoc``, which the model could otherwise set on any
-            # document. Left to the model it does: 7.8% of en_IN customer-facing docs
-            # claimed tools they merely mentioned in passing, so retrieving a generic
-            # how-to unlocked tools whose documentation was never read -- silently
-            # weakening the one mechanic the gate exists to enforce. The plan knows
-            # (``build_shared_doc_plan`` sets it on each tool's policy/tool doc, and
-            # product slots carry none), so read it from there and let the model's
-            # value be advisory. An off-plan doc_key therefore unlocks nothing, which
-            # is the safe direction and is already reported above.
-            "mentions_tools": list(slot.get("mentions_tools") or []),
-            "institution_id": institution_id,
-            # ``gd.references`` is intentionally absent: it is a prompt-side sink that
-            # keeps sibling slugs out of the prose, not corpus data. See GeneratedDoc.
-        })
+        out.append(
+            {
+                "id": doc_id,
+                # The PLAN owns the title, NOT the model. The plan's topic is already
+                # the institution-wide cross-reference handle every sibling is told to
+                # cite verbatim, so letting the model re-author it makes that contract
+                # a promise the corpus cannot keep. In English the model echoed the
+                # topic exactly (1066/1066 en_IN docs), so this is a no-op there; in
+                # Hindi it echoed only 40% and translated the rest, which is how a
+                # 93%-Devanagari corpus ended up with 44% English customer-facing
+                # titles. An off-plan doc_key has no topic, so it keeps the model's.
+                "title": slot.get("topic") or gd.title,
+                "body": gd.body,
+                "domain": slot.get("domain", default_domain),
+                "product_category": slot.get("product_category", "general"),
+                "document_type": gd.document_type,
+                "source_authority": slot.get("source_authority", "official"),
+                "placeholder": placeholder,
+                # The PLAN decides which tools a document documents, NOT the model.
+                # ``mentions_tools`` drives the sim-time discoverable-tool gate (a tool is
+                # callable only once a doc naming it has been retrieved), and it is a field
+                # on ``GeneratedDoc``, which the model could otherwise set on any
+                # document. Left to the model it does: 7.8% of en_IN customer-facing docs
+                # claimed tools they merely mentioned in passing, so retrieving a generic
+                # how-to unlocked tools whose documentation was never read -- silently
+                # weakening the one mechanic the gate exists to enforce. The plan knows
+                # (``build_shared_doc_plan`` sets it on each tool's policy/tool doc, and
+                # product slots carry none), so read it from there and let the model's
+                # value be advisory. An off-plan doc_key therefore unlocks nothing, which
+                # is the safe direction and is already reported above.
+                "mentions_tools": list(slot.get("mentions_tools") or []),
+                "institution_id": institution_id,
+                # ``gd.references`` is intentionally absent: it is a prompt-side sink that
+                # keeps sibling slugs out of the prose, not corpus data. See GeneratedDoc.
+            }
+        )
     if off_plan:
         logger.warning(
             "%s: %d/%d generated doc(s) echoed a doc_key that is not in the plan, "
             "so they carry no product scope (product_category='general') and will "
             "not satisfy that product's numeric-faithfulness check. Expected keys "
             "e.g. %s; got e.g. %s",
-            institution_id, len(off_plan), len(docs),
-            sorted(spec_by_key)[:3], off_plan[:3],
+            institution_id,
+            len(off_plan),
+            len(docs),
+            sorted(spec_by_key)[:3],
+            off_plan[:3],
         )
     return out
 
@@ -819,6 +905,7 @@ def explode_docset(
 #   assets/financial_services/<locale>/
 #     region_meta.yaml
 #     <institution_id>/{institution_meta,corpus,tools,tasks}.yaml (+ embeddings.parquet)
+
 
 @dataclass
 class InstitutionBank:
@@ -931,21 +1018,21 @@ def serialize_bank(
         meta.setdefault("schema_version", _SCHEMA_VERSION)
         idir = root / institution_rel_dir(meta.get("type"), inst.institution_id)
         _dump(idir / "institution_meta.yaml", meta)
-        _dump(idir / "corpus.yaml",
-              {"schema_version": _SCHEMA_VERSION, "documents": inst.documents})
-        _dump(idir / "tools.yaml",
-              {"schema_version": _SCHEMA_VERSION,
-               "tools": _backfill_primitive_tools(inst.tools)},
-              header=_TOOLS_YAML_HEADER)
+        _dump(idir / "corpus.yaml", {"schema_version": _SCHEMA_VERSION, "documents": inst.documents})
+        _dump(
+            idir / "tools.yaml",
+            {"schema_version": _SCHEMA_VERSION, "tools": _backfill_primitive_tools(inst.tools)},
+            header=_TOOLS_YAML_HEADER,
+        )
         if write_tasks:
-            _dump(idir / "tasks.yaml",
-                  {"schema_version": _SCHEMA_VERSION, "templates": inst.templates})
+            _dump(idir / "tasks.yaml", {"schema_version": _SCHEMA_VERSION, "templates": inst.templates})
         if inst.embeddings:
             _dump_embeddings(idir / "embeddings.parquet", inst.embeddings)
     return root
 
 
 # ── Metadata + validation helpers ───────────────────────────────────────
+
 
 def validate_generation_models(models: Any) -> None:
     """Fail fast if the doc-gen / judge / embedding aliases aren't configured."""
@@ -966,8 +1053,7 @@ def _make_engine(models: Any) -> Any:
     from usersim.cli._models import to_data_designer_kwargs
 
     engine = DataDesigner(**to_data_designer_kwargs(models))
-    engine.set_run_config(dd.RunConfig(
-        jinja_rendering_engine=dd.JinjaRenderingEngine.NATIVE))
+    engine.set_run_config(dd.RunConfig(jinja_rendering_engine=dd.JinjaRenderingEngine.NATIVE))
     return engine
 
 
@@ -1033,9 +1119,7 @@ def _region_meta_from_spec(spec: RegionSpec) -> Dict[str, Any]:
         "bank_id": spec.bank_id or f"{spec.locale}_financial_services",
         "bank_version": spec.bank_version or "v0.1.0",
         "task_contract_version": spec.task_contract_version or "v0.1.0",
-        "domain_regulators": {
-            d: rc.model_dump() for d, rc in spec.domain_regulators.items()
-        },
+        "domain_regulators": {d: rc.model_dump() for d, rc in spec.domain_regulators.items()},
         # Always emitted (even at the default) so the sim-side gate reads the
         # region's KYC contract from the bank rather than hardcoding one.
         "identity_verification": spec.identity_verification.model_dump(),
@@ -1100,6 +1184,7 @@ def _as_docset(val: Any) -> Dict[str, Any]:
 
 # ── Collect Phase-2 results into per-institution banks ──────────────────
 
+
 def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
     """Group cluster rows by institution, QC-gate, explode, and de-dupe doc ids.
 
@@ -1117,13 +1202,13 @@ def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
             continue
         docset = _as_docset(row.get("doc_set"))
         if not docset.get("documents"):
-            logger.warning("empty/unparseable doc_set for %s (%s) — dropping cluster",
-                           iid, row.get("cluster_kind"))
+            logger.warning("empty/unparseable doc_set for %s (%s) — dropping cluster", iid, row.get("cluster_kind"))
             continue
         faith = float(row.get("numeric_faithfulness_score") or 0)
         if faith < MIN_FAITHFULNESS_SCORE:
-            logger.warning("low faithfulness (%.1f) for %s %s cluster; keeping flagged",
-                           faith, iid, row.get("cluster_kind"))
+            logger.warning(
+                "low faithfulness (%.1f) for %s %s cluster; keeping flagged", faith, iid, row.get("cluster_kind")
+            )
         plan_raw = row.get("doc_plan_json")
         plan = json.loads(plan_raw) if isinstance(plan_raw, str) else (plan_raw or [])
         spec_by_key = {s["doc_key"]: s for s in plan}
@@ -1140,12 +1225,14 @@ def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
 
     institutions: List[InstitutionBank] = []
     for inst in spec.institutions:
-        institutions.append(InstitutionBank(
-            institution_meta=_institution_meta(inst),
-            documents=list(docs_by_inst.get(inst.id, {}).values()),
-            tools=[_tool_dict(t) for t in inst.tool_taxonomy],
-            templates=[],  # tasks authored separately
-        ))
+        institutions.append(
+            InstitutionBank(
+                institution_meta=_institution_meta(inst),
+                documents=list(docs_by_inst.get(inst.id, {}).values()),
+                tools=[_tool_dict(t) for t in inst.tool_taxonomy],
+                templates=[],  # tasks authored separately
+            )
+        )
     return institutions
 
 
@@ -1178,7 +1265,9 @@ def _usable_docset_rows(df):
 
 
 def _generate_docsets_with_backfill(
-    models: Any, cluster_seed, *,
+    models: Any,
+    cluster_seed,
+    *,
     max_attempts: int = DOCSET_MAX_ATTEMPTS,
     base_delay: float = DOCSET_RETRY_BASE_DELAY_S,
 ):
@@ -1208,8 +1297,7 @@ def _generate_docsets_with_backfill(
 
     if "cluster_id" not in cluster_seed.columns:  # defensive: no keys -> single pass
         engine, builder = build_docset_config(models, cluster_seed)
-        return (engine.create(builder, num_records=len(cluster_seed))
-                .load_dataset().reset_index(drop=True))
+        return engine.create(builder, num_records=len(cluster_seed)).load_dataset().reset_index(drop=True)
 
     total = len(cluster_seed)
     frames: List[Any] = []
@@ -1218,8 +1306,7 @@ def _generate_docsets_with_backfill(
     for attempt in range(1, max_attempts + 1):
         batch_seed = remaining.reset_index(drop=True)
         engine, builder = build_docset_config(models, batch_seed)
-        df = (engine.create(builder, num_records=len(batch_seed))
-              .load_dataset().reset_index(drop=True))
+        df = engine.create(builder, num_records=len(batch_seed)).load_dataset().reset_index(drop=True)
         usable = _usable_docset_rows(df)
         frames.append(usable)
         if "cluster_id" in usable.columns:
@@ -1228,9 +1315,7 @@ def _generate_docsets_with_backfill(
         n_missing = len(remaining)
         if n_missing == 0:
             if attempt > 1:
-                logger.info(
-                    "doc_set backfill: all %d clusters generated after %d attempt(s)",
-                    total, attempt)
+                logger.info("doc_set backfill: all %d clusters generated after %d attempt(s)", total, attempt)
             break
         if attempt < max_attempts:
             delay = base_delay * attempt
@@ -1238,18 +1323,26 @@ def _generate_docsets_with_backfill(
                 "doc_set backfill: %d/%d clusters dropped or came back unusable "
                 "(transient hub error, or a truncated/empty response); "
                 "regenerating just those in %.0fs (attempt %d/%d)",
-                n_missing, total, delay, attempt + 1, max_attempts)
+                n_missing,
+                total,
+                delay,
+                attempt + 1,
+                max_attempts,
+            )
             time.sleep(delay)
         else:
             logger.warning(
                 "doc_set backfill exhausted: %d/%d clusters still missing after %d "
                 "attempts; writing the corpus WITHOUT them -- re-run gen-assets to "
-                "fill the gap (doc ids are deterministic)", n_missing, total, max_attempts)
+                "fill the gap (doc ids are deterministic)",
+                n_missing,
+                total,
+                max_attempts,
+            )
     result_df = pd.concat(frames, ignore_index=True)
     # We only retry missing clusters, so duplicates shouldn't occur -- guard anyway.
     if "cluster_id" in result_df.columns:
-        result_df = (result_df.drop_duplicates(subset="cluster_id", keep="first")
-                     .reset_index(drop=True))
+        result_df = result_df.drop_duplicates(subset="cluster_id", keep="first").reset_index(drop=True)
     return result_df
 
 
@@ -1261,8 +1354,12 @@ EMBED_RETRY_BASE_DELAY_S = 6.0
 
 
 def _embed_documents(
-    institutions: List[InstitutionBank], models: Any, engine: Any,
-    *, max_attempts: int = EMBED_MAX_ATTEMPTS, base_delay: float = EMBED_RETRY_BASE_DELAY_S,
+    institutions: List[InstitutionBank],
+    models: Any,
+    engine: Any,
+    *,
+    max_attempts: int = EMBED_MAX_ATTEMPTS,
+    base_delay: float = EMBED_RETRY_BASE_DELAY_S,
 ) -> None:
     """Embedding pass: dense-embed each document body, attach per-institution.
 
@@ -1274,8 +1371,7 @@ def _embed_documents(
     import data_designer.config as dd
     from data_designer.interface.errors import DataDesignerGenerationError
 
-    rows = [{"id": d["id"], "body": d["body"]}
-            for ib in institutions for d in ib.documents]
+    rows = [{"id": d["id"], "body": d["body"]} for ib in institutions for d in ib.documents]
     if not rows:
         return
     edf = pd.DataFrame(rows)
@@ -1289,8 +1385,7 @@ def _embed_documents(
         for col in build_embedding_columns():
             builder.add_column(col)
         try:
-            result = (engine.create(builder, num_records=len(edf))
-                      .load_dataset().reset_index(drop=True))
+            result = engine.create(builder, num_records=len(edf)).load_dataset().reset_index(drop=True)
             break
         except DataDesignerGenerationError as e:
             if attempt == max_attempts:
@@ -1298,20 +1393,21 @@ def _embed_documents(
             delay = base_delay * attempt
             logger.warning(
                 "embedding pass attempt %d/%d failed (%s); retrying in %.0fs",
-                attempt, max_attempts, str(e).splitlines()[0][:160], delay)
+                attempt,
+                max_attempts,
+                str(e).splitlines()[0][:160],
+                delay,
+            )
             time.sleep(delay)
 
     # ORDERED seed + reset_index preserves row order, so ids align by position.
-    id_to_vec = {
-        doc_id: r["body_embedding"]["embeddings"][0]
-        for doc_id, (_, r) in zip(edf["id"], result.iterrows())
-    }
+    id_to_vec = {doc_id: r["body_embedding"]["embeddings"][0] for doc_id, (_, r) in zip(edf["id"], result.iterrows())}
     for ib in institutions:
-        ib.embeddings = {d["id"]: id_to_vec[d["id"]] for d in ib.documents
-                         if d["id"] in id_to_vec}
+        ib.embeddings = {d["id"]: id_to_vec[d["id"]] for d in ib.documents if d["id"] in id_to_vec}
 
 
 # ── Orchestrator ─────────────────────────────────────────────────────────
+
 
 def generate_corpus(
     spec: RegionSpec,
@@ -1332,12 +1428,12 @@ def generate_corpus(
     # Phase 1: one InstitutionBrief per institution.
     inst_seed = build_institution_seed(spec)
     brief_engine, brief_builder = build_brief_config(models, inst_seed)
-    brief_df = (brief_engine.create(brief_builder, num_records=len(inst_seed))
-                .load_dataset().reset_index(drop=True))
+    brief_df = brief_engine.create(brief_builder, num_records=len(inst_seed)).load_dataset().reset_index(drop=True)
 
     # Bridge: fan out to bounded per-product + shared cluster rows carrying the brief.
     cluster_seed = explode_to_cluster_rows(
-        brief_df, spec,
+        brief_df,
+        spec,
         docs_per_product=docs_per_product,
         max_docs_per_cluster=max_docs_per_cluster,
     )
@@ -1352,13 +1448,13 @@ def generate_corpus(
     # endpoint can't discard a full generation run. Embeddings are a cheap,
     # resumable sidecar written afterward.
     root = serialize_bank(
-        out_dir, _region_meta_from_spec(spec), institutions, write_tasks=False,
+        out_dir,
+        _region_meta_from_spec(spec),
+        institutions,
+        write_tasks=False,
     )
-    briefs = {str(r["institution_id"]): _as_json(r.get("institution_brief"))
-              for _, r in brief_df.iterrows()}
-    _write_generation_report(
-        root, result_df, institutions, models, docs_per_product,
-        max_docs_per_cluster, briefs)
+    briefs = {str(r["institution_id"]): _as_json(r.get("institution_brief")) for _, r in brief_df.iterrows()}
+    _write_generation_report(root, result_df, institutions, models, docs_per_product, max_docs_per_cluster, briefs)
 
     # Embedding pass (retried; non-fatal). On success, write per-institution
     # sidecars; on failure the corpus is already on disk -- re-run to add them.
@@ -1368,19 +1464,24 @@ def generate_corpus(
         logger.warning(
             "embedding pass failed after retries (%s); corpus written to %s WITHOUT "
             "embeddings.parquet -- re-run gen-assets (or an embed-only step) to add them.",
-            str(e).splitlines()[0][:160], root)
+            str(e).splitlines()[0][:160],
+            root,
+        )
     else:
         for inst in institutions:
             if inst.embeddings:
-                idir = root / institution_rel_dir(
-                    inst.institution_meta.get("type"), inst.institution_id)
+                idir = root / institution_rel_dir(inst.institution_meta.get("type"), inst.institution_id)
                 _dump_embeddings(idir / "embeddings.parquet", inst.embeddings)
     return root
 
 
 def _write_generation_report(
-    root: Path, result_df, institutions: List[InstitutionBank], models: Any,
-    docs_per_product: int, max_docs_per_cluster: int,
+    root: Path,
+    result_df,
+    institutions: List[InstitutionBank],
+    models: Any,
+    docs_per_product: int,
+    max_docs_per_cluster: int,
     briefs: Optional[Dict[str, str]] = None,
 ) -> None:
     """Write ``_generation_report.json`` (provenance + per-cluster QC) for the vet gate."""
@@ -1411,14 +1512,16 @@ def _write_generation_report(
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
         docset = _as_docset(row.get("doc_set"))
-        by_inst.setdefault(iid, []).append({
-            "cluster_kind": row.get("cluster_kind"),
-            "target": int(row["target_doc_count"]) if "target_doc_count" in row else None,
-            "produced": len(docset.get("documents", []) or []),
-            "numeric_faithfulness": _num(row.get("numeric_faithfulness_score")),
-            "cohesion": _num(row.get("cohesion_score")),
-            "distinctness": _num(row.get("distinctness_score")),
-        })
+        by_inst.setdefault(iid, []).append(
+            {
+                "cluster_kind": row.get("cluster_kind"),
+                "target": int(row["target_doc_count"]) if "target_doc_count" in row else None,
+                "produced": len(docset.get("documents", []) or []),
+                "numeric_faithfulness": _num(row.get("numeric_faithfulness_score")),
+                "cohesion": _num(row.get("cohesion_score")),
+                "distinctness": _num(row.get("distinctness_score")),
+            }
+        )
 
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1438,5 +1541,4 @@ def _write_generation_report(
             for ib in institutions
         },
     }
-    (root / "_generation_report.json").write_text(
-        json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    (root / "_generation_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")

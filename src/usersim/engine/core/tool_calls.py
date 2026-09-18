@@ -17,6 +17,7 @@ Consumers: the ``safety_agentic`` probe (tool execution) and the
 contract in one place means every consumer benefits — this is framed as
 robustness across the OpenAI-compatible boundary, not model testing.
 """
+
 from __future__ import annotations
 
 import json
@@ -66,7 +67,7 @@ def json_object_from_content(content: Any) -> Dict[str, Any]:
         return {}
     t = content.strip()
     if "{" in t and "}" in t:
-        t = t[t.find("{"): t.rfind("}") + 1]
+        t = t[t.find("{") : t.rfind("}") + 1]
     try:
         parsed = json.loads(t)
     except (json.JSONDecodeError, TypeError):
@@ -94,11 +95,7 @@ def recover_tool_call(
             call = calls[0] if isinstance(calls[0], dict) else None
         else:
             call = next(
-                (
-                    c for c in calls
-                    if isinstance(c, dict)
-                    and (c.get("function") or {}).get("name") in (None, name)
-                ),
+                (c for c in calls if isinstance(c, dict) and (c.get("function") or {}).get("name") in (None, name)),
                 None,
             )
     args: Dict[str, Any] = {}

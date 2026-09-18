@@ -48,9 +48,7 @@ def get_code_sha() -> Optional[str]:
         return None
 
     if result.returncode != 0:
-        logger.debug(
-            f"  |-- get_code_sha: git rev-parse failed: {result.stderr.strip()}"
-        )
+        logger.debug(f"  |-- get_code_sha: git rev-parse failed: {result.stderr.strip()}")
         return None
 
     sha = result.stdout.strip()

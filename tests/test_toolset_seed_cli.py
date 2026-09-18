@@ -60,7 +60,9 @@ class TestResolveToolsetSeedPath:
         """Not a precedence question: silently preferring one would make an
         edit to the other look like it had no effect."""
         root = _assets_root(
-            tmp_path, "toolsets_seed.parquet", "toolsets_seed.jsonl",
+            tmp_path,
+            "toolsets_seed.parquet",
+            "toolsets_seed.jsonl",
         )
         with pytest.raises(ConfigError) as e:
             resolve_toolset_seed_path(root)
@@ -84,7 +86,8 @@ class TestResolveToolsetSeedPath:
 
     def test_explicit_path_wins(self, tmp_path):
         root = _assets_root(tmp_path, "toolsets_seed.parquet")
-        custom = tmp_path / "custom.jsonl"; custom.touch()
+        custom = tmp_path / "custom.jsonl"
+        custom.touch()
         assert resolve_toolset_seed_path(root, custom) == custom.resolve()
 
     def test_explicit_missing_path_raises(self, tmp_path):
@@ -156,9 +159,15 @@ class TestJsonlSeedContract:
         reader = LocalFileSeedReader()
         reader.attach(dd.LocalFileSeedSource(path=str(seed)), _NoSecrets())
         assert reader.get_seed_dataset_size() == 1
-        frame = reader.create_batch_reader(
-            batch_size=1, index_range=None, shuffle=False,
-        ).read_next_batch().to_pandas()
+        frame = (
+            reader.create_batch_reader(
+                batch_size=1,
+                index_range=None,
+                shuffle=False,
+            )
+            .read_next_batch()
+            .to_pandas()
+        )
 
         assert frame.iloc[0]["toolset_name"] == "demo"
         tools = _normalize_tool_list(frame.iloc[0]["tools"])
@@ -168,8 +177,7 @@ class TestJsonlSeedContract:
 class TestToolsetSeedFlag:
     def _parse(self, *extra):
         return cli._build_parser().parse_args(
-            ["simulate", "--locale", "en_US", "--num-rows", "1",
-             "--out", "/tmp/x", *extra]
+            ["simulate", "--locale", "en_US", "--num-rows", "1", "--out", "/tmp/x", *extra]
         )
 
     def test_defaults_to_none(self):
@@ -201,8 +209,19 @@ class TestDryRunResolvesTheSeed:
 
     def _run(self, assets_dir, *extra, out="/tmp/x"):
         args = cli._build_parser().parse_args(
-            ["simulate", "--locale", "en_US", "--num-rows", "1",
-             "--out", out, "--assets-dir", str(assets_dir), "--dry-run", *extra]
+            [
+                "simulate",
+                "--locale",
+                "en_US",
+                "--num-rows",
+                "1",
+                "--out",
+                out,
+                "--assets-dir",
+                str(assets_dir),
+                "--dry-run",
+                *extra,
+            ]
             + ([] if "--probe-mix" in extra else ["--probe-mix", "tool_calling=1.0"])
         )
         return args.func(args)
@@ -221,7 +240,9 @@ class TestDryRunResolvesTheSeed:
 
     def test_non_tool_mix_does_not_inspect_ambiguous_seeds(self, tmp_path, capsys):
         root = _assets_root(
-            tmp_path, "toolsets_seed.parquet", "toolsets_seed.jsonl",
+            tmp_path,
+            "toolsets_seed.parquet",
+            "toolsets_seed.jsonl",
         )
         assert self._run(root, "--probe-mix", "sov_ai_facts=1.0") == 0
         assert "(not used)" in capsys.readouterr().out
@@ -238,13 +259,17 @@ class TestDryRunResolvesTheSeed:
         with pytest.raises(ConfigError, match="does not include tool_calling"):
             self._run(
                 root,
-                "--probe-mix", "sov_ai_facts=1.0",
-                "--toolset-seed-path", str(custom),
+                "--probe-mix",
+                "sov_ai_facts=1.0",
+                "--toolset-seed-path",
+                str(custom),
             )
 
     def test_raises_when_seeds_are_ambiguous(self, tmp_path):
         root = _assets_root(
-            tmp_path, "toolsets_seed.parquet", "toolsets_seed.jsonl",
+            tmp_path,
+            "toolsets_seed.parquet",
+            "toolsets_seed.jsonl",
         )
         with pytest.raises(ConfigError) as e:
             self._run(root)
@@ -275,9 +300,12 @@ class TestPipelineRejectsToolCallingWithoutASeed:
     def _build(self, mix, seed, assets_dir=None):
         from usersim.cli._models import default_models_path, load_models_config
         from usersim.cli._pipeline import build_simulator_config_builder
+
         return build_simulator_config_builder(
-            locale="en_US", models=load_models_config(default_models_path()),
-            assets_dir=Path(assets_dir).resolve() if assets_dir else packaged_assets_dir(), probe_mix=mix,
+            locale="en_US",
+            models=load_models_config(default_models_path()),
+            assets_dir=Path(assets_dir).resolve() if assets_dir else packaged_assets_dir(),
+            probe_mix=mix,
             toolset_seed_path=seed,
         )
 
@@ -305,10 +333,14 @@ class TestPipelineRejectsToolCallingWithoutASeed:
 
     def test_other_probes_do_not_inspect_ambiguous_seeds(self, tmp_path):
         root = _assets_root(
-            tmp_path, "toolsets_seed.parquet", "toolsets_seed.jsonl",
+            tmp_path,
+            "toolsets_seed.parquet",
+            "toolsets_seed.jsonl",
         )
         self._build(
-            {"sov_ai_facts": 1.0}, None, assets_dir=root,
+            {"sov_ai_facts": 1.0},
+            None,
+            assets_dir=root,
         )
 
     def test_other_probes_reject_explicit_seed(self, tmp_path):

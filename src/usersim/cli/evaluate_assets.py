@@ -28,30 +28,49 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "gate; non-blocking. Needs the judge model alias + network."
         ),
     )
-    p.add_argument("--domain", required=True, choices=domain_names(),
-                   help="Asset domain to evaluate (e.g. financial_services).")
+    p.add_argument(
+        "--domain", required=True, choices=domain_names(), help="Asset domain to evaluate (e.g. financial_services)."
+    )
     p.add_argument("--locale", required=True, help="Locale, e.g. en_US.")
-    p.add_argument("--dir", type=Path, default=None,
-                   help="Bank directory (defaults to assets/<domain>/<locale>).")
-    p.add_argument("--region-spec", type=Path, default=None,
-                   help="region_spec for authoritative-value context (defaults to bundled).")
-    p.add_argument("--models", type=Path, default=None,
-                   help="Models TOML (judge alias); defaults to the bundled config.")
-    p.add_argument("--model", action="append", default=None, metavar="ALIAS=MODEL",
-                   help="Override a model alias, e.g. --model asset_judge_model="
-                        "openai/openai/gpt-5.4. Repeatable. Provider auto-routes via "
-                        "cli/model_catalog.py.")
-    p.add_argument("--max-parallel", action="append", default=None, metavar="ALIAS=N",
-                   help="Override an alias's concurrency, e.g. --max-parallel "
-                        "asset_judge_model=8. Repeatable. (Accepted for parity with "
-                        "gen-assets so a shared flag set works across both.)")
+    p.add_argument("--dir", type=Path, default=None, help="Bank directory (defaults to assets/<domain>/<locale>).")
+    p.add_argument(
+        "--region-spec",
+        type=Path,
+        default=None,
+        help="region_spec for authoritative-value context (defaults to bundled).",
+    )
+    p.add_argument(
+        "--models", type=Path, default=None, help="Models TOML (judge alias); defaults to the bundled config."
+    )
+    p.add_argument(
+        "--model",
+        action="append",
+        default=None,
+        metavar="ALIAS=MODEL",
+        help="Override a model alias, e.g. --model asset_judge_model="
+        "openai/openai/gpt-5.4. Repeatable. Provider auto-routes via "
+        "cli/model_catalog.py.",
+    )
+    p.add_argument(
+        "--max-parallel",
+        action="append",
+        default=None,
+        metavar="ALIAS=N",
+        help="Override an alias's concurrency, e.g. --max-parallel "
+        "asset_judge_model=8. Repeatable. (Accepted for parity with "
+        "gen-assets so a shared flag set works across both.)",
+    )
     p.set_defaults(func=run)
 
 
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._models import (
-        ConfigError, apply_model_overrides, apply_parallel_overrides,
-        default_models_path, load_models_config, parse_cli_model_overrides,
+        ConfigError,
+        apply_model_overrides,
+        apply_parallel_overrides,
+        default_models_path,
+        load_models_config,
+        parse_cli_model_overrides,
         parse_cli_parallel_overrides,
     )
 

@@ -130,9 +130,7 @@ def test_probing_taxonomy_default_path_exists_and_loads(locale: str) -> None:
         "point at the right directory."
     )
     tax = load_probing_taxonomy(p)
-    assert tax.taxonomy_version, (
-        f"probing_taxonomy for {locale} loaded but taxonomy_version is empty"
-    )
+    assert tax.taxonomy_version, f"probing_taxonomy for {locale} loaded but taxonomy_version is empty"
     assert tax.locale == locale, (
         f"probing_taxonomy at {p} declares locale={tax.locale!r} but the "
         f"directory it lives in declares {locale!r} — drift between "
@@ -154,17 +152,16 @@ def test_probing_taxonomy_default_path_exists_and_loads(locale: str) -> None:
     ],
 )
 def test_seeds_default_path_loads_for_every_locale(
-    locale: str, probe: str, kind: str,
+    locale: str,
+    probe: str,
+    kind: str,
 ) -> None:
     """``load_seeds`` raises ``FileNotFoundError`` when neither the
     locale-specific file nor the ``base/`` fallback exists. We assert
     a non-empty result so a bug that ships an empty file (or points at
     one) also fails."""
     seeds = load_seeds(locale, probe, kind)
-    assert isinstance(seeds, list), (
-        f"load_seeds({locale}, {probe}, {kind}) returned {type(seeds).__name__}, "
-        "not a list"
-    )
+    assert isinstance(seeds, list), f"load_seeds({locale}, {probe}, {kind}) returned {type(seeds).__name__}, not a list"
     assert seeds, (
         f"load_seeds({locale}, {probe}, {kind}) returned an empty list — "
         "either the shipped seed file is empty or the loader landed on "
@@ -173,9 +170,7 @@ def test_seeds_default_path_loads_for_every_locale(
     # Shape contract every seed obeys (matches test_multi_locale.py).
     for s in seeds:
         assert "type" in s, f"{probe}/{kind} for {locale}: missing 'type' in {s}"
-        assert "description" in s, (
-            f"{probe}/{kind} for {locale}: missing 'description' in {s}"
-        )
+        assert "description" in s, f"{probe}/{kind} for {locale}: missing 'description' in {s}"
 
 
 # ---------------------------------------------------------------------------
@@ -213,9 +208,7 @@ def test_clinical_profile_bank_default_path_exists_and_loads(client: str) -> Non
         "Either ship the file or update default_clinical_profile_bank_path()."
     )
     bank = load_clinical_profile_bank(p)
-    assert bank.bank_version, (
-        f"clinical_profile_bank for {client} loaded but bank_version is empty"
-    )
+    assert bank.bank_version, f"clinical_profile_bank for {client} loaded but bank_version is empty"
     assert bank.client == client, (
         f"clinical_profile_bank at {p} declares client={bank.client!r} but "
         f"lives in the {client!r} directory — drift between layout and content."
@@ -295,12 +288,10 @@ def test_tool_calling_toolsets_seed_exists_and_loads() -> None:
     # Structural health: parquet readable, non-empty, has the columns the
     # data-designer SamplerColumnConfig consumes.
     import pyarrow.parquet as pq
+
     table = pq.read_table(p)
     assert table.num_rows > 0, f"{p} is empty"
     cols = set(table.column_names)
     expected = {"tools", "toolset_name"}
     missing = expected - cols
-    assert not missing, (
-        f"{p} is missing expected columns {missing}; "
-        f"present: {sorted(cols)}"
-    )
+    assert not missing, f"{p} is missing expected columns {missing}; present: {sorted(cols)}"

@@ -107,13 +107,12 @@ class TestModelsConfig:
 
     def test_require_aliases_missing(self, tmp_path):
         p = tmp_path / "minimal.toml"
-        p.write_text(
-            '[[models]]\nalias="user_model"\nmodel="x"\nprovider="nvidia"\n'
-        )
+        p.write_text('[[models]]\nalias="user_model"\nmodel="x"\nprovider="nvidia"\n')
         cfg = load_models_config(p)
         with pytest.raises(ConfigError, match="missing required aliases"):
             require_aliases(
-                cfg, required=("user_model", "assistant_model", "judge_model"),
+                cfg,
+                required=("user_model", "assistant_model", "judge_model"),
                 context="test",
             )
 
@@ -241,7 +240,7 @@ class TestToDataDesignerKwargs:
         kwargs = to_data_designer_kwargs(cfg)
         names = {p.name for p in kwargs["model_providers"]}
         assert "gateway" in names  # custom provider preserved
-        assert "nvidia" in names                # built-in merged in for assistant_model
+        assert "nvidia" in names  # built-in merged in for assistant_model
 
     def test_custom_provider_overrides_builtin_on_name_conflict(self):
         from usersim.cli._models import to_data_designer_kwargs
@@ -333,7 +332,9 @@ class TestPipelineFactory:
         names = set(known_probes())
         # Sanity-check the canonical probes are present.
         assert names >= {
-            "tool_calling", "general_open_ended", "general_educational",
+            "tool_calling",
+            "general_open_ended",
+            "general_educational",
             "sov_ai_facts",
             "sov_ai_dynamic",
             "sov_ai_multilingual_parity",
@@ -350,26 +351,30 @@ class TestPipelineFactory:
         # touch a curated asset bank that ships with placeholder
         # content the user may not want to run against by default.
         assert set(DEFAULT_PROBE_MIX) == {
-            "tool_calling", "general_open_ended", "general_educational",
+            "tool_calling",
+            "general_open_ended",
+            "general_educational",
         }
 
     def test_theme_driven_set_matches_subcategory_branches(self):
         # The pipeline's theme-column dispatcher only has explicit
         # branches for these three; everything else uses the placeholder.
-        assert THEME_DRIVEN_PROBES == frozenset(
-            {"tool_calling", "general_open_ended", "general_educational"}
-        )
+        assert THEME_DRIVEN_PROBES == frozenset({"tool_calling", "general_open_ended", "general_educational"})
 
     @pytest.mark.parametrize(
         "probe",
-        sorted([
-            "tool_calling", "general_open_ended", "general_educational",
-            "sov_ai_facts",
-            "sov_ai_dynamic",
-            "sov_ai_multilingual_parity",
-            "safety_chat_pressure",
-            "safety_agentic",
-        ]),
+        sorted(
+            [
+                "tool_calling",
+                "general_open_ended",
+                "general_educational",
+                "sov_ai_facts",
+                "sov_ai_dynamic",
+                "sov_ai_multilingual_parity",
+                "safety_chat_pressure",
+                "safety_agentic",
+            ]
+        ),
     )
     def test_build_simulator_accepts_each_probe_singly(self, probe):
         models = load_models_config(default_models_path())
@@ -413,36 +418,42 @@ class TestSampleTrajectories:
     """Coverage-aware sampler used by 02_evaluate_simulation.ipynb."""
 
     def _df(self):
-
         # 4 locales x 2 probes x 3 rows -- 24 total.
         rows = []
         for locale in ("en_US", "en_IN", "fr_FR", "ja_JP"):
             for probe in ("tool_calling", "safety_chat_pressure"):
                 for i in range(3):
-                    rows.append({
-                        "locale": locale, "probe_family": probe,
-                        "trajectory_id": f"{locale}_{probe}_{i}",
-                        "query_id": f"q_{i}" if probe == "sov_ai_multilingual_parity" else None,
-                    })
+                    rows.append(
+                        {
+                            "locale": locale,
+                            "probe_family": probe,
+                            "trajectory_id": f"{locale}_{probe}_{i}",
+                            "query_id": f"q_{i}" if probe == "sov_ai_multilingual_parity" else None,
+                        }
+                    )
         # Add a few multilingual-parity rows for matched_pair coverage.
         for locale in ("en_US", "fr_FR"):
             for q in ("q_a", "q_b", "q_c"):
-                rows.append({
-                    "locale": locale,
-                    "probe_family": "sov_ai_multilingual_parity",
-                    "trajectory_id": f"{locale}_parity_{q}",
-                    "query_id": q,
-                })
+                rows.append(
+                    {
+                        "locale": locale,
+                        "probe_family": "sov_ai_multilingual_parity",
+                        "trajectory_id": f"{locale}_parity_{q}",
+                        "query_id": q,
+                    }
+                )
         return pd.DataFrame(rows)
 
     def test_full_mode_passes_through(self):
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="full")
         assert len(out) == len(df)
 
     def test_per_locale_samples_n_per_locale(self):
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="per_locale", n=2, seed=42)
         # 4 locales -> at most 4*2 = 8 rows (each locale has >= 2 rows).
@@ -451,6 +462,7 @@ class TestSampleTrajectories:
 
     def test_per_locale_probe_samples_per_pair(self):
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="per_locale_probe", n=1, seed=42)
         per_pair = out.groupby(["locale", "probe_family"]).size()
@@ -458,6 +470,7 @@ class TestSampleTrajectories:
 
     def test_matched_pair_restricts_to_parity_probe(self):
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="matched_pair", n=2)
         assert (out["probe_family"] == "sov_ai_multilingual_parity").all()
@@ -467,11 +480,13 @@ class TestSampleTrajectories:
 
     def test_unknown_mode_raises(self):
         from usersim.cli._pipeline import sample_trajectories
+
         with pytest.raises(ValueError, match="Unknown sample mode"):
             sample_trajectories(self._df(), mode="bogus")
 
     def test_stable_across_runs_at_fixed_seed(self):
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         a = sample_trajectories(df, mode="per_locale_probe", n=2, seed=42)
         b = sample_trajectories(df, mode="per_locale_probe", n=2, seed=42)
@@ -481,6 +496,7 @@ class TestSampleTrajectories:
         """``n=None`` for per_locale should pass every row through -- no
         sampling. Functionally equivalent to mode='full'."""
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="per_locale", n=None)
         # Per-locale unfiltered means we keep ALL rows whose locale is one
@@ -495,6 +511,7 @@ class TestSampleTrajectories:
         """``n=None`` for matched_pair should keep every parity query_id,
         not just the first N."""
         from usersim.cli._pipeline import sample_trajectories
+
         df = self._df()
         out = sample_trajectories(df, mode="matched_pair", n=None)
         # All parity rows present (df has 2 locales x 3 query_ids = 6 rows).
@@ -511,15 +528,14 @@ class TestEvaluateDataframe:
     """
 
     def _source_df(self):
-        return pd.DataFrame([
-            {"trajectory_id": "T1", "locale": "en_US", "probe_family": "x",
-             "conversation_messages": "[]"},
-            {"trajectory_id": "T2", "locale": "fr_FR", "probe_family": "y",
-             "conversation_messages": "[]"},
-        ])
+        return pd.DataFrame(
+            [
+                {"trajectory_id": "T1", "locale": "en_US", "probe_family": "x", "conversation_messages": "[]"},
+                {"trajectory_id": "T2", "locale": "fr_FR", "probe_family": "y", "conversation_messages": "[]"},
+            ]
+        )
 
     def test_backfills_key_cols_when_dd_drops_them(self, monkeypatch, tmp_path):
-
         from usersim.cli import _pipeline
 
         captured_seed_path = {}
@@ -560,18 +576,19 @@ class TestEvaluateDataframe:
         assert not Path(captured_seed_path["path"]).exists()
 
     def test_preserves_key_cols_already_in_dd_output(self, monkeypatch):
-
         from usersim.cli import _pipeline
 
         class _Result:
             def load_dataset(self):
                 # DataDesigner output already has the key cols.
-                return pd.DataFrame({
-                    "trajectory_id": ["DD1", "DD2"],
-                    "locale": ["DD_LOCALE_1", "DD_LOCALE_2"],
-                    "probe_family": ["DD_PROBE_1", "DD_PROBE_2"],
-                    "assistant_eval": ["{}", "{}"],
-                })
+                return pd.DataFrame(
+                    {
+                        "trajectory_id": ["DD1", "DD2"],
+                        "locale": ["DD_LOCALE_1", "DD_LOCALE_2"],
+                        "probe_family": ["DD_PROBE_1", "DD_PROBE_2"],
+                        "assistant_eval": ["{}", "{}"],
+                    }
+                )
 
         class _DataDesigner:
             def create(self, builder, num_records):
@@ -602,12 +619,15 @@ class TestEvaluateDataframe:
 
         def _stub_builder(*, trajectory_parquet, judges, **kwargs):
             captured["judges"] = judges
+
             class _Result:
                 def load_dataset(self):
                     return pd.DataFrame({"assistant_eval": ["{}", "{}"]})
+
             class _DataDesigner:
                 def create(self, builder, num_records):
                     return _Result()
+
             return _DataDesigner(), object()
 
         monkeypatch.setattr(_pipeline, "build_evaluator_config_builder", _stub_builder)
@@ -668,9 +688,7 @@ class TestUndispatchedScorerWarning:
     def test_partial_list_names_the_scorer_and_its_capabilities(self, caplog):
         from usersim.taxonomy.capabilities import scorers_required_by_capabilities
 
-        partial = [
-            s for s in scorers_required_by_capabilities() if s != "financial_services"
-        ]
+        partial = [s for s in scorers_required_by_capabilities() if s != "financial_services"]
         text = self._warn(partial, caplog)
         assert "financial_services" in text
         assert "11 capabilities" in text
@@ -721,9 +739,7 @@ class TestEvalCliJudgesDefault:
         parser = argparse.ArgumentParser()
         sub = parser.add_subparsers(dest="cmd")
         eval_mod.register(sub)
-        ns = parser.parse_args(
-            ["eval", "--trajectories", "tmp.parquet", "--out", "tmp_out.parquet"]
-        )
+        ns = parser.parse_args(["eval", "--trajectories", "tmp.parquet", "--out", "tmp_out.parquet"])
         assert ns.judges == "evaluator_model"
 
 
@@ -763,26 +779,36 @@ class TestAssetCommandDefaults:
 
 class TestDryRuns:
     def test_panel_dry_run(self, tmp_path, capsys):
-        rc = cli.main([
-            "panel",
-            "--locale", "en_US",
-            "--num-personas", "5",
-            "--out", str(tmp_path / "panel.parquet"),
-            "--dry-run",
-        ])
+        rc = cli.main(
+            [
+                "panel",
+                "--locale",
+                "en_US",
+                "--num-personas",
+                "5",
+                "--out",
+                str(tmp_path / "panel.parquet"),
+                "--dry-run",
+            ]
+        )
         assert rc == 0
         out = capsys.readouterr().out
         assert "dry run" in out
         assert "en_US" in out
 
     def test_simulate_dry_run_with_locale(self, tmp_path, capsys):
-        rc = cli.main([
-            "simulate",
-            "--locale", "en_US",
-            "--num-rows", "3",
-            "--out", str(tmp_path / "traj.parquet"),
-            "--dry-run",
-        ])
+        rc = cli.main(
+            [
+                "simulate",
+                "--locale",
+                "en_US",
+                "--num-rows",
+                "3",
+                "--out",
+                str(tmp_path / "traj.parquet"),
+                "--dry-run",
+            ]
+        )
         assert rc == 0
         out = capsys.readouterr().out
         assert "probe mix" in out
@@ -790,45 +816,64 @@ class TestDryRuns:
         assert "store_reasoning: True" in out
 
     def test_simulate_dry_run_can_disable_reasoning_storage(
-        self, tmp_path, capsys,
+        self,
+        tmp_path,
+        capsys,
     ):
-        rc = cli.main([
-            "simulate",
-            "--locale", "en_US",
-            "--num-rows", "3",
-            "--out", str(tmp_path / "traj.parquet"),
-            "--no-store-reasoning",
-            "--dry-run",
-        ])
+        rc = cli.main(
+            [
+                "simulate",
+                "--locale",
+                "en_US",
+                "--num-rows",
+                "3",
+                "--out",
+                str(tmp_path / "traj.parquet"),
+                "--no-store-reasoning",
+                "--dry-run",
+            ]
+        )
         assert rc == 0
         assert "store_reasoning: False" in capsys.readouterr().out
 
     def test_simulate_locale_without_num_rows_errors(self, tmp_path):
         with pytest.raises(SystemExit, match="--num-rows"):
-            cli.main([
-                "simulate",
-                "--locale", "en_US",
-                "--out", str(tmp_path / "traj.parquet"),
-            ])
+            cli.main(
+                [
+                    "simulate",
+                    "--locale",
+                    "en_US",
+                    "--out",
+                    str(tmp_path / "traj.parquet"),
+                ]
+            )
 
     def test_simulate_panel_or_locale_required(self, tmp_path):
         with pytest.raises(SystemExit):
-            cli.main([
-                "simulate",
-                "--out", str(tmp_path / "traj.parquet"),
-            ])
+            cli.main(
+                [
+                    "simulate",
+                    "--out",
+                    str(tmp_path / "traj.parquet"),
+                ]
+            )
 
     def test_eval_dry_run(self, tmp_path, capsys):
         traj = tmp_path / "trajs.parquet"
         # The dry-run path doesn't open the file, so an empty placeholder is fine.
         traj.write_bytes(b"")
-        rc = cli.main([
-            "eval",
-            "--trajectories", str(traj),
-            "--out", str(tmp_path / "eval.parquet"),
-            "--judges", "judge_model",
-            "--dry-run",
-        ])
+        rc = cli.main(
+            [
+                "eval",
+                "--trajectories",
+                str(traj),
+                "--out",
+                str(tmp_path / "eval.parquet"),
+                "--judges",
+                "judge_model",
+                "--dry-run",
+            ]
+        )
         assert rc == 0
         out = capsys.readouterr().out
         assert "judge_model" in out
@@ -837,19 +882,23 @@ class TestDryRuns:
         traj = tmp_path / "trajs.parquet"
         traj.write_bytes(b"")
         with pytest.raises(SystemExit, match="aliases not in"):
-            cli.main([
-                "eval",
-                "--trajectories", str(traj),
-                "--out", str(tmp_path / "eval.parquet"),
-                "--judges", "nonexistent_judge",
-                "--dry-run",
-            ])
+            cli.main(
+                [
+                    "eval",
+                    "--trajectories",
+                    str(traj),
+                    "--out",
+                    str(tmp_path / "eval.parquet"),
+                    "--judges",
+                    "nonexistent_judge",
+                    "--dry-run",
+                ]
+            )
 
 
 # ---------------------------------------------------------------------------
 # Report subcommand (full path; no LLM)
 # ---------------------------------------------------------------------------
-
 
 
 class TestReportSubcommand:
@@ -868,7 +917,10 @@ class TestReportSubcommand:
     )
 
     def test_happy_path_writes_five_artifacts(
-        self, tmp_path, trajectory_df, evaluator_df,
+        self,
+        tmp_path,
+        trajectory_df,
+        evaluator_df,
     ):
         """Trajectories + evaluations → all five artifacts land in ``--out``."""
         traj_path = tmp_path / "trajs.parquet"
@@ -876,12 +928,17 @@ class TestReportSubcommand:
         eval_path = tmp_path / "evals.parquet"
         evaluator_df.to_parquet(eval_path, index=False)
         out = tmp_path / "out"
-        rc = cli.main([
-            "report",
-            "--trajectories", str(traj_path),
-            "--evaluations", str(eval_path),
-            "--out", str(out),
-        ])
+        rc = cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(traj_path),
+                "--evaluations",
+                str(eval_path),
+                "--out",
+                str(out),
+            ]
+        )
         assert rc == 0
         for name in self._ARTIFACTS:
             assert (out / name).exists(), f"missing artifact: {name}"
@@ -898,18 +955,24 @@ class TestReportSubcommand:
         assert manifest["n_trajectories"] == len(trajectory_df)
 
     def test_missing_evaluations_writes_partial_report(
-        self, tmp_path, trajectory_df,
+        self,
+        tmp_path,
+        trajectory_df,
     ):
         """``--evaluations`` is optional; capability cells render as
         ``not measured`` but the manifest + coverage still write."""
         traj_path = tmp_path / "trajs.parquet"
         trajectory_df.to_parquet(traj_path, index=False)
         out = tmp_path / "out"
-        rc = cli.main([
-            "report",
-            "--trajectories", str(traj_path),
-            "--out", str(out),
-        ])
+        rc = cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(traj_path),
+                "--out",
+                str(out),
+            ]
+        )
         assert rc == 0
         for name in self._ARTIFACTS:
             assert (out / name).exists(), f"missing artifact: {name}"
@@ -919,7 +982,10 @@ class TestReportSubcommand:
         assert manifest["n_evaluated"] == 0
 
     def test_capability_cells_span_multiple_locales(
-        self, tmp_path, trajectory_df, evaluator_df,
+        self,
+        tmp_path,
+        trajectory_df,
+        evaluator_df,
     ):
         """Capability matrix has at least one cell per observed locale."""
         traj_path = tmp_path / "trajs.parquet"
@@ -927,12 +993,17 @@ class TestReportSubcommand:
         eval_path = tmp_path / "evals.parquet"
         evaluator_df.to_parquet(eval_path, index=False)
         out = tmp_path / "out"
-        rc = cli.main([
-            "report",
-            "--trajectories", str(traj_path),
-            "--evaluations", str(eval_path),
-            "--out", str(out),
-        ])
+        rc = cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(traj_path),
+                "--evaluations",
+                str(eval_path),
+                "--out",
+                str(out),
+            ]
+        )
         assert rc == 0
         cells = json.loads((out / "capability_matrix.json").read_text())
         assert isinstance(cells, list) and cells
@@ -941,7 +1012,10 @@ class TestReportSubcommand:
         assert {"en_US", "pt_BR", "ja_JP"}.issubset(observed_locales)
 
     def test_run_resolution_picks_latest_run(
-        self, tmp_path, trajectory_df, evaluator_df,
+        self,
+        tmp_path,
+        trajectory_df,
+        evaluator_df,
     ):
         """Hive-partitioned layout: with multiple ``run=*`` partitions
         present, ``usersim report`` (no ``--run``) defaults to the
@@ -956,19 +1030,26 @@ class TestReportSubcommand:
         # Two runs: an older "1000000000" and a newer "2000000000".
         for run_id in ("1000000000", "2000000000"):
             write_partitioned_dataset(
-                trajectory_df, run_subroot(traj_root, run_id),
+                trajectory_df,
+                run_subroot(traj_root, run_id),
             )
             write_partitioned_dataset(
-                evaluator_df, run_subroot(eval_root, run_id),
+                evaluator_df,
+                run_subroot(eval_root, run_id),
             )
 
         out = tmp_path / "out"
-        rc = cli.main([
-            "report",
-            "--trajectories", str(traj_root),
-            "--evaluations", str(eval_root),
-            "--out", str(out),
-        ])
+        rc = cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(traj_root),
+                "--evaluations",
+                str(eval_root),
+                "--out",
+                str(out),
+            ]
+        )
         assert rc == 0
         # Artifacts land under the latest run subroot.
         run_dir = out / "run=2000000000"
@@ -997,7 +1078,8 @@ class TestConfigErrorPresentation:
 
         with patch("usersim.cli._build_parser") as build:
             build.return_value.parse_args.return_value = SimpleNamespace(
-                func=_raises, verbose=0,
+                func=_raises,
+                verbose=0,
             )
             with caplog.at_level(logging.ERROR):
                 code = cli.main([])
@@ -1029,23 +1111,38 @@ class TestReportErgonomics:
         import pandas as pd
 
         traj = tmp_path / "traj.parquet"
-        pd.DataFrame([{
-            "trajectory_id": "t1",
-            "locale": "en_US",
-            "probe_type": "general_open_ended",
-            "conversation_messages": "[]",
-            "simulation_outcome": "{}",
-        }]).to_parquet(traj)
+        pd.DataFrame(
+            [
+                {
+                    "trajectory_id": "t1",
+                    "locale": "en_US",
+                    "probe_type": "general_open_ended",
+                    "conversation_messages": "[]",
+                    "simulation_outcome": "{}",
+                }
+            ]
+        ).to_parquet(traj)
         return traj
 
     def test_index_html_is_distinguished_from_the_json_cells(
-        self, tmp_path, capsys,
+        self,
+        tmp_path,
+        capsys,
     ) -> None:
         traj = self._report_dir(tmp_path)
         out = tmp_path / "report"
-        assert cli.main([
-            "report", "--trajectories", str(traj), "--out", str(out),
-        ]) == 0
+        assert (
+            cli.main(
+                [
+                    "report",
+                    "--trajectories",
+                    str(traj),
+                    "--out",
+                    str(out),
+                ]
+            )
+            == 0
+        )
         printed = capsys.readouterr().out
         assert "open this:" in printed
         # Clickable in most terminals, and unambiguous about which file.
@@ -1064,37 +1161,63 @@ class TestReportErgonomics:
     def test_open_flag_launches_the_browser(self, tmp_path, monkeypatch) -> None:
         opened: list[str] = []
         monkeypatch.setattr(
-            "webbrowser.open", lambda url: opened.append(url) or True,
+            "webbrowser.open",
+            lambda url: opened.append(url) or True,
         )
         traj = self._report_dir(tmp_path)
         out = tmp_path / "report"
-        cli.main([
-            "report", "--trajectories", str(traj), "--out", str(out), "--open",
-        ])
+        cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(traj),
+                "--out",
+                str(out),
+                "--open",
+            ]
+        )
         assert opened and opened[0].startswith("file://")
         assert opened[0].endswith("index.html")
 
     def test_browser_failure_does_not_fail_the_run(
-        self, tmp_path, monkeypatch,
+        self,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         """The report is already written; a missing browser is not an error."""
+
         def boom(url):
             raise RuntimeError("no display")
 
         monkeypatch.setattr("webbrowser.open", boom)
         traj = self._report_dir(tmp_path)
-        assert cli.main([
-            "report", "--trajectories", str(traj),
-            "--out", str(tmp_path / "r"), "--open",
-        ]) == 0
+        assert (
+            cli.main(
+                [
+                    "report",
+                    "--trajectories",
+                    str(traj),
+                    "--out",
+                    str(tmp_path / "r"),
+                    "--open",
+                ]
+            )
+            == 0
+        )
 
     def test_list_runs_reports_nothing_to_render(self, tmp_path, capsys) -> None:
         empty = tmp_path / "trajectories"
         empty.mkdir()
-        rc = cli.main([
-            "report", "--trajectories", str(empty),
-            "--out", str(tmp_path / "r"), "--list-runs",
-        ])
+        rc = cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(empty),
+                "--out",
+                str(tmp_path / "r"),
+                "--list-runs",
+            ]
+        )
         assert rc == 1
         assert "usersim simulate" in capsys.readouterr().out
 
@@ -1103,8 +1226,14 @@ class TestReportErgonomics:
         empty = tmp_path / "trajectories"
         empty.mkdir()
         out = tmp_path / "should_not_exist"
-        cli.main([
-            "report", "--trajectories", str(empty),
-            "--out", str(out), "--list-runs",
-        ])
+        cli.main(
+            [
+                "report",
+                "--trajectories",
+                str(empty),
+                "--out",
+                str(out),
+                "--list-runs",
+            ]
+        )
         assert not out.exists()

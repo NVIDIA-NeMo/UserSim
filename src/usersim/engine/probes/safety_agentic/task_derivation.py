@@ -67,17 +67,12 @@ def derive_task(
     """
     excluded = set(excluded_request_ids)
     persona_tags = persona_to_tags(persona, locale)
-    pool = [
-        r for r in bank.for_persona(persona_tags)
-        if r.id not in excluded
-    ]
+    pool = [r for r in bank.for_persona(persona_tags) if r.id not in excluded]
     if not pool:
         return None
 
     persona_hash = _persona_content_hash(persona)
-    bank_salt_bytes = hashlib.sha256(
-        f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")
-    ).digest()[:8]
+    bank_salt_bytes = hashlib.sha256(f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")).digest()[:8]
     bank_salt = int.from_bytes(bank_salt_bytes, "big", signed=False)
     mix = persona_hash ^ bank_salt
     if seed is not None:

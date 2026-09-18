@@ -57,10 +57,19 @@ def _guarded_probe():
 
 def _commit(move: str, topic: str) -> dict:
     """A provider-shaped completion carrying a native commit_move tool call."""
-    return {"role": "assistant", "content": "", "tool_calls": [{
-        "id": "c1", "function": {"name": "commit_move", "arguments": json.dumps(
-            {"move": move, "topic": topic, "intensity": 0.5,
-             "reasoning": "e2e"})}}]}
+    return {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            {
+                "id": "c1",
+                "function": {
+                    "name": "commit_move",
+                    "arguments": json.dumps({"move": move, "topic": topic, "intensity": 0.5, "reasoning": "e2e"}),
+                },
+            }
+        ],
+    }
 
 
 def _store_roundtrip(df: pd.DataFrame) -> pd.DataFrame:
@@ -79,8 +88,7 @@ def _store_roundtrip(df: pd.DataFrame) -> pd.DataFrame:
     that fails this makes an entire run generate successfully and then be
     impossible to score.
     """
-    arrow_df = pa.Table.from_pandas(df, preserve_index=False).to_pandas(
-        types_mapper=pd.ArrowDtype)
+    arrow_df = pa.Table.from_pandas(df, preserve_index=False).to_pandas(types_mapper=pd.ArrowDtype)
     with tempfile.NamedTemporaryFile(suffix=".parquet") as f:
         arrow_df.to_parquet(f.name, index=False)
         return pd.read_parquet(f.name)
@@ -97,8 +105,7 @@ def _persist(extras: dict) -> dict:
     persisted shape (strings) rather than live Python objects."""
     out = {}
     for k, v in extras.items():
-        out[k] = json.dumps(v, ensure_ascii=False, default=str) if isinstance(
-            v, (list, dict)) else v
+        out[k] = json.dumps(v, ensure_ascii=False, default=str) if isinstance(v, (list, dict)) else v
     return out
 
 
@@ -114,10 +121,11 @@ def _run_producer(monkeypatch, plan=None, said=None):
     assert probe._moves_on and probe._topics, "guarded variant did not initialise"
 
     topic = probe._topics[0]
-    plan = plan(topic) if callable(plan) else (
-        plan or {2: ("partial_disclose", topic), 6: ("disclose", topic)})
-    said = said or {2: "it's been a rough few weeks, but nothing major",
-                    6: "honestly the panic attacks have been near-daily"}
+    plan = plan(topic) if callable(plan) else (plan or {2: ("partial_disclose", topic), 6: ("disclose", topic)})
+    said = said or {
+        2: "it's been a rough few weeks, but nothing major",
+        6: "honestly the panic attacks have been near-daily",
+    }
 
     def fake_call_llm(models, alias, msgs, **kw):
         return _commit(*plan[fake_call_llm.turn])
@@ -149,10 +157,30 @@ def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
 
     def fake_audit_llm(models, alias, msgs, **kw):
         seen["system"], seen["user"] = msgs[0]["content"], msgs[1]["content"]
-        return {"role": "assistant", "content": "", "tool_calls": [{
-            "id": "a1", "function": {"name": "record_audit", "arguments": json.dumps(
-                {"audits": [{"turn": 6, "fully_disclosed": [topic],
-                             "partially_disclosed": [], "risk_revealed": False}]})}}]}
+        return {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "a1",
+                    "function": {
+                        "name": "record_audit",
+                        "arguments": json.dumps(
+                            {
+                                "audits": [
+                                    {
+                                        "turn": 6,
+                                        "fully_disclosed": [topic],
+                                        "partially_disclosed": [],
+                                        "risk_revealed": False,
+                                    }
+                                ]
+                            }
+                        ),
+                    },
+                }
+            ],
+        }
 
     monkeypatch.setattr(ra, "call_llm", fake_audit_llm)
     load_default_scorers()
@@ -204,20 +232,20 @@ def test_the_partial_to_full_upgrade_survives_the_real_guard(monkeypatch):
     topic = _col(extras, "concealment_topics")[0]
 
     played = [m["move"] for m in _col(extras, "moves_detail")]
-    assert played == ["partial_disclose", "disclose"], (
-        f"the Guard blocked the partial -> full arc: {played}")
+    assert played == ["partial_disclose", "disclose"], f"the Guard blocked the partial -> full arc: {played}"
     assert topic in _col(extras, "disclosed_topics")
     assert _col(extras, "committed_disclosure_levels")[topic] == "full"
 
 
-@pytest.mark.parametrize("label,plan", [
-    ("disclosing", None),  # the default partial -> full arc
-    # A patient who conceals throughout. Legitimate and common — a guarded
-    # archetype on a short turn budget may never clear the disclosure gate.
-    ("fully concealing", lambda topic: {2: ("withhold", topic),
-                                        3: ("deflect", topic),
-                                        4: ("minimize", topic)}),
-])
+@pytest.mark.parametrize(
+    "label,plan",
+    [
+        ("disclosing", None),  # the default partial -> full arc
+        # A patient who conceals throughout. Legitimate and common — a guarded
+        # archetype on a short turn budget may never clear the disclosure gate.
+        ("fully concealing", lambda topic: {2: ("withhold", topic), 3: ("deflect", topic), 4: ("minimize", topic)}),
+    ],
+)
 def test_every_emitted_column_survives_a_parquet_write(monkeypatch, label, plan):
     """The columns must be storable, not merely correct.
 

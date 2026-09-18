@@ -23,6 +23,7 @@ profiles by pointing the client's
 ``profiles_env`` env var at a bank file of this same shape; absent that, the
 bundled synthetic placeholder bank is used (and flagged).
 """
+
 from __future__ import annotations
 
 import logging
@@ -85,18 +86,13 @@ class ClinicalProfileBank:
 # ---------------------------------------------------------------------------
 # Parsing / validation
 # ---------------------------------------------------------------------------
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise ClinicalProfileBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise ClinicalProfileBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise ClinicalProfileBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -113,39 +109,35 @@ def _build_clinical_profile_bank(doc: Dict[str, Any], *, src_path: str) -> Clini
 
     raw_entries = doc.get("entries")
     if not isinstance(raw_entries, list) or not raw_entries:
-        raise ClinicalProfileBankError(
-            f"{src_path}::entries: must be a non-empty list"
-        )
+        raise ClinicalProfileBankError(f"{src_path}::entries: must be a non-empty list")
 
     profiles: list[ClinicalProfile] = []
     seen: set[str] = set()
     for idx, entry in enumerate(raw_entries):
         if not isinstance(entry, dict):
-            raise ClinicalProfileBankError(
-                f"{src_path}::entries[{idx}]: each entry must be a mapping"
-            )
+            raise ClinicalProfileBankError(f"{src_path}::entries[{idx}]: each entry must be a mapping")
         profile_id = _require_str(entry, "id", src_path, ctx=f"entries[{idx}]")
         placeholder = entry.get("placeholder", False)
         if not isinstance(placeholder, bool):
             raise ClinicalProfileBankError(
-                f"{src_path}::{profile_id}: placeholder must be a bool, got "
-                f"{type(placeholder).__name__}"
+                f"{src_path}::{profile_id}: placeholder must be a bool, got {type(placeholder).__name__}"
             )
         payload = entry.get("profile")
         if not isinstance(payload, dict):
             raise ClinicalProfileBankError(
-                f"{src_path}::{profile_id}: profile must be a mapping, got "
-                f"{type(payload).__name__}"
+                f"{src_path}::{profile_id}: profile must be a mapping, got {type(payload).__name__}"
             )
         if profile_id in seen:
-            raise ClinicalProfileBankError(
-                f"{src_path}::{profile_id}: duplicate profile id"
-            )
+            raise ClinicalProfileBankError(f"{src_path}::{profile_id}: duplicate profile id")
         seen.add(profile_id)
         profiles.append(
             ClinicalProfile(
-                id=profile_id, placeholder=placeholder, profile=payload,
-                client=client, bank_id=bank_id, bank_version=bank_version,
+                id=profile_id,
+                placeholder=placeholder,
+                profile=payload,
+                client=client,
+                bank_id=bank_id,
+                bank_version=bank_version,
             )
         )
 
@@ -154,11 +146,18 @@ def _build_clinical_profile_bank(doc: Dict[str, Any], *, src_path: str) -> Clini
         logger.info(
             "clinical_profile_bank: loaded %s (v%s) with %d/%d placeholder "
             "entries — downstream scorecards will be marked preview-only",
-            bank_id, bank_version, n_placeholder, len(profiles),
+            bank_id,
+            bank_version,
+            n_placeholder,
+            len(profiles),
         )
     return ClinicalProfileBank(
-        schema_version=schema_version, client=client, bank_id=bank_id,
-        bank_version=bank_version, profiles=tuple(profiles), source_path=src_path,
+        schema_version=schema_version,
+        client=client,
+        bank_id=bank_id,
+        bank_version=bank_version,
+        profiles=tuple(profiles),
+        source_path=src_path,
     )
 
 
@@ -191,7 +190,8 @@ def default_clinical_profile_bank_path(client: str) -> Path:
 
 
 def clinical_profile_bank_path_for(
-    client: str, env_override: Optional[str] = None,
+    client: str,
+    env_override: Optional[str] = None,
 ) -> Path:
     """Resolve the bank path for a client: customer ``env_override`` var wins,
     else the bundled synthetic default."""
@@ -211,7 +211,8 @@ _BANK_CACHE_LOCK = threading.Lock()
 
 
 def load_clinical_profile_bank_for_client(
-    client: str, env_override: Optional[str] = None,
+    client: str,
+    env_override: Optional[str] = None,
 ) -> ClinicalProfileBank:
     """Load (and cache) the clinical profile bank for a client probe label.
 
@@ -227,9 +228,12 @@ def load_clinical_profile_bank_for_client(
         bank = load_clinical_profile_bank(path)
         _BANK_CACHE[cache_key] = bank
         logger.info(
-            "clinical_profile_bank: loaded %s v%s (%d profiles) for client=%s "
-            "from %s", bank.bank_id, bank.bank_version, len(bank.profiles),
-            client, path,
+            "clinical_profile_bank: loaded %s v%s (%d profiles) for client=%s from %s",
+            bank.bank_id,
+            bank.bank_version,
+            len(bank.profiles),
+            client,
+            path,
         )
         return bank
 

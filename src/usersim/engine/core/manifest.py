@@ -199,9 +199,7 @@ class ScopeInfo:
     #: (``hi_Deva_IN`` filters on "\u0939\u093f\u0902\u0926\u0940",
     #: ``hi_Latn_IN`` on "Hindi"). Which people were eligible is the
     #: thing that decides whether two runs are comparable.
-    persona_language_filters: Dict[str, Dict[str, List[str]]] = field(
-        default_factory=dict
-    )
+    persona_language_filters: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -276,28 +274,15 @@ class RunManifest:
         """
         models_raw = d.get("models", {}) or {}
         return cls(
-            manifest_schema_version=str(
-                d.get("manifest_schema_version") or MANIFEST_SCHEMA_VERSION
-            ),
+            manifest_schema_version=str(d.get("manifest_schema_version") or MANIFEST_SCHEMA_VERSION),
             run_id=str(d["run_id"]),
             started_at_epoch=int(d.get("started_at_epoch") or 0),
-            finished_at_epoch=(
-                int(d["finished_at_epoch"])
-                if d.get("finished_at_epoch") is not None
-                else None
-            ),
-            total_runtime_s=(
-                float(d["total_runtime_s"])
-                if d.get("total_runtime_s") is not None
-                else None
-            ),
+            finished_at_epoch=(int(d["finished_at_epoch"]) if d.get("finished_at_epoch") is not None else None),
+            total_runtime_s=(float(d["total_runtime_s"]) if d.get("total_runtime_s") is not None else None),
             source=_source_from_dict(d.get("source") or {}),
             code=_code_from_dict(d.get("code") or {}),
             models_config_path=d.get("models_config_path"),
-            models={
-                alias: _model_identity_from_dict(alias, body or {})
-                for alias, body in models_raw.items()
-            },
+            models={alias: _model_identity_from_dict(alias, body or {}) for alias, body in models_raw.items()},
             simulation_config=_sim_config_from_dict(d.get("simulation_config") or {}),
             scope=_scope_from_dict(d.get("scope") or {}),
             asset_versions=_asset_versions_from_dict(d.get("asset_versions") or {}),
@@ -381,9 +366,7 @@ def _asset_versions_from_dict(d: Mapping[str, Any]) -> AssetVersionsInfo:
         nemotron_personas_version=d.get("nemotron_personas_version"),
         bank_versions=dict(d.get("bank_versions") or {}),
         prompt_versions=dict(d.get("prompt_versions") or {}),
-        probe_variants_exercised={
-            k: list(v or []) for k, v in (d.get("probe_variants_exercised") or {}).items()
-        },
+        probe_variants_exercised={k: list(v or []) for k, v in (d.get("probe_variants_exercised") or {}).items()},
     )
 
 
@@ -433,9 +416,7 @@ def _detect_source(
         elif _is_running_in_notebook():
             kind = "notebook"
             invocation = (
-                os.environ.get("JPY_SESSION_NAME")
-                or os.environ.get("JUPYTER_SERVER_ROOT")
-                or "<unknown notebook>"
+                os.environ.get("JPY_SESSION_NAME") or os.environ.get("JUPYTER_SERVER_ROOT") or "<unknown notebook>"
             )
         else:
             kind = "cli"
@@ -603,9 +584,7 @@ def _aggregate_from_trajectories(
             cell_key = f"{locale}:{probe_family}"
             coverage[cell_key] = coverage.get(cell_key, 0) + 1
 
-        outcome_raw = (
-            row.get("simulation_outcome") if hasattr(row, "get") else None
-        )
+        outcome_raw = row.get("simulation_outcome") if hasattr(row, "get") else None
         outcome = _decode_json_field(outcome_raw)
         if not isinstance(outcome, dict):
             continue
@@ -629,8 +608,7 @@ def _aggregate_from_trajectories(
                     prompt_versions[probe_family] = scenario_pv
                 else:
                     logger.warning(
-                        "manifest: probe %r has multiple prompt_versions in run "
-                        "(%r vs %r); keeping the first",
+                        "manifest: probe %r has multiple prompt_versions in run (%r vs %r); keeping the first",
                         probe_family,
                         prior,
                         scenario_pv,
@@ -644,9 +622,7 @@ def _aggregate_from_trajectories(
     return {
         "bank_versions": dict(sorted(bank_versions.items())),
         "prompt_versions": dict(sorted(prompt_versions.items())),
-        "probe_variants_exercised": {
-            k: sorted(v) for k, v in sorted(probe_variants.items())
-        },
+        "probe_variants_exercised": {k: sorted(v) for k, v in sorted(probe_variants.items())},
         "status_counts": dict(sorted(status_counts.items())),
         "failure_class_histogram": dict(sorted(failure_classes.items())),
         "coverage_per_locale_probe": dict(sorted(coverage.items())),
@@ -798,16 +774,10 @@ def build_run_manifest(
         max_steps=int(getattr(sim_config, "max_steps", 10)),
         max_tools=int(getattr(sim_config, "max_tools", 5)),
         max_query_attempts=int(getattr(sim_config, "max_query_attempts", 3)),
-        max_assistant_attempts=int(
-            getattr(sim_config, "max_assistant_attempts", 1)
-        ),
+        max_assistant_attempts=int(getattr(sim_config, "max_assistant_attempts", 1)),
         store_reasoning=bool(getattr(sim_config, "store_reasoning", True)),
-        incremental_disclosure_ratio=float(
-            getattr(sim_config, "incremental_disclosure_ratio", 0.6)
-        ),
-        persona_grounding_ratio=float(
-            getattr(sim_config, "persona_grounding_ratio", 1.0)
-        ),
+        incremental_disclosure_ratio=float(getattr(sim_config, "incremental_disclosure_ratio", 0.6)),
+        persona_grounding_ratio=float(getattr(sim_config, "persona_grounding_ratio", 1.0)),
         context_compression=bool(getattr(sim_config, "context_compression", True)),
         compression_window=int(getattr(sim_config, "compression_window", 1)),
         random_seed=getattr(sim_config, "random_seed", None),
@@ -825,9 +795,7 @@ def build_run_manifest(
         probe_mix=dict(probe_mix),
         tool_calling_themes=list(tool_calling_themes),
         toolset_seed_path=str(toolset_seed_path) if toolset_seed_path else None,
-        toolset_content_hash=_file_content_hash(toolset_seed_path)
-        if toolset_seed_path
-        else None,
+        toolset_content_hash=_file_content_hash(toolset_seed_path) if toolset_seed_path else None,
         panel_path=str(panel_path) if panel_path else None,
         panel_content_hash=_file_content_hash(panel_path) if panel_path else None,
         trajectories_requested=requested_per_locale,
@@ -856,9 +824,7 @@ def build_run_manifest(
         started_at_epoch=int(started_at_epoch),
         finished_at_epoch=int(finished),
         total_runtime_s=round(runtime_s, 3),
-        source=_detect_source(
-            kind_override=source_kind, invocation_override=source_invocation
-        ),
+        source=_detect_source(kind_override=source_kind, invocation_override=source_invocation),
         code=_detect_code_info(),
         models_config_path=str(models_config_path) if models_config_path else None,
         models=models,
@@ -929,17 +895,13 @@ def write_run_manifest(
     tmp = Path(tmp_str)
     try:
         with os.fdopen(fd, "w") as f:
-            json.dump(
-                manifest.to_dict(), f, indent=2, ensure_ascii=False, default=str
-            )
+            json.dump(manifest.to_dict(), f, indent=2, ensure_ascii=False, default=str)
             f.flush()
             os.fsync(f.fileno())
         try:
             os.link(str(tmp), str(out_path))
         except FileExistsError:
-            logger.debug(
-                "manifest: lost link race for %s; another writer won", out_path
-            )
+            logger.debug("manifest: lost link race for %s; another writer won", out_path)
     finally:
         try:
             tmp.unlink()

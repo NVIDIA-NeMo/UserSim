@@ -61,11 +61,7 @@ def get_last_assistant_response(messages: List[Dict[str, Any]]) -> str:
     site use identical filtering semantics.
     """
     for m in reversed(messages):
-        if (
-            m.get("role") == "assistant"
-            and m.get("content")
-            and not m.get("tool_calls")
-        ):
+        if m.get("role") == "assistant" and m.get("content") and not m.get("tool_calls"):
             return str(m["content"])
     return ""
 
@@ -102,14 +98,15 @@ def classify_capitulation(
     )
     try:
         resp = call_llm(
-            models, "summary_model",
+            models,
+            "summary_model",
             [{"role": "user", "content": prompt}],
         )
     except Exception as e:
         logger.warning(
-            "  |-- safety_chat_pressure.classify_capitulation raised "
-            "%s: %s; treating as False",
-            type(e).__name__, e,
+            "  |-- safety_chat_pressure.classify_capitulation raised %s: %s; treating as False",
+            type(e).__name__,
+            e,
         )
         return False
     answer = resp.get("content", "") if isinstance(resp, dict) else ""

@@ -74,9 +74,9 @@ def _build_fake_ngc_zip(dest: Path) -> str:
 @pytest.mark.parametrize(
     "system, machine, expected_zip",
     [
-        ("Linux", "x86_64",  "ngccli_linux.zip"),
+        ("Linux", "x86_64", "ngccli_linux.zip"),
         ("Linux", "aarch64", "ngccli_arm64.zip"),
-        ("Linux", "arm64",   "ngccli_arm64.zip"),  # alias normalization
+        ("Linux", "arm64", "ngccli_arm64.zip"),  # alias normalization
     ],
 )
 def test_resolve_release_supported(monkeypatch, system, machine, expected_zip):
@@ -90,7 +90,7 @@ def test_resolve_release_supported(monkeypatch, system, machine, expected_zip):
 @pytest.mark.parametrize(
     "system, machine",
     [
-        ("Darwin", "arm64"),       # Mac is .pkg, not zip — refuse
+        ("Darwin", "arm64"),  # Mac is .pkg, not zip — refuse
         ("Darwin", "x86_64"),
         ("Windows", "AMD64"),
         ("Linux", "i686"),
@@ -514,7 +514,9 @@ def test_ensure_ngc_org_missing_org_hint_is_specific(monkeypatch, capsys):
 
     def fake_run(cmd, **kwargs):
         raise subprocess_module.CalledProcessError(
-            returncode=1, cmd=cmd, output="",
+            returncode=1,
+            cmd=cmd,
+            output="",
             stderr="Missing org - If Authenticated, org is also required.\n",
         )
 
@@ -550,9 +552,7 @@ def test_ensure_ngc_org_returns_none_when_ngc_org_list_fails(monkeypatch, capsys
     import subprocess as subprocess_module
 
     def fake_run(cmd, **kwargs):
-        raise subprocess_module.CalledProcessError(
-            returncode=1, cmd=cmd, output="", stderr="bad api key"
-        )
+        raise subprocess_module.CalledProcessError(returncode=1, cmd=cmd, output="", stderr="bad api key")
 
     monkeypatch.setattr(_ngc.subprocess, "run", fake_run)
 

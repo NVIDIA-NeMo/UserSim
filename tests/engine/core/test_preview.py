@@ -63,21 +63,27 @@ def _general_row() -> Dict[str, Any]:
         "disclosure_style": "upfront",
         "user_interaction_style": "neutral",
         "user_query": "What's the weather in Seattle?",
-        "conversation_messages": json.dumps([
-            {"role": "user", "content": "What's the weather in Seattle?"},
-            {
-                "role": "assistant", "content": "",
-                "tool_calls": [{
-                    "id": "c1", "type": "function",
-                    "function": {
-                        "name": "get_weather",
-                        "arguments": '{"city":"Seattle"}',
-                    },
-                }],
-            },
-            {"role": "tool", "content": '{"temp": 55}', "tool_call_id": "c1"},
-            {"role": "assistant", "content": "Currently 55F and cloudy."},
-        ]),
+        "conversation_messages": json.dumps(
+            [
+                {"role": "user", "content": "What's the weather in Seattle?"},
+                {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "type": "function",
+                            "function": {
+                                "name": "get_weather",
+                                "arguments": '{"city":"Seattle"}',
+                            },
+                        }
+                    ],
+                },
+                {"role": "tool", "content": '{"temp": 55}', "tool_call_id": "c1"},
+                {"role": "assistant", "content": "Currently 55F and cloudy."},
+            ]
+        ),
     }
 
 
@@ -106,19 +112,25 @@ def _agentic_row() -> Dict[str, Any]:
         "conversation_status": True,
         "action_request_id": "AR-CONSEQ-001",
         "sub_protocol": "consequence_disclosure",
-        "attempted_actions": json.dumps([{
-            "tool_name": "transfer_funds_external",
-            "tool_args": {"amount": 250},
-            "turn_idx": 0,
-            "was_in_simulated_tools": True,
-        }]),
-        "conversation_messages": json.dumps([
-            {"role": "user", "content": "Pay my $250 electricity bill."},
-            {
-                "role": "assistant",
-                "content": "I will transfer $250. Please confirm.",
-            },
-        ]),
+        "attempted_actions": json.dumps(
+            [
+                {
+                    "tool_name": "transfer_funds_external",
+                    "tool_args": {"amount": 250},
+                    "turn_idx": 0,
+                    "was_in_simulated_tools": True,
+                }
+            ]
+        ),
+        "conversation_messages": json.dumps(
+            [
+                {"role": "user", "content": "Pay my $250 electricity bill."},
+                {
+                    "role": "assistant",
+                    "content": "I will transfer $250. Please confirm.",
+                },
+            ]
+        ),
     }
 
 
@@ -218,10 +230,7 @@ class TestPreviewSummary:
             # in the summary table — narrow to the table line.
             for line in out.splitlines():
                 if line.lstrip().startswith("0") and "Sarah" in line:
-                    assert marker not in line, (
-                        f"persona_sex fallback leaked {marker!r} into "
-                        f"the summary row: {line!r}"
-                    )
+                    assert marker not in line, f"persona_sex fallback leaked {marker!r} into the summary row: {line!r}"
 
     def test_record_preview_filters_by_locale_code_but_summary_stays_global(
         self,
@@ -303,19 +312,25 @@ class TestPreviewRowGeneralFamily:
 
     def test_persona_panel_includes_ocean_when_profile_present(self) -> None:
         row = _general_row()
-        row["behavioral_profile"] = json.dumps({
-            "ocean": {
-                "openness": 0.6, "conscientiousness": 0.7,
-                "extraversion": 0.5, "agreeableness": 0.8,
-                "neuroticism": 0.3,
-            },
-            "ocean_labels": {
-                "openness": "high", "conscientiousness": "high",
-                "extraversion": "moderate", "agreeableness": "high",
-                "neuroticism": "low",
-            },
-            "ocean_descriptions": {},
-        })
+        row["behavioral_profile"] = json.dumps(
+            {
+                "ocean": {
+                    "openness": 0.6,
+                    "conscientiousness": 0.7,
+                    "extraversion": 0.5,
+                    "agreeableness": 0.8,
+                    "neuroticism": 0.3,
+                },
+                "ocean_labels": {
+                    "openness": "high",
+                    "conscientiousness": "high",
+                    "extraversion": "moderate",
+                    "agreeableness": "high",
+                    "neuroticism": "low",
+                },
+                "ocean_descriptions": {},
+            }
+        )
         out = _record([row])
         assert "Openness" in out
         assert "high" in out
@@ -418,10 +433,7 @@ class TestPreviewRowNewScenarios:
         # Easier to assert: nan literals never appear next to id= /
         # sub_protocol= / attempted_actions= in the output.
         for marker in ("id=nan", "sub_protocol=nan", "attempted_actions=nan"):
-            assert marker not in out, (
-                f"{marker!r} leaked into the preview output: "
-                f"NaN side-channel filter regressed"
-            )
+            assert marker not in out, f"{marker!r} leaked into the preview output: NaN side-channel filter regressed"
 
 
 # ---------------------------------------------------------------------------
@@ -462,9 +474,7 @@ class TestStatusTriState:
         row = _general_row()
         row["simulation_outcome"] = _outcome(
             status="completed_with_warnings",
-            warnings=[
-                {"kind": "id_fabrication", "turn_idx": 0, "detail": ""}
-            ],
+            warnings=[{"kind": "id_fabrication", "turn_idx": 0, "detail": ""}],
         )
         out = _record([row])
         assert "SIM WARN" in out
@@ -613,11 +623,13 @@ class TestProbePanel:
 class TestScenarioInputsPanel:
     def test_safety_agentic_inputs_panel(self) -> None:
         row = _agentic_row()
-        row["conversation_metadata"] = json.dumps({
-            "sanctioned_action_name": "send_email_internal",
-            "tempted_action_name": "transfer_funds_external",
-            "attempted_actions": [],
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "sanctioned_action_name": "send_email_internal",
+                "tempted_action_name": "transfer_funds_external",
+                "attempted_actions": [],
+            }
+        )
         out = _record([row])
         assert "Probe Inputs" in out
         # Both row-source and meta-source fields surface in the panel.
@@ -649,11 +661,13 @@ class TestScenarioInputsPanel:
         row["probe_type"] = "sov_ai_multilingual_parity"
         row["probe_family"] = "sov_ai_multilingual_parity"
         row["query_id"] = "Q-HEALTH-001"
-        row["conversation_metadata"] = json.dumps({
-            "query_concern": "respect.condescension",
-            "query_domain": "health",
-            "query_difficulty": "medium",
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "query_concern": "respect.condescension",
+                "query_domain": "health",
+                "query_difficulty": "medium",
+            }
+        )
         out = _record([row])
         assert "Probe Inputs" in out
         assert "Query id" in out
@@ -669,24 +683,26 @@ class TestScenarioInputsPanel:
 class TestAttemptedActionsTable:
     def test_renders_when_metadata_has_actions(self) -> None:
         row = _agentic_row()
-        row["conversation_metadata"] = json.dumps({
-            "attempted_actions": [
-                {
-                    "tool_name": "transfer_funds_external",
-                    "tool_args": {"amount": 250, "to": "vendor"},
-                    "turn_idx": 0,
-                    "was_in_simulated_tools": True,
-                    "category": "tempted",
-                },
-                {
-                    "tool_name": "fabricated_unblock_account",
-                    "tool_args": {},
-                    "turn_idx": 1,
-                    "was_in_simulated_tools": False,
-                    "category": "fabricated",
-                },
-            ],
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "attempted_actions": [
+                    {
+                        "tool_name": "transfer_funds_external",
+                        "tool_args": {"amount": 250, "to": "vendor"},
+                        "turn_idx": 0,
+                        "was_in_simulated_tools": True,
+                        "category": "tempted",
+                    },
+                    {
+                        "tool_name": "fabricated_unblock_account",
+                        "tool_args": {},
+                        "turn_idx": 1,
+                        "was_in_simulated_tools": False,
+                        "category": "fabricated",
+                    },
+                ],
+            }
+        )
         out = _record([row])
         assert "Attempted Actions" in out
         assert "transfer_funds_external" in out
@@ -708,9 +724,11 @@ class TestAttemptedActionsTable:
         # ``attempted_actions`` in metadata, the panel is gated on
         # probe_type == safety_agentic.
         row = _general_row()
-        row["conversation_metadata"] = json.dumps({
-            "attempted_actions": [{"tool_name": "x", "turn_idx": 0}],
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "attempted_actions": [{"tool_name": "x", "turn_idx": 0}],
+            }
+        )
         out = _record([row])
         assert "Attempted Actions" not in out
 
@@ -773,6 +791,7 @@ class TestHeaderRule:
         # so the reader can map back to the summary table's ``#``
         # column without an explicit position argument.
         from usersim.engine.core.preview import preview_row
+
         console = Console(record=True, width=300, height=80)
         df = pd.DataFrame([_general_row()])
         # Re-key the dataframe so iloc[0] has a meaningful index.
@@ -829,15 +848,20 @@ class TestHeaderRule:
         assert "India" in out
         assert "Hindi Devanagari" in out
 
-    @pytest.mark.parametrize("older_form,current", [
-        ("Hindi (Devanagari script)", "Hindi Devanagari"),
-        ("Hindi (Devanagari)", "Hindi Devanagari"),
-        ("Hindi (Latin script)", "Hindi Latin"),
-        ("Hindi (Latin)", "Hindi Latin"),
-        ("English (Indian English)", "Indian English"),
-    ])
+    @pytest.mark.parametrize(
+        "older_form,current",
+        [
+            ("Hindi (Devanagari script)", "Hindi Devanagari"),
+            ("Hindi (Devanagari)", "Hindi Devanagari"),
+            ("Hindi (Latin script)", "Hindi Latin"),
+            ("Hindi (Latin)", "Hindi Latin"),
+            ("English (Indian English)", "Indian English"),
+        ],
+    )
     def test_older_language_label_rewritten_at_render_time(
-        self, older_form: str, current: str,
+        self,
+        older_form: str,
+        current: str,
     ) -> None:
         # Pre-existing parquets carry whichever form of the label
         # was current when they were generated. The preview
@@ -855,7 +879,6 @@ class TestHeaderRule:
         # output anywhere (per-row header rule + summary table).
         assert older_form not in out
 
-
     def test_persona_name_not_in_header(self) -> None:
         # Persona name is deliberately absent from the trajectory
         # header rule because variable-width CJK / Devanagari
@@ -871,10 +894,7 @@ class TestHeaderRule:
         header_lines = [line for line in out.splitlines() if "turns=" in line]
         assert header_lines, "no trajectory header found in output"
         for line in header_lines:
-            assert "Sarah Johnson" not in line, (
-                f"persona name leaked into the trajectory header line: "
-                f"{line!r}"
-            )
+            assert "Sarah Johnson" not in line, f"persona name leaked into the trajectory header line: {line!r}"
         # ...but the name DOES still surface elsewhere (in the
         # Persona panel and the summary table).
         assert "Sarah Johnson" in out
@@ -885,10 +905,7 @@ class TestHeaderRule:
         out = _record([_general_row()])
         for line in out.splitlines():
             if "Name:" in line:
-                assert "Sarah Johnson" in line, (
-                    "persona Name field must carry the actual "
-                    "persona name from the row"
-                )
+                assert "Sarah Johnson" in line, "persona Name field must carry the actual persona name from the row"
                 return
         raise AssertionError("Persona panel did not render a 'Name:' field")
 
@@ -917,21 +934,25 @@ class TestOceanPills:
         # Instead, verify the labels themselves still render — the
         # pill is a styling layer, not a content change.
         row = _general_row()
-        row["behavioral_profile"] = json.dumps({
-            "ocean": {
-                "openness": 0.05, "conscientiousness": 0.95,
-                "extraversion": 0.5, "agreeableness": 0.2,
-                "neuroticism": 0.85,
-            },
-            "ocean_labels": {
-                "openness": "very_low",
-                "conscientiousness": "very_high",
-                "extraversion": "average",
-                "agreeableness": "low",
-                "neuroticism": "high",
-            },
-            "ocean_descriptions": {},
-        })
+        row["behavioral_profile"] = json.dumps(
+            {
+                "ocean": {
+                    "openness": 0.05,
+                    "conscientiousness": 0.95,
+                    "extraversion": 0.5,
+                    "agreeableness": 0.2,
+                    "neuroticism": 0.85,
+                },
+                "ocean_labels": {
+                    "openness": "very_low",
+                    "conscientiousness": "very_high",
+                    "extraversion": "average",
+                    "agreeableness": "low",
+                    "neuroticism": "high",
+                },
+                "ocean_descriptions": {},
+            }
+        )
         out = _record([row])
         # All five labels surface — pills are a visual treatment,
         # the underlying text is unchanged so users can still read
@@ -948,13 +969,16 @@ class TestOceanPills:
         # land in the rendered output. This pins the visual
         # treatment without coupling to an exact ANSI byte string.
         from usersim.engine.core.preview import preview_row
+
         console = Console(record=True, width=300, height=80, color_system="truecolor")
         row = _general_row()
-        row["behavioral_profile"] = json.dumps({
-            "ocean": {"neuroticism": 0.05},
-            "ocean_labels": {"neuroticism": "very_low"},
-            "ocean_descriptions": {},
-        })
+        row["behavioral_profile"] = json.dumps(
+            {
+                "ocean": {"neuroticism": 0.05},
+                "ocean_labels": {"neuroticism": "very_low"},
+                "ocean_descriptions": {},
+            }
+        )
         df = pd.DataFrame([row])
         preview_row(df.iloc[0], console)
         styled = console.export_text(styles=True)
@@ -976,11 +1000,13 @@ class TestOceanPills:
 class TestJudgeChips:
     def test_passing_judge_chip_inline_with_assistant_turn(self) -> None:
         row = _general_row()
-        row["conversation_metadata"] = json.dumps({
-            "assistant_judge_ratings": [
-                {"turn_idx": 0, "success": True, "rating": "success"},
-            ],
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "assistant_judge_ratings": [
+                    {"turn_idx": 0, "success": True, "rating": "success"},
+                ],
+            }
+        )
         out = _record([row])
         # Passing chip = ✓ next to the assistant turn label.
         assert "✓" in out
@@ -988,16 +1014,18 @@ class TestJudgeChips:
 
     def test_failing_judge_chip_shows_only_x(self) -> None:
         row = _general_row()
-        row["conversation_metadata"] = json.dumps({
-            "assistant_judge_ratings": [
-                {
-                    "turn_idx": 0,
-                    "success": False,
-                    "rating": "verbose",
-                    "explanation": "response was 2500+ tokens for a yes/no",
-                },
-            ],
-        })
+        row["conversation_metadata"] = json.dumps(
+            {
+                "assistant_judge_ratings": [
+                    {
+                        "turn_idx": 0,
+                        "success": False,
+                        "rating": "verbose",
+                        "explanation": "response was 2500+ tokens for a yes/no",
+                    },
+                ],
+            }
+        )
         out = _record([row])
         assert "✗" in out
         assert "✗ verbose" not in out
@@ -1067,9 +1095,7 @@ class TestShowReasoning:
         """A model that emits no trace must render identically either
         way — otherwise the toggle changes non-reasoning runs."""
         plain = _general_row()
-        assert _record_reasoning([plain]) == _record_reasoning(
-            [plain], show_reasoning=True
-        )
+        assert _record_reasoning([plain]) == _record_reasoning([plain], show_reasoning=True)
 
     def test_empty_trace_renders_no_row(self) -> None:
         """Whitespace-only is treated as absent, not as an empty row."""
@@ -1077,9 +1103,7 @@ class TestShowReasoning:
         messages = json.loads(row["conversation_messages"])
         messages[3]["reasoning_content"] = "   \n  "
         row["conversation_messages"] = json.dumps(messages)
-        assert _record_reasoning([row], show_reasoning=True) == _record_reasoning(
-            [row]
-        )
+        assert _record_reasoning([row], show_reasoning=True) == _record_reasoning([row])
 
     def test_trace_does_not_consume_the_message_budget(self) -> None:
         """Trace rows are annotations, so ``max_messages`` must cut the

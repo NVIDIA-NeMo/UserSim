@@ -65,34 +65,25 @@ Return the brief in the required structured format.
 #: Baking US concepts in here leaked "RMDs" and "APY" into every locale's corpus.
 DEFAULT_TYPE_CONCEPT_GUIDANCE: Dict[str, str] = {
     "bank": (
-        "Emphasize deposits, everyday banking, fees/overdraft posture, and "
-        "unauthorized-transaction dispute rights."
+        "Emphasize deposits, everyday banking, fees/overdraft posture, and unauthorized-transaction dispute rights."
     ),
     "neobank": (
-        "Emphasize digital-first onboarding, everyday payments, fees, and "
-        "unauthorized-transaction dispute rights."
+        "Emphasize digital-first onboarding, everyday payments, fees, and unauthorized-transaction dispute rights."
     ),
     "credit_union": (
-        "Emphasize member ownership, deposits, everyday banking, and "
-        "unauthorized-transaction dispute rights."
+        "Emphasize member ownership, deposits, everyday banking, and unauthorized-transaction dispute rights."
     ),
     "brokerage": (
         "Emphasize suitability of recommendations, settlement timing, market "
         "risk, and that returns are never guaranteed."
     ),
-    "wealth_manager": (
-        "Emphasize advisory duty of care, advisory fees, and risk-profiling."
-    ),
-    "robo_advisor": (
-        "Emphasize automated advice limits, advisory fees, and risk-profiling."
-    ),
+    "wealth_manager": ("Emphasize advisory duty of care, advisory fees, and risk-profiling."),
+    "robo_advisor": ("Emphasize automated advice limits, advisory fees, and risk-profiling."),
     "retirement_provider": (
         "Emphasize contribution limits, withdrawal restrictions and penalties, "
         "and flagging tax consequences without giving individualized tax advice."
     ),
-    "insurer": (
-        "Emphasize underwriting, claims handling, coverage terms, and exclusions."
-    ),
+    "insurer": ("Emphasize underwriting, claims handling, coverage terms, and exclusions."),
     "nbfc": (
         "Emphasize that this lender takes no deposits, loan eligibility and "
         "pricing transparency (interest, processing fees, prepayment/foreclosure "
@@ -102,9 +93,7 @@ DEFAULT_TYPE_CONCEPT_GUIDANCE: Dict[str, str] = {
 }
 
 
-def concept_guidance_for(
-    institution_type: str, overrides: Optional[Dict[str, str]] = None
-) -> str:
+def concept_guidance_for(institution_type: str, overrides: Optional[Dict[str, str]] = None) -> str:
     """Brief emphasis for ``institution_type``: region override else neutral default.
 
     Returns ``""`` for an unknown type with no override, so the prompt simply
@@ -115,6 +104,7 @@ def concept_guidance_for(
         if text and text.strip():
             return text.strip()
     return DEFAULT_TYPE_CONCEPT_GUIDANCE.get(institution_type, "")
+
 
 # Phase 2 seed columns: institution_id, display_name, institution_type, brand_voice,
 # language, currency_symbol, institution_brief, cluster_kind, focus_json, doc_plan_json

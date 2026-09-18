@@ -49,7 +49,9 @@ def _is_present_or_valid(value: Any, exempt: tuple[str, ...] = ()) -> bool:
 
 
 def _field_text(
-    persona: Dict[str, Any], key: str, exempt: tuple[str, ...] = (),
+    persona: Dict[str, Any],
+    key: str,
+    exempt: tuple[str, ...] = (),
 ) -> str:
     """Return one normalized persona field, or ``""`` when it is absent."""
     value = persona.get(key)
@@ -67,19 +69,16 @@ def religion_language_context(persona: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "religion": _field_text(persona, "religion") or None,
         "languages": [
-            value for value in (
+            value
+            for value in (
                 _field_text(persona, "first_language"),
                 _field_text(persona, "second_language"),
                 _field_text(persona, "third_language"),
             )
             if value
         ],
-        "religious_background": (
-            _field_text(persona, "religious_background") or None
-        ),
-        "linguistic_background": (
-            _field_text(persona, "linguistic_background") or None
-        ),
+        "religious_background": (_field_text(persona, "religious_background") or None),
+        "linguistic_background": (_field_text(persona, "linguistic_background") or None),
     }
 
 
@@ -90,6 +89,7 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
     sections for each available persona facet (in shuffled order to reduce
     positional bias).
     """
+
     def f(key: str, exempt: tuple[str, ...] = ()) -> str:
         """The field's text, or ``""`` when the cell holds nothing."""
         return _field_text(persona, key, exempt)

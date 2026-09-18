@@ -93,9 +93,7 @@ class EvalSamplePass:
             "mode": self.mode,
             "n": self.n,
             "random_seed": int(self.random_seed),
-            "eval_locales": (
-                list(self.eval_locales) if self.eval_locales is not None else None
-            ),
+            "eval_locales": (list(self.eval_locales) if self.eval_locales is not None else None),
             "n_selected": int(self.n_selected),
             "n_total": int(self.n_total),
             "trajectory_ids": list(self.trajectory_ids),
@@ -178,10 +176,7 @@ class EvalSampleManifest:
         (i.e. ``eval_locales`` was set to a non-empty list rather than
         ``None``). Lets the dashboard show a "rebuilt-piecewise" badge
         in future work."""
-        return any(
-            p.eval_locales is not None and len(p.eval_locales) > 0
-            for p in self.passes
-        )
+        return any(p.eval_locales is not None and len(p.eval_locales) > 0 for p in self.passes)
 
 
 def _pass_from_dict(raw: dict[str, Any]) -> EvalSamplePass:
@@ -211,14 +206,9 @@ def read_eval_sample_manifest(
     try:
         raw = json.loads(p.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise ValueError(
-            f"eval_sample_manifest at {p} is not valid JSON: {exc}"
-        ) from exc
+        raise ValueError(f"eval_sample_manifest at {p} is not valid JSON: {exc}") from exc
     if not isinstance(raw, dict):
-        raise ValueError(
-            f"eval_sample_manifest at {p} must be a JSON object, "
-            f"got {type(raw).__name__}"
-        )
+        raise ValueError(f"eval_sample_manifest at {p} must be a JSON object, got {type(raw).__name__}")
     return EvalSampleManifest.from_dict(raw)
 
 
@@ -268,16 +258,11 @@ def record_eval_sample_pass(
         )
     manifest = existing or EvalSampleManifest(run_id=run_id)
     pass_record = EvalSamplePass(
-        wrote_at_epoch=(
-            int(wrote_at_epoch) if wrote_at_epoch is not None
-            else int(time.time())
-        ),
+        wrote_at_epoch=(int(wrote_at_epoch) if wrote_at_epoch is not None else int(time.time())),
         mode=mode,
         n=n,
         random_seed=random_seed,
-        eval_locales=(
-            list(eval_locales) if eval_locales is not None else None
-        ),
+        eval_locales=(list(eval_locales) if eval_locales is not None else None),
         n_selected=n_selected,
         n_total=n_total,
         trajectory_ids=list(trajectory_ids),
@@ -285,6 +270,7 @@ def record_eval_sample_pass(
     manifest.passes.append(pass_record)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(
-        json.dumps(manifest.to_dict(), indent=2), encoding="utf-8",
+        json.dumps(manifest.to_dict(), indent=2),
+        encoding="utf-8",
     )
     return manifest

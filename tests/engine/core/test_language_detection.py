@@ -84,7 +84,9 @@ class TestDetectLanguageName:
         ],
     )
     def test_detects_each_locale_language(
-        self, text: str, expected: str,
+        self,
+        text: str,
+        expected: str,
     ) -> None:
         assert detect_language_name(text) == expected
 
@@ -111,9 +113,7 @@ class TestScriptComplianceFraction:
         assert script_compliance_fraction("नमस्ते", DEVANAGARI_RANGES) == 1.0
 
     def test_latin_text_against_devanagari_returns_zero(self) -> None:
-        assert (
-            script_compliance_fraction("namaste", DEVANAGARI_RANGES) == 0.0
-        )
+        assert script_compliance_fraction("namaste", DEVANAGARI_RANGES) == 0.0
 
     def test_mixed_devanagari_and_latin(self) -> None:
         # "Hello नमस्ते" — Latin "Hello" (5 letters) + Devanagari
@@ -170,9 +170,7 @@ class TestScriptDominance:
         assert result["hiragana"] > 0
         assert result["katakana"] > 0
         assert result["han"] > 0
-        assert (
-            result["hiragana"] + result["katakana"] + result["han"]
-        ) == pytest.approx(1.0, abs=0.01)
+        assert (result["hiragana"] + result["katakana"] + result["han"]) == pytest.approx(1.0, abs=0.01)
 
     def test_empty_text_all_zeros(self) -> None:
         result = script_dominance("")
@@ -184,6 +182,7 @@ class TestScriptDominance:
 
     def test_returns_all_named_buckets_plus_other(self) -> None:
         from usersim.engine.core.locale import SCRIPT_BUCKETS
+
         result = script_dominance("anything")
         # Every named script bucket (incl. the Indic/Arabic scripts added for
         # the India language-variant layer) plus the catch-all "other".
@@ -194,37 +193,39 @@ class TestScriptDominance:
 
 class TestForeignScriptsUsed:
     """A degraded model emits stray glyphs from unrelated scripts mid-word --
-    ``"MAB \u0CA8Listener"``, ``"\u0444\u043E\u0440\u043C\u0430\u091F\u094D"``. That is a broken generation rather
+    ``"MAB \u0ca8Listener"``, ``"\u0444\u043e\u0440\u043c\u0430\u091f\u094d"``. That is a broken generation rather
     than a language choice, and it is the only language signal available for
     the locales lingua has no model for, so it must not be confused with
     script compliance (which counts legitimate Latin against you).
     """
 
     def test_clean_native_text_has_no_intrusions(self) -> None:
-        assert foreign_scripts_used("\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 \u0CAA\u0CA6\u0C97\u0CB3\u0CC1", KANNADA_RANGES) == ()
+        assert (
+            foreign_scripts_used("\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 \u0caa\u0ca6\u0c97\u0cb3\u0cc1", KANNADA_RANGES) == ()
+        )
 
     def test_latin_is_always_allowed(self) -> None:
         """Kannada prose carrying UPI / KYC / PAN / a tool name is how the
         corpora are deliberately written; flagging it would make the axis
         unusable on exactly the locales it exists for."""
-        text = "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 UPI KYC PAN verify_identity \u0CAA\u0CA6\u0C97\u0CB3\u0CC1"
+        text = "\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 UPI KYC PAN verify_identity \u0caa\u0ca6\u0c97\u0cb3\u0cc1"
         assert foreign_scripts_used(text, KANNADA_RANGES) == ()
 
     def test_names_the_intruding_scripts(self) -> None:
         # Hangul + Cyrillic inside Kannada, as observed in a real run.
-        text = "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 \uAC80 \u0444\u043E\u0440\u043C\u0430 \u0CAA\u0CA6"
+        text = "\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 \uac80 \u0444\u043e\u0440\u043c\u0430 \u0caa\u0ca6"
         assert foreign_scripts_used(text, KANNADA_RANGES) == ("cyrillic", "hangul")
 
     def test_a_single_stray_glyph_is_enough(self) -> None:
         """All-or-nothing on purpose: one bad codepoint mid-word already is the
         defect, and waiting for a share of the text would hide the mild cases."""
-        assert foreign_scripts_used("\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 \uAC80", KANNADA_RANGES) == ("hangul",)
+        assert foreign_scripts_used("\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 \uac80", KANNADA_RANGES) == ("hangul",)
 
     def test_devanagari_in_an_english_locale_is_foreign(self) -> None:
-        assert foreign_scripts_used("Hello \u0928\u092E\u0938\u094D\u0924\u0947", LATIN_RANGES) == ("devanagari",)
+        assert foreign_scripts_used("Hello \u0928\u092e\u0938\u094d\u0924\u0947", LATIN_RANGES) == ("devanagari",)
 
     def test_no_expected_script_means_nothing_to_be_foreign_to(self) -> None:
-        assert foreign_scripts_used("anything \uAC80 \u0444", ()) == ()
+        assert foreign_scripts_used("anything \uac80 \u0444", ()) == ()
 
     def test_non_letters_are_ignored(self) -> None:
-        assert foreign_scripts_used("\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 123 !!! \u20B9500", KANNADA_RANGES) == ()
+        assert foreign_scripts_used("\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 123 !!! \u20b9500", KANNADA_RANGES) == ()

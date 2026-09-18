@@ -224,9 +224,7 @@ def get_profile(name: str) -> SelectionProfile:
     """Look up a shipped profile by name (case-insensitive)."""
     key = name.strip().lower()
     if key not in _PROFILES:
-        raise KeyError(
-            f"unknown selection profile {name!r}; available: {sorted(_PROFILES)}"
-        )
+        raise KeyError(f"unknown selection profile {name!r}; available: {sorted(_PROFILES)}")
     return _PROFILES[key]
 
 

@@ -154,8 +154,7 @@ class ConversationSimulatorGenerator(
             except Exception:
                 if alias == MODEL_SUMMARY:
                     logger.warning(
-                        "  |-- summary_model not found in model registry, "
-                        "falling back to user_model for summaries"
+                        "  |-- summary_model not found in model registry, falling back to user_model for summaries"
                     )
                     models[alias] = self.get_model(MODEL_USER)
                 else:
@@ -172,8 +171,8 @@ class ConversationSimulatorGenerator(
                 models[embed_alias] = self.get_model(embed_alias)
             except Exception:
                 logger.debug(
-                    "  |-- embedding model %r not in registry; finance dense "
-                    "retrieval will fall back to lexical", embed_alias,
+                    "  |-- embedding model %r not in registry; finance dense retrieval will fall back to lexical",
+                    embed_alias,
                 )
 
         # Set per-call logging level based on verbosity
@@ -184,14 +183,13 @@ class ConversationSimulatorGenerator(
 
         # Parse persona
         raw_persona = data[cfg.persona_column]
-        persona = (
-            raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona)
-        )
+        persona = raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona)
         # The raw persona column is dropped from trajectory output. Preserve the
         # normalized protected fields that now influence the user-agent prompt so
         # a stored row remains auditable without reloading the source dataset.
         data["persona_religion_language_context"] = json.dumps(
-            religion_language_context(persona), ensure_ascii=False,
+            religion_language_context(persona),
+            ensure_ascii=False,
         )
 
         # Content-hashed persona identity. Stable across runs; observed
@@ -209,25 +207,19 @@ class ConversationSimulatorGenerator(
         # (e.g. ta_Taml_IN drawing en_IN personas) resolve the education
         # ordinal against en_IN's exact vocabulary rather than the imperfect
         # keyword fallback. Non-variant locales are unchanged.
-        profile = compute_behavioral_profile(
-            persona, locale=persona_dataset_locale(locale)
-        )
+        profile = compute_behavioral_profile(persona, locale=persona_dataset_locale(locale))
         data["behavioral_profile"] = json.dumps(profile, ensure_ascii=False)
 
         # Stable hash for reproducible per-persona seeding (deterministic across
         # Python sessions, unlike the built-in hash() which is salted).
         persona_json = json.dumps(persona, sort_keys=True, default=str)
-        persona_hash = (
-            int(hashlib.sha256(persona_json.encode()).hexdigest(), 16) & 0xFFFFFFFF
-        )
+        persona_hash = int(hashlib.sha256(persona_json.encode()).hexdigest(), 16) & 0xFFFFFFFF
         disclosure_style = compute_disclosure_style(
             persona_seed=persona_hash,
             incremental_ratio=cfg.incremental_disclosure_ratio,
         )
         interaction_style = compute_user_interaction_style(profile)
-        use_grounded_query = (
-            random.Random(persona_hash + 1).random() < cfg.persona_grounding_ratio
-        )
+        use_grounded_query = random.Random(persona_hash + 1).random() < cfg.persona_grounding_ratio
         data["disclosure_style"] = disclosure_style
         data["user_interaction_style"] = interaction_style
         data["persona_grounding"] = use_grounded_query
@@ -237,9 +229,7 @@ class ConversationSimulatorGenerator(
 
         # Read probe type and dispatch
         probe_type = data[cfg.probe_type_column]
-        persona_name = (
-            f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
-        )
+        persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
         logger.info(
             f"  |-- Starting {probe_type} sim for {persona_name} "
             f"[{interaction_style}, {disclosure_style}] (max_turns={cfg.max_turns})"
@@ -270,9 +260,7 @@ class ConversationSimulatorGenerator(
         # re-runs via core.idempotency.
         prompt_version = getattr(probe_module, "PROMPT_VERSION", "v1.0")
         user_model_name = resolve_model_name(models.get(MODEL_USER), MODEL_USER)
-        assistant_model_name = resolve_model_name(
-            models.get(MODEL_ASSISTANT), MODEL_ASSISTANT
-        )
+        assistant_model_name = resolve_model_name(models.get(MODEL_ASSISTANT), MODEL_ASSISTANT)
         # ``locale`` is a load-bearing content determinant: multiple
         # conversation locales can now draw from the SAME persona dataset
         # (India language-variants all sample en_IN personas), so without
@@ -325,7 +313,8 @@ class ConversationSimulatorGenerator(
             except ContextWindowError as e:
                 logger.warning(
                     "  |-- Context window failure for %s: %s",
-                    persona_name, e,
+                    persona_name,
+                    e,
                 )
                 result = _make_failed_result(
                     str(e),
@@ -355,14 +344,11 @@ class ConversationSimulatorGenerator(
         n_tools = data.get("num_tool_calls", 0)
         tools_tag = f", {n_tools} tool calls" if n_tools else ""
         logger.info(
-            f"  |-- Finished sim for {persona_name}: {status}, "
-            f"{n_turns} turns{tools_tag} ({t_sim_elapsed:.1f}s)"
+            f"  |-- Finished sim for {persona_name}: {status}, {n_turns} turns{tools_tag} ({t_sim_elapsed:.1f}s)"
         )
 
         t_total = time.monotonic() - t_record_start
-        logger.info(
-            f"  |-- Total for {persona_name}: {t_total:.1f}s (sim={t_sim_elapsed:.1f}s)"
-        )
+        logger.info(f"  |-- Total for {persona_name}: {t_total:.1f}s (sim={t_sim_elapsed:.1f}s)")
         record_finished(t_total)
 
         if cfg.verbosity >= 2:
@@ -394,9 +380,7 @@ def _log_running_stats() -> None:
         avg_chars = s["total_chars"] / s["calls"]
         avg_words = s["total_words"] / s["calls"]
         lines.append(
-            f"  |--   {alias}: {s['calls']} calls, "
-            f"avg {avg_t:.1f}s, "
-            f"avg {avg_chars:.0f} chars / {avg_words:.0f} words"
+            f"  |--   {alias}: {s['calls']} calls, avg {avg_t:.1f}s, avg {avg_chars:.0f} chars / {avg_words:.0f} words"
         )
     for line in lines:
         logger.info(line)

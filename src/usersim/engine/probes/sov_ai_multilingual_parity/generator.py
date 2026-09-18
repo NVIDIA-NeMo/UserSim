@@ -132,8 +132,7 @@ class SovAiMultilingualParityProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """Multilingual respect-parity / quality-consistency probe.
 
@@ -190,7 +189,11 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
+        self,
+        persona: Dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[Query]:
         """Pick the matched query for this persona's locale.
 
@@ -210,6 +213,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         # bank ships it (graduation), else the India base (en_IN), else the
         # locale itself (shipped locales; unknown -> None below = fail-fast).
         from usersim.engine.core.locale import india_variant
+
         loc = self._locale
         if loc not in bank.locales:
             variant = india_variant(loc)
@@ -218,14 +222,17 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         self._asset_locale = loc
         if loc not in bank.locales:
             logger.warning(
-                "  |-- sov_ai_multilingual_parity: asset_locale=%s not in bank "
-                "%s v%s (locales: %s)",
-                loc, bank.bank_id, bank.bank_version,
+                "  |-- sov_ai_multilingual_parity: asset_locale=%s not in bank %s v%s (locales: %s)",
+                loc,
+                bank.bank_id,
+                bank.bank_version,
                 sorted(bank.locales),
             )
             return None
         return derive_task(
-            persona, bank, loc,
+            persona,
+            bank,
+            loc,
             seed=getattr(cfg, "random_seed", None),
         )
 
@@ -249,7 +256,8 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     # ── Optional hooks (verbatim + follow-up + invariants) ──────────
 
     def get_verbatim_first_user_turn(
-        self, state: ConversationState,
+        self,
+        state: ConversationState,
     ) -> Optional[str]:
         if self._rendering is None or self._task is None:
             return None
@@ -269,7 +277,9 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         return self._localize_verbatim(self._rendering)
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: ConversationState,
+        self,
+        turn_idx: int,
+        state: ConversationState,
     ) -> List[str]:
         if not self._followup_instruction:
             return []
@@ -353,6 +363,7 @@ def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
         OutcomeStatus,
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,

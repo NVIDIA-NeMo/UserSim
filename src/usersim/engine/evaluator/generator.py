@@ -80,10 +80,18 @@ logger = logging.getLogger("usersim.engine")
 EVALUATOR_VERSION = "v1.0"
 
 # Locales whose scripts need a higher token budget for judge responses.
-_NON_ASCII_LOCALES = frozenset({
-    "ja_JP", "zh_CN", "zh_TW", "ko_KR",
-    "hi_Deva_IN", "ar_SA", "th_TH", "he_IL",
-})
+_NON_ASCII_LOCALES = frozenset(
+    {
+        "ja_JP",
+        "zh_CN",
+        "zh_TW",
+        "ko_KR",
+        "hi_Deva_IN",
+        "ar_SA",
+        "th_TH",
+        "he_IL",
+    }
+)
 
 
 def _decode_json_field(raw: Any, default: Any) -> Any:
@@ -134,23 +142,15 @@ class TrajectoryEvaluatorGenerator(
         applicable_axes = select_axes(probe_family, cfg.axes)
         envelope = {
             "judge_aliases": [s.alias for s in judge_specs],
-            "judge_families": [
-                s.resolved_family(resolved_ids.get(s.alias)).value
-                for s in judge_specs
-            ],
+            "judge_families": [s.resolved_family(resolved_ids.get(s.alias)).value for s in judge_specs],
             "axes": [s.name for s in applicable_axes],
             "scorers": list(cfg.scorers),
             "prompt_version": cfg.prompt_version,
             "evaluator_version": EVALUATOR_VERSION,
         }
 
-        simulation_outcome = _decode_json_field(
-            data.get(cfg.simulation_outcome_column), default=None
-        )
-        if (
-            isinstance(simulation_outcome, dict)
-            and simulation_outcome.get("status") == "failed"
-        ):
+        simulation_outcome = _decode_json_field(data.get(cfg.simulation_outcome_column), default=None)
+        if isinstance(simulation_outcome, dict) and simulation_outcome.get("status") == "failed":
             # Any simulator failure means the trajectory did not complete under
             # the declared harness contract. Keep it for reliability/coverage,
             # but never turn a partial row into assistant-quality evidence.
@@ -168,8 +168,7 @@ class TrajectoryEvaluatorGenerator(
             existing = _decode_json_field(data.get(col_name), default=None)
             if isinstance(existing, dict) and existing.get("envelope") == envelope:
                 logger.debug(
-                    f"  |-- evaluator: skip — envelope match for traj "
-                    f"{data.get(cfg.trajectory_id_column, '?')}"
+                    f"  |-- evaluator: skip — envelope match for traj {data.get(cfg.trajectory_id_column, '?')}"
                 )
                 # Mark explicitly so the reporting layer can count skips.
                 # Overwrite (not setdefault) — the prior cell may have
@@ -181,9 +180,7 @@ class TrajectoryEvaluatorGenerator(
                 return {col_name: json.dumps(existing, ensure_ascii=False)}
 
         # ── Decode the trajectory ───────────────────────────────
-        messages = _decode_json_field(
-            data.get(cfg.conversation_messages_column), default=[]
-        )
+        messages = _decode_json_field(data.get(cfg.conversation_messages_column), default=[])
         if not isinstance(messages, list) or not any(
             m.get("role") == "assistant" for m in messages if isinstance(m, dict)
         ):
@@ -207,9 +204,7 @@ class TrajectoryEvaluatorGenerator(
 
         # ── Run each judge across all applicable axes ────────────
         models = self.get_models()
-        axis_results: Dict[str, Dict[str, Dict[str, Any]]] = {
-            s.name: {} for s in applicable_axes
-        }
+        axis_results: Dict[str, Dict[str, Dict[str, Any]]] = {s.name: {} for s in applicable_axes}
 
         prompt = EVAL_USER_PROMPT.format(
             persona=persona_text,
@@ -219,11 +214,7 @@ class TrajectoryEvaluatorGenerator(
             conversation=conversation_text,
         )
 
-        max_tokens = (
-            cfg.max_judge_tokens_non_ascii
-            if locale in _NON_ASCII_LOCALES
-            else cfg.max_judge_tokens
-        )
+        max_tokens = cfg.max_judge_tokens_non_ascii if locale in _NON_ASCII_LOCALES else cfg.max_judge_tokens
         schema_model = _build_schema_for(applicable_axes)
 
         for spec in judge_specs:
@@ -278,9 +269,7 @@ class TrajectoryEvaluatorGenerator(
                 "persona": persona,
                 "probe_family": probe_family,
                 "probe_variant": data.get(cfg.probe_variant_column),
-                "simulation_outcome": _decode_json_field(
-                    data.get(cfg.simulation_outcome_column), default=None
-                ),
+                "simulation_outcome": _decode_json_field(data.get(cfg.simulation_outcome_column), default=None),
                 "locale": locale,
                 "language": language,
             }
@@ -294,13 +283,8 @@ class TrajectoryEvaluatorGenerator(
                 try:
                     scorer_results[name] = fn(traj_row, models)
                 except Exception as e:
-                    logger.warning(
-                        f"  |-- evaluator: scorer {name!r} raised "
-                        f"{type(e).__name__}: {e}"
-                    )
-                    scorer_results[name] = {
-                        "error": f"{type(e).__name__}: {e}"
-                    }
+                    logger.warning(f"  |-- evaluator: scorer {name!r} raised {type(e).__name__}: {e}")
+                    scorer_results[name] = {"error": f"{type(e).__name__}: {e}"}
 
         result = {
             "envelope": envelope,
@@ -320,10 +304,7 @@ class TrajectoryEvaluatorGenerator(
             try:
                 out[j.alias] = self.get_model(j.alias)
             except Exception as e:
-                logger.warning(
-                    f"  |-- evaluator: judge alias {j.alias!r} not "
-                    f"resolvable in model registry: {e}"
-                )
+                logger.warning(f"  |-- evaluator: judge alias {j.alias!r} not resolvable in model registry: {e}")
         return out
 
     def _call_judge(
@@ -354,19 +335,13 @@ class TrajectoryEvaluatorGenerator(
                 },
             )
         except Exception as e:
-            logger.warning(
-                f"  |-- evaluator: judge {judge_alias!r} raised "
-                f"{type(e).__name__}: {e}"
-            )
+            logger.warning(f"  |-- evaluator: judge {judge_alias!r} raised {type(e).__name__}: {e}")
             return {}
         content = resp.get("content", "") if isinstance(resp, dict) else ""
         try:
             parsed = json.loads(content)
         except (json.JSONDecodeError, TypeError):
-            logger.warning(
-                f"  |-- evaluator: judge {judge_alias!r} produced "
-                "unparseable structured output"
-            )
+            logger.warning(f"  |-- evaluator: judge {judge_alias!r} produced unparseable structured output")
             return {}
         return parsed if isinstance(parsed, dict) else {}
 

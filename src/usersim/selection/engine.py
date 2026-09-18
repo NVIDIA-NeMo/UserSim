@@ -129,9 +129,7 @@ def _judge_disagreement_reasons(cell: dict, threshold: float) -> list[str]:
     for axis, judge_block in (cell.get("axes") or {}).items():
         if not isinstance(judge_block, dict):
             continue
-        scores = [
-            score_from_axis(v) for v in judge_block.values() if isinstance(v, dict)
-        ]
+        scores = [score_from_axis(v) for v in judge_block.values() if isinstance(v, dict)]
         scores = [s for s in scores if s is not None]
         if len(scores) >= 2 and (max(scores) - min(scores)) > threshold:
             out.append(f"judge_disagreement:{axis}")
@@ -196,9 +194,7 @@ def evaluate_row(
     # --- eval-cell gates (only when there is a usable cell) --------------
     if have_eval and not skipped:
         if profile.max_judge_disagreement is not None:
-            hard.extend(
-                _judge_disagreement_reasons(cell, profile.max_judge_disagreement)
-            )
+            hard.extend(_judge_disagreement_reasons(cell, profile.max_judge_disagreement))
         for gate in applicable_gates(profile, cell):
             score = score_from_eval_cell(cell, gate.axis)
             if score is None:
@@ -261,9 +257,7 @@ def _allocate_quota(counts: dict[Any, int], total: int) -> dict[Any, int]:
 
 
 def _sort_by_quality(df: Any) -> Any:
-    return df.sort_values(
-        [COL_QUALITY, "trajectory_id"], ascending=[False, True], na_position="last"
-    )
+    return df.sort_values([COL_QUALITY, "trajectory_id"], ascending=[False, True], na_position="last")
 
 
 def _apply_cap(
@@ -293,18 +287,12 @@ def _apply_cap(
 
     import pandas as pd
 
-    parts = [
-        _sort_by_quality(groups[k]).head(quotas[k])
-        for k in groups
-        if quotas[k] > 0
-    ]
+    parts = [_sort_by_quality(groups[k]).head(quotas[k]) for k in groups if quotas[k] > 0]
     capped = pd.concat(parts) if parts else curated.iloc[0:0]
     return _sort_by_quality(capped).reset_index(drop=True)
 
 
-def _cap_per_group(
-    curated: Any, n: Optional[int], group_cols: Sequence[str]
-) -> Any:
+def _cap_per_group(curated: Any, n: Optional[int], group_cols: Sequence[str]) -> Any:
     """Keep at most ``n`` highest-quality rows within each group.
 
     Groups are defined by ``group_cols`` (e.g. ``("locale",)`` for a per-locale
@@ -321,10 +309,7 @@ def _cap_per_group(
         return curated
     import pandas as pd
 
-    parts = [
-        _sort_by_quality(g).head(n)
-        for _, g in curated.groupby(keys, sort=True, dropna=False)
-    ]
+    parts = [_sort_by_quality(g).head(n) for _, g in curated.groupby(keys, sort=True, dropna=False)]
     capped = pd.concat(parts) if parts else curated.iloc[0:0]
     return _sort_by_quality(capped).reset_index(drop=True)
 
@@ -407,9 +392,7 @@ def select_trajectories(
     return SelectionResult(curated=curated, all=annotated, summary=summary)
 
 
-def _summarize(
-    verdicts: list[SelectionVerdict], curated: Any, profile: SelectionProfile
-) -> SelectionSummary:
+def _summarize(verdicts: list[SelectionVerdict], curated: Any, profile: SelectionProfile) -> SelectionSummary:
     total = len(verdicts)
     passed = sum(1 for v in verdicts if v.passed)
     drop_reasons: dict[str, int] = {}

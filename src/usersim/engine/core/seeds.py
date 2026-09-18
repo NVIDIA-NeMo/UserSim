@@ -63,6 +63,7 @@ def load_seeds(
         base = Path(assets_dir) / probe / kind
     else:
         from usersim.engine.core._assets import probe_assets_dir
+
         base = probe_assets_dir(probe) / kind
 
     locale_path = base / locale / f"{kind}.json"

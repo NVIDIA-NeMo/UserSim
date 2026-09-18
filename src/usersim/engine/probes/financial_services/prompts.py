@@ -37,7 +37,8 @@ _FINANCIAL_LITERACY_INSTRUCTIONS = {
 def financial_literacy_instructions(level: str) -> str:
     """Return the user-simulator instruction block for a literacy ``level``."""
     return _FINANCIAL_LITERACY_INSTRUCTIONS.get(
-        level, _FINANCIAL_LITERACY_INSTRUCTIONS["medium"],
+        level,
+        _FINANCIAL_LITERACY_INSTRUCTIONS["medium"],
     )
 
 

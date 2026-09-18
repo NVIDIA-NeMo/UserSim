@@ -64,9 +64,7 @@ def _reset_state_between_tests():
 
 @pytest.fixture
 def sample_taxonomy_path() -> Path:
-    return (
-        (packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml")
-    )
+    return packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"
 
 
 @pytest.fixture
@@ -95,10 +93,12 @@ def _trajectory(
         {"role": "assistant", "content": "Resposta do assistente sobre o tópico."},
     ]
     if n_assistant_turns >= 2:
-        messages.extend([
-            {"role": "user", "content": "Hmm, e quanto a..."},
-            {"role": "assistant", "content": "Resposta refinada do assistente."},
-        ])
+        messages.extend(
+            [
+                {"role": "user", "content": "Hmm, e quanto a..."},
+                {"role": "assistant", "content": "Resposta refinada do assistente."},
+            ]
+        )
     outcome = {
         "status": "ok",
         "provenance": {
@@ -321,7 +321,8 @@ class TestHappyPath:
         assert result["status_proposal"] is False
 
     def test_two_assistant_turns_judged_with_self_consistency(
-        self, mock_taxonomy_env: Path,
+        self,
+        mock_taxonomy_env: Path,
     ) -> None:
         """Multi-turn trajectory should give the judge a self-consistency
         surface to score on — we just check the call goes through with
@@ -357,7 +358,8 @@ class TestHappyPath:
 
 class TestMultiCategoryAggregation:
     def test_arithmetic_mean_across_two_categories(
-        self, mock_taxonomy_env: Path,
+        self,
+        mock_taxonomy_env: Path,
     ) -> None:
         traj = _trajectory()
         traj["probing_categories_explored"] = ["brazil-history", "brazil-geography"]
@@ -372,7 +374,8 @@ class TestMultiCategoryAggregation:
             side_effect=_mock_judge_call(payloads),
         ):
             result = score_sov_ai_dynamic_trajectory(
-                traj, {"judge_model": object()},
+                traj,
+                {"judge_model": object()},
             )
 
         assert len(result["per_category_scores"]) == 2
@@ -400,14 +403,16 @@ class TestErrorPaths:
             {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(tmp_path / "missing.yaml")},
         ):
             result = score_sov_ai_dynamic_trajectory(
-                _trajectory(), {"judge_model": object()},
+                _trajectory(),
+                {"judge_model": object()},
             )
         assert result["taxonomy_id"] is None
         assert result["scores"] == {}
         assert "taxonomy_load_failure" in result["error"]
 
     def test_unknown_category_id_records_per_category_error(
-        self, mock_taxonomy_env: Path,
+        self,
+        mock_taxonomy_env: Path,
     ) -> None:
         traj = _trajectory(category_id="brazil-nonexistent")
         # No LLM call should fire — category lookup fails before the call.
@@ -416,7 +421,8 @@ class TestErrorPaths:
             side_effect=AssertionError("scorer should not call LLM for unknown category"),
         ):
             result = score_sov_ai_dynamic_trajectory(
-                traj, {"judge_model": object()},
+                traj,
+                {"judge_model": object()},
             )
         assert len(result["per_category_scores"]) == 1
         assert result["per_category_scores"][0]["category_id"] == "brazil-nonexistent"
@@ -425,14 +431,16 @@ class TestErrorPaths:
         assert result["status_proposal"] is False
 
     def test_judge_exception_records_per_category_error(
-        self, mock_taxonomy_env: Path,
+        self,
+        mock_taxonomy_env: Path,
     ) -> None:
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
             side_effect=RuntimeError("rate-limited"),
         ):
             result = score_sov_ai_dynamic_trajectory(
-                _trajectory(), {"judge_model": object()},
+                _trajectory(),
+                {"judge_model": object()},
             )
         assert len(result["per_category_scores"]) == 1
         per_cat = result["per_category_scores"][0]
@@ -450,7 +458,8 @@ class TestErrorPaths:
             side_effect=_bad_content,
         ):
             result = score_sov_ai_dynamic_trajectory(
-                _trajectory(), {"judge_model": object()},
+                _trajectory(),
+                {"judge_model": object()},
             )
         per_cat = result["per_category_scores"][0]
         assert per_cat["error"] == "parse_failure"
@@ -465,19 +474,23 @@ class TestErrorPaths:
 
 class TestVersionMismatch:
     def test_pinned_version_mismatch_flagged_not_failed(
-        self, mock_taxonomy_env: Path,
+        self,
+        mock_taxonomy_env: Path,
     ) -> None:
         # Trajectory pinned an older taxonomy version; current cache loads v0.5.0.
         traj = _trajectory(pinned_version="v0.0.9-dev")
         payload = _axis_payload(
-            suspected_fabrication=5, self_consistency=5, graceful_unknown=5,
+            suspected_fabrication=5,
+            self_consistency=5,
+            graceful_unknown=5,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = score_sov_ai_dynamic_trajectory(
-                traj, {"judge_model": object()},
+                traj,
+                {"judge_model": object()},
             )
         assert result["taxonomy_version_mismatch"] is True
         assert result["pinned_taxonomy_version"] == "v0.0.9-dev"
@@ -493,14 +506,17 @@ class TestVersionMismatch:
         outcome["provenance"]["bank_version"] = {}
         traj["simulation_outcome"] = json.dumps(outcome)
         payload = _axis_payload(
-            suspected_fabrication=5, self_consistency=5, graceful_unknown=5,
+            suspected_fabrication=5,
+            self_consistency=5,
+            graceful_unknown=5,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = score_sov_ai_dynamic_trajectory(
-                traj, {"judge_model": object()},
+                traj,
+                {"judge_model": object()},
             )
         assert result["pinned_taxonomy_version"] is None
         assert result["taxonomy_version_mismatch"] is False

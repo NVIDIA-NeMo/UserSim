@@ -298,15 +298,9 @@ def compute_behavioral_profile(
     """
     ocean = _extract_ocean(persona)
 
-    patience = _clamp(
-        0.5 + 0.3 * ocean["agreeableness"] - 0.3 * ocean["neuroticism"]
-    )
-    verbosity = _clamp(
-        0.3 + 0.35 * ocean["extraversion"] + 0.2 * ocean["openness"]
-    )
-    cooperativeness = _clamp(
-        0.3 + 0.5 * ocean["agreeableness"] + 0.1 * ocean["conscientiousness"]
-    )
+    patience = _clamp(0.5 + 0.3 * ocean["agreeableness"] - 0.3 * ocean["neuroticism"])
+    verbosity = _clamp(0.3 + 0.35 * ocean["extraversion"] + 0.2 * ocean["openness"])
+    cooperativeness = _clamp(0.3 + 0.5 * ocean["agreeableness"] + 0.1 * ocean["conscientiousness"])
     tech_literacy = _infer_tech_literacy(persona, locale)
 
     education = str(persona.get("education_level", ""))
@@ -365,8 +359,8 @@ def _build_chat_realism(language: str, probe_type: str) -> str:
             "no bullet lists, no numbered lists, no tables.\n"
             "- Keep each reply SHORT — 1 to 4 sentences is typical for a chat message.\n"
             "- Focus on ONE thing per message: one question, one reaction, one concern.\n"
-            + style +
-            "- You are the person ASKING for help. You do NOT have the answers.\n"
+            + style
+            + "- You are the person ASKING for help. You do NOT have the answers.\n"
             "- When the assistant asks for details, provide them naturally. "
             "It is OK to share IDs, reference numbers, short lists of names, "
             "dates, or other structured data when the workflow requires it.\n"
@@ -385,8 +379,8 @@ def _build_chat_realism(language: str, probe_type: str) -> str:
         "no tables, no horizontal rules (---), no bullet lists with dashes.\n"
         "- Keep each reply SHORT — 1 to 4 sentences is typical for a chat message.\n"
         "- Focus on ONE thing per message: one question, one reaction, one concern.\n"
-        + style +
-        "- You are the person ASKING for help. You do NOT have the answers. "
+        + style
+        + "- You are the person ASKING for help. You do NOT have the answers. "
         "Never provide information, data, analysis, or explanations — that is "
         "the assistant's job.\n"
         "- When the assistant asks for details (names, dates, numbers, preferences), "
@@ -402,6 +396,7 @@ def _build_chat_realism(language: str, probe_type: str) -> str:
         "messages are being written.\n"
         "</CHAT_REALISM>"
     )
+
 
 USER_QUERY_INSTRUCTION = (
     "You are chatting with an AI assistant right now. "
@@ -481,12 +476,15 @@ def format_behavioral_profile_for_prompt(
                 lines.append(f"- {desc}")
 
     tech_desc = (
-        "tech-savvy" if profile["tech_literacy"] > 0.7
-        else "not very tech literate" if profile["tech_literacy"] < 0.4
+        "tech-savvy"
+        if profile["tech_literacy"] > 0.7
+        else "not very tech literate"
+        if profile["tech_literacy"] < 0.4
         else "moderately tech literate"
     )
     error_desc = (
-        "prone to typos and ambiguous phrasing" if profile["error_proneness"] > 0.6
+        "prone to typos and ambiguous phrasing"
+        if profile["error_proneness"] > 0.6
         else "generally clear in communication"
     )
 
@@ -512,6 +510,7 @@ def get_conversation_language(locale: str) -> str:
     if locale in LOCALE_LANGUAGE_MAP:
         return LOCALE_LANGUAGE_MAP[locale]
     from usersim.engine.core.locale import india_variant
+
     variant = india_variant(locale)
     if variant is not None:
         return variant.language_display

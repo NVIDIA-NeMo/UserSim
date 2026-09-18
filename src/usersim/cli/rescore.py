@@ -61,9 +61,7 @@ DETERMINISTIC_SCORERS: tuple[str, ...] = (
 _HYBRID_SCORERS: Dict[str, str] = {
     "financial_services": "calls an LLM judge on dynamic-tier rows",
     "safety_agentic": "calls an LLM judge on some sub-protocols",
-    "health_disclosure_concealment": (
-        "runs an LLM realized-behavior audit whenever a judge model is wired"
-    ),
+    "health_disclosure_concealment": ("runs an LLM realized-behavior audit whenever a judge model is wired"),
 }
 
 
@@ -79,30 +77,36 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     p.add_argument(
-        "--evaluations", type=Path, default=_ROOT / "output" / "evaluations",
+        "--evaluations",
+        type=Path,
+        default=_ROOT / "output" / "evaluations",
         help="Evaluations root (default output/evaluations).",
     )
     p.add_argument(
-        "--trajectories", type=Path, default=_ROOT / "output" / "trajectories",
+        "--trajectories",
+        type=Path,
+        default=_ROOT / "output" / "trajectories",
         help="Trajectories root, source of the scorer inputs (default output/trajectories).",
     )
     p.add_argument(
-        "--run", default=None,
+        "--run",
+        default=None,
         help="Run id to patch. Defaults to the most recent run.",
     )
     p.add_argument(
-        "--scorers", nargs="+", required=True,
-        help=(
-            "Deterministic scorers to recompute. One or more of: "
-            + ", ".join(DETERMINISTIC_SCORERS)
-        ),
+        "--scorers",
+        nargs="+",
+        required=True,
+        help=("Deterministic scorers to recompute. One or more of: " + ", ".join(DETERMINISTIC_SCORERS)),
     )
     p.add_argument(
-        "--eval-column", default="assistant_eval",
+        "--eval-column",
+        default="assistant_eval",
         help="Name of the wide eval cell column (default assistant_eval).",
     )
     p.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Report what would change without writing.",
     )
     p.set_defaults(func=run)
@@ -119,10 +123,7 @@ def _validate_scorers(names: List[str]) -> List[str]:
         else:
             bad.append(f"{name!r} — not a known deterministic scorer")
     if bad:
-        raise SystemExit(
-            "cannot rescore:\n  " + "\n  ".join(bad)
-            + "\n\nallowed: " + ", ".join(DETERMINISTIC_SCORERS)
-        )
+        raise SystemExit("cannot rescore:\n  " + "\n  ".join(bad) + "\n\nallowed: " + ", ".join(DETERMINISTIC_SCORERS))
     return list(dict.fromkeys(names))
 
 
@@ -151,11 +152,7 @@ def run(args: argparse.Namespace) -> int:
     # The eval frame is the thing we rewrite, so keep exactly its columns. The
     # trajectory frame is joined in only to feed the scorers.
     eval_columns = list(eval_df.columns)
-    traj_by_id = {
-        str(r["trajectory_id"]): r
-        for _, r in traj_df.iterrows()
-        if r.get("trajectory_id") is not None
-    }
+    traj_by_id = {str(r["trajectory_id"]): r for _, r in traj_df.iterrows() if r.get("trajectory_id") is not None}
 
     n_patched = 0
     n_unmatched = 0

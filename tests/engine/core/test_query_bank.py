@@ -72,9 +72,7 @@ def _minimal_bank_yaml(
     lines.append("    domain: health")
     lines.append("    placeholder: true")
     lines.append("    difficulty: easy")
-    lines.append(
-        '    persona_tags: ["interest:health", "age:any", "education:any"]'
-    )
+    lines.append('    persona_tags: ["interest:health", "age:any", "education:any"]')
     lines.append("    concern: |")
     lines.append("      Test concern describing what failure mode this query is")
     lines.append("      meant to surface.")
@@ -220,23 +218,25 @@ class TestEntryValidation:
         # Append a second entry with the same id. Entry indentation
         # must match what _minimal_bank_yaml uses (2 spaces under
         # `entries:`).
-        extra = "\n".join([
-            "  - id: Q-TEST-001",
-            "    domain: health",
-            "    placeholder: true",
-            "    difficulty: easy",
-            '    persona_tags: ["age:any"]',
-            "    concern: |",
-            "      Same id as the first.",
-            "    renderings:",
-            "      en_US: |",
-            "        duplicate",
-            "      pt_BR: |",
-            "        duplicada",
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
+        extra = "\n".join(
+            [
+                "  - id: Q-TEST-001",
+                "    domain: health",
+                "    placeholder: true",
+                "    difficulty: easy",
+                '    persona_tags: ["age:any"]',
+                "    concern: |",
+                "      Same id as the first.",
+                "    renderings:",
+                "      en_US: |",
+                "        duplicate",
+                "      pt_BR: |",
+                "        duplicada",
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
+        )
         path = _write_bank(tmp_path, _minimal_bank_yaml(extra_entries=extra))
         with pytest.raises(QueryBankError, match="duplicate query id"):
             load_query_bank(path)
@@ -261,9 +261,7 @@ class TestEntryValidation:
 
     def test_missing_concern_rejected(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
-            "    concern: |\n"
-            "      Test concern describing what failure mode this query is\n"
-            "      meant to surface.",
+            "    concern: |\n      Test concern describing what failure mode this query is\n      meant to surface.",
             "    concern: ''",
         )
         path = _write_bank(tmp_path, text)
@@ -289,7 +287,8 @@ class TestEntryValidation:
             load_query_bank(path)
 
     def test_non_placeholder_with_placeholder_source_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "placeholder: true",
@@ -347,9 +346,7 @@ class TestRenderingsCrossProduct:
                   last_reviewed: "2026-04-20"
             """).strip()
         path = _write_bank(tmp_path, bank_yaml)
-        with pytest.raises(
-            QueryBankError, match="missing rendering for locale"
-        ):
+        with pytest.raises(QueryBankError, match="missing rendering for locale"):
             load_query_bank(path)
 
     def test_opt_out_skips_locale_check(self, tmp_path: Path) -> None:
@@ -390,7 +387,8 @@ class TestRenderingsCrossProduct:
         assert q.renderings_opted_out == ("pt_BR", "ja_JP")
 
     def test_locale_in_both_renderings_and_opt_out_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         bank_yaml = textwrap.dedent("""
             schema_version: "v0.1"
@@ -480,9 +478,7 @@ class TestRenderingsCrossProduct:
                   last_reviewed: "2026-04-20"
             """).strip()
         path = _write_bank(tmp_path, bank_yaml)
-        with pytest.raises(
-            QueryBankError, match="not in the bank's declared locales"
-        ):
+        with pytest.raises(QueryBankError, match="not in the bank's declared locales"):
             load_query_bank(path)
 
 
@@ -528,21 +524,18 @@ class TestPersonaTagMatching:
         bank = load_query_bank(path)
         # Q-TEST-001 has age:any + education:any + interest:health.
         # A persona with the right interest matches via wildcards.
-        ms = bank.matching_persona_tags(
-            ["interest:health", "age:18-44", "education:tertiary"]
-        )
+        ms = bank.matching_persona_tags(["interest:health", "age:18-44", "education:tertiary"])
         assert len(ms) == 1
 
     def test_missing_required_interest_no_match(self, tmp_path: Path) -> None:
         path = _write_bank(tmp_path, _minimal_bank_yaml())
         bank = load_query_bank(path)
-        ms = bank.matching_persona_tags(
-            ["interest:music", "age:18-44", "education:tertiary"]
-        )
+        ms = bank.matching_persona_tags(["interest:music", "age:18-44", "education:tertiary"])
         assert len(ms) == 0
 
     def test_persona_wildcard_satisfies_specific_tag(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Bank entry requires age:45-64. A persona carrying age:any
         # (a wildcard from the persona side, used in tests) should
@@ -575,7 +568,8 @@ class TestPersonaTagMatching:
         assert len(ms) == 1
 
     def test_specific_tag_not_satisfied_returns_no_match(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         bank_yaml = textwrap.dedent("""
             schema_version: "v0.1"
@@ -630,10 +624,13 @@ class TestCacheAndDefault:
 
     def test_reset_drops_cache(self, tmp_path: Path) -> None:
         a = _write_bank(
-            tmp_path / "a", _minimal_bank_yaml(bank_id="a"),
+            tmp_path / "a",
+            _minimal_bank_yaml(bank_id="a"),
         )
         b = _write_bank(
-            tmp_path / "b", _minimal_bank_yaml(bank_id="b"), name="bank.yaml",
+            tmp_path / "b",
+            _minimal_bank_yaml(bank_id="b"),
+            name="bank.yaml",
         )
         with patch.dict(os.environ, {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": str(a)}):
             assert load_query_bank_default().bank_id == "a"
@@ -664,15 +661,14 @@ class TestShippedSampleBank:
         assert set(sample_bank.locales) == set(SHIPPED_LOCALES)
 
     def test_every_query_has_rendering_for_every_locale(
-        self, sample_bank: QueryBank,
+        self,
+        sample_bank: QueryBank,
     ) -> None:
         # The shipped sample doesn't use renderings_opted_out — every
         # query should support every locale. Catches accidental drift.
         for q in sample_bank.queries:
             for loc in sample_bank.locales:
-                assert q.supports_locale(loc), (
-                    f"shipped sample query {q.id} has no rendering for {loc}"
-                )
+                assert q.supports_locale(loc), f"shipped sample query {q.id} has no rendering for {loc}"
 
     def test_reviewed_queries_have_native_renderings(self, sample_bank: QueryBank) -> None:
         # Generated bracket-label rows are intentionally placeholders;
@@ -697,8 +693,14 @@ class TestShippedSampleBank:
         # Catch accidental domain renames; the sample is documented
         # as covering the beta matched-pair domain matrix.
         assert set(sample_bank.domains) == {
-            "health", "public-services", "civic", "tech", "finance",
-            "education", "employment", "housing-consumer",
+            "health",
+            "public-services",
+            "civic",
+            "tech",
+            "finance",
+            "education",
+            "employment",
+            "housing-consumer",
         }
 
     def test_provenance_summary_smoke(self, sample_bank: QueryBank) -> None:

@@ -296,17 +296,17 @@ def score_sov_ai_facts_trajectory(
     # a native per-variant bank is used if it has been authored).
     from usersim.engine.core.fact_bank import default_fact_bank_path
     from usersim.engine.core.locale import asset_locale
-    bank_locale = asset_locale(
-        locale, exists=lambda l: default_fact_bank_path(l).exists()
-    )
+
+    bank_locale = asset_locale(locale, exists=lambda l: default_fact_bank_path(l).exists())
 
     try:
         bank = load_fact_bank_for_locale(bank_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to load bank "
-            "for locale=%s (bank_locale=%s): %s",
-            locale, bank_locale, e,
+            "  |-- evaluator/scorers.sov_ai_facts: failed to load bank for locale=%s (bank_locale=%s): %s",
+            locale,
+            bank_locale,
+            e,
         )
         return {
             "judge_alias": judge_alias,
@@ -320,15 +320,15 @@ def score_sov_ai_facts_trajectory(
         }
 
     pinned_version = _pinned_bank_version(trajectory, locale)
-    bank_version_mismatch = (
-        pinned_version is not None and pinned_version != bank.bank_version
-    )
+    bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
             "  |-- evaluator/scorers.sov_ai_facts: trajectory pinned "
             "bank_version=%s but current loaded bank is %s for locale=%s — "
             "reporting drift flag on this row",
-            pinned_version, bank.bank_version, locale,
+            pinned_version,
+            bank.bank_version,
+            locale,
         )
 
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
@@ -431,9 +431,11 @@ def _score_one_fact(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: judge %r raised on "
-            "fact %s: %s: %s",
-            judge_alias, fact.id, type(e).__name__, e,
+            "  |-- evaluator/scorers.sov_ai_facts: judge %r raised on fact %s: %s: %s",
+            judge_alias,
+            fact.id,
+            type(e).__name__,
+            e,
         )
         return _error_result(
             fact=fact,
@@ -446,12 +448,13 @@ def _score_one_fact(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to parse "
-            "structured output for fact %s",
+            "  |-- evaluator/scorers.sov_ai_facts: failed to parse structured output for fact %s",
             fact.id,
         )
         return _error_result(
-            fact=fact, judge_alias=judge_alias, error="parse_failure",
+            fact=fact,
+            judge_alias=judge_alias,
+            error="parse_failure",
         )
 
     scores: Dict[str, Dict[str, Any]] = {}
@@ -494,11 +497,13 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
             val = cell.get("score")
             if not isinstance(val, (int, float)):
                 continue
-            entries.append({
-                "score": float(val),
-                "tag": entry.get("fact_id") or entry.get("fact_category") or "",
-                "reasoning": str(cell.get("reasoning") or ""),
-            })
+            entries.append(
+                {
+                    "score": float(val),
+                    "tag": entry.get("fact_id") or entry.get("fact_category") or "",
+                    "reasoning": str(cell.get("reasoning") or ""),
+                }
+            )
         if not entries:
             out[axis] = {"score": None, "reasoning": "no per-fact scores", "n": 0}
             continue
@@ -506,7 +511,10 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
         out[axis] = {
             "score": mean,
             "reasoning": _compose_aggregate_reasoning(
-                entries, mean, unit_singular="fact", unit_plural="facts",
+                entries,
+                mean,
+                unit_singular="fact",
+                unit_plural="facts",
             ),
             "n": len(entries),
         }
@@ -528,15 +536,15 @@ def _compose_aggregate_reasoning(
             return f"[{only['tag']}] {only['reasoning']}" if only["tag"] else only["reasoning"]
         return (
             f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'"
-            if only["tag"] else f"score={_score_text(only['score'])}"
+            if only["tag"]
+            else f"score={_score_text(only['score'])}"
         )
     sorted_entries = sorted(entries, key=lambda e: (e["score"], not e["reasoning"]))
     worst_with_text = [e for e in sorted_entries if e["reasoning"]][:2]
     if not worst_with_text:
         return f"Mean {mean} across {n} {unit_plural}."
     bullets = "".join(
-        f"\n• \"{e['tag'] or '?'}\" (score={_score_text(e['score'])}): {e['reasoning']}"
-        for e in worst_with_text
+        f'\n• "{e["tag"] or "?"}" (score={_score_text(e["score"])}): {e["reasoning"]}' for e in worst_with_text
     )
     return f"Mean {mean} across {n} {unit_plural}. Lowest scoring:{bullets}"
 

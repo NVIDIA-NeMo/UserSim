@@ -437,9 +437,7 @@ if __name__ == "__main__":
         action = "Checking" if args.check else "Processing"
         print(f"\n📂 {action} repository root")
 
-        processed, updated, skipped, files_needing_update = main(
-            repo_path, check_only=args.check, files=root_files
-        )
+        processed, updated, skipped, files_needing_update = main(repo_path, check_only=args.check, files=root_files)
 
         total_processed += processed
         total_updated += updated

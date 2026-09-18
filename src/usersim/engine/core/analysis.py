@@ -29,11 +29,7 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
         if not scores_raw:
             continue
         try:
-            scores = (
-                json.loads(scores_raw)
-                if isinstance(scores_raw, str)
-                else scores_raw
-            )
+            scores = json.loads(scores_raw) if isinstance(scores_raw, str) else scores_raw
         except (json.JSONDecodeError, TypeError):
             continue
         if not isinstance(scores, dict):
@@ -49,9 +45,7 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
             "persona_age_bin": row.get("persona_age_bin", ""),
             "persona_education_level": row.get("persona_education_level", ""),
             "persona_occupation": row.get("persona_occupation", ""),
-            "persona_country": (
-                row.get("persona_country") or row.get("persona_region", "")
-            ),
+            "persona_country": (row.get("persona_country") or row.get("persona_region", "")),
         }
         for axis, val in scores.items():
             if val is not None and isinstance(val, dict):

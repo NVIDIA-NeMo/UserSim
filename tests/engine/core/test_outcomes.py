@@ -59,17 +59,27 @@ class TestSimulationOutcomeSchema:
         outcome = SimulationOutcome()
         d = outcome.to_dict()
         expected = {
-            "status", "failure_class", "failure_attribution", "failure_detail",
-            "n_turns", "n_tool_calls",
-            "n_user_query_attempts", "n_user_followup_retries",
-            "n_assistant_inline_failures", "n_assistant_retries",
+            "status",
+            "failure_class",
+            "failure_attribution",
+            "failure_detail",
+            "n_turns",
+            "n_tool_calls",
+            "n_user_query_attempts",
+            "n_user_followup_retries",
+            "n_assistant_inline_failures",
+            "n_assistant_retries",
             "n_api_response_rerolls",
-            "n_fourth_wall_triggers", "n_user_role_violations",
+            "n_fourth_wall_triggers",
+            "n_user_role_violations",
             "n_user_language_violations",
-            "warnings", "early_stop",
-            "per_model_input_tokens", "per_model_output_tokens",
+            "warnings",
+            "early_stop",
+            "per_model_input_tokens",
+            "per_model_output_tokens",
             "per_model_calls",
-            "wall_clock_s_by_alias", "wall_clock_s",
+            "wall_clock_s_by_alias",
+            "wall_clock_s",
             "provenance",
         }
         assert set(d.keys()) == expected
@@ -172,7 +182,10 @@ class TestBuilderCounters:
         sim-time capture would always be empty anyway)."""
         b = OutcomeBuilder()
         b.record_call(
-            "assistant_model", input_tokens=10, output_tokens=80, elapsed_s=1.0,
+            "assistant_model",
+            input_tokens=10,
+            output_tokens=80,
+            elapsed_s=1.0,
         )
         out = b.finalize(OutcomeStatus.OK)
         # The field is gone -- not even an empty dict.
@@ -221,21 +234,25 @@ class TestStatusPromotion:
 class TestTraces:
     def test_add_and_serialize(self) -> None:
         b = OutcomeBuilder()
-        b.add_trace(SimulationTrace(
-            kind=TraceKind.USER_QUERY_GATE,
-            turn_idx=0,
-            call_idx=0,
-            model_alias="judge_model",
-            rating="success",
-            detail="ok",
-        ))
-        b.add_trace(SimulationTrace(
-            kind=TraceKind.API_RESPONSE_REROLL,
-            turn_idx=1,
-            call_idx=2,
-            model_alias="api_response_model",
-            detail="invalid json",
-        ))
+        b.add_trace(
+            SimulationTrace(
+                kind=TraceKind.USER_QUERY_GATE,
+                turn_idx=0,
+                call_idx=0,
+                model_alias="judge_model",
+                rating="success",
+                detail="ok",
+            )
+        )
+        b.add_trace(
+            SimulationTrace(
+                kind=TraceKind.API_RESPONSE_REROLL,
+                turn_idx=1,
+                call_idx=2,
+                model_alias="api_response_model",
+                detail="invalid json",
+            )
+        )
         traces = b.traces()
         assert len(traces) == 2
         blob = serialize_traces(traces)
@@ -278,10 +295,17 @@ class TestMakeFailedWithOutcome:
     def test_side_effect_columns_present(self) -> None:
         result = make_failed("whatever")
         for key in [
-            "user_query", "conversation_messages", "conversation_metadata",
-            "conversation_status", "num_turns",
-            "num_tool_calls", "tool_subset", "disclosure_style",
-            "user_interaction_style", "simulation_outcome", "simulation_traces",
+            "user_query",
+            "conversation_messages",
+            "conversation_metadata",
+            "conversation_status",
+            "num_turns",
+            "num_tool_calls",
+            "tool_subset",
+            "disclosure_style",
+            "user_interaction_style",
+            "simulation_outcome",
+            "simulation_traces",
         ]:
             assert key in result
 

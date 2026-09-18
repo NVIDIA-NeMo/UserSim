@@ -34,9 +34,7 @@ def seed_dir(tmp_path):
 
     ed_base = tmp_path / "general_educational" / "subjects" / "base"
     ed_base.mkdir(parents=True)
-    (ed_base / "subjects.json").write_text(
-        json.dumps([{"type": "math", "description": "Mathematics"}])
-    )
+    (ed_base / "subjects.json").write_text(json.dumps([{"type": "math", "description": "Mathematics"}]))
 
     return tmp_path
 
@@ -60,9 +58,7 @@ class TestLoadSeeds:
         with pytest.raises(FileNotFoundError):
             load_seeds("en_US", "no_such_probe", "topics", seed_dir)
 
-    def test_locale_without_translation_falls_back_to_base(
-        self, seed_dir: Path
-    ) -> None:
+    def test_locale_without_translation_falls_back_to_base(self, seed_dir: Path) -> None:
         seeds = load_seeds("ja_JP", "general_open_ended", "topics", seed_dir)
         assert len(seeds) == 2
 

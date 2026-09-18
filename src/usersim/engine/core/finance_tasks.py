@@ -102,6 +102,7 @@ def _fill_slots(text: str, params: Dict[str, Any]) -> str:
     def repl(m: "re.Match[str]") -> str:
         key = m.group(1)
         return str(params.get(key, m.group(0)))
+
     return _SLOT_RE.sub(repl, text)
 
 
@@ -125,9 +126,7 @@ def sample_params(template: TaskTemplate, rng: random.Random) -> Dict[str, Any]:
     return params
 
 
-def derive_gold(
-    template: TaskTemplate, params: Dict[str, Any], account_state: Dict[str, Any]
-) -> Optional[GoldSpec]:
+def derive_gold(template: TaskTemplate, params: Dict[str, Any], account_state: Dict[str, Any]) -> Optional[GoldSpec]:
     """Deterministically derive the gold spec for a Tier-1 instance.
 
     For the current template shapes the gold is declared on the template and
@@ -153,9 +152,7 @@ def build_instance(
     seed: Optional[int] = None,
 ) -> FinanceInstance:
     """Instantiate ``template`` (grounded in ``institution``) for one conversation."""
-    rng = random.Random(
-        _instance_seed(persona_uuid, f"{institution.institution_id}:{template.id}", seed)
-    )
+    rng = random.Random(_instance_seed(persona_uuid, f"{institution.institution_id}:{template.id}", seed))
     params = sample_params(template, rng)
     account_state = _fill_obj(dict(template.account_state), params)
     # Pick one of the template's opening phrasings (deterministic per instance)
@@ -242,16 +239,11 @@ def select_institution(
     if not insts:
         return None
     wanted = set(persona_tags)
-    matched = [
-        inst for inst in insts
-        if any(_tags_match_pair(t.persona_tags, wanted) for t in inst.templates)
-    ]
+    matched = [inst for inst in insts if any(_tags_match_pair(t.persona_tags, wanted) for t in inst.templates)]
     candidates = matched or insts
     rng = random.Random(_instance_seed(persona_uuid or "anon", "select_inst", seed))
     if type_weights:
-        weights = [
-            max(1e-6, float(type_weights.get(inst.type, 1.0))) for inst in candidates
-        ]
+        weights = [max(1e-6, float(type_weights.get(inst.type, 1.0))) for inst in candidates]
         return rng.choices(candidates, weights=weights, k=1)[0]
     return rng.choice(candidates)
 
@@ -272,14 +264,12 @@ def select_institution_and_template(
     templates of that tier (e.g. ``"verifiable"``).
     """
     all_pairs: List[Tuple[Institution, TaskTemplate]] = [
-        (inst, tpl) for inst in bank.institutions for tpl in inst.templates
-        if tier is None or tpl.tier == tier
+        (inst, tpl) for inst in bank.institutions for tpl in inst.templates if tier is None or tpl.tier == tier
     ]
     if not all_pairs:
         return None
     matched: List[Tuple[Institution, TaskTemplate]] = [
-        (inst, tpl) for inst, tpl in all_pairs
-        if _tags_match_pair(tpl.persona_tags, set(persona_tags))
+        (inst, tpl) for inst, tpl in all_pairs if _tags_match_pair(tpl.persona_tags, set(persona_tags))
     ]
     candidates = matched or all_pairs
     rng = random.Random(_instance_seed(persona_uuid or "anon", "select", seed))

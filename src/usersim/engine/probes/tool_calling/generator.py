@@ -116,9 +116,7 @@ def _normalize_tool_list(tools_raw: Any) -> list[dict]:
     else:
         parsed = tools_raw
     if not isinstance(parsed, (list, tuple)):
-        raise ValueError(
-            "tool_calling: tools must be a JSON array or JSON-encoded array"
-        )
+        raise ValueError("tool_calling: tools must be a JSON array or JSON-encoded array")
     tools = list(parsed)
     if not all(isinstance(tool, dict) for tool in tools):
         raise ValueError("tool_calling: every tools entry must be an object")
@@ -155,8 +153,7 @@ def _collect_prior_tool_responses(conversation_messages: list) -> str:
         return ""
     return (
         "\n\nPrior tool responses in this conversation (maintain consistency "
-        "with any data already returned):\n"
-        + "\n---\n".join(tool_responses[-5:])
+        "with any data already returned):\n" + "\n---\n".join(tool_responses[-5:])
     )
 
 
@@ -205,8 +202,7 @@ def _simulate_tool_response(
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """Tool-calling probe.
 
@@ -234,27 +230,22 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         if not getattr(cfg, "tools_column", None):
             raise ValueError("tool_calling: cfg.tools_column not configured")
         if cfg.tools_column not in self._data:
-            raise ValueError(
-                f"tool_calling: column {cfg.tools_column!r} missing in data"
-            )
+            raise ValueError(f"tool_calling: column {cfg.tools_column!r} missing in data")
 
         tools_raw = self._data[cfg.tools_column]
         all_tools = _normalize_tool_list(tools_raw)
         self.tool_subset = random.sample(
-            all_tools, min(cfg.max_tools, len(all_tools)),
+            all_tools,
+            min(cfg.max_tools, len(all_tools)),
         )
 
         theme = _derive_tool_theme(self._data, cfg)
-        logger.info(
-            f"  |-- tool_calling: {len(self.tool_subset)} tools, "
-            f"theme={theme.get('type', '?')}"
-        )
+        logger.info(f"  |-- tool_calling: {len(self.tool_subset)} tools, theme={theme.get('type', '?')}")
 
         self.openai_tools = _format_tools_for_api(self.tool_subset)
         self.tools_for_judge = format_tools_for_prompt(self.tool_subset)
         self.verifier = ToolCallVerifier()
         self._theme = theme
-
 
     def get_user_system_prompt(self) -> str:
         return render_prompt(
@@ -320,43 +311,52 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         synthesis pass. ``name`` is the parsed function name; ``tc`` is the
         raw tool-call dict the verifier + simulator need.
         """
-        tc_ok, tc_err = self.verifier.verify_single_tool_call(
-            tc, self.tool_subset
+        tc_ok, tc_err = self.verifier.verify_single_tool_call(tc, self.tool_subset)
+        state.metadata.setdefault("verifier_results", []).append(
+            {
+                "tool_name": name,
+                "valid": tc_ok,
+                "error": tc_err,
+            }
         )
-        state.metadata.setdefault("verifier_results", []).append({
-            "tool_name": name,
-            "valid": tc_ok,
-            "error": tc_err,
-        })
-        state.outcome.add_trace(SimulationTrace(
-            kind=TraceKind.TOOL_CALL_VERIFIER,
-            turn_idx=turn_idx,
-            call_idx=call_idx,
-            rating="success" if tc_ok else "failure",
-            detail=(tc_err if not tc_ok else f"{name} validated"),
-            extra={"tool_name": name},
-        ))
+        state.outcome.add_trace(
+            SimulationTrace(
+                kind=TraceKind.TOOL_CALL_VERIFIER,
+                turn_idx=turn_idx,
+                call_idx=call_idx,
+                rating="success" if tc_ok else "failure",
+                detail=(tc_err if not tc_ok else f"{name} validated"),
+                extra={"tool_name": name},
+            )
+        )
 
         if not tc_ok:
-            return json.dumps({
-                "error": f"Invalid tool call: {tc_err}",
-                "status": 400,
-            })
+            return json.dumps(
+                {
+                    "error": f"Invalid tool call: {tc_err}",
+                    "status": 400,
+                }
+            )
 
         tool_spec = _find_tool_spec(name, self.tool_subset)
         if tool_spec:
             simulated_response, did_reroll = _simulate_tool_response(
-                models, tool_spec, tc, state.messages,
+                models,
+                tool_spec,
+                tc,
+                state.messages,
             )
             if did_reroll:
                 state.outcome.inc_api_response_rerolls()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.API_RESPONSE_REROLL,
-                    turn_idx=turn_idx,
-                    call_idx=call_idx,
-                    model_alias=MODEL_API_RESPONSE,
-                    detail=f"invalid JSON on first attempt for {name}",
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.API_RESPONSE_REROLL,
+                        turn_idx=turn_idx,
+                        call_idx=call_idx,
+                        model_alias=MODEL_API_RESPONSE,
+                        detail=f"invalid JSON on first attempt for {name}",
+                    )
+                )
         else:
             simulated_response = json.dumps({"error": f"Unknown tool: {name}"})
 
@@ -373,18 +373,14 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         the trajectory-evaluator's ``tool_use`` scorer."""
         num_tool_calls = len(state.metadata.get("tools_called", []))
         if num_tool_calls == 0:
-            logger.info(
-                "  |-- tool_calling: sim_status=False — zero successful tool calls"
-            )
+            logger.info("  |-- tool_calling: sim_status=False — zero successful tool calls")
             return False
         return True
 
     def build_result_extras(self, state: ConversationState) -> dict:
         return {
             "num_tool_calls": len(state.metadata.get("tools_called", [])),
-            "tool_subset": json.dumps(
-                self.tool_subset, ensure_ascii=False, default=str
-            ),
+            "tool_subset": json.dumps(self.tool_subset, ensure_ascii=False, default=str),
         }
 
 
@@ -415,9 +411,7 @@ def simulate_tool_calling(
         logger.warning("  |-- tool_calling: tools_column not configured")
         return make_failed("tools_column not configured")
     if cfg.tools_column not in data:
-        logger.warning(
-            f"  |-- tool_calling: column '{cfg.tools_column}' not found in data"
-        )
+        logger.warning(f"  |-- tool_calling: column '{cfg.tools_column}' not found in data")
         return make_failed(f"tools_column '{cfg.tools_column}' missing in data")
 
     probe = ToolCallingProbe(

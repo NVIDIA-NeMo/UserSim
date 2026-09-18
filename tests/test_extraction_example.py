@@ -168,9 +168,7 @@ def extract_pairwise_examples(
     """
     out: List[Dict[str, Any]] = []
     enriched = joined.copy()
-    enriched["_score"] = enriched["assistant_eval"].apply(
-        lambda c: _per_axis_ensemble_mean(c, axis)
-    )
+    enriched["_score"] = enriched["assistant_eval"].apply(lambda c: _per_axis_ensemble_mean(c, axis))
     enriched = enriched[enriched["_score"].notna()]
     if enriched.empty:
         return out
@@ -262,11 +260,10 @@ class TestSFTExtraction:
         # evaluator_df is built from trajectory_df and shares all columns,
         # so the join is effectively a no-op pass-through. Kept explicit
         # to mirror what the 03 notebook will do with two parquets.
-        return evaluator_df.merge(
-            trajectory_df[["trajectory_id"]], on="trajectory_id", how="inner"
-        ).merge(
+        return evaluator_df.merge(trajectory_df[["trajectory_id"]], on="trajectory_id", how="inner").merge(
             evaluator_df.drop(columns=[c for c in evaluator_df.columns if c == "trajectory_id"]),
-            left_index=True, right_index=True,
+            left_index=True,
+            right_index=True,
             suffixes=("", "_dup"),
         )
 
@@ -354,10 +351,12 @@ def _make_pairwise_fixture():
     # Reuse the existing _outcome / _messages helpers via direct JSON
     # construction so the fixture is self-contained.
     def msgs(u, a):
-        return json.dumps([
-            {"role": "user", "content": u},
-            {"role": "assistant", "content": a},
-        ])
+        return json.dumps(
+            [
+                {"role": "user", "content": u},
+                {"role": "assistant", "content": a},
+            ]
+        )
 
     base_envelope = {
         "judge_aliases": ["judge_a", "judge_b"],
@@ -369,92 +368,123 @@ def _make_pairwise_fixture():
     }
 
     def cell(score_a, score_b):
-        return json.dumps({
-            "envelope": base_envelope,
-            "axes": {
-                "helpfulness": {
-                    "judge_a": {"score": score_a, "reasoning": "x"},
-                    "judge_b": {"score": score_b, "reasoning": "y"},
+        return json.dumps(
+            {
+                "envelope": base_envelope,
+                "axes": {
+                    "helpfulness": {
+                        "judge_a": {"score": score_a, "reasoning": "x"},
+                        "judge_b": {"score": score_b, "reasoning": "y"},
+                    },
                 },
-            },
-            "scorers": {},
-            "skipped": False, "skipped_reason": None,
-        })
+                "scorers": {},
+                "skipped": False,
+                "skipped_reason": None,
+            }
+        )
 
     def outcome():
-        return json.dumps({
-            "status": "ok",
-            "failure_class": None, "failure_attribution": None, "failure_detail": "",
-            "n_turns": 1, "n_tool_calls": 0,
-            "n_user_query_attempts": 1, "n_user_followup_retries": 0,
-            "n_assistant_inline_failures": 0, "n_api_response_rerolls": 0,
-            "n_fourth_wall_triggers": 0, "n_user_role_violations": 0,
-            "warnings": [], "early_stop": False,
-            "per_model_input_tokens": {}, "per_model_output_tokens": {},
-            "per_model_calls": {}, "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-            "provenance": {
-                "code_sha": "abc", "nemotron_personas_version": "v",
-                "scenario_prompt_version": "v1.0", "bank_version": {},
-            },
-        })
+        return json.dumps(
+            {
+                "status": "ok",
+                "failure_class": None,
+                "failure_attribution": None,
+                "failure_detail": "",
+                "n_turns": 1,
+                "n_tool_calls": 0,
+                "n_user_query_attempts": 1,
+                "n_user_followup_retries": 0,
+                "n_assistant_inline_failures": 0,
+                "n_api_response_rerolls": 0,
+                "n_fourth_wall_triggers": 0,
+                "n_user_role_violations": 0,
+                "warnings": [],
+                "early_stop": False,
+                "per_model_input_tokens": {},
+                "per_model_output_tokens": {},
+                "per_model_calls": {},
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+                "provenance": {
+                    "code_sha": "abc",
+                    "nemotron_personas_version": "v",
+                    "scenario_prompt_version": "v1.0",
+                    "bank_version": {},
+                },
+            }
+        )
 
     rows = []
     # Persona A — clear preference (chosen vs rejected)
-    rows.append({
-        "trajectory_id": "tA_high",
-        "persona_uuid": "pA",
-        "probe_family": "general_open_ended", "probe_variant": "default",
-        "locale": "en_US",
-        "assistant_model_id": "assistant_v2",
-        "conversation_messages": msgs("Help me with X.", "Here's a great answer."),
-        "simulation_outcome": outcome(),
-        "assistant_eval": cell(5, 5),
-    })
-    rows.append({
-        "trajectory_id": "tA_low",
-        "persona_uuid": "pA",
-        "probe_family": "general_open_ended", "probe_variant": "default",
-        "locale": "en_US",
-        "assistant_model_id": "assistant_v1",
-        "conversation_messages": msgs("Help me with X.", "I don't know."),
-        "simulation_outcome": outcome(),
-        "assistant_eval": cell(2, 3),
-    })
+    rows.append(
+        {
+            "trajectory_id": "tA_high",
+            "persona_uuid": "pA",
+            "probe_family": "general_open_ended",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "assistant_model_id": "assistant_v2",
+            "conversation_messages": msgs("Help me with X.", "Here's a great answer."),
+            "simulation_outcome": outcome(),
+            "assistant_eval": cell(5, 5),
+        }
+    )
+    rows.append(
+        {
+            "trajectory_id": "tA_low",
+            "persona_uuid": "pA",
+            "probe_family": "general_open_ended",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "assistant_model_id": "assistant_v1",
+            "conversation_messages": msgs("Help me with X.", "I don't know."),
+            "simulation_outcome": outcome(),
+            "assistant_eval": cell(2, 3),
+        }
+    )
 
     # Persona B — identical scores (no informative pair)
-    rows.append({
-        "trajectory_id": "tB_high",
-        "persona_uuid": "pB",
-        "probe_family": "general_open_ended", "probe_variant": "default",
-        "locale": "en_US",
-        "assistant_model_id": "assistant_v2",
-        "conversation_messages": msgs("Question.", "Same answer."),
-        "simulation_outcome": outcome(),
-        "assistant_eval": cell(4, 4),
-    })
-    rows.append({
-        "trajectory_id": "tB_low",
-        "persona_uuid": "pB",
-        "probe_family": "general_open_ended", "probe_variant": "default",
-        "locale": "en_US",
-        "assistant_model_id": "assistant_v1",
-        "conversation_messages": msgs("Question.", "Same answer."),
-        "simulation_outcome": outcome(),
-        "assistant_eval": cell(4, 4),
-    })
+    rows.append(
+        {
+            "trajectory_id": "tB_high",
+            "persona_uuid": "pB",
+            "probe_family": "general_open_ended",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "assistant_model_id": "assistant_v2",
+            "conversation_messages": msgs("Question.", "Same answer."),
+            "simulation_outcome": outcome(),
+            "assistant_eval": cell(4, 4),
+        }
+    )
+    rows.append(
+        {
+            "trajectory_id": "tB_low",
+            "persona_uuid": "pB",
+            "probe_family": "general_open_ended",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "assistant_model_id": "assistant_v1",
+            "conversation_messages": msgs("Question.", "Same answer."),
+            "simulation_outcome": outcome(),
+            "assistant_eval": cell(4, 4),
+        }
+    )
 
     # Persona C — only one trajectory (no pair possible)
-    rows.append({
-        "trajectory_id": "tC_only",
-        "persona_uuid": "pC",
-        "probe_family": "general_open_ended", "probe_variant": "default",
-        "locale": "en_US",
-        "assistant_model_id": "assistant_v2",
-        "conversation_messages": msgs("Solo.", "Answer."),
-        "simulation_outcome": outcome(),
-        "assistant_eval": cell(3, 3),
-    })
+    rows.append(
+        {
+            "trajectory_id": "tC_only",
+            "persona_uuid": "pC",
+            "probe_family": "general_open_ended",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "assistant_model_id": "assistant_v2",
+            "conversation_messages": msgs("Solo.", "Answer."),
+            "simulation_outcome": outcome(),
+            "assistant_eval": cell(3, 3),
+        }
+    )
 
     return pd.DataFrame(rows)
 
@@ -510,9 +540,7 @@ class TestPairwiseExtraction:
         for chosen, rejected in ids:
             chosen_persona = chosen.split("_")[0]
             rejected_persona = rejected.split("_")[0]
-            assert chosen_persona == rejected_persona, (
-                f"pair {chosen}/{rejected} mixes personas across the group key"
-            )
+            assert chosen_persona == rejected_persona, f"pair {chosen}/{rejected} mixes personas across the group key"
 
     def test_record_shape(self, pairwise_fixture):
         out = extract_pairwise_examples(
@@ -523,8 +551,14 @@ class TestPairwiseExtraction:
         )
         for rec in out:
             for k in (
-                "prompt", "chosen", "rejected", "axis", "score_delta",
-                "persona_uuid", "chosen_trajectory_id", "rejected_trajectory_id",
+                "prompt",
+                "chosen",
+                "rejected",
+                "axis",
+                "score_delta",
+                "persona_uuid",
+                "chosen_trajectory_id",
+                "rejected_trajectory_id",
             ):
                 assert k in rec, f"missing key {k}"
             assert rec["score_delta"] > 0

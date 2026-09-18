@@ -161,8 +161,7 @@ class _PickedProbe:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiDynamicProbe(BankBackedProbe):
     """Population-probing dynamic-coverage probe.
 
@@ -217,18 +216,18 @@ class SovAiDynamicProbe(BankBackedProbe):
         # Append the native/romanized language directive for variants only;
         # shipped locales keep their in-language pack byte-for-byte.
         if self._asset_locale != self._locale:
-            directive = language_instruction(
-                get_conversation_language(self._locale), self._locale
-            )
+            directive = language_instruction(get_conversation_language(self._locale), self._locale)
             if directive:
-                self._user_system_prompt = (
-                    f"{self._user_system_prompt}\n\n{directive}"
-                )
+                self._user_system_prompt = f"{self._user_system_prompt}\n\n{directive}"
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
+        self,
+        persona: Dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[_PickedProbe]:
         """Pick the matched category + subtopic_hint for this persona.
 
@@ -280,7 +279,9 @@ class SovAiDynamicProbe(BankBackedProbe):
         state.metadata["taxonomy_version"] = self._task.bank_version
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: ConversationState,
+        self,
+        turn_idx: int,
+        state: ConversationState,
     ) -> List[str]:
         if not self._followup_instruction:
             return []
@@ -294,12 +295,8 @@ class SovAiDynamicProbe(BankBackedProbe):
         if self._task is not None:
             extras["probe_variant"] = self._task.category.id
             # Top-level columns the sov_ai_dynamic scorer reads directly.
-            extras["probing_categories_explored"] = list(
-                state.metadata.get("probing_categories_explored") or []
-            )
-            extras["probing_subtopic_hints_used"] = list(
-                state.metadata.get("probing_subtopic_hints_used") or []
-            )
+            extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])
+            extras["probing_subtopic_hints_used"] = list(state.metadata.get("probing_subtopic_hints_used") or [])
         return extras
 
 
@@ -308,6 +305,7 @@ class SovAiDynamicProbe(BankBackedProbe):
 # ---------------------------------------------------------------------------
 # The substrate's default ``_pin_bank_version`` reads ``bank.bank_version``
 # but the ProbingTaxonomy uses ``taxonomy_version``. Override.
+
 
 def _pin_bank_version_override(self, locale: str) -> None:
     """Pin ``provenance.bank_version[locale]`` from the taxonomy."""
@@ -380,6 +378,7 @@ def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
         OutcomeStatus,
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,

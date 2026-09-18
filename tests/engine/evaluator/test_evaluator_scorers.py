@@ -30,8 +30,11 @@ class TestScorerRegistry:
             scorers_module.get_scorer("nope")
 
     def test_idempotent_re_registration(self) -> None:
-        def a(traj, models): return {"v": 1}
-        def b(traj, models): return {"v": 2}
+        def a(traj, models):
+            return {"v": 1}
+
+        def b(traj, models):
+            return {"v": 2}
 
         scorers_module.register_scorer("x", a)
         scorers_module.register_scorer("x", b)

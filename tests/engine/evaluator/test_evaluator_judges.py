@@ -62,27 +62,33 @@ class TestValidateEnsembleDiversity:
         validate_ensemble_diversity([JudgeSpec(alias="solo", family=JudgeFamily.OPENAI)])
 
     def test_two_distinct_families_pass(self) -> None:
-        validate_ensemble_diversity([
-            JudgeSpec(alias="a", family=JudgeFamily.OPENAI),
-            JudgeSpec(alias="b", family=JudgeFamily.NVIDIA_NEMOTRON),
-        ])
+        validate_ensemble_diversity(
+            [
+                JudgeSpec(alias="a", family=JudgeFamily.OPENAI),
+                JudgeSpec(alias="b", family=JudgeFamily.NVIDIA_NEMOTRON),
+            ]
+        )
 
     def test_same_family_rejected(self) -> None:
         with pytest.raises(EnsembleDiversityError) as exc:
-            validate_ensemble_diversity([
-                JudgeSpec(alias="a", family=JudgeFamily.OPENAI),
-                JudgeSpec(alias="b", family=JudgeFamily.OPENAI),
-            ])
+            validate_ensemble_diversity(
+                [
+                    JudgeSpec(alias="a", family=JudgeFamily.OPENAI),
+                    JudgeSpec(alias="b", family=JudgeFamily.OPENAI),
+                ]
+            )
         assert "distinct families" in str(exc.value).lower()
 
     def test_all_other_rejected_with_helpful_message(self) -> None:
         # Two judges that both resolve to OTHER -> tell the user to set
         # family explicitly.
         with pytest.raises(EnsembleDiversityError) as exc:
-            validate_ensemble_diversity([
-                JudgeSpec(alias="mystery_a"),
-                JudgeSpec(alias="mystery_b"),
-            ])
+            validate_ensemble_diversity(
+                [
+                    JudgeSpec(alias="mystery_a"),
+                    JudgeSpec(alias="mystery_b"),
+                ]
+            )
         assert "set JudgeSpec.family explicitly" in str(exc.value)
 
     def test_resolved_model_ids_disambiguate(self) -> None:

@@ -151,15 +151,11 @@ class AgenticBank:
         return None
 
     def by_sub_protocol(self, sub_protocol: str) -> Tuple[ActionRequest, ...]:
-        return tuple(
-            r for r in self.action_requests if r.sub_protocol == sub_protocol
-        )
+        return tuple(r for r in self.action_requests if r.sub_protocol == sub_protocol)
 
     def for_persona(self, persona_tags: Iterable[str]) -> Tuple[ActionRequest, ...]:
         tags = frozenset(persona_tags)
-        return tuple(
-            r for r in self.action_requests if r.matches_persona(tags)
-        )
+        return tuple(r for r in self.action_requests if r.matches_persona(tags))
 
     def request_ids(self) -> Tuple[str, ...]:
         return tuple(r.id for r in self.action_requests)
@@ -170,9 +166,7 @@ class AgenticBank:
             "bank_version": self.bank_version,
             "schema_version": self.schema_version,
             "n_requests": len(self.action_requests),
-            "n_placeholder_requests": sum(
-                1 for r in self.action_requests if r.placeholder
-            ),
+            "n_placeholder_requests": sum(1 for r in self.action_requests if r.placeholder),
             "sub_protocols": list(self.sub_protocols),
         }
 
@@ -220,6 +214,7 @@ def _default_action_taxonomy_path() -> Path:
     from the packaged asset tree. Resolution is independent of CWD; set
     ``USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`` to override."""
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
 
@@ -242,31 +237,20 @@ def _load_action_taxonomy_names(path: Path) -> FrozenSet[str]:
     with path.open("r", encoding="utf-8") as fh:
         doc = yaml.safe_load(fh)
     if not isinstance(doc, dict):
-        raise AgenticBankError(
-            f"action_taxonomy: {path}: top-level must be a mapping"
-        )
+        raise AgenticBankError(f"action_taxonomy: {path}: top-level must be a mapping")
     entries = doc.get("entries")
     if not isinstance(entries, list):
-        raise AgenticBankError(
-            f"action_taxonomy: {path}: missing top-level `entries` list"
-        )
+        raise AgenticBankError(f"action_taxonomy: {path}: missing top-level `entries` list")
     names: List[str] = []
     for i, e in enumerate(entries):
         if not isinstance(e, dict):
-            raise AgenticBankError(
-                f"action_taxonomy: {path}::entries[{i}]: must be a mapping"
-            )
+            raise AgenticBankError(f"action_taxonomy: {path}::entries[{i}]: must be a mapping")
         name = e.get("name")
         if not isinstance(name, str) or not name:
-            raise AgenticBankError(
-                f"action_taxonomy: {path}::entries[{i}]: missing or "
-                "non-string `name`"
-            )
+            raise AgenticBankError(f"action_taxonomy: {path}::entries[{i}]: missing or non-string `name`")
         names.append(name)
     if len(set(names)) != len(names):
-        raise AgenticBankError(
-            f"action_taxonomy: {path}: duplicate action names"
-        )
+        raise AgenticBankError(f"action_taxonomy: {path}: duplicate action names")
     return frozenset(names)
 
 
@@ -287,7 +271,8 @@ def _action_taxonomy_names() -> FrozenSet[str]:
         _ACTION_TAXONOMY_CACHE[cache_key] = names
         logger.info(
             "action_taxonomy: loaded %d valid action name(s) from %s",
-            len(names), path,
+            len(names),
+            path,
         )
         return names
 
@@ -337,20 +322,14 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
 
     raw_sps = doc.get("sub_protocols")
     if not isinstance(raw_sps, list) or not raw_sps:
-        raise AgenticBankError(
-            f"{src_path}::sub_protocols: must be a non-empty list"
-        )
+        raise AgenticBankError(f"{src_path}::sub_protocols: must be a non-empty list")
     sub_protocols: List[str] = []
     for i, sp in enumerate(raw_sps):
         if not isinstance(sp, str) or not sp.strip():
-            raise AgenticBankError(
-                f"{src_path}::sub_protocols[{i}]: must be a non-empty string"
-            )
+            raise AgenticBankError(f"{src_path}::sub_protocols[{i}]: must be a non-empty string")
         sub_protocols.append(sp.strip())
     if len(set(sub_protocols)) != len(sub_protocols):
-        raise AgenticBankError(
-            f"{src_path}::sub_protocols: contains duplicates: {sub_protocols}"
-        )
+        raise AgenticBankError(f"{src_path}::sub_protocols: contains duplicates: {sub_protocols}")
     sp_set = frozenset(sub_protocols)
 
     raw_tags = doc.get("tags", [])
@@ -360,9 +339,7 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
 
     raw_entries = doc.get("action_requests")
     if not isinstance(raw_entries, list) or not raw_entries:
-        raise AgenticBankError(
-            f"{src_path}::action_requests: must be a non-empty list"
-        )
+        raise AgenticBankError(f"{src_path}::action_requests: must be a non-empty list")
 
     valid_action_names = _action_taxonomy_names()
 
@@ -370,9 +347,7 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
     seen_ids: set[str] = set()
     for idx, raw in enumerate(raw_entries):
         if not isinstance(raw, dict):
-            raise AgenticBankError(
-                f"{src_path}::action_requests[{idx}]: must be a mapping"
-            )
+            raise AgenticBankError(f"{src_path}::action_requests[{idx}]: must be a mapping")
         ar = _build_action_request(
             raw,
             src_path=src_path,
@@ -383,9 +358,7 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
             valid_action_names=valid_action_names,
         )
         if ar.id in seen_ids:
-            raise AgenticBankError(
-                f"{src_path}::{ar.id}: duplicate action_request id"
-            )
+            raise AgenticBankError(f"{src_path}::{ar.id}: duplicate action_request id")
         seen_ids.add(ar.id)
         requests.append(ar)
 
@@ -405,7 +378,10 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
             "agentic_bank: loaded %s v%s with %d placeholder action request(s) "
             "of %d total — downstream readers (capability dashboard, scorers) "
             "treat placeholder-tainted trajectories as preview-only",
-            bank_id, bank_version, n_placeholder, len(bank.action_requests),
+            bank_id,
+            bank_version,
+            n_placeholder,
+            len(bank.action_requests),
         )
     return bank
 
@@ -432,19 +408,25 @@ def _build_action_request(
 
     placeholder = entry.get("placeholder")
     if not isinstance(placeholder, bool):
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::placeholder: must be a bool, got "
-            f"{type(placeholder).__name__}"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::placeholder: must be a bool, got {type(placeholder).__name__}")
 
     description = _require_localized_in_bank(
-        entry, "description", src_path, ctx=ctx,
+        entry,
+        "description",
+        src_path,
+        ctx=ctx,
     )
     expected_behavior = _require_localized_in_bank(
-        entry, "expected_behavior", src_path, ctx=ctx,
+        entry,
+        "expected_behavior",
+        src_path,
+        ctx=ctx,
     )
     initial_user_prompt = _require_localized_in_bank(
-        entry, "initial_user_prompt", src_path, ctx=ctx,
+        entry,
+        "initial_user_prompt",
+        src_path,
+        ctx=ctx,
     )
 
     # sanctioned_action_name: either a valid taxonomy name OR null
@@ -468,10 +450,7 @@ def _build_action_request(
                 "the action to the taxonomy"
             )
     else:
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::sanctioned_action_name: must be a "
-            "non-empty string or null"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::sanctioned_action_name: must be a non-empty string or null")
 
     tempted_raw = entry.get("tempted_action_name")
     tempted_action_name: Optional[str]
@@ -486,59 +465,46 @@ def _build_action_request(
                 "assets/safety_agentic/action_taxonomy.yaml"
             )
     else:
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::tempted_action_name: must be a non-empty "
-            "string or null/omitted"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::tempted_action_name: must be a non-empty string or null/omitted")
 
     raw_tools = entry.get("simulated_tools")
     if not isinstance(raw_tools, list) or not raw_tools:
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::simulated_tools: must be a non-empty list"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::simulated_tools: must be a non-empty list")
     tools: List[ToolSpec] = []
     seen_tool_names: set[str] = set()
     for ti, raw in enumerate(raw_tools):
         if not isinstance(raw, dict):
-            raise AgenticBankError(
-                f"{src_path}::{ctx}::simulated_tools[{ti}]: must be a mapping"
-            )
-        tname = _require_str(
-            raw, "name", src_path, ctx=f"{ctx}::simulated_tools[{ti}]"
-        )
+            raise AgenticBankError(f"{src_path}::{ctx}::simulated_tools[{ti}]: must be a mapping")
+        tname = _require_str(raw, "name", src_path, ctx=f"{ctx}::simulated_tools[{ti}]")
         tdesc = _require_str(
-            raw, "description", src_path,
+            raw,
+            "description",
+            src_path,
             ctx=f"{ctx}::simulated_tools[{ti}]::({tname})",
         )
         params = raw.get("parameters", {})
         if not isinstance(params, dict):
             raise AgenticBankError(
-                f"{src_path}::{ctx}::simulated_tools::{tname}::parameters: "
-                "must be a JSON-Schema-shaped mapping"
+                f"{src_path}::{ctx}::simulated_tools::{tname}::parameters: must be a JSON-Schema-shaped mapping"
             )
         if tname in seen_tool_names:
-            raise AgenticBankError(
-                f"{src_path}::{ctx}::simulated_tools::{tname}: duplicate "
-                "tool name"
-            )
+            raise AgenticBankError(f"{src_path}::{ctx}::simulated_tools::{tname}: duplicate tool name")
         seen_tool_names.add(tname)
-        tools.append(ToolSpec(
-            name=tname.strip(), description=tdesc.strip(), parameters=params,
-        ))
+        tools.append(
+            ToolSpec(
+                name=tname.strip(),
+                description=tdesc.strip(),
+                parameters=params,
+            )
+        )
 
     raw_responses = entry.get("mock_tool_responses", {}) or {}
     if not isinstance(raw_responses, dict):
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::mock_tool_responses: must be a mapping "
-            "(or omit)"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::mock_tool_responses: must be a mapping (or omit)")
     mock_responses: Dict[str, MockToolResponse] = {}
     for tname, raw in raw_responses.items():
         if not isinstance(tname, str) or not tname:
-            raise AgenticBankError(
-                f"{src_path}::{ctx}::mock_tool_responses: keys must be "
-                "non-empty tool-name strings"
-            )
+            raise AgenticBankError(f"{src_path}::{ctx}::mock_tool_responses: keys must be non-empty tool-name strings")
         if tname not in seen_tool_names:
             raise AgenticBankError(
                 f"{src_path}::{ctx}::mock_tool_responses[{tname}]: tool name "
@@ -547,20 +513,22 @@ def _build_action_request(
             )
         if not isinstance(raw, dict):
             raise AgenticBankError(
-                f"{src_path}::{ctx}::mock_tool_responses[{tname}]: must be a "
-                "mapping with role/name/content"
+                f"{src_path}::{ctx}::mock_tool_responses[{tname}]: must be a mapping with role/name/content"
             )
         role = _require_str(
-            raw, "role", src_path,
+            raw,
+            "role",
+            src_path,
             ctx=f"{ctx}::mock_tool_responses::{tname}",
         )
         if role != "tool":
             raise AgenticBankError(
-                f"{src_path}::{ctx}::mock_tool_responses[{tname}]::role: "
-                f"must be 'tool', got {role!r}"
+                f"{src_path}::{ctx}::mock_tool_responses[{tname}]::role: must be 'tool', got {role!r}"
             )
         rname = _require_str(
-            raw, "name", src_path,
+            raw,
+            "name",
+            src_path,
             ctx=f"{ctx}::mock_tool_responses::{tname}",
         )
         if rname != tname:
@@ -569,34 +537,34 @@ def _build_action_request(
                 f"must equal the dict key {tname!r}, got {rname!r}"
             )
         content = _require_str(
-            raw, "content", src_path,
+            raw,
+            "content",
+            src_path,
             ctx=f"{ctx}::mock_tool_responses::{tname}",
         )
         mock_responses[tname] = MockToolResponse(
-            role=role, name=tname, content=content.strip(),
+            role=role,
+            name=tname,
+            content=content.strip(),
         )
 
     raw_persona_tags = entry.get("persona_tags", [])
     if not isinstance(raw_persona_tags, list):
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::persona_tags: must be a list (or omit)"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::persona_tags: must be a list (or omit)")
     persona_tags: List[str] = []
     for ti, t in enumerate(raw_persona_tags):
         if not isinstance(t, str) or not t.strip():
-            raise AgenticBankError(
-                f"{src_path}::{ctx}::persona_tags[{ti}]: must be a "
-                "non-empty string"
-            )
+            raise AgenticBankError(f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty string")
         persona_tags.append(t.strip())
 
     raw_provenance = entry.get("provenance")
     if not isinstance(raw_provenance, dict):
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::provenance: must be a mapping"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::provenance: must be a mapping")
     provenance = _build_provenance(
-        raw_provenance, src_path=src_path, ctx=ctx, placeholder=placeholder,
+        raw_provenance,
+        src_path=src_path,
+        ctx=ctx,
+        placeholder=placeholder,
     )
 
     return ActionRequest(
@@ -630,32 +598,25 @@ def _build_provenance(
             f"{src_path}::{ctx}::provenance::source: 'placeholder' is only "
             "allowed when the entry's placeholder field is true"
         )
-    last_reviewed = _require_str(
-        p, "last_reviewed", src_path, ctx=f"{ctx}::provenance"
-    )
+    last_reviewed = _require_str(p, "last_reviewed", src_path, ctx=f"{ctx}::provenance")
     if not _ISO_DATE.match(last_reviewed):
         raise AgenticBankError(
-            f"{src_path}::{ctx}::provenance::last_reviewed: must be an "
-            f"ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
+            f"{src_path}::{ctx}::provenance::last_reviewed: must be an ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
         )
     raw_refs = p.get("references", [])
     if not isinstance(raw_refs, list):
-        raise AgenticBankError(
-            f"{src_path}::{ctx}::provenance::references: must be a list"
-        )
+        raise AgenticBankError(f"{src_path}::{ctx}::provenance::references: must be a list")
     refs: List[str] = []
     for ri, r in enumerate(raw_refs):
         if not isinstance(r, str) or not r.strip():
-            raise AgenticBankError(
-                f"{src_path}::{ctx}::provenance::references[{ri}]: must be "
-                "a non-empty string"
-            )
+            raise AgenticBankError(f"{src_path}::{ctx}::provenance::references[{ri}]: must be a non-empty string")
         refs.append(r.strip())
     if not placeholder and not refs:
         logger.info(
             "agentic_bank: %s::%s carries placeholder=False but has no "
             "references; consider adding at least one citation",
-            src_path, ctx,
+            src_path,
+            ctx,
         )
     return ActionProvenance(
         source=source.strip(),
@@ -665,17 +626,17 @@ def _build_provenance(
 
 
 def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None,
+    d: Dict[str, Any],
+    key: str,
+    src_path: str,
+    ctx: Optional[str] = None,
 ) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise AgenticBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise AgenticBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise AgenticBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -696,7 +657,8 @@ def _require_localized_in_bank(
         raise AgenticBankError(f"{loc}: missing required field {key!r}")
     try:
         return LocalizedText.from_yaml_value(
-            d[key], field_path=f"{loc}::{key}",
+            d[key],
+            field_path=f"{loc}::{key}",
         )
     except LocalizedTextError as e:
         raise AgenticBankError(str(e)) from e
@@ -719,6 +681,7 @@ def default_agentic_bank_path() -> Path:
     probe name (``safety_agentic``).
     """
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("safety_agentic") / "sample.yaml"
 
 
@@ -748,8 +711,10 @@ def load_agentic_bank_default() -> AgenticBank:
         _AGENTIC_BANK_CACHE[path] = bank
         logger.info(
             "agentic_bank: loaded %s v%s (%d action request(s)) from %s",
-            bank.bank_id, bank.bank_version,
-            len(bank.action_requests), path,
+            bank.bank_id,
+            bank.bank_version,
+            len(bank.action_requests),
+            path,
         )
         return bank
 

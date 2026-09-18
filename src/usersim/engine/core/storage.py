@@ -107,7 +107,7 @@ def list_runs(root: str | Path) -> list[str]:
         if not entry.is_dir():
             continue
         if entry.name.startswith("run="):
-            runs.append(entry.name[len("run="):])
+            runs.append(entry.name[len("run=") :])
         elif entry.name.startswith("locale="):
             has_legacy = True
     if not runs and has_legacy:
@@ -177,15 +177,9 @@ def resolve_run_or_raise(
     available = list_runs(root)
     resolved = resolve_run(root, run)
     if resolved is None:
-        raise FileNotFoundError(
-            f"{label}: no runs under {root}"
-            + (f" (available: {available})" if available else "")
-        )
+        raise FileNotFoundError(f"{label}: no runs under {root}" + (f" (available: {available})" if available else ""))
     if run not in (None, "latest", LEGACY_RUN_ID) and resolved not in available:
-        raise FileNotFoundError(
-            f"{label}={run!r} not found under {root} "
-            f"(available: {available})"
-        )
+        raise FileNotFoundError(f"{label}={run!r} not found under {root} (available: {available})")
     return resolved
 
 
@@ -253,9 +247,7 @@ def write_run_locales_partition(
     Returns the run subroot path.
     """
     if "locale" not in df.columns:
-        raise ValueError(
-            "write_run_locales_partition: dataframe is missing 'locale' column"
-        )
+        raise ValueError("write_run_locales_partition: dataframe is missing 'locale' column")
     locales_seq = list(locales)
     if not locales_seq:
         raise ValueError(
@@ -286,9 +278,7 @@ def write_run_locales_partition(
         for loc in locales_seq:
             locale_dir = subroot / f"locale={_format_partition_value(loc)}"
             if locale_dir.exists():
-                logger.info(
-                    "Overwriting existing locale partition at %s", locale_dir
-                )
+                logger.info("Overwriting existing locale partition at %s", locale_dir)
                 shutil.rmtree(locale_dir)
     subroot.mkdir(parents=True, exist_ok=True)
     if overwrite:
@@ -297,6 +287,7 @@ def write_run_locales_partition(
         # Append: include a writer-id token so concurrent / repeated
         # appends to the same (locale, probe_family) cell don't collide.
         import os
+
         writer_id = f"pid{os.getpid()}"
         write_partitioned_dataset(
             df,
@@ -378,9 +369,7 @@ def write_partitioned_dataset(
     # low-cardinality columns like ``locale`` that pay a per-row
     # dictionary-index cost in the row group).
     partition_cols_list = list(partition_cols)
-    non_partition_cols = [
-        c for c in df.columns if c not in partition_cols_list
-    ]
+    non_partition_cols = [c for c in df.columns if c not in partition_cols_list]
 
     if basename_template is not None:
         # ``{i}`` placeholder lets multiple writers compose without
@@ -399,22 +388,14 @@ def write_partitioned_dataset(
     for group_keys, group_df in grouped:
         if not isinstance(group_keys, tuple):
             group_keys = (group_keys,)
-        path_parts = [
-            f"{col}={_format_partition_value(val)}"
-            for col, val in zip(partition_cols_list, group_keys)
-        ]
+        path_parts = [f"{col}={_format_partition_value(val)}" for col, val in zip(partition_cols_list, group_keys)]
         out_dir = root_path.joinpath(*path_parts)
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / filename
-        if (
-            existing_data_behavior == "overwrite_or_ignore"
-            and out_path.exists()
-        ):
+        if existing_data_behavior == "overwrite_or_ignore" and out_path.exists():
             # Same writer, same partition: overwrite (idempotent rerun).
             pass
-        elif (
-            existing_data_behavior == "error" and out_path.exists()
-        ):
+        elif existing_data_behavior == "error" and out_path.exists():
             raise FileExistsError(out_path)
         # Subset to non-partition columns + write.
         sub_df = group_df[non_partition_cols]
@@ -507,14 +488,12 @@ def read_partitioned_dataset(
         # empty DataFrame so notebooks short-circuit cleanly on a
         # first-run setup.
         import pandas as pd
+
         return pd.DataFrame()
 
     subroot = run_subroot(p, resolved)
     if not subroot.exists():
-        raise FileNotFoundError(
-            f"run={resolved!r} not found under {p} "
-            f"(available: {list_runs(p)})"
-        )
+        raise FileNotFoundError(f"run={resolved!r} not found under {p} (available: {list_runs(p)})")
     p = subroot
 
     # Directory — read as a partitioned dataset, with schema
@@ -545,14 +524,18 @@ def read_partitioned_dataset(
         # reconcile post-hoc schema drift.
         try:
             return _read_fragments_with_cast(
-                initial, unified, columns=columns,
+                initial,
+                unified,
+                columns=columns,
             )
         except Exception:
             # Fallback to the older non-casting path. Lets a user
             # whose dataset doesn't actually have type drift get the
             # cheaper read path; the cast path is slower per-fragment.
             dataset = pads.dataset(
-                str(p), format="parquet", partitioning="hive",
+                str(p),
+                format="parquet",
+                partitioning="hive",
                 schema=unified,
             )
             table = dataset.to_table(columns=columns)
@@ -706,7 +689,8 @@ def _read_fragments_with_cast(initial, unified, *, columns):
 
         # Re-inject partition columns from the fragment path.
         partition_values = _partition_values_from_fragment(
-            frag, partition_fields,
+            frag,
+            partition_fields,
         )
         for field in partition_fields:
             value = partition_values.get(field.name)
@@ -769,9 +753,7 @@ def _read_all_runs(root: Path, *, columns: Optional[List[str]] = None):
     for run_id in runs:
         # If the caller projected `columns`, ensure the synthetic
         # ``run`` column we add is preserved.
-        sub_cols = (
-            list(set(columns) | {"run"}) if columns else None
-        )
+        sub_cols = list(set(columns) | {"run"}) if columns else None
         sub_df = read_partitioned_dataset(root, columns=sub_cols, run=run_id)
         if "run" not in sub_df.columns:
             sub_df["run"] = run_id
@@ -832,10 +814,7 @@ def existing_trajectory_ids(
         import pyarrow.dataset as pads
         import pyarrow.parquet as pq
     except ImportError:
-        logger.debug(
-            "  |-- existing_trajectory_ids: pyarrow unavailable; "
-            "treating output as empty"
-        )
+        logger.debug("  |-- existing_trajectory_ids: pyarrow unavailable; treating output as empty")
         return set()
 
     if p.is_file():
@@ -860,16 +839,15 @@ def existing_trajectory_ids(
                 table = pq.read_table(sp, columns=["trajectory_id"])
             else:
                 dataset = pads.dataset(
-                    str(sp), format="parquet", partitioning="hive",
+                    str(sp),
+                    format="parquet",
+                    partitioning="hive",
                 )
                 if "trajectory_id" not in dataset.schema.names:
                     continue
                 table = dataset.to_table(columns=["trajectory_id"])
         except (KeyError, ValueError) as e:
-            logger.debug(
-                f"  |-- existing_trajectory_ids: column missing in {sp} ({e}); "
-                "treating as empty"
-            )
+            logger.debug(f"  |-- existing_trajectory_ids: column missing in {sp} ({e}); treating as empty")
             continue
         column = table.column("trajectory_id")
         for v in column:
@@ -896,11 +874,14 @@ def materialize_to_temp_file(path: str | Path) -> Path:
 
     df = read_partitioned_dataset(path)
     tmp = tempfile.NamedTemporaryFile(
-        suffix=".parquet", delete=False, prefix="usersim_materialize_",
+        suffix=".parquet",
+        delete=False,
+        prefix="usersim_materialize_",
     )
     tmp.close()
     out = Path(tmp.name)
     import pyarrow as pa
+
     table = pa.Table.from_pandas(df, preserve_index=False)
     pq.write_table(table, out)
     return out
@@ -962,15 +943,14 @@ def write_locale_partition(
     (within the same run id).
     """
     if "locale" not in df.columns:
-        raise ValueError(
-            "write_locale_partition: dataframe is missing 'locale' column"
-        )
+        raise ValueError("write_locale_partition: dataframe is missing 'locale' column")
     locale_mask = df["locale"].astype(str) == str(locale)
     locale_df = df[locale_mask]
     if locale_df.empty:
         return Path(root).resolve()
 
     import os
+
     if writer_id is None:
         writer_id = f"pid{os.getpid()}"
     basename_template = f"part-{{i}}-{locale}-{writer_id}.parquet"
@@ -1005,7 +985,4 @@ def list_partition_keys(
         return []
     dataset = pads.dataset(str(p), format="parquet", partitioning="hive")
     column = dataset.to_table(columns=[partition_col]).column(partition_col)
-    return sorted({
-        v.as_py() for v in column
-        if v.is_valid and v.as_py() is not None
-    })
+    return sorted({v.as_py() for v in column if v.is_valid and v.as_py() is not None})

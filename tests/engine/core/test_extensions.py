@@ -26,7 +26,8 @@ def _fake_entry_points(monkeypatch, *specs: tuple[str, str], group: str = PROBES
     """Advertise ``(name, "module:attr")`` pairs under ``group``."""
     eps = [EntryPoint(name=n, value=v, group=group) for n, v in specs]
     monkeypatch.setattr(
-        _extensions, "entry_points",
+        _extensions,
+        "entry_points",
         lambda group: [e for e in eps if e.group == group],
     )
     clear_extension_cache()
@@ -75,16 +76,23 @@ class TestDiscovery:
         assert load_extensions(PROBES) == (("dumps", json.dumps),)
 
     def test_order_is_by_name_not_install_order(
-        self, monkeypatch, discovery_enabled,
+        self,
+        monkeypatch,
+        discovery_enabled,
     ) -> None:
         """Registry contents must not depend on pip install ordering."""
         _fake_entry_points(
-            monkeypatch, ("zeta", "json:dumps"), ("alpha", "json:loads"),
+            monkeypatch,
+            ("zeta", "json:dumps"),
+            ("alpha", "json:loads"),
         )
         assert [n for n, _ in load_extensions(PROBES)] == ["alpha", "zeta"]
 
     def test_broken_extension_is_skipped_not_fatal(
-        self, monkeypatch, discovery_enabled, caplog,
+        self,
+        monkeypatch,
+        discovery_enabled,
+        caplog,
     ) -> None:
         """One bad package must not make the CLI unusable."""
         _fake_entry_points(
@@ -116,7 +124,10 @@ class TestMergePolicy:
         assert set(merged) == {"builtin", "extra"}
 
     def test_builtin_wins_a_collision(
-        self, monkeypatch, discovery_enabled, caplog,
+        self,
+        monkeypatch,
+        discovery_enabled,
+        caplog,
     ) -> None:
         """Shadowing a shipped probe would change a run's meaning silently."""
         import json
@@ -125,7 +136,9 @@ class TestMergePolicy:
         _fake_entry_points(monkeypatch, ("tool_calling", "json:dumps"))
         with caplog.at_level(logging.WARNING, logger="usersim.engine"):
             merged = merge_extensions(
-                PROBES, {"tool_calling": shipped}, what="probe",
+                PROBES,
+                {"tool_calling": shipped},
+                what="probe",
             )
         assert merged["tool_calling"] is shipped
         assert merged["tool_calling"] is not json.dumps

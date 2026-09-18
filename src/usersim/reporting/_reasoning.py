@@ -154,17 +154,9 @@ def _count_visible_tokens_for_alias(
                 chunks.append(json.dumps(tool_calls, separators=(",", ":")))
         text = "\n".join(chunks)
     elif alias == "user_model":
-        text = "\n".join(
-            m.get("content") or ""
-            for m in msgs
-            if isinstance(m, dict) and m.get("role") == "user"
-        )
+        text = "\n".join(m.get("content") or "" for m in msgs if isinstance(m, dict) and m.get("role") == "user")
     elif alias == "api_response_model":
-        text = "\n".join(
-            m.get("content") or ""
-            for m in msgs
-            if isinstance(m, dict) and m.get("role") == "tool"
-        )
+        text = "\n".join(m.get("content") or "" for m in msgs if isinstance(m, dict) and m.get("role") == "tool")
     else:
         return None
 
@@ -199,9 +191,7 @@ def estimate_reasoning_for_row(
     """
     if alias not in _VISIBLE_OUTPUT_ALIASES:
         return 0, "unavailable"
-    visible = _count_visible_tokens_for_alias(
-        conversation_messages, alias, encoding_name
-    )
+    visible = _count_visible_tokens_for_alias(conversation_messages, alias, encoding_name)
     if visible is None:
         return 0, "unavailable"
     diff = int(output_tokens) - int(visible)

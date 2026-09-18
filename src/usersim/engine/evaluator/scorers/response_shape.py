@@ -94,9 +94,7 @@ MAX_CODE_BLOCK_LINES: int = 5
 # boundary". Combines Latin terminators, Japanese full stop and
 # question/exclamation marks, and the Devanagari danda used in Hindi
 # and other Indian scripts.
-_SENTENCE_TERMINATORS: frozenset[str] = frozenset(
-    [".", "!", "?", "…", "。", "！", "？", "।"]
-)
+_SENTENCE_TERMINATORS: frozenset[str] = frozenset([".", "!", "?", "…", "。", "！", "？", "।"])
 
 # Closing-side characters that we expect to be balanced 1:1 with their
 # opening counterparts. Imbalance suggests truncation.
@@ -118,10 +116,7 @@ def score_response_shape_trajectory(
     )
     if not assistant_messages:
         return _noop(
-            error=(
-                "no assistant turns in conversation_messages — "
-                "response_shape scorer skipped"
-            ),
+            error=("no assistant turns in conversation_messages — response_shape scorer skipped"),
         )
 
     n = len(assistant_messages)
@@ -134,22 +129,22 @@ def score_response_shape_trajectory(
         text = content or ""
         is_trivial = _is_empty_or_trivial(text)
         is_over_formatted = (not is_trivial) and _is_over_formatted(text)
-        is_truncation_suspicion = (
-            (not is_trivial) and _looks_truncated(text)
-        )
+        is_truncation_suspicion = (not is_trivial) and _looks_truncated(text)
         if is_trivial:
             n_trivial += 1
         if is_over_formatted:
             n_over_formatted += 1
         if is_truncation_suspicion:
             n_truncation_suspicion += 1
-        per_turn.append({
-            "turn_idx": idx,
-            "n_chars": len(text),
-            "empty_or_trivial": is_trivial,
-            "over_formatted": is_over_formatted,
-            "truncation_suspicion": is_truncation_suspicion,
-        })
+        per_turn.append(
+            {
+                "turn_idx": idx,
+                "n_chars": len(text),
+                "empty_or_trivial": is_trivial,
+                "over_formatted": is_over_formatted,
+                "truncation_suspicion": is_truncation_suspicion,
+            }
+        )
 
     # Reversed-scale rates: 1.0 = no failures detected.
     empty_rate = 1.0 - (n_trivial / n)
@@ -158,21 +153,22 @@ def score_response_shape_trajectory(
 
     scores = {
         "shape.empty_or_trivial_rate": _score_cell(
-            round(empty_rate, 4), n,
+            round(empty_rate, 4),
+            n,
             _summarize_shape_axis(per_turn, n, "empty_or_trivial", "empty/trivial"),
         ),
         "shape.over_formatted_rate": _score_cell(
-            round(over_formatted_rate, 4), n,
+            round(over_formatted_rate, 4),
+            n,
             _summarize_shape_axis(per_turn, n, "over_formatted", "over-formatted (chat-inappropriate)"),
         ),
         "shape.truncation_suspicion_rate": _score_cell(
-            round(truncation_rate, 4), n,
+            round(truncation_rate, 4),
+            n,
             _summarize_shape_axis(per_turn, n, "truncation_suspicion", "suspected truncation"),
         ),
     }
-    status_proposal = all(
-        c["score"] is not None and c["score"] >= 1.0 for c in scores.values()
-    )
+    status_proposal = all(c["score"] is not None and c["score"] >= 1.0 for c in scores.values())
 
     return {
         "scorer_kind": "deterministic",
@@ -336,10 +332,7 @@ def _summarize_shape_axis(
     flagged = [d for d in per_turn if d.get(flag_key)]
     if not flagged:
         return f"All {n_turns} assistant turn(s) cleared the {label} check."
-    chunks = ", ".join(
-        f"#{d['turn_idx'] + 1} ({d['n_chars']} chars)"
-        for d in flagged[:3]
-    )
+    chunks = ", ".join(f"#{d['turn_idx'] + 1} ({d['n_chars']} chars)" for d in flagged[:3])
     suffix = "" if len(flagged) <= 3 else f" + {len(flagged) - 3} more"
     return (
         f"{len(flagged)}/{n_turns} assistant turn(s) flagged for {label}. "

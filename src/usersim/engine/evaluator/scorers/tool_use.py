@@ -79,10 +79,7 @@ TRAJECTORY_SCORES: List[Score] = [
     ),
     Score(
         name="information_gathering",
-        description=(
-            "Did the model ask for missing info when needed, without "
-            "re-asking for info already provided?"
-        ),
+        description=("Did the model ask for missing info when needed, without re-asking for info already provided?"),
         options={
             1: "Fail — failed to gather or re-asked known info",
             3: "Acceptable — gathered info with some issues",
@@ -247,19 +244,14 @@ def score_tool_use_trajectory(
             },
         )
     except Exception as e:
-        logger.warning(
-            f"  |-- evaluator/scorers.tool_use: judge {judge_alias!r} raised "
-            f"{type(e).__name__}: {e}"
-        )
+        logger.warning(f"  |-- evaluator/scorers.tool_use: judge {judge_alias!r} raised {type(e).__name__}: {e}")
         return {"judge_alias": judge_alias, "scores": {}, "status_proposal": True, "error": f"{type(e).__name__}: {e}"}
 
     content = resp.get("content", "") if isinstance(resp, dict) else ""
     try:
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
-        logger.warning(
-            "  |-- evaluator/scorers.tool_use: failed to parse structured output"
-        )
+        logger.warning("  |-- evaluator/scorers.tool_use: failed to parse structured output")
         return {
             "judge_alias": judge_alias,
             "scores": {s.name: {"score": None, "reasoning": "Parse failure"} for s in TRAJECTORY_SCORES},

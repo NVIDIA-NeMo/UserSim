@@ -44,9 +44,7 @@ class TestExistingTrajectoryIds:
         result = existing_trajectory_ids(tmp_path / "nope.parquet")
         assert result == set()
 
-    def test_parquet_without_trajectory_id_column_returns_empty(
-        self, tmp_path: Path
-    ) -> None:
+    def test_parquet_without_trajectory_id_column_returns_empty(self, tmp_path: Path) -> None:
         path = tmp_path / "no_traj_id.parquet"
         pd.DataFrame({"some_other_col": ["a", "b"]}).to_parquet(path)
         assert existing_trajectory_ids(path) == set()
@@ -59,9 +57,7 @@ class TestExistingTrajectoryIds:
 
     def test_drops_nulls(self, tmp_path: Path) -> None:
         path = tmp_path / "with_nulls.parquet"
-        pd.DataFrame(
-            {"trajectory_id": ["abc1234567890def", None, "feedfacecafe5678"]}
-        ).to_parquet(path)
+        pd.DataFrame({"trajectory_id": ["abc1234567890def", None, "feedfacecafe5678"]}).to_parquet(path)
         result = existing_trajectory_ids(path)
         assert result == {"abc1234567890def", "feedfacecafe5678"}
 
@@ -102,7 +98,10 @@ class TestFilterToMissing:
         existing: set[str] = set()
         candidates = ["d", "b", "c", "a"]
         assert filter_to_missing_trajectory_ids(candidates, existing) == [
-            "d", "b", "c", "a",
+            "d",
+            "b",
+            "c",
+            "a",
         ]
 
     def test_drops_intra_candidate_duplicates(self) -> None:
@@ -111,7 +110,9 @@ class TestFilterToMissing:
         existing: set[str] = set()
         candidates = ["a", "b", "a", "c", "b"]
         assert filter_to_missing_trajectory_ids(candidates, existing) == [
-            "a", "b", "c",
+            "a",
+            "b",
+            "c",
         ]
 
     def test_empty_returns_empty(self) -> None:

@@ -161,9 +161,7 @@ _DEFAULT_TOOL_RELEVANCE_FAILURE = (
 
 # ── Public templates (YAML overrides compiled-in defaults) ────────────────
 
-USER_AGENT_SYSTEM_PROMPT = get_prompt(
-    _SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT
-)
+USER_AGENT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)
 
 # PURE-CAPABILITY-TEST POLICY: default empty.
 #
@@ -179,25 +177,15 @@ USER_AGENT_SYSTEM_PROMPT = get_prompt(
 # A YAML override is still honored (``assistant_system_prompt`` key in
 # the per-locale prompts file) for explicit research-driven exceptions
 # — those should be deliberate, documented, and reviewed.
-ASSISTANT_SYSTEM_PROMPT = get_prompt(
-    _SCENARIO, "assistant_system_prompt", ""
-)
+ASSISTANT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "assistant_system_prompt", "")
 
-TOOL_SIMULATOR_PROMPT = get_prompt(
-    _SCENARIO, "tool_simulator_prompt", _DEFAULT_TOOL_SIMULATOR
-)
+TOOL_SIMULATOR_PROMPT = get_prompt(_SCENARIO, "tool_simulator_prompt", _DEFAULT_TOOL_SIMULATOR)
 
-USER_JUDGE_PROMPT = get_prompt(
-    _SCENARIO, "user_judge_prompt", _DEFAULT_USER_JUDGE
-)
+USER_JUDGE_PROMPT = get_prompt(_SCENARIO, "user_judge_prompt", _DEFAULT_USER_JUDGE)
 
-TOOL_RELEVANCE_SUCCESS = get_prompt(
-    _SCENARIO, "tool_relevance_success", _DEFAULT_TOOL_RELEVANCE_SUCCESS
-)
+TOOL_RELEVANCE_SUCCESS = get_prompt(_SCENARIO, "tool_relevance_success", _DEFAULT_TOOL_RELEVANCE_SUCCESS)
 
-TOOL_RELEVANCE_FAILURE = get_prompt(
-    _SCENARIO, "tool_relevance_failure", _DEFAULT_TOOL_RELEVANCE_FAILURE
-)
+TOOL_RELEVANCE_FAILURE = get_prompt(_SCENARIO, "tool_relevance_failure", _DEFAULT_TOOL_RELEVANCE_FAILURE)
 
 
 # ── Call-time resolution ─────────────────────────────────────────────
@@ -207,6 +195,7 @@ TOOL_RELEVANCE_FAILURE = get_prompt(
 # accessors re-resolve on every call, which is what makes ``--assets-dir`` /
 # ``USERSIM_ASSETS_DIR`` govern prompts the same way it already governs
 # seeds and banks. The constants are kept for callers that import them.
+
 
 def user_agent_system_prompt() -> str:
     return get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)

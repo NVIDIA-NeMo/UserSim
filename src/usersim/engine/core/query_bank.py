@@ -252,39 +252,27 @@ def _build_query_bank(doc: Dict[str, Any], *, src_path: str) -> QueryBank:
 
     raw_locales = doc.get("locales")
     if not isinstance(raw_locales, list) or not raw_locales:
-        raise QueryBankError(
-            f"{src_path}::locales: must be a non-empty list of locale ids"
-        )
+        raise QueryBankError(f"{src_path}::locales: must be a non-empty list of locale ids")
     locales: List[str] = []
     for i, loc in enumerate(raw_locales):
         if not isinstance(loc, str) or not loc.strip():
-            raise QueryBankError(
-                f"{src_path}::locales[{i}]: must be a non-empty string"
-            )
+            raise QueryBankError(f"{src_path}::locales[{i}]: must be a non-empty string")
         locales.append(loc.strip())
     if len(set(locales)) != len(locales):
-        raise QueryBankError(
-            f"{src_path}::locales: contains duplicates: {locales}"
-        )
+        raise QueryBankError(f"{src_path}::locales: contains duplicates: {locales}")
     locales_tuple = tuple(locales)
     locales_set = frozenset(locales_tuple)
 
     raw_domains = doc.get("domains")
     if not isinstance(raw_domains, list) or not raw_domains:
-        raise QueryBankError(
-            f"{src_path}::domains: must be a non-empty list of domain names"
-        )
+        raise QueryBankError(f"{src_path}::domains: must be a non-empty list of domain names")
     domains: List[str] = []
     for i, dom in enumerate(raw_domains):
         if not isinstance(dom, str) or not dom.strip():
-            raise QueryBankError(
-                f"{src_path}::domains[{i}]: must be a non-empty string"
-            )
+            raise QueryBankError(f"{src_path}::domains[{i}]: must be a non-empty string")
         domains.append(dom.strip())
     if len(set(domains)) != len(domains):
-        raise QueryBankError(
-            f"{src_path}::domains: contains duplicates: {domains}"
-        )
+        raise QueryBankError(f"{src_path}::domains: contains duplicates: {domains}")
     domains_tuple = tuple(domains)
     domains_set = frozenset(domains_tuple)
 
@@ -295,17 +283,13 @@ def _build_query_bank(doc: Dict[str, Any], *, src_path: str) -> QueryBank:
 
     raw_entries = doc.get("entries")
     if not isinstance(raw_entries, list) or not raw_entries:
-        raise QueryBankError(
-            f"{src_path}::entries: must be a non-empty list of query entries"
-        )
+        raise QueryBankError(f"{src_path}::entries: must be a non-empty list of query entries")
 
     queries: List[Query] = []
     seen_ids: set[str] = set()
     for idx, entry in enumerate(raw_entries):
         if not isinstance(entry, dict):
-            raise QueryBankError(
-                f"{src_path}::entries[{idx}]: must be a mapping"
-            )
+            raise QueryBankError(f"{src_path}::entries[{idx}]: must be a mapping")
         q = _build_query(
             entry,
             src_path=src_path,
@@ -316,9 +300,7 @@ def _build_query_bank(doc: Dict[str, Any], *, src_path: str) -> QueryBank:
             allowed_domains=domains_set,
         )
         if q.id in seen_ids:
-            raise QueryBankError(
-                f"{src_path}::{q.id}: duplicate query id"
-            )
+            raise QueryBankError(f"{src_path}::{q.id}: duplicate query id")
         seen_ids.add(q.id)
         queries.append(q)
 
@@ -365,36 +347,24 @@ def _build_query(
     domain = _require_str(entry, "domain", src_path, ctx=ctx)
     if domain not in allowed_domains:
         raise QueryBankError(
-            f"{src_path}::{ctx}::domain: {domain!r} is not in the bank's "
-            f"declared domains {sorted(allowed_domains)}"
+            f"{src_path}::{ctx}::domain: {domain!r} is not in the bank's declared domains {sorted(allowed_domains)}"
         )
 
     placeholder = entry.get("placeholder")
     if not isinstance(placeholder, bool):
-        raise QueryBankError(
-            f"{src_path}::{ctx}::placeholder: must be a bool, got "
-            f"{type(placeholder).__name__}"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::placeholder: must be a bool, got {type(placeholder).__name__}")
 
     difficulty = _require_str(entry, "difficulty", src_path, ctx=ctx)
     if difficulty not in ALLOWED_DIFFICULTIES:
-        raise QueryBankError(
-            f"{src_path}::{ctx}::difficulty: {difficulty!r} not in "
-            f"{sorted(ALLOWED_DIFFICULTIES)}"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::difficulty: {difficulty!r} not in {sorted(ALLOWED_DIFFICULTIES)}")
 
     raw_tags = entry.get("persona_tags")
     if not isinstance(raw_tags, list) or not raw_tags:
-        raise QueryBankError(
-            f"{src_path}::{ctx}::persona_tags: must be a non-empty list"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::persona_tags: must be a non-empty list")
     persona_tags: List[str] = []
     for ti, tag in enumerate(raw_tags):
         if not isinstance(tag, str) or not tag.strip():
-            raise QueryBankError(
-                f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty "
-                "string"
-            )
+            raise QueryBankError(f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty string")
         persona_tags.append(tag.strip())
 
     concern = _require_str(entry, "concern", src_path, ctx=ctx)
@@ -406,16 +376,12 @@ def _build_query(
 
     raw_renderings = entry.get("renderings")
     if not isinstance(raw_renderings, dict) or not raw_renderings:
-        raise QueryBankError(
-            f"{src_path}::{ctx}::renderings: must be a non-empty mapping of "
-            "locale → rendering text"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::renderings: must be a non-empty mapping of locale → rendering text")
     renderings: Dict[str, str] = {}
     for loc, text in raw_renderings.items():
         if not isinstance(loc, str):
             raise QueryBankError(
-                f"{src_path}::{ctx}::renderings: keys must be locale id "
-                f"strings, got {type(loc).__name__}"
+                f"{src_path}::{ctx}::renderings: keys must be locale id strings, got {type(loc).__name__}"
             )
         if loc not in allowed_locales:
             raise QueryBankError(
@@ -423,24 +389,16 @@ def _build_query(
                 f"the bank's declared locales {sorted(allowed_locales)}"
             )
         if not isinstance(text, str) or not text.strip():
-            raise QueryBankError(
-                f"{src_path}::{ctx}::renderings[{loc}]: must be a non-empty "
-                "string"
-            )
+            raise QueryBankError(f"{src_path}::{ctx}::renderings[{loc}]: must be a non-empty string")
         renderings[loc] = text.strip()
 
     raw_opt_out = entry.get("renderings_opted_out", [])
     if not isinstance(raw_opt_out, list):
-        raise QueryBankError(
-            f"{src_path}::{ctx}::renderings_opted_out: must be a list (or omit)"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::renderings_opted_out: must be a list (or omit)")
     opted_out: List[str] = []
     for oi, loc in enumerate(raw_opt_out):
         if not isinstance(loc, str) or not loc.strip():
-            raise QueryBankError(
-                f"{src_path}::{ctx}::renderings_opted_out[{oi}]: must be a "
-                "non-empty locale id string"
-            )
+            raise QueryBankError(f"{src_path}::{ctx}::renderings_opted_out[{oi}]: must be a non-empty locale id string")
         if loc not in allowed_locales:
             raise QueryBankError(
                 f"{src_path}::{ctx}::renderings_opted_out[{oi}]: locale "
@@ -449,17 +407,13 @@ def _build_query(
             )
         if loc in renderings:
             raise QueryBankError(
-                f"{src_path}::{ctx}: locale {loc!r} appears in BOTH "
-                "renderings and renderings_opted_out; pick one"
+                f"{src_path}::{ctx}: locale {loc!r} appears in BOTH renderings and renderings_opted_out; pick one"
             )
         opted_out.append(loc)
 
     # Cross-product check: every locale in the bank's `locales` must
     # either have a rendering OR be in renderings_opted_out.
-    missing = [
-        loc for loc in allowed_locales
-        if loc not in renderings and loc not in opted_out
-    ]
+    missing = [loc for loc in allowed_locales if loc not in renderings and loc not in opted_out]
     if missing:
         raise QueryBankError(
             f"{src_path}::{ctx}::renderings: missing rendering for locale(s) "
@@ -470,9 +424,7 @@ def _build_query(
 
     raw_provenance = entry.get("provenance")
     if not isinstance(raw_provenance, dict):
-        raise QueryBankError(
-            f"{src_path}::{ctx}::provenance: must be a mapping"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::provenance: must be a mapping")
     provenance = _build_provenance(
         raw_provenance,
         src_path=src_path,
@@ -508,34 +460,25 @@ def _build_provenance(
             f"{src_path}::{ctx}::provenance::source: 'placeholder' is only "
             "allowed when the entry's placeholder field is true"
         )
-    last_reviewed = _require_str(
-        p, "last_reviewed", src_path, ctx=f"{ctx}::provenance"
-    )
+    last_reviewed = _require_str(p, "last_reviewed", src_path, ctx=f"{ctx}::provenance")
     if not _ISO_DATE.match(last_reviewed):
         raise QueryBankError(
-            f"{src_path}::{ctx}::provenance::last_reviewed: must be an "
-            f"ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
+            f"{src_path}::{ctx}::provenance::last_reviewed: must be an ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
         )
     raw_refs = p.get("references", [])
     if not isinstance(raw_refs, list):
-        raise QueryBankError(
-            f"{src_path}::{ctx}::provenance::references: must be a list of strings"
-        )
+        raise QueryBankError(f"{src_path}::{ctx}::provenance::references: must be a list of strings")
     refs: List[str] = []
     for ri, ref in enumerate(raw_refs):
         if not isinstance(ref, str) or not ref.strip():
-            raise QueryBankError(
-                f"{src_path}::{ctx}::provenance::references[{ri}]: must be a "
-                "non-empty string"
-            )
+            raise QueryBankError(f"{src_path}::{ctx}::provenance::references[{ri}]: must be a non-empty string")
         refs.append(ref.strip())
     if not placeholder and not refs:
         # Non-placeholder entries SHOULD have at least one reference but
         # we don't enforce — log at INFO so a CI run surfaces it as a
         # quality signal without failing the load.
         logger.info(
-            "query_bank: %s::%s carries placeholder=False but has no "
-            "references; consider adding at least one citation",
+            "query_bank: %s::%s carries placeholder=False but has no references; consider adding at least one citation",
             src_path,
             ctx,
         )
@@ -546,18 +489,13 @@ def _build_provenance(
     )
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise QueryBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise QueryBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise QueryBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -582,6 +520,7 @@ def default_query_bank_path() -> Path:
     probe name (``sov_ai_multilingual_parity``).
     """
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("sov_ai_multilingual_parity") / "sample.yaml"
 
 

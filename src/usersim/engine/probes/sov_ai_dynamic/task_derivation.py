@@ -99,7 +99,9 @@ def derive_probe(
     # is identical across every dynamic-tier probe (sov_ai_dynamic +
     # financial_services + future domains).
     return select_category(
-        persona, taxonomy, seed=seed,
+        persona,
+        taxonomy,
+        seed=seed,
         excluded_category_ids=excluded_category_ids,
         hint_rotation_index=hint_rotation_index,
     )

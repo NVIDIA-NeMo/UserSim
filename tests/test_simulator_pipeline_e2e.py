@@ -139,10 +139,7 @@ def _mock_call_llm_side_effect(models, alias, msgs, **kwargs):
     if alias == "judge_model":
         return {
             "role": "assistant",
-            "content": (
-                "<explanation>looks fine</explanation>\n"
-                "<rating>success</rating>"
-            ),
+            "content": ("<explanation>looks fine</explanation>\n<rating>success</rating>"),
         }
     if alias == "summary_model":
         return {"role": "assistant", "content": "no"}
@@ -184,9 +181,7 @@ def _patched_call_llm():
         "usersim.engine.probes.tool_calling.generator.call_llm",
         "usersim.engine.probes.safety_agentic.generator.call_llm",
     )
-    patches = [
-        patch(t, side_effect=_mock_call_llm_side_effect) for t in targets
-    ]
+    patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
     for p in patches:
         p.start()
     try:
@@ -242,7 +237,9 @@ def _cli_built_simulator_config(probe_type: str, locale: str) -> ConversationSim
 
 
 def _synthetic_row_data(
-    probe_type: str, locale: str, cfg: ConversationSimulatorConfig,
+    probe_type: str,
+    locale: str,
+    cfg: ConversationSimulatorConfig,
 ) -> Dict[str, Any]:
     """Build the per-row ``data`` dict that
     ``ConversationSimulatorGenerator.generate(data)`` consumes.
@@ -270,21 +267,11 @@ def _theme_for(probe_type: str) -> str:
     sentinel placeholder ``__not_used__`` (matches the value
     ``cli/_pipeline.py`` uses for non-theme-driven probes)."""
     if probe_type == "tool_calling":
-        return (
-            '{"type": "Weather & Location Lookup", '
-            '"description": "Look up current weather", '
-            '"tool_expected": true}'
-        )
+        return '{"type": "Weather & Location Lookup", "description": "Look up current weather", "tool_expected": true}'
     if probe_type == "general_open_ended":
-        return (
-            '{"type": "general", '
-            '"description": "casual chat about a topic"}'
-        )
+        return '{"type": "general", "description": "casual chat about a topic"}'
     if probe_type == "general_educational":
-        return (
-            '{"type": "math", '
-            '"description": "elementary math help"}'
-        )
+        return '{"type": "math", "description": "elementary math help"}'
     return "__not_used__"
 
 
@@ -333,7 +320,8 @@ def _drive_one_probe(probe_type: str, locale: str) -> Dict[str, Any]:
 
     probe_cls = resolve_probe(probe_type)
     provenance = Provenance(
-        code_sha="test", scenario_prompt_version="v1.0",
+        code_sha="test",
+        scenario_prompt_version="v1.0",
     )
     outcome_builder = OutcomeBuilder(provenance=provenance)
 
@@ -341,9 +329,13 @@ def _drive_one_probe(probe_type: str, locale: str) -> Dict[str, Any]:
     # mocked call_llm doesn't actually inspect (we patch call_llm
     # itself, so the model "client" is never used).
     models = {
-        alias: object() for alias in (
-            "user_model", "assistant_model", "judge_model",
-            "summary_model", "api_response_model",
+        alias: object()
+        for alias in (
+            "user_model",
+            "assistant_model",
+            "judge_model",
+            "summary_model",
+            "api_response_model",
         )
     }
 
@@ -362,7 +354,9 @@ def _drive_one_probe(probe_type: str, locale: str) -> Dict[str, Any]:
                 outcome_builder=outcome_builder,
             )
             result = probe.run_dispatch(
-                models=models, data=data, cfg=cfg,
+                models=models,
+                data=data,
+                cfg=cfg,
             )
     finally:
         set_current_outcome_builder(None)
@@ -427,8 +421,7 @@ def test_probe_constructs_and_dispatches_through_cli_wiring(
 
     # Loop-level invariants every healthy run honours.
     assert result["num_turns"] >= 1, (
-        f"{probe_type}: expected at least 1 user turn; got "
-        f"num_turns={result.get('num_turns')!r}"
+        f"{probe_type}: expected at least 1 user turn; got num_turns={result.get('num_turns')!r}"
     )
     assert "trajectory_id" not in result, (
         # The probe layer doesn't set trajectory_id — that lives in

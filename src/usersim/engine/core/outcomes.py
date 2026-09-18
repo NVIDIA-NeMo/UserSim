@@ -260,9 +260,7 @@ class SimulationOutcome:
         return {
             "status": self.status.value,
             "failure_class": self.failure_class.value if self.failure_class else None,
-            "failure_attribution": (
-                self.failure_attribution.value if self.failure_attribution else None
-            ),
+            "failure_attribution": (self.failure_attribution.value if self.failure_attribution else None),
             "failure_detail": self.failure_detail,
             "n_turns": self.n_turns,
             "n_tool_calls": self.n_tool_calls,
@@ -339,9 +337,7 @@ class OutcomeBuilder:
     """
 
     def __init__(self, provenance: Optional[Provenance] = None) -> None:
-        self._outcome = SimulationOutcome(
-            provenance=provenance or Provenance()
-        )
+        self._outcome = SimulationOutcome(provenance=provenance or Provenance())
         self._traces: List[SimulationTrace] = []
 
     # ── counters ───────────────────────────────────────────────────
@@ -378,9 +374,7 @@ class OutcomeBuilder:
         turn_idx: Optional[int] = None,
         detail: str = "",
     ) -> None:
-        self._outcome.warnings.append(
-            SimulationWarning(kind=kind, turn_idx=turn_idx, detail=detail)
-        )
+        self._outcome.warnings.append(SimulationWarning(kind=kind, turn_idx=turn_idx, detail=detail))
 
     # ── traces ────────────────────────────────────────────────────
 
@@ -399,18 +393,12 @@ class OutcomeBuilder:
         output_tokens: int,
         elapsed_s: float,
     ) -> None:
-        self._outcome.per_model_calls[alias] = (
-            self._outcome.per_model_calls.get(alias, 0) + 1
-        )
-        self._outcome.per_model_input_tokens[alias] = (
-            self._outcome.per_model_input_tokens.get(alias, 0) + input_tokens
-        )
+        self._outcome.per_model_calls[alias] = self._outcome.per_model_calls.get(alias, 0) + 1
+        self._outcome.per_model_input_tokens[alias] = self._outcome.per_model_input_tokens.get(alias, 0) + input_tokens
         self._outcome.per_model_output_tokens[alias] = (
             self._outcome.per_model_output_tokens.get(alias, 0) + output_tokens
         )
-        self._outcome.wall_clock_s_by_alias[alias] = (
-            self._outcome.wall_clock_s_by_alias.get(alias, 0.0) + elapsed_s
-        )
+        self._outcome.wall_clock_s_by_alias[alias] = self._outcome.wall_clock_s_by_alias.get(alias, 0.0) + elapsed_s
 
     # ── finalization ──────────────────────────────────────────────
 
@@ -439,13 +427,10 @@ class OutcomeBuilder:
         self._outcome.failure_detail = failure_detail
         # Promote to COMPLETED_WITH_WARNINGS if we finished OK but
         # accumulated warnings (identifier fabrication, etc).
-        if (
-            status == OutcomeStatus.OK
-            and (
-                self._outcome.warnings
-                or self._outcome.n_user_role_violations > 0
-                or self._outcome.n_user_language_violations > 0
-            )
+        if status == OutcomeStatus.OK and (
+            self._outcome.warnings
+            or self._outcome.n_user_role_violations > 0
+            or self._outcome.n_user_language_violations > 0
         ):
             self._outcome.status = OutcomeStatus.COMPLETED_WITH_WARNINGS
         return self._outcome

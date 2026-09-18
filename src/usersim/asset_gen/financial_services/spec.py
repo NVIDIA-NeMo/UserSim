@@ -36,27 +36,60 @@ from pydantic import (
 # ── Shared vocabulary (region-agnostic) — the enums ARE the contract ───
 
 InstitutionType = Literal[
-    "bank", "neobank", "credit_union", "brokerage", "wealth_manager",
-    "robo_advisor", "retirement_provider", "insurer", "nbfc",
+    "bank",
+    "neobank",
+    "credit_union",
+    "brokerage",
+    "wealth_manager",
+    "robo_advisor",
+    "retirement_provider",
+    "insurer",
+    "nbfc",
 ]
 Domain = Literal[
-    "retail_banking", "cards", "lending_mortgage", "wealth_management",
-    "brokerage_investing", "retirement", "insurance", "payments", "crypto", "tax",
+    "retail_banking",
+    "cards",
+    "lending_mortgage",
+    "wealth_management",
+    "brokerage_investing",
+    "retirement",
+    "insurance",
+    "payments",
+    "crypto",
+    "tax",
 ]
 BrandVoice = Literal["traditional", "neobank", "boutique"]
 DocumentType = Literal[
-    "product_sheet", "fee_schedule", "policy_procedure", "discoverable_tool_doc",
-    "faq", "promo_notice", "disclosure", "eligibility_matrix", "regulatory_note",
+    "product_sheet",
+    "fee_schedule",
+    "policy_procedure",
+    "discoverable_tool_doc",
+    "faq",
+    "promo_notice",
+    "disclosure",
+    "eligibility_matrix",
+    "regulatory_note",
     # Added to diversify the corpus (so it isn't FAQ-dominated at scale) and to
     # create realistic near-neighbor distractors for retrieval:
-    "how_to_guide", "troubleshooting", "security_advisory", "rate_sheet",
-    "terms_conditions", "comparison",
+    "how_to_guide",
+    "troubleshooting",
+    "security_advisory",
+    "rate_sheet",
+    "terms_conditions",
+    "comparison",
 ]
 SideEffectClass = Literal["read_only", "state_changing", "irreversible"]
 TaskType = Literal[
-    "advisory_qa", "product_comparison", "eligibility", "numerical",
-    "transactional", "troubleshooting", "complaint_dispute", "onboarding_kyc",
-    "fraud_triage", "cross_sell_resistance",
+    "advisory_qa",
+    "product_comparison",
+    "eligibility",
+    "numerical",
+    "transactional",
+    "troubleshooting",
+    "complaint_dispute",
+    "onboarding_kyc",
+    "fraud_triage",
+    "cross_sell_resistance",
 ]
 TaskTier = Literal["verifiable", "dynamic"]
 
@@ -92,17 +125,29 @@ INSTITUTION_DOMAINS: Dict[str, frozenset] = {
 }
 
 # Not tied to a model field, but part of the introspectable ontology.
-INFORMATION_FORMATS: frozenset = frozenset({
-    "prose", "table", "bulleted", "qa", "stepwise", "decision_tree", "form",
-})
-SOURCE_AUTHORITIES: frozenset = frozenset({"official", "marketing", "community"})
-PERSONA_TAG_PREFIXES: frozenset = frozenset({
-    "region", "age", "occupation-family", "education", "interest",
-    "financial-literacy",
-})
-_PERSONA_TAG_RE = re.compile(
-    r"^(" + "|".join(sorted(PERSONA_TAG_PREFIXES)) + r"):[a-zA-Z0-9_\-+]+$"
+INFORMATION_FORMATS: frozenset = frozenset(
+    {
+        "prose",
+        "table",
+        "bulleted",
+        "qa",
+        "stepwise",
+        "decision_tree",
+        "form",
+    }
 )
+SOURCE_AUTHORITIES: frozenset = frozenset({"official", "marketing", "community"})
+PERSONA_TAG_PREFIXES: frozenset = frozenset(
+    {
+        "region",
+        "age",
+        "occupation-family",
+        "education",
+        "interest",
+        "financial-literacy",
+    }
+)
+_PERSONA_TAG_RE = re.compile(r"^(" + "|".join(sorted(PERSONA_TAG_PREFIXES)) + r"):[a-zA-Z0-9_\-+]+$")
 
 
 class RegionSpecError(ValueError):
@@ -110,6 +155,7 @@ class RegionSpecError(ValueError):
 
 
 # ── Models ─────────────────────────────────────────────────────────────
+
 
 class ProductVariable(BaseModel):
     """A typed product value (e.g. a fee or rate) the generator must state exactly."""
@@ -225,9 +271,7 @@ def common_operations_for_type(
 ) -> Tuple[Tuple[str, SideEffectClass], ...]:
     """(name, side_effect_class) pairs every institution of ``institution_type``
     offers: the universal set plus any type-specific additions."""
-    return COMMON_UNIVERSAL_OPERATIONS + COMMON_TYPE_OPERATIONS.get(
-        institution_type, ()
-    )
+    return COMMON_UNIVERSAL_OPERATIONS + COMMON_TYPE_OPERATIONS.get(institution_type, ())
 
 
 class TaskTemplate(BaseModel):
@@ -242,18 +286,13 @@ class TaskTemplate(BaseModel):
     def _valid_persona_tags(cls, v: List[str]) -> List[str]:
         for tag in v:
             if not isinstance(tag, str) or not _PERSONA_TAG_RE.match(tag):
-                raise ValueError(
-                    f"persona_tag {tag!r} violates ontology prefixes "
-                    f"{sorted(PERSONA_TAG_PREFIXES)}"
-                )
+                raise ValueError(f"persona_tag {tag!r} violates ontology prefixes {sorted(PERSONA_TAG_PREFIXES)}")
         return v
 
     @model_validator(mode="after")
     def _verifiable_needs_gold(self) -> "TaskTemplate":
         if self.tier == "verifiable" and not self.gold_tool_sequence:
-            raise ValueError(
-                f"{self.id}: verifiable template needs a gold_tool_sequence"
-            )
+            raise ValueError(f"{self.id}: verifiable template needs a gold_tool_sequence")
         return self
 
 
@@ -281,9 +320,7 @@ class Institution(BaseModel):
         existing = {t.name for t in self.tool_taxonomy}
         for name, side_effect in common_operations_for_type(self.type):
             if name not in existing:
-                self.tool_taxonomy.append(
-                    Tool(name=name, discoverable=True, side_effect_class=side_effect)
-                )
+                self.tool_taxonomy.append(Tool(name=name, discoverable=True, side_effect_class=side_effect))
                 existing.add(name)
         return self
 
@@ -293,8 +330,7 @@ class Institution(BaseModel):
         bad = [d for d in self.domains if d not in allowed]
         if bad:
             raise ValueError(
-                f"{self.id}: a {self.type!r} may not operate in domains {bad}; "
-                f"allowed for this type: {sorted(allowed)}"
+                f"{self.id}: a {self.type!r} may not operate in domains {bad}; allowed for this type: {sorted(allowed)}"
             )
         return self
 
@@ -340,9 +376,15 @@ class RegulatorContext(BaseModel):
 #: ``full_name`` / ``date_of_birth`` are universal; the rest are region-specific
 #: national identifiers (e.g. India's PAN, issued by the income-tax department
 #: and near-universally used for financial KYC).
-IDENTITY_FIELDS: frozenset = frozenset({
-    "full_name", "date_of_birth", "pan", "aadhaar_last4", "national_id_last4",
-})
+IDENTITY_FIELDS: frozenset = frozenset(
+    {
+        "full_name",
+        "date_of_birth",
+        "pan",
+        "aadhaar_last4",
+        "national_id_last4",
+    }
+)
 
 #: Region-agnostic default: name + date of birth, which every market accepts.
 DEFAULT_IDENTITY_REQUIRED_FIELDS: Tuple[str, ...] = ("full_name", "date_of_birth")
@@ -370,8 +412,7 @@ class IdentityVerification(BaseModel):
         unknown = sorted(set(v) - IDENTITY_FIELDS)
         if unknown:
             raise ValueError(
-                f"identity_verification.required_fields: unknown field(s) {unknown} "
-                f"(known: {sorted(IDENTITY_FIELDS)})"
+                f"identity_verification.required_fields: unknown field(s) {unknown} (known: {sorted(IDENTITY_FIELDS)})"
             )
         return v
 
@@ -455,9 +496,7 @@ class DocTitleVocabulary(BaseModel):
         ):
             value = getattr(self, field)
             if value and slot not in value:
-                raise ValueError(
-                    f"doc_titles.{field} = {value!r} must contain {slot}"
-                )
+                raise ValueError(f"doc_titles.{field} = {value!r} must contain {slot}")
         return self
 
 
@@ -484,9 +523,7 @@ class RegionSpec(BaseModel):
     number_format: Optional[str] = None
     privacy_regime: Optional[str] = None
     #: Optional; omitted means the region-agnostic name + DOB default.
-    identity_verification: IdentityVerification = Field(
-        default_factory=IdentityVerification
-    )
+    identity_verification: IdentityVerification = Field(default_factory=IdentityVerification)
     #: Optional per-domain label for the account the simulator's read tools report,
     #: in this region's own product vocabulary (US: "checking account"; India:
     #: "savings account"). Region data rather than code, because naming an account
@@ -519,8 +556,7 @@ class RegionSpec(BaseModel):
         unknown = sorted(set(v) - INSTITUTION_TYPES)
         if unknown:
             raise ValueError(
-                f"concept_guidance: unknown institution type(s) {unknown} "
-                f"(known: {sorted(INSTITUTION_TYPES)})"
+                f"concept_guidance: unknown institution type(s) {unknown} (known: {sorted(INSTITUTION_TYPES)})"
             )
         return v
 
@@ -529,10 +565,7 @@ class RegionSpec(BaseModel):
     def _known_label_domains(cls, v: Dict[str, str]) -> Dict[str, str]:
         unknown = sorted(set(v) - DOMAINS)
         if unknown:
-            raise ValueError(
-                f"account_labels: unknown domain(s) {unknown} "
-                f"(known: {sorted(DOMAINS)})"
-            )
+            raise ValueError(f"account_labels: unknown domain(s) {unknown} (known: {sorted(DOMAINS)})")
         return v
 
     @field_validator("region", "locale", "currency")
@@ -561,6 +594,7 @@ class RegionSpec(BaseModel):
 
 # ── Loading / validation entry points (stable public surface) ──────────
 
+
 def _validate(raw: Any, *, src: str) -> RegionSpec:
     try:
         return RegionSpec.model_validate(raw)
@@ -578,9 +612,7 @@ def _is_id_keyed(items: Any) -> bool:
     ``gold_tool_sequence`` (plain strings) and ``tool_taxonomy`` (keyed by
     ``name``, not ``id``) do not, and so replace wholesale.
     """
-    return bool(items) and all(
-        isinstance(e, dict) and "id" in e for e in items
-    )
+    return bool(items) and all(isinstance(e, dict) and "id" in e for e in items)
 
 
 def _merge_overlay(base: Any, overlay: Any, *, path: str = "") -> Any:
@@ -601,11 +633,7 @@ def _merge_overlay(base: Any, overlay: Any, *, path: str = "") -> Any:
         for k, v in overlay.items():
             out[k] = _merge_overlay(base.get(k), v, path=f"{path}.{k}" if path else k)
         return out
-    if (
-        isinstance(base, list)
-        and isinstance(overlay, list)
-        and _is_id_keyed(base)
-    ):
+    if isinstance(base, list) and isinstance(overlay, list) and _is_id_keyed(base):
         if not _is_id_keyed(overlay):
             raise RegionSpecError(
                 f"{path or '<list>'}: the base list is keyed by 'id', so every "
@@ -635,15 +663,11 @@ def load_region_spec(path: str | Path) -> RegionSpec:
     while raw.get("extends"):
         base_locale = str(raw.pop("extends"))
         if base_locale in seen:
-            raise RegionSpecError(
-                f"{p}: circular extends chain via {base_locale!r} ({' -> '.join(seen)})"
-            )
+            raise RegionSpecError(f"{p}: circular extends chain via {base_locale!r} ({' -> '.join(seen)})")
         seen.append(base_locale)
         base_path = p.parent / f"{base_locale}.yaml"
         if not base_path.exists():
-            raise RegionSpecError(
-                f"{p}: extends {base_locale!r} but {base_path} does not exist"
-            )
+            raise RegionSpecError(f"{p}: extends {base_locale!r} but {base_path} does not exist")
         base_raw, _ = _read_spec_yaml(base_path)
         # The overlay wins; the base may itself extend another spec.
         raw = _merge_overlay(base_raw, raw)

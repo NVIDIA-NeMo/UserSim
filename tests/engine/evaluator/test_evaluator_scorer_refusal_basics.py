@@ -92,9 +92,11 @@ class TestShortCircuit:
         result = score_refusal_basics_trajectory(
             {
                 "locale": "en_US",
-                "conversation_messages": json.dumps([
-                    {"role": "user", "content": "Hi"},
-                ]),
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "Hi"},
+                    ]
+                ),
             },
             {},
         )
@@ -225,9 +227,7 @@ class TestCannedPhraseDetection:
             _trajectory(locale="en_US", assistant_messages=[phrase]),
             {},
         )
-        assert (
-            result["scores"]["refusal.canned_phrase_rate"]["score"] == 0.0
-        )
+        assert result["scores"]["refusal.canned_phrase_rate"]["score"] == 0.0
 
     def test_clean_refusal_no_canned_flagged(self) -> None:
         result = score_refusal_basics_trajectory(
@@ -239,9 +239,7 @@ class TestCannedPhraseDetection:
             ),
             {},
         )
-        assert (
-            result["scores"]["refusal.canned_phrase_rate"]["score"] == 1.0
-        )
+        assert result["scores"]["refusal.canned_phrase_rate"]["score"] == 1.0
 
 
 # ---------------------------------------------------------------------------

@@ -59,7 +59,7 @@ _RELEASES: dict[Tuple[str, str], Tuple[str, str]] = {
     # (system, machine) -> (zip_filename, sha256_hex)
     # SHAs taken from the NGC CLI 4.8.2 release notes:
     # https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/4.8.2/files
-    ("Linux", "x86_64"):  ("ngccli_linux.zip", "8f12ed29aaa49be96e059439f993a990b953a709b152550f062d5190e21afafa"),
+    ("Linux", "x86_64"): ("ngccli_linux.zip", "8f12ed29aaa49be96e059439f993a990b953a709b152550f062d5190e21afafa"),
     ("Linux", "aarch64"): ("ngccli_arm64.zip", "0243568105b0472dc2dd96fb985c59eb5f0a49913025988b7c4eec68a5c0b5dc"),
 }
 
@@ -170,8 +170,7 @@ def ensure_ngc_cli(
         # blocking download; logger.info-only would silence this for
         # callers (notebook + plain CLI invocation) without -v.
         print(
-            f"Downloading NGC CLI {NGC_VERSION} ({zip_filename}, ~60 MB) "
-            f"from {url} ...",
+            f"Downloading NGC CLI {NGC_VERSION} ({zip_filename}, ~60 MB) from {url} ...",
             file=sys.stderr,
             flush=True,
         )
@@ -266,8 +265,7 @@ def ensure_ngc_org() -> str | None:
 
     if shutil.which("ngc") is None:
         print(
-            "NGC CLI not on PATH; cannot discover org. "
-            "Run `usersim setup-ngc` first.",
+            "NGC CLI not on PATH; cannot discover org. Run `usersim setup-ngc` first.",
             file=sys.stderr,
         )
         return None
@@ -276,7 +274,7 @@ def ensure_ngc_org() -> str | None:
         print(
             "NGC_CLI_API_KEY not set; cannot discover org. Can be generated at "
             "https://org.ngc.nvidia.com/account/api-keys. Then run:\n"
-            "    export NGC_CLI_API_KEY=\"<your-ngc-key>\"\n"
+            '    export NGC_CLI_API_KEY="<your-ngc-key>"\n'
             "    usersim setup-ngc\n"
             "See docs/personas.md for details.",
             file=sys.stderr,
@@ -440,7 +438,5 @@ def _verify_install() -> None:
         )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as exc:
         stderr = getattr(exc, "stderr", "") or ""
-        raise RuntimeError(
-            f"NGC CLI install verification failed: {exc}. stderr={stderr!r}"
-        ) from exc
+        raise RuntimeError(f"NGC CLI install verification failed: {exc}. stderr={stderr!r}") from exc
     logger.info("ngc --version: %s", (result.stdout or "").strip())

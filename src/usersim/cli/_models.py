@@ -152,8 +152,7 @@ def load_models_config(path: str | Path) -> ModelsConfig:
     raw_models = doc.get("models", [])
     if not raw_models:
         raise ConfigError(
-            f"{p} has no [[models]] entries — at least user_model + "
-            "assistant_model + judge_model are required"
+            f"{p} has no [[models]] entries — at least user_model + assistant_model + judge_model are required"
         )
     models = tuple(_to_model_spec(d, source=p) for d in raw_models)
 
@@ -212,7 +211,9 @@ def _to_model_spec(d: Dict[str, Any], *, source: Path) -> ModelSpec:
             "cli/model_catalog.py:INFERENCE_DEFAULTS -- "
             "usersim project defaults will apply. Add an entry "
             "to the catalog if you want consistent params across runs.",
-            source.name, alias, model,
+            source.name,
+            alias,
+            model,
         )
 
     # TOML has no null literal, so a row cannot write ``temperature = None``
@@ -258,22 +259,25 @@ def _to_model_spec(d: Dict[str, Any], *, source: Path) -> ModelSpec:
     )
 
 
-def require_aliases(
-    config: ModelsConfig, *, required: Tuple[str, ...], context: str
-) -> None:
+def require_aliases(config: ModelsConfig, *, required: Tuple[str, ...], context: str) -> None:
     """Raise ``ConfigError`` if any required alias is absent."""
     have = set(config.aliases())
     missing = [a for a in required if a not in have]
     if missing:
         raise ConfigError(
-            f"models config is missing required aliases for {context}: {missing}; "
-            f"declared aliases: {sorted(have)}"
+            f"models config is missing required aliases for {context}: {missing}; declared aliases: {sorted(have)}"
         )
 
 
-_OVERRIDE_KNOWN_KEYS = frozenset({
-    "model", "temperature", "top_p", "max_tokens", "extra_body",
-})
+_OVERRIDE_KNOWN_KEYS = frozenset(
+    {
+        "model",
+        "temperature",
+        "top_p",
+        "max_tokens",
+        "extra_body",
+    }
+)
 
 
 def parse_cli_model_overrides(pairs: Optional[List[str]]) -> Dict[str, str]:
@@ -311,9 +315,7 @@ def parse_cli_parallel_overrides(pairs: Optional[List[str]]) -> Dict[str, int]:
     return out
 
 
-def apply_parallel_overrides(
-    config: ModelsConfig, overrides: Dict[str, int]
-) -> ModelsConfig:
+def apply_parallel_overrides(config: ModelsConfig, overrides: Dict[str, int]) -> ModelsConfig:
     """Return a new ``ModelsConfig`` with ``max_parallel_requests`` swapped per alias.
 
     Unlike ``apply_model_overrides`` (which re-resolves the whole spec), this only
@@ -327,11 +329,9 @@ def apply_parallel_overrides(
     have = set(config.aliases())
     missing = [a for a in overrides if a not in have]
     if missing:
-        raise ConfigError(f"--max-parallel targets unknown alias(es): {missing}; "
-                          f"declared aliases: {sorted(have)}")
+        raise ConfigError(f"--max-parallel targets unknown alias(es): {missing}; declared aliases: {sorted(have)}")
     new_models = tuple(
-        dataclasses.replace(m, max_parallel_requests=overrides[m.alias])
-        if m.alias in overrides else m
+        dataclasses.replace(m, max_parallel_requests=overrides[m.alias]) if m.alias in overrides else m
         for m in config.models
     )
     return dataclasses.replace(config, models=new_models)
@@ -431,8 +431,7 @@ def apply_model_overrides(
     unknown = [a for a in overrides if a not in have_aliases]
     if unknown:
         raise ConfigError(
-            f"model overrides target unknown alias(es) {unknown}; "
-            f"declared aliases: {sorted(have_aliases)}"
+            f"model overrides target unknown alias(es) {unknown}; declared aliases: {sorted(have_aliases)}"
         )
 
     # Normalize each override to the dict form upfront so the per-spec
@@ -481,9 +480,7 @@ def apply_model_overrides(
     )
     # Pre-compute the provider used by externally-routed (custom) aliases.
     # The first custom provider declared in the models config.
-    external_provider: Optional[str] = (
-        config.providers[0].name if config.providers else None
-    )
+    external_provider: Optional[str] = config.providers[0].name if config.providers else None
 
     new_specs: list[ModelSpec] = []
     for spec in config.models:
@@ -513,7 +510,9 @@ def apply_model_overrides(
                     "old spec. Add the new model to INFERENCE_DEFAULTS "
                     "(or set extra_body explicitly on the override) "
                     "to silence this warning.",
-                    spec.alias, new_model, sorted(old_extra_body.keys()),
+                    spec.alias,
+                    new_model,
+                    sorted(old_extra_body.keys()),
                 )
             elif not extra_body_in_override:
                 logger.warning(
@@ -522,7 +521,8 @@ def apply_model_overrides(
                     "temperature / top_p / max_tokens are kept from the "
                     "old spec. Add the new model to INFERENCE_DEFAULTS "
                     "to pick up its native sampling defaults.",
-                    spec.alias, new_model,
+                    spec.alias,
+                    new_model,
                 )
             # If extra_body IS in the dict-form override, the user is
             # taking explicit responsibility -- no warning needed.
@@ -547,9 +547,12 @@ def apply_model_overrides(
             )
         if new_provider != spec.provider:
             logger.info(
-                "model override: alias=%r model=%r -> %r, "
-                "provider auto-routed %r -> %r (%s tier)",
-                spec.alias, spec.model, new_model, spec.provider, new_provider,
+                "model override: alias=%r model=%r -> %r, provider auto-routed %r -> %r (%s tier)",
+                spec.alias,
+                spec.model,
+                new_model,
+                spec.provider,
+                new_provider,
                 "self-hosted" if is_self_hosted else "external",
             )
 
@@ -559,18 +562,9 @@ def apply_model_overrides(
         # explicit ``None`` / ``{}``) from "absent" so users can clear
         # the catalog default when they need to (e.g. disable thinking
         # by setting ``extra_body={}`` on the gemma row).
-        new_temperature = (
-            ov["temperature"] if "temperature" in ov
-            else catalog.get("temperature", spec.temperature)
-        )
-        new_top_p = (
-            ov["top_p"] if "top_p" in ov
-            else catalog.get("top_p", spec.top_p)
-        )
-        new_max_tokens = (
-            ov["max_tokens"] if "max_tokens" in ov
-            else catalog.get("max_tokens", spec.max_tokens)
-        )
+        new_temperature = ov["temperature"] if "temperature" in ov else catalog.get("temperature", spec.temperature)
+        new_top_p = ov["top_p"] if "top_p" in ov else catalog.get("top_p", spec.top_p)
+        new_max_tokens = ov["max_tokens"] if "max_tokens" in ov else catalog.get("max_tokens", spec.max_tokens)
         if "extra_body" in ov:
             new_extra_body = ov["extra_body"]
         elif catalog:
@@ -749,8 +743,7 @@ def default_models_path() -> Path:
         path = Path(from_env).expanduser()
         if not path.is_file():
             raise ConfigError(
-                f"USERSIM_MODELS_CONFIG points at {str(path)!r}, which is not a "
-                f"file. Unset it or correct the path."
+                f"USERSIM_MODELS_CONFIG points at {str(path)!r}, which is not a file. Unset it or correct the path."
             )
         return path
     return local_models_path() or bundled_models_path()
@@ -815,23 +808,16 @@ def warn_if_missing_api_key(
     custom_provider_envs: Dict[str, str] = {p.name: p.api_key for p in config.providers}
     needed: Dict[str, str] = {}  # env_var -> provider_name (first wins)
     for spec in config.models:
-        env_var = custom_provider_envs.get(spec.provider) or _BUILTIN_PROVIDER_API_KEY_ENV.get(
-            spec.provider
-        )
+        env_var = custom_provider_envs.get(spec.provider) or _BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
         if env_var is None:
             continue
         needed.setdefault(env_var, spec.provider)
 
-    missing = sorted(
-        f"{env} (provider={provider!r})"
-        for env, provider in needed.items()
-        if not os.environ.get(env)
-    )
+    missing = sorted(f"{env} (provider={provider!r})" for env, provider in needed.items() if not os.environ.get(env))
     if not missing:
         return None
     return (
-        f"Missing API key env var(s): {', '.join(missing)}. "
-        "Export them before running simulate/eval, or use --dry-run."
+        f"Missing API key env var(s): {', '.join(missing)}. Export them before running simulate/eval, or use --dry-run."
     )
 
 
@@ -885,11 +871,7 @@ def smoke_test_models(
     seen: set[Tuple[str, str]] = set()
 
     alias_filter = set(aliases) if aliases is not None else None
-    selected = (
-        config.models
-        if alias_filter is None
-        else [s for s in config.models if s.alias in alias_filter]
-    )
+    selected = config.models if alias_filter is None else [s for s in config.models if s.alias in alias_filter]
 
     for spec in selected:
         # Resolve endpoint + env-var name for the spec's provider.
@@ -914,8 +896,7 @@ def smoke_test_models(
         if key_pair in seen:
             # Inherit the prior result for the same (model, provider).
             prior_alias = next(
-                a for a, (_, m) in results.items()
-                if (config.get(a).model, config.get(a).provider) == key_pair
+                a for a, (_, m) in results.items() if (config.get(a).model, config.get(a).provider) == key_pair
             )
             results[spec.alias] = results[prior_alias]
             continue
@@ -924,7 +905,8 @@ def smoke_test_models(
         api_key = os.environ.get(env_var, "") if env_var else ""
         if not api_key:
             results[spec.alias] = (
-                False, f"env var {env_var!r} not set" + route_suffix,
+                False,
+                f"env var {env_var!r} not set" + route_suffix,
             )
             continue
 
@@ -939,8 +921,7 @@ def smoke_test_models(
             # Provider-specific required fields (e.g. qwen input_type/truncate)
             # -- mirror to_model_configs so the probe body matches the real call.
             emb_defaults = resolve_embedding_defaults(spec.model)
-            extra = (spec.extra_body if spec.extra_body is not None
-                     else emb_defaults.get("extra_body"))
+            extra = spec.extra_body if spec.extra_body is not None else emb_defaults.get("extra_body")
             if extra:
                 payload.update(extra)
             if emb_defaults.get("encoding_format"):
@@ -985,7 +966,8 @@ def smoke_test_models(
                 r = httpx.post(url, json=payload, headers=headers, timeout=timeout_sec)
         except Exception as e:
             results[spec.alias] = (
-                False, f"{type(e).__name__}: {e}" + route_suffix,
+                False,
+                f"{type(e).__name__}: {e}" + route_suffix,
             )
             continue
 
@@ -996,13 +978,13 @@ def smoke_test_models(
             # reasoning model. Don't fail the run for this.
             results[spec.alias] = (
                 True,
-                "OK (output capped by smoke max_tokens; provisioning fine)"
-                + route_suffix,
+                "OK (output capped by smoke max_tokens; provisioning fine)" + route_suffix,
             )
         else:
             detail = r.text[:200].replace("\n", " ").strip()
             results[spec.alias] = (
-                False, f"HTTP {r.status_code}: {detail}" + route_suffix,
+                False,
+                f"HTTP {r.status_code}: {detail}" + route_suffix,
             )
 
     return results
@@ -1049,10 +1031,7 @@ def print_resolved_models(config: ModelsConfig) -> None:
     used_providers = sorted({s.provider for s in config.models})
     if config.source_path is not None:
         print(f"Models config: {describe_models_source(config.source_path)}")
-    print(
-        f"Loaded {len(config.models)} models "
-        f"(providers: {used_providers or '(builtins only)'})"
-    )
+    print(f"Loaded {len(config.models)} models (providers: {used_providers or '(builtins only)'})")
     print("Resolved inference defaults (TOML row + cli/model_catalog.py):")
     for spec in config.models:
         extras = ""
@@ -1086,9 +1065,7 @@ def prompt_for_provider_keys(config: ModelsConfig) -> None:
             continue
         if os.environ.get(provider.api_key):
             continue
-        value = _getpass.getpass(
-            f"Enter {provider.api_key} ({provider.endpoint}): "
-        )
+        value = _getpass.getpass(f"Enter {provider.api_key} ({provider.endpoint}): ")
         if value:
             os.environ[provider.api_key] = value
 
@@ -1114,10 +1091,7 @@ def smoke_test_models_or_raise(
         if selected is not None
         else f"({len(config.models)} aliases)"
     )
-    print(
-        f"\nSmoke-testing each (model, provider) pair {scope_msg} "
-        "-- ~256 output tokens each, sub-cent cost..."
-    )
+    print(f"\nSmoke-testing each (model, provider) pair {scope_msg} -- ~256 output tokens each, sub-cent cost...")
     results = smoke_test_models(config, timeout_sec=timeout_sec, aliases=selected)
     failed: List[str] = []
     for alias, (ok, msg) in results.items():

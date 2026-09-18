@@ -183,9 +183,13 @@ class TestMATTR:
 class TestDiagnosticsFrame:
     def test_adds_columns(self, trajectory_df) -> None:
         out = compute_diagnostics_frame(trajectory_df)
-        for col in ["d1_front_loading", "d2_polite_fraction",
-                    "d3_verbosity_cv", "d4_frustration_markers",
-                    "mattr_assistant"]:
+        for col in [
+            "d1_front_loading",
+            "d2_polite_fraction",
+            "d3_verbosity_cv",
+            "d4_frustration_markers",
+            "mattr_assistant",
+        ]:
             assert col in out.columns
         # Confrontational row (idx 2) carries frustration markers.
         assert out.iloc[2]["d4_frustration_markers"] is not None
@@ -233,10 +237,13 @@ class TestResponseLengthByLocale:
 
     def test_single_locale_aggregates_correctly(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
-        df = self._build_df([
-            _length_row("en_US", [100, 200], total_tokens=80, n_calls=2),
-            _length_row("en_US", [150], total_tokens=60, n_calls=1),
-        ])
+
+        df = self._build_df(
+            [
+                _length_row("en_US", [100, 200], total_tokens=80, n_calls=2),
+                _length_row("en_US", [150], total_tokens=60, n_calls=1),
+            ]
+        )
         result = compute_response_length_by_locale(df)
         assert len(result) == 1
         row = result[0]
@@ -252,10 +259,13 @@ class TestResponseLengthByLocale:
 
     def test_two_locales_appear_separately(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
-        df = self._build_df([
-            _length_row("en_US", [200, 200], total_tokens=200, n_calls=2),
-            _length_row("hi_Deva_IN", [50, 50], total_tokens=50, n_calls=2),
-        ])
+
+        df = self._build_df(
+            [
+                _length_row("en_US", [200, 200], total_tokens=200, n_calls=2),
+                _length_row("hi_Deva_IN", [50, 50], total_tokens=50, n_calls=2),
+            ]
+        )
         result = compute_response_length_by_locale(df)
         assert len(result) == 2
         # Result is sorted by locale name.
@@ -269,10 +279,13 @@ class TestResponseLengthByLocale:
 
     def test_missing_token_data_doesnt_fail(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
+
         # No total_tokens / n_calls — only chars.
-        df = self._build_df([
-            _length_row("en_US", [100, 150]),
-        ])
+        df = self._build_df(
+            [
+                _length_row("en_US", [100, 150]),
+            ]
+        )
         result = compute_response_length_by_locale(df)
         row = result[0]
         # Char side computed.
@@ -283,17 +296,22 @@ class TestResponseLengthByLocale:
 
     def test_missing_locale_skipped(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
-        df = self._build_df([
-            _length_row("en_US", [100], total_tokens=50, n_calls=1),
-            {
-                # Row with no locale.
-                "locale": None,
-                "conversation_messages": json.dumps([
-                    {"role": "assistant", "content": "x"},
-                ]),
-                "simulation_outcome": json.dumps({}),
-            },
-        ])
+
+        df = self._build_df(
+            [
+                _length_row("en_US", [100], total_tokens=50, n_calls=1),
+                {
+                    # Row with no locale.
+                    "locale": None,
+                    "conversation_messages": json.dumps(
+                        [
+                            {"role": "assistant", "content": "x"},
+                        ]
+                    ),
+                    "simulation_outcome": json.dumps({}),
+                },
+            ]
+        )
         result = compute_response_length_by_locale(df)
         assert len(result) == 1
         assert result[0]["locale"] == "en_US"
@@ -302,12 +320,14 @@ class TestResponseLengthByLocale:
 
     def test_empty_df_returns_empty_list(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
+
         pd = pytest.importorskip("pandas")
         df = pd.DataFrame(columns=["locale", "conversation_messages", "simulation_outcome"])
         assert compute_response_length_by_locale(df) == []
 
     def test_missing_required_column_raises(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
+
         pd = pytest.importorskip("pandas")
         df = pd.DataFrame({"locale": ["en_US"]})  # missing the other two cols
         with pytest.raises(ValueError, match="conversation_messages"):
@@ -315,10 +335,12 @@ class TestResponseLengthByLocale:
 
     def test_p95_uses_pandas_quantile(self) -> None:
         from usersim.reporting import compute_response_length_by_locale
-        df = self._build_df([
-            _length_row("en_US", [100, 200, 300, 400, 500],
-                        total_tokens=500, n_calls=5),
-        ])
+
+        df = self._build_df(
+            [
+                _length_row("en_US", [100, 200, 300, 400, 500], total_tokens=500, n_calls=5),
+            ]
+        )
         result = compute_response_length_by_locale(df)
         row = result[0]
         # P95 of [100, 200, 300, 400, 500] via pandas linear interp = 480.

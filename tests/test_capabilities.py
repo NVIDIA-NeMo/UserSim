@@ -26,15 +26,9 @@ def test_every_capability_has_sources_and_policy() -> None:
 
 
 def test_probe_labels_are_explicit() -> None:
-    assert probe_label_for_capability(
-        capability_by_id("sovereign_local_knowledge")
-    ) == "sov_ai_facts, sov_ai_dynamic"
-    assert probe_label_for_capability(
-        capability_by_id("agentic_disclosure")
-    ) == "safety_agentic"
-    assert probe_label_for_capability(
-        capability_by_id("assistant_quality")
-    ) == "All"
+    assert probe_label_for_capability(capability_by_id("sovereign_local_knowledge")) == "sov_ai_facts, sov_ai_dynamic"
+    assert probe_label_for_capability(capability_by_id("agentic_disclosure")) == "safety_agentic"
+    assert probe_label_for_capability(capability_by_id("assistant_quality")) == "All"
 
 
 def test_expected_capabilities_present() -> None:
@@ -55,7 +49,8 @@ def test_dynamic_grounding_is_cross_domain_and_gated() -> None:
     assert d.scale == "score_1_5"
     assert d.aggregation_policy == "critical_axis"
     assert set(d.critical_axes) == {
-        "dynamic.numeric_faithfulness", "dynamic.no_fabrication",
+        "dynamic.numeric_faithfulness",
+        "dynamic.no_fabrication",
     }
     probes = {s.probe for s in d.sources}
     assert "financial_services" in probes
@@ -77,9 +72,7 @@ def test_finance_verifiable_capability_is_stratified_by_institution_type() -> No
         d = capability_by_id(f"financial_task_success_{itype}")
         assert d.row_filter == {"institution_type": itype}
         assert d.scale == "rate" and d.aggregation_policy == "critical_axis"
-        assert "finance.tool_selection_rate" in {
-            a for s in d.sources for a in s.axes
-        }
+        assert "finance.tool_selection_rate" in {a for s in d.sources for a in s.axes}
         # Stratified rows share the aggregate's probe/scorer (one probe).
         assert {s.probe for s in d.sources} == {"financial_services"}
 
@@ -100,8 +93,7 @@ def test_finance_retrieval_recall_is_decoupled_from_task_success() -> None:
     from usersim.taxonomy.capabilities import FINANCE_CAPABILITY_INSTITUTION_TYPES
 
     success_ids = ["financial_task_success"] + [
-        f"financial_task_success_{itype}"
-        for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES
+        f"financial_task_success_{itype}" for itype in FINANCE_CAPABILITY_INSTITUTION_TYPES
     ]
     for cid in success_ids:
         axes = {a for s in capability_by_id(cid).sources for a in s.axes}
@@ -174,24 +166,17 @@ def test_all_probe_capabilities_are_declared_with_sentinel() -> None:
         "simulation_reliability",
     }
     for capability_id in all_probe_ids:
-        assert any(
-            source.probe == ALL_PROBES
-            for source in capability_by_id(capability_id).sources
-        )
+        assert any(source.probe == ALL_PROBES for source in capability_by_id(capability_id).sources)
 
 
 def test_capabilities_expose_implementation_refs() -> None:
     assert any(
         ref.endswith("evaluator/scorers/sov_ai_facts.py")
-        for ref in implementation_refs_for_capability(
-            capability_by_id("sovereign_local_knowledge")
-        )
+        for ref in implementation_refs_for_capability(capability_by_id("sovereign_local_knowledge"))
     )
     assert any(
         ref.endswith("probes/safety_agentic/generator.py")
-        for ref in implementation_refs_for_capability(
-            capability_by_id("agentic_disclosure")
-        )
+        for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
     )
 
 
@@ -228,6 +213,7 @@ def test_no_capability_uses_status_rate() -> None:
 
 
 # ── a capability is only as good as the scorer the run actually dispatches ────
+
 
 def test_required_scorers_covers_every_declared_scorer() -> None:
     required = set(scorers_required_by_capabilities())
@@ -269,22 +255,19 @@ def test_eval_notebook_derives_its_scorer_list() -> None:
     raw = nb_path.read_text()
     assert "scorers_required_by_capabilities()" in raw
     # No literal list of scorer names assigned to SCORERS.
-    assert not re.search(r'SCORERS = \[\\n', raw), "SCORERS is hand-listed again"
+    assert not re.search(r"SCORERS = \[\\n", raw), "SCORERS is hand-listed again"
 
 
 def test_missing_scorer_map_names_the_capabilities_that_go_untested() -> None:
     """Regression: the financial_services scorer was absent from the evaluation
     run's scorer list, so all 11 finance capabilities rendered Untested (n=0)
     across a 13-locale run while the scorer itself was registered and correct."""
-    without_finance = [
-        s for s in scorers_required_by_capabilities() if s != "financial_services"
-    ]
+    without_finance = [s for s in scorers_required_by_capabilities() if s != "financial_services"]
     missing = capabilities_missing_scorer(without_finance)
     assert set(missing) == {"financial_services"}
     assert "financial_task_success" in missing["financial_services"]
     assert "dynamic_grounding" in missing["financial_services"]
     # Every finance capability, including the per-institution-type strata.
     assert len(missing["financial_services"]) == sum(
-        1 for d in capability_definitions()
-        if any(s.scorer == "financial_services" for s in d.sources)
+        1 for d in capability_definitions() if any(s.scorer == "financial_services" for s in d.sources)
     )

@@ -384,8 +384,7 @@ def get_opening_prompt(locale: str) -> str:
     """
     if locale not in _OPENING_PROMPTS:
         raise PromptsUnavailableError(
-            f"No sov_ai_dynamic opening prompt for locale={locale!r}. "
-            f"Available: {sorted(_OPENING_PROMPTS.keys())}"
+            f"No sov_ai_dynamic opening prompt for locale={locale!r}. Available: {sorted(_OPENING_PROMPTS.keys())}"
         )
     return _OPENING_PROMPTS[locale]
 

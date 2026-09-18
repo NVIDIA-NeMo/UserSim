@@ -64,11 +64,16 @@ class TestFormatConversationHistory:
         """Judge and user-agent prompts are built from this. A trace
         reaching one would leak the assistant's private thinking into a
         prompt that is supposed to see only the visible dialogue."""
-        result = format_conversation_history_for_prompt([
-            {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there",
-             "reasoning_content": "SECRET_TRACE the user seems friendly"},
-        ])
+        result = format_conversation_history_for_prompt(
+            [
+                {"role": "user", "content": "Hello"},
+                {
+                    "role": "assistant",
+                    "content": "Hi there",
+                    "reasoning_content": "SECRET_TRACE the user seems friendly",
+                },
+            ]
+        )
         assert "SECRET_TRACE" not in result
 
 
@@ -80,12 +85,14 @@ class TestProjectPublicDialogue:
             {
                 "role": "assistant",
                 "content": "Let me check.",
-                "tool_calls": [{
-                    "function": {
-                        "name": "get_weather",
-                        "arguments": '{"city":"Tokyo"}',
+                "tool_calls": [
+                    {
+                        "function": {
+                            "name": "get_weather",
+                            "arguments": '{"city":"Tokyo"}',
+                        }
                     }
-                }],
+                ],
             },
             {
                 "role": "tool",
@@ -104,17 +111,24 @@ class TestProjectPublicDialogue:
         """A thinking trace is not text a real user could observe, so it
         must not survive the projection — this is what keeps traces out
         of the follow-up and judge prompts built downstream."""
-        assert project_public_dialogue([
-            {"role": "assistant", "content": "It is sunny.",
-             "reasoning_content": "SECRET_TRACE checked the tool result"},
-        ]) == [{"role": "assistant", "content": "It is sunny."}]
+        assert project_public_dialogue(
+            [
+                {
+                    "role": "assistant",
+                    "content": "It is sunny.",
+                    "reasoning_content": "SECRET_TRACE checked the tool result",
+                },
+            ]
+        ) == [{"role": "assistant", "content": "It is sunny."}]
 
     def test_projection_does_not_mutate_source(self):
-        messages = [{
-            "role": "assistant",
-            "content": "Checking.",
-            "tool_calls": [{"function": {"name": "lookup", "arguments": "{}"}}],
-        }]
+        messages = [
+            {
+                "role": "assistant",
+                "content": "Checking.",
+                "tool_calls": [{"function": {"name": "lookup", "arguments": "{}"}}],
+            }
+        ]
         before = repr(messages)
         project_public_dialogue(messages)
         assert repr(messages) == before

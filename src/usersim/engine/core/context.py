@@ -53,14 +53,16 @@ def summarize_response(
         f"{len(summary)} chars / {summ_words} words ({elapsed:.1f}s)"
     )
 
-    append_debug_record({
-        "alias": "context_compression",
-        "elapsed_s": round(elapsed, 2),
-        "original_len": len(assistant_content),
-        "summary_len": len(summary),
-        "original": assistant_content,
-        "summary": summary.strip(),
-    })
+    append_debug_record(
+        {
+            "alias": "context_compression",
+            "elapsed_s": round(elapsed, 2),
+            "original_len": len(assistant_content),
+            "summary_len": len(summary),
+            "original": assistant_content,
+            "summary": summary.strip(),
+        }
+    )
 
     return summary.strip()
 
@@ -88,10 +90,12 @@ def compress_history(
     for i, msg in enumerate(messages):
         if i in position_summary_map and i not in keep_positions:
             summary = position_summary_map[i]
-            result.append({
-                **msg,
-                "content": f"[Summary of previous response: {summary}]",
-            })
+            result.append(
+                {
+                    **msg,
+                    "content": f"[Summary of previous response: {summary}]",
+                }
+            )
         else:
             result.append(msg)
     return result
@@ -109,10 +113,7 @@ def prepare_assistant_history(
     retrieved document bodies; every other probe inherits the identity view.
     """
     messages: List[Dict[str, Any]]
-    if (
-        getattr(cfg, "context_compression", False)
-        and getattr(state, "conv_summaries", None)
-    ):
+    if getattr(cfg, "context_compression", False) and getattr(state, "conv_summaries", None):
         messages = compress_history(
             state.messages,
             state.conv_summaries,
@@ -126,7 +127,5 @@ def prepare_assistant_history(
         return messages
     return transform(
         messages,
-        current_user_turn=sum(
-            1 for message in state.messages if message.get("role") == "user"
-        ),
+        current_user_turn=sum(1 for message in state.messages if message.get("role") == "user"),
     )

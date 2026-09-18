@@ -188,8 +188,7 @@ class _PickedActionRequest:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """Agentic-safety probe with mock tool-call interception.
 
@@ -223,7 +222,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
+        self,
+        persona: Dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[_PickedActionRequest]:
         """Resolve the action_request from row override + persona.
 
@@ -237,9 +240,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         match).
         """
         action_request_id = self._data.get("action_request_id")
-        if action_request_id is not None and not isinstance(
-            action_request_id, str
-        ):
+        if action_request_id is not None and not isinstance(action_request_id, str):
             action_request_id = str(action_request_id)
         ar = resolve_task_from_row(
             persona,
@@ -280,7 +281,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         return self._api_tools
 
     def after_assistant_turn(
-        self, models: dict, state: Any, assistant_response: Any, cfg: Any,
+        self,
+        models: dict,
+        state: Any,
+        assistant_response: Any,
+        cfg: Any,
     ) -> str:
         # Not used — this probe overrides run_dispatch and does not go
         # through ConversationLoop.run.
@@ -298,9 +303,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             # assistant protocol envelopes. Tool-call-only assistant
             # messages are implementation details and are excluded.
             extras["num_turns"] = _visible_assistant_turn_count(state.messages)
-            extras["num_tool_calls"] = len(
-                state.metadata.get("attempted_actions") or []
-            )
+            extras["num_tool_calls"] = len(state.metadata.get("attempted_actions") or [])
         return extras
 
     def should_succeed(self, state: ConversationState) -> bool:
@@ -309,7 +312,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     # ── Custom run_dispatch (bypasses ConversationLoop) ─────────────
 
     def run_dispatch(
-        self, *, models: Dict[str, Any], data: Dict[str, Any], cfg: Any,
+        self,
+        *,
+        models: Dict[str, Any],
+        data: Dict[str, Any],
+        cfg: Any,
     ) -> dict:
         """Custom agentic simulate loop.
 
@@ -344,12 +351,12 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             # locales / native renderings). This probe has no user-agent
             # turn to reuse, so the extra translation call is the only way
             # to conduct the single user turn in the target language.
-            state.messages.append({
-                "role": "user",
-                "content": self._localize_verbatim(
-                    ar.initial_user_prompt.for_locale(self._asset_locale)
-                ),
-            })
+            state.messages.append(
+                {
+                    "role": "user",
+                    "content": self._localize_verbatim(ar.initial_user_prompt.for_locale(self._asset_locale)),
+                }
+            )
 
             t_sim_start = time.monotonic()
             max_turns = max(1, int(getattr(cfg, "max_turns", 5)))
@@ -358,14 +365,16 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             for assistant_turn_idx in range(max_turns):
                 try:
                     assistant_resp = call_llm(
-                        models, _MODEL_ASSISTANT, list(state.messages),
+                        models,
+                        _MODEL_ASSISTANT,
+                        list(state.messages),
                         tools=self._api_tools,
                     )
                 except Exception as e:
                     logger.warning(
-                        "  |-- safety_agentic: assistant_model failed on "
-                        "turn %d: %s",
-                        assistant_turn_idx + 1, e,
+                        "  |-- safety_agentic: assistant_model failed on turn %d: %s",
+                        assistant_turn_idx + 1,
+                        e,
                     )
                     builder.set_wall_clock_s(
                         time.monotonic() - t_sim_start,
@@ -374,26 +383,20 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                         status=OutcomeStatus.FAILED,
                         failure_class=FailureClass.INFRASTRUCTURE_ERROR,
                         failure_attribution=FailureAttribution.ASSISTANT_MODEL,
-                        failure_detail=(
-                            f"assistant_model raised on turn "
-                            f"{assistant_turn_idx + 1}: {e}"
-                        ),
+                        failure_detail=(f"assistant_model raised on turn {assistant_turn_idx + 1}: {e}"),
                     )
                     result = make_result(
-                        state.messages, state.metadata, False,
-                        outcome=outcome, traces=builder.traces(),
+                        state.messages,
+                        state.metadata,
+                        False,
+                        outcome=outcome,
+                        traces=builder.traces(),
                     )
                     result.update(self.build_result_extras(state))
                     return result
 
-                content = (
-                    assistant_resp.get("content", "")
-                    if isinstance(assistant_resp, dict) else ""
-                )
-                tool_calls = (
-                    assistant_resp.get("tool_calls")
-                    if isinstance(assistant_resp, dict) else None
-                )
+                content = assistant_resp.get("content", "") if isinstance(assistant_resp, dict) else ""
+                tool_calls = assistant_resp.get("tool_calls") if isinstance(assistant_resp, dict) else None
 
                 # ``assistant_message`` attaches this call's own reasoning
                 # trace. This probe owns its loop, so the fallback in
@@ -401,7 +404,9 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                 # assistant turns here must carry its own.
                 state.messages.append(
                     assistant_message(
-                        assistant_resp, content, tool_calls=tool_calls,
+                        assistant_resp,
+                        content,
+                        tool_calls=tool_calls,
                         store_reasoning=getattr(cfg, "store_reasoning", True),
                     )
                 )
@@ -417,12 +422,14 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                 for tc_idx, tc in enumerate(tool_calls):
                     tool_name, tool_args = _extract_tool_call(tc)
                     in_simulated = tool_name in self._declared_tool_names
-                    state.metadata["attempted_actions"].append({
-                        "tool_name": tool_name,
-                        "tool_args": tool_args,
-                        "turn_idx": assistant_turn_idx,
-                        "was_in_simulated_tools": in_simulated,
-                    })
+                    state.metadata["attempted_actions"].append(
+                        {
+                            "tool_name": tool_name,
+                            "tool_args": tool_args,
+                            "turn_idx": assistant_turn_idx,
+                            "was_in_simulated_tools": in_simulated,
+                        }
+                    )
                     builder.add_trace(
                         SimulationTrace(
                             kind=TraceKind.TOOL_CALL_VERIFIER,
@@ -430,9 +437,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                             call_idx=tc_idx,
                             rating="success" if in_simulated else "failure",
                             detail=(
-                                f"{tool_name} called"
-                                if in_simulated
-                                else f"{tool_name} not in declared tool spec"
+                                f"{tool_name} called" if in_simulated else f"{tool_name} not in declared tool spec"
                             ),
                             extra={"tool_name": tool_name},
                         )
@@ -441,33 +446,34 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                     # Append a tool response — canned mock or synthetic
                     # error for fabricated tools.
                     tc_id = tc.get(
-                        "id", f"call_{assistant_turn_idx}_{tc_idx}",
+                        "id",
+                        f"call_{assistant_turn_idx}_{tc_idx}",
                     )
-                    if (
-                        in_simulated
-                        and tool_name in ar.mock_tool_responses
-                    ):
+                    if in_simulated and tool_name in ar.mock_tool_responses:
                         mock = ar.mock_tool_responses[tool_name]
-                        state.messages.append({
-                            "role": "tool",
-                            "content": mock.content,
-                            "tool_call_id": tc_id,
-                        })
+                        state.messages.append(
+                            {
+                                "role": "tool",
+                                "content": mock.content,
+                                "tool_call_id": tc_id,
+                            }
+                        )
                     else:
                         error_payload = {
                             "error": (
-                                "Unknown tool — the assistant called a "
-                                "tool not in the declared tool spec"
+                                "Unknown tool — the assistant called a tool not in the declared tool spec"
                                 if not in_simulated
                                 else "Tool exists but no mock response defined"
                             ),
                             "tool_name": tool_name,
                         }
-                        state.messages.append({
-                            "role": "tool",
-                            "content": json.dumps(error_payload),
-                            "tool_call_id": tc_id,
-                        })
+                        state.messages.append(
+                            {
+                                "role": "tool",
+                                "content": json.dumps(error_payload),
+                                "tool_call_id": tc_id,
+                            }
+                        )
 
                 builder.set_n_turns(assistant_turn_idx + 1)
 
@@ -483,8 +489,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             outcome = builder.finalize(status=OutcomeStatus.OK)
 
             result = make_result(
-                state.messages, state.metadata, sim_success,
-                outcome=outcome, traces=builder.traces(),
+                state.messages,
+                state.metadata,
+                sim_success,
+                outcome=outcome,
+                traces=builder.traces(),
             )
             result.update(self.build_result_extras(state))
             return result
@@ -548,6 +557,7 @@ def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
         OutcomeStatus,
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,
@@ -592,8 +602,10 @@ def _format_tools_for_api(tools: Iterable[ToolSpec]) -> List[Dict[str, Any]]:
             "function": {
                 "name": t.name,
                 "description": t.description,
-                "parameters": t.parameters or {
-                    "type": "object", "properties": {},
+                "parameters": t.parameters
+                or {
+                    "type": "object",
+                    "properties": {},
                 },
             },
         }

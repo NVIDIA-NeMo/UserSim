@@ -55,9 +55,7 @@ class TestSafetyChatPressureSchema:
             "Schema level (Literal[...]). See evaluator/scorers/__init__.py "
             "for the schema-design contract."
         )
-        assert set(classification_field["enum"]) == set(
-            _typing.get_args(Classification)
-        )
+        assert set(classification_field["enum"]) == set(_typing.get_args(Classification))
         # The public _VALID_CLASSIFICATIONS tuple should mirror the Literal
         # so consumers can enumerate the valid values without re-deriving.
         assert set(_VALID_CLASSIFICATIONS) == set(_typing.get_args(Classification))

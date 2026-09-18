@@ -301,8 +301,7 @@ def score_sov_ai_multilingual_parity_trajectory(
         bank = load_query_bank_default()
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to load "
-            "query bank: %s",
+            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to load query bank: %s",
             e,
         )
         return {
@@ -317,15 +316,15 @@ def score_sov_ai_multilingual_parity_trajectory(
         }
 
     pinned_version = _pinned_bank_version(trajectory, locale)
-    bank_version_mismatch = (
-        pinned_version is not None and pinned_version != bank.bank_version
-    )
+    bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
             "  |-- evaluator/scorers.sov_ai_multilingual_parity: trajectory "
             "pinned bank_version=%s but current loaded bank is %s for "
             "locale=%s — reporting drift flag on this row",
-            pinned_version, bank.bank_version, locale,
+            pinned_version,
+            bank.bank_version,
+            locale,
         )
 
     query = bank.by_id(query_id)
@@ -434,9 +433,11 @@ def _score_one_query(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: judge %r raised "
-            "on query %s: %s: %s",
-            judge_alias, query.id, type(e).__name__, e,
+            "  |-- evaluator/scorers.sov_ai_multilingual_parity: judge %r raised on query %s: %s: %s",
+            judge_alias,
+            query.id,
+            type(e).__name__,
+            e,
         )
         return _error_scores(f"{type(e).__name__}: {e}")
 
@@ -445,8 +446,7 @@ def _score_one_query(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to parse "
-            "structured output for query %s",
+            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to parse structured output for query %s",
             query.id,
         )
         return _error_scores("parse_failure")
@@ -470,9 +470,7 @@ def _error_scores(error: str) -> Dict[str, Any]:
     The wrapping envelope fires its own ``error`` field via the caller's
     status_proposal logic; this just makes per-axis cells well-shaped.
     """
-    out: Dict[str, Any] = {
-        s.name: {"score": None, "reasoning": error} for s in _AXES
-    }
+    out: Dict[str, Any] = {s.name: {"score": None, "reasoning": error} for s in _AXES}
     out["error"] = error
     return out
 
@@ -510,8 +508,15 @@ def _format_persona(raw: Any) -> str:
         return str(raw)
 
     fields_in_order = [
-        "first_name", "last_name", "age", "education_level",
-        "occupation", "state", "city", "region", "country",
+        "first_name",
+        "last_name",
+        "age",
+        "education_level",
+        "occupation",
+        "state",
+        "city",
+        "region",
+        "country",
     ]
     lines: List[str] = []
     for key in fields_in_order:

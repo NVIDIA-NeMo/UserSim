@@ -40,8 +40,7 @@ PROBE_VARIANTS: list[str] = ["default"]  # subject-conditioned via theme; single
 PROMPT_VERSION: str = "v1.0"
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class EducationalProbe(BaseProbe):
     """Educational / tutoring probe.
 
@@ -55,9 +54,7 @@ class EducationalProbe(BaseProbe):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        theme = _parse_theme(
-            self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}")
-        )
+        theme = _parse_theme(self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}"))
         # Parsed once; the prompt itself is rendered per call in
         # get_user_system_prompt so all three prompt hooks resolve alike.
         self._subject = theme.get("description", theme.get("type", "general subject"))
@@ -71,7 +68,8 @@ class EducationalProbe(BaseProbe):
             subject=self._subject,
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=format_behavioral_profile_for_prompt(
-                self._profile, language=self._language,
+                self._profile,
+                language=self._language,
             ),
             disclosure_instructions=format_disclosure_instructions(
                 self._disclosure_style,
@@ -86,7 +84,9 @@ class EducationalProbe(BaseProbe):
         return render_prompt(assistant_system_prompt(), self._data)
 
     def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
+        self,
+        user_query: str,
+        conversation_history: str,
     ) -> str:
         return render_prompt(
             user_judge_turn_prompt(),

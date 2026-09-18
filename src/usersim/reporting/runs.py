@@ -60,9 +60,7 @@ def _format_started(run_id: str) -> str:
     if run_id == "legacy":
         return "(legacy)"
     try:
-        return datetime.fromtimestamp(int(run_id), tz=timezone.utc).strftime(
-            "%Y-%m-%d %H:%M"
-        )
+        return datetime.fromtimestamp(int(run_id), tz=timezone.utc).strftime("%Y-%m-%d %H:%M")
     except ValueError:
         return "?"
 
@@ -138,10 +136,7 @@ def print_available_runs(
     runs = list_runs(trajectory_root)
     display_root = _display_path(trajectory_root)
     if not runs:
-        console.print(
-            f"[yellow]No trajectory runs under {display_root}. "
-            "Run `01_simulate.ipynb` first.[/yellow]"
-        )
+        console.print(f"[yellow]No trajectory runs under {display_root}. Run `01_simulate.ipynb` first.[/yellow]")
         return
 
     # `min_width` keeps narrow numeric / status columns from collapsing
@@ -170,11 +165,7 @@ def print_available_runs(
 
     for rid in sorted(runs, reverse=True):
         n_traj = len(existing_trajectory_ids(trajectory_root, run=rid))
-        n_locales = sum(
-            1
-            for p in run_subroot(trajectory_root, rid).glob("locale=*")
-            if p.is_dir()
-        )
+        n_locales = sum(1 for p in run_subroot(trajectory_root, rid).glob("locale=*") if p.is_dir())
         eval_ok = run_subroot(eval_root, rid).exists()
         report_ok = (run_subroot(report_root, rid) / "index.html").exists()
         table.add_row(
@@ -189,14 +180,9 @@ def print_available_runs(
 
     console.print(table)
     n_eval = sum(1 for r in runs if run_subroot(eval_root, r).exists())
-    n_report = sum(
-        1
-        for r in runs
-        if (run_subroot(report_root, r) / "index.html").exists()
-    )
+    n_report = sum(1 for r in runs if (run_subroot(report_root, r) / "index.html").exists())
     console.print(
-        f"[dim]{len(runs)} run(s) on disk \u00b7 "
-        f"{n_eval} with evals \u00b7 {n_report} with rendered report.[/dim]"
+        f"[dim]{len(runs)} run(s) on disk \u00b7 {n_eval} with evals \u00b7 {n_report} with rendered report.[/dim]"
     )
 
 
@@ -252,7 +238,9 @@ def print_comparison_runs(
                 run_id,
                 _format_started(run_id),
                 f"[red]load error: {exc.__class__.__name__}[/red]",
-                "—", "—", "—",
+                "—",
+                "—",
+                "—",
             )
             continue
         run_id = str(manifest.get("run_id") or path.parent.name.removeprefix("run="))
@@ -267,6 +255,4 @@ def print_comparison_runs(
 
     console.print(table)
     if len(paths) < 2:
-        console.print(
-            f"[yellow]\u26a0  Comparison requires \u22652 runs; found {len(paths)}.[/yellow]"
-        )
+        console.print(f"[yellow]\u26a0  Comparison requires \u22652 runs; found {len(paths)}.[/yellow]")

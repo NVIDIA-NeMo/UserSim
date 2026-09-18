@@ -164,9 +164,7 @@ def _hybrid_rank(
 
     dense, lex = _minmax(dense_raw), _minmax(lex_raw)
     w = _LEXICAL_WEIGHT
-    scored = [
-        (w * lex[i] + (1.0 - w) * dense[i], docs[i]) for i in range(len(docs))
-    ]
+    scored = [(w * lex[i] + (1.0 - w) * dense[i], docs[i]) for i in range(len(docs))]
     scored.sort(key=lambda s: (-s[0], s[1].id))
     return [d for _, d in scored[:k]]
 

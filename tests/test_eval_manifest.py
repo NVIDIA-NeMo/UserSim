@@ -100,13 +100,23 @@ class TestSchemaRoundTrip:
             run_id="r",
             passes=[
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=None, n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=None,
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=[], n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=[],
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
             ],
@@ -127,20 +137,26 @@ class TestLegacyV1Read:
     without manual migration."""
 
     def test_legacy_format_promotes_to_single_pass(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         path = tmp_path / MANIFEST_FILENAME
         # The exact shape the user pasted in the bug report.
-        path.write_text(json.dumps({
-            "run_id": "1778723989",
-            "mode": "full",
-            "n": None,
-            "random_seed": 42,
-            "eval_locales": ["en_US"],
-            "n_selected": 128,
-            "n_total": 1024,
-            "trajectory_ids": ["T1", "T2"],
-        }, indent=2))
+        path.write_text(
+            json.dumps(
+                {
+                    "run_id": "1778723989",
+                    "mode": "full",
+                    "n": None,
+                    "random_seed": 42,
+                    "eval_locales": ["en_US"],
+                    "n_selected": 128,
+                    "n_total": 1024,
+                    "trajectory_ids": ["T1", "T2"],
+                },
+                indent=2,
+            )
+        )
         m = read_eval_sample_manifest(path)
         assert m is not None
         assert m.run_id == "1778723989"
@@ -156,17 +172,22 @@ class TestLegacyV1Read:
         assert p.wrote_at_epoch == 0
 
     def test_legacy_without_random_seed_defaults_to_negative_one(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Some very-early manifests may have omitted random_seed.
         path = tmp_path / MANIFEST_FILENAME
-        path.write_text(json.dumps({
-            "run_id": "r",
-            "mode": "full",
-            "n_selected": 10,
-            "n_total": 10,
-            "trajectory_ids": [],
-        }))
+        path.write_text(
+            json.dumps(
+                {
+                    "run_id": "r",
+                    "mode": "full",
+                    "n_selected": 10,
+                    "n_total": 10,
+                    "trajectory_ids": [],
+                }
+            )
+        )
         m = read_eval_sample_manifest(path)
         assert m is not None
         assert m.passes[0].random_seed == -1
@@ -176,14 +197,17 @@ class TestLegacyV1Read:
 
 
 class TestRecordEvalSamplePass:
-
     def test_first_pass_creates_manifest(self, tmp_path: Path) -> None:
         path = tmp_path / MANIFEST_FILENAME
         m = record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42,
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
             eval_locales=None,
-            n_selected=1024, n_total=1024,
+            n_selected=1024,
+            n_total=1024,
             trajectory_ids=["T1", "T2"],
             wrote_at_epoch=1000,
         )
@@ -200,16 +224,28 @@ class TestRecordEvalSamplePass:
         overwriting. The cumulative audit trail is preserved."""
         path = tmp_path / MANIFEST_FILENAME
         record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=1024, n_total=1024, trajectory_ids=["T1", "T2"],
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=1024,
+            n_total=1024,
+            trajectory_ids=["T1", "T2"],
             wrote_at_epoch=1000,
         )
         # Locale-targeted re-eval: en_US only.
         m = record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42, eval_locales=["en_US"],
-            n_selected=128, n_total=1024, trajectory_ids=["T1"],
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=["en_US"],
+            n_selected=128,
+            n_total=1024,
+            trajectory_ids=["T1"],
             wrote_at_epoch=2000,
         )
         assert len(m.passes) == 2
@@ -229,15 +265,27 @@ class TestRecordEvalSamplePass:
         kind of lie."""
         path = tmp_path / MANIFEST_FILENAME
         record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=1024, n_total=1024, trajectory_ids=["T1"],
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=1024,
+            n_total=1024,
+            trajectory_ids=["T1"],
         )
         # Whole-run rewrite -> fresh=True -> history dropped.
         m = record_eval_sample_pass(
-            path, run_id="r1",
-            mode="per_locale", n=10, random_seed=42, eval_locales=None,
-            n_selected=80, n_total=1024, trajectory_ids=["T2"],
+            path,
+            run_id="r1",
+            mode="per_locale",
+            n=10,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=80,
+            n_total=1024,
+            trajectory_ids=["T2"],
             fresh=True,
         )
         assert len(m.passes) == 1
@@ -250,15 +298,27 @@ class TestRecordEvalSamplePass:
         whichever run actually owns the manifest."""
         path = tmp_path / MANIFEST_FILENAME
         record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=10, n_total=10, trajectory_ids=[],
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=10,
+            n_total=10,
+            trajectory_ids=[],
         )
         with pytest.raises(ValueError, match=r"run_id='r1'"):
             record_eval_sample_pass(
-                path, run_id="r2",  # different
-                mode="full", n=None, random_seed=42, eval_locales=None,
-                n_selected=10, n_total=10, trajectory_ids=[],
+                path,
+                run_id="r2",  # different
+                mode="full",
+                n=None,
+                random_seed=42,
+                eval_locales=None,
+                n_selected=10,
+                n_total=10,
+                trajectory_ids=[],
             )
 
     def test_fresh_bypasses_run_id_check(self, tmp_path: Path) -> None:
@@ -269,15 +329,27 @@ class TestRecordEvalSamplePass:
         triggering false-positive errors."""
         path = tmp_path / MANIFEST_FILENAME
         record_eval_sample_pass(
-            path, run_id="r1",
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=10, n_total=10, trajectory_ids=[],
+            path,
+            run_id="r1",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=10,
+            n_total=10,
+            trajectory_ids=[],
         )
         # Different run_id but fresh -> fine.
         m = record_eval_sample_pass(
-            path, run_id="r2",
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=10, n_total=10, trajectory_ids=[],
+            path,
+            run_id="r2",
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=10,
+            n_total=10,
+            trajectory_ids=[],
             fresh=True,
         )
         assert m.run_id == "r2"
@@ -286,9 +358,15 @@ class TestRecordEvalSamplePass:
         path = tmp_path / MANIFEST_FILENAME
         before = int(time.time())
         m = record_eval_sample_pass(
-            path, run_id="r",
-            mode="full", n=None, random_seed=0, eval_locales=None,
-            n_selected=0, n_total=0, trajectory_ids=[],
+            path,
+            run_id="r",
+            mode="full",
+            n=None,
+            random_seed=0,
+            eval_locales=None,
+            n_selected=0,
+            n_total=0,
+            trajectory_ids=[],
         )
         after = int(time.time())
         assert before <= m.passes[0].wrote_at_epoch <= after
@@ -296,9 +374,15 @@ class TestRecordEvalSamplePass:
     def test_creates_parent_directory(self, tmp_path: Path) -> None:
         path = tmp_path / "deeply" / "nested" / MANIFEST_FILENAME
         record_eval_sample_pass(
-            path, run_id="r",
-            mode="full", n=None, random_seed=0, eval_locales=None,
-            n_selected=0, n_total=0, trajectory_ids=[],
+            path,
+            run_id="r",
+            mode="full",
+            n=None,
+            random_seed=0,
+            eval_locales=None,
+            n_selected=0,
+            n_total=0,
+            trajectory_ids=[],
         )
         assert path.exists()
 
@@ -317,13 +401,23 @@ class TestConsensusMode:
             run_id="r",
             passes=[
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=None, n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=None,
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=["en_US"], n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=["en_US"],
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
             ],
@@ -335,14 +429,24 @@ class TestConsensusMode:
             run_id="r",
             passes=[
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=None, n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=None,
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="per_locale", n=10,
-                    random_seed=0, eval_locales=["en_US"],
-                    n_selected=0, n_total=0, trajectory_ids=[],
+                    wrote_at_epoch=0,
+                    mode="per_locale",
+                    n=10,
+                    random_seed=0,
+                    eval_locales=["en_US"],
+                    n_selected=0,
+                    n_total=0,
+                    trajectory_ids=[],
                 ),
             ],
         )
@@ -354,14 +458,18 @@ class TestConsensusMode:
 
 
 class TestLocaleTargetedDetection:
-
     def test_no_targeted_pass(self) -> None:
         m = EvalSampleManifest(
             run_id="r",
             passes=[
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=None, n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=None,
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
             ],
@@ -373,13 +481,23 @@ class TestLocaleTargetedDetection:
             run_id="r",
             passes=[
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=None, n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=None,
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
                 EvalSamplePass(
-                    wrote_at_epoch=0, mode="full", n=None, random_seed=0,
-                    eval_locales=["en_US"], n_selected=0, n_total=0,
+                    wrote_at_epoch=0,
+                    mode="full",
+                    n=None,
+                    random_seed=0,
+                    eval_locales=["en_US"],
+                    n_selected=0,
+                    n_total=0,
                     trajectory_ids=[],
                 ),
             ],
@@ -391,7 +509,6 @@ class TestLocaleTargetedDetection:
 
 
 class TestReadManifest:
-
     def test_missing_file_returns_none(self, tmp_path: Path) -> None:
         m = read_eval_sample_manifest(tmp_path / "doesntexist.json")
         assert m is None
@@ -431,7 +548,8 @@ class TestBugReportScenario:
     """
 
     def test_full_then_locale_targeted_preserves_both(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         path = tmp_path / MANIFEST_FILENAME
         run_id = "1778723989"
@@ -439,18 +557,30 @@ class TestBugReportScenario:
         # Step 1: original full pass.
         full_ids = [f"T{i:04d}" for i in range(1024)]
         record_eval_sample_pass(
-            path, run_id=run_id,
-            mode="full", n=None, random_seed=42, eval_locales=None,
-            n_selected=1024, n_total=1024, trajectory_ids=full_ids,
+            path,
+            run_id=run_id,
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=1024,
+            n_total=1024,
+            trajectory_ids=full_ids,
             wrote_at_epoch=1778723990,
         )
 
         # Step 2: locale-targeted re-eval (the bug-triggering pass).
         en_us_ids = [f"T{i:04d}" for i in range(128)]
         record_eval_sample_pass(
-            path, run_id=run_id,
-            mode="full", n=None, random_seed=42, eval_locales=["en_US"],
-            n_selected=128, n_total=1024, trajectory_ids=en_us_ids,
+            path,
+            run_id=run_id,
+            mode="full",
+            n=None,
+            random_seed=42,
+            eval_locales=["en_US"],
+            n_selected=128,
+            n_total=1024,
+            trajectory_ids=en_us_ids,
             wrote_at_epoch=1778800000,
         )
 

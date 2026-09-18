@@ -30,7 +30,9 @@ DEFAULT_EMBEDDING_ALIAS = "embedding_model"
 
 
 def embed_query(
-    models: Dict[str, Any], alias: str, text: str,
+    models: Dict[str, Any],
+    alias: str,
+    text: str,
 ) -> Optional[List[float]]:
     """Embed a single query string; return its vector or ``None`` on any error.
 
@@ -42,23 +44,25 @@ def embed_query(
     facade = models.get(alias)
     if facade is None:
         logger.debug(
-            "  |-- embeddings: no facade for alias %r; dense query falls back "
-            "to lexical", alias,
+            "  |-- embeddings: no facade for alias %r; dense query falls back to lexical",
+            alias,
         )
         return None
     embed_fn = getattr(facade, "generate_text_embeddings", None)
     if not callable(embed_fn):
         logger.debug(
-            "  |-- embeddings: facade %r has no generate_text_embeddings; "
-            "falling back to lexical", alias,
+            "  |-- embeddings: facade %r has no generate_text_embeddings; falling back to lexical",
+            alias,
         )
         return None
     try:
         vectors = embed_fn([text])
     except Exception as e:  # noqa: BLE001 — soft-fail to lexical
         logger.warning(
-            "  |-- embeddings: query embedding via %r failed (%s: %s); "
-            "falling back to lexical", alias, type(e).__name__, e,
+            "  |-- embeddings: query embedding via %r failed (%s: %s); falling back to lexical",
+            alias,
+            type(e).__name__,
+            e,
         )
         return None
     if not vectors:

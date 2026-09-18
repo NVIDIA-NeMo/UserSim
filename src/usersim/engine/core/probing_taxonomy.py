@@ -164,25 +164,18 @@ def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
 
     raw_placeholder = doc.get("placeholder", False)
     if not isinstance(raw_placeholder, bool):
-        raise ProbingTaxonomyError(
-            f"{src_path}::placeholder: must be a bool, got "
-            f"{type(raw_placeholder).__name__}"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::placeholder: must be a bool, got {type(raw_placeholder).__name__}")
     placeholder = raw_placeholder
 
     raw_categories = doc.get("categories")
     if not isinstance(raw_categories, list) or not raw_categories:
-        raise ProbingTaxonomyError(
-            f"{src_path}::categories: must be a non-empty list"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::categories: must be a non-empty list")
 
     categories: list[Category] = []
     seen_ids: set = set()
     for idx, entry in enumerate(raw_categories):
         if not isinstance(entry, dict):
-            raise ProbingTaxonomyError(
-                f"{src_path}::categories[{idx}]: must be a mapping"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::categories[{idx}]: must be a mapping")
         cat = _build_category(
             entry,
             src_path=src_path,
@@ -192,9 +185,7 @@ def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
             taxonomy_version=taxonomy_version,
         )
         if cat.id in seen_ids:
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat.id}: duplicate category id"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat.id}: duplicate category id")
         seen_ids.add(cat.id)
         categories.append(cat)
 
@@ -233,9 +224,7 @@ def _build_category(
 
     raw_hints = entry.get("subtopic_hints")
     if not isinstance(raw_hints, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: subtopic_hints must be a list"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: subtopic_hints must be a list")
     if len(raw_hints) < MIN_SUBTOPIC_HINTS:
         raise ProbingTaxonomyError(
             f"{src_path}::{cat_id}: subtopic_hints requires at least "
@@ -245,40 +234,27 @@ def _build_category(
     hints: list[str] = []
     for hi, raw_hint in enumerate(raw_hints):
         if not isinstance(raw_hint, str) or not raw_hint.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::subtopic_hints[{hi}]: "
-                "must be a non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::subtopic_hints[{hi}]: must be a non-empty string")
         hints.append(raw_hint.strip())
 
     # Optional entity-type scoping (grounded dynamic-tier probes set it).
     raw_types = entry.get("applies_to_types", []) or []
     if not isinstance(raw_types, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: applies_to_types must be a list when present"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: applies_to_types must be a list when present")
     applies_to_types: list[str] = []
     for ti, rt in enumerate(raw_types):
         if not isinstance(rt, str) or not rt.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::applies_to_types[{ti}]: must be a "
-                "non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::applies_to_types[{ti}]: must be a non-empty string")
         applies_to_types.append(rt.strip())
 
     # Optional persona-tag affinities for soft-weighting (all optional strings).
     raw_aff = entry.get("persona_affinities", []) or []
     if not isinstance(raw_aff, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: persona_affinities must be a list when present"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: persona_affinities must be a list when present")
     persona_affinities: list[str] = []
     for ai, ra in enumerate(raw_aff):
         if not isinstance(ra, str) or not ra.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::persona_affinities[{ai}]: must be a "
-                "non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::persona_affinities[{ai}]: must be a non-empty string")
         persona_affinities.append(ra.strip())
 
     return Category(
@@ -293,18 +269,13 @@ def _build_category(
     )
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise ProbingTaxonomyError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise ProbingTaxonomyError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise ProbingTaxonomyError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -353,9 +324,7 @@ def select_category(
     if category_weights:
         # Soft prior: every candidate keeps a positive floor so no category is
         # ever starved (population coverage preserved).
-        weights = [
-            max(1e-6, float(category_weights.get(c.id, 1.0))) for c in candidates
-        ]
+        weights = [max(1e-6, float(category_weights.get(c.id, 1.0))) for c in candidates]
         category = rng.choices(candidates, weights=weights, k=1)[0]
     else:
         category = rng.choice(candidates)
@@ -403,7 +372,10 @@ def _default_env_prefix(family: str) -> str:
 
 
 def taxonomy_path_for(
-    family: str, locale: str, *, filename: str = "categories.yaml",
+    family: str,
+    locale: str,
+    *,
+    filename: str = "categories.yaml",
     env_prefix: Optional[str] = None,
 ) -> Path:
     """Path the loader tries for ``(family, locale)``, honoring an env override.
@@ -417,11 +389,15 @@ def taxonomy_path_for(
     if override:
         return Path(override)
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir(family) / locale / filename
 
 
 def load_probing_taxonomy_for(
-    family: str, locale: str, *, filename: str = "categories.yaml",
+    family: str,
+    locale: str,
+    *,
+    filename: str = "categories.yaml",
     env_prefix: Optional[str] = None,
 ) -> ProbingTaxonomy:
     """Return the cached taxonomy for ``(family, locale, filename)``.
@@ -435,23 +411,33 @@ def load_probing_taxonomy_for(
         if cached is not None:
             return cached
         path = taxonomy_path_for(
-            family, locale, filename=filename, env_prefix=env_prefix,
+            family,
+            locale,
+            filename=filename,
+            env_prefix=env_prefix,
         )
         taxonomy = load_probing_taxonomy(path)
         _TAXONOMY_CACHE[key] = taxonomy
         logger.info(
             "probing_taxonomy: loaded %s v%s (%d categories) for %s/%s from %s",
-            taxonomy.taxonomy_id, taxonomy.taxonomy_version,
-            len(taxonomy.categories), family, locale, path,
+            taxonomy.taxonomy_id,
+            taxonomy.taxonomy_version,
+            len(taxonomy.categories),
+            family,
+            locale,
+            path,
         )
         return taxonomy
 
 
 # ── sov_ai_dynamic back-compat shims (family = "sov_ai_dynamic") ──────────
 
+
 def default_probing_taxonomy_path(locale: str) -> Path:
     return taxonomy_path_for(
-        "sov_ai_dynamic", locale, filename="categories.yaml",
+        "sov_ai_dynamic",
+        locale,
+        filename="categories.yaml",
         env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
     )
 
@@ -463,7 +449,9 @@ def probing_taxonomy_path_for(locale: str) -> Path:
 def load_probing_taxonomy_for_locale(locale: str) -> ProbingTaxonomy:
     """Cached sov_ai_dynamic taxonomy for ``locale`` (back-compat wrapper)."""
     return load_probing_taxonomy_for(
-        "sov_ai_dynamic", locale, filename="categories.yaml",
+        "sov_ai_dynamic",
+        locale,
+        filename="categories.yaml",
         env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
     )
 

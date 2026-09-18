@@ -78,33 +78,35 @@ def _outcome(
     nemotron_personas_version: str | None = "2026-04",
     scenario_prompt_version: str | None = "v1.0",
 ) -> str:
-    return json.dumps({
-        "status": status,
-        "failure_class": failure_class,
-        "failure_attribution": failure_attribution,
-        "failure_detail": "",
-        "n_turns": n_turns,
-        "n_tool_calls": n_tool_calls,
-        "n_user_query_attempts": n_user_query_attempts,
-        "n_user_followup_retries": n_user_followup_retries,
-        "n_assistant_inline_failures": n_assistant_inline_failures,
-        "n_api_response_rerolls": n_api_response_rerolls,
-        "n_fourth_wall_triggers": n_fourth_wall_triggers,
-        "n_user_role_violations": n_user_role_violations,
-        "warnings": [],
-        "early_stop": early_stop,
-        "per_model_input_tokens": per_model_input_tokens or {"user_model": 100, "assistant_model": 80},
-        "per_model_output_tokens": per_model_output_tokens or {"user_model": 50, "assistant_model": 90},
-        "per_model_calls": per_model_calls or {"user_model": 3, "assistant_model": 3},
-        "wall_clock_s_by_alias": wall_clock_s_by_alias or {"user_model": 4.0, "assistant_model": 6.0},
-        "wall_clock_s": wall_clock_s,
-        "provenance": {
-            "nemotron_personas_version": nemotron_personas_version,
-            "scenario_prompt_version": scenario_prompt_version,
-            "code_sha": code_sha,
-            "bank_version": {},
-        },
-    })
+    return json.dumps(
+        {
+            "status": status,
+            "failure_class": failure_class,
+            "failure_attribution": failure_attribution,
+            "failure_detail": "",
+            "n_turns": n_turns,
+            "n_tool_calls": n_tool_calls,
+            "n_user_query_attempts": n_user_query_attempts,
+            "n_user_followup_retries": n_user_followup_retries,
+            "n_assistant_inline_failures": n_assistant_inline_failures,
+            "n_api_response_rerolls": n_api_response_rerolls,
+            "n_fourth_wall_triggers": n_fourth_wall_triggers,
+            "n_user_role_violations": n_user_role_violations,
+            "warnings": [],
+            "early_stop": early_stop,
+            "per_model_input_tokens": per_model_input_tokens or {"user_model": 100, "assistant_model": 80},
+            "per_model_output_tokens": per_model_output_tokens or {"user_model": 50, "assistant_model": 90},
+            "per_model_calls": per_model_calls or {"user_model": 3, "assistant_model": 3},
+            "wall_clock_s_by_alias": wall_clock_s_by_alias or {"user_model": 4.0, "assistant_model": 6.0},
+            "wall_clock_s": wall_clock_s,
+            "provenance": {
+                "nemotron_personas_version": nemotron_personas_version,
+                "scenario_prompt_version": scenario_prompt_version,
+                "code_sha": code_sha,
+                "bank_version": {},
+            },
+        }
+    )
 
 
 def _messages(user_turns: list[str], assistant_turns: list[str]) -> str:
@@ -140,12 +142,14 @@ def trajectory_df():
                 ["Sure, what is it?", "Glad I could help."],
             ),
             "simulation_outcome": _outcome(
-                status="ok", n_turns=2,
+                status="ok",
+                n_turns=2,
                 per_model_calls={"user_model": 2, "assistant_model": 2, "judge_model": 2},
                 per_model_input_tokens={"user_model": 100, "assistant_model": 80, "judge_model": 200},
                 per_model_output_tokens={"user_model": 30, "assistant_model": 60, "judge_model": 40},
                 wall_clock_s_by_alias={"user_model": 2.0, "assistant_model": 3.5, "judge_model": 1.0},
-                wall_clock_s=8.0, early_stop=True,
+                wall_clock_s=8.0,
+                early_stop=True,
             ),
         },
         {
@@ -164,7 +168,8 @@ def trajectory_df():
                 status="failed",
                 failure_class="user_query_gate_exhausted",
                 failure_attribution="user_model",
-                n_turns=0, n_user_query_attempts=3,
+                n_turns=0,
+                n_user_query_attempts=3,
             ),
         },
         {
@@ -205,7 +210,10 @@ def trajectory_df():
                 ["It is 22 degrees in Tokyo.", "Anytime."],
             ),
             "simulation_outcome": _outcome(
-                status="ok", n_turns=2, n_tool_calls=1, early_stop=True,
+                status="ok",
+                n_turns=2,
+                n_tool_calls=1,
+                early_stop=True,
                 per_model_calls={"user_model": 2, "assistant_model": 2, "api_response_model": 1},
                 per_model_input_tokens={"user_model": 80, "assistant_model": 100, "api_response_model": 120},
                 per_model_output_tokens={"user_model": 30, "assistant_model": 70, "api_response_model": 25},
@@ -223,10 +231,13 @@ def trajectory_df():
             "disclosure_style": "upfront",
             "persona_grounding": False,
             "conversation_messages": _messages(
-                ["What's the weather?"], ["I can't help with that."],
+                ["What's the weather?"],
+                ["I can't help with that."],
             ),
             "simulation_outcome": _outcome(
-                status="ok", n_turns=1, n_tool_calls=0,
+                status="ok",
+                n_turns=1,
+                n_tool_calls=0,
             ),
         },
         {
@@ -245,7 +256,10 @@ def trajectory_df():
                 ["京都は晴れです。", "どういたしまして。"],
             ),
             "simulation_outcome": _outcome(
-                status="ok", n_turns=2, n_tool_calls=1, n_api_response_rerolls=1,
+                status="ok",
+                n_turns=2,
+                n_tool_calls=1,
+                n_api_response_rerolls=1,
                 code_sha="def456",  # different SHA -> tests provenance drift detection
             ),
         },
@@ -292,7 +306,8 @@ def evaluator_df(trajectory_df):
                     },
                 },
                 "scorers": {},
-                "skipped": False, "skipped_reason": None,
+                "skipped": False,
+                "skipped_reason": None,
             }
         elif idx == 1:
             # Short-circuit because the failed trajectory has no assistant turns.
@@ -300,7 +315,8 @@ def evaluator_df(trajectory_df):
                 "envelope": base_envelope,
                 "axes": {},
                 "scorers": {},
-                "skipped": True, "skipped_reason": "no_assistant_messages",
+                "skipped": True,
+                "skipped_reason": "no_assistant_messages",
             }
         elif idx == 2:
             # Confrontational row scored lower.
@@ -317,7 +333,8 @@ def evaluator_df(trajectory_df):
                     },
                 },
                 "scorers": {},
-                "skipped": False, "skipped_reason": None,
+                "skipped": False,
+                "skipped_reason": None,
             }
         elif idx == 3:
             # Tool-calling OK with a tool_use scorer output.
@@ -341,7 +358,8 @@ def evaluator_df(trajectory_df):
                         "status_proposal": True,
                     }
                 },
-                "skipped": False, "skipped_reason": None,
+                "skipped": False,
+                "skipped_reason": None,
             }
         elif idx == 4:
             # Skipped via envelope_match (the partial-re-run path).
@@ -358,7 +376,8 @@ def evaluator_df(trajectory_df):
                     },
                 },
                 "scorers": {},
-                "skipped": True, "skipped_reason": "envelope_match",
+                "skipped": True,
+                "skipped_reason": "envelope_match",
             }
         else:
             # Last row: tool_use scorer with an error.
@@ -383,7 +402,8 @@ def evaluator_df(trajectory_df):
                         "error": "RuntimeError: boom",
                     }
                 },
-                "skipped": False, "skipped_reason": None,
+                "skipped": False,
+                "skipped_reason": None,
             }
         eval_cells.append(json.dumps(cell))
 

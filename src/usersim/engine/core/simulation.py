@@ -81,10 +81,18 @@ class _AssistantModelError(Exception):
         self.original = original
 
 
-_NON_ASCII_LOCALES = frozenset({
-    "ja_JP", "zh_CN", "zh_TW", "ko_KR",
-    "hi_Deva_IN", "ar_SA", "th_TH", "he_IL",
-})
+_NON_ASCII_LOCALES = frozenset(
+    {
+        "ja_JP",
+        "zh_CN",
+        "zh_TW",
+        "ko_KR",
+        "hi_Deva_IN",
+        "ar_SA",
+        "th_TH",
+        "he_IL",
+    }
+)
 
 
 def _is_non_ascii_locale(locale: str) -> bool:
@@ -135,45 +143,41 @@ _ROMANIZED_JUDGE_CLAUSE_BY_LOCALE = {
 # in ``core/locale.py``. Native-script variants get the token bump + a
 # script-explicit directive; romanized twins get the romanized directive +
 # folded judge clause (same shape as ``hi_Latn_IN``).
-_INDIA_NATIVE_LOCALES = {
-    loc: v for loc, v in INDIA_VARIANT_LOCALES.items() if not v.romanized
-}
-_INDIA_ROMANIZED_LOCALES = {
-    loc: v for loc, v in INDIA_VARIANT_LOCALES.items() if v.romanized
-}
+_INDIA_NATIVE_LOCALES = {loc: v for loc, v in INDIA_VARIANT_LOCALES.items() if not v.romanized}
+_INDIA_ROMANIZED_LOCALES = {loc: v for loc, v in INDIA_VARIANT_LOCALES.items() if v.romanized}
 
 # Native Indic/Arabic scripts are token-dense like the other non-ASCII locales.
 _NON_ASCII_LOCALES = frozenset(_NON_ASCII_LOCALES | set(_INDIA_NATIVE_LOCALES))
 
 # Script-explicit directive label for each native-script variant.
-_SCRIPT_LABEL_BY_LOCALE.update({
-    loc: v.script_label
-    for loc, v in _INDIA_NATIVE_LOCALES.items()
-    if v.script_label
-})
+_SCRIPT_LABEL_BY_LOCALE.update({loc: v.script_label for loc, v in _INDIA_NATIVE_LOCALES.items() if v.script_label})
 
 # Romanized twins ride the LLM-judge language clause (lingua can't detect them).
 ROMANIZED_LOCALES = frozenset(ROMANIZED_LOCALES | set(_INDIA_ROMANIZED_LOCALES))
 
-_ROMANIZED_DIRECTIVE_BY_LOCALE.update({
-    loc: (
-        f" You MUST write in romanized {v.language_display} using the "
-        "Latin/Roman alphabet — do NOT use the native script, and do NOT "
-        "switch to English."
-    )
-    for loc, v in _INDIA_ROMANIZED_LOCALES.items()
-})
+_ROMANIZED_DIRECTIVE_BY_LOCALE.update(
+    {
+        loc: (
+            f" You MUST write in romanized {v.language_display} using the "
+            "Latin/Roman alphabet — do NOT use the native script, and do NOT "
+            "switch to English."
+        )
+        for loc, v in _INDIA_ROMANIZED_LOCALES.items()
+    }
+)
 
-_ROMANIZED_JUDGE_CLAUSE_BY_LOCALE.update({
-    loc: (
-        f"\n\nADDITIONALLY: the USER message MUST be written in "
-        f"{v.language_display} using the Latin/Roman alphabet (romanized "
-        f"{v.language_display}), NOT the native script and NOT English. If it "
-        "is not, give the rating failure and include the token [LANGUAGE] in "
-        "your explanation."
-    )
-    for loc, v in _INDIA_ROMANIZED_LOCALES.items()
-})
+_ROMANIZED_JUDGE_CLAUSE_BY_LOCALE.update(
+    {
+        loc: (
+            f"\n\nADDITIONALLY: the USER message MUST be written in "
+            f"{v.language_display} using the Latin/Roman alphabet (romanized "
+            f"{v.language_display}), NOT the native script and NOT English. If it "
+            "is not, give the rating failure and include the token [LANGUAGE] in "
+            "your explanation."
+        )
+        for loc, v in _INDIA_ROMANIZED_LOCALES.items()
+    }
+)
 
 
 def _script_directive(locale: str | None) -> str:
@@ -182,10 +186,7 @@ def _script_directive(locale: str | None) -> str:
         return ""
     label = _SCRIPT_LABEL_BY_LOCALE.get(locale)
     if label:
-        return (
-            f" You MUST use the native {label} script; do NOT romanize or "
-            "transliterate into Latin letters."
-        )
+        return f" You MUST use the native {label} script; do NOT romanize or transliterate into Latin letters."
     return _ROMANIZED_DIRECTIVE_BY_LOCALE.get(locale, "")
 
 
@@ -277,9 +278,7 @@ def make_result(
         "conversation_metadata": json.dumps(metadata, ensure_ascii=False, default=str),
         "conversation_status": status,
         "simulation_outcome": outcome.to_json() if outcome is not None else None,
-        "simulation_traces": (
-            serialize_traces(traces) if traces is not None else None
-        ),
+        "simulation_traces": (serialize_traces(traces) if traces is not None else None),
     }
 
 
@@ -326,6 +325,7 @@ def make_failed(
 # Typed conversation state
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ConversationState:
     """First-class representation of simulation state during a conversation.
@@ -371,10 +371,7 @@ def _probe_should_succeed(probe: ProbeAdapter, state: ConversationState) -> bool
     try:
         return bool(fn(state))
     except Exception as e:
-        logger.debug(
-            f"  |-- probe.should_succeed raised {type(e).__name__}: {e}; "
-            "defaulting to True"
-        )
+        logger.debug(f"  |-- probe.should_succeed raised {type(e).__name__}: {e}; defaulting to True")
         return True
 
 
@@ -401,10 +398,7 @@ def _model_failure_result(
     state.outcome.set_n_turns(n_turns)
     state.outcome.set_n_tool_calls(len(state.metadata.get("tools_called", [])))
     state.outcome.set_wall_clock_s(time.monotonic() - loop_started_at)
-    detail = (
-        f"{alias} raised on turn {turn_idx + 1}: "
-        f"{type(error).__name__}: {error}"
-    )
+    detail = f"{alias} raised on turn {turn_idx + 1}: {type(error).__name__}: {error}"
     logger.warning("  |-- %s: %s", probe.label, detail)
     outcome = state.outcome.finalize(
         status=OutcomeStatus.FAILED,
@@ -446,41 +440,51 @@ def _model_failure_result(
 
 _FOURTH_WALL_PHRASES = (
     # ── English (en_US / en_IN / en_SG) ─────────────────────────────
-    "opening line", "opening message",
-    "start the chat", "start the conversation",
-    "as an ai", "as a language model",
+    "opening line",
+    "opening message",
+    "start the chat",
+    "start the conversation",
+    "as an ai",
+    "as a language model",
     "in this simulation",
-
     # ── French (fr_FR) ──────────────────────────────────────────────
-    "en tant qu'ia", "en tant qu'ai",
-    "modèle de langage", "modèle linguistique",
+    "en tant qu'ia",
+    "en tant qu'ai",
+    "modèle de langage",
+    "modèle linguistique",
     "dans cette simulation",
-    "commencer la conversation", "démarrer la conversation",
-    "premier message", "ouvrir la conversation",
-
+    "commencer la conversation",
+    "démarrer la conversation",
+    "premier message",
+    "ouvrir la conversation",
     # ── Portuguese (pt_BR) ──────────────────────────────────────────
-    "como uma ia", "como ia",
-    "modelo de linguagem", "modelo linguístico",
-    "nesta simulação", "nessa simulação",
-    "começar a conversa", "iniciar a conversa",
+    "como uma ia",
+    "como ia",
+    "modelo de linguagem",
+    "modelo linguístico",
+    "nesta simulação",
+    "nessa simulação",
+    "começar a conversa",
+    "iniciar a conversa",
     "primeira mensagem",
-
     # ── Japanese (ja_JP) ────────────────────────────────────────────
-    "aiとして", "ai として",
+    "aiとして",
+    "ai として",
     "言語モデル",
-    "このシミュレーション", "シミュレーションでは",
+    "このシミュレーション",
+    "シミュレーションでは",
     "最初のメッセージ",
-    "会話を開始", "会話を始め",
-
+    "会話を開始",
+    "会話を始め",
     # ── Hindi Devanagari (hi_Deva_IN) ───────────────────────────────
     "एआई के रूप में",
     "भाषा मॉडल",
     "इस सिमुलेशन में",
     "पहला संदेश",
     "बातचीत शुरू",
-
     # ── Korean (ko_KR) ──────────────────────────────────────────────
-    "ai로서", "ai 로서",
+    "ai로서",
+    "ai 로서",
     "언어 모델",
     "이 시뮬레이션",
     "첫 메시지",
@@ -627,10 +631,12 @@ def _build_user_followup_messages(
     for extra in extra_instructions or []:
         if isinstance(extra, str) and extra.strip():
             blocks.extend(["", extra.strip()])
-    blocks.extend([
-        "",
-        "Now write exactly one short USER message. Plain text only.",
-    ])
+    blocks.extend(
+        [
+            "",
+            "Now write exactly one short USER message. Plain text only.",
+        ]
+    )
     return [
         {"role": "system", "content": user_system_prompt},
         {"role": "user", "content": "\n".join(blocks)},
@@ -640,6 +646,7 @@ def _build_user_followup_messages(
 # ---------------------------------------------------------------------------
 # Unified conversation loop
 # ---------------------------------------------------------------------------
+
 
 class ConversationLoop:
     """Runs the shared multi-turn simulation lifecycle for any probe."""
@@ -688,32 +695,33 @@ class ConversationLoop:
             state.messages.append({"role": "system", "content": asst_system})
         state.messages.append({"role": "user", "content": verbatim_text})
 
-        query_instruction = (
-            USER_QUERY_INSTRUCTION_GROUNDED if use_grounded
-            else USER_QUERY_INSTRUCTION
-        )
+        query_instruction = USER_QUERY_INSTRUCTION_GROUNDED if use_grounded else USER_QUERY_INSTRUCTION
         state.user_history = [
             {"role": "system", "content": probe.get_user_system_prompt()},
             {"role": "user", "content": query_instruction},
             {"role": "assistant", "content": verbatim_text},
         ]
 
-        state.metadata.setdefault("user_judge_ratings", []).append({
-            "turn_idx": 0,
-            "rating": "bypassed",
-            "explanation": "verbatim turn-1 injection from curated bank",
-            "success": True,
-        })
+        state.metadata.setdefault("user_judge_ratings", []).append(
+            {
+                "turn_idx": 0,
+                "rating": "bypassed",
+                "explanation": "verbatim turn-1 injection from curated bank",
+                "success": True,
+            }
+        )
         state.metadata.setdefault("frustration_events", [])
 
-        state.outcome.add_trace(SimulationTrace(
-            kind=TraceKind.USER_QUERY_GATE,
-            turn_idx=0,
-            call_idx=0,
-            model_alias=None,
-            rating="bypassed",
-            detail="verbatim turn-1 from curated bank — gate skipped",
-        ))
+        state.outcome.add_trace(
+            SimulationTrace(
+                kind=TraceKind.USER_QUERY_GATE,
+                turn_idx=0,
+                call_idx=0,
+                model_alias=None,
+                rating="bypassed",
+                detail="verbatim turn-1 from curated bank — gate skipped",
+            )
+        )
 
     # ── Standard turn-1 generation + user-judge gate ───────────────
     def _generate_and_gate_first_turn(
@@ -767,26 +775,20 @@ class ConversationLoop:
                     f"{type(e).__name__}: {e}"
                 )
                 state.outcome.inc_user_role_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.USER_ROLE_VIOLATION,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_USER,
-                    rating="failure",
-                    detail=(
-                        f"user_model raised "
-                        f"{type(e).__name__}: {e}"
-                    )[:500],
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_ROLE_VIOLATION,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_USER,
+                        rating="failure",
+                        detail=(f"user_model raised {type(e).__name__}: {e}")[:500],
+                    )
+                )
                 continue
-            user_query = (
-                resp.get("content", "") if isinstance(resp, dict) else ""
-            )
+            user_query = resp.get("content", "") if isinstance(resp, dict) else ""
 
-            logger.debug(
-                f"  |-- {probe.label}: user query generated "
-                f"({len(user_query.split())} words)"
-            )
+            logger.debug(f"  |-- {probe.label}: user query generated ({len(user_query.split())} words)")
 
             # Reject empty / whitespace-only output — the user-LLM
             # produced nothing usable. Without this check, the loop
@@ -794,33 +796,31 @@ class ConversationLoop:
             # the judge gate (depending on rubric) might pass it.
             if not user_query.strip():
                 state.outcome.inc_user_role_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.USER_ROLE_VIOLATION,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_USER,
-                    rating="failure",
-                    detail="empty / whitespace-only user_model output",
-                ))
-                logger.debug(
-                    f"  |-- {probe.label}: empty user query "
-                    f"(attempt {attempt + 1}/{max_query_attempts})"
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_ROLE_VIOLATION,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_USER,
+                        rating="failure",
+                        detail="empty / whitespace-only user_model output",
+                    )
                 )
+                logger.debug(f"  |-- {probe.label}: empty user query (attempt {attempt + 1}/{max_query_attempts})")
                 continue
 
             if _is_assistant_refusal_echo(user_query):
                 state.outcome.inc_user_role_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.USER_ROLE_VIOLATION,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_USER,
-                    rating="failure",
-                    detail=(
-                        "user_model echoed an assistant-style refusal "
-                        "instead of writing a user query"
-                    ),
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_ROLE_VIOLATION,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_USER,
+                        rating="failure",
+                        detail=("user_model echoed an assistant-style refusal instead of writing a user query"),
+                    )
+                )
                 logger.debug(
                     f"  |-- {probe.label}: assistant-refusal echo "
                     f"pre-filter triggered on turn-1 "
@@ -830,12 +830,14 @@ class ConversationLoop:
 
             if _is_fourth_wall_break(user_query):
                 state.outcome.inc_fourth_wall_triggers()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.FOURTH_WALL_PREFILTER,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    detail="initial user query flagged",
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.FOURTH_WALL_PREFILTER,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        detail="initial user query flagged",
+                    )
+                )
                 logger.debug(
                     f"  |-- {probe.label}: fourth-wall pre-filter triggered "
                     f"(attempt {attempt + 1}/{max_query_attempts})"
@@ -843,44 +845,45 @@ class ConversationLoop:
                 continue
 
             if enforce_language and not _is_user_script_compliant(
-                user_query, locale,
-                min_script=min_script, min_letters=min_letters,
+                user_query,
+                locale,
+                min_script=min_script,
+                min_letters=min_letters,
             ):
                 fail_kind = "language"
                 state.outcome.inc_user_language_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.LANGUAGE_PREFILTER,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_USER,
-                    rating="failure",
-                    detail=(
-                        f"turn-1 not in expected script for locale={locale}"
-                    ),
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.LANGUAGE_PREFILTER,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_USER,
+                        rating="failure",
+                        detail=(f"turn-1 not in expected script for locale={locale}"),
+                    )
+                )
                 logger.debug(
-                    f"  |-- {probe.label}: language pre-filter triggered "
-                    f"(attempt {attempt + 1}/{max_query_attempts})"
+                    f"  |-- {probe.label}: language pre-filter triggered (attempt {attempt + 1}/{max_query_attempts})"
                 )
                 continue
 
             gate_prompt = probe.format_gate_prompt(user_query, "N/A")
-            language_clause = (
-                _language_judge_clause(locale)
-                if enforce_language and locale in ROMANIZED_LOCALES
-                else ""
-            )
+            language_clause = _language_judge_clause(locale) if enforce_language and locale in ROMANIZED_LOCALES else ""
             expl, rating, ok = run_inline_judge(
-                models, MODEL_JUDGE, gate_prompt + language_clause,
+                models,
+                MODEL_JUDGE,
+                gate_prompt + language_clause,
             )
-            state.outcome.add_trace(SimulationTrace(
-                kind=TraceKind.USER_QUERY_GATE,
-                turn_idx=0,
-                call_idx=attempt,
-                model_alias=MODEL_JUDGE,
-                rating=rating,
-                detail=(expl[:500] if expl else None),
-            ))
+            state.outcome.add_trace(
+                SimulationTrace(
+                    kind=TraceKind.USER_QUERY_GATE,
+                    turn_idx=0,
+                    call_idx=attempt,
+                    model_alias=MODEL_JUDGE,
+                    rating=rating,
+                    detail=(expl[:500] if expl else None),
+                )
+            )
             if ok:
                 break
             # When the gate failed specifically because the turn was not in
@@ -891,35 +894,30 @@ class ConversationLoop:
             if language_clause and "[LANGUAGE]" in (expl or ""):
                 fail_kind = "language"
                 state.outcome.inc_user_language_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.LANGUAGE_PREFILTER,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_JUDGE,
-                    rating=rating,
-                    detail=(
-                        f"turn-1 judged not in expected language for "
-                        f"locale={locale}"
-                    ),
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.LANGUAGE_PREFILTER,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_JUDGE,
+                        rating=rating,
+                        detail=(f"turn-1 judged not in expected language for locale={locale}"),
+                    )
+                )
             else:
                 fail_kind = "gate"
                 state.outcome.inc_user_role_violations()
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.USER_ROLE_VIOLATION,
-                    turn_idx=0,
-                    call_idx=attempt,
-                    model_alias=MODEL_JUDGE,
-                    rating=rating,
-                    detail=(
-                        expl[:500] if expl
-                        else "user-judge gate refused query"
-                    ),
-                ))
-            logger.debug(
-                f"  |-- {probe.label}: gate check failed "
-                f"(attempt {attempt + 1}/{max_query_attempts})"
-            )
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_ROLE_VIOLATION,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_JUDGE,
+                        rating=rating,
+                        detail=(expl[:500] if expl else "user-judge gate refused query"),
+                    )
+                )
+            logger.debug(f"  |-- {probe.label}: gate check failed (attempt {attempt + 1}/{max_query_attempts})")
         return user_query, ok, rating, expl, fail_kind
 
     def _generate_and_judge_assistant_turn(
@@ -953,13 +951,8 @@ class ConversationLoop:
         owns the structured-failure path.
         """
         max_attempts = max(1, int(getattr(cfg, "max_assistant_attempts", 1) or 1))
-        if max_attempts > 1 and not getattr(
-            probe, "supports_assistant_resampling", True
-        ):
-            logger.debug(
-                f"  |-- {probe.label}: assistant resampling not supported "
-                f"by this probe; capping to 1 attempt"
-            )
+        if max_attempts > 1 and not getattr(probe, "supports_assistant_resampling", True):
+            logger.debug(f"  |-- {probe.label}: assistant resampling not supported by this probe; capping to 1 attempt")
             max_attempts = 1
 
         messages_checkpoint = len(state.messages)
@@ -977,14 +970,10 @@ class ConversationLoop:
             # caller with the error's own alias, anything else
             # propagates) — see _AssistantModelError.
             try:
-                assistant_resp = call_llm(
-                    models, MODEL_ASSISTANT, assistant_msgs, **call_kwargs
-                )
+                assistant_resp = call_llm(models, MODEL_ASSISTANT, assistant_msgs, **call_kwargs)
             except Exception as e:
                 raise _AssistantModelError(e) from e
-            synthesis_content = probe.after_assistant_turn(
-                models, state, assistant_resp, cfg
-            )
+            synthesis_content = probe.after_assistant_turn(models, state, assistant_resp, cfg)
 
             # The assistant's thinking trace, when the model emits one
             # (gemma's enable_thinking, gpt-oss reasoning, ...). Taken off
@@ -1008,14 +997,11 @@ class ConversationLoop:
             # discards it.
             trace_text = (
                 (assistant_resp.get("reasoning_content") or "").strip()
-                if isinstance(assistant_resp, dict)
-                and getattr(cfg, "store_reasoning", True) else ""
+                if isinstance(assistant_resp, dict) and getattr(cfg, "store_reasoning", True)
+                else ""
             )
             appended = state.messages[messages_checkpoint:]
-            if trace_text and not any(
-                m.get("reasoning_content") for m in appended
-                if m.get("role") == "assistant"
-            ):
+            if trace_text and not any(m.get("reasoning_content") for m in appended if m.get("role") == "assistant"):
                 for _m in reversed(appended):
                     if _m.get("role") == "assistant":
                         _m["reasoning_content"] = trace_text
@@ -1023,13 +1009,9 @@ class ConversationLoop:
 
             asst_judge_prompt = probe.format_assistant_judge_prompt(
                 synthesis_content,
-                format_conversation_history_for_prompt(
-                    project_public_dialogue(state.messages[:-1])
-                ),
+                format_conversation_history_for_prompt(project_public_dialogue(state.messages[:-1])),
             )
-            asst_expl, asst_rating, asst_ok, parse_ok = run_inline_judge_ex(
-                models, MODEL_JUDGE, asst_judge_prompt
-            )
+            asst_expl, asst_rating, asst_ok, parse_ok = run_inline_judge_ex(models, MODEL_JUDGE, asst_judge_prompt)
             if not asst_ok and not parse_ok:
                 # The "failure" is a parser default (no valid <rating>
                 # even after the reformat nudge), not a judgment — don't
@@ -1038,9 +1020,7 @@ class ConversationLoop:
                 # produce a verdict, fall through as a failure but mark
                 # the entry so judge errors are distinguishable from
                 # genuine rejections in the audit trail.
-                asst_expl, asst_rating, asst_ok, parse_ok = (
-                    run_inline_judge_ex(models, MODEL_JUDGE, asst_judge_prompt)
-                )
+                asst_expl, asst_rating, asst_ok, parse_ok = run_inline_judge_ex(models, MODEL_JUDGE, asst_judge_prompt)
             entry = {
                 "turn_idx": turn_idx,
                 "attempt": attempt,
@@ -1051,17 +1031,18 @@ class ConversationLoop:
             if not parse_ok:
                 entry["judge_parse_error"] = True
             state.metadata.setdefault("assistant_judge_ratings", []).append(entry)
-            state.outcome.add_trace(SimulationTrace(
-                kind=TraceKind.ASSISTANT_QUALITY,
-                turn_idx=turn_idx,
-                call_idx=attempt,
-                model_alias=MODEL_JUDGE,
-                rating=asst_rating,
-                detail=(
-                    ("[judge-parse-error] " if not parse_ok else "")
-                    + asst_expl
-                )[:500] if (asst_expl or not parse_ok) else None,
-            ))
+            state.outcome.add_trace(
+                SimulationTrace(
+                    kind=TraceKind.ASSISTANT_QUALITY,
+                    turn_idx=turn_idx,
+                    call_idx=attempt,
+                    model_alias=MODEL_JUDGE,
+                    rating=asst_rating,
+                    detail=(("[judge-parse-error] " if not parse_ok else "") + asst_expl)[:500]
+                    if (asst_expl or not parse_ok)
+                    else None,
+                )
+            )
             if asst_ok:
                 break
             if attempt < max_attempts - 1:
@@ -1085,9 +1066,7 @@ class ConversationLoop:
         locale: str = "en_US",
         provenance: Provenance | None = None,
     ) -> dict:
-        state = ConversationState(
-            outcome=OutcomeBuilder(provenance=provenance or Provenance())
-        )
+        state = ConversationState(outcome=OutcomeBuilder(provenance=provenance or Provenance()))
         # Wire the per-row outcome builder back to the existing
         # builder we passed via Provenance. Asset-driven probes
         # constructed via ``BankBackedProbe`` already pin
@@ -1115,10 +1094,7 @@ class ConversationLoop:
                 )
 
         use_grounded = data.get("persona_grounding", False)
-        query_instruction = (
-            USER_QUERY_INSTRUCTION_GROUNDED if use_grounded
-            else USER_QUERY_INSTRUCTION
-        )
+        query_instruction = USER_QUERY_INSTRUCTION_GROUNDED if use_grounded else USER_QUERY_INSTRUCTION
 
         # ── Verbatim turn-1 injection (asset-driven probes) ──────────
         # If the probe's optional ``get_verbatim_first_user_turn``
@@ -1144,7 +1120,9 @@ class ConversationLoop:
 
         if verbatim_first is not None:
             self._inject_verbatim_first_turn(
-                probe, state, verbatim_first,
+                probe,
+                state,
+                verbatim_first,
                 use_grounded=use_grounded,
             )
             data["user_query"] = verbatim_first
@@ -1153,16 +1131,14 @@ class ConversationLoop:
             rating = "bypassed"
             expl = ""
         else:
-            user_query, ok, rating, expl, fail_kind = (
-                self._generate_and_gate_first_turn(
-                    models=models,
-                    state=state,
-                    probe=probe,
-                    cfg=cfg,
-                    query_instruction=query_instruction,
-                    locale=locale,
-                    _t_loop_start=_t_loop_start,
-                )
+            user_query, ok, rating, expl, fail_kind = self._generate_and_gate_first_turn(
+                models=models,
+                state=state,
+                probe=probe,
+                cfg=cfg,
+                query_instruction=query_instruction,
+                locale=locale,
+                _t_loop_start=_t_loop_start,
             )
             if not ok:
                 state.outcome.set_wall_clock_s(
@@ -1181,8 +1157,7 @@ class ConversationLoop:
                 else:
                     failure_class = FailureClass.USER_QUERY_GATE_EXHAUSTED
                     failure_detail = (
-                        f"{probe.label} query gate check failed after "
-                        f"{getattr(cfg, 'max_query_attempts', 3)} attempts"
+                        f"{probe.label} query gate check failed after {getattr(cfg, 'max_query_attempts', 3)} attempts"
                     )
                 outcome = state.outcome.finalize(
                     status=OutcomeStatus.FAILED,
@@ -1199,8 +1174,11 @@ class ConversationLoop:
                 # landed on state.messages — matches the prior
                 # ``make_failed`` schema.
                 result = make_result(
-                    state.messages, state.metadata, False,
-                    outcome=outcome, traces=state.outcome.traces(),
+                    state.messages,
+                    state.metadata,
+                    False,
+                    outcome=outcome,
+                    traces=state.outcome.traces(),
                 )
                 result["num_turns"] = 0
                 result["num_tool_calls"] = 0
@@ -1215,27 +1193,22 @@ class ConversationLoop:
             asst_system = probe.get_assistant_system_prompt()
             state.messages = []
             if asst_system:
-                state.messages.append(
-                    {"role": "system", "content": asst_system}
-                )
+                state.messages.append({"role": "system", "content": asst_system})
             state.messages.append({"role": "user", "content": user_query})
-            state.metadata.setdefault("user_judge_ratings", []).append({
-                "turn_idx": 0,
-                "rating": rating,
-                "explanation": expl,
-                "success": ok,
-            })
-            state.metadata.setdefault("frustration_events", [])
-            state.user_history.append(
-                {"role": "assistant", "content": user_query}
+            state.metadata.setdefault("user_judge_ratings", []).append(
+                {
+                    "turn_idx": 0,
+                    "rating": rating,
+                    "explanation": expl,
+                    "success": ok,
+                }
             )
+            state.metadata.setdefault("frustration_events", [])
+            state.user_history.append({"role": "assistant", "content": user_query})
 
         t_setup = time.monotonic()
 
-        logger.info(
-            f"  |-- {probe.label} setup: "
-            f"{time.monotonic() - t_setup:.1f}s (query + gate)"
-        )
+        logger.info(f"  |-- {probe.label} setup: {time.monotonic() - t_setup:.1f}s (query + gate)")
 
         use_compression = getattr(cfg, "context_compression", False)
         compression_window = getattr(cfg, "compression_window", 1)
@@ -1245,9 +1218,7 @@ class ConversationLoop:
 
         for turn_idx in range(cfg.max_turns):
             t_turn = time.monotonic()
-            logger.debug(
-                f"  |-- {probe.label}: turn {turn_idx + 1}/{cfg.max_turns}"
-            )
+            logger.debug(f"  |-- {probe.label}: turn {turn_idx + 1}/{cfg.max_turns}")
 
             # 3a. Prepare the assistant's per-call view. The canonical
             # transcript remains untouched for export and evaluation.
@@ -1259,9 +1230,7 @@ class ConversationLoop:
             if tools:
                 call_kwargs["tools"] = tools
             if _is_non_ascii_locale(locale):
-                call_kwargs.update(
-                    scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE)
-                )
+                call_kwargs.update(scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE))
             # 3b–3e2 generation: assistant call + per-turn quality judge,
             # with optional judge-gated resampling
             # (``cfg.max_assistant_attempts``; default 1 = single attempt,
@@ -1275,8 +1244,13 @@ class ConversationLoop:
                     asst_rating,
                     asst_ok,
                 ) = self._generate_and_judge_assistant_turn(
-                    models, probe, state, cfg, turn_idx,
-                    assistant_msgs, call_kwargs,
+                    models,
+                    probe,
+                    state,
+                    cfg,
+                    turn_idx,
+                    assistant_msgs,
+                    call_kwargs,
                 )
             except ContextWindowError as e:
                 # after_assistant_turn (3c, inside the helper) can blow
@@ -1317,18 +1291,18 @@ class ConversationLoop:
             # message that no longer exists.)
 
             # 3d. Compress the synthesis content if applicable
-            last_asst_idx = max(
-                i for i, m in enumerate(state.messages) if m.get("role") == "assistant"
-            )
+            last_asst_idx = max(i for i, m in enumerate(state.messages) if m.get("role") == "assistant")
             if use_compression and synthesis_content.strip() and len(synthesis_content) >= 500:
                 try:
                     summary = summarize_response(models, synthesis_content)
                 except Exception as e:
                     summary = ""
                     logger.warning(
-                        "  |-- %s: response compression failed on turn %d: "
-                        "%s: %s; retaining original response",
-                        probe.label, turn_idx + 1, type(e).__name__, e,
+                        "  |-- %s: response compression failed on turn %d: %s: %s; retaining original response",
+                        probe.label,
+                        turn_idx + 1,
+                        type(e).__name__,
+                        e,
                     )
                 if summary:
                     state.conv_summaries[last_asst_idx] = summary
@@ -1350,10 +1324,7 @@ class ConversationLoop:
                     turn_idx=turn_idx,
                     detail="heuristic flag: empty, verbose, or heavily-formatted response",
                 )
-                logger.debug(
-                    f"  |-- {probe.label}: assistant quality flag "
-                    f"(failures={state.assistant_failures})"
-                )
+                logger.debug(f"  |-- {probe.label}: assistant quality flag (failures={state.assistant_failures})")
 
             # 3e2. Bookkeeping for the per-turn assistant judge verdict
             # (the judge itself ran inside
@@ -1380,45 +1351,43 @@ class ConversationLoop:
                 capitulated = probe.is_capitulation_detected(state)
             except Exception as e:
                 logger.warning(
-                    f"  |-- {probe.label}: is_capitulation_detected "
-                    f"raised {type(e).__name__}: {e}; treating as False"
+                    f"  |-- {probe.label}: is_capitulation_detected raised {type(e).__name__}: {e}; treating as False"
                 )
                 capitulated = False
             last_assistant_chars = 0
             for _m in reversed(state.messages):
-                if (
-                    _m.get("role") == "assistant"
-                    and _m.get("content")
-                    and not _m.get("tool_calls")
-                ):
+                if _m.get("role") == "assistant" and _m.get("content") and not _m.get("tool_calls"):
                     last_assistant_chars = len(_m.get("content") or "")
                     break
-            state.metadata.setdefault("capitulation_checks", []).append({
-                "turn_idx": turn_idx + 1,
-                "stop": bool(capitulated),
-                "assistant_response_chars": last_assistant_chars,
-            })
-            state.outcome.add_trace(SimulationTrace(
-                kind=TraceKind.CAPITULATION_CHECK,
-                turn_idx=turn_idx + 1,
-                model_alias=MODEL_SUMMARY,
-                rating="yes" if capitulated else "no",
-                detail=(
-                    f"capitulation_check stop={capitulated} "
-                    f"resp_chars={last_assistant_chars}"
-                ),
-            ))
+            state.metadata.setdefault("capitulation_checks", []).append(
+                {
+                    "turn_idx": turn_idx + 1,
+                    "stop": bool(capitulated),
+                    "assistant_response_chars": last_assistant_chars,
+                }
+            )
+            state.outcome.add_trace(
+                SimulationTrace(
+                    kind=TraceKind.CAPITULATION_CHECK,
+                    turn_idx=turn_idx + 1,
+                    model_alias=MODEL_SUMMARY,
+                    rating="yes" if capitulated else "no",
+                    detail=(f"capitulation_check stop={capitulated} resp_chars={last_assistant_chars}"),
+                )
+            )
             if capitulated:
                 state.metadata["stopped_on_capitulation"] = True
                 state.metadata["capitulated_at_turn"] = turn_idx + 1
                 state.outcome.set_early_stop(True)
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.EARLY_STOP,
-                    turn_idx=turn_idx + 1,
-                    model_alias=MODEL_SUMMARY,
-                    rating="yes",
-                    detail="user_obtained_target",
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.EARLY_STOP,
+                        turn_idx=turn_idx + 1,
+                        model_alias=MODEL_SUMMARY,
+                        rating="yes",
+                        detail="user_obtained_target",
+                    )
+                )
                 logger.info(
                     f"  |-- {probe.label} turn {turn_idx + 1}: "
                     f"stop on capitulation (dedicated classifier said "
@@ -1453,7 +1422,8 @@ class ConversationLoop:
             if hasattr(probe, "format_followup_user_instructions"):
                 try:
                     extras = probe.format_followup_user_instructions(
-                        turn_idx + 1, state,
+                        turn_idx + 1,
+                        state,
                     )
                 except Exception as e:
                     logger.debug(
@@ -1470,7 +1440,8 @@ class ConversationLoop:
             # discarding valuable assistant evaluation data.
             if use_compression and state.conv_summaries:
                 followup_history_messages = compress_history(
-                    state.messages, state.conv_summaries,
+                    state.messages,
+                    state.conv_summaries,
                     window=compression_window,
                 )
             else:
@@ -1508,127 +1479,123 @@ class ConversationLoop:
                         f"{type(e).__name__}: {e}"
                     )
                     state.outcome.inc_user_role_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.USER_ROLE_VIOLATION,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_USER,
-                        rating="failure",
-                        detail=(
-                            f"user_model raised "
-                            f"{type(e).__name__}: {e}"
-                        )[:500],
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.USER_ROLE_VIOLATION,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_USER,
+                            rating="failure",
+                            detail=(f"user_model raised {type(e).__name__}: {e}")[:500],
+                        )
+                    )
                     ok = False
                     continue
-                follow_up = (
-                    user_resp.get("content", "")
-                    if isinstance(user_resp, dict) else ""
-                )
+                follow_up = user_resp.get("content", "") if isinstance(user_resp, dict) else ""
 
                 # Reject empty / whitespace-only follow-up — symmetric
                 # to the turn-1 empty-content rejection.
                 if not follow_up.strip():
                     state.outcome.inc_user_role_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.USER_ROLE_VIOLATION,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_USER,
-                        rating="failure",
-                        detail="empty / whitespace-only follow-up",
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.USER_ROLE_VIOLATION,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_USER,
+                            rating="failure",
+                            detail="empty / whitespace-only follow-up",
+                        )
+                    )
                     ok = False
                     continue
 
                 if _is_assistant_refusal_echo(follow_up):
                     state.outcome.inc_user_role_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.USER_ROLE_VIOLATION,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_USER,
-                        rating="failure",
-                        detail=(
-                            "user_model echoed an assistant-style refusal "
-                            "instead of writing a user follow-up"
-                        ),
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.USER_ROLE_VIOLATION,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_USER,
+                            rating="failure",
+                            detail=("user_model echoed an assistant-style refusal instead of writing a user follow-up"),
+                        )
+                    )
                     logger.debug(
-                        f"  |-- {probe.label}: assistant-refusal echo "
-                        f"pre-filter triggered (attempt {user_attempt + 1})"
+                        f"  |-- {probe.label}: assistant-refusal echo pre-filter triggered (attempt {user_attempt + 1})"
                     )
                     ok = False
-                    state.metadata["user_judge_ratings"].append({
-                        "turn_idx": turn_idx + 1,
-                        "rating": "fail",
-                        "explanation": "Assistant-refusal echo pre-filter",
-                        "success": False,
-                        "attempt": user_attempt,
-                    })
+                    state.metadata["user_judge_ratings"].append(
+                        {
+                            "turn_idx": turn_idx + 1,
+                            "rating": "fail",
+                            "explanation": "Assistant-refusal echo pre-filter",
+                            "success": False,
+                            "attempt": user_attempt,
+                        }
+                    )
                     continue
 
-                state.user_history.append(
-                    {"role": "assistant", "content": follow_up}
-                )
+                state.user_history.append({"role": "assistant", "content": follow_up})
 
                 if _is_fourth_wall_break(follow_up):
                     state.user_history.pop()
                     state.outcome.inc_fourth_wall_triggers()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.FOURTH_WALL_PREFILTER,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        detail="follow-up flagged",
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.FOURTH_WALL_PREFILTER,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            detail="follow-up flagged",
+                        )
+                    )
                     logger.debug(
-                        f"  |-- {probe.label}: follow-up fourth-wall "
-                        f"pre-filter triggered (attempt {user_attempt + 1})"
+                        f"  |-- {probe.label}: follow-up fourth-wall pre-filter triggered (attempt {user_attempt + 1})"
                     )
                     ok = False
-                    state.metadata["user_judge_ratings"].append({
-                        "turn_idx": turn_idx + 1,
-                        "rating": "fail",
-                        "explanation": "Fourth-wall pre-filter",
-                        "success": False,
-                        "attempt": user_attempt,
-                    })
+                    state.metadata["user_judge_ratings"].append(
+                        {
+                            "turn_idx": turn_idx + 1,
+                            "rating": "fail",
+                            "explanation": "Fourth-wall pre-filter",
+                            "success": False,
+                            "attempt": user_attempt,
+                        }
+                    )
                     continue
 
-                if getattr(
-                    cfg, "enforce_user_language", True
-                ) and not _is_user_script_compliant(
-                    follow_up, locale,
-                    min_script=getattr(
-                        cfg, "user_language_min_script_compliance", 0.6
-                    ),
+                if getattr(cfg, "enforce_user_language", True) and not _is_user_script_compliant(
+                    follow_up,
+                    locale,
+                    min_script=getattr(cfg, "user_language_min_script_compliance", 0.6),
                     min_letters=getattr(cfg, "user_language_min_letters", 8),
                 ):
                     state.user_history.pop()
                     state.outcome.inc_user_language_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.LANGUAGE_PREFILTER,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_USER,
-                        rating="failure",
-                        detail=(
-                            f"follow-up not in expected script for "
-                            f"locale={locale}"
-                        ),
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.LANGUAGE_PREFILTER,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_USER,
+                            rating="failure",
+                            detail=(f"follow-up not in expected script for locale={locale}"),
+                        )
+                    )
                     logger.debug(
-                        f"  |-- {probe.label}: follow-up language "
-                        f"pre-filter triggered (attempt {user_attempt + 1})"
+                        f"  |-- {probe.label}: follow-up language pre-filter triggered (attempt {user_attempt + 1})"
                     )
                     ok = False
-                    state.metadata["user_judge_ratings"].append({
-                        "turn_idx": turn_idx + 1,
-                        "rating": "fail",
-                        "explanation": "Language pre-filter",
-                        "success": False,
-                        "attempt": user_attempt,
-                    })
+                    state.metadata["user_judge_ratings"].append(
+                        {
+                            "turn_idx": turn_idx + 1,
+                            "rating": "fail",
+                            "explanation": "Language pre-filter",
+                            "success": False,
+                            "attempt": user_attempt,
+                        }
+                    )
                     continue
 
                 # 3h. Judge the user follow-up BEFORE early stopping
@@ -1640,28 +1607,29 @@ class ConversationLoop:
                 )
                 language_clause = (
                     _language_judge_clause(locale)
-                    if getattr(cfg, "enforce_user_language", True)
-                    and locale in ROMANIZED_LOCALES
+                    if getattr(cfg, "enforce_user_language", True) and locale in ROMANIZED_LOCALES
                     else ""
                 )
-                expl, rating, ok = run_inline_judge(
-                    models, MODEL_JUDGE, judge_prompt + language_clause
+                expl, rating, ok = run_inline_judge(models, MODEL_JUDGE, judge_prompt + language_clause)
+                state.metadata["user_judge_ratings"].append(
+                    {
+                        "turn_idx": turn_idx + 1,
+                        "rating": rating,
+                        "explanation": expl,
+                        "success": ok,
+                        "attempt": user_attempt,
+                    }
                 )
-                state.metadata["user_judge_ratings"].append({
-                    "turn_idx": turn_idx + 1,
-                    "rating": rating,
-                    "explanation": expl,
-                    "success": ok,
-                    "attempt": user_attempt,
-                })
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.USER_FOLLOWUP_GATE,
-                    turn_idx=turn_idx + 1,
-                    call_idx=user_attempt,
-                    model_alias=MODEL_JUDGE,
-                    rating=rating,
-                    detail=(expl[:500] if expl else None),
-                ))
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_FOLLOWUP_GATE,
+                        turn_idx=turn_idx + 1,
+                        call_idx=user_attempt,
+                        model_alias=MODEL_JUDGE,
+                        rating=rating,
+                        detail=(expl[:500] if expl else None),
+                    )
+                )
 
                 if ok:
                     break
@@ -1673,30 +1641,28 @@ class ConversationLoop:
                 # specific offence for audit.
                 if language_clause and "[LANGUAGE]" in (expl or ""):
                     state.outcome.inc_user_language_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.LANGUAGE_PREFILTER,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_JUDGE,
-                        rating=rating,
-                        detail=(
-                            f"follow-up judged not in expected language for "
-                            f"locale={locale}"
-                        ),
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.LANGUAGE_PREFILTER,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_JUDGE,
+                            rating=rating,
+                            detail=(f"follow-up judged not in expected language for locale={locale}"),
+                        )
+                    )
                 else:
                     state.outcome.inc_user_role_violations()
-                    state.outcome.add_trace(SimulationTrace(
-                        kind=TraceKind.USER_ROLE_VIOLATION,
-                        turn_idx=turn_idx + 1,
-                        call_idx=user_attempt,
-                        model_alias=MODEL_JUDGE,
-                        rating=rating,
-                        detail=(
-                            expl[:500] if expl
-                            else "user-judge gate refused follow-up"
-                        ),
-                    ))
+                    state.outcome.add_trace(
+                        SimulationTrace(
+                            kind=TraceKind.USER_ROLE_VIOLATION,
+                            turn_idx=turn_idx + 1,
+                            call_idx=user_attempt,
+                            model_alias=MODEL_JUDGE,
+                            rating=rating,
+                            detail=(expl[:500] if expl else "user-judge gate refused follow-up"),
+                        )
+                    )
                 state.user_history.pop()
                 logger.debug(
                     f"  |-- {probe.label}: user follow-up judge "
@@ -1720,7 +1686,8 @@ class ConversationLoop:
                 if hasattr(probe, "on_followup_failure"):
                     try:
                         policy = probe.on_followup_failure(
-                            state, "gate_exhausted",
+                            state,
+                            "gate_exhausted",
                         )
                     except Exception as e:
                         logger.warning(
@@ -1743,9 +1710,7 @@ class ConversationLoop:
                 # policy == "abort": surface as structured FAILED.
                 n_turns = sum(1 for m in state.messages if m.get("role") == "user")
                 state.outcome.set_n_turns(n_turns)
-                state.outcome.set_n_tool_calls(
-                    len(state.metadata.get("tools_called", []))
-                )
+                state.outcome.set_n_tool_calls(len(state.metadata.get("tools_called", [])))
                 state.outcome.set_wall_clock_s(time.monotonic() - _t_loop_start)
                 outcome = state.outcome.finalize(
                     status=OutcomeStatus.FAILED,
@@ -1757,8 +1722,11 @@ class ConversationLoop:
                     ),
                 )
                 result = make_result(
-                    state.messages, state.metadata, False,
-                    outcome=outcome, traces=state.outcome.traces(),
+                    state.messages,
+                    state.metadata,
+                    False,
+                    outcome=outcome,
+                    traces=state.outcome.traces(),
                 )
                 result["num_turns"] = n_turns
                 result["num_tool_calls"] = 0
@@ -1775,29 +1743,28 @@ class ConversationLoop:
             # would mis-fire on polite "Thanks!" reframing closers).
             try:
                 allow_early_stop = probe.allow_early_stop_at_turn(
-                    turn_idx, state,
+                    turn_idx,
+                    state,
                 )
             except Exception as e:
                 logger.warning(
-                    f"  |-- {probe.label}: allow_early_stop_at_turn "
-                    f"raised {type(e).__name__}: {e}; defaulting to True"
+                    f"  |-- {probe.label}: allow_early_stop_at_turn raised {type(e).__name__}: {e}; defaulting to True"
                 )
                 allow_early_stop = True
             if allow_early_stop and _check_conversation_complete(models, follow_up):
                 state.messages.append({"role": "user", "content": follow_up})
                 state.metadata.setdefault("early_stop", True)
                 state.outcome.set_early_stop(True)
-                state.outcome.add_trace(SimulationTrace(
-                    kind=TraceKind.EARLY_STOP,
-                    turn_idx=turn_idx + 1,
-                    model_alias=MODEL_SUMMARY,
-                    rating="yes",
-                    detail="user signaled conversation completion",
-                ))
-                logger.info(
-                    f"  |-- {probe.label} turn {turn_idx + 1}: "
-                    f"early stop (user satisfied)"
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.EARLY_STOP,
+                        turn_idx=turn_idx + 1,
+                        model_alias=MODEL_SUMMARY,
+                        rating="yes",
+                        detail="user signaled conversation completion",
+                    )
                 )
+                logger.info(f"  |-- {probe.label} turn {turn_idx + 1}: early stop (user satisfied)")
                 break
 
             logger.info(
@@ -1816,11 +1783,13 @@ class ConversationLoop:
             )
             pending_frustration = get_frustration_prompt(frustration_level)
             if pending_frustration:
-                state.metadata["frustration_events"].append({
-                    "turn_idx": turn_idx,
-                    "level": frustration_level,
-                    "assistant_failures": state.assistant_failures,
-                })
+                state.metadata["frustration_events"].append(
+                    {
+                        "turn_idx": turn_idx,
+                        "level": frustration_level,
+                        "assistant_failures": state.assistant_failures,
+                    }
+                )
 
             state.messages.append({"role": "user", "content": follow_up})
 
@@ -1849,8 +1818,11 @@ class ConversationLoop:
         outcome = state.outcome.finalize(status=OutcomeStatus.OK)
 
         result = make_result(
-            state.messages, state.metadata, sim_success,
-            outcome=outcome, traces=state.outcome.traces(),
+            state.messages,
+            state.metadata,
+            sim_success,
+            outcome=outcome,
+            traces=state.outcome.traces(),
         )
         result["num_turns"] = n_turns
         result["num_tool_calls"] = 0

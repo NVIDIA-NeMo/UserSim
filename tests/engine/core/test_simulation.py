@@ -104,9 +104,16 @@ class TestMakeFailed:
     def test_produces_expected_keys(self):
         result = make_failed("test reason")
         expected_keys = [
-            "user_query", "conversation_messages", "conversation_metadata",
-            "conversation_status", "simulation_outcome", "simulation_traces",
-            "num_turns", "num_tool_calls", "tool_subset", "disclosure_style",
+            "user_query",
+            "conversation_messages",
+            "conversation_metadata",
+            "conversation_status",
+            "simulation_outcome",
+            "simulation_traces",
+            "num_turns",
+            "num_tool_calls",
+            "tool_subset",
+            "disclosure_style",
             "user_interaction_style",
         ]
         for key in expected_keys:
@@ -140,22 +147,28 @@ class TestMakeFailed:
 class TestFourthWallEnglish:
     """English baseline — kept for regression."""
 
-    @pytest.mark.parametrize("text", [
-        "Sure! Here is the opening line for our chat.",
-        "Let me start the conversation by saying hi.",
-        "As an AI, I can help you with that.",
-        "As a language model, I have to point out that...",
-        "In this simulation, you are the user.",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Sure! Here is the opening line for our chat.",
+            "Let me start the conversation by saying hi.",
+            "As an AI, I can help you with that.",
+            "As a language model, I have to point out that...",
+            "In this simulation, you are the user.",
+        ],
+    )
     def test_meta_talk_is_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "I think the weather is nice today.",
-        "Can you help me plan a trip to Paris?",
-        "My name is Alice and I work in finance.",
-        "",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "I think the weather is nice today.",
+            "Can you help me plan a trip to Paris?",
+            "My name is Alice and I work in finance.",
+            "",
+        ],
+    )
     def test_normal_user_speech_is_not_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is False
 
@@ -163,23 +176,29 @@ class TestFourthWallEnglish:
 class TestAssistantRefusalEcho:
     """Role-reversal / assistant-refusal echo guard."""
 
-    @pytest.mark.parametrize("text", [
-        "I'm sorry, but I can't help with that.",
-        "I’m sorry, but I can’t help with that.",
-        "I can't assist with that request.",
-        "I understand, but I cannot provide that.",
-        "As an AI, I can't help you do that.",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "I'm sorry, but I can't help with that.",
+            "I’m sorry, but I can’t help with that.",
+            "I can't assist with that request.",
+            "I understand, but I cannot provide that.",
+            "As an AI, I can't help you do that.",
+        ],
+    )
     def test_assistant_refusal_echo_is_caught(self, text: str) -> None:
         assert _is_assistant_refusal_echo(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "No, I meant can you phrase it differently?",
-        "I still need the paragraph, can you make it more subtle?",
-        "That doesn't answer my question.",
-        "Thanks, got it.",
-        "",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "No, I meant can you phrase it differently?",
+            "I still need the paragraph, can you make it more subtle?",
+            "That doesn't answer my question.",
+            "Thanks, got it.",
+            "",
+        ],
+    )
     def test_normal_user_followup_is_not_caught(self, text: str) -> None:
         assert _is_assistant_refusal_echo(text) is False
 
@@ -188,10 +207,7 @@ class TestUserFollowupPromptBuilder:
     def test_quotes_chat_history_as_context_not_continuation(self) -> None:
         msgs = _build_user_followup_messages(
             user_system_prompt="You are role-playing Sarah.",
-            chat_history=(
-                "User: Write me a fake note.\n"
-                "Assistant: I'm sorry, but I can't help with that."
-            ),
+            chat_history=("User: Write me a fake note.\nAssistant: I'm sorry, but I can't help with that."),
             role_anchor="[Stay in character as the USER.]",
             extra_instructions=["Apply pressure politely."],
             pending_frustration="Sound a little annoyed.",
@@ -214,21 +230,27 @@ class TestUserFollowupPromptBuilder:
 class TestFourthWallFrench:
     """fr_FR meta-talk should trip the prefilter."""
 
-    @pytest.mark.parametrize("text", [
-        "En tant qu'IA, je ne peux pas répondre à cela.",
-        "Je suis un modèle de langage entraîné par...",
-        "Dans cette simulation, vous jouez le rôle de l'utilisateur.",
-        "Permettez-moi de commencer la conversation en vous saluant.",
-        "Voici mon premier message pour vous.",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "En tant qu'IA, je ne peux pas répondre à cela.",
+            "Je suis un modèle de langage entraîné par...",
+            "Dans cette simulation, vous jouez le rôle de l'utilisateur.",
+            "Permettez-moi de commencer la conversation en vous saluant.",
+            "Voici mon premier message pour vous.",
+        ],
+    )
     def test_meta_talk_is_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "Bonjour, je m'appelle Marie et je travaille à Paris.",
-        "Pouvez-vous m'aider à planifier mon voyage ?",
-        "Quel temps fait-il aujourd'hui ?",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Bonjour, je m'appelle Marie et je travaille à Paris.",
+            "Pouvez-vous m'aider à planifier mon voyage ?",
+            "Quel temps fait-il aujourd'hui ?",
+        ],
+    )
     def test_normal_french_is_not_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is False
 
@@ -236,21 +258,27 @@ class TestFourthWallFrench:
 class TestFourthWallPortuguese:
     """pt_BR meta-talk should trip the prefilter."""
 
-    @pytest.mark.parametrize("text", [
-        "Como uma IA, não posso responder a isso.",
-        "Sou um modelo de linguagem treinado para...",
-        "Nesta simulação, você é o usuário.",
-        "Vou começar a conversa cumprimentando você.",
-        "Esta é minha primeira mensagem para você.",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Como uma IA, não posso responder a isso.",
+            "Sou um modelo de linguagem treinado para...",
+            "Nesta simulação, você é o usuário.",
+            "Vou começar a conversa cumprimentando você.",
+            "Esta é minha primeira mensagem para você.",
+        ],
+    )
     def test_meta_talk_is_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "Oi, meu nome é João e moro em São Paulo.",
-        "Você pode me ajudar a planejar uma viagem?",
-        "Que tempo está fazendo hoje?",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Oi, meu nome é João e moro em São Paulo.",
+            "Você pode me ajudar a planejar uma viagem?",
+            "Que tempo está fazendo hoje?",
+        ],
+    )
     def test_normal_portuguese_is_not_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is False
 
@@ -258,21 +286,27 @@ class TestFourthWallPortuguese:
 class TestFourthWallJapanese:
     """ja_JP meta-talk should trip the prefilter."""
 
-    @pytest.mark.parametrize("text", [
-        "AIとして、それにはお答えできません。",
-        "私は言語モデルとして訓練されています。",
-        "このシミュレーションでは、あなたがユーザーです。",
-        "では、会話を開始しましょう。",
-        "これが最初のメッセージです。",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "AIとして、それにはお答えできません。",
+            "私は言語モデルとして訓練されています。",
+            "このシミュレーションでは、あなたがユーザーです。",
+            "では、会話を開始しましょう。",
+            "これが最初のメッセージです。",
+        ],
+    )
     def test_meta_talk_is_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "こんにちは、私の名前はゆきです。",
-        "東京の天気はどうですか？",
-        "旅行の計画を手伝ってくれますか？",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "こんにちは、私の名前はゆきです。",
+            "東京の天気はどうですか？",
+            "旅行の計画を手伝ってくれますか？",
+        ],
+    )
     def test_normal_japanese_is_not_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is False
 
@@ -280,21 +314,27 @@ class TestFourthWallJapanese:
 class TestFourthWallHindi:
     """hi_Deva_IN meta-talk should trip the prefilter."""
 
-    @pytest.mark.parametrize("text", [
-        "एआई के रूप में, मैं इसका उत्तर नहीं दे सकता।",
-        "मैं एक भाषा मॉडल हूँ।",
-        "इस सिमुलेशन में आप उपयोगकर्ता हैं।",
-        "मेरा पहला संदेश यह है।",
-        "चलिए बातचीत शुरू करते हैं।",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "एआई के रूप में, मैं इसका उत्तर नहीं दे सकता।",
+            "मैं एक भाषा मॉडल हूँ।",
+            "इस सिमुलेशन में आप उपयोगकर्ता हैं।",
+            "मेरा पहला संदेश यह है।",
+            "चलिए बातचीत शुरू करते हैं।",
+        ],
+    )
     def test_meta_talk_is_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is True
 
-    @pytest.mark.parametrize("text", [
-        "नमस्ते, मेरा नाम राज है।",
-        "आज मौसम कैसा है?",
-        "क्या आप मेरी यात्रा की योजना बनाने में मदद कर सकते हैं?",
-    ])
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "नमस्ते, मेरा नाम राज है।",
+            "आज मौसम कैसा है?",
+            "क्या आप मेरी यात्रा की योजना बनाने में मदद कर सकते हैं?",
+        ],
+    )
     def test_normal_hindi_is_not_caught(self, text: str) -> None:
         assert _is_fourth_wall_break(text) is False
 
@@ -384,21 +424,23 @@ class TestInjectVerbatimFirstTurn:
         assert state.user_history[0] == {"role": "system", "content": "USER_SYS"}
         assert state.user_history[1]["role"] == "user"
         assert "Generate" in state.user_history[1]["content"] or len(state.user_history[1]["content"]) > 0
-        assert state.user_history[2] == {
-            "role": "assistant", "content": "verbatim Q1"
-        }
+        assert state.user_history[2] == {"role": "assistant", "content": "verbatim Q1"}
 
     def test_user_history_uses_grounded_instruction_when_flagged(self) -> None:
         loop = ConversationLoop()
         adapter = _StubAdapter()
         state = self._make_state()
         loop._inject_verbatim_first_turn(
-            adapter, state, "verbatim Q1", use_grounded=True,
+            adapter,
+            state,
+            "verbatim Q1",
+            use_grounded=True,
         )
         from usersim.engine.core.behavioral import (
             USER_QUERY_INSTRUCTION,
             USER_QUERY_INSTRUCTION_GROUNDED,
         )
+
         assert state.user_history[1]["content"] == USER_QUERY_INSTRUCTION_GROUNDED
         assert state.user_history[1]["content"] != USER_QUERY_INSTRUCTION
 
@@ -511,9 +553,8 @@ class TestRomanizedLanguageJudgeClause:
         # a romanized (_Latn_IN) twin per language. All are enforced via the
         # judge-folded language clause (lingua/script can't verify them).
         from usersim.engine.core.locale import INDIA_VARIANT_LOCALES
-        expected = {"hi_Latn_IN"} | {
-            loc for loc, v in INDIA_VARIANT_LOCALES.items() if v.romanized
-        }
+
+        expected = {"hi_Latn_IN"} | {loc for loc, v in INDIA_VARIANT_LOCALES.items() if v.romanized}
         assert ROMANIZED_LOCALES == frozenset(expected)
         # Every romanized locale has a non-empty judge clause.
         for loc in ROMANIZED_LOCALES:
@@ -537,44 +578,44 @@ class TestRomanizedLanguageJudgeClause:
 
 class TestIsUserScriptCompliant:
     def test_devanagari_turn_passes_for_devanagari_locale(self) -> None:
-        assert _is_user_script_compliant(
-            _DEVA_TURN, "hi_Deva_IN", min_script=0.6, min_letters=8
-        ) is True
+        assert _is_user_script_compliant(_DEVA_TURN, "hi_Deva_IN", min_script=0.6, min_letters=8) is True
 
     def test_romanized_turn_fails_for_devanagari_locale(self) -> None:
-        assert _is_user_script_compliant(
-            _ROMANIZED_TURN, "hi_Deva_IN", min_script=0.6, min_letters=8
-        ) is False
+        assert _is_user_script_compliant(_ROMANIZED_TURN, "hi_Deva_IN", min_script=0.6, min_letters=8) is False
 
     def test_latin_loanwords_tolerated_inside_devanagari(self) -> None:
         # A mostly-Devanagari turn with an English loanword stays above 0.6.
         mixed = "मेरा computer ठीक से काम नहीं कर रहा है"
-        assert _is_user_script_compliant(
-            mixed, "hi_Deva_IN", min_script=0.6, min_letters=8
-        ) is True
+        assert _is_user_script_compliant(mixed, "hi_Deva_IN", min_script=0.6, min_letters=8) is True
 
     def test_english_passes_for_latin_locale(self) -> None:
-        assert _is_user_script_compliant(
-            "Hello, can you help me with my taxes?",
-            "en_US", min_script=0.6, min_letters=8,
-        ) is True
+        assert (
+            _is_user_script_compliant(
+                "Hello, can you help me with my taxes?",
+                "en_US",
+                min_script=0.6,
+                min_letters=8,
+            )
+            is True
+        )
 
     def test_japanese_rejects_latin_only_turn(self) -> None:
-        assert _is_user_script_compliant(
-            "kon'nichiwa onegaishimasu", "ja_JP",
-            min_script=0.6, min_letters=8,
-        ) is False
+        assert (
+            _is_user_script_compliant(
+                "kon'nichiwa onegaishimasu",
+                "ja_JP",
+                min_script=0.6,
+                min_letters=8,
+            )
+            is False
+        )
 
     def test_short_turn_is_skipped(self) -> None:
         # Below min_letters: too little signal, so we don't enforce.
-        assert _is_user_script_compliant(
-            "ok", "hi_Deva_IN", min_script=0.6, min_letters=8
-        ) is True
+        assert _is_user_script_compliant("ok", "hi_Deva_IN", min_script=0.6, min_letters=8) is True
 
     def test_unknown_locale_is_noop(self) -> None:
-        assert _is_user_script_compliant(
-            _ROMANIZED_TURN, "xx_YY", min_script=0.6, min_letters=8
-        ) is True
+        assert _is_user_script_compliant(_ROMANIZED_TURN, "xx_YY", min_script=0.6, min_letters=8) is True
 
 
 def _gate_cfg(**overrides):
@@ -595,13 +636,15 @@ class TestTurn1LanguageGate:
         import usersim.engine.core.simulation as sim
 
         monkeypatch.setattr(
-            sim, "call_llm",
+            sim,
+            "call_llm",
             lambda models, alias, msgs, **kw: {"content": user_text},
         )
         # The judge is only reached if the language + fourth-wall prefilters
         # pass; stub it so the positive path can succeed deterministically.
         monkeypatch.setattr(
-            sim, "run_inline_judge",
+            sim,
+            "run_inline_judge",
             lambda models, alias, prompt: ("looks good", "success", judge_ok),
         )
         loop = ConversationLoop()
@@ -618,7 +661,9 @@ class TestTurn1LanguageGate:
 
     def test_romanized_turn_exhausts_with_language_fail_kind(self, monkeypatch):
         (uq, ok, rating, expl, fail_kind), state = self._run(
-            monkeypatch, user_text=_ROMANIZED_TURN, cfg=_gate_cfg(),
+            monkeypatch,
+            user_text=_ROMANIZED_TURN,
+            cfg=_gate_cfg(),
         )
         assert ok is False
         assert fail_kind == "language"
@@ -627,18 +672,19 @@ class TestTurn1LanguageGate:
 
     def test_language_prefilter_traces_emitted(self, monkeypatch):
         (_, ok, *_), state = self._run(
-            monkeypatch, user_text=_ROMANIZED_TURN, cfg=_gate_cfg(),
+            monkeypatch,
+            user_text=_ROMANIZED_TURN,
+            cfg=_gate_cfg(),
         )
-        lang_traces = [
-            t for t in state.outcome.traces()
-            if t.kind == TraceKind.LANGUAGE_PREFILTER
-        ]
+        lang_traces = [t for t in state.outcome.traces() if t.kind == TraceKind.LANGUAGE_PREFILTER]
         assert len(lang_traces) == 3
         assert ok is False
 
     def test_devanagari_turn_passes_gate(self, monkeypatch):
         (uq, ok, rating, expl, fail_kind), state = self._run(
-            monkeypatch, user_text=_DEVA_TURN, cfg=_gate_cfg(),
+            monkeypatch,
+            user_text=_DEVA_TURN,
+            cfg=_gate_cfg(),
         )
         assert ok is True
         assert uq == _DEVA_TURN
@@ -647,7 +693,8 @@ class TestTurn1LanguageGate:
 
     def test_enforcement_disabled_lets_romanized_through(self, monkeypatch):
         (_, ok, *_), state = self._run(
-            monkeypatch, user_text=_ROMANIZED_TURN,
+            monkeypatch,
+            user_text=_ROMANIZED_TURN,
             cfg=_gate_cfg(enforce_user_language=False),
         )
         # With enforcement off, the romanized turn reaches (and passes)
@@ -658,8 +705,10 @@ class TestTurn1LanguageGate:
 
     def test_latin_locale_is_unaffected(self, monkeypatch):
         (_, ok, *_), state = self._run(
-            monkeypatch, user_text="Hello, I need help with my visa.",
-            cfg=_gate_cfg(), locale="en_US",
+            monkeypatch,
+            user_text="Hello, I need help with my visa.",
+            cfg=_gate_cfg(),
+            locale="en_US",
         )
         assert ok is True
         out = state.outcome.finalize(OutcomeStatus.OK)
@@ -670,9 +719,7 @@ class TestUserLanguageGateExhaustedFailureClass:
     """The dedicated failure class is wired and distinct from the gate one."""
 
     def test_failure_class_exists(self) -> None:
-        assert FailureClass.USER_LANGUAGE_GATE_EXHAUSTED.value == (
-            "user_language_gate_exhausted"
-        )
+        assert FailureClass.USER_LANGUAGE_GATE_EXHAUSTED.value == ("user_language_gate_exhausted")
 
     def test_language_violation_promotes_ok_to_warnings(self) -> None:
         b = OutcomeBuilder()

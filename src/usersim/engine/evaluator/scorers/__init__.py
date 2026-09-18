@@ -230,14 +230,13 @@ def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
     fatal — other scorers still get a chance to register.
     """
     import importlib
+
     for path in scorer_module_paths:
         try:
             mod = importlib.import_module(path)
             importlib.reload(mod)
         except Exception as e:
-            logger.warning(
-                f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}"
-            )
+            logger.warning(f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}")
 
 
 # ── Bundled scorers shipped with this plugin ──────────────────────

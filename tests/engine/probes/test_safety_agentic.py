@@ -63,7 +63,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = (packaged_assets_dir() / "safety_agentic/sample.yaml")
+SAMPLE_BANK_PATH = packaged_assets_dir() / "safety_agentic/sample.yaml"
 
 
 @pytest.fixture
@@ -93,9 +93,11 @@ def _reset_bank_cache_between_tests():
 @pytest.fixture
 def simulator_cfg():
     """Minimal cfg stub the probe reads from."""
+
     class _Cfg:
         random_seed = 42
         max_turns = 1
+
     return _Cfg()
 
 
@@ -104,6 +106,7 @@ def simulator_cfg_three_turns():
     class _Cfg:
         random_seed = 42
         max_turns = 3
+
     return _Cfg()
 
 
@@ -120,8 +123,7 @@ def _mock_call_llm(responses: List[Dict[str, Any]]):
             return next(iter_)
         except StopIteration as e:
             raise AssertionError(
-                f"test consumed more LLM calls than expected; "
-                f"args_head={args[:2]} kwargs_keys={list(kwargs)}"
+                f"test consumed more LLM calls than expected; args_head={args[:2]} kwargs_keys={list(kwargs)}"
             ) from e
 
     return _side_effect
@@ -134,9 +136,7 @@ def _make_tool_call(
     tc_id: str = "call_0",
 ) -> Dict[str, Any]:
     """Build an OpenAI-style tool_call dict."""
-    args_str = (
-        arguments if isinstance(arguments, str) else json.dumps(arguments)
-    )
+    args_str = arguments if isinstance(arguments, str) else json.dumps(arguments)
     return {
         "id": tc_id,
         "type": "function",
@@ -173,6 +173,7 @@ def _synthetic_bank(
             content=json.dumps({"ok": True, "i": i}),
         )
         from usersim.engine.core.localized import LocalizedText
+
         _en = LocalizedText.from_yaml_value
         requests.append(
             ActionRequest(
@@ -215,6 +216,7 @@ class TestPersonaToTagsReExport:
         from usersim.engine.probes.sov_ai_facts.task_derivation import (
             persona_to_tags as canonical,
         )
+
         assert task_derivation.persona_to_tags is canonical
 
 
@@ -225,33 +227,41 @@ class TestPersonaToTagsReExport:
 
 class TestDeriveTask:
     def test_returns_request_when_pool_nonempty(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
         assert isinstance(ar, ActionRequest)
 
     def test_returns_none_when_no_request_matches_persona(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(
-            n_requests=1, request_persona_tags=("interest:nonexistent",),
+            n_requests=1,
+            request_persona_tags=("interest:nonexistent",),
         )
         result = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
         assert result is None
 
     def test_returns_none_when_all_excluded(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=2)
         result = task_derivation.derive_task(
-            en_persona, bank, "en_US", seed=42,
+            en_persona,
+            bank,
+            "en_US",
+            seed=42,
             excluded_request_ids={"AR-T-000", "AR-T-001"},
         )
         assert result is None
 
     def test_deterministic_for_same_inputs(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=4)
         a = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
@@ -260,7 +270,8 @@ class TestDeriveTask:
         assert a.id == b.id
 
     def test_different_seed_can_produce_different_pick(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=4)
         picks = set()
@@ -270,7 +281,8 @@ class TestDeriveTask:
         assert len(picks) > 1
 
     def test_bank_version_change_perturbs_pick(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank_a = _synthetic_bank(bank_version="v0.1.0", n_requests=4)
         bank_b = _synthetic_bank(bank_version="v0.2.0", n_requests=4)
@@ -293,40 +305,52 @@ class TestResolveTaskFromRow:
     def test_override_returns_request(self, en_persona: Dict[str, Any]) -> None:
         bank = _synthetic_bank(n_requests=2)
         ar = task_derivation.resolve_task_from_row(
-            en_persona, bank, "en_US",
+            en_persona,
+            bank,
+            "en_US",
             action_request_id="AR-T-001",
         )
         assert ar is not None
         assert ar.id == "AR-T-001"
 
     def test_override_missing_id_returns_none(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.resolve_task_from_row(
-            en_persona, bank, "en_US",
+            en_persona,
+            bank,
+            "en_US",
             action_request_id="AR-DOES-NOT-EXIST",
         )
         assert ar is None
 
     def test_override_persona_tag_mismatch_returns_none(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(
             request_persona_tags=("interest:nonexistent",),
         )
         ar = task_derivation.resolve_task_from_row(
-            en_persona, bank, "en_US",
+            en_persona,
+            bank,
+            "en_US",
             action_request_id="AR-T-000",
         )
         assert ar is None
 
     def test_no_override_falls_through_to_derive(
-        self, en_persona: Dict[str, Any],
+        self,
+        en_persona: Dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.resolve_task_from_row(
-            en_persona, bank, "en_US", seed=42,
+            en_persona,
+            bank,
+            "en_US",
+            seed=42,
         )
         assert ar is not None
 
@@ -373,18 +397,20 @@ class TestFormatToolsForApi:
             },
         )
         out = probe_gen._format_tools_for_api([spec])
-        assert out == [{
-            "type": "function",
-            "function": {
-                "name": "lookup",
-                "description": "Look something up.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {"q": {"type": "string"}},
-                    "required": ["q"],
+        assert out == [
+            {
+                "type": "function",
+                "function": {
+                    "name": "lookup",
+                    "description": "Look something up.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"q": {"type": "string"}},
+                        "required": ["q"],
+                    },
                 },
-            },
-        }]
+            }
+        ]
 
     def test_falls_back_to_empty_object_schema_when_parameters_missing(
         self,
@@ -392,7 +418,8 @@ class TestFormatToolsForApi:
         spec = ToolSpec(name="t", description="d", parameters={})
         out = probe_gen._format_tools_for_api([spec])
         assert out[0]["function"]["parameters"] == {
-            "type": "object", "properties": {},
+            "type": "object",
+            "properties": {},
         }
 
 
@@ -405,7 +432,8 @@ class TestExtractToolCall:
 
     def test_handles_dict_arguments(self) -> None:
         tc = {
-            "id": "x", "type": "function",
+            "id": "x",
+            "type": "function",
             "function": {"name": "f", "arguments": {"a": 1}},
         }
         name, args = probe_gen._extract_tool_call(tc)
@@ -414,7 +442,8 @@ class TestExtractToolCall:
 
     def test_invalid_json_arguments_yield_empty_dict(self) -> None:
         tc = {
-            "id": "x", "type": "function",
+            "id": "x",
+            "type": "function",
             "function": {"name": "f", "arguments": "{not-json"},
         }
         name, args = probe_gen._extract_tool_call(tc)
@@ -446,15 +475,22 @@ class TestSimulateAgenticSafety:
         assert resolve_probe("safety_agentic").__name__ == "SafetyAgenticProbe"
 
     def test_no_tool_call_response_short_circuits(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         # Assistant responds with content but no tool_calls — the loop
         # ends after one assistant turn (single-user-turn design).
-        with patch.dict(os.environ, _shipped_bank_env()), patch(
-            "usersim.engine.probes.safety_agentic.generator.call_llm",
-            side_effect=_mock_call_llm([
-                {"role": "assistant", "content": "I should ask first."},
-            ]),
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            patch(
+                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                side_effect=_mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "I should ask first."},
+                    ]
+                ),
+            ),
         ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
@@ -470,8 +506,10 @@ class TestSimulateAgenticSafety:
         assert result["num_tool_calls"] == 0
         assert result["action_request_id"].startswith("AR-")
         assert result["sub_protocol"] in {
-            "unsanctioned_action", "scope_creep",
-            "compromised_inputs", "consequence_disclosure",
+            "unsanctioned_action",
+            "scope_creep",
+            "compromised_inputs",
+            "consequence_disclosure",
         }
         outcome = json.loads(result["simulation_outcome"])
         # The shipped bank mixes reviewed requests with honest placeholders
@@ -481,26 +519,37 @@ class TestSimulateAgenticSafety:
         assert outcome["provenance"]["bank_version"].get("agentic") == "v0.5.4"
 
     def test_first_user_turn_is_initial_user_prompt_verbatim(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
             from usersim.engine.core.agentic_bank import (
                 load_agentic_bank_default,
             )
+
             probe_gen._reset_bank_cache()
             bank = load_agentic_bank_default()
             ar = task_derivation.derive_task(
-                en_persona, bank, "en_US", seed=simulator_cfg.random_seed,
+                en_persona,
+                bank,
+                "en_US",
+                seed=simulator_cfg.random_seed,
             )
             assert ar is not None
             expected = ar.initial_user_prompt.for_locale("en_US")
 
         probe_gen._reset_bank_cache()
-        with patch.dict(os.environ, _shipped_bank_env()), patch(
-            "usersim.engine.probes.safety_agentic.generator.call_llm",
-            side_effect=_mock_call_llm([
-                {"role": "assistant", "content": "ok"},
-            ]),
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            patch(
+                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                side_effect=_mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                ),
+            ),
         ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
@@ -517,25 +566,31 @@ class TestSimulateAgenticSafety:
         assert msgs[0]["content"] == expected
 
     def test_assistant_tool_call_intercepted_with_mock_response(
-        self, en_persona: Dict[str, Any], simulator_cfg_three_turns: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg_three_turns: Any,
     ) -> None:
         # Synthetic bank → exactly one tool ("do_thing"). Assistant
         # calls it on turn 1, then returns no-tool-calls on turn 2.
         synth = _synthetic_bank(n_requests=1, tool_name="do_thing")
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {
-                        "role": "assistant",
-                        "content": "",
-                        "tool_calls": [
-                            _make_tool_call("do_thing", {"x": "hello"}),
-                        ],
-                    },
-                    {"role": "assistant", "content": "Done."},
-                ]),
-             ):
+                side_effect=_mock_call_llm(
+                    [
+                        {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                _make_tool_call("do_thing", {"x": "hello"}),
+                            ],
+                        },
+                        {"role": "assistant", "content": "Done."},
+                    ]
+                ),
+            ),
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
@@ -559,36 +614,48 @@ class TestSimulateAgenticSafety:
         msgs = json.loads(result["conversation_messages"])
         # Sequence: user → assistant(tool_calls) → tool → assistant(content)
         assert [m["role"] for m in msgs] == [
-            "user", "assistant", "tool", "assistant",
+            "user",
+            "assistant",
+            "tool",
+            "assistant",
         ]
         # Mock response was injected verbatim.
         assert json.loads(msgs[2]["content"]) == {"ok": True, "i": 0}
 
     def test_attempted_actions_recorded_with_full_details(
-        self, en_persona: Dict[str, Any], simulator_cfg_three_turns: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg_three_turns: Any,
     ) -> None:
         # Two-call turn followed by no-tool-call turn.
         synth = _synthetic_bank(n_requests=1, tool_name="do_thing")
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {
-                        "role": "assistant",
-                        "content": "",
-                        "tool_calls": [
-                            _make_tool_call(
-                                "do_thing", {"x": "first"}, tc_id="c0",
-                            ),
-                            _make_tool_call(
-                                "do_thing", {"x": "second"}, tc_id="c1",
-                            ),
-                        ],
-                    },
-                    {"role": "assistant", "content": "Done."},
-                ]),
-             ):
-
+                side_effect=_mock_call_llm(
+                    [
+                        {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                _make_tool_call(
+                                    "do_thing",
+                                    {"x": "first"},
+                                    tc_id="c0",
+                                ),
+                                _make_tool_call(
+                                    "do_thing",
+                                    {"x": "second"},
+                                    tc_id="c1",
+                                ),
+                            ],
+                        },
+                        {"role": "assistant", "content": "Done."},
+                    ]
+                ),
+            ),
+        ):
             # Patched bank load doesn't touch the cache, so we don't need
             # to reset. Call directly.
             result = probe_gen.simulate_safety_agentic(
@@ -612,25 +679,33 @@ class TestSimulateAgenticSafety:
         # Tool messages were produced from both attempted calls.
 
     def test_unknown_tool_call_yields_synthetic_error_response(
-        self, en_persona: Dict[str, Any], simulator_cfg_three_turns: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg_three_turns: Any,
     ) -> None:
         synth = _synthetic_bank(n_requests=1, tool_name="do_thing")
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {
-                        "role": "assistant",
-                        "content": "",
-                        "tool_calls": [
-                            _make_tool_call(
-                                "fabricated_tool", {"x": "xyz"}, tc_id="c0",
-                            ),
-                        ],
-                    },
-                    {"role": "assistant", "content": "Recovered."},
-                ]),
-             ):
+                side_effect=_mock_call_llm(
+                    [
+                        {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                _make_tool_call(
+                                    "fabricated_tool",
+                                    {"x": "xyz"},
+                                    tc_id="c0",
+                                ),
+                            ],
+                        },
+                        {"role": "assistant", "content": "Recovered."},
+                    ]
+                ),
+            ),
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
@@ -650,7 +725,9 @@ class TestSimulateAgenticSafety:
         assert body["tool_name"] == "fabricated_tool"
 
     def test_bank_load_failure_returns_structured_failure(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         with patch.dict(
             os.environ,
@@ -673,11 +750,16 @@ class TestSimulateAgenticSafety:
         assert "agentic-bank load failed" in outcome["failure_detail"]
 
     def test_panel_override_with_unknown_id_returns_failure(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
-        with patch.dict(os.environ, _shipped_bank_env()), patch(
-            "usersim.engine.probes.safety_agentic.generator.call_llm",
-        ) as mock_call:
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            patch(
+                "usersim.engine.probes.safety_agentic.generator.call_llm",
+            ) as mock_call,
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={},
                 data={"action_request_id": "AR-DOES-NOT-EXIST"},
@@ -695,15 +777,19 @@ class TestSimulateAgenticSafety:
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
 
     def test_no_resolvable_request_returns_failure(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(
             request_persona_tags=("interest:nonexistent",),
         )
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-             ) as mock_call:
+            ) as mock_call,
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={},
                 data={},
@@ -720,14 +806,19 @@ class TestSimulateAgenticSafety:
         assert "no resolvable" in outcome["failure_detail"]
 
     def test_assistant_failure_attributed_to_assistant_model(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         def _raises(*args, **kwargs):
             raise RuntimeError("assistant API exploded")
 
-        with patch.dict(os.environ, _shipped_bank_env()), patch(
-            "usersim.engine.probes.safety_agentic.generator.call_llm",
-            side_effect=_raises,
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            patch(
+                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                side_effect=_raises,
+            ),
         ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
@@ -743,8 +834,10 @@ class TestSimulateAgenticSafety:
         # Side channels still pinned (mirrors the `safety_chat_pressure` invariant).
         assert result["action_request_id"].startswith("AR-")
         assert result["sub_protocol"] in {
-            "unsanctioned_action", "scope_creep",
-            "compromised_inputs", "consequence_disclosure",
+            "unsanctioned_action",
+            "scope_creep",
+            "compromised_inputs",
+            "consequence_disclosure",
         }
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == OutcomeStatus.FAILED.value
@@ -752,16 +845,22 @@ class TestSimulateAgenticSafety:
         assert outcome["failure_attribution"] == "assistant_model"
 
     def test_non_placeholder_request_no_warning(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(placeholder=False, n_requests=1)
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {"role": "assistant", "content": "ok"},
-                ]),
-             ):
+                side_effect=_mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                ),
+            ),
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
@@ -773,26 +872,29 @@ class TestSimulateAgenticSafety:
                 provenance=Provenance(),
             )
         outcome = json.loads(result["simulation_outcome"])
-        assert not any(
-            w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value
-            for w in outcome["warnings"]
-        )
+        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value for w in outcome["warnings"])
 
     def test_probe_variant_format(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(
             n_requests=1,
             sub_protocol="consequence_disclosure",
             sanctioned_action_name="transfer_funds_external",
         )
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {"role": "assistant", "content": "ok"},
-                ]),
-             ):
+                side_effect=_mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                ),
+            ),
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
@@ -803,26 +905,29 @@ class TestSimulateAgenticSafety:
                 cfg=simulator_cfg,
                 provenance=Provenance(),
             )
-        assert (
-            result["probe_variant"]
-            == "consequence_disclosure::transfer_funds_external"
-        )
+        assert result["probe_variant"] == "consequence_disclosure::transfer_funds_external"
 
     def test_probe_variant_format_when_no_sanctioned_action(
-        self, en_persona: Dict[str, Any], simulator_cfg: Any,
+        self,
+        en_persona: Dict[str, Any],
+        simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(
             n_requests=1,
             sub_protocol="compromised_inputs",
             sanctioned_action_name=None,
         )
-        with patch.object(probe_gen, "_load_bank", return_value=synth), \
-             patch(
+        with (
+            patch.object(probe_gen, "_load_bank", return_value=synth),
+            patch(
                 "usersim.engine.probes.safety_agentic.generator.call_llm",
-                side_effect=_mock_call_llm([
-                    {"role": "assistant", "content": "Refusing."},
-                ]),
-             ):
+                side_effect=_mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "Refusing."},
+                    ]
+                ),
+            ),
+        ):
             result = probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},

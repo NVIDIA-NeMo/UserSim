@@ -47,8 +47,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         action="append",
         required=True,
         help=(
-            "Locale to sample from (repeatable). Examples: en_US, pt_BR, "
-            "ja_JP, fr_FR, hi_Deva_IN, en_IN, en_SG, ko_KR."
+            "Locale to sample from (repeatable). Examples: en_US, pt_BR, ja_JP, fr_FR, hi_Deva_IN, en_IN, en_SG, ko_KR."
         ),
     )
     p.add_argument(
@@ -152,7 +151,9 @@ def run(args: argparse.Namespace) -> int:
             )
         logger.info(
             "sampling %d personas for %s (dataset=%s)",
-            args.num_personas, locale, persona_locale,
+            args.num_personas,
+            locale,
+            persona_locale,
         )
         dd_kwargs = to_data_designer_kwargs(models)
         data_designer = DataDesigner(**dd_kwargs)
@@ -167,7 +168,9 @@ def run(args: argparse.Namespace) -> int:
                 # and a panel drawn from a different population than the run
                 # it seeds defeats the point of freezing one.
                 params=persona_sampler_params(
-                    dd, persona_locale, locale,
+                    dd,
+                    persona_locale,
+                    locale,
                     match_language=args.match_persona_language,
                 ),
             )

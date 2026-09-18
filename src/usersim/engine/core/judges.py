@@ -27,12 +27,8 @@ def _parse_judge_response(text: str) -> Tuple[str, str, bool]:
     Returns (explanation, rating, parsed_ok).
     Accepts 'success', 'warn', and 'failure' as valid ratings.
     """
-    expl_match = re.search(
-        r"<explanation>\s*(.*?)\s*</explanation>", text, re.DOTALL
-    )
-    rating_match = re.search(
-        r"<rating>\s*(.*?)\s*</rating>", text, re.DOTALL
-    )
+    expl_match = re.search(r"<explanation>\s*(.*?)\s*</explanation>", text, re.DOTALL)
+    rating_match = re.search(r"<rating>\s*(.*?)\s*</rating>", text, re.DOTALL)
 
     explanation = expl_match.group(1).strip() if expl_match else text.strip()
     rating_raw = rating_match.group(1).strip().lower() if rating_match else ""
@@ -55,9 +51,7 @@ def run_inline_judge(
     Returns (explanation, rating, passed) where passed is True for both
     'success' and 'warn' ratings (only 'failure' terminates).
     """
-    explanation, rating, passed, _ = run_inline_judge_ex(
-        models, alias, prompt_text
-    )
+    explanation, rating, passed, _ = run_inline_judge_ex(models, alias, prompt_text)
     return explanation, rating, passed
 
 

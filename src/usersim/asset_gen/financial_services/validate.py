@@ -74,15 +74,18 @@ class ValidationReport:
             for r in by_scope[scope]:
                 lines.append(f"    {r.status:<4} {r.check}: {r.detail}")
         c = self.counts()
-        lines.append(f"  summary: {c[PASS]} pass / {c[WARN]} warn / {c[FAIL]} fail "
-                     f"-> {'FAIL' if self.failed else 'OK'}")
+        lines.append(
+            f"  summary: {c[PASS]} pass / {c[WARN]} warn / {c[FAIL]} fail -> {'FAIL' if self.failed else 'OK'}"
+        )
         return "\n".join(lines)
 
 
 # ── bank reading (corpus-only tolerant; no loader dependency) ───────────
 
+
 def _load_yaml(path: Path) -> Dict[str, Any]:
     import yaml
+
     with path.open("r", encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
@@ -110,6 +113,7 @@ def _read_bank(bank_dir: Path) -> Tuple[Dict[str, Any], Dict[str, _InstData]]:
         emb_path = idir / "embeddings.parquet"
         if emb_path.exists():
             import pandas as pd
+
             emb = pd.read_parquet(emb_path)
         institutions[idir.name] = _InstData(
             meta=meta,
@@ -122,6 +126,7 @@ def _read_bank(bank_dir: Path) -> Tuple[Dict[str, Any], Dict[str, _InstData]]:
 
 
 # ── individual checks ────────────────────────────────────────────────────
+
 
 def _check_structural(bank_dir: Path, insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     corpus_only = any(not d.has_tasks for d in insts.values())
@@ -138,8 +143,7 @@ def _check_structural(bank_dir: Path, insts: Dict[str, _InstData], rep: Validati
         rep.add("structural_load", "bank", PASS, "loads via load_finance_bank")
     except FinanceBankError as e:
         if corpus_only:
-            rep.add("structural_load", "bank", WARN,
-                    "corpus-only bank (no tasks.yaml) -> full structural load skipped")
+            rep.add("structural_load", "bank", WARN, "corpus-only bank (no tasks.yaml) -> full structural load skipped")
         else:
             rep.add("structural_load", "bank", FAIL, str(e))
 
@@ -205,12 +209,9 @@ def _value_present(val: Any, text: str) -> bool:
     return any(c in text for c in _value_candidates(val))
 
 
-def _check_numeric_faithfulness(
-    spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport
-) -> None:
+def _check_numeric_faithfulness(spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     if spec is None:
-        rep.add("numeric_faithfulness", "bank", WARN,
-                "skipped: no region_spec provided (cannot ground values)")
+        rep.add("numeric_faithfulness", "bank", WARN, "skipped: no region_spec provided (cannot ground values)")
         return
     for inst in spec.institutions:
         idata = insts.get(inst.id)
@@ -218,27 +219,24 @@ def _check_numeric_faithfulness(
             rep.add("numeric_faithfulness", inst.id, FAIL, "institution missing from bank")
             continue
         for product in inst.products:
-            prod_docs = [d for d in idata.documents
-                         if d.get("product_category") == product.id]
+            prod_docs = [d for d in idata.documents if d.get("product_category") == product.id]
             text = " ".join(f"{d.get('title', '')} {d.get('body', '')}" for d in prod_docs)
-            missing = [f"{name}={var.value}"
-                       for name, var in product.variables.items()
-                       if isinstance(var.value, (int, float))
-                       and not _value_present(var.value, text)]
+            missing = [
+                f"{name}={var.value}"
+                for name, var in product.variables.items()
+                if isinstance(var.value, (int, float)) and not _value_present(var.value, text)
+            ]
             if not prod_docs:
-                rep.add("numeric_faithfulness", inst.id, FAIL,
-                        f"{product.id}: no documents produced for product")
+                rep.add("numeric_faithfulness", inst.id, FAIL, f"{product.id}: no documents produced for product")
             elif missing:
-                rep.add("numeric_faithfulness", inst.id, FAIL,
-                        f"{product.id}: typed values absent from prose: {missing}")
+                rep.add(
+                    "numeric_faithfulness", inst.id, FAIL, f"{product.id}: typed values absent from prose: {missing}"
+                )
             else:
-                rep.add("numeric_faithfulness", inst.id, PASS,
-                        f"{product.id}: all typed values present")
+                rep.add("numeric_faithfulness", inst.id, PASS, f"{product.id}: all typed values present")
 
 
-def _check_variable_name_leak(
-    spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport
-) -> None:
+def _check_variable_name_leak(spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag customer-facing prose that prints a spec FIELD KEY.
 
     The doc-gen prompt hands the model each product's variables as a JSON object
@@ -248,8 +246,7 @@ def _check_variable_name_leak(
     only registers it as slightly lower realism, so check it deterministically.
     """
     if spec is None:
-        rep.add("variable_name_leak", "bank", WARN,
-                "skipped: no region_spec provided (cannot know the field names)")
+        rep.add("variable_name_leak", "bank", WARN, "skipped: no region_spec provided (cannot know the field names)")
         return
     for inst in spec.institutions:
         idata = insts.get(inst.id)
@@ -258,10 +255,7 @@ def _check_variable_name_leak(
         keys = {k for p in inst.products for k in p.variables}
         if not keys:
             continue
-        pattern = re.compile(
-            r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len,
-                                     reverse=True)) + r")\b"
-        )
+        pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len, reverse=True)) + r")\b")
         offenders: List[str] = []
         seen_keys: set = set()
         for d in idata.documents:
@@ -270,27 +264,30 @@ def _check_variable_name_leak(
                 offenders.append(str(d.get("id")))
                 seen_keys.update(found)
         if offenders:
-            rep.add("variable_name_leak", inst.id, WARN,
-                    f"{len(offenders)}/{len(idata.documents)} doc(s) print a raw "
-                    f"field name in prose (e.g. {sorted(seen_keys)[:4]}); "
-                    f"regenerate or hand-fix: {offenders[:5]}")
+            rep.add(
+                "variable_name_leak",
+                inst.id,
+                WARN,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) print a raw "
+                f"field name in prose (e.g. {sorted(seen_keys)[:4]}); "
+                f"regenerate or hand-fix: {offenders[:5]}",
+            )
         else:
-            rep.add("variable_name_leak", inst.id, PASS,
-                    "no raw field names in prose")
+            rep.add("variable_name_leak", inst.id, PASS, "no raw field names in prose")
 
 
 #: Genres written FOR THE AGENT, where naming a tool is the point. Everything else in
 #: the corpus is customer-facing prose and must not name one.
-_AGENT_FACING_GENRES: frozenset = frozenset({
-    "policy_procedure",      # numbered agent steps referencing the exact tool
-    "discoverable_tool_doc",  # the tool's signature, args and effect
-    "regulatory_note",       # "the applicable rule and the AGENT's obligation"
-})
+_AGENT_FACING_GENRES: frozenset = frozenset(
+    {
+        "policy_procedure",  # numbered agent steps referencing the exact tool
+        "discoverable_tool_doc",  # the tool's signature, args and effect
+        "regulatory_note",  # "the applicable rule and the AGENT's obligation"
+    }
+)
 
 
-def _check_tool_name_leak(
-    insts: Dict[str, _InstData], rep: ValidationReport
-) -> None:
+def _check_tool_name_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag customer-facing prose that names an internal tool.
 
     A customer-facing document should say what the customer can ask for; which tool
@@ -307,12 +304,8 @@ def _check_tool_name_leak(
         names = {n for n in names if "_" in n}
         if not names:
             continue
-        pattern = re.compile(
-            r"\b(" + "|".join(sorted((re.escape(n) for n in names), key=len,
-                                     reverse=True)) + r")\b"
-        )
-        customer = [d for d in idata.documents
-                    if d.get("document_type") not in _AGENT_FACING_GENRES]
+        pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(n) for n in names), key=len, reverse=True)) + r")\b")
+        customer = [d for d in idata.documents if d.get("document_type") not in _AGENT_FACING_GENRES]
         offenders: List[str] = []
         seen: set = set()
         for d in customer:
@@ -322,17 +315,19 @@ def _check_tool_name_leak(
                 seen.update(found)
         if not customer:
             # Emit a row anyway: a silent check reads as a check that did not run.
-            rep.add("tool_name_leak", iid, PASS,
-                    "no customer-facing documents to check")
+            rep.add("tool_name_leak", iid, PASS, "no customer-facing documents to check")
             continue
         if offenders:
-            rep.add("tool_name_leak", iid, WARN,
-                    f"{len(offenders)}/{len(customer)} customer-facing doc(s) name an "
-                    f"internal tool in prose (e.g. {sorted(seen)[:4]}); those belong in "
-                    f"the agent-facing policy/tool docs: {offenders[:5]}")
+            rep.add(
+                "tool_name_leak",
+                iid,
+                WARN,
+                f"{len(offenders)}/{len(customer)} customer-facing doc(s) name an "
+                f"internal tool in prose (e.g. {sorted(seen)[:4]}); those belong in "
+                f"the agent-facing policy/tool docs: {offenders[:5]}",
+            )
         else:
-            rep.add("tool_name_leak", iid, PASS,
-                    "no internal tool names in customer-facing prose")
+            rep.add("tool_name_leak", iid, PASS, "no internal tool names in customer-facing prose")
 
 
 #: A generated doc_key looks like ``<product>_<genre>[_<n>]`` or ``<tool>_policy`` /
@@ -346,9 +341,7 @@ _DOC_KEY_RE = re.compile(
 )
 
 
-def _check_doc_key_leak(
-    insts: Dict[str, _InstData], rep: ValidationReport
-) -> None:
+def _check_doc_key_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag prose that cites a sibling by its raw ``doc_key`` instead of its title.
 
     The prompt asks for cross-references BY TITLE, with keys confined to the
@@ -367,19 +360,21 @@ def _check_doc_key_leak(
         offenders: List[str] = []
         seen: set = set()
         for d in idata.documents:
-            found = [m for m in _DOC_KEY_RE.findall(str(d.get("body", "")))
-                     if m not in tool_names]
+            found = [m for m in _DOC_KEY_RE.findall(str(d.get("body", ""))) if m not in tool_names]
             if found:
                 offenders.append(str(d.get("id")))
                 seen.update(found)
         if offenders:
-            rep.add("doc_key_leak", iid, WARN,
-                    f"{len(offenders)}/{len(idata.documents)} doc(s) cite a sibling by "
-                    f"raw doc_key instead of its title (e.g. {sorted(seen)[:4]}); "
-                    f"regenerate or hand-fix: {offenders[:5]}")
+            rep.add(
+                "doc_key_leak",
+                iid,
+                WARN,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) cite a sibling by "
+                f"raw doc_key instead of its title (e.g. {sorted(seen)[:4]}); "
+                f"regenerate or hand-fix: {offenders[:5]}",
+            )
         else:
-            rep.add("doc_key_leak", iid, PASS,
-                    "cross-references use titles, not doc_keys")
+            rep.add("doc_key_leak", iid, PASS, "cross-references use titles, not doc_keys")
 
 
 def _in_ranges(cp: int, ranges: Tuple[Tuple[int, int], ...]) -> bool:
@@ -394,12 +389,11 @@ def _script_fraction(text: str, ranges: Tuple[Tuple[int, int], ...]) -> Optional
     return in_expected / len(letters)
 
 
-def _check_language_script(
-    region_meta: Dict[str, Any], insts: Dict[str, _InstData], rep: ValidationReport
-) -> None:
+def _check_language_script(region_meta: Dict[str, Any], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
     try:
         from usersim.engine.core.locale import expected_script_ranges
+
         ranges = expected_script_ranges(locale)
     except Exception as e:  # pragma: no cover
         rep.add("language_script", "bank", WARN, f"locale util unavailable: {e}")
@@ -414,8 +408,9 @@ def _check_language_script(
             if frac is not None and frac < MIN_SCRIPT_FRACTION:
                 bad.append(f"{d.get('id')}={frac:.2f}")
         if bad:
-            rep.add("language_script", iid, FAIL,
-                    f"docs below {MIN_SCRIPT_FRACTION} expected-script fraction: {bad[:5]}")
+            rep.add(
+                "language_script", iid, FAIL, f"docs below {MIN_SCRIPT_FRACTION} expected-script fraction: {bad[:5]}"
+            )
         else:
             rep.add("language_script", iid, PASS, "prose in expected script")
 
@@ -436,12 +431,16 @@ def _check_near_duplicate(insts: Dict[str, _InstData], rep: ValidationReport) ->
         norms = np.linalg.norm(vecs, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
         sim = (vecs / norms) @ (vecs / norms).T
-        dups = [(ids[i], ids[j], round(float(sim[i, j]), 3))
-                for i in range(len(ids)) for j in range(i + 1, len(ids))
-                if sim[i, j] >= NEAR_DUP_THRESHOLD]
+        dups = [
+            (ids[i], ids[j], round(float(sim[i, j]), 3))
+            for i in range(len(ids))
+            for j in range(i + 1, len(ids))
+            if sim[i, j] >= NEAR_DUP_THRESHOLD
+        ]
         if dups:
-            rep.add("near_duplicate", iid, WARN,
-                    f"{len(dups)} near-duplicate pair(s) >= {NEAR_DUP_THRESHOLD}: {dups[:5]}")
+            rep.add(
+                "near_duplicate", iid, WARN, f"{len(dups)} near-duplicate pair(s) >= {NEAR_DUP_THRESHOLD}: {dups[:5]}"
+            )
         else:
             rep.add("near_duplicate", iid, PASS, "no near-duplicates")
 
@@ -452,16 +451,14 @@ def _check_coverage(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
         return
     for iid, idata in insts.items():
         n = len(idata.documents)
-        rep.add("coverage", iid, FAIL if n == 0 else PASS,
-                "empty corpus" if n == 0 else f"{n} documents")
+        rep.add("coverage", iid, FAIL if n == 0 else PASS, "empty corpus" if n == 0 else f"{n} documents")
 
 
 def _check_placeholder(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     for iid, idata in insts.items():
         non_ph = [d.get("id") for d in idata.documents if not d.get("placeholder", False)]
         if non_ph:
-            rep.add("placeholder_discipline", iid, WARN,
-                    f"{len(non_ph)} doc(s) not flagged placeholder: {non_ph[:5]}")
+            rep.add("placeholder_discipline", iid, WARN, f"{len(non_ph)} doc(s) not flagged placeholder: {non_ph[:5]}")
         else:
             rep.add("placeholder_discipline", iid, PASS, "all docs placeholder:true")
 
@@ -469,8 +466,11 @@ def _check_placeholder(insts: Dict[str, _InstData], rep: ValidationReport) -> No
 def _check_scope(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
     for iid, idata in insts.items():
         domains = set(idata.meta.get("domains", []) or [])
-        bad = [f"{d.get('id')}:{d.get('domain')}" for d in idata.documents
-               if d.get("domain") and d.get("domain") not in domains]
+        bad = [
+            f"{d.get('id')}:{d.get('domain')}"
+            for d in idata.documents
+            if d.get("domain") and d.get("domain") not in domains
+        ]
         if bad:
             rep.add("scope", iid, FAIL, f"docs with out-of-institution domain: {bad[:5]}")
         else:
@@ -501,9 +501,12 @@ def _check_tool_schemas(insts: Dict[str, _InstData], rep: ValidationReport) -> N
             if not t.get("description") or not (params.get("properties") or params):
                 bad.append(name)
         if bad:
-            rep.add("tool_schemas", iid, FAIL,
-                    f"framework primitive(s) with empty schema: {bad} "
-                    "(regenerate: the pipeline backfills these)")
+            rep.add(
+                "tool_schemas",
+                iid,
+                FAIL,
+                f"framework primitive(s) with empty schema: {bad} (regenerate: the pipeline backfills these)",
+            )
         else:
             rep.add("tool_schemas", iid, PASS, "framework primitives have real schemas")
 
@@ -518,18 +521,22 @@ def _check_tool_schemas(insts: Dict[str, _InstData], rep: ValidationReport) -> N
             if doc.get("document_type") in tool_doc_types:
                 documented.update(doc.get("mentions_tools") or [])
         undocumented = [
-            t.get("name") for t in idata.tools
+            t.get("name")
+            for t in idata.tools
             if t.get("discoverable")
             and t.get("name") not in FRAMEWORK_PRIMITIVE_TOOLS
             and t.get("name") not in documented
         ]
         if undocumented:
-            rep.add("tool_doc_coverage", iid, WARN,
-                    f"discoverable tool(s) with no policy/tool doc: {undocumented} "
-                    "(regenerate to restore; cannot be a verifiable-task gold tool)")
+            rep.add(
+                "tool_doc_coverage",
+                iid,
+                WARN,
+                f"discoverable tool(s) with no policy/tool doc: {undocumented} "
+                "(regenerate to restore; cannot be a verifiable-task gold tool)",
+            )
         else:
-            rep.add("tool_doc_coverage", iid, PASS,
-                    "every discoverable tool has a policy/tool doc")
+            rep.add("tool_doc_coverage", iid, PASS, "every discoverable tool has a policy/tool doc")
 
 
 #: Identifiers a tool doc must not require, because nothing in the conversation can
@@ -570,14 +577,15 @@ def _check_unsourced_tool_arguments(insts, rep: ValidationReport) -> None:
             ids = [d for d, _ in offenders][:5]
             names = sorted({n for _, f in offenders for n in f})
             rep.add(
-                "unsourced_tool_argument", iid, WARN,
+                "unsourced_tool_argument",
+                iid,
+                WARN,
                 f"{len(offenders)} tool doc(s) require an id with no source in the "
                 f"conversation (e.g. {names}); the agent will ask the customer for it "
                 f"and stall: {ids}",
             )
         else:
-            rep.add("unsourced_tool_argument", iid, PASS,
-                    "tool arguments are all obtainable in conversation")
+            rep.add("unsourced_tool_argument", iid, PASS, "tool arguments are all obtainable in conversation")
 
 
 def _check_qc_scores(bank_dir: Path, rep: ValidationReport) -> None:
@@ -597,13 +605,18 @@ def _check_qc_scores(bank_dir: Path, rep: ValidationReport) -> None:
             if f is not None and f < MIN_FAITHFULNESS_SCORE:
                 low.append(f"{iid}/{c.get('cluster_kind')}={f}")
     if low:
-        rep.add("qc_scores", "bank", WARN,
-                f"clusters below faithfulness floor {MIN_FAITHFULNESS_SCORE} (kept flagged): {low[:8]}")
+        rep.add(
+            "qc_scores",
+            "bank",
+            WARN,
+            f"clusters below faithfulness floor {MIN_FAITHFULNESS_SCORE} (kept flagged): {low[:8]}",
+        )
     else:
         rep.add("qc_scores", "bank", PASS, "all clusters meet the faithfulness floor")
 
 
 # ── entry point ─────────────────────────────────────────────────────────
+
 
 def validate_bank(bank_dir: str | Path, region_spec: Optional[RegionSpec] = None) -> ValidationReport:
     """Vet a generated financial_services bank; returns a :class:`ValidationReport`.

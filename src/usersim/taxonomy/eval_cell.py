@@ -97,11 +97,7 @@ def score_from_eval_cell(cell: dict[str, Any], axis: str) -> Optional[float]:
     # First check universal axis results: axis -> judge_alias -> cell.
     axis_block = (cell.get("axes") or {}).get(axis)
     if isinstance(axis_block, dict):
-        scores = [
-            score_from_axis(v)
-            for v in axis_block.values()
-            if isinstance(v, dict)
-        ]
+        scores = [score_from_axis(v) for v in axis_block.values() if isinstance(v, dict)]
         scores = [s for s in scores if s is not None]
         if scores:
             return sum(scores) / len(scores)
@@ -124,11 +120,7 @@ def score_for_source(
     if scorer is None:
         axis_block = (cell.get("axes") or {}).get(axis)
         if isinstance(axis_block, dict):
-            scores = [
-                score_from_axis(v)
-                for v in axis_block.values()
-                if isinstance(v, dict)
-            ]
+            scores = [score_from_axis(v) for v in axis_block.values() if isinstance(v, dict)]
             scores = [s for s in scores if s is not None]
             if scores:
                 return sum(scores) / len(scores)

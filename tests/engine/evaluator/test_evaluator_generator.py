@@ -48,12 +48,10 @@ class TestDecodeJsonField:
 
     def test_json_string(self) -> None:
         assert _decode_json_field('{"a": 1}', default={}) == {"a": 1}
-        assert _decode_json_field('[1,2,3]', default=[]) == [1, 2, 3]
+        assert _decode_json_field("[1,2,3]", default=[]) == [1, 2, 3]
 
     def test_invalid_json_returns_default(self) -> None:
-        assert _decode_json_field("not json", default={"fallback": True}) == {
-            "fallback": True
-        }
+        assert _decode_json_field("not json", default={"fallback": True}) == {"fallback": True}
 
     def test_empty_string_returns_default(self) -> None:
         assert _decode_json_field("", default=[]) == []
@@ -113,9 +111,7 @@ class TestNoAssistantMessages:
         # Trajectory with only user messages (the simulator's
         # "infrastructure failure" case).
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"}
-            ]),
+            "conversation_messages": json.dumps([{"role": "user", "content": "hi"}]),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
         }
@@ -140,15 +136,17 @@ class TestFailedSimulation:
             side_effect=AssertionError("failed trajectory must not be judged")
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
-                },
-                {"role": "tool", "content": '{"partial":true}'},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
+                    },
+                    {"role": "tool", "content": '{"partial":true}'},
+                ]
+            ),
             "simulation_outcome": json.dumps({"status": "failed"}),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "tool_calling",
@@ -165,10 +163,12 @@ class TestFailedSimulation:
 class TestPartialReRunSkip:
     def _trajectory_with_assistant(self) -> dict:
         return {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -312,10 +312,12 @@ class TestScorerDispatch:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -349,10 +351,12 @@ class TestScorerDispatch:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -406,10 +410,12 @@ class TestScorerColumnPassthrough:
 
     def _make_data_with_probe_columns(self) -> dict:
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "inclusion",
             "probe_variant": "default",
@@ -555,10 +561,12 @@ class TestEnvelope:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",

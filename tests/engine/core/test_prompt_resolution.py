@@ -85,7 +85,9 @@ class TestRenderPrompt:
         """The real case: the row carries `persona` as a dict while the probe
         passes the formatted text block under the same name."""
         out = render_prompt(
-            "p={persona}", {"persona": {"first_name": "A"}}, persona="Name: A B",
+            "p={persona}",
+            {"persona": {"first_name": "A"}},
+            persona="Name: A B",
         )
         assert out == "p=Name: A B"
 
@@ -116,12 +118,15 @@ class TestAccessorsResolveAtCallTime:
     @pytest.mark.parametrize("probe", THEME_PROBES)
     def test_accessor_follows_the_active_asset_root(self, probe, tmp_path):
         mod = __import__(
-            f"usersim.engine.probes.{probe}.prompts", fromlist=["prompts"],
+            f"usersim.engine.probes.{probe}.prompts",
+            fromlist=["prompts"],
         )
         before = mod.user_agent_system_prompt()
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, probe, user_agent_system_prompt=f"OVERRIDE-{probe}",
+                tmp_path,
+                probe,
+                user_agent_system_prompt=f"OVERRIDE-{probe}",
             )
         )
         assert mod.user_agent_system_prompt() == f"OVERRIDE-{probe}"
@@ -129,16 +134,18 @@ class TestAccessorsResolveAtCallTime:
 
     @pytest.mark.parametrize("probe,const", PROBE_CONSTANTS.items())
     def test_module_constant_stays_at_its_import_time_value(
-        self, probe, const, tmp_path,
+        self,
+        probe,
+        const,
+        tmp_path,
     ):
         """The constants are kept for direct importers and must NOT move."""
         mod = __import__(
-            f"usersim.engine.probes.{probe}.prompts", fromlist=["prompts"],
+            f"usersim.engine.probes.{probe}.prompts",
+            fromlist=["prompts"],
         )
         pinned = getattr(mod, const)
-        set_runtime_assets_dir(
-            _assets_with_prompt(tmp_path, probe, user_agent_system_prompt="OVERRIDE")
-        )
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, probe, user_agent_system_prompt="OVERRIDE"))
         assert getattr(mod, const) == pinned
         assert mod.user_agent_system_prompt() == "OVERRIDE"
 
@@ -146,9 +153,7 @@ class TestAccessorsResolveAtCallTime:
         """A prompts.yaml that omits a key must not blank the prompt."""
         from usersim.engine.probes.general_open_ended import prompts as oe
 
-        set_runtime_assets_dir(
-            _assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="R")
-        )
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="R"))
         assert oe.user_agent_system_prompt().strip()
         assert oe.trajectory_rubric() == "R"
 
@@ -182,10 +187,15 @@ def _open_ended_probe(data: dict):
 
     persona = {"first_name": "A", "last_name": "B", "age": 30, "sex": "female"}
     return OpenEndedProbe(
-        persona=persona, locale="en_US", language="English", models={},
-        cfg=_Cfg(), provenance=None,
+        persona=persona,
+        locale="en_US",
+        language="English",
+        models={},
+        cfg=_Cfg(),
+        provenance=None,
         profile=compute_behavioral_profile(persona),
-        outcome_builder=None, data=data,
+        outcome_builder=None,
+        data=data,
     )
 
 
@@ -203,7 +213,8 @@ class TestEveryPromptHookRenders:
         there now resolves, where plain ``.format`` would have raised."""
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended",
+                tmp_path,
+                "general_open_ended",
                 user_judge_rubric="Reject unless it suits row {uuid}.",
             )
         )
@@ -216,7 +227,9 @@ class TestEveryPromptHookRenders:
         """Same diagnosable failure as the user prompt, not a bare KeyError."""
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended", user_judge_rubric="{nosuchkey}",
+                tmp_path,
+                "general_open_ended",
+                user_judge_rubric="{nosuchkey}",
             )
         )
         probe = _open_ended_probe({"uuid": "row-9", "theme": "{}"})
@@ -229,7 +242,8 @@ class TestEveryPromptHookRenders:
         """The pure-capability invariant: the model under test is primed with
         nothing. All three resolve the key; none ships a value."""
         mod = __import__(
-            f"usersim.engine.probes.{probe}.prompts", fromlist=["prompts"],
+            f"usersim.engine.probes.{probe}.prompts",
+            fromlist=["prompts"],
         )
         assert mod.assistant_system_prompt() == ""
 
@@ -238,7 +252,9 @@ class TestEveryPromptHookRenders:
         a non-empty value here primes the model under test."""
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended", assistant_system_prompt="PRIMED",
+                tmp_path,
+                "general_open_ended",
+                assistant_system_prompt="PRIMED",
             )
         )
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
@@ -256,7 +272,8 @@ class TestPromptIsRebuiltPerRow:
 
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended",
+                tmp_path,
+                "general_open_ended",
                 user_agent_system_prompt="uuid={uuid} topic={topic}",
             )
         )
@@ -266,8 +283,14 @@ class TestPromptIsRebuiltPerRow:
         rendered = []
         for uuid in ("row-0001", "row-0002"):
             probe = OpenEndedProbe(
-                persona=persona, locale="en_US", language="English", models={},
-                cfg=_Cfg(), provenance=None, profile=profile, outcome_builder=None,
+                persona=persona,
+                locale="en_US",
+                language="English",
+                models={},
+                cfg=_Cfg(),
+                provenance=None,
+                profile=profile,
+                outcome_builder=None,
                 data={
                     "uuid": uuid,
                     "theme": json.dumps({"type": "t", "description": f"top-{uuid}"}),
@@ -283,7 +306,9 @@ class TestPromptIsRebuiltPerRow:
         what resolves -- not a string captured when the probe was built."""
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended", user_agent_system_prompt="FIRST",
+                tmp_path,
+                "general_open_ended",
+                user_agent_system_prompt="FIRST",
             )
         )
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
@@ -292,7 +317,9 @@ class TestPromptIsRebuiltPerRow:
         second = tmp_path / "second"
         set_runtime_assets_dir(
             _assets_with_prompt(
-                second, "general_open_ended", user_agent_system_prompt="SECOND",
+                second,
+                "general_open_ended",
+                user_agent_system_prompt="SECOND",
             )
         )
         assert probe.get_user_system_prompt() == "SECOND"
@@ -315,9 +342,7 @@ class TestAssistantJudgePrompt:
         """No asset key present -> the compiled default, interpolated."""
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        set_runtime_assets_dir(
-            _assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="x")
-        )
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="x"))
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
         assert probe.format_assistant_judge_prompt("R", "H") == (
             ASSISTANT_JUDGE_PROMPT.format(assistant_response="R", conversation_history="H")
@@ -328,7 +353,8 @@ class TestAssistantJudgePrompt:
         growing a per-probe branch."""
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended",
+                tmp_path,
+                "general_open_ended",
                 assistant_judge_prompt="resp={assistant_response} hist={conversation_history}",
             )
         )
@@ -346,27 +372,32 @@ class TestAssistantJudgePrompt:
 
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended", assistant_judge_prompt="OVERRIDDEN",
+                tmp_path,
+                "general_open_ended",
+                assistant_judge_prompt="OVERRIDDEN",
             )
         )
-        assert _open_ended_probe({"uuid": "u", "theme": "{}"}) \
-            .format_assistant_judge_prompt("R", "H") == "OVERRIDDEN"
+        assert _open_ended_probe({"uuid": "u", "theme": "{}"}).format_assistant_judge_prompt("R", "H") == "OVERRIDDEN"
 
         persona = {"first_name": "A", "last_name": "B", "age": 30, "sex": "female"}
         educational = EducationalProbe(
-            persona=persona, locale="en_US", language="English", models={},
-            cfg=_Cfg(), provenance=None,
+            persona=persona,
+            locale="en_US",
+            language="English",
+            models={},
+            cfg=_Cfg(),
+            provenance=None,
             profile=compute_behavioral_profile(persona),
-            outcome_builder=None, data={"uuid": "u", "theme": "{}"},
+            outcome_builder=None,
+            data={"uuid": "u", "theme": "{}"},
         )
-        assert educational.format_assistant_judge_prompt("R", "H").startswith(
-            ASSISTANT_JUDGE_PROMPT[:40]
-        )
+        assert educational.format_assistant_judge_prompt("R", "H").startswith(ASSISTANT_JUDGE_PROMPT[:40])
 
     def test_can_reference_a_row_column(self, tmp_path):
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended",
+                tmp_path,
+                "general_open_ended",
                 assistant_judge_prompt="row={uuid} resp={assistant_response}",
             )
         )
@@ -376,7 +407,9 @@ class TestAssistantJudgePrompt:
     def test_typo_names_itself(self, tmp_path):
         set_runtime_assets_dir(
             _assets_with_prompt(
-                tmp_path, "general_open_ended", assistant_judge_prompt="{nosuchkey}",
+                tmp_path,
+                "general_open_ended",
+                assistant_judge_prompt="{nosuchkey}",
             )
         )
         probe = _open_ended_probe({"uuid": "u", "theme": "{}"})
@@ -396,7 +429,5 @@ class TestAssistantJudgePrompt:
 
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        shipped = yaml.safe_load(
-            (packaged_assets_dir() / probe / "prompts.yaml").read_text()
-        )
+        shipped = yaml.safe_load((packaged_assets_dir() / probe / "prompts.yaml").read_text())
         assert shipped["assistant_judge_prompt"] == ASSISTANT_JUDGE_PROMPT

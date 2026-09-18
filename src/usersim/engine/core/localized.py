@@ -78,7 +78,10 @@ class LocalizedText:
 
     @classmethod
     def from_yaml_value(
-        cls, value: Any, *, field_path: str = "<unknown>",
+        cls,
+        value: Any,
+        *,
+        field_path: str = "<unknown>",
     ) -> "LocalizedText":
         """Parse a YAML field value into a ``LocalizedText``.
 
@@ -96,27 +99,21 @@ class LocalizedText:
         """
         if isinstance(value, str):
             if not value.strip():
-                raise LocalizedTextError(
-                    f"{field_path}: empty string"
-                )
+                raise LocalizedTextError(f"{field_path}: empty string")
             return cls(renderings={cls.DEFAULT_LOCALE: value})
 
         if isinstance(value, dict):
             if not value:
-                raise LocalizedTextError(
-                    f"{field_path}: empty dict (need at least one locale)"
-                )
+                raise LocalizedTextError(f"{field_path}: empty dict (need at least one locale)")
             cleaned: dict[str, str] = {}
             for loc, text in value.items():
                 if not isinstance(loc, str) or not loc.strip():
                     raise LocalizedTextError(
-                        f"{field_path}: locale key must be a non-empty "
-                        f"string, got {type(loc).__name__}={loc!r}"
+                        f"{field_path}: locale key must be a non-empty string, got {type(loc).__name__}={loc!r}"
                     )
                 if not isinstance(text, str) or not text.strip():
                     raise LocalizedTextError(
-                        f"{field_path}::{loc}: rendering must be a "
-                        f"non-empty string, got {type(text).__name__}"
+                        f"{field_path}::{loc}: rendering must be a non-empty string, got {type(text).__name__}"
                     )
                 cleaned[loc] = text
             if cls.DEFAULT_LOCALE not in cleaned:
@@ -131,10 +128,7 @@ class LocalizedText:
                 )
             return cls(renderings=cleaned)
 
-        raise LocalizedTextError(
-            f"{field_path}: must be a string or a "
-            f"dict[locale, text], got {type(value).__name__}"
-        )
+        raise LocalizedTextError(f"{field_path}: must be a string or a dict[locale, text], got {type(value).__name__}")
 
     def for_locale(
         self,
@@ -176,5 +170,3 @@ class LocalizedText:
         a bank with all-default-locale entries surfaces as a
         placeholder in the multilingual readiness scorecard."""
         return len(self.renderings) > 1
-
-

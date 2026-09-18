@@ -277,18 +277,24 @@ VLLM_DEFAULTS: dict[str, dict[str, Any]] = {
         "tensor_parallelism": 1,
         "node_count": 1,
         "extra_args": [
-            "--gpu-memory-utilization", "0.9",
-            "--max-model-len", "32768",
-            "--max-num-seqs", "256",
+            "--gpu-memory-utilization",
+            "0.9",
+            "--max-model-len",
+            "32768",
+            "--max-num-seqs",
+            "256",
         ],
     },
     "openai/gpt-oss-120b": {
         "tensor_parallelism": 1,
         "node_count": 1,
         "extra_args": [
-            "--gpu-memory-utilization", "0.9",
-            "--max-model-len", "32768",
-            "--max-num-seqs", "256",
+            "--gpu-memory-utilization",
+            "0.9",
+            "--max-model-len",
+            "32768",
+            "--max-num-seqs",
+            "256",
         ],
     },
     # Models reachable only over a hosted endpoint are deliberately absent
@@ -318,22 +324,30 @@ VLLM_DEFAULTS: dict[str, dict[str, Any]] = {
             # loader cuts cold-start time. Override per-sweep if you need
             # the longer context window.
             "--async-scheduling",
-            "--dtype", "auto",
-            "--kv-cache-dtype", "fp8",
+            "--dtype",
+            "auto",
+            "--kv-cache-dtype",
+            "fp8",
             "--trust-remote-code",
-            "--attention-backend", "TRITON_ATTN",
-            "--gpu-memory-utilization", "0.9",
+            "--attention-backend",
+            "TRITON_ATTN",
+            "--gpu-memory-utilization",
+            "0.9",
             "--enable-chunked-prefill",
-            "--max-num-seqs", "4096",
+            "--max-num-seqs",
+            "4096",
             "--enable-auto-tool-choice",
-            "--tool-call-parser", "qwen3_coder",
+            "--tool-call-parser",
+            "qwen3_coder",
             # This model needs a reasoning parser that vLLM does not bundle.
             # Fetch it and point the flag at wherever you put it:
             #   wget https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4/raw/main/super_v3_reasoning_parser.py
             "--reasoning-parser-plugin",
             "/path/to/super_v3_reasoning_parser.py",
-            "--reasoning-parser", "super_v3",
-            "--max-model-len", "16384",
+            "--reasoning-parser",
+            "super_v3",
+            "--max-model-len",
+            "16384",
             "--model-loader-extra-config",
             '{"enable_multithread_load":true,"num_threads":16}',
             "--enable-prefix-caching",
@@ -366,15 +380,17 @@ def resolve_vllm_defaults(model: str) -> dict[str, Any]:
 # ``EmbeddingInferenceParams`` (see ``to_model_configs``) or its health check
 # (a chat ``generate``) 404s with "model could not be found". List embedding
 # model ids here; the ``embed`` substring is also treated as a fallback signal.
-EMBEDDING_MODELS: frozenset[str] = frozenset({
-    "nvidia/nvidia/nemotron-3-embed-1b",
-    "nvidia/nemotron-3-embed-1b",
-    "nvidia/qwen/qwen3-embedding-0.6b",
-    "text-embedding-3-large",
-    "text-embedding-3-small",
-    "openai/text-embedding-3-large",
-    "openai/text-embedding-3-small",
-})
+EMBEDDING_MODELS: frozenset[str] = frozenset(
+    {
+        "nvidia/nvidia/nemotron-3-embed-1b",
+        "nvidia/nemotron-3-embed-1b",
+        "nvidia/qwen/qwen3-embedding-0.6b",
+        "text-embedding-3-large",
+        "text-embedding-3-small",
+        "openai/text-embedding-3-large",
+        "openai/text-embedding-3-small",
+    }
+)
 
 # Per-embedding-model request defaults applied by ``to_model_configs`` (in addition
 # to EmbeddingInferenceParams' own defaults: encoding_format=float). ``extra_body``

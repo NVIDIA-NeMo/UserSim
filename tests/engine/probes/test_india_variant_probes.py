@@ -89,18 +89,24 @@ def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
     ob = _builder()
     with _mock_translation():
         probe = SovAiFactsProbe(
-            persona=indian_persona, locale="ta_Taml_IN", language="Tamil",
-            models={"summary_model": object()}, cfg=cfg,
-            provenance=Provenance(), profile={}, data={}, outcome_builder=ob,
+            persona=indian_persona,
+            locale="ta_Taml_IN",
+            language="Tamil",
+            models={"summary_model": object()},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile={},
+            data={},
+            outcome_builder=ob,
         )
-        assert probe._asset_locale == "en_IN"     # fell back to the en_IN bank
-        assert probe._locale == "ta_Taml_IN"       # conversation locale preserved
+        assert probe._asset_locale == "en_IN"  # fell back to the en_IN bank
+        assert probe._locale == "ta_Taml_IN"  # conversation locale preserved
         state = ConversationState(outcome=ob)
         turn1 = probe.get_verbatim_first_user_turn(state)
 
-    assert turn1 == _MARKER                          # translated
-    assert state.metadata.get("facts_probed")        # metadata still seeded
-    assert _mt_warned(ob)                            # preview-only flag
+    assert turn1 == _MARKER  # translated
+    assert state.metadata.get("facts_probed")  # metadata still seeded
+    assert _mt_warned(ob)  # preview-only flag
 
 
 # ---------------------------------------------------------------------------
@@ -117,9 +123,15 @@ def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
     ob = _builder()
     with _mock_translation():
         probe = SovAiMultilingualParityProbe(
-            persona=indian_persona, locale="ta_Taml_IN", language="Tamil",
-            models={"summary_model": object()}, cfg=cfg,
-            provenance=Provenance(), profile={}, data={}, outcome_builder=ob,
+            persona=indian_persona,
+            locale="ta_Taml_IN",
+            language="Tamil",
+            models={"summary_model": object()},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile={},
+            data={},
+            outcome_builder=ob,
         )
         # Shared bank -> asset_locale resolves to the en_IN base rendering.
         assert probe._asset_locale == "en_IN"
@@ -127,7 +139,7 @@ def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
         turn1 = probe.get_verbatim_first_user_turn(state)
 
     assert turn1 == _MARKER
-    assert state.metadata.get("query_id")            # matched-pair join key seeded
+    assert state.metadata.get("query_id")  # matched-pair join key seeded
     assert _mt_warned(ob)
 
 
@@ -140,9 +152,14 @@ def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> Non
 
     def _query_id_for(locale: str) -> str:
         probe = SovAiMultilingualParityProbe(
-            persona=indian_persona, locale=locale, language="X",
-            models={"summary_model": object()}, cfg=cfg,
-            provenance=Provenance(), profile={}, data={},
+            persona=indian_persona,
+            locale=locale,
+            language="X",
+            models={"summary_model": object()},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile={},
+            data={},
             outcome_builder=_builder(),
         )
         assert probe._asset_locale == "en_IN"
@@ -165,9 +182,15 @@ def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> N
     ob = _builder()
     with _mock_translation():
         probe = SafetyChatPressureProbe(
-            persona=indian_persona, locale="ta_Taml_IN", language="Tamil",
-            models={"summary_model": object()}, cfg=cfg,
-            provenance=Provenance(), profile={}, data={}, outcome_builder=ob,
+            persona=indian_persona,
+            locale="ta_Taml_IN",
+            language="Tamil",
+            models={"summary_model": object()},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile={},
+            data={},
+            outcome_builder=ob,
         )
         assert probe._asset_locale == "en_IN"
         state = ConversationState(outcome=ob)
@@ -189,9 +212,15 @@ def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> No
 
     ob = _builder()
     probe = SafetyAgenticProbe(
-        persona=indian_persona, locale="ta_Taml_IN", language="Tamil",
-        models={"summary_model": object()}, cfg=cfg,
-        provenance=Provenance(), profile={}, data={}, outcome_builder=ob,
+        persona=indian_persona,
+        locale="ta_Taml_IN",
+        language="Tamil",
+        models={"summary_model": object()},
+        cfg=cfg,
+        provenance=Provenance(),
+        profile={},
+        data={},
+        outcome_builder=ob,
     )
     assert probe._asset_locale == "en_IN"
     assert probe._locale == "ta_Taml_IN"
@@ -211,9 +240,15 @@ def test_sov_ai_dynamic_variant_uses_en_in_taxonomy(indian_persona, cfg) -> None
 
     ob = _builder()
     probe = SovAiDynamicProbe(
-        persona=indian_persona, locale="ta_Taml_IN", language="Tamil",
-        models={"summary_model": object()}, cfg=cfg,
-        provenance=Provenance(), profile={}, data={}, outcome_builder=ob,
+        persona=indian_persona,
+        locale="ta_Taml_IN",
+        language="Tamil",
+        models={"summary_model": object()},
+        cfg=cfg,
+        provenance=Provenance(),
+        profile={},
+        data={},
+        outcome_builder=ob,
     )
     assert probe._asset_locale == "en_IN"
     assert probe._bank.taxonomy_id.startswith("en_IN")
@@ -233,9 +268,15 @@ def test_sov_ai_dynamic_romanized_variant_gets_romanized_directive(indian_person
     from usersim.engine.probes.sov_ai_dynamic.generator import SovAiDynamicProbe
 
     probe = SovAiDynamicProbe(
-        persona=indian_persona, locale="ta_Latn_IN", language="Tamil",
-        models={"summary_model": object()}, cfg=cfg,
-        provenance=Provenance(), profile={}, data={}, outcome_builder=_builder(),
+        persona=indian_persona,
+        locale="ta_Latn_IN",
+        language="Tamil",
+        models={"summary_model": object()},
+        cfg=cfg,
+        provenance=Provenance(),
+        profile={},
+        data={},
+        outcome_builder=_builder(),
     )
     assert "romanized Tamil" in probe.get_user_system_prompt()
 
@@ -245,9 +286,15 @@ def test_sov_ai_dynamic_shipped_locale_prompt_unchanged(indian_persona, cfg) -> 
     from usersim.engine.probes.sov_ai_dynamic.generator import SovAiDynamicProbe
 
     probe = SovAiDynamicProbe(
-        persona=indian_persona, locale="en_US", language="English",
-        models={"summary_model": object()}, cfg=cfg,
-        provenance=Provenance(), profile={}, data={}, outcome_builder=_builder(),
+        persona=indian_persona,
+        locale="en_US",
+        language="English",
+        models={"summary_model": object()},
+        cfg=cfg,
+        provenance=Provenance(),
+        profile={},
+        data={},
+        outcome_builder=_builder(),
     )
     assert "You MUST write your messages in" not in probe.get_user_system_prompt()
 
@@ -275,23 +322,30 @@ def _health_probe(label: str, persona, cfg, locale: str, language: str):
     from usersim.engine.core.probes import resolve_probe
 
     return resolve_probe(label)(
-        persona=persona, locale=locale, language=language,
-        models={"summary_model": object()}, cfg=cfg, provenance=Provenance(),
-        profile=compute_behavioral_profile(persona, locale), data={},
+        persona=persona,
+        locale=locale,
+        language=language,
+        models={"summary_model": object()},
+        cfg=cfg,
+        provenance=Provenance(),
+        profile=compute_behavioral_profile(persona, locale),
+        data={},
         outcome_builder=_builder(),
     )
 
 
 @pytest.mark.parametrize("label", _HEALTH_PROBE_LABELS)
 def test_health_disclosure_variant_resolves_en_in_scaffold(
-    label, indian_persona, cfg,
+    label,
+    indian_persona,
+    cfg,
 ) -> None:
     probe = _health_probe(label, indian_persona, cfg, "ta_Taml_IN", "Tamil")
 
-    assert probe._asset_locale == "en_IN"   # scaffold pack fell back to the base
-    assert probe._locale == "ta_Taml_IN"     # conversation locale preserved
+    assert probe._asset_locale == "en_IN"  # scaffold pack fell back to the base
+    assert probe._locale == "ta_Taml_IN"  # conversation locale preserved
     prompt = probe.get_user_system_prompt()
-    assert prompt                            # en_IN pack resolved (no abort)
+    assert prompt  # en_IN pack resolved (no abort)
     # The scaffold is English, so the target-language directive must carry the
     # conversation language — otherwise the user agent writes English and the
     # script gate exhausts every row.
@@ -302,7 +356,9 @@ def test_health_disclosure_variant_resolves_en_in_scaffold(
 
 @pytest.mark.parametrize("label", _HEALTH_PROBE_LABELS)
 def test_health_disclosure_romanized_variant_gets_romanized_directive(
-    label, indian_persona, cfg,
+    label,
+    indian_persona,
+    cfg,
 ) -> None:
     probe = _health_probe(label, indian_persona, cfg, "ta_Latn_IN", "Tamil")
     assert "romanized Tamil" in probe.get_user_system_prompt()
@@ -310,7 +366,9 @@ def test_health_disclosure_romanized_variant_gets_romanized_directive(
 
 @pytest.mark.parametrize("label", _HEALTH_PROBE_LABELS)
 def test_health_disclosure_shipped_locale_unchanged(
-    label, indian_persona, cfg,
+    label,
+    indian_persona,
+    cfg,
 ) -> None:
     # Shipped locales resolve their own pack — no fallback, no directive.
     probe = _health_probe(label, indian_persona, cfg, "en_US", "English")

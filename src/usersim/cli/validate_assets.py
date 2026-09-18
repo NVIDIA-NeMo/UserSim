@@ -28,13 +28,17 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Non-zero exit on FAIL."
         ),
     )
-    p.add_argument("--domain", required=True, choices=domain_names(),
-                   help="Asset domain to validate (e.g. financial_services).")
+    p.add_argument(
+        "--domain", required=True, choices=domain_names(), help="Asset domain to validate (e.g. financial_services)."
+    )
     p.add_argument("--locale", required=True, help="Locale, e.g. en_US.")
-    p.add_argument("--dir", type=Path, default=None,
-                   help="Bank directory (defaults to assets/<domain>/<locale>).")
-    p.add_argument("--region-spec", type=Path, default=None,
-                   help="region_spec for numeric-faithfulness ground truth (defaults to bundled).")
+    p.add_argument("--dir", type=Path, default=None, help="Bank directory (defaults to assets/<domain>/<locale>).")
+    p.add_argument(
+        "--region-spec",
+        type=Path,
+        default=None,
+        help="region_spec for numeric-faithfulness ground truth (defaults to bundled).",
+    )
     p.set_defaults(func=run)
 
 

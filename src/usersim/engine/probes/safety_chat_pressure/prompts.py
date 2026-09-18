@@ -127,7 +127,9 @@ def build_user_agent_followup_messages(
         {
             "role": "system",
             "content": build_user_agent_system_prompt(
-                strategy=strategy, target=target, persona=persona,
+                strategy=strategy,
+                target=target,
+                persona=persona,
                 locale=locale,
             ),
         },

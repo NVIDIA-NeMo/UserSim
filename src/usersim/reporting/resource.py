@@ -114,10 +114,7 @@ class ResourceProfile:
         this conversation actually cost on the output side"; the
         broader in-sim resource bill is ``total_tokens``.
         """
-        return sum(
-            self.output_tokens_by_alias.get(alias, 0)
-            for alias in _CONVERSATION_ALIASES
-        )
+        return sum(self.output_tokens_by_alias.get(alias, 0) for alias in _CONVERSATION_ALIASES)
 
     @property
     def assistant_output_tokens(self) -> int:
@@ -139,9 +136,8 @@ class ResourceProfile:
         ``assistant_total = input + output``
         ``assistant_output = reasoning + conversation`` (visible)
         """
-        return (
-            self.input_tokens_by_alias.get("assistant_model", 0)
-            + self.output_tokens_by_alias.get("assistant_model", 0)
+        return self.input_tokens_by_alias.get("assistant_model", 0) + self.output_tokens_by_alias.get(
+            "assistant_model", 0
         )
 
     @property
@@ -175,10 +171,7 @@ class ResourceProfile:
         ``assistant_total_tokens`` so the dashboard's "User Tokens" row
         is structurally identical to the Assistant Tokens row.
         """
-        return (
-            self.input_tokens_by_alias.get("user_model", 0)
-            + self.output_tokens_by_alias.get("user_model", 0)
-        )
+        return self.input_tokens_by_alias.get("user_model", 0) + self.output_tokens_by_alias.get("user_model", 0)
 
     @property
     def user_output_tokens(self) -> int:
@@ -223,9 +216,8 @@ class ResourceProfile:
         probes have something to call. Output is consumed by the
         assistant's NEXT turn as input, not as a conversation turn.
         """
-        return (
-            self.input_tokens_by_alias.get("api_response_model", 0)
-            + self.output_tokens_by_alias.get("api_response_model", 0)
+        return self.input_tokens_by_alias.get("api_response_model", 0) + self.output_tokens_by_alias.get(
+            "api_response_model", 0
         )
 
     @property
@@ -249,10 +241,7 @@ class ResourceProfile:
         """Gross billable spend on ``judge_model`` -- the in-sim user-LLM
         gate / capitulation classifier. Not a conversation participant.
         """
-        return (
-            self.input_tokens_by_alias.get("judge_model", 0)
-            + self.output_tokens_by_alias.get("judge_model", 0)
-        )
+        return self.input_tokens_by_alias.get("judge_model", 0) + self.output_tokens_by_alias.get("judge_model", 0)
 
     @property
     def judge_output_tokens(self) -> int:
@@ -275,10 +264,7 @@ class ResourceProfile:
         """Gross billable spend on ``summary_model`` -- in-sim context
         compressor for long conversations. Not a conversation participant.
         """
-        return (
-            self.input_tokens_by_alias.get("summary_model", 0)
-            + self.output_tokens_by_alias.get("summary_model", 0)
-        )
+        return self.input_tokens_by_alias.get("summary_model", 0) + self.output_tokens_by_alias.get("summary_model", 0)
 
     @property
     def summary_output_tokens(self) -> int:
@@ -339,9 +325,7 @@ class ResourceProfile:
             "output_tokens_by_alias": dict(self.output_tokens_by_alias),
             "reasoning_tokens_by_alias": dict(self.reasoning_tokens_by_alias),
             "reasoning_source_by_alias": dict(self.reasoning_source_by_alias),
-            "wall_clock_s_by_alias": {
-                k: round(v, 3) for k, v in self.wall_clock_s_by_alias.items()
-            },
+            "wall_clock_s_by_alias": {k: round(v, 3) for k, v in self.wall_clock_s_by_alias.items()},
         }
 
 
@@ -385,15 +369,9 @@ def aggregate_resource_profile(
             continue
         profile.n_trajectories += 1
         _accumulate_alias_dict(profile.n_calls_by_alias, outcome.get("per_model_calls"))
-        _accumulate_alias_dict(
-            profile.input_tokens_by_alias, outcome.get("per_model_input_tokens")
-        )
-        _accumulate_alias_dict(
-            profile.output_tokens_by_alias, outcome.get("per_model_output_tokens")
-        )
-        _accumulate_alias_dict(
-            profile.wall_clock_s_by_alias, outcome.get("wall_clock_s_by_alias")
-        )
+        _accumulate_alias_dict(profile.input_tokens_by_alias, outcome.get("per_model_input_tokens"))
+        _accumulate_alias_dict(profile.output_tokens_by_alias, outcome.get("per_model_output_tokens"))
+        _accumulate_alias_dict(profile.wall_clock_s_by_alias, outcome.get("wall_clock_s_by_alias"))
         wc = outcome.get("wall_clock_s")
         if isinstance(wc, (int, float)):
             profile.total_wall_clock_s += float(wc)
@@ -418,10 +396,7 @@ def aggregate_from_dataframe(df: Any, column: str = "simulation_outcome") -> Res
     import pandas as pd  # lazy import
 
     if not isinstance(df, pd.DataFrame):
-        raise TypeError(
-            "aggregate_from_dataframe expects a pandas DataFrame, got "
-            f"{type(df).__name__}"
-        )
+        raise TypeError(f"aggregate_from_dataframe expects a pandas DataFrame, got {type(df).__name__}")
     if column not in df.columns:
         # No outcomes -> empty profile.
         return ResourceProfile()
@@ -455,12 +430,12 @@ def aggregate_from_dataframe(df: Any, column: str = "simulation_outcome") -> Res
             if not isinstance(n_out, (int, float)) or n_out <= 0:
                 continue
             tokens, source = estimate_reasoning_for_row(
-                row.get("conversation_messages"), alias, int(n_out),
+                row.get("conversation_messages"),
+                alias,
+                int(n_out),
             )
             if tokens > 0:
-                profile.reasoning_tokens_by_alias[alias] = (
-                    profile.reasoning_tokens_by_alias.get(alias, 0) + tokens
-                )
+                profile.reasoning_tokens_by_alias[alias] = profile.reasoning_tokens_by_alias.get(alias, 0) + tokens
             # ``estimated`` always wins over the default ``unavailable``
             # for visible-output aliases. The noise-floor pass below
             # decides whether the accumulated estimate is real.

@@ -99,10 +99,15 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         self._declared_tool_names: set[str] = set()  # {t.name for t in ...}
 
     def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
+        self,
+        persona: dict,
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[_DemoActionRequest]:
         return _DemoActionRequest(
-            id="AR-DEMO-001", placeholder=True,
+            id="AR-DEMO-001",
+            placeholder=True,
             sub_protocol="unsanctioned_action",
             initial_user_prompt="Please do X with my data.",
             simulated_tools=[],
@@ -119,32 +124,34 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         return self._api_tools
 
     def after_assistant_turn(
-        self, models: dict, state: Any, response: Any, cfg: Any,
+        self,
+        models: dict,
+        state: Any,
+        response: Any,
+        cfg: Any,
     ) -> str:
         return ""  # Unused — run_dispatch owns the loop.
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
         if self._task is not None:
-            extras["probe_variant"] = (
-                f"{self._task.sub_protocol}::demo"
-            )
+            extras["probe_variant"] = f"{self._task.sub_protocol}::demo"
             extras["action_request_id"] = self._task.id
             extras["sub_protocol"] = self._task.sub_protocol
             # AgenticMixin convention: num_turns = assistant-message count.
-            extras["num_turns"] = sum(
-                1 for m in state.messages if m.get("role") == "assistant"
-            )
-            extras["num_tool_calls"] = len(
-                state.metadata.get("attempted_actions") or []
-            )
+            extras["num_turns"] = sum(1 for m in state.messages if m.get("role") == "assistant")
+            extras["num_tool_calls"] = len(state.metadata.get("attempted_actions") or [])
         return extras
 
     def should_succeed(self, state: Any) -> bool:
         return bool(state.metadata.get("action_request_id"))
 
     def run_dispatch(
-        self, *, models: Dict[str, Any], data: Dict[str, Any], cfg: Any,
+        self,
+        *,
+        models: Dict[str, Any],
+        data: Dict[str, Any],
+        cfg: Any,
     ) -> dict:
         """Custom agentic simulate loop — see safety_agentic for the real one."""
         builder = self._outcome_builder or OutcomeBuilder(
@@ -156,17 +163,23 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         state.metadata["sub_protocol"] = self._task.sub_protocol
         state.metadata["attempted_actions"] = []
         # Inject verbatim user turn-1.
-        state.messages.append({
-            "role": "user", "content": self._task.initial_user_prompt,
-        })
+        state.messages.append(
+            {
+                "role": "user",
+                "content": self._task.initial_user_prompt,
+            }
+        )
         # Multi-assistant-turn tool-interception loop.
         # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
         # real implementation (call_llm wrapping, tool-call extraction,
         # mock-response injection, infrastructure-failure handling).
         outcome = builder.finalize(status=OutcomeStatus.OK)
         result = make_result(
-            state.messages, state.metadata, self.should_succeed(state),
-            outcome=outcome, traces=builder.traces(),
+            state.messages,
+            state.metadata,
+            self.should_succeed(state),
+            outcome=outcome,
+            traces=builder.traces(),
         )
         result.update(self.build_result_extras(state))
         return result

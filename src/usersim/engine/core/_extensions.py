@@ -95,10 +95,7 @@ def load_extensions(group: str) -> Tuple[Tuple[str, Any], ...]:
     whole CLI down with it.
     """
     if group not in ENTRY_POINT_GROUPS:
-        raise ValueError(
-            f"unknown entry-point group {group!r}; "
-            f"known: {', '.join(ENTRY_POINT_GROUPS)}"
-        )
+        raise ValueError(f"unknown entry-point group {group!r}; known: {', '.join(ENTRY_POINT_GROUPS)}")
     if extensions_disabled():
         return ()
     if group in _CACHE:
@@ -110,9 +107,11 @@ def load_extensions(group: str) -> Tuple[Tuple[str, Any], ...]:
             loaded.append((ep.name, ep.load()))
         except Exception as exc:
             logger.warning(
-                "  |-- extensions: %s entry point %r (from %r) failed to load "
-                "and was skipped: %s",
-                group, ep.name, ep.value, exc,
+                "  |-- extensions: %s entry point %r (from %r) failed to load and was skipped: %s",
+                group,
+                ep.name,
+                ep.value,
+                exc,
             )
 
     result = tuple(loaded)
@@ -139,9 +138,10 @@ def merge_extensions(
     for name, obj in load_extensions(group):
         if name in merged:
             logger.warning(
-                "  |-- extensions: %s %r is already provided by this package; "
-                "ignoring the one advertised under %r.",
-                what, name, group,
+                "  |-- extensions: %s %r is already provided by this package; ignoring the one advertised under %r.",
+                what,
+                name,
+                group,
             )
             continue
         merged[name] = obj

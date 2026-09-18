@@ -67,9 +67,7 @@ _STRATEGY_REQUIRED_PLACEHOLDERS: Tuple[str, ...] = (
     "{target_description}",
     "{initial_prompt}",
 )
-_REFRAMING_REQUIRED_PLACEHOLDERS: Tuple[str, ...] = (
-    "{previous_assistant_response}",
-)
+_REFRAMING_REQUIRED_PLACEHOLDERS: Tuple[str, ...] = ("{previous_assistant_response}",)
 
 
 class PressureBankError(ValueError):
@@ -117,9 +115,7 @@ class Strategy:
         always have a valid reframing to apply.
         """
         if not self.reframings:
-            raise PressureBankError(
-                f"strategy {self.id!r} has no reframings — cannot pick"
-            )
+            raise PressureBankError(f"strategy {self.id!r} has no reframings — cannot pick")
         return self.reframings[index % len(self.reframings)]
 
     def reframing_by_id(self, reframing_id: str) -> Optional[Reframing]:
@@ -184,13 +180,9 @@ class PressureBank:
         return None
 
     def targets_by_harm_category(self, category: str) -> Tuple[TargetRequest, ...]:
-        return tuple(
-            t for t in self.target_requests if t.harm_category == category
-        )
+        return tuple(t for t in self.target_requests if t.harm_category == category)
 
-    def targets_for_persona(
-        self, persona_tags: Iterable[str]
-    ) -> Tuple[TargetRequest, ...]:
+    def targets_for_persona(self, persona_tags: Iterable[str]) -> Tuple[TargetRequest, ...]:
         """Targets applicable to a persona with the given tags."""
         tags = frozenset(persona_tags)
         return tuple(t for t in self.target_requests if t.matches_persona(tags))
@@ -209,9 +201,7 @@ class PressureBank:
             "schema_version": self.schema_version,
             "n_strategies": len(self.strategies),
             "n_targets": len(self.target_requests),
-            "n_placeholder_targets": sum(
-                1 for t in self.target_requests if t.placeholder
-            ),
+            "n_placeholder_targets": sum(1 for t in self.target_requests if t.placeholder),
             "harm_categories": list(self.harm_categories),
         }
 
@@ -291,21 +281,14 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
 
     raw_harm = doc.get("harm_categories")
     if not isinstance(raw_harm, list) or not raw_harm:
-        raise PressureBankError(
-            f"{src_path}::harm_categories: must be a non-empty list"
-        )
+        raise PressureBankError(f"{src_path}::harm_categories: must be a non-empty list")
     harm_categories: List[str] = []
     for i, h in enumerate(raw_harm):
         if not isinstance(h, str) or not h.strip():
-            raise PressureBankError(
-                f"{src_path}::harm_categories[{i}]: must be a non-empty string"
-            )
+            raise PressureBankError(f"{src_path}::harm_categories[{i}]: must be a non-empty string")
         harm_categories.append(h.strip())
     if len(set(harm_categories)) != len(harm_categories):
-        raise PressureBankError(
-            f"{src_path}::harm_categories: contains duplicates: "
-            f"{harm_categories}"
-        )
+        raise PressureBankError(f"{src_path}::harm_categories: contains duplicates: {harm_categories}")
     harm_set = frozenset(harm_categories)
 
     raw_tags = doc.get("tags", [])
@@ -315,45 +298,36 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
 
     raw_strategies = doc.get("strategies")
     if not isinstance(raw_strategies, list) or not raw_strategies:
-        raise PressureBankError(
-            f"{src_path}::strategies: must be a non-empty list"
-        )
+        raise PressureBankError(f"{src_path}::strategies: must be a non-empty list")
     strategies: List[Strategy] = []
     seen_strategy_ids: set[str] = set()
     for idx, raw in enumerate(raw_strategies):
         if not isinstance(raw, dict):
-            raise PressureBankError(
-                f"{src_path}::strategies[{idx}]: must be a mapping"
-            )
+            raise PressureBankError(f"{src_path}::strategies[{idx}]: must be a mapping")
         s = _build_strategy(raw, src_path=src_path, idx=idx)
         if s.id in seen_strategy_ids:
-            raise PressureBankError(
-                f"{src_path}::{s.id}: duplicate strategy id"
-            )
+            raise PressureBankError(f"{src_path}::{s.id}: duplicate strategy id")
         seen_strategy_ids.add(s.id)
         strategies.append(s)
 
     raw_targets = doc.get("target_requests")
     if not isinstance(raw_targets, list) or not raw_targets:
-        raise PressureBankError(
-            f"{src_path}::target_requests: must be a non-empty list"
-        )
+        raise PressureBankError(f"{src_path}::target_requests: must be a non-empty list")
     targets: List[TargetRequest] = []
     seen_target_ids: set[str] = set()
     for idx, raw in enumerate(raw_targets):
         if not isinstance(raw, dict):
-            raise PressureBankError(
-                f"{src_path}::target_requests[{idx}]: must be a mapping"
-            )
+            raise PressureBankError(f"{src_path}::target_requests[{idx}]: must be a mapping")
         t = _build_target(
-            raw, src_path=src_path, idx=idx,
-            bank_id=bank_id, bank_version=bank_version,
+            raw,
+            src_path=src_path,
+            idx=idx,
+            bank_id=bank_id,
+            bank_version=bank_version,
             allowed_harm_categories=harm_set,
         )
         if t.id in seen_target_ids:
-            raise PressureBankError(
-                f"{src_path}::{t.id}: duplicate target id"
-            )
+            raise PressureBankError(f"{src_path}::{t.id}: duplicate target id")
         seen_target_ids.add(t.id)
         targets.append(t)
 
@@ -374,20 +348,24 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
             "pressure_bank: loaded %s v%s with %d placeholder target(s) of %d "
             "total — downstream readers (capability dashboard, scorers) treat "
             "trajectories that probed against placeholder targets as preview-only",
-            bank_id, bank_version, n_placeholder, len(bank.target_requests),
+            bank_id,
+            bank_version,
+            n_placeholder,
+            len(bank.target_requests),
         )
     return bank
 
 
-def _build_strategy(
-    entry: Dict[str, Any], *, src_path: str, idx: int
-) -> Strategy:
+def _build_strategy(entry: Dict[str, Any], *, src_path: str, idx: int) -> Strategy:
     sid = _require_str(entry, "id", src_path, ctx=f"strategies[{idx}]")
     ctx = sid
 
     description = _require_localized(entry, "description", src_path, ctx=ctx)
     template = _require_localized(
-        entry, "system_prompt_template", src_path, ctx=ctx,
+        entry,
+        "system_prompt_template",
+        src_path,
+        ctx=ctx,
     )
     # Validate the required-placeholders contract against EVERY
     # locale rendering — a French rendering missing ``{persona}``
@@ -404,20 +382,14 @@ def _build_strategy(
 
     raw_reframings = entry.get("reframings")
     if not isinstance(raw_reframings, list) or not raw_reframings:
-        raise PressureBankError(
-            f"{src_path}::{ctx}::reframings: must be a non-empty list"
-        )
+        raise PressureBankError(f"{src_path}::{ctx}::reframings: must be a non-empty list")
 
     reframings: List[Reframing] = []
     seen_ids: set[str] = set()
     for ri, raw in enumerate(raw_reframings):
         if not isinstance(raw, dict):
-            raise PressureBankError(
-                f"{src_path}::{ctx}::reframings[{ri}]: must be a mapping"
-            )
-        rid = _require_str(
-            raw, "id", src_path, ctx=f"{ctx}::reframings[{ri}]"
-        )
+            raise PressureBankError(f"{src_path}::{ctx}::reframings[{ri}]: must be a mapping")
+        rid = _require_str(raw, "id", src_path, ctx=f"{ctx}::reframings[{ri}]")
         rctx = f"{ctx}::reframings::{rid}"
         rdesc = _require_localized(raw, "description", src_path, ctx=rctx)
         rinstr = _require_localized(raw, "instruction", src_path, ctx=rctx)
@@ -430,9 +402,7 @@ def _build_strategy(
                         f"requires {list(_REFRAMING_REQUIRED_PLACEHOLDERS)}"
                     )
         if rid in seen_ids:
-            raise PressureBankError(
-                f"{src_path}::{rctx}: duplicate reframing id within strategy {sid!r}"
-            )
+            raise PressureBankError(f"{src_path}::{rctx}: duplicate reframing id within strategy {sid!r}")
         seen_ids.add(rid)
         reframings.append(
             Reframing(
@@ -473,39 +443,38 @@ def _build_target(
 
     placeholder = entry.get("placeholder")
     if not isinstance(placeholder, bool):
-        raise PressureBankError(
-            f"{src_path}::{ctx}::placeholder: must be a bool, got "
-            f"{type(placeholder).__name__}"
-        )
+        raise PressureBankError(f"{src_path}::{ctx}::placeholder: must be a bool, got {type(placeholder).__name__}")
 
     initial_prompt = _require_localized(
-        entry, "initial_prompt", src_path, ctx=ctx,
+        entry,
+        "initial_prompt",
+        src_path,
+        ctx=ctx,
     )
     expected_refusal = _require_localized(
-        entry, "expected_refusal", src_path, ctx=ctx,
+        entry,
+        "expected_refusal",
+        src_path,
+        ctx=ctx,
     )
 
     raw_tags = entry.get("persona_tags", [])
     if not isinstance(raw_tags, list):
-        raise PressureBankError(
-            f"{src_path}::{ctx}::persona_tags: must be a list (or omit)"
-        )
+        raise PressureBankError(f"{src_path}::{ctx}::persona_tags: must be a list (or omit)")
     persona_tags: List[str] = []
     for ti, tag in enumerate(raw_tags):
         if not isinstance(tag, str) or not tag.strip():
-            raise PressureBankError(
-                f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty "
-                "string"
-            )
+            raise PressureBankError(f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty string")
         persona_tags.append(tag.strip())
 
     raw_provenance = entry.get("provenance")
     if not isinstance(raw_provenance, dict):
-        raise PressureBankError(
-            f"{src_path}::{ctx}::provenance: must be a mapping"
-        )
+        raise PressureBankError(f"{src_path}::{ctx}::provenance: must be a mapping")
     provenance = _build_provenance(
-        raw_provenance, src_path=src_path, ctx=ctx, placeholder=placeholder,
+        raw_provenance,
+        src_path=src_path,
+        ctx=ctx,
+        placeholder=placeholder,
     )
 
     return TargetRequest(
@@ -535,32 +504,25 @@ def _build_provenance(
             f"{src_path}::{ctx}::provenance::source: 'placeholder' is only "
             "allowed when the entry's placeholder field is true"
         )
-    last_reviewed = _require_str(
-        p, "last_reviewed", src_path, ctx=f"{ctx}::provenance"
-    )
+    last_reviewed = _require_str(p, "last_reviewed", src_path, ctx=f"{ctx}::provenance")
     if not _ISO_DATE.match(last_reviewed):
         raise PressureBankError(
-            f"{src_path}::{ctx}::provenance::last_reviewed: must be an "
-            f"ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
+            f"{src_path}::{ctx}::provenance::last_reviewed: must be an ISO-8601 date YYYY-MM-DD; got {last_reviewed!r}"
         )
     raw_refs = p.get("references", [])
     if not isinstance(raw_refs, list):
-        raise PressureBankError(
-            f"{src_path}::{ctx}::provenance::references: must be a list"
-        )
+        raise PressureBankError(f"{src_path}::{ctx}::provenance::references: must be a list")
     refs: List[str] = []
     for ri, ref in enumerate(raw_refs):
         if not isinstance(ref, str) or not ref.strip():
-            raise PressureBankError(
-                f"{src_path}::{ctx}::provenance::references[{ri}]: must be a "
-                "non-empty string"
-            )
+            raise PressureBankError(f"{src_path}::{ctx}::provenance::references[{ri}]: must be a non-empty string")
         refs.append(ref.strip())
     if not placeholder and not refs:
         logger.info(
             "pressure_bank: %s::%s carries placeholder=False but has no "
             "references; consider adding at least one citation",
-            src_path, ctx,
+            src_path,
+            ctx,
         )
     return TargetProvenance(
         source=source.strip(),
@@ -569,18 +531,13 @@ def _build_provenance(
     )
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise PressureBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise PressureBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise PressureBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -601,7 +558,8 @@ def _require_localized(
         raise PressureBankError(f"{loc}: missing required field {key!r}")
     try:
         return LocalizedText.from_yaml_value(
-            d[key], field_path=f"{loc}::{key}",
+            d[key],
+            field_path=f"{loc}::{key}",
         )
     except LocalizedTextError as e:
         raise PressureBankError(str(e)) from e
@@ -623,6 +581,7 @@ def default_pressure_bank_path() -> Path:
     probe name (``safety_chat_pressure``).
     """
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("safety_chat_pressure") / "sample.yaml"
 
 
@@ -654,8 +613,11 @@ def load_pressure_bank_default() -> PressureBank:
         _PRESSURE_BANK_CACHE[path] = bank
         logger.info(
             "pressure_bank: loaded %s v%s (%d strategies, %d target(s)) from %s",
-            bank.bank_id, bank.bank_version,
-            len(bank.strategies), len(bank.target_requests), path,
+            bank.bank_id,
+            bank.bank_version,
+            len(bank.strategies),
+            len(bank.target_requests),
+            path,
         )
         return bank
 

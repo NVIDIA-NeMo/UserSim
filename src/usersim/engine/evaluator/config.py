@@ -55,8 +55,7 @@ class JudgeSpecConfig(BaseModel):
                 fam = JudgeFamily(self.family)
             except ValueError as e:
                 raise ValueError(
-                    f"Unknown judge family {self.family!r}. "
-                    f"Valid: {[f.value for f in JudgeFamily]}"
+                    f"Unknown judge family {self.family!r}. Valid: {[f.value for f in JudgeFamily]}"
                 ) from e
         return JudgeSpec(alias=self.alias, family=fam)
 
@@ -112,8 +111,7 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     axes: Optional[list[str]] = Field(
         default=None,
         description=(
-            "Subset of axes (by name) to evaluate. None means all "
-            "applicable axes for the row's probe_family."
+            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family."
         ),
     )
     scorers: list[str] = Field(

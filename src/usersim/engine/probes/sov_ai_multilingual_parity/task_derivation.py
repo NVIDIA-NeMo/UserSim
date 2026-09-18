@@ -88,17 +88,13 @@ def derive_task(
 
     persona_tags = persona_to_tags(persona, locale)
     candidates: List[Query] = [
-        q
-        for q in query_bank.matching_persona_tags(persona_tags)
-        if q.supports_locale(locale) and q.id not in excluded
+        q for q in query_bank.matching_persona_tags(persona_tags) if q.supports_locale(locale) and q.id not in excluded
     ]
     if not candidates:
         return None
 
     persona_hash = _persona_content_hash(persona)
-    bank_salt_bytes = hashlib.sha256(
-        f"{query_bank.bank_id}|{query_bank.bank_version}".encode("utf-8")
-    ).digest()[:8]
+    bank_salt_bytes = hashlib.sha256(f"{query_bank.bank_id}|{query_bank.bank_version}".encode("utf-8")).digest()[:8]
     bank_salt = int.from_bytes(bank_salt_bytes, "big", signed=False)
     mix = persona_hash ^ bank_salt
     if seed is not None:

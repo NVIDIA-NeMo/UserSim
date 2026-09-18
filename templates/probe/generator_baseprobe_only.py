@@ -60,7 +60,9 @@ class DemoGeneralProbe(BaseProbe):
         return ""
 
     def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
+        self,
+        user_query: str,
+        conversation_history: str,
     ) -> str:
         # Optional override — the BaseProbe default is a generic
         # role-violation rubric. Override when the gate should be

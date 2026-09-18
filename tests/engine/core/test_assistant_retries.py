@@ -102,8 +102,13 @@ class _Harness:
 def _run(state, cfg, probe):
     loop = ConversationLoop()
     return loop._generate_and_judge_assistant_turn(
-        models={}, probe=probe, state=state, cfg=cfg,
-        turn_idx=0, assistant_msgs=list(state.messages), call_kwargs={},
+        models={},
+        probe=probe,
+        state=state,
+        cfg=cfg,
+        turn_idx=0,
+        assistant_msgs=list(state.messages),
+        call_kwargs={},
     )
 
 
@@ -194,8 +199,7 @@ class TestResampling:
 
 
 class TestJudgePromptComesFromTheProbe:
-    """The loop must judge with the PROBE's prompt, not a module constant.
-    """
+    """The loop must judge with the PROBE's prompt, not a module constant."""
 
     def test_loop_judges_with_the_probes_prompt(self, monkeypatch):
         h = _Harness(monkeypatch, ["the answer"], [True])
@@ -255,10 +259,13 @@ class _TracingProbe:
 
     def after_assistant_turn(self, models, state, response, cfg):
         content = response.get("content", "")
-        state.messages.append(assistant_message(
-            response, content,
-            store_reasoning=getattr(cfg, "store_reasoning", True),
-        ))
+        state.messages.append(
+            assistant_message(
+                response,
+                content,
+                store_reasoning=getattr(cfg, "store_reasoning", True),
+            )
+        )
         return content
 
     def format_assistant_judge_prompt(self, assistant_response, conversation_history):
@@ -283,15 +290,20 @@ class _MultiCallProbe:
         store = getattr(cfg, "store_reasoning", True)
         state.messages.append(
             assistant_message(
-                response, response.get("content", ""), store_reasoning=store,
+                response,
+                response.get("content", ""),
+                store_reasoning=store,
             )
         )
         # A second, probe-internal call: the synthesised reply.
-        second = {"content": "final synthesis",
-                  "reasoning_content": self.SECOND_TRACE}
-        state.messages.append(assistant_message(
-            second, second["content"], store_reasoning=store,
-        ))
+        second = {"content": "final synthesis", "reasoning_content": self.SECOND_TRACE}
+        state.messages.append(
+            assistant_message(
+                second,
+                second["content"],
+                store_reasoning=store,
+            )
+        )
         return second["content"]
 
     def format_assistant_judge_prompt(self, assistant_response, conversation_history):
@@ -316,7 +328,7 @@ class TestRejectedCandidateTraces:
 
     @staticmethod
     def _no_trace(msg) -> bool:
-        """"No trace" is any falsy reading: key absent, None, or "".
+        """ "No trace" is any falsy reading: key absent, None, or "".
 
         The capture path omits the key entirely, but the property under
         test is that nothing readable survives -- an implementation that
@@ -328,8 +340,7 @@ class TestRejectedCandidateTraces:
     def test_rejected_candidates_trace_is_discarded(self, monkeypatch):
         """The surviving message carries its OWN trace, and the rejected
         candidate's trace is gone from the transcript entirely."""
-        _Harness(monkeypatch, ["bad", "good"], [False, True],
-                 traces=[self.A, self.B])
+        _Harness(monkeypatch, ["bad", "good"], [False, True], traces=[self.A, self.B])
         state = _make_state()
         _run(state, _StubConfig(2), _StubProbe())
 
@@ -350,10 +361,13 @@ class TestRejectedCandidateTraces:
         _Harness(monkeypatch, ["good"], [True], traces=[self.B])
         state = _make_state()
         # A prior, already-settled turn that DID emit a trace.
-        state.messages.append({
-            "role": "assistant", "content": "earlier reply",
-            "reasoning_content": self.A,
-        })
+        state.messages.append(
+            {
+                "role": "assistant",
+                "content": "earlier reply",
+                "reasoning_content": self.A,
+            }
+        )
         state.messages.append({"role": "user", "content": "Q2"})
         prior = state.messages[2]
 
@@ -369,8 +383,7 @@ class TestRejectedCandidateTraces:
     def test_exhaustion_keeps_the_last_trace(self, monkeypatch):
         """Budget spent with every candidate rejected: the kept message
         carries the last attempt's trace, not the first's."""
-        _Harness(monkeypatch, ["bad1", "bad2", "bad3"], [False, False, False],
-                 traces=[self.A, self.B, self.C])
+        _Harness(monkeypatch, ["bad1", "bad2", "bad3"], [False, False, False], traces=[self.A, self.B, self.C])
         state = _make_state()
         _run(state, _StubConfig(3), _StubProbe())
 
@@ -383,8 +396,7 @@ class TestRejectedCandidateTraces:
     def test_per_call_attribution_survives_rollback(self, monkeypatch):
         """Same guarantee when the probe attributes via
         ``assistant_message()`` rather than leaving it to the fallback."""
-        _Harness(monkeypatch, ["bad", "good"], [False, True],
-                 traces=[self.A, self.B])
+        _Harness(monkeypatch, ["bad", "good"], [False, True], traces=[self.A, self.B])
         state = _make_state()
         _run(state, _StubConfig(2), _TracingProbe())
 
@@ -481,9 +493,7 @@ class TestJudgeParseErrors:
     def test_parse_error_rejudges_same_candidate_without_resample(self, monkeypatch):
         # Judge flakes (unparseable), then passes the SAME candidate on
         # the re-ask: one assistant call, two judge calls, no retry burned.
-        calls = self._harness(
-            monkeypatch, ["only answer"], [(False, False), (True, True)]
-        )
+        calls = self._harness(monkeypatch, ["only answer"], [(False, False), (True, True)])
         state = _make_state()
         content, _, rating, ok = _run(state, _StubConfig(3), _StubProbe())
         assert calls["assistant"] == 1 and calls["judge"] == 2

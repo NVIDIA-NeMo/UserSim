@@ -364,8 +364,7 @@ def get_system_prompt(locale: str) -> str:
     """Return the user-agent system prompt for a locale."""
     if locale not in _SYSTEM_PROMPTS:
         raise PromptsUnavailableError(
-            f"No multilingual-consistency prompts for locale={locale!r}. "
-            f"Available: {sorted(_SYSTEM_PROMPTS.keys())}"
+            f"No multilingual-consistency prompts for locale={locale!r}. Available: {sorted(_SYSTEM_PROMPTS.keys())}"
         )
     return _SYSTEM_PROMPTS[locale]
 
@@ -392,8 +391,4 @@ def supported_locale_pairs() -> Tuple[Tuple[str, str], ...]:
     Returns the locale list with both prompts present. Used by tests
     to assert there are no half-shipped locales.
     """
-    return tuple(
-        (loc, loc)
-        for loc in sorted(_SYSTEM_PROMPTS.keys())
-        if loc in _FOLLOWUP_INSTRUCTIONS
-    )
+    return tuple((loc, loc) for loc in sorted(_SYSTEM_PROMPTS.keys()) if loc in _FOLLOWUP_INSTRUCTIONS)

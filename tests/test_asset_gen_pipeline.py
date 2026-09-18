@@ -29,15 +29,15 @@ from usersim.asset_gen.financial_services.pipeline import (
 from usersim.asset_gen.financial_services.spec import load_region_spec
 from usersim.engine.core._assets import packaged_assets_dir
 
+
 def _asset_gen_dir() -> Path:
     """Directory the ``asset_gen`` package lives in, wherever that ends up."""
     import usersim.asset_gen
 
     return Path(usersim.asset_gen.__file__).resolve().parent
 
-_REGION_SPEC = (
-    _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
-)
+
+_REGION_SPEC = _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
 
 
 def test_backfill_primitive_tools_fills_empty_primitive_schemas():
@@ -45,12 +45,27 @@ def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     must backfill their description + parameters (with a real `query` on
     kb_search) so no tools.yaml ships an empty primitive schema."""
     tools = [
-        {"name": "kb_search", "description": "", "discoverable": False,
-         "side_effect_class": "read_only", "parameters": {}},
-        {"name": "verify_identity", "description": "", "discoverable": False,
-         "side_effect_class": "read_only", "parameters": {}},
-        {"name": "file_transaction_dispute", "description": "", "discoverable": True,
-         "side_effect_class": "state_changing", "parameters": {}},
+        {
+            "name": "kb_search",
+            "description": "",
+            "discoverable": False,
+            "side_effect_class": "read_only",
+            "parameters": {},
+        },
+        {
+            "name": "verify_identity",
+            "description": "",
+            "discoverable": False,
+            "side_effect_class": "read_only",
+            "parameters": {},
+        },
+        {
+            "name": "file_transaction_dispute",
+            "description": "",
+            "discoverable": True,
+            "side_effect_class": "state_changing",
+            "parameters": {},
+        },
     ]
     out = {t["name"]: t for t in _backfill_primitive_tools(tools)}
     assert out["kb_search"]["description"]
@@ -77,12 +92,10 @@ def test_explode_to_cluster_rows_batches_and_partitions():
 
     spec = load_region_spec(_REGION_SPEC)
     # Stubbed Phase-1 output: one brief row per institution (no LLM).
-    brief_df = pd.DataFrame([
-        {"institution_id": i.id, "institution_brief": {"positioning": "p"}}
-        for i in spec.institutions
-    ])
-    rows = explode_to_cluster_rows(
-        brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    rows = explode_to_cluster_rows(brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
 
     for _, r in rows.iterrows():
         assert r["cluster_kind"] in ("product", "shared")
@@ -91,18 +104,18 @@ def test_explode_to_cluster_rows_batches_and_partitions():
         assert r["sibling_doc_index"] and int(r["target_doc_count"]) >= 1
         # per-doc, genre-aware length budget + stable uuid live in each plan entry
         import json as _json
+
         assert all(s.get("length") and s.get("uuid") for s in _json.loads(r["doc_plan_json"]))
     assert {"product", "shared"} <= set(rows["cluster_kind"])
 
     # 20 docs/product with cap 8 -> ceil(20/8)=3 product-cluster rows per product.
     import math
+
     nb = next(i for i in spec.institutions if i.id == "northwind_bank")
-    nb_product = rows[(rows.institution_id == "northwind_bank")
-                      & (rows.cluster_kind == "product")]
+    nb_product = rows[(rows.institution_id == "northwind_bank") & (rows.cluster_kind == "product")]
     assert len(nb_product) == len(nb.products) * math.ceil(20 / 8)
     # at least one shared cluster row per institution
-    nb_shared = rows[(rows.institution_id == "northwind_bank")
-                     & (rows.cluster_kind == "shared")]
+    nb_shared = rows[(rows.institution_id == "northwind_bank") & (rows.cluster_kind == "shared")]
     assert len(nb_shared) >= 1
 
 
@@ -110,18 +123,15 @@ def test_explode_to_cluster_rows_assigns_unique_cluster_ids():
     import pandas as pd
 
     spec = load_region_spec(_REGION_SPEC)
-    brief_df = pd.DataFrame([
-        {"institution_id": i.id, "institution_brief": {"positioning": "p"}}
-        for i in spec.institutions
-    ])
-    rows = explode_to_cluster_rows(
-        brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    rows = explode_to_cluster_rows(brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
     ids = list(rows["cluster_id"])
     assert all(ids), "every cluster row must carry a cluster_id"
     assert len(ids) == len(set(ids)), "cluster_id must be unique per cluster"
     # Deterministic: re-exploding the same brief yields identical ids.
-    rows2 = explode_to_cluster_rows(
-        brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
+    rows2 = explode_to_cluster_rows(brief_df, spec, docs_per_product=20, max_docs_per_cluster=8)
     assert list(rows2["cluster_id"]) == ids
 
 
@@ -138,8 +148,11 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
     bad_by_attempt = bad_by_attempt or {}
 
     class _Res:
-        def __init__(self, df): self._df = df
-        def load_dataset(self): return self._df
+        def __init__(self, df):
+            self._df = df
+
+        def load_dataset(self):
+            return self._df
 
     class _Eng:
         def __init__(self, seed_df, drop, bad):
@@ -152,8 +165,7 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
             df["doc_set"] = [
                 # A payload truncated mid-body does not parse, so _as_docset
                 # coerces it to {"documents": []} -- but the row is HERE.
-                '{"documents": [{"doc_key": "faq_1", "title": "t", "body": "trunc'
-                if cid in self._bad else _GOOD_DOCSET
+                '{"documents": [{"doc_key": "faq_1", "title": "t", "body": "trunc' if cid in self._bad else _GOOD_DOCSET
                 for cid in df["cluster_id"]
             ]
             return _Res(df.reset_index(drop=True))
@@ -162,9 +174,7 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
         attempt = len(calls)
         calls.append(list(cluster_seed["cluster_id"]))
         return (
-            _Eng(cluster_seed,
-                 drop_by_attempt.get(attempt, set()),
-                 bad_by_attempt.get(attempt, set())),
+            _Eng(cluster_seed, drop_by_attempt.get(attempt, set()), bad_by_attempt.get(attempt, set())),
             object(),
         )
 
@@ -175,9 +185,8 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
 
 def _seed(*cluster_ids):
     import pandas as pd
-    return pd.DataFrame([
-        {"cluster_id": cid, "doc_plan_json": "[]"} for cid in cluster_ids
-    ])
+
+    return pd.DataFrame([{"cluster_id": cid, "doc_plan_json": "[]"} for cid in cluster_ids])
 
 
 def test_generate_docsets_with_backfill_regenerates_dropped_clusters(monkeypatch):
@@ -186,12 +195,11 @@ def test_generate_docsets_with_backfill_regenerates_dropped_clusters(monkeypatch
     from usersim.asset_gen.financial_services import pipeline as P
 
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={0: {"c2"}})
-    result = P._generate_docsets_with_backfill(
-        models=None, cluster_seed=_seed("c1", "c2", "c3"))
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
 
     assert set(result["cluster_id"]) == {"c1", "c2", "c3"}
     assert calls[0] == ["c1", "c2", "c3"]  # first attempt: everything
-    assert calls[1] == ["c2"]              # retry: ONLY the dropped cluster
+    assert calls[1] == ["c2"]  # retry: ONLY the dropped cluster
 
 
 def test_generate_docsets_with_backfill_retries_an_unusable_payload(monkeypatch):
@@ -208,8 +216,7 @@ def test_generate_docsets_with_backfill_retries_an_unusable_payload(monkeypatch)
     from usersim.asset_gen.financial_services import pipeline as P
 
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, bad_by_attempt={0: {"c2"}})
-    result = P._generate_docsets_with_backfill(
-        models=None, cluster_seed=_seed("c1", "c2", "c3"))
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
 
     assert calls[1] == ["c2"], "the unusable cluster must be re-requested"
     assert set(result["cluster_id"]) == {"c1", "c2", "c3"}
@@ -228,8 +235,7 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
 
     bad = {i: {"c2"} for i in range(P.DOCSET_MAX_ATTEMPTS)}
     calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, bad_by_attempt=bad)
-    result = P._generate_docsets_with_backfill(
-        models=None, cluster_seed=_seed("c1", "c2", "c3"))
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
 
     assert set(result["cluster_id"]) == {"c1", "c3"}
     assert len(calls) == P.DOCSET_MAX_ATTEMPTS
@@ -242,10 +248,12 @@ def test_usable_docset_rows_keeps_low_faithfulness_clusters():
     import pandas as pd
     from usersim.asset_gen.financial_services import pipeline as P
 
-    df = pd.DataFrame([
-        {"cluster_id": "c1", "doc_set": _GOOD_DOCSET, "numeric_faithfulness_score": 1.0},
-        {"cluster_id": "c2", "doc_set": _GOOD_DOCSET, "numeric_faithfulness_score": 4.0},
-    ])
+    df = pd.DataFrame(
+        [
+            {"cluster_id": "c1", "doc_set": _GOOD_DOCSET, "numeric_faithfulness_score": 1.0},
+            {"cluster_id": "c2", "doc_set": _GOOD_DOCSET, "numeric_faithfulness_score": 4.0},
+        ]
+    )
     assert set(P._usable_docset_rows(df)["cluster_id"]) == {"c1", "c2"}
 
 
@@ -281,6 +289,7 @@ def test_doc_length_hint_gives_romanized_locales_the_latin_budget():
     romanized doc the much tighter Indic word band — under-filling every
     romanized document at the same token budget.
     """
+
     def _low(hint: str) -> int:
         return int(hint.split()[1].split("-")[0])
 
@@ -296,7 +305,7 @@ def test_doc_length_hint_gives_romanized_locales_the_latin_budget():
 def test_doc_length_hint_is_genre_aware():
     # Narrative genres get a larger band than structured/terse genres, same locale.
     lo = lambda g: int(doc_length_hint("en_US", "English", g).split()[1].split("-")[0])
-    assert lo("product_sheet") > lo("fee_schedule")      # rich > tight
+    assert lo("product_sheet") > lo("fee_schedule")  # rich > tight
     assert lo("policy_procedure") > lo("faq")
     assert lo("regulatory_note") > lo("eligibility_matrix")
     assert lo("disclosure") > lo("promo_notice")
@@ -321,6 +330,7 @@ def test_product_doc_plan_diversity_axes_make_repeats_distinct():
 
     # repeated genres must NOT share an angle (that's what drives distinctness)
     from collections import defaultdict
+
     angles_by_type = defaultdict(list)
     for s in plan:
         angles_by_type[s["document_type"]].append(s["angle"])
@@ -349,8 +359,14 @@ def test_product_doc_plan_is_genre_diverse_at_scale():
     for g in ("faq", "how_to_guide", "troubleshooting", "comparison"):
         assert counts[g] >= 3, f"{g} underused: {dict(counts)}"
     # The added document types all appear.
-    assert {"how_to_guide", "troubleshooting", "comparison", "rate_sheet",
-            "security_advisory", "terms_conditions"} <= set(counts)
+    assert {
+        "how_to_guide",
+        "troubleshooting",
+        "comparison",
+        "rate_sheet",
+        "security_advisory",
+        "terms_conditions",
+    } <= set(counts)
 
 
 def test_brief_columns_are_structured():
@@ -379,15 +395,12 @@ def test_as_docset_normalizes_numpy_documents():
     import numpy as np
     from usersim.asset_gen.financial_services.pipeline import _as_docset
 
-    raw = {"documents": np.array(
-        [{"doc_key": "a", "title": "A", "document_type": "faq", "body": "x"}],
-        dtype=object)}
+    raw = {"documents": np.array([{"doc_key": "a", "title": "A", "document_type": "faq", "body": "x"}], dtype=object)}
     out = _as_docset(raw)
     assert isinstance(out["documents"], list) and len(out["documents"]) == 1
     assert not _as_docset({"documents": np.array([], dtype=object)})["documents"]
     # explode must run without an "ambiguous truth value" error
-    docs = explode_docset(out, id_prefix="X", institution_id="i",
-                          spec_by_key={}, default_domain="retail_banking")
+    docs = explode_docset(out, id_prefix="X", institution_id="i", spec_by_key={}, default_domain="retail_banking")
     assert docs and docs[0]["title"] == "A"
 
 
@@ -397,24 +410,42 @@ def test_embedding_columns():
 
 
 def test_explode_docset_maps_to_scoped_loader_docs():
-    docset = DocSet(documents=[
-        {"doc_key": "acct_sheet", "title": "Account Overview",
-         "document_type": "product_sheet", "body": "No monthly fee.",
-         "mentions_tools": [], "references": ["dispute_policy"]},
-        {"doc_key": "dispute_policy", "title": "Dispute Protocol",
-         "document_type": "policy_procedure", "body": "Call file_dispute.",
-         "mentions_tools": ["file_dispute"], "references": []},
-    ])
+    docset = DocSet(
+        documents=[
+            {
+                "doc_key": "acct_sheet",
+                "title": "Account Overview",
+                "document_type": "product_sheet",
+                "body": "No monthly fee.",
+                "mentions_tools": [],
+                "references": ["dispute_policy"],
+            },
+            {
+                "doc_key": "dispute_policy",
+                "title": "Dispute Protocol",
+                "document_type": "policy_procedure",
+                "body": "Call file_dispute.",
+                "mentions_tools": ["file_dispute"],
+                "references": [],
+            },
+        ]
+    )
     spec_by_key = {
         "acct_sheet": {"domain": "retail_banking", "product_category": "checking"},
         # The PLAN declares which tool a policy doc documents (see
         # build_shared_doc_plan); the model's own claim is not trusted.
-        "dispute_policy": {"domain": "retail_banking", "product_category": "procedure",
-                           "mentions_tools": ["file_dispute"]},
+        "dispute_policy": {
+            "domain": "retail_banking",
+            "product_category": "procedure",
+            "mentions_tools": ["file_dispute"],
+        },
     }
     docs = explode_docset(
-        docset, id_prefix="NB", institution_id="northwind_bank",
-        spec_by_key=spec_by_key, default_domain="retail_banking",
+        docset,
+        id_prefix="NB",
+        institution_id="northwind_bank",
+        spec_by_key=spec_by_key,
+        default_domain="retail_banking",
     )
     assert {d["id"] for d in docs} == {"NB-ACCT_SHEET", "NB-DISPUTE_POLICY"}
     assert all(d["institution_id"] == "northwind_bank" for d in docs)
@@ -433,9 +464,7 @@ class TestPlanOwnedTitles:
     handed over an English title AND demanded it be reproduced exactly.
     """
 
-    _SPEC_DIR = (
-        _asset_gen_dir() / "financial_services" / "region_spec"
-    )
+    _SPEC_DIR = _asset_gen_dir() / "financial_services" / "region_spec"
 
     def _plan_titles(self, locale: str) -> set:
         from usersim.asset_gen.financial_services.pipeline import build_shared_doc_plan
@@ -449,32 +478,55 @@ class TestPlanOwnedTitles:
         return out
 
     def test_title_comes_from_the_plan_not_the_model(self):
-        docset = DocSet(documents=[{
-            "doc_key": "savings_faq", "title": "Regular Savings Account — overview",
-            "document_type": "faq", "body": "x", "mentions_tools": [],
-            "references": [],
-        }])
-        spec_by_key = {"savings_faq": {
-            "domain": "retail_banking", "product_category": "savings",
-            "topic": "नियमित बचत खाता — सिंहावलोकन",
-        }}
+        docset = DocSet(
+            documents=[
+                {
+                    "doc_key": "savings_faq",
+                    "title": "Regular Savings Account — overview",
+                    "document_type": "faq",
+                    "body": "x",
+                    "mentions_tools": [],
+                    "references": [],
+                }
+            ]
+        )
+        spec_by_key = {
+            "savings_faq": {
+                "domain": "retail_banking",
+                "product_category": "savings",
+                "topic": "नियमित बचत खाता — सिंहावलोकन",
+            }
+        }
         docs = explode_docset(
-            docset, id_prefix="CB", institution_id="chandrika_bank",
-            spec_by_key=spec_by_key, default_domain="retail_banking",
+            docset,
+            id_prefix="CB",
+            institution_id="chandrika_bank",
+            spec_by_key=spec_by_key,
+            default_domain="retail_banking",
         )
         assert docs[0]["title"] == "नियमित बचत खाता — सिंहावलोकन"
 
     def test_off_plan_doc_keeps_the_models_title(self):
         """An invented doc_key has no plan slot, so there is no topic to prefer;
         dropping its title would lose the document entirely."""
-        docset = DocSet(documents=[{
-            "doc_key": "invented", "title": "Something The Model Made Up",
-            "document_type": "faq", "body": "x", "mentions_tools": [],
-            "references": [],
-        }])
+        docset = DocSet(
+            documents=[
+                {
+                    "doc_key": "invented",
+                    "title": "Something The Model Made Up",
+                    "document_type": "faq",
+                    "body": "x",
+                    "mentions_tools": [],
+                    "references": [],
+                }
+            ]
+        )
         docs = explode_docset(
-            docset, id_prefix="CB", institution_id="chandrika_bank",
-            spec_by_key={"other": {"topic": "T"}}, default_domain="retail_banking",
+            docset,
+            id_prefix="CB",
+            institution_id="chandrika_bank",
+            spec_by_key={"other": {"topic": "T"}},
+            default_domain="retail_banking",
         )
         assert docs[0]["title"] == "Something The Model Made Up"
 
@@ -490,13 +542,9 @@ class TestPlanOwnedTitles:
         import yaml
 
         planned = self._plan_titles(locale)
-        root = (
-            packaged_assets_dir() / "financial_services" / locale
-        )
+        root = packaged_assets_dir() / "financial_services" / locale
         titles = [
-            d["title"]
-            for corpus in root.rglob("corpus.yaml")
-            for d in yaml.safe_load(corpus.read_text())["documents"]
+            d["title"] for corpus in root.rglob("corpus.yaml") for d in yaml.safe_load(corpus.read_text())["documents"]
         ]
         assert titles, f"no committed corpus for {locale}"
         assert [t for t in titles if t not in planned] == []
@@ -511,10 +559,7 @@ class TestPlanOwnedTitles:
             letters = [c for c in text if c.isalpha()]
             if not letters:
                 return 1.0
-            return sum(
-                1 for c in letters
-                if any(lo <= ord(c) <= hi for lo, hi in ranges)
-            ) / len(letters)
+            return sum(1 for c in letters if any(lo <= ord(c) <= hi for lo, hi in ranges)) / len(letters)
 
         titles = self._plan_titles("hi_Deva_IN")
         # The in-language product name reaches the title (display_name_local), and
@@ -532,9 +577,7 @@ class TestPlanOwnedTitles:
         ``below_mab_charge`` / ``retail_banking`` in reader-facing prose. Adding a
         product to the region model must not silently reintroduce that."""
         spec = load_region_spec(self._SPEC_DIR / "hi_Deva_IN.yaml")
-        variables = {
-            v for inst in spec.institutions for p in inst.products for v in p.variables
-        }
+        variables = {v for inst in spec.institutions for p in inst.products for v in p.variables}
         domains = {str(d) for inst in spec.institutions for d in inst.domains}
         assert variables - set(spec.doc_titles.variable_labels) == set()
         assert domains - set(spec.doc_titles.domain_labels) == set()
@@ -550,11 +593,14 @@ class TestPlanOwnedTitles:
         assert plan(product, 15, spec) == plan(product, 15, None)
         assert any(_FAQ_INTENTS[0] in s["angle"] for s in plan(product, 40, None))
 
-    @pytest.mark.parametrize("field,value", [
-        ("faq_variable_template", "no slot here"),
-        ("regulatory_note_topic", "नियामक नोट्स"),
-        ("tool_policy_topic", "कब उपयोग करें"),
-    ])
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("faq_variable_template", "no slot here"),
+            ("regulatory_note_topic", "नियामक नोट्स"),
+            ("tool_policy_topic", "कब उपयोग करें"),
+        ],
+    )
     def test_template_missing_its_placeholder_is_rejected(self, field, value):
         """A template that loses its slot collapses every doc of that genre onto one
         title, which then de-duplicates down to a single document."""
@@ -575,25 +621,43 @@ def test_mentions_tools_comes_from_the_plan_not_the_model():
     tools they merely mentioned, so retrieving a generic how-to unlocked tools whose
     documentation was never read. The plan is now authoritative.
     """
-    docset = DocSet(documents=[
-        # A customer-facing doc claiming two tools it has no business unlocking.
-        {"doc_key": "acct_howto", "title": "How to activate",
-         "document_type": "how_to_guide",
-         "body": "The agent will use activate_card to switch it on.",
-         "mentions_tools": ["activate_card", "get_accounts"], "references": []},
-        # A tool doc whose plan slot names its tool, but which forgot to say so.
-        {"doc_key": "activate_card_tooldoc", "title": "activate_card tool reference",
-         "document_type": "discoverable_tool_doc", "body": "Signature ...",
-         "mentions_tools": [], "references": []},
-    ])
+    docset = DocSet(
+        documents=[
+            # A customer-facing doc claiming two tools it has no business unlocking.
+            {
+                "doc_key": "acct_howto",
+                "title": "How to activate",
+                "document_type": "how_to_guide",
+                "body": "The agent will use activate_card to switch it on.",
+                "mentions_tools": ["activate_card", "get_accounts"],
+                "references": [],
+            },
+            # A tool doc whose plan slot names its tool, but which forgot to say so.
+            {
+                "doc_key": "activate_card_tooldoc",
+                "title": "activate_card tool reference",
+                "document_type": "discoverable_tool_doc",
+                "body": "Signature ...",
+                "mentions_tools": [],
+                "references": [],
+            },
+        ]
+    )
     spec_by_key = {
         "acct_howto": {"domain": "retail_banking", "product_category": "checking"},
-        "activate_card_tooldoc": {"domain": "retail_banking",
-                                  "product_category": "procedure",
-                                  "mentions_tools": ["activate_card"]},
+        "activate_card_tooldoc": {
+            "domain": "retail_banking",
+            "product_category": "procedure",
+            "mentions_tools": ["activate_card"],
+        },
     }
-    docs = explode_docset(docset, id_prefix="NB", institution_id="northwind_bank",
-                          spec_by_key=spec_by_key, default_domain="retail_banking")
+    docs = explode_docset(
+        docset,
+        id_prefix="NB",
+        institution_id="northwind_bank",
+        spec_by_key=spec_by_key,
+        default_domain="retail_banking",
+    )
     by_key = {d["id"]: d for d in docs}
     # The customer-facing doc unlocks NOTHING, whatever it claimed...
     assert by_key["NB-ACCT_HOWTO"]["mentions_tools"] == []
@@ -603,13 +667,21 @@ def test_mentions_tools_comes_from_the_plan_not_the_model():
 
 def test_off_plan_doc_key_unlocks_nothing():
     """A drifted doc_key resolves to no slot, so it must fail CLOSED."""
-    docset = DocSet(documents=[
-        {"doc_key": "hallucinated_key", "title": "T",
-         "document_type": "discoverable_tool_doc", "body": "b",
-         "mentions_tools": ["close_account"], "references": []},
-    ])
-    docs = explode_docset(docset, id_prefix="NB", institution_id="northwind_bank",
-                          spec_by_key={}, default_domain="retail_banking")
+    docset = DocSet(
+        documents=[
+            {
+                "doc_key": "hallucinated_key",
+                "title": "T",
+                "document_type": "discoverable_tool_doc",
+                "body": "b",
+                "mentions_tools": ["close_account"],
+                "references": [],
+            },
+        ]
+    )
+    docs = explode_docset(
+        docset, id_prefix="NB", institution_id="northwind_bank", spec_by_key={}, default_domain="retail_banking"
+    )
     assert docs[0]["mentions_tools"] == []
 
 
@@ -624,15 +696,23 @@ def test_references_are_a_prompt_sink_and_never_reach_the_corpus():
     graph, resolve it through ``doc_uuid`` against the institution's real doc_keys
     rather than trusting these strings.
     """
-    docset = DocSet(documents=[
-        {"doc_key": "acct_sheet", "title": "T", "document_type": "product_sheet",
-         "body": "b", "mentions_tools": [],
-         "references": ["acct_faq", "a_key_that_does_not_exist"]},
-    ])
+    docset = DocSet(
+        documents=[
+            {
+                "doc_key": "acct_sheet",
+                "title": "T",
+                "document_type": "product_sheet",
+                "body": "b",
+                "mentions_tools": [],
+                "references": ["acct_faq", "a_key_that_does_not_exist"],
+            },
+        ]
+    )
     docs = explode_docset(
-        docset, id_prefix="NB", institution_id="northwind_bank",
-        spec_by_key={"acct_sheet": {"domain": "retail_banking",
-                                    "product_category": "checking"}},
+        docset,
+        id_prefix="NB",
+        institution_id="northwind_bank",
+        spec_by_key={"acct_sheet": {"domain": "retail_banking", "product_category": "checking"}},
         default_domain="retail_banking",
     )
     assert "references" not in docs[0]
@@ -651,6 +731,7 @@ def test_the_prompt_still_offers_the_slug_sink():
 def test_doc_uuid_is_deterministic_and_scoped():
     from usersim.asset_gen.financial_services.pipeline import doc_uuid
     import uuid as _uuid
+
     a = doc_uuid("en_US", "northwind_bank", "acct_sheet")
     assert a == doc_uuid("en_US", "northwind_bank", "acct_sheet")  # stable across calls
     assert _uuid.UUID(a)  # valid uuid
@@ -662,15 +743,28 @@ def test_doc_uuid_is_deterministic_and_scoped():
 
 def test_explode_docset_uses_plan_uuid_for_id():
     from usersim.asset_gen.financial_services.pipeline import doc_uuid
+
     uid = doc_uuid("en_US", "northwind_bank", "acct_sheet")
-    docset = DocSet(documents=[
-        {"doc_key": "acct_sheet", "title": "T", "document_type": "product_sheet",
-         "body": "b", "mentions_tools": [], "references": []},
-    ])
-    spec_by_key = {"acct_sheet": {"domain": "retail_banking",
-                                  "product_category": "checking", "uuid": uid}}
-    docs = explode_docset(docset, id_prefix="NB", institution_id="northwind_bank",
-                          spec_by_key=spec_by_key, default_domain="retail_banking")
+    docset = DocSet(
+        documents=[
+            {
+                "doc_key": "acct_sheet",
+                "title": "T",
+                "document_type": "product_sheet",
+                "body": "b",
+                "mentions_tools": [],
+                "references": [],
+            },
+        ]
+    )
+    spec_by_key = {"acct_sheet": {"domain": "retail_banking", "product_category": "checking", "uuid": uid}}
+    docs = explode_docset(
+        docset,
+        id_prefix="NB",
+        institution_id="northwind_bank",
+        spec_by_key=spec_by_key,
+        default_domain="retail_banking",
+    )
     assert docs[0]["id"] == uid  # id comes from the PLAN uuid, not the model's doc_key
 
 
@@ -678,32 +772,59 @@ def test_serialize_bank_round_trips_through_loader(tmp_path: Path):
     from usersim.engine.core.finance_bank import load_finance_bank
 
     region_meta = {
-        "locale": "en_TT", "bank_id": "en_TT_test", "bank_version": "v0.0.1",
+        "locale": "en_TT",
+        "bank_id": "en_TT_test",
+        "bank_version": "v0.0.1",
         "task_contract_version": "v0.1.0",
         "domain_regulators": {"retail_banking": {"regulator_text": "test"}},
     }
     inst = InstitutionBank(
         institution_meta={
-            "institution_id": "testbank", "display_name": "Test Bank",
-            "type": "bank", "brand_voice": "traditional",
-            "domains": ["retail_banking"], "placeholder": True,
+            "institution_id": "testbank",
+            "display_name": "Test Bank",
+            "type": "bank",
+            "brand_voice": "traditional",
+            "domains": ["retail_banking"],
+            "placeholder": True,
         },
-        documents=[{
-            "id": "D1", "title": "t", "body": "b", "domain": "retail_banking",
-            "product_category": "checking", "document_type": "faq",
-            "source_authority": "official", "placeholder": True, "mentions_tools": [],
-        }],
-        tools=[{
-            "name": "kb_search", "description": "s", "discoverable": False,
-            "side_effect_class": "read_only", "parameters": {},
-        }],
-        templates=[{
-            "id": "T1", "tier": "dynamic", "task_type": "advisory_qa",
-            "domain": "retail_banking", "placeholder": True,
-            "persona_tags": ["region:any"], "opening_user_message": "hi",
-            "account_state": {}, "param_space": {}, "gold_document_ids": [],
-            "gold_tool_sequence": [], "expected_state_deltas": {},
-        }],
+        documents=[
+            {
+                "id": "D1",
+                "title": "t",
+                "body": "b",
+                "domain": "retail_banking",
+                "product_category": "checking",
+                "document_type": "faq",
+                "source_authority": "official",
+                "placeholder": True,
+                "mentions_tools": [],
+            }
+        ],
+        tools=[
+            {
+                "name": "kb_search",
+                "description": "s",
+                "discoverable": False,
+                "side_effect_class": "read_only",
+                "parameters": {},
+            }
+        ],
+        templates=[
+            {
+                "id": "T1",
+                "tier": "dynamic",
+                "task_type": "advisory_qa",
+                "domain": "retail_banking",
+                "placeholder": True,
+                "persona_tags": ["region:any"],
+                "opening_user_message": "hi",
+                "account_state": {},
+                "param_space": {},
+                "gold_document_ids": [],
+                "gold_tool_sequence": [],
+                "expected_state_deltas": {},
+            }
+        ],
     )
     serialize_bank(tmp_path / "en_TT", region_meta, [inst])
 
@@ -723,10 +844,19 @@ def test_serialize_bank_writes_embedding_sidecar(tmp_path: Path):
     region_meta = {"locale": "en_TT", "domain_regulators": {}}
     inst = InstitutionBank(
         institution_meta={"institution_id": "testbank", "type": "bank"},
-        documents=[{"id": "D1", "title": "t", "body": "b", "domain": "retail_banking",
-                    "product_category": "general", "document_type": "faq",
-                    "source_authority": "official", "placeholder": True,
-                    "mentions_tools": []}],
+        documents=[
+            {
+                "id": "D1",
+                "title": "t",
+                "body": "b",
+                "domain": "retail_banking",
+                "product_category": "general",
+                "document_type": "faq",
+                "source_authority": "official",
+                "placeholder": True,
+                "mentions_tools": [],
+            }
+        ],
         embeddings={"D1": [0.1, 0.2, 0.3]},
     )
     serialize_bank(tmp_path / "en_TT", region_meta, [inst], write_tasks=False)
@@ -745,8 +875,24 @@ def test_serialize_bank_writes_embedding_sidecar(tmp_path: Path):
 
 def test_cli_gen_assets_dry_run():
     from usersim.cli import main
-    assert main(["gen-assets", "--domain", "financial_services", "--locale", "en_US",
-                 "--dry-run", "--docs-per-product", "20", "--max-docs-per-cluster", "8"]) == 0
+
+    assert (
+        main(
+            [
+                "gen-assets",
+                "--domain",
+                "financial_services",
+                "--locale",
+                "en_US",
+                "--dry-run",
+                "--docs-per-product",
+                "20",
+                "--max-docs-per-cluster",
+                "8",
+            ]
+        )
+        == 0
+    )
 
 
 def test_generate_corpus_validates_endpoints_before_network():
@@ -770,9 +916,11 @@ def test_default_models_config_declares_gen_aliases():
     credential needed is the one the default config already requires.
     """
     from usersim.asset_gen.financial_services.pipeline import validate_generation_models
+
     # bundled_models_path, not default_models_path: this asserts what ships,
     # and default_models_path honours a developer's models.local.toml.
     from usersim.cli._models import bundled_models_path, load_models_config
+
     cfg = load_models_config(bundled_models_path())
     validate_generation_models(cfg)  # must not raise
 
@@ -801,27 +949,35 @@ def test_off_plan_doc_key_is_reported_not_silent(caplog):
 
     from usersim.asset_gen.financial_services.pipeline import explode_docset
 
-    plan = {"savings_product_sheet": {
-        "uuid": "u1", "domain": "retail_banking",
-        "product_category": "savings_regular"}}
+    plan = {"savings_product_sheet": {"uuid": "u1", "domain": "retail_banking", "product_category": "savings_regular"}}
 
     def _doc(key):
-        return {"documents": [{"doc_key": key, "title": "T", "body": "B",
-                               "document_type": "product_sheet",
-                               "mentions_tools": []}]}
+        return {
+            "documents": [
+                {"doc_key": key, "title": "T", "body": "B", "document_type": "product_sheet", "mentions_tools": []}
+            ]
+        }
 
     # Happy path: the plan slot supplies scope and the deterministic uuid.
-    ok = explode_docset(_doc("savings_product_sheet"), id_prefix="CB",
-                        institution_id="cb", spec_by_key=plan,
-                        default_domain="retail_banking")
+    ok = explode_docset(
+        _doc("savings_product_sheet"),
+        id_prefix="CB",
+        institution_id="cb",
+        spec_by_key=plan,
+        default_domain="retail_banking",
+    )
     assert ok[0]["product_category"] == "savings_regular"
     assert ok[0]["id"] == "u1"
 
     with caplog.at_level(logging.WARNING):
-        bad = explode_docset(_doc("नियमित_बचत_खाता"), id_prefix="CB",
-                             institution_id="cb", spec_by_key=plan,
-                             default_domain="retail_banking")
-    assert bad[0]["product_category"] == "general"      # scope genuinely lost
+        bad = explode_docset(
+            _doc("नियमित_बचत_खाता"),
+            id_prefix="CB",
+            institution_id="cb",
+            spec_by_key=plan,
+            default_domain="retail_banking",
+        )
+    assert bad[0]["product_category"] == "general"  # scope genuinely lost
     assert "not in the plan" in caplog.text
-    assert "savings_product_sheet" in caplog.text       # names the expected key
-    assert "नियमित_बचत_खाता" in caplog.text                # ...and what it got
+    assert "savings_product_sheet" in caplog.text  # names the expected key
+    assert "नियमित_बचत_खाता" in caplog.text  # ...and what it got

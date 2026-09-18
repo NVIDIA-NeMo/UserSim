@@ -63,17 +63,13 @@ def _minimal_bank_yaml(
     lines.append("    description: |")
     lines.append("      Strategy description.")
     lines.append("    system_prompt_template: |")
-    lines.append(
-        "      Persona: {persona}; Target: {target_description}; Opening: {initial_prompt}"
-    )
+    lines.append("      Persona: {persona}; Target: {target_description}; Opening: {initial_prompt}")
     lines.append("    reframings:")
     for i in range(n_reframings):
         lines.append(f"      - id: r{i}")
         lines.append(f"        description: Reframing {i}.")
         lines.append("        instruction: |")
-        lines.append(
-            f"          Tactic {i}: react to {{previous_assistant_response}}"
-        )
+        lines.append(f"          Tactic {i}: react to {{previous_assistant_response}}")
     if extra_strategies:
         lines.append(extra_strategies.rstrip("\n"))
     lines.append("target_requests:")
@@ -123,9 +119,7 @@ class TestMinimalBankLoad:
         assert len(bank.target_requests) == 1
 
     def test_strategy_has_reframings(self, tmp_path: Path) -> None:
-        bank = load_pressure_bank(
-            _write_bank(tmp_path, _minimal_bank_yaml(n_reframings=3))
-        )
+        bank = load_pressure_bank(_write_bank(tmp_path, _minimal_bank_yaml(n_reframings=3)))
         strat = bank.strategies[0]
         assert len(strat.reframings) == 3
         # Every reframing carries its parent strategy id.
@@ -165,7 +159,8 @@ class TestTopLevelValidation:
 
     def test_empty_harm_categories_rejected(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
-            "harm_categories:\n  - safety_bypass", "harm_categories: []",
+            "harm_categories:\n  - safety_bypass",
+            "harm_categories: []",
         )
         with pytest.raises(PressureBankError, match="harm_categories"):
             load_pressure_bank(_write_bank(tmp_path, text))
@@ -216,7 +211,8 @@ class TestTopLevelValidation:
 
 class TestTemplateValidation:
     def test_strategy_template_missing_persona_placeholder_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "Persona: {persona}; Target: {target_description}; Opening: {initial_prompt}",
@@ -226,7 +222,8 @@ class TestTemplateValidation:
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_strategy_template_missing_target_description_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "Persona: {persona}; Target: {target_description}; Opening: {initial_prompt}",
@@ -236,7 +233,8 @@ class TestTemplateValidation:
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_strategy_template_missing_initial_prompt_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "Persona: {persona}; Target: {target_description}; Opening: {initial_prompt}",
@@ -246,15 +244,14 @@ class TestTemplateValidation:
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_reframing_instruction_missing_placeholder_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "Tactic 0: react to {previous_assistant_response}",
             "Tactic 0: just react somehow",
         )
-        with pytest.raises(
-            PressureBankError, match=r"\{previous_assistant_response\}"
-        ):
+        with pytest.raises(PressureBankError, match=r"\{previous_assistant_response\}"):
             load_pressure_bank(_write_bank(tmp_path, text))
 
 
@@ -265,23 +262,26 @@ class TestTemplateValidation:
 
 class TestEntryValidation:
     def test_duplicate_strategy_id_rejected(self, tmp_path: Path) -> None:
-        extra = "\n".join([
-            "  - id: persistence",
-            "    description: Duplicate.",
-            "    system_prompt_template: |",
-            "      {persona} {target_description} {initial_prompt}",
-            "    reframings:",
-            "      - id: r0",
-            "        description: dup.",
-            "        instruction: |",
-            "          {previous_assistant_response}",
-        ])
+        extra = "\n".join(
+            [
+                "  - id: persistence",
+                "    description: Duplicate.",
+                "    system_prompt_template: |",
+                "      {persona} {target_description} {initial_prompt}",
+                "    reframings:",
+                "      - id: r0",
+                "        description: dup.",
+                "        instruction: |",
+                "          {previous_assistant_response}",
+            ]
+        )
         text = _minimal_bank_yaml(extra_strategies=extra)
         with pytest.raises(PressureBankError, match="duplicate strategy id"):
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_duplicate_reframing_id_within_strategy_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Add a second reframing with the same id as the first.
         text = _minimal_bank_yaml().replace(
@@ -302,19 +302,21 @@ class TestEntryValidation:
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_duplicate_target_id_rejected(self, tmp_path: Path) -> None:
-        extra = "\n".join([
-            "  - id: TR-TEST-001",
-            "    description: Duplicate.",
-            "    harm_category: safety_bypass",
-            "    placeholder: true",
-            "    initial_prompt: |",
-            "      x",
-            "    expected_refusal: |",
-            "      x",
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
+        extra = "\n".join(
+            [
+                "  - id: TR-TEST-001",
+                "    description: Duplicate.",
+                "    harm_category: safety_bypass",
+                "    placeholder: true",
+                "    initial_prompt: |",
+                "      x",
+                "    expected_refusal: |",
+                "      x",
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
+        )
         text = _minimal_bank_yaml(extra_targets=extra)
         with pytest.raises(PressureBankError, match="duplicate target id"):
             load_pressure_bank(_write_bank(tmp_path, text))
@@ -324,9 +326,7 @@ class TestEntryValidation:
             "harm_category: safety_bypass",
             "harm_category: not_in_bank",
         )
-        with pytest.raises(
-            PressureBankError, match="not in the bank's declared harm_categories"
-        ):
+        with pytest.raises(PressureBankError, match="not in the bank's declared harm_categories"):
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_strategy_with_no_reframings_rejected(self, tmp_path: Path) -> None:
@@ -343,16 +343,19 @@ class TestEntryValidation:
 
     def test_placeholder_must_be_bool(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
-            "    placeholder: true", "    placeholder: maybe",
+            "    placeholder: true",
+            "    placeholder: maybe",
         )
         with pytest.raises(PressureBankError, match="placeholder"):
             load_pressure_bank(_write_bank(tmp_path, text))
 
     def test_placeholder_source_with_non_placeholder_entry_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
-            "    placeholder: true", "    placeholder: false",
+            "    placeholder: true",
+            "    placeholder: false",
         )
         with pytest.raises(PressureBankError, match="'placeholder' is only allowed"):
             load_pressure_bank(_write_bank(tmp_path, text))
@@ -374,9 +377,7 @@ class TestEntryValidation:
 class TestLookups:
     @pytest.fixture
     def bank(self, tmp_path: Path) -> PressureBank:
-        return load_pressure_bank(
-            _write_bank(tmp_path, _minimal_bank_yaml(n_reframings=4))
-        )
+        return load_pressure_bank(_write_bank(tmp_path, _minimal_bank_yaml(n_reframings=4)))
 
     def test_strategy_by_id(self, bank: PressureBank) -> None:
         assert bank.strategy_by_id("persistence") is not None
@@ -422,20 +423,22 @@ class TestPersonaMatching:
 
     def test_target_with_tags_intersects_persona(self, tmp_path: Path) -> None:
         # Add a target with persona_tags constraint.
-        extra = "\n".join([
-            "  - id: TR-TEST-002",
-            "    description: Targeted.",
-            "    harm_category: safety_bypass",
-            "    placeholder: true",
-            "    initial_prompt: |",
-            "      x",
-            "    expected_refusal: |",
-            "      x",
-            '    persona_tags: ["interest:tech"]',
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
+        extra = "\n".join(
+            [
+                "  - id: TR-TEST-002",
+                "    description: Targeted.",
+                "    harm_category: safety_bypass",
+                "    placeholder: true",
+                "    initial_prompt: |",
+                "      x",
+                "    expected_refusal: |",
+                "      x",
+                '    persona_tags: ["interest:tech"]',
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
+        )
         text = _minimal_bank_yaml(extra_targets=extra)
         bank = load_pressure_bank(_write_bank(tmp_path, text))
         t = bank.target_by_id("TR-TEST-002")
@@ -444,23 +447,23 @@ class TestPersonaMatching:
         assert t.matches_persona(["interest:health"]) is False
 
     def test_targets_for_persona_returns_applicable(self, tmp_path: Path) -> None:
-        extra = "\n".join([
-            "  - id: TR-TEST-002",
-            "    description: Tech-only target.",
-            "    harm_category: safety_bypass",
-            "    placeholder: true",
-            "    initial_prompt: |",
-            "      x",
-            "    expected_refusal: |",
-            "      x",
-            '    persona_tags: ["interest:tech"]',
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
-        bank = load_pressure_bank(
-            _write_bank(tmp_path, _minimal_bank_yaml(extra_targets=extra))
+        extra = "\n".join(
+            [
+                "  - id: TR-TEST-002",
+                "    description: Tech-only target.",
+                "    harm_category: safety_bypass",
+                "    placeholder: true",
+                "    initial_prompt: |",
+                "      x",
+                "    expected_refusal: |",
+                "      x",
+                '    persona_tags: ["interest:tech"]',
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
         )
+        bank = load_pressure_bank(_write_bank(tmp_path, _minimal_bank_yaml(extra_targets=extra)))
         # Persona without interest:tech: only the unrestricted target.
         match_a = bank.targets_for_persona(["interest:health"])
         assert {t.id for t in match_a} == {"TR-TEST-001"}
@@ -495,7 +498,9 @@ class TestCacheAndDefault:
     def test_reset_drops_cache(self, tmp_path: Path) -> None:
         a = _write_bank(tmp_path / "a", _minimal_bank_yaml(bank_id="a"))
         b = _write_bank(
-            tmp_path / "b", _minimal_bank_yaml(bank_id="b"), name="bank.yaml",
+            tmp_path / "b",
+            _minimal_bank_yaml(bank_id="b"),
+            name="bank.yaml",
         )
         with patch.dict(os.environ, {"USERSIM_SAFETY_CHAT_PRESSURE_BANK": str(a)}):
             assert load_pressure_bank_default().bank_id == "a"
@@ -516,33 +521,36 @@ class TestCacheAndDefault:
 class TestShippedSampleBank:
     @pytest.fixture
     def sample_bank(self) -> PressureBank:
-        return load_pressure_bank(
-            (packaged_assets_dir() / "safety_chat_pressure/sample.yaml")
-        )
+        return load_pressure_bank((packaged_assets_dir() / "safety_chat_pressure/sample.yaml"))
 
     def test_loads_clean(self, sample_bank: PressureBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
         assert sample_bank.bank_version == "v0.5.4"
 
     def test_six_strategies_with_ten_reframings_each(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         # Beta bank: 6 strategies × 10 reframings = 60 turn-tactics.
         assert len(sample_bank.strategies) == 6
         for s in sample_bank.strategies:
             assert len(s.reframings) == 10, (
-                f"strategy {s.id} has {len(s.reframings)} reframings, "
-                "expected 10 (per the beta bank target)"
+                f"strategy {s.id} has {len(s.reframings)} reframings, expected 10 (per the beta bank target)"
             )
 
     def test_beta_strategy_ids(self, sample_bank: PressureBank) -> None:
         assert set(sample_bank.strategy_ids()) == {
-            "persistence", "hypothetical_framing", "authority_impersonation",
-            "emotional_dependency", "reward_penalty_framing", "partial_compliance",
+            "persistence",
+            "hypothetical_framing",
+            "authority_impersonation",
+            "emotional_dependency",
+            "reward_penalty_framing",
+            "partial_compliance",
         }
 
     def test_sixty_four_target_requests_across_eight_harm_categories(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         assert len(sample_bank.target_requests) == 64
         observed = {t.harm_category for t in sample_bank.target_requests}
@@ -551,7 +559,8 @@ class TestShippedSampleBank:
             assert len(sample_bank.targets_by_harm_category(cat)) == 8
 
     def test_reviewed_targets_are_not_generated_placeholders(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         # Ground truth for "this entry is AI-authored, not human-reviewed" is
         # the provenance.source field, not the ID format. After the asset
@@ -562,16 +571,13 @@ class TestShippedSampleBank:
             source = (t.provenance.source or "").lower() if t.provenance else ""
             is_ai_authored = "ai-authored" in source
             if is_ai_authored:
-                assert t.placeholder is True, (
-                    f"{t.id}: AI-authored entry must be placeholder=True"
-                )
+                assert t.placeholder is True, f"{t.id}: AI-authored entry must be placeholder=True"
             else:
-                assert t.placeholder is False, (
-                    f"{t.id}: human-reviewed entry must be placeholder=False"
-                )
+                assert t.placeholder is False, f"{t.id}: human-reviewed entry must be placeholder=False"
 
     def test_every_target_has_substantive_expected_refusal(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         # The expected_refusal field is the load-bearing reviewer-facing
         # field — the scorer reads it to ground judgement. Validate each
@@ -579,31 +585,26 @@ class TestShippedSampleBank:
         # produce a confounded judge prompt for Portuguese trajectories).
         for t in sample_bank.target_requests:
             for loc, text in t.expected_refusal.renderings.items():
-                assert len(text) >= 80, (
-                    f"{t.id}::expected_refusal[{loc}] too short "
-                    f"({len(text)} chars)"
-                )
+                assert len(text) >= 80, f"{t.id}::expected_refusal[{loc}] too short ({len(text)} chars)"
 
     def test_every_strategy_template_includes_required_placeholders(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         for s in sample_bank.strategies:
             for loc, text in s.system_prompt_template.renderings.items():
                 for ph in ("{persona}", "{target_description}", "{initial_prompt}"):
-                    assert ph in text, (
-                        f"strategy {s.id}::system_prompt_template[{loc}] "
-                        f"missing {ph}"
-                    )
+                    assert ph in text, f"strategy {s.id}::system_prompt_template[{loc}] missing {ph}"
 
     def test_every_reframing_includes_previous_assistant_placeholder(
-        self, sample_bank: PressureBank,
+        self,
+        sample_bank: PressureBank,
     ) -> None:
         for s in sample_bank.strategies:
             for r in s.reframings:
                 for loc, text in r.instruction.renderings.items():
                     assert "{previous_assistant_response}" in text, (
-                        f"reframing {s.id}::{r.id}::instruction[{loc}] "
-                        "missing {previous_assistant_response}"
+                        f"reframing {s.id}::{r.id}::instruction[{loc}] missing {{previous_assistant_response}}"
                     )
 
     def test_provenance_summary_smoke(self, sample_bank: PressureBank) -> None:

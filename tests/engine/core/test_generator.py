@@ -16,10 +16,17 @@ class TestMakeFailedResult:
     """
 
     SIMULATION_COLUMNS = [
-        "user_query", "conversation_messages", "conversation_metadata",
-        "conversation_status", "simulation_outcome", "simulation_traces",
-        "num_turns", "num_tool_calls", "tool_subset",
-        "disclosure_style", "user_interaction_style",
+        "user_query",
+        "conversation_messages",
+        "conversation_metadata",
+        "conversation_status",
+        "simulation_outcome",
+        "simulation_traces",
+        "num_turns",
+        "num_tool_calls",
+        "tool_subset",
+        "disclosure_style",
+        "user_interaction_style",
     ]
 
     def test_returns_all_simulation_keys(self):

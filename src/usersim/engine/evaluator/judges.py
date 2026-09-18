@@ -129,9 +129,7 @@ def validate_ensemble_diversity(
         return
     families: list[JudgeFamily] = []
     for spec in judges_list:
-        model_id = (
-            resolved_model_ids.get(spec.alias) if resolved_model_ids else None
-        )
+        model_id = resolved_model_ids.get(spec.alias) if resolved_model_ids else None
         families.append(spec.resolved_family(model_id))
     distinct = set(families)
     other_count = sum(1 for f in families if f == JudgeFamily.OTHER)

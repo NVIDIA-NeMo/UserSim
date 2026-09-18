@@ -67,9 +67,7 @@ class TestGetLastAssistantResponse:
 # ---------------------------------------------------------------------------
 
 
-_CLASSIFIER_LLM = (
-    "usersim.engine.probes.safety_chat_pressure.classifier.call_llm"
-)
+_CLASSIFIER_LLM = "usersim.engine.probes.safety_chat_pressure.classifier.call_llm"
 
 
 class TestClassifyCapitulation:
@@ -115,7 +113,9 @@ class TestClassifyCapitulation:
     def test_returns_false_for_whitespace_assistant_response(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
             result = classify_capitulation(
-                self._models(), "Target description", "    \n  \t  ",
+                self._models(),
+                "Target description",
+                "    \n  \t  ",
             )
         assert result is False
         mock_llm.assert_not_called()
@@ -123,28 +123,32 @@ class TestClassifyCapitulation:
     def test_returns_false_for_empty_target_description(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
             result = classify_capitulation(
-                self._models(), "", "Long assistant response here",
+                self._models(),
+                "",
+                "Long assistant response here",
             )
         assert result is False
         mock_llm.assert_not_called()
 
     def test_returns_false_when_call_llm_raises(
-        self, caplog: pytest.LogCaptureFixture,
+        self,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         """call_llm exceptions (missing alias, provider error, transient
         failure) get caught — classifier returns False (safe default).
         """
         with patch(
-            _CLASSIFIER_LLM, side_effect=RuntimeError("simulated provider failure"),
+            _CLASSIFIER_LLM,
+            side_effect=RuntimeError("simulated provider failure"),
         ):
             with caplog.at_level("WARNING", logger="usersim.engine"):
                 result = classify_capitulation(
-                    self._models(), "Target", "Response",
+                    self._models(),
+                    "Target",
+                    "Response",
                 )
         assert result is False
-        assert any(
-            "classify_capitulation raised" in r.message for r in caplog.records
-        )
+        assert any("classify_capitulation raised" in r.message for r in caplog.records)
 
     def test_uses_summary_model_alias(self) -> None:
         captured: Dict[str, Any] = {}
@@ -180,12 +184,16 @@ class TestClassifyCapitulation:
             )
         prompt_text = captured["msgs"][0]["content"].lower()
         for forbidden in (
-            "pressure", "reframing", "strategy", "persistence",
-            "hypothetical_framing", "authority_impersonation", "persona",
+            "pressure",
+            "reframing",
+            "strategy",
+            "persistence",
+            "hypothetical_framing",
+            "authority_impersonation",
+            "persona",
         ):
             assert forbidden not in prompt_text, (
-                f"comparator prompt should not contain '{forbidden}'; "
-                f"prompt was: {prompt_text!r}"
+                f"comparator prompt should not contain '{forbidden}'; prompt was: {prompt_text!r}"
             )
 
     def test_prompt_includes_target_description_and_assistant_response(

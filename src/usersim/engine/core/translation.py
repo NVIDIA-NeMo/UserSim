@@ -119,15 +119,15 @@ def translate_user_turn(
             out = content
         else:
             logger.warning(
-                "translate_user_turn: empty translation into %s; "
-                "using untranslated text",
+                "translate_user_turn: empty translation into %s; using untranslated text",
                 target_language,
             )
     except Exception as e:  # noqa: BLE001 — never propagate from a translation
         logger.warning(
-            "translate_user_turn: translation into %s failed (%s: %s); "
-            "using untranslated text",
-            target_language, type(e).__name__, e,
+            "translate_user_turn: translation into %s failed (%s: %s); using untranslated text",
+            target_language,
+            type(e).__name__,
+            e,
         )
         out = text
 
@@ -204,15 +204,15 @@ def translate_search_query(
             out = content
         else:
             logger.warning(
-                "translate_search_query: empty translation into %s; "
-                "searching with the untranslated query",
+                "translate_search_query: empty translation into %s; searching with the untranslated query",
                 target_language,
             )
     except Exception as e:  # noqa: BLE001 — never propagate from a translation
         logger.warning(
-            "translate_search_query: translation into %s failed (%s: %s); "
-            "searching with the untranslated query",
-            target_language, type(e).__name__, e,
+            "translate_search_query: translation into %s failed (%s: %s); searching with the untranslated query",
+            target_language,
+            type(e).__name__,
+            e,
         )
         out = query
 

@@ -144,8 +144,7 @@ class SovAiFactsProbeError(ValueError):
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """Sovereign-AI factual-knowledge probe.
 
@@ -178,11 +177,10 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
             # ``available_locales()`` is untouched. The fact bank's own
             # ``derive_task`` already uses ``fact_bank.locale`` for tags.
             user_system_template = get_system_prompt(
-                self._asset_locale, self._task.question_type,
+                self._asset_locale,
+                self._task.question_type,
             )
-            self._followup_instruction = get_followup_instruction(
-                self._asset_locale
-            )
+            self._followup_instruction = get_followup_instruction(self._asset_locale)
         except PromptsUnavailableError as e:
             raise SovAiFactsProbeError(str(e)) from e
         self._user_system_prompt = user_system_template.format(
@@ -194,11 +192,17 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
+        self,
+        persona: Dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[Fact]:
         """Pick the matched fact for this persona; bank is locale-keyed."""
         return derive_task(
-            persona, bank, seed=getattr(cfg, "random_seed", None),
+            persona,
+            bank,
+            seed=getattr(cfg, "random_seed", None),
         )
 
     # ── ProbeAdapter required hooks ─────────────────────────────────
@@ -215,7 +219,8 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     # ── Optional hooks (verbatim + follow-up + invariants) ──────────
 
     def get_verbatim_first_user_turn(
-        self, state: ConversationState,
+        self,
+        state: ConversationState,
     ) -> Optional[str]:
         if self._task is None:
             return None
@@ -235,7 +240,9 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         return self._localize_verbatim(self._task.question)
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: ConversationState,
+        self,
+        turn_idx: int,
+        state: ConversationState,
     ) -> List[str]:
         if not self._followup_instruction:
             return []
@@ -248,9 +255,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         extras = super().build_result_extras(state)
         if self._task is not None:
             extras["probe_variant"] = self._task.category
-            extras["sovereign_facts_probed"] = list(
-                state.metadata.get("facts_probed") or []
-            )
+            extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])
         return extras
 
 
@@ -322,6 +327,7 @@ def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
         OutcomeStatus,
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,

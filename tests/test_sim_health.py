@@ -40,8 +40,13 @@ class TestBuildSimHealth:
         b = build_sim_health(trajectory_df)
         # All five diagnostic keys exist (some may be None for trajectories
         # with too few user turns; the means here aggregate non-None).
-        for k in ["d1_front_loading", "d2_polite_fraction",
-                  "d3_verbosity_cv", "d4_frustration_markers", "mattr_assistant"]:
+        for k in [
+            "d1_front_loading",
+            "d2_polite_fraction",
+            "d3_verbosity_cv",
+            "d4_frustration_markers",
+            "mattr_assistant",
+        ]:
             assert k in b.diagnostics_means
 
     def test_diagnostics_by_interaction_style(self, trajectory_df) -> None:
@@ -103,6 +108,7 @@ class TestBuildSimHealth:
 
     def test_to_dict_serializable(self, trajectory_df) -> None:
         import json
+
         b = build_sim_health(trajectory_df)
         # Round-trip through JSON to confirm the bundle is serializable.
         json.dumps(b.to_dict())

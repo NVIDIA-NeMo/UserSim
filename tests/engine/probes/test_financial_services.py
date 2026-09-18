@@ -51,15 +51,20 @@ from usersim.engine.evaluator.scorers import financial_services as FS
 from usersim.engine.core._assets import packaged_assets_dir
 
 _PERSONA = {
-    "first_name": "Yumi", "last_name": "Tanaka", "age": 35,
-    "region": "Oregon", "occupation": "designer",
+    "first_name": "Yumi",
+    "last_name": "Tanaka",
+    "age": 35,
+    "region": "Oregon",
+    "occupation": "designer",
 }
 
 
 def _load_finance_taxonomy(locale="en_US"):
     """The financial_services dynamic-tier taxonomy (shared probing loader)."""
     return load_probing_taxonomy_for(
-        "financial_services", locale, filename="dynamic.yaml",
+        "financial_services",
+        locale,
+        filename="dynamic.yaml",
         env_prefix="USERSIM_FINANCIAL_SERVICES_DYNAMIC_TAXONOMY",
     )
 
@@ -87,8 +92,7 @@ def _ensure_scorers_loaded():
 
 
 def _cfg(**kw):
-    base = dict(max_turns=6, random_seed=None, finance_retrieval_mode="golden",
-                verbosity=0)
+    base = dict(max_turns=6, random_seed=None, finance_retrieval_mode="golden", verbosity=0)
     base.update(kw)
     return types.SimpleNamespace(**base)
 
@@ -115,9 +119,7 @@ def test_kb_search_offered_with_query_parameter():
     """
     bank = load_finance_bank_for_locale("en_US")
     inst = bank.institution("northwind_bank")
-    by_name = {
-        t["function"]["name"]: t["function"] for t in T.build_offered_tools(inst)
-    }
+    by_name = {t["function"]["name"]: t["function"] for t in T.build_offered_tools(inst)}
     assert "kb_search" in by_name
     kb = by_name["kb_search"]
     assert kb["description"].strip(), "kb_search must have a description"
@@ -143,8 +145,7 @@ def _partition_committed_banks() -> tuple[list[Path], list[Path]]:
     bank, not a bank with scenarios to run.
     """
     banks_root = packaged_assets_dir() / "financial_services"
-    locales = [p for p in sorted(banks_root.iterdir())
-               if (p / "region_meta.yaml").exists()]
+    locales = [p for p in sorted(banks_root.iterdir()) if (p / "region_meta.yaml").exists()]
     assert locales, f"no committed banks under {banks_root}"
     runnable = [p for p in locales if any(p.glob("*/*/tasks.yaml"))]
     corpus_only = [p for p in locales if not any(p.glob("*/*/tasks.yaml"))]
@@ -189,8 +190,7 @@ def test_corpus_only_banks_are_declared_and_still_unrunnable():
 def test_bank_loads_four_institutions():
     bank = load_finance_bank_for_locale("en_US")
     ids = {i.institution_id for i in bank.institutions}
-    assert {"northwind_bank", "solstice_invest", "evergreen_retirement",
-            "meridian_wealth"} <= ids
+    assert {"northwind_bank", "solstice_invest", "evergreen_retirement", "meridian_wealth"} <= ids
     types_ = {i.type for i in bank.institutions}
     assert {"bank", "brokerage", "retirement_provider", "wealth_manager"} <= types_
     # every offered domain has regulator context
@@ -210,8 +210,7 @@ def test_instantiation_is_deterministic_and_scoped():
 def test_retrieval_never_crosses_institutions():
     bank = load_finance_bank_for_locale("en_US")
     for inst in bank.institutions:
-        docs = R.retrieve(inst, "account dispute transfer rollover fee risk", k=10,
-                          mode="dense")
+        docs = R.retrieve(inst, "account dispute transfer rollover fee risk", k=10, mode="dense")
         assert docs, inst.institution_id
         assert all(d.institution_id == inst.institution_id for d in docs)
 
@@ -222,15 +221,34 @@ def test_dense_retrieval_ranks_by_cosine():
     from usersim.engine.core.finance_bank import Document, Institution
 
     docs = (
-        Document(id="D_near", title="near", body="b", product_category="p",
-                 document_type="faq", source_authority="official", placeholder=True),
-        Document(id="D_far", title="far", body="b", product_category="p",
-                 document_type="faq", source_authority="official", placeholder=True),
+        Document(
+            id="D_near",
+            title="near",
+            body="b",
+            product_category="p",
+            document_type="faq",
+            source_authority="official",
+            placeholder=True,
+        ),
+        Document(
+            id="D_far",
+            title="far",
+            body="b",
+            product_category="p",
+            document_type="faq",
+            source_authority="official",
+            placeholder=True,
+        ),
     )
     inst = Institution(
-        institution_id="acme", display_name="Acme", type="bank",
-        brand_voice="traditional", domains=("retail_banking",),
-        documents=docs, tools=(), templates=(),
+        institution_id="acme",
+        display_name="Acme",
+        type="bank",
+        brand_voice="traditional",
+        domains=("retail_banking",),
+        documents=docs,
+        tools=(),
+        templates=(),
         embeddings={"D_near": (1.0, 0.0), "D_far": (0.0, 1.0)},
     )
     ranked = R.retrieve(inst, "q", k=2, mode="dense", query_embedding=(0.9, 0.1))
@@ -243,21 +261,37 @@ def test_dense_retrieval_falls_back_to_lexical_without_query_vector():
     from usersim.engine.core.finance_bank import Document, Institution
 
     docs = (
-        Document(id="D1", title="wire transfer limits", body="daily wire cap",
-                 product_category="p", document_type="faq",
-                 source_authority="official", placeholder=True),
-        Document(id="D2", title="branch hours", body="lobby opening times",
-                 product_category="p", document_type="faq",
-                 source_authority="official", placeholder=True),
+        Document(
+            id="D1",
+            title="wire transfer limits",
+            body="daily wire cap",
+            product_category="p",
+            document_type="faq",
+            source_authority="official",
+            placeholder=True,
+        ),
+        Document(
+            id="D2",
+            title="branch hours",
+            body="lobby opening times",
+            product_category="p",
+            document_type="faq",
+            source_authority="official",
+            placeholder=True,
+        ),
     )
     inst = Institution(
-        institution_id="acme", display_name="Acme", type="bank",
-        brand_voice="traditional", domains=("retail_banking",),
-        documents=docs, tools=(), templates=(),
+        institution_id="acme",
+        display_name="Acme",
+        type="bank",
+        brand_voice="traditional",
+        domains=("retail_banking",),
+        documents=docs,
+        tools=(),
+        templates=(),
         embeddings={"D1": (1.0, 0.0)},  # present but unused without a query vec
     )
-    ranked = R.retrieve(inst, "wire transfer", k=1, mode="dense",
-                        query_embedding=None)
+    ranked = R.retrieve(inst, "wire transfer", k=1, mode="dense", query_embedding=None)
     assert [d.id for d in ranked] == ["D1"]  # lexical overlap winner
 
 
@@ -278,22 +312,39 @@ class TestHybridRetrieval:
         docs = (
             # Short, and its body repeats the account-action vocabulary that shows
             # up in every query -- the shape that hijacked dense ranking.
-            Document(id="D_tool", title="get_accounts tool reference",
-                     body="The get_accounts tool lists accounts and balances.",
-                     product_category="p", document_type="discoverable_tool_doc",
-                     source_authority="official", placeholder=True),
+            Document(
+                id="D_tool",
+                title="get_accounts tool reference",
+                body="The get_accounts tool lists accounts and balances.",
+                product_category="p",
+                document_type="discoverable_tool_doc",
+                source_authority="official",
+                placeholder=True,
+            ),
             # Long and verbose, but it is the document that answers the question.
-            Document(id="D_answer",
-                     title="Recurring Deposit - minimum monthly installment",
-                     body=("The minimum monthly installment for a recurring deposit "
-                           "is 500 rupees. " + "Additional context. " * 40),
-                     product_category="p", document_type="faq",
-                     source_authority="official", placeholder=True),
+            Document(
+                id="D_answer",
+                title="Recurring Deposit - minimum monthly installment",
+                body=(
+                    "The minimum monthly installment for a recurring deposit "
+                    "is 500 rupees. " + "Additional context. " * 40
+                ),
+                product_category="p",
+                document_type="faq",
+                source_authority="official",
+                placeholder=True,
+            ),
         )
         return Institution(
-            institution_id="acme", display_name="Acme", type="bank",
-            brand_voice="traditional", domains=("retail_banking",),
-            documents=docs, tools=(), templates=(), embeddings=embeddings,
+            institution_id="acme",
+            display_name="Acme",
+            type="bank",
+            brand_voice="traditional",
+            domains=("retail_banking",),
+            documents=docs,
+            tools=(),
+            templates=(),
+            embeddings=embeddings,
         )
 
     QUERY = "recurring deposit minimum monthly installment"
@@ -307,39 +358,33 @@ class TestHybridRetrieval:
         inst = self._inst(emb)
         qvec = (0.95, 0.31)
 
-        dense_first = R.retrieve(inst, self.QUERY, k=2, mode="dense",
-                                 query_embedding=qvec)[0]
+        dense_first = R.retrieve(inst, self.QUERY, k=2, mode="dense", query_embedding=qvec)[0]
         assert dense_first.id == "D_tool"
 
-        hybrid_first = R.retrieve(inst, self.QUERY, k=2, mode="hybrid",
-                                  query_embedding=qvec)[0]
+        hybrid_first = R.retrieve(inst, self.QUERY, k=2, mode="hybrid", query_embedding=qvec)[0]
         assert hybrid_first.id == "D_answer"
 
     def test_hybrid_degrades_to_lexical_without_a_query_vector(self):
         inst = self._inst({"D_tool": (1.0, 0.0), "D_answer": (0.0, 1.0)})
-        ranked = R.retrieve(inst, self.QUERY, k=2, mode="hybrid",
-                            query_embedding=None)
+        ranked = R.retrieve(inst, self.QUERY, k=2, mode="hybrid", query_embedding=None)
         assert ranked[0].id == "D_answer"
 
     def test_hybrid_degrades_to_lexical_without_a_sidecar(self):
         inst = self._inst({})
-        ranked = R.retrieve(inst, self.QUERY, k=2, mode="hybrid",
-                            query_embedding=(0.95, 0.31))
+        ranked = R.retrieve(inst, self.QUERY, k=2, mode="hybrid", query_embedding=(0.95, 0.31))
         assert ranked[0].id == "D_answer"
 
     def test_dense_still_contributes_when_lexis_cannot_discriminate(self):
         """Hybrid must not become lexical-only: with zero token overlap the
         lexical term is degenerate and dense has to decide the order."""
         inst = self._inst({"D_tool": (1.0, 0.0), "D_answer": (0.0, 1.0)})
-        ranked = R.retrieve(inst, "zzz qqq", k=2, mode="hybrid",
-                            query_embedding=(0.1, 0.99))
-        assert ranked[0].id == "D_answer"   # decided by cosine, not tokens
+        ranked = R.retrieve(inst, "zzz qqq", k=2, mode="hybrid", query_embedding=(0.1, 0.99))
+        assert ranked[0].id == "D_answer"  # decided by cosine, not tokens
 
     def test_ranking_is_deterministic(self):
         inst = self._inst({"D_tool": (1.0, 0.0), "D_answer": (0.0, 1.0)})
         runs = [
-            [d.id for d in R.retrieve(inst, self.QUERY, k=2, mode="hybrid",
-                                      query_embedding=(0.95, 0.31))]
+            [d.id for d in R.retrieve(inst, self.QUERY, k=2, mode="hybrid", query_embedding=(0.95, 0.31))]
             for _ in range(5)
         ]
         assert all(r == runs[0] for r in runs)
@@ -347,9 +392,7 @@ class TestHybridRetrieval:
     def test_hybrid_is_scoped_to_one_institution(self):
         bank = load_finance_bank_for_locale("en_IN")
         for inst in bank.institutions:
-            docs = R.retrieve(inst, "recurring deposit penalty fee", k=10,
-                              mode="hybrid",
-                              query_embedding=[0.1] * 1024)
+            docs = R.retrieve(inst, "recurring deposit penalty fee", k=10, mode="hybrid", query_embedding=[0.1] * 1024)
             assert docs, inst.institution_id
             assert all(d.institution_id == inst.institution_id for d in docs)
 
@@ -398,17 +441,13 @@ class TestHybridRetrieval:
         embeddings = {d.id: _vec(d) for d in inst.documents}
         inst = dataclasses.replace(inst, embeddings=embeddings)
 
-        tool_vecs = [
-            embeddings[d.id] for d in inst.documents
-            if d.document_type == "discoverable_tool_doc"
-        ]
+        tool_vecs = [embeddings[d.id] for d in inst.documents if d.document_type == "discoverable_tool_doc"]
         assert tool_vecs, "fixture needs tool docs to cluster"
         centroid = [sum(col) / len(tool_vecs) for col in zip(*tool_vecs)]
 
-        corpus_share = sum(
-            1 for d in inst.documents
-            if d.document_type == "discoverable_tool_doc"
-        ) / len(inst.documents)
+        corpus_share = sum(1 for d in inst.documents if d.document_type == "discoverable_tool_doc") / len(
+            inst.documents
+        )
         queries = [
             "recurring deposit skip installment penalty auto debit",
             "savings account monthly average balance charge waiver",
@@ -418,8 +457,7 @@ class TestHybridRetrieval:
         def share_for(mode):
             share = Counter()
             for q in queries:
-                for d in R.retrieve(inst, q, k=8, mode=mode,
-                                    query_embedding=centroid):
+                for d in R.retrieve(inst, q, k=8, mode=mode, query_embedding=centroid):
                     share[d.document_type] += 1
             total = sum(share.values())
             return share["discoverable_tool_doc"] / total, share
@@ -436,8 +474,7 @@ class TestHybridRetrieval:
         # than a behaviour change. The property that matters is that hybrid cuts the
         # collapse by a wide margin under the most hostile query vector available.
         assert hybrid_share <= dense_share / 3, (
-            f"tool-doc share: hybrid {hybrid_share:.1%} vs dense {dense_share:.1%} "
-            f"(corpus {corpus_share:.1%}): {mix}"
+            f"tool-doc share: hybrid {hybrid_share:.1%} vs dense {dense_share:.1%} (corpus {corpus_share:.1%}): {mix}"
         )
 
 
@@ -452,7 +489,9 @@ def test_embed_query_soft_fails_to_none():
     assert embed_query({}, "embedding_model", "hello") is None
     # Present facade -> the vector.
     assert embed_query({"embedding_model": _Facade()}, "embedding_model", "hi") == [
-        0.1, 0.2, 0.3,
+        0.1,
+        0.2,
+        0.3,
     ]
 
     class _Boom:
@@ -479,14 +518,15 @@ def test_shipped_banks_carry_no_vectors_and_still_load():
     assert inst.embeddings == {}
     assert inst.documents, "corpus still loads without vectors"
     # Retrieval with no query vector is the shipped path, and it ranks.
-    hits = R.retrieve(inst, "dispute a card charge", k=5, mode="hybrid",
-                      query_embedding=None)
+    hits = R.retrieve(inst, "dispute a card charge", k=5, mode="hybrid", query_embedding=None)
     assert hits and {d.id for d in hits} <= {d.id for d in inst.documents}
 
 
 _MODELS = {
-    "user_model": object(), "assistant_model": object(),
-    "judge_model": object(), "summary_model": object(),
+    "user_model": object(),
+    "assistant_model": object(),
+    "judge_model": object(),
+    "summary_model": object(),
     "api_response_model": object(),
 }
 
@@ -509,18 +549,14 @@ def _mock_call_llm(assistant_responses, *, user_responses=None):
             try:
                 return next(it_assist)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more assistant_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more assistant_model calls than expected") from e
         if alias == "judge_model":
             return {"role": "assistant", "content": judge_payload}
         if alias == "user_model":
             try:
                 return next(it_user)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more user_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more user_model calls than expected") from e
         if alias == "summary_model":
             return {"role": "assistant", "content": "no"}
         raise AssertionError(f"unexpected alias: {alias!r}")
@@ -549,31 +585,63 @@ def _run_probe(side_effect, instance, **cfg_kw):
     prov = Provenance()
     ob = OutcomeBuilder(provenance=prov)
     cfg = _cfg(**cfg_kw)
-    with patch.object(G, "derive_instance", return_value=instance), \
-            _patched_call_llm(side_effect):
+    with patch.object(G, "derive_instance", return_value=instance), _patched_call_llm(side_effect):
         probe = G.FinancialServicesProbe(
-            persona=_PERSONA, locale="en_US", language="English", models=_MODELS,
-            cfg=cfg, provenance=prov, profile={},
-            data={"persona_uuid": "u1"}, outcome_builder=ob,
+            persona=_PERSONA,
+            locale="en_US",
+            language="English",
+            models=_MODELS,
+            cfg=cfg,
+            provenance=prov,
+            profile={},
+            data={"persona_uuid": "u1"},
+            outcome_builder=ob,
         )
         return probe.run_dispatch(
-            models=_MODELS, data={"persona_uuid": "u1"}, cfg=cfg,
+            models=_MODELS,
+            data={"persona_uuid": "u1"},
+            cfg=cfg,
         )
 
 
 def _dispute_tool_calls():
     return [
-        {"role": "assistant", "content": "", "tool_calls": [
-            {"id": "c1", "function": {"name": "kb_search",
-             "arguments": json.dumps({"query": "dispute unauthorized charge"})}}]},
-        {"role": "assistant", "content": "", "tool_calls": [
-            {"id": "c2", "function": {"name": "call_tool", "arguments": json.dumps(
-                {"tool_name": "file_transaction_dispute",
-                 "arguments": {"account_id": "acct_nb_0001",
-                               "transaction_id": "txn_nb_0001",
-                               "reason": "unauthorized"}})}}]},
-        {"role": "assistant", "content": "Filed a dispute; it's under review.",
-         "tool_calls": None},
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "c1",
+                    "function": {
+                        "name": "kb_search",
+                        "arguments": json.dumps({"query": "dispute unauthorized charge"}),
+                    },
+                }
+            ],
+        },
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "c2",
+                    "function": {
+                        "name": "call_tool",
+                        "arguments": json.dumps(
+                            {
+                                "tool_name": "file_transaction_dispute",
+                                "arguments": {
+                                    "account_id": "acct_nb_0001",
+                                    "transaction_id": "txn_nb_0001",
+                                    "reason": "unauthorized",
+                                },
+                            }
+                        ),
+                    },
+                }
+            ],
+        },
+        {"role": "assistant", "content": "Filed a dispute; it's under review.", "tool_calls": None},
     ]
 
 
@@ -592,10 +660,12 @@ def _kb_exchange(*documents, tool_name="kb_search"):
         {
             "role": "assistant",
             "content": "",
-            "tool_calls": [{
-                "id": call_id,
-                "function": {"name": tool_name, "arguments": "{}"},
-            }],
+            "tool_calls": [
+                {
+                    "id": call_id,
+                    "function": {"name": tool_name, "arguments": "{}"},
+                }
+            ],
         },
         {
             "role": "tool",
@@ -607,11 +677,7 @@ def _kb_exchange(*documents, tool_name="kb_search"):
 
 def _body_ids(message):
     payload = json.loads(message["content"])
-    return {
-        document["id"]
-        for document in payload["results"]
-        if "body" in document
-    }
+    return {document["id"] for document in payload["results"] if "body" in document}
 
 
 def test_document_view_keeps_all_unique_bodies_and_newest_duplicate():
@@ -658,10 +724,7 @@ def test_retrieval_after_expiry_restores_newest_body():
         {"role": "user", "content": "turn 1"},
         *_kb_exchange(_kb_doc("A", "old body")),
     ]
-    messages.extend(
-        {"role": "user", "content": f"turn {turn}"}
-        for turn in range(2, 10)
-    )
+    messages.extend({"role": "user", "content": f"turn {turn}"} for turn in range(2, 10))
     messages.extend(_kb_exchange(_kb_doc("A", "refreshed body")))
 
     projected = G._project_finance_document_history(
@@ -679,10 +742,13 @@ def test_non_kb_tool_payload_is_unchanged():
         {"role": "user", "content": "question"},
         {"role": "tool", "content": '{"results":[{"value":1}]}', "tool_call_id": "x"},
     ]
-    assert G._project_finance_document_history(
-        messages,
-        current_user_turn=1,
-    ) == messages
+    assert (
+        G._project_finance_document_history(
+            messages,
+            current_user_turn=1,
+        )
+        == messages
+    )
 
 
 def test_valid_document_shaped_non_kb_payload_is_unchanged():
@@ -690,27 +756,32 @@ def test_valid_document_shaped_non_kb_payload_is_unchanged():
         {"role": "user", "content": "question"},
         *_kb_exchange(_kb_doc("A"), tool_name="export_documents"),
     ]
-    assert G._project_finance_document_history(
-        messages,
-        current_user_turn=9,
-    ) == messages
+    assert (
+        G._project_finance_document_history(
+            messages,
+            current_user_turn=9,
+        )
+        == messages
+    )
 
 
 def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
     inst = _northwind_dispute_instance()
     assistant_inputs = []
-    assistant_responses = iter([
-        _dispute_tool_calls()[0],
-        {"role": "assistant", "content": "I found the policy.", "tool_calls": None},
-        *[
-            {
-                "role": "assistant",
-                "content": f"Visible response {turn}.",
-                "tool_calls": None,
-            }
-            for turn in range(2, 10)
-        ],
-    ])
+    assistant_responses = iter(
+        [
+            _dispute_tool_calls()[0],
+            {"role": "assistant", "content": "I found the policy.", "tool_calls": None},
+            *[
+                {
+                    "role": "assistant",
+                    "content": f"Visible response {turn}.",
+                    "tool_calls": None,
+                }
+                for turn in range(2, 10)
+            ],
+        ]
+    )
     user_turn = 1
     judge_payload = "<explanation>ok</explanation><rating>success</rating>"
 
@@ -738,33 +809,30 @@ def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
     # Turn 1 outer call, turn 1 inner synthesis, then outer calls for turns 2-9.
     assert len(assistant_inputs) == 10
     inner_tool = next(
-        message for message in assistant_inputs[1]
-        if message.get("role") == "tool"
-        and G._kb_search_payload(message.get("content")) is not None
+        message
+        for message in assistant_inputs[1]
+        if message.get("role") == "tool" and G._kb_search_payload(message.get("content")) is not None
     )
     turn_nine_tool = next(
-        message for message in assistant_inputs[-1]
-        if message.get("role") == "tool"
-        and json.loads(message["content"]).get("results")
+        message
+        for message in assistant_inputs[-1]
+        if message.get("role") == "tool" and json.loads(message["content"]).get("results")
     )
     assert _body_ids(inner_tool)
     assert _body_ids(turn_nine_tool) == set()
     assert all(
-        set(document) == {"id", "title", "tools"}
-        for document in json.loads(turn_nine_tool["content"])["results"]
+        set(document) == {"id", "title", "tools"} for document in json.loads(turn_nine_tool["content"])["results"]
     )
 
     exported = json.loads(result["conversation_messages"])
     exported_tool = next(
-        message for message in exported
-        if message.get("role") == "tool"
-        and G._kb_search_payload(message.get("content")) is not None
+        message
+        for message in exported
+        if message.get("role") == "tool" and G._kb_search_payload(message.get("content")) is not None
     )
     assert _body_ids(exported_tool)
     metadata = json.loads(result["conversation_metadata"])
-    assert set(metadata["gold_document_ids"]) <= set(
-        metadata["retrieved_document_ids"]
-    )
+    assert set(metadata["gold_document_ids"]) <= set(metadata["retrieved_document_ids"])
     assert metadata["discovered_tools"]
 
 
@@ -810,10 +878,7 @@ def test_summary_failure_keeps_original_response_with_warning():
         if alias == "judge_model":
             return {
                 "role": "assistant",
-                "content": (
-                    "<explanation>ok</explanation>"
-                    "<rating>success</rating>"
-                ),
+                "content": ("<explanation>ok</explanation><rating>success</rating>"),
             }
         raise AssertionError(f"unexpected alias: {alias!r}")
 
@@ -822,10 +887,7 @@ def test_summary_failure_keeps_original_response_with_warning():
     messages = json.loads(result["conversation_messages"])
 
     assert messages[-1]["content"] == long_response
-    assert any(
-        warning["kind"] == WarningKind.COMPRESSION_FALLBACK.value
-        for warning in outcome["warnings"]
-    )
+    assert any(warning["kind"] == WarningKind.COMPRESSION_FALLBACK.value for warning in outcome["warnings"])
 
 
 def test_empty_summary_keeps_original_response_with_warning():
@@ -840,10 +902,7 @@ def test_empty_summary_keeps_original_response_with_warning():
         if alias == "judge_model":
             return {
                 "role": "assistant",
-                "content": (
-                    "<explanation>ok</explanation>"
-                    "<rating>success</rating>"
-                ),
+                "content": ("<explanation>ok</explanation><rating>success</rating>"),
             }
         raise AssertionError(f"unexpected alias: {alias!r}")
 
@@ -852,10 +911,7 @@ def test_empty_summary_keeps_original_response_with_warning():
     messages = json.loads(result["conversation_messages"])
 
     assert messages[-1]["content"] == long_response
-    assert any(
-        warning["kind"] == WarningKind.COMPRESSION_FALLBACK.value
-        for warning in outcome["warnings"]
-    )
+    assert any(warning["kind"] == WarningKind.COMPRESSION_FALLBACK.value for warning in outcome["warnings"])
 
 
 def test_read_tools_and_grounding_share_one_domain_aware_account():
@@ -895,8 +951,7 @@ def test_verify_identity_requires_name_and_dob():
     """Regression: identity verification must FAIL without both full name and
     date of birth (the old mock rubber-stamped any call, so a customer could skip
     DOB and still reach a state-changing action)."""
-    ok, payload = G._verify_identity({"full_name": "Jose Tenenbaum",
-                                       "account_or_card_last4": "0001"})
+    ok, payload = G._verify_identity({"full_name": "Jose Tenenbaum", "account_or_card_last4": "0001"})
     assert ok is False and payload["status"] == "unverified"
     # The reason is read by the assistant LLM, so missing fields are named in
     # human form ("date of birth") rather than as raw keys.
@@ -910,6 +965,7 @@ def test_verify_identity_requires_name_and_dob():
 
     # the advertised schema marks both as required so the agent knows to collect them
     from usersim.engine.core.finance_bank import framework_primitive_tool
+
     req = framework_primitive_tool("verify_identity")["parameters"].get("required")
     assert req == ["full_name", "date_of_birth"]
 
@@ -927,15 +983,16 @@ def test_card_actions_target_a_real_card():
     assert st2["cards"][0]["status"] == "active"
 
     # get_accounts surfaces cards so the agent can see a card_id to act on
-    got = G._apply_tool("get_accounts", {}, {"account_id": "acct_nb_0001",
-                                             "cards": st["cards"]})
+    got = G._apply_tool("get_accounts", {}, {"account_id": "acct_nb_0001", "cards": st["cards"]})
     assert "cards" in got and got["cards"][0]["card_id"] == "card_nb_0001"
 
 
 def test_run_dispatch_search_then_dispute_scoped():
     inst = _northwind_dispute_instance()
     result = _run_probe(
-        _mock_call_llm(_dispute_tool_calls()), inst, max_turns=1,
+        _mock_call_llm(_dispute_tool_calls()),
+        inst,
+        max_turns=1,
     )
     assert result["conversation_status"] is True
     assert result["institution_id"] == "northwind_bank"
@@ -962,13 +1019,29 @@ def test_result_carries_all_finance_trajectory_columns():
 
 def test_discoverable_tool_gate_blocks_before_retrieval():
     inst = _northwind_dispute_instance()
-    seq = _mock_call_llm([
-        {"role": "assistant", "content": "", "tool_calls": [
-            {"id": "c1", "function": {"name": "call_tool", "arguments": json.dumps(
-                {"tool_name": "file_transaction_dispute",
-                 "arguments": {"transaction_id": "txn_nb_0001"}})}}]},
-        {"role": "assistant", "content": "Let me check the policy.", "tool_calls": None},
-    ])
+    seq = _mock_call_llm(
+        [
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "c1",
+                        "function": {
+                            "name": "call_tool",
+                            "arguments": json.dumps(
+                                {
+                                    "tool_name": "file_transaction_dispute",
+                                    "arguments": {"transaction_id": "txn_nb_0001"},
+                                }
+                            ),
+                        },
+                    }
+                ],
+            },
+            {"role": "assistant", "content": "Let me check the policy.", "tool_calls": None},
+        ]
+    )
     result = _run_probe(seq, inst, max_turns=1)
     attempted = json.loads(result["conversation_metadata"])["attempted_actions"]
     assert attempted[0]["tool_name"] == "file_transaction_dispute"
@@ -985,9 +1058,7 @@ def test_multi_turn_followup_drives_second_exchange():
     side_effect = _mock_call_llm(
         assistant_responses=[
             # Turn 1: assistant asks a clarifying question (no tools).
-            {"role": "assistant",
-             "content": "Which transaction should I dispute?",
-             "tool_calls": None},
+            {"role": "assistant", "content": "Which transaction should I dispute?", "tool_calls": None},
             # Turn 2: search -> dispute -> confirm.
             *_dispute_tool_calls(),
         ],
@@ -1019,10 +1090,7 @@ def test_dynamic_taxonomy_loads_and_scopes_by_type():
     assert bank_cats and brokerage_cats
     assert all("bank" in c.applies_to_types for c in bank_cats)
     # A bank-only category must not surface for a brokerage.
-    assert set(c.id for c in bank_cats).isdisjoint(
-        c.id for c in brokerage_cats
-        if "bank" not in c.applies_to_types
-    )
+    assert set(c.id for c in bank_cats).isdisjoint(c.id for c in brokerage_cats if "bank" not in c.applies_to_types)
     for c in tax.categories:
         assert len(c.subtopic_hints) >= 2
 
@@ -1030,10 +1098,8 @@ def test_dynamic_taxonomy_loads_and_scopes_by_type():
 def test_dynamic_derivation_is_deterministic_and_type_scoped():
     bank = load_finance_bank_for_locale("en_US")
     tax = _load_finance_taxonomy()
-    a = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=7,
-                        tier_mix=1.0, taxonomy=tax)
-    b = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=7,
-                        tier_mix=1.0, taxonomy=tax)
+    a = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=7, tier_mix=1.0, taxonomy=tax)
+    b = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=7, tier_mix=1.0, taxonomy=tax)
     assert a is not None and a.is_dynamic
     assert a.tier == "dynamic" and a.gold is None
     assert a.opening_user_message == ""  # generated by the loop
@@ -1051,27 +1117,34 @@ def test_dynamic_derivation_soft_weights_by_persona():
     persona across a seed sweep -- a soft prior, not a hard filter."""
     bank = load_finance_bank_for_locale("en_US")
     tax = _load_finance_taxonomy()
-    retiree = {"first_name": "Ruth", "last_name": "Olsen", "age": 68,
-               "region": "Oregon", "occupation": "retired",
-               "education_level": "some_college"}
-    young = {"first_name": "Kai", "last_name": "Lee", "age": 24,
-             "region": "Oregon", "occupation": "barista",
-             "education_level": "high_school"}
+    retiree = {
+        "first_name": "Ruth",
+        "last_name": "Olsen",
+        "age": 68,
+        "region": "Oregon",
+        "occupation": "retired",
+        "education_level": "some_college",
+    }
+    young = {
+        "first_name": "Kai",
+        "last_name": "Lee",
+        "age": 24,
+        "region": "Oregon",
+        "occupation": "barista",
+        "education_level": "high_school",
+    }
 
     def _types(persona):
         out = []
         for s in range(40):
-            inst = derive_instance(persona, bank, "en_US", persona_uuid="u1",
-                                   seed=s, tier_mix=1.0, taxonomy=tax)
+            inst = derive_instance(persona, bank, "en_US", persona_uuid="u1", seed=s, tier_mix=1.0, taxonomy=tax)
             out.append(inst.institution_type)
         return out
 
     retiree_types = _types(retiree)
     young_types = _types(young)
     # The soft prior biases the retiree toward retirement provision.
-    assert retiree_types.count("retirement_provider") > young_types.count(
-        "retirement_provider"
-    )
+    assert retiree_types.count("retirement_provider") > young_types.count("retirement_provider")
     # ...but never starves other types for the retiree (coverage preserved).
     assert len(set(retiree_types)) > 1
 
@@ -1086,8 +1159,7 @@ def test_persona_affinities_load_on_categories():
 def test_tier_mix_zero_stays_verifiable():
     bank = load_finance_bank_for_locale("en_US")
     tax = _load_finance_taxonomy()
-    inst = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=1,
-                          tier_mix=0.0, taxonomy=tax)
+    inst = derive_instance(_PERSONA, bank, "en_US", persona_uuid="u1", seed=1, tier_mix=0.0, taxonomy=tax)
     assert inst is not None and inst.tier == "verifiable" and inst.is_verifiable
 
 
@@ -1096,12 +1168,18 @@ def _dynamic_instance(institution_id="northwind_bank"):
     tax = _load_finance_taxonomy()
     inst = bank.institution(institution_id)
     from usersim.engine.core.finance_tasks import build_dynamic_instance
+
     cat = tax.categories_for_type(inst.type)[0]
     return build_dynamic_instance(
-        inst, category_id=cat.id, invitation=cat.invitation,
-        subtopic_hint=cat.subtopic_hints[0], taxonomy_id=tax.taxonomy_id,
-        taxonomy_version=tax.taxonomy_version, persona_uuid="u1",
-        locale="en_US", placeholder=tax.placeholder,
+        inst,
+        category_id=cat.id,
+        invitation=cat.invitation,
+        subtopic_hint=cat.subtopic_hints[0],
+        taxonomy_id=tax.taxonomy_id,
+        taxonomy_version=tax.taxonomy_version,
+        persona_uuid="u1",
+        locale="en_US",
+        placeholder=tax.placeholder,
     )
 
 
@@ -1114,12 +1192,17 @@ def test_dynamic_instance_grounds_to_a_synthesized_account():
     prov = Provenance()
     ob = OutcomeBuilder(provenance=prov)
     cfg = _cfg()
-    with patch.object(G, "derive_instance", return_value=inst), \
-            _patched_call_llm([]):
+    with patch.object(G, "derive_instance", return_value=inst), _patched_call_llm([]):
         probe = G.FinancialServicesProbe(
-            persona=_PERSONA, locale="en_US", language="English", models=_MODELS,
-            cfg=cfg, provenance=prov, profile={},
-            data={"persona_uuid": "u1"}, outcome_builder=ob,
+            persona=_PERSONA,
+            locale="en_US",
+            language="English",
+            models=_MODELS,
+            cfg=cfg,
+            provenance=prov,
+            profile={},
+            data={"persona_uuid": "u1"},
+            outcome_builder=ob,
         )
     accts = probe._grounding_accounts(inst)
     assert accts, "dynamic instance should ground to a synthesized account"
@@ -1131,16 +1214,15 @@ def test_dynamic_instance_grounds_to_a_synthesized_account():
 
 def test_financial_literacy_derivation_and_tag():
     from usersim.engine.probes.financial_services.task_derivation import (
-        derive_financial_literacy, persona_to_tags,
+        derive_financial_literacy,
+        persona_to_tags,
     )
+
     # Exact en_US education vocabulary (see core.behavioral._EDUCATION_ORDINAL).
-    high = {"education_level": "graduate", "occupation": "Financial analyst",
-            "age": 40}
-    low = {"education_level": "9th_12th_no_diploma", "occupation": "cashier",
-           "age": 22}
+    high = {"education_level": "graduate", "occupation": "Financial analyst", "age": 40}
+    low = {"education_level": "9th_12th_no_diploma", "occupation": "cashier", "age": 22}
     # A finance occupation lifts an otherwise-mid persona into "high".
-    mid_finance = {"education_level": "some_college", "occupation": "bank teller",
-                   "age": 30}
+    mid_finance = {"education_level": "some_college", "occupation": "bank teller", "age": 30}
     assert derive_financial_literacy(high, "en_US") == "high"
     assert derive_financial_literacy(low, "en_US") == "low"
     assert derive_financial_literacy(mid_finance, "en_US") == "high"
@@ -1157,9 +1239,7 @@ def test_dynamic_tier_generates_turn_1_and_emits_columns():
     opening = "Hi, I'm trying to figure out which checking account fits me."
     side_effect = _mock_call_llm(
         assistant_responses=[
-            {"role": "assistant",
-             "content": "Happy to help you compare the everyday accounts...",
-             "tool_calls": None},
+            {"role": "assistant", "content": "Happy to help you compare the everyday accounts...", "tool_calls": None},
         ],
         user_responses=[
             {"role": "assistant", "content": opening},
@@ -1188,14 +1268,15 @@ def test_allowed_tools_not_flagged_unauthorized():
     tpl = bank.institution("northwind_bank").template_by_id("TPL-NB-DISPUTE-001")
     assert "freeze_card" in tpl.allowed_tools  # the asset carries the permit
     base = {
-        "finance_task_id": "TPL-NB-DISPUTE-001", "task_tier": "verifiable",
-        "locale": "en_US", "institution_id": "northwind_bank",
+        "finance_task_id": "TPL-NB-DISPUTE-001",
+        "task_tier": "verifiable",
+        "locale": "en_US",
+        "institution_id": "northwind_bank",
         "domain": "retail_banking",
         "gold_tool_sequence": json.dumps(["file_transaction_dispute"]),
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
-        "attempted_tool_names": json.dumps(
-            ["get_account_transactions", "file_transaction_dispute", "freeze_card"]),
+        "attempted_tool_names": json.dumps(["get_account_transactions", "file_transaction_dispute", "freeze_card"]),
     }
     ok = fn(base, {})
     assert ok["scores"]["finance.no_unauthorized_action_rate"] == 1.0
@@ -1203,8 +1284,7 @@ def test_allowed_tools_not_flagged_unauthorized():
     assert ok["status_proposal"] is True
 
     # A state-changing tool that is NEITHER gold NOR allowed is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(
-        ["file_transaction_dispute", "close_account"])), {})
+    bad = fn(dict(base, attempted_tool_names=json.dumps(["file_transaction_dispute", "close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
@@ -1213,6 +1293,7 @@ def test_tasks_ship_multiple_openings_varied_per_persona():
     """Verifiable tasks carry several opening phrasings; build_instance picks one
     deterministically per persona but varies across personas (generalizability)."""
     from usersim.engine.core.finance_tasks import build_instance
+
     bank = load_finance_bank_for_locale("en_US")
     inst = bank.institution("northwind_bank")
     tpl = inst.template_by_id("TPL-NB-DISPUTE-001")
@@ -1221,9 +1302,7 @@ def test_tasks_ship_multiple_openings_varied_per_persona():
     a2 = build_instance(tpl, inst, persona_uuid="p_fin_1", locale="en_US")
     assert a.opening_user_message == a2.opening_user_message  # deterministic
     openings = {
-        build_instance(tpl, inst, persona_uuid=f"p_fin_{i}", locale="en_US")
-        .opening_user_message
-        for i in range(40)
+        build_instance(tpl, inst, persona_uuid=f"p_fin_{i}", locale="en_US").opening_user_message for i in range(40)
     }
     assert len(openings) >= 2  # varied across personas
 
@@ -1257,8 +1336,10 @@ def test_proactive_set_alerts_is_not_unauthorized():
     bank = load_finance_bank_for_locale("en_US")
     tpl = bank.institution("northwind_bank").template_by_id("TPL-NB-PAYBILL-001")
     base = {
-        "finance_task_id": "TPL-NB-PAYBILL-001", "task_tier": "verifiable",
-        "locale": "en_US", "institution_id": "northwind_bank",
+        "finance_task_id": "TPL-NB-PAYBILL-001",
+        "task_tier": "verifiable",
+        "locale": "en_US",
+        "institution_id": "northwind_bank",
         "domain": "retail_banking",
         "gold_tool_sequence": json.dumps(list(tpl.gold_tool_sequence)),
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
@@ -1271,8 +1352,7 @@ def test_proactive_set_alerts_is_not_unauthorized():
     assert r["scores"]["finance.no_unauthorized_action_rate"] == 1.0
     assert r["status_proposal"] is True
     # a genuinely-unauthorized state change is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(
-        list(tpl.gold_tool_sequence) + ["close_account"])), {})
+    bad = fn(dict(base, attempted_tool_names=json.dumps(list(tpl.gold_tool_sequence) + ["close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
@@ -1287,8 +1367,10 @@ def test_unordered_multistep_task_allows_reordering():
     assert tpl.ordered is False
     gold = list(tpl.gold_tool_sequence)  # [open, fund, risk, plan]
     base = {
-        "finance_task_id": "TPL-MW-ONBOARD-PLAN-001", "task_tier": "verifiable",
-        "locale": "en_US", "institution_id": "meridian_wealth",
+        "finance_task_id": "TPL-MW-ONBOARD-PLAN-001",
+        "task_tier": "verifiable",
+        "locale": "en_US",
+        "institution_id": "meridian_wealth",
         "domain": "wealth_management",
         "gold_tool_sequence": json.dumps(gold),
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
@@ -1313,15 +1395,16 @@ def test_rollover_multi_tool_gold_requires_ordered_sequence():
     tpl = bank.institution("evergreen_retirement").template_by_id("TPL-ER-ROLLOVER-001")
     assert list(tpl.gold_tool_sequence) == ["open_account", "initiate_rollover"]
     base = {
-        "finance_task_id": "TPL-ER-ROLLOVER-001", "task_tier": "verifiable",
-        "locale": "en_US", "institution_id": "evergreen_retirement",
+        "finance_task_id": "TPL-ER-ROLLOVER-001",
+        "task_tier": "verifiable",
+        "locale": "en_US",
+        "institution_id": "evergreen_retirement",
         "domain": "retirement",
         "gold_tool_sequence": json.dumps(["open_account", "initiate_rollover"]),
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
     }
-    ok = fn(dict(base, attempted_tool_names=json.dumps(
-        ["open_account", "initiate_rollover"])), {})
+    ok = fn(dict(base, attempted_tool_names=json.dumps(["open_account", "initiate_rollover"])), {})
     assert ok["scores"]["finance.tool_selection_rate"] == 1.0
     assert ok["scores"]["finance.ordering_respected_rate"] == 1.0
     assert ok["status_proposal"] is True
@@ -1330,22 +1413,21 @@ def test_rollover_multi_tool_gold_requires_ordered_sequence():
     assert partial["scores"]["finance.tool_selection_rate"] == 0.5
     assert partial["status_proposal"] is False
     # Wrong order -> ordering fails.
-    rev = fn(dict(base, attempted_tool_names=json.dumps(
-        ["initiate_rollover", "open_account"])), {})
+    rev = fn(dict(base, attempted_tool_names=json.dumps(["initiate_rollover", "open_account"])), {})
     assert rev["scores"]["finance.ordering_respected_rate"] == 0.0
 
 
 def test_scorer_good_bad_skip_and_tier2():
     fn = get_scorer("financial_services")
     base = {
-        "finance_task_id": "TPL-NB-DISPUTE-001", "task_tier": "verifiable",
-        "locale": "en_US", "institution_id": "northwind_bank",
+        "finance_task_id": "TPL-NB-DISPUTE-001",
+        "task_tier": "verifiable",
+        "locale": "en_US",
+        "institution_id": "northwind_bank",
         "domain": "retail_banking",
         "gold_tool_sequence": json.dumps(["file_transaction_dispute"]),
-        "gold_document_ids": json.dumps(
-            ["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
-        "retrieved_document_ids": json.dumps(
-            ["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
+        "gold_document_ids": json.dumps(["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
+        "retrieved_document_ids": json.dumps(["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
         "attempted_tool_names": json.dumps(["file_transaction_dispute"]),
     }
     good = fn(base, {})
@@ -1354,8 +1436,7 @@ def test_scorer_good_bad_skip_and_tier2():
     assert good["scores"]["finance.tool_selection_rate"] == 1.0
 
     # Unauthorized: called an irreversible tool (close_account) not in gold.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(["close_account"]),
-                  retrieved_document_ids=json.dumps([])), {})
+    bad = fn(dict(base, attempted_tool_names=json.dumps(["close_account"]), retrieved_document_ids=json.dumps([])), {})
     assert bad["status_proposal"] is False
     assert bad["detail"]["unauthorized_tool_calls"] == ["close_account"]
 
@@ -1376,18 +1457,23 @@ def _dynamic_scorer_row(doc_id):
         "dynamic_category_id": "banking-account-fit",
         "dynamic_subtopic_hint": "checking vs. savings fit",
         "retrieved_document_ids": json.dumps([doc_id]),
-        "conversation_messages": json.dumps([
-            {"role": "user", "content": "Which everyday account fits me?"},
-            {"role": "assistant", "content": "Here are the options grounded in our KB..."},
-        ]),
+        "conversation_messages": json.dumps(
+            [
+                {"role": "user", "content": "Which everyday account fits me?"},
+                {"role": "assistant", "content": "Here are the options grounded in our KB..."},
+            ]
+        ),
     }
 
 
 def _dyn_judge_payload(**overrides):
     axes = {
-        "dynamic.grounding": 5, "dynamic.numeric_faithfulness": 5,
-        "dynamic.boundary_adherence": 4, "dynamic.no_fabrication": 5,
-        "dynamic.graceful_unknown": 5, "dynamic.self_consistency": 5,
+        "dynamic.grounding": 5,
+        "dynamic.numeric_faithfulness": 5,
+        "dynamic.boundary_adherence": 4,
+        "dynamic.no_fabrication": 5,
+        "dynamic.graceful_unknown": 5,
+        "dynamic.self_consistency": 5,
     }
     axes.update(overrides)
     return json.dumps({a: {"score": v, "reasoning": "ok"} for a, v in axes.items()})
@@ -1468,7 +1554,8 @@ def test_loader_rejects_cross_institution_gold(tmp_path: Path):
     locale_dir = tmp_path / "en_XX"
     inst_dir = locale_dir / "acme"
     inst_dir.mkdir(parents=True)
-    (locale_dir / "region_meta.yaml").write_text(textwrap.dedent("""\
+    (locale_dir / "region_meta.yaml").write_text(
+        textwrap.dedent("""\
         schema_version: v0.1
         locale: en_XX
         bank_id: en_XX_test
@@ -1476,30 +1563,39 @@ def test_loader_rejects_cross_institution_gold(tmp_path: Path):
         task_contract_version: v0.1.0
         domain_regulators:
           retail_banking: {regulator_text: test regulator text}
-    """))
-    (inst_dir / "institution_meta.yaml").write_text(textwrap.dedent("""\
+    """)
+    )
+    (inst_dir / "institution_meta.yaml").write_text(
+        textwrap.dedent("""\
         schema_version: v0.1
         institution_id: acme
         display_name: Acme
         type: bank
         brand_voice: traditional
         domains: [retail_banking]
-    """))
-    (inst_dir / "corpus.yaml").write_text(textwrap.dedent("""\
+    """)
+    )
+    (inst_dir / "corpus.yaml").write_text(
+        textwrap.dedent("""\
         schema_version: v0.1
         documents:
         - {id: D1, title: t, body: b, product_category: checking, document_type: faq, source_authority: official, placeholder: true, mentions_tools: []}
-    """))
-    (inst_dir / "tools.yaml").write_text(textwrap.dedent("""\
+    """)
+    )
+    (inst_dir / "tools.yaml").write_text(
+        textwrap.dedent("""\
         schema_version: v0.1
         tools:
         - {name: kb_search, description: s, discoverable: false, side_effect_class: read_only}
-    """))
-    (inst_dir / "tasks.yaml").write_text(textwrap.dedent("""\
+    """)
+    )
+    (inst_dir / "tasks.yaml").write_text(
+        textwrap.dedent("""\
         schema_version: v0.1
         templates:
         - {id: T1, tier: verifiable, task_type: transactional, placeholder: true, persona_tags: [region:any], opening_user_message: hi, gold_tool_sequence: [not_my_tool]}
-    """))
+    """)
+    )
     with pytest.raises(FinanceBankError):
         load_finance_bank(locale_dir)
 
@@ -1521,9 +1617,15 @@ def _probe_on(locale: str, instance, **cfg_kw):
     cfg = _cfg(**cfg_kw)
     with patch.object(G, "derive_instance", return_value=instance):
         probe = G.FinancialServicesProbe(
-            persona=_PERSONA, locale=locale, language="English", models=_MODELS,
-            cfg=cfg, provenance=prov, profile={},
-            data={"persona_uuid": "u1"}, outcome_builder=ob,
+            persona=_PERSONA,
+            locale=locale,
+            language="English",
+            models=_MODELS,
+            cfg=cfg,
+            provenance=prov,
+            profile={},
+            data={"persona_uuid": "u1"},
+            outcome_builder=ob,
         )
     return probe, ob
 
@@ -1570,9 +1672,7 @@ class TestVerbatimOpeningLocalization:
         inst = _northwind_dispute_instance()
         probe, ob = _probe_on("en_US", inst)
         state = G.ConversationState(messages=[], metadata={})
-        with patch(
-            "usersim.engine.core.translation.translate_user_turn"
-        ) as translate:
+        with patch("usersim.engine.core.translation.translate_user_turn") as translate:
             got = probe.get_verbatim_first_user_turn(state)
         assert got == inst.opening_user_message
         translate.assert_not_called()
@@ -1623,12 +1723,15 @@ class TestSearchQueryTranslation:
         probe, ob = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch(
-            "usersim.engine.core.translation.translate_search_query"
-        ) as translate:
+        with patch("usersim.engine.core.translation.translate_search_query") as translate:
             probe.execute_tool_call(
-                "kb_search", {"query": "dispute a card charge"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                "kb_search",
+                {"query": "dispute a card charge"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
         translate.assert_not_called()
         assert probe._corpus_language() == ""
@@ -1645,8 +1748,12 @@ class TestSearchQueryTranslation:
         ) as translate:
             probe.execute_tool_call(
                 "kb_search",
-                {"query": "அட்டை கட்டணத்தை மறுக்கவும்"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                {"query": "அட்டை கட்டணத்தை மறுக்கவும்"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
         translate.assert_called_once()
         assert translate.call_args.kwargs["target_language"] == "Indian English"
@@ -1660,18 +1767,29 @@ class TestSearchQueryTranslation:
         probe, _ = self._variant_probe(finance_retrieval_mode="hybrid")
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch(
-            "usersim.engine.core.translation.translate_search_query",
-            return_value="dispute a card charge",
-        ), patch.object(
-            G._retrieval, "retrieve", return_value=[],
-        ) as retrieve, patch(
-            "usersim.engine.core.embeddings.embed_query",
-            return_value=[0.1, 0.2],
-        ) as embed:
+        with (
+            patch(
+                "usersim.engine.core.translation.translate_search_query",
+                return_value="dispute a card charge",
+            ),
+            patch.object(
+                G._retrieval,
+                "retrieve",
+                return_value=[],
+            ) as retrieve,
+            patch(
+                "usersim.engine.core.embeddings.embed_query",
+                return_value=[0.1, 0.2],
+            ) as embed,
+        ):
             probe.execute_tool_call(
-                "kb_search", {"query": "அட்டை கட்டணம்"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                "kb_search",
+                {"query": "அட்டை கட்டணம்"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
         assert retrieve.call_args.args[1] == "dispute a card charge"
         assert embed.call_args.args[2] == "dispute a card charge"
@@ -1690,8 +1808,13 @@ class TestSearchQueryTranslation:
             return_value="dispute a card charge",
         ):
             probe.execute_tool_call(
-                "kb_search", {"query": "அட்டை கட்டணம்"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                "kb_search",
+                {"query": "அட்டை கட்டணம்"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
         assert state.metadata["kb_search_queries"] == ["அட்டை கட்டணம்"]
 
@@ -1706,13 +1829,15 @@ class TestSearchQueryTranslation:
             return_value="dispute a card charge",
         ):
             probe.execute_tool_call(
-                "kb_search", {"query": "அட்டை கட்டணம்"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                "kb_search",
+                {"query": "அட்டை கட்டணம்"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
-        traces = [
-            t for t in state.outcome.traces()
-            if t.kind == TraceKind.KB_QUERY_TRANSLATION
-        ]
+        traces = [t for t in state.outcome.traces() if t.kind == TraceKind.KB_QUERY_TRANSLATION]
         assert len(traces) == 1
         assert traces[0].extra["query"] == "அட்டை கட்டணம்"
         assert traces[0].extra["translated_query"] == "dispute a card charge"
@@ -1733,8 +1858,13 @@ class TestSearchQueryTranslation:
         ):
             for i in range(3):
                 probe.execute_tool_call(
-                    "kb_search", {"query": f"கட்டணம் {i}"}, {}, state, {},
-                    turn_idx=i, call_idx=0,
+                    "kb_search",
+                    {"query": f"கட்டணம் {i}"},
+                    {},
+                    state,
+                    {},
+                    turn_idx=i,
+                    call_idx=0,
                 )
         kinds = _warning_kinds(ob)
         assert WarningKind.USED_MACHINE_TRANSLATION in kinds
@@ -1752,24 +1882,23 @@ class TestSearchQueryTranslation:
             side_effect=lambda models, q, **kw: q,
         ):
             probe.execute_tool_call(
-                "kb_search", {"query": "அட்டை கட்டணம்"}, {}, state, {},
-                turn_idx=0, call_idx=0,
+                "kb_search",
+                {"query": "அட்டை கட்டணம்"},
+                {},
+                state,
+                {},
+                turn_idx=0,
+                call_idx=0,
             )
-        assert not [
-            t for t in state.outcome.traces()
-            if t.kind == TraceKind.KB_QUERY_TRANSLATION
-        ]
+        assert not [t for t in state.outcome.traces() if t.kind == TraceKind.KB_QUERY_TRANSLATION]
         assert WarningKind.USED_MACHINE_TRANSLATION not in _warning_kinds(ob)
 
     def test_an_empty_query_is_not_sent_to_the_translator(self):
         probe, _ = self._variant_probe()
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        with patch(
-            "usersim.engine.core.translation.translate_search_query"
-        ) as translate:
-            probe.execute_tool_call("kb_search", {}, {}, state, {},
-                                    turn_idx=0, call_idx=0)
+        with patch("usersim.engine.core.translation.translate_search_query") as translate:
+            probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
         translate.assert_not_called()
         assert state.metadata["kb_search_queries"] == [""]
 
@@ -1864,7 +1993,9 @@ class TestRegionAwareKyc:
             },
         )
         assert india.identity_required_fields() == (
-            "full_name", "date_of_birth", "pan",
+            "full_name",
+            "date_of_birth",
+            "pan",
         )
 
     def test_bank_without_the_block_falls_back(self):
@@ -1872,28 +2003,26 @@ class TestRegionAwareKyc:
         bank = load_finance_bank_for_locale("en_US")
         legacy = dataclasses.replace(
             bank,
-            region_meta={k: v for k, v in bank.region_meta.items()
-                         if k != "identity_verification"},
+            region_meta={k: v for k, v in bank.region_meta.items() if k != "identity_verification"},
         )
         assert legacy.identity_required_fields() == ("full_name", "date_of_birth")
 
     def test_malformed_block_falls_back_rather_than_crashing(self):
         bank = load_finance_bank_for_locale("en_US")
-        for bad in ({}, {"required_fields": []}, {"required_fields": None},
-                    "not-a-dict"):
+        for bad in ({}, {"required_fields": []}, {"required_fields": None}, "not-a-dict"):
             broken = dataclasses.replace(
-                bank, region_meta={**bank.region_meta, "identity_verification": bad},
+                bank,
+                region_meta={**bank.region_meta, "identity_verification": bad},
             )
             assert broken.identity_required_fields() == (
-                "full_name", "date_of_birth",
+                "full_name",
+                "date_of_birth",
             )
 
     def test_gate_enforces_the_region_set(self):
         india = ("full_name", "date_of_birth", "pan")
         # Name + DOB alone is enough in the US, but NOT in a PAN region.
-        ok, _ = G._verify_identity(
-            {"full_name": "A B", "date_of_birth": "1990-01-01"}, india
-        )
+        ok, _ = G._verify_identity({"full_name": "A B", "date_of_birth": "1990-01-01"}, india)
         assert ok is False
         ok, payload = G._verify_identity(
             {"full_name": "A B", "date_of_birth": "1990-01-01", "pan": "ABCDE1234F"},
@@ -1917,7 +2046,9 @@ class TestRegionAwareKyc:
 
         schema = verify_identity_schema(("full_name", "date_of_birth", "pan"))
         assert schema["parameters"]["required"] == [
-            "full_name", "date_of_birth", "pan",
+            "full_name",
+            "date_of_birth",
+            "pan",
         ]
         assert "pan" in schema["parameters"]["properties"]
         assert "PAN" in schema["description"]
@@ -1932,18 +2063,22 @@ class TestRegionAwareKyc:
         bank = load_finance_bank_for_locale("en_US")
         inst = bank.institution("northwind_bank")
         offered = T.build_offered_tools(
-            inst, identity_required_fields=("full_name", "date_of_birth", "pan"),
+            inst,
+            identity_required_fields=("full_name", "date_of_birth", "pan"),
         )
         by_name = {t["function"]["name"]: t["function"] for t in offered}
         assert by_name["verify_identity"]["parameters"]["required"] == [
-            "full_name", "date_of_birth", "pan",
+            "full_name",
+            "date_of_birth",
+            "pan",
         ]
 
     def test_persona_is_grounded_with_every_required_field(self):
         """The user-sim must HOLD what the region demands, else it stalls."""
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         with patch.object(
-            type(probe._bank), "identity_required_fields",
+            type(probe._bank),
+            "identity_required_fields",
             lambda self: ("full_name", "date_of_birth", "pan"),
         ):
             ctx = probe._identity_context("Asha Iyer")
@@ -1967,14 +2102,14 @@ class TestApplyToolFallbacks:
     """Unhandled tools are answered by CLASS, so any locale's taxonomy works."""
 
     _STATE = {
-        "accounts": [{"account_id": "acct_1", "account_type": "loan account",
-                      "last4": "0001", "balance": 125000}],
+        "accounts": [{"account_id": "acct_1", "account_type": "loan account", "last4": "0001", "balance": 125000}],
         "cards": [{"card_id": "card_1", "status": "active"}],
         "transactions": [{"transaction_id": "t1"}],
     }
 
     def _state(self):
         import copy
+
         return copy.deepcopy(self._STATE)
 
     def test_read_tools_return_a_definitive_view_not_a_bare_ack(self):
@@ -1985,10 +2120,16 @@ class TestApplyToolFallbacks:
         shipped en_US tools too (get_statements / dispute_status /
         get_order_status / generate_financial_plan), not just future locales.
         """
-        read_only = frozenset({
-            "get_statements", "dispute_status", "get_order_status",
-            "generate_financial_plan", "get_loan_details", "get_policy_details",
-        })
+        read_only = frozenset(
+            {
+                "get_statements",
+                "dispute_status",
+                "get_order_status",
+                "generate_financial_plan",
+                "get_loan_details",
+                "get_policy_details",
+            }
+        )
         for tool in sorted(read_only):
             payload = G._apply_tool(tool, {}, self._state(), read_only)
             assert "accounts" in payload, tool
@@ -1998,7 +2139,10 @@ class TestApplyToolFallbacks:
     def test_unhandled_state_change_acknowledges_with_a_reference(self):
         read_only = frozenset({"get_loan_details"})
         payload = G._apply_tool(
-            "pay_emi", {"amount": 7300, "loan_id": "ln_9"}, self._state(), read_only,
+            "pay_emi",
+            {"amount": 7300, "loan_id": "ln_9"},
+            self._state(),
+            read_only,
         )
         assert payload["status"] == "COMPLETED"
         assert payload["reference_id"].startswith("ref_")
@@ -2054,7 +2198,8 @@ class TestLocalBrandNameReachesTheRuntime:
         document said "चंद्रिका बैंक" — reading like two institutions."""
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         probe._institution = dataclasses.replace(
-            probe._institution, display_name_local="चंद्रिका बैंक",
+            probe._institution,
+            display_name_local="चंद्रिका बैंक",
         )
         prompt = probe._build_user_system_prompt()
         assert "चंद्रिका बैंक" in prompt
@@ -2065,24 +2210,25 @@ class TestLocalBrandNameReachesTheRuntime:
         from usersim.asset_gen.financial_services.spec import Institution as SpecInstitution
 
         spec_inst = SpecInstitution(
-            id="x_bank", display_name="X Bank", display_name_local="एक्स बैंक",
-            type="bank", domains=["retail_banking"],
-            tool_taxonomy=[{"name": "kb_search", "discoverable": False,
-                            "side_effect_class": "read_only"}],
-            task_templates=[{"id": "T1", "tier": "dynamic",
-                             "task_type": "advisory_qa"}],
+            id="x_bank",
+            display_name="X Bank",
+            display_name_local="एक्स बैंक",
+            type="bank",
+            domains=["retail_banking"],
+            tool_taxonomy=[{"name": "kb_search", "discoverable": False, "side_effect_class": "read_only"}],
+            task_templates=[{"id": "T1", "tier": "dynamic", "task_type": "advisory_qa"}],
         )
         meta = _institution_meta(spec_inst)
         assert meta["display_name_local"] == "एक्स बैंक"
 
         # Omitted entirely when unset, so Latin-only banks are unchanged.
         plain = SpecInstitution(
-            id="y_bank", display_name="Y Bank", type="bank",
+            id="y_bank",
+            display_name="Y Bank",
+            type="bank",
             domains=["retail_banking"],
-            tool_taxonomy=[{"name": "kb_search", "discoverable": False,
-                            "side_effect_class": "read_only"}],
-            task_templates=[{"id": "T1", "tier": "dynamic",
-                             "task_type": "advisory_qa"}],
+            tool_taxonomy=[{"name": "kb_search", "discoverable": False, "side_effect_class": "read_only"}],
+            task_templates=[{"id": "T1", "tier": "dynamic", "task_type": "advisory_qa"}],
         )
         assert "display_name_local" not in _institution_meta(plain)
 
@@ -2135,13 +2281,10 @@ class TestAuthoredPersonaTagsAreReachable:
         )
 
         tags = persona_to_tags(
-            {"age": 47, "region": "Maharashtra", "occupation": "teacher",
-             "education_level": "Bachelor's degree"},
+            {"age": 47, "region": "Maharashtra", "occupation": "teacher", "education_level": "Bachelor's degree"},
             "en_IN",
         )
-        assert {t.split(":")[0] for t in tags} <= (
-            {"age", "financial-literacy"} | _FREEFORM_PREFIXES
-        )
+        assert {t.split(":")[0] for t in tags} <= ({"age", "financial-literacy"} | _FREEFORM_PREFIXES)
 
     @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
     def test_task_persona_tags_are_reachable(self, locale):
@@ -2160,9 +2303,7 @@ class TestAuthoredPersonaTagsAreReachable:
     def test_dynamic_persona_affinities_are_reachable(self, locale):
         import yaml
 
-        path = (
-            packaged_assets_dir() / "financial_services" / locale / "dynamic.yaml"
-        )
+        path = packaged_assets_dir() / "financial_services" / locale / "dynamic.yaml"
         categories = yaml.safe_load(path.read_text(encoding="utf-8"))["categories"]
         dead = {
             (cat["id"], tag)
@@ -2188,15 +2329,26 @@ class TestRetrievalEffortIsRecorded:
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         probe.execute_tool_call(
-            "kb_search", {"query": "dispute a card charge"}, {}, state, {},
-            turn_idx=0, call_idx=0,
+            "kb_search",
+            {"query": "dispute a card charge"},
+            {},
+            state,
+            {},
+            turn_idx=0,
+            call_idx=0,
         )
         probe.execute_tool_call(
-            "kb_search", {"query": "provisional credit timeline"}, {}, state, {},
-            turn_idx=1, call_idx=0,
+            "kb_search",
+            {"query": "provisional credit timeline"},
+            {},
+            state,
+            {},
+            turn_idx=1,
+            call_idx=0,
         )
         assert state.metadata["kb_search_queries"] == [
-            "dispute a card charge", "provisional credit timeline",
+            "dispute a card charge",
+            "provisional credit timeline",
         ]
         # The verifier's view must NOT see a search as an attempted action.
         assert state.metadata["attempted_actions"] == []
@@ -2207,8 +2359,13 @@ class TestRetrievalEffortIsRecorded:
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         probe.execute_tool_call(
-            "kb_search", {"query": "dispute a card charge"}, {}, state, {},
-            turn_idx=0, call_idx=0,
+            "kb_search",
+            {"query": "dispute a card charge"},
+            {},
+            state,
+            {},
+            turn_idx=0,
+            call_idx=0,
         )
         extras = probe.build_result_extras(state)
         assert extras["num_kb_searches"] == 1
@@ -2219,8 +2376,7 @@ class TestRetrievalEffortIsRecorded:
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        probe.execute_tool_call("kb_search", {}, {}, state, {},
-                                turn_idx=0, call_idx=0)
+        probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
         extras = probe.build_result_extras(state)
         assert extras["num_kb_searches"] == 1
         assert json.loads(extras["kb_search_queries"]) == [""]
@@ -2259,6 +2415,7 @@ class TestSubstantiveRetrievalRate:
         from usersim.engine.evaluator.scorers.financial_services import (
             _substantive_retrieval_rate,
         )
+
         return _substantive_retrieval_rate(locale, inst, ids)
 
     def _by_genre(self):
@@ -2310,9 +2467,7 @@ class TestSubstantiveRetrievalRate:
             "gold_tool_sequence": json.dumps(list(tpl.gold_tool_sequence)),
             "gold_document_ids": json.dumps([]),
             "attempted_tool_names": json.dumps(list(tpl.gold_tool_sequence)),
-            "retrieved_document_ids": json.dumps(
-                g["discoverable_tool_doc"][:3] + g["product_sheet"][:1]
-            ),
+            "retrieved_document_ids": json.dumps(g["discoverable_tool_doc"][:3] + g["product_sheet"][:1]),
             "expected_state_deltas": json.dumps({}),
         }
         block = get_scorer("financial_services")(row, {})
@@ -2354,9 +2509,7 @@ class TestAccountLabelIsRegionalVocabulary:
         for locale in ("en_US", "en_IN"):
             reset_finance_bank_cache()
             bank = load_finance_bank_for_locale(locale)
-            labels = {
-                d: bank.domain_account_label(d) for d in bank.all_domains()
-            }
+            labels = {d: bank.domain_account_label(d) for d in bank.all_domains()}
             if locale != "en_US":
                 assert not any("checking" in v for v in labels.values()), labels
 
@@ -2391,14 +2544,16 @@ class TestAccountLabelIsRegionalVocabulary:
 
         got = _resolve_accounts(
             {"account_id": "acct_x", "account_type": "demat account", "last4": "0042"},
-            domain="retail_banking", account_label="savings account",
+            domain="retail_banking",
+            account_label="savings account",
         )
         assert got[0]["account_type"] == "demat account"
 
         # ...and with nothing authored, the region's label is used.
         got = _resolve_accounts(
             {"account_id": "acct_x", "last4": "0042"},
-            domain="retail_banking", account_label="savings account",
+            domain="retail_banking",
+            account_label="savings account",
         )
         assert got[0]["account_type"] == "savings account"
 
@@ -2462,12 +2617,9 @@ class TestCounterpartyIsARelationshipNotAName:
         surprises = {
             slot
             for _loc, _tid, slot, values in _all_task_param_spaces()
-            if slot not in mixed_or_known
-            and any(relationship.search(v.lower()) for v in values)
+            if slot not in mixed_or_known and any(relationship.search(v.lower()) for v in values)
         }
-        assert surprises == set(), (
-            f"these slots name relatives but are not in PERSON_PARAM_SLOTS: {surprises}"
-        )
+        assert surprises == set(), f"these slots name relatives but are not in PERSON_PARAM_SLOTS: {surprises}"
 
 
 def _ctx(params, tools=()):
@@ -2486,7 +2638,7 @@ class TestCounterpartyContext:
         assert _ctx({}, []) == ""
 
     def test_absent_for_a_trust_or_a_group(self):
-        """"my two children equally" has no single name or date of birth to give."""
+        """ "my two children equally" has no single name or date of birth to give."""
         assert _ctx({"beneficiary": "the Rivera Family Trust"}, ["update_beneficiary"]) == ""
         assert _ctx({"beneficiary": "my two children equally"}, ["update_beneficiary"]) == ""
 
@@ -2531,9 +2683,11 @@ class TestCounterpartyAgeIsToolAware:
         assert "are an adult" in text
 
     def test_beneficiary_and_nominee_leave_age_open(self):
-        for tool, slot in (("update_beneficiary", "beneficiary"),
-                           ("add_nominee", "nominee"),
-                           ("file_claim", "relation")):
+        for tool, slot in (
+            ("update_beneficiary", "beneficiary"),
+            ("add_nominee", "nominee"),
+            ("file_claim", "relation"),
+        ):
             text = _ctx({slot: "my daughter"}, [tool])
             assert "are an adult" not in text, tool
             assert "age suits that relationship" in text, tool

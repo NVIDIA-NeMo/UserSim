@@ -54,6 +54,7 @@ from usersim.engine.core.probes import (
     BankVerbatimMixin,
     register_probe,
 )
+
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
 # also copy ``prompts.py`` next to it and change this import to ``from .prompts``.
 from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # type: ignore[import-not-found]
@@ -97,14 +98,20 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     bank_version_key: Optional[str] = None  # locale-keyed (inclusion convention)
 
     def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
+        self,
+        persona: dict,
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[_DemoTask]:
         # Your real probe filters by persona-tag intersection,
         # excludes already-probed ids, deterministic salt, etc.
         # See sov_ai_facts/task_derivation.py for the canonical pattern.
         return _DemoTask(
-            id="DEMO-001", placeholder=True,
-            question="Demo question?", category="demo",
+            id="DEMO-001",
+            placeholder=True,
+            question="Demo question?",
+            category="demo",
         )
 
     def get_user_system_prompt(self) -> str:
@@ -124,7 +131,9 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
         state.metadata["fact_category"] = self._task.category
         state.metadata["bank_id"] = getattr(self._bank, "bank_id", "<unknown>")
         state.metadata["bank_version"] = getattr(
-            self._bank, "bank_version", "<unknown>",
+            self._bank,
+            "bank_version",
+            "<unknown>",
         )
         return self._task.question
 
@@ -135,7 +144,5 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
         extras = super().build_result_extras(state)
         if self._task is not None:
             extras["probe_variant"] = self._task.category
-            extras["sovereign_facts_probed"] = list(
-                state.metadata.get("facts_probed") or []
-            )
+            extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])
         return extras

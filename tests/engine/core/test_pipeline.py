@@ -8,7 +8,6 @@ LLM API calls. Full end-to-end generation tests require an NVIDIA API key
 and are marked with @pytest.mark.integration.
 """
 
-
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
@@ -64,10 +63,17 @@ class TestEndToEndStructure:
     def test_failed_result_has_simulation_columns(self):
         result = _make_failed_result("test")
         simulation_columns = [
-            "user_query", "conversation_messages", "conversation_metadata",
-            "conversation_status", "simulation_outcome", "simulation_traces",
-            "num_turns", "num_tool_calls", "tool_subset",
-            "disclosure_style", "user_interaction_style",
+            "user_query",
+            "conversation_messages",
+            "conversation_metadata",
+            "conversation_status",
+            "simulation_outcome",
+            "simulation_traces",
+            "num_turns",
+            "num_tool_calls",
+            "tool_subset",
+            "disclosure_style",
+            "user_interaction_style",
         ]
         for col in simulation_columns:
             assert col in result, f"Missing column: {col}"

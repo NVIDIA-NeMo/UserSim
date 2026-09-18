@@ -92,11 +92,17 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         )
 
     def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
+        self,
+        persona: dict,
+        bank: Any,
+        *,
+        cfg: Any,
     ) -> Optional[_DemoCategory]:
         return _DemoCategory(
-            id="cat-demo", placeholder=True,
-            invitation="Tell me about", subtopic_hint="demo subtopic",
+            id="cat-demo",
+            placeholder=True,
+            invitation="Tell me about",
+            subtopic_hint="demo subtopic",
         )
 
     def get_user_system_prompt(self) -> str:
@@ -111,11 +117,14 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         # any keys a verbatim helper might have already written.
         state.metadata.setdefault("probing_categories_explored", [self._task.id])
         state.metadata.setdefault(
-            "probing_subtopic_hints_used", [self._task.subtopic_hint],
+            "probing_subtopic_hints_used",
+            [self._task.subtopic_hint],
         )
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: Any,
+        self,
+        turn_idx: int,
+        state: Any,
     ) -> List[str]:
         return [
             "Continue the conversation naturally — ask one follow-up "
@@ -129,10 +138,6 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         extras = super().build_result_extras(state)
         if self._task is not None:
             extras["probe_variant"] = self._task.id
-            extras["probing_categories_explored"] = list(
-                state.metadata.get("probing_categories_explored") or []
-            )
-            extras["probing_subtopic_hints_used"] = list(
-                state.metadata.get("probing_subtopic_hints_used") or []
-            )
+            extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])
+            extras["probing_subtopic_hints_used"] = list(state.metadata.get("probing_subtopic_hints_used") or [])
         return extras

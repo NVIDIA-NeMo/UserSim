@@ -20,6 +20,7 @@ The (PROVISIONAL) judge axes for each client live inline in
 probe — the evaluator does not import this package. See this probe's README
 ("Changing the judge axes").
 """
+
 from __future__ import annotations
 
 from typing import Any, Callable, Dict, List
@@ -44,6 +45,7 @@ def _has_path(*path: str) -> Callable[[dict], bool]:
         for k in path:
             cur = (cur or {}).get(k) if isinstance(cur, dict) else None
         return bool(cur)
+
     return pred
 
 
@@ -105,12 +107,10 @@ CLIENTS: Dict[str, dict] = {
             failure_criteria=(
                 "- The client breaks character or acts like an assistant/therapist (gives "
                 "advice, plans, analysis, or structured output).\n"
-                "- The client offers to help the therapist, or takes over the therapist's role.\n"
-                + _COMMON_FAIL
+                "- The client offers to help the therapist, or takes over the therapist's role.\n" + _COMMON_FAIL
             ),
         ),
     },
-
     # -----------------------------------------------------------------------
     # TRIAGE — care navigation. Patient <-> triage assistant.
     # -----------------------------------------------------------------------
@@ -153,12 +153,10 @@ CLIENTS: Dict[str, dict] = {
             failure_criteria=(
                 "- The patient breaks character or acts like the assistant/clinician (self-"
                 "diagnoses, gives a plan, or produces structured output).\n"
-                "- The patient offers to help the assistant, or takes over its role.\n"
-                + _COMMON_FAIL
+                "- The patient offers to help the assistant, or takes over its role.\n" + _COMMON_FAIL
             ),
         ),
     },
-
     # -----------------------------------------------------------------------
     # CLINICAL DECISION SUPPORT — clinician <-> decision-support assistant.
     # -----------------------------------------------------------------------
@@ -202,12 +200,10 @@ CLIENTS: Dict[str, dict] = {
             failure_criteria=(
                 "- The message roleplays as the PATIENT instead of the clinician, or acts as "
                 "the assistant (answers its own clinical question, produces structured output).\n"
-                "- The clinician takes over the assistant's role.\n"
-                + _COMMON_FAIL
+                "- The clinician takes over the assistant's role.\n" + _COMMON_FAIL
             ),
         ),
     },
-
     # -----------------------------------------------------------------------
     # GENERIC US HEALTH. Patient <-> general health assistant.
     # The persona carries a hidden clinical profile (ongoing conditions +
@@ -253,8 +249,7 @@ CLIENTS: Dict[str, dict] = {
             failure_criteria=(
                 "- The patient breaks character or acts like the assistant/clinician (self-"
                 "diagnoses, gives a plan, or produces structured output).\n"
-                "- The patient offers to help the assistant, or takes over its role.\n"
-                + _COMMON_FAIL
+                "- The patient offers to help the assistant, or takes over its role.\n" + _COMMON_FAIL
             ),
         ),
     },

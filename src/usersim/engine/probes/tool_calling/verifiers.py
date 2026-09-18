@@ -33,14 +33,16 @@ class ToolCallVerifier:
             all_success.append(ok)
             all_error.append(err)
             if not ok:
-                tool_error_messages.append({
-                    "role": "tool",
-                    "content": (
-                        f"Error in calling tool `{tool_call['function']['name']}` "
-                        f"with arguments `{tool_call['function']['arguments']}`: {err}"
-                    ),
-                    "tool_call_id": tool_call["id"],
-                })
+                tool_error_messages.append(
+                    {
+                        "role": "tool",
+                        "content": (
+                            f"Error in calling tool `{tool_call['function']['name']}` "
+                            f"with arguments `{tool_call['function']['arguments']}`: {err}"
+                        ),
+                        "tool_call_id": tool_call["id"],
+                    }
+                )
             else:
                 correct_tool_calls.append(tool_call)
         return all(all_success), tool_error_messages, all_success, all_error, correct_tool_calls
@@ -85,7 +87,10 @@ class ToolCallVerifier:
 
             for arg_name, arg_value in tool_arguments.items():
                 if arg_name not in properties:
-                    return False, f"Argument `{arg_name}` present in tool call arguments but not defined in tool schema."
+                    return (
+                        False,
+                        f"Argument `{arg_name}` present in tool call arguments but not defined in tool schema.",
+                    )
 
                 param_spec = properties[arg_name]
 
@@ -95,7 +100,10 @@ class ToolCallVerifier:
 
                 if "enum" in param_spec:
                     if arg_value not in param_spec["enum"]:
-                        return False, f"Unexpected value `{arg_value}` for argument `{arg_name}`, expected one of: {param_spec['enum']}"
+                        return (
+                            False,
+                            f"Unexpected value `{arg_value}` for argument `{arg_name}`, expected one of: {param_spec['enum']}",
+                        )
 
             return True, None
 

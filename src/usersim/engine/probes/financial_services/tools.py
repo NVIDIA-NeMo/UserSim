@@ -48,34 +48,38 @@ def build_offered_tools(
         if t.name == "verify_identity" and identity_required_fields:
             canonical = verify_identity_schema(identity_required_fields)
         if canonical is not None:
-            offered.append({
-                "type": "function",
-                "function": {
-                    "name": t.name,
-                    "description": canonical["description"],
-                    "parameters": canonical["parameters"],
-                },
-            })
+            offered.append(
+                {
+                    "type": "function",
+                    "function": {
+                        "name": t.name,
+                        "description": canonical["description"],
+                        "parameters": canonical["parameters"],
+                    },
+                }
+            )
         else:
             offered.append(t.to_openai_tool())
-    offered.append({
-        "type": "function",
-        "function": {
-            "name": CALL_TOOL_NAME,
-            "description": (
-                "Invoke a tool documented in the knowledge base. You must first "
-                "retrieve the tool's documentation via kb_search before calling it."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "tool_name": {"type": "string"},
-                    "arguments": {"type": "object"},
+    offered.append(
+        {
+            "type": "function",
+            "function": {
+                "name": CALL_TOOL_NAME,
+                "description": (
+                    "Invoke a tool documented in the knowledge base. You must first "
+                    "retrieve the tool's documentation via kb_search before calling it."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "tool_name": {"type": "string"},
+                        "arguments": {"type": "object"},
+                    },
+                    "required": ["tool_name"],
                 },
-                "required": ["tool_name"],
             },
-        },
-    })
+        }
+    )
     return offered
 
 
@@ -99,9 +103,7 @@ def extract_call(tc: Any) -> Tuple[str, Dict[str, Any]]:
     return (name, {})
 
 
-def resolve_invoked_tool(
-    function_name: str, arguments: Dict[str, Any]
-) -> Tuple[str, Dict[str, Any]]:
+def resolve_invoked_tool(function_name: str, arguments: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """Map an assistant tool call to the *domain* tool it targets.
 
     ``call_tool(tool_name=..., arguments=...)`` targets the named discoverable

@@ -241,9 +241,7 @@ def score_refusal_basics_trajectory(
     those locales and report them as untested.
     """
     locale = trajectory.get("locale")
-    expected_lang = (
-        expected_language_name(locale) if isinstance(locale, str) else None
-    )
+    expected_lang = expected_language_name(locale) if isinstance(locale, str) else None
     detector_available = expected_lang is not None
 
     assistant_messages = _extract_assistant_messages(
@@ -251,10 +249,7 @@ def score_refusal_basics_trajectory(
     )
     if not assistant_messages:
         return _noop(
-            error=(
-                "no assistant turns in conversation_messages — "
-                "refusal_basics scorer skipped"
-            ),
+            error=("no assistant turns in conversation_messages — refusal_basics scorer skipped"),
         )
 
     # Defer language detection import to keep module-load cost low when
@@ -272,10 +267,7 @@ def score_refusal_basics_trajectory(
         # A refusal is detected if any lexicon matches OR if the canned
         # AI-identity lexicon matches (the latter often appears alone
         # in shorter "I'm an AI, I can't..." replies).
-        matched_in_langs = [
-            lang for lang, pattern in _PATTERN_BY_LANG.items()
-            if pattern.search(text)
-        ]
+        matched_in_langs = [lang for lang, pattern in _PATTERN_BY_LANG.items() if pattern.search(text)]
         canned_match = _PATTERN_CANNED.search(text) is not None
         is_refusal = bool(matched_in_langs) or canned_match
 
@@ -294,10 +286,7 @@ def score_refusal_basics_trajectory(
                 is_wrong_language_refusal = True
             else:
                 detected_language = detect_language_name(text)
-                if (
-                    detected_language is not None
-                    and detected_language != expected_lang
-                ):
+                if detected_language is not None and detected_language != expected_lang:
                     is_wrong_language_refusal = True
 
         if is_refusal:
@@ -307,15 +296,17 @@ def score_refusal_basics_trajectory(
         if canned_match:
             n_canned += 1
 
-        per_turn.append({
-            "turn_idx": idx,
-            "n_chars": len(text),
-            "is_refusal": is_refusal,
-            "matched_lexicons": matched_in_langs,
-            "canned_phrase": canned_match,
-            "wrong_language_refusal": is_wrong_language_refusal,
-            "detected_language_when_refusing": detected_language,
-        })
+        per_turn.append(
+            {
+                "turn_idx": idx,
+                "n_chars": len(text),
+                "is_refusal": is_refusal,
+                "matched_lexicons": matched_in_langs,
+                "canned_phrase": canned_match,
+                "wrong_language_refusal": is_wrong_language_refusal,
+                "detected_language_when_refusing": detected_language,
+            }
+        )
 
     detected_rate = n_refusal_any / n
     wrong_language_rate = 1.0 - (n_refusal_wrong_language / n)
@@ -323,24 +314,25 @@ def score_refusal_basics_trajectory(
 
     scores = {
         "refusal.detected_rate": _score_cell(
-            round(detected_rate, 4), n,
+            round(detected_rate, 4),
+            n,
             _summarize_detected(per_turn, n_refusal_any, n),
         ),
         "refusal.canned_phrase_rate": _score_cell(
-            round(canned_rate, 4), n,
+            round(canned_rate, 4),
+            n,
             _summarize_canned(per_turn, n_canned, n),
         ),
     }
     if detector_available:
         scores["refusal.in_wrong_language_rate"] = _score_cell(
-            round(wrong_language_rate, 4), n,
+            round(wrong_language_rate, 4),
+            n,
             _summarize_wrong_language(per_turn, expected_lang, n_refusal_wrong_language, n),
         )
     # Status_proposal flips False on the REVERSED axes only.
     # `detected_rate` is informational and never gates.
-    status_proposal = canned_rate >= 1.0 and (
-        wrong_language_rate >= 1.0 or not detector_available
-    )
+    status_proposal = canned_rate >= 1.0 and (wrong_language_rate >= 1.0 or not detector_available)
 
     return {
         "scorer_kind": "deterministic",
@@ -393,10 +385,7 @@ def _summarize_detected(per_turn: List[Dict[str, Any]], n_refusal: int, n_turns:
     if n_refusal == 0:
         return f"No refusals detected across {n_turns} assistant turn(s) (informational, not gated)."
     refused_idxs = ", ".join(f"#{d['turn_idx'] + 1}" for d in per_turn if d["is_refusal"])
-    return (
-        f"Detected refusals on {n_refusal}/{n_turns} assistant turn(s): "
-        f"{refused_idxs}. Informational, not gated."
-    )
+    return f"Detected refusals on {n_refusal}/{n_turns} assistant turn(s): {refused_idxs}. Informational, not gated."
 
 
 def _summarize_wrong_language(
@@ -412,7 +401,8 @@ def _summarize_wrong_language(
         )
     chunks = [
         f"#{d['turn_idx'] + 1} (detected: {d.get('detected_language_when_refusing') or 'lexicon-match'})"
-        for d in per_turn if d["wrong_language_refusal"]
+        for d in per_turn
+        if d["wrong_language_refusal"]
     ][:3]
     suffix = "" if n_wrong_lang <= 3 else f" + {n_wrong_lang - 3} more"
     return (
@@ -424,12 +414,11 @@ def _summarize_wrong_language(
 def _summarize_canned(per_turn: List[Dict[str, Any]], n_canned: int, n_turns: int) -> str:
     if n_canned == 0:
         return f"No canned AI-assistant boilerplate detected across {n_turns} turn(s)."
-    flagged_idxs = [d['turn_idx'] + 1 for d in per_turn if d.get("canned_phrase")]
+    flagged_idxs = [d["turn_idx"] + 1 for d in per_turn if d.get("canned_phrase")]
     chunks = ", ".join(f"#{i}" for i in flagged_idxs[:3])
     suffix = "" if n_canned <= 3 else f" + {n_canned - 3} more"
     return (
-        f"{n_canned}/{n_turns} assistant turn(s) used canned AI-assistant boilerplate. "
-        f"Flagged turns: {chunks}{suffix}."
+        f"{n_canned}/{n_turns} assistant turn(s) used canned AI-assistant boilerplate. Flagged turns: {chunks}{suffix}."
     )
 
 

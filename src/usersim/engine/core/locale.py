@@ -67,20 +67,14 @@ HANGUL_RANGES: Tuple[Tuple[int, int], ...] = (
     (0xAC00, 0xD7AF),  # Hangul Syllables
 )
 
-HIRAGANA_RANGES: Tuple[Tuple[int, int], ...] = (
-    (0x3040, 0x309F),
-)
+HIRAGANA_RANGES: Tuple[Tuple[int, int], ...] = ((0x3040, 0x309F),)
 
-KATAKANA_RANGES: Tuple[Tuple[int, int], ...] = (
-    (0x30A0, 0x30FF),
-)
+KATAKANA_RANGES: Tuple[Tuple[int, int], ...] = ((0x30A0, 0x30FF),)
 
 # CJK Unified Ideographs (Han / 漢字 / kanji). Doesn't include CJK Ext A/B/...
 # which are mostly historical / specialty kanji rarely seen in modern text;
 # adding them later is a one-line change.
-HAN_RANGES: Tuple[Tuple[int, int], ...] = (
-    (0x4E00, 0x9FFF),
-)
+HAN_RANGES: Tuple[Tuple[int, int], ...] = ((0x4E00, 0x9FFF),)
 
 # ── Indic + Arabic scripts (used by the India language-variant layer) ──────
 # One Unicode block per script. Devanagari (already above) is shared by
@@ -336,9 +330,7 @@ class IndiaVariant:
 # lingua build actually has the language (verified: Bengali/Gujarati/Hindi/
 # Marathi/Punjabi/Tamil/Telugu/Urdu; NOT Kannada/Malayalam/Odia/Nepali).
 # Hindi already ships as first-class ``hi_Deva_IN`` / ``hi_Latn_IN``.
-_INDIA_VARIANT_SPEC: Tuple[
-    Tuple[str, str, str, str | None, Tuple[Tuple[int, int], ...], str], ...
-] = (
+_INDIA_VARIANT_SPEC: Tuple[Tuple[str, str, str, str | None, Tuple[Tuple[int, int], ...], str], ...] = (
     ("bn_Beng_IN", "bn_Latn_IN", "Bengali", "BENGALI", BENGALI_RANGES, "Bengali"),
     ("or_Orya_IN", "or_Latn_IN", "Odia", None, ODIA_RANGES, "Odia"),
     ("ta_Taml_IN", "ta_Latn_IN", "Tamil", "TAMIL", TAMIL_RANGES, "Tamil"),
@@ -432,19 +424,19 @@ PERSONA_CORPUS_LANGUAGE: dict[str, dict[str, Any]] = {
         # can actually converse in (the India variants plus English); the
         # corpus carries ~120 more that no shipped locale can request.
         "language_name_remap": {
-            "Bengali":   "बंगाली",
-            "English":   "अंग्रेज़ी",
-            "Gujarati":  "गुजराती",
-            "Hindi":     "हिंदी",
-            "Kannada":   "कन्नडा",
+            "Bengali": "बंगाली",
+            "English": "अंग्रेज़ी",
+            "Gujarati": "गुजराती",
+            "Hindi": "हिंदी",
+            "Kannada": "कन्नडा",
             "Malayalam": "मलयालम",
-            "Marathi":   "मराठी",
-            "Nepali":    "नेपाली",
-            "Odia":      "ओडिया",
-            "Punjabi":   "पंजाबी",
-            "Tamil":     "तमिल",
-            "Telugu":    "तेलुगू",
-            "Urdu":      "उर्दू",
+            "Marathi": "मराठी",
+            "Nepali": "नेपाली",
+            "Odia": "ओडिया",
+            "Punjabi": "पंजाबी",
+            "Tamil": "तमिल",
+            "Telugu": "तेलुगू",
+            "Urdu": "उर्दू",
         },
     },
 }
@@ -475,6 +467,7 @@ def persona_dataset_locale(locale: str, *, datasets_dir: "Any | None" = None) ->
         return locale
     if datasets_dir is not None:
         from pathlib import Path
+
         if (Path(datasets_dir) / f"{locale}.parquet").exists():
             return locale
     return base

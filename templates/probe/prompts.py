@@ -31,12 +31,10 @@ DEMO_USER_AGENT_PROMPTS = LocalePromptPack(
             "real user."
         ),
         "en_IN": (
-            "You are {persona}, a curious user from India. Ask the "
-            "assistant a concrete question in your own voice."
+            "You are {persona}, a curious user from India. Ask the assistant a concrete question in your own voice."
         ),
         "en_SG": (
-            "You are {persona}, a curious user from Singapore. Ask the "
-            "assistant a concrete question in your own voice."
+            "You are {persona}, a curious user from Singapore. Ask the assistant a concrete question in your own voice."
         ),
         "pt_BR": (
             "Você é {persona}, um usuário curioso do Brasil. Faça uma "
@@ -50,10 +48,7 @@ DEMO_USER_AGENT_PROMPTS = LocalePromptPack(
             "あなたは{persona}、日本の好奇心旺盛なユーザーです。"
             "あなた自身の声で、アシスタントに具体的な質問をしてください。"
         ),
-        "hi_Deva_IN": (
-            "आप {persona} हैं, भारत के एक जिज्ञासु उपयोगकर्ता। "
-            "अपनी आवाज़ में सहायक से एक ठोस प्रश्न पूछें।"
-        ),
+        "hi_Deva_IN": ("आप {persona} हैं, भारत के एक जिज्ञासु उपयोगकर्ता। अपनी आवाज़ में सहायक से एक ठोस प्रश्न पूछें।"),
         "ko_KR": (
             "당신은 {persona}이며, 한국의 호기심 많은 사용자입니다. "
             "자신의 목소리로 어시스턴트에게 구체적인 질문을 하세요."

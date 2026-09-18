@@ -120,11 +120,13 @@ _MODEL_COLOR_OVERRIDES: tuple[tuple[str, str], ...] = (
 # model whose alphabetical sort lands at index 4 -- e.g. qwen3.6 in
 # 6-model panels alongside two gemmas and two nemotrons. That created
 # a misleading "this third-party model is also NVIDIA-branded" signal.
-_RESTRICTED_GREEN_HEX_COLORS: frozenset[str] = frozenset({
-    "#59a14f",  # Tableau-10 chartreuse green (palette slot 4)
-    "#76b900",  # canonical NVIDIA green (override target)
-    "#a8d63d",  # paler NVIDIA green (override target)
-})
+_RESTRICTED_GREEN_HEX_COLORS: frozenset[str] = frozenset(
+    {
+        "#59a14f",  # Tableau-10 chartreuse green (palette slot 4)
+        "#76b900",  # canonical NVIDIA green (override target)
+        "#a8d63d",  # paler NVIDIA green (override target)
+    }
+)
 
 # Substrings that grant a label "green eligibility" -- i.e., the model
 # is allowed to land on a restricted green hex. Match is case-insensitive
@@ -138,6 +140,7 @@ def _is_green_eligible(label: str) -> bool:
     """True iff ``label`` may be assigned a NVIDIA-green hex."""
     haystack = label.lower()
     return any(needle in haystack for needle in _GREEN_ELIGIBLE_SUBSTRINGS)
+
 
 # Vega-Lite shape vocabulary — paired with palette for dual-channel
 # encoding on the Pareto scatter.
@@ -397,9 +400,7 @@ def _spec_sim_health_metric(
                 "deeplink": _deeplink_for(r.run_id),
             }
         )
-    y_axis: dict[str, Any] | None = (
-        {"labelLimit": 280, "labelFontWeight": 600} if show_y_labels else None
-    )
+    y_axis: dict[str, Any] | None = {"labelLimit": 280, "labelFontWeight": 600} if show_y_labels else None
     if x_domain is None:
         max_v = max(
             (v["value"] for v in values if isinstance(v["value"], (int, float))),
@@ -466,20 +467,26 @@ def _spec_sim_health_metric(
 # breakage, cooler purples for assistant misbehaviour) so a reviewer
 # can read the bar's *colour* before its *legend*.
 _FAILURE_CLASS_COLORS: dict[str, str] = {
-    "infrastructure_error": "#d04848",          # red — provider / network
-    "max_turns_reached": "#d49a3a",              # amber — ran on
-    "user_query_gate_exhausted": "#c5814b",     # warm tan — sim couldn't open
+    "infrastructure_error": "#d04848",  # red — provider / network
+    "max_turns_reached": "#d49a3a",  # amber — ran on
+    "user_query_gate_exhausted": "#c5814b",  # warm tan — sim couldn't open
     "user_followup_gate_exhausted": "#c2b13a",  # mustard — sim gave up
-    "persona_break": "#9b5cb8",                  # violet — assistant stepped out
-    "parse_error": "#c9617a",                    # rose — assistant produced garbage
-    "tool_call_error": "#a07acc",                # lavender — tool plumbing
-    "fourth_wall_break": "#8077c2",              # periwinkle — meta failure
+    "persona_break": "#9b5cb8",  # violet — assistant stepped out
+    "parse_error": "#c9617a",  # rose — assistant produced garbage
+    "tool_call_error": "#a07acc",  # lavender — tool plumbing
+    "fourth_wall_break": "#8077c2",  # periwinkle — meta failure
 }
 # Fallback palette for classes not in the pinned dict above. Keeps
 # the chart deterministic without forcing an exhaustive lookup table.
 _FAILURE_CLASS_FALLBACK_PALETTE: tuple[str, ...] = (
-    "#7a8d9c", "#b3835c", "#c0937c", "#9c7d6f",
-    "#857a90", "#a0a07a", "#7d9082", "#a09080",
+    "#7a8d9c",
+    "#b3835c",
+    "#c0937c",
+    "#9c7d6f",
+    "#857a90",
+    "#a0a07a",
+    "#7d9082",
+    "#a09080",
 )
 
 
@@ -497,11 +504,7 @@ def _failure_class_color_scale(classes: list[str]) -> dict[str, Any]:
         if cls in _FAILURE_CLASS_COLORS:
             range_.append(_FAILURE_CLASS_COLORS[cls])
         else:
-            range_.append(
-                _FAILURE_CLASS_FALLBACK_PALETTE[
-                    fallback_idx % len(_FAILURE_CLASS_FALLBACK_PALETTE)
-                ]
-            )
+            range_.append(_FAILURE_CLASS_FALLBACK_PALETTE[fallback_idx % len(_FAILURE_CLASS_FALLBACK_PALETTE)])
             fallback_idx += 1
     return {"domain": classes, "range": range_}
 
@@ -568,9 +571,7 @@ def _spec_failure_taxonomy(report: ComparisonReport) -> dict[str, Any]:
     max_total = 0.0
     by_label_total: dict[str, float] = {}
     for v in values:
-        by_label_total[v["display_label"]] = (
-            by_label_total.get(v["display_label"], 0.0) + v["proportion"]
-        )
+        by_label_total[v["display_label"]] = by_label_total.get(v["display_label"], 0.0) + v["proportion"]
     if by_label_total:
         max_total = max(by_label_total.values())
     x_max = max(max_total * 1.2, 0.01)
@@ -649,9 +650,7 @@ def _spec_leaderboard(report: ComparisonReport, colors: dict[str, str]) -> dict[
             {
                 "display_label": r.display_label,
                 "score": r.mean_normalized_score,
-                "score_pct": (
-                    None if r.mean_normalized_score is None else round(r.mean_normalized_score * 100, 1)
-                ),
+                "score_pct": (None if r.mean_normalized_score is None else round(r.mean_normalized_score * 100, 1)),
                 "annotation": _leaderboard_annotation(r),
                 "deeplink": _deeplink_for(r.run_id),
                 "n_measured": r.n_cells_measured,
@@ -756,10 +755,7 @@ def _spec_verbosity_headline(report: ComparisonReport, colors: dict[str, str]) -
         # parenthetical is the reasoning subset, only shown when
         # non-zero so non-thinking models stay uncluttered.
         if reasoning_per_conv > 0 and output_per_conv > 0:
-            annotation = (
-                f"{int(round(output_per_conv)):,} "
-                f"({int(round(reasoning_per_conv)):,} reasoning)"
-            )
+            annotation = f"{int(round(output_per_conv)):,} ({int(round(reasoning_per_conv)):,} reasoning)"
         else:
             annotation = f"{int(round(output_per_conv)):,}"
         # Two stack rows per model: visible bottom, reasoning on top.
@@ -874,9 +870,7 @@ def _spec_verbosity_headline(report: ComparisonReport, colors: dict[str, str]) -
     return _spec_with_theme(spec)
 
 
-def _cleared_counts_for_locale(
-    report: ComparisonReport, locale: str
-) -> dict[str, tuple[int, int]]:
+def _cleared_counts_for_locale(report: ComparisonReport, locale: str) -> dict[str, tuple[int, int]]:
     """Map ``run_id -> (n_ready, n_eligible)`` filtered to one locale.
 
     Eligible cells exclude :data:`ROLLUP_EXCLUDED_CAPABILITIES`
@@ -897,9 +891,7 @@ def _cleared_counts_for_locale(
     return {run_id: (b[0], b[1]) for run_id, b in by_run.items()}
 
 
-def _cleared_counts_for_capability(
-    report: ComparisonReport, capability_id: str
-) -> dict[str, tuple[int, int]]:
+def _cleared_counts_for_capability(report: ComparisonReport, capability_id: str) -> dict[str, tuple[int, int]]:
     """Map ``run_id -> (n_ready, n_eligible)`` filtered to one capability.
 
     No exclusion of simulation_reliability here -- it's the caller's
@@ -918,9 +910,7 @@ def _cleared_counts_for_capability(
     return {run_id: (b[0], b[1]) for run_id, b in by_run.items()}
 
 
-def _cleared_counts_per_locale_for_model(
-    report: ComparisonReport, run_id: str
-) -> dict[str, tuple[int, int]]:
+def _cleared_counts_per_locale_for_model(report: ComparisonReport, run_id: str) -> dict[str, tuple[int, int]]:
     """Map ``locale -> (n_ready, n_eligible)`` filtered to one model.
 
     Same ROLLUP_EXCLUDED_CAPABILITIES discipline as the headline. Each
@@ -956,64 +946,66 @@ def _build_cleared_bar_spec(
     ``display_label`` / ``pct_cleared`` / ``n_ready`` / ``n_eligible``
     / ``annotation`` / ``deeplink`` (matching the headline chart).
     """
-    return _spec_with_theme({
-        "title": _chart_title(title),
-        # 800px matches the per-tab grouped-bar chart width
-        # (_spec_per_locale_grouped_bars / _spec_per_capability_facet
-        # / _spec_per_model_locale_breakdown all use 800), so the
-        # cleared chart sits flush below its main chart in each tab
-        # section instead of looking visually orphaned.
-        "width": 800,
-        "height": {"step": 32},
-        "data": {"values": values},
-        "layer": [
-            {
-                "mark": {"type": "bar", "tooltip": True, "cornerRadiusEnd": 3},
-                "encoding": {
-                    "y": {
-                        "field": "display_label",
-                        "type": "nominal",
-                        "sort": sort_order,
-                        "title": None,
-                        "axis": {"labelLimit": 280, "labelFontWeight": 600},
+    return _spec_with_theme(
+        {
+            "title": _chart_title(title),
+            # 800px matches the per-tab grouped-bar chart width
+            # (_spec_per_locale_grouped_bars / _spec_per_capability_facet
+            # / _spec_per_model_locale_breakdown all use 800), so the
+            # cleared chart sits flush below its main chart in each tab
+            # section instead of looking visually orphaned.
+            "width": 800,
+            "height": {"step": 32},
+            "data": {"values": values},
+            "layer": [
+                {
+                    "mark": {"type": "bar", "tooltip": True, "cornerRadiusEnd": 3},
+                    "encoding": {
+                        "y": {
+                            "field": "display_label",
+                            "type": "nominal",
+                            "sort": sort_order,
+                            "title": None,
+                            "axis": {"labelLimit": 280, "labelFontWeight": 600},
+                        },
+                        "x": {
+                            "field": "pct_cleared",
+                            "type": "quantitative",
+                            "scale": {"domain": [0, 1]},
+                            "axis": {"title": "Cleared %", "format": ".0%"},
+                        },
+                        "color": {
+                            "field": color_field,
+                            "type": "nominal",
+                            "scale": color_scale,
+                            "legend": None,
+                        },
+                        "tooltip": [
+                            {"field": "display_label", "title": bar_field_label},
+                            {"field": "pct_cleared_label", "title": "Cleared"},
+                            {"field": "n_ready", "title": "Cleared cells"},
+                            {"field": "n_eligible", "title": "Eligible cells"},
+                            {"field": "deeplink", "title": "Open per-run dashboard"},
+                        ],
                     },
-                    "x": {
-                        "field": "pct_cleared",
-                        "type": "quantitative",
-                        "scale": {"domain": [0, 1]},
-                        "axis": {"title": "Cleared %", "format": ".0%"},
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 6,
+                        "color": "#cbd5e1",
+                        "fontSize": 11,
                     },
-                    "color": {
-                        "field": color_field,
-                        "type": "nominal",
-                        "scale": color_scale,
-                        "legend": None,
+                    "encoding": {
+                        "y": {"field": "display_label", "type": "nominal", "sort": sort_order},
+                        "x": {"field": "pct_cleared", "type": "quantitative"},
+                        "text": {"field": "annotation", "type": "nominal"},
                     },
-                    "tooltip": [
-                        {"field": "display_label", "title": bar_field_label},
-                        {"field": "pct_cleared_label", "title": "Cleared"},
-                        {"field": "n_ready", "title": "Cleared cells"},
-                        {"field": "n_eligible", "title": "Eligible cells"},
-                        {"field": "deeplink", "title": "Open per-run dashboard"},
-                    ],
                 },
-            },
-            {
-                "mark": {
-                    "type": "text",
-                    "align": "left",
-                    "dx": 6,
-                    "color": "#cbd5e1",
-                    "fontSize": 11,
-                },
-                "encoding": {
-                    "y": {"field": "display_label", "type": "nominal", "sort": sort_order},
-                    "x": {"field": "pct_cleared", "type": "quantitative"},
-                    "text": {"field": "annotation", "type": "nominal"},
-                },
-            },
-        ],
-    })
+            ],
+        }
+    )
 
 
 def _spec_cleared_for_locale(
@@ -1035,18 +1027,17 @@ def _spec_cleared_for_locale(
         for r in report.model_summary:
             denom = r.n_cells_eligible or 1
             pct = r.n_cells_ready_eligible / denom
-            values.append({
-                "display_label": r.display_label,
-                "pct_cleared": pct,
-                "n_ready": r.n_cells_ready_eligible,
-                "n_eligible": r.n_cells_eligible,
-                "annotation": (
-                    f"{round(100 * pct)}% "
-                    f"({r.n_cells_ready_eligible}/{r.n_cells_eligible})"
-                ),
-                "pct_cleared_label": f"{round(100 * pct)}%",
-                "deeplink": _deeplink_for(r.run_id),
-            })
+            values.append(
+                {
+                    "display_label": r.display_label,
+                    "pct_cleared": pct,
+                    "n_ready": r.n_cells_ready_eligible,
+                    "n_eligible": r.n_cells_eligible,
+                    "annotation": (f"{round(100 * pct)}% ({r.n_cells_ready_eligible}/{r.n_cells_eligible})"),
+                    "pct_cleared_label": f"{round(100 * pct)}%",
+                    "deeplink": _deeplink_for(r.run_id),
+                }
+            )
         title = "Cleared capabilities · Overall (across all locales)"
     else:
         counts = _cleared_counts_for_locale(report, locale)
@@ -1054,15 +1045,17 @@ def _spec_cleared_for_locale(
             n_ready, n_eligible = counts.get(r.run_id, (0, 0))
             denom = n_eligible or 1
             pct = n_ready / denom
-            values.append({
-                "display_label": r.display_label,
-                "pct_cleared": pct,
-                "n_ready": n_ready,
-                "n_eligible": n_eligible,
-                "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
-                "pct_cleared_label": f"{round(100 * pct)}%",
-                "deeplink": _deeplink_for(r.run_id),
-            })
+            values.append(
+                {
+                    "display_label": r.display_label,
+                    "pct_cleared": pct,
+                    "n_ready": n_ready,
+                    "n_eligible": n_eligible,
+                    "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
+                    "pct_cleared_label": f"{round(100 * pct)}%",
+                    "deeplink": _deeplink_for(r.run_id),
+                }
+            )
         title = f"Cleared capabilities · {_locale_label(locale)}"
     return _build_cleared_bar_spec(
         title=title,
@@ -1093,15 +1086,17 @@ def _spec_cleared_for_capability(
         n_ready, n_eligible = counts.get(r.run_id, (0, 0))
         denom = n_eligible or 1
         pct = n_ready / denom
-        values.append({
-            "display_label": r.display_label,
-            "pct_cleared": pct,
-            "n_ready": n_ready,
-            "n_eligible": n_eligible,
-            "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
-            "pct_cleared_label": f"{round(100 * pct)}%",
-            "deeplink": _deeplink_for(r.run_id),
-        })
+        values.append(
+            {
+                "display_label": r.display_label,
+                "pct_cleared": pct,
+                "n_ready": n_ready,
+                "n_eligible": n_eligible,
+                "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
+                "pct_cleared_label": f"{round(100 * pct)}%",
+                "deeplink": _deeplink_for(r.run_id),
+            }
+        )
     return _build_cleared_bar_spec(
         title=f"Cleared {capability_label} · across locales",
         values=values,
@@ -1130,18 +1125,20 @@ def _spec_cleared_for_model_per_locale(
         n_ready, n_eligible = counts.get(loc, (0, 0))
         denom = n_eligible or 1
         pct = n_ready / denom
-        values.append({
-            # ``display_label`` is the y-axis field name expected by
-            # the shared bar-spec helper. We populate it with the
-            # locale label (flag + code) so the bars read "🇺🇸 en_US".
-            "display_label": _locale_label(loc),
-            "pct_cleared": pct,
-            "n_ready": n_ready,
-            "n_eligible": n_eligible,
-            "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
-            "pct_cleared_label": f"{round(100 * pct)}%",
-            "deeplink": _deeplink_for(run_id),
-        })
+        values.append(
+            {
+                # ``display_label`` is the y-axis field name expected by
+                # the shared bar-spec helper. We populate it with the
+                # locale label (flag + code) so the bars read "🇺🇸 en_US".
+                "display_label": _locale_label(loc),
+                "pct_cleared": pct,
+                "n_ready": n_ready,
+                "n_eligible": n_eligible,
+                "annotation": f"{round(100 * pct)}% ({n_ready}/{n_eligible})",
+                "pct_cleared_label": f"{round(100 * pct)}%",
+                "deeplink": _deeplink_for(run_id),
+            }
+        )
     sort_order = [_locale_label(loc) for loc in locales]
     color_scale = _locale_color_scale(locales)
     # The locale color scale is keyed by raw locale code; the chart's
@@ -1188,10 +1185,7 @@ def _spec_cleared_headline(report: ComparisonReport, colors: dict[str, str]) -> 
                 # Annotation reads e.g. "73% (82/112)" so reviewers
                 # see both the proportion and the raw count without
                 # needing the tooltip.
-                "annotation": (
-                    f"{round(100 * pct_cleared)}% "
-                    f"({r.n_cells_ready_eligible}/{r.n_cells_eligible})"
-                ),
+                "annotation": (f"{round(100 * pct_cleared)}% ({r.n_cells_ready_eligible}/{r.n_cells_eligible})"),
                 "pct_cleared_label": f"{round(100 * pct_cleared)}%",
                 "deeplink": _deeplink_for(r.run_id),
             }
@@ -1289,10 +1283,7 @@ def _per_locale_mean_score(report: ComparisonReport, locale: str) -> dict[str, O
         if cell.normalized_score is None:
             continue
         by_run.setdefault(cell.run_id, []).append(cell.normalized_score)
-    return {
-        run_id: (sum(scores) / len(scores) if scores else None)
-        for run_id, scores in by_run.items()
-    }
+    return {run_id: (sum(scores) / len(scores) if scores else None) for run_id, scores in by_run.items()}
 
 
 def _pareto_score_lookup_overall(report: ComparisonReport):
@@ -1327,8 +1318,7 @@ def _pareto_frontier_for(
                 continue
             if (
                 other_score > score
-                and other.assistant_output_tokens_per_conversation
-                < rollup.assistant_output_tokens_per_conversation
+                and other.assistant_output_tokens_per_conversation < rollup.assistant_output_tokens_per_conversation
             ):
                 dominated = True
                 break
@@ -1431,7 +1421,13 @@ def _spec_pareto(
                     {"filter": "datum.is_pareto_frontier"},
                     {"calculate": "datum.tokens_per_conv", "as": "tokens_sort"},
                 ],
-                "mark": {"type": "line", "color": "#76b900", "strokeDash": [3, 3], "opacity": 0.55, "interpolate": "linear"},
+                "mark": {
+                    "type": "line",
+                    "color": "#76b900",
+                    "strokeDash": [3, 3],
+                    "opacity": 0.55,
+                    "interpolate": "linear",
+                },
                 "encoding": {
                     "x": {"field": "tokens_per_conv", "type": "quantitative", "sort": "ascending"},
                     "y": {"field": "score", "type": "quantitative", "scale": y_scale},
@@ -1439,7 +1435,14 @@ def _spec_pareto(
                 },
             },
             {
-                "mark": {"type": "point", "filled": True, "tooltip": True, "stroke": "#0f172a", "strokeWidth": 1.5, "opacity": 0.95},
+                "mark": {
+                    "type": "point",
+                    "filled": True,
+                    "tooltip": True,
+                    "stroke": "#0f172a",
+                    "strokeWidth": 1.5,
+                    "opacity": 0.95,
+                },
                 "encoding": {
                     "x": {
                         "field": "tokens_per_conv",
@@ -1497,7 +1500,14 @@ def _spec_pareto(
                 },
             },
             {
-                "mark": {"type": "text", "align": "left", "dx": 12, "fontSize": 12, "color": "#e5e7eb", "fontWeight": 600},
+                "mark": {
+                    "type": "text",
+                    "align": "left",
+                    "dx": 12,
+                    "fontSize": 12,
+                    "color": "#e5e7eb",
+                    "fontWeight": 600,
+                },
                 "encoding": {
                     "x": {"field": "tokens_per_conv", "type": "quantitative"},
                     "y": {"field": "score", "type": "quantitative", "scale": y_scale},
@@ -1525,9 +1535,7 @@ def _spec_verbosity_heatmap(report: ComparisonReport, colors: dict[str, str]) ->
                     "display_label": r.display_label,
                     "locale": locale,
                     "tokens_per_turn": v,
-                    "tokens_per_turn_label": (
-                        "—" if v is None else f"{int(round(v)):,}"
-                    ),
+                    "tokens_per_turn_label": ("—" if v is None else f"{int(round(v)):,}"),
                     "deeplink": _deeplink_for(r.run_id),
                 }
             )
@@ -1583,15 +1591,11 @@ _PLOT_EXCLUDED_CAPABILITIES: tuple[str, ...] = ("simulation_reliability",)
 def _plotting_capabilities(report: ComparisonReport) -> list[tuple[str, str]]:
     """Capabilities surfaced in Layers 4 + 5 (drops simulation_reliability)."""
     return [
-        (cap_id, cap_label)
-        for cap_id, cap_label in report.capabilities
-        if cap_id not in _PLOT_EXCLUDED_CAPABILITIES
+        (cap_id, cap_label) for cap_id, cap_label in report.capabilities if cap_id not in _PLOT_EXCLUDED_CAPABILITIES
     ]
 
 
-def _split_capabilities_evenly(
-    capabilities: list[tuple[str, str]], n_rows: int = 2
-) -> list[list[tuple[str, str]]]:
+def _split_capabilities_evenly(capabilities: list[tuple[str, str]], n_rows: int = 2) -> list[list[tuple[str, str]]]:
     """Split capabilities into ``n_rows`` roughly-equal contiguous chunks.
 
     Preserves registry order within each row so a reviewer's eye learns
@@ -1600,15 +1604,10 @@ def _split_capabilities_evenly(
     if not capabilities:
         return [[] for _ in range(n_rows)]
     per_row = (len(capabilities) + n_rows - 1) // n_rows
-    return [
-        capabilities[i : i + per_row]
-        for i in range(0, len(capabilities), per_row)
-    ]
+    return [capabilities[i : i + per_row] for i in range(0, len(capabilities), per_row)]
 
 
-def _cells_for_locale(
-    report: ComparisonReport, locale: str
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _cells_for_locale(report: ComparisonReport, locale: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Return (chart_rows, threshold_rows) for the locale.
 
     Filters out simulation_reliability per the plotting policy above, so
@@ -1635,15 +1634,9 @@ def _cells_for_locale(
                 "has_must_pass_failure": bool(cell.failed_critical_axes),
                 "failed_critical_axes": ", ".join(cell.failed_critical_axes) or "—",
                 "normalized_score": cell.normalized_score if cell.normalized_score is not None else 0.0,
-                "score_pct": (
-                    None
-                    if cell.normalized_score is None
-                    else round(100 * cell.normalized_score, 1)
-                ),
+                "score_pct": (None if cell.normalized_score is None else round(100 * cell.normalized_score, 1)),
                 "threshold": cell.threshold,
-                "threshold_pct": (
-                    None if cell.threshold is None else round(100 * cell.threshold, 1)
-                ),
+                "threshold_pct": (None if cell.threshold is None else round(100 * cell.threshold, 1)),
                 "n": cell.n,
                 "n_total": cell.n_total,
                 "deeplink": deeplink_by_run.get(cell.run_id, ""),
@@ -1726,9 +1719,7 @@ def _layer4_subspec(
                         "field": "display_label",
                         "type": "nominal",
                         "scale": _color_scale(colors, label_order),
-                        "legend": (
-                            {"title": "Model", "orient": "top"} if show_legend else None
-                        ),
+                        "legend": ({"title": "Model", "orient": "top"} if show_legend else None),
                     },
                     "opacity": {
                         "condition": [
@@ -1813,9 +1804,7 @@ def _cells_for_overall(
                 "normalized_score": mean_score,
                 "score_pct": round(100 * mean_score, 1),
                 "threshold": threshold,
-                "threshold_pct": (
-                    None if threshold is None else round(100 * threshold, 1)
-                ),
+                "threshold_pct": (None if threshold is None else round(100 * threshold, 1)),
                 "n": sum(c.n for c in cells),
                 "n_total": sum(c.n_total for c in cells),
                 "deeplink": deeplink_by_run.get(run_id, ""),
@@ -1826,9 +1815,7 @@ def _cells_for_overall(
     return chart
 
 
-def _spec_per_locale_grouped_bars(
-    report: ComparisonReport, locale: str, colors: dict[str, str]
-) -> dict[str, Any]:
+def _spec_per_locale_grouped_bars(report: ComparisonReport, locale: str, colors: dict[str, str]) -> dict[str, Any]:
     """Vertical grouped bars per (capability, model), split into 2 rows.
 
     Splitting the 14 plottable capabilities (15 minus simulation_reliability)
@@ -1863,9 +1850,7 @@ def _spec_per_locale_grouped_bars(
     return _spec_with_theme(spec)
 
 
-def _spec_overall_grouped_bars(
-    report: ComparisonReport, colors: dict[str, str]
-) -> dict[str, Any]:
+def _spec_overall_grouped_bars(report: ComparisonReport, colors: dict[str, str]) -> dict[str, Any]:
     """Layer 4 Overall tab — locale-averaged grouped bars per (capability, model).
 
     Same layout as the per-locale charts (vconcat'd two-row vertical bars),
@@ -1933,14 +1918,8 @@ def _spec_per_capability_facet(
                 "has_must_pass_failure": bool(cell.failed_critical_axes),
                 "failed_critical_axes": ", ".join(cell.failed_critical_axes) or "—",
                 "normalized_score": cell.normalized_score if cell.normalized_score is not None else 0.0,
-                "score_pct": (
-                    None
-                    if cell.normalized_score is None
-                    else round(100 * cell.normalized_score, 1)
-                ),
-                "threshold_pct": (
-                    None if cell.threshold is None else round(100 * cell.threshold, 1)
-                ),
+                "score_pct": (None if cell.normalized_score is None else round(100 * cell.normalized_score, 1)),
+                "threshold_pct": (None if cell.threshold is None else round(100 * cell.threshold, 1)),
                 "n": cell.n,
                 "deeplink": deeplink_by_run.get(cell.run_id, ""),
             }
@@ -2040,9 +2019,7 @@ def _locale_color_scale(locales: list[str]) -> dict[str, Any]:
     }
 
 
-def _spec_per_model_locale_breakdown(
-    report: ComparisonReport, run_id: str, display_label: str
-) -> dict[str, Any]:
+def _spec_per_model_locale_breakdown(report: ComparisonReport, run_id: str, display_label: str) -> dict[str, Any]:
     """Vertical grouped bars over (capability, locale) for a single model.
 
     Mirrors Layer 4's structure but flips the grouping: x = capability,
@@ -2069,17 +2046,9 @@ def _spec_per_model_locale_breakdown(
                 "is_missing": cell.is_missing,
                 "has_must_pass_failure": bool(cell.failed_critical_axes),
                 "failed_critical_axes": ", ".join(cell.failed_critical_axes) or "—",
-                "normalized_score": (
-                    cell.normalized_score if cell.normalized_score is not None else 0.0
-                ),
-                "score_pct": (
-                    None
-                    if cell.normalized_score is None
-                    else round(100 * cell.normalized_score, 1)
-                ),
-                "threshold_pct": (
-                    None if cell.threshold is None else round(100 * cell.threshold, 1)
-                ),
+                "normalized_score": (cell.normalized_score if cell.normalized_score is not None else 0.0),
+                "score_pct": (None if cell.normalized_score is None else round(100 * cell.normalized_score, 1)),
+                "threshold_pct": (None if cell.threshold is None else round(100 * cell.threshold, 1)),
                 "n": cell.n,
                 "deeplink": deeplink,
             }
@@ -2122,9 +2091,7 @@ def _spec_per_model_locale_breakdown(
                             "field": "locale",
                             "type": "nominal",
                             "scale": _locale_color_scale(locale_order),
-                            "legend": (
-                                {"title": "Locale", "orient": "top"} if show_legend else None
-                            ),
+                            "legend": ({"title": "Locale", "orient": "top"} if show_legend else None),
                         },
                         "opacity": {
                             "condition": [
@@ -2172,11 +2139,7 @@ def _spec_per_model_locale_breakdown(
             ],
         }
 
-    sub_specs = [
-        _subspec(chunk, show_legend=(idx == 0))
-        for idx, chunk in enumerate(cap_rows)
-        if chunk
-    ]
+    sub_specs = [_subspec(chunk, show_legend=(idx == 0)) for idx, chunk in enumerate(cap_rows) if chunk]
     spec = {
         "title": _chart_title(f"Locale breakdown · {display_label}"),
         "vconcat": sub_specs,
@@ -2273,21 +2236,13 @@ def _fallback_html(report: ComparisonReport) -> str:
     )
     summary_rows = []
     for r in rollups_sorted:
-        score = (
-            "n/a"
-            if r.mean_normalized_score is None
-            else f"{r.mean_normalized_score * 100:.1f}%"
-        )
+        score = "n/a" if r.mean_normalized_score is None else f"{r.mean_normalized_score * 100:.1f}%"
         passing_denom = max(r.n_cells_eligible, 1)
         passing = f"{round(100 * r.n_cells_ready / passing_denom)}%"
         coverage = f"{r.n_cells_measured}/{r.n_cells_eligible}"
         output_per_conv = f"{int(round(r.assistant_output_tokens_per_conversation)):,}"
         reasoning_per_conv = f"{int(round(r.assistant_reasoning_tokens_per_conversation)):,}"
-        sim_ok = (
-            "—"
-            if r.sim_status_ok_rate is None
-            else f"{r.sim_status_ok_rate * 100:.1f}%"
-        )
+        sim_ok = "—" if r.sim_status_ok_rate is None else f"{r.sim_status_ok_rate * 100:.1f}%"
         deeplink = _deeplink_for(r.run_id)
         summary_rows.append(
             "<tr>"
@@ -2340,16 +2295,12 @@ def _fallback_html(report: ComparisonReport) -> str:
     # api_response/judge/summary aliases (they're tool synthesisers,
     # not conversational participants -- matches the per-run report's
     # ``conversation_output_tokens`` definition).
-    conversation_tokens_sum = sum(
-        e.user_output_tokens + e.assistant_output_tokens for e in report.entries
-    )
+    conversation_tokens_sum = sum(e.user_output_tokens + e.assistant_output_tokens for e in report.entries)
     assistant_tokens_sum = sum(e.assistant_output_tokens for e in report.entries)
     # Avg turns/conversation, weighted by trajectory count -- so a run
     # with 1024 trajs at 3.5 turns dominates a run with 32 trajs at
     # 5.0 turns (which is what we want for a panel-level summary).
-    total_turns = sum(
-        e.mean_turns_per_conversation * e.n_trajectories for e in report.entries
-    )
+    total_turns = sum(e.mean_turns_per_conversation * e.n_trajectories for e in report.entries)
     avg_turns = total_turns / n_conv if n_conv > 0 else 0.0
 
     return f"""
@@ -2378,7 +2329,7 @@ def _fallback_html(report: ComparisonReport) -> str:
         <th>User tokens</th>
         <th>Asst tokens</th><th>Asst reas tokens</th>
       </tr></thead>
-      <tbody>{''.join(entries_rows)}</tbody>
+      <tbody>{"".join(entries_rows)}</tbody>
     </table>
   </section>
 
@@ -2390,7 +2341,7 @@ def _fallback_html(report: ComparisonReport) -> str:
         <th>Model</th><th>Mean score</th><th>Coverage</th><th>% passing</th>
         <th>Output / conv</th><th>Reasoning / conv</th><th>Sim OK rate</th><th>Drill-down</th>
       </tr></thead>
-      <tbody>{''.join(summary_rows)}</tbody>
+      <tbody>{"".join(summary_rows)}</tbody>
     </table>
   </section>
 </main>
@@ -2486,9 +2437,7 @@ def _write_index_html(
     # later-mounted React app overwrites the earlier output and the user
     # sees the wrong dashboard in the wrong cell. Prefix is sanitized to a
     # CSS-safe identifier (alphanumerics + hyphens / underscores).
-    cmp_uid = "".join(
-        ch if ch.isalnum() or ch in "-_" else "_" for ch in str(report.comparison_id)
-    )
+    cmp_uid = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in str(report.comparison_id))
     root_id = f"root-{cmp_uid}"
     data_id = f"comparison-data-{cmp_uid}"
     specs_id = f"comparison-specs-{cmp_uid}"
@@ -2867,14 +2816,16 @@ def write_comparison_dashboard_artifacts(
         # there's no shared y-axis gutter to inherit -- each chart
         # needs its own labels.
         "sim_health_failure": _spec_sim_health_metric(
-            report, colors,
+            report,
+            colors,
             metric_field="sim_status_failure_rate",
             metric_title="Simulator failure rate",
             show_y_labels=True,
             x_axis_format=".0%",
         ),
         "sim_health_persona": _spec_sim_health_metric(
-            report, colors,
+            report,
+            colors,
             metric_field="persona_grounding_rate",
             metric_title="Persona grounding",
             show_y_labels=True,
@@ -2882,7 +2833,8 @@ def write_comparison_dashboard_artifacts(
             x_axis_format=".0%",
         ),
         "sim_health_early": _spec_sim_health_metric(
-            report, colors,
+            report,
+            colors,
             metric_field="early_stop_rate",
             metric_title="Early stop rate",
             show_y_labels=True,
@@ -2908,7 +2860,9 @@ def write_comparison_dashboard_artifacts(
             "Overall": _spec_pareto(report, colors, shapes),
             **{
                 locale: _spec_pareto(
-                    report, colors, shapes,
+                    report,
+                    colors,
+                    shapes,
                     score_lookup=_pareto_score_lookup_for_locale(report, locale),
                     locale_label=locale,
                 )
@@ -2922,10 +2876,7 @@ def write_comparison_dashboard_artifacts(
     # PerLocaleTabs component (which keys on Object.keys() insertion order).
     locale_specs = {
         "Overall": _spec_overall_grouped_bars(report, colors),
-        **{
-            locale: _spec_per_locale_grouped_bars(report, locale, colors)
-            for locale in report.locales
-        },
+        **{locale: _spec_per_locale_grouped_bars(report, locale, colors) for locale in report.locales},
     }
     # Parallel cleared-rate bundle for the per-locale tab section.
     # Same keys as ``locale_specs`` so the React component can index
@@ -2933,10 +2884,7 @@ def write_comparison_dashboard_artifacts(
     # cleared rates already on each rollup.
     locale_cleared_specs = {
         "Overall": _spec_cleared_for_locale(report, "", colors, is_overall=True),
-        **{
-            locale: _spec_cleared_for_locale(report, locale, colors, is_overall=False)
-            for locale in report.locales
-        },
+        **{locale: _spec_cleared_for_locale(report, locale, colors, is_overall=False) for locale in report.locales},
     }
     # One entry per plottable capability (drops simulation_reliability —
     # that's a process metric covered by Sim Health). Each entry
@@ -2949,7 +2897,10 @@ def write_comparison_dashboard_artifacts(
             "capability_label": cap_label,
             "spec": _spec_per_capability_facet(report, cap_id, cap_label, colors),
             "cleared_spec": _spec_cleared_for_capability(
-                report, cap_id, cap_label, colors,
+                report,
+                cap_id,
+                cap_label,
+                colors,
             ),
         }
         for cap_id, cap_label in _plotting_capabilities(report)
@@ -2964,11 +2915,11 @@ def write_comparison_dashboard_artifacts(
         {
             "run_id": entry.run_id,
             "display_label": entry.display_label,
-            "spec": _spec_per_model_locale_breakdown(
-                report, entry.run_id, entry.display_label
-            ),
+            "spec": _spec_per_model_locale_breakdown(report, entry.run_id, entry.display_label),
             "cleared_spec": _spec_cleared_for_model_per_locale(
-                report, entry.run_id, entry.display_label,
+                report,
+                entry.run_id,
+                entry.display_label,
             ),
         }
         for entry in sorted(report.entries, key=lambda e: e.display_label)
@@ -2976,7 +2927,12 @@ def write_comparison_dashboard_artifacts(
 
     index_path = out_path / "index.html"
     _write_index_html(
-        index_path, report, global_specs, locale_specs, locale_cleared_specs,
-        per_capability_specs, per_model_specs,
+        index_path,
+        report,
+        global_specs,
+        locale_specs,
+        locale_cleared_specs,
+        per_capability_specs,
+        per_model_specs,
     )
     return index_path

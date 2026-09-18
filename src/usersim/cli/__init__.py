@@ -38,6 +38,7 @@ from usersim.cli._errors import ConfigError
 
 __version__ = "0.1.0"
 
+
 def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None:
     """Let installed packages contribute subcommands.
 
@@ -56,16 +57,17 @@ def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None
     for name, register in load_extensions(COMMANDS):
         if name in subparsers.choices:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r is already provided by this "
-                "package; ignoring the contributed one.", name,
+                "  |-- extensions: command %r is already provided by this package; ignoring the contributed one.",
+                name,
             )
             continue
         try:
             register(subparsers)
         except Exception as exc:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r failed to register and was "
-                "skipped: %s", name, exc,
+                "  |-- extensions: command %r failed to register and was skipped: %s",
+                name,
+                exc,
             )
 
 
@@ -96,18 +98,19 @@ def _build_parser() -> argparse.ArgumentParser:
             "Run `usersim <command> -h` for a command's options.\n"
         ),
     )
+    parser.add_argument("--version", action="version", version=f"usersim {__version__}")
     parser.add_argument(
-        "--version", action="version", version=f"usersim {__version__}"
-    )
-    parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="count",
         default=0,
         help="Increase logging verbosity (-v=INFO, -vv=DEBUG).",
     )
 
     subparsers = parser.add_subparsers(
-        dest="command", required=True, metavar="<command>",
+        dest="command",
+        required=True,
+        metavar="<command>",
     )
 
     from usersim.cli import panel as _panel

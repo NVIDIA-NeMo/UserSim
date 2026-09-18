@@ -106,7 +106,10 @@ class TestDetectorlessLocales:
     """
 
     # 100+ chars of Kannada so the turn clears the script-integrity length floor.
-    _KANNADA = "\u0C97\u0CCD\u0CB0\u0CBE\u0CB9\u0C95\u0CB0 \u0C96\u0CBE\u0CA4\u0CC6\u0CAF \u0CB5\u0CBF\u0CB5\u0CB0 \u0CAA\u0CA1\u0CC6\u0CAF\u0CB2\u0CC1 \u0CA8\u0CBE\u0CB5\u0CC1 \u0CAA\u0CB0\u0CBF\u0CB6\u0CC0\u0CB2\u0CBF\u0CB8\u0CBF \u0CA8\u0CBF\u0CAE\u0C97\u0CC6 " * 4
+    _KANNADA = (
+        "\u0c97\u0ccd\u0cb0\u0cbe\u0cb9\u0c95\u0cb0 \u0c96\u0cbe\u0ca4\u0cc6\u0caf \u0cb5\u0cbf\u0cb5\u0cb0 \u0caa\u0ca1\u0cc6\u0caf\u0cb2\u0cc1 \u0ca8\u0cbe\u0cb5\u0cc1 \u0caa\u0cb0\u0cbf\u0cb6\u0cc0\u0cb2\u0cbf\u0cb8\u0cbf \u0ca8\u0cbf\u0cae\u0c97\u0cc6 "
+        * 4
+    )
 
     def test_scores_the_script_axes_without_a_detector(self) -> None:
         result = score_language_compliance_trajectory(
@@ -133,7 +136,7 @@ class TestDetectorlessLocales:
         result = score_language_compliance_trajectory(
             _trajectory(
                 locale="kn_Knda_IN",
-                assistant_messages=[self._KANNADA + " \uAC80 \u0444\u043E\u0440\u043C\u0430"],
+                assistant_messages=[self._KANNADA + " \uac80 \u0444\u043e\u0440\u043c\u0430"],
             ),
             {},
         )
@@ -168,11 +171,12 @@ class TestScriptIntegrity:
         unusable on the locales it exists for.
         """
         text = (
-            "\u0924\u0941\u092E\u0939\u093E\u0932\u093E UPI \u0906\u0923\u093F KYC \u092A\u0942\u0930\u094D\u0923 \u0915\u0930\u093E\u0935\u0947 \u0932\u093E\u0917\u0947\u0932. PAN \u0915\u094D\u0930\u092E\u093E\u0902\u0915 \u0926\u094D\u092F\u093E. "
-            "NEFT \u0915\u093F\u0902\u0935\u093E IMPS \u0935\u093E\u092A\u0930\u0942\u0928 \u092A\u0948\u0938\u0947 \u092A\u093E\u0920\u0935\u093E. verify_identity \u0915\u0930\u0942. "
+            "\u0924\u0941\u092e\u0939\u093e\u0932\u093e UPI \u0906\u0923\u093f KYC \u092a\u0942\u0930\u094d\u0923 \u0915\u0930\u093e\u0935\u0947 \u0932\u093e\u0917\u0947\u0932. PAN \u0915\u094d\u0930\u092e\u093e\u0902\u0915 \u0926\u094d\u092f\u093e. "
+            "NEFT \u0915\u093f\u0902\u0935\u093e IMPS \u0935\u093e\u092a\u0930\u0942\u0928 \u092a\u0948\u0938\u0947 \u092a\u093e\u0920\u0935\u093e. verify_identity \u0915\u0930\u0942. "
         ) * 2
         result = score_language_compliance_trajectory(
-            _trajectory(locale="mr_Deva_IN", assistant_messages=[text]), {},
+            _trajectory(locale="mr_Deva_IN", assistant_messages=[text]),
+            {},
         )
         integrity = result["scores"]["language.script_integrity_rate"]["score"]
         compliance = result["scores"]["language.script_compliance_rate"]["score"]
@@ -184,7 +188,8 @@ class TestScriptIntegrity:
         """A stray glyph is the entire signal, so on a 2-character turn one bad
         codepoint would sink the turn on noise."""
         result = score_language_compliance_trajectory(
-            _trajectory(locale="kn_Knda_IN", assistant_messages=["\uAC80"]), {},
+            _trajectory(locale="kn_Knda_IN", assistant_messages=["\uac80"]),
+            {},
         )
         cell = result["scores"]["language.script_integrity_rate"]
         assert cell["score"] is None
@@ -193,7 +198,8 @@ class TestScriptIntegrity:
     def test_no_scorable_turn_does_not_fail_status(self) -> None:
         """``None`` is absence of evidence, not a failure."""
         result = score_language_compliance_trajectory(
-            _trajectory(locale="en_US", assistant_messages=["ok"]), {},
+            _trajectory(locale="en_US", assistant_messages=["ok"]),
+            {},
         )
         assert result["scores"]["language.script_integrity_rate"]["score"] is None
         assert result["status_proposal"] is True
@@ -212,9 +218,11 @@ class TestShortCircuit:
     def test_missing_locale_returns_noop(self) -> None:
         result = score_language_compliance_trajectory(
             {
-                "conversation_messages": json.dumps([
-                    {"role": "assistant", "content": "hi"},
-                ]),
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "assistant", "content": "hi"},
+                    ]
+                ),
             },
             {},
         )
@@ -225,9 +233,11 @@ class TestShortCircuit:
         result = score_language_compliance_trajectory(
             {
                 "locale": "pt_BR",
-                "conversation_messages": json.dumps([
-                    {"role": "user", "content": "Olá!"},
-                ]),
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "Olá!"},
+                    ]
+                ),
             },
             {},
         )

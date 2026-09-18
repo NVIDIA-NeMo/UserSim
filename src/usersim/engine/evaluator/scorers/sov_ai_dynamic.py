@@ -273,9 +273,7 @@ def score_sov_ai_dynamic_trajectory(
             "taxonomy_version": None,
             "taxonomy_version_mismatch": False,
             "status_proposal": True,
-            "error": (
-                "no probing_categories_explored on this trajectory — scorer skipped"
-            ),
+            "error": ("no probing_categories_explored on this trajectory — scorer skipped"),
         }
 
     # India language-variants reuse the en_IN taxonomy (presence-aware:
@@ -284,17 +282,17 @@ def score_sov_ai_dynamic_trajectory(
     from usersim.engine.core.probing_taxonomy import (
         default_probing_taxonomy_path,
     )
-    taxonomy_locale = asset_locale(
-        locale, exists=lambda l: default_probing_taxonomy_path(l).exists()
-    )
+
+    taxonomy_locale = asset_locale(locale, exists=lambda l: default_probing_taxonomy_path(l).exists())
 
     try:
         taxonomy = load_probing_taxonomy_for_locale(taxonomy_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to load taxonomy "
-            "for locale=%s (taxonomy_locale=%s): %s",
-            locale, taxonomy_locale, e,
+            "  |-- evaluator/scorers.sov_ai_dynamic: failed to load taxonomy for locale=%s (taxonomy_locale=%s): %s",
+            locale,
+            taxonomy_locale,
+            e,
         )
         return {
             "judge_alias": judge_alias,
@@ -308,15 +306,15 @@ def score_sov_ai_dynamic_trajectory(
         }
 
     pinned_version = _pinned_taxonomy_version(trajectory, locale)
-    taxonomy_version_mismatch = (
-        pinned_version is not None and pinned_version != taxonomy.taxonomy_version
-    )
+    taxonomy_version_mismatch = pinned_version is not None and pinned_version != taxonomy.taxonomy_version
     if taxonomy_version_mismatch:
         logger.info(
             "  |-- evaluator/scorers.sov_ai_dynamic: trajectory pinned "
             "taxonomy_version=%s but current loaded taxonomy is %s for "
             "locale=%s — reporting drift flag on this row",
-            pinned_version, taxonomy.taxonomy_version, locale,
+            pinned_version,
+            taxonomy.taxonomy_version,
+            locale,
         )
 
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
@@ -407,9 +405,11 @@ def _score_one_category(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: judge %r raised on "
-            "category %s: %s: %s",
-            judge_alias, category.id, type(e).__name__, e,
+            "  |-- evaluator/scorers.sov_ai_dynamic: judge %r raised on category %s: %s: %s",
+            judge_alias,
+            category.id,
+            type(e).__name__,
+            e,
         )
         return _error_result(
             category=category,
@@ -422,12 +422,13 @@ def _score_one_category(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to parse "
-            "structured output for category %s",
+            "  |-- evaluator/scorers.sov_ai_dynamic: failed to parse structured output for category %s",
             category.id,
         )
         return _error_result(
-            category=category, judge_alias=judge_alias, error="parse_failure",
+            category=category,
+            judge_alias=judge_alias,
+            error="parse_failure",
         )
 
     scores: Dict[str, Dict[str, Any]] = {}
@@ -469,11 +470,13 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
             val = cell.get("score")
             if not isinstance(val, (int, float)):
                 continue
-            entries.append({
-                "score": float(val),
-                "tag": entry.get("category_id") or entry.get("subtopic_hint") or "",
-                "reasoning": str(cell.get("reasoning") or ""),
-            })
+            entries.append(
+                {
+                    "score": float(val),
+                    "tag": entry.get("category_id") or entry.get("subtopic_hint") or "",
+                    "reasoning": str(cell.get("reasoning") or ""),
+                }
+            )
         if not entries:
             out[axis] = {
                 "score": None,
@@ -485,7 +488,10 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
         out[axis] = {
             "score": mean,
             "reasoning": _compose_aggregate_reasoning(
-                entries, mean, unit_singular="category", unit_plural="categories",
+                entries,
+                mean,
+                unit_singular="category",
+                unit_plural="categories",
             ),
             "n": len(entries),
         }
@@ -516,14 +522,17 @@ def _compose_aggregate_reasoning(
         only = entries[0]
         if only["reasoning"]:
             return f"[{only['tag']}] {only['reasoning']}" if only["tag"] else only["reasoning"]
-        return f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'" if only["tag"] else f"score={_score_text(only['score'])}"
+        return (
+            f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'"
+            if only["tag"]
+            else f"score={_score_text(only['score'])}"
+        )
     sorted_entries = sorted(entries, key=lambda e: (e["score"], not e["reasoning"]))
     worst_with_text = [e for e in sorted_entries if e["reasoning"]][:2]
     if not worst_with_text:
         return f"Mean {mean} across {n} {unit_plural}."
     bullets = "".join(
-        f"\n• \"{e['tag'] or '?'}\" (score={_score_text(e['score'])}): {e['reasoning']}"
-        for e in worst_with_text
+        f'\n• "{e["tag"] or "?"}" (score={_score_text(e["score"])}): {e["reasoning"]}' for e in worst_with_text
     )
     return f"Mean {mean} across {n} {unit_plural}. Lowest scoring:{bullets}"
 
@@ -559,11 +568,7 @@ def _as_list_of_str(raw: Any) -> List[str]:
     if isinstance(raw, str):
         try:
             parsed = json.loads(raw)
-            return (
-                [s for s in parsed if isinstance(s, str) and s]
-                if isinstance(parsed, list)
-                else []
-            )
+            return [s for s in parsed if isinstance(s, str) and s] if isinstance(parsed, list) else []
         except (json.JSONDecodeError, TypeError):
             return []
     return []

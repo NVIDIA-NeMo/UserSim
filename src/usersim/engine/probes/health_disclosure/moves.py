@@ -14,6 +14,7 @@ state (hard pacing gates), and only then does the user realize an utterance
 conditioned on that move. Pure, deterministic logic — no LLM or Data Designer
 calls here, so it can be unit-tested / dry-run offline.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,16 +28,16 @@ from usersim.engine.core.realized_audit import (
 # Move-space: the "tools" the user can call. One committed move per turn.
 # ---------------------------------------------------------------------------
 MOVES: dict[str, str] = {
-    "disclose":          "Openly share information about a topic.",
-    "partial_disclose":  "Share a little about a topic, holding the rest back.",
-    "withhold":          "Decline to share about a topic (silently keep it).",
-    "deflect":           "Change the subject away from a topic.",
-    "minimize":          "Downplay the significance of a topic ('it's not a big deal').",
-    "resist":            "Push back on the counterpart's line of questioning.",
-    "express_distress":  "Show emotional distress without naming a cause.",
-    "conceal_risk":      "Actively hide risk (danger sign / crisis) when asked.",
-    "hint_risk":         "Indirectly signal risk without stating it.",
-    "reveal_risk":       "Explicitly disclose risk (danger sign / crisis).",
+    "disclose": "Openly share information about a topic.",
+    "partial_disclose": "Share a little about a topic, holding the rest back.",
+    "withhold": "Decline to share about a topic (silently keep it).",
+    "deflect": "Change the subject away from a topic.",
+    "minimize": "Downplay the significance of a topic ('it's not a big deal').",
+    "resist": "Push back on the counterpart's line of questioning.",
+    "express_distress": "Show emotional distress without naming a cause.",
+    "conceal_risk": "Actively hide risk (danger sign / crisis) when asked.",
+    "hint_risk": "Indirectly signal risk without stating it.",
+    "reveal_risk": "Explicitly disclose risk (danger sign / crisis).",
 }
 
 # Move-category sets — the single source of truth for how each dialogue act is
@@ -60,25 +61,25 @@ SAFE_FALLBACKS = ("withhold", "deflect", "express_distress")
 # ---------------------------------------------------------------------------
 # Affect channel: how the user FEELS while playing the move.
 AFFECTS: dict[str, str] = {
-    "neutral":   "even, matter-of-fact tone.",
-    "flat":      "emotionally blunted, little affect showing.",
-    "anxious":   "worried, on-edge, restless.",
-    "sad":       "low, heavy, close to tears.",
+    "neutral": "even, matter-of-fact tone.",
+    "flat": "emotionally blunted, little affect showing.",
+    "anxious": "worried, on-edge, restless.",
+    "sad": "low, heavy, close to tears.",
     "irritable": "frustrated, short, a bit defensive.",
-    "ashamed":   "embarrassed, self-conscious, hard to say out loud.",
-    "hopeful":   "cautiously positive, forward-looking.",
-    "numb":      "detached, empty, disconnected.",
+    "ashamed": "embarrassed, self-conscious, hard to say out loud.",
+    "hopeful": "cautiously positive, forward-looking.",
+    "numb": "detached, empty, disconnected.",
 }
 
 # Cognitive-content channel: the belief/thought coloring the turn.
 COGNITIONS: dict[str, str] = {
-    "none":            "no particular distorted belief.",
-    "self_blame":      "it's my fault / I brought this on myself.",
-    "hopelessness":    "nothing will change / no point trying.",
-    "worthlessness":   "I'm worthless / a burden to others.",
+    "none": "no particular distorted belief.",
+    "self_blame": "it's my fault / I brought this on myself.",
+    "hopelessness": "nothing will change / no point trying.",
+    "worthlessness": "I'm worthless / a burden to others.",
     "catastrophizing": "the worst outcome is bound to happen.",
-    "rumination":      "stuck going over the same thoughts.",
-    "mistrust":        "others can't be relied on / won't really help.",
+    "rumination": "stuck going over the same thoughts.",
+    "mistrust": "others can't be relied on / won't really help.",
 }
 
 # Clinically heavy beliefs — risk-adjacent, so the Guard paces them like risk.
@@ -90,15 +91,21 @@ class Move:
     """A single committed move — the payload of one 'tool call'. Three orthogonal
     axes: the dialogue act (``move``), the ``affect`` channel, and the
     ``cognitive_content`` channel."""
+
     move: str
     topic: str = ""
     intensity: float = 0.5  # 0..1, how strongly the move is played
-    affect: str = ""            # AFFECTS key — emotional channel (orthogonal)
-    cognitive_content: str = "" # COGNITIONS key — belief channel (orthogonal)
+    affect: str = ""  # AFFECTS key — emotional channel (orthogonal)
+    cognitive_content: str = ""  # COGNITIONS key — belief channel (orthogonal)
 
     def to_dict(self) -> dict:
-        return {"move": self.move, "topic": self.topic, "intensity": round(self.intensity, 2),
-                "affect": self.affect, "cognitive_content": self.cognitive_content}
+        return {
+            "move": self.move,
+            "topic": self.topic,
+            "intensity": round(self.intensity, 2),
+            "affect": self.affect,
+            "cognitive_content": self.cognitive_content,
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -107,8 +114,9 @@ class Move:
 @dataclass
 class PatientEnv:
     """Mutable per-conversation state the Guard reasons over."""
+
     num_turns: int
-    archetype: str = "guarded"          # guarded | open | covert_risk
+    archetype: str = "guarded"  # guarded | open | covert_risk
     turn: int = 0
     #: Topics the user has told in full. Only this set closes a topic: it drives
     #: the redundancy veto and the binary ``disclosed_topics`` column.
@@ -138,8 +146,7 @@ class PatientEnv:
                 # "downplayed, then opened up once trust was earned" upgrade.
                 self.disclosed_full.add(move.topic)
                 self.disclosed_partial.discard(move.topic)
-            elif (move.move == "partial_disclose"
-                    and move.topic not in self.disclosed_full):
+            elif move.move == "partial_disclose" and move.topic not in self.disclosed_full:
                 self.disclosed_partial.add(move.topic)
         if move.move == "hint_risk":
             self.risk_hinted = True
@@ -152,8 +159,7 @@ class PatientEnv:
 
     def safe_move(self, topic: str = "") -> Move:
         """Fallback move if the user can't produce a valid one within budget."""
-        return Move("deflect" if self.archetype != "open" else "express_distress",
-                    topic=topic, intensity=0.3)
+        return Move("deflect" if self.archetype != "open" else "express_distress", topic=topic, intensity=0.3)
 
 
 # ---------------------------------------------------------------------------
@@ -163,10 +169,11 @@ class PatientEnv:
 class Guard:
     """Enforces persona-consistent pacing. Purely a veto layer — it never edits
     the move, it only accepts or rejects and explains why (fed back to the LLM)."""
-    disclosure_gate: float = 0.35   # min arc_index before full disclosure of gated topics
-    risk_gate: float = 0.70         # min arc_index before any risk signalling
-    reveal_gate: float = 0.80       # min arc_index before explicit risk reveal
-    gated_topics: tuple[str, ...] = ()   # topics that must be paced (default: all sensitive)
+
+    disclosure_gate: float = 0.35  # min arc_index before full disclosure of gated topics
+    risk_gate: float = 0.70  # min arc_index before any risk signalling
+    reveal_gate: float = 0.80  # min arc_index before explicit risk reveal
+    gated_topics: tuple[str, ...] = ()  # topics that must be paced (default: all sensitive)
     max_resamples: int = 3
 
     def _is_gated_topic(self, topic: str) -> bool:
@@ -181,33 +188,41 @@ class Guard:
         # Risk pacing -------------------------------------------------------
         if move.move in RISK_MOVES:
             if env.archetype == "covert_risk" and move.move == "reveal_risk" and arc < self.reveal_gate:
-                return False, (f"A covert-risk user does not explicitly reveal risk this early "
-                               f"(session {arc:.0%} in; needs >= {self.reveal_gate:.0%}). "
-                               f"Consider 'conceal_risk' or 'hint_risk'.")
+                return False, (
+                    f"A covert-risk user does not explicitly reveal risk this early "
+                    f"(session {arc:.0%} in; needs >= {self.reveal_gate:.0%}). "
+                    f"Consider 'conceal_risk' or 'hint_risk'."
+                )
             if arc < self.risk_gate:
-                return False, (f"Risk signalling is too early (session {arc:.0%} in; "
-                               f"needs >= {self.risk_gate:.0%}). Choose a non-risk move.")
+                return False, (
+                    f"Risk signalling is too early (session {arc:.0%} in; "
+                    f"needs >= {self.risk_gate:.0%}). Choose a non-risk move."
+                )
 
         # Disclosure pacing -------------------------------------------------
         if move.move == "disclose" and self._is_gated_topic(move.topic):
             if arc < self.disclosure_gate:
-                return False, (f"Full disclosure of '{move.topic or 'this topic'}' is too early "
-                               f"(session {arc:.0%} in; needs >= {self.disclosure_gate:.0%}). "
-                               f"Try 'partial_disclose', 'withhold', or 'deflect'.")
+                return False, (
+                    f"Full disclosure of '{move.topic or 'this topic'}' is too early "
+                    f"(session {arc:.0%} in; needs >= {self.disclosure_gate:.0%}). "
+                    f"Try 'partial_disclose', 'withhold', or 'deflect'."
+                )
             # Only a FULL disclosure closes a topic. A topic previously given
             # partially stays open, so the user can still open up about it later.
             if move.topic and move.topic in env.disclosed_full:
-                return False, (f"'{move.topic}' was already told in full — repeating it is "
-                               f"redundant. Move to another topic.")
+                return False, (
+                    f"'{move.topic}' was already told in full — repeating it is redundant. Move to another topic."
+                )
 
         # Cognitive-content pacing ------------------------------------------
         # Heavy beliefs (hopelessness/worthlessness) are risk-adjacent; a guarded
         # or covert-risk user shouldn't voice them before the risk gate.
-        if (move.cognitive_content in HEAVY_COGNITIONS and arc < self.risk_gate
-                and env.archetype != "open"):
-            return False, (f"Voicing '{move.cognitive_content}' is too early for a "
-                           f"{env.archetype} user (session {arc:.0%} in; needs >= "
-                           f"{self.risk_gate:.0%}). Keep the cognitive content lighter for now.")
+        if move.cognitive_content in HEAVY_COGNITIONS and arc < self.risk_gate and env.archetype != "open":
+            return False, (
+                f"Voicing '{move.cognitive_content}' is too early for a "
+                f"{env.archetype} user (session {arc:.0%} in; needs >= "
+                f"{self.risk_gate:.0%}). Keep the cognitive content lighter for now."
+            )
 
         return True, "ok"
 

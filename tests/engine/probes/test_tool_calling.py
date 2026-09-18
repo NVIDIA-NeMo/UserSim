@@ -34,9 +34,13 @@ from usersim.engine.probes.tool_calling.prompts import (
 class TestPromptTemplates:
     def test_user_agent_prompt_has_all_placeholders(self):
         required = [
-            "{persona}", "{tool_context}", "{theme}",
-            "{language_instruction}", "{behavioral_instructions}",
-            "{disclosure_instructions}", "{interaction_style_instructions}",
+            "{persona}",
+            "{tool_context}",
+            "{theme}",
+            "{language_instruction}",
+            "{behavioral_instructions}",
+            "{disclosure_instructions}",
+            "{interaction_style_instructions}",
         ]
         for placeholder in required:
             assert placeholder in USER_AGENT_SYSTEM_PROMPT, f"Missing: {placeholder}"
@@ -135,11 +139,13 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     persona = {"first_name": "A", "last_name": "User", "age": 35}
     data = {
         "tools": sample_tools,
-        "theme": json.dumps({
-            "type": "Weather & Location Lookup",
-            "description": "Look up weather.",
-            "tool_expected": True,
-        }),
+        "theme": json.dumps(
+            {
+                "type": "Weather & Location Lookup",
+                "description": "Look up weather.",
+                "tool_expected": True,
+            }
+        ),
         "persona_uuid": "persona-1",
         "disclosure_style": "upfront",
         "user_interaction_style": "neutral",
@@ -172,10 +178,7 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     api_inputs = []
     assistant_call = 0
     user_call = 0
-    weather_tool = next(
-        tool for tool in probe.openai_tools
-        if tool["function"]["name"] == "get_weather"
-    )
+    weather_tool = next(tool for tool in probe.openai_tools if tool["function"]["name"] == "get_weather")
 
     def fake_call_llm(models, alias, messages, **kwargs):
         nonlocal assistant_call, user_call
@@ -184,10 +187,7 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
             user_call += 1
             return {
                 "role": "assistant",
-                "content": (
-                    "What is the weather in Tokyo?"
-                    if user_call == 1 else "Thanks, that answers it."
-                ),
+                "content": ("What is the weather in Tokyo?" if user_call == 1 else "Thanks, that answers it."),
             }
         if alias == "assistant_model":
             assistant_inputs.append(messages)
@@ -196,13 +196,15 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
                 return {
                     "role": "assistant",
                     "content": "",
-                    "tool_calls": [{
-                        "id": "weather-call",
-                        "function": {
-                            "name": weather_tool["function"]["name"],
-                            "arguments": '{"location":"Tokyo"}',
-                        },
-                    }],
+                    "tool_calls": [
+                        {
+                            "id": "weather-call",
+                            "function": {
+                                "name": weather_tool["function"]["name"],
+                                "arguments": '{"location":"Tokyo"}',
+                            },
+                        }
+                    ],
                 }
             return {
                 "role": "assistant",
@@ -246,33 +248,22 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
 
 
 def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tools):
-    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = (
-        _run_concrete_tool_probe(sample_tools)
-    )
+    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = _run_concrete_tool_probe(sample_tools)
 
     assert result["conversation_status"] is True
     assert len(api_inputs) == 1
     assert "Tokyo" in api_inputs[0][0]["content"]
     assert any(
-        message.get("role") == "tool" and "raw_secret" in message.get("content", "")
-        for message in assistant_inputs[1]
+        message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in assistant_inputs[1]
     )
     followup_prompt = user_inputs[-1][1]["content"]
-    history = followup_prompt.split("<CHAT_HISTORY>", 1)[1].split(
-        "</CHAT_HISTORY>", 1
-    )[0]
+    history = followup_prompt.split("<CHAT_HISTORY>", 1)[1].split("</CHAT_HISTORY>", 1)[0]
     assert "Tokyo is 22 degrees." in history
     assert "raw_secret" not in history
     assert "weather-call" not in history
-    assert all(
-        "raw_secret" not in message.get("content", "")
-        for call in judge_inputs for message in call
-    )
+    assert all("raw_secret" not in message.get("content", "") for call in judge_inputs for message in call)
     exported = json.loads(result["conversation_messages"])
-    assert any(
-        message.get("role") == "tool" and "raw_secret" in message.get("content", "")
-        for message in exported
-    )
+    assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
 
 
 def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):

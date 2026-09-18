@@ -60,10 +60,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     src.add_argument(
         "--locale",
         action="append",
-        help=(
-            "Locale to sample inline (repeatable). Use with --num-rows. "
-            "Mutually exclusive with --panel."
-        ),
+        help=("Locale to sample inline (repeatable). Use with --num-rows. Mutually exclusive with --panel."),
     )
 
     p.add_argument(
@@ -92,8 +89,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=Path,
         default=None,
         help=(
-            "Path to an alternate assets/ tree (seeds + toolsets). "
-            "Defaults to the banks shipped inside the package."
+            "Path to an alternate assets/ tree (seeds + toolsets). Defaults to the banks shipped inside the package."
         ),
     )
     p.add_argument(
@@ -241,9 +237,7 @@ def _parse_probe_mix(spec: str) -> dict:
         if not pair:
             continue
         if "=" not in pair:
-            raise SystemExit(
-                f"--probe-mix expects k=v pairs; got {pair!r} in {spec!r}"
-            )
+            raise SystemExit(f"--probe-mix expects k=v pairs; got {pair!r} in {spec!r}")
         k, v = pair.split("=", 1)
         out[k.strip()] = float(v.strip())
     if not out:
@@ -256,8 +250,7 @@ def _parse_probe_mix(spec: str) -> dict:
     unknown = sorted(k for k in out if k not in known)
     if unknown:
         raise SystemExit(
-            f"--probe-mix references unknown probe_type(s): {unknown}. "
-            f"Registered probes: {sorted(known)}."
+            f"--probe-mix references unknown probe_type(s): {unknown}. Registered probes: {sorted(known)}."
         )
 
     return {k: v / total for k, v in out.items()}
@@ -274,9 +267,7 @@ def run(args: argparse.Namespace) -> int:
 
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
-    require_aliases(
-        models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`"
-    )
+    require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`")
 
     probe_mix = _parse_probe_mix(args.probe_mix)
 
@@ -301,7 +292,9 @@ def run(args: argparse.Namespace) -> int:
         # instead of interleaving with a half-written plan.
         verify_probe_assets(probe_mix, args.locale or [], pinned_assets_dir)
         seed = resolve_toolset_seed_for_mix(
-            probe_mix, pinned_assets_dir, args.toolset_seed_path,
+            probe_mix,
+            pinned_assets_dir,
+            args.toolset_seed_path,
         )
         print("usersim simulate — dry run")
         if args.panel:
@@ -318,8 +311,8 @@ def run(args: argparse.Namespace) -> int:
             print(f"  assets_dir:    {args.assets_dir}")
         else:
             from usersim.engine.core._assets import asset_search_path
-            print(f"  asset path:    "
-                  f"{', '.join(str(r) for r in asset_search_path())}")
+
+            print(f"  asset path:    {', '.join(str(r) for r in asset_search_path())}")
         print(f"  match_persona_language: {args.match_persona_language}")
         print(f"  toolset_seed_path: {seed or '(not used)'}")
         print(f"  output:        {args.out}")
@@ -353,11 +346,7 @@ def run(args: argparse.Namespace) -> int:
     # A live models object and Path do not cross a scheduler boundary, so the
     # spec also carries a plain-data description of the same run for a backend
     # that has to rebuild it elsewhere.
-    params = {
-        k: (str(v) if isinstance(v, Path) else v)
-        for k, v in call_kwargs.items()
-        if k != "models"
-    }
+    params = {k: (str(v) if isinstance(v, Path) else v) for k, v in call_kwargs.items() if k != "models"}
     params["models_path"] = str(models_path)
 
     # Execution goes through the backend so the local path is the same code
@@ -444,20 +433,21 @@ def _simulate_to_parquet(
     # seeds — content-hashed trajectory_ids would still collide if
     # everything matched, but cross-run skipping is not the
     # behaviour we want).
-    already_done = (
-        existing_trajectory_ids(out, run=run_id) if skip_existing else set()
-    )
+    already_done = existing_trajectory_ids(out, run=run_id) if skip_existing else set()
     if already_done:
         logger.info(
             "run=%s already has %d trajectories — will skip",
-            run_id, len(already_done),
+            run_id,
+            len(already_done),
         )
 
     # Resolve only for a run that includes tool_calling. The builder also
     # enforces this for library callers, while doing it here gives the manifest
     # the exact file used and keeps non-tool runs independent of toolset assets.
     toolset_seed_path = resolve_toolset_seed_for_mix(
-        probe_mix, pinned_assets_dir, toolset_seed_path,
+        probe_mix,
+        pinned_assets_dir,
+        toolset_seed_path,
     )
 
     if panel:
@@ -482,7 +472,9 @@ def _simulate_to_parquet(
             datasets_dir=DEFAULT_PERSONA_DATASETS_DIR,
         )
         _applied = persona_language_filter(
-            _persona_locale, locale, match_language=match_persona_language,
+            _persona_locale,
+            locale,
+            match_language=match_persona_language,
         )
         if _applied:
             applied_language_filters[locale] = _applied
@@ -524,7 +516,9 @@ def _simulate_to_parquet(
         write_locale_partition(df, out, locale=locale, run_id=run_id)
         total_written += len(df)
         logger.info(
-            "locale=%s: wrote %d new trajectories", locale, len(df),
+            "locale=%s: wrote %d new trajectories",
+            locale,
+            len(df),
         )
 
     if total_written == 0:
@@ -533,9 +527,7 @@ def _simulate_to_parquet(
 
     print(f"wrote {total_written} new trajectories to {out}")
     print(
-        f"\nNext step: score them\n"
-        f"  usersim eval --run {run_id} \\\n"
-        f"    --trajectories {out} --out output/evaluations"
+        f"\nNext step: score them\n  usersim eval --run {run_id} \\\n    --trajectories {out} --out output/evaluations"
     )
 
     # Write the run manifest. ``run_id`` is the unix-epoch start time
@@ -576,7 +568,10 @@ def _simulate_to_parquet(
 
 
 def _build_sim_config_for_manifest(
-    *, max_turns: int, random_seed, store_reasoning: bool = True,
+    *,
+    max_turns: int,
+    random_seed,
+    store_reasoning: bool = True,
 ):
     """Snapshot the sim-config knobs the manifest captures.
 
@@ -609,10 +604,7 @@ def _locales_from_panel(panel_path: Path) -> list[str]:
 
     table = pq.read_table(panel_path, columns=["locale"])
     column = table.column("locale")
-    return sorted({
-        v.as_py() for v in column
-        if v.is_valid and v.as_py() is not None
-    })
+    return sorted({v.as_py() for v in column if v.is_valid and v.as_py() is not None})
 
 
 def _count_rows_for_locale(panel_path: Path, locale: str) -> int:
@@ -621,7 +613,4 @@ def _count_rows_for_locale(panel_path: Path, locale: str) -> int:
 
     table = pq.read_table(panel_path, columns=["locale"])
     column = table.column("locale")
-    return sum(
-        1 for v in column
-        if v.is_valid and str(v.as_py()) == str(locale)
-    )
+    return sum(1 for v in column if v.is_valid and str(v.as_py()) == str(locale))

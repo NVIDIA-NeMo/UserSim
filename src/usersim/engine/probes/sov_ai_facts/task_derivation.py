@@ -36,37 +36,75 @@ from usersim.engine.core.fact_bank import Fact, FactBank
 # https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial.html
 _BR_STATE_TO_REGION: Dict[str, str] = {
     # Norte
-    "am": "north", "amazonas": "north",
-    "pa": "north", "pará": "north", "para": "north",
-    "ac": "north", "acre": "north",
-    "ro": "north", "rondônia": "north", "rondonia": "north",
-    "rr": "north", "roraima": "north",
-    "ap": "north", "amapá": "north", "amapa": "north",
-    "to": "north", "tocantins": "north",
+    "am": "north",
+    "amazonas": "north",
+    "pa": "north",
+    "pará": "north",
+    "para": "north",
+    "ac": "north",
+    "acre": "north",
+    "ro": "north",
+    "rondônia": "north",
+    "rondonia": "north",
+    "rr": "north",
+    "roraima": "north",
+    "ap": "north",
+    "amapá": "north",
+    "amapa": "north",
+    "to": "north",
+    "tocantins": "north",
     # Nordeste
-    "ba": "northeast", "bahia": "northeast",
-    "pe": "northeast", "pernambuco": "northeast",
-    "ce": "northeast", "ceará": "northeast", "ceara": "northeast",
-    "ma": "northeast", "maranhão": "northeast", "maranhao": "northeast",
-    "pb": "northeast", "paraíba": "northeast", "paraiba": "northeast",
-    "rn": "northeast", "rio grande do norte": "northeast",
-    "al": "northeast", "alagoas": "northeast",
-    "se": "northeast", "sergipe": "northeast",
-    "pi": "northeast", "piauí": "northeast", "piaui": "northeast",
+    "ba": "northeast",
+    "bahia": "northeast",
+    "pe": "northeast",
+    "pernambuco": "northeast",
+    "ce": "northeast",
+    "ceará": "northeast",
+    "ceara": "northeast",
+    "ma": "northeast",
+    "maranhão": "northeast",
+    "maranhao": "northeast",
+    "pb": "northeast",
+    "paraíba": "northeast",
+    "paraiba": "northeast",
+    "rn": "northeast",
+    "rio grande do norte": "northeast",
+    "al": "northeast",
+    "alagoas": "northeast",
+    "se": "northeast",
+    "sergipe": "northeast",
+    "pi": "northeast",
+    "piauí": "northeast",
+    "piaui": "northeast",
     # Centro-Oeste
-    "go": "central-west", "goiás": "central-west", "goias": "central-west",
-    "mt": "central-west", "mato grosso": "central-west",
-    "ms": "central-west", "mato grosso do sul": "central-west",
-    "df": "central-west", "distrito federal": "central-west",
+    "go": "central-west",
+    "goiás": "central-west",
+    "goias": "central-west",
+    "mt": "central-west",
+    "mato grosso": "central-west",
+    "ms": "central-west",
+    "mato grosso do sul": "central-west",
+    "df": "central-west",
+    "distrito federal": "central-west",
     # Sudeste
-    "sp": "southeast", "são paulo": "southeast", "sao paulo": "southeast",
-    "rj": "southeast", "rio de janeiro": "southeast",
-    "mg": "southeast", "minas gerais": "southeast",
-    "es": "southeast", "espírito santo": "southeast", "espirito santo": "southeast",
+    "sp": "southeast",
+    "são paulo": "southeast",
+    "sao paulo": "southeast",
+    "rj": "southeast",
+    "rio de janeiro": "southeast",
+    "mg": "southeast",
+    "minas gerais": "southeast",
+    "es": "southeast",
+    "espírito santo": "southeast",
+    "espirito santo": "southeast",
     # Sul
-    "rs": "south", "rio grande do sul": "south",
-    "sc": "south", "santa catarina": "south",
-    "pr": "south", "paraná": "south", "parana": "south",
+    "rs": "south",
+    "rio grande do sul": "south",
+    "sc": "south",
+    "santa catarina": "south",
+    "pr": "south",
+    "paraná": "south",
+    "parana": "south",
 }
 
 
@@ -299,10 +337,7 @@ def derive_task(
     excluded = set(excluded_fact_ids)
 
     persona_tags = persona_to_tags(persona, fact_bank.locale)
-    candidates = [
-        f for f in fact_bank.matching_persona_tags(persona_tags)
-        if f.id not in excluded
-    ]
+    candidates = [f for f in fact_bank.matching_persona_tags(persona_tags) if f.id not in excluded]
     if not candidates:
         return None
 
@@ -313,13 +348,11 @@ def derive_task(
     # for the same persona — which is usually *not* what you want.
     # Using hashlib (content-based) keeps the salt stable across
     # Python sessions; built-in ``hash()`` is salted per-process.
-    bank_salt_bytes = hashlib.sha256(
-        f"{fact_bank.bank_id}|{fact_bank.bank_version}".encode("utf-8")
-    ).digest()[:8]
+    bank_salt_bytes = hashlib.sha256(f"{fact_bank.bank_id}|{fact_bank.bank_version}".encode("utf-8")).digest()[:8]
     bank_salt = int.from_bytes(bank_salt_bytes, "big", signed=False)
     mix = persona_hash ^ bank_salt
     if seed is not None:
-        mix ^= (int(seed) & 0xFFFFFFFFFFFFFFFF)
+        mix ^= int(seed) & 0xFFFFFFFFFFFFFFFF
 
     rng = random.Random(mix)
     return rng.choice(candidates)

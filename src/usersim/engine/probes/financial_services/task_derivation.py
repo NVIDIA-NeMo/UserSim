@@ -51,9 +51,24 @@ def _slug(value: Any) -> Optional[str]:
 
 
 _FINANCE_OCCUPATION_KEYWORDS = (
-    "financ", "account", "cpa", "auditor", "analyst", "econom", "actuar",
-    "invest", "banker", "bank ", "trader", "trading", "portfolio", "tax ",
-    "wealth", "treasur", "underwrit", "broker",
+    "financ",
+    "account",
+    "cpa",
+    "auditor",
+    "analyst",
+    "econom",
+    "actuar",
+    "invest",
+    "banker",
+    "bank ",
+    "trader",
+    "trading",
+    "portfolio",
+    "tax ",
+    "wealth",
+    "treasur",
+    "underwrit",
+    "broker",
 )
 
 
@@ -81,7 +96,8 @@ def derive_financial_literacy(persona: Dict[str, Any], locale: str = "en_US") ->
 
 
 def _institution_type_weights(
-    persona: Dict[str, Any], literacy: str,
+    persona: Dict[str, Any],
+    literacy: str,
 ) -> Dict[str, float]:
     """Soft prior over institution TYPES for this persona (base 1.0 each).
 
@@ -113,7 +129,8 @@ def _institution_type_weights(
 
 
 def _category_weights(
-    persona_tags: List[str], categories: "Sequence[Any]",
+    persona_tags: List[str],
+    categories: "Sequence[Any]",
 ) -> Dict[str, float]:
     """Soft prior over categories: +1 per persona tag a category is affine to.
 
@@ -184,7 +201,10 @@ def derive_instance(
         # a candidate (see _institution_type_weights / _category_weights).
         literacy = derive_financial_literacy(persona, locale)
         institution = select_institution(
-            bank, tags, seed=seed, persona_uuid=persona_uuid,
+            bank,
+            tags,
+            seed=seed,
+            persona_uuid=persona_uuid,
             type_weights=_institution_type_weights(persona, literacy),
         )
         if institution is not None:
@@ -193,12 +213,11 @@ def derive_instance(
             applicable = taxonomy.categories_for_type(institution.type)
             if applicable:
                 applicable_ids = {c.id for c in applicable}
-                excluded = [
-                    c.id for c in taxonomy.categories
-                    if c.id not in applicable_ids
-                ]
+                excluded = [c.id for c in taxonomy.categories if c.id not in applicable_ids]
                 picked = select_category(
-                    persona, taxonomy, seed=seed,
+                    persona,
+                    taxonomy,
+                    seed=seed,
                     excluded_category_ids=excluded,
                     category_weights=_category_weights(tags, applicable),
                 )
@@ -214,22 +233,26 @@ def derive_instance(
                     taxonomy_version=taxonomy.taxonomy_version,
                     persona_uuid=persona_uuid,
                     locale=locale,
-                    placeholder=bool(
-                        getattr(taxonomy, "placeholder", False)
-                        or institution.placeholder
-                    ),
+                    placeholder=bool(getattr(taxonomy, "placeholder", False) or institution.placeholder),
                 )
         # No institution / no applicable categories -> fall back to verifiable.
 
     picked = select_institution_and_template(
-        bank, tags, seed=seed, persona_uuid=persona_uuid, tier="verifiable",
+        bank,
+        tags,
+        seed=seed,
+        persona_uuid=persona_uuid,
+        tier="verifiable",
     )
     if picked is None:
         return None
     institution, template = picked
     return build_instance(
-        template, institution,
-        persona_uuid=persona_uuid, locale=locale, seed=seed,
+        template,
+        institution,
+        persona_uuid=persona_uuid,
+        locale=locale,
+        seed=seed,
     )
 
 

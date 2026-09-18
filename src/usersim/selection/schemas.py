@@ -64,9 +64,7 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
     # linguistic background. Also excluded by default, and separate from
     # ``persona_verbatim`` so that asking for one does not silently include
     # the other. Review before sharing anything exported with this token.
-    "persona_protected": (
-        "persona_religion_language_context",
-    ),
+    "persona_protected": ("persona_religion_language_context",),
     # financial_services gold-metadata side channels the probe emits on every
     # trajectory (verifiable + dynamic). First-class here so curated
     # training/eval exports carry them for the goal-(b) flywheel: the verifiable
@@ -101,9 +99,7 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
 # Columns the default export leaves out. They still reach ``--schema full``,
 # an explicit column list, or their group token, so nothing is unreachable:
 # the point is that exporting them is a choice someone made.
-OPT_IN_ONLY: frozenset[str] = frozenset(
-    LOGICAL_GROUPS["persona_verbatim"] + LOGICAL_GROUPS["persona_protected"]
-)
+OPT_IN_ONLY: frozenset[str] = frozenset(LOGICAL_GROUPS["persona_verbatim"] + LOGICAL_GROUPS["persona_protected"])
 
 # Named presets. ``None`` is the sentinel for "all columns" (full).
 NAMED_SCHEMAS: dict[str, Optional[tuple[str, ...]]] = {
@@ -164,10 +160,7 @@ def resolve_columns(schema: Schema, available: Iterable[str]) -> list[str]:
     available_set = set(available)
 
     def _everything(*, drop_opt_in: bool) -> list[str]:
-        return [
-            c for c in available
-            if c != "run" and not (drop_opt_in and c in OPT_IN_ONLY)
-        ]
+        return [c for c in available if c != "run" and not (drop_opt_in and c in OPT_IN_ONLY)]
 
     if schema is None or schema == "standard":
         return _everything(drop_opt_in=True)

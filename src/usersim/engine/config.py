@@ -89,7 +89,8 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # Context compression: summarize older assistant responses to bound context growth
     context_compression: bool = True
     compression_window: int = Field(
-        default=1, ge=1,
+        default=1,
+        ge=1,
         description="Keep the last N summarized assistant responses verbatim.",
     )
 

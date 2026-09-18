@@ -86,20 +86,13 @@ def derive_task(
     excluded_strategies = set(excluded_strategy_ids)
 
     persona_tags = persona_to_tags(persona, locale)
-    target_pool = [
-        t for t in bank.target_requests
-        if t.matches_persona(persona_tags) and t.id not in excluded_targets
-    ]
-    strategy_pool = [
-        s for s in bank.strategies if s.id not in excluded_strategies
-    ]
+    target_pool = [t for t in bank.target_requests if t.matches_persona(persona_tags) and t.id not in excluded_targets]
+    strategy_pool = [s for s in bank.strategies if s.id not in excluded_strategies]
     if not target_pool or not strategy_pool:
         return None
 
     persona_hash = _persona_content_hash(persona)
-    bank_salt_bytes = hashlib.sha256(
-        f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")
-    ).digest()[:16]
+    bank_salt_bytes = hashlib.sha256(f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")).digest()[:16]
     target_salt = int.from_bytes(bank_salt_bytes[:8], "big", signed=False)
     strategy_salt = int.from_bytes(bank_salt_bytes[8:], "big", signed=False)
 

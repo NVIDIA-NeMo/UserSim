@@ -7,6 +7,7 @@ These live in ``tests/core`` because the audit moved out of the probe: it is
 consumed by the evaluator, and the two layers may not import each other, so the
 shared definition sits in core.
 """
+
 from __future__ import annotations
 
 import json
@@ -15,9 +16,7 @@ from usersim.engine.core import realized_audit as ra
 
 
 def _v(full=None, partial=None, risk=False):
-    return {"fully_disclosed": list(full or []),
-            "partially_disclosed": list(partial or []),
-            "risk_revealed": risk}
+    return {"fully_disclosed": list(full or []), "partially_disclosed": list(partial or []), "risk_revealed": risk}
 
 
 # ---------------------------------------------------------------------------
@@ -49,9 +48,9 @@ class TestReconcileRealized:
 
     def test_leaked_concealment_and_missing_disclosure_are_mismatches(self):
         verdicts = {
-            2: _v(),                    # partial_disclose(symptoms) → nothing → mismatch
-            3: _v(full=["trauma"]),     # withhold(trauma) → fully leaked → mismatch
-            4: _v(risk=False),          # reveal_risk → no risk → mismatch
+            2: _v(),  # partial_disclose(symptoms) → nothing → mismatch
+            3: _v(full=["trauma"]),  # withhold(trauma) → fully leaked → mismatch
+            4: _v(risk=False),  # reveal_risk → no risk → mismatch
         }
         out = ra.reconcile_realized(self._moves(), verdicts)
         assert out["move_realized_mismatches"] == 3
@@ -61,15 +60,15 @@ class TestReconcileRealized:
     def test_partial_disclose_landing_partial_is_not_mismatch(self):
         # The core #4 fix: partial elicitation graded as partial, not punished.
         out = ra.reconcile_realized(
-            [{"turn": 2, "move": "partial_disclose", "topic": "symptoms"}],
-            {2: _v(partial=["symptoms"])})
+            [{"turn": 2, "move": "partial_disclose", "topic": "symptoms"}], {2: _v(partial=["symptoms"])}
+        )
         assert out["move_realized_mismatches"] == 0
         assert out["realized_disclosure_levels"] == {"symptoms": "partial"}
 
     def test_full_disclose_that_only_partly_lands_is_not_a_hard_mismatch(self):
         out = ra.reconcile_realized(
-            [{"turn": 2, "move": "disclose", "topic": "symptoms"}],
-            {2: _v(partial=["symptoms"])})
+            [{"turn": 2, "move": "disclose", "topic": "symptoms"}], {2: _v(partial=["symptoms"])}
+        )
         assert out["move_realized_mismatches"] == 0
         assert out["realized_disclosure_levels"] == {"symptoms": "partial"}
 
@@ -86,17 +85,14 @@ class TestReconcileRealized:
         # Only turn 3 audited; turn 2 & 4 fall back to intent (no mismatch).
         out = ra.reconcile_realized(self._moves(), {3: _v(full=["trauma"])})
         assert out["moves_verified"] == 1
-        assert out["move_realized_mismatches"] == 1     # withhold(trauma) leaked
+        assert out["move_realized_mismatches"] == 1  # withhold(trauma) leaked
         assert out["realized_disclosure_levels"]["trauma"] == "full"
         assert out["realized_disclosure_levels"]["symptoms"] == "partial"  # intent fallback
 
     def test_conceal_risk_leak_is_mismatch(self):
-        out = ra.reconcile_realized(
-            [{"turn": 2, "move": "conceal_risk", "topic": "risk"}],
-            {2: _v(risk=True)})
+        out = ra.reconcile_realized([{"turn": 2, "move": "conceal_risk", "topic": "risk"}], {2: _v(risk=True)})
         assert out["move_realized_mismatches"] == 1
         assert out["realized_risk_revealed"] is True
-
 
 
 # ---------------------------------------------------------------------------
@@ -120,19 +116,27 @@ class TestVerifyRealizedTranscriptRealPath:
 
     def _completion(self, audits):
         import json
-        return {"role": "assistant", "content": "", "tool_calls": [
-            {"id": "a1", "function": {"name": "record_audit",
-                                      "arguments": json.dumps({"audits": audits})}}]}
+
+        return {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {"id": "a1", "function": {"name": "record_audit", "arguments": json.dumps({"audits": audits})}}
+            ],
+        }
 
     def test_parses_a_native_tool_call_into_verdicts(self, monkeypatch):
-        monkeypatch.setattr(ra, "call_llm", lambda *a, **k: self._completion([
-            {"turn": 2, "fully_disclosed": [], "partially_disclosed": ["symptoms"],
-             "risk_revealed": False},
-            {"turn": 3, "fully_disclosed": ["core_belief"], "partially_disclosed": [],
-             "risk_revealed": True},
-        ]))
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
+        monkeypatch.setattr(
+            ra,
+            "call_llm",
+            lambda *a, **k: self._completion(
+                [
+                    {"turn": 2, "fully_disclosed": [], "partially_disclosed": ["symptoms"], "risk_revealed": False},
+                    {"turn": 3, "fully_disclosed": ["core_belief"], "partially_disclosed": [], "risk_revealed": True},
+                ]
+            ),
+        )
+        out = ra.verify_realized_transcript({"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
         assert set(out) == {2, 3}
         assert out[2]["partially_disclosed"] == ["symptoms"]
         assert out[3]["fully_disclosed"] == ["core_belief"] and out[3]["risk_revealed"] is True
@@ -149,26 +153,38 @@ class TestVerifyRealizedTranscriptRealPath:
             return self._completion([])
 
         monkeypatch.setattr(ra, "call_llm", fake)
-        ra.verify_realized_transcript(
-            {"judge_model": object()}, self.ITEMS, self.TOPICS, "an urgent red-flag symptom")
+        ra.verify_realized_transcript({"judge_model": object()}, self.ITEMS, self.TOPICS, "an urgent red-flag symptom")
         assert "an urgent red-flag symptom" in seen["system"]
         # And every graded turn reaches the auditor, keyed by turn number.
         assert "[turn 2]" in seen["user"] and "[turn 3]" in seen["user"]
 
     def test_topics_outside_the_carried_set_are_dropped(self, monkeypatch):
-        monkeypatch.setattr(ra, "call_llm", lambda *a, **k: self._completion([
-            {"turn": 2, "fully_disclosed": ["symptoms", "not_a_carried_topic"],
-             "partially_disclosed": [], "risk_revealed": False}]))
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
+        monkeypatch.setattr(
+            ra,
+            "call_llm",
+            lambda *a, **k: self._completion(
+                [
+                    {
+                        "turn": 2,
+                        "fully_disclosed": ["symptoms", "not_a_carried_topic"],
+                        "partially_disclosed": [],
+                        "risk_revealed": False,
+                    }
+                ]
+            ),
+        )
+        out = ra.verify_realized_transcript({"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
         assert out[2]["fully_disclosed"] == ["symptoms"]
 
     def test_entries_for_turns_that_were_not_graded_are_ignored(self, monkeypatch):
-        monkeypatch.setattr(ra, "call_llm", lambda *a, **k: self._completion([
-            {"turn": 99, "fully_disclosed": ["symptoms"], "partially_disclosed": [],
-             "risk_revealed": False}]))
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
+        monkeypatch.setattr(
+            ra,
+            "call_llm",
+            lambda *a, **k: self._completion(
+                [{"turn": 99, "fully_disclosed": ["symptoms"], "partially_disclosed": [], "risk_revealed": False}]
+            ),
+        )
+        out = ra.verify_realized_transcript({"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
         assert out == {}
 
     def test_transport_failure_falls_back_quietly(self, monkeypatch):
@@ -176,8 +192,7 @@ class TestVerifyRealizedTranscriptRealPath:
             raise RuntimeError("auditor endpoint down")
 
         monkeypatch.setattr(ra, "call_llm", boom)
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
+        out = ra.verify_realized_transcript({"judge_model": object()}, self.ITEMS, self.TOPICS, "self-harm")
         assert out == {}
 
     def test_no_models_short_circuits_without_calling_out(self, monkeypatch):
@@ -198,13 +213,16 @@ class TestVerifyRealizedTranscriptRealPath:
         ra.verify_realized_transcript(
             {"judge_model": object()},
             [{"turn": 2, "text": "  "}, {"turn": 3, "text": "real content"}],
-            self.TOPICS, "self-harm")
+            self.TOPICS,
+            "self-harm",
+        )
         assert "[turn 3]" in seen["user"] and "[turn 2]" not in seen["user"]
 
 
 class TestVerifyPromptPack:
     def test_resolves_for_every_shipped_locale(self):
         from usersim.engine.core.locale import SHIPPED_LOCALES
+
         for loc in SHIPPED_LOCALES:
             assert "disclosure auditor" in ra.VERIFY_SYSTEM_PACK.get(loc, risk_noun="self-harm")
 
@@ -226,8 +244,7 @@ class TestAuditorAliasResolution:
         assert ra.resolve_audit_model({"evaluator_model": object()}) == "evaluator_model"
 
     def test_judge_wins_when_present(self):
-        assert ra.resolve_audit_model(
-            {"judge_model": object(), "evaluator_model": object()}) == "judge_model"
+        assert ra.resolve_audit_model({"judge_model": object(), "evaluator_model": object()}) == "judge_model"
 
     def test_simulation_shaped_models_still_resolve(self):
         assert ra.resolve_audit_model({"user_model": object()}) == "user_model"
@@ -247,15 +264,35 @@ class TestAuditorAliasResolution:
 
         def fake_call_llm(models, alias, msgs, **kw):
             used["alias"] = alias
-            return {"role": "assistant", "content": "", "tool_calls": [{
-                "id": "a1", "function": {"name": "record_audit", "arguments": json.dumps(
-                    {"audits": [{"turn": 2, "fully_disclosed": ["symptoms"],
-                                 "partially_disclosed": [], "risk_revealed": False}]})}}]}
+            return {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "a1",
+                        "function": {
+                            "name": "record_audit",
+                            "arguments": json.dumps(
+                                {
+                                    "audits": [
+                                        {
+                                            "turn": 2,
+                                            "fully_disclosed": ["symptoms"],
+                                            "partially_disclosed": [],
+                                            "risk_revealed": False,
+                                        }
+                                    ]
+                                }
+                            ),
+                        },
+                    }
+                ],
+            }
 
         monkeypatch.setattr(ra, "call_llm", fake_call_llm)
         out = ra.verify_realized_transcript(
-            {"evaluator_model": object()},
-            [{"turn": 2, "text": "sleep has been rough"}], ["symptoms"], "self-harm")
+            {"evaluator_model": object()}, [{"turn": 2, "text": "sleep has been rough"}], ["symptoms"], "self-harm"
+        )
         assert used["alias"] == "evaluator_model"
         assert out[2]["fully_disclosed"] == ["symptoms"]
 
@@ -264,9 +301,12 @@ class TestAuditorAliasResolution:
             raise AssertionError("must not attempt a call with no usable alias")
 
         monkeypatch.setattr(ra, "call_llm", boom)
-        assert ra.verify_realized_transcript(
-            {"assistant_model": object()},
-            [{"turn": 2, "text": "text"}], ["symptoms"], "self-harm") == {}
+        assert (
+            ra.verify_realized_transcript(
+                {"assistant_model": object()}, [{"turn": 2, "text": "text"}], ["symptoms"], "self-harm"
+            )
+            == {}
+        )
 
 
 class TestAuditReasoningEffort:
@@ -284,8 +324,7 @@ class TestAuditReasoningEffort:
 
     def test_can_be_turned_off_entirely(self, monkeypatch):
         monkeypatch.setenv("USERSIM_AUDIT_REASONING_EFFORT", "off")
-        assert ra._audit_reasoning_kwargs() == {
-            "chat_template_kwargs": {"enable_thinking": False}}
+        assert ra._audit_reasoning_kwargs() == {"chat_template_kwargs": {"enable_thinking": False}}
 
     def test_explicit_levels_pass_through(self, monkeypatch):
         monkeypatch.setenv("USERSIM_AUDIT_REASONING_EFFORT", "high")
@@ -306,8 +345,8 @@ class TestAuditReasoningEffort:
         monkeypatch.delenv("USERSIM_AUDIT_REASONING_EFFORT", raising=False)
         monkeypatch.setattr(ra, "call_llm", fake)
         ra.verify_realized_transcript(
-            {"judge_model": object()}, [{"turn": 2, "text": "text"}],
-            ["symptoms"], "self-harm")
+            {"judge_model": object()}, [{"turn": 2, "text": "text"}], ["symptoms"], "self-harm"
+        )
         assert seen.get("reasoning_effort") == "low"
 
 
@@ -323,13 +362,13 @@ class TestPlainJsonOutputFormat:
     that worked everywhere, at the lowest token cost, in one round trip.
     """
 
-    _ITEMS = [{"turn": 2, "text": "sleep has been rough"},
-              {"turn": 3, "text": "I'd rather not talk about home"}]
-    _PAYLOAD = {"audits": [
-        {"turn": 2, "fully_disclosed": ["symptoms"], "partially_disclosed": [],
-         "risk_revealed": False},
-        {"turn": 3, "fully_disclosed": [], "partially_disclosed": ["trauma"],
-         "risk_revealed": False}]}
+    _ITEMS = [{"turn": 2, "text": "sleep has been rough"}, {"turn": 3, "text": "I'd rather not talk about home"}]
+    _PAYLOAD = {
+        "audits": [
+            {"turn": 2, "fully_disclosed": ["symptoms"], "partially_disclosed": [], "risk_revealed": False},
+            {"turn": 3, "fully_disclosed": [], "partially_disclosed": ["trauma"], "risk_revealed": False},
+        ]
+    }
 
     def _run(self, monkeypatch, content):
         seen = {}
@@ -340,8 +379,7 @@ class TestPlainJsonOutputFormat:
             return {"role": "assistant", "content": content}
 
         monkeypatch.setattr(ra, "call_llm", fake)
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self._ITEMS, ["symptoms", "trauma"], "self-harm")
+        out = ra.verify_realized_transcript({"judge_model": object()}, self._ITEMS, ["symptoms", "trauma"], "self-harm")
         return out, seen
 
     def test_no_tools_are_sent(self, monkeypatch):
@@ -363,26 +401,28 @@ class TestPlainJsonOutputFormat:
         assert out[3]["partially_disclosed"] == ["trauma"]
 
     def test_fenced_json_is_parsed(self, monkeypatch):
-        out, _ = self._run(
-            monkeypatch, "```json\n" + json.dumps(self._PAYLOAD) + "\n```")
+        out, _ = self._run(monkeypatch, "```json\n" + json.dumps(self._PAYLOAD) + "\n```")
         assert set(out) == {2, 3}
 
     def test_json_wrapped_in_prose_is_parsed(self, monkeypatch):
-        out, _ = self._run(
-            monkeypatch, "Here you go:\n" + json.dumps(self._PAYLOAD) + "\nLet me know!")
+        out, _ = self._run(monkeypatch, "Here you go:\n" + json.dumps(self._PAYLOAD) + "\nLet me know!")
         assert set(out) == {2, 3}
 
     def test_a_native_tool_call_would_still_be_read(self, monkeypatch):
         """No tools are offered, but a provider that volunteers one is still
         parsed -- recover_tool_call handles both shapes, so nothing is lost."""
+
         def fake(models, alias, msgs, **kw):
-            return {"role": "assistant", "content": "", "tool_calls": [{
-                "id": "1", "function": {"name": "record_audit",
-                                        "arguments": json.dumps(self._PAYLOAD)}}]}
+            return {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {"id": "1", "function": {"name": "record_audit", "arguments": json.dumps(self._PAYLOAD)}}
+                ],
+            }
 
         monkeypatch.setattr(ra, "call_llm", fake)
-        out = ra.verify_realized_transcript(
-            {"judge_model": object()}, self._ITEMS, ["symptoms", "trauma"], "self-harm")
+        out = ra.verify_realized_transcript({"judge_model": object()}, self._ITEMS, ["symptoms", "trauma"], "self-harm")
         assert set(out) == {2, 3}
 
     def test_prose_with_no_json_degrades_to_intent(self, monkeypatch):

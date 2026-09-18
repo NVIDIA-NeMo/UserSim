@@ -28,6 +28,7 @@ The per-turn engine (tool schema, propose/guard loop, env/Guard construction)
 lives in :mod:`.move_runtime`; this mixin is only the ``BaseProbe`` seam that
 wires that engine into the conversation loop's hooks.
 """
+
 from __future__ import annotations
 
 import json
@@ -90,7 +91,8 @@ class GuardedMoveMixin:
     # ── env-harness hook registration (domain-agnostic capability seam) ──
     @classmethod
     def register_move_hook(
-        cls, fn: Optional["mr.MoveHook"],
+        cls,
+        fn: Optional["mr.MoveHook"],
     ) -> Optional["mr.MoveHook"]:
         """Register (or clear, with ``None``) the process-wide default move hook.
 
@@ -115,11 +117,7 @@ class GuardedMoveMixin:
         from aborting on a missing prompt. Falls back to the conversation
         locale on a bare host that never ran ``BaseProbe.__init__``.
         """
-        return (
-            getattr(self, "_asset_locale", None)
-            or getattr(self, "_locale", None)
-            or "en_US"
-        )
+        return getattr(self, "_asset_locale", None) or getattr(self, "_locale", None) or "en_US"
 
     # ── configuration hooks the host probe supplies ─────────────────
     def guarded_move_config(self) -> Mapping[str, Any]:
@@ -128,9 +126,7 @@ class GuardedMoveMixin:
 
         Override in the host probe (the health family returns ``self.CLIENT``).
         """
-        raise NotImplementedError(
-            f"{type(self).__name__} must implement guarded_move_config()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must implement guarded_move_config()")
 
     def guarded_moves_enabled(self) -> bool:
         """Whether the guarded move-space is active for THIS trajectory.
@@ -178,8 +174,10 @@ class GuardedMoveMixin:
         task = getattr(self, "_task", None)
         profile = dict(getattr(task, "profile", None) or {})
         self._env, self._guard, self._topics, self._has_risk = mr.build_env(
-            num_turns=max_turns, profile=profile,
-            disclosure_style=disclosure_style, client=cfg,
+            num_turns=max_turns,
+            profile=profile,
+            disclosure_style=disclosure_style,
+            client=cfg,
         )
 
     def _resolve_move_hook(self, cfg: Mapping[str, Any]) -> Optional["mr.MoveHook"]:
@@ -223,8 +221,13 @@ class GuardedMoveMixin:
             return []
         self._env.turn = turn_idx
         move, veto_log, reasoning = mr.propose_and_guard(
-            self._models, self._env, self._guard, self._topics,
-            self._has_risk, state, self._gm_config,
+            self._models,
+            self._env,
+            self._guard,
+            self._topics,
+            self._has_risk,
+            state,
+            self._gm_config,
             self._scaffold_locale(),
             emit=getattr(self, "_move_hook", None),
             identity=getattr(self, "_move_identity", None),
@@ -277,38 +280,42 @@ class GuardedMoveMixin:
         #
         # The scorer coerces all of these back via ``_as_list`` / ``_as_levels``.
         dumps = lambda v: json.dumps(v, ensure_ascii=False, default=str)  # noqa: E731
-        extras.update({
-            "moves_enabled": True,
-            "moves_played": dumps([m.get("move") for m in moves]),
-            "moves_detail": dumps(moves),
-            "guard_veto_count": sum(len(m.get("vetoes") or []) for m in moves),
-            # Committed-INTENT columns (what the move-space decided).
-            "disclosed_topics": dumps(disclosed),
-            # Graded committed intent (full vs partial), so the scorer's fallback
-            # (when realized audit is unavailable) can grade partial_disclose too.
-            "committed_disclosure_levels": dumps(_committed_levels(moves)),
-            "concealment_topics": dumps(topics),
-            "disclosure_coverage": round(coverage, 3),
-            "risk_present": bool(self._has_risk),
-            # What "risk" concretely means for this client ("self-harm", "an
-            # urgent red-flag symptom", ...). Persisted because the evaluator's
-            # realized-behavior audit interpolates it into the auditor prompt and
-            # cannot reach the client config from there; without it the auditor is
-            # asked about the useless generic "risk".
-            "risk_noun": self._gm_config.get("risk_noun") or "risk",
-            "risk_revealed": bool(self._env.risk_revealed) if self._env else False,
-            "risk_revealed_turn": self._risk_revealed_turn,
-            "patient_archetype": self._env.archetype if self._env else None,
-            # Turn budget + whether the paced risk-reveal window was structurally
-            # reachable within it. The scorer uses ``turn_budget`` to stratify
-            # coverage (a Guard-pacing-confounded axis) and ``risk_opportunity`` to
-            # avoid charging a non-revealed risk as a safety miss when the budget
-            # was too short for the arc to complete (see move_runtime).
-            "turn_budget": int(self._env.num_turns) if self._env is not None else None,
-            "risk_opportunity": (
-                mr.risk_reveal_reachable(self._env, self._guard)
-                if (self._env is not None and self._guard is not None) else None),
-        })
+        extras.update(
+            {
+                "moves_enabled": True,
+                "moves_played": dumps([m.get("move") for m in moves]),
+                "moves_detail": dumps(moves),
+                "guard_veto_count": sum(len(m.get("vetoes") or []) for m in moves),
+                # Committed-INTENT columns (what the move-space decided).
+                "disclosed_topics": dumps(disclosed),
+                # Graded committed intent (full vs partial), so the scorer's fallback
+                # (when realized audit is unavailable) can grade partial_disclose too.
+                "committed_disclosure_levels": dumps(_committed_levels(moves)),
+                "concealment_topics": dumps(topics),
+                "disclosure_coverage": round(coverage, 3),
+                "risk_present": bool(self._has_risk),
+                # What "risk" concretely means for this client ("self-harm", "an
+                # urgent red-flag symptom", ...). Persisted because the evaluator's
+                # realized-behavior audit interpolates it into the auditor prompt and
+                # cannot reach the client config from there; without it the auditor is
+                # asked about the useless generic "risk".
+                "risk_noun": self._gm_config.get("risk_noun") or "risk",
+                "risk_revealed": bool(self._env.risk_revealed) if self._env else False,
+                "risk_revealed_turn": self._risk_revealed_turn,
+                "patient_archetype": self._env.archetype if self._env else None,
+                # Turn budget + whether the paced risk-reveal window was structurally
+                # reachable within it. The scorer uses ``turn_budget`` to stratify
+                # coverage (a Guard-pacing-confounded axis) and ``risk_opportunity`` to
+                # avoid charging a non-revealed risk as a safety miss when the budget
+                # was too short for the arc to complete (see move_runtime).
+                "turn_budget": int(self._env.num_turns) if self._env is not None else None,
+                "risk_opportunity": (
+                    mr.risk_reveal_reachable(self._env, self._guard)
+                    if (self._env is not None and self._guard is not None)
+                    else None
+                ),
+            }
+        )
         # Realized-BEHAVIOR columns: audit what the free-form utterances actually
         # did, so the ground truth reflects behavior, not just intent. Additive and
         # robust — an unavailable/failed auditor falls back to intent and raises a
@@ -319,6 +326,7 @@ class GuardedMoveMixin:
         # scorer that claims to be deterministic depend on a non-deterministic
         # step. The audit runs in the evaluator instead, off stored columns.
         return extras
+
 
 def _committed_levels(moves: List[dict]) -> dict:
     """Graded committed intent per topic from the move list (full > partial)."""

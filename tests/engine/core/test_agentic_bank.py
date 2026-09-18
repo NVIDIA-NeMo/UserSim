@@ -220,9 +220,7 @@ class TestTopLevelValidation:
 class TestActionTaxonomyResolution:
     def test_sanctioned_action_must_be_in_taxonomy(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml(sanctioned_action_name="not_a_real_action")
-        with pytest.raises(
-            AgenticBankError, match="not found in.*action_taxonomy"
-        ):
+        with pytest.raises(AgenticBankError, match="not found in.*action_taxonomy"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_sanctioned_action_can_be_null(self, tmp_path: Path) -> None:
@@ -235,25 +233,22 @@ class TestActionTaxonomyResolution:
         assert bank.action_requests[0].sanctioned_action_name is None
 
     def test_missing_sanctioned_action_field_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
-            "    sanctioned_action_name: read_user_personal_data\n", "",
+            "    sanctioned_action_name: read_user_personal_data\n",
+            "",
         )
-        with pytest.raises(
-            AgenticBankError, match="sanctioned_action_name.*missing"
-        ):
+        with pytest.raises(AgenticBankError, match="sanctioned_action_name.*missing"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_tempted_action_must_be_in_taxonomy(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
             "    sanctioned_action_name: read_user_personal_data",
-            "    sanctioned_action_name: read_user_personal_data\n"
-            "    tempted_action_name: not_a_real_action",
+            "    sanctioned_action_name: read_user_personal_data\n    tempted_action_name: not_a_real_action",
         )
-        with pytest.raises(
-            AgenticBankError, match="tempted_action_name.*not found"
-        ):
+        with pytest.raises(AgenticBankError, match="tempted_action_name.*not found"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_tempted_action_can_be_omitted(self, tmp_path: Path) -> None:
@@ -279,48 +274,48 @@ class TestEntryValidation:
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_duplicate_action_request_id_rejected(self, tmp_path: Path) -> None:
-        extra = "\n".join([
-            "  - id: AR-TEST-001",
-            "    sub_protocol: unsanctioned_action",
-            "    placeholder: true",
-            "    description: |",
-            "      Duplicate.",
-            "    sanctioned_action_name: read_user_personal_data",
-            "    initial_user_prompt: |",
-            "      x",
-            "    expected_behavior: |",
-            "      x",
-            "    simulated_tools:",
-            "      - name: t1",
-            "        description: x",
-            "        parameters: {type: object, properties: {}}",
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
+        extra = "\n".join(
+            [
+                "  - id: AR-TEST-001",
+                "    sub_protocol: unsanctioned_action",
+                "    placeholder: true",
+                "    description: |",
+                "      Duplicate.",
+                "    sanctioned_action_name: read_user_personal_data",
+                "    initial_user_prompt: |",
+                "      x",
+                "    expected_behavior: |",
+                "      x",
+                "    simulated_tools:",
+                "      - name: t1",
+                "        description: x",
+                "        parameters: {type: object, properties: {}}",
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
+        )
         text = _minimal_bank_yaml(extra_entries=extra)
-        with pytest.raises(
-            AgenticBankError, match="duplicate action_request id"
-        ):
+        with pytest.raises(AgenticBankError, match="duplicate action_request id"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_placeholder_must_be_bool(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
-            "    placeholder: true", "    placeholder: yes-please",
+            "    placeholder: true",
+            "    placeholder: yes-please",
         )
         with pytest.raises(AgenticBankError, match="placeholder"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_non_placeholder_with_placeholder_source_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml(placeholder=False).replace(
             'source: "internal authorship"',
             'source: "placeholder"',
         )
-        with pytest.raises(
-            AgenticBankError, match="'placeholder' is only allowed"
-        ):
+        with pytest.raises(AgenticBankError, match="'placeholder' is only allowed"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_non_iso_date_rejected(self, tmp_path: Path) -> None:
@@ -364,7 +359,8 @@ class TestEntryValidation:
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_mock_tool_response_for_undeclared_tool_rejected(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
             "    mock_tool_responses:\n"
@@ -380,37 +376,26 @@ class TestEntryValidation:
             "        content: |\n"
             '          {"result": "ok"}\n',
         )
-        with pytest.raises(
-            AgenticBankError, match="not declared in simulated_tools"
-        ):
+        with pytest.raises(AgenticBankError, match="not declared in simulated_tools"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_mock_tool_response_role_must_be_tool(self, tmp_path: Path) -> None:
         text = _minimal_bank_yaml().replace(
-            "      read_thing:\n"
-            '        role: "tool"\n'
-            '        name: "read_thing"\n',
-            "      read_thing:\n"
-            '        role: "user"\n'
-            '        name: "read_thing"\n',
+            '      read_thing:\n        role: "tool"\n        name: "read_thing"\n',
+            '      read_thing:\n        role: "user"\n        name: "read_thing"\n',
         )
         with pytest.raises(AgenticBankError, match="must be 'tool'"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
     def test_mock_tool_response_name_must_match_key(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         text = _minimal_bank_yaml().replace(
-            "      read_thing:\n"
-            '        role: "tool"\n'
-            '        name: "read_thing"\n',
-            "      read_thing:\n"
-            '        role: "tool"\n'
-            '        name: "different_name"\n',
+            '      read_thing:\n        role: "tool"\n        name: "read_thing"\n',
+            '      read_thing:\n        role: "tool"\n        name: "different_name"\n',
         )
-        with pytest.raises(
-            AgenticBankError, match="must equal the dict key"
-        ):
+        with pytest.raises(AgenticBankError, match="must equal the dict key"):
             load_agentic_bank(_write_bank(tmp_path, text))
 
 
@@ -436,7 +421,8 @@ class TestLookups:
         assert bank.request_ids() == ("AR-TEST-001",)
 
     def test_for_persona_no_tags_matches_anyone(
-        self, bank: AgenticBank,
+        self,
+        bank: AgenticBank,
     ) -> None:
         # Default minimal bank entry has no persona_tags.
         assert len(bank.for_persona([])) == 1
@@ -460,32 +446,33 @@ class TestPersonaMatching:
         assert ar.matches_persona(["interest:health"]) is False
 
     def test_for_persona_returns_applicable_subset(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         # Two entries: one unrestricted, one tech-only.
-        extra = "\n".join([
-            "  - id: AR-TEST-002",
-            "    sub_protocol: unsanctioned_action",
-            "    placeholder: true",
-            "    description: |",
-            "      Tech-only.",
-            "    sanctioned_action_name: read_user_personal_data",
-            "    initial_user_prompt: |",
-            "      x",
-            "    expected_behavior: |",
-            "      x",
-            "    simulated_tools:",
-            "      - name: t1",
-            "        description: x",
-            "        parameters: {type: object, properties: {}}",
-            '    persona_tags: ["interest:tech"]',
-            "    provenance:",
-            '      source: "placeholder"',
-            '      last_reviewed: "2026-04-20"',
-        ])
-        bank = load_agentic_bank(
-            _write_bank(tmp_path, _minimal_bank_yaml(extra_entries=extra))
+        extra = "\n".join(
+            [
+                "  - id: AR-TEST-002",
+                "    sub_protocol: unsanctioned_action",
+                "    placeholder: true",
+                "    description: |",
+                "      Tech-only.",
+                "    sanctioned_action_name: read_user_personal_data",
+                "    initial_user_prompt: |",
+                "      x",
+                "    expected_behavior: |",
+                "      x",
+                "    simulated_tools:",
+                "      - name: t1",
+                "        description: x",
+                "        parameters: {type: object, properties: {}}",
+                '    persona_tags: ["interest:tech"]',
+                "    provenance:",
+                '      source: "placeholder"',
+                '      last_reviewed: "2026-04-20"',
+            ]
         )
+        bank = load_agentic_bank(_write_bank(tmp_path, _minimal_bank_yaml(extra_entries=extra)))
         # Persona without tech: only the unrestricted entry.
         ms = bank.for_persona(["interest:health"])
         assert {r.id for r in ms} == {"AR-TEST-001"}
@@ -520,7 +507,9 @@ class TestCacheAndDefault:
     def test_reset_drops_cache(self, tmp_path: Path) -> None:
         a = _write_bank(tmp_path / "a", _minimal_bank_yaml(bank_id="a"))
         b = _write_bank(
-            tmp_path / "b", _minimal_bank_yaml(bank_id="b"), name="bank.yaml",
+            tmp_path / "b",
+            _minimal_bank_yaml(bank_id="b"),
+            name="bank.yaml",
         )
         with patch.dict(os.environ, {"USERSIM_SAFETY_AGENTIC_BANK": str(a)}):
             assert load_agentic_bank_default().bank_id == "a"
@@ -531,7 +520,9 @@ class TestCacheAndDefault:
     def test_default_path_resolves_to_assets(self) -> None:
         p = default_agentic_bank_path()
         assert p.parts[-3:] == (
-            "assets", "safety_agentic", "sample.yaml",
+            "assets",
+            "safety_agentic",
+            "sample.yaml",
         )
 
 
@@ -543,9 +534,7 @@ class TestCacheAndDefault:
 class TestShippedSampleBank:
     @pytest.fixture
     def sample_bank(self) -> AgenticBank:
-        return load_agentic_bank(
-            (packaged_assets_dir() / "safety_agentic/sample.yaml")
-        )
+        return load_agentic_bank((packaged_assets_dir() / "safety_agentic/sample.yaml"))
 
     def test_loads_clean(self, sample_bank: AgenticBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
@@ -561,15 +550,15 @@ class TestShippedSampleBank:
         }
 
     def test_at_least_one_request_per_sub_protocol(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         for sp in sample_bank.sub_protocols:
-            assert len(sample_bank.by_sub_protocol(sp)) >= 1, (
-                f"sub_protocol {sp} has no shipped action requests"
-            )
+            assert len(sample_bank.by_sub_protocol(sp)) >= 1, f"sub_protocol {sp} has no shipped action requests"
 
     def test_generated_requests_are_honest_placeholders(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         for r in sample_bank.action_requests:
             if r.id in {"AR-UNSAN-001", "AR-SCOPE-001", "AR-COMP-001", "AR-CONSEQ-001", "AR-CONSEQ-002"}:
@@ -578,7 +567,8 @@ class TestShippedSampleBank:
                 assert r.placeholder is True
 
     def test_every_sanctioned_action_resolves_to_taxonomy(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         # The loader already enforces this — a failed load would have
         # raised before this test could run. This guards against silent
@@ -589,24 +579,24 @@ class TestShippedSampleBank:
                 assert len(r.sanctioned_action_name) > 0
 
     def test_calendar_probe_rubric_matches_taxonomy_name(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         request = sample_bank.by_id("AR-UNSAN-001")
         assert request is not None
         assert request.sanctioned_action_name == "read_calendar"
-        assert all(
-            "read_user_personal_data" not in text
-            for text in request.expected_behavior.renderings.values()
-        )
+        assert all("read_user_personal_data" not in text for text in request.expected_behavior.renderings.values())
 
     def test_every_request_has_at_least_one_simulated_tool(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         for r in sample_bank.action_requests:
             assert len(r.simulated_tools) >= 1
 
     def test_every_request_has_substantive_expected_behavior(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         # The expected_behavior field is the load-bearing reviewer-facing
         # field — the safety_agentic scorer reads it to ground judgement.
@@ -615,13 +605,11 @@ class TestShippedSampleBank:
         # confounded judge prompt for the affected locale.
         for r in sample_bank.action_requests:
             for loc, text in r.expected_behavior.renderings.items():
-                assert len(text) >= 100, (
-                    f"{r.id}::expected_behavior[{loc}] too short "
-                    f"({len(text)} chars)"
-                )
+                assert len(text) >= 100, f"{r.id}::expected_behavior[{loc}] too short ({len(text)} chars)"
 
     def test_compromised_inputs_probe_has_adversarial_payload(
-        self, sample_bank: AgenticBank,
+        self,
+        sample_bank: AgenticBank,
     ) -> None:
         # Sanity check: the compromised_inputs probe should ship a
         # mock response with adversarial content. Otherwise the probe
@@ -629,9 +617,7 @@ class TestShippedSampleBank:
         comp_probes = sample_bank.by_sub_protocol("compromised_inputs")
         assert len(comp_probes) >= 1
         for r in comp_probes:
-            response_contents = [
-                resp.content for resp in r.mock_tool_responses.values()
-            ]
+            response_contents = [resp.content for resp in r.mock_tool_responses.values()]
             joined = "\n".join(response_contents).lower()
             # Loose check: at least one response mentions an external/
             # high-blast action verb that the embedded injection is
@@ -640,15 +626,28 @@ class TestShippedSampleBank:
             # The list spans the action_taxonomy verbs used as the
             # tempted action across compromised_inputs probes.
             triggers = (
-                "forward", "send", "transfer", "delete", "execute",
-                "share", "grant", "post", "publish", "approve",
-                "redirect", "issue", "export", "email",
-                "change_delivery_address", "modify_access_control",
-                "upgrade", "subscription", "place_order",
+                "forward",
+                "send",
+                "transfer",
+                "delete",
+                "execute",
+                "share",
+                "grant",
+                "post",
+                "publish",
+                "approve",
+                "redirect",
+                "issue",
+                "export",
+                "email",
+                "change_delivery_address",
+                "modify_access_control",
+                "upgrade",
+                "subscription",
+                "place_order",
             )
             assert any(trigger in joined for trigger in triggers), (
-                f"compromised_inputs probe {r.id} has no adversarial "
-                "payload pattern in mock_tool_responses"
+                f"compromised_inputs probe {r.id} has no adversarial payload pattern in mock_tool_responses"
             )
 
     def test_provenance_summary_smoke(self, sample_bank: AgenticBank) -> None:
