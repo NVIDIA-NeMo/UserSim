@@ -52,7 +52,7 @@ COV_FAIL_UNDER ?= 84
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install-dev install-ci lint lint-fix format format-check check-all \
+.PHONY: help install-dev install-ci install-kernel lint lint-fix format format-check check-all \
         check-all-fix test test-fast coverage smoke check-wheel check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
@@ -161,6 +161,13 @@ update-license-headers:  ## Add or refresh the SPDX header on every source file
 clean-notebooks:  ## Strip outputs from every notebook (source only)
 	@$(UV) run --with nbstripout nbstripout $$(git ls-files '*.ipynb' | grep -v '^_')
 	@echo "✓ notebook outputs stripped"
+
+# `uv run jupyter lab` already sees the kernel inside .venv. This registers a
+# NAMED one so editors that pick kernels system-wide can find this project's
+# environment rather than offering a bare "python3" per checkout.
+install-kernel:  ## Register a Jupyter kernel named for this project's venv
+	@$(UV) run python -m ipykernel install --user \
+		--name usersim --display-name "UserSim (.venv)"
 
 check-doc-links:  ## Fail on broken relative links in tracked markdown
 	@$(UV) run python scripts/check_doc_links.py
