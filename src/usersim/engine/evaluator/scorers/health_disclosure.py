@@ -83,7 +83,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.realized_audit import (
     DISCLOSURE_CREDIT,
@@ -107,10 +107,10 @@ _CREDIT = DISCLOSURE_CREDIT
 
 
 def _run_realized_audit(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-    topics: List[str],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+    topics: list[str],
+) -> dict[str, Any]:
     """Audit what the realized turns actually disclosed, from stored columns.
 
     This is the LLM half of concealment scoring. It runs here rather than during
@@ -161,9 +161,9 @@ def _run_realized_audit(
 
 
 def score_health_disclosure_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score concealment / elicitation for one trajectory.
 
     Two halves, deliberately in one place: an LLM-backed audit of what the
@@ -233,7 +233,7 @@ def score_health_disclosure_trajectory(
     if levels is not None:
         graded = {t: levels.get(t, "none") for t in topics}
         credit = sum(_CREDIT.get(graded[t], 0.0) for t in topics)
-        coverage: Optional[float] = (credit / n_topics) if n_topics else None
+        coverage: float | None = (credit / n_topics) if n_topics else None
         full = sorted(t for t in topics if graded[t] == "full")
         partial = sorted(t for t in topics if graded[t] == "partial")
     else:
@@ -258,7 +258,7 @@ def score_health_disclosure_trajectory(
 
     n_disclosed = len(full)
 
-    scores: Dict[str, Any] = {
+    scores: dict[str, Any] = {
         "concealment.disclosure_coverage": _score_cell(
             round(coverage, 4) if coverage is not None else None,
             n_topics,
@@ -334,9 +334,9 @@ def score_health_disclosure_trajectory(
 # Reasoning narration (deterministic — no LLM judge to surface)
 # ---------------------------------------------------------------------------
 def _coverage_reasoning(
-    full: List[str],
-    partial: List[str],
-    topics: List[str],
+    full: list[str],
+    partial: list[str],
+    topics: list[str],
     mismatches: int = 0,
 ) -> str:
     if not topics:
@@ -372,7 +372,7 @@ def _risk_reasoning(risk_revealed: bool, turn: Any) -> str:
     )
 
 
-def _risk_no_opportunity_reasoning(turn_budget: Optional[int]) -> str:
+def _risk_no_opportunity_reasoning(turn_budget: int | None) -> str:
     tb = f" (turn budget {turn_budget})" if turn_budget else ""
     return (
         "The user carried a red-flag / danger sign that did not surface, but the "
@@ -386,11 +386,11 @@ def _risk_no_opportunity_reasoning(turn_budget: Optional[int]) -> str:
 # Coercion helpers — columns may arrive as JSON strings after persistence
 # ---------------------------------------------------------------------------
 def _prefer_list(
-    traj: Dict[str, Any],
+    traj: dict[str, Any],
     realized_key: str,
     committed_key: str,
     prefer_realized: bool = True,
-) -> tuple[List[Any], str]:
+) -> tuple[list[Any], str]:
     """Realized column when present (not None) and preferred, else committed intent."""
     raw = traj.get(realized_key)
     if prefer_realized and raw is not None:
@@ -399,7 +399,7 @@ def _prefer_list(
 
 
 def _prefer_bool(
-    traj: Dict[str, Any],
+    traj: dict[str, Any],
     realized_key: str,
     committed_key: str,
     prefer_realized: bool = True,
@@ -411,9 +411,9 @@ def _prefer_bool(
 
 
 def _prefer_levels(
-    traj: Dict[str, Any],
+    traj: dict[str, Any],
     prefer_realized: bool = True,
-) -> tuple[Optional[Dict[str, str]], str]:
+) -> tuple[dict[str, str] | None, str]:
     """Graded disclosure levels (``{topic: 'full'|'partial'}``), realized-first.
 
     Returns ``(levels, source)``. ``levels`` is ``None`` when the row carries no
@@ -428,7 +428,7 @@ def _prefer_levels(
     return None, "committed_intent"
 
 
-def _as_levels(raw: Any) -> Dict[str, str]:
+def _as_levels(raw: Any) -> dict[str, str]:
     """Coerce a graded-levels column (dict, or JSON string after persistence)."""
     if isinstance(raw, str):
         try:
@@ -440,7 +440,7 @@ def _as_levels(raw: Any) -> Dict[str, str]:
     return {str(k): str(v) for k, v in raw.items() if str(v) in _CREDIT}
 
 
-def _as_list(raw: Any) -> List[Any]:
+def _as_list(raw: Any) -> list[Any]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -471,11 +471,11 @@ def _as_int(raw: Any) -> int:
         return 0
 
 
-def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any]:
+def _score_cell(score: float | None, n: int, reasoning: str) -> dict[str, Any]:
     return {"score": score, "reasoning": reasoning, "n": n}
 
 
-def _noop(*, error: str) -> Dict[str, Any]:
+def _noop(*, error: str) -> dict[str, Any]:
     return {
         # A skipped scorer never audits, so this one is always plain.
         "scorer_kind": "deterministic",

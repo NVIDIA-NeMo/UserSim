@@ -35,8 +35,6 @@ import os
 from contextvars import ContextVar, Token
 from importlib import resources
 from pathlib import Path
-from typing import Optional
-
 
 #: Probe directories the packaged ``assets/`` tree must contain. Kept as an
 #: explicit list so ``test_assets_discovery.py`` can assert it stays in
@@ -58,13 +56,13 @@ _ASSETS_MARKERS: tuple[str, ...] = (
     "health_general_disclosure",
 )
 
-_RUNTIME_ASSETS_DIR: ContextVar[Optional[Path]] = ContextVar(
+_RUNTIME_ASSETS_DIR: ContextVar[Path | None] = ContextVar(
     "conversation_plugin_runtime_assets_dir",
     default=None,
 )
 
 
-def set_runtime_assets_dir(path: str | Path | None) -> Token[Optional[Path]]:
+def set_runtime_assets_dir(path: str | Path | None) -> Token[Path | None]:
     """Set a per-context asset root for serialized/remote generation.
 
     A remote or containerised runner may need to point at a
@@ -74,7 +72,7 @@ def set_runtime_assets_dir(path: str | Path | None) -> Token[Optional[Path]]:
     return _RUNTIME_ASSETS_DIR.set(Path(path) if path else None)
 
 
-def reset_runtime_assets_dir(token: Token[Optional[Path]]) -> None:
+def reset_runtime_assets_dir(token: Token[Path | None]) -> None:
     """Restore the previous per-context asset root."""
     _RUNTIME_ASSETS_DIR.reset(token)
 
@@ -134,7 +132,7 @@ def default_assets_dir() -> Path:
 def probe_assets_dir(
     probe: str,
     *,
-    assets_root: Optional[Path] = None,
+    assets_root: Path | None = None,
 ) -> Path:
     """Canonical path to a probe's asset folder.
 

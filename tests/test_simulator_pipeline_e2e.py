@@ -51,7 +51,7 @@ from __future__ import annotations
 import json
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -60,10 +60,9 @@ import pytest
 # self-registers every probe class.
 import usersim.engine.generator  # noqa: F401
 from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.probes import known_probes, resolve_probe
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Synthetic personas keyed by locale
@@ -75,7 +74,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 # probe (i.e. lives in the locale, has fields the per-locale fact /
 # query / pressure / agentic banks expect).
 
-_PERSONAS: Dict[str, Dict[str, Any]] = {
+_PERSONAS: dict[str, dict[str, Any]] = {
     "en_US": {
         "first_name": "Sarah",
         "last_name": "Johnson",
@@ -240,7 +239,7 @@ def _synthetic_row_data(
     probe_type: str,
     locale: str,
     cfg: ConversationSimulatorConfig,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build the per-row ``data`` dict that
     ``ConversationSimulatorGenerator.generate(data)`` consumes.
 
@@ -249,7 +248,7 @@ def _synthetic_row_data(
     ``tools`` / ``toolset_name`` (when ``cfg.tools_column`` is set).
     """
     persona = _PERSONAS.get(locale) or _PERSONAS[_DEFAULT_LOCALE]
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         cfg.persona_column: persona,
         cfg.probe_type_column: probe_type,
         cfg.theme_column: _theme_for(probe_type),
@@ -279,7 +278,7 @@ def repo_root_assets() -> Path:
     return packaged_assets_dir()
 
 
-def _toolset_for_test(assets_dir: Path) -> List[Dict[str, Any]]:
+def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
     """Read one row from the shipped ``toolsets_seed.parquet`` to use
     as the synthetic ``tools`` column value. Reads only the first
     row's ``tools`` field — keeps the test small and avoids
@@ -300,7 +299,7 @@ def _toolset_for_test(assets_dir: Path) -> List[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-def _drive_one_probe(probe_type: str, locale: str) -> Dict[str, Any]:
+def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
     """Construct + run one probe end-to-end against synthetic inputs
     and a mocked ``call_llm``. Returns the result dict the probe
     produces (same shape ``ConversationSimulatorGenerator`` would
@@ -373,7 +372,7 @@ def _drive_one_probe(probe_type: str, locale: str) -> Dict[str, Any]:
 # the placeholder for sov_ai_facts / sov_ai_dynamic so use it for
 # those families to ensure the persona matches the bank's
 # ``persona_tags``. (For other probes en_US is fine.)
-_PROBE_LOCALES: Dict[str, str] = {
+_PROBE_LOCALES: dict[str, str] = {
     "general_open_ended": "en_US",
     "general_educational": "en_US",
     "tool_calling": "en_US",

@@ -22,7 +22,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from usersim.asset_gen.financial_services.prompts import EVAL_PROMPT
 from usersim.asset_gen.financial_services.spec import RegionSpec
@@ -34,7 +34,7 @@ EVAL_JUDGE_MODEL_ALIAS = "asset_judge_model"
 LOW_SCORE_THRESHOLD = 3
 
 #: (rubric name, flattened column name); the column order defines the scorecard.
-_AXES: Tuple[Tuple[str, str], ...] = (
+_AXES: tuple[tuple[str, str], ...] = (
     ("Realism", "realism_score"),
     ("RegulatorySoundness", "regulatory_soundness_score"),
     ("ClarityReadability", "clarity_readability_score"),
@@ -43,7 +43,7 @@ _AXES: Tuple[Tuple[str, str], ...] = (
 )
 
 
-def evaluate_scores() -> List[Any]:
+def evaluate_scores() -> list[Any]:
     """The per-document judge rubrics (``dd.Score``, 1-5)."""
     import data_designer.config as dd
 
@@ -118,11 +118,11 @@ def evaluate_scores() -> List[Any]:
     ]
 
 
-def build_eval_columns() -> List[Any]:
+def build_eval_columns() -> list[Any]:
     """DD columns: one LLM-judge over each doc + per-axis score flatteners."""
     import data_designer.config as dd
 
-    cols: List[Any] = [
+    cols: list[Any] = [
         dd.LLMJudgeColumnConfig(
             name="doc_eval",
             model_alias=EVAL_JUDGE_MODEL_ALIAS,
@@ -138,7 +138,7 @@ def build_eval_columns() -> List[Any]:
 # ── seed: one row per committed document ────────────────────────────────
 
 
-def build_eval_seed(bank_dir: str | Path, region_spec: Optional[RegionSpec]):
+def build_eval_seed(bank_dir: str | Path, region_spec: RegionSpec | None):
     """One DD seed row per committed document, carrying judge context (pure/offline).
 
     Joins each document with its institution's generated brief (from
@@ -153,7 +153,7 @@ def build_eval_seed(bank_dir: str | Path, region_spec: Optional[RegionSpec]):
     region_meta, insts = _read_bank(bank_dir)
 
     # brief per institution (best-effort, from the generation report).
-    briefs: Dict[str, str] = {}
+    briefs: dict[str, str] = {}
     report_path = bank_dir / "_generation_report.json"
     if report_path.exists():
         try:
@@ -165,7 +165,7 @@ def build_eval_seed(bank_dir: str | Path, region_spec: Optional[RegionSpec]):
             pass
 
     # authoritative typed values per (institution, product_category).
-    values: Dict[Tuple[str, str], str] = {}
+    values: dict[tuple[str, str], str] = {}
     if region_spec is not None:
         for inst in region_spec.institutions:
             for product in inst.products:
@@ -176,7 +176,7 @@ def build_eval_seed(bank_dir: str | Path, region_spec: Optional[RegionSpec]):
     dr = region_meta.get("domain_regulators", {}) or {}
     language = region_spec.language if region_spec is not None else ""
 
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for iid, idata in insts.items():
         for d in idata.documents:
             domain = d.get("domain", "")
@@ -202,8 +202,8 @@ def build_eval_seed(bank_dir: str | Path, region_spec: Optional[RegionSpec]):
 
 @dataclass
 class EvalScorecard:
-    per_doc: List[Dict[str, Any]] = field(default_factory=list)
-    aggregate: Dict[str, Any] = field(default_factory=dict)
+    per_doc: list[dict[str, Any]] = field(default_factory=list)
+    aggregate: dict[str, Any] = field(default_factory=dict)
 
     def to_text(self) -> str:
         lines = ["  aggregate (mean 1-5):"]
@@ -217,19 +217,19 @@ class EvalScorecard:
 def shape_scorecard(result_df) -> EvalScorecard:
     """Flatten a judged dataframe into a per-doc scorecard + aggregate (pure)."""
 
-    def _num(v: Any) -> Optional[float]:
+    def _num(v: Any) -> float | None:
         try:
             return float(v)
         except (TypeError, ValueError):
             return None
 
-    per_doc: List[Dict[str, Any]] = []
-    low_docs: List[str] = []
-    sums: Dict[str, float] = {col: 0.0 for _, col in _AXES}
-    counts: Dict[str, int] = {col: 0 for _, col in _AXES}
+    per_doc: list[dict[str, Any]] = []
+    low_docs: list[str] = []
+    sums: dict[str, float] = {col: 0.0 for _, col in _AXES}
+    counts: dict[str, int] = {col: 0 for _, col in _AXES}
 
     for _, row in result_df.iterrows():
-        rec: Dict[str, Any] = {
+        rec: dict[str, Any] = {
             "id": row.get("id"),
             "institution_id": row.get("institution_id"),
             "document_type": row.get("document_type"),
@@ -247,7 +247,7 @@ def shape_scorecard(result_df) -> EvalScorecard:
         if is_low and rec["id"] is not None:
             low_docs.append(str(rec["id"]))
 
-    aggregate: Dict[str, Any] = {col: (sums[col] / counts[col] if counts[col] else float("nan")) for _, col in _AXES}
+    aggregate: dict[str, Any] = {col: (sums[col] / counts[col] if counts[col] else float("nan")) for _, col in _AXES}
     aggregate["n_docs"] = len(per_doc)
     aggregate["low_docs"] = low_docs
     return EvalScorecard(per_doc=per_doc, aggregate=aggregate)
@@ -266,7 +266,7 @@ def validate_eval_models(models: Any) -> None:
 SCORECARD_HISTORY_DIR = "_scorecards"
 
 
-def _archive_previous_scorecard(bank_dir: Path) -> Optional[Path]:
+def _archive_previous_scorecard(bank_dir: Path) -> Path | None:
     """Move an existing ``_eval_scorecard.parquet`` into ``_scorecards/`` first.
 
     Regeneration used to overwrite the scorecard in place, so the previous run's
@@ -296,7 +296,7 @@ def _archive_previous_scorecard(bank_dir: Path) -> Optional[Path]:
 
 def evaluate_bank(
     bank_dir: str | Path,
-    region_spec: Optional[RegionSpec],
+    region_spec: RegionSpec | None,
     models: Any,
 ) -> EvalScorecard:
     """Judge each committed document and write ``_eval_scorecard.parquet``.

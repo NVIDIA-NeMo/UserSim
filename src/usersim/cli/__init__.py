@@ -32,7 +32,6 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from typing import List, Optional
 
 from usersim.cli._errors import ConfigError
 
@@ -113,17 +112,17 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="<command>",
     )
 
-    from usersim.cli import panel as _panel
-    from usersim.cli import simulate as _simulate
     from usersim.cli import evaluate as _evaluate
+    from usersim.cli import evaluate_assets as _evaluate_assets
+    from usersim.cli import gen_assets as _gen_assets
+    from usersim.cli import panel as _panel
+    from usersim.cli import report as _report
     from usersim.cli import rescore as _rescore
     from usersim.cli import select as _select
-    from usersim.cli import report as _report
-    from usersim.cli import gen_assets as _gen_assets
-    from usersim.cli import validate_assets as _validate_assets
-    from usersim.cli import evaluate_assets as _evaluate_assets
-    from usersim.cli import smoke as _smoke
     from usersim.cli import setup_ngc as _setup_ngc
+    from usersim.cli import simulate as _simulate
+    from usersim.cli import smoke as _smoke
+    from usersim.cli import validate_assets as _validate_assets
 
     _panel.register(subparsers)
     _simulate.register(subparsers)
@@ -155,7 +154,7 @@ def _configure_logging(verbosity: int) -> None:
     )
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     _configure_logging(args.verbose)

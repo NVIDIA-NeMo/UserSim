@@ -10,7 +10,6 @@ tool-equipped context, not what an elaborate prompt can paper over.
 
 from __future__ import annotations
 
-
 # PURE-CAPABILITY-TEST POLICY: empty by design.
 #
 # Whether the model confirms before irreversible actions, discloses

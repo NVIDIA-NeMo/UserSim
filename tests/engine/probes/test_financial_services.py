@@ -22,6 +22,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.finance_bank import (
     FinanceBankError,
     load_finance_bank,
@@ -29,13 +30,6 @@ from usersim.engine.core.finance_bank import (
     reset_finance_bank_cache,
 )
 from usersim.engine.core.finance_tasks import build_instance
-from usersim.engine.core.probing_taxonomy import (
-    load_probing_taxonomy_for,
-    reset_probing_taxonomy_cache,
-)
-from usersim.engine.probes.financial_services.task_derivation import (
-    derive_instance,
-)
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
@@ -43,12 +37,18 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import known_probes
+from usersim.engine.core.probing_taxonomy import (
+    load_probing_taxonomy_for,
+    reset_probing_taxonomy_cache,
+)
+from usersim.engine.evaluator.scorers import financial_services as FS
+from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.probes.financial_services import generator as G
 from usersim.engine.probes.financial_services import retrieval as R
 from usersim.engine.probes.financial_services import tools as T
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
-from usersim.engine.evaluator.scorers import financial_services as FS
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.probes.financial_services.task_derivation import (
+    derive_instance,
+)
 
 _PERSONA = {
     "first_name": "Yumi",

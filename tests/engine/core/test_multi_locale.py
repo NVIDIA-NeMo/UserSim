@@ -6,11 +6,10 @@
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core.behavioral import get_conversation_language, LOCALE_LANGUAGE_MAP
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.behavioral import LOCALE_LANGUAGE_MAP, get_conversation_language
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.seeds import load_seeds
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 LOCALES = SHIPPED_LOCALES
 ASSETS_DIR = packaged_assets_dir()

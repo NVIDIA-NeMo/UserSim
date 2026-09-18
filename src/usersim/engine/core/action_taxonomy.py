@@ -42,7 +42,7 @@ import os
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
@@ -89,29 +89,29 @@ class ActionTaxonomyEntry:
     blast_radius_rank: int
     p_user_detect_value: float
     p_user_detect_rationale: str
-    tags: Tuple[str, ...] = field(default_factory=tuple)
-    provenance: Optional[ActionTaxonomyProvenance] = None
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    provenance: ActionTaxonomyProvenance | None = None
 
 
 @dataclass(frozen=True)
 class ActionTaxonomy:
     schema_version: str
-    risk_tiers: Tuple[str, ...]
-    blast_radius_levels: Tuple[str, ...]
-    categories: Tuple[str, ...]
-    entries: Tuple[ActionTaxonomyEntry, ...]
-    source_path: Optional[str] = None
+    risk_tiers: tuple[str, ...]
+    blast_radius_levels: tuple[str, ...]
+    categories: tuple[str, ...]
+    entries: tuple[ActionTaxonomyEntry, ...]
+    source_path: str | None = None
 
-    def by_name(self, name: str) -> Optional[ActionTaxonomyEntry]:
+    def by_name(self, name: str) -> ActionTaxonomyEntry | None:
         for e in self.entries:
             if e.name == name:
                 return e
         return None
 
-    def names(self) -> Tuple[str, ...]:
+    def names(self) -> tuple[str, ...]:
         return tuple(e.name for e in self.entries)
 
-    def blast_radius_rank(self, level: str) -> Optional[int]:
+    def blast_radius_rank(self, level: str) -> int | None:
         """Return the rank (index) for a blast-radius level string.
 
         ``None`` when the level is not in the authoritative list.
@@ -128,7 +128,7 @@ class ActionTaxonomy:
 # ---------------------------------------------------------------------------
 
 
-_ACTION_TAXONOMY_CACHE: Dict[str, ActionTaxonomy] = {}
+_ACTION_TAXONOMY_CACHE: dict[str, ActionTaxonomy] = {}
 _ACTION_TAXONOMY_CACHE_LOCK = threading.Lock()
 
 
@@ -216,7 +216,7 @@ def load_action_taxonomy(path: str | Path) -> ActionTaxonomy:
     if not isinstance(raw_entries, list):
         raise ActionTaxonomyError(f"{src_path}: missing top-level `entries` list")
 
-    entries: List[ActionTaxonomyEntry] = []
+    entries: list[ActionTaxonomyEntry] = []
     seen_names: set[str] = set()
 
     for i, raw in enumerate(raw_entries):
@@ -245,7 +245,7 @@ def load_action_taxonomy(path: str | Path) -> ActionTaxonomy:
     )
 
 
-def _require_str_list(doc: Dict[str, Any], key: str, path: Path) -> List[str]:
+def _require_str_list(doc: dict[str, Any], key: str, path: Path) -> list[str]:
     raw = doc.get(key)
     if not isinstance(raw, list) or not all(isinstance(x, str) and x for x in raw):
         raise ActionTaxonomyError(f"{path}: `{key}` must be a non-empty list of strings")
@@ -253,13 +253,13 @@ def _require_str_list(doc: Dict[str, Any], key: str, path: Path) -> List[str]:
 
 
 def _parse_entry(
-    raw: Dict[str, Any],
+    raw: dict[str, Any],
     idx: int,
     path: Path,
     *,
-    risk_tiers: List[str],
-    blast_radius_levels: List[str],
-    categories: List[str],
+    risk_tiers: list[str],
+    blast_radius_levels: list[str],
+    categories: list[str],
 ) -> ActionTaxonomyEntry:
     where = f"{path}::entries[{idx}]"
 
@@ -315,7 +315,7 @@ def _parse_entry(
         raise ActionTaxonomyError(f"{where}: `tags` must be a list of non-empty strings")
 
     prov_raw = raw.get("provenance")
-    prov: Optional[ActionTaxonomyProvenance] = None
+    prov: ActionTaxonomyProvenance | None = None
     if prov_raw is not None:
         if not isinstance(prov_raw, dict):
             raise ActionTaxonomyError(f"{where}: `provenance` must be a mapping when present")

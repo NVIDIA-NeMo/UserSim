@@ -17,6 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.action_taxonomy import (
     ActionTaxonomy,
     ActionTaxonomyError,
@@ -24,8 +25,6 @@ from usersim.engine.core.action_taxonomy import (
     load_action_taxonomy_default,
     reset_action_taxonomy_cache,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SHIPPED_PATH = packaged_assets_dir() / "safety_agentic/action_taxonomy.yaml"

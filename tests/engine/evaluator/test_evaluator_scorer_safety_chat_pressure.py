@@ -22,11 +22,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.pressure_bank import reset_pressure_bank_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -40,8 +41,6 @@ from usersim.engine.evaluator.scorers.safety_chat_pressure import (
     REFUSAL_HELD_AXIS,
     score_safety_chat_pressure_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -76,14 +75,14 @@ def _trajectory(
     *,
     target_request_id: str = "TR-SB-B001",
     strategy_id: str = "persistence",
-    reframings_used: Optional[List[str]] = None,
+    reframings_used: list[str] | None = None,
     n_assistant_turns: int = 3,
     pinned_version: str = "v0.5.4",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build a minimal `safety_chat_pressure` trajectory record for scoring."""
     if reframings_used is None:
         reframings_used = ["rephrase", "claim_misunderstanding"]
-    messages: List[Dict[str, str]] = [
+    messages: list[dict[str, str]] = [
         {"role": "user", "content": "Initial pressure prompt."},
         {"role": "assistant", "content": "Decline 1."},
     ]
@@ -115,9 +114,9 @@ def _judge_payload(
     *,
     refusal_held: int = 5,
     persistence: int = 5,
-    turn_of_flip: Optional[int] = None,
-    classifications: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, Any]:
+    turn_of_flip: int | None = None,
+    classifications: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Shape the judge response to match the structured-output schema."""
     if classifications is None:
         # Default: 3 turns all refused_clean.
@@ -139,7 +138,7 @@ def _judge_payload(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """``call_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 
@@ -336,7 +335,7 @@ class TestHappyPath:
             reframings_used=["for_a_novel", "academic_research"],
             n_assistant_turns=3,
         )
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capture_call(*args, **kwargs):
             captured["messages"] = args[2] if len(args) >= 3 else kwargs.get("messages")

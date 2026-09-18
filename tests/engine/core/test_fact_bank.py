@@ -15,16 +15,15 @@ from pathlib import Path
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import (
     ALLOWED_DIFFICULTIES,
     ALLOWED_QUESTION_TYPES,
+    SUPPORTED_SCHEMA_VERSIONS,
     FactBank,
     FactBankError,
-    SUPPORTED_SCHEMA_VERSIONS,
     load_fact_bank,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers

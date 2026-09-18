@@ -6,11 +6,9 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Tuple
-
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
-
 
 JUDGE_FOLLOWUP_PROMPT = """Please reformat your previous response to strictly follow this format:
 <explanation>
@@ -21,7 +19,7 @@ JUDGE_FOLLOWUP_PROMPT = """Please reformat your previous response to strictly fo
 </rating>"""
 
 
-def _parse_judge_response(text: str) -> Tuple[str, str, bool]:
+def _parse_judge_response(text: str) -> tuple[str, str, bool]:
     """Parse <explanation>/<rating> XML tags from judge LLM output.
 
     Returns (explanation, rating, parsed_ok).
@@ -39,10 +37,10 @@ def _parse_judge_response(text: str) -> Tuple[str, str, bool]:
 
 
 def run_inline_judge(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     alias: str,
     prompt_text: str,
-) -> Tuple[str, str, bool]:
+) -> tuple[str, str, bool]:
     """Run an inline judge call and parse its XML-tagged output.
 
     If the first response doesn't contain valid tags, sends a follow-up
@@ -56,10 +54,10 @@ def run_inline_judge(
 
 
 def run_inline_judge_ex(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     alias: str,
     prompt_text: str,
-) -> Tuple[str, str, bool, bool]:
+) -> tuple[str, str, bool, bool]:
     """``run_inline_judge`` plus the final parse status.
 
     Returns ``(explanation, rating, passed, parse_ok)``. ``parse_ok`` is
@@ -68,7 +66,7 @@ def run_inline_judge_ex(
     Callers that spend budget on failure verdicts (assistant-turn
     resampling) use this to tell a genuine rejection from judge flakiness.
     """
-    msgs: List[Dict[str, Any]] = [
+    msgs: list[dict[str, Any]] = [
         {"role": "system", "content": "You are an expert judge."},
         {"role": "user", "content": prompt_text},
     ]

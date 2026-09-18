@@ -98,11 +98,9 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-# `format-check` is not yet part of `check-all`; run `make format` to apply
-# formatting in the meantime.
-check-all: lint  ## Run every static check CI enforces
+check-all: lint format-check  ## Run every static check CI enforces
 
-check-all-fix: lint-fix  ## Fix everything fixable, then you re-review
+check-all-fix: lint-fix format  ## Fix everything fixable, then you re-review
 
 # --- test ------------------------------------------------------------------
 

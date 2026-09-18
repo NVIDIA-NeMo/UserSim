@@ -84,7 +84,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Iterable
 
 from usersim.engine.core.agentic_bank import (
     ActionRequest,
@@ -93,7 +93,6 @@ from usersim.engine.core.agentic_bank import (
     reset_agentic_bank_cache,
 )
 from usersim.engine.core.llm import call_llm, set_current_outcome_builder
-from usersim.engine.core.tool_calls import parse_tool_call
 from usersim.engine.core.outcomes import (
     FailureAttribution,
     FailureClass,
@@ -114,6 +113,7 @@ from usersim.engine.core.simulation import (
     make_failed,
     make_result,
 )
+from usersim.engine.core.tool_calls import parse_tool_call
 from usersim.engine.probes.safety_agentic.task_derivation import (
     resolve_task_from_row,
 )
@@ -223,11 +223,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
 
     def derive_task(
         self,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[_PickedActionRequest]:
+    ) -> _PickedActionRequest | None:
         """Resolve the action_request from row override + persona.
 
         Reads one optional override column from ``self._data``:
@@ -274,7 +274,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         # the signal.
         return ""
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         # The OpenAI ``tools=`` parameter still exposes the schemas
         # (the model knows what tools exist); pure-capability policy
         # only removes BEHAVIORAL instruction.
@@ -314,8 +314,8 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     def run_dispatch(
         self,
         *,
-        models: Dict[str, Any],
-        data: Dict[str, Any],
+        models: dict[str, Any],
+        data: dict[str, Any],
         cfg: Any,
     ) -> dict:
         """Custom agentic simulate loop.
@@ -507,22 +507,23 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
 
 
 def simulate_safety_agentic(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim for callers that import ``simulate_safety_agentic``.
 
     Catches construction exceptions (bank-load / no-resolvable-action)
     and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance as _Provenance
+    from usersim.engine.core.outcomes import OutcomeBuilder
+    from usersim.engine.core.outcomes import Provenance as _Provenance
     from usersim.engine.core.probes import BankLoadError
 
     provenance = kwargs.get("provenance") or _Provenance()
@@ -548,13 +549,15 @@ def simulate_safety_agentic(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
     from usersim.engine.core.outcomes import (
         FailureAttribution,
         FailureClass,
         OutcomeBuilder,
         OutcomeStatus,
+    )
+    from usersim.engine.core.outcomes import (
         Provenance as _Provenance,
     )
 
@@ -573,7 +576,7 @@ def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def _visible_assistant_turn_count(messages: List[Dict[str, Any]]) -> int:
+def _visible_assistant_turn_count(messages: list[dict[str, Any]]) -> int:
     """Count assistant turns visible to the user.
 
     OpenAI-style tool use emits an assistant message containing
@@ -594,7 +597,7 @@ def _visible_assistant_turn_count(messages: List[Dict[str, Any]]) -> int:
     return n
 
 
-def _format_tools_for_api(tools: Iterable[ToolSpec]) -> List[Dict[str, Any]]:
+def _format_tools_for_api(tools: Iterable[ToolSpec]) -> list[dict[str, Any]]:
     """Convert the bank's typed ``ToolSpec`` list into OpenAI-style tools."""
     return [
         {
@@ -613,7 +616,7 @@ def _format_tools_for_api(tools: Iterable[ToolSpec]) -> List[Dict[str, Any]]:
     ]
 
 
-def _extract_tool_call(tc: Any) -> tuple[str, Dict[str, Any]]:
+def _extract_tool_call(tc: Any) -> tuple[str, dict[str, Any]]:
     """Pull ``(tool_name, tool_args_dict)`` out of one tool_call dict.
 
     Thin wrapper over the shared, hardened ``core.tool_calls.parse_tool_call``

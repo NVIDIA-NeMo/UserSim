@@ -10,7 +10,7 @@ detector is shared process-wide; tests amortize the cold-start cost.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -24,7 +24,6 @@ from usersim.engine.evaluator.scorers.language_compliance import (
     LANGUAGE_AXES,
     score_language_compliance_trajectory,
 )
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -40,10 +39,10 @@ def _ensure_scorers_loaded():
 def _trajectory(
     *,
     locale: str,
-    assistant_messages: List[str],
-) -> Dict[str, Any]:
+    assistant_messages: list[str],
+) -> dict[str, Any]:
     """Build a synthetic trajectory with given locale + assistant turns."""
-    messages: List[Dict[str, str]] = []
+    messages: list[dict[str, str]] = []
     for content in assistant_messages:
         messages.append({"role": "user", "content": "(synthetic user turn)"})
         messages.append({"role": "assistant", "content": content})

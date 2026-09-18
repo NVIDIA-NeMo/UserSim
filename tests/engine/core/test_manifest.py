@@ -26,7 +26,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -52,7 +52,6 @@ from usersim.engine.core.manifest import (
     write_run_manifest,
 )
 
-
 # ─── Test fixtures: lightweight stand-ins for cli/_models.py types ────────
 
 
@@ -63,12 +62,12 @@ class _StubModelSpec:
     alias: str
     model: str
     provider: str
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
     max_parallel_requests: int = 4
-    temperature: Optional[float] = 1.0
-    top_p: Optional[float] = 1.0
-    timeout: Optional[float] = None
-    extra_body: Optional[Dict[str, Any]] = None
+    temperature: float | None = 1.0
+    top_p: float | None = 1.0
+    timeout: float | None = None
+    extra_body: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -99,7 +98,7 @@ class _StubSimConfig:
     persona_grounding_ratio: float = 1.0
     context_compression: bool = True
     compression_window: int = 1
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
     store_reasoning: bool = True
 
 
@@ -369,10 +368,10 @@ class TestAggregateTrajectories:
         probe_family: str,
         probe_variant: str = "default",
         status: str = "ok",
-        failure_class: Optional[str] = None,
+        failure_class: str | None = None,
         scenario_prompt_version: str = "v1.0",
-        bank_version: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, Any]:
+        bank_version: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         outcome = {
             "status": status,
             "failure_class": failure_class,

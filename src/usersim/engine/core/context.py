@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.llm import append_debug_record, call_llm
 
@@ -32,7 +32,7 @@ _SUMMARY_PROMPT = (
 
 
 def summarize_response(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     assistant_content: str,
 ) -> str:
     """Condense an assistant response into a 1-2 sentence user-facing summary."""
@@ -68,10 +68,10 @@ def summarize_response(
 
 
 def compress_history(
-    messages: List[Dict[str, Any]],
-    position_summary_map: Dict[int, str],
+    messages: list[dict[str, Any]],
+    position_summary_map: dict[int, str],
     window: int = 1,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Return a copy of *messages* with older assistant entries replaced by summaries.
 
     Only entries whose index appears in *position_summary_map* are candidates.
@@ -86,7 +86,7 @@ def compress_history(
     positions = sorted(position_summary_map.keys())
     keep_positions = set(positions[-window:]) if len(positions) >= window else set(positions)
 
-    result: List[Dict[str, Any]] = []
+    result: list[dict[str, Any]] = []
     for i, msg in enumerate(messages):
         if i in position_summary_map and i not in keep_positions:
             summary = position_summary_map[i]
@@ -105,14 +105,14 @@ def prepare_assistant_history(
     state: Any,
     probe: Any,
     cfg: Any,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Build the assistant's per-call view without mutating the transcript.
 
     Compression runs before the probe transform because summary keys refer to
     canonical message positions. The finance probe uses the transform to bound
     retrieved document bodies; every other probe inherits the identity view.
     """
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     if getattr(cfg, "context_compression", False) and getattr(state, "conv_summaries", None):
         messages = compress_history(
             state.messages,

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -30,9 +30,9 @@ def _ensure_scorers_loaded():
 def _trajectory(
     *,
     locale: str,
-    assistant_messages: List[str],
-) -> Dict[str, Any]:
-    messages: List[Dict[str, str]] = []
+    assistant_messages: list[str],
+) -> dict[str, Any]:
+    messages: list[dict[str, str]] = []
     for content in assistant_messages:
         messages.append({"role": "user", "content": "(user)"})
         messages.append({"role": "assistant", "content": content})

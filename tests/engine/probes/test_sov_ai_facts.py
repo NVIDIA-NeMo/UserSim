@@ -20,13 +20,15 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import (
     Fact,
     FactBank,
@@ -38,15 +40,14 @@ from usersim.engine.core.outcomes import (
     FailureClass,
     Provenance,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_facts import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_facts import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -54,7 +55,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 @pytest.fixture
-def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
+def pt_br_persona_southeast_teacher() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -68,7 +69,7 @@ def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def pt_br_persona_northeast_retiree() -> Dict[str, Any]:
+def pt_br_persona_northeast_retiree() -> dict[str, Any]:
     return {
         "first_name": "José",
         "last_name": "Santos",
@@ -111,7 +112,7 @@ def simulator_cfg():
 
 class TestPersonaToTags:
     def test_brazilian_southeast_teacher_picks_right_tags(
-        self, pt_br_persona_southeast_teacher: Dict[str, Any]
+        self, pt_br_persona_southeast_teacher: dict[str, Any]
     ) -> None:
         tags = task_derivation.persona_to_tags(pt_br_persona_southeast_teacher, "pt_BR")
         assert "region:southeast" in tags
@@ -122,7 +123,7 @@ class TestPersonaToTags:
         assert "occupation-family:teacher" in tags
         assert "interest:literature" in tags or "interest:history" in tags
 
-    def test_brazilian_northeast_retiree(self, pt_br_persona_northeast_retiree: Dict[str, Any]) -> None:
+    def test_brazilian_northeast_retiree(self, pt_br_persona_northeast_retiree: dict[str, Any]) -> None:
         tags = task_derivation.persona_to_tags(pt_br_persona_northeast_retiree, "pt_BR")
         assert "region:northeast" in tags
         assert "age:65+" in tags
@@ -191,7 +192,7 @@ class TestPersonaToTags:
 class TestDeriveTask:
     def test_deterministic_on_persona_and_seed(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         a = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42)
@@ -201,7 +202,7 @@ class TestDeriveTask:
 
     def test_different_seed_can_yield_different_fact(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         # Over many seeds, we expect at least one pair that disagree.
@@ -213,8 +214,8 @@ class TestDeriveTask:
 
     def test_different_personas_can_yield_different_facts(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         # Same seed but different persona content → high probability of
@@ -231,7 +232,7 @@ class TestDeriveTask:
 
     def test_excluded_ids_skip_the_pool(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         first = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=7)
@@ -264,7 +265,7 @@ class TestDeriveTask:
         bank_a = _build_synthetic_bank(facts=facts, bank_version="v0.1.0")
         bank_b = _build_synthetic_bank(facts=facts, bank_version="v0.2.0")
 
-        per_persona_picks: List[tuple] = []
+        per_persona_picks: list[tuple] = []
         for persona in _persona_variations():
             a = task_derivation.derive_task(persona, bank_a, seed=5)
             b = task_derivation.derive_task(persona, bank_b, seed=5)
@@ -390,7 +391,7 @@ class TestSimulateSovAiFacts:
 
     def test_single_turn_runs_end_to_end(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
         simulator_cfg: Any,
         tmp_path: Path,
@@ -441,7 +442,7 @@ class TestSimulateSovAiFacts:
 
     def test_verbatim_question_is_first_user_turn(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
         simulator_cfg: Any,
     ) -> None:
@@ -495,7 +496,7 @@ class TestSimulateSovAiFacts:
 
     def test_two_turn_mode_issues_followup(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         simulator_cfg.max_turns = 2
@@ -547,7 +548,7 @@ class TestSimulateSovAiFacts:
 
     def test_assistant_failure_produces_failed_outcome(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with (
@@ -678,9 +679,9 @@ class TestShouldSucceed:
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Alias-dispatching ``call_llm`` mock for the unified loop.
@@ -772,7 +773,7 @@ def _fact(id_: str, *, persona_tags: tuple = (), category: str = "cat-a") -> Fac
 
 def _build_synthetic_bank(
     *,
-    facts: List[Fact],
+    facts: list[Fact],
     bank_version: str = "v0.1.0",
 ) -> FactBank:
     return FactBank(
@@ -786,7 +787,7 @@ def _build_synthetic_bank(
     )
 
 
-def _persona_variations() -> List[Dict[str, Any]]:
+def _persona_variations() -> list[dict[str, Any]]:
     """A small population of synthetic personas for statistical assertions."""
     return [
         {"age": age, "state_abbrev": state, "occupation": occ}

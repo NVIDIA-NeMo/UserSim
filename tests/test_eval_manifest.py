@@ -35,7 +35,6 @@ from usersim.reporting.eval_manifest import (
     record_eval_sample_pass,
 )
 
-
 # ─── Schema round-trip ──────────────────────────────────────────────
 
 

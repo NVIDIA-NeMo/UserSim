@@ -15,8 +15,7 @@ from __future__ import annotations
 import json
 import random
 import re
-from typing import Any, Dict, Tuple
-
+from typing import Any
 
 _OCEAN_TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
 
@@ -39,7 +38,7 @@ LOCALE_LANGUAGE_MAP = {
 # Values sourced from actual Nemotron-Personas datasets.
 # ---------------------------------------------------------------------------
 
-_EDUCATION_ORDINAL: Dict[str, Dict[str, float]] = {
+_EDUCATION_ORDINAL: dict[str, dict[str, float]] = {
     "en_US": {
         "less_than_9th": 0.0,
         "9th_12th_no_diploma": 0.15,
@@ -214,7 +213,7 @@ def _parse_ocean_value(raw: Any) -> float:
         return 0.5
 
 
-def _extract_ocean(persona: Dict[str, Any]) -> Dict[str, float]:
+def _extract_ocean(persona: dict[str, Any]) -> dict[str, float]:
     """Extract OCEAN trait scores from a persona dict.
 
     DD's persona sampler provides OCEAN traits as dicts with t_scores.
@@ -223,7 +222,7 @@ def _extract_ocean(persona: Dict[str, Any]) -> Dict[str, float]:
     return {t: _parse_ocean_value(persona.get(t, 0.5)) for t in _OCEAN_TRAITS}
 
 
-def _extract_ocean_metadata(persona: Dict[str, Any]) -> Tuple[Dict[str, str], Dict[str, str]]:
+def _extract_ocean_metadata(persona: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
     """Extract OCEAN labels and descriptions from persona dict.
 
     Returns:
@@ -231,8 +230,8 @@ def _extract_ocean_metadata(persona: Dict[str, Any]) -> Tuple[Dict[str, str], Di
         like "Sociable, outgoing, and energetic...".
     Handles both dict values (en_US) and JSON-string values (other locales).
     """
-    labels: Dict[str, str] = {}
-    descriptions: Dict[str, str] = {}
+    labels: dict[str, str] = {}
+    descriptions: dict[str, str] = {}
     for trait in _OCEAN_TRAITS:
         raw = persona.get(trait)
         d: dict | None = None
@@ -254,7 +253,7 @@ def _extract_ocean_metadata(persona: Dict[str, Any]) -> Tuple[Dict[str, str], Di
     return labels, descriptions
 
 
-def _infer_tech_literacy(persona: Dict[str, Any], locale: str = "en_US") -> float:
+def _infer_tech_literacy(persona: dict[str, Any], locale: str = "en_US") -> float:
     """Infer tech literacy from education, occupation, and age.
 
     Returns a score in [0, 1] where 1 = highly tech literate.
@@ -288,9 +287,9 @@ def _infer_tech_literacy(persona: Dict[str, Any], locale: str = "en_US") -> floa
 
 
 def compute_behavioral_profile(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     locale: str = "en_US",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Derive behavioral parameters from persona attributes.
 
     Returns a BehavioralProfile dict with parameters that control
@@ -446,7 +445,7 @@ ROLE_ANCHOR_PROMPT_WRAPUP = (
 
 
 def format_behavioral_profile_for_prompt(
-    profile: Dict[str, Any],
+    profile: dict[str, Any],
     probe_type: str = "",
     language: str = "English",
 ) -> str:
@@ -643,7 +642,7 @@ FRUSTRATION_PROMPTS = {
 }
 
 
-def compute_user_interaction_style(profile: Dict[str, Any]) -> str:
+def compute_user_interaction_style(profile: dict[str, Any]) -> str:
     """Derive user interaction style from OCEAN-grounded behavioral profile.
 
     Maps personality traits to one of five interaction styles that control

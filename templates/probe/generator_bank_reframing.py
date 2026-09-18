@@ -59,7 +59,7 @@ format, panel-driven overrides for both strategy and target,
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.probes import (
@@ -73,7 +73,7 @@ from usersim.engine.core.probes import (
 class _DemoStrategy:
     id: str
     description: str
-    reframings: List[Any]
+    reframings: list[Any]
 
     def reframing_at(self, idx: int) -> Any:
         return self.reframings[idx % len(self.reframings)]
@@ -137,7 +137,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[_DemoPickedPair]:
+    ) -> _DemoPickedPair | None:
         # Real probe: independent salts for strategy and target so
         # they don't co-vary across bank-version bumps.
         strat = _DemoStrategy(
@@ -187,7 +187,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
         self,
         turn_idx: int,
         state: Any,
-    ) -> List[str]:
+    ) -> list[str]:
         # turn_idx is 1-indexed for follow-ups; reframing_at is 0-indexed.
         reframing = self._task.strategy.reframing_at(turn_idx - 1)
         # Pull the previous assistant response from state.messages.

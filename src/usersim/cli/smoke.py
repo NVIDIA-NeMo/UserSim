@@ -49,7 +49,7 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable
 
 logger = logging.getLogger("usersim.cli.smoke")
 
@@ -68,7 +68,7 @@ class CheckResult:
 
 @dataclass
 class SmokeReport:
-    results: List[CheckResult] = field(default_factory=list)
+    results: list[CheckResult] = field(default_factory=list)
 
     def add(self, name: str, ok: bool, detail: str = "") -> None:
         self.results.append(CheckResult(name=name, ok=ok, detail=detail))
@@ -179,7 +179,7 @@ def _check_imports(report: SmokeReport) -> None:
         "usersim.reporting",
         "usersim.cli",
     ]
-    missing: List[str] = []
+    missing: list[str] = []
     for m in modules:
         try:
             importlib.import_module(m)
@@ -385,12 +385,13 @@ def _check_probe_registry(report: SmokeReport) -> None:
     try:
         # Importing the plugin's generator triggers the probe bootstrap
         # that fills the substrate's _PROBE_REGISTRY.
+        import sys
+
         import usersim.engine.generator  # noqa: F401
         from usersim.engine.core.probes import (
             _PROBE_REGISTRY,
             resolve_probe,
         )
-        import sys
     except Exception as e:
         report.add(
             "probe registry",
@@ -403,7 +404,7 @@ def _check_probe_registry(report: SmokeReport) -> None:
         report.add("probe registry", False, "registry is empty")
         return
 
-    failures: List[str] = []
+    failures: list[str] = []
     for probe_name in sorted(_PROBE_REGISTRY):
         try:
             probe_cls = resolve_probe(probe_name)
@@ -457,11 +458,11 @@ def _check_asset_paths(report: SmokeReport) -> None:
         )
         from usersim.engine.core.agentic_bank import default_agentic_bank_path
         from usersim.engine.core.fact_bank import default_fact_bank_path
+        from usersim.engine.core.locale import SHIPPED_LOCALES
         from usersim.engine.core.pressure_bank import default_pressure_bank_path
         from usersim.engine.core.probing_taxonomy import (
             default_probing_taxonomy_path,
         )
-        from usersim.engine.core.locale import SHIPPED_LOCALES
         from usersim.engine.core.prompt_loader import load_prompt_file
         from usersim.engine.core.query_bank import default_query_bank_path
         from usersim.engine.core.seeds import load_seeds
@@ -473,7 +474,7 @@ def _check_asset_paths(report: SmokeReport) -> None:
         )
         return
 
-    failures: List[str] = []
+    failures: list[str] = []
     n_paths = 0
 
     # Per-locale loaders.
@@ -655,8 +656,8 @@ def _check_capability_dashboard(
     report: SmokeReport,
     *,
     write_fixtures: bool,
-    fixtures_dir: Optional[Path],
-) -> Optional[Path]:
+    fixtures_dir: Path | None,
+) -> Path | None:
     """Build the capability dashboard from synthetic in-process frames.
 
     Asserts the five artifacts (``index.html`` + four JSON cells) are
@@ -853,8 +854,8 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
 
 def _silently(fn: Callable[[], int]) -> int:
     """Run a function while suppressing its stdout (the dry-run plan dump)."""
-    import io
     import contextlib
+    import io
 
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):

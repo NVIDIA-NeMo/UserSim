@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 class ToolCallVerifier:
@@ -14,9 +14,9 @@ class ToolCallVerifier:
 
     def verify(
         self,
-        tool_calls: List[Dict[str, Any]],
-        tools: List[Dict[str, Any]],
-    ) -> Tuple[bool, List[Dict[str, Any]], List[bool], List[Any], List[Dict[str, Any]]]:
+        tool_calls: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> tuple[bool, list[dict[str, Any]], list[bool], list[Any], list[dict[str, Any]]]:
         """Verify a list of tool calls against available tool definitions.
 
         Returns:
@@ -24,10 +24,10 @@ class ToolCallVerifier:
         """
         if not tool_calls:
             return True, [], [], [], []
-        all_success: List[bool] = []
-        all_error: List[Any] = []
-        tool_error_messages: List[Dict[str, Any]] = []
-        correct_tool_calls: List[Dict[str, Any]] = []
+        all_success: list[bool] = []
+        all_error: list[Any] = []
+        tool_error_messages: list[dict[str, Any]] = []
+        correct_tool_calls: list[dict[str, Any]] = []
         for tool_call in tool_calls:
             ok, err = self.verify_single_tool_call(tool_call, tools)
             all_success.append(ok)
@@ -49,9 +49,9 @@ class ToolCallVerifier:
 
     def verify_single_tool_call(
         self,
-        tool_call: Dict[str, Any],
-        tools: List[Dict[str, Any]],
-    ) -> Tuple[bool, str | None]:
+        tool_call: dict[str, Any],
+        tools: list[dict[str, Any]],
+    ) -> tuple[bool, str | None]:
         """Verify a single tool call against the available tool definitions."""
         try:
             tool_name = tool_call.get("function", {}).get("name")
@@ -113,8 +113,8 @@ class ToolCallVerifier:
     def _validate_parameter_type(
         self,
         value: Any,
-        param_spec: Dict[str, Any],
-    ) -> Tuple[bool, str | None]:
+        param_spec: dict[str, Any],
+    ) -> tuple[bool, str | None]:
         expected_type = param_spec.get("type")
 
         if expected_type == "string":

@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import json
 import math
-from typing import Any, Optional
+from typing import Any
 
 
 def decode_cell(raw: Any) -> dict[str, Any]:
@@ -81,7 +81,7 @@ def normalize_axis_score(axis: str, score: float) -> float:
     return float(score)
 
 
-def score_from_axis(axis_cell: Any) -> Optional[float]:
+def score_from_axis(axis_cell: Any) -> float | None:
     """Pull a numeric score from an axis/judge cell (``{"score": ...}`` or scalar)."""
     if isinstance(axis_cell, dict):
         val = axis_cell.get("score")
@@ -92,7 +92,7 @@ def score_from_axis(axis_cell: Any) -> Optional[float]:
     return None
 
 
-def score_from_eval_cell(cell: dict[str, Any], axis: str) -> Optional[float]:
+def score_from_eval_cell(cell: dict[str, Any], axis: str) -> float | None:
     """Best-effort score for ``axis``: judge-ensemble mean, then scorer blocks."""
     # First check universal axis results: axis -> judge_alias -> cell.
     axis_block = (cell.get("axes") or {}).get(axis)
@@ -115,7 +115,7 @@ def score_for_source(
     cell: dict[str, Any],
     scorer: str | None,
     axis: str,
-) -> Optional[float]:
+) -> float | None:
     """Score for ``axis`` from a specific source (``None`` scorer = judge axes)."""
     if scorer is None:
         axis_block = (cell.get("axes") or {}).get(axis)

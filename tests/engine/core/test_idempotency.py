@@ -32,7 +32,6 @@ from usersim.engine.core.idempotency import (
     is_duplicate_trajectory_id,
 )
 
-
 pd = pytest.importorskip("pandas")
 
 

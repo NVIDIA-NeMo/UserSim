@@ -19,8 +19,8 @@ import pytest
 
 from usersim.cli._models import (
     ConfigError,
-    ModelSpec,
     ModelsConfig,
+    ModelSpec,
     ProviderSpec,
     apply_model_overrides,
     load_models_config,
@@ -37,7 +37,6 @@ from usersim.cli.model_catalog import (
     resolve_inference_defaults,
     resolve_vllm_defaults,
 )
-
 
 # ---------------------------------------------------------------------------
 # Catalog primitives

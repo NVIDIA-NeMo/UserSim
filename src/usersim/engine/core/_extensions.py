@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 import os
 from importlib.metadata import EntryPoint, entry_points
-from typing import Any, Dict, Tuple
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
@@ -55,7 +55,7 @@ CAPABILITIES = "usersim.capabilities"
 COMMANDS = "usersim.commands"
 TOOLSET_SOURCES = "usersim.toolset_sources"
 
-ENTRY_POINT_GROUPS: Tuple[str, ...] = (
+ENTRY_POINT_GROUPS: tuple[str, ...] = (
     PROBES,
     SCORERS,
     ASSET_DOMAINS,
@@ -68,7 +68,7 @@ ENTRY_POINT_GROUPS: Tuple[str, ...] = (
 # Loaded objects keyed by group. Only populated when discovery is enabled, so
 # toggling the environment variable within a process takes effect immediately
 # rather than being masked by a cached empty result.
-_CACHE: Dict[str, Tuple[Tuple[str, Any], ...]] = {}
+_CACHE: dict[str, tuple[tuple[str, Any], ...]] = {}
 
 
 def extensions_disabled() -> bool:
@@ -81,12 +81,12 @@ def clear_extension_cache() -> None:
     _CACHE.clear()
 
 
-def _select(group: str) -> Tuple[EntryPoint, ...]:
+def _select(group: str) -> tuple[EntryPoint, ...]:
     """Entry points in ``group``, ordered by name for reproducible results."""
     return tuple(sorted(entry_points(group=group), key=lambda ep: ep.name))
 
 
-def load_extensions(group: str) -> Tuple[Tuple[str, Any], ...]:
+def load_extensions(group: str) -> tuple[tuple[str, Any], ...]:
     """Load every advertised extension in ``group`` as ``(name, object)``.
 
     Returns an empty tuple when discovery is disabled. Entry points that fail
@@ -101,7 +101,7 @@ def load_extensions(group: str) -> Tuple[Tuple[str, Any], ...]:
     if group in _CACHE:
         return _CACHE[group]
 
-    loaded: list[Tuple[str, Any]] = []
+    loaded: list[tuple[str, Any]] = []
     for ep in _select(group):
         try:
             loaded.append((ep.name, ep.load()))
@@ -121,10 +121,10 @@ def load_extensions(group: str) -> Tuple[Tuple[str, Any], ...]:
 
 def merge_extensions(
     group: str,
-    builtins: Dict[str, Any],
+    builtins: dict[str, Any],
     *,
     what: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Merge discovered extensions into ``builtins`` without displacing them.
 
     A built-in always wins a name collision. An extension that silently

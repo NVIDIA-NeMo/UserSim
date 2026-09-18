@@ -19,12 +19,12 @@ import json
 import shutil
 import time
 from pathlib import Path
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Sequence
 
-from usersim.taxonomy.eval_cell import decode_cell
 from usersim.selection.engine import SelectionSummary
 from usersim.selection.profiles import SelectionProfile
 from usersim.selection.schemas import Schema, project
+from usersim.taxonomy.eval_cell import decode_cell
 
 # Manifest filename. Underscore prefix => ignored by the pyarrow dataset
 # reader (mirrors the trajectory dataset's ``_manifest.json``).
@@ -33,9 +33,9 @@ MANIFEST_NAME = "_selection_manifest.json"
 
 def load_run(
     trajectories: str | Path,
-    evaluations: Optional[str | Path] = None,
+    evaluations: str | Path | None = None,
     *,
-    run: Optional[str] = None,
+    run: str | None = None,
 ) -> tuple[Any, Any, str]:
     """Read a run's trajectory + evaluation frames and resolve its run id.
 
@@ -69,9 +69,9 @@ def load_run(
 
 def load_runs(
     trajectories: str | Path,
-    evaluations: Optional[str | Path] = None,
+    evaluations: str | Path | None = None,
     *,
-    runs: Optional[Union[str, Sequence[str]]] = None,
+    runs: str | Sequence[str] | None = None,
 ) -> tuple[Any, Any, str]:
     """Load and concatenate one or more runs' trajectory + evaluation frames.
 
@@ -139,8 +139,8 @@ def resolve_generation_model(
     trajectories: Any,
     run_label: str,
     *,
-    explicit: Optional[str] = None,
-) -> Optional[str]:
+    explicit: str | None = None,
+) -> str | None:
     """Return the model under test for ``run_label``, read from its manifest.
 
     The assistant model is not a trajectory column, but every run records it
@@ -193,7 +193,7 @@ def build_manifest(
     source_run: str,
     eval_column: str,
     provenance: dict[str, Any],
-    generation_model: Optional[str] = None,
+    generation_model: str | None = None,
 ) -> dict[str, Any]:
     return {
         "kind": "selection",
@@ -333,9 +333,9 @@ def push_to_hf(
     repo: str,
     *,
     private: bool = True,
-    token: Optional[str] = None,
-    manifest: Optional[dict] = None,
-    profile: Optional[SelectionProfile] = None,
+    token: str | None = None,
+    manifest: dict | None = None,
+    profile: SelectionProfile | None = None,
     columns: Schema = None,
 ) -> str:
     """Push a curated frame to a (private by default) HF dataset repo.

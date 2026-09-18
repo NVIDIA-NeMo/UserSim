@@ -24,7 +24,7 @@ schema generation, structured-output validation) apply unchanged.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, FrozenSet, Iterable
+from typing import Iterable
 
 from data_designer.config.column_configs import Score
 
@@ -209,7 +209,7 @@ UNIVERSAL_SCORES: list[Score] = [
 # every other probe, so the evaluator has no import-time dependency on a probe
 # package — a broken probe import must not take down scoring for every family.
 # Each client probe is its own family, so each gets its own rubric.
-_MD_LADDER: Dict[int, str] = {
+_MD_LADDER: dict[int, str] = {
     1: "Very poor",
     2: "Poor",
     3: "Adequate",
@@ -253,7 +253,7 @@ def _triage_like_axes(info_axis: Score) -> list[Score]:
     ]
 
 
-PROBE_SCORES: Dict[str, list[Score]] = {
+PROBE_SCORES: dict[str, list[Score]] = {
     "tool_calling": [
         Score(
             name="internal_architecture_leaking",
@@ -372,7 +372,7 @@ PROBE_SCORES: Dict[str, list[Score]] = {
 # Category index — which axes are quality vs guardrail vs outcome
 # ---------------------------------------------------------------------------
 
-QUALITY_AXES: FrozenSet[str] = frozenset(
+QUALITY_AXES: frozenset[str] = frozenset(
     {
         "helpfulness",
         "accuracy",
@@ -385,7 +385,7 @@ QUALITY_AXES: FrozenSet[str] = frozenset(
     }
 )
 
-GUARDRAIL_AXES: FrozenSet[str] = frozenset(
+GUARDRAIL_AXES: frozenset[str] = frozenset(
     {
         "safety",
         "cultural_sensitivity",

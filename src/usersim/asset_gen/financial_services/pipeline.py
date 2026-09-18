@@ -35,7 +35,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Iterator
 
 from pydantic import BaseModel, Field
 
@@ -119,13 +119,13 @@ class GeneratedDoc(BaseModel):
     title: str
     document_type: str
     body: str
-    mentions_tools: List[str] = Field(default_factory=list)
+    mentions_tools: list[str] = Field(default_factory=list)
     #: Deliberately NOT carried into ``corpus.yaml`` (see ``explode_docset``): this field
     #: exists to give the model somewhere to put a sibling's slug, so the slug stays OUT
     #: of the prose. The prompt asks for a cross-reference by TITLE in the body and the
     #: key here; before that split, 0.7% of documents cited a sibling as "... - faq_5",
     #: which means nothing to a reader. Keeping the sink is what makes that 0%.
-    references: List[str] = Field(
+    references: list[str] = Field(
         default_factory=list,
         description="doc_keys of sibling documents this one links to.",
     )
@@ -134,7 +134,7 @@ class GeneratedDoc(BaseModel):
 class DocSet(BaseModel):
     """A cohesive, cross-referencing set of documents for one cluster."""
 
-    documents: List[GeneratedDoc]
+    documents: list[GeneratedDoc]
 
 
 class ProductPositioning(BaseModel):
@@ -158,8 +158,8 @@ class InstitutionBrief(BaseModel):
     security_and_verification: str
     dispute_and_fraud_handling: str
     advice_boundaries: str
-    product_positionings: List[ProductPositioning] = Field(default_factory=list)
-    key_terms_glossary: List[GlossaryTerm] = Field(default_factory=list)
+    product_positionings: list[ProductPositioning] = Field(default_factory=list)
+    key_terms_glossary: list[GlossaryTerm] = Field(default_factory=list)
 
 
 # ── Doc-plan partition (deterministic; product-specific vs cross-cutting) ─
@@ -171,10 +171,10 @@ def _slot(
     topic: str,
     domain: str,
     product_category: str,
-    mentions_tools: List[str] | None = None,
+    mentions_tools: list[str] | None = None,
     angle: str = "",
     audience: str = "",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     return {
         "doc_key": doc_key,
         "document_type": document_type,
@@ -205,7 +205,7 @@ _PRODUCT_AUDIENCES = [
 #: instruction-y phrasing here leaks into the corpus. Because they are reader-facing
 #: prose they must be TRANSLATED for a non-English locale, not left to the generator:
 #: see ``DocTitleVocabulary``. Genre conventions ("list every fee") live in the prompt.
-_PRODUCT_GENRE_ANGLES: Dict[str, List[str]] = {
+_PRODUCT_GENRE_ANGLES: dict[str, list[str]] = {
     "product_sheet": [
         "overview",
         "who it is best for and common use cases",
@@ -290,7 +290,7 @@ def build_product_doc_plan(
     product: Product,
     target_docs: int,
     vocab: Any = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """PRODUCT-specific doc slots, BALANCED across genres (not FAQ-dominated).
 
     Round-robins one slot at a time across the product-appropriate genres (an
@@ -337,7 +337,7 @@ def build_product_doc_plan(
     how_to_var_fmt = voc.how_to_variable_template or "how to manage {v}"
     trouble_var_fmt = voc.troubleshooting_variable_template or "issues with {v}"
 
-    def _cycle_after_variables(per_variable_fmt: str, intents: List[str]):
+    def _cycle_after_variables(per_variable_fmt: str, intents: list[str]):
         # Per-variable angles FIRST. Used by ``faq``, whose "{v} explained" angles are
         # the value explainers that carry each authoritative number into prose -- the
         # backbone of the numeric-faithfulness check.
@@ -345,7 +345,7 @@ def build_product_doc_plan(
             yield per_variable_fmt.format(v=v)
         yield from intents
 
-    def _cycle_before_variables(per_variable_fmt: str, intents: List[str]):
+    def _cycle_before_variables(per_variable_fmt: str, intents: list[str]):
         # Intents FIRST. Used by ``how_to_guide`` / ``troubleshooting``, whose intents
         # are the customer-journey documents (open, close, a failed action) that the
         # dynamic tier asks about.
@@ -359,7 +359,7 @@ def build_product_doc_plan(
         for v in var_names:
             yield per_variable_fmt.format(v=v)
 
-    def _cycle(intents: List[str]):
+    def _cycle(intents: list[str]):
         yield from intents
 
     def finite(genre: str):
@@ -369,7 +369,7 @@ def build_product_doc_plan(
     # once their angles are exhausted; the FOUR expandable genres (faq /
     # how_to_guide / troubleshooting / comparison) SHARE the tail, so a large
     # ``target_docs`` produces a balanced, realistic mix instead of all-FAQ.
-    genres: List[Tuple[str, Any]] = [
+    genres: list[tuple[str, Any]] = [
         ("product_sheet", finite("product_sheet")),
         ("faq", _cycle_after_variables(faq_var_fmt, faq_intents)),
         ("how_to_guide", _cycle_before_variables(how_to_var_fmt, how_to_intents)),
@@ -383,8 +383,8 @@ def build_product_doc_plan(
         ("security_advisory", finite("security_advisory")),
         ("terms_conditions", finite("terms_conditions")),
     ]
-    counts: Dict[str, int] = {g: 0 for g, _ in genres}
-    slots: List[Dict[str, Any]] = []
+    counts: dict[str, int] = {g: 0 for g, _ in genres}
+    slots: list[dict[str, Any]] = []
     seen: set = set()
     target = max(target_docs, 1)
     while len(slots) < target:
@@ -425,7 +425,7 @@ def build_product_doc_plan(
 def build_shared_doc_plan(
     inst: Institution,
     vocab: Any = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """CROSS-CUTTING doc slots owned by the institution's shared cluster.
 
     Generated once (never per product) so they cannot drift: institution fee
@@ -541,7 +541,7 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
     return f"roughly {lo}-{hi} words"
 
 
-def _batches(items: List[Any], cap: int) -> Iterator[List[Any]]:
+def _batches(items: list[Any], cap: int) -> Iterator[list[Any]]:
     cap = max(cap, 1)
     for i in range(0, len(items), cap):
         yield items[i : i + cap]
@@ -554,7 +554,7 @@ def build_institution_seed(spec: RegionSpec):
     """One seed row per institution for the Phase-1 brief (pure)."""
     import pandas as pd
 
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for inst in spec.institutions:
         regulators = {d: spec.domain_regulators[d].model_dump() for d in inst.domains if d in spec.domain_regulators}
         rows.append(
@@ -579,7 +579,7 @@ def build_institution_seed(spec: RegionSpec):
     return pd.DataFrame(rows)
 
 
-def build_brief_columns() -> List[Any]:
+def build_brief_columns() -> list[Any]:
     """Phase-1 DD columns (introspectable): the structured InstitutionBrief."""
     import data_designer.config as dd
 
@@ -596,6 +596,7 @@ def build_brief_columns() -> List[Any]:
 def build_brief_config(models: Any, inst_seed) -> Any:
     """Assemble the Phase-1 (engine, builder). One place, explicit add_column."""
     import data_designer.config as dd
+
     from usersim.cli._models import to_model_configs
 
     engine = _make_engine(models)
@@ -625,7 +626,7 @@ def explode_to_cluster_rows(
     import pandas as pd
 
     spec_by_id = {i.id: i for i in spec.institutions}
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
 
     for _, brow in brief_df.iterrows():
         iid = str(brow["institution_id"])
@@ -647,7 +648,7 @@ def explode_to_cluster_rows(
 
         # Deterministic sibling index (doc_key -> intended title/topic) for by-title
         # cross-references across the whole institution.
-        sibling_index: Dict[str, str] = {}
+        sibling_index: dict[str, str] = {}
         for pl in product_plans.values():
             for s in pl:
                 sibling_index[s["doc_key"]] = s["topic"]
@@ -708,7 +709,7 @@ def explode_to_cluster_rows(
 # ── Phase 2: cluster generation config ──────────────────────────────────
 
 
-def docset_qc_scores() -> List[Any]:
+def docset_qc_scores() -> list[Any]:
     """Generation-time LLM-judge rubrics for a cluster (``dd.Score``)."""
     import data_designer.config as dd
 
@@ -755,11 +756,11 @@ def docset_qc_scores() -> List[Any]:
     ]
 
 
-def build_docset_columns() -> List[Any]:
+def build_docset_columns() -> list[Any]:
     """Phase-2 DD columns (introspectable): DocSet -> judge QC -> score flatteners."""
     import data_designer.config as dd
 
-    cols: List[Any] = [
+    cols: list[Any] = [
         dd.LLMStructuredColumnConfig(
             name="doc_set",
             model_alias=DOC_GEN_MODEL_ALIAS,
@@ -786,6 +787,7 @@ def build_docset_columns() -> List[Any]:
 def build_docset_config(models: Any, cluster_seed) -> Any:
     """Assemble the Phase-2 (engine, builder). One place, explicit add_column."""
     import data_designer.config as dd
+
     from usersim.cli._models import to_model_configs
 
     engine = _make_engine(models)
@@ -796,7 +798,7 @@ def build_docset_config(models: Any, cluster_seed) -> Any:
     return engine, builder
 
 
-def build_embedding_columns() -> List[Any]:
+def build_embedding_columns() -> list[Any]:
     """Embedding pass columns (run on the exploded per-doc frame): one vector/body."""
     import data_designer.config as dd
 
@@ -813,14 +815,14 @@ def build_embedding_columns() -> List[Any]:
 
 
 def explode_docset(
-    docset: "DocSet | Dict[str, Any]",
+    docset: "DocSet | dict[str, Any]",
     *,
     id_prefix: str,
     institution_id: str,
-    spec_by_key: Dict[str, Dict[str, Any]],
+    spec_by_key: dict[str, dict[str, Any]],
     default_domain: str,
     placeholder: bool = True,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Explode a ``DocSet`` into loader-compatible document dicts.
 
     Each generated doc is joined (by ``doc_key``) with the requested plan slot
@@ -831,9 +833,9 @@ def explode_docset(
         docs = docset.documents
     else:
         docs = [GeneratedDoc(**d) for d in (docset.get("documents") or [])]
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     seen: set = set()
-    off_plan: List[str] = []
+    off_plan: list[str] = []
     for gd in docs:
         slot = spec_by_key.get(gd.doc_key, {})
         if not slot and spec_by_key:
@@ -911,13 +913,13 @@ def explode_docset(
 class InstitutionBank:
     """One institution's serializable content."""
 
-    institution_meta: Dict[str, Any]
-    documents: List[Dict[str, Any]] = field(default_factory=list)
-    tools: List[Dict[str, Any]] = field(default_factory=list)
-    templates: List[Dict[str, Any]] = field(default_factory=list)
+    institution_meta: dict[str, Any]
+    documents: list[dict[str, Any]] = field(default_factory=list)
+    tools: list[dict[str, Any]] = field(default_factory=list)
+    templates: list[dict[str, Any]] = field(default_factory=list)
     #: doc_id -> dense embedding vector; written as an ``embeddings.parquet`` sidecar
     #: (not into corpus.yaml -- vectors don't belong in human-readable YAML).
-    embeddings: Dict[str, List[float]] = field(default_factory=dict)
+    embeddings: dict[str, list[float]] = field(default_factory=dict)
 
     @property
     def institution_id(self) -> str:
@@ -938,7 +940,7 @@ _TOOLS_YAML_HEADER = (
 )
 
 
-def _dump(path: Path, doc: Dict[str, Any], *, header: str = "") -> None:
+def _dump(path: Path, doc: dict[str, Any], *, header: str = "") -> None:
     import yaml
 
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -965,7 +967,7 @@ def doc_uuid(locale: str, institution_id: str, doc_key: str) -> str:
     return str(uuid.uuid5(_DOC_UUID_NAMESPACE, key))
 
 
-def _cluster_id(institution_id: str, cluster_kind: str, batch: List[Dict[str, Any]]) -> str:
+def _cluster_id(institution_id: str, cluster_kind: str, batch: list[dict[str, Any]]) -> str:
     """Stable id for one generation cluster, minted from its batch's deterministic
     doc uuids. Used to match a seed row to its generated output so dropped clusters
     (transient hub failures) can be detected and regenerated on their own -- and, being
@@ -985,7 +987,7 @@ def institution_rel_dir(institution_type: Any, institution_id: str) -> Path:
     return Path(itype) / institution_id if itype else Path(institution_id)
 
 
-def _dump_embeddings(path: Path, embeddings: Dict[str, List[float]]) -> None:
+def _dump_embeddings(path: Path, embeddings: dict[str, list[float]]) -> None:
     """Write a doc_id -> vector sidecar the dense retriever loads (not in YAML)."""
     import pandas as pd
 
@@ -996,8 +998,8 @@ def _dump_embeddings(path: Path, embeddings: Dict[str, List[float]]) -> None:
 
 def serialize_bank(
     out_dir: str | Path,
-    region_meta: Dict[str, Any],
-    institutions: List[InstitutionBank],
+    region_meta: dict[str, Any],
+    institutions: list[InstitutionBank],
     *,
     write_tasks: bool = True,
 ) -> Path:
@@ -1057,8 +1059,8 @@ def _make_engine(models: Any) -> Any:
     return engine
 
 
-def _institution_meta(inst: Institution) -> Dict[str, Any]:
-    meta: Dict[str, Any] = {
+def _institution_meta(inst: Institution) -> dict[str, Any]:
+    meta: dict[str, Any] = {
         "institution_id": inst.id,
         "display_name": inst.display_name or inst.id,
         "type": inst.type,
@@ -1074,7 +1076,7 @@ def _institution_meta(inst: Institution) -> Dict[str, Any]:
     return meta
 
 
-def _tool_dict(tool: Tool) -> Dict[str, Any]:
+def _tool_dict(tool: Tool) -> dict[str, Any]:
     return {
         "name": tool.name,
         "description": tool.description,
@@ -1085,8 +1087,8 @@ def _tool_dict(tool: Tool) -> Dict[str, Any]:
 
 
 def _backfill_primitive_tools(
-    tools: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    tools: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Fill framework-primitive (kb_search / verify_identity) description +
     parameters from the runtime bank contract when the source spec left them
     empty. Region specs list these by name only, so without this the generated
@@ -1097,7 +1099,7 @@ def _backfill_primitive_tools(
     """
     from usersim.engine.core.finance_bank import framework_primitive_tool
 
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     for t in tools:
         t = dict(t)
         canonical = framework_primitive_tool(t.get("name"))
@@ -1110,8 +1112,8 @@ def _backfill_primitive_tools(
     return out
 
 
-def _region_meta_from_spec(spec: RegionSpec) -> Dict[str, Any]:
-    meta: Dict[str, Any] = {
+def _region_meta_from_spec(spec: RegionSpec) -> dict[str, Any]:
+    meta: dict[str, Any] = {
         "locale": spec.locale,
         "region": spec.region,
         "currency": spec.currency,
@@ -1162,7 +1164,7 @@ def _to_py(obj: Any) -> Any:
     return obj
 
 
-def _as_docset(val: Any) -> Dict[str, Any]:
+def _as_docset(val: Any) -> dict[str, Any]:
     """Coerce a DD structured column value into a ``{"documents": [...]}`` dict,
     with ``documents`` guaranteed to be a plain Python list."""
     if val is None:
@@ -1185,7 +1187,7 @@ def _as_docset(val: Any) -> Dict[str, Any]:
 # ── Collect Phase-2 results into per-institution banks ──────────────────
 
 
-def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
+def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     """Group cluster rows by institution, QC-gate, explode, and de-dupe doc ids.
 
     QC-drop policy: an unparseable/empty cluster is dropped (with a warning);
@@ -1193,7 +1195,7 @@ def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
     so we never leave silent gaps that would break future task gold links.
     """
     spec_by_id = {i.id: i for i in spec.institutions}
-    docs_by_inst: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    docs_by_inst: dict[str, dict[str, dict[str, Any]]] = {}
 
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
@@ -1223,7 +1225,7 @@ def collect_institutions(result_df, spec: RegionSpec) -> List[InstitutionBank]:
         for d in docs:
             bucket.setdefault(d["id"], d)  # de-dupe ids across the institution's rows
 
-    institutions: List[InstitutionBank] = []
+    institutions: list[InstitutionBank] = []
     for inst in spec.institutions:
         institutions.append(
             InstitutionBank(
@@ -1300,7 +1302,7 @@ def _generate_docsets_with_backfill(
         return engine.create(builder, num_records=len(cluster_seed)).load_dataset().reset_index(drop=True)
 
     total = len(cluster_seed)
-    frames: List[Any] = []
+    frames: list[Any] = []
     done: set = set()
     remaining = cluster_seed
     for attempt in range(1, max_attempts + 1):
@@ -1354,7 +1356,7 @@ EMBED_RETRY_BASE_DELAY_S = 6.0
 
 
 def _embed_documents(
-    institutions: List[InstitutionBank],
+    institutions: list[InstitutionBank],
     models: Any,
     engine: Any,
     *,
@@ -1367,8 +1369,8 @@ def _embed_documents(
     load); on final failure it re-raises so the caller can persist the corpus without
     embeddings rather than discarding it.
     """
-    import pandas as pd
     import data_designer.config as dd
+    import pandas as pd
     from data_designer.interface.errors import DataDesignerGenerationError
 
     rows = [{"id": d["id"], "body": d["body"]} for ib in institutions for d in ib.documents]
@@ -1478,11 +1480,11 @@ def generate_corpus(
 def _write_generation_report(
     root: Path,
     result_df,
-    institutions: List[InstitutionBank],
+    institutions: list[InstitutionBank],
     models: Any,
     docs_per_product: int,
     max_docs_per_cluster: int,
-    briefs: Optional[Dict[str, str]] = None,
+    briefs: dict[str, str] | None = None,
 ) -> None:
     """Write ``_generation_report.json`` (provenance + per-cluster QC) for the vet gate."""
     from datetime import datetime, timezone
@@ -1508,7 +1510,7 @@ def _write_generation_report(
         except json.JSONDecodeError:
             return None
 
-    by_inst: Dict[str, List[Dict[str, Any]]] = {}
+    by_inst: dict[str, list[dict[str, Any]]] = {}
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
         docset = _as_docset(row.get("doc_set"))

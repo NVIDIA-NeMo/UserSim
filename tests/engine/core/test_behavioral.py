@@ -4,6 +4,12 @@
 """Tests for core/behavioral.py -- OCEAN->behavioral parameter computation."""
 
 from usersim.engine.core.behavioral import (
+    _education_ordinal,
+    _extract_ocean,
+    _extract_ocean_metadata,
+    _infer_tech_literacy,
+    _is_tech_occupation,
+    _parse_ocean_value,
     compute_behavioral_profile,
     compute_disclosure_style,
     compute_frustration_level,
@@ -13,12 +19,6 @@ from usersim.engine.core.behavioral import (
     format_interaction_style_instructions,
     get_conversation_language,
     get_frustration_prompt,
-    _education_ordinal,
-    _extract_ocean,
-    _extract_ocean_metadata,
-    _infer_tech_literacy,
-    _is_tech_occupation,
-    _parse_ocean_value,
 )
 
 

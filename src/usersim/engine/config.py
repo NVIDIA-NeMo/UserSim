@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
 from data_designer.config.base import SingleColumnConfig
 from pydantic import Field
@@ -28,8 +28,8 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     theme_column: str = "theme"
 
     # Tool-calling-specific columns (optional, None for non-tool probes)
-    tools_column: Optional[str] = None
-    toolset_name_column: Optional[str] = None
+    tools_column: str | None = None
+    toolset_name_column: str | None = None
 
     # Locale (set per pipeline run, not per row)
     locale: str = "en_US"
@@ -124,7 +124,7 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # capability (document recall).
     # ``finance_embedding_model_alias`` is the query-embedding alias.
     finance_tier_mix: float = 0.0
-    finance_tier: Optional[str] = None
+    finance_tier: str | None = None
     finance_retrieval_mode: str = "hybrid"
     finance_embedding_model_alias: str = "embedding_model"
 

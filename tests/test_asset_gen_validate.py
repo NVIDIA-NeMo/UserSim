@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -14,7 +14,7 @@ from usersim.asset_gen.financial_services.pipeline import InstitutionBank, seria
 from usersim.asset_gen.financial_services.spec import RegionSpec
 from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, validate_bank
 
-_SPEC_DICT: Dict[str, Any] = {
+_SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
     "region": "US",
     "currency": "USD",
@@ -50,7 +50,7 @@ def _spec() -> RegionSpec:
     return RegionSpec.model_validate(_SPEC_DICT)
 
 
-def _doc(doc_id: str, body: str) -> Dict[str, Any]:
+def _doc(doc_id: str, body: str) -> dict[str, Any]:
     return {
         "id": doc_id,
         "title": "Checking overview",
@@ -65,7 +65,7 @@ def _doc(doc_id: str, body: str) -> Dict[str, Any]:
 
 
 def _write_bank(
-    tmp_path: Path, locale: str, docs: List[Dict[str, Any]], embeddings: Optional[Dict[str, List[float]]] = None
+    tmp_path: Path, locale: str, docs: list[dict[str, Any]], embeddings: dict[str, list[float]] | None = None
 ) -> Path:
     region_meta = {"locale": locale, "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
     inst = InstitutionBank(
@@ -85,7 +85,7 @@ def _write_bank(
     return serialize_bank(tmp_path / locale, region_meta, [inst], write_tasks=False)
 
 
-def _status(report, check: str, scope: Optional[str] = None) -> Optional[str]:
+def _status(report, check: str, scope: str | None = None) -> str | None:
     for r in report.results:
         if r.check == check and (scope is None or r.scope == scope):
             return r.status
@@ -247,7 +247,7 @@ def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
 # ── tool names and doc_keys must not appear in customer-facing prose ─────────
 
 
-def _bank_with(tmp_path: Path, docs: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None) -> Path:
+def _bank_with(tmp_path: Path, docs: list[dict[str, Any]], tools: list[dict[str, Any]] | None = None) -> Path:
     """A bank whose tool taxonomy includes a real state-changing tool to leak."""
     region_meta = {"locale": "en_US", "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
     inst = InstitutionBank(
@@ -274,7 +274,7 @@ def _bank_with(tmp_path: Path, docs: List[Dict[str, Any]], tools: Optional[List[
     return serialize_bank(tmp_path / "en_US", region_meta, [inst], write_tasks=False)
 
 
-def _typed(doc_id: str, genre: str, body: str) -> Dict[str, Any]:
+def _typed(doc_id: str, genre: str, body: str) -> dict[str, Any]:
     d = _doc(doc_id, body)
     d["document_type"] = genre
     return d

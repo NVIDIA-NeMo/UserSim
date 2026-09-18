@@ -20,13 +20,13 @@ from __future__ import annotations
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
 
 @lru_cache(maxsize=16)
-def _load_prompt_file_at(probe: str, assets_root: str) -> Dict[str, Any]:
+def _load_prompt_file_at(probe: str, assets_root: str) -> dict[str, Any]:
     """Load a probe's ``prompts.yaml`` from a specific asset root."""
     yaml_path = Path(assets_root) / probe / "prompts.yaml"
 
@@ -45,7 +45,7 @@ def _load_prompt_file_at(probe: str, assets_root: str) -> Dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def load_prompt_file(probe: str) -> Dict[str, Any]:
+def load_prompt_file(probe: str) -> dict[str, Any]:
     """Load a probe's ``prompts.yaml`` from the active asset root.
 
     Returns an empty dict if the file doesn't exist or PyYAML is not
@@ -67,7 +67,7 @@ def get_prompt(probe: str, key: str, default: str = "") -> str:
     return prompts.get(key, default)
 
 
-def render_prompt(template: str, row: Dict[str, Any], /, **explicit: Any) -> str:
+def render_prompt(template: str, row: dict[str, Any], /, **explicit: Any) -> str:
     """Fill ``template``'s placeholders from ``explicit`` values, then the row.
 
     Lets a prompt edited in ``assets/<probe>/prompts.yaml`` reference any

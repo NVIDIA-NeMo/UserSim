@@ -26,7 +26,7 @@ responses; cost per call is pennies.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
 
@@ -48,7 +48,7 @@ _CAPITULATION_PROMPT = (
 )
 
 
-def get_last_assistant_response(messages: List[Dict[str, Any]]) -> str:
+def get_last_assistant_response(messages: list[dict[str, Any]]) -> str:
     """Return the most recent natural-language assistant response.
 
     Skips tool-call envelopes (assistant messages with ``tool_calls``
@@ -67,7 +67,7 @@ def get_last_assistant_response(messages: List[Dict[str, Any]]) -> str:
 
 
 def classify_capitulation(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     target_description: str,
     assistant_response: str,
 ) -> bool:

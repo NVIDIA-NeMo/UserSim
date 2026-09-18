@@ -44,7 +44,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.taxonomy.capabilities import capability_definitions
 
@@ -97,7 +97,7 @@ class ComparisonEntry:
     """
 
     run_id: str
-    model_id: Optional[str]
+    model_id: str | None
     display_label: str
     eval_column: str
     n_trajectories: int
@@ -131,8 +131,8 @@ class ComparisonCell:
     run_id: str
     display_label: str
     state: str
-    normalized_score: Optional[float]
-    threshold: Optional[float]
+    normalized_score: float | None
+    threshold: float | None
     n: int
     n_total: int
     failed_critical_axes: list[str] = field(default_factory=list)
@@ -151,7 +151,7 @@ class ModelRollup:
 
     run_id: str
     display_label: str
-    model_id: Optional[str]
+    model_id: str | None
 
     # Coverage / state distribution (denominator = all cells INCLUDING
     # simulation_reliability and missing — gives a faithful picture of
@@ -182,7 +182,7 @@ class ModelRollup:
     n_gaps: int = 0
 
     # Quality (skips missing/insufficient + excludes simulation_reliability).
-    mean_normalized_score: Optional[float] = None
+    mean_normalized_score: float | None = None
 
     # Verbosity (Layers 1b, 2, 3).
     #
@@ -213,10 +213,10 @@ class ModelRollup:
     # Both are surfaced so the dashboard can pick whichever the
     # reviewer cares about -- failure rates draw the eye to outliers
     # better than success rates that cluster around 100%.
-    sim_status_ok_rate: Optional[float] = None
-    sim_status_failure_rate: Optional[float] = None
-    persona_grounding_rate: Optional[float] = None
-    early_stop_rate: Optional[float] = None
+    sim_status_ok_rate: float | None = None
+    sim_status_failure_rate: float | None = None
+    persona_grounding_rate: float | None = None
+    early_stop_rate: float | None = None
     has_sim_health: bool = True
     # Per-class failure breakdown lifted directly from
     # ``sim_health.failure_taxonomy``: a list of dicts shaped
@@ -288,7 +288,7 @@ def discover_comparison_runs(report_root: Path | str) -> list[Path]:
 def select_runs_for_comparison(
     report_root: Path | str,
     *,
-    compare_run_ids: Optional[list[str]] = None,
+    compare_run_ids: list[str] | None = None,
 ) -> list[Path]:
     """Discover + (optionally) filter / reorder report manifests for comparison.
 
@@ -323,7 +323,7 @@ def select_runs_for_comparison(
 # ---------------------------------------------------------------------------
 
 
-def _short_label(model_id: Optional[str]) -> str:
+def _short_label(model_id: str | None) -> str:
     """Strip provider prefix from a ``model_id`` for the chart label.
 
     ``"nvidia/google/gemma-4-31b-it"`` -> ``"gemma-4-31b-it"``
@@ -442,10 +442,10 @@ def _build_rollup(
     # Sim health (Layer 0) — may be absent on very old manifests.
     sim_health = manifest.get("sim_health") or {}
     has_sim_health = bool(sim_health.get("n_trajectories"))
-    sim_status_ok_rate: Optional[float] = None
-    sim_status_failure_rate: Optional[float] = None
-    persona_grounding_rate: Optional[float] = None
-    early_stop_rate: Optional[float] = None
+    sim_status_ok_rate: float | None = None
+    sim_status_failure_rate: float | None = None
+    persona_grounding_rate: float | None = None
+    early_stop_rate: float | None = None
     if has_sim_health:
         status_counts = sim_health.get("status_counts") or {}
         n_traj_sh = sim_health.get("n_trajectories", 0) or 0
@@ -637,7 +637,7 @@ def _load_manifest(path: Path) -> dict[str, Any]:
 def _build_entry(
     manifest: dict[str, Any],
     manifest_path: Path,
-    labels: Optional[dict[str, str]] = None,
+    labels: dict[str, str] | None = None,
 ) -> ComparisonEntry:
     run_id = str(manifest.get("run_id") or manifest_path.parent.name.removeprefix("run="))
     model_id = manifest.get("model_id")
@@ -678,9 +678,9 @@ def _build_entry(
 def build_comparison_report(
     manifest_paths: Iterable[Path | str],
     *,
-    comparison_id: Optional[str] = None,
-    labels: Optional[dict[str, str]] = None,
-    locales: Optional[Iterable[str]] = None,
+    comparison_id: str | None = None,
+    labels: dict[str, str] | None = None,
+    locales: Iterable[str] | None = None,
 ) -> ComparisonReport:
     """Build a :class:`ComparisonReport` from N per-run manifest paths.
 

@@ -30,13 +30,15 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
@@ -51,15 +53,14 @@ from usersim.engine.core.pressure_bank import (
     TargetRequest,
     load_pressure_bank,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.safety_chat_pressure import (
     generator as probe_gen,
+)
+from usersim.engine.probes.safety_chat_pressure import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -76,7 +77,7 @@ def sample_bank() -> PressureBank:
 
 
 @pytest.fixture
-def en_persona() -> Dict[str, Any]:
+def en_persona() -> dict[str, Any]:
     return {
         "first_name": "Sarah",
         "last_name": "Johnson",
@@ -115,10 +116,10 @@ def simulator_cfg_three_turns():
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
-    summary_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
+    summary_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Alias-dispatching ``call_llm`` mock for the unified loop.
@@ -195,7 +196,7 @@ def _patched_call_llm(side_effect):
         yield
 
 
-def _shipped_bank_env() -> Dict[str, str]:
+def _shipped_bank_env() -> dict[str, str]:
     return {"USERSIM_SAFETY_CHAT_PRESSURE_BANK": str(SAMPLE_BANK_PATH)}
 
 
@@ -289,7 +290,7 @@ class TestPersonaToTagsReExport:
 class TestDeriveTask:
     def test_returns_pair_when_both_pools_nonempty(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         pair = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
@@ -300,7 +301,7 @@ class TestDeriveTask:
 
     def test_returns_none_when_no_targets_match_persona(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         # Synthetic bank where the only target requires a tag the
         # persona doesn't carry.
@@ -313,7 +314,7 @@ class TestDeriveTask:
 
     def test_returns_none_when_all_strategies_excluded(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_strategies=2)
         result = task_derivation.derive_task(
@@ -327,7 +328,7 @@ class TestDeriveTask:
 
     def test_returns_none_when_all_targets_excluded(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_targets=2)
         result = task_derivation.derive_task(
@@ -341,7 +342,7 @@ class TestDeriveTask:
 
     def test_deterministic_for_same_inputs(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_strategies=3, n_targets=4)
         a = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
@@ -351,7 +352,7 @@ class TestDeriveTask:
 
     def test_different_seed_can_produce_different_pick(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_strategies=4, n_targets=4)
         picks = set()
@@ -367,7 +368,7 @@ class TestDeriveTask:
 
     def test_bank_version_change_perturbs_pick(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank_a = _synthetic_bank(
             bank_version="v0.1.0",
@@ -390,7 +391,7 @@ class TestDeriveTask:
 
     def test_strategy_and_target_picks_use_independent_salts(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         # The independent-salt design intent: across many seeds, the
         # joint distribution of (strategy_index, target_index) should
@@ -423,7 +424,7 @@ class TestDeriveTask:
 
 
 class TestResolveTaskFromRow:
-    def test_full_override_returns_pair(self, en_persona: Dict[str, Any]) -> None:
+    def test_full_override_returns_pair(self, en_persona: dict[str, Any]) -> None:
         bank = _synthetic_bank(n_strategies=2, n_targets=2)
         pair = task_derivation.resolve_task_from_row(
             en_persona,
@@ -438,7 +439,7 @@ class TestResolveTaskFromRow:
 
     def test_full_override_missing_strategy_returns_none(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         pair = task_derivation.resolve_task_from_row(
@@ -452,7 +453,7 @@ class TestResolveTaskFromRow:
 
     def test_full_override_missing_target_returns_none(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         pair = task_derivation.resolve_task_from_row(
@@ -466,7 +467,7 @@ class TestResolveTaskFromRow:
 
     def test_partial_strategy_override_derives_target(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_strategies=2, n_targets=3)
         pair = task_derivation.resolve_task_from_row(
@@ -482,7 +483,7 @@ class TestResolveTaskFromRow:
 
     def test_partial_target_override_derives_strategy(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_strategies=3, n_targets=2)
         pair = task_derivation.resolve_task_from_row(
@@ -498,7 +499,7 @@ class TestResolveTaskFromRow:
 
     def test_no_override_falls_through_to_derive_task(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         pair = task_derivation.resolve_task_from_row(
@@ -511,7 +512,7 @@ class TestResolveTaskFromRow:
 
     def test_full_override_persona_tag_mismatch_returns_none(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         # Target requires a tag the persona doesn't carry — even with
         # an explicit panel override, the adapter refuses the pair.
@@ -535,7 +536,7 @@ class TestPrompts:
     def test_user_agent_system_prompt_interpolates(
         self,
         sample_bank: PressureBank,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         s = sample_bank.strategy_by_id("persistence")
         t = sample_bank.target_by_id("TR-SB-B001")
@@ -586,7 +587,7 @@ class TestPrompts:
     def test_followup_messages_end_with_reframing_instruction(
         self,
         sample_bank: PressureBank,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         s = sample_bank.strategy_by_id("persistence")
         t = sample_bank.target_by_id("TR-SB-B001")
@@ -619,7 +620,7 @@ class TestPrompts:
 class TestFollowupGatePrompt:
     def test_gate_prompt_scores_role_legitimacy_not_content_policy(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank()
@@ -663,7 +664,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_single_turn_runs_end_to_end(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with (
@@ -732,7 +733,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_first_user_turn_is_target_initial_prompt_verbatim(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
@@ -787,7 +788,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_three_turn_run_rotates_reframings(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         # 3 turns: 1 verbatim + 2 follow-ups → 2 reframings used.
@@ -840,7 +841,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_pressure_followup_after_refusal_is_accepted(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         class _Cfg:
             random_seed = 42
@@ -893,7 +894,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_bank_load_failure_returns_structured_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(
@@ -918,7 +919,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_panel_override_with_unknown_target_returns_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         sim_patch = patch("usersim.engine.core.simulation.call_llm")
@@ -947,7 +948,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_no_resolvable_pair_returns_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Synthetic bank where every target requires a tag the persona
@@ -975,7 +976,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_assistant_turn1_failure_attributed_to_assistant_model(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         def _raises(*args, **kwargs):
@@ -1022,7 +1023,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_non_placeholder_target_does_not_emit_placeholder_warning(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(placeholder=False)
@@ -1057,7 +1058,7 @@ class TestSimulateSafetyChatPressure:
 
     def test_followup_failure_aborts_with_failed_outcome(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         # Turn 1: assistant ok. Turn 2: user_model raises on every
@@ -1151,7 +1152,7 @@ class TestCapitulationStopHook:
     unreliable due to safety-bias and multi-turn context contamination.
     """
 
-    def _models(self) -> Dict[str, Any]:
+    def _models(self) -> dict[str, Any]:
         return {
             "user_model": object(),
             "assistant_model": object(),
@@ -1162,7 +1163,7 @@ class TestCapitulationStopHook:
 
     def test_classifier_yes_stops_loop_with_side_channels(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """summary_model returns 'yes' after T1 → trajectory ends at 1/1.
@@ -1218,7 +1219,7 @@ class TestCapitulationStopHook:
 
     def test_classifier_no_continues_loop(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """summary_model returns 'no' every call → loop runs to max_turns.
@@ -1263,7 +1264,7 @@ class TestCapitulationStopHook:
 
     def test_classifier_runs_after_each_assistant_turn(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """summary_model returns 'no', 'no', 'yes' → stops at turn 3."""
@@ -1309,7 +1310,7 @@ class TestCapitulationStopHook:
 
     def test_classifier_exception_treated_as_continue(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """summary_model raising → classifier returns False → loop continues.
@@ -1357,7 +1358,7 @@ class TestCapitulationStopHook:
 
     def test_capitulation_checks_promoted_to_row_column(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """``state.metadata['capitulation_checks']`` lands as a top-level
@@ -1409,7 +1410,7 @@ class TestCapitulationStopHook:
 
     def test_user_followup_path_is_now_freeform(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """The user-LLM call no longer carries a response_format kwarg.
@@ -1419,7 +1420,7 @@ class TestCapitulationStopHook:
         invocations and assert the user_model call has no
         response_format in kwargs.
         """
-        captured_kwargs: List[Dict[str, Any]] = []
+        captured_kwargs: list[dict[str, Any]] = []
 
         def _capturing_side_effect(models, alias, msgs, **kwargs):
             if alias == "user_model":
@@ -1461,7 +1462,7 @@ class TestCapitulationStopHook:
 
     def test_polite_thanks_followup_does_not_early_stop(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         """Polite ``Thanks!`` in a follow-up does NOT trigger the generic

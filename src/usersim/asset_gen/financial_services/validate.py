@@ -25,7 +25,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from usersim.asset_gen.financial_services.spec import RegionSpec
 
@@ -49,7 +49,7 @@ class CheckResult:
 
 @dataclass
 class ValidationReport:
-    results: List[CheckResult] = field(default_factory=list)
+    results: list[CheckResult] = field(default_factory=list)
 
     def add(self, check: str, scope: str, status: str, detail: str = "") -> None:
         self.results.append(CheckResult(check, scope, status, detail))
@@ -58,15 +58,15 @@ class ValidationReport:
     def failed(self) -> bool:
         return any(r.status == FAIL for r in self.results)
 
-    def counts(self) -> Dict[str, int]:
+    def counts(self) -> dict[str, int]:
         out = {PASS: 0, WARN: 0, FAIL: 0}
         for r in self.results:
             out[r.status] = out.get(r.status, 0) + 1
         return out
 
     def to_text(self) -> str:
-        lines: List[str] = []
-        by_scope: Dict[str, List[CheckResult]] = {}
+        lines: list[str] = []
+        by_scope: dict[str, list[CheckResult]] = {}
         for r in self.results:
             by_scope.setdefault(r.scope, []).append(r)
         for scope in sorted(by_scope):
@@ -83,7 +83,7 @@ class ValidationReport:
 # ── bank reading (corpus-only tolerant; no loader dependency) ───────────
 
 
-def _load_yaml(path: Path) -> Dict[str, Any]:
+def _load_yaml(path: Path) -> dict[str, Any]:
     import yaml
 
     with path.open("r", encoding="utf-8") as fh:
@@ -92,16 +92,16 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
 
 @dataclass
 class _InstData:
-    meta: Dict[str, Any]
-    documents: List[Dict[str, Any]]
-    tools: List[Dict[str, Any]]
+    meta: dict[str, Any]
+    documents: list[dict[str, Any]]
+    tools: list[dict[str, Any]]
     embeddings: Any  # pandas.DataFrame | None
     has_tasks: bool
 
 
-def _read_bank(bank_dir: Path) -> Tuple[Dict[str, Any], Dict[str, _InstData]]:
+def _read_bank(bank_dir: Path) -> tuple[dict[str, Any], dict[str, _InstData]]:
     region_meta = _load_yaml(bank_dir / "region_meta.yaml")
-    institutions: Dict[str, _InstData] = {}
+    institutions: dict[str, _InstData] = {}
     # Institutions live under a type dir (<type>/<id>/); discover layout-agnostically
     # via institution_meta.yaml (also tolerates a legacy flat layout).
     for meta_path in sorted(bank_dir.rglob("institution_meta.yaml")):
@@ -128,7 +128,7 @@ def _read_bank(bank_dir: Path) -> Tuple[Dict[str, Any], Dict[str, _InstData]]:
 # ── individual checks ────────────────────────────────────────────────────
 
 
-def _check_structural(bank_dir: Path, insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_structural(bank_dir: Path, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     corpus_only = any(not d.has_tasks for d in insts.values())
     try:
         from usersim.engine.core.finance_bank import (
@@ -160,7 +160,7 @@ def _indian_grouped(iv: int) -> str:
     if len(digits) <= 3:
         return f"{sign}{digits}"
     head, tail = digits[:-3], digits[-3:]
-    pairs: List[str] = []
+    pairs: list[str] = []
     while len(head) > 2:
         pairs.insert(0, head[-2:])
         head = head[:-2]
@@ -189,7 +189,7 @@ def _scale_word_forms(iv: int) -> set:
     return out
 
 
-def _value_candidates(val: Any) -> List[str]:
+def _value_candidates(val: Any) -> list[str]:
     cands = {str(val)}
     if isinstance(val, bool):
         return list(cands)
@@ -209,7 +209,7 @@ def _value_present(val: Any, text: str) -> bool:
     return any(c in text for c in _value_candidates(val))
 
 
-def _check_numeric_faithfulness(spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     if spec is None:
         rep.add("numeric_faithfulness", "bank", WARN, "skipped: no region_spec provided (cannot ground values)")
         return
@@ -236,7 +236,7 @@ def _check_numeric_faithfulness(spec: Optional[RegionSpec], insts: Dict[str, _In
                 rep.add("numeric_faithfulness", inst.id, PASS, f"{product.id}: all typed values present")
 
 
-def _check_variable_name_leak(spec: Optional[RegionSpec], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag customer-facing prose that prints a spec FIELD KEY.
 
     The doc-gen prompt hands the model each product's variables as a JSON object
@@ -256,7 +256,7 @@ def _check_variable_name_leak(spec: Optional[RegionSpec], insts: Dict[str, _Inst
         if not keys:
             continue
         pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len, reverse=True)) + r")\b")
-        offenders: List[str] = []
+        offenders: list[str] = []
         seen_keys: set = set()
         for d in idata.documents:
             found = pattern.findall(f"{d.get('title', '')} {d.get('body', '')}")
@@ -287,7 +287,7 @@ _AGENT_FACING_GENRES: frozenset = frozenset(
 )
 
 
-def _check_tool_name_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_tool_name_leak(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag customer-facing prose that names an internal tool.
 
     A customer-facing document should say what the customer can ask for; which tool
@@ -306,7 +306,7 @@ def _check_tool_name_leak(insts: Dict[str, _InstData], rep: ValidationReport) ->
             continue
         pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(n) for n in names), key=len, reverse=True)) + r")\b")
         customer = [d for d in idata.documents if d.get("document_type") not in _AGENT_FACING_GENRES]
-        offenders: List[str] = []
+        offenders: list[str] = []
         seen: set = set()
         for d in customer:
             found = pattern.findall(f"{d.get('title', '')} {d.get('body', '')}")
@@ -341,7 +341,7 @@ _DOC_KEY_RE = re.compile(
 )
 
 
-def _check_doc_key_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_doc_key_leak(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag prose that cites a sibling by its raw ``doc_key`` instead of its title.
 
     The prompt asks for cross-references BY TITLE, with keys confined to the
@@ -357,7 +357,7 @@ def _check_doc_key_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> N
         # Those are tool-name leaks, reported by _check_tool_name_leak; excluding them
         # here keeps one string from being blamed under two different checks.
         tool_names = {str(t.get("name")) for t in idata.tools if t.get("name")}
-        offenders: List[str] = []
+        offenders: list[str] = []
         seen: set = set()
         for d in idata.documents:
             found = [m for m in _DOC_KEY_RE.findall(str(d.get("body", ""))) if m not in tool_names]
@@ -377,11 +377,11 @@ def _check_doc_key_leak(insts: Dict[str, _InstData], rep: ValidationReport) -> N
             rep.add("doc_key_leak", iid, PASS, "cross-references use titles, not doc_keys")
 
 
-def _in_ranges(cp: int, ranges: Tuple[Tuple[int, int], ...]) -> bool:
+def _in_ranges(cp: int, ranges: tuple[tuple[int, int], ...]) -> bool:
     return any(lo <= cp <= hi for lo, hi in ranges)
 
 
-def _script_fraction(text: str, ranges: Tuple[Tuple[int, int], ...]) -> Optional[float]:
+def _script_fraction(text: str, ranges: tuple[tuple[int, int], ...]) -> float | None:
     letters = [c for c in text if unicodedata.category(c).startswith("L")]
     if not letters:
         return None
@@ -389,7 +389,7 @@ def _script_fraction(text: str, ranges: Tuple[Tuple[int, int], ...]) -> Optional
     return in_expected / len(letters)
 
 
-def _check_language_script(region_meta: Dict[str, Any], insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
     try:
         from usersim.engine.core.locale import expected_script_ranges
@@ -415,7 +415,7 @@ def _check_language_script(region_meta: Dict[str, Any], insts: Dict[str, _InstDa
             rep.add("language_script", iid, PASS, "prose in expected script")
 
 
-def _check_near_duplicate(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_near_duplicate(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     import numpy as np
 
     for iid, idata in insts.items():
@@ -445,7 +445,7 @@ def _check_near_duplicate(insts: Dict[str, _InstData], rep: ValidationReport) ->
             rep.add("near_duplicate", iid, PASS, "no near-duplicates")
 
 
-def _check_coverage(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_coverage(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     if not insts:
         rep.add("coverage", "bank", FAIL, "no institutions in bank")
         return
@@ -454,7 +454,7 @@ def _check_coverage(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
         rep.add("coverage", iid, FAIL if n == 0 else PASS, "empty corpus" if n == 0 else f"{n} documents")
 
 
-def _check_placeholder(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_placeholder(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     for iid, idata in insts.items():
         non_ph = [d.get("id") for d in idata.documents if not d.get("placeholder", False)]
         if non_ph:
@@ -463,7 +463,7 @@ def _check_placeholder(insts: Dict[str, _InstData], rep: ValidationReport) -> No
             rep.add("placeholder_discipline", iid, PASS, "all docs placeholder:true")
 
 
-def _check_scope(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_scope(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     for iid, idata in insts.items():
         domains = set(idata.meta.get("domains", []) or [])
         bad = [
@@ -477,7 +477,7 @@ def _check_scope(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
             rep.add("scope", iid, PASS, "all docs within institution domains")
 
 
-def _check_tool_schemas(insts: Dict[str, _InstData], rep: ValidationReport) -> None:
+def _check_tool_schemas(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     """Framework primitives (kb_search / verify_identity) must ship a real schema.
 
     An empty schema (no description / no parameters) leaves the assistant calling
@@ -618,7 +618,7 @@ def _check_qc_scores(bank_dir: Path, rep: ValidationReport) -> None:
 # ── entry point ─────────────────────────────────────────────────────────
 
 
-def validate_bank(bank_dir: str | Path, region_spec: Optional[RegionSpec] = None) -> ValidationReport:
+def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -> ValidationReport:
     """Vet a generated financial_services bank; returns a :class:`ValidationReport`.
 
     ``region_spec`` is the source of truth for the numeric-faithfulness check; if

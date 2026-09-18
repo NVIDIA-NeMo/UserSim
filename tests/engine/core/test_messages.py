@@ -4,11 +4,11 @@
 """Tests for core/messages.py formatting helpers."""
 
 from usersim.engine.core.messages import (
-    format_tools_for_prompt,
-    format_themes_for_prompt,
-    format_conversation_history_for_prompt,
-    project_public_dialogue,
     _parse_theme,
+    format_conversation_history_for_prompt,
+    format_themes_for_prompt,
+    format_tools_for_prompt,
+    project_public_dialogue,
 )
 
 

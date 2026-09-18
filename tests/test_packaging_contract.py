@@ -261,9 +261,8 @@ class TestProbeAssetPreflight:
     def test_shipped_assets_satisfy_every_probe(self) -> None:
         """The banks that ship must satisfy their own probes for en_US."""
         import usersim.engine.generator  # noqa: F401  (populates registry)
-        from usersim.engine.core.probes import known_probes
-
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.core.probes import known_probes
 
         verify_probe_assets({p: 1.0 for p in known_probes()}, ["en_US"], None)
 

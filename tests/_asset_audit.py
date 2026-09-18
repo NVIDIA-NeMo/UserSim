@@ -29,7 +29,6 @@ from typing import Any
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # All Nemotron-Personas locale ids the simulator currently supports.

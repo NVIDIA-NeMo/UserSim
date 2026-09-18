@@ -29,7 +29,6 @@ from usersim.engine.probes.general_educational.prompts import (
     user_judge_turn_prompt,
 )
 
-
 # ── Probe metadata ──────────────────────────────────────────────────
 # Bumping ``PROMPT_VERSION`` invalidates prior evaluator rows on
 # re-run, since the dedup key includes it. Bump on any semantic change

@@ -14,10 +14,10 @@ synthetic-training-extraction example.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import MagicMock
 
-
+from usersim.engine.evaluator import scorers as scorers_module
 from usersim.engine.evaluator.config import (
     JudgeSpecConfig,
     TrajectoryEvaluatorConfig,
@@ -27,8 +27,6 @@ from usersim.engine.evaluator.generator import (
     TrajectoryEvaluatorGenerator,
     _decode_json_field,
 )
-from usersim.engine.evaluator import scorers as scorers_module
-
 
 # ── Pure helpers ────────────────────────────────────────────────────
 
@@ -63,7 +61,7 @@ class TestDecodeJsonField:
 
 def _build_generator(
     cfg: TrajectoryEvaluatorConfig,
-    judge_responses: Dict[str, Dict[str, Any]] | None = None,
+    judge_responses: dict[str, dict[str, Any]] | None = None,
 ) -> TrajectoryEvaluatorGenerator:
     """Construct a generator without DD's full ResourceProvider machinery.
 

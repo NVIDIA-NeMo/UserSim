@@ -19,8 +19,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable
-
+from typing import Any, Iterable
 
 # The "conversation aliases" — the two parties IN the conversation:
 # the simulated user and the assistant under test.
@@ -41,7 +40,7 @@ from typing import Any, Dict, Iterable
 _CONVERSATION_ALIASES = ("user_model", "assistant_model")
 
 
-def _decode_outcome(raw: Any) -> Dict[str, Any]:
+def _decode_outcome(raw: Any) -> dict[str, Any]:
     """Best-effort decode of the ``simulation_outcome`` cell."""
     if raw is None:
         return {}
@@ -77,12 +76,12 @@ class ResourceProfile:
     """
 
     n_trajectories: int = 0
-    n_calls_by_alias: Dict[str, int] = field(default_factory=dict)
-    input_tokens_by_alias: Dict[str, int] = field(default_factory=dict)
-    output_tokens_by_alias: Dict[str, int] = field(default_factory=dict)
-    reasoning_tokens_by_alias: Dict[str, int] = field(default_factory=dict)
-    reasoning_source_by_alias: Dict[str, str] = field(default_factory=dict)
-    wall_clock_s_by_alias: Dict[str, float] = field(default_factory=dict)
+    n_calls_by_alias: dict[str, int] = field(default_factory=dict)
+    input_tokens_by_alias: dict[str, int] = field(default_factory=dict)
+    output_tokens_by_alias: dict[str, int] = field(default_factory=dict)
+    reasoning_tokens_by_alias: dict[str, int] = field(default_factory=dict)
+    reasoning_source_by_alias: dict[str, str] = field(default_factory=dict)
+    wall_clock_s_by_alias: dict[str, float] = field(default_factory=dict)
     total_wall_clock_s: float = 0.0
 
     @property
@@ -290,7 +289,7 @@ class ResourceProfile:
         """
         return sum(self.reasoning_tokens_by_alias.values())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "n_trajectories": self.n_trajectories,
             "total_calls": self.total_calls,
@@ -329,7 +328,7 @@ class ResourceProfile:
         }
 
 
-def _accumulate_alias_dict(target: Dict[str, Any], source: Any) -> None:
+def _accumulate_alias_dict(target: dict[str, Any], source: Any) -> None:
     """Merge ``source`` (dict-or-decodable) into ``target``, summing values.
 
     Tolerant of unparseable / wrong-type sources (treats them as empty).

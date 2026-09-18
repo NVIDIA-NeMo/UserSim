@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
 from usersim.engine.core.locale import SHIPPED_LOCALES
@@ -48,9 +48,9 @@ CONCEALING_MOVES = {"withhold", "deflect", "minimize", "conceal_risk"}
 
 
 def pair_realized_turns(
-    messages: List[Dict[str, Any]],
-    moves: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    messages: list[dict[str, Any]],
+    moves: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Pair each committed move with the user turn that realized it.
 
     Moves are the *follow-up* turns, so the opening user turn (turn 1) has no
@@ -81,7 +81,7 @@ _AUDIT_MODEL_ENV = "USERSIM_AUDIT_MODEL"
 #: Graded disclosure credit for the concealment coverage axis. Kept here (next to
 #: the auditor that produces the levels) as the single tunable definition; the
 #: scorer imports the same weights so intent and behavior grade identically.
-DISCLOSURE_CREDIT: Dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
+DISCLOSURE_CREDIT: dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
 
 
 #: Alias preference for the auditor, most-independent first. The audit runs in
@@ -94,7 +94,7 @@ DISCLOSURE_CREDIT: Dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
 _AUDIT_ALIAS_PREFERENCE = ("judge_model", "evaluator_model", "user_model")
 
 
-def resolve_audit_model(models: Dict[str, Any]) -> str:
+def resolve_audit_model(models: dict[str, Any]) -> str:
     """Pick the model alias that audits realized behavior, or "" if none is wired.
 
     Realized-behavior verification is *meta-evaluation of the simulator*, so it
@@ -119,7 +119,7 @@ def resolve_audit_model(models: Dict[str, Any]) -> str:
 _AUDIT_EFFORT_ENV = "USERSIM_AUDIT_REASONING_EFFORT"
 
 
-def _audit_reasoning_kwargs() -> Dict[str, Any]:
+def _audit_reasoning_kwargs() -> dict[str, Any]:
     """Reasoning-effort override for the auditor call.
 
     Mirrors ``move_runtime._move_reasoning_kwargs``, the same knob the move call
@@ -170,12 +170,12 @@ VERIFY_SYSTEM_PACK = LocalePromptPack(
 
 
 def verify_realized_transcript(
-    models: Dict[str, Any],
-    items: List[Dict[str, Any]],
-    candidate_topics: List[str],
+    models: dict[str, Any],
+    items: list[dict[str, Any]],
+    candidate_topics: list[str],
     risk_noun: str,
     locale: str = "en_US",
-) -> Dict[int, Dict[str, Any]]:
+) -> dict[int, dict[str, Any]]:
     """Audit every realized user turn in ONE batched call.
 
     ``items``: ordered ``[{"turn": int, "text": str}, ...]`` — the realized user
@@ -252,7 +252,7 @@ def verify_realized_transcript(
         return {}
     allowed = set(candidate_topics)
     valid_turns = {int(it["turn"]) for it in graded}
-    out: Dict[int, Dict[str, Any]] = {}
+    out: dict[int, dict[str, Any]] = {}
     for a in audits:
         if not isinstance(a, dict):
             continue
@@ -311,9 +311,9 @@ def _best_level(current: str, new: str) -> str:
 
 
 def reconcile_realized(
-    moves: List[Dict[str, Any]],
-    verdicts: Dict[int, Dict[str, Any]],
-) -> Dict[str, Any]:
+    moves: list[dict[str, Any]],
+    verdicts: dict[int, dict[str, Any]],
+) -> dict[str, Any]:
     """Reconcile committed moves against per-turn audit verdicts (pure).
 
     ``moves``: committed move dicts, each with ``turn`` + ``move`` + ``topic``.
@@ -338,7 +338,7 @@ def reconcile_realized(
         was audited, intent where it wasn't — instead of discarding the whole
         row's realized ground truth because a single turn went ungraded.
     """
-    levels: Dict[str, str] = {}
+    levels: dict[str, str] = {}
     verified_topics: set = set()
     realized_risk = False
     mismatches = 0

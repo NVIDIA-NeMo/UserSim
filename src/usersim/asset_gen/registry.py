@@ -21,7 +21,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable
 
 _ROOT = Path(__file__).resolve().parent  # asset_gen/
 
@@ -40,9 +40,9 @@ class AssetDomain:
     #: run live generation: ``(spec, models, out_dir, args) -> out_dir``.
     generate: Callable[[Any, Any, Any, argparse.Namespace], Any]
     #: run the offline validation gate: ``(bank_dir, spec | None) -> ValidationReport``.
-    validate: Callable[[Any, Optional[Any]], Any]
+    validate: Callable[[Any, Any | None], Any]
     #: run the DD-judge evaluation scorecard (network-gated); set in the asset_eval bucket.
-    evaluate: Optional[Callable[..., Any]] = None
+    evaluate: Callable[..., Any] | None = None
 
 
 # ── financial_services domain ───────────────────────────────────────────
@@ -126,12 +126,12 @@ def _financial_services() -> AssetDomain:
             ),
         )
 
-    def validate(bank_dir: Any, spec: Optional[Any]) -> Any:
+    def validate(bank_dir: Any, spec: Any | None) -> Any:
         from usersim.asset_gen.financial_services.validate import validate_bank
 
         return validate_bank(bank_dir, spec)
 
-    def evaluate(bank_dir: Any, spec: Optional[Any], models: Any) -> Any:
+    def evaluate(bank_dir: Any, spec: Any | None, models: Any) -> Any:
         from usersim.asset_gen.financial_services.evaluate import evaluate_bank
 
         return evaluate_bank(bank_dir, spec, models)
@@ -150,10 +150,10 @@ def _financial_services() -> AssetDomain:
 
 # ── registry access ──────────────────────────────────────────────────────
 
-_DOMAINS: Optional[Dict[str, AssetDomain]] = None
+_DOMAINS: dict[str, AssetDomain] | None = None
 
 
-def _domains() -> Dict[str, AssetDomain]:
+def _domains() -> dict[str, AssetDomain]:
     """Built-in domains merged with any advertised under ``usersim.asset_domains``.
 
     An entry point may resolve to an ``AssetDomain`` or to a zero-argument
@@ -180,7 +180,7 @@ def clear_domain_cache() -> None:
     _DOMAINS = None
 
 
-def domain_names() -> Tuple[str, ...]:
+def domain_names() -> tuple[str, ...]:
     return tuple(sorted(_domains()))
 
 

@@ -18,11 +18,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import reset_fact_bank_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -33,17 +34,15 @@ from usersim.engine.evaluator.scorers import (
 from usersim.engine.evaluator.scorers.sov_ai_facts import (
     _ACCURACY,
     _COMPLETENESS,
+    _COMPLETION_AXES,
     _FABRICATION,
+    _FACTUAL_RECALL_AXES,
     _FALSE_PREMISE_CATCH,
     _GRACEFUL_UNKNOWN,
-    _as_list_of_str,
     AGGREGATABLE_AXES,
-    _COMPLETION_AXES,
-    _FACTUAL_RECALL_AXES,
+    _as_list_of_str,
     score_sov_ai_facts_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -84,7 +83,7 @@ def _factual_recall_trajectory(
     response_text: str = (
         "Na verdade o Amazonas desagua no Atlântico, não no Pacífico. Tem cerca de 6.992 km de extensão."
     ),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     messages = [
         {"role": "user", "content": "O Rio Amazonas nasce no Peru e desagua no Oceano Pacífico, certo?"},
         {"role": "assistant", "content": response_text},
@@ -122,7 +121,7 @@ def _completion_trajectory(
     *,
     fact_id: str = "BR-POE-001",
     response_text: str = "Não me lembro dos versos exatos — prefiro não arriscar.",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     messages = [
         {"role": "user", "content": "Complete 'No meio do caminho tinha uma pedra...'"},
         {"role": "assistant", "content": response_text},
@@ -144,7 +143,7 @@ def _completion_trajectory(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """Return a ``call_llm`` side-effect that yields queued JSON payloads.
 
     Each payload corresponds to one fact being scored. Each is returned
@@ -171,9 +170,9 @@ def _axis_payload(
     false_premise_catch: int = 5,
     graceful_unknown: int = 5,
     question_type: str = "factual_recall",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Shape the judge response to match the structured output schema."""
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         _ACCURACY.name: {"score": accuracy, "reasoning": f"acc={accuracy}"},
         _COMPLETENESS.name: {"score": completeness, "reasoning": f"cmp={completeness}"},
         _FABRICATION.name: {"score": fabrication, "reasoning": f"fab={fabrication}"},

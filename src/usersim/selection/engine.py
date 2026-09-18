@@ -18,8 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional, Sequence
+from typing import Any, Sequence
 
+from usersim.selection.profiles import GENEROUS, SelectionProfile, applicable_gates
 from usersim.taxonomy.eval_cell import (
     decode_cell,
     normalize_axis_score,
@@ -27,7 +28,6 @@ from usersim.taxonomy.eval_cell import (
     score_from_eval_cell,
     scorer_state,
 )
-from usersim.selection.profiles import GENEROUS, SelectionProfile, applicable_gates
 
 # Added columns on the annotated / curated frames.
 COL_PASSED = "selection_passed"
@@ -53,11 +53,11 @@ ADDED_COLUMNS = (
 class SelectionVerdict:
     trajectory_id: str
     passed: bool
-    quality_score: Optional[float]
+    quality_score: float | None
     axis_scores: dict[str, float]
     failed_gates: list[str]
-    drop_reason: Optional[str]
-    split: Optional[str]
+    drop_reason: str | None
+    split: str | None
 
 
 @dataclass
@@ -67,9 +67,9 @@ class SelectionSummary:
     passed: int
     dropped: int
     selected: int = 0
-    max_records: Optional[int] = None
-    max_per_locale: Optional[int] = None
-    stratify_by: Optional[tuple[str, ...]] = None
+    max_records: int | None = None
+    max_per_locale: int | None = None
+    stratify_by: tuple[str, ...] | None = None
     drop_reasons: dict[str, int] = field(default_factory=dict)
     kept_by_group: dict[str, int] = field(default_factory=dict)
     holdout: dict[str, int] = field(default_factory=dict)
@@ -97,7 +97,7 @@ class SelectionResult:
     summary: SelectionSummary
 
 
-def _split_for(persona_uuid: Any, fraction: float) -> Optional[str]:
+def _split_for(persona_uuid: Any, fraction: float) -> str | None:
     """Deterministically bucket a persona into train/holdout by uuid hash."""
     if fraction <= 0.0:
         return None
@@ -106,7 +106,7 @@ def _split_for(persona_uuid: Any, fraction: float) -> Optional[str]:
     return "holdout" if bucket < fraction else "train"
 
 
-def _quality_score(cell: dict, profile: SelectionProfile) -> Optional[float]:
+def _quality_score(cell: dict, profile: SelectionProfile) -> float | None:
     """Unweighted mean of normalized (0-1) applicable 1-5 judge axes."""
     from usersim.taxonomy.eval_cell import axis_scale
 
@@ -262,8 +262,8 @@ def _sort_by_quality(df: Any) -> Any:
 
 def _apply_cap(
     curated: Any,
-    max_records: Optional[int],
-    stratify_by: Optional[Sequence[str]],
+    max_records: int | None,
+    stratify_by: Sequence[str] | None,
 ) -> Any:
     """Trim ``curated`` to ``max_records`` highest-quality rows.
 
@@ -292,7 +292,7 @@ def _apply_cap(
     return _sort_by_quality(capped).reset_index(drop=True)
 
 
-def _cap_per_group(curated: Any, n: Optional[int], group_cols: Sequence[str]) -> Any:
+def _cap_per_group(curated: Any, n: int | None, group_cols: Sequence[str]) -> Any:
     """Keep at most ``n`` highest-quality rows within each group.
 
     Groups are defined by ``group_cols`` (e.g. ``("locale",)`` for a per-locale
@@ -320,9 +320,9 @@ def select_trajectories(
     *,
     profile: SelectionProfile = GENEROUS,
     eval_column: str = "assistant_eval",
-    max_records: Optional[int] = None,
-    max_per_locale: Optional[int] = None,
-    stratify_by: Optional[Sequence[str]] = ("probe_family",),
+    max_records: int | None = None,
+    max_per_locale: int | None = None,
+    stratify_by: Sequence[str] | None = ("probe_family",),
 ) -> SelectionResult:
     """Apply ``profile`` to every trajectory and return the curated subset.
 

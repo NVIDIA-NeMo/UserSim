@@ -25,6 +25,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.pressure_bank import (
     PressureBank,
     PressureBankError,
@@ -33,8 +34,6 @@ from usersim.engine.core.pressure_bank import (
     load_pressure_bank_default,
     reset_pressure_bank_cache,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers

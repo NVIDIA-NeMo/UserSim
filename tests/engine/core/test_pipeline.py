@@ -11,6 +11,7 @@ and are marked with @pytest.mark.integration.
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.behavioral import compute_behavioral_profile, get_conversation_language
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.seeds import load_seeds
@@ -19,7 +20,6 @@ from usersim.engine.evaluator.axes import (
     axes_for_probe,
 )
 from usersim.engine.generator import _make_failed_result
-from usersim.engine.core._assets import packaged_assets_dir
 
 
 class TestPipelineConfig:

@@ -24,11 +24,11 @@ import pytest
 
 from usersim import cli
 from usersim.cli._models import (
-    ConfigError,
-    ModelSpec,
-    ModelsConfig,
-    ProviderSpec,
     REQUIRED_SIMULATOR_ALIASES,
+    ConfigError,
+    ModelsConfig,
+    ModelSpec,
+    ProviderSpec,
     default_models_path,
     load_models_config,
     require_aliases,
@@ -43,7 +43,6 @@ from usersim.cli._pipeline import (
 from usersim.cli.evaluate import _parse_csv_or_none, _parse_judges
 from usersim.cli.simulate import _parse_probe_mix
 from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Top-level parser

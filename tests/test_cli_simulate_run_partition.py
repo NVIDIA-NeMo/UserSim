@@ -47,7 +47,6 @@ from usersim.engine.core.storage import (
     write_locale_partition,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures: synthetic trajectory frame + minimal models config
 # ---------------------------------------------------------------------------
@@ -225,8 +224,8 @@ class TestNewRunIdWiring:
         DataDesigner whose ``create().load_dataset()`` returns our
         synthetic frame. This isolates the run-id wiring without
         needing API keys."""
-        from usersim.cli.simulate import _simulate_to_parquet
         from usersim.cli._models import default_models_path, load_models_config
+        from usersim.cli.simulate import _simulate_to_parquet
 
         out = tmp_path / "trajs"
         out.mkdir()
@@ -315,8 +314,8 @@ class TestNewRunIdWiring:
         """``skip_existing=True`` resumes into the most-recent
         existing run; the FRESH trajectory lands in that same run
         partition, not a new one."""
-        from usersim.cli.simulate import _simulate_to_parquet
         from usersim.cli._models import default_models_path, load_models_config
+        from usersim.cli.simulate import _simulate_to_parquet
 
         out = tmp_path / "trajs"
         out.mkdir()

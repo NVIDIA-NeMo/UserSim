@@ -21,33 +21,34 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.probing_taxonomy import (
     Category,
     ProbingTaxonomy,
     load_probing_taxonomy,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_dynamic import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_dynamic import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -55,7 +56,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 @pytest.fixture
-def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
+def pt_br_persona_southeast_teacher() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -69,7 +70,7 @@ def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def pt_br_persona_northeast_retiree() -> Dict[str, Any]:
+def pt_br_persona_northeast_retiree() -> dict[str, Any]:
     return {
         "first_name": "José",
         "last_name": "Santos",
@@ -115,7 +116,7 @@ class TestPersonaToInterestTags:
     sovereign-knowledge so cross-probe joins on persona-feature axes
     are direct. These tests guard the alias contract."""
 
-    def test_delegates_to_sov_ai_facts_tagger(self, pt_br_persona_southeast_teacher: Dict[str, Any]) -> None:
+    def test_delegates_to_sov_ai_facts_tagger(self, pt_br_persona_southeast_teacher: dict[str, Any]) -> None:
         from usersim.engine.probes.sov_ai_facts.task_derivation import (
             persona_to_tags as upstream,
         )
@@ -138,7 +139,7 @@ class TestPersonaToInterestTags:
 class TestDeriveProbe:
     def test_returns_a_category_and_a_hint(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         probe = task_derivation.derive_probe(
@@ -155,7 +156,7 @@ class TestDeriveProbe:
 
     def test_deterministic_on_persona_and_seed(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         a = task_derivation.derive_probe(
@@ -174,7 +175,7 @@ class TestDeriveProbe:
 
     def test_different_seed_can_yield_different_category(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         # Over many seeds, expect at least one pair that disagrees on
@@ -195,8 +196,8 @@ class TestDeriveProbe:
 
     def test_different_personas_can_yield_different_categories(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         a_cat = task_derivation.derive_probe(
@@ -230,7 +231,7 @@ class TestDeriveProbe:
 
     def test_excluded_categories_skip_the_pool(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         first = task_derivation.derive_probe(
@@ -249,7 +250,7 @@ class TestDeriveProbe:
 
     def test_all_categories_excluded_returns_none(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         all_ids = {c.id for c in pt_br_taxonomy.categories}
@@ -263,7 +264,7 @@ class TestDeriveProbe:
 
     def test_hint_rotation_index_shifts_hint(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         # Same (persona, seed) → same category. Different
@@ -289,8 +290,8 @@ class TestDeriveProbe:
 
     def test_taxonomy_version_salt_changes_pick(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         """Bumping taxonomy_version should change at least some picks."""
@@ -402,7 +403,7 @@ class TestSimulateSovAiDynamic:
 
     def test_single_turn_runs_end_to_end(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         opening_msg = "Aproveitando, queria saber sobre o cerrado..."
@@ -468,7 +469,7 @@ class TestSimulateSovAiDynamic:
 
     def test_two_turn_mode_issues_followup(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         simulator_cfg.max_turns = 2
@@ -527,7 +528,7 @@ class TestSimulateSovAiDynamic:
 
     def test_empty_opening_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         """If the user-agent returns whitespace, the trajectory must
@@ -584,7 +585,7 @@ class TestSimulateSovAiDynamic:
 
     def test_user_model_exception_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # ConversationLoop's user-LLM call is wrapped in try/except;
@@ -620,7 +621,7 @@ class TestSimulateSovAiDynamic:
 
     def test_assistant_failure_after_opening_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         """User-agent succeeds on turn 1; assistant_model raises. The
@@ -724,9 +725,9 @@ class TestPlaceholderTaxonomyWarning:
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Alias-dispatching ``call_llm`` mock for the unified loop.

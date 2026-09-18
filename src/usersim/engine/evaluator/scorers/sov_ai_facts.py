@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -139,14 +139,14 @@ _GRACEFUL_UNKNOWN = Score(
 )
 
 
-_FACTUAL_RECALL_AXES: Tuple[Score, ...] = (
+_FACTUAL_RECALL_AXES: tuple[Score, ...] = (
     _ACCURACY,
     _COMPLETENESS,
     _FABRICATION,
     _FALSE_PREMISE_CATCH,
 )
 
-_COMPLETION_AXES: Tuple[Score, ...] = (
+_COMPLETION_AXES: tuple[Score, ...] = (
     _ACCURACY,
     _COMPLETENESS,
     _FABRICATION,
@@ -155,7 +155,7 @@ _COMPLETION_AXES: Tuple[Score, ...] = (
 
 # Axes shared across question types — used by the trajectory-level
 # aggregate (mean across facts) and by per-category stratified reporting.
-AGGREGATABLE_AXES: Tuple[str, ...] = (
+AGGREGATABLE_AXES: tuple[str, ...] = (
     _ACCURACY.name,
     _COMPLETENESS.name,
     _FABRICATION.name,
@@ -236,7 +236,7 @@ _DEFAULT_JUDGE_ALIAS = "judge_model"
 # ---------------------------------------------------------------------------
 
 
-def _build_schema(axes: Tuple[Score, ...]):
+def _build_schema(axes: tuple[Score, ...]):
     response_models = [create_judge_response_model(s) for s in axes]
     return create_judge_structured_output_model(response_models)
 
@@ -247,9 +247,9 @@ def _build_schema(axes: Tuple[Score, ...]):
 
 
 def score_sov_ai_facts_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score a trajectory produced by ``sov_ai_facts``.
 
     Contract:
@@ -333,7 +333,7 @@ def score_sov_ai_facts_trajectory(
 
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
 
-    per_fact: List[Dict[str, Any]] = []
+    per_fact: list[dict[str, Any]] = []
     status_proposal = True
     for fact_id in facts_probed:
         fact = bank.by_id(fact_id)
@@ -376,11 +376,11 @@ def score_sov_ai_facts_trajectory(
 def _score_one_fact(
     *,
     fact: Fact,
-    conversation: List[Dict[str, Any]],
-    models: Dict[str, Any],
+    conversation: list[dict[str, Any]],
+    models: dict[str, Any],
     judge_alias: str,
     locale: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """LLM-judge one fact. Returns the ``per_fact_scores`` entry dict."""
     if fact.question_type == "factual_recall":
         axes = _FACTUAL_RECALL_AXES
@@ -457,7 +457,7 @@ def _score_one_fact(
             error="parse_failure",
         )
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     for s in axes:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):
@@ -478,7 +478,7 @@ def _score_one_fact(
     }
 
 
-def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _aggregate(per_fact_scores: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Mean per axis with reasoning that surfaces the per-fact judge text.
 
     Replaces the uninformative ``"arithmetic mean across N fact(s)"``
@@ -487,9 +487,9 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
     answered wrong and *what* the judge said about it. For
     single-fact trajectories the judge text is surfaced verbatim.
     """
-    out: Dict[str, Dict[str, Any]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for axis in AGGREGATABLE_AXES:
-        entries: List[Dict[str, Any]] = []
+        entries: list[dict[str, Any]] = []
         for entry in per_fact_scores:
             cell = (entry.get("scores") or {}).get(axis)
             if not isinstance(cell, dict):
@@ -522,7 +522,7 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
 
 
 def _compose_aggregate_reasoning(
-    entries: List[Dict[str, Any]],
+    entries: list[dict[str, Any]],
     mean: float,
     *,
     unit_singular: str,
@@ -553,13 +553,13 @@ def _score_text(score: float) -> str:
     return str(int(score)) if float(score).is_integer() else f"{score:.1f}"
 
 
-def _format_premises(premises: Tuple[str, ...]) -> str:
+def _format_premises(premises: tuple[str, ...]) -> str:
     if not premises:
         return "(none)"
     return "\n".join(f"{i + 1}. {p}" for i, p in enumerate(premises))
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -573,7 +573,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _as_list_of_str(raw: Any) -> List[str]:
+def _as_list_of_str(raw: Any) -> list[str]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -592,7 +592,7 @@ def _as_list_of_str(raw: Any) -> List[str]:
     return []
 
 
-def _pinned_bank_version(trajectory: Dict[str, Any], locale: str) -> Optional[str]:
+def _pinned_bank_version(trajectory: dict[str, Any], locale: str) -> str | None:
     """Extract ``bank_version[locale]`` from the trajectory's simulation_outcome."""
     outcome_raw = trajectory.get("simulation_outcome")
     if not outcome_raw:
@@ -614,7 +614,7 @@ def _pinned_bank_version(trajectory: Dict[str, Any], locale: str) -> Optional[st
     return None
 
 
-def _no_fact_result(fact_id: str, judge_alias: str) -> Dict[str, Any]:
+def _no_fact_result(fact_id: str, judge_alias: str) -> dict[str, Any]:
     """Placeholder entry for a fact_id the trajectory probed but the bank doesn't contain."""
     return {
         "fact_id": fact_id,
@@ -632,7 +632,7 @@ def _error_result(
     fact: Fact,
     judge_alias: str,
     error: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Per-fact entry for a fact whose judge call failed. Scores are all None."""
     axes = _FACTUAL_RECALL_AXES if fact.question_type == "factual_recall" else _COMPLETION_AXES
     return {

@@ -13,7 +13,6 @@ the probe-level ``supports_assistant_resampling`` opt-out, and the
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
 import usersim.engine.core.simulation as sim
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
@@ -68,14 +67,14 @@ class _Harness:
     def __init__(
         self,
         monkeypatch,
-        responses: List[str],
-        verdicts: List[bool],
-        traces: List[str] | None = None,
+        responses: list[str],
+        verdicts: list[bool],
+        traces: list[str] | None = None,
     ):
         self.assistant_calls = 0
         self.judge_calls = 0
         #: Prompt text the loop actually handed the judge, per call.
-        self.judge_prompts: List[str] = []
+        self.judge_prompts: list[str] = []
 
         def fake_call_llm(models, alias, messages, **kwargs):
             i = min(self.assistant_calls, len(responses) - 1)

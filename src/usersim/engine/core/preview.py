@@ -41,7 +41,6 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-
 # Flags + country names cover only the LOCALES we actually ship
 # today (the keys of
 # ``usersim.engine.core.behavioral.LOCALE_LANGUAGE_MAP``).

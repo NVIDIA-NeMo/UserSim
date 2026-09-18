@@ -48,7 +48,7 @@ Side channels emitted on the trajectory:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.fact_bank import (
     Fact,
@@ -193,11 +193,11 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
 
     def derive_task(
         self,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[Fact]:
+    ) -> Fact | None:
         """Pick the matched fact for this persona; bank is locale-keyed."""
         return derive_task(
             persona,
@@ -221,7 +221,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     def get_verbatim_first_user_turn(
         self,
         state: ConversationState,
-    ) -> Optional[str]:
+    ) -> str | None:
         if self._task is None:
             return None
         # Seed the side-channel metadata before the loop's
@@ -243,7 +243,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         self,
         turn_idx: int,
         state: ConversationState,
-    ) -> List[str]:
+    ) -> list[str]:
         if not self._followup_instruction:
             return []
         return [self._followup_instruction]
@@ -265,15 +265,15 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
 
 
 def simulate_sov_ai_facts(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim for callers that import ``simulate_sov_ai_facts``.
 
     The dispatcher in ``usersim.engine.generator`` instantiates
@@ -285,7 +285,8 @@ def simulate_sov_ai_facts(
     prompt-pack-missing) and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance as _Provenance
+    from usersim.engine.core.outcomes import OutcomeBuilder
+    from usersim.engine.core.outcomes import Provenance as _Provenance
     from usersim.engine.core.probes import BankLoadError
 
     provenance = kwargs.get("provenance") or _Provenance()
@@ -318,13 +319,15 @@ def simulate_sov_ai_facts(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
     from usersim.engine.core.outcomes import (
         FailureAttribution,
         FailureClass,
         OutcomeBuilder,
         OutcomeStatus,
+    )
+    from usersim.engine.core.outcomes import (
         Provenance as _Provenance,
     )
 

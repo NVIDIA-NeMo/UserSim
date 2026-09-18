@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional
 
 logger = logging.getLogger("usersim.cli.env")
 
@@ -21,14 +20,14 @@ logger = logging.getLogger("usersim.cli.env")
 ENV_FILENAMES = (".env.local", ".env")
 
 
-def find_env_files(start: Optional[Path] = None) -> List[Path]:
+def find_env_files(start: Path | None = None) -> list[Path]:
     """Return the ``.env`` files that apply to ``start``, nearest first.
 
     Walks upward so a command run from a subdirectory still finds the file at
     the project root.
     """
     here = (start or Path.cwd()).resolve()
-    found: List[Path] = []
+    found: list[Path] = []
     for directory in [here, *here.parents]:
         for name in ENV_FILENAMES:
             candidate = directory / name
@@ -39,7 +38,7 @@ def find_env_files(start: Optional[Path] = None) -> List[Path]:
     return found
 
 
-def load_local_env(start: Optional[Path] = None) -> List[Path]:
+def load_local_env(start: Path | None = None) -> list[Path]:
     """Load ``.env.local`` then ``.env`` into the environment.
 
     **Variables already set in the environment always win.** Someone who
@@ -55,14 +54,14 @@ def load_local_env(start: Optional[Path] = None) -> List[Path]:
         logger.debug("python-dotenv not installed; skipping .env loading")
         return []
 
-    loaded: List[Path] = []
+    loaded: list[Path] = []
     for path in find_env_files(start):
         load_dotenv(path, override=False)
         loaded.append(path)
     return loaded
 
 
-def describe_loaded_env(paths: List[Path]) -> str:
+def describe_loaded_env(paths: list[Path]) -> str:
     """Return a one-line summary naming the files read, never their contents."""
     if not paths:
         return "no .env file found; using the environment as-is"
@@ -70,6 +69,6 @@ def describe_loaded_env(paths: List[Path]) -> str:
     return f"read {names} (existing environment variables take precedence)"
 
 
-def missing_keys(names: object) -> List[str]:
+def missing_keys(names: object) -> list[str]:
     """Return which of ``names`` are absent or empty in the environment."""
     return [n for n in names if not os.environ.get(str(n))]  # type: ignore[union-attr]

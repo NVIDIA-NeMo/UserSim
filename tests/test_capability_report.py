@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 
-from usersim.taxonomy.capabilities import capability_by_id
-from usersim.reporting.dashboard import write_capability_dashboard_artifacts
 from usersim.reporting.capability_report import (
     _capability_from_definition,
     build_capability_report,
     render_capability_report_html,
 )
+from usersim.reporting.dashboard import write_capability_dashboard_artifacts
+from usersim.taxonomy.capabilities import capability_by_id
 
 
 @pytest.mark.parametrize(
@@ -797,11 +797,11 @@ def test_status_rate_cell_skips_none_status_proposal():
     ``bool(None)``. Defence in depth for any future ``status_rate``
     consumer of a tri-state scorer.
     """
+    from usersim.reporting.capability_report import _status_rate_cell
     from usersim.taxonomy.capabilities import (
         CapabilityDefinition,
         EvidenceSource,
     )
-    from usersim.reporting.capability_report import _status_rate_cell
 
     pd = __import__("pandas")
     df = pd.DataFrame(
@@ -966,9 +966,9 @@ class TestRunMetadataResolution:
 
     def _write_manifest(self, root, run_id: str, *, assistant_model: str = "nvidia/nemotron-3-super-v3"):
         from usersim.engine.core.manifest import (
+            MANIFEST_SCHEMA_VERSION,
             AssetVersionsInfo,
             CodeInfo,
-            MANIFEST_SCHEMA_VERSION,
             ModelIdentity,
             OutcomeSummary,
             ReplayInfo,

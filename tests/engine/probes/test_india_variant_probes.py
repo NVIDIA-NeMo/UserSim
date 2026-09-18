@@ -20,7 +20,7 @@ loop's ``_patched_call_llm`` helper does not cover it) so no network is hit.
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -34,12 +34,11 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.simulation import ConversationState
 
-
 _MARKER = "‹TRANSLATED-turn1›"
 
 
 @pytest.fixture
-def indian_persona() -> Dict[str, Any]:
+def indian_persona() -> dict[str, Any]:
     return {
         "first_name": "Arjun",
         "last_name": "Kumar",

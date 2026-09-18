@@ -12,7 +12,7 @@ import random as _random
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
@@ -31,7 +31,7 @@ _DEBUG_LOG_PATH = Path(os.environ.get("USERSIM_DEBUG_LOG") or _DEFAULT_DEBUG_LOG
 _DEBUG_LOG_ENABLED = bool(os.environ.get("USERSIM_DEBUG_LOG"))
 _CALL_COUNTER = 0
 _CALL_LOCK = threading.Lock()
-_PENDING_RECORDS: List[Dict[str, Any]] = []
+_PENDING_RECORDS: list[dict[str, Any]] = []
 
 _CONV_LOCAL = threading.local()
 
@@ -56,7 +56,7 @@ class ContextWindowError(RuntimeError):
 NON_ASCII_TOKEN_SCALE = 2.0
 
 
-def scaled_max_tokens(facade: Any, scale: float) -> Dict[str, int]:
+def scaled_max_tokens(facade: Any, scale: float) -> dict[str, int]:
     """Return ``{"max_tokens": n}`` scaled from what ``facade`` is configured with.
 
     Returns an empty dict when the model sets no budget, which is how
@@ -87,7 +87,7 @@ def _rejects_max_tokens(error: Exception) -> bool:
 
 def _is_context_window_error(error: Exception) -> bool:
     """Recognize context failures through provider wrapper/cause chains."""
-    pending: List[BaseException] = [error]
+    pending: list[BaseException] = [error]
     seen: set[int] = set()
     while pending:
         current = pending.pop()
@@ -115,7 +115,7 @@ def _is_context_window_error(error: Exception) -> bool:
 
 
 # ── Per-model call statistics (thread-safe) ──────────────────────────────
-_MODEL_STATS: Dict[str, Dict[str, float]] = {}
+_MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
 # ── Per-trajectory outcome hook (thread-local) ──────────────────────────
@@ -216,14 +216,14 @@ def _record_stat(
         s["total_output_tokens"] += output_tokens
 
 
-def get_call_stats() -> Dict[str, Dict[str, Any]]:
+def get_call_stats() -> dict[str, dict[str, Any]]:
     """Return a snapshot of per-model call statistics."""
     with _CALL_LOCK:
         return {alias: dict(s) for alias, s in _MODEL_STATS.items()}
 
 
 # ── Per-record timing (thread-safe) ──────────────────────────────────────
-_RECORD_TIMES: List[float] = []
+_RECORD_TIMES: list[float] = []
 
 
 def record_finished(elapsed: float) -> None:
@@ -232,7 +232,7 @@ def record_finished(elapsed: float) -> None:
         _RECORD_TIMES.append(elapsed)
 
 
-def get_record_stats() -> Dict[str, float]:
+def get_record_stats() -> dict[str, float]:
     """Return record-level timing statistics."""
     with _CALL_LOCK:
         times = list(_RECORD_TIMES)
@@ -265,7 +265,7 @@ def set_conversation_id(conv_id: str) -> None:
     _CONV_LOCAL.conv_id = conv_id
 
 
-def append_debug_record(record: Dict[str, Any]) -> None:
+def append_debug_record(record: dict[str, Any]) -> None:
     """Append an arbitrary record to the pending debug log."""
     with _CALL_LOCK:
         global _CALL_COUNTER
@@ -291,7 +291,7 @@ def flush_debug_log() -> None:
 from data_designer.engine.models.utils import ChatMessage
 
 
-def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]:
+def _dicts_to_chat_messages(messages: list[dict[str, Any]]) -> list[ChatMessage]:
     """Convert a list of plain dicts to ChatMessage objects for ModelFacade.
 
     A prior turn's ``reasoning_content`` is never forwarded: the
@@ -303,7 +303,7 @@ def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]
     ``assistant_message`` in ``core/probes.py``), so it stays available
     for analysis -- it is dropped only on the way back into a model.
     """
-    out: List[ChatMessage] = []
+    out: list[ChatMessage] = []
     for msg in messages:
         role = msg.get("role", "user")
         content = msg.get("content", "")
@@ -324,7 +324,7 @@ def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]
     return out
 
 
-def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
+def _assistant_message_to_dict(msg: Any) -> dict[str, Any]:
     """Convert a DD AssistantMessage to a plain dict.
 
     DD v0.5.3 ChatCompletionResponse has a .message (AssistantMessage)
@@ -333,7 +333,7 @@ def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
     so we convert to OpenAI format ({function: {name, arguments}}) which
     the verifier and generator code expects.
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "role": "assistant",
         "content": getattr(msg, "content", "") or "",
     }
@@ -365,11 +365,11 @@ def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
 
 
 def call_llm(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     alias: str,
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Call an LLM via DD ModelFacade.completion().
 
     Returns a dict with role, content, and optionally reasoning_content

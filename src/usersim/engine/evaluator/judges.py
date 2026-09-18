@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Iterable, Optional
+from typing import Iterable
 
 
 class JudgeFamily(str, Enum):
@@ -96,9 +96,9 @@ class JudgeSpec:
     """
 
     alias: str
-    family: Optional[JudgeFamily] = None
+    family: JudgeFamily | None = None
 
-    def resolved_family(self, model_id: Optional[str] = None) -> JudgeFamily:
+    def resolved_family(self, model_id: str | None = None) -> JudgeFamily:
         if self.family is not None:
             return self.family
         return infer_judge_family(model_id or self.alias)
@@ -112,7 +112,7 @@ def validate_ensemble_diversity(
     judges: Iterable[JudgeSpec],
     *,
     min_distinct_families: int = 2,
-    resolved_model_ids: Optional[dict[str, str]] = None,
+    resolved_model_ids: dict[str, str] | None = None,
 ) -> None:
     """Raise ``EnsembleDiversityError`` if the ensemble lacks family diversity.
 

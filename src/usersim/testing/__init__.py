@@ -27,7 +27,7 @@ keep.
 
 from __future__ import annotations
 
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 __all__ = [
     "assert_probe_conforms",
@@ -45,16 +45,16 @@ _REQUIRED_PROBE_METHODS = (
 )
 
 
-def probe_conformance_problems(probe: str | type) -> List[str]:
+def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
     from usersim.engine.core._assets import probe_assets_dir
     from usersim.engine.core.probes import (
-        BaseProbe,
         _PROBE_REGISTRY,
+        BaseProbe,
         known_probes,
     )
 
-    problems: List[str] = []
+    problems: list[str] = []
 
     if isinstance(probe, str):
         if probe not in known_probes():
@@ -125,7 +125,7 @@ def scorer_conformance_problems(
     name: str,
     *,
     sample_row: dict[str, Any] | None = None,
-) -> List[str]:
+) -> list[str]:
     """Findings for one scorer. Empty means conforming.
 
     ``sample_row`` is passed to the scorer to check it returns the mapping
@@ -142,7 +142,7 @@ def scorer_conformance_problems(
             f"Registered: {', '.join(sorted(list_scorers())) or '(none)'}"
         ]
 
-    problems: List[str] = []
+    problems: list[str] = []
     fn: Callable[..., Any] = _REGISTRY[name]
     if not callable(fn):
         return [f"{name!r} is registered to a non-callable: {fn!r}"]

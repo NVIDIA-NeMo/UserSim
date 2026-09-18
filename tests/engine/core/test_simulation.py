@@ -16,10 +16,10 @@ from usersim.engine.core.outcomes import (
     TraceKind,
 )
 from usersim.engine.core.simulation import (
+    _FOURTH_WALL_PHRASES,
+    ROMANIZED_LOCALES,
     ConversationLoop,
     ConversationState,
-    ROMANIZED_LOCALES,
-    _FOURTH_WALL_PHRASES,
     _build_user_followup_messages,
     _is_assistant_refusal_echo,
     _is_fourth_wall_break,
@@ -515,7 +515,6 @@ class TestRoleViolationCounterPromotesStatus:
 import types  # noqa: E402
 
 from usersim.engine.core.outcomes import FailureClass  # noqa: E402
-
 
 # A natural Devanagari user turn (well above the loanword threshold).
 _DEVA_TURN = "मुझे अपनी पेंशन के नियमों के बारे में जानकारी चाहिए"

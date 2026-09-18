@@ -96,7 +96,7 @@ import tempfile
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Mapping, Sequence
 
 logger = logging.getLogger("usersim.engine")
 
@@ -125,15 +125,15 @@ class ModelIdentity:
 
     alias: str
     model: str
-    provider: Optional[str] = None
-    endpoint: Optional[str] = None
-    api_key_env_var: Optional[str] = None
-    temperature: Optional[float] = None
-    top_p: Optional[float] = None
-    max_tokens: Optional[int] = None
-    max_parallel_requests: Optional[int] = None
-    timeout: Optional[float] = None
-    extra_body: Dict[str, Any] = field(default_factory=dict)
+    provider: str | None = None
+    endpoint: str | None = None
+    api_key_env_var: str | None = None
+    temperature: float | None = None
+    top_p: float | None = None
+    max_tokens: int | None = None
+    max_parallel_requests: int | None = None
+    timeout: float | None = None
+    extra_body: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -151,9 +151,9 @@ class SourceInfo:
 class CodeInfo:
     """Code identity at run time."""
 
-    code_sha: Optional[str] = None
-    conversation_plugin_version: Optional[str] = None
-    data_designer_version: Optional[str] = None
+    code_sha: str | None = None
+    conversation_plugin_version: str | None = None
+    data_designer_version: str | None = None
 
 
 @dataclass(frozen=True)
@@ -169,7 +169,7 @@ class SimulationConfigSnapshot:
     persona_grounding_ratio: float
     context_compression: bool
     compression_window: int
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
     store_reasoning: bool = True
 
 
@@ -177,16 +177,16 @@ class SimulationConfigSnapshot:
 class ScopeInfo:
     """What this run sampled / replayed."""
 
-    locales: List[str]
-    probes: List[str]
-    probe_mix: Dict[str, float]
-    tool_calling_themes: List[str] = field(default_factory=list)
-    toolset_seed_path: Optional[str] = None
-    toolset_content_hash: Optional[str] = None
-    panel_path: Optional[str] = None
-    panel_content_hash: Optional[str] = None
-    trajectories_requested: Dict[str, int] = field(default_factory=dict)
-    trajectories_completed: Dict[str, int] = field(default_factory=dict)
+    locales: list[str]
+    probes: list[str]
+    probe_mix: dict[str, float]
+    tool_calling_themes: list[str] = field(default_factory=list)
+    toolset_seed_path: str | None = None
+    toolset_content_hash: str | None = None
+    panel_path: str | None = None
+    panel_content_hash: str | None = None
+    trajectories_requested: dict[str, int] = field(default_factory=dict)
+    trajectories_completed: dict[str, int] = field(default_factory=dict)
 
     #: Per-locale persona constraint AS APPLIED, e.g.
     #: ``{"ta_Taml_IN": {"first_language": ["Tamil"]}}``. A locale is
@@ -199,18 +199,18 @@ class ScopeInfo:
     #: (``hi_Deva_IN`` filters on "\u0939\u093f\u0902\u0926\u0940",
     #: ``hi_Latn_IN`` on "Hindi"). Which people were eligible is the
     #: thing that decides whether two runs are comparable.
-    persona_language_filters: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
+    persona_language_filters: dict[str, dict[str, list[str]]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class AssetVersionsInfo:
     """Aggregated asset / prompt / variant lineage across the run."""
 
-    assets_dir: Optional[str] = None
-    nemotron_personas_version: Optional[str] = None
-    bank_versions: Dict[str, str] = field(default_factory=dict)
-    prompt_versions: Dict[str, str] = field(default_factory=dict)
-    probe_variants_exercised: Dict[str, List[str]] = field(default_factory=dict)
+    assets_dir: str | None = None
+    nemotron_personas_version: str | None = None
+    bank_versions: dict[str, str] = field(default_factory=dict)
+    prompt_versions: dict[str, str] = field(default_factory=dict)
+    probe_variants_exercised: dict[str, list[str]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -218,9 +218,9 @@ class OutcomeSummary:
     """Cached run-level outcome stats so consumers don't have to scan parquet."""
 
     trajectories_total: int = 0
-    status_counts: Dict[str, int] = field(default_factory=dict)
-    failure_class_histogram: Dict[str, int] = field(default_factory=dict)
-    coverage_per_locale_probe: Dict[str, int] = field(default_factory=dict)
+    status_counts: dict[str, int] = field(default_factory=dict)
+    failure_class_histogram: dict[str, int] = field(default_factory=dict)
+    coverage_per_locale_probe: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -229,8 +229,8 @@ class ReplayInfo:
     replay workstream is an additive change rather than a v2 bump.
     """
 
-    replayed_from_run_id: Optional[str] = None
-    matched_pair_group_id: Optional[str] = None
+    replayed_from_run_id: str | None = None
+    matched_pair_group_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -244,19 +244,19 @@ class RunManifest:
     manifest_schema_version: str
     run_id: str
     started_at_epoch: int
-    finished_at_epoch: Optional[int]
-    total_runtime_s: Optional[float]
+    finished_at_epoch: int | None
+    total_runtime_s: float | None
     source: SourceInfo
     code: CodeInfo
-    models_config_path: Optional[str]
-    models: Dict[str, ModelIdentity]
+    models_config_path: str | None
+    models: dict[str, ModelIdentity]
     simulation_config: SimulationConfigSnapshot
     scope: ScopeInfo
     asset_versions: AssetVersionsInfo
     outcome_summary: OutcomeSummary
     replay: ReplayInfo
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """JSON-serializable dict of the manifest."""
         return asdict(self)
 
@@ -393,8 +393,8 @@ def _replay_from_dict(d: Mapping[str, Any]) -> ReplayInfo:
 
 def _detect_source(
     *,
-    kind_override: Optional[str] = None,
-    invocation_override: Optional[str] = None,
+    kind_override: str | None = None,
+    invocation_override: str | None = None,
 ) -> SourceInfo:
     """Best-effort detection of how this run was launched.
 
@@ -474,7 +474,7 @@ def _detect_code_info() -> CodeInfo:
     )
 
 
-def _own_version() -> Optional[str]:
+def _own_version() -> str | None:
     """Version of the distribution providing this package.
 
     Resolved through ``packages_distributions`` rather than a hardcoded
@@ -490,7 +490,7 @@ def _own_version() -> Optional[str]:
     return _pkg_version(dists[0]) if dists else None
 
 
-def _pkg_version(name: str) -> Optional[str]:
+def _pkg_version(name: str) -> str | None:
     try:
         from importlib.metadata import PackageNotFoundError, version
 
@@ -507,7 +507,7 @@ def _pkg_version(name: str) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 
-def _file_content_hash(path: Optional[Path]) -> Optional[str]:
+def _file_content_hash(path: Path | None) -> str | None:
     """SHA-256 of a file's contents, or ``None`` if path is missing."""
     if path is None:
         return None
@@ -532,7 +532,7 @@ def _file_content_hash(path: Optional[Path]) -> Optional[str]:
 
 def _aggregate_from_trajectories(
     traj_df: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Aggregate per-row data into the manifest's ``asset_versions`` and
     ``outcome_summary`` dicts.
 
@@ -559,13 +559,13 @@ def _aggregate_from_trajectories(
             "trajectories_total": 0,
         }
 
-    bank_versions: Dict[str, str] = {}
-    prompt_versions: Dict[str, str] = {}
-    probe_variants: Dict[str, set] = {}
-    status_counts: Dict[str, int] = {}
-    failure_classes: Dict[str, int] = {}
-    coverage: Dict[str, int] = {}
-    completed_per_locale: Dict[str, int] = {}
+    bank_versions: dict[str, str] = {}
+    prompt_versions: dict[str, str] = {}
+    probe_variants: dict[str, set] = {}
+    status_counts: dict[str, int] = {}
+    failure_classes: dict[str, int] = {}
+    coverage: dict[str, int] = {}
+    completed_per_locale: dict[str, int] = {}
     probes_seen: set = set()
     locales_seen: set = set()
 
@@ -658,12 +658,12 @@ def _decode_json_field(raw: Any) -> Any:
 # Mirrors cli/_models.py::_BUILTIN_PROVIDER_API_KEY_ENV +
 # _BUILTIN_PROVIDER_ENDPOINTS. Duplicated here because usersim.engine
 # core must not depend on cli/. Keep in sync.
-_BUILTIN_PROVIDER_API_KEY_ENV: Dict[str, str] = {
+_BUILTIN_PROVIDER_API_KEY_ENV: dict[str, str] = {
     "nvidia": "NVIDIA_API_KEY",
     "openai": "OPENAI_API_KEY",
     "openrouter": "OPENROUTER_API_KEY",
 }
-_BUILTIN_PROVIDER_ENDPOINTS: Dict[str, str] = {
+_BUILTIN_PROVIDER_ENDPOINTS: dict[str, str] = {
     "nvidia": "https://integrate.api.nvidia.com/v1",
     "openai": "https://api.openai.com/v1",
     "openrouter": "https://openrouter.ai/api/v1",
@@ -674,7 +674,7 @@ def _resolve_models(
     *,
     model_specs: Sequence[Any],
     provider_specs: Sequence[Any],
-) -> Dict[str, ModelIdentity]:
+) -> dict[str, ModelIdentity]:
     """Build the alias → :class:`ModelIdentity` map from the simulator's
     typed config (``ModelsConfig.models`` and ``.providers`` from
     ``cli/_models.py``).
@@ -684,12 +684,12 @@ def _resolve_models(
     fall back to the static dicts at module top so we never store the
     resolved key value.
     """
-    custom_by_name: Dict[str, Any] = {p.name: p for p in provider_specs}
-    out: Dict[str, ModelIdentity] = {}
+    custom_by_name: dict[str, Any] = {p.name: p for p in provider_specs}
+    out: dict[str, ModelIdentity] = {}
 
     for spec in model_specs:
-        endpoint: Optional[str] = None
-        env_var: Optional[str] = None
+        endpoint: str | None = None
+        env_var: str | None = None
         if spec.provider in custom_by_name:
             cp = custom_by_name[spec.provider]
             endpoint = cp.endpoint
@@ -723,23 +723,23 @@ def build_run_manifest(
     *,
     run_id: str,
     started_at_epoch: int,
-    finished_at_epoch: Optional[int] = None,
+    finished_at_epoch: int | None = None,
     models_config: Any,
-    models_config_path: Optional[Path] = None,
+    models_config_path: Path | None = None,
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
     tool_calling_themes: Sequence[str] = (),
-    toolset_seed_path: Optional[Path] = None,
-    panel_path: Optional[Path] = None,
-    assets_dir: Optional[Path] = None,
-    trajectories_requested: Optional[Mapping[str, int]] = None,
-    persona_language_filters: Optional[Mapping[str, Mapping[str, Sequence[str]]]] = None,
+    toolset_seed_path: Path | None = None,
+    panel_path: Path | None = None,
+    assets_dir: Path | None = None,
+    trajectories_requested: Mapping[str, int] | None = None,
+    persona_language_filters: Mapping[str, Mapping[str, Sequence[str]]] | None = None,
     trajectory_df: Any = None,
-    source_kind: Optional[str] = None,
-    source_invocation: Optional[str] = None,
-    replayed_from_run_id: Optional[str] = None,
-    matched_pair_group_id: Optional[str] = None,
+    source_kind: str | None = None,
+    source_invocation: str | None = None,
+    replayed_from_run_id: str | None = None,
+    matched_pair_group_id: str | None = None,
 ) -> RunManifest:
     """Assemble a :class:`RunManifest` from the inputs the simulator has
     at run-end.
@@ -839,7 +839,7 @@ def build_run_manifest(
     )
 
 
-def _nemotron_version() -> Optional[str]:
+def _nemotron_version() -> str | None:
     """Re-export of the Nemotron-Personas version helper (env-var-backed)."""
     from usersim.engine.core.provenance import get_nemotron_personas_version
 
@@ -916,20 +916,20 @@ def write_simulator_manifest(
     started_at_epoch: int,
     trajectory_root: Path | str,
     models_config: Any,
-    models_config_path: Optional[Path] = None,
+    models_config_path: Path | None = None,
     sim_config: Any,
     locales_requested: Sequence[str],
     probe_mix: Mapping[str, float],
     tool_calling_themes: Sequence[str] = (),
-    toolset_seed_path: Optional[Path] = None,
-    panel_path: Optional[Path] = None,
-    assets_dir: Optional[Path] = None,
-    trajectories_requested: Optional[Mapping[str, int]] = None,
-    persona_language_filters: Optional[Mapping[str, Mapping[str, Sequence[str]]]] = None,
-    source_kind: Optional[str] = None,
-    source_invocation: Optional[str] = None,
-    replayed_from_run_id: Optional[str] = None,
-    matched_pair_group_id: Optional[str] = None,
+    toolset_seed_path: Path | None = None,
+    panel_path: Path | None = None,
+    assets_dir: Path | None = None,
+    trajectories_requested: Mapping[str, int] | None = None,
+    persona_language_filters: Mapping[str, Mapping[str, Sequence[str]]] | None = None,
+    source_kind: str | None = None,
+    source_invocation: str | None = None,
+    replayed_from_run_id: str | None = None,
+    matched_pair_group_id: str | None = None,
 ) -> Path:
     """Build + write the simulator manifest in a single call.
 
@@ -976,7 +976,7 @@ def write_simulator_manifest(
 def load_run_manifest(
     run_id: str,
     root: Path | str,
-) -> Optional[RunManifest]:
+) -> RunManifest | None:
     """Canonical reader. Returns ``None`` for runs without a manifest.
 
     Consumers MUST go through this function rather than rolling their

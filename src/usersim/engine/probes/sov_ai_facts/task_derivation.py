@@ -23,7 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Iterable
 
 from usersim.engine.core.fact_bank import Fact, FactBank
 
@@ -34,7 +34,7 @@ from usersim.engine.core.fact_bank import Fact, FactBank
 # Map each Brazilian state (uppercase 2-letter code OR full name, both
 # lowercased for matching) to the IBGE macro-region. Reference:
 # https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial.html
-_BR_STATE_TO_REGION: Dict[str, str] = {
+_BR_STATE_TO_REGION: dict[str, str] = {
     # Norte
     "am": "north",
     "amazonas": "north",
@@ -108,7 +108,7 @@ _BR_STATE_TO_REGION: Dict[str, str] = {
 }
 
 
-def _br_region_from_persona(persona: Dict[str, Any]) -> Optional[str]:
+def _br_region_from_persona(persona: dict[str, Any]) -> str | None:
     """Resolve a Brazilian macro-region tag from persona state fields."""
     # Nemotron-Personas-Brazil carries a ``state`` or ``state_abbrev``
     # field. Fall back to ``region`` if present.
@@ -126,7 +126,7 @@ def _br_region_from_persona(persona: Dict[str, Any]) -> Optional[str]:
 # Age bin → tag
 # ---------------------------------------------------------------------------
 
-_AGE_BINS: List[tuple] = [
+_AGE_BINS: list[tuple] = [
     (0, 17, "age:under-18"),
     (18, 24, "age:18-24"),
     (25, 44, "age:25-44"),
@@ -135,7 +135,7 @@ _AGE_BINS: List[tuple] = [
 ]
 
 
-def _age_tag(persona: Dict[str, Any]) -> Optional[str]:
+def _age_tag(persona: dict[str, Any]) -> str | None:
     """Extract an age-bin tag from a persona's numeric age if possible."""
     raw = persona.get("age")
     try:
@@ -152,7 +152,7 @@ def _age_tag(persona: Dict[str, Any]) -> Optional[str]:
 # Education level → tag
 # ---------------------------------------------------------------------------
 
-_EDUCATION_MAP: Dict[str, str] = {
+_EDUCATION_MAP: dict[str, str] = {
     # Map common Nemotron-Personas education_level values to our coarse
     # tag vocabulary. Keys are lowercased substring matches.
     "no schooling": "primary",
@@ -178,7 +178,7 @@ _EDUCATION_MAP: Dict[str, str] = {
 }
 
 
-def _education_tag(persona: Dict[str, Any]) -> Optional[str]:
+def _education_tag(persona: dict[str, Any]) -> str | None:
     raw = persona.get("education_level")
     if not isinstance(raw, str):
         return None
@@ -197,7 +197,7 @@ def _education_tag(persona: Dict[str, Any]) -> Optional[str]:
 # Occupation phrases (lowercased substring match) → (family, interests).
 # Very coarse on purpose: the point is to seed interest tags, not to build a
 # complete occupation taxonomy. Reviewers can extend this block per locale.
-_OCCUPATION_MAP: List[tuple] = [
+_OCCUPATION_MAP: list[tuple] = [
     # (substring, occupation-family, extra interests)
     ("teacher", "teacher", ("interest:literature", "interest:history")),
     ("professor", "teacher", ("interest:literature",)),
@@ -235,7 +235,7 @@ _OCCUPATION_MAP: List[tuple] = [
 ]
 
 
-def _occupation_tags(persona: Dict[str, Any]) -> List[str]:
+def _occupation_tags(persona: dict[str, Any]) -> list[str]:
     """Best-effort occupation-family + derived-interest tags."""
     raw = persona.get("occupation")
     if not isinstance(raw, str):
@@ -246,7 +246,7 @@ def _occupation_tags(persona: Dict[str, Any]) -> List[str]:
     # First-match wins (list is ordered roughly most-specific-first).
     for key, family, interests in _OCCUPATION_MAP:
         if key in needle:
-            tags: List[str] = [f"occupation-family:{family}"]
+            tags: list[str] = [f"occupation-family:{family}"]
             tags.extend(interests)
             return tags
     return []
@@ -257,7 +257,7 @@ def _occupation_tags(persona: Dict[str, Any]) -> List[str]:
 # ---------------------------------------------------------------------------
 
 
-def persona_to_tags(persona: Dict[str, Any], locale: str) -> List[str]:
+def persona_to_tags(persona: dict[str, Any], locale: str) -> list[str]:
     """Build the persona-tag set the matcher intersects with fact tags.
 
     Always includes ``region:any``, ``age:any``, and ``interest:geography``
@@ -266,7 +266,7 @@ def persona_to_tags(persona: Dict[str, Any], locale: str) -> List[str]:
     locale-specific block (e.g., Brazilian macro-regions for ``pt_BR``)
     adds precise tags on top.
     """
-    tags: Set[str] = {
+    tags: set[str] = {
         "region:any",
         "age:any",
         # Broad interests everyone shares to some degree — ensures the
@@ -299,7 +299,7 @@ def persona_to_tags(persona: Dict[str, Any], locale: str) -> List[str]:
     return sorted(tags)
 
 
-def _persona_content_hash(persona: Dict[str, Any]) -> int:
+def _persona_content_hash(persona: dict[str, Any]) -> int:
     """Deterministic int seed derived from persona content.
 
     Uses the same canonicalization style as ``core.identity``: JSON with
@@ -311,12 +311,12 @@ def _persona_content_hash(persona: Dict[str, Any]) -> int:
 
 
 def derive_task(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     fact_bank: FactBank,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_fact_ids: Iterable[str] = (),
-) -> Optional[Fact]:
+) -> Fact | None:
     """Pick one fact from the bank for this persona.
 
     The pool is ``fact_bank.matching_persona_tags(persona_to_tags(...))``;

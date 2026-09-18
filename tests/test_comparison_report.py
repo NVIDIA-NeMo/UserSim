@@ -15,7 +15,6 @@ from pathlib import Path
 
 import pytest
 
-from usersim.taxonomy.capabilities import capability_definitions
 from usersim.reporting.comparison import (
     ComparisonCell,
     ComparisonReport,
@@ -33,7 +32,7 @@ from usersim.reporting.comparison_dashboard import (
     write_comparison_dashboard_artifacts,
 )
 from usersim.reporting.runs import print_comparison_runs
-
+from usersim.taxonomy.capabilities import capability_definitions
 
 # Quality-capability count, derived from the registry rather than hardcoded:
 # rollups exclude ``simulation_reliability`` (a process-health metric, not
@@ -1098,7 +1097,8 @@ class TestParetoLocaleTabs:
     def test_pareto_per_locale_bundle_keys_are_overall_then_locale_codes(self, tmp_path):
         # Bundle key order (and therefore the React tab default-active
         # tab) must be ["Overall", ...locales].
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(
             tmp_path,
@@ -1358,7 +1358,8 @@ class TestLocaleFlags:
         assert '"🇯🇵"' in html or "🇯🇵" in html
 
     def test_layer4_chart_titles_carry_flags(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(
             tmp_path,
@@ -1400,7 +1401,8 @@ class TestPerModelLayer:
     """Layer 7: tab strip across models, x = capability, color = locale."""
 
     def test_per_model_specs_emitted_with_run_id_and_label(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(
             tmp_path,
@@ -1439,7 +1441,8 @@ class TestPerModelLayer:
             assert "run_id" in entry and "display_label" in entry and "spec" in entry
 
     def test_per_model_spec_uses_capability_x_locale_color(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1466,7 +1469,8 @@ class TestPerModelLayer:
         assert bar["encoding"]["color"]["scale"]["range"][0] != _PALETTE[0]
 
     def test_per_model_skips_simulation_reliability(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1496,7 +1500,8 @@ class TestVerdictRowSpecs:
         # the OK-rate flavour was retired because its bars all sat
         # clamped near 100% and read as visual noise. Failure rate
         # auto-scales because failure clusters <10%.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1523,7 +1528,8 @@ class TestVerdictRowSpecs:
     def test_performance_row_emits_cleared_score_verbosity(self, tmp_path):
         # Performance row swaps the old gaps_headline for cleared_headline
         # and reorders to: cleared | leaderboard | verbosity.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1559,7 +1565,8 @@ class TestVerdictRowSpecs:
         # Cleared chart leads the row -> shows model labels.
         # Leaderboard + verbosity sit to its right -> hide labels
         # (no duplicate y-axis gutters in the same row).
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1656,8 +1663,8 @@ class TestClearedHeadline:
         # 8 locales × the quality capabilities = the eligible cells. If every
         # quality cell passes, cleared = 100%; if every capability for one
         # locale fails, cleared = 7/8 = 87.5%.
-        from usersim.taxonomy.capabilities import capability_definitions
         from usersim.reporting.comparison_dashboard import _spec_cleared_headline
+        from usersim.taxonomy.capabilities import capability_definitions
 
         locales = ["en_US", "en_IN", "en_SG", "fr_FR", "ja_JP", "ko_KR", "pt_BR", "hi_Deva_IN"]
         cap_ids = [d.id for d in capability_definitions()]
@@ -1868,7 +1875,8 @@ class TestPerTabClearedCharts:
         # bars. React reads them via specsPayload.per_locale_cleared
         # and the cleared_spec field on per_capability / per_model
         # entries.
-        import json, re
+        import json
+        import re
 
         report = self._build_two_locale_panel(tmp_path)
         out = tmp_path / "out"
@@ -2046,7 +2054,8 @@ class TestFailureTaxonomyChart:
     def test_failure_taxonomy_spec_emitted_in_global_specs(self, tmp_path):
         # Wired into the dashboard payload so the React component
         # can find it under ``specsPayload.global.sim_health_failure_taxonomy``.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -2196,7 +2205,8 @@ class TestSimHealthLayout:
         # inherit. Every rate chart must render its own model labels;
         # the failure-taxonomy chart already does (axis with
         # labelLimit/labelFontWeight).
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -2355,7 +2365,8 @@ class TestChartTitleHygiene:
         return titles
 
     def _load_specs(self, tmp_path) -> dict:
-        import json, re
+        import json
+        import re
 
         # Build a tiny multi-locale, multi-capability comparison so
         # the per-locale, per-capability, and per-model spec banks
@@ -2486,7 +2497,8 @@ class TestDashboardArtifacts:
         # Layer 4's per_locale spec dict must include "Overall" as the
         # first key so the React tab strip defaults to it. The Overall
         # spec is the locale-averaged grouped-bar chart.
-        import json, re
+        import json
+        import re
 
         report = self._build_report(tmp_path, n_runs=3, n_locales=3)
         out = tmp_path / "out"

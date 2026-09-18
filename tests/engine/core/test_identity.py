@@ -32,7 +32,6 @@ from usersim.engine.core.identity import (
     trajectory_id,
 )
 
-
 # ── Persona UUID ────────────────────────────────────────────────────────
 
 

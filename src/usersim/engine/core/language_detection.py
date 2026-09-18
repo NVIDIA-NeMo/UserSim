@@ -37,7 +37,6 @@ language therefore means registering it in
 from __future__ import annotations
 
 import threading
-from typing import Dict, Optional, Tuple
 
 from usersim.engine.core.locale import (
     INDIA_VARIANT_LOCALES,
@@ -45,7 +44,6 @@ from usersim.engine.core.locale import (
     LOCALE_TO_LANGUAGE_NAME,
     SCRIPT_BUCKETS,
 )
-
 
 # ---------------------------------------------------------------------------
 # Lazy detector
@@ -98,7 +96,7 @@ def reset_detector() -> None:
 # ---------------------------------------------------------------------------
 
 
-def detect_language_name(text: str) -> Optional[str]:
+def detect_language_name(text: str) -> str | None:
     """Return the lingua language enum NAME for the dominant language in
     ``text``, or ``None`` if the text is empty / whitespace / too
     ambiguous for the detector to decide.
@@ -119,7 +117,7 @@ def detect_language_name(text: str) -> Optional[str]:
 
 def script_compliance_fraction(
     text: str,
-    expected_ranges: Tuple[Tuple[int, int], ...],
+    expected_ranges: tuple[tuple[int, int], ...],
 ) -> float:
     """Return the fraction of letter codepoints in ``text`` that fall
     within any of ``expected_ranges`` (each range is a
@@ -160,8 +158,8 @@ def script_compliance_fraction(
 
 def foreign_scripts_used(
     text: str,
-    expected_ranges: Tuple[Tuple[int, int], ...],
-) -> Tuple[str, ...]:
+    expected_ranges: tuple[tuple[int, int], ...],
+) -> tuple[str, ...]:
     """Return the names of scripts in ``text`` that the locale never expects.
 
     A script is foreign when it is neither the locale's own script nor Latin.
@@ -206,7 +204,7 @@ def _script_name(cp: int) -> str:
     return "other"
 
 
-def script_dominance(text: str) -> Dict[str, float]:
+def script_dominance(text: str) -> dict[str, float]:
     """Return per-script-bucket fractions of the letter codepoints in
     ``text``. Buckets: ``latin``, ``devanagari``, ``hiragana``,
     ``katakana``, ``han``, ``other``.
@@ -218,7 +216,7 @@ def script_dominance(text: str) -> Dict[str, float]:
 
     Returns all-zero fractions if the text contains no letters.
     """
-    counts: Dict[str, int] = {k: 0 for k in list(SCRIPT_BUCKETS) + ["other"]}
+    counts: dict[str, int] = {k: 0 for k in list(SCRIPT_BUCKETS) + ["other"]}
     n_letter = 0
     for ch in text:
         if not ch.isalpha():

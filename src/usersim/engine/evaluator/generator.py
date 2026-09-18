@@ -47,7 +47,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Any, Dict, Iterable
+from typing import Any, Iterable
 
 from data_designer.engine.column_generators.generators.base import (
     ColumnGeneratorCellByCell,
@@ -204,7 +204,7 @@ class TrajectoryEvaluatorGenerator(
 
         # ── Run each judge across all applicable axes ────────────
         models = self.get_models()
-        axis_results: Dict[str, Dict[str, Dict[str, Any]]] = {s.name: {} for s in applicable_axes}
+        axis_results: dict[str, dict[str, dict[str, Any]]] = {s.name: {} for s in applicable_axes}
 
         prompt = EVAL_USER_PROMPT.format(
             persona=persona_text,
@@ -242,7 +242,7 @@ class TrajectoryEvaluatorGenerator(
                 }
 
         # ── Run any registered deterministic scorers ─────────────
-        scorer_results: Dict[str, Any] = {}
+        scorer_results: dict[str, Any] = {}
         if cfg.scorers:
             # Pass-through merge: the bag of probe-specific top-level
             # columns each probe writes (sovereign_facts_probed /
@@ -297,9 +297,9 @@ class TrajectoryEvaluatorGenerator(
 
     # ── Internals ───────────────────────────────────────────────
 
-    def get_models(self) -> Dict[str, Any]:
+    def get_models(self) -> dict[str, Any]:
         """Resolve every configured judge alias to its facade."""
-        out: Dict[str, Any] = {}
+        out: dict[str, Any] = {}
         for j in self.config.judges:
             try:
                 out[j.alias] = self.get_model(j.alias)
@@ -309,12 +309,12 @@ class TrajectoryEvaluatorGenerator(
 
     def _call_judge(
         self,
-        models: Dict[str, Any],
+        models: dict[str, Any],
         judge_alias: str,
         prompt: str,
         schema_model: type,
         max_tokens: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """One judge call, structured-output enforced. Returns parsed dict."""
         msgs = [
             {"role": "system", "content": EVAL_SYSTEM_PROMPT},

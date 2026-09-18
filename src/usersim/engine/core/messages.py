@@ -6,10 +6,10 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 
-def format_tools_for_prompt(tools: List[Dict[str, Any]]) -> str:
+def format_tools_for_prompt(tools: list[dict[str, Any]]) -> str:
     """Format a list of tool definitions into a human-readable prompt block."""
     lines = []
     for tool_data in tools:
@@ -20,7 +20,7 @@ def format_tools_for_prompt(tools: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def format_themes_for_prompt(themes: List[Dict[str, Any]]) -> str:
+def format_themes_for_prompt(themes: list[dict[str, Any]]) -> str:
     """Format a list of theme dicts into a human-readable prompt block."""
     lines = []
     for theme in themes:
@@ -28,7 +28,7 @@ def format_themes_for_prompt(themes: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def format_conversation_history_for_prompt(messages: List[Dict[str, Any]]) -> str:
+def format_conversation_history_for_prompt(messages: list[dict[str, Any]]) -> str:
     """Format conversation messages into a text block for judge prompts."""
     lines = []
     for msg in messages:
@@ -56,14 +56,14 @@ def format_conversation_history_for_prompt(messages: List[Dict[str, Any]]) -> st
 
 
 def project_public_dialogue(
-    messages: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    messages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Return only text a real user could observe.
 
     Assistant text remains public even when its source message also contains a
     tool call. Protocol envelopes, arguments, and raw tool results do not.
     """
-    result: List[Dict[str, Any]] = []
+    result: list[dict[str, Any]] = []
     for message in messages:
         role = message.get("role")
         content = message.get("content", "")
@@ -74,7 +74,7 @@ def project_public_dialogue(
     return result
 
 
-def _parse_theme(raw: Any) -> Dict[str, Any]:
+def _parse_theme(raw: Any) -> dict[str, Any]:
     """Normalise a theme value into a dict with 'type' and 'description' keys."""
     if isinstance(raw, dict):
         return raw

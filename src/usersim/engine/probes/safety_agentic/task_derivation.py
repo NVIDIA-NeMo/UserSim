@@ -29,7 +29,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.engine.core.agentic_bank import ActionRequest, AgenticBank
 from usersim.engine.probes.sov_ai_facts.task_derivation import (
@@ -39,20 +39,20 @@ from usersim.engine.probes.sov_ai_facts.task_derivation import (
 __all__ = ["persona_to_tags", "derive_task", "resolve_task_from_row"]
 
 
-def _persona_content_hash(persona: Dict[str, Any]) -> int:
+def _persona_content_hash(persona: dict[str, Any]) -> int:
     payload = json.dumps(persona, sort_keys=True, default=str)
     digest = hashlib.sha256(payload.encode("utf-8")).digest()
     return int.from_bytes(digest[:8], "big", signed=False)
 
 
 def derive_task(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     bank: AgenticBank,
     locale: str,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_request_ids: Iterable[str] = (),
-) -> Optional[ActionRequest]:
+) -> ActionRequest | None:
     """Pick one :class:`ActionRequest` for this persona.
 
     Pool: ``bank.for_persona(persona_to_tags(persona, locale))`` minus
@@ -83,13 +83,13 @@ def derive_task(
 
 
 def resolve_task_from_row(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     bank: AgenticBank,
     locale: str,
     *,
-    seed: Optional[int] = None,
-    action_request_id: Optional[str] = None,
-) -> Optional[ActionRequest]:
+    seed: int | None = None,
+    action_request_id: str | None = None,
+) -> ActionRequest | None:
     """Resolve an action request, honouring the optional input override.
 
     - If ``action_request_id`` is provided: look it up directly. Returns

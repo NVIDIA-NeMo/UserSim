@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -40,7 +40,7 @@ logger = logging.getLogger("usersim.engine")
 
 # ── 8-axis trajectory schema (unchanged from the in-sim version) ──────
 
-TRAJECTORY_SCORES: List[Score] = [
+TRAJECTORY_SCORES: list[Score] = [
     Score(
         name="task_completion",
         description="Was the user's request resolved?",
@@ -167,7 +167,7 @@ def _build_schema():
     return create_judge_structured_output_model(response_models)
 
 
-def _normalize_tool_subset(tool_subset_field: Any) -> List[Dict[str, Any]]:
+def _normalize_tool_subset(tool_subset_field: Any) -> list[dict[str, Any]]:
     """The trajectory carries `tool_subset` as a JSON-encoded list. Decode."""
     if tool_subset_field is None:
         return []
@@ -183,9 +183,9 @@ def _normalize_tool_subset(tool_subset_field: Any) -> List[Dict[str, Any]]:
 
 
 def score_tool_use_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Apply the 8-axis tool-use trajectory judge to one trajectory.
 
     Inputs (from the trajectory row dict):
@@ -259,7 +259,7 @@ def score_tool_use_trajectory(
             "error": "parse_failure",
         }
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     for s in TRAJECTORY_SCORES:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):

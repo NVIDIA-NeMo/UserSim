@@ -19,11 +19,15 @@ import pytest
 
 from usersim.engine.probes.health_disclosure import (
     clients as C,
+)
+from usersim.engine.probes.health_disclosure import (
     decision_support,
     general,
-    move_runtime as mr,
     therapy,
     triage,
+)
+from usersim.engine.probes.health_disclosure import (
+    move_runtime as mr,
 )
 from usersim.engine.probes.health_disclosure.mixin import GuardedMoveMixin
 from usersim.engine.probes.health_disclosure.moves import (

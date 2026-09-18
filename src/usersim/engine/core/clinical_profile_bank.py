@@ -31,11 +31,11 @@ import os
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
-SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
+SUPPORTED_SCHEMA_VERSIONS: frozenset[str] = frozenset({"v0.1"})
 
 #: Profile id the derived task falls back to when a persona uuid isn't in the
 #: bank (the usual case for a bundled synthetic bank). Ships in every bundled
@@ -43,7 +43,7 @@ SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
 DEFAULT_PROFILE_ID = "__default__"
 
 #: The registered client probe labels that own a clinical profile bank.
-CLIENT_PROBE_LABELS: Tuple[str, ...] = (
+CLIENT_PROBE_LABELS: tuple[str, ...] = (
     "health_therapy_disclosure",
     "health_triage_disclosure",
     "health_decision_support_disclosure",
@@ -61,7 +61,7 @@ class ClinicalProfile:
 
     id: str  # persona uuid (join key), or DEFAULT_PROFILE_ID for the fallback
     placeholder: bool
-    profile: Dict[str, Any]  # concealment / gated-topic / risk ground truth
+    profile: dict[str, Any]  # concealment / gated-topic / risk ground truth
     client: str = ""
     bank_id: str = ""
     bank_version: str = ""
@@ -73,10 +73,10 @@ class ClinicalProfileBank:
     client: str
     bank_id: str
     bank_version: str
-    profiles: Tuple[ClinicalProfile, ...] = field(default_factory=tuple)
-    source_path: Optional[str] = None
+    profiles: tuple[ClinicalProfile, ...] = field(default_factory=tuple)
+    source_path: str | None = None
 
-    def by_id(self, profile_id: str) -> Optional[ClinicalProfile]:
+    def by_id(self, profile_id: str) -> ClinicalProfile | None:
         for p in self.profiles:
             if p.id == profile_id:
                 return p
@@ -86,7 +86,7 @@ class ClinicalProfileBank:
 # ---------------------------------------------------------------------------
 # Parsing / validation
 # ---------------------------------------------------------------------------
-def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
+def _require_str(d: dict[str, Any], key: str, src_path: str, ctx: str | None = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise ClinicalProfileBankError(f"{loc}: missing required field {key!r}")
@@ -96,7 +96,7 @@ def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] 
     return v
 
 
-def _build_clinical_profile_bank(doc: Dict[str, Any], *, src_path: str) -> ClinicalProfileBank:
+def _build_clinical_profile_bank(doc: dict[str, Any], *, src_path: str) -> ClinicalProfileBank:
     schema_version = _require_str(doc, "schema_version", src_path)
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ClinicalProfileBankError(
@@ -191,7 +191,7 @@ def default_clinical_profile_bank_path(client: str) -> Path:
 
 def clinical_profile_bank_path_for(
     client: str,
-    env_override: Optional[str] = None,
+    env_override: str | None = None,
 ) -> Path:
     """Resolve the bank path for a client: customer ``env_override`` var wins,
     else the bundled synthetic default."""
@@ -206,13 +206,13 @@ def clinical_profile_bank_path_for(
 # ``env_override`` can repoint a client at a different file within one process
 # (tests, config reloads), and a label-keyed cache would then serve the stale
 # bank. The path is what actually determines the bank contents.
-_BANK_CACHE: Dict[str, ClinicalProfileBank] = {}
+_BANK_CACHE: dict[str, ClinicalProfileBank] = {}
 _BANK_CACHE_LOCK = threading.Lock()
 
 
 def load_clinical_profile_bank_for_client(
     client: str,
-    env_override: Optional[str] = None,
+    env_override: str | None = None,
 ) -> ClinicalProfileBank:
     """Load (and cache) the clinical profile bank for a client probe label.
 

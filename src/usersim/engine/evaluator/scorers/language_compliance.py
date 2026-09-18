@@ -68,7 +68,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.language_detection import (
     detect_language_name,
@@ -107,9 +107,9 @@ INTEGRITY_MIN_CHARS: int = 80
 
 
 def score_language_compliance_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],  # unused — deterministic scorer, no LLM call
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],  # unused — deterministic scorer, no LLM call
+) -> dict[str, Any]:
     """Score a trajectory's assistant turns for language + script compliance.
 
     Contract:
@@ -159,9 +159,9 @@ def score_language_compliance_trajectory(
             error=("no assistant turns in conversation_messages — language_compliance scorer skipped"),
         )
 
-    per_turn: List[Dict[str, Any]] = []
+    per_turn: list[dict[str, Any]] = []
     matches = 0
-    script_fractions: List[float] = []
+    script_fractions: list[float] = []
 
     for idx, content in enumerate(assistant_messages):
         text = content or ""
@@ -194,7 +194,7 @@ def score_language_compliance_trajectory(
     n_turns = len(assistant_messages)
     script_compliance_rate = sum(script_fractions) / n_turns if script_fractions else 1.0
 
-    scores: Dict[str, Any] = {
+    scores: dict[str, Any] = {
         "language.script_compliance_rate": _score_cell(
             round(script_compliance_rate, 4),
             n_turns,
@@ -242,7 +242,7 @@ def score_language_compliance_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _extract_assistant_messages(raw: Any) -> List[str]:
+def _extract_assistant_messages(raw: Any) -> list[str]:
     """Pull the assistant turns out of ``conversation_messages`` as a
     list of content strings, in turn order. Tolerates both list and
     JSON-string forms.
@@ -260,7 +260,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
       flagging the trajectory as a language-mismatch failure.
     """
     messages = _normalize_conversation(raw)
-    out: List[str] = []
+    out: list[str] = []
     for m in messages:
         if not isinstance(m, dict):
             continue
@@ -278,7 +278,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     return out
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -293,7 +293,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
 
 
 def _summarize_match_rate(
-    per_turn: List[Dict[str, Any]],
+    per_turn: list[dict[str, Any]],
     expected_lang: str,
     matches: int,
     n_turns: int,
@@ -313,7 +313,7 @@ def _summarize_match_rate(
 
 
 def _summarize_script_compliance(
-    per_turn: List[Dict[str, Any]],
+    per_turn: list[dict[str, Any]],
     rate: float,
     n_turns: int,
 ) -> str:
@@ -350,7 +350,7 @@ def _summarize_script_compliance(
     return f"Mean script compliance {rate:.0%} across {n_turns} turn(s). Below threshold: {', '.join(chunks)}{suffix}."
 
 
-def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _script_integrity_cell(per_turn: list[dict[str, Any]]) -> dict[str, Any]:
     """Share of substantial assistant turns carrying no foreign-script glyph.
 
     A turn fails on *any* foreign glyph rather than on a fraction of them. One
@@ -392,14 +392,14 @@ def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
     )
 
 
-def _summarize_first_turn(first: Dict[str, Any], expected_lang: str) -> str:
+def _summarize_first_turn(first: dict[str, Any], expected_lang: str) -> str:
     if first["language_match"]:
         return f"Turn 1 detected as {expected_lang} ({first['n_chars']} chars)."
     detected = first["detected_language"] or "None (empty / too-short content)"
     return f"Turn 1 detected as {detected}, expected {expected_lang} ({first['n_chars']} chars)."
 
 
-def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any]:
+def _score_cell(score: float | None, n: int, reasoning: str) -> dict[str, Any]:
     return {
         "score": score,
         "reasoning": reasoning,
@@ -407,7 +407,7 @@ def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any
     }
 
 
-def _noop(*, error: str) -> Dict[str, Any]:
+def _noop(*, error: str) -> dict[str, Any]:
     """No-op envelope shape returned when the trajectory can't be scored."""
     return {
         "scorer_kind": "deterministic",

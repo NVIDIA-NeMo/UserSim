@@ -46,7 +46,7 @@ Total LOC: ~80. ``sov_ai_facts`` is a real example at ~190 LOC
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.probes import (
@@ -95,7 +95,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     label = "demo_bank_verbatim"
     bank_loader = staticmethod(_demo_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
-    bank_version_key: Optional[str] = None  # locale-keyed (inclusion convention)
+    bank_version_key: str | None = None  # locale-keyed (inclusion convention)
 
     def derive_task(
         self,
@@ -103,7 +103,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[_DemoTask]:
+    ) -> _DemoTask | None:
         # Your real probe filters by persona-tag intersection,
         # excludes already-probed ids, deterministic salt, etc.
         # See sov_ai_facts/task_derivation.py for the canonical pattern.

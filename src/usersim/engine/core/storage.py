@@ -49,7 +49,7 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import Sequence
 
 logger = logging.getLogger("usersim.engine")
 
@@ -71,7 +71,7 @@ RUN_PARTITION_COL: str = "run"
 LEGACY_RUN_ID: str = "legacy"
 
 
-def new_run_id(now: Optional[float] = None) -> str:
+def new_run_id(now: float | None = None) -> str:
     """Generate a fresh run id for a simulator invocation.
 
     The id is the integer Unix epoch second at the moment of the
@@ -115,7 +115,7 @@ def list_runs(root: str | Path) -> list[str]:
     return runs
 
 
-def latest_run_id(root: str | Path) -> Optional[str]:
+def latest_run_id(root: str | Path) -> str | None:
     """Return the most-recent run id under ``root``, or ``None`` if
     no runs exist. ``"legacy"`` is treated as the oldest possible
     run (i.e. it is returned only when no real runs exist)."""
@@ -128,7 +128,7 @@ def latest_run_id(root: str | Path) -> Optional[str]:
     return LEGACY_RUN_ID
 
 
-def resolve_run(root: str | Path, run: Union[str, None]) -> Optional[str]:
+def resolve_run(root: str | Path, run: str | None) -> str | None:
     """Resolve a caller-facing ``run`` argument into a concrete id.
 
     - ``None`` or ``"latest"`` → the most-recent run under ``root``,
@@ -146,7 +146,7 @@ def resolve_run(root: str | Path, run: Union[str, None]) -> Optional[str]:
 
 def resolve_run_or_raise(
     root: str | Path,
-    run: Union[str, int, None],
+    run: str | int | None,
     *,
     label: str = "run",
 ) -> str:
@@ -314,7 +314,7 @@ def write_partitioned_dataset(
     root: str | Path,
     *,
     partition_cols: Sequence[str] = DEFAULT_PARTITION_COLS,
-    basename_template: Optional[str] = None,
+    basename_template: str | None = None,
     existing_data_behavior: str = "overwrite_or_ignore",
 ) -> Path:
     """Write ``df`` to a Hive-partitioned parquet dataset rooted at ``root``.
@@ -425,8 +425,8 @@ def _format_partition_value(value) -> str:
 def read_partitioned_dataset(
     path: str | Path,
     *,
-    columns: Optional[List[str]] = None,
-    run: Optional[str] = None,
+    columns: list[str] | None = None,
+    run: str | None = None,
 ):
     """Read a parquet path, transparently handling single files and dataset dirs.
 
@@ -734,7 +734,7 @@ def _read_fragments_with_cast(initial, unified, *, columns):
     return combined.to_pandas(types_mapper=_pyarrow_type_mapper())
 
 
-def _read_all_runs(root: Path, *, columns: Optional[List[str]] = None):
+def _read_all_runs(root: Path, *, columns: list[str] | None = None):
     """Read every run under ``root`` and concatenate, tagging each row
     with its source ``run`` id.
 
@@ -784,7 +784,7 @@ def _partition_values_from_fragment(frag, partition_fields) -> dict:
 def existing_trajectory_ids(
     path: str | Path,
     *,
-    run: Optional[str] = None,
+    run: str | None = None,
 ) -> set[str]:
     """Return the set of ``trajectory_id`` values present at ``path``.
 
@@ -919,7 +919,7 @@ def write_locale_partition(
     locale: str,
     run_id: str,
     partition_cols: Sequence[str] = DEFAULT_PARTITION_COLS,
-    writer_id: Optional[str] = None,
+    writer_id: str | None = None,
 ) -> Path:
     """Atomically write one locale's partition into a specific run.
 
@@ -968,7 +968,7 @@ def list_partition_keys(
     root: str | Path,
     *,
     partition_col: str = "locale",
-) -> List[str]:
+) -> list[str]:
     """List the distinct values of ``partition_col`` present in ``root``.
 
     Returns an empty list if ``root`` does not exist. Useful for the

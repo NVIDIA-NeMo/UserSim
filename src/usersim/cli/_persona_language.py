@@ -16,7 +16,7 @@ import logging
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Sequence
 
 logger = logging.getLogger("usersim.cli.persona_language")
 
@@ -25,8 +25,8 @@ DEFAULT_PERSONA_DATASETS_DIR = Path.home() / ".data-designer" / "managed-assets"
 
 def persona_language_for_locale(
     locale: str,
-    persona_locale: Optional[str] = None,
-) -> Optional[str]:
+    persona_locale: str | None = None,
+) -> str | None:
     """Return the sampled corpus's language value for a conversation locale."""
     from usersim.engine.core.locale import (
         INDIA_VARIANT_LOCALES,
@@ -60,7 +60,7 @@ def persona_language_filter(
     conversation_locale: str,
     *,
     match_language: bool = False,
-) -> Optional[dict[str, list[str]]]:
+) -> dict[str, list[str]] | None:
     """Return the corpus-defined language constraint actually applied.
 
     ``None`` means the population is not narrowed: matching was not requested,
@@ -156,9 +156,9 @@ def log_persona_language_population(
     *,
     persona_locale: str,
     conversation_locale: str,
-    constraint: Optional[Mapping[str, Sequence[str]]],
+    constraint: Mapping[str, Sequence[str]] | None,
     datasets_dir: Path = DEFAULT_PERSONA_DATASETS_DIR,
-) -> Optional[PersonaLanguagePopulation]:
+) -> PersonaLanguagePopulation | None:
     """Log the eligible synthetic-persona pool for an applied constraint.
 
     Best-effort only: a missing or unreadable managed asset never blocks

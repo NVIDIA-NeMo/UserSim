@@ -18,11 +18,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.probing_taxonomy import reset_probing_taxonomy_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -35,12 +36,10 @@ from usersim.engine.evaluator.scorers.sov_ai_dynamic import (
     _GRACEFUL_UNKNOWN,
     _SELF_CONSISTENCY,
     _SUSPECTED_FABRICATION,
-    _as_list_of_str,
     AGGREGATABLE_AXES,
+    _as_list_of_str,
     score_sov_ai_dynamic_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -82,13 +81,13 @@ def _trajectory(
     subtopic_hint: str = "Era Vargas",
     pinned_version: str = "v0.5.1",
     n_assistant_turns: int = 1,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build a minimal `sov_ai_dynamic` trajectory record for scoring.
 
     ``n_assistant_turns`` controls whether the conversation has 1 or 2
     assistant turns (relevant for ``self_consistency`` semantics).
     """
-    messages: List[Dict[str, str]] = [
+    messages: list[dict[str, str]] = [
         {"role": "user", "content": f"Aproveitando, queria entender melhor sobre {subtopic_hint}..."},
         {"role": "assistant", "content": "Resposta do assistente sobre o tópico."},
     ]
@@ -134,7 +133,7 @@ def _axis_payload(
     suspected_fabrication: int,
     self_consistency: int,
     graceful_unknown: int,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Shape the judge response to match the scorer's structured output schema."""
     return {
         _SUSPECTED_FABRICATION.name: {
@@ -152,7 +151,7 @@ def _axis_payload(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """``call_llm`` side-effect that yields queued JSON payloads in order."""
     queue = iter(payloads)
 
@@ -332,7 +331,7 @@ class TestHappyPath:
             self_consistency=3,  # mild inconsistency surfaced
             graceful_unknown=5,
         )
-        captured_calls: List[Any] = []
+        captured_calls: list[Any] = []
 
         def _capturing_side_effect(*args, **kwargs):
             captured_calls.append((args, kwargs))

@@ -32,9 +32,6 @@ canonical question).
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
-
-
 # ---------------------------------------------------------------------------
 # en_US prompts
 # ---------------------------------------------------------------------------
@@ -341,7 +338,7 @@ _USER_FOLLOWUP_INSTRUCTION_KO_KR = """이제 페르소나의 목소리를 유지
 - 전문가 역할을 맡거나 어시스턴트를 도와주지 마세요."""
 
 
-_OPENING_PROMPTS: Dict[str, str] = {
+_OPENING_PROMPTS: dict[str, str] = {
     "en_US": _USER_AGENT_OPENING_PROMPT_EN_US,
     "pt_BR": _USER_AGENT_OPENING_PROMPT_PT_BR,
     "fr_FR": _USER_AGENT_OPENING_PROMPT_FR_FR,
@@ -353,7 +350,7 @@ _OPENING_PROMPTS: Dict[str, str] = {
     "ko_KR": _USER_AGENT_OPENING_PROMPT_KO_KR,
 }
 
-_FOLLOWUP_INSTRUCTIONS: Dict[str, str] = {
+_FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "pt_BR": _USER_FOLLOWUP_INSTRUCTION_PT_BR,
     "fr_FR": _USER_FOLLOWUP_INSTRUCTION_FR_FR,
@@ -399,6 +396,6 @@ def get_followup_instruction(locale: str) -> str:
     return _FOLLOWUP_INSTRUCTIONS[locale]
 
 
-def available_locales() -> Tuple[str, ...]:
+def available_locales() -> tuple[str, ...]:
     """List of locales for which prompts are defined (matches taxonomy locales)."""
     return tuple(sorted(set(_OPENING_PROMPTS.keys()) & set(_FOLLOWUP_INSTRUCTIONS.keys())))

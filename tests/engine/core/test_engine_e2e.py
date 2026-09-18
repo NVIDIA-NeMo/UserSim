@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import MagicMock, patch
-
 
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
@@ -189,7 +188,7 @@ class TestConversationLoopSimple:
             assistant_responses=["Python is a language.", "Python has dynamic types."],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(
@@ -211,7 +210,7 @@ class TestConversationLoopSimple:
             assistant_responses=[],
             judge_responses=[_judge_failure(), _judge_failure()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2, max_query_attempts=2)
 
         adapter = _StubProbe(
@@ -230,7 +229,7 @@ class TestConversationLoopSimple:
             assistant_responses=["Python is a language.", "It has types."],
             judge_responses=[_judge_success(), _judge_warn(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(
@@ -255,7 +254,7 @@ class TestMessageInvariants:
             assistant_responses=["Hi there!", "You're welcome."],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(user_system_prompt="System.")
@@ -276,7 +275,7 @@ class TestMessageInvariants:
             assistant_responses=["A1", "A2"],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(user_system_prompt="System.")

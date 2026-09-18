@@ -8,8 +8,7 @@ from __future__ import annotations
 import hashlib
 import math
 import random
-from typing import Any, Dict, List
-
+from typing import Any
 
 #: Cell values that mean "nothing here" rather than a fact about the
 #: person. ``"-"`` is what the dataset writes for a slot the person does
@@ -49,7 +48,7 @@ def _is_present_or_valid(value: Any, exempt: tuple[str, ...] = ()) -> bool:
 
 
 def _field_text(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     key: str,
     exempt: tuple[str, ...] = (),
 ) -> str:
@@ -58,7 +57,7 @@ def _field_text(
     return str(value) if _is_present_or_valid(value, exempt) else ""
 
 
-def religion_language_context(persona: Dict[str, Any]) -> Dict[str, Any]:
+def religion_language_context(persona: dict[str, Any]) -> dict[str, Any]:
     """Structured audit view of religion/language fields shown to the user agent.
 
     The raw persona is dropped from trajectory output, but these protected,
@@ -82,7 +81,7 @@ def religion_language_context(persona: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
+def format_persona_for_prompt(persona: dict[str, Any]) -> str:
     """Build a structured persona text block for user agent prompts.
 
     Outputs the person's name first, followed by demographics, then labeled
@@ -105,7 +104,7 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
     ]
     name = " ".join(p for p in name_parts if p) or "Unknown"
 
-    demographics: List[str] = []
+    demographics: list[str] = []
     if age_str:
         demographics.append(f"Age: {age_str}")
     if f("sex"):
@@ -148,7 +147,7 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
     if f("bachelors_field"):
         demographics.append(f"Bachelors Field: {f('bachelors_field')}")
 
-    sections: List[str] = []
+    sections: list[str] = []
     sections.append(f"Name: {name}")
     if demographics:
         sections.append("Demographics:\n" + "\n".join(demographics))

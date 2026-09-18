@@ -15,7 +15,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
@@ -38,9 +38,9 @@ from usersim.engine.core.language_detection import script_compliance_fraction
 from usersim.engine.core.llm import (
     NON_ASCII_TOKEN_SCALE,
     ContextWindowError,
+    _word_count,
     call_llm,
     scaled_max_tokens,
-    _word_count,
 )
 from usersim.engine.core.locale import (
     INDIA_VARIANT_LOCALES,
@@ -337,11 +337,11 @@ class ConversationState:
     surfaced to interactive previews and the deep-dive analysis script.
     """
 
-    messages: List[Dict[str, Any]] = field(default_factory=list)
-    user_history: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    conv_summaries: Dict[int, str] = field(default_factory=dict)
-    uh_echo_positions: Dict[int, str] = field(default_factory=dict)
+    messages: list[dict[str, Any]] = field(default_factory=list)
+    user_history: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    conv_summaries: dict[int, str] = field(default_factory=dict)
+    uh_echo_positions: dict[int, str] = field(default_factory=dict)
     assistant_failures: int = 0
     outcome: OutcomeBuilder = field(default_factory=OutcomeBuilder)
 
@@ -927,8 +927,8 @@ class ConversationLoop:
         state: ConversationState,
         cfg: Any,
         turn_idx: int,
-        assistant_msgs: List[Dict[str, Any]],
-        call_kwargs: Dict[str, Any],
+        assistant_msgs: list[dict[str, Any]],
+        call_kwargs: dict[str, Any],
     ) -> tuple:
         """Assistant call + per-turn quality judge, with optional
         judge-gated resampling.
@@ -1226,7 +1226,7 @@ class ConversationLoop:
 
             # 3b. Call assistant
             tools = probe.get_tools_for_assistant()
-            call_kwargs: Dict[str, Any] = {}
+            call_kwargs: dict[str, Any] = {}
             if tools:
                 call_kwargs["tools"] = tools
             if _is_non_ascii_locale(locale):

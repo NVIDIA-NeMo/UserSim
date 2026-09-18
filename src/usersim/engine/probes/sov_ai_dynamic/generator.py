@@ -51,8 +51,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+from usersim.engine.core.behavioral import get_conversation_language
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
@@ -64,7 +65,6 @@ from usersim.engine.core.probing_taxonomy import (
     load_probing_taxonomy_for_locale,
     reset_probing_taxonomy_cache,
 )
-from usersim.engine.core.behavioral import get_conversation_language
 from usersim.engine.core.simulation import (
     ConversationState,
     language_instruction,
@@ -224,11 +224,11 @@ class SovAiDynamicProbe(BankBackedProbe):
 
     def derive_task(
         self,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[_PickedProbe]:
+    ) -> _PickedProbe | None:
         """Pick the matched category + subtopic_hint for this persona.
 
         Returns None when ``derive_probe`` finds no usable category
@@ -282,7 +282,7 @@ class SovAiDynamicProbe(BankBackedProbe):
         self,
         turn_idx: int,
         state: ConversationState,
-    ) -> List[str]:
+    ) -> list[str]:
         if not self._followup_instruction:
             return []
         return [self._followup_instruction]
@@ -325,22 +325,23 @@ SovAiDynamicProbe._pin_bank_version = _pin_bank_version_override  # type: ignore
 
 
 def simulate_sov_ai_dynamic(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim for callers that import ``simulate_sov_ai_dynamic``.
 
     Catches construction exceptions (taxonomy-load / no-usable-category
     / prompt-pack-missing) and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance as _Provenance
+    from usersim.engine.core.outcomes import OutcomeBuilder
+    from usersim.engine.core.outcomes import Provenance as _Provenance
     from usersim.engine.core.probes import BankLoadError
 
     provenance = kwargs.get("provenance") or _Provenance()
@@ -369,13 +370,15 @@ def simulate_sov_ai_dynamic(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
     from usersim.engine.core.outcomes import (
         FailureAttribution,
         FailureClass,
         OutcomeBuilder,
         OutcomeStatus,
+    )
+    from usersim.engine.core.outcomes import (
         Provenance as _Provenance,
     )
 

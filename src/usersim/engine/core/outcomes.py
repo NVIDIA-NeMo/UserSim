@@ -35,8 +35,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -186,12 +185,12 @@ class Provenance:
     possible.
     """
 
-    nemotron_personas_version: Optional[str] = None
-    scenario_prompt_version: Optional[str] = None
-    code_sha: Optional[str] = None
-    bank_version: Dict[str, str] = field(default_factory=dict)
+    nemotron_personas_version: str | None = None
+    scenario_prompt_version: str | None = None
+    code_sha: str | None = None
+    bank_version: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "nemotron_personas_version": self.nemotron_personas_version,
             "scenario_prompt_version": self.scenario_prompt_version,
@@ -205,10 +204,10 @@ class SimulationWarning:
     """Structured warning entry. Stored in ``SimulationOutcome.warnings``."""
 
     kind: WarningKind
-    turn_idx: Optional[int] = None
+    turn_idx: int | None = None
     detail: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "kind": self.kind.value,
             "turn_idx": self.turn_idx,
@@ -226,8 +225,8 @@ class SimulationOutcome:
     """
 
     status: OutcomeStatus = OutcomeStatus.OK
-    failure_class: Optional[FailureClass] = None
-    failure_attribution: Optional[FailureAttribution] = None
+    failure_class: FailureClass | None = None
+    failure_attribution: FailureAttribution | None = None
     failure_detail: str = ""
 
     n_turns: int = 0
@@ -245,18 +244,18 @@ class SimulationOutcome:
     n_user_role_violations: int = 0
     n_user_language_violations: int = 0
 
-    warnings: List[SimulationWarning] = field(default_factory=list)
+    warnings: list[SimulationWarning] = field(default_factory=list)
     early_stop: bool = False
 
-    per_model_input_tokens: Dict[str, int] = field(default_factory=dict)
-    per_model_output_tokens: Dict[str, int] = field(default_factory=dict)
-    per_model_calls: Dict[str, int] = field(default_factory=dict)
-    wall_clock_s_by_alias: Dict[str, float] = field(default_factory=dict)
+    per_model_input_tokens: dict[str, int] = field(default_factory=dict)
+    per_model_output_tokens: dict[str, int] = field(default_factory=dict)
+    per_model_calls: dict[str, int] = field(default_factory=dict)
+    wall_clock_s_by_alias: dict[str, float] = field(default_factory=dict)
     wall_clock_s: float = 0.0
 
     provenance: Provenance = field(default_factory=Provenance)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status.value,
             "failure_class": self.failure_class.value if self.failure_class else None,
@@ -297,16 +296,16 @@ class SimulationTrace:
     kind: TraceKind
     turn_idx: int
     call_idx: int = 0
-    model_alias: Optional[str] = None
+    model_alias: str | None = None
     input_tokens: int = 0
     output_tokens: int = 0
     latency_s: float = 0.0
-    prompt_version: Optional[str] = None
-    rating: Optional[str] = None  # for judge kinds: "success" / "warn" / "failure"
-    detail: Optional[str] = None  # free-text: short explanation, error, etc.
-    extra: Dict[str, Any] = field(default_factory=dict)
+    prompt_version: str | None = None
+    rating: str | None = None  # for judge kinds: "success" / "warn" / "failure"
+    detail: str | None = None  # free-text: short explanation, error, etc.
+    extra: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "kind": self.kind.value,
             "turn_idx": self.turn_idx,
@@ -336,9 +335,9 @@ class OutcomeBuilder:
     ``SimulationTrace`` entries for the sidecar.
     """
 
-    def __init__(self, provenance: Optional[Provenance] = None) -> None:
+    def __init__(self, provenance: Provenance | None = None) -> None:
         self._outcome = SimulationOutcome(provenance=provenance or Provenance())
-        self._traces: List[SimulationTrace] = []
+        self._traces: list[SimulationTrace] = []
 
     # ── counters ───────────────────────────────────────────────────
 
@@ -371,7 +370,7 @@ class OutcomeBuilder:
     def add_warning(
         self,
         kind: WarningKind,
-        turn_idx: Optional[int] = None,
+        turn_idx: int | None = None,
         detail: str = "",
     ) -> None:
         self._outcome.warnings.append(SimulationWarning(kind=kind, turn_idx=turn_idx, detail=detail))
@@ -381,7 +380,7 @@ class OutcomeBuilder:
     def add_trace(self, trace: SimulationTrace) -> None:
         self._traces.append(trace)
 
-    def traces(self) -> List[SimulationTrace]:
+    def traces(self) -> list[SimulationTrace]:
         return list(self._traces)
 
     # ── per-model aggregation (called from within the LLM layer) ──
@@ -417,8 +416,8 @@ class OutcomeBuilder:
     def finalize(
         self,
         status: OutcomeStatus,
-        failure_class: Optional[FailureClass] = None,
-        failure_attribution: Optional[FailureAttribution] = None,
+        failure_class: FailureClass | None = None,
+        failure_attribution: FailureAttribution | None = None,
         failure_detail: str = "",
     ) -> SimulationOutcome:
         self._outcome.status = status
@@ -441,6 +440,6 @@ class OutcomeBuilder:
 # ---------------------------------------------------------------------------
 
 
-def serialize_traces(traces: List[SimulationTrace]) -> str:
+def serialize_traces(traces: list[SimulationTrace]) -> str:
     """JSON-encode a list of traces for storage as a string column."""
     return json.dumps([t.to_dict() for t in traces], ensure_ascii=False, default=str)

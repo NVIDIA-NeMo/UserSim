@@ -22,11 +22,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.query_bank import reset_query_bank_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -36,14 +37,12 @@ from usersim.engine.evaluator.scorers import (
 )
 from usersim.engine.evaluator.scorers.sov_ai_multilingual_parity import (
     _AXES,
-    _CONDESCENSION,
     _COMPLEXITY_CALIBRATION,
+    _CONDESCENSION,
     _HELPFULNESS_AT_PROFICIENCY,
     RESPECT_AXES,
     score_sov_ai_multilingual_parity_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -81,8 +80,8 @@ def _trajectory(
     locale: str = "pt_BR",
     pinned_version: str = "v0.6.0",
     n_assistant_turns: int = 1,
-    persona: Dict[str, Any] | None = None,
-) -> Dict[str, Any]:
+    persona: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Build a minimal `sov_ai_multilingual_parity` trajectory record for scoring."""
     if persona is None:
         persona = {
@@ -93,7 +92,7 @@ def _trajectory(
             "occupation": "Enfermeira",
             "state": "SP",
         }
-    messages: List[Dict[str, str]] = [
+    messages: list[dict[str, str]] = [
         {"role": "user", "content": "Pergunta verbatim do banco."},
         {"role": "assistant", "content": "Resposta do assistente."},
     ]
@@ -130,7 +129,7 @@ def _axis_payload(
     condescension: int,
     complexity_calibration: int,
     helpfulness: int,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Shape the judge response to match the scorer's structured output schema."""
     return {
         _CONDESCENSION.name: {
@@ -148,7 +147,7 @@ def _axis_payload(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """``call_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 

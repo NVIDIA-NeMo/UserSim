@@ -47,7 +47,7 @@ import re
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from usersim.engine.core.localized import (
     LocalizedText,
@@ -56,18 +56,18 @@ from usersim.engine.core.localized import (
 
 logger = logging.getLogger("usersim.engine")
 
-SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
+SUPPORTED_SCHEMA_VERSIONS: frozenset[str] = frozenset({"v0.1"})
 _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 # Required placeholders the loader validates on every strategy /
 # reframing template. Bumping these is a schema-version-incrementing
 # change because every shipped bank would need a re-author pass.
-_STRATEGY_REQUIRED_PLACEHOLDERS: Tuple[str, ...] = (
+_STRATEGY_REQUIRED_PLACEHOLDERS: tuple[str, ...] = (
     "{persona}",
     "{target_description}",
     "{initial_prompt}",
 )
-_REFRAMING_REQUIRED_PLACEHOLDERS: Tuple[str, ...] = ("{previous_assistant_response}",)
+_REFRAMING_REQUIRED_PLACEHOLDERS: tuple[str, ...] = ("{previous_assistant_response}",)
 
 
 class PressureBankError(ValueError):
@@ -87,7 +87,7 @@ class PressureBankError(ValueError):
 class TargetProvenance:
     source: str
     last_reviewed: str
-    references: Tuple[str, ...] = field(default_factory=tuple)
+    references: tuple[str, ...] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
@@ -105,7 +105,7 @@ class Strategy:
     id: str
     description: "LocalizedText"
     system_prompt_template: "LocalizedText"
-    reframings: Tuple[Reframing, ...] = field(default_factory=tuple)
+    reframings: tuple[Reframing, ...] = field(default_factory=tuple)
 
     def reframing_at(self, index: int) -> Reframing:
         """Return the reframing at ``index`` modulo the strategy's length.
@@ -118,7 +118,7 @@ class Strategy:
             raise PressureBankError(f"strategy {self.id!r} has no reframings — cannot pick")
         return self.reframings[index % len(self.reframings)]
 
-    def reframing_by_id(self, reframing_id: str) -> Optional[Reframing]:
+    def reframing_by_id(self, reframing_id: str) -> Reframing | None:
         for r in self.reframings:
             if r.id == reframing_id:
                 return r
@@ -133,8 +133,8 @@ class TargetRequest:
     placeholder: bool
     initial_prompt: "LocalizedText"
     expected_refusal: "LocalizedText"
-    persona_tags: Tuple[str, ...] = field(default_factory=tuple)
-    provenance: Optional[TargetProvenance] = None
+    persona_tags: tuple[str, ...] = field(default_factory=tuple)
+    provenance: TargetProvenance | None = None
     # Set by the loader from the bank's top-level fields so consumers
     # can carry provenance per-target.
     bank_id: str = ""
@@ -159,41 +159,41 @@ class PressureBank:
     schema_version: str
     bank_id: str
     bank_version: str
-    harm_categories: Tuple[str, ...]
-    tags: Tuple[str, ...] = field(default_factory=tuple)
-    strategies: Tuple[Strategy, ...] = field(default_factory=tuple)
-    target_requests: Tuple[TargetRequest, ...] = field(default_factory=tuple)
-    source_path: Optional[str] = None
+    harm_categories: tuple[str, ...]
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    strategies: tuple[Strategy, ...] = field(default_factory=tuple)
+    target_requests: tuple[TargetRequest, ...] = field(default_factory=tuple)
+    source_path: str | None = None
 
     # ── Lookups ─────────────────────────────────────────────────────
 
-    def strategy_by_id(self, strategy_id: str) -> Optional[Strategy]:
+    def strategy_by_id(self, strategy_id: str) -> Strategy | None:
         for s in self.strategies:
             if s.id == strategy_id:
                 return s
         return None
 
-    def target_by_id(self, target_id: str) -> Optional[TargetRequest]:
+    def target_by_id(self, target_id: str) -> TargetRequest | None:
         for t in self.target_requests:
             if t.id == target_id:
                 return t
         return None
 
-    def targets_by_harm_category(self, category: str) -> Tuple[TargetRequest, ...]:
+    def targets_by_harm_category(self, category: str) -> tuple[TargetRequest, ...]:
         return tuple(t for t in self.target_requests if t.harm_category == category)
 
-    def targets_for_persona(self, persona_tags: Iterable[str]) -> Tuple[TargetRequest, ...]:
+    def targets_for_persona(self, persona_tags: Iterable[str]) -> tuple[TargetRequest, ...]:
         """Targets applicable to a persona with the given tags."""
         tags = frozenset(persona_tags)
         return tuple(t for t in self.target_requests if t.matches_persona(tags))
 
-    def strategy_ids(self) -> Tuple[str, ...]:
+    def strategy_ids(self) -> tuple[str, ...]:
         return tuple(s.id for s in self.strategies)
 
-    def target_ids(self) -> Tuple[str, ...]:
+    def target_ids(self) -> tuple[str, ...]:
         return tuple(t.id for t in self.target_requests)
 
-    def provenance_summary(self) -> Dict[str, Any]:
+    def provenance_summary(self) -> dict[str, Any]:
         """Surfaces that the downstream reporting layer reads."""
         return {
             "bank_id": self.bank_id,
@@ -213,12 +213,12 @@ class PressureBank:
 
 def _persona_tags_match(
     target_tags: Iterable[str],
-    persona_tags: FrozenSet[str],
+    persona_tags: frozenset[str],
 ) -> bool:
     """Return True iff the target's required tags are satisfiable by
     the persona. Same prefix-aware semantics as the query-bank matcher.
     """
-    by_prefix: Dict[str, List[str]] = {}
+    by_prefix: dict[str, list[str]] = {}
     for tag in target_tags:
         if ":" not in tag:
             by_prefix.setdefault("__bare__", []).append(tag)
@@ -268,7 +268,7 @@ def load_pressure_bank(path: str | Path) -> PressureBank:
     return _build_pressure_bank(doc, src_path=str(src_path))
 
 
-def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
+def _build_pressure_bank(doc: dict[str, Any], *, src_path: str) -> PressureBank:
     schema_version = _require_str(doc, "schema_version", src_path)
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise PressureBankError(
@@ -282,7 +282,7 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
     raw_harm = doc.get("harm_categories")
     if not isinstance(raw_harm, list) or not raw_harm:
         raise PressureBankError(f"{src_path}::harm_categories: must be a non-empty list")
-    harm_categories: List[str] = []
+    harm_categories: list[str] = []
     for i, h in enumerate(raw_harm):
         if not isinstance(h, str) or not h.strip():
             raise PressureBankError(f"{src_path}::harm_categories[{i}]: must be a non-empty string")
@@ -299,7 +299,7 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
     raw_strategies = doc.get("strategies")
     if not isinstance(raw_strategies, list) or not raw_strategies:
         raise PressureBankError(f"{src_path}::strategies: must be a non-empty list")
-    strategies: List[Strategy] = []
+    strategies: list[Strategy] = []
     seen_strategy_ids: set[str] = set()
     for idx, raw in enumerate(raw_strategies):
         if not isinstance(raw, dict):
@@ -313,7 +313,7 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
     raw_targets = doc.get("target_requests")
     if not isinstance(raw_targets, list) or not raw_targets:
         raise PressureBankError(f"{src_path}::target_requests: must be a non-empty list")
-    targets: List[TargetRequest] = []
+    targets: list[TargetRequest] = []
     seen_target_ids: set[str] = set()
     for idx, raw in enumerate(raw_targets):
         if not isinstance(raw, dict):
@@ -356,7 +356,7 @@ def _build_pressure_bank(doc: Dict[str, Any], *, src_path: str) -> PressureBank:
     return bank
 
 
-def _build_strategy(entry: Dict[str, Any], *, src_path: str, idx: int) -> Strategy:
+def _build_strategy(entry: dict[str, Any], *, src_path: str, idx: int) -> Strategy:
     sid = _require_str(entry, "id", src_path, ctx=f"strategies[{idx}]")
     ctx = sid
 
@@ -384,7 +384,7 @@ def _build_strategy(entry: Dict[str, Any], *, src_path: str, idx: int) -> Strate
     if not isinstance(raw_reframings, list) or not raw_reframings:
         raise PressureBankError(f"{src_path}::{ctx}::reframings: must be a non-empty list")
 
-    reframings: List[Reframing] = []
+    reframings: list[Reframing] = []
     seen_ids: set[str] = set()
     for ri, raw in enumerate(raw_reframings):
         if not isinstance(raw, dict):
@@ -422,13 +422,13 @@ def _build_strategy(entry: Dict[str, Any], *, src_path: str, idx: int) -> Strate
 
 
 def _build_target(
-    entry: Dict[str, Any],
+    entry: dict[str, Any],
     *,
     src_path: str,
     idx: int,
     bank_id: str,
     bank_version: str,
-    allowed_harm_categories: FrozenSet[str],
+    allowed_harm_categories: frozenset[str],
 ) -> TargetRequest:
     tid = _require_str(entry, "id", src_path, ctx=f"target_requests[{idx}]")
     ctx = tid
@@ -461,7 +461,7 @@ def _build_target(
     raw_tags = entry.get("persona_tags", [])
     if not isinstance(raw_tags, list):
         raise PressureBankError(f"{src_path}::{ctx}::persona_tags: must be a list (or omit)")
-    persona_tags: List[str] = []
+    persona_tags: list[str] = []
     for ti, tag in enumerate(raw_tags):
         if not isinstance(tag, str) or not tag.strip():
             raise PressureBankError(f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty string")
@@ -492,7 +492,7 @@ def _build_target(
 
 
 def _build_provenance(
-    p: Dict[str, Any],
+    p: dict[str, Any],
     *,
     src_path: str,
     ctx: str,
@@ -512,7 +512,7 @@ def _build_provenance(
     raw_refs = p.get("references", [])
     if not isinstance(raw_refs, list):
         raise PressureBankError(f"{src_path}::{ctx}::provenance::references: must be a list")
-    refs: List[str] = []
+    refs: list[str] = []
     for ri, ref in enumerate(raw_refs):
         if not isinstance(ref, str) or not ref.strip():
             raise PressureBankError(f"{src_path}::{ctx}::provenance::references[{ri}]: must be a non-empty string")
@@ -531,7 +531,7 @@ def _build_provenance(
     )
 
 
-def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None) -> str:
+def _require_str(d: dict[str, Any], key: str, src_path: str, ctx: str | None = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise PressureBankError(f"{loc}: missing required field {key!r}")
@@ -542,10 +542,10 @@ def _require_str(d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] 
 
 
 def _require_localized(
-    d: Dict[str, Any],
+    d: dict[str, Any],
     key: str,
     src_path: str,
-    ctx: Optional[str] = None,
+    ctx: str | None = None,
 ) -> LocalizedText:
     """Parse a YAML field as a :class:`LocalizedText` (string OR dict).
 
@@ -569,7 +569,7 @@ def _require_localized(
 # Process-local cache
 # ---------------------------------------------------------------------------
 
-_PRESSURE_BANK_CACHE: Dict[str, PressureBank] = {}
+_PRESSURE_BANK_CACHE: dict[str, PressureBank] = {}
 _PRESSURE_BANK_CACHE_LOCK = threading.Lock()
 
 

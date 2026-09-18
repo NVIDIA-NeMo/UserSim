@@ -25,10 +25,9 @@ locale is caught at CI time.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Any
 
-
-SHIPPED_LOCALES: Tuple[str, ...] = (
+SHIPPED_LOCALES: tuple[str, ...] = (
     "en_US",
     "en_IN",
     "en_SG",
@@ -51,68 +50,68 @@ SHIPPED_LOCALES: Tuple[str, ...] = (
 
 # Latin: basic + Latin-1 + Latin Extended-A + Latin Extended-B (covers
 # every accented vowel that French / Portuguese / Spanish use).
-LATIN_RANGES: Tuple[Tuple[int, int], ...] = (
+LATIN_RANGES: tuple[tuple[int, int], ...] = (
     (0x0041, 0x005A),  # A-Z
     (0x0061, 0x007A),  # a-z
     (0x00C0, 0x024F),  # Latin-1 Supplement + Latin Extended-A + Extended-B
 )
 
-DEVANAGARI_RANGES: Tuple[Tuple[int, int], ...] = (
+DEVANAGARI_RANGES: tuple[tuple[int, int], ...] = (
     (0x0900, 0x097F),  # Devanagari block
 )
 
-HANGUL_RANGES: Tuple[Tuple[int, int], ...] = (
+HANGUL_RANGES: tuple[tuple[int, int], ...] = (
     (0x1100, 0x11FF),  # Hangul Jamo
     (0x3130, 0x318F),  # Hangul Compatibility Jamo
     (0xAC00, 0xD7AF),  # Hangul Syllables
 )
 
-HIRAGANA_RANGES: Tuple[Tuple[int, int], ...] = ((0x3040, 0x309F),)
+HIRAGANA_RANGES: tuple[tuple[int, int], ...] = ((0x3040, 0x309F),)
 
-KATAKANA_RANGES: Tuple[Tuple[int, int], ...] = ((0x30A0, 0x30FF),)
+KATAKANA_RANGES: tuple[tuple[int, int], ...] = ((0x30A0, 0x30FF),)
 
 # CJK Unified Ideographs (Han / 漢字 / kanji). Doesn't include CJK Ext A/B/...
 # which are mostly historical / specialty kanji rarely seen in modern text;
 # adding them later is a one-line change.
-HAN_RANGES: Tuple[Tuple[int, int], ...] = ((0x4E00, 0x9FFF),)
+HAN_RANGES: tuple[tuple[int, int], ...] = ((0x4E00, 0x9FFF),)
 
 # ── Indic + Arabic scripts (used by the India language-variant layer) ──────
 # One Unicode block per script. Devanagari (already above) is shared by
 # Hindi / Marathi / Nepali; the rest are one-language-dominant in India.
 
-BENGALI_RANGES: Tuple[Tuple[int, int], ...] = (
+BENGALI_RANGES: tuple[tuple[int, int], ...] = (
     (0x0980, 0x09FF),  # Bengali (also Assamese)
 )
 
-GURMUKHI_RANGES: Tuple[Tuple[int, int], ...] = (
+GURMUKHI_RANGES: tuple[tuple[int, int], ...] = (
     (0x0A00, 0x0A7F),  # Gurmukhi (Punjabi)
 )
 
-GUJARATI_RANGES: Tuple[Tuple[int, int], ...] = (
+GUJARATI_RANGES: tuple[tuple[int, int], ...] = (
     (0x0A80, 0x0AFF),  # Gujarati
 )
 
-ODIA_RANGES: Tuple[Tuple[int, int], ...] = (
+ODIA_RANGES: tuple[tuple[int, int], ...] = (
     (0x0B00, 0x0B7F),  # Odia / Oriya
 )
 
-TAMIL_RANGES: Tuple[Tuple[int, int], ...] = (
+TAMIL_RANGES: tuple[tuple[int, int], ...] = (
     (0x0B80, 0x0BFF),  # Tamil
 )
 
-TELUGU_RANGES: Tuple[Tuple[int, int], ...] = (
+TELUGU_RANGES: tuple[tuple[int, int], ...] = (
     (0x0C00, 0x0C7F),  # Telugu
 )
 
-KANNADA_RANGES: Tuple[Tuple[int, int], ...] = (
+KANNADA_RANGES: tuple[tuple[int, int], ...] = (
     (0x0C80, 0x0CFF),  # Kannada
 )
 
-MALAYALAM_RANGES: Tuple[Tuple[int, int], ...] = (
+MALAYALAM_RANGES: tuple[tuple[int, int], ...] = (
     (0x0D00, 0x0D7F),  # Malayalam
 )
 
-ARABIC_RANGES: Tuple[Tuple[int, int], ...] = (
+ARABIC_RANGES: tuple[tuple[int, int], ...] = (
     (0x0600, 0x06FF),  # Arabic block (Urdu is written in Arabic script)
 )
 
@@ -123,15 +122,15 @@ ARABIC_RANGES: Tuple[Tuple[int, int], ...] = (
 # glyphs mid-word in Indic prose, and the script-integrity check can only
 # report "Cyrillic" instead of the useless "other" if the bucket has a name.
 
-CYRILLIC_RANGES: Tuple[Tuple[int, int], ...] = (
+CYRILLIC_RANGES: tuple[tuple[int, int], ...] = (
     (0x0400, 0x04FF),  # Cyrillic
 )
 
-HEBREW_RANGES: Tuple[Tuple[int, int], ...] = (
+HEBREW_RANGES: tuple[tuple[int, int], ...] = (
     (0x0590, 0x05FF),  # Hebrew
 )
 
-GREEK_RANGES: Tuple[Tuple[int, int], ...] = (
+GREEK_RANGES: tuple[tuple[int, int], ...] = (
     (0x0370, 0x03FF),  # Greek and Coptic
 )
 
@@ -190,7 +189,7 @@ LOCALE_TO_LANGUAGE_DISPLAY: dict[str, str] = {
 # :func:`script_compliance_fraction` helper, which only counts letter
 # codepoints — digits and punctuation are script-neutral.
 
-LOCALE_TO_EXPECTED_SCRIPT_RANGES: dict[str, Tuple[Tuple[int, int], ...]] = {
+LOCALE_TO_EXPECTED_SCRIPT_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
     "en_US": LATIN_RANGES,
     "en_IN": LATIN_RANGES,
     "en_SG": LATIN_RANGES,
@@ -208,7 +207,7 @@ LOCALE_TO_EXPECTED_SCRIPT_RANGES: dict[str, Tuple[Tuple[int, int], ...]] = {
 # ---------------------------------------------------------------------------
 
 
-def supported_locales() -> Tuple[str, ...]:
+def supported_locales() -> tuple[str, ...]:
     """Locales for which this module knows both an expected language
     and an expected script. Tests assert this matches every locale that
     ships a fact bank or probing taxonomy."""
@@ -240,7 +239,7 @@ def expected_language_display(locale: str) -> str | None:
     return None
 
 
-def expected_script_ranges(locale: str) -> Tuple[Tuple[int, int], ...]:
+def expected_script_ranges(locale: str) -> tuple[tuple[int, int], ...]:
     """Return the Unicode codepoint ranges that count as "expected
     script" for ``locale``. Empty tuple for unregistered locales.
 
@@ -255,7 +254,7 @@ def expected_script_ranges(locale: str) -> Tuple[Tuple[int, int], ...]:
 
 # Named script-bucket map used by the script-dominance helper. Public so
 # callers can also enumerate the buckets directly.
-SCRIPT_BUCKETS: dict[str, Tuple[Tuple[int, int], ...]] = {
+SCRIPT_BUCKETS: dict[str, tuple[tuple[int, int], ...]] = {
     "latin": LATIN_RANGES,
     "devanagari": DEVANAGARI_RANGES,
     "hangul": HANGUL_RANGES,
@@ -318,7 +317,7 @@ class IndiaVariant:
     base_locale: str
     language_display: str
     lingua_name: str | None
-    script_ranges: Tuple[Tuple[int, int], ...]
+    script_ranges: tuple[tuple[int, int], ...]
     script_label: str | None
     romanized: bool
 
@@ -330,7 +329,7 @@ class IndiaVariant:
 # lingua build actually has the language (verified: Bengali/Gujarati/Hindi/
 # Marathi/Punjabi/Tamil/Telugu/Urdu; NOT Kannada/Malayalam/Odia/Nepali).
 # Hindi already ships as first-class ``hi_Deva_IN`` / ``hi_Latn_IN``.
-_INDIA_VARIANT_SPEC: Tuple[Tuple[str, str, str, str | None, Tuple[Tuple[int, int], ...], str], ...] = (
+_INDIA_VARIANT_SPEC: tuple[tuple[str, str, str, str | None, tuple[tuple[int, int], ...], str], ...] = (
     ("bn_Beng_IN", "bn_Latn_IN", "Bengali", "BENGALI", BENGALI_RANGES, "Bengali"),
     ("or_Orya_IN", "or_Latn_IN", "Odia", None, ODIA_RANGES, "Odia"),
     ("ta_Taml_IN", "ta_Latn_IN", "Tamil", "TAMIL", TAMIL_RANGES, "Tamil"),

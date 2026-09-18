@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 def load_seeds(
@@ -34,7 +34,7 @@ def load_seeds(
     probe: str,
     kind: str,
     assets_dir: Path | str | None = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Load seed data for ``(probe, kind)`` with locale-aware replacement.
 
     Path resolution:

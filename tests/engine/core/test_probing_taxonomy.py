@@ -17,13 +17,14 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probing_taxonomy import (
-    Category,
     MIN_SUBTOPIC_HINTS,
+    SUPPORTED_SCHEMA_VERSIONS,
+    Category,
     ProbingTaxonomy,
     ProbingTaxonomyError,
-    SUPPORTED_SCHEMA_VERSIONS,
     default_probing_taxonomy_path,
     load_probing_taxonomy,
     load_probing_taxonomy_for,
@@ -32,8 +33,6 @@ from usersim.engine.core.probing_taxonomy import (
     reset_probing_taxonomy_cache,
     select_category,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers

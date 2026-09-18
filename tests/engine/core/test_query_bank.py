@@ -25,6 +25,8 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.query_bank import (
     QueryBank,
     QueryBankError,
@@ -33,9 +35,6 @@ from usersim.engine.core.query_bank import (
     load_query_bank_default,
     reset_query_bank_cache,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers

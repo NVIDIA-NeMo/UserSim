@@ -12,8 +12,9 @@ resolver falls back to all templates when nothing matches.
 from __future__ import annotations
 
 import random
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Sequence
 
+from usersim.engine.core.finance_bank import FinanceBank
 from usersim.engine.core.finance_tasks import (
     FinanceInstance,
     _instance_seed,
@@ -22,11 +23,10 @@ from usersim.engine.core.finance_tasks import (
     select_institution,
     select_institution_and_template,
 )
-from usersim.engine.core.finance_bank import FinanceBank
 from usersim.engine.core.probing_taxonomy import select_category
 
 
-def _age_bin(age: Any) -> Optional[str]:
+def _age_bin(age: Any) -> str | None:
     try:
         a = int(age)
     except (TypeError, ValueError):
@@ -44,7 +44,7 @@ def _age_bin(age: Any) -> Optional[str]:
     return "65+"
 
 
-def _slug(value: Any) -> Optional[str]:
+def _slug(value: Any) -> str | None:
     if not isinstance(value, str) or not value.strip():
         return None
     return value.strip().lower().replace(" ", "_")
@@ -72,7 +72,7 @@ _FINANCE_OCCUPATION_KEYWORDS = (
 )
 
 
-def derive_financial_literacy(persona: Dict[str, Any], locale: str = "en_US") -> str:
+def derive_financial_literacy(persona: dict[str, Any], locale: str = "en_US") -> str:
     """Derive a coarse ``low``/``medium``/``high`` financial-literacy level.
 
     A DERIVED persona axis (not a raw Nemotron-Personas field): education
@@ -96,9 +96,9 @@ def derive_financial_literacy(persona: Dict[str, Any], locale: str = "en_US") ->
 
 
 def _institution_type_weights(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     literacy: str,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Soft prior over institution TYPES for this persona (base 1.0 each).
 
     Ecological biasing (retiree -> retirement/wealth; investor / high-literacy
@@ -106,7 +106,7 @@ def _institution_type_weights(
     every type keeps its baseline weight and nothing is starved. Banks stay at
     baseline because everyday banking is near-universal.
     """
-    weights: Dict[str, float] = {}
+    weights: dict[str, float] = {}
 
     def boost(itype: str, amount: float) -> None:
         weights[itype] = weights.get(itype, 1.0) + amount
@@ -129,9 +129,9 @@ def _institution_type_weights(
 
 
 def _category_weights(
-    persona_tags: List[str],
+    persona_tags: list[str],
     categories: "Sequence[Any]",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Soft prior over categories: +1 per persona tag a category is affine to.
 
     Data-driven via each category's authored ``persona_affinities`` (e.g.
@@ -139,7 +139,7 @@ def _category_weights(
     no overlap, keep the 1.0 baseline — a soft prior, never a hard filter.
     """
     ptags = set(persona_tags)
-    weights: Dict[str, float] = {}
+    weights: dict[str, float] = {}
     for c in categories:
         w = 1.0
         for aff in getattr(c, "persona_affinities", ()) or ():
@@ -149,16 +149,16 @@ def _category_weights(
     return weights
 
 
-def _age_int(age: Any) -> Optional[int]:
+def _age_int(age: Any) -> int | None:
     try:
         return int(age)
     except (TypeError, ValueError):
         return None
 
 
-def persona_to_tags(persona: Dict[str, Any], locale: str = "en_US") -> List[str]:
+def persona_to_tags(persona: dict[str, Any], locale: str = "en_US") -> list[str]:
     """Map a persona to `<prefix>:<value>` tags used for template matching."""
-    tags: List[str] = []
+    tags: list[str] = []
     age_bin = _age_bin(persona.get("age"))
     if age_bin:
         tags.append(f"age:{age_bin}")
@@ -173,16 +173,16 @@ def persona_to_tags(persona: Dict[str, Any], locale: str = "en_US") -> List[str]
 
 
 def derive_instance(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     bank: FinanceBank,
     locale: str,
     *,
     persona_uuid: str,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     tier_mix: float = 0.0,
-    forced_tier: Optional[str] = None,
+    forced_tier: str | None = None,
     taxonomy: Any = None,
-) -> Optional[FinanceInstance]:
+) -> FinanceInstance | None:
     """Instantiate a task for this persona, tier-branched.
 
     ``tier_mix`` is the probability of the ``dynamic`` tier (0.0 default =
@@ -258,9 +258,9 @@ def derive_instance(
 
 def _pick_tier(
     persona_uuid: str,
-    seed: Optional[int],
+    seed: int | None,
     tier_mix: float,
-    forced_tier: Optional[str],
+    forced_tier: str | None,
     taxonomy: Any,
 ) -> str:
     """Deterministically choose ``verifiable`` vs ``dynamic`` for this instance."""

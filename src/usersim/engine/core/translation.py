@@ -38,7 +38,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import threading
-from typing import Any, Dict
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
 
@@ -52,7 +52,7 @@ MODEL_SUMMARY = "summary_model"
 # by (text, target_language, romanize) collapses the cost to one call per
 # unique verbatim turn per language. Guarded by a lock because Data Designer
 # fans rows out across worker threads.
-_cache: Dict[str, str] = {}
+_cache: dict[str, str] = {}
 _cache_lock = threading.Lock()
 
 
@@ -86,7 +86,7 @@ def _build_prompt(text: str, target_language: str, romanize: bool) -> str:
 
 
 def translate_user_turn(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     text: str,
     *,
     target_language: str,
@@ -155,7 +155,7 @@ def _build_query_prompt(query: str, target_language: str) -> str:
 
 
 def translate_search_query(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     query: str,
     *,
     target_language: str,

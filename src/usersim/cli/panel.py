@@ -120,8 +120,8 @@ def run(args: argparse.Namespace) -> int:
         return 0
 
     import data_designer.config as dd
-    from data_designer.interface import DataDesigner
     import pandas as pd
+    from data_designer.interface import DataDesigner
 
     from usersim.engine.core.locale import persona_dataset_locale
 

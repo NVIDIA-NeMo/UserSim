@@ -50,7 +50,7 @@ import re
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from usersim.engine.core.localized import (
     LocalizedText,
@@ -59,7 +59,7 @@ from usersim.engine.core.localized import (
 
 logger = logging.getLogger("usersim.engine")
 
-SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
+SUPPORTED_SCHEMA_VERSIONS: frozenset[str] = frozenset({"v0.1"})
 _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -80,7 +80,7 @@ class AgenticBankError(ValueError):
 class ActionProvenance:
     source: str
     last_reviewed: str
-    references: Tuple[str, ...] = field(default_factory=tuple)
+    references: tuple[str, ...] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
@@ -89,7 +89,7 @@ class ToolSpec:
 
     name: str
     description: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -108,14 +108,14 @@ class ActionRequest:
     sub_protocol: str
     placeholder: bool
     description: "LocalizedText"
-    sanctioned_action_name: Optional[str]  # None = "no action; refuse"
-    tempted_action_name: Optional[str]
+    sanctioned_action_name: str | None  # None = "no action; refuse"
+    tempted_action_name: str | None
     initial_user_prompt: "LocalizedText"
     expected_behavior: "LocalizedText"
-    simulated_tools: Tuple[ToolSpec, ...]
-    mock_tool_responses: Dict[str, MockToolResponse] = field(default_factory=dict)
-    persona_tags: Tuple[str, ...] = field(default_factory=tuple)
-    provenance: Optional[ActionProvenance] = None
+    simulated_tools: tuple[ToolSpec, ...]
+    mock_tool_responses: dict[str, MockToolResponse] = field(default_factory=dict)
+    persona_tags: tuple[str, ...] = field(default_factory=tuple)
+    provenance: ActionProvenance | None = None
     # Set by the loader from the bank's top-level fields so consumers
     # can carry attribution per-entry without re-looking-up.
     bank_id: str = ""
@@ -139,28 +139,28 @@ class AgenticBank:
     schema_version: str
     bank_id: str
     bank_version: str
-    sub_protocols: Tuple[str, ...]
-    tags: Tuple[str, ...] = field(default_factory=tuple)
-    action_requests: Tuple[ActionRequest, ...] = field(default_factory=tuple)
-    source_path: Optional[str] = None
+    sub_protocols: tuple[str, ...]
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    action_requests: tuple[ActionRequest, ...] = field(default_factory=tuple)
+    source_path: str | None = None
 
-    def by_id(self, request_id: str) -> Optional[ActionRequest]:
+    def by_id(self, request_id: str) -> ActionRequest | None:
         for r in self.action_requests:
             if r.id == request_id:
                 return r
         return None
 
-    def by_sub_protocol(self, sub_protocol: str) -> Tuple[ActionRequest, ...]:
+    def by_sub_protocol(self, sub_protocol: str) -> tuple[ActionRequest, ...]:
         return tuple(r for r in self.action_requests if r.sub_protocol == sub_protocol)
 
-    def for_persona(self, persona_tags: Iterable[str]) -> Tuple[ActionRequest, ...]:
+    def for_persona(self, persona_tags: Iterable[str]) -> tuple[ActionRequest, ...]:
         tags = frozenset(persona_tags)
         return tuple(r for r in self.action_requests if r.matches_persona(tags))
 
-    def request_ids(self) -> Tuple[str, ...]:
+    def request_ids(self) -> tuple[str, ...]:
         return tuple(r.id for r in self.action_requests)
 
-    def provenance_summary(self) -> Dict[str, Any]:
+    def provenance_summary(self) -> dict[str, Any]:
         return {
             "bank_id": self.bank_id,
             "bank_version": self.bank_version,
@@ -178,9 +178,9 @@ class AgenticBank:
 
 def _persona_tags_match(
     target_tags: Iterable[str],
-    persona_tags: FrozenSet[str],
+    persona_tags: frozenset[str],
 ) -> bool:
-    by_prefix: Dict[str, List[str]] = {}
+    by_prefix: dict[str, list[str]] = {}
     for tag in target_tags:
         if ":" not in tag:
             by_prefix.setdefault("__bare__", []).append(tag)
@@ -218,11 +218,11 @@ def _default_action_taxonomy_path() -> Path:
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
 
-_ACTION_TAXONOMY_CACHE: Dict[str, FrozenSet[str]] = {}
+_ACTION_TAXONOMY_CACHE: dict[str, frozenset[str]] = {}
 _ACTION_TAXONOMY_CACHE_LOCK = threading.Lock()
 
 
-def _load_action_taxonomy_names(path: Path) -> FrozenSet[str]:
+def _load_action_taxonomy_names(path: Path) -> frozenset[str]:
     """Load the action taxonomy and return the set of valid ``name``s.
 
     The taxonomy file's full structure is rich (risk_tier,
@@ -241,7 +241,7 @@ def _load_action_taxonomy_names(path: Path) -> FrozenSet[str]:
     entries = doc.get("entries")
     if not isinstance(entries, list):
         raise AgenticBankError(f"action_taxonomy: {path}: missing top-level `entries` list")
-    names: List[str] = []
+    names: list[str] = []
     for i, e in enumerate(entries):
         if not isinstance(e, dict):
             raise AgenticBankError(f"action_taxonomy: {path}::entries[{i}]: must be a mapping")
@@ -254,7 +254,7 @@ def _load_action_taxonomy_names(path: Path) -> FrozenSet[str]:
     return frozenset(names)
 
 
-def _action_taxonomy_names() -> FrozenSet[str]:
+def _action_taxonomy_names() -> frozenset[str]:
     """Return the cached set of valid action-taxonomy names.
 
     Honours ``USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`` env override
@@ -309,7 +309,7 @@ def load_agentic_bank(path: str | Path) -> AgenticBank:
     return _build_bank(doc, src_path=str(src_path))
 
 
-def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
+def _build_bank(doc: dict[str, Any], *, src_path: str) -> AgenticBank:
     schema_version = _require_str(doc, "schema_version", src_path)
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise AgenticBankError(
@@ -323,7 +323,7 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
     raw_sps = doc.get("sub_protocols")
     if not isinstance(raw_sps, list) or not raw_sps:
         raise AgenticBankError(f"{src_path}::sub_protocols: must be a non-empty list")
-    sub_protocols: List[str] = []
+    sub_protocols: list[str] = []
     for i, sp in enumerate(raw_sps):
         if not isinstance(sp, str) or not sp.strip():
             raise AgenticBankError(f"{src_path}::sub_protocols[{i}]: must be a non-empty string")
@@ -343,7 +343,7 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
 
     valid_action_names = _action_taxonomy_names()
 
-    requests: List[ActionRequest] = []
+    requests: list[ActionRequest] = []
     seen_ids: set[str] = set()
     for idx, raw in enumerate(raw_entries):
         if not isinstance(raw, dict):
@@ -387,14 +387,14 @@ def _build_bank(doc: Dict[str, Any], *, src_path: str) -> AgenticBank:
 
 
 def _build_action_request(
-    entry: Dict[str, Any],
+    entry: dict[str, Any],
     *,
     src_path: str,
     idx: int,
     bank_id: str,
     bank_version: str,
-    sub_protocol_set: FrozenSet[str],
-    valid_action_names: FrozenSet[str],
+    sub_protocol_set: frozenset[str],
+    valid_action_names: frozenset[str],
 ) -> ActionRequest:
     rid = _require_str(entry, "id", src_path, ctx=f"action_requests[{idx}]")
     ctx = rid
@@ -453,7 +453,7 @@ def _build_action_request(
         raise AgenticBankError(f"{src_path}::{ctx}::sanctioned_action_name: must be a non-empty string or null")
 
     tempted_raw = entry.get("tempted_action_name")
-    tempted_action_name: Optional[str]
+    tempted_action_name: str | None
     if tempted_raw is None:
         tempted_action_name = None
     elif isinstance(tempted_raw, str) and tempted_raw.strip():
@@ -470,7 +470,7 @@ def _build_action_request(
     raw_tools = entry.get("simulated_tools")
     if not isinstance(raw_tools, list) or not raw_tools:
         raise AgenticBankError(f"{src_path}::{ctx}::simulated_tools: must be a non-empty list")
-    tools: List[ToolSpec] = []
+    tools: list[ToolSpec] = []
     seen_tool_names: set[str] = set()
     for ti, raw in enumerate(raw_tools):
         if not isinstance(raw, dict):
@@ -501,7 +501,7 @@ def _build_action_request(
     raw_responses = entry.get("mock_tool_responses", {}) or {}
     if not isinstance(raw_responses, dict):
         raise AgenticBankError(f"{src_path}::{ctx}::mock_tool_responses: must be a mapping (or omit)")
-    mock_responses: Dict[str, MockToolResponse] = {}
+    mock_responses: dict[str, MockToolResponse] = {}
     for tname, raw in raw_responses.items():
         if not isinstance(tname, str) or not tname:
             raise AgenticBankError(f"{src_path}::{ctx}::mock_tool_responses: keys must be non-empty tool-name strings")
@@ -551,7 +551,7 @@ def _build_action_request(
     raw_persona_tags = entry.get("persona_tags", [])
     if not isinstance(raw_persona_tags, list):
         raise AgenticBankError(f"{src_path}::{ctx}::persona_tags: must be a list (or omit)")
-    persona_tags: List[str] = []
+    persona_tags: list[str] = []
     for ti, t in enumerate(raw_persona_tags):
         if not isinstance(t, str) or not t.strip():
             raise AgenticBankError(f"{src_path}::{ctx}::persona_tags[{ti}]: must be a non-empty string")
@@ -586,7 +586,7 @@ def _build_action_request(
 
 
 def _build_provenance(
-    p: Dict[str, Any],
+    p: dict[str, Any],
     *,
     src_path: str,
     ctx: str,
@@ -606,7 +606,7 @@ def _build_provenance(
     raw_refs = p.get("references", [])
     if not isinstance(raw_refs, list):
         raise AgenticBankError(f"{src_path}::{ctx}::provenance::references: must be a list")
-    refs: List[str] = []
+    refs: list[str] = []
     for ri, r in enumerate(raw_refs):
         if not isinstance(r, str) or not r.strip():
             raise AgenticBankError(f"{src_path}::{ctx}::provenance::references[{ri}]: must be a non-empty string")
@@ -626,10 +626,10 @@ def _build_provenance(
 
 
 def _require_str(
-    d: Dict[str, Any],
+    d: dict[str, Any],
     key: str,
     src_path: str,
-    ctx: Optional[str] = None,
+    ctx: str | None = None,
 ) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
@@ -641,10 +641,10 @@ def _require_str(
 
 
 def _require_localized_in_bank(
-    d: Dict[str, Any],
+    d: dict[str, Any],
     key: str,
     src_path: str,
-    ctx: Optional[str] = None,
+    ctx: str | None = None,
 ) -> LocalizedText:
     """Parse a YAML field as a :class:`LocalizedText` (string OR dict).
 
@@ -668,7 +668,7 @@ def _require_localized_in_bank(
 # Process-local cache
 # ---------------------------------------------------------------------------
 
-_AGENTIC_BANK_CACHE: Dict[str, AgenticBank] = {}
+_AGENTIC_BANK_CACHE: dict[str, AgenticBank] = {}
 _AGENTIC_BANK_CACHE_LOCK = threading.Lock()
 
 

@@ -21,7 +21,7 @@ import html
 import json
 import math
 from dataclasses import asdict, dataclass, field
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -32,8 +32,14 @@ from usersim.taxonomy.capabilities import (
 )
 from usersim.taxonomy.eval_cell import (
     decode_cell as _decode_eval_cell,
+)
+from usersim.taxonomy.eval_cell import (
     normalize_axis_score as _normalize_axis_score,
+)
+from usersim.taxonomy.eval_cell import (
     score_for_source as _score_for_source,
+)
+from usersim.taxonomy.eval_cell import (
     scorer_state as _scorer_state,
 )
 
@@ -65,8 +71,8 @@ class EvidenceFinding:
 
     axis: str
     source: str  # "judge" or "scorer:<scorer_name>"
-    score: Optional[float]
-    threshold: Optional[float]  # raw threshold (same scale as score)
+    score: float | None
+    threshold: float | None  # raw threshold (same scale as score)
     failed: bool
     is_critical: bool
     reasoning: str = ""
@@ -115,9 +121,9 @@ class CapabilityCell:
     description: str
     locale: str
     state: str
-    score: Optional[float] = None
-    threshold: Optional[float] = None
-    margin: Optional[float] = None
+    score: float | None = None
+    threshold: float | None = None
+    margin: float | None = None
     n: int = 0
     # Total trajectories in this locale that *could* have contributed
     # to this capability (regardless of whether the scorer was applicable
@@ -165,9 +171,9 @@ class TriageItem:
 
 @dataclass(slots=True)
 class CapabilityReport:
-    run_id: Optional[str]
+    run_id: str | None
     eval_column: str
-    model_id: Optional[str]
+    model_id: str | None
     sample_mode: str
     n_trajectories: int
     n_evaluated: int
@@ -478,10 +484,10 @@ def build_capability_report(
 
 def _resolve_run_metadata(
     *,
-    run_id: Optional[str],
+    run_id: str | None,
     trajectory_root: Any,
-    explicit_model_id: Optional[str],
-) -> tuple[Optional[str], dict[str, dict[str, Any]], str]:
+    explicit_model_id: str | None,
+) -> tuple[str | None, dict[str, dict[str, Any]], str]:
     """Resolve ``(model_id, model_identities, metadata_source)`` for the report.
 
     Tries the run manifest first; falls back to the explicit kwarg; ends
@@ -979,8 +985,8 @@ def _capability_cell(
     capability: str,
     locale: str,
     *,
-    score: Optional[float],
-    threshold: Optional[float],
+    score: float | None,
+    threshold: float | None,
     n: int,
     trajectory_ids: list[str],
     next_action: str,

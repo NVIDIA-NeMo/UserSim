@@ -21,10 +21,10 @@ robustness across the OpenAI-compatible boundary, not model testing.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 
-def parse_arguments(raw: Any) -> Dict[str, Any]:
+def parse_arguments(raw: Any) -> dict[str, Any]:
     """Coerce a tool-call ``arguments`` payload into a ``dict``.
 
     Accepts an already-parsed dict or a JSON string; anything else (or a JSON
@@ -41,7 +41,7 @@ def parse_arguments(raw: Any) -> Dict[str, Any]:
     return {}
 
 
-def parse_tool_call(tc: Any) -> Tuple[str, Dict[str, Any]]:
+def parse_tool_call(tc: Any) -> tuple[str, dict[str, Any]]:
     """Pull ``(tool_name, args_dict)`` out of a single ``tool_call`` dict.
 
     Defensive: tool-call shapes vary slightly across providers. Falls back to a
@@ -57,7 +57,7 @@ def parse_tool_call(tc: Any) -> Tuple[str, Dict[str, Any]]:
     return (name, parse_arguments(fn.get("arguments")))
 
 
-def json_object_from_content(content: Any) -> Dict[str, Any]:
+def json_object_from_content(content: Any) -> dict[str, Any]:
     """Best-effort recovery of a single JSON object embedded in free text.
 
     Handles fenced or prose-wrapped JSON by slicing the outermost ``{ ... }``.
@@ -76,9 +76,9 @@ def json_object_from_content(content: Any) -> Dict[str, Any]:
 
 
 def recover_tool_call(
-    result: Dict[str, Any],
-    name: Optional[str] = None,
-) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+    result: dict[str, Any],
+    name: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     """Recover ``(args_dict, raw_tool_call | None)`` from a completion result.
 
     Tolerant of provider variance: looks for a ``tool_calls`` entry (matching
@@ -89,7 +89,7 @@ def recover_tool_call(
     ``content``.
     """
     calls = result.get("tool_calls") or []
-    call: Optional[Dict[str, Any]] = None
+    call: dict[str, Any] | None = None
     if isinstance(calls, list) and calls:
         if name is None:
             call = calls[0] if isinstance(calls[0], dict) else None
@@ -98,7 +98,7 @@ def recover_tool_call(
                 (c for c in calls if isinstance(c, dict) and (c.get("function") or {}).get("name") in (None, name)),
                 None,
             )
-    args: Dict[str, Any] = {}
+    args: dict[str, Any] = {}
     if call is not None:
         args = parse_arguments((call.get("function") or {}).get("arguments"))
     if not args:  # provider-variance fallback: JSON in content

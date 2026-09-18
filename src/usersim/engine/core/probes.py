@@ -51,20 +51,17 @@ import sys
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
-    Optional,
     Protocol,
     Sequence,
     runtime_checkable,
 )
 
+from usersim.engine.core.locale import india_variant
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import india_variant
 
 logger = logging.getLogger("usersim.engine")
 
@@ -86,7 +83,7 @@ def assistant_message(
     content: str,
     tool_calls: Any = _UNSET,
     store_reasoning: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build an assistant message carrying its own reasoning trace.
 
     ``response`` is the raw ``call_llm`` result that produced ``content``;
@@ -100,7 +97,7 @@ def assistant_message(
     ``store_reasoning=False`` (``cfg.store_reasoning``) omits the key
     entirely, producing traces without reasoning content.
     """
-    msg: Dict[str, Any] = {"role": "assistant", "content": content or ""}
+    msg: dict[str, Any] = {"role": "assistant", "content": content or ""}
     if tool_calls is not _UNSET:
         msg["tool_calls"] = tool_calls or None
     trace = (response.get("reasoning_content") or "").strip() if isinstance(response, dict) else ""
@@ -166,7 +163,7 @@ class ProbeAdapter(Protocol):
         """System prompt for the assistant-under-test (empty = lean)."""
         ...
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         """Tool definitions (OpenAI schema) for the assistant, or None."""
         ...
 
@@ -186,7 +183,7 @@ class ProbeAdapter(Protocol):
         self,
         models: dict,
         state: Any,
-        assistant_response: Dict[str, Any],
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         """Process the assistant response; return final synthesis content.
@@ -264,15 +261,15 @@ class BaseProbe:
     def __init__(
         self,
         *,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         locale: str,
         language: str,
-        models: Dict[str, Any],
+        models: dict[str, Any],
         cfg: Any = None,
-        provenance: Optional[Provenance] = None,
-        profile: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
-        outcome_builder: Optional[OutcomeBuilder] = None,
+        provenance: Provenance | None = None,
+        profile: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        outcome_builder: OutcomeBuilder | None = None,
         **_kwargs: Any,
     ) -> None:
         self._persona = persona
@@ -309,7 +306,7 @@ class BaseProbe:
     def get_assistant_system_prompt(self) -> str:  # pragma: no cover — abstract
         raise NotImplementedError(f"{type(self).__name__} must override get_assistant_system_prompt()")
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         """Default: no tools. Override for tool_calling-shape probes."""
         return None
 
@@ -365,7 +362,7 @@ class BaseProbe:
         self,
         models: dict,
         state: Any,
-        assistant_response: Dict[str, Any],
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         """Default: append the raw assistant message; return its content.
@@ -423,10 +420,10 @@ class BaseProbe:
 
     def transform_assistant_history(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         *,
         current_user_turn: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Return this probe's assistant-only view of copied history.
 
         The default is an identity copy. Retrieval-backed probes may reduce
@@ -446,7 +443,7 @@ class BaseProbe:
         """
         return True
 
-    def get_verbatim_first_user_turn(self, state: Any) -> Optional[str]:
+    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         """If non-None, ConversationLoop bypasses the turn-1 generate-and-gate path.
 
         Asset-driven probes (sov_ai_facts / sov_ai_multilingual_parity
@@ -458,7 +455,7 @@ class BaseProbe:
         """
         return None
 
-    def get_user_query_instruction(self, turn_idx: int) -> Optional[str]:
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
         """If non-None, override the default user-query instruction for ``turn_idx``.
 
         Used by ``CustomTurn1InstructionMixin`` for probes that
@@ -470,7 +467,7 @@ class BaseProbe:
         """
         return None
 
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Additional user-history nudges to append before generating turn ``turn_idx`` follow-up.
 
         Default: no extra instructions. ``BankReframingMixin``
@@ -624,18 +621,18 @@ class BankBackedProbe(BaseProbe):
 
     bank_loader: Callable[[str], Any]
     placeholder_warning_kind: WarningKind
-    bank_version_key: Optional[str] = None  # None = locale-keyed
+    bank_version_key: str | None = None  # None = locale-keyed
 
     def __init__(
         self,
         *,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         locale: str,
         language: str,
-        models: Dict[str, Any],
+        models: dict[str, Any],
         cfg: Any = None,
-        provenance: Optional[Provenance] = None,
-        outcome_builder: Optional[OutcomeBuilder] = None,
+        provenance: Provenance | None = None,
+        outcome_builder: OutcomeBuilder | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -656,7 +653,7 @@ class BankBackedProbe(BaseProbe):
 
     # ── Subclass API ────────────────────────────────────────────────
 
-    def derive_task(self, persona: Dict[str, Any], bank: Any, *, cfg: Any) -> Any:
+    def derive_task(self, persona: dict[str, Any], bank: Any, *, cfg: Any) -> Any:
         """Probe-specific asset selection. Subclass MUST override.
 
         Returns the derived task object (with at least ``id`` and
@@ -828,7 +825,7 @@ class BankVerbatimMixin:
 
     verbatim_field: str = "verbatim_text"
 
-    def get_verbatim_first_user_turn(self, state: Any) -> Optional[str]:
+    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         task = getattr(self, "_task", None)
         if task is None:
             return None
@@ -855,7 +852,7 @@ class CustomTurn1InstructionMixin:
 
     turn1_instruction_template: str = ""
 
-    def get_user_query_instruction(self, turn_idx: int) -> Optional[str]:
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
         if turn_idx != 0:
             return None
         template = type(self).turn1_instruction_template
@@ -893,7 +890,7 @@ class BankReframingMixin(BankVerbatimMixin):
     Used by safety_chat_pressure.
     """
 
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         task = getattr(self, "_task", None)
         if task is None:
             return []
@@ -1021,7 +1018,7 @@ class ToolExecutionMixin:
     def execute_tool_call(
         self,
         name: str,
-        args: Dict[str, Any],
+        args: dict[str, Any],
         tc: Any,
         state: Any,
         models: dict,
@@ -1032,7 +1029,7 @@ class ToolExecutionMixin:
         raise NotImplementedError(f"{type(self).__name__} must implement execute_tool_call()")
 
     @staticmethod
-    def parse_tool_call(tc: Any) -> tuple[str, Dict[str, Any]]:
+    def parse_tool_call(tc: Any) -> tuple[str, dict[str, Any]]:
         import json as _json
 
         if not isinstance(tc, dict):
@@ -1059,7 +1056,7 @@ class ToolExecutionMixin:
         self,
         models: dict,
         state: Any,
-        assistant_response: Dict[str, Any],
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         resp = assistant_response
@@ -1124,7 +1121,7 @@ class ToolExecutionMixin:
         cfg: Any,
         *,
         with_tools: bool,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         from usersim.engine.core.llm import (
             NON_ASCII_TOKEN_SCALE,
             call_llm,
@@ -1132,7 +1129,7 @@ class ToolExecutionMixin:
         )
         from usersim.engine.core.simulation import _is_non_ascii_locale
 
-        kwargs: Dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
         tools = self.get_tools_for_assistant() if with_tools else None
         if tools:
             kwargs["tools"] = tools
@@ -1161,7 +1158,7 @@ class ToolExecutionMixin:
         )
         return content or ""
 
-    def _synthesis_messages(self, state: Any, cfg: Any) -> List[Dict[str, Any]]:
+    def _synthesis_messages(self, state: Any, cfg: Any) -> list[dict[str, Any]]:
         from usersim.engine.core.context import prepare_assistant_history
 
         return prepare_assistant_history(state, self, cfg)
@@ -1208,7 +1205,7 @@ class LocalePromptPack:
         self,
         *,
         label: str,
-        prompts: Dict[str, str],
+        prompts: dict[str, str],
         shipped_locales: Sequence[str],
     ) -> None:
         self.label = label
@@ -1226,7 +1223,7 @@ class LocalePromptPack:
                 label,
                 extra,
             )
-        self._prompts: Dict[str, str] = dict(prompts)
+        self._prompts: dict[str, str] = dict(prompts)
         self._shipped: tuple[str, ...] = tuple(shipped_locales)
 
     def get(self, locale: str, **format_kwargs: Any) -> str:
@@ -1259,7 +1256,7 @@ class LocalePromptPack:
 # ---------------------------------------------------------------------------
 
 
-_PROBE_REGISTRY: Dict[str, type[BaseProbe]] = {}
+_PROBE_REGISTRY: dict[str, type[BaseProbe]] = {}
 
 
 class ProbeRegistrationError(ValueError):
@@ -1374,8 +1371,8 @@ def clear_registry() -> None:
 def _baseprobe_run_dispatch(
     self: BaseProbe,
     *,
-    models: Dict[str, Any],
-    data: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
     cfg: Any,
 ) -> dict:
     """Default dispatch: drive the shared ``ConversationLoop``.

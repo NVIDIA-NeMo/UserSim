@@ -9,7 +9,7 @@ Extracted here to avoid duplication and ensure consistent behavior.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -23,7 +23,7 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     Returns an empty DataFrame if no valid scores are found.
     """
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for _, row in df.iterrows():
         scores_raw = row.get("eval_scores")
         if not scores_raw:

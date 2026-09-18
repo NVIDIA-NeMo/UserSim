@@ -8,11 +8,11 @@ from __future__ import annotations
 import pytest
 
 from usersim.engine.evaluator.axes import (
-    AxisCategory,
     GUARDRAIL_AXES,
     PROBE_SCORES,
     QUALITY_AXES,
     UNIVERSAL_SCORES,
+    AxisCategory,
     all_axis_names,
     axes_for_probe,
     axis_category,

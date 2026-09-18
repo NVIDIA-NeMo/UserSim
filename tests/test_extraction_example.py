@@ -32,7 +32,7 @@ notebook does not yet ship.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import pytest
 
@@ -42,7 +42,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 
-def _decode_json(value: Any) -> Optional[Dict[str, Any]]:
+def _decode_json(value: Any) -> dict[str, Any] | None:
     if value is None:
         return None
     if isinstance(value, dict):
@@ -55,7 +55,7 @@ def _decode_json(value: Any) -> Optional[Dict[str, Any]]:
     return None
 
 
-def _per_axis_ensemble_mean(eval_cell: Any, axis: str) -> Optional[float]:
+def _per_axis_ensemble_mean(eval_cell: Any, axis: str) -> float | None:
     """Return the mean score across all judges for one axis, or None.
 
     Returns None if the cell is missing, skipped, or doesn't carry the
@@ -68,7 +68,7 @@ def _per_axis_ensemble_mean(eval_cell: Any, axis: str) -> Optional[float]:
     axis_block = (cell.get("axes") or {}).get(axis)
     if not isinstance(axis_block, dict) or not axis_block:
         return None
-    scores: List[float] = []
+    scores: list[float] = []
     for judge_block in axis_block.values():
         if not isinstance(judge_block, dict):
             continue
@@ -80,7 +80,7 @@ def _per_axis_ensemble_mean(eval_cell: Any, axis: str) -> Optional[float]:
     return sum(scores) / len(scores)
 
 
-def _last_user_assistant_pair(messages: Any) -> Optional[Tuple[str, str]]:
+def _last_user_assistant_pair(messages: Any) -> tuple[str, str] | None:
     """Pull the last (user, assistant) turn from a conversation, or None.
 
     The simplest SFT format: a single (prompt, response) pair per
@@ -90,7 +90,7 @@ def _last_user_assistant_pair(messages: Any) -> Optional[Tuple[str, str]]:
     msgs = _decode_json(messages)
     if not isinstance(msgs, list):
         return None
-    last_assistant_idx: Optional[int] = None
+    last_assistant_idx: int | None = None
     for i in range(len(msgs) - 1, -1, -1):
         if msgs[i].get("role") == "assistant":
             last_assistant_idx = i
@@ -108,7 +108,7 @@ def extract_sft_examples(
     *,
     axis: str,
     min_score: float,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Emit (prompt, response, provenance) records for high-scoring trajectories.
 
     Filters:
@@ -117,7 +117,7 @@ def extract_sft_examples(
     - evaluator's per-axis ensemble mean on ``axis`` >= ``min_score``
     - the trajectory has at least one (user, assistant) turn pair
     """
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     for _, row in joined.iterrows():
         outcome = _decode_json(row.get("simulation_outcome")) or {}
         if outcome.get("status") not in {"ok", "completed_with_warnings"}:
@@ -152,9 +152,9 @@ def extract_pairwise_examples(
     joined,
     *,
     axis: str,
-    group_keys: Tuple[str, ...],
+    group_keys: tuple[str, ...],
     min_score_delta: float = 1.0,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Emit (prompt, chosen, rejected) pairs from matched trajectories.
 
     Within each group (defined by ``group_keys``, typically
@@ -166,7 +166,7 @@ def extract_pairwise_examples(
     (assumed to be representative of the group's question — in
     practice the 03 notebook will join on a per-turn key).
     """
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     enriched = joined.copy()
     enriched["_score"] = enriched["assistant_eval"].apply(lambda c: _per_axis_ensemble_mean(c, axis))
     enriched = enriched[enriched["_score"].notna()]

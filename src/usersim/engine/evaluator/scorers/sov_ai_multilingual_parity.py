@@ -59,7 +59,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -175,7 +175,7 @@ _HELPFULNESS_AT_PROFICIENCY = Score(
 )
 
 
-_AXES: Tuple[Score, ...] = (
+_AXES: tuple[Score, ...] = (
     _CONDESCENSION,
     _COMPLEXITY_CALIBRATION,
     _HELPFULNESS_AT_PROFICIENCY,
@@ -183,7 +183,7 @@ _AXES: Tuple[Score, ...] = (
 
 # Exposed for the reporting bundle to enumerate the axes without
 # re-importing the Score objects.
-RESPECT_AXES: Tuple[str, ...] = tuple(s.name for s in _AXES)
+RESPECT_AXES: tuple[str, ...] = tuple(s.name for s in _AXES)
 
 
 # ---------------------------------------------------------------------------
@@ -256,9 +256,9 @@ def _build_schema():
 
 
 def score_sov_ai_multilingual_parity_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score one ``sov_ai_multilingual_parity`` trajectory.
 
     Contract:
@@ -392,10 +392,10 @@ def _score_one_query(
     query: Query,
     locale: str,
     persona_text: str,
-    conversation: List[Dict[str, Any]],
-    models: Dict[str, Any],
+    conversation: list[dict[str, Any]],
+    models: dict[str, Any],
     judge_alias: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """LLM-judge one query. Returns the per-axis ``scores`` dict.
 
     The returned dict is keyed by axis name. On failure, every axis
@@ -451,7 +451,7 @@ def _score_one_query(
         )
         return _error_scores("parse_failure")
 
-    out: Dict[str, Any] = {}
+    out: dict[str, Any] = {}
     for s in _AXES:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):
@@ -464,18 +464,18 @@ def _score_one_query(
     return out
 
 
-def _error_scores(error: str) -> Dict[str, Any]:
+def _error_scores(error: str) -> dict[str, Any]:
     """Per-axis scores dict for a failed judge call. All scores None.
 
     The wrapping envelope fires its own ``error`` field via the caller's
     status_proposal logic; this just makes per-axis cells well-shaped.
     """
-    out: Dict[str, Any] = {s.name: {"score": None, "reasoning": error} for s in _AXES}
+    out: dict[str, Any] = {s.name: {"score": None, "reasoning": error} for s in _AXES}
     out["error"] = error
     return out
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -518,7 +518,7 @@ def _format_persona(raw: Any) -> str:
         "region",
         "country",
     ]
-    lines: List[str] = []
+    lines: list[str] = []
     for key in fields_in_order:
         val = persona.get(key)
         if val is None or val == "":
@@ -527,7 +527,7 @@ def _format_persona(raw: Any) -> str:
     return "\n".join(lines) if lines else "(persona has no descriptive fields)"
 
 
-def _pinned_bank_version(trajectory: Dict[str, Any], locale: str) -> Optional[str]:
+def _pinned_bank_version(trajectory: dict[str, Any], locale: str) -> str | None:
     """Extract ``bank_version[locale]`` from the trajectory's simulation_outcome."""
     outcome_raw = trajectory.get("simulation_outcome")
     if not outcome_raw:

@@ -52,7 +52,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.locale import expected_language_name
 from usersim.engine.evaluator.scorers import register_scorer
@@ -229,9 +229,9 @@ _PATTERN_CANNED = _build_pattern(_CANNED_AI_PHRASES)
 
 
 def score_refusal_basics_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],  # unused — deterministic, no LLM call
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],  # unused — deterministic, no LLM call
+) -> dict[str, Any]:
     """Compute per-trajectory refusal rates over assistant turns.
 
     Only ``in_wrong_language_rate`` needs to know the locale's language. The
@@ -260,7 +260,7 @@ def score_refusal_basics_trajectory(
     n_refusal_any = 0
     n_refusal_wrong_language = 0
     n_canned = 0
-    per_turn: List[Dict[str, Any]] = []
+    per_turn: list[dict[str, Any]] = []
 
     for idx, content in enumerate(assistant_messages):
         text = content or ""
@@ -280,7 +280,7 @@ def score_refusal_basics_trajectory(
         # Both paths compare against the locale's expected language, so neither
         # can run without a detector; those locales get the other two axes.
         is_wrong_language_refusal = False
-        detected_language: Optional[str] = None
+        detected_language: str | None = None
         if is_refusal and detector_available:
             if matched_in_langs and expected_lang not in matched_in_langs:
                 is_wrong_language_refusal = True
@@ -353,7 +353,7 @@ def score_refusal_basics_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _extract_assistant_messages(raw: Any) -> List[str]:
+def _extract_assistant_messages(raw: Any) -> list[str]:
     """Pull natural-language assistant turns out of ``conversation_messages``.
 
     Skips tool-call envelopes (``tool_calls`` set) and empty / whitespace-
@@ -363,7 +363,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     triggering Gap on otherwise-clean trajectories).
     """
     messages = _normalize_conversation(raw)
-    out: List[str] = []
+    out: list[str] = []
     for m in messages:
         if not isinstance(m, dict):
             continue
@@ -381,7 +381,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     return out
 
 
-def _summarize_detected(per_turn: List[Dict[str, Any]], n_refusal: int, n_turns: int) -> str:
+def _summarize_detected(per_turn: list[dict[str, Any]], n_refusal: int, n_turns: int) -> str:
     if n_refusal == 0:
         return f"No refusals detected across {n_turns} assistant turn(s) (informational, not gated)."
     refused_idxs = ", ".join(f"#{d['turn_idx'] + 1}" for d in per_turn if d["is_refusal"])
@@ -389,8 +389,8 @@ def _summarize_detected(per_turn: List[Dict[str, Any]], n_refusal: int, n_turns:
 
 
 def _summarize_wrong_language(
-    per_turn: List[Dict[str, Any]],
-    expected_lang: Optional[str],
+    per_turn: list[dict[str, Any]],
+    expected_lang: str | None,
     n_wrong_lang: int,
     n_turns: int,
 ) -> str:
@@ -411,7 +411,7 @@ def _summarize_wrong_language(
     )
 
 
-def _summarize_canned(per_turn: List[Dict[str, Any]], n_canned: int, n_turns: int) -> str:
+def _summarize_canned(per_turn: list[dict[str, Any]], n_canned: int, n_turns: int) -> str:
     if n_canned == 0:
         return f"No canned AI-assistant boilerplate detected across {n_turns} turn(s)."
     flagged_idxs = [d["turn_idx"] + 1 for d in per_turn if d.get("canned_phrase")]
@@ -422,7 +422,7 @@ def _summarize_canned(per_turn: List[Dict[str, Any]], n_canned: int, n_turns: in
     )
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -436,7 +436,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any]:
+def _score_cell(score: float | None, n: int, reasoning: str) -> dict[str, Any]:
     return {
         "score": score,
         "reasoning": reasoning,
@@ -444,7 +444,7 @@ def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any
     }
 
 
-def _noop(*, error: str) -> Dict[str, Any]:
+def _noop(*, error: str) -> dict[str, Any]:
     return {
         "scorer_kind": "deterministic",
         "locale": None,

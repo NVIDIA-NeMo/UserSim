@@ -21,6 +21,8 @@ from dataclasses import dataclass, field
 
 from usersim.engine.core.realized_audit import (
     CONCEALING_MOVES as _CONCEALING_MOVES,
+)
+from usersim.engine.core.realized_audit import (
     DISCLOSING_MOVES as _DISCLOSING_MOVES,
 )
 

@@ -234,8 +234,9 @@ def run(args: argparse.Namespace) -> int:
         seed_source_path = traj_run_root
 
     try:
-        import pandas as pd
         import tempfile
+
+        import pandas as pd
 
         key_cols = ["trajectory_id", "locale", "probe_family"]
         if args.num_records is not None and args.num_records_per_locale is not None:

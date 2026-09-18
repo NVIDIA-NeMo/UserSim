@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -26,7 +26,7 @@ from usersim.asset_gen.financial_services.evaluate import (
 from usersim.asset_gen.financial_services.pipeline import InstitutionBank, serialize_bank
 from usersim.asset_gen.financial_services.spec import RegionSpec
 
-_SPEC_DICT: Dict[str, Any] = {
+_SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
     "region": "US",
     "currency": "USD",
@@ -105,7 +105,7 @@ def test_build_eval_seed_joins_context(tmp_path: Path):
 
 def test_build_eval_columns_axes():
     cols = build_eval_columns()
-    by_type: Dict[str, List[Any]] = {}
+    by_type: dict[str, list[Any]] = {}
     for c in cols:
         by_type.setdefault(c.column_type, []).append(c)
     assert "llm-judge" in by_type
@@ -160,7 +160,7 @@ def test_shape_scorecard_aggregates_and_flags_low():
 
 
 def test_validate_eval_models_requires_judge():
-    from usersim.cli._models import ConfigError, ModelSpec, ModelsConfig
+    from usersim.cli._models import ConfigError, ModelsConfig, ModelSpec
 
     cfg = ModelsConfig(providers=(), models=(ModelSpec(alias="doc_gen_model", model="m", provider="nvidia"),))
     with pytest.raises(ConfigError):

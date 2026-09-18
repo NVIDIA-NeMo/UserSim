@@ -55,7 +55,7 @@ What is NOT asserted here (and where it lives instead):
 from __future__ import annotations
 
 import sys
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable
 
 import pytest
 
@@ -95,7 +95,7 @@ EXPECTED_PROBES: tuple[str, ...] = (
 # pass. Probes whose ``should_succeed`` defers to ``BaseProbe`` (the
 # always-True default — currently the two general probes) carry None
 # for both, and the test asserts True regardless of metadata.
-SHOULD_SUCCEED_CONTRACT: Dict[str, Tuple[str | None, Any]] = {
+SHOULD_SUCCEED_CONTRACT: dict[str, tuple[str | None, Any]] = {
     "general_open_ended": (None, None),
     "general_educational": (None, None),
     "tool_calling": ("tools_called", [{"name": "x"}]),
@@ -125,7 +125,7 @@ def _resolve_target_class(probe_label: str) -> type:
     return resolve_probe(probe_label)
 
 
-def _make_state(metadata: Dict[str, Any] | None = None) -> ConversationState:
+def _make_state(metadata: dict[str, Any] | None = None) -> ConversationState:
     """Build a minimally-empty ConversationState for invariant checks."""
     state = ConversationState(outcome=OutcomeBuilder())
     if metadata:

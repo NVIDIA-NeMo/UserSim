@@ -28,10 +28,13 @@ from usersim.engine.core.behavioral import (
 )
 from usersim.engine.core.identity import (
     persona_uuid as compute_persona_uuid,
+)
+from usersim.engine.core.identity import (
     resolve_model_name,
+)
+from usersim.engine.core.identity import (
     trajectory_id as compute_trajectory_id,
 )
-from usersim.engine.core.locale import persona_dataset_locale
 from usersim.engine.core.llm import (
     ContextWindowError,
     flush_debug_log,
@@ -41,6 +44,7 @@ from usersim.engine.core.llm import (
     set_conversation_id,
     set_current_outcome_builder,
 )
+from usersim.engine.core.locale import persona_dataset_locale
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.persona import religion_language_context
 from usersim.engine.core.probes import BankLoadError, resolve_probe
@@ -86,19 +90,19 @@ def _bootstrap_probes() -> None:
     Idempotent: re-importing is a no-op for already-loaded modules.
     """
     # Imports trigger the decorators; the imports themselves go unused.
-    import usersim.engine.probes.tool_calling.generator  # noqa: F401
-    import usersim.engine.probes.general_open_ended.generator  # noqa: F401
-    import usersim.engine.probes.general_educational.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_facts.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_dynamic.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_multilingual_parity.generator  # noqa: F401
-    import usersim.engine.probes.safety_chat_pressure.generator  # noqa: F401
-    import usersim.engine.probes.safety_agentic.generator  # noqa: F401
     import usersim.engine.probes.financial_services.generator  # noqa: F401
-    import usersim.engine.probes.health_disclosure.therapy  # noqa: F401
-    import usersim.engine.probes.health_disclosure.triage  # noqa: F401
+    import usersim.engine.probes.general_educational.generator  # noqa: F401
+    import usersim.engine.probes.general_open_ended.generator  # noqa: F401
     import usersim.engine.probes.health_disclosure.decision_support  # noqa: F401
     import usersim.engine.probes.health_disclosure.general  # noqa: F401
+    import usersim.engine.probes.health_disclosure.therapy  # noqa: F401
+    import usersim.engine.probes.health_disclosure.triage  # noqa: F401
+    import usersim.engine.probes.safety_agentic.generator  # noqa: F401
+    import usersim.engine.probes.safety_chat_pressure.generator  # noqa: F401
+    import usersim.engine.probes.sov_ai_dynamic.generator  # noqa: F401
+    import usersim.engine.probes.sov_ai_facts.generator  # noqa: F401
+    import usersim.engine.probes.sov_ai_multilingual_parity.generator  # noqa: F401
+    import usersim.engine.probes.tool_calling.generator  # noqa: F401
 
 
 _bootstrap_probes()

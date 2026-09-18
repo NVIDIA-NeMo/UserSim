@@ -28,7 +28,6 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import Dict
 
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
 
@@ -393,14 +392,14 @@ def _simulate_to_parquet(
     max_assistant_attempts=1,
     store_reasoning=True,
 ) -> int:
-    from usersim.cli._pipeline import (
-        DEFAULT_TOOL_CALLING_THEMES,
-        build_simulator_config_builder,
-    )
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
         persona_language_filter,
+    )
+    from usersim.cli._pipeline import (
+        DEFAULT_TOOL_CALLING_THEMES,
+        build_simulator_config_builder,
     )
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
@@ -537,7 +536,7 @@ def _simulate_to_parquet(
     # is a noop. ``trajectories_requested`` is the per-locale request
     # count from this invocation; the manifest's ``trajectories_completed``
     # comes from re-reading the parquet partitions for this run.
-    requested_per_locale: Dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
+    requested_per_locale: dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
     sim_cfg_for_manifest = _build_sim_config_for_manifest(
         max_turns=max_turns,
         random_seed=random_seed,

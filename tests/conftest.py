@@ -13,7 +13,7 @@ deliverable.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -22,7 +22,7 @@ class _WordSplitEncoder:
     """Deterministic stand-in for a ``tiktoken`` encoding."""
 
     @staticmethod
-    def encode(text: str) -> List[int]:
+    def encode(text: str) -> list[int]:
         return [0] * len(text.split())
 
 
@@ -69,10 +69,10 @@ def _outcome(
     n_fourth_wall_triggers: int = 0,
     n_user_role_violations: int = 0,
     early_stop: bool = False,
-    per_model_calls: Dict[str, int] | None = None,
-    per_model_input_tokens: Dict[str, int] | None = None,
-    per_model_output_tokens: Dict[str, int] | None = None,
-    wall_clock_s_by_alias: Dict[str, float] | None = None,
+    per_model_calls: dict[str, int] | None = None,
+    per_model_input_tokens: dict[str, int] | None = None,
+    per_model_output_tokens: dict[str, int] | None = None,
+    wall_clock_s_by_alias: dict[str, float] | None = None,
     wall_clock_s: float = 12.34,
     code_sha: str | None = "abc123",
     nemotron_personas_version: str | None = "2026-04",
@@ -111,7 +111,7 @@ def _outcome(
 
 def _messages(user_turns: list[str], assistant_turns: list[str]) -> str:
     """Interleave user/assistant turns into a JSON-encoded conversation."""
-    msgs: List[Dict[str, Any]] = []
+    msgs: list[dict[str, Any]] = []
     for u, a in zip(user_turns, assistant_turns):
         msgs.append({"role": "user", "content": u})
         msgs.append({"role": "assistant", "content": a})

@@ -19,7 +19,7 @@ local-dev override only.
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 from usersim.engine.core.behavioral import (
     format_behavioral_profile_for_prompt,
@@ -72,7 +72,7 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[ClinicalProfile]:
+    ) -> ClinicalProfile | None:
         """Select this persona's hidden clinical profile from the bank.
 
         Only the guarded variant consumes the profile (the default variant is a

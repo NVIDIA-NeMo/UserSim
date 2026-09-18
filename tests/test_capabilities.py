@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
     capabilities_missing_scorer,

@@ -50,7 +50,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.evaluator.scorers import register_scorer
 
@@ -107,9 +107,9 @@ _PAIR_OPENERS: dict[str, str] = {"(": ")", "[": "]", "{": "}", "「": "」", "�
 
 
 def score_response_shape_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],  # unused — deterministic scorer, no LLM call
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],  # unused — deterministic scorer, no LLM call
+) -> dict[str, Any]:
     """Compute per-trajectory shape rates over assistant turns."""
     assistant_messages = _extract_assistant_messages(
         trajectory.get("conversation_messages"),
@@ -123,7 +123,7 @@ def score_response_shape_trajectory(
     n_trivial = 0
     n_over_formatted = 0
     n_truncation_suspicion = 0
-    per_turn: List[Dict[str, Any]] = []
+    per_turn: list[dict[str, Any]] = []
 
     for idx, content in enumerate(assistant_messages):
         text = content or ""
@@ -272,7 +272,7 @@ def _looks_truncated(text: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _extract_assistant_messages(raw: Any) -> List[str]:
+def _extract_assistant_messages(raw: Any) -> list[str]:
     """Pull the assistant turns out of ``conversation_messages``.
 
     Skips tool-call envelopes (``tool_calls`` set) and empty /
@@ -282,7 +282,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     even when the assistant's actual reply was fine.
     """
     messages = _normalize_conversation(raw)
-    out: List[str] = []
+    out: list[str] = []
     for m in messages:
         if not isinstance(m, dict):
             continue
@@ -300,7 +300,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     return out
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -315,7 +315,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
 
 
 def _summarize_shape_axis(
-    per_turn: List[Dict[str, Any]],
+    per_turn: list[dict[str, Any]],
     n_turns: int,
     flag_key: str,
     label: str,
@@ -340,7 +340,7 @@ def _summarize_shape_axis(
     )
 
 
-def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any]:
+def _score_cell(score: float | None, n: int, reasoning: str) -> dict[str, Any]:
     return {
         "score": score,
         "reasoning": reasoning,
@@ -348,7 +348,7 @@ def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any
     }
 
 
-def _noop(*, error: str) -> Dict[str, Any]:
+def _noop(*, error: str) -> dict[str, Any]:
     return {
         "scorer_kind": "deterministic",
         "n_assistant_turns": 0,

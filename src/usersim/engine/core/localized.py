@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, ClassVar, Mapping, Tuple
+from typing import Any, ClassVar, Mapping
 
 logger = logging.getLogger("usersim.engine")
 
@@ -159,7 +159,7 @@ class LocalizedText:
         # ``renderings``, so this is non-empty by construction.
         return next(iter(self.renderings.values()), "")
 
-    def available_locales(self) -> Tuple[str, ...]:
+    def available_locales(self) -> tuple[str, ...]:
         """Sorted tuple of locales this field has renderings for."""
         return tuple(sorted(self.renderings.keys()))
 

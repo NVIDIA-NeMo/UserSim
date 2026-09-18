@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Tuple, get_args
+from typing import Any, Literal, get_args
 
 from pydantic import (
     BaseModel,
@@ -108,7 +108,7 @@ TASK_TIERS: frozenset = frozenset(get_args(TaskTier))
 # the DD-idiomatic conditional sampler does not apply — the authoring-time
 # equivalent is this compatibility map, enforced by an ``Institution`` validator.
 # (e.g. an ``insurer`` may not offer ``retail_banking``.)
-INSTITUTION_DOMAINS: Dict[str, frozenset] = {
+INSTITUTION_DOMAINS: dict[str, frozenset] = {
     "bank": frozenset({"retail_banking", "cards", "lending_mortgage", "payments"}),
     "neobank": frozenset({"retail_banking", "cards", "payments", "crypto"}),
     "credit_union": frozenset({"retail_banking", "cards", "lending_mortgage", "payments"}),
@@ -175,7 +175,7 @@ class Product(BaseModel):
     #: across a whole corpus instead of being re-translated per document.
     display_name_local: str = ""
     domain: Domain
-    variables: Dict[str, ProductVariable] = Field(default_factory=dict)
+    variables: dict[str, ProductVariable] = Field(default_factory=dict)
 
 
 class Tool(BaseModel):
@@ -183,7 +183,7 @@ class Tool(BaseModel):
     discoverable: bool = False
     side_effect_class: SideEffectClass = "read_only"
     description: str = ""
-    parameters: Dict[str, Any] = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +196,7 @@ class Tool(BaseModel):
 # WITHOUT being hand-repeated in every region spec. All are discoverable domain
 # tools (reached via the ``call_tool`` gate; the pipeline generates their docs).
 # A region spec that explicitly declares a tool of the same name wins (no dup).
-COMMON_UNIVERSAL_OPERATIONS: Tuple[Tuple[str, SideEffectClass], ...] = (
+COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
     # Read primitive that lists a VERIFIED customer's accounts (id, type, last4,
     # balance). Analogous to tau-Banking's get_user_details: it lets the agent
     # resolve a last-4 the customer gives into the account_id that every
@@ -215,7 +215,7 @@ COMMON_UNIVERSAL_OPERATIONS: Tuple[Tuple[str, SideEffectClass], ...] = (
 # never gold for a task — they exist as realistic, gold-ADJACENT tool docs so
 # retrieval must discriminate the right procedure among many similar ones (the
 # tau-Knowledge difficulty), and so the discoverable-tool gate is non-trivial.
-_DEPOSIT_OPS: Tuple[Tuple[str, SideEffectClass], ...] = (
+_DEPOSIT_OPS: tuple[tuple[str, SideEffectClass], ...] = (
     ("transfer_funds", "state_changing"),
     ("order_replacement_card", "state_changing"),
     ("stop_payment", "state_changing"),
@@ -224,7 +224,7 @@ _DEPOSIT_OPS: Tuple[Tuple[str, SideEffectClass], ...] = (
     ("dispute_status", "read_only"),
     ("manage_authorized_users", "state_changing"),
 )
-_BROKERAGE_OPS: Tuple[Tuple[str, SideEffectClass], ...] = (
+_BROKERAGE_OPS: tuple[tuple[str, SideEffectClass], ...] = (
     ("transfer_funds", "state_changing"),
     ("cancel_order", "state_changing"),
     ("get_order_status", "read_only"),
@@ -232,7 +232,7 @@ _BROKERAGE_OPS: Tuple[Tuple[str, SideEffectClass], ...] = (
     ("withdraw_funds", "irreversible"),
     ("manage_authorized_users", "state_changing"),
 )
-COMMON_TYPE_OPERATIONS: Dict[str, Tuple[Tuple[str, SideEffectClass], ...]] = {
+COMMON_TYPE_OPERATIONS: dict[str, tuple[tuple[str, SideEffectClass], ...]] = {
     "bank": _DEPOSIT_OPS,
     "neobank": _DEPOSIT_OPS,
     "credit_union": _DEPOSIT_OPS,
@@ -268,7 +268,7 @@ COMMON_TYPE_OPERATIONS: Dict[str, Tuple[Tuple[str, SideEffectClass], ...]] = {
 
 def common_operations_for_type(
     institution_type: str,
-) -> Tuple[Tuple[str, SideEffectClass], ...]:
+) -> tuple[tuple[str, SideEffectClass], ...]:
     """(name, side_effect_class) pairs every institution of ``institution_type``
     offers: the universal set plus any type-specific additions."""
     return COMMON_UNIVERSAL_OPERATIONS + COMMON_TYPE_OPERATIONS.get(institution_type, ())
@@ -278,12 +278,12 @@ class TaskTemplate(BaseModel):
     id: str
     tier: TaskTier
     task_type: TaskType
-    persona_tags: List[str] = Field(default_factory=list)
-    gold_tool_sequence: List[str] = Field(default_factory=list)
+    persona_tags: list[str] = Field(default_factory=list)
+    gold_tool_sequence: list[str] = Field(default_factory=list)
 
     @field_validator("persona_tags")
     @classmethod
-    def _valid_persona_tags(cls, v: List[str]) -> List[str]:
+    def _valid_persona_tags(cls, v: list[str]) -> list[str]:
         for tag in v:
             if not isinstance(tag, str) or not _PERSONA_TAG_RE.match(tag):
                 raise ValueError(f"persona_tag {tag!r} violates ontology prefixes {sorted(PERSONA_TAG_PREFIXES)}")
@@ -306,10 +306,10 @@ class Institution(BaseModel):
     display_name_local: str = ""
     type: InstitutionType
     brand_voice: BrandVoice = "traditional"
-    domains: List[Domain] = Field(min_length=1)
-    products: List[Product] = Field(default_factory=list)
-    tool_taxonomy: List[Tool] = Field(min_length=1)
-    task_templates: List[TaskTemplate] = Field(min_length=1)
+    domains: list[Domain] = Field(min_length=1)
+    products: list[Product] = Field(default_factory=list)
+    tool_taxonomy: list[Tool] = Field(min_length=1)
+    task_templates: list[TaskTemplate] = Field(min_length=1)
 
     @model_validator(mode="after")
     def _inject_common_operations(self) -> "Institution":
@@ -361,7 +361,7 @@ class Institution(BaseModel):
 
 
 class RegulatorContext(BaseModel):
-    regulators: List[str] = Field(default_factory=list)
+    regulators: list[str] = Field(default_factory=list)
     regulator_text: str
 
     @field_validator("regulator_text")
@@ -387,7 +387,7 @@ IDENTITY_FIELDS: frozenset = frozenset(
 )
 
 #: Region-agnostic default: name + date of birth, which every market accepts.
-DEFAULT_IDENTITY_REQUIRED_FIELDS: Tuple[str, ...] = ("full_name", "date_of_birth")
+DEFAULT_IDENTITY_REQUIRED_FIELDS: tuple[str, ...] = ("full_name", "date_of_birth")
 
 
 class IdentityVerification(BaseModel):
@@ -401,14 +401,14 @@ class IdentityVerification(BaseModel):
     through.
     """
 
-    required_fields: List[str] = Field(
+    required_fields: list[str] = Field(
         default_factory=lambda: list(DEFAULT_IDENTITY_REQUIRED_FIELDS),
         min_length=1,
     )
 
     @field_validator("required_fields")
     @classmethod
-    def _known_fields(cls, v: List[str]) -> List[str]:
+    def _known_fields(cls, v: list[str]) -> list[str]:
         unknown = sorted(set(v) - IDENTITY_FIELDS)
         if unknown:
             raise ValueError(
@@ -422,7 +422,7 @@ class IdentityVerification(BaseModel):
 #: every market ("checking account" exists in the US and nowhere else, India says
 #: savings / current), so the default must be true everywhere and regions override
 #: it with local vocabulary via ``RegionSpec.account_labels``.
-DEFAULT_DOMAIN_ACCOUNT_LABELS: Dict[str, str] = {
+DEFAULT_DOMAIN_ACCOUNT_LABELS: dict[str, str] = {
     "retail_banking": "deposit account",
     "payments": "payment account",
     "cards": "credit card account",
@@ -456,11 +456,11 @@ class DocTitleVocabulary(BaseModel):
 
     #: Per-genre angle lists, keyed by document_type; overrides one genre at a
     #: time, so a locale can translate ``fee_schedule`` and inherit the rest.
-    product_genre_angles: Dict[str, List[str]] = Field(default_factory=dict)
-    faq_intents: List[str] = Field(default_factory=list)
-    how_to_intents: List[str] = Field(default_factory=list)
-    troubleshooting_intents: List[str] = Field(default_factory=list)
-    comparison_intents: List[str] = Field(default_factory=list)
+    product_genre_angles: dict[str, list[str]] = Field(default_factory=dict)
+    faq_intents: list[str] = Field(default_factory=list)
+    how_to_intents: list[str] = Field(default_factory=list)
+    troubleshooting_intents: list[str] = Field(default_factory=list)
+    comparison_intents: list[str] = Field(default_factory=list)
     #: Per-variable angle templates; must contain a ``{v}`` slot for the label.
     faq_variable_template: str = ""
     how_to_variable_template: str = ""
@@ -468,9 +468,9 @@ class DocTitleVocabulary(BaseModel):
     #: Machine variable name -> reader-facing label. Unmapped names keep the
     #: default underscores-to-spaces rendering, which is why en_IN currently
     #: ships titles like "below mab charge explained".
-    variable_labels: Dict[str, str] = Field(default_factory=dict)
+    variable_labels: dict[str, str] = Field(default_factory=dict)
     #: Machine domain -> reader-facing label, for the regulatory-note topic.
-    domain_labels: Dict[str, str] = Field(default_factory=dict)
+    domain_labels: dict[str, str] = Field(default_factory=dict)
     #: Separator between the product name and the angle.
     topic_separator: str = ""
     #: Shared-cluster topics. ``{domain}`` / ``{tool}`` are substituted; a tool
@@ -510,7 +510,7 @@ class RegionSpec(BaseModel):
     #: copied per language and drift the first time a fee changed in only one.
     #: A language variant therefore overlays just what differs (locale, language,
     #: in-language names). Resolved at load time; never serialized.
-    extends: Optional[str] = None
+    extends: str | None = None
     region: str
     locale: str
     currency: str
@@ -520,8 +520,8 @@ class RegionSpec(BaseModel):
     #: non-English locale produces native-language docs. Region-specific data, not
     #: derived from ``locale``, so authors control script/register explicitly.
     language: str
-    number_format: Optional[str] = None
-    privacy_regime: Optional[str] = None
+    number_format: str | None = None
+    privacy_regime: str | None = None
     #: Optional; omitted means the region-agnostic name + DOB default.
     identity_verification: IdentityVerification = Field(default_factory=IdentityVerification)
     #: Optional per-domain label for the account the simulator's read tools report,
@@ -531,28 +531,28 @@ class RegionSpec(BaseModel):
     #: the customer. Omitted domains fall back to
     #: ``DEFAULT_DOMAIN_ACCOUNT_LABELS``; a task's authored ``account_type`` always
     #: wins over both.
-    account_labels: Dict[str, str] = Field(default_factory=dict)
+    account_labels: dict[str, str] = Field(default_factory=dict)
     #: Optional in-language overrides for the words the doc plan builds titles
     #: from. A LANGUAGE surface, not a region property, so it belongs in the
     #: language overlay next to ``display_name_local`` rather than in the region
     #: model. Omitted entirely => the English defaults in ``pipeline.py``.
     doc_titles: DocTitleVocabulary = Field(default_factory=DocTitleVocabulary)
-    bank_id: Optional[str] = None
-    bank_version: Optional[str] = None
-    task_contract_version: Optional[str] = None
-    document_types: List[DocumentType] = Field(min_length=1)
-    domain_regulators: Dict[str, RegulatorContext] = Field(default_factory=dict)
+    bank_id: str | None = None
+    bank_version: str | None = None
+    task_contract_version: str | None = None
+    document_types: list[DocumentType] = Field(min_length=1)
+    domain_regulators: dict[str, RegulatorContext] = Field(default_factory=dict)
     #: Optional per-institution-type emphasis for the generated brief, keyed by
     #: institution type. This is where MARKET-SPECIFIC framing belongs (US: RMDs,
     #: best-interest/fiduciary; India: NPS/PPF lock-ins, AMFI market-risk wording,
     #: gold-loan LTV). Unset types fall back to a region-neutral default, so a new
     #: locale never silently inherits another market's instruments or statutes.
-    concept_guidance: Dict[str, str] = Field(default_factory=dict)
-    institutions: List[Institution] = Field(min_length=1)
+    concept_guidance: dict[str, str] = Field(default_factory=dict)
+    institutions: list[Institution] = Field(min_length=1)
 
     @field_validator("concept_guidance")
     @classmethod
-    def _known_types(cls, v: Dict[str, str]) -> Dict[str, str]:
+    def _known_types(cls, v: dict[str, str]) -> dict[str, str]:
         unknown = sorted(set(v) - INSTITUTION_TYPES)
         if unknown:
             raise ValueError(
@@ -562,7 +562,7 @@ class RegionSpec(BaseModel):
 
     @field_validator("account_labels")
     @classmethod
-    def _known_label_domains(cls, v: Dict[str, str]) -> Dict[str, str]:
+    def _known_label_domains(cls, v: dict[str, str]) -> dict[str, str]:
         unknown = sorted(set(v) - DOMAINS)
         if unknown:
             raise ValueError(f"account_labels: unknown domain(s) {unknown} (known: {sorted(DOMAINS)})")
@@ -659,7 +659,7 @@ def load_region_spec(path: str | Path) -> RegionSpec:
     Raises :class:`RegionSpecError`.
     """
     raw, p = _read_spec_yaml(path)
-    seen: List[str] = []
+    seen: list[str] = []
     while raw.get("extends"):
         base_locale = str(raw.pop("extends"))
         if base_locale in seen:
@@ -674,7 +674,7 @@ def load_region_spec(path: str | Path) -> RegionSpec:
     return _validate(raw, src=str(p))
 
 
-def _read_spec_yaml(path: str | Path) -> Tuple[Dict[str, Any], Path]:
+def _read_spec_yaml(path: str | Path) -> tuple[dict[str, Any], Path]:
     import yaml
 
     p = Path(path)
@@ -704,7 +704,7 @@ def validate_region_spec(spec: Any, *, src: str = "<region_spec>") -> RegionSpec
     return _validate(spec, src=src)
 
 
-def core_ontology() -> Dict[str, Any]:
+def core_ontology() -> dict[str, Any]:
     """The full ontology vocabulary as a dict (for docs / introspection)."""
     return {
         "institution_types": sorted(INSTITUTION_TYPES),

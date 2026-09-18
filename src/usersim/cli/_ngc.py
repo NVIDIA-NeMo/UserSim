@@ -43,7 +43,6 @@ import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
-from typing import Tuple
 
 logger = logging.getLogger("usersim.cli._ngc")
 
@@ -55,7 +54,7 @@ _BASE_URL = "https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/ver
 
 _MANUAL_INSTALL_URL = "https://org.ngc.nvidia.com/setup/installers/cli"
 
-_RELEASES: dict[Tuple[str, str], Tuple[str, str]] = {
+_RELEASES: dict[tuple[str, str], tuple[str, str]] = {
     # (system, machine) -> (zip_filename, sha256_hex)
     # SHAs taken from the NGC CLI 4.8.2 release notes:
     # https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/4.8.2/files
@@ -359,7 +358,7 @@ def _parse_first_org(csv_output: str) -> str | None:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_release() -> Tuple[str, str]:
+def _resolve_release() -> tuple[str, str]:
     """Return ``(zip_filename, sha256_hex)`` for the current host.
 
     Normalises the few aliases ``platform.machine()`` returns inconsistently:

@@ -41,7 +41,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger("usersim.cli.rescore")
 
@@ -58,7 +58,7 @@ DETERMINISTIC_SCORERS: tuple[str, ...] = (
 )
 
 # Hybrids, named so the error can say WHY instead of "unknown scorer".
-_HYBRID_SCORERS: Dict[str, str] = {
+_HYBRID_SCORERS: dict[str, str] = {
     "financial_services": "calls an LLM judge on dynamic-tier rows",
     "safety_agentic": "calls an LLM judge on some sub-protocols",
     "health_disclosure_concealment": ("runs an LLM realized-behavior audit whenever a judge model is wired"),
@@ -112,9 +112,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.set_defaults(func=run)
 
 
-def _validate_scorers(names: List[str]) -> List[str]:
+def _validate_scorers(names: list[str]) -> list[str]:
     """Reject anything that might reach an LLM, with a reason."""
-    bad: List[str] = []
+    bad: list[str] = []
     for name in names:
         if name in DETERMINISTIC_SCORERS:
             continue
@@ -156,8 +156,8 @@ def run(args: argparse.Namespace) -> int:
 
     n_patched = 0
     n_unmatched = 0
-    per_scorer_changed: Dict[str, int] = {name: 0 for name in scorers}
-    new_cells: List[Any] = []
+    per_scorer_changed: dict[str, int] = {name: 0 for name in scorers}
+    new_cells: list[Any] = []
 
     for _, row in eval_df.iterrows():
         raw = row.get(args.eval_column)
@@ -209,7 +209,7 @@ def run(args: argparse.Namespace) -> int:
     return 0
 
 
-def _decode(raw: Any) -> Dict[str, Any]:
+def _decode(raw: Any) -> dict[str, Any]:
     if isinstance(raw, dict):
         return raw
     if isinstance(raw, str) and raw.strip():

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Literal, Mapping, Protocol, runtime_checkable
+from typing import Any, Callable, Literal, Mapping, Protocol, runtime_checkable
 
 #: Terminal and non-terminal states a submitted job can be in.
 JobState = Literal["pending", "running", "succeeded", "failed"]
@@ -108,7 +108,7 @@ class LocalBackend:
     name = "local"
 
     def __init__(self) -> None:
-        self._results: Dict[str, JobStatus] = {}
+        self._results: dict[str, JobStatus] = {}
         self._counter = 0
 
     def submit(
@@ -154,7 +154,7 @@ class LocalBackend:
         return Path(dest)
 
 
-def _builtin_backends() -> Dict[str, Any]:
+def _builtin_backends() -> dict[str, Any]:
     return {LocalBackend.name: LocalBackend}
 
 

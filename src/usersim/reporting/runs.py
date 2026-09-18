@@ -22,8 +22,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
-
 
 # Lead with assistant_model in the manifest-derived "models" block;
 # everything else follows in the order users care about (the simulator
@@ -102,7 +100,7 @@ def print_available_runs(
     eval_root: Path | str,
     report_root: Path | str,
     *,
-    console: Optional[object] = None,
+    console: object | None = None,
 ) -> None:
     """Render a ``rich.Table`` of trajectory runs with their eval/report
     status + actor models (from each run's manifest, when present).
@@ -189,7 +187,7 @@ def print_available_runs(
 def print_comparison_runs(
     paths: list[Path | str],
     *,
-    console: Optional[object] = None,
+    console: object | None = None,
 ) -> None:
     """Render a ``rich.Table`` of report manifests selected for comparison.
 

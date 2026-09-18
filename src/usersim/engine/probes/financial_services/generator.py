@@ -33,7 +33,7 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, FrozenSet, List, Optional, Sequence
+from typing import Any, Sequence
 
 from usersim.engine.core.behavioral import (
     format_behavioral_profile_for_prompt,
@@ -71,8 +71,10 @@ from usersim.engine.core.probes import (
 )
 from usersim.engine.core.simulation import (
     ConversationState,
-    language_instruction as _language_instruction,
     make_failed,
+)
+from usersim.engine.core.simulation import (
+    language_instruction as _language_instruction,
 )
 from usersim.engine.probes.financial_services import retrieval as _retrieval
 from usersim.engine.probes.financial_services import tools as _tools
@@ -177,7 +179,7 @@ class FinancialServicesProbeError(ValueError):
     """Raised when the probe cannot construct (no resolvable task template)."""
 
 
-def _kb_search_payload(content: Any) -> Optional[Dict[str, Any]]:
+def _kb_search_payload(content: Any) -> dict[str, Any] | None:
     """Parse only the exact finance document-result shape, else return None."""
     if not isinstance(content, str):
         return None
@@ -203,11 +205,11 @@ def _kb_search_payload(content: Any) -> Optional[Dict[str, Any]]:
 
 
 def _tool_result_names(
-    messages: List[Dict[str, Any]],
-) -> Dict[int, str]:
+    messages: list[dict[str, Any]],
+) -> dict[int, str]:
     """Map tool-message positions to their originating assistant function."""
-    result: Dict[int, str] = {}
-    pending: List[tuple[Optional[str], str]] = []
+    result: dict[int, str] = {}
+    pending: list[tuple[str | None, str]] = []
     for message_index, message in enumerate(messages):
         if message.get("role") == "assistant":
             pending = []
@@ -236,12 +238,12 @@ def _tool_result_names(
 
 
 def _project_finance_document_history(
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     *,
     current_user_turn: int,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Keep a deduplicated, refreshable document working set for the assistant."""
-    retrievals: List[tuple[int, int, Dict[str, Any]]] = []
+    retrievals: list[tuple[int, int, dict[str, Any]]] = []
     tool_result_names = _tool_result_names(messages)
     retrieval_turn = 0
     for message_index, message in enumerate(messages):
@@ -256,14 +258,14 @@ def _project_finance_document_history(
     if not retrievals:
         return list(messages)
 
-    newest_occurrence: Dict[str, tuple[int, int]] = {}
+    newest_occurrence: dict[str, tuple[int, int]] = {}
     for message_index, _turn, payload in retrievals:
         for document_index, document in enumerate(payload["results"]):
             newest_occurrence[document["id"]] = (message_index, document_index)
 
     projected = list(messages)
     for message_index, document_turn, payload in retrievals:
-        documents: List[Dict[str, Any]] = []
+        documents: list[dict[str, Any]] = []
         changed = False
         for document_index, document in enumerate(payload["results"]):
             keep_body = (
@@ -337,7 +339,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         )
         # Read tools are answered with a definitive account view rather than a
         # bare ack, so the assistant resolves and proceeds instead of re-querying.
-        self._read_only_tools: FrozenSet[str] = frozenset(
+        self._read_only_tools: frozenset[str] = frozenset(
             t.name for t in self._institution.tools if t.side_effect_class == "read_only"
         )
         self._retrieval_mode = getattr(self._cfg, "finance_retrieval_mode", "hybrid")
@@ -381,11 +383,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
     def derive_task(
         self,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         bank: FinanceBank,
         *,
         cfg: Any,
-    ) -> Optional[_PickedTask]:
+    ) -> _PickedTask | None:
         puuid = self._data.get("persona_uuid") or compute_persona_uuid(persona)
         tier_mix = float(getattr(cfg, "finance_tier_mix", 0.0) or 0.0)
         forced_tier = getattr(cfg, "finance_tier", None)
@@ -448,17 +450,17 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # pure-capability policy: the assistant gets no system prompt
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         return self._offered_tools
 
     # ── Optional hooks ──────────────────────────────────────────────
 
     def transform_assistant_history(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         *,
         current_user_turn: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Bound retrieved bodies in assistant requests, not in the transcript."""
         return _project_finance_document_history(
             messages,
@@ -520,7 +522,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             md["taxonomy_id"] = inst.taxonomy_id
             md["taxonomy_version"] = inst.taxonomy_version
 
-    def get_verbatim_first_user_turn(self, state: ConversationState) -> Optional[str]:
+    def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
         """Tier-branched turn-1.
 
         ``verifiable`` ships a param-locked opening (returned verbatim to keep
@@ -558,7 +560,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         self,
         turn_idx: int,
         state: ConversationState,
-    ) -> List[str]:
+    ) -> list[str]:
         """Dynamic-tier depth nudge (collapse avoidance).
 
         Open-ended conversations otherwise tend to close after one generic
@@ -701,7 +703,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     def execute_tool_call(
         self,
         name: str,
-        args: Dict[str, Any],
+        args: dict[str, Any],
         tc: Any,
         state: ConversationState,
         models: dict,
@@ -920,7 +922,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         tail = letters[int(h[14:16], 16) % 26]
         return f"{head}{digits}{tail}"
 
-    def _identity_value(self, field: str, persona_name: str) -> Optional[str]:
+    def _identity_value(self, field: str, persona_name: str) -> str | None:
         """The customer's value for one region-required identity field."""
         if field == "full_name":
             return persona_name
@@ -1053,15 +1055,15 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
 
 def simulate_financial_services(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim: catch construction errors -> structured SCENARIO_ABORTED."""
     from usersim.engine.core.probes import BankLoadError
 
@@ -1088,7 +1090,7 @@ def simulate_financial_services(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     builder = OutcomeBuilder(provenance=provenance or Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,
@@ -1124,7 +1126,7 @@ def _seeded_last4(seed: str) -> str:
 
 
 def _resolve_accounts(
-    account_state: Dict[str, Any],
+    account_state: dict[str, Any],
     *,
     domain: str = "",
     institution_type: str = "",
@@ -1165,7 +1167,7 @@ def _resolve_accounts(
     ]
 
 
-def _accounts_view(account_state: Dict[str, Any]) -> list:
+def _accounts_view(account_state: dict[str, Any]) -> list:
     """Accounts as a listing tool returns them. ``seed_state_metadata`` populates
     ``account_state['accounts']`` with the resolved canonical view, so this simply
     returns it (falling back to a domain-agnostic synth if it wasn't seeded)."""
@@ -1173,7 +1175,7 @@ def _accounts_view(account_state: Dict[str, Any]) -> list:
 
 
 def _verify_identity(
-    args: Dict[str, Any],
+    args: dict[str, Any],
     required_fields: Sequence[str] = (),
 ) -> tuple:
     """Identity gate over the REGION's required fields.
@@ -1201,7 +1203,7 @@ def _verify_identity(
     }
 
 
-def _resolve_card(account_state: Dict[str, Any], args: Dict[str, Any]):
+def _resolve_card(account_state: dict[str, Any], args: dict[str, Any]):
     """Resolve the card a card action targets. Prefer an explicit ``card_id`` that
     matches a card on file; otherwise fall back to the single card on file. There
     is no card-listing tool, so the customer references "the card ending X" and the
@@ -1217,10 +1219,10 @@ def _resolve_card(account_state: Dict[str, Any], args: Dict[str, Any]):
 
 def _apply_tool(
     tool_name: str,
-    args: Dict[str, Any],
-    account_state: Dict[str, Any],
-    read_only_tools: FrozenSet[str] = frozenset(),
-) -> Dict[str, Any]:
+    args: dict[str, Any],
+    account_state: dict[str, Any],
+    read_only_tools: frozenset[str] = frozenset(),
+) -> dict[str, Any]:
     """Deterministic mock tool execution mutating the in-memory account state.
 
     Acknowledges the call and applies the obvious state transition for the tools
@@ -1251,7 +1253,7 @@ def _apply_tool(
     # never reached the state-changing gold tool). Cards are included so card
     # actions can target a real card_id (there is no separate card-listing tool).
     if tool_name in ("get_accounts", "get_retirement_accounts"):
-        payload: Dict[str, Any] = {"accounts": _accounts_view(account_state)}
+        payload: dict[str, Any] = {"accounts": _accounts_view(account_state)}
         if account_state.get("cards"):
             payload["cards"] = account_state["cards"]
         return payload
@@ -1293,7 +1295,7 @@ def _apply_tool(
         # A read must come back DEFINITIVE. A bare {"status": "ok"} tells the
         # assistant nothing, so it re-queries and burns the turn budget without
         # ever reaching the state-changing gold tool.
-        payload: Dict[str, Any] = {"accounts": _accounts_view(account_state)}
+        payload: dict[str, Any] = {"accounts": _accounts_view(account_state)}
         if account_state.get("cards"):
             payload["cards"] = account_state["cards"]
         for key in ("transactions", "positions", "holdings"):
@@ -1306,7 +1308,7 @@ def _apply_tool(
     # retrying an apparently-inert call. Deterministic per (tool, args) so the
     # same call yields the same reference within a trajectory.
     ref = hashlib.sha1(f"{tool_name}:{sorted((str(k), str(v)) for k, v in args.items())}".encode()).hexdigest()[:8]
-    ack: Dict[str, Any] = {
+    ack: dict[str, Any] = {
         "status": "COMPLETED",
         "reference_id": f"ref_{ref}",
         "tool_name": tool_name,

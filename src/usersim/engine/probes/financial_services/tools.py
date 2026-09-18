@@ -14,7 +14,7 @@ pure helpers; the probe's ``after_assistant_turn`` tool loop owns state.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Sequence
 
 from usersim.engine.core.finance_bank import (
     Institution,
@@ -28,8 +28,8 @@ CALL_TOOL_NAME = "call_tool"
 def build_offered_tools(
     institution: Institution,
     *,
-    identity_required_fields: Optional[Sequence[str]] = None,
-) -> List[Dict[str, Any]]:
+    identity_required_fields: Sequence[str] | None = None,
+) -> list[dict[str, Any]]:
     """OpenAI-style tool schemas offered to the assistant, SCOPED to ``institution``.
 
     Permanent (non-discoverable) tools are offered by name; discoverable tools
@@ -42,7 +42,7 @@ def build_offered_tools(
     KYC contract (e.g. India also requires a PAN). Omit it for the universal
     name + DOB default.
     """
-    offered: List[Dict[str, Any]] = []
+    offered: list[dict[str, Any]] = []
     for t in institution.permanent_tools():
         canonical = framework_primitive_tool(t.name)
         if t.name == "verify_identity" and identity_required_fields:
@@ -83,7 +83,7 @@ def build_offered_tools(
     return offered
 
 
-def extract_call(tc: Any) -> Tuple[str, Dict[str, Any]]:
+def extract_call(tc: Any) -> tuple[str, dict[str, Any]]:
     """Pull ``(function_name, arguments_dict)`` from one tool_call dict."""
     if not isinstance(tc, dict):
         return ("<malformed>", {})
@@ -103,7 +103,7 @@ def extract_call(tc: Any) -> Tuple[str, Dict[str, Any]]:
     return (name, {})
 
 
-def resolve_invoked_tool(function_name: str, arguments: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+def resolve_invoked_tool(function_name: str, arguments: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     """Map an assistant tool call to the *domain* tool it targets.
 
     ``call_tool(tool_name=..., arguments=...)`` targets the named discoverable

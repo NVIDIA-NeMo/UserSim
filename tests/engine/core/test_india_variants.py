@@ -19,12 +19,11 @@ Covers three buckets:
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
-
+from usersim.engine.core import behavioral as B
 from usersim.engine.core import locale as L
 from usersim.engine.core import simulation as S
-from usersim.engine.core import behavioral as B
 from usersim.engine.core import translation as T
 from usersim.engine.core.identity import trajectory_id
 from usersim.engine.core.outcomes import (
@@ -33,7 +32,6 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin
-
 
 # ---------------------------------------------------------------------------
 # core/locale.py — registry + presence-aware resolvers
@@ -299,7 +297,7 @@ class _FakeProbe(BankVerbatimMixin, BankBackedProbe):
             return _FakeBank()
         raise FileNotFoundError(f"no bank for {locale}")
 
-    def derive_task(self, persona: Dict[str, Any], bank: Any, *, cfg: Any) -> Any:
+    def derive_task(self, persona: dict[str, Any], bank: Any, *, cfg: Any) -> Any:
         return _FakeTask()
 
     def get_user_system_prompt(self) -> str:
@@ -388,8 +386,8 @@ class TestDontBreak:
         # The variant fallback is a call-time redirect (asset_locale=en_IN),
         # NOT a dict mutation — so available_locales() must still equal the
         # shipped set (guards the existing all-shipped-locale suites).
-        from usersim.engine.probes.sov_ai_facts import prompts as facts_p
         from usersim.engine.probes.sov_ai_dynamic import prompts as dyn_p
+        from usersim.engine.probes.sov_ai_facts import prompts as facts_p
         from usersim.engine.probes.sov_ai_multilingual_parity import (
             prompts as par_p,
         )

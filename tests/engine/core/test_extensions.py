@@ -16,9 +16,9 @@ from usersim.engine.core._extensions import (
     ENTRY_POINT_GROUPS,
     PROBES,
     clear_extension_cache,
+    extensions_disabled,
     load_extensions,
     merge_extensions,
-    extensions_disabled,
 )
 
 

@@ -23,13 +23,11 @@ import json
 from pathlib import Path
 
 #: repo root: tests/core -> tests -> conversation-plugin -> repo
-
 import pytest
 import yaml
 
-from usersim.engine.core._assets import set_runtime_assets_dir
+from usersim.engine.core._assets import packaged_assets_dir, set_runtime_assets_dir
 from usersim.engine.core.prompt_loader import render_prompt
-from usersim.engine.core._assets import packaged_assets_dir
 
 #: The theme-driven probes, mapped to the name each one gives the
 #: import-time constant behind ``user_agent_system_prompt()``. Spelled out
@@ -364,11 +362,11 @@ class TestAssistantJudgePrompt:
     def test_override_is_scoped_to_one_probe(self, tmp_path):
         """Keyed on the probe label, so overriding it for one probe leaves
         every other probe on the default."""
+        from usersim.engine.core.behavioral import compute_behavioral_profile
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
         from usersim.engine.probes.general_educational.generator import (
             EducationalProbe,
         )
-        from usersim.engine.core.behavioral import compute_behavioral_profile
 
         set_runtime_assets_dir(
             _assets_with_prompt(

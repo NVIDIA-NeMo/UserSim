@@ -31,7 +31,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._models import ModelsConfig, to_data_designer_kwargs, to_model_configs
@@ -42,7 +42,7 @@ from usersim.cli._persona_language import (
 
 logger = logging.getLogger("usersim.cli.pipeline")
 
-DEFAULT_TOOL_CALLING_THEMES: Tuple[str, ...] = (
+DEFAULT_TOOL_CALLING_THEMES: tuple[str, ...] = (
     '{"type": "Weather & Location Lookup", "description": "Look up current weather, forecasts, or location-based info.", "tool_expected": true}',
     '{"type": "Calendar & Scheduling", "description": "Create, modify, or check calendar events and availability.", "tool_expected": true}',
     '{"type": "Data Retrieval & Search", "description": "Search databases, look up records, or retrieve structured data.", "tool_expected": true}',
@@ -53,7 +53,7 @@ DEFAULT_TOOL_CALLING_THEMES: Tuple[str, ...] = (
     '{"type": "Opinion or Advice Request", "description": "Ask for subjective advice or opinions where tools are unnecessary.", "tool_expected": false}',
 )
 
-DEFAULT_PROBE_MIX: Dict[str, float] = {
+DEFAULT_PROBE_MIX: dict[str, float] = {
     "tool_calling": 1 / 3,
     "general_open_ended": 1 / 3,
     "general_educational": 1 / 3,
@@ -82,7 +82,7 @@ def seed_themes(
     probe: str,
     kind: str,
     assets_dir: Path | str | None = None,
-) -> List[str]:
+) -> list[str]:
     """Load a theme-driven probe's seeds and JSON-encode them for the sampler.
 
     Called only for probes actually present in the run's ``probe_mix``, so an
@@ -104,13 +104,13 @@ def seed_themes(
 #: accepted by Data Designer's
 #: ``LocalFileSeedSource`` (``VALID_DATASET_FILE_EXTENSIONS``); parquet is
 #: what ships, jsonl is the hand-editable alternative.
-TOOLSET_SEED_SUFFIXES: Tuple[str, ...] = (".parquet", ".jsonl")
+TOOLSET_SEED_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
 
 
 def resolve_toolset_seed_path(
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
-) -> Optional[Path]:
+) -> Path | None:
     """The ``tool_calling`` toolset seed to use, or ``None`` if there isn't one.
 
     Two sources, at least one of which must be given:
@@ -189,7 +189,7 @@ _LOCALE_SCOPED_PROBES: frozenset[str] = frozenset(
 
 
 def verify_probe_assets(
-    probe_mix: Dict[str, float],
+    probe_mix: dict[str, float],
     locales: "list[str] | tuple[str, ...]",
     assets_dir: Path | str | None = None,
 ) -> None:
@@ -236,10 +236,10 @@ def verify_probe_assets(
 
 
 def resolve_toolset_seed_for_mix(
-    probe_mix: Dict[str, float],
+    probe_mix: dict[str, float],
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
-) -> Optional[Path]:
+) -> Path | None:
     """Resolve a toolset only when the run actually includes ``tool_calling``.
 
     A non-tool run must not be blocked by an ambiguous or missing toolset in
@@ -269,8 +269,8 @@ def resolve_toolset_seed_for_mix(
 def _wire_toolsets(
     config_builder: Any,
     dd: Any,
-    toolset_seed_path: Optional[Path],
-) -> Dict[str, Any]:
+    toolset_seed_path: Path | None,
+) -> dict[str, Any]:
     """Attach ``tool_calling``'s toolset seed and return its config keys.
 
     Both halves of the wiring — the builder mutation and the
@@ -362,7 +362,7 @@ def _set_run_config(data_designer, dd, models: ModelsConfig) -> None:
     data_designer.set_run_config(run_config)
 
 
-def known_probes() -> Tuple[str, ...]:
+def known_probes() -> tuple[str, ...]:
     """Return the set of probe_type values the simulator dispatcher
     knows about. Source-of-truth is the plugin's ``_PROBE_REGISTRY``.
 
@@ -386,12 +386,12 @@ def build_simulator_config_builder(
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
-    probe_mix: Optional[Dict[str, float]] = None,
-    tool_calling_themes: Optional[Tuple[str, ...]] = None,
-    toolset_seed_path: Optional[Path] = None,
+    probe_mix: dict[str, float] | None = None,
+    tool_calling_themes: tuple[str, ...] | None = None,
+    toolset_seed_path: Path | None = None,
     match_persona_language: bool = False,
     verbosity: int = 1,
-    random_seed: Optional[int] = None,
+    random_seed: int | None = None,
     finance_tier_mix: float = 0.0,
     finance_retrieval_mode: str = "hybrid",
     finance_embedding_model_alias: str = "embedding_model",
@@ -481,8 +481,8 @@ def build_simulator_config_builder(
     # general probe stays usable, and a mix without tool_calling never
     # attaches a seed dataset. ``toolset_kwargs`` is populated by the
     # tool_calling branch and splatted into the simulator config below.
-    theme_values: Dict[str, List[str]] = {}
-    toolset_kwargs: Dict[str, Any] = {}
+    theme_values: dict[str, list[str]] = {}
+    toolset_kwargs: dict[str, Any] = {}
     for probe in probe_mix:
         if probe == "tool_calling":
             theme_values[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
@@ -549,9 +549,9 @@ def build_evaluator_config_builder(
     *,
     models: ModelsConfig,
     trajectory_parquet: Path,
-    judges: Optional[List[Dict[str, Any]]] = None,
-    axes: Optional[List[str]] = None,
-    scorers: Optional[List[str]] = None,
+    judges: list[dict[str, Any]] | None = None,
+    axes: list[str] | None = None,
+    scorers: list[str] | None = None,
     skip_if_existing: bool = True,
     output_column: str = "assistant_eval",
     prompt_version: str = "v1.0",
@@ -610,7 +610,7 @@ def build_evaluator_config_builder(
     return data_designer, config_builder
 
 
-def _warn_on_undispatched_scorers(scorers: List[str]) -> None:
+def _warn_on_undispatched_scorers(scorers: list[str]) -> None:
     """Say so when the run cannot possibly score some capability.
 
     The evaluator dispatches exactly the scorers it is handed and keys off nothing
@@ -656,7 +656,7 @@ def sample_trajectories(
     df,
     *,
     mode: str,
-    n: Optional[int] = None,
+    n: int | None = None,
     seed: int = 42,
 ):
     """Coverage-aware sampler for the trajectory-evaluator's seed dataset.
@@ -704,9 +704,9 @@ def evaluate_dataframe(
     df,
     *,
     models: ModelsConfig,
-    scorers: List[str],
-    judges: Optional[List[Dict[str, Any]]] = None,
-    axes: Optional[List[str]] = None,
+    scorers: list[str],
+    judges: list[dict[str, Any]] | None = None,
+    axes: list[str] | None = None,
     prompt_version: str = "v1.0",
     eval_column: str = "assistant_eval",
     skip_if_existing: bool = True,
@@ -730,9 +730,9 @@ def evaluate_dataframe(
       project away the seed columns; the dashboard's join needs them).
     """
     import tempfile
+    from pathlib import Path as _Path
 
     import pandas as pd  # noqa: F401  -- imported for clarity at the call site
-    from pathlib import Path as _Path
 
     if judges is None:
         judges = [{"alias": "evaluator_model"}]

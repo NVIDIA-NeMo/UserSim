@@ -42,7 +42,7 @@ template can't fully express).
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 from usersim.engine.core.probes import (
     BaseProbe,
@@ -83,7 +83,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         return self._tools
 
     def after_assistant_turn(

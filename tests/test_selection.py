@@ -27,13 +27,13 @@ from usersim.selection import (
     select_trajectories,
     write_curated_dataset,
 )
+from usersim.selection.io import parse_repo_id
 from usersim.selection.profiles import (
     ALL_FLOORS,
     GENEROUS,
     SelectionProfile,
     applicable_gates,
 )
-from usersim.selection.io import parse_repo_id
 from usersim.selection.schemas import (
     LOGICAL_GROUPS,
     OPT_IN_ONLY,

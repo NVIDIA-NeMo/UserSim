@@ -84,7 +84,6 @@ from usersim.engine.core.query_bank import (
 )
 from usersim.engine.core.seeds import load_seeds
 
-
 # ---------------------------------------------------------------------------
 # Per-locale loaders: fact_bank + probing_taxonomy
 # ---------------------------------------------------------------------------

@@ -48,7 +48,7 @@ pattern; the extra LOC is bank-specific class-construction handling).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
@@ -104,7 +104,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         bank: Any,
         *,
         cfg: Any,
-    ) -> Optional[_DemoActionRequest]:
+    ) -> _DemoActionRequest | None:
         return _DemoActionRequest(
             id="AR-DEMO-001",
             placeholder=True,
@@ -120,7 +120,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         return self._api_tools
 
     def after_assistant_turn(
@@ -149,8 +149,8 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     def run_dispatch(
         self,
         *,
-        models: Dict[str, Any],
-        data: Dict[str, Any],
+        models: dict[str, Any],
+        data: dict[str, Any],
         cfg: Any,
     ) -> dict:
         """Custom agentic simulate loop — see safety_agentic for the real one."""

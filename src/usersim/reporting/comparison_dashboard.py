@@ -43,7 +43,7 @@ import html
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.reporting.comparison import (
     MEASURED_STATES,
@@ -1260,7 +1260,7 @@ def _spec_cleared_headline(report: ComparisonReport, colors: dict[str, str]) -> 
 # ---------------------------------------------------------------------------
 
 
-def _per_locale_mean_score(report: ComparisonReport, locale: str) -> dict[str, Optional[float]]:
+def _per_locale_mean_score(report: ComparisonReport, locale: str) -> dict[str, float | None]:
     """Map run_id -> mean normalized score for ``locale`` only.
 
     Same rollup discipline as :func:`reporting.comparison._build_rollup`:

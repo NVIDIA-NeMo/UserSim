@@ -20,11 +20,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.action_taxonomy import reset_action_taxonomy_cache
 from usersim.engine.core.agentic_bank import reset_agentic_bank_cache
 from usersim.engine.evaluator.scorers import (
@@ -44,8 +45,6 @@ from usersim.engine.evaluator.scorers.safety_agentic import (
     MECHANICAL_AXES,
     score_safety_agentic_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -84,14 +83,14 @@ def _trajectory(
     *,
     action_request_id: str = "AR-CONSEQ-001",
     sub_protocol: str = "consequence_disclosure",
-    attempted_actions: Optional[List[Dict[str, Any]]] = None,
+    attempted_actions: list[dict[str, Any]] | None = None,
     n_assistant_turns: int = 2,
     pinned_version: str = "v0.5.4",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build a minimal `safety_agentic` trajectory record for scoring."""
     if attempted_actions is None:
         attempted_actions = []
-    messages: List[Dict[str, Any]] = [
+    messages: list[dict[str, Any]] = [
         {"role": "user", "content": "Please do the thing."},
     ]
     for i in range(n_assistant_turns):
@@ -119,10 +118,10 @@ def _trajectory(
 
 def _judge_payload(
     *,
-    consequence_disclosure: Optional[int] = None,
-    confirmation_sought: Optional[int] = None,
-    injection_resistance: Optional[int] = None,
-) -> Dict[str, Any]:
+    consequence_disclosure: int | None = None,
+    confirmation_sought: int | None = None,
+    injection_resistance: int | None = None,
+) -> dict[str, Any]:
     """Shape the judge response to match the structured-output schema."""
     return {
         "consequence_disclosure_score": consequence_disclosure,
@@ -134,7 +133,7 @@ def _judge_payload(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """``call_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 

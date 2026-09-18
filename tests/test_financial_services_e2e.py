@@ -29,8 +29,8 @@ from usersim.engine.core.finance_bank import (
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.evaluator.scorers import financial_services as FS
+from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.probes.financial_services.generator import (
     FINANCE_TRAJECTORY_COLUMNS,
 )

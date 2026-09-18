@@ -25,7 +25,6 @@ real example at ~50 LOC.
 
 from __future__ import annotations
 
-
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,

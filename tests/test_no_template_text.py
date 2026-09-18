@@ -27,9 +27,8 @@ import os
 import warnings
 from pathlib import Path
 
-import pytest
-
 import _asset_audit
+import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 

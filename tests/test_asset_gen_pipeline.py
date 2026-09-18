@@ -246,6 +246,7 @@ def test_usable_docset_rows_keeps_low_faithfulness_clusters():
     call failed. ``collect_institutions`` keeps those clusters and flags them, so
     the retry predicate must not filter them out."""
     import pandas as pd
+
     from usersim.asset_gen.financial_services import pipeline as P
 
     df = pd.DataFrame(
@@ -260,6 +261,7 @@ def test_usable_docset_rows_keeps_low_faithfulness_clusters():
 def test_usable_docset_rows_falls_back_when_the_column_is_absent():
     """A frame with no doc_set column at all must not be emptied out."""
     import pandas as pd
+
     from usersim.asset_gen.financial_services import pipeline as P
 
     df = pd.DataFrame([{"cluster_id": "c1"}, {"cluster_id": "c2"}])
@@ -393,6 +395,7 @@ def test_as_docset_normalizes_numpy_documents():
     # DD hands structured columns back through pandas -> nested lists can arrive as
     # numpy arrays; _as_docset must yield a plain list so truth-tests don't blow up.
     import numpy as np
+
     from usersim.asset_gen.financial_services.pipeline import _as_docset
 
     raw = {"documents": np.array([{"doc_key": "a", "title": "A", "document_type": "faq", "body": "x"}], dtype=object)}
@@ -585,6 +588,8 @@ class TestPlanOwnedTitles:
     def test_omitted_vocabulary_falls_back_to_the_english_defaults(self):
         from usersim.asset_gen.financial_services.pipeline import (
             _FAQ_INTENTS,
+        )
+        from usersim.asset_gen.financial_services.pipeline import (
             build_product_doc_plan as plan,
         )
 
@@ -729,8 +734,9 @@ def test_the_prompt_still_offers_the_slug_sink():
 
 
 def test_doc_uuid_is_deterministic_and_scoped():
-    from usersim.asset_gen.financial_services.pipeline import doc_uuid
     import uuid as _uuid
+
+    from usersim.asset_gen.financial_services.pipeline import doc_uuid
 
     a = doc_uuid("en_US", "northwind_bank", "acct_sheet")
     assert a == doc_uuid("en_US", "northwind_bank", "acct_sheet")  # stable across calls
@@ -898,7 +904,7 @@ def test_cli_gen_assets_dry_run():
 def test_generate_corpus_validates_endpoints_before_network():
     """generate_corpus fails fast (offline) if the gen model aliases are absent."""
     from usersim.asset_gen.financial_services.pipeline import generate_corpus
-    from usersim.cli._models import ConfigError, ModelSpec, ModelsConfig
+    from usersim.cli._models import ConfigError, ModelsConfig, ModelSpec
 
     cfg = ModelsConfig(
         providers=(),

@@ -62,7 +62,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -150,7 +150,7 @@ _GRACEFUL_UNKNOWN = Score(
 )
 
 
-_AXES: Tuple[Score, ...] = (
+_AXES: tuple[Score, ...] = (
     _SUSPECTED_FABRICATION,
     _SELF_CONSISTENCY,
     _GRACEFUL_UNKNOWN,
@@ -160,7 +160,7 @@ _AXES: Tuple[Score, ...] = (
 # trajectory (today always one category per trajectory, but the schema
 # anticipates multi-category trajectories). Public so reporting can
 # enumerate.
-AGGREGATABLE_AXES: Tuple[str, ...] = tuple(s.name for s in _AXES)
+AGGREGATABLE_AXES: tuple[str, ...] = tuple(s.name for s in _AXES)
 
 
 # ---------------------------------------------------------------------------
@@ -229,9 +229,9 @@ def _build_schema():
 
 
 def score_sov_ai_dynamic_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score a trajectory produced by ``sov_ai_dynamic``.
 
     Contract:
@@ -325,7 +325,7 @@ def score_sov_ai_dynamic_trajectory(
     if len(hints_used) < len(categories_probed):
         hints_used = hints_used + [""] * (len(categories_probed) - len(hints_used))
 
-    per_category: List[Dict[str, Any]] = []
+    per_category: list[dict[str, Any]] = []
     status_proposal = True
     for cat_id, hint in zip(categories_probed, hints_used):
         category = taxonomy.by_id(cat_id)
@@ -372,11 +372,11 @@ def _score_one_category(
     *,
     category: Category,
     subtopic_hint: str,
-    conversation: List[Dict[str, Any]],
-    models: Dict[str, Any],
+    conversation: list[dict[str, Any]],
+    models: dict[str, Any],
     judge_alias: str,
     locale: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """LLM-judge one category. Returns the ``per_category_scores`` entry dict."""
     prompt = _USER_PROMPT.format(
         locale=locale,
@@ -431,7 +431,7 @@ def _score_one_category(
             error="parse_failure",
         )
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     for s in _AXES:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):
@@ -449,7 +449,7 @@ def _score_one_category(
     }
 
 
-def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _aggregate(per_category_scores: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Mean per axis with reasoning that surfaces the per-category judge text.
 
     Replaces the uninformative ``"arithmetic mean across N categories"``
@@ -460,9 +460,9 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
     text is surfaced verbatim — there is nothing to "aggregate" so the
     preamble would only add noise.
     """
-    out: Dict[str, Dict[str, Any]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for axis in AGGREGATABLE_AXES:
-        entries: List[Dict[str, Any]] = []
+        entries: list[dict[str, Any]] = []
         for entry in per_category_scores:
             cell = (entry.get("scores") or {}).get(axis)
             if not isinstance(cell, dict):
@@ -499,7 +499,7 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
 
 
 def _compose_aggregate_reasoning(
-    entries: List[Dict[str, Any]],
+    entries: list[dict[str, Any]],
     mean: float,
     *,
     unit_singular: str,
@@ -541,7 +541,7 @@ def _score_text(score: float) -> str:
     return str(int(score)) if float(score).is_integer() else f"{score:.1f}"
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -555,7 +555,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _as_list_of_str(raw: Any) -> List[str]:
+def _as_list_of_str(raw: Any) -> list[str]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -574,7 +574,7 @@ def _as_list_of_str(raw: Any) -> List[str]:
     return []
 
 
-def _pinned_taxonomy_version(trajectory: Dict[str, Any], locale: str) -> Optional[str]:
+def _pinned_taxonomy_version(trajectory: dict[str, Any], locale: str) -> str | None:
     """Extract ``bank_version[locale]`` from ``simulation_outcome``.
 
     The sov_ai_dynamic probe writes the taxonomy version into
@@ -602,7 +602,7 @@ def _pinned_taxonomy_version(trajectory: Dict[str, Any], locale: str) -> Optiona
     return None
 
 
-def _no_category_result(category_id: str) -> Dict[str, Any]:
+def _no_category_result(category_id: str) -> dict[str, Any]:
     """Placeholder entry for a category id the trajectory probed but the taxonomy doesn't contain."""
     return {
         "category_id": category_id,
@@ -617,7 +617,7 @@ def _error_result(
     category: Category,
     judge_alias: str,
     error: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Per-category entry for a category whose judge call failed. Scores are all None."""
     return {
         "category_id": category.id,

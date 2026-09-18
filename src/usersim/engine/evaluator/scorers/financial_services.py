@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -84,13 +84,13 @@ def _bank_locale(locale: str) -> str:
     return asset_locale(locale, exists=lambda loc: finance_bank_dir_for(loc).exists())
 
 
-def _ordered_subsequence(needles: List[str], haystack: List[str]) -> bool:
+def _ordered_subsequence(needles: list[str], haystack: list[str]) -> bool:
     """True if every element of ``needles`` appears in ``haystack`` in order."""
     it = iter(haystack)
     return all(any(n == h for h in it) for n in needles)
 
 
-def _side_effect_by_tool(locale: str, institution_id: str) -> Dict[str, str]:
+def _side_effect_by_tool(locale: str, institution_id: str) -> dict[str, str]:
     """Map tool name -> side_effect_class, SCOPED to the row's institution."""
     try:
         from usersim.engine.core.finance_bank import (
@@ -118,7 +118,7 @@ _PROCEDURAL_GENRES: frozenset = frozenset(
 )
 
 
-def _document_types_by_id(locale: str, institution_id: str) -> Dict[str, str]:
+def _document_types_by_id(locale: str, institution_id: str) -> dict[str, str]:
     """Map document id -> document_type, SCOPED to the row's institution.
 
     Read at score time from the same bank the side-effect map comes from, so no
@@ -138,7 +138,7 @@ def _document_types_by_id(locale: str, institution_id: str) -> Dict[str, str]:
         return {}
 
 
-def _substantive_retrieval_rate(locale: str, institution_id: str, retrieved: List[str]) -> Optional[float]:
+def _substantive_retrieval_rate(locale: str, institution_id: str, retrieved: list[str]) -> float | None:
     """Share of retrieved documents that carry FACTS rather than procedure.
 
     Why this exists alongside document recall: gold documents are derived from the
@@ -209,9 +209,9 @@ def _task_ordering_required(locale: str, institution_id: str, task_id: str) -> b
 
 
 def score_financial_services_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Tier-aware dispatcher: verifiable -> verifier; dynamic -> grounded judge."""
     task_id = trajectory.get("finance_task_id")
     if not task_id:
@@ -223,18 +223,18 @@ def score_financial_services_trajectory(
     return _score_verifiable(trajectory)
 
 
-def _score_verifiable(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+def _score_verifiable(trajectory: dict[str, Any]) -> dict[str, Any]:
     """Deterministic verifier for the ``verifiable`` tier."""
     tier = trajectory.get("task_tier")
-    gold_tools: List[str] = list(_loads(trajectory.get("gold_tool_sequence"), []))
+    gold_tools: list[str] = list(_loads(trajectory.get("gold_tool_sequence"), []))
     if tier != "verifiable" or not gold_tools:
         return {
             "error": "no verifiable finance gold on this trajectory — scorer skipped",
         }
 
-    gold_docs: List[str] = list(_loads(trajectory.get("gold_document_ids"), []))
-    retrieved: List[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
-    attempted: List[str] = list(_loads(trajectory.get("attempted_tool_names"), []))
+    gold_docs: list[str] = list(_loads(trajectory.get("gold_document_ids"), []))
+    retrieved: list[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
+    attempted: list[str] = list(_loads(trajectory.get("attempted_tool_names"), []))
     locale = str(trajectory.get("locale") or "en_US")
     institution_id = str(trajectory.get("institution_id") or "")
     domain = str(trajectory.get("domain") or "")
@@ -390,7 +390,7 @@ _DYN_SELF_CONSISTENCY = Score(
     },
 )
 
-_DYNAMIC_AXES: Tuple[Score, ...] = (
+_DYNAMIC_AXES: tuple[Score, ...] = (
     _DYN_GROUNDING,
     _DYN_NUMERIC,
     _DYN_BOUNDARY,
@@ -400,7 +400,7 @@ _DYNAMIC_AXES: Tuple[Score, ...] = (
 )
 # Critical axes: a low score here fails the row's status_proposal (a fabricated
 # or numerically-wrong grounded answer is the worst failure mode).
-_DYNAMIC_CRITICAL_AXES: Tuple[str, ...] = (
+_DYNAMIC_CRITICAL_AXES: tuple[str, ...] = (
     _DYN_NUMERIC.name,
     _DYN_NO_FABRICATION.name,
 )
@@ -445,9 +445,9 @@ _GENERIC_BOUNDARY = (
 def _dynamic_reference(
     locale: str,
     institution_id: str,
-    retrieved_ids: List[str],
+    retrieved_ids: list[str],
     domain: str,
-) -> Tuple[str, str, str, str]:
+) -> tuple[str, str, str, str]:
     """Return (reference_excerpts, boundary, institution_type, display_name).
 
     Reference = the retrieved KB doc excerpts (the grounding the assistant had
@@ -470,7 +470,7 @@ def _dynamic_reference(
         return ("(institution not found)", _GENERIC_BOUNDARY, "", institution_id)
 
     seen = set()
-    excerpts: List[str] = []
+    excerpts: list[str] = []
     for did in retrieved_ids:
         if did in seen:
             continue
@@ -490,15 +490,15 @@ def _dynamic_reference(
 
 
 def _score_dynamic(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Reference-grounded LLM judge for the ``dynamic`` tier."""
     judge_alias = next(iter(models)) if models else _DEFAULT_JUDGE_ALIAS
     locale = str(trajectory.get("locale") or "en_US")
     institution_id = str(trajectory.get("institution_id") or "")
     domain = str(trajectory.get("domain") or "")
-    retrieved: List[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
+    retrieved: list[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
 
     reference, boundary, inst_type, display_name = _dynamic_reference(
@@ -575,7 +575,7 @@ def _score_dynamic(
     except (json.JSONDecodeError, TypeError):
         parsed = {}
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     status_proposal = True
     for s in _DYNAMIC_AXES:
         cell = parsed.get(s.name) if isinstance(parsed, dict) else None
@@ -618,7 +618,7 @@ def _score_dynamic(
     }
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):

@@ -30,6 +30,7 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import (
+    _PROBE_REGISTRY,
     AgenticMixin,
     BankBackedProbe,
     BankLoadError,
@@ -44,13 +45,11 @@ from usersim.engine.core.probes import (
     ToolCallingMixin,
     ToolExecutionMixin,
     assistant_message,
-    _PROBE_REGISTRY,
     clear_registry,
     known_probes,
     register_probe,
     resolve_probe,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

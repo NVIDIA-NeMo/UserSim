@@ -27,35 +27,36 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.query_bank import (
     Query,
     QueryBank,
     QueryProvenance,
     load_query_bank,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_multilingual_parity import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_multilingual_parity import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -72,7 +73,7 @@ def sample_bank() -> QueryBank:
 
 
 @pytest.fixture
-def br_persona_southeast() -> Dict[str, Any]:
+def br_persona_southeast() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -86,7 +87,7 @@ def br_persona_southeast() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def in_persona_health_interest() -> Dict[str, Any]:
+def in_persona_health_interest() -> dict[str, Any]:
     return {
         "first_name": "Priya",
         "last_name": "Sharma",
@@ -127,9 +128,9 @@ def simulator_cfg_two_turns():
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Return a side_effect callable that dispatches by model alias.
@@ -179,7 +180,7 @@ def _mock_call_llm(
     return _side_effect
 
 
-def _shipped_bank_env() -> Dict[str, str]:
+def _shipped_bank_env() -> dict[str, str]:
     """Env vars to point ``load_query_bank_default`` at the shipped sample."""
     return {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": str(SAMPLE_BANK_PATH)}
 
@@ -276,13 +277,13 @@ class TestPersonaToTagsReExport:
 
         assert task_derivation.persona_to_tags is canonical
 
-    def test_pt_br_persona_gets_brazilian_region(self, br_persona_southeast: Dict[str, Any]) -> None:
+    def test_pt_br_persona_gets_brazilian_region(self, br_persona_southeast: dict[str, Any]) -> None:
         tags = task_derivation.persona_to_tags(br_persona_southeast, "pt_BR")
         assert "region:southeast" in tags
         assert "interest:health" in tags  # via "Enfermeira" → healthcare
         assert "education:tertiary" in tags
 
-    def test_in_persona_gets_health_interest(self, in_persona_health_interest: Dict[str, Any]) -> None:
+    def test_in_persona_gets_health_interest(self, in_persona_health_interest: dict[str, Any]) -> None:
         tags = task_derivation.persona_to_tags(in_persona_health_interest, "en_IN")
         assert "interest:health" in tags
         assert "education:tertiary" in tags
@@ -506,7 +507,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_single_turn_runs_end_to_end(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with (
@@ -553,7 +554,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_first_user_turn_is_locale_rendering_verbatim(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Pick the deterministic choice for this (persona, seed) so we
@@ -612,7 +613,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_two_turn_runs_followup(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg_two_turns: Any,
     ) -> None:
         with (
@@ -658,7 +659,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_locale_not_in_bank_returns_structured_failure(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
@@ -737,7 +738,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_assistant_turn1_failure_is_attributed_to_assistant_model(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         def _raises(*args, **kwargs):
@@ -777,7 +778,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_bank_load_failure_returns_structured_failure(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Point env at a path that does not exist.

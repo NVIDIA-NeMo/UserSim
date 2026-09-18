@@ -31,7 +31,7 @@ import copy
 import json
 import math
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable
 
 from usersim.engine.core.llm import call_llm
 from usersim.engine.core.tool_calls import recover_tool_call
@@ -68,19 +68,19 @@ MODEL_USER = "user_model"
 #    + identity fields: "trajectory_id", "persona_uuid", "probe_family",
 #      "probe_variant"}
 # --------------------------------------------------------------------------
-MoveHook = Callable[[Dict[str, Any]], None]
+MoveHook = Callable[[dict[str, Any]], None]
 
 
 def _move_payload(
     env: "PatientEnv",
     move: "Move",
-    identity: Optional[Dict[str, Any]],
+    identity: dict[str, Any] | None,
     *,
     accepted: bool,
     reason: str,
-    raw_call: Optional[Dict[str, Any]],
+    raw_call: dict[str, Any] | None,
     resampled: int,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build the serializable move-event payload for the env-harness hook.
 
     ``native_tool_call`` is defensively deep-copied: the very same raw dict is
@@ -90,7 +90,7 @@ def _move_payload(
     stream. Trajectory ``identity`` is merged in so concurrent rows are
     attributable.
     """
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         "turn": env.turn,
         "arc": round(env.arc_index, 3),
         "move": move.to_dict(),
@@ -105,14 +105,14 @@ def _move_payload(
 
 
 def _emit_move(
-    emit: Optional[MoveHook],
-    identity: Optional[Dict[str, Any]],
+    emit: MoveHook | None,
+    identity: dict[str, Any] | None,
     env: "PatientEnv",
     move: "Move",
     *,
     accepted: bool,
     reason: str,
-    raw_call: Optional[Dict[str, Any]],
+    raw_call: dict[str, Any] | None,
     resampled: int,
 ) -> None:
     """Fire the caller-supplied ``emit`` sink for one move (no-op when ``None``).
@@ -147,7 +147,7 @@ def _move_reasoning_kwargs() -> dict:
     return {}
 
 
-def _move_tool(topics: List[str]) -> Dict[str, Any]:
+def _move_tool(topics: list[str]) -> dict[str, Any]:
     """OpenAI-style function schema for the auditable move the user commits to.
     UserSim's call_llm forwards this to ModelFacade.completion() and returns the
     structured tool_calls; the Guard validates the captured call."""
@@ -203,10 +203,10 @@ def _move_tool(topics: List[str]) -> Dict[str, Any]:
 def build_env(
     *,
     num_turns: int,
-    profile: Dict,
+    profile: dict,
     disclosure_style: str,
-    client: Dict,
-) -> Tuple[PatientEnv, Guard, List[str], bool]:
+    client: dict,
+) -> tuple[PatientEnv, Guard, list[str], bool]:
     """Construct the PatientEnv + Guard + topic list for a user, from client config.
 
     Returns (env, guard, all_topics, has_risk).
@@ -232,12 +232,12 @@ def _last_assistant(state: Any) -> str:
 
 def _proposal_messages(
     env: PatientEnv,
-    topics: List[str],
+    topics: list[str],
     has_risk: bool,
     counterpart_msg: str,
-    client: Dict,
+    client: dict,
     locale: str,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     prop = client.get("proposal", {})
     self_noun = prop.get("self_noun", "simulated user")
     counterpart = prop.get("counterpart_noun", "Counterpart")
@@ -272,7 +272,7 @@ def _proposal_messages(
     return [{"role": "system", "content": sys}, {"role": "user", "content": usr}]
 
 
-def _extract_move(result: Dict[str, Any], topics: List[str]) -> Tuple[Optional[Move], str, Optional[Dict[str, Any]]]:
+def _extract_move(result: dict[str, Any], topics: list[str]) -> tuple[Move | None, str, dict[str, Any] | None]:
     """Pull the committed Move + reasoning out of a native commit_move tool call.
 
     Uses the shared, provider-tolerant ``core.tool_calls`` recovery (structured
@@ -298,7 +298,7 @@ def _extract_move(result: Dict[str, Any], topics: List[str]) -> Tuple[Optional[M
     return _snap_topic(move, topics), reasoning, call
 
 
-def _snap_topic(move: Move, topics: List[str]) -> Move:
+def _snap_topic(move: Move, topics: list[str]) -> Move:
     """Keep only canonical topics (or 'risk'); map invented labels to nearest/empty."""
     allowed = set(topics) | {"risk"}
     t = move.topic
@@ -313,7 +313,7 @@ def _snap_topic(move: Move, topics: List[str]) -> Move:
     return move
 
 
-def risk_pull(env: PatientEnv, guard: Guard, has_risk: bool) -> Optional[Move]:
+def risk_pull(env: PatientEnv, guard: Guard, has_risk: bool) -> Move | None:
     """Deterministic late-session risk escalation for risk-carrying users.
 
     Ensures the risk arc actually surfaces (hint after ``risk_gate``, reveal after
@@ -353,7 +353,7 @@ def risk_reveal_reachable(env: PatientEnv, guard: Guard) -> bool:
     return hint_turn < (n - 1)
 
 
-def _assistant_toolcall_msg(raw_call: Dict[str, Any]) -> Dict[str, Any]:
+def _assistant_toolcall_msg(raw_call: dict[str, Any]) -> dict[str, Any]:
     """Echo the user's commit_move call as an assistant message (native shape)."""
     fn = raw_call.get("function") or {}
     args = fn.get("arguments")
@@ -372,7 +372,7 @@ def _assistant_toolcall_msg(raw_call: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _tool_result_msg(raw_call: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+def _tool_result_msg(raw_call: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
     """Return the Guard's verdict to the user as a native tool result."""
     return {
         "role": "tool",
@@ -382,18 +382,18 @@ def _tool_result_msg(raw_call: Dict[str, Any], payload: Dict[str, Any]) -> Dict[
 
 
 def propose_and_guard(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     env: PatientEnv,
     guard: Guard,
-    topics: List[str],
+    topics: list[str],
     has_risk: bool,
     state: Any,
-    client: Dict,
+    client: dict,
     locale: str = "en_US",
     *,
-    emit: Optional[MoveHook] = None,
-    identity: Optional[Dict[str, Any]] = None,
-) -> Tuple[Move, List[Dict[str, str]], str]:
+    emit: MoveHook | None = None,
+    identity: dict[str, Any] | None = None,
+) -> tuple[Move, list[dict[str, str]], str]:
     """The user LLM commits a move via the native ``commit_move`` tool call; the
     Guard validates its pacing, returning a native tool result on a veto so the model
     re-commits in-protocol. Returns (committed_move, veto_log, reasoning). ``veto_log``
@@ -403,7 +403,7 @@ def propose_and_guard(
     fired once per committed/vetoed move with a serializable payload tagged with
     ``identity`` (see :func:`_move_payload`). Both default to ``None`` (no-op)."""
     counterpart_msg = _last_assistant(state)
-    veto_log: List[Dict[str, str]] = []
+    veto_log: list[dict[str, str]] = []
     tools = [_move_tool(topics)]
     extra = _move_reasoning_kwargs()
 

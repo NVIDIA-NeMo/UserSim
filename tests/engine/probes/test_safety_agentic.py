@@ -28,11 +28,13 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.agentic_bank import (
     ActionProvenance,
     ActionRequest,
@@ -47,15 +49,14 @@ from usersim.engine.core.outcomes import (
     Provenance,
     WarningKind,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.safety_agentic import (
     generator as probe_gen,
+)
+from usersim.engine.probes.safety_agentic import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -72,7 +73,7 @@ def sample_bank() -> AgenticBank:
 
 
 @pytest.fixture
-def en_persona() -> Dict[str, Any]:
+def en_persona() -> dict[str, Any]:
     return {
         "first_name": "Sarah",
         "last_name": "Johnson",
@@ -110,11 +111,11 @@ def simulator_cfg_three_turns():
     return _Cfg()
 
 
-def _shipped_bank_env() -> Dict[str, str]:
+def _shipped_bank_env() -> dict[str, str]:
     return {"USERSIM_SAFETY_AGENTIC_BANK": str(SAMPLE_BANK_PATH)}
 
 
-def _mock_call_llm(responses: List[Dict[str, Any]]):
+def _mock_call_llm(responses: list[dict[str, Any]]):
     """Side-effect callable yielding the next queued response."""
     iter_ = iter(responses)
 
@@ -131,10 +132,10 @@ def _mock_call_llm(responses: List[Dict[str, Any]]):
 
 def _make_tool_call(
     name: str,
-    arguments: Dict[str, Any] | str,
+    arguments: dict[str, Any] | str,
     *,
     tc_id: str = "call_0",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build an OpenAI-style tool_call dict."""
     args_str = arguments if isinstance(arguments, str) else json.dumps(arguments)
     return {
@@ -228,7 +229,7 @@ class TestPersonaToTagsReExport:
 class TestDeriveTask:
     def test_returns_request_when_pool_nonempty(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
@@ -236,7 +237,7 @@ class TestDeriveTask:
 
     def test_returns_none_when_no_request_matches_persona(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(
             n_requests=1,
@@ -247,7 +248,7 @@ class TestDeriveTask:
 
     def test_returns_none_when_all_excluded(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=2)
         result = task_derivation.derive_task(
@@ -261,7 +262,7 @@ class TestDeriveTask:
 
     def test_deterministic_for_same_inputs(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=4)
         a = task_derivation.derive_task(en_persona, bank, "en_US", seed=42)
@@ -271,7 +272,7 @@ class TestDeriveTask:
 
     def test_different_seed_can_produce_different_pick(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(n_requests=4)
         picks = set()
@@ -282,7 +283,7 @@ class TestDeriveTask:
 
     def test_bank_version_change_perturbs_pick(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank_a = _synthetic_bank(bank_version="v0.1.0", n_requests=4)
         bank_b = _synthetic_bank(bank_version="v0.2.0", n_requests=4)
@@ -302,7 +303,7 @@ class TestDeriveTask:
 
 
 class TestResolveTaskFromRow:
-    def test_override_returns_request(self, en_persona: Dict[str, Any]) -> None:
+    def test_override_returns_request(self, en_persona: dict[str, Any]) -> None:
         bank = _synthetic_bank(n_requests=2)
         ar = task_derivation.resolve_task_from_row(
             en_persona,
@@ -315,7 +316,7 @@ class TestResolveTaskFromRow:
 
     def test_override_missing_id_returns_none(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.resolve_task_from_row(
@@ -328,7 +329,7 @@ class TestResolveTaskFromRow:
 
     def test_override_persona_tag_mismatch_returns_none(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank(
             request_persona_tags=("interest:nonexistent",),
@@ -343,7 +344,7 @@ class TestResolveTaskFromRow:
 
     def test_no_override_falls_through_to_derive(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
     ) -> None:
         bank = _synthetic_bank()
         ar = task_derivation.resolve_task_from_row(
@@ -476,7 +477,7 @@ class TestSimulateAgenticSafety:
 
     def test_no_tool_call_response_short_circuits(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Assistant responds with content but no tool_calls — the loop
@@ -520,7 +521,7 @@ class TestSimulateAgenticSafety:
 
     def test_first_user_turn_is_initial_user_prompt_verbatim(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
@@ -567,7 +568,7 @@ class TestSimulateAgenticSafety:
 
     def test_assistant_tool_call_intercepted_with_mock_response(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         # Synthetic bank → exactly one tool ("do_thing"). Assistant
@@ -624,7 +625,7 @@ class TestSimulateAgenticSafety:
 
     def test_attempted_actions_recorded_with_full_details(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         # Two-call turn followed by no-tool-call turn.
@@ -680,7 +681,7 @@ class TestSimulateAgenticSafety:
 
     def test_unknown_tool_call_yields_synthetic_error_response(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
     ) -> None:
         synth = _synthetic_bank(n_requests=1, tool_name="do_thing")
@@ -726,7 +727,7 @@ class TestSimulateAgenticSafety:
 
     def test_bank_load_failure_returns_structured_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(
@@ -751,7 +752,7 @@ class TestSimulateAgenticSafety:
 
     def test_panel_override_with_unknown_id_returns_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with (
@@ -778,7 +779,7 @@ class TestSimulateAgenticSafety:
 
     def test_no_resolvable_request_returns_failure(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(
@@ -807,7 +808,7 @@ class TestSimulateAgenticSafety:
 
     def test_assistant_failure_attributed_to_assistant_model(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         def _raises(*args, **kwargs):
@@ -846,7 +847,7 @@ class TestSimulateAgenticSafety:
 
     def test_non_placeholder_request_no_warning(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(placeholder=False, n_requests=1)
@@ -876,7 +877,7 @@ class TestSimulateAgenticSafety:
 
     def test_probe_variant_format(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(
@@ -909,7 +910,7 @@ class TestSimulateAgenticSafety:
 
     def test_probe_variant_format_when_no_sanctioned_action(
         self,
-        en_persona: Dict[str, Any],
+        en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         synth = _synthetic_bank(

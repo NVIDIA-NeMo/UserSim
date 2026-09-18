@@ -22,7 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import random
-from typing import Any, Dict
+from typing import Any
 
 from usersim.engine.core.behavioral import (
     format_behavioral_profile_for_prompt,
@@ -35,11 +35,11 @@ from usersim.engine.core.messages import (
     format_conversation_history_for_prompt,
     format_tools_for_prompt,
 )
-from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.outcomes import (
     SimulationTrace,
     TraceKind,
 )
+from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BaseProbe,
     ToolCallingMixin,
@@ -49,8 +49,10 @@ from usersim.engine.core.probes import (
 from usersim.engine.core.prompt_loader import render_prompt
 from usersim.engine.core.simulation import (
     ConversationState,
-    language_instruction as _language_instruction,
     make_failed,
+)
+from usersim.engine.core.simulation import (
+    language_instruction as _language_instruction,
 )
 from usersim.engine.probes.tool_calling.prompts import (
     assistant_system_prompt,
@@ -295,8 +297,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     def execute_tool_call(
         self,
         name: str,
-        args: Dict[str, Any],
-        tc: Dict[str, Any],
+        args: dict[str, Any],
+        tc: dict[str, Any],
         state: ConversationState,
         models: dict,
         *,

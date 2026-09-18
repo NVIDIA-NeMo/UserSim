@@ -30,7 +30,7 @@ is also pinned by ``test_nan_user_query_does_not_raise``.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -43,7 +43,7 @@ from usersim.engine.core.preview import (
 )
 
 
-def _general_row() -> Dict[str, Any]:
+def _general_row() -> dict[str, Any]:
     """A representative ``general`` family (tool_calling) trajectory."""
     return {
         "persona_name": "Sarah Johnson",
@@ -87,7 +87,7 @@ def _general_row() -> Dict[str, Any]:
     }
 
 
-def _agentic_row() -> Dict[str, Any]:
+def _agentic_row() -> dict[str, Any]:
     """A representative safety_agentic trajectory.
 
     Crucially: ``user_query`` is absent (the curated-asset probes inject the
@@ -135,9 +135,9 @@ def _agentic_row() -> Dict[str, Any]:
 
 
 def _record(
-    frames: List[Dict[str, Any]],
+    frames: list[dict[str, Any]],
     *,
-    preview_locale: str | List[str] | None = None,
+    preview_locale: str | list[str] | None = None,
 ) -> str:
     """Render via preview_row + preview_summary into a Rich record buffer.
 
@@ -443,11 +443,11 @@ class TestPreviewRowNewScenarios:
 
 def _outcome(
     status: str = "ok",
-    warnings: List[Dict[str, Any]] | None = None,
+    warnings: list[dict[str, Any]] | None = None,
     **extra: Any,
 ) -> str:
     """Build a ``simulation_outcome`` JSON blob for tests."""
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         "status": status,
         "warnings": warnings or [],
     }
@@ -1038,7 +1038,7 @@ class TestJudgeChips:
 # ---------------------------------------------------------------------------
 
 
-def _traced_row() -> Dict[str, Any]:
+def _traced_row() -> dict[str, Any]:
     """A ``general`` row whose assistant turns carry thinking traces.
 
     Two assistant messages in one user turn (the tool-call envelope and

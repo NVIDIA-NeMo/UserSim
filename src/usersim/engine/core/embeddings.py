@@ -22,7 +22,7 @@ the offline lexical path rather than failing the simulation.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
@@ -30,10 +30,10 @@ DEFAULT_EMBEDDING_ALIAS = "embedding_model"
 
 
 def embed_query(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     alias: str,
     text: str,
-) -> Optional[List[float]]:
+) -> list[float] | None:
     """Embed a single query string; return its vector or ``None`` on any error.
 
     ``None`` is a soft signal to the caller to fall back to lexical retrieval;

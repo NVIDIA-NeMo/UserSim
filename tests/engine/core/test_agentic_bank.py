@@ -26,6 +26,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.agentic_bank import (
     AgenticBank,
     AgenticBankError,
@@ -37,8 +38,6 @@ from usersim.engine.core.agentic_bank import (
     reset_action_taxonomy_cache,
     reset_agentic_bank_cache,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers

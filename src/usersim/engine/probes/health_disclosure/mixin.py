@@ -35,7 +35,7 @@ import json
 import logging
 import os
 import threading
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Mapping
 
 from usersim.engine.probes.health_disclosure import move_runtime as mr
 
@@ -49,7 +49,7 @@ _FALSE = ("0", "false", "no", "off")
 _MOVE_HOOK_LOCK = threading.Lock()
 
 
-def env_override(name: str) -> Optional[bool]:
+def env_override(name: str) -> bool | None:
     """Tri-state read of a boolean env var: ``True``/``False`` for a recognised
     on/off token, else ``None`` (unset or unrecognised).
 
@@ -77,7 +77,7 @@ class GuardedMoveMixin:
     #: Optional env var name that overrides the variant (local dev only). Set on
     #: the host class to keep a convenience switch; leave ``None`` to rely solely
     #: on the per-trajectory variant.
-    GUARDED_MOVE_ENV: Optional[str] = None
+    GUARDED_MOVE_ENV: str | None = None
 
     #: Process-wide default env-harness move hook (a serializable-payload sink;
     #: see ``move_runtime._move_payload``). Lives on the *capability*, not in a
@@ -86,14 +86,14 @@ class GuardedMoveMixin:
     #: default is the ergonomic "observe every trajectory" switch. Either channel
     #: is separable under concurrency because every payload is tagged with the
     #: trajectory identity (:meth:`_move_identity`).
-    _default_move_hook: Optional["mr.MoveHook"] = None
+    _default_move_hook: "mr.MoveHook" | None = None
 
     # ── env-harness hook registration (domain-agnostic capability seam) ──
     @classmethod
     def register_move_hook(
         cls,
-        fn: Optional["mr.MoveHook"],
-    ) -> Optional["mr.MoveHook"]:
+        fn: "mr.MoveHook" | None,
+    ) -> "mr.MoveHook" | None:
         """Register (or clear, with ``None``) the process-wide default move hook.
 
         Returns the previous default so callers can restore it. A hook that
@@ -155,13 +155,13 @@ class GuardedMoveMixin:
         self._gm_config: Mapping[str, Any] = {}
         self._env = None
         self._guard = None
-        self._topics: List[str] = []
+        self._topics: list[str] = []
         self._has_risk: bool = False
-        self._risk_revealed_turn: Optional[int] = None
+        self._risk_revealed_turn: int | None = None
         # Env-harness seam, resolved per-instance (never read from a global at
         # emit time): config-supplied hook wins, else the capability default.
-        self._move_hook: Optional["mr.MoveHook"] = None
-        self._move_identity: Dict[str, Any] = {}
+        self._move_hook: "mr.MoveHook" | None = None
+        self._move_identity: dict[str, Any] = {}
         if not self._moves_on:
             return
         cfg = self.guarded_move_config()
@@ -180,7 +180,7 @@ class GuardedMoveMixin:
             client=cfg,
         )
 
-    def _resolve_move_hook(self, cfg: Mapping[str, Any]) -> Optional["mr.MoveHook"]:
+    def _resolve_move_hook(self, cfg: Mapping[str, Any]) -> "mr.MoveHook" | None:
         """Resolve the env-harness hook for THIS trajectory, carried on the
         instance (never read from a global at emit time): a per-trajectory
         ``move_hook`` in the config mapping wins, else the capability's
@@ -188,7 +188,7 @@ class GuardedMoveMixin:
         """
         return cfg.get("move_hook") or GuardedMoveMixin._default_move_hook
 
-    def _build_move_identity(self, cfg: Mapping[str, Any]) -> Dict[str, Any]:
+    def _build_move_identity(self, cfg: Mapping[str, Any]) -> dict[str, Any]:
         """Trajectory identity stamped on every emitted move payload.
 
         Uses the framework's canonical, content-derived ``trajectory_id`` (set on
@@ -211,7 +211,7 @@ class GuardedMoveMixin:
         }
 
     # ── per-turn seam (BaseProbe hooks) ─────────────────────────────
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Commit a Guard-validated move for this turn and instruct the user.
 
         Returns ``[]`` when the move-space is disabled, so the host probe's base
@@ -328,7 +328,7 @@ class GuardedMoveMixin:
         return extras
 
 
-def _committed_levels(moves: List[dict]) -> dict:
+def _committed_levels(moves: list[dict]) -> dict:
     """Graded committed intent per topic from the move list (full > partial)."""
     order = {"none": 0, "partial": 1, "full": 2}
     levels: dict[str, str] = {}

@@ -25,7 +25,7 @@ asks for it (it is otherwise encoded in the output path).
 
 from __future__ import annotations
 
-from typing import Iterable, Optional, Sequence, Union
+from typing import Iterable, Sequence
 
 # Logical group tokens that expand to several real columns. Missing columns
 # are skipped at resolve time, so these can list optional columns freely.
@@ -102,7 +102,7 @@ LOGICAL_GROUPS: dict[str, tuple[str, ...]] = {
 OPT_IN_ONLY: frozenset[str] = frozenset(LOGICAL_GROUPS["persona_verbatim"] + LOGICAL_GROUPS["persona_protected"])
 
 # Named presets. ``None`` is the sentinel for "all columns" (full).
-NAMED_SCHEMAS: dict[str, Optional[tuple[str, ...]]] = {
+NAMED_SCHEMAS: dict[str, tuple[str, ...] | None] = {
     "full": None,
     # The default. Every column except the persona fields copied verbatim from
     # the source dataset. Handled as an exclusion rather than a token list so
@@ -130,7 +130,7 @@ NAMED_SCHEMAS: dict[str, Optional[tuple[str, ...]]] = {
 _PARTITION_REQUIRED: tuple[str, ...] = ("locale", "probe_family")
 
 # Schema = a preset name, a comma-separated string, or an explicit column list.
-Schema = Union[str, Sequence[str], None]
+Schema = str | Sequence[str] | None
 
 
 def available_schemas() -> tuple[str, ...]:

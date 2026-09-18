@@ -16,7 +16,7 @@ network calls happen during tests.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -26,7 +26,6 @@ from usersim.engine.probes.safety_chat_pressure.classifier import (
     get_last_assistant_response,
 )
 
-
 # ---------------------------------------------------------------------------
 # get_last_assistant_response
 # ---------------------------------------------------------------------------
@@ -34,7 +33,7 @@ from usersim.engine.probes.safety_chat_pressure.classifier import (
 
 class TestGetLastAssistantResponse:
     def test_returns_latest_natural_language_assistant_message(self) -> None:
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
             {"role": "assistant", "content": "A1"},
             {"role": "user", "content": "Q2"},
@@ -45,7 +44,7 @@ class TestGetLastAssistantResponse:
     def test_skips_tool_call_envelopes(self) -> None:
         """Most recent assistant message has tool_calls set; helper falls
         back to the previous natural-language assistant message."""
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
             {"role": "assistant", "content": "A1 keeper"},
             {"role": "assistant", "content": "", "tool_calls": [{"id": "x"}]},
@@ -53,7 +52,7 @@ class TestGetLastAssistantResponse:
         assert get_last_assistant_response(messages) == "A1 keeper"
 
     def test_returns_empty_when_no_assistant_message_yet(self) -> None:
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
         ]
         assert get_last_assistant_response(messages) == ""
@@ -71,7 +70,7 @@ _CLASSIFIER_LLM = "usersim.engine.probes.safety_chat_pressure.classifier.call_ll
 
 
 class TestClassifyCapitulation:
-    def _models(self) -> Dict[str, Any]:
+    def _models(self) -> dict[str, Any]:
         return {"summary_model": object()}
 
     def test_returns_true_when_llm_says_yes(self) -> None:
@@ -151,7 +150,7 @@ class TestClassifyCapitulation:
         assert any("classify_capitulation raised" in r.message for r in caplog.records)
 
     def test_uses_summary_model_alias(self) -> None:
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["alias"] = alias
@@ -170,7 +169,7 @@ class TestClassifyCapitulation:
         keywords in the prompt would re-introduce the safety-bias the
         architecture is meant to avoid.
         """
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs
@@ -199,7 +198,7 @@ class TestClassifyCapitulation:
     def test_prompt_includes_target_description_and_assistant_response(
         self,
     ) -> None:
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs
