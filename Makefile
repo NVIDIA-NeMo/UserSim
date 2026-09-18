@@ -143,8 +143,11 @@ check-wheel:  ## Build the wheel, clean-install it, and smoke from an empty dir
 		exit 1; \
 	fi; \
 	echo "→ installing into a throwaway venv"; \
-	$(UV) venv "$$WORK/venv" --python 3.13 >/dev/null 2>&1; \
-	VIRTUAL_ENV="$$WORK/venv" $(UV) pip install --quiet "$$WORK"/*.whl; \
+	$(UV) venv "$$WORK/venv" >/dev/null; \
+	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK"/*.whl; \
+	test -x "$$WORK/venv/bin/usersim" \
+		|| { echo "   ✗ the wheel installed but shipped no usersim entry point"; exit 1; }; \
 	echo "→ running from $$EMPTY (no repo in sight)"; \
 	cd "$$EMPTY" && "$$WORK/venv/bin/usersim" smoke; \
 	cd "$$EMPTY" && "$$WORK/venv/bin/usersim" simulate --dry-run \
@@ -260,10 +263,11 @@ check-extensions:  ## Install an out-of-tree package and prove all six seams wor
 	echo "→ building wheels into $$WORK"; \
 	$(UV) build --wheel -o "$$WORK" >/dev/null; \
 	echo "→ installing them plus the fixture extension into a throwaway venv"; \
-	$(UV) venv "$$WORK/venv" --python 3.13 >/dev/null 2>&1; \
-	VIRTUAL_ENV="$$WORK/venv" $(UV) pip install --quiet "$$WORK"/*.whl; \
+	$(UV) venv "$$WORK/venv" >/dev/null; \
+	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK"/*.whl; \
 	cp -R tests/fixtures/extension_package "$$WORK/ext"; \
-	VIRTUAL_ENV="$$WORK/venv" $(UV) pip install --quiet "$$WORK/ext"; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/ext"; \
 	echo "→ asking the installed CLI what it can see, from $$EMPTY"; \
 	cp tests/fixtures/extension_package/verify_seams.py "$$EMPTY/"; \
 	cd "$$EMPTY" && "$$WORK/venv/bin/python" verify_seams.py
