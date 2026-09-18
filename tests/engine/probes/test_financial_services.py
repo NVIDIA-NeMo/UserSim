@@ -568,14 +568,18 @@ def _mock_call_llm(assistant_responses, *, user_responses=None):
 def _patched_call_llm(side_effect):
     """Patch ``call_llm`` everywhere the loop + probe bind it.
 
-    ``simulation`` (loop assistant + turn-1 gen + completion check) and
-    ``judges`` (in-sim judge) bind ``call_llm`` at module load; the
-    ``ToolExecutionMixin`` inner-loop re-calls import it lazily from
-    ``core.llm``, so all three references must be patched.
+    ``simulation`` (loop assistant + turn-1 gen + completion check),
+    ``judges`` (in-sim judge) and ``context`` (response compression) each
+    bind ``call_llm`` at module load, so patching the source module does not
+    reach them; the ``ToolExecutionMixin`` inner-loop re-calls import it
+    lazily from ``core.llm``. Every one of these references must be patched,
+    or the real ``call_llm`` runs against this module's placeholder facades
+    and the probe's fallback quietly absorbs the resulting error.
     """
     with (
         patch("usersim.engine.core.simulation.call_llm", side_effect=side_effect),
         patch("usersim.engine.core.judges.call_llm", side_effect=side_effect),
+        patch("usersim.engine.core.context.call_llm", side_effect=side_effect),
         patch("usersim.engine.core.llm.call_llm", side_effect=side_effect),
     ):
         yield

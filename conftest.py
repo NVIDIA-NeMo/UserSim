@@ -30,8 +30,16 @@ _BLOCKED_MESSAGE = (
 )
 
 
-class BlockedNetworkCall(RuntimeError):
-    """Raised when a test attempts an outbound connection."""
+class BlockedNetworkCall(BaseException):
+    """Raised when a test attempts an outbound connection.
+
+    Deliberately not an ``Exception``. Production code retries failed model
+    calls and falls back on failed ones, both via ``except Exception``, so an
+    ordinary exception here gets absorbed: the test spends seconds in retry
+    backoff and then passes down a fallback path, reporting success for
+    whatever it meant to assert. Inheriting from ``BaseException`` means an
+    unmocked boundary stops the test at the point it happens.
+    """
 
 
 def _require_hermetic_env() -> None:

@@ -21,12 +21,31 @@ import pytest
 # is what fails rather than name resolution.
 _UNROUTABLE = ("203.0.113.1", 80)
 
+# The guard lives in the root conftest, which cannot be imported here because
+# `conftest` resolves to this directory's one.
+_GUARD_NAME = "BlockedNetworkCall"
+
+
+def _assert_guard_raised(excinfo) -> None:
+    """The guard must be a BaseException, not an Exception.
+
+    Both the model-call retry loop and the probe fallbacks catch
+    ``Exception``. An ordinary exception here is therefore absorbed: the test
+    spends the whole backoff budget retrying and then passes down a fallback
+    path, reporting success for whatever it set out to assert.
+    """
+    assert type(excinfo.value).__name__ == _GUARD_NAME
+    assert not isinstance(excinfo.value, Exception), (
+        "the network guard is an Exception again, so retry and fallback paths will swallow it and unmocked boundaries will go unnoticed"
+    )
+
 
 def test_outbound_connect_is_blocked() -> None:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        with pytest.raises(RuntimeError, match="network access is blocked"):
+        with pytest.raises(BaseException, match="network access is blocked") as excinfo:
             sock.connect(_UNROUTABLE)
+        _assert_guard_raised(excinfo)
     finally:
         sock.close()
 
@@ -34,8 +53,9 @@ def test_outbound_connect_is_blocked() -> None:
 def test_outbound_connect_ex_is_blocked() -> None:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        with pytest.raises(RuntimeError, match="network access is blocked"):
+        with pytest.raises(BaseException, match="network access is blocked") as excinfo:
             sock.connect_ex(_UNROUTABLE)
+        _assert_guard_raised(excinfo)
     finally:
         sock.close()
 

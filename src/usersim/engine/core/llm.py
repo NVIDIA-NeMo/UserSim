@@ -18,6 +18,13 @@ _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
 _MAX_DELAY = 30.0
 
+#: Failures that another attempt cannot fix, because they mean the call was
+#: built wrong rather than that the provider was briefly unhappy: a malformed
+#: models dict, a facade missing the method, bad keyword arguments. Retrying
+#: these only delays the traceback by the full backoff budget and buries the
+#: cause under warnings about a provider that was never at fault.
+_NEVER_RETRY = (AttributeError, TypeError, NameError, ImportError)
+
 logger = logging.getLogger("usersim.engine")
 
 # Full prompts, completions, reasoning content, and tool calls. Opt-in:
@@ -406,6 +413,8 @@ def call_llm(
                     alias,
                 )
                 continue
+            if isinstance(e, _NEVER_RETRY):
+                raise
             if attempt >= _MAX_RETRIES:
                 raise
             delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
