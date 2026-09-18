@@ -70,11 +70,19 @@ def _load_finance_taxonomy(locale="en_US"):
 
 
 @pytest.fixture(autouse=True)
-def _fresh_bank():
-    reset_finance_bank_cache()
+def _fresh_taxonomy():
+    """Reset the taxonomy cache, which is per-test state because the loader
+    reads an environment variable for its source.
+
+    The finance bank cache is deliberately NOT reset here. It is keyed by
+    locale and ``FinanceBank`` is a frozen dataclass, so a cached bank cannot
+    leak between tests; clearing it just reloads the same immutable assets
+    from disk, once per test, which was most of this file's runtime. Tests
+    that load a bank from a path of their own call ``load_finance_bank``
+    directly and never touch the cache.
+    """
     reset_probing_taxonomy_cache()
     yield
-    reset_finance_bank_cache()
     reset_probing_taxonomy_cache()
 
 
