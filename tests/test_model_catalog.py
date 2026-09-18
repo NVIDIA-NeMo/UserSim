@@ -254,10 +254,10 @@ class TestGemma4ThinkingTrigger:
         defaults = INFERENCE_DEFAULTS[self.MODEL]
         assert defaults["temperature"] == 1.0
         assert defaults["top_p"] == 0.95
-        # max_tokens=8192 mirrors other thinking-capable entries; with
+        # max_tokens mirrors other thinking-capable entries; with
         # thinking enabled, completions can be ~2x the non-thinking
         # length on rubric-heavy turns (probe showed 881 vs 476).
-        assert defaults["max_tokens"] == 8192
+        assert defaults["max_tokens"] == 4096
 
     def test_extra_body_round_trips_through_loader(self, tmp_path: Path):
         """End-to-end: a TOML row that omits extra_body picks up the
@@ -361,7 +361,7 @@ class TestLoaderAutofill:
         assistant = cfg.get("assistant_model")
         assert assistant.provider == "nvidia"
         # From the catalog: the TOML row sets none of these.
-        assert assistant.max_tokens == 8192
+        assert assistant.max_tokens == 4096
         assert assistant.temperature is not None
         assert assistant.top_p is not None
         # From the TOML row, which the catalog must not override.
@@ -564,7 +564,7 @@ class TestApplyModelOverrides:
     def test_swap_preserves_per_alias_fields(self):
         # max_parallel_requests / timeout / provider belong to the alias;
         # they MUST survive a model swap. (max_tokens IS per-model in the
-        # catalog as of the 8192-uniform-cap landing -- it gets re-resolved
+        # catalog as of the uniform-cap landing -- it gets re-resolved
         # along with temperature / top_p / extra_body. The other test
         # `test_swap_to_model_with_different_extra_body_drops_old_extra`
         # covers the model-keyed re-resolution path.)
@@ -578,8 +578,9 @@ class TestApplyModelOverrides:
         assert summary.provider == "nvidia"             # alias-specific, kept
         # New model is in catalog -> reasoning_effort=high carries over.
         assert summary.extra_body == {"reasoning_effort": "high"}
-        # max_tokens is per-model in the catalog now (8192 uniformly).
-        assert summary.max_tokens == 8192
+        # max_tokens is per-model in the catalog now (4096 uniformly;
+        # non-ASCII locales get it scaled up at call time).
+        assert summary.max_tokens == 4096
 
     def test_other_aliases_unchanged_by_targeted_override(self):
         cfg = self._cfg()
@@ -723,7 +724,7 @@ class TestApplyModelOverrides:
         sent = judge_mc.inference_parameters.generate_kwargs
         assert "temperature" not in sent  # would 400 on Opus 4.7 if present
         assert "top_p" not in sent        # would 400 on Opus 4.7 if present
-        assert sent["max_tokens"] == 8192
+        assert sent["max_tokens"] == 4096
 
 
 class TestApplyModelOverridesDictForm:
@@ -765,7 +766,7 @@ class TestApplyModelOverridesDictForm:
         # Sampling defaults still come from the gemma catalog entry.
         assert a.temperature == 1.0
         assert a.top_p == 0.95
-        assert a.max_tokens == 8192
+        assert a.max_tokens == 4096
 
     def test_dict_form_extra_body_explicit_none_clears_catalog(self):
         """``extra_body: None`` in the dict form is also a valid
@@ -1225,6 +1226,99 @@ class TestCatalogGapWarning:
         """The signal this check exists for must survive the fix."""
         messages = self._warnings_for("some-vendor/not-a-real-model", caplog)
         assert any("INFERENCE_DEFAULTS" in m for m in messages), messages
+
+    def test_openai_reasoning_entries_omit_sampling_params(self) -> None:
+        """On api.openai.com, reasoning mode excludes sampling parameters.
+
+        Measured: gpt-5.4-nano accepts ``temperature`` on its own and rejects
+        it the moment ``reasoning_effort`` is sent alongside. So the trigger
+        is the request rather than the model, which makes the rule checkable
+        instead of a per-model list someone has to keep current.
+
+        Scoped to OpenAI's own API, which is what the un-namespaced ids are.
+        Other providers serving reasoning models accept sampling parameters
+        happily: ``openai/gpt-oss-20b`` on build.nvidia.com and the OpenRouter
+        ids both take ``reasoning_effort`` and ``temperature`` together, and
+        the live matrix passes for them.
+
+        ``None`` is required rather than an absent key: absent applies the
+        project fallbacks (0.7 / 0.95), which are then rejected.
+        """
+        from usersim.cli.model_catalog import INFERENCE_DEFAULTS
+
+        offenders = []
+        for model, entry in INFERENCE_DEFAULTS.items():
+            # A namespaced id (vendor/model) is routed to a gateway, not to
+            # api.openai.com, and is not subject to this restriction.
+            if "/" in model:
+                continue
+            if "reasoning_effort" not in (entry.get("extra_body") or {}):
+                continue
+            for field in ("temperature", "top_p"):
+                if entry.get(field, "absent") is not None:
+                    offenders.append(f"{model}.{field}")
+            if entry.get("max_tokens") is not None:
+                offenders.append(f"{model}.max_tokens")
+        assert not offenders, (
+            "OpenAI entries setting reasoning_effort must set temperature and "
+            f"top_p to None and omit max_tokens: {sorted(offenders)}"
+        )
+
+    def test_reasoning_models_send_no_sampling_params(self) -> None:
+        """Reasoning endpoints reject temperature and top_p with an HTTP 400.
+
+        Omitting the keys from the catalog is not enough: the project
+        fallbacks (0.7 / 0.95) would then apply and the request would be
+        rejected. The entries must say ``None`` explicitly. This shipped
+        broken once because the offline probe sends its own payload and never
+        exercised the parameters a real run sends.
+        """
+        from usersim.cli._models import load_models_config, to_model_configs
+
+        cfg = load_models_config(_cli_dir() / "models_openai.toml")
+        for model_config in to_model_configs(cfg):
+            params = model_config.inference_parameters
+            if getattr(params, "generation_type", None) == "embedding":
+                continue
+            assert getattr(params, "temperature", None) is None, (
+                f"{model_config.alias} ({model_config.model}) would send a "
+                f"temperature to a reasoning endpoint"
+            )
+            assert getattr(params, "top_p", None) is None, model_config.alias
+
+    def test_drop_params_omits_them(self, tmp_path) -> None:
+        """A TOML row can suppress a parameter, which null cannot express."""
+        from usersim.cli._models import load_models_config, to_model_configs
+
+        path = tmp_path / "m.toml"
+        path.write_text(
+            'models = [\n'
+            '  { alias = "user_model", model = "gpt-4.1", provider = "openai", '
+            'drop_params = ["temperature", "top_p"] },\n'
+            '  { alias = "judge_model", model = "gpt-4.1", provider = "openai" },\n'
+            ']\n'
+        )
+        cfg = load_models_config(path)
+        assert cfg.get("user_model").temperature is None
+        assert cfg.get("user_model").top_p is None
+        # The alias that did not ask keeps the catalog's values.
+        assert cfg.get("judge_model").temperature == 0.85
+
+        by_alias = {m.alias: m.inference_parameters for m in to_model_configs(cfg)}
+        assert getattr(by_alias["user_model"], "temperature", None) is None
+        assert getattr(by_alias["judge_model"], "temperature", None) == 0.85
+
+    def test_drop_params_rejects_unknown_fields(self, tmp_path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._models import load_models_config
+
+        path = tmp_path / "m.toml"
+        path.write_text(
+            'models = [{ alias = "user_model", model = "gpt-4.1", '
+            'provider = "openai", drop_params = ["provider"] }]\n'
+        )
+        with pytest.raises(ConfigError, match="not droppable"):
+            load_models_config(path)
 
     def test_bundled_path_ignores_a_local_override(self, tmp_path, monkeypatch) -> None:
         """``bundled_models_path`` must never follow a local file.

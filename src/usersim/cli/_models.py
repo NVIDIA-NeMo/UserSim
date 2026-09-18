@@ -215,10 +215,27 @@ def _to_model_spec(d: Dict[str, Any], *, source: Path) -> ModelSpec:
             source.name, alias, model,
         )
 
+    # TOML has no null literal, so a row cannot write ``temperature = None``
+    # to mean "send no temperature". ``drop_params`` is that expression: it
+    # names the parameters to leave out of the request entirely. Needed for
+    # reasoning models on a custom provider, which reject a non-default
+    # temperature and reject top_p outright, and which the catalog cannot
+    # cover because their ids are provider-specific.
+    dropped = {str(x) for x in d.get("drop_params", ())}
+    _DROPPABLE = {"temperature", "top_p", "max_tokens"}
+    if unknown_drop := dropped - _DROPPABLE:
+        raise ConfigError(
+            f"{source.name}: alias={alias!r} has drop_params "
+            f"{sorted(unknown_drop)}, which are not droppable. "
+            f"Choose from {sorted(_DROPPABLE)}."
+        )
+
     def pick(field: str, default: Any = None) -> Any:
         # TOML wins; otherwise catalog; otherwise hard-coded fallback.
         # NOTE: a catalog value of ``None`` is treated as "explicitly
         # drop this param" -- different from "field not in catalog".
+        if field in dropped:
+            return None
         if field in d:
             return d[field]
         if field in catalog:
@@ -941,6 +958,18 @@ def smoke_test_models(
                 "messages": [{"role": "user", "content": "Say hi briefly."}],
                 "max_tokens": 256,
             }
+            # Send the sampling parameters this alias resolved to, so the
+            # probe exercises what a real run sends. Without this the probe
+            # passes on a model that rejects the configured temperature or
+            # top_p, and the failure only appears later at the provider's
+            # health check. ``None`` means the config omits the parameter,
+            # so it is omitted here too.
+            if spec.temperature is not None:
+                payload["temperature"] = spec.temperature
+            if spec.top_p is not None:
+                payload["top_p"] = spec.top_p
+            if spec.extra_body:
+                payload.update(spec.extra_body)
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",

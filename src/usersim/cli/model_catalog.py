@@ -28,11 +28,16 @@ What's intentionally NOT in this catalog:
 - ``max_parallel_requests`` -- per-alias rate budget. Lives in the TOML row.
 - ``provider`` -- per-deployment routing decision. Lives in the TOML row.
 
-``max_tokens`` is per-model in the catalog at a uniform 8192 rather than
-per-alias, to absorb non-ASCII tokenization variance: a tight per-job limit
-costs truncation on Japanese, Hindi and Korean locales. Override per-alias by
-setting ``max_tokens`` explicitly on the TOML row if a particular alias
-needs a different ceiling.
+``max_tokens`` is per-model in the catalog at a uniform 4096 rather than
+per-alias. Non-ASCII locales do not carry a smaller budget: the simulator
+scales this up for them at call time (see ``NON_ASCII_TOKEN_SCALE`` in
+``engine/core/llm.py``), because Japanese, Hindi and Korean tokenize far more
+densely than English for the same number of characters.
+
+Override per-alias by setting ``max_tokens`` on the TOML row when an alias
+needs a different ceiling. ``financial_services`` is the case that most often
+wants more: its answers quote knowledge-base documents, so 8192 is a better
+fit there than the default.
 
 Cluster-specific variants of ``extra_args`` are NOT modeled here yet. If we
 move to a second cluster with different memory ceilings, swap this for a
@@ -56,13 +61,11 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/gpt-oss-20b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        # 8192 max_tokens uniformly across the simulator -- non-ASCII locales
-        # (Japanese, Hindi, Korean, etc.) tokenize ~3x more densely than
-        # English in the OpenAI BPE family, so a 1024 / 2048 / 256 per-alias
-        # cap (the previous per-job tuning) can truncate responses mid-token
-        # for the same number of characters. A uniform high ceiling trades
-        # tighter generation budgets for safety against truncation.
-        "max_tokens": 8192,
+        # 4096 uniformly across the simulator. Non-ASCII locales (Japanese,
+        # Hindi, Korean) tokenize far more densely than English for the same
+        # number of characters, so they get a scaled-up budget at call time
+        # rather than a separate entry here. See NON_ASCII_TOKEN_SCALE.
+        "max_tokens": 4096,
         # reasoning_effort=high uniformly across aliases that use 20b.
         # Trade slower / more expensive calls for higher answer quality;
         # apply consistently to user_model + api_response_model + summary_model.
@@ -71,7 +74,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/gpt-oss-120b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # reasoning_effort=high for both 120b aliases (assistant + judge).
         # The judge benefits most -- harder rubric calls get more thinking
         # tokens; assistant under test runs at the same effort users expect.
@@ -84,7 +87,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/openai/gpt-oss-120b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "extra_body": {"reasoning_effort": "high"},
     },
     # The double "openai/" prefix is intentional: the first segment is the
@@ -98,13 +101,13 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai/openai/gpt-5.4": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "timeout": 300,
     },
     "openai/openai/gpt-5.5": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # gpt-5.5 is a reasoning model -- emits internal thinking tokens
         # before visible output. 5 minutes is generous for a single
         # reply; if the hub is slower than that, treat it as an infra
@@ -124,7 +127,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
         # default value"). Use prompting to guide behavior instead.
         "temperature": None,
         "top_p": None,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         # Anthropic doesn't expose reasoning_effort; leave extra_body unset.
     },
     # Nemotron-3-Super-120B (LatentMoE, ~12B active params).
@@ -144,12 +147,12 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/nvidia/nemotron-3-super-v3": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     "nvidia/nemotron-3-super": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     # Gemma-4-31B-Instruct via the NVIDIA inference hub.
     # Reasoning is gated by the chat template's ``enable_thinking`` flag,
@@ -181,7 +184,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/google/gemma-4-31b-it": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "extra_body": {"chat_template_kwargs": {"enable_thinking": True}},
     },
     # ── openai provider (api.openai.com) ──────────────────────────────
@@ -190,23 +193,41 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "gpt-4.1": {
         "temperature": 0.85,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
-    # Reasoning models. These deliberately carry neither sampling parameters
-    # nor ``max_tokens``: they sample their own thinking regardless of
-    # temperature, and the OpenAI reasoning endpoints reject ``max_tokens``
-    # outright with an HTTP 400, expecting ``max_completion_tokens`` instead.
-    # Leaving ``max_tokens`` unset is what keeps it out of the request.
+    # REASONING MODE AND SAMPLING PARAMETERS ARE MUTUALLY EXCLUSIVE.
+    #
+    # The trigger is the request, not the model: measured against
+    # api.openai.com, ``gpt-5.4-nano`` accepts ``temperature`` on its own and
+    # rejects it as soon as ``reasoning_effort`` is also sent. So any entry
+    # setting ``reasoning_effort`` must omit ``temperature``, ``top_p`` and
+    # ``max_tokens`` (the last replaced by ``max_completion_tokens``).
+    #
+    # ``None`` means "omit", which is NOT the same as leaving the key out:
+    # absent applies the project fallbacks (0.7 / 0.95) and the request is
+    # then rejected. Writing the documented default instead of omitting is
+    # the other trap, since it breaks when that default changes.
+    #
+    # test_reasoning_entries_omit_sampling_params enforces this across the
+    # whole map, so a new entry cannot get it wrong.
     "gpt-5": {
+        "temperature": None,
+        "top_p": None,
         "extra_body": {"reasoning_effort": "medium"},
     },
     "gpt-5.4-nano": {
+        "temperature": None,
+        "top_p": None,
         "extra_body": {"reasoning_effort": "low"},
     },
     "gpt-5.6-luna": {
+        "temperature": None,
+        "top_p": None,
         "extra_body": {"reasoning_effort": "medium"},
     },
     "gpt-5.6-terra": {
+        "temperature": None,
+        "top_p": None,
         "extra_body": {"reasoning_effort": "medium"},
     },
     # ── openrouter provider (openrouter.ai) ───────────────────────────
@@ -216,13 +237,13 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/nemotron-3-nano-30b-a3b": {
         "temperature": 1.0,
         "top_p": 1.0,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     # build.nvidia.com spells the same model ``nemotron-3.5-lightning-30b-a3b``.
     "nvidia/nemotron-3.5-lightning": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     # ── build.nvidia.com (nvidia provider) ────────────────────────────
     # The two chat models and the embedding model the default config uses.
@@ -231,14 +252,14 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "nvidia/nemotron-3-super-120b-a12b": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "extra_body": {"reasoning_effort": "medium"},
     },
     # OpenRouter spells the same model ``nemotron-3.5-lightning``.
     "nvidia/nemotron-3.5-lightning-30b-a3b": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     },
     # Reasoning is gated by the chat template's ``enable_thinking`` flag; see
     # the note on the gateway-namespaced entry above for why the other
@@ -246,7 +267,7 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "google/gemma-4-31b-it": {
         "temperature": 1.0,
         "top_p": 0.95,
-        "max_tokens": 8192,
+        "max_tokens": 4096,
         "extra_body": {"chat_template_kwargs": {"enable_thinking": True}},
     },
 }

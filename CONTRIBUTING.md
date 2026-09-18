@@ -151,6 +151,19 @@ directory. **Variables already set in your environment always win**, so the
 file fills gaps rather than overriding a deliberate export. Nothing is required:
 a missing file is normal, and the notebooks prompt for any key still missing.
 
+**Reasoning models reject sampling parameters.** Most return an HTTP 400 for
+any non-default `temperature`, and some reject `top_p` outright. Catalogued
+models handle this already. For one the catalog does not know, such as a model
+behind your own provider, name the parameters to leave out of the request.
+TOML has no null literal, so this is how a row says "send nothing here":
+
+```toml
+{ alias = "evaluator_model", model = "my-reasoning-model", provider = "my-endpoint", drop_params = ["temperature", "top_p"] }
+```
+
+Without it the project defaults (`temperature = 0.7`, `top_p = 0.95`) apply and
+the call fails. `max_tokens` is droppable the same way.
+
 Adding a model means adding it to
 [`model_catalog.py`](src/usersim/cli/model_catalog.py) as well, so its sampling
 parameters resolve. `usersim smoke` fails if a shipped config names a model the
