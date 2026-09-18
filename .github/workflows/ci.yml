@@ -1,0 +1,106 @@
+# Every job here wraps a `make` target rather than restating the command, so
+# what CI enforces and what you can run locally cannot drift apart. If a job
+# fails, the same target reproduces it on your machine.
+#
+# No job in this file touches a secret. Anything needing a credential lives in
+# health-checks.yml, which never runs on pull_request, so a PR from a fork can
+# run the full suite without exposing anything.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: enough to clone, nothing else. Checking out a private
+# repository needs `contents: read`, so an empty block would fail here even
+# though it works for a public one.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Fail rather than silently re-resolving when uv.lock is stale.
+  UV_FROZEN: "1"
+
+jobs:
+  static:
+    name: Lint, format, docs and licences
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          python-version: "3.12"
+          enable-cache: true
+
+      - run: make install-ci
+
+      - name: Lint and formatting
+        run: make check-all
+
+      - name: SPDX headers
+        run: make check-license-headers
+
+      - name: Relative links in markdown
+        run: make check-doc-links
+
+      - name: Dependency licences
+        run: make check-dependency-licenses
+
+      - name: Notebook outputs are stripped
+        # nbstripout runs from a pre-commit hook that only exists if a
+        # contributor ran `make install-dev`. A fresh clone has no hooks, so
+        # this is the only thing that actually keeps outputs out of the repo.
+        run: make check-notebooks-clean
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - run: make install-ci
+
+      - name: Test suite
+        run: make test
+
+      - name: Offline self-check
+        run: make smoke
+
+  packaging:
+    name: Wheel and extension seams
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          python-version: "3.12"
+          enable-cache: true
+
+      - run: make install-ci
+
+      - name: Build the wheel, install it clean, run from an empty directory
+        run: make check-wheel
+
+      - name: An out-of-tree package reaches every extension seam
+        run: make check-extensions

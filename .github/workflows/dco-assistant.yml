@@ -1,0 +1,52 @@
+# Records Developer Certificate of Origin sign-off. A contributor who forgot
+# `git commit -s` can sign by leaving a comment instead of rewriting history.
+#
+# This uses pull_request_target because it must comment on and store
+# signatures for pull requests from forks, which the read-only token on a
+# `pull_request` event cannot do. It never checks out the pull request's code,
+# so the elevated token is not exposed to anything the contributor wrote.
+name: DCO Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  statuses: write
+
+jobs:
+  dco:
+    # Forks of this repository have neither the signature branch nor the
+    # token, so the job would fail on every pull request they receive.
+    if: github.repository_owner == 'NVIDIA-NeMo'
+    runs-on: ubuntu-latest
+    steps:
+      - name: DCO Assistant
+        if: >-
+          github.event_name == 'pull_request_target'
+          || github.event.comment.body == 'recheck'
+          || github.event.comment.body == 'I have read the DCO document and I hereby sign the DCO.'
+        uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08 # v2.6.1
+        env:
+          # No personal access token. The action only reads one when
+          # signatures are stored in a different repository, which is what
+          # `remote-repository-name` / `remote-organization-name` configure.
+          # Ours live on this repository's `signatures` branch, so the
+          # built-in token writes them. That branch must stay unprotected.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-signatures: "dco-signatures.json"
+          path-to-document: "https://github.com/NVIDIA-NeMo/UserSim/blob/main/DCO"
+          branch: "signatures"
+          allowlist: dependabot[bot]
+          create-file-commit-message: "chore: create file to store dco signatures"
+          signed-commit-message: "chore: $contributorName has signed the dco in #$pullRequestNo"
+          custom-notsigned-prcomment: "Thank you for your submission! We ask that $you sign our [Developer Certificate of Origin](https://github.com/NVIDIA-NeMo/UserSim/blob/main/DCO) before we can accept your contribution. You can sign the DCO by adding a comment below using this text:"
+          custom-pr-sign-comment: "I have read the DCO document and I hereby sign the DCO."
+          lock-pullrequest-aftermerge: false
+          use-dco-flag: true

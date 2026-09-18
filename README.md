@@ -1,5 +1,9 @@
 # NeMo UserSim: Population-Grounded User Simulation
 
+[![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](pyproject.toml)
+
 > Simulate a statistically representative population of users having multi-turn
 > conversations with your LLM. Every run yields both evaluation signal and
 > curated training data, before you have a real user base to learn from.

@@ -57,7 +57,7 @@ COV_FAIL_UNDER ?= 84
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install-dev install-ci install-kernel lint lint-fix format format-check check-all \
+.PHONY: help install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
         check-all-fix test test-fast coverage smoke check-wheel check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
@@ -165,6 +165,33 @@ clean-notebooks:  ## Strip outputs from every notebook (source only)
 	@$(UV) run --with nbstripout nbstripout $$(git ls-files '*.ipynb' | grep -v '^_')
 	@echo "✓ notebook outputs stripped"
 
+# The pre-commit hook that strips outputs only exists if someone ran
+# `make install-dev`; a fresh clone has none. This is what actually keeps
+# outputs, and the absolute paths and endpoint URLs inside them, out of the
+# repository.
+check-notebooks-clean:  ## Fail if any committed notebook carries outputs
+	@$(UV) run python -c "$$CHECK_NOTEBOOKS_PY"
+
+define CHECK_NOTEBOOKS_PY
+import json, subprocess, sys
+files = subprocess.run(
+    ["git", "ls-files", "*.ipynb"], capture_output=True, text=True, check=True
+).stdout.split()
+dirty = []
+for path in files:
+    nb = json.load(open(path))
+    n = sum(len(c.get("outputs", [])) for c in nb["cells"])
+    n += sum(1 for c in nb["cells"] if c.get("execution_count"))
+    if n:
+        dirty.append(f"{path} ({n} output/execution entries)")
+if dirty:
+    print("Committed notebooks carry outputs:", *dirty, sep="\n  ")
+    print("\nRun `make clean-notebooks` and commit the result.")
+    sys.exit(1)
+print(f"OK {len(files)} notebook(s) carry no outputs")
+endef
+export CHECK_NOTEBOOKS_PY
+
 # `uv run jupyter lab` already sees the kernel inside .venv. This registers a
 # NAMED one so editors that pick kernels system-wide can find this project's
 # environment rather than offering a bare "python3" per checkout.
@@ -174,6 +201,56 @@ install-kernel:  ## Register a Jupyter kernel named for this project's venv
 
 check-doc-links:  ## Fail on broken relative links in tracked markdown
 	@$(UV) run python scripts/check_doc_links.py
+
+# --- live checks (need credentials; never run in PR CI) --------------------
+
+# The offline suite proves the code is self-consistent. This proves a real
+# provider accepts what we send it, which is a different question: the
+# parameters, the provider routing and the engine's token budget are only
+# exercised by an actual run. One row, two turns, so the cost is negligible.
+PROVIDER_CONFIG ?= src/usersim/cli/models_default.toml
+HEALTH_LOCALE   ?= ja_JP
+HEALTH_PROBE    ?= sov_ai_dynamic
+
+# A provider you have no key for is skipped rather than failed. Without this
+# the target is red for everyone who has one key, and the scheduled workflow
+# is red until every secret is provisioned, which trains people to ignore it.
+define REQUIRE_KEYS_PY
+import sys
+from usersim.cli._models import load_models_config, required_api_key_env_vars
+config = sys.argv[1]
+missing = sorted(v for v in required_api_key_env_vars(load_models_config(config)) if not __import__("os").environ.get(v))
+if missing:
+    print(f"SKIP  {config}: {', '.join(missing)} not set")
+    sys.exit(1)
+endef
+export REQUIRE_KEYS_PY
+
+health-check:  ## Live one-row simulate + eval + report against a provider
+	@set -eu; \
+	if ! $(UV) run python -c "$$REQUIRE_KEYS_PY" "$(PROVIDER_CONFIG)"; then exit 0; fi; \
+	OUT=$$(mktemp -d); \
+	trap 'rm -rf "$$OUT"' EXIT; \
+	echo "==> simulate  ($(HEALTH_LOCALE), $(PROVIDER_CONFIG))"; \
+	$(UV) run usersim simulate \
+		--locale $(HEALTH_LOCALE) --num-rows 1 --max-turns 2 \
+		--probe-mix "$(HEALTH_PROBE)=1.0" \
+		--models $(PROVIDER_CONFIG) \
+		--out "$$OUT/trajectories"; \
+	RUN=$$(basename $$(ls -d "$$OUT"/trajectories/run=* | head -1) | cut -d= -f2); \
+	echo "==> eval      (run $$RUN)"; \
+	$(UV) run usersim eval --run "$$RUN" \
+		--trajectories "$$OUT/trajectories" \
+		--models $(PROVIDER_CONFIG) \
+		--out "$$OUT/evaluations"; \
+	echo "==> report    (run $$RUN)"; \
+	$(UV) run usersim report --run "$$RUN" \
+		--trajectories "$$OUT/trajectories" \
+		--evaluations "$$OUT/evaluations" \
+		--out "$$OUT/report"; \
+	test -f "$$OUT/report/run=$$RUN/index.html" \
+		|| { echo "report produced no index.html"; exit 1; }; \
+	echo "✓ simulate, eval and report all completed"
 
 check-extensions:  ## Install an out-of-tree package and prove all six seams work
 	@set -eu; \

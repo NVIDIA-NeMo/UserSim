@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # Actions are pinned to full commit SHAs, which is what makes a supply-chain
+  # attack on a tag ineffective and also what makes them impossible to update
+  # by hand. This is the mechanism that keeps the pins current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      all-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+
+  # Security alerts only. Every run pins a model and a provider, so a surprise
+  # dependency bump landing on main is more likely to change results than to
+  # fix anything; upgrades are deliberate.
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    commit-message:
+      prefix: "chore"

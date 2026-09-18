@@ -1,0 +1,115 @@
+# Live provider checks. Deliberately NOT triggered by pull_request: this is
+# the only workflow holding credentials, and a PR from a fork must never be
+# able to reach them.
+#
+# Why this exists in addition to the offline suite: `usersim smoke` and the
+# model probe build their own request payloads and call the provider
+# directly. That proves connectivity and authentication, and nothing else. It
+# has reported every alias healthy against a configuration that could not
+# complete a single turn, because the parameters a real run sends, the
+# provider registry it resolves through, and the token budget the engine
+# injects were all untested. So this drives the actual commands.
+name: Health checks
+
+on:
+  schedule:
+    # Monday 08:00 UTC. Model availability changes without notice; weekly is
+    # often enough to catch a retired model before a user does.
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    # pipefail is the point. The default shell reports the exit status of the
+    # last command in a pipeline, so a failing check piped into `tee` reports
+    # success and this workflow could never go red.
+    shell: bash -euo pipefail {0}
+
+concurrency:
+  group: health-checks
+  cancel-in-progress: false
+
+jobs:
+  live:
+    name: ${{ matrix.provider }} end to end
+    runs-on: ubuntu-latest
+    # A provider outage should not hide the state of the other two.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # A different non-Latin locale each. Non-Latin is not decoration:
+          # the engine injects a token budget only for those locales, and
+          # that path has broken twice without the suite noticing.
+          #
+          # Each job receives only the one key it needs, so a leak in a job
+          # cannot expose the other providers' credentials.
+          - provider: nvidia
+            config: src/usersim/cli/models_default.toml
+            locale: ja_JP
+            key_env: NVIDIA_API_KEY
+            secret_name: TEST_NVIDIA_API_KEY
+          - provider: openai
+            config: src/usersim/cli/models_openai.toml
+            locale: ko_KR
+            key_env: OPENAI_API_KEY
+            secret_name: TEST_OPENAI_API_KEY
+          - provider: openrouter
+            config: src/usersim/cli/models_openrouter.toml
+            locale: hi_Deva_IN
+            key_env: OPENROUTER_API_KEY
+            secret_name: TEST_OPENROUTER_API_KEY
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          python-version: "3.12"
+          enable-cache: true
+
+      - run: make install-ci
+
+      - name: Simulate, evaluate and report
+        env:
+          # An expression cannot be an `env` key, so the secret arrives under
+          # a fixed name and the step below exports it as the one the
+          # provider expects. Each job still receives only its own key.
+          #
+          # An unconfigured secret arrives as the empty string, which the
+          # target treats as absent and skips, so this workflow is green
+          # before any secret exists. The summary is what tells you it did
+          # nothing.
+          PROVIDER_API_KEY: ${{ secrets[matrix.secret_name] }}
+          KEY_ENV: ${{ matrix.key_env }}
+          PROVIDER_CONFIG: ${{ matrix.config }}
+          HEALTH_LOCALE: ${{ matrix.locale }}
+        run: |
+          export "$KEY_ENV=$PROVIDER_API_KEY"
+          make health-check \
+            PROVIDER_CONFIG="$PROVIDER_CONFIG" \
+            HEALTH_LOCALE="$HEALTH_LOCALE" \
+            | tee /tmp/health.log
+
+      - name: Summary
+        if: always()
+        env:
+          PROVIDER: ${{ matrix.provider }}
+          LOCALE: ${{ matrix.locale }}
+          SECRET_NAME: ${{ matrix.secret_name }}
+        run: |
+          {
+            echo "### $PROVIDER ($LOCALE)"
+            echo
+            if grep -q '^SKIP' /tmp/health.log; then
+              echo "Skipped: repository secret \`$SECRET_NAME\` is not set."
+            else
+              echo '```'
+              tail -20 /tmp/health.log || echo "(no output captured)"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

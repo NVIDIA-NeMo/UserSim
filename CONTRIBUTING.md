@@ -196,6 +196,36 @@ make check-extensions   # installs an out-of-tree package, asserts all six seams
 
 `make update-license-headers` adds the SPDX header to new files.
 
+Your PR title must follow [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat:`, `fix:`, `docs:`, `ci:`, `chore:`, `refactor:`, `test:`, `style:`,
+`perf:`), because it becomes the squashed commit subject on `main`.
+
+## What CI runs
+
+Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
+rejects reproduces locally with the same command. Tests run on Python 3.12 and
+3.13.
+
+No job triggered by a pull request has access to a credential, so a PR from a
+fork runs the complete suite. The consequence is that CI cannot tell you
+whether a provider still accepts what we send it. That check lives in
+`.github/workflows/health-checks.yml`, which runs weekly and on demand, and
+you can run it yourself:
+
+```bash
+make health-check                                             # build.nvidia.com
+make health-check PROVIDER_CONFIG=src/usersim/cli/models_openai.toml
+```
+
+A provider whose API key you have not set is reported as skipped rather than
+failed, so you can run this with one key and check one provider.
+
+It runs a real one-row `simulate`, `eval` and `report`. Please run it if you
+touched models, providers, prompts, scorers or the trajectory store. The
+offline suite mocks every model call, and `usersim smoke` builds its own
+request rather than the one a run sends, so neither can catch a payload a
+provider rejects or a file we write but cannot read back.
+
 ## What the tests expect
 
 The suite is hermetic: every model call is mocked, and a network guard fails
