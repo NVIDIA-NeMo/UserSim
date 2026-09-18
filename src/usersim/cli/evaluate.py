@@ -84,10 +84,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--axes",
         type=str,
         default=None,
-        help=(
-            "Comma-separated axis names to score. Default: all axes "
-            "applicable to each row's probe_family."
-        ),
+        help=("Comma-separated axis names to score. Default: all axes applicable to each row's probe_family."),
     )
     p.add_argument(
         "--scorers",
@@ -113,10 +110,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--num-records",
         type=int,
         default=None,
-        help=(
-            "Evaluate only the first N ordered trajectory rows. "
-            "Default: evaluate the full run."
-        ),
+        help=("Evaluate only the first N ordered trajectory rows. Default: evaluate the full run."),
     )
     p.add_argument(
         "--num-records-per-locale",
@@ -183,10 +177,7 @@ def run(args: argparse.Namespace) -> int:
     declared = set(models.aliases())
     missing = [j["alias"] for j in judges if j["alias"] not in declared]
     if missing:
-        raise SystemExit(
-            f"--judges references aliases not in {models_path}: {missing}; "
-            f"declared: {sorted(declared)}"
-        )
+        raise SystemExit(f"--judges references aliases not in {models_path}: {missing}; declared: {sorted(declared)}")
 
     if args.dry_run:
         print("usersim eval — dry run")
@@ -197,10 +188,7 @@ def run(args: argparse.Namespace) -> int:
         print(f"  prompt_ver:    {args.prompt_version}")
         print(f"  skip_existing: {not args.no_skip_existing}")
         print(f"  num_records:   {args.num_records if args.num_records is not None else 'all'}")
-        print(
-            "  per_locale:    "
-            f"{args.num_records_per_locale if args.num_records_per_locale is not None else 'off'}"
-        )
+        print(f"  per_locale:    {args.num_records_per_locale if args.num_records_per_locale is not None else 'off'}")
         print(f"  output column: {args.output_column}")
         print(f"  models config: {models_path}")
         print(f"  output:        {args.out}")
@@ -229,9 +217,7 @@ def run(args: argparse.Namespace) -> int:
     traj_path = Path(args.trajectories).resolve()
     run_id = resolve_run(traj_path, getattr(args, "run", None))
     if run_id is None:
-        raise FileNotFoundError(
-            f"no runs found under {traj_path} — run `usersim simulate` first"
-        )
+        raise FileNotFoundError(f"no runs found under {traj_path} — run `usersim simulate` first")
     print(f"  run_id:        {run_id}")
 
     # Resolve the trajectory dataset for THIS run only. The
@@ -248,8 +234,9 @@ def run(args: argparse.Namespace) -> int:
         seed_source_path = traj_run_root
 
     try:
-        import pandas as pd
         import tempfile
+
+        import pandas as pd
 
         key_cols = ["trajectory_id", "locale", "probe_family"]
         if args.num_records is not None and args.num_records_per_locale is not None:
@@ -269,9 +256,7 @@ def run(args: argparse.Namespace) -> int:
                     for _, group in full_seed_df.groupby("locale", sort=True)
                 ]
             ).sort_index()
-            tmp = tempfile.NamedTemporaryFile(
-                suffix=".parquet", delete=False, prefix="usersim_eval_seed_"
-            )
+            tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False, prefix="usersim_eval_seed_")
             tmp.close()
             temp_sample_seed = Path(tmp.name)
             seed_df.to_parquet(temp_sample_seed, index=False)
@@ -281,11 +266,7 @@ def run(args: argparse.Namespace) -> int:
         else:
             seed_df = pd.read_parquet(seed_source_path, columns=key_cols)
             seed_row_count = len(seed_df)
-            num_records = (
-                seed_row_count
-                if args.num_records is None
-                else min(int(args.num_records), seed_row_count)
-            )
+            num_records = seed_row_count if args.num_records is None else min(int(args.num_records), seed_row_count)
         if num_records <= 0:
             raise ValueError("--num-records must be positive when provided")
 

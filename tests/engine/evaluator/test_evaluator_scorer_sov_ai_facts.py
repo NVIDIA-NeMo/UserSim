@@ -18,11 +18,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import reset_fact_bank_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -33,17 +34,15 @@ from usersim.engine.evaluator.scorers import (
 from usersim.engine.evaluator.scorers.sov_ai_facts import (
     _ACCURACY,
     _COMPLETENESS,
+    _COMPLETION_AXES,
     _FABRICATION,
+    _FACTUAL_RECALL_AXES,
     _FALSE_PREMISE_CATCH,
     _GRACEFUL_UNKNOWN,
-    _as_list_of_str,
     AGGREGATABLE_AXES,
-    _COMPLETION_AXES,
-    _FACTUAL_RECALL_AXES,
+    _as_list_of_str,
     score_sov_ai_facts_trajectory,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -68,16 +67,12 @@ def _reset_state_between_tests():
 @pytest.fixture
 def sample_bank_path() -> Path:
     # conversation-plugin/tests/ → parents[3] is the repo root
-    return (
-        (packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml")
-    )
+    return packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"
 
 
 @pytest.fixture
 def mock_bank_env(sample_bank_path: Path):
-    with patch.dict(
-        os.environ, {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(sample_bank_path)}
-    ):
+    with patch.dict(os.environ, {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(sample_bank_path)}):
         yield sample_bank_path
 
 
@@ -86,10 +81,9 @@ def _factual_recall_trajectory(
     fact_id: str = "BR-GEO-001",
     pinned_version: str = "v0.5.2",
     response_text: str = (
-        "Na verdade o Amazonas desagua no Atlântico, não no Pacífico. "
-        "Tem cerca de 6.992 km de extensão."
+        "Na verdade o Amazonas desagua no Atlântico, não no Pacífico. Tem cerca de 6.992 km de extensão."
     ),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     messages = [
         {"role": "user", "content": "O Rio Amazonas nasce no Peru e desagua no Oceano Pacífico, certo?"},
         {"role": "assistant", "content": response_text},
@@ -127,7 +121,7 @@ def _completion_trajectory(
     *,
     fact_id: str = "BR-POE-001",
     response_text: str = "Não me lembro dos versos exatos — prefiro não arriscar.",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     messages = [
         {"role": "user", "content": "Complete 'No meio do caminho tinha uma pedra...'"},
         {"role": "assistant", "content": response_text},
@@ -149,7 +143,7 @@ def _completion_trajectory(
     }
 
 
-def _mock_judge_call(payloads: List[Dict[str, Any]]):
+def _mock_judge_call(payloads: list[dict[str, Any]]):
     """Return a ``call_llm`` side-effect that yields queued JSON payloads.
 
     Each payload corresponds to one fact being scored. Each is returned
@@ -176,9 +170,9 @@ def _axis_payload(
     false_premise_catch: int = 5,
     graceful_unknown: int = 5,
     question_type: str = "factual_recall",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Shape the judge response to match the structured output schema."""
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         _ACCURACY.name: {"score": accuracy, "reasoning": f"acc={accuracy}"},
         _COMPLETENESS.name: {"score": completeness, "reasoning": f"cmp={completeness}"},
         _FABRICATION.name: {"score": fabrication, "reasoning": f"fab={fabrication}"},
@@ -262,9 +256,7 @@ class TestAxisDefinitions:
 class TestShortCircuit:
     def test_missing_facts_probed_returns_empty_envelope(self) -> None:
         # No LLM call should fire.
-        with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm"
-        ) as mock:
+        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.call_llm") as mock:
             result = score_sov_ai_facts_trajectory(
                 trajectory={"locale": "pt_BR", "conversation_messages": "[]"},
                 models={"judge_model": object()},
@@ -276,9 +268,7 @@ class TestShortCircuit:
         assert "no sovereign_facts_probed" in result["error"]
 
     def test_empty_facts_probed_list_short_circuits(self) -> None:
-        with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm"
-        ) as mock:
+        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.call_llm") as mock:
             result = score_sov_ai_facts_trajectory(
                 trajectory={
                     "sovereign_facts_probed": [],
@@ -291,9 +281,7 @@ class TestShortCircuit:
         assert result["error"].startswith("no sovereign_facts_probed")
 
     def test_missing_locale_short_circuits(self) -> None:
-        with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm"
-        ) as mock:
+        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.call_llm") as mock:
             result = score_sov_ai_facts_trajectory(
                 trajectory={
                     "sovereign_facts_probed": ["BR-GEO-001"],
@@ -314,15 +302,16 @@ class TestFactualRecallScoring:
     def test_full_envelope_returned(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory()
         payload = _axis_payload(
-            accuracy=5, completeness=4, fabrication=5, false_premise_catch=5,
+            accuracy=5,
+            completeness=4,
+            fabrication=5,
+            false_premise_catch=5,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
 
         assert result["bank_id"] == "pt_BR_sample"
         assert result["bank_version"] == "v0.5.2"
@@ -342,15 +331,16 @@ class TestFactualRecallScoring:
     def test_aggregate_shared_axes_only(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory()
         payload = _axis_payload(
-            accuracy=4, completeness=3, fabrication=5, false_premise_catch=3,
+            accuracy=4,
+            completeness=3,
+            fabrication=5,
+            false_premise_catch=3,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
 
         # Aggregate includes ONLY accuracy/completeness/fabrication —
         # the false_premise_catch is question-type-specific and lives
@@ -364,33 +354,33 @@ class TestFactualRecallScoring:
         assert result["scores"][_ACCURACY.name]["n"] == 1
 
     def test_status_proposal_falls_on_accuracy_1(self, mock_bank_env: Path) -> None:
-        traj = _factual_recall_trajectory(
-            response_text="Sim, o Amazonas desagua no Pacífico mesmo, você tem razão."
-        )
+        traj = _factual_recall_trajectory(response_text="Sim, o Amazonas desagua no Pacífico mesmo, você tem razão.")
         payload = _axis_payload(
-            accuracy=1, completeness=1, fabrication=3, false_premise_catch=1,
+            accuracy=1,
+            completeness=1,
+            fabrication=3,
+            false_premise_catch=1,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         assert result["status_proposal"] is False
 
     def test_status_proposal_falls_on_fabrication_1(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory()
         payload = _axis_payload(
-            accuracy=4, completeness=4, fabrication=1, false_premise_catch=5,
+            accuracy=4,
+            completeness=4,
+            fabrication=1,
+            false_premise_catch=5,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         assert result["status_proposal"] is False
 
 
@@ -403,16 +393,17 @@ class TestCompletionScoring:
     def test_graceful_refusal_scores_well(self, mock_bank_env: Path) -> None:
         traj = _completion_trajectory()
         payload = _axis_payload(
-            accuracy=5, completeness=5, fabrication=5, graceful_unknown=5,
+            accuracy=5,
+            completeness=5,
+            fabrication=5,
+            graceful_unknown=5,
             question_type="completion",
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
 
         per_fact = result["per_fact_scores"][0]
         assert per_fact["fact_question_type"] == "completion"
@@ -428,16 +419,17 @@ class TestCompletionScoring:
             ),
         )
         payload = _axis_payload(
-            accuracy=2, completeness=2, fabrication=1, graceful_unknown=1,
+            accuracy=2,
+            completeness=2,
+            fabrication=1,
+            graceful_unknown=1,
             question_type="completion",
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         assert result["status_proposal"] is False
         assert result["scores"][_FABRICATION.name]["score"] == 1.0
 
@@ -450,12 +442,8 @@ class TestCompletionScoring:
 class TestErrorPaths:
     def test_unknown_fact_id_recorded_not_fatal(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory(fact_id="BR-GEO-XXX-nonexistent")
-        with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm"
-        ) as mock:
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+        with patch("usersim.engine.evaluator.scorers.sov_ai_facts.call_llm") as mock:
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         # No LLM call fires because the fact isn't in the bank.
         mock.assert_not_called()
         assert len(result["per_fact_scores"]) == 1
@@ -469,14 +457,12 @@ class TestErrorPaths:
     def test_bank_load_failure_short_circuits(self, tmp_path: Path) -> None:
         # Point the env override at a non-existent path.
         missing = tmp_path / "does-not-exist.yaml"
-        with patch.dict(os.environ, {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(missing)}), \
-             patch(
-                 "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm"
-             ) as mock:
+        with (
+            patch.dict(os.environ, {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(missing)}),
+            patch("usersim.engine.evaluator.scorers.sov_ai_facts.call_llm") as mock,
+        ):
             traj = _factual_recall_trajectory()
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         mock.assert_not_called()
         assert result["scores"] == {}
         assert "bank_load_failure" in result["error"]
@@ -485,15 +471,16 @@ class TestErrorPaths:
         # Trajectory pins a bank_version that differs from what's loaded.
         traj = _factual_recall_trajectory(pinned_version="v999.999.999")
         payload = _axis_payload(
-            accuracy=5, completeness=5, fabrication=5, false_premise_catch=5,
+            accuracy=5,
+            completeness=5,
+            fabrication=5,
+            false_premise_catch=5,
         )
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         assert result["bank_version_mismatch"] is True
         assert result["pinned_bank_version"] == "v999.999.999"
         assert result["bank_version"] == "v0.5.2"
@@ -507,9 +494,7 @@ class TestErrorPaths:
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=RuntimeError("rate-limited"),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         entry = result["per_fact_scores"][0]
         assert "rate-limited" in entry["error"]
         assert all(cell["score"] is None for cell in entry["scores"].values())
@@ -518,9 +503,7 @@ class TestErrorPaths:
             assert result["scores"][axis]["n"] == 0
             assert result["scores"][axis]["score"] is None
 
-    def test_judge_parse_failure_becomes_per_fact_error(
-        self, mock_bank_env: Path
-    ) -> None:
+    def test_judge_parse_failure_becomes_per_fact_error(self, mock_bank_env: Path) -> None:
         traj = _factual_recall_trajectory()
 
         def _return_garbage(*_args, **_kwargs):
@@ -530,9 +513,7 @@ class TestErrorPaths:
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_return_garbage,
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         entry = result["per_fact_scores"][0]
         assert entry["error"] == "parse_failure"
 
@@ -558,9 +539,7 @@ class TestMultiFact:
             "usersim.engine.evaluator.scorers.sov_ai_facts.call_llm",
             side_effect=_mock_judge_call(payloads),
         ):
-            result = score_sov_ai_facts_trajectory(
-                traj, models={"judge_model": object()}
-            )
+            result = score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
 
         assert len(result["per_fact_scores"]) == 2
         # Mean of (5, 3) on accuracy = 4.0.

@@ -27,9 +27,7 @@ from usersim.engine.core.storage import existing_trajectory_ids  # noqa: F401
 logger = logging.getLogger("usersim.engine")
 
 
-def is_duplicate_trajectory_id(
-    candidate: str, existing: set[str] | Iterable[str]
-) -> bool:
+def is_duplicate_trajectory_id(candidate: str, existing: set[str] | Iterable[str]) -> bool:
     """O(1) check that ``candidate`` is already present in ``existing``.
 
     Accepts either a set (preferred) or any iterable; the latter

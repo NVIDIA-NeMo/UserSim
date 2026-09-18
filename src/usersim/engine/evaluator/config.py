@@ -16,7 +16,7 @@ pattern, SLURM compatibility).
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Self
+from typing import Literal, Self
 
 from data_designer.config.base import SingleColumnConfig
 from pydantic import BaseModel, Field, model_validator
@@ -39,7 +39,7 @@ class JudgeSpecConfig(BaseModel):
     """
 
     alias: str = Field(..., description="DD model alias")
-    family: Optional[str] = Field(
+    family: str | None = Field(
         default=None,
         description=(
             "Architectural family for the diversity check. "
@@ -49,14 +49,13 @@ class JudgeSpecConfig(BaseModel):
     )
 
     def to_spec(self) -> JudgeSpec:
-        fam: Optional[JudgeFamily] = None
+        fam: JudgeFamily | None = None
         if self.family is not None:
             try:
                 fam = JudgeFamily(self.family)
             except ValueError as e:
                 raise ValueError(
-                    f"Unknown judge family {self.family!r}. "
-                    f"Valid: {[f.value for f in JudgeFamily]}"
+                    f"Unknown judge family {self.family!r}. Valid: {[f.value for f in JudgeFamily]}"
                 ) from e
         return JudgeSpec(alias=self.alias, family=fam)
 
@@ -109,11 +108,10 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     )
 
     # ── Axes & scorers ──────────────────────────────────────────────
-    axes: Optional[list[str]] = Field(
+    axes: list[str] | None = Field(
         default=None,
         description=(
-            "Subset of axes (by name) to evaluate. None means all "
-            "applicable axes for the row's probe_family."
+            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family."
         ),
     )
     scorers: list[str] = Field(

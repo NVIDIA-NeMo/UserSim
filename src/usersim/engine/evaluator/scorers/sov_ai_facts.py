@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -139,14 +139,14 @@ _GRACEFUL_UNKNOWN = Score(
 )
 
 
-_FACTUAL_RECALL_AXES: Tuple[Score, ...] = (
+_FACTUAL_RECALL_AXES: tuple[Score, ...] = (
     _ACCURACY,
     _COMPLETENESS,
     _FABRICATION,
     _FALSE_PREMISE_CATCH,
 )
 
-_COMPLETION_AXES: Tuple[Score, ...] = (
+_COMPLETION_AXES: tuple[Score, ...] = (
     _ACCURACY,
     _COMPLETENESS,
     _FABRICATION,
@@ -155,7 +155,7 @@ _COMPLETION_AXES: Tuple[Score, ...] = (
 
 # Axes shared across question types — used by the trajectory-level
 # aggregate (mean across facts) and by per-category stratified reporting.
-AGGREGATABLE_AXES: Tuple[str, ...] = (
+AGGREGATABLE_AXES: tuple[str, ...] = (
     _ACCURACY.name,
     _COMPLETENESS.name,
     _FABRICATION.name,
@@ -236,7 +236,7 @@ _DEFAULT_JUDGE_ALIAS = "judge_model"
 # ---------------------------------------------------------------------------
 
 
-def _build_schema(axes: Tuple[Score, ...]):
+def _build_schema(axes: tuple[Score, ...]):
     response_models = [create_judge_response_model(s) for s in axes]
     return create_judge_structured_output_model(response_models)
 
@@ -247,9 +247,9 @@ def _build_schema(axes: Tuple[Score, ...]):
 
 
 def score_sov_ai_facts_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score a trajectory produced by ``sov_ai_facts``.
 
     Contract:
@@ -296,17 +296,17 @@ def score_sov_ai_facts_trajectory(
     # a native per-variant bank is used if it has been authored).
     from usersim.engine.core.fact_bank import default_fact_bank_path
     from usersim.engine.core.locale import asset_locale
-    bank_locale = asset_locale(
-        locale, exists=lambda l: default_fact_bank_path(l).exists()
-    )
+
+    bank_locale = asset_locale(locale, exists=lambda l: default_fact_bank_path(l).exists())
 
     try:
         bank = load_fact_bank_for_locale(bank_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to load bank "
-            "for locale=%s (bank_locale=%s): %s",
-            locale, bank_locale, e,
+            "  |-- evaluator/scorers.sov_ai_facts: failed to load bank for locale=%s (bank_locale=%s): %s",
+            locale,
+            bank_locale,
+            e,
         )
         return {
             "judge_alias": judge_alias,
@@ -320,20 +320,20 @@ def score_sov_ai_facts_trajectory(
         }
 
     pinned_version = _pinned_bank_version(trajectory, locale)
-    bank_version_mismatch = (
-        pinned_version is not None and pinned_version != bank.bank_version
-    )
+    bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
             "  |-- evaluator/scorers.sov_ai_facts: trajectory pinned "
             "bank_version=%s but current loaded bank is %s for locale=%s — "
             "reporting drift flag on this row",
-            pinned_version, bank.bank_version, locale,
+            pinned_version,
+            bank.bank_version,
+            locale,
         )
 
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
 
-    per_fact: List[Dict[str, Any]] = []
+    per_fact: list[dict[str, Any]] = []
     status_proposal = True
     for fact_id in facts_probed:
         fact = bank.by_id(fact_id)
@@ -376,11 +376,11 @@ def score_sov_ai_facts_trajectory(
 def _score_one_fact(
     *,
     fact: Fact,
-    conversation: List[Dict[str, Any]],
-    models: Dict[str, Any],
+    conversation: list[dict[str, Any]],
+    models: dict[str, Any],
     judge_alias: str,
     locale: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """LLM-judge one fact. Returns the ``per_fact_scores`` entry dict."""
     if fact.question_type == "factual_recall":
         axes = _FACTUAL_RECALL_AXES
@@ -431,9 +431,11 @@ def _score_one_fact(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: judge %r raised on "
-            "fact %s: %s: %s",
-            judge_alias, fact.id, type(e).__name__, e,
+            "  |-- evaluator/scorers.sov_ai_facts: judge %r raised on fact %s: %s: %s",
+            judge_alias,
+            fact.id,
+            type(e).__name__,
+            e,
         )
         return _error_result(
             fact=fact,
@@ -446,15 +448,16 @@ def _score_one_fact(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_facts: failed to parse "
-            "structured output for fact %s",
+            "  |-- evaluator/scorers.sov_ai_facts: failed to parse structured output for fact %s",
             fact.id,
         )
         return _error_result(
-            fact=fact, judge_alias=judge_alias, error="parse_failure",
+            fact=fact,
+            judge_alias=judge_alias,
+            error="parse_failure",
         )
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     for s in axes:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):
@@ -475,7 +478,7 @@ def _score_one_fact(
     }
 
 
-def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _aggregate(per_fact_scores: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Mean per axis with reasoning that surfaces the per-fact judge text.
 
     Replaces the uninformative ``"arithmetic mean across N fact(s)"``
@@ -484,9 +487,9 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
     answered wrong and *what* the judge said about it. For
     single-fact trajectories the judge text is surfaced verbatim.
     """
-    out: Dict[str, Dict[str, Any]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for axis in AGGREGATABLE_AXES:
-        entries: List[Dict[str, Any]] = []
+        entries: list[dict[str, Any]] = []
         for entry in per_fact_scores:
             cell = (entry.get("scores") or {}).get(axis)
             if not isinstance(cell, dict):
@@ -494,11 +497,13 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
             val = cell.get("score")
             if not isinstance(val, (int, float)):
                 continue
-            entries.append({
-                "score": float(val),
-                "tag": entry.get("fact_id") or entry.get("fact_category") or "",
-                "reasoning": str(cell.get("reasoning") or ""),
-            })
+            entries.append(
+                {
+                    "score": float(val),
+                    "tag": entry.get("fact_id") or entry.get("fact_category") or "",
+                    "reasoning": str(cell.get("reasoning") or ""),
+                }
+            )
         if not entries:
             out[axis] = {"score": None, "reasoning": "no per-fact scores", "n": 0}
             continue
@@ -506,7 +511,10 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
         out[axis] = {
             "score": mean,
             "reasoning": _compose_aggregate_reasoning(
-                entries, mean, unit_singular="fact", unit_plural="facts",
+                entries,
+                mean,
+                unit_singular="fact",
+                unit_plural="facts",
             ),
             "n": len(entries),
         }
@@ -514,7 +522,7 @@ def _aggregate(per_fact_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any
 
 
 def _compose_aggregate_reasoning(
-    entries: List[Dict[str, Any]],
+    entries: list[dict[str, Any]],
     mean: float,
     *,
     unit_singular: str,
@@ -528,15 +536,15 @@ def _compose_aggregate_reasoning(
             return f"[{only['tag']}] {only['reasoning']}" if only["tag"] else only["reasoning"]
         return (
             f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'"
-            if only["tag"] else f"score={_score_text(only['score'])}"
+            if only["tag"]
+            else f"score={_score_text(only['score'])}"
         )
     sorted_entries = sorted(entries, key=lambda e: (e["score"], not e["reasoning"]))
     worst_with_text = [e for e in sorted_entries if e["reasoning"]][:2]
     if not worst_with_text:
         return f"Mean {mean} across {n} {unit_plural}."
     bullets = "".join(
-        f"\n• \"{e['tag'] or '?'}\" (score={_score_text(e['score'])}): {e['reasoning']}"
-        for e in worst_with_text
+        f'\n• "{e["tag"] or "?"}" (score={_score_text(e["score"])}): {e["reasoning"]}' for e in worst_with_text
     )
     return f"Mean {mean} across {n} {unit_plural}. Lowest scoring:{bullets}"
 
@@ -545,13 +553,13 @@ def _score_text(score: float) -> str:
     return str(int(score)) if float(score).is_integer() else f"{score:.1f}"
 
 
-def _format_premises(premises: Tuple[str, ...]) -> str:
+def _format_premises(premises: tuple[str, ...]) -> str:
     if not premises:
         return "(none)"
     return "\n".join(f"{i + 1}. {p}" for i, p in enumerate(premises))
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -565,7 +573,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _as_list_of_str(raw: Any) -> List[str]:
+def _as_list_of_str(raw: Any) -> list[str]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -584,7 +592,7 @@ def _as_list_of_str(raw: Any) -> List[str]:
     return []
 
 
-def _pinned_bank_version(trajectory: Dict[str, Any], locale: str) -> Optional[str]:
+def _pinned_bank_version(trajectory: dict[str, Any], locale: str) -> str | None:
     """Extract ``bank_version[locale]`` from the trajectory's simulation_outcome."""
     outcome_raw = trajectory.get("simulation_outcome")
     if not outcome_raw:
@@ -606,7 +614,7 @@ def _pinned_bank_version(trajectory: Dict[str, Any], locale: str) -> Optional[st
     return None
 
 
-def _no_fact_result(fact_id: str, judge_alias: str) -> Dict[str, Any]:
+def _no_fact_result(fact_id: str, judge_alias: str) -> dict[str, Any]:
     """Placeholder entry for a fact_id the trajectory probed but the bank doesn't contain."""
     return {
         "fact_id": fact_id,
@@ -624,7 +632,7 @@ def _error_result(
     fact: Fact,
     judge_alias: str,
     error: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Per-fact entry for a fact whose judge call failed. Scores are all None."""
     axes = _FACTUAL_RECALL_AXES if fact.question_type == "factual_recall" else _COMPLETION_AXES
     return {

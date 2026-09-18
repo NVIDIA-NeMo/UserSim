@@ -48,13 +48,6 @@ from usersim.reporting.comparison_dashboard import (
     write_comparison_dashboard_artifacts,
 )
 from usersim.reporting.dashboard import write_capability_dashboard_artifacts
-from usersim.reporting.eval_manifest import (
-    MANIFEST_FILENAME as EVAL_SAMPLE_MANIFEST_FILENAME,
-    EvalSampleManifest,
-    EvalSamplePass,
-    read_eval_sample_manifest,
-    record_eval_sample_pass,
-)
 from usersim.reporting.diagnostics import (
     compute_diagnostics_frame,
     compute_front_loading_ratio,
@@ -63,6 +56,15 @@ from usersim.reporting.diagnostics import (
     compute_polite_turn_fraction,
     compute_response_length_by_locale,
     compute_verbosity_cv,
+)
+from usersim.reporting.eval_manifest import (
+    MANIFEST_FILENAME as EVAL_SAMPLE_MANIFEST_FILENAME,
+)
+from usersim.reporting.eval_manifest import (
+    EvalSampleManifest,
+    EvalSamplePass,
+    read_eval_sample_manifest,
+    record_eval_sample_pass,
 )
 from usersim.reporting.resource import (
     ResourceProfile,

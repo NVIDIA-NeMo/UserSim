@@ -30,9 +30,6 @@ scorer picks it up via the fact's ``locale`` field).
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
-
-
 # ---------------------------------------------------------------------------
 # pt_BR prompts
 # ---------------------------------------------------------------------------
@@ -533,7 +530,7 @@ _USER_FOLLOWUP_INSTRUCTION_HI_LATN_IN = """Ab is baatcheet mein apna agla sandes
 # ---------------------------------------------------------------------------
 
 
-_SYSTEM_PROMPTS: Dict[Tuple[str, str], str] = {
+_SYSTEM_PROMPTS: dict[tuple[str, str], str] = {
     ("pt_BR", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_PT_BR_FACTUAL_RECALL,
     ("pt_BR", "completion"): _USER_AGENT_SYSTEM_PROMPT_PT_BR_COMPLETION,
     ("en_US", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_EN_US_FACTUAL_RECALL,
@@ -554,7 +551,7 @@ _SYSTEM_PROMPTS: Dict[Tuple[str, str], str] = {
     ("ko_KR", "completion"): _USER_AGENT_SYSTEM_PROMPT_KO_KR_COMPLETION,
 }
 
-_FOLLOWUP_INSTRUCTIONS: Dict[str, str] = {
+_FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "pt_BR": _USER_FOLLOWUP_INSTRUCTION_PT_BR,
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "en_IN": _USER_FOLLOWUP_INSTRUCTION_EN_IN,
@@ -598,6 +595,6 @@ def get_followup_instruction(locale: str) -> str:
     return _FOLLOWUP_INSTRUCTIONS[locale]
 
 
-def available_locales() -> Tuple[str, ...]:
+def available_locales() -> tuple[str, ...]:
     """List of locales for which prompts are defined (matches fact-bank locales)."""
     return tuple(sorted({locale for locale, _ in _SYSTEM_PROMPTS.keys()}))

@@ -16,7 +16,6 @@ import socket
 
 import pytest
 
-
 # TEST-NET-3 (RFC 5737): reserved for documentation and guaranteed not to be
 # routable. Using a literal address keeps DNS out of the picture, so the guard
 # is what fails rather than name resolution.

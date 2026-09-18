@@ -13,15 +13,16 @@ from usersim.reporting import ResourceProfile, aggregate_resource_profile
 from usersim.reporting.resource import aggregate_from_dataframe
 
 
-def _outcome(*, calls=None, in_tokens=None, out_tokens=None,
-             wall_by_alias=None, wall=10.0):
-    return json.dumps({
-        "per_model_calls": calls or {},
-        "per_model_input_tokens": in_tokens or {},
-        "per_model_output_tokens": out_tokens or {},
-        "wall_clock_s_by_alias": wall_by_alias or {},
-        "wall_clock_s": wall,
-    })
+def _outcome(*, calls=None, in_tokens=None, out_tokens=None, wall_by_alias=None, wall=10.0):
+    return json.dumps(
+        {
+            "per_model_calls": calls or {},
+            "per_model_input_tokens": in_tokens or {},
+            "per_model_output_tokens": out_tokens or {},
+            "wall_clock_s_by_alias": wall_by_alias or {},
+            "wall_clock_s": wall,
+        }
+    )
 
 
 class TestAggregateResourceProfile:
@@ -69,9 +70,11 @@ class TestAggregateResourceProfile:
         assert p.total_tokens == 625
 
     def test_to_dict_round_trip(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(calls={"a": 1}, in_tokens={"a": 10}, out_tokens={"a": 5}),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(calls={"a": 1}, in_tokens={"a": 10}, out_tokens={"a": 5}),
+            ]
+        )
         d = p.to_dict()
         assert d["total_calls"] == 1
         assert d["n_calls_by_alias"] == {"a": 1}
@@ -92,16 +95,20 @@ class TestConversationOutputTokens:
     (judge / summary)."""
 
     def test_sums_only_user_and_assistant_aliases(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={
-                "user_model": 100,
-                "assistant_model": 200,
-                "api_response_model": 50,    # excluded -- tool synthesiser
-                "judge_model": 999,          # excluded -- in-sim scaffolding
-                "summary_model": 999,        # excluded -- in-sim scaffolding
-                "evaluator_model": 9999,     # excluded (out-of-sim, shouldn't be here anyway)
-            }),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    out_tokens={
+                        "user_model": 100,
+                        "assistant_model": 200,
+                        "api_response_model": 50,  # excluded -- tool synthesiser
+                        "judge_model": 999,  # excluded -- in-sim scaffolding
+                        "summary_model": 999,  # excluded -- in-sim scaffolding
+                        "evaluator_model": 9999,  # excluded (out-of-sim, shouldn't be here anyway)
+                    }
+                ),
+            ]
+        )
         # 100 + 200 = 300; api_response / judge / summary / evaluator absent.
         assert p.conversation_output_tokens == 300
 
@@ -113,22 +120,28 @@ class TestConversationOutputTokens:
         next turn, not as a turn the synthesiser itself takes in the
         conversation. Counting it would conflate tool-call cost with
         conversation cost."""
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={
-                "user_model": 50,
-                "assistant_model": 75,
-                "api_response_model": 1000,  # large, should NOT inflate conv
-            }),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    out_tokens={
+                        "user_model": 50,
+                        "assistant_model": 75,
+                        "api_response_model": 1000,  # large, should NOT inflate conv
+                    }
+                ),
+            ]
+        )
         assert p.conversation_output_tokens == 125  # NOT 1125
         # `total_output_tokens` does include api_response (it's still
         # in-sim spend, just not conversation spend).
         assert p.total_output_tokens == 1125
 
     def test_zero_when_no_conversation_aliases_present(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={"judge_model": 200, "summary_model": 100}),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(out_tokens={"judge_model": 200, "summary_model": 100}),
+            ]
+        )
         assert p.conversation_output_tokens == 0
         # `total_output_tokens` still surfaces the broader figure.
         assert p.total_output_tokens == 300
@@ -137,9 +150,11 @@ class TestConversationOutputTokens:
         # Trajectories that don't fire api_response (non-tool_calling probes)
         # still report a non-zero conversation_output_tokens from
         # user_model + assistant_model.
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={"user_model": 50, "assistant_model": 75}),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(out_tokens={"user_model": 50, "assistant_model": 75}),
+            ]
+        )
         assert p.conversation_output_tokens == 125
 
     def test_empty_profile_is_zero(self) -> None:
@@ -153,28 +168,36 @@ class TestAssistantOutputTokens:
     contribution to the rest of the conversation."""
 
     def test_returns_only_assistant_model_output(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={
-                "assistant_model": 200,
-                "user_model": 100,
-                "api_response_model": 50,
-                "judge_model": 999,
-            }),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    out_tokens={
+                        "assistant_model": 200,
+                        "user_model": 100,
+                        "api_response_model": 50,
+                        "judge_model": 999,
+                    }
+                ),
+            ]
+        )
         assert p.assistant_output_tokens == 200
         # And it's <= conversation_output_tokens (which sums user + assistant).
         assert p.assistant_output_tokens <= p.conversation_output_tokens
 
     def test_zero_when_no_assistant_alias_present(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={"user_model": 50, "judge_model": 75}),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(out_tokens={"user_model": 50, "judge_model": 75}),
+            ]
+        )
         assert p.assistant_output_tokens == 0
 
     def test_serialized_in_to_dict(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(out_tokens={"assistant_model": 12}),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(out_tokens={"assistant_model": 12}),
+            ]
+        )
         d = p.to_dict()
         assert d["assistant_output_tokens"] == 12
 
@@ -189,30 +212,36 @@ class TestAssistantTotalTokens:
     from ``conversation_output_tokens`` -- single alias, both sides."""
 
     def test_sums_input_plus_output_for_assistant_alias(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(
-                in_tokens={"assistant_model": 200, "user_model": 100},
-                out_tokens={"assistant_model": 300, "user_model": 50},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    in_tokens={"assistant_model": 200, "user_model": 100},
+                    out_tokens={"assistant_model": 300, "user_model": 50},
+                ),
+            ]
+        )
         assert p.assistant_total_tokens == 500
 
     def test_zero_when_no_assistant_alias_present(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(
-                in_tokens={"user_model": 100},
-                out_tokens={"user_model": 50},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    in_tokens={"user_model": 100},
+                    out_tokens={"user_model": 50},
+                ),
+            ]
+        )
         assert p.assistant_total_tokens == 0
 
     def test_serialised_in_to_dict(self) -> None:
-        p = aggregate_resource_profile([
-            _outcome(
-                in_tokens={"assistant_model": 50},
-                out_tokens={"assistant_model": 75},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                _outcome(
+                    in_tokens={"assistant_model": 50},
+                    out_tokens={"assistant_model": 75},
+                ),
+            ]
+        )
         d = p.to_dict()
         assert d["assistant_total_tokens"] == 125
 
@@ -295,30 +324,36 @@ class TestUserTokens:
     user_model alone."""
 
     def _user_outcome(self, *, in_tokens=0, out_tokens=0):
-        return json.dumps({
-            "per_model_calls": {"user_model": 1},
-            "per_model_input_tokens": {"user_model": in_tokens},
-            "per_model_output_tokens": {"user_model": out_tokens},
-            "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-        })
+        return json.dumps(
+            {
+                "per_model_calls": {"user_model": 1},
+                "per_model_input_tokens": {"user_model": in_tokens},
+                "per_model_output_tokens": {"user_model": out_tokens},
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+            }
+        )
 
     def test_total_is_input_plus_output(self) -> None:
-        p = aggregate_resource_profile([
-            self._user_outcome(in_tokens=300, out_tokens=120),
-        ])
+        p = aggregate_resource_profile(
+            [
+                self._user_outcome(in_tokens=300, out_tokens=120),
+            ]
+        )
         assert p.user_total_tokens == 420
         assert p.input_tokens_by_alias.get("user_model", 0) == 300
 
     def test_output_isolates_user_alias(self) -> None:
         # user_model output must NOT include other aliases' output.
-        outcome = json.dumps({
-            "per_model_calls": {"user_model": 1, "assistant_model": 1},
-            "per_model_input_tokens": {"user_model": 50, "assistant_model": 80},
-            "per_model_output_tokens": {"user_model": 30, "assistant_model": 200},
-            "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-        })
+        outcome = json.dumps(
+            {
+                "per_model_calls": {"user_model": 1, "assistant_model": 1},
+                "per_model_input_tokens": {"user_model": 50, "assistant_model": 80},
+                "per_model_output_tokens": {"user_model": 30, "assistant_model": 200},
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+            }
+        )
         p = aggregate_resource_profile([outcome])
         assert p.user_output_tokens == 30  # not 230
 
@@ -383,13 +418,15 @@ class TestSupportActorTokens:
 
     @staticmethod
     def _outcome(out_tokens=None, in_tokens=None):
-        return json.dumps({
-            "per_model_calls": {a: 1 for a in (out_tokens or {})},
-            "per_model_input_tokens": in_tokens or {},
-            "per_model_output_tokens": out_tokens or {},
-            "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-        })
+        return json.dumps(
+            {
+                "per_model_calls": {a: 1 for a in (out_tokens or {})},
+                "per_model_input_tokens": in_tokens or {},
+                "per_model_output_tokens": out_tokens or {},
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+            }
+        )
 
     def test_api_response_decomposes_total_output_reasoning_conversation(self) -> None:
         # Property-level test: a profile with per-alias output and
@@ -405,32 +442,34 @@ class TestSupportActorTokens:
         assert p.api_response_reasoning_tokens == 75
         assert p.api_response_conversation_tokens == 425  # 500 - 75
         # Algebra invariant.
-        assert p.api_response_output_tokens == (
-            p.api_response_reasoning_tokens + p.api_response_conversation_tokens
-        )
+        assert p.api_response_output_tokens == (p.api_response_reasoning_tokens + p.api_response_conversation_tokens)
 
     def test_judge_decomposes_with_unavailable_reasoning(self) -> None:
         # Typical run: judge_model has no Phase B fallback (no visible
         # content on the trajectory) -> reasoning=0, conversation
         # collapses to output.
-        p = aggregate_resource_profile([
-            self._outcome(
-                in_tokens={"judge_model": 1000},
-                out_tokens={"judge_model": 100},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                self._outcome(
+                    in_tokens={"judge_model": 1000},
+                    out_tokens={"judge_model": 100},
+                ),
+            ]
+        )
         assert p.judge_total_tokens == 1100
         assert p.judge_output_tokens == 100
         assert p.judge_reasoning_tokens == 0
         assert p.judge_conversation_tokens == 100  # equals output
 
     def test_summary_decomposes_with_unavailable_reasoning(self) -> None:
-        p = aggregate_resource_profile([
-            self._outcome(
-                in_tokens={"summary_model": 5000},
-                out_tokens={"summary_model": 200},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                self._outcome(
+                    in_tokens={"summary_model": 5000},
+                    out_tokens={"summary_model": 200},
+                ),
+            ]
+        )
         assert p.summary_total_tokens == 5200
         assert p.summary_output_tokens == 200
         assert p.summary_reasoning_tokens == 0
@@ -477,12 +516,14 @@ class TestSupportActorTokens:
         assert p.api_response_conversation_tokens == 0
 
     def test_serialised_in_to_dict(self) -> None:
-        p = aggregate_resource_profile([
-            self._outcome(
-                in_tokens={"api_response_model": 50, "judge_model": 80, "summary_model": 30},
-                out_tokens={"api_response_model": 25, "judge_model": 12, "summary_model": 8},
-            ),
-        ])
+        p = aggregate_resource_profile(
+            [
+                self._outcome(
+                    in_tokens={"api_response_model": 50, "judge_model": 80, "summary_model": 30},
+                    out_tokens={"api_response_model": 25, "judge_model": 12, "summary_model": 8},
+                ),
+            ]
+        )
         d = p.to_dict()
         for alias_prefix, total, output in [
             ("api_response", 75, 25),
@@ -510,27 +551,35 @@ class TestThreeRowAlgebraInvariant:
     break the dashboard's claimed math."""
 
     def test_total_equals_input_plus_output_for_overall(self) -> None:
-        p = aggregate_resource_profile([
-            json.dumps({
-                "per_model_calls": {"assistant_model": 1, "judge_model": 1},
-                "per_model_input_tokens": {"assistant_model": 100, "judge_model": 200},
-                "per_model_output_tokens": {"assistant_model": 50, "judge_model": 30},
-                "wall_clock_s_by_alias": {},
-                "wall_clock_s": 1.0,
-            }),
-        ])
+        p = aggregate_resource_profile(
+            [
+                json.dumps(
+                    {
+                        "per_model_calls": {"assistant_model": 1, "judge_model": 1},
+                        "per_model_input_tokens": {"assistant_model": 100, "judge_model": 200},
+                        "per_model_output_tokens": {"assistant_model": 50, "judge_model": 30},
+                        "wall_clock_s_by_alias": {},
+                        "wall_clock_s": 1.0,
+                    }
+                ),
+            ]
+        )
         assert p.total_tokens == p.total_input_tokens + p.total_output_tokens
 
     def test_user_total_equals_user_input_plus_user_output(self) -> None:
-        p = aggregate_resource_profile([
-            json.dumps({
-                "per_model_calls": {"user_model": 1},
-                "per_model_input_tokens": {"user_model": 200},
-                "per_model_output_tokens": {"user_model": 80},
-                "wall_clock_s_by_alias": {},
-                "wall_clock_s": 1.0,
-            }),
-        ])
+        p = aggregate_resource_profile(
+            [
+                json.dumps(
+                    {
+                        "per_model_calls": {"user_model": 1},
+                        "per_model_input_tokens": {"user_model": 200},
+                        "per_model_output_tokens": {"user_model": 80},
+                        "wall_clock_s_by_alias": {},
+                        "wall_clock_s": 1.0,
+                    }
+                ),
+            ]
+        )
         user_input = p.input_tokens_by_alias.get("user_model", 0)
         assert p.user_total_tokens == user_input + p.user_output_tokens
 
@@ -543,24 +592,24 @@ class TestThreeRowAlgebraInvariant:
             output_tokens_by_alias={"user_model": 100},
             reasoning_tokens_by_alias={"user_model": 30},
         )
-        assert p.user_output_tokens == (
-            p.user_reasoning_tokens + p.user_conversation_tokens
-        )
+        assert p.user_output_tokens == (p.user_reasoning_tokens + p.user_conversation_tokens)
 
     def test_assistant_total_equals_assistant_input_plus_assistant_output(self) -> None:
-        p = aggregate_resource_profile([
-            json.dumps({
-                "per_model_calls": {"assistant_model": 1},
-                "per_model_input_tokens": {"assistant_model": 400},
-                "per_model_output_tokens": {"assistant_model": 200},
-                "wall_clock_s_by_alias": {},
-                "wall_clock_s": 1.0,
-            }),
-        ])
-        assistant_input = p.input_tokens_by_alias.get("assistant_model", 0)
-        assert p.assistant_total_tokens == (
-            assistant_input + p.assistant_output_tokens
+        p = aggregate_resource_profile(
+            [
+                json.dumps(
+                    {
+                        "per_model_calls": {"assistant_model": 1},
+                        "per_model_input_tokens": {"assistant_model": 400},
+                        "per_model_output_tokens": {"assistant_model": 200},
+                        "wall_clock_s_by_alias": {},
+                        "wall_clock_s": 1.0,
+                    }
+                ),
+            ]
         )
+        assistant_input = p.input_tokens_by_alias.get("assistant_model", 0)
+        assert p.assistant_total_tokens == (assistant_input + p.assistant_output_tokens)
 
     def test_assistant_output_equals_assistant_reasoning_plus_assistant_conversation(self) -> None:
         p = ResourceProfile(
@@ -568,9 +617,7 @@ class TestThreeRowAlgebraInvariant:
             output_tokens_by_alias={"assistant_model": 500},
             reasoning_tokens_by_alias={"assistant_model": 200},
         )
-        assert p.assistant_output_tokens == (
-            p.assistant_reasoning_tokens + p.assistant_conversation_tokens
-        )
+        assert p.assistant_output_tokens == (p.assistant_reasoning_tokens + p.assistant_conversation_tokens)
 
 
 class TestReasoningTokens:
@@ -585,13 +632,15 @@ class TestReasoningTokens:
 
     @staticmethod
     def _outcome(*, out_tokens):
-        return json.dumps({
-            "per_model_calls": {a: 1 for a in out_tokens},
-            "per_model_input_tokens": {a: 10 for a in out_tokens},
-            "per_model_output_tokens": out_tokens,
-            "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-        })
+        return json.dumps(
+            {
+                "per_model_calls": {a: 1 for a in out_tokens},
+                "per_model_input_tokens": {a: 10 for a in out_tokens},
+                "per_model_output_tokens": out_tokens,
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+            }
+        )
 
     def test_estimates_above_noise_floor_register(self) -> None:
         """When the diff between provider's output_tokens and tiktoken's
@@ -599,17 +648,24 @@ class TestReasoningTokens:
         reasoning), the alias surfaces with source='estimated' and a
         non-zero token count."""
         import pandas as pd
-        df = pd.DataFrame([{
-            "simulation_outcome": self._outcome(
-                out_tokens={"assistant_model": 1000},  # gross billable
-            ),
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                # ~5 visible tokens; provider charged 1000 -> ~995
-                # reasoning -> 99.5% of output, clears the 5% floor.
-                {"role": "assistant", "content": "hello there"},
-            ]),
-        }])
+
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(
+                        out_tokens={"assistant_model": 1000},  # gross billable
+                    ),
+                    "conversation_messages": json.dumps(
+                        [
+                            {"role": "user", "content": "hi"},
+                            # ~5 visible tokens; provider charged 1000 -> ~995
+                            # reasoning -> 99.5% of output, clears the 5% floor.
+                            {"role": "assistant", "content": "hello there"},
+                        ]
+                    ),
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         assert p.reasoning_tokens_by_alias["assistant_model"] > 0
         assert p.reasoning_source_by_alias["assistant_model"] == "estimated"
@@ -621,23 +677,32 @@ class TestReasoningTokens:
         reasoning. Zero out and mark unavailable -- this is the
         gemma-instruct case."""
         import pandas as pd
+
         # Output 1000, visible content tokenizes to ~975 -> diff 25 ->
         # 25/1000 = 2.5% < 5% floor.
-        df = pd.DataFrame([{
-            "simulation_outcome": self._outcome(
-                out_tokens={"assistant_model": 1000},
-            ),
-            "conversation_messages": json.dumps([{
-                "role": "assistant",
-                # Long content so tiktoken count approaches 1000.
-                "content": (
-                    "This is a fairly long assistant response that should "
-                    "tokenize to roughly the same number of tokens as the "
-                    "provider's output count, leaving only a small diff that "
-                    "falls below the noise floor. " * 30
-                ),
-            }]),
-        }])
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(
+                        out_tokens={"assistant_model": 1000},
+                    ),
+                    "conversation_messages": json.dumps(
+                        [
+                            {
+                                "role": "assistant",
+                                # Long content so tiktoken count approaches 1000.
+                                "content": (
+                                    "This is a fairly long assistant response that should "
+                                    "tokenize to roughly the same number of tokens as the "
+                                    "provider's output count, leaving only a small diff that "
+                                    "falls below the noise floor. " * 30
+                                ),
+                            }
+                        ]
+                    ),
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         # Below floor: zeroed out, marked unavailable.
         assert p.reasoning_tokens_by_alias.get("assistant_model", 0) == 0
@@ -649,15 +714,24 @@ class TestReasoningTokens:
         post-aggregation noise floor decides whether the alias's total
         is real."""
         import pandas as pd
-        df = pd.DataFrame([{
-            "simulation_outcome": self._outcome(
-                out_tokens={"assistant_model": 5},  # tiny
-            ),
-            "conversation_messages": json.dumps([{
-                "role": "assistant",
-                "content": "this is much longer than five tokens by far",
-            }]),
-        }])
+
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(
+                        out_tokens={"assistant_model": 5},  # tiny
+                    ),
+                    "conversation_messages": json.dumps(
+                        [
+                            {
+                                "role": "assistant",
+                                "content": "this is much longer than five tokens by far",
+                            }
+                        ]
+                    ),
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         # Single negative-diff row: total reasoning is 0, falls below
         # the 5% floor, gets flagged unavailable.
@@ -668,12 +742,17 @@ class TestReasoningTokens:
         """judge_model / summary_model never have visible output to
         tokenize. They're flagged unavailable regardless of input."""
         import pandas as pd
-        df = pd.DataFrame([{
-            "simulation_outcome": self._outcome(
-                out_tokens={"judge_model": 50, "summary_model": 30},
-            ),
-            "conversation_messages": json.dumps([]),
-        }])
+
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(
+                        out_tokens={"judge_model": 50, "summary_model": 30},
+                    ),
+                    "conversation_messages": json.dumps([]),
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         assert p.reasoning_source_by_alias["judge_model"] == "unavailable"
         assert p.reasoning_source_by_alias["summary_model"] == "unavailable"
@@ -687,12 +766,17 @@ class TestReasoningTokens:
         alias with output > 0 to ``unavailable`` (the noise floor sees
         reasoning=0 against output>0 and clamps)."""
         import pandas as pd
-        df = pd.DataFrame([{
-            "simulation_outcome": self._outcome(
-                out_tokens={"assistant_model": 100},
-            ),
-            # no conversation_messages column
-        }])
+
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(
+                        out_tokens={"assistant_model": 100},
+                    ),
+                    # no conversation_messages column
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         # All aliases land on unavailable -- assistant_model because
         # 0 reasoning / 100 output = 0% which is below the floor;
@@ -708,31 +792,43 @@ class TestReasoningTokens:
         Omitting it would over-attribute to 'reasoning' for tool_calling
         probes -- a real gap caught during plan review."""
         import pandas as pd
-        msg_no_tools = json.dumps([
-            {"role": "assistant", "content": "hi"},
-        ])
-        msg_with_tools = json.dumps([
-            {
-                "role": "assistant",
-                "content": "hi",
-                "tool_calls": [{
-                    "id": "c_1",
-                    "type": "function",
-                    "function": {
-                        "name": "lookup_weather",
-                        "arguments": '{"city": "Tokyo", "units": "metric"}'
-                    },
-                }],
-            },
-        ])
-        df_no = pd.DataFrame([{
-            "simulation_outcome": self._outcome(out_tokens={"assistant_model": 100}),
-            "conversation_messages": msg_no_tools,
-        }])
-        df_with = pd.DataFrame([{
-            "simulation_outcome": self._outcome(out_tokens={"assistant_model": 100}),
-            "conversation_messages": msg_with_tools,
-        }])
+
+        msg_no_tools = json.dumps(
+            [
+                {"role": "assistant", "content": "hi"},
+            ]
+        )
+        msg_with_tools = json.dumps(
+            [
+                {
+                    "role": "assistant",
+                    "content": "hi",
+                    "tool_calls": [
+                        {
+                            "id": "c_1",
+                            "type": "function",
+                            "function": {"name": "lookup_weather", "arguments": '{"city": "Tokyo", "units": "metric"}'},
+                        }
+                    ],
+                },
+            ]
+        )
+        df_no = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(out_tokens={"assistant_model": 100}),
+                    "conversation_messages": msg_no_tools,
+                }
+            ]
+        )
+        df_with = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": self._outcome(out_tokens={"assistant_model": 100}),
+                    "conversation_messages": msg_with_tools,
+                }
+            ]
+        )
         p_no = aggregate_from_dataframe(df_no)
         p_with = aggregate_from_dataframe(df_with)
         # Same gross output_tokens (100), but tool_calls add visible
@@ -747,21 +843,30 @@ class TestReasoningTokens:
         every outcome. The aggregator ignores it cleanly -- we don't
         re-introduce Phase A capture by accident, and we don't crash."""
         import pandas as pd
-        legacy_outcome = json.dumps({
-            "per_model_calls": {"assistant_model": 1},
-            "per_model_input_tokens": {"assistant_model": 10},
-            "per_model_output_tokens": {"assistant_model": 1000},
-            # Legacy Phase A field. Should be ignored.
-            "per_model_reasoning_tokens": {"assistant_model": 42},
-            "wall_clock_s_by_alias": {},
-            "wall_clock_s": 1.0,
-        })
-        df = pd.DataFrame([{
-            "simulation_outcome": legacy_outcome,
-            "conversation_messages": json.dumps([
-                {"role": "assistant", "content": "hello"},
-            ]),
-        }])
+
+        legacy_outcome = json.dumps(
+            {
+                "per_model_calls": {"assistant_model": 1},
+                "per_model_input_tokens": {"assistant_model": 10},
+                "per_model_output_tokens": {"assistant_model": 1000},
+                # Legacy Phase A field. Should be ignored.
+                "per_model_reasoning_tokens": {"assistant_model": 42},
+                "wall_clock_s_by_alias": {},
+                "wall_clock_s": 1.0,
+            }
+        )
+        df = pd.DataFrame(
+            [
+                {
+                    "simulation_outcome": legacy_outcome,
+                    "conversation_messages": json.dumps(
+                        [
+                            {"role": "assistant", "content": "hello"},
+                        ]
+                    ),
+                }
+            ]
+        )
         p = aggregate_from_dataframe(df)
         # The 42 from the legacy field MUST NOT appear in the profile;
         # the value is whatever Phase B produced (large diff -> well

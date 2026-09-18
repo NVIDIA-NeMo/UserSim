@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 class ToolCallVerifier:
@@ -14,9 +14,9 @@ class ToolCallVerifier:
 
     def verify(
         self,
-        tool_calls: List[Dict[str, Any]],
-        tools: List[Dict[str, Any]],
-    ) -> Tuple[bool, List[Dict[str, Any]], List[bool], List[Any], List[Dict[str, Any]]]:
+        tool_calls: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> tuple[bool, list[dict[str, Any]], list[bool], list[Any], list[dict[str, Any]]]:
         """Verify a list of tool calls against available tool definitions.
 
         Returns:
@@ -24,32 +24,34 @@ class ToolCallVerifier:
         """
         if not tool_calls:
             return True, [], [], [], []
-        all_success: List[bool] = []
-        all_error: List[Any] = []
-        tool_error_messages: List[Dict[str, Any]] = []
-        correct_tool_calls: List[Dict[str, Any]] = []
+        all_success: list[bool] = []
+        all_error: list[Any] = []
+        tool_error_messages: list[dict[str, Any]] = []
+        correct_tool_calls: list[dict[str, Any]] = []
         for tool_call in tool_calls:
             ok, err = self.verify_single_tool_call(tool_call, tools)
             all_success.append(ok)
             all_error.append(err)
             if not ok:
-                tool_error_messages.append({
-                    "role": "tool",
-                    "content": (
-                        f"Error in calling tool `{tool_call['function']['name']}` "
-                        f"with arguments `{tool_call['function']['arguments']}`: {err}"
-                    ),
-                    "tool_call_id": tool_call["id"],
-                })
+                tool_error_messages.append(
+                    {
+                        "role": "tool",
+                        "content": (
+                            f"Error in calling tool `{tool_call['function']['name']}` "
+                            f"with arguments `{tool_call['function']['arguments']}`: {err}"
+                        ),
+                        "tool_call_id": tool_call["id"],
+                    }
+                )
             else:
                 correct_tool_calls.append(tool_call)
         return all(all_success), tool_error_messages, all_success, all_error, correct_tool_calls
 
     def verify_single_tool_call(
         self,
-        tool_call: Dict[str, Any],
-        tools: List[Dict[str, Any]],
-    ) -> Tuple[bool, str | None]:
+        tool_call: dict[str, Any],
+        tools: list[dict[str, Any]],
+    ) -> tuple[bool, str | None]:
         """Verify a single tool call against the available tool definitions."""
         try:
             tool_name = tool_call.get("function", {}).get("name")
@@ -85,7 +87,10 @@ class ToolCallVerifier:
 
             for arg_name, arg_value in tool_arguments.items():
                 if arg_name not in properties:
-                    return False, f"Argument `{arg_name}` present in tool call arguments but not defined in tool schema."
+                    return (
+                        False,
+                        f"Argument `{arg_name}` present in tool call arguments but not defined in tool schema.",
+                    )
 
                 param_spec = properties[arg_name]
 
@@ -95,7 +100,10 @@ class ToolCallVerifier:
 
                 if "enum" in param_spec:
                     if arg_value not in param_spec["enum"]:
-                        return False, f"Unexpected value `{arg_value}` for argument `{arg_name}`, expected one of: {param_spec['enum']}"
+                        return (
+                            False,
+                            f"Unexpected value `{arg_value}` for argument `{arg_name}`, expected one of: {param_spec['enum']}",
+                        )
 
             return True, None
 
@@ -105,8 +113,8 @@ class ToolCallVerifier:
     def _validate_parameter_type(
         self,
         value: Any,
-        param_spec: Dict[str, Any],
-    ) -> Tuple[bool, str | None]:
+        param_spec: dict[str, Any],
+    ) -> tuple[bool, str | None]:
         expected_type = param_spec.get("type")
 
         if expected_type == "string":

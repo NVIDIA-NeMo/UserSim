@@ -111,20 +111,15 @@ Strictly respond in the following format:
 
 # ── Public templates (YAML overrides compiled-in defaults) ────────────────
 
-EDUCATIONAL_USER_AGENT_SYSTEM_PROMPT = get_prompt(
-    _SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT
-)
+EDUCATIONAL_USER_AGENT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)
 
-EDUCATIONAL_USER_JUDGE_RUBRIC = get_prompt(
-    _SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC
-)
+EDUCATIONAL_USER_JUDGE_RUBRIC = get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
 
-EDUCATIONAL_TRAJECTORY_RUBRIC = get_prompt(
-    _SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC
-)
+EDUCATIONAL_TRAJECTORY_RUBRIC = get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
 
 
-USER_JUDGE_TURN_PROMPT = """You are an expert evaluator. Judge the learner's message in this tutoring conversation.
+USER_JUDGE_TURN_PROMPT = (
+    """You are an expert evaluator. Judge the learner's message in this tutoring conversation.
 
 Previous conversation:
 <PREV_CONVERSATION>
@@ -137,21 +132,30 @@ Learner message to judge:
 </LEARNER_MESSAGE>
 
 <RUBRIC>
-""" + EDUCATIONAL_USER_JUDGE_RUBRIC + """
+"""
+    + EDUCATIONAL_USER_JUDGE_RUBRIC
+    + """
 </RUBRIC>
-""" + _INLINE_JUDGE_RESPONSE_FORMAT
+"""
+    + _INLINE_JUDGE_RESPONSE_FORMAT
+)
 
 
-TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT = """You are an expert evaluator. Judge this entire tutoring conversation.
+TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT = (
+    """You are an expert evaluator. Judge this entire tutoring conversation.
 
 <CONVERSATION>
 {conversation_history}
 </CONVERSATION>
 
 <RUBRIC>
-""" + EDUCATIONAL_TRAJECTORY_RUBRIC + """
+"""
+    + EDUCATIONAL_TRAJECTORY_RUBRIC
+    + """
 </RUBRIC>
-""" + _INLINE_JUDGE_RESPONSE_FORMAT
+"""
+    + _INLINE_JUDGE_RESPONSE_FORMAT
+)
 
 
 # ── Call-time resolution ─────────────────────────────────────────────
@@ -163,9 +167,11 @@ TRAJECTORY_LEVEL_JUDGE_TURN_PROMPT = """You are an expert evaluator. Judge this 
 # already governs seeds and banks. The constants are kept for callers that
 # import them directly.
 
+
 def user_agent_system_prompt() -> str:
     """Resolve ``user_agent_system_prompt`` against the currently-active asset root."""
     return get_prompt(_SCENARIO, "user_agent_system_prompt", _DEFAULT_USER_AGENT)
+
 
 def assistant_system_prompt() -> str:
     """Resolve ``assistant_system_prompt`` against the currently-active asset root.
@@ -180,13 +186,16 @@ def assistant_system_prompt() -> str:
     """
     return get_prompt(_SCENARIO, "assistant_system_prompt", "")
 
+
 def user_judge_rubric() -> str:
     """Resolve ``user_judge_rubric`` against the currently-active asset root."""
     return get_prompt(_SCENARIO, "user_judge_rubric", _DEFAULT_USER_JUDGE_RUBRIC)
 
+
 def trajectory_rubric() -> str:
     """Resolve ``trajectory_rubric`` against the currently-active asset root."""
     return get_prompt(_SCENARIO, "trajectory_rubric", _DEFAULT_TRAJECTORY_RUBRIC)
+
 
 def user_judge_turn_prompt() -> str:
     """``USER_JUDGE_TURN_PROMPT`` with the rubric resolved at call time."""

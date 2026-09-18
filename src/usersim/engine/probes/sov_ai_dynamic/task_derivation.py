@@ -32,7 +32,7 @@ Determinism contract (mirrors :mod:`sov_ai_facts.task_derivation`):
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from usersim.engine.core.probing_taxonomy import (
     Category,
@@ -40,16 +40,15 @@ from usersim.engine.core.probing_taxonomy import (
     select_category,
 )
 
-
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 
 def persona_to_interest_tags(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     locale: str,
-) -> List[str]:
+) -> list[str]:
     """Return the structured interest-tag set this persona projects to.
 
     Re-uses :func:`sov_ai_facts.task_derivation.persona_to_tags`
@@ -70,13 +69,13 @@ def persona_to_interest_tags(
 
 
 def derive_probe(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     taxonomy: ProbingTaxonomy,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_category_ids: Iterable[str] = (),
     hint_rotation_index: int = 0,
-) -> Optional[Tuple[Category, str]]:
+) -> tuple[Category, str] | None:
     """Pick a ``(category, subtopic_hint)`` pair for this persona.
 
     Returns ``None`` when every category in the taxonomy has been
@@ -99,7 +98,9 @@ def derive_probe(
     # is identical across every dynamic-tier probe (sov_ai_dynamic +
     # financial_services + future domains).
     return select_category(
-        persona, taxonomy, seed=seed,
+        persona,
+        taxonomy,
+        seed=seed,
         excluded_category_ids=excluded_category_ids,
         hint_rotation_index=hint_rotation_index,
     )

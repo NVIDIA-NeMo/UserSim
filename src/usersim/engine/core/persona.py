@@ -8,8 +8,7 @@ from __future__ import annotations
 import hashlib
 import math
 import random
-from typing import Any, Dict, List
-
+from typing import Any
 
 #: Cell values that mean "nothing here" rather than a fact about the
 #: person. ``"-"`` is what the dataset writes for a slot the person does
@@ -49,14 +48,16 @@ def _is_present_or_valid(value: Any, exempt: tuple[str, ...] = ()) -> bool:
 
 
 def _field_text(
-    persona: Dict[str, Any], key: str, exempt: tuple[str, ...] = (),
+    persona: dict[str, Any],
+    key: str,
+    exempt: tuple[str, ...] = (),
 ) -> str:
     """Return one normalized persona field, or ``""`` when it is absent."""
     value = persona.get(key)
     return str(value) if _is_present_or_valid(value, exempt) else ""
 
 
-def religion_language_context(persona: Dict[str, Any]) -> Dict[str, Any]:
+def religion_language_context(persona: dict[str, Any]) -> dict[str, Any]:
     """Structured audit view of religion/language fields shown to the user agent.
 
     The raw persona is dropped from trajectory output, but these protected,
@@ -67,29 +68,27 @@ def religion_language_context(persona: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "religion": _field_text(persona, "religion") or None,
         "languages": [
-            value for value in (
+            value
+            for value in (
                 _field_text(persona, "first_language"),
                 _field_text(persona, "second_language"),
                 _field_text(persona, "third_language"),
             )
             if value
         ],
-        "religious_background": (
-            _field_text(persona, "religious_background") or None
-        ),
-        "linguistic_background": (
-            _field_text(persona, "linguistic_background") or None
-        ),
+        "religious_background": (_field_text(persona, "religious_background") or None),
+        "linguistic_background": (_field_text(persona, "linguistic_background") or None),
     }
 
 
-def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
+def format_persona_for_prompt(persona: dict[str, Any]) -> str:
     """Build a structured persona text block for user agent prompts.
 
     Outputs the person's name first, followed by demographics, then labeled
     sections for each available persona facet (in shuffled order to reduce
     positional bias).
     """
+
     def f(key: str, exempt: tuple[str, ...] = ()) -> str:
         """The field's text, or ``""`` when the cell holds nothing."""
         return _field_text(persona, key, exempt)
@@ -105,7 +104,7 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
     ]
     name = " ".join(p for p in name_parts if p) or "Unknown"
 
-    demographics: List[str] = []
+    demographics: list[str] = []
     if age_str:
         demographics.append(f"Age: {age_str}")
     if f("sex"):
@@ -148,7 +147,7 @@ def format_persona_for_prompt(persona: Dict[str, Any]) -> str:
     if f("bachelors_field"):
         demographics.append(f"Bachelors Field: {f('bachelors_field')}")
 
-    sections: List[str] = []
+    sections: list[str] = []
     sections.append(f"Name: {name}")
     if demographics:
         sections.append("Demographics:\n" + "\n".join(demographics))

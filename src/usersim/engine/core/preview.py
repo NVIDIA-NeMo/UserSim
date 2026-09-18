@@ -41,7 +41,6 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-
 # Flags + country names cover only the LOCALES we actually ship
 # today (the keys of
 # ``usersim.engine.core.behavioral.LOCALE_LANGUAGE_MAP``).
@@ -231,13 +230,15 @@ _PROBE_DESCRIPTIONS = {
 _PANEL_BOX = box.HORIZONTALS
 
 
-_PLACEHOLDER_WARNING_KINDS = frozenset({
-    "used_placeholder_fact",
-    "used_placeholder_taxonomy",
-    "used_placeholder_query",
-    "used_placeholder_target",
-    "used_placeholder_agentic_action",
-})
+_PLACEHOLDER_WARNING_KINDS = frozenset(
+    {
+        "used_placeholder_fact",
+        "used_placeholder_taxonomy",
+        "used_placeholder_query",
+        "used_placeholder_target",
+        "used_placeholder_agentic_action",
+    }
+)
 
 
 # Tri-state status. A ``completed_with_warnings`` row is functionally
@@ -367,11 +368,7 @@ def filter_preview_locale(
     if isinstance(locale, str):
         selectors = {locale.strip().lower()}
     else:
-        selectors = {
-            str(item).strip().lower()
-            for item in locale
-            if str(item).strip()
-        }
+        selectors = {str(item).strip().lower() for item in locale if str(item).strip()}
     if not selectors:
         return df
 
@@ -386,11 +383,7 @@ def filter_preview_locale(
 
     if "conversation_language" in df.columns:
         language_values = df["conversation_language"].map(
-            lambda v: (
-                _LANGUAGE_REWRITES.get(v, v).strip().lower()
-                if isinstance(v, str) and v.strip()
-                else ""
-            ),
+            lambda v: (_LANGUAGE_REWRITES.get(v, v).strip().lower() if isinstance(v, str) and v.strip() else ""),
         )
         mask = mask | language_values.isin(selectors)
         if "english" in selectors:
@@ -547,11 +540,7 @@ def _status_kind(row: pd.Series, outcome: dict | None) -> str:
         if status_str == "failed":
             return _STATUS_FAIL
         if status_str == "completed_with_warnings":
-            return (
-                _STATUS_WARN
-                if _has_non_placeholder_warning(outcome)
-                else _STATUS_OK
-            )
+            return _STATUS_WARN if _has_non_placeholder_warning(outcome) else _STATUS_OK
         if status_str == "ok":
             return _STATUS_OK
     if not bool(row.get("conversation_status", False)):
@@ -589,9 +578,7 @@ def _score_color(score: int | float | None) -> str:
     return "red"
 
 
-def _judge_chip_for_turn(
-    turn_idx: int, ratings: list[dict] | None
-) -> Text | None:
+def _judge_chip_for_turn(turn_idx: int, ratings: list[dict] | None) -> Text | None:
     """Return the ``✓`` / ``✗`` chip for an assistant turn.
 
     The in-sim ``assistant_judge_ratings`` are 0-indexed by turn so
@@ -798,9 +785,7 @@ def _render_probe_panel(row: pd.Series) -> Panel:
     probe = row.get("probe_type", "?")
     family = _str_or_none(row.get("probe_family")) or "—"
     variant = _str_or_none(row.get("probe_variant"))
-    description = _PROBE_DESCRIPTIONS.get(
-        probe, "(no description registered)"
-    )
+    description = _PROBE_DESCRIPTIONS.get(probe, "(no description registered)")
 
     body = Text()
     body.append("Probe: ", style="bold")
@@ -884,9 +869,7 @@ _PROBE_INPUT_FIELDS: dict[str, list[tuple[str, str, str]]] = {
 }
 
 
-def _render_probe_inputs(
-    row: pd.Series, metadata: dict | None
-) -> Panel | None:
+def _render_probe_inputs(row: pd.Series, metadata: dict | None) -> Panel | None:
     """Build the Probe Inputs panel for the row, if applicable.
 
     Returns ``None`` for the ``general`` family (no curated-asset
@@ -1004,18 +987,13 @@ def _render_field_value(value: Any) -> str | None:
                 rendered = _format_dict_for_display(parsed)
                 return rendered if rendered is not None else normalised
             if isinstance(parsed, list):
-                items = [
-                    _render_field_value(item) for item in parsed
-                ]
+                items = [_render_field_value(item) for item in parsed]
                 items = [s for s in items if s]
                 if items:
                     return ", ".join(items)
         return normalised
     if isinstance(value, (list, tuple)):
-        items = [
-            " ".join(str(v).split())
-            for v in value if v not in (None, "")
-        ]
+        items = [" ".join(str(v).split()) for v in value if v not in (None, "")]
         items = [s for s in items if s]
         return ", ".join(items) if items else None
     if isinstance(value, dict):
@@ -1097,9 +1075,7 @@ def _render_attempted_actions_table(
 # ---------------------------------------------------------------------------
 
 
-def _render_trajectory_footer(
-    row: pd.Series, outcome: dict | None
-) -> Text | None:
+def _render_trajectory_footer(row: pd.Series, outcome: dict | None) -> Text | None:
     """Render the compact provenance footer for a trajectory.
 
     Three load-bearing correlation handles only — kept small so
@@ -1318,13 +1294,15 @@ def preview_row(
         box_content = Group(Align.center(header), Align.center(footer))
     else:
         box_content = Align.center(header)
-    console.print(Panel(
-        box_content,
-        box=box.DOUBLE,
-        border_style=rule_colour,
-        expand=True,
-        padding=(0, 2),
-    ))
+    console.print(
+        Panel(
+            box_content,
+            box=box.DOUBLE,
+            border_style=rule_colour,
+            expand=True,
+            padding=(0, 2),
+        )
+    )
 
     # Probe panel — what we're testing. Lives above the Probe Inputs
     # + Persona panels so the reader's mental flow is *what is being
@@ -1361,10 +1339,9 @@ def preview_row(
         location = raw_location
     else:
         fallback_parts = [row.get("persona_city"), row.get("persona_region")]
-        location = ", ".join(
-            str(p) for p in fallback_parts
-            if isinstance(p, str) and p.strip() and p.strip() != "-"
-        ) or "?"
+        location = (
+            ", ".join(str(p) for p in fallback_parts if isinstance(p, str) and p.strip() and p.strip() != "-") or "?"
+        )
 
     persona_text = Text()
     # Name is the first persona field (lifted out of the trajectory
@@ -1430,17 +1407,19 @@ def preview_row(
                     persona_text.append(f" — {desc}", style="dim")
                 persona_text.append("\n")
 
-    console.print(Panel(
-        persona_text,
-        title="[bold]Persona[/bold]",
-        # Green border distinguishes the persona panel from the
-        # cyan Probe Inputs and magenta Probe panels above —
-        # readers parse "who is being tested" at a glance from
-        # the colour rather than scanning the title.
-        border_style="green",
-        box=_PANEL_BOX,
-        expand=True,
-    ))
+    console.print(
+        Panel(
+            persona_text,
+            title="[bold]Persona[/bold]",
+            # Green border distinguishes the persona panel from the
+            # cyan Probe Inputs and magenta Probe panels above —
+            # readers parse "who is being tested" at a glance from
+            # the colour rather than scanning the title.
+            border_style="green",
+            box=_PANEL_BOX,
+            expand=True,
+        )
+    )
 
     # Full Conversation
     if show_conversation:
@@ -1450,18 +1429,13 @@ def preview_row(
         # panel below still fires for failure summaries — the chip
         # just adds at-a-glance visibility for clean / warn turns
         # too.
-        assistant_ratings = (
-            metadata.get("assistant_judge_ratings", []) if metadata else []
-        )
+        assistant_ratings = metadata.get("assistant_judge_ratings", []) if metadata else []
         if not isinstance(assistant_ratings, list):
             assistant_ratings = []
 
         messages = _parse_json_field(row.get("conversation_messages"))
         if isinstance(messages, list) and messages:
-            visible = [
-                m for m in messages
-                if isinstance(m, dict) and m.get("role") in ("user", "assistant", "tool")
-            ]
+            visible = [m for m in messages if isinstance(m, dict) and m.get("role") in ("user", "assistant", "tool")]
 
             # Two-column conversation table: left column is the
             # turn label (fixed width, no-wrap), right column is
@@ -1483,7 +1457,11 @@ def preview_row(
             # room. ``no_wrap=True`` clamps to width even for
             # double-digit turn counts.
             conv_table.add_column(
-                "label", width=27, no_wrap=True, vertical="top", style="bold",
+                "label",
+                width=27,
+                no_wrap=True,
+                vertical="top",
+                style="bold",
             )
             conv_table.add_column("content", overflow="fold")
 
@@ -1511,11 +1489,7 @@ def preview_row(
                     turn_label = "api response"
 
                 judge_chip = None
-                if (
-                    role == "assistant"
-                    and not is_tool_call_envelope
-                    and assistant_in_turn == 0
-                ):
+                if role == "assistant" and not is_tool_call_envelope and assistant_in_turn == 0:
                     # Only chip the FIRST assistant message in a
                     # user-visible turn. Tool-call envelopes are
                     # implementation details; the final natural-
@@ -1537,11 +1511,7 @@ def preview_row(
                 # conversation AND the most informative for
                 # follow-up triage (the user often reacts to the
                 # assistant's closing question or recommendation).
-                msg_max = (
-                    int(max_message_length * 1.5)
-                    if role == "assistant"
-                    else max_message_length
-                )
+                msg_max = int(max_message_length * 1.5) if role == "assistant" else max_message_length
                 content_cell = _format_message_content(msg, max_content=msg_max)
                 conv_table.add_row(label_cell, content_cell)
 
@@ -1580,10 +1550,7 @@ def preview_row(
             conv_table.add_row("", "")
 
             n_user = sum(1 for m in visible if m.get("role") == "user")
-            n_asst = sum(
-                1 for m in visible
-                if m.get("role") == "assistant" and not _is_tool_call_envelope(m)
-            )
+            n_asst = sum(1 for m in visible if m.get("role") == "assistant" and not _is_tool_call_envelope(m))
             n_tool_calls = sum(1 for m in visible if _is_tool_call_envelope(m))
             n_tool = sum(1 for m in visible if m.get("role") == "tool")
             counts = f"{n_user} user, {n_asst} assistant"
@@ -1591,22 +1558,26 @@ def preview_row(
                 counts += f", {n_tool_calls} tool call"
             if n_tool:
                 counts += f", {n_tool} tool"
-            console.print(Panel(
-                conv_table,
-                title=f"[bold]Full Conversation ({counts})[/bold]",
-                border_style="white",
-                box=_PANEL_BOX,
-                expand=True,
-            ))
+            console.print(
+                Panel(
+                    conv_table,
+                    title=f"[bold]Full Conversation ({counts})[/bold]",
+                    border_style="white",
+                    box=_PANEL_BOX,
+                    expand=True,
+                )
+            )
         elif status_kind == _STATUS_FAIL:
             reason = "unknown"
             if isinstance(metadata, dict):
                 reason = metadata.get("reason", reason)
-            console.print(Panel(
-                f"[dim italic]No conversation generated. Reason: {reason}[/dim italic]",
-                border_style="red",
-                box=_PANEL_BOX,
-            ))
+            console.print(
+                Panel(
+                    f"[dim italic]No conversation generated. Reason: {reason}[/dim italic]",
+                    border_style="red",
+                    box=_PANEL_BOX,
+                )
+            )
 
     # Per-call attempted-actions audit (safety_agentic). Lives below
     # the conversation panel so the reader has the conversational
@@ -1615,12 +1586,14 @@ def preview_row(
     if show_metadata and probe == "safety_agentic":
         actions_table = _render_attempted_actions_table(metadata)
         if actions_table is not None:
-            console.print(Panel(
-                actions_table,
-                title="[bold]Attempted Actions[/bold]",
-                border_style="red",
-                box=_PANEL_BOX,
-            ))
+            console.print(
+                Panel(
+                    actions_table,
+                    title="[bold]Attempted Actions[/bold]",
+                    border_style="red",
+                    box=_PANEL_BOX,
+                )
+            )
 
     # Per-turn assistant quality (only shown when at least one turn's
     # FINAL attempt failed — a turn resampled and then accepted is clean
@@ -1649,21 +1622,20 @@ def preview_row(
                     if expl:
                         quality_text.append(f" — {expl}", style="dim")
                     quality_text.append("\n")
-            console.print(Panel(
-                quality_text,
-                title="[bold]Assistant Quality (per-turn)[/bold]",
-                border_style="red",
-                box=_PANEL_BOX,
-            ))
+            console.print(
+                Panel(
+                    quality_text,
+                    title="[bold]Assistant Quality (per-turn)[/bold]",
+                    border_style="red",
+                    box=_PANEL_BOX,
+                )
+            )
 
     # Trajectory judgment
     if show_metadata:
         traj = _parse_json_field(row.get("trajectory_judgment"))
         if isinstance(traj, dict) and traj:
-            has_axis_scores = any(
-                isinstance(v, dict) and v.get("score") is not None
-                for v in traj.values()
-            )
+            has_axis_scores = any(isinstance(v, dict) and v.get("score") is not None for v in traj.values())
             if has_axis_scores:
                 traj_table = Table(show_header=True, header_style="bold", expand=True, show_lines=False)
                 traj_table.add_column("Axis", style="bold")
@@ -1675,7 +1647,9 @@ def preview_row(
                         reasoning = val.get("reasoning", "")
                         score_str = str(score) if score is not None else "—"
                         traj_table.add_row(axis, Text(score_str, style=_score_color(score)), reasoning)
-                console.print(Panel(traj_table, title="[bold]Trajectory Judgment[/bold]", border_style="magenta", box=_PANEL_BOX))
+                console.print(
+                    Panel(traj_table, title="[bold]Trajectory Judgment[/bold]", border_style="magenta", box=_PANEL_BOX)
+                )
             elif "rating" in traj:
                 rating = traj.get("rating", "?")
                 explanation = traj.get("explanation", "")
@@ -1686,7 +1660,9 @@ def preview_row(
                 if explanation:
                     traj_text.append("Explanation: ", style="bold")
                     traj_text.append(explanation)
-                console.print(Panel(traj_text, title="[bold]Trajectory Judgment[/bold]", border_style="magenta", box=_PANEL_BOX))
+                console.print(
+                    Panel(traj_text, title="[bold]Trajectory Judgment[/bold]", border_style="magenta", box=_PANEL_BOX)
+                )
 
     # Eval scores
     if show_eval:
@@ -1706,7 +1682,9 @@ def preview_row(
                         reasoning = reasoning[:120] + "..."
                     score_str = f"{score}/5" if score is not None else "—"
                     score_table.add_row(axis, Text(score_str, style=_score_color(score)), reasoning)
-            console.print(Panel(score_table, title="[bold]Evaluation Scores[/bold]", border_style="green", box=_PANEL_BOX))
+            console.print(
+                Panel(score_table, title="[bold]Evaluation Scores[/bold]", border_style="green", box=_PANEL_BOX)
+            )
 
     # Tool-calling metadata
     if show_metadata and probe == "tool_calling" and isinstance(metadata, dict):
@@ -1720,7 +1698,11 @@ def preview_row(
                 valid = "✓" if vr.get("valid") else "✗"
                 err = f" ({vr.get('error')})" if vr.get("error") else ""
                 meta_parts.append(f"  {valid} {vr.get('tool_name', '?')}{err}")
-            console.print(Panel("\n".join(meta_parts), title="[bold]Tool Call Details[/bold]", border_style="blue", box=_PANEL_BOX))
+            console.print(
+                Panel(
+                    "\n".join(meta_parts), title="[bold]Tool Call Details[/bold]", border_style="blue", box=_PANEL_BOX
+                )
+            )
 
 
 def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
@@ -1815,7 +1797,9 @@ def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
     # ``_COUNTRY_COLUMN_MIN_WIDTH``); Rich's auto-sizer
     # underestimates flag-emoji cells without it.
     table.add_column(
-        "Country", no_wrap=True, min_width=_COUNTRY_COLUMN_MIN_WIDTH,
+        "Country",
+        no_wrap=True,
+        min_width=_COUNTRY_COLUMN_MIN_WIDTH,
     )
     table.add_column("Language", no_wrap=True)
     # Age + Sex sit just before Persona — the demographic

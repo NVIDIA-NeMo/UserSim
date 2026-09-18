@@ -21,7 +21,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable
 
 _ROOT = Path(__file__).resolve().parent  # asset_gen/
 
@@ -40,12 +40,13 @@ class AssetDomain:
     #: run live generation: ``(spec, models, out_dir, args) -> out_dir``.
     generate: Callable[[Any, Any, Any, argparse.Namespace], Any]
     #: run the offline validation gate: ``(bank_dir, spec | None) -> ValidationReport``.
-    validate: Callable[[Any, Optional[Any]], Any]
+    validate: Callable[[Any, Any | None], Any]
     #: run the DD-judge evaluation scorecard (network-gated); set in the asset_eval bucket.
-    evaluate: Optional[Callable[..., Any]] = None
+    evaluate: Callable[..., Any] | None = None
 
 
 # ── financial_services domain ───────────────────────────────────────────
+
 
 def _financial_services() -> AssetDomain:
     def add_gen_args(p: argparse.ArgumentParser) -> None:
@@ -54,18 +55,22 @@ def _financial_services() -> AssetDomain:
         # resolved in describe_plan / generate. Keeps add_gen_args import-free
         # (fast --help) while avoiding a drifting duplicate default.
         p.add_argument(
-            "--docs-per-product", type=int, default=None,
-            help="[financial_services] target docs per product cluster "
-                 "(default: pipeline DEFAULT_DOCS_PER_PRODUCT).",
+            "--docs-per-product",
+            type=int,
+            default=None,
+            help="[financial_services] target docs per product cluster (default: pipeline DEFAULT_DOCS_PER_PRODUCT).",
         )
         p.add_argument(
-            "--max-docs-per-cluster", type=int, default=None,
+            "--max-docs-per-cluster",
+            type=int,
+            default=None,
             help="[financial_services] per-call cap; larger targets fan into "
-                 "batches (default: pipeline DEFAULT_MAX_DOCS_PER_CLUSTER).",
+            "batches (default: pipeline DEFAULT_MAX_DOCS_PER_CLUSTER).",
         )
 
     def load_spec(path: Any) -> Any:
         from usersim.asset_gen.financial_services.spec import load_region_spec
+
         return load_region_spec(path)
 
     def describe_plan(spec: Any, args: argparse.Namespace) -> None:
@@ -78,13 +83,13 @@ def _financial_services() -> AssetDomain:
             build_product_doc_plan,
             build_shared_doc_plan,
         )
+
         dpp = args.docs_per_product if args.docs_per_product is not None else DEFAULT_DOCS_PER_PRODUCT
         cap = args.max_docs_per_cluster if args.max_docs_per_cluster is not None else DEFAULT_MAX_DOCS_PER_CLUSTER
         by_type: Counter = Counter()
         total_docs = total_clusters = 0
         print(f"  docs_per_product={dpp}  max_docs_per_cluster={cap}")
-        print(f"  institutions: {len(spec.institutions)} "
-              f"({', '.join(i.id for i in spec.institutions)})")
+        print(f"  institutions: {len(spec.institutions)} ({', '.join(i.id for i in spec.institutions)})")
         for inst in spec.institutions:
             clusters = []
             for product in inst.products:
@@ -97,8 +102,10 @@ def _financial_services() -> AssetDomain:
             inst_docs = sum(clusters)
             total_docs += inst_docs
             total_clusters += len(clusters)
-            print(f"    - {inst.id}: 1 brief + {len(clusters)} cluster call(s) "
-                  f"({len(inst.products)} product + shared) -> {inst_docs} docs")
+            print(
+                f"    - {inst.id}: 1 brief + {len(clusters)} cluster call(s) "
+                f"({len(inst.products)} product + shared) -> {inst_docs} docs"
+            )
         print(f"  total: {total_clusters} cluster calls -> {total_docs} documents")
         print(f"  by document_type: {dict(by_type)}")
 
@@ -108,22 +115,25 @@ def _financial_services() -> AssetDomain:
             DEFAULT_MAX_DOCS_PER_CLUSTER,
             generate_corpus,
         )
+
         return generate_corpus(
-            spec, models, out_dir,
-            docs_per_product=(args.docs_per_product
-                              if args.docs_per_product is not None
-                              else DEFAULT_DOCS_PER_PRODUCT),
-            max_docs_per_cluster=(args.max_docs_per_cluster
-                                  if args.max_docs_per_cluster is not None
-                                  else DEFAULT_MAX_DOCS_PER_CLUSTER),
+            spec,
+            models,
+            out_dir,
+            docs_per_product=(args.docs_per_product if args.docs_per_product is not None else DEFAULT_DOCS_PER_PRODUCT),
+            max_docs_per_cluster=(
+                args.max_docs_per_cluster if args.max_docs_per_cluster is not None else DEFAULT_MAX_DOCS_PER_CLUSTER
+            ),
         )
 
-    def validate(bank_dir: Any, spec: Optional[Any]) -> Any:
+    def validate(bank_dir: Any, spec: Any | None) -> Any:
         from usersim.asset_gen.financial_services.validate import validate_bank
+
         return validate_bank(bank_dir, spec)
 
-    def evaluate(bank_dir: Any, spec: Optional[Any], models: Any) -> Any:
+    def evaluate(bank_dir: Any, spec: Any | None, models: Any) -> Any:
         from usersim.asset_gen.financial_services.evaluate import evaluate_bank
+
         return evaluate_bank(bank_dir, spec, models)
 
     return AssetDomain(
@@ -140,10 +150,10 @@ def _financial_services() -> AssetDomain:
 
 # ── registry access ──────────────────────────────────────────────────────
 
-_DOMAINS: Optional[Dict[str, AssetDomain]] = None
+_DOMAINS: dict[str, AssetDomain] | None = None
 
 
-def _domains() -> Dict[str, AssetDomain]:
+def _domains() -> dict[str, AssetDomain]:
     """Built-in domains merged with any advertised under ``usersim.asset_domains``.
 
     An entry point may resolve to an ``AssetDomain`` or to a zero-argument
@@ -160,10 +170,7 @@ def _domains() -> Dict[str, AssetDomain]:
             {"financial_services": _financial_services()},
             what="asset domain",
         )
-        _DOMAINS = {
-            name: obj if isinstance(obj, AssetDomain) else obj()
-            for name, obj in merged.items()
-        }
+        _DOMAINS = {name: obj if isinstance(obj, AssetDomain) else obj() for name, obj in merged.items()}
     return _DOMAINS
 
 
@@ -173,7 +180,7 @@ def clear_domain_cache() -> None:
     _DOMAINS = None
 
 
-def domain_names() -> Tuple[str, ...]:
+def domain_names() -> tuple[str, ...]:
     return tuple(sorted(_domains()))
 
 

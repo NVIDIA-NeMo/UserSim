@@ -11,7 +11,7 @@ classification helpers (``_is_empty_or_trivial``, ``_is_over_formatted``,
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -35,8 +35,8 @@ def _ensure_scorers_loaded():
     yield
 
 
-def _trajectory(assistant_messages: List[str]) -> Dict[str, Any]:
-    messages: List[Dict[str, str]] = []
+def _trajectory(assistant_messages: list[str]) -> dict[str, Any]:
+    messages: list[dict[str, str]] = []
     for content in assistant_messages:
         messages.append({"role": "user", "content": "(user)"})
         messages.append({"role": "assistant", "content": content})
@@ -74,7 +74,8 @@ class TestRegistration:
 
 class TestEmptyOrTrivial:
     @pytest.mark.parametrize(
-        "text", ["", " ", "   \n  ", "ok", "...", "hi", "👍", "✓"],
+        "text",
+        ["", " ", "   \n  ", "ok", "...", "hi", "👍", "✓"],
     )
     def test_trivial_strings_flagged(self, text: str) -> None:
         assert _is_empty_or_trivial(text) is True
@@ -110,7 +111,7 @@ class TestOverFormatted:
         assert _is_over_formatted(text) is True
 
     def test_long_numbered_list_flagged(self) -> None:
-        text = "\n".join(f"{i+1}. item {i+1}" for i in range(7))
+        text = "\n".join(f"{i + 1}. item {i + 1}" for i in range(7))
         assert _is_over_formatted(text) is True
 
     def test_short_numbered_list_not_flagged(self) -> None:
@@ -118,7 +119,7 @@ class TestOverFormatted:
         assert _is_over_formatted(text) is False
 
     def test_long_bulleted_list_flagged(self) -> None:
-        text = "\n".join(f"- bullet {i+1}" for i in range(7))
+        text = "\n".join(f"- bullet {i + 1}" for i in range(7))
         assert _is_over_formatted(text) is True
 
     def test_long_code_block_flagged(self) -> None:
@@ -175,10 +176,12 @@ class TestLooksTruncated:
 class TestTrajectoryScoring:
     def test_clean_trajectory_all_perfect(self) -> None:
         result = score_response_shape_trajectory(
-            _trajectory([
-                "Sure, here's the answer. The capital of France is Paris.",
-                "You're welcome!",
-            ]),
+            _trajectory(
+                [
+                    "Sure, here's the answer. The capital of France is Paris.",
+                    "You're welcome!",
+                ]
+            ),
             {},
         )
         for axis in SHAPE_AXES:
@@ -194,12 +197,14 @@ class TestTrajectoryScoring:
         assert result["status_proposal"] is False
 
     def test_one_over_formatted_turn_drops_rate(self) -> None:
-        long_list = "\n".join(f"{i+1}. item {i+1}" for i in range(8))
+        long_list = "\n".join(f"{i + 1}. item {i + 1}" for i in range(8))
         result = score_response_shape_trajectory(
-            _trajectory([
-                "A short clean reply.",
-                long_list,
-            ]),
+            _trajectory(
+                [
+                    "A short clean reply.",
+                    long_list,
+                ]
+            ),
             {},
         )
         assert result["scores"]["shape.over_formatted_rate"]["score"] == 0.5
@@ -207,10 +212,12 @@ class TestTrajectoryScoring:
 
     def test_one_truncated_turn_drops_rate(self) -> None:
         result = score_response_shape_trajectory(
-            _trajectory([
-                "Clean response.",
-                "And then the user said abru",
-            ]),
+            _trajectory(
+                [
+                    "Clean response.",
+                    "And then the user said abru",
+                ]
+            ),
             {},
         )
         assert result["scores"]["shape.truncation_suspicion_rate"]["score"] == 0.5
@@ -220,9 +227,11 @@ class TestTrajectoryScoring:
         result = score_response_shape_trajectory(
             {
                 "locale": "en_US",
-                "conversation_messages": json.dumps([
-                    {"role": "user", "content": "Hi"},
-                ]),
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "Hi"},
+                    ]
+                ),
             },
             {},
         )

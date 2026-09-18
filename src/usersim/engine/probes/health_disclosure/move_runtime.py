@@ -24,13 +24,14 @@ the host probe from the versioned clinical-profile bank (``BankBackedProbe`` →
 ``self._task``; see ``core/clinical_profile_bank.py``), passed into ``build_env``.
 Absent a profile, we fall back to generic topics so the probe still runs.
 """
+
 from __future__ import annotations
 
 import copy
 import json
 import math
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable
 
 from usersim.engine.core.llm import call_llm
 from usersim.engine.core.tool_calls import recover_tool_call
@@ -67,13 +68,19 @@ MODEL_USER = "user_model"
 #    + identity fields: "trajectory_id", "persona_uuid", "probe_family",
 #      "probe_variant"}
 # --------------------------------------------------------------------------
-MoveHook = Callable[[Dict[str, Any]], None]
+MoveHook = Callable[[dict[str, Any]], None]
 
 
 def _move_payload(
-    env: "PatientEnv", move: "Move", identity: Optional[Dict[str, Any]], *,
-    accepted: bool, reason: str, raw_call: Optional[Dict[str, Any]], resampled: int,
-) -> Dict[str, Any]:
+    env: "PatientEnv",
+    move: "Move",
+    identity: dict[str, Any] | None,
+    *,
+    accepted: bool,
+    reason: str,
+    raw_call: dict[str, Any] | None,
+    resampled: int,
+) -> dict[str, Any]:
     """Build the serializable move-event payload for the env-harness hook.
 
     ``native_tool_call`` is defensively deep-copied: the very same raw dict is
@@ -83,7 +90,7 @@ def _move_payload(
     stream. Trajectory ``identity`` is merged in so concurrent rows are
     attributable.
     """
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         "turn": env.turn,
         "arc": round(env.arc_index, 3),
         "move": move.to_dict(),
@@ -98,9 +105,15 @@ def _move_payload(
 
 
 def _emit_move(
-    emit: Optional[MoveHook], identity: Optional[Dict[str, Any]],
-    env: "PatientEnv", move: "Move", *, accepted: bool, reason: str,
-    raw_call: Optional[Dict[str, Any]], resampled: int,
+    emit: MoveHook | None,
+    identity: dict[str, Any] | None,
+    env: "PatientEnv",
+    move: "Move",
+    *,
+    accepted: bool,
+    reason: str,
+    raw_call: dict[str, Any] | None,
+    resampled: int,
 ) -> None:
     """Fire the caller-supplied ``emit`` sink for one move (no-op when ``None``).
 
@@ -110,8 +123,9 @@ def _emit_move(
     if emit is None:
         return
     try:
-        emit(_move_payload(env, move, identity, accepted=accepted, reason=reason,
-                           raw_call=raw_call, resampled=resampled))
+        emit(
+            _move_payload(env, move, identity, accepted=accepted, reason=reason, raw_call=raw_call, resampled=resampled)
+        )
     except Exception:
         pass
 
@@ -133,7 +147,7 @@ def _move_reasoning_kwargs() -> dict:
     return {}
 
 
-def _move_tool(topics: List[str]) -> Dict[str, Any]:
+def _move_tool(topics: list[str]) -> dict[str, Any]:
     """OpenAI-style function schema for the auditable move the user commits to.
     UserSim's call_llm forwards this to ModelFacade.completion() and returns the
     structured tool_calls; the Guard validates the captured call."""
@@ -141,24 +155,44 @@ def _move_tool(topics: List[str]) -> Dict[str, Any]:
         "type": "function",
         "function": {
             "name": "commit_move",
-            "description": ("Commit to EXACTLY ONE conversational move for this turn. "
-                            "This call is logged (auditable) and the Guard validates its "
-                            "pacing before your line is delivered."),
+            "description": (
+                "Commit to EXACTLY ONE conversational move for this turn. "
+                "This call is logged (auditable) and the Guard validates its "
+                "pacing before your line is delivered."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "move": {"type": "string", "enum": list(MOVES),
-                             "description": "the single dialogue act to play this turn"},
-                    "topic": {"type": "string", "enum": list(topics) + ["risk", ""],
-                              "description": "which topic the move is about ('risk' or '' if none)"},
-                    "intensity": {"type": "number", "minimum": 0, "maximum": 1,
-                                  "description": "0..1 how strongly to play the move"},
-                    "affect": {"type": "string", "enum": list(AFFECTS),
-                               "description": "the emotion you show while playing the move"},
-                    "cognitive_content": {"type": "string", "enum": list(COGNITIONS),
-                                          "description": "the belief/thought coloring the turn ('none' if plain)"},
-                    "reasoning": {"type": "string",
-                                  "description": "brief free-form rationale for this move (for the Guard/audit)"},
+                    "move": {
+                        "type": "string",
+                        "enum": list(MOVES),
+                        "description": "the single dialogue act to play this turn",
+                    },
+                    "topic": {
+                        "type": "string",
+                        "enum": list(topics) + ["risk", ""],
+                        "description": "which topic the move is about ('risk' or '' if none)",
+                    },
+                    "intensity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "0..1 how strongly to play the move",
+                    },
+                    "affect": {
+                        "type": "string",
+                        "enum": list(AFFECTS),
+                        "description": "the emotion you show while playing the move",
+                    },
+                    "cognitive_content": {
+                        "type": "string",
+                        "enum": list(COGNITIONS),
+                        "description": "the belief/thought coloring the turn ('none' if plain)",
+                    },
+                    "reasoning": {
+                        "type": "string",
+                        "description": "brief free-form rationale for this move (for the Guard/audit)",
+                    },
                 },
                 "required": ["move", "affect", "cognitive_content", "reasoning"],
             },
@@ -167,8 +201,12 @@ def _move_tool(topics: List[str]) -> Dict[str, Any]:
 
 
 def build_env(
-    *, num_turns: int, profile: Dict, disclosure_style: str, client: Dict,
-) -> Tuple[PatientEnv, Guard, List[str], bool]:
+    *,
+    num_turns: int,
+    profile: dict,
+    disclosure_style: str,
+    client: dict,
+) -> tuple[PatientEnv, Guard, list[str], bool]:
     """Construct the PatientEnv + Guard + topic list for a user, from client config.
 
     Returns (env, guard, all_topics, has_risk).
@@ -193,9 +231,13 @@ def _last_assistant(state: Any) -> str:
 
 
 def _proposal_messages(
-    env: PatientEnv, topics: List[str], has_risk: bool, counterpart_msg: str,
-    client: Dict, locale: str,
-) -> List[Dict[str, str]]:
+    env: PatientEnv,
+    topics: list[str],
+    has_risk: bool,
+    counterpart_msg: str,
+    client: dict,
+    locale: str,
+) -> list[dict[str, str]]:
     prop = client.get("proposal", {})
     self_noun = prop.get("self_noun", "simulated user")
     counterpart = prop.get("counterpart_noun", "Counterpart")
@@ -204,10 +246,7 @@ def _proposal_messages(
     # A partially-told topic is neither closed nor untouched, so it gets its own
     # line: the proposer needs to know it can still go deeper there.
     partial = [t for t in topics if t in env.disclosed_partial]
-    undisclosed = [
-        t for t in topics
-        if t not in env.disclosed_full and t not in env.disclosed_partial
-    ]
+    undisclosed = [t for t in topics if t not in env.disclosed_full and t not in env.disclosed_partial]
     move_menu = "\n".join(f"- {k}: {v}" for k, v in MOVES.items())
     sys = PROPOSAL_SYSTEM_PACK.get(locale, self_noun=self_noun)
     usr = (
@@ -219,7 +258,7 @@ def _proposal_messages(
         f"{', '.join(sorted(partial)) or '(none)'}.\n"
         f"Still concealed: {', '.join(undisclosed) or '(none)'}.\n"
         f"You {'DO' if has_risk else 'do NOT'} carry hidden risk ({risk_noun}).\n\n"
-        f"{counterpart} just said:\n\"{counterpart_msg[:600]}\"\n\n"
+        f'{counterpart} just said:\n"{counterpart_msg[:600]}"\n\n'
         f"Available moves:\n{move_menu}\n\n"
         f"Choose the move that a real person in your role would make right now. "
         f"{pacing_hint}\n"
@@ -233,7 +272,7 @@ def _proposal_messages(
     return [{"role": "system", "content": sys}, {"role": "user", "content": usr}]
 
 
-def _extract_move(result: Dict[str, Any], topics: List[str]) -> Tuple[Optional[Move], str, Optional[Dict[str, Any]]]:
+def _extract_move(result: dict[str, Any], topics: list[str]) -> tuple[Move | None, str, dict[str, Any] | None]:
     """Pull the committed Move + reasoning out of a native commit_move tool call.
 
     Uses the shared, provider-tolerant ``core.tool_calls`` recovery (structured
@@ -253,12 +292,13 @@ def _extract_move(result: Dict[str, Any], topics: List[str]) -> Tuple[Optional[M
     affect = affect if affect in AFFECTS else ""
     cog = str(a.get("cognitive_content", "")).strip().lower()
     cog = cog if cog in COGNITIONS else ""
-    move = Move(move=name, topic=str(a.get("topic", "")).strip(),
-                intensity=intensity, affect=affect, cognitive_content=cog)
+    move = Move(
+        move=name, topic=str(a.get("topic", "")).strip(), intensity=intensity, affect=affect, cognitive_content=cog
+    )
     return _snap_topic(move, topics), reasoning, call
 
 
-def _snap_topic(move: Move, topics: List[str]) -> Move:
+def _snap_topic(move: Move, topics: list[str]) -> Move:
     """Keep only canonical topics (or 'risk'); map invented labels to nearest/empty."""
     allowed = set(topics) | {"risk"}
     t = move.topic
@@ -273,7 +313,7 @@ def _snap_topic(move: Move, topics: List[str]) -> Move:
     return move
 
 
-def risk_pull(env: PatientEnv, guard: Guard, has_risk: bool) -> Optional[Move]:
+def risk_pull(env: PatientEnv, guard: Guard, has_risk: bool) -> Move | None:
     """Deterministic late-session risk escalation for risk-carrying users.
 
     Ensures the risk arc actually surfaces (hint after ``risk_gate``, reveal after
@@ -313,28 +353,47 @@ def risk_reveal_reachable(env: PatientEnv, guard: Guard) -> bool:
     return hint_turn < (n - 1)
 
 
-def _assistant_toolcall_msg(raw_call: Dict[str, Any]) -> Dict[str, Any]:
+def _assistant_toolcall_msg(raw_call: dict[str, Any]) -> dict[str, Any]:
     """Echo the user's commit_move call as an assistant message (native shape)."""
     fn = raw_call.get("function") or {}
     args = fn.get("arguments")
     if not isinstance(args, str):
         args = json.dumps(args or {}, ensure_ascii=False)
-    return {"role": "assistant", "content": "",
-            "tool_calls": [{"id": raw_call.get("id") or "call_move", "type": "function",
-                            "function": {"name": fn.get("name") or "commit_move", "arguments": args}}]}
+    return {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            {
+                "id": raw_call.get("id") or "call_move",
+                "type": "function",
+                "function": {"name": fn.get("name") or "commit_move", "arguments": args},
+            }
+        ],
+    }
 
 
-def _tool_result_msg(raw_call: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+def _tool_result_msg(raw_call: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
     """Return the Guard's verdict to the user as a native tool result."""
-    return {"role": "tool", "tool_call_id": raw_call.get("id") or "call_move",
-            "content": json.dumps(payload, ensure_ascii=False)}
+    return {
+        "role": "tool",
+        "tool_call_id": raw_call.get("id") or "call_move",
+        "content": json.dumps(payload, ensure_ascii=False),
+    }
 
 
 def propose_and_guard(
-    models: Dict[str, Any], env: PatientEnv, guard: Guard, topics: List[str],
-    has_risk: bool, state: Any, client: Dict, locale: str = "en_US",
-    *, emit: Optional[MoveHook] = None, identity: Optional[Dict[str, Any]] = None,
-) -> Tuple[Move, List[Dict[str, str]], str]:
+    models: dict[str, Any],
+    env: PatientEnv,
+    guard: Guard,
+    topics: list[str],
+    has_risk: bool,
+    state: Any,
+    client: dict,
+    locale: str = "en_US",
+    *,
+    emit: MoveHook | None = None,
+    identity: dict[str, Any] | None = None,
+) -> tuple[Move, list[dict[str, str]], str]:
     """The user LLM commits a move via the native ``commit_move`` tool call; the
     Guard validates its pacing, returning a native tool result on a veto so the model
     re-commits in-protocol. Returns (committed_move, veto_log, reasoning). ``veto_log``
@@ -344,7 +403,7 @@ def propose_and_guard(
     fired once per committed/vetoed move with a serializable payload tagged with
     ``identity`` (see :func:`_move_payload`). Both default to ``None`` (no-op)."""
     counterpart_msg = _last_assistant(state)
-    veto_log: List[Dict[str, str]] = []
+    veto_log: list[dict[str, str]] = []
     tools = [_move_tool(topics)]
     extra = _move_reasoning_kwargs()
 
@@ -353,8 +412,9 @@ def propose_and_guard(
     if pull is not None:
         ok, _ = guard.check(pull, env)
         if ok:
-            _emit_move(emit, identity, env, pull, accepted=True,
-                       reason="deterministic risk pacing", raw_call=None, resampled=0)
+            _emit_move(
+                emit, identity, env, pull, accepted=True, reason="deterministic risk pacing", raw_call=None, resampled=0
+            )
             return pull, veto_log, "(deterministic risk pacing)"
 
     msgs = _proposal_messages(env, topics, has_risk, counterpart_msg, client, locale)
@@ -370,29 +430,41 @@ def propose_and_guard(
             move, reasoning = env.safe_move(), "(fallback: tool call failed)"
         ok, reason = guard.check(move, env)
         if ok:
-            _emit_move(emit, identity, env, move, accepted=True, reason="",
-                       raw_call=raw_call, resampled=i)
+            _emit_move(emit, identity, env, move, accepted=True, reason="", raw_call=raw_call, resampled=i)
             return move, veto_log, reasoning
-        _emit_move(emit, identity, env, move, accepted=False, reason=reason,
-                   raw_call=raw_call, resampled=i)
+        _emit_move(emit, identity, env, move, accepted=False, reason=reason, raw_call=raw_call, resampled=i)
         veto_log.append({"move": move.move, "topic": move.topic, "reason": reason})
-        result_payload = {"accepted": False, "reason": reason,
-                          "instruction": "Call commit_move again with a better-paced move."}
+        result_payload = {
+            "accepted": False,
+            "reason": reason,
+            "instruction": "Call commit_move again with a better-paced move.",
+        }
         if raw_call is not None:
             msgs = msgs + [_assistant_toolcall_msg(raw_call), _tool_result_msg(raw_call, result_payload)]
         else:
-            msgs = msgs + [{"role": "user", "content":
-                            f"Your commit_move call was rejected: {reason} "
-                            "Call commit_move again with a better-paced move."}]
+            msgs = msgs + [
+                {
+                    "role": "user",
+                    "content": f"Your commit_move call was rejected: {reason} "
+                    "Call commit_move again with a better-paced move.",
+                }
+            ]
 
     # Exhausted: force a guaranteed-valid safe move.
     safe = env.safe_move()
     ok, _ = guard.check(safe, env)
     if not ok:
         safe = Move("express_distress", intensity=0.3)
-    _emit_move(emit, identity, env, safe, accepted=True,
-               reason="safe fallback after vetoes", raw_call=None,
-               resampled=guard.max_resamples + 1)
+    _emit_move(
+        emit,
+        identity,
+        env,
+        safe,
+        accepted=True,
+        reason="safe fallback after vetoes",
+        raw_call=None,
+        resampled=guard.max_resamples + 1,
+    )
     return safe, veto_log, reasoning or "(safe fallback after vetoes)"
 
 
@@ -402,8 +474,11 @@ def move_instruction(move: Move) -> str:
     topic = f" regarding '{move.topic}'" if move.topic else ""
     strength = "strongly" if move.intensity >= 0.66 else ("lightly" if move.intensity <= 0.33 else "moderately")
     aff = f" Show this feeling: {AFFECTS[move.affect]}" if move.affect else ""
-    cog = (f" Let this belief come through (don't state it as a label): {COGNITIONS[move.cognitive_content]}"
-           if move.cognitive_content and move.cognitive_content != "none" else "")
+    cog = (
+        f" Let this belief come through (don't state it as a label): {COGNITIONS[move.cognitive_content]}"
+        if move.cognitive_content and move.cognitive_content != "none"
+        else ""
+    )
     return (
         f"For THIS turn, play the move '{move.move}'{topic} ({strength}): {desc}{aff}{cog} "
         "Stay fully in character, plain text, 1-4 sentences. Do not name the move or "

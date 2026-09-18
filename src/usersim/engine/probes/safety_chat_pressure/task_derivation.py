@@ -31,7 +31,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Iterable
 
 from usersim.engine.core.pressure_bank import (
     PressureBank,
@@ -49,21 +49,21 @@ __all__ = [
 ]
 
 
-def _persona_content_hash(persona: Dict[str, Any]) -> int:
+def _persona_content_hash(persona: dict[str, Any]) -> int:
     payload = json.dumps(persona, sort_keys=True, default=str)
     digest = hashlib.sha256(payload.encode("utf-8")).digest()
     return int.from_bytes(digest[:8], "big", signed=False)
 
 
 def derive_task(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     bank: PressureBank,
     locale: str,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_target_ids: Iterable[str] = (),
     excluded_strategy_ids: Iterable[str] = (),
-) -> Optional[Tuple[Strategy, TargetRequest]]:
+) -> tuple[Strategy, TargetRequest] | None:
     """Pick one (strategy, target_request) pair for this persona.
 
     Pool construction:
@@ -86,20 +86,13 @@ def derive_task(
     excluded_strategies = set(excluded_strategy_ids)
 
     persona_tags = persona_to_tags(persona, locale)
-    target_pool = [
-        t for t in bank.target_requests
-        if t.matches_persona(persona_tags) and t.id not in excluded_targets
-    ]
-    strategy_pool = [
-        s for s in bank.strategies if s.id not in excluded_strategies
-    ]
+    target_pool = [t for t in bank.target_requests if t.matches_persona(persona_tags) and t.id not in excluded_targets]
+    strategy_pool = [s for s in bank.strategies if s.id not in excluded_strategies]
     if not target_pool or not strategy_pool:
         return None
 
     persona_hash = _persona_content_hash(persona)
-    bank_salt_bytes = hashlib.sha256(
-        f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")
-    ).digest()[:16]
+    bank_salt_bytes = hashlib.sha256(f"{bank.bank_id}|{bank.bank_version}".encode("utf-8")).digest()[:16]
     target_salt = int.from_bytes(bank_salt_bytes[:8], "big", signed=False)
     strategy_salt = int.from_bytes(bank_salt_bytes[8:], "big", signed=False)
 
@@ -122,14 +115,14 @@ def derive_task(
 
 
 def resolve_task_from_row(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     bank: PressureBank,
     locale: str,
     *,
-    seed: Optional[int] = None,
-    pressure_strategy_id: Optional[str] = None,
-    target_request_id: Optional[str] = None,
-) -> Optional[Tuple[Strategy, TargetRequest]]:
+    seed: int | None = None,
+    pressure_strategy_id: str | None = None,
+    target_request_id: str | None = None,
+) -> tuple[Strategy, TargetRequest] | None:
     """Resolve a (strategy, target) pair, honouring input-column overrides.
 
     Resolution order:

@@ -62,7 +62,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -150,7 +150,7 @@ _GRACEFUL_UNKNOWN = Score(
 )
 
 
-_AXES: Tuple[Score, ...] = (
+_AXES: tuple[Score, ...] = (
     _SUSPECTED_FABRICATION,
     _SELF_CONSISTENCY,
     _GRACEFUL_UNKNOWN,
@@ -160,7 +160,7 @@ _AXES: Tuple[Score, ...] = (
 # trajectory (today always one category per trajectory, but the schema
 # anticipates multi-category trajectories). Public so reporting can
 # enumerate.
-AGGREGATABLE_AXES: Tuple[str, ...] = tuple(s.name for s in _AXES)
+AGGREGATABLE_AXES: tuple[str, ...] = tuple(s.name for s in _AXES)
 
 
 # ---------------------------------------------------------------------------
@@ -229,9 +229,9 @@ def _build_schema():
 
 
 def score_sov_ai_dynamic_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Score a trajectory produced by ``sov_ai_dynamic``.
 
     Contract:
@@ -273,9 +273,7 @@ def score_sov_ai_dynamic_trajectory(
             "taxonomy_version": None,
             "taxonomy_version_mismatch": False,
             "status_proposal": True,
-            "error": (
-                "no probing_categories_explored on this trajectory — scorer skipped"
-            ),
+            "error": ("no probing_categories_explored on this trajectory — scorer skipped"),
         }
 
     # India language-variants reuse the en_IN taxonomy (presence-aware:
@@ -284,17 +282,17 @@ def score_sov_ai_dynamic_trajectory(
     from usersim.engine.core.probing_taxonomy import (
         default_probing_taxonomy_path,
     )
-    taxonomy_locale = asset_locale(
-        locale, exists=lambda l: default_probing_taxonomy_path(l).exists()
-    )
+
+    taxonomy_locale = asset_locale(locale, exists=lambda l: default_probing_taxonomy_path(l).exists())
 
     try:
         taxonomy = load_probing_taxonomy_for_locale(taxonomy_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to load taxonomy "
-            "for locale=%s (taxonomy_locale=%s): %s",
-            locale, taxonomy_locale, e,
+            "  |-- evaluator/scorers.sov_ai_dynamic: failed to load taxonomy for locale=%s (taxonomy_locale=%s): %s",
+            locale,
+            taxonomy_locale,
+            e,
         )
         return {
             "judge_alias": judge_alias,
@@ -308,15 +306,15 @@ def score_sov_ai_dynamic_trajectory(
         }
 
     pinned_version = _pinned_taxonomy_version(trajectory, locale)
-    taxonomy_version_mismatch = (
-        pinned_version is not None and pinned_version != taxonomy.taxonomy_version
-    )
+    taxonomy_version_mismatch = pinned_version is not None and pinned_version != taxonomy.taxonomy_version
     if taxonomy_version_mismatch:
         logger.info(
             "  |-- evaluator/scorers.sov_ai_dynamic: trajectory pinned "
             "taxonomy_version=%s but current loaded taxonomy is %s for "
             "locale=%s — reporting drift flag on this row",
-            pinned_version, taxonomy.taxonomy_version, locale,
+            pinned_version,
+            taxonomy.taxonomy_version,
+            locale,
         )
 
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
@@ -327,7 +325,7 @@ def score_sov_ai_dynamic_trajectory(
     if len(hints_used) < len(categories_probed):
         hints_used = hints_used + [""] * (len(categories_probed) - len(hints_used))
 
-    per_category: List[Dict[str, Any]] = []
+    per_category: list[dict[str, Any]] = []
     status_proposal = True
     for cat_id, hint in zip(categories_probed, hints_used):
         category = taxonomy.by_id(cat_id)
@@ -374,11 +372,11 @@ def _score_one_category(
     *,
     category: Category,
     subtopic_hint: str,
-    conversation: List[Dict[str, Any]],
-    models: Dict[str, Any],
+    conversation: list[dict[str, Any]],
+    models: dict[str, Any],
     judge_alias: str,
     locale: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """LLM-judge one category. Returns the ``per_category_scores`` entry dict."""
     prompt = _USER_PROMPT.format(
         locale=locale,
@@ -407,9 +405,11 @@ def _score_one_category(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: judge %r raised on "
-            "category %s: %s: %s",
-            judge_alias, category.id, type(e).__name__, e,
+            "  |-- evaluator/scorers.sov_ai_dynamic: judge %r raised on category %s: %s: %s",
+            judge_alias,
+            category.id,
+            type(e).__name__,
+            e,
         )
         return _error_result(
             category=category,
@@ -422,15 +422,16 @@ def _score_one_category(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to parse "
-            "structured output for category %s",
+            "  |-- evaluator/scorers.sov_ai_dynamic: failed to parse structured output for category %s",
             category.id,
         )
         return _error_result(
-            category=category, judge_alias=judge_alias, error="parse_failure",
+            category=category,
+            judge_alias=judge_alias,
+            error="parse_failure",
         )
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     for s in _AXES:
         cell = parsed.get(s.name)
         if isinstance(cell, dict):
@@ -448,7 +449,7 @@ def _score_one_category(
     }
 
 
-def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _aggregate(per_category_scores: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Mean per axis with reasoning that surfaces the per-category judge text.
 
     Replaces the uninformative ``"arithmetic mean across N categories"``
@@ -459,9 +460,9 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
     text is surfaced verbatim — there is nothing to "aggregate" so the
     preamble would only add noise.
     """
-    out: Dict[str, Dict[str, Any]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for axis in AGGREGATABLE_AXES:
-        entries: List[Dict[str, Any]] = []
+        entries: list[dict[str, Any]] = []
         for entry in per_category_scores:
             cell = (entry.get("scores") or {}).get(axis)
             if not isinstance(cell, dict):
@@ -469,11 +470,13 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
             val = cell.get("score")
             if not isinstance(val, (int, float)):
                 continue
-            entries.append({
-                "score": float(val),
-                "tag": entry.get("category_id") or entry.get("subtopic_hint") or "",
-                "reasoning": str(cell.get("reasoning") or ""),
-            })
+            entries.append(
+                {
+                    "score": float(val),
+                    "tag": entry.get("category_id") or entry.get("subtopic_hint") or "",
+                    "reasoning": str(cell.get("reasoning") or ""),
+                }
+            )
         if not entries:
             out[axis] = {
                 "score": None,
@@ -485,7 +488,10 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
         out[axis] = {
             "score": mean,
             "reasoning": _compose_aggregate_reasoning(
-                entries, mean, unit_singular="category", unit_plural="categories",
+                entries,
+                mean,
+                unit_singular="category",
+                unit_plural="categories",
             ),
             "n": len(entries),
         }
@@ -493,7 +499,7 @@ def _aggregate(per_category_scores: List[Dict[str, Any]]) -> Dict[str, Dict[str,
 
 
 def _compose_aggregate_reasoning(
-    entries: List[Dict[str, Any]],
+    entries: list[dict[str, Any]],
     mean: float,
     *,
     unit_singular: str,
@@ -516,14 +522,17 @@ def _compose_aggregate_reasoning(
         only = entries[0]
         if only["reasoning"]:
             return f"[{only['tag']}] {only['reasoning']}" if only["tag"] else only["reasoning"]
-        return f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'" if only["tag"] else f"score={_score_text(only['score'])}"
+        return (
+            f"score={_score_text(only['score'])} on {unit_singular} '{only['tag']}'"
+            if only["tag"]
+            else f"score={_score_text(only['score'])}"
+        )
     sorted_entries = sorted(entries, key=lambda e: (e["score"], not e["reasoning"]))
     worst_with_text = [e for e in sorted_entries if e["reasoning"]][:2]
     if not worst_with_text:
         return f"Mean {mean} across {n} {unit_plural}."
     bullets = "".join(
-        f"\n• \"{e['tag'] or '?'}\" (score={_score_text(e['score'])}): {e['reasoning']}"
-        for e in worst_with_text
+        f'\n• "{e["tag"] or "?"}" (score={_score_text(e["score"])}): {e["reasoning"]}' for e in worst_with_text
     )
     return f"Mean {mean} across {n} {unit_plural}. Lowest scoring:{bullets}"
 
@@ -532,7 +541,7 @@ def _score_text(score: float) -> str:
     return str(int(score)) if float(score).is_integer() else f"{score:.1f}"
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -546,7 +555,7 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _as_list_of_str(raw: Any) -> List[str]:
+def _as_list_of_str(raw: Any) -> list[str]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -559,17 +568,13 @@ def _as_list_of_str(raw: Any) -> List[str]:
     if isinstance(raw, str):
         try:
             parsed = json.loads(raw)
-            return (
-                [s for s in parsed if isinstance(s, str) and s]
-                if isinstance(parsed, list)
-                else []
-            )
+            return [s for s in parsed if isinstance(s, str) and s] if isinstance(parsed, list) else []
         except (json.JSONDecodeError, TypeError):
             return []
     return []
 
 
-def _pinned_taxonomy_version(trajectory: Dict[str, Any], locale: str) -> Optional[str]:
+def _pinned_taxonomy_version(trajectory: dict[str, Any], locale: str) -> str | None:
     """Extract ``bank_version[locale]`` from ``simulation_outcome``.
 
     The sov_ai_dynamic probe writes the taxonomy version into
@@ -597,7 +602,7 @@ def _pinned_taxonomy_version(trajectory: Dict[str, Any], locale: str) -> Optiona
     return None
 
 
-def _no_category_result(category_id: str) -> Dict[str, Any]:
+def _no_category_result(category_id: str) -> dict[str, Any]:
     """Placeholder entry for a category id the trajectory probed but the taxonomy doesn't contain."""
     return {
         "category_id": category_id,
@@ -612,7 +617,7 @@ def _error_result(
     category: Category,
     judge_alias: str,
     error: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Per-category entry for a category whose judge call failed. Scores are all None."""
     return {
         "category_id": category.id,

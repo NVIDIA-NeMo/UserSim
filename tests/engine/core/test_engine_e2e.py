@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import MagicMock, patch
-
 
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
@@ -39,9 +38,7 @@ class _StubProbe(BaseProbe):
         self,
         *,
         user_system_prompt: str = "You are a user.",
-        gate_prompt_template: str = (
-            "{conversation_history}\n{user_turn_to_evaluate}"
-        ),
+        gate_prompt_template: str = ("{conversation_history}\n{user_turn_to_evaluate}"),
     ) -> None:
         super().__init__(
             persona={"first_name": "Test", "last_name": "User"},
@@ -59,7 +56,9 @@ class _StubProbe(BaseProbe):
         return ""
 
     def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
+        self,
+        user_query: str,
+        conversation_history: str,
     ) -> str:
         return self._gate_prompt_template.format(
             conversation_history=conversation_history,
@@ -70,6 +69,7 @@ class _StubProbe(BaseProbe):
 # ---------------------------------------------------------------------------
 # Stub model that returns canned responses
 # ---------------------------------------------------------------------------
+
 
 class StubFacade:
     """Minimal ModelFacade stub that returns canned responses in sequence."""
@@ -109,6 +109,7 @@ class StubConfig:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _build_models(
     user_responses: list[str],
     assistant_responses: list[str],
@@ -139,6 +140,7 @@ def _judge_warn():
 # Tests: early stopping detection
 # ---------------------------------------------------------------------------
 
+
 class TestEarlyStopping:
     def test_llm_based_satisfaction_detected(self):
         models = {"summary_model": StubFacade(["yes"])}
@@ -156,6 +158,7 @@ class TestEarlyStopping:
 # ---------------------------------------------------------------------------
 # Tests: assistant quality check
 # ---------------------------------------------------------------------------
+
 
 class TestAssistantQualityCheck:
     def test_empty_response_flagged(self):
@@ -177,6 +180,7 @@ class TestAssistantQualityCheck:
 # Tests: unified loop with simple adapter
 # ---------------------------------------------------------------------------
 
+
 class TestConversationLoopSimple:
     def test_successful_conversation(self):
         models = _build_models(
@@ -184,13 +188,11 @@ class TestConversationLoopSimple:
             assistant_responses=["Python is a language.", "Python has dynamic types."],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(
-            gate_prompt_template=(
-                "Judge: {conversation_history}\n{user_turn_to_evaluate}"
-            ),
+            gate_prompt_template=("Judge: {conversation_history}\n{user_turn_to_evaluate}"),
         )
 
         loop = ConversationLoop()
@@ -208,13 +210,11 @@ class TestConversationLoopSimple:
             assistant_responses=[],
             judge_responses=[_judge_failure(), _judge_failure()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2, max_query_attempts=2)
 
         adapter = _StubProbe(
-            gate_prompt_template=(
-                "Judge: {conversation_history}\n{user_turn_to_evaluate}"
-            ),
+            gate_prompt_template=("Judge: {conversation_history}\n{user_turn_to_evaluate}"),
         )
 
         loop = ConversationLoop()
@@ -229,13 +229,11 @@ class TestConversationLoopSimple:
             assistant_responses=["Python is a language.", "It has types."],
             judge_responses=[_judge_success(), _judge_warn(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(
-            gate_prompt_template=(
-                "Judge: {conversation_history}\n{user_turn_to_evaluate}"
-            ),
+            gate_prompt_template=("Judge: {conversation_history}\n{user_turn_to_evaluate}"),
         )
 
         loop = ConversationLoop()
@@ -248,6 +246,7 @@ class TestConversationLoopSimple:
 # Tests: message ordering invariants
 # ---------------------------------------------------------------------------
 
+
 class TestMessageInvariants:
     def test_user_assistant_alternation(self):
         models = _build_models(
@@ -255,7 +254,7 @@ class TestMessageInvariants:
             assistant_responses=["Hi there!", "You're welcome."],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(user_system_prompt="System.")
@@ -267,8 +266,7 @@ class TestMessageInvariants:
         non_system = [m for m in messages if m["role"] != "system"]
         for i in range(len(non_system) - 1):
             assert non_system[i]["role"] != non_system[i + 1]["role"], (
-                f"Adjacent messages have same role at positions {i} and {i+1}: "
-                f"{non_system[i]['role']}"
+                f"Adjacent messages have same role at positions {i} and {i + 1}: {non_system[i]['role']}"
             )
 
     def test_num_turns_matches_user_messages(self):
@@ -277,7 +275,7 @@ class TestMessageInvariants:
             assistant_responses=["A1", "A2"],
             judge_responses=[_judge_success(), _judge_success(), _judge_success()],
         )
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         cfg = StubConfig(max_turns=2)
 
         adapter = _StubProbe(user_system_prompt="System.")
@@ -305,25 +303,29 @@ class _ProtocolHistoryProbe(_StubProbe):
         return f"{conversation_history}\nCANDIDATE:{user_query}"
 
     def after_assistant_turn(self, models, state, response, cfg):
-        state.messages.extend([
-            {
-                "role": "assistant",
-                "content": "Let me check.",
-                "tool_calls": [{
-                    "id": "c1",
-                    "function": {
-                        "name": "internal_lookup",
-                        "arguments": '{"secret_arg":"x"}',
-                    },
-                }],
-            },
-            {
-                "role": "tool",
-                "content": '{"raw_secret_result":"42"}',
-                "tool_call_id": "c1",
-            },
-            {"role": "assistant", "content": "The result is 42."},
-        ])
+        state.messages.extend(
+            [
+                {
+                    "role": "assistant",
+                    "content": "Let me check.",
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "function": {
+                                "name": "internal_lookup",
+                                "arguments": '{"secret_arg":"x"}',
+                            },
+                        }
+                    ],
+                },
+                {
+                    "role": "tool",
+                    "content": '{"raw_secret_result":"42"}',
+                    "tool_call_id": "c1",
+                },
+                {"role": "assistant", "content": "The result is 42."},
+            ]
+        )
         return "The result is 42."
 
 
@@ -372,9 +374,7 @@ def test_user_and_inline_judges_see_only_public_dialogue():
         )
 
     assert len(user_prompts) == 1
-    history = user_prompts[0].split("<CHAT_HISTORY>", 1)[1].split(
-        "</CHAT_HISTORY>", 1
-    )[0]
+    history = user_prompts[0].split("<CHAT_HISTORY>", 1)[1].split("</CHAT_HISTORY>", 1)[0]
     assert "Let me check." in history
     assert "The result is 42." in history
     assert "internal_lookup" not in history
@@ -393,11 +393,13 @@ def test_tool_hook_context_failure_preserves_model_attribution():
             return "Use the tool."
 
         def after_assistant_turn(self, models, state, response, cfg):
-            state.messages.append({
-                "role": "assistant",
-                "content": "",
-                "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
-            })
+            state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
+                }
+            )
             raise ContextWindowError(
                 "api_response_model",
                 RuntimeError("maximum context length is 32768 tokens"),
@@ -423,6 +425,7 @@ def test_tool_hook_context_failure_preserves_model_attribution():
 # ---------------------------------------------------------------------------
 # Tests: make_result / make_failed
 # ---------------------------------------------------------------------------
+
 
 class TestResultHelpers:
     def test_make_result_structure(self):

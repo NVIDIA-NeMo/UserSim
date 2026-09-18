@@ -35,8 +35,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict, Iterable, List, Optional
-
+from typing import Any, Iterable
 
 # ---------------------------------------------------------------------------
 # Marker dictionaries — kept here (not in __init__.py) so additions are
@@ -63,7 +62,7 @@ FRUSTRATION_MARKERS = re.compile(
 # ---------------------------------------------------------------------------
 
 
-def _decode_messages(raw: Any) -> List[Dict[str, Any]]:
+def _decode_messages(raw: Any) -> list[dict[str, Any]]:
     """Accept either a list-of-dicts or a JSON-encoded string."""
     if raw is None:
         return []
@@ -78,10 +77,10 @@ def _decode_messages(raw: Any) -> List[Dict[str, Any]]:
     return []
 
 
-def _user_turns(messages: Any) -> List[str]:
+def _user_turns(messages: Any) -> list[str]:
     """Extract text content of every user-role message, preserving order."""
     msgs = _decode_messages(messages)
-    out: List[str] = []
+    out: list[str] = []
     for m in msgs:
         if not isinstance(m, dict):
             continue
@@ -105,7 +104,7 @@ def _word_count(text: str) -> int:
 # ---------------------------------------------------------------------------
 
 
-def compute_front_loading_ratio(messages: Any) -> Optional[float]:
+def compute_front_loading_ratio(messages: Any) -> float | None:
     """First-turn word count / mean of subsequent-turn word counts.
 
     Returns ``None`` when there are < 2 user turns (the metric is
@@ -127,7 +126,7 @@ def compute_front_loading_ratio(messages: Any) -> Optional[float]:
 # ---------------------------------------------------------------------------
 
 
-def compute_polite_turn_fraction(messages: Any) -> Optional[float]:
+def compute_polite_turn_fraction(messages: Any) -> float | None:
     """Fraction of user turns containing a polite-marker hit."""
     turns = _user_turns(messages)
     if not turns:
@@ -141,7 +140,7 @@ def compute_polite_turn_fraction(messages: Any) -> Optional[float]:
 # ---------------------------------------------------------------------------
 
 
-def compute_verbosity_cv(messages: Any) -> Optional[float]:
+def compute_verbosity_cv(messages: Any) -> float | None:
     """Coefficient of variation of user-turn word counts. None if undefined."""
     turns = _user_turns(messages)
     if len(turns) < 2:
@@ -154,7 +153,7 @@ def compute_verbosity_cv(messages: Any) -> Optional[float]:
     # Population stddev (n divisor) — matches numpy's default and the
     # original notebook implementation.
     var = sum((x - mean_len) ** 2 for x in lengths) / n
-    std = var ** 0.5
+    std = var**0.5
     return round(std / mean_len, 3)
 
 
@@ -163,7 +162,7 @@ def compute_verbosity_cv(messages: Any) -> Optional[float]:
 # ---------------------------------------------------------------------------
 
 
-def compute_frustration_marker_fraction(messages: Any) -> Optional[float]:
+def compute_frustration_marker_fraction(messages: Any) -> float | None:
     """Fraction of user turns containing a frustration-marker hit."""
     turns = _user_turns(messages)
     if not turns:
@@ -190,21 +189,21 @@ def compute_mattr(tokens: Iterable[str], window_size: int = 50) -> float:
         return 0.0
     if len(toks) < window_size:
         return len(set(toks)) / len(toks)
-    ttrs: List[float] = []
+    ttrs: list[float] = []
     for i in range(len(toks) - window_size + 1):
         window = toks[i : i + window_size]
         ttrs.append(len(set(window)) / window_size)
     return sum(ttrs) / len(ttrs)
 
 
-def assistant_tokens_for_mattr(messages: Any) -> List[str]:
+def assistant_tokens_for_mattr(messages: Any) -> list[str]:
     """Lowercase whitespace tokens for every assistant turn in a trajectory.
 
     Concatenated across turns; MATTR sliding window then runs over the
     resulting per-trajectory token sequence.
     """
     msgs = _decode_messages(messages)
-    out: List[str] = []
+    out: list[str] = []
     for m in msgs:
         if not isinstance(m, dict):
             continue
@@ -232,28 +231,16 @@ def compute_diagnostics_frame(df: Any) -> Any:
     import pandas as pd  # lazy import — keeps top-level free for tests
 
     if not isinstance(df, pd.DataFrame):
-        raise TypeError(
-            "compute_diagnostics_frame expects a pandas DataFrame, got "
-            f"{type(df).__name__}"
-        )
+        raise TypeError(f"compute_diagnostics_frame expects a pandas DataFrame, got {type(df).__name__}")
     if "conversation_messages" not in df.columns:
         raise ValueError(
-            "compute_diagnostics_frame: input must have a "
-            "'conversation_messages' column (the trajectory store schema)"
+            "compute_diagnostics_frame: input must have a 'conversation_messages' column (the trajectory store schema)"
         )
     out = df.copy()
-    out["d1_front_loading"] = out["conversation_messages"].apply(
-        compute_front_loading_ratio
-    )
-    out["d2_polite_fraction"] = out["conversation_messages"].apply(
-        compute_polite_turn_fraction
-    )
-    out["d3_verbosity_cv"] = out["conversation_messages"].apply(
-        compute_verbosity_cv
-    )
-    out["d4_frustration_markers"] = out["conversation_messages"].apply(
-        compute_frustration_marker_fraction
-    )
+    out["d1_front_loading"] = out["conversation_messages"].apply(compute_front_loading_ratio)
+    out["d2_polite_fraction"] = out["conversation_messages"].apply(compute_polite_turn_fraction)
+    out["d3_verbosity_cv"] = out["conversation_messages"].apply(compute_verbosity_cv)
+    out["d4_frustration_markers"] = out["conversation_messages"].apply(compute_frustration_marker_fraction)
     out["mattr_assistant"] = out["conversation_messages"].apply(
         lambda raw: compute_mattr(assistant_tokens_for_mattr(raw))
     )
@@ -272,12 +259,12 @@ def compute_diagnostics_frame(df: Any) -> Any:
 # token-to-character ratios diverge sharply).
 
 
-def _assistant_chars_per_turn(messages: Any) -> List[int]:
+def _assistant_chars_per_turn(messages: Any) -> list[int]:
     """Character count of every assistant turn, in order. Empty / non-string
     contents contribute 0 (so they appear in the per-trajectory mean as a
     real 0, not as a missing value)."""
     msgs = _decode_messages(messages)
-    out: List[int] = []
+    out: list[int] = []
     for m in msgs:
         if not isinstance(m, dict):
             continue
@@ -291,7 +278,7 @@ def _assistant_chars_per_turn(messages: Any) -> List[int]:
     return out
 
 
-def _outcome_assistant_tokens(raw: Any) -> Optional[int]:
+def _outcome_assistant_tokens(raw: Any) -> int | None:
     """Pull total assistant-model output tokens from a simulation_outcome
     cell (JSON string or dict). Returns ``None`` if missing — the
     simulator only writes this when the assistant_model was actually
@@ -316,7 +303,7 @@ def _outcome_assistant_tokens(raw: Any) -> Optional[int]:
     return None
 
 
-def _outcome_n_assistant_turns(raw: Any) -> Optional[int]:
+def _outcome_n_assistant_turns(raw: Any) -> int | None:
     """Pull ``per_model_calls["assistant_model"]`` from a simulation_outcome
     cell — this is the number of assistant turns the simulator actually
     invoked the model for. Used as a per-turn-token denominator."""
@@ -340,7 +327,7 @@ def _outcome_n_assistant_turns(raw: Any) -> Optional[int]:
     return None
 
 
-def compute_response_length_by_locale(df: Any) -> List[Dict[str, Any]]:
+def compute_response_length_by_locale(df: Any) -> list[dict[str, Any]]:
     """Aggregate assistant-response length per locale.
 
     Returns a list of dicts, one per locale present in ``df``, with
@@ -368,10 +355,7 @@ def compute_response_length_by_locale(df: Any) -> List[Dict[str, Any]]:
     import pandas as pd
 
     if not isinstance(df, pd.DataFrame):
-        raise TypeError(
-            "compute_response_length_by_locale expects a pandas DataFrame, got "
-            f"{type(df).__name__}"
-        )
+        raise TypeError(f"compute_response_length_by_locale expects a pandas DataFrame, got {type(df).__name__}")
     for col in ("locale", "conversation_messages", "simulation_outcome"):
         if col not in df.columns:
             raise ValueError(
@@ -383,9 +367,9 @@ def compute_response_length_by_locale(df: Any) -> List[Dict[str, Any]]:
     # row to the chars-per-turn distribution; tokens are averaged
     # within the trajectory (we don't have per-turn token counts in
     # the simulation_outcome — only the totals).
-    char_rows: List[Dict[str, Any]] = []
-    token_rows: List[Dict[str, Any]] = []
-    n_per_locale: Dict[str, int] = {}
+    char_rows: list[dict[str, Any]] = []
+    token_rows: list[dict[str, Any]] = []
+    n_per_locale: dict[str, int] = {}
 
     for _, row in df.iterrows():
         locale = row.get("locale")
@@ -406,21 +390,23 @@ def compute_response_length_by_locale(df: Any) -> List[Dict[str, Any]]:
         n_calls = _outcome_n_assistant_turns(row.get("simulation_outcome"))
         if total_tokens is not None and n_calls is not None and n_calls > 0:
             mean_tokens_per_turn_in_traj = total_tokens / n_calls
-            token_rows.append({
-                "locale": locale,
-                "tokens_per_turn": mean_tokens_per_turn_in_traj,
-                "total_tokens": total_tokens,
-            })
+            token_rows.append(
+                {
+                    "locale": locale,
+                    "tokens_per_turn": mean_tokens_per_turn_in_traj,
+                    "total_tokens": total_tokens,
+                }
+            )
 
     chars_df = pd.DataFrame(char_rows)
     tokens_df = pd.DataFrame(token_rows)
 
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     for locale in sorted(n_per_locale):
         loc_chars = chars_df[chars_df["locale"] == locale] if len(chars_df) else chars_df
         loc_tokens = tokens_df[tokens_df["locale"] == locale] if len(tokens_df) else tokens_df
 
-        record: Dict[str, Any] = {
+        record: dict[str, Any] = {
             "locale": locale,
             "n_trajectories": n_per_locale[locale],
         }

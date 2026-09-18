@@ -41,7 +41,8 @@ def extension(monkeypatch, tmp_path):
         (tmp_path / filename).write_text(source, encoding="utf-8")
         eps = [EntryPoint(name=n, value=v, group=g) for n, v, g in specs]
         monkeypatch.setattr(
-            _extensions, "entry_points",
+            _extensions,
+            "entry_points",
             lambda group: [e for e in eps if e.group == group],
         )
         clear_extension_cache()
@@ -68,20 +69,21 @@ def probe_registry():
 class TestProbeDiscovery:
     """A probe package must register through the same decorator a built-in uses."""
 
-    SOURCE = '''
+    SOURCE = """
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 
 @register_probe(family="general", prompt_version="v1.0", variants=("default",))
 class PartnerProbe(BaseProbe):
     label = "partner_probe"
-'''
+"""
 
     def test_contributed_probe_appears(self, extension, probe_registry) -> None:
         from usersim.engine.core.probes import known_probes
 
         extension(
-            "ext_probe_mod.py", self.SOURCE,
+            "ext_probe_mod.py",
+            self.SOURCE,
             ("partner_probe", "ext_probe_mod:PartnerProbe", PROBES),
         )
         assert "partner_probe" in known_probes()
@@ -90,7 +92,8 @@ class PartnerProbe(BaseProbe):
         from usersim.engine.core.probes import resolve_probe
 
         extension(
-            "ext_probe_mod2.py", self.SOURCE.replace("PartnerProbe", "P2"),
+            "ext_probe_mod2.py",
+            self.SOURCE.replace("PartnerProbe", "P2"),
             ("partner_probe", "ext_probe_mod2:P2", PROBES),
         )
         assert resolve_probe("partner_probe").label == "partner_probe"
@@ -99,7 +102,8 @@ class PartnerProbe(BaseProbe):
         from usersim.engine.core.probes import known_probes
 
         extension(
-            "ext_probe_mod3.py", self.SOURCE.replace("PartnerProbe", "P3"),
+            "ext_probe_mod3.py",
+            self.SOURCE.replace("PartnerProbe", "P3"),
             ("partner_probe", "ext_probe_mod3:P3", PROBES),
         )
         monkeypatch.setenv(DISABLE_ENV_VAR, "1")
@@ -118,7 +122,7 @@ def scorer_registry():
 
 
 class TestScorerDiscovery:
-    SOURCE = '''
+    SOURCE = """
 from usersim.engine.evaluator.scorers import register_scorer
 
 
@@ -127,13 +131,14 @@ def _score(row, models):
 
 
 register_scorer("partner_scorer", _score)
-'''
+"""
 
     def test_contributed_scorer_resolves(self, extension, scorer_registry) -> None:
         from usersim.engine.evaluator.scorers import get_scorer
 
         extension(
-            "ext_scorer_mod.py", self.SOURCE,
+            "ext_scorer_mod.py",
+            self.SOURCE,
             ("partner_scorer", "ext_scorer_mod", SCORERS),
         )
         assert get_scorer("partner_scorer")({}, {}) == {"score": 1.0}
@@ -142,7 +147,8 @@ register_scorer("partner_scorer", _score)
         from usersim.engine.evaluator.scorers import list_scorers
 
         extension(
-            "ext_scorer_mod2.py", self.SOURCE,
+            "ext_scorer_mod2.py",
+            self.SOURCE,
             ("partner_scorer", "ext_scorer_mod2", SCORERS),
         )
         assert "partner_scorer" in list_scorers()
@@ -151,7 +157,7 @@ register_scorer("partner_scorer", _score)
 class TestAssetDomainDiscovery:
     """The registry whose docstring promised extensibility it did not have."""
 
-    SOURCE = '''
+    SOURCE = """
 from usersim.asset_gen.registry import AssetDomain
 
 
@@ -173,13 +179,14 @@ DOMAIN = AssetDomain(
 
 def factory():
     return DOMAIN
-'''
+"""
 
     def test_contributed_domain_appears(self, extension) -> None:
         from usersim.asset_gen.registry import clear_domain_cache, domain_names
 
         extension(
-            "ext_domain_mod.py", self.SOURCE,
+            "ext_domain_mod.py",
+            self.SOURCE,
             ("partner_domain", "ext_domain_mod:DOMAIN", ASSET_DOMAINS),
         )
         clear_domain_cache()
@@ -195,7 +202,8 @@ def factory():
         from usersim.asset_gen.registry import clear_domain_cache, get_domain
 
         extension(
-            "ext_domain_mod2.py", self.SOURCE,
+            "ext_domain_mod2.py",
+            self.SOURCE,
             ("partner_domain", "ext_domain_mod2:factory", ASSET_DOMAINS),
         )
         clear_domain_cache()
@@ -216,9 +224,7 @@ def factory():
         clear_domain_cache()
         try:
             domain = get_domain("financial_services")
-            assert domain.region_spec_dir is not None, (
-                "the extension displaced the built-in financial_services domain"
-            )
+            assert domain.region_spec_dir is not None, "the extension displaced the built-in financial_services domain"
         finally:
             clear_domain_cache()
 
@@ -231,7 +237,7 @@ class TestCapabilityDiscovery:
     row, no triage entry.
     """
 
-    SOURCE = '''
+    SOURCE = """
 from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
 
 PARTNER = CapabilityDefinition(
@@ -246,13 +252,14 @@ PARTNER = CapabilityDefinition(
 )
 
 PAIR = (PARTNER,)
-'''
+"""
 
     def test_contributed_capability_appears(self, extension) -> None:
         from usersim.taxonomy.capabilities import capability_definitions
 
         extension(
-            "ext_cap_mod.py", self.SOURCE,
+            "ext_cap_mod.py",
+            self.SOURCE,
             ("partner_capability", "ext_cap_mod:PARTNER", CAPABILITIES),
         )
         ids = [d.id for d in capability_definitions()]
@@ -265,7 +272,8 @@ PAIR = (PARTNER,)
         from usersim.taxonomy.capabilities import capability_definitions
 
         extension(
-            "ext_cap_mod2.py", self.SOURCE,
+            "ext_cap_mod2.py",
+            self.SOURCE,
             ("partner_pair", "ext_cap_mod2:PAIR", CAPABILITIES),
         )
         assert "partner_capability" in [d.id for d in capability_definitions()]
@@ -275,7 +283,8 @@ PAIR = (PARTNER,)
         from usersim.taxonomy.capabilities import capability_by_id
 
         extension(
-            "ext_cap_mod3.py", self.SOURCE,
+            "ext_cap_mod3.py",
+            self.SOURCE,
             ("partner_capability", "ext_cap_mod3:PARTNER", CAPABILITIES),
         )
         assert capability_by_id("partner_capability").label == "Partner Capability"
@@ -288,7 +297,8 @@ PAIR = (PARTNER,)
         )
 
         extension(
-            "ext_cap_mod4.py", self.SOURCE,
+            "ext_cap_mod4.py",
+            self.SOURCE,
             ("partner_capability", "ext_cap_mod4:PARTNER", CAPABILITIES),
         )
         assert "partner_scorer" in scorers_required_by_capabilities()
@@ -334,9 +344,7 @@ class TestLayering:
                     layer = parts[1] if parts[:1] == ["usersim"] else parts[0]
                     if layer in {"reporting", "selection", "cli"}:
                         offenders.append(f"{path}: {n}")
-        assert not offenders, (
-            "taxonomy must not import the layers that depend on it: " + str(offenders)
-        )
+        assert not offenders, "taxonomy must not import the layers that depend on it: " + str(offenders)
 
     def test_config_time_construction_avoids_reporting(self) -> None:
         """Config-time construction must not import the reporting layer."""
@@ -344,9 +352,7 @@ class TestLayering:
 
         from usersim import cli
 
-        source = (
-            pathlib.Path(cli.__file__).resolve().parent / "_pipeline.py"
-        ).read_text()
+        source = (pathlib.Path(cli.__file__).resolve().parent / "_pipeline.py").read_text()
         assert "usersim.taxonomy.capabilities" in source
         assert "usersim.reporting.capabilities" not in source
 
@@ -354,7 +360,7 @@ class TestLayering:
 class TestCommandDiscovery:
     """An overlay must be able to add a subcommand without editing the CLI."""
 
-    SOURCE = '''
+    SOURCE = """
 def register(subparsers):
     p = subparsers.add_parser("partner-cmd", help="Contributed by a package.")
     p.set_defaults(func=lambda args: 0)
@@ -367,13 +373,14 @@ def register_colliding(subparsers):
 
 def register_broken(subparsers):
     raise RuntimeError("this command is broken")
-'''
+"""
 
     def test_contributed_command_appears(self, extension) -> None:
         from usersim import cli
 
         extension(
-            "ext_cmd_mod.py", self.SOURCE,
+            "ext_cmd_mod.py",
+            self.SOURCE,
             ("partner-cmd", "ext_cmd_mod:register", COMMANDS),
         )
         assert "partner-cmd" in cli._build_parser()._subparsers._group_actions[0].choices
@@ -382,7 +389,8 @@ def register_broken(subparsers):
         from usersim import cli
 
         extension(
-            "ext_cmd_mod2.py", self.SOURCE,
+            "ext_cmd_mod2.py",
+            self.SOURCE,
             ("partner-cmd", "ext_cmd_mod2:register", COMMANDS),
         )
         assert cli.main(["partner-cmd"]) == 0
@@ -392,7 +400,8 @@ def register_broken(subparsers):
         from usersim import cli
 
         extension(
-            "ext_cmd_mod3.py", self.SOURCE,
+            "ext_cmd_mod3.py",
+            self.SOURCE,
             ("smoke", "ext_cmd_mod3:register_colliding", COMMANDS),
         )
         parser = cli._build_parser()
@@ -403,7 +412,8 @@ def register_broken(subparsers):
         from usersim import cli
 
         extension(
-            "ext_cmd_mod4.py", self.SOURCE,
+            "ext_cmd_mod4.py",
+            self.SOURCE,
             ("partner-cmd", "ext_cmd_mod4:register_broken", COMMANDS),
         )
         choices = cli._build_parser()._subparsers._group_actions[0].choices
@@ -411,7 +421,7 @@ def register_broken(subparsers):
 
 
 class TestBackendDiscovery:
-    SOURCE = '''
+    SOURCE = """
 from usersim.engine.core.backends import JobHandle, JobStatus
 
 
@@ -427,7 +437,7 @@ class PartnerBackend:
 
     def fetch(self, handle, dest):
         return dest
-'''
+"""
 
     def test_local_backend_is_always_available(self) -> None:
         from usersim.engine.core.backends import known_backends
@@ -438,7 +448,8 @@ class PartnerBackend:
         from usersim.engine.core.backends import known_backends
 
         extension(
-            "ext_backend_mod.py", self.SOURCE,
+            "ext_backend_mod.py",
+            self.SOURCE,
             ("partner", "ext_backend_mod:PartnerBackend", BACKENDS),
         )
         assert "partner" in known_backends()
@@ -448,21 +459,21 @@ class PartnerBackend:
         from usersim import cli
 
         extension(
-            "ext_backend_mod2.py", self.SOURCE,
+            "ext_backend_mod2.py",
+            self.SOURCE,
             ("partner", "ext_backend_mod2:PartnerBackend", BACKENDS),
         )
         parser = cli._build_parser()
         simulate = parser._subparsers._group_actions[0].choices["simulate"]
-        backend_action = next(
-            a for a in simulate._actions if a.dest == "backend"
-        )
+        backend_action = next(a for a in simulate._actions if a.dest == "backend")
         assert "partner" in backend_action.choices
 
     def test_contributed_backend_satisfies_the_protocol(self, extension) -> None:
         from usersim.engine.core.backends import ExecutionBackend, get_backend
 
         extension(
-            "ext_backend_mod3.py", self.SOURCE,
+            "ext_backend_mod3.py",
+            self.SOURCE,
             ("partner", "ext_backend_mod3:PartnerBackend", BACKENDS),
         )
         assert isinstance(get_backend("partner"), ExecutionBackend)
@@ -480,9 +491,7 @@ class TestLocalBackend:
 
         ran = []
         backend = LocalBackend()
-        handle = backend.submit(
-            JobSpec(name="t", callable_=lambda: ran.append(1) or 0)
-        )
+        handle = backend.submit(JobSpec(name="t", callable_=lambda: ran.append(1) or 0))
         assert ran == [1]
         status = backend.poll(handle)
         assert status.state == "succeeded" and status.done
@@ -523,6 +532,4 @@ class TestLocalBackend:
 
         # Nothing that outlives a single call may carry them.
         for carrier in (JobSpec, JobHandle):
-            assert "credentials" not in {
-                f.name for f in dataclasses.fields(carrier)
-            }
+            assert "credentials" not in {f.name for f in dataclasses.fields(carrier)}

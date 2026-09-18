@@ -14,56 +14,62 @@ from usersim.engine.core.analysis import extract_eval_scores
 @pytest.fixture
 def sample_generated_data():
     """Simulate generated output data for analysis testing."""
-    return pd.DataFrame([
-        {
-            "locale": "en_US",
-            "probe_type": "general_open_ended",
-            "persona_age_bin": "25-34",
-            "persona_education_level": "Bachelor's degree",
-            "persona_occupation": "Software engineer",
-            "persona_region": "California",
-            "conversation_status": True,
-            "eval_scores": json.dumps({
-                "helpfulness": {"score": 4, "reasoning": "Good"},
-                "accuracy": {"score": 3, "reasoning": "Ok"},
-                "cultural_sensitivity": {"score": 5, "reasoning": "Great"},
-                "language_appropriateness": {"score": 4, "reasoning": "Fine"},
-                "safety": {"score": 5, "reasoning": "Safe"},
-                "coherence": {"score": 4, "reasoning": "Clear"},
-                "tool_use_correctness": None,
-                "pedagogical_quality": None,
-            }),
-        },
-        {
-            "locale": "pt_BR",
-            "probe_type": "general_educational",
-            "persona_age_bin": "45-54",
-            "persona_education_level": "Primary education",
-            "persona_occupation": "Teacher",
-            "persona_region": "São Paulo",
-            "conversation_status": True,
-            "eval_scores": json.dumps({
-                "helpfulness": {"score": 3, "reasoning": "Decent"},
-                "accuracy": {"score": 4, "reasoning": "Accurate"},
-                "cultural_sensitivity": {"score": 2, "reasoning": "Could improve"},
-                "language_appropriateness": {"score": 3, "reasoning": "Adequate"},
-                "safety": {"score": 5, "reasoning": "Safe"},
-                "coherence": {"score": 3, "reasoning": "Ok"},
-                "tool_use_correctness": None,
-                "pedagogical_quality": {"score": 3, "reasoning": "Decent pedagogy"},
-            }),
-        },
-        {
-            "locale": "en_US",
-            "probe_type": "tool_calling",
-            "persona_age_bin": "65+",
-            "persona_education_level": "High school",
-            "persona_occupation": "Retired",
-            "persona_region": "Texas",
-            "conversation_status": False,
-            "eval_scores": None,
-        },
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "locale": "en_US",
+                "probe_type": "general_open_ended",
+                "persona_age_bin": "25-34",
+                "persona_education_level": "Bachelor's degree",
+                "persona_occupation": "Software engineer",
+                "persona_region": "California",
+                "conversation_status": True,
+                "eval_scores": json.dumps(
+                    {
+                        "helpfulness": {"score": 4, "reasoning": "Good"},
+                        "accuracy": {"score": 3, "reasoning": "Ok"},
+                        "cultural_sensitivity": {"score": 5, "reasoning": "Great"},
+                        "language_appropriateness": {"score": 4, "reasoning": "Fine"},
+                        "safety": {"score": 5, "reasoning": "Safe"},
+                        "coherence": {"score": 4, "reasoning": "Clear"},
+                        "tool_use_correctness": None,
+                        "pedagogical_quality": None,
+                    }
+                ),
+            },
+            {
+                "locale": "pt_BR",
+                "probe_type": "general_educational",
+                "persona_age_bin": "45-54",
+                "persona_education_level": "Primary education",
+                "persona_occupation": "Teacher",
+                "persona_region": "São Paulo",
+                "conversation_status": True,
+                "eval_scores": json.dumps(
+                    {
+                        "helpfulness": {"score": 3, "reasoning": "Decent"},
+                        "accuracy": {"score": 4, "reasoning": "Accurate"},
+                        "cultural_sensitivity": {"score": 2, "reasoning": "Could improve"},
+                        "language_appropriateness": {"score": 3, "reasoning": "Adequate"},
+                        "safety": {"score": 5, "reasoning": "Safe"},
+                        "coherence": {"score": 3, "reasoning": "Ok"},
+                        "tool_use_correctness": None,
+                        "pedagogical_quality": {"score": 3, "reasoning": "Decent pedagogy"},
+                    }
+                ),
+            },
+            {
+                "locale": "en_US",
+                "probe_type": "tool_calling",
+                "persona_age_bin": "65+",
+                "persona_education_level": "High school",
+                "persona_occupation": "Retired",
+                "persona_region": "Texas",
+                "conversation_status": False,
+                "eval_scores": None,
+            },
+        ]
+    )
 
 
 class TestExtractEvalScores:

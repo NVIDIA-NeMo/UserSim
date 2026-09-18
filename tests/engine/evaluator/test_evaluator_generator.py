@@ -14,10 +14,10 @@ synthetic-training-extraction example.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import MagicMock
 
-
+from usersim.engine.evaluator import scorers as scorers_module
 from usersim.engine.evaluator.config import (
     JudgeSpecConfig,
     TrajectoryEvaluatorConfig,
@@ -27,8 +27,6 @@ from usersim.engine.evaluator.generator import (
     TrajectoryEvaluatorGenerator,
     _decode_json_field,
 )
-from usersim.engine.evaluator import scorers as scorers_module
-
 
 # ── Pure helpers ────────────────────────────────────────────────────
 
@@ -48,12 +46,10 @@ class TestDecodeJsonField:
 
     def test_json_string(self) -> None:
         assert _decode_json_field('{"a": 1}', default={}) == {"a": 1}
-        assert _decode_json_field('[1,2,3]', default=[]) == [1, 2, 3]
+        assert _decode_json_field("[1,2,3]", default=[]) == [1, 2, 3]
 
     def test_invalid_json_returns_default(self) -> None:
-        assert _decode_json_field("not json", default={"fallback": True}) == {
-            "fallback": True
-        }
+        assert _decode_json_field("not json", default={"fallback": True}) == {"fallback": True}
 
     def test_empty_string_returns_default(self) -> None:
         assert _decode_json_field("", default=[]) == []
@@ -65,7 +61,7 @@ class TestDecodeJsonField:
 
 def _build_generator(
     cfg: TrajectoryEvaluatorConfig,
-    judge_responses: Dict[str, Dict[str, Any]] | None = None,
+    judge_responses: dict[str, dict[str, Any]] | None = None,
 ) -> TrajectoryEvaluatorGenerator:
     """Construct a generator without DD's full ResourceProvider machinery.
 
@@ -113,9 +109,7 @@ class TestNoAssistantMessages:
         # Trajectory with only user messages (the simulator's
         # "infrastructure failure" case).
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"}
-            ]),
+            "conversation_messages": json.dumps([{"role": "user", "content": "hi"}]),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
         }
@@ -140,15 +134,17 @@ class TestFailedSimulation:
             side_effect=AssertionError("failed trajectory must not be judged")
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
-                },
-                {"role": "tool", "content": '{"partial":true}'},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{"id": "c1", "function": {"name": "lookup"}}],
+                    },
+                    {"role": "tool", "content": '{"partial":true}'},
+                ]
+            ),
             "simulation_outcome": json.dumps({"status": "failed"}),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "tool_calling",
@@ -165,10 +161,12 @@ class TestFailedSimulation:
 class TestPartialReRunSkip:
     def _trajectory_with_assistant(self) -> dict:
         return {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -291,11 +289,18 @@ class TestPartialReRunSkip:
 
 
 class TestScorerDispatch:
+    # Snapshot and restore rather than leaving the registry empty: it is
+    # process-global, so a bare clear() in teardown makes every later test in
+    # the same worker see zero scorers. Under `pytest -n auto` that surfaces
+    # only when the affected files land on the same worker, which is why it
+    # read as a flake. Mirrors TestRegisterProbe in test_probes_substrate.py.
     def setup_method(self) -> None:
+        self._snapshot = dict(scorers_module._REGISTRY)
         scorers_module.clear_registry()
 
     def teardown_method(self) -> None:
         scorers_module.clear_registry()
+        scorers_module._REGISTRY.update(self._snapshot)
 
     def test_unknown_scorer_recorded_as_error_not_raised(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
@@ -312,10 +317,12 @@ class TestScorerDispatch:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -349,10 +356,12 @@ class TestScorerDispatch:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",
@@ -399,17 +408,21 @@ class TestScorerColumnPassthrough:
     )
 
     def setup_method(self) -> None:
+        self._snapshot = dict(scorers_module._REGISTRY)
         scorers_module.clear_registry()
 
     def teardown_method(self) -> None:
         scorers_module.clear_registry()
+        scorers_module._REGISTRY.update(self._snapshot)
 
     def _make_data_with_probe_columns(self) -> dict:
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "inclusion",
             "probe_variant": "default",
@@ -555,10 +568,12 @@ class TestEnvelope:
             },
         )
         data = {
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "hi"},
-                {"role": "assistant", "content": "hello"},
-            ]),
+            "conversation_messages": json.dumps(
+                [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ]
+            ),
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
             "locale": "en_US",

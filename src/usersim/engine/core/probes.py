@@ -51,20 +51,17 @@ import sys
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
-    Optional,
     Protocol,
     Sequence,
     runtime_checkable,
 )
 
+from usersim.engine.core.locale import india_variant
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import india_variant
 
 logger = logging.getLogger("usersim.engine")
 
@@ -86,7 +83,7 @@ def assistant_message(
     content: str,
     tool_calls: Any = _UNSET,
     store_reasoning: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build an assistant message carrying its own reasoning trace.
 
     ``response`` is the raw ``call_llm`` result that produced ``content``;
@@ -100,13 +97,10 @@ def assistant_message(
     ``store_reasoning=False`` (``cfg.store_reasoning``) omits the key
     entirely, producing traces without reasoning content.
     """
-    msg: Dict[str, Any] = {"role": "assistant", "content": content or ""}
+    msg: dict[str, Any] = {"role": "assistant", "content": content or ""}
     if tool_calls is not _UNSET:
         msg["tool_calls"] = tool_calls or None
-    trace = (
-        (response.get("reasoning_content") or "").strip()
-        if isinstance(response, dict) else ""
-    )
+    trace = (response.get("reasoning_content") or "").strip() if isinstance(response, dict) else ""
     if trace and store_reasoning:
         msg["reasoning_content"] = trace
     return msg
@@ -169,19 +163,15 @@ class ProbeAdapter(Protocol):
         """System prompt for the assistant-under-test (empty = lean)."""
         ...
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         """Tool definitions (OpenAI schema) for the assistant, or None."""
         ...
 
-    def format_gate_prompt(
-        self, user_query: str, conversation_history: str
-    ) -> str:
+    def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
         """Format the user-judge gate prompt for one user turn."""
         ...
 
-    def format_assistant_judge_prompt(
-        self, assistant_response: str, conversation_history: str
-    ) -> str:
+    def format_assistant_judge_prompt(self, assistant_response: str, conversation_history: str) -> str:
         """Format the per-turn assistant quality judge prompt.
 
         ``BaseProbe`` supplies a default; a probe overrides it only to
@@ -193,7 +183,7 @@ class ProbeAdapter(Protocol):
         self,
         models: dict,
         state: Any,
-        assistant_response: Dict[str, Any],
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         """Process the assistant response; return final synthesis content.
@@ -271,15 +261,15 @@ class BaseProbe:
     def __init__(
         self,
         *,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         locale: str,
         language: str,
-        models: Dict[str, Any],
+        models: dict[str, Any],
         cfg: Any = None,
-        provenance: Optional[Provenance] = None,
-        profile: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
-        outcome_builder: Optional[OutcomeBuilder] = None,
+        provenance: Provenance | None = None,
+        profile: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        outcome_builder: OutcomeBuilder | None = None,
         **_kwargs: Any,
     ) -> None:
         self._persona = persona
@@ -303,29 +293,24 @@ class BaseProbe:
         # Pre-derive behavioral knobs the loop reads via the
         # ``run_dispatch`` helper so subclasses don't have to.
         self._interaction_style = self._data.get(
-            "user_interaction_style", "neutral",
+            "user_interaction_style",
+            "neutral",
         )
         self._patience = float(self._profile.get("patience", 0.5))
 
     # ── Required hooks (must be overridden) ─────────────────────────
 
     def get_user_system_prompt(self) -> str:  # pragma: no cover — abstract
-        raise NotImplementedError(
-            f"{type(self).__name__} must override get_user_system_prompt()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must override get_user_system_prompt()")
 
     def get_assistant_system_prompt(self) -> str:  # pragma: no cover — abstract
-        raise NotImplementedError(
-            f"{type(self).__name__} must override get_assistant_system_prompt()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must override get_assistant_system_prompt()")
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         """Default: no tools. Override for tool_calling-shape probes."""
         return None
 
-    def format_assistant_judge_prompt(
-        self, assistant_response: str, conversation_history: str
-    ) -> str:
+    def format_assistant_judge_prompt(self, assistant_response: str, conversation_history: str) -> str:
         """Prompt for the loop's per-turn assistant quality judge.
 
         Lives on the probe rather than in ``core/simulation.py`` so a probe
@@ -361,9 +346,7 @@ class BaseProbe:
             conversation_history=conversation_history,
         )
 
-    def format_gate_prompt(
-        self, user_query: str, conversation_history: str
-    ) -> str:
+    def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
         """Default: a generic role-violation rubric.
 
         Override to ground the gate in probe-specific quality criteria
@@ -379,7 +362,7 @@ class BaseProbe:
         self,
         models: dict,
         state: Any,
-        assistant_response: Dict[str, Any],
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         """Default: append the raw assistant message; return its content.
@@ -387,15 +370,14 @@ class BaseProbe:
         Override for tool-calling / agentic shapes that need to
         intercept tool calls, simulate API responses, etc.
         """
-        content = (
-            assistant_response.get("content", "")
-            if isinstance(assistant_response, dict)
-            else ""
+        content = assistant_response.get("content", "") if isinstance(assistant_response, dict) else ""
+        state.messages.append(
+            assistant_message(
+                assistant_response,
+                content,
+                store_reasoning=getattr(cfg, "store_reasoning", True),
+            )
         )
-        state.messages.append(assistant_message(
-            assistant_response, content,
-            store_reasoning=getattr(cfg, "store_reasoning", True),
-        ))
         return content
 
     def build_result_extras(self, state: Any) -> dict:
@@ -407,9 +389,7 @@ class BaseProbe:
         trajectory dict.
         """
         return {
-            "num_turns": sum(
-                1 for m in state.messages if m.get("role") == "user"
-            ),
+            "num_turns": sum(1 for m in state.messages if m.get("role") == "user"),
             "num_tool_calls": len(state.metadata.get("tools_called", [])),
         }
 
@@ -440,10 +420,10 @@ class BaseProbe:
 
     def transform_assistant_history(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         *,
         current_user_turn: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Return this probe's assistant-only view of copied history.
 
         The default is an identity copy. Retrieval-backed probes may reduce
@@ -463,7 +443,7 @@ class BaseProbe:
         """
         return True
 
-    def get_verbatim_first_user_turn(self, state: Any) -> Optional[str]:
+    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         """If non-None, ConversationLoop bypasses the turn-1 generate-and-gate path.
 
         Asset-driven probes (sov_ai_facts / sov_ai_multilingual_parity
@@ -475,7 +455,7 @@ class BaseProbe:
         """
         return None
 
-    def get_user_query_instruction(self, turn_idx: int) -> Optional[str]:
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
         """If non-None, override the default user-query instruction for ``turn_idx``.
 
         Used by ``CustomTurn1InstructionMixin`` for probes that
@@ -487,9 +467,7 @@ class BaseProbe:
         """
         return None
 
-    def format_followup_user_instructions(
-        self, turn_idx: int, state: Any
-    ) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Additional user-history nudges to append before generating turn ``turn_idx`` follow-up.
 
         Default: no extra instructions. ``BankReframingMixin``
@@ -514,9 +492,7 @@ class BaseProbe:
         """
         return "skip"
 
-    def should_inline_judge_user_turn(
-        self, turn_idx: int, state: Any
-    ) -> bool:
+    def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
         """Default True: every user turn flows through the user-judge gate.
 
         ``AgenticMixin`` returns False for turn 0 (the user's verbatim
@@ -525,9 +501,7 @@ class BaseProbe:
         """
         return True
 
-    def should_inline_judge_assistant_turn(
-        self, turn_idx: int, state: Any
-    ) -> bool:
+    def should_inline_judge_assistant_turn(self, turn_idx: int, state: Any) -> bool:
         """Default True: every assistant turn flows through the quality judge.
 
         Override sparingly — the assistant-quality judge is what
@@ -544,9 +518,7 @@ class BaseProbe:
         """
         return True
 
-    def allow_early_stop_at_turn(
-        self, turn_idx: int, state: Any
-    ) -> bool:
+    def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
         """Whether to consider early-stop heuristics at this turn.
 
         Default True (the loop's standard early-stop check applies).
@@ -649,18 +621,18 @@ class BankBackedProbe(BaseProbe):
 
     bank_loader: Callable[[str], Any]
     placeholder_warning_kind: WarningKind
-    bank_version_key: Optional[str] = None  # None = locale-keyed
+    bank_version_key: str | None = None  # None = locale-keyed
 
     def __init__(
         self,
         *,
-        persona: Dict[str, Any],
+        persona: dict[str, Any],
         locale: str,
         language: str,
-        models: Dict[str, Any],
+        models: dict[str, Any],
         cfg: Any = None,
-        provenance: Optional[Provenance] = None,
-        outcome_builder: Optional[OutcomeBuilder] = None,
+        provenance: Provenance | None = None,
+        outcome_builder: OutcomeBuilder | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -681,7 +653,7 @@ class BankBackedProbe(BaseProbe):
 
     # ── Subclass API ────────────────────────────────────────────────
 
-    def derive_task(self, persona: Dict[str, Any], bank: Any, *, cfg: Any) -> Any:
+    def derive_task(self, persona: dict[str, Any], bank: Any, *, cfg: Any) -> Any:
         """Probe-specific asset selection. Subclass MUST override.
 
         Returns the derived task object (with at least ``id`` and
@@ -691,9 +663,7 @@ class BankBackedProbe(BaseProbe):
         surfacing the no-match condition (typically by overriding
         ``should_succeed`` to return False).
         """
-        raise NotImplementedError(
-            f"{type(self).__name__} must override derive_task()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must override derive_task()")
 
     # ── Internals ───────────────────────────────────────────────────
 
@@ -734,9 +704,7 @@ class BankBackedProbe(BaseProbe):
             self._asset_locale = cand
             return bank
         raise BankLoadError(
-            f"{type(self).__name__}: bank loader "
-            f"{loader.__qualname__!r} raised "
-            f"{type(last_exc).__name__}: {last_exc}"
+            f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(last_exc).__name__}: {last_exc}"
         ) from last_exc
 
     def _localize_verbatim(self, text: str) -> str:
@@ -793,8 +761,7 @@ class BankBackedProbe(BaseProbe):
         """Emit the configured placeholder warning kind on the OutcomeBuilder."""
         if self._outcome_builder is None:
             logger.debug(
-                "  |-- %s: placeholder task picked but no outcome_builder "
-                "available; warning silently dropped",
+                "  |-- %s: placeholder task picked but no outcome_builder available; warning silently dropped",
                 type(self).__name__,
             )
             return
@@ -858,7 +825,7 @@ class BankVerbatimMixin:
 
     verbatim_field: str = "verbatim_text"
 
-    def get_verbatim_first_user_turn(self, state: Any) -> Optional[str]:
+    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         task = getattr(self, "_task", None)
         if task is None:
             return None
@@ -885,7 +852,7 @@ class CustomTurn1InstructionMixin:
 
     turn1_instruction_template: str = ""
 
-    def get_user_query_instruction(self, turn_idx: int) -> Optional[str]:
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
         if turn_idx != 0:
             return None
         template = type(self).turn1_instruction_template
@@ -901,9 +868,9 @@ class CustomTurn1InstructionMixin:
             return template.format(task=task, **getattr(task, "__dict__", {}))
         except (KeyError, AttributeError) as e:
             logger.warning(
-                "  |-- %s.turn1_instruction_template missing field %s; "
-                "falling back to raw template",
-                type(self).__name__, e,
+                "  |-- %s.turn1_instruction_template missing field %s; falling back to raw template",
+                type(self).__name__,
+                e,
             )
             return template
 
@@ -923,9 +890,7 @@ class BankReframingMixin(BankVerbatimMixin):
     Used by safety_chat_pressure.
     """
 
-    def format_followup_user_instructions(
-        self, turn_idx: int, state: Any
-    ) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         task = getattr(self, "_task", None)
         if task is None:
             return []
@@ -937,7 +902,9 @@ class BankReframingMixin(BankVerbatimMixin):
         except Exception as e:
             logger.debug(
                 "  |-- %s: reframing_at(%d) raised %s; no extra instructions",
-                type(self).__name__, turn_idx, e,
+                type(self).__name__,
+                turn_idx,
+                e,
             )
             return []
         return [text] if isinstance(text, str) and text else []
@@ -976,9 +943,7 @@ class AgenticMixin(BankVerbatimMixin):
         tool_calls = last.get("tool_calls")
         return bool(tool_calls)
 
-    def should_inline_judge_user_turn(
-        self, turn_idx: int, state: Any
-    ) -> bool:
+    def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
         return turn_idx > 0
 
 
@@ -997,9 +962,7 @@ class ToolCallingMixin:
     # safely rolled back and replayed — assistant resampling is off.
     supports_assistant_resampling: bool = False
 
-    def allow_early_stop_at_turn(
-        self, turn_idx: int, state: Any
-    ) -> bool:
+    def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
         tools_used = len(state.metadata.get("tools_called", []))
         return tools_used > 0
 
@@ -1053,15 +1016,20 @@ class ToolExecutionMixin:
     tool_max_calls_per_turn: int = 8
 
     def execute_tool_call(
-        self, name: str, args: Dict[str, Any], tc: Any, state: Any,
-        models: dict, *, turn_idx: int, call_idx: int,
+        self,
+        name: str,
+        args: dict[str, Any],
+        tc: Any,
+        state: Any,
+        models: dict,
+        *,
+        turn_idx: int,
+        call_idx: int,
     ) -> str:  # pragma: no cover — abstract
-        raise NotImplementedError(
-            f"{type(self).__name__} must implement execute_tool_call()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must implement execute_tool_call()")
 
     @staticmethod
-    def parse_tool_call(tc: Any) -> tuple[str, Dict[str, Any]]:
+    def parse_tool_call(tc: Any) -> tuple[str, dict[str, Any]]:
         import json as _json
 
         if not isinstance(tc, dict):
@@ -1085,22 +1053,25 @@ class ToolExecutionMixin:
         return None
 
     def after_assistant_turn(
-        self, models: dict, state: Any, assistant_response: Dict[str, Any],
+        self,
+        models: dict,
+        state: Any,
+        assistant_response: dict[str, Any],
         cfg: Any,
     ) -> str:
         resp = assistant_response
         calls_made = 0
         while True:
             content = resp.get("content", "") if isinstance(resp, dict) else ""
-            tool_calls = (
-                resp.get("tool_calls") if isinstance(resp, dict) else None
-            )
+            tool_calls = resp.get("tool_calls") if isinstance(resp, dict) else None
             # ``resp`` is whichever call produced this message -- the initial
             # assistant turn on the first pass, a ``_recall_assistant`` result
             # on later ones -- so its trace lands on the right message.
             state.messages.append(
                 assistant_message(
-                    resp, content, tool_calls=tool_calls,
+                    resp,
+                    content,
+                    tool_calls=tool_calls,
                     store_reasoning=getattr(cfg, "store_reasoning", True),
                 )
             )
@@ -1108,9 +1079,7 @@ class ToolExecutionMixin:
                 self.on_tool_round_complete(state, 0)
                 return content or ""
 
-            trace_turn_idx = sum(
-                1 for m in state.messages if m.get("role") == "assistant"
-            )
+            trace_turn_idx = sum(1 for m in state.messages if m.get("role") == "assistant")
             n_this_round = 0
             capped = False
             for call_idx, tc in enumerate(tool_calls):
@@ -1118,16 +1087,23 @@ class ToolExecutionMixin:
                     capped = True
                     break
                 name, args = self.parse_tool_call(tc)
-                tc_id = (
-                    tc.get("id") if isinstance(tc, dict) else None
-                ) or f"call_{trace_turn_idx}_{call_idx}"
+                tc_id = (tc.get("id") if isinstance(tc, dict) else None) or f"call_{trace_turn_idx}_{call_idx}"
                 payload = self.execute_tool_call(
-                    name, args, tc, state, models,
-                    turn_idx=trace_turn_idx, call_idx=call_idx,
+                    name,
+                    args,
+                    tc,
+                    state,
+                    models,
+                    turn_idx=trace_turn_idx,
+                    call_idx=call_idx,
                 )
-                state.messages.append({
-                    "role": "tool", "content": payload, "tool_call_id": tc_id,
-                })
+                state.messages.append(
+                    {
+                        "role": "tool",
+                        "content": payload,
+                        "tool_call_id": tc_id,
+                    }
+                )
                 calls_made += 1
                 n_this_round += 1
             self.on_tool_round_complete(state, n_this_round)
@@ -1139,8 +1115,13 @@ class ToolExecutionMixin:
     # ── internal plumbing ───────────────────────────────────────────
 
     def _recall_assistant(
-        self, models: dict, state: Any, cfg: Any, *, with_tools: bool,
-    ) -> Dict[str, Any]:
+        self,
+        models: dict,
+        state: Any,
+        cfg: Any,
+        *,
+        with_tools: bool,
+    ) -> dict[str, Any]:
         from usersim.engine.core.llm import (
             NON_ASCII_TOKEN_SCALE,
             call_llm,
@@ -1148,16 +1129,16 @@ class ToolExecutionMixin:
         )
         from usersim.engine.core.simulation import _is_non_ascii_locale
 
-        kwargs: Dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
         tools = self.get_tools_for_assistant() if with_tools else None
         if tools:
             kwargs["tools"] = tools
         if _is_non_ascii_locale(getattr(self, "_locale", "en_US")):
-            kwargs.update(
-                scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE)
-            )
+            kwargs.update(scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE))
         resp = call_llm(
-            models, "assistant_model", self._synthesis_messages(state, cfg),
+            models,
+            "assistant_model",
+            self._synthesis_messages(state, cfg),
             **kwargs,
         )
         return resp if isinstance(resp, dict) else {"content": ""}
@@ -1167,13 +1148,17 @@ class ToolExecutionMixin:
         content = resp.get("content", "") if isinstance(resp, dict) else ""
         # The synthesis call has its own reasoning, distinct from the call
         # that requested the tools.
-        state.messages.append(assistant_message(
-            resp, content, tool_calls=None,
-            store_reasoning=getattr(cfg, "store_reasoning", True),
-        ))
+        state.messages.append(
+            assistant_message(
+                resp,
+                content,
+                tool_calls=None,
+                store_reasoning=getattr(cfg, "store_reasoning", True),
+            )
+        )
         return content or ""
 
-    def _synthesis_messages(self, state: Any, cfg: Any) -> List[Dict[str, Any]]:
+    def _synthesis_messages(self, state: Any, cfg: Any) -> list[dict[str, Any]]:
         from usersim.engine.core.context import prepare_assistant_history
 
         return prepare_assistant_history(state, self, cfg)
@@ -1220,7 +1205,7 @@ class LocalePromptPack:
         self,
         *,
         label: str,
-        prompts: Dict[str, str],
+        prompts: dict[str, str],
         shipped_locales: Sequence[str],
     ) -> None:
         self.label = label
@@ -1234,19 +1219,18 @@ class LocalePromptPack:
         extra = sorted(set(prompts) - set(shipped_locales))
         if extra:
             logger.debug(
-                "  |-- LocalePromptPack(%r): prompts include locales not "
-                "in shipped_locales: %s — kept (unused)",
-                label, extra,
+                "  |-- LocalePromptPack(%r): prompts include locales not in shipped_locales: %s — kept (unused)",
+                label,
+                extra,
             )
-        self._prompts: Dict[str, str] = dict(prompts)
+        self._prompts: dict[str, str] = dict(prompts)
         self._shipped: tuple[str, ...] = tuple(shipped_locales)
 
     def get(self, locale: str, **format_kwargs: Any) -> str:
         """Return the (optionally format-substituted) prompt for ``locale``."""
         if locale not in self._prompts:
             raise LocalePromptPackError(
-                f"LocalePromptPack({self.label!r}): no prompt for "
-                f"locale={locale!r}. Available: {sorted(self._prompts)}"
+                f"LocalePromptPack({self.label!r}): no prompt for locale={locale!r}. Available: {sorted(self._prompts)}"
             )
         template = self._prompts[locale]
         if not format_kwargs:
@@ -1272,7 +1256,7 @@ class LocalePromptPack:
 # ---------------------------------------------------------------------------
 
 
-_PROBE_REGISTRY: Dict[str, type[BaseProbe]] = {}
+_PROBE_REGISTRY: dict[str, type[BaseProbe]] = {}
 
 
 class ProbeRegistrationError(ValueError):
@@ -1312,14 +1296,11 @@ def register_probe(
 
     def decorator(cls: type[BaseProbe]) -> type[BaseProbe]:
         if not isinstance(cls, type) or not issubclass(cls, BaseProbe):
-            raise ProbeRegistrationError(
-                f"@register_probe: {cls!r} is not a subclass of BaseProbe"
-            )
+            raise ProbeRegistrationError(f"@register_probe: {cls!r} is not a subclass of BaseProbe")
         label = getattr(cls, "label", "<unset>")
         if not isinstance(label, str) or label == "<unset>":
             raise ProbeRegistrationError(
-                f"@register_probe: {cls.__name__} must set a class-level "
-                f"`label` string before decoration"
+                f"@register_probe: {cls.__name__} must set a class-level `label` string before decoration"
             )
 
         module = sys.modules.get(cls.__module__)
@@ -1330,8 +1311,7 @@ def register_probe(
 
         if label in _PROBE_REGISTRY and _PROBE_REGISTRY[label] is not cls:
             logger.debug(
-                "  |-- @register_probe: replacing existing probe %r "
-                "(was %s, now %s)",
+                "  |-- @register_probe: replacing existing probe %r (was %s, now %s)",
                 label,
                 _PROBE_REGISTRY[label].__qualname__,
                 cls.__qualname__,
@@ -1368,9 +1348,7 @@ def resolve_probe(label: str) -> type[BaseProbe]:
         load_extension_probes()
     if label not in _PROBE_REGISTRY:
         available = ", ".join(known_probes()) or "(none)"
-        raise KeyError(
-            f"Unknown probe: {label!r}. Registered: {available}"
-        )
+        raise KeyError(f"Unknown probe: {label!r}. Registered: {available}")
     return _PROBE_REGISTRY[label]
 
 
@@ -1393,8 +1371,8 @@ def clear_registry() -> None:
 def _baseprobe_run_dispatch(
     self: BaseProbe,
     *,
-    models: Dict[str, Any],
-    data: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
     cfg: Any,
 ) -> dict:
     """Default dispatch: drive the shared ``ConversationLoop``.

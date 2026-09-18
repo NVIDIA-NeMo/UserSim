@@ -16,7 +16,7 @@ network calls happen during tests.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -26,7 +26,6 @@ from usersim.engine.probes.safety_chat_pressure.classifier import (
     get_last_assistant_response,
 )
 
-
 # ---------------------------------------------------------------------------
 # get_last_assistant_response
 # ---------------------------------------------------------------------------
@@ -34,7 +33,7 @@ from usersim.engine.probes.safety_chat_pressure.classifier import (
 
 class TestGetLastAssistantResponse:
     def test_returns_latest_natural_language_assistant_message(self) -> None:
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
             {"role": "assistant", "content": "A1"},
             {"role": "user", "content": "Q2"},
@@ -45,7 +44,7 @@ class TestGetLastAssistantResponse:
     def test_skips_tool_call_envelopes(self) -> None:
         """Most recent assistant message has tool_calls set; helper falls
         back to the previous natural-language assistant message."""
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
             {"role": "assistant", "content": "A1 keeper"},
             {"role": "assistant", "content": "", "tool_calls": [{"id": "x"}]},
@@ -53,7 +52,7 @@ class TestGetLastAssistantResponse:
         assert get_last_assistant_response(messages) == "A1 keeper"
 
     def test_returns_empty_when_no_assistant_message_yet(self) -> None:
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "user", "content": "Q1"},
         ]
         assert get_last_assistant_response(messages) == ""
@@ -67,13 +66,11 @@ class TestGetLastAssistantResponse:
 # ---------------------------------------------------------------------------
 
 
-_CLASSIFIER_LLM = (
-    "usersim.engine.probes.safety_chat_pressure.classifier.call_llm"
-)
+_CLASSIFIER_LLM = "usersim.engine.probes.safety_chat_pressure.classifier.call_llm"
 
 
 class TestClassifyCapitulation:
-    def _models(self) -> Dict[str, Any]:
+    def _models(self) -> dict[str, Any]:
         return {"summary_model": object()}
 
     def test_returns_true_when_llm_says_yes(self) -> None:
@@ -115,7 +112,9 @@ class TestClassifyCapitulation:
     def test_returns_false_for_whitespace_assistant_response(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
             result = classify_capitulation(
-                self._models(), "Target description", "    \n  \t  ",
+                self._models(),
+                "Target description",
+                "    \n  \t  ",
             )
         assert result is False
         mock_llm.assert_not_called()
@@ -123,31 +122,35 @@ class TestClassifyCapitulation:
     def test_returns_false_for_empty_target_description(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
             result = classify_capitulation(
-                self._models(), "", "Long assistant response here",
+                self._models(),
+                "",
+                "Long assistant response here",
             )
         assert result is False
         mock_llm.assert_not_called()
 
     def test_returns_false_when_call_llm_raises(
-        self, caplog: pytest.LogCaptureFixture,
+        self,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         """call_llm exceptions (missing alias, provider error, transient
         failure) get caught — classifier returns False (safe default).
         """
         with patch(
-            _CLASSIFIER_LLM, side_effect=RuntimeError("simulated provider failure"),
+            _CLASSIFIER_LLM,
+            side_effect=RuntimeError("simulated provider failure"),
         ):
             with caplog.at_level("WARNING", logger="usersim.engine"):
                 result = classify_capitulation(
-                    self._models(), "Target", "Response",
+                    self._models(),
+                    "Target",
+                    "Response",
                 )
         assert result is False
-        assert any(
-            "classify_capitulation raised" in r.message for r in caplog.records
-        )
+        assert any("classify_capitulation raised" in r.message for r in caplog.records)
 
     def test_uses_summary_model_alias(self) -> None:
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["alias"] = alias
@@ -166,7 +169,7 @@ class TestClassifyCapitulation:
         keywords in the prompt would re-introduce the safety-bias the
         architecture is meant to avoid.
         """
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs
@@ -180,18 +183,22 @@ class TestClassifyCapitulation:
             )
         prompt_text = captured["msgs"][0]["content"].lower()
         for forbidden in (
-            "pressure", "reframing", "strategy", "persistence",
-            "hypothetical_framing", "authority_impersonation", "persona",
+            "pressure",
+            "reframing",
+            "strategy",
+            "persistence",
+            "hypothetical_framing",
+            "authority_impersonation",
+            "persona",
         ):
             assert forbidden not in prompt_text, (
-                f"comparator prompt should not contain '{forbidden}'; "
-                f"prompt was: {prompt_text!r}"
+                f"comparator prompt should not contain '{forbidden}'; prompt was: {prompt_text!r}"
             )
 
     def test_prompt_includes_target_description_and_assistant_response(
         self,
     ) -> None:
-        captured: Dict[str, Any] = {}
+        captured: dict[str, Any] = {}
 
         def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs

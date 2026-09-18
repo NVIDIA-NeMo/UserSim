@@ -28,9 +28,6 @@ the locale-content audit lives in the same reviewer queue as the
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
-
-
 # ---------------------------------------------------------------------------
 # en_US
 # ---------------------------------------------------------------------------
@@ -325,7 +322,7 @@ _USER_FOLLOWUP_INSTRUCTION_KO_KR = """이제 이 대화의 다음 메시지를 �
 - 전문가처럼 설명하지 마세요. 당신은 사용자입니다."""
 
 
-_SYSTEM_PROMPTS: Dict[str, str] = {
+_SYSTEM_PROMPTS: dict[str, str] = {
     "en_US": _USER_AGENT_SYSTEM_PROMPT_EN_US,
     "en_IN": _USER_AGENT_SYSTEM_PROMPT_EN_IN,
     "en_SG": _USER_AGENT_SYSTEM_PROMPT_EN_SG,
@@ -337,7 +334,7 @@ _SYSTEM_PROMPTS: Dict[str, str] = {
     "ko_KR": _USER_AGENT_SYSTEM_PROMPT_KO_KR,
 }
 
-_FOLLOWUP_INSTRUCTIONS: Dict[str, str] = {
+_FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "en_IN": _USER_FOLLOWUP_INSTRUCTION_EN_IN,
     "en_SG": _USER_FOLLOWUP_INSTRUCTION_EN_SG,
@@ -364,8 +361,7 @@ def get_system_prompt(locale: str) -> str:
     """Return the user-agent system prompt for a locale."""
     if locale not in _SYSTEM_PROMPTS:
         raise PromptsUnavailableError(
-            f"No multilingual-consistency prompts for locale={locale!r}. "
-            f"Available: {sorted(_SYSTEM_PROMPTS.keys())}"
+            f"No multilingual-consistency prompts for locale={locale!r}. Available: {sorted(_SYSTEM_PROMPTS.keys())}"
         )
     return _SYSTEM_PROMPTS[locale]
 
@@ -381,19 +377,15 @@ def get_followup_instruction(locale: str) -> str:
     return _FOLLOWUP_INSTRUCTIONS[locale]
 
 
-def available_locales() -> Tuple[str, ...]:
+def available_locales() -> tuple[str, ...]:
     """Locales with a complete prompt pack."""
     return tuple(sorted(_SYSTEM_PROMPTS.keys()))
 
 
-def supported_locale_pairs() -> Tuple[Tuple[str, str], ...]:
+def supported_locale_pairs() -> tuple[tuple[str, str], ...]:
     """Pairs (system, followup) consistency check helper for tests.
 
     Returns the locale list with both prompts present. Used by tests
     to assert there are no half-shipped locales.
     """
-    return tuple(
-        (loc, loc)
-        for loc in sorted(_SYSTEM_PROMPTS.keys())
-        if loc in _FOLLOWUP_INSTRUCTIONS
-    )
+    return tuple((loc, loc) for loc in sorted(_SYSTEM_PROMPTS.keys()) if loc in _FOLLOWUP_INSTRUCTIONS)

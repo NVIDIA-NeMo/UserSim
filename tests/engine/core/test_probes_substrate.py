@@ -30,6 +30,7 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import (
+    _PROBE_REGISTRY,
     AgenticMixin,
     BankBackedProbe,
     BankLoadError,
@@ -44,13 +45,11 @@ from usersim.engine.core.probes import (
     ToolCallingMixin,
     ToolExecutionMixin,
     assistant_message,
-    _PROBE_REGISTRY,
     clear_registry,
     known_probes,
     register_probe,
     resolve_probe,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -74,6 +73,7 @@ class _StubTask:
 @dataclass
 class _StubState:
     """Mimics ConversationState shape just enough for the substrate tests."""
+
     messages: list = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
@@ -96,7 +96,10 @@ class _MinimalProbe(BaseProbe):
 class TestBaseProbeDefaults:
     def _build(self) -> _MinimalProbe:
         return _MinimalProbe(
-            persona={}, locale="en_US", language="English", models={},
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
         )
 
     def test_implements_protocol(self) -> None:
@@ -117,14 +120,13 @@ class TestBaseProbeDefaults:
         probe = self._build()
         state = _StubState()
         out = probe.after_assistant_turn(
-            models={}, state=state,
+            models={},
+            state=state,
             assistant_response={"content": "Sure, here is..."},
             cfg=None,
         )
         assert out == "Sure, here is..."
-        assert state.messages == [
-            {"role": "assistant", "content": "Sure, here is..."}
-        ]
+        assert state.messages == [{"role": "assistant", "content": "Sure, here is..."}]
 
     def test_build_result_extras_counts_user_turns_and_tools(self) -> None:
         probe = self._build()
@@ -160,7 +162,10 @@ class TestBaseProbeDefaults:
             label = "half_baked"
 
         probe = HalfBaked(
-            persona={}, locale="en_US", language="English", models={},
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
         )
         with pytest.raises(NotImplementedError):
             probe.get_user_system_prompt()
@@ -243,42 +248,62 @@ class TestBankBackedProbe:
     def test_pins_bank_version_under_locale_key_by_default(self) -> None:
         builder, prov = self._build_outcome()
         _SubclassedBankProbe(
-            persona={}, locale="ja_JP", language="Japanese", models={},
-            outcome_builder=builder, provenance=prov,
+            persona={},
+            locale="ja_JP",
+            language="Japanese",
+            models={},
+            outcome_builder=builder,
+            provenance=prov,
         )
         assert prov.bank_version == {"ja_JP": "v1.ja_JP"}
 
     def test_pins_bank_version_under_fixed_key_when_set(self) -> None:
         builder, prov = self._build_outcome()
         _LocaleIndependentBankProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=prov,
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=prov,
         )
         assert prov.bank_version == {"safety": "v2.0"}
 
     def test_emits_placeholder_warning_when_task_is_placeholder(self) -> None:
         builder, prov = self._build_outcome()
         _PlaceholderBankProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=prov,
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=prov,
         )
-        outcome = builder.finalize(__import__(
-            "usersim.engine.core.outcomes",
-            fromlist=["OutcomeStatus"],
-        ).OutcomeStatus.OK)
+        outcome = builder.finalize(
+            __import__(
+                "usersim.engine.core.outcomes",
+                fromlist=["OutcomeStatus"],
+            ).OutcomeStatus.OK
+        )
         kinds = [w.kind for w in outcome.warnings]
         assert WarningKind.USED_PLACEHOLDER_FACT in kinds
 
     def test_no_placeholder_warning_when_task_is_clean(self) -> None:
         builder, prov = self._build_outcome()
         _SubclassedBankProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=prov,
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=prov,
         )
-        outcome = builder.finalize(__import__(
-            "usersim.engine.core.outcomes",
-            fromlist=["OutcomeStatus"],
-        ).OutcomeStatus.OK)
+        outcome = builder.finalize(
+            __import__(
+                "usersim.engine.core.outcomes",
+                fromlist=["OutcomeStatus"],
+            ).OutcomeStatus.OK
+        )
         assert outcome.warnings == []
 
     def test_bank_load_failure_raises_bank_load_error(self) -> None:
@@ -292,8 +317,12 @@ class TestBankBackedProbe:
         builder, prov = self._build_outcome()
         with pytest.raises(BankLoadError) as exc_info:
             _FailingProbe(
-                persona={}, locale="en_US", language="English", models={},
-                outcome_builder=builder, provenance=prov,
+                persona={},
+                locale="en_US",
+                language="English",
+                models={},
+                outcome_builder=builder,
+                provenance=prov,
             )
         assert "no bank on disk" in str(exc_info.value)
 
@@ -305,6 +334,7 @@ class TestBankBackedProbe:
 
 class _BankVerbatimProbe(BankVerbatimMixin, _SubclassedBankProbe):
     """Mixin BEFORE base class so its overrides win MRO. Convention pinned in core/probes.py docstrings."""
+
     label = "bank_verbatim_test"
     verbatim_field = "verbatim_text"
 
@@ -313,17 +343,24 @@ class TestBankVerbatimMixin:
     def test_returns_verbatim_text_from_task(self) -> None:
         builder = OutcomeBuilder()
         probe = _BankVerbatimProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=Provenance(),
         )
-        assert probe.get_verbatim_first_user_turn(_StubState()) == \
-            "Hello, can you help me?"
+        assert probe.get_verbatim_first_user_turn(_StubState()) == "Hello, can you help me?"
 
     def test_skip_on_followup_failure(self) -> None:
         builder = OutcomeBuilder()
         probe = _BankVerbatimProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=Provenance(),
         )
         assert probe.on_followup_failure(_StubState(), "any") == "skip"
 
@@ -337,8 +374,12 @@ class TestBankVerbatimMixin:
 
         builder = OutcomeBuilder()
         probe = _EmptyTaskProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=Provenance(),
         )
         assert probe.get_verbatim_first_user_turn(_StubState()) is None
 
@@ -352,8 +393,12 @@ class TestCustomTurn1InstructionMixin:
     def _build(self) -> _TurnOneInstructionProbe:
         builder = OutcomeBuilder()
         return _TurnOneInstructionProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=builder, provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=Provenance(),
         )
 
     def test_returns_template_with_task_substitution_for_turn_0(self) -> None:
@@ -394,19 +439,20 @@ class _ReframingProbe(BankReframingMixin, _SubclassedBankProbe):
 class TestBankReframingMixin:
     def _build(self) -> _ReframingProbe:
         return _ReframingProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=OutcomeBuilder(), provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=OutcomeBuilder(),
+            provenance=Provenance(),
         )
 
     def test_returns_reframing_for_each_turn(self) -> None:
         probe = self._build()
         state = _StubState()
-        assert probe.format_followup_user_instructions(1, state) == \
-            ["First reframe."]
-        assert probe.format_followup_user_instructions(2, state) == \
-            ["Second reframe."]
-        assert probe.format_followup_user_instructions(3, state) == \
-            ["Third reframe."]
+        assert probe.format_followup_user_instructions(1, state) == ["First reframe."]
+        assert probe.format_followup_user_instructions(2, state) == ["Second reframe."]
+        assert probe.format_followup_user_instructions(3, state) == ["Third reframe."]
 
     def test_returns_empty_list_past_reframing_count(self) -> None:
         probe = self._build()
@@ -418,8 +464,7 @@ class TestBankReframingMixin:
 
     def test_inherits_bank_verbatim_first_turn(self) -> None:
         probe = self._build()
-        assert probe.get_verbatim_first_user_turn(_StubState()) == \
-            "Initial pressure question?"
+        assert probe.get_verbatim_first_user_turn(_StubState()) == "Initial pressure question?"
 
 
 class _AgenticProbe(AgenticMixin, _SubclassedBankProbe):
@@ -429,24 +474,32 @@ class _AgenticProbe(AgenticMixin, _SubclassedBankProbe):
 class TestAgenticMixin:
     def _build(self) -> _AgenticProbe:
         return _AgenticProbe(
-            persona={}, locale="en_US", language="English", models={},
-            outcome_builder=OutcomeBuilder(), provenance=Provenance(),
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=OutcomeBuilder(),
+            provenance=Provenance(),
         )
 
     def test_continues_when_assistant_emitted_tool_calls(self) -> None:
         probe = self._build()
-        state = _StubState(messages=[
-            {"role": "user"},
-            {"role": "assistant", "tool_calls": [{"id": "t1"}]},
-        ])
+        state = _StubState(
+            messages=[
+                {"role": "user"},
+                {"role": "assistant", "tool_calls": [{"id": "t1"}]},
+            ]
+        )
         assert probe.should_continue_after_turn(state) is True
 
     def test_stops_when_assistant_emitted_no_tool_calls(self) -> None:
         probe = self._build()
-        state = _StubState(messages=[
-            {"role": "user"},
-            {"role": "assistant", "content": "I refuse."},
-        ])
+        state = _StubState(
+            messages=[
+                {"role": "user"},
+                {"role": "assistant", "content": "I refuse."},
+            ]
+        )
         assert probe.should_continue_after_turn(state) is False
 
     def test_stops_on_empty_message_history(self) -> None:
@@ -467,7 +520,10 @@ class _ToolCallingMixinProbe(ToolCallingMixin, _MinimalProbe):
 class TestToolCallingMixin:
     def _build(self) -> _ToolCallingMixinProbe:
         return _ToolCallingMixinProbe(
-            persona={}, locale="en_US", language="English", models={},
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
         )
 
     def test_blocks_early_stop_when_no_tools_called_yet(self) -> None:
@@ -513,9 +569,7 @@ def _tc(name: str = "t", args: str = "{}", cid: str = "c1") -> dict:
 
 class TestToolExecutionMixin:
     def test_parse_tool_call_openai_shape(self) -> None:
-        name, args = ToolExecutionMixin.parse_tool_call(
-            {"function": {"name": "x", "arguments": '{"a": 1}'}}
-        )
+        name, args = ToolExecutionMixin.parse_tool_call({"function": {"name": "x", "arguments": '{"a": 1}'}})
         assert name == "x" and args == {"a": 1}
 
     def test_no_tool_calls_returns_content_without_llm(self) -> None:
@@ -523,7 +577,10 @@ class TestToolExecutionMixin:
         state = _StubState()
         with patch("usersim.engine.core.llm.call_llm") as m:
             out = probe.after_assistant_turn(
-                {}, state, {"content": "just talking", "tool_calls": None}, object(),
+                {},
+                state,
+                {"content": "just talking", "tool_calls": None},
+                object(),
             )
         assert out == "just talking"
         assert probe.executed == [] and probe.rounds == [0]
@@ -537,7 +594,10 @@ class TestToolExecutionMixin:
             return_value={"content": "here is the answer", "tool_calls": None},
         ) as m:
             out = probe.after_assistant_turn(
-                {}, state, {"content": "", "tool_calls": [_tc()]}, object(),
+                {},
+                state,
+                {"content": "", "tool_calls": [_tc()]},
+                object(),
             )
         assert probe.executed == ["t"]  # one round of tools
         assert out == "here is the answer"  # single synthesis pass
@@ -554,16 +614,21 @@ class TestToolExecutionMixin:
         probe = _ToolExecProbe(mode="multi")
         state = _StubState()
         # First re-call asks for another tool; second stops.
-        responses = iter([
-            {"content": "", "tool_calls": [_tc(cid="c2")]},
-            {"content": "done", "tool_calls": None},
-        ])
+        responses = iter(
+            [
+                {"content": "", "tool_calls": [_tc(cid="c2")]},
+                {"content": "done", "tool_calls": None},
+            ]
+        )
         with patch(
             "usersim.engine.core.llm.call_llm",
             side_effect=lambda *a, **k: next(responses),
         ):
             out = probe.after_assistant_turn(
-                {}, state, {"content": "", "tool_calls": [_tc()]}, object(),
+                {},
+                state,
+                {"content": "", "tool_calls": [_tc()]},
+                object(),
             )
         assert probe.executed == ["t", "t"]  # two rounds
         assert out == "done"
@@ -576,7 +641,8 @@ class TestToolExecutionMixin:
             return_value={"content": "capped synth", "tool_calls": None},
         ):
             out = probe.after_assistant_turn(
-                {}, state,
+                {},
+                state,
                 {"content": "", "tool_calls": [_tc(cid="c1"), _tc(cid="c2")]},
                 object(),
             )
@@ -621,7 +687,9 @@ class TestLocalePromptPack:
 
     def test_get_returns_template_when_no_kwargs(self) -> None:
         pack = LocalePromptPack(
-            label="t", prompts={"en_US": "hello"}, shipped_locales=("en_US",),
+            label="t",
+            prompts={"en_US": "hello"},
+            shipped_locales=("en_US",),
         )
         assert pack.get("en_US") == "hello"
 
@@ -631,12 +699,13 @@ class TestLocalePromptPack:
             prompts={"en_US": "Hello {name}, you are {age} years old."},
             shipped_locales=("en_US",),
         )
-        assert pack.get("en_US", name="Alice", age=30) == \
-            "Hello Alice, you are 30 years old."
+        assert pack.get("en_US", name="Alice", age=30) == "Hello Alice, you are 30 years old."
 
     def test_get_raises_on_unknown_locale(self) -> None:
         pack = LocalePromptPack(
-            label="t", prompts={"en_US": "hi"}, shipped_locales=("en_US",),
+            label="t",
+            prompts={"en_US": "hi"},
+            shipped_locales=("en_US",),
         )
         with pytest.raises(LocalePromptPackError, match="ru_RU"):
             pack.get("ru_RU")
@@ -673,8 +742,7 @@ class TestRegisterProbe:
     def test_registers_class_under_label_and_sets_module_constants(self) -> None:
         mod = self._make_module()
 
-        @register_probe(family="general", prompt_version="v1.2",
-                        variants=("default", "alt"))
+        @register_probe(family="general", prompt_version="v1.2", variants=("default", "alt"))
         class _Decorated(BaseProbe):
             label = "_decorated_probe"
 
@@ -689,7 +757,8 @@ class TestRegisterProbe:
         # the module we just constructed (the original decoration ran
         # before we reassigned __module__).
         _Decorated = register_probe(
-            family="general", prompt_version="v1.2",
+            family="general",
+            prompt_version="v1.2",
             variants=("default", "alt"),
         )(_Decorated)
 
@@ -705,7 +774,8 @@ class TestRegisterProbe:
 
         with pytest.raises(ProbeRegistrationError, match="not a subclass"):
             register_probe(
-                family="general", prompt_version="v1.0",
+                family="general",
+                prompt_version="v1.0",
                 variants=("default",),
             )(_NotAProbe)
 
@@ -715,7 +785,8 @@ class TestRegisterProbe:
 
         with pytest.raises(ProbeRegistrationError, match="label"):
             register_probe(
-                family="general", prompt_version="v1.0",
+                family="general",
+                prompt_version="v1.0",
                 variants=("default",),
             )(_NoLabel)
 
@@ -724,19 +795,25 @@ class TestRegisterProbe:
             resolve_probe("bogus_probe")
 
     def test_known_probes_returns_sorted_tuple(self) -> None:
-        @register_probe(family="general", prompt_version="v1.0",
-                        variants=("default",))
+        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
         class _Z(BaseProbe):
             label = "z_probe"
-            def get_user_system_prompt(self) -> str: return ""
-            def get_assistant_system_prompt(self) -> str: return ""
 
-        @register_probe(family="general", prompt_version="v1.0",
-                        variants=("default",))
+            def get_user_system_prompt(self) -> str:
+                return ""
+
+            def get_assistant_system_prompt(self) -> str:
+                return ""
+
+        @register_probe(family="general", prompt_version="v1.0", variants=("default",))
         class _A(BaseProbe):
             label = "a_probe"
-            def get_user_system_prompt(self) -> str: return ""
-            def get_assistant_system_prompt(self) -> str: return ""
+
+            def get_user_system_prompt(self) -> str:
+                return ""
+
+            def get_assistant_system_prompt(self) -> str:
+                return ""
 
         assert known_probes() == ("a_probe", "z_probe")
 
@@ -763,37 +840,49 @@ class TestAssistantMessageShape:
     def test_omitted_tool_calls_omits_the_key(self) -> None:
         """Plain probes built ``{"role", "content"}`` with no tool_calls."""
         assert assistant_message(self.NO_TRACE, "hi") == {
-            "role": "assistant", "content": "hi",
+            "role": "assistant",
+            "content": "hi",
         }
 
     def test_explicit_none_keeps_the_key(self) -> None:
         """Tool probes wrote an explicit ``"tool_calls": None``."""
         assert assistant_message(self.NO_TRACE, "hi", tool_calls=None) == {
-            "role": "assistant", "content": "hi", "tool_calls": None,
+            "role": "assistant",
+            "content": "hi",
+            "tool_calls": None,
         }
 
     def test_tool_calls_are_passed_through(self) -> None:
-        calls = [{"id": "c1", "type": "function",
-                  "function": {"name": "f", "arguments": "{}"}}]
+        calls = [{"id": "c1", "type": "function", "function": {"name": "f", "arguments": "{}"}}]
         assert assistant_message(self.NO_TRACE, "", tool_calls=calls) == {
-            "role": "assistant", "content": "", "tool_calls": calls,
+            "role": "assistant",
+            "content": "",
+            "tool_calls": calls,
         }
 
     def test_falsy_tool_calls_normalise_to_none(self) -> None:
         """Matches the old ``tool_calls if tool_calls else None``."""
         assert assistant_message(self.NO_TRACE, "hi", tool_calls=[]) == {
-            "role": "assistant", "content": "hi", "tool_calls": None,
+            "role": "assistant",
+            "content": "hi",
+            "tool_calls": None,
         }
 
     def test_absent_trace_adds_no_key(self) -> None:
         """A non-reasoning model must produce exactly the old dict — the
         key is absent, not present-and-empty, so consumers written
         against the old schema keep working."""
-        for response in ({}, {"reasoning_content": None},
-                         {"reasoning_content": ""},
-                         {"reasoning_content": "   \n "}, None, "not-a-dict"):
+        for response in (
+            {},
+            {"reasoning_content": None},
+            {"reasoning_content": ""},
+            {"reasoning_content": "   \n "},
+            None,
+            "not-a-dict",
+        ):
             assert assistant_message(response, "hi") == {
-                "role": "assistant", "content": "hi",
+                "role": "assistant",
+                "content": "hi",
             }
 
     def test_none_content_normalises_to_empty_string(self) -> None:
@@ -806,29 +895,27 @@ class TestAssistantMessageStoreReasoning:
     TRACED = {"content": "hi", "reasoning_content": "the thinking"}
 
     def test_stored_by_default(self) -> None:
-        assert assistant_message(self.TRACED, "hi")["reasoning_content"] == (
-            "the thinking"
-        )
+        assert assistant_message(self.TRACED, "hi")["reasoning_content"] == ("the thinking")
 
     def test_disabled_omits_the_key_entirely(self) -> None:
         """Not empty-string, not null -- the same dict a non-reasoning
         model produces, so consumers cannot tell the two apart."""
         assert assistant_message(self.TRACED, "hi", store_reasoning=False) == {
-            "role": "assistant", "content": "hi",
+            "role": "assistant",
+            "content": "hi",
         }
 
     def test_disabled_preserves_the_rest_of_the_shape(self) -> None:
-        calls = [{"id": "c1", "type": "function",
-                  "function": {"name": "f", "arguments": "{}"}}]
-        assert assistant_message(
-            self.TRACED, "hi", tool_calls=calls, store_reasoning=False
-        ) == {"role": "assistant", "content": "hi", "tool_calls": calls}
+        calls = [{"id": "c1", "type": "function", "function": {"name": "f", "arguments": "{}"}}]
+        assert assistant_message(self.TRACED, "hi", tool_calls=calls, store_reasoning=False) == {
+            "role": "assistant",
+            "content": "hi",
+            "tool_calls": calls,
+        }
 
     def test_config_default_is_on(self) -> None:
         """The default behaviour should be to store reasoning content.
         If a probe wants to opt out, it can do so by setting store_reasoning to False."""
         from usersim.engine.config import ConversationSimulatorConfig
 
-        assert ConversationSimulatorConfig.model_fields[
-            "store_reasoning"
-        ].default is True
+        assert ConversationSimulatorConfig.model_fields["store_reasoning"].default is True

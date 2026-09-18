@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 
-from usersim.taxonomy.capabilities import capability_by_id
-from usersim.reporting.dashboard import write_capability_dashboard_artifacts
 from usersim.reporting.capability_report import (
     _capability_from_definition,
     build_capability_report,
     render_capability_report_html,
 )
+from usersim.reporting.dashboard import write_capability_dashboard_artifacts
+from usersim.taxonomy.capabilities import capability_by_id
 
 
 @pytest.mark.parametrize(
@@ -50,77 +50,78 @@ def test_report_chrome_uses_the_display_name(module: str) -> None:
                 continue
             # Env vars, the CLI name, import paths, CSS class names and the
             # repo URL are identifiers, not product chrome.
-            if re.search(
-                r"USERSIM_|usersim[./_-]|NVIDIA-NeMo/UserSim|\.usersim", text
-            ):
+            if re.search(r"USERSIM_|usersim[./_-]|NVIDIA-NeMo/UserSim|\.usersim", text):
                 continue
             if "NeMo UserSim" not in text:
                 offenders.append(text.strip()[:70])
     assert not offenders, (
-        f"{module} has reader-facing text that is not exactly 'NeMo UserSim' "
-        f"(note the casing): {offenders}"
+        f"{module} has reader-facing text that is not exactly 'NeMo UserSim' (note the casing): {offenders}"
     )
 
 
 def _eval_cell(*, helpfulness=4, language=1.0, tool_status=True):
     tool_score = 5 if tool_status else 1
-    return json.dumps({
-        "envelope": {
-            "judge_aliases": ["judge_model"],
-            "axes": ["helpfulness", "accuracy", "coherence"],
-            "scorers": ["language_compliance", "tool_use"],
-            "prompt_version": "v1.0",
-            "evaluator_version": "v1.0",
-        },
-        "axes": {
-            "helpfulness": {
-                "judge_model": {
-                    "score": helpfulness,
-                    "reasoning": "The answer missed key user needs.",
-                }
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["judge_model"],
+                "axes": ["helpfulness", "accuracy", "coherence"],
+                "scorers": ["language_compliance", "tool_use"],
+                "prompt_version": "v1.0",
+                "evaluator_version": "v1.0",
             },
-            "accuracy": {"judge_model": {"score": 4, "reasoning": ""}},
-            "coherence": {"judge_model": {"score": 4, "reasoning": ""}},
-        },
-        "scorers": {
-            "language_compliance": {
-                "scores": {
-                    "language.requested_language_match_rate": {"score": language},
-                    "language.script_compliance_rate": {"score": language},
-                    "language.first_turn_match": {"score": language},
+            "axes": {
+                "helpfulness": {
+                    "judge_model": {
+                        "score": helpfulness,
+                        "reasoning": "The answer missed key user needs.",
+                    }
                 },
-                "status_proposal": language >= 1.0,
+                "accuracy": {"judge_model": {"score": 4, "reasoning": ""}},
+                "coherence": {"judge_model": {"score": 4, "reasoning": ""}},
             },
-            "tool_use": {
-                "scores": {
-                    "task_completion": {"score": tool_score, "reasoning": ""},
-                    "tool_selection": {"score": tool_score, "reasoning": ""},
-                    "argument_quality": {"score": tool_score, "reasoning": ""},
-                    "information_gathering": {"score": tool_score, "reasoning": ""},
-                    "overall": {"score": tool_score, "reasoning": ""},
-                    "unnecessary_tool_use": {"score": 5, "reasoning": ""},
-                    "architecture_leaking": {"score": 5, "reasoning": ""},
+            "scorers": {
+                "language_compliance": {
+                    "scores": {
+                        "language.requested_language_match_rate": {"score": language},
+                        "language.script_compliance_rate": {"score": language},
+                        "language.first_turn_match": {"score": language},
+                    },
+                    "status_proposal": language >= 1.0,
                 },
-                "status_proposal": tool_status,
+                "tool_use": {
+                    "scores": {
+                        "task_completion": {"score": tool_score, "reasoning": ""},
+                        "tool_selection": {"score": tool_score, "reasoning": ""},
+                        "argument_quality": {"score": tool_score, "reasoning": ""},
+                        "information_gathering": {"score": tool_score, "reasoning": ""},
+                        "overall": {"score": tool_score, "reasoning": ""},
+                        "unnecessary_tool_use": {"score": 5, "reasoning": ""},
+                        "architecture_leaking": {"score": 5, "reasoning": ""},
+                    },
+                    "status_proposal": tool_status,
+                },
             },
-        },
-        "skipped": False,
-        "skipped_reason": None,
-    })
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
 
 
 def test_build_capability_report_capability_cells(trajectory_df):
     import pandas as pd
 
-    eval_df = pd.DataFrame({
-        "trajectory_id": ["t000000000000001", "t000000000000004"],
-        "locale": ["en_US", "en_US"],
-        "probe_family": ["general_open_ended", "tool_calling"],
-        "assistant_eval": [
-            _eval_cell(helpfulness=2, language=1.0),
-            _eval_cell(helpfulness=4, language=0.5, tool_status=False),
-        ],
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t000000000000001", "t000000000000004"],
+            "locale": ["en_US", "en_US"],
+            "probe_family": ["general_open_ended", "tool_calling"],
+            "assistant_eval": [
+                _eval_cell(helpfulness=2, language=1.0),
+                _eval_cell(helpfulness=4, language=0.5, tool_status=False),
+            ],
+        }
+    )
 
     report = build_capability_report(
         trajectory_df,
@@ -159,14 +160,8 @@ def test_build_capability_report_capability_cells(trajectory_df):
     assert isinstance(report.reasoning_source_by_alias, dict)
     assert report.reasoning_source_by_alias.get("judge_model") == "unavailable"
     assert report.to_dict()["total_reasoning_tokens"] == report.total_reasoning_tokens
-    assert (
-        report.to_dict()["reasoning_tokens_by_alias"]
-        == report.reasoning_tokens_by_alias
-    )
-    assert (
-        report.to_dict()["reasoning_source_by_alias"]
-        == report.reasoning_source_by_alias
-    )
+    assert report.to_dict()["reasoning_tokens_by_alias"] == report.reasoning_tokens_by_alias
+    assert report.to_dict()["reasoning_source_by_alias"] == report.reasoning_source_by_alias
     # Three-row Sim Health algebra invariant. Each row (User, Assistant)
     # decomposes cleanly:
     #   total = input + output
@@ -180,23 +175,14 @@ def test_build_capability_report_capability_cells(trajectory_df):
     assert report.assistant_reasoning_tokens <= report.total_reasoning_tokens
     assert report.assistant_reasoning_tokens <= report.assistant_total_tokens
     # output = reasoning + conversation (per-alias visible split)
-    assert (
-        report.assistant_output_tokens
-        == report.assistant_reasoning_tokens + report.assistant_conversation_tokens
-    )
-    assert (
-        report.user_output_tokens
-        == report.user_reasoning_tokens + report.user_conversation_tokens
-    )
+    assert report.assistant_output_tokens == report.assistant_reasoning_tokens + report.assistant_conversation_tokens
+    assert report.user_output_tokens == report.user_reasoning_tokens + report.user_conversation_tokens
     # User-model totals follow the same shape as assistant.
     assert report.user_total_tokens >= 0
     assert report.user_total_tokens <= report.total_tokens
     # Both per-alias totals are subsets of the global (input+output)
     # total; their sum (plus other aliases' input+output) equals it.
-    assert (
-        report.user_total_tokens + report.assistant_total_tokens
-        <= report.total_tokens
-    )
+    assert report.user_total_tokens + report.assistant_total_tokens <= report.total_tokens
     # to_dict round-trips all eight new tokens fields.
     d = report.to_dict()
     assert d["assistant_total_tokens"] == report.assistant_total_tokens
@@ -226,22 +212,24 @@ def test_build_capability_report_capability_cells(trajectory_df):
 def test_failed_simulations_do_not_enter_quality_denominators():
     import pandas as pd
 
-    rows = pd.DataFrame([
-        {
-            "trajectory_id": "ok",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-            "simulation_outcome": json.dumps({"status": "ok"}),
-            "assistant_eval": _eval_cell(helpfulness=1),
-        },
-        {
-            "trajectory_id": "failed",
-            "locale": "en_US",
-            "probe_family": "general_open_ended",
-            "simulation_outcome": json.dumps({"status": "failed"}),
-            "assistant_eval": _eval_cell(helpfulness=5),
-        },
-    ])
+    rows = pd.DataFrame(
+        [
+            {
+                "trajectory_id": "ok",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+                "simulation_outcome": json.dumps({"status": "ok"}),
+                "assistant_eval": _eval_cell(helpfulness=1),
+            },
+            {
+                "trajectory_id": "failed",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+                "simulation_outcome": json.dumps({"status": "failed"}),
+                "assistant_eval": _eval_cell(helpfulness=5),
+            },
+        ]
+    )
     definition = capability_by_id("assistant_quality")
     actual = _capability_from_definition(
         definition,
@@ -321,12 +309,14 @@ def test_render_capability_report_html_contains_heatmap(trajectory_df):
 def test_render_capability_report_html_includes_conversation_evidence(trajectory_df):
     import pandas as pd
 
-    eval_df = pd.DataFrame({
-        "trajectory_id": ["t000000000000001"],
-        "locale": ["en_US"],
-        "probe_family": ["general_open_ended"],
-        "assistant_eval": [_eval_cell(helpfulness=1, language=1.0)],
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t000000000000001"],
+            "locale": ["en_US"],
+            "probe_family": ["general_open_ended"],
+            "assistant_eval": [_eval_cell(helpfulness=1, language=1.0)],
+        }
+    )
     report = build_capability_report(
         trajectory_df,
         eval_df,
@@ -422,70 +412,81 @@ def _safety_pressure_eval_cell(
     can pass ``None`` to exercise the tri-state skip path in
     ``_status_rate_cell``.
     """
-    return json.dumps({
-        "envelope": {
-            "judge_aliases": ["judge_model"],
-            "axes": ["helpfulness", "accuracy", "coherence"],
-            "scorers": ["safety_chat_pressure"],
-            "prompt_version": "v1.1",
-            "evaluator_version": "v1.0",
-        },
-        "axes": {},
-        "scorers": {
-            "safety_chat_pressure": {
-                "judge_alias": "judge_model",
-                "scores": {
-                    "pressure.refusal_held": {
-                        "score": refusal_held, "reasoning": "stub",
-                    },
-                    "pressure.contextual_safety_persistence": {
-                        "score": contextual, "reasoning": "stub",
-                    },
-                },
-                "turn_of_flip": turn_of_flip,
-                "status_proposal": status_proposal,
-                "target_request_id": "t-1",
-                "strategy_id": "persistence",
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["judge_model"],
+                "axes": ["helpfulness", "accuracy", "coherence"],
+                "scorers": ["safety_chat_pressure"],
+                "prompt_version": "v1.1",
+                "evaluator_version": "v1.0",
             },
-        },
-        "skipped": False,
-        "skipped_reason": None,
-    })
+            "axes": {},
+            "scorers": {
+                "safety_chat_pressure": {
+                    "judge_alias": "judge_model",
+                    "scores": {
+                        "pressure.refusal_held": {
+                            "score": refusal_held,
+                            "reasoning": "stub",
+                        },
+                        "pressure.contextual_safety_persistence": {
+                            "score": contextual,
+                            "reasoning": "stub",
+                        },
+                    },
+                    "turn_of_flip": turn_of_flip,
+                    "status_proposal": status_proposal,
+                    "target_request_id": "t-1",
+                    "strategy_id": "persistence",
+                },
+            },
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
 
 
 def _safety_pressure_traj_df():
     """Three safety_chat_pressure trajectory rows in en_US for cell tests."""
     pd = __import__("pandas")
-    return pd.DataFrame([
-        {
-            "trajectory_id": f"sp{i:014d}",
-            "probe_family": "safety_chat_pressure",
-            "probe_variant": "persistence::manipulation",
-            "locale": "en_US",
-            "conversation_messages": json.dumps([
-                {"role": "user", "content": "Q"},
-                {"role": "assistant", "content": "A"},
-            ]),
-            "simulation_outcome": json.dumps({"status": "ok"}),
-        }
-        for i in range(1, 4)
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "trajectory_id": f"sp{i:014d}",
+                "probe_family": "safety_chat_pressure",
+                "probe_variant": "persistence::manipulation",
+                "locale": "en_US",
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "Q"},
+                        {"role": "assistant", "content": "A"},
+                    ]
+                ),
+                "simulation_outcome": json.dumps({"status": "ok"}),
+            }
+            for i in range(1, 4)
+        ]
+    )
 
 
 def test_safety_pressure_cell_ready_when_all_high():
     """All trajectories at refusal_held=5, contextual=5 -> ready."""
     pd = __import__("pandas")
     df = _safety_pressure_traj_df()
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=5, contextual=5)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=5, contextual=5)] * 3,
+        }
+    )
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
@@ -498,16 +499,19 @@ def test_safety_pressure_cell_blocked_when_critical_axis_fails():
     """All refusal_held=2 -> blocked + must-pass badge on refusal_held."""
     pd = __import__("pandas")
     df = _safety_pressure_traj_df()
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=2, contextual=2)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=2, contextual=2)] * 3,
+        }
+    )
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
@@ -519,14 +523,14 @@ def _mixed_axis_report():
     """One axis strong, one weak -- the shape that hides a broken axis in the mean."""
     pd = __import__("pandas")
     df = _safety_pressure_traj_df()
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=5, contextual=1)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=5, contextual=1)] * 3,
+        }
+    )
     return build_capability_report(df, eval_df, eval_column="assistant_eval", min_n=1)
 
 
@@ -539,11 +543,10 @@ def test_axis_scores_expose_the_broken_axis_behind_the_mean():
     could not show how far off it was and a reviewer had to open the parquet.
     """
     report = _mixed_axis_report()
-    cell = {(c.capability, c.locale): c for c in report.capability_cells}[
-        ("safety_pressure", "en_US")
-    ]
+    cell = {(c.capability, c.locale): c for c in report.capability_cells}[("safety_pressure", "en_US")]
     assert set(cell.axis_scores) == {
-        "pressure.refusal_held", "pressure.contextual_safety_persistence",
+        "pressure.refusal_held",
+        "pressure.contextual_safety_persistence",
     }
     strong = cell.axis_scores["pressure.refusal_held"]
     weak = cell.axis_scores["pressure.contextual_safety_persistence"]
@@ -554,9 +557,7 @@ def test_axis_scores_expose_the_broken_axis_behind_the_mean():
 
 def test_axis_scores_are_the_per_axis_means_not_the_cell_score():
     report = _mixed_axis_report()
-    cell = {(c.capability, c.locale): c for c in report.capability_cells}[
-        ("safety_pressure", "en_US")
-    ]
+    cell = {(c.capability, c.locale): c for c in report.capability_cells}[("safety_pressure", "en_US")]
     # Every row scored refusal_held=5 (the top of the scale), so its axis mean is
     # the normalized maximum regardless of what the cell score came out as.
     assert cell.axis_scores["pressure.refusal_held"] == 1.0
@@ -643,16 +644,19 @@ def test_safety_pressure_cell_blocked_below_mean_without_must_pass_badge():
     """
     pd = __import__("pandas")
     df = _safety_pressure_traj_df()
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=5, contextual=2)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=5, contextual=2)] * 3,
+        }
+    )
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
@@ -666,29 +670,32 @@ def test_safety_pressure_findings_surface_turn_of_flip():
     """The new informational finding for ``turn_of_flip`` is rendered."""
     pd = __import__("pandas")
     df = _safety_pressure_traj_df()
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(
-                refusal_held=2, contextual=2, turn_of_flip=3,
-            )
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [
+                _safety_pressure_eval_cell(
+                    refusal_held=2,
+                    contextual=2,
+                    turn_of_flip=3,
+                )
+            ]
+            * 3,
+        }
+    )
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
     snippets = cell.evidence_snippets
     assert snippets, "expected at least one evidence snippet"
-    flip_findings = [
-        f
-        for snippet in snippets
-        for f in snippet.findings
-        if f.axis == "turn_of_flip"
-    ]
+    flip_findings = [f for snippet in snippets for f in snippet.findings if f.axis == "turn_of_flip"]
     assert flip_findings
     assert flip_findings[0].score is None  # informational, never gates
     assert flip_findings[0].failed is False
@@ -701,24 +708,24 @@ def test_safety_pressure_findings_surface_stopped_on_capitulation():
     df = _safety_pressure_traj_df()
     df["stopped_on_capitulation"] = [True, False, True]
     df["capitulated_at_turn"] = [2, None, 1]
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=2, contextual=2)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=2, contextual=2)] * 3,
+        }
+    )
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
     stopped_findings = [
-        f
-        for snippet in cell.evidence_snippets
-        for f in snippet.findings
-        if f.axis == "stopped_on_capitulation"
+        f for snippet in cell.evidence_snippets for f in snippet.findings if f.axis == "stopped_on_capitulation"
     ]
     assert stopped_findings, "expected stopped_on_capitulation finding"
     assert stopped_findings[0].score is None
@@ -744,30 +751,31 @@ def test_safety_pressure_findings_handles_pd_na_stopped_on_capitulation():
     # third is a plain False. The renderer must tolerate all three
     # without raising.
     df["stopped_on_capitulation"] = pd.array(
-        [True, pd.NA, False], dtype="boolean",
+        [True, pd.NA, False],
+        dtype="boolean",
     )
     df["capitulated_at_turn"] = pd.array([3, pd.NA, pd.NA], dtype="Int64")
-    eval_df = pd.DataFrame({
-        "trajectory_id": df["trajectory_id"].tolist(),
-        "locale": ["en_US"] * 3,
-        "probe_family": ["safety_chat_pressure"] * 3,
-        "assistant_eval": [
-            _safety_pressure_eval_cell(refusal_held=2, contextual=2)
-        ] * 3,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=2, contextual=2)] * 3,
+        }
+    )
     # Must not raise — the bug was a TypeError from bool(pd.NA).
     report = build_capability_report(
-        df, eval_df, eval_column="assistant_eval", min_n=1,
+        df,
+        eval_df,
+        eval_column="assistant_eval",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
     cell = by_key[("safety_pressure", "en_US")]
     # Exactly one stopped_on_capitulation finding emitted (only the True
     # row qualifies; pd.NA and False are skipped).
     stopped_findings = [
-        f
-        for snippet in cell.evidence_snippets
-        for f in snippet.findings
-        if f.axis == "stopped_on_capitulation"
+        f for snippet in cell.evidence_snippets for f in snippet.findings if f.axis == "stopped_on_capitulation"
     ]
     assert len(stopped_findings) == 1
     assert "turn 3" in stopped_findings[0].reasoning
@@ -789,35 +797,41 @@ def test_status_rate_cell_skips_none_status_proposal():
     ``bool(None)``. Defence in depth for any future ``status_rate``
     consumer of a tri-state scorer.
     """
+    from usersim.reporting.capability_report import _status_rate_cell
     from usersim.taxonomy.capabilities import (
         CapabilityDefinition,
         EvidenceSource,
     )
-    from usersim.reporting.capability_report import _status_rate_cell
 
     pd = __import__("pandas")
-    df = pd.DataFrame([
-        {
-            "trajectory_id": "p-row",
-            "locale": "en_US",
-            "probe_family": "safety_chat_pressure",
-            "conversation_messages": json.dumps([]),
-            "simulation_outcome": json.dumps({"status": "ok"}),
-            "assistant_eval": _safety_pressure_eval_cell(
-                refusal_held=3, contextual=3, status_proposal=None,
-            ),
-        },
-        {
-            "trajectory_id": "f-row",
-            "locale": "en_US",
-            "probe_family": "safety_chat_pressure",
-            "conversation_messages": json.dumps([]),
-            "simulation_outcome": json.dumps({"status": "ok"}),
-            "assistant_eval": _safety_pressure_eval_cell(
-                refusal_held=2, contextual=2, status_proposal=False,
-            ),
-        },
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "trajectory_id": "p-row",
+                "locale": "en_US",
+                "probe_family": "safety_chat_pressure",
+                "conversation_messages": json.dumps([]),
+                "simulation_outcome": json.dumps({"status": "ok"}),
+                "assistant_eval": _safety_pressure_eval_cell(
+                    refusal_held=3,
+                    contextual=3,
+                    status_proposal=None,
+                ),
+            },
+            {
+                "trajectory_id": "f-row",
+                "locale": "en_US",
+                "probe_family": "safety_chat_pressure",
+                "conversation_messages": json.dumps([]),
+                "simulation_outcome": json.dumps({"status": "ok"}),
+                "assistant_eval": _safety_pressure_eval_cell(
+                    refusal_held=2,
+                    contextual=2,
+                    status_proposal=False,
+                ),
+            },
+        ]
+    )
     # Synthetic capability that uses status_rate against the
     # safety_chat_pressure scorer (mirrors the legacy shape so we
     # exercise the None-skip branch deterministically).
@@ -825,17 +839,23 @@ def test_status_rate_cell_skips_none_status_proposal():
         id="legacy_status_rate_probe",
         label="Legacy status_rate",
         description="Legacy capability proving the None-skip behaviour.",
-        sources=(EvidenceSource(
-            probe="safety_chat_pressure",
-            scorer="safety_chat_pressure",
-            axes=(),
-        ),),
+        sources=(
+            EvidenceSource(
+                probe="safety_chat_pressure",
+                scorer="safety_chat_pressure",
+                axes=(),
+            ),
+        ),
         threshold=0.95,
         scale="rate",
         aggregation_policy="status_rate",
     )
     cell = _status_rate_cell(
-        legacy_def, "en_US", df, "assistant_eval", min_n=1,
+        legacy_def,
+        "en_US",
+        df,
+        "assistant_eval",
+        min_n=1,
     )
     # Only the ``False`` row counts; the ``None`` row is skipped, so the
     # score is 0.0 (one fail, no contributions from None).
@@ -902,7 +922,9 @@ def test_dashboard_hero_token_cards_use_gross_output(trajectory_df, tmp_path):
         min_n=1,
     )
     index_path = write_capability_dashboard_artifacts(
-        report, tmp_path, build_react=False,
+        report,
+        tmp_path,
+        build_react=False,
     )
     html = index_path.read_text()
     # Static-fallback hero stats render the formatted token labels next
@@ -910,16 +932,11 @@ def test_dashboard_hero_token_cards_use_gross_output(trajectory_df, tmp_path):
     # We check the formatted label appears immediately before the span
     # so we know the hero pulled the right metric.
     from usersim.reporting.dashboard import _format_tokens
+
     conv_label = _format_tokens(report.conversation_output_tokens)
     asst_label = _format_tokens(report.assistant_output_tokens)
-    assert (
-        f"<strong>{conv_label}</strong><span>conversation tokens</span>"
-        in html
-    )
-    assert (
-        f"<strong>{asst_label}</strong><span>assistant tokens</span>"
-        in html
-    )
+    assert f"<strong>{conv_label}</strong><span>conversation tokens</span>" in html
+    assert f"<strong>{asst_label}</strong><span>assistant tokens</span>" in html
     # The fixture's conversation_output_tokens MUST equal the per-alias
     # OUTPUT sum across user_model + assistant_model -- the two parties
     # IN the conversation. Excludes api_response_model (tool-response
@@ -929,10 +946,7 @@ def test_dashboard_hero_token_cards_use_gross_output(trajectory_df, tmp_path):
     # the metric is gross OUTPUT for those two aliases only.
     profile = report.sim_health.get("resource_profile") or {}
     out_by_alias = profile.get("output_tokens_by_alias") or {}
-    expected = (
-        out_by_alias.get("user_model", 0)
-        + out_by_alias.get("assistant_model", 0)
-    )
+    expected = out_by_alias.get("user_model", 0) + out_by_alias.get("assistant_model", 0)
     assert report.conversation_output_tokens == expected
     # Critically: api_response_model output must NOT be counted here.
     # If the fixture has any api_response output (tool_calling probes
@@ -941,9 +955,7 @@ def test_dashboard_hero_token_cards_use_gross_output(trajectory_df, tmp_path):
     api_output = out_by_alias.get("api_response_model", 0)
     if api_output > 0:
         assert report.conversation_output_tokens < (expected + api_output)
-    assert report.assistant_output_tokens == out_by_alias.get(
-        "assistant_model", 0
-    )
+    assert report.assistant_output_tokens == out_by_alias.get("assistant_model", 0)
 
 
 # ─── Manifest-derived run metadata (Phase 2 of metadata-capture plan) ─────
@@ -952,13 +964,11 @@ def test_dashboard_hero_token_cards_use_gross_output(trajectory_df, tmp_path):
 class TestRunMetadataResolution:
     """``model_id`` derivation precedence: manifest -> kwarg -> unknown."""
 
-    def _write_manifest(
-        self, root, run_id: str, *, assistant_model: str = "nvidia/nemotron-3-super-v3"
-    ):
+    def _write_manifest(self, root, run_id: str, *, assistant_model: str = "nvidia/nemotron-3-super-v3"):
         from usersim.engine.core.manifest import (
+            MANIFEST_SCHEMA_VERSION,
             AssetVersionsInfo,
             CodeInfo,
-            MANIFEST_SCHEMA_VERSION,
             ModelIdentity,
             OutcomeSummary,
             ReplayInfo,
@@ -975,15 +985,11 @@ class TestRunMetadataResolution:
             started_at_epoch=int(run_id) if run_id.isdigit() else 0,
             finished_at_epoch=None,
             total_runtime_s=None,
-            source=SourceInfo(
-                kind="cli", invocation="x", hostname="h", platform="p", python_version="3.13"
-            ),
+            source=SourceInfo(kind="cli", invocation="x", hostname="h", platform="p", python_version="3.13"),
             code=CodeInfo(),
             models_config_path=None,
             models={
-                "user_model": ModelIdentity(
-                    alias="user_model", model="openai/gpt-5.5", provider="nvidia"
-                ),
+                "user_model": ModelIdentity(alias="user_model", model="openai/gpt-5.5", provider="nvidia"),
                 "assistant_model": ModelIdentity(
                     alias="assistant_model",
                     model=assistant_model,
@@ -1102,9 +1108,7 @@ class TestRunMetadataResolution:
         )
         assert report.metadata_source == "unknown"
 
-    def test_dashboard_renders_actors_panel_when_captured(
-        self, trajectory_df, tmp_path
-    ) -> None:
+    def test_dashboard_renders_actors_panel_when_captured(self, trajectory_df, tmp_path) -> None:
         """End-to-end: manifest -> report -> dashboard fallback HTML.
 
         The dashboard's actors panel should list the resolved aliases.
@@ -1151,9 +1155,7 @@ class TestRunMetadataResolution:
         assert manifest_blob["metadata_source"] == "manifest"
         assert "assistant_model" in manifest_blob["model_identities"]
 
-    def test_dashboard_renders_unknown_banner_for_old_run(
-        self, trajectory_df, tmp_path
-    ) -> None:
+    def test_dashboard_renders_unknown_banner_for_old_run(self, trajectory_df, tmp_path) -> None:
         """Old runs (no manifest, no kwarg) render the gap banner —
         never silently fall back to a misleading default."""
         report = build_capability_report(
@@ -1259,40 +1261,49 @@ class TestCapabilityReportPrintActors:
 
 def _cell_with_a_skipped_scorer():
     """An eval cell whose language_compliance declined to score."""
-    return json.dumps({
-        "envelope": {
-            "judge_aliases": ["judge_model"],
-            "axes": ["helpfulness"],
-            "scorers": ["language_compliance"],
-            "prompt_version": "v1.0",
-            "evaluator_version": "v1.0",
-        },
-        "axes": {"helpfulness": {"judge_model": {"score": 4, "reasoning": ""}}},
-        "scorers": {
-            "language_compliance": {
-                "scorer_kind": "deterministic",
-                "scores": {},
-                "status_proposal": True,
-                "error": "locale='kn_Knda_IN': no detector model — scorer skipped",
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["judge_model"],
+                "axes": ["helpfulness"],
+                "scorers": ["language_compliance"],
+                "prompt_version": "v1.0",
+                "evaluator_version": "v1.0",
             },
-        },
-        "skipped": False,
-        "skipped_reason": None,
-    })
+            "axes": {"helpfulness": {"judge_model": {"score": 4, "reasoning": ""}}},
+            "scorers": {
+                "language_compliance": {
+                    "scorer_kind": "deterministic",
+                    "scores": {},
+                    "status_proposal": True,
+                    "error": "locale='kn_Knda_IN': no detector model — scorer skipped",
+                },
+            },
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
 
 
 def _report_with_a_skipped_scorer(trajectory_df):
     import pandas as pd
 
-    eval_df = pd.DataFrame({
-        "trajectory_id": ["t000000000000001", "t000000000000004"],
-        "locale": ["en_US", "en_US"],
-        "probe_family": ["general_open_ended", "tool_calling"],
-        "assistant_eval": [_cell_with_a_skipped_scorer()] * 2,
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t000000000000001", "t000000000000004"],
+            "locale": ["en_US", "en_US"],
+            "probe_family": ["general_open_ended", "tool_calling"],
+            "assistant_eval": [_cell_with_a_skipped_scorer()] * 2,
+        }
+    )
     return build_capability_report(
-        trajectory_df, eval_df, eval_column="assistant_eval",
-        run_id="test-run", model_id="test-model", sample_mode="prototype", min_n=1,
+        trajectory_df,
+        eval_df,
+        eval_column="assistant_eval",
+        run_id="test-run",
+        model_id="test-model",
+        sample_mode="prototype",
+        min_n=1,
     )
 
 
@@ -1304,8 +1315,7 @@ def test_scored_rows_with_no_evidence_are_not_called_untested(trajectory_df):
     """
     report = _report_with_a_skipped_scorer(trajectory_df)
     cell = next(
-        c for c in report.capability_cells
-        if c.capability == "multilingual_reliability" and c.locale == "en_US"
+        c for c in report.capability_cells if c.capability == "multilingual_reliability" and c.locale == "en_US"
     )
     assert cell.state == "missing"
     assert cell.n_total > 0

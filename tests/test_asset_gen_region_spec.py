@@ -19,15 +19,15 @@ from usersim.asset_gen.financial_services.spec import (
     validate_region_spec,
 )
 
+
 def _asset_gen_dir() -> Path:
     """Directory the ``asset_gen`` package lives in, wherever that ends up."""
     import usersim.asset_gen
 
     return Path(usersim.asset_gen.__file__).resolve().parent
 
-_REGION_SPEC_DIR = (
-    _asset_gen_dir() / "financial_services" / "region_spec"
-)
+
+_REGION_SPEC_DIR = _asset_gen_dir() / "financial_services" / "region_spec"
 _EN_US = _REGION_SPEC_DIR / "en_US.yaml"
 
 
@@ -75,14 +75,19 @@ def test_common_operations_injected_into_every_institution():
     """Every institution gets the universal account-lifecycle + servicing tools
     without the region spec listing them, plus its per-type operations."""
     spec = load_region_spec(_EN_US)
-    universal = {"open_account", "close_account", "update_contact_info",
-                 "get_statements", "update_beneficiary", "set_alerts"}
+    universal = {
+        "open_account",
+        "close_account",
+        "update_contact_info",
+        "get_statements",
+        "update_beneficiary",
+        "set_alerts",
+    }
     for inst in spec.institutions:
         names = {t.name for t in inst.tool_taxonomy}
         assert universal <= names, f"{inst.id} missing universal ops: {universal - names}"
     by_type = {i.type: {t.name for t in i.tool_taxonomy} for i in spec.institutions}
-    assert {"transfer_funds", "order_replacement_card", "stop_payment",
-            "pay_bill"} <= by_type["bank"]
+    assert {"transfer_funds", "order_replacement_card", "stop_payment", "pay_bill"} <= by_type["bank"]
     assert {"cancel_order", "get_order_status", "deposit_funds"} <= by_type["brokerage"]
     assert {"request_withdrawal", "plan_loan"} <= by_type["retirement_provider"]
     assert "generate_financial_plan" in by_type["wealth_manager"]
@@ -96,19 +101,28 @@ def test_common_operations_do_not_override_explicit_tools():
     """An explicitly-declared tool of a common-ops name keeps its own schema."""
     from usersim.asset_gen.financial_services.spec import Institution
 
-    inst = Institution.model_validate({
-        "id": "x", "display_name": "X", "type": "bank",
-        "brand_voice": "traditional", "domains": ["retail_banking"],
-        "products": [{"id": "p", "domain": "retail_banking",
-                      "variables": {"fee": {"type": "money", "value": 1}}}],
-        "tool_taxonomy": [
-            {"name": "kb_search", "discoverable": False, "side_effect_class": "read_only"},
-            {"name": "open_account", "discoverable": True,
-             "side_effect_class": "read_only", "description": "custom"},
-        ],
-        "task_templates": [{"id": "T", "tier": "dynamic", "task_type": "advisory_qa",
-                            "persona_tags": ["region:any"]}],
-    })
+    inst = Institution.model_validate(
+        {
+            "id": "x",
+            "display_name": "X",
+            "type": "bank",
+            "brand_voice": "traditional",
+            "domains": ["retail_banking"],
+            "products": [{"id": "p", "domain": "retail_banking", "variables": {"fee": {"type": "money", "value": 1}}}],
+            "tool_taxonomy": [
+                {"name": "kb_search", "discoverable": False, "side_effect_class": "read_only"},
+                {
+                    "name": "open_account",
+                    "discoverable": True,
+                    "side_effect_class": "read_only",
+                    "description": "custom",
+                },
+            ],
+            "task_templates": [
+                {"id": "T", "tier": "dynamic", "task_type": "advisory_qa", "persona_tags": ["region:any"]}
+            ],
+        }
+    )
     open_tools = [t for t in inst.tool_taxonomy if t.name == "open_account"]
     assert len(open_tools) == 1  # not duplicated by injection
     assert open_tools[0].description == "custom"  # explicit declaration wins
@@ -203,7 +217,8 @@ def test_nbfc_is_a_deposit_less_lender_in_the_ontology():
 def test_identity_verification_defaults_to_name_and_dob():
     spec = load_region_spec(_EN_US)
     assert spec.identity_verification.required_fields == [
-        "full_name", "date_of_birth",
+        "full_name",
+        "date_of_birth",
     ]
 
 
@@ -234,12 +249,15 @@ def test_identity_verification_is_serialized_into_region_meta():
     }
     meta = _region_meta_from_spec(validate_region_spec(raw))
     assert meta["identity_verification"]["required_fields"] == [
-        "full_name", "date_of_birth", "pan",
+        "full_name",
+        "date_of_birth",
+        "pan",
     ]
     # Present at the default too.
     default_meta = _region_meta_from_spec(load_region_spec(_EN_US))
     assert default_meta["identity_verification"]["required_fields"] == [
-        "full_name", "date_of_birth",
+        "full_name",
+        "date_of_birth",
     ]
 
 
@@ -257,8 +275,16 @@ def test_concept_guidance_defaults_are_region_neutral():
     )
 
     blob = " ".join(DEFAULT_TYPE_CONCEPT_GUIDANCE.values()).lower()
-    for us_term in ("rmd", "regulation e", "regulation best interest",
-                    "advisers act", "fiduciary", "apy", "401(k)", "fdic"):
+    for us_term in (
+        "rmd",
+        "regulation e",
+        "regulation best interest",
+        "advisers act",
+        "fiduciary",
+        "apy",
+        "401(k)",
+        "fdic",
+    ):
         assert us_term not in blob, f"US concept {us_term!r} leaked into the default"
     for us_term in ("rmd", "regulation best interest", "advisers act", "apy"):
         assert us_term not in BRIEF_PROMPT.lower()
@@ -303,7 +329,7 @@ def test_institution_seed_carries_resolved_concept_guidance():
 # hi_Deva_IN (India) region_spec
 # ---------------------------------------------------------------------------
 
-_EN_IN = _REGION_SPEC_DIR / "en_IN.yaml"          # the India REGION model
+_EN_IN = _REGION_SPEC_DIR / "en_IN.yaml"  # the India REGION model
 _HI_DEVA_IN = _REGION_SPEC_DIR / "hi_Deva_IN.yaml"  # a language overlay on it
 
 
@@ -316,7 +342,9 @@ def test_india_region_spec_valid_and_locally_grounded():
     assert "Hindi" in spec.language
     # India's KYC leans on PAN in addition to the universal pair.
     assert spec.identity_verification.required_fields == [
-        "full_name", "date_of_birth", "pan",
+        "full_name",
+        "date_of_birth",
+        "pan",
     ]
 
 
@@ -369,11 +397,9 @@ def test_india_spec_carries_no_us_instruments():
     """US concepts must not leak into India's framing or regulator text."""
     spec = load_region_spec(_HI_DEVA_IN)
     blob = " ".join(
-        [*spec.concept_guidance.values(),
-         *(rc.regulator_text for rc in spec.domain_regulators.values())]
+        [*spec.concept_guidance.values(), *(rc.regulator_text for rc in spec.domain_regulators.values())]
     ).lower()
-    for us_term in ("rmd", "401(k)", "fdic", "regulation best interest",
-                    "advisers act", "finra", "cfpb", "apy"):
+    for us_term in ("rmd", "401(k)", "fdic", "regulation best interest", "advisers act", "finra", "cfpb", "apy"):
         assert us_term not in blob, f"US concept {us_term!r} leaked into hi_Deva_IN"
     # ...and the India regulators ARE named.
     for want in ("rbi", "sebi", "irdai", "npci", "dicgc"):
@@ -390,7 +416,7 @@ def test_india_gold_tools_resolve_including_injected_common_ops():
     for inst in spec.institutions:
         names = {t.name for t in inst.tool_taxonomy}
         for tpl in inst.task_templates:
-            for gold in (tpl.gold_tool_sequence or []):
+            for gold in tpl.gold_tool_sequence or []:
                 assert gold in names, f"{inst.id}/{tpl.id}: {gold} not in taxonomy"
     insurer = next(i for i in spec.institutions if i.type == "insurer")
     assert "file_claim" in {t.name for t in insurer.tool_taxonomy}
@@ -423,20 +449,26 @@ def test_language_overlay_inherits_the_whole_region_model():
 
     def shape(spec):
         return [
-            (i.id, i.type, tuple(i.domains),
-             tuple((p.id, p.domain,
-                    tuple(sorted((k, v.value) for k, v in p.variables.items())))
-                   for p in i.products),
-             tuple(t.name for t in i.tool_taxonomy),
-             tuple(t.id for t in i.task_templates))
+            (
+                i.id,
+                i.type,
+                tuple(i.domains),
+                tuple(
+                    (p.id, p.domain, tuple(sorted((k, v.value) for k, v in p.variables.items()))) for p in i.products
+                ),
+                tuple(t.name for t in i.tool_taxonomy),
+                tuple(t.id for t in i.task_templates),
+            )
             for i in spec.institutions
         ]
 
     assert shape(base) == shape(deva)
     assert base.domain_regulators.keys() == deva.domain_regulators.keys()
-    assert (base.identity_verification.required_fields
-            == deva.identity_verification.required_fields == [
-                "full_name", "date_of_birth", "pan"])
+    assert (
+        base.identity_verification.required_fields
+        == deva.identity_verification.required_fields
+        == ["full_name", "date_of_birth", "pan"]
+    )
     assert base.concept_guidance == deva.concept_guidance
 
 
@@ -451,11 +483,11 @@ def test_overlay_adds_in_language_names_without_touching_canonical_ones():
     deva = load_region_spec(_HI_DEVA_IN)
 
     for b, d in zip(base.institutions, deva.institutions):
-        assert b.display_name == d.display_name          # canonical unchanged
-        assert not b.display_name_local                  # base needs none
-        assert d.display_name_local                      # overlay supplies one
+        assert b.display_name == d.display_name  # canonical unchanged
+        assert not b.display_name_local  # base needs none
+        assert d.display_name_local  # overlay supplies one
         assert d.display_name.isascii()
-        assert not d.display_name_local.isascii()        # actually Devanagari
+        assert not d.display_name_local.isascii()  # actually Devanagari
         for bp, dp in zip(b.products, d.products):
             assert bp.display_name == dp.display_name
             assert dp.display_name_local, f"{dp.id} missing a local name"
@@ -465,8 +497,7 @@ def test_every_product_has_an_authored_local_name():
     """Left unauthored, the generator would re-translate a product per document
     and the corpus would name one product several ways (hurting retrieval)."""
     deva = load_region_spec(_HI_DEVA_IN)
-    missing = [p.id for i in deva.institutions for p in i.products
-               if not p.display_name_local]
+    missing = [p.id for i in deva.institutions for p in i.products if not p.display_name_local]
     assert missing == []
 
 
@@ -516,8 +547,7 @@ def test_overlay_onto_an_id_keyed_list_must_carry_ids():
     from usersim.asset_gen.financial_services.spec import _merge_overlay
 
     with pytest.raises(RegionSpecError):
-        _merge_overlay([{"id": "a"}], [{"display_name": "no id here"}],
-                       path="institutions")
+        _merge_overlay([{"id": "a"}], [{"display_name": "no id here"}], path="institutions")
 
 
 def test_validate_region_spec_refuses_to_silently_drop_inheritance():
@@ -531,18 +561,21 @@ def test_validate_region_spec_refuses_to_silently_drop_inheritance():
     with pytest.raises(RegionSpecError, match="load_region_spec"):
         validate_region_spec(raw)
 
+
 # ── product doc plan: coverage, ordering, and no duplicates ─────────────────
 #: The four angles that answer the RELATIONSHIP questions a customer asks as often
 #: as product questions: what evidence do I need, how do I open this, how do I close
 #: it, why did my action not complete. They are product-scoped because they genuinely
 #: differ per product (a 401(k) needs an employer sponsorship letter; a checking
 #: account does not, and transfer limits are product variables).
-_SERVICING_ANGLES = frozenset({
-    "required documentation",
-    "set up and activate",
-    "cancel, close, or downgrade",
-    "a failed or pending action",
-})
+_SERVICING_ANGLES = frozenset(
+    {
+        "required documentation",
+        "set up and activate",
+        "cancel, close, or downgrade",
+        "a failed or pending action",
+    }
+)
 
 #: The floor derived from the round-robin: with 12 genres, the latest of the four
 #: lands at slot 18 (`eligibility_matrix` position 6, second angle).
@@ -571,17 +604,10 @@ def test_declared_document_types_match_what_the_plan_emits(path):
     for inst in spec.institutions:
         emitted |= {s["document_type"] for s in build_shared_doc_plan(inst)}
         for product in inst.products:
-            emitted |= {
-                s["document_type"] for s in build_product_doc_plan(product, 40)
-            }
+            emitted |= {s["document_type"] for s in build_product_doc_plan(product, 40)}
     declared = set(spec.document_types)
-    assert not (emitted - declared), (
-        f"{path.name}: plan emits undeclared genre(s) {sorted(emitted - declared)}"
-    )
-    assert not (declared - emitted), (
-        f"{path.name}: declares genre(s) the plan never emits "
-        f"{sorted(declared - emitted)}"
-    )
+    assert not (emitted - declared), f"{path.name}: plan emits undeclared genre(s) {sorted(emitted - declared)}"
+    assert not (declared - emitted), f"{path.name}: declares genre(s) the plan never emits {sorted(declared - emitted)}"
 
 
 @pytest.mark.parametrize("path", [_EN_US, _EN_IN])
@@ -621,9 +647,7 @@ def test_no_product_plan_ever_repeats_an_angle(path, target):
     for inst_id, product in _all_products(path):
         slots = build_product_doc_plan(product, target)
         pairs = [(s["document_type"], s["angle"]) for s in slots]
-        assert len(pairs) == len(set(pairs)), (
-            f"{inst_id}/{product.id} repeats an angle at docs_per_product={target}"
-        )
+        assert len(pairs) == len(set(pairs)), f"{inst_id}/{product.id} repeats an angle at docs_per_product={target}"
         assert len(slots) <= target
         # doc_keys must stay unique too -- they mint the deterministic doc uuids.
         keys = [s["doc_key"] for s in slots]
@@ -648,8 +672,7 @@ def test_intent_first_and_variable_first_generators_differ_as_intended():
     back numeric faithfulness). Getting these backwards is the original bug."""
     from usersim.asset_gen.financial_services.pipeline import build_product_doc_plan
 
-    _, product = next((i, p) for i, p in _all_products(_EN_IN)
-                      if len(p.variables) >= 4)
+    _, product = next((i, p) for i, p in _all_products(_EN_IN) if len(p.variables) >= 4)
     slots = build_product_doc_plan(product, 40)
 
     def angles(genre):
@@ -686,25 +709,29 @@ def test_genre_conventions_are_scoped_to_the_cluster(cluster_kind):
     else:
         emitted = set()
         for product in inst.products:
-            emitted |= {
-                s["document_type"] for s in build_product_doc_plan(product, 40)
-            }
+            emitted |= {s["document_type"] for s in build_product_doc_plan(product, 40)}
 
     rendered = Template(DOCSET_PROMPT).render(
-        display_name="X", display_name_local="", institution_id="x",
-        brand_voice="traditional", institution_type="bank", language="English",
-        currency_symbol="$", institution_brief="{}", focus_json="{}",
-        doc_plan_json="[]", sibling_doc_index="{}", target_doc_count=1,
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
         cluster_kind=cluster_kind,
     )
     documented = set(re.findall(r"^    (\w+):", rendered, re.M))
     assert not (emitted - documented), (
-        f"{cluster_kind} cluster emits genre(s) with no convention: "
-        f"{sorted(emitted - documented)}"
+        f"{cluster_kind} cluster emits genre(s) with no convention: {sorted(emitted - documented)}"
     )
     assert not (documented - emitted), (
-        f"{cluster_kind} cluster is given conventions for genre(s) it cannot emit: "
-        f"{sorted(documented - emitted)}"
+        f"{cluster_kind} cluster is given conventions for genre(s) it cannot emit: {sorted(documented - emitted)}"
     )
 
 
@@ -730,8 +757,7 @@ def test_action_genres_require_the_agent_to_act_in_conversation(genre):
 
     from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
 
-    block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)",
-                      DOCSET_PROMPT, re.M | re.S)
+    block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, f"no convention for {genre}"
     # Collapse the prompt's line wrapping: this asserts on wording, not layout.
     text = re.sub(r"\s+", " ", block.group(1)).lower()
@@ -756,8 +782,7 @@ def test_how_to_guide_may_not_make_reaching_us_a_step():
 
     from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
 
-    block = re.search(r"^    how_to_guide:(.*?)(?=^    \w+:|^-|\Z)",
-                      DOCSET_PROMPT, re.M | re.S)
+    block = re.search(r"^    how_to_guide:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, "no convention for how_to_guide"
     text = re.sub(r"\s+", " ", block.group(1)).lower()
     assert "reaching us is not a step" in text
@@ -774,11 +799,9 @@ def test_only_the_how_to_convention_bans_a_contact_step():
     from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
 
     for genre in ("troubleshooting", "policy_procedure"):
-        block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)",
-                          DOCSET_PROMPT, re.M | re.S)
+        block = re.search(rf"^    {genre}:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
         assert block, f"no convention for {genre}"
-        assert "reaching us is not a step" not in re.sub(
-            r"\s+", " ", block.group(1)).lower(), genre
+        assert "reaching us is not a step" not in re.sub(r"\s+", " ", block.group(1)).lower(), genre
 
 
 def test_the_constraint_is_region_neutral():
@@ -805,14 +828,22 @@ def test_customer_facing_genres_are_told_not_to_name_tools():
 
     from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
 
-    base = dict(display_name="X", display_name_local="", institution_id="x",
-                brand_voice="traditional", institution_type="bank", language="English",
-                currency_symbol="$", institution_brief="{}", focus_json="{}",
-                doc_plan_json="[]", sibling_doc_index="{}", target_doc_count=1)
-    product = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(
-        **base, cluster_kind="product")).lower()
-    shared = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(
-        **base, cluster_kind="shared")).lower()
+    base = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+    )
+    product = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind="product")).lower()
+    shared = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind="shared")).lower()
 
     rule = "none of them may name an internal tool"
     assert rule in product
@@ -845,12 +876,21 @@ def test_tool_docs_must_not_invent_unobtainable_arguments():
 
     from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
 
-    base = dict(display_name="X", display_name_local="", institution_id="x",
-                brand_voice="traditional", institution_type="bank", language="English",
-                currency_symbol="$", institution_brief="{}", focus_json="{}",
-                doc_plan_json="[]", sibling_doc_index="{}", target_doc_count=1)
-    shared = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(
-        **base, cluster_kind="shared"))
+    base = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+    )
+    shared = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind="shared"))
 
     # Arguments must be obtainable in the conversation...
     assert "must be something the agent can actually obtain" in shared
@@ -863,6 +903,5 @@ def test_tool_docs_must_not_invent_unobtainable_arguments():
 
     # It belongs to the agent-facing branch only; product clusters never document a
     # signature, so spending their budget on this would be noise.
-    product = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(
-        **base, cluster_kind="product"))
+    product = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind="product"))
     assert "must be something the agent can actually obtain" not in product

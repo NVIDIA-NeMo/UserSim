@@ -32,7 +32,6 @@ from usersim.engine.core.identity import (
     trajectory_id,
 )
 
-
 # ── Persona UUID ────────────────────────────────────────────────────────
 
 
@@ -84,7 +83,10 @@ class TestPersonaUuid:
         ],
     )
     def test_prompt_visible_india_fields_change_identity(
-        self, field: str, first: str, second: str,
+        self,
+        field: str,
+        first: str,
+        second: str,
     ) -> None:
         """Every field rendered into the user-agent prompt is identity-bearing."""
         base = {"first_name": "Ravi", "last_name": "Kumar", field: first}
@@ -108,9 +110,7 @@ class TestPersonaUuid:
         # dict — these are intentionally different representations).
         assert persona_uuid(as_dict) != persona_uuid(full_persona)
 
-    def test_two_distinct_personas_collide_only_on_match(
-        self, full_persona: dict, minimal_persona: dict
-    ) -> None:
+    def test_two_distinct_personas_collide_only_on_match(self, full_persona: dict, minimal_persona: dict) -> None:
         assert persona_uuid(full_persona) != persona_uuid(minimal_persona)
 
     def test_canonical_json_is_sorted_and_stable(self, full_persona: dict) -> None:
@@ -159,9 +159,7 @@ class TestTrajectoryId:
         baseline = trajectory_id(**self.BASE)
         diff = dict(self.BASE)
         diff[field] = new_value
-        assert trajectory_id(**diff) != baseline, (
-            f"trajectory_id failed to discriminate on {field}"
-        )
+        assert trajectory_id(**diff) != baseline, f"trajectory_id failed to discriminate on {field}"
 
     def test_extra_keys_discriminate(self) -> None:
         baseline = trajectory_id(**self.BASE)
@@ -205,19 +203,13 @@ class _OpaqueFacade:
 
 class TestResolveModelName:
     def test_facade_with_model_config_dot_model(self) -> None:
-        assert resolve_model_name(_FacadeWithModelConfig(), "user_model") == (
-            "openai/gpt-oss-120b"
-        )
+        assert resolve_model_name(_FacadeWithModelConfig(), "user_model") == ("openai/gpt-oss-120b")
 
     def test_facade_with_model_name(self) -> None:
-        assert resolve_model_name(_FacadeWithModelName(), "judge_model") == (
-            "anthropic/claude-3.5"
-        )
+        assert resolve_model_name(_FacadeWithModelName(), "judge_model") == ("anthropic/claude-3.5")
 
     def test_facade_with_config_dot_name(self) -> None:
-        assert resolve_model_name(_FacadeWithConfigName(), "judge_model") == (
-            "qwen/qwen3-72b"
-        )
+        assert resolve_model_name(_FacadeWithConfigName(), "judge_model") == ("qwen/qwen3-72b")
 
     def test_opaque_facade_falls_back_to_alias(self) -> None:
         assert resolve_model_name(_OpaqueFacade(), "user_model") == "user_model"

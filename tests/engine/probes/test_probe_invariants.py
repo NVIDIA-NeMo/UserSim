@@ -55,7 +55,7 @@ What is NOT asserted here (and where it lives instead):
 from __future__ import annotations
 
 import sys
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable
 
 import pytest
 
@@ -95,7 +95,7 @@ EXPECTED_PROBES: tuple[str, ...] = (
 # pass. Probes whose ``should_succeed`` defers to ``BaseProbe`` (the
 # always-True default — currently the two general probes) carry None
 # for both, and the test asserts True regardless of metadata.
-SHOULD_SUCCEED_CONTRACT: Dict[str, Tuple[str | None, Any]] = {
+SHOULD_SUCCEED_CONTRACT: dict[str, tuple[str | None, Any]] = {
     "general_open_ended": (None, None),
     "general_educational": (None, None),
     "tool_calling": ("tools_called", [{"name": "x"}]),
@@ -125,7 +125,7 @@ def _resolve_target_class(probe_label: str) -> type:
     return resolve_probe(probe_label)
 
 
-def _make_state(metadata: Dict[str, Any] | None = None) -> ConversationState:
+def _make_state(metadata: dict[str, Any] | None = None) -> ConversationState:
     """Build a minimally-empty ConversationState for invariant checks."""
     state = ConversationState(outcome=OutcomeBuilder())
     if metadata:
@@ -176,13 +176,9 @@ class TestRegistryCompleteness:
         missing = expected - registered
         extra = registered - expected
         assert not missing, (
-            f"expected probes missing from registry: {sorted(missing)}; "
-            f"a rename or import failure dropped them"
+            f"expected probes missing from registry: {sorted(missing)}; a rename or import failure dropped them"
         )
-        assert not extra, (
-            f"unexpected probes in registry: {sorted(extra)}; "
-            f"update EXPECTED_PROBES if intentional"
-        )
+        assert not extra, f"unexpected probes in registry: {sorted(extra)}; update EXPECTED_PROBES if intentional"
 
     def test_registry_is_non_empty(self) -> None:
         assert len(_PROBE_REGISTRY) >= len(EXPECTED_PROBES)
@@ -207,30 +203,23 @@ class TestModuleConstants:
         cls = resolve_probe(label)
         module = sys.modules[cls.__module__]
         family = getattr(module, "PROBE_FAMILY", None)
-        assert isinstance(family, str) and family, (
-            f"{label}: PROBE_FAMILY missing or non-string"
-        )
+        assert isinstance(family, str) and family, f"{label}: PROBE_FAMILY missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_prompt_version_is_non_empty_string(self, label: str) -> None:
         cls = resolve_probe(label)
         module = sys.modules[cls.__module__]
         prompt_version = getattr(module, "PROMPT_VERSION", None)
-        assert isinstance(prompt_version, str) and prompt_version, (
-            f"{label}: PROMPT_VERSION missing or non-string"
-        )
+        assert isinstance(prompt_version, str) and prompt_version, f"{label}: PROMPT_VERSION missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_probe_variants_is_non_empty_sequence(self, label: str) -> None:
         cls = resolve_probe(label)
         module = sys.modules[cls.__module__]
         variants = getattr(module, "PROBE_VARIANTS", None)
-        assert isinstance(variants, (list, tuple)) and variants, (
-            f"{label}: PROBE_VARIANTS missing or empty"
-        )
+        assert isinstance(variants, (list, tuple)) and variants, f"{label}: PROBE_VARIANTS missing or empty"
         assert all(isinstance(v, str) and v for v in variants), (
-            f"{label}: PROBE_VARIANTS contains non-string or empty entries: "
-            f"{variants!r}"
+            f"{label}: PROBE_VARIANTS contains non-string or empty entries: {variants!r}"
         )
 
 
@@ -264,14 +253,8 @@ class TestProbeAdapterConformance:
     def test_method_present_on_class(self, label: str, method: str) -> None:
         target_cls = _resolve_target_class(label)
         attr = getattr(target_cls, method, None)
-        assert attr is not None, (
-            f"{label}: required ProbeAdapter method {method!r} missing on "
-            f"{target_cls.__name__}"
-        )
-        assert callable(attr), (
-            f"{label}: ProbeAdapter method {method!r} is not callable on "
-            f"{target_cls.__name__}"
-        )
+        assert attr is not None, f"{label}: required ProbeAdapter method {method!r} missing on {target_cls.__name__}"
+        assert callable(attr), f"{label}: ProbeAdapter method {method!r} is not callable on {target_cls.__name__}"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_label_attribute_matches_registry(self, label: str) -> None:
@@ -289,11 +272,10 @@ class TestProbeAdapterConformance:
         # check structural shape, not implementation). This sanity-
         # check ensures the Protocol decorator itself is wired.
         from usersim.engine.core.probes import ProbeAdapter as _PA
+
         # Protocol is runtime-checkable; isinstance dispatches on the
         # presence of the required methods.
-        assert hasattr(_PA, "_is_runtime_protocol") or hasattr(
-            _PA, "_is_protocol"
-        )
+        assert hasattr(_PA, "_is_runtime_protocol") or hasattr(_PA, "_is_protocol")
 
 
 # ---------------------------------------------------------------------------
@@ -315,10 +297,7 @@ class TestShouldSucceedInvariant:
     def test_returns_bool(self, label: str) -> None:
         fn = _resolve_should_succeed(label)
         result = fn(_make_state())
-        assert isinstance(result, bool), (
-            f"{label}: should_succeed returned {type(result).__name__}; "
-            f"expected bool"
-        )
+        assert isinstance(result, bool), f"{label}: should_succeed returned {type(result).__name__}; expected bool"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_minimal_empty_state_returns_expected(self, label: str) -> None:
@@ -328,8 +307,7 @@ class TestShouldSucceedInvariant:
         if key is None:
             # Default-True probes (general probes inheriting BaseProbe).
             assert result is True, (
-                f"{label}: should_succeed on empty state returned False; "
-                f"BaseProbe default should return True"
+                f"{label}: should_succeed on empty state returned False; BaseProbe default should return True"
             )
         else:
             assert result is False, (
@@ -345,10 +323,7 @@ class TestShouldSucceedInvariant:
             return
         fn = _resolve_should_succeed(label)
         result = fn(_make_state(metadata={key: value}))
-        assert result is True, (
-            f"{label}: should_succeed with metadata[{key!r}]={value!r} "
-            f"returned False; expected True"
-        )
+        assert result is True, f"{label}: should_succeed with metadata[{key!r}]={value!r} returned False; expected True"
 
 
 # ---------------------------------------------------------------------------
@@ -393,7 +368,8 @@ class TestBaseProbeAfterAssistantTurnContract:
         state = _make_state()
         before = list(state.messages)
         returned = probe.after_assistant_turn(
-            models={}, state=state,
+            models={},
+            state=state,
             assistant_response={"content": "Hello, world."},
             cfg=None,
         )
@@ -406,7 +382,8 @@ class TestBaseProbeAfterAssistantTurnContract:
         probe = self._probe()
         state = _make_state()
         returned = probe.after_assistant_turn(
-            models={}, state=state,
+            models={},
+            state=state,
             assistant_response={"content": "Some reply."},
             cfg=None,
         )
@@ -416,7 +393,8 @@ class TestBaseProbeAfterAssistantTurnContract:
         probe = self._probe()
         state = _make_state()
         returned = probe.after_assistant_turn(
-            models={}, state=state,
+            models={},
+            state=state,
             assistant_response={"content": ""},
             cfg=None,
         )
@@ -427,7 +405,8 @@ class TestBaseProbeAfterAssistantTurnContract:
         probe = self._probe()
         state = _make_state()
         returned = probe.after_assistant_turn(
-            models={}, state=state,
+            models={},
+            state=state,
             assistant_response="not a dict",  # type: ignore[arg-type]
             cfg=None,
         )

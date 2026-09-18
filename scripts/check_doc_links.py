@@ -36,8 +36,11 @@ SKIP_SCHEMES = ("http://", "https://", "mailto:", "tel:", "#")
 
 def tracked_markdown() -> list[Path]:
     out = subprocess.run(
-        ["git", "ls-files", "*.md"], cwd=REPO,
-        capture_output=True, text=True, check=True,
+        ["git", "ls-files", "*.md"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout.split()
     return [REPO / f for f in out if not f.startswith(SKIP_PREFIXES)]
 

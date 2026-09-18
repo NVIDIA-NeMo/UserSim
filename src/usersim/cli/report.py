@@ -99,18 +99,12 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--open",
         action="store_true",
-        help=(
-            "Open the rendered report in the default browser. Opt-in, so "
-            "CI and headless runs never spawn one."
-        ),
+        help=("Open the rendered report in the default browser. Opt-in, so CI and headless runs never spawn one."),
     )
     p.add_argument(
         "--list-runs",
         action="store_true",
-        help=(
-            "List the run ids available under --trajectories and exit, "
-            "without rendering anything."
-        ),
+        help=("List the run ids available under --trajectories and exit, without rendering anything."),
     )
     p.set_defaults(func=run)
 
@@ -147,17 +141,16 @@ def run(args: argparse.Namespace) -> int:
     else:
         run_id = resolve_run(args.trajectories, getattr(args, "run", None))
         if run_id is None:
-            raise SystemExit(
-                f"no runs found under {args.trajectories} — "
-                "run `usersim simulate` first"
-            )
+            raise SystemExit(f"no runs found under {args.trajectories} — run `usersim simulate` first")
         out_dir = run_subroot(base_out, run_id)
     out_dir.mkdir(parents=True, exist_ok=True)
     if run_id is not None:
         print(f"reporting on run_id={run_id} → {out_dir}")
 
     logger.info(
-        "loading trajectories from %s (run=%s)", args.trajectories, run_id,
+        "loading trajectories from %s (run=%s)",
+        args.trajectories,
+        run_id,
     )
     traj_df = read_partitioned_dataset(args.trajectories, run=run_id)
     logger.info("loaded %d trajectory rows", len(traj_df))
@@ -222,8 +215,7 @@ def _print_runs(trajectories: Path, list_runs) -> int:
     print(f"{len(runs)} run(s) under {trajectories}, newest first:\n")
     for run_id in reversed(runs):
         print(f"  {run_id}")
-    print(f"\nreport on one with:  usersim report --run <run_id> "
-          f"--trajectories {trajectories} --out output/report")
+    print(f"\nreport on one with:  usersim report --run <run_id> --trajectories {trajectories} --out output/report")
     return 0
 
 

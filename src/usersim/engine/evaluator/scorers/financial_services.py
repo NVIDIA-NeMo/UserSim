@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from data_designer.config.column_configs import Score
 from data_designer.engine.column_generators.utils.judge_score_factory import (
@@ -80,26 +80,26 @@ def _bank_locale(locale: str) -> str:
     """
     from usersim.engine.core.finance_bank import finance_bank_dir_for
     from usersim.engine.core.locale import asset_locale
+
     return asset_locale(locale, exists=lambda loc: finance_bank_dir_for(loc).exists())
 
 
-def _ordered_subsequence(needles: List[str], haystack: List[str]) -> bool:
+def _ordered_subsequence(needles: list[str], haystack: list[str]) -> bool:
     """True if every element of ``needles`` appears in ``haystack`` in order."""
     it = iter(haystack)
     return all(any(n == h for h in it) for n in needles)
 
 
-def _side_effect_by_tool(locale: str, institution_id: str) -> Dict[str, str]:
+def _side_effect_by_tool(locale: str, institution_id: str) -> dict[str, str]:
     """Map tool name -> side_effect_class, SCOPED to the row's institution."""
     try:
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         bank = load_finance_bank_for_locale(_bank_locale(locale))
         inst = bank.institution(institution_id) if institution_id else None
-        tools = inst.tools if inst is not None else [
-            t for i in bank.institutions for t in i.tools
-        ]
+        tools = inst.tools if inst is not None else [t for i in bank.institutions for t in i.tools]
         return {t.name: t.side_effect_class for t in tools}
     except Exception as e:  # noqa: BLE001 — scoring must never crash the eval
         logger.debug("financial_services scorer: bank load failed (%s)", e)
@@ -110,12 +110,15 @@ def _side_effect_by_tool(locale: str, institution_id: str) -> Dict[str, str]:
 #: the procedure is) rather than the facts a customer asks about. Gold documents
 #: are derived from exactly these two — the discoverable-tool gate requires
 #: retrieving them — so they are legitimately needed, just not sufficient.
-_PROCEDURAL_GENRES: frozenset = frozenset({
-    "discoverable_tool_doc", "policy_procedure",
-})
+_PROCEDURAL_GENRES: frozenset = frozenset(
+    {
+        "discoverable_tool_doc",
+        "policy_procedure",
+    }
+)
 
 
-def _document_types_by_id(locale: str, institution_id: str) -> Dict[str, str]:
+def _document_types_by_id(locale: str, institution_id: str) -> dict[str, str]:
     """Map document id -> document_type, SCOPED to the row's institution.
 
     Read at score time from the same bank the side-effect map comes from, so no
@@ -125,20 +128,17 @@ def _document_types_by_id(locale: str, institution_id: str) -> Dict[str, str]:
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         bank = load_finance_bank_for_locale(_bank_locale(locale))
         inst = bank.institution(institution_id) if institution_id else None
-        docs = inst.documents if inst is not None else [
-            d for i in bank.institutions for d in i.documents
-        ]
+        docs = inst.documents if inst is not None else [d for i in bank.institutions for d in i.documents]
         return {d.id: d.document_type for d in docs}
     except Exception as e:  # noqa: BLE001 — scoring must never crash the eval
         logger.debug("financial_services scorer: doc-type load failed (%s)", e)
         return {}
 
 
-def _substantive_retrieval_rate(
-    locale: str, institution_id: str, retrieved: List[str]
-) -> Optional[float]:
+def _substantive_retrieval_rate(locale: str, institution_id: str, retrieved: list[str]) -> float | None:
     """Share of retrieved documents that carry FACTS rather than procedure.
 
     Why this exists alongside document recall: gold documents are derived from the
@@ -163,9 +163,7 @@ def _substantive_retrieval_rate(
     return substantive / len(known)
 
 
-def _allowed_tools_for_task(
-    locale: str, institution_id: str, task_id: str
-) -> set:
+def _allowed_tools_for_task(locale: str, institution_id: str, task_id: str) -> set:
     """PERMITTED (non-gold) state-changing tools for this task, from the template.
 
     Read at score time from the same bank the side-effect map comes from (static
@@ -179,6 +177,7 @@ def _allowed_tools_for_task(
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         bank = load_finance_bank_for_locale(_bank_locale(locale))
         inst = bank.institution(institution_id)
         tpl = inst.template_by_id(task_id) if inst is not None else None
@@ -188,9 +187,7 @@ def _allowed_tools_for_task(
         return set()
 
 
-def _task_ordering_required(
-    locale: str, institution_id: str, task_id: str
-) -> bool:
+def _task_ordering_required(locale: str, institution_id: str, task_id: str) -> bool:
     """Whether this task's gold_tool_sequence ORDER is enforced (template opt-in).
 
     Default False (order not enforced) — see ``TaskTemplate.ordered``. Read at
@@ -201,6 +198,7 @@ def _task_ordering_required(
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         bank = load_finance_bank_for_locale(_bank_locale(locale))
         inst = bank.institution(institution_id)
         tpl = inst.template_by_id(task_id) if inst is not None else None
@@ -211,8 +209,9 @@ def _task_ordering_required(
 
 
 def score_financial_services_trajectory(
-    trajectory: Dict[str, Any], models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Tier-aware dispatcher: verifiable -> verifier; dynamic -> grounded judge."""
     task_id = trajectory.get("finance_task_id")
     if not task_id:
@@ -224,18 +223,18 @@ def score_financial_services_trajectory(
     return _score_verifiable(trajectory)
 
 
-def _score_verifiable(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+def _score_verifiable(trajectory: dict[str, Any]) -> dict[str, Any]:
     """Deterministic verifier for the ``verifiable`` tier."""
     tier = trajectory.get("task_tier")
-    gold_tools: List[str] = list(_loads(trajectory.get("gold_tool_sequence"), []))
+    gold_tools: list[str] = list(_loads(trajectory.get("gold_tool_sequence"), []))
     if tier != "verifiable" or not gold_tools:
         return {
             "error": "no verifiable finance gold on this trajectory — scorer skipped",
         }
 
-    gold_docs: List[str] = list(_loads(trajectory.get("gold_document_ids"), []))
-    retrieved: List[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
-    attempted: List[str] = list(_loads(trajectory.get("attempted_tool_names"), []))
+    gold_docs: list[str] = list(_loads(trajectory.get("gold_document_ids"), []))
+    retrieved: list[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
+    attempted: list[str] = list(_loads(trajectory.get("attempted_tool_names"), []))
     locale = str(trajectory.get("locale") or "en_US")
     institution_id = str(trajectory.get("institution_id") or "")
     domain = str(trajectory.get("domain") or "")
@@ -244,10 +243,7 @@ def _score_verifiable(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     attempted_set = set(attempted)
 
     # Tool selection: fraction of gold tools that were actually called.
-    tool_selection_rate = (
-        len(gold_tool_set & attempted_set) / len(gold_tool_set)
-        if gold_tool_set else 1.0
-    )
+    tool_selection_rate = len(gold_tool_set & attempted_set) / len(gold_tool_set) if gold_tool_set else 1.0
     # Ordering: gold tools appear in attempted order. Only enforced for tasks
     # that opt in via ``ordered: true`` (genuine dependency chains); otherwise
     # order is not required (interchangeable actions), so ordering is treated as
@@ -265,35 +261,23 @@ def _score_verifiable(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     # ``financial_retrieval_recall`` capability, and is DELIBERATELY NOT part of
     # the success gate below — so a failure can be attributed to retrieval
     # (low recall) vs policy/reasoning (high recall, still wrong tools/state).
-    document_recall_rate = (
-        len(set(gold_docs) & set(retrieved)) / len(set(gold_docs))
-        if gold_docs else 1.0
-    )
+    document_recall_rate = len(set(gold_docs) & set(retrieved)) / len(set(gold_docs)) if gold_docs else 1.0
 
     # Unauthorized state change: a state-changing/irreversible tool that is
     # neither required (gold) nor explicitly PERMITTED for this task. Permitting
     # legitimate user-invited actions (e.g. freezing a compromised card during a
     # dispute) via the template's ``allowed_tools`` keeps the verifier from
     # false-failing correct behavior.
-    permitted = gold_tool_set | _allowed_tools_for_task(
-        locale, institution_id, task_id
-    ) | _BENIGN_SIDE_ACTIONS
+    permitted = gold_tool_set | _allowed_tools_for_task(locale, institution_id, task_id) | _BENIGN_SIDE_ACTIONS
     side_effects = _side_effect_by_tool(locale, institution_id)
-    unauthorized = [
-        t for t in attempted
-        if side_effects.get(t) in _STATE_CHANGING and t not in permitted
-    ]
+    unauthorized = [t for t in attempted if side_effects.get(t) in _STATE_CHANGING and t not in permitted]
     no_unauthorized_rate = 0.0 if unauthorized else 1.0
 
     # Success = the verifiable STATE/action outcome only (right tools, right
     # order, no unauthorized state change). Retrieval quality is intentionally
     # excluded from this gate and reported separately (see document_recall_rate
     # above) so the access-vs-utilization signals stay disentangled.
-    status_proposal = bool(
-        tool_selection_rate >= 1.0
-        and ordering_respected
-        and not unauthorized
-    )
+    status_proposal = bool(tool_selection_rate >= 1.0 and ordering_respected and not unauthorized)
 
     scores = {
         "finance.tool_selection_rate": round(tool_selection_rate, 4),
@@ -397,8 +381,7 @@ _DYN_GRACEFUL_UNKNOWN = Score(
 _DYN_SELF_CONSISTENCY = Score(
     name="dynamic.self_consistency",
     description=(
-        "Across turns, did the assistant stay consistent (no contradiction or "
-        "walk-back of earlier statements)?"
+        "Across turns, did the assistant stay consistent (no contradiction or walk-back of earlier statements)?"
     ),
     options={
         1: "Fail — contradicted or reversed an earlier statement",
@@ -407,7 +390,7 @@ _DYN_SELF_CONSISTENCY = Score(
     },
 )
 
-_DYNAMIC_AXES: Tuple[Score, ...] = (
+_DYNAMIC_AXES: tuple[Score, ...] = (
     _DYN_GROUNDING,
     _DYN_NUMERIC,
     _DYN_BOUNDARY,
@@ -417,8 +400,9 @@ _DYNAMIC_AXES: Tuple[Score, ...] = (
 )
 # Critical axes: a low score here fails the row's status_proposal (a fabricated
 # or numerically-wrong grounded answer is the worst failure mode).
-_DYNAMIC_CRITICAL_AXES: Tuple[str, ...] = (
-    _DYN_NUMERIC.name, _DYN_NO_FABRICATION.name,
+_DYNAMIC_CRITICAL_AXES: tuple[str, ...] = (
+    _DYN_NUMERIC.name,
+    _DYN_NO_FABRICATION.name,
 )
 
 _DYNAMIC_SYSTEM_PROMPT = (
@@ -459,8 +443,11 @@ _GENERIC_BOUNDARY = (
 
 
 def _dynamic_reference(
-    locale: str, institution_id: str, retrieved_ids: List[str], domain: str,
-) -> Tuple[str, str, str, str]:
+    locale: str,
+    institution_id: str,
+    retrieved_ids: list[str],
+    domain: str,
+) -> tuple[str, str, str, str]:
     """Return (reference_excerpts, boundary, institution_type, display_name).
 
     Reference = the retrieved KB doc excerpts (the grounding the assistant had
@@ -472,6 +459,7 @@ def _dynamic_reference(
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         bank = load_finance_bank_for_locale(_bank_locale(locale))
     except Exception as e:  # noqa: BLE001 — scoring must never crash the eval
         logger.debug("financial_services dynamic scorer: bank load failed (%s)", e)
@@ -482,7 +470,7 @@ def _dynamic_reference(
         return ("(institution not found)", _GENERIC_BOUNDARY, "", institution_id)
 
     seen = set()
-    excerpts: List[str] = []
+    excerpts: list[str] = []
     for did in retrieved_ids:
         if did in seen:
             continue
@@ -502,18 +490,22 @@ def _dynamic_reference(
 
 
 def _score_dynamic(
-    trajectory: Dict[str, Any], models: Dict[str, Any],
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],
+) -> dict[str, Any]:
     """Reference-grounded LLM judge for the ``dynamic`` tier."""
     judge_alias = next(iter(models)) if models else _DEFAULT_JUDGE_ALIAS
     locale = str(trajectory.get("locale") or "en_US")
     institution_id = str(trajectory.get("institution_id") or "")
     domain = str(trajectory.get("domain") or "")
-    retrieved: List[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
+    retrieved: list[str] = list(_loads(trajectory.get("retrieved_document_ids"), []))
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
 
     reference, boundary, inst_type, display_name = _dynamic_reference(
-        locale, institution_id, retrieved, domain,
+        locale,
+        institution_id,
+        retrieved,
+        domain,
     )
 
     prompt = _DYNAMIC_USER_PROMPT.format(
@@ -528,12 +520,11 @@ def _score_dynamic(
         conversation=format_conversation_history_for_prompt(conversation),
     )
 
-    schema_model = create_judge_structured_output_model(
-        [create_judge_response_model(s) for s in _DYNAMIC_AXES]
-    )
+    schema_model = create_judge_structured_output_model([create_judge_response_model(s) for s in _DYNAMIC_AXES])
     try:
         resp = call_llm(
-            models, judge_alias,
+            models,
+            judge_alias,
             [
                 {"role": "system", "content": _DYNAMIC_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
@@ -563,7 +554,9 @@ def _score_dynamic(
     except Exception as e:  # noqa: BLE001 — scoring never crashes the eval
         logger.warning(
             "  |-- financial_services dynamic judge %r raised: %s: %s",
-            judge_alias, type(e).__name__, e,
+            judge_alias,
+            type(e).__name__,
+            e,
         )
         return {
             "scorer": "financial_services",
@@ -582,18 +575,14 @@ def _score_dynamic(
     except (json.JSONDecodeError, TypeError):
         parsed = {}
 
-    scores: Dict[str, Dict[str, Any]] = {}
+    scores: dict[str, dict[str, Any]] = {}
     status_proposal = True
     for s in _DYNAMIC_AXES:
         cell = parsed.get(s.name) if isinstance(parsed, dict) else None
         val = cell.get("score") if isinstance(cell, dict) else None
         reasoning = cell.get("reasoning", "") if isinstance(cell, dict) else ""
         scores[s.name] = {"score": val, "reasoning": reasoning}
-        if (
-            s.name in _DYNAMIC_CRITICAL_AXES
-            and isinstance(val, (int, float))
-            and val <= 2
-        ):
+        if s.name in _DYNAMIC_CRITICAL_AXES and isinstance(val, (int, float)) and val <= 2:
             status_proposal = False
 
     # Deterministic retrieval-quality diagnostic, alongside the judged axes. The
@@ -629,7 +618,7 @@ def _score_dynamic(
     }
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):

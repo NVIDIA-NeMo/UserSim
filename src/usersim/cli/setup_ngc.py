@@ -50,18 +50,12 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--check-only",
         action="store_true",
-        help=(
-            "Don't install — just check whether `ngc` is available. "
-            "Exits 0 if available, 1 if missing."
-        ),
+        help=("Don't install — just check whether `ngc` is available. Exits 0 if available, 1 if missing."),
     )
     p.add_argument(
         "--dry-run",
         action="store_true",
-        help=(
-            "Print the resolved release (URL + sha256 + target path) "
-            "and exit without downloading."
-        ),
+        help=("Print the resolved release (URL + sha256 + target path) and exit without downloading."),
     )
     p.set_defaults(func=run)
 

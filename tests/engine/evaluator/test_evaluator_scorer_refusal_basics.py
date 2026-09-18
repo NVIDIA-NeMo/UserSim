@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -30,9 +30,9 @@ def _ensure_scorers_loaded():
 def _trajectory(
     *,
     locale: str,
-    assistant_messages: List[str],
-) -> Dict[str, Any]:
-    messages: List[Dict[str, str]] = []
+    assistant_messages: list[str],
+) -> dict[str, Any]:
+    messages: list[dict[str, str]] = []
     for content in assistant_messages:
         messages.append({"role": "user", "content": "(user)"})
         messages.append({"role": "assistant", "content": content})
@@ -92,9 +92,11 @@ class TestShortCircuit:
         result = score_refusal_basics_trajectory(
             {
                 "locale": "en_US",
-                "conversation_messages": json.dumps([
-                    {"role": "user", "content": "Hi"},
-                ]),
+                "conversation_messages": json.dumps(
+                    [
+                        {"role": "user", "content": "Hi"},
+                    ]
+                ),
             },
             {},
         )
@@ -225,9 +227,7 @@ class TestCannedPhraseDetection:
             _trajectory(locale="en_US", assistant_messages=[phrase]),
             {},
         )
-        assert (
-            result["scores"]["refusal.canned_phrase_rate"]["score"] == 0.0
-        )
+        assert result["scores"]["refusal.canned_phrase_rate"]["score"] == 0.0
 
     def test_clean_refusal_no_canned_flagged(self) -> None:
         result = score_refusal_basics_trajectory(
@@ -239,9 +239,7 @@ class TestCannedPhraseDetection:
             ),
             {},
         )
-        assert (
-            result["scores"]["refusal.canned_phrase_rate"]["score"] == 1.0
-        )
+        assert result["scores"]["refusal.canned_phrase_rate"]["score"] == 1.0
 
 
 # ---------------------------------------------------------------------------

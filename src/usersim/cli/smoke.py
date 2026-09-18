@@ -49,7 +49,7 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable
 
 logger = logging.getLogger("usersim.cli.smoke")
 
@@ -68,7 +68,7 @@ class CheckResult:
 
 @dataclass
 class SmokeReport:
-    results: List[CheckResult] = field(default_factory=list)
+    results: list[CheckResult] = field(default_factory=list)
 
     def add(self, name: str, ok: bool, detail: str = "") -> None:
         self.results.append(CheckResult(name=name, ok=ok, detail=detail))
@@ -179,20 +179,16 @@ def _check_imports(report: SmokeReport) -> None:
         "usersim.reporting",
         "usersim.cli",
     ]
-    missing: List[str] = []
+    missing: list[str] = []
     for m in modules:
         try:
             importlib.import_module(m)
         except Exception as e:
             missing.append(f"{m}: {type(e).__name__}: {e}")
     if missing:
-        report.add(
-            "core imports", False, "; ".join(missing)
-        )
+        report.add("core imports", False, "; ".join(missing))
     else:
-        report.add(
-            "core imports", True, f"{len(modules)} modules"
-        )
+        report.add("core imports", True, f"{len(modules)} modules")
 
 
 def _check_models_config(report: SmokeReport) -> None:
@@ -206,11 +202,10 @@ def _check_models_config(report: SmokeReport) -> None:
 
         path = default_models_path()
         cfg = load_models_config(path)
-        require_aliases(
-            cfg, required=REQUIRED_SIMULATOR_ALIASES, context="smoke"
-        )
+        require_aliases(cfg, required=REQUIRED_SIMULATOR_ALIASES, context="smoke")
         report.add(
-            "models config", True,
+            "models config",
+            True,
             f"{path.name} — {len(cfg.models)} aliases",
         )
     except Exception as e:
@@ -237,7 +232,9 @@ def _check_model_catalog(report: SmokeReport) -> None:
         toml_paths = sorted(Path(__file__).parent.glob("models_*.toml"))
         if not toml_paths:
             report.add(
-                "model catalog", False, "no models_*.toml files found in cli/",
+                "model catalog",
+                False,
+                "no models_*.toml files found in cli/",
             )
             return
 
@@ -267,7 +264,8 @@ def _check_model_catalog(report: SmokeReport) -> None:
             # silently fall back to project defaults instead of the intended
             # per-model parameters.
             report.add(
-                "model catalog", False,
+                "model catalog",
+                False,
                 f"{len(unknown_inf)} alias(es) outside catalog: "
                 + ", ".join(f"{p}::{e}" for p, e in unknown_inf)
                 + " — add them to the catalog or drop them from the TOML",
@@ -296,12 +294,14 @@ def _check_simulator_config(report: SmokeReport) -> None:
         missing = required - cols
         if missing:
             report.add(
-                "simulator config", False,
+                "simulator config",
+                False,
                 f"missing side-effect columns: {sorted(missing)}",
             )
             return
         report.add(
-            "simulator config", True,
+            "simulator config",
+            True,
             f"{len(cols)} side-effect columns",
         )
     except Exception as e:
@@ -348,7 +348,8 @@ def _check_scorer_registry(report: SmokeReport) -> None:
         names = sorted(list_scorers())
         if "tool_use" not in names:
             report.add(
-                "scorer registry", False,
+                "scorer registry",
+                False,
                 f"tool_use missing; registered: {names}",
             )
             return
@@ -356,11 +357,14 @@ def _check_scorer_registry(report: SmokeReport) -> None:
         fn = get_scorer("tool_use")
         if not callable(fn):
             report.add(
-                "scorer registry", False, "tool_use entry is not callable",
+                "scorer registry",
+                False,
+                "tool_use entry is not callable",
             )
             return
         report.add(
-            "scorer registry", True,
+            "scorer registry",
+            True,
             f"{len(names)} scorer(s): {names}",
         )
     except Exception as e:
@@ -381,15 +385,17 @@ def _check_probe_registry(report: SmokeReport) -> None:
     try:
         # Importing the plugin's generator triggers the probe bootstrap
         # that fills the substrate's _PROBE_REGISTRY.
+        import sys
+
         import usersim.engine.generator  # noqa: F401
         from usersim.engine.core.probes import (
             _PROBE_REGISTRY,
             resolve_probe,
         )
-        import sys
     except Exception as e:
         report.add(
-            "probe registry", False,
+            "probe registry",
+            False,
             f"import failed: {type(e).__name__}: {e}",
         )
         return
@@ -398,23 +404,18 @@ def _check_probe_registry(report: SmokeReport) -> None:
         report.add("probe registry", False, "registry is empty")
         return
 
-    failures: List[str] = []
+    failures: list[str] = []
     for probe_name in sorted(_PROBE_REGISTRY):
         try:
             probe_cls = resolve_probe(probe_name)
         except Exception as e:
-            failures.append(
-                f"{probe_name}: resolve raised {type(e).__name__}: {e}"
-            )
+            failures.append(f"{probe_name}: resolve raised {type(e).__name__}: {e}")
             continue
         # All probes self-register via ``@register_probe`` and live
         # in their own module; the constants live there too.
         module = sys.modules.get(probe_cls.__module__)
         if module is None:
-            failures.append(
-                f"{probe_name}: probe metadata module "
-                f"{probe_cls.__module__!r} not in sys.modules"
-            )
+            failures.append(f"{probe_name}: probe metadata module {probe_cls.__module__!r} not in sys.modules")
             continue
         family = getattr(module, "PROBE_FAMILY", None)
         if not isinstance(family, str) or not family:
@@ -424,20 +425,19 @@ def _check_probe_registry(report: SmokeReport) -> None:
             failures.append(f"{probe_name}: PROMPT_VERSION missing or non-string")
         variants = getattr(module, "PROBE_VARIANTS", None)
         if not isinstance(variants, (list, tuple)) or not variants:
-            failures.append(
-                f"{probe_name}: PROBE_VARIANTS missing or empty"
-            )
+            failures.append(f"{probe_name}: PROBE_VARIANTS missing or empty")
 
     if failures:
         report.add(
-            "probe registry", False,
+            "probe registry",
+            False,
             f"{len(failures)} issue(s); first: {failures[0]}",
         )
         return
     report.add(
-        "probe registry", True,
-        f"{len(_PROBE_REGISTRY)} probe(s) registered: "
-        f"{sorted(_PROBE_REGISTRY)}",
+        "probe registry",
+        True,
+        f"{len(_PROBE_REGISTRY)} probe(s) registered: {sorted(_PROBE_REGISTRY)}",
     )
 
 
@@ -458,22 +458,23 @@ def _check_asset_paths(report: SmokeReport) -> None:
         )
         from usersim.engine.core.agentic_bank import default_agentic_bank_path
         from usersim.engine.core.fact_bank import default_fact_bank_path
+        from usersim.engine.core.locale import SHIPPED_LOCALES
         from usersim.engine.core.pressure_bank import default_pressure_bank_path
         from usersim.engine.core.probing_taxonomy import (
             default_probing_taxonomy_path,
         )
-        from usersim.engine.core.locale import SHIPPED_LOCALES
         from usersim.engine.core.prompt_loader import load_prompt_file
         from usersim.engine.core.query_bank import default_query_bank_path
         from usersim.engine.core.seeds import load_seeds
     except Exception as e:
         report.add(
-            "asset paths", False,
+            "asset paths",
+            False,
             f"loader import failed: {type(e).__name__}: {e}",
         )
         return
 
-    failures: List[str] = []
+    failures: list[str] = []
     n_paths = 0
 
     # Per-locale loaders.
@@ -522,9 +523,7 @@ def _check_asset_paths(report: SmokeReport) -> None:
     for probe in ("tool_calling", "general_open_ended", "general_educational"):
         n_paths += 1
         if not load_prompt_file(probe):
-            failures.append(
-                f"prompts({probe}): assets/{probe}/prompts.yaml missing or empty"
-            )
+            failures.append(f"prompts({probe}): assets/{probe}/prompts.yaml missing or empty")
 
     # tool_calling toolsets_seed.parquet — composed manually by
     # cli/simulate.py + the notebook (no loader fronts it). When
@@ -532,6 +531,7 @@ def _check_asset_paths(report: SmokeReport) -> None:
     # tool_calling trajectory fails at probe construction with
     # ``cfg.tools_column not configured``.
     from usersim.engine.core._assets import probe_assets_dir
+
     n_paths += 1
     toolset = probe_assets_dir("tool_calling") / "toolsets_seed.parquet"
     if not toolset.exists():
@@ -549,6 +549,7 @@ def _check_asset_paths(report: SmokeReport) -> None:
         from usersim.engine.core.finance_bank import (
             load_finance_bank_for_locale,
         )
+
         fin_bank = load_finance_bank_for_locale("en_US")
         if not fin_bank.institutions:
             failures.append("financial_services(en_US): bank has no institutions")
@@ -559,16 +560,17 @@ def _check_asset_paths(report: SmokeReport) -> None:
         from usersim.engine.core.probing_taxonomy import (
             load_probing_taxonomy_for,
         )
+
         fin_tax = load_probing_taxonomy_for(
-            "financial_services", "en_US", filename="dynamic.yaml",
+            "financial_services",
+            "en_US",
+            filename="dynamic.yaml",
             env_prefix="USERSIM_FINANCIAL_SERVICES_DYNAMIC_TAXONOMY",
         )
         if not fin_tax.categories:
             failures.append("financial_services dynamic.yaml(en_US): no categories")
     except Exception as e:  # noqa: BLE001 — smoke reports, never raises
-        failures.append(
-            f"financial_services dynamic.yaml(en_US): {type(e).__name__}: {e}"
-        )
+        failures.append(f"financial_services dynamic.yaml(en_US): {type(e).__name__}: {e}")
 
     if failures:
         # Show first three failures to keep the smoke output readable;
@@ -576,16 +578,16 @@ def _check_asset_paths(report: SmokeReport) -> None:
         head = failures[:3]
         more = f" (+{len(failures) - 3} more)" if len(failures) > 3 else ""
         report.add(
-            "asset paths", False,
-            f"{len(failures)}/{n_paths} default paths missing: "
-            f"{'; '.join(head)}{more}",
+            "asset paths",
+            False,
+            f"{len(failures)}/{n_paths} default paths missing: {'; '.join(head)}{more}",
         )
         return
 
     report.add(
-        "asset paths", True,
-        f"{n_paths} default paths resolve cleanly across "
-        f"{len(SHIPPED_LOCALES)} locales",
+        "asset paths",
+        True,
+        f"{n_paths} default paths resolve cleanly across {len(SHIPPED_LOCALES)} locales",
     )
 
 
@@ -607,23 +609,32 @@ def _check_dry_runs(report: SmokeReport) -> None:
             invocations = [
                 [
                     "panel",
-                    "--locale", "en_US",
-                    "--num-personas", "5",
-                    "--out", str(tmp_path / "panel.parquet"),
+                    "--locale",
+                    "en_US",
+                    "--num-personas",
+                    "5",
+                    "--out",
+                    str(tmp_path / "panel.parquet"),
                     "--dry-run",
                 ],
                 [
                     "simulate",
-                    "--locale", "en_US",
-                    "--num-rows", "3",
-                    "--out", str(tmp_path / "trajs.parquet"),
+                    "--locale",
+                    "en_US",
+                    "--num-rows",
+                    "3",
+                    "--out",
+                    str(tmp_path / "trajs.parquet"),
                     "--dry-run",
                 ],
                 [
                     "eval",
-                    "--trajectories", str(traj_stub),
-                    "--out", str(tmp_path / "evals.parquet"),
-                    "--judges", "evaluator_model",
+                    "--trajectories",
+                    str(traj_stub),
+                    "--out",
+                    str(tmp_path / "evals.parquet"),
+                    "--judges",
+                    "evaluator_model",
                     "--dry-run",
                 ],
             ]
@@ -631,7 +642,8 @@ def _check_dry_runs(report: SmokeReport) -> None:
                 rc = _silently(lambda a=argv: cli.main(a))
                 if rc != 0:
                     report.add(
-                        "dry-run subcommands", False,
+                        "dry-run subcommands",
+                        False,
                         f"`usersim {argv[0]} --dry-run` exited {rc}",
                     )
                     return
@@ -644,8 +656,8 @@ def _check_capability_dashboard(
     report: SmokeReport,
     *,
     write_fixtures: bool,
-    fixtures_dir: Optional[Path],
-) -> Optional[Path]:
+    fixtures_dir: Path | None,
+) -> Path | None:
     """Build the capability dashboard from synthetic in-process frames.
 
     Asserts the five artifacts (``index.html`` + four JSON cells) are
@@ -663,14 +675,12 @@ def _check_capability_dashboard(
         traj_df, eval_df = _synthetic_smoke_frames(pd)
 
         capability_report = build_capability_report(
-            traj_df, eval_df, eval_column="assistant_eval",
+            traj_df,
+            eval_df,
+            eval_column="assistant_eval",
         )
 
-        out_dir = (
-            fixtures_dir
-            if fixtures_dir is not None
-            else Path(tempfile.mkdtemp(prefix="usersim-smoke-"))
-        )
+        out_dir = fixtures_dir if fixtures_dir is not None else Path(tempfile.mkdtemp(prefix="usersim-smoke-"))
         out_dir.mkdir(parents=True, exist_ok=True)
         write_capability_dashboard_artifacts(capability_report, out_dir)
 
@@ -685,7 +695,8 @@ def _check_capability_dashboard(
             path = out_dir / name
             if not path.exists() or path.stat().st_size == 0:
                 report.add(
-                    "capability dashboard", False,
+                    "capability dashboard",
+                    False,
                     f"missing or empty artifact: {name}",
                 )
                 return None
@@ -694,7 +705,8 @@ def _check_capability_dashboard(
                     json.loads(path.read_text())
                 except json.JSONDecodeError as exc:
                     report.add(
-                        "capability dashboard", False,
+                        "capability dashboard",
+                        False,
                         f"{name} did not parse as JSON: {exc}",
                     )
                     return None
@@ -710,7 +722,8 @@ def _check_capability_dashboard(
         missing = required_keys - manifest.keys()
         if missing:
             report.add(
-                "capability dashboard", False,
+                "capability dashboard",
+                False,
                 f"report_manifest.json missing keys: {sorted(missing)}",
             )
             return None
@@ -719,16 +732,19 @@ def _check_capability_dashboard(
             from usersim.engine.core.storage import (
                 write_partitioned_dataset,
             )
+
             write_partitioned_dataset(traj_df, out_dir / "trajectories")
             write_partitioned_dataset(eval_df, out_dir / "evaluations")
             report.add(
-                "capability dashboard", True,
+                "capability dashboard",
+                True,
                 "5 artifacts + trajectories/evaluations fixtures",
             )
             return out_dir
 
         report.add(
-            "capability dashboard", True,
+            "capability dashboard",
+            True,
             "5 artifacts (index.html + 4 JSON), manifest keys present",
         )
         return None
@@ -763,7 +779,8 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
             pass
         else:
             report.add(
-                "comparison dashboard", False,
+                "comparison dashboard",
+                False,
                 "build_comparison_report([]) did not raise ValueError",
             )
             return
@@ -778,7 +795,8 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
             pass
         except Exception as e:
             report.add(
-                "comparison dashboard", False,
+                "comparison dashboard",
+                False,
                 f"single-run guard raised unexpected {type(e).__name__}: {e}",
             )
             return
@@ -792,13 +810,15 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
         colors, shapes = assign_palette(labels)
         if len(set(colors.values())) != 8:
             report.add(
-                "comparison dashboard", False,
+                "comparison dashboard",
+                False,
                 f"palette collision: 8 labels -> {len(set(colors.values()))} colors",
             )
             return
         if len(set(shapes.values())) != 8:
             report.add(
-                "comparison dashboard", False,
+                "comparison dashboard",
+                False,
                 f"shape collision: 8 labels -> {len(set(shapes.values()))} shapes",
             )
             return
@@ -806,18 +826,21 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
         # without nano/super/ultra must never be assigned a restricted
         # green hex even when the palette is comfortable.
         from usersim.reporting.comparison_dashboard import _RESTRICTED_GREEN_HEX_COLORS
+
         for label, hex_color in colors.items():
             if "ultra" in label or "super" in label or "nano" in label:
                 continue
             if hex_color in _RESTRICTED_GREEN_HEX_COLORS:
                 report.add(
-                    "comparison dashboard", False,
+                    "comparison dashboard",
+                    False,
                     f"non-NVIDIA label {label!r} got restricted-green {hex_color}",
                 )
                 return
 
         report.add(
-            "comparison dashboard", True,
+            "comparison dashboard",
+            True,
             "import OK, edge cases raise cleanly, palette distinct for 8 models with branded green guard",
         )
     except Exception as e:
@@ -831,8 +854,8 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
 
 def _silently(fn: Callable[[], int]) -> int:
     """Run a function while suppressing its stdout (the dry-run plan dump)."""
-    import io
     import contextlib
+    import io
 
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
@@ -846,93 +869,101 @@ def _synthetic_smoke_frames(pd):
     each frame so the bundles exercise both code paths (status counts,
     failure taxonomy, per-axis means, judge ensemble).
     """
-    outcome_ok = json.dumps({
-        "status": "ok",
-        "failure_class": None,
-        "failure_attribution": None,
-        "failure_detail": "",
-        "n_turns": 2,
-        "n_tool_calls": 0,
-        "n_user_query_attempts": 1,
-        "n_user_followup_retries": 0,
-        "n_assistant_inline_failures": 0,
-        "n_api_response_rerolls": 0,
-        "n_fourth_wall_triggers": 0,
-        "n_user_role_violations": 0,
-        "warnings": [],
-        "early_stop": False,
-        "per_model_input_tokens": {"user_model": 100, "assistant_model": 80},
-        "per_model_output_tokens": {"user_model": 30, "assistant_model": 60},
-        "per_model_calls": {"user_model": 2, "assistant_model": 2},
-        "wall_clock_s_by_alias": {"user_model": 1.0, "assistant_model": 1.5},
-        "wall_clock_s": 2.5,
-        "provenance": {
-            "code_sha": "smoke",
-            "nemotron_personas_version": None,
-            "scenario_prompt_version": "v1.0",
-            "bank_version": {},
-        },
-    })
-    outcome_fail = json.dumps({
-        "status": "failed",
-        "failure_class": "user_query_gate_exhausted",
-        "failure_attribution": "user_model",
-        "failure_detail": "smoke fixture failure",
-        "n_turns": 0,
-        "n_tool_calls": 0,
-        "n_user_query_attempts": 3,
-        "n_user_followup_retries": 0,
-        "n_assistant_inline_failures": 0,
-        "n_api_response_rerolls": 0,
-        "n_fourth_wall_triggers": 0,
-        "n_user_role_violations": 0,
-        "warnings": [],
-        "early_stop": False,
-        "per_model_input_tokens": {},
-        "per_model_output_tokens": {},
-        "per_model_calls": {},
-        "wall_clock_s_by_alias": {},
-        "wall_clock_s": 0.5,
-        "provenance": {
-            "code_sha": "smoke",
-            "nemotron_personas_version": None,
-            "scenario_prompt_version": "v1.0",
-            "bank_version": {},
-        },
-    })
-    messages = json.dumps([
-        {"role": "user", "content": "Hello, can you help me?"},
-        {"role": "assistant", "content": "Of course — what do you need?"},
-    ])
+    outcome_ok = json.dumps(
+        {
+            "status": "ok",
+            "failure_class": None,
+            "failure_attribution": None,
+            "failure_detail": "",
+            "n_turns": 2,
+            "n_tool_calls": 0,
+            "n_user_query_attempts": 1,
+            "n_user_followup_retries": 0,
+            "n_assistant_inline_failures": 0,
+            "n_api_response_rerolls": 0,
+            "n_fourth_wall_triggers": 0,
+            "n_user_role_violations": 0,
+            "warnings": [],
+            "early_stop": False,
+            "per_model_input_tokens": {"user_model": 100, "assistant_model": 80},
+            "per_model_output_tokens": {"user_model": 30, "assistant_model": 60},
+            "per_model_calls": {"user_model": 2, "assistant_model": 2},
+            "wall_clock_s_by_alias": {"user_model": 1.0, "assistant_model": 1.5},
+            "wall_clock_s": 2.5,
+            "provenance": {
+                "code_sha": "smoke",
+                "nemotron_personas_version": None,
+                "scenario_prompt_version": "v1.0",
+                "bank_version": {},
+            },
+        }
+    )
+    outcome_fail = json.dumps(
+        {
+            "status": "failed",
+            "failure_class": "user_query_gate_exhausted",
+            "failure_attribution": "user_model",
+            "failure_detail": "smoke fixture failure",
+            "n_turns": 0,
+            "n_tool_calls": 0,
+            "n_user_query_attempts": 3,
+            "n_user_followup_retries": 0,
+            "n_assistant_inline_failures": 0,
+            "n_api_response_rerolls": 0,
+            "n_fourth_wall_triggers": 0,
+            "n_user_role_violations": 0,
+            "warnings": [],
+            "early_stop": False,
+            "per_model_input_tokens": {},
+            "per_model_output_tokens": {},
+            "per_model_calls": {},
+            "wall_clock_s_by_alias": {},
+            "wall_clock_s": 0.5,
+            "provenance": {
+                "code_sha": "smoke",
+                "nemotron_personas_version": None,
+                "scenario_prompt_version": "v1.0",
+                "bank_version": {},
+            },
+        }
+    )
+    messages = json.dumps(
+        [
+            {"role": "user", "content": "Hello, can you help me?"},
+            {"role": "assistant", "content": "Of course — what do you need?"},
+        ]
+    )
 
-    traj_df = pd.DataFrame([
-        {
-            "trajectory_id": "smoke0000000001",
-            "persona_uuid": "smokepersona001",
-            "probe_family": "general_open_ended",
-            "probe_variant": "default",
-            "locale": "en_US",
-            "conversation_language": "English",
-            "user_interaction_style": "cooperative",
-            "disclosure_style": "incremental",
-            "persona_grounding": True,
-            "conversation_messages": messages,
-            "simulation_outcome": outcome_ok,
-        },
-        {
-            "trajectory_id": "smoke0000000002",
-            "persona_uuid": "smokepersona002",
-            "probe_family": "general_open_ended",
-            "probe_variant": "default",
-            "locale": "en_US",
-            "conversation_language": "English",
-            "user_interaction_style": "neutral",
-            "disclosure_style": "upfront",
-            "persona_grounding": False,
-            "conversation_messages": "[]",
-            "simulation_outcome": outcome_fail,
-        },
-    ])
+    traj_df = pd.DataFrame(
+        [
+            {
+                "trajectory_id": "smoke0000000001",
+                "persona_uuid": "smokepersona001",
+                "probe_family": "general_open_ended",
+                "probe_variant": "default",
+                "locale": "en_US",
+                "conversation_language": "English",
+                "user_interaction_style": "cooperative",
+                "disclosure_style": "incremental",
+                "persona_grounding": True,
+                "conversation_messages": messages,
+                "simulation_outcome": outcome_ok,
+            },
+            {
+                "trajectory_id": "smoke0000000002",
+                "persona_uuid": "smokepersona002",
+                "probe_family": "general_open_ended",
+                "probe_variant": "default",
+                "locale": "en_US",
+                "conversation_language": "English",
+                "user_interaction_style": "neutral",
+                "disclosure_style": "upfront",
+                "persona_grounding": False,
+                "conversation_messages": "[]",
+                "simulation_outcome": outcome_fail,
+            },
+        ]
+    )
 
     envelope = {
         "judge_aliases": ["judge_a"],
@@ -942,23 +973,27 @@ def _synthetic_smoke_frames(pd):
         "prompt_version": "v1.0",
         "evaluator_version": "v1.0",
     }
-    eval_cell = json.dumps({
-        "envelope": envelope,
-        "axes": {
-            "helpfulness": {"judge_a": {"score": 5, "reasoning": "great"}},
-            "accuracy": {"judge_a": {"score": 4, "reasoning": "ok"}},
-        },
-        "scorers": {},
-        "skipped": False,
-        "skipped_reason": None,
-    })
-    eval_skip = json.dumps({
-        "envelope": envelope,
-        "axes": {},
-        "scorers": {},
-        "skipped": True,
-        "skipped_reason": "no_assistant_messages",
-    })
+    eval_cell = json.dumps(
+        {
+            "envelope": envelope,
+            "axes": {
+                "helpfulness": {"judge_a": {"score": 5, "reasoning": "great"}},
+                "accuracy": {"judge_a": {"score": 4, "reasoning": "ok"}},
+            },
+            "scorers": {},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
+    eval_skip = json.dumps(
+        {
+            "envelope": envelope,
+            "axes": {},
+            "scorers": {},
+            "skipped": True,
+            "skipped_reason": "no_assistant_messages",
+        }
+    )
 
     eval_df = traj_df.copy()
     eval_df["assistant_eval"] = [eval_cell, eval_skip]

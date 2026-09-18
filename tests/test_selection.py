@@ -27,13 +27,13 @@ from usersim.selection import (
     select_trajectories,
     write_curated_dataset,
 )
+from usersim.selection.io import parse_repo_id
 from usersim.selection.profiles import (
     ALL_FLOORS,
     GENEROUS,
     SelectionProfile,
     applicable_gates,
 )
-from usersim.selection.io import parse_repo_id
 from usersim.selection.schemas import (
     LOGICAL_GROUPS,
     OPT_IN_ONLY,
@@ -42,12 +42,12 @@ from usersim.selection.schemas import (
 )
 
 # Shared-fixture trajectory ids (see tests/conftest.py).
-T_OK = "t000000000000001"            # general_open_ended, ok, scored
-T_FAILED = "t000000000000002"        # failed + skipped (no_assistant_messages)
-T_WARN_ROLE = "t000000000000003"     # completed_with_warnings, n_user_role_violations=1
-T_TOOL_OK = "t000000000000004"       # tool_calling ok, tool_use scorer ok
-T_SKIPPED = "t000000000000005"       # ok status but eval skipped (envelope_match)
-T_TOOL_ERR = "t000000000000006"      # tool_calling ok, tool_use scorer errored
+T_OK = "t000000000000001"  # general_open_ended, ok, scored
+T_FAILED = "t000000000000002"  # failed + skipped (no_assistant_messages)
+T_WARN_ROLE = "t000000000000003"  # completed_with_warnings, n_user_role_violations=1
+T_TOOL_OK = "t000000000000004"  # tool_calling ok, tool_use scorer ok
+T_SKIPPED = "t000000000000005"  # ok status but eval skipped (envelope_match)
+T_TOOL_ERR = "t000000000000006"  # tool_calling ok, tool_use scorer errored
 
 
 def _ids(df) -> set[str]:
@@ -136,27 +136,43 @@ def _outcome(status="ok", n_turns=2, **counters):
 
 
 def _cell(axes=None, scorers=None, skipped=False):
-    return json.dumps({
-        "envelope": {"judge_aliases": ["j"], "judge_families": ["openai"],
-                     "axes": list((axes or {}).keys()), "scorers": list((scorers or {}).keys()),
-                     "prompt_version": "v1.0", "evaluator_version": "v1.0"},
-        "axes": {a: {"j": {"score": s}} for a, s in (axes or {}).items()},
-        "scorers": scorers or {},
-        "skipped": skipped, "skipped_reason": None,
-    })
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["j"],
+                "judge_families": ["openai"],
+                "axes": list((axes or {}).keys()),
+                "scorers": list((scorers or {}).keys()),
+                "prompt_version": "v1.0",
+                "evaluator_version": "v1.0",
+            },
+            "axes": {a: {"j": {"score": s}} for a, s in (axes or {}).items()},
+            "scorers": scorers or {},
+            "skipped": skipped,
+            "skipped_reason": None,
+        }
+    )
 
 
-def _row(tid, *, probe_family="general_open_ended", persona="p", n_turns=2,
-         axes=None, scorers=None, skipped=False, status="ok", **counters):
+def _row(
+    tid,
+    *,
+    probe_family="general_open_ended",
+    persona="p",
+    n_turns=2,
+    axes=None,
+    scorers=None,
+    skipped=False,
+    status="ok",
+    **counters,
+):
     return {
         "trajectory_id": tid,
         "persona_uuid": persona,
         "probe_family": probe_family,
         "locale": "hi_Deva_IN",
         "num_turns": n_turns,
-        "conversation_messages": json.dumps(
-            [{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}]
-        ),
+        "conversation_messages": json.dumps([{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}]),
         "simulation_outcome": _outcome(status=status, n_turns=n_turns, **counters),
         "assistant_eval": _cell(axes=axes, scorers=scorers, skipped=skipped),
     }
@@ -200,10 +216,16 @@ class TestBespokeGates:
     def test_scorer_error_recorded_not_dropped(self):
         prof = dataclasses.replace(GENEROUS, axis_floors={"overall": 4.0}, critical_axes=(ALL_FLOORS,))
         rows = [
-            _row("ok_scorer", probe_family="tool_calling",
-                 scorers={"tool_use": {"scores": {"overall": {"score": 5}}, "status_proposal": True}}),
-            _row("err_scorer", probe_family="tool_calling",
-                 scorers={"tool_use": {"scores": {}, "status_proposal": True, "error": "RuntimeError: boom"}}),
+            _row(
+                "ok_scorer",
+                probe_family="tool_calling",
+                scorers={"tool_use": {"scores": {"overall": {"score": 5}}, "status_proposal": True}},
+            ),
+            _row(
+                "err_scorer",
+                probe_family="tool_calling",
+                scorers={"tool_use": {"scores": {}, "status_proposal": True, "error": "RuntimeError: boom"}},
+            ),
         ]
         df = _frame(rows)
         res = select_trajectories(df, df, profile=prof)
@@ -246,8 +268,12 @@ class TestStability:
         df = _frame([_row("x", axes={"accuracy": 5})])
         res = select_trajectories(df, df, profile=GENEROUS)
         for col in (
-            "selection_passed", "selection_quality_score", "selection_axis_scores",
-            "selection_failed_gates", "selection_drop_reason", "selection_profile",
+            "selection_passed",
+            "selection_quality_score",
+            "selection_axis_scores",
+            "selection_failed_gates",
+            "selection_drop_reason",
+            "selection_profile",
             "selection_split",
         ):
             assert col in res.curated.columns
@@ -270,6 +296,7 @@ class TestStability:
 class TestApplicableGates:
     def test_gate_only_for_present_axes(self):
         from usersim.taxonomy.eval_cell import decode_cell
+
         cell = decode_cell(_cell(axes={"accuracy": 5}))  # no safety axis present
         gates = {g.axis for g in applicable_gates(GENEROUS, cell)}
         assert "accuracy" in gates
@@ -279,8 +306,7 @@ class TestApplicableGates:
 class TestMaxRecords:
     def test_cap_keeps_highest_quality(self):
         # 5 passing rows with distinct (ungated) helpfulness -> quality; cap at 2.
-        rows = [_row(f"t{i}", persona=f"p{i}", axes={"helpfulness": i, "accuracy": 5})
-                for i in range(1, 6)]
+        rows = [_row(f"t{i}", persona=f"p{i}", axes={"helpfulness": i, "accuracy": 5}) for i in range(1, 6)]
         df = _frame(rows)
         traj, ev = df.drop(columns=["assistant_eval"]), df[["trajectory_id", "assistant_eval"]]
         res = select_trajectories(traj, ev, profile=GENEROUS, max_records=2)
@@ -301,13 +327,21 @@ class TestMaxRecords:
 class TestStratifiedCap:
     def test_balances_across_probes(self):
         from usersim.selection.engine import select_trajectories as st
+
         # Probe A: 10 high-quality rows; Probe B: 10 lower-quality rows.
         rows = []
         for i in range(10):
-            rows.append(_row(f"a{i}", persona=f"a{i}", probe_family="tool_calling",
-                             axes={"helpfulness": 5, "accuracy": 5}))
-            rows.append(_row(f"b{i}", persona=f"b{i}", probe_family="general_open_ended",
-                             axes={"helpfulness": 2 + (i % 3), "accuracy": 5}))
+            rows.append(
+                _row(f"a{i}", persona=f"a{i}", probe_family="tool_calling", axes={"helpfulness": 5, "accuracy": 5})
+            )
+            rows.append(
+                _row(
+                    f"b{i}",
+                    persona=f"b{i}",
+                    probe_family="general_open_ended",
+                    axes={"helpfulness": 2 + (i % 3), "accuracy": 5},
+                )
+            )
         df = _frame(rows)
         traj, ev = df.drop(columns=["assistant_eval"]), df[["trajectory_id", "assistant_eval"]]
 
@@ -323,6 +357,7 @@ class TestStratifiedCap:
 
     def test_redistributes_when_a_stratum_is_small(self):
         from usersim.selection.engine import _allocate_quota
+
         # 2 strata, one tiny: tiny gets all it has, the rest goes to the big one.
         assert _allocate_quota({"a": 2, "b": 100}, 10) == {"a": 2, "b": 8}
         # even split when both have capacity
@@ -335,8 +370,11 @@ class TestStratifiedCap:
 
     def test_within_stratum_keeps_highest_quality(self):
         from usersim.selection.engine import select_trajectories as st
-        rows = [_row(f"b{i}", persona=f"b{i}", probe_family="general_open_ended",
-                     axes={"helpfulness": i, "accuracy": 5}) for i in range(1, 6)]
+
+        rows = [
+            _row(f"b{i}", persona=f"b{i}", probe_family="general_open_ended", axes={"helpfulness": i, "accuracy": 5})
+            for i in range(1, 6)
+        ]
         df = _frame(rows)
         traj, ev = df.drop(columns=["assistant_eval"]), df[["trajectory_id", "assistant_eval"]]
         res = st(traj, ev, profile=GENEROUS, max_records=2, stratify_by=["probe_family"])
@@ -350,8 +388,7 @@ class TestMaxPerLocale:
         rows = []
         for loc in locales:
             for i in range(per):
-                r = _row(f"{loc}{i}", persona=f"{loc}{i}",
-                         axes={"helpfulness": 5, "accuracy": 5})
+                r = _row(f"{loc}{i}", persona=f"{loc}{i}", axes={"helpfulness": 5, "accuracy": 5})
                 r["locale"] = loc
                 rows.append(r)
         return rows
@@ -362,16 +399,19 @@ class TestMaxPerLocale:
 
     def test_caps_each_locale_independently(self):
         from usersim.selection.engine import select_trajectories as st
+
         traj, ev = self._traj_ev(self._locale_rows(["ta_Taml_IN", "bn_Beng_IN"], 6))
         res = st(traj, ev, profile=GENEROUS, max_per_locale=3, stratify_by=None)
         assert res.curated["locale"].value_counts().to_dict() == {
-            "ta_Taml_IN": 3, "bn_Beng_IN": 3,
+            "ta_Taml_IN": 3,
+            "bn_Beng_IN": 3,
         }
         assert res.summary.max_per_locale == 3
         assert len(res.curated) == 6
 
     def test_within_locale_keeps_highest_quality(self):
         from usersim.selection.engine import select_trajectories as st
+
         rows = []
         for i in range(1, 6):
             r = _row(f"t{i}", persona=f"t{i}", axes={"helpfulness": i, "accuracy": 5})
@@ -383,17 +423,16 @@ class TestMaxPerLocale:
 
     def test_composes_with_global_max_records(self):
         from usersim.selection.engine import select_trajectories as st
-        traj, ev = self._traj_ev(
-            self._locale_rows(["ta_Taml_IN", "bn_Beng_IN", "te_Telu_IN"], 6)
-        )
+
+        traj, ev = self._traj_ev(self._locale_rows(["ta_Taml_IN", "bn_Beng_IN", "te_Telu_IN"], 6))
         # per-locale cap 4 -> 12 kept, then global cap 5 -> 5 total.
-        res = st(traj, ev, profile=GENEROUS, max_per_locale=4, max_records=5,
-                 stratify_by=None)
+        res = st(traj, ev, profile=GENEROUS, max_per_locale=4, max_records=5, stratify_by=None)
         assert len(res.curated) == 5
         assert all(v <= 4 for v in res.curated["locale"].value_counts().to_dict().values())
 
     def test_none_is_noop(self):
         from usersim.selection.engine import select_trajectories as st
+
         traj, ev = self._traj_ev(self._locale_rows(["ta_Taml_IN"], 4))
         res = st(traj, ev, profile=GENEROUS, max_per_locale=None)
         assert len(res.curated) == 4
@@ -413,13 +452,17 @@ class TestGenerationModelProvenance:
 
         p = manifest_path(root, run_id)
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({
-            "schema_version": 1,
-            "run_id": run_id,
-            "models": {
-                "assistant_model": {"alias": "assistant_model", "model": assistant},
-            },
-        }))
+        p.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "run_id": run_id,
+                    "models": {
+                        "assistant_model": {"alias": "assistant_model", "model": assistant},
+                    },
+                }
+            )
+        )
 
     def test_reads_the_model_from_the_run_manifest(self, tmp_path):
         from usersim.selection import resolve_generation_model
@@ -432,7 +475,7 @@ class TestGenerationModelProvenance:
         from usersim.selection import resolve_generation_model
 
         self._write_manifest(tmp_path, "111", "gpt-5.6-luna")
-        self._write_manifest(tmp_path, "222", "gpt-5.6-luna")   # duplicate
+        self._write_manifest(tmp_path, "222", "gpt-5.6-luna")  # duplicate
         self._write_manifest(tmp_path, "333", "google/gemma-4-31b-it")
         got = resolve_generation_model(tmp_path, "111+222+333")
         assert got == "gpt-5.6-luna, google/gemma-4-31b-it"
@@ -467,8 +510,14 @@ class TestSchema:
         Both stay reachable, but only when named.
         """
         available = [
-            "run", "locale", "probe_family", "trajectory_id", "persona_uuid",
-            "conversation_messages", "persona_age_bin", "user_interaction_style",
+            "run",
+            "locale",
+            "probe_family",
+            "trajectory_id",
+            "persona_uuid",
+            "conversation_messages",
+            "persona_age_bin",
+            "user_interaction_style",
             *OPT_IN_ONLY,
         ]
         cols = resolve_columns(schema, available)
@@ -498,13 +547,26 @@ class TestSchema:
 
     def test_compact_expands_groups_and_skips_missing(self):
         available = [
-            "run", "locale", "probe_family", "conversation_messages",
-            "conversation_metadata", "conversation_status", "trajectory_id",
-            "persona_uuid", "probe_type", "probe_variant", "theme",
-            "persona_age_bin", "user_interaction_style", "tools", "num_tools",
-            "persona_name", "persona_age",  # verbatim; explicit opt-in
+            "run",
+            "locale",
+            "probe_family",
+            "conversation_messages",
+            "conversation_metadata",
+            "conversation_status",
+            "trajectory_id",
+            "persona_uuid",
+            "probe_type",
+            "probe_variant",
+            "theme",
+            "persona_age_bin",
+            "user_interaction_style",
+            "tools",
+            "num_tools",
+            "persona_name",
+            "persona_age",  # verbatim; explicit opt-in
             # num_turns intentionally absent -> "if available" skip
-            "simulation_traces", "assistant_eval",  # should be excluded
+            "simulation_traces",
+            "assistant_eval",  # should be excluded
             "persona_religion_language_context",  # protected; explicit opt-in
         ]
         cols = resolve_columns("compact", available)
@@ -520,22 +582,40 @@ class TestSchema:
         # financial_services gold-metadata is first-class in compact exports so
         # the training-data flywheel keeps it; absent on non-finance rows.
         available = [
-            "run", "locale", "probe_family", "trajectory_id",
-            "finance_task_id", "task_tier", "task_contract_version",
-            "institution_id", "institution_type", "domain",
-            "gold_document_ids", "gold_tool_sequence", "expected_state_deltas",
-            "retrieved_document_ids", "attempted_tool_names",
-            "dynamic_category_id", "dynamic_subtopic_hint", "taxonomy_version",
+            "run",
+            "locale",
+            "probe_family",
+            "trajectory_id",
+            "finance_task_id",
+            "task_tier",
+            "task_contract_version",
+            "institution_id",
+            "institution_type",
+            "domain",
+            "gold_document_ids",
+            "gold_tool_sequence",
+            "expected_state_deltas",
+            "retrieved_document_ids",
+            "attempted_tool_names",
+            "dynamic_category_id",
+            "dynamic_subtopic_hint",
+            "taxonomy_version",
         ]
         cols = resolve_columns("compact", available)
         for c in (
-            "finance_task_id", "task_tier", "institution_id", "domain",
-            "gold_tool_sequence", "expected_state_deltas", "dynamic_category_id",
+            "finance_task_id",
+            "task_tier",
+            "institution_id",
+            "domain",
+            "gold_tool_sequence",
+            "expected_state_deltas",
+            "dynamic_category_id",
         ):
             assert c in cols, c
         # Non-finance frame: finance columns simply absent (no error).
         non_finance = resolve_columns(
-            "compact", ["run", "locale", "probe_family", "trajectory_id"],
+            "compact",
+            ["run", "locale", "probe_family", "trajectory_id"],
         )
         assert "finance_task_id" not in non_finance
 
@@ -551,7 +631,9 @@ class TestSchema:
         assert set(LOGICAL_GROUPS["finance"]) == set(FINANCE_TRAJECTORY_COLUMNS)
 
     def test_explicit_list_and_partition_forced(self):
-        cols = resolve_columns(["trajectory_id", "conversation"], ["trajectory_id", "conversation_messages", "locale", "probe_family"])
+        cols = resolve_columns(
+            ["trajectory_id", "conversation"], ["trajectory_id", "conversation_messages", "locale", "probe_family"]
+        )
         # group expanded, and partition columns force-appended for the writer
         assert "conversation_messages" in cols
         assert "locale" in cols and "probe_family" in cols
@@ -596,18 +678,22 @@ class TestLoadRuns:
 
     def test_single_run_delegates(self, monkeypatch):
         import usersim.selection.io as sio
+
         monkeypatch.setattr(sio, "load_run", lambda *a, **k: ("T", "E", k["run"]))
         assert sio.load_runs("t", "e", runs=["only"]) == ("T", "E", "only")
         assert sio.load_runs("t", "e", runs="latest") == ("T", "E", "latest")
 
 
 class TestRepoId:
-    @pytest.mark.parametrize("raw,expected", [
-        ("https://huggingface.co/datasets/nvidia/usersim-x", "nvidia/usersim-x"),
-        ("hf.co/datasets/org/name", "org/name"),
-        ("org/name", "org/name"),
-        ("org/name/", "org/name"),
-    ])
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("https://huggingface.co/datasets/nvidia/usersim-x", "nvidia/usersim-x"),
+            ("hf.co/datasets/org/name", "org/name"),
+            ("org/name", "org/name"),
+            ("org/name/", "org/name"),
+        ],
+    )
     def test_parse_repo_id(self, raw, expected):
         assert parse_repo_id(raw) == expected
 
@@ -622,9 +708,7 @@ class TestWrite:
         from usersim.engine.core.storage import read_partitioned_dataset
 
         res = select_trajectories(trajectory_df, evaluator_df, profile=GENEROUS)
-        root = write_curated_dataset(
-            res.curated, tmp_path, "1700000000", GENEROUS, summary=res.summary
-        )
+        root = write_curated_dataset(res.curated, tmp_path, "1700000000", GENEROUS, summary=res.summary)
         assert root.name == "profile=generous"
         manifest = json.loads((root / MANIFEST_NAME).read_text())
         assert manifest["funnel"]["passed"] == res.summary.passed

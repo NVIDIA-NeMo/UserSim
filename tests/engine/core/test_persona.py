@@ -73,22 +73,21 @@ class TestReligionAndLanguages:
 
     def _lines(self, **fields) -> list:
         text = format_persona_for_prompt({**self.BASE, **fields})
-        return [
-            ln for ln in text.splitlines()
-            if ln.startswith(("Religion:", "Languages:"))
-        ]
+        return [ln for ln in text.splitlines() if ln.startswith(("Religion:", "Languages:"))]
 
     def test_religion_renders(self):
         assert self._lines(religion="Hindu") == ["Religion: Hindu"]
 
     def test_languages_render_in_order(self):
         assert self._lines(
-            first_language="Hindi", second_language="English",
+            first_language="Hindi",
+            second_language="English",
         ) == ["Languages: Hindi, English"]
 
     def test_unused_language_slots_are_dropped(self):
         assert self._lines(
-            first_language="Malayalam", second_language="-",
+            first_language="Malayalam",
+            second_language="-",
             third_language="-",
         ) == ["Languages: Malayalam"]
 
@@ -103,26 +102,32 @@ class TestReligionAndLanguages:
         assert self._lines(religion=nan) == []
         assert self._lines(first_language=nan) == []
         assert self._lines(
-            first_language="Hindi", second_language="-", third_language=nan,
+            first_language="Hindi",
+            second_language="-",
+            third_language=nan,
         ) == ["Languages: Hindi"]
 
     def test_nan_is_dropped_for_every_field_not_just_these(self):
         """The NaN guard lives in the shared accessor, so it covers
         fields this MR does not touch."""
-        text = format_persona_for_prompt({
-            "first_name": "Ravi", "last_name": "Kumar",
-            "age": float("nan"), "occupation": float("nan"),
-        })
+        text = format_persona_for_prompt(
+            {
+                "first_name": "Ravi",
+                "last_name": "Kumar",
+                "age": float("nan"),
+                "occupation": float("nan"),
+            }
+        )
         assert "nan" not in text.lower()
 
     def test_dataset_no_religion_value_is_preserved(self):
-        """"Other" is how these datasets spell "no religion" (en_IN
+        """ "Other" is how these datasets spell "no religion" (en_IN
         "Other" / hi_Deva_IN "अन्य" / hi_Latn_IN "Anya"), so it must
         render. Only the literal placeholder words are dropped."""
         assert self._lines(religion="Other") == ["Religion: Other"]
 
     def test_placeholder_words_are_dropped_case_insensitively(self):
-        """"none" / "nan" as literal cell text mean an unfilled cell, not
+        """ "none" / "nan" as literal cell text mean an unfilled cell, not
         a fact -- a CSV round-trip is the usual way they appear."""
         for text in ("none", "None", "NONE", "nan", "NaN", " - ", "  "):
             assert self._lines(religion=text) == [], text
@@ -130,9 +135,7 @@ class TestReligionAndLanguages:
     def test_placeholder_words_inside_prose_survive(self):
         """The match is on the whole stripped cell, so prose that merely
         contains one of the words is untouched."""
-        assert self._lines(religion="None practising") == [
-            "Religion: None practising"
-        ]
+        assert self._lines(religion="None practising") == ["Religion: None practising"]
 
     def test_absent_fields_render_nothing(self):
         assert self._lines() == []
@@ -150,35 +153,36 @@ class TestReligionAndLanguages:
         The two prose facets render through the facet loop rather than
         the demographics block, so they need asserting separately.
         """
-        text = format_persona_for_prompt({
-            "first_name": "Ravi",
-            "last_name": "Kumar",
-            "age": 34,
-            "city": "Kochi",
-            "country": "India",
-            "religion": "Hindu",
-            "first_language": "Malayalam",
-            "second_language": "English",
-            "third_language": "-",
-            "religious_background": "Observes the major festivals",
-            "linguistic_background": "Malayalam at home, English at work",
-        })
+        text = format_persona_for_prompt(
+            {
+                "first_name": "Ravi",
+                "last_name": "Kumar",
+                "age": 34,
+                "city": "Kochi",
+                "country": "India",
+                "religion": "Hindu",
+                "first_language": "Malayalam",
+                "second_language": "English",
+                "third_language": "-",
+                "religious_background": "Observes the major festivals",
+                "linguistic_background": "Malayalam at home, English at work",
+            }
+        )
         assert "Religion: Hindu" in text
         assert "Languages: Malayalam, English" in text
         assert "Religious Background: Observes the major festivals." in text
-        assert (
-            "Linguistic Background: Malayalam at home, English at work."
-            in text
-        )
+        assert "Linguistic Background: Malayalam at home, English at work." in text
 
     def test_sentinel_on_a_prose_facet_is_dropped(self):
         """The facet loop is a separate path from the demographics block,
         so the placeholder filter needs pinning on both."""
-        text = format_persona_for_prompt({
-            **self.BASE,
-            "religious_background": "-",
-            "linguistic_background": float("nan"),
-        })
+        text = format_persona_for_prompt(
+            {
+                **self.BASE,
+                "religious_background": "-",
+                "linguistic_background": float("nan"),
+            }
+        )
         assert "Religious Background" not in text
         assert "Linguistic Background" not in text
         assert "nan" not in text.lower()
@@ -205,14 +209,16 @@ class TestReligionAndLanguages:
 
 class TestReligionLanguageAuditContext:
     def test_matches_the_normalized_prompt_fields(self):
-        context = religion_language_context({
-            "religion": "Hindu",
-            "first_language": "Malayalam",
-            "second_language": "English",
-            "third_language": "-",
-            "religious_background": "Observes the major festivals",
-            "linguistic_background": "Malayalam at home, English at work",
-        })
+        context = religion_language_context(
+            {
+                "religion": "Hindu",
+                "first_language": "Malayalam",
+                "second_language": "English",
+                "third_language": "-",
+                "religious_background": "Observes the major festivals",
+                "linguistic_background": "Malayalam at home, English at work",
+            }
+        )
         assert context == {
             "religion": "Hindu",
             "languages": ["Malayalam", "English"],
@@ -221,13 +227,15 @@ class TestReligionLanguageAuditContext:
         }
 
     def test_sentinels_are_absent_from_the_audit_view(self):
-        context = religion_language_context({
-            "religion": "-",
-            "first_language": float("nan"),
-            "second_language": "none",
-            "religious_background": " ",
-            "linguistic_background": None,
-        })
+        context = religion_language_context(
+            {
+                "religion": "-",
+                "first_language": float("nan"),
+                "second_language": "none",
+                "religious_background": " ",
+                "linguistic_background": None,
+            }
+        )
         assert context == {
             "religion": None,
             "languages": [],
@@ -258,29 +266,29 @@ class TestNameExemption:
     """
 
     def test_exempt_word_is_kept_as_a_name(self):
-        assert format_persona_for_prompt(
-            {"first_name": "Nan", "last_name": "Goldin"}
-        ).startswith("Name: Nan Goldin")
+        assert format_persona_for_prompt({"first_name": "Nan", "last_name": "Goldin"}).startswith("Name: Nan Goldin")
 
     def test_real_null_name_is_still_dropped(self):
         for empty in (None, float("nan"), "", "   "):
-            assert format_persona_for_prompt(
-                {"first_name": empty, "last_name": "Rao"}
-            ).startswith("Name: Rao"), repr(empty)
+            assert format_persona_for_prompt({"first_name": empty, "last_name": "Rao"}).startswith("Name: Rao"), repr(
+                empty
+            )
 
     def test_unexempted_placeholders_still_filter_on_names(self):
         """Only "nan" is exempt — "-" and "none" are not."""
         for text in ("-", "none"):
-            assert format_persona_for_prompt(
-                {"first_name": text, "last_name": "Rao"}
-            ).startswith("Name: Rao"), text
+            assert format_persona_for_prompt({"first_name": text, "last_name": "Rao"}).startswith("Name: Rao"), text
 
     def test_exemption_does_not_leak_to_other_fields(self):
         """Same row: the name survives, religion and languages do not."""
-        text = format_persona_for_prompt({
-            "first_name": "Nan", "last_name": "Goldin",
-            "religion": "nan", "first_language": "nan",
-        })
+        text = format_persona_for_prompt(
+            {
+                "first_name": "Nan",
+                "last_name": "Goldin",
+                "religion": "nan",
+                "first_language": "nan",
+            }
+        )
         assert "Name: Nan Goldin" in text
         assert "Religion" not in text
         assert "Languages" not in text

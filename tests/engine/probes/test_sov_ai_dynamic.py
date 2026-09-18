@@ -21,33 +21,34 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.probing_taxonomy import (
     Category,
     ProbingTaxonomy,
     load_probing_taxonomy,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_dynamic import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_dynamic import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -55,7 +56,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 @pytest.fixture
-def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
+def pt_br_persona_southeast_teacher() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -69,7 +70,7 @@ def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def pt_br_persona_northeast_retiree() -> Dict[str, Any]:
+def pt_br_persona_northeast_retiree() -> dict[str, Any]:
     return {
         "first_name": "José",
         "last_name": "Santos",
@@ -83,9 +84,7 @@ def pt_br_persona_northeast_retiree() -> Dict[str, Any]:
 
 @pytest.fixture
 def pt_br_taxonomy() -> ProbingTaxonomy:
-    return load_probing_taxonomy(
-        (packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml")
-    )
+    return load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"))
 
 
 @pytest.fixture(autouse=True)
@@ -99,9 +98,11 @@ def _reset_taxonomy_cache_between_tests():
 @pytest.fixture
 def simulator_cfg():
     """Minimal cfg stub that ``simulate_sov_ai_dynamic`` reads from."""
+
     class _Cfg:
         random_seed = 42
         max_turns = 1
+
     return _Cfg()
 
 
@@ -115,22 +116,17 @@ class TestPersonaToInterestTags:
     sovereign-knowledge so cross-probe joins on persona-feature axes
     are direct. These tests guard the alias contract."""
 
-    def test_delegates_to_sov_ai_facts_tagger(
-        self, pt_br_persona_southeast_teacher: Dict[str, Any]
-    ) -> None:
+    def test_delegates_to_sov_ai_facts_tagger(self, pt_br_persona_southeast_teacher: dict[str, Any]) -> None:
         from usersim.engine.probes.sov_ai_facts.task_derivation import (
             persona_to_tags as upstream,
         )
-        ours = task_derivation.persona_to_interest_tags(
-            pt_br_persona_southeast_teacher, "pt_BR"
-        )
+
+        ours = task_derivation.persona_to_interest_tags(pt_br_persona_southeast_teacher, "pt_BR")
         theirs = upstream(pt_br_persona_southeast_teacher, "pt_BR")
         assert ours == theirs
 
     def test_baseline_fallbacks_present(self) -> None:
-        tags = task_derivation.persona_to_interest_tags(
-            {"age": 30}, "xx_YY"
-        )
+        tags = task_derivation.persona_to_interest_tags({"age": 30}, "xx_YY")
         assert "region:any" in tags
         assert "age:any" in tags
 
@@ -143,11 +139,13 @@ class TestPersonaToInterestTags:
 class TestDeriveProbe:
     def test_returns_a_category_and_a_hint(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         probe = task_derivation.derive_probe(
-            pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=42,
+            pt_br_persona_southeast_teacher,
+            pt_br_taxonomy,
+            seed=42,
         )
         assert probe is not None
         category, hint = probe
@@ -158,14 +156,18 @@ class TestDeriveProbe:
 
     def test_deterministic_on_persona_and_seed(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         a = task_derivation.derive_probe(
-            pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=42,
+            pt_br_persona_southeast_teacher,
+            pt_br_taxonomy,
+            seed=42,
         )
         b = task_derivation.derive_probe(
-            pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=42,
+            pt_br_persona_southeast_teacher,
+            pt_br_taxonomy,
+            seed=42,
         )
         assert a is not None and b is not None
         assert a[0].id == b[0].id
@@ -173,7 +175,7 @@ class TestDeriveProbe:
 
     def test_different_seed_can_yield_different_category(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         # Over many seeds, expect at least one pair that disagrees on
@@ -194,37 +196,48 @@ class TestDeriveProbe:
 
     def test_different_personas_can_yield_different_categories(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         a_cat = task_derivation.derive_probe(
-            pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=42,
+            pt_br_persona_southeast_teacher,
+            pt_br_taxonomy,
+            seed=42,
         )[0].id
         b_cat = task_derivation.derive_probe(
-            pt_br_persona_northeast_retiree, pt_br_taxonomy, seed=42,
+            pt_br_persona_northeast_retiree,
+            pt_br_taxonomy,
+            seed=42,
         )[0].id
         # If they happen to land on the same category at seed=42, an
         # alternate seed must separate them — otherwise the persona
         # part of the seed has no effect.
         if a_cat == b_cat:
             alt = task_derivation.derive_probe(
-                pt_br_persona_northeast_retiree, pt_br_taxonomy, seed=43,
+                pt_br_persona_northeast_retiree,
+                pt_br_taxonomy,
+                seed=43,
             )[0].id
-            assert alt != a_cat or task_derivation.derive_probe(
-                pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=43,
-            )[0].id != alt, (
-                "persona content has no influence on category pick — "
-                "salt is overwhelming the persona hash"
-            )
+            assert (
+                alt != a_cat
+                or task_derivation.derive_probe(
+                    pt_br_persona_southeast_teacher,
+                    pt_br_taxonomy,
+                    seed=43,
+                )[0].id
+                != alt
+            ), "persona content has no influence on category pick — salt is overwhelming the persona hash"
 
     def test_excluded_categories_skip_the_pool(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         first = task_derivation.derive_probe(
-            pt_br_persona_southeast_teacher, pt_br_taxonomy, seed=7,
+            pt_br_persona_southeast_teacher,
+            pt_br_taxonomy,
+            seed=7,
         )
         assert first is not None
         second = task_derivation.derive_probe(
@@ -237,7 +250,7 @@ class TestDeriveProbe:
 
     def test_all_categories_excluded_returns_none(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         all_ids = {c.id for c in pt_br_taxonomy.categories}
@@ -251,7 +264,7 @@ class TestDeriveProbe:
 
     def test_hint_rotation_index_shifts_hint(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         # Same (persona, seed) → same category. Different
@@ -277,8 +290,8 @@ class TestDeriveProbe:
 
     def test_taxonomy_version_salt_changes_pick(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_taxonomy: ProbingTaxonomy,
     ) -> None:
         """Bumping taxonomy_version should change at least some picks."""
@@ -316,7 +329,8 @@ class TestTaxonomyCache:
     def test_load_once_cached(self, tmp_path: Path) -> None:
         path = _write_tiny_pt_br_taxonomy(tmp_path)
         with patch.dict(
-            os.environ, {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)},
+            os.environ,
+            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)},
         ):
             t1 = probe_gen._load_taxonomy_for_locale("pt_BR")
             t2 = probe_gen._load_taxonomy_for_locale("pt_BR")
@@ -325,7 +339,8 @@ class TestTaxonomyCache:
     def test_env_override_picks_up_different_taxonomy(self, tmp_path: Path) -> None:
         path = _write_tiny_pt_br_taxonomy(tmp_path, taxonomy_id="override_taxonomy")
         with patch.dict(
-            os.environ, {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)},
+            os.environ,
+            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)},
         ):
             taxonomy = probe_gen._load_taxonomy_for_locale("pt_BR")
         assert taxonomy.taxonomy_id == "override_taxonomy"
@@ -338,10 +353,12 @@ class TestTaxonomyCache:
 
 class TestPrompts:
     @pytest.mark.parametrize(
-        "locale", SHIPPED_LOCALES,
+        "locale",
+        SHIPPED_LOCALES,
     )
     def test_opening_prompt_available_for_all_shipped_locales(
-        self, locale: str,
+        self,
+        locale: str,
     ) -> None:
         text = prompts.get_opening_prompt(locale)
         # Template carries the three placeholders the probe fills.
@@ -350,11 +367,10 @@ class TestPrompts:
         assert "{subtopic_hint}" in text
 
     @pytest.mark.parametrize(
-        "locale", SHIPPED_LOCALES,
+        "locale",
+        SHIPPED_LOCALES,
     )
-    def test_followup_instruction_available_for_all_shipped_locales(
-        self, locale: str
-    ) -> None:
+    def test_followup_instruction_available_for_all_shipped_locales(self, locale: str) -> None:
         assert prompts.get_followup_instruction(locale)
 
     def test_unknown_locale_raises_for_opening(self) -> None:
@@ -374,9 +390,7 @@ class TestPrompts:
 # ---------------------------------------------------------------------------
 
 
-_PT_BR_TAXONOMY_PATH = (
-    (packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml")
-)
+_PT_BR_TAXONOMY_PATH = packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"
 
 
 class TestSimulateSovAiDynamic:
@@ -389,25 +403,36 @@ class TestSimulateSovAiDynamic:
 
     def test_single_turn_runs_end_to_end(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         opening_msg = "Aproveitando, queria saber sobre o cerrado..."
         assistant_reply = "Boa pergunta! O cerrado é um bioma..."
 
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
-        ), _patched_call_llm(_mock_call_llm(
-            assistant_responses=[
-                {"role": "assistant", "content": assistant_reply},
-            ],
-            user_responses=[
-                {"role": "assistant", "content": opening_msg},
-            ],
-        )):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[
+                        {"role": "assistant", "content": assistant_reply},
+                    ],
+                    user_responses=[
+                        {"role": "assistant", "content": opening_msg},
+                    ],
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_dynamic(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -436,16 +461,15 @@ class TestSimulateSovAiDynamic:
         assert outcome["status"] in {"ok", "completed_with_warnings"}
         # The shipped pt_BR taxonomy has been promoted to beta, so no
         # placeholder warning should be attached.
-        assert not any(
-            w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value
-            for w in outcome["warnings"]
-        ), f"unexpected USED_PLACEHOLDER_TAXONOMY warning: {outcome['warnings']}"
+        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value for w in outcome["warnings"]), (
+            f"unexpected USED_PLACEHOLDER_TAXONOMY warning: {outcome['warnings']}"
+        )
         # taxonomy_version must be pinned on provenance.
         assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.1"
 
     def test_two_turn_mode_issues_followup(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         simulator_cfg.max_turns = 2
@@ -454,21 +478,32 @@ class TestSimulateSovAiDynamic:
         user_followup = "Hmm, e quanto a... ?"
         assistant_reply_2 = "Resposta refinada."
 
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
-        ), _patched_call_llm(_mock_call_llm(
-            assistant_responses=[
-                {"role": "assistant", "content": assistant_reply_1},
-                {"role": "assistant", "content": assistant_reply_2},
-            ],
-            user_responses=[
-                {"role": "assistant", "content": opening_msg},
-                {"role": "assistant", "content": user_followup},
-            ],
-        )):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[
+                        {"role": "assistant", "content": assistant_reply_1},
+                        {"role": "assistant", "content": assistant_reply_2},
+                    ],
+                    user_responses=[
+                        {"role": "assistant", "content": opening_msg},
+                        {"role": "assistant", "content": user_followup},
+                    ],
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_dynamic(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -480,7 +515,10 @@ class TestSimulateSovAiDynamic:
 
         messages = json.loads(result["conversation_messages"])
         assert [m["role"] for m in messages] == [
-            "user", "assistant", "user", "assistant",
+            "user",
+            "assistant",
+            "user",
+            "assistant",
         ]
         assert messages[0]["content"] == opening_msg
         assert messages[1]["content"] == assistant_reply_1
@@ -490,7 +528,7 @@ class TestSimulateSovAiDynamic:
 
     def test_empty_opening_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         """If the user-agent returns whitespace, the trajectory must
@@ -503,19 +541,30 @@ class TestSimulateSovAiDynamic:
         # USER_QUERY_GATE_EXHAUSTED outcome with the probe's
         # side-channel keys preserved (build_result_extras runs even
         # on the failure path).
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
-        ), _patched_call_llm(_mock_call_llm(
-            assistant_responses=[],
-            user_responses=[
-                {"role": "assistant", "content": "   \n  "},
-                {"role": "assistant", "content": "   \n  "},
-                {"role": "assistant", "content": "   \n  "},
-            ],
-        )):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[],
+                    user_responses=[
+                        {"role": "assistant", "content": "   \n  "},
+                        {"role": "assistant", "content": "   \n  "},
+                        {"role": "assistant", "content": "   \n  "},
+                    ],
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_dynamic(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -536,18 +585,27 @@ class TestSimulateSovAiDynamic:
 
     def test_user_model_exception_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # ConversationLoop's user-LLM call is wrapped in try/except;
         # the exception triggers a role-violation + retry loop. After
         # max_query_attempts retries → USER_QUERY_GATE_EXHAUSTED.
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
-        ), _patched_call_llm(RuntimeError("rate limited")):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
+            ),
+            _patched_call_llm(RuntimeError("rate limited")),
+        ):
             result = probe_gen.simulate_sov_ai_dynamic(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -563,7 +621,7 @@ class TestSimulateSovAiDynamic:
 
     def test_assistant_failure_after_opening_fails_cleanly(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         """User-agent succeeds on turn 1; assistant_model raises. The
@@ -574,9 +632,7 @@ class TestSimulateSovAiDynamic:
         # Alias-dispatching side-effect: user_model + judge_model
         # succeed for the gate, then assistant_model raises. Matches
         # the unified loop's call sequence for turn-1.
-        judge_payload = (
-            "<explanation>looks fine</explanation>\n<rating>success</rating>"
-        )
+        judge_payload = "<explanation>looks fine</explanation>\n<rating>success</rating>"
 
         def _side_effect(models, alias, msgs, **kwargs):
             if alias == "user_model":
@@ -589,12 +645,21 @@ class TestSimulateSovAiDynamic:
                 return {"role": "assistant", "content": "no"}
             raise AssertionError(f"unexpected alias: {alias!r}")
 
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
-        ), _patched_call_llm(_side_effect):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(_PT_BR_TAXONOMY_PATH)},
+            ),
+            _patched_call_llm(_side_effect),
+        ):
             result = probe_gen.simulate_sov_ai_dynamic(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -621,17 +686,20 @@ class TestSimulateSovAiDynamic:
 class TestShouldSucceed:
     def test_returns_true_when_categories_explored(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         state.metadata["probing_categories_explored"] = ["brazil-history"]
         assert probe_gen.should_succeed(state) is True
 
     def test_returns_false_when_no_categories_explored(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         assert probe_gen.should_succeed(state) is False
 
     def test_returns_false_on_empty_list(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         state.metadata["probing_categories_explored"] = []
         assert probe_gen.should_succeed(state) is False
@@ -647,14 +715,8 @@ class TestPlaceholderTaxonomyWarning:
         assert WarningKind.USED_PLACEHOLDER_TAXONOMY.value == "used_placeholder_taxonomy"
 
     def test_distinct_from_used_placeholder_fact(self) -> None:
-        assert (
-            WarningKind.USED_PLACEHOLDER_TAXONOMY
-            is not WarningKind.USED_PLACEHOLDER_FACT
-        )
-        assert (
-            WarningKind.USED_PLACEHOLDER_TAXONOMY.value
-            != WarningKind.USED_PLACEHOLDER_FACT.value
-        )
+        assert WarningKind.USED_PLACEHOLDER_TAXONOMY is not WarningKind.USED_PLACEHOLDER_FACT
+        assert WarningKind.USED_PLACEHOLDER_TAXONOMY.value != WarningKind.USED_PLACEHOLDER_FACT.value
 
 
 # ---------------------------------------------------------------------------
@@ -663,9 +725,9 @@ class TestPlaceholderTaxonomyWarning:
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Alias-dispatching ``call_llm`` mock for the unified loop.
@@ -678,28 +740,21 @@ def _mock_call_llm(
     iter_assist = iter(assistant_responses)
     iter_user = iter(user_responses or [])
     rating = "success" if judge_pass else "failure"
-    judge_payload = (
-        f"<explanation>looks fine</explanation>\n"
-        f"<rating>{rating}</rating>"
-    )
+    judge_payload = f"<explanation>looks fine</explanation>\n<rating>{rating}</rating>"
 
     def _side_effect(models, alias, msgs, **kwargs):
         if alias == "assistant_model":
             try:
                 return next(iter_assist)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more assistant_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more assistant_model calls than expected") from e
         if alias == "judge_model":
             return {"role": "assistant", "content": judge_payload}
         if alias == "user_model":
             try:
                 return next(iter_user)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more user_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more user_model calls than expected") from e
         if alias == "summary_model":
             return {"role": "assistant", "content": "no"}
         raise AssertionError(f"unexpected alias: {alias!r}")

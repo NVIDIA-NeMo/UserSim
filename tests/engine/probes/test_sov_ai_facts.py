@@ -20,13 +20,15 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import (
     Fact,
     FactBank,
@@ -38,15 +40,14 @@ from usersim.engine.core.outcomes import (
     FailureClass,
     Provenance,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_facts import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_facts import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -54,7 +55,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 @pytest.fixture
-def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
+def pt_br_persona_southeast_teacher() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -68,7 +69,7 @@ def pt_br_persona_southeast_teacher() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def pt_br_persona_northeast_retiree() -> Dict[str, Any]:
+def pt_br_persona_northeast_retiree() -> dict[str, Any]:
     return {
         "first_name": "José",
         "last_name": "Santos",
@@ -96,9 +97,11 @@ def _reset_bank_cache_between_tests():
 @pytest.fixture
 def simulator_cfg():
     """Minimal cfg stub that ``simulate_sov_ai_facts`` reads from."""
+
     class _Cfg:
         random_seed = 42
         max_turns = 1
+
     return _Cfg()
 
 
@@ -109,11 +112,9 @@ def simulator_cfg():
 
 class TestPersonaToTags:
     def test_brazilian_southeast_teacher_picks_right_tags(
-        self, pt_br_persona_southeast_teacher: Dict[str, Any]
+        self, pt_br_persona_southeast_teacher: dict[str, Any]
     ) -> None:
-        tags = task_derivation.persona_to_tags(
-            pt_br_persona_southeast_teacher, "pt_BR"
-        )
+        tags = task_derivation.persona_to_tags(pt_br_persona_southeast_teacher, "pt_BR")
         assert "region:southeast" in tags
         assert "region:any" in tags
         assert "age:25-44" in tags
@@ -122,12 +123,8 @@ class TestPersonaToTags:
         assert "occupation-family:teacher" in tags
         assert "interest:literature" in tags or "interest:history" in tags
 
-    def test_brazilian_northeast_retiree(
-        self, pt_br_persona_northeast_retiree: Dict[str, Any]
-    ) -> None:
-        tags = task_derivation.persona_to_tags(
-            pt_br_persona_northeast_retiree, "pt_BR"
-        )
+    def test_brazilian_northeast_retiree(self, pt_br_persona_northeast_retiree: dict[str, Any]) -> None:
+        tags = task_derivation.persona_to_tags(pt_br_persona_northeast_retiree, "pt_BR")
         assert "region:northeast" in tags
         assert "age:65+" in tags
         assert "occupation-family:retired" in tags
@@ -163,9 +160,7 @@ class TestPersonaToTags:
         assert "age:25-44" in tags
 
     def test_missing_age_is_handled_gracefully(self) -> None:
-        tags = task_derivation.persona_to_tags(
-            {"state_abbrev": "SP", "occupation": "Teacher"}, "pt_BR"
-        )
+        tags = task_derivation.persona_to_tags({"state_abbrev": "SP", "occupation": "Teacher"}, "pt_BR")
         # No age-bin tag (other than age:any fallback) — no crash.
         assert not any(t.startswith("age:") and t != "age:any" for t in tags)
         assert "age:any" in tags
@@ -177,18 +172,14 @@ class TestPersonaToTags:
             ("Master's degree", "education:tertiary"),
             ("Pós-graduação lato sensu", "education:tertiary"),
         ]:
-            tags = task_derivation.persona_to_tags(
-                {"education_level": raw, "age": 30}, "pt_BR"
-            )
+            tags = task_derivation.persona_to_tags({"education_level": raw, "age": 30}, "pt_BR")
             assert expected in tags, f"{raw!r} → expected {expected!r}, got {tags}"
 
     def test_occupation_substring_matching_multilingual(self) -> None:
         # English + Portuguese variants of the same concept should
         # produce the same occupation-family tag.
         for raw in ("Doctor of medicine", "Médico cardiologista"):
-            tags = task_derivation.persona_to_tags(
-                {"occupation": raw, "age": 40}, "pt_BR"
-            )
+            tags = task_derivation.persona_to_tags({"occupation": raw, "age": 40}, "pt_BR")
             assert "occupation-family:healthcare" in tags
             assert "interest:health" in tags
 
@@ -201,70 +192,55 @@ class TestPersonaToTags:
 class TestDeriveTask:
     def test_deterministic_on_persona_and_seed(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
-        a = task_derivation.derive_task(
-            pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42
-        )
-        b = task_derivation.derive_task(
-            pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42
-        )
+        a = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42)
+        b = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42)
         assert a is not None and b is not None
         assert a.id == b.id
 
     def test_different_seed_can_yield_different_fact(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         # Over many seeds, we expect at least one pair that disagree.
         ids = {
-            task_derivation.derive_task(
-                pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=s
-            ).id
+            task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=s).id
             for s in range(10)
         }
         assert len(ids) > 1
 
     def test_different_personas_can_yield_different_facts(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
-        pt_br_persona_northeast_retiree: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
+        pt_br_persona_northeast_retiree: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
         # Same seed but different persona content → high probability of
         # a different choice. (Not guaranteed for every bank, but easy
         # to satisfy with the 25-entry sample bank.)
-        a = task_derivation.derive_task(
-            pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42
-        )
-        b = task_derivation.derive_task(
-            pt_br_persona_northeast_retiree, pt_br_sample_bank, seed=42
-        )
+        a = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=42)
+        b = task_derivation.derive_task(pt_br_persona_northeast_retiree, pt_br_sample_bank, seed=42)
         # Either they differ, or (unlikely) both match the same entry —
         # in the latter case at least the matching pool differs enough
         # that bumping the seed separates them.
         if a.id == b.id:
-            b_alt = task_derivation.derive_task(
-                pt_br_persona_northeast_retiree, pt_br_sample_bank, seed=43
-            )
-            assert b_alt.id != a.id, (
-                "persona-dependent variance is weaker than expected for the "
-                "shipped sample bank"
-            )
+            b_alt = task_derivation.derive_task(pt_br_persona_northeast_retiree, pt_br_sample_bank, seed=43)
+            assert b_alt.id != a.id, "persona-dependent variance is weaker than expected for the shipped sample bank"
 
     def test_excluded_ids_skip_the_pool(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
     ) -> None:
-        first = task_derivation.derive_task(
-            pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=7
-        )
+        first = task_derivation.derive_task(pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=7)
         assert first is not None
         second = task_derivation.derive_task(
-            pt_br_persona_southeast_teacher, pt_br_sample_bank, seed=7,
+            pt_br_persona_southeast_teacher,
+            pt_br_sample_bank,
+            seed=7,
             excluded_fact_ids={first.id},
         )
         assert second is not None and second.id != first.id
@@ -285,14 +261,11 @@ class TestDeriveTask:
         """Bumping the bank's version should change the picked fact for at
         least some personas. A bank update that silently re-picks the
         same fact for every persona would be the bug we want to catch."""
-        facts = [
-            _fact(f"F-{i}", persona_tags=("interest:history", "region:any"))
-            for i in range(8)
-        ]
+        facts = [_fact(f"F-{i}", persona_tags=("interest:history", "region:any")) for i in range(8)]
         bank_a = _build_synthetic_bank(facts=facts, bank_version="v0.1.0")
         bank_b = _build_synthetic_bank(facts=facts, bank_version="v0.2.0")
 
-        per_persona_picks: List[tuple] = []
+        per_persona_picks: list[tuple] = []
         for persona in _persona_variations():
             a = task_derivation.derive_task(persona, bank_a, seed=5)
             b = task_derivation.derive_task(persona, bank_b, seed=5)
@@ -357,7 +330,8 @@ class TestPrompts:
 
     @pytest.mark.parametrize("locale", SHIPPED_LOCALES)
     def test_factual_recall_prompt_available_for_all_shipped_locales(
-        self, locale: str,
+        self,
+        locale: str,
     ) -> None:
         text = prompts.get_system_prompt(locale, "factual_recall")
         # Required placeholders for the probe's .format call.
@@ -369,7 +343,8 @@ class TestPrompts:
 
     @pytest.mark.parametrize("locale", SHIPPED_LOCALES)
     def test_completion_prompt_available_for_all_shipped_locales(
-        self, locale: str,
+        self,
+        locale: str,
     ) -> None:
         text = prompts.get_system_prompt(locale, "completion")
         assert "{persona}" in text
@@ -379,7 +354,8 @@ class TestPrompts:
 
     @pytest.mark.parametrize("locale", SHIPPED_LOCALES)
     def test_followup_instruction_available_for_all_shipped_locales(
-        self, locale: str,
+        self,
+        locale: str,
     ) -> None:
         text = prompts.get_followup_instruction(locale)
         assert len(text) > 100
@@ -415,21 +391,32 @@ class TestSimulateSovAiFacts:
 
     def test_single_turn_runs_end_to_end(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
         simulator_cfg: Any,
         tmp_path: Path,
     ) -> None:
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(
-                (packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml")
-            )},
-        ), _patched_call_llm(_mock_call_llm([
-                {"role": "assistant", "content": "Essa é uma resposta de teste."},
-            ])):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "Essa é uma resposta de teste."},
+                    ]
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_facts(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -455,7 +442,7 @@ class TestSimulateSovAiFacts:
 
     def test_verbatim_question_is_first_user_turn(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
         simulator_cfg: Any,
     ) -> None:
@@ -469,16 +456,27 @@ class TestSimulateSovAiFacts:
         )
         assert expected_fact is not None
 
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(
-                (packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml")
-            )},
-        ), _patched_call_llm(_mock_call_llm([
-                {"role": "assistant", "content": "ok"},
-            ])):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_facts(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -491,15 +489,14 @@ class TestSimulateSovAiFacts:
         messages = json.loads(result["conversation_messages"])
         assert messages[0]["role"] == "user"
         assert messages[0]["content"] == expected_fact.question, (
-            "first user message was not the fact's verbatim question — the "
-            "false-premise wording must survive intact"
+            "first user message was not the fact's verbatim question — the false-premise wording must survive intact"
         )
         assert result["sovereign_facts_probed"] == [expected_fact.id]
         assert result["probe_variant"] == expected_fact.category
 
     def test_two_turn_mode_issues_followup(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         simulator_cfg.max_turns = 2
@@ -507,22 +504,31 @@ class TestSimulateSovAiFacts:
         user_followup = "Hmm, tem certeza? Pode explicar melhor?"
         assistant_reply_2 = "Resposta refinada do assistente."
 
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(
-                (packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml")
-            )},
-        ), _patched_call_llm(_mock_call_llm(
-            assistant_responses=[
-                {"role": "assistant", "content": assistant_reply_1},
-                {"role": "assistant", "content": assistant_reply_2},
-            ],
-            user_responses=[
-                {"role": "assistant", "content": user_followup},
-            ],
-        )):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[
+                        {"role": "assistant", "content": assistant_reply_1},
+                        {"role": "assistant", "content": assistant_reply_2},
+                    ],
+                    user_responses=[
+                        {"role": "assistant", "content": user_followup},
+                    ],
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_facts(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -542,17 +548,24 @@ class TestSimulateSovAiFacts:
 
     def test_assistant_failure_produces_failed_outcome(
         self,
-        pt_br_persona_southeast_teacher: Dict[str, Any],
+        pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        with patch.dict(
-            os.environ,
-            {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(
-                (packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml")
-            )},
-        ), _patched_call_llm(RuntimeError("rate-limited by provider")):
+        with (
+            patch.dict(
+                os.environ,
+                {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))},
+            ),
+            _patched_call_llm(RuntimeError("rate-limited by provider")),
+        ):
             result = probe_gen.simulate_sov_ai_facts(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=pt_br_persona_southeast_teacher,
                 profile={},
@@ -571,7 +584,9 @@ class TestSimulateSovAiFacts:
         assert result["sovereign_facts_probed"]
 
     def test_no_matching_fact_fails_cleanly(
-        self, tmp_path: Path, simulator_cfg: Any,
+        self,
+        tmp_path: Path,
+        simulator_cfg: Any,
     ) -> None:
         # A narrow bank whose facts require occupation-family:astronaut.
         narrow_bank_path = tmp_path / "narrow.yaml"
@@ -582,16 +597,16 @@ class TestSimulateSovAiFacts:
             "bank_version: v0.1.0\n"
             "categories: [rare]\n"
             "entries:\n"
-            '  - id: N-001\n'
-            '    category: rare\n'
-            '    question_type: factual_recall\n'
-            '    placeholder: true\n'
+            "  - id: N-001\n"
+            "    category: rare\n"
+            "    question_type: factual_recall\n"
+            "    placeholder: true\n"
             '    question: "Uma pergunta rara?"\n'
-            '    false_premises: []\n'
+            "    false_premises: []\n"
             '    ground_truth: "Uma resposta rara."\n'
             '    persona_tags: ["occupation-family:astronaut"]\n'
-            '    difficulty: hard\n'
-            '    provenance:\n'
+            "    difficulty: hard\n"
+            "    provenance:\n"
             '      source: "placeholder"\n'
             '      last_reviewed: "2026-04-18"\n',
             encoding="utf-8",
@@ -610,7 +625,13 @@ class TestSimulateSovAiFacts:
             {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(narrow_bank_path)},
         ):
             result = probe_gen.simulate_sov_ai_facts(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=persona,
                 profile={},
@@ -633,17 +654,20 @@ class TestSimulateSovAiFacts:
 class TestShouldSucceed:
     def test_returns_true_when_facts_probed(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         state.metadata["facts_probed"] = ["BR-GEO-001"]
         assert probe_gen.should_succeed(state) is True
 
     def test_returns_false_when_no_facts_probed(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         assert probe_gen.should_succeed(state) is False
 
     def test_returns_false_on_empty_list(self) -> None:
         from usersim.engine.core.simulation import ConversationState
+
         state = ConversationState()
         state.metadata["facts_probed"] = []
         assert probe_gen.should_succeed(state) is False
@@ -655,9 +679,9 @@ class TestShouldSucceed:
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Alias-dispatching ``call_llm`` mock for the unified loop.
@@ -678,19 +702,14 @@ def _mock_call_llm(
     iter_assist = iter(assistant_responses)
     iter_user = iter(user_responses or [])
     rating = "success" if judge_pass else "failure"
-    judge_payload = (
-        f"<explanation>looks fine</explanation>\n"
-        f"<rating>{rating}</rating>"
-    )
+    judge_payload = f"<explanation>looks fine</explanation>\n<rating>{rating}</rating>"
 
     def _side_effect(models, alias, msgs, **kwargs):
         if alias == "assistant_model":
             try:
                 return next(iter_assist)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more assistant_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more assistant_model calls than expected") from e
         if alias == "judge_model":
             return {"role": "assistant", "content": judge_payload}
         if alias == "user_model":
@@ -754,7 +773,7 @@ def _fact(id_: str, *, persona_tags: tuple = (), category: str = "cat-a") -> Fac
 
 def _build_synthetic_bank(
     *,
-    facts: List[Fact],
+    facts: list[Fact],
     bank_version: str = "v0.1.0",
 ) -> FactBank:
     return FactBank(
@@ -768,7 +787,7 @@ def _build_synthetic_bank(
     )
 
 
-def _persona_variations() -> List[Dict[str, Any]]:
+def _persona_variations() -> list[dict[str, Any]]:
     """A small population of synthetic personas for statistical assertions."""
     return [
         {"age": age, "state_abbrev": state, "occupation": occ}

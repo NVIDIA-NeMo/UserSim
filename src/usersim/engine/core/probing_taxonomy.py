@@ -34,11 +34,11 @@ import random
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Iterable, Optional, Tuple
+from typing import Any, Iterable
 
 logger = logging.getLogger("usersim.engine")
 
-SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
+SUPPORTED_SCHEMA_VERSIONS: frozenset[str] = frozenset({"v0.1"})
 MIN_SUBTOPIC_HINTS: int = 2  # rotation requires at least two distinct hints
 
 
@@ -59,17 +59,17 @@ class ProbingTaxonomyError(ValueError):
 class Category:
     id: str
     invitation: str
-    subtopic_hints: Tuple[str, ...]
+    subtopic_hints: tuple[str, ...]
     # Optional entity-TYPE scoping (empty = applies to every type). Used by
     # GROUNDED dynamic-tier probes (e.g. financial_services scopes categories
     # to the institution type); ungrounded population probing (sov_ai_dynamic)
     # leaves it empty so every category is universal.
-    applies_to_types: Tuple[str, ...] = ()
+    applies_to_types: tuple[str, ...] = ()
     # Optional persona-tag affinities for SOFT-WEIGHTING selection toward
     # ecologically-valid topics (e.g. ``age:55-64`` / ``financial-literacy:low``).
     # A soft prior only: consumers boost, never zero out, so coverage holds.
     # Empty (the sov_ai_dynamic case) => uniform selection.
-    persona_affinities: Tuple[str, ...] = ()
+    persona_affinities: tuple[str, ...] = ()
     # Set by the loader from the taxonomy's top-level fields so
     # downstream consumers can carry provenance per-category.
     locale: str = ""
@@ -87,21 +87,21 @@ class ProbingTaxonomy:
     taxonomy_id: str
     taxonomy_version: str
     placeholder: bool = False
-    categories: Tuple[Category, ...] = field(default_factory=tuple)
-    source_path: Optional[str] = None
+    categories: tuple[Category, ...] = field(default_factory=tuple)
+    source_path: str | None = None
 
     # ── Lookups ─────────────────────────────────────────────────────
 
-    def by_id(self, category_id: str) -> Optional[Category]:
+    def by_id(self, category_id: str) -> Category | None:
         for c in self.categories:
             if c.id == category_id:
                 return c
         return None
 
-    def category_ids(self) -> Tuple[str, ...]:
+    def category_ids(self) -> tuple[str, ...]:
         return tuple(c.id for c in self.categories)
 
-    def categories_for_type(self, entity_type: str) -> Tuple[Category, ...]:
+    def categories_for_type(self, entity_type: str) -> tuple[Category, ...]:
         """Categories applicable to ``entity_type`` (the runtime scope filter).
 
         Categories with an empty ``applies_to_types`` are universal (the
@@ -110,7 +110,7 @@ class ProbingTaxonomy:
         """
         return tuple(c for c in self.categories if c.applies_to(entity_type))
 
-    def provenance_summary(self) -> Dict[str, Any]:
+    def provenance_summary(self) -> dict[str, Any]:
         """Surfaces that the downstream reporting layer reads."""
         return {
             "taxonomy_id": self.taxonomy_id,
@@ -150,7 +150,7 @@ def load_probing_taxonomy(path: str | Path) -> ProbingTaxonomy:
     return _build_taxonomy(doc, src_path=str(src_path))
 
 
-def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
+def _build_taxonomy(doc: dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
     schema_version = _require_str(doc, "schema_version", src_path)
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ProbingTaxonomyError(
@@ -164,25 +164,18 @@ def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
 
     raw_placeholder = doc.get("placeholder", False)
     if not isinstance(raw_placeholder, bool):
-        raise ProbingTaxonomyError(
-            f"{src_path}::placeholder: must be a bool, got "
-            f"{type(raw_placeholder).__name__}"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::placeholder: must be a bool, got {type(raw_placeholder).__name__}")
     placeholder = raw_placeholder
 
     raw_categories = doc.get("categories")
     if not isinstance(raw_categories, list) or not raw_categories:
-        raise ProbingTaxonomyError(
-            f"{src_path}::categories: must be a non-empty list"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::categories: must be a non-empty list")
 
     categories: list[Category] = []
     seen_ids: set = set()
     for idx, entry in enumerate(raw_categories):
         if not isinstance(entry, dict):
-            raise ProbingTaxonomyError(
-                f"{src_path}::categories[{idx}]: must be a mapping"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::categories[{idx}]: must be a mapping")
         cat = _build_category(
             entry,
             src_path=src_path,
@@ -192,9 +185,7 @@ def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
             taxonomy_version=taxonomy_version,
         )
         if cat.id in seen_ids:
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat.id}: duplicate category id"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat.id}: duplicate category id")
         seen_ids.add(cat.id)
         categories.append(cat)
 
@@ -220,7 +211,7 @@ def _build_taxonomy(doc: Dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
 
 
 def _build_category(
-    entry: Dict[str, Any],
+    entry: dict[str, Any],
     *,
     src_path: str,
     idx: int,
@@ -233,9 +224,7 @@ def _build_category(
 
     raw_hints = entry.get("subtopic_hints")
     if not isinstance(raw_hints, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: subtopic_hints must be a list"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: subtopic_hints must be a list")
     if len(raw_hints) < MIN_SUBTOPIC_HINTS:
         raise ProbingTaxonomyError(
             f"{src_path}::{cat_id}: subtopic_hints requires at least "
@@ -245,40 +234,27 @@ def _build_category(
     hints: list[str] = []
     for hi, raw_hint in enumerate(raw_hints):
         if not isinstance(raw_hint, str) or not raw_hint.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::subtopic_hints[{hi}]: "
-                "must be a non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::subtopic_hints[{hi}]: must be a non-empty string")
         hints.append(raw_hint.strip())
 
     # Optional entity-type scoping (grounded dynamic-tier probes set it).
     raw_types = entry.get("applies_to_types", []) or []
     if not isinstance(raw_types, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: applies_to_types must be a list when present"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: applies_to_types must be a list when present")
     applies_to_types: list[str] = []
     for ti, rt in enumerate(raw_types):
         if not isinstance(rt, str) or not rt.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::applies_to_types[{ti}]: must be a "
-                "non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::applies_to_types[{ti}]: must be a non-empty string")
         applies_to_types.append(rt.strip())
 
     # Optional persona-tag affinities for soft-weighting (all optional strings).
     raw_aff = entry.get("persona_affinities", []) or []
     if not isinstance(raw_aff, list):
-        raise ProbingTaxonomyError(
-            f"{src_path}::{cat_id}: persona_affinities must be a list when present"
-        )
+        raise ProbingTaxonomyError(f"{src_path}::{cat_id}: persona_affinities must be a list when present")
     persona_affinities: list[str] = []
     for ai, ra in enumerate(raw_aff):
         if not isinstance(ra, str) or not ra.strip():
-            raise ProbingTaxonomyError(
-                f"{src_path}::{cat_id}::persona_affinities[{ai}]: must be a "
-                "non-empty string"
-            )
+            raise ProbingTaxonomyError(f"{src_path}::{cat_id}::persona_affinities[{ai}]: must be a non-empty string")
         persona_affinities.append(ra.strip())
 
     return Category(
@@ -293,18 +269,13 @@ def _build_category(
     )
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: dict[str, Any], key: str, src_path: str, ctx: str | None = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise ProbingTaxonomyError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise ProbingTaxonomyError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise ProbingTaxonomyError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v
 
 
@@ -318,14 +289,14 @@ def _require_str(
 
 
 def select_category(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     taxonomy: ProbingTaxonomy,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_category_ids: Iterable[str] = (),
     hint_rotation_index: int = 0,
-    category_weights: Optional[Dict[str, float]] = None,
-) -> Optional[Tuple[Category, str]]:
+    category_weights: dict[str, float] | None = None,
+) -> tuple[Category, str] | None:
     """Pick a ``(category, subtopic_hint)`` deterministically for a persona.
 
     Returns ``None`` when every category is excluded. Seeded by
@@ -353,9 +324,7 @@ def select_category(
     if category_weights:
         # Soft prior: every candidate keeps a positive floor so no category is
         # ever starved (population coverage preserved).
-        weights = [
-            max(1e-6, float(category_weights.get(c.id, 1.0))) for c in candidates
-        ]
+        weights = [max(1e-6, float(category_weights.get(c.id, 1.0))) for c in candidates]
         category = rng.choices(candidates, weights=weights, k=1)[0]
     else:
         category = rng.choice(candidates)
@@ -367,7 +336,7 @@ def select_category(
     return category, category.subtopic_hints[hint_idx]
 
 
-def _persona_content_hash(persona: Dict[str, Any]) -> int:
+def _persona_content_hash(persona: dict[str, Any]) -> int:
     """Stable int seed derived from persona content (sorted-keys JSON)."""
     payload = json.dumps(persona, sort_keys=True, default=str)
     digest = hashlib.sha256(payload.encode("utf-8")).digest()
@@ -394,7 +363,7 @@ def _taxonomy_salt(taxonomy: ProbingTaxonomy) -> int:
 # cross-run drift detection. Keyed by (family, locale, filename) so multiple
 # domains (sov_ai_dynamic, financial_services, ...) share the machinery.
 
-_TAXONOMY_CACHE: Dict[Tuple[str, str, str], ProbingTaxonomy] = {}
+_TAXONOMY_CACHE: dict[tuple[str, str, str], ProbingTaxonomy] = {}
 _TAXONOMY_CACHE_LOCK = threading.Lock()
 
 
@@ -403,8 +372,11 @@ def _default_env_prefix(family: str) -> str:
 
 
 def taxonomy_path_for(
-    family: str, locale: str, *, filename: str = "categories.yaml",
-    env_prefix: Optional[str] = None,
+    family: str,
+    locale: str,
+    *,
+    filename: str = "categories.yaml",
+    env_prefix: str | None = None,
 ) -> Path:
     """Path the loader tries for ``(family, locale)``, honoring an env override.
 
@@ -417,12 +389,16 @@ def taxonomy_path_for(
     if override:
         return Path(override)
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir(family) / locale / filename
 
 
 def load_probing_taxonomy_for(
-    family: str, locale: str, *, filename: str = "categories.yaml",
-    env_prefix: Optional[str] = None,
+    family: str,
+    locale: str,
+    *,
+    filename: str = "categories.yaml",
+    env_prefix: str | None = None,
 ) -> ProbingTaxonomy:
     """Return the cached taxonomy for ``(family, locale, filename)``.
 
@@ -435,23 +411,33 @@ def load_probing_taxonomy_for(
         if cached is not None:
             return cached
         path = taxonomy_path_for(
-            family, locale, filename=filename, env_prefix=env_prefix,
+            family,
+            locale,
+            filename=filename,
+            env_prefix=env_prefix,
         )
         taxonomy = load_probing_taxonomy(path)
         _TAXONOMY_CACHE[key] = taxonomy
         logger.info(
             "probing_taxonomy: loaded %s v%s (%d categories) for %s/%s from %s",
-            taxonomy.taxonomy_id, taxonomy.taxonomy_version,
-            len(taxonomy.categories), family, locale, path,
+            taxonomy.taxonomy_id,
+            taxonomy.taxonomy_version,
+            len(taxonomy.categories),
+            family,
+            locale,
+            path,
         )
         return taxonomy
 
 
 # ── sov_ai_dynamic back-compat shims (family = "sov_ai_dynamic") ──────────
 
+
 def default_probing_taxonomy_path(locale: str) -> Path:
     return taxonomy_path_for(
-        "sov_ai_dynamic", locale, filename="categories.yaml",
+        "sov_ai_dynamic",
+        locale,
+        filename="categories.yaml",
         env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
     )
 
@@ -463,7 +449,9 @@ def probing_taxonomy_path_for(locale: str) -> Path:
 def load_probing_taxonomy_for_locale(locale: str) -> ProbingTaxonomy:
     """Cached sov_ai_dynamic taxonomy for ``locale`` (back-compat wrapper)."""
     return load_probing_taxonomy_for(
-        "sov_ai_dynamic", locale, filename="categories.yaml",
+        "sov_ai_dynamic",
+        locale,
+        filename="categories.yaml",
         env_prefix="USERSIM_SOV_AI_DYNAMIC_TAXONOMY",
     )
 

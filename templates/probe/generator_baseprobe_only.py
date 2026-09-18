@@ -25,7 +25,6 @@ real example at ~50 LOC.
 
 from __future__ import annotations
 
-
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
@@ -60,7 +59,9 @@ class DemoGeneralProbe(BaseProbe):
         return ""
 
     def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
+        self,
+        user_query: str,
+        conversation_history: str,
     ) -> str:
         # Optional override — the BaseProbe default is a generic
         # role-violation rubric. Override when the gate should be

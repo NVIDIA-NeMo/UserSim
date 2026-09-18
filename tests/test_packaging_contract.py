@@ -36,8 +36,7 @@ class TestPluginEntryPoints:
         return [
             getattr(plugin, name)
             for name in dir(plugin)
-            if not name.startswith("_")
-            and type(getattr(plugin, name)).__name__ == "Plugin"
+            if not name.startswith("_") and type(getattr(plugin, name)).__name__ == "Plugin"
         ]
 
     def test_both_plugins_are_declared(self) -> None:
@@ -53,8 +52,7 @@ class TestPluginEntryPoints:
             except ImportError as exc:  # pragma: no cover - the failure we guard
                 pytest.fail(f"{dotted}: module {module_path!r} does not import ({exc})")
             assert hasattr(module, symbol), (
-                f"{dotted}: {module_path!r} has no attribute {symbol!r}. "
-                "A rename broke a plugin entry point."
+                f"{dotted}: {module_path!r} has no attribute {symbol!r}. A rename broke a plugin entry point."
             )
 
     def test_declared_entry_points_match_the_module(self) -> None:
@@ -97,10 +95,7 @@ class TestDeclaredDependencies:
                     found.update(a.name.split(".")[0] for a in node.names)
                 elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
                     found.add(node.module.split(".")[0])
-        return {
-            m for m in found
-            if m not in sys.stdlib_module_names and m != own_package
-        }
+        return {m for m in found if m not in sys.stdlib_module_names and m != own_package}
 
     @staticmethod
     def _declared(pyproject: Path) -> set[str]:
@@ -128,12 +123,11 @@ class TestDeclaredDependencies:
         # Packages this distribution ships; they are not dependencies.
         first_party = {"usersim"}
         missing = {
-            mod for mod in imported - self._OPTIONAL - first_party
+            mod
+            for mod in imported - self._OPTIONAL - first_party
             if aliases.get(mod, mod).lower().replace("-", "_") not in declared
         }
-        assert not missing, (
-            f"the distribution imports but does not declare: {sorted(missing)}"
-        )
+        assert not missing, f"the distribution imports but does not declare: {sorted(missing)}"
 
     def test_optional_imports_stay_guarded(self) -> None:
         """An undeclared import is only acceptable behind try/except."""
@@ -218,10 +212,7 @@ class TestProbeTemplate:
         src = self.TEMPLATE.read_text()
         cited = set(re.findall(r"``(test_\w+)\.py``", src))
         assert cited, "template should cite worked examples"
-        missing = [
-            name for name in cited
-            if not (_REPO_ROOT / "tests" / "engine" / "probes" / f"{name}.py").is_file()
-        ]
+        missing = [name for name in cited if not (_REPO_ROOT / "tests" / "engine" / "probes" / f"{name}.py").is_file()]
         assert not missing, f"template cites tests that do not exist: {sorted(missing)}"
 
 
@@ -270,9 +261,8 @@ class TestProbeAssetPreflight:
     def test_shipped_assets_satisfy_every_probe(self) -> None:
         """The banks that ship must satisfy their own probes for en_US."""
         import usersim.engine.generator  # noqa: F401  (populates registry)
-        from usersim.engine.core.probes import known_probes
-
         from usersim.cli._pipeline import verify_probe_assets
+        from usersim.engine.core.probes import known_probes
 
         verify_probe_assets({p: 1.0 for p in known_probes()}, ["en_US"], None)
 
@@ -341,8 +331,15 @@ class TestRuntimeDependencySurface:
 
     def test_notebook_tooling_is_not_a_runtime_dependency(self) -> None:
         forbidden = {
-            "ipykernel", "ipython", "jupyter", "jupyterlab", "notebook",
-            "jupyter-client", "jupyter-core", "nbconvert", "nbformat",
+            "ipykernel",
+            "ipython",
+            "jupyter",
+            "jupyterlab",
+            "notebook",
+            "jupyter-client",
+            "jupyter-core",
+            "nbconvert",
+            "nbformat",
         }
         leaked = forbidden & self._runtime_deps()
         assert not leaked, (
@@ -361,9 +358,7 @@ class TestRuntimeDependencySurface:
         """The reason ipykernel is not needed: the import already degrades."""
         import ast
 
-        source = (
-            _REPO_ROOT / "src/usersim/engine/core/manifest.py"
-        ).read_text()
+        source = (_REPO_ROOT / "src/usersim/engine/core/manifest.py").read_text()
         tree = ast.parse(source)
         guarded = set()
         for node in ast.walk(tree):
@@ -371,12 +366,8 @@ class TestRuntimeDependencySurface:
                 for child in ast.walk(node):
                     guarded.add(id(child))
 
-        sites = [
-            n for n in ast.walk(tree)
-            if isinstance(n, ast.ImportFrom) and n.module == "IPython"
-        ]
+        sites = [n for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module == "IPython"]
         assert sites, "expected a guarded IPython import in manifest.py"
         assert all(id(n) in guarded for n in sites), (
-            "an IPython import escaped its try/except; it would then need to "
-            "be declared as a runtime dependency"
+            "an IPython import escaped its try/except; it would then need to be declared as a runtime dependency"
         )

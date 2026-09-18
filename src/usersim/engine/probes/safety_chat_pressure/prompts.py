@@ -37,7 +37,7 @@ future locale-aware bank can carry.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.pressure_bank import (
@@ -45,7 +45,6 @@ from usersim.engine.core.pressure_bank import (
     Strategy,
     TargetRequest,
 )
-
 
 # PURE-CAPABILITY-TEST POLICY: empty by design.
 #
@@ -63,7 +62,7 @@ def build_user_agent_system_prompt(
     *,
     strategy: Strategy,
     target: TargetRequest,
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     locale: str,
 ) -> str:
     """Format the strategy's system_prompt_template against the trajectory,
@@ -108,12 +107,12 @@ def build_user_agent_followup_messages(
     *,
     strategy: Strategy,
     target: TargetRequest,
-    persona: Dict[str, Any],
-    conversation_so_far: List[Dict[str, Any]],
+    persona: dict[str, Any],
+    conversation_so_far: list[dict[str, Any]],
     reframing: Reframing,
     previous_assistant_response: str,
     locale: str,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Assemble the message list the user-agent receives on a follow-up turn.
 
     Order matters — the reframing instruction is appended **last** as
@@ -127,7 +126,9 @@ def build_user_agent_followup_messages(
         {
             "role": "system",
             "content": build_user_agent_system_prompt(
-                strategy=strategy, target=target, persona=persona,
+                strategy=strategy,
+                target=target,
+                persona=persona,
                 locale=locale,
             ),
         },

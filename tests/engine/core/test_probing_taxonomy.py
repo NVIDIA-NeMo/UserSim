@@ -17,13 +17,14 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probing_taxonomy import (
-    Category,
     MIN_SUBTOPIC_HINTS,
+    SUPPORTED_SCHEMA_VERSIONS,
+    Category,
     ProbingTaxonomy,
     ProbingTaxonomyError,
-    SUPPORTED_SCHEMA_VERSIONS,
     default_probing_taxonomy_path,
     load_probing_taxonomy,
     load_probing_taxonomy_for,
@@ -32,8 +33,6 @@ from usersim.engine.core.probing_taxonomy import (
     reset_probing_taxonomy_cache,
     select_category,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -49,11 +48,7 @@ def _write(tmp_path: Path, content: str, name: str = "tax.yaml") -> Path:
 def _minimal_category(cid: str = "cat-a", hints: int = 2) -> str:
     """Render one category block (already indented for inclusion under `categories:`)."""
     hint_lines = "\n".join(f"      - 'hint {cid} #{i}'" for i in range(hints))
-    return (
-        f"  - id: {cid}\n"
-        f"    invitation: 'invitation text for {cid}'\n"
-        f"    subtopic_hints:\n{hint_lines}\n"
-    )
+    return f"  - id: {cid}\n    invitation: 'invitation text for {cid}'\n    subtopic_hints:\n{hint_lines}\n"
 
 
 def _minimal_taxonomy(extra_categories: str = "") -> str:
@@ -62,9 +57,7 @@ def _minimal_taxonomy(extra_categories: str = "") -> str:
         "locale: en_US\n"
         "taxonomy_id: test_taxonomy\n"
         "taxonomy_version: v0.1.0\n"
-        "categories:\n"
-        + _minimal_category()
-        + extra_categories
+        "categories:\n" + _minimal_category() + extra_categories
     )
 
 
@@ -140,14 +133,9 @@ class TestTopLevelValidation:
         with pytest.raises(ProbingTaxonomyError, match="YAML parse failure"):
             load_probing_taxonomy(_write(tmp_path, "schema_version: 'v0.1\nbroken: ["))
 
-    @pytest.mark.parametrize(
-        "field", ["schema_version", "locale", "taxonomy_id", "taxonomy_version"]
-    )
+    @pytest.mark.parametrize("field", ["schema_version", "locale", "taxonomy_id", "taxonomy_version"])
     def test_required_top_level_fields(self, tmp_path: Path, field: str) -> None:
-        bad = "\n".join(
-            ln for ln in _minimal_taxonomy().splitlines()
-            if not ln.lstrip().startswith(f"{field}:")
-        )
+        bad = "\n".join(ln for ln in _minimal_taxonomy().splitlines() if not ln.lstrip().startswith(f"{field}:"))
         with pytest.raises(ProbingTaxonomyError, match=field):
             load_probing_taxonomy(_write(tmp_path, bad))
 
@@ -210,9 +198,7 @@ class TestCategoryValidation:
             "    subtopic_hints:\n"
             "      - 'only one'\n"
         )
-        with pytest.raises(
-            ProbingTaxonomyError, match="at least 2 entries"
-        ):
+        with pytest.raises(ProbingTaxonomyError, match="at least 2 entries"):
             load_probing_taxonomy(_write(tmp_path, bad))
 
     def test_empty_hint_string_rejected(self, tmp_path: Path) -> None:
@@ -291,11 +277,9 @@ class TestCache:
     def test_env_override_picks_up_different_file(self, tmp_path: Path) -> None:
         path = _write(
             tmp_path,
-            _minimal_taxonomy().replace(
-                "locale: en_US", "locale: pt_BR"
-            ).replace(
-                "taxonomy_id: test_taxonomy", "taxonomy_id: override_id"
-            ),
+            _minimal_taxonomy()
+            .replace("locale: en_US", "locale: pt_BR")
+            .replace("taxonomy_id: test_taxonomy", "taxonomy_id: override_id"),
         )
         with patch.dict(os.environ, {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(path)}):
             tax = load_probing_taxonomy_for_locale("pt_BR")
@@ -304,20 +288,16 @@ class TestCache:
     def test_reset_drops_cache(self, tmp_path: Path) -> None:
         path_a = _write(
             tmp_path,
-            _minimal_taxonomy().replace(
-                "locale: en_US", "locale: pt_BR"
-            ).replace(
-                "taxonomy_id: test_taxonomy", "taxonomy_id: id_a"
-            ),
+            _minimal_taxonomy()
+            .replace("locale: en_US", "locale: pt_BR")
+            .replace("taxonomy_id: test_taxonomy", "taxonomy_id: id_a"),
             name="a.yaml",
         )
         path_b = _write(
             tmp_path,
-            _minimal_taxonomy().replace(
-                "locale: en_US", "locale: pt_BR"
-            ).replace(
-                "taxonomy_id: test_taxonomy", "taxonomy_id: id_b"
-            ),
+            _minimal_taxonomy()
+            .replace("locale: en_US", "locale: pt_BR")
+            .replace("taxonomy_id: test_taxonomy", "taxonomy_id: id_b"),
             name="b.yaml",
         )
 
@@ -333,7 +313,9 @@ class TestCache:
             os.environ.pop("USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR", None)
             assert probing_taxonomy_path_for("pt_BR") == default_probing_taxonomy_path("pt_BR")
             assert default_probing_taxonomy_path("pt_BR").parts[-3:] == (
-                "sov_ai_dynamic", "pt_BR", "categories.yaml",
+                "sov_ai_dynamic",
+                "pt_BR",
+                "categories.yaml",
             )
 
 
@@ -353,30 +335,22 @@ class TestPlaceholderField:
         assert tax.placeholder is False
 
     def test_explicit_false_loads(self, tmp_path: Path) -> None:
-        body = _minimal_taxonomy().replace(
-            "categories:\n", "placeholder: false\ncategories:\n"
-        )
+        body = _minimal_taxonomy().replace("categories:\n", "placeholder: false\ncategories:\n")
         tax = load_probing_taxonomy(_write(tmp_path, body))
         assert tax.placeholder is False
 
     def test_explicit_true_loads(self, tmp_path: Path) -> None:
-        body = _minimal_taxonomy().replace(
-            "categories:\n", "placeholder: true\ncategories:\n"
-        )
+        body = _minimal_taxonomy().replace("categories:\n", "placeholder: true\ncategories:\n")
         tax = load_probing_taxonomy(_write(tmp_path, body))
         assert tax.placeholder is True
 
     def test_non_bool_rejected(self, tmp_path: Path) -> None:
-        body = _minimal_taxonomy().replace(
-            "categories:\n", 'placeholder: "yesplease"\ncategories:\n'
-        )
+        body = _minimal_taxonomy().replace("categories:\n", 'placeholder: "yesplease"\ncategories:\n')
         with pytest.raises(ProbingTaxonomyError, match="placeholder"):
             load_probing_taxonomy(_write(tmp_path, body))
 
     def test_provenance_summary_carries_flag(self, tmp_path: Path) -> None:
-        body = _minimal_taxonomy().replace(
-            "categories:\n", "placeholder: true\ncategories:\n"
-        )
+        body = _minimal_taxonomy().replace("categories:\n", "placeholder: true\ncategories:\n")
         tax = load_probing_taxonomy(_write(tmp_path, body))
         assert tax.provenance_summary()["placeholder"] is True
 
@@ -435,9 +409,7 @@ class TestEveryShippedLocaleTaxonomy:
     """Sanity-check every per-locale taxonomy ships in the right shape."""
 
     def _load(self, locale: str) -> ProbingTaxonomy:
-        return load_probing_taxonomy(
-            packaged_assets_dir() / f"sov_ai_dynamic/{locale}/categories.yaml"
-        )
+        return load_probing_taxonomy(packaged_assets_dir() / f"sov_ai_dynamic/{locale}/categories.yaml")
 
     def test_loads(self, locale: str, prefix: str) -> None:
         tax = self._load(locale)
@@ -445,23 +417,18 @@ class TestEveryShippedLocaleTaxonomy:
         assert tax.schema_version == "v0.1"
         assert tax.taxonomy_id.startswith(locale)
 
-    def test_placeholder_flag_matches_review_status(
-        self, locale: str, prefix: str
-    ) -> None:
+    def test_placeholder_flag_matches_review_status(self, locale: str, prefix: str) -> None:
         # The shipped taxonomies have been promoted to beta and should
         # no longer carry placeholder-readiness blockers.
         tax = self._load(locale)
         assert tax.placeholder is False
 
-    def test_10_categories_with_country_prefix(
-        self, locale: str, prefix: str
-    ) -> None:
+    def test_10_categories_with_country_prefix(self, locale: str, prefix: str) -> None:
         tax = self._load(locale)
         assert len(tax.categories) == 10
         for cat in tax.categories:
             assert cat.id.startswith(f"{prefix}-"), (
-                f"{locale}: category {cat.id!r} does not start with "
-                f"{prefix!r}- prefix"
+                f"{locale}: category {cat.id!r} does not start with {prefix!r}- prefix"
             )
 
     def test_canonical_10_topic_set(self, locale: str, prefix: str) -> None:
@@ -482,20 +449,15 @@ class TestEveryShippedLocaleTaxonomy:
             "digital-services",
         }, f"{locale}: unexpected topic set {topics}"
 
-    def test_every_category_has_invitation_and_hints(
-        self, locale: str, prefix: str
-    ) -> None:
+    def test_every_category_has_invitation_and_hints(self, locale: str, prefix: str) -> None:
         tax = self._load(locale)
         for cat in tax.categories:
             assert cat.invitation, f"{locale}::{cat.id}: empty invitation"
             assert len(cat.subtopic_hints) >= MIN_SUBTOPIC_HINTS, (
-                f"{locale}::{cat.id}: only {len(cat.subtopic_hints)} hints; "
-                f"loader requires {MIN_SUBTOPIC_HINTS}"
+                f"{locale}::{cat.id}: only {len(cat.subtopic_hints)} hints; loader requires {MIN_SUBTOPIC_HINTS}"
             )
 
-    def test_invitations_use_locale_language(
-        self, locale: str, prefix: str
-    ) -> None:
+    def test_invitations_use_locale_language(self, locale: str, prefix: str) -> None:
         # Light heuristic that catches accidental English drift in
         # non-English locales (and the reverse for English locales).
         markers = _LANGUAGE_MARKERS[locale]
@@ -513,21 +475,13 @@ class TestIndiaSharesTopicUniverse:
     """en_IN and hi_Deva_IN cover the same country with two language surfaces."""
 
     def test_same_category_ids(self) -> None:
-        en = load_probing_taxonomy(
-            (packaged_assets_dir() / "sov_ai_dynamic/en_IN/categories.yaml")
-        )
-        hi = load_probing_taxonomy(
-            (packaged_assets_dir() / "sov_ai_dynamic/hi_Deva_IN/categories.yaml")
-        )
+        en = load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/en_IN/categories.yaml"))
+        hi = load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/hi_Deva_IN/categories.yaml"))
         assert set(en.category_ids()) == set(hi.category_ids())
 
     def test_taxonomy_ids_remain_locale_distinct(self) -> None:
-        en = load_probing_taxonomy(
-            (packaged_assets_dir() / "sov_ai_dynamic/en_IN/categories.yaml")
-        )
-        hi = load_probing_taxonomy(
-            (packaged_assets_dir() / "sov_ai_dynamic/hi_Deva_IN/categories.yaml")
-        )
+        en = load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/en_IN/categories.yaml"))
+        hi = load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/hi_Deva_IN/categories.yaml"))
         # Same topics, different language surfaces → different ids.
         assert en.taxonomy_id != hi.taxonomy_id
 
@@ -541,16 +495,23 @@ class TestIndiaSharesTopicUniverse:
 
 def _cat(cid, *, applies=(), affinities=(), hints=("h1", "h2")):
     return Category(
-        id=cid, invitation=f"inv {cid}", subtopic_hints=tuple(hints),
-        applies_to_types=tuple(applies), persona_affinities=tuple(affinities),
-        taxonomy_id="tx", taxonomy_version="v1",
+        id=cid,
+        invitation=f"inv {cid}",
+        subtopic_hints=tuple(hints),
+        applies_to_types=tuple(applies),
+        persona_affinities=tuple(affinities),
+        taxonomy_id="tx",
+        taxonomy_version="v1",
     )
 
 
 def _tax(*cats):
     return ProbingTaxonomy(
-        schema_version="v0.1", locale="en_US", taxonomy_id="tx",
-        taxonomy_version="v1", categories=tuple(cats),
+        schema_version="v0.1",
+        locale="en_US",
+        taxonomy_id="tx",
+        taxonomy_version="v1",
+        categories=tuple(cats),
     )
 
 
@@ -570,11 +531,13 @@ class TestEntityTypeScoping:
             _cat("universal"),
         )
         assert {c.id for c in tax.categories_for_type("bank")} == {
-            "bankcat", "universal",
+            "bankcat",
+            "universal",
         }
 
     def test_loader_parses_applies_to_types_and_persona_affinities(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         content = (
             'schema_version: "v0.1"\n'
@@ -613,28 +576,39 @@ class TestSelectCategory:
 
     def test_excluded_ids_skip_the_pool(self) -> None:
         tax = _tax(_cat("a"), _cat("b"))
-        assert select_category(
-            self._PERSONA, tax, seed=7, excluded_category_ids={"a"},
-        )[0].id == "b"
+        assert (
+            select_category(
+                self._PERSONA,
+                tax,
+                seed=7,
+                excluded_category_ids={"a"},
+            )[0].id
+            == "b"
+        )
 
     def test_all_excluded_returns_none(self) -> None:
         tax = _tax(_cat("a"))
-        assert select_category(
-            self._PERSONA, tax, excluded_category_ids={"a"},
-        ) is None
+        assert (
+            select_category(
+                self._PERSONA,
+                tax,
+                excluded_category_ids={"a"},
+            )
+            is None
+        )
 
     def test_category_weights_bias_selection(self) -> None:
         tax = _tax(_cat("a"), _cat("b"), _cat("c"))
         weighted = [
             select_category(
-                {"i": i}, tax, seed=i,
+                {"i": i},
+                tax,
+                seed=i,
                 category_weights={"a": 1.0, "b": 50.0, "c": 1.0},
             )[0].id
             for i in range(40)
         ]
-        uniform = [
-            select_category({"i": i}, tax, seed=i)[0].id for i in range(40)
-        ]
+        uniform = [select_category({"i": i}, tax, seed=i)[0].id for i in range(40)]
         # The heavy prior dominates without changing the uniform path.
         assert weighted.count("b") >= 30
         assert weighted.count("b") > uniform.count("b")
@@ -648,7 +622,9 @@ class TestFamilyLoader:
             {"USERSIM_MYDOMAIN_DYNAMIC_TAXONOMY_EN_US": str(path)},
         ):
             tax = load_probing_taxonomy_for(
-                "mydomain", "en_US", filename="dynamic.yaml",
+                "mydomain",
+                "en_US",
+                filename="dynamic.yaml",
                 env_prefix="USERSIM_MYDOMAIN_DYNAMIC_TAXONOMY",
             )
         assert tax.taxonomy_id == "test_taxonomy"

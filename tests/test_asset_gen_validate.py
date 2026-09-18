@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -14,22 +14,35 @@ from usersim.asset_gen.financial_services.pipeline import InstitutionBank, seria
 from usersim.asset_gen.financial_services.spec import RegionSpec
 from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, validate_bank
 
-_SPEC_DICT: Dict[str, Any] = {
-    "locale": "en_US", "region": "US", "currency": "USD", "currency_symbol": "$",
-    "language": "English (US)", "document_types": ["product_sheet"],
+_SPEC_DICT: dict[str, Any] = {
+    "locale": "en_US",
+    "region": "US",
+    "currency": "USD",
+    "currency_symbol": "$",
+    "language": "English (US)",
+    "document_types": ["product_sheet"],
     "domain_regulators": {"retail_banking": {"regulator_text": "x"}},
-    "institutions": [{
-        "id": "testbank", "display_name": "Test Bank", "type": "bank",
-        "brand_voice": "traditional", "domains": ["retail_banking"],
-        "products": [{
-            "id": "checking", "display_name": "Checking", "domain": "retail_banking",
-            "variables": {"overdraft_fee": {"type": "money", "value": 34}},
-        }],
-        "tool_taxonomy": [{"name": "kb_search", "discoverable": False,
-                           "side_effect_class": "read_only"}],
-        "task_templates": [{"id": "T1", "tier": "dynamic", "task_type": "advisory_qa",
-                            "persona_tags": ["region:any"]}],
-    }],
+    "institutions": [
+        {
+            "id": "testbank",
+            "display_name": "Test Bank",
+            "type": "bank",
+            "brand_voice": "traditional",
+            "domains": ["retail_banking"],
+            "products": [
+                {
+                    "id": "checking",
+                    "display_name": "Checking",
+                    "domain": "retail_banking",
+                    "variables": {"overdraft_fee": {"type": "money", "value": 34}},
+                }
+            ],
+            "tool_taxonomy": [{"name": "kb_search", "discoverable": False, "side_effect_class": "read_only"}],
+            "task_templates": [
+                {"id": "T1", "tier": "dynamic", "task_type": "advisory_qa", "persona_tags": ["region:any"]}
+            ],
+        }
+    ],
 }
 
 
@@ -37,29 +50,42 @@ def _spec() -> RegionSpec:
     return RegionSpec.model_validate(_SPEC_DICT)
 
 
-def _doc(doc_id: str, body: str) -> Dict[str, Any]:
-    return {"id": doc_id, "title": "Checking overview", "body": body,
-            "domain": "retail_banking", "product_category": "checking",
-            "document_type": "product_sheet", "source_authority": "official",
-            "placeholder": True, "mentions_tools": []}
+def _doc(doc_id: str, body: str) -> dict[str, Any]:
+    return {
+        "id": doc_id,
+        "title": "Checking overview",
+        "body": body,
+        "domain": "retail_banking",
+        "product_category": "checking",
+        "document_type": "product_sheet",
+        "source_authority": "official",
+        "placeholder": True,
+        "mentions_tools": [],
+    }
 
 
-def _write_bank(tmp_path: Path, locale: str, docs: List[Dict[str, Any]],
-                embeddings: Optional[Dict[str, List[float]]] = None) -> Path:
-    region_meta = {"locale": locale,
-                   "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
+def _write_bank(
+    tmp_path: Path, locale: str, docs: list[dict[str, Any]], embeddings: dict[str, list[float]] | None = None
+) -> Path:
+    region_meta = {"locale": locale, "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
     inst = InstitutionBank(
-        institution_meta={"institution_id": "testbank", "type": "bank",
-                          "domains": ["retail_banking"]},
+        institution_meta={"institution_id": "testbank", "type": "bank", "domains": ["retail_banking"]},
         documents=docs,
-        tools=[{"name": "kb_search", "description": "", "discoverable": False,
-                "side_effect_class": "read_only", "parameters": {}}],
+        tools=[
+            {
+                "name": "kb_search",
+                "description": "",
+                "discoverable": False,
+                "side_effect_class": "read_only",
+                "parameters": {},
+            }
+        ],
         embeddings=embeddings or {},
     )
     return serialize_bank(tmp_path / locale, region_meta, [inst], write_tasks=False)
 
 
-def _status(report, check: str, scope: Optional[str] = None) -> Optional[str]:
+def _status(report, check: str, scope: str | None = None) -> str | None:
     for r in report.results:
         if r.check == check and (scope is None or r.scope == scope):
             return r.status
@@ -81,9 +107,7 @@ def test_serialize_backfills_primitive_tool_schema(tmp_path: Path):
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "The overdraft fee is $34 per item.")])
     rep = validate_bank(bank, _spec())
     assert _status(rep, "tool_schemas", "testbank") == PASS
-    tools = yaml.safe_load(
-        (bank / "bank" / "testbank" / "tools.yaml").read_text()
-    )["tools"]
+    tools = yaml.safe_load((bank / "bank" / "testbank" / "tools.yaml").read_text())["tools"]
     kb = next(t for t in tools if t["name"] == "kb_search")
     assert kb["parameters"]["properties"]["query"]["type"] == "string"
 
@@ -92,11 +116,23 @@ def test_empty_primitive_schema_fails_tool_schemas(tmp_path: Path):
     """A bank that predates the backfill (empty kb_search on disk) is caught."""
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "The overdraft fee is $34 per item.")])
     tools_path = bank / "bank" / "testbank" / "tools.yaml"
-    tools_path.write_text(yaml.safe_dump({
-        "schema_version": "v0.1",
-        "tools": [{"name": "kb_search", "description": "", "discoverable": False,
-                   "side_effect_class": "read_only", "parameters": {}}],
-    }), encoding="utf-8")
+    tools_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "v0.1",
+                "tools": [
+                    {
+                        "name": "kb_search",
+                        "description": "",
+                        "discoverable": False,
+                        "side_effect_class": "read_only",
+                        "parameters": {},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
     rep = validate_bank(bank, _spec())
     assert _status(rep, "tool_schemas", "testbank") == FAIL
     assert rep.failed
@@ -111,8 +147,7 @@ def test_wrong_number_fails_numeric_faithfulness(tmp_path: Path):
 
 def test_non_latin_locale_fails_language_script(tmp_path: Path):
     # ja_JP bank with an English body -> expected-script fraction ~0 -> FAIL.
-    bank = _write_bank(tmp_path, "ja_JP",
-                       [_doc("D1", "The overdraft fee is thirty four dollars.")])
+    bank = _write_bank(tmp_path, "ja_JP", [_doc("D1", "The overdraft fee is thirty four dollars.")])
     rep = validate_bank(bank)  # no region_spec -> numeric skipped
     assert _status(rep, "language_script", "testbank") == FAIL
 
@@ -127,11 +162,23 @@ def test_duplicate_embeddings_warn(tmp_path: Path):
 
 def test_cli_validate_assets(tmp_path: Path):
     from usersim.cli import main
+
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "The overdraft fee is $34 per item.")])
     spec_path = tmp_path / "spec.yaml"
     spec_path.write_text(yaml.safe_dump(_SPEC_DICT), encoding="utf-8")
-    rc = main(["validate-assets", "--domain", "financial_services", "--locale", "en_US",
-               "--dir", str(bank), "--region-spec", str(spec_path)])
+    rc = main(
+        [
+            "validate-assets",
+            "--domain",
+            "financial_services",
+            "--locale",
+            "en_US",
+            "--dir",
+            str(bank),
+            "--region-spec",
+            str(spec_path),
+        ]
+    )
     assert rc == 0
 
 
@@ -187,40 +234,47 @@ def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
     check. Observed at ~8-9% of documents in real runs, e.g. "we make ownership
     affordable with an interest_rate_annual of 0%".
     """
-    leaky = _write_bank(tmp_path / "leaky", "en_US",
-                        [_doc("D1", "Our overdraft_fee is $34 per item.")])
+    leaky = _write_bank(tmp_path / "leaky", "en_US", [_doc("D1", "Our overdraft_fee is $34 per item.")])
     rep = validate_bank(leaky, _spec())
     assert _status(rep, "variable_name_leak", "testbank") == WARN
-    assert not rep.failed          # a quality flag, not a gate failure
+    assert not rep.failed  # a quality flag, not a gate failure
 
-    clean = _write_bank(tmp_path / "clean", "en_US",
-                        [_doc("D1", "Our overdraft fee is $34 per item.")])
+    clean = _write_bank(tmp_path / "clean", "en_US", [_doc("D1", "Our overdraft fee is $34 per item.")])
     rep = validate_bank(clean, _spec())
     assert _status(rep, "variable_name_leak", "testbank") == PASS
 
 
 # ── tool names and doc_keys must not appear in customer-facing prose ─────────
 
-def _bank_with(tmp_path: Path, docs: List[Dict[str, Any]],
-               tools: Optional[List[Dict[str, Any]]] = None) -> Path:
+
+def _bank_with(tmp_path: Path, docs: list[dict[str, Any]], tools: list[dict[str, Any]] | None = None) -> Path:
     """A bank whose tool taxonomy includes a real state-changing tool to leak."""
-    region_meta = {"locale": "en_US",
-                   "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
+    region_meta = {"locale": "en_US", "domain_regulators": {"retail_banking": {"regulator_text": "x"}}}
     inst = InstitutionBank(
-        institution_meta={"institution_id": "testbank", "type": "bank",
-                          "domains": ["retail_banking"]},
+        institution_meta={"institution_id": "testbank", "type": "bank", "domains": ["retail_banking"]},
         documents=docs,
-        tools=tools or [
-            {"name": "kb_search", "description": "", "discoverable": False,
-             "side_effect_class": "read_only", "parameters": {}},
-            {"name": "activate_card", "description": "", "discoverable": True,
-             "side_effect_class": "state_changing", "parameters": {}},
+        tools=tools
+        or [
+            {
+                "name": "kb_search",
+                "description": "",
+                "discoverable": False,
+                "side_effect_class": "read_only",
+                "parameters": {},
+            },
+            {
+                "name": "activate_card",
+                "description": "",
+                "discoverable": True,
+                "side_effect_class": "state_changing",
+                "parameters": {},
+            },
         ],
     )
     return serialize_bank(tmp_path / "en_US", region_meta, [inst], write_tasks=False)
 
 
-def _typed(doc_id: str, genre: str, body: str) -> Dict[str, Any]:
+def _typed(doc_id: str, genre: str, body: str) -> dict[str, Any]:
     d = _doc(doc_id, body)
     d["document_type"] = genre
     return d
@@ -230,10 +284,12 @@ def test_tool_name_in_customer_facing_prose_warns(tmp_path: Path):
     """Regression: ~10% of how_to/troubleshooting docs named an internal tool in BOTH
     locales, e.g. "the agent will use the internal activate_card tool" inside a
     document whose own convention calls it CUSTOMER-facing."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "how_to_guide",
-               "The agent will then use activate_card to switch your card on."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "how_to_guide", "The agent will then use activate_card to switch your card on."),
+        ],
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "tool_name_leak", "testbank") == WARN
 
@@ -242,18 +298,24 @@ def test_agent_facing_genres_may_name_tools(tmp_path: Path):
     """policy_procedure / discoverable_tool_doc / regulatory_note exist to document
     the tool; regulatory_note's convention is literally "the AGENT's obligation"."""
     for genre in ("policy_procedure", "discoverable_tool_doc", "regulatory_note"):
-        bank = _bank_with(tmp_path / genre, [
-            _typed("D1", genre, "Call activate_card once identity is verified."),
-        ])
+        bank = _bank_with(
+            tmp_path / genre,
+            [
+                _typed("D1", genre, "Call activate_card once identity is verified."),
+            ],
+        )
         rep = validate_bank(bank, None)
         assert _status(rep, "tool_name_leak", "testbank") == PASS, genre
 
 
 def test_ordinary_prose_does_not_false_positive_as_a_tool_name(tmp_path: Path):
     """Tool names are snake_case, so the English phrase must not trip the check."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "how_to_guide", "Ask us to activate card services for you."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "how_to_guide", "Ask us to activate card services for you."),
+        ],
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "tool_name_leak", "testbank") == PASS
 
@@ -261,19 +323,23 @@ def test_ordinary_prose_does_not_false_positive_as_a_tool_name(tmp_path: Path):
 def test_raw_doc_key_reference_warns(tmp_path: Path):
     """Docs citing "1-Year Fixed Deposit - faq_5" hand the reader an internal slug and
     defer their own substance; they average 2.38 on self-containment vs 2.78."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "fee_schedule",
-               "For penalty calculations refer to 1-Year Fixed Deposit - faq_5."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "fee_schedule", "For penalty calculations refer to 1-Year Fixed Deposit - faq_5."),
+        ],
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "doc_key_leak", "testbank") == WARN
 
 
 def test_title_cross_reference_is_fine(tmp_path: Path):
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "fee_schedule",
-               "See 1-Year Fixed Deposit - fee schedule for the penalty detail."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "fee_schedule", "See 1-Year Fixed Deposit - fee schedule for the penalty detail."),
+        ],
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "doc_key_leak", "testbank") == PASS
 
@@ -283,20 +349,35 @@ def test_a_tool_named_like_a_doc_key_is_not_double_reported(tmp_path: Path):
     ``<tool>_policy`` doc_key shape. It is a tool-name leak, not a doc_key leak, and
     must be blamed under exactly one check."""
     tools = [
-        {"name": "kb_search", "description": "", "discoverable": False,
-         "side_effect_class": "read_only", "parameters": {}},
-        {"name": "renew_policy", "description": "", "discoverable": True,
-         "side_effect_class": "state_changing", "parameters": {}},
+        {
+            "name": "kb_search",
+            "description": "",
+            "discoverable": False,
+            "side_effect_class": "read_only",
+            "parameters": {},
+        },
+        {
+            "name": "renew_policy",
+            "description": "",
+            "discoverable": True,
+            "side_effect_class": "state_changing",
+            "parameters": {},
+        },
     ]
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "how_to_guide", "We will call renew_policy for you."),
-    ], tools=tools)
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "how_to_guide", "We will call renew_policy for you."),
+        ],
+        tools=tools,
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "tool_name_leak", "testbank") == WARN
     assert _status(rep, "doc_key_leak", "testbank") == PASS
 
 
 # ── provenance has to survive the freeze ─────────────────────────────────────
+
 
 def test_freeze_promotes_the_generation_report():
     """``_generation_report.json`` is written to the scratch --out dir, and the freeze
@@ -313,14 +394,10 @@ def test_freeze_promotes_the_generation_report():
 
     # Derived from the package, not the working directory: a relative path
     # here turns a real regression into a skip that nobody reads.
-    nb_path = (
-        Path(asset_gen.__file__).resolve().parent
-        / "notebooks" / "finance_assets.ipynb"
-    )
+    nb_path = Path(asset_gen.__file__).resolve().parent / "notebooks" / "finance_assets.ipynb"
     assert nb_path.is_file(), f"asset notebook is missing from the package: {nb_path}"
     nb = _json.loads(nb_path.read_text())
-    freeze = [s for s in ("".join(c.get("source", [])) for c in nb["cells"])
-              if "FREEZE" in s and "shutil" in s]
+    freeze = [s for s in ("".join(c.get("source", [])) for c in nb["cells"]) if "FREEZE" in s and "shutil" in s]
     assert freeze, "no freeze cell found"
     assert any("_generation_report.json" in s for s in freeze)
 
@@ -335,41 +412,63 @@ def test_freeze_promotes_the_generation_report():
 # refused to act for want of an id -- while northwind's and meridian's versions of the
 # same tool asked for `user_details` and worked.
 
+
 def test_tool_doc_requiring_an_unsourced_id_warns(tmp_path: Path):
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "discoverable_tool_doc",
-               "manage_authorized_users(account_id: string, user_id: string). "
-               "user_id: the unique identifier of the person being added."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed(
+                "D1",
+                "discoverable_tool_doc",
+                "manage_authorized_users(account_id: string, user_id: string). "
+                "user_id: the unique identifier of the person being added.",
+            ),
+        ],
+    )
     assert _status(validate_bank(bank, None), "unsourced_tool_argument", "testbank") == WARN
 
 
 def test_taking_the_person_s_details_is_fine(tmp_path: Path):
     """The working form: what the customer can actually tell the agent."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "discoverable_tool_doc",
-               "manage_authorized_users(account_id: string, user_details: object). "
-               "user_details: the person's full name, date of birth and contact."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed(
+                "D1",
+                "discoverable_tool_doc",
+                "manage_authorized_users(account_id: string, user_details: object). "
+                "user_details: the person's full name, date of birth and contact.",
+            ),
+        ],
+    )
     assert _status(validate_bank(bank, None), "unsourced_tool_argument", "testbank") == PASS
 
 
 def test_account_id_is_not_flagged(tmp_path: Path):
     """account_id and card_id HAVE a source -- get_accounts resolves them from a
     last-4 -- so requiring one is correct and must not be reported."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "discoverable_tool_doc",
-               "freeze_card(account_id: string, card_id: string). Use get_accounts "
-               "to resolve the account_id from the customer's last-4."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed(
+                "D1",
+                "discoverable_tool_doc",
+                "freeze_card(account_id: string, card_id: string). Use get_accounts "
+                "to resolve the account_id from the customer's last-4.",
+            ),
+        ],
+    )
     assert _status(validate_bank(bank, None), "unsourced_tool_argument", "testbank") == PASS
 
 
 def test_only_tool_docs_are_scanned(tmp_path: Path):
     """A customer-facing genre mentioning an id in passing is not a signature."""
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "faq", "Your customer_id appears on your statement header."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "faq", "Your customer_id appears on your statement header."),
+        ],
+    )
     assert _status(validate_bank(bank, None), "unsourced_tool_argument", "testbank") == PASS
 
 
@@ -382,14 +481,14 @@ def test_the_check_actually_reads_the_documents(tmp_path: Path):
     than no check: it reports safety it never verified. Two offenders in one bank must
     be counted, which is only possible if the documents were really read.
     """
-    bank = _bank_with(tmp_path, [
-        _typed("D1", "discoverable_tool_doc", "add_user(user_id: string)"),
-        _typed("D2", "policy_procedure", "Look up the client_id, then call the tool."),
-    ])
+    bank = _bank_with(
+        tmp_path,
+        [
+            _typed("D1", "discoverable_tool_doc", "add_user(user_id: string)"),
+            _typed("D2", "policy_procedure", "Look up the client_id, then call the tool."),
+        ],
+    )
     rep = validate_bank(bank, None)
     assert _status(rep, "unsourced_tool_argument", "testbank") == WARN
-    detail = next(
-        r.detail for r in rep.results
-        if r.check == "unsourced_tool_argument" and r.scope == "testbank"
-    )
+    detail = next(r.detail for r in rep.results if r.check == "unsourced_tool_argument" and r.scope == "testbank")
     assert "2 tool doc(s)" in detail

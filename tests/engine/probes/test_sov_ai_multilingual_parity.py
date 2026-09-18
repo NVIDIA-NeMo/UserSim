@@ -27,35 +27,36 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+import usersim.engine.generator  # noqa: F401 — triggers probe registration
+from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
     OutcomeStatus,
     Provenance,
     WarningKind,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.core.query_bank import (
     Query,
     QueryBank,
     QueryProvenance,
     load_query_bank,
 )
-import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
 from usersim.engine.probes.sov_ai_multilingual_parity import (
     generator as probe_gen,
+)
+from usersim.engine.probes.sov_ai_multilingual_parity import (
     prompts,
     task_derivation,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -63,7 +64,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = (packaged_assets_dir() / "sov_ai_multilingual_parity/sample.yaml")
+SAMPLE_BANK_PATH = packaged_assets_dir() / "sov_ai_multilingual_parity/sample.yaml"
 
 
 @pytest.fixture
@@ -72,7 +73,7 @@ def sample_bank() -> QueryBank:
 
 
 @pytest.fixture
-def br_persona_southeast() -> Dict[str, Any]:
+def br_persona_southeast() -> dict[str, Any]:
     return {
         "first_name": "Mariana",
         "last_name": "Silva",
@@ -86,7 +87,7 @@ def br_persona_southeast() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def in_persona_health_interest() -> Dict[str, Any]:
+def in_persona_health_interest() -> dict[str, Any]:
     return {
         "first_name": "Priya",
         "last_name": "Sharma",
@@ -109,9 +110,11 @@ def _reset_bank_cache_between_tests():
 @pytest.fixture
 def simulator_cfg():
     """Minimal cfg stub the probe reads from."""
+
     class _Cfg:
         random_seed = 42
         max_turns = 1
+
     return _Cfg()
 
 
@@ -120,13 +123,14 @@ def simulator_cfg_two_turns():
     class _Cfg:
         random_seed = 42
         max_turns = 2
+
     return _Cfg()
 
 
 def _mock_call_llm(
-    assistant_responses: List[Dict[str, Any]],
+    assistant_responses: list[dict[str, Any]],
     *,
-    user_responses: Optional[List[Dict[str, Any]]] = None,
+    user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
     """Return a side_effect callable that dispatches by model alias.
@@ -151,19 +155,14 @@ def _mock_call_llm(
     # parse failure → reformat retry → ``failure`` rating, which
     # would burn through gate retries in the unified loop.
     rating = "success" if judge_pass else "failure"
-    judge_payload = (
-        f"<explanation>looks fine</explanation>\n"
-        f"<rating>{rating}</rating>"
-    )
+    judge_payload = f"<explanation>looks fine</explanation>\n<rating>{rating}</rating>"
 
     def _side_effect(models, alias, msgs, **kwargs):
         if alias == "assistant_model":
             try:
                 return next(iter_assist)
             except StopIteration as e:
-                raise AssertionError(
-                    "test consumed more assistant_model calls than expected"
-                ) from e
+                raise AssertionError("test consumed more assistant_model calls than expected") from e
         if alias == "judge_model":
             return {"role": "assistant", "content": judge_payload}
         if alias == "user_model":
@@ -181,7 +180,7 @@ def _mock_call_llm(
     return _side_effect
 
 
-def _shipped_bank_env() -> Dict[str, str]:
+def _shipped_bank_env() -> dict[str, str]:
     """Env vars to point ``load_query_bank_default`` at the shipped sample."""
     return {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": str(SAMPLE_BANK_PATH)}
 
@@ -222,9 +221,7 @@ def _query(
     opt_out: tuple = (),
 ) -> Query:
     """Build a synthetic Query for the unit-test layer."""
-    renderings = {
-        loc: f"Question {qid} in {loc}" for loc in locales if loc not in opt_out
-    }
+    renderings = {loc: f"Question {qid} in {loc}" for loc in locales if loc not in opt_out}
     return Query(
         id=qid,
         domain=domain,
@@ -277,22 +274,17 @@ class TestPersonaToTagsReExport:
         from usersim.engine.probes.sov_ai_facts.task_derivation import (
             persona_to_tags as canonical,
         )
+
         assert task_derivation.persona_to_tags is canonical
 
-    def test_pt_br_persona_gets_brazilian_region(
-        self, br_persona_southeast: Dict[str, Any]
-    ) -> None:
+    def test_pt_br_persona_gets_brazilian_region(self, br_persona_southeast: dict[str, Any]) -> None:
         tags = task_derivation.persona_to_tags(br_persona_southeast, "pt_BR")
         assert "region:southeast" in tags
         assert "interest:health" in tags  # via "Enfermeira" → healthcare
         assert "education:tertiary" in tags
 
-    def test_in_persona_gets_health_interest(
-        self, in_persona_health_interest: Dict[str, Any]
-    ) -> None:
-        tags = task_derivation.persona_to_tags(
-            in_persona_health_interest, "en_IN"
-        )
+    def test_in_persona_gets_health_interest(self, in_persona_health_interest: dict[str, Any]) -> None:
+        tags = task_derivation.persona_to_tags(in_persona_health_interest, "en_IN")
         assert "interest:health" in tags
         assert "education:tertiary" in tags
         assert "age:25-44" in tags
@@ -305,20 +297,17 @@ class TestPersonaToTagsReExport:
 
 class TestDeriveTask:
     def test_returns_none_when_pool_empty(self) -> None:
-        bank = _make_bank((
-            _query("Q1", persona_tags=("interest:music",)),
-        ))
+        bank = _make_bank((_query("Q1", persona_tags=("interest:music",)),))
         # A persona with no music interest will not match.
         persona = {"age": 30, "education_level": "high school"}
         assert task_derivation.derive_task(persona, bank, "en_US", seed=1) is None
 
     def test_deterministic_for_same_inputs(self) -> None:
-        bank = _make_bank(tuple(
-            _query(f"Q{i}", persona_tags=("age:any", "education:any"))
-            for i in range(8)
-        ))
+        bank = _make_bank(tuple(_query(f"Q{i}", persona_tags=("age:any", "education:any")) for i in range(8)))
         persona = {
-            "first_name": "X", "last_name": "Y", "age": 30,
+            "first_name": "X",
+            "last_name": "Y",
+            "age": 30,
             "education_level": "high school",
         }
         a = task_derivation.derive_task(persona, bank, "en_US", seed=42)
@@ -326,31 +315,26 @@ class TestDeriveTask:
         assert a is not None and a.id == b.id
 
     def test_different_seed_can_produce_different_pick(self) -> None:
-        bank = _make_bank(tuple(
-            _query(f"Q{i}", persona_tags=("age:any", "education:any"))
-            for i in range(8)
-        ))
+        bank = _make_bank(tuple(_query(f"Q{i}", persona_tags=("age:any", "education:any")) for i in range(8)))
         persona = {
-            "first_name": "X", "last_name": "Y", "age": 30,
+            "first_name": "X",
+            "last_name": "Y",
+            "age": 30,
             "education_level": "high school",
         }
-        picks = {
-            task_derivation.derive_task(persona, bank, "en_US", seed=s).id
-            for s in range(20)
-        }
+        picks = {task_derivation.derive_task(persona, bank, "en_US", seed=s).id for s in range(20)}
         # Across 20 seeds we should see more than one distinct pick out
         # of 8 candidates (probability of collapsing to 1 is negligible).
         assert len(picks) > 1
 
     def test_bank_version_change_changes_pick(self) -> None:
-        queries = tuple(
-            _query(f"Q{i}", persona_tags=("age:any", "education:any"))
-            for i in range(8)
-        )
+        queries = tuple(_query(f"Q{i}", persona_tags=("age:any", "education:any")) for i in range(8))
         bank_a = _make_bank(queries, bank_version="v0.1.0")
         bank_b = _make_bank(queries, bank_version="v0.2.0")
         persona = {
-            "first_name": "X", "last_name": "Y", "age": 30,
+            "first_name": "X",
+            "last_name": "Y",
+            "age": 30,
             "education_level": "high school",
         }
         # Same persona, same seed, two bank versions — collect the picks
@@ -364,50 +348,56 @@ class TestDeriveTask:
             if a.id != b.id:
                 any_diff = True
                 break
-        assert any_diff, (
-            "bank_version change should perturb the deterministic pick"
-        )
+        assert any_diff, "bank_version change should perturb the deterministic pick"
 
     def test_locale_opt_out_filters_query(self) -> None:
         # Two queries: one supports both locales, one opts out of pt_BR.
-        bank = _make_bank((
-            _query("Q-OK", persona_tags=("age:any", "education:any")),
-            _query(
-                "Q-OPTOUT",
-                persona_tags=("age:any", "education:any"),
-                opt_out=("pt_BR",),
-            ),
-        ))
+        bank = _make_bank(
+            (
+                _query("Q-OK", persona_tags=("age:any", "education:any")),
+                _query(
+                    "Q-OPTOUT",
+                    persona_tags=("age:any", "education:any"),
+                    opt_out=("pt_BR",),
+                ),
+            )
+        )
         persona = {"age": 30, "education_level": "high school"}
         # Pt_BR pool can only return Q-OK.
         for s in range(30):
             picked = task_derivation.derive_task(
-                persona, bank, "pt_BR", seed=s,
+                persona,
+                bank,
+                "pt_BR",
+                seed=s,
             )
             assert picked is not None and picked.id == "Q-OK", (
                 f"opted-out query should never appear for pt_BR, got {picked.id}"
             )
 
     def test_excluded_query_ids_filtered(self) -> None:
-        bank = _make_bank(tuple(
-            _query(f"Q{i}", persona_tags=("age:any", "education:any"))
-            for i in range(8)
-        ))
+        bank = _make_bank(tuple(_query(f"Q{i}", persona_tags=("age:any", "education:any")) for i in range(8)))
         persona = {"age": 30, "education_level": "high school"}
         # Exclude all but one — the remaining must be picked.
         excluded = {f"Q{i}" for i in range(7)}
         picked = task_derivation.derive_task(
-            persona, bank, "en_US", seed=42, excluded_query_ids=excluded,
+            persona,
+            bank,
+            "en_US",
+            seed=42,
+            excluded_query_ids=excluded,
         )
         assert picked is not None and picked.id == "Q7"
 
     def test_excluded_takes_pool_to_zero_returns_none(self) -> None:
-        bank = _make_bank((
-            _query("Q-ONLY", persona_tags=("age:any", "education:any")),
-        ))
+        bank = _make_bank((_query("Q-ONLY", persona_tags=("age:any", "education:any")),))
         persona = {"age": 30, "education_level": "high school"}
         out = task_derivation.derive_task(
-            persona, bank, "en_US", seed=42, excluded_query_ids={"Q-ONLY"},
+            persona,
+            bank,
+            "en_US",
+            seed=42,
+            excluded_query_ids={"Q-ONLY"},
         )
         assert out is None
 
@@ -479,9 +469,7 @@ class TestPrompts:
         "locale",
         SHIPPED_LOCALES,
     )
-    def test_every_supported_locale_has_followup_instruction(
-        self, locale: str
-    ) -> None:
+    def test_every_supported_locale_has_followup_instruction(self, locale: str) -> None:
         text = prompts.get_followup_instruction(locale)
         assert isinstance(text, str) and len(text) > 100
 
@@ -515,20 +503,31 @@ class TestSimulateSovAiMultilingualParity:
         # this is a fast smoke check that the SovAiMultilingualParityProbe
         # class itself is the registered target.
         assert "sov_ai_multilingual_parity" in _PROBE_REGISTRY
-        assert resolve_probe("sov_ai_multilingual_parity").__name__ == (
-            "SovAiMultilingualParityProbe"
-        )
+        assert resolve_probe("sov_ai_multilingual_parity").__name__ == ("SovAiMultilingualParityProbe")
 
     def test_single_turn_runs_end_to_end(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(_mock_call_llm([
-                {"role": "assistant", "content": "Resposta de teste."},
-            ])):
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            _patched_call_llm(
+                _mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "Resposta de teste."},
+                    ]
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=br_persona_southeast,
                 profile={},
@@ -555,7 +554,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_first_user_turn_is_locale_rendering_verbatim(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Pick the deterministic choice for this (persona, seed) so we
@@ -563,7 +562,9 @@ class TestSimulateSovAiMultilingualParity:
         with patch.dict(os.environ, _shipped_bank_env()):
             bank = probe_gen._load_bank()
             picked = task_derivation.derive_task(
-                br_persona_southeast, bank, "pt_BR",
+                br_persona_southeast,
+                bank,
+                "pt_BR",
                 seed=simulator_cfg.random_seed,
             )
             assert picked is not None
@@ -573,11 +574,24 @@ class TestSimulateSovAiMultilingualParity:
         # rather than picking up the cached bank we just used.
         probe_gen._reset_bank_cache()
 
-        with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(_mock_call_llm([
-                {"role": "assistant", "content": "ok"},
-            ])):
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            _patched_call_llm(
+                _mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=br_persona_southeast,
                 profile={},
@@ -599,27 +613,32 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_two_turn_runs_followup(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg_two_turns: Any,
     ) -> None:
-        with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(
-            _mock_call_llm(
-                assistant_responses=[
-                    {"role": "assistant", "content": "Primeira resposta."},
-                    {"role": "assistant", "content": "Segunda resposta."},
-                ],
-                user_responses=[
-                    {
-                        "role": "assistant",
-                        "content": "Mas e quanto a outra parte?",
-                    },
-                ],
-            )
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            _patched_call_llm(
+                _mock_call_llm(
+                    assistant_responses=[
+                        {"role": "assistant", "content": "Primeira resposta."},
+                        {"role": "assistant", "content": "Segunda resposta."},
+                    ],
+                    user_responses=[
+                        {
+                            "role": "assistant",
+                            "content": "Mas e quanto a outra parte?",
+                        },
+                    ],
+                )
+            ),
         ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
-                    "user_model": object(), "assistant_model": object(),
-                    "judge_model": object(), "summary_model": object(),
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
                     "api_response_model": object(),
                 },
                 data={},
@@ -640,7 +659,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_locale_not_in_bank_returns_structured_failure(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
@@ -673,22 +692,31 @@ class TestSimulateSovAiMultilingualParity:
         # geography" / "interest:history" wildcards from persona_to_tags.
         # To force no-match we patch a synthetic bank with a tag that
         # the persona cannot produce.
-        synthetic_bank = _make_bank((
-            _query(
-                "Q-IMP",
-                persona_tags=("interest:nonexistent-interest",),
-                locales=("en_US", "pt_BR"),
+        synthetic_bank = _make_bank(
+            (
+                _query(
+                    "Q-IMP",
+                    persona_tags=("interest:nonexistent-interest",),
+                    locales=("en_US", "pt_BR"),
+                ),
             ),
-        ), locales=("en_US", "pt_BR"))
+            locales=("en_US", "pt_BR"),
+        )
         mock_call = patch(
             "usersim.engine.core.simulation.call_llm",
         )
         mock_judge_call = patch(
             "usersim.engine.core.judges.call_llm",
         )
-        with patch.object(
-            probe_gen, "_load_bank", return_value=synthetic_bank,
-        ), mock_call as mc, mock_judge_call as mjc:
+        with (
+            patch.object(
+                probe_gen,
+                "_load_bank",
+                return_value=synthetic_bank,
+            ),
+            mock_call as mc,
+            mock_judge_call as mjc,
+        ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
                 models={},
                 data={},
@@ -710,17 +738,26 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_assistant_turn1_failure_is_attributed_to_assistant_model(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         def _raises(*args, **kwargs):
             raise RuntimeError("assistant API exploded")
 
-        with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(
-            _raises,
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            _patched_call_llm(
+                _raises,
+            ),
         ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona=br_persona_southeast,
                 profile={},
@@ -741,7 +778,7 @@ class TestSimulateSovAiMultilingualParity:
 
     def test_bank_load_failure_returns_structured_failure(
         self,
-        br_persona_southeast: Dict[str, Any],
+        br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         # Point env at a path that does not exist.
@@ -765,7 +802,8 @@ class TestSimulateSovAiMultilingualParity:
         assert "query-bank load failed" in outcome["failure_detail"]
 
     def test_non_placeholder_query_does_not_emit_placeholder_warning(
-        self, simulator_cfg: Any,
+        self,
+        simulator_cfg: Any,
     ) -> None:
         # Synthetic non-placeholder bank to confirm the warning is
         # *only* attached when placeholder=True.
@@ -780,13 +818,28 @@ class TestSimulateSovAiMultilingualParity:
             ),
             locales=("en_US",),
         )
-        with patch.object(
-            probe_gen, "_load_bank", return_value=synthetic_bank,
-        ), _patched_call_llm(_mock_call_llm([
-                {"role": "assistant", "content": "ok"},
-            ])):
+        with (
+            patch.object(
+                probe_gen,
+                "_load_bank",
+                return_value=synthetic_bank,
+            ),
+            _patched_call_llm(
+                _mock_call_llm(
+                    [
+                        {"role": "assistant", "content": "ok"},
+                    ]
+                )
+            ),
+        ):
             result = probe_gen.simulate_sov_ai_multilingual_parity(
-                models={"user_model": object(), "assistant_model": object(), "judge_model": object(), "summary_model": object(), "api_response_model": object()},
+                models={
+                    "user_model": object(),
+                    "assistant_model": object(),
+                    "judge_model": object(),
+                    "summary_model": object(),
+                    "api_response_model": object(),
+                },
                 data={},
                 persona={"age": 30, "education_level": "high school"},
                 profile={},
@@ -796,10 +849,7 @@ class TestSimulateSovAiMultilingualParity:
                 provenance=Provenance(),
             )
         outcome = json.loads(result["simulation_outcome"])
-        assert not any(
-            w["kind"] == WarningKind.USED_PLACEHOLDER_QUERY.value
-            for w in outcome["warnings"]
-        )
+        assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_QUERY.value for w in outcome["warnings"])
 
 
 # ---------------------------------------------------------------------------

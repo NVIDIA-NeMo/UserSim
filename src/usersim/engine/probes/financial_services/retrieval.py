@@ -61,7 +61,7 @@ from __future__ import annotations
 
 import math
 import re
-from typing import List, Optional, Sequence
+from typing import Sequence
 
 from usersim.engine.core.finance_bank import Document, Institution
 
@@ -72,7 +72,7 @@ def _tokens(text: str) -> set:
     return set(_WORD_RE.findall(text.lower()))
 
 
-def _lexical_rank(institution: Institution, query: str, k: int) -> List[Document]:
+def _lexical_rank(institution: Institution, query: str, k: int) -> list[Document]:
     q = _tokens(query)
     if not q:
         return list(institution.documents[:k])
@@ -98,9 +98,9 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
 def _dense_rank(
     institution: Institution,
     query: str,
-    query_embedding: Optional[Sequence[float]],
+    query_embedding: Sequence[float] | None,
     k: int,
-) -> List[Document]:
+) -> list[Document]:
     """Cosine top-k over the institution's precomputed doc vectors.
 
     Falls back to lexical ranking when the query was not embedded (no endpoint)
@@ -127,7 +127,7 @@ def _dense_rank(
 _LEXICAL_WEIGHT = 0.5
 
 
-def _minmax(values: List[float]) -> List[float]:
+def _minmax(values: list[float]) -> list[float]:
     """Scale to [0, 1]. Cosine and token-overlap counts are not comparable
     otherwise; a degenerate (all-equal) signal contributes nothing rather than
     dividing by zero."""
@@ -141,9 +141,9 @@ def _minmax(values: List[float]) -> List[float]:
 def _hybrid_rank(
     institution: Institution,
     query: str,
-    query_embedding: Optional[Sequence[float]],
+    query_embedding: Sequence[float] | None,
     k: int,
-) -> List[Document]:
+) -> list[Document]:
     """Normalised dense cosine + normalised lexical overlap.
 
     Degrades to pure lexical when there is no query vector or no sidecar — which
@@ -164,9 +164,7 @@ def _hybrid_rank(
 
     dense, lex = _minmax(dense_raw), _minmax(lex_raw)
     w = _LEXICAL_WEIGHT
-    scored = [
-        (w * lex[i] + (1.0 - w) * dense[i], docs[i]) for i in range(len(docs))
-    ]
+    scored = [(w * lex[i] + (1.0 - w) * dense[i], docs[i]) for i in range(len(docs))]
     scored.sort(key=lambda s: (-s[0], s[1].id))
     return [d for _, d in scored[:k]]
 
@@ -179,8 +177,8 @@ def retrieve(
     mode: str = "golden",
     gold_document_ids: Sequence[str] = (),
     distractor_k: int = 3,
-    query_embedding: Optional[Sequence[float]] = None,
-) -> List[Document]:
+    query_embedding: Sequence[float] | None = None,
+) -> list[Document]:
     """Return up to ``k`` documents for ``query``, SCOPED to ``institution``.
 
     Retrieval never crosses institutions. ``hybrid`` (the default mode at the

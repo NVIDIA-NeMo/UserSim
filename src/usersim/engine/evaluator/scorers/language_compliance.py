@@ -68,7 +68,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.language_detection import (
     detect_language_name,
@@ -107,9 +107,9 @@ INTEGRITY_MIN_CHARS: int = 80
 
 
 def score_language_compliance_trajectory(
-    trajectory: Dict[str, Any],
-    models: Dict[str, Any],  # unused — deterministic scorer, no LLM call
-) -> Dict[str, Any]:
+    trajectory: dict[str, Any],
+    models: dict[str, Any],  # unused — deterministic scorer, no LLM call
+) -> dict[str, Any]:
     """Score a trajectory's assistant turns for language + script compliance.
 
     Contract:
@@ -128,12 +128,8 @@ def score_language_compliance_trajectory(
     - Returns ``status_proposal=False`` whenever any axis it computed < 1.0.
     """
     locale = trajectory.get("locale")
-    expected_lang = (
-        expected_language_name(locale) if isinstance(locale, str) else None
-    )
-    expected_ranges = (
-        expected_script_ranges(locale) if isinstance(locale, str) else ()
-    )
+    expected_lang = expected_language_name(locale) if isinstance(locale, str) else None
+    expected_ranges = expected_script_ranges(locale) if isinstance(locale, str) else ()
     detector_available = expected_lang is not None
     # Latin-only expected script + no detector = nothing measurable. This is the
     # romanized case (Hindi or Telugu written in Latin), where both script axes
@@ -160,15 +156,12 @@ def score_language_compliance_trajectory(
     )
     if not assistant_messages:
         return _noop(
-            error=(
-                "no assistant turns in conversation_messages — "
-                "language_compliance scorer skipped"
-            ),
+            error=("no assistant turns in conversation_messages — language_compliance scorer skipped"),
         )
 
-    per_turn: List[Dict[str, Any]] = []
+    per_turn: list[dict[str, Any]] = []
     matches = 0
-    script_fractions: List[float] = []
+    script_fractions: list[float] = []
 
     for idx, content in enumerate(assistant_messages):
         text = content or ""
@@ -179,33 +172,32 @@ def score_language_compliance_trajectory(
         if match:
             matches += 1
         script_fractions.append(script_frac)
-        per_turn.append({
-            "turn_idx": idx,
-            "n_chars": len(text),
-            "detected_language": detected,
-            "expected_language": expected_lang,
-            "language_match": match,
-            "script_compliance": round(script_frac, 4),
-            # Surface dominant-script breakdown when the per-turn
-            # compliance failed — gives the reviewer the actionable
-            # signal of what the model used instead.
-            "script_dominance": (
-                script_dominance(text) if script_frac < 1.0 else None
-            ),
-            # Names the scripts that had no business being here, so the
-            # reviewer sees "hangul, cyrillic" rather than a bare rate.
-            "foreign_scripts": list(foreign),
-            "counts_toward_integrity": len(text.strip()) >= INTEGRITY_MIN_CHARS,
-        })
+        per_turn.append(
+            {
+                "turn_idx": idx,
+                "n_chars": len(text),
+                "detected_language": detected,
+                "expected_language": expected_lang,
+                "language_match": match,
+                "script_compliance": round(script_frac, 4),
+                # Surface dominant-script breakdown when the per-turn
+                # compliance failed — gives the reviewer the actionable
+                # signal of what the model used instead.
+                "script_dominance": (script_dominance(text) if script_frac < 1.0 else None),
+                # Names the scripts that had no business being here, so the
+                # reviewer sees "hangul, cyrillic" rather than a bare rate.
+                "foreign_scripts": list(foreign),
+                "counts_toward_integrity": len(text.strip()) >= INTEGRITY_MIN_CHARS,
+            }
+        )
 
     n_turns = len(assistant_messages)
-    script_compliance_rate = (
-        sum(script_fractions) / n_turns if script_fractions else 1.0
-    )
+    script_compliance_rate = sum(script_fractions) / n_turns if script_fractions else 1.0
 
-    scores: Dict[str, Any] = {
+    scores: dict[str, Any] = {
         "language.script_compliance_rate": _score_cell(
-            round(script_compliance_rate, 4), n_turns,
+            round(script_compliance_rate, 4),
+            n_turns,
             _summarize_script_compliance(per_turn, script_compliance_rate, n_turns),
         ),
         "language.script_integrity_rate": _script_integrity_cell(per_turn),
@@ -215,11 +207,13 @@ def score_language_compliance_trajectory(
         # lingua has a model. Absent beats zero: a missing axis is skipped by
         # the capability aggregation, whereas a 0.0 would read as a real failure.
         scores["language.requested_language_match_rate"] = _score_cell(
-            matches / n_turns, n_turns,
+            matches / n_turns,
+            n_turns,
             _summarize_match_rate(per_turn, expected_lang, matches, n_turns),
         )
         scores["language.first_turn_match"] = _score_cell(
-            1.0 if per_turn[0]["language_match"] else 0.0, 1,
+            1.0 if per_turn[0]["language_match"] else 0.0,
+            1,
             _summarize_first_turn(per_turn[0], expected_lang),
         )
 
@@ -248,7 +242,7 @@ def score_language_compliance_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _extract_assistant_messages(raw: Any) -> List[str]:
+def _extract_assistant_messages(raw: Any) -> list[str]:
     """Pull the assistant turns out of ``conversation_messages`` as a
     list of content strings, in turn order. Tolerates both list and
     JSON-string forms.
@@ -266,7 +260,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
       flagging the trajectory as a language-mismatch failure.
     """
     messages = _normalize_conversation(raw)
-    out: List[str] = []
+    out: list[str] = []
     for m in messages:
         if not isinstance(m, dict):
             continue
@@ -284,7 +278,7 @@ def _extract_assistant_messages(raw: Any) -> List[str]:
     return out
 
 
-def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
+def _normalize_conversation(raw: Any) -> list[dict[str, Any]]:
     if raw is None:
         return []
     if isinstance(raw, list):
@@ -299,21 +293,17 @@ def _normalize_conversation(raw: Any) -> List[Dict[str, Any]]:
 
 
 def _summarize_match_rate(
-    per_turn: List[Dict[str, Any]],
+    per_turn: list[dict[str, Any]],
     expected_lang: str,
     matches: int,
     n_turns: int,
 ) -> str:
     """Narrate which assistant turns failed the language check, if any."""
     if matches == n_turns:
-        return (
-            f"All {n_turns} assistant turn(s) detected as {expected_lang}."
-        )
+        return f"All {n_turns} assistant turn(s) detected as {expected_lang}."
     failing = [d for d in per_turn if not d["language_match"]]
     failing_chunks = ", ".join(
-        f"#{d['turn_idx'] + 1} ({d['detected_language'] or 'undetected'}, "
-        f"{d['n_chars']} chars)"
-        for d in failing[:3]
+        f"#{d['turn_idx'] + 1} ({d['detected_language'] or 'undetected'}, {d['n_chars']} chars)" for d in failing[:3]
     )
     suffix = "" if len(failing) <= 3 else f" + {len(failing) - 3} more"
     return (
@@ -323,7 +313,7 @@ def _summarize_match_rate(
 
 
 def _summarize_script_compliance(
-    per_turn: List[Dict[str, Any]],
+    per_turn: list[dict[str, Any]],
     rate: float,
     n_turns: int,
 ) -> str:
@@ -352,22 +342,15 @@ def _summarize_script_compliance(
             reverse=True,
         )
         if dominant_items:
-            dom_text = ", ".join(
-                f"{k} {round(v * 100)}%" for k, v in dominant_items[:2]
-            )
+            dom_text = ", ".join(f"{k} {round(v * 100)}%" for k, v in dominant_items[:2])
         else:
             dom_text = "n/a"
-        chunks.append(
-            f"#{d['turn_idx'] + 1} ({d['script_compliance']:.0%}, dominant: {dom_text})"
-        )
+        chunks.append(f"#{d['turn_idx'] + 1} ({d['script_compliance']:.0%}, dominant: {dom_text})")
     suffix = "" if len(below) <= 3 else f" + {len(below) - 3} more"
-    return (
-        f"Mean script compliance {rate:.0%} across {n_turns} turn(s). "
-        f"Below threshold: {', '.join(chunks)}{suffix}."
-    )
+    return f"Mean script compliance {rate:.0%} across {n_turns} turn(s). Below threshold: {', '.join(chunks)}{suffix}."
 
 
-def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _script_integrity_cell(per_turn: list[dict[str, Any]]) -> dict[str, Any]:
     """Share of substantial assistant turns carrying no foreign-script glyph.
 
     A turn fails on *any* foreign glyph rather than on a fraction of them. One
@@ -383,7 +366,8 @@ def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
     counted = [d for d in per_turn if d["counts_toward_integrity"]]
     if not counted:
         return _score_cell(
-            None, 0,
+            None,
+            0,
             f"No assistant turn reached {INTEGRITY_MIN_CHARS} characters, the "
             "floor below which a single stray glyph would dominate the rate.",
         )
@@ -391,18 +375,16 @@ def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
     rate = (len(counted) - len(dirty)) / len(counted)
     if not dirty:
         return _score_cell(
-            1.0, len(counted),
-            f"All {len(counted)} substantial assistant turn(s) used only the "
-            "expected script plus Latin.",
+            1.0,
+            len(counted),
+            f"All {len(counted)} substantial assistant turn(s) used only the expected script plus Latin.",
         )
-    chunks = ", ".join(
-        f"#{d['turn_idx'] + 1} ({', '.join(d['foreign_scripts'])})"
-        for d in dirty[:3]
-    )
+    chunks = ", ".join(f"#{d['turn_idx'] + 1} ({', '.join(d['foreign_scripts'])})" for d in dirty[:3])
     suffix = "" if len(dirty) <= 3 else f" + {len(dirty) - 3} more"
     intruders = sorted({s for d in dirty for s in d["foreign_scripts"]})
     return _score_cell(
-        round(rate, 4), len(counted),
+        round(rate, 4),
+        len(counted),
         f"{len(dirty)}/{len(counted)} substantial assistant turn(s) contain "
         f"glyphs from a script this locale never expects ({', '.join(intruders)}) "
         f"— a broken generation rather than a language choice. Turns: "
@@ -410,19 +392,14 @@ def _script_integrity_cell(per_turn: List[Dict[str, Any]]) -> Dict[str, Any]:
     )
 
 
-def _summarize_first_turn(first: Dict[str, Any], expected_lang: str) -> str:
+def _summarize_first_turn(first: dict[str, Any], expected_lang: str) -> str:
     if first["language_match"]:
-        return (
-            f"Turn 1 detected as {expected_lang} ({first['n_chars']} chars)."
-        )
+        return f"Turn 1 detected as {expected_lang} ({first['n_chars']} chars)."
     detected = first["detected_language"] or "None (empty / too-short content)"
-    return (
-        f"Turn 1 detected as {detected}, expected {expected_lang} "
-        f"({first['n_chars']} chars)."
-    )
+    return f"Turn 1 detected as {detected}, expected {expected_lang} ({first['n_chars']} chars)."
 
 
-def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any]:
+def _score_cell(score: float | None, n: int, reasoning: str) -> dict[str, Any]:
     return {
         "score": score,
         "reasoning": reasoning,
@@ -430,7 +407,7 @@ def _score_cell(score: Optional[float], n: int, reasoning: str) -> Dict[str, Any
     }
 
 
-def _noop(*, error: str) -> Dict[str, Any]:
+def _noop(*, error: str) -> dict[str, Any]:
     """No-op envelope shape returned when the trajectory can't be scored."""
     return {
         "scorer_kind": "deterministic",

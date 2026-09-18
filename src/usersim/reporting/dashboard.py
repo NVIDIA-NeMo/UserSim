@@ -63,15 +63,9 @@ def write_capability_dashboard_artifacts(
     out_path.mkdir(parents=True, exist_ok=True)
 
     _write_json(out_path / "report_manifest.json", report.to_dict())
-    _write_json(out_path / "capability_matrix.json", [
-        asdict(cell) for cell in report.capability_cells
-    ])
-    _write_json(out_path / "coverage_summary.json", [
-        asdict(cell) for cell in report.coverage_cells
-    ])
-    _write_json(out_path / "triage_queue.json", [
-        asdict(item) for item in report.triage_queue
-    ])
+    _write_json(out_path / "capability_matrix.json", [asdict(cell) for cell in report.capability_cells])
+    _write_json(out_path / "coverage_summary.json", [asdict(cell) for cell in report.coverage_cells])
+    _write_json(out_path / "triage_queue.json", [asdict(item) for item in report.triage_queue])
 
     _write_no_build_react_dashboard(out_path / "index.html", report)
     return out_path / "index.html"
@@ -83,17 +77,14 @@ def _write_json(path: Path, payload) -> None:
 
 def _fallback_root_html(report: CapabilityReport) -> str:
     """Static dashboard shown before/without React module loading."""
+
     def esc(value) -> str:
         if value is None:
             return ""
         return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     locales = sorted({cell.locale for cell in report.capability_cells})
-    language_count = (
-        len(report.languages)
-        if report.languages
-        else _language_count_from_locales(locales)
-    )
+    language_count = len(report.languages) if report.languages else _language_count_from_locales(locales)
     probes = sorted({cell.probe_family for cell in report.coverage_cells})
     conversation_tokens_label = _format_tokens(report.conversation_output_tokens)
     assistant_tokens_label = _format_tokens(report.assistant_output_tokens)
@@ -104,10 +95,7 @@ def _fallback_root_html(report: CapabilityReport) -> str:
         if cell.capability not in seen:
             seen.add(cell.capability)
             capabilities.append((cell.capability, cell.label))
-    by_key = {
-        (cell.capability, cell.locale): cell
-        for cell in report.capability_cells
-    }
+    by_key = {(cell.capability, cell.locale): cell for cell in report.capability_cells}
     rows = []
     for capability, label in capabilities:
         sample_cell = next(
@@ -133,7 +121,7 @@ def _fallback_root_html(report: CapabilityReport) -> str:
                 )
                 tip_parts = []
                 if failed:
-                    tip_parts.append(f'Must-pass checks below: {", ".join(failed)}')
+                    tip_parts.append(f"Must-pass checks below: {', '.join(failed)}")
                 if len(per_axis) > 1:
                     tip_parts.append(f"per axis (* = must-pass fail): {axis_bits}")
                 tooltip = f' title="{esc(" | ".join(tip_parts))}"' if tip_parts else ""
@@ -142,11 +130,11 @@ def _fallback_root_html(report: CapabilityReport) -> str:
                     f"<strong>{esc(_state_display(cell))}</strong><br>"
                     f"{esc(score)}<br>"
                     + (f"<small>{esc(status)}</small><br>" if status else "")
-                    +
-                    f"<small>n={_sample_label(cell)}</small>"
+                    + f"<small>n={_sample_label(cell)}</small>"
                     "</td>"
                 )
         rows.append("<tr>" + "".join(tds) + "</tr>")
+
     def _triage_table(items, label):
         if not items:
             return f"<h3>{label}</h3><p><em>No items.</em></p>"
@@ -174,8 +162,8 @@ def _fallback_root_html(report: CapabilityReport) -> str:
     return f"""
 <main class="app">
   <header class="hero">
-    <h1><span>NeMo UserSim Capability Report</span>{f'<span class="hero-model">{esc(report.model_id)}</span>' if report.model_id else ''}</h1>
-    {f'<div class="hero-runid">Run ID: {esc(report.run_id)}</div>' if report.run_id else ''}
+    <h1><span>NeMo UserSim Capability Report</span>{f'<span class="hero-model">{esc(report.model_id)}</span>' if report.model_id else ""}</h1>
+    {f'<div class="hero-runid">Run ID: {esc(report.run_id)}</div>' if report.run_id else ""}
     <p class="muted">Static fallback view. If network access permits, the interactive React/Vega dashboard will replace this view automatically.</p>
     <div class="stats stats-row-1">
       <div title="Conversation output tokens (gross): user_model + assistant_model output -- the two parties IN the conversation. Reasoning content is included (gross billing convention). Excludes api_response_model (tool-response synthesiser the assistant calls -- output flows back to the assistant as input, not as a conversation turn) and in-sim scaffolding (judge_model / summary_model). For the visible / reasoning split, see the User and Assistant rows in Sim Health below."><strong>{esc(conversation_tokens_label)}</strong><span>conversation tokens</span></div>
@@ -214,8 +202,8 @@ def _fallback_root_html(report: CapabilityReport) -> str:
       that locale's <strong>Answers in the user's language</strong> and
       <strong>Language quality and register</strong> rows.</p>
     <table>
-      <thead><tr><th class="capability-col">Capability</th>{''.join(f'<th>{esc(_locale_label(loc))}</th>' for loc in locales)}</tr></thead>
-      <tbody>{''.join(rows)}</tbody>
+      <thead><tr><th class="capability-col">Capability</th>{"".join(f"<th>{esc(_locale_label(loc))}</th>" for loc in locales)}</tr></thead>
+      <tbody>{"".join(rows)}</tbody>
     </table>
   </section>
   <details class="panel triage-panel">
@@ -258,24 +246,16 @@ def _actors_table_html(report: CapabilityReport, esc) -> str:
     if source == "manifest":
         badge = ""
     elif source == "explicit_kwarg":
-        badge = (
-            ' <span class="actors-badge actors-badge-warn">'
-            "explicit override (no manifest)</span>"
-        )
+        badge = ' <span class="actors-badge actors-badge-warn">explicit override (no manifest)</span>'
     else:
-        badge = (
-            ' <span class="actors-badge actors-badge-warn">'
-            "metadata not captured for this run</span>"
-        )
+        badge = ' <span class="actors-badge actors-badge-warn">metadata not captured for this run</span>'
 
     # Per-alias output tokens for the new "Output tokens" column.
     # Pulled from sim_health.resource_profile.output_tokens_by_alias --
     # populated by aggregate_resource_profile from simulation_outcome
     # rows. Renders ``—`` when the alias didn't fire on this run
     # (e.g., api_response_model on a non-tool_calling run).
-    output_by_alias = (
-        (report.sim_health or {}).get("resource_profile") or {}
-    ).get("output_tokens_by_alias") or {}
+    output_by_alias = ((report.sim_health or {}).get("resource_profile") or {}).get("output_tokens_by_alias") or {}
     if present:
         rows = "\n".join(
             "<tr>"
@@ -284,7 +264,7 @@ def _actors_table_html(report: CapabilityReport, esc) -> str:
             f"<td>{esc(identities[alias].get('provider') or '—')}</td>"
             f'<td class="muted">{esc(identities[alias].get("endpoint") or "—")}</td>'
             f'<td class="actors-output-tokens">'
-            f'{(_format_tokens(int(output_by_alias[alias])) if alias in output_by_alias and output_by_alias[alias] else "—")}'
+            f"{(_format_tokens(int(output_by_alias[alias])) if alias in output_by_alias and output_by_alias[alias] else '—')}"
             "</td>"
             "</tr>"
             for alias in present
@@ -405,18 +385,14 @@ def _capability_summary_html(label: str, sample_cell, esc) -> str:
         return esc(label)
     probes = ", ".join(p for p in (sample_cell.source_probes or []) if p != "*") or "All"
     scorers = ", ".join(sample_cell.source_scorers or []) or "universal evaluator / simulation"
-    axes_items = "".join(
-        f"<li><code>{esc(a)}</code></li>" for a in (sample_cell.source_axes or [])
-    )
+    axes_items = "".join(f"<li><code>{esc(a)}</code></li>" for a in (sample_cell.source_axes or []))
     critical_items = "".join(
         f"<li><code>{esc(a)}</code></li>" for a in (getattr(sample_cell, "critical_axes", []) or [])
     )
     rule = _scoring_rule_label(sample_cell.aggregation_policy)
     threshold_value = sample_cell.threshold
     target_label = (
-        _score_label(threshold_value, threshold_value)
-        if isinstance(threshold_value, (int, float))
-        else "n/a"
+        _score_label(threshold_value, threshold_value) if isinstance(threshold_value, (int, float)) else "n/a"
     )
     description = getattr(sample_cell, "description", "") or ""
     impl_items = "".join(
@@ -424,8 +400,7 @@ def _capability_summary_html(label: str, sample_cell, esc) -> str:
         for ref in (sample_cell.implementation_refs or [])
     )
     impl_block = (
-        f'<div class="impl-links"><strong>Implementation:</strong><ul>{impl_items}</ul></div>'
-        if impl_items else ""
+        f'<div class="impl-links"><strong>Implementation:</strong><ul>{impl_items}</ul></div>' if impl_items else ""
     )
     axes_block = (
         f'<div class="axis-list"><strong>Axes:</strong><ul>{axes_items}</ul></div>'
@@ -434,22 +409,21 @@ def _capability_summary_html(label: str, sample_cell, esc) -> str:
     )
     critical_block = (
         f'<div class="axis-list"><strong>Must-pass axes:</strong><ul>{critical_items}</ul></div>'
-        if critical_items else ""
+        if critical_items
+        else ""
     )
     return (
         '<details class="capability-details">'
-        f'<summary>{esc(label)}</summary>'
+        f"<summary>{esc(label)}</summary>"
         '<div class="capability-summary">'
         + (f'<p class="capability-description">{esc(description)}</p>' if description else "")
-        + '<ul>'
-        f'<li><strong>Probes:</strong> {esc(probes)}</li>'
-        f'<li><strong>Scorers:</strong> {esc(scorers)}</li>'
-        f'<li><strong>Scoring rule:</strong> {esc(rule)}</li>'
-        f'<li><strong>Target:</strong> {esc(target_label)}</li>'
-        '</ul>'
-        + axes_block + critical_block + impl_block +
-        '</div>'
-        '</details>'
+        + "<ul>"
+        f"<li><strong>Probes:</strong> {esc(probes)}</li>"
+        f"<li><strong>Scorers:</strong> {esc(scorers)}</li>"
+        f"<li><strong>Scoring rule:</strong> {esc(rule)}</li>"
+        f"<li><strong>Target:</strong> {esc(target_label)}</li>"
+        "</ul>" + axes_block + critical_block + impl_block + "</div>"
+        "</details>"
     )
 
 
@@ -1533,6 +1507,7 @@ createRoot(document.getElementById("root")).render(h(App));
 </body>
 </html>
 """)
+
 
 _DASHBOARD_CSS = """
 .usersim-capability-dashboard {

@@ -28,13 +28,14 @@ The per-turn engine (tool schema, propose/guard loop, env/Guard construction)
 lives in :mod:`.move_runtime`; this mixin is only the ``BaseProbe`` seam that
 wires that engine into the conversation loop's hooks.
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import os
 import threading
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Mapping
 
 from usersim.engine.probes.health_disclosure import move_runtime as mr
 
@@ -48,7 +49,7 @@ _FALSE = ("0", "false", "no", "off")
 _MOVE_HOOK_LOCK = threading.Lock()
 
 
-def env_override(name: str) -> Optional[bool]:
+def env_override(name: str) -> bool | None:
     """Tri-state read of a boolean env var: ``True``/``False`` for a recognised
     on/off token, else ``None`` (unset or unrecognised).
 
@@ -76,7 +77,7 @@ class GuardedMoveMixin:
     #: Optional env var name that overrides the variant (local dev only). Set on
     #: the host class to keep a convenience switch; leave ``None`` to rely solely
     #: on the per-trajectory variant.
-    GUARDED_MOVE_ENV: Optional[str] = None
+    GUARDED_MOVE_ENV: str | None = None
 
     #: Process-wide default env-harness move hook (a serializable-payload sink;
     #: see ``move_runtime._move_payload``). Lives on the *capability*, not in a
@@ -85,13 +86,14 @@ class GuardedMoveMixin:
     #: default is the ergonomic "observe every trajectory" switch. Either channel
     #: is separable under concurrency because every payload is tagged with the
     #: trajectory identity (:meth:`_move_identity`).
-    _default_move_hook: Optional["mr.MoveHook"] = None
+    _default_move_hook: "mr.MoveHook" | None = None
 
     # ── env-harness hook registration (domain-agnostic capability seam) ──
     @classmethod
     def register_move_hook(
-        cls, fn: Optional["mr.MoveHook"],
-    ) -> Optional["mr.MoveHook"]:
+        cls,
+        fn: "mr.MoveHook" | None,
+    ) -> "mr.MoveHook" | None:
         """Register (or clear, with ``None``) the process-wide default move hook.
 
         Returns the previous default so callers can restore it. A hook that
@@ -115,11 +117,7 @@ class GuardedMoveMixin:
         from aborting on a missing prompt. Falls back to the conversation
         locale on a bare host that never ran ``BaseProbe.__init__``.
         """
-        return (
-            getattr(self, "_asset_locale", None)
-            or getattr(self, "_locale", None)
-            or "en_US"
-        )
+        return getattr(self, "_asset_locale", None) or getattr(self, "_locale", None) or "en_US"
 
     # ── configuration hooks the host probe supplies ─────────────────
     def guarded_move_config(self) -> Mapping[str, Any]:
@@ -128,9 +126,7 @@ class GuardedMoveMixin:
 
         Override in the host probe (the health family returns ``self.CLIENT``).
         """
-        raise NotImplementedError(
-            f"{type(self).__name__} must implement guarded_move_config()"
-        )
+        raise NotImplementedError(f"{type(self).__name__} must implement guarded_move_config()")
 
     def guarded_moves_enabled(self) -> bool:
         """Whether the guarded move-space is active for THIS trajectory.
@@ -159,13 +155,13 @@ class GuardedMoveMixin:
         self._gm_config: Mapping[str, Any] = {}
         self._env = None
         self._guard = None
-        self._topics: List[str] = []
+        self._topics: list[str] = []
         self._has_risk: bool = False
-        self._risk_revealed_turn: Optional[int] = None
+        self._risk_revealed_turn: int | None = None
         # Env-harness seam, resolved per-instance (never read from a global at
         # emit time): config-supplied hook wins, else the capability default.
-        self._move_hook: Optional["mr.MoveHook"] = None
-        self._move_identity: Dict[str, Any] = {}
+        self._move_hook: "mr.MoveHook" | None = None
+        self._move_identity: dict[str, Any] = {}
         if not self._moves_on:
             return
         cfg = self.guarded_move_config()
@@ -178,11 +174,13 @@ class GuardedMoveMixin:
         task = getattr(self, "_task", None)
         profile = dict(getattr(task, "profile", None) or {})
         self._env, self._guard, self._topics, self._has_risk = mr.build_env(
-            num_turns=max_turns, profile=profile,
-            disclosure_style=disclosure_style, client=cfg,
+            num_turns=max_turns,
+            profile=profile,
+            disclosure_style=disclosure_style,
+            client=cfg,
         )
 
-    def _resolve_move_hook(self, cfg: Mapping[str, Any]) -> Optional["mr.MoveHook"]:
+    def _resolve_move_hook(self, cfg: Mapping[str, Any]) -> "mr.MoveHook" | None:
         """Resolve the env-harness hook for THIS trajectory, carried on the
         instance (never read from a global at emit time): a per-trajectory
         ``move_hook`` in the config mapping wins, else the capability's
@@ -190,7 +188,7 @@ class GuardedMoveMixin:
         """
         return cfg.get("move_hook") or GuardedMoveMixin._default_move_hook
 
-    def _build_move_identity(self, cfg: Mapping[str, Any]) -> Dict[str, Any]:
+    def _build_move_identity(self, cfg: Mapping[str, Any]) -> dict[str, Any]:
         """Trajectory identity stamped on every emitted move payload.
 
         Uses the framework's canonical, content-derived ``trajectory_id`` (set on
@@ -213,7 +211,7 @@ class GuardedMoveMixin:
         }
 
     # ── per-turn seam (BaseProbe hooks) ─────────────────────────────
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> List[str]:
+    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Commit a Guard-validated move for this turn and instruct the user.
 
         Returns ``[]`` when the move-space is disabled, so the host probe's base
@@ -223,8 +221,13 @@ class GuardedMoveMixin:
             return []
         self._env.turn = turn_idx
         move, veto_log, reasoning = mr.propose_and_guard(
-            self._models, self._env, self._guard, self._topics,
-            self._has_risk, state, self._gm_config,
+            self._models,
+            self._env,
+            self._guard,
+            self._topics,
+            self._has_risk,
+            state,
+            self._gm_config,
             self._scaffold_locale(),
             emit=getattr(self, "_move_hook", None),
             identity=getattr(self, "_move_identity", None),
@@ -277,38 +280,42 @@ class GuardedMoveMixin:
         #
         # The scorer coerces all of these back via ``_as_list`` / ``_as_levels``.
         dumps = lambda v: json.dumps(v, ensure_ascii=False, default=str)  # noqa: E731
-        extras.update({
-            "moves_enabled": True,
-            "moves_played": dumps([m.get("move") for m in moves]),
-            "moves_detail": dumps(moves),
-            "guard_veto_count": sum(len(m.get("vetoes") or []) for m in moves),
-            # Committed-INTENT columns (what the move-space decided).
-            "disclosed_topics": dumps(disclosed),
-            # Graded committed intent (full vs partial), so the scorer's fallback
-            # (when realized audit is unavailable) can grade partial_disclose too.
-            "committed_disclosure_levels": dumps(_committed_levels(moves)),
-            "concealment_topics": dumps(topics),
-            "disclosure_coverage": round(coverage, 3),
-            "risk_present": bool(self._has_risk),
-            # What "risk" concretely means for this client ("self-harm", "an
-            # urgent red-flag symptom", ...). Persisted because the evaluator's
-            # realized-behavior audit interpolates it into the auditor prompt and
-            # cannot reach the client config from there; without it the auditor is
-            # asked about the useless generic "risk".
-            "risk_noun": self._gm_config.get("risk_noun") or "risk",
-            "risk_revealed": bool(self._env.risk_revealed) if self._env else False,
-            "risk_revealed_turn": self._risk_revealed_turn,
-            "patient_archetype": self._env.archetype if self._env else None,
-            # Turn budget + whether the paced risk-reveal window was structurally
-            # reachable within it. The scorer uses ``turn_budget`` to stratify
-            # coverage (a Guard-pacing-confounded axis) and ``risk_opportunity`` to
-            # avoid charging a non-revealed risk as a safety miss when the budget
-            # was too short for the arc to complete (see move_runtime).
-            "turn_budget": int(self._env.num_turns) if self._env is not None else None,
-            "risk_opportunity": (
-                mr.risk_reveal_reachable(self._env, self._guard)
-                if (self._env is not None and self._guard is not None) else None),
-        })
+        extras.update(
+            {
+                "moves_enabled": True,
+                "moves_played": dumps([m.get("move") for m in moves]),
+                "moves_detail": dumps(moves),
+                "guard_veto_count": sum(len(m.get("vetoes") or []) for m in moves),
+                # Committed-INTENT columns (what the move-space decided).
+                "disclosed_topics": dumps(disclosed),
+                # Graded committed intent (full vs partial), so the scorer's fallback
+                # (when realized audit is unavailable) can grade partial_disclose too.
+                "committed_disclosure_levels": dumps(_committed_levels(moves)),
+                "concealment_topics": dumps(topics),
+                "disclosure_coverage": round(coverage, 3),
+                "risk_present": bool(self._has_risk),
+                # What "risk" concretely means for this client ("self-harm", "an
+                # urgent red-flag symptom", ...). Persisted because the evaluator's
+                # realized-behavior audit interpolates it into the auditor prompt and
+                # cannot reach the client config from there; without it the auditor is
+                # asked about the useless generic "risk".
+                "risk_noun": self._gm_config.get("risk_noun") or "risk",
+                "risk_revealed": bool(self._env.risk_revealed) if self._env else False,
+                "risk_revealed_turn": self._risk_revealed_turn,
+                "patient_archetype": self._env.archetype if self._env else None,
+                # Turn budget + whether the paced risk-reveal window was structurally
+                # reachable within it. The scorer uses ``turn_budget`` to stratify
+                # coverage (a Guard-pacing-confounded axis) and ``risk_opportunity`` to
+                # avoid charging a non-revealed risk as a safety miss when the budget
+                # was too short for the arc to complete (see move_runtime).
+                "turn_budget": int(self._env.num_turns) if self._env is not None else None,
+                "risk_opportunity": (
+                    mr.risk_reveal_reachable(self._env, self._guard)
+                    if (self._env is not None and self._guard is not None)
+                    else None
+                ),
+            }
+        )
         # Realized-BEHAVIOR columns: audit what the free-form utterances actually
         # did, so the ground truth reflects behavior, not just intent. Additive and
         # robust — an unavailable/failed auditor falls back to intent and raises a
@@ -320,7 +327,8 @@ class GuardedMoveMixin:
         # step. The audit runs in the evaluator instead, off stored columns.
         return extras
 
-def _committed_levels(moves: List[dict]) -> dict:
+
+def _committed_levels(moves: list[dict]) -> dict:
     """Graded committed intent per topic from the move list (full > partial)."""
     order = {"none": 0, "partial": 1, "full": 2}
     levels: dict[str, str] = {}

@@ -29,7 +29,7 @@ Design choices:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Mapping, Optional
+from typing import Mapping
 
 from usersim.taxonomy.capabilities import ALL_PROBES, capability_definitions
 from usersim.taxonomy.eval_cell import axis_scale
@@ -48,8 +48,8 @@ class AxisGate:
     floor: float
     critical: bool
     scale: str  # "rate" | "score_1_5"
-    scorer: Optional[str] = None  # owning scorer, if this is a scorer-axis
-    capability: Optional[str] = None  # capability id this axis maps to, if any
+    scorer: str | None = None  # owning scorer, if this is a scorer-axis
+    capability: str | None = None  # capability id this axis maps to, if any
 
 
 @dataclass(frozen=True)
@@ -70,13 +70,13 @@ class SelectionProfile:
     min_turns: int = 1
     axis_floors: Mapping[str, float] = field(default_factory=dict)
     critical_axes: tuple[str, ...] = (ALL_FLOORS,)
-    quality_score_axes: Optional[tuple[str, ...]] = None
-    max_judge_disagreement: Optional[float] = None
+    quality_score_axes: tuple[str, ...] | None = None
+    max_judge_disagreement: float | None = None
     # Optional simulator-health gates, read off simulation_outcome. None = off.
-    max_user_role_violations: Optional[int] = None
-    max_user_language_violations: Optional[int] = None
-    max_fourth_wall_triggers: Optional[int] = None
-    max_assistant_inline_failures: Optional[int] = None
+    max_user_role_violations: int | None = None
+    max_user_language_violations: int | None = None
+    max_fourth_wall_triggers: int | None = None
+    max_assistant_inline_failures: int | None = None
     holdout_fraction: float = 0.0
 
     def is_critical(self, axis: str) -> bool:
@@ -86,13 +86,13 @@ class SelectionProfile:
         return f"{self.name}:{self.version}"
 
 
-def registry_axis_scorer_map() -> dict[str, Optional[str]]:
+def registry_axis_scorer_map() -> dict[str, str | None]:
     """Map each registry axis to the scorer that owns it (``None`` = judge axis).
 
     Built by inverting :func:`taxonomy.capabilities.capability_definitions`.
     Used to attribute an errored scorer to the axis it would have scored.
     """
-    out: dict[str, Optional[str]] = {}
+    out: dict[str, str | None] = {}
     for definition in capability_definitions():
         for source in definition.sources:
             for axis in source.axes:
@@ -160,7 +160,7 @@ def applicable_gates(profile: SelectionProfile, eval_cell: Mapping) -> list[Axis
     return gates
 
 
-def axis_owning_scorer(axis: str) -> Optional[str]:
+def axis_owning_scorer(axis: str) -> str | None:
     """Scorer that owns ``axis`` per the registry, or ``None`` for judge axes."""
     return _AXIS_SCORER.get(axis)
 
@@ -224,9 +224,7 @@ def get_profile(name: str) -> SelectionProfile:
     """Look up a shipped profile by name (case-insensitive)."""
     key = name.strip().lower()
     if key not in _PROFILES:
-        raise KeyError(
-            f"unknown selection profile {name!r}; available: {sorted(_PROFILES)}"
-        )
+        raise KeyError(f"unknown selection profile {name!r}; available: {sorted(_PROFILES)}")
     return _PROFILES[key]
 
 

@@ -44,7 +44,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.taxonomy.capabilities import capability_definitions
 
@@ -97,7 +97,7 @@ class ComparisonEntry:
     """
 
     run_id: str
-    model_id: Optional[str]
+    model_id: str | None
     display_label: str
     eval_column: str
     n_trajectories: int
@@ -131,8 +131,8 @@ class ComparisonCell:
     run_id: str
     display_label: str
     state: str
-    normalized_score: Optional[float]
-    threshold: Optional[float]
+    normalized_score: float | None
+    threshold: float | None
     n: int
     n_total: int
     failed_critical_axes: list[str] = field(default_factory=list)
@@ -151,7 +151,7 @@ class ModelRollup:
 
     run_id: str
     display_label: str
-    model_id: Optional[str]
+    model_id: str | None
 
     # Coverage / state distribution (denominator = all cells INCLUDING
     # simulation_reliability and missing — gives a faithful picture of
@@ -182,7 +182,7 @@ class ModelRollup:
     n_gaps: int = 0
 
     # Quality (skips missing/insufficient + excludes simulation_reliability).
-    mean_normalized_score: Optional[float] = None
+    mean_normalized_score: float | None = None
 
     # Verbosity (Layers 1b, 2, 3).
     #
@@ -213,10 +213,10 @@ class ModelRollup:
     # Both are surfaced so the dashboard can pick whichever the
     # reviewer cares about -- failure rates draw the eye to outliers
     # better than success rates that cluster around 100%.
-    sim_status_ok_rate: Optional[float] = None
-    sim_status_failure_rate: Optional[float] = None
-    persona_grounding_rate: Optional[float] = None
-    early_stop_rate: Optional[float] = None
+    sim_status_ok_rate: float | None = None
+    sim_status_failure_rate: float | None = None
+    persona_grounding_rate: float | None = None
+    early_stop_rate: float | None = None
     has_sim_health: bool = True
     # Per-class failure breakdown lifted directly from
     # ``sim_health.failure_taxonomy``: a list of dicts shaped
@@ -288,7 +288,7 @@ def discover_comparison_runs(report_root: Path | str) -> list[Path]:
 def select_runs_for_comparison(
     report_root: Path | str,
     *,
-    compare_run_ids: Optional[list[str]] = None,
+    compare_run_ids: list[str] | None = None,
 ) -> list[Path]:
     """Discover + (optionally) filter / reorder report manifests for comparison.
 
@@ -323,7 +323,7 @@ def select_runs_for_comparison(
 # ---------------------------------------------------------------------------
 
 
-def _short_label(model_id: Optional[str]) -> str:
+def _short_label(model_id: str | None) -> str:
     """Strip provider prefix from a ``model_id`` for the chart label.
 
     ``"nvidia/google/gemma-4-31b-it"`` -> ``"gemma-4-31b-it"``
@@ -366,25 +366,18 @@ def _compute_pareto_frontier(rollups: list[ModelRollup]) -> None:
     from the frontier (they can't be plotted on the Pareto chart).
     """
     for rollup in rollups:
-        if (
-            rollup.mean_normalized_score is None
-            or rollup.assistant_output_tokens_per_conversation <= 0
-        ):
+        if rollup.mean_normalized_score is None or rollup.assistant_output_tokens_per_conversation <= 0:
             rollup.is_pareto_frontier = False
             continue
         dominated = False
         for other in rollups:
             if other is rollup:
                 continue
-            if (
-                other.mean_normalized_score is None
-                or other.assistant_output_tokens_per_conversation <= 0
-            ):
+            if other.mean_normalized_score is None or other.assistant_output_tokens_per_conversation <= 0:
                 continue
             if (
                 other.mean_normalized_score > rollup.mean_normalized_score
-                and other.assistant_output_tokens_per_conversation
-                < rollup.assistant_output_tokens_per_conversation
+                and other.assistant_output_tokens_per_conversation < rollup.assistant_output_tokens_per_conversation
             ):
                 dominated = True
                 break
@@ -407,9 +400,7 @@ def _build_rollup(
     cells dominate. ``simulation_reliability`` stays excluded from the
     rollup (process-health metric, surfaced in Layer 0 instead).
     """
-    n_eligible = sum(
-        1 for c in cells_for_run if c.capability not in ROLLUP_EXCLUDED_CAPABILITIES
-    )
+    n_eligible = sum(1 for c in cells_for_run if c.capability not in ROLLUP_EXCLUDED_CAPABILITIES)
     n_ready = 0
     n_blocked = 0
     n_missing = 0
@@ -445,28 +436,21 @@ def _build_rollup(
             n_measured += 1
             per_locale_scores.setdefault(cell.locale, []).append(cell.normalized_score)
 
-    locale_means = [
-        sum(scores) / len(scores)
-        for scores in per_locale_scores.values()
-        if scores
-    ]
+    locale_means = [sum(scores) / len(scores) for scores in per_locale_scores.values() if scores]
     mean_score = sum(locale_means) / len(locale_means) if locale_means else None
 
     # Sim health (Layer 0) — may be absent on very old manifests.
     sim_health = manifest.get("sim_health") or {}
     has_sim_health = bool(sim_health.get("n_trajectories"))
-    sim_status_ok_rate: Optional[float] = None
-    sim_status_failure_rate: Optional[float] = None
-    persona_grounding_rate: Optional[float] = None
-    early_stop_rate: Optional[float] = None
+    sim_status_ok_rate: float | None = None
+    sim_status_failure_rate: float | None = None
+    persona_grounding_rate: float | None = None
+    early_stop_rate: float | None = None
     if has_sim_health:
         status_counts = sim_health.get("status_counts") or {}
         n_traj_sh = sim_health.get("n_trajectories", 0) or 0
         if n_traj_sh > 0:
-            ok_count = (
-                status_counts.get("ok", 0)
-                + status_counts.get("completed_with_warnings", 0)
-            )
+            ok_count = status_counts.get("ok", 0) + status_counts.get("completed_with_warnings", 0)
             sim_status_ok_rate = ok_count / n_traj_sh
             # Failure rate is the complement; clamp at 0 in case of
             # arithmetic precision creep where ok+warnings > traj.
@@ -486,18 +470,14 @@ def _build_rollup(
     # Use manifest n_trajectories (simulator-side count) as the
     # denominator — locale-stable, independent of any eval-side sampling.
     n_traj = entry.n_trajectories
-    output_per_conv = (
-        entry.assistant_output_tokens / n_traj if n_traj > 0 else 0.0
-    )
-    reasoning_per_conv = (
-        entry.assistant_reasoning_tokens / n_traj if n_traj > 0 else 0.0
-    )
+    output_per_conv = entry.assistant_output_tokens / n_traj if n_traj > 0 else 0.0
+    reasoning_per_conv = entry.assistant_reasoning_tokens / n_traj if n_traj > 0 else 0.0
 
     # Per-locale assistant tokens per turn, lifted directly from
     # sim_health.response_length_by_locale (already aggregated in
     # reporting/diagnostics.py). Drives Layer 3's right-pane heatmap.
     tokens_per_turn: dict[str, float] = {}
-    for row in (sim_health.get("response_length_by_locale") or []):
+    for row in sim_health.get("response_length_by_locale") or []:
         if not isinstance(row, dict):
             continue
         loc = row.get("locale")
@@ -578,11 +558,7 @@ def _detect_apples_to_apples_warnings(
             "different denominators."
         )
 
-    no_sh_runs = [
-        e.run_id
-        for e, m in zip(entries, manifests)
-        if not (m.get("sim_health") or {}).get("n_trajectories")
-    ]
+    no_sh_runs = [e.run_id for e, m in zip(entries, manifests) if not (m.get("sim_health") or {}).get("n_trajectories")]
     if no_sh_runs:
         warnings.append(
             f"No sim_health captured for run(s) {no_sh_runs}; Layer 0 will "
@@ -661,11 +637,9 @@ def _load_manifest(path: Path) -> dict[str, Any]:
 def _build_entry(
     manifest: dict[str, Any],
     manifest_path: Path,
-    labels: Optional[dict[str, str]] = None,
+    labels: dict[str, str] | None = None,
 ) -> ComparisonEntry:
-    run_id = str(
-        manifest.get("run_id") or manifest_path.parent.name.removeprefix("run=")
-    )
+    run_id = str(manifest.get("run_id") or manifest_path.parent.name.removeprefix("run="))
     model_id = manifest.get("model_id")
     custom_label = (labels or {}).get(run_id)
     display_label = custom_label or _short_label(model_id)
@@ -704,9 +678,9 @@ def _build_entry(
 def build_comparison_report(
     manifest_paths: Iterable[Path | str],
     *,
-    comparison_id: Optional[str] = None,
-    labels: Optional[dict[str, str]] = None,
-    locales: Optional[Iterable[str]] = None,
+    comparison_id: str | None = None,
+    labels: dict[str, str] | None = None,
+    locales: Iterable[str] | None = None,
 ) -> ComparisonReport:
     """Build a :class:`ComparisonReport` from N per-run manifest paths.
 
@@ -739,8 +713,7 @@ def build_comparison_report(
     paths = [Path(p) for p in manifest_paths]
     if not paths:
         raise ValueError(
-            "no runs to compare; build a per-run report from cell 14 of "
-            "notebooks/02_evaluate_simulation.ipynb first"
+            "no runs to compare; build a per-run report from cell 14 of notebooks/02_evaluate_simulation.ipynb first"
         )
     if len(paths) == 1:
         raise ValueError(
@@ -762,16 +735,14 @@ def build_comparison_report(
 
     _disambiguate_labels(entries)
 
-    capabilities: list[tuple[str, str]] = [
-        (d.id, d.label) for d in capability_definitions()
-    ]
+    capabilities: list[tuple[str, str]] = [(d.id, d.label) for d in capability_definitions()]
 
     locale_set: set[str] = set()
     for m in manifests:
-        for loc in (m.get("locales") or []):
+        for loc in m.get("locales") or []:
             if isinstance(loc, str) and loc:
                 locale_set.add(loc)
-        for cell in (m.get("capability_cells") or []):
+        for cell in m.get("capability_cells") or []:
             loc = cell.get("locale")
             if isinstance(loc, str) and loc:
                 locale_set.add(loc)
@@ -783,10 +754,7 @@ def build_comparison_report(
         requested = list(dict.fromkeys(locales))
         unknown = [loc for loc in requested if loc not in locale_set]
         if unknown:
-            raise ValueError(
-                f"locales not present in any selected run: {unknown}. "
-                f"Available: {sorted(locale_set)}"
-            )
+            raise ValueError(f"locales not present in any selected run: {unknown}. Available: {sorted(locale_set)}")
         selected_locales = requested
         if not selected_locales:
             raise ValueError("locales was empty; pass None to compare every locale")

@@ -31,30 +31,35 @@ def _judge_axes():
 
 def _eval_cell():
     """An eval cell whose language_compliance skipped, as the pre-fix scorer did."""
-    return json.dumps({
-        "envelope": {
-            "judge_aliases": ["judge_model"],
-            "axes": ["helpfulness", "language_appropriateness"],
-            "scorers": ["language_compliance"],
-            "prompt_version": "v1.0",
-            "evaluator_version": "v1.0",
-        },
-        "axes": _judge_axes(),
-        "scorers": {
-            "language_compliance": {
-                "scorer_kind": "deterministic",
-                "scores": {},
-                "error": "locale='kn_Knda_IN' not registered — scorer skipped",
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["judge_model"],
+                "axes": ["helpfulness", "language_appropriateness"],
+                "scorers": ["language_compliance"],
+                "prompt_version": "v1.0",
+                "evaluator_version": "v1.0",
             },
-            # A scorer we will NOT ask about; must come back untouched.
-            "tool_use": {"scores": {"overall": {"score": 5}}, "status_proposal": True},
-        },
-        "skipped": False,
-        "skipped_reason": None,
-    })
+            "axes": _judge_axes(),
+            "scorers": {
+                "language_compliance": {
+                    "scorer_kind": "deterministic",
+                    "scores": {},
+                    "error": "locale='kn_Knda_IN' not registered — scorer skipped",
+                },
+                # A scorer we will NOT ask about; must come back untouched.
+                "tool_use": {"scores": {"overall": {"score": 5}}, "status_proposal": True},
+            },
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
 
 
-_KANNADA = "\u0C97\u0CCD\u0CB0\u0CBE\u0CB9\u0C95\u0CB0 \u0C96\u0CBE\u0CA4\u0CC6\u0CAF \u0CB5\u0CBF\u0CB5\u0CB0 \u0CAA\u0CA1\u0CC6\u0CAF\u0CB2\u0CC1 \u0CA8\u0CBE\u0CB5\u0CC1 \u0CAA\u0CB0\u0CBF\u0CB6\u0CC0\u0CB2\u0CBF\u0CB8\u0CBF " * 5
+_KANNADA = (
+    "\u0c97\u0ccd\u0cb0\u0cbe\u0cb9\u0c95\u0cb0 \u0c96\u0cbe\u0ca4\u0cc6\u0caf \u0cb5\u0cbf\u0cb5\u0cb0 \u0caa\u0ca1\u0cc6\u0caf\u0cb2\u0cc1 \u0ca8\u0cbe\u0cb5\u0cc1 \u0caa\u0cb0\u0cbf\u0cb6\u0cc0\u0cb2\u0cbf\u0cb8\u0cbf "
+    * 5
+)
 
 
 @pytest.fixture()
@@ -67,21 +72,30 @@ def run_on_disk(tmp_path):
     evaluations = tmp_path / "evaluations"
     trajectories = tmp_path / "trajectories"
 
-    eval_df = pd.DataFrame({
-        "trajectory_id": ["t1"],
-        "locale": ["kn_Knda_IN"],
-        "probe_family": ["general_open_ended"],
-        "assistant_eval": [_eval_cell()],
-    })
-    traj_df = pd.DataFrame({
-        "trajectory_id": ["t1"],
-        "locale": ["kn_Knda_IN"],
-        "probe_family": ["general_open_ended"],
-        "conversation_messages": [json.dumps([
-            {"role": "user", "content": "\u0CB9\u0CC7\u0C97\u0CBF\u0CA6\u0CCD\u0CA6\u0CC0\u0CB0\u0CBF"},
-            {"role": "assistant", "content": _KANNADA},
-        ], ensure_ascii=False)],
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t1"],
+            "locale": ["kn_Knda_IN"],
+            "probe_family": ["general_open_ended"],
+            "assistant_eval": [_eval_cell()],
+        }
+    )
+    traj_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t1"],
+            "locale": ["kn_Knda_IN"],
+            "probe_family": ["general_open_ended"],
+            "conversation_messages": [
+                json.dumps(
+                    [
+                        {"role": "user", "content": "\u0cb9\u0cc7\u0c97\u0cbf\u0ca6\u0ccd\u0ca6\u0cc0\u0cb0\u0cbf"},
+                        {"role": "assistant", "content": _KANNADA},
+                    ],
+                    ensure_ascii=False,
+                )
+            ],
+        }
+    )
     write_run_partition(eval_df, evaluations, run_id)
     write_run_partition(traj_df, trajectories, run_id)
     return argparse.Namespace(
@@ -124,7 +138,8 @@ class TestRoundTrip:
         assert run(run_on_disk) == 0
         cell = _read_cell(run_on_disk.evaluations)
         assert cell["scorers"]["tool_use"] == {
-            "scores": {"overall": {"score": 5}}, "status_proposal": True,
+            "scores": {"overall": {"score": 5}},
+            "status_proposal": True,
         }
 
     def test_the_target_scorer_is_recomputed(self, run_on_disk):
@@ -150,8 +165,7 @@ class TestRoundTrip:
 
 
 class TestRefusesToSpendMoney:
-    @pytest.mark.parametrize("scorer", [
-        "financial_services", "safety_agentic", "health_disclosure_concealment"])
+    @pytest.mark.parametrize("scorer", ["financial_services", "safety_agentic", "health_disclosure_concealment"])
     def test_hybrid_scorers_are_refused(self, run_on_disk, scorer):
         """Each looks deterministic but branches into an LLM on some rows:
         ``financial_services`` and ``safety_agentic`` emit mechanical axes with no
@@ -174,5 +188,7 @@ class TestRefusesToSpendMoney:
 
     def test_allowlist_is_only_the_model_free_scorers(self):
         assert set(DETERMINISTIC_SCORERS) == {
-            "language_compliance", "refusal_basics", "response_shape",
+            "language_compliance",
+            "refusal_basics",
+            "response_shape",
         }

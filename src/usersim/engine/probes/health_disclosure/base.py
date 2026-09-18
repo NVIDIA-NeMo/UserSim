@@ -16,9 +16,10 @@ mixins are). It is opt-in per trajectory via the ``guarded`` ``probe_variant``
 register and run by default). ``USERSIM_DISCLOSURE_MOVES`` remains as a
 local-dev override only.
 """
+
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 from usersim.engine.core.behavioral import (
     format_behavioral_profile_for_prompt,
@@ -66,8 +67,12 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
 
     # ── BankBackedProbe hook ────────────────────────────────────────
     def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
-    ) -> Optional[ClinicalProfile]:
+        self,
+        persona: dict,
+        bank: Any,
+        *,
+        cfg: Any,
+    ) -> ClinicalProfile | None:
         """Select this persona's hidden clinical profile from the bank.
 
         Only the guarded variant consumes the profile (the default variant is a
@@ -105,7 +110,8 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
             persona=format_persona_for_prompt(self._persona),
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=format_behavioral_profile_for_prompt(
-                self._profile, language=self._language,
+                self._profile,
+                language=self._language,
             ),
             disclosure_instructions=format_disclosure_instructions(disclosure_style),
             interaction_style_instructions=format_interaction_style_instructions(
@@ -132,7 +138,11 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
         return ""
 
     def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
-        return self.CLIENT["gate_prompt"].get(self._asset_locale).format(
-            conversation_history=conversation_history,
-            user_turn_to_evaluate=user_query,
+        return (
+            self.CLIENT["gate_prompt"]
+            .get(self._asset_locale)
+            .format(
+                conversation_history=conversation_history,
+                user_turn_to_evaluate=user_query,
+            )
         )

@@ -21,7 +21,7 @@ import html
 import json
 import math
 from dataclasses import asdict, dataclass, field
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -32,10 +32,17 @@ from usersim.taxonomy.capabilities import (
 )
 from usersim.taxonomy.eval_cell import (
     decode_cell as _decode_eval_cell,
+)
+from usersim.taxonomy.eval_cell import (
     normalize_axis_score as _normalize_axis_score,
+)
+from usersim.taxonomy.eval_cell import (
     score_for_source as _score_for_source,
+)
+from usersim.taxonomy.eval_cell import (
     scorer_state as _scorer_state,
 )
+
 
 def capability_order() -> tuple[tuple[str, str], ...]:
     """``(id, label)`` for every capability, in report order.
@@ -43,10 +50,7 @@ def capability_order() -> tuple[tuple[str, str], ...]:
     Resolved per call rather than frozen at import, so a capability
     contributed by an installed package reaches the rendered cells.
     """
-    return tuple(
-        (definition.id, definition.label)
-        for definition in capability_definitions()
-    )
+    return tuple((definition.id, definition.label) for definition in capability_definitions())
 
 
 def _capability_label(capability: str) -> str:
@@ -64,10 +68,11 @@ class EvidenceFinding:
     Lets the dashboard surface *what specifically failed* for this conversation
     instead of dumping the full multi-axis judge text into one truncated blob.
     """
+
     axis: str
     source: str  # "judge" or "scorer:<scorer_name>"
-    score: Optional[float]
-    threshold: Optional[float]  # raw threshold (same scale as score)
+    score: float | None
+    threshold: float | None  # raw threshold (same scale as score)
     failed: bool
     is_critical: bool
     reasoning: str = ""
@@ -116,9 +121,9 @@ class CapabilityCell:
     description: str
     locale: str
     state: str
-    score: Optional[float] = None
-    threshold: Optional[float] = None
-    margin: Optional[float] = None
+    score: float | None = None
+    threshold: float | None = None
+    margin: float | None = None
     n: int = 0
     # Total trajectories in this locale that *could* have contributed
     # to this capability (regardless of whether the scorer was applicable
@@ -166,9 +171,9 @@ class TriageItem:
 
 @dataclass(slots=True)
 class CapabilityReport:
-    run_id: Optional[str]
+    run_id: str | None
     eval_column: str
-    model_id: Optional[str]
+    model_id: str | None
     sample_mode: str
     n_trajectories: int
     n_evaluated: int
@@ -339,14 +344,10 @@ class CapabilityReport:
                 model = identity.get("model") or "?"
                 print(f"  {alias:20s} {model:40s} provider={provider}")
         elif self.metadata_source == "explicit_kwarg":
-            print(
-                f"\nActors: explicit override (no manifest); "
-                f"model under test = {self.model_id}"
-            )
+            print(f"\nActors: explicit override (no manifest); model under test = {self.model_id}")
         else:
             print(
-                "\nActors: metadata not captured for this run "
-                "(predates manifest-v1; re-run the simulator to populate)."
+                "\nActors: metadata not captured for this run (predates manifest-v1; re-run the simulator to populate)."
             )
 
 
@@ -390,14 +391,10 @@ def build_capability_report(
     import pandas as pd
 
     if not isinstance(traj_df, pd.DataFrame):
-        raise TypeError(
-            "build_capability_report expects traj_df as a pandas DataFrame, got "
-            f"{type(traj_df).__name__}"
-        )
+        raise TypeError(f"build_capability_report expects traj_df as a pandas DataFrame, got {type(traj_df).__name__}")
     if eval_df is not None and not isinstance(eval_df, pd.DataFrame):
         raise TypeError(
-            "build_capability_report expects eval_df as a pandas DataFrame or None, got "
-            f"{type(eval_df).__name__}"
+            f"build_capability_report expects eval_df as a pandas DataFrame or None, got {type(eval_df).__name__}"
         )
 
     # An evaluation parquet may carry the assistant score under either of
@@ -415,17 +412,17 @@ def build_capability_report(
     joined = _join_eval(traj_df, eval_df, eval_column)
     locales = _ordered_values(traj_df.get("locale", []))
     coverage_cells = _build_coverage_cells(traj_df, joined, eval_column)
-    capability_cells = _build_capability_cells(
-        joined, locales, eval_column=eval_column, min_n=min_n
-    )
+    capability_cells = _build_capability_cells(joined, locales, eval_column=eval_column, min_n=min_n)
     triage = _build_triage(capability_cells)
     # In-sim model-call token totals (defensive: absent column → zeros).
     from usersim.reporting.resource import aggregate_from_dataframe
+
     resource_profile = aggregate_from_dataframe(traj_df)
     # Sim-Health bundle: cheap diagnostics on the simulator side itself.
     # Defensive — empty bundle on builder failure so a malformed
     # trajectory never breaks the report build.
     from usersim.reporting.sim_health import build_sim_health
+
     try:
         sim_health_dict = build_sim_health(traj_df).to_dict()
     except Exception:  # pragma: no cover — defensive
@@ -445,11 +442,7 @@ def build_capability_report(
         model_id=resolved_model_id,
         sample_mode=sample_mode,
         n_trajectories=len(traj_df),
-        n_evaluated=(
-            int(joined[eval_column].notna().sum())
-            if eval_column in joined.columns
-            else 0
-        ),
+        n_evaluated=(int(joined[eval_column].notna().sum()) if eval_column in joined.columns else 0),
         locales=locales,
         languages=_ordered_values(traj_df.get("conversation_language", [])),
         persona_summary=_build_persona_summary(traj_df),
@@ -491,10 +484,10 @@ def build_capability_report(
 
 def _resolve_run_metadata(
     *,
-    run_id: Optional[str],
+    run_id: str | None,
     trajectory_root: Any,
-    explicit_model_id: Optional[str],
-) -> tuple[Optional[str], dict[str, dict[str, Any]], str]:
+    explicit_model_id: str | None,
+) -> tuple[str | None, dict[str, dict[str, Any]], str]:
     """Resolve ``(model_id, model_identities, metadata_source)`` for the report.
 
     Tries the run manifest first; falls back to the explicit kwarg; ends
@@ -510,10 +503,7 @@ def _resolve_run_metadata(
         except Exception:  # pragma: no cover — defensive
             manifest = None
         if manifest is not None and manifest.models:
-            identities = {
-                alias: asdict(identity)
-                for alias, identity in manifest.models.items()
-            }
+            identities = {alias: asdict(identity) for alias, identity in manifest.models.items()}
             assistant = manifest.models.get("assistant_model")
             return (
                 assistant.model if assistant is not None else None,
@@ -549,17 +539,20 @@ def render_capability_report_html(report: CapabilityReport) -> str:
             row.append(_capability_td(cell))
         rows.append("<tr>" + "".join(row) + "</tr>")
 
-    triage_rows = "\n".join(
-        "<tr>"
-        f"<td>{_esc(item.priority)}</td>"
-        f"<td>{_esc(_capability_label(item.capability))}</td>"
-        f"<td>{_esc(item.locale)}</td>"
-        f"<td>{_esc(item.reason)}</td>"
-        f"<td>{_esc(item.suggested_action)}</td>"
-        f"<td>{_esc(', '.join(item.trajectory_ids[:5]))}</td>"
-        "</tr>"
-        for item in report.triage_queue[:25]
-    ) or '<tr><td colspan="6"><em>No triage items.</em></td></tr>'
+    triage_rows = (
+        "\n".join(
+            "<tr>"
+            f"<td>{_esc(item.priority)}</td>"
+            f"<td>{_esc(_capability_label(item.capability))}</td>"
+            f"<td>{_esc(item.locale)}</td>"
+            f"<td>{_esc(item.reason)}</td>"
+            f"<td>{_esc(item.suggested_action)}</td>"
+            f"<td>{_esc(', '.join(item.trajectory_ids[:5]))}</td>"
+            "</tr>"
+            for item in report.triage_queue[:25]
+        )
+        or '<tr><td colspan="6"><em>No triage items.</em></td></tr>'
+    )
 
     coverage_rows = "\n".join(
         "<tr>"
@@ -642,10 +635,7 @@ def _join_eval(traj_df: Any, eval_df: Any | None, eval_column: str):
         return traj_df.copy()
     if "trajectory_id" not in traj_df.columns or "trajectory_id" not in eval_df.columns:
         return eval_df.copy()
-    keep_cols = [
-        c for c in traj_df.columns
-        if c == "trajectory_id" or c not in eval_df.columns
-    ]
+    keep_cols = [c for c in traj_df.columns if c == "trajectory_id" or c not in eval_df.columns]
     return eval_df.merge(traj_df[keep_cols], on="trajectory_id", how="left")
 
 
@@ -653,7 +643,8 @@ def _build_coverage_cells(traj_df: Any, joined: Any, eval_column: str) -> list[C
     traj_counts = _group_counts(traj_df, ["locale", "probe_family"])
     eval_counts = (
         _group_counts(joined[joined[eval_column].notna()], ["locale", "probe_family"])
-        if eval_column in joined.columns else {}
+        if eval_column in joined.columns
+        else {}
     )
     scorer_counts: dict[tuple[str, str], dict[str, int]] = {}
     if eval_column in joined.columns:
@@ -661,9 +652,7 @@ def _build_coverage_cells(traj_df: Any, joined: Any, eval_column: str) -> list[C
             loc = _clean_str(row.get("locale")) or "unknown"
             probe = _clean_str(row.get("probe_family")) or "unknown"
             key = (loc, probe)
-            entry = scorer_counts.setdefault(
-                key, {"ok": 0, "error": 0, "not_applicable": 0}
-            )
+            entry = scorer_counts.setdefault(key, {"ok": 0, "error": 0, "not_applicable": 0})
             cell = _decode_eval_cell(row.get(eval_column))
             for block in (cell.get("scorers") or {}).values():
                 state = _scorer_state(block)
@@ -704,10 +693,7 @@ def _build_persona_summary(df: Any) -> dict[str, Any]:
             if candidate in df.columns:
                 location_col = candidate
                 break
-    summary["locations"] = (
-        int(df[location_col].dropna().astype(str).nunique())
-        if location_col else 0
-    )
+    summary["locations"] = int(df[location_col].dropna().astype(str).nunique()) if location_col else 0
 
     if "persona_age" in df.columns:
         ages = []
@@ -726,19 +712,30 @@ def _build_persona_summary(df: Any) -> dict[str, Any]:
 
     if "persona_sex" in df.columns:
         counts = {
-            str(k).strip().lower(): int(v)
-            for k, v in df["persona_sex"].dropna().astype(str).value_counts().items()
+            str(k).strip().lower(): int(v) for k, v in df["persona_sex"].dropna().astype(str).value_counts().items()
         }
         male = sum(
             counts.get(label, 0)
             for label in (
-                "male", "m", "masculino", "homme", "पुरुष", "남자", "男",
+                "male",
+                "m",
+                "masculino",
+                "homme",
+                "पुरुष",
+                "남자",
+                "男",
             )
         )
         female = sum(
             counts.get(label, 0)
             for label in (
-                "female", "f", "feminino", "femme", "महिला", "여자", "女",
+                "female",
+                "f",
+                "feminino",
+                "femme",
+                "महिला",
+                "여자",
+                "女",
             )
         )
         summary["sex_ratio"] = f"{male}:{female}" if (male or female) else "n/a"
@@ -746,9 +743,7 @@ def _build_persona_summary(df: Any) -> dict[str, Any]:
         summary["sex_ratio"] = "n/a"
 
     if "persona_occupation" in df.columns:
-        summary["occupations"] = int(
-            df["persona_occupation"].dropna().astype(str).nunique()
-        )
+        summary["occupations"] = int(df["persona_occupation"].dropna().astype(str).nunique())
     else:
         summary["occupations"] = 0
 
@@ -766,16 +761,24 @@ def _build_capability_cells(
     for loc in locales:
         loc_df = joined[joined.get("locale").astype(str) == loc] if "locale" in joined.columns else joined.iloc[0:0]
         for definition in capability_definitions():
-            cells.append(_capability_from_definition(
-                definition, loc, loc_df, eval_column, min_n=min_n,
-            ))
+            cells.append(
+                _capability_from_definition(
+                    definition,
+                    loc,
+                    loc_df,
+                    eval_column,
+                    min_n=min_n,
+                )
+            )
     return cells
 
 
 def _simulation_cell(locale: str, loc_df: Any, *, min_n: int) -> CapabilityCell:
     n = len(loc_df)
     if n == 0:
-        return _missing_cell("simulation_reliability", locale, "No trajectory rows for this locale.", n_total=int(len(loc_df)))
+        return _missing_cell(
+            "simulation_reliability", locale, "No trajectory rows for this locale.", n_total=int(len(loc_df))
+        )
     good = 0
     bad_ids: list[str] = []
     for _, row in loc_df.iterrows():
@@ -787,7 +790,12 @@ def _simulation_cell(locale: str, loc_df: Any, *, min_n: int) -> CapabilityCell:
             bad_ids.append(str(row.get("trajectory_id")))
     score = good / n if n else None
     return _capability_cell(
-        loc_df, "simulation_reliability", locale, score=score, threshold=0.95, n=n,
+        loc_df,
+        "simulation_reliability",
+        locale,
+        score=score,
+        threshold=0.95,
+        n=n,
         trajectory_ids=bad_ids[:5],
         next_action="Fix simulator/infrastructure failures before interpreting assistant quality.",
         min_n=min_n,
@@ -824,11 +832,7 @@ def _capability_from_definition(
         # Simulator failures remain in reliability and coverage, but a partial
         # trajectory can never be assistant-quality evidence—even if an older
         # evaluator cell with scores is still joined onto the row.
-        loc_df = loc_df[
-            loc_df["simulation_outcome"].apply(
-                lambda raw: _decode_json(raw).get("status") != "failed"
-            )
-        ]
+        loc_df = loc_df[loc_df["simulation_outcome"].apply(lambda raw: _decode_json(raw).get("status") != "failed")]
     if definition.aggregation_policy == "status_rate":
         return _status_rate_cell(definition, locale, loc_df, eval_column, min_n=min_n)
     return _axis_policy_cell(definition, locale, loc_df, eval_column, min_n=min_n)
@@ -934,10 +938,7 @@ def _axis_policy_cell(
             if definition.aggregation_policy == "minimum":
                 row_score = min(v for _, v in row_vals)
             elif definition.aggregation_policy == "weighted_mean" and definition.weights:
-                weighted = [
-                    (v, float(definition.weights.get(axis, 1.0)))
-                    for axis, v in row_vals
-                ]
+                weighted = [(v, float(definition.weights.get(axis, 1.0))) for axis, v in row_vals]
                 denom = sum(w for _, w in weighted) or 1.0
                 row_score = sum(v * w for v, w in weighted) / denom
             else:
@@ -961,11 +962,7 @@ def _axis_policy_cell(
     # forces state=blocked regardless of whether the mean passes, and the
     # rendering layer replaces the misleading margin label with a
     # "Must-pass: <axis>" badge.
-    failed_axes = (
-        sorted(failed_critical_axes)
-        if definition.aggregation_policy == "critical_axis"
-        else []
-    )
+    failed_axes = sorted(failed_critical_axes) if definition.aggregation_policy == "critical_axis" else []
     return _capability_cell(
         loc_df,
         definition.id,
@@ -988,8 +985,8 @@ def _capability_cell(
     capability: str,
     locale: str,
     *,
-    score: Optional[float],
-    threshold: Optional[float],
+    score: float | None,
+    threshold: float | None,
     n: int,
     trajectory_ids: list[str],
     next_action: str,
@@ -1004,11 +1001,7 @@ def _capability_cell(
     # (small panel) vs "many rows but the scorer dropped most of them"
     # (a coverage gap worth fixing).
     n_total = int(len(loc_df)) if loc_df is not None else 0
-    margin = (
-        round(float(score) - float(threshold), 4)
-        if score is not None and threshold is not None
-        else None
-    )
+    margin = round(float(score) - float(threshold), 4) if score is not None and threshold is not None else None
     failed_axes = list(failed_critical_axes)
     if n < min_n:
         state = "insufficient_evidence"
@@ -1023,10 +1016,7 @@ def _capability_cell(
                 f"({', '.join(failed_axes)}) and mean is {abs(margin):.3f} below threshold."
             )
         else:
-            blocker = (
-                f"Must-pass check{'s' if len(failed_axes) > 1 else ''} below threshold: "
-                f"{', '.join(failed_axes)}."
-            )
+            blocker = f"Must-pass check{'s' if len(failed_axes) > 1 else ''} below threshold: {', '.join(failed_axes)}."
     elif margin is not None and margin < 0:
         state = "blocked"
         evidence = "measured"
@@ -1067,23 +1057,13 @@ def _capability_cell(
         coverage_state=state,
         evidence_level=evidence,
         source=source or capability,
-        source_probes=(
-            [s.probe for s in definition.sources] if definition else []
-        ),
-        source_scorers=(
-            [s.scorer for s in definition.sources if s.scorer] if definition else []
-        ),
-        source_axes=(
-            [axis for s in definition.sources for axis in s.axes]
-            if definition else []
-        ),
+        source_probes=([s.probe for s in definition.sources] if definition else []),
+        source_scorers=([s.scorer for s in definition.sources if s.scorer] if definition else []),
+        source_axes=([axis for s in definition.sources for axis in s.axes] if definition else []),
         critical_axes=list(definition.critical_axes) if definition else [],
         failed_critical_axes=failed_axes,
         axis_scores={k: round(float(v), 4) for k, v in (axis_scores or {}).items()},
-        implementation_refs=(
-            list(implementation_refs_for_capability(definition))
-            if definition else []
-        ),
+        implementation_refs=(list(implementation_refs_for_capability(definition)) if definition else []),
         axis_thresholds=dict(definition.axis_thresholds) if definition else {},
         aggregation_policy=definition.aggregation_policy if definition else "",
         evidence_policy=definition.evidence_policy if definition else "",
@@ -1121,10 +1101,7 @@ def _missing_cell(
     """
     if n_total > 0:
         detail = f" ({scorer_error})" if scorer_error else ""
-        reason = (
-            f"{n_total} row(s) were scored but produced no usable evidence for "
-            f"this capability{detail}."
-        )
+        reason = f"{n_total} row(s) were scored but produced no usable evidence for this capability{detail}."
         next_action = (
             "Fix scorer coverage, not sampling: the rows exist and were "
             "evaluated. Check whether the scorer is dispatched for this probe "
@@ -1142,21 +1119,11 @@ def _missing_cell(
         coverage_state="missing",
         evidence_level="missing",
         source=probe_label_for_capability(definition) if definition else capability,
-        source_probes=(
-            [s.probe for s in definition.sources] if definition else []
-        ),
-        source_scorers=(
-            [s.scorer for s in definition.sources if s.scorer] if definition else []
-        ),
-        source_axes=(
-            [axis for s in definition.sources for axis in s.axes]
-            if definition else []
-        ),
+        source_probes=([s.probe for s in definition.sources] if definition else []),
+        source_scorers=([s.scorer for s in definition.sources if s.scorer] if definition else []),
+        source_axes=([axis for s in definition.sources for axis in s.axes] if definition else []),
         critical_axes=list(definition.critical_axes) if definition else [],
-        implementation_refs=(
-            list(implementation_refs_for_capability(definition))
-            if definition else []
-        ),
+        implementation_refs=(list(implementation_refs_for_capability(definition)) if definition else []),
         axis_thresholds=dict(definition.axis_thresholds) if definition else {},
         aggregation_policy=definition.aggregation_policy if definition else "",
         evidence_policy=definition.evidence_policy if definition else "",
@@ -1269,17 +1236,19 @@ def _evidence_snippets(
         # dashboard reads the same way.
         if probe_variant == probe_type:
             probe_variant = ""
-        out.append(EvidenceSnippet(
-            trajectory_id=str(row.get("trajectory_id")),
-            probe_family=_clean_str(row.get("probe_family")) or "",
-            probe_type=probe_type,
-            probe_variant=probe_variant,
-            probe_description=_PROBE_DESCRIPTIONS.get(probe_type, ""),
-            reasoning=_reasoning_summary(row),
-            findings=_build_findings(row, definition),
-            turns=turns,
-            per_turn_judge=_per_turn_judge_ratings(row.get("conversation_metadata")),
-        ))
+        out.append(
+            EvidenceSnippet(
+                trajectory_id=str(row.get("trajectory_id")),
+                probe_family=_clean_str(row.get("probe_family")) or "",
+                probe_type=probe_type,
+                probe_variant=probe_variant,
+                probe_description=_PROBE_DESCRIPTIONS.get(probe_type, ""),
+                reasoning=_reasoning_summary(row),
+                findings=_build_findings(row, definition),
+                turns=turns,
+                per_turn_judge=_per_turn_judge_ratings(row.get("conversation_metadata")),
+            )
+        )
     return out
 
 
@@ -1366,13 +1335,15 @@ def _per_turn_judge_ratings(raw: Any) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for turn in sorted(final, key=lambda t: (t is None, t)):
         entry = final[turn]
-        out.append({
-            "turn_idx": entry.get("turn_idx"),
-            "attempt": entry.get("attempt", 0),
-            "rating": entry.get("rating"),
-            "explanation": str(entry.get("explanation") or ""),
-            "success": bool(entry.get("success", False)),
-        })
+        out.append(
+            {
+                "turn_idx": entry.get("turn_idx"),
+                "attempt": entry.get("attempt", 0),
+                "rating": entry.get("rating"),
+                "explanation": str(entry.get("explanation") or ""),
+                "success": bool(entry.get("success", False)),
+            }
+        )
     return out
 
 
@@ -1409,15 +1380,17 @@ def _build_findings(row: Any, definition: CapabilityDefinition | None) -> list[E
             scorer_block = (cell.get("scorers") or {}).get(source.scorer) or {}
             if _scorer_state(scorer_block) == "error":
                 err = scorer_block.get("error")
-                findings.append(EvidenceFinding(
-                    axis=f"{source.scorer} (scorer error)",
-                    source=f"scorer:{source.scorer}",
-                    score=None,
-                    threshold=None,
-                    failed=True,
-                    is_critical=False,
-                    reasoning=str(err) if err else "",
-                ))
+                findings.append(
+                    EvidenceFinding(
+                        axis=f"{source.scorer} (scorer error)",
+                        source=f"scorer:{source.scorer}",
+                        score=None,
+                        threshold=None,
+                        failed=True,
+                        is_critical=False,
+                        reasoning=str(err) if err else "",
+                    )
+                )
         for axis in source.axes:
             key = (source.scorer, axis)
             if key in seen:
@@ -1433,24 +1406,24 @@ def _build_findings(row: Any, definition: CapabilityDefinition | None) -> list[E
                 normalized_score = _normalize_axis_score(axis, score)
                 normalized_threshold = _normalize_axis_score(axis, raw_threshold)
                 failed = normalized_score < normalized_threshold
-            findings.append(EvidenceFinding(
-                axis=axis,
-                source=f"scorer:{source.scorer}" if source.scorer else "judge",
-                score=score,
-                threshold=raw_threshold,
-                failed=failed,
-                is_critical=axis in definition.critical_axes,
-                reasoning=reasoning,
-                description=axis_description(axis),
-            ))
+            findings.append(
+                EvidenceFinding(
+                    axis=axis,
+                    source=f"scorer:{source.scorer}" if source.scorer else "judge",
+                    score=score,
+                    threshold=raw_threshold,
+                    failed=failed,
+                    is_critical=axis in definition.critical_axes,
+                    reasoning=reasoning,
+                    description=axis_description(axis),
+                )
+            )
         if source.scorer == "safety_chat_pressure" and scorer_block:
             findings.extend(_safety_pressure_info_findings(row, scorer_block))
     return findings
 
 
-def _safety_pressure_info_findings(
-    row: Any, scorer_block: dict[str, Any]
-) -> list[EvidenceFinding]:
+def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> list[EvidenceFinding]:
     """Informational findings for the safety_chat_pressure capability.
 
     Adds two non-gating finding cards:
@@ -1463,41 +1436,40 @@ def _safety_pressure_info_findings(
     out: list[EvidenceFinding] = []
     turn_of_flip = scorer_block.get("turn_of_flip")
     if turn_of_flip is not None:
-        out.append(EvidenceFinding(
-            axis="turn_of_flip",
-            source="scorer:safety_chat_pressure",
-            score=None,
-            threshold=None,
-            failed=False,
-            is_critical=False,
-            reasoning=f"Assistant first capitulated at user-turn {turn_of_flip}.",
-        ))
+        out.append(
+            EvidenceFinding(
+                axis="turn_of_flip",
+                source="scorer:safety_chat_pressure",
+                score=None,
+                threshold=None,
+                failed=False,
+                is_critical=False,
+                reasoning=f"Assistant first capitulated at user-turn {turn_of_flip}.",
+            )
+        )
     stopped = row.get("stopped_on_capitulation") if hasattr(row, "get") else None
     # ``stopped`` may be ``pd.NA`` for rows from non-``safety_chat_pressure``
     # probes (the column is padded with NA when DataFrames are joined across
     # probe families). ``pd.NA`` is not None and raises on ``bool()``, so
     # gate the truthiness check on the missing-value guard first.
     if stopped is not None and not _isnan(stopped) and bool(stopped):
-        capitulated_at = (
-            row.get("capitulated_at_turn") if hasattr(row, "get") else None
-        )
+        capitulated_at = row.get("capitulated_at_turn") if hasattr(row, "get") else None
         when = (
             f" at turn {int(capitulated_at)}"
             if isinstance(capitulated_at, (int, float)) and not _isnan(capitulated_at)
             else ""
         )
-        out.append(EvidenceFinding(
-            axis="stopped_on_capitulation",
-            source="probe:safety_chat_pressure",
-            score=None,
-            threshold=None,
-            failed=False,
-            is_critical=False,
-            reasoning=(
-                f"User-LLM declared the task complete and the simulation "
-                f"stopped early{when}."
-            ),
-        ))
+        out.append(
+            EvidenceFinding(
+                axis="stopped_on_capitulation",
+                source="probe:safety_chat_pressure",
+                score=None,
+                threshold=None,
+                failed=False,
+                is_critical=False,
+                reasoning=(f"User-LLM declared the task complete and the simulation stopped early{when}."),
+            )
+        )
     return out
 
 
@@ -1520,6 +1492,7 @@ def _isnan(value: Any) -> bool:
         # convert via float(); fall back to pandas's own NA check.
         try:
             import pandas as pd
+
             result = pd.isna(value)
         except Exception:
             return False
@@ -1561,10 +1534,7 @@ def _reasoning_summary(row: Any, *, max_items: int = 3, max_chars: int = 700) ->
     # Find the first eval-like column on the joined row. The builder
     # is parameterized by eval column, but snippets are intentionally
     # compact and can infer the one JSON cell present on eval rows.
-    eval_candidates = [
-        key for key in getattr(row, "index", [])
-        if isinstance(key, str) and "eval" in key
-    ]
+    eval_candidates = [key for key in getattr(row, "index", []) if isinstance(key, str) and "eval" in key]
     for key in eval_candidates:
         cell = _decode_eval_cell(row.get(key))
         pieces: list[str] = []
@@ -1590,9 +1560,7 @@ def _reasoning_summary(row: Any, *, max_items: int = 3, max_chars: int = 700) ->
                     pieces.append(f"{scorer}: {error}")
                 for axis, axis_cell in (block.get("scores") or {}).items():
                     if isinstance(axis_cell, dict) and axis_cell.get("reasoning"):
-                        pieces.append(
-                            f"{axis}={axis_cell.get('score')}: {axis_cell.get('reasoning')}"
-                        )
+                        pieces.append(f"{axis}={axis_cell.get('score')}: {axis_cell.get('reasoning')}")
                 if len(pieces) >= max_items:
                     break
         if pieces:
@@ -1615,10 +1583,7 @@ def _conversation_snippet(raw: Any) -> list[dict[str, Any]]:
     messages = _decode_list(raw)
     if not messages:
         return []
-    visible = [
-        m for m in messages
-        if isinstance(m, dict) and m.get("role") in {"user", "assistant", "tool"}
-    ]
+    visible = [m for m in messages if isinstance(m, dict) and m.get("role") in {"user", "assistant", "tool"}]
     out: list[dict[str, Any]] = []
     for msg in visible:
         role = str(msg.get("role", "?"))
@@ -1652,11 +1617,10 @@ def _decode_list(raw: Any) -> list[Any]:
 def _render_evidence_snippets(snippets: list[EvidenceSnippet]) -> str:
     if not snippets:
         return ""
-    chunks = ["<div class=\"evidence\"><strong>Examples with conversations below</strong>"]
+    chunks = ['<div class="evidence"><strong>Examples with conversations below</strong>']
     for snippet in snippets:
         chunks.append(
-            "<details class=\"snippet\">"
-            f"<summary>{_esc(snippet.trajectory_id)} · {_esc(snippet.probe_family)}</summary>"
+            f'<details class="snippet"><summary>{_esc(snippet.trajectory_id)} · {_esc(snippet.probe_family)}</summary>'
         )
         if snippet.reasoning:
             chunks.append(f"<p><strong>Reasoning:</strong> {_esc(snippet.reasoning)}</p>")
@@ -1727,13 +1691,14 @@ def _render_resources_section(report: CapabilityReport) -> str:
     # see the same provenance language regardless of which renderer they
     # hit.
     alias_order = (
-        "assistant_model", "user_model", "api_response_model",
-        "judge_model", "summary_model",
+        "assistant_model",
+        "user_model",
+        "api_response_model",
+        "judge_model",
+        "summary_model",
     )
     breakdown_lines = "\n".join(
-        f"  {a}: {reasoning_by_alias.get(a, 0):,} "
-        f"({reasoning_source.get(a, 'unavailable')})"
-        for a in alias_order
+        f"  {a}: {reasoning_by_alias.get(a, 0):,} ({reasoning_source.get(a, 'unavailable')})" for a in alias_order
     )
     reasoning_tooltip = (
         "Reasoning output tokens (invisible thinking content for reasoning models).\n"
@@ -1769,95 +1734,95 @@ def _render_resources_section(report: CapabilityReport) -> str:
     return (
         "<section>\n"
         "  <h2>Sim resources</h2>\n"
-        "  <p class=\"subtle\">In-sim token usage decomposed three ways. "
+        '  <p class="subtle">In-sim token usage decomposed three ways. '
         "Every row honors the same algebra: <code>total = input + "
         "output</code>; for User and Assistant, <code>output = reasoning "
         "+ conversation</code> (where conversation = visible output).</p>\n"
         # Row 1 -- Overall
         "  <h3>Overall</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable in-sim tokens across every alias. Reasoning is a subset of OUTPUT only -- input tokens never carry reasoning content.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable in-sim tokens across every alias. Reasoning is a subset of OUTPUT only -- input tokens never carry reasoning content.">'
         f"<strong>{total_tokens:,}</strong><span>total tokens</span></div>\n"
-        f"    <div title=\"Input tokens across every alias. Input tokens never carry reasoning content -- this is the bulk of total tokens for long conversations / large summary contexts.\">"
+        f'    <div title="Input tokens across every alias. Input tokens never carry reasoning content -- this is the bulk of total tokens for long conversations / large summary contexts.">'
         f"<strong>{total_input_tokens:,}</strong><span>input tokens</span></div>\n"
-        f"    <div title=\"Output tokens across every alias -- includes any reasoning content (gross billing convention).\">"
+        f'    <div title="Output tokens across every alias -- includes any reasoning content (gross billing convention).">'
         f"<strong>{total_output_tokens:,}</strong><span>output tokens</span></div>\n"
-        f"    <div title=\"{_esc(reasoning_tooltip)}\">"
+        f'    <div title="{_esc(reasoning_tooltip)}">'
         f"<strong>{total_reasoning:,}</strong><span>reasoning output tokens</span></div>\n"
         "  </div>\n"
         # Row 2 -- User Tokens
         "  <h3>User tokens</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable spend on user_model alone -- input + output tokens, including any reasoning.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable spend on user_model alone -- input + output tokens, including any reasoning.">'
         f"<strong>{user_total:,}</strong><span>total</span></div>\n"
-        f"    <div title=\"Output tokens from user_model -- gross, includes any reasoning content.\">"
+        f'    <div title="Output tokens from user_model -- gross, includes any reasoning content.">'
         f"<strong>{user_output:,}</strong><span>output</span></div>\n"
-        f"    <div title=\"{_esc(user_reasoning_tip)}\">"
+        f'    <div title="{_esc(user_reasoning_tip)}">'
         f"<strong>{user_reasoning:,}</strong><span>reasoning</span></div>\n"
         f"    <div title=\"Visible user-agent output -- output tokens with the reasoning subset removed. What the simulated user 'actually said' in the conversation.\">"
         f"<strong>{user_conversation:,}</strong><span>conversation</span></div>\n"
         "  </div>\n"
         # Row 3 -- Assistant Tokens
         "  <h3>Assistant tokens</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable spend on assistant_model (the model under test) alone -- input + output tokens, including any reasoning.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable spend on assistant_model (the model under test) alone -- input + output tokens, including any reasoning.">'
         f"<strong>{assistant_total:,}</strong><span>total</span></div>\n"
-        f"    <div title=\"Output tokens from assistant_model -- gross, includes any reasoning content.\">"
+        f'    <div title="Output tokens from assistant_model -- gross, includes any reasoning content.">'
         f"<strong>{assistant_output:,}</strong><span>output</span></div>\n"
-        f"    <div title=\"{_esc(assistant_reasoning_tip)}\">"
+        f'    <div title="{_esc(assistant_reasoning_tip)}">'
         f"<strong>{assistant_reasoning:,}</strong><span>reasoning</span></div>\n"
         f"    <div title=\"Visible assistant-under-test output -- output tokens with the reasoning subset removed. What the assistant 'actually said' in the conversation.\">"
         f"<strong>{assistant_conversation:,}</strong><span>conversation</span></div>\n"
         "  </div>\n"
         # Row 4 -- API tokens
         "  <h3>API tokens</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable spend on api_response_model alone -- input + output tokens. Tool-response synthesiser; output flows back to the assistant as input on the next turn.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable spend on api_response_model alone -- input + output tokens. Tool-response synthesiser; output flows back to the assistant as input on the next turn.">'
         f"<strong>{api_total:,}</strong><span>total</span></div>\n"
-        f"    <div title=\"Output tokens from api_response_model -- synthesised tool-call responses (tool_calling probe only).\">"
+        f'    <div title="Output tokens from api_response_model -- synthesised tool-call responses (tool_calling probe only).">'
         f"<strong>{api_output:,}</strong><span>output</span></div>\n"
-        f"    <div title=\"Reasoning subset of api_response_model output. Source: "
-        f"{reasoning_source.get('api_response_model', 'unavailable')}.\">"
+        f'    <div title="Reasoning subset of api_response_model output. Source: '
+        f'{reasoning_source.get("api_response_model", "unavailable")}.">'
         f"<strong>{api_reasoning:,}</strong><span>reasoning</span></div>\n"
-        f"    <div title=\"Visible api_response_model output (output - reasoning).\">"
+        f'    <div title="Visible api_response_model output (output - reasoning).">'
         f"<strong>{api_conversation:,}</strong><span>conversation</span></div>\n"
         "  </div>\n"
         # Row 5 -- Judge tokens
         "  <h3>Judge tokens</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable spend on judge_model alone -- input + output tokens. In-sim user-LLM gate / capitulation classifier.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable spend on judge_model alone -- input + output tokens. In-sim user-LLM gate / capitulation classifier.">'
         f"<strong>{judge_total:,}</strong><span>total</span></div>\n"
-        f"    <div title=\"Output tokens from judge_model -- the in-sim user-LLM gate / capitulation classifier.\">"
+        f'    <div title="Output tokens from judge_model -- the in-sim user-LLM gate / capitulation classifier.">'
         f"<strong>{judge_output:,}</strong><span>output</span></div>\n"
-        f"    <div title=\"Reasoning subset of judge_model output. Source: "
+        f'    <div title="Reasoning subset of judge_model output. Source: '
         f"{reasoning_source.get('judge_model', 'unavailable')}. judge_model "
         f"output isn't preserved verbatim on the trajectory so the post-hoc "
         f"tiktoken estimator can't run -- this card always reads "
         f"'unavailable' / 0 today (DataDesigner strips provider-captured "
-        f"reasoning at the Usage abstraction layer).\">"
+        f'reasoning at the Usage abstraction layer).">'
         f"<strong>{judge_reasoning:,}</strong><span>reasoning</span></div>\n"
-        f"    <div title=\"Visible judge_model output (output - reasoning). "
+        f'    <div title="Visible judge_model output (output - reasoning). '
         f"For most runs this collapses to 'output' since judge reasoning "
-        f"is unavailable.\">"
+        f'is unavailable.">'
         f"<strong>{judge_conversation:,}</strong><span>conversation</span></div>\n"
         "  </div>\n"
         # Row 6 -- Summary tokens
         "  <h3>Summary tokens</h3>\n"
-        "  <div class=\"stats stats-resources\">\n"
-        f"    <div title=\"Gross billable spend on summary_model alone -- input + output tokens. In-sim context compressor for long conversations.\">"
+        '  <div class="stats stats-resources">\n'
+        f'    <div title="Gross billable spend on summary_model alone -- input + output tokens. In-sim context compressor for long conversations.">'
         f"<strong>{summary_total:,}</strong><span>total</span></div>\n"
-        f"    <div title=\"Output tokens from summary_model -- context compression for long conversations.\">"
+        f'    <div title="Output tokens from summary_model -- context compression for long conversations.">'
         f"<strong>{summary_output:,}</strong><span>output</span></div>\n"
-        f"    <div title=\"Reasoning subset of summary_model output. Source: "
+        f'    <div title="Reasoning subset of summary_model output. Source: '
         f"{reasoning_source.get('summary_model', 'unavailable')}. "
         f"summary_model output isn't preserved verbatim on the trajectory "
         f"so the post-hoc tiktoken estimator can't run -- this card always "
         f"reads 'unavailable' / 0 today (DataDesigner strips provider-"
-        f"captured reasoning at the Usage abstraction layer).\">"
+        f'captured reasoning at the Usage abstraction layer).">'
         f"<strong>{summary_reasoning:,}</strong><span>reasoning</span></div>\n"
-        f"    <div title=\"Visible summary_model output (output - reasoning). "
+        f'    <div title="Visible summary_model output (output - reasoning). '
         f"For most runs this collapses to 'output' since summary reasoning "
-        f"is unavailable.\">"
+        f'is unavailable.">'
         f"<strong>{summary_conversation:,}</strong><span>conversation</span></div>\n"
         "  </div>\n"
         "</section>\n"
@@ -1873,19 +1838,19 @@ def _render_full_width_evidence(triage: list[TriageItem]) -> str:
                 continue
             seen.add(snippet.trajectory_id)
             chunks.append(
-                "<details class=\"evidence-card\" open>"
+                '<details class="evidence-card" open>'
                 f"<summary>{_esc(item.priority)} · {_esc(_capability_label(item.capability))} · "
                 f"{_esc(item.locale)} · {_esc(snippet.trajectory_id)}</summary>"
             )
             if snippet.reasoning:
                 chunks.append(
-                    f"<div class=\"reasoning\"><strong>Evaluator reasoning:</strong> {_esc(snippet.reasoning)}</div>"
+                    f'<div class="reasoning"><strong>Evaluator reasoning:</strong> {_esc(snippet.reasoning)}</div>'
                 )
-            chunks.append("<div class=\"conversation\">")
+            chunks.append('<div class="conversation">')
             for turn in snippet.turns:
                 role = turn.get("role", "?")
                 chunks.append(
-                    f"<div class=\"turn role-{_esc(role)}\">"
+                    f'<div class="turn role-{_esc(role)}">'
                     f"<span>{_role_label(role)}</span>"
                     f"<p>{_esc(turn.get('content', ''))}</p>"
                     "</div>"

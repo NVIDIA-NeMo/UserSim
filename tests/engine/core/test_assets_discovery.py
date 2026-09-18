@@ -35,9 +35,7 @@ class TestPackagedResolution:
     def test_resolves_inside_the_package(self) -> None:
         path = packaged_assets_dir()
         assert path.is_dir(), f"{path} is not a directory"
-        assert path.parent.name == "engine", (
-            f"assets must be package data, resolved {path}"
-        )
+        assert path.parent.name == "engine", f"assets must be package data, resolved {path}"
 
     def test_independent_of_cwd(self, tmp_path: Path, monkeypatch) -> None:
         """Resolution must not depend on where the process was started."""
@@ -76,9 +74,7 @@ class TestOverrides:
         assert default_assets_dir() == baseline
 
     def test_explicit_root_wins_in_probe_assets_dir(self, tmp_path: Path) -> None:
-        assert probe_assets_dir("sov_ai_facts", assets_root=tmp_path) == (
-            tmp_path / "sov_ai_facts"
-        )
+        assert probe_assets_dir("sov_ai_facts", assets_root=tmp_path) == (tmp_path / "sov_ai_facts")
 
 
 class TestMarkerAndRegistryInvariants:
@@ -116,15 +112,14 @@ class TestMarkerAndRegistryInvariants:
     def test_probe_assets_dir_resolves_for_every_marker(self) -> None:
         for marker in _ASSETS_MARKERS:
             path = probe_assets_dir(marker)
-            assert path.is_dir(), (
-                f"probe_assets_dir({marker!r}) -> {path}, not a directory"
-            )
+            assert path.is_dir(), f"probe_assets_dir({marker!r}) -> {path}, not a directory"
 
     def test_packaged_tree_has_no_stray_top_level_entries(self) -> None:
         """Everything shipped under assets/ should be a probe folder. Catches
         a doc image or scratch file riding into the wheel."""
         stray = [
-            p.name for p in packaged_assets_dir().iterdir()
+            p.name
+            for p in packaged_assets_dir().iterdir()
             if p.name not in _ASSETS_MARKERS and not p.name.startswith("__")
         ]
         assert not stray, f"unexpected entries in packaged assets/: {stray}"
@@ -148,7 +143,8 @@ class TestAssetSearchPath:
 
         first, second = tmp_path / "a", tmp_path / "b"
         monkeypatch.setenv(
-            "USERSIM_ASSET_PATH", f"{first}{os.pathsep}{second}",
+            "USERSIM_ASSET_PATH",
+            f"{first}{os.pathsep}{second}",
         )
         path = asset_search_path()
         assert path[0] == first and path[1] == second
@@ -157,12 +153,15 @@ class TestAssetSearchPath:
         from usersim.engine.core._assets import asset_search_path
 
         monkeypatch.setenv(
-            "USERSIM_ASSET_PATH", f"{tmp_path}{os.pathsep}{tmp_path}",
+            "USERSIM_ASSET_PATH",
+            f"{tmp_path}{os.pathsep}{tmp_path}",
         )
         assert len(asset_search_path()) == len(set(asset_search_path()))
 
     def test_contributed_root_wins_for_the_probe_it_has(
-        self, monkeypatch, tmp_path,
+        self,
+        monkeypatch,
+        tmp_path,
     ) -> None:
         from usersim.engine.core._assets import probe_assets_dir
 
@@ -193,7 +192,9 @@ class TestAssetSearchPath:
         assert not resolved.exists()
 
     def test_unresolvable_probe_reports_the_top_root(
-        self, monkeypatch, tmp_path,
+        self,
+        monkeypatch,
+        tmp_path,
     ) -> None:
         from usersim.engine.core._assets import probe_assets_dir
 

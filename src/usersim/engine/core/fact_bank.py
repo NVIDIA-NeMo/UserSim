@@ -38,13 +38,13 @@ import threading
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 logger = logging.getLogger("usersim.engine")
 
-SUPPORTED_SCHEMA_VERSIONS: FrozenSet[str] = frozenset({"v0.1"})
-ALLOWED_QUESTION_TYPES: FrozenSet[str] = frozenset({"factual_recall", "completion"})
-ALLOWED_DIFFICULTIES: FrozenSet[str] = frozenset({"easy", "medium", "hard"})
+SUPPORTED_SCHEMA_VERSIONS: frozenset[str] = frozenset({"v0.1"})
+ALLOWED_QUESTION_TYPES: frozenset[str] = frozenset({"factual_recall", "completion"})
+ALLOWED_DIFFICULTIES: frozenset[str] = frozenset({"easy", "medium", "hard"})
 
 _PERSONA_TAG_RE = re.compile(r"^(region|age|occupation-family|education|interest):[a-zA-Z0-9_\-+]+$")
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -67,21 +67,21 @@ class FactBankError(ValueError):
 class FactProvenance:
     source: str
     last_reviewed: str  # YYYY-MM-DD
-    references: Tuple[str, ...] = ()
+    references: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class Fact:
     id: str
     category: str
-    question_type: str           # factual_recall | completion
+    question_type: str  # factual_recall | completion
     placeholder: bool
     question: str
-    false_premises: Tuple[str, ...]
+    false_premises: tuple[str, ...]
     ground_truth: str
-    graceful_unknown: Optional[str]
-    persona_tags: Tuple[str, ...]
-    difficulty: str              # easy | medium | hard
+    graceful_unknown: str | None
+    persona_tags: tuple[str, ...]
+    difficulty: str  # easy | medium | hard
     provenance: FactProvenance
     # Set by the loader from the bank's top-level fields so downstream
     # consumers can carry provenance per-fact without holding the whole
@@ -97,26 +97,26 @@ class FactBank:
     locale: str
     bank_id: str
     bank_version: str
-    categories: Tuple[str, ...]
-    tags: Tuple[str, ...]
-    facts: Tuple[Fact, ...] = field(default_factory=tuple)
-    source_path: Optional[str] = None
+    categories: tuple[str, ...]
+    tags: tuple[str, ...]
+    facts: tuple[Fact, ...] = field(default_factory=tuple)
+    source_path: str | None = None
 
     # ── Lookups ─────────────────────────────────────────────────────
 
-    def by_id(self, fact_id: str) -> Optional[Fact]:
+    def by_id(self, fact_id: str) -> Fact | None:
         for f in self.facts:
             if f.id == fact_id:
                 return f
         return None
 
-    def by_category(self, category: str) -> Tuple[Fact, ...]:
+    def by_category(self, category: str) -> tuple[Fact, ...]:
         return tuple(f for f in self.facts if f.category == category)
 
-    def by_tag(self, tag: str) -> Tuple[Fact, ...]:
+    def by_tag(self, tag: str) -> tuple[Fact, ...]:
         return tuple(f for f in self.facts if tag in f.persona_tags)
 
-    def matching_persona_tags(self, tags: Iterable[str]) -> Tuple[Fact, ...]:
+    def matching_persona_tags(self, tags: Iterable[str]) -> tuple[Fact, ...]:
         """Return facts whose persona_tags intersect ``tags``.
 
         ``*:any`` wildcards on the fact side match every persona tag
@@ -137,34 +137,25 @@ class FactBank:
                     continue
             concrete.add(t)
 
-        out: List[Fact] = []
+        out: list[Fact] = []
         for f in self.facts:
             if concrete & set(f.persona_tags):
                 out.append(f)
                 continue
             # Persona carries *:any → matches any fact tag with that prefix.
-            if wildcard_prefixes and any(
-                t.split(":", 1)[0] in wildcard_prefixes
-                for t in f.persona_tags if ":" in t
-            ):
+            if wildcard_prefixes and any(t.split(":", 1)[0] in wildcard_prefixes for t in f.persona_tags if ":" in t):
                 out.append(f)
                 continue
             # Fact carries *:any → matches any persona tag with that prefix.
-            fact_wildcards = {
-                t.split(":", 1)[0]
-                for t in f.persona_tags if t.endswith(":any")
-            }
-            if fact_wildcards and any(
-                t.split(":", 1)[0] in fact_wildcards
-                for t in wanted if ":" in t
-            ):
+            fact_wildcards = {t.split(":", 1)[0] for t in f.persona_tags if t.endswith(":any")}
+            if fact_wildcards and any(t.split(":", 1)[0] in fact_wildcards for t in wanted if ":" in t):
                 out.append(f)
         return tuple(out)
 
-    def placeholder_only(self) -> Tuple[Fact, ...]:
+    def placeholder_only(self) -> tuple[Fact, ...]:
         return tuple(f for f in self.facts if f.placeholder)
 
-    def non_placeholder(self) -> Tuple[Fact, ...]:
+    def non_placeholder(self) -> tuple[Fact, ...]:
         return tuple(f for f in self.facts if not f.placeholder)
 
     def placeholder_fraction(self) -> float:
@@ -172,7 +163,7 @@ class FactBank:
             return 0.0
         return sum(1 for f in self.facts if f.placeholder) / len(self.facts)
 
-    def provenance_summary(self) -> Dict[str, Any]:
+    def provenance_summary(self) -> dict[str, Any]:
         """Surfaces that the downstream reporting layer reads."""
         return {
             "bank_id": self.bank_id,
@@ -226,7 +217,7 @@ def load_fact_bank(path: str | Path) -> FactBank:
 # e.g. ``USERSIM_SOV_AI_FACTS_BANK_PT_BR=/abs/path/pt_BR_v1.yaml``. This is the
 # hook SLURM / CI jobs use to pin a bank version.
 
-_FACT_BANK_CACHE: Dict[str, FactBank] = {}
+_FACT_BANK_CACHE: dict[str, FactBank] = {}
 _FACT_BANK_CACHE_LOCK = threading.Lock()
 
 
@@ -238,6 +229,7 @@ def default_fact_bank_path(locale: str) -> Path:
     of CWD. Asset directory matches the consuming probe name.
     """
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("sov_ai_facts") / locale / "sample.yaml"
 
 
@@ -281,7 +273,7 @@ def reset_fact_bank_cache() -> None:
         _FACT_BANK_CACHE.clear()
 
 
-def _build_fact_bank(doc: Dict[str, Any], *, src_path: str) -> FactBank:
+def _build_fact_bank(doc: dict[str, Any], *, src_path: str) -> FactBank:
     schema_version = _require_str(doc, "schema_version", src_path)
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise FactBankError(
@@ -295,9 +287,7 @@ def _build_fact_bank(doc: Dict[str, Any], *, src_path: str) -> FactBank:
 
     raw_categories = doc.get("categories")
     if not isinstance(raw_categories, list) or not raw_categories:
-        raise FactBankError(
-            f"{src_path}::categories: must be a non-empty list"
-        )
+        raise FactBankError(f"{src_path}::categories: must be a non-empty list")
     categories = tuple(str(c) for c in raw_categories)
 
     raw_tags = doc.get("tags", [])
@@ -307,17 +297,13 @@ def _build_fact_bank(doc: Dict[str, Any], *, src_path: str) -> FactBank:
 
     raw_entries = doc.get("entries")
     if not isinstance(raw_entries, list) or not raw_entries:
-        raise FactBankError(
-            f"{src_path}::entries: must be a non-empty list"
-        )
+        raise FactBankError(f"{src_path}::entries: must be a non-empty list")
 
-    facts: List[Fact] = []
+    facts: list[Fact] = []
     seen_ids: set = set()
     for idx, entry in enumerate(raw_entries):
         if not isinstance(entry, dict):
-            raise FactBankError(
-                f"{src_path}::entries[{idx}]: must be a mapping"
-            )
+            raise FactBankError(f"{src_path}::entries[{idx}]: must be a mapping")
         fact = _build_fact(
             entry,
             src_path=src_path,
@@ -328,9 +314,7 @@ def _build_fact_bank(doc: Dict[str, Any], *, src_path: str) -> FactBank:
             bank_version=bank_version,
         )
         if fact.id in seen_ids:
-            raise FactBankError(
-                f"{src_path}::{fact.id}: duplicate fact id"
-            )
+            raise FactBankError(f"{src_path}::{fact.id}: duplicate fact id")
         seen_ids.add(fact.id)
         facts.append(fact)
 
@@ -359,11 +343,11 @@ def _build_fact_bank(doc: Dict[str, Any], *, src_path: str) -> FactBank:
 
 
 def _build_fact(
-    entry: Dict[str, Any],
+    entry: dict[str, Any],
     *,
     src_path: str,
     idx: int,
-    categories: Tuple[str, ...],
+    categories: tuple[str, ...],
     locale: str,
     bank_id: str,
     bank_version: str,
@@ -371,24 +355,17 @@ def _build_fact(
     fact_id = _require_str(entry, "id", src_path, ctx=f"entries[{idx}]")
     category = _require_str(entry, "category", src_path, ctx=fact_id)
     if category not in categories:
-        raise FactBankError(
-            f"{src_path}::{fact_id}: category {category!r} not in bank "
-            f"categories {list(categories)}"
-        )
+        raise FactBankError(f"{src_path}::{fact_id}: category {category!r} not in bank categories {list(categories)}")
 
     question_type = _require_str(entry, "question_type", src_path, ctx=fact_id)
     if question_type not in ALLOWED_QUESTION_TYPES:
         raise FactBankError(
-            f"{src_path}::{fact_id}: question_type {question_type!r} must be "
-            f"one of {sorted(ALLOWED_QUESTION_TYPES)}"
+            f"{src_path}::{fact_id}: question_type {question_type!r} must be one of {sorted(ALLOWED_QUESTION_TYPES)}"
         )
 
     placeholder = entry.get("placeholder", False)
     if not isinstance(placeholder, bool):
-        raise FactBankError(
-            f"{src_path}::{fact_id}: placeholder must be a bool, got "
-            f"{type(placeholder).__name__}"
-        )
+        raise FactBankError(f"{src_path}::{fact_id}: placeholder must be a bool, got {type(placeholder).__name__}")
 
     question = _require_str(entry, "question", src_path, ctx=fact_id)
     ground_truth = _require_str(entry, "ground_truth", src_path, ctx=fact_id)
@@ -397,9 +374,7 @@ def _build_fact(
     # ignored for completion (stored empty to keep the dataclass uniform).
     raw_fp = entry.get("false_premises", [])
     if not isinstance(raw_fp, list):
-        raise FactBankError(
-            f"{src_path}::{fact_id}: false_premises must be a list"
-        )
+        raise FactBankError(f"{src_path}::{fact_id}: false_premises must be a list")
     false_premises = tuple(str(p) for p in raw_fp)
     if question_type == "completion" and false_premises:
         raise FactBankError(
@@ -424,15 +399,11 @@ def _build_fact(
 
     raw_persona_tags = entry.get("persona_tags", [])
     if not isinstance(raw_persona_tags, list) or not raw_persona_tags:
-        raise FactBankError(
-            f"{src_path}::{fact_id}: persona_tags must be a non-empty list"
-        )
-    persona_tags: List[str] = []
+        raise FactBankError(f"{src_path}::{fact_id}: persona_tags must be a non-empty list")
+    persona_tags: list[str] = []
     for t in raw_persona_tags:
         if not isinstance(t, str):
-            raise FactBankError(
-                f"{src_path}::{fact_id}: persona_tags entries must be strings"
-            )
+            raise FactBankError(f"{src_path}::{fact_id}: persona_tags entries must be strings")
         if not _PERSONA_TAG_RE.match(t):
             raise FactBankError(
                 f"{src_path}::{fact_id}: persona_tag {t!r} does not match "
@@ -443,8 +414,7 @@ def _build_fact(
     difficulty = _require_str(entry, "difficulty", src_path, ctx=fact_id)
     if difficulty not in ALLOWED_DIFFICULTIES:
         raise FactBankError(
-            f"{src_path}::{fact_id}: difficulty {difficulty!r} must be one "
-            f"of {sorted(ALLOWED_DIFFICULTIES)}"
+            f"{src_path}::{fact_id}: difficulty {difficulty!r} must be one of {sorted(ALLOWED_DIFFICULTIES)}"
         )
 
     provenance = _build_provenance(
@@ -480,31 +450,21 @@ def _build_provenance(
     placeholder: bool,
 ) -> FactProvenance:
     if not isinstance(raw, dict):
-        raise FactBankError(
-            f"{src_path}::{fact_id}: provenance must be a mapping"
-        )
+        raise FactBankError(f"{src_path}::{fact_id}: provenance must be a mapping")
     source = _require_str(raw, "source", src_path, ctx=f"{fact_id}/provenance")
-    last_reviewed = _require_str(
-        raw, "last_reviewed", src_path, ctx=f"{fact_id}/provenance"
-    )
+    last_reviewed = _require_str(raw, "last_reviewed", src_path, ctx=f"{fact_id}/provenance")
     if not _ISO_DATE_RE.match(last_reviewed):
         raise FactBankError(
-            f"{src_path}::{fact_id}: provenance.last_reviewed must be "
-            f"YYYY-MM-DD, got {last_reviewed!r}"
+            f"{src_path}::{fact_id}: provenance.last_reviewed must be YYYY-MM-DD, got {last_reviewed!r}"
         )
     try:
         date.fromisoformat(last_reviewed)
     except ValueError as e:
-        raise FactBankError(
-            f"{src_path}::{fact_id}: provenance.last_reviewed is not a real "
-            f"calendar date: {e}"
-        ) from e
+        raise FactBankError(f"{src_path}::{fact_id}: provenance.last_reviewed is not a real calendar date: {e}") from e
 
     raw_refs = raw.get("references", [])
     if not isinstance(raw_refs, list):
-        raise FactBankError(
-            f"{src_path}::{fact_id}: provenance.references must be a list"
-        )
+        raise FactBankError(f"{src_path}::{fact_id}: provenance.references must be a list")
     references = tuple(str(r) for r in raw_refs)
 
     if placeholder:
@@ -519,8 +479,7 @@ def _build_provenance(
             )
         if not references:
             raise FactBankError(
-                f"{src_path}::{fact_id}: non-placeholder entry must declare at "
-                "least one provenance.references citation"
+                f"{src_path}::{fact_id}: non-placeholder entry must declare at least one provenance.references citation"
             )
 
     return FactProvenance(
@@ -530,16 +489,11 @@ def _build_provenance(
     )
 
 
-def _require_str(
-    d: Dict[str, Any], key: str, src_path: str, ctx: Optional[str] = None
-) -> str:
+def _require_str(d: dict[str, Any], key: str, src_path: str, ctx: str | None = None) -> str:
     loc = f"{src_path}::{ctx}" if ctx else src_path
     if key not in d:
         raise FactBankError(f"{loc}: missing required field {key!r}")
     v = d[key]
     if not isinstance(v, str) or not v.strip():
-        raise FactBankError(
-            f"{loc}: field {key!r} must be a non-empty string, got "
-            f"{type(v).__name__}"
-        )
+        raise FactBankError(f"{loc}: field {key!r} must be a non-empty string, got {type(v).__name__}")
     return v

@@ -29,8 +29,8 @@ from usersim.engine.core.finance_bank import (
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
-from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.evaluator.scorers import financial_services as FS
+from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.probes.financial_services.generator import (
     FINANCE_TRAJECTORY_COLUMNS,
 )
@@ -47,33 +47,35 @@ def _fresh():
 
 
 def _outcome(status: str = "ok", n_tool_calls: int = 0) -> str:
-    return json.dumps({
-        "status": status,
-        "failure_class": None,
-        "failure_attribution": None,
-        "failure_detail": "",
-        "n_turns": 2,
-        "n_tool_calls": n_tool_calls,
-        "n_user_query_attempts": 1,
-        "n_user_followup_retries": 0,
-        "n_assistant_inline_failures": 0,
-        "n_api_response_rerolls": 0,
-        "n_fourth_wall_triggers": 0,
-        "n_user_role_violations": 0,
-        "warnings": [],
-        "early_stop": False,
-        "per_model_input_tokens": {"user_model": 80, "assistant_model": 90},
-        "per_model_output_tokens": {"user_model": 30, "assistant_model": 70},
-        "per_model_calls": {"user_model": 2, "assistant_model": 2},
-        "wall_clock_s_by_alias": {"user_model": 2.0, "assistant_model": 3.0},
-        "wall_clock_s": 6.0,
-        "provenance": {
-            "nemotron_personas_version": "2026-04",
-            "scenario_prompt_version": "v1.0",
-            "code_sha": "test",
-            "bank_version": {},
-        },
-    })
+    return json.dumps(
+        {
+            "status": status,
+            "failure_class": None,
+            "failure_attribution": None,
+            "failure_detail": "",
+            "n_turns": 2,
+            "n_tool_calls": n_tool_calls,
+            "n_user_query_attempts": 1,
+            "n_user_followup_retries": 0,
+            "n_assistant_inline_failures": 0,
+            "n_api_response_rerolls": 0,
+            "n_fourth_wall_triggers": 0,
+            "n_user_role_violations": 0,
+            "warnings": [],
+            "early_stop": False,
+            "per_model_input_tokens": {"user_model": 80, "assistant_model": 90},
+            "per_model_output_tokens": {"user_model": 30, "assistant_model": 70},
+            "per_model_calls": {"user_model": 2, "assistant_model": 2},
+            "wall_clock_s_by_alias": {"user_model": 2.0, "assistant_model": 3.0},
+            "wall_clock_s": 6.0,
+            "provenance": {
+                "nemotron_personas_version": "2026-04",
+                "scenario_prompt_version": "v1.0",
+                "code_sha": "test",
+                "bank_version": {},
+            },
+        }
+    )
 
 
 def _messages(pairs) -> str:
@@ -87,25 +89,27 @@ def _messages(pairs) -> str:
 def _base_row(**overrides):
     """A finance trajectory row with every FINANCE_TRAJECTORY_COLUMN present."""
     row = {c: "" for c in FINANCE_TRAJECTORY_COLUMNS}
-    row.update({
-        "gold_document_ids": json.dumps([]),
-        "gold_tool_sequence": json.dumps([]),
-        "expected_state_deltas": json.dumps({}),
-        "retrieved_document_ids": json.dumps([]),
-        "attempted_tool_names": json.dumps([]),
-        "num_tool_calls": 0,
-        # standard trajectory columns the report reads.
-        "persona_uuid": "p_fin_0001",
-        "probe_family": "financial_services",
-        "probe_variant": "default",
-        "locale": "en_US",
-        "conversation_language": "English",
-        "user_interaction_style": "neutral",
-        "disclosure_style": "upfront",
-        "persona_grounding": True,
-        "conversation_messages": _messages([("hi", "hello")]),
-        "simulation_outcome": _outcome(),
-    })
+    row.update(
+        {
+            "gold_document_ids": json.dumps([]),
+            "gold_tool_sequence": json.dumps([]),
+            "expected_state_deltas": json.dumps({}),
+            "retrieved_document_ids": json.dumps([]),
+            "attempted_tool_names": json.dumps([]),
+            "num_tool_calls": 0,
+            # standard trajectory columns the report reads.
+            "persona_uuid": "p_fin_0001",
+            "probe_family": "financial_services",
+            "probe_variant": "default",
+            "locale": "en_US",
+            "conversation_language": "English",
+            "user_interaction_style": "neutral",
+            "disclosure_style": "upfront",
+            "persona_grounding": True,
+            "conversation_messages": _messages([("hi", "hello")]),
+            "simulation_outcome": _outcome(),
+        }
+    )
     row.update(overrides)
     return row
 
@@ -129,9 +133,11 @@ def _verifiable_row():
         attempted_tool_names=json.dumps(["file_transaction_dispute"]),
         num_tool_calls=1,
         simulation_outcome=_outcome(n_tool_calls=1),
-        conversation_messages=_messages([
-            ("There's a charge I don't recognize.", "Filed a dispute; it's under review."),
-        ]),
+        conversation_messages=_messages(
+            [
+                ("There's a charge I don't recognize.", "Filed a dispute; it's under review."),
+            ]
+        ),
     )
 
 
@@ -150,35 +156,42 @@ def _dynamic_row():
         dynamic_subtopic_hint="checking vs. savings fit",
         taxonomy_version="v0.1.0",
         retrieved_document_ids=json.dumps([inst.documents[0].id]),
-        conversation_messages=_messages([
-            ("Which everyday account fits me?", "Here are the options grounded in our KB..."),
-        ]),
+        conversation_messages=_messages(
+            [
+                ("Which everyday account fits me?", "Here are the options grounded in our KB..."),
+            ]
+        ),
     )
 
 
 def _dyn_judge_payload():
     axes = {
-        "dynamic.grounding": 5, "dynamic.numeric_faithfulness": 5,
-        "dynamic.boundary_adherence": 4, "dynamic.no_fabrication": 5,
-        "dynamic.graceful_unknown": 5, "dynamic.self_consistency": 5,
+        "dynamic.grounding": 5,
+        "dynamic.numeric_faithfulness": 5,
+        "dynamic.boundary_adherence": 4,
+        "dynamic.no_fabrication": 5,
+        "dynamic.graceful_unknown": 5,
+        "dynamic.self_consistency": 5,
     }
     return json.dumps({a: {"score": v, "reasoning": "ok"} for a, v in axes.items()})
 
 
 def _eval_cell(scorer_block) -> str:
-    return json.dumps({
-        "envelope": {
-            "judge_aliases": ["judge_model"],
-            "axes": [],
-            "scorers": ["financial_services"],
-            "prompt_version": "v1.0",
-            "evaluator_version": "v1.0",
-        },
-        "axes": {},
-        "scorers": {"financial_services": scorer_block},
-        "skipped": False,
-        "skipped_reason": None,
-    })
+    return json.dumps(
+        {
+            "envelope": {
+                "judge_aliases": ["judge_model"],
+                "axes": [],
+                "scorers": ["financial_services"],
+                "prompt_version": "v1.0",
+                "evaluator_version": "v1.0",
+            },
+            "axes": {},
+            "scorers": {"financial_services": scorer_block},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+    )
 
 
 def test_financial_services_eval_select_report_both_tiers():
@@ -199,23 +212,36 @@ def test_financial_services_eval_select_report_both_tiers():
     assert dyn_block["task_tier"] == "dynamic"
     assert dyn_block["scores"]["dynamic.numeric_faithfulness"]["score"] == 5
 
-    eval_df = pd.DataFrame({
-        "trajectory_id": [ver["trajectory_id"], dyn["trajectory_id"]],
-        "locale": ["en_US", "en_US"],
-        "probe_family": ["financial_services", "financial_services"],
-        "assistant_eval": [_eval_cell(ver_block), _eval_cell(dyn_block)],
-    })
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": [ver["trajectory_id"], dyn["trajectory_id"]],
+            "locale": ["en_US", "en_US"],
+            "probe_family": ["financial_services", "financial_services"],
+            "assistant_eval": [_eval_cell(ver_block), _eval_cell(dyn_block)],
+        }
+    )
 
     # ── select: the compact projection keeps the finance gold-metadata ──
     cols = resolve_columns("compact", list(traj_df.columns))
-    for c in ("finance_task_id", "task_tier", "institution_type",
-              "gold_tool_sequence", "expected_state_deltas", "dynamic_category_id"):
+    for c in (
+        "finance_task_id",
+        "task_tier",
+        "institution_type",
+        "gold_tool_sequence",
+        "expected_state_deltas",
+        "dynamic_category_id",
+    ):
         assert c in cols, f"compact projection dropped {c}"
 
     # ── report: finance capabilities surface, stratified by tier + type ──
     report = build_capability_report(
-        traj_df, eval_df, eval_column="assistant_eval",
-        run_id="fin-e2e", model_id="test-model", sample_mode="prototype", min_n=1,
+        traj_df,
+        eval_df,
+        eval_column="assistant_eval",
+        run_id="fin-e2e",
+        model_id="test-model",
+        sample_mode="prototype",
+        min_n=1,
     )
     by_key = {(c.capability, c.locale): c for c in report.capability_cells}
 
@@ -264,23 +290,19 @@ def test_dynamic_row_feeds_no_verifiable_capability():
     axes = set(block["scores"])
 
     verifiable_only = {
-        "financial_task_success", "financial_retrieval_recall",
-    } | {
-        f"financial_task_success_{t}" for t in FINANCE_CAPABILITY_INSTITUTION_TYPES
-    }
+        "financial_task_success",
+        "financial_retrieval_recall",
+    } | {f"financial_task_success_{t}" for t in FINANCE_CAPABILITY_INSTITUTION_TYPES}
     forbidden = {
         axis
-        for cap in capability_definitions() if cap.id in verifiable_only
+        for cap in capability_definitions()
+        if cap.id in verifiable_only
         for src in cap.sources
         for axis in src.axes
     }
     assert forbidden, "registry lookup found no verifiable axes — test is vacuous"
-    assert not (axes & forbidden), (
-        f"dynamic row supplies verifier evidence: {sorted(axes & forbidden)}"
-    )
+    assert not (axes & forbidden), f"dynamic row supplies verifier evidence: {sorted(axes & forbidden)}"
     # The judged axes are all present, and the only finance axis is the shared
     # retrieval diagnostic.
     assert {a for a in axes if a.startswith("dynamic.")}
-    assert {a for a in axes if a.startswith("finance.")} <= {
-        "finance.substantive_retrieval_rate"
-    }
+    assert {a for a in axes if a.startswith("finance.")} <= {"finance.substantive_retrieval_rate"}

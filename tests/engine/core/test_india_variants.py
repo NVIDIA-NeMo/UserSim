@@ -19,12 +19,11 @@ Covers three buckets:
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
-
+from usersim.engine.core import behavioral as B
 from usersim.engine.core import locale as L
 from usersim.engine.core import simulation as S
-from usersim.engine.core import behavioral as B
 from usersim.engine.core import translation as T
 from usersim.engine.core.identity import trajectory_id
 from usersim.engine.core.outcomes import (
@@ -33,7 +32,6 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin
-
 
 # ---------------------------------------------------------------------------
 # core/locale.py — registry + presence-aware resolvers
@@ -81,6 +79,7 @@ class TestVariantRegistry:
             detect_language_name,
             reset_detector,
         )
+
         reset_detector()
         try:
             assert detect_language_name("வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?") == "TAMIL"
@@ -93,6 +92,7 @@ class TestVariantRegistry:
 
     def test_lingua_names_resolve(self) -> None:
         from lingua import Language
+
         for v in L.INDIA_VARIANT_LOCALES.values():
             if v.lingua_name is not None:
                 assert hasattr(Language, v.lingua_name)
@@ -173,8 +173,12 @@ class TestSimulationDirectives:
 
 class TestTrajectoryIdLocale:
     BASE = dict(
-        persona_uuid="abcd", probe_family="sov_ai_facts", probe_variant="v",
-        scenario_seed=None, user_model="u", assistant_model="a",
+        persona_uuid="abcd",
+        probe_family="sov_ai_facts",
+        probe_variant="v",
+        scenario_seed=None,
+        user_model="u",
+        assistant_model="a",
         prompt_version="v1.0",
     )
 
@@ -293,7 +297,7 @@ class _FakeProbe(BankVerbatimMixin, BankBackedProbe):
             return _FakeBank()
         raise FileNotFoundError(f"no bank for {locale}")
 
-    def derive_task(self, persona: Dict[str, Any], bank: Any, *, cfg: Any) -> Any:
+    def derive_task(self, persona: dict[str, Any], bank: Any, *, cfg: Any) -> Any:
         return _FakeTask()
 
     def get_user_system_prompt(self) -> str:
@@ -319,7 +323,7 @@ class TestAssetLocaleRouting:
     def test_variant_falls_back_to_base(self) -> None:
         probe = _make_probe("ta_Taml_IN")
         assert probe._asset_locale == "en_IN"  # native ta bank absent -> en_IN
-        assert probe._locale == "ta_Taml_IN"   # conversation locale unchanged
+        assert probe._locale == "ta_Taml_IN"  # conversation locale unchanged
 
     def test_non_variant_unchanged(self) -> None:
         probe = _make_probe("pt_BR")
@@ -343,9 +347,7 @@ class TestVerbatimTranslation:
         T.reset_translation_cache()
 
     def test_variant_translates_and_flags(self, monkeypatch) -> None:
-        monkeypatch.setattr(
-            T, "call_llm", lambda *a, **k: {"content": "TAMIL_TEXT"}
-        )
+        monkeypatch.setattr(T, "call_llm", lambda *a, **k: {"content": "TAMIL_TEXT"})
         probe = _make_probe("ta_Taml_IN")
         out = probe._localize_verbatim(_FakeTask.text)
         assert out == "TAMIL_TEXT"
@@ -355,9 +357,7 @@ class TestVerbatimTranslation:
 
     def test_shipped_locale_no_translation(self, monkeypatch) -> None:
         called = []
-        monkeypatch.setattr(
-            T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"}
-        )
+        monkeypatch.setattr(T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"})
         probe = _make_probe("pt_BR")
         out = probe._localize_verbatim(_FakeTask.text)
         assert out == _FakeTask.text  # unchanged
@@ -365,9 +365,7 @@ class TestVerbatimTranslation:
 
     def test_graduated_native_variant_no_translation(self, monkeypatch) -> None:
         called = []
-        monkeypatch.setattr(
-            T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"}
-        )
+        monkeypatch.setattr(T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"})
         _FakeProbe._native_locales.add("ta_Taml_IN")
         try:
             probe = _make_probe("ta_Taml_IN")  # asset_locale == locale
@@ -388,11 +386,12 @@ class TestDontBreak:
         # The variant fallback is a call-time redirect (asset_locale=en_IN),
         # NOT a dict mutation — so available_locales() must still equal the
         # shipped set (guards the existing all-shipped-locale suites).
-        from usersim.engine.probes.sov_ai_facts import prompts as facts_p
         from usersim.engine.probes.sov_ai_dynamic import prompts as dyn_p
+        from usersim.engine.probes.sov_ai_facts import prompts as facts_p
         from usersim.engine.probes.sov_ai_multilingual_parity import (
             prompts as par_p,
         )
+
         shipped = set(L.SHIPPED_LOCALES)
         assert set(facts_p.available_locales()) == shipped
         assert set(dyn_p.available_locales()) == shipped

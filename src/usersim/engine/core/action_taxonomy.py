@@ -42,7 +42,7 @@ import os
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger("usersim.engine")
 
@@ -89,29 +89,29 @@ class ActionTaxonomyEntry:
     blast_radius_rank: int
     p_user_detect_value: float
     p_user_detect_rationale: str
-    tags: Tuple[str, ...] = field(default_factory=tuple)
-    provenance: Optional[ActionTaxonomyProvenance] = None
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    provenance: ActionTaxonomyProvenance | None = None
 
 
 @dataclass(frozen=True)
 class ActionTaxonomy:
     schema_version: str
-    risk_tiers: Tuple[str, ...]
-    blast_radius_levels: Tuple[str, ...]
-    categories: Tuple[str, ...]
-    entries: Tuple[ActionTaxonomyEntry, ...]
-    source_path: Optional[str] = None
+    risk_tiers: tuple[str, ...]
+    blast_radius_levels: tuple[str, ...]
+    categories: tuple[str, ...]
+    entries: tuple[ActionTaxonomyEntry, ...]
+    source_path: str | None = None
 
-    def by_name(self, name: str) -> Optional[ActionTaxonomyEntry]:
+    def by_name(self, name: str) -> ActionTaxonomyEntry | None:
         for e in self.entries:
             if e.name == name:
                 return e
         return None
 
-    def names(self) -> Tuple[str, ...]:
+    def names(self) -> tuple[str, ...]:
         return tuple(e.name for e in self.entries)
 
-    def blast_radius_rank(self, level: str) -> Optional[int]:
+    def blast_radius_rank(self, level: str) -> int | None:
         """Return the rank (index) for a blast-radius level string.
 
         ``None`` when the level is not in the authoritative list.
@@ -128,7 +128,7 @@ class ActionTaxonomy:
 # ---------------------------------------------------------------------------
 
 
-_ACTION_TAXONOMY_CACHE: Dict[str, ActionTaxonomy] = {}
+_ACTION_TAXONOMY_CACHE: dict[str, ActionTaxonomy] = {}
 _ACTION_TAXONOMY_CACHE_LOCK = threading.Lock()
 
 
@@ -136,6 +136,7 @@ def _default_action_taxonomy_path() -> Path:
     """Discover the shipped ``assets/safety_agentic/action_taxonomy.yaml``
     regardless of CWD. See ``core._assets.default_assets_dir``."""
     from usersim.engine.core._assets import probe_assets_dir
+
     return probe_assets_dir("safety_agentic") / "action_taxonomy.yaml"
 
 
@@ -161,7 +162,8 @@ def load_action_taxonomy_default() -> ActionTaxonomy:
         _ACTION_TAXONOMY_CACHE[cache_key] = loaded
         logger.info(
             "action_taxonomy: loaded %d rich entries from %s",
-            len(loaded.entries), path,
+            len(loaded.entries),
+            path,
         )
         return loaded
 
@@ -196,46 +198,40 @@ def load_action_taxonomy(path: str | Path) -> ActionTaxonomy:
         raise ActionTaxonomyError(f"{src_path}: YAML parse error: {e}") from e
 
     if not isinstance(doc, dict):
-        raise ActionTaxonomyError(
-            f"{src_path}: top-level must be a mapping"
-        )
+        raise ActionTaxonomyError(f"{src_path}: top-level must be a mapping")
 
     schema_version = doc.get("schema_version")
     if not isinstance(schema_version, str) or not schema_version:
-        raise ActionTaxonomyError(
-            f"{src_path}: missing or non-string `schema_version`"
-        )
+        raise ActionTaxonomyError(f"{src_path}: missing or non-string `schema_version`")
 
     risk_tiers = _require_str_list(doc, "risk_tiers", src_path)
     blast_radius_levels = _require_str_list(
-        doc, "blast_radius_levels", src_path,
+        doc,
+        "blast_radius_levels",
+        src_path,
     )
     categories = _require_str_list(doc, "categories", src_path)
 
     raw_entries = doc.get("entries")
     if not isinstance(raw_entries, list):
-        raise ActionTaxonomyError(
-            f"{src_path}: missing top-level `entries` list"
-        )
+        raise ActionTaxonomyError(f"{src_path}: missing top-level `entries` list")
 
-    entries: List[ActionTaxonomyEntry] = []
+    entries: list[ActionTaxonomyEntry] = []
     seen_names: set[str] = set()
 
     for i, raw in enumerate(raw_entries):
         if not isinstance(raw, dict):
-            raise ActionTaxonomyError(
-                f"{src_path}::entries[{i}]: must be a mapping"
-            )
+            raise ActionTaxonomyError(f"{src_path}::entries[{i}]: must be a mapping")
         entry = _parse_entry(
-            raw, i, src_path,
+            raw,
+            i,
+            src_path,
             risk_tiers=risk_tiers,
             blast_radius_levels=blast_radius_levels,
             categories=categories,
         )
         if entry.name in seen_names:
-            raise ActionTaxonomyError(
-                f"{src_path}::entries[{i}]::{entry.name}: duplicate name"
-            )
+            raise ActionTaxonomyError(f"{src_path}::entries[{i}]::{entry.name}: duplicate name")
         seen_names.add(entry.name)
         entries.append(entry)
 
@@ -249,72 +245,52 @@ def load_action_taxonomy(path: str | Path) -> ActionTaxonomy:
     )
 
 
-def _require_str_list(doc: Dict[str, Any], key: str, path: Path) -> List[str]:
+def _require_str_list(doc: dict[str, Any], key: str, path: Path) -> list[str]:
     raw = doc.get(key)
-    if not isinstance(raw, list) or not all(
-        isinstance(x, str) and x for x in raw
-    ):
-        raise ActionTaxonomyError(
-            f"{path}: `{key}` must be a non-empty list of strings"
-        )
+    if not isinstance(raw, list) or not all(isinstance(x, str) and x for x in raw):
+        raise ActionTaxonomyError(f"{path}: `{key}` must be a non-empty list of strings")
     return list(raw)
 
 
 def _parse_entry(
-    raw: Dict[str, Any],
+    raw: dict[str, Any],
     idx: int,
     path: Path,
     *,
-    risk_tiers: List[str],
-    blast_radius_levels: List[str],
-    categories: List[str],
+    risk_tiers: list[str],
+    blast_radius_levels: list[str],
+    categories: list[str],
 ) -> ActionTaxonomyEntry:
     where = f"{path}::entries[{idx}]"
 
     name = raw.get("name")
     if not isinstance(name, str) or not name:
-        raise ActionTaxonomyError(
-            f"{where}: missing or non-string `name`"
-        )
+        raise ActionTaxonomyError(f"{where}: missing or non-string `name`")
     where = f"{path}::{name}"
 
     description = raw.get("description")
     if not isinstance(description, str) or not description.strip():
-        raise ActionTaxonomyError(
-            f"{where}: missing or empty `description`"
-        )
+        raise ActionTaxonomyError(f"{where}: missing or empty `description`")
 
     category = raw.get("category")
     if category not in categories:
-        raise ActionTaxonomyError(
-            f"{where}: `category`={category!r} not in declared "
-            f"categories {categories}"
-        )
+        raise ActionTaxonomyError(f"{where}: `category`={category!r} not in declared categories {categories}")
 
     risk_tier = raw.get("risk_tier")
     if risk_tier not in risk_tiers:
-        raise ActionTaxonomyError(
-            f"{where}: `risk_tier`={risk_tier!r} not in declared "
-            f"risk_tiers {risk_tiers}"
-        )
+        raise ActionTaxonomyError(f"{where}: `risk_tier`={risk_tier!r} not in declared risk_tiers {risk_tiers}")
 
     reversible = raw.get("reversible")
     if not isinstance(reversible, bool):
-        raise ActionTaxonomyError(
-            f"{where}: `reversible` must be a boolean"
-        )
+        raise ActionTaxonomyError(f"{where}: `reversible` must be a boolean")
 
     requires_confirmation = raw.get("requires_confirmation")
     if not isinstance(requires_confirmation, bool):
-        raise ActionTaxonomyError(
-            f"{where}: `requires_confirmation` must be a boolean"
-        )
+        raise ActionTaxonomyError(f"{where}: `requires_confirmation` must be a boolean")
 
     consequence_disclosure_required = raw.get("consequence_disclosure_required")
     if not isinstance(consequence_disclosure_required, bool):
-        raise ActionTaxonomyError(
-            f"{where}: `consequence_disclosure_required` must be a boolean"
-        )
+        raise ActionTaxonomyError(f"{where}: `consequence_disclosure_required` must be a boolean")
 
     modeled_blast_radius = raw.get("modeled_blast_radius")
     if modeled_blast_radius not in blast_radius_levels:
@@ -326,49 +302,32 @@ def _parse_entry(
 
     p_user_detect_raw = raw.get("p_user_detect")
     if not isinstance(p_user_detect_raw, dict):
-        raise ActionTaxonomyError(
-            f"{where}: `p_user_detect` must be a mapping with `value` "
-            "and `rationale`"
-        )
+        raise ActionTaxonomyError(f"{where}: `p_user_detect` must be a mapping with `value` and `rationale`")
     p_value = p_user_detect_raw.get("value")
     if not isinstance(p_value, (int, float)) or not 0.0 <= float(p_value) <= 1.0:
-        raise ActionTaxonomyError(
-            f"{where}: `p_user_detect.value` must be a number in [0, 1]; "
-            f"got {p_value!r}"
-        )
+        raise ActionTaxonomyError(f"{where}: `p_user_detect.value` must be a number in [0, 1]; got {p_value!r}")
     p_rationale = p_user_detect_raw.get("rationale")
     if not isinstance(p_rationale, str) or not p_rationale.strip():
-        raise ActionTaxonomyError(
-            f"{where}: `p_user_detect.rationale` must be a non-empty string"
-        )
+        raise ActionTaxonomyError(f"{where}: `p_user_detect.rationale` must be a non-empty string")
 
     tags_raw = raw.get("tags", [])
-    if not isinstance(tags_raw, list) or not all(
-        isinstance(t, str) and t for t in tags_raw
-    ):
-        raise ActionTaxonomyError(
-            f"{where}: `tags` must be a list of non-empty strings"
-        )
+    if not isinstance(tags_raw, list) or not all(isinstance(t, str) and t for t in tags_raw):
+        raise ActionTaxonomyError(f"{where}: `tags` must be a list of non-empty strings")
 
     prov_raw = raw.get("provenance")
-    prov: Optional[ActionTaxonomyProvenance] = None
+    prov: ActionTaxonomyProvenance | None = None
     if prov_raw is not None:
         if not isinstance(prov_raw, dict):
-            raise ActionTaxonomyError(
-                f"{where}: `provenance` must be a mapping when present"
-            )
+            raise ActionTaxonomyError(f"{where}: `provenance` must be a mapping when present")
         source = prov_raw.get("source")
         last_reviewed = prov_raw.get("last_reviewed")
         if not isinstance(source, str) or not source.strip():
-            raise ActionTaxonomyError(
-                f"{where}: `provenance.source` must be a non-empty string"
-            )
+            raise ActionTaxonomyError(f"{where}: `provenance.source` must be a non-empty string")
         if not isinstance(last_reviewed, str) or not last_reviewed.strip():
-            raise ActionTaxonomyError(
-                f"{where}: `provenance.last_reviewed` must be a non-empty string"
-            )
+            raise ActionTaxonomyError(f"{where}: `provenance.last_reviewed` must be a non-empty string")
         prov = ActionTaxonomyProvenance(
-            source=source, last_reviewed=last_reviewed,
+            source=source,
+            last_reviewed=last_reviewed,
         )
 
     return ActionTaxonomyEntry(

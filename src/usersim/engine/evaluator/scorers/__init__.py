@@ -159,15 +159,15 @@ JSON Schema to enforce anything against.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, Iterable
+from typing import Any, Callable, Iterable
 
 logger = logging.getLogger("usersim.engine")
 
 # trajectory-row-dict + models -> structured-result-dict
-ScorerFn = Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]
+ScorerFn = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
 
 
-_REGISTRY: Dict[str, ScorerFn] = {}
+_REGISTRY: dict[str, ScorerFn] = {}
 
 
 def register_scorer(name: str, fn: ScorerFn) -> None:
@@ -230,14 +230,13 @@ def reload_scorers(scorer_module_paths: Iterable[str]) -> None:
     fatal — other scorers still get a chance to register.
     """
     import importlib
+
     for path in scorer_module_paths:
         try:
             mod = importlib.import_module(path)
             importlib.reload(mod)
         except Exception as e:
-            logger.warning(
-                f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}"
-            )
+            logger.warning(f"  |-- evaluator.scorers: failed to (re)load {path!r}: {e}")
 
 
 # ── Bundled scorers shipped with this plugin ──────────────────────

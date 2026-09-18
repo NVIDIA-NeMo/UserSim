@@ -26,9 +26,14 @@ class TestSchemaSurface:
     def test_8_scores_with_expected_names(self) -> None:
         names = {s.name for s in TRAJECTORY_SCORES}
         assert names == {
-            "task_completion", "tool_selection", "argument_quality",
-            "unnecessary_tool_use", "information_gathering",
-            "role_adherence", "architecture_leaking", "overall",
+            "task_completion",
+            "tool_selection",
+            "argument_quality",
+            "unnecessary_tool_use",
+            "information_gathering",
+            "role_adherence",
+            "architecture_leaking",
+            "overall",
         }
 
     def test_scores_are_score_objects_with_1_3_5_scale(self) -> None:
@@ -49,9 +54,7 @@ class TestRegistration:
     """The scorer must be registered by the time `evaluator.scorers` is imported."""
 
     def test_tool_use_in_default_modules(self) -> None:
-        assert "usersim.engine.evaluator.scorers.tool_use" in (
-            scorers_module.DEFAULT_SCORER_MODULES
-        )
+        assert "usersim.engine.evaluator.scorers.tool_use" in (scorers_module.DEFAULT_SCORER_MODULES)
 
     def test_tool_use_resolvable_via_get_scorer(self) -> None:
         # Auto-loaded on package import; fetching it should work without
@@ -121,13 +124,21 @@ class TestScorerOnFakeJudge:
         }
 
     def test_full_pass_yields_status_proposal_true(self) -> None:
-        self._stub_call_llm({
-            name: {"score": 5, "reasoning": "ok"} for name in [
-                "task_completion", "tool_selection", "argument_quality",
-                "unnecessary_tool_use", "information_gathering",
-                "role_adherence", "architecture_leaking", "overall",
-            ]
-        })
+        self._stub_call_llm(
+            {
+                name: {"score": 5, "reasoning": "ok"}
+                for name in [
+                    "task_completion",
+                    "tool_selection",
+                    "argument_quality",
+                    "unnecessary_tool_use",
+                    "information_gathering",
+                    "role_adherence",
+                    "architecture_leaking",
+                    "overall",
+                ]
+            }
+        )
         result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is True
         assert result["scores"]["overall"]["score"] == 5
@@ -136,26 +147,36 @@ class TestScorerOnFakeJudge:
     @pytest.mark.parametrize("failing_axis", ["overall", "tool_selection", "architecture_leaking"])
     def test_critical_axis_failure_flips_status_proposal(self, failing_axis: str) -> None:
         scores = {
-            name: {"score": 5, "reasoning": "ok"} for name in [
-                "task_completion", "tool_selection", "argument_quality",
-                "unnecessary_tool_use", "information_gathering",
-                "role_adherence", "architecture_leaking", "overall",
+            name: {"score": 5, "reasoning": "ok"}
+            for name in [
+                "task_completion",
+                "tool_selection",
+                "argument_quality",
+                "unnecessary_tool_use",
+                "information_gathering",
+                "role_adherence",
+                "architecture_leaking",
+                "overall",
             ]
         }
         scores[failing_axis] = {"score": 1, "reasoning": "fail"}
         self._stub_call_llm(scores)
         result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
-        assert result["status_proposal"] is False, (
-            f"axis {failing_axis} scored 1 should propose status=False"
-        )
+        assert result["status_proposal"] is False, f"axis {failing_axis} scored 1 should propose status=False"
 
     def test_non_critical_axis_failure_does_not_flip(self) -> None:
         # information_gathering is NOT in the critical-flip set.
         scores = {
-            name: {"score": 5, "reasoning": "ok"} for name in [
-                "task_completion", "tool_selection", "argument_quality",
-                "unnecessary_tool_use", "information_gathering",
-                "role_adherence", "architecture_leaking", "overall",
+            name: {"score": 5, "reasoning": "ok"}
+            for name in [
+                "task_completion",
+                "tool_selection",
+                "argument_quality",
+                "unnecessary_tool_use",
+                "information_gathering",
+                "role_adherence",
+                "architecture_leaking",
+                "overall",
             ]
         }
         scores["information_gathering"] = {"score": 1, "reasoning": "weak"}

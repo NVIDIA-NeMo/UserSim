@@ -19,11 +19,15 @@ import pytest
 
 from usersim.engine.probes.health_disclosure import (
     clients as C,
+)
+from usersim.engine.probes.health_disclosure import (
     decision_support,
     general,
-    move_runtime as mr,
     therapy,
     triage,
+)
+from usersim.engine.probes.health_disclosure import (
+    move_runtime as mr,
 )
 from usersim.engine.probes.health_disclosure.mixin import GuardedMoveMixin
 from usersim.engine.probes.health_disclosure.moves import (
@@ -38,11 +42,18 @@ from usersim.engine.probes.health_disclosure.prompts import (
     make_gate_prompt,
 )
 
-ALL_LABELS = ("health_therapy_disclosure", "health_triage_disclosure",
-              "health_decision_support_disclosure", "health_general_disclosure")
+ALL_LABELS = (
+    "health_therapy_disclosure",
+    "health_triage_disclosure",
+    "health_decision_support_disclosure",
+    "health_general_disclosure",
+)
 _PLACEHOLDERS = (
-    "{persona}", "{language_instruction}", "{behavioral_instructions}",
-    "{disclosure_instructions}", "{interaction_style_instructions}",
+    "{persona}",
+    "{language_instruction}",
+    "{behavioral_instructions}",
+    "{disclosure_instructions}",
+    "{interaction_style_instructions}",
 )
 
 
@@ -53,9 +64,18 @@ class TestClientConfig:
     @pytest.mark.parametrize("label", ALL_LABELS)
     def test_config_has_required_keys(self, label):
         cfg = C.CLIENTS[label]
-        for key in ("label", "family", "prompt_version", "profiles_env",
-                    "risk_noun", "topics", "user_prompt", "standin_prompt",
-                    "proposal", "gate_prompt"):
+        for key in (
+            "label",
+            "family",
+            "prompt_version",
+            "profiles_env",
+            "risk_noun",
+            "topics",
+            "user_prompt",
+            "standin_prompt",
+            "proposal",
+            "gate_prompt",
+        ):
             assert key in cfg, f"{label} missing config key {key!r}"
         assert cfg["label"] == label
 
@@ -77,8 +97,11 @@ class TestClientConfig:
         # No stray/unescaped braces — get(...) .format must succeed with real keys.
         out = C.CLIENTS[label]["user_prompt"].get(
             "en_US",
-            persona="P", language_instruction="L", behavioral_instructions="B",
-            disclosure_instructions="D", interaction_style_instructions="I",
+            persona="P",
+            language_instruction="L",
+            behavioral_instructions="B",
+            disclosure_instructions="D",
+            interaction_style_instructions="I",
         )
         assert "P" in out
 
@@ -86,13 +109,17 @@ class TestClientConfig:
     def test_user_prompt_pack_ships_all_locales(self, label):
         # all-locales-or-fail: the pack must cover every shipped locale.
         from usersim.engine.core.locale import SHIPPED_LOCALES
+
         pack = C.CLIENTS[label]["user_prompt"]
         assert set(pack.available_locales()) >= set(SHIPPED_LOCALES)
 
     @pytest.mark.parametrize("label", ALL_LABELS)
     def test_gate_prompt_formats_cleanly(self, label):
-        out = C.CLIENTS[label]["gate_prompt"].get("en_US").format(
-            conversation_history="HIST", user_turn_to_evaluate="TURN")
+        out = (
+            C.CLIENTS[label]["gate_prompt"]
+            .get("en_US")
+            .format(conversation_history="HIST", user_turn_to_evaluate="TURN")
+        )
         assert "HIST" in out and "TURN" in out
 
     @pytest.mark.parametrize("label", ALL_LABELS)
@@ -114,8 +141,7 @@ class TestClientConfig:
 
     def test_topics_for_therapy(self):
         cfg = C.CLIENTS["health_therapy_disclosure"]
-        profile = {"formulation": {"ccd": {"core_belief": "I'm a burden"}},
-                   "narrative_memory": ["hard memory"]}
+        profile = {"formulation": {"ccd": {"core_belief": "I'm a burden"}}, "narrative_memory": ["hard memory"]}
         assert {"core_belief", "trauma"} <= set(C.topics_for(profile, cfg))
         # Profile present but without the gated markers → gated topics dropped.
         bare = C.topics_for({"formulation": {}}, cfg)
@@ -168,10 +194,15 @@ class TestMoveTool:
 
 class TestExtractMove:
     def test_parses_native_tool_call(self):
-        args = {"move": "partial_disclose", "topic": "symptoms", "intensity": 0.5,
-                "affect": "anxious", "cognitive_content": "rumination", "reasoning": "early"}
-        result = {"tool_calls": [{"id": "c1", "function": {
-            "name": "commit_move", "arguments": json.dumps(args)}}]}
+        args = {
+            "move": "partial_disclose",
+            "topic": "symptoms",
+            "intensity": 0.5,
+            "affect": "anxious",
+            "cognitive_content": "rumination",
+            "reasoning": "early",
+        }
+        result = {"tool_calls": [{"id": "c1", "function": {"name": "commit_move", "arguments": json.dumps(args)}}]}
         move, reasoning, raw = mr._extract_move(result, ["symptoms"])
         assert move.move == "partial_disclose" and move.topic == "symptoms"
         assert move.affect == "anxious" and move.cognitive_content == "rumination"
@@ -182,14 +213,12 @@ class TestExtractMove:
         assert move.move == "deflect" and raw is None
 
     def test_invalid_move_returns_none(self):
-        result = {"tool_calls": [{"function": {
-            "name": "commit_move", "arguments": json.dumps({"move": "nope"})}}]}
+        result = {"tool_calls": [{"function": {"name": "commit_move", "arguments": json.dumps({"move": "nope"})}}]}
         assert mr._extract_move(result, ["symptoms"])[0] is None
 
     def test_unknown_topic_is_snapped(self):
         args = {"move": "disclose", "topic": "sympt", "reasoning": "x"}
-        result = {"tool_calls": [{"function": {
-            "name": "commit_move", "arguments": json.dumps(args)}}]}
+        result = {"tool_calls": [{"function": {"name": "commit_move", "arguments": json.dumps(args)}}]}
         assert mr._extract_move(result, ["symptoms"])[0].topic == "symptoms"
 
 
@@ -201,9 +230,22 @@ class TestExtractMove:
 # ---------------------------------------------------------------------------
 class TestExtractMoveRobustness:
     def test_arguments_as_parsed_dict(self):
-        res = {"tool_calls": [{"id": "c1", "function": {"name": "commit_move",
-               "arguments": {"move": "withhold", "affect": "flat",
-                             "cognitive_content": "none", "reasoning": "r"}}}]}
+        res = {
+            "tool_calls": [
+                {
+                    "id": "c1",
+                    "function": {
+                        "name": "commit_move",
+                        "arguments": {
+                            "move": "withhold",
+                            "affect": "flat",
+                            "cognitive_content": "none",
+                            "reasoning": "r",
+                        },
+                    },
+                }
+            ]
+        }
         move, _, raw = mr._extract_move(res, ["symptoms"])
         assert move.move == "withhold" and raw is not None
 
@@ -218,16 +260,26 @@ class TestExtractMoveRobustness:
         assert move.move == "minimize"
 
     def test_toolcall_stub_empty_args_recovers_from_content(self):
-        res = {"tool_calls": [{"id": "c1", "function": {"name": "commit_move", "arguments": ""}}],
-               "content": '{"move": "deflect"}'}
+        res = {
+            "tool_calls": [{"id": "c1", "function": {"name": "commit_move", "arguments": ""}}],
+            "content": '{"move": "deflect"}',
+        }
         move, _, raw = mr._extract_move(res, ["symptoms"])
         assert move.move == "deflect" and raw is not None
 
     def test_multiple_tool_calls_picks_commit_move(self):
-        res = {"tool_calls": [
-            {"id": "a", "function": {"name": "other_tool", "arguments": "{}"}},
-            {"id": "b", "function": {"name": "commit_move",
-             "arguments": json.dumps({"move": "disclose", "topic": "symptoms"})}}]}
+        res = {
+            "tool_calls": [
+                {"id": "a", "function": {"name": "other_tool", "arguments": "{}"}},
+                {
+                    "id": "b",
+                    "function": {
+                        "name": "commit_move",
+                        "arguments": json.dumps({"move": "disclose", "topic": "symptoms"}),
+                    },
+                },
+            ]
+        }
         move, _, _ = mr._extract_move(res, ["symptoms"])
         assert move.move == "disclose"
 
@@ -235,9 +287,12 @@ class TestExtractMoveRobustness:
         assert mr._extract_move({"content": "[1, 2, 3]"}, ["symptoms"])[0] is None
 
     def test_reasoning_content_used_when_absent_in_args(self):
-        res = {"tool_calls": [{"id": "c", "function": {"name": "commit_move",
-               "arguments": json.dumps({"move": "deflect"})}}],
-               "reasoning_content": "model CoT here"}
+        res = {
+            "tool_calls": [
+                {"id": "c", "function": {"name": "commit_move", "arguments": json.dumps({"move": "deflect"})}}
+            ],
+            "reasoning_content": "model CoT here",
+        }
         move, reasoning, _ = mr._extract_move(res, ["symptoms"])
         assert move.move == "deflect" and reasoning == "model CoT here"
 
@@ -255,35 +310,49 @@ class _HookState:
 
 
 def _canned_commit(**over):
-    args = {"move": "deflect", "topic": "", "affect": "anxious",
-            "cognitive_content": "none", "reasoning": "not ready yet"}
+    args = {
+        "move": "deflect",
+        "topic": "",
+        "affect": "anxious",
+        "cognitive_content": "none",
+        "reasoning": "not ready yet",
+    }
     args.update(over)
-    return {"tool_calls": [{"id": "c1", "function": {
-        "name": "commit_move", "arguments": json.dumps(args)}}]}
+    return {"tool_calls": [{"id": "c1", "function": {"name": "commit_move", "arguments": json.dumps(args)}}]}
 
 
-_IDENTITY = {"trajectory_id": "t-123", "persona_uuid": "p-9",
-             "probe_family": "health_therapy_disclosure", "probe_variant": "guarded"}
+_IDENTITY = {
+    "trajectory_id": "t-123",
+    "persona_uuid": "p-9",
+    "probe_family": "health_therapy_disclosure",
+    "probe_variant": "guarded",
+}
 
 
 class TestMoveHook:
     """Emission through the caller-supplied ``emit`` sink of propose_and_guard."""
 
-    def _run(self, *, emit, guard=None, has_risk=False, env=None,
-             canned=None, monkeypatch=None):
+    def _run(self, *, emit, guard=None, has_risk=False, env=None, canned=None, monkeypatch=None):
         if canned is not None and monkeypatch is not None:
             monkeypatch.setattr(mr, "call_llm", lambda *a, **k: canned)
         env = env or PatientEnv(num_turns=10)
         if not getattr(env, "turn", 0):
             env.turn = 1
         return mr.propose_and_guard(
-            {}, env, guard or Guard(), ["symptoms"], has_risk, _HookState(),
-            C.CLIENTS["health_therapy_disclosure"], emit=emit, identity=_IDENTITY)
+            {},
+            env,
+            guard or Guard(),
+            ["symptoms"],
+            has_risk,
+            _HookState(),
+            C.CLIENTS["health_therapy_disclosure"],
+            emit=emit,
+            identity=_IDENTITY,
+        )
 
     def test_fires_on_commit_with_identity_payload(self, monkeypatch):
         captured = []
-        move, _, _ = self._run(emit=captured.append, canned=_canned_commit(),
-                               monkeypatch=monkeypatch)
+        move, _, _ = self._run(emit=captured.append, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"
         assert len(captured) == 1
         p = captured[0]
@@ -302,10 +371,15 @@ class TestMoveHook:
         # gate on every resample, ending in the forced safe fallback — both the
         # veto and the safe-fallback emission paths in one run.
         captured = []
-        env = PatientEnv(num_turns=10); env.turn = 1
-        self._run(emit=captured.append, guard=Guard(gated_topics=("symptoms",)),
-                  env=env, canned=_canned_commit(move="disclose", topic="symptoms"),
-                  monkeypatch=monkeypatch)
+        env = PatientEnv(num_turns=10)
+        env.turn = 1
+        self._run(
+            emit=captured.append,
+            guard=Guard(gated_topics=("symptoms",)),
+            env=env,
+            canned=_canned_commit(move="disclose", topic="symptoms"),
+            monkeypatch=monkeypatch,
+        )
         rejected = [p for p in captured if p["accepted"] is False]
         assert rejected and rejected[0]["move"]["move"] == "disclose"
         assert "too early" in rejected[0]["reason"]
@@ -315,7 +389,8 @@ class TestMoveHook:
     def test_fires_on_deterministic_risk_pull(self):
         # Late-session risk-carrying user → deterministic hint_risk, no LLM call.
         captured = []
-        env = PatientEnv(num_turns=10); env.turn = 8
+        env = PatientEnv(num_turns=10)
+        env.turn = 8
         move, _, _ = self._run(emit=captured.append, has_risk=True, env=env)
         assert move.move == "hint_risk"
         assert len(captured) == 1
@@ -326,22 +401,21 @@ class TestMoveHook:
     def test_raising_hook_never_breaks_the_sim(self, monkeypatch):
         def boom(_payload):
             raise RuntimeError("customer harness is down")
-        move, _, _ = self._run(emit=boom, canned=_canned_commit(),
-                               monkeypatch=monkeypatch)
+
+        move, _, _ = self._run(emit=boom, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"  # sim survived a raising hook
 
     def test_no_emit_is_a_noop(self, monkeypatch):
-        move, _, _ = self._run(emit=None, canned=_canned_commit(),
-                               monkeypatch=monkeypatch)
+        move, _, _ = self._run(emit=None, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"
 
     def test_payload_deep_copies_native_tool_call(self):
         # A hook that mutates any level of native_tool_call must not corrupt the
         # raw dict that is also echoed into the in-sim re-commit message.
         raw = {"id": "c1", "function": {"name": "commit_move", "arguments": "{}"}}
-        env = PatientEnv(num_turns=10); env.turn = 1
-        payload = mr._move_payload(env, Move("deflect"), _IDENTITY, accepted=True,
-                                   reason="", raw_call=raw, resampled=0)
+        env = PatientEnv(num_turns=10)
+        env.turn = 1
+        payload = mr._move_payload(env, Move("deflect"), _IDENTITY, accepted=True, reason="", raw_call=raw, resampled=0)
         payload["native_tool_call"]["function"]["arguments"] = "HACKED"
         assert raw["function"]["arguments"] == "{}"  # deep copy isolated the mutation
         assert payload["trajectory_id"] == "t-123"
@@ -366,6 +440,7 @@ class TestMoveHookRegistration:
     def test_register_returns_previous_and_clears(self):
         def h(_):
             return None
+
         assert GuardedMoveMixin.register_move_hook(h) is None
         assert GuardedMoveMixin.register_move_hook(None) is h
 
@@ -374,20 +449,22 @@ class TestMoveHookRegistration:
         cfg_hook = lambda _p: None  # noqa: E731
         GuardedMoveMixin.register_move_hook(default)
         # Config-supplied hook wins for a trajectory that has one …
-        assert _FakeHost({"move_hook": cfg_hook})._resolve_move_hook(
-            {"move_hook": cfg_hook}) is cfg_hook
+        assert _FakeHost({"move_hook": cfg_hook})._resolve_move_hook({"move_hook": cfg_hook}) is cfg_hook
         # … otherwise the process-wide default is used.
         assert _FakeHost({})._resolve_move_hook({}) is default
 
     def test_identity_uses_framework_trajectory_id(self):
         host = _FakeHost(
             {"family": "fam"},
-            data={"trajectory_id": "tid", "probe_variant": "guarded",
-                  "probe_family": "fam"},
-            persona={"uuid": "u1"})
+            data={"trajectory_id": "tid", "probe_variant": "guarded", "probe_family": "fam"},
+            persona={"uuid": "u1"},
+        )
         assert host._build_move_identity(host.guarded_move_config()) == {
-            "trajectory_id": "tid", "persona_uuid": "u1",
-            "probe_family": "fam", "probe_variant": "guarded"}
+            "trajectory_id": "tid",
+            "persona_uuid": "u1",
+            "probe_family": "fam",
+            "probe_variant": "guarded",
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -406,10 +483,8 @@ class TestGuardPacing:
 
     def test_covert_reveal_gate(self):
         g = Guard()
-        assert not g.check(Move("reveal_risk", topic="risk"),
-                           self._env(turn=7, archetype="covert_risk"))[0]
-        assert g.check(Move("reveal_risk", topic="risk"),
-                       self._env(turn=9, archetype="covert_risk"))[0]
+        assert not g.check(Move("reveal_risk", topic="risk"), self._env(turn=7, archetype="covert_risk"))[0]
+        assert g.check(Move("reveal_risk", topic="risk"), self._env(turn=9, archetype="covert_risk"))[0]
 
     def test_disclosure_gate(self):
         g = Guard(gated_topics=("core_belief",))
@@ -493,26 +568,28 @@ class TestGuardPacing:
 class TestRuntime:
     def test_build_env_uses_client_config(self):
         cfg = C.CLIENTS["health_therapy_disclosure"]
-        profile = {"risk": {"level": "high"},
-                   "formulation": {"ccd": {"core_belief": "x"}}}
+        profile = {"risk": {"level": "high"}, "formulation": {"ccd": {"core_belief": "x"}}}
         env, guard, topics, has_risk = mr.build_env(
-            num_turns=8, profile=profile, disclosure_style="incremental", client=cfg)
+            num_turns=8, profile=profile, disclosure_style="incremental", client=cfg
+        )
         assert env.archetype == "covert_risk" and has_risk is True
         assert "core_belief" in topics
         assert guard.gated_topics == ("core_belief", "trauma")
 
     def test_risk_pull_hint_then_reveal(self):
         g = Guard()
-        env = PatientEnv(num_turns=10, archetype="covert_risk"); env.turn = 8
+        env = PatientEnv(num_turns=10, archetype="covert_risk")
+        env.turn = 8
         assert mr.risk_pull(env, g, True).move == "hint_risk"
-        env.risk_hinted = True; env.turn = 9
+        env.risk_hinted = True
+        env.turn = 9
         assert mr.risk_pull(env, g, True).move == "reveal_risk"
         assert mr.risk_pull(env, g, False) is None
 
     def test_move_instruction_renders_axes(self):
-        text = mr.move_instruction(Move("partial_disclose", topic="symptoms",
-                                        intensity=0.5, affect="anxious",
-                                        cognitive_content="rumination"))
+        text = mr.move_instruction(
+            Move("partial_disclose", topic="symptoms", intensity=0.5, affect="anxious", cognitive_content="rumination")
+        )
         assert "partial_disclose" in text and "symptoms" in text
         assert AFFECTS["anxious"] in text and COGNITIONS["rumination"] in text
 
@@ -531,12 +608,15 @@ class TestRuntime:
 # Module metadata (the three registered modules)
 # ---------------------------------------------------------------------------
 class TestModuleMetadata:
-    @pytest.mark.parametrize("mod,label,family", [
-        (therapy, "health_therapy_disclosure", "health_therapy_disclosure"),
-        (triage, "health_triage_disclosure", "health_triage_disclosure"),
-        (decision_support, "health_decision_support_disclosure", "health_decision_support_disclosure"),
-        (general, "health_general_disclosure", "health_general_disclosure"),
-    ])
+    @pytest.mark.parametrize(
+        "mod,label,family",
+        [
+            (therapy, "health_therapy_disclosure", "health_therapy_disclosure"),
+            (triage, "health_triage_disclosure", "health_triage_disclosure"),
+            (decision_support, "health_decision_support_disclosure", "health_decision_support_disclosure"),
+            (general, "health_general_disclosure", "health_general_disclosure"),
+        ],
+    )
     def test_module_constants(self, mod, label, family):
         assert mod.PROBE_FAMILY == family
         assert isinstance(mod.PROMPT_VERSION, str) and mod.PROMPT_VERSION
@@ -545,8 +625,7 @@ class TestModuleMetadata:
         # (move-space OFF) and "guarded" is the opt-in move-space.
         assert list(mod.PROBE_VARIANTS)[:2] == ["default", "guarded"]
         # The registered class binds the right label + config.
-        cls = [c for c in vars(mod).values()
-               if isinstance(c, type) and getattr(c, "label", None) == label][0]
+        cls = [c for c in vars(mod).values() if isinstance(c, type) and getattr(c, "label", None) == label][0]
         assert cls.CLIENT["family"] == family
 
 
@@ -615,8 +694,7 @@ class TestGuardedMoveMixin:
         p = _new_probe(data={"probe_variant": "guarded"})
         p.init_guarded_moves(disclosure_style="incremental", max_turns=8)
         extras = p.build_result_extras(_ExtrasState())
-        for col in ("moves_enabled", "disclosure_coverage", "concealment_topics",
-                    "risk_present", "patient_archetype"):
+        for col in ("moves_enabled", "disclosure_coverage", "concealment_topics", "risk_present", "patient_archetype"):
             assert col in extras
 
 
@@ -640,29 +718,37 @@ class TestDeriveTask:
     def test_guarded_falls_back_to_default_profile(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
         from usersim.engine.core.clinical_profile_bank import (
-            DEFAULT_PROFILE_ID, ClinicalProfile,
+            DEFAULT_PROFILE_ID,
+            ClinicalProfile,
         )
+
         default = ClinicalProfile(
-            id=DEFAULT_PROFILE_ID, placeholder=True,
+            id=DEFAULT_PROFILE_ID,
+            placeholder=True,
             profile={"risk": {"level": "moderate"}},
         )
         p = _new_probe(data={"probe_variant": "guarded"})
         task = p.derive_task(
-            {"uuid": "unknown"}, _FakeBank({DEFAULT_PROFILE_ID: default}), cfg=None,
+            {"uuid": "unknown"},
+            _FakeBank({DEFAULT_PROFILE_ID: default}),
+            cfg=None,
         )
         assert task is default and task.placeholder is True
 
     def test_guarded_prefers_persona_uuid(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
         from usersim.engine.core.clinical_profile_bank import (
-            DEFAULT_PROFILE_ID, ClinicalProfile,
+            DEFAULT_PROFILE_ID,
+            ClinicalProfile,
         )
+
         mine = ClinicalProfile(id="u-1", placeholder=False, profile={})
         default = ClinicalProfile(id=DEFAULT_PROFILE_ID, placeholder=True, profile={})
         p = _new_probe(data={"probe_variant": "guarded"})
         task = p.derive_task(
             {"uuid": "u-1"},
-            _FakeBank({"u-1": mine, DEFAULT_PROFILE_ID: default}), cfg=None,
+            _FakeBank({"u-1": mine, DEFAULT_PROFILE_ID: default}),
+            cfg=None,
         )
         assert task is mine
 

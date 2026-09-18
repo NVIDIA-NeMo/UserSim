@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Literal, Mapping, Protocol, runtime_checkable
+from typing import Any, Callable, Literal, Mapping, Protocol, runtime_checkable
 
 #: Terminal and non-terminal states a submitted job can be in.
 JobState = Literal["pending", "running", "succeeded", "failed"]
@@ -81,7 +81,10 @@ class ExecutionBackend(Protocol):
     name: str
 
     def submit(
-        self, spec: JobSpec, *, credentials: Mapping[str, str] | None = None,
+        self,
+        spec: JobSpec,
+        *,
+        credentials: Mapping[str, str] | None = None,
     ) -> JobHandle:
         """Start the work and return a handle to it."""
         ...
@@ -105,11 +108,14 @@ class LocalBackend:
     name = "local"
 
     def __init__(self) -> None:
-        self._results: Dict[str, JobStatus] = {}
+        self._results: dict[str, JobStatus] = {}
         self._counter = 0
 
     def submit(
-        self, spec: JobSpec, *, credentials: Mapping[str, str] | None = None,
+        self,
+        spec: JobSpec,
+        *,
+        credentials: Mapping[str, str] | None = None,
     ) -> JobHandle:
         self._counter += 1
         job_id = f"{spec.name}-{self._counter}"
@@ -127,11 +133,15 @@ class LocalBackend:
             # The exception itself is kept so the CLI can re-raise it and
             # preserve the exit code its error handling already assigns.
             self._results[job_id] = JobStatus(
-                state="failed", exit_code=1, message=str(exc), error=exc,
+                state="failed",
+                exit_code=1,
+                message=str(exc),
+                error=exc,
             )
         else:
             self._results[job_id] = JobStatus(
-                state="succeeded" if code == 0 else "failed", exit_code=code,
+                state="succeeded" if code == 0 else "failed",
+                exit_code=code,
             )
         return JobHandle(backend=self.name, job_id=job_id)
 
@@ -144,7 +154,7 @@ class LocalBackend:
         return Path(dest)
 
 
-def _builtin_backends() -> Dict[str, Any]:
+def _builtin_backends() -> dict[str, Any]:
     return {LocalBackend.name: LocalBackend}
 
 
@@ -152,9 +162,7 @@ def known_backends() -> tuple[str, ...]:
     """Names of every available backend, built-in and contributed."""
     from usersim.engine.core._extensions import BACKENDS, merge_extensions
 
-    return tuple(sorted(
-        merge_extensions(BACKENDS, _builtin_backends(), what="backend")
-    ))
+    return tuple(sorted(merge_extensions(BACKENDS, _builtin_backends(), what="backend")))
 
 
 def get_backend(name: str) -> ExecutionBackend:
@@ -167,9 +175,6 @@ def get_backend(name: str) -> ExecutionBackend:
 
     available = merge_extensions(BACKENDS, _builtin_backends(), what="backend")
     if name not in available:
-        raise KeyError(
-            f"unknown execution backend {name!r}; "
-            f"available: {', '.join(sorted(available))}"
-        )
+        raise KeyError(f"unknown execution backend {name!r}; available: {', '.join(sorted(available))}")
     backend = available[name]
     return backend() if callable(backend) else backend

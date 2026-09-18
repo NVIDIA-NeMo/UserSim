@@ -25,7 +25,7 @@ import hashlib
 import random
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from usersim.engine.core.finance_bank import (
     FinanceBank,
@@ -44,9 +44,9 @@ _SLOT_RE = re.compile(r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}")
 class GoldSpec:
     """The verifiable ground truth for one Tier-1 instance."""
 
-    gold_document_ids: Tuple[str, ...]
-    gold_tool_sequence: Tuple[str, ...]
-    expected_state_deltas: Dict[str, Any] = field(default_factory=dict)
+    gold_document_ids: tuple[str, ...]
+    gold_tool_sequence: tuple[str, ...]
+    expected_state_deltas: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -72,9 +72,9 @@ class FinanceInstance:
     institution_type: str
     domain: str
     opening_user_message: str
-    account_state: Dict[str, Any]
-    params: Dict[str, Any]
-    gold: Optional[GoldSpec]  # None for the dynamic tier (judge-scored)
+    account_state: dict[str, Any]
+    params: dict[str, Any]
+    gold: GoldSpec | None  # None for the dynamic tier (judge-scored)
     task_contract_version: str = TASK_CONTRACT_VERSION
     # Dynamic-tier fields (empty for verifiable instances).
     dynamic_category_id: str = ""
@@ -92,20 +92,21 @@ class FinanceInstance:
         return self.tier == "dynamic"
 
 
-def _instance_seed(persona_uuid: str, template_id: str, seed: Optional[int]) -> int:
+def _instance_seed(persona_uuid: str, template_id: str, seed: int | None) -> int:
     """Deterministic per-instance seed (stable across Python sessions)."""
     key = f"{persona_uuid}|{template_id}|{seed if seed is not None else 0}"
     return int(hashlib.sha256(key.encode()).hexdigest(), 16) & 0xFFFFFFFF
 
 
-def _fill_slots(text: str, params: Dict[str, Any]) -> str:
+def _fill_slots(text: str, params: dict[str, Any]) -> str:
     def repl(m: "re.Match[str]") -> str:
         key = m.group(1)
         return str(params.get(key, m.group(0)))
+
     return _SLOT_RE.sub(repl, text)
 
 
-def _fill_obj(obj: Any, params: Dict[str, Any]) -> Any:
+def _fill_obj(obj: Any, params: dict[str, Any]) -> Any:
     """Recursively fill ``{{slot}}`` markers in strings within a nested object."""
     if isinstance(obj, str):
         return _fill_slots(obj, params)
@@ -116,18 +117,16 @@ def _fill_obj(obj: Any, params: Dict[str, Any]) -> Any:
     return obj
 
 
-def sample_params(template: TaskTemplate, rng: random.Random) -> Dict[str, Any]:
+def sample_params(template: TaskTemplate, rng: random.Random) -> dict[str, Any]:
     """Pick one value per param-space slot, deterministically from ``rng``."""
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
     for slot, values in sorted(template.param_space.items()):
         if values:
             params[slot] = rng.choice(list(values))
     return params
 
 
-def derive_gold(
-    template: TaskTemplate, params: Dict[str, Any], account_state: Dict[str, Any]
-) -> Optional[GoldSpec]:
+def derive_gold(template: TaskTemplate, params: dict[str, Any], account_state: dict[str, Any]) -> GoldSpec | None:
     """Deterministically derive the gold spec for a Tier-1 instance.
 
     For the current template shapes the gold is declared on the template and
@@ -150,12 +149,10 @@ def build_instance(
     *,
     persona_uuid: str,
     locale: str,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> FinanceInstance:
     """Instantiate ``template`` (grounded in ``institution``) for one conversation."""
-    rng = random.Random(
-        _instance_seed(persona_uuid, f"{institution.institution_id}:{template.id}", seed)
-    )
+    rng = random.Random(_instance_seed(persona_uuid, f"{institution.institution_id}:{template.id}", seed))
     params = sample_params(template, rng)
     account_state = _fill_obj(dict(template.account_state), params)
     # Pick one of the template's opening phrasings (deterministic per instance)
@@ -220,12 +217,12 @@ def build_dynamic_instance(
 
 def select_institution(
     bank: FinanceBank,
-    persona_tags: List[str],
+    persona_tags: list[str],
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     persona_uuid: str = "",
-    type_weights: Optional[Dict[str, float]] = None,
-) -> Optional[Institution]:
+    type_weights: dict[str, float] | None = None,
+) -> Institution | None:
     """Deterministically pick a persona-matching institution (permissive).
 
     Prefers institutions with at least one template whose persona_tags match,
@@ -242,28 +239,23 @@ def select_institution(
     if not insts:
         return None
     wanted = set(persona_tags)
-    matched = [
-        inst for inst in insts
-        if any(_tags_match_pair(t.persona_tags, wanted) for t in inst.templates)
-    ]
+    matched = [inst for inst in insts if any(_tags_match_pair(t.persona_tags, wanted) for t in inst.templates)]
     candidates = matched or insts
     rng = random.Random(_instance_seed(persona_uuid or "anon", "select_inst", seed))
     if type_weights:
-        weights = [
-            max(1e-6, float(type_weights.get(inst.type, 1.0))) for inst in candidates
-        ]
+        weights = [max(1e-6, float(type_weights.get(inst.type, 1.0))) for inst in candidates]
         return rng.choices(candidates, weights=weights, k=1)[0]
     return rng.choice(candidates)
 
 
 def select_institution_and_template(
     bank: FinanceBank,
-    persona_tags: List[str],
+    persona_tags: list[str],
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     persona_uuid: str = "",
-    tier: Optional[str] = None,
-) -> Optional[Tuple[Institution, TaskTemplate]]:
+    tier: str | None = None,
+) -> tuple[Institution, TaskTemplate] | None:
     """Deterministically pick a persona-matching (institution, template).
 
     Permissive matching (banking is universal): every ``(institution, template)``
@@ -271,22 +263,20 @@ def select_institution_and_template(
     full set so the sampler is never starved. ``tier`` (when given) restricts to
     templates of that tier (e.g. ``"verifiable"``).
     """
-    all_pairs: List[Tuple[Institution, TaskTemplate]] = [
-        (inst, tpl) for inst in bank.institutions for tpl in inst.templates
-        if tier is None or tpl.tier == tier
+    all_pairs: list[tuple[Institution, TaskTemplate]] = [
+        (inst, tpl) for inst in bank.institutions for tpl in inst.templates if tier is None or tpl.tier == tier
     ]
     if not all_pairs:
         return None
-    matched: List[Tuple[Institution, TaskTemplate]] = [
-        (inst, tpl) for inst, tpl in all_pairs
-        if _tags_match_pair(tpl.persona_tags, set(persona_tags))
+    matched: list[tuple[Institution, TaskTemplate]] = [
+        (inst, tpl) for inst, tpl in all_pairs if _tags_match_pair(tpl.persona_tags, set(persona_tags))
     ]
     candidates = matched or all_pairs
     rng = random.Random(_instance_seed(persona_uuid or "anon", "select", seed))
     return rng.choice(candidates)
 
 
-def _tags_match_pair(tpl_tags: Tuple[str, ...], persona_tags: set) -> bool:
+def _tags_match_pair(tpl_tags: tuple[str, ...], persona_tags: set) -> bool:
     if not tpl_tags:
         return True
     for tag in tpl_tags:

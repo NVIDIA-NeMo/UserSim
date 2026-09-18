@@ -21,12 +21,12 @@ from usersim.engine.core.locale import (
     KATAKANA_RANGES,
     LATIN_RANGES,
     LOCALE_TO_EXPECTED_SCRIPT_RANGES,
-    LOCALE_TO_LANGUAGE_NAME,
     LOCALE_TO_LANGUAGE_DISPLAY,
+    LOCALE_TO_LANGUAGE_NAME,
     SCRIPT_BUCKETS,
     SHIPPED_LOCALES,
-    expected_language_name,
     expected_language_display,
+    expected_language_name,
     expected_script_ranges,
     persona_dataset_locale,
     supported_locales,
@@ -45,9 +45,7 @@ class TestSupportedLocales:
 
     def test_language_and_script_maps_have_same_keys(self) -> None:
         # Adding a locale to one map without the other = config bug.
-        assert (
-            set(LOCALE_TO_LANGUAGE_NAME) == set(LOCALE_TO_EXPECTED_SCRIPT_RANGES)
-        )
+        assert set(LOCALE_TO_LANGUAGE_NAME) == set(LOCALE_TO_EXPECTED_SCRIPT_RANGES)
 
     def test_display_map_covers_shipped_locales(self) -> None:
         assert set(LOCALE_TO_LANGUAGE_DISPLAY) == set(SHIPPED_LOCALES)
@@ -72,7 +70,9 @@ class TestExpectedLanguage:
         ],
     )
     def test_each_locale_maps_to_expected_lingua_language(
-        self, locale: str, expected: str,
+        self,
+        locale: str,
+        expected: str,
     ) -> None:
         assert expected_language_name(locale) == expected
 
@@ -86,6 +86,7 @@ class TestExpectedLanguage:
     def test_lingua_language_names_resolve(self) -> None:
         """Every name we declare must be a real lingua Language enum."""
         from lingua import Language
+
         for name in LOCALE_TO_LANGUAGE_NAME.values():
             if name is None:
                 # Romanized locales (e.g. hi_Latn_IN) deliberately map to
@@ -93,8 +94,7 @@ class TestExpectedLanguage:
                 # language scorers skip them. Nothing to resolve.
                 continue
             assert hasattr(Language, name), (
-                f"language name {name!r} declared in LOCALE_TO_LANGUAGE_NAME "
-                "but not present in lingua.Language enum"
+                f"language name {name!r} declared in LOCALE_TO_LANGUAGE_NAME but not present in lingua.Language enum"
             )
 
 
@@ -168,8 +168,7 @@ class TestScriptBuckets:
         for locale in supported_locales():
             for r in expected_script_ranges(locale):
                 assert r in all_bucket_ranges, (
-                    f"{locale} declares range {r} that is not in any named "
-                    "SCRIPT_BUCKETS; reviewer must classify it"
+                    f"{locale} declares range {r} that is not in any named SCRIPT_BUCKETS; reviewer must classify it"
                 )
 
 
@@ -197,7 +196,9 @@ class TestSampleCodepoints:
         ],
     )
     def test_known_chars_in_only_expected_locales(
-        self, char: str, expected_locales: list[str],
+        self,
+        char: str,
+        expected_locales: list[str],
     ) -> None:
         cp = ord(char)
         for locale in supported_locales():

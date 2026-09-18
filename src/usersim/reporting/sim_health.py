@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.reporting.diagnostics import (
     compute_diagnostics_frame,
@@ -43,7 +43,7 @@ from usersim.reporting.resource import (
 )
 
 
-def _decode_outcome(raw: Any) -> Dict[str, Any]:
+def _decode_outcome(raw: Any) -> dict[str, Any]:
     if raw is None:
         return {}
     if isinstance(raw, dict):
@@ -62,18 +62,18 @@ class SimHealthBundle:
     """Structured bundle of simulator-side diagnostics for one trajectory parquet."""
 
     n_trajectories: int = 0
-    status_counts: Dict[str, int] = field(default_factory=dict)
-    failure_taxonomy: List[Dict[str, Any]] = field(default_factory=list)
-    failure_taxonomy_by_locale: List[Dict[str, Any]] = field(default_factory=list)
+    status_counts: dict[str, int] = field(default_factory=dict)
+    failure_taxonomy: list[dict[str, Any]] = field(default_factory=list)
+    failure_taxonomy_by_locale: list[dict[str, Any]] = field(default_factory=list)
 
-    diagnostics_means: Dict[str, Optional[float]] = field(default_factory=dict)
-    diagnostics_by_interaction_style: List[Dict[str, Any]] = field(default_factory=list)
+    diagnostics_means: dict[str, float | None] = field(default_factory=dict)
+    diagnostics_by_interaction_style: list[dict[str, Any]] = field(default_factory=list)
 
-    persona_grounding_rate: Optional[float] = None
-    early_stop_rate: Optional[float] = None
+    persona_grounding_rate: float | None = None
+    early_stop_rate: float | None = None
 
-    counters_means: Dict[str, float] = field(default_factory=dict)
-    counters_totals: Dict[str, int] = field(default_factory=dict)
+    counters_means: dict[str, float] = field(default_factory=dict)
+    counters_totals: dict[str, int] = field(default_factory=dict)
 
     resource_profile: ResourceProfile = field(default_factory=ResourceProfile)
 
@@ -86,31 +86,27 @@ class SimHealthBundle:
     # ``mean_total_tokens_per_trajectory``. The equity diagnostic this
     # surfaces: are non-English locales getting systematically shorter
     # responses for matched workloads?
-    response_length_by_locale: List[Dict[str, Any]] = field(default_factory=list)
+    response_length_by_locale: list[dict[str, Any]] = field(default_factory=list)
 
-    provenance_observed: Dict[str, List[str]] = field(default_factory=dict)
-    probe_family_counts: Dict[str, int] = field(default_factory=dict)
-    locale_counts: Dict[str, int] = field(default_factory=dict)
+    provenance_observed: dict[str, list[str]] = field(default_factory=dict)
+    probe_family_counts: dict[str, int] = field(default_factory=dict)
+    locale_counts: dict[str, int] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "n_trajectories": self.n_trajectories,
             "status_counts": dict(self.status_counts),
             "failure_taxonomy": list(self.failure_taxonomy),
             "failure_taxonomy_by_locale": list(self.failure_taxonomy_by_locale),
             "diagnostics_means": dict(self.diagnostics_means),
-            "diagnostics_by_interaction_style": list(
-                self.diagnostics_by_interaction_style
-            ),
+            "diagnostics_by_interaction_style": list(self.diagnostics_by_interaction_style),
             "persona_grounding_rate": self.persona_grounding_rate,
             "early_stop_rate": self.early_stop_rate,
             "counters_means": dict(self.counters_means),
             "counters_totals": dict(self.counters_totals),
             "resource_profile": self.resource_profile.to_dict(),
             "response_length_by_locale": list(self.response_length_by_locale),
-            "provenance_observed": {
-                k: list(v) for k, v in self.provenance_observed.items()
-            },
+            "provenance_observed": {k: list(v) for k, v in self.provenance_observed.items()},
             "probe_family_counts": dict(self.probe_family_counts),
             "locale_counts": dict(self.locale_counts),
         }
@@ -131,15 +127,17 @@ def _explode_outcome_columns(df: Any) -> Any:
     decoded = out["simulation_outcome"].apply(_decode_outcome)
     out["_status"] = decoded.apply(lambda d: d.get("status"))
     out["_failure_class"] = decoded.apply(lambda d: d.get("failure_class"))
-    out["_failure_attribution"] = decoded.apply(
-        lambda d: d.get("failure_attribution")
-    )
+    out["_failure_attribution"] = decoded.apply(lambda d: d.get("failure_attribution"))
     out["_early_stop"] = decoded.apply(lambda d: bool(d.get("early_stop", False)))
     counter_keys = [
-        "n_turns", "n_tool_calls", "n_user_query_attempts",
-        "n_user_followup_retries", "n_assistant_inline_failures",
+        "n_turns",
+        "n_tool_calls",
+        "n_user_query_attempts",
+        "n_user_followup_retries",
+        "n_assistant_inline_failures",
         "n_assistant_retries",
-        "n_api_response_rerolls", "n_fourth_wall_triggers",
+        "n_api_response_rerolls",
+        "n_fourth_wall_triggers",
         "n_user_role_violations",
     ]
     for k in counter_keys:
@@ -148,42 +146,37 @@ def _explode_outcome_columns(df: Any) -> Any:
     return out
 
 
-def _build_failure_taxonomy(df_exp: Any) -> List[Dict[str, Any]]:
+def _build_failure_taxonomy(df_exp: Any) -> list[dict[str, Any]]:
     """``groupby(failure_class × failure_attribution).size()`` with proportions."""
 
     failed = df_exp[df_exp["_failure_class"].notna()].copy()
     if failed.empty:
         return []
     n = len(df_exp) or 1
-    grp = (
-        failed.groupby(["_failure_class", "_failure_attribution"], dropna=False)
-        .size()
-        .reset_index(name="n")
-    )
+    grp = failed.groupby(["_failure_class", "_failure_attribution"], dropna=False).size().reset_index(name="n")
     grp["proportion"] = (grp["n"] / n).round(4)
     grp = grp.sort_values("n", ascending=False)
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     for _, row in grp.iterrows():
-        out.append({
-            "failure_class": row["_failure_class"],
-            "failure_attribution": row["_failure_attribution"],
-            "n": int(row["n"]),
-            "proportion": float(row["proportion"]),
-        })
+        out.append(
+            {
+                "failure_class": row["_failure_class"],
+                "failure_attribution": row["_failure_attribution"],
+                "n": int(row["n"]),
+                "proportion": float(row["proportion"]),
+            }
+        )
     return out
 
 
-def _build_failure_taxonomy_by_locale(df_exp: Any) -> List[Dict[str, Any]]:
-
+def _build_failure_taxonomy_by_locale(df_exp: Any) -> list[dict[str, Any]]:
     if "locale" not in df_exp.columns:
         return []
     failed = df_exp[df_exp["_failure_class"].notna()].copy()
     if failed.empty:
         return []
     grp = (
-        failed.groupby(
-            ["locale", "_failure_class", "_failure_attribution"], dropna=False
-        )
+        failed.groupby(["locale", "_failure_class", "_failure_attribution"], dropna=False)
         .size()
         .reset_index(name="n")
         .sort_values(["locale", "n"], ascending=[True, False])
@@ -199,10 +192,9 @@ def _build_failure_taxonomy_by_locale(df_exp: Any) -> List[Dict[str, Any]]:
     ]
 
 
-def _build_diagnostics_means(df_diag: Any) -> Dict[str, Optional[float]]:
-    cols = ["d1_front_loading", "d2_polite_fraction", "d3_verbosity_cv",
-            "d4_frustration_markers", "mattr_assistant"]
-    out: Dict[str, Optional[float]] = {}
+def _build_diagnostics_means(df_diag: Any) -> dict[str, float | None]:
+    cols = ["d1_front_loading", "d2_polite_fraction", "d3_verbosity_cv", "d4_frustration_markers", "mattr_assistant"]
+    out: dict[str, float | None] = {}
     for c in cols:
         if c not in df_diag.columns:
             out[c] = None
@@ -212,27 +204,22 @@ def _build_diagnostics_means(df_diag: Any) -> Dict[str, Optional[float]]:
     return out
 
 
-def _build_diagnostics_by_interaction_style(df_diag: Any) -> List[Dict[str, Any]]:
+def _build_diagnostics_by_interaction_style(df_diag: Any) -> list[dict[str, Any]]:
     if "user_interaction_style" not in df_diag.columns:
         return []
-    cols = ["d1_front_loading", "d2_polite_fraction", "d3_verbosity_cv",
-            "d4_frustration_markers", "mattr_assistant"]
+    cols = ["d1_front_loading", "d2_polite_fraction", "d3_verbosity_cv", "d4_frustration_markers", "mattr_assistant"]
     available = [c for c in cols if c in df_diag.columns]
     if not available:
         return []
-    grp = (
-        df_diag.groupby("user_interaction_style", dropna=False)[available]
-        .mean(numeric_only=True)
-        .reset_index()
-    )
+    grp = df_diag.groupby("user_interaction_style", dropna=False)[available].mean(numeric_only=True).reset_index()
     # ``mean(numeric_only=True)`` silently drops columns whose values are
     # all-None (object dtype), so the surviving metrics are exactly
     # ``grp.columns - {"user_interaction_style"}``. Iterate over those
     # rather than ``available`` to avoid KeyError on the dropped ones.
     metric_cols = [c for c in grp.columns if c != "user_interaction_style"]
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     for _, row in grp.iterrows():
-        entry: Dict[str, Any] = {
+        entry: dict[str, Any] = {
             "user_interaction_style": row["user_interaction_style"],
         }
         for c in metric_cols:
@@ -242,12 +229,12 @@ def _build_diagnostics_by_interaction_style(df_diag: Any) -> List[Dict[str, Any]
     return out
 
 
-def _provenance_observed(df_exp: Any) -> Dict[str, List[str]]:
+def _provenance_observed(df_exp: Any) -> dict[str, list[str]]:
     """Distinct (sorted) values seen for each provenance field."""
     if "_provenance" not in df_exp.columns:
         return {}
     keys = ["nemotron_personas_version", "scenario_prompt_version", "code_sha"]
-    seen: Dict[str, set] = {k: set() for k in keys}
+    seen: dict[str, set] = {k: set() for k in keys}
     for prov in df_exp["_provenance"]:
         if not isinstance(prov, dict):
             continue
@@ -258,7 +245,7 @@ def _provenance_observed(df_exp: Any) -> Dict[str, List[str]]:
     return {k: sorted(v) for k, v in seen.items()}
 
 
-def _value_counts_dict(series: Any) -> Dict[str, int]:
+def _value_counts_dict(series: Any) -> dict[str, int]:
     if series is None or len(series) == 0:
         return {}
     vc = series.fillna("__null__").value_counts()
@@ -280,10 +267,7 @@ def build_sim_health(df: Any) -> SimHealthBundle:
     import pandas as pd
 
     if not isinstance(df, pd.DataFrame):
-        raise TypeError(
-            "build_sim_health expects a pandas DataFrame, got "
-            f"{type(df).__name__}"
-        )
+        raise TypeError(f"build_sim_health expects a pandas DataFrame, got {type(df).__name__}")
 
     bundle = SimHealthBundle()
     bundle.n_trajectories = len(df)
@@ -291,15 +275,9 @@ def build_sim_health(df: Any) -> SimHealthBundle:
         return bundle
 
     # Diagnostics frame is independent of outcome decoding.
-    df_diag = (
-        compute_diagnostics_frame(df)
-        if "conversation_messages" in df.columns
-        else df.copy()
-    )
+    df_diag = compute_diagnostics_frame(df) if "conversation_messages" in df.columns else df.copy()
     bundle.diagnostics_means = _build_diagnostics_means(df_diag)
-    bundle.diagnostics_by_interaction_style = (
-        _build_diagnostics_by_interaction_style(df_diag)
-    )
+    bundle.diagnostics_by_interaction_style = _build_diagnostics_by_interaction_style(df_diag)
 
     # Outcome-derived aggregates.
     df_exp = _explode_outcome_columns(df)
@@ -307,14 +285,16 @@ def build_sim_health(df: Any) -> SimHealthBundle:
         bundle.status_counts = _value_counts_dict(df_exp["_status"])
         bundle.failure_taxonomy = _build_failure_taxonomy(df_exp)
         bundle.failure_taxonomy_by_locale = _build_failure_taxonomy_by_locale(df_exp)
-        bundle.early_stop_rate = round(
-            float(df_exp["_early_stop"].mean()), 4
-        )
+        bundle.early_stop_rate = round(float(df_exp["_early_stop"].mean()), 4)
         counter_keys = [
-            "n_turns", "n_tool_calls", "n_user_query_attempts",
-            "n_user_followup_retries", "n_assistant_inline_failures",
+            "n_turns",
+            "n_tool_calls",
+            "n_user_query_attempts",
+            "n_user_followup_retries",
+            "n_assistant_inline_failures",
             "n_assistant_retries",
-            "n_api_response_rerolls", "n_fourth_wall_triggers",
+            "n_api_response_rerolls",
+            "n_fourth_wall_triggers",
             "n_user_role_violations",
         ]
         for k in counter_keys:
@@ -347,10 +327,7 @@ def build_sim_health(df: Any) -> SimHealthBundle:
     # Equity diagnostic: per-locale response length. Requires all three
     # columns (locale + conversation_messages + simulation_outcome);
     # silently skip if any are missing rather than raise.
-    if all(
-        c in df.columns
-        for c in ("locale", "conversation_messages", "simulation_outcome")
-    ):
+    if all(c in df.columns for c in ("locale", "conversation_messages", "simulation_outcome")):
         bundle.response_length_by_locale = compute_response_length_by_locale(df)
 
     return bundle

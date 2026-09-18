@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable
 
 # Persona attributes that participate in the canonical hash. We
 # explicitly enumerate them rather than hashing the whole persona dict
@@ -117,7 +117,7 @@ def _canonical_value(v: Any) -> Any:
     return v
 
 
-def canonical_persona_json(persona: Dict[str, Any]) -> str:
+def canonical_persona_json(persona: dict[str, Any]) -> str:
     """Build a canonical JSON string of the persona's hash-relevant attributes.
 
     Only fields in ``_CANONICAL_PERSONA_KEYS`` that are actually present
@@ -126,14 +126,14 @@ def canonical_persona_json(persona: Dict[str, Any]) -> str:
     a future Nemotron-Personas release does not retroactively change the
     UUIDs of personas that lack the new field.
     """
-    canonical: Dict[str, Any] = {}
+    canonical: dict[str, Any] = {}
     for key in _CANONICAL_PERSONA_KEYS:
         if key in persona and persona[key] is not None:
             canonical[key] = _canonical_value(persona[key])
     return json.dumps(canonical, sort_keys=True, ensure_ascii=False, default=str)
 
 
-def persona_uuid(persona: Dict[str, Any]) -> str:
+def persona_uuid(persona: dict[str, Any]) -> str:
     """Content-hashed 16-char persona identifier.
 
     Stable across runs given identical content. Replay-safe: a
@@ -185,7 +185,7 @@ def trajectory_id(
     user_model: str,
     assistant_model: str,
     prompt_version: str,
-    extra_keys: Optional[Iterable[tuple[str, str]]] = None,
+    extra_keys: Iterable[tuple[str, str]] | None = None,
 ) -> str:
     """Deterministic 16-char trajectory identifier.
 

@@ -15,16 +15,15 @@ from pathlib import Path
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.fact_bank import (
     ALLOWED_DIFFICULTIES,
     ALLOWED_QUESTION_TYPES,
+    SUPPORTED_SCHEMA_VERSIONS,
     FactBank,
     FactBankError,
-    SUPPORTED_SCHEMA_VERSIONS,
     load_fact_bank,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -66,9 +65,7 @@ def _minimal_bank(extra_entries: str = "") -> str:
         "bank_id: test_bank\n"
         "bank_version: v0.1.0\n"
         "categories: [cat-a]\n"
-        "entries:\n"
-        + _minimal_factual_recall_entry()
-        + extra_entries
+        "entries:\n" + _minimal_factual_recall_entry() + extra_entries
     )
 
 
@@ -138,17 +135,12 @@ class TestTopLevelValidation:
         with pytest.raises(FactBankError, match="YAML parse failure"):
             load_fact_bank(_write(tmp_path, "schema_version: 'v0.1\nbroken: ["))
 
-    @pytest.mark.parametrize(
-        "field", ["schema_version", "locale", "bank_id", "bank_version"]
-    )
+    @pytest.mark.parametrize("field", ["schema_version", "locale", "bank_id", "bank_version"])
     def test_required_top_level_fields(self, tmp_path: Path, field: str) -> None:
         # Strip the field by replacing its line with a comment.
         bank_yaml = _minimal_bank()
         # Remove the requested field's line wholesale.
-        new_lines = [
-            ln for ln in bank_yaml.splitlines()
-            if not ln.lstrip().startswith(f"{field}:")
-        ]
+        new_lines = [ln for ln in bank_yaml.splitlines() if not ln.lstrip().startswith(f"{field}:")]
         with pytest.raises(FactBankError, match=field):
             load_fact_bank(_write(tmp_path, "\n".join(new_lines)))
 
@@ -199,9 +191,7 @@ class TestEntryValidation:
             load_fact_bank(_write(tmp_path, bank_yaml))
 
     def test_persona_tags_must_be_non_empty(self, tmp_path: Path) -> None:
-        bank_yaml = _minimal_bank().replace(
-            'persona_tags: ["interest:geography"]', "persona_tags: []"
-        )
+        bank_yaml = _minimal_bank().replace('persona_tags: ["interest:geography"]', "persona_tags: []")
         with pytest.raises(FactBankError, match="persona_tags"):
             load_fact_bank(_write(tmp_path, bank_yaml))
 
@@ -310,7 +300,7 @@ class TestCompletionEntries:
 class TestFactualRecallEntries:
     def test_false_premises_can_be_empty(self, tmp_path: Path) -> None:
         bank_yaml = _minimal_bank().replace(
-            "    false_premises:\n      - \"Sky is red (it is blue)\"\n",
+            '    false_premises:\n      - "Sky is red (it is blue)"\n',
             "    false_premises: []\n",
         )
         bank = load_fact_bank(_write(tmp_path, bank_yaml))
@@ -336,34 +326,40 @@ class TestProvenance:
             load_fact_bank(_write(tmp_path, bank_yaml))
 
     def test_non_placeholder_requires_at_least_one_reference(self, tmp_path: Path) -> None:
-        bank_yaml = _minimal_bank().replace(
-            "placeholder: true",
-            "placeholder: false",
-        ).replace(
-            'source: "placeholder"',
-            'source: "Britannica entry on the sky"',
+        bank_yaml = (
+            _minimal_bank()
+            .replace(
+                "placeholder: true",
+                "placeholder: false",
+            )
+            .replace(
+                'source: "placeholder"',
+                'source: "Britannica entry on the sky"',
+            )
         )
         # No references list at all → must fail.
         with pytest.raises(FactBankError, match="references"):
             load_fact_bank(_write(tmp_path, bank_yaml))
 
     def test_non_placeholder_with_references_loads(self, tmp_path: Path) -> None:
-        bank_yaml = _minimal_bank().replace(
-            "    placeholder: true\n",
-            "    placeholder: false\n",
-        ).replace(
-            '      source: "placeholder"\n      last_reviewed: "2026-04-17"\n',
-            (
-                '      source: "Britannica entry on Rayleigh scattering"\n'
-                '      last_reviewed: "2026-04-17"\n'
-                '      references:\n'
-                '        - "https://www.britannica.com/science/Rayleigh-scattering"\n'
-            ),
+        bank_yaml = (
+            _minimal_bank()
+            .replace(
+                "    placeholder: true\n",
+                "    placeholder: false\n",
+            )
+            .replace(
+                '      source: "placeholder"\n      last_reviewed: "2026-04-17"\n',
+                (
+                    '      source: "Britannica entry on Rayleigh scattering"\n'
+                    '      last_reviewed: "2026-04-17"\n'
+                    "      references:\n"
+                    '        - "https://www.britannica.com/science/Rayleigh-scattering"\n'
+                ),
+            )
         )
         bank = load_fact_bank(_write(tmp_path, bank_yaml))
-        assert bank.facts[0].provenance.references == (
-            "https://www.britannica.com/science/Rayleigh-scattering",
-        )
+        assert bank.facts[0].provenance.references == ("https://www.britannica.com/science/Rayleigh-scattering",)
 
     def test_iso_date_format_enforced(self, tmp_path: Path) -> None:
         bank_yaml = _minimal_bank().replace(
@@ -488,23 +484,17 @@ class TestPersonaTagMatching:
         #   - G-001 (concrete intersection on region:southeast)
         #   - M-001 (concrete intersection on interest:music + region:southeast)
         #   - G-002 (its region:any wildcard matches the persona's region:southeast)
-        out = multi_entry_bank.matching_persona_tags(
-            ["interest:music", "region:southeast"]
-        )
+        out = multi_entry_bank.matching_persona_tags(["interest:music", "region:southeast"])
         assert {f.id for f in out} == {"G-001", "G-002", "M-001"}
 
-    def test_persona_wildcard_matches_any_with_prefix(
-        self, multi_entry_bank: FactBank
-    ) -> None:
+    def test_persona_wildcard_matches_any_with_prefix(self, multi_entry_bank: FactBank) -> None:
         # Persona with 'region:any' should pull in every entry that has
         # any region:* tag.
         out = multi_entry_bank.matching_persona_tags(["region:any"])
         # G-001 has region:southeast, G-002 has region:any, M-001 has region:southeast
         assert {f.id for f in out} == {"G-001", "G-002", "M-001"}
 
-    def test_fact_wildcard_matches_any_persona_with_prefix(
-        self, multi_entry_bank: FactBank
-    ) -> None:
+    def test_fact_wildcard_matches_any_persona_with_prefix(self, multi_entry_bank: FactBank) -> None:
         # Persona with region:nordeste should pull G-002 (region:any on fact)
         # but neither G-001 nor M-001 (concrete southeast on facts).
         out = multi_entry_bank.matching_persona_tags(["region:nordeste"])
@@ -516,9 +506,7 @@ class TestPersonaTagMatching:
     def test_iteration_order_is_file_order(self, multi_entry_bank: FactBank) -> None:
         # by_category preserves file order; same for matching_persona_tags
         # results to keep simulator behaviour deterministic.
-        out = multi_entry_bank.matching_persona_tags(
-            ["interest:geography", "interest:music"]
-        )
+        out = multi_entry_bank.matching_persona_tags(["interest:geography", "interest:music"])
         # File order is G-001, G-002, M-001 — preserved.
         assert [f.id for f in out] == ["G-001", "G-002", "M-001"]
 
@@ -546,9 +534,7 @@ class TestPtBrSampleBank:
         assert len(bank.facts) == 60
         assert len(bank.categories) == 10
         for cat in bank.categories:
-            assert len(bank.by_category(cat)) == 6, (
-                f"category {cat} expected to have 6 entries"
-            )
+            assert len(bank.by_category(cat)) == 6, f"category {cat} expected to have 6 entries"
 
     def test_all_entries_placeholder_until_real_refs(self, bank: FactBank) -> None:
         # Per the schema's promotion convention, an entry promoted to
@@ -569,9 +555,7 @@ class TestPtBrSampleBank:
         assert len(completions) == 8
         assert all(f.graceful_unknown for f in completions)
 
-    def test_factual_recall_entries_have_false_premises(
-        self, bank: FactBank
-    ) -> None:
+    def test_factual_recall_entries_have_false_premises(self, bank: FactBank) -> None:
         # Every shipped factual_recall entry deliberately embeds at least one
         # false premise — that's the whole point of this category. The
         # pt_BR DIGI-B006 entry was migrated from completion → factual_recall
@@ -581,16 +565,15 @@ class TestPtBrSampleBank:
         factual = [f for f in bank.facts if f.question_type == "factual_recall"]
         assert len(factual) == 52
         for f in factual:
-            assert len(f.false_premises) >= 1, (
-                f"{f.id} declares no false premises but is factual_recall"
-            )
+            assert len(f.false_premises) >= 1, f"{f.id} declares no false premises but is factual_recall"
 
     def test_every_entry_carries_persona_tags(self, bank: FactBank) -> None:
         for f in bank.facts:
             assert len(f.persona_tags) >= 1, f"{f.id} has no persona_tags"
 
     def test_non_placeholder_entries_have_no_todo_or_placeholder_text(
-        self, bank: FactBank,
+        self,
+        bank: FactBank,
     ) -> None:
         forbidden = (
             "reviewer todo",
@@ -599,7 +582,5 @@ class TestPtBrSampleBank:
             "wrong national agency",
         )
         for f in bank.non_placeholder():
-            text = "\n".join(
-                [f.question, f.ground_truth, f.graceful_unknown or ""]
-            ).lower()
+            text = "\n".join([f.question, f.ground_truth, f.graceful_unknown or ""]).lower()
             assert not any(token in text for token in forbidden), f.id

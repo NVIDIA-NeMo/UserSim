@@ -15,7 +15,6 @@ from pathlib import Path
 
 import pytest
 
-from usersim.taxonomy.capabilities import capability_definitions
 from usersim.reporting.comparison import (
     ComparisonCell,
     ComparisonReport,
@@ -33,16 +32,14 @@ from usersim.reporting.comparison_dashboard import (
     write_comparison_dashboard_artifacts,
 )
 from usersim.reporting.runs import print_comparison_runs
-
+from usersim.taxonomy.capabilities import capability_definitions
 
 # Quality-capability count, derived from the registry rather than hardcoded:
 # rollups exclude ``simulation_reliability`` (a process-health metric, not
 # assistant quality), so "eligible" cells are every OTHER capability. Adding a
 # capability row (e.g. a new probe family's) must not require editing counts
 # scattered through this file.
-N_ELIGIBLE_CAPS = len(
-    [d for d in capability_definitions() if d.id != "simulation_reliability"]
-)
+N_ELIGIBLE_CAPS = len([d for d in capability_definitions() if d.id != "simulation_reliability"])
 
 
 # ---------------------------------------------------------------------------
@@ -141,8 +138,7 @@ def _manifest(
             # so synthetic reports don't accidentally land on 0.0.
             "counters_means": {"n_turns": mean_turns_per_conversation},
             "response_length_by_locale": [
-                {"locale": loc, "mean_tokens_per_turn": 200.0 + i * 10}
-                for i, loc in enumerate(locales)
+                {"locale": loc, "mean_tokens_per_turn": 200.0 + i * 10} for i, loc in enumerate(locales)
             ],
         }
     elif sim_health is None:
@@ -254,9 +250,7 @@ class TestMaterialization:
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         # m1's fr_FR cells should be present but state=missing.
-        m1_fr = [
-            c for c in report.cells if c.run_id == "1" and c.locale == "fr_FR"
-        ]
+        m1_fr = [c for c in report.cells if c.run_id == "1" and c.locale == "fr_FR"]
         assert len(m1_fr) == len(capability_definitions())
         assert all(c.state == "missing" and c.is_missing for c in m1_fr)
 
@@ -271,7 +265,8 @@ class TestEntryTokenFields:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a",
+                run_id="1",
+                model_id="v/x/a",
                 assistant_total_tokens=1_000_000,
                 assistant_output_tokens=375_000,
                 assistant_reasoning_tokens=42_000,
@@ -280,7 +275,8 @@ class TestEntryTokenFields:
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", model_id="v/x/b",
+                run_id="2",
+                model_id="v/x/b",
                 assistant_total_tokens=2_000_000,
                 assistant_output_tokens=500_000,
             ),
@@ -298,7 +294,8 @@ class TestEntryTokenFields:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/legacy",
+                run_id="1",
+                model_id="v/x/legacy",
                 assistant_total_tokens=1_000_000,
                 omit_assistant_output_tokens=True,
             ),
@@ -320,7 +317,8 @@ class TestEntryTokenFields:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a",
+                run_id="1",
+                model_id="v/x/a",
                 assistant_output_tokens=400_000,
                 user_output_tokens=180_000,
                 user_reasoning_tokens=12_000,
@@ -339,10 +337,12 @@ class TestEntryTokenFields:
         # ``sim_health.counters_means.n_turns`` -> entry field. Drives
         # the "avg turns/conversation" hero card.
         m1 = _write_manifest(
-            tmp_path, _manifest(run_id="1", model_id="v/x/a", mean_turns_per_conversation=3.7),
+            tmp_path,
+            _manifest(run_id="1", model_id="v/x/a", mean_turns_per_conversation=3.7),
         )
         m2 = _write_manifest(
-            tmp_path, _manifest(run_id="2", model_id="v/x/b", mean_turns_per_conversation=4.2),
+            tmp_path,
+            _manifest(run_id="2", model_id="v/x/b", mean_turns_per_conversation=4.2),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         by_run = {e.run_id: e for e in report.entries}
@@ -395,16 +395,20 @@ class TestHeroPanelLabels:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a",
-                n_trajectories=1024, n_evaluated=1024,
+                run_id="1",
+                model_id="v/x/a",
+                n_trajectories=1024,
+                n_evaluated=1024,
                 mean_turns_per_conversation=3.0,
             ),
         )
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", model_id="v/x/b",
-                n_trajectories=256, n_evaluated=256,
+                run_id="2",
+                model_id="v/x/b",
+                n_trajectories=256,
+                n_evaluated=256,
                 mean_turns_per_conversation=7.0,
             ),
         )
@@ -515,7 +519,9 @@ class TestRollupTokenFields:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a", n_trajectories=1024,
+                run_id="1",
+                model_id="v/x/a",
+                n_trajectories=1024,
                 assistant_total_tokens=4_000_000,
                 assistant_output_tokens=512_000,
                 assistant_reasoning_tokens=128_000,
@@ -578,18 +584,14 @@ class TestRollupMath:
     ) -> ComparisonReport:
         locales = ["en_US"]
         cells_baseline = _full_capability_cells(locales=locales, base_score=0.9)
-        cells_with_overrides = _full_capability_cells(
-            locales=locales, base_score=0.9, score_overrides=m1_overrides
-        )
+        cells_with_overrides = _full_capability_cells(locales=locales, base_score=0.9, score_overrides=m1_overrides)
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/m1", locales=locales,
-                      capability_cells=cells_with_overrides),
+            _manifest(run_id="1", model_id="v/x/m1", locales=locales, capability_cells=cells_with_overrides),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/m2", locales=locales,
-                      capability_cells=cells_baseline),
+            _manifest(run_id="2", model_id="v/x/m2", locales=locales, capability_cells=cells_baseline),
         )
         return build_comparison_report([m1, m2], comparison_id="cmp_test")
 
@@ -600,10 +602,7 @@ class TestRollupMath:
         # Flip the first 5 capability cells to missing on m1; score on
         # measured cells stays identical to m2 -> rollup score stays equal.
         cap_ids = [d.id for d in capability_definitions()][:5]
-        overrides = {
-            (cap_id, "en_US"): {"state": "missing", "score": None, "threshold": None}
-            for cap_id in cap_ids
-        }
+        overrides = {(cap_id, "en_US"): {"state": "missing", "score": None, "threshold": None} for cap_id in cap_ids}
         report = self._two_run_report_with_overrides(tmp_path, m1_overrides=overrides)
         m1, m2 = self._rollup(report, "m1"), self._rollup(report, "m2")
         assert m1.mean_normalized_score is not None
@@ -625,10 +624,7 @@ class TestRollupMath:
         # 5 missing cells out of (15-1)=14 eligible per locale (1 run, 1 locale)
         # -> measured = 14 - 5 = 9, eligible = 14, pct_measured ~= 9/14 = 0.643
         cap_ids = [d.id for d in capability_definitions() if d.id != "simulation_reliability"][:5]
-        overrides = {
-            (cap_id, "en_US"): {"state": "missing", "score": None, "threshold": None}
-            for cap_id in cap_ids
-        }
+        overrides = {(cap_id, "en_US"): {"state": "missing", "score": None, "threshold": None} for cap_id in cap_ids}
         report = self._two_run_report_with_overrides(tmp_path, m1_overrides=overrides)
         m1 = self._rollup(report, "m1")
         m2 = self._rollup(report, "m2")
@@ -653,24 +649,28 @@ class TestRollupMath:
             cells: list[dict] = []
             for cap_def in capability_definitions():
                 for loc in locales:
-                    cells.append(_capability_cell(
-                        capability=cap_def.id,
-                        locale=loc,
-                        score=per_locale_score[loc],
-                        threshold=0.8,
-                        state="ready" if per_locale_score[loc] >= 0.8 else "blocked",
-                    ))
+                    cells.append(
+                        _capability_cell(
+                            capability=cap_def.id,
+                            locale=loc,
+                            score=per_locale_score[loc],
+                            threshold=0.8,
+                            state="ready" if per_locale_score[loc] >= 0.8 else "blocked",
+                        )
+                    )
             return cells
 
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/m1", locales=locales,
-                      capability_cells=_cells({"en_US": 1.0, "fr_FR": 0.5})),
+            _manifest(
+                run_id="1", model_id="v/x/m1", locales=locales, capability_cells=_cells({"en_US": 1.0, "fr_FR": 0.5})
+            ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/m2", locales=locales,
-                      capability_cells=_cells({"en_US": 0.75, "fr_FR": 0.75})),
+            _manifest(
+                run_id="2", model_id="v/x/m2", locales=locales, capability_cells=_cells({"en_US": 0.75, "fr_FR": 0.75})
+            ),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         m1 = next(r for r in report.model_summary if r.display_label == "m1")
@@ -685,14 +685,16 @@ class TestRollupMath:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", locales=["en_US"],
+                run_id="1",
+                locales=["en_US"],
                 capability_cells=_full_capability_cells(locales=["en_US"]),
             ),
         )
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", locales=["en_US"],
+                run_id="2",
+                locales=["en_US"],
                 capability_cells=_full_capability_cells(locales=["en_US"]),
             ),
         )
@@ -785,12 +787,8 @@ class TestApplesToApples:
         assert any("sample_mode" in w for w in report.apples_to_apples_warnings)
 
     def test_warns_on_persona_panel_mismatch(self, tmp_path):
-        m1 = _write_manifest(
-            tmp_path, _manifest(run_id="1", persona_summary={"personas": 100})
-        )
-        m2 = _write_manifest(
-            tmp_path, _manifest(run_id="2", persona_summary={"personas": 1000})
-        )
+        m1 = _write_manifest(tmp_path, _manifest(run_id="1", persona_summary={"personas": 100}))
+        m2 = _write_manifest(tmp_path, _manifest(run_id="2", persona_summary={"personas": 1000}))
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         assert any("persona_summary.personas" in w for w in report.apples_to_apples_warnings)
 
@@ -905,8 +903,7 @@ class TestPalette:
         assert colors["nemotron-3-ultra-preview"] == "#76b900"
         assert colors["nemotron-3-super-120b-long-ctx"] == "#a8d63d"
         # Non-branded models do NOT land on any NVIDIA-ish green.
-        for label in ("gemma-4-31b-it (run=1)", "gemma-4-31b-it (run=2)",
-                      "gpt-5.4", "gpt-oss-120b", "qwen3.6-35b-a3b"):
+        for label in ("gemma-4-31b-it (run=1)", "gemma-4-31b-it (run=2)", "gpt-5.4", "gpt-oss-120b", "qwen3.6-35b-a3b"):
             assert colors[label] not in {"#76b900", "#a8d63d", "#59a14f"}, (
                 f"{label} got a green-restricted hex: {colors[label]}"
             )
@@ -931,7 +928,12 @@ class TestPalette:
         # Both nemotron variants + 6 other models = 8 colors total.
         # Overrides shouldn't steal palette slots from the rest.
         labels = [
-            "alpha", "beta", "gamma", "delta", "epsilon", "zeta",
+            "alpha",
+            "beta",
+            "gamma",
+            "delta",
+            "epsilon",
+            "zeta",
             "nemotron-3-ultra-preview",
             "nemotron-3-super-120b-long-ctx",
         ]
@@ -981,7 +983,8 @@ class TestVerbosityHeadlineAnnotation:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a",
+                run_id="1",
+                model_id="v/x/a",
                 assistant_total_tokens=1_000_000,
                 assistant_output_tokens=400_000,
                 assistant_reasoning_tokens=120_000,
@@ -990,7 +993,8 @@ class TestVerbosityHeadlineAnnotation:
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", model_id="v/x/b",
+                run_id="2",
+                model_id="v/x/b",
                 assistant_total_tokens=2_000_000,
                 assistant_output_tokens=500_000,
                 assistant_reasoning_tokens=80_000,
@@ -1005,9 +1009,7 @@ class TestVerbosityHeadlineAnnotation:
         for row in values:
             segments_per_model.setdefault(row["display_label"], set()).add(row["segment"])
         for label, segs in segments_per_model.items():
-            assert segs == {"visible", "reasoning"}, (
-                f"model {label} missing a stack segment"
-            )
+            assert segs == {"visible", "reasoning"}, f"model {label} missing a stack segment"
         # The bar mark stacks the segments along x.
         bar_layer = spec["layer"][0]
         assert bar_layer["encoding"]["x"]["aggregate"] == "sum"
@@ -1021,7 +1023,8 @@ class TestVerbosityHeadlineAnnotation:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/a",
+                run_id="1",
+                model_id="v/x/a",
                 assistant_total_tokens=1_000_000,
                 assistant_output_tokens=300_000,
                 assistant_reasoning_tokens=50_000,
@@ -1030,7 +1033,8 @@ class TestVerbosityHeadlineAnnotation:
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", model_id="v/x/b",
+                run_id="2",
+                model_id="v/x/b",
                 assistant_total_tokens=2_000_000,
                 assistant_output_tokens=600_000,
                 assistant_reasoning_tokens=200_000,
@@ -1076,12 +1080,8 @@ class TestVerbosityHeadlineAnnotation:
         # the domain back to [0, 1] silently.
         for layer_idx in (0, 1, 2):
             y_enc = spec["layer"][layer_idx]["encoding"]["y"]
-            assert y_enc["scale"]["domain"] == [0.5, 1.0], (
-                f"layer {layer_idx} y-scale not zoomed: {y_enc.get('scale')}"
-            )
-            assert y_enc["scale"]["zero"] is False, (
-                f"layer {layer_idx} y-scale missing 'zero: false' override"
-            )
+            assert y_enc["scale"]["domain"] == [0.5, 1.0], f"layer {layer_idx} y-scale not zoomed: {y_enc.get('scale')}"
+            assert y_enc["scale"]["zero"] is False, f"layer {layer_idx} y-scale missing 'zero: false' override"
         # The point layer (index 1) carries the axis tick lock too:
         # explicit ``values`` keep the labels at clean 0.1 increments
         # so .1f rounding never produces duplicate "0.5/0.5/0.6/0.6"
@@ -1097,19 +1097,35 @@ class TestParetoLocaleTabs:
     def test_pareto_per_locale_bundle_keys_are_overall_then_locale_codes(self, tmp_path):
         # Bundle key order (and therefore the React tab default-active
         # tab) must be ["Overall", ...locales].
-        import json, re
+        import json
+        import re
 
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a", locales=["en_US", "fr_FR"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"])))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b", locales=["en_US", "fr_FR"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"])))
+        m1 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="1",
+                model_id="v/x/a",
+                locales=["en_US", "fr_FR"],
+                capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"]),
+            ),
+        )
+        m2 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="2",
+                model_id="v/x/b",
+                locales=["en_US", "fr_FR"],
+                capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"]),
+            ),
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_t")
         out = tmp_path / "out"
         write_comparison_dashboard_artifacts(report, out)
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         bundle = specs["global"]["pareto_per_locale"]
@@ -1131,38 +1147,42 @@ class TestParetoLocaleTabs:
             cells = []
             for cap_def in capability_definitions():
                 for loc in locales:
-                    cells.append(_capability_cell(
-                        capability=cap_def.id, locale=loc,
-                        score=per_locale[loc], threshold=0.4,
-                        state="ready",
-                    ))
+                    cells.append(
+                        _capability_cell(
+                            capability=cap_def.id,
+                            locale=loc,
+                            score=per_locale[loc],
+                            threshold=0.4,
+                            state="ready",
+                        )
+                    )
             return cells
 
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/m1", locales=locales,
-                      capability_cells=_cells({"en_US": 1.0, "fr_FR": 0.5})),
+            _manifest(
+                run_id="1", model_id="v/x/m1", locales=locales, capability_cells=_cells({"en_US": 1.0, "fr_FR": 0.5})
+            ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/m2", locales=locales,
-                      capability_cells=_cells({"en_US": 0.7, "fr_FR": 0.7})),
+            _manifest(
+                run_id="2", model_id="v/x/m2", locales=locales, capability_cells=_cells({"en_US": 0.7, "fr_FR": 0.7})
+            ),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         from usersim.reporting.comparison_dashboard import (
             _pareto_score_lookup_for_locale,
             _spec_pareto,
         )
+
         # Overall: m1 == 0.75 (avg of 1.0 and 0.5).
         overall = _spec_pareto(
             report,
             colors={"m1": "#000", "m2": "#fff"},
             shapes={"m1": "circle", "m2": "square"},
         )
-        m1_overall_score = next(
-            row["score"] for row in overall["data"]["values"]
-            if row["display_label"] == "m1"
-        )
+        m1_overall_score = next(row["score"] for row in overall["data"]["values"] if row["display_label"] == "m1")
         assert m1_overall_score == pytest.approx(0.75)
         # en_US tab: m1 score == 1.0.
         en_us = _spec_pareto(
@@ -1172,10 +1192,7 @@ class TestParetoLocaleTabs:
             score_lookup=_pareto_score_lookup_for_locale(report, "en_US"),
             locale_label="en_US",
         )
-        m1_en_us_score = next(
-            row["score"] for row in en_us["data"]["values"]
-            if row["display_label"] == "m1"
-        )
+        m1_en_us_score = next(row["score"] for row in en_us["data"]["values"] if row["display_label"] == "m1")
         assert m1_en_us_score == pytest.approx(1.0)
         # fr_FR tab: m1 score == 0.5.
         fr_fr = _spec_pareto(
@@ -1185,10 +1202,7 @@ class TestParetoLocaleTabs:
             score_lookup=_pareto_score_lookup_for_locale(report, "fr_FR"),
             locale_label="fr_FR",
         )
-        m1_fr_fr_score = next(
-            row["score"] for row in fr_fr["data"]["values"]
-            if row["display_label"] == "m1"
-        )
+        m1_fr_fr_score = next(row["score"] for row in fr_fr["data"]["values"] if row["display_label"] == "m1")
         assert m1_fr_fr_score == pytest.approx(0.5)
         # Per-locale tab title carries the locale label. Titles are
         # now dict-shaped ({text, anchor}) for left-anchored layout.
@@ -1207,7 +1221,8 @@ class TestParetoLocaleTabs:
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/with_reasoning",
+                run_id="1",
+                model_id="v/x/with_reasoning",
                 # Output ~ 8500 / conv, reasoning ~ 5400 / conv.
                 # Pick ratios that round cleanly to 8,495 / 5,417.
                 n_trajectories=1000,
@@ -1218,7 +1233,8 @@ class TestParetoLocaleTabs:
         m2 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="2", model_id="v/x/no_reasoning",
+                run_id="2",
+                model_id="v/x/no_reasoning",
                 n_trajectories=1000,
                 assistant_output_tokens=2_000_000,
                 assistant_reasoning_tokens=0,
@@ -1226,7 +1242,8 @@ class TestParetoLocaleTabs:
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         spec = _spec_verbosity_headline(
-            report, colors={"with_reasoning": "#000", "no_reasoning": "#fff"},
+            report,
+            colors={"with_reasoning": "#000", "no_reasoning": "#fff"},
         )
         # Each model emits two rows (visible + reasoning); the
         # annotation field is identical across them, so collect the
@@ -1250,8 +1267,12 @@ class TestLeaderboardAnnotation:
         from usersim.reporting.comparison_dashboard import _leaderboard_annotation
 
         rollup = ModelRollup(
-            run_id="r1", display_label="m1", model_id="m1",
-            n_cells_eligible=120, n_cells_ready=80, n_cells_measured=100,
+            run_id="r1",
+            display_label="m1",
+            model_id="m1",
+            n_cells_eligible=120,
+            n_cells_ready=80,
+            n_cells_measured=100,
             mean_normalized_score=0.832,
         )
         # Drops the "·measured·passing" decoration to keep the bar label clean.
@@ -1261,7 +1282,9 @@ class TestLeaderboardAnnotation:
         from usersim.reporting.comparison_dashboard import _leaderboard_annotation
 
         rollup = ModelRollup(
-            run_id="r1", display_label="m1", model_id="m1",
+            run_id="r1",
+            display_label="m1",
+            model_id="m1",
             mean_normalized_score=None,
         )
         assert _leaderboard_annotation(rollup) == "no measured cells"
@@ -1281,10 +1304,12 @@ class TestGapsCount:
         }
         cells_a = _full_capability_cells(locales=["en_US"], score_overrides=overrides)
         cells_b = _full_capability_cells(locales=["en_US"], base_score=0.9)
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/m1",
-                                                  locales=["en_US"], capability_cells=cells_a))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/m2",
-                                                  locales=["en_US"], capability_cells=cells_b))
+        m1 = _write_manifest(
+            tmp_path, _manifest(run_id="1", model_id="v/x/m1", locales=["en_US"], capability_cells=cells_a)
+        )
+        m2 = _write_manifest(
+            tmp_path, _manifest(run_id="2", model_id="v/x/m2", locales=["en_US"], capability_cells=cells_b)
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         m1_rollup = next(r for r in report.model_summary if r.display_label == "m1")
         m2_rollup = next(r for r in report.model_summary if r.display_label == "m2")
@@ -1301,10 +1326,24 @@ class TestLocaleFlags:
         # The JS-side localeLabel function maps locale codes to flag emoji.
         # Verify the helper + flag dict ship in the rendered HTML so the
         # PerLocaleTabs buttons read e.g. "🇺🇸  en_US" instead of "en_US".
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a", locales=["en_US", "ja_JP"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "ja_JP"])))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b", locales=["en_US", "ja_JP"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "ja_JP"])))
+        m1 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="1",
+                model_id="v/x/a",
+                locales=["en_US", "ja_JP"],
+                capability_cells=_full_capability_cells(locales=["en_US", "ja_JP"]),
+            ),
+        )
+        m2 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="2",
+                model_id="v/x/b",
+                locales=["en_US", "ja_JP"],
+                capability_cells=_full_capability_cells(locales=["en_US", "ja_JP"]),
+            ),
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_t")
         out = tmp_path / "out"
         write_comparison_dashboard_artifacts(report, out)
@@ -1313,25 +1352,41 @@ class TestLocaleFlags:
         assert "const localeLabel" in html
         assert "_LOCALE_FLAGS" in html
         # Per-locale tab JSX uses localeLabel for non-Overall labels:
-        assert 'localeLabel(loc)' in html
+        assert "localeLabel(loc)" in html
         # At least the en_US + ja_JP flags are baked into the JS dict:
         assert '"🇺🇸"' in html or "🇺🇸" in html
         assert '"🇯🇵"' in html or "🇯🇵" in html
 
     def test_layer4_chart_titles_carry_flags(self, tmp_path):
-        import json, re
+        import json
+        import re
 
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a", locales=["en_US"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US"])))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b", locales=["en_US"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US"])))
+        m1 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="1",
+                model_id="v/x/a",
+                locales=["en_US"],
+                capability_cells=_full_capability_cells(locales=["en_US"]),
+            ),
+        )
+        m2 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="2",
+                model_id="v/x/b",
+                locales=["en_US"],
+                capability_cells=_full_capability_cells(locales=["en_US"]),
+            ),
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_t")
         out = tmp_path / "out"
         write_comparison_dashboard_artifacts(report, out)
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         en_us_spec = specs["per_locale"]["en_US"]
@@ -1346,19 +1401,35 @@ class TestPerModelLayer:
     """Layer 7: tab strip across models, x = capability, color = locale."""
 
     def test_per_model_specs_emitted_with_run_id_and_label(self, tmp_path):
-        import json, re
+        import json
+        import re
 
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/alpha", locales=["en_US", "fr_FR"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"])))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/beta", locales=["en_US", "fr_FR"],
-                                                  capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"])))
+        m1 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="1",
+                model_id="v/x/alpha",
+                locales=["en_US", "fr_FR"],
+                capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"]),
+            ),
+        )
+        m2 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="2",
+                model_id="v/x/beta",
+                locales=["en_US", "fr_FR"],
+                capability_cells=_full_capability_cells(locales=["en_US", "fr_FR"]),
+            ),
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_t")
         out = tmp_path / "out"
         write_comparison_dashboard_artifacts(report, out)
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         per_model = specs["per_model"]
@@ -1370,7 +1441,8 @@ class TestPerModelLayer:
             assert "run_id" in entry and "display_label" in entry and "spec" in entry
 
     def test_per_model_spec_uses_capability_x_locale_color(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1380,7 +1452,8 @@ class TestPerModelLayer:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         sample = specs["per_model"][0]["spec"]
@@ -1396,7 +1469,8 @@ class TestPerModelLayer:
         assert bar["encoding"]["color"]["scale"]["range"][0] != _PALETTE[0]
 
     def test_per_model_skips_simulation_reliability(self, tmp_path):
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1406,7 +1480,8 @@ class TestPerModelLayer:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         # No data row references simulation_reliability in the per-model
@@ -1425,7 +1500,8 @@ class TestVerdictRowSpecs:
         # the OK-rate flavour was retired because its bars all sat
         # clamped near 100% and read as visual noise. Failure rate
         # auto-scales because failure clusters <10%.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1435,7 +1511,8 @@ class TestVerdictRowSpecs:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         for key in ("sim_health_failure", "sim_health_persona", "sim_health_early"):
@@ -1451,7 +1528,8 @@ class TestVerdictRowSpecs:
     def test_performance_row_emits_cleared_score_verbosity(self, tmp_path):
         # Performance row swaps the old gaps_headline for cleared_headline
         # and reorders to: cleared | leaderboard | verbosity.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1461,7 +1539,8 @@ class TestVerdictRowSpecs:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         for key in ("cleared_headline", "leaderboard", "verbosity_headline"):
@@ -1486,7 +1565,8 @@ class TestVerdictRowSpecs:
         # Cleared chart leads the row -> shows model labels.
         # Leaderboard + verbosity sit to its right -> hide labels
         # (no duplicate y-axis gutters in the same row).
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1496,7 +1576,8 @@ class TestVerdictRowSpecs:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         # Cleared shows labels (axis is a dict, not None).
@@ -1529,8 +1610,7 @@ class TestVerdictRowSpecs:
         idx_lb = html.index("specsPayload.global.leaderboard")
         idx_verb = html.index("specsPayload.global.verbosity_headline")
         assert idx_cleared < idx_lb < idx_verb, (
-            f"Performance row out of order: cleared={idx_cleared}, "
-            f"leaderboard={idx_lb}, verbosity={idx_verb}"
+            f"Performance row out of order: cleared={idx_cleared}, leaderboard={idx_lb}, verbosity={idx_verb}"
         )
 
 
@@ -1554,18 +1634,17 @@ class TestClearedHeadline:
             ("simulation_reliability", "en_US"): {"score": 0.0, "state": "blocked"},
         }
         cells_with_block = _full_capability_cells(
-            locales=["en_US"], score_overrides=overrides,
+            locales=["en_US"],
+            score_overrides=overrides,
         )
         cells_clean = _full_capability_cells(locales=["en_US"])
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/a", locales=["en_US"],
-                      capability_cells=cells_with_block),
+            _manifest(run_id="1", model_id="v/x/a", locales=["en_US"], capability_cells=cells_with_block),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/b", locales=["en_US"],
-                      capability_cells=cells_clean),
+            _manifest(run_id="2", model_id="v/x/b", locales=["en_US"], capability_cells=cells_clean),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         m1_rollup = next(r for r in report.model_summary if r.run_id == "1")
@@ -1584,27 +1663,29 @@ class TestClearedHeadline:
         # 8 locales × the quality capabilities = the eligible cells. If every
         # quality cell passes, cleared = 100%; if every capability for one
         # locale fails, cleared = 7/8 = 87.5%.
-        from usersim.taxonomy.capabilities import capability_definitions
         from usersim.reporting.comparison_dashboard import _spec_cleared_headline
+        from usersim.taxonomy.capabilities import capability_definitions
 
-        locales = ["en_US", "en_IN", "en_SG", "fr_FR",
-                   "ja_JP", "ko_KR", "pt_BR", "hi_Deva_IN"]
+        locales = ["en_US", "en_IN", "en_SG", "fr_FR", "ja_JP", "ko_KR", "pt_BR", "hi_Deva_IN"]
         cap_ids = [d.id for d in capability_definitions()]
         # m1: every quality capability blocked in en_US.
         overrides = {
-            (cap, "en_US"): {"score": 0.0, "state": "blocked"}
-            for cap in cap_ids if cap != "simulation_reliability"
+            (cap, "en_US"): {"score": 0.0, "state": "blocked"} for cap in cap_ids if cap != "simulation_reliability"
         }
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/a", locales=locales,
-                      capability_cells=_full_capability_cells(
-                          locales=locales, score_overrides=overrides)),
+            _manifest(
+                run_id="1",
+                model_id="v/x/a",
+                locales=locales,
+                capability_cells=_full_capability_cells(locales=locales, score_overrides=overrides),
+            ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/b", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="2", model_id="v/x/b", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         m1_rollup = next(r for r in report.model_summary if r.run_id == "1")
@@ -1613,9 +1694,15 @@ class TestClearedHeadline:
         # Every quality capability blocked in en_US -> one locale's worth of
         # cells drops out of the ready count.
         assert m1_rollup.n_cells_ready_eligible == 7 * N_ELIGIBLE_CAPS
-        spec = _spec_cleared_headline(report, colors={
-            "a": "#000", "b": "#fff", "v/x/a": "#000", "v/x/b": "#fff",
-        })
+        spec = _spec_cleared_headline(
+            report,
+            colors={
+                "a": "#000",
+                "b": "#fff",
+                "v/x/a": "#000",
+                "v/x/b": "#fff",
+            },
+        )
         rows = {r["display_label"]: r for r in spec["data"]["values"]}
         m1_row = rows["a"]
         assert m1_row["pct_cleared"] == pytest.approx(7 / 8)
@@ -1642,21 +1729,22 @@ class TestPerTabClearedCharts:
         cap_ids = [d.id for d in capability_definitions()]
         locales = ["en_US", "fr_FR"]
         overrides = {
-            (cap, "fr_FR"): {"score": 0.0, "state": "blocked"}
-            for cap in cap_ids if cap != "simulation_reliability"
+            (cap, "fr_FR"): {"score": 0.0, "state": "blocked"} for cap in cap_ids if cap != "simulation_reliability"
         }
         m1 = _write_manifest(
             tmp_path,
             _manifest(
-                run_id="1", model_id="v/x/m1", locales=locales,
-                capability_cells=_full_capability_cells(
-                    locales=locales, score_overrides=overrides),
+                run_id="1",
+                model_id="v/x/m1",
+                locales=locales,
+                capability_cells=_full_capability_cells(locales=locales, score_overrides=overrides),
             ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/m2", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="2", model_id="v/x/m2", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         return build_comparison_report([m1, m2], comparison_id="cmp_test")
 
@@ -1667,7 +1755,8 @@ class TestPerTabClearedCharts:
 
         report = self._build_two_locale_panel(tmp_path)
         en_us = _spec_cleared_for_locale(
-            report, "en_US",
+            report,
+            "en_US",
             colors={"m1": "#000", "m2": "#fff", "v/x/m1": "#000", "v/x/m2": "#fff"},
             is_overall=False,
         )
@@ -1679,7 +1768,8 @@ class TestPerTabClearedCharts:
         assert "en_US" in en_us["title"]["text"]
 
         fr_fr = _spec_cleared_for_locale(
-            report, "fr_FR",
+            report,
+            "fr_FR",
             colors={"m1": "#000", "m2": "#fff", "v/x/m1": "#000", "v/x/m2": "#fff"},
             is_overall=False,
         )
@@ -1698,7 +1788,8 @@ class TestPerTabClearedCharts:
 
         report = self._build_two_locale_panel(tmp_path)
         overall = _spec_cleared_for_locale(
-            report, "",
+            report,
+            "",
             colors={"m1": "#000", "m2": "#fff", "v/x/m1": "#000", "v/x/m2": "#fff"},
             is_overall=True,
         )
@@ -1718,7 +1809,9 @@ class TestPerTabClearedCharts:
 
         report = self._build_two_locale_panel(tmp_path)
         spec = _spec_cleared_for_capability(
-            report, "assistant_quality", "Assistant quality",
+            report,
+            "assistant_quality",
+            "Assistant quality",
             colors={"m1": "#000", "m2": "#fff", "v/x/m1": "#000", "v/x/m2": "#fff"},
         )
         rows = {r["display_label"]: r for r in spec["data"]["values"]}
@@ -1782,7 +1875,8 @@ class TestPerTabClearedCharts:
         # bars. React reads them via specsPayload.per_locale_cleared
         # and the cleared_spec field on per_capability / per_model
         # entries.
-        import json, re
+        import json
+        import re
 
         report = self._build_two_locale_panel(tmp_path)
         out = tmp_path / "out"
@@ -1791,7 +1885,8 @@ class TestPerTabClearedCharts:
         html = (out / "out").exists() and (out / "index.html").read_text() or (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         # New per_locale_cleared bundle present, same key set as per_locale.
@@ -1820,7 +1915,9 @@ class TestFailureRateChart:
     def test_failure_rate_with_mixed_status_counts(self, tmp_path):
         m = _manifest(run_id="1", model_id="v/x/a", n_trajectories=1000)
         m["sim_health"]["status_counts"] = {
-            "ok": 700, "completed_with_warnings": 200, "failed": 100,
+            "ok": 700,
+            "completed_with_warnings": 200,
+            "failed": 100,
         }
         m1 = _write_manifest(tmp_path, m)
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1851,17 +1948,21 @@ class TestFailureTaxonomyChart:
         m1 = _write_manifest(
             tmp_path,
             self._manifest_with_failures(
-                run_id="1", model_id="v/x/a", n_trajectories=1000,
+                run_id="1",
+                model_id="v/x/a",
+                n_trajectories=1000,
                 failures=[
                     {
                         "failure_class": "infrastructure_error",
                         "failure_attribution": "assistant_model",
-                        "n": 50, "proportion": 0.05,
+                        "n": 50,
+                        "proportion": 0.05,
                     },
                     {
                         "failure_class": "max_turns_reached",
                         "failure_attribution": "user_model",
-                        "n": 10, "proportion": 0.01,
+                        "n": 10,
+                        "proportion": 0.01,
                     },
                 ],
             ),
@@ -1883,25 +1984,38 @@ class TestFailureTaxonomyChart:
         m1 = _write_manifest(
             tmp_path,
             self._manifest_with_failures(
-                run_id="1", model_id="v/x/a", n_trajectories=1000,
+                run_id="1",
+                model_id="v/x/a",
+                n_trajectories=1000,
                 failures=[
-                    {"failure_class": "infrastructure_error",
-                     "failure_attribution": "assistant_model",
-                     "n": 50, "proportion": 0.05},
-                    {"failure_class": "max_turns_reached",
-                     "failure_attribution": "user_model",
-                     "n": 10, "proportion": 0.01},
+                    {
+                        "failure_class": "infrastructure_error",
+                        "failure_attribution": "assistant_model",
+                        "n": 50,
+                        "proportion": 0.05,
+                    },
+                    {
+                        "failure_class": "max_turns_reached",
+                        "failure_attribution": "user_model",
+                        "n": 10,
+                        "proportion": 0.01,
+                    },
                 ],
             ),
         )
         m2 = _write_manifest(
             tmp_path,
             self._manifest_with_failures(
-                run_id="2", model_id="v/x/b", n_trajectories=1000,
+                run_id="2",
+                model_id="v/x/b",
+                n_trajectories=1000,
                 failures=[
-                    {"failure_class": "infrastructure_error",
-                     "failure_attribution": "assistant_model",
-                     "n": 30, "proportion": 0.03},
+                    {
+                        "failure_class": "infrastructure_error",
+                        "failure_attribution": "assistant_model",
+                        "n": 30,
+                        "proportion": 0.03,
+                    },
                 ],
             ),
         )
@@ -1940,7 +2054,8 @@ class TestFailureTaxonomyChart:
     def test_failure_taxonomy_spec_emitted_in_global_specs(self, tmp_path):
         # Wired into the dashboard payload so the React component
         # can find it under ``specsPayload.global.sim_health_failure_taxonomy``.
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -1950,7 +2065,8 @@ class TestFailureTaxonomyChart:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         assert "sim_health_failure_taxonomy" in specs["global"]
@@ -1971,13 +2087,15 @@ class TestClearedExplainers:
         locales = ["en_US", "fr_FR"]
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/a", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="1", model_id="v/x/a", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/b", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="2", model_id="v/x/b", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         out = tmp_path / "out"
@@ -2087,7 +2205,8 @@ class TestSimHealthLayout:
         # inherit. Every rate chart must render its own model labels;
         # the failure-taxonomy chart already does (axis with
         # labelLimit/labelFontWeight).
-        import json, re
+        import json
+        import re
 
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b"))
@@ -2097,15 +2216,14 @@ class TestSimHealthLayout:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         for key in ("sim_health_failure", "sim_health_persona", "sim_health_early"):
             y_axis = specs["global"][key]["encoding"]["y"]["axis"]
             assert y_axis is not None, f"{key} hides y-axis labels"
-            assert "labelFontWeight" in y_axis, (
-                f"{key} y-axis missing labelFontWeight: {y_axis}"
-            )
+            assert "labelFontWeight" in y_axis, f"{key} y-axis missing labelFontWeight: {y_axis}"
 
 
 class TestVerbositySectionLayout:
@@ -2150,10 +2268,18 @@ class TestSectionHeadings:
         # Build a small panel and return the rendered HTML (caller
         # asserts on substrings).
         locales = ["en_US", "fr_FR"]
-        m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/a", locales=locales,
-                                                  capability_cells=_full_capability_cells(locales=locales)))
-        m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/b", locales=locales,
-                                                  capability_cells=_full_capability_cells(locales=locales)))
+        m1 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="1", model_id="v/x/a", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
+        )
+        m2 = _write_manifest(
+            tmp_path,
+            _manifest(
+                run_id="2", model_id="v/x/b", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
+        )
         report = build_comparison_report([m1, m2], comparison_id="cmp_test")
         out = tmp_path / "out"
         write_comparison_dashboard_artifacts(report, out)
@@ -2239,7 +2365,8 @@ class TestChartTitleHygiene:
         return titles
 
     def _load_specs(self, tmp_path) -> dict:
-        import json, re
+        import json
+        import re
 
         # Build a tiny multi-locale, multi-capability comparison so
         # the per-locale, per-capability, and per-model spec banks
@@ -2247,13 +2374,15 @@ class TestChartTitleHygiene:
         locales = ["en_US", "fr_FR"]
         m1 = _write_manifest(
             tmp_path,
-            _manifest(run_id="1", model_id="v/x/a", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="1", model_id="v/x/a", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         m2 = _write_manifest(
             tmp_path,
-            _manifest(run_id="2", model_id="v/x/b", locales=locales,
-                      capability_cells=_full_capability_cells(locales=locales)),
+            _manifest(
+                run_id="2", model_id="v/x/b", locales=locales, capability_cells=_full_capability_cells(locales=locales)
+            ),
         )
         report = build_comparison_report([m1, m2], comparison_id="cmp_t")
         out = tmp_path / "out"
@@ -2261,7 +2390,8 @@ class TestChartTitleHygiene:
         html = (out / "index.html").read_text()
         m = re.search(
             r'<script id="comparison-specs-cmp_t" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         return json.loads(m.group(1).replace("<\\/", "</"))
 
@@ -2271,9 +2401,7 @@ class TestChartTitleHygiene:
         specs = self._load_specs(tmp_path)
         for title in self._all_titles(specs):
             text = title["text"] if isinstance(title, dict) else title
-            assert not text.startswith("Layer "), (
-                f"chart title still carries layer prefix: {text!r}"
-            )
+            assert not text.startswith("Layer "), f"chart title still carries layer prefix: {text!r}"
 
     def test_chart_titles_render_above_plot(self, tmp_path):
         # All chart titles ship with ``anchor: middle`` (the
@@ -2286,12 +2414,8 @@ class TestChartTitleHygiene:
         # "title centred above the chart" look.
         specs = self._load_specs(tmp_path)
         for title in self._all_titles(specs):
-            assert isinstance(title, dict), (
-                f"expected dict-shaped title, got {type(title).__name__}: {title!r}"
-            )
-            assert title.get("anchor") == "middle", (
-                f"chart title not centred above plot: {title!r}"
-            )
+            assert isinstance(title, dict), f"expected dict-shaped title, got {type(title).__name__}: {title!r}"
+            assert title.get("anchor") == "middle", f"chart title not centred above plot: {title!r}"
 
 
 # ===========================================================================
@@ -2343,8 +2467,7 @@ class TestDashboardArtifacts:
         write_comparison_dashboard_artifacts(report, out)
         size = (out / "index.html").stat().st_size
         assert size < budget, (
-            f"index.html is {size:,} bytes (budget {budget:,} = "
-            f"140 KB × {N_ELIGIBLE_CAPS} eligible capabilities)"
+            f"index.html is {size:,} bytes (budget {budget:,} = 140 KB × {N_ELIGIBLE_CAPS} eligible capabilities)"
         )
 
     def test_uses_esm_imports_for_vega(self, tmp_path):
@@ -2365,7 +2488,7 @@ class TestDashboardArtifacts:
 
         floating = _re.findall(r'https://esm\.sh/[a-z0-9-]+@\d+(?:/[a-z]+)?"', html)
         assert not floating, f"floating esm.sh pins: {floating}"
-        assert _re.search(r'https://esm\.sh/vega-embed@\d+\.\d+\.\d+', html)
+        assert _re.search(r"https://esm\.sh/vega-embed@\d+\.\d+\.\d+", html)
         # No UMD CDN tag, no inline bundle marker.
         assert "cdn.jsdelivr.net/npm/vega" not in html
         assert "// === vega@" not in html
@@ -2374,7 +2497,8 @@ class TestDashboardArtifacts:
         # Layer 4's per_locale spec dict must include "Overall" as the
         # first key so the React tab strip defaults to it. The Overall
         # spec is the locale-averaged grouped-bar chart.
-        import json, re
+        import json
+        import re
 
         report = self._build_report(tmp_path, n_runs=3, n_locales=3)
         out = tmp_path / "out"
@@ -2383,7 +2507,8 @@ class TestDashboardArtifacts:
         cmp_uid = report.comparison_id.replace("/", "_")
         m = re.search(
             rf'<script id="comparison-specs-{cmp_uid}" type="application/json">(.*?)</script>',
-            html, re.DOTALL,
+            html,
+            re.DOTALL,
         )
         specs = json.loads(m.group(1).replace("<\\/", "</"))
         per_locale = specs["per_locale"]
@@ -2575,10 +2700,7 @@ class TestNotebookComparisonSection:
     """
 
     def test_eval_notebook_has_comparison_section(self):
-        nb_path = (
-            Path(__file__).resolve().parents[1]
-            / "notebooks" / "02_evaluate_simulation.ipynb"
-        )
+        nb_path = Path(__file__).resolve().parents[1] / "notebooks" / "02_evaluate_simulation.ipynb"
         assert nb_path.is_file(), f"evaluation notebook is missing: {nb_path}"
         nb = json.loads(nb_path.read_text())
         sources = ["".join(c.get("source", [])) for c in nb["cells"]]

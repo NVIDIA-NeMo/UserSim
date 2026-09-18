@@ -32,9 +32,7 @@ class TestCodeSha:
         provenance_module.get_code_sha.cache_clear()
         assert provenance_module.get_code_sha() == "env-sha-1234"
 
-    def test_env_override_blank_falls_through(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_env_override_blank_falls_through(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("USERSIM_CODE_SHA", "   ")
         provenance_module.get_code_sha.cache_clear()
         # Blank env should be treated as unset; fall through to git or None.

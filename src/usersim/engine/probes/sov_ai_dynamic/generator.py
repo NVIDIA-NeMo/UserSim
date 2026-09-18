@@ -51,8 +51,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+from usersim.engine.core.behavioral import get_conversation_language
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
@@ -64,7 +65,6 @@ from usersim.engine.core.probing_taxonomy import (
     load_probing_taxonomy_for_locale,
     reset_probing_taxonomy_cache,
 )
-from usersim.engine.core.behavioral import get_conversation_language
 from usersim.engine.core.simulation import (
     ConversationState,
     language_instruction,
@@ -161,8 +161,7 @@ class _PickedProbe:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SovAiDynamicProbe(BankBackedProbe):
     """Population-probing dynamic-coverage probe.
 
@@ -217,19 +216,19 @@ class SovAiDynamicProbe(BankBackedProbe):
         # Append the native/romanized language directive for variants only;
         # shipped locales keep their in-language pack byte-for-byte.
         if self._asset_locale != self._locale:
-            directive = language_instruction(
-                get_conversation_language(self._locale), self._locale
-            )
+            directive = language_instruction(get_conversation_language(self._locale), self._locale)
             if directive:
-                self._user_system_prompt = (
-                    f"{self._user_system_prompt}\n\n{directive}"
-                )
+                self._user_system_prompt = f"{self._user_system_prompt}\n\n{directive}"
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
-    ) -> Optional[_PickedProbe]:
+        self,
+        persona: dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
+    ) -> _PickedProbe | None:
         """Pick the matched category + subtopic_hint for this persona.
 
         Returns None when ``derive_probe`` finds no usable category
@@ -280,8 +279,10 @@ class SovAiDynamicProbe(BankBackedProbe):
         state.metadata["taxonomy_version"] = self._task.bank_version
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: ConversationState,
-    ) -> List[str]:
+        self,
+        turn_idx: int,
+        state: ConversationState,
+    ) -> list[str]:
         if not self._followup_instruction:
             return []
         return [self._followup_instruction]
@@ -294,12 +295,8 @@ class SovAiDynamicProbe(BankBackedProbe):
         if self._task is not None:
             extras["probe_variant"] = self._task.category.id
             # Top-level columns the sov_ai_dynamic scorer reads directly.
-            extras["probing_categories_explored"] = list(
-                state.metadata.get("probing_categories_explored") or []
-            )
-            extras["probing_subtopic_hints_used"] = list(
-                state.metadata.get("probing_subtopic_hints_used") or []
-            )
+            extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])
+            extras["probing_subtopic_hints_used"] = list(state.metadata.get("probing_subtopic_hints_used") or [])
         return extras
 
 
@@ -308,6 +305,7 @@ class SovAiDynamicProbe(BankBackedProbe):
 # ---------------------------------------------------------------------------
 # The substrate's default ``_pin_bank_version`` reads ``bank.bank_version``
 # but the ProbingTaxonomy uses ``taxonomy_version``. Override.
+
 
 def _pin_bank_version_override(self, locale: str) -> None:
     """Pin ``provenance.bank_version[locale]`` from the taxonomy."""
@@ -327,22 +325,23 @@ SovAiDynamicProbe._pin_bank_version = _pin_bank_version_override  # type: ignore
 
 
 def simulate_sov_ai_dynamic(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim for callers that import ``simulate_sov_ai_dynamic``.
 
     Catches construction exceptions (taxonomy-load / no-usable-category
     / prompt-pack-missing) and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance as _Provenance
+    from usersim.engine.core.outcomes import OutcomeBuilder
+    from usersim.engine.core.outcomes import Provenance as _Provenance
     from usersim.engine.core.probes import BankLoadError
 
     provenance = kwargs.get("provenance") or _Provenance()
@@ -371,15 +370,18 @@ def simulate_sov_ai_dynamic(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
     from usersim.engine.core.outcomes import (
         FailureAttribution,
         FailureClass,
         OutcomeBuilder,
         OutcomeStatus,
+    )
+    from usersim.engine.core.outcomes import (
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,

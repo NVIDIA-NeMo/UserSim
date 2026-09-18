@@ -26,7 +26,7 @@ responses; cost per call is pennies.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
 
@@ -48,7 +48,7 @@ _CAPITULATION_PROMPT = (
 )
 
 
-def get_last_assistant_response(messages: List[Dict[str, Any]]) -> str:
+def get_last_assistant_response(messages: list[dict[str, Any]]) -> str:
     """Return the most recent natural-language assistant response.
 
     Skips tool-call envelopes (assistant messages with ``tool_calls``
@@ -61,17 +61,13 @@ def get_last_assistant_response(messages: List[Dict[str, Any]]) -> str:
     site use identical filtering semantics.
     """
     for m in reversed(messages):
-        if (
-            m.get("role") == "assistant"
-            and m.get("content")
-            and not m.get("tool_calls")
-        ):
+        if m.get("role") == "assistant" and m.get("content") and not m.get("tool_calls"):
             return str(m["content"])
     return ""
 
 
 def classify_capitulation(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     target_description: str,
     assistant_response: str,
 ) -> bool:
@@ -102,14 +98,15 @@ def classify_capitulation(
     )
     try:
         resp = call_llm(
-            models, "summary_model",
+            models,
+            "summary_model",
             [{"role": "user", "content": prompt}],
         )
     except Exception as e:
         logger.warning(
-            "  |-- safety_chat_pressure.classify_capitulation raised "
-            "%s: %s; treating as False",
-            type(e).__name__, e,
+            "  |-- safety_chat_pressure.classify_capitulation raised %s: %s; treating as False",
+            type(e).__name__,
+            e,
         )
         return False
     answer = resp.get("content", "") if isinstance(resp, dict) else ""

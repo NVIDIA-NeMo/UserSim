@@ -42,7 +42,7 @@ template can't fully express).
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 from usersim.engine.core.probes import (
     BaseProbe,
@@ -65,9 +65,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
         super().__init__(**kwargs)
         cfg = self._cfg
         if not getattr(cfg, "tools_column", None):
-            raise ValueError(
-                "demo_tool_calling: cfg.tools_column not configured"
-            )
+            raise ValueError("demo_tool_calling: cfg.tools_column not configured")
         # Real probe: parse self._data[cfg.tools_column], validate,
         # sample subset. See tool_calling/generator.py for the
         # canonical tool-sampling logic.
@@ -85,39 +83,41 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_tools_for_assistant(self) -> Optional[list]:
+    def get_tools_for_assistant(self) -> list | None:
         return self._tools
 
     def after_assistant_turn(
-        self, models: dict, state: Any, response: Any, cfg: Any,
+        self,
+        models: dict,
+        state: Any,
+        response: Any,
+        cfg: Any,
     ) -> str:
         # Real probe: extract tool_calls, validate against the tool
         # schema, simulate execution via an API-response model
         # (or mock), append tool-response messages, record in
         # state.metadata["tools_called"].
-        content = (
-            response.get("content", "")
-            if isinstance(response, dict) else ""
+        content = response.get("content", "") if isinstance(response, dict) else ""
+        tool_calls = response.get("tool_calls") if isinstance(response, dict) else None
+        state.messages.append(
+            {
+                "role": "assistant",
+                "content": content or "",
+                "tool_calls": tool_calls or None,
+            }
         )
-        tool_calls = (
-            response.get("tool_calls")
-            if isinstance(response, dict) else None
-        )
-        state.messages.append({
-            "role": "assistant",
-            "content": content or "",
-            "tool_calls": tool_calls or None,
-        })
         if tool_calls:
             for idx, tc in enumerate(tool_calls):
                 tool_name = tc.get("function", {}).get("name", "<unknown>")
                 state.metadata.setdefault("tools_called", []).append(tool_name)
                 # Simulated tool response.
-                state.messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.get("id", f"call_{idx}"),
-                    "content": json.dumps({"ok": True}),
-                })
+                state.messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc.get("id", f"call_{idx}"),
+                        "content": json.dumps({"ok": True}),
+                    }
+                )
         return content or ""
 
     def should_succeed(self, state: Any) -> bool:
@@ -127,11 +127,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         return {
-            "num_turns": sum(
-                1 for m in state.messages if m.get("role") == "user"
-            ),
+            "num_turns": sum(1 for m in state.messages if m.get("role") == "user"),
             "num_tool_calls": len(state.metadata.get("tools_called", [])),
-            "tool_subset": json.dumps(
-                state.metadata.get("tools_called", [])
-            ),
+            "tool_subset": json.dumps(state.metadata.get("tools_called", [])),
         }

@@ -40,7 +40,10 @@ def _render_dashboard(tmp_path: Path, traj_df, transcript: str | None = None) ->
         traj_df.at[0, "conversation_messages"] = json.dumps(msgs)
 
     report = build_capability_report(
-        traj_df, None, eval_column="assistant_eval", run_id="sec-test",
+        traj_df,
+        None,
+        eval_column="assistant_eval",
+        run_id="sec-test",
     )
     write_capability_dashboard_artifacts(report, tmp_path)
     return (tmp_path / "index.html").read_text()
@@ -63,10 +66,8 @@ class TestDashboardSanitisation:
         html = _render_dashboard(tmp_path, trajectory_df)
         # Every marked.parse( must be wrapped by DOMPurify.sanitize(.
         for match in re.finditer(r"marked\.parse\(", html):
-            prefix = html[max(0, match.start() - 40):match.start()]
-            assert "DOMPurify.sanitize(" in prefix, (
-                f"unwrapped marked.parse() at offset {match.start()}"
-            )
+            prefix = html[max(0, match.start() - 40) : match.start()]
+            assert "DOMPurify.sanitize(" in prefix, f"unwrapped marked.parse() at offset {match.start()}"
 
     def test_parse_failure_does_not_fall_back_to_raw_text(self, tmp_path, trajectory_df) -> None:
         # The original catch returned the raw string, which bypassed the
@@ -83,7 +84,7 @@ class TestDashboardSanitisation:
     def test_hostile_payloads_are_embedded_inertly(self, tmp_path, trajectory_df) -> None:
         # The JSON payload must not be able to close its own <script> tag,
         # which is the one breakout the sanitizer cannot help with.
-        payload = '</script><script>alert(1)</script>'
+        payload = "</script><script>alert(1)</script>"
         html = _render_dashboard(tmp_path, trajectory_df, payload)
         body = html.split('type="application/json">', 1)[1]
         embedded = body.split("</script>", 1)[0]
@@ -132,9 +133,11 @@ class TestDebugTranscriptDefaults:
         """
         env = {k: v for k, v in os.environ.items() if k != "USERSIM_DEBUG_LOG"}
         proc = subprocess.run(
-            [sys.executable, "-c",
-             f"from usersim.engine.core import llm; print({expr})"],
-            capture_output=True, text=True, env=env, timeout=60,
+            [sys.executable, "-c", f"from usersim.engine.core import llm; print({expr})"],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=60,
         )
         assert proc.returncode == 0, proc.stderr
         return proc.stdout.strip()
@@ -148,10 +151,15 @@ class TestDebugTranscriptDefaults:
     def test_enabling_via_env_var_works(self) -> None:
         env = dict(os.environ, USERSIM_DEBUG_LOG="/tmp/x.jsonl")
         proc = subprocess.run(
-            [sys.executable, "-c",
-             "from usersim.engine.core import llm;"
-             " print(llm._DEBUG_LOG_ENABLED, llm._DEBUG_LOG_PATH)"],
-            capture_output=True, text=True, env=env, timeout=60,
+            [
+                sys.executable,
+                "-c",
+                "from usersim.engine.core import llm; print(llm._DEBUG_LOG_ENABLED, llm._DEBUG_LOG_PATH)",
+            ],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=60,
         )
         assert proc.returncode == 0, proc.stderr
         assert proc.stdout.strip() == "True /tmp/x.jsonl"
@@ -183,14 +191,12 @@ class TestNotebookCredentials:
             'os.environ.setdefault(\\"NGC_CLI_API_KEY\\", nvidia_key)',
             'os.environ.setdefault(\\"NGC_API_KEY\\", nvidia_key)',
         ):
-            assert forbidden not in source, (
-                "the notebook must not populate NGC credentials from NVIDIA_API_KEY"
-            )
+            assert forbidden not in source, "the notebook must not populate NGC credentials from NVIDIA_API_KEY"
 
     def test_no_notebook_mirrors_the_inference_key(self) -> None:
         for nb in sorted((_REPO_ROOT / "notebooks").glob("*.ipynb")):
             source = json.dumps(json.load(nb.open()))
-            assert "NGC_CLI_API_KEY\\\", nvidia_key" not in source, nb.name
+            assert 'NGC_CLI_API_KEY\\", nvidia_key' not in source, nb.name
 
 
 class TestProductNaming:
@@ -221,10 +227,7 @@ class TestProductNaming:
             "usersim.reporting.comparison_dashboard",
         ):
             source = self._source(module)
-            titles = [
-                line for line in source.splitlines()
-                if "<title>" in line or "<h1>" in line
-            ]
+            titles = [line for line in source.splitlines() if "<title>" in line or "<h1>" in line]
             assert titles, f"{module} renders no title or heading"
             assert any(self.DISPLAY in line for line in titles), (
                 f"{module} renders a title without {self.DISPLAY!r}: {titles}"
@@ -283,8 +286,7 @@ class TestDocumentedCounts:
         from pathlib import Path
 
         root = Path(__file__).resolve().parents[1]
-        parts = [root / "README.md", root / "docs" / "probes.md",
-                 root / "docs" / "outputs.md"]
+        parts = [root / "README.md", root / "docs" / "probes.md", root / "docs" / "outputs.md"]
         joined = "\n".join(p.read_text() for p in parts if p.is_file())
         # Collapse whitespace: these assertions are about the count being
         # right, not about where prose happens to wrap.
@@ -302,20 +304,21 @@ class TestDocumentedCounts:
 
     #: Spelled-out forms the prose uses.
     WORDS = {
-        11: "eleven", 12: "twelve", 13: "thirteen", 14: "fourteen",
-        15: "fifteen", 9: "nine", 10: "ten",
+        11: "eleven",
+        12: "twelve",
+        13: "thirteen",
+        14: "fourteen",
+        15: "fifteen",
+        9: "nine",
+        10: "ten",
     }
 
     def test_probe_count_matches_the_registry(self) -> None:
         probes, _, _ = self._registries()
         readme = self._readme()
-        assert f"**{probes} probes ·" in readme, (
-            f"README headline does not say {probes} probes"
-        )
+        assert f"**{probes} probes ·" in readme, f"README headline does not say {probes} probes"
         word = self.WORDS[probes].capitalize()
-        assert f"{word} probes ship today" in readme, (
-            f"README prose does not say '{word} probes ship today'"
-        )
+        assert f"{word} probes ship today" in readme, f"README prose does not say '{word} probes ship today'"
 
     def test_scorer_count_matches_the_registry(self) -> None:
         _, scorers, _ = self._registries()
@@ -325,13 +328,10 @@ class TestDocumentedCounts:
 
     def test_non_general_probe_count_matches(self) -> None:
         _, _, non_general = self._registries()
-        assert (
-            f"The {self.WORDS[non_general]} non-`general` probes" in self._readme()
-        )
+        assert f"The {self.WORDS[non_general]} non-`general` probes" in self._readme()
 
     def test_no_superseded_counts_remain(self) -> None:
         """The specific wrong numbers this test was written to catch."""
         readme = self._readme()
-        for stale in ("**12 probes ·", "· 10 evaluator scorers ·",
-                      "Twelve probes ship today", "2500+ tests"):
+        for stale in ("**12 probes ·", "· 10 evaluator scorers ·", "Twelve probes ship today", "2500+ tests"):
             assert stale not in readme, f"stale count survives: {stale!r}"

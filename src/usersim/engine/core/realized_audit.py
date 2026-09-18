@@ -26,11 +26,12 @@ Design points this section encodes, from review:
   turn is not scored as a full reveal, and ``partial_disclose`` is not mislabeled
   a mismatch for doing exactly what it committed to.
 """
+
 from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 from usersim.engine.core.llm import call_llm
 from usersim.engine.core.locale import SHIPPED_LOCALES
@@ -47,8 +48,9 @@ CONCEALING_MOVES = {"withhold", "deflect", "minimize", "conceal_risk"}
 
 
 def pair_realized_turns(
-    messages: List[Dict[str, Any]], moves: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    messages: list[dict[str, Any]],
+    moves: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Pair each committed move with the user turn that realized it.
 
     Moves are the *follow-up* turns, so the opening user turn (turn 1) has no
@@ -60,19 +62,18 @@ def pair_realized_turns(
     without re-running a simulation.
     """
     user_turns = [
-        str(m.get("content") or "")
-        for m in (messages or [])
-        if isinstance(m, dict) and m.get("role") == "user"
+        str(m.get("content") or "") for m in (messages or []) if isinstance(m, dict) and m.get("role") == "user"
     ]
     realized_texts = user_turns[1:]
     if len(realized_texts) != len(moves):
         logger.warning(
             "realized audit: %d realized user turn(s) vs %d committed move(s); "
             "pairing the first %d by order and keying on turn number.",
-            len(realized_texts), len(moves), min(len(realized_texts), len(moves)),
+            len(realized_texts),
+            len(moves),
+            min(len(realized_texts), len(moves)),
         )
-    return [{"turn": mv.get("turn"), "text": txt}
-            for mv, txt in zip(moves, realized_texts)]
+    return [{"turn": mv.get("turn"), "text": txt} for mv, txt in zip(moves, realized_texts)]
 
 
 _AUDIT_MODEL_ENV = "USERSIM_AUDIT_MODEL"
@@ -80,7 +81,7 @@ _AUDIT_MODEL_ENV = "USERSIM_AUDIT_MODEL"
 #: Graded disclosure credit for the concealment coverage axis. Kept here (next to
 #: the auditor that produces the levels) as the single tunable definition; the
 #: scorer imports the same weights so intent and behavior grade identically.
-DISCLOSURE_CREDIT: Dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
+DISCLOSURE_CREDIT: dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
 
 
 #: Alias preference for the auditor, most-independent first. The audit runs in
@@ -93,7 +94,7 @@ DISCLOSURE_CREDIT: Dict[str, float] = {"full": 1.0, "partial": 0.5, "none": 0.0}
 _AUDIT_ALIAS_PREFERENCE = ("judge_model", "evaluator_model", "user_model")
 
 
-def resolve_audit_model(models: Dict[str, Any]) -> str:
+def resolve_audit_model(models: dict[str, Any]) -> str:
     """Pick the model alias that audits realized behavior, or "" if none is wired.
 
     Realized-behavior verification is *meta-evaluation of the simulator*, so it
@@ -118,7 +119,7 @@ def resolve_audit_model(models: Dict[str, Any]) -> str:
 _AUDIT_EFFORT_ENV = "USERSIM_AUDIT_REASONING_EFFORT"
 
 
-def _audit_reasoning_kwargs() -> Dict[str, Any]:
+def _audit_reasoning_kwargs() -> dict[str, Any]:
     """Reasoning-effort override for the auditor call.
 
     Mirrors ``move_runtime._move_reasoning_kwargs``, the same knob the move call
@@ -169,9 +170,12 @@ VERIFY_SYSTEM_PACK = LocalePromptPack(
 
 
 def verify_realized_transcript(
-    models: Dict[str, Any], items: List[Dict[str, Any]], candidate_topics: List[str],
-    risk_noun: str, locale: str = "en_US",
-) -> Dict[int, Dict[str, Any]]:
+    models: dict[str, Any],
+    items: list[dict[str, Any]],
+    candidate_topics: list[str],
+    risk_noun: str,
+    locale: str = "en_US",
+) -> dict[int, dict[str, Any]]:
     """Audit every realized user turn in ONE batched call.
 
     ``items``: ordered ``[{"turn": int, "text": str}, ...]`` — the realized user
@@ -189,8 +193,9 @@ def verify_realized_transcript(
     alias = resolve_audit_model(models)
     if not alias:
         logger.warning(
-            "realized audit: no auditor alias available (have: %s); "
-            "scoring committed intent.", ", ".join(sorted(models)) or "none")
+            "realized audit: no auditor alias available (have: %s); scoring committed intent.",
+            ", ".join(sorted(models)) or "none",
+        )
         return {}
 
     # Prompt assembly is pure. It stays OUTSIDE the guard below on purpose: a
@@ -199,9 +204,7 @@ def verify_realized_transcript(
     # empty result, and exactly how a missing import once left this whole path
     # silently dead while every test still passed.
     sys_prompt = VERIFY_SYSTEM_PACK.get(locale, risk_noun=risk_noun)
-    turns_block = "\n\n".join(
-        f"[turn {it['turn']}]\n\"{str(it['text'])[:1200]}\"" for it in graded
-    )
+    turns_block = "\n\n".join(f'[turn {it["turn"]}]\n"{str(it["text"])[:1200]}"' for it in graded)
     usr = (
         f"Topics to check: {', '.join(candidate_topics) or '(none)'}.\n\n"
         f"Messages (one person, across the conversation):\n{turns_block}\n\n"
@@ -239,9 +242,7 @@ def verify_realized_transcript(
     try:
         resp = call_llm(models, alias, msgs, **_audit_reasoning_kwargs())
     except Exception:
-        logger.exception(
-            "realized audit: auditor call failed; falling back to committed intent."
-        )
+        logger.exception("realized audit: auditor call failed; falling back to committed intent.")
         return {}
 
     args, _ = recover_tool_call(resp, name="record_audit")
@@ -251,7 +252,7 @@ def verify_realized_transcript(
         return {}
     allowed = set(candidate_topics)
     valid_turns = {int(it["turn"]) for it in graded}
-    out: Dict[int, Dict[str, Any]] = {}
+    out: dict[int, dict[str, Any]] = {}
     for a in audits:
         if not isinstance(a, dict):
             continue
@@ -262,10 +263,12 @@ def verify_realized_transcript(
         if turn not in valid_turns:
             continue
         full = [t for t in (a.get("fully_disclosed") or []) if t in allowed]
-        partial = [t for t in (a.get("partially_disclosed") or [])
-                   if t in allowed and t not in full]
-        out[turn] = {"fully_disclosed": full, "partially_disclosed": partial,
-                     "risk_revealed": bool(a.get("risk_revealed"))}
+        partial = [t for t in (a.get("partially_disclosed") or []) if t in allowed and t not in full]
+        out[turn] = {
+            "fully_disclosed": full,
+            "partially_disclosed": partial,
+            "risk_revealed": bool(a.get("risk_revealed")),
+        }
     if not out:
         # Say WHY, not just that. An empty audit has several very different
         # causes — the model answered in prose instead of calling the tool, it
@@ -274,8 +277,9 @@ def verify_realized_transcript(
         # different fixes. Logging only the count means the next person has to
         # re-run a live evaluation to learn anything, which is expensive and slow.
         calls = resp.get("tool_calls") if isinstance(resp, dict) else None
-        names = [c.get("function", {}).get("name")
-                 for c in calls if isinstance(c, dict)] if isinstance(calls, list) else []
+        names = (
+            [c.get("function", {}).get("name") for c in calls if isinstance(c, dict)] if isinstance(calls, list) else []
+        )
         content = str((resp or {}).get("content") or "")[:200]
         # reasoning_content matters as much as content here: these are reasoning
         # models, and "empty content, no tool call" looks identical whether the
@@ -286,10 +290,16 @@ def verify_realized_transcript(
             "realized audit: no usable entries for %d graded turn(s) from %r. "
             "tool_calls=%s, audits_returned=%d, turns_shown=%s, topics_allowed=%s. "
             "response_keys=%s, content[:200]=%r, reasoning_content(%d chars)[:300]=%r",
-            len(graded), alias, names or "none", len(audits),
-            sorted(valid_turns), sorted(allowed),
+            len(graded),
+            alias,
+            names or "none",
+            len(audits),
+            sorted(valid_turns),
+            sorted(allowed),
             sorted((resp or {}).keys()) if isinstance(resp, dict) else type(resp).__name__,
-            content, len(reasoning), reasoning[:300],
+            content,
+            len(reasoning),
+            reasoning[:300],
         )
     return out
 
@@ -301,9 +311,9 @@ def _best_level(current: str, new: str) -> str:
 
 
 def reconcile_realized(
-    moves: List[Dict[str, Any]],
-    verdicts: Dict[int, Dict[str, Any]],
-) -> Dict[str, Any]:
+    moves: list[dict[str, Any]],
+    verdicts: dict[int, dict[str, Any]],
+) -> dict[str, Any]:
     """Reconcile committed moves against per-turn audit verdicts (pure).
 
     ``moves``: committed move dicts, each with ``turn`` + ``move`` + ``topic``.
@@ -328,7 +338,7 @@ def reconcile_realized(
         was audited, intent where it wasn't — instead of discarding the whole
         row's realized ground truth because a single turn went ungraded.
     """
-    levels: Dict[str, str] = {}
+    levels: dict[str, str] = {}
     verified_topics: set = set()
     realized_risk = False
     mismatches = 0

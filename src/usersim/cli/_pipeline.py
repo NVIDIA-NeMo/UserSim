@@ -31,7 +31,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._models import ModelsConfig, to_data_designer_kwargs, to_model_configs
@@ -42,7 +42,7 @@ from usersim.cli._persona_language import (
 
 logger = logging.getLogger("usersim.cli.pipeline")
 
-DEFAULT_TOOL_CALLING_THEMES: Tuple[str, ...] = (
+DEFAULT_TOOL_CALLING_THEMES: tuple[str, ...] = (
     '{"type": "Weather & Location Lookup", "description": "Look up current weather, forecasts, or location-based info.", "tool_expected": true}',
     '{"type": "Calendar & Scheduling", "description": "Create, modify, or check calendar events and availability.", "tool_expected": true}',
     '{"type": "Data Retrieval & Search", "description": "Search databases, look up records, or retrieve structured data.", "tool_expected": true}',
@@ -53,7 +53,7 @@ DEFAULT_TOOL_CALLING_THEMES: Tuple[str, ...] = (
     '{"type": "Opinion or Advice Request", "description": "Ask for subjective advice or opinions where tools are unnecessary.", "tool_expected": false}',
 )
 
-DEFAULT_PROBE_MIX: Dict[str, float] = {
+DEFAULT_PROBE_MIX: dict[str, float] = {
     "tool_calling": 1 / 3,
     "general_open_ended": 1 / 3,
     "general_educational": 1 / 3,
@@ -82,7 +82,7 @@ def seed_themes(
     probe: str,
     kind: str,
     assets_dir: Path | str | None = None,
-) -> List[str]:
+) -> list[str]:
     """Load a theme-driven probe's seeds and JSON-encode them for the sampler.
 
     Called only for probes actually present in the run's ``probe_mix``, so an
@@ -97,23 +97,20 @@ def seed_themes(
     """
     from usersim.engine.core.seeds import load_seeds
 
-    return [
-        json.dumps(t, ensure_ascii=False)
-        for t in load_seeds(locale, probe, kind, assets_dir)
-    ]
+    return [json.dumps(t, ensure_ascii=False) for t in load_seeds(locale, probe, kind, assets_dir)]
 
 
 #: Seed-file suffixes the ``tool_calling`` toolset seed may use. Both are
 #: accepted by Data Designer's
 #: ``LocalFileSeedSource`` (``VALID_DATASET_FILE_EXTENSIONS``); parquet is
 #: what ships, jsonl is the hand-editable alternative.
-TOOLSET_SEED_SUFFIXES: Tuple[str, ...] = (".parquet", ".jsonl")
+TOOLSET_SEED_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
 
 
 def resolve_toolset_seed_path(
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
-) -> Optional[Path]:
+) -> Path | None:
     """The ``tool_calling`` toolset seed to use, or ``None`` if there isn't one.
 
     Two sources, at least one of which must be given:
@@ -182,15 +179,17 @@ def resolve_toolset_seed_path(
 #: Probe asset trees that are partitioned by locale rather than flat. For
 #: these, having the probe directory is not enough -- the run's locale must
 #: have its own subtree, or the loader fails once the run is already going.
-_LOCALE_SCOPED_PROBES: frozenset[str] = frozenset({
-    "financial_services",
-    "sov_ai_dynamic",
-    "sov_ai_facts",
-})
+_LOCALE_SCOPED_PROBES: frozenset[str] = frozenset(
+    {
+        "financial_services",
+        "sov_ai_dynamic",
+        "sov_ai_facts",
+    }
+)
 
 
 def verify_probe_assets(
-    probe_mix: Dict[str, float],
+    probe_mix: dict[str, float],
     locales: "list[str] | tuple[str, ...]",
     assets_dir: Path | str | None = None,
 ) -> None:
@@ -218,14 +217,9 @@ def verify_probe_assets(
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
         if probe in _LOCALE_SCOPED_PROBES:
-            missing = [
-                loc for loc in locales
-                if not (probe_dir / loc).is_dir()
-            ]
+            missing = [loc for loc in locales if not (probe_dir / loc).is_dir()]
             if missing:
-                available = sorted(
-                    p.name for p in probe_dir.iterdir() if p.is_dir()
-                )
+                available = sorted(p.name for p in probe_dir.iterdir() if p.is_dir())
                 problems.append(
                     f"{probe}: no assets for locale(s) {', '.join(missing)} "
                     f"(available: {', '.join(available) or 'none'})"
@@ -242,10 +236,10 @@ def verify_probe_assets(
 
 
 def resolve_toolset_seed_for_mix(
-    probe_mix: Dict[str, float],
+    probe_mix: dict[str, float],
     assets_dir: Path | str | None = None,
     toolset_seed_path: Path | str | None = None,
-) -> Optional[Path]:
+) -> Path | None:
     """Resolve a toolset only when the run actually includes ``tool_calling``.
 
     A non-tool run must not be blocked by an ambiguous or missing toolset in
@@ -275,8 +269,8 @@ def resolve_toolset_seed_for_mix(
 def _wire_toolsets(
     config_builder: Any,
     dd: Any,
-    toolset_seed_path: Optional[Path],
-) -> Dict[str, Any]:
+    toolset_seed_path: Path | None,
+) -> dict[str, Any]:
     """Attach ``tool_calling``'s toolset seed and return its config keys.
 
     Both halves of the wiring — the builder mutation and the
@@ -368,7 +362,7 @@ def _set_run_config(data_designer, dd, models: ModelsConfig) -> None:
     data_designer.set_run_config(run_config)
 
 
-def known_probes() -> Tuple[str, ...]:
+def known_probes() -> tuple[str, ...]:
     """Return the set of probe_type values the simulator dispatcher
     knows about. Source-of-truth is the plugin's ``_PROBE_REGISTRY``.
 
@@ -392,12 +386,12 @@ def build_simulator_config_builder(
     max_turns: int = 5,
     max_assistant_attempts: int = 1,
     store_reasoning: bool = True,
-    probe_mix: Optional[Dict[str, float]] = None,
-    tool_calling_themes: Optional[Tuple[str, ...]] = None,
-    toolset_seed_path: Optional[Path] = None,
+    probe_mix: dict[str, float] | None = None,
+    tool_calling_themes: tuple[str, ...] | None = None,
+    toolset_seed_path: Path | None = None,
     match_persona_language: bool = False,
     verbosity: int = 1,
-    random_seed: Optional[int] = None,
+    random_seed: int | None = None,
     finance_tier_mix: float = 0.0,
     finance_retrieval_mode: str = "hybrid",
     finance_embedding_model_alias: str = "embedding_model",
@@ -434,20 +428,17 @@ def build_simulator_config_builder(
     known = set(known_probes())
     unknown = [k for k in probe_mix if k not in known]
     if unknown:
-        raise ConfigError(
-            f"Unknown probe_type(s) in probe_mix: {unknown}. "
-            f"Registered: {sorted(known)}."
-        )
+        raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known)}.")
     resolved_toolset_seed = resolve_toolset_seed_for_mix(
-        probe_mix, assets_dir, toolset_seed_path,
+        probe_mix,
+        assets_dir,
+        toolset_seed_path,
     )
 
     dd_kwargs = to_data_designer_kwargs(models)
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd, models)
-    config_builder = dd.DataDesignerConfigBuilder(
-        model_configs=to_model_configs(models)
-    )
+    config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
 
     config_builder.add_column(
         dd.SamplerColumnConfig(
@@ -455,7 +446,9 @@ def build_simulator_config_builder(
             drop=True,
             sampler_type=dd.SamplerType.PERSON,
             params=persona_sampler_params(
-                dd, persona_locale, locale,
+                dd,
+                persona_locale,
+                locale,
                 match_language=match_persona_language,
             ),
         )
@@ -488,25 +481,31 @@ def build_simulator_config_builder(
     # general probe stays usable, and a mix without tool_calling never
     # attaches a seed dataset. ``toolset_kwargs`` is populated by the
     # tool_calling branch and splatted into the simulator config below.
-    theme_values: Dict[str, List[str]] = {}
-    toolset_kwargs: Dict[str, Any] = {}
+    theme_values: dict[str, list[str]] = {}
+    toolset_kwargs: dict[str, Any] = {}
     for probe in probe_mix:
         if probe == "tool_calling":
-            theme_values[probe] = list(
-                tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES
-            )
+            theme_values[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
             # ``resolved_toolset_seed`` is non-None only for a mix containing
             # tool_calling; non-tool runs neither inspect nor attach a toolset.
             toolset_kwargs = _wire_toolsets(
-                config_builder, dd, resolved_toolset_seed,
+                config_builder,
+                dd,
+                resolved_toolset_seed,
             )
         elif probe == "general_open_ended":
             theme_values[probe] = seed_themes(
-                locale, "general_open_ended", "topics", assets_dir,
+                locale,
+                "general_open_ended",
+                "topics",
+                assets_dir,
             )
         elif probe == "general_educational":
             theme_values[probe] = seed_themes(
-                locale, "general_educational", "subjects", assets_dir,
+                locale,
+                "general_educational",
+                "subjects",
+                assets_dir,
             )
         else:
             theme_values[probe] = [_NO_THEME_PLACEHOLDER]
@@ -550,9 +549,9 @@ def build_evaluator_config_builder(
     *,
     models: ModelsConfig,
     trajectory_parquet: Path,
-    judges: Optional[List[Dict[str, Any]]] = None,
-    axes: Optional[List[str]] = None,
-    scorers: Optional[List[str]] = None,
+    judges: list[dict[str, Any]] | None = None,
+    axes: list[str] | None = None,
+    scorers: list[str] | None = None,
     skip_if_existing: bool = True,
     output_column: str = "assistant_eval",
     prompt_version: str = "v1.0",
@@ -587,9 +586,7 @@ def build_evaluator_config_builder(
     dd_kwargs = to_data_designer_kwargs(models)
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd, models)
-    config_builder = dd.DataDesignerConfigBuilder(
-        model_configs=to_model_configs(models)
-    )
+    config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
 
     config_builder.with_seed_dataset(
         dd.LocalFileSeedSource(path=str(Path(trajectory_parquet).resolve())),
@@ -613,7 +610,7 @@ def build_evaluator_config_builder(
     return data_designer, config_builder
 
 
-def _warn_on_undispatched_scorers(scorers: List[str]) -> None:
+def _warn_on_undispatched_scorers(scorers: list[str]) -> None:
     """Say so when the run cannot possibly score some capability.
 
     The evaluator dispatches exactly the scorers it is handed and keys off nothing
@@ -636,8 +633,9 @@ def _warn_on_undispatched_scorers(scorers: List[str]) -> None:
         # scorer -- a warning that fires ten times on a deliberate choice is noise
         # people learn to scroll past, which is how the real one gets missed.
         logger.warning(
-            "no scorers dispatched, so all %d capabilit%s needing one will render "
-            "as Untested (n=0).", affected, "y" if affected == 1 else "ies",
+            "no scorers dispatched, so all %d capabilit%s needing one will render as Untested (n=0).",
+            affected,
+            "y" if affected == 1 else "ies",
         )
         return
     for scorer, ids in missing.items():
@@ -646,7 +644,10 @@ def _warn_on_undispatched_scorers(scorers: List[str]) -> None:
             "scorer %r is not in this run's scorer list, so %d capabilit%s will "
             "render as Untested (n=0) rather than scored: %s. Add it to --scorers "
             "(notebook: SCORERS) to measure %s.",
-            scorer, len(ids), "y" if len(ids) == 1 else "ies", shown,
+            scorer,
+            len(ids),
+            "y" if len(ids) == 1 else "ies",
+            shown,
             "it" if len(ids) == 1 else "them",
         )
 
@@ -655,7 +656,7 @@ def sample_trajectories(
     df,
     *,
     mode: str,
-    n: Optional[int] = None,
+    n: int | None = None,
     seed: int = 42,
 ):
     """Coverage-aware sampler for the trajectory-evaluator's seed dataset.
@@ -683,20 +684,14 @@ def sample_trajectories(
     import pandas as pd
 
     def _take(group):
-        return group if n is None else group.sample(
-            n=min(n, len(group)), random_state=seed
-        )
+        return group if n is None else group.sample(n=min(n, len(group)), random_state=seed)
 
     if mode == "full":
         return df
     if mode == "per_locale":
-        return pd.concat(
-            [_take(g) for _, g in df.groupby("locale", sort=True)]
-        ).sort_index()
+        return pd.concat([_take(g) for _, g in df.groupby("locale", sort=True)]).sort_index()
     if mode == "per_locale_probe":
-        return pd.concat(
-            [_take(g) for _, g in df.groupby(["locale", "probe_family"], sort=True)]
-        ).sort_index()
+        return pd.concat([_take(g) for _, g in df.groupby(["locale", "probe_family"], sort=True)]).sort_index()
     if mode == "matched_pair":
         parity = df[df["probe_family"].astype(str) == "sov_ai_multilingual_parity"]
         all_ids = sorted(parity["query_id"].dropna().astype(str).unique())
@@ -709,9 +704,9 @@ def evaluate_dataframe(
     df,
     *,
     models: ModelsConfig,
-    scorers: List[str],
-    judges: Optional[List[Dict[str, Any]]] = None,
-    axes: Optional[List[str]] = None,
+    scorers: list[str],
+    judges: list[dict[str, Any]] | None = None,
+    axes: list[str] | None = None,
     prompt_version: str = "v1.0",
     eval_column: str = "assistant_eval",
     skip_if_existing: bool = True,
@@ -735,16 +730,14 @@ def evaluate_dataframe(
       project away the seed columns; the dashboard's join needs them).
     """
     import tempfile
+    from pathlib import Path as _Path
 
     import pandas as pd  # noqa: F401  -- imported for clarity at the call site
-    from pathlib import Path as _Path
 
     if judges is None:
         judges = [{"alias": "evaluator_model"}]
 
-    tmp = tempfile.NamedTemporaryFile(
-        suffix=".parquet", delete=False, prefix="usersim_eval_seed_"
-    )
+    tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False, prefix="usersim_eval_seed_")
     tmp.close()
     seed_path = _Path(tmp.name)
     try:
@@ -776,13 +769,9 @@ def evaluate_dataframe(
 def _add_persona_expressions(config_builder, dd) -> None:
     """Add the seven persona-* expression columns shared by the notebook."""
     config_builder.add_column(
-        dd.ExpressionColumnConfig(
-            name="persona_name", expr="{{ persona.first_name }} {{ persona.last_name }}"
-        )
+        dd.ExpressionColumnConfig(name="persona_name", expr="{{ persona.first_name }} {{ persona.last_name }}")
     )
-    config_builder.add_column(
-        dd.ExpressionColumnConfig(name="persona_age", expr="{{ persona.age }}")
-    )
+    config_builder.add_column(dd.ExpressionColumnConfig(name="persona_age", expr="{{ persona.age }}"))
     # ``persona_sex`` was added after the original 7-column projection
     # so existing parquets won't have it. The preview defends against
     # that with a None fallback. Coerced to lowercase string so
@@ -815,15 +804,9 @@ def _add_persona_expressions(config_builder, dd) -> None:
         )
     )
     config_builder.add_column(
-        dd.ExpressionColumnConfig(
-            name="persona_education_level", expr="{{ persona.education_level }}"
-        )
+        dd.ExpressionColumnConfig(name="persona_education_level", expr="{{ persona.education_level }}")
     )
-    config_builder.add_column(
-        dd.ExpressionColumnConfig(
-            name="persona_occupation", expr="{{ persona.occupation }}"
-        )
-    )
+    config_builder.add_column(dd.ExpressionColumnConfig(name="persona_occupation", expr="{{ persona.occupation }}"))
     # Location fields. The Nemotron-Personas dataset has a uniform
     # schema across every shipped locale — ``city`` / ``region`` /
     # ``district`` / ``country`` (verified by inspecting

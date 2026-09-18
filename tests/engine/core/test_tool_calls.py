@@ -6,6 +6,7 @@
 Covers the provider-variance shapes that consumers (safety_agentic tool
 execution, health_disclosure move-space) rely on being parsed uniformly.
 """
+
 from __future__ import annotations
 
 from usersim.engine.core.tool_calls import (
@@ -73,10 +74,12 @@ class TestJsonObjectFromContent:
 
 class TestRecoverToolCall:
     def test_structured_tool_call_by_name(self):
-        result = {"tool_calls": [
-            {"function": {"name": "other", "arguments": "{}"}},
-            {"function": {"name": "commit_move", "arguments": '{"move": "withhold"}'}},
-        ]}
+        result = {
+            "tool_calls": [
+                {"function": {"name": "other", "arguments": "{}"}},
+                {"function": {"name": "commit_move", "arguments": '{"move": "withhold"}'}},
+            ]
+        }
         args, call = recover_tool_call(result, name="commit_move")
         assert args == {"move": "withhold"}
         assert call is not None and call["function"]["name"] == "commit_move"

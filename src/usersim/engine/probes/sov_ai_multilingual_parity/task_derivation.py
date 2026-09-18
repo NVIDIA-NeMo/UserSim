@@ -33,7 +33,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Iterable
 
 from usersim.engine.core.query_bank import Query, QueryBank
 from usersim.engine.probes.sov_ai_facts.task_derivation import (
@@ -43,7 +43,7 @@ from usersim.engine.probes.sov_ai_facts.task_derivation import (
 __all__ = ["persona_to_tags", "derive_task"]
 
 
-def _persona_content_hash(persona: Dict[str, Any]) -> int:
+def _persona_content_hash(persona: dict[str, Any]) -> int:
     """Deterministic int seed derived from persona content."""
     payload = json.dumps(persona, sort_keys=True, default=str)
     digest = hashlib.sha256(payload.encode("utf-8")).digest()
@@ -51,13 +51,13 @@ def _persona_content_hash(persona: Dict[str, Any]) -> int:
 
 
 def derive_task(
-    persona: Dict[str, Any],
+    persona: dict[str, Any],
     query_bank: QueryBank,
     locale: str,
     *,
-    seed: Optional[int] = None,
+    seed: int | None = None,
     excluded_query_ids: Iterable[str] = (),
-) -> Optional[Query]:
+) -> Query | None:
     """Pick one query from the bank for this persona in this locale.
 
     Pool construction:
@@ -87,18 +87,14 @@ def derive_task(
     excluded = set(excluded_query_ids)
 
     persona_tags = persona_to_tags(persona, locale)
-    candidates: List[Query] = [
-        q
-        for q in query_bank.matching_persona_tags(persona_tags)
-        if q.supports_locale(locale) and q.id not in excluded
+    candidates: list[Query] = [
+        q for q in query_bank.matching_persona_tags(persona_tags) if q.supports_locale(locale) and q.id not in excluded
     ]
     if not candidates:
         return None
 
     persona_hash = _persona_content_hash(persona)
-    bank_salt_bytes = hashlib.sha256(
-        f"{query_bank.bank_id}|{query_bank.bank_version}".encode("utf-8")
-    ).digest()[:8]
+    bank_salt_bytes = hashlib.sha256(f"{query_bank.bank_id}|{query_bank.bank_version}".encode("utf-8")).digest()[:8]
     bank_salt = int.from_bytes(bank_salt_bytes, "big", signed=False)
     mix = persona_hash ^ bank_salt
     if seed is not None:

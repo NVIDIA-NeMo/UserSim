@@ -72,16 +72,12 @@ def test_non_ascii_budget_scales_up_never_down() -> None:
 
     def facade(max_tokens):
         return SimpleNamespace(
-            _model_config=SimpleNamespace(
-                inference_parameters=SimpleNamespace(max_tokens=max_tokens)
-            )
+            _model_config=SimpleNamespace(inference_parameters=SimpleNamespace(max_tokens=max_tokens))
         )
 
     for configured in (2048, 4096, 8192):
         scaled = scaled_max_tokens(facade(configured), NON_ASCII_TOKEN_SCALE)
-        assert scaled["max_tokens"] > configured, (
-            f"non-ASCII budget {scaled} must exceed the configured {configured}"
-        )
+        assert scaled["max_tokens"] > configured, f"non-ASCII budget {scaled} must exceed the configured {configured}"
 
     # A model that sets no budget must not acquire one: that is how reasoning
     # models are configured, and they reject the parameter outright.
@@ -290,8 +286,7 @@ def test_trace_does_not_reach_the_chat_message() -> None:
     trace = "Let me think. The user wants X, so I do Y."
     messages = [
         {"role": "user", "content": "first question"},
-        {"role": "assistant", "content": "first answer",
-         "reasoning_content": trace},
+        {"role": "assistant", "content": "first answer", "reasoning_content": trace},
         {"role": "user", "content": "second question"},
     ]
     chat = _dicts_to_chat_messages(messages)

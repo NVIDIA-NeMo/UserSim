@@ -27,7 +27,7 @@ keep.
 
 from __future__ import annotations
 
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 __all__ = [
     "assert_probe_conforms",
@@ -45,16 +45,16 @@ _REQUIRED_PROBE_METHODS = (
 )
 
 
-def probe_conformance_problems(probe: str | type) -> List[str]:
+def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
     from usersim.engine.core._assets import probe_assets_dir
     from usersim.engine.core.probes import (
-        BaseProbe,
         _PROBE_REGISTRY,
+        BaseProbe,
         known_probes,
     )
 
-    problems: List[str] = []
+    problems: list[str] = []
 
     if isinstance(probe, str):
         if probe not in known_probes():
@@ -69,9 +69,7 @@ def probe_conformance_problems(probe: str | type) -> List[str]:
 
     label = getattr(cls, "label", None)
     if not isinstance(label, str) or not label or label == "<unset>":
-        problems.append(
-            f"{cls.__qualname__}.label must be a non-empty string; got {label!r}"
-        )
+        problems.append(f"{cls.__qualname__}.label must be a non-empty string; got {label!r}")
         return problems
 
     if not issubclass(cls, BaseProbe):
@@ -93,8 +91,7 @@ def probe_conformance_problems(probe: str | type) -> List[str]:
         for const in ("PROBE_FAMILY", "PROMPT_VERSION", "PROBE_VARIANTS"):
             if getattr(mod, const, None) in (None, "", ()):
                 problems.append(
-                    f"{module}.{const} is unset. Use @register_probe rather "
-                    f"than assigning to the registry directly."
+                    f"{module}.{const} is unset. Use @register_probe rather than assigning to the registry directly."
                 )
 
     for method in _REQUIRED_PROBE_METHODS:
@@ -110,8 +107,7 @@ def probe_conformance_problems(probe: str | type) -> List[str]:
     assets = probe_assets_dir(label)
     if not assets.is_dir():
         problems.append(
-            f"no assets for {label!r} at {assets}. Ship them in the package, "
-            f"or add their root to USERSIM_ASSET_PATH."
+            f"no assets for {label!r} at {assets}. Ship them in the package, or add their root to USERSIM_ASSET_PATH."
         )
 
     return problems
@@ -122,16 +118,14 @@ def assert_probe_conforms(probe: str | type) -> None:
     problems = probe_conformance_problems(probe)
     if problems:
         name = probe if isinstance(probe, str) else probe.__qualname__
-        raise AssertionError(
-            f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems)
-        )
+        raise AssertionError(f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems))
 
 
 def scorer_conformance_problems(
     name: str,
     *,
     sample_row: dict[str, Any] | None = None,
-) -> List[str]:
+) -> list[str]:
     """Findings for one scorer. Empty means conforming.
 
     ``sample_row`` is passed to the scorer to check it returns the mapping
@@ -148,7 +142,7 @@ def scorer_conformance_problems(
             f"Registered: {', '.join(sorted(list_scorers())) or '(none)'}"
         ]
 
-    problems: List[str] = []
+    problems: list[str] = []
     fn: Callable[..., Any] = _REGISTRY[name]
     if not callable(fn):
         return [f"{name!r} is registered to a non-callable: {fn!r}"]
@@ -165,8 +159,7 @@ def scorer_conformance_problems(
 
     if not isinstance(result, dict):
         problems.append(
-            f"returned {type(result).__name__}, expected a dict the "
-            f"evaluator can merge into the eval cell."
+            f"returned {type(result).__name__}, expected a dict the evaluator can merge into the eval cell."
         )
     return problems
 
@@ -179,6 +172,4 @@ def assert_scorer_conforms(
     """Raise ``AssertionError`` listing every conformance problem at once."""
     problems = scorer_conformance_problems(name, sample_row=sample_row)
     if problems:
-        raise AssertionError(
-            f"scorer {name!r} does not conform:\n  - " + "\n  - ".join(problems)
-        )
+        raise AssertionError(f"scorer {name!r} does not conform:\n  - " + "\n  - ".join(problems))

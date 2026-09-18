@@ -52,11 +52,10 @@ from __future__ import annotations
 
 import functools
 import json
-from typing import Any, Optional, Tuple
-
+from typing import Any
 
 # Aliases that produce visible conversation turns (estimable post-hoc).
-_VISIBLE_OUTPUT_ALIASES: Tuple[str, ...] = (
+_VISIBLE_OUTPUT_ALIASES: tuple[str, ...] = (
     "assistant_model",
     "user_model",
     "api_response_model",
@@ -64,7 +63,7 @@ _VISIBLE_OUTPUT_ALIASES: Tuple[str, ...] = (
 
 # Aliases whose output isn't preserved on the trajectory -- always
 # ``unavailable`` because Phase B has no visible content to tokenize.
-_UNAVAILABLE_ALIASES: Tuple[str, ...] = ("judge_model", "summary_model")
+_UNAVAILABLE_ALIASES: tuple[str, ...] = ("judge_model", "summary_model")
 
 
 # Per-alias noise floor: aggregate reasoning estimates below this fraction
@@ -97,7 +96,7 @@ def _encoder(name: str):
         return None
 
 
-def _decode_messages(messages: Any) -> Optional[list]:
+def _decode_messages(messages: Any) -> list | None:
     """Coerce a stored ``conversation_messages`` cell into a list of dicts.
 
     The trajectory parquet stores it as either a JSON string or a native
@@ -125,7 +124,7 @@ def _count_visible_tokens_for_alias(
     messages: Any,
     alias: str,
     encoding_name: str,
-) -> Optional[int]:
+) -> int | None:
     """Tokenize the visible content the alias produced in this conversation.
 
     Returns ``None`` when the messages are malformed (caller marks
@@ -154,17 +153,9 @@ def _count_visible_tokens_for_alias(
                 chunks.append(json.dumps(tool_calls, separators=(",", ":")))
         text = "\n".join(chunks)
     elif alias == "user_model":
-        text = "\n".join(
-            m.get("content") or ""
-            for m in msgs
-            if isinstance(m, dict) and m.get("role") == "user"
-        )
+        text = "\n".join(m.get("content") or "" for m in msgs if isinstance(m, dict) and m.get("role") == "user")
     elif alias == "api_response_model":
-        text = "\n".join(
-            m.get("content") or ""
-            for m in msgs
-            if isinstance(m, dict) and m.get("role") == "tool"
-        )
+        text = "\n".join(m.get("content") or "" for m in msgs if isinstance(m, dict) and m.get("role") == "tool")
     else:
         return None
 
@@ -182,7 +173,7 @@ def estimate_reasoning_for_row(
     output_tokens: int,
     *,
     encoding_name: str = "cl100k_base",
-) -> Tuple[int, str]:
+) -> tuple[int, str]:
     """Per-row, per-alias reasoning-token estimate.
 
     Returns ``(reasoning_tokens, source)`` where ``source`` is one of:
@@ -199,9 +190,7 @@ def estimate_reasoning_for_row(
     """
     if alias not in _VISIBLE_OUTPUT_ALIASES:
         return 0, "unavailable"
-    visible = _count_visible_tokens_for_alias(
-        conversation_messages, alias, encoding_name
-    )
+    visible = _count_visible_tokens_for_alias(conversation_messages, alias, encoding_name)
     if visible is None:
         return 0, "unavailable"
     diff = int(output_tokens) - int(visible)

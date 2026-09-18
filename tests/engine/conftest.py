@@ -32,8 +32,7 @@ def full_persona():
 
 @pytest.fixture
 def full_persona_non_indic():
-    """A persona explicitly guaranteed to carry no India-only fields.
-    """
+    """A persona explicitly guaranteed to carry no India-only fields."""
     return {
         "first_name": "Maria",
         "last_name": "Silva",

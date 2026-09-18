@@ -26,7 +26,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -52,7 +52,6 @@ from usersim.engine.core.manifest import (
     write_run_manifest,
 )
 
-
 # ─── Test fixtures: lightweight stand-ins for cli/_models.py types ────────
 
 
@@ -63,12 +62,12 @@ class _StubModelSpec:
     alias: str
     model: str
     provider: str
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
     max_parallel_requests: int = 4
-    temperature: Optional[float] = 1.0
-    top_p: Optional[float] = 1.0
-    timeout: Optional[float] = None
-    extra_body: Optional[Dict[str, Any]] = None
+    temperature: float | None = 1.0
+    top_p: float | None = 1.0
+    timeout: float | None = None
+    extra_body: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -99,7 +98,7 @@ class _StubSimConfig:
     persona_grounding_ratio: float = 1.0
     context_compression: bool = True
     compression_window: int = 1
-    random_seed: Optional[int] = None
+    random_seed: int | None = None
     store_reasoning: bool = True
 
 
@@ -219,9 +218,7 @@ def _minimal_manifest(run_id: str = "1700000000") -> RunManifest:
         started_at_epoch=int(run_id) if run_id.isdigit() else 0,
         finished_at_epoch=None,
         total_runtime_s=None,
-        source=SourceInfo(
-            kind="cli", invocation="x", hostname="h", platform="p", python_version="3.13"
-        ),
+        source=SourceInfo(kind="cli", invocation="x", hostname="h", platform="p", python_version="3.13"),
         code=CodeInfo(),
         models_config_path=None,
         models={},
@@ -371,10 +368,10 @@ class TestAggregateTrajectories:
         probe_family: str,
         probe_variant: str = "default",
         status: str = "ok",
-        failure_class: Optional[str] = None,
+        failure_class: str | None = None,
         scenario_prompt_version: str = "v1.0",
-        bank_version: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, Any]:
+        bank_version: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         outcome = {
             "status": status,
             "failure_class": failure_class,
@@ -398,33 +395,37 @@ class TestAggregateTrajectories:
         assert out["bank_versions"] == {}
 
     def test_aggregates_status_and_failure_class(self) -> None:
-        df = pd.DataFrame([
-            self._row(locale="en_US", probe_family="tool_calling", status="ok"),
-            self._row(
-                locale="en_US",
-                probe_family="tool_calling",
-                status="failed",
-                failure_class="user_query_gate_exhausted",
-            ),
-        ])
+        df = pd.DataFrame(
+            [
+                self._row(locale="en_US", probe_family="tool_calling", status="ok"),
+                self._row(
+                    locale="en_US",
+                    probe_family="tool_calling",
+                    status="failed",
+                    failure_class="user_query_gate_exhausted",
+                ),
+            ]
+        )
         out = _aggregate_from_trajectories(df)
         assert out["trajectories_total"] == 2
         assert out["status_counts"] == {"failed": 1, "ok": 1}
         assert out["failure_class_histogram"] == {"user_query_gate_exhausted": 1}
 
     def test_aggregates_per_probe_prompt_versions(self) -> None:
-        df = pd.DataFrame([
-            self._row(
-                locale="en_US",
-                probe_family="tool_calling",
-                scenario_prompt_version="v1.0",
-            ),
-            self._row(
-                locale="ja_JP",
-                probe_family="general_open_ended",
-                scenario_prompt_version="v1.2",
-            ),
-        ])
+        df = pd.DataFrame(
+            [
+                self._row(
+                    locale="en_US",
+                    probe_family="tool_calling",
+                    scenario_prompt_version="v1.0",
+                ),
+                self._row(
+                    locale="ja_JP",
+                    probe_family="general_open_ended",
+                    scenario_prompt_version="v1.2",
+                ),
+            ]
+        )
         out = _aggregate_from_trajectories(df)
         assert out["prompt_versions"] == {
             "general_open_ended": "v1.2",
@@ -432,18 +433,20 @@ class TestAggregateTrajectories:
         }
 
     def test_aggregates_bank_versions_across_locales(self) -> None:
-        df = pd.DataFrame([
-            self._row(
-                locale="en_US",
-                probe_family="sov_ai_facts",
-                bank_version={"sov_ai_facts:en_US": "2025.04.01"},
-            ),
-            self._row(
-                locale="ja_JP",
-                probe_family="sov_ai_facts",
-                bank_version={"sov_ai_facts:ja_JP": "2025.04.10"},
-            ),
-        ])
+        df = pd.DataFrame(
+            [
+                self._row(
+                    locale="en_US",
+                    probe_family="sov_ai_facts",
+                    bank_version={"sov_ai_facts:en_US": "2025.04.01"},
+                ),
+                self._row(
+                    locale="ja_JP",
+                    probe_family="sov_ai_facts",
+                    bank_version={"sov_ai_facts:ja_JP": "2025.04.10"},
+                ),
+            ]
+        )
         out = _aggregate_from_trajectories(df)
         assert out["bank_versions"] == {
             "sov_ai_facts:en_US": "2025.04.01",
@@ -451,29 +454,31 @@ class TestAggregateTrajectories:
         }
 
     def test_aggregates_probe_variants_exercised(self) -> None:
-        df = pd.DataFrame([
-            self._row(
-                locale="en_US",
-                probe_family="safety_chat_pressure",
-                probe_variant="default",
-            ),
-            self._row(
-                locale="en_US",
-                probe_family="safety_chat_pressure",
-                probe_variant="consequence_framing",
-            ),
-        ])
+        df = pd.DataFrame(
+            [
+                self._row(
+                    locale="en_US",
+                    probe_family="safety_chat_pressure",
+                    probe_variant="default",
+                ),
+                self._row(
+                    locale="en_US",
+                    probe_family="safety_chat_pressure",
+                    probe_variant="consequence_framing",
+                ),
+            ]
+        )
         out = _aggregate_from_trajectories(df)
-        assert out["probe_variants_exercised"] == {
-            "safety_chat_pressure": ["consequence_framing", "default"]
-        }
+        assert out["probe_variants_exercised"] == {"safety_chat_pressure": ["consequence_framing", "default"]}
 
     def test_coverage_per_locale_probe(self) -> None:
-        df = pd.DataFrame([
-            self._row(locale="en_US", probe_family="tool_calling"),
-            self._row(locale="en_US", probe_family="tool_calling"),
-            self._row(locale="ja_JP", probe_family="tool_calling"),
-        ])
+        df = pd.DataFrame(
+            [
+                self._row(locale="en_US", probe_family="tool_calling"),
+                self._row(locale="en_US", probe_family="tool_calling"),
+                self._row(locale="ja_JP", probe_family="tool_calling"),
+            ]
+        )
         out = _aggregate_from_trajectories(df)
         assert out["coverage_per_locale_probe"] == {
             "en_US:tool_calling": 2,
@@ -484,14 +489,16 @@ class TestAggregateTrajectories:
     def test_decodes_outcome_when_already_dict(self) -> None:
         # simulation_outcome may arrive as dict (notebook prototyping) or
         # as JSON string (post-DD). Both must aggregate.
-        df = pd.DataFrame([
-            {
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-                "probe_variant": "default",
-                "simulation_outcome": {"status": "ok", "provenance": {}},
-            },
-        ])
+        df = pd.DataFrame(
+            [
+                {
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                    "probe_variant": "default",
+                    "simulation_outcome": {"status": "ok", "provenance": {}},
+                },
+            ]
+        )
         out = _aggregate_from_trajectories(df)
         assert out["status_counts"] == {"ok": 1}
 
@@ -523,20 +530,24 @@ class TestBuildRunManifest:
                 ),
             ),
         )
-        traj = pd.DataFrame([
-            {
-                "locale": "en_US",
-                "probe_family": "tool_calling",
-                "probe_variant": "default",
-                "simulation_outcome": json.dumps({
-                    "status": "ok",
-                    "provenance": {
-                        "scenario_prompt_version": "v1.0",
-                        "bank_version": {},
-                    },
-                }),
-            },
-        ])
+        traj = pd.DataFrame(
+            [
+                {
+                    "locale": "en_US",
+                    "probe_family": "tool_calling",
+                    "probe_variant": "default",
+                    "simulation_outcome": json.dumps(
+                        {
+                            "status": "ok",
+                            "provenance": {
+                                "scenario_prompt_version": "v1.0",
+                                "bank_version": {},
+                            },
+                        }
+                    ),
+                },
+            ]
+        )
         manifest = build_run_manifest(
             run_id="1700000001",
             started_at_epoch=1700000001,
@@ -633,10 +644,7 @@ class TestNoCredentialLeak:
         ]
         for pattern in forbidden:
             match = pattern.search(content)
-            assert match is None, (
-                f"manifest leaked credential-looking string: {match.group(0)!r} "
-                f"in {path}"
-            )
+            assert match is None, f"manifest leaked credential-looking string: {match.group(0)!r} in {path}"
         # The ENV VAR NAME, however, should be present.
         assert "NVIDIA_API_KEY" in content
 

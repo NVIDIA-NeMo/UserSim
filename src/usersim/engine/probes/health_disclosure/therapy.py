@@ -7,6 +7,7 @@ Thin client module: all behavior lives in ``HealthDisclosureProbe``; this only
 binds the label + client config and registers the probe with its own family
 (so it gets its own judge axes).
 """
+
 from __future__ import annotations
 
 from usersim.engine.core.clinical_profile_bank import (
@@ -34,8 +35,7 @@ def _bank_loader():
     return _load_bank(_LABEL, env_override=_CFG.get("profiles_env"))
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class TherapyDisclosureProbe(HealthDisclosureProbe):
     label = _LABEL
     CLIENT = _CFG

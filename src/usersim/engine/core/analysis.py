@@ -9,7 +9,7 @@ Extracted here to avoid duplication and ensure consistent behavior.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -23,17 +23,13 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     Returns an empty DataFrame if no valid scores are found.
     """
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for _, row in df.iterrows():
         scores_raw = row.get("eval_scores")
         if not scores_raw:
             continue
         try:
-            scores = (
-                json.loads(scores_raw)
-                if isinstance(scores_raw, str)
-                else scores_raw
-            )
+            scores = json.loads(scores_raw) if isinstance(scores_raw, str) else scores_raw
         except (json.JSONDecodeError, TypeError):
             continue
         if not isinstance(scores, dict):
@@ -49,9 +45,7 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
             "persona_age_bin": row.get("persona_age_bin", ""),
             "persona_education_level": row.get("persona_education_level", ""),
             "persona_occupation": row.get("persona_occupation", ""),
-            "persona_country": (
-                row.get("persona_country") or row.get("persona_region", "")
-            ),
+            "persona_country": (row.get("persona_country") or row.get("persona_region", "")),
         }
         for axis, val in scores.items():
             if val is not None and isinstance(val, dict):

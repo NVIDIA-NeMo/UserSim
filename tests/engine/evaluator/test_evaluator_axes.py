@@ -8,11 +8,11 @@ from __future__ import annotations
 import pytest
 
 from usersim.engine.evaluator.axes import (
-    AxisCategory,
     GUARDRAIL_AXES,
     PROBE_SCORES,
     QUALITY_AXES,
     UNIVERSAL_SCORES,
+    AxisCategory,
     all_axis_names,
     axes_for_probe,
     axis_category,
@@ -32,9 +32,7 @@ class TestUniversalScores:
         # All universal axes use 1-5; downstream reporting bootstrap CIs
         # assume this scale.
         for s in UNIVERSAL_SCORES:
-            assert set(s.options.keys()) == {1, 2, 3, 4, 5}, (
-                f"Axis {s.name} does not use the full 1-5 scale"
-            )
+            assert set(s.options.keys()) == {1, 2, 3, 4, 5}, f"Axis {s.name} does not use the full 1-5 scale"
 
 
 class TestProbeScores:

@@ -175,16 +175,38 @@ target-version = "py312"
 # them keeps a bare `ruff check` equivalent to `make lint`.
 extend-exclude = ["notebooks", "output", "artifacts"]
 
+# Deliberately absent, so the omissions read as choices rather than gaps:
+# `E`, because the formatter owns line length and enabling both means they
+# argue; `ERA001` (commented-out code), which misfires on pseudo-code inside
+# docstrings; and `RUF100` (unused noqa), which is worth a periodic sweep but
+# not a build failure.
 [tool.ruff.lint]
 select = [
-    "F",   # pyflakes: real bugs (undefined names, unused imports)
-    "W",   # pycodestyle warnings
-    "PIE", # flake8-pie: misc correctness lints
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes: real bugs (undefined names, unused imports)
+    "I",     # isort (import sorting)
+    "ICN",   # flake8-import-conventions
+    "PIE",   # flake8-pie: misc correctness lints
+    "TID",   # flake8-tidy-imports (ban relative imports)
+    "UP006", # List[A] -> list[A]
+    "UP007", # Union[A, B] -> A | B
+    "UP045", # Optional[A] -> A | None
 ]
+ignore = [
+    "ANN401", # Dynamically typed expressions (Any)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["usersim"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.coverage.report]
 exclude_lines = [

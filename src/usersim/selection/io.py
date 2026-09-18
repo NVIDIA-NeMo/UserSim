@@ -19,12 +19,12 @@ import json
 import shutil
 import time
 from pathlib import Path
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Sequence
 
-from usersim.taxonomy.eval_cell import decode_cell
 from usersim.selection.engine import SelectionSummary
 from usersim.selection.profiles import SelectionProfile
 from usersim.selection.schemas import Schema, project
+from usersim.taxonomy.eval_cell import decode_cell
 
 # Manifest filename. Underscore prefix => ignored by the pyarrow dataset
 # reader (mirrors the trajectory dataset's ``_manifest.json``).
@@ -33,9 +33,9 @@ MANIFEST_NAME = "_selection_manifest.json"
 
 def load_run(
     trajectories: str | Path,
-    evaluations: Optional[str | Path] = None,
+    evaluations: str | Path | None = None,
     *,
-    run: Optional[str] = None,
+    run: str | None = None,
 ) -> tuple[Any, Any, str]:
     """Read a run's trajectory + evaluation frames and resolve its run id.
 
@@ -51,9 +51,7 @@ def load_run(
     traj_path = Path(trajectories).resolve()
     run_id = resolve_run(traj_path, run)
     if run_id is None:
-        raise FileNotFoundError(
-            f"no runs found under {traj_path} — run `usersim simulate` first"
-        )
+        raise FileNotFoundError(f"no runs found under {traj_path} — run `usersim simulate` first")
     traj_df = read_partitioned_dataset(traj_path, run=run_id)
     # Reading at the run= level means ``run`` is not reconstructed as a column;
     # re-attach it so downstream schema projection (and a flattened HF export)
@@ -71,9 +69,9 @@ def load_run(
 
 def load_runs(
     trajectories: str | Path,
-    evaluations: Optional[str | Path] = None,
+    evaluations: str | Path | None = None,
     *,
-    runs: Optional[Union[str, Sequence[str]]] = None,
+    runs: str | Sequence[str] | None = None,
 ) -> tuple[Any, Any, str]:
     """Load and concatenate one or more runs' trajectory + evaluation frames.
 
@@ -103,15 +101,9 @@ def load_runs(
         if eval_df is not None:
             eval_parts.append(eval_df)
 
-    traj_all = pd.concat(traj_parts, ignore_index=True).drop_duplicates(
-        "trajectory_id", keep="first"
-    )
+    traj_all = pd.concat(traj_parts, ignore_index=True).drop_duplicates("trajectory_id", keep="first")
     eval_all = (
-        pd.concat(eval_parts, ignore_index=True).drop_duplicates(
-            "trajectory_id", keep="first"
-        )
-        if eval_parts
-        else None
+        pd.concat(eval_parts, ignore_index=True).drop_duplicates("trajectory_id", keep="first") if eval_parts else None
     )
     return traj_all, eval_all, "+".join(run_list)
 
@@ -147,8 +139,8 @@ def resolve_generation_model(
     trajectories: Any,
     run_label: str,
     *,
-    explicit: Optional[str] = None,
-) -> Optional[str]:
+    explicit: str | None = None,
+) -> str | None:
     """Return the model under test for ``run_label``, read from its manifest.
 
     The assistant model is not a trajectory column, but every run records it
@@ -201,7 +193,7 @@ def build_manifest(
     source_run: str,
     eval_column: str,
     provenance: dict[str, Any],
-    generation_model: Optional[str] = None,
+    generation_model: str | None = None,
 ) -> dict[str, Any]:
     return {
         "kind": "selection",
@@ -271,9 +263,7 @@ def write_curated_dataset(
     # Underscore prefix so pyarrow's dataset reader ignores it (it skips
     # files prefixed with '_' / '.'); a bare ``selection_manifest.json``
     # inside the dataset root would be misread as a parquet fragment.
-    (profile_root / MANIFEST_NAME).write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    (profile_root / MANIFEST_NAME).write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
     return profile_root
 
 
@@ -287,7 +277,7 @@ def parse_repo_id(repo: str) -> str:
         "hf.co/datasets/",
     ):
         if repo.startswith(prefix):
-            repo = repo[len(prefix):]
+            repo = repo[len(prefix) :]
             break
     return repo
 
@@ -299,8 +289,7 @@ def _dataset_card(repo_id: str, profile: SelectionProfile, manifest: dict) -> st
 
     by_probe = _records_by_probe(funnel)
     probe_table = "| probe | records |\n|---|---|\n" + "".join(
-        f"| {probe} | {count} |\n"
-        for probe, count in sorted(by_probe.items(), key=lambda kv: (-kv[1], kv[0]))
+        f"| {probe} | {count} |\n" for probe, count in sorted(by_probe.items(), key=lambda kv: (-kv[1], kv[0]))
     )
     if by_probe:
         probe_table += f"| **total** | **{sum(by_probe.values())}** |\n"
@@ -344,9 +333,9 @@ def push_to_hf(
     repo: str,
     *,
     private: bool = True,
-    token: Optional[str] = None,
-    manifest: Optional[dict] = None,
-    profile: Optional[SelectionProfile] = None,
+    token: str | None = None,
+    manifest: dict | None = None,
+    profile: SelectionProfile | None = None,
     columns: Schema = None,
 ) -> str:
     """Push a curated frame to a (private by default) HF dataset repo.
@@ -366,9 +355,7 @@ def push_to_hf(
         manifest = {**manifest, "schema": list(payload.columns)}
 
     api = HfApi(token=token or os.environ.get("HF_TOKEN"))
-    api.create_repo(
-        repo_id, repo_type="dataset", private=private, exist_ok=True
-    )
+    api.create_repo(repo_id, repo_type="dataset", private=private, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -391,9 +378,7 @@ def push_to_hf(
                 repo_type="dataset",
             )
             if profile is not None:
-                (tmp_path / "README.md").write_text(
-                    _dataset_card(repo_id, profile, manifest), encoding="utf-8"
-                )
+                (tmp_path / "README.md").write_text(_dataset_card(repo_id, profile, manifest), encoding="utf-8")
                 api.upload_file(
                     path_or_fileobj=str(tmp_path / "README.md"),
                     path_in_repo="README.md",

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Tests for the clinical-profile bank loader (``core.clinical_profile_bank``)."""
+
 from __future__ import annotations
 
 from pathlib import Path

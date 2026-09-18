@@ -32,11 +32,11 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from typing import List, Optional
 
 from usersim.cli._errors import ConfigError
 
 __version__ = "0.1.0"
+
 
 def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None:
     """Let installed packages contribute subcommands.
@@ -56,16 +56,17 @@ def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None
     for name, register in load_extensions(COMMANDS):
         if name in subparsers.choices:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r is already provided by this "
-                "package; ignoring the contributed one.", name,
+                "  |-- extensions: command %r is already provided by this package; ignoring the contributed one.",
+                name,
             )
             continue
         try:
             register(subparsers)
         except Exception as exc:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r failed to register and was "
-                "skipped: %s", name, exc,
+                "  |-- extensions: command %r failed to register and was skipped: %s",
+                name,
+                exc,
             )
 
 
@@ -96,31 +97,32 @@ def _build_parser() -> argparse.ArgumentParser:
             "Run `usersim <command> -h` for a command's options.\n"
         ),
     )
+    parser.add_argument("--version", action="version", version=f"usersim {__version__}")
     parser.add_argument(
-        "--version", action="version", version=f"usersim {__version__}"
-    )
-    parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="count",
         default=0,
         help="Increase logging verbosity (-v=INFO, -vv=DEBUG).",
     )
 
     subparsers = parser.add_subparsers(
-        dest="command", required=True, metavar="<command>",
+        dest="command",
+        required=True,
+        metavar="<command>",
     )
 
-    from usersim.cli import panel as _panel
-    from usersim.cli import simulate as _simulate
     from usersim.cli import evaluate as _evaluate
+    from usersim.cli import evaluate_assets as _evaluate_assets
+    from usersim.cli import gen_assets as _gen_assets
+    from usersim.cli import panel as _panel
+    from usersim.cli import report as _report
     from usersim.cli import rescore as _rescore
     from usersim.cli import select as _select
-    from usersim.cli import report as _report
-    from usersim.cli import gen_assets as _gen_assets
-    from usersim.cli import validate_assets as _validate_assets
-    from usersim.cli import evaluate_assets as _evaluate_assets
-    from usersim.cli import smoke as _smoke
     from usersim.cli import setup_ngc as _setup_ngc
+    from usersim.cli import simulate as _simulate
+    from usersim.cli import smoke as _smoke
+    from usersim.cli import validate_assets as _validate_assets
 
     _panel.register(subparsers)
     _simulate.register(subparsers)
@@ -152,7 +154,7 @@ def _configure_logging(verbosity: int) -> None:
     )
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     _configure_logging(args.verbose)

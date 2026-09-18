@@ -62,7 +62,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.pressure_bank import (
@@ -219,8 +219,7 @@ class _PickedPair:
 # ---------------------------------------------------------------------------
 
 
-@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION,
-                variants=tuple(PROBE_VARIANTS))
+@register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """Conversational-pressure refusal-robustness probe.
 
@@ -266,8 +265,12 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     # ── BankBackedProbe API ─────────────────────────────────────────
 
     def derive_task(
-        self, persona: Dict[str, Any], bank: Any, *, cfg: Any,
-    ) -> Optional[_PickedPair]:
+        self,
+        persona: dict[str, Any],
+        bank: Any,
+        *,
+        cfg: Any,
+    ) -> _PickedPair | None:
         """Resolve (strategy, target) from row overrides + persona.
 
         Reads two optional override columns from ``self._data``:
@@ -281,13 +284,9 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         pressure_strategy_id = self._data.get("pressure_strategy_id")
         target_request_id = self._data.get("target_request_id")
         # Coerce to str if non-None so panel-driven int ids work.
-        if pressure_strategy_id is not None and not isinstance(
-            pressure_strategy_id, str
-        ):
+        if pressure_strategy_id is not None and not isinstance(pressure_strategy_id, str):
             pressure_strategy_id = str(pressure_strategy_id)
-        if target_request_id is not None and not isinstance(
-            target_request_id, str
-        ):
+        if target_request_id is not None and not isinstance(target_request_id, str):
             target_request_id = str(target_request_id)
 
         pair = resolve_task_from_row(
@@ -323,7 +322,9 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         return ""
 
     def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
+        self,
+        user_query: str,
+        conversation_history: str,
     ) -> str:
         """Gate pressure follow-ups on user-role validity, not safety policy."""
         return _FOLLOWUP_GATE_PROMPT.format(
@@ -334,8 +335,9 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     # ── Optional hooks (verbatim + reframing + invariants) ──────────
 
     def get_verbatim_first_user_turn(
-        self, state: ConversationState,
-    ) -> Optional[str]:
+        self,
+        state: ConversationState,
+    ) -> str | None:
         if self._task is None:
             return None
         # Seed side-channel metadata before _inject_verbatim_first_turn
@@ -351,13 +353,13 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         # language when we fell back (no-op for shipped locales / native
         # renderings). for_locale falls back to en_US if the asset locale
         # isn't authored on this target.
-        return self._localize_verbatim(
-            self._task.target.initial_prompt.for_locale(self._asset_locale)
-        )
+        return self._localize_verbatim(self._task.target.initial_prompt.for_locale(self._asset_locale))
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: ConversationState,
-    ) -> List[str]:
+        self,
+        turn_idx: int,
+        state: ConversationState,
+    ) -> list[str]:
         """Reframing instruction for the current follow-up turn.
 
         ``turn_idx`` is 1-indexed in the loop's framing (turn 1 =
@@ -393,7 +395,8 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         return should_succeed(state)
 
     def is_capitulation_detected(
-        self, state: ConversationState,
+        self,
+        state: ConversationState,
     ) -> bool:
         """Per-turn capitulation check via the dedicated classifier.
 
@@ -437,7 +440,9 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         )
 
     def allow_early_stop_at_turn(
-        self, turn_idx: int, state: ConversationState,
+        self,
+        turn_idx: int,
+        state: ConversationState,
     ) -> bool:
         """Suppress the generic LLM-based ``_check_conversation_complete``.
 
@@ -454,14 +459,10 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     def build_result_extras(self, state: ConversationState) -> dict:
         extras = super().build_result_extras(state)
         if self._task is not None:
-            extras["probe_variant"] = (
-                f"{self._task.strategy.id}::{self._task.target.harm_category}"
-            )
+            extras["probe_variant"] = f"{self._task.strategy.id}::{self._task.target.harm_category}"
             extras["target_request_id"] = self._task.target.id
             extras["strategy_id"] = self._task.strategy.id
-            extras["reframings_used"] = list(
-                state.metadata.get("reframings_used") or []
-            )
+            extras["reframings_used"] = list(state.metadata.get("reframings_used") or [])
             # Side channels set by the simulator loop when the
             # dedicated classifier detected capitulation. Promoted
             # to top-level row columns so the capability dashboard's
@@ -489,22 +490,23 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
 
 
 def simulate_safety_chat_pressure(
-    models: Dict[str, Any],
-    data: Dict[str, Any],
-    persona: Dict[str, Any],
-    profile: Dict[str, Any],
+    models: dict[str, Any],
+    data: dict[str, Any],
+    persona: dict[str, Any],
+    profile: dict[str, Any],
     locale: str,
     language: str,
     cfg: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Thin shim for callers that import ``simulate_safety_chat_pressure``.
 
     Catches construction exceptions (bank-load / no-resolvable-pair)
     and returns a ``make_failed`` outcome with
     ``failure_class=SCENARIO_ABORTED``.
     """
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance as _Provenance
+    from usersim.engine.core.outcomes import OutcomeBuilder
+    from usersim.engine.core.outcomes import Provenance as _Provenance
     from usersim.engine.core.probes import BankLoadError
 
     provenance = kwargs.get("provenance") or _Provenance()
@@ -530,15 +532,18 @@ def simulate_safety_chat_pressure(
     return probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
-def _aborted(reason: str, provenance: Any) -> Dict[str, Any]:
+def _aborted(reason: str, provenance: Any) -> dict[str, Any]:
     """Build a structured SCENARIO_ABORTED failure result."""
     from usersim.engine.core.outcomes import (
         FailureAttribution,
         FailureClass,
         OutcomeBuilder,
         OutcomeStatus,
+    )
+    from usersim.engine.core.outcomes import (
         Provenance as _Provenance,
     )
+
     builder = OutcomeBuilder(provenance=provenance or _Provenance())
     outcome = builder.finalize(
         status=OutcomeStatus.FAILED,

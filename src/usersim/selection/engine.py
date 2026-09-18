@@ -18,8 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional, Sequence
+from typing import Any, Sequence
 
+from usersim.selection.profiles import GENEROUS, SelectionProfile, applicable_gates
 from usersim.taxonomy.eval_cell import (
     decode_cell,
     normalize_axis_score,
@@ -27,7 +28,6 @@ from usersim.taxonomy.eval_cell import (
     score_from_eval_cell,
     scorer_state,
 )
-from usersim.selection.profiles import GENEROUS, SelectionProfile, applicable_gates
 
 # Added columns on the annotated / curated frames.
 COL_PASSED = "selection_passed"
@@ -53,11 +53,11 @@ ADDED_COLUMNS = (
 class SelectionVerdict:
     trajectory_id: str
     passed: bool
-    quality_score: Optional[float]
+    quality_score: float | None
     axis_scores: dict[str, float]
     failed_gates: list[str]
-    drop_reason: Optional[str]
-    split: Optional[str]
+    drop_reason: str | None
+    split: str | None
 
 
 @dataclass
@@ -67,9 +67,9 @@ class SelectionSummary:
     passed: int
     dropped: int
     selected: int = 0
-    max_records: Optional[int] = None
-    max_per_locale: Optional[int] = None
-    stratify_by: Optional[tuple[str, ...]] = None
+    max_records: int | None = None
+    max_per_locale: int | None = None
+    stratify_by: tuple[str, ...] | None = None
     drop_reasons: dict[str, int] = field(default_factory=dict)
     kept_by_group: dict[str, int] = field(default_factory=dict)
     holdout: dict[str, int] = field(default_factory=dict)
@@ -97,7 +97,7 @@ class SelectionResult:
     summary: SelectionSummary
 
 
-def _split_for(persona_uuid: Any, fraction: float) -> Optional[str]:
+def _split_for(persona_uuid: Any, fraction: float) -> str | None:
     """Deterministically bucket a persona into train/holdout by uuid hash."""
     if fraction <= 0.0:
         return None
@@ -106,7 +106,7 @@ def _split_for(persona_uuid: Any, fraction: float) -> Optional[str]:
     return "holdout" if bucket < fraction else "train"
 
 
-def _quality_score(cell: dict, profile: SelectionProfile) -> Optional[float]:
+def _quality_score(cell: dict, profile: SelectionProfile) -> float | None:
     """Unweighted mean of normalized (0-1) applicable 1-5 judge axes."""
     from usersim.taxonomy.eval_cell import axis_scale
 
@@ -129,9 +129,7 @@ def _judge_disagreement_reasons(cell: dict, threshold: float) -> list[str]:
     for axis, judge_block in (cell.get("axes") or {}).items():
         if not isinstance(judge_block, dict):
             continue
-        scores = [
-            score_from_axis(v) for v in judge_block.values() if isinstance(v, dict)
-        ]
+        scores = [score_from_axis(v) for v in judge_block.values() if isinstance(v, dict)]
         scores = [s for s in scores if s is not None]
         if len(scores) >= 2 and (max(scores) - min(scores)) > threshold:
             out.append(f"judge_disagreement:{axis}")
@@ -196,9 +194,7 @@ def evaluate_row(
     # --- eval-cell gates (only when there is a usable cell) --------------
     if have_eval and not skipped:
         if profile.max_judge_disagreement is not None:
-            hard.extend(
-                _judge_disagreement_reasons(cell, profile.max_judge_disagreement)
-            )
+            hard.extend(_judge_disagreement_reasons(cell, profile.max_judge_disagreement))
         for gate in applicable_gates(profile, cell):
             score = score_from_eval_cell(cell, gate.axis)
             if score is None:
@@ -261,15 +257,13 @@ def _allocate_quota(counts: dict[Any, int], total: int) -> dict[Any, int]:
 
 
 def _sort_by_quality(df: Any) -> Any:
-    return df.sort_values(
-        [COL_QUALITY, "trajectory_id"], ascending=[False, True], na_position="last"
-    )
+    return df.sort_values([COL_QUALITY, "trajectory_id"], ascending=[False, True], na_position="last")
 
 
 def _apply_cap(
     curated: Any,
-    max_records: Optional[int],
-    stratify_by: Optional[Sequence[str]],
+    max_records: int | None,
+    stratify_by: Sequence[str] | None,
 ) -> Any:
     """Trim ``curated`` to ``max_records`` highest-quality rows.
 
@@ -293,18 +287,12 @@ def _apply_cap(
 
     import pandas as pd
 
-    parts = [
-        _sort_by_quality(groups[k]).head(quotas[k])
-        for k in groups
-        if quotas[k] > 0
-    ]
+    parts = [_sort_by_quality(groups[k]).head(quotas[k]) for k in groups if quotas[k] > 0]
     capped = pd.concat(parts) if parts else curated.iloc[0:0]
     return _sort_by_quality(capped).reset_index(drop=True)
 
 
-def _cap_per_group(
-    curated: Any, n: Optional[int], group_cols: Sequence[str]
-) -> Any:
+def _cap_per_group(curated: Any, n: int | None, group_cols: Sequence[str]) -> Any:
     """Keep at most ``n`` highest-quality rows within each group.
 
     Groups are defined by ``group_cols`` (e.g. ``("locale",)`` for a per-locale
@@ -321,10 +309,7 @@ def _cap_per_group(
         return curated
     import pandas as pd
 
-    parts = [
-        _sort_by_quality(g).head(n)
-        for _, g in curated.groupby(keys, sort=True, dropna=False)
-    ]
+    parts = [_sort_by_quality(g).head(n) for _, g in curated.groupby(keys, sort=True, dropna=False)]
     capped = pd.concat(parts) if parts else curated.iloc[0:0]
     return _sort_by_quality(capped).reset_index(drop=True)
 
@@ -335,9 +320,9 @@ def select_trajectories(
     *,
     profile: SelectionProfile = GENEROUS,
     eval_column: str = "assistant_eval",
-    max_records: Optional[int] = None,
-    max_per_locale: Optional[int] = None,
-    stratify_by: Optional[Sequence[str]] = ("probe_family",),
+    max_records: int | None = None,
+    max_per_locale: int | None = None,
+    stratify_by: Sequence[str] | None = ("probe_family",),
 ) -> SelectionResult:
     """Apply ``profile`` to every trajectory and return the curated subset.
 
@@ -407,9 +392,7 @@ def select_trajectories(
     return SelectionResult(curated=curated, all=annotated, summary=summary)
 
 
-def _summarize(
-    verdicts: list[SelectionVerdict], curated: Any, profile: SelectionProfile
-) -> SelectionSummary:
+def _summarize(verdicts: list[SelectionVerdict], curated: Any, profile: SelectionProfile) -> SelectionSummary:
     total = len(verdicts)
     passed = sum(1 for v in verdicts if v.passed)
     drop_reasons: dict[str, int] = {}

@@ -4,6 +4,12 @@
 """Tests for core/behavioral.py -- OCEAN->behavioral parameter computation."""
 
 from usersim.engine.core.behavioral import (
+    _education_ordinal,
+    _extract_ocean,
+    _extract_ocean_metadata,
+    _infer_tech_literacy,
+    _is_tech_occupation,
+    _parse_ocean_value,
     compute_behavioral_profile,
     compute_disclosure_style,
     compute_frustration_level,
@@ -13,12 +19,6 @@ from usersim.engine.core.behavioral import (
     format_interaction_style_instructions,
     get_conversation_language,
     get_frustration_prompt,
-    _education_ordinal,
-    _extract_ocean,
-    _extract_ocean_metadata,
-    _infer_tech_literacy,
-    _is_tech_occupation,
-    _parse_ocean_value,
 )
 
 
@@ -286,40 +286,65 @@ class TestComputeUserInteractionStyle:
     def test_high_neuroticism_low_agreeableness_is_confrontational(self):
         profile = {
             "patience": 0.2,
-            "ocean": {"neuroticism": 0.8, "agreeableness": 0.3, "openness": 0.5,
-                       "conscientiousness": 0.5, "extraversion": 0.5},
+            "ocean": {
+                "neuroticism": 0.8,
+                "agreeableness": 0.3,
+                "openness": 0.5,
+                "conscientiousness": 0.5,
+                "extraversion": 0.5,
+            },
         }
         assert compute_user_interaction_style(profile) == "confrontational"
 
     def test_high_neuroticism_low_patience_is_frustrated(self):
         profile = {
             "patience": 0.3,
-            "ocean": {"neuroticism": 0.7, "agreeableness": 0.5, "openness": 0.5,
-                       "conscientiousness": 0.5, "extraversion": 0.5},
+            "ocean": {
+                "neuroticism": 0.7,
+                "agreeableness": 0.5,
+                "openness": 0.5,
+                "conscientiousness": 0.5,
+                "extraversion": 0.5,
+            },
         }
         assert compute_user_interaction_style(profile) == "frustrated"
 
     def test_high_agreeableness_low_neuroticism_is_cooperative(self):
         profile = {
             "patience": 0.8,
-            "ocean": {"neuroticism": 0.2, "agreeableness": 0.8, "openness": 0.5,
-                       "conscientiousness": 0.5, "extraversion": 0.5},
+            "ocean": {
+                "neuroticism": 0.2,
+                "agreeableness": 0.8,
+                "openness": 0.5,
+                "conscientiousness": 0.5,
+                "extraversion": 0.5,
+            },
         }
         assert compute_user_interaction_style(profile) == "cooperative"
 
     def test_low_agreeableness_is_impatient(self):
         profile = {
             "patience": 0.5,
-            "ocean": {"neuroticism": 0.4, "agreeableness": 0.3, "openness": 0.5,
-                       "conscientiousness": 0.5, "extraversion": 0.5},
+            "ocean": {
+                "neuroticism": 0.4,
+                "agreeableness": 0.3,
+                "openness": 0.5,
+                "conscientiousness": 0.5,
+                "extraversion": 0.5,
+            },
         }
         assert compute_user_interaction_style(profile) == "impatient"
 
     def test_moderate_is_neutral(self):
         profile = {
             "patience": 0.5,
-            "ocean": {"neuroticism": 0.5, "agreeableness": 0.5, "openness": 0.5,
-                       "conscientiousness": 0.5, "extraversion": 0.5},
+            "ocean": {
+                "neuroticism": 0.5,
+                "agreeableness": 0.5,
+                "openness": 0.5,
+                "conscientiousness": 0.5,
+                "extraversion": 0.5,
+            },
         }
         assert compute_user_interaction_style(profile) == "neutral"
 
@@ -354,7 +379,9 @@ class TestComputeFrustrationLevel:
         assert level <= 1
 
     def test_confrontational_escalates_fast(self):
-        level = compute_frustration_level("confrontational", turn_idx=1, assistant_failures=1, patience=0.3, max_turns=3)
+        level = compute_frustration_level(
+            "confrontational", turn_idx=1, assistant_failures=1, patience=0.3, max_turns=3
+        )
         assert level >= 2
 
     def test_no_failures_low_frustration(self):
@@ -362,7 +389,9 @@ class TestComputeFrustrationLevel:
         assert level == 0
 
     def test_clamped_to_three(self):
-        level = compute_frustration_level("confrontational", turn_idx=5, assistant_failures=5, patience=0.1, max_turns=8)
+        level = compute_frustration_level(
+            "confrontational", turn_idx=5, assistant_failures=5, patience=0.1, max_turns=8
+        )
         assert level == 3
 
     def test_frustrated_starts_elevated(self):
@@ -370,13 +399,17 @@ class TestComputeFrustrationLevel:
         assert level >= 1
 
     def test_proportional_thresholds_3_turns(self):
-        level_early = compute_frustration_level("impatient", turn_idx=0, assistant_failures=0, patience=0.3, max_turns=3)
+        level_early = compute_frustration_level(
+            "impatient", turn_idx=0, assistant_failures=0, patience=0.3, max_turns=3
+        )
         level_mid = compute_frustration_level("impatient", turn_idx=1, assistant_failures=0, patience=0.3, max_turns=3)
         level_late = compute_frustration_level("impatient", turn_idx=2, assistant_failures=0, patience=0.3, max_turns=3)
         assert level_late >= level_mid >= level_early
 
     def test_proportional_thresholds_8_turns(self):
-        level_early = compute_frustration_level("impatient", turn_idx=0, assistant_failures=0, patience=0.3, max_turns=8)
+        level_early = compute_frustration_level(
+            "impatient", turn_idx=0, assistant_failures=0, patience=0.3, max_turns=8
+        )
         level_mid = compute_frustration_level("impatient", turn_idx=4, assistant_failures=0, patience=0.3, max_turns=8)
         level_late = compute_frustration_level("impatient", turn_idx=6, assistant_failures=0, patience=0.3, max_turns=8)
         assert level_late >= level_mid >= level_early

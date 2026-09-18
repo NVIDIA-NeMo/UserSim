@@ -39,21 +39,25 @@ def _stage_trajectory_run(
     rows = []
     for locale in locales:
         for i in range(n_per_locale):
-            rows.append({
-                "trajectory_id": f"{run_id}_{locale}_{i}",
-                "locale": locale,
-                "probe_family": "tool_calling",
-            })
+            rows.append(
+                {
+                    "trajectory_id": f"{run_id}_{locale}_{i}",
+                    "locale": locale,
+                    "probe_family": "tool_calling",
+                }
+            )
     write_run_partition(pd.DataFrame(rows), trajectory_root, run_id)
 
 
 def _stage_eval_run(eval_root: Path, run_id: str) -> None:
-    rows = [{
-        "trajectory_id": f"{run_id}_en_US_0",
-        "locale": "en_US",
-        "probe_family": "tool_calling",
-        "assistant_eval": "{}",
-    }]
+    rows = [
+        {
+            "trajectory_id": f"{run_id}_en_US_0",
+            "locale": "en_US",
+            "probe_family": "tool_calling",
+            "assistant_eval": "{}",
+        }
+    ]
     write_run_partition(pd.DataFrame(rows), eval_root, run_id)
 
 
@@ -88,20 +92,26 @@ def test_lists_runs_with_counts_and_flags(tmp_path: Path) -> None:
     eval_root = tmp_path / "evaluations"
     report_root = tmp_path / "report"
     _stage_trajectory_run(
-        trajectory_root, "1714074853",
+        trajectory_root,
+        "1714074853",
         locales=["en_US", "fr_FR", "ja_JP"],
         n_per_locale=2,
     )
     _stage_trajectory_run(
-        trajectory_root, "1714000000",
-        locales=["en_US"], n_per_locale=4,
+        trajectory_root,
+        "1714000000",
+        locales=["en_US"],
+        n_per_locale=4,
     )
     # Only the older run has eval data; only the newer run has a report.
     _stage_eval_run(eval_root, "1714000000")
     _stage_report_run(report_root, "1714074853")
 
     out = _capture(
-        print_available_runs, trajectory_root, eval_root, report_root,
+        print_available_runs,
+        trajectory_root,
+        eval_root,
+        report_root,
     )
     # Both run ids appear in the table.
     assert "1714074853" in out
@@ -123,43 +133,50 @@ def test_models_block_surfaces_assistant_model_from_manifest(
 ) -> None:
     trajectory_root = tmp_path / "trajectories"
     _stage_trajectory_run(
-        trajectory_root, "1714074853", locales=["en_US"], n_per_locale=1,
+        trajectory_root,
+        "1714074853",
+        locales=["en_US"],
+        n_per_locale=1,
     )
     # Hand-write a manifest so the helper can surface the assistant model.
     manifest_path = trajectory_root / "run=1714074853" / "_manifest.json"
-    manifest_path.write_text(json.dumps({
-        "manifest_version": 1,
-        "run_id": "1714074853",
-        "timestamp": "2024-04-25T00:00:00Z",
-        "models": {
-            "assistant_model": {
-                "alias": "assistant_model",
-                "model": "openai/gpt-oss-120b",
-                "provider": "nvidia",
-                "endpoint": None,
-                "api_key_env_var": "NVIDIA_API_KEY",
-                "temperature": 1.0,
-                "top_p": 1.0,
-                "max_tokens": 8192,
-                "max_parallel_requests": 4,
-                "timeout": 300,
-                "extra_body": {"reasoning_effort": "high"},
-            },
-            "user_model": {
-                "alias": "user_model",
-                "model": "openai/gpt-oss-20b",
-                "provider": "nvidia",
-                "endpoint": None,
-                "api_key_env_var": "NVIDIA_API_KEY",
-                "temperature": 1.0,
-                "top_p": 1.0,
-                "max_tokens": 1024,
-                "max_parallel_requests": 4,
-                "timeout": None,
-                "extra_body": None,
-            },
-        },
-    }))
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "manifest_version": 1,
+                "run_id": "1714074853",
+                "timestamp": "2024-04-25T00:00:00Z",
+                "models": {
+                    "assistant_model": {
+                        "alias": "assistant_model",
+                        "model": "openai/gpt-oss-120b",
+                        "provider": "nvidia",
+                        "endpoint": None,
+                        "api_key_env_var": "NVIDIA_API_KEY",
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "max_tokens": 8192,
+                        "max_parallel_requests": 4,
+                        "timeout": 300,
+                        "extra_body": {"reasoning_effort": "high"},
+                    },
+                    "user_model": {
+                        "alias": "user_model",
+                        "model": "openai/gpt-oss-20b",
+                        "provider": "nvidia",
+                        "endpoint": None,
+                        "api_key_env_var": "NVIDIA_API_KEY",
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "max_tokens": 1024,
+                        "max_parallel_requests": 4,
+                        "timeout": None,
+                        "extra_body": None,
+                    },
+                },
+            }
+        )
+    )
 
     out = _capture(
         print_available_runs,
@@ -177,7 +194,10 @@ def test_models_block_surfaces_assistant_model_from_manifest(
 def test_missing_manifest_renders_em_dash(tmp_path: Path) -> None:
     trajectory_root = tmp_path / "trajectories"
     _stage_trajectory_run(
-        trajectory_root, "1714074853", locales=["en_US"], n_per_locale=1,
+        trajectory_root,
+        "1714074853",
+        locales=["en_US"],
+        n_per_locale=1,
     )
     # No manifest written -- the helper should render `—` in the models cell.
     out = _capture(
@@ -202,9 +222,7 @@ class TestDisplayPath:
         repo = tmp_path / "fake-repo"
         (repo / "output" / "trajectories").mkdir(parents=True)
         (repo / "pyproject.toml").write_text("")
-        assert _display_path(repo / "output" / "trajectories") == (
-            "fake-repo/output/trajectories"
-        )
+        assert _display_path(repo / "output" / "trajectories") == ("fake-repo/output/trajectories")
 
     def test_path_with_git_marker_works_without_pyproject(self, tmp_path: Path) -> None:
         from usersim.reporting.runs import _display_path
@@ -215,7 +233,8 @@ class TestDisplayPath:
         assert _display_path(repo / "output") == "other-repo/output"
 
     def test_path_outside_any_repo_falls_back_to_last_two_components(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         from usersim.reporting.runs import _display_path
 
@@ -228,6 +247,7 @@ class TestDisplayPath:
 
 
 # ── resuming a run you stopped part-way ──────────────────────────────────────
+
 
 def _simulate_notebook_source() -> str:
     import json

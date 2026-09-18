@@ -17,13 +17,12 @@ import logging
 import os
 import subprocess
 from functools import lru_cache
-from typing import Optional
 
 logger = logging.getLogger("usersim.engine")
 
 
 @lru_cache(maxsize=1)
-def get_code_sha() -> Optional[str]:
+def get_code_sha() -> str | None:
     """Return the current git SHA (short form), or None if unavailable.
 
     Cached for the lifetime of the process — we do not expect the SHA
@@ -48,16 +47,14 @@ def get_code_sha() -> Optional[str]:
         return None
 
     if result.returncode != 0:
-        logger.debug(
-            f"  |-- get_code_sha: git rev-parse failed: {result.stderr.strip()}"
-        )
+        logger.debug(f"  |-- get_code_sha: git rev-parse failed: {result.stderr.strip()}")
         return None
 
     sha = result.stdout.strip()
     return sha or None
 
 
-def get_nemotron_personas_version() -> Optional[str]:
+def get_nemotron_personas_version() -> str | None:
     """Best-effort version tag for the Nemotron-Personas dataset in use.
 
     Today the dataset's version is not explicitly exposed; we record

@@ -18,7 +18,12 @@ UV ?= uv
 -include $(wildcard _*/targets.mk)
 
 # Overridable so CI can scope a job without editing recipes.
-PY_SRC   ?= src
+#
+# scripts/ and templates/ are in scope deliberately. The gate scripts run in
+# CI, and templates/probe/ is example code a contributor copies, so both
+# should meet the same bar as src/. Leaving them out meant a later scope
+# change would trigger a second repo-wide reformat.
+PY_SRC   ?= src scripts templates
 PY_TESTS ?= tests conftest.py
 PY_ALL   := $(PY_SRC) $(PY_TESTS)
 
@@ -93,11 +98,9 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-# `format-check` is not yet part of `check-all`; run `make format` to apply
-# formatting in the meantime.
-check-all: lint  ## Run every static check CI enforces
+check-all: lint format-check  ## Run every static check CI enforces
 
-check-all-fix: lint-fix  ## Fix everything fixable, then you re-review
+check-all-fix: lint-fix format  ## Fix everything fixable, then you re-review
 
 # --- test ------------------------------------------------------------------
 

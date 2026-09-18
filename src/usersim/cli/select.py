@@ -204,9 +204,7 @@ def _print_funnel(summary) -> None:
         print(f"  selected:      {summary.selected}")
     if summary.drop_reasons:
         print("  drop reasons:")
-        for reason, count in sorted(
-            summary.drop_reasons.items(), key=lambda kv: (-kv[1], kv[0])
-        ):
+        for reason, count in sorted(summary.drop_reasons.items(), key=lambda kv: (-kv[1], kv[0])):
             print(f"    {reason:40s} {count}")
     if summary.holdout:
         print(f"  holdout split: {summary.holdout}")
@@ -224,11 +222,7 @@ def run(args: argparse.Namespace) -> int:
 
     profile = _resolve_profile(args)
     max_records = args.max_records if args.max_records and args.max_records > 0 else None
-    max_per_locale = (
-        args.max_per_locale
-        if args.max_per_locale and args.max_per_locale > 0
-        else None
-    )
+    max_per_locale = args.max_per_locale if args.max_per_locale and args.max_per_locale > 0 else None
     stratify_by = None
     if args.stratify_by and args.stratify_by.strip().lower() != "none":
         stratify_by = tuple(c.strip() for c in args.stratify_by.split(",") if c.strip())
@@ -253,28 +247,35 @@ def run(args: argparse.Namespace) -> int:
         print(f"  keep_all:      {args.keep_all}")
         print(f"  eval_column:   {args.eval_column}")
         print(f"  out:           {args.out}")
-        print(f"  hf_repo:       {args.hf_repo or '(none)'}"
-              + ("" if not args.hf_repo else f"  private={not args.hf_public}"))
+        print(
+            f"  hf_repo:       {args.hf_repo or '(none)'}"
+            + ("" if not args.hf_repo else f"  private={not args.hf_public}")
+        )
         return 0
 
-    traj_df, eval_df, run_id = load_runs(
-        args.trajectories, args.evaluations, runs=runs
-    )
+    traj_df, eval_df, run_id = load_runs(args.trajectories, args.evaluations, runs=runs)
     print(f"  run_id:        {run_id}")
-    logger.info("loaded %d trajectory rows, %d eval rows", len(traj_df),
-                0 if eval_df is None else len(eval_df))
+    logger.info("loaded %d trajectory rows, %d eval rows", len(traj_df), 0 if eval_df is None else len(eval_df))
 
     result = select_trajectories(
-        traj_df, eval_df, profile=profile, eval_column=args.eval_column,
-        max_records=max_records, max_per_locale=max_per_locale,
+        traj_df,
+        eval_df,
+        profile=profile,
+        eval_column=args.eval_column,
+        max_records=max_records,
+        max_per_locale=max_per_locale,
         stratify_by=stratify_by,
     )
     _print_funnel(result.summary)
 
     to_write = result.all if args.keep_all else result.curated
     out_root = write_curated_dataset(
-        to_write, args.out, run_id, profile,
-        summary=result.summary, eval_column=args.eval_column,
+        to_write,
+        args.out,
+        run_id,
+        profile,
+        summary=result.summary,
+        eval_column=args.eval_column,
         columns=args.schema,
     )
     label = "annotated" if args.keep_all else "curated"
@@ -282,13 +283,20 @@ def run(args: argparse.Namespace) -> int:
 
     if args.hf_repo:
         manifest = build_manifest(
-            profile=profile, summary=result.summary, source_run=str(run_id),
-            eval_column=args.eval_column, provenance=_provenance(to_write, args.eval_column),
+            profile=profile,
+            summary=result.summary,
+            source_run=str(run_id),
+            eval_column=args.eval_column,
+            provenance=_provenance(to_write, args.eval_column),
             generation_model=args.generation_model,
         )
         url = push_to_hf(
-            to_write, args.hf_repo, private=not args.hf_public,
-            manifest=manifest, profile=profile, columns=args.schema,
+            to_write,
+            args.hf_repo,
+            private=not args.hf_public,
+            manifest=manifest,
+            profile=profile,
+            columns=args.schema,
         )
         print(f"uploaded {len(to_write)} rows to {url} (private={not args.hf_public})")
     return 0

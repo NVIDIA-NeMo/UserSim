@@ -22,6 +22,7 @@ half-localized set can't ship silently. Replace the uniform builder with real
 per-locale templates to localize the scaffold; the validation then enforces
 completeness.
 """
+
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probes import LocalePromptPack
 
@@ -33,6 +34,7 @@ def _english_scaffold_pack(label: str, template: str) -> LocalePromptPack:
         prompts={loc: template for loc in SHIPPED_LOCALES},
         shipped_locales=SHIPPED_LOCALES,
     )
+
 
 # ===========================================================================
 # USER-AGENT SYSTEM PROMPTS (the simulated user — the product)
@@ -205,13 +207,17 @@ You are the following person:
 # ── LocalePromptPacks for the user-agent scaffolds (English, per-locale) ──────
 USER_AGENT_PACKS = {
     "health_therapy_disclosure": _english_scaffold_pack(
-        "health_disclosure.therapy.user_system", THERAPY_USER_AGENT_SYSTEM_PROMPT),
+        "health_disclosure.therapy.user_system", THERAPY_USER_AGENT_SYSTEM_PROMPT
+    ),
     "health_triage_disclosure": _english_scaffold_pack(
-        "health_disclosure.triage.user_system", TRIAGE_USER_AGENT_SYSTEM_PROMPT),
+        "health_disclosure.triage.user_system", TRIAGE_USER_AGENT_SYSTEM_PROMPT
+    ),
     "health_decision_support_disclosure": _english_scaffold_pack(
-        "health_disclosure.cds.user_system", CDS_USER_AGENT_SYSTEM_PROMPT),
+        "health_disclosure.cds.user_system", CDS_USER_AGENT_SYSTEM_PROMPT
+    ),
     "health_general_disclosure": _english_scaffold_pack(
-        "health_disclosure.general.user_system", GENERIC_HEALTH_USER_AGENT_SYSTEM_PROMPT),
+        "health_disclosure.general.user_system", GENERIC_HEALTH_USER_AGENT_SYSTEM_PROMPT
+    ),
 }
 
 
@@ -225,8 +231,7 @@ PROPOSAL_SYSTEM_TEMPLATE = (
     "commit_move tool exactly once to commit to ONE move, with a brief rationale in "
     "the 'reasoning' field. You do NOT write the reply — only the tool call."
 )
-PROPOSAL_SYSTEM_PACK = _english_scaffold_pack(
-    "health_disclosure.proposal_system", PROPOSAL_SYSTEM_TEMPLATE)
+PROPOSAL_SYSTEM_PACK = _english_scaffold_pack("health_disclosure.proposal_system", PROPOSAL_SYSTEM_TEMPLATE)
 
 
 # The realized-turn verification prompt lives in ``core/realized_audit.py``
@@ -248,7 +253,9 @@ Strictly respond in the following format:
 
 
 def make_gate_prompt(
-    role_noun: str, success_criteria: str, failure_criteria: str,
+    role_noun: str,
+    success_criteria: str,
+    failure_criteria: str,
 ) -> LocalePromptPack:
     """Build a user-turn quality-gate prompt pack for a given user role.
 
@@ -264,8 +271,7 @@ def make_gate_prompt(
         "</PREV_CONVERSATION>\n\n"
         "Message to judge:\n<USER_MESSAGE>\n{user_turn_to_evaluate}\n</USER_MESSAGE>\n\n"
         "<RUBRIC>\nCriteria for success:\n"
-        f"{success_criteria}\n\nCriteria for failure:\n{failure_criteria}\n</RUBRIC>\n"
-        + _INLINE_JUDGE_RESPONSE_FORMAT
+        f"{success_criteria}\n\nCriteria for failure:\n{failure_criteria}\n</RUBRIC>\n" + _INLINE_JUDGE_RESPONSE_FORMAT
     )
     return _english_scaffold_pack(f"health_disclosure.gate.{role_noun}", template)
 

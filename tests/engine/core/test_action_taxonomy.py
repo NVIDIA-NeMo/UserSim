@@ -17,6 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.action_taxonomy import (
     ActionTaxonomy,
     ActionTaxonomyError,
@@ -24,11 +25,9 @@ from usersim.engine.core.action_taxonomy import (
     load_action_taxonomy_default,
     reset_action_taxonomy_cache,
 )
-from usersim.engine.core._assets import packaged_assets_dir
-
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SHIPPED_PATH = (packaged_assets_dir() / "safety_agentic/action_taxonomy.yaml")
+SHIPPED_PATH = packaged_assets_dir() / "safety_agentic/action_taxonomy.yaml"
 
 
 @pytest.fixture(autouse=True)
@@ -55,12 +54,7 @@ def _minimal_yaml(
     category = override_category or "read_only"
     risk_tier = override_risk_tier or "info"
     blast = override_blast_radius or "none"
-    p_user_detect = override_p_user_detect or (
-        "p_user_detect:\n"
-        "      value: 1.0\n"
-        "      rationale: >\n"
-        "        N/A.\n"
-    )
+    p_user_detect = override_p_user_detect or ("p_user_detect:\n      value: 1.0\n      rationale: >\n        N/A.\n")
     lines = [
         'schema_version: "v0.1"',
         'risk_tiers: ["info", "low", "medium", "high", "critical"]',
@@ -137,7 +131,8 @@ class TestMinimalLoad:
         assert tax.by_name("does_not_exist") is None
 
     def test_blast_radius_rank_returns_none_for_unknown_level(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         p = _write(tmp_path / "t.yaml", _minimal_yaml())
         tax = load_action_taxonomy(p)
@@ -175,7 +170,8 @@ class TestSchemaValidation:
 
     def test_missing_risk_tiers_rejected(self, tmp_path: Path) -> None:
         y = _minimal_yaml().replace(
-            'risk_tiers: ["info", "low", "medium", "high", "critical"]\n', "",
+            'risk_tiers: ["info", "low", "medium", "high", "critical"]\n',
+            "",
         )
         p = _write(tmp_path / "t.yaml", y)
         with pytest.raises(ActionTaxonomyError, match="risk_tiers"):
@@ -214,12 +210,9 @@ class TestSchemaValidation:
     def test_p_user_detect_out_of_range_rejected(self, tmp_path: Path) -> None:
         p = _write(
             tmp_path / "t.yaml",
-            _minimal_yaml(override_p_user_detect=(
-                "p_user_detect:\n"
-                "      value: 1.5\n"
-                "      rationale: >\n"
-                "        out of range\n"
-            )),
+            _minimal_yaml(
+                override_p_user_detect=("p_user_detect:\n      value: 1.5\n      rationale: >\n        out of range\n")
+            ),
         )
         with pytest.raises(ActionTaxonomyError, match="p_user_detect.value"):
             load_action_taxonomy(p)
@@ -246,7 +239,7 @@ class TestSchemaValidation:
             "      value: 1.0\n"
             "      rationale: >\n"
             "        dup.\n"
-            '    tags: []\n'
+            "    tags: []\n"
         )
         p = _write(tmp_path / "t.yaml", y)
         with pytest.raises(ActionTaxonomyError, match="duplicate name"):

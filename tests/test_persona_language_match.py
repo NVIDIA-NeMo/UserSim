@@ -57,22 +57,24 @@ class _FakeDD:
 
 
 class TestPersonaLanguageForLocale:
-    @pytest.mark.parametrize("locale,expected", [
-        ("ta_Taml_IN", "Tamil"),
-        ("ml_Mlym_IN", "Malayalam"),
-        ("bn_Beng_IN", "Bengali"),
-        ("te_Telu_IN", "Telugu"),
-        ("pa_Guru_IN", "Punjabi"),
-        ("ur_Arab_IN", "Urdu"),
-    ])
+    @pytest.mark.parametrize(
+        "locale,expected",
+        [
+            ("ta_Taml_IN", "Tamil"),
+            ("ml_Mlym_IN", "Malayalam"),
+            ("bn_Beng_IN", "Bengali"),
+            ("te_Telu_IN", "Telugu"),
+            ("pa_Guru_IN", "Punjabi"),
+            ("ur_Arab_IN", "Urdu"),
+        ],
+    )
     def test_variants_use_en_in_latin_names(self, locale, expected):
         """Preview variants sample ``en_IN``, which spells languages in Latin."""
         assert persona_language_for_locale(locale, "en_IN") == expected
 
     def test_romanized_twin_matches_its_native_twin(self):
         """A language's romanized locale resolves to the same language."""
-        assert (persona_language_for_locale("ta_Latn_IN", "en_IN")
-                == persona_language_for_locale("ta_Taml_IN", "en_IN"))
+        assert persona_language_for_locale("ta_Latn_IN", "en_IN") == persona_language_for_locale("ta_Taml_IN", "en_IN")
 
     def test_devanagari_corpus_uses_devanagari_name(self):
         """``hi_Deva_IN`` stores "हिंदी" — the Latin "Hindi" matches 0 rows."""
@@ -97,8 +99,7 @@ class TestPersonaLanguageForLocale:
         assert persona_language_for_locale("hi_Latn_IN", "en_IN") == "Hindi"
 
     def test_persona_locale_defaults_to_conversation_locale(self):
-        assert (persona_language_for_locale("hi_Deva_IN")
-                == persona_language_for_locale("hi_Deva_IN", "hi_Deva_IN"))
+        assert persona_language_for_locale("hi_Deva_IN") == persona_language_for_locale("hi_Deva_IN", "hi_Deva_IN")
 
     def test_unknown_locale_returns_none(self):
         """None so callers no-op rather than filter on a bogus value."""
@@ -133,15 +134,13 @@ class TestBothEntryPointsDefaultOff:
 
     def test_cli_default_is_off(self):
         args = cli._build_parser().parse_args(
-            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1",
-             "--out", "/tmp/x"]
+            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1", "--out", "/tmp/x"]
         )
         assert args.match_persona_language is False
 
     def test_cli_flag_turns_it_on(self):
         args = cli._build_parser().parse_args(
-            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1",
-             "--out", "/tmp/x", "--match-persona-language"]
+            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1", "--out", "/tmp/x", "--match-persona-language"]
         )
         assert args.match_persona_language is True
 
@@ -155,15 +154,22 @@ class TestBothEntryPointsDefaultOff:
         never language-match at all.
         """
         args = cli._build_parser().parse_args(
-            ["panel", "--locale", "ta_Taml_IN", "--num-personas", "5",
-             "--out", "/tmp/p.parquet"]
+            ["panel", "--locale", "ta_Taml_IN", "--num-personas", "5", "--out", "/tmp/p.parquet"]
         )
         assert args.match_persona_language is False
 
     def test_panel_flag_turns_it_on(self):
         args = cli._build_parser().parse_args(
-            ["panel", "--locale", "ta_Taml_IN", "--num-personas", "5",
-             "--out", "/tmp/p.parquet", "--match-persona-language"]
+            [
+                "panel",
+                "--locale",
+                "ta_Taml_IN",
+                "--num-personas",
+                "5",
+                "--out",
+                "/tmp/p.parquet",
+                "--match-persona-language",
+            ]
         )
         assert args.match_persona_language is True
 
@@ -211,7 +217,10 @@ class TestPersonaSamplerParams:
 
     def test_match_uses_corpus_spelling_for_hindi(self):
         p = persona_sampler_params(
-            _FakeDD(), "hi_Deva_IN", "hi_Deva_IN", match_language=True,
+            _FakeDD(),
+            "hi_Deva_IN",
+            "hi_Deva_IN",
+            match_language=True,
         )
         assert p["select_field_values"] == {"first_language": ["हिंदी"]}
 
@@ -219,10 +228,17 @@ class TestPersonaSamplerParams:
         p = persona_sampler_params(_FakeDD(), "en_US", "zz_ZZ", match_language=True)
         assert "select_field_values" not in p
 
-    @pytest.mark.parametrize("corpus,locale", [
-        ("ja_JP", "ja_JP"), ("en_US", "en_US"), ("pt_BR", "pt_BR"),
-        ("ko_KR", "ko_KR"), ("fr_FR", "fr_FR"), ("en_SG", "en_SG"),
-    ])
+    @pytest.mark.parametrize(
+        "corpus,locale",
+        [
+            ("ja_JP", "ja_JP"),
+            ("en_US", "en_US"),
+            ("pt_BR", "pt_BR"),
+            ("ko_KR", "ko_KR"),
+            ("fr_FR", "fr_FR"),
+            ("en_SG", "en_SG"),
+        ],
+    )
     def test_match_is_noop_where_corpus_lacks_the_column(self, corpus, locale):
         """Only the India datasets carry ``first_language``.
 
@@ -249,8 +265,7 @@ class TestSimulateFlag:
 
     def test_flag_turns_it_on(self):
         args = cli._build_parser().parse_args(
-            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1",
-             "--out", "/tmp/x", "--match-persona-language"]
+            ["simulate", "--locale", "ta_Taml_IN", "--num-rows", "1", "--out", "/tmp/x", "--match-persona-language"]
         )
         assert args.match_persona_language is True
 
@@ -278,14 +293,10 @@ class TestManifestRecordsWhatWasApplied:
     """
 
     def test_absent_when_not_requested(self):
-        assert persona_language_filter(
-            "en_IN", "ta_Taml_IN", match_language=False
-        ) is None
+        assert persona_language_filter("en_IN", "ta_Taml_IN", match_language=False) is None
 
     def test_records_the_value_actually_used(self):
-        assert persona_language_filter(
-            "en_IN", "ta_Taml_IN", match_language=True
-        ) == {"first_language": ["Tamil"]}
+        assert persona_language_filter("en_IN", "ta_Taml_IN", match_language=True) == {"first_language": ["Tamil"]}
 
     def test_hindi_corpora_apply_different_values(self):
         """Same language, two spellings -- the reason the flag alone is
@@ -299,12 +310,8 @@ class TestManifestRecordsWhatWasApplied:
     def test_requested_but_not_applicable_records_nothing(self):
         """The case the flag alone gets wrong: matching asked for, corpus
         has no language column, nothing narrowed."""
-        assert persona_language_filter(
-            "en_US", "en_US", match_language=True
-        ) is None
-        assert persona_language_filter(
-            "ja_JP", "ja_JP", match_language=True
-        ) is None
+        assert persona_language_filter("en_US", "en_US", match_language=True) is None
+        assert persona_language_filter("ja_JP", "ja_JP", match_language=True) is None
 
     def test_scope_field_round_trips(self):
         import dataclasses
@@ -312,7 +319,9 @@ class TestManifestRecordsWhatWasApplied:
         from usersim.engine.core.manifest import ScopeInfo, _scope_from_dict
 
         scope = ScopeInfo(
-            locales=["ta_Taml_IN"], probes=[], probe_mix={},
+            locales=["ta_Taml_IN"],
+            probes=[],
+            probe_mix={},
             persona_language_filters={"ta_Taml_IN": {"first_language": ["Tamil"]}},
         )
         back = _scope_from_dict(dataclasses.asdict(scope))
@@ -398,7 +407,9 @@ class TestPopulationCountIsLogged:
         assert stats.eligible_rows == 1
 
     def test_en_in_warning_explains_the_full_population_mode(
-        self, tmp_path, caplog,
+        self,
+        tmp_path,
+        caplog,
     ):
         root = self._corpus(
             tmp_path,

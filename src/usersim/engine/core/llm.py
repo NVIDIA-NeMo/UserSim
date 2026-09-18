@@ -12,7 +12,7 @@ import random as _random
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
@@ -27,13 +27,11 @@ logger = logging.getLogger("usersim.engine")
 # set_debug_log_path(). The default location sits under the gitignored
 # output/ tree so an enabled run still cannot be committed by accident.
 _DEFAULT_DEBUG_LOG_PATH = Path("output/debug/debug_llm_responses.jsonl")
-_DEBUG_LOG_PATH = Path(
-    os.environ.get("USERSIM_DEBUG_LOG") or _DEFAULT_DEBUG_LOG_PATH
-)
+_DEBUG_LOG_PATH = Path(os.environ.get("USERSIM_DEBUG_LOG") or _DEFAULT_DEBUG_LOG_PATH)
 _DEBUG_LOG_ENABLED = bool(os.environ.get("USERSIM_DEBUG_LOG"))
 _CALL_COUNTER = 0
 _CALL_LOCK = threading.Lock()
-_PENDING_RECORDS: List[Dict[str, Any]] = []
+_PENDING_RECORDS: list[dict[str, Any]] = []
 
 _CONV_LOCAL = threading.local()
 
@@ -44,10 +42,7 @@ class ContextWindowError(RuntimeError):
     def __init__(self, alias: str, original: Exception) -> None:
         self.alias = alias
         self.original = original
-        super().__init__(
-            f"{alias} context window exceeded: "
-            f"{type(original).__name__}: {original}"
-        )
+        super().__init__(f"{alias} context window exceeded: {type(original).__name__}: {original}")
 
 
 #: Multiplier applied to a model's configured ``max_tokens`` for locales whose
@@ -61,7 +56,7 @@ class ContextWindowError(RuntimeError):
 NON_ASCII_TOKEN_SCALE = 2.0
 
 
-def scaled_max_tokens(facade: Any, scale: float) -> Dict[str, int]:
+def scaled_max_tokens(facade: Any, scale: float) -> dict[str, int]:
     """Return ``{"max_tokens": n}`` scaled from what ``facade`` is configured with.
 
     Returns an empty dict when the model sets no budget, which is how
@@ -87,14 +82,12 @@ def _rejects_max_tokens(error: Exception) -> bool:
     Matched on substrings because the wording differs across providers.
     """
     text = str(error).lower()
-    return "max_completion_tokens" in text and (
-        "unsupported" in text or "not supported" in text or "instead" in text
-    )
+    return "max_completion_tokens" in text and ("unsupported" in text or "not supported" in text or "instead" in text)
 
 
 def _is_context_window_error(error: Exception) -> bool:
     """Recognize context failures through provider wrapper/cause chains."""
-    pending: List[BaseException] = [error]
+    pending: list[BaseException] = [error]
     seen: set[int] = set()
     while pending:
         current = pending.pop()
@@ -122,7 +115,7 @@ def _is_context_window_error(error: Exception) -> bool:
 
 
 # ── Per-model call statistics (thread-safe) ──────────────────────────────
-_MODEL_STATS: Dict[str, Dict[str, float]] = {}
+_MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
 # ── Per-trajectory outcome hook (thread-local) ──────────────────────────
@@ -148,9 +141,7 @@ def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def
         _CONV_LOCAL.outcome_builder = builder
 
 
-def _feed_outcome_builder(
-    alias: str, input_tokens: int, output_tokens: int, elapsed_s: float
-) -> None:
+def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:
     """Forward per-call resource stats to the thread-local outcome builder, if set.
 
     Reasoning tokens are NOT captured here. DataDesigner's normalised
@@ -180,10 +171,10 @@ def _has_cjk(text: str) -> bool:
     for ch in text:
         cp = ord(ch)
         if (
-            0x4E00 <= cp <= 0x9FFF        # CJK Unified Ideographs
-            or 0x3040 <= cp <= 0x309F      # Hiragana
-            or 0x30A0 <= cp <= 0x30FF      # Katakana
-            or 0xAC00 <= cp <= 0xD7AF      # Hangul Syllables
+            0x4E00 <= cp <= 0x9FFF  # CJK Unified Ideographs
+            or 0x3040 <= cp <= 0x309F  # Hiragana
+            or 0x30A0 <= cp <= 0x30FF  # Katakana
+            or 0xAC00 <= cp <= 0xD7AF  # Hangul Syllables
         ):
             return True
     return False
@@ -206,11 +197,17 @@ def _record_stat(
     output_tokens: int = 0,
 ) -> None:
     with _CALL_LOCK:
-        s = _MODEL_STATS.setdefault(alias, {
-            "calls": 0, "total_s": 0.0,
-            "total_chars": 0, "total_words": 0,
-            "total_input_tokens": 0, "total_output_tokens": 0,
-        })
+        s = _MODEL_STATS.setdefault(
+            alias,
+            {
+                "calls": 0,
+                "total_s": 0.0,
+                "total_chars": 0,
+                "total_words": 0,
+                "total_input_tokens": 0,
+                "total_output_tokens": 0,
+            },
+        )
         s["calls"] += 1
         s["total_s"] += elapsed
         s["total_chars"] += content_len
@@ -219,14 +216,14 @@ def _record_stat(
         s["total_output_tokens"] += output_tokens
 
 
-def get_call_stats() -> Dict[str, Dict[str, Any]]:
+def get_call_stats() -> dict[str, dict[str, Any]]:
     """Return a snapshot of per-model call statistics."""
     with _CALL_LOCK:
         return {alias: dict(s) for alias, s in _MODEL_STATS.items()}
 
 
 # ── Per-record timing (thread-safe) ──────────────────────────────────────
-_RECORD_TIMES: List[float] = []
+_RECORD_TIMES: list[float] = []
 
 
 def record_finished(elapsed: float) -> None:
@@ -235,7 +232,7 @@ def record_finished(elapsed: float) -> None:
         _RECORD_TIMES.append(elapsed)
 
 
-def get_record_stats() -> Dict[str, float]:
+def get_record_stats() -> dict[str, float]:
     """Return record-level timing statistics."""
     with _CALL_LOCK:
         times = list(_RECORD_TIMES)
@@ -268,7 +265,7 @@ def set_conversation_id(conv_id: str) -> None:
     _CONV_LOCAL.conv_id = conv_id
 
 
-def append_debug_record(record: Dict[str, Any]) -> None:
+def append_debug_record(record: dict[str, Any]) -> None:
     """Append an arbitrary record to the pending debug log."""
     with _CALL_LOCK:
         global _CALL_COUNTER
@@ -290,10 +287,11 @@ def flush_debug_log() -> None:
         for r in records:
             f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
 
+
 from data_designer.engine.models.utils import ChatMessage
 
 
-def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]:
+def _dicts_to_chat_messages(messages: list[dict[str, Any]]) -> list[ChatMessage]:
     """Convert a list of plain dicts to ChatMessage objects for ModelFacade.
 
     A prior turn's ``reasoning_content`` is never forwarded: the
@@ -305,18 +303,20 @@ def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]
     ``assistant_message`` in ``core/probes.py``), so it stays available
     for analysis -- it is dropped only on the way back into a model.
     """
-    out: List[ChatMessage] = []
+    out: list[ChatMessage] = []
     for msg in messages:
         role = msg.get("role", "user")
         content = msg.get("content", "")
         if role == "system":
             out.append(ChatMessage.as_system(content))
         elif role == "assistant":
-            out.append(ChatMessage.as_assistant(
-                content=content,
-                reasoning_content=None,
-                tool_calls=msg.get("tool_calls") or None,
-            ))
+            out.append(
+                ChatMessage.as_assistant(
+                    content=content,
+                    reasoning_content=None,
+                    tool_calls=msg.get("tool_calls") or None,
+                )
+            )
         elif role == "tool":
             out.append(ChatMessage.as_tool(content, msg.get("tool_call_id", "")))
         else:
@@ -324,7 +324,7 @@ def _dicts_to_chat_messages(messages: List[Dict[str, Any]]) -> List[ChatMessage]
     return out
 
 
-def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
+def _assistant_message_to_dict(msg: Any) -> dict[str, Any]:
     """Convert a DD AssistantMessage to a plain dict.
 
     DD v0.5.3 ChatCompletionResponse has a .message (AssistantMessage)
@@ -333,7 +333,7 @@ def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
     so we convert to OpenAI format ({function: {name, arguments}}) which
     the verifier and generator code expects.
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "role": "assistant",
         "content": getattr(msg, "content", "") or "",
     }
@@ -344,14 +344,16 @@ def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
         converted = []
         for tc in raw_tool_calls:
             if hasattr(tc, "arguments_json"):
-                converted.append({
-                    "id": getattr(tc, "id", ""),
-                    "type": "function",
-                    "function": {
-                        "name": getattr(tc, "name", ""),
-                        "arguments": getattr(tc, "arguments_json", "{}"),
-                    },
-                })
+                converted.append(
+                    {
+                        "id": getattr(tc, "id", ""),
+                        "type": "function",
+                        "function": {
+                            "name": getattr(tc, "name", ""),
+                            "arguments": getattr(tc, "arguments_json", "{}"),
+                        },
+                    }
+                )
             elif hasattr(tc, "model_dump"):
                 converted.append(tc.model_dump())
             elif isinstance(tc, dict):
@@ -363,11 +365,11 @@ def _assistant_message_to_dict(msg: Any) -> Dict[str, Any]:
 
 
 def call_llm(
-    models: Dict[str, Any],
+    models: dict[str, Any],
     alias: str,
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Call an LLM via DD ModelFacade.completion().
 
     Returns a dict with role, content, and optionally reasoning_content
@@ -400,13 +402,13 @@ def call_llm(
             if _rejects_max_tokens(e) and "max_tokens" in kwargs:
                 kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
                 logger.debug(
-                    "  |-- %s rejects max_tokens; retrying with "
-                    "max_completion_tokens", alias,
+                    "  |-- %s rejects max_tokens; retrying with max_completion_tokens",
+                    alias,
                 )
                 continue
             if attempt >= _MAX_RETRIES:
                 raise
-            delay = min(_BASE_DELAY * (2 ** attempt), _MAX_DELAY)
+            delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
             jitter = _random.uniform(0, delay * 0.3)
             logger.warning(
                 f"  |-- LLM retry {attempt + 1}/{_MAX_RETRIES} for {alias}: "
@@ -436,21 +438,12 @@ def call_llm(
         # tiktoken on the trajectory's visible content. Some OpenAI-
         # shaped mocks expose prompt_tokens / completion_tokens, so
         # support both names.
-        input_tokens = (
-            getattr(usage, "input_tokens", None)
-            or getattr(usage, "prompt_tokens", None)
-            or 0
-        )
-        output_tokens = (
-            getattr(usage, "output_tokens", None)
-            or getattr(usage, "completion_tokens", None)
-            or 0
-        )
+        input_tokens = getattr(usage, "input_tokens", None) or getattr(usage, "prompt_tokens", None) or 0
+        output_tokens = getattr(usage, "output_tokens", None) or getattr(usage, "completion_tokens", None) or 0
     token_tag = f", {input_tokens}+{output_tokens} tok" if (input_tokens or output_tokens) else ""
 
     logger.debug(
-        f"  |-- LLM done: {alias} in {elapsed:.1f}s "
-        f"({content_len} chars / {word_cnt} words{tc_tag}{token_tag})"
+        f"  |-- LLM done: {alias} in {elapsed:.1f}s ({content_len} chars / {word_cnt} words{tc_tag}{token_tag})"
     )
     _record_stat(alias, elapsed, content_len, word_cnt, input_tokens, output_tokens)
     _feed_outcome_builder(alias, input_tokens, output_tokens, elapsed)
@@ -470,10 +463,7 @@ def call_llm(
         "content_len": content_len,
         "reasoning_len": len(reasoning) if reasoning else 0,
         "n_tool_calls": n_tool_calls,
-        "input_messages": [
-            {"role": m.get("role"), "content": m.get("content", "")}
-            for m in messages
-        ],
+        "input_messages": [{"role": m.get("role"), "content": m.get("content", "")} for m in messages],
         "content": result.get("content", ""),
         "reasoning_content": reasoning,
         "tool_calls": result.get("tool_calls"),

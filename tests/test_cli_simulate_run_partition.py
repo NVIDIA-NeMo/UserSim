@@ -47,7 +47,6 @@ from usersim.engine.core.storage import (
     write_locale_partition,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures: synthetic trajectory frame + minimal models config
 # ---------------------------------------------------------------------------
@@ -56,48 +55,58 @@ from usersim.engine.core.storage import (
 def _synthetic_trajectory(trajectory_id: str = "T-001") -> pd.DataFrame:
     """Single-row frame matching the simulator's output schema enough
     to exercise ``write_locale_partition`` + ``read_partitioned_dataset``."""
-    outcome = json.dumps({
-        "status": "ok",
-        "failure_class": None,
-        "failure_attribution": None,
-        "failure_detail": "",
-        "n_turns": 1,
-        "warnings": [],
-    })
-    return pd.DataFrame([{
-        "trajectory_id": trajectory_id,
-        "persona_uuid": f"p-{trajectory_id}",
-        "locale": "en_US",
-        "probe_family": "general_open_ended",
-        "probe_variant": "default",
-        "simulation_outcome": outcome,
-        "conversation_messages": "[]",
-    }])
+    outcome = json.dumps(
+        {
+            "status": "ok",
+            "failure_class": None,
+            "failure_attribution": None,
+            "failure_detail": "",
+            "n_turns": 1,
+            "warnings": [],
+        }
+    )
+    return pd.DataFrame(
+        [
+            {
+                "trajectory_id": trajectory_id,
+                "persona_uuid": f"p-{trajectory_id}",
+                "locale": "en_US",
+                "probe_family": "general_open_ended",
+                "probe_variant": "default",
+                "simulation_outcome": outcome,
+                "conversation_messages": "[]",
+            }
+        ]
+    )
 
 
 def _synthetic_context_failure() -> pd.DataFrame:
     frame = _synthetic_trajectory("CTX-FAIL")
-    frame.loc[0, "simulation_outcome"] = json.dumps({
-        "status": "failed",
-        "failure_class": "infrastructure_error",
-        "failure_attribution": "assistant_model",
-        "failure_detail": "assistant_model context window exceeded",
-        "n_turns": 1,
-        "warnings": [],
-    })
-    frame.loc[0, "conversation_messages"] = json.dumps([
-        {"role": "user", "content": "help"},
+    frame.loc[0, "simulation_outcome"] = json.dumps(
         {
-            "role": "assistant",
-            "content": "",
-            "tool_calls": [{"id": "c1", "function": {"name": "kb_search"}}],
-        },
-        {
-            "role": "tool",
-            "content": '{"results":[{"id":"d1","body":"evidence"}]}',
-            "tool_call_id": "c1",
-        },
-    ])
+            "status": "failed",
+            "failure_class": "infrastructure_error",
+            "failure_attribution": "assistant_model",
+            "failure_detail": "assistant_model context window exceeded",
+            "n_turns": 1,
+            "warnings": [],
+        }
+    )
+    frame.loc[0, "conversation_messages"] = json.dumps(
+        [
+            {"role": "user", "content": "help"},
+            {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [{"id": "c1", "function": {"name": "kb_search"}}],
+            },
+            {
+                "role": "tool",
+                "content": '{"results":[{"id":"d1","body":"evidence"}]}',
+                "tool_call_id": "c1",
+            },
+        ]
+    )
     frame.loc[0, "finance_task_id"] = "TASK-CTX"
     frame.loc[0, "retrieved_document_ids"] = '["d1"]'
     return frame
@@ -115,7 +124,8 @@ class TestRunIsolation:
     latest one."""
 
     def test_two_fresh_runs_isolate_into_separate_partitions(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         root = tmp_path / "trajectories"
 
@@ -123,13 +133,17 @@ class TestRunIsolation:
         run1 = new_run_id(now=1700000000)
         write_locale_partition(
             _synthetic_trajectory("OLD-001"),
-            root, locale="en_US", run_id=run1,
+            root,
+            locale="en_US",
+            run_id=run1,
         )
         # Run 2 (now): mint a fresh id and write.
         run2 = new_run_id(now=1800000000)
         write_locale_partition(
             _synthetic_trajectory("NEW-001"),
-            root, locale="en_US", run_id=run2,
+            root,
+            locale="en_US",
+            run_id=run2,
         )
 
         assert sorted(list_runs(root)) == sorted([run1, run2])
@@ -147,14 +161,18 @@ class TestRunIsolation:
         # run="all" surfaces both with a ``run`` column.
         df_all = read_partitioned_dataset(root, run="all")
         assert set(df_all["trajectory_id"].astype(str)) == {"OLD-001", "NEW-001"}
-        run_to_traj = dict(zip(
-            df_all["trajectory_id"].astype(str), df_all["run"].astype(str),
-        ))
+        run_to_traj = dict(
+            zip(
+                df_all["trajectory_id"].astype(str),
+                df_all["run"].astype(str),
+            )
+        )
         assert run_to_traj["OLD-001"] == run1
         assert run_to_traj["NEW-001"] == run2
 
     def test_resume_into_latest_run_appends_to_same_partition(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """RESUME semantics: writing into an existing run id with a
         new trajectory_id appends to that run's partition rather
@@ -163,12 +181,16 @@ class TestRunIsolation:
         run = new_run_id(now=1700000000)
         write_locale_partition(
             _synthetic_trajectory("FIRST"),
-            root, locale="en_US", run_id=run,
+            root,
+            locale="en_US",
+            run_id=run,
         )
         # Resume: another write with the same run id.
         write_locale_partition(
             _synthetic_trajectory("SECOND"),
-            root, locale="en_US", run_id=run,
+            root,
+            locale="en_US",
+            run_id=run,
         )
         assert list_runs(root) == [run]
         df = read_partitioned_dataset(root)
@@ -189,7 +211,9 @@ class TestNewRunIdWiring:
         assert int(rid_b) > int(rid_a)
 
     def test_simulate_helper_mints_new_run_when_skip_existing_false(
-        self, tmp_path: Path, monkeypatch,
+        self,
+        tmp_path: Path,
+        monkeypatch,
     ) -> None:
         """``cli.simulate._simulate_to_parquet`` with ``skip_existing=False``
         must call ``new_run_id`` and route writes under that new
@@ -200,15 +224,17 @@ class TestNewRunIdWiring:
         DataDesigner whose ``create().load_dataset()`` returns our
         synthetic frame. This isolates the run-id wiring without
         needing API keys."""
-        from usersim.cli.simulate import _simulate_to_parquet
         from usersim.cli._models import default_models_path, load_models_config
+        from usersim.cli.simulate import _simulate_to_parquet
 
         out = tmp_path / "trajs"
         out.mkdir()
         # Pre-existing "old" run on disk.
         write_locale_partition(
             _synthetic_trajectory("OLD"),
-            out, locale="en_US", run_id="1700000000",
+            out,
+            locale="en_US",
+            run_id="1700000000",
         )
 
         # Fake DataDesigner: returns our synthetic frame from
@@ -254,13 +280,9 @@ class TestNewRunIdWiring:
         runs = list_runs(out)
         assert "1700000000" in runs, runs
         fresh_runs = [r for r in runs if r != "1700000000"]
-        assert len(fresh_runs) == 1, (
-            f"expected exactly one new run id; got {fresh_runs}"
-        )
+        assert len(fresh_runs) == 1, f"expected exactly one new run id; got {fresh_runs}"
         new_id = fresh_runs[0]
-        assert int(new_id) > 1700000000, (
-            f"new run id {new_id} should be a current epoch second"
-        )
+        assert int(new_id) > 1700000000, f"new run id {new_id} should be a current epoch second"
 
         # The fresh run contains FRESH; the old run still contains OLD.
         df_new = read_partitioned_dataset(out, run=new_id)
@@ -285,20 +307,24 @@ class TestNewRunIdWiring:
         assert load_run_manifest("1700000000", out) is None
 
     def test_simulate_helper_resumes_into_latest_when_skip_existing_true(
-        self, tmp_path: Path, monkeypatch,
+        self,
+        tmp_path: Path,
+        monkeypatch,
     ) -> None:
         """``skip_existing=True`` resumes into the most-recent
         existing run; the FRESH trajectory lands in that same run
         partition, not a new one."""
-        from usersim.cli.simulate import _simulate_to_parquet
         from usersim.cli._models import default_models_path, load_models_config
+        from usersim.cli.simulate import _simulate_to_parquet
 
         out = tmp_path / "trajs"
         out.mkdir()
         existing_run = "1700000000"
         write_locale_partition(
             _synthetic_trajectory("OLD"),
-            out, locale="en_US", run_id=existing_run,
+            out,
+            locale="en_US",
+            run_id=existing_run,
         )
 
         class _FakeResult:

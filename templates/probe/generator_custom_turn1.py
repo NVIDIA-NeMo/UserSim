@@ -43,7 +43,7 @@ Total LOC: ~100. ``sov_ai_dynamic`` is a real example at ~280 LOC.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.probes import BankBackedProbe, register_probe
@@ -72,7 +72,7 @@ class DemoCustomTurn1Probe(BankBackedProbe):
     label = "demo_custom_turn1"
     bank_loader = staticmethod(_demo_taxonomy_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
-    bank_version_key: Optional[str] = None  # locale-keyed
+    bank_version_key: str | None = None  # locale-keyed
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -92,11 +92,17 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         )
 
     def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
-    ) -> Optional[_DemoCategory]:
+        self,
+        persona: dict,
+        bank: Any,
+        *,
+        cfg: Any,
+    ) -> _DemoCategory | None:
         return _DemoCategory(
-            id="cat-demo", placeholder=True,
-            invitation="Tell me about", subtopic_hint="demo subtopic",
+            id="cat-demo",
+            placeholder=True,
+            invitation="Tell me about",
+            subtopic_hint="demo subtopic",
         )
 
     def get_user_system_prompt(self) -> str:
@@ -111,12 +117,15 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         # any keys a verbatim helper might have already written.
         state.metadata.setdefault("probing_categories_explored", [self._task.id])
         state.metadata.setdefault(
-            "probing_subtopic_hints_used", [self._task.subtopic_hint],
+            "probing_subtopic_hints_used",
+            [self._task.subtopic_hint],
         )
 
     def format_followup_user_instructions(
-        self, turn_idx: int, state: Any,
-    ) -> List[str]:
+        self,
+        turn_idx: int,
+        state: Any,
+    ) -> list[str]:
         return [
             "Continue the conversation naturally — ask one follow-up "
             "question that goes deeper into the same topic, in your voice."
@@ -129,10 +138,6 @@ class DemoCustomTurn1Probe(BankBackedProbe):
         extras = super().build_result_extras(state)
         if self._task is not None:
             extras["probe_variant"] = self._task.id
-            extras["probing_categories_explored"] = list(
-                state.metadata.get("probing_categories_explored") or []
-            )
-            extras["probing_subtopic_hints_used"] = list(
-                state.metadata.get("probing_subtopic_hints_used") or []
-            )
+            extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])
+            extras["probing_subtopic_hints_used"] = list(state.metadata.get("probing_subtopic_hints_used") or [])
         return extras

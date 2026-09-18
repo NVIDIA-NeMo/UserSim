@@ -13,7 +13,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable, Literal, Mapping
 
-
 ALL_PROBES = "*"
 
 AggregationPolicy = Literal[
@@ -84,7 +83,8 @@ def _extension_capabilities() -> tuple[CapabilityDefinition, ...]:
                 logging.getLogger("usersim.engine").warning(
                     "  |-- extensions: capability %r (advertised as %r) collides "
                     "with an existing definition; ignoring it.",
-                    definition.id, name,
+                    definition.id,
+                    name,
                 )
                 continue
             known.add(definition.id)
@@ -150,11 +150,7 @@ def capabilities_missing_scorer(
 
 
 def probe_label_for_capability(definition: CapabilityDefinition) -> str:
-    probes = [
-        source.probe
-        for source in definition.sources
-        if source.role == "primary" and source.probe
-    ]
+    probes = [source.probe for source in definition.sources if source.role == "primary" and source.probe]
     unique = []
     for probe in probes:
         if probe not in unique:
@@ -433,7 +429,9 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
         ),
         sources=(
             EvidenceSource(
-                probe=ALL_PROBES, scorer=None, axes=("language_appropriateness",),
+                probe=ALL_PROBES,
+                scorer=None,
+                axes=("language_appropriateness",),
             ),
         ),
         # 3.5, not the 4.0 its sibling judge axes use. At 4.0 this passed ZERO
@@ -762,8 +760,7 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
             "dynamic.no_fabrication",
         ),
         next_action=(
-            "Inspect low-grounding / fabricated advisory trajectories; check "
-            "retrieval quality and the boundary rubric."
+            "Inspect low-grounding / fabricated advisory trajectories; check retrieval quality and the boundary rubric."
         ),
     ),
 ) + _finance_verifiable_by_institution_type()
@@ -800,15 +797,9 @@ _AXIS_IMPL_REFS = {
     "response_conciseness": "src/usersim/engine/evaluator/axes.py",
     "safety": "src/usersim/engine/evaluator/axes.py",
     # financial_services verifier + dynamic.* judge axes both live in its scorer.
-    "finance.tool_selection_rate": (
-        "src/usersim/engine/evaluator/scorers/financial_services.py"
-    ),
-    "dynamic.numeric_faithfulness": (
-        "src/usersim/engine/evaluator/scorers/financial_services.py"
-    ),
-    "dynamic.no_fabrication": (
-        "src/usersim/engine/evaluator/scorers/financial_services.py"
-    ),
+    "finance.tool_selection_rate": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
+    "dynamic.numeric_faithfulness": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
+    "dynamic.no_fabrication": ("src/usersim/engine/evaluator/scorers/financial_services.py"),
 }
 
 #: What each axis measures, in a reviewer's terms. Deterministic scorers compute a
