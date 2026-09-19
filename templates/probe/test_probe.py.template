@@ -174,7 +174,7 @@ class TestSimulateYourProbe:
         import sys
         assert PROBE_LABEL in _PROBE_REGISTRY
         probe_cls = resolve_probe(PROBE_LABEL)
-        module = sys.modules[probe_cls.constants_module_name]
+        module = sys.modules[probe_cls.__module__]
         assert module.PROBE_FAMILY == PROBE_LABEL
         assert module.PROMPT_VERSION  # non-empty
         assert module.PROBE_VARIANTS  # non-empty
