@@ -27,7 +27,6 @@ from usersim.engine.core.finance_bank import (
     FinanceBankError,
     load_finance_bank,
     load_finance_bank_for_locale,
-    reset_finance_bank_cache,
 )
 from usersim.engine.core.finance_tasks import build_instance
 from usersim.engine.core.outcomes import (
@@ -2300,7 +2299,6 @@ class TestAuthoredPersonaTagsAreReachable:
 
     @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
     def test_task_persona_tags_are_reachable(self, locale):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale(locale)
         dead = {
             (tpl.id, tag)
@@ -2507,19 +2505,16 @@ class TestAccountLabelIsRegionalVocabulary:
     """
 
     def test_india_uses_indian_deposit_vocabulary(self):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale("en_IN")
         assert bank.domain_account_label("retail_banking") == "savings account"
         assert bank.domain_account_label("payments") == "wallet account"
 
     def test_us_keeps_its_own_vocabulary(self):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale("en_US")
         assert bank.domain_account_label("retail_banking") == "checking account"
 
     def test_no_locale_reports_checking_outside_its_own_region(self):
         for locale in ("en_US", "en_IN"):
-            reset_finance_bank_cache()
             bank = load_finance_bank_for_locale(locale)
             labels = {d: bank.domain_account_label(d) for d in bank.all_domains()}
             if locale != "en_US":
