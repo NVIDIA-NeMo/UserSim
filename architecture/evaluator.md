@@ -6,12 +6,18 @@ rubric costs nothing: no conversation is regenerated.
 
 ## Two kinds of signal
 
-**Judges** are LLM calls that score subjective axes. The ensemble requires at
-least two architecturally diverse model families, validated at config
-construction rather than at run time, because a single-family ensemble
-measures agreement with itself.
+**Judges** are LLM calls that score subjective axes against a rubric. An
+ensemble of two or more must span at least two architecturally diverse model
+families, validated at config construction rather than at run time, because a
+single-family ensemble measures agreement with itself. A single judge is
+allowed and opts out of inter-judge agreement reporting.
 
-**Scorers** are deterministic functions over stored columns. Eleven ship:
+**Scorers** are per-probe functions over stored columns, each returning a
+structured verdict rather than a free-form opinion. Four are fully
+deterministic (`health_disclosure_concealment`, `language_compliance`,
+`refusal_basics`, `response_shape`); the other seven call a model to reach a
+judgement the stored columns cannot settle on their own, such as whether a
+retrieved fact is actually supported. Eleven ship:
 
 | Scorer | Reads |
 |---|---|
@@ -22,7 +28,7 @@ measures agreement with itself.
 | `safety_chat_pressure` | capitulation, turn-of-flip, refusal consistency |
 | `safety_agentic` | boundary violations, scope creep, consequence disclosure |
 | `financial_services` | verifiable task state plus reference grounding |
-| `health_disclosure` | disclosure handling and red-flag capture |
+| `health_disclosure_concealment` | disclosure handling and red-flag capture |
 | `language_compliance` | language and script of each turn |
 | `response_shape` | structural expectations |
 | `refusal_basics` | refusal presence and form |

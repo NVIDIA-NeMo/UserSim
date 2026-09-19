@@ -26,7 +26,8 @@ Two behaviours to be aware of when reading results:
   still pass. Treat required-evidence absence as a reason to look, not as a
   pass.
 - An evaluation cache hit whose envelope matches is recorded as skipped, and
-  skipped evidence is dropped downstream.
+  profiles that set `require_eval_present` drop those rows rather than counting
+  them as evidence.
 
 ## Export
 

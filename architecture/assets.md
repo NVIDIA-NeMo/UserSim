@@ -33,8 +33,8 @@ checkout.
 ## Pre-flight
 
 Before any model call, a run verifies that every selected probe's assets
-exist, including the locale subtree for locale-scoped probes like
-`financial_services` and the `sov_ai_*` family. Every missing path is
+exist, including the locale subtree for the locale-scoped probes:
+`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. Every missing path is
 reported at once, with the three remedies: point `--assets-dir` somewhere
 else, generate the bank, or drop the probe from the mix.
 
@@ -57,14 +57,17 @@ new domain does not require modifying this project. See
 
 Bank entries carry a review status. Content authored by a model rather than
 reviewed by a subject-matter expert is marked `placeholder: true`, and that
-marking propagates: a capability cell computed from unreviewed content is
-labelled accordingly rather than presented as a finished result.
+marking propagates: every trajectory that draws on such an entry records a
+`used_placeholder_*` warning on its outcome, which is written to the
+trajectory parquet alongside the scores.
 
-This is deliberate machinery, not a caveat. Building a locale bank means
-generating a first draft and then getting it reviewed, and the framework
-tracks which stage each entry is at so a scorecard never overstates its own
-evidence. When a native reviewer signs off on an entry, flip the flag and the
-cell upgrades itself.
+Building a locale bank is a two-stage process, generate then review, and the
+framework tracks which stage each entry is at so a scorecard's evidence base
+stays traceable. When a native reviewer signs off on an entry, flip the flag
+and every later run reflects it.
 
-Today the `general` probes run on reviewed content; the sovereign-AI, safety,
-health and finance banks ship as reviewed-pending first drafts.
+Review status is per entry rather than per bank. The `general` and
+`sov_ai_dynamic` banks carry reviewed content throughout; `safety_agentic`,
+`safety_chat_pressure` and `sov_ai_multilingual_parity` mix reviewed entries
+with entries still marked; the finance, sovereign-AI fact and health banks are
+awaiting review. A bank's own YAML is the authority on which is which.

@@ -8,7 +8,7 @@ number from a run.
 
 Building and shipping AI models and agentic solutions requires understanding how
 real users will interact with them: across languages, cultures, skill levels,
-personality types, and an open-ended space of use cases. Today, teams face two
+personality types, and an open-ended space of use cases. Today, teams face three
 compounding challenges:
 
 **The cold-start problem.** You need realistic user traffic to evaluate and
@@ -38,7 +38,7 @@ professionals and rural Minas Gerais retirees. English-centric evaluation and
 training pipelines cannot help here. Multilingual, culturally grounded user
 simulation is not a nice-to-have for sovereign AI; it is a prerequisite.
 
-Today's workarounds don't address either problem well:
+Today's workarounds address none of these well:
 
 - **Vibe-testing**: small manual prompt sets that cover a fraction of the
   interaction surface and reflect the biases of whoever wrote them.
@@ -74,21 +74,21 @@ OCEAN personality traits this depends on) with a **general-purpose probe engine*
 interaction pattern: open-ended conversation, tutoring, multi-step tool use,
 agentic workflows, safety probing, and more.
 
-## Behavioural realism, and how far it goes
+## Behavioural realism
 
-NeMo UserSim implements four behavior-realism features inspired by
-[Zhou et al. (2026)](https://arxiv.org/abs/2603.11245). Treat these as a
-**first cut at the persona-to-behavior gap**: they reduce LLM-as-fake-user
-homogeneity but do not close it.
+NeMo UserSim implements four behavioural-realism features inspired by
+[Zhou et al. (2026)](https://arxiv.org/abs/2603.11245). Each is measurable in
+the output, and the D1-D4 diagnostics below quantify how far they move a run
+away from LLM-as-fake-user homogeneity.
 
 - **Incremental disclosure**: 60% of users withhold details and reveal gradually (real-user-like); 40% provide everything upfront. Controlled by `incremental_disclosure_ratio` (default 0.6).
 - **OCEAN-grounded interaction style**: each user receives one of `cooperative` / `neutral` / `impatient` / `frustrated` / `confrontational` derived from their persona's neuroticism / agreeableness / patience scores.
 - **Reactive frustration**: when the assistant is judged inadequate, the user agent receives escalating frustration prompts (pushing back, repeating requests, threatening to leave).
 - **D1–D4 + MATTR diagnostics**: post-hoc behavioral-realism metrics (front-loading ratio, politeness fraction, verbosity CV, frustration-marker frequency, lexical diversity) surfaced in the dashboard.
 
-Honest limits:
+Scope:
 
 - **Not a substitute for real-user studies.** Sim2Real gaps remain; simulation is most valuable as an orthogonal measurement system that complements production data, not a replacement for it.
-- **Behavioral fidelity is bounded by the simulator-LLM.** Current LLMs flatten OCEAN-derived behavioral differences relative to what the persona descriptions warrant. The persona-to-behavior gap is the central open problem.
-- **Placeholder content discipline on safety / sovereign-AI banks.** All non-`general` probe banks ship with AI-authored content flagged `placeholder: true` until SME review; downstream scorecards refuse production-ready headlines on placeholder-tainted runs.
+- **Behavioural fidelity is bounded by the simulator-LLM.** Current LLMs flatten OCEAN-derived behavioural differences relative to what the persona descriptions warrant. The D1-D4 diagnostics exist to make that flattening visible in a given run.
+- **Review status is tracked per entry.** Bank entries carry a `placeholder` flag, set until a subject-matter expert signs off. Any trajectory drawing on an unreviewed entry records a `used_placeholder_*` warning on its outcome, so a result's provenance is always recoverable from the run.
 - **Evaluator circularity for subjective dimensions.** LLM judges evaluating LLM-simulated users interacting with LLMs is structurally circular for subjective quality dimensions; reserve human judgment for those, and prefer verifier-based scoring (code execution, formal verification, step-level checkers) wherever ground truth is available.

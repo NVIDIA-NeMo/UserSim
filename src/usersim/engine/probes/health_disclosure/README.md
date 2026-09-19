@@ -32,9 +32,9 @@ Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
 
 > **Reusing the move-space elsewhere.** `GuardedMoveMixin` hardcodes nothing
 > domain-specific: a probe family in another domain can compose it and supply its own
-> config mapping via `guarded_move_config()`. The mixin + `move_runtime` are kept
-> in this package for now (single consumer); promoting them to `core/` is the
-> natural step once a second family adopts them (avoiding speculative abstraction).
+> config mapping via `guarded_move_config()`. The mixin and `move_runtime` live in
+> this package, which is currently their only consumer; they move to `core/` when a
+> second family adopts them.
 
 ## The move + Guard mechanism (opt-in)
 Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
@@ -132,7 +132,7 @@ Select the variant per row via the `probe_variant` column (see
 **local-dev override** that forces the capability on/off regardless of variant.
 
 ### Provider tolerance
-The customer picks their own patient model + inference provider, so DECIDE must
+You pick your own patient model and inference provider, so DECIDE must
 survive uneven "OpenAI-compatible" implementations. `move_runtime._extract_move`
 delegates to the shared, hardened `core/tool_calls.py`, recovering the committed
 move whether it arrives as a structured `tool_calls` array, as `arguments`
@@ -141,7 +141,7 @@ prose), and still surfaces the raw native call for audit. These shapes are
 pinned in `TestExtractMoveRobustness`.
 
 ### Env-harness seam
-A customer env harness can catch + log every committed/vetoed move
+An env harness can catch and log every committed or vetoed move
 **out-of-band**. Register one observer for all trajectories with
 `GuardedMoveMixin.register_move_hook(fn)` (it lives on the domain-agnostic
 capability, so any family reusing the mixin gets the same seam), or supply a
@@ -181,7 +181,7 @@ hole), placeholder-entry discipline, and asset-audit test coverage.
 - **Bundled banks are SYNTHETIC placeholders** (`placeholder: true`). Any guarded
   trajectory that uses one raises `WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE`,
   so scorecards stay preview-only until real ground truth is supplied.
-- **Customer override.** Point `USERSIM_<CLIENT>_PROFILES` at a bank file of the
+- **Supplying your own bank.** Point `USERSIM_<CLIENT>_PROFILES` at a bank file of the
   same shape (`schema_version` / `client` / `bank_id` / `bank_version` / `entries`,
   each entry `id` = persona uuid, `placeholder: false`, `profile: {...}`). A
   persona uuid not present in the bank falls back to the bank's `__default__` entry.
@@ -240,10 +240,10 @@ rest of the repo: a half-localized set can't ship silently. To localize the
 scaffold, replace the uniform English builder (`prompts._english_scaffold_pack`)
 with real per-locale templates; the validation then enforces completeness.
 
-## Changing the judge axes  ⚠️ read this
-The per-client judge axes are **PROVISIONAL**: we authored them and they have
-**not** been validated by the customer (i.e. not a customer's real, clinically-validated rubric). Treat
-them as a starting point.
+## Changing the judge axes
+The per-client judge axes are authored defaults on a generic 1-5 ladder.
+A clinical deployment should replace them with a rubric validated by its own
+clinicians; the axes are declared in one place to make that a single edit.
 
 They live inline in **`evaluator/axes.py`** (`PROBE_SCORES`, keyed by the client
 `family`): the same place every other probe declares its axes, so the evaluator

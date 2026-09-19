@@ -1,10 +1,10 @@
-# Authoring a new probe in 30 minutes
+# Authoring a new probe
 
-This is the end-to-end tutorial for adding a new probe to the
-conversation-simulator plugin. After reading and following this, you
-should have a working probe in ~50 lines of declarative configuration
-+ ~150 lines of test scaffolding (the substrate handles the
-~400 lines of conversation-loop machinery you would otherwise hand-roll).
+This is the end-to-end tutorial for adding a new probe to NeMo UserSim. A
+probe is a class with a handful of attributes and hooks: turn iteration, the
+pre-filters, the judge gates, frustration escalation and early-stop all come
+from the shared conversation loop. Every probe therefore gets the same
+conversation semantics, and a fix to the loop reaches all of them at once.
 
 For the substrate's API surface (every class, every mixin, every
 hook), the source-of-truth docstrings live in
@@ -345,13 +345,11 @@ decorator at startup.
 usersim smoke
 ```
 
-Should print 8 `[OK]` lines including:
+Every check should report `[OK]`. Confirm your probe appears in the
+`probe registry` line:
 
 ```
-[OK] probe registry: 10 probe(s) registered: ['financial_services',
-     'general_educational', 'general_open_ended', 'my_probe', 'safety_agentic',
-     'safety_chat_pressure', 'sov_ai_dynamic', 'sov_ai_facts',
-     'sov_ai_multilingual_parity', 'tool_calling']
+[OK]   probe registry        14 probe(s) registered: [..., 'my_probe', ...]
 ```
 
 If your probe doesn't show up, the bootstrap import is the most
@@ -402,10 +400,11 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional
 
 import yaml
+
+from usersim.engine.core._assets import probe_assets_dir
 
 
 @dataclass
@@ -435,7 +434,7 @@ _CACHE: dict[str, CookingBank] = {}
 
 def load_cooking_bank_default() -> CookingBank:
     path = os.environ.get("USERSIM_COOKING_BANK") or str(
-        Path(__file__).parents[3] / "assets" / "cooking_recipes" / "sample.yaml"
+        probe_assets_dir("cooking_recipes") / "sample.yaml"
     )
     if path in _CACHE:
         return _CACHE[path]
@@ -551,7 +550,8 @@ class CookingAdvisorProbe(BankVerbatimMixin, BankBackedProbe):
     def derive_task(
         self, persona: dict, bank: Any, *, cfg: Any,
     ) -> Optional[CookingRecipe]:
-        # Production probe filters by persona tags; demo: just pick first.
+        # Narrow by persona tags as the shipped probes do; this example
+        # takes the first match.
         if not bank.recipes:
             return None
         return bank.recipes[0]
@@ -634,18 +634,19 @@ test stubs.
 ```bash
 usersim smoke                                                    # confirms registration
 pytest tests/engine/probes/test_cooking_advisor.py -v # confirms behavior
-usersim simulate --probe-mix 'cooking_advisor=1.0' --num-rows 5  # end-to-end
+usersim simulate --locale en_US --num-rows 5 \
+  --probe-mix 'cooking_advisor=1.0' --out output/cooking   # end-to-end
 ```
 
-That's the entire probe: about 250 lines including bank loader,
-prompts, probe class, and shim. The substrate handles the
-~400 lines of conversation-loop machinery you don't have to write.
+That is the whole probe: a bank loader, prompts, the probe class and the
+shim. Everything about how the conversation runs comes from the shared loop.
 
 ---
 
-## Common gotchas
+## Eight things to get right
 
-These are the failure modes that bite probe authors most often.
+These eight points account for most first-run failures. Reading them before
+you run the smoke test will save a cycle.
 Read them before you run the smoke test.
 
 ### 1. Assistant system prompt must be empty (pure-capability policy)
@@ -658,7 +659,7 @@ contaminates the very signal each probe is designed to surface.
 See [`docs/engine/README.md` "Assistant under test:
 pure-capability policy"](README.md#assistant-under-test-pure-capability-policy)
 for the full rationale. If your probe deliberately deviates, document
-in the module docstring and reference the deviation in your roadmap
+in the module docstring
 entry. The default is empty; deviations are deliberate.
 
 ### 2. Test patching: BOTH `core.simulation.call_llm` AND `core.judges.call_llm`
@@ -763,12 +764,15 @@ before any LLM call.
 is the canonical scaffold. Copy it; substitute your probe's name;
 fill in the 8 standard test stubs:
 
-1. **Registry registration**: probe label is in `_PROBE_REGISTRY`,
-   resolves to a class, module exposes the 3 metadata constants.
+1. **Registry registration**: the probe label is in `_PROBE_REGISTRY` and
+   resolves to a class, and `sys.modules[probe_cls.__module__]` exposes the
+   three metadata constants.
 2. **Single-turn end-to-end**: minimal mocked-LLM run produces a
    trajectory with `conversation_status=True`.
-3. **First user turn shape** (verbatim probes only): `msgs[0].content
-   == bank.task.text` exactly.
+3. **First user turn shape** (verbatim probes only):
+   `msgs[0]["content"] == bank.<your_task>.<verbatim_field>` exactly.
+   Conversation messages are dicts, so index them rather than using
+   attribute access.
 4. **Two-turn follow-up**: provide 2 assistant responses, drive
    turn 2 via the user-agent + judge gate.
 5. **`probe_variant` overridden**: assert `result["probe_variant"]`
@@ -790,9 +794,10 @@ covers (1) for you parametrically. So your per-probe file can focus
 on (2)-(8) plus the should_succeed contract: the cross-cutting
 checks come for free.
 
-For real working examples: `tests/probes/test_sov_ai_facts.py` (verbatim),
-`tests/probes/test_safety_chat_pressure.py` (reframings + abort policy),
-`tests/probes/test_safety_agentic.py` (custom run_dispatch + simpler mock).
+For real working examples: `tests/engine/probes/test_sov_ai_facts.py`
+(verbatim), `tests/engine/probes/test_safety_chat_pressure.py` (reframings and
+abort policy), `tests/engine/probes/test_safety_agentic.py` (custom
+run_dispatch and a simpler mock).
 
 ---
 
@@ -804,17 +809,23 @@ that JUDGES the assistant's responses lives separately under
 This is the in-sim / out-of-sim boundary the architecture
 deliberately enforces.
 
-A scorer is a callable registered via `@register_scorer("your_probe")`
-that takes `(traj_row, judges, **kwargs)` and returns a dict of axis
-scores + side-channel rollups. The matching `traj_row` carries every
-top-level column your `build_result_extras` surfaced
-(`TrajectoryEvaluatorGenerator` merges the full row dict into
-`traj_row`, so any side-channel column you set is visible to the scorer).
+A scorer is a function `score_<your_probe>_trajectory(trajectory, models)`
+returning a dict of axis scores and side-channel rollups. Register it at the
+bottom of the module, the way every shipped scorer does:
+
+```python
+register_scorer("your_probe", score_your_probe_trajectory)
+```
+
+`register_scorer` takes the name and the function; it is not a decorator. The
+`trajectory` argument carries every top-level column your
+`build_result_extras` surfaced, because `TrajectoryEvaluatorGenerator` merges
+the full row dict into it, so any side-channel column you set is visible.
 
 Add the module path to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
-so the auto-load path picks it up. After that, `usersim eval` reads
-your scorer for every trajectory matching `probe_type=your_probe`.
+so the auto-load path picks it up. After that, `usersim eval` runs your scorer
+for every trajectory whose `probe_family` matches your probe's label.
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See

@@ -9,7 +9,7 @@ report files.
 `output/trajectories/run=<id>/locale=<X>/probe_family=<Y>/`. One row per
 simulated conversation, each carrying:
 
-- `conversation_messages` (JSON): the full multi-turn message list. Each entry is `{role, content}`, plus `tool_calls` / `tool_call_id` on tool-using turns and `reasoning_content` on an assistant turn whose model emitted a thinking trace, unless `--no-store-reasoning` was passed. The trace is stored for analysis only; it is never replayed into a later turn (see `conversation-plugin/README.md`).
+- `conversation_messages` (JSON): the full multi-turn message list. Each entry is `{role, content}`, plus `tool_calls` / `tool_call_id` on tool-using turns and `reasoning_content` on an assistant turn whose model emitted a thinking trace, unless `--no-store-reasoning` was passed. The trace is stored for analysis only; it is never replayed into a later turn (see [`docs/engine/README.md`](engine/README.md)).
 - `simulation_outcome` (JSON) holds a row-level structured record: status, failure-class taxonomy, per-actor attribution, per-model token counts, wall-clock, provenance (code SHA + asset bank versions + prompt versions).
 - `simulation_traces` (JSON): per-turn / per-call telemetry (judge-gate ratings, fourth-wall pre-filter triggers, capitulation checks, tool-call verification, etc.).
 - A content-hashed `persona_uuid` (stable across runs) and a deterministic `trajectory_id` (hash of `persona + probe + resolved model identities + prompt version`). These are the simulator's idempotency keys.
@@ -24,11 +24,13 @@ simulated conversation, each carrying:
 
 **Evaluations**: a wide JSON cell per trajectory containing per-axis × per-judge
 scores plus deterministic scorer outputs. The `trajectory-evaluator` plugin
-configures a judge ensemble (≥2 architecturally-diverse model families, validated
-at config-construct time) and a set of scorers, of which eleven ship today
-(`tool_use`, `sov_ai_facts`, `sov_ai_dynamic`, `sov_ai_multilingual_parity`,
-`safety_chat_pressure`, `safety_agentic`, `financial_services`, plus the
-deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
+configures a judge ensemble (a single judge by default; any ensemble of two or
+more must span at least two architecturally diverse model families, validated at
+config-construct time, so inter-judge agreement means something) and a set of
+scorers, of which eleven ship today (`tool_use`, `sov_ai_facts`,
+`sov_ai_dynamic`, `sov_ai_multilingual_parity`, `safety_chat_pressure`,
+`safety_agentic`, `financial_services`, `health_disclosure_concealment`, plus
+the deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
 envelope describing exactly which judges / axes / scorers / prompt version
 produced them, and the evaluator skips rows whose envelope already matches
 on re-run, so iterating on a judge or rubric is cheap.
@@ -77,7 +79,7 @@ artifacts under `output/report/run=<id>/`: `index.html`,
 `coverage_summary.json`, `triage_queue.json`.
 
 **Multi-model comparison dashboard**: a side-by-side bake-off of every
-per-run report under `output/report/`. Six-layer narrative: simulator
+per-run report under `output/report/`. Seven-layer narrative: simulator
 health · model leaderboard · quality-vs-verbosity Pareto scatter ·
 verbosity profile · per-locale grouped bars · per-capability flipped
 facet · coverage matrix. Locked color + shape per model across every

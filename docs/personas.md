@@ -7,7 +7,7 @@ supplies the demographics, the personality traits and the language the
 simulated user brings to a conversation, which is what makes a run something
 other than one model's idea of a generic user.
 
-UserSim samples an **extended version of these datasets distributed through
+NeMo UserSim samples an **extended version of these datasets distributed through
 NGC**, which adds the OCEAN personality traits, names and a number of further
 fields beyond those in the Hugging Face collection. Those extra fields are
 what drive interaction style, so the NGC version is what the behavioural
@@ -18,7 +18,7 @@ features described below depend on.
 Each row is one synthetic individual: name, age, sex, location, occupation,
 education, and a written description in the region's own language. Alongside
 those are the five OCEAN personality traits (openness, conscientiousness,
-extraversion, agreeableness, neuroticism), which UserSim maps to an
+extraversion, agreeableness, neuroticism), which NeMo UserSim maps to an
 interaction style. That mapping is what produces an impatient user who
 withholds detail rather than a cooperative one who volunteers everything, and
 it is the axis reports stratify on.
@@ -30,7 +30,7 @@ corresponds to a real person.
 ## Getting the datasets
 
 The datasets are not bundled, and they are large: a single locale runs from a
-few hundred megabytes to several gigabytes. UserSim downloads them lazily from
+few hundred megabytes to several gigabytes. NeMo UserSim downloads them lazily from
 the [NGC catalog](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
 the first time a run needs one, into
 `~/.data-designer/managed-assets/datasets/`.
