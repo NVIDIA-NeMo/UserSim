@@ -1,14 +1,15 @@
-# NeMo UserSim: Population-Grounded User Simulation
+# NeMo UserSim: Population-Grounded User Simulation for Models and Agents
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](pyproject.toml)
 
 > Simulate a statistically representative population of users having multi-turn
-> conversations with your LLM. Every run yields both evaluation signal and
-> curated training data, before you have a real user base to learn from.
+> conversations with your model or agentic system. Every run produces auditable
+> trajectories: evaluation signal, failure analysis, and curated training data,
+> before you have production traffic to learn from.
 
-**13 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · ~7M+ census-grounded personas · 11 evaluator scorers · 3,100+ tests · offline `usersim smoke` in seconds**
+**13 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 11 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
 
 <img src="docs/images/pipeline_architecture.jpg" width="800">
 
@@ -16,18 +17,19 @@
 
 ## Why simulate users?
 
-Most teams either vibe-test their models or wait for production traffic to
-surface real-user feedback. Both are biased toward the populations you
-already have, and neither catches the long tail of locales, demographics, or
-safety scenarios that matter most.
+Most teams either hand-test their models and agents or wait for production
+traffic to surface real-user feedback. Both are biased toward the populations
+you already have, and neither catches the long tail of locales, demographics,
+or safety scenarios that matter most. For an agent the gap is wider still,
+because a failure often needs several turns and a tool call to appear at all.
 
-The parallel to autonomous driving is instructive: Waymo leaned on simulation
-long before it had a large fleet, running simulated miles grounded in real
-driving distributions to reach rare scenarios faster than road data alone
-allowed. Simulation and real data are not a binary choice, but grounded
-simulation lets you move first.
+Autonomous driving reached this conclusion years ago. Simulated miles,
+grounded in real driving distributions, reach the rare and dangerous
+scenarios far faster than waiting for a fleet to encounter them. Simulation
+and real data are not a binary choice, but grounded simulation lets you move
+at the speed of light (SOL) rather than the speed of traffic.
 
-Prompting an LLM to "act as a user" does not get you there. It produces
+Prompting a model to "act as a user" does not get you there. It produces
 unrealistically articulate, demographically homogeneous users. NeMo UserSim
 instead samples from
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
@@ -42,8 +44,8 @@ behavioural features depend on.
 The datasets are downloaded on first use rather than bundled, and carry their
 own licence separate from this project's, including an AI ethics clause. See
 [`docs/personas.md`](docs/personas.md) for how to get them and what the terms
-allow. The reasoning behind the design, and where it stops being trustworthy,
-is in [`docs/methodology.md`](docs/methodology.md).
+allow. The reasoning behind the design, and how far the results carry, is in
+[`docs/methodology.md`](docs/methodology.md).
 
 What a single simulated trajectory looks like in practice:
 
@@ -55,28 +57,41 @@ evaluation reads off, all from one row of a parquet dataset.
 
 ## Who it's for
 
-- **Model evaluators and quality teams** who need to know how an assistant
-  performs across demographics, languages, and interaction styles rather than
-  on a static benchmark. Runs produce population-stratified evaluations with
-  claims grounded in census distributions.
+- **Model and agent teams** who need to know how a system performs across
+  demographics, languages, and interaction styles rather than on a static
+  benchmark. Runs produce population-stratified evaluations with claims
+  grounded in census distributions.
 - **Sovereign-AI builders** with no user base yet. You get an in-language
   evaluation surface from day one, drawn from your country's actual census
   distribution: USA, Japan, India, Singapore, Brazil, France and Korea ship
   today.
-- **Agent and safety teams** testing multi-turn safety, agentic tool use, and
-  reasoning faithfulness in controlled environments. The evaluator runs out of
-  sim, so iterating on a judge or rubric never re-simulates.
+- **Agent builders** putting a tool-using system under multi-turn load. Probes
+  execute tools against a mock environment that holds state across turns, so a
+  run surfaces scope creep, unauthorised calls, prompt-injection susceptibility
+  and missing consequence disclosure, not just the final answer. Every tool
+  call and its result is recorded on the trajectory.
+- **Safety teams** testing multi-turn capitulation under pressure, gradual
+  disclosure of sensitive information, and reasoning faithfulness. The
+  evaluator runs out of sim, so iterating on a judge or rubric never
+  re-simulates.
 
-**Two outputs from one run.** The same conversations answer two questions.
-*How is the model doing*: population-stratified scores across demographics,
+**Two outputs from one run.** The same trajectories answer two questions.
+*How is the system doing*: population-stratified scores across demographics,
 languages and interaction styles. And *what should it learn next*: the
 trajectories that passed your quality gates, curated into a dataset with the
 demographic metadata still attached, so you can target the populations or
-probes where the model is weakest.
+probes where it is weakest.
+
+**Every trajectory is auditable.** A run records the full message list, each
+tool call and its result, the per-turn judge decisions, the assets and prompt
+versions it drew on, and the resolved model identities. A number in a report
+can always be traced back to the conversation that produced it, which is what
+makes failure analysis possible rather than just scoring.
 
 **How it differs.** Benchmarks like MMLU or tau-bench define the task first
 and bolt on users second; this inverts that: start with a census-grounded
-population, then derive tasks from persona attributes. The test surface grows
+population, then derive tasks from persona attributes. The user is simulated
+with the same care as the system under test. The test surface grows
 through a probe registry rather than being frozen at release, and extensions
 plug in through entry points without forking the repository.
 
@@ -85,8 +100,8 @@ plug in through entry points without forking the repository.
 Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-# Resolve uv.lock and editable-install the project, with the dev tooling
-# and the Jupyter kernel the notebooks need.
+# Resolve uv.lock and editable-install the project, with the dev and
+# notebook tooling.
 uv sync
 source .venv/bin/activate
 
@@ -110,7 +125,7 @@ making a single model call.
 
 ```bash
 # 1. Simulate. Pick a locale and a row count; the default probe mix is the
-#    three `general` probes.
+#    two `general` probes plus `tool_calling`.
 usersim simulate --locale en_US --num-rows 30 --out output/trajectories
 
 # 2. Score the assistant under test.
@@ -168,14 +183,15 @@ of the run, not its cast.
 ### Models
 
 Inference defaults to [build.nvidia.com](https://build.nvidia.com) through
-Data Designer's `nvidia` provider. Five aliases configure a run
-(`user_model`, `assistant_model`, `api_response_model`, `judge_model`,
-`summary_model`), catalogued in
+Data Designer's `nvidia` provider. Six aliases configure a full run:
+`user_model`, `assistant_model` and `judge_model` drive the simulation,
+`api_response_model` and `summary_model` support it, and `evaluator_model`
+scores the result. All six are catalogued in
 [`src/usersim/cli/models_default.toml`](src/usersim/cli/models_default.toml);
 point `--models` at your own file to change providers, endpoints or sampling.
 
-Every LLM-driven subcommand takes `--dry-run`, which resolves the full plan
-and exits before the first network call.
+`simulate`, `eval` and `gen-assets` take `--dry-run`, which resolves the run's
+full plan and exits before the first network call.
 
 ## Documentation
 
@@ -201,22 +217,25 @@ and exits before the first network call.
 - [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md): end-to-end tutorial for a new probe
 - [`docs/engine/README.md`](docs/engine/README.md): the substrate's full API surface
 - [`templates/probe/`](templates/probe/): copy-and-edit starters, one per probe shape
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): gates, conventions, and how to sign off
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): setup, conventions, and how to sign off
 
 ## What it's good for
 
 Simulation is a measurement system that reaches populations and scenarios
 production traffic won't. It complements real-user data rather than replacing
 it, and it's strongest where you have ground truth to check against: tool
-calls that either match a schema or don't, facts that are either right or
-wrong, red-flag symptoms that were either caught or missed.
+calls that either match a schema or don't, a tool sequence that either
+achieved the expected state change or didn't, facts that are either right or
+wrong, red-flag symptoms that were either caught or missed. Those are also
+the checks that matter most for an agent, where the final message can look
+fine while the actions behind it were wrong.
 
 Three things are worth knowing before you quote a number.
 
 Behavioural fidelity is bounded by the model doing the simulating. Current
 models flatten personality differences relative to what a persona
-description implies, so treat interaction-style coverage as breadth rather
-than calibrated realism. Closing that gap is the most active area of work.
+description implies, so interaction-style coverage is best read as breadth
+across styles rather than a calibrated measure of any one of them.
 
 Judges scoring simulated users is circular for subjective dimensions. A
 model's opinion of another model's helpfulness is not an independent
@@ -224,9 +243,10 @@ measurement. Lean on the deterministic scorers where ground truth exists, and
 reserve human review for taste.
 
 Content review status travels with the numbers. Bank entries authored by a
-model rather than reviewed by a domain expert are flagged, and any capability
-cell computed from them inherits the flag, so you can always tell which
-findings rest on reviewed content.
+model rather than reviewed by a domain expert carry `placeholder: true`, and
+every trajectory that drew on one records a `used_placeholder_*` warning on
+its outcome. That warning is written to the trajectory parquet, so you can
+always trace which findings rest on reviewed content.
 
 [`docs/methodology.md`](docs/methodology.md) covers all three in depth.
 

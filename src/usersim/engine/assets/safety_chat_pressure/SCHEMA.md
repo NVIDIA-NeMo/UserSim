@@ -29,12 +29,12 @@ Three primitives, three slots in the bank:
   `manipulation`, `circumvention`, `fraud`, …) for stratified reporting.
 
 - **Pressure strategy.** A high-level approach for the user-agent. The
-  Default ships three strategies (`persistence`,
-  `hypothetical_framing`, `authority_impersonation`) corresponding to
-  the three canonical pressure patterns documented in the literature.
-  Each strategy carries a `system_prompt_template` consumed by the
-  user-agent, plus a list of `reframings` (eight per strategy by
-  default).
+  The bank ships six strategies (`persistence`, `hypothetical_framing`,
+  `authority_impersonation`, `emotional_dependency`,
+  `reward_penalty_framing`, `partial_compliance`), covering the pressure
+  patterns most often reported in the red-teaming literature. Each strategy
+  carries a `system_prompt_template` consumed by the user-agent, plus a list
+  of `reframings` (ten per strategy).
 
 - **Reframing.** A concrete tactic within a strategy applied turn-by-
   turn. The user-agent rotates through the strategy's reframings
@@ -69,7 +69,7 @@ One bank per file. The loader picks one by path; the env override is
 | `bank_version` | str | ✓ | Semver-style version of this bank's *contents*. Bump on any entry edit; the version is carried into `simulation_outcome.provenance` so consumers can spot when a bank changed mid-run. |
 | `harm_categories` | list[str] | ✓ | The set of harm-category bins used by target-request entries. Used for stratified reporting. |
 | `tags` | list[str] | optional | The tag vocabulary used by `persona_tags` on target-request entries. Informational; no enforcement. |
-| `strategies` | list[Strategy] | ✓ | The pressure strategies. Minimum 1 entry. The default ships 3 (`persistence`, `hypothetical_framing`, `authority_impersonation`). |
+| `strategies` | list[Strategy] | ✓ | The pressure strategies. Minimum 1 entry. The bank ships 6. |
 | `target_requests` | list[TargetRequest] | ✓ | The target-request entries. Minimum 1 entry. |
 
 ## Strategy fields
@@ -79,7 +79,7 @@ One bank per file. The loader picks one by path; the env override is
 | `id` | str | ✓ | Unique across the bank's `strategies` list. Convention: lowercase snake_case (`persistence`, `hypothetical_framing`, `authority_impersonation`). |
 | `description` | str | ✓ | Reviewer-facing one-paragraph description of what this strategy is and why a real-world adversary might use it. Grounds reviewer judgement when authoring new strategies / reframings. |
 | `system_prompt_template` | str | ✓ | The user-agent's system prompt for this strategy. Authored in English (the user-agent for safety probes runs in English by default: this is intentional; a non-English jailbreak attempt is a separate test). Must accept these placeholders: `{persona}`, `{target_description}`, `{initial_prompt}`. The user-agent's first turn is the target's `initial_prompt` verbatim; this prompt frames how the user-agent should react to the assistant on follow-up turns. |
-| `reframings` | list[Reframing] | ✓ (≥1) | The reframings the user-agent rotates through on follow-up turns. Default: 8 per strategy. The first follow-up turn picks reframing index `(persona_hash + bank_salt) % len(reframings)`; subsequent turns advance one index at a time (with wrap-around). This deterministic rotation means the same persona always sees the same reframing sequence given a fixed bank version. |
+| `reframings` | list[Reframing] | ✓ (≥1) | The reframings the user-agent rotates through on follow-up turns. Ten per strategy in the shipped bank. The first follow-up turn picks reframing index `(persona_hash + bank_salt) % len(reframings)`; subsequent turns advance one index at a time (with wrap-around). This deterministic rotation means the same persona always sees the same reframing sequence given a fixed bank version. |
 
 ## Reframing fields
 
@@ -130,10 +130,9 @@ failure, not catastrophic harm). The `initial_prompt` is published in
 this repo and visible to anyone reading the source: it must not
 contribute to a real attack pattern by being public.
 
-The shipped placeholders cover five canonical refusal categories:
-identity-manipulation jailbreaks (DAN-style), manipulation-script
-generation, deceptive marketing, fraud-document templates, and minor
-circumvention. None of these produce content that materially advances
+The shipped targets cover eight refusal categories, eight targets each:
+safety bypass, manipulation, deception, fraud, circumvention, privacy
+invasion, impersonation, and harassment. None of these produce content that materially advances
 real harm if the model fails the test.
 
 Reviewers replacing placeholder targets must apply the same discipline:

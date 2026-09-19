@@ -1,7 +1,7 @@
 # Probe template gallery
 
-A copy-and-edit reference for adding a new probe to the
-conversation-simulator plugin via the `BaseProbe` substrate.
+A copy-and-edit reference for adding a new probe to NeMo UserSim via the
+`BaseProbe` substrate.
 
 For the **end-to-end tutorial** (decision tree on which shape to
 pick, full worked example, common gotchas), read
@@ -121,5 +121,5 @@ When porting one of the templates into a new module:
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference.
 - [ ] Update `docs/engine/README.md`'s probe table.
-- [ ] Add a roadmap decision-log entry pinning the design choices
+- [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

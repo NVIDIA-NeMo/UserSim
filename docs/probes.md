@@ -25,13 +25,17 @@ validates the mix at parse time so an unknown probe fails immediately.
 | Health-disclosure | `health_therapy_disclosure` | Mishandled self-harm / crisis content when a therapy patient discloses gradually, where the user side paces disclosure via a deterministic move-space + Guard |
 | Health-disclosure | `health_triage_disclosure` | Missed urgent red-flag symptoms that a patient only surfaces once a care-navigation / triage assistant earns them |
 | Health-disclosure | `health_decision_support_disclosure` | Missed clinical danger signs when a *clinician* presents a case to a decision-support assistant |
+| Health-disclosure | `health_general_disclosure` | Downplayed red-flag symptoms and quiet medication lapses when a patient with an ongoing condition consults a general health assistant |
 
 Content review status travels with the results. The eleven non-`general`
-probes run on banks whose entries are marked `placeholder: true` until a
-native reviewer or domain expert signs off, and any capability cell computed
-from a marked entry carries that status through to the report. You can always
-see which findings rest on expert-reviewed content and which rest on a first
-draft, and flipping a flag upgrades every cell downstream of it.
+probes draw on curated banks whose entries carry a review flag, set to
+`placeholder: true` until a native reviewer or domain expert signs off. Every
+trajectory that drew on a marked entry records a `used_placeholder_*` warning
+on its outcome, written to the trajectory parquet alongside the scores, so you
+can always see which findings rest on expert-reviewed content. Status is per
+entry rather than per bank: the `sov_ai_dynamic` taxonomies are reviewed
+throughout, the safety and multilingual-parity banks are part-way, and the
+finance, sovereign-AI fact and health banks are awaiting review.
 
 ## Choosing a mix
 

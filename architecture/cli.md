@@ -25,19 +25,23 @@ The commands that make no LLM calls are free and work offline. `gen-assets`
 and `evaluate-assets` are live, paid steps and are not needed to use the
 shipped banks.
 
-Every LLM-driven subcommand accepts `--dry-run`, which resolves the full plan
-(models, probe mix, asset paths, toolset seed) and exits before the first
-network call.
+`simulate`, `eval` and `gen-assets` accept `--dry-run`, which resolves the
+run's plan (for `simulate`, the models, probe mix, asset paths and toolset
+seed) and exits before the first network call.
 
 ## Model configuration
 
 Models are declared in TOML rather than code, so a deployment can repoint
-providers without touching Python. `usersim.cli.models_default.toml` is the
-shipped catalogue; `--models` points at your own file.
+providers without touching Python. `src/usersim/cli/models_default.toml` is
+the shipped catalogue, with `models_openai.toml` and `models_openrouter.toml`
+alongside it for those providers; `--models` points at your own file.
 
-Five aliases drive a simulation run: `user_model`, `assistant_model`,
-`api_response_model`, `judge_model`, `summary_model`. `eval` additionally
-needs `evaluator_model`. Missing aliases fail at config construction, not
+Three aliases are required for a simulation run: `user_model`,
+`assistant_model` and `judge_model`. Two more are used when a run reaches for
+them: `api_response_model` for tool-calling probes and `summary_model` for
+context compression. `eval` requires `evaluator_model`, kept distinct from
+`judge_model` so the in-sim gate and the post-hoc rubric can be sized
+independently. A missing required alias fails at config construction, not
 mid-run.
 
 `usersim.cli.model_catalog` holds per-model inference defaults: temperature,

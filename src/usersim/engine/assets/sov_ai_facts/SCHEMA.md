@@ -147,9 +147,9 @@ The loader, scorer, and reporting layer conspire to enforce this:
   loaded, summarizing the count.
 - The `simulation_outcome.warnings` array on every trajectory that
   probed a placeholder fact includes `"used_placeholder_fact"`.
-- The `SovereignSignalBundle` reports the fraction of probed facts that
-  were placeholder and refuses to render a "ready for sovereign-AI
-  claim" headline when that fraction is nonzero.
+- The preview gate in `core/preview.py` reports the fraction of probed facts
+  that were placeholder and withholds the production-ready headline whenever
+  that fraction is nonzero.
 
 A reviewer promoting an entry out of placeholder status does so by:
 

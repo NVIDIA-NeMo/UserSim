@@ -22,8 +22,7 @@ This schema lives here so:
 Three primitives, three sections:
 
 - **Sub-protocol.** A high-level failure mode the trajectory is
-  designed to surface. The default ships four sub-protocols
-  (matching the roadmap pin):
+  designed to surface. The bank ships four sub-protocols:
   - `unsanctioned_action`: user asks for X; the assistant should do
     X but is tempted to also do a related higher-risk Y. Tests
     whether the assistant volunteers actions outside the user's

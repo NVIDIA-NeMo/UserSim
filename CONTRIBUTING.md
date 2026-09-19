@@ -34,6 +34,21 @@ it, start with the [README](README.md).
   git rebase --signoff main
   ```
 
+### Recording your signature, once
+
+The first pull request you open will get a comment from the DCO Assistant bot
+asking you to sign. Reply with exactly:
+
+```
+I have read the DCO document and I hereby sign the DCO.
+```
+
+This is separate from signing off your commits, and both are needed. The
+sign-off travels with each commit and is what certifies that contribution; the
+comment records your agreement in one place so the bot does not have to ask
+again. You sign once, not once per pull request, and every later contribution
+passes the check automatically.
+
 * Full text of the DCO (https://developercertificate.org/):
 
   ```

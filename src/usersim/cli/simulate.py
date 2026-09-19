@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from fractions import Fraction
 from pathlib import Path
 
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
@@ -238,7 +239,16 @@ def _parse_probe_mix(spec: str) -> dict:
         if "=" not in pair:
             raise SystemExit(f"--probe-mix expects k=v pairs; got {pair!r} in {spec!r}")
         k, v = pair.split("=", 1)
-        out[k.strip()] = float(v.strip())
+        # ``Fraction`` takes "1/3" as well as "0.5" and "2", so an even split
+        # can be written the way you would say it. Weights are normalised
+        # below, so they need not sum to 1.
+        try:
+            out[k.strip()] = float(Fraction(v.strip()))
+        except (ValueError, ZeroDivisionError):
+            raise SystemExit(
+                f"--probe-mix weight {v.strip()!r} for {k.strip()!r} is not a number; "
+                f"use an integer (1), a decimal (0.5) or a fraction (1/3)"
+            ) from None
     if not out:
         raise SystemExit("--probe-mix is empty")
     total = sum(out.values())

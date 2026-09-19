@@ -36,10 +36,14 @@ runs the trajectory evaluator and builds the capability dashboard
 `triage_queue.json` alongside a static `index.html`.
 
 **[`03_extract_training_data.ipynb`](../notebooks/03_extract_training_data.ipynb)**
-is a deliberate placeholder. Training-data extraction is a separate
-workstream; the notebook publishes the planned five-record-type interface
-contract and the questions still open before it can be implemented. The
-schemas it describes are pinned by `tests/test_extraction_example.py`.
+joins a run's trajectories and evaluations, applies a quality profile, and
+writes the passing subset to `output/curated/run=<id>/profile=<name>/`. It
+drives the same `selection` package as `usersim select`, so the two produce
+identical results. The curated output carries the full trajectory schema plus
+the `selection_*` quality columns, which is what a downstream job filters on
+to shape training records. `tests/test_extraction_example.py` pins the schema contract for the SFT and
+pairwise shapes, confirming the trajectory and evaluation columns are
+sufficient to drive them.
 
 ## Notebook or CLI?
 

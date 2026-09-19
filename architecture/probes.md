@@ -58,10 +58,10 @@ Six mixins cover the shapes that recur, all in `core/probes.py`:
   environment.
 - **`AgenticMixin`**: bank-seeded, tool-executing, multi-step.
 
-Mixins that execute tools or mutate environment state set
-`allow_assistant_resampling = False`. A resample rolls the transcript back
-and re-calls the assistant, which is only safe when the turn had no side
-effects.
+Mixins that offer or execute tools (`AgenticMixin`, `ToolCallingMixin`,
+`ToolExecutionMixin`) set `supports_assistant_resampling = False`. A resample
+rolls the transcript back and re-calls the assistant, which is only safe when
+the turn had no side effects.
 
 ## Assets
 

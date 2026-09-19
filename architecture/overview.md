@@ -1,8 +1,8 @@
 # Architecture overview
 
-Every run answers four questions in order: **who** is the user, **how** do
-they behave, **what** are they trying to do, and **how well** did the
-assistant handle it. Each is a separate layer you can replace without
+Every NeMo UserSim run answers four questions in order: **who** is the user,
+**how** do they behave, **what** are they trying to do, and **how well** did
+the assistant handle it. Each is a separate layer you can replace without
 touching the others, which is the whole design in one sentence.
 
 <img src="../docs/images/pipeline_architecture.jpg" width="800">

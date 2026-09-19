@@ -25,14 +25,12 @@ by locale, education, age cohort, and occupation in the capability dashboard.
 | `ja_JP` | Japanese | Nemotron-Personas-Japan |
 | `ko_KR` | Korean | Nemotron-Personas-Korea |
 
-> `hi_Latn_IN` (romanized Hindi) is a full shipped locale. Because lingua/script
-> checks cannot detect romanized Hindi, its user-turn language is enforced via an
-> LLM-judge clause folded into the existing per-turn gate (no extra calls), and the
-> deterministic language scorers skip it (`expected_language_name = None`). Its probe
-> assets are directly transliterated from `hi_Deva_IN` and remain `placeholder: true`
-> pending native review; the two safety banks (`safety_chat_pressure`, `safety_agentic`)
-> are still being transliterated and fall back to English turn-1 for `hi_Latn_IN` until
-> finished.
+> `hi_Latn_IN` (romanized Hindi) is a full shipped locale. Script and lingua
+> checks cannot identify romanized Hindi, so its user-turn language is enforced by
+> an LLM-judge clause folded into the existing per-turn gate, costing no extra model
+> calls, and the deterministic language scorers skip it
+> (`expected_language_name = None`). Its probe assets are transliterated from
+> `hi_Deva_IN` and carry `placeholder: true` until a native reviewer signs off.
 
 ### India persona-language matching
 
@@ -102,8 +100,8 @@ How it works, all handled for you:
   **machine-translated** from the `en_IN` bank into the target language (a
   single cached `summary_model` call, with false premises preserved);
   generate-and-gate probes write in the target language directly.
-  `financial_services` needs a per-locale bank and so stays on its own
-  locales: `en_US` and, natively, Hindi.
+  `financial_services` needs a per-locale bank with its own task set, so it
+  stays on the two markets that have one: `en_US` and `en_IN`.
 - **Language enforcement** mirrors the shipped locales: native scripts are
   enforced by Unicode-range checks (with a real lingua scorer where the ✅
   column allows); romanized twins ride the LLM-judge language clause like

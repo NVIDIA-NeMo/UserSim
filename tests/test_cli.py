@@ -297,6 +297,20 @@ class TestScenarioMixParser:
         assert pytest.approx(sum(m.values())) == 1.0
         assert pytest.approx(m["sov_ai_dynamic"]) == 0.6
 
+    def test_fractions_are_accepted(self):
+        """The README and docs/probes.md both document an even three-way
+        split as `=1/3`, which is the readable way to write it."""
+        m = _parse_probe_mix("sov_ai_facts=1/3,sov_ai_dynamic=1/3,sov_ai_multilingual_parity=1/3")
+        assert pytest.approx(sum(m.values())) == 1.0
+        for weight in m.values():
+            assert pytest.approx(weight, abs=1e-9) == 1 / 3
+
+    def test_unparseable_weight_explains_itself(self):
+        """Bad input to a CLI should name the problem, not raise a traceback
+        out of argument parsing."""
+        with pytest.raises(SystemExit, match="is not a number"):
+            _parse_probe_mix("sov_ai_facts=abc")
+
     def test_empty_raises(self):
         with pytest.raises(SystemExit):
             _parse_probe_mix("")

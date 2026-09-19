@@ -13,8 +13,8 @@ calls *plugins* and gates with `DISABLE_DATA_DESIGNER_PLUGINS`. This project
 registers two of them (`conversation-simulator`, `trajectory-evaluator`).
 
 What is described on this page is unrelated, and is called an *extension*
-throughout, variable names included. Anyone running both should be able to
-tell from a name which system they are looking at.
+throughout, variable names included. Anyone running both can tell from a name
+which system they are looking at.
 
 ## The seven groups
 

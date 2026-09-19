@@ -33,10 +33,10 @@ rendering anything.
 
 ## Rendering
 
-`dashboard.py` writes a self-contained `index.html`. React, Vega and `marked`
-load from a CDN at view time, pinned to exact versions, under a
-Content-Security-Policy. Untrusted text is sanitised before it reaches the
-DOM.
+`dashboard.py` writes a self-contained `index.html`. React, Vega, `marked` and
+DOMPurify load from a CDN at view time, pinned to exact versions, under a
+Content-Security-Policy. DOMPurify sanitises untrusted text before it reaches
+the DOM.
 
 Opening the file offline is a supported path: the static fallback view is
 rendered *inline* with the real data, and the React app replaces it only if
