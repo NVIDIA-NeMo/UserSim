@@ -1,0 +1,15 @@
+# Review is requested automatically from the owning team for every change.
+#
+# A team named here that does not exist, or that lacks write access, silently
+# requests nobody, so tests/test_ci_workflows.py checks these against the
+# teams that exist. Update both together.
+
+# Default owner for everything.
+* @NVIDIA-NeMo/user_sim_team
+
+# Anything that can reach a credential, relax a permission, or change what
+# the repository publishes needs an admin.
+/.github/ @NVIDIA-NeMo/user_sim_maintainers
+/LICENSE @NVIDIA-NeMo/user_sim_maintainers
+/DCO @NVIDIA-NeMo/user_sim_maintainers
+/pyproject.toml @NVIDIA-NeMo/user_sim_maintainers

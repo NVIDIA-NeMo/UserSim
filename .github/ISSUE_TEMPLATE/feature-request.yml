@@ -1,0 +1,42 @@
+name: ✨ Feature Request
+description: Suggest a capability, probe or scorer
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: >-
+        Describe the situation rather than the fix you have in mind. Knowing
+        what you are trying to measure usually suggests a better answer than
+        the one either of us started with.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the project?
+      options:
+        - A new probe or capability to measure
+        - A scorer or how results are graded
+        - Reporting and dashboards
+        - Personas and locales
+        - Models, providers and configuration
+        - Training-data export
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you have considered
+      description: Including anything you tried that did not work.

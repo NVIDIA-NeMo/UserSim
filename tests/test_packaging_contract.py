@@ -216,6 +216,25 @@ class TestProbeTemplate:
         assert not missing, f"template cites tests that do not exist: {sorted(missing)}"
 
 
+class TestTypeMarker:
+    """PEP 561. The marker is a single empty file, which makes it easy to lose
+    in a build-config change and impossible to notice from the source tree,
+    where annotations resolve regardless."""
+
+    def test_marker_exists(self) -> None:
+        assert (_REPO_ROOT / "src" / "usersim" / "py.typed").is_file()
+
+    def test_marker_is_declared_as_package_data(self) -> None:
+        with (_REPO_ROOT / "pyproject.toml").open("rb") as fh:
+            data = tomllib.load(fh)
+        package_data = data["tool"]["setuptools"]["package-data"]
+        assert "py.typed" in package_data.get("usersim", []), (
+            "src/usersim/py.typed exists but is not declared as package data, "
+            "so the wheel ships without it and annotations are invisible to "
+            "type checkers."
+        )
+
+
 class TestProbeAssetPreflight:
     """A selected probe whose bank is absent must fail before any model call.
 

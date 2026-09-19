@@ -784,6 +784,24 @@ _BUILTIN_PROVIDER_ENDPOINTS: dict[str, str] = {
 }
 
 
+def required_api_key_env_vars(config: ModelsConfig) -> dict[str, str]:
+    """Map each API-key env var ``config`` needs to the provider that needs it.
+
+    Covers custom providers' ``api_key`` field plus the env vars for any
+    built-in providers (``nvidia`` / ``openai`` / ``openrouter``) referenced by
+    a ``ModelSpec``. A provider we cannot map to an env var is omitted rather
+    than guessed at.
+    """
+    custom_provider_envs = {p.name: p.api_key for p in config.providers}
+    needed: dict[str, str] = {}  # env_var -> provider_name (first wins)
+    for spec in config.models:
+        env_var = custom_provider_envs.get(spec.provider) or _BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
+        if env_var is None:
+            continue
+        needed.setdefault(env_var, spec.provider)
+    return needed
+
+
 def warn_if_missing_api_key(
     config: ModelsConfig | None = None,
 ) -> str | None:
@@ -805,14 +823,7 @@ def warn_if_missing_api_key(
             )
         return None
 
-    custom_provider_envs: dict[str, str] = {p.name: p.api_key for p in config.providers}
-    needed: dict[str, str] = {}  # env_var -> provider_name (first wins)
-    for spec in config.models:
-        env_var = custom_provider_envs.get(spec.provider) or _BUILTIN_PROVIDER_API_KEY_ENV.get(spec.provider)
-        if env_var is None:
-            continue
-        needed.setdefault(env_var, spec.provider)
-
+    needed = required_api_key_env_vars(config)
     missing = sorted(f"{env} (provider={provider!r})" for env, provider in needed.items() if not os.environ.get(env))
     if not missing:
         return None

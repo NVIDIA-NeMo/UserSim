@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine.core import llm
 from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
@@ -57,6 +58,55 @@ class _RejectsMaxTokensFacade:
             message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
             usage=SimpleNamespace(input_tokens=1, output_tokens=1),
         )
+
+
+class _BrokenFacade:
+    """Stands in for a malformed models dict: no ``completion`` to call."""
+
+    def __init__(self) -> None:
+        self.attempts = 0
+
+    def completion(self, messages, **kwargs):
+        self.attempts += 1
+        raise AttributeError("'object' object has no attribute 'completion'")
+
+
+def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
+    """Retrying cannot repair a call that was built wrong.
+
+    The backoff is there for a provider having a bad minute. Spending it on
+    an AttributeError delays the traceback by the full budget and buries the
+    cause under warnings blaming a provider that was never asked anything.
+    """
+    facade = _BrokenFacade()
+    slept: list[float] = []
+
+    with patch.object(llm.time, "sleep", slept.append), pytest.raises(AttributeError):
+        call_llm({"summary_model": facade}, "summary_model", [{"role": "user", "content": "hi"}])
+
+    assert facade.attempts == 1, f"tried {facade.attempts} times; a defective call should be attempted once"
+    assert slept == [], f"backed off {slept} before reporting a failure that no retry could fix"
+
+
+def test_transient_failures_are_still_retried() -> None:
+    """The guard above must not disable the backoff it sits next to."""
+    calls: list[int] = []
+
+    class _FlakyFacade:
+        def completion(self, messages, **kwargs):
+            calls.append(1)
+            if len(calls) < 3:
+                raise RuntimeError("503 Service Unavailable")
+            return SimpleNamespace(
+                message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
+                usage=SimpleNamespace(input_tokens=1, output_tokens=1),
+            )
+
+    with patch.object(llm.time, "sleep", lambda _: None):
+        result = call_llm({"m": _FlakyFacade()}, "m", [{"role": "user", "content": "hi"}])
+
+    assert result["content"] == "ok"
+    assert len(calls) == 3
 
 
 def test_non_ascii_budget_scales_up_never_down() -> None:

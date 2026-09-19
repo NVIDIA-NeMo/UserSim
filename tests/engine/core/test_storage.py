@@ -76,6 +76,39 @@ class TestRoundTrip:
             "safety_chat_pressure",
         }
 
+    def test_list_columns_stay_readable_by_plain_pandas(self, tmp_path: Path) -> None:
+        """A probe emitting a list column must not produce an unreadable file.
+
+        Frames arriving here are pyarrow-backed, and pandas cannot parse the
+        dtype string it records for a nested pyarrow column. Writing one
+        verbatim yields a trajectory that scores as written and then raises
+        ``TypeError`` on every read, including a read of unrelated scalar
+        columns, because the failure is in the metadata.
+        """
+        import pyarrow as pa
+
+        df = _trajectory_frame(
+            {
+                "trajectory_id": "T-001",
+                "locale": "ja_JP",
+                "probe_family": "sovereign_ai",
+                "categories_explored": ["policy", "language"],
+            }
+        ).astype({"categories_explored": pd.ArrowDtype(pa.list_(pa.string()))})
+
+        root = tmp_path / "trajs"
+        write_partitioned_dataset(df, root)
+
+        written = next(root.rglob("*.parquet"))
+        # Selecting scalar columns is the read the evaluator performs.
+        assert pd.read_parquet(written, columns=["trajectory_id"])["trajectory_id"].tolist() == ["T-001"]
+        # The list survives as a sequence, and on-disk it is still a list type.
+        assert list(pd.read_parquet(written)["categories_explored"][0]) == ["policy", "language"]
+        assert pa.types.is_list(pq.read_schema(written).field("categories_explored").type)
+
+        out = read_partitioned_dataset(root)
+        assert list(out["categories_explored"][0]) == ["policy", "language"]
+
     def test_creates_hive_partition_directories(self, tmp_path: Path) -> None:
         df = _trajectory_frame(
             {

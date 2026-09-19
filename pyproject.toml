@@ -134,6 +134,10 @@ where = ["src"]
 include = ["usersim*"]
 
 [tool.setuptools.package-data]
+# PEP 561. Without this marker every annotation in the package is invisible to
+# a type checker running against an installed copy, so callers get `Any` back
+# from functions we annotated carefully.
+"usersim" = ["py.typed"]
 "usersim.cli" = [
     # Every shipped models TOML, not just the default: smoke validates all of
     # them against the catalog, and an unshipped one silently reduces what an

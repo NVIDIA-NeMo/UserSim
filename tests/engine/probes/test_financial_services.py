@@ -27,7 +27,6 @@ from usersim.engine.core.finance_bank import (
     FinanceBankError,
     load_finance_bank,
     load_finance_bank_for_locale,
-    reset_finance_bank_cache,
 )
 from usersim.engine.core.finance_tasks import build_instance
 from usersim.engine.core.outcomes import (
@@ -70,11 +69,19 @@ def _load_finance_taxonomy(locale="en_US"):
 
 
 @pytest.fixture(autouse=True)
-def _fresh_bank():
-    reset_finance_bank_cache()
+def _fresh_taxonomy():
+    """Reset the taxonomy cache, which is per-test state because the loader
+    reads an environment variable for its source.
+
+    The finance bank cache is deliberately NOT reset here. It is keyed by
+    locale and ``FinanceBank`` is a frozen dataclass, so a cached bank cannot
+    leak between tests; clearing it just reloads the same immutable assets
+    from disk, once per test, which was most of this file's runtime. Tests
+    that load a bank from a path of their own call ``load_finance_bank``
+    directly and never touch the cache.
+    """
     reset_probing_taxonomy_cache()
     yield
-    reset_finance_bank_cache()
     reset_probing_taxonomy_cache()
 
 
@@ -568,14 +575,18 @@ def _mock_call_llm(assistant_responses, *, user_responses=None):
 def _patched_call_llm(side_effect):
     """Patch ``call_llm`` everywhere the loop + probe bind it.
 
-    ``simulation`` (loop assistant + turn-1 gen + completion check) and
-    ``judges`` (in-sim judge) bind ``call_llm`` at module load; the
-    ``ToolExecutionMixin`` inner-loop re-calls import it lazily from
-    ``core.llm``, so all three references must be patched.
+    ``simulation`` (loop assistant + turn-1 gen + completion check),
+    ``judges`` (in-sim judge) and ``context`` (response compression) each
+    bind ``call_llm`` at module load, so patching the source module does not
+    reach them; the ``ToolExecutionMixin`` inner-loop re-calls import it
+    lazily from ``core.llm``. Every one of these references must be patched,
+    or the real ``call_llm`` runs against this module's placeholder facades
+    and the probe's fallback quietly absorbs the resulting error.
     """
     with (
         patch("usersim.engine.core.simulation.call_llm", side_effect=side_effect),
         patch("usersim.engine.core.judges.call_llm", side_effect=side_effect),
+        patch("usersim.engine.core.context.call_llm", side_effect=side_effect),
         patch("usersim.engine.core.llm.call_llm", side_effect=side_effect),
     ):
         yield
@@ -2288,7 +2299,6 @@ class TestAuthoredPersonaTagsAreReachable:
 
     @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
     def test_task_persona_tags_are_reachable(self, locale):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale(locale)
         dead = {
             (tpl.id, tag)
@@ -2495,19 +2505,16 @@ class TestAccountLabelIsRegionalVocabulary:
     """
 
     def test_india_uses_indian_deposit_vocabulary(self):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale("en_IN")
         assert bank.domain_account_label("retail_banking") == "savings account"
         assert bank.domain_account_label("payments") == "wallet account"
 
     def test_us_keeps_its_own_vocabulary(self):
-        reset_finance_bank_cache()
         bank = load_finance_bank_for_locale("en_US")
         assert bank.domain_account_label("retail_banking") == "checking account"
 
     def test_no_locale_reports_checking_outside_its_own_region(self):
         for locale in ("en_US", "en_IN"):
-            reset_finance_bank_cache()
             bank = load_finance_bank_for_locale(locale)
             labels = {d: bank.domain_account_label(d) for d in bank.all_domains()}
             if locale != "en_US":
