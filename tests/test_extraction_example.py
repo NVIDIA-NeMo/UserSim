@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
 
 """Synthetic training-data extraction example — schema-sufficiency contract.
 

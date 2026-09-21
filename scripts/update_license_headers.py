@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
 
 import argparse
 import re
@@ -11,6 +11,11 @@ from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+#: The SPDX identifier stamped on every source file. ``make check-license-headers``
+#: rejects any file that disagrees with it, so this is the single place the header
+#: license is declared and the only line to change when the project license changes.
+LICENSE_IDENTIFIER = "LicenseRef-NVIDIA-Software-and-Model-Evaluation"
 
 SKIP_PATTERNS = frozenset(
     [
@@ -341,7 +346,7 @@ def generate_license_header(copyright_year: str) -> str:
     return (
         f"# SPDX-FileCopyrightText: Copyright (c) {copyright_year} "
         "NVIDIA CORPORATION & AFFILIATES. All rights reserved.\n"
-        "# SPDX-License-Identifier: Apache-2.0\n\n"
+        f"# SPDX-License-Identifier: {LICENSE_IDENTIFIER}\n\n"
     )
 
 

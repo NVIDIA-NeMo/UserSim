@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
 
 """Pure parsers for the trajectory-evaluator's wide ``assistant_eval`` cell.
 
