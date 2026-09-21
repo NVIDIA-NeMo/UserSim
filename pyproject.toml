@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 keywords = [
     "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
 ]
-license = "Apache-2.0"
+license = "LicenseRef-NVIDIA-Software-and-Model-Evaluation"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

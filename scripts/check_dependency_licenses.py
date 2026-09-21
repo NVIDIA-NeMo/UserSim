@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
 
 from __future__ import annotations
 
@@ -19,6 +19,12 @@ else:
 
 PIP_LICENSES_VERSION = "5.5.5"
 POLICY_PATH = Path(__file__).resolve().parents[1] / "dependency-license-policy.toml"
+
+#: The scanner reports every distribution in the environment, and this project is
+#: installed alongside its dependencies. The policy governs what the project may
+#: depend on rather than what the project itself is licensed as, so its own entry
+#: is not a dependency and is excluded from the report.
+PROJECT_DISTRIBUTION = "nemo-usersim"
 
 LICENSE_ALIASES = {
     "Apache Software License": {"Apache-2.0"},
@@ -201,8 +207,13 @@ def normalized_license_alternatives(package: PackageLicense) -> tuple[frozenset[
     return alternatives if parsed_any else ()
 
 
+def is_project_distribution(name: str) -> bool:
+    """Report whether a distribution name refers to this project."""
+    return name.casefold().replace("_", "-") == PROJECT_DISTRIBUTION
+
+
 def parse_report(data: list[dict[str, Any]]) -> list[PackageLicense]:
-    """Parse the structured pip-licenses report."""
+    """Parse the structured pip-licenses report, excluding this project."""
     return [
         PackageLicense(
             name=str(item["Name"]),
@@ -211,6 +222,7 @@ def parse_report(data: list[dict[str, Any]]) -> list[PackageLicense]:
             license_text=str(item.get("LicenseText", "")),
         )
         for item in data
+        if not is_project_distribution(str(item["Name"]))
     ]
 
 
