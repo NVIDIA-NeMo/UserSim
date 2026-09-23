@@ -572,7 +572,7 @@ class CookingAdvisorProbe(BankVerbatimMixin, BankBackedProbe):
             conversation_history=conversation_history,
         )
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str:
         state.metadata["recipe_id"] = self._task.id
         state.metadata["cuisine"] = self._task.cuisine
         state.metadata["dietary"] = self._task.dietary
@@ -594,7 +594,7 @@ class CookingAdvisorProbe(BankVerbatimMixin, BankBackedProbe):
 
 
 # Optional thin shim for callers that import simulate_cooking_advisor.
-def simulate_cooking_advisor(
+async def simulate_cooking_advisor(
     models, data, persona, profile, locale, language, cfg, **kwargs,
 ):
     from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
@@ -607,7 +607,7 @@ def simulate_cooking_advisor(
         cfg=cfg, provenance=provenance, profile=profile, data=data,
         outcome_builder=outcome_builder,
     )
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 ```
 
 ### File 6: bootstrap import
@@ -643,7 +643,7 @@ shim. Everything about how the conversation runs comes from the shared loop.
 
 ---
 
-## Eight things to get right
+## Common gotchas
 
 These eight points account for most first-run failures. Reading them before
 you run the smoke test will save a cycle.
@@ -662,22 +662,22 @@ for the full rationale. If your probe deliberately deviates, document
 in the module docstring
 entry. The default is empty; deviations are deliberate.
 
-### 2. Test patching: BOTH `core.simulation.call_llm` AND `core.judges.call_llm`
+### 2. Test patching: BOTH `core.simulation.acall_llm` AND `core.judges.acall_llm`
 
-Both modules locally re-import `call_llm` from `core.llm` at module
-load. Patching `core.llm.call_llm` doesn't affect the imported
+Both modules locally re-import `acall_llm` from `core.llm` at module
+load. Patching `core.llm.acall_llm` doesn't affect the imported
 bindings. Use the `_patched_call_llm` context manager from the test
 template, which patches both call sites at once:
 
 ```python
 with patch(
-    "usersim.engine.core.simulation.call_llm",
+    "usersim.engine.core.simulation.acall_llm",
     side_effect=side_effect,
 ), patch(
-    "usersim.engine.core.judges.call_llm",
+    "usersim.engine.core.judges.acall_llm",
     side_effect=side_effect,
 ):
-    result = probe_gen.simulate_my_probe(...)
+    result = await probe_gen.simulate_my_probe(...)
 ```
 
 ### 3. Mock must be alias-dispatching with judge XML payloads
@@ -755,6 +755,23 @@ matched-pair joins downstream silently drop those rows.
 All asset-driven probes seed metadata in `get_verbatim_first_user_turn`
 (verbatim path) or `seed_state_metadata` (path-agnostic): both fire
 before any LLM call.
+
+### 9. Hooks that reach a model must be `async def`
+
+The loop awaits `get_verbatim_first_user_turn`,
+`format_followup_user_instructions`, `after_assistant_turn`,
+`is_capitulation_detected`, `execute_tool_call` and `run_dispatch`.
+Declaring an override with a plain `def` registers fine and then raises
+`TypeError` partway through a conversation, once the loop tries to await
+whatever it returned. `usersim.testing.assert_probe_conforms` catches it
+in your own test suite instead:
+
+```python
+from usersim.testing import assert_probe_conforms
+
+def test_my_probe_conforms():
+    assert_probe_conforms("my_probe")
+```
 
 ---
 

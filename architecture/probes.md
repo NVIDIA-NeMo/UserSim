@@ -44,6 +44,12 @@ required; the rest have working defaults on `BaseProbe`.
 Anything a probe does not override inherits a default, which is what keeps a
 new probe to roughly fifty lines.
 
+Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
+`format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,
+`execute_tool_call` and `run_dispatch`. Declare an override of any of these with
+`async def`. `usersim.testing.assert_probe_conforms` reports a plain `def` override,
+which would otherwise raise partway through a conversation.
+
 ## Mixins
 
 Six mixins cover the shapes that recur, all in `core/probes.py`:

@@ -121,7 +121,7 @@ class DemoCustomTurn1Probe(BankBackedProbe):
             [self._task.subtopic_hint],
         )
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: Any,

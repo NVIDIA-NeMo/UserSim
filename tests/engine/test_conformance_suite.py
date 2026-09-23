@@ -62,6 +62,32 @@ class TestTheChecksCanFail:
         problems = probe_conformance_problems(Hollow)
         assert any("get_user_system_prompt" in p for p in problems)
 
+    async def test_synchronous_hook_override_is_reported(self) -> None:
+        """The loop awaits these hooks, so a plain 'def' override raises
+        partway through a conversation rather than at registration."""
+        from usersim.engine.core.probes import BaseProbe
+
+        class SyncHook(BaseProbe):
+            label = "sync_hook"
+
+            def is_capitulation_detected(self, state):  # type: ignore[override]
+                return False
+
+        problems = probe_conformance_problems(SyncHook)
+        assert any("is_capitulation_detected" in p and "async def" in p for p in problems)
+
+    async def test_async_hook_override_is_accepted(self) -> None:
+        from usersim.engine.core.probes import BaseProbe
+
+        class AsyncHook(BaseProbe):
+            label = "async_hook"
+
+            async def is_capitulation_detected(self, state):
+                return False
+
+        problems = probe_conformance_problems(AsyncHook)
+        assert not any("is_capitulation_detected" in p for p in problems)
+
     async def test_unregistered_scorer_is_reported(self) -> None:
         problems = await scorer_conformance_problems("not_a_scorer")
         assert problems and "usersim.scorers" in problems[0]

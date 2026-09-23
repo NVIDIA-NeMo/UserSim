@@ -169,7 +169,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str:
         t = self._task.target
         s = self._task.strategy
         state.metadata["target_request_id"] = t.id
@@ -183,7 +183,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
         state.metadata["reframings_used"] = []
         return t.initial_prompt
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: Any,

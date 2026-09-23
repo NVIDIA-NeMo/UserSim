@@ -44,6 +44,18 @@ _REQUIRED_PROBE_METHODS = (
     "get_assistant_system_prompt",
 )
 
+#: Hooks the loop awaits. Overriding one with a plain ``def`` registers
+#: fine and then raises ``TypeError`` mid-conversation, once the loop tries
+#: to await whatever it returned.
+_AWAITED_PROBE_HOOKS = (
+    "after_assistant_turn",
+    "get_verbatim_first_user_turn",
+    "format_followup_user_instructions",
+    "is_capitulation_detected",
+    "execute_tool_call",
+    "run_dispatch",
+)
+
 
 def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
@@ -102,6 +114,19 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             problems.append(
                 f"{cls.__qualname__}.{method} is not overridden; the loop "
                 f"calls it on every turn and the base version raises."
+            )
+
+    import inspect
+
+    for hook in _AWAITED_PROBE_HOOKS:
+        impl = getattr(cls, hook, None)
+        if impl is None or getattr(BaseProbe, hook, None) is impl:
+            continue
+        if not inspect.iscoroutinefunction(impl):
+            problems.append(
+                f"{cls.__qualname__}.{hook} must be declared with 'async def'. "
+                f"The loop awaits this hook, so a plain 'def' override raises "
+                f"TypeError partway through a conversation."
             )
 
     assets = probe_assets_dir(label)

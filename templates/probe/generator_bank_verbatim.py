@@ -123,7 +123,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str:
         # Seed all the metadata keys the scorer joins on. Use
         # setdefault if the substrate's seed_state_metadata might
         # have already populated them.

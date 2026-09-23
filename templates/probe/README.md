@@ -115,8 +115,8 @@ When porting one of the templates into a new module:
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
 - [ ] Write tests using the patterns in `test_probe.py.template`:
-      use `_patched_call_llm` to patch BOTH `core.simulation.call_llm`
-      AND `core.judges.call_llm`; use the alias-dispatching mock with
+      use `_patched_call_llm` to patch BOTH `core.simulation.acall_llm`
+      AND `core.judges.acall_llm`; use the alias-dispatching mock with
       XML-shaped judge payloads. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference.

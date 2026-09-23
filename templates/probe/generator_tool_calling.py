@@ -86,7 +86,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     def get_tools_for_assistant(self) -> list | None:
         return self._tools
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
