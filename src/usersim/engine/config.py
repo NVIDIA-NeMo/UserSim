@@ -209,4 +209,42 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             # idempotent re-runs. See core/identity.py.
             "persona_uuid",
             "trajectory_id",
+            # Probe-specific side channels. Each is written by one probe's
+            # ``build_result_extras`` and read back by that probe's scorer,
+            # which treats an absent value as "nothing to score" rather than
+            # as an error. The engine writes the configured column plus the
+            # names declared here and silently discards anything else, so an
+            # undeclared column is computed and then dropped, and the probe
+            # scores as unscoreable. They are declared for every run rather
+            # than per probe because the declaration is read once, before
+            # any row reveals which probe produced it; rows from other
+            # probes simply leave them empty.
+            "query_id",
+            "sovereign_facts_probed",
+            "probing_categories_explored",
+            "probing_subtopic_hints_used",
+            "action_request_id",
+            "sub_protocol",
+            "target_request_id",
+            "strategy_id",
+            "reframings_used",
+            "capitulation_checks",
+            "finance_task_id",
+            "task_type",
+            "task_tier",
+            "task_contract_version",
+            "taxonomy_version",
+            "domain",
+            "region",
+            "institution_id",
+            "institution_type",
+            "dynamic_category_id",
+            "dynamic_subtopic_hint",
+            "expected_state_deltas",
+            "gold_document_ids",
+            "gold_tool_sequence",
+            "retrieved_document_ids",
+            "kb_search_queries",
+            "num_kb_searches",
+            "attempted_tool_names",
         ]

@@ -19,6 +19,7 @@ pass with an unmocked model call underneath.
 from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
 from data_designer.config.column_configs import GenerationStrategy
 from data_designer.engine.column_generators.generators.base import ColumnGenerator
 from test_simulator_pipeline_e2e import (
@@ -27,6 +28,7 @@ from test_simulator_pipeline_e2e import (
     _synthetic_row_data,
 )
 
+from usersim.engine.core.probes import known_probes
 from usersim.engine.evaluator.generator import TrajectoryEvaluatorGenerator
 from usersim.engine.generator import ConversationSimulatorGenerator
 
@@ -115,6 +117,31 @@ class TestSimulatorRunsARow:
         undeclared = (set(row) - before) - declarable
         assert not undeclared, (
             f"row carries columns the config never declared, so they are dropped: {sorted(undeclared)}"
+        )
+
+    @pytest.mark.parametrize("probe_type", sorted(known_probes()))
+    async def test_no_probe_writes_a_column_the_config_did_not_declare(self, probe_type: str) -> None:
+        """Every probe, not just the default one.
+
+        ``build_result_extras`` is per-probe, so the columns a row carries
+        depend on which probe produced it. The engine writes the configured
+        column plus the declared side-effect columns and nothing else, with
+        no warning, so a probe-specific column that is not declared is
+        computed, dropped, and then read back as absent by the scorer that
+        needs it -- which reports the trajectory as unscoreable rather than
+        failing.
+        """
+        cfg = _cli_built_simulator_config(probe_type, LOCALE)
+        data = _synthetic_row_data(probe_type, LOCALE, cfg)
+        before = set(data)
+        generator = ConversationSimulatorGenerator(cfg, _resource_provider())
+        with _patched_call_llm():
+            row = await generator.agenerate(data)
+
+        undeclared = (set(row) - before) - ({cfg.name} | set(cfg.side_effect_columns))
+        assert not undeclared, (
+            f"{probe_type} writes columns the config never declares, so they are dropped "
+            f"before anything can read them: {sorted(undeclared)}"
         )
 
     async def test_carries_the_identity_columns_forward(self) -> None:

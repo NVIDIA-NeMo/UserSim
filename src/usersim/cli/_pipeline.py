@@ -327,9 +327,16 @@ def _set_run_config(data_designer, dd) -> None:
     the scheduler's own admission control. What bounds load on any one
     provider is ``max_parallel_requests``, set per alias in the models
     TOML.
+
+    The metrics endpoint is off. Left on, every run opens a local HTTP
+    listener on a fixed port that nothing here reads, and a second run
+    sharing the machine cannot bind it -- which surfaces as a traceback
+    mid-run. Set ``otel_metrics_port`` on the run config to turn it back
+    on for a session that wants to scrape it.
     """
     run_config = dd.RunConfig(
         jinja_rendering_engine=dd.JinjaRenderingEngine.NATIVE,
+        otel_metrics_port=None,
     )
     data_designer.set_run_config(run_config)
 
