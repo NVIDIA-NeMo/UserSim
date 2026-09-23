@@ -10,6 +10,31 @@ from typing import Literal
 from data_designer.config.base import SingleColumnConfig
 from pydantic import Field
 
+MODEL_USER = "user_model"
+MODEL_ASSISTANT = "assistant_model"
+MODEL_API_RESPONSE = "api_response_model"
+MODEL_JUDGE = "judge_model"
+MODEL_SUMMARY = "summary_model"
+
+#: Every chat alias the simulator resolves from the model registry.
+MODEL_ALIASES = [
+    MODEL_USER,
+    MODEL_ASSISTANT,
+    MODEL_API_RESPONSE,
+    MODEL_JUDGE,
+    MODEL_SUMMARY,
+]
+
+#: The subset a run cannot start without. ``MODEL_SUMMARY`` is absent
+#: because the engine falls back to ``MODEL_USER`` for summaries, and the
+#: embedding alias because dense retrieval falls back to lexical.
+REQUIRED_MODEL_ALIASES = [
+    MODEL_USER,
+    MODEL_ASSISTANT,
+    MODEL_API_RESPONSE,
+    MODEL_JUDGE,
+]
+
 
 class ConversationSimulatorConfig(SingleColumnConfig):
     """Configuration for the unified conversation simulator plugin.
@@ -130,6 +155,21 @@ class ConversationSimulatorConfig(SingleColumnConfig):
 
     # Reproducibility
     random_seed: int | None = None
+
+    def get_model_aliases(self) -> list[str]:
+        """The aliases a run cannot start without.
+
+        A conversation needs all four: the simulated user, the assistant
+        under test, tool-call responses, and the in-sim judge. Declaring
+        them here means an unreachable endpoint or a typo surfaces in the
+        startup health check rather than partway through a paid run.
+
+        ``summary_model`` and ``finance_embedding_model_alias`` are left
+        out on purpose. Both are optional at run time -- summaries fall
+        back to the user model, dense retrieval falls back to lexical --
+        and the health check treats every alias it is given as required.
+        """
+        return list(REQUIRED_MODEL_ALIASES)
 
     @property
     def required_columns(self) -> list[str]:

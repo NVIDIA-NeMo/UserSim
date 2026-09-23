@@ -18,7 +18,15 @@ from data_designer.engine.column_generators.generators.base import (
     ColumnGeneratorWithModelRegistry,
 )
 
-from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.config import (
+    MODEL_ALIASES,
+    MODEL_API_RESPONSE,
+    MODEL_ASSISTANT,
+    MODEL_JUDGE,
+    MODEL_SUMMARY,
+    MODEL_USER,
+    ConversationSimulatorConfig,
+)
 from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
 from usersim.engine.core.behavioral import (
     compute_behavioral_profile,
@@ -55,17 +63,14 @@ from usersim.engine.core.provenance import (
 
 logger = logging.getLogger("usersim.engine")
 
-MODEL_USER = "user_model"
-MODEL_ASSISTANT = "assistant_model"
-MODEL_API_RESPONSE = "api_response_model"
-MODEL_JUDGE = "judge_model"
-MODEL_SUMMARY = "summary_model"
-MODEL_ALIASES = [
-    MODEL_USER,
-    MODEL_ASSISTANT,
-    MODEL_API_RESPONSE,
-    MODEL_JUDGE,
-    MODEL_SUMMARY,
+__all__ = [
+    "MODEL_ALIASES",
+    "MODEL_API_RESPONSE",
+    "MODEL_ASSISTANT",
+    "MODEL_JUDGE",
+    "MODEL_SUMMARY",
+    "MODEL_USER",
+    "ConversationSimulatorGenerator",
 ]
 
 

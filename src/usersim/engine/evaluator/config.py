@@ -79,11 +79,10 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     column_type: Literal["trajectory-evaluator"] = "trajectory-evaluator"
 
-    # Data Designer's model-health-check path expects every
-    # model-generated column config to expose a single ``model_alias``.
-    # The evaluator can use a judge ensemble, but the health check only
-    # has a scalar hook here; keep it pointed at the first judge so DD
-    # validates at least the primary judge alias before generation.
+    # Every model-generated column config exposes a single
+    # ``model_alias``. The evaluator can run a judge ensemble, so this
+    # stays pointed at the first judge and ``get_model_aliases()`` below
+    # declares the rest.
     model_alias: str = "judge_model"
 
     # ── Input columns (defaults match the simulator's side-effect columns) ─
@@ -158,6 +157,17 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
             # Re-raise as ValueError so Pydantic surfaces it cleanly.
             raise ValueError(str(e)) from e
         return self
+
+    def get_model_aliases(self) -> list[str]:
+        """Every judge in the ensemble, so all of them are checked at startup.
+
+        A judge whose alias does not resolve drops out of the ensemble
+        and the run continues, which quietly produces a score built from
+        fewer judges than the evaluation envelope records. Declaring the
+        whole ensemble turns that into a startup failure naming the
+        alias.
+        """
+        return list(dict.fromkeys(j.alias for j in self.judges if j.alias))
 
     @property
     def required_columns(self) -> list[str]:

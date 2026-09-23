@@ -20,24 +20,13 @@ classifiers = [
 ]
 
 dependencies = [
-    # ``>=0.5.8`` for ``RunConfig.jinja_rendering_engine`` and the
-    # ko_KR Nemotron-Personas locale support required by the simulator. The
-    # ``NATIVE`` mode is what lets us use the standard Jinja ``select`` /
-    # ``join`` filters in expression columns (the older ``SECURE`` mode
-    # ships a narrow filter allowlist that excludes both). See
-    # ``cli/_pipeline.py`` for the opt-in.
-    #
-    # ``<0.6`` because 0.6.0 makes the async engine the default and hands
-    # column-generator plugins async-mode ``HttpModelClient``s (0.7.0+
-    # then hardcodes async). The simulator's synchronous
-    # ``facade.completion()`` call (``core/llm.py``) raises
-    # ``SyncClientUnavailableError`` against an async-mode client, so every
-    # live model call fails. 0.6.x offers only deprecated sync fallbacks
-    # (an ``allow_resize=True`` column or ``DATA_DESIGNER_ASYNC_ENGINE=0``),
-    # neither of which this pipeline uses — so 0.5.x is the last fully
-    # sync-compatible line. Lift the cap once the plugin's LLM path is
-    # async-aware (or forces SYNC clients at model-registry construction).
-    "data-designer>=0.5.9,<0.6",
+    # The simulator runs on the async engine, which 0.9 provides. It also
+    # needs ``RunConfig.jinja_rendering_engine`` and ko_KR
+    # Nemotron-Personas locale support: the ``NATIVE`` mode is what lets
+    # expression columns use the standard Jinja ``select`` / ``join``
+    # filters (the older ``SECURE`` mode ships a narrow filter allowlist
+    # that excludes both). See ``cli/_pipeline.py`` for the opt-in.
+    "data-designer>=0.9.3,<0.10",
     # Language detection for the language_compliance scorer. Pure Python,
     # MIT, accurate on short conversational text. Pinned to a major version
     # to keep CI deterministic -- bump deliberately.
@@ -124,10 +113,8 @@ trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 
 [tool.uv]
 override-dependencies = [
-    # Keep the upper cap in sync with the ``dependencies`` pin above
-    # (0.6.0 makes async-mode clients the default, breaking the
-    # synchronous LLM path).
-    "data-designer>=0.5.9,<0.6",
+    # Keep in sync with the ``dependencies`` pin above.
+    "data-designer>=0.9.3,<0.10",
 ]
 
 [build-system]
