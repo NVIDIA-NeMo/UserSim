@@ -51,8 +51,9 @@ MODEL_SUMMARY = "summary_model"
 
 # Process-local translation cache. Bank entries repeat across rows, so caching
 # by (text, target_language, romanize) collapses the cost to one call per
-# unique verbatim turn per language. Guarded by a lock because Data Designer
-# fans rows out across worker threads.
+# unique verbatim turn per language. Guarded by a lock because the cache is
+# process-wide while the trajectories reading it may sit on more than one
+# event loop, each on its own thread.
 _cache: dict[str, str] = {}
 _cache_lock = threading.Lock()
 

@@ -411,10 +411,13 @@ def _log_running_stats() -> None:
     if not model_stats:
         return
 
+    # ``combined`` is the sum of per-record durations, which is larger than
+    # the elapsed time of the run: trajectories overlap, so the same second
+    # of wall clock is counted once per trajectory running through it.
     lines = [
         f"  |-- 📈 Running stats ({rec['records']} records): "
         f"avg={rec['avg_s']:.1f}s, min={rec['min_s']:.1f}s, "
-        f"max={rec['max_s']:.1f}s, total={rec['total_s']:.0f}s"
+        f"max={rec['max_s']:.1f}s, combined={rec['total_s']:.0f}s"
     ]
     for alias in MODEL_ALIASES:
         s = model_stats.get(alias)
