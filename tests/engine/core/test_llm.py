@@ -29,6 +29,70 @@ from usersim.engine.core.llm import (
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
 
 
+class TestAsyncModelCalls:
+    """The awaiting call path, which shares its retry policy with the sync one."""
+
+    class _Facade:
+        def __init__(self, failures: int = 0) -> None:
+            self.attempts = 0
+            self._failures = failures
+
+        async def acompletion(self, messages, **kwargs):
+            self.attempts += 1
+            if self.attempts <= self._failures:
+                raise RuntimeError("transient")
+            return SimpleNamespace(
+                message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
+                usage=SimpleNamespace(input_tokens=3, output_tokens=4),
+            )
+
+    async def test_returns_the_reply_as_a_message_dict(self) -> None:
+        from usersim.engine.core.llm import acall_llm
+
+        result = await acall_llm({"m": self._Facade()}, "m", [{"role": "user", "content": "hi"}])
+
+        assert result["role"] == "assistant"
+        assert result["content"] == "ok"
+
+    async def test_waits_without_blocking_the_runtime(self) -> None:
+        """Backoff has to yield, or every other conversation waits with it."""
+        import asyncio
+
+        from usersim.engine.core import llm as llm_module
+
+        slept: list[float] = []
+
+        async def _record(delay: float) -> None:
+            slept.append(delay)
+
+        facade = self._Facade(failures=1)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(asyncio, "sleep", _record)
+            mp.setattr(llm_module.time, "sleep", lambda _: pytest.fail("backoff blocked the runtime"))
+            result = await llm_module.acall_llm({"m": facade}, "m", [{"role": "user", "content": "hi"}])
+
+        assert facade.attempts == 2, f"expected one retry, made {facade.attempts} attempts"
+        assert slept, "retried with no backoff at all"
+        assert result["content"] == "ok"
+
+    async def test_a_defective_call_is_not_retried(self) -> None:
+        """A call built wrong cannot be repaired by sending it again."""
+        from usersim.engine.core.llm import acall_llm
+
+        class _Broken:
+            def __init__(self) -> None:
+                self.attempts = 0
+
+            async def acompletion(self, messages, **kwargs):
+                self.attempts += 1
+                raise AttributeError("no such method")
+
+        facade = _Broken()
+        with pytest.raises(AttributeError):
+            await acall_llm({"m": facade}, "m", [{"role": "user", "content": "hi"}])
+        assert facade.attempts == 1, f"tried {facade.attempts} times for a failure no retry can fix"
+
+
 class TestConversationStateIsPerContext:
     """Conversation state follows the unit of work, not the runtime thread.
 

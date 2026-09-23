@@ -29,6 +29,60 @@ logger = logging.getLogger("usersim.engine")
 DEFAULT_EMBEDDING_ALIAS = "embedding_model"
 
 
+def _embedder(models: dict[str, Any], alias: str, text: str, attribute: str) -> Any | None:
+    """Resolve the embedding callable for ``alias``, or ``None`` to fall back."""
+    if not models or not text:
+        return None
+    facade = models.get(alias)
+    if facade is None:
+        logger.debug(
+            "  |-- embeddings: no facade for alias %r; dense query falls back to lexical",
+            alias,
+        )
+        return None
+    embed_fn = getattr(facade, attribute, None)
+    if not callable(embed_fn):
+        logger.debug(
+            "  |-- embeddings: facade %r has no %s; falling back to lexical",
+            alias,
+            attribute,
+        )
+        return None
+    return embed_fn
+
+
+def _embedding_failed(alias: str, error: Exception) -> None:
+    logger.warning(
+        "  |-- embeddings: query embedding via %r failed (%s: %s); falling back to lexical",
+        alias,
+        type(error).__name__,
+        error,
+    )
+
+
+async def aembed_query(
+    models: dict[str, Any],
+    alias: str,
+    text: str,
+) -> list[float] | None:
+    """Embed a single query string; return its vector or ``None`` on any error.
+
+    ``None`` is a soft signal to the caller to fall back to lexical retrieval;
+    this function never raises.
+    """
+    embed_fn = _embedder(models, alias, text, "agenerate_text_embeddings")
+    if embed_fn is None:
+        return None
+    try:
+        vectors = await embed_fn([text])
+    except Exception as e:  # noqa: BLE001 — soft-fail to lexical
+        _embedding_failed(alias, e)
+        return None
+    if not vectors:
+        return None
+    return list(vectors[0])
+
+
 def embed_query(
     models: dict[str, Any],
     alias: str,
@@ -39,31 +93,13 @@ def embed_query(
     ``None`` is a soft signal to the caller to fall back to lexical retrieval;
     this function never raises.
     """
-    if not models or not text:
-        return None
-    facade = models.get(alias)
-    if facade is None:
-        logger.debug(
-            "  |-- embeddings: no facade for alias %r; dense query falls back to lexical",
-            alias,
-        )
-        return None
-    embed_fn = getattr(facade, "generate_text_embeddings", None)
-    if not callable(embed_fn):
-        logger.debug(
-            "  |-- embeddings: facade %r has no generate_text_embeddings; falling back to lexical",
-            alias,
-        )
+    embed_fn = _embedder(models, alias, text, "generate_text_embeddings")
+    if embed_fn is None:
         return None
     try:
         vectors = embed_fn([text])
     except Exception as e:  # noqa: BLE001 — soft-fail to lexical
-        logger.warning(
-            "  |-- embeddings: query embedding via %r failed (%s: %s); falling back to lexical",
-            alias,
-            type(e).__name__,
-            e,
-        )
+        _embedding_failed(alias, e)
         return None
     if not vectors:
         return None

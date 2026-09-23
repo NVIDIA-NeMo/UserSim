@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -416,6 +417,90 @@ def _assistant_message_to_dict(msg: Any) -> dict[str, Any]:
     return result
 
 
+def _begin_call(
+    models: dict[str, Any],
+    alias: str,
+    messages: list[dict[str, Any]],
+    kwargs: dict[str, Any],
+) -> tuple[Any, list[ChatMessage], float]:
+    """Resolve the model and convert the transcript, returning a start time."""
+    facade = models.get(alias)
+    if facade is None:
+        raise ValueError(f"Model alias '{alias}' not found in models dict")
+
+    has_tools = "tools" in kwargs and kwargs["tools"]
+    tool_tag = f" + {len(kwargs['tools'])} tools" if has_tools else ""
+    chat_messages = _dicts_to_chat_messages(messages)
+
+    logger.debug(f"  |-- LLM call: {alias} ({len(messages)} msgs{tool_tag}) ...")
+    return facade, chat_messages, time.monotonic()
+
+
+def _backoff_before_retry(
+    error: Exception,
+    alias: str,
+    attempt: int,
+    kwargs: dict[str, Any],
+) -> float:
+    """Return how long to wait before retrying, or zero to retry at once.
+
+    Raises when no retry can repair the call, so the caller only ever sees a
+    wait. Mutates ``kwargs`` when the fix is a differently spelled argument.
+    """
+    if _is_context_window_error(error):
+        raise ContextWindowError(alias, error) from error
+    # Reasoning endpoints replaced ``max_tokens`` with
+    # ``max_completion_tokens`` because hidden thinking tokens are billed as
+    # output. Callers pass a budget without knowing which spelling the model
+    # takes, so translate once and retry rather than burning the backoff
+    # budget on an error that cannot resolve itself.
+    if _rejects_max_tokens(error) and "max_tokens" in kwargs:
+        kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
+        logger.debug(
+            "  |-- %s rejects max_tokens; retrying with max_completion_tokens",
+            alias,
+        )
+        return 0.0
+    if isinstance(error, _NEVER_RETRY):
+        raise
+    if attempt >= _MAX_RETRIES:
+        raise
+    delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
+    jitter = _random.uniform(0, delay * 0.3)
+    logger.warning(
+        f"  |-- LLM retry {attempt + 1}/{_MAX_RETRIES} for {alias}: "
+        f"{type(error).__name__}: {error} (backoff {delay + jitter:.1f}s)"
+    )
+    return delay + jitter
+
+
+async def acall_llm(
+    models: dict[str, Any],
+    alias: str,
+    messages: list[dict[str, Any]],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Call a model and return its reply as a message dict.
+
+    Returns role, content, and where the model supplied them
+    reasoning_content and tool_calls.
+    """
+    facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
+
+    for attempt in range(_MAX_RETRIES + 1):
+        try:
+            response = await facade.acompletion(chat_messages, **kwargs)
+            break
+        except Exception as e:
+            backoff = _backoff_before_retry(e, alias, attempt, kwargs)
+            if backoff:
+                # Awaited rather than slept: every other conversation on this
+                # runtime keeps moving while this one waits out the backoff.
+                await asyncio.sleep(backoff)
+
+    return _finish_call(response, alias, messages, time.monotonic() - t0)
+
+
 def call_llm(
     models: dict[str, Any],
     alias: str,
@@ -427,51 +512,27 @@ def call_llm(
     Returns a dict with role, content, and optionally reasoning_content
     and tool_calls. Logs timing at DEBUG level for verbosity=2.
     """
-    facade = models.get(alias)
-    if facade is None:
-        raise ValueError(f"Model alias '{alias}' not found in models dict")
-
-    has_tools = "tools" in kwargs and kwargs["tools"]
-    tool_tag = f" + {len(kwargs['tools'])} tools" if has_tools else ""
-    chat_messages = _dicts_to_chat_messages(messages)
-
-    t0 = time.monotonic()
-    logger.debug(f"  |-- LLM call: {alias} ({len(messages)} msgs{tool_tag}) ...")
+    facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
 
     for attempt in range(_MAX_RETRIES + 1):
         try:
             response = facade.completion(chat_messages, **kwargs)
             break
         except Exception as e:
-            if _is_context_window_error(e):
-                raise ContextWindowError(alias, e) from e
-            # Reasoning endpoints replaced ``max_tokens`` with
-            # ``max_completion_tokens`` because hidden thinking tokens are
-            # billed as output. Callers pass a budget without knowing which
-            # spelling the model takes, so translate once and retry rather
-            # than burning the backoff budget on an error that cannot
-            # resolve itself.
-            if _rejects_max_tokens(e) and "max_tokens" in kwargs:
-                kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
-                logger.debug(
-                    "  |-- %s rejects max_tokens; retrying with max_completion_tokens",
-                    alias,
-                )
-                continue
-            if isinstance(e, _NEVER_RETRY):
-                raise
-            if attempt >= _MAX_RETRIES:
-                raise
-            delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
-            jitter = _random.uniform(0, delay * 0.3)
-            logger.warning(
-                f"  |-- LLM retry {attempt + 1}/{_MAX_RETRIES} for {alias}: "
-                f"{type(e).__name__}: {e} (backoff {delay + jitter:.1f}s)"
-            )
-            time.sleep(delay + jitter)
+            backoff = _backoff_before_retry(e, alias, attempt, kwargs)
+            if backoff:
+                time.sleep(backoff)
 
-    elapsed = time.monotonic() - t0
+    return _finish_call(response, alias, messages, time.monotonic() - t0)
 
+
+def _finish_call(
+    response: Any,
+    alias: str,
+    messages: list[dict[str, Any]],
+    elapsed: float,
+) -> dict[str, Any]:
+    """Record the call's cost and return the reply as a message dict."""
     result = _assistant_message_to_dict(response.message)
     n_tool_calls = len(result.get("tool_calls", []))
     tc_tag = f", {n_tool_calls} tool_calls" if n_tool_calls else ""
