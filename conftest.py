@@ -62,6 +62,24 @@ def _require_hermetic_env() -> None:
     )
 
 
+def _require_async_plugin(config) -> None:
+    """Abort the run if async tests cannot be collected, naming the cause.
+
+    Without ``pytest-asyncio`` every ``async def`` test is skipped with a
+    warning rather than failed, so a suite that never ran the async paths
+    still reports green. Failing here costs one clear message instead.
+    """
+    if config.pluginmanager.hasplugin("asyncio"):
+        return
+    raise pytest.UsageError(
+        "pytest-asyncio is not installed, so every async test would be "
+        "skipped with a warning and the suite would report green without "
+        "having run them. It is part of the dev dependency group, so the "
+        "usual cause is that the group is not installed. Run `uv sync` "
+        "(or `make install-dev`) and retry."
+    )
+
+
 def pytest_configure(config) -> None:
     """Fail loudly on outbound connections instead of depending on egress.
 
@@ -79,6 +97,7 @@ def pytest_configure(config) -> None:
     AF_UNIX is left open because subprocess and multiprocessing IPC use it.
     """
     _require_hermetic_env()
+    _require_async_plugin(config)
 
     real_connect = socket.socket.connect
     real_connect_ex = socket.socket.connect_ex

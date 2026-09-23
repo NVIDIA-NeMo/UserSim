@@ -104,6 +104,11 @@ dev = [
     # would run after one that imports a registry, which is too late to keep
     # discovery out of the suite. conftest.py fails the run if this is absent.
     "pytest-env>=1.1,<2",
+    # Collects `async def` tests. `asyncio_mode = "auto"` below means they need
+    # no decorator, so a contributor writing one does not have to know this is
+    # here. conftest.py fails the run if it is absent, because without it every
+    # async test is skipped with a warning rather than failing.
+    "pytest-asyncio>=1.0,<2",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
@@ -169,6 +174,10 @@ addopts = "-q"
 env = [
     "USERSIM_DISABLE_EXTENSIONS=1",
 ]
+# Every `async def` test is collected and run without a per-test marker. The
+# alternative, strict mode, silently skips any test whose decorator was
+# forgotten, which reads as a passing suite.
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 120

@@ -26,6 +26,21 @@ _UNROUTABLE = ("203.0.113.1", 80)
 _GUARD_NAME = "BlockedNetworkCall"
 
 
+def _guard_names(raised: BaseException) -> set[str]:
+    """Collect the exception type names, unwrapping any group.
+
+    An async client runs its connection attempt inside a task group, which
+    re-raises whatever escaped wrapped in a ``BaseExceptionGroup``. The guard
+    is still in there and still not an ``Exception``, so the check has to look
+    through the wrapper rather than at the outermost type.
+    """
+    names = {type(raised).__name__}
+    if isinstance(raised, BaseExceptionGroup):
+        for inner in raised.exceptions:
+            names |= _guard_names(inner)
+    return names
+
+
 def _assert_guard_raised(excinfo) -> None:
     """The guard must be a BaseException, not an Exception.
 
@@ -34,7 +49,7 @@ def _assert_guard_raised(excinfo) -> None:
     spends the whole backoff budget retrying and then passes down a fallback
     path, reporting success for whatever it set out to assert.
     """
-    assert type(excinfo.value).__name__ == _GUARD_NAME
+    assert _GUARD_NAME in _guard_names(excinfo.value), f"expected the guard somewhere in {_guard_names(excinfo.value)}"
     assert not isinstance(excinfo.value, Exception), (
         "the network guard is an Exception again, so retry and fallback paths will swallow it and unmocked boundaries will go unnoticed"
     )
@@ -58,6 +73,56 @@ def test_outbound_connect_ex_is_blocked() -> None:
         _assert_guard_raised(excinfo)
     finally:
         sock.close()
+
+
+async def test_outbound_connect_is_blocked_from_a_coroutine() -> None:
+    """The guard patches the socket class, so it applies on any loop too."""
+    import asyncio
+
+    with pytest.raises(BaseException, match="network access is blocked") as excinfo:
+        await asyncio.open_connection(*_UNROUTABLE)
+    _assert_guard_raised(excinfo)
+
+
+async def test_outbound_connect_is_blocked_for_an_async_http_client() -> None:
+    """The client wraps the failure in a group; the guard survives inside it."""
+    import httpx
+
+    with pytest.raises(BaseException) as excinfo:
+        async with httpx.AsyncClient() as client:
+            await client.get(f"http://{_UNROUTABLE[0]}/")
+    _assert_guard_raised(excinfo)
+
+
+def test_gather_is_never_used_in_a_form_that_absorbs_the_guard() -> None:
+    """``return_exceptions=True`` collects BaseException instead of raising.
+
+    The guard is a ``BaseException`` precisely so nothing swallows it. That
+    call form puts it in a results list, which restores the silent-absorption
+    this whole guard exists to prevent.
+    """
+    import ast
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parent.parent
+    offenders: list[str] = []
+    for directory in ("src", "tests"):
+        for path in (repo_root / directory).rglob("*.py"):
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                for keyword in node.keywords:
+                    if (
+                        keyword.arg == "return_exceptions"
+                        and isinstance(keyword.value, ast.Constant)
+                        and keyword.value.value is True
+                    ):
+                        offenders.append(f"{path.relative_to(repo_root)}:{node.lineno}")
+    assert not offenders, (
+        f"gather(..., return_exceptions=True) collects BaseException rather than "
+        f"propagating it, so the network guard stops stopping tests: {offenders}"
+    )
 
 
 def test_reasoning_estimate_degrades_when_no_tokenizer(monkeypatch) -> None:
