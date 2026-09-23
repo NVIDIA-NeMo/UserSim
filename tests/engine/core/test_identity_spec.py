@@ -40,11 +40,11 @@ BASE: dict[str, Any] = {
     "bank_id": "identity_fixture",
     "bank_version": "1.0.0",
     "developers": {
-        "nvidia": {"names": ["NVIDIA"], "products": ["Nemotron"]},
-        "alibaba": {"names": ["Alibaba"], "products": ["Qwen"]},
-        "openai": {"names": ["OpenAI"], "products": ["ChatGPT", "GPT"]},
-        "google": {"names": ["Google"], "products": ["Gemini", "Gemma"]},
-        "meta": {"names": ["Meta"], "products": ["Llama"]},
+        "nvidia": {"names": ["NVIDIA", "エヌビディア"], "models": ["Nemotron"]},
+        "alibaba": {"names": ["Alibaba"], "products": ["Qwen"], "models": ["Qwen"]},
+        "openai": {"names": ["OpenAI"], "products": ["ChatGPT"], "models": ["GPT"], "ambiguous": ["GPT"]},
+        "google": {"names": ["Google"], "products": ["Gemini"], "models": ["Gemini", "Gemma"]},
+        "meta": {"names": ["Meta"], "products": ["Meta AI"], "models": ["Llama"], "ambiguous": ["Meta"]},
     },
     "expected_identities": [
         {
@@ -178,9 +178,37 @@ class TestResolution:
         _write(roots[1], LABEL, BASE)
         return load_identity_spec_default(LABEL)
 
-    def test_a_hosting_namespace_never_decides_the_developer(self, spec) -> None:
-        assert spec.resolve("nvidia/qwen/qwen3.6-35b-a3b").developers == ("alibaba",)
-        assert spec.resolve("gateway/nvidia/nemotron-3-nano-30b-a3b").developers == ("nvidia",)
+    @pytest.mark.parametrize(
+        "model_id",
+        [
+            "Qwen/Qwen3-32B",
+            "qwen/qwen3-32b:nitro",
+            "qwen.qwen3-235b-a22b-2507-v1:0",
+            "bedrock/converse/qwen.qwen3-235b-a22b-2507-v1:0",
+            "qwen2.5:7b",
+            "hf.co/unsloth/Qwen3-8B-GGUF:Q4_K_M",
+            "accounts/fireworks/models/qwen3p7-plus",
+            "databricks-qwen35-122b-a10b",
+            "openai/qwen3-8b",
+            "gateway/nvidia/qwen3-8b",
+        ],
+    )
+    def test_the_family_is_found_whatever_the_provider_calls_the_model(self, spec, model_id: str) -> None:
+        assert spec.resolve(model_id).developers == ("alibaba",)
+
+    def test_a_family_name_must_start_a_part_of_the_id(self, spec) -> None:
+        assert spec.resolve("google/recurrentgemma-2b") is None, "gemma* does not match inside a word"
+        assert spec.resolve("google/gemma-3-27b-it").developers == ("google",)
+
+    def test_a_host_or_publisher_name_never_decides_the_developer(self, spec) -> None:
+        assert spec.resolve("nvidia/Qwen3-8B-FP8").developers == ("alibaba",)
+        assert spec.resolve("meta/acme-7b") is None
+
+    def test_a_rule_may_list_several_patterns(self, roots) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["expected_identities"][2]["match"] = ["qwen*", "qwq*"]
+        spec = load_identity_spec(_write(roots[1], LABEL, doc))
+        assert spec.resolve("qwq-plus").rule == "qwq*"
 
     def test_the_first_matching_rule_wins(self, spec) -> None:
         expected = spec.resolve("nvidia/llama-3.3-nemotron-super-49b-v1")
@@ -200,7 +228,7 @@ class TestResolution:
         assert spec.resolve("/checkpoints/run-42/step-1200").rule == "*/run-42/step-*"
         assert spec.resolve("step-1200") is None
 
-    def test_the_expected_identity_records_the_spec_version(self, spec) -> None:
+    def test_the_expected_identity_records_how_it_was_found(self, spec) -> None:
         expected = asdict(spec.resolve("nvidia/nemotron-3-nano-30b-a3b"))
         assert expected == {
             "model_id": "nvidia/nemotron-3-nano-30b-a3b",
@@ -208,14 +236,63 @@ class TestResolution:
             "model_names": ("Nemotron",),
             "lineage": (),
             "rule": "*nemotron*",
+            "declared": False,
+            "layer": "identity_fixture@1.0.0",
             "spec_version": "identity_fixture@1.0.0",
         }
+
+    def test_names_match_across_width_case_and_invisible_characters(self, spec) -> None:
+        assert spec.developer_of("ＮＶＩＤＩＡ") == "nvidia"
+        assert spec.developer_of("エ\u200bヌビディア") == "nvidia"
+        assert spec.developer_of("  gemma ") == "google"
+        assert spec.developer_of("Acme") is None
 
     def test_competitors_drop_the_developer_under_test(self, spec) -> None:
         assert spec.competitor_pool("ko_KR", exclude=("google",)) == ("ChatGPT", "Qwen", "Llama")
 
     def test_a_locale_without_competitors_uses_the_default(self, spec) -> None:
         assert spec.competitor_pool("fr_FR") == ("ChatGPT", "Gemini", "Llama", "Qwen")
+
+
+class TestDeclaration:
+    """A layer names the exact id of the model under test, whatever the provider calls it."""
+
+    @pytest.fixture
+    def spec(self, roots):
+        upper, lower = roots
+        _write(lower, LABEL, BASE)
+        _write(
+            upper,
+            LABEL,
+            _layer(
+                "my_models",
+                extends=LABEL,
+                developers={"acme": {"names": ["Acme AI"], "models": ["AcmeBot"]}},
+                expected_identities=[{"model": "prod-chat", "developer": "acme", "model_names": ["AcmeBot"]}],
+            ),
+        )
+        return load_identity_spec_default(LABEL)
+
+    def test_a_declared_model_resolves_to_its_developer(self, spec) -> None:
+        expected = spec.resolve("prod-chat")
+        assert (expected.developers, expected.declared, expected.layer) == (("acme",), True, "my_models@1")
+
+    def test_a_declaration_matches_only_that_id(self, spec) -> None:
+        assert spec.resolve("PROD-CHAT").developers == ("acme",)
+        assert spec.resolve("prod-chat-v2") is None
+        assert spec.resolve("azure/prod-chat") is None
+
+    def test_a_declaration_wins_over_every_pattern(self, roots) -> None:
+        upper, lower = roots
+        doc = copy.deepcopy(BASE)
+        doc["expected_identities"].append({"model": "qwen3-acme-ft", "developer": "nvidia"})
+        _write(lower, LABEL, doc)
+        _write(
+            upper, LABEL, _layer("catch_all", extends=LABEL, expected_identities=[{"match": "*", "developer": "meta"}])
+        )
+        spec = load_identity_spec_default(LABEL)
+        assert spec.resolve("qwen3-acme-ft").developers == ("nvidia",)
+        assert spec.resolve("qwen3-8b").developers == ("meta",)
 
 
 class TestLayering:
@@ -445,3 +522,39 @@ class TestValidation:
 
     def test_a_missing_file_is_reported_not_raised(self, roots) -> None:
         assert _codes(validate_spec("no_such_probe")) == {ProblemCode.UNREADABLE}
+
+    @pytest.mark.parametrize(
+        "rule",
+        [
+            {"developer": "nvidia"},
+            {"model": "prod-chat", "match": "prod-*", "developer": "nvidia"},
+        ],
+        ids=["neither", "both"],
+    )
+    def test_a_rule_names_a_model_or_a_pattern(self, roots, rule: dict[str, Any]) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["expected_identities"].append(rule)
+        (problem,) = self._problems(roots, doc)
+        assert problem.code is ProblemCode.MISSING_FIELD
+        assert problem.where.endswith("::expected_identities[4]")
+
+    def test_a_declaration_takes_no_examples(self, roots) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["expected_identities"].append({"model": "prod-chat", "developer": "nvidia", "examples": ["prod-chat"]})
+        (problem,) = self._problems(roots, doc)
+        assert problem.code is ProblemCode.INVALID_VALUE
+        assert problem.where.endswith("::expected_identities[prod-chat].examples")
+
+    def test_a_name_listed_under_two_developers_is_reported(self, roots) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["developers"]["meta"]["models"].append("ｑｗｅｎ")
+        (problem,) = self._problems(roots, doc)
+        assert problem.code is ProblemCode.SHARED_NAME
+        assert "'qwen'" in problem.detail
+
+    def test_an_ambiguous_entry_must_be_in_the_vocabulary(self, roots) -> None:
+        doc = copy.deepcopy(BASE)
+        doc["developers"]["google"]["ambiguous"] = ["Bard"]
+        (problem,) = self._problems(roots, doc)
+        assert problem.code is ProblemCode.INVALID_VALUE
+        assert problem.where.endswith("::developers.google.ambiguous")

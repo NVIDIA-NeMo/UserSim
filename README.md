@@ -15,7 +15,7 @@
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
-**13 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 11 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
+**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 11 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
 
 <img src="docs/images/pipeline_architecture.jpg" width="800">
 
@@ -203,7 +203,7 @@ full plan and exits before the first network call.
 
 **Using it**
 
-- [`docs/probes.md`](docs/probes.md): the 13 probes and which failure mode each catches
+- [`docs/probes.md`](docs/probes.md): the 14 probes and which failure mode each catches
 - [`docs/outputs.md`](docs/outputs.md): the parquet columns, evaluation cells and report artifacts a run produces
 - [`docs/locales.md`](docs/locales.md): the 9 shipped locales, the 22 India preview variants, persona-language matching
 - [`docs/notebooks.md`](docs/notebooks.md): the interactive flow

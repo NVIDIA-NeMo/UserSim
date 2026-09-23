@@ -6,7 +6,7 @@ catalogue: which probe catches which failure mode. For how the probe
 substrate works, see [`architecture/probes.md`](../architecture/probes.md);
 for writing one, [`docs/engine/AUTHORING_A_PROBE.md`](engine/AUTHORING_A_PROBE.md).
 
-Thirteen probes ship today, each aimed at a distinct failure mode. Select them
+Fourteen probes ship today, each aimed at a distinct failure mode. Select them
 with `--probe-mix` on `usersim simulate`, or `PROBE_MIX = {...}` in
 [`notebooks/01_simulate.ipynb`](../notebooks/01_simulate.ipynb); the registry
 validates the mix at parse time so an unknown probe fails immediately.
@@ -26,8 +26,9 @@ validates the mix at parse time so an unknown probe fails immediately.
 | Health-disclosure | `health_triage_disclosure` | Missed urgent red-flag symptoms that a patient only surfaces once a care-navigation / triage assistant earns them |
 | Health-disclosure | `health_decision_support_disclosure` | Missed clinical danger signs when a *clinician* presents a case to a decision-support assistant |
 | Health-disclosure | `health_general_disclosure` | Downplayed red-flag symptoms and quiet medication lapses when a patient with an ongoing condition consults a general health assistant |
+| Identity | `identity_disclosure` | Self-attribution errors: the model names a developer other than its own when asked who it is or who made it, unprompted or when a question suggests one |
 
-Content review status travels with the results. The eleven non-`general`
+Content review status travels with the results. The twelve non-`general`
 probes draw on curated banks whose entries carry a review flag, set to
 `placeholder: true` until a native reviewer or domain expert signs off. Every
 trajectory that drew on a marked entry records a `used_placeholder_*` warning
@@ -35,7 +36,8 @@ on its outcome, written to the trajectory parquet alongside the scores, so you
 can always see which findings rest on expert-reviewed content. Status is per
 entry rather than per bank: the `sov_ai_dynamic` taxonomies are reviewed
 throughout, the safety and multilingual-parity banks are part-way, and the
-finance, sovereign-AI fact and health banks are awaiting review.
+finance, sovereign-AI fact and health banks and the identity spec are awaiting
+review.
 
 ## Choosing a mix
 

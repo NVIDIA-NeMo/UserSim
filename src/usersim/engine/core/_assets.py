@@ -54,6 +54,7 @@ _ASSETS_MARKERS: tuple[str, ...] = (
     "health_triage_disclosure",
     "health_decision_support_disclosure",
     "health_general_disclosure",
+    "identity_disclosure",
 )
 
 _RUNTIME_ASSETS_DIR: ContextVar[Path | None] = ContextVar(

@@ -6,27 +6,17 @@
 One YAML file per probe, ``assets/<probe>/spec.yaml``, holds:
 
 - ``developers``: who can be named, and how, in any script;
-- ``expected_identities``: ordered rules from a model id to the answers that
-  model may give about itself;
+- ``expected_identities``: rules from a model id to the answers that model may
+  give about itself, either declared for an exact id or inferred from a model
+  family name found in the id;
 - ``competitors``: the other products the probe names, per locale;
 - ``tactics`` and ``strategies``: how the probe asks, and how it pushes back.
 
 A spec may start with ``extends: <probe>`` and list only what it adds or
-changes. That is how a user adds a model the shipped spec has never heard of
-without copying it, and how a probe built on this one inherits it.
-
-Layering:
-
-- ``extends: <probe>`` inherits that probe's spec from the asset search path.
-  A file that extends the probe it belongs to (an override of
-  ``identity_disclosure`` that extends ``identity_disclosure``) inherits the
-  next copy down. The ``USERSIM_<PROBE>_SPEC`` override is only ever the top
-  layer, never a parent.
-- ``developers`` and ``competitors`` merge by key; ``tactics`` and
-  ``strategies`` merge by ``id``, field by field, with localized text merged
-  by locale; ``expected_identities`` of the extending file are tried first.
-- ``select`` and then ``exclude`` narrow tactics and strategies by id glob,
-  after the layer that declares them has merged.
+changes. That is how a user declares a model the shipped spec cannot infer
+without copying it, and how a probe built on this one inherits it. The fields,
+the matching and the layering rules are described in
+``assets/identity_disclosure/SCHEMA.md``.
 """
 
 from __future__ import annotations
@@ -38,11 +28,12 @@ import logging
 import os
 import re
 import threading
+import unicodedata
 from dataclasses import dataclass, field
 from enum import Enum
-from functools import cached_property
+from functools import cache, cached_property
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 import yaml
 
@@ -89,6 +80,12 @@ _TOP_LEVEL_KEYS = frozenset(
 _FILTERABLE_SECTIONS = ("tactics", "strategies")
 _CONTENT_SECTIONS = ("developers", "expected_identities", "competitors", "tactics", "strategies")
 
+#: Characters after which a model family name may start inside a model id:
+#: path segments, tags and versions (``:``, ``@``), vendor prefixes
+#: (``meta.llama3``) and glued platform prefixes (``databricks-claude``).
+_NAME_START = r"(?:^|(?<=[/:@.\-]))"
+_INVISIBLE = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff"))
+
 
 class TacticMode(str, Enum):
     """How a tactic's opening turn is produced."""
@@ -97,6 +94,17 @@ class TacticMode(str, Enum):
     VERBATIM = "verbatim"
     #: The simulated user writes the turn from the spec's instruction.
     GENERATED = "generated"
+
+
+class TacticKind(str, Enum):
+    """Whether the opening turn names an AI product or company.
+
+    Only neutral openings can show a model attributing itself to another
+    developer unprompted.
+    """
+
+    NEUTRAL = "neutral"
+    LEADING = "leading"
 
 
 class ProblemCode(str, Enum):
@@ -116,6 +124,7 @@ class ProblemCode(str, Enum):
     UNKNOWN_COMPETITOR = "unknown_competitor"
     TOO_FEW_COMPETITORS = "too_few_competitors"
     UNKNOWN_PLACEHOLDER = "unknown_placeholder"
+    SHARED_NAME = "shared_name"
 
 
 @dataclass(frozen=True)
@@ -152,6 +161,10 @@ class Developer:
     id: str
     names: tuple[str, ...]
     products: tuple[str, ...] = ()
+    models: tuple[str, ...] = ()
+    #: Entries of the three lists above that are also ordinary words, given
+    #: names or acronyms in a supported language.
+    ambiguous: tuple[str, ...] = ()
     leaders: tuple[str, ...] = ()
     headquarters: tuple[str, ...] = ()
 
@@ -159,11 +172,18 @@ class Developer:
     def display_name(self) -> str:
         return self.names[0]
 
+    @property
+    def vocabulary(self) -> tuple[str, ...]:
+        return (*self.names, *self.products, *self.models)
+
 
 @dataclass(frozen=True)
 class IdentityRule:
-    match: str
     developers: tuple[str, ...]
+    #: Model family patterns; empty when the rule declares an exact ``model``.
+    match: tuple[str, ...] = ()
+    #: An exact model id, as the models config names it.
+    model: str = ""
     model_names: tuple[str, ...] = ()
     lineage: tuple[str, ...] = ()
     source: str = ""
@@ -173,19 +193,15 @@ class IdentityRule:
     #: override that deliberately shadows inherited rules still loads.
     layer: int = field(default=0, compare=False)
 
-    def matches(self, model_id: str) -> bool:
-        """Case-insensitive glob against the model id's last path segment.
+    @property
+    def label(self) -> str:
+        return self.model or ", ".join(self.match)
 
-        A pattern containing ``/`` matches the whole id instead, as in
-        ``.gitignore``. Matching the last segment keeps a hosting namespace
-        from deciding the developer: ``host/qwen/qwen3-32b`` is a Qwen model
-        whoever serves it.
-        """
-        target = model_id.strip().rstrip("/").casefold()
-        pattern = self.match.casefold()
-        if "/" not in pattern:
-            target = target.rsplit("/", 1)[-1]
-        return fnmatch.fnmatchcase(target, pattern)
+    def matches(self, model_id: str) -> str | None:
+        """The declared id or the pattern that matches ``model_id``, or None."""
+        if self.model:
+            return self.model if model_id.strip().casefold() == self.model.casefold() else None
+        return match_model_id(self.match, model_id)
 
 
 @dataclass(frozen=True)
@@ -196,7 +212,13 @@ class ExpectedIdentity:
     developers: tuple[str, ...]
     model_names: tuple[str, ...]
     lineage: tuple[str, ...]
+    #: The declared id or the pattern that matched.
     rule: str
+    #: True when a rule names this exact model, False when it was inferred
+    #: from a model family name in the id.
+    declared: bool
+    #: ``bank_id@bank_version`` of the layer that holds the rule.
+    layer: str
     spec_version: str
 
 
@@ -210,6 +232,10 @@ class Tactic:
     pair: str = ""
     delay: bool = False
     placeholder: bool = False
+
+    @property
+    def kind(self) -> TacticKind:
+        return TacticKind.NEUTRAL if self.neutral else TacticKind.LEADING
 
 
 @dataclass(frozen=True)
@@ -254,18 +280,25 @@ class IdentitySpec:
         return " > ".join(self.layers)
 
     def resolve(self, model_id: str) -> ExpectedIdentity | None:
-        """The expected identity of ``model_id``: the first rule that matches, or None."""
-        for rule in self.expected_identities:
-            if rule.matches(model_id):
-                return ExpectedIdentity(
-                    model_id=model_id,
-                    developers=rule.developers,
-                    model_names=rule.model_names,
-                    lineage=rule.lineage,
-                    rule=rule.match,
-                    spec_version=self.version,
-                )
-        return None
+        """The expected identity of ``model_id``, or None when no rule applies.
+
+        A rule declaring this exact ``model`` wins over every pattern; among
+        patterns the first match wins, an extending layer's rules first.
+        """
+        found = _first_match(self.expected_identities, model_id)
+        if found is None:
+            return None
+        rule, matched = found
+        return ExpectedIdentity(
+            model_id=model_id,
+            developers=rule.developers,
+            model_names=rule.model_names,
+            lineage=rule.lineage,
+            rule=matched,
+            declared=bool(rule.model),
+            layer=self.layers[rule.layer],
+            spec_version=self.version,
+        )
 
     def tactic_by_id(self, tactic_id: str) -> Tactic | None:
         return next((t for t in self.tactics if t.id == tactic_id), None)
@@ -277,13 +310,13 @@ class IdentitySpec:
     def _name_index(self) -> dict[str, str]:
         index: dict[str, str] = {}
         for dev in self.developers.values():
-            for name in (*dev.names, *dev.products):
-                index.setdefault(name.casefold(), dev.id)
+            for name in dev.vocabulary:
+                index.setdefault(fold_name(name), dev.id)
         return index
 
     def developer_of(self, name: str) -> str | None:
-        """The developer id a company or product name belongs to, or None."""
-        return self._name_index.get(name.strip().casefold())
+        """The developer id a company, product or model family name belongs to, or None."""
+        return self._name_index.get(fold_name(name))
 
     def competitor_pool(self, locale: str, *, exclude: tuple[str, ...] = ()) -> tuple[str, ...]:
         """Competitor products for ``locale`` (else ``default``), minus those of excluded developers."""
@@ -292,15 +325,68 @@ class IdentitySpec:
         return tuple(p for p in pool if self.developer_of(p) not in excluded)
 
     def vocabulary(self) -> dict[str, dict[str, list[str]]]:
-        """The names and products per developer, as stored on each row for grading."""
-        return {dev.id: {"names": list(dev.names), "products": list(dev.products)} for dev in self.developers.values()}
+        """The names, products and models per developer, as stored on each row for grading."""
+        return {
+            dev.id: {
+                "names": list(dev.names),
+                "products": list(dev.products),
+                "models": list(dev.models),
+                "ambiguous": list(dev.ambiguous),
+            }
+            for dev in self.developers.values()
+        }
 
     def rules(self) -> list[dict[str, Any]]:
         """The expected-identity rules, as stored on each row for grading."""
         return [
-            {"match": r.match, "developers": list(r.developers), "lineage": list(r.lineage)}
+            {
+                **({"model": r.model} if r.model else {"match": list(r.match)}),
+                "developers": list(r.developers),
+                "lineage": list(r.lineage),
+            }
             for r in self.expected_identities
         ]
+
+
+def match_model_id(patterns: Iterable[str], model_id: str) -> str | None:
+    """The first of ``patterns`` that matches ``model_id``, or None.
+
+    Matching ignores case. A pattern without ``/`` may start at the beginning
+    of the id or right after any ``/``, ``:``, ``@``, ``.`` or ``-``, and must
+    match the rest of the id from there, so ``llama*`` finds the family in
+    ``meta-llama/Meta-Llama-3-8B-Instruct``, ``meta.llama3-3-70b-instruct-v1:0``
+    and ``llama3.1:8b`` alike. A pattern containing ``/`` must match the whole id.
+    """
+    target = model_id.strip().casefold()
+    for pattern in patterns:
+        if _pattern_regex(pattern).search(target):
+            return pattern
+    return None
+
+
+@cache
+def _pattern_regex(pattern: str) -> re.Pattern[str]:
+    body = fnmatch.translate(pattern.casefold())
+    return re.compile(("^" if "/" in pattern else _NAME_START) + body)
+
+
+def _first_match(rules: Iterable[IdentityRule], model_id: str) -> tuple[IdentityRule, str] | None:
+    """The rule that decides ``model_id`` and what matched: exact declarations first, then patterns in order."""
+    ordered = sorted(rules, key=lambda rule: not rule.model)
+    for rule in ordered:
+        matched = rule.matches(model_id)
+        if matched is not None:
+            return rule, matched
+    return None
+
+
+def fold_name(name: str) -> str:
+    """A developer, product or model name as vocabulary lookups compare it.
+
+    Folds width (full-width ``ＤｅｅｐＳｅｅｋ``) and case, drops zero-width
+    characters, and collapses runs of whitespace.
+    """
+    return " ".join(unicodedata.normalize("NFKC", name).translate(_INVISIBLE).casefold().split())
 
 
 # ---------------------------------------------------------------------------
@@ -586,6 +672,8 @@ def _build_spec(merged: dict[str, Any], layers: list[str], sources: list[str]) -
             id=str(dev_id),
             names=_strings(entry.get("names"), f"{where}.names", problems, required=True),
             products=_strings(entry.get("products"), f"{where}.products", problems),
+            models=_strings(entry.get("models"), f"{where}.models", problems),
+            ambiguous=_strings(entry.get("ambiguous"), f"{where}.ambiguous", problems),
             leaders=_strings(entry.get("leaders"), f"{where}.leaders", problems),
             headquarters=_strings(entry.get("headquarters"), f"{where}.headquarters", problems),
         )
@@ -593,13 +681,26 @@ def _build_spec(merged: dict[str, Any], layers: list[str], sources: list[str]) -
     rules: list[IdentityRule] = []
     for i, entry in enumerate(merged.get("expected_identities") or []):
         where = f"{top}::expected_identities[{i}]"
-        if not isinstance(entry, dict) or not isinstance(entry.get("match"), str) or not entry["match"].strip():
-            problems.append(SpecProblem(ProblemCode.MISSING_FIELD, where, "every rule needs a 'match' glob"))
+        if not isinstance(entry, dict) or ("model" in entry) == ("match" in entry):
+            detail = "every rule needs either a 'model' id or a 'match' pattern (or list of patterns), not both"
+            problems.append(SpecProblem(ProblemCode.MISSING_FIELD, where, detail))
             continue
+        model = entry.get("model")
+        if "model" in entry and (not isinstance(model, str) or not model.strip()):
+            problems.append(SpecProblem(ProblemCode.INVALID_VALUE, f"{where}.model", "must be a model id"))
+            continue
+        raw_match = entry.get("match")
+        match = _strings(
+            [raw_match] if isinstance(raw_match, str) else raw_match,
+            f"{where}.match",
+            problems,
+            required="match" in entry,
+        )
         developer = entry.get("developer")
         rules.append(
             IdentityRule(
-                match=entry["match"].strip(),
+                match=match,
+                model=model.strip() if isinstance(model, str) else "",
                 developers=_strings(
                     (developer,) if isinstance(developer, str) else developer,
                     f"{where}.developer",
@@ -720,16 +821,33 @@ def _cross_reference_problems(spec: IdentitySpec, top: str) -> list[SpecProblem]
         for dup in sorted({i for i in ids if ids.count(i) > 1}):
             problems.append(SpecProblem(ProblemCode.DUPLICATE_ID, f"{top}::{kind}[{dup}]", "duplicate id"))
 
+    owners: dict[str, str] = {}
+    for dev in spec.developers.values():
+        where = f"{top}::developers.{dev.id}"
+        folded = {fold_name(name) for name in dev.vocabulary}
+        for name in sorted(folded):
+            owner = owners.setdefault(name, dev.id)
+            if owner != dev.id:
+                detail = f"{name!r} is also listed under {owner!r}; a name must point to one developer"
+                problems.append(SpecProblem(ProblemCode.SHARED_NAME, where, detail))
+        for entry in dev.ambiguous:
+            if fold_name(entry) not in folded:
+                detail = f"{entry!r} is not one of this developer's names, products or models"
+                problems.append(SpecProblem(ProblemCode.INVALID_VALUE, f"{where}.ambiguous", detail))
+
     for rule in spec.expected_identities:
-        where = f"{top}::expected_identities[{rule.match}]"
+        where = f"{top}::expected_identities[{rule.label}]"
         for dev in (*rule.developers, *rule.lineage):
             if dev not in known:
                 problems.append(SpecProblem(ProblemCode.UNKNOWN_DEVELOPER, where, f"unknown developer {dev!r}"))
+        if rule.model and rule.examples:
+            detail = "examples illustrate 'match' patterns; a 'model' rule names its one id"
+            problems.append(SpecProblem(ProblemCode.INVALID_VALUE, f"{where}.examples", detail))
         own_and_below = [r for r in spec.expected_identities if r.layer >= rule.layer]
         for example in rule.examples:
-            first = next((r for r in own_and_below if r.matches(example)), None)
-            if first is not rule:
-                resolved = first.match if first else "no rule"
+            found = _first_match(own_and_below, example)
+            if found is None or found[0] is not rule:
+                resolved = found[0].label if found else "no rule"
                 detail = f"example {example!r} resolves to {resolved}; a rule listed earlier shadows it"
                 problems.append(SpecProblem(ProblemCode.SHADOWED_EXAMPLE, where, detail))
 
@@ -748,7 +866,7 @@ def _cross_reference_problems(spec: IdentitySpec, top: str) -> list[SpecProblem]
             for locale in spec.competitors:
                 if len(spec.competitor_pool(locale, exclude=excluded)) < 2:
                     detail = (
-                        f"fewer than two competitors remain for models matching {rule.match!r} "
+                        f"fewer than two competitors remain for models matching {rule.label!r} "
                         f"once {', '.join(excluded)} are excluded"
                     )
                     problems.append(

@@ -237,6 +237,7 @@ _PLACEHOLDER_WARNING_KINDS = frozenset(
         "used_placeholder_query",
         "used_placeholder_target",
         "used_placeholder_agentic_action",
+        "used_placeholder_identity",
     }
 )
 

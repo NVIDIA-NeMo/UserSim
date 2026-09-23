@@ -46,7 +46,7 @@ from __future__ import annotations
 #: what a run keeps without touching any Python.
 #:
 #: Deliberately generic. It asks only whether the reply addresses the user
-#: and is coherent, because it runs for all thirteen probes; anything
+#: and is coherent, because it runs for every probe; anything
 #: probe-specific belongs in that probe's own ``prompts.yaml`` under
 #: ``assistant_judge_prompt``.
 ASSISTANT_JUDGE_PROMPT = """\

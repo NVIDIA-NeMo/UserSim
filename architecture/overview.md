@@ -19,7 +19,7 @@ underperforms. This is what separates a simulated population from a prompt
 that says "act as a user."
 
 **What** is a probe: the interaction pattern, the opening turn, and the
-definition of failure. Thirteen ship; adding one is roughly fifty lines.
+definition of failure. Fourteen ship; adding one is roughly fifty lines.
 
 **How well** is the evaluator, and it runs *after* simulation rather than
 inside it. Trajectories land in a parquet file, and scoring reads that file.
