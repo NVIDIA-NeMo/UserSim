@@ -19,6 +19,7 @@ emits trajectories; sim-side guardrails (e.g. zero-tool-calls) live on
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import random
@@ -29,7 +30,7 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import (
     _parse_theme,
     format_conversation_history_for_prompt,
@@ -103,6 +104,17 @@ def _build_tool_context(tool_subset: list) -> str:
     return "\n".join(lines) if lines else "No tools available."
 
 
+def _tool_subset_seed(data: dict) -> int:
+    """Derive a stable seed for a row's tool draw.
+
+    Prefers the trajectory identity so two configurations over one persona
+    draw independently, and falls back to the persona when a caller builds a
+    probe without one.
+    """
+    key = str(data.get("trajectory_id") or data.get("persona_uuid") or "")
+    return int(hashlib.sha256(key.encode()).hexdigest(), 16) & 0xFFFFFFFF
+
+
 def _normalize_tool_list(tools_raw: Any) -> list[dict]:
     """Normalize parquet/JSONL tool cells to a Python list of mappings.
 
@@ -159,7 +171,7 @@ def _collect_prior_tool_responses(conversation_messages: list) -> str:
     )
 
 
-def _simulate_tool_response(
+async def _simulate_tool_response(
     models: dict,
     tool_spec: dict,
     tool_call: dict,
@@ -184,7 +196,7 @@ def _simulate_tool_response(
     if prior_context:
         prompt += prior_context
     msgs = [{"role": "user", "content": prompt}]
-    resp = call_llm(models, MODEL_API_RESPONSE, msgs)
+    resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
     content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
 
     did_reroll = False
@@ -193,7 +205,7 @@ def _simulate_tool_response(
     except (json.JSONDecodeError, TypeError):
         did_reroll = True
         logger.debug("  |-- api_response_model: invalid JSON, retrying once")
-        resp = call_llm(models, MODEL_API_RESPONSE, msgs)
+        resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
 
     return content, did_reroll
@@ -236,7 +248,11 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tools_raw = self._data[cfg.tools_column]
         all_tools = _normalize_tool_list(tools_raw)
-        self.tool_subset = random.sample(
+        # Drawn from the row's own identity rather than the process RNG. The
+        # subset shapes the entire conversation but is not part of the
+        # trajectory identity, so an identity only means something if the same
+        # row is always handed the same tools.
+        self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(
             all_tools,
             min(cfg.max_tools, len(all_tools)),
         )
@@ -294,7 +310,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             extra_failure_criteria=extra_failure_criteria,
         )
 
-    def execute_tool_call(
+    async def execute_tool_call(
         self,
         name: str,
         args: dict[str, Any],
@@ -342,7 +358,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tool_spec = _find_tool_spec(name, self.tool_subset)
         if tool_spec:
-            simulated_response, did_reroll = _simulate_tool_response(
+            simulated_response, did_reroll = await _simulate_tool_response(
                 models,
                 tool_spec,
                 tc,
@@ -391,7 +407,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_tool_calling(
+async def simulate_tool_calling(
     models: dict,
     data: dict,
     persona: dict,
@@ -427,4 +443,4 @@ def simulate_tool_calling(
         data=data,
         outcome_builder=kwargs.get("outcome_builder"),
     )
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)

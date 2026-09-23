@@ -29,6 +29,7 @@ deterministic scorer is self-contained (no re-derivation).
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -522,7 +523,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             md["taxonomy_id"] = inst.taxonomy_id
             md["taxonomy_version"] = inst.taxonomy_version
 
-    def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
+    async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
         """Tier-branched turn-1.
 
         ``verifiable`` ships a param-locked opening (returned verbatim to keep
@@ -537,7 +538,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         including native Hindi), and a machine translation only when we fell
         back to a base-locale bank for a language variant.
         """
-        return self._localize_verbatim(self._instance.opening_user_message) or None
+        return await self._localize_verbatim(self._instance.opening_user_message) or None
 
     def allow_early_stop_at_turn(
         self,
@@ -556,7 +557,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             return len(state.metadata.get("tools_called", [])) > 0
         return True
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: ConversationState,
@@ -637,7 +638,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             return ""
         return expected_language_display(self._asset_locale) or ""
 
-    def _search_query(
+    async def _search_query(
         self,
         query: str,
         state: ConversationState,
@@ -666,7 +667,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             return query
         from usersim.engine.core.translation import translate_search_query
 
-        translated = translate_search_query(
+        translated = await translate_search_query(
             models,
             query,
             target_language=corpus_language,
@@ -700,7 +701,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
         return translated
 
-    def execute_tool_call(
+    async def execute_tool_call(
         self,
         name: str,
         args: dict[str, Any],
@@ -727,7 +728,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             # Record what the ASSISTANT asked for, not what we searched with:
             # the query is assistant behaviour, the translation is ours.
             md.setdefault("kb_search_queries", []).append(query)
-            search_query = self._search_query(
+            search_query = await self._search_query(
                 query,
                 state,
                 models,
@@ -736,9 +737,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
             query_embedding = None
             if self._retrieval_mode in ("hybrid", "dense"):
-                from usersim.engine.core.embeddings import embed_query
+                from usersim.engine.core.embeddings import aembed_query
 
-                query_embedding = embed_query(
+                query_embedding = await aembed_query(
                     models,
                     self._embedding_alias,
                     search_query,
@@ -756,7 +757,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                         self._embedding_alias,
                         self._embedding_alias,
                     )
-            docs = _retrieval.retrieve(
+            # Ranking scores every document in the institution corpus, so it
+            # runs off the event loop: left inline it would stall every other
+            # conversation sharing the runtime for the whole pass.
+            docs = await asyncio.to_thread(
+                _retrieval.retrieve,
                 self._institution,
                 search_query,
                 k=8,
@@ -1054,7 +1059,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_financial_services(
+async def simulate_financial_services(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -1087,7 +1092,7 @@ def simulate_financial_services(
         return _aborted(f"financial_services bank load failed: {e}", provenance)
     except FinancialServicesProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

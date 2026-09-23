@@ -211,7 +211,7 @@ class GuardedMoveMixin:
         }
 
     # ── per-turn seam (BaseProbe hooks) ─────────────────────────────
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
+    async def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Commit a Guard-validated move for this turn and instruct the user.
 
         Returns ``[]`` when the move-space is disabled, so the host probe's base
@@ -220,7 +220,7 @@ class GuardedMoveMixin:
         if not getattr(self, "_moves_on", False) or self._env is None or self._guard is None:
             return []
         self._env.turn = turn_idx
-        move, veto_log, reasoning = mr.propose_and_guard(
+        move, veto_log, reasoning = await mr.propose_and_guard(
             self._models,
             self._env,
             self._guard,

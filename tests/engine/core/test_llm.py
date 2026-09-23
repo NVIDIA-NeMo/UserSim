@@ -15,7 +15,7 @@ trajectory's visible content. See ``reporting/_reasoning.py``.
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -23,14 +23,186 @@ from usersim.engine.core import llm
 from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
-    call_llm,
+    acall_llm,
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
 
 
+async def _noop_sleep(_delay):
+    """Stand in for the awaited backoff, returning at once."""
+    return None
+
+
+def _collect(into):
+    """Record each backoff without waiting it out."""
+
+    def _sleep(delay):
+        into.append(delay)
+        return None
+
+    return _sleep
+
+
+class TestAsyncModelCalls:
+    """The awaiting call path, which shares its retry policy with the sync one."""
+
+    class _Facade:
+        def __init__(self, failures: int = 0) -> None:
+            self.attempts = 0
+            self._failures = failures
+
+        async def acompletion(self, messages, **kwargs):
+            self.attempts += 1
+            if self.attempts <= self._failures:
+                raise RuntimeError("transient")
+            return SimpleNamespace(
+                message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
+                usage=SimpleNamespace(input_tokens=3, output_tokens=4),
+            )
+
+    async def test_returns_the_reply_as_a_message_dict(self) -> None:
+        from usersim.engine.core.llm import acall_llm
+
+        result = await acall_llm({"m": self._Facade()}, "m", [{"role": "user", "content": "hi"}])
+
+        assert result["role"] == "assistant"
+        assert result["content"] == "ok"
+
+    async def test_waits_without_blocking_the_runtime(self) -> None:
+        """Backoff has to yield, or every other conversation waits with it."""
+        import asyncio
+
+        from usersim.engine.core import llm as llm_module
+
+        slept: list[float] = []
+
+        async def _record(delay: float) -> None:
+            slept.append(delay)
+
+        facade = self._Facade(failures=1)
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(asyncio, "sleep", _record)
+            mp.setattr(llm_module.time, "sleep", lambda _: pytest.fail("backoff blocked the runtime"))
+            result = await llm_module.acall_llm({"m": facade}, "m", [{"role": "user", "content": "hi"}])
+
+        assert facade.attempts == 2, f"expected one retry, made {facade.attempts} attempts"
+        assert slept, "retried with no backoff at all"
+        assert result["content"] == "ok"
+
+    async def test_a_defective_call_is_not_retried(self) -> None:
+        """A call built wrong cannot be repaired by sending it again."""
+        from usersim.engine.core.llm import acall_llm
+
+        class _Broken:
+            def __init__(self) -> None:
+                self.attempts = 0
+
+            async def acompletion(self, messages, **kwargs):
+                self.attempts += 1
+                raise AttributeError("no such method")
+
+        facade = _Broken()
+        with pytest.raises(AttributeError):
+            await acall_llm({"m": facade}, "m", [{"role": "user", "content": "hi"}])
+        assert facade.attempts == 1, f"tried {facade.attempts} times for a failure no retry can fix"
+
+
+class TestConversationStateIsPerContext:
+    """Conversation state follows the unit of work, not the runtime thread.
+
+    Two trajectories can share a thread. When they do, state keyed by thread
+    identity collapses into one slot and each trajectory's model calls are
+    attributed to whichever ran most recently.
+    """
+
+    @staticmethod
+    def _in_its_own_context(fn, *args):
+        import contextvars
+
+        return contextvars.copy_context().run(fn, *args)
+
+    def test_one_context_cannot_see_another_conversation_id(self) -> None:
+        from usersim.engine.core.llm import get_conversation_id, set_conversation_id
+
+        observed: dict[str, str | None] = {}
+
+        def work(name: str) -> None:
+            set_conversation_id(name)
+            observed[name] = get_conversation_id()
+
+        self._in_its_own_context(work, "traj-a")
+        self._in_its_own_context(work, "traj-b")
+
+        assert observed == {"traj-a": "traj-a", "traj-b": "traj-b"}
+        assert get_conversation_id() is None, (
+            f"a trajectory's conversation id escaped into the caller as "
+            f"{get_conversation_id()!r}, so the next one inherits it"
+        )
+
+    def test_one_context_cannot_see_another_outcome_builder(self) -> None:
+        from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+        from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
+
+        def work() -> None:
+            set_current_outcome_builder(OutcomeBuilder(provenance=Provenance()))
+
+        self._in_its_own_context(work)
+
+        assert get_current_outcome_builder() is None, (
+            "a trajectory's outcome builder escaped into the caller, so calls "
+            "made after it record against the wrong trajectory"
+        )
+
+    def test_a_buffer_is_not_inherited_from_the_caller(self) -> None:
+        """Naming a conversation gives it a buffer of its own.
+
+        Copying a context copies the reference to the buffer, not the buffer,
+        so a conversation that reused an inherited one would append into
+        whatever its caller was still holding.
+        """
+        from usersim.engine.core import llm as llm_module
+        from usersim.engine.core.llm import append_debug_record, set_conversation_id
+
+        set_conversation_id("outer")
+        append_debug_record({"alias": "user_model"})
+        outer_buffer = llm_module._pending_debug_records()
+
+        def inner() -> list:
+            set_conversation_id("inner")
+            append_debug_record({"alias": "judge_model"})
+            return llm_module._pending_debug_records()
+
+        inner_buffer = self._in_its_own_context(inner)
+
+        assert inner_buffer is not outer_buffer, "both conversations share one buffer"
+        assert len(outer_buffer) == 1, f"the caller's buffer grew to {len(outer_buffer)} records"
+        set_conversation_id(None)
+
+    def test_a_flush_drains_only_its_own_records(self) -> None:
+        """One trajectory's flush must not consume another's pending records."""
+        from usersim.engine.core.llm import append_debug_record, flush_debug_log, set_conversation_id
+
+        drained: dict[str, int] = {}
+
+        def record_two_then_flush(name: str) -> None:
+            set_conversation_id(name)
+            append_debug_record({"alias": "user_model"})
+            append_debug_record({"alias": "judge_model"})
+            from usersim.engine.core import llm as llm_module
+
+            pending = llm_module._pending_debug_records()
+            drained[name] = len(pending)
+            flush_debug_log()
+
+        self._in_its_own_context(record_two_then_flush, "traj-a")
+        self._in_its_own_context(record_two_then_flush, "traj-b")
+
+        assert drained == {"traj-a": 2, "traj-b": 2}, f"a trajectory saw records that were not its own: {drained}"
+
+
 class _Facade:
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -47,7 +219,7 @@ class _RejectsMaxTokensFacade:
     def __init__(self) -> None:
         self.calls: list[dict] = []
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         self.calls.append(dict(kwargs))
         if "max_tokens" in kwargs:
             raise RuntimeError(
@@ -66,12 +238,12 @@ class _BrokenFacade:
     def __init__(self) -> None:
         self.attempts = 0
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         self.attempts += 1
         raise AttributeError("'object' object has no attribute 'completion'")
 
 
-def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
+async def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
     """Retrying cannot repair a call that was built wrong.
 
     The backoff is there for a provider having a bad minute. Spending it on
@@ -81,19 +253,19 @@ def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
     facade = _BrokenFacade()
     slept: list[float] = []
 
-    with patch.object(llm.time, "sleep", slept.append), pytest.raises(AttributeError):
-        call_llm({"summary_model": facade}, "summary_model", [{"role": "user", "content": "hi"}])
+    with patch.object(llm.asyncio, "sleep", _collect(slept)), pytest.raises(AttributeError):
+        await acall_llm({"summary_model": facade}, "summary_model", [{"role": "user", "content": "hi"}])
 
     assert facade.attempts == 1, f"tried {facade.attempts} times; a defective call should be attempted once"
     assert slept == [], f"backed off {slept} before reporting a failure that no retry could fix"
 
 
-def test_transient_failures_are_still_retried() -> None:
+async def test_transient_failures_are_still_retried() -> None:
     """The guard above must not disable the backoff it sits next to."""
     calls: list[int] = []
 
     class _FlakyFacade:
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             calls.append(1)
             if len(calls) < 3:
                 raise RuntimeError("503 Service Unavailable")
@@ -102,8 +274,8 @@ def test_transient_failures_are_still_retried() -> None:
                 usage=SimpleNamespace(input_tokens=1, output_tokens=1),
             )
 
-    with patch.object(llm.time, "sleep", lambda _: None):
-        result = call_llm({"m": _FlakyFacade()}, "m", [{"role": "user", "content": "hi"}])
+    with patch.object(llm.asyncio, "sleep", _noop_sleep):
+        result = await acall_llm({"m": _FlakyFacade()}, "m", [{"role": "user", "content": "hi"}])
 
     assert result["content"] == "ok"
     assert len(calls) == 3
@@ -134,7 +306,7 @@ def test_non_ascii_budget_scales_up_never_down() -> None:
     assert scaled_max_tokens(facade(None), NON_ASCII_TOKEN_SCALE) == {}
 
 
-def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
+async def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     """Callers pass a token budget without knowing the model's spelling.
 
     The engine injects ``max_tokens`` at the call site for non-ASCII locales,
@@ -143,7 +315,7 @@ def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     burned all three attempts and failed the turn.
     """
     facade = _RejectsMaxTokensFacade()
-    result = call_llm(
+    result = await acall_llm(
         {"assistant_model": facade},
         "assistant_model",
         [{"role": "user", "content": "hi"}],
@@ -156,11 +328,11 @@ def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     assert "max_tokens" not in facade.calls[1]
 
 
-def test_call_llm_records_data_designer_usage_tokens() -> None:
+async def test_call_llm_records_data_designer_usage_tokens() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        result = call_llm(
+        result = await acall_llm(
             {"judge_model": _Facade()},
             "judge_model",
             [{"role": "user", "content": "hello"}],
@@ -179,7 +351,7 @@ class _OpenAIShapedFacade:
     """Provider that exposes prompt_tokens / completion_tokens (the
     OpenAI-shaped names DD's ``extract_usage`` accepts as a fallback)."""
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -192,7 +364,7 @@ class _OpenAIShapedFacade:
         )
 
 
-def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
+async def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
     """The wrapper accepts either DD-canonical (input/output_tokens) or
     OpenAI-shaped (prompt/completion_tokens) Usage objects. This is
     behaviour we share with DD's own ``extract_usage`` parser and care
@@ -200,7 +372,7 @@ def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        call_llm(
+        await acall_llm(
             {"assistant_model": _OpenAIShapedFacade()},
             "assistant_model",
             [{"role": "user", "content": "hello"}],
@@ -218,7 +390,7 @@ class _ReasoningFieldFacade:
     does NOT read (regression lock that we don't accidentally re-enable
     Phase A capture against fields DD would have stripped anyway)."""
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -238,7 +410,7 @@ class _ReasoningFieldFacade:
         )
 
 
-def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
+async def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     """Regression lock: even if a mock exposes
     ``usage.completion_tokens_details.reasoning_tokens``, the wrapper
     must NOT attempt to capture it. Reasoning lives at the report-build
@@ -247,7 +419,7 @@ def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        call_llm(
+        await acall_llm(
             {"assistant_model": _ReasoningFieldFacade()},
             "assistant_model",
             [{"role": "user", "content": "hello"}],
@@ -263,11 +435,11 @@ def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     assert not hasattr(outcome, "per_model_reasoning_tokens")
 
 
-def test_context_window_error_is_not_retried() -> None:
+async def test_context_window_error_is_not_retried() -> None:
     class _ContextFacade:
         calls = 0
 
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             self.calls += 1
             raise RuntimeError(
                 "ProviderError: litellm.ContextWindowExceededError: "
@@ -275,9 +447,9 @@ def test_context_window_error_is_not_retried() -> None:
             )
 
     facade = _ContextFacade()
-    with patch("usersim.engine.core.llm.time.sleep") as sleep:
+    with patch("usersim.engine.core.llm.asyncio.sleep", new_callable=AsyncMock) as sleep:
         with pytest.raises(ContextWindowError) as exc:
-            call_llm(
+            await acall_llm(
                 {"assistant_model": facade},
                 "assistant_model",
                 [{"role": "user", "content": "large prompt"}],
@@ -287,11 +459,11 @@ def test_context_window_error_is_not_retried() -> None:
     sleep.assert_not_called()
 
 
-def test_transient_error_still_retries() -> None:
+async def test_transient_error_still_retries() -> None:
     class _FlakyFacade:
         calls = 0
 
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             self.calls += 1
             if self.calls == 1:
                 raise RuntimeError("temporary endpoint failure")
@@ -305,8 +477,8 @@ def test_transient_error_still_retries() -> None:
             )
 
     facade = _FlakyFacade()
-    with patch("usersim.engine.core.llm.time.sleep") as sleep:
-        result = call_llm(
+    with patch("usersim.engine.core.llm.asyncio.sleep", new_callable=AsyncMock) as sleep:
+        result = await acall_llm(
             {"assistant_model": facade},
             "assistant_model",
             [{"role": "user", "content": "hello"}],

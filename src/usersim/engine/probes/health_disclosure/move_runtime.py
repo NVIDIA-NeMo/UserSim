@@ -9,7 +9,7 @@ a tool" loop, adapted to UserSim's per-turn user seam
 
   1. Each follow-up turn, the user COMMITS one move via a native ``commit_move``
      tool call (three axes: move / affect / cognitive_content + free-form reasoning),
-     given the session state + the assistant's last message. call_llm forwards the
+     given the session state + the assistant's last message. acall_llm forwards the
      tool schema to ModelFacade and returns the structured tool_calls (auditable).
   2. The GUARD validates it against pacing gates; a veto is returned as a native tool
      result (role:"tool") so the model re-commits in-protocol (up to
@@ -33,7 +33,7 @@ import math
 import os
 from typing import Any, Callable
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.tool_calls import recover_tool_call
 from usersim.engine.probes.health_disclosure import clients as C
 from usersim.engine.probes.health_disclosure.moves import (
@@ -149,7 +149,7 @@ def _move_reasoning_kwargs() -> dict:
 
 def _move_tool(topics: list[str]) -> dict[str, Any]:
     """OpenAI-style function schema for the auditable move the user commits to.
-    UserSim's call_llm forwards this to ModelFacade.completion() and returns the
+    UserSim's acall_llm forwards this to ModelFacade.acompletion() and returns the
     structured tool_calls; the Guard validates the captured call."""
     return {
         "type": "function",
@@ -381,7 +381,7 @@ def _tool_result_msg(raw_call: dict[str, Any], payload: dict[str, Any]) -> dict[
     }
 
 
-def propose_and_guard(
+async def propose_and_guard(
     models: dict[str, Any],
     env: PatientEnv,
     guard: Guard,
@@ -422,7 +422,7 @@ def propose_and_guard(
     for i in range(guard.max_resamples + 1):
         raw_call = None
         try:
-            resp = call_llm(models, MODEL_USER, msgs, tools=tools, tool_choice="auto", **extra)
+            resp = await acall_llm(models, MODEL_USER, msgs, tools=tools, tool_choice="auto", **extra)
             move, reasoning, raw_call = _extract_move(resp, topics)
             if move is None:
                 move = env.safe_move()

@@ -475,7 +475,7 @@ class TestSimulateAgenticSafety:
         assert "safety_agentic" in _PROBE_REGISTRY
         assert resolve_probe("safety_agentic").__name__ == "SafetyAgenticProbe"
 
-    def test_no_tool_call_response_short_circuits(
+    async def test_no_tool_call_response_short_circuits(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -485,7 +485,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "I should ask first."},
@@ -493,7 +493,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -519,7 +519,7 @@ class TestSimulateAgenticSafety:
         # Bank version pinned on provenance under "agentic" key.
         assert outcome["provenance"]["bank_version"].get("agentic") == "v0.5.4"
 
-    def test_first_user_turn_is_initial_user_prompt_verbatim(
+    async def test_first_user_turn_is_initial_user_prompt_verbatim(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -544,7 +544,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -552,7 +552,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -566,7 +566,7 @@ class TestSimulateAgenticSafety:
         assert msgs[0]["role"] == "user"
         assert msgs[0]["content"] == expected
 
-    def test_assistant_tool_call_intercepted_with_mock_response(
+    async def test_assistant_tool_call_intercepted_with_mock_response(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -577,7 +577,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -592,7 +592,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -623,7 +623,7 @@ class TestSimulateAgenticSafety:
         # Mock response was injected verbatim.
         assert json.loads(msgs[2]["content"]) == {"ok": True, "i": 0}
 
-    def test_attempted_actions_recorded_with_full_details(
+    async def test_attempted_actions_recorded_with_full_details(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -633,7 +633,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -659,7 +659,7 @@ class TestSimulateAgenticSafety:
         ):
             # Patched bank load doesn't touch the cache, so we don't need
             # to reset. Call directly.
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -679,7 +679,7 @@ class TestSimulateAgenticSafety:
         assert len(tool_msgs) == 2
         # Tool messages were produced from both attempted calls.
 
-    def test_unknown_tool_call_yields_synthetic_error_response(
+    async def test_unknown_tool_call_yields_synthetic_error_response(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -688,7 +688,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {
@@ -707,7 +707,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -725,7 +725,7 @@ class TestSimulateAgenticSafety:
         assert "error" in body
         assert body["tool_name"] == "fabricated_tool"
 
-    def test_bank_load_failure_returns_structured_failure(
+    async def test_bank_load_failure_returns_structured_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -734,7 +734,7 @@ class TestSimulateAgenticSafety:
             os.environ,
             {"USERSIM_SAFETY_AGENTIC_BANK": "/nonexistent/bank.yaml"},
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={},
                 data={},
                 persona=en_persona,
@@ -750,7 +750,7 @@ class TestSimulateAgenticSafety:
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
         assert "agentic-bank load failed" in outcome["failure_detail"]
 
-    def test_panel_override_with_unknown_id_returns_failure(
+    async def test_panel_override_with_unknown_id_returns_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -758,10 +758,10 @@ class TestSimulateAgenticSafety:
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
             ) as mock_call,
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={},
                 data={"action_request_id": "AR-DOES-NOT-EXIST"},
                 persona=en_persona,
@@ -777,7 +777,7 @@ class TestSimulateAgenticSafety:
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
 
-    def test_no_resolvable_request_returns_failure(
+    async def test_no_resolvable_request_returns_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -788,10 +788,10 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
             ) as mock_call,
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={},
                 data={},
                 persona=en_persona,
@@ -806,22 +806,22 @@ class TestSimulateAgenticSafety:
         outcome = json.loads(result["simulation_outcome"])
         assert "no resolvable" in outcome["failure_detail"]
 
-    def test_assistant_failure_attributed_to_assistant_model(
+    async def test_assistant_failure_attributed_to_assistant_model(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        def _raises(*args, **kwargs):
+        async def _raises(*args, **kwargs):
             raise RuntimeError("assistant API exploded")
 
         with (
             patch.dict(os.environ, _shipped_bank_env()),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_raises,
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -845,7 +845,7 @@ class TestSimulateAgenticSafety:
         assert outcome["failure_class"] == FailureClass.INFRASTRUCTURE_ERROR.value
         assert outcome["failure_attribution"] == "assistant_model"
 
-    def test_non_placeholder_request_no_warning(
+    async def test_non_placeholder_request_no_warning(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -854,7 +854,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -862,7 +862,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -875,7 +875,7 @@ class TestSimulateAgenticSafety:
         outcome = json.loads(result["simulation_outcome"])
         assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value for w in outcome["warnings"])
 
-    def test_probe_variant_format(
+    async def test_probe_variant_format(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -888,7 +888,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "ok"},
@@ -896,7 +896,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,
@@ -908,7 +908,7 @@ class TestSimulateAgenticSafety:
             )
         assert result["probe_variant"] == "consequence_disclosure::transfer_funds_external"
 
-    def test_probe_variant_format_when_no_sanctioned_action(
+    async def test_probe_variant_format_when_no_sanctioned_action(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -921,7 +921,7 @@ class TestSimulateAgenticSafety:
         with (
             patch.object(probe_gen, "_load_bank", return_value=synth),
             patch(
-                "usersim.engine.probes.safety_agentic.generator.call_llm",
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
                 side_effect=_mock_call_llm(
                     [
                         {"role": "assistant", "content": "Refusing."},
@@ -929,7 +929,7 @@ class TestSimulateAgenticSafety:
                 ),
             ),
         ):
-            result = probe_gen.simulate_safety_agentic(
+            result = await probe_gen.simulate_safety_agentic(
                 models={"assistant_model": object()},
                 data={},
                 persona=en_persona,

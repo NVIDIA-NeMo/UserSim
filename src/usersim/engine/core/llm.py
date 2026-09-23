@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
 import random as _random
 import threading
 import time
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -38,9 +40,20 @@ _DEBUG_LOG_PATH = Path(os.environ.get("USERSIM_DEBUG_LOG") or _DEFAULT_DEBUG_LOG
 _DEBUG_LOG_ENABLED = bool(os.environ.get("USERSIM_DEBUG_LOG"))
 _CALL_COUNTER = 0
 _CALL_LOCK = threading.Lock()
-_PENDING_RECORDS: list[dict[str, Any]] = []
+#: Serializes appends to the debug log so two trajectories finishing together
+#: cannot interleave lines within one file.
+_DEBUG_FILE_LOCK = threading.Lock()
 
-_CONV_LOCAL = threading.local()
+# Conversation state is held per context rather than per thread. Several
+# trajectories can share one thread, and when they do, anything keyed by
+# thread identity collapses into a single slot: every model call then records
+# against whichever trajectory touched it last.
+_CONV_ID: ContextVar[str | None] = ContextVar("usersim_conversation_id", default=None)
+_OUTCOME_BUILDER: ContextVar[Any] = ContextVar("usersim_outcome_builder", default=None)
+_PENDING_RECORDS: ContextVar[list[dict[str, Any]] | None] = ContextVar(
+    "usersim_pending_debug_records",
+    default=None,
+)
 
 
 class ContextWindowError(RuntimeError):
@@ -125,31 +138,37 @@ def _is_context_window_error(error: Exception) -> bool:
 _MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
-# ── Per-trajectory outcome hook (thread-local) ──────────────────────────
+# ── Per-trajectory outcome hook (context-scoped) ───────────────────────
 # generator.py sets this to the current ConversationState.outcome builder
 # at the start of generate() and clears it at the end. Every successful
-# call_llm invocation feeds its per-call tokens/calls/latency into the
+# acall_llm invocation feeds its per-call tokens/calls/latency into the
 # builder as well as the cross-trajectory MODEL_STATS aggregate. Exposed
 # via set_current_outcome_builder() so the simulator's per-row resource
 # profile is populated without threading state through every caller.
 
 
 def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def]
-    """Set (or clear) the thread-local OutcomeBuilder receiving per-call stats.
+    """Set (or clear) the OutcomeBuilder receiving per-call stats.
 
     Pass ``None`` to clear. Safe to call with any object exposing
     ``record_call(alias, input_tokens, output_tokens, elapsed_s)`` —
     typed loosely to avoid a circular import from core.outcomes.
     """
-    if builder is None:
-        if hasattr(_CONV_LOCAL, "outcome_builder"):
-            delattr(_CONV_LOCAL, "outcome_builder")
-    else:
-        _CONV_LOCAL.outcome_builder = builder
+    _OUTCOME_BUILDER.set(builder)
+
+
+def get_current_outcome_builder():  # type: ignore[no-untyped-def]
+    """Return the OutcomeBuilder currently receiving per-call stats, if any.
+
+    A scope that installs its own builder saves this first and puts it back
+    on the way out, so an inner scope cannot detach the row's builder and
+    leave the calls after it unattributed.
+    """
+    return _OUTCOME_BUILDER.get()
 
 
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:
-    """Forward per-call resource stats to the thread-local outcome builder, if set.
+    """Forward per-call resource stats to the current outcome builder, if set.
 
     Reasoning tokens are NOT captured here. DataDesigner's normalised
     ``Usage`` dataclass exposes only ``input_tokens`` / ``output_tokens``
@@ -159,7 +178,7 @@ def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, ela
     estimates reasoning post-hoc via tiktoken on visible content and
     applies a 5% noise-floor clamp. See ``reporting/_reasoning.py``.
     """
-    builder = getattr(_CONV_LOCAL, "outcome_builder", None)
+    builder = _OUTCOME_BUILDER.get()
     if builder is None:
         return
     try:
@@ -267,9 +286,38 @@ def set_debug_log_path(path: str | Path | None) -> None:
         _DEBUG_LOG_ENABLED = True
 
 
-def set_conversation_id(conv_id: str) -> None:
-    """Set the conversation identifier for the current thread's debug logs."""
-    _CONV_LOCAL.conv_id = conv_id
+def set_conversation_id(conv_id: str | None) -> None:
+    """Name the conversation whose debug records are being collected.
+
+    Pass ``None`` to clear. The name is scoped to the calling conversation,
+    so a trajectory cannot label another one's records.
+
+    A fresh record buffer is installed alongside the name. Copying a context
+    copies the reference to the buffer rather than the buffer itself, so a
+    conversation that inherited one would append into whatever its caller
+    was holding.
+    """
+    _CONV_ID.set(conv_id)
+    _PENDING_RECORDS.set([])
+
+
+def get_conversation_id() -> str | None:
+    """Return the conversation currently collecting debug records, if any."""
+    return _CONV_ID.get()
+
+
+def _pending_debug_records() -> list[dict[str, Any]]:
+    """Return this conversation's pending records, creating the buffer once.
+
+    The buffer belongs to the conversation rather than the process, so a
+    trajectory flushing at its own end writes only what it produced and
+    leaves everything still in flight alone.
+    """
+    records = _PENDING_RECORDS.get()
+    if records is None:
+        records = []
+        _PENDING_RECORDS.set(records)
+    return records
 
 
 def append_debug_record(record: dict[str, Any]) -> None:
@@ -278,20 +326,24 @@ def append_debug_record(record: dict[str, Any]) -> None:
         global _CALL_COUNTER
         _CALL_COUNTER += 1
         record.setdefault("seq", _CALL_COUNTER)
-        record.setdefault("conv_id", getattr(_CONV_LOCAL, "conv_id", "unknown"))
-        _PENDING_RECORDS.append(record)
+    record.setdefault("conv_id", _CONV_ID.get() or "unknown")
+    _pending_debug_records().append(record)
 
 
 def flush_debug_log() -> None:
-    """Write all pending debug records to disk, sorted by conv_id then seq."""
-    with _CALL_LOCK:
-        records = list(_PENDING_RECORDS)
-        _PENDING_RECORDS.clear()
-    if not records or not _DEBUG_LOG_ENABLED:
+    """Write this conversation's pending records to disk, ordered by sequence."""
+    records = _pending_debug_records()
+    if not records:
         return
-    records.sort(key=lambda r: (r["conv_id"], r["seq"]))
-    with open(_DEBUG_LOG_PATH, "a") as f:
-        for r in records:
+    pending = list(records)
+    records.clear()
+    if not _DEBUG_LOG_ENABLED:
+        return
+    pending.sort(key=lambda r: (r["conv_id"], r["seq"]))
+    # Held across the write so two conversations finishing together append
+    # whole blocks rather than interleaving lines.
+    with _DEBUG_FILE_LOCK, open(_DEBUG_LOG_PATH, "a") as f:
+        for r in pending:
             f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
 
 
@@ -371,17 +423,13 @@ def _assistant_message_to_dict(msg: Any) -> dict[str, Any]:
     return result
 
 
-def call_llm(
+def _begin_call(
     models: dict[str, Any],
     alias: str,
     messages: list[dict[str, Any]],
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Call an LLM via DD ModelFacade.completion().
-
-    Returns a dict with role, content, and optionally reasoning_content
-    and tool_calls. Logs timing at DEBUG level for verbosity=2.
-    """
+    kwargs: dict[str, Any],
+) -> tuple[Any, list[ChatMessage], float]:
+    """Resolve the model and convert the transcript, returning a start time."""
     facade = models.get(alias)
     if facade is None:
         raise ValueError(f"Model alias '{alias}' not found in models dict")
@@ -390,43 +438,82 @@ def call_llm(
     tool_tag = f" + {len(kwargs['tools'])} tools" if has_tools else ""
     chat_messages = _dicts_to_chat_messages(messages)
 
-    t0 = time.monotonic()
     logger.debug(f"  |-- LLM call: {alias} ({len(messages)} msgs{tool_tag}) ...")
+    return facade, chat_messages, time.monotonic()
+
+
+def _backoff_before_retry(
+    error: Exception,
+    alias: str,
+    attempt: int,
+    kwargs: dict[str, Any],
+) -> float:
+    """Return how long to wait before retrying, or zero to retry at once.
+
+    Raises when no retry can repair the call, so the caller only ever sees a
+    wait. Mutates ``kwargs`` when the fix is a differently spelled argument.
+    """
+    if _is_context_window_error(error):
+        raise ContextWindowError(alias, error) from error
+    # Reasoning endpoints replaced ``max_tokens`` with
+    # ``max_completion_tokens`` because hidden thinking tokens are billed as
+    # output. Callers pass a budget without knowing which spelling the model
+    # takes, so translate once and retry rather than burning the backoff
+    # budget on an error that cannot resolve itself.
+    if _rejects_max_tokens(error) and "max_tokens" in kwargs:
+        kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
+        logger.debug(
+            "  |-- %s rejects max_tokens; retrying with max_completion_tokens",
+            alias,
+        )
+        return 0.0
+    if isinstance(error, _NEVER_RETRY):
+        raise
+    if attempt >= _MAX_RETRIES:
+        raise
+    delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
+    jitter = _random.uniform(0, delay * 0.3)
+    logger.warning(
+        f"  |-- LLM retry {attempt + 1}/{_MAX_RETRIES} for {alias}: "
+        f"{type(error).__name__}: {error} (backoff {delay + jitter:.1f}s)"
+    )
+    return delay + jitter
+
+
+async def acall_llm(
+    models: dict[str, Any],
+    alias: str,
+    messages: list[dict[str, Any]],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Call a model and return its reply as a message dict.
+
+    Returns role, content, and where the model supplied them
+    reasoning_content and tool_calls.
+    """
+    facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
 
     for attempt in range(_MAX_RETRIES + 1):
         try:
-            response = facade.completion(chat_messages, **kwargs)
+            response = await facade.acompletion(chat_messages, **kwargs)
             break
         except Exception as e:
-            if _is_context_window_error(e):
-                raise ContextWindowError(alias, e) from e
-            # Reasoning endpoints replaced ``max_tokens`` with
-            # ``max_completion_tokens`` because hidden thinking tokens are
-            # billed as output. Callers pass a budget without knowing which
-            # spelling the model takes, so translate once and retry rather
-            # than burning the backoff budget on an error that cannot
-            # resolve itself.
-            if _rejects_max_tokens(e) and "max_tokens" in kwargs:
-                kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
-                logger.debug(
-                    "  |-- %s rejects max_tokens; retrying with max_completion_tokens",
-                    alias,
-                )
-                continue
-            if isinstance(e, _NEVER_RETRY):
-                raise
-            if attempt >= _MAX_RETRIES:
-                raise
-            delay = min(_BASE_DELAY * (2**attempt), _MAX_DELAY)
-            jitter = _random.uniform(0, delay * 0.3)
-            logger.warning(
-                f"  |-- LLM retry {attempt + 1}/{_MAX_RETRIES} for {alias}: "
-                f"{type(e).__name__}: {e} (backoff {delay + jitter:.1f}s)"
-            )
-            time.sleep(delay + jitter)
+            backoff = _backoff_before_retry(e, alias, attempt, kwargs)
+            if backoff:
+                # Awaited rather than slept: every other conversation on this
+                # runtime keeps moving while this one waits out the backoff.
+                await asyncio.sleep(backoff)
 
-    elapsed = time.monotonic() - t0
+    return _finish_call(response, alias, messages, time.monotonic() - t0)
 
+
+def _finish_call(
+    response: Any,
+    alias: str,
+    messages: list[dict[str, Any]],
+    elapsed: float,
+) -> dict[str, Any]:
+    """Record the call's cost and return the reply as a message dict."""
     result = _assistant_message_to_dict(response.message)
     n_tool_calls = len(result.get("tool_calls", []))
     tc_tag = f", {n_tool_calls} tool_calls" if n_tool_calls else ""
@@ -463,7 +550,7 @@ def call_llm(
         seq = _CALL_COUNTER
 
     reasoning = getattr(response.message, "reasoning_content", None)
-    conv_id = getattr(_CONV_LOCAL, "conv_id", "unknown")
+    conv_id = _CONV_ID.get() or "unknown"
     debug_record = {
         "seq": seq,
         "conv_id": conv_id,
@@ -478,8 +565,7 @@ def call_llm(
         "tool_calls": result.get("tool_calls"),
     }
     try:
-        with _CALL_LOCK:
-            _PENDING_RECORDS.append(debug_record)
+        _pending_debug_records().append(debug_record)
     except Exception:
         pass
 

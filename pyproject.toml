@@ -20,24 +20,13 @@ classifiers = [
 ]
 
 dependencies = [
-    # ``>=0.5.8`` for ``RunConfig.jinja_rendering_engine`` and the
-    # ko_KR Nemotron-Personas locale support required by the simulator. The
-    # ``NATIVE`` mode is what lets us use the standard Jinja ``select`` /
-    # ``join`` filters in expression columns (the older ``SECURE`` mode
-    # ships a narrow filter allowlist that excludes both). See
-    # ``cli/_pipeline.py`` for the opt-in.
-    #
-    # ``<0.6`` because 0.6.0 makes the async engine the default and hands
-    # column-generator plugins async-mode ``HttpModelClient``s (0.7.0+
-    # then hardcodes async). The simulator's synchronous
-    # ``facade.completion()`` call (``core/llm.py``) raises
-    # ``SyncClientUnavailableError`` against an async-mode client, so every
-    # live model call fails. 0.6.x offers only deprecated sync fallbacks
-    # (an ``allow_resize=True`` column or ``DATA_DESIGNER_ASYNC_ENGINE=0``),
-    # neither of which this pipeline uses — so 0.5.x is the last fully
-    # sync-compatible line. Lift the cap once the plugin's LLM path is
-    # async-aware (or forces SYNC clients at model-registry construction).
-    "data-designer>=0.5.9,<0.6",
+    # The simulator runs on the async engine, which 0.9 provides. It also
+    # needs ``RunConfig.jinja_rendering_engine`` and ko_KR
+    # Nemotron-Personas locale support: the ``NATIVE`` mode is what lets
+    # expression columns use the standard Jinja ``select`` / ``join``
+    # filters (the older ``SECURE`` mode ships a narrow filter allowlist
+    # that excludes both). See ``cli/_pipeline.py`` for the opt-in.
+    "data-designer>=0.9.3,<0.10",
     # Language detection for the language_compliance scorer. Pure Python,
     # MIT, accurate on short conversational text. Pinned to a major version
     # to keep CI deterministic -- bump deliberately.
@@ -104,6 +93,11 @@ dev = [
     # would run after one that imports a registry, which is too late to keep
     # discovery out of the suite. conftest.py fails the run if this is absent.
     "pytest-env>=1.1,<2",
+    # Collects `async def` tests. `asyncio_mode = "auto"` below means they need
+    # no decorator, so a contributor writing one does not have to know this is
+    # here. conftest.py fails the run if it is absent, because without it every
+    # async test is skipped with a warning rather than failing.
+    "pytest-asyncio>=1.0,<2",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
@@ -119,10 +113,8 @@ trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 
 [tool.uv]
 override-dependencies = [
-    # Keep the upper cap in sync with the ``dependencies`` pin above
-    # (0.6.0 makes async-mode clients the default, breaking the
-    # synchronous LLM path).
-    "data-designer>=0.5.9,<0.6",
+    # Keep in sync with the ``dependencies`` pin above.
+    "data-designer>=0.9.3,<0.10",
 ]
 
 [build-system]
@@ -169,6 +161,10 @@ addopts = "-q"
 env = [
     "USERSIM_DISABLE_EXTENSIONS=1",
 ]
+# Every `async def` test is collected and run without a per-test marker. The
+# alternative, strict mode, silently skips any test whose decorator was
+# forgotten, which reads as a passing suite.
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 120

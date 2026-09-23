@@ -18,8 +18,16 @@ from data_designer.engine.column_generators.generators.base import (
     ColumnGeneratorWithModelRegistry,
 )
 
-from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import set_runtime_assets_dir
+from usersim.engine.config import (
+    MODEL_ALIASES,
+    MODEL_API_RESPONSE,
+    MODEL_ASSISTANT,
+    MODEL_JUDGE,
+    MODEL_SUMMARY,
+    MODEL_USER,
+    ConversationSimulatorConfig,
+)
+from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
 from usersim.engine.core.behavioral import (
     compute_behavioral_profile,
     compute_disclosure_style,
@@ -55,17 +63,14 @@ from usersim.engine.core.provenance import (
 
 logger = logging.getLogger("usersim.engine")
 
-MODEL_USER = "user_model"
-MODEL_ASSISTANT = "assistant_model"
-MODEL_API_RESPONSE = "api_response_model"
-MODEL_JUDGE = "judge_model"
-MODEL_SUMMARY = "summary_model"
-MODEL_ALIASES = [
-    MODEL_USER,
-    MODEL_ASSISTANT,
-    MODEL_API_RESPONSE,
-    MODEL_JUDGE,
-    MODEL_SUMMARY,
+__all__ = [
+    "MODEL_ALIASES",
+    "MODEL_API_RESPONSE",
+    "MODEL_ASSISTANT",
+    "MODEL_JUDGE",
+    "MODEL_SUMMARY",
+    "MODEL_USER",
+    "ConversationSimulatorGenerator",
 ]
 
 
@@ -148,9 +153,48 @@ class ConversationSimulatorGenerator(
 ):
     """Unified generator that dispatches to probe-specific simulation modules."""
 
+    def _initialize(self) -> None:
+        """Prepare process-wide state once, before any row runs.
+
+        The log level is process-wide, so it belongs to the run rather than to
+        a row: setting it per row would let one column's verbosity decide how
+        loudly everything else logs.
+
+        Resolving the code SHA shells out to git. Doing it here keeps that
+        subprocess out of the first row, where it would be charged to a
+        trajectory rather than to setup.
+        """
+        if self.config.verbosity >= 2:
+            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
+        get_code_sha()
+
     def generate(self, data: dict) -> dict:
+        """Not available: a conversation awaits model calls. Use ``agenerate``.
+
+        Turns, judges and tool responses are awaited several levels down, so
+        there is no synchronous path to fall back on. The engine calls
+        ``agenerate`` directly; this exists because the base class declares
+        it and a caller reaching here has taken a wrong turn.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} simulates conversations asynchronously. "
+            f"Await agenerate(data) instead of calling generate(data)."
+        )
+
+    async def agenerate(self, data: dict) -> dict:
+        """Run one row with the configured asset root installed for its duration.
+
+        The root is scoped to the row rather than to the process, so a row that
+        sets one cannot change how any later row resolves its banks.
+        """
+        token = set_runtime_assets_dir(self.config.assets_dir)
+        try:
+            return await self._generate_row(data)
+        finally:
+            reset_runtime_assets_dir(token)
+
+    async def _generate_row(self, data: dict) -> dict:
         cfg = self.config
-        set_runtime_assets_dir(cfg.assets_dir)
         models = {}
         for alias in MODEL_ALIASES:
             try:
@@ -178,10 +222,6 @@ class ConversationSimulatorGenerator(
                     "  |-- embedding model %r not in registry; finance dense retrieval will fall back to lexical",
                     embed_alias,
                 )
-
-        # Set per-call logging level based on verbosity
-        if cfg.verbosity >= 2:
-            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
 
         t_record_start = time.monotonic()
 
@@ -288,7 +328,7 @@ class ConversationSimulatorGenerator(
         # specific replayed row.
         set_conversation_id(f"{traj_id} | {persona_name} | {probe_type}")
 
-        # Install the thread-local outcome-builder hook so call_llm()
+        # Install the per-conversation outcome-builder hook so await acall_llm()
         # invocations inside this trajectory feed per-model tokens /
         # calls / latencies into simulation_outcome. Cleared in the
         # finally block so we never leak the builder across rows.
@@ -309,7 +349,7 @@ class ConversationSimulatorGenerator(
                     data=data,
                     outcome_builder=row_outcome_builder,
                 )
-                result = probe.run_dispatch(
+                result = await probe.run_dispatch(
                     models=models,
                     data=data,
                     cfg=cfg,
@@ -371,10 +411,13 @@ def _log_running_stats() -> None:
     if not model_stats:
         return
 
+    # ``combined`` is the sum of per-record durations, which is larger than
+    # the elapsed time of the run: trajectories overlap, so the same second
+    # of wall clock is counted once per trajectory running through it.
     lines = [
         f"  |-- 📈 Running stats ({rec['records']} records): "
         f"avg={rec['avg_s']:.1f}s, min={rec['min_s']:.1f}s, "
-        f"max={rec['max_s']:.1f}s, total={rec['total_s']:.0f}s"
+        f"max={rec['max_s']:.1f}s, combined={rec['total_s']:.0f}s"
     ]
     for alias in MODEL_ALIASES:
         s = model_stats.get(alias)

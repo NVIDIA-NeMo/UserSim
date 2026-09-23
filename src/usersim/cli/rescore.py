@@ -128,6 +128,7 @@ def _validate_scorers(names: list[str]) -> list[str]:
 
 
 def run(args: argparse.Namespace) -> int:
+    from usersim.cli._async import run_coroutine
     from usersim.engine.core.storage import (
         read_partitioned_dataset,
         resolve_run_or_raise,
@@ -177,7 +178,7 @@ def run(args: argparse.Namespace) -> int:
         for name in scorers:
             before = blocks.get(name)
             try:
-                blocks[name] = get_scorer(name)(traj_row, {})
+                blocks[name] = run_coroutine(get_scorer(name)(traj_row, {}))
             except Exception as exc:  # a bad row must not lose the whole run
                 logger.warning("scorer %s failed on trajectory_id=%s: %s", name, tid, exc)
                 continue

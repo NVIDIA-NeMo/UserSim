@@ -75,6 +75,12 @@ hooks for the four common probe shapes; what you override differs by shape.
 | Agentic single-user-turn + tool loop | `BankBackedProbe` | `AgenticMixin` | `derive_task`, `run_dispatch` (custom loop, not `ConversationLoop`), `build_result_extras` | follow-up generation (no user-LLM at all) |
 | Tool-calling capability test | `BaseProbe` | `ToolCallingMixin` | tool-sampling logic in `__init__`, `after_assistant_turn` (tool execution), `should_succeed`, `build_result_extras` | early-stop heuristic (mixin gates on tool-use first) |
 
+Six of those hooks can reach a model and the loop awaits them, so declare an
+override with `async def`: `get_verbatim_first_user_turn`,
+`format_followup_user_instructions`, `after_assistant_turn`,
+`is_capitulation_detected`, `execute_tool_call` and `run_dispatch`. The rest are
+plain `def`. `usersim.testing.assert_probe_conforms` reports a mismatch.
+
 See the per-shape generator file in this directory for a copy-pasteable starter.
 
 ## Where probe judging lives
@@ -111,12 +117,18 @@ When porting one of the templates into a new module:
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
       that ships across multiple locales.
+- [ ] Declare every key `build_result_extras` adds in
+      `side_effect_columns` on `ConversationSimulatorConfig`. The engine
+      writes the configured column plus the declared names and silently
+      discards the rest, so an undeclared join key is computed, dropped,
+      and then read back as absent by your scorer -- which reports the
+      trajectory as having nothing to score while the run looks fine.
 - [ ] Add a deterministic scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
 - [ ] Write tests using the patterns in `test_probe.py.template`:
-      use `_patched_call_llm` to patch BOTH `core.simulation.call_llm`
-      AND `core.judges.call_llm`; use the alias-dispatching mock with
+      use `_patched_call_llm` to patch BOTH `core.simulation.acall_llm`
+      AND `core.judges.acall_llm`; use the alias-dispatching mock with
       XML-shaped judge payloads. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference.

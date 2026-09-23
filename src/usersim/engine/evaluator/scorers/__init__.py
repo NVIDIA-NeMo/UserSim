@@ -84,7 +84,7 @@ A scorer is a callable with signature ``fn(trajectory, models) -> dict``
 where ``trajectory`` is a deserialized row dict (``conversation_messages``,
 ``persona``, ``simulation_outcome``, ``ground_truth``, ...) and ``models``
 is the same model registry passed to the LLM evaluator. Scorers may
-invoke ``call_llm`` if needed (e.g., the relocated tool-calling scorer
+invoke ``acall_llm`` if needed (e.g., the relocated tool-calling scorer
 still uses an LLM judge for its 8-axis structured output) — the
 distinction from LLM-quality-axis scoring is *who is being scored*
 (the assistant), not *whether an LLM call is involved*.
@@ -95,7 +95,7 @@ The evaluator generator dispatches by name based on its config.
 Schema-design contract for LLM-judge scorers
 ============================================
 
-Every scorer that calls ``call_llm`` with ``response_format={"type":
+Every scorer that calls ``acall_llm`` with ``response_format={"type":
 "json_schema", ...}`` MUST follow these rules. They are enforced by
 regression tests in
 ``tests/evaluator/test_evaluator_scorer_structured_output_schemas.py`` —
@@ -159,12 +159,12 @@ JSON Schema to enforce anything against.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Iterable
+from typing import Any, Awaitable, Callable, Iterable
 
 logger = logging.getLogger("usersim.engine")
 
 # trajectory-row-dict + models -> structured-result-dict
-ScorerFn = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
+ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 _REGISTRY: dict[str, ScorerFn] = {}

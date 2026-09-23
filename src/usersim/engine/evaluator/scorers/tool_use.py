@@ -28,7 +28,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import (
     format_conversation_history_for_prompt,
     format_tools_for_prompt,
@@ -182,7 +182,7 @@ def _normalize_tool_subset(tool_subset_field: Any) -> list[dict[str, Any]]:
     return []
 
 
-def score_tool_use_trajectory(
+async def score_tool_use_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -231,7 +231,7 @@ def score_tool_use_trajectory(
     ]
     schema_model = _build_schema()
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             msgs,

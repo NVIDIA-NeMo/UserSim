@@ -36,7 +36,7 @@ class _StubProbe:
     label: str = "stub_probe"
     supports_assistant_resampling: bool = True
 
-    def after_assistant_turn(self, models, state, response, cfg):
+    async def after_assistant_turn(self, models, state, response, cfg):
         content = response.get("content", "")
         state.messages.append({"role": "assistant", "content": content})
         return content
@@ -76,7 +76,7 @@ class _Harness:
         #: Prompt text the loop actually handed the judge, per call.
         self.judge_prompts: list[str] = []
 
-        def fake_call_llm(models, alias, messages, **kwargs):
+        async def fake_call_llm(models, alias, messages, **kwargs):
             i = min(self.assistant_calls, len(responses) - 1)
             content = responses[i]
             self.assistant_calls += 1
@@ -85,7 +85,7 @@ class _Harness:
                 resp["reasoning_content"] = traces[min(i, len(traces) - 1)]
             return resp
 
-        def fake_judge_ex(models, alias, prompt):
+        async def fake_judge_ex(models, alias, prompt):
             ok = verdicts[min(self.judge_calls, len(verdicts) - 1)]
             self.judge_prompts.append(prompt)
             self.judge_calls += 1
@@ -94,13 +94,13 @@ class _Harness:
             # not parser defaults (judge flakiness is tested separately).
             return f"verdict {self.judge_calls}", rating, ok, True
 
-        monkeypatch.setattr(sim, "call_llm", fake_call_llm)
+        monkeypatch.setattr(sim, "acall_llm", fake_call_llm)
         monkeypatch.setattr(sim, "run_inline_judge_ex", fake_judge_ex)
 
 
-def _run(state, cfg, probe):
+async def _run(state, cfg, probe):
     loop = ConversationLoop()
-    return loop._generate_and_judge_assistant_turn(
+    return await loop._generate_and_judge_assistant_turn(
         models={},
         probe=probe,
         state=state,
@@ -114,18 +114,18 @@ def _run(state, cfg, probe):
 class TestDefaultSingleAttempt:
     """max_assistant_attempts=1 must reproduce the original behavior."""
 
-    def test_one_call_one_judgment_on_pass(self, monkeypatch):
+    async def test_one_call_one_judgment_on_pass(self, monkeypatch):
         h = _Harness(monkeypatch, ["good answer"], [True])
         state = _make_state()
-        content, expl, rating, ok = _run(state, _StubConfig(1), _StubProbe())
+        content, expl, rating, ok = await _run(state, _StubConfig(1), _StubProbe())
         assert (h.assistant_calls, h.judge_calls) == (1, 1)
         assert ok and rating == "success" and content == "good answer"
         assert state.messages[-1]["content"] == "good answer"
 
-    def test_failed_judgment_is_flag_only_no_resample(self, monkeypatch):
+    async def test_failed_judgment_is_flag_only_no_resample(self, monkeypatch):
         h = _Harness(monkeypatch, ["bad answer"], [False])
         state = _make_state()
-        content, _, rating, ok = _run(state, _StubConfig(1), _StubProbe())
+        content, _, rating, ok = await _run(state, _StubConfig(1), _StubProbe())
         assert h.assistant_calls == 1
         assert not ok and rating == "failure"
         # The flagged candidate stays in the transcript (flag-only).
@@ -133,10 +133,10 @@ class TestDefaultSingleAttempt:
         out = state.outcome.finalize(OutcomeStatus.OK)
         assert out.n_assistant_retries == 0
 
-    def test_metadata_entry_has_attempt_index(self, monkeypatch):
+    async def test_metadata_entry_has_attempt_index(self, monkeypatch):
         _Harness(monkeypatch, ["a"], [True])
         state = _make_state()
-        _run(state, _StubConfig(1), _StubProbe())
+        await _run(state, _StubConfig(1), _StubProbe())
         ratings = state.metadata["assistant_judge_ratings"]
         assert len(ratings) == 1
         assert ratings[0]["turn_idx"] == 0
@@ -145,41 +145,41 @@ class TestDefaultSingleAttempt:
 
 
 class TestResampling:
-    def test_rejected_candidate_is_replaced(self, monkeypatch):
+    async def test_rejected_candidate_is_replaced(self, monkeypatch):
         h = _Harness(monkeypatch, ["bad", "bad2", "good"], [False, False, True])
         state = _make_state()
-        content, _, _, ok = _run(state, _StubConfig(3), _StubProbe())
+        content, _, _, ok = await _run(state, _StubConfig(3), _StubProbe())
         assert (h.assistant_calls, h.judge_calls) == (3, 3)
         assert ok and content == "good"
         # Transcript contains ONLY the accepted candidate.
         assistant_msgs = [m for m in state.messages if m["role"] == "assistant"]
         assert assistant_msgs == [{"role": "assistant", "content": "good"}]
 
-    def test_all_attempts_logged_with_attempt_indices(self, monkeypatch):
+    async def test_all_attempts_logged_with_attempt_indices(self, monkeypatch):
         _Harness(monkeypatch, ["bad", "good"], [False, True])
         state = _make_state()
-        _run(state, _StubConfig(3), _StubProbe())
+        await _run(state, _StubConfig(3), _StubProbe())
         ratings = state.metadata["assistant_judge_ratings"]
         assert [r["attempt"] for r in ratings] == [0, 1]
         assert [r["success"] for r in ratings] == [False, True]
 
-    def test_retry_counter_counts_discarded_candidates(self, monkeypatch):
+    async def test_retry_counter_counts_discarded_candidates(self, monkeypatch):
         _Harness(monkeypatch, ["bad", "good"], [False, True])
         state = _make_state()
-        _run(state, _StubConfig(3), _StubProbe())
+        await _run(state, _StubConfig(3), _StubProbe())
         out = state.outcome.finalize(OutcomeStatus.OK)
         assert out.n_assistant_retries == 1
 
-    def test_stops_early_on_first_pass(self, monkeypatch):
+    async def test_stops_early_on_first_pass(self, monkeypatch):
         h = _Harness(monkeypatch, ["good"], [True])
         state = _make_state()
-        _run(state, _StubConfig(3), _StubProbe())
+        await _run(state, _StubConfig(3), _StubProbe())
         assert (h.assistant_calls, h.judge_calls) == (1, 1)
 
-    def test_exhaustion_keeps_last_candidate_flagged(self, monkeypatch):
+    async def test_exhaustion_keeps_last_candidate_flagged(self, monkeypatch):
         h = _Harness(monkeypatch, ["bad1", "bad2", "bad3"], [False, False, False])
         state = _make_state()
-        content, _, _, ok = _run(state, _StubConfig(3), _StubProbe())
+        content, _, _, ok = await _run(state, _StubConfig(3), _StubProbe())
         assert h.assistant_calls == 3
         assert not ok and content == "bad3"
         # Last candidate kept (same semantics as flag-only), budget spent.
@@ -188,11 +188,11 @@ class TestResampling:
         # Only discarded-and-regenerated candidates count as retries.
         assert out.n_assistant_retries == 2
 
-    def test_transcript_rollback_leaves_prior_turns_intact(self, monkeypatch):
+    async def test_transcript_rollback_leaves_prior_turns_intact(self, monkeypatch):
         _Harness(monkeypatch, ["bad", "good"], [False, True])
         state = _make_state()
         prior = list(state.messages)
-        _run(state, _StubConfig(2), _StubProbe())
+        await _run(state, _StubConfig(2), _StubProbe())
         assert state.messages[: len(prior)] == prior
         assert len(state.messages) == len(prior) + 1
 
@@ -200,31 +200,31 @@ class TestResampling:
 class TestJudgePromptComesFromTheProbe:
     """The loop must judge with the PROBE's prompt, not a module constant."""
 
-    def test_loop_judges_with_the_probes_prompt(self, monkeypatch):
+    async def test_loop_judges_with_the_probes_prompt(self, monkeypatch):
         h = _Harness(monkeypatch, ["the answer"], [True])
         state = _make_state()
-        _run(state, _StubConfig(1), _StubProbe())
+        await _run(state, _StubConfig(1), _StubProbe())
 
         # _StubProbe returns f"judge: {assistant_response}" -- a shape no
         # module constant produces, so a match can only come from the hook.
         assert h.judge_prompts == ["judge: the answer"]
 
-    def test_every_resample_attempt_re_renders_it(self, monkeypatch):
+    async def test_every_resample_attempt_re_renders_it(self, monkeypatch):
         """Each attempt judges its own candidate, so the prompt is rebuilt
         per attempt rather than computed once and reused."""
         h = _Harness(monkeypatch, ["bad", "good"], [False, True])
         state = _make_state()
-        _run(state, _StubConfig(2), _StubProbe())
+        await _run(state, _StubConfig(2), _StubProbe())
 
         assert h.judge_prompts == ["judge: bad", "judge: good"]
 
 
 class TestProbeOptOut:
-    def test_unsafe_probe_capped_to_one_attempt(self, monkeypatch):
+    async def test_unsafe_probe_capped_to_one_attempt(self, monkeypatch):
         h = _Harness(monkeypatch, ["bad"], [False])
         state = _make_state()
         probe = _StubProbe(supports_assistant_resampling=False)
-        _run(state, _StubConfig(3), probe)
+        await _run(state, _StubConfig(3), probe)
         assert h.assistant_calls == 1
         out = state.outcome.finalize(OutcomeStatus.OK)
         assert out.n_assistant_retries == 0
@@ -256,7 +256,7 @@ class _TracingProbe:
     label: str = "tracing_probe"
     supports_assistant_resampling: bool = True
 
-    def after_assistant_turn(self, models, state, response, cfg):
+    async def after_assistant_turn(self, models, state, response, cfg):
         content = response.get("content", "")
         state.messages.append(
             assistant_message(
@@ -284,7 +284,7 @@ class _MultiCallProbe:
     supports_assistant_resampling: bool = True
     SECOND_TRACE: str = "TRACE_SECOND_CALL"
 
-    def after_assistant_turn(self, models, state, response, cfg):
+    async def after_assistant_turn(self, models, state, response, cfg):
         # The loop's call (a tool call, in the real shape).
         store = getattr(cfg, "store_reasoning", True)
         state.messages.append(
@@ -336,19 +336,19 @@ class TestRejectedCandidateTraces:
         """
         return not msg.get("reasoning_content")
 
-    def test_rejected_candidates_trace_is_discarded(self, monkeypatch):
+    async def test_rejected_candidates_trace_is_discarded(self, monkeypatch):
         """The surviving message carries its OWN trace, and the rejected
         candidate's trace is gone from the transcript entirely."""
         _Harness(monkeypatch, ["bad", "good"], [False, True], traces=[self.A, self.B])
         state = _make_state()
-        _run(state, _StubConfig(2), _StubProbe())
+        await _run(state, _StubConfig(2), _StubProbe())
 
         assistants = self._assistants(state)
         assert [m["content"] for m in assistants] == ["good"]
         assert assistants[0]["reasoning_content"] == self.B
         assert self.A not in str(state.messages)
 
-    def test_scoped_to_this_attempt_not_the_whole_transcript(self, monkeypatch):
+    async def test_scoped_to_this_attempt_not_the_whole_transcript(self, monkeypatch):
         """The fallback's "already attributed?" check must look only at
         messages THIS attempt appended.
 
@@ -370,7 +370,7 @@ class TestRejectedCandidateTraces:
         state.messages.append({"role": "user", "content": "Q2"})
         prior = state.messages[2]
 
-        _run(state, _StubConfig(2), _StubProbe())
+        await _run(state, _StubConfig(2), _StubProbe())
 
         # This turn still got its own trace ...
         survivor = self._assistants(state)[-1]
@@ -379,12 +379,12 @@ class TestRejectedCandidateTraces:
         # ... and the earlier turn's is untouched.
         assert prior["reasoning_content"] == self.A
 
-    def test_exhaustion_keeps_the_last_trace(self, monkeypatch):
+    async def test_exhaustion_keeps_the_last_trace(self, monkeypatch):
         """Budget spent with every candidate rejected: the kept message
         carries the last attempt's trace, not the first's."""
         _Harness(monkeypatch, ["bad1", "bad2", "bad3"], [False, False, False], traces=[self.A, self.B, self.C])
         state = _make_state()
-        _run(state, _StubConfig(3), _StubProbe())
+        await _run(state, _StubConfig(3), _StubProbe())
 
         assistants = self._assistants(state)
         assert [m["content"] for m in assistants] == ["bad3"]
@@ -392,19 +392,19 @@ class TestRejectedCandidateTraces:
         for gone in (self.A, self.B):
             assert gone not in str(state.messages)
 
-    def test_per_call_attribution_survives_rollback(self, monkeypatch):
+    async def test_per_call_attribution_survives_rollback(self, monkeypatch):
         """Same guarantee when the probe attributes via
         ``assistant_message()`` rather than leaving it to the fallback."""
         _Harness(monkeypatch, ["bad", "good"], [False, True], traces=[self.A, self.B])
         state = _make_state()
-        _run(state, _StubConfig(2), _TracingProbe())
+        await _run(state, _StubConfig(2), _TracingProbe())
 
         assistants = self._assistants(state)
         assert [m["content"] for m in assistants] == ["good"]
         assert assistants[0]["reasoning_content"] == self.B
         assert self.A not in str(state.messages)
 
-    def test_fallback_does_not_overwrite_an_attributed_trace(self, monkeypatch):
+    async def test_fallback_does_not_overwrite_an_attributed_trace(self, monkeypatch):
         """The fallback's "already attributed" guard.
 
         Only bites on a multi-message turn. ``assistant_resp`` is the
@@ -415,37 +415,37 @@ class TestRejectedCandidateTraces:
         """
         _Harness(monkeypatch, ["tool call"], [True], traces=[self.B])
         state = _make_state()
-        _run(state, _StubConfig(1), _MultiCallProbe())
+        await _run(state, _StubConfig(1), _MultiCallProbe())
 
         first, final = self._assistants(state)
         assert first["reasoning_content"] == self.B
         assert final["reasoning_content"] == _MultiCallProbe.SECOND_TRACE
 
-    def test_store_reasoning_off_drops_the_trace(self, monkeypatch):
+    async def test_store_reasoning_off_drops_the_trace(self, monkeypatch):
         """The loop fallback honours ``cfg.store_reasoning`` too, not just
         ``assistant_message`` -- otherwise probes that hand-build their
         message would ignore the flag."""
         _Harness(monkeypatch, ["good"], [True], traces=[self.B])
         state = _make_state()
-        _run(state, _StubConfig(1, store_reasoning=False), _StubProbe())
+        await _run(state, _StubConfig(1, store_reasoning=False), _StubProbe())
 
         assistants = self._assistants(state)
         assert [m["content"] for m in assistants] == ["good"]
         assert all(self._no_trace(m) for m in assistants)
 
-    def test_store_reasoning_off_on_the_per_call_path(self, monkeypatch):
+    async def test_store_reasoning_off_on_the_per_call_path(self, monkeypatch):
         _Harness(monkeypatch, ["good"], [True], traces=[self.B])
         state = _make_state()
-        _run(state, _StubConfig(1, store_reasoning=False), _TracingProbe())
+        await _run(state, _StubConfig(1, store_reasoning=False), _TracingProbe())
 
         assert all(self._no_trace(m) for m in self._assistants(state))
 
-    def test_traceless_model_is_unaffected_by_rollback(self, monkeypatch):
+    async def test_traceless_model_is_unaffected_by_rollback(self, monkeypatch):
         """No trace emitted => nothing readable, before or after a
         resample."""
         _Harness(monkeypatch, ["bad", "good"], [False, True])
         state = _make_state()
-        _run(state, _StubConfig(2), _StubProbe())
+        await _run(state, _StubConfig(2), _StubProbe())
 
         assistants = self._assistants(state)
         assert [m["content"] for m in assistants] == ["good"]
@@ -474,27 +474,27 @@ class TestJudgeParseErrors:
         """judge_script: list of (ok, parse_ok) tuples, consumed per call."""
         calls = {"assistant": 0, "judge": 0}
 
-        def fake_call_llm(models, alias, messages, **kwargs):
+        async def fake_call_llm(models, alias, messages, **kwargs):
             content = responses[min(calls["assistant"], len(responses) - 1)]
             calls["assistant"] += 1
             return {"content": content}
 
-        def fake_judge_ex(models, alias, prompt):
+        async def fake_judge_ex(models, alias, prompt):
             ok, parse_ok = judge_script[min(calls["judge"], len(judge_script) - 1)]
             calls["judge"] += 1
             rating = "success" if ok else "failure"
             return f"verdict {calls['judge']}", rating, ok, parse_ok
 
-        monkeypatch.setattr(sim, "call_llm", fake_call_llm)
+        monkeypatch.setattr(sim, "acall_llm", fake_call_llm)
         monkeypatch.setattr(sim, "run_inline_judge_ex", fake_judge_ex)
         return calls
 
-    def test_parse_error_rejudges_same_candidate_without_resample(self, monkeypatch):
+    async def test_parse_error_rejudges_same_candidate_without_resample(self, monkeypatch):
         # Judge flakes (unparseable), then passes the SAME candidate on
         # the re-ask: one assistant call, two judge calls, no retry burned.
         calls = self._harness(monkeypatch, ["only answer"], [(False, False), (True, True)])
         state = _make_state()
-        content, _, rating, ok = _run(state, _StubConfig(3), _StubProbe())
+        content, _, rating, ok = await _run(state, _StubConfig(3), _StubProbe())
         assert calls["assistant"] == 1 and calls["judge"] == 2
         assert ok and content == "only answer"
         out = state.outcome.finalize(OutcomeStatus.OK)
@@ -502,7 +502,7 @@ class TestJudgeParseErrors:
         ratings = state.metadata["assistant_judge_ratings"]
         assert len(ratings) == 1 and "judge_parse_error" not in ratings[0]
 
-    def test_persistent_parse_error_is_marked_and_counts_as_failure(self, monkeypatch):
+    async def test_persistent_parse_error_is_marked_and_counts_as_failure(self, monkeypatch):
         # Judge never produces a parseable verdict: after one re-ask the
         # attempt proceeds as a failure (documented budget charge), and
         # the audit entry is distinguishable from a genuine rejection.
@@ -512,7 +512,7 @@ class TestJudgeParseErrors:
             [(False, False)] * 4,
         )
         state = _make_state()
-        content, _, rating, ok = _run(state, _StubConfig(2), _StubProbe())
+        content, _, rating, ok = await _run(state, _StubConfig(2), _StubProbe())
         assert calls["assistant"] == 2  # budget consumed as documented
         assert not ok
         ratings = state.metadata["assistant_judge_ratings"]

@@ -14,7 +14,7 @@ shipped en_IN / shared banks:
 - side-channel metadata is still seeded (so ``should_succeed`` + scorers work),
 - a ``USED_MACHINE_TRANSLATION`` warning is recorded (preview-only discipline).
 
-Translation is mocked at ``core.translation.call_llm`` (its own binding — the
+Translation is mocked at ``core.translation.acall_llm`` (its own binding — the
 loop's ``_patched_call_llm`` helper does not cover it) so no network is hit.
 """
 
@@ -33,6 +33,16 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.simulation import ConversationState
+
+
+def _as_async(fn):
+    """Wrap a canned reply so the awaiting call site can await it."""
+
+    async def _call(*args, **kwargs):
+        return fn(*args, **kwargs)
+
+    return _call
+
 
 _MARKER = "‹TRANSLATED-turn1›"
 
@@ -64,8 +74,8 @@ def cfg() -> Any:
 
 
 def _mock_translation():
-    """Patch the translation module's own ``call_llm`` binding."""
-    return patch.object(T, "call_llm", lambda *a, **k: {"content": _MARKER})
+    """Patch the translation module's own awaited model call."""
+    return patch.object(T, "acall_llm", _as_async(lambda *a, **k: {"content": _MARKER}))
 
 
 def _builder() -> OutcomeBuilder:
@@ -81,7 +91,7 @@ def _mt_warned(ob: OutcomeBuilder) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
+async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
     from usersim.engine.probes.sov_ai_facts.generator import SovAiFactsProbe
 
     T.reset_translation_cache()
@@ -101,7 +111,7 @@ def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
         assert probe._asset_locale == "en_IN"  # fell back to the en_IN bank
         assert probe._locale == "ta_Taml_IN"  # conversation locale preserved
         state = ConversationState(outcome=ob)
-        turn1 = probe.get_verbatim_first_user_turn(state)
+        turn1 = await probe.get_verbatim_first_user_turn(state)
 
     assert turn1 == _MARKER  # translated
     assert state.metadata.get("facts_probed")  # metadata still seeded
@@ -113,7 +123,7 @@ def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
+async def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
     from usersim.engine.probes.sov_ai_multilingual_parity.generator import (
         SovAiMultilingualParityProbe,
     )
@@ -135,7 +145,7 @@ def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
         # Shared bank -> asset_locale resolves to the en_IN base rendering.
         assert probe._asset_locale == "en_IN"
         state = ConversationState(outcome=ob)
-        turn1 = probe.get_verbatim_first_user_turn(state)
+        turn1 = await probe.get_verbatim_first_user_turn(state)
 
     assert turn1 == _MARKER
     assert state.metadata.get("query_id")  # matched-pair join key seeded
@@ -172,7 +182,7 @@ def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> Non
 # ---------------------------------------------------------------------------
 
 
-def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> None:
+async def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> None:
     from usersim.engine.probes.safety_chat_pressure.generator import (
         SafetyChatPressureProbe,
     )
@@ -193,7 +203,7 @@ def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> N
         )
         assert probe._asset_locale == "en_IN"
         state = ConversationState(outcome=ob)
-        turn1 = probe.get_verbatim_first_user_turn(state)
+        turn1 = await probe.get_verbatim_first_user_turn(state)
 
     assert turn1 == _MARKER
     assert state.metadata.get("target_request_id")
@@ -206,7 +216,7 @@ def test_safety_chat_pressure_variant_translates_turn1(indian_persona, cfg) -> N
 # ---------------------------------------------------------------------------
 
 
-def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> None:
+async def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> None:
     from usersim.engine.probes.safety_agentic.generator import SafetyAgenticProbe
 
     ob = _builder()
@@ -225,7 +235,7 @@ def test_safety_agentic_variant_constructs_and_routes(indian_persona, cfg) -> No
     assert probe._locale == "ta_Taml_IN"
     # The translation gate fires because asset_locale != locale.
     with _mock_translation():
-        assert probe._localize_verbatim("english action prompt") == _MARKER
+        assert await probe._localize_verbatim("english action prompt") == _MARKER
     assert _mt_warned(ob)
 
 

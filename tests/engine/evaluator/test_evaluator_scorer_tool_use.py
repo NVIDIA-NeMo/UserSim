@@ -66,21 +66,21 @@ class TestRegistration:
 
 class TestScorerOnFakeJudge:
     """Exercise score_tool_use_trajectory's parsing + status_proposal logic
-    without invoking a real model — by stubbing `call_llm` in the module."""
+    without invoking a real model — by stubbing `acall_llm` in the module."""
 
     def setup_method(self) -> None:
-        self._orig_call_llm = tool_use_module.call_llm
+        self._orig_acall_llm = tool_use_module.acall_llm
 
     def teardown_method(self) -> None:
-        tool_use_module.call_llm = self._orig_call_llm
+        tool_use_module.acall_llm = self._orig_acall_llm
 
     def _stub_call_llm(self, structured_response: dict):
         import json as _json
 
-        def _stub(models, alias, msgs, **kwargs):
+        async def _stub(models, alias, msgs, **kwargs):
             return {"content": _json.dumps(structured_response)}
 
-        tool_use_module.call_llm = _stub
+        tool_use_module.acall_llm = _stub
 
     def _trajectory(self) -> dict:
         return {
@@ -123,7 +123,7 @@ class TestScorerOnFakeJudge:
             ],
         }
 
-    def test_full_pass_yields_status_proposal_true(self) -> None:
+    async def test_full_pass_yields_status_proposal_true(self) -> None:
         self._stub_call_llm(
             {
                 name: {"score": 5, "reasoning": "ok"}
@@ -139,13 +139,13 @@ class TestScorerOnFakeJudge:
                 ]
             }
         )
-        result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is True
         assert result["scores"]["overall"]["score"] == 5
         assert "error" not in result
 
     @pytest.mark.parametrize("failing_axis", ["overall", "tool_selection", "architecture_leaking"])
-    def test_critical_axis_failure_flips_status_proposal(self, failing_axis: str) -> None:
+    async def test_critical_axis_failure_flips_status_proposal(self, failing_axis: str) -> None:
         scores = {
             name: {"score": 5, "reasoning": "ok"}
             for name in [
@@ -161,10 +161,10 @@ class TestScorerOnFakeJudge:
         }
         scores[failing_axis] = {"score": 1, "reasoning": "fail"}
         self._stub_call_llm(scores)
-        result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is False, f"axis {failing_axis} scored 1 should propose status=False"
 
-    def test_non_critical_axis_failure_does_not_flip(self) -> None:
+    async def test_non_critical_axis_failure_does_not_flip(self) -> None:
         # information_gathering is NOT in the critical-flip set.
         scores = {
             name: {"score": 5, "reasoning": "ok"}
@@ -181,26 +181,26 @@ class TestScorerOnFakeJudge:
         }
         scores["information_gathering"] = {"score": 1, "reasoning": "weak"}
         self._stub_call_llm(scores)
-        result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["status_proposal"] is True
 
-    def test_unparseable_response_returns_parse_error(self) -> None:
-        def _stub(models, alias, msgs, **kwargs):
+    async def test_unparseable_response_returns_parse_error(self) -> None:
+        async def _stub(models, alias, msgs, **kwargs):
             return {"content": "not json"}
 
-        tool_use_module.call_llm = _stub
-        result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        tool_use_module.acall_llm = _stub
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert result["error"] == "parse_failure"
         # All scores marked None.
         for s in TRAJECTORY_SCORES:
             assert result["scores"][s.name]["score"] is None
 
-    def test_call_llm_exception_returns_error_field(self) -> None:
-        def _boom(models, alias, msgs, **kwargs):
+    async def test_call_llm_exception_returns_error_field(self) -> None:
+        async def _boom(models, alias, msgs, **kwargs):
             raise RuntimeError("boom")
 
-        tool_use_module.call_llm = _boom
-        result = score_tool_use_trajectory(self._trajectory(), {"judge": object()})
+        tool_use_module.acall_llm = _boom
+        result = await score_tool_use_trajectory(self._trajectory(), {"judge": object()})
         assert "error" in result
         assert "boom" in result["error"]
         # status_proposal defaults to True when scoring fails (we can't

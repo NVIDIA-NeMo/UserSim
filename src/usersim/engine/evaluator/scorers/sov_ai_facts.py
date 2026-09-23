@@ -50,7 +50,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 )
 
 from usersim.engine.core.fact_bank import Fact, load_fact_bank_for_locale
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.evaluator.scorers import register_scorer
 
@@ -246,7 +246,7 @@ def _build_schema(axes: tuple[Score, ...]):
 # ---------------------------------------------------------------------------
 
 
-def score_sov_ai_facts_trajectory(
+async def score_sov_ai_facts_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -341,7 +341,7 @@ def score_sov_ai_facts_trajectory(
             per_fact.append(_no_fact_result(fact_id, judge_alias))
             status_proposal = False
             continue
-        entry = _score_one_fact(
+        entry = await _score_one_fact(
             fact=fact,
             conversation=conversation,
             models=models,
@@ -373,7 +373,7 @@ def score_sov_ai_facts_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _score_one_fact(
+async def _score_one_fact(
     *,
     fact: Fact,
     conversation: list[dict[str, Any]],
@@ -414,7 +414,7 @@ def _score_one_fact(
 
     schema_model = _build_schema(axes)
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [

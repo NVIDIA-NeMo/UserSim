@@ -89,10 +89,10 @@ class TestToolHelpers:
         spec = _find_tool_spec("nonexistent", sample_tools)
         assert spec is None
 
-    def test_api_simulator_keeps_tool_arguments_and_prior_results(self):
+    async def test_api_simulator_keeps_tool_arguments_and_prior_results(self):
         captured = {}
 
-        def fake_call_llm(models, alias, messages):
+        async def fake_call_llm(models, alias, messages):
             captured["alias"] = alias
             captured["prompt"] = messages[0]["content"]
             return {"content": '{"ok":true}'}
@@ -115,10 +115,10 @@ class TestToolHelpers:
         from unittest.mock import patch
 
         with patch(
-            "usersim.engine.probes.tool_calling.generator.call_llm",
+            "usersim.engine.probes.tool_calling.generator.acall_llm",
             side_effect=fake_call_llm,
         ):
-            content, rerolled = _simulate_tool_response(
+            content, rerolled = await _simulate_tool_response(
                 {},
                 tool_spec,
                 tool_call,
@@ -133,7 +133,7 @@ class TestToolHelpers:
         assert '"prior_secret":"rain"' in captured["prompt"]
 
 
-def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
+async def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -180,7 +180,7 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     user_call = 0
     weather_tool = next(tool for tool in probe.openai_tools if tool["function"]["name"] == "get_weather")
 
-    def fake_call_llm(models, alias, messages, **kwargs):
+    async def fake_call_llm(models, alias, messages, **kwargs):
         nonlocal assistant_call, user_call
         if alias == "user_model":
             user_inputs.append(messages)
@@ -230,15 +230,15 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
         raise AssertionError(alias)
 
     targets = (
-        "usersim.engine.core.simulation.call_llm",
-        "usersim.engine.core.judges.call_llm",
-        "usersim.engine.core.llm.call_llm",
-        "usersim.engine.probes.tool_calling.generator.call_llm",
+        "usersim.engine.core.simulation.acall_llm",
+        "usersim.engine.core.judges.acall_llm",
+        "usersim.engine.core.llm.acall_llm",
+        "usersim.engine.probes.tool_calling.generator.acall_llm",
     )
     with ExitStack() as stack:
         for target in targets:
             stack.enter_context(patch(target, side_effect=fake_call_llm))
-        result = ConversationLoop().run(
+        result = await ConversationLoop().run(
             models={},
             data=data,
             cfg=cfg,
@@ -247,8 +247,8 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     return result, assistant_inputs, user_inputs, judge_inputs, api_inputs
 
 
-def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tools):
-    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = _run_concrete_tool_probe(sample_tools)
+async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tools):
+    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
     assert result["conversation_status"] is True
     assert len(api_inputs) == 1
@@ -266,11 +266,80 @@ def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tool
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
 
 
-def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
-    result, _assistant, _user, _judge, _api = _run_concrete_tool_probe(
+async def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
+    result, _assistant, _user, _judge, _api = await _run_concrete_tool_probe(
         sample_tools,
         api_context_error=True,
     )
     outcome = json.loads(result["simulation_outcome"])
     assert result["conversation_status"] is False
     assert outcome["failure_attribution"] == "api_response_model"
+
+
+def _tool_entry(index: int) -> dict:
+    return {
+        "tool": {
+            "type": "function",
+            "function": {
+                "name": f"tool_{index}",
+                "description": f"Tool number {index}",
+                "parameters": {"type": "object", "properties": {}},
+            },
+        }
+    }
+
+
+class TestToolSubsetIsRowDerived:
+    """Which tools a row is given must be a function of the row itself.
+
+    The subset shapes the whole conversation but is not part of the
+    trajectory identity, so two rows sharing an identity have to be handed
+    the same tools for that identity to mean anything.
+    """
+
+    @staticmethod
+    def _subset(**data_overrides: object) -> list[str]:
+        from usersim.engine.core.behavioral import compute_behavioral_profile
+
+        persona = {"first_name": "A", "last_name": "User", "age": 35}
+        data = {
+            "tools": [_tool_entry(i) for i in range(12)],
+            "theme": json.dumps({"type": "T", "description": "d", "tool_expected": True}),
+            "persona_uuid": "persona-1",
+            "trajectory_id": "traj-1",
+            "disclosure_style": "upfront",
+            "user_interaction_style": "neutral",
+        }
+        data.update(data_overrides)
+        cfg = types.SimpleNamespace(
+            tools_column="tools",
+            theme_column="theme",
+            max_tools=3,
+            max_turns=2,
+            max_query_attempts=1,
+            context_compression=False,
+            compression_window=1,
+            enforce_user_language=False,
+        )
+        probe = ToolCallingProbe(
+            persona=persona,
+            locale="en_US",
+            language="English",
+            models={},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile=compute_behavioral_profile(persona),
+            data=data,
+            outcome_builder=OutcomeBuilder(provenance=Provenance()),
+        )
+        return [tool["tool"]["function"]["name"] for tool in probe.tool_subset]
+
+    def test_one_row_always_draws_the_same_tools(self) -> None:
+        first = self._subset()
+        second = self._subset()
+        assert first == second, f"one row drew two different tool subsets: {first} then {second}"
+
+    def test_separate_rows_draw_separately(self) -> None:
+        a = self._subset(trajectory_id="traj-a")
+        b = self._subset(trajectory_id="traj-b")
+        assert a != b, f"two rows drew the same subset {a}, so the draw is not derived from the row"

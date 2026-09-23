@@ -485,28 +485,28 @@ class TestHybridRetrieval:
         )
 
 
-def test_embed_query_soft_fails_to_none():
-    from usersim.engine.core.embeddings import embed_query
+async def test_embed_query_soft_fails_to_none():
+    from usersim.engine.core.embeddings import aembed_query
 
     class _Facade:
-        def generate_text_embeddings(self, texts):
+        async def agenerate_text_embeddings(self, texts):
             return [[0.1, 0.2, 0.3] for _ in texts]
 
     # Missing alias -> None (caller falls back to lexical).
-    assert embed_query({}, "embedding_model", "hello") is None
+    assert await aembed_query({}, "embedding_model", "hello") is None
     # Present facade -> the vector.
-    assert embed_query({"embedding_model": _Facade()}, "embedding_model", "hi") == [
+    assert await aembed_query({"embedding_model": _Facade()}, "embedding_model", "hi") == [
         0.1,
         0.2,
         0.3,
     ]
 
     class _Boom:
-        def generate_text_embeddings(self, texts):
+        async def agenerate_text_embeddings(self, texts):
             raise RuntimeError("endpoint down")
 
     # Endpoint error -> None (never raises).
-    assert embed_query({"embedding_model": _Boom()}, "embedding_model", "hi") is None
+    assert await aembed_query({"embedding_model": _Boom()}, "embedding_model", "hi") is None
 
 
 def test_shipped_banks_carry_no_vectors_and_still_load():
@@ -539,7 +539,7 @@ _MODELS = {
 
 
 def _mock_call_llm(assistant_responses, *, user_responses=None):
-    """Alias-dispatching ``call_llm`` mock for the shared ConversationLoop.
+    """Alias-dispatching ``acall_llm`` mock for the shared ConversationLoop.
 
     The probe now rides ``ConversationLoop`` (not a custom run_dispatch), so
     the assistant is called by the loop (first tool-call of a turn) AND by the
@@ -573,26 +573,26 @@ def _mock_call_llm(assistant_responses, *, user_responses=None):
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the loop + probe bind it.
+    """Patch ``acall_llm`` everywhere the loop + probe bind it.
 
     ``simulation`` (loop assistant + turn-1 gen + completion check),
     ``judges`` (in-sim judge) and ``context`` (response compression) each
-    bind ``call_llm`` at module load, so patching the source module does not
+    bind ``acall_llm`` at module load, so patching the source module does not
     reach them; the ``ToolExecutionMixin`` inner-loop re-calls import it
     lazily from ``core.llm``. Every one of these references must be patched,
-    or the real ``call_llm`` runs against this module's placeholder facades
+    or the real ``acall_llm`` runs against this module's placeholder facades
     and the probe's fallback quietly absorbs the resulting error.
     """
     with (
-        patch("usersim.engine.core.simulation.call_llm", side_effect=side_effect),
-        patch("usersim.engine.core.judges.call_llm", side_effect=side_effect),
-        patch("usersim.engine.core.context.call_llm", side_effect=side_effect),
-        patch("usersim.engine.core.llm.call_llm", side_effect=side_effect),
+        patch("usersim.engine.core.simulation.acall_llm", side_effect=side_effect),
+        patch("usersim.engine.core.judges.acall_llm", side_effect=side_effect),
+        patch("usersim.engine.core.context.acall_llm", side_effect=side_effect),
+        patch("usersim.engine.core.llm.acall_llm", side_effect=side_effect),
     ):
         yield
 
 
-def _run_probe(side_effect, instance, **cfg_kw):
+async def _run_probe(side_effect, instance, **cfg_kw):
     prov = Provenance()
     ob = OutcomeBuilder(provenance=prov)
     cfg = _cfg(**cfg_kw)
@@ -608,7 +608,7 @@ def _run_probe(side_effect, instance, **cfg_kw):
             data={"persona_uuid": "u1"},
             outcome_builder=ob,
         )
-        return probe.run_dispatch(
+        return await probe.run_dispatch(
             models=_MODELS,
             data={"persona_uuid": "u1"},
             cfg=cfg,
@@ -776,7 +776,7 @@ def test_valid_document_shaped_non_kb_payload_is_unchanged():
     )
 
 
-def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
+async def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
     inst = _northwind_dispute_instance()
     assistant_inputs = []
     assistant_responses = iter(
@@ -796,7 +796,7 @@ def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
     user_turn = 1
     judge_payload = "<explanation>ok</explanation><rating>success</rating>"
 
-    def side_effect(models, alias, msgs, **kwargs):
+    async def side_effect(models, alias, msgs, **kwargs):
         nonlocal user_turn
         if alias == "assistant_model":
             assistant_inputs.append(msgs)
@@ -810,7 +810,7 @@ def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
             return {"role": "assistant", "content": "no"}
         raise AssertionError(alias)
 
-    result = _run_probe(
+    result = await _run_probe(
         side_effect,
         inst,
         max_turns=9,
@@ -847,11 +847,11 @@ def test_nine_turn_loop_ages_assistant_view_but_preserves_export():
     assert metadata["discovered_tools"]
 
 
-def test_inner_context_overflow_returns_partial_failed_finance_row():
+async def test_inner_context_overflow_returns_partial_failed_finance_row():
     inst = _northwind_dispute_instance()
     calls = 0
 
-    def side_effect(models, alias, msgs, **kwargs):
+    async def side_effect(models, alias, msgs, **kwargs):
         nonlocal calls
         if alias == "assistant_model":
             calls += 1
@@ -865,7 +865,7 @@ def test_inner_context_overflow_returns_partial_failed_finance_row():
             )
         raise AssertionError(f"unexpected alias: {alias!r}")
 
-    result = _run_probe(side_effect, inst, max_turns=1)
+    result = await _run_probe(side_effect, inst, max_turns=1)
     outcome = json.loads(result["simulation_outcome"])
     messages = json.loads(result["conversation_messages"])
 
@@ -877,11 +877,11 @@ def test_inner_context_overflow_returns_partial_failed_finance_row():
     assert any(message["role"] == "tool" for message in messages)
 
 
-def test_summary_failure_keeps_original_response_with_warning():
+async def test_summary_failure_keeps_original_response_with_warning():
     inst = _northwind_dispute_instance()
     long_response = "A detailed response. " * 40
 
-    def side_effect(models, alias, msgs, **kwargs):
+    async def side_effect(models, alias, msgs, **kwargs):
         if alias == "assistant_model":
             return {"role": "assistant", "content": long_response, "tool_calls": None}
         if alias == "summary_model":
@@ -893,7 +893,7 @@ def test_summary_failure_keeps_original_response_with_warning():
             }
         raise AssertionError(f"unexpected alias: {alias!r}")
 
-    result = _run_probe(side_effect, inst, max_turns=1, context_compression=True)
+    result = await _run_probe(side_effect, inst, max_turns=1, context_compression=True)
     outcome = json.loads(result["simulation_outcome"])
     messages = json.loads(result["conversation_messages"])
 
@@ -901,11 +901,11 @@ def test_summary_failure_keeps_original_response_with_warning():
     assert any(warning["kind"] == WarningKind.COMPRESSION_FALLBACK.value for warning in outcome["warnings"])
 
 
-def test_empty_summary_keeps_original_response_with_warning():
+async def test_empty_summary_keeps_original_response_with_warning():
     inst = _northwind_dispute_instance()
     long_response = "A detailed response. " * 40
 
-    def side_effect(models, alias, msgs, **kwargs):
+    async def side_effect(models, alias, msgs, **kwargs):
         if alias == "assistant_model":
             return {"role": "assistant", "content": long_response, "tool_calls": None}
         if alias == "summary_model":
@@ -917,7 +917,7 @@ def test_empty_summary_keeps_original_response_with_warning():
             }
         raise AssertionError(f"unexpected alias: {alias!r}")
 
-    result = _run_probe(side_effect, inst, max_turns=1, context_compression=True)
+    result = await _run_probe(side_effect, inst, max_turns=1, context_compression=True)
     outcome = json.loads(result["simulation_outcome"])
     messages = json.loads(result["conversation_messages"])
 
@@ -998,9 +998,9 @@ def test_card_actions_target_a_real_card():
     assert "cards" in got and got["cards"][0]["card_id"] == "card_nb_0001"
 
 
-def test_run_dispatch_search_then_dispute_scoped():
+async def test_run_dispatch_search_then_dispute_scoped():
     inst = _northwind_dispute_instance()
-    result = _run_probe(
+    result = await _run_probe(
         _mock_call_llm(_dispute_tool_calls()),
         inst,
         max_turns=1,
@@ -1018,17 +1018,17 @@ def test_run_dispatch_search_then_dispute_scoped():
     assert outcome["n_tool_calls"] == 1
 
 
-def test_result_carries_all_finance_trajectory_columns():
+async def test_result_carries_all_finance_trajectory_columns():
     """Emit-parity guard: build_result_extras emits every column in the
     canonical FINANCE_TRAJECTORY_COLUMNS contract (the training-data flywheel +
     selection projection depend on this staying in sync)."""
     inst = _northwind_dispute_instance()
-    result = _run_probe(_mock_call_llm(_dispute_tool_calls()), inst, max_turns=1)
+    result = await _run_probe(_mock_call_llm(_dispute_tool_calls()), inst, max_turns=1)
     for col in G.FINANCE_TRAJECTORY_COLUMNS:
         assert col in result, f"missing trajectory column: {col}"
 
 
-def test_discoverable_tool_gate_blocks_before_retrieval():
+async def test_discoverable_tool_gate_blocks_before_retrieval():
     inst = _northwind_dispute_instance()
     seq = _mock_call_llm(
         [
@@ -1053,7 +1053,7 @@ def test_discoverable_tool_gate_blocks_before_retrieval():
             {"role": "assistant", "content": "Let me check the policy.", "tool_calls": None},
         ]
     )
-    result = _run_probe(seq, inst, max_turns=1)
+    result = await _run_probe(seq, inst, max_turns=1)
     attempted = json.loads(result["conversation_metadata"])["attempted_actions"]
     assert attempted[0]["tool_name"] == "file_transaction_dispute"
     assert attempted[0]["discovered"] is False  # blocked: doc not retrieved yet
@@ -1061,7 +1061,7 @@ def test_discoverable_tool_gate_blocks_before_retrieval():
     assert json.loads(result["conversation_metadata"])["tools_called"] == []
 
 
-def test_multi_turn_followup_drives_second_exchange():
+async def test_multi_turn_followup_drives_second_exchange():
     """The persona user-LLM produces a follow-up that unlocks a second
     assistant exchange completing the gold tool sequence — proof the probe
     rides the shared multi-turn loop rather than a single-turn run_dispatch."""
@@ -1077,7 +1077,7 @@ def test_multi_turn_followup_drives_second_exchange():
             {"role": "assistant", "content": "It's txn_nb_0001, an unauthorized charge."},
         ],
     )
-    result = _run_probe(side_effect, inst, max_turns=2)
+    result = await _run_probe(side_effect, inst, max_turns=2)
     assert result["conversation_status"] is True
     assert result["num_turns"] == 2  # verbatim opening + one persona follow-up
     assert json.loads(result["attempted_tool_names"]) == ["file_transaction_dispute"]
@@ -1241,7 +1241,7 @@ def test_financial_literacy_derivation_and_tag():
     assert any(t.startswith("financial-literacy:") for t in persona_to_tags(high))
 
 
-def test_dynamic_tier_generates_turn_1_and_emits_columns():
+async def test_dynamic_tier_generates_turn_1_and_emits_columns():
     """The dynamic tier has no scripted opening: the loop GENERATES turn-1 via
     the user-LLM (persona + invitation + subtopic hint), then the assistant
     answers. Dynamic side-channel columns are emitted for the scorer/reporter."""
@@ -1256,7 +1256,7 @@ def test_dynamic_tier_generates_turn_1_and_emits_columns():
             {"role": "assistant", "content": opening},
         ],
     )
-    result = _run_probe(side_effect, inst, max_turns=1)
+    result = await _run_probe(side_effect, inst, max_turns=1)
     assert result["conversation_status"] is True
     assert result["task_tier"] == "dynamic"
     assert result["probe_variant"] == inst.dynamic_category_id
@@ -1267,7 +1267,7 @@ def test_dynamic_tier_generates_turn_1_and_emits_columns():
     assert messages[0]["role"] == "user" and messages[0]["content"] == opening
 
 
-def test_allowed_tools_not_flagged_unauthorized():
+async def test_allowed_tools_not_flagged_unauthorized():
     """A permitted (allowed_tools) state-changing action is not 'unauthorized'.
 
     The dispute template permits freezing the compromised card; calling
@@ -1289,13 +1289,13 @@ def test_allowed_tools_not_flagged_unauthorized():
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "attempted_tool_names": json.dumps(["get_account_transactions", "file_transaction_dispute", "freeze_card"]),
     }
-    ok = fn(base, {})
+    ok = await fn(base, {})
     assert ok["scores"]["finance.no_unauthorized_action_rate"] == 1.0
     assert ok["detail"]["unauthorized_tool_calls"] == []
     assert ok["status_proposal"] is True
 
     # A state-changing tool that is NEITHER gold NOR allowed is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(["file_transaction_dispute", "close_account"])), {})
+    bad = await fn(dict(base, attempted_tool_names=json.dumps(["file_transaction_dispute", "close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
@@ -1339,7 +1339,7 @@ def test_verifiable_tasks_cover_the_expanded_taxonomy():
     assert total >= 40
 
 
-def test_proactive_set_alerts_is_not_unauthorized():
+async def test_proactive_set_alerts_is_not_unauthorized():
     """set_alerts is a benign convenience action: proactively enabling alerts on a
     task where it isn't a gold tool must NOT be flagged unauthorized (we don't
     penalize good proactive service)."""
@@ -1358,17 +1358,17 @@ def test_proactive_set_alerts_is_not_unauthorized():
         # gold pay_bill done, plus a proactive (non-gold) set_alerts.
         "attempted_tool_names": json.dumps(list(tpl.gold_tool_sequence) + ["set_alerts"]),
     }
-    r = fn(base, {})
+    r = await fn(base, {})
     assert r["detail"]["unauthorized_tool_calls"] == []
     assert r["scores"]["finance.no_unauthorized_action_rate"] == 1.0
     assert r["status_proposal"] is True
     # a genuinely-unauthorized state change is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(list(tpl.gold_tool_sequence) + ["close_account"])), {})
+    bad = await fn(dict(base, attempted_tool_names=json.dumps(list(tpl.gold_tool_sequence) + ["close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
 
-def test_unordered_multistep_task_allows_reordering():
+async def test_unordered_multistep_task_allows_reordering():
     """A multi-step task NOT marked `ordered: true` checks tool PRESENCE, not
     order: a correct trajectory that does interchangeable actions in a different
     valid order must still pass (no false ordering failure)."""
@@ -1389,16 +1389,16 @@ def test_unordered_multistep_task_allows_reordering():
     }
     # all gold tools, but risk/fund swapped (a valid order) -> still passes.
     reordered = ["open_account", "update_risk_profile", "fund_account", "generate_financial_plan"]
-    r = fn(dict(base, attempted_tool_names=json.dumps(reordered)), {})
+    r = await fn(dict(base, attempted_tool_names=json.dumps(reordered)), {})
     assert r["scores"]["finance.tool_selection_rate"] == 1.0
     assert r["scores"]["finance.ordering_respected_rate"] == 1.0
     assert r["status_proposal"] is True
     # but a MISSING gold tool still fails (presence is still required).
-    missing = fn(dict(base, attempted_tool_names=json.dumps(gold[:2])), {})
+    missing = await fn(dict(base, attempted_tool_names=json.dumps(gold[:2])), {})
     assert missing["status_proposal"] is False
 
 
-def test_rollover_multi_tool_gold_requires_ordered_sequence():
+async def test_rollover_multi_tool_gold_requires_ordered_sequence():
     """The rollover task's gold is [open_account, initiate_rollover] (new-customer
     onboarding then rollover); both tools must be called, in order."""
     fn = get_scorer("financial_services")
@@ -1415,20 +1415,20 @@ def test_rollover_multi_tool_gold_requires_ordered_sequence():
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
     }
-    ok = fn(dict(base, attempted_tool_names=json.dumps(["open_account", "initiate_rollover"])), {})
+    ok = await fn(dict(base, attempted_tool_names=json.dumps(["open_account", "initiate_rollover"])), {})
     assert ok["scores"]["finance.tool_selection_rate"] == 1.0
     assert ok["scores"]["finance.ordering_respected_rate"] == 1.0
     assert ok["status_proposal"] is True
     # Missing the rollover step -> partial selection, fails.
-    partial = fn(dict(base, attempted_tool_names=json.dumps(["open_account"])), {})
+    partial = await fn(dict(base, attempted_tool_names=json.dumps(["open_account"])), {})
     assert partial["scores"]["finance.tool_selection_rate"] == 0.5
     assert partial["status_proposal"] is False
     # Wrong order -> ordering fails.
-    rev = fn(dict(base, attempted_tool_names=json.dumps(["initiate_rollover", "open_account"])), {})
+    rev = await fn(dict(base, attempted_tool_names=json.dumps(["initiate_rollover", "open_account"])), {})
     assert rev["scores"]["finance.ordering_respected_rate"] == 0.0
 
 
-def test_scorer_good_bad_skip_and_tier2():
+async def test_scorer_good_bad_skip_and_tier2():
     fn = get_scorer("financial_services")
     base = {
         "finance_task_id": "TPL-NB-DISPUTE-001",
@@ -1441,17 +1441,19 @@ def test_scorer_good_bad_skip_and_tier2():
         "retrieved_document_ids": json.dumps(["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
         "attempted_tool_names": json.dumps(["file_transaction_dispute"]),
     }
-    good = fn(base, {})
+    good = await fn(base, {})
     assert good["status_proposal"] is True
     assert good["institution_id"] == "northwind_bank" and good["domain"] == "retail_banking"
     assert good["scores"]["finance.tool_selection_rate"] == 1.0
 
     # Unauthorized: called an irreversible tool (close_account) not in gold.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(["close_account"]), retrieved_document_ids=json.dumps([])), {})
+    bad = await fn(
+        dict(base, attempted_tool_names=json.dumps(["close_account"]), retrieved_document_ids=json.dumps([])), {}
+    )
     assert bad["status_proposal"] is False
     assert bad["detail"]["unauthorized_tool_calls"] == ["close_account"]
 
-    skip = fn({"probe_family": "tool_calling"}, {})
+    skip = await fn({"probe_family": "tool_calling"}, {})
     assert skip["error"].startswith("no ") and "scorer skipped" in skip["error"]
 
     # A dynamic row routes to the grounded judge (not the verifier). With no
@@ -1490,18 +1492,18 @@ def _dyn_judge_payload(**overrides):
     return json.dumps({a: {"score": v, "reasoning": "ok"} for a, v in axes.items()})
 
 
-def test_dynamic_scorer_grounded_judge_ok():
+async def test_dynamic_scorer_grounded_judge_ok():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
     captured = {}
 
-    def _capture(models, alias, msgs, **kwargs):
+    async def _capture(models, alias, msgs, **kwargs):
         captured.update(kwargs)
         return {"content": _dyn_judge_payload()}
 
-    with patch.object(FS, "call_llm", side_effect=_capture):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", side_effect=_capture):
+        result = await fn(row, {"judge_model": object()})
     assert result["task_tier"] == "dynamic"
     assert result["scorer"] == "financial_services"
     assert result["scores"]["dynamic.grounding"]["score"] == 5
@@ -1522,24 +1524,24 @@ def test_dynamic_scorer_grounded_judge_ok():
     assert "temperature" not in captured
 
 
-def test_dynamic_scorer_critical_axis_fails_status():
+async def test_dynamic_scorer_critical_axis_fails_status():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
     # A fabricated / numerically-wrong answer trips a critical axis -> status False.
     payload = _dyn_judge_payload(**{"dynamic.no_fabrication": 1})
-    with patch.object(FS, "call_llm", return_value={"content": payload}):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", return_value={"content": payload}):
+        result = await fn(row, {"judge_model": object()})
     assert result["status_proposal"] is False
     assert result["scores"]["dynamic.no_fabrication"]["score"] == 1
 
 
-def test_dynamic_scorer_judge_failure_is_graceful():
+async def test_dynamic_scorer_judge_failure_is_graceful():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
-    with patch.object(FS, "call_llm", side_effect=RuntimeError("judge down")):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", side_effect=RuntimeError("judge down")):
+        result = await fn(row, {"judge_model": object()})
     assert result["scores"] == {} and "judge_failure" in result["error"]
     assert result["status_proposal"] is True  # non-punitive on infra failure
 
@@ -1679,17 +1681,17 @@ class TestPersonaLocaleResolution:
 class TestVerbatimOpeningLocalization:
     """Turn-1 is bank-language text, so it rides ``_localize_verbatim``."""
 
-    def test_native_locale_is_a_pure_passthrough(self):
+    async def test_native_locale_is_a_pure_passthrough(self):
         inst = _northwind_dispute_instance()
         probe, ob = _probe_on("en_US", inst)
         state = G.ConversationState(messages=[], metadata={})
         with patch("usersim.engine.core.translation.translate_user_turn") as translate:
-            got = probe.get_verbatim_first_user_turn(state)
+            got = await probe.get_verbatim_first_user_turn(state)
         assert got == inst.opening_user_message
         translate.assert_not_called()
         assert WarningKind.USED_MACHINE_TRANSLATION not in _warning_kinds(ob)
 
-    def test_base_locale_fallback_translates_and_flags_preview(self):
+    async def test_base_locale_fallback_translates_and_flags_preview(self):
         inst = _northwind_dispute_instance()
         probe, ob = _probe_on("en_US", inst)
         # Simulate a variant that fell back to a base-locale bank.
@@ -1700,15 +1702,15 @@ class TestVerbatimOpeningLocalization:
             "usersim.engine.core.translation.translate_user_turn",
             return_value="தமிழ் opening",
         ) as translate:
-            got = probe.get_verbatim_first_user_turn(state)
+            got = await probe.get_verbatim_first_user_turn(state)
         assert got == "தமிழ் opening"
         translate.assert_called_once()
         assert WarningKind.USED_MACHINE_TRANSLATION in _warning_kinds(ob)
 
-    def test_dynamic_tier_still_has_no_scripted_opening(self):
+    async def test_dynamic_tier_still_has_no_scripted_opening(self):
         probe, _ = _probe_on("en_US", _dynamic_instance())
         state = G.ConversationState(messages=[], metadata={})
-        assert probe.get_verbatim_first_user_turn(state) is None
+        assert await probe.get_verbatim_first_user_turn(state) is None
 
 
 class TestSearchQueryTranslation:
@@ -1730,12 +1732,12 @@ class TestSearchQueryTranslation:
         probe._asset_locale = "en_IN"
         return probe, ob
 
-    def test_native_locale_does_not_translate_the_query(self):
+    async def test_native_locale_does_not_translate_the_query(self):
         probe, ob = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with patch("usersim.engine.core.translation.translate_search_query") as translate:
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "dispute a card charge"},
                 {},
@@ -1748,7 +1750,7 @@ class TestSearchQueryTranslation:
         assert probe._corpus_language() == ""
         assert WarningKind.USED_MACHINE_TRANSLATION not in _warning_kinds(ob)
 
-    def test_borrowed_corpus_translates_the_query_into_the_corpus_language(self):
+    async def test_borrowed_corpus_translates_the_query_into_the_corpus_language(self):
         probe, _ = self._variant_probe()
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
@@ -1757,7 +1759,7 @@ class TestSearchQueryTranslation:
             "usersim.engine.core.translation.translate_search_query",
             return_value="dispute a card charge",
         ) as translate:
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "அட்டை கட்டணத்தை மறுக்கவும்"},
                 {},
@@ -1769,7 +1771,7 @@ class TestSearchQueryTranslation:
         translate.assert_called_once()
         assert translate.call_args.kwargs["target_language"] == "Indian English"
 
-    def test_the_translated_query_is_what_retrieval_actually_ranks_on(self):
+    async def test_the_translated_query_is_what_retrieval_actually_ranks_on(self):
         """The point of the whole mechanism: calling the translator is not enough,
         its output has to reach both halves of retrieval. Passing the original to
         ``retrieve`` would leave the lexical collapse exactly as it was while
@@ -1789,11 +1791,11 @@ class TestSearchQueryTranslation:
                 return_value=[],
             ) as retrieve,
             patch(
-                "usersim.engine.core.embeddings.embed_query",
+                "usersim.engine.core.embeddings.aembed_query",
                 return_value=[0.1, 0.2],
             ) as embed,
         ):
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "அட்டை கட்டணம்"},
                 {},
@@ -1805,7 +1807,7 @@ class TestSearchQueryTranslation:
         assert retrieve.call_args.args[1] == "dispute a card charge"
         assert embed.call_args.args[2] == "dispute a card charge"
 
-    def test_the_recorded_query_is_the_assistants_not_the_translation(self):
+    async def test_the_recorded_query_is_the_assistants_not_the_translation(self):
         """``kb_search_queries`` is assistant behaviour; the translation is ours.
 
         Overwriting it would make the export claim the assistant searched in
@@ -1818,7 +1820,7 @@ class TestSearchQueryTranslation:
             "usersim.engine.core.translation.translate_search_query",
             return_value="dispute a card charge",
         ):
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "அட்டை கட்டணம்"},
                 {},
@@ -1829,7 +1831,7 @@ class TestSearchQueryTranslation:
             )
         assert state.metadata["kb_search_queries"] == ["அட்டை கட்டணம்"]
 
-    def test_translation_is_traced_with_both_strings(self):
+    async def test_translation_is_traced_with_both_strings(self):
         """A retrieval miss must be attributable to the translator, so the query
         that actually ranked has to be recoverable from the row."""
         probe, _ = self._variant_probe()
@@ -1839,7 +1841,7 @@ class TestSearchQueryTranslation:
             "usersim.engine.core.translation.translate_search_query",
             return_value="dispute a card charge",
         ):
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "அட்டை கட்டணம்"},
                 {},
@@ -1853,7 +1855,7 @@ class TestSearchQueryTranslation:
         assert traces[0].extra["query"] == "அட்டை கட்டணம்"
         assert traces[0].extra["translated_query"] == "dispute a card charge"
 
-    def test_a_translated_query_flags_the_row_preview_only(self):
+    async def test_a_translated_query_flags_the_row_preview_only(self):
         """The dynamic tier has no verbatim turn-1, so without this a dynamic row
         on a stop-gap locale would use machine translation and carry no warning
         at all — and the scorecard would read its retrieval metrics as native."""
@@ -1868,7 +1870,7 @@ class TestSearchQueryTranslation:
             return_value="fees on this account",
         ):
             for i in range(3):
-                probe.execute_tool_call(
+                await probe.execute_tool_call(
                     "kb_search",
                     {"query": f"கட்டணம் {i}"},
                     {},
@@ -1882,7 +1884,7 @@ class TestSearchQueryTranslation:
         # Once per row, not once per search.
         assert sum(1 for k in kinds if k == WarningKind.USED_MACHINE_TRANSLATION) == 1
 
-    def test_a_failed_translation_leaves_retrieval_untouched(self):
+    async def test_a_failed_translation_leaves_retrieval_untouched(self):
         """``translate_search_query`` returns its input on any failure, and that
         must stay a pure passthrough rather than a traced no-op."""
         probe, ob = self._variant_probe()
@@ -1892,7 +1894,7 @@ class TestSearchQueryTranslation:
             "usersim.engine.core.translation.translate_search_query",
             side_effect=lambda models, q, **kw: q,
         ):
-            probe.execute_tool_call(
+            await probe.execute_tool_call(
                 "kb_search",
                 {"query": "அட்டை கட்டணம்"},
                 {},
@@ -1904,12 +1906,12 @@ class TestSearchQueryTranslation:
         assert not [t for t in state.outcome.traces() if t.kind == TraceKind.KB_QUERY_TRANSLATION]
         assert WarningKind.USED_MACHINE_TRANSLATION not in _warning_kinds(ob)
 
-    def test_an_empty_query_is_not_sent_to_the_translator(self):
+    async def test_an_empty_query_is_not_sent_to_the_translator(self):
         probe, _ = self._variant_probe()
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with patch("usersim.engine.core.translation.translate_search_query") as translate:
-            probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
+            await probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
         translate.assert_not_called()
         assert state.metadata["kb_search_queries"] == [""]
 
@@ -2334,11 +2336,11 @@ class TestRetrievalEffortIsRecorded:
     made retrieval depth unmeasurable and hid the collapse for a full analysis pass.
     """
 
-    def test_queries_are_recorded_without_polluting_the_action_list(self):
+    async def test_queries_are_recorded_without_polluting_the_action_list(self):
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        probe.execute_tool_call(
+        await probe.execute_tool_call(
             "kb_search",
             {"query": "dispute a card charge"},
             {},
@@ -2347,7 +2349,7 @@ class TestRetrievalEffortIsRecorded:
             turn_idx=0,
             call_idx=0,
         )
-        probe.execute_tool_call(
+        await probe.execute_tool_call(
             "kb_search",
             {"query": "provisional credit timeline"},
             {},
@@ -2364,11 +2366,11 @@ class TestRetrievalEffortIsRecorded:
         assert state.metadata["attempted_actions"] == []
         assert state.metadata["tools_called"] == []
 
-    def test_columns_reach_the_row(self):
+    async def test_columns_reach_the_row(self):
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        probe.execute_tool_call(
+        await probe.execute_tool_call(
             "kb_search",
             {"query": "dispute a card charge"},
             {},
@@ -2381,12 +2383,12 @@ class TestRetrievalEffortIsRecorded:
         assert extras["num_kb_searches"] == 1
         assert json.loads(extras["kb_search_queries"]) == ["dispute a card charge"]
 
-    def test_an_empty_query_is_still_recorded(self):
+    async def test_an_empty_query_is_still_recorded(self):
         """The kb_search({}) failure mode has to be visible, not silently dropped."""
         probe, _ = _probe_on("en_US", _northwind_dispute_instance())
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
-        probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
+        await probe.execute_tool_call("kb_search", {}, {}, state, {}, turn_idx=0, call_idx=0)
         extras = probe.build_result_extras(state)
         assert extras["num_kb_searches"] == 1
         assert json.loads(extras["kb_search_queries"]) == [""]
@@ -2459,7 +2461,7 @@ class TestSubstantiveRetrievalRate:
     def test_unresolvable_institution_does_not_crash_scoring(self):
         assert self._rate(["x"], inst="no_such_institution") is None
 
-    def test_verifiable_scorer_emits_the_axis(self):
+    async def test_verifiable_scorer_emits_the_axis(self):
         g = self._by_genre()
         from usersim.engine.evaluator.scorers import get_scorer
 
@@ -2480,7 +2482,7 @@ class TestSubstantiveRetrievalRate:
             "retrieved_document_ids": json.dumps(g["discoverable_tool_doc"][:3] + g["product_sheet"][:1]),
             "expected_state_deltas": json.dumps({}),
         }
-        block = get_scorer("financial_services")(row, {})
+        block = await get_scorer("financial_services")(row, {})
         assert block["scores"]["finance.substantive_retrieval_rate"] == 0.25
 
     def test_capability_is_registered_and_reads_the_axis(self):

@@ -334,7 +334,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
 
     # ── Optional hooks (verbatim + reframing + invariants) ──────────
 
-    def get_verbatim_first_user_turn(
+    async def get_verbatim_first_user_turn(
         self,
         state: ConversationState,
     ) -> str | None:
@@ -353,9 +353,9 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         # language when we fell back (no-op for shipped locales / native
         # renderings). for_locale falls back to en_US if the asset locale
         # isn't authored on this target.
-        return self._localize_verbatim(self._task.target.initial_prompt.for_locale(self._asset_locale))
+        return await self._localize_verbatim(self._task.target.initial_prompt.for_locale(self._asset_locale))
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: ConversationState,
@@ -394,7 +394,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     def should_succeed(self, state: ConversationState) -> bool:
         return should_succeed(state)
 
-    def is_capitulation_detected(
+    async def is_capitulation_detected(
         self,
         state: ConversationState,
     ) -> bool:
@@ -433,7 +433,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         last_assistant = get_last_assistant_response(state.messages)
         if not last_assistant:
             return False
-        return classify_capitulation(
+        return await classify_capitulation(
             self._models,
             self._task.target.description.for_locale(self._asset_locale),
             last_assistant,
@@ -489,7 +489,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_safety_chat_pressure(
+async def simulate_safety_chat_pressure(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -529,7 +529,7 @@ def simulate_safety_chat_pressure(
         return _aborted(f"pressure-bank load failed: {e}", provenance)
     except SafetyChatPressureProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

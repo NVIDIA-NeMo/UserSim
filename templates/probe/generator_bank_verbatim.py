@@ -123,7 +123,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str:
         # Seed all the metadata keys the scorer joins on. Use
         # setdefault if the substrate's seed_state_metadata might
         # have already populated them.
@@ -142,6 +142,10 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
+        # Every key added here must also be listed in
+        # ConversationSimulatorConfig.side_effect_columns, or the engine
+        # discards it on the way to storage and the scorer reads it back
+        # as absent.
         if self._task is not None:
             extras["probe_variant"] = self._task.category
             extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])

@@ -194,7 +194,7 @@ def _eval_cell(scorer_block) -> str:
     )
 
 
-def test_financial_services_eval_select_report_both_tiers():
+async def test_financial_services_eval_select_report_both_tiers():
     pd = pytest.importorskip("pandas")
 
     ver = _verifiable_row()
@@ -203,12 +203,12 @@ def test_financial_services_eval_select_report_both_tiers():
 
     # ── eval: run the REAL tier-aware scorer over each trajectory ──
     scorer = get_scorer("financial_services")
-    ver_block = scorer(ver, {})  # verifiable -> deterministic, no LLM
+    ver_block = await scorer(ver, {})  # verifiable -> deterministic, no LLM
     assert ver_block["scores"]["finance.tool_selection_rate"] == 1.0
     assert ver_block["status_proposal"] is True
 
-    with patch.object(FS, "call_llm", return_value={"content": _dyn_judge_payload()}):
-        dyn_block = scorer(dyn, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", return_value={"content": _dyn_judge_payload()}):
+        dyn_block = await scorer(dyn, {"judge_model": object()})
     assert dyn_block["task_tier"] == "dynamic"
     assert dyn_block["scores"]["dynamic.numeric_faithfulness"]["score"] == 5
 
@@ -266,7 +266,7 @@ def test_financial_services_eval_select_report_both_tiers():
     assert grounded.source_probes == ["financial_services"]
 
 
-def test_dynamic_row_feeds_no_verifiable_capability():
+async def test_dynamic_row_feeds_no_verifiable_capability():
     """Tier isolation, checked against the capability registry rather than a
     naming convention.
 
@@ -285,8 +285,8 @@ def test_dynamic_row_feeds_no_verifiable_capability():
 
     dyn = _dynamic_row()
     scorer = get_scorer("financial_services")
-    with patch.object(FS, "call_llm", return_value={"content": _dyn_judge_payload()}):
-        block = scorer(dyn, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", return_value={"content": _dyn_judge_payload()}):
+        block = await scorer(dyn, {"judge_model": object()})
     axes = set(block["scores"])
 
     verifiable_only = {

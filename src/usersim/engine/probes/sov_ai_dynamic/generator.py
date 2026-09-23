@@ -278,7 +278,7 @@ class SovAiDynamicProbe(BankBackedProbe):
         state.metadata["taxonomy_id"] = self._task.bank_id
         state.metadata["taxonomy_version"] = self._task.bank_version
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: ConversationState,
@@ -324,7 +324,7 @@ SovAiDynamicProbe._pin_bank_version = _pin_bank_version_override  # type: ignore
 # ---------------------------------------------------------------------------
 
 
-def simulate_sov_ai_dynamic(
+async def simulate_sov_ai_dynamic(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -367,7 +367,7 @@ def simulate_sov_ai_dynamic(
         )
     except SovAiDynamicProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

@@ -10,6 +10,31 @@ from typing import Literal
 from data_designer.config.base import SingleColumnConfig
 from pydantic import Field
 
+MODEL_USER = "user_model"
+MODEL_ASSISTANT = "assistant_model"
+MODEL_API_RESPONSE = "api_response_model"
+MODEL_JUDGE = "judge_model"
+MODEL_SUMMARY = "summary_model"
+
+#: Every chat alias the simulator resolves from the model registry.
+MODEL_ALIASES = [
+    MODEL_USER,
+    MODEL_ASSISTANT,
+    MODEL_API_RESPONSE,
+    MODEL_JUDGE,
+    MODEL_SUMMARY,
+]
+
+#: The subset a run cannot start without. ``MODEL_SUMMARY`` is absent
+#: because the engine falls back to ``MODEL_USER`` for summaries, and the
+#: embedding alias because dense retrieval falls back to lexical.
+REQUIRED_MODEL_ALIASES = [
+    MODEL_USER,
+    MODEL_ASSISTANT,
+    MODEL_API_RESPONSE,
+    MODEL_JUDGE,
+]
+
 
 class ConversationSimulatorConfig(SingleColumnConfig):
     """Configuration for the unified conversation simulator plugin.
@@ -131,6 +156,21 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # Reproducibility
     random_seed: int | None = None
 
+    def get_model_aliases(self) -> list[str]:
+        """The aliases a run cannot start without.
+
+        A conversation needs all four: the simulated user, the assistant
+        under test, tool-call responses, and the in-sim judge. Declaring
+        them here means an unreachable endpoint or a typo surfaces in the
+        startup health check rather than partway through a paid run.
+
+        ``summary_model`` and ``finance_embedding_model_alias`` are left
+        out on purpose. Both are optional at run time -- summaries fall
+        back to the user model, dense retrieval falls back to lexical --
+        and the health check treats every alias it is given as required.
+        """
+        return list(REQUIRED_MODEL_ALIASES)
+
     @property
     def required_columns(self) -> list[str]:
         return [
@@ -169,4 +209,42 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             # idempotent re-runs. See core/identity.py.
             "persona_uuid",
             "trajectory_id",
+            # Probe-specific side channels. Each is written by one probe's
+            # ``build_result_extras`` and read back by that probe's scorer,
+            # which treats an absent value as "nothing to score" rather than
+            # as an error. The engine writes the configured column plus the
+            # names declared here and silently discards anything else, so an
+            # undeclared column is computed and then dropped, and the probe
+            # scores as unscoreable. They are declared for every run rather
+            # than per probe because the declaration is read once, before
+            # any row reveals which probe produced it; rows from other
+            # probes simply leave them empty.
+            "query_id",
+            "sovereign_facts_probed",
+            "probing_categories_explored",
+            "probing_subtopic_hints_used",
+            "action_request_id",
+            "sub_protocol",
+            "target_request_id",
+            "strategy_id",
+            "reframings_used",
+            "capitulation_checks",
+            "finance_task_id",
+            "task_type",
+            "task_tier",
+            "task_contract_version",
+            "taxonomy_version",
+            "domain",
+            "region",
+            "institution_id",
+            "institution_type",
+            "dynamic_category_id",
+            "dynamic_subtopic_hint",
+            "expected_state_deltas",
+            "gold_document_ids",
+            "gold_tool_sequence",
+            "retrieved_document_ids",
+            "kb_search_queries",
+            "num_kb_searches",
+            "attempted_tool_names",
         ]

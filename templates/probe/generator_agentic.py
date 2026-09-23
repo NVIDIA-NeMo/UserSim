@@ -123,7 +123,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     def get_tools_for_assistant(self) -> list | None:
         return self._api_tools
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -134,6 +134,10 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
+        # Every key added here must also be listed in
+        # ConversationSimulatorConfig.side_effect_columns, or the engine
+        # discards it on the way to storage and the scorer reads it back
+        # as absent.
         if self._task is not None:
             extras["probe_variant"] = f"{self._task.sub_protocol}::demo"
             extras["action_request_id"] = self._task.id
@@ -146,7 +150,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     def should_succeed(self, state: Any) -> bool:
         return bool(state.metadata.get("action_request_id"))
 
-    def run_dispatch(
+    async def run_dispatch(
         self,
         *,
         models: dict[str, Any],
@@ -171,7 +175,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         )
         # Multi-assistant-turn tool-interception loop.
         # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
-        # real implementation (call_llm wrapping, tool-call extraction,
+        # real implementation (acall_llm wrapping, tool-call extraction,
         # mock-response injection, infrastructure-failure handling).
         outcome = builder.finalize(status=OutcomeStatus.OK)
         result = make_result(

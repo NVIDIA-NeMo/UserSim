@@ -44,6 +44,18 @@ _REQUIRED_PROBE_METHODS = (
     "get_assistant_system_prompt",
 )
 
+#: Hooks the loop awaits. Overriding one with a plain ``def`` registers
+#: fine and then raises ``TypeError`` mid-conversation, once the loop tries
+#: to await whatever it returned.
+_AWAITED_PROBE_HOOKS = (
+    "after_assistant_turn",
+    "get_verbatim_first_user_turn",
+    "format_followup_user_instructions",
+    "is_capitulation_detected",
+    "execute_tool_call",
+    "run_dispatch",
+)
+
 
 def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
@@ -104,6 +116,19 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                 f"calls it on every turn and the base version raises."
             )
 
+    import inspect
+
+    for hook in _AWAITED_PROBE_HOOKS:
+        impl = getattr(cls, hook, None)
+        if impl is None or getattr(BaseProbe, hook, None) is impl:
+            continue
+        if not inspect.iscoroutinefunction(impl):
+            problems.append(
+                f"{cls.__qualname__}.{hook} must be declared with 'async def'. "
+                f"The loop awaits this hook, so a plain 'def' override raises "
+                f"TypeError partway through a conversation."
+            )
+
     assets = probe_assets_dir(label)
     if not assets.is_dir():
         problems.append(
@@ -121,7 +146,7 @@ def assert_probe_conforms(probe: str | type) -> None:
         raise AssertionError(f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems))
 
 
-def scorer_conformance_problems(
+async def scorer_conformance_problems(
     name: str,
     *,
     sample_row: dict[str, Any] | None = None,
@@ -132,7 +157,12 @@ def scorer_conformance_problems(
     the evaluator expects. The default is an empty row, which a scorer must
     tolerate: the evaluator calls it for trajectories that may be missing
     any given field.
+
+    Awaitable, because a scorer is: the evaluator awaits it, so checking it
+    means awaiting it here too.
     """
+    import inspect
+
     from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
 
     if name not in _REGISTRY:
@@ -147,8 +177,13 @@ def scorer_conformance_problems(
     if not callable(fn):
         return [f"{name!r} is registered to a non-callable: {fn!r}"]
 
+    if not inspect.iscoroutinefunction(fn):
+        return [
+            f"{name!r} is not an async function. The evaluator awaits every scorer, so declare it with 'async def'."
+        ]
+
     try:
-        result = fn(dict(sample_row or {}), {})
+        result = await fn(dict(sample_row or {}), {})
     except Exception as exc:
         problems.append(
             f"raised {type(exc).__name__} on an empty row: {exc}. The "
@@ -164,12 +199,12 @@ def scorer_conformance_problems(
     return problems
 
 
-def assert_scorer_conforms(
+async def assert_scorer_conforms(
     name: str,
     *,
     sample_row: dict[str, Any] | None = None,
 ) -> None:
     """Raise ``AssertionError`` listing every conformance problem at once."""
-    problems = scorer_conformance_problems(name, sample_row=sample_row)
+    problems = await scorer_conformance_problems(name, sample_row=sample_row)
     if problems:
         raise AssertionError(f"scorer {name!r} does not conform:\n  - " + "\n  - ".join(problems))

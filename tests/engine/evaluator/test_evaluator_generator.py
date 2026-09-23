@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 from usersim.engine.evaluator import scorers as scorers_module
 from usersim.engine.evaluator.config import (
@@ -81,7 +81,7 @@ def _build_generator(
     # Stub _call_judge with canned responses keyed by alias.
     responses = judge_responses or {}
 
-    def _stub_call_judge(models, judge_alias, prompt, schema_model, max_tokens):
+    async def _stub_call_judge(models, judge_alias, prompt, schema_model, max_tokens):
         return responses.get(judge_alias, {})
 
     gen._call_judge = _stub_call_judge  # type: ignore[method-assign]
@@ -99,7 +99,7 @@ def _ok_judges() -> list[JudgeSpecConfig]:
 
 
 class TestNoAssistantMessages:
-    def test_short_circuits_with_skipped_record(self) -> None:
+    async def test_short_circuits_with_skipped_record(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
@@ -113,7 +113,7 @@ class TestNoAssistantMessages:
             "persona": json.dumps({"first_name": "A", "last_name": "B"}),
             "probe_family": "general_open_ended",
         }
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         assert "eval_v2" in out
         parsed = json.loads(out["eval_v2"])
         assert parsed["skipped"] is True
@@ -123,14 +123,14 @@ class TestNoAssistantMessages:
 
 
 class TestFailedSimulation:
-    def test_partial_failed_trajectory_is_not_quality_scored(self) -> None:
+    async def test_partial_failed_trajectory_is_not_quality_scored(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
             axes=["helpfulness"],
         )
         gen = _build_generator(cfg)
-        gen._call_judge = MagicMock(  # type: ignore[method-assign]
+        gen._call_judge = AsyncMock(  # type: ignore[method-assign]
             side_effect=AssertionError("failed trajectory must not be judged")
         )
         data = {
@@ -150,7 +150,7 @@ class TestFailedSimulation:
             "probe_family": "tool_calling",
         }
 
-        parsed = json.loads(gen.generate(data)["eval_v2"])
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
 
         assert parsed["skipped"] is True
         assert parsed["skipped_reason"] == "simulation_failed"
@@ -173,7 +173,7 @@ class TestPartialReRunSkip:
             "conversation_language": "English",
         }
 
-    def test_matching_envelope_skips_judges(self) -> None:
+    async def test_matching_envelope_skips_judges(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
@@ -206,7 +206,7 @@ class TestPartialReRunSkip:
         }
         data = self._trajectory_with_assistant()
         data["eval_v2"] = json.dumps(existing)
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         # The old reasoning survives — judges were not re-run.
         assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "old"
@@ -214,7 +214,7 @@ class TestPartialReRunSkip:
         assert parsed["skipped"] is True
         assert parsed["skipped_reason"] == "envelope_match"
 
-    def test_changed_prompt_version_invalidates(self) -> None:
+    async def test_changed_prompt_version_invalidates(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
@@ -244,14 +244,14 @@ class TestPartialReRunSkip:
         }
         data = self._trajectory_with_assistant()
         data["eval_v2"] = json.dumps(existing)
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         # Fresh judging happened.
         assert parsed["skipped"] is False
         assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
         assert parsed["envelope"]["prompt_version"] == "v1.1"
 
-    def test_skip_if_existing_false_forces_rerun(self) -> None:
+    async def test_skip_if_existing_false_forces_rerun(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
@@ -281,7 +281,7 @@ class TestPartialReRunSkip:
         }
         data = self._trajectory_with_assistant()
         data["eval_v2"] = json.dumps(existing)
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         # Fresh judges ran despite envelope match.
         assert parsed["skipped"] is False
@@ -302,7 +302,7 @@ class TestScorerDispatch:
         scorers_module.clear_registry()
         scorers_module._REGISTRY.update(self._snapshot)
 
-    def test_unknown_scorer_recorded_as_error_not_raised(self) -> None:
+    async def test_unknown_scorer_recorded_as_error_not_raised(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=_ok_judges(),
@@ -328,15 +328,15 @@ class TestScorerDispatch:
             "locale": "en_US",
             "conversation_language": "English",
         }
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         assert "does_not_exist" in parsed["scorers"]
         assert "error" in parsed["scorers"]["does_not_exist"]
 
-    def test_registered_scorer_runs(self) -> None:
+    async def test_registered_scorer_runs(self) -> None:
         captured: list[dict] = []
 
-        def my_scorer(traj: dict, models: dict) -> dict:
+        async def my_scorer(traj: dict, models: dict) -> dict:
             captured.append(traj)
             return {"my_metric": 0.42}
 
@@ -367,7 +367,7 @@ class TestScorerDispatch:
             "locale": "en_US",
             "conversation_language": "English",
         }
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         assert parsed["scorers"]["my_scorer"] == {"my_metric": 0.42}
         # The scorer received a deserialized trajectory row.
@@ -435,10 +435,10 @@ class TestScorerColumnPassthrough:
             data[key] = f"<probe-specific:{key}>"
         return data
 
-    def test_all_probe_specific_columns_reach_scorer(self) -> None:
+    async def test_all_probe_specific_columns_reach_scorer(self) -> None:
         seen: dict[str, dict] = {}
 
-        def spy(traj: dict, models: dict) -> dict:
+        async def spy(traj: dict, models: dict) -> dict:
             seen["traj_row"] = traj
             return {"spy": True}
 
@@ -457,7 +457,7 @@ class TestScorerColumnPassthrough:
                 "judge_b": {"helpfulness": {"score": 4, "reasoning": "ok"}},
             },
         )
-        gen.generate(self._make_data_with_probe_columns())
+        await gen.agenerate(self._make_data_with_probe_columns())
 
         traj_row = seen["traj_row"]
         for key in self.PROBE_SPECIFIC_KEYS:
@@ -469,7 +469,7 @@ class TestScorerColumnPassthrough:
             )
             assert traj_row[key] == f"<probe-specific:{key}>"
 
-    def test_explicit_projection_wins_over_passthrough(self) -> None:
+    async def test_explicit_projection_wins_over_passthrough(self) -> None:
         """Decoded ``conversation_messages`` / ``persona`` / etc. take precedence.
 
         The pass-through merge spreads ``data`` first, then re-applies
@@ -480,7 +480,7 @@ class TestScorerColumnPassthrough:
         """
         seen: dict[str, dict] = {}
 
-        def spy(traj: dict, models: dict) -> dict:
+        async def spy(traj: dict, models: dict) -> dict:
             seen["traj_row"] = traj
             return {"spy": True}
 
@@ -499,7 +499,7 @@ class TestScorerColumnPassthrough:
                 "judge_b": {"helpfulness": {"score": 4, "reasoning": "ok"}},
             },
         )
-        gen.generate(self._make_data_with_probe_columns())
+        await gen.agenerate(self._make_data_with_probe_columns())
 
         traj_row = seen["traj_row"]
         # Decoded forms, not raw JSON strings.
@@ -510,7 +510,7 @@ class TestScorerColumnPassthrough:
         assert traj_row["language"] == "English"
         assert traj_row["locale"] == "en_US"
 
-    def test_unknown_keys_passed_through_unchanged(self) -> None:
+    async def test_unknown_keys_passed_through_unchanged(self) -> None:
         """A future probe's new side-channel column reaches scorers without code change.
 
         The whole point of pass-through merge over a static allow-list:
@@ -519,7 +519,7 @@ class TestScorerColumnPassthrough:
         """
         seen: dict[str, dict] = {}
 
-        def spy(traj: dict, models: dict) -> dict:
+        async def spy(traj: dict, models: dict) -> dict:
             seen["traj_row"] = traj
             return {"spy": True}
 
@@ -543,7 +543,7 @@ class TestScorerColumnPassthrough:
         data["future_probe_side_channel"] = ["a", "b", "c"]
         data["another_brand_new_column"] = {"nested": True}
 
-        gen.generate(data)
+        await gen.agenerate(data)
 
         traj_row = seen["traj_row"]
         assert traj_row["future_probe_side_channel"] == ["a", "b", "c"]
@@ -551,7 +551,7 @@ class TestScorerColumnPassthrough:
 
 
 class TestEnvelope:
-    def test_envelope_includes_resolved_families(self) -> None:
+    async def test_envelope_includes_resolved_families(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
             judges=[
@@ -579,7 +579,7 @@ class TestEnvelope:
             "locale": "en_US",
             "conversation_language": "English",
         }
-        out = gen.generate(data)
+        out = await gen.agenerate(data)
         parsed = json.loads(out["eval_v2"])
         env = parsed["envelope"]
         assert env["judge_aliases"] == ["judge_a", "judge_b"]

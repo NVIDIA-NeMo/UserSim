@@ -190,7 +190,7 @@ unchanged: the fallback is a call-time redirect, **not** a mutation of the
 **Verbatim turn-1 translation.** When a probe fell back
 (`self._asset_locale != self._locale`), `BankBackedProbe._localize_verbatim`
 machine-translates the verbatim turn-1 into the conversation language via
-`core/translation.py::translate_user_turn` (cached, thread-safe, cheap
+`core/translation.py::translate_user_turn` (cached, single-flight, cheap
 `summary_model`, preserves false premises, never raises) and records a
 `WarningKind.USED_MACHINE_TRANSLATION` on the outcome. `sov_ai_dynamic`
 generates turn-1 in-language via the loop's language directive, so it needs no
@@ -384,7 +384,12 @@ Quick orientation:
    [`generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py)
    so the bootstrap triggers your probe's `@register_probe` at
    plugin import.
-6. Run `usersim smoke` to confirm registration; copy
+6. Declare every column `build_result_extras` writes in
+   `side_effect_columns` on
+   [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).
+   An undeclared column is discarded on the way to storage, and the
+   scorer that reads it back reports nothing to score.
+7. Run `usersim smoke` to confirm registration; copy
    `templates/probe/test_probe.py.template` for the per-probe
    regression test.
 
@@ -492,7 +497,7 @@ what each one carries:
 
 | Module | Purpose |
 |--------|---------|
-| `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, thread-local outcome-builder hook for resource accounting |
+| `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, per-conversation outcome-builder hook for resource accounting |
 | `core/judges.py` | Inline judge invocation (XML response parsing, run_inline_judge helper) |
 | `core/context.py` | Context-window compression: `compress_history` and `summarize_response` (driven by `cfg.context_compression` / `compression_window`) |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
@@ -550,7 +555,7 @@ per-scorer end-to-end).
 | `test_preview.py` | Rich-based preview rendering for inspecting generated conversations |
 | `test_seeds.py` | Hybrid seed loading and merging (per-probe `base/` + per-locale extensions) |
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
-| `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, thread-local outcome-builder hook) |
+| `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, per-conversation outcome-builder hook) |
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
 | `test_fact_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
 | `test_probing_taxonomy.py` | Probing-taxonomy YAML schema validator, loader, lookup helpers, locale-keyed shared cache |

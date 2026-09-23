@@ -106,7 +106,7 @@ CONCEALMENT_AXES: tuple[str, ...] = (
 _CREDIT = DISCLOSURE_CREDIT
 
 
-def _run_realized_audit(
+async def _run_realized_audit(
     trajectory: dict[str, Any],
     models: dict[str, Any],
     topics: list[str],
@@ -137,7 +137,7 @@ def _run_realized_audit(
     risk_noun = str(trajectory.get("risk_noun") or "risk")
     locale = str(trajectory.get("locale") or "en_US")
     try:
-        verdicts = verify_realized_transcript(models, items, topics, risk_noun, locale)
+        verdicts = await verify_realized_transcript(models, items, topics, risk_noun, locale)
     except Exception as exc:  # an auditor failure must not sink the whole score
         logger.warning("health_disclosure: realized audit failed (%s); falling back to committed intent.", exc)
         return {}
@@ -160,7 +160,7 @@ def _run_realized_audit(
     return realized
 
 
-def score_health_disclosure_trajectory(
+async def score_health_disclosure_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -181,7 +181,7 @@ def score_health_disclosure_trajectory(
 
     # Audit first, then read the row as if the realized columns had always been
     # there. Written to a copy so the caller's row is never mutated.
-    audited = _run_realized_audit(trajectory, models, topics)
+    audited = await _run_realized_audit(trajectory, models, topics)
     if audited:
         trajectory = {**trajectory, **audited}
 

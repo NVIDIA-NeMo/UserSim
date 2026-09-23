@@ -33,6 +33,16 @@ from usersim.engine.core.outcomes import (
 )
 from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin
 
+
+def _as_async(fn):
+    """Wrap a canned reply so the awaiting call site can await it."""
+
+    async def _call(*args, **kwargs):
+        return fn(*args, **kwargs)
+
+    return _call
+
+
 # ---------------------------------------------------------------------------
 # core/locale.py — registry + presence-aware resolvers
 # ---------------------------------------------------------------------------
@@ -228,42 +238,42 @@ class TestTranslation:
     def teardown_method(self) -> None:
         T.reset_translation_cache()
 
-    def test_translate_and_cache(self, monkeypatch) -> None:
+    async def test_translate_and_cache(self, monkeypatch) -> None:
         calls = []
 
-        def fake(models, alias, msgs, **kw):
+        async def fake(models, alias, msgs, **kw):
             calls.append(msgs[0]["content"])
             return {"content": "अनुवादित"}
 
-        monkeypatch.setattr(T, "call_llm", fake)
-        out = T.translate_user_turn({}, "How often can I take this?", target_language="Tamil")
+        monkeypatch.setattr(T, "acall_llm", fake)
+        out = await T.translate_user_turn({}, "How often can I take this?", target_language="Tamil")
         assert out == "अनुवादित"
         # Cached: a second identical call does not re-invoke the model.
-        T.translate_user_turn({}, "How often can I take this?", target_language="Tamil")
+        await T.translate_user_turn({}, "How often can I take this?", target_language="Tamil")
         assert len(calls) == 1
         # The prompt preserves false premises + names the language.
         assert "Tamil" in calls[0] and "premise" in calls[0].lower()
 
-    def test_romanize_flag_changes_prompt(self, monkeypatch) -> None:
+    async def test_romanize_flag_changes_prompt(self, monkeypatch) -> None:
         seen = {}
 
-        def fake(models, alias, msgs, **kw):
+        async def fake(models, alias, msgs, **kw):
             seen["prompt"] = msgs[0]["content"]
             return {"content": "x"}
 
-        monkeypatch.setattr(T, "call_llm", fake)
-        T.translate_user_turn({}, "hi", target_language="Tamil", romanize=True)
+        monkeypatch.setattr(T, "acall_llm", fake)
+        await T.translate_user_turn({}, "hi", target_language="Tamil", romanize=True)
         assert "Latin/Roman alphabet" in seen["prompt"]
 
-    def test_error_passthrough(self, monkeypatch) -> None:
-        def boom(*a, **k):
+    async def test_error_passthrough(self, monkeypatch) -> None:
+        async def boom(*a, **k):
             raise RuntimeError("provider down")
 
-        monkeypatch.setattr(T, "call_llm", boom)
-        assert T.translate_user_turn({}, "unchanged", target_language="Odia") == "unchanged"
+        monkeypatch.setattr(T, "acall_llm", boom)
+        assert await T.translate_user_turn({}, "unchanged", target_language="Odia") == "unchanged"
 
-    def test_empty_passthrough(self) -> None:
-        assert T.translate_user_turn({}, "", target_language="Tamil") == ""
+    async def test_empty_passthrough(self) -> None:
+        assert await T.translate_user_turn({}, "", target_language="Tamil") == ""
 
 
 # ---------------------------------------------------------------------------
@@ -346,30 +356,30 @@ class TestVerbatimTranslation:
     def teardown_method(self) -> None:
         T.reset_translation_cache()
 
-    def test_variant_translates_and_flags(self, monkeypatch) -> None:
-        monkeypatch.setattr(T, "call_llm", lambda *a, **k: {"content": "TAMIL_TEXT"})
+    async def test_variant_translates_and_flags(self, monkeypatch) -> None:
+        monkeypatch.setattr(T, "acall_llm", _as_async(lambda *a, **k: {"content": "TAMIL_TEXT"}))
         probe = _make_probe("ta_Taml_IN")
-        out = probe._localize_verbatim(_FakeTask.text)
+        out = await probe._localize_verbatim(_FakeTask.text)
         assert out == "TAMIL_TEXT"
         # A USED_MACHINE_TRANSLATION warning is recorded on the outcome builder.
         kinds = [w.kind for w in probe._outcome_builder._outcome.warnings]
         assert WarningKind.USED_MACHINE_TRANSLATION in kinds
 
-    def test_shipped_locale_no_translation(self, monkeypatch) -> None:
+    async def test_shipped_locale_no_translation(self, monkeypatch) -> None:
         called = []
-        monkeypatch.setattr(T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"})
+        monkeypatch.setattr(T, "acall_llm", _as_async(lambda *a, **k: called.append(1) or {"content": "x"}))
         probe = _make_probe("pt_BR")
-        out = probe._localize_verbatim(_FakeTask.text)
+        out = await probe._localize_verbatim(_FakeTask.text)
         assert out == _FakeTask.text  # unchanged
         assert not called  # no translation call
 
-    def test_graduated_native_variant_no_translation(self, monkeypatch) -> None:
+    async def test_graduated_native_variant_no_translation(self, monkeypatch) -> None:
         called = []
-        monkeypatch.setattr(T, "call_llm", lambda *a, **k: called.append(1) or {"content": "x"})
+        monkeypatch.setattr(T, "acall_llm", _as_async(lambda *a, **k: called.append(1) or {"content": "x"}))
         _FakeProbe._native_locales.add("ta_Taml_IN")
         try:
             probe = _make_probe("ta_Taml_IN")  # asset_locale == locale
-            out = probe._localize_verbatim(_FakeTask.text)
+            out = await probe._localize_verbatim(_FakeTask.text)
         finally:
             _FakeProbe._native_locales.discard("ta_Taml_IN")
         assert out == _FakeTask.text

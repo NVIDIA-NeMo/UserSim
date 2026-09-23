@@ -86,7 +86,7 @@ def assistant_message(
 ) -> dict[str, Any]:
     """Build an assistant message carrying its own reasoning trace.
 
-    ``response`` is the raw ``call_llm`` result that produced ``content``;
+    ``response`` is the raw ``acall_llm`` result that produced ``content``;
     its ``reasoning_content`` (when the model emits one) is attached to
     THIS message rather than to whichever assistant message happens to be
     last. That distinction matters for tool-calling shapes, where a single
@@ -179,7 +179,7 @@ class ProbeAdapter(Protocol):
         """
         ...
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -358,7 +358,7 @@ class BaseProbe:
             user_turn_to_evaluate=user_query,
         )
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -443,7 +443,7 @@ class BaseProbe:
         """
         return True
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         """If non-None, ConversationLoop bypasses the turn-1 generate-and-gate path.
 
         Asset-driven probes (sov_ai_facts / sov_ai_multilingual_parity
@@ -467,7 +467,7 @@ class BaseProbe:
         """
         return None
 
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
+    async def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         """Additional user-history nudges to append before generating turn ``turn_idx`` follow-up.
 
         Default: no extra instructions. ``BankReframingMixin``
@@ -528,7 +528,7 @@ class BaseProbe:
         """
         return True
 
-    def is_capitulation_detected(self, state: Any) -> bool:
+    async def is_capitulation_detected(self, state: Any) -> bool:
         """Probe-decided per-turn capitulation check.
 
         Called by the simulator after each assistant turn lands on
@@ -707,7 +707,7 @@ class BankBackedProbe(BaseProbe):
             f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(last_exc).__name__}: {last_exc}"
         ) from last_exc
 
-    def _localize_verbatim(self, text: str) -> str:
+    async def _localize_verbatim(self, text: str) -> str:
         """Translate a verbatim bank turn into the conversation language.
 
         No-op unless this probe fell back to a base-locale (en_IN) asset for
@@ -731,7 +731,7 @@ class BankBackedProbe(BaseProbe):
 
         variant = india_variant(self._locale)
         language = expected_language_display(self._locale) or self._language
-        translated = translate_user_turn(
+        translated = await translate_user_turn(
             self._models,
             text,
             target_language=language,
@@ -825,7 +825,7 @@ class BankVerbatimMixin:
 
     verbatim_field: str = "verbatim_text"
 
-    def get_verbatim_first_user_turn(self, state: Any) -> str | None:
+    async def get_verbatim_first_user_turn(self, state: Any) -> str | None:
         task = getattr(self, "_task", None)
         if task is None:
             return None
@@ -890,7 +890,7 @@ class BankReframingMixin(BankVerbatimMixin):
     Used by safety_chat_pressure.
     """
 
-    def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
+    async def format_followup_user_instructions(self, turn_idx: int, state: Any) -> list[str]:
         task = getattr(self, "_task", None)
         if task is None:
             return []
@@ -1015,7 +1015,7 @@ class ToolExecutionMixin:
     tool_loop_mode: str = "single"
     tool_max_calls_per_turn: int = 8
 
-    def execute_tool_call(
+    async def execute_tool_call(
         self,
         name: str,
         args: dict[str, Any],
@@ -1052,7 +1052,7 @@ class ToolExecutionMixin:
     def on_tool_round_complete(self, state: Any, n_calls: int) -> None:
         return None
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -1088,7 +1088,7 @@ class ToolExecutionMixin:
                     break
                 name, args = self.parse_tool_call(tc)
                 tc_id = (tc.get("id") if isinstance(tc, dict) else None) or f"call_{trace_turn_idx}_{call_idx}"
-                payload = self.execute_tool_call(
+                payload = await self.execute_tool_call(
                     name,
                     args,
                     tc,
@@ -1109,12 +1109,12 @@ class ToolExecutionMixin:
             self.on_tool_round_complete(state, n_this_round)
 
             if self.tool_loop_mode == "single" or capped:
-                return self._synthesize_reply(models, state, cfg)
-            resp = self._recall_assistant(models, state, cfg, with_tools=True)
+                return await self._synthesize_reply(models, state, cfg)
+            resp = await self._recall_assistant(models, state, cfg, with_tools=True)
 
     # ── internal plumbing ───────────────────────────────────────────
 
-    def _recall_assistant(
+    async def _recall_assistant(
         self,
         models: dict,
         state: Any,
@@ -1124,7 +1124,7 @@ class ToolExecutionMixin:
     ) -> dict[str, Any]:
         from usersim.engine.core.llm import (
             NON_ASCII_TOKEN_SCALE,
-            call_llm,
+            acall_llm,
             scaled_max_tokens,
         )
         from usersim.engine.core.simulation import _is_non_ascii_locale
@@ -1135,7 +1135,7 @@ class ToolExecutionMixin:
             kwargs["tools"] = tools
         if _is_non_ascii_locale(getattr(self, "_locale", "en_US")):
             kwargs.update(scaled_max_tokens(models["assistant_model"], NON_ASCII_TOKEN_SCALE))
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             "assistant_model",
             self._synthesis_messages(state, cfg),
@@ -1143,8 +1143,8 @@ class ToolExecutionMixin:
         )
         return resp if isinstance(resp, dict) else {"content": ""}
 
-    def _synthesize_reply(self, models: dict, state: Any, cfg: Any) -> str:
-        resp = self._recall_assistant(models, state, cfg, with_tools=False)
+    async def _synthesize_reply(self, models: dict, state: Any, cfg: Any) -> str:
+        resp = await self._recall_assistant(models, state, cfg, with_tools=False)
         content = resp.get("content", "") if isinstance(resp, dict) else ""
         # The synthesis call has its own reasoning, distinct from the call
         # that requested the tools.
@@ -1368,7 +1368,7 @@ def clear_registry() -> None:
 # turn tool-interception loop) override ``run_dispatch`` themselves.
 
 
-def _baseprobe_run_dispatch(
+async def _baseprobe_run_dispatch(
     self: BaseProbe,
     *,
     models: dict[str, Any],
@@ -1385,7 +1385,7 @@ def _baseprobe_run_dispatch(
     from usersim.engine.core.simulation import ConversationLoop
 
     loop = ConversationLoop()
-    return loop.run(
+    return await loop.run(
         models=models,
         data=data,
         cfg=cfg,

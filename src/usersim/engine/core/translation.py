@@ -35,12 +35,13 @@ than silently switching to a different code path.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import threading
 from typing import Any
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 
 logger = logging.getLogger("usersim.engine")
 
@@ -50,10 +51,21 @@ MODEL_SUMMARY = "summary_model"
 
 # Process-local translation cache. Bank entries repeat across rows, so caching
 # by (text, target_language, romanize) collapses the cost to one call per
-# unique verbatim turn per language. Guarded by a lock because Data Designer
-# fans rows out across worker threads.
+# unique verbatim turn per language. Guarded by a lock because the cache is
+# process-wide while the trajectories reading it may sit on more than one
+# event loop, each on its own thread.
 _cache: dict[str, str] = {}
 _cache_lock = threading.Lock()
+
+# Translations in flight, so concurrent conversations wanting the same text
+# share one call instead of each paying for it. Keyed by the running loop as
+# well as the text: a future belongs to the loop that created it, and awaiting
+# one from another loop is an error.
+_in_flight: dict[tuple[int, str], asyncio.Future[str]] = {}
+
+
+def _inflight_key(key: str) -> tuple[int, str]:
+    return (id(asyncio.get_running_loop()), key)
 
 
 def _cache_key(text: str, target_language: str, romanize: bool) -> str:
@@ -85,7 +97,7 @@ def _build_prompt(text: str, target_language: str, romanize: bool) -> str:
     )
 
 
-def translate_user_turn(
+async def translate_user_turn(
     models: dict[str, Any],
     text: str,
     *,
@@ -106,34 +118,51 @@ def translate_user_turn(
     if cached is not None:
         return cached
 
+    # A translation already under way for this text is awaited rather than
+    # repeated. Bank entries recur across rows, so without this every
+    # conversation starting at once pays for the same translation.
+    flight_key = _inflight_key(key)
+    pending = _in_flight.get(flight_key)
+    if pending is not None:
+        return await pending
+    flight: asyncio.Future[str] = asyncio.get_running_loop().create_future()
+    _in_flight[flight_key] = flight
+
     out = text
     try:
-        resp = call_llm(
-            models,
-            MODEL_SUMMARY,
-            [{"role": "user", "content": _build_prompt(text, target_language, romanize)}],
-        )
-        content = resp.get("content", "") if isinstance(resp, dict) else ""
-        content = (content or "").strip()
-        if content:
-            out = content
-        else:
-            logger.warning(
-                "translate_user_turn: empty translation into %s; using untranslated text",
-                target_language,
+        try:
+            resp = await acall_llm(
+                models,
+                MODEL_SUMMARY,
+                [{"role": "user", "content": _build_prompt(text, target_language, romanize)}],
             )
-    except Exception as e:  # noqa: BLE001 — never propagate from a translation
-        logger.warning(
-            "translate_user_turn: translation into %s failed (%s: %s); using untranslated text",
-            target_language,
-            type(e).__name__,
-            e,
-        )
-        out = text
+            content = resp.get("content", "") if isinstance(resp, dict) else ""
+            content = (content or "").strip()
+            if content:
+                out = content
+            else:
+                logger.warning(
+                    "translate_user_turn: empty translation into %s; using untranslated text",
+                    target_language,
+                )
+        except Exception as e:  # noqa: BLE001 — never propagate from a translation
+            logger.warning(
+                "translate_user_turn: translation into %s failed (%s: %s); using untranslated text",
+                target_language,
+                type(e).__name__,
+                e,
+            )
+            out = text
 
-    with _cache_lock:
-        _cache[key] = out
-    return out
+        with _cache_lock:
+            _cache[key] = out
+        return out
+    finally:
+        # Released whatever happened, so a failure cannot leave an entry that
+        # later callers wait on forever.
+        _in_flight.pop(flight_key, None)
+        if not flight.done():
+            flight.set_result(out)
 
 
 def _build_query_prompt(query: str, target_language: str) -> str:
@@ -154,7 +183,7 @@ def _build_query_prompt(query: str, target_language: str) -> str:
     )
 
 
-def translate_search_query(
+async def translate_search_query(
     models: dict[str, Any],
     query: str,
     *,
@@ -193,7 +222,7 @@ def translate_search_query(
 
     out = query
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             MODEL_SUMMARY,
             [{"role": "user", "content": _build_query_prompt(query, target_language)}],

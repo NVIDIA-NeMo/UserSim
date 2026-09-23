@@ -95,7 +95,7 @@ class EducationalProbe(BaseProbe):
         )
 
 
-def simulate_general_educational(
+async def simulate_general_educational(
     models: dict,
     data: dict,
     persona: dict,
@@ -122,4 +122,4 @@ def simulate_general_educational(
         data=data,
         outcome_builder=kwargs.get("outcome_builder"),
     )
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)

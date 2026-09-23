@@ -14,16 +14,19 @@ have are stubbed below. For real working examples, see:
   (``on_followup_failure="abort"`` test case).
 - ``test_safety_agentic.py`` — agentic probe (custom ``run_dispatch``,
   no user-LLM, simpler mock pattern — FIFO-only since there's only
-  one call_llm caller).
+  one acall_llm caller).
 
 CRITICAL gotchas the substrate's loop reveals — the per-probe test
 files all hit these:
 
-1. **Patch BOTH ``core.simulation.call_llm`` AND
-   ``core.judges.call_llm``** in the same context manager. Both
-   modules locally import ``call_llm`` from ``core.llm`` at module
-   load, so patching ``core.llm.call_llm`` doesn't reach either.
+1. **Patch BOTH ``core.simulation.acall_llm`` AND
+   ``core.judges.acall_llm``** in the same context manager. Both
+   modules locally import ``acall_llm`` from ``core.llm`` at module
+   load, so patching ``core.llm.acall_llm`` doesn't reach either.
    The ``_patched_call_llm`` helper below patches both at once.
+   The target is a coroutine function, so ``patch`` installs an
+   ``AsyncMock``; a plain ``def`` side_effect still works, and its
+   return value is what the ``await`` yields.
 
 2. **Mock returns must match the caller's expected shape.** For
    judge calls (``judge_model``), return a string with
@@ -73,7 +76,7 @@ def _mock_call_llm(
     assistant_responses: List[Any] | None = None,
     judge_responses: List[str] | None = None,
 ):
-    """Alias-dispatching mock for call_llm.
+    """Alias-dispatching mock for acall_llm.
 
     Returns a side_effect callable that pops from the right queue
     based on the alias kwarg. Resilient to gate retries reordering
@@ -91,7 +94,7 @@ def _mock_call_llm(
     judge_q = list(judge_responses or [])
 
     def _side_effect(*args, **kwargs):
-        # call_llm signature: (models, alias, messages, **kwargs)
+        # acall_llm signature: (models, alias, messages, **kwargs)
         alias = args[1] if len(args) >= 2 else kwargs.get("alias", "")
         if alias == "user_model":
             queue = user_q
@@ -101,7 +104,7 @@ def _mock_call_llm(
             queue = judge_q
         else:
             raise AssertionError(
-                f"unexpected call_llm alias={alias!r}; queues: "
+                f"unexpected acall_llm alias={alias!r}; queues: "
                 f"user={len(user_q)} assistant={len(asst_q)} "
                 f"judge={len(judge_q)}"
             )
@@ -117,17 +120,17 @@ def _mock_call_llm(
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch call_llm in BOTH core.simulation AND core.judges.
+    """Patch acall_llm in BOTH core.simulation AND core.judges.
 
-    Both modules locally re-import call_llm from core.llm at module
-    load, so patching core.llm.call_llm doesn't propagate. This
+    Both modules locally re-import acall_llm from core.llm at module
+    load, so patching core.llm.acall_llm doesn't propagate. This
     context manager patches both call sites at once.
     """
     with patch(
-        "usersim.engine.core.simulation.call_llm",
+        "usersim.engine.core.simulation.acall_llm",
         side_effect=side_effect,
     ), patch(
-        "usersim.engine.core.judges.call_llm",
+        "usersim.engine.core.judges.acall_llm",
         side_effect=side_effect,
     ):
         yield
@@ -180,7 +183,7 @@ class TestSimulateYourProbe:
         assert module.PROBE_VARIANTS  # non-empty
 
     # 2. Single-turn end-to-end (verbatim or generate-and-gate).
-    def test_single_turn_end_to_end(
+    async def test_single_turn_end_to_end(
         self, en_persona, simulator_cfg, models,
     ) -> None:
         side_effect = _mock_call_llm(
@@ -193,7 +196,7 @@ class TestSimulateYourProbe:
             judge_responses=[],
         )
         with _patched_call_llm(side_effect):
-            result = probe_gen.simulate_YOUR_PROBE(  # rename to your shim
+            result = await probe_gen.simulate_YOUR_PROBE(  # rename to your shim
                 models=models, data={}, persona=en_persona,
                 profile={}, locale="en_US", language="English",
                 cfg=simulator_cfg, provenance=Provenance(),
@@ -235,14 +238,14 @@ class TestSimulateYourProbe:
         pass
 
     # 7. Bank-load failure aborts cleanly.
-    def test_bank_load_failure_aborts(
+    async def test_bank_load_failure_aborts(
         self, en_persona, simulator_cfg, models,
     ) -> None:
         with patch.dict(
             os.environ,
             {"USERSIM_YOUR_BANK": "/nonexistent/bank.yaml"},
         ):
-            result = probe_gen.simulate_YOUR_PROBE(
+            result = await probe_gen.simulate_YOUR_PROBE(
                 models=models, data={}, persona=en_persona,
                 profile={}, locale="en_US", language="English",
                 cfg=simulator_cfg, provenance=Provenance(),

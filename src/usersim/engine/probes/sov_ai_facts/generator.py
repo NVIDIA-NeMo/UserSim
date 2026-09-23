@@ -218,7 +218,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
 
     # ── Optional hooks (verbatim + follow-up + invariants) ──────────
 
-    def get_verbatim_first_user_turn(
+    async def get_verbatim_first_user_turn(
         self,
         state: ConversationState,
     ) -> str | None:
@@ -237,9 +237,9 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         # conversation language for India variants that fell back to the
         # en_IN bank (no-op for shipped locales / native variant assets).
         # False premises are preserved by the translation prompt.
-        return self._localize_verbatim(self._task.question)
+        return await self._localize_verbatim(self._task.question)
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: ConversationState,
@@ -264,7 +264,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_sov_ai_facts(
+async def simulate_sov_ai_facts(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -316,7 +316,7 @@ def simulate_sov_ai_facts(
         )
     except SovAiFactsProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

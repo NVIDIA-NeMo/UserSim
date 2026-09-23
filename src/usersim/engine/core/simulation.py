@@ -39,7 +39,7 @@ from usersim.engine.core.llm import (
     NON_ASCII_TOKEN_SCALE,
     ContextWindowError,
     _word_count,
-    call_llm,
+    acall_llm,
     scaled_max_tokens,
 )
 from usersim.engine.core.locale import (
@@ -69,7 +69,7 @@ MODEL_JUDGE = "judge_model"
 
 
 class _AssistantModelError(Exception):
-    """Wraps an exception raised by the assistant ``call_llm`` inside the
+    """Wraps an exception raised by the assistant ``acall_llm`` inside the
     resampling helper, so the caller can attribute it to the assistant
     model while every OTHER exception (probe bugs in
     ``after_assistant_turn``, judge crashes) propagates exactly as it did
@@ -269,7 +269,7 @@ def make_result(
     Assistant thinking traces, when the model emits them, ride on the
     assistant message itself as ``reasoning_content`` -- the OpenAI-style
     shape ``{role, content, reasoning_content, tool_calls}``. They are
-    stored for analysis but NOT replayed to a model: ``call_llm`` converts
+    stored for analysis but NOT replayed to a model: ``acall_llm`` converts
     messages with ``include_reasoning=False``, so a later turn never sees
     an earlier turn's thinking.
     """
@@ -575,7 +575,7 @@ def _is_poor_assistant_response(content: str) -> bool:
     return False
 
 
-def _check_conversation_complete(models: dict, follow_up: str) -> bool:
+async def _check_conversation_complete(models: dict, follow_up: str) -> bool:
     """Ask the summary_model whether the user is signaling conversation completion.
 
     Language-agnostic: works for any locale without per-language regex patterns.
@@ -583,7 +583,7 @@ def _check_conversation_complete(models: dict, follow_up: str) -> bool:
     """
     prompt = _EARLY_STOP_PROMPT.format(follow_up=follow_up)
     msgs = [{"role": "user", "content": prompt}]
-    resp = call_llm(models, MODEL_SUMMARY, msgs)
+    resp = await acall_llm(models, MODEL_SUMMARY, msgs)
     answer = resp.get("content", "") if isinstance(resp, dict) else ""
     return answer.strip().lower().startswith("yes")
 
@@ -724,7 +724,7 @@ class ConversationLoop:
         )
 
     # ── Standard turn-1 generation + user-judge gate ───────────────
-    def _generate_and_gate_first_turn(
+    async def _generate_and_gate_first_turn(
         self,
         *,
         models: dict,
@@ -760,7 +760,7 @@ class ConversationLoop:
         for attempt in range(max_query_attempts):
             state.outcome.inc_user_query_attempts()
             try:
-                resp = call_llm(models, MODEL_USER, state.user_history)
+                resp = await acall_llm(models, MODEL_USER, state.user_history)
             except ContextWindowError:
                 raise
             except Exception as e:
@@ -869,7 +869,7 @@ class ConversationLoop:
 
             gate_prompt = probe.format_gate_prompt(user_query, "N/A")
             language_clause = _language_judge_clause(locale) if enforce_language and locale in ROMANIZED_LOCALES else ""
-            expl, rating, ok = run_inline_judge(
+            expl, rating, ok = await run_inline_judge(
                 models,
                 MODEL_JUDGE,
                 gate_prompt + language_clause,
@@ -920,7 +920,7 @@ class ConversationLoop:
             logger.debug(f"  |-- {probe.label}: gate check failed (attempt {attempt + 1}/{max_query_attempts})")
         return user_query, ok, rating, expl, fail_kind
 
-    def _generate_and_judge_assistant_turn(
+    async def _generate_and_judge_assistant_turn(
         self,
         models: dict,
         probe: ProbeAdapter,
@@ -970,10 +970,10 @@ class ConversationLoop:
             # caller with the error's own alias, anything else
             # propagates) — see _AssistantModelError.
             try:
-                assistant_resp = call_llm(models, MODEL_ASSISTANT, assistant_msgs, **call_kwargs)
+                assistant_resp = await acall_llm(models, MODEL_ASSISTANT, assistant_msgs, **call_kwargs)
             except Exception as e:
                 raise _AssistantModelError(e) from e
-            synthesis_content = probe.after_assistant_turn(models, state, assistant_resp, cfg)
+            synthesis_content = await probe.after_assistant_turn(models, state, assistant_resp, cfg)
 
             # The assistant's thinking trace, when the model emits one
             # (gemma's enable_thinking, gpt-oss reasoning, ...). Taken off
@@ -1011,7 +1011,9 @@ class ConversationLoop:
                 synthesis_content,
                 format_conversation_history_for_prompt(project_public_dialogue(state.messages[:-1])),
             )
-            asst_expl, asst_rating, asst_ok, parse_ok = run_inline_judge_ex(models, MODEL_JUDGE, asst_judge_prompt)
+            asst_expl, asst_rating, asst_ok, parse_ok = await run_inline_judge_ex(
+                models, MODEL_JUDGE, asst_judge_prompt
+            )
             if not asst_ok and not parse_ok:
                 # The "failure" is a parser default (no valid <rating>
                 # even after the reformat nudge), not a judgment — don't
@@ -1020,7 +1022,9 @@ class ConversationLoop:
                 # produce a verdict, fall through as a failure but mark
                 # the entry so judge errors are distinguishable from
                 # genuine rejections in the audit trail.
-                asst_expl, asst_rating, asst_ok, parse_ok = run_inline_judge_ex(models, MODEL_JUDGE, asst_judge_prompt)
+                asst_expl, asst_rating, asst_ok, parse_ok = await run_inline_judge_ex(
+                    models, MODEL_JUDGE, asst_judge_prompt
+                )
             entry = {
                 "turn_idx": turn_idx,
                 "attempt": attempt,
@@ -1054,7 +1058,7 @@ class ConversationLoop:
                 )
         return synthesis_content, asst_expl, asst_rating, asst_ok
 
-    def run(
+    async def run(
         self,
         models: dict,
         data: dict,
@@ -1071,7 +1075,7 @@ class ConversationLoop:
         # builder we passed via Provenance. Asset-driven probes
         # constructed via ``BankBackedProbe`` already pin
         # provenance.bank_version on the same builder; here we make
-        # sure call_llm's thread-local hook writes into the same
+        # sure acall_llm's context-scoped hook writes into the same
         # OutcomeBuilder that the loop's traces / counters land on.
         # If the probe carries an outcome_builder, swap it in so the
         # placeholder warnings + bank-version pins emitted at probe
@@ -1109,7 +1113,7 @@ class ConversationLoop:
         verbatim_first = None
         if hasattr(probe, "get_verbatim_first_user_turn"):
             try:
-                verbatim_first = probe.get_verbatim_first_user_turn(state)
+                verbatim_first = await probe.get_verbatim_first_user_turn(state)
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: get_verbatim_first_user_turn "
@@ -1131,7 +1135,7 @@ class ConversationLoop:
             rating = "bypassed"
             expl = ""
         else:
-            user_query, ok, rating, expl, fail_kind = self._generate_and_gate_first_turn(
+            user_query, ok, rating, expl, fail_kind = await self._generate_and_gate_first_turn(
                 models=models,
                 state=state,
                 probe=probe,
@@ -1243,7 +1247,7 @@ class ConversationLoop:
                     asst_expl,
                     asst_rating,
                     asst_ok,
-                ) = self._generate_and_judge_assistant_turn(
+                ) = await self._generate_and_judge_assistant_turn(
                     models,
                     probe,
                     state,
@@ -1294,7 +1298,7 @@ class ConversationLoop:
             last_asst_idx = max(i for i, m in enumerate(state.messages) if m.get("role") == "assistant")
             if use_compression and synthesis_content.strip() and len(synthesis_content) >= 500:
                 try:
-                    summary = summarize_response(models, synthesis_content)
+                    summary = await summarize_response(models, synthesis_content)
                 except Exception as e:
                     summary = ""
                     logger.warning(
@@ -1348,7 +1352,7 @@ class ConversationLoop:
             # how frustration_events / assistant_judge_ratings /
             # user_judge_ratings are written by the simulator today.
             try:
-                capitulated = probe.is_capitulation_detected(state)
+                capitulated = await probe.is_capitulation_detected(state)
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: is_capitulation_detected raised {type(e).__name__}: {e}; treating as False"
@@ -1421,7 +1425,7 @@ class ConversationLoop:
             # bank-driven reframings for safety_chat_pressure).
             if hasattr(probe, "format_followup_user_instructions"):
                 try:
-                    extras = probe.format_followup_user_instructions(
+                    extras = await probe.format_followup_user_instructions(
                         turn_idx + 1,
                         state,
                     )
@@ -1465,7 +1469,7 @@ class ConversationLoop:
             for user_attempt in range(max_user_retries + 1):
                 state.outcome.inc_user_followup_retries()
                 try:
-                    user_resp = call_llm(models, MODEL_USER, compressed_uh)
+                    user_resp = await acall_llm(models, MODEL_USER, compressed_uh)
                 except ContextWindowError:
                     raise
                 except Exception as e:
@@ -1610,7 +1614,7 @@ class ConversationLoop:
                     if getattr(cfg, "enforce_user_language", True) and locale in ROMANIZED_LOCALES
                     else ""
                 )
-                expl, rating, ok = run_inline_judge(models, MODEL_JUDGE, judge_prompt + language_clause)
+                expl, rating, ok = await run_inline_judge(models, MODEL_JUDGE, judge_prompt + language_clause)
                 state.metadata["user_judge_ratings"].append(
                     {
                         "turn_idx": turn_idx + 1,
@@ -1751,7 +1755,7 @@ class ConversationLoop:
                     f"  |-- {probe.label}: allow_early_stop_at_turn raised {type(e).__name__}: {e}; defaulting to True"
                 )
                 allow_early_stop = True
-            if allow_early_stop and _check_conversation_complete(models, follow_up):
+            if allow_early_stop and await _check_conversation_complete(models, follow_up):
                 state.messages.append({"role": "user", "content": follow_up})
                 state.metadata.setdefault("early_stop", True)
                 state.outcome.set_early_stop(True)

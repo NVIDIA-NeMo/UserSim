@@ -270,7 +270,14 @@ from usersim.testing import assert_probe_conforms, assert_scorer_conforms
 
 def test_my_probe_conforms():
     assert_probe_conforms("my_probe")
+
+async def test_my_scorer_conforms():
+    await assert_scorer_conforms("my_scorer")
 ```
+
+The scorer check is a coroutine, because it calls your scorer and the
+evaluator awaits every scorer. Calling it without `await` returns a
+coroutine that is never run, and the test passes having checked nothing.
 
 Those same checks run against every built-in probe and scorer, so they cannot
 drift into describing a contract this project does not itself keep.

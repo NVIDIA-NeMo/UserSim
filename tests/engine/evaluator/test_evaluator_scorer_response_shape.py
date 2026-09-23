@@ -174,8 +174,8 @@ class TestLooksTruncated:
 
 
 class TestTrajectoryScoring:
-    def test_clean_trajectory_all_perfect(self) -> None:
-        result = score_response_shape_trajectory(
+    async def test_clean_trajectory_all_perfect(self) -> None:
+        result = await score_response_shape_trajectory(
             _trajectory(
                 [
                     "Sure, here's the answer. The capital of France is Paris.",
@@ -188,17 +188,17 @@ class TestTrajectoryScoring:
             assert result["scores"][axis]["score"] == 1.0
         assert result["status_proposal"] is True
 
-    def test_one_trivial_turn_drops_rate(self) -> None:
-        result = score_response_shape_trajectory(
+    async def test_one_trivial_turn_drops_rate(self) -> None:
+        result = await score_response_shape_trajectory(
             _trajectory(["Sure, here's a real answer for you.", "ok"]),
             {},
         )
         assert result["scores"]["shape.empty_or_trivial_rate"]["score"] == 0.5
         assert result["status_proposal"] is False
 
-    def test_one_over_formatted_turn_drops_rate(self) -> None:
+    async def test_one_over_formatted_turn_drops_rate(self) -> None:
         long_list = "\n".join(f"{i + 1}. item {i + 1}" for i in range(8))
-        result = score_response_shape_trajectory(
+        result = await score_response_shape_trajectory(
             _trajectory(
                 [
                     "A short clean reply.",
@@ -210,8 +210,8 @@ class TestTrajectoryScoring:
         assert result["scores"]["shape.over_formatted_rate"]["score"] == 0.5
         assert result["status_proposal"] is False
 
-    def test_one_truncated_turn_drops_rate(self) -> None:
-        result = score_response_shape_trajectory(
+    async def test_one_truncated_turn_drops_rate(self) -> None:
+        result = await score_response_shape_trajectory(
             _trajectory(
                 [
                     "Clean response.",
@@ -223,8 +223,8 @@ class TestTrajectoryScoring:
         assert result["scores"]["shape.truncation_suspicion_rate"]["score"] == 0.5
         assert result["status_proposal"] is False
 
-    def test_no_assistant_turns_short_circuits(self) -> None:
-        result = score_response_shape_trajectory(
+    async def test_no_assistant_turns_short_circuits(self) -> None:
+        result = await score_response_shape_trajectory(
             {
                 "locale": "en_US",
                 "conversation_messages": json.dumps(
@@ -240,11 +240,11 @@ class TestTrajectoryScoring:
         # Vacuously True — no evidence to fail on.
         assert result["status_proposal"] is True
 
-    def test_trivial_turn_not_double_counted_as_truncated(self) -> None:
+    async def test_trivial_turn_not_double_counted_as_truncated(self) -> None:
         # "ok" is trivial but the truncation check should not also fire
         # (would be a misleading double-count). The implementation
         # short-circuits truncation/over-formatted on trivial turns.
-        result = score_response_shape_trajectory(
+        result = await score_response_shape_trajectory(
             _trajectory(["ok", "Substantive reply here."]),
             {},
         )

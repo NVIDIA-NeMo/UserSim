@@ -33,7 +33,7 @@ import logging
 import os
 from typing import Any
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probes import LocalePromptPack
 from usersim.engine.core.tool_calls import recover_tool_call
@@ -105,7 +105,7 @@ def resolve_audit_model(models: dict[str, Any]) -> str:
 
     Only ever returns an alias the caller actually holds, so a missing auditor is
     a clean fallback to committed intent rather than an exception thrown from
-    inside ``call_llm``.
+    inside ``acall_llm``.
     """
     forced = os.environ.get(_AUDIT_MODEL_ENV, "").strip()
     if forced:
@@ -169,7 +169,7 @@ VERIFY_SYSTEM_PACK = LocalePromptPack(
 )
 
 
-def verify_realized_transcript(
+async def verify_realized_transcript(
     models: dict[str, Any],
     items: list[dict[str, Any]],
     candidate_topics: list[str],
@@ -240,7 +240,7 @@ def verify_realized_transcript(
     # arrives bare, fenced, or wrapped in prose, and it would still pick up a
     # native tool call if some provider volunteered one.
     try:
-        resp = call_llm(models, alias, msgs, **_audit_reasoning_kwargs())
+        resp = await acall_llm(models, alias, msgs, **_audit_reasoning_kwargs())
     except Exception:
         logger.exception("realized audit: auditor call failed; falling back to committed intent.")
         return {}

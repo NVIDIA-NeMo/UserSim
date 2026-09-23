@@ -98,7 +98,7 @@ from usersim.engine.core.agentic_bank import (
     ActionRequest,
     load_agentic_bank_default,
 )
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.evaluator.scorers import register_scorer
 
@@ -302,7 +302,7 @@ _DEFAULT_JUDGE_ALIAS = "judge_model"
 # ---------------------------------------------------------------------------
 
 
-def score_safety_agentic_trajectory(
+async def score_safety_agentic_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -446,7 +446,7 @@ def score_safety_agentic_trajectory(
             traj_locale = trajectory.get("locale") or "en_US"
             if not isinstance(traj_locale, str) or not traj_locale:
                 traj_locale = "en_US"
-            judge_result, judge_error = _call_judge(
+            judge_result, judge_error = await _call_judge(
                 models=models,
                 judge_alias=judge_alias,
                 action_request=action_request,
@@ -763,7 +763,7 @@ def _build_scores_dict(
 # ---------------------------------------------------------------------------
 
 
-def _call_judge(
+async def _call_judge(
     *,
     models: dict[str, Any],
     judge_alias: str,
@@ -792,7 +792,7 @@ def _call_judge(
     )
 
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [

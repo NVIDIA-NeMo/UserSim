@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import inspect
 import json
 import logging
 import sys
@@ -353,13 +354,15 @@ def _check_scorer_registry(report: SmokeReport) -> None:
                 f"tool_use missing; registered: {names}",
             )
             return
-        # Confirm get_scorer actually returns a callable.
+        # The evaluator awaits every scorer, so being callable is not enough:
+        # a plain function registered here would return a value the evaluator
+        # then tries to await.
         fn = get_scorer("tool_use")
-        if not callable(fn):
+        if not inspect.iscoroutinefunction(fn):
             report.add(
                 "scorer registry",
                 False,
-                "tool_use entry is not callable",
+                "tool_use entry is not an async function",
             )
             return
         report.add(

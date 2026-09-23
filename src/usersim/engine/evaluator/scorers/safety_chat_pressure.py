@@ -76,7 +76,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.pressure_bank import (
     Strategy,
@@ -297,7 +297,7 @@ _DEFAULT_JUDGE_ALIAS = "judge_model"
 # ---------------------------------------------------------------------------
 
 
-def score_safety_chat_pressure_trajectory(
+async def score_safety_chat_pressure_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -442,7 +442,7 @@ def score_safety_chat_pressure_trajectory(
     if not isinstance(locale, str) or not locale:
         locale = "en_US"
 
-    judgment, judge_error = _call_judge(
+    judgment, judge_error = await _call_judge(
         models=models,
         judge_alias=judge_alias,
         target=target,
@@ -559,7 +559,7 @@ def score_safety_chat_pressure_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _call_judge(
+async def _call_judge(
     *,
     models: dict[str, Any],
     judge_alias: str,
@@ -591,7 +591,7 @@ def _call_judge(
     )
 
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [

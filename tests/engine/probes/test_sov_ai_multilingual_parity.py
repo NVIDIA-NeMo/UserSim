@@ -14,7 +14,7 @@ Layered the same way as ``test_sov_ai_facts.py`` and
 3. **Prompts** — every supported locale has both system prompt + follow-up
    instruction; no half-shipped locales.
 4. **End-to-end probe** — ``simulate_sov_ai_multilingual_parity``
-   with mocked ``call_llm``; covers single-turn, multi-turn, verbatim
+   with mocked ``acall_llm``; covers single-turn, multi-turn, verbatim
    injection, placeholder warning, structured failure paths
    (bank-load / no-matching-query / locale-not-in-bank / assistant-error).
 5. **Sim-side guardrail** — ``should_succeed`` invariant check.
@@ -187,22 +187,22 @@ def _shipped_bank_env() -> dict[str, str]:
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere it's bound by the unified loop.
+    """Patch ``acall_llm`` everywhere it's bound by the unified loop.
 
-    ``ConversationLoop`` calls ``call_llm`` from
+    ``ConversationLoop`` calls ``acall_llm`` from
     ``core.simulation`` (assistant turn), and ``run_inline_judge``
     calls it from ``core.judges`` (in-sim assistant-quality judge +
     user-judge gate). Both bindings are local re-imports of
-    ``core.llm.call_llm``, so a single patch at the source doesn't
+    ``core.llm.acall_llm``, so a single patch at the source doesn't
     propagate. This helper patches both consumer modules at once.
     """
     with (
         patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
             side_effect=side_effect,
         ),
         patch(
-            "usersim.engine.core.judges.call_llm",
+            "usersim.engine.core.judges.acall_llm",
             side_effect=side_effect,
         ),
     ):
@@ -505,7 +505,7 @@ class TestSimulateSovAiMultilingualParity:
         assert "sov_ai_multilingual_parity" in _PROBE_REGISTRY
         assert resolve_probe("sov_ai_multilingual_parity").__name__ == ("SovAiMultilingualParityProbe")
 
-    def test_single_turn_runs_end_to_end(
+    async def test_single_turn_runs_end_to_end(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
@@ -520,7 +520,7 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -552,7 +552,7 @@ class TestSimulateSovAiMultilingualParity:
         # bank_version must be pinned on provenance for drift detection.
         assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.6.0"
 
-    def test_first_user_turn_is_locale_rendering_verbatim(
+    async def test_first_user_turn_is_locale_rendering_verbatim(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
@@ -584,7 +584,7 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -611,7 +611,7 @@ class TestSimulateSovAiMultilingualParity:
         assert user_msgs, "expected at least one user turn"
         assert user_msgs[0]["content"] == expected_first_turn
 
-    def test_two_turn_runs_followup(
+    async def test_two_turn_runs_followup(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg_two_turns: Any,
@@ -633,7 +633,7 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -657,13 +657,13 @@ class TestSimulateSovAiMultilingualParity:
         assert len(user_msgs) == 2
         assert user_msgs[1]["content"] == "Mas e quanto a outra parte?"
 
-    def test_locale_not_in_bank_returns_structured_failure(
+    async def test_locale_not_in_bank_returns_structured_failure(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
         with patch.dict(os.environ, _shipped_bank_env()):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={},
                 data={},
                 persona=br_persona_southeast,
@@ -679,7 +679,7 @@ class TestSimulateSovAiMultilingualParity:
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
         assert "de_DE" in outcome["failure_detail"]
 
-    def test_no_matching_query_returns_structured_failure(
+    async def test_no_matching_query_returns_structured_failure(
         self,
         simulator_cfg: Any,
     ) -> None:
@@ -703,10 +703,10 @@ class TestSimulateSovAiMultilingualParity:
             locales=("en_US", "pt_BR"),
         )
         mock_call = patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
         )
         mock_judge_call = patch(
-            "usersim.engine.core.judges.call_llm",
+            "usersim.engine.core.judges.acall_llm",
         )
         with (
             patch.object(
@@ -717,7 +717,7 @@ class TestSimulateSovAiMultilingualParity:
             mock_call as mc,
             mock_judge_call as mjc,
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={},
                 data={},
                 persona={"age": 30, "education_level": "high school"},
@@ -736,12 +736,12 @@ class TestSimulateSovAiMultilingualParity:
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
         assert "no query" in outcome["failure_detail"].lower()
 
-    def test_assistant_turn1_failure_is_attributed_to_assistant_model(
+    async def test_assistant_turn1_failure_is_attributed_to_assistant_model(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        def _raises(*args, **kwargs):
+        async def _raises(*args, **kwargs):
             raise RuntimeError("assistant API exploded")
 
         with (
@@ -750,7 +750,7 @@ class TestSimulateSovAiMultilingualParity:
                 _raises,
             ),
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -776,7 +776,7 @@ class TestSimulateSovAiMultilingualParity:
         assert outcome["failure_class"] == FailureClass.INFRASTRUCTURE_ERROR.value
         assert outcome["failure_attribution"] == "assistant_model"
 
-    def test_bank_load_failure_returns_structured_failure(
+    async def test_bank_load_failure_returns_structured_failure(
         self,
         br_persona_southeast: dict[str, Any],
         simulator_cfg: Any,
@@ -786,7 +786,7 @@ class TestSimulateSovAiMultilingualParity:
             os.environ,
             {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": "/nonexistent/query_bank.yaml"},
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={},
                 data={},
                 persona=br_persona_southeast,
@@ -801,7 +801,7 @@ class TestSimulateSovAiMultilingualParity:
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert "query-bank load failed" in outcome["failure_detail"]
 
-    def test_non_placeholder_query_does_not_emit_placeholder_warning(
+    async def test_non_placeholder_query_does_not_emit_placeholder_warning(
         self,
         simulator_cfg: Any,
     ) -> None:
@@ -832,7 +832,7 @@ class TestSimulateSovAiMultilingualParity:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_multilingual_parity(
+            result = await probe_gen.simulate_sov_ai_multilingual_parity(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),

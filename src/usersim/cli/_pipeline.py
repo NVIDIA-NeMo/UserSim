@@ -311,53 +311,32 @@ def _wire_toolsets(
     return {"tools_column": "tools", "toolset_name_column": "toolset_name"}
 
 
-def _trajectory_max_workers(models: ModelsConfig) -> int:
-    """Derive the row-level fan-out for the conversation simulator /
-    trajectory evaluator from the loaded ``ModelsConfig``.
+def _set_run_config(data_designer, dd) -> None:
+    """Configure the DataDesigner instance with the ``NATIVE`` Jinja2 engine.
 
-    The conversation simulator is a multi-model custom column generator
-    — DD classifies it as "non-inference" for fan-out (only single-model
-    ``ColumnGeneratorWithModel`` columns derive workers from
-    ``inference_parameters.max_parallel_requests``). DD's default for
-    non-inference columns is ``RunConfig.non_inference_max_parallel_workers
-    = 4``, regardless of what we set on individual model specs.
+    Required by :func:`_add_persona_expressions`'s ``persona_location``
+    template, which needs ``select | unique | join`` to collapse the
+    four-tuple of city/district/region/country into a single string.
+    ``NATIVE`` mode disables DD's hardened sandbox; safe here because
+    every Jinja template we render is authored by us (asset banks + this
+    module's own expression strings) — no user-supplied template ever
+    reaches DD.
 
-    We use the max ``max_parallel_requests`` across all aliases as the
-    row-level worker count: the highest-concurrency model in the catalogue
-    is a sensible upper bound on how many trajectories we can run in
-    parallel without saturating any one provider. Users tune one knob
-    (in the TOML) and both per-model + per-row fan-out follow.
-    """
-    if not models.models:
-        return 4
-    return max(spec.max_parallel_requests for spec in models.models)
+    Trajectory concurrency is not set here. Trajectories are coroutines
+    on the engine's event loop, and how many run at once is governed by
+    the scheduler's own admission control. What bounds load on any one
+    provider is ``max_parallel_requests``, set per alias in the models
+    TOML.
 
-
-def _set_run_config(data_designer, dd, models: ModelsConfig) -> None:
-    """Configure the DataDesigner instance with the ``NATIVE`` Jinja2
-    engine and a row-level fan-out matching the model catalogue.
-
-    Native Jinja: required by :func:`_add_persona_expressions`'s
-    ``persona_location`` template, which needs ``select | unique | join``
-    to collapse the four-tuple of city/district/region/country into a
-    single string. ``NATIVE`` mode disables DD's hardened sandbox; safe
-    here because every Jinja template we render is authored by us
-    (asset banks + this module's own expression strings) — no
-    user-supplied template ever reaches DD.
-
-    Worker count: see :func:`_trajectory_max_workers`. Without this,
-    ``conversation_messages`` (the multi-model custom column) defaults
-    to DD's 4 non-inference workers regardless of what each model
-    spec declares.
-
-    Available since ``data-designer==0.5.7`` (PR #557 added
-    ``RunConfig.jinja_rendering_engine`` + the ``JinjaRenderingEngine``
-    enum). The pyproject pins ``>=0.5.8`` because the locale matrix
-    also depends on ko_KR persona support.
+    The metrics endpoint is off. Left on, every run opens a local HTTP
+    listener on a fixed port that nothing here reads, and a second run
+    sharing the machine cannot bind it -- which surfaces as a traceback
+    mid-run. Set ``otel_metrics_port`` on the run config to turn it back
+    on for a session that wants to scrape it.
     """
     run_config = dd.RunConfig(
         jinja_rendering_engine=dd.JinjaRenderingEngine.NATIVE,
-        non_inference_max_parallel_workers=_trajectory_max_workers(models),
+        otel_metrics_port=None,
     )
     data_designer.set_run_config(run_config)
 
@@ -437,7 +416,7 @@ def build_simulator_config_builder(
 
     dd_kwargs = to_data_designer_kwargs(models)
     data_designer = DataDesigner(**dd_kwargs)
-    _set_run_config(data_designer, dd, models)
+    _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
 
     config_builder.add_column(
@@ -585,7 +564,7 @@ def build_evaluator_config_builder(
 
     dd_kwargs = to_data_designer_kwargs(models)
     data_designer = DataDesigner(**dd_kwargs)
-    _set_run_config(data_designer, dd, models)
+    _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
 
     config_builder.with_seed_dataset(

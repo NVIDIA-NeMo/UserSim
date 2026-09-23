@@ -86,7 +86,7 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
     def get_tools_for_assistant(self) -> list | None:
         return self._tools
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -126,6 +126,10 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
         return len(state.metadata.get("tools_called", [])) > 0
 
     def build_result_extras(self, state: Any) -> dict:
+        # Every key added here must also be listed in
+        # ConversationSimulatorConfig.side_effect_columns, or the engine
+        # discards it on the way to storage and the scorer reads it back
+        # as absent.
         return {
             "num_turns": sum(1 for m in state.messages if m.get("role") == "user"),
             "num_tool_calls": len(state.metadata.get("tools_called", [])),

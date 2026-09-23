@@ -228,7 +228,7 @@ _PATTERN_CANNED = _build_pattern(_CANNED_AI_PHRASES)
 # ---------------------------------------------------------------------------
 
 
-def score_refusal_basics_trajectory(
+async def score_refusal_basics_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],  # unused — deterministic, no LLM call
 ) -> dict[str, Any]:

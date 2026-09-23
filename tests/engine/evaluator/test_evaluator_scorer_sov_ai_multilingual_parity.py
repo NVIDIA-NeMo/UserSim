@@ -12,7 +12,7 @@ assistant response on three respect-parity axes
 (one query per trajectory; no per-item loop, unlike the
 ``sov_ai_dynamic`` scorer).
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Query-bank state is swapped via the ``USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK`` env
 override + ``reset_query_bank_cache`` so the cache never leaks.
 """
@@ -148,7 +148,7 @@ def _axis_payload(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """``call_llm`` side-effect that yields queued JSON payloads."""
+    """``acall_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 
     def _side_effect(*args, **kwargs):
@@ -217,32 +217,32 @@ class TestAxisDefinitions:
 
 
 class TestShortCircuit:
-    def test_missing_query_id_returns_no_op(self) -> None:
-        out = score_sov_ai_multilingual_parity_trajectory({}, {})
+    async def test_missing_query_id_returns_no_op(self) -> None:
+        out = await score_sov_ai_multilingual_parity_trajectory({}, {})
         assert out["scores"] == {}
         assert "no query_id" in out["error"]
         assert out["status_proposal"] is True
         assert out["bank_id"] is None
 
-    def test_non_string_query_id_returns_no_op(self) -> None:
-        out = score_sov_ai_multilingual_parity_trajectory(
+    async def test_non_string_query_id_returns_no_op(self) -> None:
+        out = await score_sov_ai_multilingual_parity_trajectory(
             {"query_id": 12345, "locale": "pt_BR"},
             {},
         )
         assert "no query_id" in out["error"]
 
-    def test_missing_locale_returns_no_op(self) -> None:
-        out = score_sov_ai_multilingual_parity_trajectory(
+    async def test_missing_locale_returns_no_op(self) -> None:
+        out = await score_sov_ai_multilingual_parity_trajectory(
             {"query_id": "Q-MEDS-001"},
             {},
         )
         assert "no query_id" in out["error"]
 
-    def test_no_llm_call_made_on_short_circuit(self) -> None:
+    async def test_no_llm_call_made_on_short_circuit(self) -> None:
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
         ) as mock_call:
-            score_sov_ai_multilingual_parity_trajectory({}, {"alias": object()})
+            await score_sov_ai_multilingual_parity_trajectory({}, {"alias": object()})
         mock_call.assert_not_called()
 
 
@@ -252,13 +252,13 @@ class TestShortCircuit:
 
 
 class TestHappyPath:
-    def test_runs_one_judge_call_and_returns_scores(
+    async def test_runs_one_judge_call_and_returns_scores(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory(query_id="Q-MEDS-001", locale="pt_BR")
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -269,7 +269,7 @@ class TestHappyPath:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -289,17 +289,17 @@ class TestHappyPath:
         assert out["scores"][_COMPLEXITY_CALIBRATION.name]["score"] == 4
         assert out["scores"][_HELPFULNESS_AT_PROFICIENCY.name]["score"] == 5
 
-    def test_judge_alias_falls_back_to_default_when_models_empty(
+    async def test_judge_alias_falls_back_to_default_when_models_empty(
         self,
         mock_bank_env: Path,
     ) -> None:
         # Empty models dict: scorer should still return a no-op-style
         # envelope rather than crashing on next(iter(models)). It will
-        # fail at the LLM call step (KeyError under call_llm), but we
-        # patch call_llm to avoid that and assert envelope shape.
+        # fail at the LLM call step (KeyError under acall_llm), but we
+        # patch acall_llm to avoid that and assert envelope shape.
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -310,10 +310,10 @@ class TestHappyPath:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(traj, {})
+            out = await score_sov_ai_multilingual_parity_trajectory(traj, {})
         assert out["judge_alias"] == "judge_model"
 
-    def test_judge_call_receives_locale_and_concern(
+    async def test_judge_call_receives_locale_and_concern(
         self,
         mock_bank_env: Path,
     ) -> None:
@@ -322,8 +322,8 @@ class TestHappyPath:
         traj = _trajectory(query_id="Q-MEDS-001", locale="pt_BR")
         captured = {}
 
-        def _capture_call(*args, **kwargs):
-            # call_llm signature: (models, alias, messages, **kwargs)
+        async def _capture_call(*args, **kwargs):
+            # acall_llm signature: (models, alias, messages, **kwargs)
             captured["messages"] = args[2] if len(args) >= 3 else kwargs.get("messages")
             return {
                 "role": "assistant",
@@ -337,10 +337,10 @@ class TestHappyPath:
             }
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_capture_call,
         ):
-            score_sov_ai_multilingual_parity_trajectory(
+            await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -364,15 +364,15 @@ class TestHappyPath:
 
 
 class TestErrorPaths:
-    def test_query_not_in_bank_returns_structured_error(
+    async def test_query_not_in_bank_returns_structured_error(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory(query_id="Q-DOES-NOT-EXIST", locale="pt_BR")
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
         ) as mock_call:
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -384,7 +384,7 @@ class TestErrorPaths:
         assert out["bank_id"] == "sample_v1"
         assert out["bank_version"] == "v0.6.0"
 
-    def test_bank_load_failure_returns_structured_error(self) -> None:
+    async def test_bank_load_failure_returns_structured_error(self) -> None:
         traj = _trajectory()
         # Point env at a path that does not exist.
         with (
@@ -393,10 +393,10 @@ class TestErrorPaths:
                 {"USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK": "/nonexistent/bank.yaml"},
             ),
             patch(
-                "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+                "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             ) as mock_call,
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -406,19 +406,19 @@ class TestErrorPaths:
         assert out["bank_id"] is None
         assert out["scores"] == {}
 
-    def test_judge_exception_yields_per_axis_none_and_blocks_status(
+    async def test_judge_exception_yields_per_axis_none_and_blocks_status(
         self,
         mock_bank_env: Path,
     ) -> None:
-        def _raises(*args, **kwargs):
+        async def _raises(*args, **kwargs):
             raise RuntimeError("judge API exploded")
 
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_raises,
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -431,16 +431,16 @@ class TestErrorPaths:
             assert cell["score"] is None
             assert "RuntimeError" in cell["reasoning"]
 
-    def test_unparseable_judge_response_yields_per_axis_none(
+    async def test_unparseable_judge_response_yields_per_axis_none(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             return_value={"role": "assistant", "content": "not-json-{"},
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -457,13 +457,13 @@ class TestErrorPaths:
 
 
 class TestStatusProposal:
-    def test_score_of_one_on_condescension_blocks_status(
+    async def test_score_of_one_on_condescension_blocks_status(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -474,19 +474,19 @@ class TestStatusProposal:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
         assert out["status_proposal"] is False
 
-    def test_score_of_one_on_helpfulness_blocks_status(
+    async def test_score_of_one_on_helpfulness_blocks_status(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -497,13 +497,13 @@ class TestStatusProposal:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
         assert out["status_proposal"] is False
 
-    def test_score_of_one_on_complexity_calibration_does_not_block(
+    async def test_score_of_one_on_complexity_calibration_does_not_block(
         self,
         mock_bank_env: Path,
     ) -> None:
@@ -512,7 +512,7 @@ class TestStatusProposal:
         # accidental gating-rule expansion.
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -523,16 +523,16 @@ class TestStatusProposal:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
         assert out["status_proposal"] is True
 
-    def test_all_high_scores_passes_status(self, mock_bank_env: Path) -> None:
+    async def test_all_high_scores_passes_status(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -543,7 +543,7 @@ class TestStatusProposal:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -556,13 +556,13 @@ class TestStatusProposal:
 
 
 class TestVersionMismatch:
-    def test_pinned_version_matches_current_no_mismatch(
+    async def test_pinned_version_matches_current_no_mismatch(
         self,
         mock_bank_env: Path,
     ) -> None:
         traj = _trajectory(pinned_version="v0.6.0")
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -573,20 +573,20 @@ class TestVersionMismatch:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
         assert out["bank_version_mismatch"] is False
 
-    def test_pinned_version_differs_from_current_emits_mismatch_flag(
+    async def test_pinned_version_differs_from_current_emits_mismatch_flag(
         self,
         mock_bank_env: Path,
     ) -> None:
         # Trajectory pinned to a fictional older bank_version.
         traj = _trajectory(pinned_version="v0.0.5")
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -597,7 +597,7 @@ class TestVersionMismatch:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )
@@ -607,14 +607,14 @@ class TestVersionMismatch:
         # Drift does NOT block status — it's surfaced as informational.
         assert out["status_proposal"] is True
 
-    def test_no_pinned_version_no_mismatch(self, mock_bank_env: Path) -> None:
+    async def test_no_pinned_version_no_mismatch(self, mock_bank_env: Path) -> None:
         traj = _trajectory()
         # Strip the bank_version block from simulation_outcome.
         outcome = json.loads(traj["simulation_outcome"])
         outcome["provenance"]["bank_version"] = {}
         traj["simulation_outcome"] = json.dumps(outcome)
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
                 [
                     _axis_payload(
@@ -625,7 +625,7 @@ class TestVersionMismatch:
                 ]
             ),
         ):
-            out = score_sov_ai_multilingual_parity_trajectory(
+            out = await score_sov_ai_multilingual_parity_trajectory(
                 traj,
                 {"judge_a": object()},
             )

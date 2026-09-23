@@ -69,13 +69,13 @@ class TestRegistration:
 
 
 class TestShortCircuit:
-    def test_locale_without_a_detector_still_scores_the_lexicon_axes(self) -> None:
+    async def test_locale_without_a_detector_still_scores_the_lexicon_axes(self) -> None:
         """Only ``in_wrong_language_rate`` compares against the locale's
         language. Withholding the other two as well is what reported five
         real locales (Kannada, Malayalam, Odia, Nepali, Marathi) as untested
         across 500 scored rows.
         """
-        result = score_refusal_basics_trajectory(
+        result = await score_refusal_basics_trajectory(
             _trajectory(locale="xx_YY", assistant_messages=["hello"]),
             {},
         )
@@ -88,8 +88,8 @@ class TestShortCircuit:
         # language" rather than "could not be checked".
         assert "refusal.in_wrong_language_rate" not in result["scores"]
 
-    def test_no_assistant_turns_returns_noop(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_no_assistant_turns_returns_noop(self) -> None:
+        result = await score_refusal_basics_trajectory(
             {
                 "locale": "en_US",
                 "conversation_messages": json.dumps(
@@ -109,8 +109,8 @@ class TestShortCircuit:
 
 
 class TestCleanTrajectory:
-    def test_no_refusal_means_zero_refusal_rate(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_no_refusal_means_zero_refusal_rate(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="en_US",
                 assistant_messages=[
@@ -133,8 +133,8 @@ class TestCleanTrajectory:
 
 
 class TestRefusalInExpectedLanguage:
-    def test_english_refusal_in_english_locale(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_english_refusal_in_english_locale(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="en_US",
                 assistant_messages=[
@@ -161,8 +161,8 @@ class TestRefusalInExpectedLanguage:
 
 
 class TestWrongLanguageRefusal:
-    def test_english_refusal_in_hindi_locale_flagged(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_english_refusal_in_hindi_locale_flagged(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -175,8 +175,8 @@ class TestWrongLanguageRefusal:
         assert scores["refusal.in_wrong_language_rate"]["score"] == 0.0
         assert result["status_proposal"] is False
 
-    def test_english_refusal_in_portuguese_locale_flagged(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_english_refusal_in_portuguese_locale_flagged(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="pt_BR",
                 assistant_messages=[
@@ -188,8 +188,8 @@ class TestWrongLanguageRefusal:
         scores = result["scores"]
         assert scores["refusal.in_wrong_language_rate"]["score"] == 0.0
 
-    def test_portuguese_refusal_in_portuguese_locale_clean(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_portuguese_refusal_in_portuguese_locale_clean(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="pt_BR",
                 assistant_messages=[
@@ -221,16 +221,16 @@ class TestCannedPhraseDetection:
             "Je ne peux pas répondre. En tant qu'IA, je n'ai pas accès.",
         ],
     )
-    def test_canned_phrases_flagged(self, phrase: str) -> None:
+    async def test_canned_phrases_flagged(self, phrase: str) -> None:
         # Use en_US locale so we don't conflate with wrong-language detection.
-        result = score_refusal_basics_trajectory(
+        result = await score_refusal_basics_trajectory(
             _trajectory(locale="en_US", assistant_messages=[phrase]),
             {},
         )
         assert result["scores"]["refusal.canned_phrase_rate"]["score"] == 0.0
 
-    def test_clean_refusal_no_canned_flagged(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_clean_refusal_no_canned_flagged(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="en_US",
                 assistant_messages=[
@@ -248,8 +248,8 @@ class TestCannedPhraseDetection:
 
 
 class TestPerTurnDetails:
-    def test_per_turn_carries_match_diagnostics(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_per_turn_carries_match_diagnostics(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -273,9 +273,9 @@ class TestPerTurnDetails:
 
 
 class TestStatusProposalGating:
-    def test_high_refusal_rate_alone_does_not_flip_status(self) -> None:
+    async def test_high_refusal_rate_alone_does_not_flip_status(self) -> None:
         """detected_rate is informational; only the two reversed axes gate."""
-        result = score_refusal_basics_trajectory(
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="en_US",
                 assistant_messages=[
@@ -291,8 +291,8 @@ class TestStatusProposalGating:
         assert result["scores"]["refusal.detected_rate"]["score"] == 1.0
         assert result["status_proposal"] is True
 
-    def test_canned_phrase_alone_flips_status(self) -> None:
-        result = score_refusal_basics_trajectory(
+    async def test_canned_phrase_alone_flips_status(self) -> None:
+        result = await score_refusal_basics_trajectory(
             _trajectory(
                 locale="en_US",
                 assistant_messages=[

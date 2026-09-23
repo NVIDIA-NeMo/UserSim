@@ -4,7 +4,7 @@
 from usersim.engine.evaluator.scorers import register_scorer
 
 
-def score(row, models):
+async def score(row, models):
     return {"fixture_axis": 1.0}
 
 

@@ -21,7 +21,7 @@ sovereign-AI readiness question:
 
 The two probes share the same persona-tag vocabulary and route
 through the same in-sim infrastructure (``ConversationState``,
-``OutcomeBuilder``, ``call_llm``), and their outputs converge in the
+``OutcomeBuilder``, ``acall_llm``), and their outputs converge in the
 combined sovereign-AI scorecard.
 
 Public entry point: :func:`generator.simulate_sov_ai_dynamic`.

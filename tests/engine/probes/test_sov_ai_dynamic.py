@@ -10,7 +10,7 @@ Three layers (parallel to ``test_sov_ai_facts.py``):
    from a probing taxonomy.
 2. **Taxonomy caching** — process-local cache + env-override.
 3. **End-to-end probe** — ``simulate_sov_ai_dynamic``
-   with a mocked ``call_llm`` so no real network calls happen.
+   with a mocked ``acall_llm`` so no real network calls happen.
 
 No live LLM. No real Nemotron-Personas dataset. Everything here runs
 in under a second against fixtures or against the shipped placeholder
@@ -401,7 +401,7 @@ class TestSimulateSovAiDynamic:
         assert "sov_ai_dynamic" in _PROBE_REGISTRY
         assert resolve_probe("sov_ai_dynamic").__name__ == "SovAiDynamicProbe"
 
-    def test_single_turn_runs_end_to_end(
+    async def test_single_turn_runs_end_to_end(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -425,7 +425,7 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_dynamic(
+            result = await probe_gen.simulate_sov_ai_dynamic(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -467,7 +467,7 @@ class TestSimulateSovAiDynamic:
         # taxonomy_version must be pinned on provenance.
         assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.1"
 
-    def test_two_turn_mode_issues_followup(
+    async def test_two_turn_mode_issues_followup(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -496,7 +496,7 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_dynamic(
+            result = await probe_gen.simulate_sov_ai_dynamic(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -526,7 +526,7 @@ class TestSimulateSovAiDynamic:
         assert messages[3]["content"] == assistant_reply_2
         assert result["num_turns"] == 2
 
-    def test_empty_opening_fails_cleanly(
+    async def test_empty_opening_fails_cleanly(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -557,7 +557,7 @@ class TestSimulateSovAiDynamic:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_dynamic(
+            result = await probe_gen.simulate_sov_ai_dynamic(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -583,7 +583,7 @@ class TestSimulateSovAiDynamic:
         assert result["probing_subtopic_hints_used"]
         assert result["probe_variant"].startswith("brazil-")
 
-    def test_user_model_exception_fails_cleanly(
+    async def test_user_model_exception_fails_cleanly(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -598,7 +598,7 @@ class TestSimulateSovAiDynamic:
             ),
             _patched_call_llm(RuntimeError("rate limited")),
         ):
-            result = probe_gen.simulate_sov_ai_dynamic(
+            result = await probe_gen.simulate_sov_ai_dynamic(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -619,7 +619,7 @@ class TestSimulateSovAiDynamic:
         assert outcome["status"] == "failed"
         assert outcome["failure_class"] == FailureClass.USER_QUERY_GATE_EXHAUSTED.value
 
-    def test_assistant_failure_after_opening_fails_cleanly(
+    async def test_assistant_failure_after_opening_fails_cleanly(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -634,7 +634,7 @@ class TestSimulateSovAiDynamic:
         # the unified loop's call sequence for turn-1.
         judge_payload = "<explanation>looks fine</explanation>\n<rating>success</rating>"
 
-        def _side_effect(models, alias, msgs, **kwargs):
+        async def _side_effect(models, alias, msgs, **kwargs):
             if alias == "user_model":
                 return {"role": "assistant", "content": opening_msg}
             if alias == "judge_model":
@@ -652,7 +652,7 @@ class TestSimulateSovAiDynamic:
             ),
             _patched_call_llm(_side_effect),
         ):
-            result = probe_gen.simulate_sov_ai_dynamic(
+            result = await probe_gen.simulate_sov_ai_dynamic(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -730,7 +730,7 @@ def _mock_call_llm(
     user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
-    """Alias-dispatching ``call_llm`` mock for the unified loop.
+    """Alias-dispatching ``acall_llm`` mock for the unified loop.
 
     See test_sov_ai_facts._mock_call_llm for the full rationale.
     sov_ai_dynamic generates turn-1 via the user-LLM (no verbatim
@@ -764,19 +764,19 @@ def _mock_call_llm(
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the unified loop binds it.
+    """Patch ``acall_llm`` everywhere the unified loop binds it.
 
-    Patches both ``core.simulation.call_llm`` (assistant + turn-1
-    generation) AND ``core.judges.call_llm`` (in-sim judge) since
-    each consumer module re-imports ``call_llm`` at module load.
+    Patches both ``core.simulation.acall_llm`` (assistant + turn-1
+    generation) AND ``core.judges.acall_llm`` (in-sim judge) since
+    each consumer module re-imports ``acall_llm`` at module load.
     """
     with (
         patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
             side_effect=side_effect,
         ),
         patch(
-            "usersim.engine.core.judges.call_llm",
+            "usersim.engine.core.judges.acall_llm",
             side_effect=side_effect,
         ),
     ):

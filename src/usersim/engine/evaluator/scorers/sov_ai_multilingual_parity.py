@@ -67,7 +67,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.locale import expected_language_display
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.query_bank import Query, load_query_bank_default
@@ -255,7 +255,7 @@ def _build_schema():
 # ---------------------------------------------------------------------------
 
 
-def score_sov_ai_multilingual_parity_trajectory(
+async def score_sov_ai_multilingual_parity_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -347,7 +347,7 @@ def score_sov_ai_multilingual_parity_trajectory(
     conversation = _normalize_conversation(trajectory.get("conversation_messages"))
     persona_text = _format_persona(trajectory.get("persona"))
 
-    scores = _score_one_query(
+    scores = await _score_one_query(
         query=query,
         locale=locale,
         persona_text=persona_text,
@@ -387,7 +387,7 @@ def score_sov_ai_multilingual_parity_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _score_one_query(
+async def _score_one_query(
     *,
     query: Query,
     locale: str,
@@ -416,7 +416,7 @@ def _score_one_query(
 
     schema_model = _build_schema()
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [
