@@ -125,6 +125,33 @@ def test_gather_is_never_used_in_a_form_that_absorbs_the_guard() -> None:
     )
 
 
+def test_no_handler_catches_the_guard() -> None:
+    """A bare ``except:`` or ``except BaseException`` absorbs the guard.
+
+    ``except Exception`` is fine and used widely -- the guard is deliberately
+    not an ``Exception`` so those handlers miss it. The two forms banned here
+    are the ones that catch it anyway, which puts an unmocked network
+    boundary back under a passing test.
+    """
+    import ast
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parent.parent
+    offenders: list[str] = []
+    for directory in ("src", "tests", "scripts"):
+        for path in (repo_root / directory).rglob("*.py"):
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.ExceptHandler):
+                    continue
+                where = f"{path.relative_to(repo_root)}:{node.lineno}"
+                if node.type is None:
+                    offenders.append(f"{where} (bare except)")
+                elif isinstance(node.type, ast.Name) and node.type.id == "BaseException":
+                    offenders.append(f"{where} (except BaseException)")
+    assert not offenders, f"these handlers catch the network guard and hide an unmocked boundary: {offenders}"
+
+
 def test_reasoning_estimate_degrades_when_no_tokenizer(monkeypatch) -> None:
     """A missing tokenizer must yield ``unavailable``, not crash the report.
 
