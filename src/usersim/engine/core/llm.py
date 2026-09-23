@@ -148,6 +148,16 @@ def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def
         _CONV_LOCAL.outcome_builder = builder
 
 
+def get_current_outcome_builder():  # type: ignore[no-untyped-def]
+    """Return the OutcomeBuilder currently receiving per-call stats, if any.
+
+    A scope that installs its own builder saves this first and puts it back
+    on the way out, so an inner scope cannot detach the row's builder and
+    leave the calls after it unattributed.
+    """
+    return getattr(_CONV_LOCAL, "outcome_builder", None)
+
+
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:
     """Forward per-call resource stats to the thread-local outcome builder, if set.
 

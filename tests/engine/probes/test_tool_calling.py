@@ -274,3 +274,72 @@ def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
     outcome = json.loads(result["simulation_outcome"])
     assert result["conversation_status"] is False
     assert outcome["failure_attribution"] == "api_response_model"
+
+
+def _tool_entry(index: int) -> dict:
+    return {
+        "tool": {
+            "type": "function",
+            "function": {
+                "name": f"tool_{index}",
+                "description": f"Tool number {index}",
+                "parameters": {"type": "object", "properties": {}},
+            },
+        }
+    }
+
+
+class TestToolSubsetIsRowDerived:
+    """Which tools a row is given must be a function of the row itself.
+
+    The subset shapes the whole conversation but is not part of the
+    trajectory identity, so two rows sharing an identity have to be handed
+    the same tools for that identity to mean anything.
+    """
+
+    @staticmethod
+    def _subset(**data_overrides: object) -> list[str]:
+        from usersim.engine.core.behavioral import compute_behavioral_profile
+
+        persona = {"first_name": "A", "last_name": "User", "age": 35}
+        data = {
+            "tools": [_tool_entry(i) for i in range(12)],
+            "theme": json.dumps({"type": "T", "description": "d", "tool_expected": True}),
+            "persona_uuid": "persona-1",
+            "trajectory_id": "traj-1",
+            "disclosure_style": "upfront",
+            "user_interaction_style": "neutral",
+        }
+        data.update(data_overrides)
+        cfg = types.SimpleNamespace(
+            tools_column="tools",
+            theme_column="theme",
+            max_tools=3,
+            max_turns=2,
+            max_query_attempts=1,
+            context_compression=False,
+            compression_window=1,
+            enforce_user_language=False,
+        )
+        probe = ToolCallingProbe(
+            persona=persona,
+            locale="en_US",
+            language="English",
+            models={},
+            cfg=cfg,
+            provenance=Provenance(),
+            profile=compute_behavioral_profile(persona),
+            data=data,
+            outcome_builder=OutcomeBuilder(provenance=Provenance()),
+        )
+        return [tool["tool"]["function"]["name"] for tool in probe.tool_subset]
+
+    def test_one_row_always_draws_the_same_tools(self) -> None:
+        first = self._subset()
+        second = self._subset()
+        assert first == second, f"one row drew two different tool subsets: {first} then {second}"
+
+    def test_separate_rows_draw_separately(self) -> None:
+        a = self._subset(trajectory_id="traj-a")
+        b = self._subset(trajectory_id="traj-b")
+        assert a != b, f"two rows drew the same subset {a}, so the draw is not derived from the row"

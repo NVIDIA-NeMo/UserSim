@@ -19,7 +19,7 @@ from data_designer.engine.column_generators.generators.base import (
 )
 
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import set_runtime_assets_dir
+from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
 from usersim.engine.core.behavioral import (
     compute_behavioral_profile,
     compute_disclosure_style,
@@ -148,9 +148,35 @@ class ConversationSimulatorGenerator(
 ):
     """Unified generator that dispatches to probe-specific simulation modules."""
 
+    def _initialize(self) -> None:
+        """Prepare process-wide state once, before any row runs.
+
+        The log level is process-wide, so it belongs to the run rather than to
+        a row: setting it per row would let one column's verbosity decide how
+        loudly everything else logs.
+
+        Resolving the code SHA shells out to git. Doing it here keeps that
+        subprocess out of the first row, where it would be charged to a
+        trajectory rather than to setup.
+        """
+        if self.config.verbosity >= 2:
+            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
+        get_code_sha()
+
     def generate(self, data: dict) -> dict:
+        """Run one row with the configured asset root installed for its duration.
+
+        The root is scoped to the row rather than to the process, so a row that
+        sets one cannot change how any later row resolves its banks.
+        """
+        token = set_runtime_assets_dir(self.config.assets_dir)
+        try:
+            return self._generate_row(data)
+        finally:
+            reset_runtime_assets_dir(token)
+
+    def _generate_row(self, data: dict) -> dict:
         cfg = self.config
-        set_runtime_assets_dir(cfg.assets_dir)
         models = {}
         for alias in MODEL_ALIASES:
             try:
@@ -178,10 +204,6 @@ class ConversationSimulatorGenerator(
                     "  |-- embedding model %r not in registry; finance dense retrieval will fall back to lexical",
                     embed_alias,
                 )
-
-        # Set per-call logging level based on verbosity
-        if cfg.verbosity >= 2:
-            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
 
         t_record_start = time.monotonic()
 

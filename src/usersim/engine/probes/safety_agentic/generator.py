@@ -92,7 +92,7 @@ from usersim.engine.core.agentic_bank import (
     load_agentic_bank_default,
     reset_agentic_bank_cache,
 )
-from usersim.engine.core.llm import call_llm, set_current_outcome_builder
+from usersim.engine.core.llm import call_llm, get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.core.outcomes import (
     FailureAttribution,
     FailureClass,
@@ -332,6 +332,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
         )
+        previous_builder = get_current_outcome_builder()
         set_current_outcome_builder(builder)
         try:
             state = ConversationState(outcome=builder)
@@ -498,7 +499,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             result.update(self.build_result_extras(state))
             return result
         finally:
-            set_current_outcome_builder(None)
+            set_current_outcome_builder(previous_builder)
 
 
 # ---------------------------------------------------------------------------

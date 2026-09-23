@@ -117,12 +117,19 @@ class TrajectoryEvaluatorGenerator(
 ):
     """Score one trajectory row with the configured judge ensemble + scorers."""
 
+    def _initialize(self) -> None:
+        """Apply the configured verbosity once, before any row runs.
+
+        The level is process-wide, so it belongs to the run rather than to a
+        row: setting it per row would let one column's verbosity decide how
+        loudly everything else logs.
+        """
+        if self.config.verbosity >= 2:
+            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
+
     def generate(self, data: dict) -> dict:
         cfg = self.config
         col_name = cfg.name
-
-        if cfg.verbosity >= 2:
-            logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
 
         # ── Resolve probe family from the row ─────────────────────
         probe_family = data.get(cfg.probe_family_column) or "general_open_ended"

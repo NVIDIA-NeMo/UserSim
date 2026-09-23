@@ -19,6 +19,7 @@ emits trajectories; sim-side guardrails (e.g. zero-tool-calls) live on
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import random
@@ -101,6 +102,17 @@ def _build_tool_context(tool_subset: list) -> str:
         desc = spec.get("description", "No description available.")
         lines.append(f"- {name}: {desc}")
     return "\n".join(lines) if lines else "No tools available."
+
+
+def _tool_subset_seed(data: dict) -> int:
+    """Derive a stable seed for a row's tool draw.
+
+    Prefers the trajectory identity so two configurations over one persona
+    draw independently, and falls back to the persona when a caller builds a
+    probe without one.
+    """
+    key = str(data.get("trajectory_id") or data.get("persona_uuid") or "")
+    return int(hashlib.sha256(key.encode()).hexdigest(), 16) & 0xFFFFFFFF
 
 
 def _normalize_tool_list(tools_raw: Any) -> list[dict]:
@@ -236,7 +248,11 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tools_raw = self._data[cfg.tools_column]
         all_tools = _normalize_tool_list(tools_raw)
-        self.tool_subset = random.sample(
+        # Drawn from the row's own identity rather than the process RNG. The
+        # subset shapes the entire conversation but is not part of the
+        # trajectory identity, so an identity only means something if the same
+        # row is always handed the same tools.
+        self.tool_subset = random.Random(_tool_subset_seed(self._data)).sample(
             all_tools,
             min(cfg.max_tools, len(all_tools)),
         )
