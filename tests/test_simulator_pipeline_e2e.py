@@ -25,7 +25,7 @@ This test fills that gap. For every probe in the registry it:
 4. Constructs the probe class (``resolve_probe(probe_name)(...)``)
    with that cfg and a synthetic persona — the same calling pattern
    ``ConversationSimulatorGenerator.generate`` uses.
-5. Runs ``probe.run_dispatch(...)`` against a mocked ``call_llm`` so
+5. Runs ``await probe.run_dispatch(...)`` against a mocked ``call_llm`` so
    no real network calls happen.
 6. Asserts the result is **not** a scenario-aborted outcome and
    that at least one assistant turn was produced.
@@ -174,11 +174,11 @@ def _patched_call_llm():
     surface area focused.
     """
     targets = (
-        "usersim.engine.core.simulation.call_llm",
-        "usersim.engine.core.judges.call_llm",
-        "usersim.engine.core.context.call_llm",
-        "usersim.engine.probes.tool_calling.generator.call_llm",
-        "usersim.engine.probes.safety_agentic.generator.call_llm",
+        "usersim.engine.core.simulation.acall_llm",
+        "usersim.engine.core.judges.acall_llm",
+        "usersim.engine.core.context.acall_llm",
+        "usersim.engine.probes.tool_calling.generator.acall_llm",
+        "usersim.engine.probes.safety_agentic.generator.acall_llm",
     )
     patches = [patch(t, side_effect=_mock_call_llm_side_effect) for t in targets]
     for p in patches:
@@ -299,7 +299,7 @@ def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
+async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
     """Construct + run one probe end-to-end against synthetic inputs
     and a mocked ``call_llm``. Returns the result dict the probe
     produces (same shape ``ConversationSimulatorGenerator`` would
@@ -352,7 +352,7 @@ def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
                 data=data,
                 outcome_builder=outcome_builder,
             )
-            result = probe.run_dispatch(
+            result = await probe.run_dispatch(
                 models=models,
                 data=data,
                 cfg=cfg,
@@ -385,7 +385,7 @@ _PROBE_LOCALES: dict[str, str] = {
 
 
 @pytest.mark.parametrize("probe_type", sorted(known_probes()))
-def test_probe_constructs_and_dispatches_through_cli_wiring(
+async def test_probe_constructs_and_dispatches_through_cli_wiring(
     probe_type: str,
 ) -> None:
     """For every shipped probe: the wiring
@@ -403,7 +403,7 @@ def test_probe_constructs_and_dispatches_through_cli_wiring(
     not configured`` regression).
     """
     locale = _PROBE_LOCALES.get(probe_type, _DEFAULT_LOCALE)
-    result = _drive_one_probe(probe_type, locale)
+    result = await _drive_one_probe(probe_type, locale)
 
     # Decode the simulation_outcome envelope.
     outcome = json.loads(result["simulation_outcome"])

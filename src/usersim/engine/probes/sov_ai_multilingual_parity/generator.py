@@ -255,7 +255,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
 
     # ── Optional hooks (verbatim + follow-up + invariants) ──────────
 
-    def get_verbatim_first_user_turn(
+    async def get_verbatim_first_user_turn(
         self,
         state: ConversationState,
     ) -> str | None:
@@ -274,9 +274,9 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         # variant without its own rendering; machine-translate it into the
         # conversation language (no-op for shipped locales / native
         # renderings). query_id is unchanged, so matched pairs still join.
-        return self._localize_verbatim(self._rendering)
+        return await self._localize_verbatim(self._rendering)
 
-    def format_followup_user_instructions(
+    async def format_followup_user_instructions(
         self,
         turn_idx: int,
         state: ConversationState,
@@ -302,7 +302,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_sov_ai_multilingual_parity(
+async def simulate_sov_ai_multilingual_parity(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -352,7 +352,7 @@ def simulate_sov_ai_multilingual_parity(
         return _aborted(f"query-bank load failed: {e}", provenance)
     except SovAiMultilingualParityProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

@@ -116,10 +116,10 @@ class TestBaseProbeDefaults:
         assert "Hello?" in prompt
         assert "(no history)" in prompt
 
-    def test_after_assistant_turn_appends_and_returns_content(self) -> None:
+    async def test_after_assistant_turn_appends_and_returns_content(self) -> None:
         probe = self._build()
         state = _StubState()
-        out = probe.after_assistant_turn(
+        out = await probe.after_assistant_turn(
             models={},
             state=state,
             assistant_response={"content": "Sure, here is..."},
@@ -143,14 +143,14 @@ class TestBaseProbeDefaults:
         assert extras["num_turns"] == 2
         assert extras["num_tool_calls"] == 2
 
-    def test_optional_hooks_return_documented_defaults(self) -> None:
+    async def test_optional_hooks_return_documented_defaults(self) -> None:
         probe = self._build()
         state = _StubState()
         assert probe.should_succeed(state) is True
-        assert probe.get_verbatim_first_user_turn(state) is None
+        assert await probe.get_verbatim_first_user_turn(state) is None
         assert probe.get_user_query_instruction(0) is None
         assert probe.get_user_query_instruction(5) is None
-        assert probe.format_followup_user_instructions(1, state) == []
+        assert await probe.format_followup_user_instructions(1, state) == []
         assert probe.on_followup_failure(state, "gate_exhausted") == "skip"
         assert probe.should_inline_judge_user_turn(0, state) is True
         assert probe.should_inline_judge_assistant_turn(0, state) is True
@@ -340,7 +340,7 @@ class _BankVerbatimProbe(BankVerbatimMixin, _SubclassedBankProbe):
 
 
 class TestBankVerbatimMixin:
-    def test_returns_verbatim_text_from_task(self) -> None:
+    async def test_returns_verbatim_text_from_task(self) -> None:
         builder = OutcomeBuilder()
         probe = _BankVerbatimProbe(
             persona={},
@@ -350,7 +350,7 @@ class TestBankVerbatimMixin:
             outcome_builder=builder,
             provenance=Provenance(),
         )
-        assert probe.get_verbatim_first_user_turn(_StubState()) == "Hello, can you help me?"
+        assert await probe.get_verbatim_first_user_turn(_StubState()) == "Hello, can you help me?"
 
     def test_skip_on_followup_failure(self) -> None:
         builder = OutcomeBuilder()
@@ -364,7 +364,7 @@ class TestBankVerbatimMixin:
         )
         assert probe.on_followup_failure(_StubState(), "any") == "skip"
 
-    def test_returns_none_when_field_empty(self) -> None:
+    async def test_returns_none_when_field_empty(self) -> None:
         class _EmptyTaskProbe(BankVerbatimMixin, _SubclassedBankProbe):
             label = "empty_task_test"
             verbatim_field = "verbatim_text"
@@ -381,7 +381,7 @@ class TestBankVerbatimMixin:
             outcome_builder=builder,
             provenance=Provenance(),
         )
-        assert probe.get_verbatim_first_user_turn(_StubState()) is None
+        assert await probe.get_verbatim_first_user_turn(_StubState()) is None
 
 
 class _TurnOneInstructionProbe(CustomTurn1InstructionMixin, _SubclassedBankProbe):
@@ -447,24 +447,24 @@ class TestBankReframingMixin:
             provenance=Provenance(),
         )
 
-    def test_returns_reframing_for_each_turn(self) -> None:
+    async def test_returns_reframing_for_each_turn(self) -> None:
         probe = self._build()
         state = _StubState()
-        assert probe.format_followup_user_instructions(1, state) == ["First reframe."]
-        assert probe.format_followup_user_instructions(2, state) == ["Second reframe."]
-        assert probe.format_followup_user_instructions(3, state) == ["Third reframe."]
+        assert await probe.format_followup_user_instructions(1, state) == ["First reframe."]
+        assert await probe.format_followup_user_instructions(2, state) == ["Second reframe."]
+        assert await probe.format_followup_user_instructions(3, state) == ["Third reframe."]
 
-    def test_returns_empty_list_past_reframing_count(self) -> None:
+    async def test_returns_empty_list_past_reframing_count(self) -> None:
         probe = self._build()
-        assert probe.format_followup_user_instructions(99, _StubState()) == []
+        assert await probe.format_followup_user_instructions(99, _StubState()) == []
 
     def test_abort_on_followup_failure(self) -> None:
         probe = self._build()
         assert probe.on_followup_failure(_StubState(), "any") == "abort"
 
-    def test_inherits_bank_verbatim_first_turn(self) -> None:
+    async def test_inherits_bank_verbatim_first_turn(self) -> None:
         probe = self._build()
-        assert probe.get_verbatim_first_user_turn(_StubState()) == "Initial pressure question?"
+        assert await probe.get_verbatim_first_user_turn(_StubState()) == "Initial pressure question?"
 
 
 class _AgenticProbe(AgenticMixin, _SubclassedBankProbe):
@@ -555,7 +555,7 @@ class _ToolExecProbe(ToolExecutionMixin, _MinimalProbe):
     def get_tools_for_assistant(self):
         return [{"type": "function", "function": {"name": "t", "parameters": {}}}]
 
-    def execute_tool_call(self, name, args, tc, state, models, *, turn_idx, call_idx):
+    async def execute_tool_call(self, name, args, tc, state, models, *, turn_idx, call_idx):
         self.executed.append(name)
         return '{"ok": true}'
 
@@ -572,11 +572,11 @@ class TestToolExecutionMixin:
         name, args = ToolExecutionMixin.parse_tool_call({"function": {"name": "x", "arguments": '{"a": 1}'}})
         assert name == "x" and args == {"a": 1}
 
-    def test_no_tool_calls_returns_content_without_llm(self) -> None:
+    async def test_no_tool_calls_returns_content_without_llm(self) -> None:
         probe = _ToolExecProbe(mode="single")
         state = _StubState()
-        with patch("usersim.engine.core.llm.call_llm") as m:
-            out = probe.after_assistant_turn(
+        with patch("usersim.engine.core.llm.acall_llm") as m:
+            out = await probe.after_assistant_turn(
                 {},
                 state,
                 {"content": "just talking", "tool_calls": None},
@@ -586,14 +586,14 @@ class TestToolExecutionMixin:
         assert probe.executed == [] and probe.rounds == [0]
         m.assert_not_called()
 
-    def test_single_mode_executes_one_round_then_synthesizes(self) -> None:
+    async def test_single_mode_executes_one_round_then_synthesizes(self) -> None:
         probe = _ToolExecProbe(mode="single")
         state = _StubState()
         with patch(
-            "usersim.engine.core.llm.call_llm",
+            "usersim.engine.core.llm.acall_llm",
             return_value={"content": "here is the answer", "tool_calls": None},
         ) as m:
-            out = probe.after_assistant_turn(
+            out = await probe.after_assistant_turn(
                 {},
                 state,
                 {"content": "", "tool_calls": [_tc()]},
@@ -610,7 +610,7 @@ class TestToolExecutionMixin:
         }
         assert state.messages[-1]["role"] == "assistant"
 
-    def test_multi_mode_re_calls_until_no_tool_calls(self) -> None:
+    async def test_multi_mode_re_calls_until_no_tool_calls(self) -> None:
         probe = _ToolExecProbe(mode="multi")
         state = _StubState()
         # First re-call asks for another tool; second stops.
@@ -621,10 +621,10 @@ class TestToolExecutionMixin:
             ]
         )
         with patch(
-            "usersim.engine.core.llm.call_llm",
+            "usersim.engine.core.llm.acall_llm",
             side_effect=lambda *a, **k: next(responses),
         ):
-            out = probe.after_assistant_turn(
+            out = await probe.after_assistant_turn(
                 {},
                 state,
                 {"content": "", "tool_calls": [_tc()]},
@@ -633,14 +633,14 @@ class TestToolExecutionMixin:
         assert probe.executed == ["t", "t"]  # two rounds
         assert out == "done"
 
-    def test_multi_mode_respects_per_turn_cap(self) -> None:
+    async def test_multi_mode_respects_per_turn_cap(self) -> None:
         probe = _ToolExecProbe(mode="multi", cap=1)
         state = _StubState()
         with patch(
-            "usersim.engine.core.llm.call_llm",
+            "usersim.engine.core.llm.acall_llm",
             return_value={"content": "capped synth", "tool_calls": None},
         ):
-            out = probe.after_assistant_turn(
+            out = await probe.after_assistant_turn(
                 {},
                 state,
                 {"content": "", "tool_calls": [_tc(cid="c1"), _tc(cid="c2")]},

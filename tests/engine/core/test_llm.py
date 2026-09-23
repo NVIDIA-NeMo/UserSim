@@ -15,7 +15,7 @@ trajectory's visible content. See ``reporting/_reasoning.py``.
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -23,10 +23,25 @@ from usersim.engine.core import llm
 from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
-    call_llm,
+    acall_llm,
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
+
+
+async def _noop_sleep(_delay):
+    """Stand in for the awaited backoff, returning at once."""
+    return None
+
+
+def _collect(into):
+    """Record each backoff without waiting it out."""
+
+    def _sleep(delay):
+        into.append(delay)
+        return None
+
+    return _sleep
 
 
 class TestAsyncModelCalls:
@@ -187,7 +202,7 @@ class TestConversationStateIsPerContext:
 
 
 class _Facade:
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -204,7 +219,7 @@ class _RejectsMaxTokensFacade:
     def __init__(self) -> None:
         self.calls: list[dict] = []
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         self.calls.append(dict(kwargs))
         if "max_tokens" in kwargs:
             raise RuntimeError(
@@ -223,12 +238,12 @@ class _BrokenFacade:
     def __init__(self) -> None:
         self.attempts = 0
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         self.attempts += 1
         raise AttributeError("'object' object has no attribute 'completion'")
 
 
-def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
+async def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
     """Retrying cannot repair a call that was built wrong.
 
     The backoff is there for a provider having a bad minute. Spending it on
@@ -238,19 +253,19 @@ def test_a_malformed_call_fails_immediately_instead_of_backing_off() -> None:
     facade = _BrokenFacade()
     slept: list[float] = []
 
-    with patch.object(llm.time, "sleep", slept.append), pytest.raises(AttributeError):
-        call_llm({"summary_model": facade}, "summary_model", [{"role": "user", "content": "hi"}])
+    with patch.object(llm.asyncio, "sleep", _collect(slept)), pytest.raises(AttributeError):
+        await acall_llm({"summary_model": facade}, "summary_model", [{"role": "user", "content": "hi"}])
 
     assert facade.attempts == 1, f"tried {facade.attempts} times; a defective call should be attempted once"
     assert slept == [], f"backed off {slept} before reporting a failure that no retry could fix"
 
 
-def test_transient_failures_are_still_retried() -> None:
+async def test_transient_failures_are_still_retried() -> None:
     """The guard above must not disable the backoff it sits next to."""
     calls: list[int] = []
 
     class _FlakyFacade:
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             calls.append(1)
             if len(calls) < 3:
                 raise RuntimeError("503 Service Unavailable")
@@ -259,8 +274,8 @@ def test_transient_failures_are_still_retried() -> None:
                 usage=SimpleNamespace(input_tokens=1, output_tokens=1),
             )
 
-    with patch.object(llm.time, "sleep", lambda _: None):
-        result = call_llm({"m": _FlakyFacade()}, "m", [{"role": "user", "content": "hi"}])
+    with patch.object(llm.asyncio, "sleep", _noop_sleep):
+        result = await acall_llm({"m": _FlakyFacade()}, "m", [{"role": "user", "content": "hi"}])
 
     assert result["content"] == "ok"
     assert len(calls) == 3
@@ -291,7 +306,7 @@ def test_non_ascii_budget_scales_up_never_down() -> None:
     assert scaled_max_tokens(facade(None), NON_ASCII_TOKEN_SCALE) == {}
 
 
-def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
+async def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     """Callers pass a token budget without knowing the model's spelling.
 
     The engine injects ``max_tokens`` at the call site for non-ASCII locales,
@@ -300,7 +315,7 @@ def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     burned all three attempts and failed the turn.
     """
     facade = _RejectsMaxTokensFacade()
-    result = call_llm(
+    result = await acall_llm(
         {"assistant_model": facade},
         "assistant_model",
         [{"role": "user", "content": "hi"}],
@@ -313,11 +328,11 @@ def test_call_llm_translates_max_tokens_for_reasoning_models() -> None:
     assert "max_tokens" not in facade.calls[1]
 
 
-def test_call_llm_records_data_designer_usage_tokens() -> None:
+async def test_call_llm_records_data_designer_usage_tokens() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        result = call_llm(
+        result = await acall_llm(
             {"judge_model": _Facade()},
             "judge_model",
             [{"role": "user", "content": "hello"}],
@@ -336,7 +351,7 @@ class _OpenAIShapedFacade:
     """Provider that exposes prompt_tokens / completion_tokens (the
     OpenAI-shaped names DD's ``extract_usage`` accepts as a fallback)."""
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -349,7 +364,7 @@ class _OpenAIShapedFacade:
         )
 
 
-def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
+async def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
     """The wrapper accepts either DD-canonical (input/output_tokens) or
     OpenAI-shaped (prompt/completion_tokens) Usage objects. This is
     behaviour we share with DD's own ``extract_usage`` parser and care
@@ -357,7 +372,7 @@ def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        call_llm(
+        await acall_llm(
             {"assistant_model": _OpenAIShapedFacade()},
             "assistant_model",
             [{"role": "user", "content": "hello"}],
@@ -375,7 +390,7 @@ class _ReasoningFieldFacade:
     does NOT read (regression lock that we don't accidentally re-enable
     Phase A capture against fields DD would have stripped anyway)."""
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         return SimpleNamespace(
             message=SimpleNamespace(
                 content="ok",
@@ -395,7 +410,7 @@ class _ReasoningFieldFacade:
         )
 
 
-def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
+async def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     """Regression lock: even if a mock exposes
     ``usage.completion_tokens_details.reasoning_tokens``, the wrapper
     must NOT attempt to capture it. Reasoning lives at the report-build
@@ -404,7 +419,7 @@ def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     builder = OutcomeBuilder()
     set_current_outcome_builder(builder)
     try:
-        call_llm(
+        await acall_llm(
             {"assistant_model": _ReasoningFieldFacade()},
             "assistant_model",
             [{"role": "user", "content": "hello"}],
@@ -420,11 +435,11 @@ def test_call_llm_ignores_provider_reasoning_telemetry() -> None:
     assert not hasattr(outcome, "per_model_reasoning_tokens")
 
 
-def test_context_window_error_is_not_retried() -> None:
+async def test_context_window_error_is_not_retried() -> None:
     class _ContextFacade:
         calls = 0
 
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             self.calls += 1
             raise RuntimeError(
                 "ProviderError: litellm.ContextWindowExceededError: "
@@ -432,9 +447,9 @@ def test_context_window_error_is_not_retried() -> None:
             )
 
     facade = _ContextFacade()
-    with patch("usersim.engine.core.llm.time.sleep") as sleep:
+    with patch("usersim.engine.core.llm.asyncio.sleep", new_callable=AsyncMock) as sleep:
         with pytest.raises(ContextWindowError) as exc:
-            call_llm(
+            await acall_llm(
                 {"assistant_model": facade},
                 "assistant_model",
                 [{"role": "user", "content": "large prompt"}],
@@ -444,11 +459,11 @@ def test_context_window_error_is_not_retried() -> None:
     sleep.assert_not_called()
 
 
-def test_transient_error_still_retries() -> None:
+async def test_transient_error_still_retries() -> None:
     class _FlakyFacade:
         calls = 0
 
-        def completion(self, messages, **kwargs):
+        async def acompletion(self, messages, **kwargs):
             self.calls += 1
             if self.calls == 1:
                 raise RuntimeError("temporary endpoint failure")
@@ -462,8 +477,8 @@ def test_transient_error_still_retries() -> None:
             )
 
     facade = _FlakyFacade()
-    with patch("usersim.engine.core.llm.time.sleep") as sleep:
-        result = call_llm(
+    with patch("usersim.engine.core.llm.asyncio.sleep", new_callable=AsyncMock) as sleep:
+        result = await acall_llm(
             {"assistant_model": facade},
             "assistant_model",
             [{"role": "user", "content": "hello"}],

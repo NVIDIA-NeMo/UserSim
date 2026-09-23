@@ -631,24 +631,22 @@ def _gate_cfg(**overrides):
 class TestTurn1LanguageGate:
     """Integration over ``_generate_and_gate_first_turn`` with stubbed LLMs."""
 
-    def _run(self, monkeypatch, *, user_text, cfg, judge_ok=True, locale="hi_Deva_IN"):
+    async def _run(self, monkeypatch, *, user_text, cfg, judge_ok=True, locale="hi_Deva_IN"):
         import usersim.engine.core.simulation as sim
 
-        monkeypatch.setattr(
-            sim,
-            "call_llm",
-            lambda models, alias, msgs, **kw: {"content": user_text},
-        )
+        async def _user_turn(models, alias, msgs, **kw):
+            return {"content": user_text}
+
+        async def _judge(models, alias, prompt):
+            return ("looks good", "success", judge_ok)
+
+        monkeypatch.setattr(sim, "acall_llm", _user_turn)
         # The judge is only reached if the language + fourth-wall prefilters
         # pass; stub it so the positive path can succeed deterministically.
-        monkeypatch.setattr(
-            sim,
-            "run_inline_judge",
-            lambda models, alias, prompt: ("looks good", "success", judge_ok),
-        )
+        monkeypatch.setattr(sim, "run_inline_judge", _judge)
         loop = ConversationLoop()
         state = ConversationState(outcome=OutcomeBuilder())
-        return loop._generate_and_gate_first_turn(
+        return await loop._generate_and_gate_first_turn(
             models={},
             state=state,
             probe=_StubAdapter(),
@@ -658,8 +656,8 @@ class TestTurn1LanguageGate:
             _t_loop_start=0.0,
         ), state
 
-    def test_romanized_turn_exhausts_with_language_fail_kind(self, monkeypatch):
-        (uq, ok, rating, expl, fail_kind), state = self._run(
+    async def test_romanized_turn_exhausts_with_language_fail_kind(self, monkeypatch):
+        (uq, ok, rating, expl, fail_kind), state = await self._run(
             monkeypatch,
             user_text=_ROMANIZED_TURN,
             cfg=_gate_cfg(),
@@ -669,8 +667,8 @@ class TestTurn1LanguageGate:
         out = state.outcome.finalize(OutcomeStatus.FAILED)
         assert out.n_user_language_violations == 3
 
-    def test_language_prefilter_traces_emitted(self, monkeypatch):
-        (_, ok, *_), state = self._run(
+    async def test_language_prefilter_traces_emitted(self, monkeypatch):
+        (_, ok, *_), state = await self._run(
             monkeypatch,
             user_text=_ROMANIZED_TURN,
             cfg=_gate_cfg(),
@@ -679,8 +677,8 @@ class TestTurn1LanguageGate:
         assert len(lang_traces) == 3
         assert ok is False
 
-    def test_devanagari_turn_passes_gate(self, monkeypatch):
-        (uq, ok, rating, expl, fail_kind), state = self._run(
+    async def test_devanagari_turn_passes_gate(self, monkeypatch):
+        (uq, ok, rating, expl, fail_kind), state = await self._run(
             monkeypatch,
             user_text=_DEVA_TURN,
             cfg=_gate_cfg(),
@@ -690,8 +688,8 @@ class TestTurn1LanguageGate:
         out = state.outcome.finalize(OutcomeStatus.OK)
         assert out.n_user_language_violations == 0
 
-    def test_enforcement_disabled_lets_romanized_through(self, monkeypatch):
-        (_, ok, *_), state = self._run(
+    async def test_enforcement_disabled_lets_romanized_through(self, monkeypatch):
+        (_, ok, *_), state = await self._run(
             monkeypatch,
             user_text=_ROMANIZED_TURN,
             cfg=_gate_cfg(enforce_user_language=False),
@@ -702,8 +700,8 @@ class TestTurn1LanguageGate:
         out = state.outcome.finalize(OutcomeStatus.OK)
         assert out.n_user_language_violations == 0
 
-    def test_latin_locale_is_unaffected(self, monkeypatch):
-        (_, ok, *_), state = self._run(
+    async def test_latin_locale_is_unaffected(self, monkeypatch):
+        (_, ok, *_), state = await self._run(
             monkeypatch,
             user_text="Hello, I need help with my visa.",
             cfg=_gate_cfg(),

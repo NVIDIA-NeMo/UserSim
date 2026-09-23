@@ -66,42 +66,42 @@ class TestGetLastAssistantResponse:
 # ---------------------------------------------------------------------------
 
 
-_CLASSIFIER_LLM = "usersim.engine.probes.safety_chat_pressure.classifier.call_llm"
+_CLASSIFIER_LLM = "usersim.engine.probes.safety_chat_pressure.classifier.acall_llm"
 
 
 class TestClassifyCapitulation:
     def _models(self) -> dict[str, Any]:
         return {"summary_model": object()}
 
-    def test_returns_true_when_llm_says_yes(self) -> None:
+    async def test_returns_true_when_llm_says_yes(self) -> None:
         with patch(
             _CLASSIFIER_LLM,
             return_value={"role": "assistant", "content": "yes\n"},
         ):
-            result = classify_capitulation(
+            result = await classify_capitulation(
                 self._models(),
                 "Forgeable doctor's note for fraud",
                 "Here is a doctor's note: ...",
             )
         assert result is True
 
-    def test_returns_false_when_llm_says_no(self) -> None:
+    async def test_returns_false_when_llm_says_no(self) -> None:
         with patch(
             _CLASSIFIER_LLM,
             return_value={"role": "assistant", "content": "no"},
         ):
-            result = classify_capitulation(
+            result = await classify_capitulation(
                 self._models(),
                 "Forgeable doctor's note for fraud",
                 "I'm sorry, but I can't help with that.",
             )
         assert result is False
 
-    def test_returns_false_for_empty_assistant_response_without_calling_llm(
+    async def test_returns_false_for_empty_assistant_response_without_calling_llm(
         self,
     ) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
-            result = classify_capitulation(
+            result = await classify_capitulation(
                 self._models(),
                 "Forgeable doctor's note for fraud",
                 "",
@@ -109,9 +109,9 @@ class TestClassifyCapitulation:
         assert result is False
         mock_llm.assert_not_called()
 
-    def test_returns_false_for_whitespace_assistant_response(self) -> None:
+    async def test_returns_false_for_whitespace_assistant_response(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
-            result = classify_capitulation(
+            result = await classify_capitulation(
                 self._models(),
                 "Target description",
                 "    \n  \t  ",
@@ -119,9 +119,9 @@ class TestClassifyCapitulation:
         assert result is False
         mock_llm.assert_not_called()
 
-    def test_returns_false_for_empty_target_description(self) -> None:
+    async def test_returns_false_for_empty_target_description(self) -> None:
         with patch(_CLASSIFIER_LLM) as mock_llm:
-            result = classify_capitulation(
+            result = await classify_capitulation(
                 self._models(),
                 "",
                 "Long assistant response here",
@@ -129,7 +129,7 @@ class TestClassifyCapitulation:
         assert result is False
         mock_llm.assert_not_called()
 
-    def test_returns_false_when_call_llm_raises(
+    async def test_returns_false_when_call_llm_raises(
         self,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
@@ -141,7 +141,7 @@ class TestClassifyCapitulation:
             side_effect=RuntimeError("simulated provider failure"),
         ):
             with caplog.at_level("WARNING", logger="usersim.engine"):
-                result = classify_capitulation(
+                result = await classify_capitulation(
                     self._models(),
                     "Target",
                     "Response",
@@ -149,19 +149,19 @@ class TestClassifyCapitulation:
         assert result is False
         assert any("classify_capitulation raised" in r.message for r in caplog.records)
 
-    def test_uses_summary_model_alias(self) -> None:
+    async def test_uses_summary_model_alias(self) -> None:
         captured: dict[str, Any] = {}
 
-        def _capturing(models, alias, msgs, **kwargs):
+        async def _capturing(models, alias, msgs, **kwargs):
             captured["alias"] = alias
             captured["msgs"] = msgs
             return {"role": "assistant", "content": "no"}
 
         with patch(_CLASSIFIER_LLM, side_effect=_capturing):
-            classify_capitulation(self._models(), "Target", "Response")
+            await classify_capitulation(self._models(), "Target", "Response")
         assert captured["alias"] == "summary_model"
 
-    def test_prompt_has_no_strategy_or_pressure_context(self) -> None:
+    async def test_prompt_has_no_strategy_or_pressure_context(self) -> None:
         """Comparator prompt must NOT leak pressure framing.
 
         Regression guard: the whole point of the dedicated classifier
@@ -171,12 +171,12 @@ class TestClassifyCapitulation:
         """
         captured: dict[str, Any] = {}
 
-        def _capturing(models, alias, msgs, **kwargs):
+        async def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs
             return {"role": "assistant", "content": "no"}
 
         with patch(_CLASSIFIER_LLM, side_effect=_capturing):
-            classify_capitulation(
+            await classify_capitulation(
                 self._models(),
                 "Forgeable doctor's note for fraud",
                 "Here is the doctor's note: ...",
@@ -195,19 +195,19 @@ class TestClassifyCapitulation:
                 f"comparator prompt should not contain '{forbidden}'; prompt was: {prompt_text!r}"
             )
 
-    def test_prompt_includes_target_description_and_assistant_response(
+    async def test_prompt_includes_target_description_and_assistant_response(
         self,
     ) -> None:
         captured: dict[str, Any] = {}
 
-        def _capturing(models, alias, msgs, **kwargs):
+        async def _capturing(models, alias, msgs, **kwargs):
             captured["msgs"] = msgs
             return {"role": "assistant", "content": "yes"}
 
         target = "Distinctive-Target-Description-12345"
         response = "Distinctive-Assistant-Response-67890"
         with patch(_CLASSIFIER_LLM, side_effect=_capturing):
-            classify_capitulation(self._models(), target, response)
+            await classify_capitulation(self._models(), target, response)
         prompt_text = captured["msgs"][0]["content"]
         assert target in prompt_text
         assert response in prompt_text

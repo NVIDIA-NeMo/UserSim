@@ -389,7 +389,7 @@ class TestSimulateSovAiFacts:
         assert "sov_ai_facts" in _PROBE_REGISTRY
         assert resolve_probe("sov_ai_facts").__name__ == "SovAiFactsProbe"
 
-    def test_single_turn_runs_end_to_end(
+    async def test_single_turn_runs_end_to_end(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
@@ -409,7 +409,7 @@ class TestSimulateSovAiFacts:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_facts(
+            result = await probe_gen.simulate_sov_ai_facts(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -440,7 +440,7 @@ class TestSimulateSovAiFacts:
         # Bank version must be pinned on the provenance block.
         assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.2"
 
-    def test_verbatim_question_is_first_user_turn(
+    async def test_verbatim_question_is_first_user_turn(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         pt_br_sample_bank: FactBank,
@@ -469,7 +469,7 @@ class TestSimulateSovAiFacts:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_facts(
+            result = await probe_gen.simulate_sov_ai_facts(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -494,7 +494,7 @@ class TestSimulateSovAiFacts:
         assert result["sovereign_facts_probed"] == [expected_fact.id]
         assert result["probe_variant"] == expected_fact.category
 
-    def test_two_turn_mode_issues_followup(
+    async def test_two_turn_mode_issues_followup(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -521,7 +521,7 @@ class TestSimulateSovAiFacts:
                 )
             ),
         ):
-            result = probe_gen.simulate_sov_ai_facts(
+            result = await probe_gen.simulate_sov_ai_facts(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -546,7 +546,7 @@ class TestSimulateSovAiFacts:
         assert messages[3]["content"] == assistant_reply_2
         assert result["num_turns"] == 2
 
-    def test_assistant_failure_produces_failed_outcome(
+    async def test_assistant_failure_produces_failed_outcome(
         self,
         pt_br_persona_southeast_teacher: dict[str, Any],
         simulator_cfg: Any,
@@ -558,7 +558,7 @@ class TestSimulateSovAiFacts:
             ),
             _patched_call_llm(RuntimeError("rate-limited by provider")),
         ):
-            result = probe_gen.simulate_sov_ai_facts(
+            result = await probe_gen.simulate_sov_ai_facts(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -583,7 +583,7 @@ class TestSimulateSovAiFacts:
         # attempted-but-failed probes.
         assert result["sovereign_facts_probed"]
 
-    def test_no_matching_fact_fails_cleanly(
+    async def test_no_matching_fact_fails_cleanly(
         self,
         tmp_path: Path,
         simulator_cfg: Any,
@@ -624,7 +624,7 @@ class TestSimulateSovAiFacts:
             os.environ,
             {"USERSIM_SOV_AI_FACTS_BANK_PT_BR": str(narrow_bank_path)},
         ):
-            result = probe_gen.simulate_sov_ai_facts(
+            result = await probe_gen.simulate_sov_ai_facts(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -738,11 +738,11 @@ def _patched_call_llm(side_effect):
     """
     with (
         patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
             side_effect=side_effect,
         ),
         patch(
-            "usersim.engine.core.judges.call_llm",
+            "usersim.engine.core.judges.acall_llm",
             side_effect=side_effect,
         ),
     ):

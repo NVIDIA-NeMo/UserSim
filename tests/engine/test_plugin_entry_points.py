@@ -85,19 +85,19 @@ class TestSimulatorRunsARow:
     """The simulator, constructed and driven the way the engine does."""
 
     @staticmethod
-    def _run_one_row() -> tuple[dict[str, Any], Any]:
+    async def _run_one_row() -> tuple[dict[str, Any], Any]:
         cfg = _cli_built_simulator_config(PROBE_TYPE, LOCALE)
         data = _synthetic_row_data(PROBE_TYPE, LOCALE, cfg)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
-            return generator.generate(data), cfg
+            return await generator.agenerate(data), cfg
 
-    def test_returns_the_row_with_the_configured_column(self) -> None:
-        row, cfg = self._run_one_row()
+    async def test_returns_the_row_with_the_configured_column(self) -> None:
+        row, cfg = await self._run_one_row()
         assert isinstance(row, dict), f"a cell-by-cell generator returns the row mapping, got {type(row).__name__}"
         assert cfg.name in row, f"the configured column {cfg.name!r} is absent from the returned row"
 
-    def test_adds_no_column_the_config_did_not_declare(self) -> None:
+    async def test_adds_no_column_the_config_did_not_declare(self) -> None:
         """Only declared columns survive the write.
 
         The engine persists the configured column plus the declared
@@ -109,7 +109,7 @@ class TestSimulatorRunsARow:
         before = set(data)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
-            row = generator.generate(data)
+            row = await generator.agenerate(data)
 
         declarable = {cfg.name} | set(cfg.side_effect_columns)
         undeclared = (set(row) - before) - declarable
@@ -117,8 +117,8 @@ class TestSimulatorRunsARow:
             f"row carries columns the config never declared, so they are dropped: {sorted(undeclared)}"
         )
 
-    def test_carries_the_identity_columns_forward(self) -> None:
-        row, _cfg = self._run_one_row()
+    async def test_carries_the_identity_columns_forward(self) -> None:
+        row, _cfg = await self._run_one_row()
         for column in ("trajectory_id", "persona_uuid"):
             assert row.get(column), f"{column} is missing or empty, so the row cannot be identified"
 
@@ -137,7 +137,7 @@ class TestEvaluatorRunsARow:
         data = _synthetic_row_data(PROBE_TYPE, LOCALE, cfg)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
-            return generator.generate(data)
+            return await generator.agenerate(data)
 
     async def test_scores_a_simulator_row(self) -> None:
         from usersim.engine.evaluator.config import JudgeSpecConfig, TrajectoryEvaluatorConfig

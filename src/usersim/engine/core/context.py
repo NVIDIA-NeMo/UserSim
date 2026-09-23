@@ -14,7 +14,7 @@ import logging
 import time
 from typing import Any
 
-from usersim.engine.core.llm import append_debug_record, call_llm
+from usersim.engine.core.llm import acall_llm, append_debug_record
 
 logger = logging.getLogger("usersim.engine")
 
@@ -31,7 +31,7 @@ _SUMMARY_PROMPT = (
 )
 
 
-def summarize_response(
+async def summarize_response(
     models: dict[str, Any],
     assistant_content: str,
 ) -> str:
@@ -43,7 +43,7 @@ def summarize_response(
     msgs = [{"role": "user", "content": prompt}]
 
     t0 = time.monotonic()
-    resp = call_llm(models, MODEL_SUMMARY, msgs)
+    resp = await acall_llm(models, MODEL_SUMMARY, msgs)
     summary = resp.get("content", "") if isinstance(resp, dict) else ""
     elapsed = time.monotonic() - t0
     orig_words = len(assistant_content.split())

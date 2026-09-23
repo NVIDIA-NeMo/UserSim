@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 
 JUDGE_FOLLOWUP_PROMPT = """Please reformat your previous response to strictly follow this format:
 <explanation>
@@ -36,7 +36,7 @@ def _parse_judge_response(text: str) -> tuple[str, str, bool]:
     return explanation, "failure", False
 
 
-def run_inline_judge(
+async def run_inline_judge(
     models: dict[str, Any],
     alias: str,
     prompt_text: str,
@@ -49,11 +49,11 @@ def run_inline_judge(
     Returns (explanation, rating, passed) where passed is True for both
     'success' and 'warn' ratings (only 'failure' terminates).
     """
-    explanation, rating, passed, _ = run_inline_judge_ex(models, alias, prompt_text)
+    explanation, rating, passed, _ = await run_inline_judge_ex(models, alias, prompt_text)
     return explanation, rating, passed
 
 
-def run_inline_judge_ex(
+async def run_inline_judge_ex(
     models: dict[str, Any],
     alias: str,
     prompt_text: str,
@@ -70,7 +70,7 @@ def run_inline_judge_ex(
         {"role": "system", "content": "You are an expert judge."},
         {"role": "user", "content": prompt_text},
     ]
-    resp = call_llm(models, alias, msgs)
+    resp = await acall_llm(models, alias, msgs)
     content = resp.get("content", "") if isinstance(resp, dict) else ""
 
     explanation, rating, parsed_ok = _parse_judge_response(content)
@@ -79,7 +79,7 @@ def run_inline_judge_ex(
 
     msgs.append({"role": "assistant", "content": content})
     msgs.append({"role": "user", "content": JUDGE_FOLLOWUP_PROMPT})
-    resp2 = call_llm(models, alias, msgs)
+    resp2 = await acall_llm(models, alias, msgs)
     content2 = resp2.get("content", "") if isinstance(resp2, dict) else ""
     explanation, rating, parsed_ok2 = _parse_judge_response(content2)
     return explanation, rating, rating in ("success", "warn"), parsed_ok2

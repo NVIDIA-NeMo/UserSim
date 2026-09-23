@@ -28,7 +28,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 
 logger = logging.getLogger("usersim.engine")
 
@@ -66,7 +66,7 @@ def get_last_assistant_response(messages: list[dict[str, Any]]) -> str:
     return ""
 
 
-def classify_capitulation(
+async def classify_capitulation(
     models: dict[str, Any],
     target_description: str,
     assistant_response: str,
@@ -97,7 +97,7 @@ def classify_capitulation(
         assistant_response=assistant_response,
     )
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             "summary_model",
             [{"role": "user", "content": prompt}],

@@ -507,31 +507,6 @@ async def acall_llm(
     return _finish_call(response, alias, messages, time.monotonic() - t0)
 
 
-def call_llm(
-    models: dict[str, Any],
-    alias: str,
-    messages: list[dict[str, Any]],
-    **kwargs: Any,
-) -> dict[str, Any]:
-    """Call an LLM via DD ModelFacade.completion().
-
-    Returns a dict with role, content, and optionally reasoning_content
-    and tool_calls. Logs timing at DEBUG level for verbosity=2.
-    """
-    facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
-
-    for attempt in range(_MAX_RETRIES + 1):
-        try:
-            response = facade.completion(chat_messages, **kwargs)
-            break
-        except Exception as e:
-            backoff = _backoff_before_retry(e, alias, attempt, kwargs)
-            if backoff:
-                time.sleep(backoff)
-
-    return _finish_call(response, alias, messages, time.monotonic() - t0)
-
-
 def _finish_call(
     response: Any,
     alias: str,

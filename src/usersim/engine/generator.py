@@ -164,6 +164,19 @@ class ConversationSimulatorGenerator(
         get_code_sha()
 
     def generate(self, data: dict) -> dict:
+        """Not available: a conversation awaits model calls. Use ``agenerate``.
+
+        Turns, judges and tool responses are awaited several levels down, so
+        there is no synchronous path to fall back on. The engine calls
+        ``agenerate`` directly; this exists because the base class declares
+        it and a caller reaching here has taken a wrong turn.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} simulates conversations asynchronously. "
+            f"Await agenerate(data) instead of calling generate(data)."
+        )
+
+    async def agenerate(self, data: dict) -> dict:
         """Run one row with the configured asset root installed for its duration.
 
         The root is scoped to the row rather than to the process, so a row that
@@ -171,11 +184,11 @@ class ConversationSimulatorGenerator(
         """
         token = set_runtime_assets_dir(self.config.assets_dir)
         try:
-            return self._generate_row(data)
+            return await self._generate_row(data)
         finally:
             reset_runtime_assets_dir(token)
 
-    def _generate_row(self, data: dict) -> dict:
+    async def _generate_row(self, data: dict) -> dict:
         cfg = self.config
         models = {}
         for alias in MODEL_ALIASES:
@@ -310,7 +323,7 @@ class ConversationSimulatorGenerator(
         # specific replayed row.
         set_conversation_id(f"{traj_id} | {persona_name} | {probe_type}")
 
-        # Install the thread-local outcome-builder hook so call_llm()
+        # Install the thread-local outcome-builder hook so await acall_llm()
         # invocations inside this trajectory feed per-model tokens /
         # calls / latencies into simulation_outcome. Cleared in the
         # finally block so we never leak the builder across rows.
@@ -331,7 +344,7 @@ class ConversationSimulatorGenerator(
                     data=data,
                     outcome_builder=row_outcome_builder,
                 )
-                result = probe.run_dispatch(
+                result = await probe.run_dispatch(
                     models=models,
                     data=data,
                     cfg=cfg,

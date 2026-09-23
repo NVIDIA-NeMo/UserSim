@@ -31,19 +31,19 @@ def _generator_without_resources(cfg: ConversationSimulatorConfig) -> Conversati
 class TestRuntimeAssetsRoot:
     """The per-row asset root must not outlive the row that set it."""
 
-    def test_restored_after_a_row_fails(self, tmp_path: Path) -> None:
+    async def test_restored_after_a_row_fails(self, tmp_path: Path) -> None:
         baseline = default_assets_dir()
         gen = _generator_without_resources(ConversationSimulatorConfig(name="conversation", assets_dir=str(tmp_path)))
 
         with pytest.raises(Exception):
-            gen.generate({})
+            await gen.agenerate({})
 
         assert default_assets_dir() == baseline, (
             "the row's asset root is still installed, so banks for whatever "
             "runs next resolve against it instead of the configured root"
         )
 
-    def test_a_nested_scope_puts_the_row_builder_back(self) -> None:
+    async def test_a_nested_scope_puts_the_row_builder_back(self) -> None:
         """A probe that installs its own builder must not detach the row's.
 
         Every model call feeds the installed builder, so a scope that clears
@@ -79,7 +79,7 @@ class TestRuntimeAssetsRoot:
             with pytest.raises(RuntimeError):
                 with pytest.MonkeyPatch.context() as mp:
                     mp.setattr(safety_agentic, "ConversationState", _explode)
-                    probe.run_dispatch(models={}, data={}, cfg=types.SimpleNamespace())
+                    await probe.run_dispatch(models={}, data={}, cfg=types.SimpleNamespace())
             assert get_current_outcome_builder() is row_builder, (
                 "the nested scope cleared the row's outcome builder instead of "
                 "restoring it, so later calls in this row record nowhere"
@@ -87,7 +87,7 @@ class TestRuntimeAssetsRoot:
         finally:
             set_current_outcome_builder(None)
 
-    def test_a_row_does_not_change_the_process_log_level(self) -> None:
+    async def test_a_row_does_not_change_the_process_log_level(self) -> None:
         """Verbosity belongs to the run, so a row must not raise it globally."""
         import logging
 
@@ -100,7 +100,7 @@ class TestRuntimeAssetsRoot:
             # absent persona column, which is past the point of interest.
             gen.get_model = lambda *a, **k: object()
             with pytest.raises(Exception):
-                gen.generate({})
+                await gen.agenerate({})
             assert engine_logger.level == logging.WARNING, (
                 "one row raised the process-wide log level, so every other row "
                 "in this process inherits it with no way back"
@@ -125,13 +125,13 @@ class TestRuntimeAssetsRoot:
             "the code SHA is still unresolved after setup, so the first row pays for the git call"
         )
 
-    def test_the_row_does_see_its_own_root(self, tmp_path: Path) -> None:
+    async def test_the_row_does_see_its_own_root(self, tmp_path: Path) -> None:
         """Guards the test above: it must fail for the right reason."""
         seen: list[Path] = []
         gen = _generator_without_resources(ConversationSimulatorConfig(name="conversation", assets_dir=str(tmp_path)))
         gen.get_model = lambda *a, **k: seen.append(default_assets_dir()) or (_ for _ in ()).throw(RuntimeError("stop"))
 
         with pytest.raises(Exception):
-            gen.generate({})
+            await gen.agenerate({})
 
         assert seen and seen[0] == tmp_path, f"row did not see its configured root, saw {seen}"

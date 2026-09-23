@@ -30,7 +30,7 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import (
     _parse_theme,
     format_conversation_history_for_prompt,
@@ -171,7 +171,7 @@ def _collect_prior_tool_responses(conversation_messages: list) -> str:
     )
 
 
-def _simulate_tool_response(
+async def _simulate_tool_response(
     models: dict,
     tool_spec: dict,
     tool_call: dict,
@@ -196,7 +196,7 @@ def _simulate_tool_response(
     if prior_context:
         prompt += prior_context
     msgs = [{"role": "user", "content": prompt}]
-    resp = call_llm(models, MODEL_API_RESPONSE, msgs)
+    resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
     content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
 
     did_reroll = False
@@ -205,7 +205,7 @@ def _simulate_tool_response(
     except (json.JSONDecodeError, TypeError):
         did_reroll = True
         logger.debug("  |-- api_response_model: invalid JSON, retrying once")
-        resp = call_llm(models, MODEL_API_RESPONSE, msgs)
+        resp = await acall_llm(models, MODEL_API_RESPONSE, msgs)
         content = resp.get("content", "{}") if isinstance(resp, dict) else "{}"
 
     return content, did_reroll
@@ -310,7 +310,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             extra_failure_criteria=extra_failure_criteria,
         )
 
-    def execute_tool_call(
+    async def execute_tool_call(
         self,
         name: str,
         args: dict[str, Any],
@@ -358,7 +358,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
         tool_spec = _find_tool_spec(name, self.tool_subset)
         if tool_spec:
-            simulated_response, did_reroll = _simulate_tool_response(
+            simulated_response, did_reroll = await _simulate_tool_response(
                 models,
                 tool_spec,
                 tc,
@@ -407,7 +407,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_tool_calling(
+async def simulate_tool_calling(
     models: dict,
     data: dict,
     persona: dict,
@@ -443,4 +443,4 @@ def simulate_tool_calling(
         data=data,
         outcome_builder=kwargs.get("outcome_builder"),
     )
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)

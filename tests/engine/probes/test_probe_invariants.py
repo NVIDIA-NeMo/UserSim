@@ -363,11 +363,11 @@ class TestBaseProbeAfterAssistantTurnContract:
             models={},
         )
 
-    def test_appends_assistant_message_and_returns_content(self) -> None:
+    async def test_appends_assistant_message_and_returns_content(self) -> None:
         probe = self._probe()
         state = _make_state()
         before = list(state.messages)
-        returned = probe.after_assistant_turn(
+        returned = await probe.after_assistant_turn(
             models={},
             state=state,
             assistant_response={"content": "Hello, world."},
@@ -378,10 +378,10 @@ class TestBaseProbeAfterAssistantTurnContract:
             {"role": "assistant", "content": "Hello, world."},
         ]
 
-    def test_returned_text_equals_last_message_content(self) -> None:
+    async def test_returned_text_equals_last_message_content(self) -> None:
         probe = self._probe()
         state = _make_state()
-        returned = probe.after_assistant_turn(
+        returned = await probe.after_assistant_turn(
             models={},
             state=state,
             assistant_response={"content": "Some reply."},
@@ -389,10 +389,10 @@ class TestBaseProbeAfterAssistantTurnContract:
         )
         assert returned == state.messages[-1]["content"]
 
-    def test_handles_empty_content(self) -> None:
+    async def test_handles_empty_content(self) -> None:
         probe = self._probe()
         state = _make_state()
-        returned = probe.after_assistant_turn(
+        returned = await probe.after_assistant_turn(
             models={},
             state=state,
             assistant_response={"content": ""},
@@ -401,10 +401,10 @@ class TestBaseProbeAfterAssistantTurnContract:
         assert returned == ""
         assert state.messages[-1] == {"role": "assistant", "content": ""}
 
-    def test_handles_non_dict_response_gracefully(self) -> None:
+    async def test_handles_non_dict_response_gracefully(self) -> None:
         probe = self._probe()
         state = _make_state()
-        returned = probe.after_assistant_turn(
+        returned = await probe.after_assistant_turn(
             models={},
             state=state,
             assistant_response="not a dict",  # type: ignore[arg-type]

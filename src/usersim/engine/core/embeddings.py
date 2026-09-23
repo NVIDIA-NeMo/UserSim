@@ -81,26 +81,3 @@ async def aembed_query(
     if not vectors:
         return None
     return list(vectors[0])
-
-
-def embed_query(
-    models: dict[str, Any],
-    alias: str,
-    text: str,
-) -> list[float] | None:
-    """Embed a single query string; return its vector or ``None`` on any error.
-
-    ``None`` is a soft signal to the caller to fall back to lexical retrieval;
-    this function never raises.
-    """
-    embed_fn = _embedder(models, alias, text, "generate_text_embeddings")
-    if embed_fn is None:
-        return None
-    try:
-        vectors = embed_fn([text])
-    except Exception as e:  # noqa: BLE001 — soft-fail to lexical
-        _embedding_failed(alias, e)
-        return None
-    if not vectors:
-        return None
-    return list(vectors[0])

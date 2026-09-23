@@ -89,10 +89,10 @@ class TestToolHelpers:
         spec = _find_tool_spec("nonexistent", sample_tools)
         assert spec is None
 
-    def test_api_simulator_keeps_tool_arguments_and_prior_results(self):
+    async def test_api_simulator_keeps_tool_arguments_and_prior_results(self):
         captured = {}
 
-        def fake_call_llm(models, alias, messages):
+        async def fake_call_llm(models, alias, messages):
             captured["alias"] = alias
             captured["prompt"] = messages[0]["content"]
             return {"content": '{"ok":true}'}
@@ -115,10 +115,10 @@ class TestToolHelpers:
         from unittest.mock import patch
 
         with patch(
-            "usersim.engine.probes.tool_calling.generator.call_llm",
+            "usersim.engine.probes.tool_calling.generator.acall_llm",
             side_effect=fake_call_llm,
         ):
-            content, rerolled = _simulate_tool_response(
+            content, rerolled = await _simulate_tool_response(
                 {},
                 tool_spec,
                 tool_call,
@@ -133,7 +133,7 @@ class TestToolHelpers:
         assert '"prior_secret":"rain"' in captured["prompt"]
 
 
-def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
+async def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     from usersim.engine.core.behavioral import compute_behavioral_profile
 
     persona = {"first_name": "A", "last_name": "User", "age": 35}
@@ -180,7 +180,7 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     user_call = 0
     weather_tool = next(tool for tool in probe.openai_tools if tool["function"]["name"] == "get_weather")
 
-    def fake_call_llm(models, alias, messages, **kwargs):
+    async def fake_call_llm(models, alias, messages, **kwargs):
         nonlocal assistant_call, user_call
         if alias == "user_model":
             user_inputs.append(messages)
@@ -230,15 +230,15 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
         raise AssertionError(alias)
 
     targets = (
-        "usersim.engine.core.simulation.call_llm",
-        "usersim.engine.core.judges.call_llm",
-        "usersim.engine.core.llm.call_llm",
-        "usersim.engine.probes.tool_calling.generator.call_llm",
+        "usersim.engine.core.simulation.acall_llm",
+        "usersim.engine.core.judges.acall_llm",
+        "usersim.engine.core.llm.acall_llm",
+        "usersim.engine.probes.tool_calling.generator.acall_llm",
     )
     with ExitStack() as stack:
         for target in targets:
             stack.enter_context(patch(target, side_effect=fake_call_llm))
-        result = ConversationLoop().run(
+        result = await ConversationLoop().run(
             models={},
             data=data,
             cfg=cfg,
@@ -247,8 +247,8 @@ def _run_concrete_tool_probe(sample_tools, *, api_context_error=False):
     return result, assistant_inputs, user_inputs, judge_inputs, api_inputs
 
 
-def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tools):
-    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = _run_concrete_tool_probe(sample_tools)
+async def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tools):
+    result, assistant_inputs, user_inputs, judge_inputs, api_inputs = await _run_concrete_tool_probe(sample_tools)
 
     assert result["conversation_status"] is True
     assert len(api_inputs) == 1
@@ -266,8 +266,8 @@ def test_concrete_tool_probe_keeps_private_and_public_views_separate(sample_tool
     assert any(message.get("role") == "tool" and "raw_secret" in message.get("content", "") for message in exported)
 
 
-def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
-    result, _assistant, _user, _judge, _api = _run_concrete_tool_probe(
+async def test_concrete_tool_probe_attributes_api_context_failure(sample_tools):
+    result, _assistant, _user, _judge, _api = await _run_concrete_tool_probe(
         sample_tools,
         api_context_error=True,
     )

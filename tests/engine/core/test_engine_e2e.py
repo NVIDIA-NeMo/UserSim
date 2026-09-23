@@ -78,7 +78,7 @@ class StubFacade:
         self._responses = list(responses)
         self._idx = 0
 
-    def completion(self, messages, **kwargs):
+    async def acompletion(self, messages, **kwargs):
         text = self._responses[min(self._idx, len(self._responses) - 1)]
         self._idx += 1
         msg = MagicMock()
@@ -142,17 +142,17 @@ def _judge_warn():
 
 
 class TestEarlyStopping:
-    def test_llm_based_satisfaction_detected(self):
+    async def test_llm_based_satisfaction_detected(self):
         models = {"summary_model": StubFacade(["yes"])}
-        assert _check_conversation_complete(models, "Thanks, that's all I needed!")
+        assert await _check_conversation_complete(models, "Thanks, that's all I needed!")
 
-    def test_llm_based_not_stopped(self):
+    async def test_llm_based_not_stopped(self):
         models = {"summary_model": StubFacade(["no"])}
-        assert not _check_conversation_complete(models, "Can you tell me more?")
+        assert not await _check_conversation_complete(models, "Can you tell me more?")
 
-    def test_llm_based_handles_whitespace(self):
+    async def test_llm_based_handles_whitespace(self):
         models = {"summary_model": StubFacade(["  Yes  \n"])}
-        assert _check_conversation_complete(models, "Perfect, thanks!")
+        assert await _check_conversation_complete(models, "Perfect, thanks!")
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +182,7 @@ class TestAssistantQualityCheck:
 
 
 class TestConversationLoopSimple:
-    def test_successful_conversation(self):
+    async def test_successful_conversation(self):
         models = _build_models(
             user_responses=["What is Python?", "Tell me more about types."],
             assistant_responses=["Python is a language.", "Python has dynamic types."],
@@ -196,7 +196,7 @@ class TestConversationLoopSimple:
         )
 
         loop = ConversationLoop()
-        result = loop.run(models, data, cfg, adapter)
+        result = await loop.run(models, data, cfg, adapter)
 
         assert result["conversation_status"] is True
         messages = json.loads(result["conversation_messages"])
@@ -204,7 +204,7 @@ class TestConversationLoopSimple:
         roles = [m["role"] for m in messages]
         assert "assistant" in roles
 
-    def test_gate_failure_returns_failed(self):
+    async def test_gate_failure_returns_failed(self):
         models = _build_models(
             user_responses=["Bad query", "Still bad"],
             assistant_responses=[],
@@ -218,12 +218,12 @@ class TestConversationLoopSimple:
         )
 
         loop = ConversationLoop()
-        result = loop.run(models, data, cfg, adapter)
+        result = await loop.run(models, data, cfg, adapter)
 
         assert result["conversation_status"] is False
         assert result["num_turns"] == 0
 
-    def test_warn_rating_continues_conversation(self):
+    async def test_warn_rating_continues_conversation(self):
         models = _build_models(
             user_responses=["What is Python?", "Tell me more."],
             assistant_responses=["Python is a language.", "It has types."],
@@ -237,7 +237,7 @@ class TestConversationLoopSimple:
         )
 
         loop = ConversationLoop()
-        result = loop.run(models, data, cfg, adapter)
+        result = await loop.run(models, data, cfg, adapter)
 
         assert result["conversation_status"] is True
 
@@ -248,7 +248,7 @@ class TestConversationLoopSimple:
 
 
 class TestMessageInvariants:
-    def test_user_assistant_alternation(self):
+    async def test_user_assistant_alternation(self):
         models = _build_models(
             user_responses=["Hello", "Thanks"],
             assistant_responses=["Hi there!", "You're welcome."],
@@ -260,7 +260,7 @@ class TestMessageInvariants:
         adapter = _StubProbe(user_system_prompt="System.")
 
         loop = ConversationLoop()
-        result = loop.run(models, data, cfg, adapter)
+        result = await loop.run(models, data, cfg, adapter)
         messages = json.loads(result["conversation_messages"])
 
         non_system = [m for m in messages if m["role"] != "system"]
@@ -269,7 +269,7 @@ class TestMessageInvariants:
                 f"Adjacent messages have same role at positions {i} and {i + 1}: {non_system[i]['role']}"
             )
 
-    def test_num_turns_matches_user_messages(self):
+    async def test_num_turns_matches_user_messages(self):
         models = _build_models(
             user_responses=["Q1", "Q2"],
             assistant_responses=["A1", "A2"],
@@ -281,7 +281,7 @@ class TestMessageInvariants:
         adapter = _StubProbe(user_system_prompt="System.")
 
         loop = ConversationLoop()
-        result = loop.run(models, data, cfg, adapter)
+        result = await loop.run(models, data, cfg, adapter)
         messages = json.loads(result["conversation_messages"])
 
         user_count = sum(1 for m in messages if m["role"] == "user")
@@ -295,14 +295,14 @@ class _ProtocolHistoryProbe(_StubProbe):
         super().__init__()
         self.gate_histories: list[str] = []
 
-    def get_verbatim_first_user_turn(self, state):
+    async def get_verbatim_first_user_turn(self, state):
         return "Please check the private result."
 
     def format_gate_prompt(self, user_query, conversation_history):
         self.gate_histories.append(conversation_history)
         return f"{conversation_history}\nCANDIDATE:{user_query}"
 
-    def after_assistant_turn(self, models, state, response, cfg):
+    async def after_assistant_turn(self, models, state, response, cfg):
         state.messages.extend(
             [
                 {
@@ -329,7 +329,7 @@ class _ProtocolHistoryProbe(_StubProbe):
         return "The result is 42."
 
 
-def test_user_and_inline_judges_see_only_public_dialogue():
+async def test_user_and_inline_judges_see_only_public_dialogue():
     probe = _ProtocolHistoryProbe()
     user_prompts: list[str] = []
     judge_prompts: list[str] = []
@@ -348,13 +348,13 @@ def test_user_and_inline_judges_see_only_public_dialogue():
         judge_prompts.append(prompt)
         return ("ok", "success", True)
 
-    def fake_judge_ex(models, alias, prompt):
+    async def fake_judge_ex(models, alias, prompt):
         expl, rating, ok = fake_judge(models, alias, prompt)
         return (expl, rating, ok, True)
 
     with (
         patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
             side_effect=fake_call_llm,
         ),
         patch(
@@ -366,7 +366,7 @@ def test_user_and_inline_judges_see_only_public_dialogue():
             side_effect=fake_judge_ex,
         ),
     ):
-        ConversationLoop().run(
+        await ConversationLoop().run(
             models={},
             data={},
             cfg=StubConfig(max_turns=2),
@@ -385,14 +385,14 @@ def test_user_and_inline_judges_see_only_public_dialogue():
     assert all("secret_arg" not in prompt for prompt in judge_prompts)
 
 
-def test_tool_hook_context_failure_preserves_model_attribution():
+async def test_tool_hook_context_failure_preserves_model_attribution():
     from usersim.engine.core.llm import ContextWindowError
 
     class _ApiContextFailureProbe(_StubProbe):
-        def get_verbatim_first_user_turn(self, state):
+        async def get_verbatim_first_user_turn(self, state):
             return "Use the tool."
 
-        def after_assistant_turn(self, models, state, response, cfg):
+        async def after_assistant_turn(self, models, state, response, cfg):
             state.messages.append(
                 {
                     "role": "assistant",
@@ -406,10 +406,10 @@ def test_tool_hook_context_failure_preserves_model_attribution():
             )
 
     with patch(
-        "usersim.engine.core.simulation.call_llm",
+        "usersim.engine.core.simulation.acall_llm",
         return_value={"role": "assistant", "content": ""},
     ):
-        result = ConversationLoop().run(
+        result = await ConversationLoop().run(
             models={},
             data={},
             cfg=StubConfig(max_turns=1),

@@ -33,7 +33,7 @@ import math
 import os
 from typing import Any, Callable
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.tool_calls import recover_tool_call
 from usersim.engine.probes.health_disclosure import clients as C
 from usersim.engine.probes.health_disclosure.moves import (
@@ -381,7 +381,7 @@ def _tool_result_msg(raw_call: dict[str, Any], payload: dict[str, Any]) -> dict[
     }
 
 
-def propose_and_guard(
+async def propose_and_guard(
     models: dict[str, Any],
     env: PatientEnv,
     guard: Guard,
@@ -422,7 +422,7 @@ def propose_and_guard(
     for i in range(guard.max_resamples + 1):
         raw_call = None
         try:
-            resp = call_llm(models, MODEL_USER, msgs, tools=tools, tool_choice="auto", **extra)
+            resp = await acall_llm(models, MODEL_USER, msgs, tools=tools, tool_choice="auto", **extra)
             move, reasoning, raw_call = _extract_move(resp, topics)
             if move is None:
                 move = env.safe_move()

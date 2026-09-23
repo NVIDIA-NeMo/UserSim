@@ -92,7 +92,7 @@ from usersim.engine.core.agentic_bank import (
     load_agentic_bank_default,
     reset_agentic_bank_cache,
 )
-from usersim.engine.core.llm import call_llm, get_current_outcome_builder, set_current_outcome_builder
+from usersim.engine.core.llm import acall_llm, get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.core.outcomes import (
     FailureAttribution,
     FailureClass,
@@ -280,7 +280,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         # only removes BEHAVIORAL instruction.
         return self._api_tools
 
-    def after_assistant_turn(
+    async def after_assistant_turn(
         self,
         models: dict,
         state: Any,
@@ -311,7 +311,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
 
     # ── Custom run_dispatch (bypasses ConversationLoop) ─────────────
 
-    def run_dispatch(
+    async def run_dispatch(
         self,
         *,
         models: dict[str, Any],
@@ -355,7 +355,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             state.messages.append(
                 {
                     "role": "user",
-                    "content": self._localize_verbatim(ar.initial_user_prompt.for_locale(self._asset_locale)),
+                    "content": await self._localize_verbatim(ar.initial_user_prompt.for_locale(self._asset_locale)),
                 }
             )
 
@@ -365,7 +365,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             # Multi-assistant-turn tool-interception loop.
             for assistant_turn_idx in range(max_turns):
                 try:
-                    assistant_resp = call_llm(
+                    assistant_resp = await acall_llm(
                         models,
                         _MODEL_ASSISTANT,
                         list(state.messages),
@@ -507,7 +507,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
 # ---------------------------------------------------------------------------
 
 
-def simulate_safety_agentic(
+async def simulate_safety_agentic(
     models: dict[str, Any],
     data: dict[str, Any],
     persona: dict[str, Any],
@@ -547,7 +547,7 @@ def simulate_safety_agentic(
         return _aborted(f"agentic-bank load failed: {e}", provenance)
     except SafetyAgenticProbeError as e:
         return _aborted(str(e), provenance)
-    return probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

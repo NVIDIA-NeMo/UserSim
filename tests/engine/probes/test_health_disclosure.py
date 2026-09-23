@@ -332,13 +332,17 @@ _IDENTITY = {
 class TestMoveHook:
     """Emission through the caller-supplied ``emit`` sink of propose_and_guard."""
 
-    def _run(self, *, emit, guard=None, has_risk=False, env=None, canned=None, monkeypatch=None):
+    async def _run(self, *, emit, guard=None, has_risk=False, env=None, canned=None, monkeypatch=None):
         if canned is not None and monkeypatch is not None:
-            monkeypatch.setattr(mr, "call_llm", lambda *a, **k: canned)
+
+            async def _reply(*_args, **_kwargs):
+                return canned
+
+            monkeypatch.setattr(mr, "acall_llm", _reply)
         env = env or PatientEnv(num_turns=10)
         if not getattr(env, "turn", 0):
             env.turn = 1
-        return mr.propose_and_guard(
+        return await mr.propose_and_guard(
             {},
             env,
             guard or Guard(),
@@ -350,9 +354,9 @@ class TestMoveHook:
             identity=_IDENTITY,
         )
 
-    def test_fires_on_commit_with_identity_payload(self, monkeypatch):
+    async def test_fires_on_commit_with_identity_payload(self, monkeypatch):
         captured = []
-        move, _, _ = self._run(emit=captured.append, canned=_canned_commit(), monkeypatch=monkeypatch)
+        move, _, _ = await self._run(emit=captured.append, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"
         assert len(captured) == 1
         p = captured[0]
@@ -366,14 +370,14 @@ class TestMoveHook:
         assert p["probe_family"] == "health_therapy_disclosure"
         assert p["probe_variant"] == "guarded"
 
-    def test_fires_on_veto_then_safe_fallback(self, monkeypatch):
+    async def test_fires_on_veto_then_safe_fallback(self, monkeypatch):
         # A full disclose of a gated topic at turn 1 is vetoed by the disclosure
         # gate on every resample, ending in the forced safe fallback — both the
         # veto and the safe-fallback emission paths in one run.
         captured = []
         env = PatientEnv(num_turns=10)
         env.turn = 1
-        self._run(
+        await self._run(
             emit=captured.append,
             guard=Guard(gated_topics=("symptoms",)),
             env=env,
@@ -386,27 +390,27 @@ class TestMoveHook:
         assert captured[-1]["accepted"] is True
         assert "safe fallback" in captured[-1]["reason"]
 
-    def test_fires_on_deterministic_risk_pull(self):
+    async def test_fires_on_deterministic_risk_pull(self):
         # Late-session risk-carrying user → deterministic hint_risk, no LLM call.
         captured = []
         env = PatientEnv(num_turns=10)
         env.turn = 8
-        move, _, _ = self._run(emit=captured.append, has_risk=True, env=env)
+        move, _, _ = await self._run(emit=captured.append, has_risk=True, env=env)
         assert move.move == "hint_risk"
         assert len(captured) == 1
         assert captured[0]["accepted"] is True
         assert "risk pacing" in captured[0]["reason"]
         assert captured[0]["move"]["move"] == "hint_risk"
 
-    def test_raising_hook_never_breaks_the_sim(self, monkeypatch):
+    async def test_raising_hook_never_breaks_the_sim(self, monkeypatch):
         def boom(_payload):
             raise RuntimeError("customer harness is down")
 
-        move, _, _ = self._run(emit=boom, canned=_canned_commit(), monkeypatch=monkeypatch)
+        move, _, _ = await self._run(emit=boom, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"  # sim survived a raising hook
 
-    def test_no_emit_is_a_noop(self, monkeypatch):
-        move, _, _ = self._run(emit=None, canned=_canned_commit(), monkeypatch=monkeypatch)
+    async def test_no_emit_is_a_noop(self, monkeypatch):
+        move, _, _ = await self._run(emit=None, canned=_canned_commit(), monkeypatch=monkeypatch)
         assert move.move == "deflect"
 
     def test_payload_deep_copies_native_tool_call(self):
@@ -654,13 +658,13 @@ class TestGuardedMoveMixin:
     def test_config_hook_returns_client(self):
         assert _new_probe().guarded_move_config() is therapy.TherapyDisclosureProbe.CLIENT
 
-    def test_disabled_by_default(self, monkeypatch):
+    async def test_disabled_by_default(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
         p = _new_probe()  # no probe_variant → default
         assert p.guarded_moves_enabled() is False
         p.init_guarded_moves(disclosure_style="incremental", max_turns=8)
         assert p._moves_on is False
-        assert p.format_followup_user_instructions(1, _ExtrasState()) == []
+        assert await p.format_followup_user_instructions(1, _ExtrasState()) == []
         assert p.allow_early_stop_at_turn(1, None) is True
 
     def test_enabled_by_guarded_variant(self, monkeypatch):

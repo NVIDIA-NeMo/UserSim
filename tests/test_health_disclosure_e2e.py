@@ -109,7 +109,7 @@ def _persist(extras: dict) -> dict:
     return out
 
 
-def _run_producer(monkeypatch, plan=None, said=None):
+async def _run_producer(monkeypatch, plan=None, said=None):
     """Drive the real move/Guard loop and return (columns, transcript).
 
     ``plan`` maps turn number -> (move, topic). The default walks the partial ->
@@ -127,16 +127,16 @@ def _run_producer(monkeypatch, plan=None, said=None):
         6: "honestly the panic attacks have been near-daily",
     }
 
-    def fake_call_llm(models, alias, msgs, **kw):
+    async def fake_call_llm(models, alias, msgs, **kw):
         return _commit(*plan[fake_call_llm.turn])
 
-    monkeypatch.setattr(mr, "call_llm", fake_call_llm)
+    monkeypatch.setattr(mr, "acall_llm", fake_call_llm)
 
     state = _State()
     transcript = [{"role": "user", "content": "opening turn, no move"}]
     for turn in sorted(plan):
         fake_call_llm.turn = turn
-        probe.format_followup_user_instructions(turn, state)
+        await probe.format_followup_user_instructions(turn, state)
         transcript.append({"role": "assistant", "content": "tell me more?"})
         transcript.append({"role": "user", "content": said.get(turn, "mm.")})
 
@@ -144,7 +144,7 @@ def _run_producer(monkeypatch, plan=None, said=None):
 
 
 async def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
-    extras, transcript = _run_producer(monkeypatch)
+    extras, transcript = await _run_producer(monkeypatch)
 
     # The producer really ran the Guard-paced loop.
     assert extras["moves_enabled"] is True
@@ -213,7 +213,7 @@ async def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeyp
 async def test_without_an_auditor_the_same_row_still_scores_on_intent(monkeypatch):
     """No judge model wired is a supported mode, not a failure: the scorer must
     still produce a number, and must not claim a model contributed to it."""
-    extras, transcript = _run_producer(monkeypatch)
+    extras, transcript = await _run_producer(monkeypatch)
     row = {**_persist(extras), "conversation_messages": transcript}
 
     load_default_scorers()
@@ -224,11 +224,11 @@ async def test_without_an_auditor_the_same_row_still_scores_on_intent(monkeypatc
     assert out["scores"]["concealment.disclosure_coverage"]["score"] is not None
 
 
-def test_the_partial_to_full_upgrade_survives_the_real_guard(monkeypatch):
+async def test_the_partial_to_full_upgrade_survives_the_real_guard(monkeypatch):
     """The bug this MR fixes, asserted through the producer rather than a unit:
     a topic told partially at turn 2 must still be fully disclosable at turn 6,
     and must land in the binary column only once it is full."""
-    extras, _ = _run_producer(monkeypatch)
+    extras, _ = await _run_producer(monkeypatch)
     topic = _col(extras, "concealment_topics")[0]
 
     played = [m["move"] for m in _col(extras, "moves_detail")]
@@ -246,7 +246,7 @@ def test_the_partial_to_full_upgrade_survives_the_real_guard(monkeypatch):
         ("fully concealing", lambda topic: {2: ("withhold", topic), 3: ("deflect", topic), 4: ("minimize", topic)}),
     ],
 )
-def test_every_emitted_column_survives_a_parquet_write(monkeypatch, label, plan):
+async def test_every_emitted_column_survives_a_parquet_write(monkeypatch, label, plan):
     """The columns must be storable, not merely correct.
 
     Found by a live run, not by the suite: ``committed_disclosure_levels`` was
@@ -261,7 +261,7 @@ def test_every_emitted_column_survives_a_parquet_write(monkeypatch, label, plan)
     aborted an entire simulation run after every LLM call had been paid for. And
     it only reproduced when nobody disclosed, so a disclosing run looked fine.
     """
-    extras, _ = _run_producer(monkeypatch, plan=plan)
+    extras, _ = await _run_producer(monkeypatch, plan=plan)
 
     broken = []
     for column, value in extras.items():

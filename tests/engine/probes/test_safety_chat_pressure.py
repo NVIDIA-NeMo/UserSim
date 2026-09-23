@@ -171,25 +171,25 @@ def _mock_call_llm(
 def _patched_call_llm(side_effect):
     """Patch ``call_llm`` everywhere the unified loop binds it.
 
-    Patches ``core.simulation.call_llm`` and
-    ``core.judges.call_llm`` (each consumer module re-imports
+    Patches ``core.simulation.acall_llm`` and
+    ``core.judges.acall_llm`` (each consumer module re-imports
     ``call_llm`` at module load), AND
-    ``probes.safety_chat_pressure.classifier.call_llm`` (the
+    ``probes.safety_chat_pressure.classifier.acall_llm`` (the
     dedicated capitulation classifier introduced in v1.2 — without
     this patch the classifier would hit the real provider during
     tests and either hang or report network errors).
     """
     with (
         patch(
-            "usersim.engine.core.simulation.call_llm",
+            "usersim.engine.core.simulation.acall_llm",
             side_effect=side_effect,
         ),
         patch(
-            "usersim.engine.core.judges.call_llm",
+            "usersim.engine.core.judges.acall_llm",
             side_effect=side_effect,
         ),
         patch(
-            "usersim.engine.probes.safety_chat_pressure.classifier.call_llm",
+            "usersim.engine.probes.safety_chat_pressure.classifier.acall_llm",
             side_effect=side_effect,
         ),
     ):
@@ -662,7 +662,7 @@ class TestSimulateSafetyChatPressure:
         assert "safety_chat_pressure" in _PROBE_REGISTRY
         assert resolve_probe("safety_chat_pressure").__name__ == ("SafetyChatPressureProbe")
 
-    def test_single_turn_runs_end_to_end(
+    async def test_single_turn_runs_end_to_end(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -677,7 +677,7 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -731,7 +731,7 @@ class TestSimulateSafetyChatPressure:
         # blaming the assistant).
         assert outcome["provenance"]["bank_version"].get("safety") == "v0.5.4"
 
-    def test_first_user_turn_is_target_initial_prompt_verbatim(
+    async def test_first_user_turn_is_target_initial_prompt_verbatim(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -763,7 +763,7 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -786,7 +786,7 @@ class TestSimulateSafetyChatPressure:
         assert user_msgs
         assert user_msgs[0]["content"] == expected_first_turn
 
-    def test_three_turn_run_rotates_reframings(
+    async def test_three_turn_run_rotates_reframings(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -810,7 +810,7 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -839,7 +839,7 @@ class TestSimulateSafetyChatPressure:
         # confirm the trajectory completed cleanly.
         assert outcome["status"] in {"ok", "completed_with_warnings"}
 
-    def test_pressure_followup_after_refusal_is_accepted(
+    async def test_pressure_followup_after_refusal_is_accepted(
         self,
         en_persona: dict[str, Any],
     ) -> None:
@@ -868,7 +868,7 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -892,7 +892,7 @@ class TestSimulateSafetyChatPressure:
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["failure_class"] is None
 
-    def test_bank_load_failure_returns_structured_failure(
+    async def test_bank_load_failure_returns_structured_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -901,7 +901,7 @@ class TestSimulateSafetyChatPressure:
             os.environ,
             {"USERSIM_SAFETY_CHAT_PRESSURE_BANK": "/nonexistent/bank.yaml"},
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={},
                 data={},
                 persona=en_persona,
@@ -917,15 +917,15 @@ class TestSimulateSafetyChatPressure:
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
         assert "pressure-bank load failed" in outcome["failure_detail"]
 
-    def test_panel_override_with_unknown_target_returns_failure(
+    async def test_panel_override_with_unknown_target_returns_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        sim_patch = patch("usersim.engine.core.simulation.call_llm")
-        judge_patch = patch("usersim.engine.core.judges.call_llm")
+        sim_patch = patch("usersim.engine.core.simulation.acall_llm")
+        judge_patch = patch("usersim.engine.core.judges.acall_llm")
         with patch.dict(os.environ, _shipped_bank_env()), sim_patch as mc_sim, judge_patch as mc_judge:
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={},
                 data={
                     "pressure_strategy_id": "persistence",
@@ -946,7 +946,7 @@ class TestSimulateSafetyChatPressure:
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
 
-    def test_no_resolvable_pair_returns_failure(
+    async def test_no_resolvable_pair_returns_failure(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -954,10 +954,10 @@ class TestSimulateSafetyChatPressure:
         # Synthetic bank where every target requires a tag the persona
         # does not carry.
         synth = _synthetic_bank(target_persona_tags=("interest:nonexistent",))
-        sim_patch = patch("usersim.engine.core.simulation.call_llm")
-        judge_patch = patch("usersim.engine.core.judges.call_llm")
+        sim_patch = patch("usersim.engine.core.simulation.acall_llm")
+        judge_patch = patch("usersim.engine.core.judges.acall_llm")
         with patch.object(probe_gen, "_load_bank", return_value=synth), sim_patch as mc_sim, judge_patch as mc_judge:
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={},
                 data={},
                 persona=en_persona,
@@ -974,12 +974,12 @@ class TestSimulateSafetyChatPressure:
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert "no resolvable" in outcome["failure_detail"]
 
-    def test_assistant_turn1_failure_attributed_to_assistant_model(
+    async def test_assistant_turn1_failure_attributed_to_assistant_model(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
     ) -> None:
-        def _raises(*args, **kwargs):
+        async def _raises(*args, **kwargs):
             raise RuntimeError("assistant API exploded")
 
         with (
@@ -988,7 +988,7 @@ class TestSimulateSafetyChatPressure:
                 _raises,
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1021,7 +1021,7 @@ class TestSimulateSafetyChatPressure:
         assert outcome["failure_class"] == FailureClass.INFRASTRUCTURE_ERROR.value
         assert outcome["failure_attribution"] == "assistant_model"
 
-    def test_non_placeholder_target_does_not_emit_placeholder_warning(
+    async def test_non_placeholder_target_does_not_emit_placeholder_warning(
         self,
         en_persona: dict[str, Any],
         simulator_cfg: Any,
@@ -1037,7 +1037,7 @@ class TestSimulateSafetyChatPressure:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1056,7 +1056,7 @@ class TestSimulateSafetyChatPressure:
         outcome = json.loads(result["simulation_outcome"])
         assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_TARGET.value for w in outcome["warnings"])
 
-    def test_followup_failure_aborts_with_failed_outcome(
+    async def test_followup_failure_aborts_with_failed_outcome(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1072,7 +1072,7 @@ class TestSimulateSafetyChatPressure:
         # user_model raises on every attempt. judge_model not reached
         # (the user-LLM exception triggers retries before the judge
         # would be called).
-        def _side_effect(models, alias, msgs, **kwargs):
+        async def _side_effect(models, alias, msgs, **kwargs):
             if alias == "assistant_model":
                 return {"role": "assistant", "content": "Decline."}
             if alias == "user_model":
@@ -1092,7 +1092,7 @@ class TestSimulateSafetyChatPressure:
                 _side_effect,
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models={
                     "user_model": object(),
                     "assistant_model": object(),
@@ -1161,7 +1161,7 @@ class TestCapitulationStopHook:
             "api_response_model": object(),
         }
 
-    def test_classifier_yes_stops_loop_with_side_channels(
+    async def test_classifier_yes_stops_loop_with_side_channels(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1188,7 +1188,7 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1217,7 +1217,7 @@ class TestCapitulationStopHook:
         assert len(check_traces) == 1
         assert check_traces[0]["rating"] == "yes"
 
-    def test_classifier_no_continues_loop(
+    async def test_classifier_no_continues_loop(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1244,7 +1244,7 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1262,7 +1262,7 @@ class TestCapitulationStopHook:
         assert len(check_traces) == 3
         assert all(t["rating"] == "no" for t in check_traces)
 
-    def test_classifier_runs_after_each_assistant_turn(
+    async def test_classifier_runs_after_each_assistant_turn(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1289,7 +1289,7 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1308,7 +1308,7 @@ class TestCapitulationStopHook:
         assert [c["stop"] for c in checks] == [False, False, True]
         assert [c["turn_idx"] for c in checks] == [1, 2, 3]
 
-    def test_classifier_exception_treated_as_continue(
+    async def test_classifier_exception_treated_as_continue(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1323,7 +1323,7 @@ class TestCapitulationStopHook:
 
         # Custom mock: summary_model raises; everything else uses the
         # default mock semantics.
-        def _side_effect(models, alias, msgs, **kwargs):
+        async def _side_effect(models, alias, msgs, **kwargs):
             if alias == "assistant_model":
                 return {"role": "assistant", "content": "Decline."}
             if alias == "judge_model":
@@ -1338,7 +1338,7 @@ class TestCapitulationStopHook:
             raise AssertionError(f"unexpected alias: {alias!r}")
 
         with patch.dict(os.environ, _shipped_bank_env()), _patched_call_llm(_side_effect):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1356,7 +1356,7 @@ class TestCapitulationStopHook:
         assert len(checks) == 3
         assert all(c["stop"] is False for c in checks)
 
-    def test_capitulation_checks_promoted_to_row_column(
+    async def test_capitulation_checks_promoted_to_row_column(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1383,7 +1383,7 @@ class TestCapitulationStopHook:
                 random_seed = 42
                 max_turns = 2
 
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1408,7 +1408,7 @@ class TestCapitulationStopHook:
         # "Decline 2." (10c).
         assert [c["assistant_response_chars"] for c in checks] == [10, 10]
 
-    def test_user_followup_path_is_now_freeform(
+    async def test_user_followup_path_is_now_freeform(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1422,7 +1422,7 @@ class TestCapitulationStopHook:
         """
         captured_kwargs: list[dict[str, Any]] = []
 
-        def _capturing_side_effect(models, alias, msgs, **kwargs):
+        async def _capturing_side_effect(models, alias, msgs, **kwargs):
             if alias == "user_model":
                 captured_kwargs.append(dict(kwargs))
                 return {"role": "assistant", "content": "Try this reframe."}
@@ -1443,7 +1443,7 @@ class TestCapitulationStopHook:
                 random_seed = 42
                 max_turns = 2
 
-            probe_gen.simulate_safety_chat_pressure(
+            await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
@@ -1460,7 +1460,7 @@ class TestCapitulationStopHook:
                 f"user_model call should be free-form (no response_format); got kwargs={kwargs}"
             )
 
-    def test_polite_thanks_followup_does_not_early_stop(
+    async def test_polite_thanks_followup_does_not_early_stop(
         self,
         en_persona: dict[str, Any],
         simulator_cfg_three_turns: Any,
@@ -1505,7 +1505,7 @@ class TestCapitulationStopHook:
                 )
             ),
         ):
-            result = probe_gen.simulate_safety_chat_pressure(
+            result = await probe_gen.simulate_safety_chat_pressure(
                 models=self._models(),
                 data={},
                 persona=en_persona,
