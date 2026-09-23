@@ -40,7 +40,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.evaluator.scorers import register_scorer
 
@@ -208,7 +208,7 @@ def _task_ordering_required(locale: str, institution_id: str, task_id: str) -> b
         return False
 
 
-def score_financial_services_trajectory(
+async def score_financial_services_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -219,7 +219,7 @@ def score_financial_services_trajectory(
 
     tier = trajectory.get("task_tier")
     if tier == "dynamic":
-        return _score_dynamic(trajectory, models)
+        return await _score_dynamic(trajectory, models)
     return _score_verifiable(trajectory)
 
 
@@ -489,7 +489,7 @@ def _dynamic_reference(
     return (reference, boundary, inst.type, inst.display_name)
 
 
-def _score_dynamic(
+async def _score_dynamic(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -522,7 +522,7 @@ def _score_dynamic(
 
     schema_model = create_judge_structured_output_model([create_judge_response_model(s) for s in _DYNAMIC_AXES])
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [

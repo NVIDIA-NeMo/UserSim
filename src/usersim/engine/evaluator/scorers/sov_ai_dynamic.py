@@ -70,7 +70,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_structured_output_model,
 )
 
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.probing_taxonomy import (
     Category,
@@ -228,7 +228,7 @@ def _build_schema():
 # ---------------------------------------------------------------------------
 
 
-def score_sov_ai_dynamic_trajectory(
+async def score_sov_ai_dynamic_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],
 ) -> dict[str, Any]:
@@ -333,7 +333,7 @@ def score_sov_ai_dynamic_trajectory(
             per_category.append(_no_category_result(cat_id))
             status_proposal = False
             continue
-        entry = _score_one_category(
+        entry = await _score_one_category(
             category=category,
             subtopic_hint=hint,
             conversation=conversation,
@@ -368,7 +368,7 @@ def score_sov_ai_dynamic_trajectory(
 # ---------------------------------------------------------------------------
 
 
-def _score_one_category(
+async def _score_one_category(
     *,
     category: Category,
     subtopic_hint: str,
@@ -388,7 +388,7 @@ def _score_one_category(
 
     schema_model = _build_schema()
     try:
-        resp = call_llm(
+        resp = await acall_llm(
             models,
             judge_alias,
             [

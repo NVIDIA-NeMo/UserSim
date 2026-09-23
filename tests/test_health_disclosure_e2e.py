@@ -143,7 +143,7 @@ def _run_producer(monkeypatch, plan=None, said=None):
     return probe.build_result_extras(state), transcript
 
 
-def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
+async def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
     extras, transcript = _run_producer(monkeypatch)
 
     # The producer really ran the Guard-paced loop.
@@ -155,7 +155,7 @@ def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
 
     seen = {}
 
-    def fake_audit_llm(models, alias, msgs, **kw):
+    async def fake_audit_llm(models, alias, msgs, **kw):
         seen["system"], seen["user"] = msgs[0]["content"], msgs[1]["content"]
         return {
             "role": "assistant",
@@ -182,9 +182,9 @@ def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
             ],
         }
 
-    monkeypatch.setattr(ra, "call_llm", fake_audit_llm)
+    monkeypatch.setattr(ra, "acall_llm", fake_audit_llm)
     load_default_scorers()
-    out = get_scorer("health_disclosure_concealment")(row, {"judge_model": object()})
+    out = await get_scorer("health_disclosure_concealment")(row, {"judge_model": object()})
 
     # The audit ran for real. This is the assertion the old tests could not make:
     # it holds only if moves_detail, conversation_messages and concealment_topics
@@ -210,14 +210,14 @@ def test_probe_columns_feed_the_scorer_and_the_audit_actually_runs(monkeypatch):
     assert out["scores"]["concealment.disclosure_coverage"]["score"] > 0
 
 
-def test_without_an_auditor_the_same_row_still_scores_on_intent(monkeypatch):
+async def test_without_an_auditor_the_same_row_still_scores_on_intent(monkeypatch):
     """No judge model wired is a supported mode, not a failure: the scorer must
     still produce a number, and must not claim a model contributed to it."""
     extras, transcript = _run_producer(monkeypatch)
     row = {**_persist(extras), "conversation_messages": transcript}
 
     load_default_scorers()
-    out = get_scorer("health_disclosure_concealment")(row, {})
+    out = await get_scorer("health_disclosure_concealment")(row, {})
 
     assert out["scorer_kind"] == "deterministic"
     assert out["ground_truth_source"] == "committed_intent"

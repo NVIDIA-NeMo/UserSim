@@ -79,7 +79,25 @@ from usersim.testing import assert_probe_conforms, assert_scorer_conforms
 
 def test_my_probe_conforms():
     assert_probe_conforms("my_probe")
+
+async def test_my_scorer_conforms():
+    await assert_scorer_conforms("my_scorer")
 ```
+
+The scorer check is awaitable because a scorer is. The evaluator awaits every
+scorer, so `register_scorer` expects an async function:
+
+```python
+from usersim.engine.evaluator.scorers import register_scorer
+
+async def score(row, models):
+    return {"my_axis": 1.0}
+
+register_scorer("my_scorer", score)
+```
+
+A scorer declared with plain `def` is reported as non-conforming rather than
+failing later inside a run.
 
 Each check has a `*_problems` form that returns every finding at once, so you
 fix one thing rather than rediscovering the next on each run.

@@ -132,14 +132,14 @@ class TestEvaluatorRunsARow:
     """
 
     @staticmethod
-    def _trajectory_row() -> dict[str, Any]:
+    async def _trajectory_row() -> dict[str, Any]:
         cfg = _cli_built_simulator_config(PROBE_TYPE, LOCALE)
         data = _synthetic_row_data(PROBE_TYPE, LOCALE, cfg)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
             return generator.generate(data)
 
-    def test_scores_a_simulator_row(self) -> None:
+    async def test_scores_a_simulator_row(self) -> None:
         from usersim.engine.evaluator.config import JudgeSpecConfig, TrajectoryEvaluatorConfig
 
         cfg = TrajectoryEvaluatorConfig(
@@ -151,9 +151,13 @@ class TestEvaluatorRunsARow:
             axes=["helpfulness"],
         )
         generator = TrajectoryEvaluatorGenerator(cfg, _resource_provider())
-        generator._call_judge = lambda models, judge_alias, prompt, schema_model, max_tokens: {}
 
-        row = generator.generate(self._trajectory_row())
+        async def _no_judge_verdict(models, judge_alias, prompt, schema_model, max_tokens):
+            return {}
+
+        generator._call_judge = _no_judge_verdict
+
+        row = await generator.agenerate(await self._trajectory_row())
 
         assert isinstance(row, dict), f"a cell-by-cell generator returns the row mapping, got {type(row).__name__}"
         assert cfg.name in row, f"the configured column {cfg.name!r} is absent from the returned row"

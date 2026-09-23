@@ -106,7 +106,7 @@ _PAIR_OPENERS: dict[str, str] = {"(": ")", "[": "]", "{": "}", "「": "」", "�
 # ---------------------------------------------------------------------------
 
 
-def score_response_shape_trajectory(
+async def score_response_shape_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],  # unused — deterministic scorer, no LLM call
 ) -> dict[str, Any]:

@@ -159,12 +159,12 @@ JSON Schema to enforce anything against.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Iterable
+from typing import Any, Awaitable, Callable, Iterable
 
 logger = logging.getLogger("usersim.engine")
 
 # trajectory-row-dict + models -> structured-result-dict
-ScorerFn = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
+ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 _REGISTRY: dict[str, ScorerFn] = {}

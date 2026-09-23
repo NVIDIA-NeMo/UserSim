@@ -232,8 +232,8 @@ class TestAxisDefinitions:
 
 
 class TestShortCircuit:
-    def test_missing_categories_returns_noop(self) -> None:
-        result = score_sov_ai_dynamic_trajectory(
+    async def test_missing_categories_returns_noop(self) -> None:
+        result = await score_sov_ai_dynamic_trajectory(
             {"locale": "pt_BR"},  # no probing_categories_explored
             {"judge_model": object()},
         )
@@ -242,8 +242,8 @@ class TestShortCircuit:
         assert result["status_proposal"] is True
         assert "no probing_categories_explored" in result["error"]
 
-    def test_empty_categories_list_returns_noop(self) -> None:
-        result = score_sov_ai_dynamic_trajectory(
+    async def test_empty_categories_list_returns_noop(self) -> None:
+        result = await score_sov_ai_dynamic_trajectory(
             {
                 "probing_categories_explored": [],
                 "locale": "pt_BR",
@@ -253,8 +253,8 @@ class TestShortCircuit:
         assert result["scores"] == {}
         assert "no probing_categories_explored" in result["error"]
 
-    def test_missing_locale_returns_noop(self) -> None:
-        result = score_sov_ai_dynamic_trajectory(
+    async def test_missing_locale_returns_noop(self) -> None:
+        result = await score_sov_ai_dynamic_trajectory(
             {"probing_categories_explored": ["brazil-geography"]},
             {"judge_model": object()},
         )
@@ -268,17 +268,17 @@ class TestShortCircuit:
 
 
 class TestHappyPath:
-    def test_one_category_scored(self, mock_taxonomy_env: Path) -> None:
+    async def test_one_category_scored(self, mock_taxonomy_env: Path) -> None:
         payload = _axis_payload(
             suspected_fabrication=4,
             self_consistency=5,
             graceful_unknown=4,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(),
                 {"judge_model": object()},
             )
@@ -303,23 +303,23 @@ class TestHappyPath:
         assert agg[_SELF_CONSISTENCY.name]["score"] == 5
         assert agg[_GRACEFUL_UNKNOWN.name]["score"] == 4
 
-    def test_failing_score_flips_status_proposal(self, mock_taxonomy_env: Path) -> None:
+    async def test_failing_score_flips_status_proposal(self, mock_taxonomy_env: Path) -> None:
         payload = _axis_payload(
             suspected_fabrication=1,  # fail
             self_consistency=5,
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(),
                 {"judge_model": object()},
             )
         assert result["status_proposal"] is False
 
-    def test_two_assistant_turns_judged_with_self_consistency(
+    async def test_two_assistant_turns_judged_with_self_consistency(
         self,
         mock_taxonomy_env: Path,
     ) -> None:
@@ -333,15 +333,15 @@ class TestHappyPath:
         )
         captured_calls: list[Any] = []
 
-        def _capturing_side_effect(*args, **kwargs):
+        async def _capturing_side_effect(*args, **kwargs):
             captured_calls.append((args, kwargs))
             return {"role": "assistant", "content": json.dumps(payload)}
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_capturing_side_effect,
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(n_assistant_turns=2),
                 {"judge_model": object()},
             )
@@ -356,7 +356,7 @@ class TestHappyPath:
 
 
 class TestMultiCategoryAggregation:
-    def test_arithmetic_mean_across_two_categories(
+    async def test_arithmetic_mean_across_two_categories(
         self,
         mock_taxonomy_env: Path,
     ) -> None:
@@ -369,10 +369,10 @@ class TestMultiCategoryAggregation:
             _axis_payload(suspected_fabrication=2, self_consistency=3, graceful_unknown=4),
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_mock_judge_call(payloads),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 traj,
                 {"judge_model": object()},
             )
@@ -395,13 +395,13 @@ class TestMultiCategoryAggregation:
 
 
 class TestErrorPaths:
-    def test_taxonomy_load_failure_returns_structured_error(self, tmp_path: Path) -> None:
+    async def test_taxonomy_load_failure_returns_structured_error(self, tmp_path: Path) -> None:
         # Point env at a nonexistent file.
         with patch.dict(
             os.environ,
             {"USERSIM_SOV_AI_DYNAMIC_TAXONOMY_PT_BR": str(tmp_path / "missing.yaml")},
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(),
                 {"judge_model": object()},
             )
@@ -409,17 +409,17 @@ class TestErrorPaths:
         assert result["scores"] == {}
         assert "taxonomy_load_failure" in result["error"]
 
-    def test_unknown_category_id_records_per_category_error(
+    async def test_unknown_category_id_records_per_category_error(
         self,
         mock_taxonomy_env: Path,
     ) -> None:
         traj = _trajectory(category_id="brazil-nonexistent")
         # No LLM call should fire — category lookup fails before the call.
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=AssertionError("scorer should not call LLM for unknown category"),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 traj,
                 {"judge_model": object()},
             )
@@ -429,15 +429,15 @@ class TestErrorPaths:
         # Status flips to False because we couldn't actually score.
         assert result["status_proposal"] is False
 
-    def test_judge_exception_records_per_category_error(
+    async def test_judge_exception_records_per_category_error(
         self,
         mock_taxonomy_env: Path,
     ) -> None:
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=RuntimeError("rate-limited"),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(),
                 {"judge_model": object()},
             )
@@ -448,15 +448,15 @@ class TestErrorPaths:
         for axis_name in AGGREGATABLE_AXES:
             assert per_cat["scores"][axis_name]["score"] is None
 
-    def test_judge_returns_unparseable_content(self, mock_taxonomy_env: Path) -> None:
-        def _bad_content(*args, **kwargs):
+    async def test_judge_returns_unparseable_content(self, mock_taxonomy_env: Path) -> None:
+        async def _bad_content(*args, **kwargs):
             return {"role": "assistant", "content": "not-json-{garbage"}
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_bad_content,
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 _trajectory(),
                 {"judge_model": object()},
             )
@@ -472,7 +472,7 @@ class TestErrorPaths:
 
 
 class TestVersionMismatch:
-    def test_pinned_version_mismatch_flagged_not_failed(
+    async def test_pinned_version_mismatch_flagged_not_failed(
         self,
         mock_taxonomy_env: Path,
     ) -> None:
@@ -484,10 +484,10 @@ class TestVersionMismatch:
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 traj,
                 {"judge_model": object()},
             )
@@ -498,7 +498,7 @@ class TestVersionMismatch:
         assert result["scores"][_SUSPECTED_FABRICATION.name]["score"] == 5
         assert result["status_proposal"] is True
 
-    def test_no_pinned_version_no_mismatch_flag(self, mock_taxonomy_env: Path) -> None:
+    async def test_no_pinned_version_no_mismatch_flag(self, mock_taxonomy_env: Path) -> None:
         traj = _trajectory()
         # Strip the bank_version block from the simulation_outcome.
         outcome = json.loads(traj["simulation_outcome"])
@@ -510,10 +510,10 @@ class TestVersionMismatch:
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.call_llm",
+            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
-            result = score_sov_ai_dynamic_trajectory(
+            result = await score_sov_ai_dynamic_trajectory(
                 traj,
                 {"judge_model": object()},
             )

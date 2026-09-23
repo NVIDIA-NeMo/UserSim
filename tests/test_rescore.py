@@ -151,6 +151,18 @@ class TestRoundTrip:
         assert block["detector_available"] is False
         assert "language.script_integrity_rate" in block["scores"]
 
+    def test_the_recomputed_block_is_data_not_a_pending_call(self, run_on_disk):
+        """A scorer block has to be the result, not the call that produces it.
+
+        Scoring is awaited. Storing whatever the call returns without waiting
+        for it writes a placeholder into the cell, and because a placeholder
+        never equals the block it replaced, every row also reports as changed.
+        """
+        assert run(run_on_disk) == 0
+        block = _read_cell(run_on_disk.evaluations)["scorers"]["language_compliance"]
+        assert isinstance(block, dict), f"stored {type(block).__name__} where a scorer result belongs"
+        assert block.get("scores"), "the stored block carries no scores, so nothing was actually scored"
+
     def test_marks_which_scorers_were_patched(self, run_on_disk):
         """Otherwise a reader hits a cell whose scorers disagree with its
         envelope and has no way to tell why."""

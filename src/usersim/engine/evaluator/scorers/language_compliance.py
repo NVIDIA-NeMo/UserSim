@@ -106,7 +106,7 @@ INTEGRITY_MIN_CHARS: int = 80
 # ---------------------------------------------------------------------------
 
 
-def score_language_compliance_trajectory(
+async def score_language_compliance_trajectory(
     trajectory: dict[str, Any],
     models: dict[str, Any],  # unused — deterministic scorer, no LLM call
 ) -> dict[str, Any]:

@@ -152,7 +152,7 @@ def _patched_call_llm():
     """Patch ``call_llm`` at every simulator-side binding site.
 
     ``call_llm`` is imported by name into multiple modules at module-
-    load time (``from usersim.engine.core.llm import call_llm``),
+    load time (``from usersim.engine.core.llm import acall_llm``),
     so a single patch on the source module doesn't propagate to
     callers — each binding has to be patched explicitly. The
     simulator-side callers are:

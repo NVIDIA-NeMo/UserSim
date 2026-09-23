@@ -291,8 +291,14 @@ def set_conversation_id(conv_id: str | None) -> None:
 
     Pass ``None`` to clear. The name is scoped to the calling conversation,
     so a trajectory cannot label another one's records.
+
+    A fresh record buffer is installed alongside the name. Copying a context
+    copies the reference to the buffer rather than the buffer itself, so a
+    conversation that inherited one would append into whatever its caller
+    was holding.
     """
     _CONV_ID.set(conv_id)
+    _PENDING_RECORDS.set([])
 
 
 def get_conversation_id() -> str | None:

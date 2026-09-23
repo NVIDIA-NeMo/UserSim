@@ -110,8 +110,8 @@ class TestDetectorlessLocales:
         * 4
     )
 
-    def test_scores_the_script_axes_without_a_detector(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_scores_the_script_axes_without_a_detector(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="kn_Knda_IN", assistant_messages=[self._KANNADA]),
             {},
         )
@@ -121,18 +121,18 @@ class TestDetectorlessLocales:
             "language.script_integrity_rate",
         }
 
-    def test_language_identity_axes_are_absent_not_zero(self) -> None:
+    async def test_language_identity_axes_are_absent_not_zero(self) -> None:
         """A 0.0 would read as "answered in the wrong language"; absent is
         skipped by the capability aggregation, which is the truth."""
-        result = score_language_compliance_trajectory(
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="ml_Mlym_IN", assistant_messages=[self._KANNADA]),
             {},
         )
         assert "language.requested_language_match_rate" not in result["scores"]
         assert "language.first_turn_match" not in result["scores"]
 
-    def test_intrusion_is_caught_without_a_detector(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_intrusion_is_caught_without_a_detector(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="kn_Knda_IN",
                 assistant_messages=[self._KANNADA + " \uac80 \u0444\u043e\u0440\u043c\u0430"],
@@ -143,7 +143,7 @@ class TestDetectorlessLocales:
         assert cell["score"] == 0.0
         assert "cyrillic" in cell["reasoning"] and "hangul" in cell["reasoning"]
 
-    def test_romanized_locale_is_still_skipped(self) -> None:
+    async def test_romanized_locale_is_still_skipped(self) -> None:
         """Its expected script IS Latin, so both script axes come back a
         meaningless 1.0 for an answer that is plain English -- scoring it would
         manufacture a pass. ``hi_Latn_IN`` in particular ships as a first-class
@@ -151,7 +151,7 @@ class TestDetectorlessLocales:
         FLAG lookup misses it; the guard tests the script ranges instead.
         """
         for locale in ("hi_Latn_IN", "te_Latn_IN"):
-            result = score_language_compliance_trajectory(
+            result = await score_language_compliance_trajectory(
                 _trajectory(
                     locale=locale,
                     assistant_messages=["Your account is closed. " * 10],
@@ -163,7 +163,7 @@ class TestDetectorlessLocales:
 
 
 class TestScriptIntegrity:
-    def test_legitimate_latin_identifiers_do_not_count(self) -> None:
+    async def test_legitimate_latin_identifiers_do_not_count(self) -> None:
         """Marathi answers carry UPI / KYC / PAN / NEFT / tool names because
         that is how Indians write. Script COMPLIANCE penalizes them (it floors
         near 0.83 on clean Devanagari); integrity must not, or the axis is
@@ -173,7 +173,7 @@ class TestScriptIntegrity:
             "\u0924\u0941\u092e\u0939\u093e\u0932\u093e UPI \u0906\u0923\u093f KYC \u092a\u0942\u0930\u094d\u0923 \u0915\u0930\u093e\u0935\u0947 \u0932\u093e\u0917\u0947\u0932. PAN \u0915\u094d\u0930\u092e\u093e\u0902\u0915 \u0926\u094d\u092f\u093e. "
             "NEFT \u0915\u093f\u0902\u0935\u093e IMPS \u0935\u093e\u092a\u0930\u0942\u0928 \u092a\u0948\u0938\u0947 \u092a\u093e\u0920\u0935\u093e. verify_identity \u0915\u0930\u0942. "
         ) * 2
-        result = score_language_compliance_trajectory(
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="mr_Deva_IN", assistant_messages=[text]),
             {},
         )
@@ -183,10 +183,10 @@ class TestScriptIntegrity:
         # The contrast is the whole point of having both axes.
         assert compliance < 0.95
 
-    def test_short_turns_are_excluded_from_the_rate(self) -> None:
+    async def test_short_turns_are_excluded_from_the_rate(self) -> None:
         """A stray glyph is the entire signal, so on a 2-character turn one bad
         codepoint would sink the turn on noise."""
-        result = score_language_compliance_trajectory(
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="kn_Knda_IN", assistant_messages=["\uac80"]),
             {},
         )
@@ -194,9 +194,9 @@ class TestScriptIntegrity:
         assert cell["score"] is None
         assert cell["n"] == 0
 
-    def test_no_scorable_turn_does_not_fail_status(self) -> None:
+    async def test_no_scorable_turn_does_not_fail_status(self) -> None:
         """``None`` is absence of evidence, not a failure."""
-        result = score_language_compliance_trajectory(
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="en_US", assistant_messages=["ok"]),
             {},
         )
@@ -205,8 +205,8 @@ class TestScriptIntegrity:
 
 
 class TestShortCircuit:
-    def test_unknown_locale_returns_noop(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_unknown_locale_returns_noop(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(locale="xx_YY", assistant_messages=["hello"]),
             {},
         )
@@ -214,8 +214,8 @@ class TestShortCircuit:
         assert "not registered" in result["error"]
         assert result["status_proposal"] is True
 
-    def test_missing_locale_returns_noop(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_missing_locale_returns_noop(self) -> None:
+        result = await score_language_compliance_trajectory(
             {
                 "conversation_messages": json.dumps(
                     [
@@ -228,8 +228,8 @@ class TestShortCircuit:
         assert result["scores"] == {}
         assert "not registered" in result["error"]
 
-    def test_no_assistant_turns_returns_noop(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_no_assistant_turns_returns_noop(self) -> None:
+        result = await score_language_compliance_trajectory(
             {
                 "locale": "pt_BR",
                 "conversation_messages": json.dumps(
@@ -250,8 +250,8 @@ class TestShortCircuit:
 
 
 class TestCleanHindiTrajectory:
-    def test_perfect_hindi_response_scores_one(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_perfect_hindi_response_scores_one(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -272,8 +272,8 @@ class TestCleanHindiTrajectory:
 
 
 class TestEnglishFallbackInHindiTrajectory:
-    def test_turn_2_in_english_drops_match_rate(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_turn_2_in_english_drops_match_rate(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -291,8 +291,8 @@ class TestEnglishFallbackInHindiTrajectory:
         # Status flips to False (any rate < 1.0 is a fail).
         assert result["status_proposal"] is False
 
-    def test_turn_1_in_english_drops_first_turn_match(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_turn_1_in_english_drops_first_turn_match(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -312,10 +312,10 @@ class TestEnglishFallbackInHindiTrajectory:
 
 
 class TestHindiInLatinTransliteration:
-    def test_namaste_in_latin_fails_script_check(self) -> None:
+    async def test_namaste_in_latin_fails_script_check(self) -> None:
         # Lingua may detect this as English — that's the whole point:
         # the script check is the load-bearing one for this case.
-        result = score_language_compliance_trajectory(
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=[
@@ -336,8 +336,8 @@ class TestHindiInLatinTransliteration:
 
 
 class TestJapaneseMixedScripts:
-    def test_japanese_with_hiragana_katakana_han_all_compliant(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_japanese_with_hiragana_katakana_han_all_compliant(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="ja_JP",
                 assistant_messages=[
@@ -358,8 +358,8 @@ class TestJapaneseMixedScripts:
 
 
 class TestPerTurnDetails:
-    def test_per_turn_carries_detected_and_compliance(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_per_turn_carries_detected_and_compliance(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="pt_BR",
                 assistant_messages=[
@@ -376,8 +376,8 @@ class TestPerTurnDetails:
         assert second["detected_language"] == "ENGLISH"
         assert second["language_match"] is False
 
-    def test_script_dominance_present_when_compliance_failed(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_script_dominance_present_when_compliance_failed(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=["hello world"],
@@ -389,8 +389,8 @@ class TestPerTurnDetails:
         assert per_turn["script_dominance"] is not None
         assert per_turn["script_dominance"]["latin"] == 1.0
 
-    def test_script_dominance_omitted_when_compliance_perfect(self) -> None:
-        result = score_language_compliance_trajectory(
+    async def test_script_dominance_omitted_when_compliance_perfect(self) -> None:
+        result = await score_language_compliance_trajectory(
             _trajectory(
                 locale="hi_Deva_IN",
                 assistant_messages=["नमस्ते"],

@@ -139,6 +139,31 @@ class TestConversationStateIsPerContext:
             "made after it record against the wrong trajectory"
         )
 
+    def test_a_buffer_is_not_inherited_from_the_caller(self) -> None:
+        """Naming a conversation gives it a buffer of its own.
+
+        Copying a context copies the reference to the buffer, not the buffer,
+        so a conversation that reused an inherited one would append into
+        whatever its caller was still holding.
+        """
+        from usersim.engine.core import llm as llm_module
+        from usersim.engine.core.llm import append_debug_record, set_conversation_id
+
+        set_conversation_id("outer")
+        append_debug_record({"alias": "user_model"})
+        outer_buffer = llm_module._pending_debug_records()
+
+        def inner() -> list:
+            set_conversation_id("inner")
+            append_debug_record({"alias": "judge_model"})
+            return llm_module._pending_debug_records()
+
+        inner_buffer = self._in_its_own_context(inner)
+
+        assert inner_buffer is not outer_buffer, "both conversations share one buffer"
+        assert len(outer_buffer) == 1, f"the caller's buffer grew to {len(outer_buffer)} records"
+        set_conversation_id(None)
+
     def test_a_flush_drains_only_its_own_records(self) -> None:
         """One trajectory's flush must not consume another's pending records."""
         from usersim.engine.core.llm import append_debug_record, flush_debug_log, set_conversation_id

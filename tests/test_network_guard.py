@@ -55,7 +55,7 @@ def _assert_guard_raised(excinfo) -> None:
     )
 
 
-def test_outbound_connect_is_blocked() -> None:
+async def test_outbound_connect_is_blocked() -> None:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         with pytest.raises(BaseException, match="network access is blocked") as excinfo:
@@ -65,7 +65,7 @@ def test_outbound_connect_is_blocked() -> None:
         sock.close()
 
 
-def test_outbound_connect_ex_is_blocked() -> None:
+async def test_outbound_connect_ex_is_blocked() -> None:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         with pytest.raises(BaseException, match="network access is blocked") as excinfo:

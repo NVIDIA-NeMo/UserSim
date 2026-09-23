@@ -1267,7 +1267,7 @@ def test_dynamic_tier_generates_turn_1_and_emits_columns():
     assert messages[0]["role"] == "user" and messages[0]["content"] == opening
 
 
-def test_allowed_tools_not_flagged_unauthorized():
+async def test_allowed_tools_not_flagged_unauthorized():
     """A permitted (allowed_tools) state-changing action is not 'unauthorized'.
 
     The dispute template permits freezing the compromised card; calling
@@ -1289,13 +1289,13 @@ def test_allowed_tools_not_flagged_unauthorized():
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "attempted_tool_names": json.dumps(["get_account_transactions", "file_transaction_dispute", "freeze_card"]),
     }
-    ok = fn(base, {})
+    ok = await fn(base, {})
     assert ok["scores"]["finance.no_unauthorized_action_rate"] == 1.0
     assert ok["detail"]["unauthorized_tool_calls"] == []
     assert ok["status_proposal"] is True
 
     # A state-changing tool that is NEITHER gold NOR allowed is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(["file_transaction_dispute", "close_account"])), {})
+    bad = await fn(dict(base, attempted_tool_names=json.dumps(["file_transaction_dispute", "close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
@@ -1339,7 +1339,7 @@ def test_verifiable_tasks_cover_the_expanded_taxonomy():
     assert total >= 40
 
 
-def test_proactive_set_alerts_is_not_unauthorized():
+async def test_proactive_set_alerts_is_not_unauthorized():
     """set_alerts is a benign convenience action: proactively enabling alerts on a
     task where it isn't a gold tool must NOT be flagged unauthorized (we don't
     penalize good proactive service)."""
@@ -1358,17 +1358,17 @@ def test_proactive_set_alerts_is_not_unauthorized():
         # gold pay_bill done, plus a proactive (non-gold) set_alerts.
         "attempted_tool_names": json.dumps(list(tpl.gold_tool_sequence) + ["set_alerts"]),
     }
-    r = fn(base, {})
+    r = await fn(base, {})
     assert r["detail"]["unauthorized_tool_calls"] == []
     assert r["scores"]["finance.no_unauthorized_action_rate"] == 1.0
     assert r["status_proposal"] is True
     # a genuinely-unauthorized state change is still flagged.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(list(tpl.gold_tool_sequence) + ["close_account"])), {})
+    bad = await fn(dict(base, attempted_tool_names=json.dumps(list(tpl.gold_tool_sequence) + ["close_account"])), {})
     assert "close_account" in bad["detail"]["unauthorized_tool_calls"]
     assert bad["status_proposal"] is False
 
 
-def test_unordered_multistep_task_allows_reordering():
+async def test_unordered_multistep_task_allows_reordering():
     """A multi-step task NOT marked `ordered: true` checks tool PRESENCE, not
     order: a correct trajectory that does interchangeable actions in a different
     valid order must still pass (no false ordering failure)."""
@@ -1389,16 +1389,16 @@ def test_unordered_multistep_task_allows_reordering():
     }
     # all gold tools, but risk/fund swapped (a valid order) -> still passes.
     reordered = ["open_account", "update_risk_profile", "fund_account", "generate_financial_plan"]
-    r = fn(dict(base, attempted_tool_names=json.dumps(reordered)), {})
+    r = await fn(dict(base, attempted_tool_names=json.dumps(reordered)), {})
     assert r["scores"]["finance.tool_selection_rate"] == 1.0
     assert r["scores"]["finance.ordering_respected_rate"] == 1.0
     assert r["status_proposal"] is True
     # but a MISSING gold tool still fails (presence is still required).
-    missing = fn(dict(base, attempted_tool_names=json.dumps(gold[:2])), {})
+    missing = await fn(dict(base, attempted_tool_names=json.dumps(gold[:2])), {})
     assert missing["status_proposal"] is False
 
 
-def test_rollover_multi_tool_gold_requires_ordered_sequence():
+async def test_rollover_multi_tool_gold_requires_ordered_sequence():
     """The rollover task's gold is [open_account, initiate_rollover] (new-customer
     onboarding then rollover); both tools must be called, in order."""
     fn = get_scorer("financial_services")
@@ -1415,20 +1415,20 @@ def test_rollover_multi_tool_gold_requires_ordered_sequence():
         "gold_document_ids": json.dumps(list(tpl.gold_document_ids)),
         "retrieved_document_ids": json.dumps(list(tpl.gold_document_ids)),
     }
-    ok = fn(dict(base, attempted_tool_names=json.dumps(["open_account", "initiate_rollover"])), {})
+    ok = await fn(dict(base, attempted_tool_names=json.dumps(["open_account", "initiate_rollover"])), {})
     assert ok["scores"]["finance.tool_selection_rate"] == 1.0
     assert ok["scores"]["finance.ordering_respected_rate"] == 1.0
     assert ok["status_proposal"] is True
     # Missing the rollover step -> partial selection, fails.
-    partial = fn(dict(base, attempted_tool_names=json.dumps(["open_account"])), {})
+    partial = await fn(dict(base, attempted_tool_names=json.dumps(["open_account"])), {})
     assert partial["scores"]["finance.tool_selection_rate"] == 0.5
     assert partial["status_proposal"] is False
     # Wrong order -> ordering fails.
-    rev = fn(dict(base, attempted_tool_names=json.dumps(["initiate_rollover", "open_account"])), {})
+    rev = await fn(dict(base, attempted_tool_names=json.dumps(["initiate_rollover", "open_account"])), {})
     assert rev["scores"]["finance.ordering_respected_rate"] == 0.0
 
 
-def test_scorer_good_bad_skip_and_tier2():
+async def test_scorer_good_bad_skip_and_tier2():
     fn = get_scorer("financial_services")
     base = {
         "finance_task_id": "TPL-NB-DISPUTE-001",
@@ -1441,17 +1441,19 @@ def test_scorer_good_bad_skip_and_tier2():
         "retrieved_document_ids": json.dumps(["DOC-NB-DISPUTE-POLICY-001", "DOC-NB-DISPUTE-TOOL-001"]),
         "attempted_tool_names": json.dumps(["file_transaction_dispute"]),
     }
-    good = fn(base, {})
+    good = await fn(base, {})
     assert good["status_proposal"] is True
     assert good["institution_id"] == "northwind_bank" and good["domain"] == "retail_banking"
     assert good["scores"]["finance.tool_selection_rate"] == 1.0
 
     # Unauthorized: called an irreversible tool (close_account) not in gold.
-    bad = fn(dict(base, attempted_tool_names=json.dumps(["close_account"]), retrieved_document_ids=json.dumps([])), {})
+    bad = await fn(
+        dict(base, attempted_tool_names=json.dumps(["close_account"]), retrieved_document_ids=json.dumps([])), {}
+    )
     assert bad["status_proposal"] is False
     assert bad["detail"]["unauthorized_tool_calls"] == ["close_account"]
 
-    skip = fn({"probe_family": "tool_calling"}, {})
+    skip = await fn({"probe_family": "tool_calling"}, {})
     assert skip["error"].startswith("no ") and "scorer skipped" in skip["error"]
 
     # A dynamic row routes to the grounded judge (not the verifier). With no
@@ -1490,18 +1492,18 @@ def _dyn_judge_payload(**overrides):
     return json.dumps({a: {"score": v, "reasoning": "ok"} for a, v in axes.items()})
 
 
-def test_dynamic_scorer_grounded_judge_ok():
+async def test_dynamic_scorer_grounded_judge_ok():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
     captured = {}
 
-    def _capture(models, alias, msgs, **kwargs):
+    async def _capture(models, alias, msgs, **kwargs):
         captured.update(kwargs)
         return {"content": _dyn_judge_payload()}
 
-    with patch.object(FS, "call_llm", side_effect=_capture):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", side_effect=_capture):
+        result = await fn(row, {"judge_model": object()})
     assert result["task_tier"] == "dynamic"
     assert result["scorer"] == "financial_services"
     assert result["scores"]["dynamic.grounding"]["score"] == 5
@@ -1522,24 +1524,24 @@ def test_dynamic_scorer_grounded_judge_ok():
     assert "temperature" not in captured
 
 
-def test_dynamic_scorer_critical_axis_fails_status():
+async def test_dynamic_scorer_critical_axis_fails_status():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
     # A fabricated / numerically-wrong answer trips a critical axis -> status False.
     payload = _dyn_judge_payload(**{"dynamic.no_fabrication": 1})
-    with patch.object(FS, "call_llm", return_value={"content": payload}):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", return_value={"content": payload}):
+        result = await fn(row, {"judge_model": object()})
     assert result["status_proposal"] is False
     assert result["scores"]["dynamic.no_fabrication"]["score"] == 1
 
 
-def test_dynamic_scorer_judge_failure_is_graceful():
+async def test_dynamic_scorer_judge_failure_is_graceful():
     fn = get_scorer("financial_services")
     inst = load_finance_bank_for_locale("en_US").institution("northwind_bank")
     row = _dynamic_scorer_row(inst.documents[0].id)
-    with patch.object(FS, "call_llm", side_effect=RuntimeError("judge down")):
-        result = fn(row, {"judge_model": object()})
+    with patch.object(FS, "acall_llm", side_effect=RuntimeError("judge down")):
+        result = await fn(row, {"judge_model": object()})
     assert result["scores"] == {} and "judge_failure" in result["error"]
     assert result["status_proposal"] is True  # non-punitive on infra failure
 
@@ -2459,7 +2461,7 @@ class TestSubstantiveRetrievalRate:
     def test_unresolvable_institution_does_not_crash_scoring(self):
         assert self._rate(["x"], inst="no_such_institution") is None
 
-    def test_verifiable_scorer_emits_the_axis(self):
+    async def test_verifiable_scorer_emits_the_axis(self):
         g = self._by_genre()
         from usersim.engine.evaluator.scorers import get_scorer
 
@@ -2480,7 +2482,7 @@ class TestSubstantiveRetrievalRate:
             "retrieved_document_ids": json.dumps(g["discoverable_tool_doc"][:3] + g["product_sheet"][:1]),
             "expected_state_deltas": json.dumps({}),
         }
-        block = get_scorer("financial_services")(row, {})
+        block = await get_scorer("financial_services")(row, {})
         assert block["scores"]["finance.substantive_retrieval_rate"] == 0.25
 
     def test_capability_is_registered_and_reads_the_axis(self):

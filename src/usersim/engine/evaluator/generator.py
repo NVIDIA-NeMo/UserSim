@@ -59,7 +59,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 )
 
 from usersim.engine.core.identity import resolve_model_name
-from usersim.engine.core.llm import call_llm
+from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.evaluator.axes import select_axes
@@ -128,6 +128,19 @@ class TrajectoryEvaluatorGenerator(
             logging.getLogger("usersim.engine").setLevel(logging.DEBUG)
 
     def generate(self, data: dict) -> dict:
+        """Not available: scoring awaits model calls. Use ``agenerate``.
+
+        Judges and the model-backed scorers are awaited several levels down,
+        so there is no synchronous path to fall back on. The engine calls
+        ``agenerate`` directly; this exists because the base class declares
+        it and a caller reaching here has taken a wrong turn.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} scores trajectories asynchronously. "
+            f"Await agenerate(data) instead of calling generate(data)."
+        )
+
+    async def agenerate(self, data: dict) -> dict:
         cfg = self.config
         col_name = cfg.name
 
@@ -226,7 +239,7 @@ class TrajectoryEvaluatorGenerator(
 
         for spec in judge_specs:
             t_judge = time.monotonic()
-            parsed = self._call_judge(
+            parsed = await self._call_judge(
                 models=models,
                 judge_alias=spec.alias,
                 prompt=prompt,
@@ -288,7 +301,7 @@ class TrajectoryEvaluatorGenerator(
                     scorer_results[name] = {"error": str(e)}
                     continue
                 try:
-                    scorer_results[name] = fn(traj_row, models)
+                    scorer_results[name] = await fn(traj_row, models)
                 except Exception as e:
                     logger.warning(f"  |-- evaluator: scorer {name!r} raised {type(e).__name__}: {e}")
                     scorer_results[name] = {"error": f"{type(e).__name__}: {e}"}
@@ -314,7 +327,7 @@ class TrajectoryEvaluatorGenerator(
                 logger.warning(f"  |-- evaluator: judge alias {j.alias!r} not resolvable in model registry: {e}")
         return out
 
-    def _call_judge(
+    async def _call_judge(
         self,
         models: dict[str, Any],
         judge_alias: str,
@@ -328,7 +341,7 @@ class TrajectoryEvaluatorGenerator(
             {"role": "user", "content": prompt},
         ]
         try:
-            resp = call_llm(
+            resp = await acall_llm(
                 models,
                 judge_alias,
                 msgs,
