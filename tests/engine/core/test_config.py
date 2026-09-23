@@ -24,6 +24,39 @@ class TestConversationSimulatorConfig:
         cfg = ConversationSimulatorConfig(name="test", locale="pt_BR")
         assert cfg.locale == "pt_BR"
 
+    def test_declares_every_alias_a_conversation_cannot_start_without(self):
+        """These reach the startup health check and the scheduler's sizing.
+
+        The inherited default reports only ``model_alias``, which would
+        leave three of the four unchecked until the first row tried to
+        use them.
+        """
+        cfg = ConversationSimulatorConfig(name="test")
+        assert cfg.get_model_aliases() == [
+            "user_model",
+            "assistant_model",
+            "api_response_model",
+            "judge_model",
+        ]
+
+    def test_omits_the_aliases_the_engine_can_run_without(self):
+        """Summaries fall back to the user model and dense retrieval falls
+        back to lexical, so declaring these would turn a working run with a
+        minimal model config into a startup failure."""
+        cfg = ConversationSimulatorConfig(name="test")
+        declared = cfg.get_model_aliases()
+        assert "summary_model" not in declared
+        assert cfg.finance_embedding_model_alias not in declared
+
+    def test_every_probe_specific_column_is_declared(self):
+        """A column the config does not declare is written by the probe and
+        then discarded, and the scorer that reads it back reports the
+        trajectory as unscoreable rather than failing."""
+        cfg = ConversationSimulatorConfig(name="test")
+        declared = set(cfg.side_effect_columns)
+        for column in ("query_id", "sovereign_facts_probed", "probing_categories_explored", "finance_task_id"):
+            assert column in declared, f"{column} would be dropped before any scorer could read it"
+
     def test_random_seed_can_be_set(self):
         cfg = ConversationSimulatorConfig(name="test", random_seed=42)
         assert cfg.random_seed == 42

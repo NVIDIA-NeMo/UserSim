@@ -59,6 +59,31 @@ class TestTrajectoryEvaluatorConfig:
         # attribute on every model-generated column config.
         assert cfg.model_alias == "primary_judge"
 
+    def test_declares_every_judge_in_the_ensemble(self) -> None:
+        """A judge whose alias does not resolve drops out of the ensemble and
+        the run continues, producing a score built from fewer judges than the
+        evaluation envelope records. Declaring them all makes that a startup
+        failure naming the alias."""
+        cfg = TrajectoryEvaluatorConfig(
+            name="x",
+            judges=[
+                JudgeSpecConfig(alias="primary_judge", family="openai"),
+                JudgeSpecConfig(alias="secondary_judge", family="nvidia_nemotron"),
+            ],
+        )
+        assert cfg.get_model_aliases() == ["primary_judge", "secondary_judge"]
+
+    def test_repeated_judge_alias_is_declared_once(self) -> None:
+        cfg = TrajectoryEvaluatorConfig(
+            name="x",
+            judges=[
+                JudgeSpecConfig(alias="judge_a", family="openai"),
+                JudgeSpecConfig(alias="judge_b", family="nvidia_nemotron"),
+                JudgeSpecConfig(alias="judge_a", family="openai"),
+            ],
+        )
+        assert cfg.get_model_aliases() == ["judge_a", "judge_b"]
+
     def test_required_columns_include_only_hard_dependencies(self) -> None:
         cfg = TrajectoryEvaluatorConfig(name="x", judges=self._ok_judges())
         required = cfg.required_columns
