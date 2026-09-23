@@ -13,6 +13,21 @@ import pytest
 from usersim.engine.core.episode_runtime import ProbeEpisodeRuntime
 
 
+class _JSONModel:
+    model_name = "json-model"
+
+    async def acompletion(self, messages, **kwargs):
+        del messages, kwargs
+        return SimpleNamespace(
+            message=SimpleNamespace(
+                content='{"temperature_c": 22}',
+                reasoning_content=None,
+                tool_calls=None,
+            ),
+            usage=None,
+        )
+
+
 @pytest.fixture
 def safety_runtime() -> ProbeEpisodeRuntime:
     return ProbeEpisodeRuntime(
@@ -91,3 +106,73 @@ async def test_runtime_rejects_cross_episode_tool_without_side_effects(
         await safety_runtime.simulate_tool_call("not_this_episode", {})
 
     assert await safety_runtime.evidence() == before
+
+
+async def test_tool_calling_runtime_reuses_native_verifier_and_response_model() -> None:
+    runtime = ProbeEpisodeRuntime(
+        probe_type="tool_calling",
+        persona={"first_name": "A", "last_name": "User", "age": 35},
+        locale="en_US",
+        language="English",
+        models={"api_response_model": _JSONModel()},
+        config=SimpleNamespace(
+            tools_column="tools",
+            max_tools=1,
+            theme_column="theme",
+            random_seed=7,
+        ),
+        data={
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "get_weather",
+                        "description": "Get current weather.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {"location": {"type": "string"}},
+                            "required": ["location"],
+                        },
+                    },
+                }
+            ],
+            "theme": {"type": "weather", "description": "Look up weather."},
+        },
+    )
+
+    payload = await runtime.simulate_tool_call("get_weather", {"location": "Tokyo"})
+
+    assert json.loads(payload) == {"temperature_c": 22}
+    evidence = await runtime.evidence()
+    assert evidence["conversation_metadata"]["tools_called"] == ["get_weather"]
+
+
+async def test_financial_runtime_uses_packaged_stateful_tools() -> None:
+    runtime = ProbeEpisodeRuntime(
+        probe_type="financial_services",
+        persona={
+            "first_name": "Yumi",
+            "last_name": "Tanaka",
+            "age": 35,
+            "region": "Oregon",
+            "occupation": "designer",
+        },
+        locale="en_US",
+        language="English",
+        models={},
+        config=SimpleNamespace(
+            random_seed=1,
+            finance_tier_mix=0.0,
+            finance_tier="verifiable",
+            finance_retrieval_mode="golden",
+            finance_embedding_model_alias="embedding_model",
+        ),
+        data={},
+    )
+
+    payload = await runtime.simulate_tool_call("kb_search", {"query": "account procedure"})
+
+    assert json.loads(payload)["results"]
+    evidence = await runtime.evidence()
+    assert evidence["conversation_metadata"]["kb_search_queries"] == ["account procedure"]
+    assert evidence["result_extras"]["finance_task_id"]
