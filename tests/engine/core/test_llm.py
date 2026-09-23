@@ -29,6 +29,74 @@ from usersim.engine.core.llm import (
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
 
 
+class TestConversationStateIsPerContext:
+    """Conversation state follows the unit of work, not the runtime thread.
+
+    Two trajectories can share a thread. When they do, state keyed by thread
+    identity collapses into one slot and each trajectory's model calls are
+    attributed to whichever ran most recently.
+    """
+
+    @staticmethod
+    def _in_its_own_context(fn, *args):
+        import contextvars
+
+        return contextvars.copy_context().run(fn, *args)
+
+    def test_one_context_cannot_see_another_conversation_id(self) -> None:
+        from usersim.engine.core.llm import get_conversation_id, set_conversation_id
+
+        observed: dict[str, str | None] = {}
+
+        def work(name: str) -> None:
+            set_conversation_id(name)
+            observed[name] = get_conversation_id()
+
+        self._in_its_own_context(work, "traj-a")
+        self._in_its_own_context(work, "traj-b")
+
+        assert observed == {"traj-a": "traj-a", "traj-b": "traj-b"}
+        assert get_conversation_id() is None, (
+            f"a trajectory's conversation id escaped into the caller as "
+            f"{get_conversation_id()!r}, so the next one inherits it"
+        )
+
+    def test_one_context_cannot_see_another_outcome_builder(self) -> None:
+        from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
+        from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
+
+        def work() -> None:
+            set_current_outcome_builder(OutcomeBuilder(provenance=Provenance()))
+
+        self._in_its_own_context(work)
+
+        assert get_current_outcome_builder() is None, (
+            "a trajectory's outcome builder escaped into the caller, so calls "
+            "made after it record against the wrong trajectory"
+        )
+
+    def test_a_flush_drains_only_its_own_records(self) -> None:
+        """One trajectory's flush must not consume another's pending records."""
+        from usersim.engine.core.llm import append_debug_record, flush_debug_log, set_conversation_id
+
+        drained: dict[str, int] = {}
+
+        def record_two_then_flush(name: str) -> None:
+            set_conversation_id(name)
+            append_debug_record({"alias": "user_model"})
+            append_debug_record({"alias": "judge_model"})
+            from usersim.engine.core import llm as llm_module
+
+            pending = llm_module._pending_debug_records()
+            drained[name] = len(pending)
+            flush_debug_log()
+
+        self._in_its_own_context(record_two_then_flush, "traj-a")
+        self._in_its_own_context(record_two_then_flush, "traj-b")
+
+        assert drained == {"traj-a": 2, "traj-b": 2}, f"a trajectory saw records that were not its own: {drained}"
+
+
 class _Facade:
     def completion(self, messages, **kwargs):
         return SimpleNamespace(

@@ -11,6 +11,7 @@ import os
 import random as _random
 import threading
 import time
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -38,9 +39,20 @@ _DEBUG_LOG_PATH = Path(os.environ.get("USERSIM_DEBUG_LOG") or _DEFAULT_DEBUG_LOG
 _DEBUG_LOG_ENABLED = bool(os.environ.get("USERSIM_DEBUG_LOG"))
 _CALL_COUNTER = 0
 _CALL_LOCK = threading.Lock()
-_PENDING_RECORDS: list[dict[str, Any]] = []
+#: Serializes appends to the debug log so two trajectories finishing together
+#: cannot interleave lines within one file.
+_DEBUG_FILE_LOCK = threading.Lock()
 
-_CONV_LOCAL = threading.local()
+# Conversation state is held per context rather than per thread. Several
+# trajectories can share one thread, and when they do, anything keyed by
+# thread identity collapses into a single slot: every model call then records
+# against whichever trajectory touched it last.
+_CONV_ID: ContextVar[str | None] = ContextVar("usersim_conversation_id", default=None)
+_OUTCOME_BUILDER: ContextVar[Any] = ContextVar("usersim_outcome_builder", default=None)
+_PENDING_RECORDS: ContextVar[list[dict[str, Any]] | None] = ContextVar(
+    "usersim_pending_debug_records",
+    default=None,
+)
 
 
 class ContextWindowError(RuntimeError):
@@ -141,11 +153,7 @@ def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def
     ``record_call(alias, input_tokens, output_tokens, elapsed_s)`` —
     typed loosely to avoid a circular import from core.outcomes.
     """
-    if builder is None:
-        if hasattr(_CONV_LOCAL, "outcome_builder"):
-            delattr(_CONV_LOCAL, "outcome_builder")
-    else:
-        _CONV_LOCAL.outcome_builder = builder
+    _OUTCOME_BUILDER.set(builder)
 
 
 def get_current_outcome_builder():  # type: ignore[no-untyped-def]
@@ -155,7 +163,7 @@ def get_current_outcome_builder():  # type: ignore[no-untyped-def]
     on the way out, so an inner scope cannot detach the row's builder and
     leave the calls after it unattributed.
     """
-    return getattr(_CONV_LOCAL, "outcome_builder", None)
+    return _OUTCOME_BUILDER.get()
 
 
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:
@@ -169,7 +177,7 @@ def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, ela
     estimates reasoning post-hoc via tiktoken on visible content and
     applies a 5% noise-floor clamp. See ``reporting/_reasoning.py``.
     """
-    builder = getattr(_CONV_LOCAL, "outcome_builder", None)
+    builder = _OUTCOME_BUILDER.get()
     if builder is None:
         return
     try:
@@ -277,9 +285,32 @@ def set_debug_log_path(path: str | Path | None) -> None:
         _DEBUG_LOG_ENABLED = True
 
 
-def set_conversation_id(conv_id: str) -> None:
-    """Set the conversation identifier for the current thread's debug logs."""
-    _CONV_LOCAL.conv_id = conv_id
+def set_conversation_id(conv_id: str | None) -> None:
+    """Name the conversation whose debug records are being collected.
+
+    Pass ``None`` to clear. The name is scoped to the calling conversation,
+    so a trajectory cannot label another one's records.
+    """
+    _CONV_ID.set(conv_id)
+
+
+def get_conversation_id() -> str | None:
+    """Return the conversation currently collecting debug records, if any."""
+    return _CONV_ID.get()
+
+
+def _pending_debug_records() -> list[dict[str, Any]]:
+    """Return this conversation's pending records, creating the buffer once.
+
+    The buffer belongs to the conversation rather than the process, so a
+    trajectory flushing at its own end writes only what it produced and
+    leaves everything still in flight alone.
+    """
+    records = _PENDING_RECORDS.get()
+    if records is None:
+        records = []
+        _PENDING_RECORDS.set(records)
+    return records
 
 
 def append_debug_record(record: dict[str, Any]) -> None:
@@ -288,20 +319,24 @@ def append_debug_record(record: dict[str, Any]) -> None:
         global _CALL_COUNTER
         _CALL_COUNTER += 1
         record.setdefault("seq", _CALL_COUNTER)
-        record.setdefault("conv_id", getattr(_CONV_LOCAL, "conv_id", "unknown"))
-        _PENDING_RECORDS.append(record)
+    record.setdefault("conv_id", _CONV_ID.get() or "unknown")
+    _pending_debug_records().append(record)
 
 
 def flush_debug_log() -> None:
-    """Write all pending debug records to disk, sorted by conv_id then seq."""
-    with _CALL_LOCK:
-        records = list(_PENDING_RECORDS)
-        _PENDING_RECORDS.clear()
-    if not records or not _DEBUG_LOG_ENABLED:
+    """Write this conversation's pending records to disk, ordered by sequence."""
+    records = _pending_debug_records()
+    if not records:
         return
-    records.sort(key=lambda r: (r["conv_id"], r["seq"]))
-    with open(_DEBUG_LOG_PATH, "a") as f:
-        for r in records:
+    pending = list(records)
+    records.clear()
+    if not _DEBUG_LOG_ENABLED:
+        return
+    pending.sort(key=lambda r: (r["conv_id"], r["seq"]))
+    # Held across the write so two conversations finishing together append
+    # whole blocks rather than interleaving lines.
+    with _DEBUG_FILE_LOCK, open(_DEBUG_LOG_PATH, "a") as f:
+        for r in pending:
             f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
 
 
@@ -473,7 +508,7 @@ def call_llm(
         seq = _CALL_COUNTER
 
     reasoning = getattr(response.message, "reasoning_content", None)
-    conv_id = getattr(_CONV_LOCAL, "conv_id", "unknown")
+    conv_id = _CONV_ID.get() or "unknown"
     debug_record = {
         "seq": seq,
         "conv_id": conv_id,
@@ -488,8 +523,7 @@ def call_llm(
         "tool_calls": result.get("tool_calls"),
     }
     try:
-        with _CALL_LOCK:
-            _PENDING_RECORDS.append(debug_record)
+        _pending_debug_records().append(debug_record)
     except Exception:
         pass
 
