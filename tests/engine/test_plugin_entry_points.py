@@ -37,7 +37,7 @@ LOCALE = "en_US"
 def _resource_provider() -> MagicMock:
     """A provider whose registry answers with sentinel facades.
 
-    ``call_llm`` is patched for these tests, so nothing ever reads a
+    ``acall_llm`` is patched for these tests, so nothing ever reads a
     facade; the registry only has to resolve an alias without raising.
     """
     provider = MagicMock()

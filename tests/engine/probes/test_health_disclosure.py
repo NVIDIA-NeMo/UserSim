@@ -7,7 +7,7 @@ Focus on the deterministic, LLM-free surface (matching ``test_tool_calling.py``)
 the shared Guard pacing gates, the ``commit_move`` tool schema, move extraction,
 and the per-client config (topics / risk / archetype / prompts / provisional axes).
 
-The end-to-end ``propose_and_guard`` loop calls ``call_llm`` and is exercised by
+The end-to-end ``propose_and_guard`` loop calls ``acall_llm`` and is exercised by
 the smoke run / integration tests, not here.
 """
 

@@ -10,7 +10,7 @@ Three layers:
    and pick a fact deterministically.
 2. **Fact-bank caching** — process-local cache + env-override.
 3. **End-to-end probe** — ``simulate_sov_ai_facts``
-   with a mocked ``call_llm`` so no real network calls happen.
+   with a mocked ``acall_llm`` so no real network calls happen.
 
 No live LLM. No real Nemotron-Personas dataset. Everything here runs
 in under a second against fixtures.
@@ -684,7 +684,7 @@ def _mock_call_llm(
     user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
-    """Alias-dispatching ``call_llm`` mock for the unified loop.
+    """Alias-dispatching ``acall_llm`` mock for the unified loop.
 
     The probe runs through ``ConversationLoop``, which calls multiple
     aliases per turn (assistant_model for the assistant under test,
@@ -729,11 +729,11 @@ def _mock_call_llm(
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the unified loop binds it.
+    """Patch ``acall_llm`` everywhere the unified loop binds it.
 
     See ``test_sov_ai_multilingual_parity._patched_call_llm`` for
     the rationale: ``core.simulation`` and ``core.judges`` each
-    re-import ``call_llm`` from ``core.llm`` at module load, so a
+    re-import ``acall_llm`` from ``core.llm`` at module load, so a
     single patch at the source module doesn't propagate.
     """
     with (

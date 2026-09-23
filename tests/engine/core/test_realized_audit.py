@@ -104,7 +104,7 @@ class TestReconcileRealized:
 #   committed intent forever. The whole suite stayed green, because the tests
 #   monkeypatched ``verify_realized_transcript`` itself and never ran a line of it.
 #
-#   The rule these encode: fake the transport (``call_llm``), never the function
+#   The rule these encode: fake the transport (``acall_llm``), never the function
 #   under test.
 # ---------------------------------------------------------------------------
 class TestVerifyRealizedTranscriptRealPath:
@@ -244,7 +244,7 @@ class TestAuditorAliasResolution:
     This shipped broken: the function kept defaulting to ``user_model``, a
     simulation-time alias, after the audit moved layers. A real eval wires
     ``evaluator_model`` and no ``user_model``, so every trajectory raised
-    "Model alias 'user_model' not found in models dict" deep inside call_llm and
+    "Model alias 'user_model' not found in models dict" deep inside acall_llm and
     silently fell back to committed intent. The offline tests missed it because
     they all passed a models dict containing ``judge_model``.
     """

@@ -323,7 +323,7 @@ class ConversationSimulatorGenerator(
         # specific replayed row.
         set_conversation_id(f"{traj_id} | {persona_name} | {probe_type}")
 
-        # Install the thread-local outcome-builder hook so await acall_llm()
+        # Install the per-conversation outcome-builder hook so await acall_llm()
         # invocations inside this trajectory feed per-model tokens /
         # calls / latencies into simulation_outcome. Cleared in the
         # finally block so we never leak the builder across rows.

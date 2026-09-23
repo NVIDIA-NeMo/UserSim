@@ -25,7 +25,7 @@ This test fills that gap. For every probe in the registry it:
 4. Constructs the probe class (``resolve_probe(probe_name)(...)``)
    with that cfg and a synthetic persona — the same calling pattern
    ``ConversationSimulatorGenerator.generate`` uses.
-5. Runs ``await probe.run_dispatch(...)`` against a mocked ``call_llm`` so
+5. Runs ``await probe.run_dispatch(...)`` against a mocked ``acall_llm`` so
    no real network calls happen.
 6. Asserts the result is **not** a scenario-aborted outcome and
    that at least one assistant turn was produced.
@@ -106,7 +106,7 @@ _DEFAULT_LOCALE = "en_US"
 
 
 # ---------------------------------------------------------------------------
-# Mocked call_llm side-effect — alias-dispatching like the per-probe tests
+# Mocked acall_llm side-effect — alias-dispatching like the per-probe tests
 # ---------------------------------------------------------------------------
 
 
@@ -149,9 +149,9 @@ def _mock_call_llm_side_effect(models, alias, msgs, **kwargs):
 
 @contextmanager
 def _patched_call_llm():
-    """Patch ``call_llm`` at every simulator-side binding site.
+    """Patch ``acall_llm`` at every simulator-side binding site.
 
-    ``call_llm`` is imported by name into multiple modules at module-
+    ``acall_llm`` is imported by name into multiple modules at module-
     load time (``from usersim.engine.core.llm import acall_llm``),
     so a single patch on the source module doesn't propagate to
     callers — each binding has to be patched explicitly. The
@@ -169,7 +169,7 @@ def _patched_call_llm():
       tool-response synthesis.
 
     Evaluator-side scorer modules (``evaluator/scorers/*.py``) ALSO
-    import ``call_llm``, but they aren't exercised by the simulator
+    import ``acall_llm``, but they aren't exercised by the simulator
     pipeline this test covers. Leaving them unpatched keeps the
     surface area focused.
     """
@@ -301,7 +301,7 @@ def _toolset_for_test(assets_dir: Path) -> list[dict[str, Any]]:
 
 async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
     """Construct + run one probe end-to-end against synthetic inputs
-    and a mocked ``call_llm``. Returns the result dict the probe
+    and a mocked ``acall_llm``. Returns the result dict the probe
     produces (same shape ``ConversationSimulatorGenerator`` would
     return after ``data.update(result)``).
     """
@@ -325,7 +325,7 @@ async def _drive_one_probe(probe_type: str, locale: str) -> dict[str, Any]:
     outcome_builder = OutcomeBuilder(provenance=provenance)
 
     # Synthetic model registry: each value is a sentinel object the
-    # mocked call_llm doesn't actually inspect (we patch call_llm
+    # mocked acall_llm doesn't actually inspect (we patch acall_llm
     # itself, so the model "client" is never used).
     models = {
         alias: object()

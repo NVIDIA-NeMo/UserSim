@@ -8,7 +8,7 @@ it reads ``probing_categories_explored`` + ``probing_subtopic_hints_used``
 off a trajectory, re-loads the locale's probing taxonomy, and LLM-judges
 the assistant response on three response-only axes (no ground truth).
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Taxonomy state is swapped via the ``USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>``
 env override + ``reset_probing_taxonomy_cache`` so the cache never leaks.
 """
@@ -152,7 +152,7 @@ def _axis_payload(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """``call_llm`` side-effect that yields queued JSON payloads in order."""
+    """``acall_llm`` side-effect that yields queued JSON payloads in order."""
     queue = iter(payloads)
 
     def _side_effect(*args, **kwargs):

@@ -9,7 +9,7 @@ a tool" loop, adapted to UserSim's per-turn user seam
 
   1. Each follow-up turn, the user COMMITS one move via a native ``commit_move``
      tool call (three axes: move / affect / cognitive_content + free-form reasoning),
-     given the session state + the assistant's last message. call_llm forwards the
+     given the session state + the assistant's last message. acall_llm forwards the
      tool schema to ModelFacade and returns the structured tool_calls (auditable).
   2. The GUARD validates it against pacing gates; a veto is returned as a native tool
      result (role:"tool") so the model re-commits in-protocol (up to
@@ -149,7 +149,7 @@ def _move_reasoning_kwargs() -> dict:
 
 def _move_tool(topics: list[str]) -> dict[str, Any]:
     """OpenAI-style function schema for the auditable move the user commits to.
-    UserSim's call_llm forwards this to ModelFacade.completion() and returns the
+    UserSim's acall_llm forwards this to ModelFacade.acompletion() and returns the
     structured tool_calls; the Guard validates the captured call."""
     return {
         "type": "function",

@@ -8,7 +8,7 @@ it reads ``sovereign_facts_probed`` off a trajectory, re-loads the
 locale's fact bank, and LLM-judges the assistant response against
 each probed fact's ``ground_truth``.
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Fact-bank state is swapped via the ``USERSIM_SOV_AI_FACTS_BANK_<LOCALE>``
 env override + ``reset_fact_bank_cache`` so the cache never leaks.
 """
@@ -144,7 +144,7 @@ def _completion_trajectory(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """Return a ``call_llm`` side-effect that yields queued JSON payloads.
+    """Return a ``acall_llm`` side-effect that yields queued JSON payloads.
 
     Each payload corresponds to one fact being scored. Each is returned
     as ``{"content": json.dumps(payload)}`` to mimic the wrapped LLM

@@ -10,7 +10,7 @@ Three layers (parallel to ``test_sov_ai_facts.py``):
    from a probing taxonomy.
 2. **Taxonomy caching** — process-local cache + env-override.
 3. **End-to-end probe** — ``simulate_sov_ai_dynamic``
-   with a mocked ``call_llm`` so no real network calls happen.
+   with a mocked ``acall_llm`` so no real network calls happen.
 
 No live LLM. No real Nemotron-Personas dataset. Everything here runs
 in under a second against fixtures or against the shipped placeholder
@@ -730,7 +730,7 @@ def _mock_call_llm(
     user_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
-    """Alias-dispatching ``call_llm`` mock for the unified loop.
+    """Alias-dispatching ``acall_llm`` mock for the unified loop.
 
     See test_sov_ai_facts._mock_call_llm for the full rationale.
     sov_ai_dynamic generates turn-1 via the user-LLM (no verbatim
@@ -764,11 +764,11 @@ def _mock_call_llm(
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the unified loop binds it.
+    """Patch ``acall_llm`` everywhere the unified loop binds it.
 
     Patches both ``core.simulation.acall_llm`` (assistant + turn-1
     generation) AND ``core.judges.acall_llm`` (in-sim judge) since
-    each consumer module re-imports ``call_llm`` at module load.
+    each consumer module re-imports ``acall_llm`` at module load.
     """
     with (
         patch(

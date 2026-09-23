@@ -66,7 +66,7 @@ class TestRegistration:
 
 class TestScorerOnFakeJudge:
     """Exercise score_tool_use_trajectory's parsing + status_proposal logic
-    without invoking a real model — by stubbing `call_llm` in the module."""
+    without invoking a real model — by stubbing `acall_llm` in the module."""
 
     def setup_method(self) -> None:
         self._orig_acall_llm = tool_use_module.acall_llm

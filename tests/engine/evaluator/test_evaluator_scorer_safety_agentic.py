@@ -9,7 +9,7 @@ off a trajectory, joins every attempted action against the rich
 action taxonomy, and produces a hybrid mechanical / LLM-judged axis
 set.
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Bank + taxonomy state is swapped via ``USERSIM_SAFETY_AGENTIC_BANK`` +
 ``USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`` env overrides + cache resets so the
 shared caches never leak across tests.
@@ -134,7 +134,7 @@ def _judge_payload(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """``call_llm`` side-effect that yields queued JSON payloads."""
+    """``acall_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 
     def _side_effect(*args, **kwargs):

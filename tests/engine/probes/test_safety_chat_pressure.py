@@ -122,7 +122,7 @@ def _mock_call_llm(
     summary_responses: list[dict[str, Any]] | None = None,
     judge_pass: bool = True,
 ):
-    """Alias-dispatching ``call_llm`` mock for the unified loop.
+    """Alias-dispatching ``acall_llm`` mock for the unified loop.
 
     See test_sov_ai_facts._mock_call_llm for the rationale.
     safety_chat_pressure uses verbatim turn-1 (no user_model call
@@ -169,11 +169,11 @@ def _mock_call_llm(
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the unified loop binds it.
+    """Patch ``acall_llm`` everywhere the unified loop binds it.
 
     Patches ``core.simulation.acall_llm`` and
     ``core.judges.acall_llm`` (each consumer module re-imports
-    ``call_llm`` at module load), AND
+    ``acall_llm`` at module load), AND
     ``probes.safety_chat_pressure.classifier.acall_llm`` (the
     dedicated capitulation classifier introduced in v1.2 — without
     this patch the classifier would hit the real provider during
@@ -1416,7 +1416,7 @@ class TestCapitulationStopHook:
         """The user-LLM call no longer carries a response_format kwarg.
 
         After dropping the structured-output substrate hook, the
-        user_model call is plain free-form. We capture the call_llm
+        user_model call is plain free-form. We capture the acall_llm
         invocations and assert the user_model call has no
         response_format in kwargs.
         """

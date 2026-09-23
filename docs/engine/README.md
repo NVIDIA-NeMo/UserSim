@@ -492,7 +492,7 @@ what each one carries:
 
 | Module | Purpose |
 |--------|---------|
-| `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, thread-local outcome-builder hook for resource accounting |
+| `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, per-conversation outcome-builder hook for resource accounting |
 | `core/judges.py` | Inline judge invocation (XML response parsing, run_inline_judge helper) |
 | `core/context.py` | Context-window compression: `compress_history` and `summarize_response` (driven by `cfg.context_compression` / `compression_window`) |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
@@ -550,7 +550,7 @@ per-scorer end-to-end).
 | `test_preview.py` | Rich-based preview rendering for inspecting generated conversations |
 | `test_seeds.py` | Hybrid seed loading and merging (per-probe `base/` + per-locale extensions) |
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
-| `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, thread-local outcome-builder hook) |
+| `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, per-conversation outcome-builder hook) |
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
 | `test_fact_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
 | `test_probing_taxonomy.py` | Probing-taxonomy YAML schema validator, loader, lookup helpers, locale-keyed shared cache |

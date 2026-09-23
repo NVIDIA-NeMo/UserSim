@@ -14,7 +14,7 @@ This test closes that loop. It runs the REAL producer (mixin + Guard +
 it to the REAL scorer. Nothing about the columns is asserted from memory — the
 row is whatever the probe actually produced.
 
-Both LLM calls are faked at the TRANSPORT boundary (``call_llm``), never at the
+Both LLM calls are faked at the TRANSPORT boundary (``acall_llm``), never at the
 boundary of the code under test. That distinction is the direct lesson of a
 regression where the audit raised ``NameError`` on every call, a bare ``except``
 turned it into an empty result, and the suite stayed green because the tests had

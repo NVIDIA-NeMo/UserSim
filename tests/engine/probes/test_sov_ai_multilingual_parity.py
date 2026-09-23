@@ -14,7 +14,7 @@ Layered the same way as ``test_sov_ai_facts.py`` and
 3. **Prompts** — every supported locale has both system prompt + follow-up
    instruction; no half-shipped locales.
 4. **End-to-end probe** — ``simulate_sov_ai_multilingual_parity``
-   with mocked ``call_llm``; covers single-turn, multi-turn, verbatim
+   with mocked ``acall_llm``; covers single-turn, multi-turn, verbatim
    injection, placeholder warning, structured failure paths
    (bank-load / no-matching-query / locale-not-in-bank / assistant-error).
 5. **Sim-side guardrail** — ``should_succeed`` invariant check.
@@ -187,9 +187,9 @@ def _shipped_bank_env() -> dict[str, str]:
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere it's bound by the unified loop.
+    """Patch ``acall_llm`` everywhere it's bound by the unified loop.
 
-    ``ConversationLoop`` calls ``call_llm`` from
+    ``ConversationLoop`` calls ``acall_llm`` from
     ``core.simulation`` (assistant turn), and ``run_inline_judge``
     calls it from ``core.judges`` (in-sim assistant-quality judge +
     user-judge gate). Both bindings are local re-imports of

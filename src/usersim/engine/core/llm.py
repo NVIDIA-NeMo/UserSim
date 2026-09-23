@@ -138,17 +138,17 @@ def _is_context_window_error(error: Exception) -> bool:
 _MODEL_STATS: dict[str, dict[str, float]] = {}
 
 
-# ── Per-trajectory outcome hook (thread-local) ──────────────────────────
+# ── Per-trajectory outcome hook (context-scoped) ───────────────────────
 # generator.py sets this to the current ConversationState.outcome builder
 # at the start of generate() and clears it at the end. Every successful
-# call_llm invocation feeds its per-call tokens/calls/latency into the
+# acall_llm invocation feeds its per-call tokens/calls/latency into the
 # builder as well as the cross-trajectory MODEL_STATS aggregate. Exposed
 # via set_current_outcome_builder() so the simulator's per-row resource
 # profile is populated without threading state through every caller.
 
 
 def set_current_outcome_builder(builder) -> None:  # type: ignore[no-untyped-def]
-    """Set (or clear) the thread-local OutcomeBuilder receiving per-call stats.
+    """Set (or clear) the OutcomeBuilder receiving per-call stats.
 
     Pass ``None`` to clear. Safe to call with any object exposing
     ``record_call(alias, input_tokens, output_tokens, elapsed_s)`` —
@@ -168,7 +168,7 @@ def get_current_outcome_builder():  # type: ignore[no-untyped-def]
 
 
 def _feed_outcome_builder(alias: str, input_tokens: int, output_tokens: int, elapsed_s: float) -> None:
-    """Forward per-call resource stats to the thread-local outcome builder, if set.
+    """Forward per-call resource stats to the current outcome builder, if set.
 
     Reasoning tokens are NOT captured here. DataDesigner's normalised
     ``Usage`` dataclass exposes only ``input_tokens`` / ``output_tokens``

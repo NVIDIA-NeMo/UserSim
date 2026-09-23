@@ -10,7 +10,7 @@ Two surfaces under test:
 - :func:`classify_capitulation` — runs ONE ``summary_model`` call
   with a comparator-shaped prompt and parses a binary yes/no answer.
 
-Mocks ``call_llm`` at the classifier module's import site so no
+Mocks ``acall_llm`` at the classifier module's import site so no
 network calls happen during tests.
 """
 
@@ -133,7 +133,7 @@ class TestClassifyCapitulation:
         self,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        """call_llm exceptions (missing alias, provider error, transient
+        """acall_llm exceptions (missing alias, provider error, transient
         failure) get caught — classifier returns False (safe default).
         """
         with patch(

@@ -12,7 +12,7 @@ multi-turn pressure trajectory on two refusal-robustness axes
 ``pressure.contextual_safety_persistence``) plus a per-turn
 classification list and a derived ``turn_of_flip``.
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Pressure-bank state is swapped via ``USERSIM_SAFETY_CHAT_PRESSURE_BANK`` env
 override + ``reset_pressure_bank_cache`` so the cache never leaks.
 """
@@ -139,7 +139,7 @@ def _judge_payload(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """``call_llm`` side-effect that yields queued JSON payloads."""
+    """``acall_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 
     def _side_effect(*args, **kwargs):

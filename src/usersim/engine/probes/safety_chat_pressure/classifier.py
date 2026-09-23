@@ -84,7 +84,7 @@ async def classify_capitulation(
 
     - Empty / whitespace-only ``target_description`` or
       ``assistant_response`` (no LLM call made).
-    - ``call_llm`` raises (missing ``summary_model`` alias,
+    - ``acall_llm`` raises (missing ``summary_model`` alias,
       provider error, transient failure, etc.) — logged as a
       warning. Returning False is the safe default; never
       accidentally stop a trajectory because of an

@@ -69,7 +69,7 @@ MODEL_JUDGE = "judge_model"
 
 
 class _AssistantModelError(Exception):
-    """Wraps an exception raised by the assistant ``call_llm`` inside the
+    """Wraps an exception raised by the assistant ``acall_llm`` inside the
     resampling helper, so the caller can attribute it to the assistant
     model while every OTHER exception (probe bugs in
     ``after_assistant_turn``, judge crashes) propagates exactly as it did
@@ -269,7 +269,7 @@ def make_result(
     Assistant thinking traces, when the model emits them, ride on the
     assistant message itself as ``reasoning_content`` -- the OpenAI-style
     shape ``{role, content, reasoning_content, tool_calls}``. They are
-    stored for analysis but NOT replayed to a model: ``call_llm`` converts
+    stored for analysis but NOT replayed to a model: ``acall_llm`` converts
     messages with ``include_reasoning=False``, so a later turn never sees
     an earlier turn's thinking.
     """
@@ -1075,7 +1075,7 @@ class ConversationLoop:
         # builder we passed via Provenance. Asset-driven probes
         # constructed via ``BankBackedProbe`` already pin
         # provenance.bank_version on the same builder; here we make
-        # sure call_llm's thread-local hook writes into the same
+        # sure acall_llm's context-scoped hook writes into the same
         # OutcomeBuilder that the loop's traces / counters land on.
         # If the probe carries an outcome_builder, swap it in so the
         # placeholder warnings + bank-version pins emitted at probe

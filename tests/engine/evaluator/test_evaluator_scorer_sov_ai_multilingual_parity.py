@@ -12,7 +12,7 @@ assistant response on three respect-parity axes
 (one query per trajectory; no per-item loop, unlike the
 ``sov_ai_dynamic`` scorer).
 
-Nothing here calls a real LLM — ``call_llm`` is patched per test.
+Nothing here calls a real LLM — ``acall_llm`` is patched per test.
 Query-bank state is swapped via the ``USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK`` env
 override + ``reset_query_bank_cache`` so the cache never leaks.
 """
@@ -148,7 +148,7 @@ def _axis_payload(
 
 
 def _mock_judge_call(payloads: list[dict[str, Any]]):
-    """``call_llm`` side-effect that yields queued JSON payloads."""
+    """``acall_llm`` side-effect that yields queued JSON payloads."""
     queue = iter(payloads)
 
     def _side_effect(*args, **kwargs):
@@ -295,8 +295,8 @@ class TestHappyPath:
     ) -> None:
         # Empty models dict: scorer should still return a no-op-style
         # envelope rather than crashing on next(iter(models)). It will
-        # fail at the LLM call step (KeyError under call_llm), but we
-        # patch call_llm to avoid that and assert envelope shape.
+        # fail at the LLM call step (KeyError under acall_llm), but we
+        # patch acall_llm to avoid that and assert envelope shape.
         traj = _trajectory()
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
@@ -323,7 +323,7 @@ class TestHappyPath:
         captured = {}
 
         async def _capture_call(*args, **kwargs):
-            # call_llm signature: (models, alias, messages, **kwargs)
+            # acall_llm signature: (models, alias, messages, **kwargs)
             captured["messages"] = args[2] if len(args) >= 3 else kwargs.get("messages")
             return {
                 "role": "assistant",

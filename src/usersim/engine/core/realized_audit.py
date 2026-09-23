@@ -105,7 +105,7 @@ def resolve_audit_model(models: dict[str, Any]) -> str:
 
     Only ever returns an alias the caller actually holds, so a missing auditor is
     a clean fallback to committed intent rather than an exception thrown from
-    inside ``call_llm``.
+    inside ``acall_llm``.
     """
     forced = os.environ.get(_AUDIT_MODEL_ENV, "").strip()
     if forced:

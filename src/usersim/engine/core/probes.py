@@ -86,7 +86,7 @@ def assistant_message(
 ) -> dict[str, Any]:
     """Build an assistant message carrying its own reasoning trace.
 
-    ``response`` is the raw ``call_llm`` result that produced ``content``;
+    ``response`` is the raw ``acall_llm`` result that produced ``content``;
     its ``reasoning_content`` (when the model emits one) is attached to
     THIS message rather than to whichever assistant message happens to be
     last. That distinction matters for tool-calling shapes, where a single

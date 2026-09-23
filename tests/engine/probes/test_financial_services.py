@@ -539,7 +539,7 @@ _MODELS = {
 
 
 def _mock_call_llm(assistant_responses, *, user_responses=None):
-    """Alias-dispatching ``call_llm`` mock for the shared ConversationLoop.
+    """Alias-dispatching ``acall_llm`` mock for the shared ConversationLoop.
 
     The probe now rides ``ConversationLoop`` (not a custom run_dispatch), so
     the assistant is called by the loop (first tool-call of a turn) AND by the
@@ -573,14 +573,14 @@ def _mock_call_llm(assistant_responses, *, user_responses=None):
 
 @contextmanager
 def _patched_call_llm(side_effect):
-    """Patch ``call_llm`` everywhere the loop + probe bind it.
+    """Patch ``acall_llm`` everywhere the loop + probe bind it.
 
     ``simulation`` (loop assistant + turn-1 gen + completion check),
     ``judges`` (in-sim judge) and ``context`` (response compression) each
-    bind ``call_llm`` at module load, so patching the source module does not
+    bind ``acall_llm`` at module load, so patching the source module does not
     reach them; the ``ToolExecutionMixin`` inner-loop re-calls import it
     lazily from ``core.llm``. Every one of these references must be patched,
-    or the real ``call_llm`` runs against this module's placeholder facades
+    or the real ``acall_llm`` runs against this module's placeholder facades
     and the probe's fallback quietly absorbs the resulting error.
     """
     with (
