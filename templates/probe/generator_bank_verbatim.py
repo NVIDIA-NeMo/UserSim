@@ -142,6 +142,10 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
+        # Every key added here must also be listed in
+        # ConversationSimulatorConfig.side_effect_columns, or the engine
+        # discards it on the way to storage and the scorer reads it back
+        # as absent.
         if self._task is not None:
             extras["probe_variant"] = self._task.category
             extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])

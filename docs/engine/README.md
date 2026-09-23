@@ -190,7 +190,7 @@ unchanged: the fallback is a call-time redirect, **not** a mutation of the
 **Verbatim turn-1 translation.** When a probe fell back
 (`self._asset_locale != self._locale`), `BankBackedProbe._localize_verbatim`
 machine-translates the verbatim turn-1 into the conversation language via
-`core/translation.py::translate_user_turn` (cached, thread-safe, cheap
+`core/translation.py::translate_user_turn` (cached, single-flight, cheap
 `summary_model`, preserves false premises, never raises) and records a
 `WarningKind.USED_MACHINE_TRANSLATION` on the outcome. `sov_ai_dynamic`
 generates turn-1 in-language via the loop's language directive, so it needs no
@@ -384,7 +384,12 @@ Quick orientation:
    [`generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py)
    so the bootstrap triggers your probe's `@register_probe` at
    plugin import.
-6. Run `usersim smoke` to confirm registration; copy
+6. Declare every column `build_result_extras` writes in
+   `side_effect_columns` on
+   [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).
+   An undeclared column is discarded on the way to storage, and the
+   scorer that reads it back reports nothing to score.
+7. Run `usersim smoke` to confirm registration; copy
    `templates/probe/test_probe.py.template` for the per-probe
    regression test.
 

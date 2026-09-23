@@ -39,10 +39,15 @@ required; the rest have working defaults on `BaseProbe`.
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
-| `build_result_extras` | adding probe-specific columns to the trajectory |
+| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` |
 
 Anything a probe does not override inherits a default, which is what keeps a
 new probe to roughly fifty lines.
+
+A probe's own columns are the one part of this that is declared twice. Whatever
+`build_result_extras` returns is written only if the name appears in
+`ConversationSimulatorConfig.side_effect_columns`; anything else is discarded
+without a warning, and the scorer that reads it back finds nothing to score.
 
 Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
 `format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,
