@@ -223,6 +223,51 @@ count "No, I'm a language model developed by X" as a refusal and as canned
 boilerplate, and Tool-use restraint reads a model describing its own
 architecture as a leak. Read identity results from the rows above.
 
+## Modifying the spec
+
+A layer that extends the spec lists only what it changes, as the declaration
+above does. Besides declaring models, a layer can add a developer, or names,
+products and models to one; add a model family; add or replace tactics and
+strategies, or a locale's rendering of one; change a locale's competitors; and
+narrow the run with `select` and `exclude`.
+
+Set `USERSIM_IDENTITY_DISCLOSURE_SPEC` to the layer's path for a run, or save
+it as `identity_disclosure/spec.yaml` under a directory on `USERSIM_ASSET_PATH`
+to use it for every run. Each row records the layers and a digest of the
+merged spec in its `identity_spec` column, so results say exactly what graded
+them. [`SCHEMA.md`](../../assets/identity_disclosure/SCHEMA.md#layering) gives
+the merge rules, and `validate_spec("identity_disclosure")` in
+`usersim.engine.core.identity_spec` reports every problem with the layers at
+once.
+
+## Building a probe on top
+
+A probe that asks about identity its own way, with its own tactics,
+strategies or models, can subclass this one under a label of its own:
+
+```python
+from usersim.engine.core.probes import register_probe
+from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosureProbe
+
+
+@register_probe(family="my_identity", prompt_version="v1.0", variants=("default",))
+class MyIdentityProbe(IdentityDisclosureProbe):
+    label = "my_identity"
+```
+
+Its spec is `my_identity/spec.yaml` on the asset search path, or the file
+`USERSIM_MY_IDENTITY_SPEC` names, and is usually a layer with
+`extends: identity_disclosure`. Its rows record that spec's version under
+their own label and carry an `expected_identity`, so the `identity_disclosure`
+scorer and the identity capability rows apply to them without further
+registration. Advertise the class under the `usersim.probes` entry point, as
+[`architecture/plugins.md`](../../../../../architecture/plugins.md) describes,
+and check it with `usersim.testing.assert_probe_conforms("my_identity")`. The
+extension fixture's
+[probe](../../../../../tests/fixtures/extension_package/usersim_extension_fixture/identity.py)
+and [spec layer](../../../../../tests/fixtures/extension_package/usersim_extension_fixture/assets/fixture_identity/spec.yaml)
+are a working example, which `make check-extensions` installs and checks.
+
 ## Columns
 
 | Column | Meaning |

@@ -26,7 +26,7 @@ validates the mix at parse time so an unknown probe fails immediately.
 | Health-disclosure | `health_triage_disclosure` | Missed urgent red-flag symptoms that a patient only surfaces once a care-navigation / triage assistant earns them |
 | Health-disclosure | `health_decision_support_disclosure` | Missed clinical danger signs when a *clinician* presents a case to a decision-support assistant |
 | Health-disclosure | `health_general_disclosure` | Downplayed red-flag symptoms and quiet medication lapses when a patient with an ongoing condition consults a general health assistant |
-| Identity | `identity_disclosure` | Self-attribution errors: the model names a developer other than its own when asked who it is or who made it, unprompted, when a question suggests one, or after several turns of a user pressing a competitor |
+| Identity | `identity_disclosure` | Self-attribution errors: the model names a developer other than its own when asked who it is or who made it, unprompted, when a question suggests one, or after several turns of a user pressing a competitor. The probe infers who made the model from its id; [declare](../src/usersim/engine/probes/identity_disclosure/README.md#what-a-row-is-graded-against) any model it cannot infer |
 
 Content review status travels with the results. The twelve non-`general`
 probes draw on curated banks whose entries carry a review flag, set to
