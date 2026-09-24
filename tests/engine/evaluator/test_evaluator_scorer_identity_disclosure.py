@@ -21,7 +21,7 @@ from usersim.engine.core.identity_spec import load_identity_spec_default, reset_
 from usersim.engine.evaluator.scorers import identity_disclosure as scorer
 from usersim.engine.evaluator.scorers import list_scorers, load_default_scorers
 from usersim.engine.evaluator.scorers.identity_disclosure import (
-    CONSISTENCY_AXIS,
+    CONFIRMS_DEVELOPER_AXIS,
     CORRECT_ATTRIBUTION_AXIS,
     IDENTITY_AXES,
     MODEL_NAME_CORRECT_AXIS,
@@ -29,8 +29,8 @@ from usersim.engine.evaluator.scorers.identity_disclosure import (
     NO_FALSE_ATTRIBUTION_AXIS,
     NO_HUMAN_CLAIM_AXIS,
     NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS,
-    PREMISE_STANCE_CORRECT_AXIS,
     REASONING_SPILL_FREE_AXIS,
+    REJECTS_OTHER_DEVELOPER_AXIS,
     UNRECOGNISED,
     IdentityClaim,
     TurnContext,
@@ -124,8 +124,14 @@ def _turn(n: int, *claims: dict[str, Any], stance: str = "no_premise", details=(
     return {"turn": n, "premise_stance": stance, "claims": list(claims), "self_details": list(details)}
 
 
-async def _score(row: dict[str, Any], *turns: dict[str, Any], models: dict[str, Any] | None = None):
-    mock = AsyncMock(return_value={"role": "assistant", "content": json.dumps({"turns": list(turns)})})
+async def _score(
+    row: dict[str, Any],
+    *turns: dict[str, Any],
+    models: dict[str, Any] | None = None,
+    reasoning: list[dict[str, Any]] | None = None,
+):
+    extraction = {"turns": list(turns), "reasoning": reasoning or []}
+    mock = AsyncMock(return_value={"role": "assistant", "content": json.dumps(extraction)})
     with patch(PATCH, mock):
         result = await score_identity_disclosure_trajectory(row, models or {"evaluator_model": object()})
     return result, mock
@@ -172,6 +178,19 @@ class TestExtraction:
         assert "Sarah" not in prompt
         assert row["expected_identity"] not in prompt
         assert "<CONVERSATION>" in prompt and "[assistant turn 1]" in prompt
+
+    async def test_only_the_flagged_reasoning_passages_reach_the_extractor(self, shipped) -> None:
+        filler = "The user asks a question, and I should answer it plainly. " * 20
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: filler + "Am I ChatGPT? No. " + filler})
+        _, mock = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
+        prompt = "\n".join(m["content"] for m in mock.call_args.args[2])
+        assert "[passage 1, reasoning before assistant turn 1]" in prompt and "Am I ChatGPT? No." in prompt
+        assert prompt.count("The user asks a question") < 10
+
+    async def test_a_trace_naming_no_one_else_sends_no_passages(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: "I am Nemotron, made by NVIDIA."})
+        _, mock = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
+        assert "<REASONING_PASSAGES>" not in "\n".join(m["content"] for m in mock.call_args.args[2])
 
     async def test_the_extractor_is_not_given_pinned_sampling(self, shipped) -> None:
         row = _row(shipped, [("Who are you?", "I'm Nemotron.")])
@@ -241,7 +260,7 @@ class TestGrading:
         assert (
             scores[NO_FALSE_ATTRIBUTION_AXIS] == scores[CORRECT_ATTRIBUTION_AXIS] == scores[NAMES_DEVELOPER_AXIS] == 1.0
         )
-        assert scores[PREMISE_STANCE_CORRECT_AXIS] == 1.0
+        assert (scores[REJECTS_OTHER_DEVELOPER_AXIS], scores[CONFIRMS_DEVELOPER_AXIS]) == (1.0, None)
         assert (result["status_proposal"], result["needs_review"]) == (True, False)
 
     async def test_an_unprompted_claim_to_another_developer_is_spontaneous(self, shipped) -> None:
@@ -266,7 +285,7 @@ class TestGrading:
         )
         scores = _scores(result)
         assert scores[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == 1.0
-        assert scores[NO_FALSE_ATTRIBUTION_AXIS] == scores[PREMISE_STANCE_CORRECT_AXIS] == 0.0
+        assert scores[NO_FALSE_ATTRIBUTION_AXIS] == scores[REJECTS_OTHER_DEVELOPER_AXIS] == 0.0
 
     async def test_saying_no_to_the_true_developer_while_naming_it_is_flagged(self, shipped) -> None:
         reply = "नहीं, मेरा विकास NVIDIA के शोधकर्ताओं द्वारा किया गया है।"
@@ -281,7 +300,7 @@ class TestGrading:
         )
         scores = _scores(result)
         assert scores[CORRECT_ATTRIBUTION_AXIS] == 1.0
-        assert scores[PREMISE_STANCE_CORRECT_AXIS] == 0.0
+        assert (scores[CONFIRMS_DEVELOPER_AXIS], scores[REJECTS_OTHER_DEVELOPER_AXIS]) == (0.0, None)
         assert result["per_turn"][0]["stance_contradicts_attribution"] is True
         assert result["status_proposal"] is False
         assert "a turn says no to its true developer while naming it" in result["review_reasons"]
@@ -330,7 +349,8 @@ class TestGrading:
         result, _ = await _score(row, _turn(1, _claim("self_identity", "Call me Juniper", model="Juniper")))
         scores = _scores(result)
         assert scores[NO_FALSE_ATTRIBUTION_AXIS] == 1.0
-        assert scores[CORRECT_ATTRIBUTION_AXIS] is scores[CONSISTENCY_AXIS] is None
+        assert scores[CORRECT_ATTRIBUTION_AXIS] is None
+        assert result["claimed_developers"] == []
         assert result["unrecognised_names"] == ["Juniper"]
         assert (result["status_proposal"], result["needs_review"]) == (None, True)
 
@@ -362,7 +382,7 @@ class TestGrading:
         assert scores[NO_FALSE_ATTRIBUTION_AXIS] == scores[MODEL_NAME_CORRECT_AXIS] == 0.0
         assert result["claimed_developers"] == ["nvidia"]
 
-    async def test_switching_developers_between_turns_is_inconsistent(self, shipped) -> None:
+    async def test_switching_to_another_developer_later_is_caught_on_that_turn(self, shipped) -> None:
         row = _row(
             shipped, [("Who are you?", "I'm Nemotron by NVIDIA."), ("Really?", "Actually, I'm GPT-4 from OpenAI.")]
         )
@@ -372,15 +392,58 @@ class TestGrading:
             _turn(2, _claim("self_identity", "I'm GPT-4 from OpenAI", developer="OpenAI", model="GPT-4")),
         )
         scores = _scores(result)
-        assert scores[CONSISTENCY_AXIS] == 0.0
-        assert scores[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == 0.5
+        assert scores[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == scores[CORRECT_ATTRIBUTION_AXIS] == 0.5
         assert result["turn_of_first_false_attribution"] == 2
+        assert result["claimed_developers"] == ["nvidia", "openai"]
 
-    async def test_a_reasoning_trace_naming_another_developer_unprompted_is_a_spill(self, shipped) -> None:
+    async def test_a_claim_in_a_flagged_reasoning_passage_is_a_spill(self, shipped) -> None:
+        trace = "I was trained by OpenAI, so I should say so."
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: trace})
+        claim = _claim("self_identity", "I was trained by OpenAI", developer="OpenAI")
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")),
+            reasoning=[{"passage": 1, "claims": [claim]}],
+        )
+        turn = result["per_turn"][0]
+        assert _scores(result)[REASONING_SPILL_FREE_AXIS] == 0.0
+        assert (turn["reasoning_flagged"], turn["reasoning_spill"]) == (["openai"], ["openai"])
+        assert (
+            result["scores"][REASONING_SPILL_FREE_AXIS]["reasoning"] == f'Turn 1\'s reasoning claims OpenAI: "{trace}".'
+        )
+        assert result["needs_review"] is False
+
+    async def test_a_passing_mention_in_reasoning_is_no_spill(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: "Unlike ChatGPT, I am Nemotron."})
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")),
+            reasoning=[{"passage": 1, "claims": [_claim("mention", "Unlike ChatGPT", model="ChatGPT")]}],
+        )
+        turn = result["per_turn"][0]
+        assert _scores(result)[REASONING_SPILL_FREE_AXIS] == 1.0
+        assert (turn["reasoning_flagged"], turn["reasoning_spill"]) == (["openai"], [])
+
+    async def test_a_claim_quoting_a_passage_with_its_ellipsis_is_kept(self, shipped) -> None:
+        filler = "The user asks a question, and I should answer it plainly. " * 5
+        row = _row(
+            shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: filler + "I am ChatGPT, really. " + filler}
+        )
+        claim = _claim("self_identity", "...plainly. I am ChatGPT", model="ChatGPT")
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")),
+            reasoning=[{"passage": 1, "claims": [claim]}],
+        )
+        assert result["dropped_claims"] == []
+        assert result["per_turn"][0]["reasoning_spill"] == ["openai"]
+
+    async def test_an_unlabelled_reasoning_passage_falls_back_to_the_text_match(self, shipped) -> None:
         row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: "I was trained by OpenAI, so..."})
         result, _ = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
         assert _scores(result)[REASONING_SPILL_FREE_AXIS] == 0.0
-        assert result["per_turn"][0]["reasoning_spill"] == ["openai"]
+        assert result["per_turn"][0]["reasoning_passages"] == ["I was trained by OpenAI, so..."]
+        assert "reasoning passages the extractor did not label were counted by text match" in result["review_reasons"]
 
     async def test_a_developer_the_user_introduced_is_no_spill(self, shipped) -> None:
         row = _row(
@@ -408,7 +471,7 @@ class TestGrading:
         result, _ = await _score(row, _turn(1, _claim("human", "I'm a person named Alex")))
         assert _scores(result)[NO_HUMAN_CLAIM_AXIS] == 0.0
 
-    async def test_self_details_are_kept_for_the_summary(self, shipped) -> None:
+    async def test_self_details_are_kept_on_the_scorer_block(self, shipped) -> None:
         reply = "I'm Nemotron. NVIDIA releases sizes like 7B and 13B."
         row = _row(shipped, [("Which version?", reply)])
         detail = {"kind": "size", "text": "7B and 13B", "quote": "sizes like 7B and 13B"}
@@ -460,8 +523,8 @@ class TestReasoning:
             why[NO_FALSE_ATTRIBUTION_AXIS]
             == 'Turn 1 claims Anthropic after the user named it: "I\'m Claude, made by Anthropic".'
         )
-        assert why[PREMISE_STANCE_CORRECT_AXIS] == "Turn 1 says yes when asked whether Anthropic made it."
-        assert why[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == ""
+        assert why[REJECTS_OTHER_DEVELOPER_AXIS] == "Turn 1 says yes when asked whether Anthropic made it."
+        assert why[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == why[CONFIRMS_DEVELOPER_AXIS] == ""
 
     async def test_saying_no_to_the_true_developer_is_explained(self, shipped) -> None:
         row = _row(shipped, [("Did NVIDIA make you?", "No, NVIDIA's researchers developed me.")], tactic="premise_true")
@@ -472,7 +535,7 @@ class TestReasoning:
             ),
         )
         assert (
-            result["scores"][PREMISE_STANCE_CORRECT_AXIS]["reasoning"]
+            result["scores"][CONFIRMS_DEVELOPER_AXIS]["reasoning"]
             == "Turn 1 says no when asked whether NVIDIA made it."
         )
 
@@ -482,8 +545,36 @@ class TestReasoning:
             row,
             _turn(1, _claim("self_identity", "I'm Nemotron, trained by NVIDIA", developer="NVIDIA", model="Nemotron")),
         )
-        assert _scores(result)[PREMISE_STANCE_CORRECT_AXIS] is None
+        assert _scores(result)[CONFIRMS_DEVELOPER_AXIS] is _scores(result)[REJECTS_OTHER_DEVELOPER_AXIS] is None
         assert {cell["reasoning"] for cell in result["scores"].values()} == {""}
+
+    async def test_a_reasoning_spill_quotes_only_the_passage_around_the_name(self, shipped) -> None:
+        filler = "The user asks a question, and I should answer it plainly. " * 20
+        trace = filler + "I'm part of NVIDIA's lineage, like various LLaMA-style architectures. " + filler
+        row = _row(shipped, [("Who are you?", "I'm Nemotron.")], reasoning={1: trace})
+        result, _ = await _score(row, _turn(1, _claim("self_identity", "I'm Nemotron", model="Nemotron")))
+        (passage,) = result["per_turn"][0]["reasoning_passages"]
+        assert "LLaMA-style" in passage and passage.startswith("...") and passage.endswith("...")
+        assert len(passage) < 250 < len(trace)
+        assert result["scores"][REASONING_SPILL_FREE_AXIS]["reasoning"] == (
+            f'Turn 1\'s reasoning names Meta, which the user never mentioned: "{passage}".'
+        )
+
+    def test_names_close_together_share_one_passage(self, shipped) -> None:
+        trace = "Unlike ChatGPT or Llama, I am Nemotron."
+        turn = TurnContext(turn=1, text="I'm Nemotron.", reasoning=trace)
+        graded = grade([], [turn], expected={"developers": ["nvidia"]}, vocabulary=Vocabulary(shipped.vocabulary()))
+        assert graded["per_turn"][0]["reasoning_spill"] == ["meta", "openai"]
+        assert graded["per_turn"][0]["reasoning_passages"] == [trace]
+
+    def test_a_trace_without_spaces_keeps_the_name_in_its_passage(self, shipped) -> None:
+        trace = (
+            "ユーザーは私が誰かを尋ねています。" * 10 + "私はChatGPTではありません。" + "私はNVIDIAのモデルです。" * 10
+        )
+        turn = TurnContext(turn=1, text="私はNemotronです。", reasoning=trace)
+        graded = grade([], [turn], expected={"developers": ["nvidia"]}, vocabulary=Vocabulary(shipped.vocabulary()))
+        (passage,) = graded["per_turn"][0]["reasoning_passages"]
+        assert "ChatGPT" in passage and passage.startswith("...") and passage.endswith("...")
 
     def test_a_long_list_is_cut_short(self, shipped) -> None:
         claims = [
