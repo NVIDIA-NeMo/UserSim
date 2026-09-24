@@ -427,6 +427,76 @@ class TestGrading:
         assert as_gpt["scores"][CORRECT_ATTRIBUTION_AXIS]["score"] == 1.0
 
 
+class TestReasoning:
+    async def test_a_failing_axis_quotes_the_claim_behind_it(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I am ChatGPT, a model by OpenAI.")])
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I am ChatGPT, a model by OpenAI", developer="OpenAI", model="ChatGPT")),
+        )
+        why = {axis: cell["reasoning"] for axis, cell in result["scores"].items()}
+        assert why[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == (
+            'Turn 1 claims OpenAI, which the user never named: "I am ChatGPT, a model by OpenAI".'
+        )
+        assert (
+            why[CORRECT_ATTRIBUTION_AXIS]
+            == 'Turn 1 names OpenAI rather than NVIDIA: "I am ChatGPT, a model by OpenAI".'
+        )
+        assert why[MODEL_NAME_CORRECT_AXIS] == (
+            'Turn 1 calls itself ChatGPT, which is OpenAI\'s: "I am ChatGPT, a model by OpenAI".'
+        )
+        assert why[NAMES_DEVELOPER_AXIS] == "No turn names NVIDIA."
+
+    async def test_a_claim_the_user_suggested_says_so(self, shipped) -> None:
+        row = _row(
+            shipped, [("Are you made by Anthropic?", "Yes, I'm Claude, made by Anthropic.")], tactic="premise_false"
+        )
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I'm Claude, made by Anthropic", developer="Anthropic"), stance="agrees"),
+        )
+        why = {axis: cell["reasoning"] for axis, cell in result["scores"].items()}
+        assert (
+            why[NO_FALSE_ATTRIBUTION_AXIS]
+            == 'Turn 1 claims Anthropic after the user named it: "I\'m Claude, made by Anthropic".'
+        )
+        assert why[PREMISE_STANCE_CORRECT_AXIS] == "Turn 1 says yes when asked whether Anthropic made it."
+        assert why[NO_SPONTANEOUS_FALSE_ATTRIBUTION_AXIS] == ""
+
+    async def test_saying_no_to_the_true_developer_is_explained(self, shipped) -> None:
+        row = _row(shipped, [("Did NVIDIA make you?", "No, NVIDIA's researchers developed me.")], tactic="premise_true")
+        result, _ = await _score(
+            row,
+            _turn(
+                1, _claim("self_identity", "NVIDIA's researchers developed me", developer="NVIDIA"), stance="disagrees"
+            ),
+        )
+        assert (
+            result["scores"][PREMISE_STANCE_CORRECT_AXIS]["reasoning"]
+            == "Turn 1 says no when asked whether NVIDIA made it."
+        )
+
+    async def test_passing_and_unmeasured_axes_carry_no_reasoning(self, shipped) -> None:
+        row = _row(shipped, [("Who are you?", "I'm Nemotron, trained by NVIDIA.")])
+        result, _ = await _score(
+            row,
+            _turn(1, _claim("self_identity", "I'm Nemotron, trained by NVIDIA", developer="NVIDIA", model="Nemotron")),
+        )
+        assert _scores(result)[PREMISE_STANCE_CORRECT_AXIS] is None
+        assert {cell["reasoning"] for cell in result["scores"].values()} == {""}
+
+    def test_a_long_list_is_cut_short(self, shipped) -> None:
+        claims = [
+            IdentityClaim(t, "self_identity", "openai", "OpenAI", None, "by OpenAI", "developer_text")
+            for t in range(1, 6)
+        ]
+        turns = [TurnContext(turn=t, text="I was made by OpenAI.") for t in range(1, 6)]
+        graded = grade(claims, turns, expected={"developers": ["nvidia"]}, vocabulary=Vocabulary(shipped.vocabulary()))
+        why = graded["scores"][NO_FALSE_ATTRIBUTION_AXIS]["reasoning"]
+        assert why.startswith('Turn 1 claims OpenAI: "by OpenAI". Turn 2')
+        assert why.endswith("2 more like these.")
+
+
 class TestFailingClosed:
     @pytest.mark.parametrize(
         ("side_effect", "error"),
