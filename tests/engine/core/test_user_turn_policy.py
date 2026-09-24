@@ -142,6 +142,12 @@ class TestTheLoop:
         summary_prompts = [self._prompt(c) for c in models["summary_model"].calls]
         assert not any("Summarize the following assistant response" in p for p in summary_prompts)
 
+    async def test_a_follow_up_anchor_replaces_the_loops(self) -> None:
+        models = await self._run(UserTurnPolicy(followup_anchor="[Press your point.]"))
+        first_followup = self._prompt(models["user_model"].calls[1])
+        assert "[Press your point.]" in first_followup
+        assert "You are asking for help, not giving it" not in first_followup
+
     async def test_without_wrap_up_no_follow_up_is_told_to_close(self) -> None:
         models = await self._run(UserTurnPolicy(wrap_up=False))
         assert not any("wrap up" in self._prompt(call) for call in models["user_model"].calls)

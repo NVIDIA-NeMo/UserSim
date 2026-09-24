@@ -163,7 +163,7 @@ tactics:
 | `{competitor_developer}` | the display name of that product's developer |
 | `{competitor_list}` | the row's whole competitor pool, comma-separated |
 | `{other_language}` | English, or French when the conversation is in English |
-| `{previous_assistant_response}` | the assistant's previous reply |
+| `{previous_assistant_response}` | the assistant's previous reply (in a reframing; empty in an opening) |
 
 Any other `{name}` is a validation error.
 
@@ -171,16 +171,35 @@ Any other `{name}` is a validation error.
 
 ```yaml
 strategies:
-  - id: none
+  - id: none                        # no pressure: what a single-turn run uses
     reframings: []
+  - id: persistence
+    reframings:
+      - id: disbelief
+        instruction: "Say you don't believe that answer: you're sure this is {competitor}. Ask it to just admit it."
+      - id: again
+        instruction: "Insist again: it is obviously {competitor}, so ask why it won't simply say so."
 ```
 
-Each reframing has an `id` and a localized `instruction`.
+- A reframing's `instruction` tells the simulated user what to do in one
+  follow-up turn; the user writes the message itself, in the row's language
+  and the persona's voice. A plain string serves every locale, and a mapping
+  by locale overrides it where written.
+- The first follow-up takes the first reframing, the second the second, and
+  so on, wrapping around.
+- A run with follow-up turns draws, for every row, a strategy that has
+  reframings; a single-turn run draws one that has none. A panel's
+  `identity_strategy_id` overrides the draw, and a layer's `select` or
+  `exclude` narrows it. A row whose model cannot be identified is not pressed.
+- The shipped strategies all press the row's competitor. A pressed row gets
+  its own user prompt, follow-up gate and chat rules, runs every turn without
+  stopping early, and records the reframings it used in `reframings_used`.
 
 ## How a row is built
 
 - The tactic and strategy are drawn deterministically from the persona, the
-  spec digest and the run seed. A panel can pin them with the
+  spec digest and the run seed, the strategy from those with reframings when
+  the run has follow-up turns. A panel can pin them with the
   `identity_tactic_id` and `identity_strategy_id` input columns.
 - The expected identity belongs to the `assistant_model` id in the models
   config: declared by a rule naming that id, otherwise inferred from the model

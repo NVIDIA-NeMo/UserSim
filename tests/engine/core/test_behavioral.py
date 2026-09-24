@@ -200,6 +200,14 @@ class TestFormatBehavioralProfile:
         assert "verbose" not in text.lower()
         assert "cooperative" not in text.lower()
 
+    def test_a_pressing_user_may_state_what_it_believes(self, full_persona):
+        profile = compute_behavioral_profile(full_persona)
+        asking = format_behavioral_profile_for_prompt(profile)
+        pressing = format_behavioral_profile_for_prompt(profile, pressing=True)
+        assert "You do NOT have the answers" in asking and "Never provide information" in asking
+        assert "You do NOT have the answers" not in pressing and "Never provide information" not in pressing
+        assert "pressing the point" in pressing and "Use plain text ONLY" in pressing
+
 
 class TestGetConversationLanguage:
     def test_known_locales(self):

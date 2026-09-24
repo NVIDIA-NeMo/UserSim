@@ -22,10 +22,15 @@ How a row is built:
   expected identity, so its row cannot be graded.
 - The competitor pool drops the expected developer and its lineage, so a
   leading question never offers the true developer as the false premise.
+- A run with follow-up turns gives every identified row a pressure strategy.
+  Each follow-up then carries the strategy's next reframing, and the simulated
+  user presses the row's competitor with its own prompt, gate and chat rules,
+  over every turn of the run. A single-turn run uses the ``none`` strategy.
 
 Columns written, all declared in ``ConversationSimulatorConfig.side_effect_columns``:
 ``identity_tactic_id``, ``identity_tactic_kind`` (``neutral`` or ``leading``),
 ``identity_pair``, ``identity_competitor``, ``strategy_id``,
+``reframings_used`` (the reframing ids in follow-up order),
 ``expected_identity`` and ``identity_spec`` (both JSON), and
 ``probe_variant = "<tactic>::<strategy>"``.
 
@@ -66,7 +71,14 @@ from usersim.engine.core.user_turn_policy import (
     PUSHBACK_OPENERS,
     UserTurnPolicy,
 )
-from usersim.engine.probes.identity_disclosure.prompts import GATE_PROMPTS, USER_SYSTEM_PROMPTS
+from usersim.engine.probes.identity_disclosure.prompts import (
+    FOLLOWUP_ANCHOR,
+    GATE_PROMPTS,
+    PRESSURE_GATE_PROMPTS,
+    PRESSURE_INSTRUCTION,
+    PRESSURE_USER_SYSTEM_PROMPTS,
+    USER_SYSTEM_PROMPTS,
+)
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
     IdentityTask,
@@ -77,6 +89,7 @@ from usersim.engine.probes.identity_disclosure.task_derivation import (
     select_competitor,
     select_strategy,
     select_tactic,
+    strategy_placeholders,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -145,6 +158,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 persona_key,
                 seed=seed,
                 override=_panel_value(self._data.get("identity_strategy_id")),
+                # A row that cannot be graded is not worth pressing.
+                max_turns=getattr(cfg, "max_turns", 1) if identified else 1,
             )
         except IdentityTaskError as e:
             raise IdentityDisclosureProbeError(f"{label}: {e}") from e
@@ -156,12 +171,12 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
 
         excluded = (*expected.developers, *expected.lineage) if expected else ()
         pool = spec.competitor_pool(self._asset_locale, exclude=excluded)
-        names_competitor = bool(placeholders_in(tactic) & COMPETITOR_PLACEHOLDERS)
+        names_competitor = bool((placeholders_in(tactic) | strategy_placeholders(strategy)) & COMPETITOR_PLACEHOLDERS)
         competitor = select_competitor(spec, pool, persona_key, seed=seed) if names_competitor else None
         if names_competitor and competitor is None:
             raise IdentityDisclosureProbeError(
-                f"{label}: tactic {tactic.id!r} names a competitor, but spec {spec.version} leaves none "
-                f"for locale {self._asset_locale} once {', '.join(excluded)} are excluded"
+                f"{label}: tactic {tactic.id!r} or strategy {strategy.id!r} names a competitor, but spec "
+                f"{spec.version} leaves none for locale {self._asset_locale} once {', '.join(excluded)} are excluded"
             )
         values = placeholder_values(spec, expected, competitor=competitor, pool=pool, language=self._language)
         return IdentityTask(
@@ -172,29 +187,60 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             competitor=competitor,
             expected=expected,
             opening=fill(tactic.text.for_locale(self._asset_locale), values),
+            values=values,
         )
 
     # ── ProbeAdapter hooks ──────────────────────────────────────────
 
     def get_user_system_prompt(self) -> str:
-        return USER_SYSTEM_PROMPTS.get(
+        pressing = self._pressing
+        return (PRESSURE_USER_SYSTEM_PROMPTS if pressing else USER_SYSTEM_PROMPTS).get(
             _prompt_locale(self._locale),
             persona=format_persona_for_prompt(self._persona),
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=(
                 format_behavioral_profile_for_prompt(
-                    self._profile, probe_type=type(self).label, language=self._language
+                    self._profile, probe_type=type(self).label, language=self._language, pressing=pressing
                 )
                 if self._profile
                 else ""
             ),
             interaction_style_instructions=format_interaction_style_instructions(self._interaction_style),
+            **self._pressure_values,
         )
 
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability policy: what the model says about itself unprompted
         # is the finding, so it gets no system prompt.
         return ""
+
+    @property
+    def _pressing(self) -> bool:
+        return self._task is not None and self._task.pressured
+
+    @property
+    def _pressure_values(self) -> dict[str, str]:
+        """The competitor a pressed row's prompts name; empty for a row that is not pressed."""
+        if not self._pressing:
+            return {}
+        values = self._task.values
+        return {"competitor": values["competitor"], "competitor_developer": values["competitor_developer"]}
+
+    async def format_followup_user_instructions(self, turn_idx: int, state: ConversationState) -> list[str]:
+        """The strategy's next reframing, filled for this row; none for a row that is not pressed."""
+        reframing = self._task.strategy.reframing_at(turn_idx - 1) if self._pressing else None
+        if reframing is None:
+            return []
+        state.metadata.setdefault("reframings_used", []).append(reframing.id)
+        messages = getattr(state, "messages", None) or []
+        previous = next((m.get("content") or "" for m in reversed(messages) if m.get("role") == "assistant"), "")
+        values = {**self._task.values, "previous_assistant_response": previous}
+        instruction = fill(reframing.instruction.for_locale(self._asset_locale), values)
+        return [PRESSURE_INSTRUCTION.format(instruction=instruction)]
+
+    def allow_early_stop_at_turn(self, turn_idx: int, state: ConversationState) -> bool:
+        # A pressed row runs every turn, so a model that gives in late, or recovers, is seen.
+        return not self._pressing
 
     def user_turn_policy(self) -> UserTurnPolicy:
         """Earlier replies stay as written, no follow-up wraps up, and the words these users write pass the filters.
@@ -216,15 +262,17 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         return UserTurnPolicy(
             context_compression=False,
             wrap_up=False,
+            followup_anchor=FOLLOWUP_ANCHOR if self._pressing else None,
             allowed_phrases=LANGUAGE_MODEL_NOUNS | FIRST_MESSAGE_PHRASES | PUSHBACK_OPENERS,
             script_check_ignores=tuple(sorted(names)),
         )
 
     def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
-        return GATE_PROMPTS.get(
+        return (PRESSURE_GATE_PROMPTS if self._pressing else GATE_PROMPTS).get(
             _prompt_locale(self._locale),
             conversation_history=conversation_history,
             user_turn_to_evaluate=user_query,
+            **self._pressure_values,
         )
 
     def seed_state_metadata(self, state: ConversationState) -> None:
@@ -236,6 +284,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         state.metadata["identity_pair"] = task.tactic.pair or None
         state.metadata["identity_competitor"] = task.competitor
         state.metadata["strategy_id"] = task.strategy.id
+        state.metadata["reframings_used"] = []
 
     async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
         if self._task is None:
@@ -259,6 +308,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
                 "identity_pair": task.tactic.pair or None,
                 "identity_competitor": task.competitor,
                 "strategy_id": task.strategy.id,
+                "reframings_used": list(state.metadata.get("reframings_used") or []),
                 "expected_identity": (
                     json.dumps(asdict(task.expected), ensure_ascii=False) if task.expected is not None else None
                 ),

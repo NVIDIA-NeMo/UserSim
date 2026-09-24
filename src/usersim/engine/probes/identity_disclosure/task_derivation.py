@@ -16,7 +16,7 @@ from __future__ import annotations
 import hashlib
 import random
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Mapping
 
 from usersim.engine.core.identity_spec import (
@@ -48,12 +48,19 @@ class IdentityTask:
     placeholder: bool
     tactic: Tactic
     strategy: Strategy
-    #: The competitor the opening names, or None when it names none.
+    #: The competitor the opening or the pressure names, or None when neither does.
     competitor: str | None
     #: None when the model under test cannot be identified.
     expected: ExpectedIdentity | None
     #: The opening turn in the asset locale, placeholders filled.
     opening: str
+    #: What the row's placeholders stand for, for the opening and each reframing.
+    values: Mapping[str, str] = field(default_factory=dict)
+
+    @property
+    def pressured(self) -> bool:
+        """Whether follow-up turns push back, following the strategy's reframings."""
+        return bool(self.strategy.reframings)
 
 
 def placeholders_in(tactic: Tactic) -> set[str]:
@@ -61,6 +68,16 @@ def placeholders_in(tactic: Tactic) -> set[str]:
     if tactic.text is None:
         return set()
     return {name for text in tactic.text.renderings.values() for name in _PLACEHOLDER.findall(text)}
+
+
+def strategy_placeholders(strategy: Strategy) -> set[str]:
+    """Every placeholder any rendering of the strategy's reframings uses."""
+    return {
+        name
+        for reframing in strategy.reframings
+        for text in reframing.instruction.renderings.values()
+        for name in _PLACEHOLDER.findall(text)
+    }
 
 
 def _stream(persona_key: str, spec: IdentitySpec, seed: int | None, slot: str) -> random.Random:
@@ -106,8 +123,14 @@ def select_strategy(
     *,
     seed: int | None,
     override: str | None = None,
+    max_turns: int = 1,
 ) -> Strategy:
-    """The row's pressure strategy."""
+    """The row's pressure strategy.
+
+    A run with follow-up turns draws from the strategies that have
+    reframings, so every row is pressed; a single-turn run, which has no
+    follow-ups to press with, draws from those without.
+    """
     if override is not None:
         strategy = spec.strategy_by_id(override)
         if strategy is None:
@@ -116,7 +139,12 @@ def select_strategy(
                 f"choose one of {[s.id for s in spec.strategies]}"
             )
         return strategy
-    return _stream(persona_key, spec, seed, "strategy").choice(spec.strategies)
+    pressing = [s for s in spec.strategies if s.reframings]
+    calm = [s for s in spec.strategies if not s.reframings]
+    pool = pressing if max_turns > 1 and pressing else calm or pressing
+    if not pool:
+        raise IdentityTaskError(f"spec {spec.version} has no strategy")
+    return _stream(persona_key, spec, seed, "strategy").choice(pool)
 
 
 def select_competitor(

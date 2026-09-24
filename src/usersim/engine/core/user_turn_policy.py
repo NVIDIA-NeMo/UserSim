@@ -50,6 +50,8 @@ class UserTurnPolicy:
     context_compression: bool = True
     #: Whether the last follow-ups may tell the simulated user to thank the assistant and wrap up.
     wrap_up: bool = True
+    #: Replaces the loop's follow-up role anchor, which casts the user as asking for help.
+    followup_anchor: str | None = None
     #: Fourth-wall and refusal-echo phrases this probe's user turns may contain.
     allowed_phrases: frozenset[str] = frozenset()
     #: Names left out of a user turn's script check, such as brand names written in

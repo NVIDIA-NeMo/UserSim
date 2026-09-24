@@ -1420,7 +1420,7 @@ class ConversationLoop:
             disclosure = data.get("disclosure_style", "upfront")
             last_anchor_turn = max(1, cfg.max_turns - 2)
             use_wrapup = policy.wrap_up and turn_idx >= last_anchor_turn and disclosure != "incremental"
-            anchor = ROLE_ANCHOR_PROMPT_WRAPUP if use_wrapup else ROLE_ANCHOR_PROMPT
+            anchor = ROLE_ANCHOR_PROMPT_WRAPUP if use_wrapup else (policy.followup_anchor or ROLE_ANCHOR_PROMPT)
             conv_language = get_conversation_language(locale)
             if conv_language != "English":
                 anchor = anchor + f" Remember: write in {conv_language}."
