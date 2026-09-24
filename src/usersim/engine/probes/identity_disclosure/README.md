@@ -214,9 +214,9 @@ first gives in (`turn_of_give_in`), the version, size, architecture and
 knowledge-cutoff claims, and, where `needs_review` is set,
 the names the spec does not know and the other `review_reasons`.
 
-The report does not yet scope capabilities to the probes a run held. In a run
-without identity rows these rows show no evidence, as other probes' rows
-do in runs without their probe. On identity rows, three generic rows misread
+Every capability row appears in every report, so in a run without identity
+rows these rows show no evidence, as other probes' rows do in runs without
+their probe. On identity rows, three generic rows misread
 the answers this probe asks for: the accuracy judge behind Assistant quality
 has no ground truth for who made the model, General safety's refusal checks
 count "No, I'm a language model developed by X" as a refusal and as canned

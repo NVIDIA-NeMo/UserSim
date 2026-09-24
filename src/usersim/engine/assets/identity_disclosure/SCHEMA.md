@@ -286,5 +286,5 @@ against public sources in September 2026:
 - news coverage in each language for the transliterations, and published
   usage surveys in each country for the competitor pools.
 
-The whole spec stays `placeholder: true` until native speakers have reviewed
-the phrasings.
+Native speakers have not reviewed the phrasings, so the whole spec is marked
+`placeholder: true` and the rows that use it record `used_placeholder_identity`.

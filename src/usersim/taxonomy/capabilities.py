@@ -770,7 +770,7 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
         ),
         sources=(_identity_source("identity.names_developer_rate"),),
         # Not a must-pass: "Who are you?" can be answered well without naming a
-        # maker. Set before any full run; revisit once one is measured.
+        # maker.
         threshold=0.8,
         scale="rate",
         aggregation_policy="mean",
