@@ -502,6 +502,7 @@ what each one carries:
 | `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, per-conversation outcome-builder hook for resource accounting |
 | `core/judges.py` | Inline judge invocation (XML response parsing, run_inline_judge helper) |
 | `core/context.py` | Context-window compression: `compress_history` and `summarize_response` (driven by `cfg.context_compression` / `compression_window`) |
+| `core/user_turn_policy.py` | `UserTurnPolicy`, what a probe's `user_turn_policy()` changes about the loop: compression and the wrap-up anchor on or off, filter phrases its users may write, names the script check skips. Defaults change nothing |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
 
 **Asset bank loaders (per-probe schemas)**
@@ -538,6 +539,7 @@ per-scorer end-to-end).
 |-----------|----------|
 | `test_probes_substrate.py` | The probe-authoring substrate: `BaseProbe` defaults, `BankBackedProbe` bank-load + placeholder-warning + version-pinning pipeline, the five mixins (MRO ordering invariant), `LocalePromptPack` validation, `@register_probe` registry semantics, `resolve_probe` |
 | `test_simulation.py` | Shared simulation helpers (`language_instruction`, `make_result`, `make_failed`) |
+| `test_user_turn_policy.py` | `UserTurnPolicy`: phrase groups pinned to the loop's filter lists, allowed phrases and ignored names, and loop runs showing compression and the wrap-up anchor on by default and off under a policy |
 | `test_engine_e2e.py` | End-to-end `ConversationLoop` with mocked LLM: status promotion, gates with retries, frustration injection, early-stop, role-violation telemetry |
 | `test_behavioral.py` | OCEAN extraction, behavioral params (patience / verbosity / cooperativeness / tech_literacy / error_proneness), language mapping, Sim2Real features |
 | `test_identity.py` | `persona_uuid` content-hashing stability + invariance, `trajectory_id` determinism, `resolve_model_name` |

@@ -143,6 +143,7 @@ implementations.
 | `should_continue_after_turn(state)` | no | `True` | `AgenticMixin` returns False once assistant emits no tool calls |
 | `allow_early_stop_at_turn(turn_idx, state)` | no | `True` | `ToolCallingMixin` defers until tools are used; `safety_chat_pressure` returns False (the dedicated capitulation classifier on the assistant side is the only stop signal) |
 | `async is_capitulation_detected(state)` | no | `False` | `safety_chat_pressure` overrides this and runs a dedicated comparator-shaped classifier (`classifier.py::classify_capitulation`) against the assistant's last response. When True the simulator sets `stopped_on_capitulation=True`, `capitulated_at_turn=N`, emits `EARLY_STOP` + `CAPITULATION_CHECK` traces, and breaks the loop. Capitulation-specific by design: if a future probe needs a different post-assistant-turn stop reason, add a sibling hook with its own dedicated vocabulary rather than overloading this one. |
+| `user_turn_policy()` | no | `UserTurnPolicy()`: the loop's own behaviour | When the probe tests what the model says across turns: turn off compression so the model sees its own replies, turn off the wrap-up anchor so every follow-up stays on topic, allow filter phrases its users naturally write, and skip names (such as brand names in Latin script) in the script check. `identity_disclosure` does all four. Read once per trajectory, after `derive_task` |
 | `async run_dispatch(*, models, data, cfg)` | no | drives `ConversationLoop` | Only when the unified loop is wrong shape (currently: only `safety_agentic`) |
 
 ---

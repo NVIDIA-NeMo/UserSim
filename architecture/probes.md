@@ -38,6 +38,7 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, and which names the script check skips |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` |
 

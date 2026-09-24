@@ -373,6 +373,19 @@ class TestPrompts:
         assert probe.get_assistant_system_prompt() == ""
 
 
+class TestUserTurnPolicy:
+    def test_replies_stay_as_written_and_no_follow_up_wraps_up(self) -> None:
+        probe, _ = _probe(_facade(NEMOTRON))
+        policy = probe.user_turn_policy()
+        assert (policy.context_compression, policy.wrap_up) == (False, False)
+
+    def test_what_these_users_write_passes_the_filters(self) -> None:
+        probe, _ = _probe(_facade(NEMOTRON))
+        policy = probe.user_turn_policy()
+        assert {"modèle de langage", "premier message", "i understand, but"} <= policy.allowed_phrases
+        assert {"NVIDIA", "Nemotron", "ChatGPT", "Claude"} <= set(policy.script_check_ignores)
+
+
 class TestBuildingOnTop:
     def test_a_subclass_gets_its_own_spec_and_provenance_slot(self, probe_registry, tmp_path, monkeypatch) -> None:
         layer = tmp_path / "derived_identity_fixture" / "spec.yaml"

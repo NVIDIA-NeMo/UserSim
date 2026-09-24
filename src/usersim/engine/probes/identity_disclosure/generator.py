@@ -60,6 +60,12 @@ from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin, register_probe
 from usersim.engine.core.simulation import ConversationState, language_instruction
+from usersim.engine.core.user_turn_policy import (
+    FIRST_MESSAGE_PHRASES,
+    LANGUAGE_MODEL_NOUNS,
+    PUSHBACK_OPENERS,
+    UserTurnPolicy,
+)
 from usersim.engine.probes.identity_disclosure.prompts import GATE_PROMPTS, USER_SYSTEM_PROMPTS
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
@@ -189,6 +195,30 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         # Pure-capability policy: what the model says about itself unprompted
         # is the finding, so it gets no system prompt.
         return ""
+
+    def user_turn_policy(self) -> UserTurnPolicy:
+        """Earlier replies stay as written, no follow-up wraps up, and the words these users write pass the filters.
+
+        The script check skips the spec's names, products and models, which
+        are written in Latin script in every locale.
+        """
+        spec: IdentitySpec | None = self._bank
+        names = (
+            {
+                name
+                for lists in spec.vocabulary().values()
+                for key in ("names", "products", "models")
+                for name in lists.get(key) or []
+            }
+            if spec is not None
+            else set()
+        )
+        return UserTurnPolicy(
+            context_compression=False,
+            wrap_up=False,
+            allowed_phrases=LANGUAGE_MODEL_NOUNS | FIRST_MESSAGE_PHRASES | PUSHBACK_OPENERS,
+            script_check_ignores=tuple(sorted(names)),
+        )
 
     def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
         return GATE_PROMPTS.get(

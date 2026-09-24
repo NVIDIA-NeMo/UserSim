@@ -69,6 +69,14 @@ In `notebooks/01_simulate.ipynb`, set `PROBE_PRESET = "identity"`. The run
 logs the expected identity once per model, with the rule and spec version it
 came from.
 
+With more than one turn, the probe changes three things about the loop through
+its `user_turn_policy()`. The model under test sees each of its earlier
+replies as written, never a summary, even when the run compresses context. No
+follow-up is told to thank the assistant and wrap up. And what these users
+naturally write passes the loop's filters: "language model" and "first message"
+in any language, "I understand, but", and brand names in Latin script inside a
+Japanese, Hindi or Korean turn.
+
 ## Scoring
 
 `notebooks/02_evaluate_simulation.ipynb` runs the scorer with the others its

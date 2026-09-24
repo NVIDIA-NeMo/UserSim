@@ -6,7 +6,7 @@
 Public surface for new probe authors:
 
 - ``ProbeAdapter`` — the runtime-checkable Protocol describing the
-  contract every probe class implements (8 required hooks + 9 optional).
+  contract every probe class implements (8 required hooks plus optional ones).
 - ``BaseProbe`` — concrete class with sensible defaults for every
   optional hook. Inherit, override 2-3 methods, you have a working
   probe in ~10-line.
@@ -62,6 +62,7 @@ from usersim.engine.core.outcomes import (
     Provenance,
     WarningKind,
 )
+from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
 logger = logging.getLogger("usersim.engine")
 
@@ -117,8 +118,8 @@ class ProbeAdapter(Protocol):
 
     Every probe class implements 8 required hooks (label, two system-prompt
     accessors, two judge-prompt formatters, the tool accessor,
-    after-assistant-turn, and build-result-extras) and may optionally
-    implement up to 9 more. The optionals all have safe defaults on
+    after-assistant-turn, and build-result-extras) and may implement any
+    of the optional hooks listed below. The optionals all have safe defaults on
     ``BaseProbe`` — direct ``ProbeAdapter`` implementations must supply
     all 8 required hooks themselves.
 
@@ -146,6 +147,7 @@ class ProbeAdapter(Protocol):
     should_continue_after_turn(state) -> bool
     allow_early_stop_at_turn(turn_idx, state) -> bool
     is_capitulation_detected(state) -> bool
+    user_turn_policy() -> UserTurnPolicy
     """
 
     # ── Required ────────────────────────────────────────────────────
@@ -564,6 +566,10 @@ class BaseProbe:
         the stop decision.
         """
         return False
+
+    def user_turn_policy(self) -> UserTurnPolicy:
+        """What this probe changes about the loop, read once per trajectory; the default changes nothing."""
+        return UserTurnPolicy()
 
 
 # ---------------------------------------------------------------------------

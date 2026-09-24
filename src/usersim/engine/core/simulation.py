@@ -62,6 +62,7 @@ from usersim.engine.core.outcomes import (
     WarningKind,
     serialize_traces,
 )
+from usersim.engine.core.user_turn_policy import resolve_user_turn_policy
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -516,19 +517,20 @@ _ASSISTANT_REFUSAL_ECHO_PHRASES = (
 )
 
 
-def _is_fourth_wall_break(text: str) -> bool:
+def _is_fourth_wall_break(text: str, allowed: frozenset[str] = frozenset()) -> bool:
     """Deterministic check for common fourth-wall patterns in user messages.
 
     Substring match against the (English + 4-locale) phrase set in
-    ``_FOURTH_WALL_PHRASES``. Lowercases the input first; `.lower()` is
-    a no-op for Japanese / Devanagari scripts that have no case, so the
-    same matching path works across all five shipped languages.
+    ``_FOURTH_WALL_PHRASES``, less the probe's ``allowed`` phrases.
+    Lowercases the input first; `.lower()` is a no-op for Japanese /
+    Devanagari scripts that have no case, so the same matching path
+    works across all five shipped languages.
     """
     lower = text.lower()
-    return any(phrase in lower for phrase in _FOURTH_WALL_PHRASES)
+    return any(phrase in lower for phrase in _FOURTH_WALL_PHRASES if phrase not in allowed)
 
 
-def _is_assistant_refusal_echo(text: str) -> bool:
+def _is_assistant_refusal_echo(text: str, allowed: frozenset[str] = frozenset()) -> bool:
     """True iff a user-model output appears to be an assistant refusal.
 
     This catches the role-reversal failure where the simulated user
@@ -538,7 +540,7 @@ def _is_assistant_refusal_echo(text: str) -> bool:
     identify before spending a judge-model call.
     """
     lower = " ".join((text or "").lower().split())
-    return any(phrase in lower for phrase in _ASSISTANT_REFUSAL_ECHO_PHRASES)
+    return any(phrase in lower for phrase in _ASSISTANT_REFUSAL_ECHO_PHRASES if phrase not in allowed)
 
 
 # Early-stopping detection (LLM-based, language-agnostic)
@@ -752,6 +754,7 @@ class ConversationLoop:
         enforce_language = getattr(cfg, "enforce_user_language", True)
         min_script = getattr(cfg, "user_language_min_script_compliance", 0.6)
         min_letters = getattr(cfg, "user_language_min_letters", 8)
+        policy = resolve_user_turn_policy(probe)
         user_query = ""
         ok = False
         expl = ""
@@ -809,7 +812,7 @@ class ConversationLoop:
                 logger.debug(f"  |-- {probe.label}: empty user query (attempt {attempt + 1}/{max_query_attempts})")
                 continue
 
-            if _is_assistant_refusal_echo(user_query):
+            if _is_assistant_refusal_echo(user_query, policy.allowed_phrases):
                 state.outcome.inc_user_role_violations()
                 state.outcome.add_trace(
                     SimulationTrace(
@@ -828,7 +831,7 @@ class ConversationLoop:
                 )
                 continue
 
-            if _is_fourth_wall_break(user_query):
+            if _is_fourth_wall_break(user_query, policy.allowed_phrases):
                 state.outcome.inc_fourth_wall_triggers()
                 state.outcome.add_trace(
                     SimulationTrace(
@@ -845,7 +848,7 @@ class ConversationLoop:
                 continue
 
             if enforce_language and not _is_user_script_compliant(
-                user_query,
+                policy.without_ignored_names(user_query),
                 locale,
                 min_script=min_script,
                 min_letters=min_letters,
@@ -1214,7 +1217,8 @@ class ConversationLoop:
 
         logger.info(f"  |-- {probe.label} setup: {time.monotonic() - t_setup:.1f}s (query + gate)")
 
-        use_compression = getattr(cfg, "context_compression", False)
+        policy = resolve_user_turn_policy(probe)
+        use_compression = getattr(cfg, "context_compression", False) and policy.context_compression
         compression_window = getattr(cfg, "compression_window", 1)
 
         # ── 3. Turn loop ─────────────────────────────────────────────
@@ -1415,7 +1419,7 @@ class ConversationLoop:
             # give a single role-explicit instruction for the next USER turn.
             disclosure = data.get("disclosure_style", "upfront")
             last_anchor_turn = max(1, cfg.max_turns - 2)
-            use_wrapup = turn_idx >= last_anchor_turn and disclosure != "incremental"
+            use_wrapup = policy.wrap_up and turn_idx >= last_anchor_turn and disclosure != "incremental"
             anchor = ROLE_ANCHOR_PROMPT_WRAPUP if use_wrapup else ROLE_ANCHOR_PROMPT
             conv_language = get_conversation_language(locale)
             if conv_language != "English":
@@ -1514,7 +1518,7 @@ class ConversationLoop:
                     ok = False
                     continue
 
-                if _is_assistant_refusal_echo(follow_up):
+                if _is_assistant_refusal_echo(follow_up, policy.allowed_phrases):
                     state.outcome.inc_user_role_violations()
                     state.outcome.add_trace(
                         SimulationTrace(
@@ -1543,7 +1547,7 @@ class ConversationLoop:
 
                 state.user_history.append({"role": "assistant", "content": follow_up})
 
-                if _is_fourth_wall_break(follow_up):
+                if _is_fourth_wall_break(follow_up, policy.allowed_phrases):
                     state.user_history.pop()
                     state.outcome.inc_fourth_wall_triggers()
                     state.outcome.add_trace(
@@ -1570,7 +1574,7 @@ class ConversationLoop:
                     continue
 
                 if getattr(cfg, "enforce_user_language", True) and not _is_user_script_compliant(
-                    follow_up,
+                    policy.without_ignored_names(follow_up),
                     locale,
                     min_script=getattr(cfg, "user_language_min_script_compliance", 0.6),
                     min_letters=getattr(cfg, "user_language_min_letters", 8),
