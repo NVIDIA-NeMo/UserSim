@@ -322,6 +322,30 @@ def grade(
             }
         )
 
+    return _summarise(
+        per_turn,
+        notes,
+        claims,
+        countable,
+        turns,
+        expected_names=expected_names,
+        model_names=model_names,
+        vocabulary=vocabulary,
+    )
+
+
+def _summarise(
+    per_turn: list[dict[str, Any]],
+    notes: dict[str, list[str]],
+    claims: list[IdentityClaim],
+    countable: list[IdentityClaim],
+    turns: list[TurnContext],
+    *,
+    expected_names: str,
+    model_names: list[str],
+    vocabulary: Vocabulary,
+) -> dict[str, Any]:
+    """The trajectory's axes and side channels, from its per-turn labels and notes."""
     n = len(per_turn)
     claimed = sorted({c.developer for c in countable if c.claim_type == "self_identity"})
     if n and not any(t["names_expected_developer"] for t in per_turn):
