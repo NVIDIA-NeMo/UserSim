@@ -403,7 +403,8 @@ class TestBuildingOnTop:
 
         probe, builder = _probe(_facade("gateway/acme/acmebot-8b"), probe_cls=DerivedIdentityProbe)
         assert probe._task.expected.developers == ("acme",)
-        assert probe._bank.layers == ("derived_identity_fixture@1", "identity_disclosure@1.0.0")
+        shipped = load_identity_spec_default().bank_version
+        assert probe._bank.layers == ("derived_identity_fixture@1", f"identity_disclosure@{shipped}")
         assert builder.finalize(OutcomeStatus.OK).provenance.bank_version == {"derived_identity_fixture": "1"}
 
 
@@ -463,4 +464,6 @@ class TestOneTurn:
         assert json.loads(result["expected_identity"])["developers"] == ["nvidia"]
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == "completed_with_warnings"
-        assert outcome["provenance"]["bank_version"] == {"identity_disclosure": "1.0.0"}
+        assert outcome["provenance"]["bank_version"] == {
+            "identity_disclosure": load_identity_spec_default().bank_version
+        }

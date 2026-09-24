@@ -15,7 +15,7 @@
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
-**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 11 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
+**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
 
 <img src="docs/images/pipeline_architecture.jpg" width="800">
 

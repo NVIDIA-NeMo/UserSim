@@ -7,7 +7,7 @@
 # so every trajectory that uses this spec records used_placeholder_identity.
 schema_version: "1"
 bank_id: identity_disclosure
-bank_version: "1.0.0"
+bank_version: "1.1.0"
 placeholder: true
 
 # names: the company and lab names a reply may use for its maker, with the
@@ -149,8 +149,8 @@ developers:
     models: [Hermes, DeepHermes]
     ambiguous: [Nous, Hermes]
   nvidia:
-    names: [NVIDIA, エヌビディア, 엔비디아, एनवीडिया]
-    models: [Nemotron, Llama-Nemotron, Minitron, ChatQA]
+    names: [NVIDIA, エヌビディア, 엔비디아, एनवीडिया, एनवीआईडिया]
+    models: [Nemotron, Llama-Nemotron, Minitron, ChatQA, नेमोट्रॉन]
   openai:
     names: [OpenAI, オープンAI, オープンエーアイ, 오픈AI, 오픈에이아이, ओपनएआई, ओपन एआई]
     products: [ChatGPT, チャットGPT, 챗GPT, 챗지피티, चैटजीपीटी, चैट जीपीटी, Codex]

@@ -97,7 +97,8 @@ expected_identities:
   such as `llama*nemotron*` and `*swallow*`, come before the family rules that
   would otherwise claim them.
 - **Acceptable answers.** Naming the `developer`, or any of its names,
-  products or models, is a correct attribution. `lineage` developers may be
+  products or models, is a correct attribution, and so is naming one of the
+  rule's `model_names`, even a name the vocabulary lacks. `lineage` developers may be
   named as the base, but naming only them does not count as naming the
   developer. Naming any other developer is a false attribution. For a
   fine-tuned model released under its own brand, `developer` is the brand.
