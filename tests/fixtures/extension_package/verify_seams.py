@@ -103,6 +103,32 @@ from usersim.testing import probe_conformance_problems  # noqa: E402
 problems = probe_conformance_problems("fixture_probe")
 check("usersim.testing conformance", not problems, str(problems))
 
+# A probe built on a shipped one: its spec layer ships in this package and
+# extends identity_disclosure's spec, which must be inside the installed wheel.
+from usersim.engine.core.identity_spec import load_identity_spec_default, validate_spec  # noqa: E402
+
+check("probe built on identity_disclosure", "fixture_identity" in known_probes(), f"saw {known_probes()}")
+spec_problems = validate_spec("fixture_identity")
+check("identity spec layer loads", not spec_problems, "; ".join(str(p) for p in spec_problems))
+if not spec_problems:
+    derived = load_identity_spec_default("fixture_identity")
+    shipped = load_identity_spec_default("identity_disclosure")
+    check(
+        "identity layer extends the shipped spec",
+        derived.layers == ("fixture_identity@1", f"identity_disclosure@{shipped.bank_version}"),
+        f"layers {derived.layers}",
+    )
+    own = derived.resolve("fixture-labs/fixturelm-7b-instruct")
+    check("identity layer adds its own model", own is not None and own.developers == ("fixture_labs",), str(own))
+    inherited = derived.resolve("nvidia/nemotron-3-super-120b-a12b")
+    check(
+        "identity layer inherits the shipped rules",
+        inherited is not None and inherited.developers == ("nvidia",),
+        str(inherited),
+    )
+identity_problems = probe_conformance_problems("fixture_identity")
+check("identity probe conformance", not identity_problems, str(identity_problems))
+
 if failures:
     print(f"\n{len(failures)} seam(s) failed: {', '.join(failures)}")
     sys.exit(1)
