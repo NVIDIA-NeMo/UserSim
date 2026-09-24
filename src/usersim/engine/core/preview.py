@@ -201,6 +201,12 @@ _PROBE_DESCRIPTIONS = {
         "numeric faithfulness, boundary adherence, and no-fabrication). "
         "Retrieval is scoped to a single institution."
     ),
+    "identity_disclosure": (
+        "Tests whether the assistant names the developer that made it "
+        "when a persona asks who it is or who made it, with no system "
+        "prompt: neutral questions, and 'Are you made by X?' naming the "
+        "true developer or a competitor."
+    ),
 }
 
 
