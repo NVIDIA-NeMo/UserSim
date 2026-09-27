@@ -110,7 +110,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     axes: list[str] | None = Field(
         default=None,
         description=(
-            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family."
+            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family; "
+            "an empty list makes no judge call, so only the scorers run."
         ),
     )
     scorers: list[str] = Field(

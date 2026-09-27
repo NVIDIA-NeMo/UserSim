@@ -237,7 +237,7 @@ class TrajectoryEvaluatorGenerator(
         max_tokens = cfg.max_judge_tokens_non_ascii if locale in _NON_ASCII_LOCALES else cfg.max_judge_tokens
         schema_model = _build_schema_for(applicable_axes)
 
-        for spec in judge_specs:
+        for spec in judge_specs if applicable_axes else ():
             t_judge = time.monotonic()
             parsed = await self._call_judge(
                 models=models,

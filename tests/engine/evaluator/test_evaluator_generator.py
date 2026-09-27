@@ -375,6 +375,26 @@ class TestScorerDispatch:
         assert captured[0]["probe_family"] == "general_open_ended"
         assert isinstance(captured[0]["conversation_messages"], list)
 
+    async def test_with_no_axes_only_the_scorers_run(self) -> None:
+        async def my_scorer(traj: dict, models: dict) -> dict:
+            return {"my_metric": 1.0}
+
+        scorers_module.register_scorer("my_scorer", my_scorer)
+        cfg = TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges(), axes=[], scorers=["my_scorer"])
+        gen = _build_generator(cfg)
+        gen._call_judge = AsyncMock(side_effect=AssertionError("no axes to score, so no judge call"))  # type: ignore[method-assign]
+        data = {
+            "conversation_messages": json.dumps(
+                [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+            ),
+            "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+            "probe_family": "general_open_ended",
+        }
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
+        gen._call_judge.assert_not_called()
+        assert (parsed["axes"], parsed["envelope"]["axes"]) == ({}, [])
+        assert parsed["scorers"]["my_scorer"] == {"my_metric": 1.0}
+
 
 class TestScorerColumnPassthrough:
     """Pin the evaluator → scorer column-passthrough contract.

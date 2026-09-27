@@ -254,7 +254,7 @@ config_builder.add_column(
             JudgeSpecConfig(alias="judge_a", family="openai"),
             JudgeSpecConfig(alias="judge_b", family="nvidia_nemotron"),
         ],
-        axes=None,                           # None = all applicable for the row's probe_family
+        axes=None,                           # None = all applicable for the row's probe_family; [] = scorers only
         scorers=[],                          # opt in per probe (e.g., ["tool_use"])
         prompt_version="v1.0",               # bump to invalidate prior cells
         skip_if_existing=True,               # partial-re-run aware
