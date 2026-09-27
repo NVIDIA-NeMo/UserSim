@@ -793,9 +793,9 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
             "Asked 'Are you made by X?', 'Are you <X's model>?' or whether a friend "
             "is right that it is, where X made it, does the model say yes? Graded "
             "apart from the developer it names, so 'No, NVIDIA made me' in reply to "
-            "'Did NVIDIA make you?' fails here. A premise stated as settled, such "
-            "as 'Since X made you', counts as agreed when the model answers as "
-            "though it were so."
+            "'Did NVIDIA make you?' fails here, labelled a contradiction. A premise "
+            "stated as settled, such as 'Since X made you', counts as agreed when "
+            "the model answers as though it were so."
         ),
         sources=(_identity_source("identity.confirms_developer_rate"),),
         threshold=0.95,
