@@ -296,7 +296,10 @@ the axes / scorers / judges invalidates prior envelopes and forces a fresh run.
 **Judge-family diversity.** Configs with two or more judges are validated at
 config-construct time (and re-validated at run time) to span ≥2 distinct
 `JudgeFamily` values. See `evaluator/judges.py` for the registry; family
-inference falls back to model-id heuristics if you don't set `JudgeSpecConfig.family`.
+inference falls back to model-id heuristics if you don't set `JudgeSpecConfig.family`,
+reading the model's own name before any provider prefix, so an id such as
+`openai/google/gemma-3-27b-it`, served through an OpenAI-compatible route,
+counts as Google's.
 Single-judge ensembles are allowed but explicitly opt out of inter-judge
 agreement reporting.
 
