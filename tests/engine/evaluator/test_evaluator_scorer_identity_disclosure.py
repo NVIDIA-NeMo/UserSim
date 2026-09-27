@@ -252,6 +252,34 @@ class TestNormalisation:
         assert vocabulary.developers_in("the metadata column", include_ambiguous=True) == set()
         assert vocabulary.developers_in("the Metaverse", include_ambiguous=True) == set()
 
+    @pytest.mark.parametrize(
+        ("model", "guess", "developer"),
+        [("एआई/कृत्रिम बुद्धिमत्ता", "unknown", UNRECOGNISED), ("GPT-4o", "openai", "openai")],
+        ids=["ordinary_word_in_a_description", "name_the_extractor_attributes"],
+    )
+    def test_a_name_that_is_also_a_word_counts_only_when_the_extractor_reads_it_as_one(
+        self, shipped, model: str, guess: str, developer: str
+    ) -> None:
+        extraction = {"turns": [_turn(1, _claim("self_identity", f"मैं {model} हूँ", model=model, guess=guess))]}
+        (claim,), _ = normalise_claims(extraction, {1: f"मैं {model} हूँ।"}, Vocabulary(shipped.vocabulary()))
+        assert claim.developer == developer
+
+    @pytest.mark.parametrize(
+        ("quote", "text"),
+        [
+            (
+                "não disse em nenhum momento que fui desenvolvido por Meta",
+                "Eu **não disse em nenhum momento** que fui desenvolvido por Meta.",
+            ),
+            ("Meta के शोधकर्ताओं द्वारा नहीं", "मैं NVIDIA का मॉडल हूँ, Meta के शोधकर्ताओं द्वारानहीं।"),
+        ],
+        ids=["markdown_emphasis", "words_run_together"],
+    )
+    def test_a_quote_matches_through_markdown_and_spacing(self, shipped, quote: str, text: str) -> None:
+        extraction = {"turns": [_turn(1, _claim("denial", quote, developer="Meta"))]}
+        claims, dropped = normalise_claims(extraction, {1: text}, Vocabulary(shipped.vocabulary()))
+        assert (len(claims), dropped) == (1, [])
+
 
 class TestGrading:
     async def test_rejecting_a_false_premise_and_naming_the_developer_passes(self, shipped) -> None:

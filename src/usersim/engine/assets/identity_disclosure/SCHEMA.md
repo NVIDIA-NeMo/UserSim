@@ -48,7 +48,9 @@ developers:
   acronyms in a supported language: Meta means "goal" in Portuguese, Le Chat
   means "the cat", and कृत्रिम is Hindi for "artificial". Grading maps them to
   the developer only when a reply uses them as a name, never from a bare text
-  match.
+  match: in a claim, only when the extractor also attributes it to that
+  developer, so "GPT-4o" is OpenAI's while "एआई/कृत्रिम बुद्धिमत्ता" ("AI,
+  artificial intelligence") is no claim to be Krutrim.
 
 A name belongs to one developer; listing it under two is an error. Names are
 compared without regard to letter case, character width (`ＤｅｅｐＳｅｅｋ`) or

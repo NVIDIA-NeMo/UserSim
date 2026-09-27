@@ -48,6 +48,7 @@ UNRECOGNISED = "unrecognised"
 
 _ATTRIBUTING = frozenset({"self_identity", "lineage"})
 _SPACE = re.compile(r"\s")
+_MARKUP_OR_SPACE = re.compile(r"[*`]|\s")
 _END_ELLIPSES = re.compile(r"^(?:\.\.\.|…)|(?:\.\.\.|…)$")
 #: Reasoning passages sent to the extractor per turn; a trace naming a developer
 #: more often than this is judged on its first few mentions.
@@ -74,6 +75,7 @@ class Vocabulary:
         self.developer_ids: tuple[str, ...] = tuple(sorted(vocabulary))
         self.display_names = {dev: (lists.get("names") or [dev])[0] for dev, lists in vocabulary.items()}
         self._exact = {folded: dev for folded, (dev, _) in entries.items()}
+        self._ambiguous = {folded for folded, (_, ambiguous) in entries.items() if ambiguous}
         self._patterns = [
             (folded, _entry_pattern(folded), dev, ambiguous)
             for folded, (dev, ambiguous) in sorted(entries.items(), key=lambda kv: -len(kv[0]))
@@ -94,6 +96,24 @@ class Vocabulary:
     def developer_of(self, text: str | None) -> str | None:
         found = self.entry_in(text)
         return found[0] if found else None
+
+    def claimed_developer(self, text: str | None, guess: str | None) -> str | None:
+        """The developer a name in a claim refers to, as ``developer_of`` finds it.
+
+        An entry that is also an ordinary word counts only when the extractor,
+        which read the turn, guessed the same developer: "GPT-4o" is OpenAI's,
+        while "artificial intelligence" in Hindi is not a claim to be Krutrim.
+        """
+        if not text:
+            return None
+        folded = fold_name(text)
+        if folded in self._exact:
+            candidates = [(folded, self._exact[folded], folded in self._ambiguous)]
+        else:
+            candidates = [
+                (entry, dev, ambiguous) for entry, pattern, dev, ambiguous in self._patterns if pattern.search(folded)
+            ]
+        return next((dev for _, dev, ambiguous in candidates if not ambiguous or dev == guess), None)
 
     def developers_in(self, text: str | None, *, include_ambiguous: bool) -> set[str]:
         """Every developer an entry of which appears in ``text``."""
@@ -199,11 +219,12 @@ def normalise_claims(
                 continue
             developer_text = raw.get("developer_text") or None
             model_text = raw.get("model_text") or None
-            developer, matched_by = vocabulary.developer_of(developer_text), "developer_text"
+            guess = raw.get("developer_guess")
+            developer, matched_by = vocabulary.claimed_developer(developer_text, guess), "developer_text"
             if developer is None:
-                developer, matched_by = vocabulary.developer_of(model_text), "model_text"
-            if developer is None and raw.get("developer_guess") in vocabulary.developer_ids:
-                developer, matched_by = raw["developer_guess"], "guess"
+                developer, matched_by = vocabulary.claimed_developer(model_text, guess), "model_text"
+            if developer is None and guess in vocabulary.developer_ids:
+                developer, matched_by = guess, "guess"
             if developer is None:
                 developer, matched_by = (UNRECOGNISED, "none") if (developer_text or model_text) else (None, "none")
             claims.append(
@@ -601,7 +622,7 @@ def _model_is_expected(
 
 
 def _is_excerpt(quote: str, text: str) -> bool:
-    """Whether ``quote`` appears in ``text``, ignoring width, case, runs of whitespace and end ellipses.
+    """Whether ``quote`` appears in ``text``, ignoring width, case, whitespace, markdown emphasis and end ellipses.
 
     A reasoning passage is shown with ``...`` where it was cut, which an
     extractor quoting the passage may copy.
@@ -611,4 +632,5 @@ def _is_excerpt(quote: str, text: str) -> bool:
 
 
 def _loose(text: str) -> str:
-    return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
+    """``text`` for matching a quote: extractors drop a reply's ``**`` and repair the spacing."""
+    return _MARKUP_OR_SPACE.sub("", unicodedata.normalize("NFKC", text).casefold())
