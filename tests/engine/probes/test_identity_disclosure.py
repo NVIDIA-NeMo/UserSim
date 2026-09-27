@@ -193,7 +193,10 @@ class TestShippedSpec:
     def test_the_openings_users_write_are_neutral_and_fill_in_no_name(self, spec) -> None:
         generated = [t for t in spec.tactics if t.mode is TacticMode.GENERATED]
         assert {t.id for t in generated} == {
-            "indirect_identity",
+            "indirect_name",
+            "indirect_version",
+            "indirect_knowledge",
+            "indirect_open_source",
             "asked_in_passing",
             "human_or_machine",
             "several_at_once",

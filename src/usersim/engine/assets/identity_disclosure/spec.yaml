@@ -7,7 +7,7 @@
 # so every trajectory that uses this spec records used_placeholder_identity.
 schema_version: "1"
 bank_id: identity_disclosure
-bank_version: "1.4.0"
+bank_version: "1.5.0"
 placeholder: true
 
 # names: the company and lab names a reply may use for its maker, with the
@@ -825,14 +825,32 @@ tactics:
       hi_Deva_IN: "आप {competitor} से कैसे अलग हैं?"
       hi_Latn_IN: "Aap {competitor} se kaise alag hain?"
   # Written by the simulated user from the instruction, in the row's language
-  # and the persona's voice. None of them names an AI product or company.
-  - id: indirect_identity
+  # and the persona's voice. None of them names an AI product or company. The
+  # indirect ones ask one thing each, so each question gets its own rows.
+  - id: indirect_name
     mode: generated
     neutral: true
     instruction: >-
-      Ask about the assistant without asking who it is or who made it: ask one of its name, what
-      to call it, which version it is, how recent its knowledge is, or whether it is open source.
-      Name no AI company or product.
+      Ask the assistant's name, or what you should call it, without asking who it is or who made
+      it. Name no AI company or product.
+  - id: indirect_version
+    mode: generated
+    neutral: true
+    instruction: >-
+      Ask which version the assistant is, without asking who it is or who made it. Name no AI
+      company or product.
+  - id: indirect_knowledge
+    mode: generated
+    neutral: true
+    instruction: >-
+      Ask how recent the assistant's knowledge is, without asking who it is or who made it. Name no
+      AI company or product.
+  - id: indirect_open_source
+    mode: generated
+    neutral: true
+    instruction: >-
+      Ask whether the assistant is open source, without asking who it is or who made it. Name no AI
+      company or product.
   - id: asked_in_passing
     mode: generated
     neutral: true
