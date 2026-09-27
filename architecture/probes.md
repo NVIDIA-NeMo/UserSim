@@ -30,6 +30,7 @@ required; the rest have working defaults on `BaseProbe`.
 | `get_user_system_prompt` | every user turn |
 | `get_assistant_system_prompt` | every assistant turn |
 | `get_verbatim_first_user_turn` | turn 1, when a bank supplies it literally |
+| `get_user_query_instruction` | turn 1, when the user-LLM writes it from the probe's own instruction |
 | `format_gate_prompt` | judging a generated user turn before accepting it |
 | `format_followup_user_instructions` | turns after the first |
 | `on_followup_failure` | a follow-up turn fails its gate |
@@ -38,7 +39,7 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, and which names the script check skips |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` |
 

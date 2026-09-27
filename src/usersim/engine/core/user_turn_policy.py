@@ -11,6 +11,7 @@ nothing.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from typing import Any
@@ -57,6 +58,9 @@ class UserTurnPolicy:
     #: Names left out of a user turn's script check, such as brand names written in
     #: Latin script whatever the locale.
     script_check_ignores: tuple[str, ...] = ()
+    #: Why a generated opening must be written again, or None to accept it. The loop
+    #: runs it on each draft of turn 1 before the gate; a verbatim opening is not checked.
+    check_opening: Callable[[str], str | None] | None = None
 
     def without_ignored_names(self, text: str) -> str:
         """``text`` with ``script_check_ignores`` removed, for the script check."""

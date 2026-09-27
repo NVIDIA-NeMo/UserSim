@@ -870,6 +870,25 @@ class ConversationLoop:
                 )
                 continue
 
+            rejected = policy.check_opening(user_query) if policy.check_opening is not None else None
+            if rejected:
+                fail_kind = "gate"
+                state.outcome.inc_user_role_violations()
+                state.outcome.add_trace(
+                    SimulationTrace(
+                        kind=TraceKind.USER_ROLE_VIOLATION,
+                        turn_idx=0,
+                        call_idx=attempt,
+                        model_alias=MODEL_USER,
+                        rating="failure",
+                        detail=f"the probe rejected the opening: {rejected}"[:500],
+                    )
+                )
+                logger.debug(
+                    f"  |-- {probe.label}: opening rejected ({rejected}) (attempt {attempt + 1}/{max_query_attempts})"
+                )
+                continue
+
             gate_prompt = probe.format_gate_prompt(user_query, "N/A")
             language_clause = _language_judge_clause(locale) if enforce_language and locale in ROMANIZED_LOCALES else ""
             expl, rating, ok = await run_inline_judge(
@@ -1102,6 +1121,14 @@ class ConversationLoop:
 
         use_grounded = data.get("persona_grounding", False)
         query_instruction = USER_QUERY_INSTRUCTION_GROUNDED if use_grounded else USER_QUERY_INSTRUCTION
+        if hasattr(probe, "get_user_query_instruction"):
+            try:
+                query_instruction = probe.get_user_query_instruction(0) or query_instruction
+            except Exception as e:
+                logger.warning(
+                    f"  |-- {probe.label}: get_user_query_instruction raised "
+                    f"{type(e).__name__}: {e}; using the standard instruction"
+                )
 
         # ── Verbatim turn-1 injection (asset-driven probes) ──────────
         # If the probe's optional ``get_verbatim_first_user_turn``

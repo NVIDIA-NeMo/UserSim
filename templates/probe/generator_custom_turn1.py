@@ -16,13 +16,12 @@ Why not ``BankVerbatimMixin``?
   organically ask). Verbatim would re-introduce benchmark
   contamination.
 
-Why not ``CustomTurn1InstructionMixin`` (the named mixin doesn't exist
-in the substrate today)?
-- ``sov_ai_dynamic`` deliberately uses ``BankBackedProbe`` directly
-  without a turn-1 mixin because the existing prompt design carries
-  persona + invitation + subtopic_hint in a single system message
-  (splitting across system + user-instruction would change behavior
-  without measurable benefit). This template mirrors that decision.
+Why not ``CustomTurn1InstructionMixin``?
+- That mixin hands the user-LLM a separate turn-1 instruction through
+  ``get_user_query_instruction``, which suits an opening that asks for
+  something the rest of the conversation does not. ``sov_ai_dynamic``
+  and this template keep persona, invitation and subtopic hint in a
+  single system message instead, which serves every turn alike.
 
 What you provide:
 - ``derive_task(persona, bank, *, cfg)`` — picks the bank entry.

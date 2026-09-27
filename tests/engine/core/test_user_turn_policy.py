@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Any
 from unittest.mock import MagicMock
@@ -108,17 +109,26 @@ class _Config:
     max_steps: int = 10
 
 
+class _Instructed(_Probe):
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
+        return "[Ask which AI you are talking to.]" if turn_idx == 0 else None
+
+
 class TestTheLoop:
     @staticmethod
-    async def _run(policy: UserTurnPolicy) -> dict[str, _Recording]:
-        models = {
-            "user_model": _Recording(["Who are you?", "Really?", "And now?"]),
+    def _models(user_replies: list[str]) -> dict[str, _Recording]:
+        return {
+            "user_model": _Recording(user_replies),
             "assistant_model": _Recording([LONG_REPLY, LONG_REPLY, "Yes."]),
             "judge_model": _Recording([SUCCESS]),
             "summary_model": _Recording(["A short summary."]),
             "api_response_model": _Recording(["{}"]),
         }
-        result = await ConversationLoop().run(models, {}, _Config(), _Probe(policy))
+
+    @classmethod
+    async def _run(cls, policy: UserTurnPolicy, probe: _Probe | None = None) -> dict[str, _Recording]:
+        models = cls._models(["Who are you?", "Really?", "And now?"])
+        result = await ConversationLoop().run(models, {}, _Config(), probe or _Probe(policy))
         assert result["num_turns"] == 3
         return models
 
@@ -151,3 +161,23 @@ class TestTheLoop:
     async def test_without_wrap_up_no_follow_up_is_told_to_close(self) -> None:
         models = await self._run(UserTurnPolicy(wrap_up=False))
         assert not any("wrap up" in self._prompt(call) for call in models["user_model"].calls)
+
+    async def test_a_probe_instruction_replaces_the_loops_turn_one_instruction(self) -> None:
+        models = await self._run(UserTurnPolicy(), probe=_Instructed(UserTurnPolicy()))
+        assert models["user_model"].calls[0][-1] == {"role": "user", "content": "[Ask which AI you are talking to.]"}
+
+    async def test_an_opening_the_probe_rejects_is_written_again_before_the_gate(self) -> None:
+        policy = UserTurnPolicy(check_opening=lambda text: "names ChatGPT" if "ChatGPT" in text else None)
+        models = self._models(["Are you ChatGPT?", "Who are you?", "Really?", "And now?"])
+        result = await ConversationLoop().run(models, {}, _Config(), _Probe(policy))
+
+        assert json.loads(result["conversation_messages"])[0] == {"role": "user", "content": "Who are you?"}
+        assert not any("Are you ChatGPT?" in self._prompt(call) for call in models["judge_model"].calls)
+        details = [t["detail"] for t in json.loads(result["simulation_traces"])]
+        assert "the probe rejected the opening: names ChatGPT" in details
+
+    async def test_an_opening_rejected_on_every_attempt_fails_the_row(self) -> None:
+        policy = UserTurnPolicy(check_opening=lambda text: "names ChatGPT")
+        result = await ConversationLoop().run(self._models(["Are you ChatGPT?"]), {}, _Config(), _Probe(policy))
+        assert result["num_turns"] == 0
+        assert json.loads(result["simulation_outcome"])["failure_class"] == "user_query_gate_exhausted"
