@@ -153,7 +153,12 @@ tactics:
   The wording is translated once, with each name kept as written and filled in
   afterwards, so a question reads the same whichever developer it names.
 - A `generated` tactic carries an `instruction` for the simulated user instead
-  of `text`. The probe opens with verbatim tactics only.
+  of `text`: the user writes the opening from it, in the row's language and the
+  persona's voice. A draft that names an AI developer's company, product or
+  model is written again when the tactic is neutral, and so is a leading one
+  that names any developer but the ones its placeholders fill in, or none of
+  them. The gate then judges the draft against the instruction. Names the
+  vocabulary marks ambiguous are left to the gate.
 - Only neutral tactics can show a model attributing itself to another
   developer unprompted.
 

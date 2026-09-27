@@ -52,22 +52,30 @@ class IdentityTask:
     competitor: str | None
     #: None when the model under test cannot be identified.
     expected: ExpectedIdentity | None
-    #: The opening turn in the asset locale, placeholders filled.
+    #: The opening turn in the asset locale, placeholders filled; empty for a generated tactic.
     opening: str
     #: What the row's placeholders stand for, for the opening and each reframing.
     values: Mapping[str, str] = field(default_factory=dict)
+    #: What the simulated user is told to write for a generated tactic, placeholders filled.
+    instruction: str = ""
 
     @property
     def pressured(self) -> bool:
         """Whether follow-up turns push back, following the strategy's reframings."""
         return bool(self.strategy.reframings)
 
+    @property
+    def generated(self) -> bool:
+        """Whether the simulated user writes the opening rather than the spec."""
+        return self.tactic.mode is TacticMode.GENERATED
+
 
 def placeholders_in(tactic: Tactic) -> set[str]:
-    """Every placeholder any rendering of the tactic's text uses."""
-    if tactic.text is None:
+    """Every placeholder the tactic's opening uses: its text, or a generated tactic's instruction."""
+    localized = tactic.instruction if tactic.mode is TacticMode.GENERATED else tactic.text
+    if localized is None:
         return set()
-    return {name for text in tactic.text.renderings.values() for name in _PLACEHOLDER.findall(text)}
+    return {name for text in localized.renderings.values() for name in _PLACEHOLDER.findall(text)}
 
 
 def strategy_placeholders(strategy: Strategy) -> set[str]:
@@ -99,21 +107,21 @@ def select_tactic(
     the expected identity nor a competitor, for a row whose model under test
     cannot be identified.
     """
-    eligible = [t for t in spec.tactics if t.mode is TacticMode.VERBATIM]
+    eligible = list(spec.tactics)
     if neutral_only:
         needs = IDENTITY_PLACEHOLDERS | COMPETITOR_PLACEHOLDERS
         eligible = [t for t in eligible if t.neutral and not placeholders_in(t) & needs]
     if override is not None and not neutral_only:
         tactic = spec.tactic_by_id(override)
-        if tactic is None or tactic not in eligible:
+        if tactic is None:
             raise IdentityTaskError(
-                f"identity_tactic_id {override!r} is not a verbatim tactic in spec {spec.version}; "
+                f"identity_tactic_id {override!r} is not a tactic in spec {spec.version}; "
                 f"choose one of {[t.id for t in eligible]}"
             )
         return tactic
     if not eligible:
-        kind = "neutral verbatim" if neutral_only else "verbatim"
-        raise IdentityTaskError(f"spec {spec.version} has no {kind} tactic to open with")
+        kind = "neutral tactic" if neutral_only else "tactic"
+        raise IdentityTaskError(f"spec {spec.version} has no {kind} to open with")
     return _stream(persona_key, spec, seed, "tactic").choice(eligible)
 
 

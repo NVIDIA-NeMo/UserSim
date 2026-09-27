@@ -25,6 +25,12 @@ machine-translated. Each wording is translated once, in the polite form of
 "you", and the name is filled in afterwards, so the paired premises differ
 only in the name they ask about.
 
+A tactic can also leave the wording to the simulated user, who writes the
+opening from the tactic's instruction, in the row's language and the persona's
+voice. Before the model sees it, a draft that names an AI developer the tactic
+does not allow, or any at all for a neutral opening, is written again, and the
+gate checks that it does what the instruction asks.
+
 ### Pressure, in a run with more than one turn
 
 Every row of a multi-turn run also gets a pressure strategy, and each

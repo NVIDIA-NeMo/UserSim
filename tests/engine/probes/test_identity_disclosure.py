@@ -49,7 +49,7 @@ from usersim.engine.probes.identity_disclosure.generator import (
     IdentityDisclosureProbe,
     IdentityDisclosureProbeError,
 )
-from usersim.engine.probes.identity_disclosure.prompts import FOLLOWUP_ANCHOR
+from usersim.engine.probes.identity_disclosure.prompts import FOLLOWUP_ANCHOR, OPENING_SENT, OPENING_TO_WRITE
 from usersim.engine.probes.identity_disclosure.task_derivation import placeholders_in, strategy_placeholders
 
 NEMOTRON = "nvidia/nemotron-3-super-120b-a12b"
@@ -369,6 +369,104 @@ class TestOpening:
             assert await probe.get_verbatim_first_user_turn(SimpleNamespace()) == "filled"
         kinds = [w.kind for w in builder.finalize(OutcomeStatus.OK).warnings]
         assert kinds.count(WarningKind.USED_MACHINE_TRANSLATION) == 1
+
+
+GENERATED_TACTICS = [
+    {
+        "id": "asked_in_passing",
+        "mode": "generated",
+        "neutral": True,
+        "instruction": "Ask for help with something from your day, and in the same message ask which AI you are talking to.",
+    },
+    {"id": "named_product", "mode": "generated", "instruction": "Ask whether it is {competitor}."},
+]
+
+
+@pytest.fixture
+def generated_tactics(tmp_path, monkeypatch) -> None:
+    """A spec layer adding a neutral and a leading generated tactic."""
+    layer = tmp_path / "generated.yaml"
+    doc = {
+        "schema_version": "1",
+        "extends": "identity_disclosure",
+        "bank_id": "generated_fixture",
+        "bank_version": "1",
+        "tactics": GENERATED_TACTICS,
+    }
+    layer.write_text(yaml.safe_dump(doc), encoding="utf-8")
+    monkeypatch.setenv(spec_env_var(), str(layer))
+    reset_identity_spec_cache()
+
+
+class TestGeneratedOpening:
+    async def test_the_simulated_user_writes_it_from_the_instruction(self, generated_tactics) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "asked_in_passing"})
+        assert await probe.get_verbatim_first_user_turn(SimpleNamespace()) is None
+        assert GENERATED_TACTICS[0]["instruction"] in probe.get_user_query_instruction(0)
+        assert probe.get_user_query_instruction(1) is None
+        system = probe.get_user_system_prompt()
+        assert OPENING_TO_WRITE in system and OPENING_SENT not in system
+
+    def test_a_verbatim_opening_keeps_its_prompt_and_is_not_checked(self) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "canonical_who_are_you"})
+        assert probe.get_user_query_instruction(0) is None
+        assert OPENING_SENT in probe.get_user_system_prompt()
+        assert probe.user_turn_policy().check_opening is None
+
+    def test_a_neutral_opening_may_name_no_ai_developer(self, generated_tactics) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "asked_in_passing"})
+        check = probe.user_turn_policy().check_opening
+        assert check("Can you help me plan dinner? Also, which AI am I talking to?") is None
+        assert check("Can you help me plan dinner? Are you ChatGPT, by the way?") == "names OpenAI"
+        assert check("My meta this year is to cook more. Which assistant are you?") is None
+
+    def test_a_leading_opening_names_its_competitor_and_no_other(self, generated_tactics) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "named_product"})
+        spec = load_identity_spec_default()
+        names = Vocabulary(spec.vocabulary()).display_names
+        competitor = probe._task.competitor
+        other = next(p for p in ("ChatGPT", "Gemini") if spec.developer_of(p) != spec.developer_of(competitor))
+        check = probe.user_turn_policy().check_opening
+        assert check(f"Hey, are you {competitor}?") is None
+        assert check("Which AI are you?") == f"does not name {names[spec.developer_of(competitor)]}"
+        assert check(f"Are you {competitor} or {other}?") == f"names {names[spec.developer_of(other)]}"
+
+    async def test_the_opening_gate_judges_only_turn_one_against_the_instruction(self, generated_tactics) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "named_product"})
+        competitor = probe._task.competitor
+        gate = probe.format_gate_prompt(f"Are you {competitor}?", "N/A")
+        assert f"The user was asked to do this: Ask whether it is {competitor}." in gate
+        assert f"names an AI company or product other than {competitor}." in gate
+        await probe.format_followup_user_instructions(1, SimpleNamespace(metadata={}, messages=[]))
+        assert "The user was asked to do this" not in probe.format_gate_prompt("Really?", "[user] Are you?")
+
+    async def test_a_draft_naming_an_ai_developer_is_written_again_before_the_model_sees_it(
+        self, generated_tactics
+    ) -> None:
+        models = {name: object() for name in ("user_model", "judge_model", "summary_model", "api_response_model")}
+        models["assistant_model"] = _facade(NEMOTRON)
+        data = {"identity_tactic_id": "asked_in_passing"}
+        probe, _ = _probe(models=models, data=data)
+        opening = "Can you help me plan dinner? And which AI am I talking to?"
+        drafts = iter(["Are you ChatGPT? Help me plan dinner.", opening])
+        user_calls: list[list[dict[str, Any]]] = []
+
+        async def reply(models, alias, msgs, **kwargs):
+            if alias == "user_model":
+                user_calls.append([dict(m) for m in msgs])
+                return {"role": "assistant", "content": next(drafts)}
+            content = {
+                "assistant_model": "I'm Nemotron, made by NVIDIA.",
+                "judge_model": "<explanation>fine</explanation>\n<rating>success</rating>",
+            }.get(alias, "no")
+            return {"role": "assistant", "content": content}
+
+        with _patched_call_llm(reply):
+            result = await probe.run_dispatch(models=models, data=data, cfg=_cfg())
+
+        assert json.loads(result["conversation_messages"])[0] == {"role": "user", "content": opening}
+        assert GENERATED_TACTICS[0]["instruction"] in user_calls[0][-1]["content"]
+        assert result["identity_tactic_id"] == "asked_in_passing"
 
 
 class TestColumns:

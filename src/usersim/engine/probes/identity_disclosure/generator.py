@@ -20,6 +20,11 @@ How a row is built:
   call, and the message shows the declaration that would fix it. A facade
   that exposes no model id (a test stub) gets a neutral question and no
   expected identity, so its row cannot be graded.
+- A verbatim tactic's text is sent as written. For a generated tactic the
+  simulated user writes the opening from the tactic's instruction, in the
+  row's language and the persona's voice; a draft naming AI developers the
+  tactic does not allow is written again, and the gate judges it against the
+  instruction.
 - The competitor pool drops the expected developer and its lineage, so a
   leading question never offers the true developer as the false premise.
 - A run with follow-up turns gives every identified row a pressure strategy.
@@ -44,6 +49,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+from collections.abc import Callable
 from dataclasses import asdict
 from typing import Any
 
@@ -57,6 +63,8 @@ from usersim.engine.core.identity_spec import (
     PROBE_LABEL,
     ExpectedIdentity,
     IdentitySpec,
+    TacticMode,
+    Vocabulary,
     load_identity_spec_default,
     spec_env_var,
 )
@@ -74,6 +82,12 @@ from usersim.engine.core.user_turn_policy import (
 from usersim.engine.probes.identity_disclosure.prompts import (
     FOLLOWUP_ANCHOR,
     GATE_PROMPTS,
+    LEADING_NAMES_RULE,
+    NEUTRAL_NAMES_RULE,
+    OPENING_GATE_PROMPTS,
+    OPENING_INSTRUCTION,
+    OPENING_SENT,
+    OPENING_TO_WRITE,
     PRESSURE_GATE_PROMPTS,
     PRESSURE_INSTRUCTION,
     PRESSURE_USER_SYSTEM_PROMPTS,
@@ -81,6 +95,7 @@ from usersim.engine.probes.identity_disclosure.prompts import (
 )
 from usersim.engine.probes.identity_disclosure.task_derivation import (
     COMPETITOR_PLACEHOLDERS,
+    IDENTITY_PLACEHOLDERS,
     IdentityTask,
     IdentityTaskError,
     fill,
@@ -123,6 +138,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     label = PROBE_LABEL
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_IDENTITY
     bank_version_key = PROBE_LABEL
+    #: Set once the loop asks for the first follow-up, so the opening gate judges only turn 1.
+    _opening_written = False
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
@@ -171,7 +188,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
 
         # An India variant opens with its own rendering when the spec has one,
         # and otherwise with the base locale's, which _localize_verbatim translates.
-        if self._asset_locale != self._locale and self._locale in tactic.text.renderings:
+        if self._asset_locale != self._locale and tactic.text is not None and self._locale in tactic.text.renderings:
             self._asset_locale = self._locale
 
         excluded = (*expected.developers, *expected.lineage) if expected else ()
@@ -191,8 +208,13 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             strategy=strategy,
             competitor=competitor,
             expected=expected,
-            opening=fill(tactic.text.for_locale(self._asset_locale), values),
+            opening=fill(tactic.text.for_locale(self._asset_locale), values) if tactic.text is not None else "",
             values=values,
+            instruction=(
+                fill(tactic.instruction.for_locale(self._asset_locale), values)
+                if tactic.mode is TacticMode.GENERATED
+                else ""
+            ),
         )
 
     # ── ProbeAdapter hooks ──────────────────────────────────────────
@@ -201,6 +223,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         pressing = self._pressing
         return (PRESSURE_USER_SYSTEM_PROMPTS if pressing else USER_SYSTEM_PROMPTS).get(
             _prompt_locale(self._locale),
+            opening_line=OPENING_TO_WRITE if self._writes_opening else OPENING_SENT,
             persona=format_persona_for_prompt(self._persona),
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=(
@@ -224,6 +247,17 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         return self._task is not None and self._task.pressured
 
     @property
+    def _writes_opening(self) -> bool:
+        """Whether the simulated user writes the opening from a generated tactic's instruction."""
+        return self._task is not None and self._task.generated
+
+    def get_user_query_instruction(self, turn_idx: int) -> str | None:
+        """Turn 1 of a generated tactic: its instruction, for the simulated user to write from."""
+        if turn_idx != 0 or not self._writes_opening:
+            return None
+        return OPENING_INSTRUCTION.format(instruction=self._task.instruction)
+
+    @property
     def _pressure_values(self) -> dict[str, str]:
         """The competitor a pressed row's prompts name; empty for a row that is not pressed."""
         if not self._pressing:
@@ -233,6 +267,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
 
     async def format_followup_user_instructions(self, turn_idx: int, state: ConversationState) -> list[str]:
         """The strategy's next reframing, filled for this row; none for a row that is not pressed."""
+        self._opening_written = True
         reframing = self._task.strategy.reframing_at(turn_idx - 1) if self._pressing else None
         if reframing is None:
             return []
@@ -251,7 +286,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         """Earlier replies stay as written, no follow-up wraps up, and the words these users write pass the filters.
 
         The script check skips the spec's names, products and models, which
-        are written in Latin script in every locale.
+        are written in Latin script in every locale. An opening the simulated
+        user writes is checked for the names it may and may not contain.
         """
         spec: IdentitySpec | None = self._bank
         names = (
@@ -270,15 +306,65 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             followup_anchor=FOLLOWUP_ANCHOR if self._pressing else None,
             allowed_phrases=LANGUAGE_MODEL_NOUNS | FIRST_MESSAGE_PHRASES | PUSHBACK_OPENERS,
             script_check_ignores=tuple(sorted(names)),
+            check_opening=self._opening_check(spec) if self._writes_opening and spec is not None else None,
         )
 
+    def _opening_check(self, spec: IdentitySpec) -> Callable[[str], str | None]:
+        """Why a drafted opening breaks its tactic's rules, or None.
+
+        A neutral opening names no AI developer's company, product or model; a
+        leading one names the row's and no other. Names that are also ordinary
+        words are left to the gate, which reads them in context.
+        """
+        vocabulary = Vocabulary(spec.vocabulary())
+        allowed = self._opening_developers(spec)
+
+        def check(text: str) -> str | None:
+            named = vocabulary.developers_in(text, include_ambiguous=False)
+            if others := sorted(named - allowed):
+                return f"names {', '.join(vocabulary.display_names[dev] for dev in others)}"
+            if allowed and not named & allowed:
+                return f"does not name {', '.join(sorted(vocabulary.display_names[dev] for dev in allowed))}"
+            return None
+
+        return check
+
+    def _opening_developers(self, spec: IdentitySpec) -> set[str]:
+        """The developers whose names the tactic's instruction fills in."""
+        task = self._task
+        placeholders = placeholders_in(task.tactic)
+        developers: set[str] = set()
+        if placeholders & IDENTITY_PLACEHOLDERS and task.expected is not None:
+            developers.update(task.expected.developers)
+        products = [task.competitor] if placeholders & {"competitor", "competitor_developer"} else []
+        if "competitor_list" in placeholders:
+            products += task.values["competitor_list"].split(", ")
+        developers.update(dev for dev in map(spec.developer_of, filter(None, products)) if dev)
+        return developers
+
     def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
+        if self._writes_opening and not self._opening_written:
+            return OPENING_GATE_PROMPTS.get(
+                _prompt_locale(self._locale),
+                instruction=self._task.instruction,
+                user_turn_to_evaluate=user_query,
+                names_rule=self._names_rule(),
+            )
         return (PRESSURE_GATE_PROMPTS if self._pressing else GATE_PROMPTS).get(
             _prompt_locale(self._locale),
             conversation_history=conversation_history,
             user_turn_to_evaluate=user_query,
             **self._pressure_values,
         )
+
+    def _names_rule(self) -> str:
+        """The opening gate's rule on AI names: none for a neutral opening, only the row's for a leading one."""
+        task = self._task
+        filled = sorted(placeholders_in(task.tactic) & (IDENTITY_PLACEHOLDERS | COMPETITOR_PLACEHOLDERS))
+        names = [task.values[p] for p in filled if task.values.get(p)]
+        if task.tactic.neutral or not names:
+            return NEUTRAL_NAMES_RULE
+        return LEADING_NAMES_RULE.format(names=", ".join(names))
 
     def seed_state_metadata(self, state: ConversationState) -> None:
         task = self._task
@@ -292,7 +378,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         state.metadata["reframings_used"] = []
 
     async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
-        if self._task is None:
+        if self._task is None or self._writes_opening:
             return None
         return await self._opening_in_conversation_language(self._task)
 
