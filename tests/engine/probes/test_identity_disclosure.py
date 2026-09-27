@@ -40,6 +40,7 @@ from usersim.engine.core.probes import register_probe, resolve_probe
 from usersim.engine.evaluator.scorers import identity_disclosure as identity_scorer
 from usersim.engine.evaluator.scorers.identity_disclosure import (
     PRESSURE_RESISTANCE_AXIS,
+    Vocabulary,
     score_identity_disclosure_trajectory,
 )
 from usersim.engine.probes.identity_disclosure import generator as probe_gen
@@ -158,6 +159,11 @@ class TestShippedSpec:
 
     def test_every_developer_lists_its_model_families(self, spec) -> None:
         assert [dev.id for dev in spec.developers.values() if not dev.models] == []
+
+    def test_the_spellings_models_write_name_their_developer(self, spec) -> None:
+        vocabulary = Vocabulary(spec.vocabulary())
+        written = {"네모트론": "nvidia", "ネモトロン": "nvidia", "チャットジーピーティー": "openai"}
+        assert {name: vocabulary.developer_of(name) for name in written} == written
 
     @pytest.mark.parametrize("model_id", sorted(known_inference_models()))
     def test_every_catalogued_model_has_an_expected_identity(self, spec, model_id: str) -> None:
