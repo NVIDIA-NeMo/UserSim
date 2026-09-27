@@ -63,36 +63,60 @@ def _format_started(run_id: str) -> str:
         return "?"
 
 
-def _format_models_block(run_id: str, trajectory_root: Path) -> str:
+def _format_models_block(run_id: str, trajectory_root: Path, eval_root: Path, eval_column: str) -> str:
     """Manifest → one-cell layout: assistant first (bold green), blank line,
-    then user / api_response / judge / summary (dim). Alias labels are
-    right-padded to the longest one's width so the colons + model names
-    line up vertically -- easier to scan when the labels are different
-    lengths (``user`` vs ``api_response`` etc.).
+    then user / api_response / judge / summary (dim), then the evaluator
+    that scored the run. Alias labels are right-padded to the longest one's
+    width so the colons + model names line up vertically -- easier to scan
+    when the labels are different lengths (``user`` vs ``api_response`` etc.).
+
+    The evaluator line comes from the run's evaluation rows, not the
+    manifest: the manifest records the models config as it stood when the
+    simulation ran, which need not be the model that later scored it.
     """
     from usersim.engine.core.manifest import load_run_manifest
 
     if run_id == "legacy":
         return "—"
     manifest = load_run_manifest(run_id, trajectory_root)
-    if manifest is None:
-        return "—"
 
     labels = [alias.removesuffix("_model") for alias in _MODEL_ALIASES_ORDERED]
-    width = max(len(label) for label in labels)
+    width = max(len(label) for label in (*labels, "evaluator"))
 
     lines: list[str] = []
-    assistant = manifest.models.get("assistant_model")
+    assistant = manifest.models.get("assistant_model") if manifest else None
     if assistant is not None:
         label = "assistant".ljust(width)
         lines.append(f"[green][bold]{label}[/bold]: {assistant.model}[/green]")
     for alias in _MODEL_ALIASES_ORDERED[1:]:
-        ident = manifest.models.get(alias)
+        ident = manifest.models.get(alias) if manifest else None
         if ident is None:
             continue
         label = alias.removesuffix("_model").ljust(width)
         lines.append(f"[dim]{label}: {ident.model}[/dim]")
+    scoring = _scoring_models(eval_root, run_id, eval_column)
+    if scoring:
+        lines.append(f"[dim]{'evaluator'.ljust(width)}: {', '.join(scoring)}[/dim]")
     return "\n".join(lines) if lines else "—"
+
+
+def _scoring_models(eval_root: Path, run_id: str, eval_column: str) -> list[str]:
+    """The models the run's evaluation envelopes record; empty when they record none."""
+    import pandas as pd
+
+    from usersim.engine.core.storage import run_subroot
+    from usersim.taxonomy.eval_cell import decode_cell
+
+    models: set[str] = set()
+    for path in sorted(run_subroot(eval_root, run_id).rglob("*.parquet")):
+        try:
+            cells = pd.read_parquet(path, columns=[eval_column])[eval_column]
+        except (KeyError, ValueError, OSError):
+            continue
+        for raw in cells.dropna():
+            envelope = decode_cell(raw).get("envelope") or {}
+            models.update(str(model) for model in envelope.get("judge_models") or [])
+    return sorted(models)
 
 
 def print_available_runs(
@@ -100,6 +124,7 @@ def print_available_runs(
     eval_root: Path | str,
     report_root: Path | str,
     *,
+    eval_column: str = "assistant_eval",
     console: object | None = None,
 ) -> None:
     """Render a ``rich.Table`` of trajectory runs with their eval/report
@@ -108,7 +133,8 @@ def print_available_runs(
     Columns: ``run_id`` / ``started (UTC)`` / ``# traj`` / ``# locales`` /
     ``models`` / ``eval`` / ``report``. The models cell shows the
     assistant model first, then a blank line, then user / api / judge /
-    summary aliases.
+    summary aliases, then the evaluator recorded in the run's
+    ``eval_column`` cells.
 
     Pass ``console`` (a ``rich.Console`` instance) to redirect output
     (tests use ``Console(file=stringio)``); defaults to a stdout console.
@@ -171,7 +197,7 @@ def print_available_runs(
             _format_started(rid),
             str(n_traj),
             str(n_locales),
-            _format_models_block(rid, trajectory_root),
+            _format_models_block(rid, trajectory_root, eval_root, eval_column),
             "[green]\u2713[/green]" if eval_ok else "[dim]\u2014[/dim]",
             "[green]\u2713[/green]" if report_ok else "[dim]\u2014[/dim]",
         )

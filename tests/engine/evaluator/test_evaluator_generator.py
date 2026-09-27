@@ -73,8 +73,10 @@ def _build_generator(
     gen._config = cfg
     gen._resource_provider = MagicMock()
 
-    # Stub get_model: returns a sentinel facade per alias.
+    # Stub get_model: returns a sentinel facade per alias, serving "<alias>-model".
     facades = {j.alias: MagicMock(name=f"facade_{j.alias}") for j in cfg.judges}
+    for alias, facade in facades.items():
+        facade.model_config.model = f"{alias}-model"
     gen.get_model = lambda alias: facades.get(alias)  # type: ignore[method-assign]
     gen.get_models = lambda: facades  # type: ignore[method-assign]
 
@@ -193,6 +195,7 @@ class TestPartialReRunSkip:
         existing = {
             "envelope": {
                 "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
                 "judge_families": ["openai", "nvidia_nemotron"],
                 "axes": ["helpfulness"],
                 "scorers": [],
@@ -231,6 +234,7 @@ class TestPartialReRunSkip:
         existing = {
             "envelope": {
                 "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
                 "judge_families": ["openai", "nvidia_nemotron"],
                 "axes": ["helpfulness"],
                 "scorers": [],
@@ -251,6 +255,38 @@ class TestPartialReRunSkip:
         assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
         assert parsed["envelope"]["prompt_version"] == "v1.1"
 
+    async def test_another_model_behind_the_same_alias_invalidates(self) -> None:
+        """A cell scored by a different model under the same judge alias is scored again, not reused."""
+        cfg = TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges(), axes=["helpfulness"])
+        gen = _build_generator(
+            cfg,
+            judge_responses={
+                "judge_a": {"helpfulness": {"score": 5, "reasoning": "fresh"}},
+                "judge_b": {"helpfulness": {"score": 4, "reasoning": "fresh"}},
+            },
+        )
+        existing = {
+            "envelope": {
+                "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["an-earlier-model", "judge_b-model"],
+                "judge_families": ["openai", "nvidia_nemotron"],
+                "axes": ["helpfulness"],
+                "scorers": [],
+                "prompt_version": "v1.0",
+                "evaluator_version": EVALUATOR_VERSION,
+            },
+            "axes": {"helpfulness": {"judge_a": {"score": 3, "reasoning": "old"}}},
+            "scorers": {},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+        data = self._trajectory_with_assistant()
+        data["eval_v2"] = json.dumps(existing)
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
+        assert parsed["skipped"] is False
+        assert parsed["axes"]["helpfulness"]["judge_a"]["reasoning"] == "fresh"
+        assert parsed["envelope"]["judge_models"] == ["judge_a-model", "judge_b-model"]
+
     async def test_skip_if_existing_false_forces_rerun(self) -> None:
         cfg = TrajectoryEvaluatorConfig(
             name="eval_v2",
@@ -268,6 +304,7 @@ class TestPartialReRunSkip:
         existing = {
             "envelope": {
                 "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
                 "judge_families": ["openai", "nvidia_nemotron"],
                 "axes": ["helpfulness"],
                 "scorers": [],
@@ -603,6 +640,7 @@ class TestEnvelope:
         parsed = json.loads(out["eval_v2"])
         env = parsed["envelope"]
         assert env["judge_aliases"] == ["judge_a", "judge_b"]
+        assert env["judge_models"] == ["judge_a-model", "judge_b-model"]
         assert env["judge_families"] == ["openai", "nvidia_nemotron"]
         assert env["axes"] == ["helpfulness"]
         assert env["evaluator_version"] == EVALUATOR_VERSION

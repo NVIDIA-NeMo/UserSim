@@ -267,6 +267,11 @@ class CapabilityReport:
     # silently falling back to a misleading default.
     model_identities: dict[str, dict[str, Any]] = field(default_factory=dict)
     metadata_source: str = "unknown"  # "manifest" | "explicit_kwarg" | "unknown"
+    # Judge alias -> the models that scored this report's rows, read from each
+    # evaluation cell's envelope rather than the run manifest, which records
+    # the models config as it stood when the simulation ran. Empty for
+    # evaluations written before envelopes recorded ``judge_models``.
+    evaluator_models: dict[str, list[str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -313,6 +318,7 @@ class CapabilityReport:
             "sim_health": dict(self.sim_health),
             "model_identities": dict(self.model_identities),
             "metadata_source": self.metadata_source,
+            "evaluator_models": {alias: list(models) for alias, models in self.evaluator_models.items()},
         }
 
     def print_actors(self) -> None:
@@ -327,6 +333,9 @@ class CapabilityReport:
         - ``"explicit_kwarg"`` — prints the model_id override.
         - ``"unknown"``        — prints the missing-manifest banner so the
           reviewer sees the gap rather than a misleading default.
+
+        Then the models that scored the evaluated rows, from their envelopes,
+        or a line saying the rows do not record them.
         """
         if self.metadata_source == "manifest" and self.model_identities:
             print(f"\nActors (captured from simulation run {self.run_id}):")
@@ -349,6 +358,12 @@ class CapabilityReport:
             print(
                 "\nActors: metadata not captured for this run (predates manifest-v1; re-run the simulator to populate)."
             )
+        if self.evaluator_models:
+            print("Scored by (from the evaluation rows):")
+            for alias, models in self.evaluator_models.items():
+                print(f"  {alias:20s} {', '.join(models)}")
+        elif self.n_evaluated:
+            print("Scored by: not recorded in these evaluation rows.")
 
 
 def build_capability_report(
@@ -479,7 +494,20 @@ def build_capability_report(
         sim_health=sim_health_dict,
         model_identities=model_identities,
         metadata_source=metadata_source,
+        evaluator_models=_evaluator_models(joined, eval_column),
     )
+
+
+def _evaluator_models(joined: Any, eval_column: str) -> dict[str, list[str]]:
+    """Judge alias -> the models behind it in the evaluation cells' envelopes."""
+    if eval_column not in getattr(joined, "columns", []):
+        return {}
+    models: dict[str, set[str]] = {}
+    for raw in joined[eval_column].dropna():
+        envelope = _decode_eval_cell(raw).get("envelope") or {}
+        for alias, model in zip(envelope.get("judge_aliases") or [], envelope.get("judge_models") or []):
+            models.setdefault(str(alias), set()).add(str(model))
+    return {alias: sorted(names) for alias, names in sorted(models.items())}
 
 
 def _resolve_run_metadata(

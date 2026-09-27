@@ -108,6 +108,49 @@ def _eval_cell(*, helpfulness=4, language=1.0, tool_status=True):
     )
 
 
+def _scored_by(model: str | None) -> str:
+    """An evaluation cell whose envelope records ``model`` behind its judge alias, or no model."""
+    cell = json.loads(_eval_cell())
+    if model is not None:
+        cell["envelope"]["judge_models"] = [model]
+    return json.dumps(cell)
+
+
+def _scored_frame(*cells: str):
+    import pandas as pd
+
+    ids = ["t000000000000001", "t000000000000004"][: len(cells)]
+    return pd.DataFrame(
+        {
+            "trajectory_id": ids,
+            "locale": ["en_US"] * len(cells),
+            "probe_family": ["general_open_ended", "tool_calling"][: len(cells)],
+            "assistant_eval": list(cells),
+        }
+    )
+
+
+def test_the_report_names_the_models_that_scored_its_rows(trajectory_df, capsys):
+    """Read from the evaluation rows, so a locale re-scored by another model shows both."""
+    eval_df = _scored_frame(_scored_by("vendor/model-a"), _scored_by("vendor/model-b"))
+    report = build_capability_report(trajectory_df, eval_df, eval_column="assistant_eval", run_id="test-run")
+    assert report.evaluator_models == {"judge_model": ["vendor/model-a", "vendor/model-b"]}
+    assert report.to_dict()["evaluator_models"] == {"judge_model": ["vendor/model-a", "vendor/model-b"]}
+    report.print_actors()
+    printed = capsys.readouterr().out
+    assert "Scored by (from the evaluation rows):" in printed
+    assert "vendor/model-a, vendor/model-b" in printed
+
+
+def test_rows_that_do_not_record_their_scoring_model_say_so(trajectory_df, capsys):
+    report = build_capability_report(
+        trajectory_df, _scored_frame(_scored_by(None)), eval_column="assistant_eval", run_id="test-run"
+    )
+    assert report.evaluator_models == {}
+    report.print_actors()
+    assert "Scored by: not recorded in these evaluation rows." in capsys.readouterr().out
+
+
 def test_build_capability_report_capability_cells(trajectory_df):
     import pandas as pd
 

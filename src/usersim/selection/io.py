@@ -114,6 +114,7 @@ def _provenance(df: Any, eval_column: str) -> dict[str, Any]:
         "code_sha": None,
         "scenario_prompt_version": None,
         "judge_aliases": None,
+        "judge_models": None,
         "judge_families": None,
         "evaluator_prompt_version": None,
     }
@@ -129,6 +130,7 @@ def _provenance(df: Any, eval_column: str) -> dict[str, Any]:
             env = (decode_cell(raw).get("envelope")) or {}
             if env:
                 out["judge_aliases"] = env.get("judge_aliases")
+                out["judge_models"] = env.get("judge_models")
                 out["judge_families"] = env.get("judge_families")
                 out["evaluator_prompt_version"] = env.get("prompt_version")
                 break
@@ -307,7 +309,7 @@ def _dataset_card(repo_id: str, profile: SelectionProfile, manifest: dict) -> st
         f"- generation model (assistant under test): "
         f"`{gen_model if gen_model else 'unspecified'}`\n"
         f"- evaluator / judges: {prov.get('judge_aliases')} "
-        f"(families: {prov.get('judge_families')})\n"
+        f"(models: {prov.get('judge_models')}, families: {prov.get('judge_families')})\n"
         f"- source run(s): `{manifest.get('source_run')}` · code_sha: "
         f"`{prov.get('code_sha')}`\n\n"
         "## Selection\n\n"

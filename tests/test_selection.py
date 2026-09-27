@@ -713,6 +713,7 @@ class TestWrite:
         manifest = json.loads((root / MANIFEST_NAME).read_text())
         assert manifest["funnel"]["passed"] == res.summary.passed
         assert manifest["provenance"]["code_sha"]  # captured from outcome
+        assert manifest["provenance"]["judge_models"] == ["vendor/judge-a", "vendor/judge-b"]
         back = read_partitioned_dataset(root)
         assert len(back) == res.summary.passed
         assert bool(back["selection_passed"].all())

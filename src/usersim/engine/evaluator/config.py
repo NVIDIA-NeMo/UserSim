@@ -72,8 +72,9 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     Partial-re-run discipline: if ``skip_if_existing`` is True and the
     row already carries a non-null value in this column whose envelope
-    (``judge_aliases``, ``axes``, ``scorers``, ``prompt_version``)
-    matches the current config, the LLM judge calls are skipped. See
+    (``judge_aliases`` and the ``judge_models`` behind them, ``axes``,
+    ``scorers``, ``prompt_version``) matches the current config, the LLM
+    judge calls are skipped. See
     ``evaluator/generator.py`` for the envelope check.
     """
 

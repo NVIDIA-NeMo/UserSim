@@ -15,6 +15,7 @@ Cell envelope (the JSON written into ``self.config.name``):
     {
       "envelope": {
         "judge_aliases": ["..."],
+        "judge_models": ["<the model each alias resolved to>", ...],
         "judge_families": ["openai", "nvidia_nemotron", ...],
         "axes": ["helpfulness", "accuracy", ...],
         "scorers": ["tool_use", ...],
@@ -39,7 +40,8 @@ Cell envelope (the JSON written into ``self.config.name``):
 Partial-re-run skip: if the row already has a non-null cell whose
 envelope matches the current config, the LLM judge calls are skipped
 and ``skipped=true`` / ``skipped_reason="envelope_match"`` is returned
-in place of fresh axes.
+in place of fresh axes. ``judge_models`` is part of the envelope, so a
+row scored by another model behind the same alias is scored again.
 """
 
 from __future__ import annotations
@@ -162,6 +164,7 @@ class TrajectoryEvaluatorGenerator(
         applicable_axes = select_axes(probe_family, cfg.axes)
         envelope = {
             "judge_aliases": [s.alias for s in judge_specs],
+            "judge_models": [resolved_ids[s.alias] for s in judge_specs],
             "judge_families": [s.resolved_family(resolved_ids.get(s.alias)).value for s in judge_specs],
             "axes": [s.name for s in applicable_axes],
             "scorers": list(cfg.scorers),
