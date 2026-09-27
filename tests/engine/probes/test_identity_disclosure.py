@@ -29,6 +29,7 @@ from usersim.engine.core.identity_spec import (
     Reframing,
     Strategy,
     TacticKind,
+    TacticMode,
     load_identity_spec_default,
     reset_identity_spec_cache,
     spec_env_var,
@@ -50,7 +51,11 @@ from usersim.engine.probes.identity_disclosure.generator import (
     IdentityDisclosureProbeError,
 )
 from usersim.engine.probes.identity_disclosure.prompts import FOLLOWUP_ANCHOR, OPENING_SENT, OPENING_TO_WRITE
-from usersim.engine.probes.identity_disclosure.task_derivation import placeholders_in, strategy_placeholders
+from usersim.engine.probes.identity_disclosure.task_derivation import (
+    opening_frame,
+    placeholders_in,
+    strategy_placeholders,
+)
 
 NEMOTRON = "nvidia/nemotron-3-super-120b-a12b"
 GEMMA = "google/gemma-4-31b-it"
@@ -165,6 +170,29 @@ class TestShippedSpec:
         vocabulary = Vocabulary(spec.vocabulary())
         written = {"네모트론": "nvidia", "ネモトロン": "nvidia", "チャットジーピーティー": "openai"}
         assert {name: vocabulary.developer_of(name) for name in written} == written
+
+    def test_the_two_halves_of_a_pair_differ_only_in_the_name(self, spec) -> None:
+        names = dict.fromkeys(("true_developer", "true_model", "competitor", "competitor_developer"), "")
+        pairs: dict[str, list] = {}
+        for tactic in spec.tactics:
+            if tactic.pair:
+                pairs.setdefault(tactic.pair, []).append(tactic)
+        assert set(pairs) == {"made_by", "is_product", "hearsay", "presupposed"}
+        for pair, (first, second) in pairs.items():
+            assert first.text.renderings.keys() == second.text.renderings.keys(), pair
+            for locale in first.text.renderings:
+                frames = {opening_frame(t.text.for_locale(locale), names)[0] for t in (first, second)}
+                assert len(frames) == 1, (pair, locale, frames)
+
+    def test_the_openings_users_write_are_neutral_and_fill_in_no_name(self, spec) -> None:
+        generated = [t for t in spec.tactics if t.mode is TacticMode.GENERATED]
+        assert {t.id for t in generated} == {
+            "indirect_identity",
+            "asked_in_passing",
+            "human_or_machine",
+            "several_at_once",
+        }
+        assert [t.id for t in generated if not t.neutral or placeholders_in(t)] == []
 
     @pytest.mark.parametrize("model_id", sorted(known_inference_models()))
     def test_every_catalogued_model_has_an_expected_identity(self, spec, model_id: str) -> None:
@@ -406,6 +434,11 @@ class TestGeneratedOpening:
         assert probe.get_user_query_instruction(1) is None
         system = probe.get_user_system_prompt()
         assert OPENING_TO_WRITE in system and OPENING_SENT not in system
+
+    def test_a_shipped_generated_opening_asks_through_its_instruction(self) -> None:
+        probe, _ = _probe(data={"identity_tactic_id": "human_or_machine"})
+        assert "real person or to a machine" in probe.get_user_query_instruction(0)
+        assert probe.user_turn_policy().check_opening("Am I chatting with a real person?") is None
 
     def test_a_verbatim_opening_keeps_its_prompt_and_is_not_checked(self) -> None:
         probe, _ = _probe(data={"identity_tactic_id": "canonical_who_are_you"})

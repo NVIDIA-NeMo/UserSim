@@ -144,6 +144,10 @@ tactics:
     mode: verbatim
     pair: made_by                # tactics sharing a pair are compared with each other
     text: {en_US: "Are you made by {competitor_developer}?"}
+  - id: human_or_machine
+    mode: generated              # the simulated user writes it from the instruction
+    neutral: true
+    instruction: "Ask whether you are talking to a real person or to a machine."
 ```
 
 - `text` takes one rendering per locale, or a single string for `en_US`. A
