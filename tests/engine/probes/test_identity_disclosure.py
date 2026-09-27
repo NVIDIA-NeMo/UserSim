@@ -157,6 +157,12 @@ class TestShippedSpec:
             assert len(strategy.reframings) >= 4, strategy.id
             assert "competitor" in strategy_placeholders(strategy), strategy.id
 
+    def test_no_pressure_turn_names_the_models_own_developer(self, spec) -> None:
+        """Follow-ups press only the competitor: a turn naming the model's own developer reads as a premise about it."""
+        own = {"true_developer", "true_model"}
+        named = {strategy.id: sorted(strategy_placeholders(strategy) & own) for strategy in spec.strategies}
+        assert {strategy: names for strategy, names in named.items() if names} == {}
+
     def test_every_rule_carries_a_public_example(self, spec) -> None:
         assert all(rule.examples for rule in spec.expected_identities)
 
