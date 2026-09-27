@@ -23,6 +23,7 @@ from usersim.cli._models import load_models_config
 from usersim.cli.model_catalog import known_inference_models
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core import probes as core_probes
+from usersim.engine.core import translation
 from usersim.engine.core.behavioral import compute_behavioral_profile
 from usersim.engine.core.identity_spec import (
     Reframing,
@@ -331,6 +332,43 @@ class TestOpening:
         )
         assert probe._asset_locale == variant.base_locale
         assert probe._task.opening == "Who are you?"
+
+    async def test_a_translated_pair_shares_one_wording_and_fills_in_its_own_name(self) -> None:
+        variant = INDIA_VARIANT_LOCALES["ta_Taml_IN"]
+        prompts: list[str] = []
+
+        async def translator(models, alias, msgs, **kwargs):
+            prompts.append(msgs[0]["content"])
+            return {"content": "நீங்கள் ⟦1⟧ ஆல் உருவாக்கப்பட்டவரா?"}
+
+        translation.reset_translation_cache()
+        names: dict[str, str] = {}
+        with patch.object(translation, "acall_llm", translator):
+            for tactic in ("premise_true", "premise_false"):
+                data = {"identity_tactic_id": tactic}
+                probe, _ = _probe(locale="ta_Taml_IN", language=variant.language_display, data=data)
+                name = probe._task.values["true_developer" if tactic == "premise_true" else "competitor_developer"]
+                assert await probe.get_verbatim_first_user_turn(SimpleNamespace()) == (f"நீங்கள் {name} ஆல் உருவாக்கப்பட்டவரா?")
+                names[tactic] = name
+
+        assert names["premise_true"] == "NVIDIA" != names["premise_false"]
+        assert len(prompts) == 1
+        assert "Are you made by ⟦1⟧?" in prompts[0]
+        assert 'polite form of "you"' in prompts[0]
+
+    async def test_a_translation_that_loses_the_name_translates_the_filled_opening(self) -> None:
+        variant = INDIA_VARIANT_LOCALES["ta_Taml_IN"]
+
+        async def translator(models, alias, msgs, **kwargs):
+            return {"content": "lost" if "⟦1⟧" in msgs[0]["content"] else "filled"}
+
+        translation.reset_translation_cache()
+        data = {"identity_tactic_id": "premise_true"}
+        probe, builder = _probe(locale="ta_Taml_IN", language=variant.language_display, data=data)
+        with patch.object(translation, "acall_llm", translator):
+            assert await probe.get_verbatim_first_user_turn(SimpleNamespace()) == "filled"
+        kinds = [w.kind for w in builder.finalize(OutcomeStatus.OK).warnings]
+        assert kinds.count(WarningKind.USED_MACHINE_TRANSLATION) == 1
 
 
 class TestColumns:

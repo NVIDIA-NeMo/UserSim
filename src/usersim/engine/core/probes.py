@@ -713,7 +713,7 @@ class BankBackedProbe(BaseProbe):
             f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(last_exc).__name__}: {last_exc}"
         ) from last_exc
 
-    async def _localize_verbatim(self, text: str) -> str:
+    async def _localize_verbatim(self, text: str, *, rules: tuple[str, ...] = (), warn: bool = True) -> str:
         """Translate a verbatim bank turn into the conversation language.
 
         No-op unless this probe fell back to a base-locale (en_IN) asset for
@@ -722,6 +722,8 @@ class BankBackedProbe(BaseProbe):
         be in another Indian language. Shipped locales and variants with a
         native asset (``asset_locale == locale``) return ``text`` unchanged,
         so this is a pure graduation-aware pass-through by default.
+        ``rules`` are extra instructions for the translator. ``warn=False``
+        skips the warning, for a second translation of a turn already flagged.
 
         Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder
         so downstream scorecards treat the row as preview-only. Never raises
@@ -742,8 +744,9 @@ class BankBackedProbe(BaseProbe):
             text,
             target_language=language,
             romanize=bool(variant and variant.romanized),
+            rules=rules,
         )
-        if translated != text and self._outcome_builder is not None:
+        if warn and translated != text and self._outcome_builder is not None:
             self._outcome_builder.add_warning(
                 kind=WarningKind.USED_MACHINE_TRANSLATION,
                 detail=(

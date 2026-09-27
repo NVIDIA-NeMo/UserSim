@@ -21,7 +21,9 @@ fields in [`SCHEMA.md`](../../assets/identity_disclosure/SCHEMA.md)):
 
 The phrasings cover all nine shipped locales, with the English locales sharing
 one rendering. India language variants open with the base locale's phrasing,
-machine-translated.
+machine-translated. Each wording is translated once, in the polite form of
+"you", and the name is filled in afterwards, so the paired premises differ
+only in the name they ask about.
 
 ### Pressure, in a run with more than one turn
 

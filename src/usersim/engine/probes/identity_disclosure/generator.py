@@ -84,6 +84,8 @@ from usersim.engine.probes.identity_disclosure.task_derivation import (
     IdentityTask,
     IdentityTaskError,
     fill,
+    fill_frame,
+    opening_frame,
     placeholder_values,
     placeholders_in,
     select_competitor,
@@ -97,6 +99,9 @@ logger = logging.getLogger("usersim.engine")
 PROBE_FAMILY: str = PROBE_LABEL
 PROBE_VARIANTS: list[str] = ["default"]
 PROMPT_VERSION: str = "v1.0"
+
+#: Every machine-translated opening in a locale addresses the model the same way.
+_POLITE_YOU = 'Address the reader with the polite form of "you" used with a stranger.'
 
 #: (label, model id, spec digest) already announced in this process.
 _announced: set[tuple[str, str, str]] = set()
@@ -289,7 +294,33 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
         if self._task is None:
             return None
-        return await self._localize_verbatim(self._task.opening)
+        return await self._opening_in_conversation_language(self._task)
+
+    async def _opening_in_conversation_language(self, task: IdentityTask) -> str:
+        """The opening as the model reads it.
+
+        A machine-translated opening is translated once per wording, with each
+        name held as a token and filled in afterwards, so a question reads the
+        same whichever developer it names.
+        """
+        if self._asset_locale == self._locale:
+            return task.opening
+        frame, names = opening_frame(task.tactic.text.for_locale(self._asset_locale), task.values)
+        rules = (_POLITE_YOU,)
+        if names:
+            rules += (
+                f"Keep {', '.join(names)} exactly as written: each stands for a name, so place it where the name belongs.",
+            )
+        translated = await self._localize_verbatim(frame, rules=rules)
+        if all(token in translated for token in names):
+            return fill_frame(translated, names)
+        logger.warning(
+            "  |-- %s: translating %r into %s lost a name; translating the filled opening instead",
+            type(self).label,
+            frame,
+            self._language,
+        )
+        return await self._localize_verbatim(task.opening, rules=(_POLITE_YOU,), warn=False)
 
     def should_succeed(self, state: ConversationState) -> bool:
         return should_succeed(state)

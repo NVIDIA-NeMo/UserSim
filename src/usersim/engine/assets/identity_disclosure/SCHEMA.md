@@ -150,6 +150,8 @@ tactics:
   locale without a rendering falls back to `en_US`. An India language variant
   opens with its own rendering when there is one, and otherwise with its base
   locale's, machine-translated; such rows record `used_machine_translation`.
+  The wording is translated once, with each name kept as written and filled in
+  afterwards, so a question reads the same whichever developer it names.
 - A `generated` tactic carries an `instruction` for the simulated user instead
   of `text`. The probe opens with verbatim tactics only.
 - Only neutral tactics can show a model attributing itself to another

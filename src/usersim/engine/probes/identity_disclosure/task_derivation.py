@@ -188,3 +188,32 @@ def placeholder_values(
 def fill(text: str, values: Mapping[str, str]) -> str:
     """Substitute known placeholders and leave any other braces untouched."""
     return _PLACEHOLDER.sub(lambda m: values.get(m.group(1), m.group(0)), text)
+
+
+def opening_frame(text: str, values: Mapping[str, str]) -> tuple[str, dict[str, str]]:
+    """``text`` with each known placeholder held as a numbered token, and the name each token stands for.
+
+    Tokens are numbered in order of first appearance rather than named after
+    the placeholder, so openings that differ only in which name they ask
+    about share one frame, and so one translation.
+    """
+    tokens: dict[str, str] = {}
+    names: dict[str, str] = {}
+
+    def hold(match: re.Match[str]) -> str:
+        placeholder = match.group(1)
+        if placeholder not in values:
+            return match.group(0)
+        if placeholder not in tokens:
+            tokens[placeholder] = f"⟦{len(tokens) + 1}⟧"
+            names[tokens[placeholder]] = values[placeholder]
+        return tokens[placeholder]
+
+    return _PLACEHOLDER.sub(hold, text), names
+
+
+def fill_frame(text: str, names: Mapping[str, str]) -> str:
+    """``text`` with each token from :func:`opening_frame` replaced by its name."""
+    for token, name in names.items():
+        text = text.replace(token, name)
+    return text
