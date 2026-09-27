@@ -41,6 +41,7 @@ import logging
 import threading
 from typing import Any
 
+from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import acall_llm
 
 logger = logging.getLogger("usersim.engine")
@@ -51,9 +52,10 @@ MODEL_SUMMARY = "summary_model"
 
 # Process-local translation cache. Bank entries repeat across rows, so caching
 # by (text, target_language, romanize) collapses the cost to one call per
-# unique verbatim turn per language. Guarded by a lock because the cache is
-# process-wide while the trajectories reading it may sit on more than one
-# event loop, each on its own thread.
+# unique verbatim turn per language. The translating model is part of the key,
+# so a process that switches models never serves the previous one's wording.
+# Guarded by a lock because the cache is process-wide while the trajectories
+# reading it may sit on more than one event loop, each on its own thread.
 _cache: dict[str, str] = {}
 _cache_lock = threading.Lock()
 
@@ -68,9 +70,12 @@ def _inflight_key(key: str) -> tuple[int, str]:
     return (id(asyncio.get_running_loop()), key)
 
 
-def _cache_key(text: str, target_language: str, romanize: bool, rules: tuple[str, ...] = ()) -> str:
+def _cache_key(
+    models: dict[str, Any], text: str, target_language: str, romanize: bool, rules: tuple[str, ...] = ()
+) -> str:
     digest = hashlib.sha1("\n".join((text, *rules)).encode("utf-8")).hexdigest()
-    return f"{digest}|{target_language}|{int(romanize)}"
+    translator = resolve_model_name(models.get(MODEL_SUMMARY), MODEL_SUMMARY)
+    return f"{digest}|{target_language}|{int(romanize)}|{translator}"
 
 
 def _build_prompt(text: str, target_language: str, romanize: bool, rules: tuple[str, ...] = ()) -> str:
@@ -117,7 +122,7 @@ async def translate_user_turn(
     """
     if not text or not text.strip():
         return text
-    key = _cache_key(text, target_language, romanize, rules)
+    key = _cache_key(models, text, target_language, romanize, rules)
     with _cache_lock:
         cached = _cache.get(key)
     if cached is not None:
@@ -219,7 +224,7 @@ async def translate_search_query(
     """
     if not query or not query.strip():
         return query
-    key = f"q|{_cache_key(query, target_language, False)}"
+    key = f"q|{_cache_key(models, query, target_language, False)}"
     with _cache_lock:
         cached = _cache.get(key)
     if cached is not None:

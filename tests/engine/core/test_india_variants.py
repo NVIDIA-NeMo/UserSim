@@ -19,6 +19,7 @@ Covers three buckets:
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
 from usersim.engine.core import behavioral as B
@@ -253,6 +254,26 @@ class TestTranslation:
         assert len(calls) == 1
         # The prompt preserves false premises + names the language.
         assert "Tamil" in calls[0] and "premise" in calls[0].lower()
+
+    async def test_the_cache_is_kept_per_translating_model(self, monkeypatch) -> None:
+        """Switching the translating model translates again rather than serving the previous model's wording."""
+        calls = []
+
+        async def fake(models, alias, msgs, **kw):
+            calls.append(models[alias].model_config.model)
+            return {"content": f"by {models[alias].model_config.model}"}
+
+        def translator(model: str) -> dict:
+            return {"summary_model": SimpleNamespace(model_config=SimpleNamespace(model=model))}
+
+        monkeypatch.setattr(T, "acall_llm", fake)
+        first, second = translator("model-a"), translator("model-b")
+        assert await T.translate_user_turn(first, "Who made you?", target_language="Tamil") == "by model-a"
+        assert await T.translate_user_turn(second, "Who made you?", target_language="Tamil") == "by model-b"
+        assert await T.translate_user_turn(first, "Who made you?", target_language="Tamil") == "by model-a"
+        assert await T.translate_search_query(first, "loan rates", target_language="Tamil") == "by model-a"
+        assert await T.translate_search_query(second, "loan rates", target_language="Tamil") == "by model-b"
+        assert calls == ["model-a", "model-b", "model-a", "model-b"]
 
     async def test_romanize_flag_changes_prompt(self, monkeypatch) -> None:
         seen = {}
