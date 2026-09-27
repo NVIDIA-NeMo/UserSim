@@ -326,3 +326,100 @@ def fold_name(name: str) -> str:
     characters, and collapses runs of whitespace.
     """
     return " ".join(unicodedata.normalize("NFKC", name).translate(_INVISIBLE).casefold().split())
+
+
+class Vocabulary:
+    """The row's names, products and models, for looking up developers in text."""
+
+    def __init__(self, vocabulary: dict[str, dict[str, list[str]]]) -> None:
+        entries: dict[str, tuple[str, bool]] = {}
+        for developer, lists in vocabulary.items():
+            ambiguous = {fold_name(name) for name in lists.get("ambiguous") or []}
+            for key in ("names", "products", "models"):
+                for name in lists.get(key) or []:
+                    folded = fold_name(name)
+                    if folded:
+                        entries.setdefault(folded, (developer, folded in ambiguous))
+        self.developer_ids: tuple[str, ...] = tuple(sorted(vocabulary))
+        self.display_names = {dev: (lists.get("names") or [dev])[0] for dev, lists in vocabulary.items()}
+        self._exact = {folded: dev for folded, (dev, _) in entries.items()}
+        self._ambiguous = {folded for folded, (_, ambiguous) in entries.items() if ambiguous}
+        self._patterns = [
+            (folded, name_pattern(folded), dev, ambiguous)
+            for folded, (dev, ambiguous) in sorted(entries.items(), key=lambda kv: -len(kv[0]))
+        ]
+
+    def entry_in(self, text: str | None) -> tuple[str, str] | None:
+        """The developer and entry a claimed name refers to: an exact entry, else the longest entry it contains."""
+        if not text:
+            return None
+        folded = fold_name(text)
+        if folded in self._exact:
+            return self._exact[folded], folded
+        for entry, pattern, dev, _ in self._patterns:
+            if pattern.search(folded):
+                return dev, entry
+        return None
+
+    def developer_of(self, text: str | None) -> str | None:
+        found = self.entry_in(text)
+        return found[0] if found else None
+
+    def claimed_developer(self, text: str | None, guess: str | None) -> str | None:
+        """The developer a name in a claim refers to, as ``developer_of`` finds it.
+
+        An entry that is also an ordinary word counts only when the extractor,
+        which read the turn, guessed the same developer: "GPT-4o" is OpenAI's,
+        while "artificial intelligence" in Hindi is not a claim to be Krutrim.
+        """
+        if not text:
+            return None
+        folded = fold_name(text)
+        if folded in self._exact:
+            candidates = [(folded, self._exact[folded], folded in self._ambiguous)]
+        else:
+            candidates = [
+                (entry, dev, ambiguous) for entry, pattern, dev, ambiguous in self._patterns if pattern.search(folded)
+            ]
+        return next((dev for _, dev, ambiguous in candidates if not ambiguous or dev == guess), None)
+
+    def developers_in(self, text: str | None, *, include_ambiguous: bool) -> set[str]:
+        """Every developer an entry of which appears in ``text``."""
+        if not text:
+            return set()
+        folded = fold_name(text)
+        return {
+            dev
+            for _, pattern, dev, ambiguous in self._patterns
+            if (include_ambiguous or not ambiguous) and pattern.search(folded)
+        }
+
+    def mentions(self, text: str, developers: Iterable[str]) -> list[tuple[int, int]]:
+        """Every place ``text`` names one of ``developers``, as spans of the text as written.
+
+        Any letter case and run of whitespace matches; a name ``developers_in``
+        finds only after width or other normalisation has no span.
+        """
+        wanted = set(developers)
+        return sorted(
+            match.span()
+            for entry, _, dev, ambiguous in self._patterns
+            if dev in wanted and not ambiguous
+            for match in _written_pattern(entry).finditer(text)
+        )
+
+
+@cache
+def name_pattern(folded: str) -> re.Pattern[str]:
+    """Match ``folded`` as a whole name: Latin letters and digits may not run on either side."""
+    start = r"(?<![0-9a-z])" if folded[0].isascii() and folded[0].isalnum() else ""
+    end = r"(?![0-9a-z])" if folded[-1].isascii() and folded[-1].isalnum() else ""
+    return re.compile(start + re.escape(folded) + end)
+
+
+@cache
+def _written_pattern(folded: str) -> re.Pattern[str]:
+    """``name_pattern`` for text as written: any letter case, any whitespace between words."""
+    start = r"(?<![0-9a-z])" if folded[0].isascii() and folded[0].isalnum() else ""
+    end = r"(?![0-9a-z])" if folded[-1].isascii() and folded[-1].isalnum() else ""
+    return re.compile(start + r"\s+".join(map(re.escape, folded.split())) + end, re.IGNORECASE)

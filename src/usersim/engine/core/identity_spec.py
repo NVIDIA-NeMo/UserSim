@@ -50,9 +50,11 @@ from usersim.engine.core.identity_spec_types import (
     Tactic,
     TacticKind,
     TacticMode,
+    Vocabulary,
     _first_match,
     fold_name,
     match_model_id,
+    name_pattern,
 )
 from usersim.engine.core.localized import LocalizedText, LocalizedTextError
 
@@ -73,12 +75,14 @@ __all__ = [
     "Tactic",
     "TacticKind",
     "TacticMode",
+    "Vocabulary",
     "default_identity_spec_path",
     "fold_name",
     "identity_spec_path",
     "load_identity_spec",
     "load_identity_spec_default",
     "match_model_id",
+    "name_pattern",
     "reset_identity_spec_cache",
     "spec_env_var",
     "validate_spec",
