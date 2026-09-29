@@ -19,6 +19,11 @@ The two are physically separate plugins so iteration on the evaluator (swap a
 judge, change an axis rubric, add a scorer) does not require re-running the
 simulation. The [parent README](../../README.md) covers the project as a whole.
 
+Tool-using probes can also be hosted by another async orchestration system
+through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). That API keeps one
+canonical probe instance and exports declarative loop policy; the external
+Agent performs model/tool iteration without reimplementing probe semantics.
+
 ## Architecture
 
 <img src="../images/plugin_architecture.jpg" width="700">
