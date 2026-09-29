@@ -326,6 +326,7 @@ async def test_runtime_policies_match_native_probe_rules(safety_runtime: ProbeEp
         "single_user_turn": False,
         "assistant_error_behavior": "fail_episode",
         "tool_error_behavior": "return_error_payload",
+        "max_tool_calls_per_turn": tool_runtime.probe.tool_max_calls_per_turn,
         "max_tool_response_attempts": tool_runtime.probe.max_tool_response_attempts,
         "assistant_resampling": tool_runtime.probe.supports_assistant_resampling,
     }
@@ -336,6 +337,7 @@ async def test_runtime_policies_match_native_probe_rules(safety_runtime: ProbeEp
         "single_user_turn": safety_runtime.probe.single_user_turn,
         "assistant_error_behavior": "fail_episode",
         "tool_error_behavior": "return_error_payload",
+        "max_tool_calls_per_turn": None,
         "max_tool_response_attempts": 1,
         "assistant_resampling": safety_runtime.probe.supports_assistant_resampling,
     }
@@ -346,6 +348,7 @@ async def test_runtime_policies_match_native_probe_rules(safety_runtime: ProbeEp
         "single_user_turn": False,
         "assistant_error_behavior": "fail_episode",
         "tool_error_behavior": "return_error_payload",
+        "max_tool_calls_per_turn": financial_runtime.probe.tool_max_calls_per_turn,
         "max_tool_response_attempts": 1,
         "assistant_resampling": financial_runtime.probe.supports_assistant_resampling,
     }
