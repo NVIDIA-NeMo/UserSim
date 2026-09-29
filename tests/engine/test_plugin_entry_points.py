@@ -16,6 +16,7 @@ network guard along with everything else, so a test routed through it can
 pass with an unmocked model call underneath.
 """
 
+import sys
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -28,12 +29,21 @@ from test_simulator_pipeline_e2e import (
     _synthetic_row_data,
 )
 
-from usersim.engine.core.probes import known_probes
+from usersim.engine.core.probes import known_probes, resolve_probe
 from usersim.engine.evaluator.generator import TrajectoryEvaluatorGenerator
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 PROBE_TYPE = "general_open_ended"
 LOCALE = "en_US"
+
+
+def _probe_variant_pairs() -> list[tuple[str, str]]:
+    """Every registered probe paired with every variant it declares."""
+    pairs = []
+    for probe in sorted(known_probes()):
+        module = sys.modules[resolve_probe(probe).__module__]
+        pairs.extend((probe, str(v)) for v in module.PROBE_VARIANTS)
+    return pairs
 
 
 def _resource_provider() -> MagicMock:
@@ -119,9 +129,9 @@ class TestSimulatorRunsARow:
             f"row carries columns the config never declared, so they are dropped: {sorted(undeclared)}"
         )
 
-    @pytest.mark.parametrize("probe_type", sorted(known_probes()))
-    async def test_no_probe_writes_a_column_the_config_did_not_declare(self, probe_type: str) -> None:
-        """Every probe, not just the default one.
+    @pytest.mark.parametrize(("probe_type", "variant"), _probe_variant_pairs())
+    async def test_no_probe_writes_a_column_the_config_did_not_declare(self, probe_type: str, variant: str) -> None:
+        """Every probe and every variant it declares, not just the default one.
 
         ``build_result_extras`` is per-probe, so the columns a row carries
         depend on which probe produced it. The engine writes the configured
@@ -130,19 +140,50 @@ class TestSimulatorRunsARow:
         computed, dropped, and then read back as absent by the scorer that
         needs it -- which reports the trajectory as unscoreable rather than
         failing.
+
+        A variant can write columns its default does not: the guarded
+        ``health_*`` variants write the move/Guard ground truth that
+        ``health_disclosure_concealment`` scores from, and the default
+        variants write none of it. Running only the default variant is how
+        those columns went undeclared without a failing test.
         """
         cfg = _cli_built_simulator_config(probe_type, LOCALE)
         data = _synthetic_row_data(probe_type, LOCALE, cfg)
+        data["probe_variant"] = variant
         before = set(data)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
             row = await generator.agenerate(data)
 
+        if variant != "default":
+            # Some probes relabel the default variant from their own data, so
+            # only a requested non-default variant is required to stick.
+            assert row.get("probe_variant") == variant, (
+                f"{probe_type} ran as {row.get('probe_variant')!r}, not {variant!r}, so this case checked nothing"
+            )
         undeclared = (set(row) - before) - ({cfg.name} | set(cfg.side_effect_columns))
         assert not undeclared, (
-            f"{probe_type} writes columns the config never declares, so they are dropped "
+            f"{probe_type} ({variant}) writes columns the config never declares, so they are dropped "
             f"before anything can read them: {sorted(undeclared)}"
         )
+
+    @pytest.mark.parametrize("probe_type", sorted(p for p, v in _probe_variant_pairs() if v == "guarded"))
+    async def test_guarded_variant_writes_its_ground_truth(self, probe_type: str) -> None:
+        """The guarded variant really produces the columns the test above checks.
+
+        Without this, a guarded row that silently fell back to the default
+        behaviour would write no move columns, and the declaration test would
+        pass for the wrong reason.
+        """
+        cfg = _cli_built_simulator_config(probe_type, LOCALE)
+        data = _synthetic_row_data(probe_type, LOCALE, cfg)
+        data["probe_variant"] = "guarded"
+        generator = ConversationSimulatorGenerator(cfg, _resource_provider())
+        with _patched_call_llm():
+            row = await generator.agenerate(data)
+
+        assert row.get("moves_enabled") is True, f"{probe_type} guarded row carries no move/Guard ground truth"
+        assert "concealment_topics" in row and "moves_detail" in row
 
     async def test_carries_the_identity_columns_forward(self) -> None:
         row, _cfg = await self._run_one_row()

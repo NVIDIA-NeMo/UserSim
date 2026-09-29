@@ -253,4 +253,23 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             "identity_competitor",
             "expected_identity",
             "identity_spec",
+            # health_* guarded variant: the move/Guard ground truth written by
+            # GuardedMoveMixin.build_result_extras and read back by
+            # health_disclosure_concealment. The default variant writes none of
+            # these, so rows from it leave them empty.
+            "moves_enabled",
+            "moves_played",
+            "moves_detail",
+            "guard_veto_count",
+            "disclosed_topics",
+            "committed_disclosure_levels",
+            "concealment_topics",
+            "disclosure_coverage",
+            "risk_present",
+            "risk_noun",
+            "risk_revealed",
+            "risk_revealed_turn",
+            "patient_archetype",
+            "turn_budget",
+            "risk_opportunity",
         ]
