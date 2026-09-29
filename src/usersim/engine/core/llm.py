@@ -442,14 +442,34 @@ def _begin_call(
     return facade, chat_messages, time.monotonic()
 
 
-def _close_json_schema_objects(value: Any) -> Any:
+def _resolve_local_schema_ref(root: dict[str, Any], ref: str) -> Any:
+    """Resolve a local JSON Pointer without accepting external references."""
+    if not ref.startswith("#/"):
+        return None
+    value: Any = root
+    for raw_part in ref[2:].split("/"):
+        part = raw_part.replace("~1", "/").replace("~0", "~")
+        if not isinstance(value, dict) or part not in value:
+            return None
+        value = value[part]
+    return value
+
+
+def _close_json_schema_objects(value: Any, *, root: dict[str, Any] | None = None) -> Any:
     """Return a strict-output-compatible copy of a JSON Schema value."""
+    if root is None and isinstance(value, dict):
+        root = value
     if isinstance(value, list):
-        return [_close_json_schema_objects(item) for item in value]
+        return [_close_json_schema_objects(item, root=root) for item in value]
     if not isinstance(value, dict):
         return value
 
-    closed = {key: _close_json_schema_objects(item) for key, item in value.items()}
+    if isinstance(value.get("$ref"), str) and len(value) > 1 and root is not None:
+        target = _resolve_local_schema_ref(root, value["$ref"])
+        if isinstance(target, dict):
+            value = {**target, **{key: item for key, item in value.items() if key != "$ref"}}
+
+    closed = {key: _close_json_schema_objects(item, root=root) for key, item in value.items()}
     if closed.get("type") == "object" or isinstance(closed.get("properties"), dict):
         closed["additionalProperties"] = False
     return closed

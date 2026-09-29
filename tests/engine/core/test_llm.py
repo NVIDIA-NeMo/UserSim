@@ -83,9 +83,15 @@ class TestAsyncModelCalls:
             "$defs": {
                 "result": {
                     "type": "object",
-                    "properties": {"score": {"type": "integer"}},
+                    "properties": {
+                        "score": {
+                            "$ref": "#/$defs/score",
+                            "description": "Quality score",
+                        }
+                    },
                     "required": ["score"],
-                }
+                },
+                "score": {"type": "integer", "enum": [1, 2, 3, 4, 5]},
             },
             "required": ["result"],
         }
@@ -104,8 +110,15 @@ class TestAsyncModelCalls:
         sent_schema = facade.kwargs["response_format"]["json_schema"]["schema"]
         assert sent_schema["additionalProperties"] is False
         assert sent_schema["$defs"]["result"]["additionalProperties"] is False
+        score_schema = sent_schema["$defs"]["result"]["properties"]["score"]
+        assert score_schema == {
+            "type": "integer",
+            "enum": [1, 2, 3, 4, 5],
+            "description": "Quality score",
+        }
         assert "additionalProperties" not in schema
         assert "additionalProperties" not in schema["$defs"]["result"]
+        assert schema["$defs"]["result"]["properties"]["score"]["$ref"] == "#/$defs/score"
 
     async def test_waits_without_blocking_the_runtime(self) -> None:
         """Backoff has to yield, or every other conversation waits with it."""
