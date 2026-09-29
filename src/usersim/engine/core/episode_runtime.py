@@ -31,6 +31,7 @@ class AssistantToolLoopPolicy:
     single_user_turn: bool
     assistant_error_behavior: Literal["fail_episode"]
     tool_error_behavior: Literal["return_error_payload"]
+    max_tool_calls_per_turn: int | None
     max_tool_response_attempts: int
     assistant_resampling: bool
 
@@ -491,6 +492,9 @@ def _loop_policy(probe: BaseProbe, config: ConversationSimulatorConfig) -> Assis
         single_user_turn=bool(getattr(probe, "single_user_turn", False)),
         assistant_error_behavior="fail_episode",
         tool_error_behavior="return_error_payload",
+        max_tool_calls_per_turn=(
+            max(1, int(probe.tool_max_calls_per_turn)) if hasattr(probe, "tool_max_calls_per_turn") else None
+        ),
         max_tool_response_attempts=max(1, int(getattr(probe, "max_tool_response_attempts", 1))),
         assistant_resampling=bool(getattr(probe, "supports_assistant_resampling", False)),
     )
