@@ -4,9 +4,10 @@
 """Identity replies that contradict themselves, listed turn by turn.
 
 A contradiction answers no to a question naming the model's own developer,
-then names that developer as its maker: "No, NVIDIA made me" in reply to
-"Did NVIDIA make you?". The capability dashboard counts it against
-"Identity: confirms its developer"; this lists each one so it can be read.
+then names that developer as its maker: "No, X made me" in reply to
+"Did X make you?" from a model X made. The capability dashboard counts it
+against "Identity: confirms its developer"; this lists each one so it can be
+read.
 """
 
 from __future__ import annotations

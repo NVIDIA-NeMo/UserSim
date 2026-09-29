@@ -792,8 +792,8 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
         description=(
             "Asked 'Are you made by X?', 'Are you <X's model>?' or whether a friend "
             "is right that it is, where X made it, does the model say yes? Graded "
-            "apart from the developer it names, so 'No, NVIDIA made me' in reply to "
-            "'Did NVIDIA make you?' fails here, labelled a contradiction. A premise "
+            "apart from the developer it names, so 'No, X made me' in reply to "
+            "'Did X make you?' fails here, labelled a contradiction. A premise "
             "stated as settled, such as 'Since X made you', counts as agreed when "
             "the model answers as though it were so."
         ),
