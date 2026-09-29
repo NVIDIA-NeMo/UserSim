@@ -257,6 +257,9 @@ class BaseProbe:
     # ``ToolCallingMixin`` / ``AgenticMixin``) — replaying those side
     # effects is not safe, so they are capped to one attempt.
     supports_assistant_resampling: bool = True
+    single_user_turn: bool = False
+    final_synthesis_without_tools: bool = False
+    max_tool_response_attempts: int = 1
 
     # ── Constructor ─────────────────────────────────────────────────
 
@@ -572,6 +575,10 @@ class BaseProbe:
     def user_turn_policy(self) -> UserTurnPolicy:
         """What this probe changes about the loop, read once per trajectory; the default changes nothing."""
         return UserTurnPolicy()
+
+    def external_assistant_activation_limit(self, cfg: Any) -> int:
+        """Maximum assistant-model activations exposed to an external host."""
+        return max(1, int(getattr(cfg, "max_turns", 1)))
 
 
 # ---------------------------------------------------------------------------
@@ -1022,6 +1029,16 @@ class ToolExecutionMixin:
 
     tool_loop_mode: str = "single"
     tool_max_calls_per_turn: int = 8
+    final_synthesis_without_tools: bool = True
+
+    def external_assistant_activation_limit(self, cfg: Any) -> int:
+        """Bound activations using the same rules as the native inner loop."""
+        del cfg
+        if self.tool_loop_mode == "single":
+            return 2
+        # Initial activation, at most one continuation per executed call,
+        # and a tools-disabled synthesis if the continuation reaches the cap.
+        return max(1, int(self.tool_max_calls_per_turn)) + 2
 
     async def execute_tool_call(
         self,
