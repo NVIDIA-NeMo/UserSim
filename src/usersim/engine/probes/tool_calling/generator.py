@@ -237,6 +237,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """
 
     label = "tool_calling"
+    # The API-response simulator retries malformed JSON once.
+    max_tool_response_attempts = 2
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
