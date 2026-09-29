@@ -69,6 +69,44 @@ class TestAsyncModelCalls:
         assert result["role"] == "assistant"
         assert result["content"] == "ok"
 
+    async def test_closes_nested_json_schema_objects_for_strict_providers(self) -> None:
+        class CapturingFacade(self._Facade):
+            kwargs: dict
+
+            async def acompletion(self, messages, **kwargs):
+                self.kwargs = kwargs
+                return await super().acompletion(messages, **kwargs)
+
+        schema = {
+            "type": "object",
+            "properties": {"result": {"$ref": "#/$defs/result"}},
+            "$defs": {
+                "result": {
+                    "type": "object",
+                    "properties": {"score": {"type": "integer"}},
+                    "required": ["score"],
+                }
+            },
+            "required": ["result"],
+        }
+        facade = CapturingFacade()
+
+        await acall_llm(
+            {"m": facade},
+            "m",
+            [{"role": "user", "content": "hi"}],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": "evaluation", "schema": schema},
+            },
+        )
+
+        sent_schema = facade.kwargs["response_format"]["json_schema"]["schema"]
+        assert sent_schema["additionalProperties"] is False
+        assert sent_schema["$defs"]["result"]["additionalProperties"] is False
+        assert "additionalProperties" not in schema
+        assert "additionalProperties" not in schema["$defs"]["result"]
+
     async def test_waits_without_blocking_the_runtime(self) -> None:
         """Backoff has to yield, or every other conversation waits with it."""
         import asyncio
