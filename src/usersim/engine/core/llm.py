@@ -442,6 +442,36 @@ def _begin_call(
     return facade, chat_messages, time.monotonic()
 
 
+def _close_json_schema_objects(value: Any) -> Any:
+    """Return a strict-output-compatible copy of a JSON Schema value."""
+    if isinstance(value, list):
+        return [_close_json_schema_objects(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+
+    closed = {key: _close_json_schema_objects(item) for key, item in value.items()}
+    if closed.get("type") == "object" or isinstance(closed.get("properties"), dict):
+        closed["additionalProperties"] = False
+    return closed
+
+
+def _normalize_response_format(kwargs: dict[str, Any]) -> None:
+    """Close every object in a JSON-schema response format for strict providers."""
+    response_format = kwargs.get("response_format")
+    if not isinstance(response_format, dict) or response_format.get("type") != "json_schema":
+        return
+    json_schema = response_format.get("json_schema")
+    if not isinstance(json_schema, dict) or not isinstance(json_schema.get("schema"), dict):
+        return
+    kwargs["response_format"] = {
+        **response_format,
+        "json_schema": {
+            **json_schema,
+            "schema": _close_json_schema_objects(json_schema["schema"]),
+        },
+    }
+
+
 def _backoff_before_retry(
     error: Exception,
     alias: str,
@@ -491,6 +521,7 @@ async def acall_llm(
     Returns role, content, and where the model supplied them
     reasoning_content and tool_calls.
     """
+    _normalize_response_format(kwargs)
     facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
 
     for attempt in range(_MAX_RETRIES + 1):
