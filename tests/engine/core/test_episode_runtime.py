@@ -455,3 +455,36 @@ async def test_finalize_rejects_transcript_that_desynchronizes_tool_evidence(
         await safety_runtime.finalize([])
     with pytest.raises(ValueError, match="evidence"):
         await safety_runtime.finalize([{"role": "tool", "tool_call_id": "call-1", "content": payload + "changed"}])
+
+
+async def test_transcript_accepts_semantically_identical_json_tool_payload(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    tool_name = next(iter(safety_runtime.allowed_tool_names))
+    payload = await safety_runtime.simulate_tool_call(
+        tool_name,
+        {},
+        tool_call_id="call-1",
+        turn_idx=0,
+        call_idx=0,
+    )
+    transcript = [
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "type": "function",
+                    "function": {"name": tool_name, "arguments": "{}"},
+                }
+            ],
+        },
+        {
+            "role": "tool",
+            "tool_call_id": "call-1",
+            "content": json.dumps(json.loads(payload), separators=(",", ":")),
+        },
+    ]
+
+    await safety_runtime.synchronize_transcript(transcript)

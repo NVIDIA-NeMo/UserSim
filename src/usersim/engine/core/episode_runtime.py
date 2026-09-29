@@ -399,7 +399,7 @@ class ProbeEpisodeRuntime:
             observed_tool_ids.add(call_id)
             tool_positions[call_id] = message_position
             call = expected.get(call_id)
-            if call is None or message.get("content") != call.payload:
+            if call is None or not _payloads_equal(message.get("content"), call.payload):
                 raise ValueError("Transcript tool messages do not match executed tool-call evidence")
         if expected.keys() - observed_tool_ids:
             raise ValueError("Transcript tool messages do not match executed tool-call evidence")
@@ -478,6 +478,17 @@ def _assistant_calls(messages: Sequence[Mapping[str, Any]]) -> dict[str, tuple[s
                 raise ValueError("Transcript assistant tool-call arguments must be an object")
             calls[call_id] = (name, dict(arguments), message_position)
     return calls
+
+
+def _payloads_equal(observed: object, expected: str) -> bool:
+    if observed == expected:
+        return True
+    if not isinstance(observed, str):
+        return False
+    try:
+        return json.loads(observed) == json.loads(expected)
+    except json.JSONDecodeError:
+        return False
 
 
 def _loop_policy(probe: BaseProbe, config: ConversationSimulatorConfig) -> AssistantToolLoopPolicy:
