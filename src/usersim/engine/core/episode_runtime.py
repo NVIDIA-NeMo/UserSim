@@ -365,6 +365,7 @@ class ProbeEpisodeRuntime:
 
     async def _drive_native_lifecycle(self) -> None:
         original_execute = getattr(self.probe, "execute_tool_call", None)
+        original_models = self.probe._models
         if callable(original_execute):
             self.probe.execute_tool_call = self._replay_executed_tool_call  # type: ignore[method-assign]
         previous_builder = get_current_outcome_builder()
@@ -372,6 +373,7 @@ class ProbeEpisodeRuntime:
         activation_models = dict(self.models)
         for alias in _MODEL_ROLE:
             activation_models[alias] = _ActivationModel(self, alias)
+        self.probe._models = activation_models
         try:
             result = await self.probe.run_dispatch(
                 models=activation_models,
@@ -389,6 +391,7 @@ class ProbeEpisodeRuntime:
             await self._activation_events.put(_LifecycleFailure(error))
         finally:
             set_current_outcome_builder(previous_builder)
+            self.probe._models = original_models
             if callable(original_execute):
                 self.probe.execute_tool_call = original_execute  # type: ignore[method-assign]
 
@@ -814,11 +817,10 @@ def _user_turn_policy(probe: BaseProbe) -> UserTurnPolicySnapshot:
 class _ActivationModel:
     """ModelFacade-shaped rendezvous used by ``acall_llm``."""
 
-    model_name = "external-activation"
-
     def __init__(self, runtime: ProbeEpisodeRuntime, alias: str) -> None:
         self._runtime = runtime
         self._alias = alias
+        self.model_name = getattr(runtime.models.get(alias), "model_name", "external-activation")
 
     async def acompletion(self, messages: Sequence[Any], **kwargs: Any) -> SimpleNamespace:
         response = await self._runtime._request_activation(
