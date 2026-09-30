@@ -386,6 +386,8 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         models: dict[str, Any],
         data: dict[str, Any],
         cfg: Any,
+        state: ConversationState | None = None,
+        seed_state: bool = True,
     ) -> dict:
         """Custom agentic simulate loop.
 
@@ -403,10 +405,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         previous_builder = get_current_outcome_builder()
         set_current_outcome_builder(builder)
         try:
-            state = ConversationState(outcome=builder)
+            state = state or ConversationState(outcome=builder)
             # Seed metadata up front — survives even if turn-1 fails
             # (pin-side-channels-first discipline).
-            self.seed_state_metadata(state)
+            if seed_state:
+                self.seed_state_metadata(state)
 
             # Inject the verbatim user turn-1 from the asset locale (en_IN
             # base for an India variant), machine-translated into the

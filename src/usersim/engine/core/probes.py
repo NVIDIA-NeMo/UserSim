@@ -1399,6 +1399,8 @@ async def _baseprobe_run_dispatch(
     models: dict[str, Any],
     data: dict[str, Any],
     cfg: Any,
+    state: Any = None,
+    seed_state: bool = True,
 ) -> dict:
     """Default dispatch: drive the shared ``ConversationLoop``.
 
@@ -1419,6 +1421,8 @@ async def _baseprobe_run_dispatch(
         patience=getattr(self, "_patience", 0.5),
         locale=getattr(self, "_locale", "en_US"),
         provenance=getattr(self, "_provenance", None),
+        state=state,
+        seed_state=seed_state,
     )
 
 
