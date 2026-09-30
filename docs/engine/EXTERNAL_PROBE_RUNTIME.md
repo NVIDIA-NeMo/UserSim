@@ -3,7 +3,39 @@
 `ProbeEpisodeRuntime` lets an external host run a tool-using probe without
 moving probe policy or simulated state into the host.
 
-One runtime represents one resolved episode. It owns:
+Materialize inputs without model calls before constructing runtimes:
+
+```python
+from usersim.engine.external import ProbeEpisodeRuntime, materialize_episode_inputs
+
+rows = materialize_episode_inputs(
+    locale="en_US",
+    num_rows=1,
+    probe_mix={"tool_calling": 1.0},
+    random_seed=42,
+)
+
+runtime = ProbeEpisodeRuntime.from_resolved_row(rows[0], models=runtime_models)
+```
+
+This uses the same Data Designer persona, probe, theme, and toolset sampler
+graph as `usersim simulate`; the host does not select panel indices or author
+themes/toolsets. Rows include the persona, probe inputs, locale-aware
+behavioral settings, probe family/variant, trajectory ID, config snapshot, and
+UserSim provenance. `models_path` and `assets_dir` are optional keyword
+overrides; their packaged UserSim defaults are used otherwise. Model
+configuration supplies trajectory identities but no configured model is
+called. The equivalent CLI is:
+
+```bash
+usersim simulate --locale en_US --num-rows 1 \
+  --probe-mix tool_calling=1 --random-seed 42 \
+  --materialize-inputs --out episode-inputs.jsonl
+```
+
+`from_resolved_row()` restores the embedded UserSim config and preserves the
+resolved trajectory identity and provenance. One runtime represents one such
+resolved episode. It owns:
 
 - the resolved probe and scenario state;
 - Assistant tool schemas and the allowlist;
@@ -34,10 +66,13 @@ The Assistant loop policy declares:
 
 Hosts must not derive these rules from `probe_type`.
 
-For every selected tool call, invoke `simulate_tool_call()` with the original
-non-empty `tool_call_id`, semantic `turn_idx`, and `call_idx`. The runtime
-rejects unavailable tools, duplicate identities, and mutation after
-finalization.
+For every selected tool call, invoke `simulate_tool_call()` with only the
+original non-empty `tool_call_id`, name, and arguments. For parallel calls
+from one Assistant response, use `simulate_tool_calls()` with the ordered
+batch. UserSim assigns native `turn_idx` and `call_idx`; the host must not
+derive them. An identical retry is idempotent, while reusing an ID with a
+different name or arguments is rejected. Simulated payloads are returned as
+plain strings.
 
 Use `synchronize_transcript()` to install the complete observed transcript as
 it grows. Synchronization is monotonic. Every tool result must match runtime
@@ -52,12 +87,7 @@ result.
 
 ## Supported probes
 
-The external runtime currently supports:
-
-- `tool_calling`;
-- `safety_agentic`; and
-- `financial_services`.
-
-Other probes continue to use the native Conversation Loop. Adding another
-probe requires an explicit external-runtime opt-in and host-contract parity
-tests; it is not inferred from the presence of tool schemas.
+The resumable lifecycle covers every registered probe. The hosted-parity suite
+runs one standalone `ConversationSimulatorGenerator` execution and one
+`ProbeEpisodeRuntime` execution for each registry entry and compares native
+results after removing only wall-clock fields.

@@ -204,8 +204,6 @@ async def test_runtime_simulates_call_and_finalizes_native_evidence(
         tool_name,
         {"value": "example"},
         tool_call_id="call-1",
-        turn_idx=0,
-        call_idx=0,
     )
     await safety_runtime.synchronize_transcript(
         [
@@ -226,6 +224,7 @@ async def test_runtime_simulates_call_and_finalizes_native_evidence(
     assert result["num_tool_calls"] == 1
     metadata = json.loads(result["conversation_metadata"])
     assert metadata["attempted_actions"][0]["tool_name"] == tool_name
+    assert metadata["attempted_actions"][0]["turn_idx"] == 0
     assert json.loads(result["simulation_traces"])[0]["kind"] == "tool_call_verifier"
 
 
@@ -265,8 +264,6 @@ async def test_synchronize_transcript_validates_assistant_call_and_tool_result(
         tool_name,
         {"value": "different"},
         tool_call_id="call-1",
-        turn_idx=0,
-        call_idx=0,
     )
 
     with pytest.raises(ValueError, match="assistant calls"):
@@ -305,8 +302,6 @@ async def test_synchronize_transcript_rejects_changed_tool_result(
         tool_name,
         {},
         tool_call_id="call-1",
-        turn_idx=0,
-        call_idx=0,
     )
 
     with pytest.raises(ValueError, match="tool messages"):
@@ -332,8 +327,6 @@ async def test_runtime_rejects_cross_episode_tool_without_side_effects(
             "not_this_episode",
             {},
             tool_call_id="call-1",
-            turn_idx=0,
-            call_idx=0,
         )
 
     assert await safety_runtime.evidence() == before
@@ -346,8 +339,6 @@ async def test_tool_calling_runtime_reuses_native_verifier_and_response_model() 
         "get_weather",
         {"location": "Tokyo"},
         tool_call_id="call-weather",
-        turn_idx=0,
-        call_idx=0,
     )
 
     assert json.loads(payload) == {"temperature_c": 22}
@@ -362,8 +353,6 @@ async def test_financial_runtime_uses_packaged_stateful_tools() -> None:
         "kb_search",
         {"query": "account procedure"},
         tool_call_id="call-search",
-        turn_idx=0,
-        call_idx=0,
     )
 
     assert json.loads(payload)["results"]
@@ -463,7 +452,7 @@ async def test_runtime_delegates_participant_lifecycle_hooks(
     assert evidence["result_extras"] == extras
 
 
-async def test_simulate_tool_call_requires_explicit_semantic_identity(
+async def test_simulate_tool_call_requires_only_stable_call_identity(
     safety_runtime: ProbeEpisodeRuntime,
 ) -> None:
     tool_name = next(iter(safety_runtime.allowed_tool_names))
@@ -471,11 +460,72 @@ async def test_simulate_tool_call_requires_explicit_semantic_identity(
     with pytest.raises(TypeError, match="tool_call_id"):
         await safety_runtime.simulate_tool_call(tool_name, {})  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="tool_call_id"):
-        await safety_runtime.simulate_tool_call(tool_name, {}, tool_call_id="", turn_idx=0, call_idx=0)
-    with pytest.raises(ValueError, match="turn_idx"):
-        await safety_runtime.simulate_tool_call(tool_name, {}, tool_call_id="call-1", turn_idx=-1, call_idx=0)
-    with pytest.raises(ValueError, match="call_idx"):
-        await safety_runtime.simulate_tool_call(tool_name, {}, tool_call_id="call-1", turn_idx=0, call_idx=-1)
+        await safety_runtime.simulate_tool_call(tool_name, {}, tool_call_id="")
+
+
+async def test_simulate_tool_call_retry_is_idempotent_and_conflicts_are_rejected(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    tool_name = next(iter(safety_runtime.allowed_tool_names))
+    first = await safety_runtime.simulate_tool_call(tool_name, {"value": "same"}, tool_call_id="stable-call")
+
+    assert (
+        await safety_runtime.simulate_tool_call(
+            tool_name,
+            {"value": "same"},
+            tool_call_id="stable-call",
+        )
+        == first
+    )
+    assert (await safety_runtime.evidence())["conversation_metadata"]["attempted_actions"][0]["turn_idx"] == 0
+    with pytest.raises(ValueError, match="different call"):
+        await safety_runtime.simulate_tool_call(
+            tool_name,
+            {"value": "changed"},
+            tool_call_id="stable-call",
+        )
+
+
+async def test_tool_call_batches_receive_native_semantic_indices(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    tool_name = next(iter(safety_runtime.allowed_tool_names))
+    calls = [
+        {"tool_call_id": "batch-1", "tool_name": tool_name, "arguments": {"value": "first"}},
+        {"tool_call_id": "batch-2", "tool_name": tool_name, "arguments": {"value": "second"}},
+    ]
+
+    payloads = await safety_runtime.simulate_tool_calls(calls)
+    assert await safety_runtime.simulate_tool_calls(calls) == payloads
+    await safety_runtime.simulate_tool_call(
+        tool_name,
+        {"value": "next round"},
+        tool_call_id="batch-3",
+    )
+
+    evidence = await safety_runtime.evidence()
+    actions = evidence["conversation_metadata"]["attempted_actions"]
+    traces = evidence["simulation_traces"]
+    assert [action["turn_idx"] for action in actions] == [0, 0, 1]
+    assert [(trace["turn_idx"], trace["call_idx"]) for trace in traces] == [(0, 0), (0, 1), (1, 0)]
+
+
+async def test_simulate_tool_call_preserves_plain_string_payload(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    async def execute_plain_text(*args, **kwargs) -> str:
+        return "plain simulated payload"
+
+    safety_runtime._native_execute_tool_call = execute_plain_text
+
+    assert (
+        await safety_runtime.simulate_tool_call(
+            next(iter(safety_runtime.allowed_tool_names)),
+            {},
+            tool_call_id="plain-call",
+        )
+        == "plain simulated payload"
+    )
 
 
 async def test_finalization_is_idempotent_and_blocks_mutation(
@@ -491,8 +541,6 @@ async def test_finalization_is_idempotent_and_blocks_mutation(
             next(iter(safety_runtime.allowed_tool_names)),
             {},
             tool_call_id="late-call",
-            turn_idx=0,
-            call_idx=0,
         )
 
 
@@ -504,8 +552,6 @@ async def test_finalize_rejects_transcript_that_desynchronizes_tool_evidence(
         tool_name,
         {},
         tool_call_id="call-1",
-        turn_idx=2,
-        call_idx=3,
     )
 
     with pytest.raises(ValueError, match="evidence"):
@@ -522,8 +568,6 @@ async def test_transcript_accepts_semantically_identical_json_tool_payload(
         tool_name,
         {},
         tool_call_id="call-1",
-        turn_idx=0,
-        call_idx=0,
     )
     transcript = [
         {
@@ -655,8 +699,6 @@ async def test_assistant_activation_accepts_complete_external_tool_loop_delta(
         tool_name,
         arguments,
         tool_call_id="call-external",
-        turn_idx=0,
-        call_idx=0,
     )
     delta = (
         {
@@ -693,15 +735,11 @@ async def test_financial_activation_consumes_complete_external_tool_loop_delta()
         "kb_search",
         {"query": "account procedure"},
         tool_call_id="call-search",
-        turn_idx=0,
-        call_idx=0,
     )
     second_payload = await runtime.simulate_tool_call(
         "kb_search",
         {"query": "dispute procedure"},
         tool_call_id="call-dispute",
-        turn_idx=0,
-        call_idx=1,
     )
     delta = (
         {

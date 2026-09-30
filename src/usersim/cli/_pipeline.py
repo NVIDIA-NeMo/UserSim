@@ -30,7 +30,11 @@ from __future__ import annotations
 
 import json
 import logging
+import random
+import threading
+from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from usersim.cli._errors import ConfigError
@@ -75,6 +79,7 @@ THEME_DRIVEN_PROBES: frozenset = frozenset(
 # exists so DD's SubcategorySampler has a value to draw when the
 # probe_type sampled is one that doesn't use themes.
 _NO_THEME_PLACEHOLDER: str = "__not_used__"
+_SAMPLING_LOCK = threading.Lock()
 
 
 def seed_themes(
@@ -387,116 +392,23 @@ def build_simulator_config_builder(
     from data_designer.interface import DataDesigner
 
     from usersim.engine.config import ConversationSimulatorConfig
-    from usersim.engine.core.locale import persona_dataset_locale
 
     probe_mix = probe_mix or DEFAULT_PROBE_MIX
-
-    # India language-variants (e.g. ta_Taml_IN) reuse an existing India
-    # persona dataset: sample personas from the resolved dataset locale
-    # (en_IN today, or the variant's own parquet once one is dropped in),
-    # while the CONVERSATION locale below drives language / script / probe
-    # asset resolution / partitioning. Non-variant locales are unchanged.
-    persona_locale = persona_dataset_locale(
-        locale,
-        datasets_dir=DEFAULT_PERSONA_DATASETS_DIR,
-    )
-
-    # Validate probe_mix keys against the plugin's registry — fail
-    # fast with a friendly message rather than letting DD raise a
-    # generic sampler error mid-run.
-    known = set(known_probes())
-    unknown = [k for k in probe_mix if k not in known]
-    if unknown:
-        raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known)}.")
-    resolved_toolset_seed = resolve_toolset_seed_for_mix(
-        probe_mix,
-        assets_dir,
-        toolset_seed_path,
-    )
 
     dd_kwargs = to_data_designer_kwargs(models)
     data_designer = DataDesigner(**dd_kwargs)
     _set_run_config(data_designer, dd)
     config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
-
-    config_builder.add_column(
-        dd.SamplerColumnConfig(
-            name="persona",
-            drop=True,
-            sampler_type=dd.SamplerType.PERSON,
-            params=persona_sampler_params(
-                dd,
-                persona_locale,
-                locale,
-                match_language=match_persona_language,
-            ),
-        )
-    )
-
-    _add_persona_expressions(config_builder, dd)
-
-    probe_values = list(probe_mix.keys())
-    probe_weights = list(probe_mix.values())
-    config_builder.add_column(
-        dd.SamplerColumnConfig(
-            name="probe_type",
-            sampler_type=dd.SamplerType.CATEGORY,
-            params=dd.CategorySamplerParams(
-                values=probe_values,
-                weights=probe_weights,
-            ),
-        )
-    )
-
-    # The ``theme`` column is consumed by the three theme-driven probes
-    # (tool_calling / general_open_ended / general_educational). The
-    # persona-derived probes (sovereign-AI + safety families) ignore it,
-    # but DD's SubcategorySampler still needs an entry for every
-    # probe_type that can be sampled — otherwise sampling a
-    # persona-derived probe raises mid-run. We hand non-theme probes
-    # a single-element placeholder that they never read.
-    # Each probe's assets load inside its own branch, so a run only reads
-    # what its mix actually needs: an assets root shipping seeds for one
-    # general probe stays usable, and a mix without tool_calling never
-    # attaches a seed dataset. ``toolset_kwargs`` is populated by the
-    # tool_calling branch and splatted into the simulator config below.
-    theme_values: dict[str, list[str]] = {}
-    toolset_kwargs: dict[str, Any] = {}
-    for probe in probe_mix:
-        if probe == "tool_calling":
-            theme_values[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
-            # ``resolved_toolset_seed`` is non-None only for a mix containing
-            # tool_calling; non-tool runs neither inspect nor attach a toolset.
-            toolset_kwargs = _wire_toolsets(
-                config_builder,
-                dd,
-                resolved_toolset_seed,
-            )
-        elif probe == "general_open_ended":
-            theme_values[probe] = seed_themes(
-                locale,
-                "general_open_ended",
-                "topics",
-                assets_dir,
-            )
-        elif probe == "general_educational":
-            theme_values[probe] = seed_themes(
-                locale,
-                "general_educational",
-                "subjects",
-                assets_dir,
-            )
-        else:
-            theme_values[probe] = [_NO_THEME_PLACEHOLDER]
-    config_builder.add_column(
-        dd.SamplerColumnConfig(
-            name="theme",
-            sampler_type=dd.SamplerType.SUBCATEGORY,
-            params=dd.SubcategorySamplerParams(
-                category="probe_type",
-                values=theme_values,
-            ),
-        )
+    toolset_kwargs = _add_episode_input_columns(
+        config_builder,
+        dd,
+        locale=locale,
+        assets_dir=assets_dir,
+        probe_mix=probe_mix,
+        tool_calling_themes=tool_calling_themes,
+        toolset_seed_path=toolset_seed_path,
+        match_persona_language=match_persona_language,
+        drop_persona=True,
     )
 
     config_builder.add_column(
@@ -522,6 +434,179 @@ def build_simulator_config_builder(
     )
 
     return data_designer, config_builder
+
+
+def _add_episode_input_columns(
+    config_builder: Any,
+    dd: Any,
+    *,
+    locale: str,
+    assets_dir: Path,
+    probe_mix: dict[str, float],
+    tool_calling_themes: tuple[str, ...] | None,
+    toolset_seed_path: Path | None,
+    match_persona_language: bool,
+    drop_persona: bool,
+) -> dict[str, Any]:
+    """Install the one canonical persona/probe/theme/toolset sampler graph."""
+    from usersim.engine.core.locale import persona_dataset_locale
+
+    persona_locale = persona_dataset_locale(locale, datasets_dir=DEFAULT_PERSONA_DATASETS_DIR)
+    unknown = [key for key in probe_mix if key not in set(known_probes())]
+    if unknown:
+        raise ConfigError(f"Unknown probe_type(s) in probe_mix: {unknown}. Registered: {sorted(known_probes())}.")
+    resolved_toolset_seed = resolve_toolset_seed_for_mix(probe_mix, assets_dir, toolset_seed_path)
+    config_builder.add_column(
+        dd.SamplerColumnConfig(
+            name="persona",
+            drop=drop_persona,
+            sampler_type=dd.SamplerType.PERSON,
+            params=persona_sampler_params(
+                dd,
+                persona_locale,
+                locale,
+                match_language=match_persona_language,
+            ),
+        )
+    )
+    _add_persona_expressions(config_builder, dd)
+    config_builder.add_column(
+        dd.SamplerColumnConfig(
+            name="probe_type",
+            sampler_type=dd.SamplerType.CATEGORY,
+            params=dd.CategorySamplerParams(values=list(probe_mix), weights=list(probe_mix.values())),
+        )
+    )
+    themes: dict[str, list[str]] = {}
+    toolset_kwargs: dict[str, Any] = {}
+    for probe in probe_mix:
+        if probe == "tool_calling":
+            themes[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
+            toolset_kwargs = _wire_toolsets(config_builder, dd, resolved_toolset_seed)
+        elif probe == "general_open_ended":
+            themes[probe] = seed_themes(locale, probe, "topics", assets_dir)
+        elif probe == "general_educational":
+            themes[probe] = seed_themes(locale, probe, "subjects", assets_dir)
+        else:
+            themes[probe] = [_NO_THEME_PLACEHOLDER]
+    config_builder.add_column(
+        dd.SamplerColumnConfig(
+            name="theme",
+            sampler_type=dd.SamplerType.SUBCATEGORY,
+            params=dd.SubcategorySamplerParams(category="probe_type", values=themes),
+        )
+    )
+    return toolset_kwargs
+
+
+@contextmanager
+def _deterministic_sampling(seed: int | None):
+    """Scope Data Designer's process-global samplers behind a lock."""
+    import numpy as np
+    from data_designer.engine.resources.person_reader import PersonReader
+    from data_designer.engine.resources.seed_reader import SeedReader
+    from data_designer.engine.sampling_gen.generator import DatasetGenerator
+
+    with _SAMPLING_LOCK:
+        python_state = random.getstate()
+        numpy_state = np.random.get_state()
+        original_init = DatasetGenerator.__init__
+        original_person_execute = PersonReader.execute
+        original_create_batch_reader = SeedReader.create_batch_reader
+
+        def seeded_init(instance, *args, random_state=None, **kwargs):
+            return original_init(
+                instance,
+                *args,
+                random_state=seed if random_state is None else random_state,
+                **kwargs,
+            )
+
+        def seeded_person_execute(instance, query, parameters):
+            if seed is not None:
+                query = query.replace("order by random()", f"order by hash(uuid, {seed})")
+            return original_person_execute(instance, query, parameters)
+
+        def seeded_create_batch_reader(instance, *args, **kwargs):
+            if seed is not None:
+                duckdb_seed = (seed % 2_000_001) / 1_000_000 - 1
+                instance._get_duckdb_connection().execute(f"SELECT setseed({duckdb_seed})")
+            return original_create_batch_reader(instance, *args, **kwargs)
+
+        random.seed(seed)
+        np.random.seed(seed)
+        DatasetGenerator.__init__ = seeded_init
+        PersonReader.execute = seeded_person_execute
+        SeedReader.create_batch_reader = seeded_create_batch_reader
+        try:
+            yield
+        finally:
+            DatasetGenerator.__init__ = original_init
+            PersonReader.execute = original_person_execute
+            SeedReader.create_batch_reader = original_create_batch_reader
+            random.setstate(python_state)
+            np.random.set_state(numpy_state)
+
+
+def materialize_episode_inputs(
+    *,
+    locale: str,
+    num_rows: int,
+    models: ModelsConfig,
+    assets_dir: Path,
+    probe_mix: dict[str, float],
+    random_seed: int | None = None,
+    tool_calling_themes: tuple[str, ...] | None = None,
+    toolset_seed_path: Path | None = None,
+    match_persona_language: bool = False,
+    max_turns: int = 5,
+    max_assistant_attempts: int = 1,
+    store_reasoning: bool = True,
+    finance_tier_mix: float = 0.0,
+    finance_retrieval_mode: str = "hybrid",
+) -> list[dict[str, Any]]:
+    """Materialize fully resolved simulator rows without model calls."""
+    import data_designer.config as dd
+    from data_designer.interface import DataDesigner
+
+    from usersim.engine.config import ConversationSimulatorConfig
+    from usersim.engine.core.episode_input import construct_probe_episode
+
+    designer = DataDesigner(**to_data_designer_kwargs(models))
+    _set_run_config(designer, dd)
+    builder = dd.DataDesignerConfigBuilder()
+    toolset_kwargs = _add_episode_input_columns(
+        builder,
+        dd,
+        locale=locale,
+        assets_dir=assets_dir,
+        probe_mix=probe_mix,
+        tool_calling_themes=tool_calling_themes,
+        toolset_seed_path=toolset_seed_path,
+        match_persona_language=match_persona_language,
+        drop_persona=False,
+    )
+    config = ConversationSimulatorConfig(
+        name="conversation_messages",
+        locale=locale,
+        assets_dir=str(assets_dir.resolve()),
+        random_seed=random_seed,
+        max_turns=max_turns,
+        max_assistant_attempts=max_assistant_attempts,
+        store_reasoning=store_reasoning,
+        finance_tier_mix=finance_tier_mix,
+        finance_retrieval_mode=finance_retrieval_mode,
+        **toolset_kwargs,
+    )
+    model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
+    with _deterministic_sampling(random_seed):
+        sampled = designer.preview(builder, num_records=num_rows).dataset
+    if sampled is None:
+        return []
+    return [
+        construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()
+        for row in sampled.to_dict(orient="records")
+    ]
 
 
 def build_evaluator_config_builder(

@@ -5,13 +5,9 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
-import random
-import sys
 import time
-from typing import Any
 
 from data_designer.engine.column_generators.generators.base import (
     ColumnGeneratorCellByCell,
@@ -28,21 +24,7 @@ from usersim.engine.config import (
     ConversationSimulatorConfig,
 )
 from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
-from usersim.engine.core.behavioral import (
-    compute_behavioral_profile,
-    compute_disclosure_style,
-    compute_user_interaction_style,
-    get_conversation_language,
-)
-from usersim.engine.core.identity import (
-    persona_uuid as compute_persona_uuid,
-)
-from usersim.engine.core.identity import (
-    resolve_model_name,
-)
-from usersim.engine.core.identity import (
-    trajectory_id as compute_trajectory_id,
-)
+from usersim.engine.core.episode_input import EpisodeConstructionError, construct_probe_episode
 from usersim.engine.core.llm import (
     ContextWindowError,
     flush_debug_log,
@@ -52,14 +34,9 @@ from usersim.engine.core.llm import (
     set_conversation_id,
     set_current_outcome_builder,
 )
-from usersim.engine.core.locale import persona_dataset_locale
-from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
-from usersim.engine.core.persona import religion_language_context
-from usersim.engine.core.probes import BankLoadError, resolve_probe
-from usersim.engine.core.provenance import (
-    get_code_sha,
-    get_nemotron_personas_version,
-)
+from usersim.engine.core.outcomes import Provenance
+from usersim.engine.core.probes import BankLoadError
+from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
 
@@ -112,40 +89,6 @@ def _bootstrap_probes() -> None:
 
 
 _bootstrap_probes()
-
-
-def _probe_variant(data: dict, probe_module: Any, probe_type: str) -> str:
-    """Resolve the per-trajectory ``probe_variant`` label.
-
-    Priority:
-      1. Explicit ``probe_variant`` column on the row, if present.
-      2. Probe-module default (first entry in ``PROBE_VARIANTS``).
-      3. Fallback to ``"default"``.
-
-    ``probe_variant`` is a probe-specific discriminator that the
-    evaluator reads for stratification and the training-extraction
-    workstream reads for matched-pair joins. Today the general probes
-    declare a single variant (``"default"``); richer probes
-    (``safety_chat_pressure``, ``safety_agentic``) declare
-    multiple.
-    """
-    explicit = data.get("probe_variant")
-    if isinstance(explicit, str) and explicit:
-        return explicit
-    variants = getattr(probe_module, "PROBE_VARIANTS", None)
-    if variants and isinstance(variants, (list, tuple)) and variants:
-        return str(variants[0])
-    return "default"
-
-
-def _build_provenance(probe_module: Any) -> Provenance:
-    """Assemble per-trajectory provenance from module metadata and environment."""
-    return Provenance(
-        nemotron_personas_version=get_nemotron_personas_version(),
-        scenario_prompt_version=getattr(probe_module, "PROMPT_VERSION", None),
-        code_sha=get_code_sha(),
-        bank_version={},  # populated by probes that consume curated fact banks
-    )
 
 
 class ConversationSimulatorGenerator(
@@ -226,104 +169,26 @@ class ConversationSimulatorGenerator(
 
         t_record_start = time.monotonic()
 
-        # Parse persona
-        raw_persona = data[cfg.persona_column]
-        persona = raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona)
-        # The raw persona column is dropped from trajectory output. Preserve the
-        # normalized protected fields that now influence the user-agent prompt so
-        # a stored row remains auditable without reloading the source dataset.
-        data["persona_religion_language_context"] = json.dumps(
-            religion_language_context(persona),
-            ensure_ascii=False,
-        )
-
-        # Content-hashed persona identity. Stable across runs; observed
-        # (not assigned). Replay from a prior trajectory parquet produces
-        # the same UUID under unchanged content.
-        persona_uuid_value = compute_persona_uuid(persona)
-        data["persona_uuid"] = persona_uuid_value
-
-        # Locale and language
-        locale = cfg.locale
-
-        # Compute behavioral profile (locale-aware for education/occupation
-        # mapping). Persona attributes come from the persona *dataset* locale,
-        # not the conversation locale, so India language-variants
-        # (e.g. ta_Taml_IN drawing en_IN personas) resolve the education
-        # ordinal against en_IN's exact vocabulary rather than the imperfect
-        # keyword fallback. Non-variant locales are unchanged.
-        profile = compute_behavioral_profile(persona, locale=persona_dataset_locale(locale))
-        data["behavioral_profile"] = json.dumps(profile, ensure_ascii=False)
-
-        # Stable hash for reproducible per-persona seeding (deterministic across
-        # Python sessions, unlike the built-in hash() which is salted).
-        persona_json = json.dumps(persona, sort_keys=True, default=str)
-        persona_hash = int(hashlib.sha256(persona_json.encode()).hexdigest(), 16) & 0xFFFFFFFF
-        disclosure_style = compute_disclosure_style(
-            persona_seed=persona_hash,
-            incremental_ratio=cfg.incremental_disclosure_ratio,
-        )
-        interaction_style = compute_user_interaction_style(profile)
-        use_grounded_query = random.Random(persona_hash + 1).random() < cfg.persona_grounding_ratio
-        data["disclosure_style"] = disclosure_style
-        data["user_interaction_style"] = interaction_style
-        data["persona_grounding"] = use_grounded_query
-        language = get_conversation_language(locale)
-        data["locale"] = locale
-        data["conversation_language"] = language
-
-        # Read probe type and dispatch
-        probe_type = data[cfg.probe_type_column]
+        construction_error: EpisodeConstructionError | None = None
+        try:
+            constructed = construct_probe_episode(data, config=cfg, models=models)
+            preamble = constructed.preamble
+        except EpisodeConstructionError as error:
+            constructed = None
+            preamble = error.preamble
+            construction_error = error
+        data.clear()
+        data.update(preamble.data)
+        persona = preamble.persona
+        probe_type = preamble.probe_type
         persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
         logger.info(
             f"  |-- Starting {probe_type} sim for {persona_name} "
-            f"[{interaction_style}, {disclosure_style}] (max_turns={cfg.max_turns})"
+            f"[{preamble.user_interaction_style}, {preamble.disclosure_style}] (max_turns={cfg.max_turns})"
         )
 
-        try:
-            probe_cls = resolve_probe(probe_type)
-        except KeyError as e:
-            raise ValueError(str(e)) from e
-        probe_module = sys.modules.get(probe_cls.__module__)
-
-        # Build per-trajectory provenance + resolve probe_variant.
-        # These land on the trajectory for replay correctness (persona
-        # dataset / prompt version skew detection) and for stratified
-        # reporting.
-        provenance = _build_provenance(probe_module)
-        probe_variant = _probe_variant(data, probe_module, probe_type)
-        probe_family = getattr(probe_module, "PROBE_FAMILY", probe_type)
-        data["probe_family"] = probe_family
-        data["probe_variant"] = probe_variant
-
-        # Deterministic trajectory_id. Composed from persona, probe
-        # family + variant, probe seed (cfg.random_seed if set, else
-        # a default), resolved model identities for each role (so
-        # model-version drift produces a different id), and the
-        # probe module's PROMPT_VERSION. Same inputs -> same id;
-        # the simulator-driver uses this for resumable / idempotent
-        # re-runs via core.idempotency.
-        prompt_version = getattr(probe_module, "PROMPT_VERSION", "v1.0")
-        user_model_name = resolve_model_name(models.get(MODEL_USER), MODEL_USER)
-        assistant_model_name = resolve_model_name(models.get(MODEL_ASSISTANT), MODEL_ASSISTANT)
-        # ``locale`` is a load-bearing content determinant: multiple
-        # conversation locales can now draw from the SAME persona dataset
-        # (India language-variants all sample en_IN personas), so without
-        # the locale salt two languages would collide on persona_uuid +
-        # probe + models + prompt_version and the idempotency layer would
-        # drop the second as a duplicate. Salting keeps each locale's row
-        # distinct. (One-time change to the id formula for all locales.)
-        traj_id = compute_trajectory_id(
-            persona_uuid=persona_uuid_value,
-            probe_family=probe_family,
-            probe_variant=probe_variant,
-            scenario_seed=cfg.random_seed,
-            user_model=user_model_name,
-            assistant_model=assistant_model_name,
-            prompt_version=prompt_version,
-            extra_keys=[("locale", locale)],
-        )
-        data["trajectory_id"] = traj_id
+        provenance = preamble.provenance
+        traj_id = preamble.trajectory_id
         # Tag the conversation log with the trajectory_id too — much
         # easier to grep through debug_llm.jsonl when chasing a
         # specific replayed row.
@@ -333,28 +198,16 @@ class ConversationSimulatorGenerator(
         # invocations inside this trajectory feed per-model tokens /
         # calls / latencies into simulation_outcome. Cleared in the
         # finally block so we never leak the builder across rows.
-        row_outcome_builder = OutcomeBuilder(provenance=provenance)
+        row_outcome_builder = constructed.outcome if constructed is not None else None
         set_current_outcome_builder(row_outcome_builder)
 
         t_sim_start = time.monotonic()
         try:
             try:
-                probe = probe_cls(
-                    persona=persona,
-                    locale=locale,
-                    language=language,
-                    models=models,
-                    cfg=cfg,
-                    provenance=provenance,
-                    profile=profile,
-                    data=data,
-                    outcome_builder=row_outcome_builder,
-                )
-                result = await probe.run_dispatch(
-                    models=models,
-                    data=data,
-                    cfg=cfg,
-                )
+                if construction_error is not None:
+                    raise construction_error.cause
+                assert constructed is not None
+                result = await constructed.probe.run_dispatch(models=models, data=data, cfg=cfg)
             except ContextWindowError as e:
                 logger.warning(
                     "  |-- Context window failure for %s: %s",
