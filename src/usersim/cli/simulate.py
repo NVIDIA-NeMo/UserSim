@@ -209,6 +209,14 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         action="store_true",
         help="Print the resolved plan and exit without invoking the LLM.",
     )
+    p.add_argument(
+        "--materialize-inputs",
+        action="store_true",
+        help=(
+            "Write fully resolved UserSim episode-input rows to --out and exit "
+            "without invoking any model. --out must end in .jsonl or .parquet."
+        ),
+    )
     # Choices come from the registry rather than a literal list, so an
     # installed backend is offered in --help without editing this file.
     from usersim.engine.core.backends import known_backends
@@ -296,6 +304,9 @@ def run(args: argparse.Namespace) -> int:
     if args.locale and args.num_rows is None:
         raise SystemExit("--locale requires --num-rows")
 
+    if args.materialize_inputs:
+        return _materialize_inputs(args, models, probe_mix)
+
     if args.dry_run:
         # Resolved before anything is printed so a bad config fails cleanly
         # instead of interleaving with a half-written plan.
@@ -379,6 +390,47 @@ def run(args: argparse.Namespace) -> int:
         logger.error("simulate failed on backend %r: %s", backend.name, status.message)
         return 1
     return status.exit_code or 0
+
+
+def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
+    """CLI adapter for the public no-model-call materialization seam."""
+    import json
+
+    import pandas as pd
+
+    from usersim.cli._pipeline import materialize_episode_inputs
+
+    locales = _locales_from_panel(args.panel) if args.panel else list(args.locale or [])
+    rows = []
+    for locale in locales:
+        count = _count_rows_for_locale(args.panel, locale) if args.panel else args.num_rows
+        rows.extend(
+            materialize_episode_inputs(
+                locale=locale,
+                num_rows=count,
+                models=models,
+                assets_dir=Path(args.assets_dir).resolve(),
+                probe_mix=probe_mix,
+                random_seed=args.random_seed,
+                toolset_seed_path=args.toolset_seed_path,
+                match_persona_language=args.match_persona_language,
+                max_turns=args.max_turns,
+                max_assistant_attempts=args.max_assistant_attempts,
+                store_reasoning=not args.no_store_reasoning,
+                finance_tier_mix=args.finance_tier_mix,
+                finance_retrieval_mode=args.finance_retrieval_mode,
+            )
+        )
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.suffix == ".jsonl":
+        out.write_text("".join(json.dumps(row, ensure_ascii=False, default=str) + "\n" for row in rows))
+    elif out.suffix == ".parquet":
+        pd.DataFrame(rows).to_parquet(out, index=False)
+    else:
+        raise SystemExit("--materialize-inputs requires --out ending in .jsonl or .parquet")
+    print(f"wrote {len(rows)} resolved episode inputs to {out}")
+    return 0
 
 
 def _simulate_to_parquet(

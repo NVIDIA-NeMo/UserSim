@@ -20,8 +20,8 @@ from usersim.engine.core.episode_runtime import (
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
-from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.core.probes import known_probes
+from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
     "first_name": "Sarah",
@@ -212,22 +212,13 @@ async def _execute_assistant_activation(
         return ActivationResult(activation_id=activation.activation_id, response=response)
 
     transcript = [response]
-    # ToolCallingProbe's verifier records human turns one-based; the action
-    # probes preserve their native zero-based assistant turn index.
-    turn_index = (
-        sum(1 for message in messages if str(_message_value(message, "role")) == "user")
-        if runtime.probe_type == "tool_calling"
-        else 0
-    )
-    for call_index, call in enumerate(response["tool_calls"]):
+    for call in response["tool_calls"]:
         function = call["function"]
         arguments = json.loads(function["arguments"])
         payload = await runtime.simulate_tool_call(
             function["name"],
             arguments,
             tool_call_id=call["id"],
-            turn_idx=turn_index,
-            call_idx=call_index,
         )
         transcript.append({"role": "tool", "content": payload, "tool_call_id": call["id"]})
     return ActivationResult(
@@ -258,16 +249,10 @@ async def _run_external(
 
 
 async def _run_direct(runtime: ProbeEpisodeRuntime) -> dict[str, Any]:
-    previous_builder = get_current_outcome_builder()
-    set_current_outcome_builder(runtime.outcome)
-    try:
-        return await runtime.probe.run_dispatch(
-            models=runtime.models,
-            data=runtime.probe._data,
-            cfg=runtime.config,
-        )
-    finally:
-        set_current_outcome_builder(previous_builder)
+    registry = SimpleNamespace(get_model=lambda *, model_alias: runtime.models[model_alias])
+    provider = SimpleNamespace(model_registry=registry)
+    generator = ConversationSimulatorGenerator(runtime.config, provider)
+    return await generator.agenerate(runtime.preamble.to_row())
 
 
 def _normalized_result(result: Mapping[str, Any]) -> dict[str, Any]:
@@ -298,8 +283,23 @@ async def test_direct_and_resumable_execution_have_deterministic_parity(case: _C
     direct_runtime, direct_invocations = _runtime(case)
     external_runtime, external_invocations = _runtime(case)
 
-    direct = await _run_direct(direct_runtime)
+    direct_row = await _run_direct(direct_runtime)
     external, roles = await _run_external(external_runtime, external_invocations)
+    for field in (
+        "persona_uuid",
+        "locale",
+        "behavioral_profile",
+        "disclosure_style",
+        "user_interaction_style",
+        "persona_grounding",
+        "probe_family",
+        "probe_variant",
+        "trajectory_id",
+        "usersim_provenance",
+        "usersim_config",
+    ):
+        assert direct_row[field] == direct_runtime.preamble.to_row()[field]
+    direct = {key: direct_row[key] for key in external}
     direct_normalized = _normalized_result(direct)
     external_normalized = _normalized_result(external)
 

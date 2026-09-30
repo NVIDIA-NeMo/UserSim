@@ -11,14 +11,17 @@ from collections import deque
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from types import SimpleNamespace
-from typing import Any, Literal, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Literal, Mapping, Sequence
 
-from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core.episode_input import EpisodeConstructionError, EpisodePreamble, construct_probe_episode
 from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
-from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus, Provenance
-from usersim.engine.core.probes import BaseProbe, resolve_probe
+from usersim.engine.core.outcomes import OutcomeStatus, Provenance
+from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import ConversationState, make_result
 from usersim.engine.core.user_turn_policy import resolve_user_turn_policy
+
+if TYPE_CHECKING:
+    from usersim.engine.config import ConversationSimulatorConfig
 
 ActivationRole = Literal["user", "assistant", "judge", "summary"]
 
@@ -217,6 +220,41 @@ class ProbeEpisodeRuntime:
     and result extras used by an in-process UserSim run.
     """
 
+    @classmethod
+    def from_resolved_row(
+        cls,
+        row: Mapping[str, Any],
+        *,
+        models: Mapping[str, Any],
+    ) -> ProbeEpisodeRuntime:
+        """Create a runtime directly from a materialized UserSim episode row."""
+        from usersim.engine.config import ConversationSimulatorConfig
+
+        raw_config = row.get("usersim_config")
+        if not isinstance(raw_config, Mapping):
+            raise ValueError("Resolved episode row requires a usersim_config mapping")
+        config = ConversationSimulatorConfig.model_validate(dict(raw_config))
+        persona_column = getattr(config, "persona_column", "persona")
+        probe_type_column = getattr(config, "probe_type_column", "probe_type")
+        persona = row.get(persona_column)
+        if not isinstance(persona, Mapping):
+            raise ValueError(f"Resolved episode row requires a {persona_column!r} mapping")
+        probe_type = row.get(probe_type_column)
+        if not isinstance(probe_type, str) or not probe_type:
+            raise ValueError(f"Resolved episode row requires a non-empty {probe_type_column!r}")
+        language = row.get("conversation_language")
+        if not isinstance(language, str) or not language:
+            raise ValueError("Resolved episode row requires a non-empty conversation_language")
+        return cls(
+            probe_type=probe_type,
+            persona=persona,
+            locale=config.locale,
+            language=language,
+            models=models,
+            config=config,
+            data=row,
+        )
+
     def __init__(
         self,
         *,
@@ -233,22 +271,27 @@ class ProbeEpisodeRuntime:
         # Importing the generator bootstraps all built-in probe registrations.
         import usersim.engine.generator  # noqa: F401
 
-        self.probe_type = probe_type
         self.models = dict(models)
         self.config = config
-        self.outcome = OutcomeBuilder(provenance=provenance or Provenance())
-        probe_cls = resolve_probe(probe_type)
-        self.probe: BaseProbe = probe_cls(
-            persona=dict(persona),
-            locale=locale,
-            language=language,
-            models=self.models,
-            cfg=config,
-            provenance=provenance,
-            profile=dict(profile or {}),
-            data=dict(data),
-            outcome_builder=self.outcome,
-        )
+        try:
+            constructed = construct_probe_episode(
+                {
+                    **dict(data),
+                    getattr(config, "persona_column", "persona"): dict(persona),
+                    getattr(config, "probe_type_column", "probe_type"): probe_type,
+                    **({"behavioral_profile": dict(profile)} if profile is not None else {}),
+                },
+                config=config,
+                models=self.models,
+                provenance=provenance,
+            )
+        except EpisodeConstructionError as error:
+            raise error.cause from error
+        preamble = constructed.preamble
+        self.preamble: EpisodePreamble = preamble
+        self.probe_type = preamble.probe_type
+        self.outcome = constructed.outcome
+        self.probe: BaseProbe = constructed.probe
         self.state = ConversationState(outcome=self.outcome)
         self.probe.seed_state_metadata(self.state)
         self._assistant_tools = deepcopy(self.probe.get_tools_for_assistant() or [])
@@ -257,6 +300,7 @@ class ProbeEpisodeRuntime:
         self._user_turn_policy = _user_turn_policy(self.probe)
         self._native_execute_tool_call = getattr(self.probe, "execute_tool_call", None)
         self._call_count = 0
+        self._tool_round_index = 0 if self.probe_type == "safety_agentic" else 1
         self._executed_tool_calls: list[_ExecutedToolCall] = []
         self._synchronized_messages: list[dict[str, Any]] = []
         self._initial_user_message: str | None | object = _UNSET
@@ -523,69 +567,86 @@ class ProbeEpisodeRuntime:
         arguments: Mapping[str, Any],
         *,
         tool_call_id: str,
-        turn_idx: int,
-        call_idx: int,
     ) -> str:
-        """Simulate one allowed call and append its result to runtime state."""
+        """Simulate one call with UserSim-assigned semantic indices.
+
+        Repeating the same stable call identity and payload is idempotent.
+        Use :meth:`simulate_tool_calls` for parallel calls from one Assistant
+        response so they share a turn index and receive ordered call indices.
+        """
+        payloads = await self.simulate_tool_calls(
+            [{"tool_call_id": tool_call_id, "tool_name": tool_name, "arguments": dict(arguments)}]
+        )
+        return payloads[0]
+
+    async def simulate_tool_calls(self, calls: Sequence[Mapping[str, Any]]) -> list[str]:
+        """Simulate one Assistant response's ordered tool-call batch."""
         async with self._lock:
             self._ensure_open()
-            if tool_name not in self._allowed_tool_names:
-                raise ValueError(f"Tool {tool_name!r} is not available for this {self.probe_type!r} episode")
-            if not isinstance(arguments, Mapping):
-                raise TypeError("Tool arguments must be a mapping")
-            if not isinstance(tool_call_id, str) or not tool_call_id:
-                raise ValueError("tool_call_id must be a non-empty string")
-            if not isinstance(turn_idx, int) or isinstance(turn_idx, bool) or turn_idx < 0:
-                raise ValueError("turn_idx must be a non-negative integer")
-            if not isinstance(call_idx, int) or isinstance(call_idx, bool) or call_idx < 0:
-                raise ValueError("call_idx must be a non-negative integer")
-            if any(call.tool_call_id == tool_call_id for call in self._executed_tool_calls):
-                raise ValueError(f"tool_call_id {tool_call_id!r} has already been executed")
-            if any(call.turn_idx == turn_idx and call.call_idx == call_idx for call in self._executed_tool_calls):
-                raise ValueError(f"turn_idx={turn_idx}, call_idx={call_idx} has already been executed")
-
-            raw_call = {
-                "id": tool_call_id,
-                "type": "function",
-                "function": {
-                    "name": tool_name,
-                    "arguments": json.dumps(dict(arguments), ensure_ascii=False),
-                },
-            }
             execute = self._native_execute_tool_call
             if not callable(execute):
                 raise TypeError(f"Probe {self.probe_type!r} does not implement single-call execution")
-
-            previous_builder = get_current_outcome_builder()
-            set_current_outcome_builder(self.outcome)
-            try:
-                payload = await execute(
-                    tool_name,
-                    dict(arguments),
-                    raw_call,
-                    self.state,
-                    self.models,
-                    turn_idx=turn_idx,
-                    call_idx=call_idx,
+            payloads: list[str] = []
+            executed_new_call = False
+            turn_idx = self._tool_round_index
+            for call_idx, call in enumerate(calls):
+                tool_name = call.get("tool_name")
+                arguments = call.get("arguments")
+                tool_call_id = call.get("tool_call_id")
+                if not isinstance(tool_name, str) or tool_name not in self._allowed_tool_names:
+                    raise ValueError(f"Tool {tool_name!r} is not available for this {self.probe_type!r} episode")
+                if not isinstance(arguments, Mapping):
+                    raise TypeError("Tool arguments must be a mapping")
+                if not isinstance(tool_call_id, str) or not tool_call_id:
+                    raise ValueError("tool_call_id must be a non-empty string")
+                prior = next((item for item in self._executed_tool_calls if item.tool_call_id == tool_call_id), None)
+                if prior is not None:
+                    if prior.tool_name != tool_name or prior.arguments != dict(arguments):
+                        raise ValueError(f"tool_call_id {tool_call_id!r} was reused with a different call")
+                    payloads.append(prior.payload)
+                    continue
+                raw_call = {
+                    "id": tool_call_id,
+                    "type": "function",
+                    "function": {
+                        "name": tool_name,
+                        "arguments": json.dumps(dict(arguments), ensure_ascii=False),
+                    },
+                }
+                previous_builder = get_current_outcome_builder()
+                set_current_outcome_builder(self.outcome)
+                try:
+                    payload = await execute(
+                        tool_name,
+                        dict(arguments),
+                        raw_call,
+                        self.state,
+                        self.models,
+                        turn_idx=turn_idx,
+                        call_idx=call_idx,
+                    )
+                finally:
+                    set_current_outcome_builder(previous_builder)
+                if not isinstance(payload, str):
+                    payload = json.dumps(payload, ensure_ascii=False, default=str)
+                if not self._lifecycle_started:
+                    self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": tool_call_id})
+                self._executed_tool_calls.append(
+                    _ExecutedToolCall(
+                        tool_call_id=tool_call_id,
+                        tool_name=tool_name,
+                        arguments=deepcopy(dict(arguments)),
+                        payload=payload,
+                        turn_idx=turn_idx,
+                        call_idx=call_idx,
+                    )
                 )
-            finally:
-                set_current_outcome_builder(previous_builder)
-            if not isinstance(payload, str):
-                payload = json.dumps(payload, ensure_ascii=False, default=str)
-            if not self._lifecycle_started:
-                self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": tool_call_id})
-            self._executed_tool_calls.append(
-                _ExecutedToolCall(
-                    tool_call_id=tool_call_id,
-                    tool_name=tool_name,
-                    arguments=deepcopy(dict(arguments)),
-                    payload=payload,
-                    turn_idx=turn_idx,
-                    call_idx=call_idx,
-                )
-            )
-            self._call_count += 1
-            return payload
+                executed_new_call = True
+                self._call_count += 1
+                payloads.append(payload)
+            if executed_new_call:
+                self._tool_round_index += 1
+            return payloads
 
     async def evidence(self) -> dict[str, Any]:
         """Return a JSON-safe snapshot suitable for verification and audit."""

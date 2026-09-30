@@ -652,6 +652,19 @@ The import alone triggers the `@register_probe` decorator, which
 self-registers the probe class into `_PROBE_REGISTRY`. No bundle
 list, no factory wrapping: the substrate handles it.
 
+Every registered probe is also constructible through
+`construct_probe_episode()`. Do not add a separate hosted-runtime constructor:
+the public constructor resolves the locale-aware persona settings, provenance,
+probe family/variant and trajectory identity, then initializes the native
+probe once for both `ConversationSimulatorGenerator` and
+`ProbeEpisodeRuntime`.
+
+For tool probes, `execute_tool_call(..., turn_idx, call_idx)` continues to
+receive native semantic indices. External hosts provide only stable call IDs,
+names and arguments; `ProbeEpisodeRuntime` assigns the indices. Author probe
+logic against those supplied indices rather than reconstructing host
+transcript positions.
+
 ### File 7: tests at `tests/engine/probes/test_cooking_advisor.py`
 
 Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template),
