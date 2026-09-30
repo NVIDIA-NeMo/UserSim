@@ -6,11 +6,18 @@
 from __future__ import annotations
 
 import json
+from inspect import signature
 from types import SimpleNamespace
 
 import pytest
 
-from usersim.engine.core.episode_runtime import ProbeEpisodeRuntime
+from usersim.engine.core.episode_runtime import (
+    ActivationRequest,
+    ActivationResult,
+    EpisodeLifecycleComplete,
+    ProbeEpisodeRuntime,
+)
+from usersim.engine.core.probes import known_probes, resolve_probe
 
 
 class _JSONModel:
@@ -21,6 +28,21 @@ class _JSONModel:
         return SimpleNamespace(
             message=SimpleNamespace(
                 content='{"temperature_c": 22}',
+                reasoning_content=None,
+                tool_calls=None,
+            ),
+            usage=None,
+        )
+
+
+class _AssistantTextModel:
+    model_name = "assistant-text-model"
+
+    async def acompletion(self, messages, **kwargs):
+        del messages, kwargs
+        return SimpleNamespace(
+            message=SimpleNamespace(
+                content="I cannot perform that action.",
                 reasoning_content=None,
                 tool_calls=None,
             ),
@@ -83,6 +105,39 @@ def _financial_runtime() -> ProbeEpisodeRuntime:
             finance_embedding_model_alias="embedding_model",
         ),
         data={},
+    )
+
+
+def _open_ended_runtime() -> ProbeEpisodeRuntime:
+    return ProbeEpisodeRuntime(
+        probe_type="general_open_ended",
+        persona={
+            "first_name": "A",
+            "last_name": "User",
+            "age": 35,
+            "region": "Oregon",
+            "occupation": "designer",
+        },
+        locale="en_US",
+        language="English",
+        models={},
+        config=SimpleNamespace(
+            theme_column="theme",
+            max_turns=2,
+            max_query_attempts=1,
+            max_assistant_attempts=1,
+            enforce_user_language=False,
+            context_compression=False,
+            compression_window=1,
+            store_reasoning=True,
+        ),
+        data={
+            "theme": {"type": "travel", "description": "planning a trip"},
+            "disclosure_style": "upfront",
+            "user_interaction_style": "neutral",
+            "persona_grounding": False,
+        },
+        profile={"patience": 0.5, "tech_literacy": 0.5, "error_proneness": 0.5},
     )
 
 
@@ -488,3 +543,195 @@ async def test_transcript_accepts_semantically_identical_json_tool_payload(
     ]
 
     await safety_runtime.synchronize_transcript(transcript)
+
+
+async def test_native_lifecycle_pauses_uniformly_and_is_idempotent(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    activation = await safety_runtime.advance()
+
+    assert isinstance(activation, ActivationRequest)
+    assert activation.role == "assistant"
+    assert activation.model_alias == "assistant_model"
+    assert activation.messages[-1]["role"] == "user"
+    assert activation.assistant_tool_loop_policy == safety_runtime.loop_policy
+    json.dumps(activation.to_dict())
+
+    result = ActivationResult(
+        activation_id=activation.activation_id,
+        response={"role": "assistant", "content": "I cannot perform that action."},
+    )
+    completed = await safety_runtime.advance(result)
+
+    assert isinstance(completed, EpisodeLifecycleComplete)
+    assert completed.result["conversation_status"] is True
+    assert json.loads(completed.result["conversation_messages"])[-1]["content"] == "I cannot perform that action."
+    assert await safety_runtime.advance(result) == completed
+    with pytest.raises(ValueError, match="different result"):
+        await safety_runtime.advance(
+            ActivationResult(
+                activation_id=activation.activation_id,
+                response={"role": "assistant", "content": "changed"},
+            )
+        )
+
+
+def test_activation_result_enforces_json_safe_exclusive_payload() -> None:
+    with pytest.raises(TypeError, match="JSON serializable"):
+        ActivationResult(activation_id="activation-1", response={"bad": object()})
+    with pytest.raises(ValueError, match="exactly one"):
+        ActivationResult(
+            activation_id="activation-1",
+            response={"role": "assistant", "content": "duplicate"},
+            transcript_delta=({"role": "assistant", "content": "duplicate"},),
+        )
+
+
+async def test_activation_lifecycle_matches_native_safety_dispatch() -> None:
+    external = ProbeEpisodeRuntime(
+        probe_type="safety_agentic",
+        persona={
+            "first_name": "Sarah",
+            "last_name": "Johnson",
+            "age": 35,
+            "city": "Seattle",
+            "education_level": "Bachelor",
+            "occupation": "Software Engineer",
+        },
+        locale="en_US",
+        language="English",
+        models={},
+        config=SimpleNamespace(random_seed=42, max_turns=3),
+        data={"user_interaction_style": "direct"},
+        profile={"patience": 0.75},
+    )
+    native = ProbeEpisodeRuntime(
+        probe_type="safety_agentic",
+        persona={
+            "first_name": "Sarah",
+            "last_name": "Johnson",
+            "age": 35,
+            "city": "Seattle",
+            "education_level": "Bachelor",
+            "occupation": "Software Engineer",
+        },
+        locale="en_US",
+        language="English",
+        models={"assistant_model": _AssistantTextModel()},
+        config=SimpleNamespace(random_seed=42, max_turns=3),
+        data={"user_interaction_style": "direct"},
+        profile={"patience": 0.75},
+    )
+
+    activation = await external.advance()
+    assert isinstance(activation, ActivationRequest)
+    external_complete = await external.advance(
+        ActivationResult(
+            activation_id=activation.activation_id,
+            response={"role": "assistant", "content": "I cannot perform that action."},
+        )
+    )
+    native_result = await native.probe.run_dispatch(
+        models=native.models,
+        data=native.probe._data,
+        cfg=native.config,
+    )
+
+    assert isinstance(external_complete, EpisodeLifecycleComplete)
+    for key in ("conversation_messages", "conversation_metadata", "conversation_status", "num_turns", "num_tool_calls"):
+        assert external_complete.result[key] == native_result[key]
+
+
+async def test_assistant_activation_accepts_complete_external_tool_loop_delta(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    activation = await safety_runtime.advance()
+    assert isinstance(activation, ActivationRequest)
+    tool_name = next(iter(safety_runtime.allowed_tool_names))
+    arguments = {"value": "example"}
+    payload = await safety_runtime.simulate_tool_call(
+        tool_name,
+        arguments,
+        tool_call_id="call-external",
+        turn_idx=0,
+        call_idx=0,
+    )
+    delta = (
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-external",
+                    "type": "function",
+                    "function": {"name": tool_name, "arguments": json.dumps(arguments)},
+                }
+            ],
+        },
+        {"role": "tool", "content": payload, "tool_call_id": "call-external"},
+        {"role": "assistant", "content": "The action completed.", "tool_calls": None},
+    )
+
+    completed = await safety_runtime.advance(
+        ActivationResult(activation_id=activation.activation_id, transcript_delta=delta)
+    )
+
+    assert isinstance(completed, EpisodeLifecycleComplete)
+    messages = json.loads(completed.result["conversation_messages"])
+    assert messages[-3:] == list(delta)
+    assert completed.result["num_tool_calls"] == 1
+    assert len(json.loads(completed.result["conversation_metadata"])["attempted_actions"]) == 1
+
+
+def test_native_lifecycle_surface_covers_all_registered_probes() -> None:
+    registered = (
+        "financial_services",
+        "general_educational",
+        "general_open_ended",
+        "health_decision_support_disclosure",
+        "health_general_disclosure",
+        "health_therapy_disclosure",
+        "health_triage_disclosure",
+        "identity_disclosure",
+        "safety_agentic",
+        "safety_chat_pressure",
+        "sov_ai_dynamic",
+        "sov_ai_facts",
+        "sov_ai_multilingual_parity",
+        "tool_calling",
+    )
+    assert known_probes() == registered
+    for label in registered:
+        parameters = signature(resolve_probe(label).run_dispatch).parameters
+        assert "state" in parameters, label
+        assert "seed_state" in parameters, label
+
+
+async def test_native_lifecycle_routes_all_participant_roles() -> None:
+    runtime = _open_ended_runtime()
+    event = await runtime.advance()
+    roles = []
+    user_activation_count = 0
+
+    while isinstance(event, ActivationRequest):
+        roles.append(event.role)
+        if event.role == "user":
+            user_activation_count += 1
+            content = "How should I plan my trip?" if user_activation_count == 1 else "Thanks, that answers it."
+        elif event.role == "assistant":
+            content = "Start with dates, budget, and destination preferences."
+            assert event.assistant_tool_loop_policy == runtime.loop_policy
+        elif event.role == "judge":
+            content = "<explanation>valid participant turn</explanation><rating>success</rating>"
+        else:
+            content = "yes"
+        event = await runtime.advance(
+            {
+                "activation_id": event.activation_id,
+                "response": {"role": "assistant", "content": content},
+            }
+        )
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert set(roles) == {"user", "assistant", "judge", "summary"}
+    assert event.result["conversation_status"] is True

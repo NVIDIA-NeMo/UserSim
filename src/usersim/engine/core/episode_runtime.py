@@ -7,8 +7,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections import deque
 from copy import deepcopy
 from dataclasses import asdict, dataclass
+from types import SimpleNamespace
 from typing import Any, Literal, Mapping, Sequence
 
 from usersim.engine.config import ConversationSimulatorConfig
@@ -18,7 +20,14 @@ from usersim.engine.core.probes import BaseProbe, resolve_probe
 from usersim.engine.core.simulation import ConversationState, make_result
 from usersim.engine.core.user_turn_policy import resolve_user_turn_policy
 
-_EXTERNAL_RUNTIME_PROBES = frozenset({"tool_calling", "safety_agentic", "financial_services"})
+ActivationRole = Literal["user", "assistant", "judge", "summary"]
+
+_MODEL_ROLE: dict[str, ActivationRole] = {
+    "user_model": "user",
+    "assistant_model": "assistant",
+    "judge_model": "judge",
+    "summary_model": "summary",
+}
 
 
 @dataclass(frozen=True)
@@ -41,6 +50,102 @@ class AssistantToolLoopPolicy:
 
 
 @dataclass(frozen=True)
+class ActivationRequest:
+    """One JSON-safe model activation paused inside the native lifecycle."""
+
+    activation_id: str
+    role: ActivationRole
+    model_alias: str
+    messages: tuple[dict[str, Any], ...]
+    parameters: dict[str, Any]
+    assistant_tool_loop_policy: AssistantToolLoopPolicy | None = None
+
+    def __post_init__(self) -> None:
+        if not self.activation_id:
+            raise ValueError("activation_id must be a non-empty string")
+        if self.role not in _MODEL_ROLE.values():
+            raise ValueError(f"Unsupported activation role: {self.role!r}")
+        object.__setattr__(self, "messages", tuple(_normalize_message(message) for message in self.messages))
+        object.__setattr__(self, "parameters", _json_safe_copy(self.parameters))
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a defensive JSON-serializable copy."""
+        return {
+            "activation_id": self.activation_id,
+            "role": self.role,
+            "model_alias": self.model_alias,
+            "messages": deepcopy(list(self.messages)),
+            "parameters": deepcopy(self.parameters),
+            "assistant_tool_loop_policy": (
+                self.assistant_tool_loop_policy.to_dict() if self.assistant_tool_loop_policy else None
+            ),
+        }
+
+
+@dataclass(frozen=True)
+class ActivationResult:
+    """Externally executed result for one activation."""
+
+    activation_id: str
+    response: dict[str, Any] | None = None
+    transcript_delta: tuple[dict[str, Any], ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.activation_id, str):
+            raise TypeError("activation_id must be a string")
+        if (self.response is None) == (not self.transcript_delta):
+            raise ValueError("ActivationResult requires exactly one of response or transcript_delta")
+        if self.response is not None:
+            if not isinstance(self.response, Mapping):
+                raise TypeError("activation response must be a mapping")
+            object.__setattr__(self, "response", _json_safe_copy(dict(self.response)))
+        object.__setattr__(
+            self,
+            "transcript_delta",
+            tuple(_normalize_message(message) for message in self.transcript_delta),
+        )
+
+    @classmethod
+    def from_value(cls, value: ActivationResult | Mapping[str, Any]) -> ActivationResult:
+        """Normalize a typed or wire-format activation result."""
+        if isinstance(value, cls):
+            return value
+        if not isinstance(value, Mapping):
+            raise TypeError("activation result must be ActivationResult or a mapping")
+        response = value.get("response")
+        delta = value.get("transcript_delta") or ()
+        return cls(
+            activation_id=str(value.get("activation_id") or ""),
+            response=deepcopy(dict(response)) if isinstance(response, Mapping) else None,
+            transcript_delta=tuple(_normalize_message(message) for message in delta),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a defensive JSON-serializable copy."""
+        return {
+            "activation_id": self.activation_id,
+            "response": deepcopy(self.response),
+            "transcript_delta": deepcopy(list(self.transcript_delta)),
+        }
+
+
+@dataclass(frozen=True)
+class EpisodeLifecycleComplete:
+    """Terminal event returned after the native lifecycle finalizes."""
+
+    result: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a defensive JSON-serializable copy."""
+        return {"complete": True, "result": deepcopy(self.result)}
+
+
+@dataclass(frozen=True)
+class _LifecycleFailure:
+    error: BaseException
+
+
+@dataclass(frozen=True)
 class UserTurnPolicySnapshot:
     """JSON-safe subset used to reconstruct UserSim's outer-loop policy."""
 
@@ -49,7 +154,7 @@ class UserTurnPolicySnapshot:
     followup_anchor: str | None
     allowed_phrases: tuple[str, ...]
     script_check_ignores: tuple[str, ...]
-    check_opening: Literal["none"]
+    check_opening: Literal["none", "native"]
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serializable copy."""
@@ -125,12 +230,6 @@ class ProbeEpisodeRuntime:
         profile: Mapping[str, Any] | None = None,
         provenance: Provenance | None = None,
     ) -> None:
-        if probe_type not in _EXTERNAL_RUNTIME_PROBES:
-            raise ValueError(
-                f"Probe {probe_type!r} does not support external tool execution; "
-                f"supported probes: {sorted(_EXTERNAL_RUNTIME_PROBES)}"
-            )
-
         # Importing the generator bootstraps all built-in probe registrations.
         import usersim.engine.generator  # noqa: F401
 
@@ -156,6 +255,7 @@ class ProbeEpisodeRuntime:
         self._allowed_tool_names = frozenset(_tool_name(tool) for tool in self._assistant_tools)
         self._loop_policy = _loop_policy(self.probe, config)
         self._user_turn_policy = _user_turn_policy(self.probe)
+        self._native_execute_tool_call = getattr(self.probe, "execute_tool_call", None)
         self._call_count = 0
         self._executed_tool_calls: list[_ExecutedToolCall] = []
         self._synchronized_messages: list[dict[str, Any]] = []
@@ -163,6 +263,18 @@ class ProbeEpisodeRuntime:
         self._finalized = False
         self._final_result: dict[str, Any] | None = None
         self._lock = asyncio.Lock()
+        self._lifecycle_started = False
+        self._lifecycle_task: asyncio.Task[None] | None = None
+        self._activation_events: asyncio.Queue[ActivationRequest | EpisodeLifecycleComplete | _LifecycleFailure] = (
+            asyncio.Queue()
+        )
+        self._activation_waiters: dict[str, asyncio.Future[ActivationResult]] = {}
+        self._activation_requests: dict[str, ActivationRequest] = {}
+        self._activation_transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
+        self._active_activation_id: str | None = None
+        self._activation_sequence = 0
+        self._assistant_replay: deque[dict[str, Any]] = deque()
+        self._assistant_expected_tools: deque[dict[str, Any]] = deque()
 
     @property
     def assistant_tools(self) -> list[dict[str, Any]]:
@@ -202,6 +314,181 @@ class ProbeEpisodeRuntime:
                 patience=float(getattr(self.probe, "_patience", 0.5)),
                 user_turn_policy=self._user_turn_policy,
             )
+
+    async def advance(
+        self,
+        result: ActivationResult | Mapping[str, Any] | None = None,
+    ) -> ActivationRequest | EpisodeLifecycleComplete:
+        """Start or resume the native lifecycle at one external model boundary.
+
+        A repeated result with the same activation ID and identical payload is
+        idempotent and returns the same transition. Reusing an ID with a
+        different payload is rejected.
+        """
+        async with self._lock:
+            if not self._lifecycle_started:
+                if result is not None:
+                    raise ValueError("The first lifecycle advance cannot include a result")
+                self._lifecycle_started = True
+                self._lifecycle_task = asyncio.create_task(self._drive_native_lifecycle())
+                return await self._next_activation_event()
+
+            if result is None:
+                raise ValueError("A started lifecycle requires an activation result")
+            normalized = ActivationResult.from_value(result)
+            if not normalized.activation_id:
+                raise ValueError("activation_id must be a non-empty string")
+            fingerprint = _json_fingerprint(normalized.to_dict())
+            prior = self._activation_transitions.get(normalized.activation_id)
+            if prior is not None:
+                prior_fingerprint, event = prior
+                if prior_fingerprint != fingerprint:
+                    raise ValueError(f"activation_id {normalized.activation_id!r} was reused with a different result")
+                return deepcopy(event)
+            if normalized.activation_id != self._active_activation_id:
+                raise ValueError(
+                    f"activation_id {normalized.activation_id!r} is not the pending activation "
+                    f"{self._active_activation_id!r}"
+                )
+            waiter = self._activation_waiters[normalized.activation_id]
+            waiter.set_result(normalized)
+            event = await self._next_activation_event()
+            self._activation_transitions[normalized.activation_id] = (fingerprint, deepcopy(event))
+            return event
+
+    async def _next_activation_event(self) -> ActivationRequest | EpisodeLifecycleComplete:
+        event = await self._activation_events.get()
+        if isinstance(event, _LifecycleFailure):
+            raise event.error
+        self._active_activation_id = event.activation_id if isinstance(event, ActivationRequest) else None
+        return event
+
+    async def _drive_native_lifecycle(self) -> None:
+        original_execute = getattr(self.probe, "execute_tool_call", None)
+        if callable(original_execute):
+            self.probe.execute_tool_call = self._replay_executed_tool_call  # type: ignore[method-assign]
+        previous_builder = get_current_outcome_builder()
+        set_current_outcome_builder(self.outcome)
+        activation_models = dict(self.models)
+        for alias in _MODEL_ROLE:
+            activation_models[alias] = _ActivationModel(self, alias)
+        try:
+            result = await self.probe.run_dispatch(
+                models=activation_models,
+                data=self.probe._data,
+                cfg=self.config,
+                state=self.state,
+                seed_state=False,
+            )
+            if self._assistant_replay or self._assistant_expected_tools:
+                raise ValueError("Assistant transcript delta contained unconsumed messages")
+            self._finalized = True
+            self._final_result = deepcopy(result)
+            await self._activation_events.put(EpisodeLifecycleComplete(deepcopy(result)))
+        except BaseException as error:
+            await self._activation_events.put(_LifecycleFailure(error))
+        finally:
+            set_current_outcome_builder(previous_builder)
+            if callable(original_execute):
+                self.probe.execute_tool_call = original_execute  # type: ignore[method-assign]
+
+    async def _request_activation(
+        self,
+        alias: str,
+        messages: list[dict[str, Any]],
+        parameters: dict[str, Any],
+    ) -> dict[str, Any]:
+        if alias == "assistant_model" and self._assistant_replay:
+            response = self._assistant_replay.popleft()
+            self._consume_expected_tools_before(response)
+            return response
+        if alias != "assistant_model" and (self._assistant_replay or self._assistant_expected_tools):
+            raise ValueError("Assistant transcript delta did not complete before the next participant activation")
+
+        self._activation_sequence += 1
+        activation_id = f"activation-{self._activation_sequence:06d}"
+        request = ActivationRequest(
+            activation_id=activation_id,
+            role=_MODEL_ROLE[alias],
+            model_alias=alias,
+            messages=tuple(deepcopy(messages)),
+            parameters=_json_safe_copy(parameters),
+            assistant_tool_loop_policy=self._loop_policy if alias == "assistant_model" else None,
+        )
+        waiter: asyncio.Future[ActivationResult] = asyncio.get_running_loop().create_future()
+        self._activation_requests[activation_id] = request
+        self._activation_waiters[activation_id] = waiter
+        await self._activation_events.put(request)
+        result = await waiter
+        return self._resolve_activation_response(request, result)
+
+    def _resolve_activation_response(
+        self,
+        request: ActivationRequest,
+        result: ActivationResult,
+    ) -> dict[str, Any]:
+        if request.role != "assistant" and result.transcript_delta:
+            raise ValueError("transcript_delta is only valid for assistant activations")
+        if result.transcript_delta:
+            assistants = [
+                deepcopy(message) for message in result.transcript_delta if message.get("role") == "assistant"
+            ]
+            if not assistants:
+                raise ValueError("Assistant transcript_delta must contain at least one assistant message")
+            if result.transcript_delta[0].get("role") != "assistant":
+                raise ValueError("Assistant transcript_delta must begin with an assistant message")
+            self._validate_activation_delta(result.transcript_delta)
+            self._assistant_replay.extend(assistants[1:])
+            self._assistant_expected_tools.extend(
+                deepcopy(message) for message in result.transcript_delta if message.get("role") == "tool"
+            )
+            response = assistants[0]
+        elif result.response is not None:
+            response = _normalize_assistant_response(result.response)
+        else:
+            raise ValueError("Activation result requires response or transcript_delta")
+        return response
+
+    def _validate_activation_delta(self, delta: Sequence[Mapping[str, Any]]) -> None:
+        expected = {call.tool_call_id: call for call in self._executed_tool_calls}
+        for message in delta:
+            role = message.get("role")
+            if role not in {"assistant", "tool"}:
+                raise ValueError("Assistant transcript_delta may contain only assistant and tool messages")
+            if role == "tool":
+                call_id = message.get("tool_call_id")
+                evidence = expected.get(call_id) if isinstance(call_id, str) else None
+                if evidence is None or not _payloads_equal(message.get("content"), evidence.payload):
+                    raise ValueError("Assistant transcript_delta tool result has no matching runtime evidence")
+
+    def _consume_expected_tools_before(self, response: Mapping[str, Any]) -> None:
+        del response
+        if self._assistant_expected_tools:
+            raise ValueError("Assistant transcript delta tool messages were not consumed by native probe dispatch")
+
+    async def _replay_executed_tool_call(
+        self,
+        name: str,
+        args: dict[str, Any],
+        raw_call: Mapping[str, Any],
+        state: ConversationState,
+        models: dict[str, Any],
+        *,
+        turn_idx: int,
+        call_idx: int,
+    ) -> str:
+        del state, models, turn_idx, call_idx
+        call_id = raw_call.get("id")
+        for evidence in self._executed_tool_calls:
+            if evidence.tool_call_id == call_id and evidence.tool_name == name and evidence.arguments == args:
+                if self._assistant_expected_tools:
+                    expected = self._assistant_expected_tools.popleft()
+                    if expected.get("tool_call_id") != call_id or not _payloads_equal(
+                        expected.get("content"), evidence.payload
+                    ):
+                        raise ValueError("Assistant transcript_delta tool order diverges from native probe dispatch")
+                return evidence.payload
+        raise ValueError(f"Assistant tool call {call_id!r} was not executed through simulate_tool_call")
 
     async def append_message(self, message: Mapping[str, Any]) -> None:
         """Append one externally produced OpenAI-style conversation message."""
@@ -259,7 +546,7 @@ class ProbeEpisodeRuntime:
                     "arguments": json.dumps(dict(arguments), ensure_ascii=False),
                 },
             }
-            execute = getattr(self.probe, "execute_tool_call", None)
+            execute = self._native_execute_tool_call
             if not callable(execute):
                 raise TypeError(f"Probe {self.probe_type!r} does not implement single-call execution")
 
@@ -279,7 +566,8 @@ class ProbeEpisodeRuntime:
                 set_current_outcome_builder(previous_builder)
             if not isinstance(payload, str):
                 payload = json.dumps(payload, ensure_ascii=False, default=str)
-            self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": tool_call_id})
+            if not self._lifecycle_started:
+                self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": tool_call_id})
             self._executed_tool_calls.append(
                 _ExecutedToolCall(
                     tool_call_id=tool_call_id,
@@ -513,16 +801,77 @@ def _loop_policy(probe: BaseProbe, config: ConversationSimulatorConfig) -> Assis
 
 def _user_turn_policy(probe: BaseProbe) -> UserTurnPolicySnapshot:
     policy = resolve_user_turn_policy(probe)
-    if policy.check_opening is not None:
-        raise ValueError(f"Probe {probe.label!r} has a non-serializable opening-check policy")
     return UserTurnPolicySnapshot(
         context_compression=policy.context_compression,
         wrap_up=policy.wrap_up,
         followup_anchor=policy.followup_anchor,
         allowed_phrases=tuple(sorted(policy.allowed_phrases)),
         script_check_ignores=tuple(policy.script_check_ignores),
-        check_opening="none",
+        check_opening="native" if policy.check_opening is not None else "none",
     )
+
+
+class _ActivationModel:
+    """ModelFacade-shaped rendezvous used by ``acall_llm``."""
+
+    model_name = "external-activation"
+
+    def __init__(self, runtime: ProbeEpisodeRuntime, alias: str) -> None:
+        self._runtime = runtime
+        self._alias = alias
+
+    async def acompletion(self, messages: Sequence[Any], **kwargs: Any) -> SimpleNamespace:
+        response = await self._runtime._request_activation(
+            self._alias,
+            [_chat_message_to_dict(message) for message in messages],
+            dict(kwargs),
+        )
+        return SimpleNamespace(
+            message=SimpleNamespace(
+                content=response.get("content", "") or "",
+                reasoning_content=response.get("reasoning_content"),
+                tool_calls=deepcopy(response.get("tool_calls")),
+            ),
+            usage=None,
+        )
+
+
+def _chat_message_to_dict(message: Any) -> dict[str, Any]:
+    role = getattr(message, "role", "user")
+    role_value = getattr(role, "value", role)
+    normalized: dict[str, Any] = {
+        "role": str(role_value),
+        "content": getattr(message, "content", "") or "",
+    }
+    tool_calls = getattr(message, "tool_calls", None)
+    if tool_calls:
+        normalized["tool_calls"] = [
+            call.model_dump() if hasattr(call, "model_dump") else deepcopy(call) for call in tool_calls
+        ]
+    tool_call_id = getattr(message, "tool_call_id", None)
+    if tool_call_id:
+        normalized["tool_call_id"] = str(tool_call_id)
+    return _json_safe_copy(normalized)
+
+
+def _normalize_assistant_response(response: Mapping[str, Any]) -> dict[str, Any]:
+    normalized = deepcopy(dict(response))
+    role = normalized.setdefault("role", "assistant")
+    if role != "assistant":
+        raise ValueError(f"Activation response role must be 'assistant', got {role!r}")
+    normalized.setdefault("content", "")
+    return _json_safe_copy(normalized)
+
+
+def _json_safe_copy(value: Any) -> Any:
+    try:
+        return json.loads(json.dumps(value, ensure_ascii=False))
+    except (TypeError, ValueError) as error:
+        raise TypeError("Activation payload must be JSON serializable") from error
+
+
+def _json_fingerprint(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 _UNSET = object()
