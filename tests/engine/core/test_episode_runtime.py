@@ -99,6 +99,8 @@ def _financial_runtime() -> ProbeEpisodeRuntime:
         models={},
         config=SimpleNamespace(
             random_seed=1,
+            max_turns=1,
+            context_compression=False,
             finance_tier_mix=0.0,
             finance_tier="verifiable",
             finance_retrieval_mode="golden",
@@ -681,6 +683,76 @@ async def test_assistant_activation_accepts_complete_external_tool_loop_delta(
     assert messages[-3:] == list(delta)
     assert completed.result["num_tool_calls"] == 1
     assert len(json.loads(completed.result["conversation_metadata"])["attempted_actions"]) == 1
+
+
+async def test_financial_activation_consumes_complete_external_tool_loop_delta() -> None:
+    runtime = _financial_runtime()
+    activation = await runtime.advance()
+    assert isinstance(activation, ActivationRequest)
+    payload = await runtime.simulate_tool_call(
+        "kb_search",
+        {"query": "account procedure"},
+        tool_call_id="call-search",
+        turn_idx=0,
+        call_idx=0,
+    )
+    second_payload = await runtime.simulate_tool_call(
+        "kb_search",
+        {"query": "dispute procedure"},
+        tool_call_id="call-dispute",
+        turn_idx=0,
+        call_idx=1,
+    )
+    delta = (
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-search",
+                    "type": "function",
+                    "function": {
+                        "name": "kb_search",
+                        "arguments": json.dumps({"query": "account procedure"}),
+                    },
+                }
+            ],
+        },
+        {"role": "tool", "content": payload, "tool_call_id": "call-search"},
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": "call-dispute",
+                    "type": "function",
+                    "function": {
+                        "name": "kb_search",
+                        "arguments": json.dumps({"query": "dispute procedure"}),
+                    },
+                }
+            ],
+        },
+        {"role": "tool", "content": second_payload, "tool_call_id": "call-dispute"},
+        {"role": "assistant", "content": "Here is the account procedure.", "tool_calls": None},
+    )
+
+    event = await runtime.advance(ActivationResult(activation_id=activation.activation_id, transcript_delta=delta))
+    while isinstance(event, ActivationRequest):
+        assert event.role != "assistant"
+        event = await runtime.advance(
+            ActivationResult(
+                activation_id=event.activation_id,
+                response={
+                    "role": "assistant",
+                    "content": "<explanation>complete</explanation><rating>success</rating>",
+                },
+            )
+        )
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert json.loads(event.result["conversation_messages"])[-5:] == list(delta)
+    assert json.loads(event.result["kb_search_queries"]) == ["account procedure", "dispute procedure"]
 
 
 def test_native_lifecycle_surface_covers_all_registered_probes() -> None:

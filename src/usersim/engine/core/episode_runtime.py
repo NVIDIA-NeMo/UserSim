@@ -273,7 +273,7 @@ class ProbeEpisodeRuntime:
         self._activation_transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
         self._active_activation_id: str | None = None
         self._activation_sequence = 0
-        self._assistant_replay: deque[dict[str, Any]] = deque()
+        self._assistant_replay: deque[tuple[dict[str, Any], tuple[dict[str, Any], ...]]] = deque()
         self._assistant_expected_tools: deque[dict[str, Any]] = deque()
 
     @property
@@ -402,8 +402,9 @@ class ProbeEpisodeRuntime:
         parameters: dict[str, Any],
     ) -> dict[str, Any]:
         if alias == "assistant_model" and self._assistant_replay:
-            response = self._assistant_replay.popleft()
+            response, expected_tools = self._assistant_replay.popleft()
             self._consume_expected_tools_before(response)
+            self._assistant_expected_tools.extend(expected_tools)
             return response
         if alias != "assistant_model" and (self._assistant_replay or self._assistant_expected_tools):
             raise ValueError("Assistant transcript delta did not complete before the next participant activation")
@@ -433,19 +434,21 @@ class ProbeEpisodeRuntime:
         if request.role != "assistant" and result.transcript_delta:
             raise ValueError("transcript_delta is only valid for assistant activations")
         if result.transcript_delta:
-            assistants = [
-                deepcopy(message) for message in result.transcript_delta if message.get("role") == "assistant"
-            ]
-            if not assistants:
+            segments: list[tuple[dict[str, Any], tuple[dict[str, Any], ...]]] = []
+            for message in result.transcript_delta:
+                if message.get("role") == "assistant":
+                    segments.append((deepcopy(message), ()))
+                elif segments:
+                    response, tools = segments[-1]
+                    segments[-1] = (response, (*tools, deepcopy(message)))
+            if not segments:
                 raise ValueError("Assistant transcript_delta must contain at least one assistant message")
             if result.transcript_delta[0].get("role") != "assistant":
                 raise ValueError("Assistant transcript_delta must begin with an assistant message")
             self._validate_activation_delta(result.transcript_delta)
-            self._assistant_replay.extend(assistants[1:])
-            self._assistant_expected_tools.extend(
-                deepcopy(message) for message in result.transcript_delta if message.get("role") == "tool"
-            )
-            response = assistants[0]
+            response, expected_tools = segments[0]
+            self._assistant_expected_tools.extend(expected_tools)
+            self._assistant_replay.extend(segments[1:])
         elif result.response is not None:
             response = _normalize_assistant_response(result.response)
         else:
