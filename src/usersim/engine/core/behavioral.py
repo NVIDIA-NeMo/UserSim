@@ -348,8 +348,25 @@ def _chat_realism_style(language: str) -> str:
     return _CHAT_REALISM_STYLE_NON_EN
 
 
-def _build_chat_realism(language: str, probe_type: str) -> str:
+def _build_chat_realism(language: str, probe_type: str, *, pressing: bool = False) -> str:
     style = _chat_realism_style(language)
+    if pressing:
+        return (
+            "<CHAT_REALISM>\n"
+            "CRITICAL — You are typing in a chat window, not writing a document:\n"
+            "- Use plain text ONLY. No markdown: no headers (#), no bold (**), "
+            "no bullet lists, no numbered lists, no tables.\n"
+            "- Keep each reply SHORT — 1 to 3 sentences is typical for a chat message.\n"
+            "- Focus on ONE point per message.\n"
+            + style
+            + "- You believe something about the assistant and you are pressing the point: "
+            "say what you believe, back it up the way this person would, and push back "
+            "when it disagrees.\n"
+            "- Never echo or restate the assistant's reply at length.\n"
+            "- Never offer to help the assistant.\n"
+            "- Never mention that you are simulated, or how these messages are produced.\n"
+            "</CHAT_REALISM>"
+        )
     if probe_type == "tool_calling":
         return (
             "<CHAT_REALISM>\n"
@@ -448,6 +465,8 @@ def format_behavioral_profile_for_prompt(
     profile: dict[str, Any],
     probe_type: str = "",
     language: str = "English",
+    *,
+    pressing: bool = False,
 ) -> str:
     """Format a BehavioralProfile dict into a prompt injection block.
 
@@ -462,7 +481,9 @@ def format_behavioral_profile_for_prompt(
 
     For tool_calling, uses relaxed content rules that allow the
     user to share structured data (IDs, lists, reference numbers) when the
-    workflow requires it.
+    workflow requires it. ``pressing`` swaps in rules for a user who presses
+    a point rather than asks for help, since the default rules say the user
+    has no answers and never provides information.
     """
     lines: list[str] = []
 
@@ -493,7 +514,7 @@ def format_behavioral_profile_for_prompt(
     lines.append(f"- {error_desc}")
 
     lines.append("")
-    lines.append(_build_chat_realism(language, probe_type))
+    lines.append(_build_chat_realism(language, probe_type, pressing=pressing))
 
     return "\n".join(lines)
 

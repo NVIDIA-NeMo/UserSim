@@ -1,0 +1,15 @@
+# A probe built on identity_disclosure: this layer inherits the shipped spec
+# and adds one fictional developer and model family.
+schema_version: "1"
+extends: identity_disclosure
+bank_id: fixture_identity
+bank_version: "1"
+developers:
+  fixture_labs:
+    names: [Fixture Labs]
+    models: [FixtureLM]
+expected_identities:
+  - match: "fixturelm*"
+    developer: fixture_labs
+    model_names: [FixtureLM]
+    examples: [fixture-labs/fixturelm-7b-instruct, fixturelm:7b]

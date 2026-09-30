@@ -35,6 +35,8 @@ debug_litellm_requests.jsonl
 # models file carrying your own endpoint `models.local.toml`.
 models.local.toml
 *.local.toml
+# Local spec layers, such as an identity spec naming unpublished models.
+*.local.yaml
 
 # Data artifacts
 data/

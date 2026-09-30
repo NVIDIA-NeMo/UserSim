@@ -66,6 +66,7 @@ from usersim.reporting.eval_manifest import (
     read_eval_sample_manifest,
     record_eval_sample_pass,
 )
+from usersim.reporting.identity import identity_contradictions
 from usersim.reporting.resource import (
     ResourceProfile,
     aggregate_resource_profile,
@@ -100,6 +101,7 @@ __all__ = [
     "compute_response_length_by_locale",
     "compute_verbosity_cv",
     "discover_comparison_runs",
+    "identity_contradictions",
     "print_available_runs",
     "print_comparison_runs",
     "read_eval_sample_manifest",

@@ -41,6 +41,7 @@ import logging
 import threading
 from typing import Any
 
+from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import acall_llm
 
 logger = logging.getLogger("usersim.engine")
@@ -51,9 +52,10 @@ MODEL_SUMMARY = "summary_model"
 
 # Process-local translation cache. Bank entries repeat across rows, so caching
 # by (text, target_language, romanize) collapses the cost to one call per
-# unique verbatim turn per language. Guarded by a lock because the cache is
-# process-wide while the trajectories reading it may sit on more than one
-# event loop, each on its own thread.
+# unique verbatim turn per language. The translating model is part of the key,
+# so a process that switches models never serves the previous one's wording.
+# Guarded by a lock because the cache is process-wide while the trajectories
+# reading it may sit on more than one event loop, each on its own thread.
 _cache: dict[str, str] = {}
 _cache_lock = threading.Lock()
 
@@ -68,12 +70,15 @@ def _inflight_key(key: str) -> tuple[int, str]:
     return (id(asyncio.get_running_loop()), key)
 
 
-def _cache_key(text: str, target_language: str, romanize: bool) -> str:
-    digest = hashlib.sha1(text.encode("utf-8")).hexdigest()
-    return f"{digest}|{target_language}|{int(romanize)}"
+def _cache_key(
+    models: dict[str, Any], text: str, target_language: str, romanize: bool, rules: tuple[str, ...] = ()
+) -> str:
+    digest = hashlib.sha1("\n".join((text, *rules)).encode("utf-8")).hexdigest()
+    translator = resolve_model_name(models.get(MODEL_SUMMARY), MODEL_SUMMARY)
+    return f"{digest}|{target_language}|{int(romanize)}|{translator}"
 
 
-def _build_prompt(text: str, target_language: str, romanize: bool) -> str:
+def _build_prompt(text: str, target_language: str, romanize: bool, rules: tuple[str, ...] = ()) -> str:
     script_line = (
         f"Write your answer in {target_language} using the Latin/Roman "
         f"alphabet (romanized {target_language}) — NOT the native script, "
@@ -91,7 +96,8 @@ def _build_prompt(text: str, target_language: str, romanize: bool) -> str:
         "soften, question, or answer it. You are translating, not responding.\n"
         "- Do not add, omit, or explain anything.\n"
         "- Output ONLY the translation: no preamble, quotes, or notes.\n"
-        f"{script_line}"
+        + "".join(f"- {rule}\n" for rule in rules)
+        + f"{script_line}"
         "\nUSER MESSAGE:\n"
         f"{text}"
     )
@@ -103,8 +109,12 @@ async def translate_user_turn(
     *,
     target_language: str,
     romanize: bool = False,
+    rules: tuple[str, ...] = (),
 ) -> str:
     """Translate a verbatim user turn into ``target_language`` (cached).
+
+    ``rules`` are added to the translator's instructions, and the same text
+    under different rules is translated separately.
 
     Returns the input ``text`` unchanged on empty input or any failure —
     this function never raises, so callers can wrap a verbatim-injection
@@ -112,7 +122,7 @@ async def translate_user_turn(
     """
     if not text or not text.strip():
         return text
-    key = _cache_key(text, target_language, romanize)
+    key = _cache_key(models, text, target_language, romanize, rules)
     with _cache_lock:
         cached = _cache.get(key)
     if cached is not None:
@@ -134,7 +144,7 @@ async def translate_user_turn(
             resp = await acall_llm(
                 models,
                 MODEL_SUMMARY,
-                [{"role": "user", "content": _build_prompt(text, target_language, romanize)}],
+                [{"role": "user", "content": _build_prompt(text, target_language, romanize, rules)}],
             )
             content = resp.get("content", "") if isinstance(resp, dict) else ""
             content = (content or "").strip()
@@ -214,7 +224,7 @@ async def translate_search_query(
     """
     if not query or not query.strip():
         return query
-    key = f"q|{_cache_key(query, target_language, False)}"
+    key = f"q|{_cache_key(models, query, target_language, False)}"
     with _cache_lock:
         cached = _cache.get(key)
     if cached is not None:

@@ -575,6 +575,16 @@ def _check_asset_paths(report: SmokeReport) -> None:
     except Exception as e:  # noqa: BLE001 — smoke reports, never raises
         failures.append(f"financial_services dynamic.yaml(en_US): {type(e).__name__}: {e}")
 
+    # identity_disclosure spec: loading it follows its layers and checks every
+    # cross-reference (developers, competitors, placeholders, rule examples).
+    n_paths += 1
+    try:
+        from usersim.engine.core.identity_spec import validate_spec
+
+        failures.extend(f"identity_disclosure spec: {problem}" for problem in validate_spec("identity_disclosure"))
+    except Exception as e:  # noqa: BLE001 — smoke reports, never raises
+        failures.append(f"identity_disclosure spec: {type(e).__name__}: {e}")
+
     if failures:
         # Show first three failures to keep the smoke output readable;
         # the full count lands in the failure detail.

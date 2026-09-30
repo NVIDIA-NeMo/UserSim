@@ -102,6 +102,7 @@ def _bootstrap_probes() -> None:
     import usersim.engine.probes.health_disclosure.general  # noqa: F401
     import usersim.engine.probes.health_disclosure.therapy  # noqa: F401
     import usersim.engine.probes.health_disclosure.triage  # noqa: F401
+    import usersim.engine.probes.identity_disclosure.generator  # noqa: F401
     import usersim.engine.probes.safety_agentic.generator  # noqa: F401
     import usersim.engine.probes.safety_chat_pressure.generator  # noqa: F401
     import usersim.engine.probes.sov_ai_dynamic.generator  # noqa: F401

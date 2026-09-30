@@ -283,6 +283,7 @@ def evaluator_df(trajectory_df):
 
     base_envelope = {
         "judge_aliases": ["judge_a", "judge_b"],
+        "judge_models": ["vendor/judge-a", "vendor/judge-b"],
         "judge_families": ["openai", "nvidia_nemotron"],
         "axes": ["helpfulness", "accuracy"],
         "scorers": [],

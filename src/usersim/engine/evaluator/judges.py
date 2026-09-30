@@ -42,29 +42,35 @@ class JudgeFamily(str, Enum):
     OTHER = "other"
 
 
-# Best-effort mapping from common model-name fragments to families.
-# Used when the user specifies a judge by alias only and has not
-# explicitly set the family. The user can always override.
-_FAMILY_HINTS: dict[str, JudgeFamily] = {
+# Best-effort mapping from model ids to families, used when the user
+# specifies a judge by alias only and has not explicitly set the family.
+# The user can always override. Fragments of the model's own name come
+# first: a gateway or an OpenAI-compatible route serves other developers'
+# models under its own prefix ("openai/google/gemma-3-27b-it"), so a
+# provider prefix only decides when the name carries no hint.
+_MODEL_NAME_HINTS: dict[str, JudgeFamily] = {
     "gpt-oss": JudgeFamily.OPENAI,
-    "openai/": JudgeFamily.OPENAI,
     "gpt-5": JudgeFamily.OPENAI,
     "gpt-4": JudgeFamily.OPENAI,
-    "o3": JudgeFamily.OPENAI,
-    "o4": JudgeFamily.OPENAI,
-    "nvidia/": JudgeFamily.NVIDIA_NEMOTRON,
     "nemotron": JudgeFamily.NVIDIA_NEMOTRON,
     "claude": JudgeFamily.ANTHROPIC,
-    "anthropic/": JudgeFamily.ANTHROPIC,
     "deepseek": JudgeFamily.DEEPSEEK,
     "qwen": JudgeFamily.QWEN,
-    "alibaba/": JudgeFamily.QWEN,
     "llama": JudgeFamily.LLAMA,
-    "meta/": JudgeFamily.LLAMA,
-    "meta-llama/": JudgeFamily.LLAMA,
     "mistral": JudgeFamily.MISTRAL,
     "mixtral": JudgeFamily.MISTRAL,
     "gemini": JudgeFamily.GEMINI,
+    "gemma": JudgeFamily.GEMINI,
+    "o3": JudgeFamily.OPENAI,
+    "o4": JudgeFamily.OPENAI,
+}
+_PROVIDER_HINTS: dict[str, JudgeFamily] = {
+    "openai/": JudgeFamily.OPENAI,
+    "nvidia/": JudgeFamily.NVIDIA_NEMOTRON,
+    "anthropic/": JudgeFamily.ANTHROPIC,
+    "alibaba/": JudgeFamily.QWEN,
+    "meta/": JudgeFamily.LLAMA,
+    "meta-llama/": JudgeFamily.LLAMA,
     "google/": JudgeFamily.GEMINI,
 }
 
@@ -78,9 +84,10 @@ def infer_judge_family(model_id: str) -> JudgeFamily:
     multiple OTHER-family judges as non-diverse).
     """
     lowered = model_id.lower()
-    for hint, fam in _FAMILY_HINTS.items():
-        if hint in lowered:
-            return fam
+    for hints in (_MODEL_NAME_HINTS, _PROVIDER_HINTS):
+        for hint, fam in hints.items():
+            if hint in lowered:
+                return fam
     return JudgeFamily.OTHER
 
 

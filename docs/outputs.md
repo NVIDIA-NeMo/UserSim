@@ -27,10 +27,10 @@ scores plus deterministic scorer outputs. The `trajectory-evaluator` plugin
 configures a judge ensemble (a single judge by default; any ensemble of two or
 more must span at least two architecturally diverse model families, validated at
 config-construct time, so inter-judge agreement means something) and a set of
-scorers, of which eleven ship today (`tool_use`, `sov_ai_facts`,
+scorers, of which twelve ship today (`tool_use`, `sov_ai_facts`,
 `sov_ai_dynamic`, `sov_ai_multilingual_parity`, `safety_chat_pressure`,
-`safety_agentic`, `financial_services`, `health_disclosure_concealment`, plus
-the deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
+`safety_agentic`, `financial_services`, `health_disclosure_concealment`,
+`identity_disclosure`, plus the deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
 envelope describing exactly which judges / axes / scorers / prompt version
 produced them, and the evaluator skips rows whose envelope already matches
 on re-run, so iterating on a judge or rubric is cheap.

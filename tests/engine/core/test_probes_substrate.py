@@ -50,6 +50,7 @@ from usersim.engine.core.probes import (
     register_probe,
     resolve_probe,
 )
+from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -156,6 +157,7 @@ class TestBaseProbeDefaults:
         assert probe.should_inline_judge_assistant_turn(0, state) is True
         assert probe.should_continue_after_turn(state) is True
         assert probe.allow_early_stop_at_turn(0, state) is True
+        assert probe.user_turn_policy() == UserTurnPolicy()
 
     def test_required_hooks_raise_when_unimplemented(self) -> None:
         class HalfBaked(BaseProbe):

@@ -15,9 +15,9 @@ allowed and opts out of inter-judge agreement reporting.
 **Scorers** are per-probe functions over stored columns, each returning a
 structured verdict rather than a free-form opinion. Four are fully
 deterministic (`health_disclosure_concealment`, `language_compliance`,
-`refusal_basics`, `response_shape`); the other seven call a model to reach a
+`refusal_basics`, `response_shape`); the other eight call a model to reach a
 judgement the stored columns cannot settle on their own, such as whether a
-retrieved fact is actually supported. Eleven ship:
+retrieved fact is actually supported. Twelve ship:
 
 | Scorer | Reads |
 |---|---|
@@ -29,6 +29,7 @@ retrieved fact is actually supported. Eleven ship:
 | `safety_agentic` | boundary violations, scope creep, consequence disclosure |
 | `financial_services` | verifiable task state plus reference grounding |
 | `health_disclosure_concealment` | disclosure handling and red-flag capture |
+| `identity_disclosure` | who the model says built it, against the expected identity |
 | `language_compliance` | language and script of each turn |
 | `response_shape` | structural expectations |
 | `refusal_basics` | refusal presence and form |

@@ -63,8 +63,11 @@ The runtime `ProbeAdapter` contract has 8 required hooks: class-level
 tool accessor, `after_assistant_turn`, and `build_result_extras`.
 `BaseProbe` supplies defaults for five of them, so a normal subclass only
 sets `label` and implements the two system-prompt accessors. It also
-provides up to 9 optional hooks. The mixins pre-configure the optional
+provides defaults for every optional hook. The mixins pre-configure the optional
 hooks for the four common probe shapes; what you override differs by shape.
+A probe that tests what the model says across turns can also return a
+`UserTurnPolicy` from `user_turn_policy()`, as `identity_disclosure` does, to
+keep earlier replies unsummarised and every follow-up on topic.
 
 | Shape | Recommended base | Mixin | Override these | Skip these |
 |---|---|---|---|---|

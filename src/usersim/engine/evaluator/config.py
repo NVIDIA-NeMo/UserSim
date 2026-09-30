@@ -72,8 +72,9 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     Partial-re-run discipline: if ``skip_if_existing`` is True and the
     row already carries a non-null value in this column whose envelope
-    (``judge_aliases``, ``axes``, ``scorers``, ``prompt_version``)
-    matches the current config, the LLM judge calls are skipped. See
+    (``judge_aliases`` and the ``judge_models`` behind them, ``axes``,
+    ``scorers``, ``prompt_version``) matches the current config, the LLM
+    judge calls are skipped. See
     ``evaluator/generator.py`` for the envelope check.
     """
 
@@ -110,7 +111,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     axes: list[str] | None = Field(
         default=None,
         description=(
-            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family."
+            "Subset of axes (by name) to evaluate. None means all applicable axes for the row's probe_family; "
+            "an empty list makes no judge call, so only the scorers run."
         ),
     )
     scorers: list[str] = Field(

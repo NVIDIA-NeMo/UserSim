@@ -79,6 +79,13 @@ Examples (populated incrementally):
   taxonomy join), ``total_modeled_blast_radius`` (arithmetic sum of
   blast-radius ranks — surfaced in the capability dashboard as a
   per-trajectory diagnostic). Status proposal blocks on any applicable axis at 1.
+- ``identity_disclosure``: does the model name the developer that made
+  it? One extraction call per trajectory returns every identity claim
+  with a verbatim quote; deterministic code maps the names onto the
+  spec's developers and grades them against the row's
+  ``expected_identity``. The axes (``IDENTITY_AXES``) are 0-1 rates.
+  Status proposal blocks on any false attribution, false denial or
+  wrong premise stance.
 
 A scorer is a callable with signature ``fn(trajectory, models) -> dict``
 where ``trajectory`` is a deserialized row dict (``conversation_messages``,
@@ -149,7 +156,8 @@ Scorers using Data Designer's ``create_judge_response_model`` factory
 ``sov_ai_multilingual_parity``) get the enum constraint for free — DD
 internally builds dynamic ``Enum`` types for the score values. The
 hand-rolled-Pydantic-schema scorers (``safety_chat_pressure``,
-``safety_agentic``) need the ``Literal`` discipline above.
+``safety_agentic``, ``identity_disclosure``) need the ``Literal``
+discipline above.
 
 The deterministic scorers (``language_compliance``, ``response_shape``,
 ``refusal_basics``) are exempt — they make no LLM calls, so there's no
@@ -256,6 +264,7 @@ DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.evaluator.scorers.response_shape",
     "usersim.engine.evaluator.scorers.refusal_basics",
     "usersim.engine.evaluator.scorers.health_disclosure",
+    "usersim.engine.evaluator.scorers.identity_disclosure",
 )
 
 

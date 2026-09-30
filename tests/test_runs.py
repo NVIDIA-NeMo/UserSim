@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -49,13 +50,13 @@ def _stage_trajectory_run(
     write_run_partition(pd.DataFrame(rows), trajectory_root, run_id)
 
 
-def _stage_eval_run(eval_root: Path, run_id: str) -> None:
+def _stage_eval_run(eval_root: Path, run_id: str, cell: str = "{}") -> None:
     rows = [
         {
             "trajectory_id": f"{run_id}_en_US_0",
             "locale": "en_US",
             "probe_family": "tool_calling",
-            "assistant_eval": "{}",
+            "assistant_eval": cell,
         }
     ]
     write_run_partition(pd.DataFrame(rows), eval_root, run_id)
@@ -189,6 +190,18 @@ def test_models_block_surfaces_assistant_model_from_manifest(
     assert "openai/gpt-oss-120b" in out
     # User model surfaces under its `_model`-stripped label.
     assert "openai/gpt-oss-20b" in out
+
+
+def test_models_block_names_the_model_that_scored_the_run(tmp_path: Path) -> None:
+    """The evaluator line comes from the evaluation rows, whatever the run manifest says."""
+    trajectory_root = tmp_path / "trajectories"
+    eval_root = tmp_path / "evaluations"
+    _stage_trajectory_run(trajectory_root, "1714074853", locales=["en_US"], n_per_locale=1)
+    envelope = {"judge_aliases": ["evaluator_model"], "judge_models": ["vendor/scoring-model"]}
+    _stage_eval_run(eval_root, "1714074853", cell=json.dumps({"envelope": envelope}))
+
+    out = _capture(print_available_runs, trajectory_root, eval_root, tmp_path / "report")
+    assert re.search(r"evaluator\s*: vendor/scoring-model", out)
 
 
 def test_missing_manifest_renders_em_dash(tmp_path: Path) -> None:

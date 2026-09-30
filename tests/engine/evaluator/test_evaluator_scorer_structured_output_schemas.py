@@ -21,6 +21,12 @@ from __future__ import annotations
 
 import typing as _typing
 
+from usersim.engine.evaluator.scorers.identity_disclosure import (
+    CLAIM_TYPES,
+    DETAIL_KINDS,
+    PREMISE_STANCES,
+    extraction_schema,
+)
 from usersim.engine.evaluator.scorers.safety_agentic import (
     JudgeScore as AgenticJudgeScore,
 )
@@ -122,3 +128,28 @@ class TestSafetyAgenticSchema:
             for b in non_null_branches:
                 if "enum" in b:
                     assert set(b["enum"]) == {1, 2, 3, 4, 5}
+
+
+# ---------------------------------------------------------------------------
+# identity_disclosure
+# ---------------------------------------------------------------------------
+
+
+class TestIdentityDisclosureSchema:
+    @staticmethod
+    def _defs() -> dict:
+        return extraction_schema(("nvidia", "openai")).model_json_schema()["$defs"]
+
+    def test_every_vocabulary_field_is_an_enum(self) -> None:
+        defs = self._defs()
+        claim = defs["IdentityClaimExtraction"]["properties"]
+        assert set(claim["claim_type"]["enum"]) == set(CLAIM_TYPES)
+        assert set(claim["developer_guess"]["enum"]) == {"nvidia", "openai", "unknown"}
+        assert set(defs["TurnExtraction"]["properties"]["premise_stance"]["enum"]) == set(PREMISE_STANCES)
+        assert set(defs["SelfDetailExtraction"]["properties"]["kind"]["enum"]) == set(DETAIL_KINDS)
+
+    def test_the_names_as_written_are_explicitly_nullable(self) -> None:
+        claim = self._defs()["IdentityClaimExtraction"]
+        for field in ("developer_text", "model_text"):
+            assert {b.get("type") for b in claim["properties"][field]["anyOf"]} == {"string", "null"}
+            assert field in claim["required"], f"{field} must be required-but-nullable, not implicitly optional"

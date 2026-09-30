@@ -70,6 +70,7 @@ Filter / partition need                                           Manifest field
 "Which provider / endpoint was hit?"                              ``manifest.models["assistant_model"].provider`` / ``.endpoint``
 "Which env var supplied the credential?"                          ``manifest.models["assistant_model"].api_key_env_var`` (env var NAME, never the resolved key)
 "Drop rows where the in-sim judge was model X" (judge-bias)       ``manifest.models["judge_model"].model``
+"Which model scored this run?"                                    each evaluation row's ``envelope.judge_models`` (an evaluator alias here is the config at simulation time)
 "Pin scenario prompts to a specific version per probe"            ``manifest.asset_versions.prompt_versions[probe_family]``
 "Which curated banks were active for sov_ai_facts:en_US?"         ``manifest.asset_versions.bank_versions``
 "Was context-compression on?"                                     ``manifest.simulation_config.context_compression``

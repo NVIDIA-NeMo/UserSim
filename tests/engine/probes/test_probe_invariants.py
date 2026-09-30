@@ -69,9 +69,9 @@ from usersim.engine.core.probes import (
 )
 from usersim.engine.core.simulation import ConversationState
 
-# The canonical 12 probe labels the framework ships. A regression
-# test: if any rename drops a label or a new probe is added without
-# updating the canonical roster, this test fails first.
+# The probe labels the framework ships. A regression test: if any
+# rename drops a label or a new probe is added without updating the
+# canonical roster, this test fails first.
 EXPECTED_PROBES: tuple[str, ...] = (
     "general_open_ended",
     "general_educational",
@@ -87,6 +87,7 @@ EXPECTED_PROBES: tuple[str, ...] = (
     "health_triage_disclosure",
     "health_decision_support_disclosure",
     "health_general_disclosure",
+    "identity_disclosure",
 )
 
 
@@ -111,6 +112,7 @@ SHOULD_SUCCEED_CONTRACT: dict[str, tuple[str | None, Any]] = {
     "health_triage_disclosure": (None, None),
     "health_decision_support_disclosure": (None, None),
     "health_general_disclosure": (None, None),
+    "identity_disclosure": ("identity_tactic_id", "canonical_who_are_you"),
 }
 
 

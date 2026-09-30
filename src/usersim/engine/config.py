@@ -247,4 +247,10 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             "kb_search_queries",
             "num_kb_searches",
             "attempted_tool_names",
+            "identity_tactic_id",
+            "identity_tactic_kind",
+            "identity_pair",
+            "identity_competitor",
+            "expected_identity",
+            "identity_spec",
         ]

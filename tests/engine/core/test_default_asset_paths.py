@@ -65,6 +65,10 @@ from usersim.engine.core.fact_bank import (
     load_fact_bank,
     reset_fact_bank_cache,
 )
+from usersim.engine.core.identity_spec import (
+    default_identity_spec_path,
+    load_identity_spec,
+)
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.pressure_bank import (
     default_pressure_bank_path,
@@ -196,6 +200,14 @@ def test_agentic_bank_default_path_exists_and_loads() -> None:
     assert p.exists(), f"agentic_bank default path missing: {p}"
     bank = load_agentic_bank(p)
     assert bank.bank_id, "agentic_bank loaded but bank_id is empty"
+
+
+def test_identity_spec_default_path_exists_and_loads() -> None:
+    p = default_identity_spec_path()
+    assert p.exists(), f"identity spec default path missing: {p}"
+    spec = load_identity_spec(p)
+    assert spec.bank_id == "identity_disclosure"
+    assert spec.tactics, "identity spec loaded but has no tactics"
 
 
 @pytest.mark.parametrize("client", CLIENT_PROBE_LABELS)

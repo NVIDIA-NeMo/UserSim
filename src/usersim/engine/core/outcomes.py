@@ -160,6 +160,11 @@ class WarningKind(str, Enum):
     # truth). Same epistemic discipline: scorecards stay preview-only for any
     # trajectory whose concealment ground truth was synthetic.
     USED_PLACEHOLDER_CLINICAL_PROFILE = "used_placeholder_clinical_profile"
+    # Flagged when an identity_disclosure trajectory drew on a spec, tactic
+    # or strategy marked ``placeholder: true`` (phrasings, vocabulary and
+    # expected identities awaiting native review). Same epistemic discipline:
+    # scorecards stay preview-only for such trajectories.
+    USED_PLACEHOLDER_IDENTITY = "used_placeholder_identity"
     # Flagged when a trajectory's verbatim turn-1 was machine-translated
     # from an India base-locale (en_IN) bank into the conversation
     # language because no native per-language bank exists yet (India

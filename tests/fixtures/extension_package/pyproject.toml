@@ -11,6 +11,7 @@ requires-python = ">=3.12"
 # One entry per published group. If a seam stops working, installing this
 # package and asking the CLI what it can see is what notices.
 [project.entry-points."usersim.probes"]
+fixture_identity = "usersim_extension_fixture.identity:FixtureIdentityProbe"
 fixture_probe = "usersim_extension_fixture.probe:FixtureProbe"
 
 [project.entry-points."usersim.scorers"]

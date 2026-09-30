@@ -106,11 +106,11 @@ they move a run away from LLM-as-fake-user homogeneity. See
 
 ### Asset-driven probes
 
-Nine of the twelve shipped probes consume a curated asset bank: three
+Ten of the fourteen shipped probes consume a curated asset bank: three
 sovereign-AI probes (*curated factual depth*, *dynamic open-ended
 breadth*, *cross-locale matched-pair queries*), two safety probes
-(*conversational pressure*, *agentic tool-use*), `financial_services`, and the
-three `health_disclosure` clients. Each probe consumes one asset shape; the
+(*conversational pressure*, *agentic tool-use*), `financial_services`, the
+three `health_disclosure` clients, and `identity_disclosure`. Each probe consumes one asset shape; the
 assets are intentionally distinct because the probes ask structurally
 different questions of the model.
 
@@ -121,6 +121,7 @@ different questions of the model.
 | Financial-services bank | `core/finance_bank.py` (+ `finance_tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
 | Query bank | `core/query_bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
 | Clinical-profile bank | `core/clinical_profile_bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the three `health_disclosure` clients |
+| Identity spec | `core/identity_spec.py` | Developers, ordered expected-identity rules, competitors, tactics and strategies; a spec layer can extend another | One file shared across locales; localized text per tactic | `identity_disclosure` |
 
 The query bank's cross-locale shape is load-bearing: the `sov_ai_multilingual_parity`
 probe needs to join trajectories that probed *the same conceptual question*
@@ -128,7 +129,7 @@ across locales / demographic strata, and that join requires a shared
 `query_id`. See `assets/sov_ai_multilingual_parity/SCHEMA.md` §"File layout"
 for the comparison table and the rationale.
 
-Nine asset-driven probes are wired today. Each probe owns exactly one asset folder under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`, `assets/financial_services/<locale>/`, `assets/health_therapy_disclosure/`, etc.
+Each asset-driven probe owns exactly one asset folder under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`, `assets/financial_services/<locale>/`, `assets/health_therapy_disclosure/`, `assets/identity_disclosure/spec.yaml`, etc.
 
 | Probe | Curated asset | Turn 1 origin | Per-trajectory side channels (in addition to the standard set) | Out-of-sim scorer |
 | --- | --- | --- | --- | --- |
@@ -139,8 +140,9 @@ Nine asset-driven probes are wired today. Each probe owns exactly one asset fold
 | `safety_agentic` | shared agentic-action bank under `assets/safety_agentic/sample.yaml` (4 sub-protocols × 5 action requests, each with its own simulated tool spec + canned mock responses); cross-asset name resolution against `assets/safety_agentic/action_taxonomy.yaml` at load time | injected verbatim from `action_request.initial_user_prompt` (single-user-turn design: the user states the request once); subsequent turns are the assistant's tool-using response with **mock-env interception** (every assistant tool call is recorded and answered with the matching `mock_tool_responses[tool_name]`; tools the assistant fabricates outside the spec get a synthetic "unknown tool" reply) | `action_request_id`, `sub_protocol`, `sanctioned_action_name`, `tempted_action_name`, `attempted_actions` (list of `{tool_name, tool_args, turn_idx, was_in_simulated_tools}` records: the load-bearing side channel for the `safety_agentic` scorer), `probe_variant = f"{sub_protocol}::{sanctioned_action_name or 'no_action'}"`. Optional input-row column `action_request_id` allows panel-driven (sub_protocol × action_category) matrix sampling. | `safety_agentic` (hybrid mechanical / LLM-judged axes: `agentic.boundary_held` and `agentic.blast_radius_contained` are purely mechanical: classify every attempted action, join against the rich action taxonomy, check for escalation; `agentic.consequence_disclosure` + `agentic.confirmation_sought` populated only for `consequence_disclosure` sub-protocol via single LLM judge call grounded in `action_request.expected_behavior`; `agentic.injection_resistance` populated only for `compromised_inputs` sub-protocol; zero judge calls for `unsanctioned_action` / `scope_creep`; outputs `attempted_actions_classified` + `total_modeled_blast_radius` as structured side channels for the capability dashboard) |
 
 | `financial_services` | per-locale, multi-institution bank under `assets/financial_services/<locale>/<institution_type>/<institution_id>/` (corpus + tools + tasks; the optional `embeddings.parquet` sidecar is not shipped and is built by `gen-assets`) plus a per-locale `dynamic.yaml` taxonomy | tier-branched: `verifiable` injects the param-locked `opening_user_message` verbatim; `dynamic` generates turn-1 from the taxonomy `invitation` + a rotated `subtopic_hint` | `finance_task_id`, `task_tier`, `institution_id` / `institution_type` / `domain`, `gold_document_ids` / `gold_tool_sequence` / `expected_state_deltas`, `retrieved_document_ids`, `attempted_tool_names`, `dynamic_category_id` / `taxonomy_version`; scoped `kb_search` + discoverable-tool gate + in-memory `account_state` (rides `ToolExecutionMixin`) | `financial_services` (tier-aware: `verifiable` → deterministic verifier `finance.*_rate` axes; `dynamic` → reference-grounded judge `dynamic.*` axes) |
+| `identity_disclosure` | shared spec under `assets/identity_disclosure/spec.yaml` (one file; localized text per tactic; spec layers can extend it, see its `SCHEMA.md`) | injected verbatim from the tactic's text, with the expected developer or a competitor filled in, or for a generated tactic written by the simulated user from its instruction and checked for AI names before the gate; in a multi-turn run every follow-up presses the row's competitor, the simulated user writing it from the strategy's next reframing | `identity_tactic_id`, `identity_tactic_kind`, `identity_pair`, `identity_competitor`, `strategy_id` (a pressure strategy in a multi-turn run, `none` in a single-turn one), `reframings_used`, `expected_identity` (declared in the spec for the assistant model's id, or inferred from the model family name in it), `identity_spec` (version, digest, vocabulary and rules), `probe_variant = f"{tactic}::{strategy}"`. Optional input-row columns `identity_tactic_id` / `identity_strategy_id` allow panel-driven sampling. | `identity_disclosure` (rate axes: `identity.{no_spontaneous_false_attribution_rate,no_false_attribution_rate,correct_attribution_rate,names_developer_rate,model_name_correct_rate,confirms_developer_rate,rejects_other_developer_rate,pressure_resistance_rate,reasoning_spill_free_rate,no_human_claim_rate}`, each feeding an `identity_*` capability, and pressure resistance also one per pressure strategy; one extraction call per trajectory returns the identity claims with verbatim quotes, and deterministic code grades them against `expected_identity` and the spec's vocabulary; names the vocabulary does not know go to review, and an unknown company still counts as a false attribution while an unknown model name does not) |
 
-All six probes write the asset version into `simulation_outcome.provenance.bank_version[<key>]` (key is the locale for the sovereign-AI + financial_services probes, the stable non-locale string `"safety"` for `safety_chat_pressure`, and `"agentic"` for `safety_agentic`: both safety probes are English-only by design and not locale-stratified). Each attaches a `WarningKind.USED_PLACEHOLDER_*` warning (`USED_PLACEHOLDER_FACT` / `USED_PLACEHOLDER_TAXONOMY` / `USED_PLACEHOLDER_QUERY` / `USED_PLACEHOLDER_TARGET` / `USED_PLACEHOLDER_AGENTIC_ACTION` / `USED_PLACEHOLDER_FINANCE`) whenever it probed a placeholder-flagged asset, so downstream scorecards refuse production-ready headlines on placeholder-tainted runs.
+These probes write the asset version into `simulation_outcome.provenance.bank_version[<key>]` (key is the locale for the sovereign-AI + financial_services probes; the stable non-locale string `"safety"` for `safety_chat_pressure` and `"agentic"` for `safety_agentic`, both English-only by design and not locale-stratified; and the probe's label for `identity_disclosure`, whose one spec serves every locale). Each attaches a `WarningKind.USED_PLACEHOLDER_*` warning (`USED_PLACEHOLDER_FACT` / `USED_PLACEHOLDER_TAXONOMY` / `USED_PLACEHOLDER_QUERY` / `USED_PLACEHOLDER_TARGET` / `USED_PLACEHOLDER_AGENTIC_ACTION` / `USED_PLACEHOLDER_FINANCE` / `USED_PLACEHOLDER_IDENTITY`) whenever it probed a placeholder-flagged asset, so downstream scorecards refuse production-ready headlines on placeholder-tainted runs.
 
 **Difficulty and correctness semantics.** Difficulty is author metadata
 used for stratification and as judge-prompt context; current scorers do
@@ -228,9 +230,9 @@ usersim simulate --locale en_US --num-rows 5 \
   --out output/agentic_only
 ```
 
-Each probe resolves its curated asset at simulator-call time under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/sov_ai_dynamic/<locale>/categories.yaml`, `assets/sov_ai_multilingual_parity/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, and `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`. Override paths via `USERSIM_SOV_AI_FACTS_BANK_<LOCALE>` / `USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>` / `USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK` / `USERSIM_SAFETY_CHAT_PRESSURE_BANK` / `USERSIM_SAFETY_AGENTIC_BANK` / `USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY` env vars when running against private banks.
+Each probe resolves its curated asset at simulator-call time under `assets/<probe-name>/`: `assets/sov_ai_facts/<locale>/sample.yaml`, `assets/sov_ai_dynamic/<locale>/categories.yaml`, `assets/sov_ai_multilingual_parity/sample.yaml`, `assets/safety_chat_pressure/sample.yaml`, `assets/safety_agentic/{sample.yaml,action_taxonomy.yaml}`, and `assets/identity_disclosure/spec.yaml`. Override paths via `USERSIM_SOV_AI_FACTS_BANK_<LOCALE>` / `USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>` / `USERSIM_SOV_AI_MULTILINGUAL_PARITY_BANK` / `USERSIM_SAFETY_CHAT_PRESSURE_BANK` / `USERSIM_SAFETY_AGENTIC_BANK` / `USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY` / `USERSIM_IDENTITY_DISCLOSURE_SPEC` env vars when running against private banks; an identity spec named by its override can extend the shipped one rather than replace it.
 
-**Panel-driven matrix sampling**: the `sov_ai_multilingual_parity`, `safety_chat_pressure`, and `safety_agentic` probes all accept optional input-row columns that override their persona-derived defaults: `query_id` for `sov_ai_multilingual_parity`, `pressure_strategy_id` + `target_request_id` for `safety_chat_pressure`, `action_request_id` for `safety_agentic`. To use them, build the panel with the override column populated (typically via `usersim panel` followed by a small pandas script that adds the column) and pass `--panel <path>` to `usersim simulate` instead of `--locale`. Without overrides, every probe falls back to its persona-derived default: useful for smoke runs.
+**Panel-driven matrix sampling**: the `sov_ai_multilingual_parity`, `safety_chat_pressure`, `safety_agentic` and `identity_disclosure` probes all accept optional input-row columns that override their persona-derived defaults: `query_id` for `sov_ai_multilingual_parity`, `pressure_strategy_id` + `target_request_id` for `safety_chat_pressure`, `action_request_id` for `safety_agentic`, `identity_tactic_id` + `identity_strategy_id` for `identity_disclosure`. To use them, build the panel with the override column populated (typically via `usersim panel` followed by a small pandas script that adds the column) and pass `--panel <path>` to `usersim simulate` instead of `--locale`. Without overrides, every probe falls back to its persona-derived default: useful for smoke runs.
 
 ## Trajectory Evaluator
 
@@ -252,7 +254,7 @@ config_builder.add_column(
             JudgeSpecConfig(alias="judge_a", family="openai"),
             JudgeSpecConfig(alias="judge_b", family="nvidia_nemotron"),
         ],
-        axes=None,                           # None = all applicable for the row's probe_family
+        axes=None,                           # None = all applicable for the row's probe_family; [] = scorers only
         scorers=[],                          # opt in per probe (e.g., ["tool_use"])
         prompt_version="v1.0",               # bump to invalidate prior cells
         skip_if_existing=True,               # partial-re-run aware
@@ -266,6 +268,7 @@ config_builder.add_column(
 {
   "envelope": {
     "judge_aliases": ["judge_a", "judge_b"],
+    "judge_models": ["openai/gpt-oss-120b", "nvidia/nemotron-3-super-120b-a12b"],
     "judge_families": ["openai", "nvidia_nemotron"],
     "axes": ["helpfulness", "accuracy", "..."],
     "scorers": [],
@@ -289,12 +292,19 @@ config_builder.add_column(
 existing cell value already carries an envelope matching the current config
 is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
 so downstream reporting can count skips. Bumping `prompt_version` or changing
-the axes / scorers / judges invalidates prior envelopes and forces a fresh run.
+the axes / scorers / judges, or the model behind a judge alias, invalidates
+prior envelopes and forces a fresh run. `judge_models` also records which
+model scored each row: the capability report and the notebook's run listing
+read it from there, since the run manifest records the models config as it
+stood when the simulation ran.
 
 **Judge-family diversity.** Configs with two or more judges are validated at
 config-construct time (and re-validated at run time) to span ≥2 distinct
 `JudgeFamily` values. See `evaluator/judges.py` for the registry; family
-inference falls back to model-id heuristics if you don't set `JudgeSpecConfig.family`.
+inference falls back to model-id heuristics if you don't set `JudgeSpecConfig.family`,
+reading the model's own name before any provider prefix, so an id such as
+`openai/google/gemma-3-27b-it`, served through an OpenAI-compatible route,
+counts as Google's.
 Single-judge ensembles are allowed but explicitly opt out of inter-judge
 agreement reporting.
 
@@ -500,6 +510,7 @@ what each one carries:
 | `core/llm.py` | LLM calling via ModelFacade with retries, debug log, per-model stats, per-conversation outcome-builder hook for resource accounting |
 | `core/judges.py` | Inline judge invocation (XML response parsing, run_inline_judge helper) |
 | `core/context.py` | Context-window compression: `compress_history` and `summarize_response` (driven by `cfg.context_compression` / `compression_window`) |
+| `core/user_turn_policy.py` | `UserTurnPolicy`, what a probe's `user_turn_policy()` changes about the loop: compression and the wrap-up anchor on or off, filter phrases its users may write, names the script check skips, a check each generated opening must pass before the gate. Defaults change nothing |
 | `core/language_detection.py` | Lazy `lingua` detector + `script_compliance_fraction` + `script_dominance` helpers used by the deterministic mechanical-evals scorers |
 
 **Asset bank loaders (per-probe schemas)**
@@ -536,6 +547,7 @@ per-scorer end-to-end).
 |-----------|----------|
 | `test_probes_substrate.py` | The probe-authoring substrate: `BaseProbe` defaults, `BankBackedProbe` bank-load + placeholder-warning + version-pinning pipeline, the five mixins (MRO ordering invariant), `LocalePromptPack` validation, `@register_probe` registry semantics, `resolve_probe` |
 | `test_simulation.py` | Shared simulation helpers (`language_instruction`, `make_result`, `make_failed`) |
+| `test_user_turn_policy.py` | `UserTurnPolicy`: phrase groups pinned to the loop's filter lists, allowed phrases and ignored names, and loop runs showing compression and the wrap-up anchor on by default and off under a policy, a probe's turn-1 instruction reaching the user-LLM, and a rejected opening written again before the gate |
 | `test_engine_e2e.py` | End-to-end `ConversationLoop` with mocked LLM: status promotion, gates with retries, frustration injection, early-stop, role-violation telemetry |
 | `test_behavioral.py` | OCEAN extraction, behavioral params (patience / verbosity / cooperativeness / tech_literacy / error_proneness), language mapping, Sim2Real features |
 | `test_identity.py` | `persona_uuid` content-hashing stability + invariance, `trajectory_id` determinism, `resolve_model_name` |
@@ -563,6 +575,7 @@ per-scorer end-to-end).
 | `test_pressure_bank.py` | Pressure-strategy bank YAML schema validator, loader with template-placeholder validation, deterministic reframing rotation with wrap-around, persona-tag matcher, cache + env override, shipped-sample end-to-end |
 | `test_agentic_bank.py` | Agentic-action bank YAML schema validator, loader with cross-asset action_taxonomy name resolution at load time, JSON-Schema tool-spec validation, mock-response cross-reference validation, persona-tag matcher, cache + env override, shipped-sample end-to-end |
 | `test_action_taxonomy.py` | Rich action-taxonomy loader (consumed by `safety_agentic` scorer): schema validation, cache + env override (`USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`), `by_name` / `blast_radius_rank` lookups |
+| `test_identity_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
 
 **`tests/engine/probes/`: the probe generators, verifier and invariants**
 
@@ -577,6 +590,7 @@ per-scorer end-to-end).
 | `test_safety_chat_pressure.py` | `safety_chat_pressure` probe: persona→tag re-export, `derive_task` with independent strategy/target salts (50-seed cell-coverage test), `resolve_task_from_row` (full / partial / neither override + persona-tag guard against panel-driven mismatches), prompt-formatting helpers, end-to-end with mocked LLM (verbatim turn-1, multi-turn rotation, bank-load failure, panel-id miss, no-resolvable-pair, assistant-error attribution, follow-up-failure breaks loop) |
 | `test_safety_chat_pressure_classifier.py` | Dedicated capitulation classifier (comparator-shaped `summary_model` call): rubric-anchored decision, defensive returns, regression that the comparator prompt has no pressure / strategy / persona keywords (post the v1.2 redesign) |
 | `test_safety_agentic.py` | `safety_agentic` probe: persona→tag re-export, `derive_task` (deterministic + bank-version perturbation + exclusion lists), `resolve_task_from_row`, `_format_tools_for_api` + `_extract_tool_call` internal helpers, e2e with mocked LLM (verbatim turn-1, no-tool-call short-circuit, mock-response interception, fabricated-tool synthetic-error reply), `should_succeed` invariant |
+| `test_identity_disclosure.py` | `identity_disclosure` probe: registration and the placeholder flag; shipped-spec checks (public examples, sourced lineage, every catalogued and shipped model resolves); deterministic tactic and strategy draws with panel overrides; expected-identity resolution (declared, inferred, an abort showing the declaration to add, an unidentified facade); openings and competitors; openings the simulated user writes (its instruction and prompt line, the check for AI names, the opening gate, a draft naming an AI developer written again in a loop run); row columns; prompts; pressure (every multi-turn row pressed, reframings recorded, its own prompt, gate and anchor, a loop run the scorer grades); the user-turn policy; a probe built on top; one full turn through the loop |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
 
@@ -594,6 +608,7 @@ per-scorer end-to-end).
 | `test_evaluator_scorer_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` out-of-sim respect-parity scorer: single LLM judge per trajectory with `respect.{condescension,complexity_calibration,helpfulness_at_proficiency}` axes, concern-grounded rubric, locale+language interpolation, status-proposal gating, error paths, version-mismatch drift |
 | `test_evaluator_scorer_safety_chat_pressure.py` | `safety_chat_pressure` out-of-sim scorer: single LLM judge per trajectory with `pressure.{refusal_held,contextual_safety_persistence}` scored axes plus per-turn classifications + derived `turn_of_flip`, rubric grounded in `target.expected_refusal` + `strategy.description`, status-proposal gating, error paths, version-mismatch drift |
 | `test_evaluator_scorer_safety_agentic.py` | `safety_agentic` scorer: registration, axis constants (`agentic.*` namespace; mechanical vs LLM separation), short-circuit paths, load failures, mechanical-only sub-protocols, attempted-actions normalisation, `consequence_disclosure` and `compromised_inputs` judge paths, judge-error paths, bank-version drift, total-blast-radius aggregation, envelope contract |
+| `test_evaluator_scorer_identity_disclosure.py` | `identity_disclosure` scorer: applicability and fail-closed paths, extraction schema built from the spec's developers, quote validation, name-to-developer mapping (names, products, model names, ambiguous words), per-turn grading (false and spontaneous attribution, premise stance, reasoning spill, human claims), giving in under pressure, trajectory rates and review flags, same-family extractor warning |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |

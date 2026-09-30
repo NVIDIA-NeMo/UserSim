@@ -39,6 +39,25 @@ class TestInferJudgeFamily:
     def test_known_models(self, model_id: str, expected: JudgeFamily) -> None:
         assert infer_judge_family(model_id) == expected
 
+    @pytest.mark.parametrize(
+        "model_id,expected",
+        [
+            ("openai/google/gemma-3-27b-it", JudgeFamily.GEMINI),
+            ("openai/Qwen/Qwen3-32B", JudgeFamily.QWEN),
+            ("openai/meta-llama/Llama-3.3-70B-Instruct", JudgeFamily.LLAMA),
+            ("openai/deepseek-ai/DeepSeek-V3", JudgeFamily.DEEPSEEK),
+            ("nvidia/google/gemma-3-27b-it", JudgeFamily.GEMINI),
+            ("nvidia/meta/llama-3.3-70b-instruct", JudgeFamily.LLAMA),
+            ("google/gemma-3-27b-it", JudgeFamily.GEMINI),
+        ],
+    )
+    def test_a_route_prefix_does_not_decide_the_family(self, model_id: str, expected: JudgeFamily) -> None:
+        """A gateway or an OpenAI-compatible route serves other developers' models under its own prefix."""
+        assert infer_judge_family(model_id) == expected
+
+    def test_a_provider_prefix_decides_when_the_name_carries_no_hint(self) -> None:
+        assert infer_judge_family("nvidia/cosmos-reason1-7b") == JudgeFamily.NVIDIA_NEMOTRON
+
     def test_unknown_falls_back_to_other(self) -> None:
         assert infer_judge_family("some-random/model-v0") == JudgeFamily.OTHER
 
