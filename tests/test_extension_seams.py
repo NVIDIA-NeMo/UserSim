@@ -60,6 +60,9 @@ def probe_registry():
     """
     from usersim.engine.core import probes
 
+    # Loaded first so the snapshot holds the built-ins even when no earlier
+    # test has looked a probe up.
+    probes.load_builtin_probes()
     snapshot = dict(probes._PROBE_REGISTRY)
     yield
     probes._PROBE_REGISTRY.clear()

@@ -13,10 +13,13 @@ Covers:
 - ``LocalePromptPack`` validation fails fast on missing locales.
 - ``@register_probe`` populates module constants + writes the registry,
   and ``known_probes`` / ``resolve_probe`` / ``clear_registry`` work.
+- Lookups load the shipped probes without the simulator generator.
 """
 
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
 import types
 from dataclasses import dataclass, field
@@ -47,6 +50,7 @@ from usersim.engine.core.probes import (
     assistant_message,
     clear_registry,
     known_probes,
+    load_builtin_probes,
     register_probe,
     resolve_probe,
 )
@@ -729,6 +733,9 @@ class TestLocalePromptPack:
 
 class TestRegisterProbe:
     def setup_method(self) -> None:
+        # Loaded before the snapshot so it holds the built-ins, and so a
+        # lookup during the test cannot add them to the cleared registry.
+        load_builtin_probes()
         self._snapshot = dict(_PROBE_REGISTRY)
         clear_registry()
 
@@ -818,6 +825,47 @@ class TestRegisterProbe:
                 return ""
 
         assert known_probes() == ("a_probe", "z_probe")
+
+
+_FRESH_INTERPRETER_LOOKUP = """
+import json
+import sys
+
+from usersim.engine.core.probes import known_probes, resolve_probe
+
+resolve_probe("tool_calling")
+labels = list(known_probes())
+generator_imported = "usersim.engine.generator" in sys.modules
+
+import usersim.engine.generator
+
+print(json.dumps({
+    "labels": labels,
+    "generator_imported": generator_imported,
+    "labels_with_generator": list(known_probes()),
+}))
+"""
+
+
+class TestBuiltinProbes:
+    def test_lookups_load_the_shipped_probes_without_the_generator(self) -> None:
+        """The registry loads the shipped probes itself.
+
+        A fresh interpreter resolves and lists them without importing the
+        simulator generator, and lists the same labels importing it would.
+        """
+        proc = subprocess.run(
+            [sys.executable, "-c", _FRESH_INTERPRETER_LOOKUP],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        assert proc.returncode == 0, proc.stderr
+        result = json.loads(proc.stdout.strip().splitlines()[-1])
+
+        assert result["generator_imported"] is False
+        assert result["labels"]
+        assert result["labels"] == result["labels_with_generator"]
 
 
 # ---------------------------------------------------------------------------

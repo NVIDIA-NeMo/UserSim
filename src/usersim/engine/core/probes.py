@@ -46,6 +46,7 @@ end-to-end tutorial.
 
 from __future__ import annotations
 
+import importlib
 import logging
 import sys
 from typing import (
@@ -257,9 +258,8 @@ class BaseProbe:
     # ``ToolCallingMixin`` / ``AgenticMixin``) — replaying those side
     # effects is not safe, so they are capped to one attempt.
     supports_assistant_resampling: bool = True
-    single_user_turn: bool = False
-    final_synthesis_without_tools: bool = False
-    max_tool_response_attempts: int = 1
+    # Set via set_tool_call_observer(); notify-only, never behaviour-changing.
+    _tool_call_observer: Callable[..., None] | None = None
 
     # ── Constructor ─────────────────────────────────────────────────
 
@@ -576,9 +576,49 @@ class BaseProbe:
         """What this probe changes about the loop, read once per trajectory; the default changes nothing."""
         return UserTurnPolicy()
 
-    def external_assistant_activation_limit(self, cfg: Any) -> int:
-        """Maximum assistant-model activations exposed to an external host."""
-        return max(1, int(getattr(cfg, "max_turns", 1)))
+    def set_tool_call_observer(self, observer: Callable[..., None] | None) -> None:
+        """Register a notify-only observer for tool calls this probe executes.
+
+        This is the seam an external host uses to watch the probe's own tool
+        execution. It cannot change loop behaviour: the loop ignores whatever
+        the observer returns, and the observer never gets to veto a call.
+        """
+        self._tool_call_observer = observer
+
+    def on_tool_call_executed(
+        self,
+        *,
+        tool_call_id: str,
+        tool_name: str,
+        arguments: dict[str, Any],
+        payload: str,
+        turn_idx: int,
+        call_idx: int,
+    ) -> None:
+        """Notify-only: one tool call just executed inside this probe's own loop.
+
+        Forwards to the observer registered by :meth:`set_tool_call_observer`,
+        with the loop's own ``turn_idx`` and ``call_idx``. The default observer
+        is ``None`` and this is then a no-op.
+
+        A probe that executes tool calls itself — rather than inheriting
+        :class:`ToolExecutionMixin` — must call this immediately after it
+        appends the resulting ``role: "tool"`` message, or the payloads it
+        produced never reach its host. See
+        ``docs/engine/EXTERNAL_PROBE_RUNTIME.md``.
+        """
+        observer = getattr(self, "_tool_call_observer", None)
+        if observer is None:
+            return None
+        observer(
+            tool_call_id=tool_call_id,
+            tool_name=tool_name,
+            arguments=arguments,
+            payload=payload,
+            turn_idx=turn_idx,
+            call_idx=call_idx,
+        )
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -1029,16 +1069,6 @@ class ToolExecutionMixin:
 
     tool_loop_mode: str = "single"
     tool_max_calls_per_turn: int = 8
-    final_synthesis_without_tools: bool = True
-
-    def external_assistant_activation_limit(self, cfg: Any) -> int:
-        """Bound activations using the same rules as the native inner loop."""
-        del cfg
-        if self.tool_loop_mode == "single":
-            return 2
-        # Initial activation, at most one continuation per executed call,
-        # and a tools-disabled synthesis if the continuation reaches the cap.
-        return max(1, int(self.tool_max_calls_per_turn)) + 2
 
     async def execute_tool_call(
         self,
@@ -1128,6 +1158,14 @@ class ToolExecutionMixin:
                         "content": payload,
                         "tool_call_id": tc_id,
                     }
+                )
+                self.on_tool_call_executed(
+                    tool_call_id=tc_id,
+                    tool_name=name,
+                    arguments=args,
+                    payload=payload,
+                    turn_idx=trace_turn_idx,
+                    call_idx=call_idx,
                 )
                 calls_made += 1
                 n_this_round += 1
@@ -1347,6 +1385,33 @@ def register_probe(
     return decorator
 
 
+#: Modules defining the shipped probes; importing one runs its
+#: ``@register_probe``. Listed by path because every probe module imports
+#: this one, so this module cannot import them at load time.
+BUILTIN_PROBE_MODULES: tuple[str, ...] = (
+    "usersim.engine.probes.financial_services.generator",
+    "usersim.engine.probes.general_educational.generator",
+    "usersim.engine.probes.general_open_ended.generator",
+    "usersim.engine.probes.health_disclosure.decision_support",
+    "usersim.engine.probes.health_disclosure.general",
+    "usersim.engine.probes.health_disclosure.therapy",
+    "usersim.engine.probes.health_disclosure.triage",
+    "usersim.engine.probes.identity_disclosure.generator",
+    "usersim.engine.probes.safety_agentic.generator",
+    "usersim.engine.probes.safety_chat_pressure.generator",
+    "usersim.engine.probes.sov_ai_dynamic.generator",
+    "usersim.engine.probes.sov_ai_facts.generator",
+    "usersim.engine.probes.sov_ai_multilingual_parity.generator",
+    "usersim.engine.probes.tool_calling.generator",
+)
+
+
+def load_builtin_probes() -> None:
+    """Import every shipped probe module so its probes are registered. Idempotent."""
+    for module in BUILTIN_PROBE_MODULES:
+        importlib.import_module(module)
+
+
 def load_extension_probes() -> None:
     """Import probe packages advertised under ``usersim.probes``.
 
@@ -1363,12 +1428,15 @@ def load_extension_probes() -> None:
 
 def known_probes() -> tuple[str, ...]:
     """All registered probe labels, sorted."""
+    load_builtin_probes()
     load_extension_probes()
     return tuple(sorted(_PROBE_REGISTRY))
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:
     """Look up a probe class by label. Raises ``KeyError`` if unknown."""
+    if label not in _PROBE_REGISTRY:
+        load_builtin_probes()
     if label not in _PROBE_REGISTRY:
         load_extension_probes()
     if label not in _PROBE_REGISTRY:

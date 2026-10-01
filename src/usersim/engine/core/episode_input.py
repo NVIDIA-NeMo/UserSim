@@ -13,6 +13,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
 
+from usersim.engine.config import MODEL_ASSISTANT, MODEL_USER
 from usersim.engine.core.behavioral import (
     compute_behavioral_profile,
     compute_disclosure_style,
@@ -28,9 +29,6 @@ from usersim.engine.core.provenance import get_code_sha, get_nemotron_personas_v
 
 if TYPE_CHECKING:
     from usersim.engine.config import ConversationSimulatorConfig
-
-MODEL_USER = "user_model"
-MODEL_ASSISTANT = "assistant_model"
 
 
 @dataclass(frozen=True)
@@ -88,11 +86,11 @@ def construct_episode_preamble(
     returned ``data`` mapping unchanged.
     """
     resolved = deepcopy(dict(data))
-    persona_column = getattr(config, "persona_column", "persona")
-    probe_type_column = getattr(config, "probe_type_column", "probe_type")
+    persona_column = config.persona_column
+    probe_type_column = config.probe_type_column
     raw_persona = resolved[persona_column]
     persona = deepcopy(raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona))
-    locale = getattr(config, "locale", "en_US")
+    locale = config.locale
     raw_profile = resolved.get("behavioral_profile")
     if isinstance(raw_profile, str):
         raw_profile = json.loads(raw_profile)
@@ -107,14 +105,14 @@ def construct_episode_preamble(
         resolved.get("disclosure_style")
         or compute_disclosure_style(
             persona_seed=persona_seed,
-            incremental_ratio=float(getattr(config, "incremental_disclosure_ratio", 0.6)),
+            incremental_ratio=config.incremental_disclosure_ratio,
         )
     )
     interaction_style = str(resolved.get("user_interaction_style") or compute_user_interaction_style(profile))
     grounding = (
         bool(resolved["persona_grounding"])
         if "persona_grounding" in resolved
-        else random.Random(persona_seed + 1).random() < float(getattr(config, "persona_grounding_ratio", 1.0))
+        else random.Random(persona_seed + 1).random() < config.persona_grounding_ratio
     )
     probe_type = str(resolved[probe_type_column])
     probe_cls = resolve_probe(probe_type)
@@ -155,7 +153,7 @@ def construct_episode_preamble(
             persona_uuid=persona_id,
             probe_family=probe_family,
             probe_variant=probe_variant,
-            scenario_seed=getattr(config, "random_seed", None),
+            scenario_seed=config.random_seed,
             user_model=resolve_model_name(models.get(MODEL_USER), MODEL_USER),
             assistant_model=resolve_model_name(models.get(MODEL_ASSISTANT), MODEL_ASSISTANT),
             prompt_version=prompt_version,
@@ -181,11 +179,6 @@ def construct_episode_preamble(
             "probe_variant": probe_variant,
             "trajectory_id": episode_id,
             "usersim_provenance": provenance.to_dict(),
-            "usersim_config": (
-                config.model_dump(mode="json")
-                if hasattr(config, "model_dump")
-                else {key: value for key, value in vars(config).items() if not key.startswith("_")}
-            ),
         }
     )
     return EpisodePreamble(
@@ -214,8 +207,6 @@ def construct_probe_episode(
     provenance: Provenance | None = None,
 ) -> ConstructedEpisode:
     """Construct the canonical preamble and native probe exactly once."""
-    from usersim.engine.core.simulation import ConversationState
-
     preamble = construct_episode_preamble(data, config=config, models=models)
     resolved_provenance = provenance or preamble.provenance
     outcome = OutcomeBuilder(provenance=resolved_provenance)
@@ -232,16 +223,6 @@ def construct_probe_episode(
             data=preamble.data,
             outcome_builder=outcome,
         )
-        variant = probe.build_result_extras(ConversationState(outcome=outcome)).get("probe_variant")
     except (KeyError, ValueError, json.JSONDecodeError, BankLoadError) as error:
         raise EpisodeConstructionError(preamble, error) from error
-    if isinstance(variant, str) and variant and variant != preamble.probe_variant:
-        updated_data = {**preamble.data, "probe_variant": variant}
-        updated_data.pop("trajectory_id", None)
-        preamble = construct_episode_preamble(
-            updated_data,
-            config=config,
-            models=models,
-        )
-        probe._data = preamble.data
     return ConstructedEpisode(preamble=preamble, probe=probe, outcome=outcome)

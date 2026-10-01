@@ -19,10 +19,10 @@ The two are physically separate plugins so iteration on the evaluator (swap a
 judge, change an axis rubric, add a scorer) does not require re-running the
 simulation. The [parent README](../../README.md) covers the project as a whole.
 
-Tool-using probes can also be hosted by another async orchestration system
-through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). That API keeps one
-canonical probe instance and exports declarative loop policy; the external
-Agent performs model/tool iteration without reimplementing probe semantics.
+Any registered probe can also be hosted by another async orchestration system
+through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). UserSim runs its own
+episode loop, pauses at each user, assistant, judge and summary model call for
+the host to answer, and executes the assistant's tool calls itself.
 
 ## Architecture
 
@@ -395,10 +395,9 @@ Quick orientation:
    into `_PROBE_REGISTRY` (and the per-module `PROBE_FAMILY` /
    `PROMPT_VERSION` / `PROBE_VARIANTS` constants the smoke check
    reads).
-5. Add a dispatcher import in
-   [`generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py)
-   so the bootstrap triggers your probe's `@register_probe` at
-   plugin import.
+5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
+   [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
+   registry imports it and runs your probe's `@register_probe`.
 6. Declare every column `build_result_extras` writes in
    `side_effect_columns` on
    [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).

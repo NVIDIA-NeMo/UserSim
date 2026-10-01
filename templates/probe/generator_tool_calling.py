@@ -111,12 +111,25 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
                 tool_name = tc.get("function", {}).get("name", "<unknown>")
                 state.metadata.setdefault("tools_called", []).append(tool_name)
                 # Simulated tool response.
+                tc_id = tc.get("id", f"call_{idx}")
+                payload = json.dumps({"ok": True})
                 state.messages.append(
                     {
                         "role": "tool",
-                        "tool_call_id": tc.get("id", f"call_{idx}"),
-                        "content": json.dumps({"ok": True}),
+                        "tool_call_id": tc_id,
+                        "content": payload,
                     }
+                )
+                # Required: a probe that writes its own tool messages must
+                # notify, or an external host cannot see the payloads it
+                # produced. Notify-only -- the return value is ignored.
+                self.on_tool_call_executed(
+                    tool_call_id=tc_id,
+                    tool_name=tool_name,
+                    arguments=tc.get("function", {}).get("arguments", {}),
+                    payload=payload,
+                    turn_idx=sum(1 for m in state.messages if m.get("role") == "assistant"),
+                    call_idx=idx,
                 )
         return content or ""
 

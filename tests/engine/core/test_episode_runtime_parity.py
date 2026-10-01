@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from copy import deepcopy
 from dataclasses import dataclass
 from types import SimpleNamespace
@@ -17,10 +18,11 @@ from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_runtime import (
     ActivationRequest,
     ActivationResult,
+    EpisodeContractError,
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
-from usersim.engine.core.probes import known_probes
+from usersim.engine.core.probes import known_probes, resolve_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
@@ -76,6 +78,25 @@ _CASES = (
 )
 
 
+def _plain_message(message: Any) -> dict[str, Any]:
+    """Normalize a chat message to a comparable dict, however it was supplied."""
+    if isinstance(message, Mapping):
+        return deepcopy(dict(message))
+    value: dict[str, Any] = {
+        "role": str(getattr(getattr(message, "role", "user"), "value", getattr(message, "role", "user"))),
+        "content": getattr(message, "content", "") or "",
+    }
+    tool_calls = getattr(message, "tool_calls", None)
+    if tool_calls:
+        value["tool_calls"] = [
+            call.model_dump() if hasattr(call, "model_dump") else deepcopy(call) for call in tool_calls
+        ]
+    tool_call_id = getattr(message, "tool_call_id", None)
+    if tool_call_id:
+        value["tool_call_id"] = str(tool_call_id)
+    return value
+
+
 def _message_value(message: Any, name: str, default: Any = None) -> Any:
     if isinstance(message, Mapping):
         return message.get(name, default)
@@ -107,12 +128,20 @@ class _ReplayableModel:
 
     model_name = "nvidia/nemotron-3-super-120b-a12b"
 
-    def __init__(self, role: str, invocations: list[str]) -> None:
+    def __init__(self, role: str, invocations: list[str], prompts: list[dict[str, Any]] | None = None) -> None:
         self.role = role
         self.invocations = invocations
+        self.prompts = prompts if prompts is not None else []
 
     async def acompletion(self, messages: Sequence[Any], **kwargs: Any) -> SimpleNamespace:
         self.invocations.append(self.role)
+        self.prompts.append(
+            {
+                "role": self.role,
+                "messages": [_plain_message(message) for message in messages],
+                "tools": deepcopy(kwargs.get("tools")),
+            }
+        )
         tool_calls = None
         has_tool_result = any(str(_message_value(message, "role")) == "tool" for message in messages)
         if self.role == "assistant" and kwargs.get("tools") and not has_tool_result:
@@ -147,7 +176,11 @@ class _ReplayableModel:
         )
 
 
-def _runtime(case: _Case) -> tuple[ProbeEpisodeRuntime, list[str]]:
+def _runtime(
+    case: _Case,
+    model_class: type[_ReplayableModel] = _ReplayableModel,
+    prompts: list[dict[str, Any]] | None = None,
+) -> tuple[ProbeEpisodeRuntime, list[str]]:
     data = {
         **dict(case.probe_data or {}),
         "persona": _PERSONA,
@@ -169,11 +202,11 @@ def _runtime(case: _Case) -> tuple[ProbeEpisodeRuntime, list[str]]:
     )
     invocations: list[str] = []
     models = {
-        "api_response_model": _ReplayableModel("api", invocations),
-        "assistant_model": _ReplayableModel("assistant", invocations),
-        "judge_model": _ReplayableModel("judge", invocations),
-        "summary_model": _ReplayableModel("summary", invocations),
-        "user_model": _ReplayableModel("user", invocations),
+        "api_response_model": model_class("api", invocations, prompts),
+        "assistant_model": model_class("assistant", invocations, prompts),
+        "judge_model": model_class("judge", invocations, prompts),
+        "summary_model": model_class("summary", invocations, prompts),
+        "user_model": model_class("user", invocations, prompts),
     }
     return (
         ProbeEpisodeRuntime(
@@ -200,51 +233,38 @@ def _response_dict(response: SimpleNamespace) -> dict[str, Any]:
     return {key: item for key, item in value.items() if item is not None}
 
 
-async def _execute_assistant_activation(
-    runtime: ProbeEpisodeRuntime,
-    activation: ActivationRequest,
-    invocations: list[str],
-) -> ActivationResult:
-    model = _ReplayableModel("assistant", invocations)
-    messages = list(activation.messages)
-    response = _response_dict(await model.acompletion(messages, **activation.parameters))
-    if not response.get("tool_calls"):
-        return ActivationResult(activation_id=activation.activation_id, response=response)
-
-    transcript = [response]
-    for call in response["tool_calls"]:
-        function = call["function"]
-        arguments = json.loads(function["arguments"])
-        payload = await runtime.simulate_tool_call(
-            function["name"],
-            arguments,
-            tool_call_id=call["id"],
-        )
-        transcript.append({"role": "tool", "content": payload, "tool_call_id": call["id"]})
-    return ActivationResult(
-        activation_id=activation.activation_id,
-        transcript_delta=tuple(transcript),
-    )
+def _activation_kwargs(activation: ActivationRequest) -> dict[str, Any]:
+    """Reassemble the call options UserSim would have passed to the model."""
+    kwargs = dict(activation.parameters)
+    if activation.tools:
+        kwargs["tools"] = [deepcopy(tool) for tool in activation.tools]
+    return kwargs
 
 
 async def _run_external(
     runtime: ProbeEpisodeRuntime,
     invocations: list[str],
+    prompts: list[dict[str, Any]] | None = None,
+    model_factory: Any = None,
 ) -> tuple[dict[str, Any], list[str]]:
+    """Drive the episode the way a host does: record each response, nothing else."""
+    build = model_factory or (lambda role: _ReplayableModel(role, invocations, prompts))
     event = await runtime.advance()
     roles: list[str] = []
+    recorded_call_ids: set[str] = set()
     while isinstance(event, ActivationRequest):
         roles.append(event.role)
-        if event.role == "assistant":
-            result = await _execute_assistant_activation(runtime, event, invocations)
-        else:
-            response = await _ReplayableModel(event.role, invocations).acompletion(event.messages, **event.parameters)
-            result = ActivationResult(
-                activation_id=event.activation_id,
-                response=_response_dict(response),
-            )
-        event = await runtime.advance(result)
+        response = await build(event.role).acompletion(list(event.messages), **_activation_kwargs(event))
+        recorded = _response_dict(response)
+        recorded_call_ids.update(call["id"] for call in recorded.get("tool_calls") or [])
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=recorded))
     assert isinstance(event, EpisodeLifecycleComplete)
+    # UserSim ran the recorded calls its own loop accepted -- a probe may cap
+    # how many it executes per turn -- and every one of those is retrievable.
+    executed = await runtime.executed_tool_calls()
+    assert {call.tool_call_id for call in executed} <= recorded_call_ids
+    for call in executed:
+        assert await runtime.tool_result(call.tool_call_id) == call.payload
     return event.result, roles
 
 
@@ -277,6 +297,15 @@ _CORE_RESULT_FIELDS = {
 }
 
 
+def _seeded_probe_variant(probe_type: str) -> str:
+    """The variant the dispatcher seeds before the probe runs (main's rule)."""
+    module = sys.modules[resolve_probe(probe_type).__module__]
+    variants = getattr(module, "PROBE_VARIANTS", None)
+    if variants and isinstance(variants, (list, tuple)):
+        return str(variants[0])
+    return "default"
+
+
 @pytest.mark.parametrize("case", _CASES, ids=lambda case: case.probe_type)
 async def test_direct_and_resumable_execution_have_deterministic_parity(case: _Case) -> None:
     """Replay one resolved episode through both execution paths and compare evidence."""
@@ -293,12 +322,14 @@ async def test_direct_and_resumable_execution_have_deterministic_parity(case: _C
         "user_interaction_style",
         "persona_grounding",
         "probe_family",
-        "probe_variant",
         "trajectory_id",
         "usersim_provenance",
-        "usersim_config",
     ):
         assert direct_row[field] == direct_runtime.preamble.to_row()[field]
+    # A probe that discovers its own variant reports it on the finished row, but
+    # identity stays keyed on the dispatcher-seeded variant so resume and
+    # deduplication keep working. Changing this changes every stored trajectory_id.
+    assert direct_runtime.preamble.to_row()["probe_variant"] == _seeded_probe_variant(case.probe_type)
     direct = {key: direct_row[key] for key in external}
     direct_normalized = _normalized_result(direct)
     external_normalized = _normalized_result(external)
@@ -330,3 +361,178 @@ async def test_direct_and_resumable_execution_have_deterministic_parity(case: _C
 
 def test_parity_cases_cover_the_complete_registry() -> None:
     assert {case.probe_type for case in _CASES} == set(known_probes())
+
+
+class _AlwaysToolModel(_ReplayableModel):
+    """Issue tool calls on every activation that offers tools.
+
+    The single-round scripted model cannot see cross-turn divergence: tool
+    indices and the tool simulator's context only drift once a second round
+    happens on a later turn.
+    """
+
+    async def acompletion(self, messages: Sequence[Any], **kwargs: Any) -> SimpleNamespace:
+        self.invocations.append(self.role)
+        self.prompts.append(
+            {
+                "role": self.role,
+                "messages": [_plain_message(message) for message in messages],
+                "tools": deepcopy(kwargs.get("tools")),
+            }
+        )
+        tools = kwargs.get("tools")
+        if self.role == "assistant" and tools:
+            function = tools[0]["function"]
+            call_index = sum(1 for item in self.invocations if item == "assistant")
+            return SimpleNamespace(
+                message=SimpleNamespace(
+                    content="",
+                    reasoning_content="assistant reasoning",
+                    tool_calls=[
+                        {
+                            "id": f"call-round-{call_index}",
+                            "type": "function",
+                            "function": {
+                                "name": function["name"],
+                                "arguments": json.dumps(
+                                    _arguments_for_schema(function.get("parameters", {})), sort_keys=True
+                                ),
+                            },
+                        }
+                    ],
+                ),
+                usage=None,
+            )
+        content = {
+            "api": '{"ok":true}',
+            "assistant": "Scripted assistant response.",
+            "judge": "<explanation>valid scripted turn</explanation><rating>success</rating>",
+            "summary": "yes",
+            "user": "Could you explain that a little more?",
+        }[self.role]
+        return SimpleNamespace(
+            message=SimpleNamespace(content=content, reasoning_content=f"{self.role} reasoning", tool_calls=None),
+            usage=None,
+        )
+
+
+_MULTI_ROUND_CASES = (
+    _Case("tool_calling", 2003, {"tools": [_TOOL]}, 3),
+    _Case("financial_services", 2009, None, 3),
+    _Case("safety_agentic", 2042, {"user_interaction_style": "direct"}, 3),
+)
+
+
+@pytest.mark.parametrize("case", _MULTI_ROUND_CASES, ids=lambda case: case.probe_type)
+async def test_multi_turn_multi_round_tool_use_matches_standalone(case: _Case) -> None:
+    """Tools on every turn: hosted and standalone agree on results and on prompts.
+
+    The tool simulator's context and the recorded ``turn_idx`` can only differ
+    from a standalone run from the second round onward, which single-round
+    parity cannot see.
+    """
+    direct_prompts: list[dict[str, Any]] = []
+    external_prompts: list[dict[str, Any]] = []
+    direct_runtime, direct_invocations = _runtime(case, _AlwaysToolModel, direct_prompts)
+    # Models UserSim calls directly in the hosted run too (the tool-response
+    # simulator) must record into the hosted prompt log, or the comparison is
+    # only checking the halves the harness happens to drive.
+    external_runtime, external_invocations = _runtime(case, _AlwaysToolModel, external_prompts)
+
+    direct_row = await _run_direct(direct_runtime)
+    external, _roles = await _run_external(
+        external_runtime,
+        external_invocations,
+        external_prompts,
+        model_factory=lambda role: _AlwaysToolModel(role, external_invocations, external_prompts),
+    )
+
+    assert direct_invocations == external_invocations
+    # The prompt each model saw, in order, including the assistant's own
+    # tool-call line in the tool simulator's context.
+    assert direct_prompts == external_prompts
+    assert _normalized_result({key: direct_row[key] for key in external}) == _normalized_result(external)
+
+    executed = await external_runtime.executed_tool_calls()
+    assert executed, "the multi-round case must execute tool calls"
+    # The indices the host observes are the loop's own, not a host-side
+    # counter. Calibrate against the standalone run rather than a fixed
+    # number: whatever rounds it spanned, the hosted run spans the same.
+    direct_tool_turns = [
+        trace["turn_idx"]
+        for trace in json.loads(direct_row["simulation_traces"])
+        if trace.get("kind") == "tool_call_verifier" and trace.get("turn_idx") is not None
+    ]
+    if direct_tool_turns:
+        assert [call.turn_idx for call in executed] == direct_tool_turns
+        assert len({call.turn_idx for call in executed}) == len(set(direct_tool_turns))
+
+
+async def test_recording_tool_calls_when_tools_are_off_is_rejected() -> None:
+    """A record that breaks the probe's loop rules fails at the host-facing call.
+
+    ``tool_calling`` disables tools for its answer step. Keeping them on is a
+    host bug: it must not consume a model retry or be attributed to the model
+    under test.
+    """
+    runtime, invocations = _runtime(_Case("tool_calling", 3003, {"tools": [_TOOL]}, 1))
+
+    event = await runtime.advance()
+    answer_step: ActivationRequest | None = None
+    while isinstance(event, ActivationRequest):
+        if event.role == "assistant" and not event.tools_enabled:
+            answer_step = event
+            break
+        response = _response_dict(
+            await _ReplayableModel(event.role, invocations).acompletion(
+                list(event.messages), **_activation_kwargs(event)
+            )
+        )
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+
+    assert answer_step is not None, "tool_calling must reach a tools-disabled answer step"
+    assert answer_step.continues_turn is True
+
+    before = len([role for role in invocations if role == "assistant"])
+    with pytest.raises(EpisodeContractError, match="offers no tools"):
+        await runtime.advance(
+            ActivationResult(
+                activation_id=answer_step.activation_id,
+                response={
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "call-illegal",
+                            "type": "function",
+                            "function": {"name": _TOOL["function"]["name"], "arguments": "{}"},
+                        }
+                    ],
+                },
+            )
+        )
+    # No retry was issued, and the episode is still waiting on the same step.
+    assert len([role for role in invocations if role == "assistant"]) == before
+    await runtime.close()
+
+
+async def test_the_multi_round_suite_actually_spans_more_than_one_round() -> None:
+    """The multi-round suite spans more than one round of tool calls.
+
+    Divergence between hosted and standalone tool indices only appears from the
+    second round onward, so a suite that silently degraded to one round per
+    episode would stop testing the thing it exists to test.
+    """
+    runtime, invocations = _runtime(_Case("financial_services", 2009, None, 3), _AlwaysToolModel)
+    await _run_external(
+        runtime,
+        invocations,
+        [],
+        model_factory=lambda role: _AlwaysToolModel(role, invocations, []),
+    )
+
+    executed = await runtime.executed_tool_calls()
+    assert len({call.turn_idx for call in executed}) > 1, (
+        f"expected tool calls across more than one round, saw turn indices "
+        f"{sorted({call.turn_idx for call in executed})}"
+    )

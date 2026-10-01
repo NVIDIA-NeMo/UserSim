@@ -16,17 +16,27 @@ from usersim.engine.core.episode_input import (
 from usersim.engine.core.episode_runtime import (
     ActivationRequest,
     ActivationResult,
+    ActivationUsage,
+    EpisodeContractError,
     EpisodeLifecycleComplete,
+    ExecutedToolCall,
+    HostRoleModel,
     ProbeEpisodeRuntime,
+    ProbeRuntimeDescriptor,
 )
 
 __all__ = [
     "ActivationRequest",
     "ActivationResult",
+    "ActivationUsage",
     "ConstructedEpisode",
+    "EpisodeContractError",
     "EpisodeLifecycleComplete",
     "EpisodePreamble",
+    "ExecutedToolCall",
+    "HostRoleModel",
     "ProbeEpisodeRuntime",
+    "ProbeRuntimeDescriptor",
     "construct_episode_preamble",
     "construct_probe_episode",
     "materialize_episode_inputs",

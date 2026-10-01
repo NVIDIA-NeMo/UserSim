@@ -48,6 +48,29 @@ _FALSE = ("0", "false", "no", "off")
 #: ``GuardedMoveMixin.register_move_hook``.
 _MOVE_HOOK_LOCK = threading.Lock()
 
+#: Every column ``GuardedMoveMixin.build_result_extras`` adds on the guarded
+#: variant. The engine keeps only the columns named in
+#: ``ConversationSimulatorConfig.side_effect_columns`` and drops the rest without
+#: a warning, so each of these must be listed there too; the tests check both
+#: that the guarded extras are exactly these and that the config declares them.
+GUARDED_RESULT_COLUMNS: tuple[str, ...] = (
+    "moves_enabled",
+    "moves_played",
+    "moves_detail",
+    "guard_veto_count",
+    "disclosed_topics",
+    "committed_disclosure_levels",
+    "concealment_topics",
+    "disclosure_coverage",
+    "risk_present",
+    "risk_noun",
+    "risk_revealed",
+    "risk_revealed_turn",
+    "patient_archetype",
+    "turn_budget",
+    "risk_opportunity",
+)
+
 
 def env_override(name: str) -> bool | None:
     """Tri-state read of a boolean env var: ``True``/``False`` for a recognised
@@ -316,15 +339,11 @@ class GuardedMoveMixin:
                 ),
             }
         )
-        # Realized-BEHAVIOR columns: audit what the free-form utterances actually
-        # did, so the ground truth reflects behavior, not just intent. Additive and
-        # robust — an unavailable/failed auditor falls back to intent and raises a
-        # warning so the scorer treats the trajectory as preview-only.
-        # NOTE: no realized-behavior audit here. It needs an LLM, and an LLM call
-        # inside column assembly would put a network round-trip (and its cost,
-        # latency and failure surface) on the simulation path, and would make a
-        # scorer that claims to be deterministic depend on a non-deterministic
-        # step. The audit runs in the evaluator instead, off stored columns.
+        # No realized-behavior columns here: what the utterances actually
+        # disclosed is audited by health_disclosure_concealment at eval time, off
+        # the columns above. The audit needs an LLM, and a call inside column
+        # assembly would put a network round-trip (and its cost, latency and
+        # failure surface) on the simulation path.
         return extras
 
 

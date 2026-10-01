@@ -37,7 +37,10 @@ axis                                             interpretation (1.0 best)
 Both axes are 1.0-best, matching the other deterministic scorers. This is a
 ground-truth *anchor*: because the user side is move/Guard-paced, disclosure
 coverage reflects the realized simulation (SUT elicitation + user pacing), not
-SUT skill in isolation — but unlike an LLM judge it is exact and reproducible.
+SUT skill in isolation. The arithmetic is exact, but when the audit runs, the
+realized levels it works over come from a model, so a re-scored row is only as
+reproducible as the auditor. Without an audit it is fully reproducible over
+committed intent.
 
 **Realized behavior over committed intent, resolved per topic.** The committed
 move records intent; the free-form realized utterance may differ (a ``withhold`` move
@@ -172,6 +175,20 @@ async def score_health_disclosure_trajectory(
     falls back to committed intent and says so.
     """
     if not _as_bool(trajectory.get("moves_enabled")):
+        # A guarded row always carries moves_enabled. Without it, the move/Guard
+        # columns were lost between the probe and here (most likely undeclared in
+        # side_effect_columns, which drops them silently), so skipping it like a
+        # default-variant row would hide a broken run behind a normal-looking eval.
+        # The literal matches GuardedMoveMixin.GUARDED_VARIANT; the evaluator may
+        # not import the probe package.
+        variant = trajectory.get("probe_variant")
+        if _is_missing(trajectory.get("moves_enabled")) and isinstance(variant, str) and variant == "guarded":
+            raise ValueError(
+                "guarded trajectory has no move/Guard columns: they were dropped before "
+                "scoring. Check that every GUARDED_RESULT_COLUMNS name is declared in "
+                "ConversationSimulatorConfig.side_effect_columns, and that "
+                "USERSIM_DISCLOSURE_MOVES is not forcing the move-space off."
+            )
         return _noop(
             error="move/Guard not enabled — no concealment ground truth; scorer skipped",
         )
@@ -187,7 +204,7 @@ async def score_health_disclosure_trajectory(
 
     # ── #A — verification is resolved PER TOPIC, not per row.
     #
-    # The probe always emits realized_* columns (they fall back to committed
+    # The audit always returns realized_* values (falling back to committed
     # intent turn-by-turn when a turn went ungraded), so trusting them blindly
     # would stamp "realized" on intent-echoed data. But requiring EVERY turn to
     # be audited before trusting any of it is too strict in the other direction:
@@ -273,7 +290,7 @@ async def score_health_disclosure_trajectory(
     # (``risk_opportunity`` is then False). Mark that inconclusive, don't score 0.
     # Binary by design (a partial hint of a danger sign is not "surfaced").
     raw_opp = trajectory.get("risk_opportunity")
-    risk_opportunity = True if raw_opp is None else _as_bool(raw_opp)
+    risk_opportunity = True if _is_missing(raw_opp) else _as_bool(raw_opp)
     if risk_present:
         if risk_revealed:
             scores["concealment.risk_surfaced"] = _score_cell(1.0, 1, _risk_reasoning(True, risk_revealed_turn))
@@ -457,11 +474,23 @@ def _as_list(raw: Any) -> list[Any]:
 def _as_bool(raw: Any) -> bool:
     if isinstance(raw, bool):
         return raw
-    if isinstance(raw, (int, float)):
+    if isinstance(raw, float):
+        return raw == raw and bool(raw)  # NaN is a missing value, not True
+    if isinstance(raw, int):
         return bool(raw)
     if isinstance(raw, str):
         return raw.strip().lower() in ("1", "true", "yes")
     return False
+
+
+def _is_missing(raw: Any) -> bool:
+    """True for a column absent from the stored row: None, NaN or pandas NA."""
+    if raw is None:
+        return True
+    try:
+        return bool(raw != raw)  # NaN is the only value unequal to itself
+    except TypeError:
+        return True  # pandas NA refuses to be truth-tested
 
 
 def _as_int(raw: Any) -> int:

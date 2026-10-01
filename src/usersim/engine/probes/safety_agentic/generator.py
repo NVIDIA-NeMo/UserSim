@@ -201,8 +201,6 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
-    tool_loop_mode = "multi"
-    single_user_turn = True
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale
@@ -506,6 +504,14 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                             "content": payload,
                             "tool_call_id": tc_id,
                         }
+                    )
+                    self.on_tool_call_executed(
+                        tool_call_id=tc_id,
+                        tool_name=tool_name,
+                        arguments=tool_args,
+                        payload=payload,
+                        turn_idx=assistant_turn_idx,
+                        call_idx=tc_idx,
                     )
 
                 builder.set_n_turns(assistant_turn_idx + 1)

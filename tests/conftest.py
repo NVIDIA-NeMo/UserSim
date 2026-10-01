@@ -55,6 +55,67 @@ def deterministic_token_encoder():
         reasoning._encoder = original
 
 
+# First name, last name, sex, age, education level, occupation, city. Values
+# use the en_US dataset's own vocabulary; every row is in Texas, like the
+# persona tests/test_simulator_pipeline_e2e.py uses for every shipped probe.
+_SYNTHETIC_PERSONAS = (
+    ("Sarah", "Johnson", "Female", 42, "bachelors", "elementary_or_middle_school_teacher", "Austin"),
+    ("Daniel", "Reyes", "Male", 29, "some_college", "electrician", "San Antonio"),
+    ("Grace", "Liu", "Female", 67, "graduate", "pharmacist", "Houston"),
+    ("Marcus", "Hill", "Male", 51, "high_school", "driver_sales_worker_or_truck_driver", "Dallas"),
+)
+_OCEAN_TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
+
+
+def _synthetic_persona_rows() -> list[dict[str, Any]]:
+    return [
+        {
+            "uuid": f"synthetic-persona-{index}",
+            "first_name": first_name,
+            "last_name": last_name,
+            "sex": sex,
+            "age": age,
+            "education_level": education_level,
+            "occupation": occupation,
+            "city": city,
+            "region": "TX",
+            "country": "USA",
+            "persona": f"{first_name} {last_name} works as a {occupation.replace('_', ' ')} in {city}, Texas.",
+            **{
+                trait: {"description": "Synthetic trait.", "label": "average", "t_score": 50} for trait in _OCEAN_TRAITS
+            },
+        }
+        for index, (first_name, last_name, sex, age, education_level, occupation, city) in enumerate(
+            _SYNTHETIC_PERSONAS, start=1
+        )
+    ]
+
+
+@pytest.fixture(autouse=True, scope="session")
+def synthetic_persona_dataset(tmp_path_factory):
+    """Point Data Designer's persona sampler at a small synthetic dataset.
+
+    The sampler reads the Nemotron-Personas datasets, a separate download
+    that a fresh checkout does not have, so leaving it live makes every test
+    that samples personas depend on what happens to be installed. Those tests
+    exercise UserSim's sampler graph, not the dataset's contents, so a few
+    rows serve as well as millions. Every shipped probe accepts every row.
+
+    Autouse rather than opt-in so a new test cannot silently depend on the
+    downloaded datasets.
+    """
+    import pandas as pd
+
+    root = tmp_path_factory.mktemp("managed-assets")
+    (root / "datasets").mkdir()
+    pd.DataFrame(_synthetic_persona_rows()).to_parquet(root / "datasets" / "en_US.parquet", index=False)
+    with pytest.MonkeyPatch.context() as patcher:
+        # UserSim constructs DataDesigner without managed_assets_path, so the
+        # sampler reads this module default.
+        patcher.setattr("data_designer.interface.data_designer.MANAGED_ASSETS_PATH", root)
+        yield root
+
+
 def _outcome(
     *,
     status: str = "ok",

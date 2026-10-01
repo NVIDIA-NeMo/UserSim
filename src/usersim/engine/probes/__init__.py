@@ -5,10 +5,9 @@
 
 Every probe lives under this package as a ``BaseProbe`` subclass that
 registers itself in the substrate's ``_PROBE_REGISTRY`` via
-``@register_probe`` at import time. The bootstrap function in
-``usersim.engine.generator._bootstrap_probes`` imports every
-shipped probe module to fire the decorators before the dispatcher
-starts resolving probe labels.
+``@register_probe`` at import time. The registry imports every module
+listed in ``usersim.engine.core.probes.BUILTIN_PROBE_MODULES`` the
+first time a probe is looked up, which fires the decorators.
 
 Three families:
 
