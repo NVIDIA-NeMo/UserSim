@@ -460,7 +460,7 @@ def test_activation_result_requires_a_json_safe_assistant_response() -> None:
 
 
 async def test_host_role_model_identity_and_budget_reach_the_runtime() -> None:
-    """Item 3 of #10: the host's real model id and token budget are UserSim's.
+    """The host's declared model id and token budget reach the runtime.
 
     Trajectory identity is keyed on the resolved model id, and a probe that
     grades the assistant's self-description cannot work without it.

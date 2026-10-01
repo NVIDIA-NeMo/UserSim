@@ -33,7 +33,7 @@ themes and toolsets. Rows carry the persona, probe inputs, locale-aware
 behavioral settings, probe family and variant, trajectory ID, provenance, and
 the `usersim_config` snapshot `from_resolved_row()` restores. `models_path` and
 `assets_dir` are optional overrides. Model configuration supplies trajectory
-identities — no configured model is called.
+identities; no configured model is called.
 
 Rows are the dataset: store them, and replay from the stored rows. Regenerating
 the same rows from the same seed is explicitly *not* guaranteed, because
@@ -93,13 +93,13 @@ row = await runtime.finalize()
 
 Each `ActivationRequest` carries:
 
-- `role` — `user`, `assistant`, `judge` or `summary`;
-- `messages` — the exact input UserSim would send, so the host never builds one;
-- `tools` and `tools_enabled` — whether UserSim is offering tools for *this*
+- `role`: `user`, `assistant`, `judge` or `summary`;
+- `messages`: the exact input UserSim would send, so the host never builds one;
+- `tools` and `tools_enabled`: whether UserSim is offering tools for *this*
   call. It disables them when the probe's loop asks for a final answer;
-- `continues_turn` — whether this request continues the turn already in
+- `continues_turn`: whether this request continues the turn already in
   progress rather than opening a new one;
-- `parameters` — the sampling options UserSim would have passed.
+- `parameters`: the sampling options UserSim would have passed.
 
 Recording the same `activation_id` with an identical payload is idempotent and
 replays the same transition, including after the episode completes. Reusing an
@@ -112,7 +112,7 @@ writes for the same inputs. Loop-written columns such as `user_query` are on it.
 
 ## Tool calls
 
-The host records the assistant's response — tool calls included — **before**
+The host records the assistant's response, tool calls included, **before**
 issuing those calls. UserSim's own loop then executes them, in its own context
 and with its own `turn_idx` and `call_idx`, and the payloads become available:
 
@@ -126,7 +126,7 @@ Payloads are returned verbatim, as plain strings, and are never parsed or
 re-encoded; several probes' simulated responses are not JSON.
 
 A probe caps how many calls it executes per turn. A recorded call beyond that
-cap never runs, and `tool_result()` raises for it — `executed_tool_calls()` is
+cap never runs, and `tool_result()` raises for it; `executed_tool_calls()` is
 the authoritative list of what ran.
 
 A host that cannot record tool calls simply returns one model response per
@@ -134,8 +134,8 @@ request with no `tool_calls`; UserSim runs the tools either way.
 
 ## Contract errors
 
-Recording a response that breaks the probe's loop rules — tool calls when the
-request offers no tools, an unoffered tool name, a missing or repeated call id —
+Recording a response that breaks the probe's loop rules (tool calls when the
+request offers no tools, an unoffered tool name, a missing or repeated call id)
 raises `EpisodeContractError` from `advance()`. These are host bugs, so they are
 raised at the call that made them: they never consume a model retry and are
 never attributed to the model under test.

@@ -27,7 +27,7 @@ same id in every run, forever.
 model identities, and the prompt version.
 
 The probe component is the variant the *dispatcher seeds* before the probe
-runs — the probe module's first `PROBE_VARIANTS` entry, or an explicit
+runs: the probe module's first `PROBE_VARIANTS` entry, or an explicit
 `probe_variant` column. Seven probes discover a finer-grained variant only
 once they have picked a task (a fact category, a pressure strategy, a
 sanctioned action). That discovered value lands on the finished row for
@@ -46,8 +46,8 @@ model versions.
 
 ## Episode construction, in one place
 
-`core/episode_input.py` resolves one episode's inputs — persona-derived
-settings, probe metadata, provenance, and trajectory identity — without
+`core/episode_input.py` resolves one episode's inputs (persona-derived
+settings, probe metadata, provenance, and trajectory identity) without
 calling a model. `ConversationSimulatorGenerator` and the externally hosted
 `core/episode_runtime.py` both consume it, so a hosted run and a standalone
 run start from the same resolved row rather than two reconstructions that

@@ -83,8 +83,7 @@ class ConversationSimulatorGenerator(
         The supported way to run one row outside a Data Designer pipeline — for
         a hosted-parity check, say. ``models`` maps a role alias
         (``user_model``, ``assistant_model``, ...) to anything exposing
-        ``acompletion``. Callers previously had to subclass or fake Data
-        Designer's provider to get here.
+        ``acompletion``.
         """
         registry = SimpleNamespace(get_model=lambda *, model_alias: dict(models)[model_alias])
         return cls(config, SimpleNamespace(model_registry=registry))

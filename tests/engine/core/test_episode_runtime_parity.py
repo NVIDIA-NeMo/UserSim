@@ -427,9 +427,9 @@ _MULTI_ROUND_CASES = (
 async def test_multi_turn_multi_round_tool_use_matches_standalone(case: _Case) -> None:
     """Tools on every turn: hosted and standalone agree on results and on prompts.
 
-    This is the case single-round parity cannot see. Executing tool calls
-    outside UserSim's loop made the tool simulator's context and the recorded
-    ``turn_idx`` diverge from a standalone run from the second round onward.
+    The tool simulator's context and the recorded ``turn_idx`` can only differ
+    from a standalone run from the second round onward, which single-round
+    parity cannot see.
     """
     direct_prompts: list[dict[str, Any]] = []
     external_prompts: list[dict[str, Any]] = []
@@ -517,7 +517,7 @@ async def test_recording_tool_calls_when_tools_are_off_is_rejected() -> None:
 
 
 async def test_the_multi_round_suite_actually_spans_more_than_one_round() -> None:
-    """Pin the coverage the single-round parity suite was missing.
+    """The multi-round suite spans more than one round of tool calls.
 
     Divergence between hosted and standalone tool indices only appears from the
     second round onward, so a suite that silently degraded to one round per
