@@ -1,13 +1,13 @@
 # Personas
 
-Every simulated user in NeMo UserSim is a person sampled from
+Every simulated user in NeMo User Sim is a person sampled from
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas),
 a family of synthetic-population datasets grounded in census data. A persona
 supplies the demographics, the personality traits and the language the
 simulated user brings to a conversation, which is what makes a run something
 other than one model's idea of a generic user.
 
-NeMo UserSim samples an **extended version of these datasets distributed through
+NeMo User Sim samples an **extended version of these datasets distributed through
 NGC**, which adds the OCEAN personality traits, names and a number of further
 fields beyond those in the Hugging Face collection. Those extra fields are
 what drive interaction style, so the NGC version is what the behavioural
@@ -18,7 +18,7 @@ features described below depend on.
 Each row is one synthetic individual: name, age, sex, location, occupation,
 education, and a written description in the region's own language. Alongside
 those are the five OCEAN personality traits (openness, conscientiousness,
-extraversion, agreeableness, neuroticism), which NeMo UserSim maps to an
+extraversion, agreeableness, neuroticism), which NeMo User Sim maps to an
 interaction style. That mapping is what produces an impatient user who
 withholds detail rather than a cooperative one who volunteers everything, and
 it is the axis reports stratify on.
@@ -30,7 +30,7 @@ corresponds to a real person.
 ## Getting the datasets
 
 The datasets are not bundled, and they are large: a single locale runs from a
-few hundred megabytes to several gigabytes. NeMo UserSim downloads them lazily from
+few hundred megabytes to several gigabytes. NeMo User Sim downloads them lazily from
 the [NGC catalog](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
 the first time a run needs one, into
 `~/.data-designer/managed-assets/datasets/`.
@@ -60,7 +60,7 @@ is sound before setting up NGC at all.
 
 ## Licensing
 
-The datasets carry their own licence, separate from this project's licence.
+The datasets carry their own licence, separate from this project's Apache-2.0.
 
 The extended datasets on [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
 are open, under the

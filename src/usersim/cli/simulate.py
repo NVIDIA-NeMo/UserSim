@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """``usersim simulate`` — run the conversation simulator.
 
@@ -213,7 +213,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--materialize-inputs",
         action="store_true",
         help=(
-            "Write fully resolved UserSim episode-input rows to --out and exit "
+            "Write fully resolved User Sim episode-input rows to --out and exit "
             "without invoking any model. --out must end in .jsonl or .parquet."
         ),
     )

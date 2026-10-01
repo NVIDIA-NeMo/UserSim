@@ -1,6 +1,6 @@
 # Authoring a new probe
 
-This is the end-to-end tutorial for adding a new probe to NeMo UserSim. A
+This is the end-to-end tutorial for adding a new probe to NeMo User Sim. A
 probe is a class with a handful of attributes and hooks: turn iteration, the
 pre-filters, the judge gates, frustration escalation and early-stop all come
 from the shared conversation loop. Every probe therefore gets the same

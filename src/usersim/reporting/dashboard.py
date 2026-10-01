@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Build helpers for the static React/Vega reporting dashboard."""
 
@@ -162,7 +162,7 @@ def _fallback_root_html(report: CapabilityReport) -> str:
     return f"""
 <main class="app">
   <header class="hero">
-    <h1><span>NeMo UserSim Capability Report</span>{f'<span class="hero-model">{esc(report.model_id)}</span>' if report.model_id else ""}</h1>
+    <h1><span>NeMo User Sim Capability Report</span>{f'<span class="hero-model">{esc(report.model_id)}</span>' if report.model_id else ""}</h1>
     {f'<div class="hero-runid">Run ID: {esc(report.run_id)}</div>' if report.run_id else ""}
     <p class="muted">Static fallback view. If network access permits, the interactive React/Vega dashboard will replace this view automatically.</p>
     <div class="stats stats-row-1">
@@ -513,7 +513,7 @@ def _write_no_build_react_dashboard(path: Path, report: CapabilityReport) -> Non
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Security-Policy" content="{_CSP}" />
-<title>NeMo UserSim Capability Dashboard</title>
+<title>NeMo User Sim Capability Dashboard</title>
 <style>{_DASHBOARD_CSS}</style>
 </head>
 <body>
@@ -1443,7 +1443,7 @@ function App() {{
   return h("main", {{className:"app"}},
     h("header", {{className:"hero"}},
       h("h1", null,
-        h("span", null, "NeMo UserSim Capability Report"),
+        h("span", null, "NeMo User Sim Capability Report"),
         report.model_id ? h("span", {{className:"hero-model"}}, report.model_id) : null
       ),
       report.run_id

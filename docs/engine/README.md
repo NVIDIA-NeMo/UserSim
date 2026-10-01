@@ -1,7 +1,7 @@
 # Conversation Plugin
 
 This package ships **two** Data Designer column generators for the
-[NeMo UserSim](../../README.md) population-grounded user simulation framework:
+[NeMo User Sim](../../README.md) population-grounded user simulation framework:
 
 - **`conversation-simulator`**: the trajectory simulator. Runs probe-dispatched
   user/assistant conversations with in-sim judges and emits trajectory parquet rows.
@@ -20,7 +20,7 @@ judge, change an axis rubric, add a scorer) does not require re-running the
 simulation. The [parent README](../../README.md) covers the project as a whole.
 
 Any registered probe can also be hosted by another async orchestration system
-through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). UserSim runs its own
+through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). User Sim runs its own
 episode loop, pauses at each user, assistant, judge and summary model call for
 the host to answer, and executes the assistant's tool calls itself.
 

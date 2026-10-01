@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Tests for the capability-gap report contract."""
 
@@ -25,7 +25,7 @@ from usersim.taxonomy.capabilities import capability_by_id
     ["dashboard.py", "capability_report.py", "comparison_dashboard.py"],
 )
 def test_report_chrome_uses_the_display_name(module: str) -> None:
-    """Reader-facing report text says "NeMo UserSim", never bare "UserSim".
+    """Reader-facing report text says "NeMo User Sim", never "User Sim" or "UserSim" alone.
 
     The static HTML titles were rebranded but two React header strings were
     not, so the same artifact carried both spellings: a correct ``<title>``
@@ -46,16 +46,16 @@ def test_report_chrome_uses_the_display_name(module: str) -> None:
         code = line.split("#", 1)[0]
         for literal in re.findall(r'"([^"]*)"|\'([^\']*)\'', code):
             text = literal[0] or literal[1]
-            if not re.search(r"UserSim|USERSIM|Usersim", text, re.IGNORECASE):
+            if not re.search(r"\bUser ?Sim\b", text, re.IGNORECASE):
                 continue
             # Env vars, the CLI name, import paths, CSS class names and the
             # repo URL are identifiers, not product chrome.
             if re.search(r"USERSIM_|usersim[./_-]|NVIDIA-NeMo/UserSim|\.usersim", text):
                 continue
-            if "NeMo UserSim" not in text:
+            if "NeMo User Sim" not in text:
                 offenders.append(text.strip()[:70])
     assert not offenders, (
-        f"{module} has reader-facing text that is not exactly 'NeMo UserSim' (note the casing): {offenders}"
+        f"{module} has reader-facing text that is not exactly 'NeMo User Sim' (note the casing): {offenders}"
     )
 
 
@@ -356,7 +356,7 @@ def test_render_capability_report_html_contains_heatmap(trajectory_df):
 
     html = render_capability_report_html(report)
     assert html.startswith("<!doctype html>")
-    assert "UserSim Capability Report" in html
+    assert "NeMo User Sim Capability Report" in html
     assert "Capability Gap Map" not in html
     assert "Bird's-eye capability heatmap" in html
     assert "Coverage matrix" in html

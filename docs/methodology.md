@@ -53,7 +53,7 @@ Today's workarounds address none of these well:
 
 ## The approach
 
-NeMo UserSim takes a different path: **simulate a statistically representative
+NeMo User Sim takes a different path: **simulate a statistically representative
 population of users interacting with your LLM**, producing structured evaluation
 signals and training data automatically, with controllable coverage over
 languages, demographics, interaction styles, and probe complexity.
@@ -67,7 +67,7 @@ coverage of corner cases, weather conditions, and traffic patterns that no
 amount of driving will encounter frequently enough. Simulation and real-world
 data are not a binary choice; both matter.
 
-NeMo UserSim brings this discipline to LLMs by combining
+NeMo User Sim brings this discipline to LLMs by combining
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas)
 (census-grounded synthetic personas; the extended NGC version carries the
 OCEAN personality traits this depends on) with a **general-purpose probe engine** that can simulate any
@@ -76,7 +76,7 @@ agentic workflows, safety probing, and more.
 
 ## Behavioural realism
 
-NeMo UserSim implements four behavioural-realism features inspired by
+NeMo User Sim implements four behavioural-realism features inspired by
 [Zhou et al. (2026)](https://arxiv.org/abs/2603.11245). Each is measurable in
 the output, and the D1-D4 diagnostics below quantify how far they move a run
 away from LLM-as-fake-user homogeneity.

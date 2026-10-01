@@ -14,7 +14,7 @@ than launching Jupyter yourself, register a named kernel once so this
 project's environment is selectable:
 
 ```bash
-make install-kernel     # appears as "UserSim (.venv)"
+make install-kernel     # appears as "User Sim (.venv)"
 ```
 
 Outputs are stripped from the committed notebooks, so you will see source

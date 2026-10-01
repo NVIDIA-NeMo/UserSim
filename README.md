@@ -1,14 +1,8 @@
-# NeMo UserSim: Population-Grounded User Simulation for Models and Agents
+# NeMo User Sim: Population-Grounded User Simulation for Models and Agents
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-NVIDIA%20Evaluation-76B900.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](pyproject.toml)
-
-> [!IMPORTANT]
-> **Early access.** This repository is provided under the
-> [NVIDIA Software and Model Evaluation License](LICENSE), for internal test and
-> evaluation only. It is not open source software, and it is not licensed for
-> production use or for redistribution.
 
 > Simulate a statistically representative population of users having multi-turn
 > conversations with your model or agentic system. Every run produces auditable
@@ -36,7 +30,7 @@ and real data are not a binary choice, but grounded simulation lets you move
 at the speed of light (SOL) rather than the speed of traffic.
 
 Prompting a model to "act as a user" does not get you there. It produces
-unrealistically articulate, demographically homogeneous users. NeMo UserSim
+unrealistically articulate, demographically homogeneous users. NeMo User Sim
 instead samples from
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
 millions of synthetic individuals grounded in real census data, generated
@@ -55,7 +49,7 @@ allow. The reasoning behind the design, and how far the results carry, is in
 
 What a single simulated trajectory looks like in practice:
 
-![A NeMo UserSim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](docs/images/conversation_preview.png)
+![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](docs/images/conversation_preview.png)
 
 A census-grounded persona, an OCEAN-derived interaction style, a probe-driven
 multi-turn conversation, and the trajectory metadata that downstream
@@ -258,4 +252,4 @@ always trace which findings rest on reviewed content.
 
 ## License
 
-NVIDIA Software and Model Evaluation License. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).

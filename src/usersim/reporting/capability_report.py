@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Capability-gap reporting primitives for the evaluation dashboard.
 
@@ -617,7 +617,7 @@ def render_capability_report_html(report: CapabilityReport) -> str:
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>NeMo UserSim Capability Report</title>
+<title>NeMo User Sim Capability Report</title>
 <style>
 {_STYLE}
 </style>
@@ -625,7 +625,7 @@ def render_capability_report_html(report: CapabilityReport) -> str:
 <body>
 <main class="capability-report">
 <header>
-  <h1>NeMo UserSim Capability Report</h1>
+  <h1>NeMo User Sim Capability Report</h1>
   <div class="meta-pills">
     <span>Run {_esc(report.run_id)}</span>
     <span>Model {_esc(report.model_id)}</span>

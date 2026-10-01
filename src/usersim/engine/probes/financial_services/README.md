@@ -13,7 +13,7 @@ in each institution's own knowledge base. The same runs serve two purposes:
   grounded training records.
 
 It is inspired by tau-Banking but built as a first-class, population-grounded,
-multilingual NeMo UserSim probe. "Financial services" is deliberately **not one
+multilingual NeMo User Sim probe. "Financial services" is deliberately **not one
 retail bank**: a locale is a set of **institutions** (brands), each spanning one
 or more **domains** (retail banking, brokerage/investing, retirement/401k-IRA,
 wealth management, ...). Retrieval, tools, and scoring are always scoped to a
@@ -53,7 +53,7 @@ stay faithful to the institution's numbers, respect the advice boundary
 factual recall belongs in `sov_ai_facts`; ungrounded open-ended exploration
 belongs in `sov_ai_dynamic`.)
 
-## Why it's a NeMo UserSim probe
+## Why it's a NeMo User Sim probe
 
 - **Census-grounded personas**: population-scale, demographically diverse users
   rather than a fixed cast; the engine for scaling across users and regions.
@@ -443,7 +443,7 @@ into finance; the domains only meet again at the reporting layer, on the shared
 Shared with tau-Banking: knowledge-grounded retrieval, the discoverable-tool
 mechanic, gold ground truth for verifiable tasks, and whole-document retrieval.
 
-Different here: scoring is NeMo UserSim-native (deterministic verifier + judge axes +
+Different here: scoring is native to NeMo User Sim (deterministic verifier + judge axes +
 capability × locale rollups) rather than `pass^k`; state is a lightweight
 in-memory account record rather than a full mutable database; conversations are
 multilingual across many institutions and domains rather than English-only

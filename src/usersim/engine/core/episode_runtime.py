@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Externally hosted, episode-scoped execution of UserSim's own probe loop.
 
@@ -448,7 +448,7 @@ class ProbeEpisodeRuntime:
                     return executed.payload
         raise EpisodeContractError(
             f"Tool call {tool_call_id!r} has not been executed. Either its assistant response has not "
-            f"been recorded with advance() yet, or the probe's per-turn cap was reached and UserSim "
+            f"been recorded with advance() yet, or the probe's per-turn cap was reached and User Sim "
             f"declined to run it; see executed_tool_calls()."
         )
 
@@ -514,7 +514,7 @@ class ProbeEpisodeRuntime:
         if not request.tools_enabled:
             raise EpisodeContractError(
                 f"Activation {request.activation_id!r} offers no tools, so the recorded response "
-                f"must not contain tool calls. UserSim disables tools when the probe's loop asks "
+                f"must not contain tool calls. User Sim disables tools when the probe's loop asks "
                 f"the assistant for its final answer."
             )
         allowed = request.tool_names

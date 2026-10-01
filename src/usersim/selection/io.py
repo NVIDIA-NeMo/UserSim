@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """I/O for the selection layer: load a run's join inputs, write the curated subset.
 
@@ -302,7 +302,7 @@ def _dataset_card(repo_id: str, profile: SelectionProfile, manifest: dict) -> st
         "tags:\n  - usersim\n  - synthetic\n  - user-simulation\n"
         "---\n\n"
         f"# {repo_id}\n\n"
-        "Curated trajectories produced by [**NeMo UserSim**]"
+        "Curated trajectories produced by [**NeMo User Sim**]"
         "(https://github.com/NVIDIA-NeMo/UserSim) "
         "(`selection` layer over simulated + evaluated multi-turn conversations).\n\n"
         "## Generation\n\n"
@@ -324,7 +324,7 @@ def _dataset_card(repo_id: str, profile: SelectionProfile, manifest: dict) -> st
         "## Provenance\n\n"
         "The simulated users are sampled from "
         "[Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas), "
-        "which carries its own terms separate from NeMo UserSim's. Set the "
+        "which carries its own terms separate from NeMo User Sim's. Set the "
         "`license` field above to whatever governs this dataset; `other` is "
         "the placeholder, not an answer.\n"
     )
