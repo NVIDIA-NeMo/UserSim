@@ -347,6 +347,7 @@ def flush_debug_log() -> None:
             f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
 
 
+from data_designer.engine.models.facade import ModelFacade
 from data_designer.engine.models.utils import ChatMessage
 
 
@@ -492,6 +493,57 @@ def _normalize_response_format(kwargs: dict[str, Any]) -> None:
     }
 
 
+#: Reasoning settings Data Designer's facade drops when they arrive as keyword
+#: arguments, because it forwards a fixed set of request fields and nothing
+#: else. They reach the provider inside ``extra_body`` instead.
+_EXTRA_BODY_SETTINGS = ("reasoning_effort", "chat_template_kwargs")
+
+
+def _configured_extra_body(facade: Any) -> dict[str, Any]:
+    """The ``extra_body`` the model is configured with, or an empty dict."""
+    try:
+        return dict(facade._model_config.inference_parameters.extra_body or {})
+    except AttributeError:
+        return {}
+
+
+def _request_kwargs(facade: Any, alias: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+    """``kwargs`` in the form Data Designer's facade passes on to the provider.
+
+    The facade drops arguments outside its request fields, and an ``extra_body``
+    given with a call replaces the model's configured one instead of merging
+    with it. So the reasoning settings travel inside ``extra_body``, on top of
+    the model's own, and each only where the model's config already sets it: a
+    model whose provider rejects one of them is never sent it.
+    ``max_completion_tokens`` only appears on the retry its provider asked for,
+    so it is always sent. Any other facade, such as a hosted run's, gets
+    ``kwargs`` unchanged.
+    """
+    if not isinstance(facade, ModelFacade):
+        return kwargs
+    moved = [key for key in (*_EXTRA_BODY_SETTINGS, "max_completion_tokens") if key in kwargs]
+    if not moved:
+        return kwargs
+    configured = _configured_extra_body(facade)
+    body = {**configured, **(kwargs.get("extra_body") or {})}
+    for key in _EXTRA_BODY_SETTINGS:
+        if key not in kwargs:
+            continue
+        if key not in configured:
+            logger.debug("  |-- %s: %s not sent; the model config does not set it", alias, key)
+            continue
+        value = kwargs[key]
+        if isinstance(value, dict) and isinstance(configured[key], dict):
+            value = {**configured[key], **value}
+        body[key] = value
+    if "max_completion_tokens" in kwargs:
+        body["max_completion_tokens"] = kwargs["max_completion_tokens"]
+    request = {key: value for key, value in kwargs.items() if key not in moved and key != "extra_body"}
+    if body:
+        request["extra_body"] = body
+    return request
+
+
 def _backoff_before_retry(
     error: Exception,
     alias: str,
@@ -546,7 +598,7 @@ async def acall_llm(
 
     for attempt in range(_MAX_RETRIES + 1):
         try:
-            response = await facade.acompletion(chat_messages, **kwargs)
+            response = await facade.acompletion(chat_messages, **_request_kwargs(facade, alias, kwargs))
             break
         except Exception as e:
             backoff = _backoff_before_retry(e, alias, attempt, kwargs)

@@ -134,7 +134,9 @@ def _audit_reasoning_kwargs() -> dict[str, Any]:
     costs the tokens it needed to answer.
 
     Set ``USERSIM_AUDIT_REASONING_EFFORT`` to ``off``/``low``/``medium``/``high``
-    to override.
+    to override. ``acall_llm`` sends the setting only to an auditor whose model
+    config already sets it (``reasoning_effort``, or ``chat_template_kwargs`` for
+    ``off``); any other auditor runs as configured.
     """
     raw = os.environ.get(_AUDIT_EFFORT_ENV, "").strip().lower() or "low"
     if raw in ("off", "none", "false", "0"):
