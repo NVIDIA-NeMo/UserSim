@@ -359,6 +359,15 @@ length in the probe's module docstring.
 See [`docs/AUTHORING_A_PROBE.md`](AUTHORING_A_PROBE.md) for the
 end-to-end tutorial on writing a new probe against this substrate.
 
+## External hosts
+
+An episode currently mixes three jobs — simulating the user, running the
+probe's tools, and judging — in one `ConversationState`. A proposal for
+separating them, so a host can take the user simulator without also taking
+the tool environment, is at
+[`docs/EPISODE_ROLES.md`](EPISODE_ROLES.md). Design only; nothing is
+implemented yet.
+
 ## Adding a new probe
 
 The end-to-end tutorial: decision tree on which shape to pick, full
