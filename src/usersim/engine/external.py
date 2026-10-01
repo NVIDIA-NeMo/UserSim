@@ -39,6 +39,7 @@ from usersim.engine.core.episode_runtime import (
     ToolRoundReceipt,
     ToolTurnContext,
 )
+from usersim.engine.evaluator.runtime import TrajectoryEvaluatorRuntime, native_scorers_for_trajectory
 
 __all__ = [
     "ActivationRequest",
@@ -67,9 +68,11 @@ __all__ = [
     "ToolExecutionResult",
     "ToolRoundReceipt",
     "ToolTurnContext",
+    "TrajectoryEvaluatorRuntime",
     "construct_episode_preamble",
     "construct_probe_episode",
     "materialize_episode_inputs",
+    "native_scorers_for_trajectory",
 ]
 
 
