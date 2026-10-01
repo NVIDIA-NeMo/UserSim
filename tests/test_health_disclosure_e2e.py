@@ -23,12 +23,14 @@ monkeypatched the audit function itself.
 
 from __future__ import annotations
 
+import functools
 import json
 import tempfile
 
 import pandas as pd
 import pyarrow as pa
 import pytest
+from test_simulator_pipeline_e2e import _cli_built_simulator_config
 
 from usersim.engine.core import realized_audit as ra
 from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
@@ -100,11 +102,27 @@ def _col(extras: dict, name: str):
     return json.loads(raw) if isinstance(raw, str) else raw
 
 
+@functools.cache
+def _kept_columns() -> frozenset[str]:
+    """The columns the engine writes back: the configured one plus
+    ``side_effect_columns``, from the config a CLI run builds."""
+    cfg = _cli_built_simulator_config("health_therapy_disclosure", "en_US")
+    return frozenset({cfg.name, *cfg.side_effect_columns})
+
+
 def _persist(extras: dict) -> dict:
-    """JSON-encode the way the trajectory store does, so the scorer sees the
-    persisted shape (strings) rather than live Python objects."""
+    """Keep only what the engine keeps, then JSON-encode the way the trajectory
+    store does, so the scorer sees the persisted row rather than live objects.
+
+    The filter is the step that once dropped every guarded column: the engine
+    discards any key not declared in ``side_effect_columns`` without a warning,
+    so a row built straight from ``build_result_extras`` hides that loss.
+    """
+    kept = _kept_columns()
     out = {}
     for k, v in extras.items():
+        if k not in kept:
+            continue
         out[k] = json.dumps(v, ensure_ascii=False, default=str) if isinstance(v, (list, dict)) else v
     return out
 
@@ -116,6 +134,7 @@ async def _run_producer(monkeypatch, plan=None, said=None):
     full arc: early turns can only get a partial past the Guard's
     disclosure_gate, later ones can go full.
     """
+    monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
     probe = _guarded_probe()
     probe.init_guarded_moves(disclosure_style="incremental", max_turns=MAX_TURNS)
     assert probe._moves_on and probe._topics, "guarded variant did not initialise"
