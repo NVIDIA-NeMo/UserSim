@@ -27,8 +27,8 @@ content once the assistant (the system under test) earns it.
 Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
 + its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under
 `assets/<label>/sample.yaml` (with its marker in `core/_assets.py` and label in
-`clinical_profile_bank.CLIENT_PROBE_LABELS`) + one import line in
-`generator.py::_bootstrap_probes`.
+`clinical_profile_bank.CLIENT_PROBE_LABELS`) + its module path in
+`core/probes.py::BUILTIN_PROBE_MODULES`.
 
 > **Reusing the move-space elsewhere.** `GuardedMoveMixin` hardcodes nothing
 > domain-specific: a probe family in another domain can compose it and supply its own

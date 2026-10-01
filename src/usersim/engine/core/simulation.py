@@ -1091,8 +1091,10 @@ class ConversationLoop:
         patience: float = 0.5,
         locale: str = "en_US",
         provenance: Provenance | None = None,
+        state: ConversationState | None = None,
+        seed_state: bool = True,
     ) -> dict:
-        state = ConversationState(outcome=OutcomeBuilder(provenance=provenance or Provenance()))
+        state = state or ConversationState(outcome=OutcomeBuilder(provenance=provenance or Provenance()))
         # Wire the per-row outcome builder back to the existing
         # builder we passed via Provenance. Asset-driven probes
         # constructed via ``BankBackedProbe`` already pin
@@ -1110,7 +1112,7 @@ class ConversationLoop:
         # Path-agnostic side-channel metadata hook. Called before
         # either the verbatim-injection path or the generate-and-gate
         # path runs — both preserve pre-seeded metadata via setdefault.
-        if hasattr(probe, "seed_state_metadata"):
+        if seed_state and hasattr(probe, "seed_state_metadata"):
             try:
                 probe.seed_state_metadata(state)
             except Exception as e:

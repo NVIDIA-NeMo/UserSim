@@ -26,6 +26,16 @@ same id in every run, forever.
 **`trajectory_id`** hashes the persona together with the probe, the resolved
 model identities, and the prompt version.
 
+The probe component is the variant the *dispatcher seeds* before the probe
+runs: the probe module's first `PROBE_VARIANTS` entry, or an explicit
+`probe_variant` column. Seven probes discover a finer-grained variant only
+once they have picked a task (a fact category, a pressure strategy, a
+sanctioned action). That discovered value lands on the finished row for
+stratified reporting, and deliberately does **not** feed the id: identity has
+to be knowable before the episode runs, or resume and deduplication cannot
+skip work they have already done. `tests/engine/core/test_episode_input.py`
+pins the id of every registered probe against this rule.
+
 That combination buys three things at once. A run is **resumable**, because
 `simulate` skips any `trajectory_id` already present. A run is
 **reproducible**, because changing a model or a prompt produces a different
@@ -33,6 +43,15 @@ id rather than silently overwriting. And two assistants are **comparable**,
 because their trajectory ids differ while still joining cleanly on
 `persona_uuid`, which is what makes matched-pair statistics possible across
 model versions.
+
+## Episode construction, in one place
+
+`core/episode_input.py` resolves one episode's inputs (persona-derived
+settings, probe metadata, provenance, and trajectory identity) without
+calling a model. `ConversationSimulatorGenerator` and the externally hosted
+`core/episode_runtime.py` both consume it, so a hosted run and a standalone
+run start from the same resolved row rather than two reconstructions that
+drift apart. `docs/engine/EXTERNAL_PROBE_RUNTIME.md` covers the host contract.
 
 ## Every row explains itself
 

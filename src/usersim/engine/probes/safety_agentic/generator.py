@@ -280,6 +280,73 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         # only removes BEHAVIORAL instruction.
         return self._api_tools
 
+    async def get_verbatim_first_user_turn(self, state: ConversationState) -> str | None:
+        """Return the bank-authored request for either execution host."""
+        del state
+        ar = self._task.action_request
+        return await self._localize_verbatim(ar.initial_user_prompt.for_locale(self._asset_locale))
+
+    def seed_state_metadata(self, state: ConversationState) -> None:
+        """Seed scorer-visible action metadata for either execution host."""
+        ar = self._task.action_request
+        state.metadata.update(
+            {
+                "action_request_id": ar.id,
+                "sub_protocol": ar.sub_protocol,
+                "sanctioned_action_name": ar.sanctioned_action_name,
+                "tempted_action_name": ar.tempted_action_name,
+                "bank_id": ar.bank_id,
+                "bank_version": ar.bank_version,
+                "attempted_actions": [],
+            }
+        )
+
+    async def execute_tool_call(
+        self,
+        name: str,
+        args: dict[str, Any],
+        tc: Any,
+        state: ConversationState,
+        models: dict,
+        *,
+        turn_idx: int,
+        call_idx: int,
+    ) -> str:
+        """Simulate one declared action and preserve native scorer evidence."""
+        del tc, models
+        ar = self._task.action_request
+        in_simulated = name in self._declared_tool_names
+        state.metadata.setdefault("attempted_actions", []).append(
+            {
+                "tool_name": name,
+                "tool_args": args,
+                "turn_idx": turn_idx,
+                "was_in_simulated_tools": in_simulated,
+            }
+        )
+        state.outcome.add_trace(
+            SimulationTrace(
+                kind=TraceKind.TOOL_CALL_VERIFIER,
+                turn_idx=turn_idx,
+                call_idx=call_idx,
+                rating="success" if in_simulated else "failure",
+                detail=f"{name} called" if in_simulated else f"{name} not in declared tool spec",
+                extra={"tool_name": name},
+            )
+        )
+        if in_simulated and name in ar.mock_tool_responses:
+            return ar.mock_tool_responses[name].content
+        return json.dumps(
+            {
+                "error": (
+                    "Unknown tool — the assistant called a tool not in the declared tool spec"
+                    if not in_simulated
+                    else "Tool exists but no mock response defined"
+                ),
+                "tool_name": name,
+            }
+        )
+
     async def after_assistant_turn(
         self,
         models: dict,
@@ -317,6 +384,8 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         models: dict[str, Any],
         data: dict[str, Any],
         cfg: Any,
+        state: ConversationState | None = None,
+        seed_state: bool = True,
     ) -> dict:
         """Custom agentic simulate loop.
 
@@ -327,7 +396,6 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         if self._task is None:  # pragma: no cover — __init__ raises
             raise SafetyAgenticProbeError("no task resolved at dispatch time")
 
-        ar = self._task.action_request
         # Ensure the row-level outcome builder is the one we write into.
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
@@ -335,16 +403,11 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         previous_builder = get_current_outcome_builder()
         set_current_outcome_builder(builder)
         try:
-            state = ConversationState(outcome=builder)
+            state = state or ConversationState(outcome=builder)
             # Seed metadata up front — survives even if turn-1 fails
             # (pin-side-channels-first discipline).
-            state.metadata["action_request_id"] = ar.id
-            state.metadata["sub_protocol"] = ar.sub_protocol
-            state.metadata["sanctioned_action_name"] = ar.sanctioned_action_name
-            state.metadata["tempted_action_name"] = ar.tempted_action_name
-            state.metadata["bank_id"] = ar.bank_id
-            state.metadata["bank_version"] = ar.bank_version
-            state.metadata["attempted_actions"] = []
+            if seed_state:
+                self.seed_state_metadata(state)
 
             # Inject the verbatim user turn-1 from the asset locale (en_IN
             # base for an India variant), machine-translated into the
@@ -355,7 +418,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             state.messages.append(
                 {
                     "role": "user",
-                    "content": await self._localize_verbatim(ar.initial_user_prompt.for_locale(self._asset_locale)),
+                    "content": await self.get_verbatim_first_user_turn(state),
                 }
             )
 
@@ -422,59 +485,34 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
                 # Intercept and record each tool call.
                 for tc_idx, tc in enumerate(tool_calls):
                     tool_name, tool_args = _extract_tool_call(tc)
-                    in_simulated = tool_name in self._declared_tool_names
-                    state.metadata["attempted_actions"].append(
-                        {
-                            "tool_name": tool_name,
-                            "tool_args": tool_args,
-                            "turn_idx": assistant_turn_idx,
-                            "was_in_simulated_tools": in_simulated,
-                        }
-                    )
-                    builder.add_trace(
-                        SimulationTrace(
-                            kind=TraceKind.TOOL_CALL_VERIFIER,
-                            turn_idx=assistant_turn_idx,
-                            call_idx=tc_idx,
-                            rating="success" if in_simulated else "failure",
-                            detail=(
-                                f"{tool_name} called" if in_simulated else f"{tool_name} not in declared tool spec"
-                            ),
-                            extra={"tool_name": tool_name},
-                        )
-                    )
-
-                    # Append a tool response — canned mock or synthetic
-                    # error for fabricated tools.
                     tc_id = tc.get(
                         "id",
                         f"call_{assistant_turn_idx}_{tc_idx}",
                     )
-                    if in_simulated and tool_name in ar.mock_tool_responses:
-                        mock = ar.mock_tool_responses[tool_name]
-                        state.messages.append(
-                            {
-                                "role": "tool",
-                                "content": mock.content,
-                                "tool_call_id": tc_id,
-                            }
-                        )
-                    else:
-                        error_payload = {
-                            "error": (
-                                "Unknown tool — the assistant called a tool not in the declared tool spec"
-                                if not in_simulated
-                                else "Tool exists but no mock response defined"
-                            ),
-                            "tool_name": tool_name,
+                    payload = await self.execute_tool_call(
+                        tool_name,
+                        tool_args,
+                        tc,
+                        state,
+                        models,
+                        turn_idx=assistant_turn_idx,
+                        call_idx=tc_idx,
+                    )
+                    state.messages.append(
+                        {
+                            "role": "tool",
+                            "content": payload,
+                            "tool_call_id": tc_id,
                         }
-                        state.messages.append(
-                            {
-                                "role": "tool",
-                                "content": json.dumps(error_payload),
-                                "tool_call_id": tc_id,
-                            }
-                        )
+                    )
+                    self.on_tool_call_executed(
+                        tool_call_id=tc_id,
+                        tool_name=tool_name,
+                        arguments=tool_args,
+                        payload=payload,
+                        turn_idx=assistant_turn_idx,
+                        call_idx=tc_idx,
+                    )
 
                 builder.set_n_turns(assistant_turn_idx + 1)
 

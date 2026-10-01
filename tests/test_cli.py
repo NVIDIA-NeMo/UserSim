@@ -861,6 +861,36 @@ class TestDryRuns:
                 ]
             )
 
+    def test_simulate_materializes_resolved_inputs_without_models(self, tmp_path):
+        out = tmp_path / "episode-inputs.jsonl"
+
+        rc = cli.main(
+            [
+                "simulate",
+                "--locale",
+                "en_US",
+                "--num-rows",
+                "1",
+                "--probe-mix",
+                "tool_calling=1",
+                "--random-seed",
+                "42",
+                "--materialize-inputs",
+                "--out",
+                str(out),
+            ]
+        )
+
+        assert rc == 0
+        row = json.loads(out.read_text().strip())
+        assert row["probe_type"] == "tool_calling"
+        assert row["persona"]
+        assert row["theme"]
+        assert row["tools"]
+        assert row["usersim_config"]["random_seed"] == 42
+        assert row["usersim_config"]["finance_retrieval_mode"] == "dense"
+        assert row["usersim_config"]["store_reasoning"] is True
+
     def test_simulate_panel_or_locale_required(self, tmp_path):
         with pytest.raises(SystemExit):
             cli.main(
