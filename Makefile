@@ -204,7 +204,7 @@ export CHECK_NOTEBOOKS_PY
 # environment rather than offering a bare "python3" per checkout.
 install-kernel:  ## Register a Jupyter kernel named for this project's venv
 	@$(UV) run python -m ipykernel install --user \
-		--name usersim --display-name "UserSim (.venv)"
+		--name usersim --display-name "User Sim (.venv)"
 
 check-doc-links:  ## Fail on broken relative links in tracked markdown
 	@$(UV) run python scripts/check_doc_links.py

@@ -1,6 +1,6 @@
-# Contributing to NeMo UserSim
+# Contributing to NeMo User Sim
 
-Thanks for your interest. This guide covers **developing** UserSim. To *use*
+Thanks for your interest. This guide covers **developing** User Sim. To *use*
 it, start with the [README](README.md).
 
 ## Developer Certificate of Origin
@@ -149,7 +149,7 @@ Loaded 9 models (providers: ['my-endpoint'])
 
 If you would rather configure an endpoint once for every project rather than
 per checkout, add it to `~/.data-designer/model_providers.yaml`: Data Designer
-reads that file and UserSim merges it, and it sits outside any repository.
+reads that file and User Sim merges it, and it sits outside any repository.
 
 ### Credentials
 

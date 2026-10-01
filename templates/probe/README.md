@@ -1,6 +1,6 @@
 # Probe template gallery
 
-A copy-and-edit reference for adding a new probe to NeMo UserSim via the
+A copy-and-edit reference for adding a new probe to NeMo User Sim via the
 `BaseProbe` substrate.
 
 For the **end-to-end tutorial** (decision tree on which shape to

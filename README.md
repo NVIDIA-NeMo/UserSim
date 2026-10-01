@@ -1,4 +1,4 @@
-# NeMo UserSim: Population-Grounded User Simulation for Models and Agents
+# NeMo User Sim: Population-Grounded User Simulation for Models and Agents
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -30,7 +30,7 @@ and real data are not a binary choice, but grounded simulation lets you move
 at the speed of light (SOL) rather than the speed of traffic.
 
 Prompting a model to "act as a user" does not get you there. It produces
-unrealistically articulate, demographically homogeneous users. NeMo UserSim
+unrealistically articulate, demographically homogeneous users. NeMo User Sim
 instead samples from
 [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
 millions of synthetic individuals grounded in real census data, generated
@@ -49,7 +49,7 @@ allow. The reasoning behind the design, and how far the results carry, is in
 
 What a single simulated trajectory looks like in practice:
 
-![A NeMo UserSim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](docs/images/conversation_preview.png)
+![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](docs/images/conversation_preview.png)
 
 A census-grounded persona, an OCEAN-derived interaction style, a probe-driven
 multi-turn conversation, and the trajectory metadata that downstream

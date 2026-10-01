@@ -1,10 +1,10 @@
 # External Probe Runtime
 
-`ProbeEpisodeRuntime` lets an external host run a UserSim episode without
-reimplementing any part of it. UserSim runs the unmodified probe dispatch as a
+`ProbeEpisodeRuntime` lets an external host run a User Sim episode without
+reimplementing any part of it. User Sim runs the unmodified probe dispatch as a
 background task and pauses at every model boundary; the host answers each pause
 with a model response. Per-episode settings, user-turn gates, judges, early
-stop, tool execution and finalize stay UserSim's.
+stop, tool execution and finalize stay User Sim's.
 
 The host never assembles a prompt, picks a tool index, or decides when a turn
 ends. Each paused request states what comes next.
@@ -64,12 +64,12 @@ runtime_models = {
 }
 ```
 
-`max_tokens` is the role's budget; UserSim scales it for non-Latin-script
+`max_tokens` is the role's budget; User Sim scales it for non-Latin-script
 locales exactly as it does for a configured model, and the scaled value arrives
 in the request's `parameters`.
 
 `tool_calling` also simulates each tool's response with `api_response_model`, a
-model UserSim calls itself rather than sending to the host. A host running
+model User Sim calls itself rather than sending to the host. A host running
 `tool_calling` therefore passes one: anything exposing the same `acompletion()`
 as a Data Designer model facade.
 
@@ -109,18 +109,18 @@ row = await runtime.finalize()
 Each `ActivationRequest` carries:
 
 - `role`: `user`, `assistant`, `judge` or `summary`;
-- `messages`: the exact input UserSim would send, so the host never builds one;
-- `tools` and `tools_enabled`: whether UserSim is offering tools for *this*
+- `messages`: the exact input User Sim would send, so the host never builds one;
+- `tools` and `tools_enabled`: whether User Sim is offering tools for *this*
   call. It disables them when the probe's loop asks for a final answer;
 - `continues_turn`: whether this request continues the turn already in
   progress rather than opening a new one;
-- `parameters`: the sampling options UserSim would have passed.
+- `parameters`: the sampling options User Sim would have passed.
 
 Recording the same `activation_id` with an identical payload is idempotent and
 replays the same transition, including after the episode completes. Reusing an
 id with a different payload is rejected.
 
-`finalize()` returns the row UserSim's own dispatch produced: the resolved input
+`finalize()` returns the row User Sim's own dispatch produced: the resolved input
 row updated with the result, which is what `ConversationSimulatorGenerator`
 writes for the same inputs. Loop-written columns such as `user_query` are on it.
 `close()` cancels a running episode.
@@ -128,7 +128,7 @@ writes for the same inputs. Loop-written columns such as `user_query` are on it.
 ## Tool calls
 
 The host records the assistant's response, tool calls included, **before**
-issuing those calls. UserSim's own loop then executes them, in its own context
+issuing those calls. User Sim's own loop then executes them, in its own context
 and with its own `turn_idx` and `call_idx`, and the payloads become available:
 
 ```python
@@ -145,7 +145,7 @@ cap never runs, and `tool_result()` raises for it; `executed_tool_calls()` is
 the authoritative list of what ran.
 
 A host that cannot record tool calls simply returns one model response per
-request with no `tool_calls`; UserSim runs the tools either way.
+request with no `tool_calls`; User Sim runs the tools either way.
 
 ## Contract errors
 

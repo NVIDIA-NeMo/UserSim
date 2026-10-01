@@ -75,7 +75,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="usersim",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
-            "🎭  NeMo UserSim \u2014 Population-Grounded User Simulation\n"
+            "🎭  NeMo User Sim \u2014 Population-Grounded User Simulation\n"
             "\n"
             "Simulate a statistically representative, census-grounded population of\n"
             "users having multi-turn conversations with your LLM \u2014 then score the\n"

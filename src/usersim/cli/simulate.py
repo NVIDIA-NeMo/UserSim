@@ -213,7 +213,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--materialize-inputs",
         action="store_true",
         help=(
-            "Write fully resolved UserSim episode-input rows to --out and exit "
+            "Write fully resolved User Sim episode-input rows to --out and exit "
             "without invoking any model. --out must end in .jsonl or .parquet."
         ),
     )

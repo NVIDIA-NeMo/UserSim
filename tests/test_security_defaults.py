@@ -207,12 +207,12 @@ class TestProductNaming:
     on them before, which is how a brand sweep could quietly rewrite a
     title and pass.
 
-    The split is deliberate: ``NeMo UserSim`` is the product name a reader
+    The split is deliberate: ``NeMo User Sim`` is the product name a reader
     sees; ``usersim`` is the technical identifier (CLI, imports, env vars,
     entry-point groups) and must stay lowercase and unprefixed.
     """
 
-    DISPLAY = "NeMo UserSim"
+    DISPLAY = "NeMo User Sim"
 
     def _source(self, dotted: str) -> str:
         import importlib
@@ -250,7 +250,7 @@ class TestProductNaming:
             "usersim.cli",
         ):
             source = self._source(module)
-            for stale in ("NeMo-Sim", "nemo-sim", "NEMO-SIM"):
+            for stale in ("NeMo-Sim", "nemo-sim", "NEMO-SIM", "NeMo UserSim"):
                 assert stale not in source, f"{module} still contains {stale!r}"
 
     def test_technical_identifiers_stay_unprefixed(self) -> None:

@@ -2306,7 +2306,7 @@ def _fallback_html(report: ComparisonReport) -> str:
     return f"""
 <main class="comparison-app">
   <header class="hero">
-    <h1>NeMo UserSim Multi-Model Comparison</h1>
+    <h1>NeMo User Sim Multi-Model Comparison</h1>
     <div class="hero-runid">Comparison ID: <code>{html.escape(report.comparison_id)}</code></div>
     <p class="muted">Static fallback view. React 19 mounts the interactive Vega-Lite dashboard above (leaderboard, Pareto scatter, locale-tabbed grouped bars, etc.) when it can — but it ships ESM-only and modern browsers block ES module imports from <code>file://</code> URLs. If you're seeing this, run <code>python -m http.server 8000</code> from the repo root and reopen via <code>http://localhost:8000/...</code>, or render inline from the notebook (Jupyter serves over HTTP).</p>
     <div class="stats stats-row-1">
@@ -2449,7 +2449,7 @@ def _write_index_html(
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Security-Policy" content="{_CSP}" />
-<title>NeMo UserSim Multi-Model Comparison</title>
+<title>NeMo User Sim Multi-Model Comparison</title>
 <style>{css}</style>
 </head>
 <body>
@@ -2535,7 +2535,7 @@ function HeroPanel() {{
   }}, []);
   return h("header", {{className: "hero"}},
     h("h1", null,
-      h("span", null, "NeMo UserSim Multi-Model Comparison"),
+      h("span", null, "NeMo User Sim Multi-Model Comparison"),
       h("span", {{className: "hero-model"}}, `${{report.entries.length}} models · ${{report.locales.length}} locales`)
     ),
     h("div", {{className: "hero-runid"}}, `Comparison ID: ${{report.comparison_id}}`),
