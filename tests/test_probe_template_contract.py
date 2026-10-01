@@ -18,11 +18,28 @@ import pytest
 _TEMPLATES = sorted((Path(__file__).resolve().parent.parent / "templates" / "probe").glob("generator_*.py"))
 
 
+def _run_dispatch_overrides(template: Path) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+    tree = ast.parse(template.read_text(encoding="utf-8"), filename=str(template))
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "run_dispatch"
+    ]
+
+
+_DISPATCH_TEMPLATES = [template for template in _TEMPLATES if _run_dispatch_overrides(template)]
+
+
 def test_probe_templates_are_present() -> None:
     assert _TEMPLATES, "no probe templates found"
 
 
-@pytest.mark.parametrize("template", _TEMPLATES, ids=lambda path: path.name)
+def test_some_template_overrides_run_dispatch() -> None:
+    """The hosted-parameter check below must cover at least one template."""
+    assert _DISPATCH_TEMPLATES, "no probe template overrides run_dispatch"
+
+
+@pytest.mark.parametrize("template", _DISPATCH_TEMPLATES, ids=lambda path: path.name)
 def test_custom_run_dispatch_accepts_the_hosted_parameters(template: Path) -> None:
     """A template that overrides run_dispatch must be hostable.
 
@@ -30,17 +47,7 @@ def test_custom_run_dispatch_accepts_the_hosted_parameters(template: Path) -> No
     ``run_dispatch(..., state=..., seed_state=False)``. A template missing
     either parameter produces probes that raise ``TypeError`` when hosted.
     """
-    tree = ast.parse(template.read_text(encoding="utf-8"), filename=str(template))
-
-    dispatches = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "run_dispatch"
-    ]
-    if not dispatches:
-        pytest.skip(f"{template.name} does not override run_dispatch")
-
-    for node in dispatches:
+    for node in _run_dispatch_overrides(template):
         names = {arg.arg for arg in node.args.kwonlyargs} | {arg.arg for arg in node.args.args}
         missing = {"state", "seed_state"} - names
         assert not missing, (
