@@ -41,6 +41,7 @@ from usersim.cli._persona_language import (
     DEFAULT_PERSONA_DATASETS_DIR,
     persona_sampler_params,
 )
+from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 logger = logging.getLogger("usersim.cli.pipeline")
 
@@ -567,7 +568,7 @@ def build_evaluator_config_builder(
     scorers: list[str] | None = None,
     skip_if_existing: bool = True,
     output_column: str = "assistant_eval",
-    prompt_version: str = "v1.0",
+    prompt_version: str = EVAL_PROMPT_VERSION,
 ):
     """Build a Data Designer ConfigBuilder for the trajectory evaluator.
 
@@ -720,7 +721,7 @@ def evaluate_dataframe(
     scorers: list[str],
     judges: list[dict[str, Any]] | None = None,
     axes: list[str] | None = None,
-    prompt_version: str = "v1.0",
+    prompt_version: str = EVAL_PROMPT_VERSION,
     eval_column: str = "assistant_eval",
     skip_if_existing: bool = True,
 ):

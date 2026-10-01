@@ -261,7 +261,7 @@ config_builder.add_column(
         ],
         axes=None,                           # None = all applicable for the row's probe_family; [] = scorers only
         scorers=[],                          # opt in per probe (e.g., ["tool_use"])
-        prompt_version="v1.0",               # bump to invalidate prior cells
+        prompt_version="v1.1",               # bump to invalidate prior cells
         skip_if_existing=True,               # partial-re-run aware
     )
 )
@@ -277,7 +277,7 @@ config_builder.add_column(
     "judge_families": ["openai", "nvidia_nemotron"],
     "axes": ["helpfulness", "accuracy", "..."],
     "scorers": [],
-    "prompt_version": "v1.0",
+    "prompt_version": "v1.1",
     "evaluator_version": "v1.0"
   },
   "axes": {

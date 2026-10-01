@@ -18,6 +18,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 from usersim.engine.evaluator import scorers as scorers_module
+from usersim.engine.evaluator.axes import select_axes
 from usersim.engine.evaluator.config import (
     JudgeSpecConfig,
     TrajectoryEvaluatorConfig,
@@ -98,6 +99,37 @@ def _ok_judges() -> list[JudgeSpecConfig]:
 
 
 # ── Behavioral tests ───────────────────────────────────────────────
+
+
+class TestJudgePrompt:
+    async def test_each_judge_is_sent_the_rubric_for_the_rows_axes(self) -> None:
+        cfg = TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges())
+        gen = _build_generator(cfg)
+        prompts: list[str] = []
+
+        async def _capture(models, judge_alias, prompt, schema_model, max_tokens):
+            prompts.append(prompt)
+            return {}
+
+        gen._call_judge = _capture  # type: ignore[method-assign]
+        await gen.agenerate(
+            {
+                "conversation_messages": json.dumps(
+                    [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+                ),
+                "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+                "probe_family": "tool_calling",
+                "locale": "en_US",
+                "conversation_language": "English",
+            }
+        )
+
+        assert len(prompts) == len(cfg.judges)
+        for axis in select_axes("tool_calling"):
+            assert axis.description in prompts[0], f"{axis.name} is missing from the judge prompt"
+            assert all(anchor in prompts[0] for anchor in axis.options.values()), (
+                f"an anchor of {axis.name} is missing from the judge prompt"
+            )
 
 
 class TestNoAssistantMessages:

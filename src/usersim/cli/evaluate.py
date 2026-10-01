@@ -21,6 +21,8 @@ import logging
 import shutil
 from pathlib import Path
 
+from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
+
 logger = logging.getLogger("usersim.cli.eval")
 
 
@@ -98,7 +100,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--prompt-version",
         type=str,
-        default="v1.0",
+        default=EVAL_PROMPT_VERSION,
         help="Bump to invalidate prior eval cells with a different version.",
     )
     p.add_argument(

@@ -27,6 +27,7 @@ from usersim.engine.evaluator.judges import (
     JudgeSpec,
     validate_ensemble_diversity,
 )
+from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 
 class JudgeSpecConfig(BaseModel):
@@ -125,7 +126,7 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     # ── Partial-re-run envelope ─────────────────────────────────────
     prompt_version: str = Field(
-        default="v1.0",
+        default=EVAL_PROMPT_VERSION,
         description=(
             "Bumping this invalidates prior eval cells whose envelope "
             "carries a different prompt_version — they will be re-judged "

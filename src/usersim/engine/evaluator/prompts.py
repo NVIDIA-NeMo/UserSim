@@ -12,6 +12,16 @@ in-sim / out-of-sim boundary.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Iterable
+
+if TYPE_CHECKING:
+    from data_designer.config.column_configs import Score
+
+#: Version of the judge prompt below. Every evaluation cell records it in its
+#: envelope, so bumping it after a prompt change re-judges stored rows on the
+#: next run instead of mixing scores from two prompts.
+EVAL_PROMPT_VERSION = "v1.1"
+
 EVAL_SYSTEM_PROMPT = (
     "You are an expert evaluator of AI assistant conversations. "
     "Score each axis carefully with detailed reasoning. "
@@ -61,9 +71,29 @@ SCORING CALIBRATION:
 Do NOT default to 5. Critically evaluate each axis. A competent response that gets the
 job done is a 4, not a 5. A 5 means you cannot think of a way to improve the response.
 
+RUBRIC: each axis below says what it measures and what each score means for it.
+These anchors define the axis's scale; apply them with the calibration above.
+
+{rubric}
+
 Score each axis according to its rubric. For each axis, provide a score
 (choosing from the defined options) and detailed reasoning explaining
 your assessment."""
+
+
+def render_rubric(axes: Iterable[Score]) -> str:
+    """The rubric for ``axes`` as prompt text: each axis's name and description,
+    then the anchor for every score it allows.
+
+    The response schema carries the same text, but a schema constrains the
+    judge's output; nothing guarantees a provider shows it to the model.
+    """
+    blocks = []
+    for axis in axes:
+        lines = [f"{axis.name}: {axis.description}"]
+        lines.extend(f"  {score}: {anchor}" for score, anchor in axis.options.items())
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks)
 
 
 def build_locale_rigor_instruction(language: str) -> str:

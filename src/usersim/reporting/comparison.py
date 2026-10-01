@@ -30,8 +30,8 @@ Edge-case discipline (also per plan):
   the cells aren't drawn from the same evaluator output column, so a join
   would silently align mismatched data).
 
-Other drift dimensions (sample_mode, prompt_version, persona panel,
-missing sim_health) are surfaced as warnings on
+Other drift dimensions (sample_mode, judge prompt version, n_trajectories,
+persona panel, missing sim_health) are surfaced as warnings on
 ``ComparisonReport.apples_to_apples_warnings`` rather than errors.
 
 This module performs no I/O of HTML — that is the dashboard module's
@@ -110,6 +110,7 @@ class ComparisonEntry:
     mean_turns_per_conversation: float
     sample_mode: str
     manifest_path: str
+    evaluator_prompt_versions: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -536,6 +537,14 @@ def _detect_apples_to_apples_warnings(
             "values differ, so leaderboard rankings carry different statistical power."
         )
 
+    prompt_versions = sorted({v for e in entries for v in e.evaluator_prompt_versions})
+    if len(prompt_versions) > 1:
+        warnings.append(
+            f"Judge prompt versions differ across runs ({prompt_versions}); judge "
+            "scores from different prompt versions are not comparable. Re-run eval "
+            "so every run uses the same version."
+        )
+
     n_trajs = [e.n_trajectories for e in entries if e.n_trajectories > 0]
     if len(n_trajs) >= 2:
         lo, hi = min(n_trajs), max(n_trajs)
@@ -667,6 +676,7 @@ def _build_entry(
         mean_turns_per_conversation=float(mean_turns) if isinstance(mean_turns, (int, float)) else 0.0,
         sample_mode=sample_mode,
         manifest_path=str(manifest_path),
+        evaluator_prompt_versions=[str(v) for v in manifest.get("evaluator_prompt_versions") or []],
     )
 
 

@@ -19,7 +19,7 @@ Cell envelope (the JSON written into ``self.config.name``):
         "judge_families": ["openai", "nvidia_nemotron", ...],
         "axes": ["helpfulness", "accuracy", ...],
         "scorers": ["tool_use", ...],
-        "prompt_version": "v1.0",
+        "prompt_version": "v1.1",
         "evaluator_version": "v1.0",
       },
       "axes": {
@@ -74,6 +74,7 @@ from usersim.engine.evaluator.prompts import (
     EVAL_SYSTEM_PROMPT,
     EVAL_USER_PROMPT,
     build_locale_rigor_instruction,
+    render_rubric,
 )
 from usersim.engine.evaluator.scorers import get_scorer
 
@@ -235,6 +236,7 @@ class TrajectoryEvaluatorGenerator(
             locale=locale,
             locale_rigor_instruction=build_locale_rigor_instruction(language),
             conversation=conversation_text,
+            rubric=render_rubric(applicable_axes),
         )
 
         max_tokens = cfg.max_judge_tokens_non_ascii if locale in _NON_ASCII_LOCALES else cfg.max_judge_tokens

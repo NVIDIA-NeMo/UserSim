@@ -808,6 +808,23 @@ class TestApplesToApples:
         assert m1_rollup.sim_status_ok_rate is None
         # Still rendered, no exception.
 
+    def test_warns_when_runs_were_judged_with_different_prompt_versions(self, tmp_path):
+        older, newer = _manifest(run_id="1"), _manifest(run_id="2")
+        older["evaluator_prompt_versions"] = ["v1.0"]
+        newer["evaluator_prompt_versions"] = ["v1.1"]
+        report = build_comparison_report(
+            [_write_manifest(tmp_path, older), _write_manifest(tmp_path, newer)], comparison_id="cmp_test"
+        )
+        assert any("Judge prompt versions differ" in w for w in report.apples_to_apples_warnings)
+
+    def test_one_prompt_version_across_runs_raises_no_version_warning(self, tmp_path):
+        first, second = _manifest(run_id="1"), _manifest(run_id="2")
+        first["evaluator_prompt_versions"] = second["evaluator_prompt_versions"] = ["v1.1"]
+        report = build_comparison_report(
+            [_write_manifest(tmp_path, first), _write_manifest(tmp_path, second)], comparison_id="cmp_test"
+        )
+        assert not any("prompt version" in w for w in report.apples_to_apples_warnings)
+
     def test_clean_runs_emit_no_warnings(self, tmp_path):
         m1 = _write_manifest(tmp_path, _manifest(run_id="1", model_id="v/x/alpha"))
         m2 = _write_manifest(tmp_path, _manifest(run_id="2", model_id="v/x/beta"))
