@@ -13,11 +13,13 @@ single-family ensemble measures agreement with itself. A single judge is
 allowed and opts out of inter-judge agreement reporting.
 
 **Scorers** are per-probe functions over stored columns, each returning a
-structured verdict rather than a free-form opinion. Four are fully
-deterministic (`health_disclosure_concealment`, `language_compliance`,
-`refusal_basics`, `response_shape`); the other eight call a model to reach a
-judgement the stored columns cannot settle on their own, such as whether a
-retrieved fact is actually supported. Twelve ship:
+structured verdict rather than a free-form opinion. Three are fully
+deterministic (`language_compliance`, `refusal_basics`, `response_shape`); the
+other nine call a model to reach a judgement the stored columns cannot settle on
+their own, such as whether a retrieved fact is actually supported or what a
+free-form turn actually disclosed (`health_disclosure_concealment`, which falls
+back to deterministic arithmetic over committed intent when no auditor is wired).
+Twelve ship:
 
 | Scorer | Reads |
 |---|---|

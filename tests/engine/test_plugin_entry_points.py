@@ -16,6 +16,7 @@ network guard along with everything else, so a test routed through it can
 pass with an unmocked model call underneath.
 """
 
+import sys
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -28,12 +29,29 @@ from test_simulator_pipeline_e2e import (
     _synthetic_row_data,
 )
 
-from usersim.engine.core.probes import known_probes
+from usersim.engine.core.probes import known_probes, resolve_probe
 from usersim.engine.evaluator.generator import TrajectoryEvaluatorGenerator
 from usersim.engine.generator import ConversationSimulatorGenerator
+from usersim.engine.probes.health_disclosure.mixin import GUARDED_RESULT_COLUMNS
 
 PROBE_TYPE = "general_open_ended"
 LOCALE = "en_US"
+
+
+def _probe_variant_pairs() -> list[tuple[str, str]]:
+    """Every registered probe paired with every variant it declares."""
+    pairs = []
+    for probe in sorted(known_probes()):
+        module = sys.modules[resolve_probe(probe).__module__]
+        pairs.extend((probe, str(v)) for v in module.PROBE_VARIANTS)
+    return pairs
+
+
+@pytest.fixture
+def no_moves_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``USERSIM_DISCLOSURE_MOVES`` overrides ``probe_variant``, so a value left set
+    in the shell would decide what the variant tests exercise."""
+    monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
 
 
 def _resource_provider() -> MagicMock:
@@ -87,15 +105,21 @@ class TestSimulatorRunsARow:
     """The simulator, constructed and driven the way the engine does."""
 
     @staticmethod
-    async def _run_one_row() -> tuple[dict[str, Any], Any]:
-        cfg = _cli_built_simulator_config(PROBE_TYPE, LOCALE)
-        data = _synthetic_row_data(PROBE_TYPE, LOCALE, cfg)
+    async def _run_one_row(
+        probe_type: str = PROBE_TYPE, variant: str | None = None
+    ) -> tuple[dict[str, Any], Any, set[str]]:
+        """Run one row; return it, its config, and the keys the row started with."""
+        cfg = _cli_built_simulator_config(probe_type, LOCALE)
+        data = _synthetic_row_data(probe_type, LOCALE, cfg)
+        if variant is not None:
+            data["probe_variant"] = variant
+        before = set(data)
         generator = ConversationSimulatorGenerator(cfg, _resource_provider())
         with _patched_call_llm():
-            return await generator.agenerate(data), cfg
+            return await generator.agenerate(data), cfg, before
 
     async def test_returns_the_row_with_the_configured_column(self) -> None:
-        row, cfg = await self._run_one_row()
+        row, cfg, _ = await self._run_one_row()
         assert isinstance(row, dict), f"a cell-by-cell generator returns the row mapping, got {type(row).__name__}"
         assert cfg.name in row, f"the configured column {cfg.name!r} is absent from the returned row"
 
@@ -106,22 +130,17 @@ class TestSimulatorRunsARow:
         side-effect columns and drops everything else, so a value written
         under any other name is computed and then silently discarded.
         """
-        cfg = _cli_built_simulator_config(PROBE_TYPE, LOCALE)
-        data = _synthetic_row_data(PROBE_TYPE, LOCALE, cfg)
-        before = set(data)
-        generator = ConversationSimulatorGenerator(cfg, _resource_provider())
-        with _patched_call_llm():
-            row = await generator.agenerate(data)
-
+        row, cfg, before = await self._run_one_row()
         declarable = {cfg.name} | set(cfg.side_effect_columns)
         undeclared = (set(row) - before) - declarable
         assert not undeclared, (
             f"row carries columns the config never declared, so they are dropped: {sorted(undeclared)}"
         )
 
-    @pytest.mark.parametrize("probe_type", sorted(known_probes()))
-    async def test_no_probe_writes_a_column_the_config_did_not_declare(self, probe_type: str) -> None:
-        """Every probe, not just the default one.
+    @pytest.mark.usefixtures("no_moves_override")
+    @pytest.mark.parametrize(("probe_type", "variant"), _probe_variant_pairs())
+    async def test_no_probe_writes_a_column_the_config_did_not_declare(self, probe_type: str, variant: str) -> None:
+        """Every probe and every variant it declares, not just the default one.
 
         ``build_result_extras`` is per-probe, so the columns a row carries
         depend on which probe produced it. The engine writes the configured
@@ -130,22 +149,49 @@ class TestSimulatorRunsARow:
         computed, dropped, and then read back as absent by the scorer that
         needs it -- which reports the trajectory as unscoreable rather than
         failing.
-        """
-        cfg = _cli_built_simulator_config(probe_type, LOCALE)
-        data = _synthetic_row_data(probe_type, LOCALE, cfg)
-        before = set(data)
-        generator = ConversationSimulatorGenerator(cfg, _resource_provider())
-        with _patched_call_llm():
-            row = await generator.agenerate(data)
 
+        A variant can write columns its default does not: the guarded
+        ``health_*`` variants write the move/Guard ground truth that
+        ``health_disclosure_concealment`` scores from, and the default
+        variants write none of it. Running only the default variant would
+        miss a column that only another variant writes.
+        """
+        row, cfg, before = await self._run_one_row(probe_type, variant)
+        if variant != "default":
+            # Some probes relabel the default variant from their own data, so
+            # only a requested non-default variant is required to stick.
+            assert row.get("probe_variant") == variant, (
+                f"{probe_type} ran as {row.get('probe_variant')!r}, not {variant!r}, so this case checked nothing"
+            )
         undeclared = (set(row) - before) - ({cfg.name} | set(cfg.side_effect_columns))
         assert not undeclared, (
-            f"{probe_type} writes columns the config never declares, so they are dropped "
+            f"{probe_type} ({variant}) writes columns the config never declares, so they are dropped "
             f"before anything can read them: {sorted(undeclared)}"
         )
 
+    @pytest.mark.usefixtures("no_moves_override")
+    @pytest.mark.parametrize("probe_type", sorted(p for p, v in _probe_variant_pairs() if v == "guarded"))
+    async def test_the_guarded_variant_adds_exactly_its_result_columns(self, probe_type: str) -> None:
+        """A guarded row carries every name in ``GUARDED_RESULT_COLUMNS`` and nothing else
+        a default row lacks.
+
+        Checking a few of them would let the mixin stop writing, say,
+        ``turn_budget`` while every test stayed green and the scorer reported a
+        null stratum. Comparing against a default row of the same probe also
+        rules out the guarded case passing by silently running as default.
+        """
+        guarded, _, _ = await self._run_one_row(probe_type, "guarded")
+        default, _, _ = await self._run_one_row(probe_type, "default")
+        assert guarded.get("moves_enabled") is True, f"{probe_type} guarded row carries no move/Guard ground truth"
+        assert set(guarded) - set(default) == set(GUARDED_RESULT_COLUMNS)
+
+    def test_the_config_declares_every_guarded_result_column(self) -> None:
+        cfg = _cli_built_simulator_config("health_therapy_disclosure", LOCALE)
+        missing = set(GUARDED_RESULT_COLUMNS) - set(cfg.side_effect_columns)
+        assert not missing, f"guarded columns the engine would drop: {sorted(missing)}"
+
     async def test_carries_the_identity_columns_forward(self) -> None:
-        row, _cfg = await self._run_one_row()
+        row, _cfg, _ = await self._run_one_row()
         for column in ("trajectory_id", "persona_uuid"):
             assert row.get(column), f"{column} is missing or empty, so the row cannot be identified"
 
