@@ -156,16 +156,25 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         models: dict[str, Any],
         data: dict[str, Any],
         cfg: Any,
+        state: Any = None,
+        seed_state: bool = True,
     ) -> dict:
-        """Custom agentic simulate loop — see safety_agentic for the real one."""
+        """Custom agentic simulate loop — see safety_agentic for the real one.
+
+        ``state`` and ``seed_state`` are part of the dispatch contract: an
+        external host (``core/episode_runtime.py``) resumes an episode by
+        passing the state it already owns and suppressing re-seeding. Accept
+        both and honour them, or the probe cannot be hosted.
+        """
         builder = self._outcome_builder or OutcomeBuilder(
             provenance=self._provenance,
         )
-        state = ConversationState(outcome=builder)
+        state = state or ConversationState(outcome=builder)
         # Seed metadata BEFORE turn-1 — survives even if turn-1 fails.
-        state.metadata["action_request_id"] = self._task.id
-        state.metadata["sub_protocol"] = self._task.sub_protocol
-        state.metadata["attempted_actions"] = []
+        if seed_state:
+            state.metadata["action_request_id"] = self._task.id
+            state.metadata["sub_protocol"] = self._task.sub_protocol
+            state.metadata["attempted_actions"] = []
         # Inject verbatim user turn-1.
         state.messages.append(
             {

@@ -16,7 +16,3 @@ The load-bearing decisions:
 - staying with the plugin entry-point pattern (SLURM compatibility),
 - wide-per-row storage with reporting-layer wide -> long via pd.melt.
 """
-
-from usersim.engine.evaluator.runtime import TrajectoryEvaluatorRuntime
-
-__all__ = ["TrajectoryEvaluatorRuntime"]

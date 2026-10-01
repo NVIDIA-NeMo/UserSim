@@ -1,9 +1,18 @@
 # External Probe Runtime
 
-`ProbeEpisodeRuntime` lets an external host run a tool-using probe without
-moving probe policy or simulated state into the host.
+`ProbeEpisodeRuntime` lets an external host run a UserSim episode without
+reimplementing any part of it. UserSim runs the unmodified probe dispatch as a
+background task and pauses at every model boundary; the host answers each pause
+with a model response. Per-episode settings, user-turn gates, judges, early
+stop, tool execution and finalize stay UserSim's.
 
-Materialize inputs without model calls before constructing runtimes:
+The host never assembles a prompt, picks a tool index, or decides when a turn
+ends. Each paused request states what comes next.
+
+## Materializing inputs
+
+Materialize resolved rows without model calls, then construct runtimes from
+them:
 
 ```python
 from usersim.engine.external import ProbeEpisodeRuntime, materialize_episode_inputs
@@ -18,14 +27,19 @@ rows = materialize_episode_inputs(
 runtime = ProbeEpisodeRuntime.from_resolved_row(rows[0], models=runtime_models)
 ```
 
-This uses the same Data Designer persona, probe, theme, and toolset sampler
+This uses the same Data Designer persona, probe, theme and toolset sampler
 graph as `usersim simulate`; the host does not select panel indices or author
-themes/toolsets. Rows include the persona, probe inputs, locale-aware
-behavioral settings, probe family/variant, trajectory ID, config snapshot, and
-UserSim provenance. `models_path` and `assets_dir` are optional keyword
-overrides; their packaged UserSim defaults are used otherwise. Model
-configuration supplies trajectory identities but no configured model is
-called. The equivalent CLI is:
+themes and toolsets. Rows carry the persona, probe inputs, locale-aware
+behavioral settings, probe family and variant, trajectory ID, provenance, and
+the `usersim_config` snapshot `from_resolved_row()` restores. `models_path` and
+`assets_dir` are optional overrides. Model configuration supplies trajectory
+identities — no configured model is called.
+
+Rows are the dataset: store them, and replay from the stored rows. Regenerating
+the same rows from the same seed is explicitly *not* guaranteed, because
+nothing depends on it.
+
+The equivalent CLI is:
 
 ```bash
 usersim simulate --locale en_US --num-rows 1 \
@@ -33,61 +47,124 @@ usersim simulate --locale en_US --num-rows 1 \
   --materialize-inputs --out episode-inputs.jsonl
 ```
 
-`from_resolved_row()` restores the embedded UserSim config and preserves the
-resolved trajectory identity and provenance. One runtime represents one such
-resolved episode. It owns:
+## Declaring the host's models
 
-- the resolved probe and scenario state;
-- Assistant tool schemas and the allowlist;
-- probe-specific tool simulation and evidence;
-- completion checks and result extras; and
-- final native UserSim output.
+Trajectory identity is keyed on the resolved model id, and `identity_disclosure`
+cannot grade an assistant it cannot name, so a host that proxies model calls
+still declares what is behind each role:
 
-The host owns only transport and mechanical orchestration. In a NeMo Gym
-deployment, the Environment chooses the next participant, the Assistant Agent
-runs the model-to-tool-to-model loop, and the Resources Server retains the
-runtime.
+```python
+from usersim.engine.external import HostRoleModel
 
-## Host contract
+runtime_models = {
+    "user_model": HostRoleModel(model_name="my-provider/user-model", max_tokens=2048),
+    "assistant_model": HostRoleModel(model_name="my-provider/model-under-test", max_tokens=4096),
+    "judge_model": HostRoleModel(model_name="my-provider/judge-model"),
+    "summary_model": HostRoleModel(model_name="my-provider/summary-model"),
+}
+```
 
-Await `runtime.descriptor()` once after constructing the runtime. The
-descriptor is immutable and JSON serializable. It includes participant
-prompts, the initial verbatim user message when applicable, tool schemas, user
-turn policy, and `AssistantToolLoopPolicy`.
+`max_tokens` is the role's budget; UserSim scales it for non-Latin-script
+locales exactly as it does for a configured model, and the scaled value arrives
+in the request's `parameters`.
 
-The Assistant loop policy declares:
+## Driving the episode
 
-- `tool_round_mode`;
-- `max_assistant_activations`;
-- `max_tool_calls_per_turn`;
-- whether a final tools-disabled synthesis activation is required;
-- whether the probe has only one user turn; and
-- retry and resampling behavior.
+`advance()` is the whole loop. The first call takes no result; every later call
+records one model response:
 
-Hosts must not derive these rules from `probe_type`.
+```python
+event = await runtime.advance()
+while isinstance(event, ActivationRequest):
+    reply = await call_your_model(event.role, event.messages, event.tools, event.parameters)
+    event = await runtime.advance({
+        "activation_id": event.activation_id,
+        "response": {
+            "role": "assistant",
+            "content": reply.content,
+            "reasoning_content": reply.reasoning,
+            "tool_calls": reply.tool_calls,
+        },
+        "usage": {"input_tokens": reply.input_tokens, "output_tokens": reply.output_tokens},
+    })
 
-For every selected tool call, invoke `simulate_tool_call()` with only the
-original non-empty `tool_call_id`, name, and arguments. For parallel calls
-from one Assistant response, use `simulate_tool_calls()` with the ordered
-batch. UserSim assigns native `turn_idx` and `call_idx`; the host must not
-derive them. An identical retry is idempotent, while reusing an ID with a
-different name or arguments is rejected. Simulated payloads are returned as
-plain strings.
+row = await runtime.finalize()
+```
 
-Use `synchronize_transcript()` to install the complete observed transcript as
-it grows. Synchronization is monotonic. Every tool result must match runtime
-execution evidence, and every executed call must match the Assistant function
-call's ID, name, and arguments. JSON tool payloads are compared semantically
-so transport whitespace does not change evidence identity.
+Each `ActivationRequest` carries:
 
-The runtime exposes delegated follow-up, capitulation, success, and result
-hooks over that synchronized state. Call `finalize()` once verification is
-ready. Repeating `finalize()` without changing the transcript returns the same
-result.
+- `role` — `user`, `assistant`, `judge` or `summary`;
+- `messages` — the exact input UserSim would send, so the host never builds one;
+- `tools` and `tools_enabled` — whether UserSim is offering tools for *this*
+  call. It disables them when the probe's loop asks for a final answer;
+- `continues_turn` — whether this request continues the turn already in
+  progress rather than opening a new one;
+- `parameters` — the sampling options UserSim would have passed.
+
+Recording the same `activation_id` with an identical payload is idempotent and
+replays the same transition, including after the episode completes. Reusing an
+id with a different payload is rejected.
+
+`finalize()` returns the row UserSim's own dispatch produced: the resolved input
+row updated with the result, which is what `ConversationSimulatorGenerator`
+writes for the same inputs. Loop-written columns such as `user_query` are on it.
+`close()` cancels a running episode.
+
+## Tool calls
+
+The host records the assistant's response — tool calls included — **before**
+issuing those calls. UserSim's own loop then executes them, in its own context
+and with its own `turn_idx` and `call_idx`, and the payloads become available:
+
+```python
+event = await runtime.advance({"activation_id": ..., "response": response_with_tool_calls})
+for call in response_with_tool_calls["tool_calls"]:
+    payload = await runtime.tool_result(call["id"])
+```
+
+Payloads are returned verbatim, as plain strings, and are never parsed or
+re-encoded; several probes' simulated responses are not JSON.
+
+A probe caps how many calls it executes per turn. A recorded call beyond that
+cap never runs, and `tool_result()` raises for it — `executed_tool_calls()` is
+the authoritative list of what ran.
+
+A host that cannot record tool calls simply returns one model response per
+request with no `tool_calls`; UserSim runs the tools either way.
+
+## Contract errors
+
+Recording a response that breaks the probe's loop rules — tool calls when the
+request offers no tools, an unoffered tool name, a missing or repeated call id —
+raises `EpisodeContractError` from `advance()`. These are host bugs, so they are
+raised at the call that made them: they never consume a model retry and are
+never attributed to the model under test.
+
+## Writing a hostable probe
+
+Probes on the shared `ConversationLoop` are hostable with no extra work. A probe
+that does its own work has two obligations:
+
+- A custom `run_dispatch` must accept `state` and `seed_state`, reuse the
+  supplied state, and skip seeding when asked. See `templates/probe/generator_agentic.py`.
+- A probe that executes its own tool calls must call `on_tool_call_executed()`
+  immediately after appending each `role: "tool"` message, or the payloads it
+  produced never reach its host. See `templates/probe/generator_tool_calling.py`.
+
+Check both, and overall parity, from your own test suite:
+
+```python
+from usersim.testing import assert_hosted_parity
+
+async def test_my_probe_is_hostable():
+    await assert_hosted_parity("my_probe", config=cfg, persona=persona, data=data)
+```
+
+It runs one episode standalone and one hosted against scripted models and
+reports every difference, including prompts. `usersim.testing.hosted_parity_report`
+returns the findings as a list instead of raising.
 
 ## Supported probes
 
-The resumable lifecycle covers every registered probe. The hosted-parity suite
-runs one standalone `ConversationSimulatorGenerator` execution and one
-`ProbeEpisodeRuntime` execution for each registry entry and compares native
-results after removing only wall-clock fields.
+Every registered probe is hostable, and the check above runs against all of
+them so this document cannot drift from what the probes actually do.

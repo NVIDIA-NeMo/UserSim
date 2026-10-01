@@ -30,9 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
-import random
-import threading
-from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -79,7 +77,6 @@ THEME_DRIVEN_PROBES: frozenset = frozenset(
 # exists so DD's SubcategorySampler has a value to draw when the
 # probe_type sampled is one that doesn't use themes.
 _NO_THEME_PLACEHOLDER: str = "__not_used__"
-_SAMPLING_LOCK = threading.Lock()
 
 
 def seed_themes(
@@ -499,55 +496,6 @@ def _add_episode_input_columns(
     return toolset_kwargs
 
 
-@contextmanager
-def _deterministic_sampling(seed: int | None):
-    """Scope Data Designer's process-global samplers behind a lock."""
-    import numpy as np
-    from data_designer.engine.resources.person_reader import PersonReader
-    from data_designer.engine.resources.seed_reader import SeedReader
-    from data_designer.engine.sampling_gen.generator import DatasetGenerator
-
-    with _SAMPLING_LOCK:
-        python_state = random.getstate()
-        numpy_state = np.random.get_state()
-        original_init = DatasetGenerator.__init__
-        original_person_execute = PersonReader.execute
-        original_create_batch_reader = SeedReader.create_batch_reader
-
-        def seeded_init(instance, *args, random_state=None, **kwargs):
-            return original_init(
-                instance,
-                *args,
-                random_state=seed if random_state is None else random_state,
-                **kwargs,
-            )
-
-        def seeded_person_execute(instance, query, parameters):
-            if seed is not None:
-                query = query.replace("order by random()", f"order by hash(uuid, {seed})")
-            return original_person_execute(instance, query, parameters)
-
-        def seeded_create_batch_reader(instance, *args, **kwargs):
-            if seed is not None:
-                duckdb_seed = (seed % 2_000_001) / 1_000_000 - 1
-                instance._get_duckdb_connection().execute(f"SELECT setseed({duckdb_seed})")
-            return original_create_batch_reader(instance, *args, **kwargs)
-
-        random.seed(seed)
-        np.random.seed(seed)
-        DatasetGenerator.__init__ = seeded_init
-        PersonReader.execute = seeded_person_execute
-        SeedReader.create_batch_reader = seeded_create_batch_reader
-        try:
-            yield
-        finally:
-            DatasetGenerator.__init__ = original_init
-            PersonReader.execute = original_person_execute
-            SeedReader.create_batch_reader = original_create_batch_reader
-            random.setstate(python_state)
-            np.random.set_state(numpy_state)
-
-
 def materialize_episode_inputs(
     *,
     locale: str,
@@ -599,14 +547,19 @@ def materialize_episode_inputs(
         **toolset_kwargs,
     )
     model_identities = {spec.alias: SimpleNamespace(model_name=spec.model) for spec in models.models}
-    with _deterministic_sampling(random_seed):
-        sampled = designer.preview(builder, num_records=num_rows).dataset
+    sampled = designer.preview(builder, num_records=num_rows).dataset
     if sampled is None:
         return []
-    return [
-        construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()
-        for row in sampled.to_dict(orient="records")
-    ]
+    # ``usersim_config`` rides on the materialized row only. It is what lets a
+    # host restore the episode with ProbeEpisodeRuntime.from_resolved_row; the
+    # simulator's own trajectory rows do not repeat it.
+    config_snapshot = config.model_dump(mode="json")
+    rows: list[dict[str, Any]] = []
+    for row in sampled.to_dict(orient="records"):
+        resolved = construct_probe_episode(row, config=config, models=model_identities).preamble.to_row()
+        resolved["usersim_config"] = deepcopy(config_snapshot)
+        rows.append(resolved)
+    return rows
 
 
 def build_evaluator_config_builder(

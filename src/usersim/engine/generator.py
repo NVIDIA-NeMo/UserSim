@@ -8,6 +8,8 @@ from __future__ import annotations
 import json
 import logging
 import time
+from types import SimpleNamespace
+from typing import Any, Mapping
 
 from data_designer.engine.column_generators.generators.base import (
     ColumnGeneratorCellByCell,
@@ -96,6 +98,23 @@ class ConversationSimulatorGenerator(
     ColumnGeneratorWithModelRegistry[ConversationSimulatorConfig],
 ):
     """Unified generator that dispatches to probe-specific simulation modules."""
+
+    @classmethod
+    def with_models(
+        cls,
+        config: ConversationSimulatorConfig,
+        models: Mapping[str, Any],
+    ) -> ConversationSimulatorGenerator:
+        """Build the simulator against supplied model facades, without Data Designer.
+
+        The supported way to run one row outside a Data Designer pipeline — for
+        a hosted-parity check, say. ``models`` maps a role alias
+        (``user_model``, ``assistant_model``, ...) to anything exposing
+        ``acompletion``. Callers previously had to subclass or fake Data
+        Designer's provider to get here.
+        """
+        registry = SimpleNamespace(get_model=lambda *, model_alias: dict(models)[model_alias])
+        return cls(config, SimpleNamespace(model_registry=registry))
 
     def _initialize(self) -> None:
         """Prepare process-wide state once, before any row runs.

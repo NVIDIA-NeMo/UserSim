@@ -210,7 +210,6 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             "persona_uuid",
             "trajectory_id",
             "usersim_provenance",
-            "usersim_config",
             # Probe-specific side channels. Each is written by one probe's
             # ``build_result_extras`` and read back by that probe's scorer,
             # which treats an absent value as "nothing to score" rather than

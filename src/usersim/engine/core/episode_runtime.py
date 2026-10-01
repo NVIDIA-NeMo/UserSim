@@ -1,24 +1,38 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
 
-"""Externally hosted, episode-scoped execution for tool-using probes."""
+"""Externally hosted, episode-scoped execution of UserSim's own probe loop.
+
+The host does not reimplement any part of an episode. UserSim runs the
+unmodified probe dispatch as a background task and pauses at every model
+boundary; each pause becomes an :class:`ActivationRequest` the host answers
+with the model response it obtained. Per-episode settings, user-turn gates,
+judges, early stop, tool execution and finalize therefore stay UserSim's.
+
+The host records the assistant's response — tool calls included — *before*
+issuing those tool calls. UserSim's own loop then executes them, with its own
+turn and call indices and its own context, and the recorded payloads are
+available to the host through :meth:`ProbeEpisodeRuntime.tool_result`. The
+next request tells the host what comes next: whether it continues the current
+turn, whether tools are offered, and the exact input UserSim would send.
+"""
 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
-from collections import deque
 from copy import deepcopy
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Literal, Mapping, Sequence
 
 from usersim.engine.core.episode_input import EpisodeConstructionError, EpisodePreamble, construct_probe_episode
+from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
-from usersim.engine.core.outcomes import OutcomeStatus, Provenance
+from usersim.engine.core.outcomes import Provenance
 from usersim.engine.core.probes import BaseProbe
-from usersim.engine.core.simulation import ConversationState, make_result
-from usersim.engine.core.user_turn_policy import resolve_user_turn_policy
+from usersim.engine.core.simulation import ConversationState
 
 if TYPE_CHECKING:
     from usersim.engine.config import ConversationSimulatorConfig
@@ -34,34 +48,66 @@ _MODEL_ROLE: dict[str, ActivationRole] = {
 
 
 @dataclass(frozen=True)
-class AssistantToolLoopPolicy:
-    """Serializable instructions for an external assistant/tool-loop host."""
+class HostRoleModel:
+    """The host's real model identity and token budget for one role.
 
-    tool_round_mode: Literal["single", "multi"]
-    max_assistant_activations: int
-    final_synthesis_without_tools: bool
-    single_user_turn: bool
-    assistant_error_behavior: Literal["fail_episode"]
-    tool_error_behavior: Literal["return_error_payload"]
-    max_tool_calls_per_turn: int | None
-    max_tool_response_attempts: int
-    assistant_resampling: bool
+    Trajectory ids are keyed on the resolved model identity, and
+    ``identity_disclosure`` cannot grade an assistant it cannot name, so a
+    host that proxies model calls must still declare which model is behind
+    each role. ``max_tokens`` is the role's budget; UserSim scales it for
+    non-Latin-script locales exactly as it does for a configured model.
+    """
+
+    model_name: str
+    max_tokens: int | None = None
+
+    @property
+    def _model_config(self) -> SimpleNamespace:
+        """Mirror the attribute path ``core/llm.scaled_max_tokens`` reads."""
+        return SimpleNamespace(inference_parameters=SimpleNamespace(max_tokens=self.max_tokens))
+
+
+@dataclass(frozen=True)
+class ExecutedToolCall:
+    """One tool call executed by UserSim's own loop."""
+
+    tool_call_id: str
+    tool_name: str
+    arguments: dict[str, Any]
+    payload: str
+    turn_idx: int
+    call_idx: int
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a JSON-serializable copy."""
-        return asdict(self)
+        """Return a defensive JSON-serializable copy."""
+        return {
+            "tool_call_id": self.tool_call_id,
+            "tool_name": self.tool_name,
+            "arguments": deepcopy(self.arguments),
+            "payload": self.payload,
+            "turn_idx": self.turn_idx,
+            "call_idx": self.call_idx,
+        }
 
 
 @dataclass(frozen=True)
 class ActivationRequest:
-    """One JSON-safe model activation paused inside the native lifecycle."""
+    """One model activation paused inside UserSim's own episode.
+
+    ``messages`` is the exact input UserSim would send, so a host never has to
+    assemble its own. ``tools`` is empty when UserSim is not offering tools for
+    this call — recording tool calls against it is a contract error, not a
+    model failure. ``continues_turn`` marks a request that continues the turn
+    already in progress rather than opening a new one.
+    """
 
     activation_id: str
     role: ActivationRole
     model_alias: str
     messages: tuple[dict[str, Any], ...]
     parameters: dict[str, Any]
-    assistant_tool_loop_policy: AssistantToolLoopPolicy | None = None
+    tools: tuple[dict[str, Any], ...] = ()
+    continues_turn: bool = False
 
     def __post_init__(self) -> None:
         if not self.activation_id:
@@ -70,6 +116,17 @@ class ActivationRequest:
             raise ValueError(f"Unsupported activation role: {self.role!r}")
         object.__setattr__(self, "messages", tuple(_normalize_message(message) for message in self.messages))
         object.__setattr__(self, "parameters", _json_safe_copy(self.parameters))
+        object.__setattr__(self, "tools", tuple(_json_safe_copy(list(self.tools))))
+
+    @property
+    def tools_enabled(self) -> bool:
+        """Whether UserSim is offering tools for this activation."""
+        return bool(self.tools)
+
+    @property
+    def tool_names(self) -> frozenset[str]:
+        """Names the host may record tool calls against for this activation."""
+        return frozenset(_tool_name(tool) for tool in self.tools)
 
     def to_dict(self) -> dict[str, Any]:
         """Return a defensive JSON-serializable copy."""
@@ -79,34 +136,43 @@ class ActivationRequest:
             "model_alias": self.model_alias,
             "messages": deepcopy(list(self.messages)),
             "parameters": deepcopy(self.parameters),
-            "assistant_tool_loop_policy": (
-                self.assistant_tool_loop_policy.to_dict() if self.assistant_tool_loop_policy else None
-            ),
+            "tools": deepcopy(list(self.tools)),
+            "tools_enabled": self.tools_enabled,
+            "continues_turn": self.continues_turn,
         }
 
 
 @dataclass(frozen=True)
+class ActivationUsage:
+    """Token usage the host observed for one activation."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serializable copy."""
+        return {"input_tokens": self.input_tokens, "output_tokens": self.output_tokens}
+
+
+@dataclass(frozen=True)
 class ActivationResult:
-    """Externally executed result for one activation."""
+    """The model response the host recorded for one activation.
+
+    ``response`` is an OpenAI-shaped assistant message. Reasoning belongs in
+    ``reasoning_content`` and is retained exactly as a configured model's would
+    be; ``usage`` feeds UserSim's per-model token accounting.
+    """
 
     activation_id: str
-    response: dict[str, Any] | None = None
-    transcript_delta: tuple[dict[str, Any], ...] = ()
+    response: dict[str, Any]
+    usage: ActivationUsage | None = None
 
     def __post_init__(self) -> None:
-        if not isinstance(self.activation_id, str):
-            raise TypeError("activation_id must be a string")
-        if (self.response is None) == (not self.transcript_delta):
-            raise ValueError("ActivationResult requires exactly one of response or transcript_delta")
-        if self.response is not None:
-            if not isinstance(self.response, Mapping):
-                raise TypeError("activation response must be a mapping")
-            object.__setattr__(self, "response", _json_safe_copy(dict(self.response)))
-        object.__setattr__(
-            self,
-            "transcript_delta",
-            tuple(_normalize_message(message) for message in self.transcript_delta),
-        )
+        if not isinstance(self.activation_id, str) or not self.activation_id:
+            raise ValueError("activation_id must be a non-empty string")
+        if not isinstance(self.response, Mapping):
+            raise TypeError("activation response must be a mapping")
+        object.__setattr__(self, "response", _normalize_assistant_response(self.response))
 
     @classmethod
     def from_value(cls, value: ActivationResult | Mapping[str, Any]) -> ActivationResult:
@@ -116,11 +182,21 @@ class ActivationResult:
         if not isinstance(value, Mapping):
             raise TypeError("activation result must be ActivationResult or a mapping")
         response = value.get("response")
-        delta = value.get("transcript_delta") or ()
+        if not isinstance(response, Mapping):
+            raise ValueError("activation result requires a 'response' mapping")
+        raw_usage = value.get("usage")
+        usage = None
+        if isinstance(raw_usage, ActivationUsage):
+            usage = raw_usage
+        elif isinstance(raw_usage, Mapping):
+            usage = ActivationUsage(
+                input_tokens=int(raw_usage.get("input_tokens") or 0),
+                output_tokens=int(raw_usage.get("output_tokens") or 0),
+            )
         return cls(
             activation_id=str(value.get("activation_id") or ""),
-            response=deepcopy(dict(response)) if isinstance(response, Mapping) else None,
-            transcript_delta=tuple(_normalize_message(message) for message in delta),
+            response=deepcopy(dict(response)),
+            usage=usage,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -128,13 +204,13 @@ class ActivationResult:
         return {
             "activation_id": self.activation_id,
             "response": deepcopy(self.response),
-            "transcript_delta": deepcopy(list(self.transcript_delta)),
+            "usage": self.usage.to_dict() if self.usage else None,
         }
 
 
 @dataclass(frozen=True)
 class EpisodeLifecycleComplete:
-    """Terminal event returned after the native lifecycle finalizes."""
+    """Terminal event returned after UserSim's own dispatch finalizes."""
 
     result: dict[str, Any]
 
@@ -148,76 +224,49 @@ class _LifecycleFailure:
     error: BaseException
 
 
-@dataclass(frozen=True)
-class UserTurnPolicySnapshot:
-    """JSON-safe subset used to reconstruct UserSim's outer-loop policy."""
+class EpisodeContractError(ValueError):
+    """The host broke the episode contract.
 
-    context_compression: bool
-    wrap_up: bool
-    followup_anchor: str | None
-    allowed_phrases: tuple[str, ...]
-    script_check_ignores: tuple[str, ...]
-    check_opening: Literal["none", "native"]
-
-    def to_dict(self) -> dict[str, Any]:
-        """Return a JSON-serializable copy."""
-        data = asdict(self)
-        data["allowed_phrases"] = list(self.allowed_phrases)
-        data["script_check_ignores"] = list(self.script_check_ignores)
-        return data
+    Raised to the host at the call that broke it, never routed through the
+    model under test: these are host bugs, not model failures, so they must
+    not consume a model retry or be attributed to the assistant.
+    """
 
 
 @dataclass(frozen=True)
 class ProbeRuntimeDescriptor:
-    """Stable, JSON-serializable description of one resolved episode."""
+    """Stable, JSON-serializable description of one resolved episode.
+
+    Deliberately small: every per-call decision — whether tools are offered,
+    whether the turn continues, what to send next — is carried by the
+    activation request itself, so a host never has to model UserSim's loop.
+    """
 
     probe_type: str
-    assistant_tools: tuple[dict[str, Any], ...]
-    allowed_tool_names: tuple[str, ...]
-    initial_user_message: str | None
-    loop_policy: AssistantToolLoopPolicy
-    user_system_prompt: str
-    assistant_system_prompt: str
-    turn0_user_query_instruction: str | None
-    user_interaction_style: str
-    patience: float
-    user_turn_policy: UserTurnPolicySnapshot
+    assistant_tools: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Return a defensive JSON-serializable copy."""
         return {
             "probe_type": self.probe_type,
             "assistant_tools": deepcopy(list(self.assistant_tools)),
-            "allowed_tool_names": list(self.allowed_tool_names),
-            "initial_user_message": self.initial_user_message,
-            "loop_policy": self.loop_policy.to_dict(),
-            "user_system_prompt": self.user_system_prompt,
-            "assistant_system_prompt": self.assistant_system_prompt,
-            "turn0_user_query_instruction": self.turn0_user_query_instruction,
-            "user_interaction_style": self.user_interaction_style,
-            "patience": self.patience,
-            "user_turn_policy": self.user_turn_policy.to_dict(),
         }
 
 
-@dataclass(frozen=True)
-class _ExecutedToolCall:
-    tool_call_id: str
-    tool_name: str
-    arguments: dict[str, Any]
-    payload: str
-    turn_idx: int
-    call_idx: int
+@dataclass
+class _PendingActivation:
+    request: ActivationRequest
+    waiter: asyncio.Future[ActivationResult]
+    result: ActivationResult | None = field(default=None)
 
 
 class ProbeEpisodeRuntime:
-    """Own one probe's mutable tool state outside UserSim's conversation loop.
+    """Run one UserSim episode with the model calls answered by a host.
 
-    An agent harness remains responsible for model/tool iteration. The host
-    exposes :attr:`assistant_tools`, forwards each selected function call to
-    :meth:`simulate_tool_call`, and finally supplies the complete transcript to
-    :meth:`finalize`. The runtime preserves the same probe hooks, state, traces,
-    and result extras used by an in-process UserSim run.
+    Construct from a materialized row with :meth:`from_resolved_row`, then
+    drive :meth:`advance` until it returns :class:`EpisodeLifecycleComplete`.
+    :meth:`finalize` returns the same row a standalone ``usersim simulate``
+    would have written for the same inputs.
     """
 
     @classmethod
@@ -234,14 +283,12 @@ class ProbeEpisodeRuntime:
         if not isinstance(raw_config, Mapping):
             raise ValueError("Resolved episode row requires a usersim_config mapping")
         config = ConversationSimulatorConfig.model_validate(dict(raw_config))
-        persona_column = getattr(config, "persona_column", "persona")
-        probe_type_column = getattr(config, "probe_type_column", "probe_type")
-        persona = row.get(persona_column)
+        persona = row.get(config.persona_column)
         if not isinstance(persona, Mapping):
-            raise ValueError(f"Resolved episode row requires a {persona_column!r} mapping")
-        probe_type = row.get(probe_type_column)
+            raise ValueError(f"Resolved episode row requires a {config.persona_column!r} mapping")
+        probe_type = row.get(config.probe_type_column)
         if not isinstance(probe_type, str) or not probe_type:
-            raise ValueError(f"Resolved episode row requires a non-empty {probe_type_column!r}")
+            raise ValueError(f"Resolved episode row requires a non-empty {config.probe_type_column!r}")
         language = row.get("conversation_language")
         if not isinstance(language, str) or not language:
             raise ValueError("Resolved episode row requires a non-empty conversation_language")
@@ -277,8 +324,8 @@ class ProbeEpisodeRuntime:
             constructed = construct_probe_episode(
                 {
                     **dict(data),
-                    getattr(config, "persona_column", "persona"): dict(persona),
-                    getattr(config, "probe_type_column", "probe_type"): probe_type,
+                    config.persona_column: dict(persona),
+                    config.probe_type_column: probe_type,
                     **({"behavioral_profile": dict(profile)} if profile is not None else {}),
                 },
                 config=config,
@@ -295,16 +342,10 @@ class ProbeEpisodeRuntime:
         self.state = ConversationState(outcome=self.outcome)
         self.probe.seed_state_metadata(self.state)
         self._assistant_tools = deepcopy(self.probe.get_tools_for_assistant() or [])
-        self._allowed_tool_names = frozenset(_tool_name(tool) for tool in self._assistant_tools)
-        self._loop_policy = _loop_policy(self.probe, config)
-        self._user_turn_policy = _user_turn_policy(self.probe)
-        self._native_execute_tool_call = getattr(self.probe, "execute_tool_call", None)
-        self._call_count = 0
-        self._tool_round_index = 0 if self.probe_type == "safety_agentic" else 1
-        self._executed_tool_calls: list[_ExecutedToolCall] = []
-        self._synchronized_messages: list[dict[str, Any]] = []
-        self._initial_user_message: str | None | object = _UNSET
+
+        self._executed_tool_calls: list[ExecutedToolCall] = []
         self._finalized = False
+        self._closed = False
         self._final_result: dict[str, Any] | None = None
         self._lock = asyncio.Lock()
         self._lifecycle_started = False
@@ -312,93 +353,207 @@ class ProbeEpisodeRuntime:
         self._activation_events: asyncio.Queue[ActivationRequest | EpisodeLifecycleComplete | _LifecycleFailure] = (
             asyncio.Queue()
         )
-        self._activation_waiters: dict[str, asyncio.Future[ActivationResult]] = {}
-        self._activation_requests: dict[str, ActivationRequest] = {}
-        self._activation_transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
+        self._pending: dict[str, _PendingActivation] = {}
+        self._transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
         self._active_activation_id: str | None = None
         self._activation_sequence = 0
-        self._assistant_replay: deque[tuple[dict[str, Any], tuple[dict[str, Any], ...]]] = deque()
-        self._assistant_expected_tools: deque[dict[str, Any]] = deque()
+        # A new assistant activation continues the current turn when no user
+        # message has been appended since the previous one.
+        self._assistant_user_message_count: int | None = None
 
     @property
     def assistant_tools(self) -> list[dict[str, Any]]:
         """Return a defensive copy of the schemas available in this episode."""
         return deepcopy(self._assistant_tools)
 
-    @property
-    def allowed_tool_names(self) -> frozenset[str]:
-        """Names accepted by :meth:`simulate_tool_call` for this episode."""
-        return self._allowed_tool_names
-
-    @property
-    def loop_policy(self) -> AssistantToolLoopPolicy:
-        """Probe-owned policy for the host's mechanical assistant/tool loop."""
-        return self._loop_policy
-
-    async def initial_user_message(self) -> str | None:
-        """Return a probe-authored verbatim opening, when the probe defines one."""
-        async with self._lock:
-            self._ensure_open()
-            return await self._initial_user_message_locked()
-
     async def descriptor(self) -> ProbeRuntimeDescriptor:
         """Return the deterministic host contract for this resolved episode."""
         async with self._lock:
-            initial_message = await self._initial_user_message_locked()
             return ProbeRuntimeDescriptor(
                 probe_type=self.probe_type,
                 assistant_tools=tuple(deepcopy(self._assistant_tools)),
-                allowed_tool_names=tuple(sorted(self._allowed_tool_names)),
-                initial_user_message=initial_message,
-                loop_policy=self._loop_policy,
-                user_system_prompt=self.probe.get_user_system_prompt(),
-                assistant_system_prompt=self.probe.get_assistant_system_prompt(),
-                turn0_user_query_instruction=self.probe.get_user_query_instruction(0),
-                user_interaction_style=str(getattr(self.probe, "_interaction_style", "neutral")),
-                patience=float(getattr(self.probe, "_patience", 0.5)),
-                user_turn_policy=self._user_turn_policy,
             )
 
     async def advance(
         self,
         result: ActivationResult | Mapping[str, Any] | None = None,
     ) -> ActivationRequest | EpisodeLifecycleComplete:
-        """Start or resume the native lifecycle at one external model boundary.
+        """Start the episode, or record one model response and resume it.
 
-        A repeated result with the same activation ID and identical payload is
-        idempotent and returns the same transition. Reusing an ID with a
-        different payload is rejected.
+        The first call takes no result. Every later call records the response
+        for the pending activation; UserSim then runs to the next model
+        boundary, executing any tool calls the response asked for, and returns
+        the next request or the completed episode.
+
+        Re-recording the same activation with an identical payload is
+        idempotent and replays the same transition. Reusing an activation id
+        with a different payload is rejected.
         """
         async with self._lock:
+            if self._closed:
+                raise EpisodeContractError("Probe episode runtime has been closed")
+            if self._lifecycle_started and result is not None:
+                normalized = ActivationResult.from_value(result)
+                fingerprint = _json_fingerprint(normalized.to_dict())
+                prior = self._transitions.get(normalized.activation_id)
+                if prior is not None:
+                    prior_fingerprint, event = prior
+                    if prior_fingerprint != fingerprint:
+                        raise EpisodeContractError(
+                            f"activation_id {normalized.activation_id!r} was reused with a different result"
+                        )
+                    return deepcopy(event)
+            self._ensure_open()
             if not self._lifecycle_started:
                 if result is not None:
-                    raise ValueError("The first lifecycle advance cannot include a result")
+                    raise EpisodeContractError("The first lifecycle advance cannot include a result")
                 self._lifecycle_started = True
                 self._lifecycle_task = asyncio.create_task(self._drive_native_lifecycle())
                 return await self._next_activation_event()
 
             if result is None:
-                raise ValueError("A started lifecycle requires an activation result")
-            normalized = ActivationResult.from_value(result)
-            if not normalized.activation_id:
-                raise ValueError("activation_id must be a non-empty string")
-            fingerprint = _json_fingerprint(normalized.to_dict())
-            prior = self._activation_transitions.get(normalized.activation_id)
-            if prior is not None:
-                prior_fingerprint, event = prior
-                if prior_fingerprint != fingerprint:
-                    raise ValueError(f"activation_id {normalized.activation_id!r} was reused with a different result")
-                return deepcopy(event)
+                raise EpisodeContractError("A started lifecycle requires an activation result")
             if normalized.activation_id != self._active_activation_id:
-                raise ValueError(
+                raise EpisodeContractError(
                     f"activation_id {normalized.activation_id!r} is not the pending activation "
                     f"{self._active_activation_id!r}"
                 )
-            waiter = self._activation_waiters[normalized.activation_id]
-            waiter.set_result(normalized)
+            pending = self._pending[normalized.activation_id]
+            # Validated here, at the host-facing call, so a contract error is
+            # raised to its author rather than surfacing inside UserSim's model
+            # call where it would consume a retry and be blamed on the model.
+            self._validate_recorded_response(pending.request, normalized)
+            pending.result = normalized
+            pending.waiter.set_result(normalized)
             event = await self._next_activation_event()
-            self._activation_transitions[normalized.activation_id] = (fingerprint, deepcopy(event))
+            self._transitions[normalized.activation_id] = (fingerprint, deepcopy(event))
             return event
+
+    async def tool_result(self, tool_call_id: str) -> str:
+        """Return the payload UserSim's loop produced for one recorded call.
+
+        Available once the response carrying the call has been recorded with
+        :meth:`advance`; UserSim executes the calls as part of that step.
+
+        Raises if the call did not execute. A probe caps how many calls it
+        executes per turn, so a recorded call beyond that cap never runs —
+        :meth:`executed_tool_calls` is the authoritative list.
+        """
+        async with self._lock:
+            for executed in self._executed_tool_calls:
+                if executed.tool_call_id == tool_call_id:
+                    return executed.payload
+        raise EpisodeContractError(
+            f"Tool call {tool_call_id!r} has not been executed. Either its assistant response has not "
+            f"been recorded with advance() yet, or the probe's per-turn cap was reached and UserSim "
+            f"declined to run it; see executed_tool_calls()."
+        )
+
+    async def executed_tool_calls(self) -> list[ExecutedToolCall]:
+        """Return every tool call UserSim's loop has executed so far, in order."""
+        async with self._lock:
+            return list(self._executed_tool_calls)
+
+    async def evidence(self) -> dict[str, Any]:
+        """Return a JSON-safe snapshot suitable for verification and audit."""
+        async with self._lock:
+            return {
+                "probe_type": self.probe_type,
+                "assistant_tools": self.assistant_tools,
+                "transcript": deepcopy(self.state.messages),
+                "conversation_metadata": deepcopy(self.state.metadata),
+                "simulation_traces": [trace.to_dict() for trace in self.outcome.traces()],
+                "executed_tool_calls": [call.to_dict() for call in self._executed_tool_calls],
+                "result_extras": deepcopy(self.probe.build_result_extras(self.state)),
+            }
+
+    async def finalize(self) -> dict[str, Any]:
+        """Return the row UserSim's own dispatch produced for this episode.
+
+        This is the resolved input row updated with the dispatch result —
+        byte-for-byte what ``ConversationSimulatorGenerator`` writes for the
+        same inputs, including loop-written columns such as ``user_query``.
+        """
+        async with self._lock:
+            if not self._finalized:
+                raise EpisodeContractError(
+                    "Probe episode lifecycle has not completed; drive it to completion with advance()"
+                )
+            assert self._final_result is not None
+            return deepcopy(self._final_result)
+
+    async def close(self) -> None:
+        """Cancel the running episode and release its task."""
+        task = self._lifecycle_task
+        self._closed = True
+        if task is not None and not task.done():
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+        for pending in self._pending.values():
+            if not pending.waiter.done():
+                pending.waiter.cancel()
+
+    # ── internals ────────────────────────────────────────────────────
+
+    def _ensure_open(self) -> None:
+        if self._closed:
+            raise EpisodeContractError("Probe episode runtime has been closed")
+        if self._finalized:
+            raise EpisodeContractError("Probe episode runtime has already been finalized")
+
+    def _validate_recorded_response(self, request: ActivationRequest, result: ActivationResult) -> None:
+        tool_calls = result.response.get("tool_calls") or []
+        if not tool_calls:
+            return
+        if request.role != "assistant":
+            raise EpisodeContractError(f"A {request.role} activation cannot record tool calls")
+        if not request.tools_enabled:
+            raise EpisodeContractError(
+                f"Activation {request.activation_id!r} offers no tools, so the recorded response "
+                f"must not contain tool calls. UserSim disables tools when the probe's loop asks "
+                f"the assistant for its final answer."
+            )
+        allowed = request.tool_names
+        seen: set[str] = set()
+        for raw_call in tool_calls:
+            if not isinstance(raw_call, Mapping):
+                raise EpisodeContractError("Recorded tool calls must be mappings")
+            call_id = raw_call.get("id")
+            if not isinstance(call_id, str) or not call_id:
+                raise EpisodeContractError("Recorded tool calls require a non-empty id")
+            if call_id in seen:
+                raise EpisodeContractError(f"Recorded tool call id {call_id!r} is repeated in one response")
+            seen.add(call_id)
+            function = raw_call.get("function")
+            name = function.get("name") if isinstance(function, Mapping) else None
+            if not isinstance(name, str) or name not in allowed:
+                raise EpisodeContractError(
+                    f"Tool {name!r} is not offered for activation {request.activation_id!r}; "
+                    f"available: {sorted(allowed)}"
+                )
+
+    def _record_executed_tool_call(
+        self,
+        *,
+        tool_call_id: str,
+        tool_name: str,
+        arguments: dict[str, Any],
+        payload: str,
+        turn_idx: int,
+        call_idx: int,
+    ) -> None:
+        """Observe one tool call UserSim's own loop just executed."""
+        self._executed_tool_calls.append(
+            ExecutedToolCall(
+                tool_call_id=str(tool_call_id),
+                tool_name=str(tool_name),
+                arguments=deepcopy(dict(arguments)),
+                payload=payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False, default=str),
+                turn_idx=int(turn_idx),
+                call_idx=int(call_idx),
+            )
+        )
 
     async def _next_activation_event(self) -> ActivationRequest | EpisodeLifecycleComplete:
         event = await self._activation_events.get()
@@ -408,16 +563,14 @@ class ProbeEpisodeRuntime:
         return event
 
     async def _drive_native_lifecycle(self) -> None:
-        original_execute = getattr(self.probe, "execute_tool_call", None)
         original_models = self.probe._models
-        if callable(original_execute):
-            self.probe.execute_tool_call = self._replay_executed_tool_call  # type: ignore[method-assign]
         previous_builder = get_current_outcome_builder()
         set_current_outcome_builder(self.outcome)
         activation_models = dict(self.models)
         for alias in _MODEL_ROLE:
-            activation_models[alias] = _ActivationModel(self, alias)
+            activation_models[alias] = _ActivationModel(self, alias, self.models.get(alias))
         self.probe._models = activation_models
+        self.probe.set_tool_call_observer(self._record_executed_tool_call)
         try:
             result = await self.probe.run_dispatch(
                 models=activation_models,
@@ -426,365 +579,50 @@ class ProbeEpisodeRuntime:
                 state=self.state,
                 seed_state=False,
             )
-            if self._assistant_replay or self._assistant_expected_tools:
-                raise ValueError("Assistant transcript delta contained unconsumed messages")
+            # The generator's output row is the resolved input row updated with
+            # the dispatch result; loop-written columns such as ``user_query``
+            # live on the former. Hosted rows must match it exactly.
+            final_row = {**deepcopy(self.probe._data), **deepcopy(result)}
             self._finalized = True
-            self._final_result = deepcopy(result)
-            await self._activation_events.put(EpisodeLifecycleComplete(deepcopy(result)))
-        except BaseException as error:
+            self._final_result = final_row
+            await self._activation_events.put(EpisodeLifecycleComplete(deepcopy(final_row)))
+        except asyncio.CancelledError:
+            raise
+        except Exception as error:
             await self._activation_events.put(_LifecycleFailure(error))
         finally:
             set_current_outcome_builder(previous_builder)
+            self.probe.set_tool_call_observer(None)
             self.probe._models = original_models
-            if callable(original_execute):
-                self.probe.execute_tool_call = original_execute  # type: ignore[method-assign]
 
     async def _request_activation(
         self,
         alias: str,
         messages: list[dict[str, Any]],
         parameters: dict[str, Any],
-    ) -> dict[str, Any]:
-        if alias == "assistant_model" and self._assistant_replay:
-            response, expected_tools = self._assistant_replay.popleft()
-            self._consume_expected_tools_before(response)
-            self._assistant_expected_tools.extend(expected_tools)
-            return response
-        if alias != "assistant_model" and (self._assistant_replay or self._assistant_expected_tools):
-            raise ValueError("Assistant transcript delta did not complete before the next participant activation")
-
+    ) -> ActivationResult:
         self._activation_sequence += 1
         activation_id = f"activation-{self._activation_sequence:06d}"
+        call_parameters = dict(parameters)
+        tools = call_parameters.pop("tools", None) or ()
+        continues_turn = False
+        if alias == "assistant_model":
+            user_messages = sum(1 for message in self.state.messages if message.get("role") == "user")
+            continues_turn = self._assistant_user_message_count == user_messages
+            self._assistant_user_message_count = user_messages
         request = ActivationRequest(
             activation_id=activation_id,
             role=_MODEL_ROLE[alias],
             model_alias=alias,
             messages=tuple(deepcopy(messages)),
-            parameters=_json_safe_copy(parameters),
-            assistant_tool_loop_policy=self._loop_policy if alias == "assistant_model" else None,
+            parameters=_json_safe_copy(call_parameters),
+            tools=tuple(deepcopy(list(tools))),
+            continues_turn=continues_turn,
         )
         waiter: asyncio.Future[ActivationResult] = asyncio.get_running_loop().create_future()
-        self._activation_requests[activation_id] = request
-        self._activation_waiters[activation_id] = waiter
+        self._pending[activation_id] = _PendingActivation(request=request, waiter=waiter)
         await self._activation_events.put(request)
-        result = await waiter
-        return self._resolve_activation_response(request, result)
-
-    def _resolve_activation_response(
-        self,
-        request: ActivationRequest,
-        result: ActivationResult,
-    ) -> dict[str, Any]:
-        if request.role != "assistant" and result.transcript_delta:
-            raise ValueError("transcript_delta is only valid for assistant activations")
-        if result.transcript_delta:
-            segments: list[tuple[dict[str, Any], tuple[dict[str, Any], ...]]] = []
-            for message in result.transcript_delta:
-                if message.get("role") == "assistant":
-                    segments.append((deepcopy(message), ()))
-                elif segments:
-                    response, tools = segments[-1]
-                    segments[-1] = (response, (*tools, deepcopy(message)))
-            if not segments:
-                raise ValueError("Assistant transcript_delta must contain at least one assistant message")
-            if result.transcript_delta[0].get("role") != "assistant":
-                raise ValueError("Assistant transcript_delta must begin with an assistant message")
-            self._validate_activation_delta(result.transcript_delta)
-            response, expected_tools = segments[0]
-            self._assistant_expected_tools.extend(expected_tools)
-            self._assistant_replay.extend(segments[1:])
-        elif result.response is not None:
-            response = _normalize_assistant_response(result.response)
-        else:
-            raise ValueError("Activation result requires response or transcript_delta")
-        return response
-
-    def _validate_activation_delta(self, delta: Sequence[Mapping[str, Any]]) -> None:
-        expected = {call.tool_call_id: call for call in self._executed_tool_calls}
-        for message in delta:
-            role = message.get("role")
-            if role not in {"assistant", "tool"}:
-                raise ValueError("Assistant transcript_delta may contain only assistant and tool messages")
-            if role == "tool":
-                call_id = message.get("tool_call_id")
-                evidence = expected.get(call_id) if isinstance(call_id, str) else None
-                if evidence is None or not _payloads_equal(message.get("content"), evidence.payload):
-                    raise ValueError("Assistant transcript_delta tool result has no matching runtime evidence")
-
-    def _consume_expected_tools_before(self, response: Mapping[str, Any]) -> None:
-        del response
-        if self._assistant_expected_tools:
-            raise ValueError("Assistant transcript delta tool messages were not consumed by native probe dispatch")
-
-    async def _replay_executed_tool_call(
-        self,
-        name: str,
-        args: dict[str, Any],
-        raw_call: Mapping[str, Any],
-        state: ConversationState,
-        models: dict[str, Any],
-        *,
-        turn_idx: int,
-        call_idx: int,
-    ) -> str:
-        del state, models, turn_idx, call_idx
-        call_id = raw_call.get("id")
-        for evidence in self._executed_tool_calls:
-            if evidence.tool_call_id == call_id and evidence.tool_name == name and evidence.arguments == args:
-                if self._assistant_expected_tools:
-                    expected = self._assistant_expected_tools.popleft()
-                    if expected.get("tool_call_id") != call_id or not _payloads_equal(
-                        expected.get("content"), evidence.payload
-                    ):
-                        raise ValueError("Assistant transcript_delta tool order diverges from native probe dispatch")
-                return evidence.payload
-        raise ValueError(f"Assistant tool call {call_id!r} was not executed through simulate_tool_call")
-
-    async def append_message(self, message: Mapping[str, Any]) -> None:
-        """Append one externally produced OpenAI-style conversation message."""
-        async with self._lock:
-            self._ensure_open()
-            normalized = _normalize_message(message)
-            if normalized["role"] == "tool":
-                raise ValueError("Tool messages must be produced by simulate_tool_call")
-            self.state.messages.append(normalized)
-
-    async def synchronize_transcript(self, messages: Sequence[Mapping[str, Any]]) -> None:
-        """Install a monotonic, externally observed transcript.
-
-        The transcript may advance from an assistant tool request to its
-        runtime-produced tool result and later assistant/user messages. It may
-        not alter or remove an already synchronized message, and every observed
-        tool result must match runtime-owned execution evidence.
-        """
-        async with self._lock:
-            self._ensure_open()
-            self._synchronize_transcript_locked(messages)
-
-    async def simulate_tool_call(
-        self,
-        tool_name: str,
-        arguments: Mapping[str, Any],
-        *,
-        tool_call_id: str,
-    ) -> str:
-        """Simulate one call with UserSim-assigned semantic indices.
-
-        Repeating the same stable call identity and payload is idempotent.
-        Use :meth:`simulate_tool_calls` for parallel calls from one Assistant
-        response so they share a turn index and receive ordered call indices.
-        """
-        payloads = await self.simulate_tool_calls(
-            [{"tool_call_id": tool_call_id, "tool_name": tool_name, "arguments": dict(arguments)}]
-        )
-        return payloads[0]
-
-    async def simulate_tool_calls(self, calls: Sequence[Mapping[str, Any]]) -> list[str]:
-        """Simulate one Assistant response's ordered tool-call batch."""
-        async with self._lock:
-            self._ensure_open()
-            execute = self._native_execute_tool_call
-            if not callable(execute):
-                raise TypeError(f"Probe {self.probe_type!r} does not implement single-call execution")
-            payloads: list[str] = []
-            executed_new_call = False
-            turn_idx = self._tool_round_index
-            for call_idx, call in enumerate(calls):
-                tool_name = call.get("tool_name")
-                arguments = call.get("arguments")
-                tool_call_id = call.get("tool_call_id")
-                if not isinstance(tool_name, str) or tool_name not in self._allowed_tool_names:
-                    raise ValueError(f"Tool {tool_name!r} is not available for this {self.probe_type!r} episode")
-                if not isinstance(arguments, Mapping):
-                    raise TypeError("Tool arguments must be a mapping")
-                if not isinstance(tool_call_id, str) or not tool_call_id:
-                    raise ValueError("tool_call_id must be a non-empty string")
-                prior = next((item for item in self._executed_tool_calls if item.tool_call_id == tool_call_id), None)
-                if prior is not None:
-                    if prior.tool_name != tool_name or prior.arguments != dict(arguments):
-                        raise ValueError(f"tool_call_id {tool_call_id!r} was reused with a different call")
-                    payloads.append(prior.payload)
-                    continue
-                raw_call = {
-                    "id": tool_call_id,
-                    "type": "function",
-                    "function": {
-                        "name": tool_name,
-                        "arguments": json.dumps(dict(arguments), ensure_ascii=False),
-                    },
-                }
-                previous_builder = get_current_outcome_builder()
-                set_current_outcome_builder(self.outcome)
-                try:
-                    payload = await execute(
-                        tool_name,
-                        dict(arguments),
-                        raw_call,
-                        self.state,
-                        self.models,
-                        turn_idx=turn_idx,
-                        call_idx=call_idx,
-                    )
-                finally:
-                    set_current_outcome_builder(previous_builder)
-                if not isinstance(payload, str):
-                    payload = json.dumps(payload, ensure_ascii=False, default=str)
-                if not self._lifecycle_started:
-                    self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": tool_call_id})
-                self._executed_tool_calls.append(
-                    _ExecutedToolCall(
-                        tool_call_id=tool_call_id,
-                        tool_name=tool_name,
-                        arguments=deepcopy(dict(arguments)),
-                        payload=payload,
-                        turn_idx=turn_idx,
-                        call_idx=call_idx,
-                    )
-                )
-                executed_new_call = True
-                self._call_count += 1
-                payloads.append(payload)
-            if executed_new_call:
-                self._tool_round_index += 1
-            return payloads
-
-    async def evidence(self) -> dict[str, Any]:
-        """Return a JSON-safe snapshot suitable for verification and audit."""
-        async with self._lock:
-            return {
-                "probe_type": self.probe_type,
-                "assistant_tools": self.assistant_tools,
-                "allowed_tool_names": sorted(self.allowed_tool_names),
-                "transcript": deepcopy(self.state.messages),
-                "conversation_metadata": deepcopy(self.state.metadata),
-                "simulation_traces": [trace.to_dict() for trace in self.outcome.traces()],
-                "result_extras": deepcopy(self.probe.build_result_extras(self.state)),
-            }
-
-    async def format_followup_user_instructions(self, turn_idx: int) -> list[str]:
-        """Delegate probe-authored instructions over synchronized state."""
-        if not isinstance(turn_idx, int) or isinstance(turn_idx, bool) or turn_idx < 1:
-            raise ValueError("turn_idx must be a positive integer for a follow-up")
-        async with self._lock:
-            self._ensure_open()
-            instructions = await self.probe.format_followup_user_instructions(turn_idx, self.state)
-            if not isinstance(instructions, list) or not all(isinstance(item, str) for item in instructions):
-                raise TypeError("Probe follow-up instructions must be a list of strings")
-            return list(instructions)
-
-    async def is_capitulation_detected(self) -> bool:
-        """Delegate the probe's assistant-turn stop check."""
-        async with self._lock:
-            self._ensure_open()
-            return bool(await self.probe.is_capitulation_detected(self.state))
-
-    async def should_succeed(self) -> bool:
-        """Delegate the probe's completion guard over synchronized state."""
-        async with self._lock:
-            self._ensure_open()
-            return bool(self.probe.should_succeed(self.state))
-
-    async def result_extras(self) -> dict[str, Any]:
-        """Return probe-authored result columns over synchronized state."""
-        async with self._lock:
-            self._ensure_open()
-            return deepcopy(self.probe.build_result_extras(self.state))
-
-    async def finalize(self, messages: Sequence[Mapping[str, Any]] | None = None) -> dict[str, Any]:
-        """Finalize a native UserSim result from externally executed messages."""
-        async with self._lock:
-            if self._finalized:
-                if (
-                    messages is not None
-                    and [_normalize_message(message) for message in messages] != self.state.messages
-                ):
-                    raise RuntimeError("Probe episode runtime was finalized with a different transcript")
-                assert self._final_result is not None
-                return deepcopy(self._final_result)
-            if messages is not None:
-                self._synchronize_transcript_locked(messages)
-            self._validate_tool_evidence(self.state.messages, require_complete=True)
-            result_extras = self.probe.build_result_extras(self.state)
-            n_turns = int(
-                result_extras.get(
-                    "num_turns",
-                    sum(1 for message in self.state.messages if message.get("role") == "user"),
-                )
-            )
-            self.outcome.set_n_turns(n_turns)
-            self.outcome.set_n_tool_calls(self._call_count)
-            status = bool(self.probe.should_succeed(self.state))
-            outcome = self.outcome.finalize(status=OutcomeStatus.OK)
-            result = make_result(
-                self.state.messages,
-                self.state.metadata,
-                status,
-                outcome=outcome,
-                traces=self.outcome.traces(),
-            )
-            result.update(result_extras)
-            result["num_turns"] = n_turns
-            result["num_tool_calls"] = self._call_count
-            self._finalized = True
-            self._final_result = deepcopy(result)
-            return deepcopy(result)
-
-    async def _initial_user_message_locked(self) -> str | None:
-        if self._initial_user_message is _UNSET:
-            message = await self.probe.get_verbatim_first_user_turn(self.state)
-            self._initial_user_message = message if isinstance(message, str) and message else None
-        assert self._initial_user_message is None or isinstance(self._initial_user_message, str)
-        return self._initial_user_message
-
-    def _validate_tool_evidence(
-        self,
-        messages: Sequence[Mapping[str, Any]],
-        *,
-        require_complete: bool,
-    ) -> None:
-        expected = {call.tool_call_id: call for call in self._executed_tool_calls}
-        observed_tool_ids: set[str] = set()
-        tool_positions: dict[str, int] = {}
-        for message_position, message in enumerate(messages):
-            if message.get("role") != "tool":
-                continue
-            call_id = message.get("tool_call_id")
-            if not isinstance(call_id, str) or call_id in observed_tool_ids:
-                raise ValueError("Transcript tool messages do not match executed tool-call evidence")
-            observed_tool_ids.add(call_id)
-            tool_positions[call_id] = message_position
-            call = expected.get(call_id)
-            if call is None or not _payloads_equal(message.get("content"), call.payload):
-                raise ValueError("Transcript tool messages do not match executed tool-call evidence")
-        if expected.keys() - observed_tool_ids:
-            raise ValueError("Transcript tool messages do not match executed tool-call evidence")
-
-        assistant_calls = _assistant_calls(messages)
-        for call_id, evidence in expected.items():
-            observed = assistant_calls.get(call_id)
-            if (
-                observed is None
-                or observed[:2] != (evidence.tool_name, evidence.arguments)
-                or observed[2] >= tool_positions[call_id]
-            ):
-                raise ValueError("Transcript assistant calls do not match executed tool-call evidence")
-        if require_complete and assistant_calls.keys() - expected.keys():
-            raise ValueError("Transcript assistant calls have no executed tool-call evidence")
-
-    def _synchronize_transcript_locked(self, messages: Sequence[Mapping[str, Any]]) -> None:
-        normalized = [_normalize_message(message) for message in messages]
-        synchronized_count = len(self._synchronized_messages)
-        if len(normalized) < synchronized_count:
-            raise ValueError("Transcript synchronization cannot regress")
-        if normalized[:synchronized_count] != self._synchronized_messages:
-            raise ValueError("Transcript synchronization diverges from previously observed messages")
-        self._validate_tool_evidence(normalized, require_complete=False)
-        self._synchronized_messages = deepcopy(normalized)
-        self.state.messages = normalized
-
-    def _ensure_open(self) -> None:
-        if self._finalized:
-            raise RuntimeError("Probe episode runtime has already been finalized")
+        return await waiter
 
 
 def _tool_name(tool: Mapping[str, Any]) -> str:
@@ -806,99 +644,38 @@ def _normalize_message(message: Mapping[str, Any]) -> dict[str, Any]:
     return deepcopy(dict(message))
 
 
-def _assistant_calls(messages: Sequence[Mapping[str, Any]]) -> dict[str, tuple[str, dict[str, Any], int]]:
-    calls: dict[str, tuple[str, dict[str, Any], int]] = {}
-    for message_position, message in enumerate(messages):
-        if message.get("role") != "assistant":
-            continue
-        for raw_call in message.get("tool_calls") or []:
-            if not isinstance(raw_call, Mapping):
-                raise ValueError("Transcript assistant tool calls must be mappings")
-            call_id = raw_call.get("id")
-            function = raw_call.get("function")
-            if not isinstance(call_id, str) or not call_id or call_id in calls:
-                raise ValueError("Transcript assistant tool calls require unique non-empty IDs")
-            if not isinstance(function, Mapping):
-                raise ValueError("Transcript assistant tool calls require a function mapping")
-            name = function.get("name")
-            if not isinstance(name, str) or not name:
-                raise ValueError("Transcript assistant tool calls require a function name")
-            arguments = function.get("arguments", {})
-            if isinstance(arguments, str):
-                try:
-                    arguments = json.loads(arguments)
-                except json.JSONDecodeError as error:
-                    raise ValueError("Transcript assistant tool-call arguments must be valid JSON") from error
-            if not isinstance(arguments, Mapping):
-                raise ValueError("Transcript assistant tool-call arguments must be an object")
-            calls[call_id] = (name, dict(arguments), message_position)
-    return calls
-
-
-def _payloads_equal(observed: object, expected: str) -> bool:
-    if observed == expected:
-        return True
-    if not isinstance(observed, str):
-        return False
-    try:
-        return json.loads(observed) == json.loads(expected)
-    except json.JSONDecodeError:
-        return False
-
-
-def _loop_policy(probe: BaseProbe, config: ConversationSimulatorConfig) -> AssistantToolLoopPolicy:
-    mode = getattr(probe, "tool_loop_mode", "multi")
-    if mode not in {"single", "multi"}:
-        raise ValueError(f"Unsupported assistant tool-loop mode: {mode!r}")
-    activation_limit = probe.external_assistant_activation_limit(config)
-    return AssistantToolLoopPolicy(
-        tool_round_mode=mode,
-        max_assistant_activations=activation_limit,
-        final_synthesis_without_tools=bool(getattr(probe, "final_synthesis_without_tools", False)),
-        single_user_turn=bool(getattr(probe, "single_user_turn", False)),
-        assistant_error_behavior="fail_episode",
-        tool_error_behavior="return_error_payload",
-        max_tool_calls_per_turn=(
-            max(1, int(probe.tool_max_calls_per_turn)) if hasattr(probe, "tool_max_calls_per_turn") else None
-        ),
-        max_tool_response_attempts=max(1, int(getattr(probe, "max_tool_response_attempts", 1))),
-        assistant_resampling=bool(getattr(probe, "supports_assistant_resampling", False)),
-    )
-
-
-def _user_turn_policy(probe: BaseProbe) -> UserTurnPolicySnapshot:
-    policy = resolve_user_turn_policy(probe)
-    return UserTurnPolicySnapshot(
-        context_compression=policy.context_compression,
-        wrap_up=policy.wrap_up,
-        followup_anchor=policy.followup_anchor,
-        allowed_phrases=tuple(sorted(policy.allowed_phrases)),
-        script_check_ignores=tuple(policy.script_check_ignores),
-        check_opening="native" if policy.check_opening is not None else "none",
-    )
-
-
 class _ActivationModel:
-    """ModelFacade-shaped rendezvous used by ``acall_llm``."""
+    """ModelFacade-shaped rendezvous used by ``acall_llm``.
 
-    def __init__(self, runtime: ProbeEpisodeRuntime, alias: str) -> None:
+    Mirrors the host's declared identity and token budget so UserSim resolves
+    the real model id for trajectory identity and probe grading, and scales
+    ``max_tokens`` for non-Latin-script locales as it would for a configured
+    model.
+    """
+
+    def __init__(self, runtime: ProbeEpisodeRuntime, alias: str, host_model: Any) -> None:
         self._runtime = runtime
         self._alias = alias
-        self.model_name = getattr(runtime.models.get(alias), "model_name", "external-activation")
+        self.model_name = resolve_model_name(host_model, alias)
+        self._model_config = getattr(host_model, "_model_config", None)
 
     async def acompletion(self, messages: Sequence[Any], **kwargs: Any) -> SimpleNamespace:
-        response = await self._runtime._request_activation(
+        result = await self._runtime._request_activation(
             self._alias,
             [_chat_message_to_dict(message) for message in messages],
             dict(kwargs),
         )
+        response = result.response
+        usage = result.usage
         return SimpleNamespace(
             message=SimpleNamespace(
                 content=response.get("content", "") or "",
                 reasoning_content=response.get("reasoning_content"),
                 tool_calls=deepcopy(response.get("tool_calls")),
             ),
-            usage=None,
+            usage=(
+                SimpleNamespace(input_tokens=usage.input_tokens, output_tokens=usage.output_tokens) if usage else None
+            ),
         )
 
 
@@ -938,6 +715,3 @@ def _json_safe_copy(value: Any) -> Any:
 
 def _json_fingerprint(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-
-
-_UNSET = object()

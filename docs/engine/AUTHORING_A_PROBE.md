@@ -147,7 +147,27 @@ implementations.
 | `allow_early_stop_at_turn(turn_idx, state)` | no | `True` | `ToolCallingMixin` defers until tools are used; `safety_chat_pressure` returns False (the dedicated capitulation classifier on the assistant side is the only stop signal) |
 | `async is_capitulation_detected(state)` | no | `False` | `safety_chat_pressure` overrides this and runs a dedicated comparator-shaped classifier (`classifier.py::classify_capitulation`) against the assistant's last response. When True the simulator sets `stopped_on_capitulation=True`, `capitulated_at_turn=N`, emits `EARLY_STOP` + `CAPITULATION_CHECK` traces, and breaks the loop. Capitulation-specific by design: if a future probe needs a different post-assistant-turn stop reason, add a sibling hook with its own dedicated vocabulary rather than overloading this one. |
 | `user_turn_policy()` | no | `UserTurnPolicy()`: the loop's own behaviour | When the probe tests what the model says across turns: turn off compression so the model sees its own replies, turn off the wrap-up anchor so every follow-up stays on topic, allow filter phrases its users naturally write, and skip names (such as brand names in Latin script) in the script check. `identity_disclosure` does all four, and checks the openings its users write for AI names. A generated opening can also be checked before the gate (`check_opening`): return why a draft breaks the probe's rules, and the loop asks for another draft within `max_query_attempts`. Read once per trajectory, after `derive_task` |
-| `async run_dispatch(*, models, data, cfg)` | no | drives `ConversationLoop` | Only when the unified loop is wrong shape (currently: only `safety_agentic`) |
+| `async run_dispatch(*, models, data, cfg, state=None, seed_state=True)` | no | drives `ConversationLoop` | Only when the unified loop is wrong shape (currently: only `safety_agentic`). An override **must** accept `state` and `seed_state` and honour them — reuse the supplied `state` instead of building one, and skip metadata seeding when `seed_state` is False. An external host resumes an episode through them (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`); an override with the old signature raises `TypeError` when hosted. |
+| `on_tool_call_executed(*, tool_call_id, tool_name, arguments, payload, turn_idx, call_idx)` | no | notifies the registered observer | Only when the probe executes tool calls itself instead of inheriting `ToolExecutionMixin`. Call it immediately after appending each `role: "tool"` message. Notify-only: the loop ignores the return value, so it cannot change behaviour, but without it the payloads the probe produced never reach an external host (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`). |
+
+### Is the probe hostable?
+
+A probe is hostable when an external host driving it through
+`ProbeEpisodeRuntime` reproduces what `usersim simulate` would have produced for
+the same inputs. Probes on the shared `ConversationLoop` get this for free. A
+probe with its own `run_dispatch` or its own tool execution has to be checked,
+from the probe's own test suite:
+
+```python
+from usersim.testing import assert_hosted_parity
+
+async def test_my_probe_is_hostable():
+    await assert_hosted_parity("my_probe", config=cfg, persona=persona, data=data)
+```
+
+It runs the episode both ways against scripted models and reports every
+difference, prompts included, plus any tool call the probe executed without
+notifying. See `docs/engine/EXTERNAL_PROBE_RUNTIME.md`.
 
 ---
 
