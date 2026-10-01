@@ -14,12 +14,17 @@ trajectory's visible content. See ``reporting/_reasoning.py``.
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from data_designer.engine.models.clients.types import TransportKwargs
+from data_designer.engine.models.facade import _COMPLETION_REQUEST_FIELDS, ModelFacade
 
-from usersim.engine.core import llm
+import usersim
+from usersim.engine.core import llm, realized_audit
 from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
@@ -27,6 +32,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
+from usersim.engine.probes.health_disclosure import move_runtime
 
 
 async def _noop_sleep(_delay):
@@ -571,3 +577,131 @@ def test_trace_does_not_reach_the_chat_message() -> None:
     payload = [m.to_dict() for m in chat]
     assert not any("reasoning_content" in m for m in payload)
     assert trace not in str(payload)
+
+
+# ---------------------------------------------------------------------------
+# Settings Data Designer's facade would drop
+# ---------------------------------------------------------------------------
+
+_HI = [{"role": "user", "content": "hi"}]
+
+
+def _data_designer_facade(extra_body: dict | None = None, *, rejects_max_tokens: bool = False) -> MagicMock:
+    """A facade of the type Data Designer builds, configured with ``extra_body``,
+    that records each call and answers like ``_Facade`` or ``_RejectsMaxTokensFacade``."""
+    answers = _RejectsMaxTokensFacade() if rejects_max_tokens else _Facade()
+    facade = MagicMock(spec=ModelFacade)
+    facade._model_config = SimpleNamespace(inference_parameters=SimpleNamespace(extra_body=extra_body, max_tokens=None))
+    facade.calls = []
+
+    async def acompletion(messages, **kwargs):
+        facade.calls.append(kwargs)
+        return await answers.acompletion(messages, **kwargs)
+
+    facade.acompletion = acompletion
+    return facade
+
+
+class TestSettingsDataDesignerWouldDrop:
+    """Data Designer forwards a fixed set of request fields and drops the rest
+    without an error, so a reasoning setting only reaches the provider inside
+    ``extra_body``."""
+
+    async def test_a_setting_the_model_already_uses_is_sent_over_its_config(self) -> None:
+        facade = _data_designer_facade({"reasoning_effort": "high", "top_k": 20})
+        await acall_llm({"judge_model": facade}, "judge_model", _HI, reasoning_effort="low")
+        (call,) = facade.calls
+        assert "reasoning_effort" not in call
+        assert call["extra_body"] == {"reasoning_effort": "low", "top_k": 20}
+
+    async def test_a_setting_the_model_does_not_use_is_not_sent(self) -> None:
+        """A provider can reject a setting outright, and the model config is the
+        record of which ones this model takes."""
+        facade = _data_designer_facade({"chat_template_kwargs": {"enable_thinking": True}})
+        await acall_llm({"judge_model": facade}, "judge_model", _HI, reasoning_effort="low")
+        (call,) = facade.calls
+        assert "reasoning_effort" not in call
+        assert "reasoning_effort" not in call.get("extra_body", {})
+
+    async def test_chat_template_kwargs_merge_with_the_models_own(self) -> None:
+        facade = _data_designer_facade({"chat_template_kwargs": {"enable_thinking": True, "keep": 1}})
+        await acall_llm({"judge_model": facade}, "judge_model", _HI, chat_template_kwargs={"enable_thinking": False})
+        (call,) = facade.calls
+        assert call["extra_body"] == {"chat_template_kwargs": {"enable_thinking": False, "keep": 1}}
+
+    async def test_the_max_tokens_retry_sends_its_budget_inside_extra_body(self) -> None:
+        facade = _data_designer_facade(rejects_max_tokens=True)
+        await acall_llm({"assistant_model": facade}, "assistant_model", _HI, max_tokens=4096)
+        first, retry = facade.calls
+        assert first["max_tokens"] == 4096
+        assert "max_tokens" not in retry and "max_completion_tokens" not in retry
+        assert retry["extra_body"] == {"max_completion_tokens": 4096}
+
+    async def test_other_facades_get_the_arguments_as_given(self) -> None:
+        """A hosted run's facade hands its parameters to the host, which applies them."""
+        seen = []
+
+        class _HostedFacade(_Facade):
+            async def acompletion(self, messages, **kwargs):
+                seen.append(kwargs)
+                return await super().acompletion(messages, **kwargs)
+
+        await acall_llm({"judge_model": _HostedFacade()}, "judge_model", _HI, reasoning_effort="low")
+        assert seen == [{"reasoning_effort": "low"}]
+
+    def test_data_designer_builds_the_settings_into_the_request_body(self) -> None:
+        """Through Data Designer's own request building, so an upstream change
+        to either step fails here instead of silently dropping the setting."""
+        configured = {"reasoning_effort": "high"}
+        kwargs = llm._request_kwargs(
+            _data_designer_facade(configured), "judge_model", {"reasoning_effort": "low", "max_tokens": 100}
+        )
+        owner = SimpleNamespace(
+            _model_config=SimpleNamespace(
+                inference_parameters=SimpleNamespace(generate_kwargs={"extra_body": configured})
+            ),
+            model_provider=SimpleNamespace(name="nvidia", extra_body=None, extra_headers=None),
+            model_name="vendor/model",
+        )
+        consolidated = ModelFacade.consolidate_kwargs(owner, **kwargs)
+        request = ModelFacade._build_chat_completion_request(owner, _HI, consolidated)
+        body = TransportKwargs.from_request(request).body
+        assert body["reasoning_effort"] == "low"
+        assert body["max_tokens"] == 100
+
+    def test_data_designer_still_drops_the_settings_routed_around_it(self) -> None:
+        """If Data Designer starts forwarding one of these itself, it can be
+        passed as a plain argument."""
+        forwarded = set(_COMPLETION_REQUEST_FIELDS) & {*llm._EXTRA_BODY_SETTINGS, "max_completion_tokens"}
+        assert not forwarded, f"Data Designer now forwards {sorted(forwarded)}; stop routing them through extra_body."
+
+
+def test_every_argument_passed_to_a_model_can_reach_it() -> None:
+    """Data Designer drops keyword arguments outside its request fields without
+    an error, so an argument added at a call site has to be one it forwards or
+    one ``acall_llm`` routes."""
+    root = Path(usersim.__file__).parent
+    reaches = set(_COMPLETION_REQUEST_FIELDS) | set(llm._EXTRA_BODY_SETTINGS)
+    offenders = []
+    for path in sorted(root.rglob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if not isinstance(node, ast.Call):
+                continue
+            if getattr(node.func, "id", getattr(node.func, "attr", None)) != "acall_llm":
+                continue
+            for keyword in node.keywords:
+                if keyword.arg is None or keyword.arg in reaches:
+                    continue
+                # The default whenever tools are passed, so dropping it changes nothing.
+                if keyword.arg == "tool_choice" and getattr(keyword.value, "value", None) == "auto":
+                    continue
+                offenders.append(f"{path.relative_to(root)}:{node.lineno} {keyword.arg}")
+    assert not offenders, f"these arguments never reach the model: {offenders}"
+
+
+@pytest.mark.parametrize("value", ["off", "low", "medium", "high"])
+def test_the_reasoning_overrides_use_only_settings_acall_llm_routes(monkeypatch, value) -> None:
+    monkeypatch.setenv("USERSIM_AUDIT_REASONING_EFFORT", value)
+    monkeypatch.setattr(move_runtime, "_MOVE_REASONING_EFFORT", value)
+    for produced in (realized_audit._audit_reasoning_kwargs(), move_runtime._move_reasoning_kwargs()):
+        assert produced and set(produced) <= set(llm._EXTRA_BODY_SETTINGS)

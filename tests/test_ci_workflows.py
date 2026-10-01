@@ -12,6 +12,7 @@ the API key" is always to add the key.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -201,3 +202,42 @@ class TestCiWrapsMakeTargets:
                     continue
                 target = step["run"].strip().split()[1]
                 assert target in declared, f"ci.yml calls `make {target}`, which the Makefile does not define."
+
+
+class TestDcoAssistant:
+    """A contributor signs by pasting a phrase, and nothing reports it when the
+    paste does not count: the step is skipped and the job still passes."""
+
+    def _step(self) -> dict:
+        doc = _load(_WORKFLOWS / "dco-assistant.yml")
+        steps = [
+            step
+            for job in doc["jobs"].values()
+            for step in job.get("steps") or []
+            if "contributor-assistant/github-action" in step.get("uses", "")
+        ]
+        assert len(steps) == 1, "dco-assistant.yml should run the DCO action in exactly one step."
+        return steps[0]
+
+    def test_the_sign_phrase_runs_the_step_with_surrounding_whitespace(self) -> None:
+        """A phrase copied from the browser usually ends in a newline, which an
+        exact comparison rejects. The action trims the comment before its own
+        match, so the condition only has to let the comment through."""
+        step = self._step()
+        phrase = step["with"]["custom-pr-sign-comment"]
+        assert f"contains(github.event.comment.body, '{phrase}')" in step["if"], (
+            "The step condition must let the sign phrase through with surrounding whitespace."
+        )
+        assert "startsWith(github.event.comment.body, 'recheck')" in step["if"]
+        assert "github.event.comment.body ==" not in step["if"], (
+            "An exact comparison skips the step for a comment ending in a newline, and the job still passes."
+        )
+
+    def test_the_signed_commit_message_uses_only_substituted_placeholders(self) -> None:
+        """The pinned action replaces $contributorName, $owner and $repo in this
+        message and leaves any other placeholder in the commit subject."""
+        message = self._step()["with"]["signed-commit-message"]
+        unsubstituted = set(re.findall(r"\$\w+", message)) - {"$contributorName", "$owner", "$repo"}
+        assert not unsubstituted, (
+            f"signed-commit-message uses {sorted(unsubstituted)}, which the action never replaces."
+        )

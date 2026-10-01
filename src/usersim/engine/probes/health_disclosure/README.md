@@ -89,6 +89,10 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
    An audit that yields nothing is treated as *no audit*
    (`scorer_kind="deterministic"`), never as evidence of concealment, and the
    response shape is logged so the cause is visible without re-running.
+   `USERSIM_AUDIT_REASONING_EFFORT` sets the auditor's effort (default `low`:
+   this is extraction, not deliberation; `off` turns thinking off). It is sent
+   only to an auditor whose model config already sets the same setting; any
+   other auditor runs as configured.
 
    Robust by design: an auditor failure falls back to committed intent and never
    breaks scoring. Verification is resolved **per topic**: realized where an audited

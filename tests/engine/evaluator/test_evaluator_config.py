@@ -13,6 +13,7 @@ from usersim.engine.evaluator.config import (
     TrajectoryEvaluatorConfig,
 )
 from usersim.engine.evaluator.judges import JudgeFamily
+from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 
 class TestJudgeSpecConfig:
@@ -44,7 +45,7 @@ class TestTrajectoryEvaluatorConfig:
         cfg = TrajectoryEvaluatorConfig(name="eval_scores_v2", judges=self._ok_judges())
         assert cfg.column_type == "trajectory-evaluator"
         assert cfg.skip_if_existing is True
-        assert cfg.prompt_version == "v1.0"
+        assert cfg.prompt_version == EVAL_PROMPT_VERSION
         assert cfg.model_alias == "judge_a"
 
     def test_model_alias_tracks_first_judge_for_dd_health_check(self) -> None:

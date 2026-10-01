@@ -130,10 +130,10 @@ def _emit_move(
         pass
 
 
-# Optional per-turn reasoning budget for the DECIDE step. Forwarded to
-# ModelFacade.completion() as reasoning_effort when set (low|medium|high) or as a
-# thinking toggle when 'off'. Left unset by default so DD's own config wins and
-# we never send a kwarg the facade might reject.
+# Optional per-turn reasoning budget for the DECIDE step: reasoning_effort when
+# set to low|medium|high, a thinking toggle when 'off'. acall_llm sends it only to
+# a model whose config already sets the same setting, so a provider that rejects
+# it never sees it. Unset by default, which leaves the model as configured.
 _MOVE_REASONING_EFFORT = os.environ.get("USERSIM_MOVE_REASONING_EFFORT", "").lower().strip()
 
 

@@ -17,9 +17,11 @@ pass with an unmocked model call underneath.
 """
 
 import sys
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
+import pandas as pd
 import pytest
 from data_designer.config.column_configs import GenerationStrategy
 from data_designer.engine.column_generators.generators.base import ColumnGenerator
@@ -168,6 +170,22 @@ class TestSimulatorRunsARow:
             f"{probe_type} ({variant}) writes columns the config never declares, so they are dropped "
             f"before anything can read them: {sorted(undeclared)}"
         )
+
+    @pytest.mark.usefixtures("no_moves_override")
+    @pytest.mark.parametrize(("probe_type", "variant"), _probe_variant_pairs())
+    async def test_every_probe_row_can_be_written_to_parquet(
+        self, probe_type: str, variant: str, tmp_path: Path
+    ) -> None:
+        """Data Designer writes each batch of rows to parquet before ``usersim simulate`` reads it back.
+
+        A value pyarrow cannot store, such as an empty mapping, makes Data
+        Designer drop the whole batch, so the run ends with no trajectories.
+        The row is written here the way Data Designer writes a batch.
+        """
+        row, _, _ = await self._run_one_row(probe_type, variant)
+        path = tmp_path / "batch.parquet"
+        pd.DataFrame([row]).to_parquet(path, index=False)
+        assert pd.read_parquet(path)["trajectory_id"].tolist() == [row["trajectory_id"]]
 
     @pytest.mark.usefixtures("no_moves_override")
     @pytest.mark.parametrize("probe_type", sorted(p for p, v in _probe_variant_pairs() if v == "guarded"))

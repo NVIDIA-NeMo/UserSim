@@ -142,6 +142,20 @@ def test_the_report_names_the_models_that_scored_its_rows(trajectory_df, capsys)
     assert "vendor/model-a, vendor/model-b" in printed
 
 
+def _judged_under(version: str) -> str:
+    """An evaluation cell whose envelope records judge prompt ``version``."""
+    cell = json.loads(_eval_cell())
+    cell["envelope"]["prompt_version"] = version
+    return json.dumps(cell)
+
+
+def test_the_report_records_the_judge_prompt_versions_of_its_rows(trajectory_df):
+    eval_df = _scored_frame(_judged_under("v1.0"), _judged_under("v1.1"))
+    report = build_capability_report(trajectory_df, eval_df, eval_column="assistant_eval", run_id="test-run")
+    assert report.evaluator_prompt_versions == ["v1.0", "v1.1"]
+    assert report.to_dict()["evaluator_prompt_versions"] == ["v1.0", "v1.1"]
+
+
 def test_rows_that_do_not_record_their_scoring_model_say_so(trajectory_df, capsys):
     report = build_capability_report(
         trajectory_df, _scored_frame(_scored_by(None)), eval_column="assistant_eval", run_id="test-run"

@@ -21,7 +21,7 @@ import html
 import json
 import math
 from dataclasses import asdict, dataclass, field
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -272,6 +272,9 @@ class CapabilityReport:
     # the models config as it stood when the simulation ran. Empty for
     # evaluations written before envelopes recorded ``judge_models``.
     evaluator_models: dict[str, list[str]] = field(default_factory=dict)
+    # The judge prompt versions in the evaluation cells' envelopes, so a
+    # comparison can tell when its runs were judged by different prompts.
+    evaluator_prompt_versions: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -319,6 +322,7 @@ class CapabilityReport:
             "model_identities": dict(self.model_identities),
             "metadata_source": self.metadata_source,
             "evaluator_models": {alias: list(models) for alias, models in self.evaluator_models.items()},
+            "evaluator_prompt_versions": list(self.evaluator_prompt_versions),
         }
 
     def print_actors(self) -> None:
@@ -495,16 +499,28 @@ def build_capability_report(
         model_identities=model_identities,
         metadata_source=metadata_source,
         evaluator_models=_evaluator_models(joined, eval_column),
+        evaluator_prompt_versions=_evaluator_prompt_versions(joined, eval_column),
     )
+
+
+def _envelopes(joined: Any, eval_column: str) -> Iterator[dict[str, Any]]:
+    """The envelope of every evaluation cell in ``joined``."""
+    if eval_column not in getattr(joined, "columns", []):
+        return
+    for raw in joined[eval_column].dropna():
+        yield _decode_eval_cell(raw).get("envelope") or {}
+
+
+def _evaluator_prompt_versions(joined: Any, eval_column: str) -> list[str]:
+    """The judge prompt versions recorded in the evaluation cells' envelopes."""
+    versions = {envelope.get("prompt_version") for envelope in _envelopes(joined, eval_column)}
+    return sorted(str(version) for version in versions if version)
 
 
 def _evaluator_models(joined: Any, eval_column: str) -> dict[str, list[str]]:
     """Judge alias -> the models behind it in the evaluation cells' envelopes."""
-    if eval_column not in getattr(joined, "columns", []):
-        return {}
     models: dict[str, set[str]] = {}
-    for raw in joined[eval_column].dropna():
-        envelope = _decode_eval_cell(raw).get("envelope") or {}
+    for envelope in _envelopes(joined, eval_column):
         for alias, model in zip(envelope.get("judge_aliases") or [], envelope.get("judge_models") or []):
             models.setdefault(str(alias), set()).add(str(model))
     return {alias: sorted(names) for alias, names in sorted(models.items())}
