@@ -19,15 +19,15 @@ from usersim.engine.core.episode_runtime import (
     ActivationRequest,
     ActivationResult,
     AssistantModelCall,
-    AssistantToolRound,
     AssistantTurnRequest,
     CompletedAssistantTurn,
+    CompletedTurnEvidence,
     EpisodeContractError,
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
 from usersim.engine.core.probes import known_probes, resolve_probe
-from usersim.engine.external import ConversationRuntime, ProbeToolSession
+from usersim.engine.external import ConversationRuntime, ProbeToolCallRequest, ProbeToolSession
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
@@ -295,9 +295,9 @@ async def _run_split(
             )
             continue
         roles.append("assistant")
-        await tools.begin_turn(event.tool_context)
         transcript: list[dict[str, Any]] = []
         model_calls: list[AssistantModelCall] = []
+        evidence = CompletedTurnEvidence.from_unexecuted_turn(event.tool_context)
         tool_count = 0
         limit_reached = False
         while True:
@@ -318,16 +318,24 @@ async def _run_split(
             tool_calls = recorded.get("tool_calls") or []
             if not tool_calls:
                 break
-            receipt = await tools.execute_round(
-                AssistantToolRound(
-                    turn_id=event.turn_id,
-                    round_id=f"round-{len(model_calls):06d}",
-                    assistant_response=recorded,
+            for raw_call in tool_calls:
+                function = raw_call["function"]
+                arguments = json.loads(function["arguments"])
+                result = await tools.execute_call(
+                    ProbeToolCallRequest(
+                        context=event.tool_context,
+                        tool_call_id=raw_call["id"],
+                        tool_name=function["name"],
+                        arguments=arguments,
+                        round_id=f"round-{len(model_calls):06d}",
+                        assistant_response=recorded,
+                    )
                 )
-            )
-            transcript.extend(receipt.tool_messages)
-            tool_count += len(receipt.receipts)
-            limit_reached = receipt.limit_reached
+                evidence = result.evidence
+                limit_reached = result.limit_reached
+                if result.receipt is not None:
+                    transcript.append(result.receipt.tool_message)
+            tool_count = len(evidence.receipts)
             if not event.loop_policy.should_continue(model_calls=len(model_calls), tool_calls=tool_count):
                 break
         event = await runtime.advance(
@@ -335,7 +343,7 @@ async def _run_split(
                 turn_id=event.turn_id,
                 transcript=tuple(transcript),
                 model_calls=tuple(model_calls),
-                evidence=await tools.complete_turn(event.turn_id),
+                evidence=evidence,
             )
         )
     return event.result, roles

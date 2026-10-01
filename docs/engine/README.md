@@ -28,8 +28,10 @@ returns one completed transcript. `ProbeToolSession` is resources-hostable and
 independently owns episode tool schemas, effects, semantic call indices,
 mutable state, receipts, and verification evidence. Environment never steps
 individual Assistant model/tool calls, and there is no record-before-tool
-callback. `ProbeEpisodeRuntime` adapts this split back to the existing local
-per-model `advance()` facade.
+callback. Its per-call seam sits behind normal named Resources tool routes;
+UserSim lifecycle methods do not need transport endpoints.
+`ProbeEpisodeRuntime` adapts this split back to the existing local per-model
+`advance()` facade.
 
 ## Architecture
 

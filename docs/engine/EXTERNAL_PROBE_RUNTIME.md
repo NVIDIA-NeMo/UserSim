@@ -153,15 +153,18 @@ turn. This example shows the ownership boundary; `agent_model` and
 `resources_client` may be remote services:
 
 ```python
+import json
+
 from usersim.engine.external import (
     ActivationRequest,
     ActivationResult,
     AssistantModelCall,
-    AssistantToolRound,
     AssistantTurnRequest,
     CompletedAssistantTurn,
+    CompletedTurnEvidence,
     ConversationRuntime,
     EpisodeLifecycleComplete,
+    ProbeToolCallRequest,
 )
 
 conversation = ConversationRuntime.from_resolved_row(row, models=role_models)
@@ -176,9 +179,9 @@ while not isinstance(event, EpisodeLifecycleComplete):
         continue
 
     # One Environment -> Agent delegation. Everything below runs in Agent.
-    await resources_client.begin_turn(event.tool_context)
     transcript = []
     model_calls = []
+    evidence = CompletedTurnEvidence.from_unexecuted_turn(event.tool_context)
     tool_count = 0
     limit_reached = False
 
@@ -203,16 +206,25 @@ while not isinstance(event, EpisodeLifecycleComplete):
         if not call.response.get("tool_calls"):
             break
 
-        batch = await resources_client.execute_round(
-            AssistantToolRound(
-                turn_id=event.turn_id,
-                round_id=f"round-{len(model_calls)}",
-                assistant_response=call.response,
+        for raw_call in call.response["tool_calls"]:
+            function = raw_call["function"]
+            result = await resources_client.call_tool(
+                function["name"],
+                json.loads(function["arguments"]),
+                metadata=ProbeToolCallRequest(
+                    context=event.tool_context,
+                    tool_call_id=raw_call["id"],
+                    tool_name=function["name"],
+                    arguments=json.loads(function["arguments"]),
+                    round_id=f"round-{len(model_calls)}",
+                    assistant_response=call.response,
+                ),
             )
-        )
-        transcript.extend(batch.tool_messages)
-        tool_count += len(batch.receipts)
-        limit_reached = batch.limit_reached
+            evidence = result.evidence
+            limit_reached = result.limit_reached
+            if result.receipt is not None:
+                transcript.append(result.receipt.tool_message)
+        tool_count = len(evidence.receipts)
         if not event.loop_policy.should_continue(
             model_calls=len(model_calls),
             tool_calls=tool_count,
@@ -223,17 +235,28 @@ while not isinstance(event, EpisodeLifecycleComplete):
         turn_id=event.turn_id,
         transcript=tuple(transcript),
         model_calls=tuple(model_calls),
-        evidence=await resources_client.complete_turn(event.turn_id),
+        evidence=evidence,
     )
     # One Agent -> Environment result for the entire turn.
     event = await conversation.advance(completed)
 ```
 
-`begin_turn()` initializes only Resources-owned state. `execute_round()` takes
-an ordered batch and returns opaque string payloads plus typed receipts;
-Resources—not Agent—assigns `turn_idx` and `call_idx`, owns mutable tool state,
-and marks `limit_reached`. Parallel calls retain response order. A call beyond
-the native cap receives no receipt and is not executed.
+`ProbeToolSession.execute_call()` is the Resources adapter seam behind a normal
+named tool route. Its request combines the ordinary route name and argument
+body with hidden Agent metadata: the turn context, original Assistant response,
+call ID, and round ID. The first call lazily initializes Resources-owned state.
+Each result separates the opaque model-visible `payload` from the hidden typed
+receipt and cumulative `CompletedTurnEvidence`.
+
+Resources—not Agent—validates the raw call and assigns `turn_idx` and
+`call_idx`. Calls from one Assistant response arrive in model order, including
+parallel calls. A call beyond the native cap receives no receipt and is not
+executed. For turns with no tool call,
+`CompletedTurnEvidence.from_unexecuted_turn()` creates the empty evidence
+directly from the request context, so no Resources lifecycle call is needed.
+`begin_turn()`, `execute_round()`, and `complete_turn()` remain compatibility
+methods for batch-oriented hosts; a normal Resources adapter does not expose
+them as transport endpoints.
 
 When Environment accepts the completed turn, `ConversationRuntime` validates
 the transcript against Resources evidence, then replays the recorded assistant

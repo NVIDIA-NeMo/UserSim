@@ -22,6 +22,7 @@ from usersim.engine.core.episode_runtime import (
     AssistantToolRound,
     AssistantTurnRequest,
     CompletedAssistantTurn,
+    CompletedTurnEvidence,
     EpisodeContractError,
     EpisodeLifecycleComplete,
     HostRoleModel,
@@ -29,7 +30,7 @@ from usersim.engine.core.episode_runtime import (
 )
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.probes import _PROBE_REGISTRY, BaseProbe, known_probes, resolve_probe
-from usersim.engine.external import ConversationRuntime, ProbeToolSession, ToolExecutionRequest
+from usersim.engine.external import ConversationRuntime, ProbeToolCallRequest, ProbeToolSession, ToolExecutionRequest
 
 
 class _JSONModel:
@@ -241,9 +242,9 @@ async def _drive_split(
             event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=respond(event)))
             continue
         assistant_turns.append(event)
-        await tools.begin_turn(event.tool_context.to_dict())
         transcript: list[dict[str, object]] = []
         model_calls: list[AssistantModelCall] = []
+        evidence = CompletedTurnEvidence.from_unexecuted_turn(event.tool_context)
         limit_reached = False
         response = respond(event)
         while True:
@@ -252,21 +253,29 @@ async def _drive_split(
             tool_calls = response.get("tool_calls") or []
             if not tool_calls:
                 break
-            receipt = await tools.execute_round(
-                AssistantToolRound(
-                    turn_id=event.turn_id,
-                    round_id=f"round-{len(model_calls):06d}",
-                    assistant_response=response,
-                ).to_dict()
-            )
-            transcript.extend(receipt.tool_messages)
-            limit_reached = receipt.limit_reached
+            for raw_call in tool_calls:
+                function = raw_call["function"]
+                arguments = json.loads(function["arguments"])
+                result = await tools.execute_call(
+                    ProbeToolCallRequest(
+                        context=event.tool_context,
+                        tool_call_id=raw_call["id"],
+                        tool_name=function["name"],
+                        arguments=arguments,
+                        round_id=f"round-{len(model_calls):06d}",
+                        assistant_response=response,
+                    )
+                )
+                evidence = result.evidence
+                limit_reached = result.limit_reached
+                if result.receipt is not None:
+                    transcript.append(result.receipt.tool_message)
+            tool_count = len(evidence.receipts)
             if not event.loop_policy.should_continue(
                 model_calls=len(model_calls),
-                tool_calls=sum(len(item.receipts) for item in await tools.rounds(event.turn_id)),
+                tool_calls=tool_count,
             ):
                 break
-            tool_count = sum(len(item.receipts) for item in await tools.rounds(event.turn_id))
             response = respond(
                 ActivationRequest(
                     activation_id=f"{event.turn_id}-agent-{len(model_calls) + 1}",
@@ -290,7 +299,7 @@ async def _drive_split(
             turn_id=event.turn_id,
             transcript=tuple(transcript),
             model_calls=tuple(model_calls),
-            evidence=await tools.complete_turn(event.turn_id),
+            evidence=evidence,
         )
         event = await runtime.advance(completed.to_dict())
     return event, assistant_turns
@@ -457,6 +466,91 @@ async def test_split_safety_tool_session_preserves_plain_text_and_indices(
     assert [(receipt.turn_idx, receipt.call_idx) for receipt in receipts] == [(0, 0), (1, 0), (2, 0)]
     assert all(isinstance(receipt.payload, str) for receipt in receipts)
     assert await runtime.tool_result("split-plain") == receipts[0].payload
+
+
+async def test_resources_native_call_lazily_initializes_turn_and_returns_hidden_evidence(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    event = await runtime.advance()
+    assert isinstance(event, AssistantTurnRequest)
+    response = _tool_call(event.tools[0]["function"]["name"], {"value": "example"}, "normal-resource-call")
+    function = response["tool_calls"][0]["function"]
+    request = ProbeToolCallRequest(
+        context=event.tool_context,
+        assistant_response=response,
+        tool_call_id="normal-resource-call",
+        tool_name=function["name"],
+        arguments=json.loads(function["arguments"]),
+    )
+
+    first = await tools.execute_call(request)
+    retried = await tools.execute_call(request.to_dict())
+
+    assert first.payload and isinstance(first.payload, str)
+    assert first.receipt == retried.receipt
+    assert first.evidence == retried.evidence
+    assert first.receipt is not None
+    assert (first.receipt.turn_idx, first.receipt.call_idx) == (0, 0)
+    assert first.evidence.receipts == (first.receipt,)
+
+
+async def test_resources_native_calls_assign_parallel_indices_from_assistant_order(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    event = await runtime.advance()
+    assert isinstance(event, AssistantTurnRequest)
+    tool_name = event.tools[0]["function"]["name"]
+    response = {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            _tool_call(tool_name, {"value": "first"}, "parallel-1")["tool_calls"][0],
+            _tool_call(tool_name, {"value": "second"}, "parallel-2")["tool_calls"][0],
+        ],
+    }
+    evidence = CompletedTurnEvidence.from_unexecuted_turn(event.tool_context)
+    for raw_call in response["tool_calls"]:
+        function = raw_call["function"]
+        result = await tools.execute_call(
+            ProbeToolCallRequest(
+                context=event.tool_context,
+                assistant_response=response,
+                tool_call_id=raw_call["id"],
+                tool_name=function["name"],
+                arguments=json.loads(function["arguments"]),
+            )
+        )
+        evidence = result.evidence
+
+    assert [(receipt.turn_idx, receipt.call_idx) for receipt in evidence.receipts] == [(0, 0), (0, 1)]
+
+
+async def test_resources_native_call_rejects_route_mismatch_before_execution(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    event = await runtime.advance()
+    assert isinstance(event, AssistantTurnRequest)
+    tool_name = event.tools[0]["function"]["name"]
+    response = _tool_call(tool_name, {"value": "example"}, "route-mismatch")
+
+    with pytest.raises(EpisodeContractError, match="route name or arguments disagree"):
+        await tools.execute_call(
+            ProbeToolCallRequest(
+                context=event.tool_context,
+                assistant_response=response,
+                tool_call_id="route-mismatch",
+                tool_name=tool_name,
+                arguments={"value": "different"},
+            )
+        )
+
+    assert not (await tools.evidence())["receipts"]
 
 
 async def test_environment_observes_one_completed_assistant_turn_for_multi_call_agent(

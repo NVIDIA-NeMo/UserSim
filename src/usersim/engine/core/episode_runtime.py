@@ -553,6 +553,97 @@ class CompletedTurnEvidence:
             "final_effect_state": deepcopy(self.final_effect_state),
         }
 
+    @classmethod
+    def from_unexecuted_turn(cls, context: ToolTurnContext | Mapping[str, Any]) -> CompletedTurnEvidence:
+        """Build evidence for a completed Assistant turn that called no tools."""
+        normalized = ToolTurnContext.from_value(context)
+        return cls(
+            turn_id=normalized.turn_id,
+            rounds=(),
+            final_effect_state=_effect_state_from_snapshot(normalized.state_snapshot),
+        )
+
+
+@dataclass(frozen=True)
+class ProbeToolCallRequest:
+    """One normal Resources tool call plus hidden UserSim turn context.
+
+    ``tool_name`` and ``arguments`` are the ordinary Resources route path and
+    body. The remaining fields are transport metadata that let UserSim validate
+    the original Assistant response and assign native semantic indices.
+    """
+
+    context: ToolTurnContext
+    assistant_response: dict[str, Any]
+    tool_call_id: str
+    tool_name: str
+    arguments: dict[str, JSONValue]
+    round_id: str = ""
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "context", ToolTurnContext.from_value(self.context))
+        object.__setattr__(self, "assistant_response", _normalize_assistant_response(self.assistant_response))
+        object.__setattr__(self, "arguments", _json_mapping(self.arguments, "arguments"))
+        if not self.tool_call_id or not self.tool_name:
+            raise ValueError("tool_call_id and tool_name must be non-empty strings")
+        if not self.round_id:
+            object.__setattr__(self, "round_id", _json_fingerprint(self.assistant_response))
+
+    @classmethod
+    def from_value(cls, value: ProbeToolCallRequest | Mapping[str, Any]) -> ProbeToolCallRequest:
+        if isinstance(value, cls):
+            return value
+        return cls(
+            context=ToolTurnContext.from_value(cast(Mapping[str, Any], value.get("context") or {})),
+            assistant_response=_json_mapping(value.get("assistant_response"), "assistant_response"),
+            tool_call_id=str(value.get("tool_call_id") or ""),
+            tool_name=str(value.get("tool_name") or ""),
+            arguments=_json_mapping(value.get("arguments"), "arguments"),
+            round_id=str(value.get("round_id") or ""),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "context": self.context.to_dict(),
+            "assistant_response": deepcopy(self.assistant_response),
+            "tool_call_id": self.tool_call_id,
+            "tool_name": self.tool_name,
+            "arguments": deepcopy(self.arguments),
+            "round_id": self.round_id,
+        }
+
+
+@dataclass(frozen=True)
+class ProbeToolCallResult:
+    """Model-visible payload plus hidden Resources evidence for one call."""
+
+    receipt: ToolCallReceipt | None
+    evidence: CompletedTurnEvidence
+    limit_reached: bool = False
+
+    @property
+    def payload(self) -> str | None:
+        """Return the opaque model-visible payload when the call executed."""
+        return self.receipt.payload if self.receipt is not None else None
+
+    @classmethod
+    def from_value(cls, value: ProbeToolCallResult | Mapping[str, Any]) -> ProbeToolCallResult:
+        if isinstance(value, cls):
+            return value
+        raw_receipt = value.get("receipt")
+        return cls(
+            receipt=ToolCallReceipt.from_value(raw_receipt) if isinstance(raw_receipt, Mapping) else None,
+            evidence=CompletedTurnEvidence.from_value(cast(Mapping[str, Any], value.get("evidence") or {})),
+            limit_reached=bool(value.get("limit_reached")),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "receipt": self.receipt.to_dict() if self.receipt is not None else None,
+            "evidence": self.evidence.to_dict(),
+            "limit_reached": self.limit_reached,
+        }
+
 
 @dataclass(frozen=True)
 class CompletedAssistantTurn:
@@ -755,10 +846,28 @@ class _AssistantReplay:
 
 
 @dataclass
+class _ToolRoundState:
+    batch: AssistantToolRound
+    fingerprint: str
+    turn_idx: int
+    receipts: list[ToolCallReceipt] = field(default_factory=list)
+    call_fingerprints: dict[str, str] = field(default_factory=dict)
+    limit_reached: bool = False
+
+    def snapshot(self) -> ToolRoundReceipt:
+        return ToolRoundReceipt(
+            turn_id=self.batch.turn_id,
+            round_id=self.batch.round_id,
+            receipts=tuple(deepcopy(self.receipts)),
+            limit_reached=self.limit_reached,
+        )
+
+
+@dataclass
 class _ToolTurnState:
     context: ToolTurnContext
-    rounds: list[ToolRoundReceipt] = field(default_factory=list)
-    round_fingerprints: dict[str, tuple[str, ToolRoundReceipt]] = field(default_factory=dict)
+    rounds: list[_ToolRoundState] = field(default_factory=list)
+    rounds_by_id: dict[str, _ToolRoundState] = field(default_factory=dict)
 
 
 @dataclass
@@ -1513,17 +1622,8 @@ class ProbeToolSession:
     async def begin_turn(self, context: ToolTurnContext | Mapping[str, Any]) -> None:
         """Initialize Resources state before an Agent owns the model/tool loop."""
         context = ToolTurnContext.from_value(context)
-        fingerprint = _json_fingerprint(context.to_dict())
         async with self._lock:
-            if self._closed:
-                raise EpisodeContractError("Probe tool session has been closed")
-            prior = self._turns.get(context.turn_id)
-            if prior is not None:
-                if _json_fingerprint(prior.context.to_dict()) != fingerprint:
-                    raise EpisodeContractError(f"turn_id {context.turn_id!r} was reused with different context")
-                return
-            self._apply_request_snapshot(context.state_snapshot)
-            self._turns[context.turn_id] = _ToolTurnState(context=context)
+            self._begin_turn_locked(context)
 
     async def execute_round(self, batch: AssistantToolRound | Mapping[str, Any]) -> ToolRoundReceipt:
         """Execute one ordered batch; Resources assigns every semantic index."""
@@ -1534,73 +1634,70 @@ class ProbeToolSession:
             turn = self._turns.get(batch.turn_id)
             if turn is None:
                 raise EpisodeContractError(f"Tool turn {batch.turn_id!r} has not been initialized")
-            fingerprint = _json_fingerprint(batch.assistant_response)
-            prior = turn.round_fingerprints.get(batch.round_id)
-            if prior is not None:
-                if prior[0] != fingerprint:
-                    raise EpisodeContractError(f"round_id {batch.round_id!r} was reused with a different batch")
-                return deepcopy(prior[1])
+            round_state = self._round_locked(turn, batch)
+            for raw_call in batch.assistant_response.get("tool_calls") or []:
+                if not isinstance(raw_call, Mapping):
+                    raise EpisodeContractError("Tool calls must be mappings")
+                raw = _json_mapping(raw_call, "raw_tool_call")
+                name, arguments = self._parse_and_validate_call(raw)
+                await self._execute_call_locked(
+                    turn,
+                    round_state,
+                    raw=raw,
+                    name=name,
+                    arguments=arguments,
+                )
+            return round_state.snapshot()
 
-            raw_calls = batch.assistant_response.get("tool_calls") or []
-            if not raw_calls:
-                raise EpisodeContractError("A tool round requires at least one tool call")
-            self.state.messages.append(deepcopy(batch.assistant_response))
-            turn_idx = turn.context.first_tool_turn_idx + len(turn.rounds)
-            receipts: list[ToolCallReceipt] = []
-            limit_reached = False
-            allowed = frozenset(_tool_name(tool) for tool in self._assistant_tools)
-            previous_builder = get_current_outcome_builder()
-            set_current_outcome_builder(self.outcome)
-            try:
-                for call_idx, raw_call in enumerate(raw_calls):
-                    calls_made = sum(len(round_receipt.receipts) for round_receipt in turn.rounds) + len(receipts)
-                    if turn.context.max_tool_calls is not None and calls_made >= turn.context.max_tool_calls:
-                        limit_reached = True
-                        break
-                    if not isinstance(raw_call, Mapping):
-                        raise EpisodeContractError("Tool calls must be mappings")
-                    raw = _json_mapping(raw_call, "raw_tool_call")
-                    if hasattr(self.probe, "parse_tool_call"):
-                        name, args = self.probe.parse_tool_call(raw)
-                    else:
-                        name, args = _parse_tool_call(raw)
-                    if name not in allowed:
-                        raise EpisodeContractError(f"Tool {name!r} is not offered by this Resources session")
-                    call_id = str(raw.get("id") or f"call_{turn_idx}_{call_idx}")
-                    payload = await self.probe.execute_tool_call(
-                        name,
-                        deepcopy(args),
-                        deepcopy(raw),
-                        self.state,
-                        self.models,
-                        turn_idx=turn_idx,
-                        call_idx=call_idx,
-                    )
-                    if not isinstance(payload, str):
-                        payload = json.dumps(payload, ensure_ascii=False, default=str)
-                    self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": call_id})
-                    receipt = ToolCallReceipt(
-                        tool_call_id=call_id,
-                        tool_name=name,
-                        arguments=_json_mapping(args, "arguments"),
-                        raw_tool_call=raw,
-                        payload=payload,
-                        turn_idx=turn_idx,
-                        call_idx=call_idx,
-                        effect_state=self._effect_state(),
-                    )
-                    receipts.append(receipt)
-            finally:
-                set_current_outcome_builder(previous_builder)
-            result = ToolRoundReceipt(
-                turn_id=batch.turn_id,
-                round_id=batch.round_id,
-                receipts=tuple(receipts),
-                limit_reached=limit_reached,
+    async def execute_call(
+        self,
+        request: ProbeToolCallRequest | Mapping[str, Any],
+    ) -> ProbeToolCallResult:
+        """Execute one normal Resources tool call and return hidden native evidence.
+
+        The first call lazily initializes its turn from ``request.context``.
+        Calls in one Assistant response must arrive in model order. The
+        returned ``payload`` is the normal model-visible tool result; the
+        receipt and evidence are host metadata and must not be shown to the
+        model.
+        """
+        normalized = ProbeToolCallRequest.from_value(request)
+        async with self._lock:
+            turn = self._begin_turn_locked(normalized.context)
+            batch = AssistantToolRound(
+                turn_id=normalized.context.turn_id,
+                round_id=normalized.round_id,
+                assistant_response=normalized.assistant_response,
             )
-            turn.rounds.append(result)
-            turn.round_fingerprints[batch.round_id] = (fingerprint, result)
-            return deepcopy(result)
+            raw_calls = batch.assistant_response.get("tool_calls") or []
+            matches = [
+                raw_call
+                for raw_call in raw_calls
+                if isinstance(raw_call, Mapping) and raw_call.get("id") == normalized.tool_call_id
+            ]
+            if len(matches) != 1:
+                raise EpisodeContractError(
+                    f"tool_call_id {normalized.tool_call_id!r} must identify exactly one call in the Assistant response"
+                )
+            raw = _json_mapping(matches[0], "raw_tool_call")
+            name, arguments = self._parse_and_validate_call(raw)
+            if name != normalized.tool_name or arguments != normalized.arguments:
+                raise EpisodeContractError(
+                    "Resources route name or arguments disagree with the raw Assistant tool call"
+                )
+            round_state = self._round_locked(turn, batch)
+            receipt = await self._execute_call_locked(
+                turn,
+                round_state,
+                raw=raw,
+                name=name,
+                arguments=arguments,
+            )
+            return ProbeToolCallResult(
+                receipt=deepcopy(receipt),
+                evidence=self._completed_evidence_locked(turn),
+                limit_reached=round_state.limit_reached,
+            )
 
     async def rounds(self, turn_id: str) -> tuple[ToolRoundReceipt, ...]:
         """Return Resources receipts for a turn in execution order."""
@@ -1608,7 +1705,7 @@ class ProbeToolSession:
             turn = self._turns.get(turn_id)
             if turn is None:
                 raise EpisodeContractError(f"Tool turn {turn_id!r} has not been initialized")
-            return tuple(deepcopy(turn.rounds))
+            return tuple(round_state.snapshot() for round_state in turn.rounds)
 
     async def complete_turn(self, turn_id: str) -> CompletedTurnEvidence:
         """Snapshot typed Resources evidence for the Agent result."""
@@ -1616,11 +1713,132 @@ class ProbeToolSession:
             turn = self._turns.get(turn_id)
             if turn is None:
                 raise EpisodeContractError(f"Tool turn {turn_id!r} has not been initialized")
-            return CompletedTurnEvidence(
-                turn_id=turn_id,
-                rounds=tuple(deepcopy(turn.rounds)),
-                final_effect_state=self._effect_state(),
+            return self._completed_evidence_locked(turn)
+
+    def _begin_turn_locked(self, context: ToolTurnContext) -> _ToolTurnState:
+        if self._closed:
+            raise EpisodeContractError("Probe tool session has been closed")
+        fingerprint = _json_fingerprint(context.to_dict())
+        prior = self._turns.get(context.turn_id)
+        if prior is not None:
+            if _json_fingerprint(prior.context.to_dict()) != fingerprint:
+                raise EpisodeContractError(f"turn_id {context.turn_id!r} was reused with different context")
+            return prior
+        self._apply_request_snapshot(context.state_snapshot)
+        turn = _ToolTurnState(context=context)
+        self._turns[context.turn_id] = turn
+        return turn
+
+    def _round_locked(self, turn: _ToolTurnState, batch: AssistantToolRound) -> _ToolRoundState:
+        fingerprint = _json_fingerprint(batch.assistant_response)
+        prior = turn.rounds_by_id.get(batch.round_id)
+        if prior is not None:
+            if prior.fingerprint != fingerprint:
+                raise EpisodeContractError(f"round_id {batch.round_id!r} was reused with a different batch")
+            return prior
+        raw_calls = batch.assistant_response.get("tool_calls") or []
+        if not raw_calls:
+            raise EpisodeContractError("A tool round requires at least one tool call")
+        call_ids = [raw_call.get("id") for raw_call in raw_calls if isinstance(raw_call, Mapping)]
+        if len(call_ids) != len(raw_calls) or any(not isinstance(call_id, str) or not call_id for call_id in call_ids):
+            raise EpisodeContractError("Every tool call requires a non-empty string id")
+        if len(set(call_ids)) != len(call_ids):
+            raise EpisodeContractError("Tool call ids must be unique within one Assistant response")
+        self.state.messages.append(deepcopy(batch.assistant_response))
+        round_state = _ToolRoundState(
+            batch=batch,
+            fingerprint=fingerprint,
+            turn_idx=turn.context.first_tool_turn_idx + len(turn.rounds),
+        )
+        turn.rounds.append(round_state)
+        turn.rounds_by_id[batch.round_id] = round_state
+        return round_state
+
+    def _parse_and_validate_call(self, raw: dict[str, JSONValue]) -> tuple[str, dict[str, JSONValue]]:
+        if hasattr(self.probe, "parse_tool_call"):
+            name, arguments = self.probe.parse_tool_call(raw)
+        else:
+            name, arguments = _parse_tool_call(raw)
+        allowed = frozenset(_tool_name(tool) for tool in self._assistant_tools)
+        if name not in allowed:
+            raise EpisodeContractError(f"Tool {name!r} is not offered by this Resources session")
+        return name, _json_mapping(arguments, "arguments")
+
+    async def _execute_call_locked(
+        self,
+        turn: _ToolTurnState,
+        round_state: _ToolRoundState,
+        *,
+        raw: dict[str, JSONValue],
+        name: str,
+        arguments: dict[str, JSONValue],
+    ) -> ToolCallReceipt | None:
+        raw_calls = round_state.batch.assistant_response.get("tool_calls") or []
+        call_id = str(raw["id"])
+        call_idx = next(
+            index
+            for index, raw_call in enumerate(raw_calls)
+            if isinstance(raw_call, Mapping) and raw_call.get("id") == call_id
+        )
+        fingerprint = _json_fingerprint(
+            {
+                "raw_tool_call": raw,
+                "tool_name": name,
+                "arguments": arguments,
+            }
+        )
+        prior_fingerprint = round_state.call_fingerprints.get(call_id)
+        if prior_fingerprint is not None:
+            if prior_fingerprint != fingerprint:
+                raise EpisodeContractError(f"tool_call_id {call_id!r} was reused with different arguments")
+            return next(
+                (receipt for receipt in round_state.receipts if receipt.tool_call_id == call_id),
+                None,
             )
+        if call_idx != len(round_state.call_fingerprints):
+            raise EpisodeContractError("Resources tool calls must arrive in Assistant response order")
+        round_state.call_fingerprints[call_id] = fingerprint
+        calls_made = sum(len(prior.receipts) for prior in turn.rounds[:-1]) + len(round_state.receipts)
+        if turn.context.max_tool_calls is not None and calls_made >= turn.context.max_tool_calls:
+            round_state.limit_reached = True
+            return None
+
+        previous_builder = get_current_outcome_builder()
+        set_current_outcome_builder(self.outcome)
+        try:
+            payload = await self.probe.execute_tool_call(
+                name,
+                deepcopy(arguments),
+                deepcopy(raw),
+                self.state,
+                self.models,
+                turn_idx=round_state.turn_idx,
+                call_idx=call_idx,
+            )
+        finally:
+            set_current_outcome_builder(previous_builder)
+        if not isinstance(payload, str):
+            payload = json.dumps(payload, ensure_ascii=False, default=str)
+        self.state.messages.append({"role": "tool", "content": payload, "tool_call_id": call_id})
+        receipt = ToolCallReceipt(
+            tool_call_id=call_id,
+            tool_name=name,
+            arguments=arguments,
+            raw_tool_call=raw,
+            payload=payload,
+            turn_idx=round_state.turn_idx,
+            call_idx=call_idx,
+            effect_state=self._effect_state(),
+        )
+        round_state.receipts.append(receipt)
+        return receipt
+
+    def _completed_evidence_locked(self, turn: _ToolTurnState) -> CompletedTurnEvidence:
+        return CompletedTurnEvidence(
+            turn_id=turn.context.turn_id,
+            rounds=tuple(round_state.snapshot() for round_state in turn.rounds),
+            final_effect_state=self._effect_state(),
+        )
 
     def _effect_state(self) -> dict[str, JSONValue]:
         return _json_mapping(
@@ -1929,6 +2147,20 @@ def _parse_tool_call(raw_call: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
             return name, {}
         return name, parsed if isinstance(parsed, dict) else {}
     return name, {}
+
+
+def _effect_state_from_snapshot(snapshot: Mapping[str, Any]) -> dict[str, JSONValue]:
+    metadata = snapshot.get("metadata")
+    outcome = snapshot.get("outcome")
+    if not isinstance(metadata, Mapping) or not isinstance(outcome, Mapping):
+        raise EpisodeContractError("Tool turn snapshot requires metadata and outcome mappings")
+    return _json_mapping(
+        {
+            "metadata": metadata,
+            "outcome": outcome,
+        },
+        "effect_state",
+    )
 
 
 def _project_document_tool_results(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
