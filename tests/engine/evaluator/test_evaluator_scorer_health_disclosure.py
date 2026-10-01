@@ -68,7 +68,7 @@ class TestSkip:
         assert out["scores"] == {} and "error" in out
 
     async def test_noop_when_column_absent_and_variant_unknown(self):
-        # Rows written before probe_variant existed carry neither column.
+        # Without probe_variant nothing marks the row as guarded, so it is skipped.
         out = await score({}, {})
         assert out["scores"] == {} and "error" in out
 
@@ -76,8 +76,8 @@ class TestSkip:
     async def test_raises_when_a_guarded_row_lost_its_columns(self, absent):
         """A guarded row always carries moves_enabled, so its absence means the
         move/Guard columns were dropped before scoring. Skipping it like a
-        default row is how every guarded trajectory scored nothing while eval
-        exited 0."""
+        default row would let a run lose every concealment score without an
+        error."""
         row = {"probe_variant": "guarded"}
         if absent is not _MISSING_KEY:
             row["moves_enabled"] = absent

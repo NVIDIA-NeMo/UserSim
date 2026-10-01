@@ -256,8 +256,9 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             # health_* guarded variant: the move/Guard ground truth written by
             # GuardedMoveMixin.build_result_extras and read back by
             # health_disclosure_concealment. The default variant writes none of
-            # these, so rows from it leave them empty. Kept equal to
-            # GUARDED_RESULT_COLUMNS in probes/health_disclosure/mixin.py by a test.
+            # these, so rows from it leave them empty. A test checks that every
+            # name in GUARDED_RESULT_COLUMNS (probes/health_disclosure/mixin.py)
+            # is listed here.
             "moves_enabled",
             "moves_played",
             "moves_detail",

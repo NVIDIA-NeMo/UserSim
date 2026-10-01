@@ -153,8 +153,8 @@ class TestSimulatorRunsARow:
         A variant can write columns its default does not: the guarded
         ``health_*`` variants write the move/Guard ground truth that
         ``health_disclosure_concealment`` scores from, and the default
-        variants write none of it. Running only the default variant is how
-        those columns went undeclared without a failing test.
+        variants write none of it. Running only the default variant would
+        miss a column that only another variant writes.
         """
         row, cfg, before = await self._run_one_row(probe_type, variant)
         if variant != "default":

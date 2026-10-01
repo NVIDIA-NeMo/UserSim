@@ -114,9 +114,9 @@ def _persist(extras: dict) -> dict:
     """Keep only what the engine keeps, then JSON-encode the way the trajectory
     store does, so the scorer sees the persisted row rather than live objects.
 
-    The filter is the step that once dropped every guarded column: the engine
-    discards any key not declared in ``side_effect_columns`` without a warning,
-    so a row built straight from ``build_result_extras`` hides that loss.
+    The filter matters because the engine discards any key not declared in
+    ``side_effect_columns`` without a warning, so a row built straight from
+    ``build_result_extras`` would hide an undeclared column.
     """
     kept = _kept_columns()
     out = {}
