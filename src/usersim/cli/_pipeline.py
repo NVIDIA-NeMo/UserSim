@@ -348,12 +348,8 @@ def known_probes() -> tuple[str, ...]:
     knows about. Source-of-truth is the plugin's ``_PROBE_REGISTRY``.
 
     Used by ``cli.simulate`` to validate ``--probe-mix`` keys before
-    running, and by ``cli.smoke._check_probe_registry`` for offline
-    verification.
+    running.
     """
-    # Importing the plugin's generator triggers the probe bootstrap,
-    # which populates the substrate's _PROBE_REGISTRY.
-    import usersim.engine.generator  # noqa: F401
     from usersim.engine.core.probes import known_probes as _known
 
     return _known()

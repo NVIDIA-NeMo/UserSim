@@ -37,7 +37,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
-from usersim.engine.core.probes import BankLoadError
+from usersim.engine.core.probes import BankLoadError, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
@@ -59,38 +59,11 @@ __all__ = [
 #
 # Each probe is a ``BaseProbe`` subclass registered in the substrate's
 # ``_PROBE_REGISTRY`` (in ``core/probes.py``) via ``@register_probe``
-# at import time. The bootstrap function below is the lazy-import
-# trigger that ensures every shipped probe module is imported (which
-# fires its ``@register_probe`` decorator) before the dispatcher
-# starts resolving probe labels.
+# at import time. Lookups load the shipped probes on demand; loading
+# them here as well keeps the registry complete for code that reads it
+# directly.
 
-
-def _bootstrap_probes() -> None:
-    """Trigger import-time ``@register_probe`` for every shipped probe.
-
-    Each imported module's ``@register_probe`` decorator self-registers
-    its probe class into ``_PROBE_REGISTRY`` and sets the per-module
-    ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS`` constants.
-    Idempotent: re-importing is a no-op for already-loaded modules.
-    """
-    # Imports trigger the decorators; the imports themselves go unused.
-    import usersim.engine.probes.financial_services.generator  # noqa: F401
-    import usersim.engine.probes.general_educational.generator  # noqa: F401
-    import usersim.engine.probes.general_open_ended.generator  # noqa: F401
-    import usersim.engine.probes.health_disclosure.decision_support  # noqa: F401
-    import usersim.engine.probes.health_disclosure.general  # noqa: F401
-    import usersim.engine.probes.health_disclosure.therapy  # noqa: F401
-    import usersim.engine.probes.health_disclosure.triage  # noqa: F401
-    import usersim.engine.probes.identity_disclosure.generator  # noqa: F401
-    import usersim.engine.probes.safety_agentic.generator  # noqa: F401
-    import usersim.engine.probes.safety_chat_pressure.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_dynamic.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_facts.generator  # noqa: F401
-    import usersim.engine.probes.sov_ai_multilingual_parity.generator  # noqa: F401
-    import usersim.engine.probes.tool_calling.generator  # noqa: F401
-
-
-_bootstrap_probes()
+load_builtin_probes()
 
 
 class ConversationSimulatorGenerator(

@@ -315,9 +315,6 @@ class ProbeEpisodeRuntime:
         profile: Mapping[str, Any] | None = None,
         provenance: Provenance | None = None,
     ) -> None:
-        # Importing the generator bootstraps all built-in probe registrations.
-        import usersim.engine.generator  # noqa: F401
-
         self.models = dict(models)
         self.config = config
         # Probes may keep the models they are constructed with, so construction

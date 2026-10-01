@@ -11,7 +11,8 @@ and the command exits non-zero if any check fails.
 Checks performed:
 
 1. **core imports** — ``data_designer``, ``usersim.engine``,
-   ``usersim.engine.evaluator``, ``reporting``, ``cli`` all import.
+   ``usersim.engine.generator``, ``usersim.engine.evaluator``,
+   ``reporting``, ``cli`` all import.
 2. **models config** — ``cli/models_default.toml`` loads and declares
    the required simulator aliases.
 3. **simulator config** — ``ConversationSimulatorConfig`` validates with
@@ -22,7 +23,7 @@ Checks performed:
 6. **dry-run subcommands** — the four LLM-driven subcommands accept
    their typical argument sets without touching the network.
 7. **probe registry** — every probe in
-   ``usersim.engine.core.probes._PROBE_REGISTRY`` resolves
+   ``usersim.engine.core.probes.known_probes()`` resolves
    to a callable + a module that exposes ``PROBE_FAMILY`` /
    ``PROMPT_VERSION`` / ``PROBE_VARIANTS`` metadata.
 8. **asset paths** — every shipped probe's default asset path
@@ -175,6 +176,7 @@ def _check_imports(report: SmokeReport) -> None:
     modules = [
         "data_designer",
         "usersim.engine",
+        "usersim.engine.generator",
         "usersim.engine.evaluator",
         "usersim.engine.evaluator.scorers",
         "usersim.reporting",
@@ -386,15 +388,11 @@ def _check_probe_registry(report: SmokeReport) -> None:
     corrupts downstream aggregation.
     """
     try:
-        # Importing the plugin's generator triggers the probe bootstrap
-        # that fills the substrate's _PROBE_REGISTRY.
         import sys
 
-        import usersim.engine.generator  # noqa: F401
-        from usersim.engine.core.probes import (
-            _PROBE_REGISTRY,
-            resolve_probe,
-        )
+        from usersim.engine.core.probes import known_probes, resolve_probe
+
+        probe_names = known_probes()
     except Exception as e:
         report.add(
             "probe registry",
@@ -403,12 +401,12 @@ def _check_probe_registry(report: SmokeReport) -> None:
         )
         return
 
-    if not _PROBE_REGISTRY:
+    if not probe_names:
         report.add("probe registry", False, "registry is empty")
         return
 
     failures: list[str] = []
-    for probe_name in sorted(_PROBE_REGISTRY):
+    for probe_name in probe_names:
         try:
             probe_cls = resolve_probe(probe_name)
         except Exception as e:
@@ -440,7 +438,7 @@ def _check_probe_registry(report: SmokeReport) -> None:
     report.add(
         "probe registry",
         True,
-        f"{len(_PROBE_REGISTRY)} probe(s) registered: {sorted(_PROBE_REGISTRY)}",
+        f"{len(probe_names)} probe(s) registered: {list(probe_names)}",
     )
 
 

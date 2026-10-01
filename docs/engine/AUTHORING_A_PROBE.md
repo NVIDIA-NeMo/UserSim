@@ -355,11 +355,10 @@ The decorator does TWO things in one call:
 
 Both surfaces are what the dispatcher reads.
 
-After this, you also need to import-trigger the registration in the
-plugin's bootstrap. Add a line in
-[`usersim/engine/generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py)
-to import your module: that's what triggers the `@register_probe`
-decorator at startup.
+After this, add your module's import path to `BUILTIN_PROBE_MODULES` in
+[`usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py).
+The registry imports every listed module the first time a probe is looked
+up, and that import is what runs the `@register_probe` decorator.
 
 ### Declare every column your probe writes
 
@@ -401,8 +400,8 @@ Every check should report `[OK]`. Confirm your probe appears in the
 [OK]   probe registry        14 probe(s) registered: [..., 'my_probe', ...]
 ```
 
-If your probe doesn't show up, the bootstrap import is the most
-likely cause. If it shows up but `PROBE_FAMILY missing` fires, the
+If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
+is the most likely cause. If it shows up but `PROBE_FAMILY missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
 
@@ -659,18 +658,21 @@ async def simulate_cooking_advisor(
     return await probe.run_dispatch(models=models, data=data, cfg=cfg)
 ```
 
-### File 6: bootstrap import
+### File 6: built-in probe list
 
-In [`src/usersim/engine/generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py),
-add:
+In [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py),
+add the module to `BUILTIN_PROBE_MODULES`:
 
 ```python
-import usersim.engine.probes.cooking_advisor.generator  # noqa: F401
+BUILTIN_PROBE_MODULES: tuple[str, ...] = (
+    ...
+    "usersim.engine.probes.cooking_advisor.generator",
+)
 ```
 
-The import alone triggers the `@register_probe` decorator, which
-self-registers the probe class into `_PROBE_REGISTRY`. No bundle
-list, no factory wrapping: the substrate handles it.
+Importing the module runs the `@register_probe` decorator, which
+self-registers the probe class into `_PROBE_REGISTRY`. No factory
+wrapping: the substrate handles it.
 
 Every registered probe is also constructible through
 `construct_probe_episode()`. Do not add a separate hosted-runtime constructor:

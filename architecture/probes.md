@@ -17,8 +17,13 @@ class OpenEndedProbe(BaseProbe):
     label = "general_open_ended"
 ```
 
-The class *is* the registration; there is no separate table to edit. A
+The class *is* the registration; there is no separate label table to edit. A
 duplicate label is rejected rather than silently overwriting.
+
+Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
+(`core/probes.py`); the registry imports them the first time a probe is
+looked up, which is when their decorators run. Out-of-tree probes are
+imported through the `usersim.probes` entry-point group instead.
 
 ## Hooks the loop calls
 

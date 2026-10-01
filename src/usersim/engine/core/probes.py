@@ -46,6 +46,7 @@ end-to-end tutorial.
 
 from __future__ import annotations
 
+import importlib
 import logging
 import sys
 from typing import (
@@ -1384,6 +1385,33 @@ def register_probe(
     return decorator
 
 
+#: Modules defining the shipped probes; importing one runs its
+#: ``@register_probe``. Listed by path because every probe module imports
+#: this one, so this module cannot import them at load time.
+BUILTIN_PROBE_MODULES: tuple[str, ...] = (
+    "usersim.engine.probes.financial_services.generator",
+    "usersim.engine.probes.general_educational.generator",
+    "usersim.engine.probes.general_open_ended.generator",
+    "usersim.engine.probes.health_disclosure.decision_support",
+    "usersim.engine.probes.health_disclosure.general",
+    "usersim.engine.probes.health_disclosure.therapy",
+    "usersim.engine.probes.health_disclosure.triage",
+    "usersim.engine.probes.identity_disclosure.generator",
+    "usersim.engine.probes.safety_agentic.generator",
+    "usersim.engine.probes.safety_chat_pressure.generator",
+    "usersim.engine.probes.sov_ai_dynamic.generator",
+    "usersim.engine.probes.sov_ai_facts.generator",
+    "usersim.engine.probes.sov_ai_multilingual_parity.generator",
+    "usersim.engine.probes.tool_calling.generator",
+)
+
+
+def load_builtin_probes() -> None:
+    """Import every shipped probe module so its probes are registered. Idempotent."""
+    for module in BUILTIN_PROBE_MODULES:
+        importlib.import_module(module)
+
+
 def load_extension_probes() -> None:
     """Import probe packages advertised under ``usersim.probes``.
 
@@ -1400,12 +1428,15 @@ def load_extension_probes() -> None:
 
 def known_probes() -> tuple[str, ...]:
     """All registered probe labels, sorted."""
+    load_builtin_probes()
     load_extension_probes()
     return tuple(sorted(_PROBE_REGISTRY))
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:
     """Look up a probe class by label. Raises ``KeyError`` if unknown."""
+    if label not in _PROBE_REGISTRY:
+        load_builtin_probes()
     if label not in _PROBE_REGISTRY:
         load_extension_probes()
     if label not in _PROBE_REGISTRY:

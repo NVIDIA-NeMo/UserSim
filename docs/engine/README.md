@@ -395,10 +395,9 @@ Quick orientation:
    into `_PROBE_REGISTRY` (and the per-module `PROBE_FAMILY` /
    `PROMPT_VERSION` / `PROBE_VARIANTS` constants the smoke check
    reads).
-5. Add a dispatcher import in
-   [`generator.py::_bootstrap_probes`](../../src/usersim/engine/generator.py)
-   so the bootstrap triggers your probe's `@register_probe` at
-   plugin import.
+5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
+   [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
+   registry imports it and runs your probe's `@register_probe`.
 6. Declare every column `build_result_extras` writes in
    `side_effect_columns` on
    [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).
