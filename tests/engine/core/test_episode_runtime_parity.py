@@ -176,7 +176,11 @@ class _ReplayableModel:
         )
 
 
-def _runtime(case: _Case) -> tuple[ProbeEpisodeRuntime, list[str]]:
+def _runtime(
+    case: _Case,
+    model_class: type[_ReplayableModel] = _ReplayableModel,
+    prompts: list[dict[str, Any]] | None = None,
+) -> tuple[ProbeEpisodeRuntime, list[str]]:
     data = {
         **dict(case.probe_data or {}),
         "persona": _PERSONA,
@@ -198,11 +202,11 @@ def _runtime(case: _Case) -> tuple[ProbeEpisodeRuntime, list[str]]:
     )
     invocations: list[str] = []
     models = {
-        "api_response_model": _ReplayableModel("api", invocations),
-        "assistant_model": _ReplayableModel("assistant", invocations),
-        "judge_model": _ReplayableModel("judge", invocations),
-        "summary_model": _ReplayableModel("summary", invocations),
-        "user_model": _ReplayableModel("user", invocations),
+        "api_response_model": model_class("api", invocations, prompts),
+        "assistant_model": model_class("assistant", invocations, prompts),
+        "judge_model": model_class("judge", invocations, prompts),
+        "summary_model": model_class("summary", invocations, prompts),
+        "user_model": model_class("user", invocations, prompts),
     }
     return (
         ProbeEpisodeRuntime(
@@ -427,24 +431,15 @@ async def test_multi_turn_multi_round_tool_use_matches_standalone(case: _Case) -
     outside UserSim's loop made the tool simulator's context and the recorded
     ``turn_idx`` diverge from a standalone run from the second round onward.
     """
-    direct_runtime, direct_invocations = _runtime(case)
-    external_runtime, external_invocations = _runtime(case)
     direct_prompts: list[dict[str, Any]] = []
     external_prompts: list[dict[str, Any]] = []
-
-    direct_runtime.models = {
-        alias: _AlwaysToolModel(model.role, direct_invocations, direct_prompts)
-        for alias, model in direct_runtime.models.items()
-    }
-    direct_row = await _run_direct(direct_runtime)
-
+    direct_runtime, direct_invocations = _runtime(case, _AlwaysToolModel, direct_prompts)
     # Models UserSim calls directly in the hosted run too (the tool-response
     # simulator) must record into the hosted prompt log, or the comparison is
     # only checking the halves the harness happens to drive.
-    external_runtime.models = {
-        alias: _AlwaysToolModel(model.role, external_invocations, external_prompts)
-        for alias, model in external_runtime.models.items()
-    }
+    external_runtime, external_invocations = _runtime(case, _AlwaysToolModel, external_prompts)
+
+    direct_row = await _run_direct(direct_runtime)
     external, _roles = await _run_external(
         external_runtime,
         external_invocations,
@@ -528,8 +523,7 @@ async def test_the_multi_round_suite_actually_spans_more_than_one_round() -> Non
     second round onward, so a suite that silently degraded to one round per
     episode would stop testing the thing it exists to test.
     """
-    runtime, invocations = _runtime(_Case("financial_services", 2009, None, 3))
-    runtime.models = {alias: _AlwaysToolModel(model.role, invocations, []) for alias, model in runtime.models.items()}
+    runtime, invocations = _runtime(_Case("financial_services", 2009, None, 3), _AlwaysToolModel)
     await _run_external(
         runtime,
         invocations,

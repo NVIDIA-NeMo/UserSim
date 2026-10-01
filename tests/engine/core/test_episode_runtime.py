@@ -23,7 +23,8 @@ from usersim.engine.core.episode_runtime import (
     HostRoleModel,
     ProbeEpisodeRuntime,
 )
-from usersim.engine.core.probes import known_probes, resolve_probe
+from usersim.engine.core.llm import acall_llm
+from usersim.engine.core.probes import _PROBE_REGISTRY, BaseProbe, known_probes, resolve_probe
 
 
 class _JSONModel:
@@ -54,6 +55,19 @@ class _AssistantTextModel:
             ),
             usage=None,
         )
+
+
+class _KeepsConstructionModelsProbe(BaseProbe):
+    """Calls a model it kept from construction, as a probe author may."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._kept_models = dict(kwargs["models"])
+
+    async def run_dispatch(self, *, models, data, cfg, state=None, seed_state=True):
+        del models, data, cfg, state, seed_state
+        reply = await acall_llm(self._kept_models, "assistant_model", [{"role": "user", "content": "Hello"}])
+        return {"assistant_reply": reply["content"]}
 
 
 def _tool_calling_runtime() -> ProbeEpisodeRuntime:
@@ -520,6 +534,35 @@ async def test_identity_disclosure_identifies_the_hosts_assistant_model() -> Non
 
     assert extras["expected_identity"], "the probe must resolve an expected developer to grade against"
     assert "nvidia" in json.dumps(extras["expected_identity"]).lower()
+
+
+async def test_models_kept_from_construction_are_answered_by_the_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A hosted probe is constructed with the models its dispatch receives.
+
+    A model the probe keeps from construction is therefore answered by the
+    host, as the configured model would answer it in a standalone run.
+    """
+    monkeypatch.setitem(_PROBE_REGISTRY, "keeps_construction_models", _KeepsConstructionModelsProbe)
+    runtime = ProbeEpisodeRuntime(
+        probe_type="keeps_construction_models",
+        persona={"first_name": "A", "last_name": "User", "age": 35},
+        locale="en_US",
+        language="English",
+        models={"assistant_model": HostRoleModel(model_name="host/assistant-model")},
+        config=ConversationSimulatorConfig(name="episode_runtime_test"),
+        data={},
+    )
+
+    request = await runtime.advance()
+
+    assert isinstance(request, ActivationRequest)
+    assert request.role == "assistant"
+    assert request.messages == ({"role": "user", "content": "Hello"},)
+    complete = await runtime.advance(
+        ActivationResult(activation_id=request.activation_id, response={"role": "assistant", "content": "Hi"})
+    )
+    assert isinstance(complete, EpisodeLifecycleComplete)
+    assert complete.result["assistant_reply"] == "Hi"
 
 
 async def test_recorded_usage_reaches_the_outcome() -> None:

@@ -320,6 +320,12 @@ class ProbeEpisodeRuntime:
 
         self.models = dict(models)
         self.config = config
+        # Probes may keep the models they are constructed with, so construction
+        # and dispatch share the activation models.
+        self._activation_models: dict[str, Any] = {
+            **self.models,
+            **{alias: _ActivationModel(self, alias, self.models.get(alias)) for alias in _MODEL_ROLE},
+        }
         try:
             constructed = construct_probe_episode(
                 {
@@ -329,7 +335,7 @@ class ProbeEpisodeRuntime:
                     **({"behavioral_profile": dict(profile)} if profile is not None else {}),
                 },
                 config=config,
-                models=self.models,
+                models=self._activation_models,
                 provenance=provenance,
             )
         except EpisodeConstructionError as error:
@@ -563,17 +569,12 @@ class ProbeEpisodeRuntime:
         return event
 
     async def _drive_native_lifecycle(self) -> None:
-        original_models = self.probe._models
         previous_builder = get_current_outcome_builder()
         set_current_outcome_builder(self.outcome)
-        activation_models = dict(self.models)
-        for alias in _MODEL_ROLE:
-            activation_models[alias] = _ActivationModel(self, alias, self.models.get(alias))
-        self.probe._models = activation_models
         self.probe.set_tool_call_observer(self._record_executed_tool_call)
         try:
             result = await self.probe.run_dispatch(
-                models=activation_models,
+                models=self._activation_models,
                 data=self.probe._data,
                 cfg=self.config,
                 state=self.state,
@@ -593,7 +594,6 @@ class ProbeEpisodeRuntime:
         finally:
             set_current_outcome_builder(previous_builder)
             self.probe.set_tool_call_observer(None)
-            self.probe._models = original_models
 
     async def _request_activation(
         self,
