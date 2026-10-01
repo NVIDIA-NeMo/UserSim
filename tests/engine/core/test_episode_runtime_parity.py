@@ -18,11 +18,16 @@ from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_runtime import (
     ActivationRequest,
     ActivationResult,
+    AssistantModelCall,
+    AssistantToolRound,
+    AssistantTurnRequest,
+    CompletedAssistantTurn,
     EpisodeContractError,
     EpisodeLifecycleComplete,
     ProbeEpisodeRuntime,
 )
 from usersim.engine.core.probes import known_probes, resolve_probe
+from usersim.engine.external import ConversationRuntime, ProbeToolSession
 from usersim.engine.generator import ConversationSimulatorGenerator
 
 _PERSONA = {
@@ -268,6 +273,74 @@ async def _run_external(
     return event.result, roles
 
 
+async def _run_split(
+    runtime: ConversationRuntime,
+    tools: ProbeToolSession,
+    invocations: list[str],
+    prompts: list[dict[str, Any]],
+    model_class: type[_ReplayableModel],
+) -> tuple[dict[str, Any], list[str]]:
+    """Drive independently constructed environment/resources components."""
+    event = await runtime.advance()
+    roles: list[str] = []
+    while not isinstance(event, EpisodeLifecycleComplete):
+        if not isinstance(event, AssistantTurnRequest):
+            roles.append(event.role)
+            response = await model_class(event.role, invocations, prompts).acompletion(
+                list(event.messages),
+                **_activation_kwargs(event),
+            )
+            event = await runtime.advance(
+                ActivationResult(activation_id=event.activation_id, response=_response_dict(response))
+            )
+            continue
+        roles.append("assistant")
+        await tools.begin_turn(event.tool_context)
+        transcript: list[dict[str, Any]] = []
+        model_calls: list[AssistantModelCall] = []
+        tool_count = 0
+        limit_reached = False
+        while True:
+            kwargs = dict(event.parameters)
+            if event.loop_policy.tools_enabled(
+                model_calls=len(model_calls),
+                tool_calls=tool_count,
+                limit_reached=limit_reached,
+            ):
+                kwargs["tools"] = list(event.tools)
+            response = await model_class("assistant", invocations, prompts).acompletion(
+                list(event.model_messages(transcript)),
+                **kwargs,
+            )
+            recorded = _response_dict(response)
+            model_calls.append(AssistantModelCall(response=recorded))
+            transcript.append(recorded)
+            tool_calls = recorded.get("tool_calls") or []
+            if not tool_calls:
+                break
+            receipt = await tools.execute_round(
+                AssistantToolRound(
+                    turn_id=event.turn_id,
+                    round_id=f"round-{len(model_calls):06d}",
+                    assistant_response=recorded,
+                )
+            )
+            transcript.extend(receipt.tool_messages)
+            tool_count += len(receipt.receipts)
+            limit_reached = receipt.limit_reached
+            if not event.loop_policy.should_continue(model_calls=len(model_calls), tool_calls=tool_count):
+                break
+        event = await runtime.advance(
+            CompletedAssistantTurn(
+                turn_id=event.turn_id,
+                transcript=tuple(transcript),
+                model_calls=tuple(model_calls),
+                evidence=await tools.complete_turn(event.turn_id),
+            )
+        )
+    return event.result, roles
+
+
 async def _run_direct(runtime: ProbeEpisodeRuntime) -> dict[str, Any]:
     registry = SimpleNamespace(get_model=lambda *, model_alias: runtime.models[model_alias])
     provider = SimpleNamespace(model_registry=registry)
@@ -421,6 +494,59 @@ _MULTI_ROUND_CASES = (
     _Case("financial_services", 2009, None, 3),
     _Case("safety_agentic", 2042, {"user_interaction_style": "direct"}, 3),
 )
+
+
+@pytest.mark.parametrize("case", _MULTI_ROUND_CASES, ids=lambda case: f"split-{case.probe_type}")
+async def test_independently_hosted_tool_runtime_matches_standalone(case: _Case) -> None:
+    """Environment and resources hosts reconstruct independently from one row."""
+    direct_prompts: list[dict[str, Any]] = []
+    split_prompts: list[dict[str, Any]] = []
+    direct_runtime, direct_invocations = _runtime(case, _AlwaysToolModel, direct_prompts)
+    source_runtime, split_invocations = _runtime(case, _AlwaysToolModel)
+    row = source_runtime.preamble.to_row()
+    row["usersim_config"] = source_runtime.config.model_dump(mode="json")
+    role_models = {
+        alias: _AlwaysToolModel(role, split_invocations, split_prompts)
+        for alias, role in (
+            ("user_model", "user"),
+            ("assistant_model", "assistant"),
+            ("judge_model", "judge"),
+            ("summary_model", "summary"),
+        )
+    }
+    support_models = (
+        {"api_response_model": _AlwaysToolModel("api", split_invocations, split_prompts)}
+        if case.probe_type == "tool_calling"
+        else {}
+    )
+    conversation = ConversationRuntime.from_resolved_row(row, models=role_models)
+    tools = ProbeToolSession.from_resolved_row(row, models=support_models)
+
+    assert conversation.probe is not tools.probe
+    assert conversation.state is not tools.state
+    direct_row = await _run_direct(direct_runtime)
+    split_row, roles = await _run_split(
+        conversation,
+        tools,
+        split_invocations,
+        split_prompts,
+        _AlwaysToolModel,
+    )
+
+    assert direct_invocations == split_invocations
+    assert direct_prompts == split_prompts
+    split_result = {key: value for key, value in split_row.items() if key != "usersim_config"}
+    assert _normalized_result({key: direct_row[key] for key in split_result}) == _normalized_result(split_result)
+    expected_roles: list[str] = []
+    for role in (role for role in split_invocations if role != "api"):
+        if role == "assistant" and expected_roles and expected_roles[-1] == "assistant":
+            continue
+        expected_roles.append(role)
+    assert roles == expected_roles
+    if case.probe_type == "safety_agentic":
+        requests = (await tools.evidence())["receipts"]
+        assert requests
+        assert all(isinstance(receipt["payload"], str) for receipt in requests)
 
 
 @pytest.mark.parametrize("case", _MULTI_ROUND_CASES, ids=lambda case: case.probe_type)

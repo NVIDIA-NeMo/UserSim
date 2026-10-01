@@ -20,9 +20,16 @@ judge, change an axis rubric, add a scorer) does not require re-running the
 simulation. The [parent README](../../README.md) covers the project as a whole.
 
 Any registered probe can also be hosted by another async orchestration system
-through [`ProbeEpisodeRuntime`](EXTERNAL_PROBE_RUNTIME.md). UserSim runs its own
-episode loop, pauses at each user, assistant, judge and summary model call for
-the host to answer, and executes the assistant's tool calls itself.
+through the [external runtime API](EXTERNAL_PROBE_RUNTIME.md).
+`ConversationRuntime` is environment-hostable and owns native dispatch and
+outer conversation state. It delegates each Assistant turn once to an Agent,
+which autonomously owns the complete model → Resources tools → model loop and
+returns one completed transcript. `ProbeToolSession` is resources-hostable and
+independently owns episode tool schemas, effects, semantic call indices,
+mutable state, receipts, and verification evidence. Environment never steps
+individual Assistant model/tool calls, and there is no record-before-tool
+callback. `ProbeEpisodeRuntime` adapts this split back to the existing local
+per-model `advance()` facade.
 
 ## Architecture
 

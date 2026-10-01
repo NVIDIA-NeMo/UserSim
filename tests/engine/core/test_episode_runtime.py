@@ -18,6 +18,10 @@ from usersim.engine.core.episode_runtime import (
     ActivationRequest,
     ActivationResult,
     ActivationUsage,
+    AssistantModelCall,
+    AssistantToolRound,
+    AssistantTurnRequest,
+    CompletedAssistantTurn,
     EpisodeContractError,
     EpisodeLifecycleComplete,
     HostRoleModel,
@@ -25,6 +29,7 @@ from usersim.engine.core.episode_runtime import (
 )
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.probes import _PROBE_REGISTRY, BaseProbe, known_probes, resolve_probe
+from usersim.engine.external import ConversationRuntime, ProbeToolSession, ToolExecutionRequest
 
 
 class _JSONModel:
@@ -223,6 +228,74 @@ async def _drive(runtime: ProbeEpisodeRuntime, respond=_text) -> tuple[object, l
     return event, seen
 
 
+async def _drive_split(
+    runtime: ConversationRuntime,
+    tools: ProbeToolSession,
+    respond=_text,
+) -> tuple[object, list[AssistantTurnRequest]]:
+    """Drive Environment, Agent, and Resources through completed turns."""
+    assistant_turns: list[AssistantTurnRequest] = []
+    event = await runtime.advance()
+    while not isinstance(event, EpisodeLifecycleComplete):
+        if not isinstance(event, AssistantTurnRequest):
+            event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=respond(event)))
+            continue
+        assistant_turns.append(event)
+        await tools.begin_turn(event.tool_context.to_dict())
+        transcript: list[dict[str, object]] = []
+        model_calls: list[AssistantModelCall] = []
+        limit_reached = False
+        response = respond(event)
+        while True:
+            model_calls.append(AssistantModelCall(response=response))
+            transcript.append(response)
+            tool_calls = response.get("tool_calls") or []
+            if not tool_calls:
+                break
+            receipt = await tools.execute_round(
+                AssistantToolRound(
+                    turn_id=event.turn_id,
+                    round_id=f"round-{len(model_calls):06d}",
+                    assistant_response=response,
+                ).to_dict()
+            )
+            transcript.extend(receipt.tool_messages)
+            limit_reached = receipt.limit_reached
+            if not event.loop_policy.should_continue(
+                model_calls=len(model_calls),
+                tool_calls=sum(len(item.receipts) for item in await tools.rounds(event.turn_id)),
+            ):
+                break
+            tool_count = sum(len(item.receipts) for item in await tools.rounds(event.turn_id))
+            response = respond(
+                ActivationRequest(
+                    activation_id=f"{event.turn_id}-agent-{len(model_calls) + 1}",
+                    role="assistant",
+                    model_alias=event.model_alias,
+                    messages=event.model_messages(transcript),
+                    parameters=event.parameters,
+                    tools=(
+                        event.tools
+                        if event.loop_policy.tools_enabled(
+                            model_calls=len(model_calls),
+                            tool_calls=tool_count,
+                            limit_reached=limit_reached,
+                        )
+                        else ()
+                    ),
+                    continues_turn=True,
+                )
+            )
+        completed = CompletedAssistantTurn(
+            turn_id=event.turn_id,
+            transcript=tuple(transcript),
+            model_calls=tuple(model_calls),
+            evidence=await tools.complete_turn(event.turn_id),
+        )
+        event = await runtime.advance(completed.to_dict())
+    return event, assistant_turns
+
+
 def test_runtime_exposes_only_resolved_episode_tools(safety_runtime: ProbeEpisodeRuntime) -> None:
     schemas = safety_runtime.assistant_tools
     assert schemas
@@ -361,6 +434,162 @@ async def test_tool_payloads_reach_the_host_verbatim(safety_runtime: ProbeEpisod
     assert await safety_runtime.tool_result(executed[0].tool_call_id) == executed[0].payload
 
 
+async def test_split_safety_tool_session_preserves_plain_text_and_indices(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    tool_name = runtime.assistant_tools[0]["function"]["name"]
+
+    assert runtime.probe is not tools.probe
+    assert runtime.state is not tools.state
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        if activation.role == "assistant" and activation.tools_enabled:
+            return _tool_call(tool_name, {"value": "example"}, "split-plain")
+        return _text(activation)
+
+    event, requests = await _drive_split(runtime, tools, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(requests) == 1
+    receipts = (await tools.complete_turn(requests[0].turn_id)).receipts
+    assert [(receipt.turn_idx, receipt.call_idx) for receipt in receipts] == [(0, 0), (1, 0), (2, 0)]
+    assert all(isinstance(receipt.payload, str) for receipt in receipts)
+    assert await runtime.tool_result("split-plain") == receipts[0].payload
+
+
+async def test_environment_observes_one_completed_assistant_turn_for_multi_call_agent(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    tool_name = runtime.assistant_tools[0]["function"]["name"]
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        return _tool_call(tool_name, {"value": "example"}, f"call-{activation.activation_id}")
+
+    event, assistant_turns = await _drive_split(runtime, tools, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(assistant_turns) == 1
+    evidence = await tools.complete_turn(assistant_turns[0].turn_id)
+    assert len(evidence.rounds) == 3
+    assert all(not isinstance(turn, ToolExecutionRequest) for turn in assistant_turns)
+
+
+async def test_completed_turn_transcript_evidence_mismatch_is_a_host_contract_error(
+    safety_runtime: ProbeEpisodeRuntime,
+) -> None:
+    runtime = safety_runtime.conversation
+    tools = safety_runtime.tool_session
+    event = await runtime.advance()
+    assert isinstance(event, AssistantTurnRequest)
+    await tools.begin_turn(event.tool_context)
+    response = _tool_call(event.tools[0]["function"]["name"], {"value": "example"}, "call-mismatch")
+    receipt = await tools.execute_round(
+        AssistantToolRound(turn_id=event.turn_id, round_id="round-1", assistant_response=response)
+    )
+    bad_tool_message = {**receipt.tool_messages[0], "content": "not the Resources payload"}
+    completed = CompletedAssistantTurn(
+        turn_id=event.turn_id,
+        transcript=(response, bad_tool_message),
+        model_calls=(AssistantModelCall(response=response),),
+        evidence=await tools.complete_turn(event.turn_id),
+    )
+
+    with pytest.raises(EpisodeContractError, match="transcript and model/evidence records disagree"):
+        await runtime.advance(completed)
+    await runtime.close()
+
+
+async def test_split_tool_calling_applies_metadata_traces_and_support_model_usage() -> None:
+    facade = _tool_calling_runtime()
+    issued = False
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        nonlocal issued
+        if activation.role == "assistant" and activation.tools_enabled and not issued:
+            issued = True
+            return _tool_call("get_weather", {"location": "Tokyo"}, "split-weather")
+        return _text(activation)
+
+    event, requests = await _drive_split(facade.conversation, facade.tool_session, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(requests) == 1
+    receipt = (await facade.tool_session.complete_turn(requests[0].turn_id)).receipts[0]
+    assert receipt.raw_tool_call["function"] == {
+        "name": "get_weather",
+        "arguments": json.dumps({"location": "Tokyo"}),
+    }
+    metadata = json.loads(event.result["conversation_metadata"])
+    traces = json.loads(event.result["simulation_traces"])
+    outcome = json.loads(event.result["simulation_outcome"])
+    assert metadata["tools_called"] == ["get_weather"]
+    assert any(trace["kind"] == "tool_call_verifier" for trace in traces)
+    assert outcome["per_model_calls"]["api_response_model"] == 1
+
+
+async def test_split_components_construct_independently_from_one_resolved_row() -> None:
+    source = _tool_calling_runtime()
+    row = source.preamble.to_row()
+    row["usersim_config"] = source.config.model_dump(mode="json")
+    conversation = ConversationRuntime.from_resolved_row(
+        row,
+        models={
+            "user_model": HostRoleModel("host/user"),
+            "assistant_model": HostRoleModel("host/assistant"),
+            "judge_model": HostRoleModel("host/judge"),
+            "summary_model": HostRoleModel("host/summary"),
+        },
+    )
+    tools = ProbeToolSession.from_resolved_row(row, models={"api_response_model": _JSONModel()})
+
+    assert conversation.probe is not tools.probe
+    assert conversation.state is not tools.state
+    assert conversation.assistant_tools == tools.assistant_tools
+
+    issued = False
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        nonlocal issued
+        if activation.role == "assistant" and activation.tools_enabled and not issued:
+            issued = True
+            return _tool_call("get_weather", {"location": "Tokyo"}, "independent-weather")
+        return _text(activation)
+
+    event, requests = await _drive_split(conversation, tools, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(requests) == 1
+    assert json.loads(await conversation.tool_result("independent-weather")) == {"temperature_c": 22}
+
+
+async def test_split_finance_session_preserves_state_across_tool_rounds() -> None:
+    facade = _financial_runtime()
+    calls = iter(
+        (
+            _tool_call("kb_search", {"query": "account procedure"}, "split-search"),
+            _tool_call("verify_identity", {"full_name": "Yumi Tanaka", "date_of_birth": "01/01/1991"}, "split-id"),
+        )
+    )
+
+    def respond(activation: ActivationRequest) -> dict[str, object]:
+        if activation.role == "assistant" and activation.tools_enabled:
+            return next(calls, _text(activation))
+        return _text(activation)
+
+    event, requests = await _drive_split(facade.conversation, facade.tool_session, respond)
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(requests) == 1
+    assert len((await facade.tool_session.complete_turn(requests[0].turn_id)).rounds) == 2
+    metadata = json.loads(event.result["conversation_metadata"])
+    assert metadata["kb_search_queries"] == ["account procedure"]
+    assert metadata["identity_verified"] is True
+
+
 async def test_recording_an_unoffered_tool_is_rejected(safety_runtime: ProbeEpisodeRuntime) -> None:
     activation = await safety_runtime.advance()
     assert isinstance(activation, ActivationRequest)
@@ -457,6 +686,22 @@ def test_activation_result_requires_a_json_safe_assistant_response() -> None:
         ActivationResult(activation_id="", response={"role": "assistant", "content": "x"})
     with pytest.raises(ValueError, match="requires a 'response' mapping"):
         ActivationResult.from_value({"activation_id": "activation-1"})
+
+
+def test_tool_execution_request_requires_a_json_mapping_raw_call() -> None:
+    with pytest.raises(TypeError, match="raw_tool_call must be a JSON mapping"):
+        ToolExecutionRequest.from_value(
+            {
+                "request_id": "tool-1",
+                "tool_call_id": "call-1",
+                "tool_name": "get_weather",
+                "arguments": {},
+                "raw_tool_call": ["not", "a", "mapping"],
+                "turn_idx": 0,
+                "call_idx": 0,
+                "state_snapshot": {},
+            }
+        )
 
 
 async def test_host_role_model_identity_and_budget_reach_the_runtime() -> None:

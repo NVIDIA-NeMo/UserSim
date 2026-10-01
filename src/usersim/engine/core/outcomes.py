@@ -35,7 +35,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Mapping
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -387,6 +387,133 @@ class OutcomeBuilder:
 
     def traces(self) -> list[SimulationTrace]:
         return list(self._traces)
+
+    def snapshot(self) -> dict[str, Any]:
+        """Return exact JSON-safe mutable state for a hosted boundary.
+
+        Unlike the public presentation serializers, this transport snapshot
+        must not round timings: it may cross the boundary repeatedly during
+        one episode and is reapplied as live accumulator state.
+        """
+        outcome = self._outcome
+        return {
+            "outcome": {
+                "status": outcome.status.value,
+                "failure_class": outcome.failure_class.value if outcome.failure_class else None,
+                "failure_attribution": (outcome.failure_attribution.value if outcome.failure_attribution else None),
+                "failure_detail": outcome.failure_detail,
+                "n_turns": outcome.n_turns,
+                "n_tool_calls": outcome.n_tool_calls,
+                "n_user_query_attempts": outcome.n_user_query_attempts,
+                "n_user_followup_retries": outcome.n_user_followup_retries,
+                "n_assistant_inline_failures": outcome.n_assistant_inline_failures,
+                "n_assistant_retries": outcome.n_assistant_retries,
+                "n_api_response_rerolls": outcome.n_api_response_rerolls,
+                "n_fourth_wall_triggers": outcome.n_fourth_wall_triggers,
+                "n_user_role_violations": outcome.n_user_role_violations,
+                "n_user_language_violations": outcome.n_user_language_violations,
+                "warnings": [warning.to_dict() for warning in outcome.warnings],
+                "early_stop": outcome.early_stop,
+                "per_model_input_tokens": dict(outcome.per_model_input_tokens),
+                "per_model_output_tokens": dict(outcome.per_model_output_tokens),
+                "per_model_calls": dict(outcome.per_model_calls),
+                "wall_clock_s_by_alias": dict(outcome.wall_clock_s_by_alias),
+                "wall_clock_s": outcome.wall_clock_s,
+                "provenance": outcome.provenance.to_dict(),
+            },
+            "traces": [
+                {
+                    "kind": trace.kind.value,
+                    "turn_idx": trace.turn_idx,
+                    "call_idx": trace.call_idx,
+                    "model_alias": trace.model_alias,
+                    "input_tokens": trace.input_tokens,
+                    "output_tokens": trace.output_tokens,
+                    "latency_s": trace.latency_s,
+                    "prompt_version": trace.prompt_version,
+                    "rating": trace.rating,
+                    "detail": trace.detail,
+                    "extra": dict(trace.extra),
+                }
+                for trace in self._traces
+            ],
+        }
+
+    def apply_snapshot(self, snapshot: Mapping[str, Any]) -> None:
+        """Replace mutable outcome state from :meth:`snapshot` output."""
+        raw_outcome = snapshot.get("outcome")
+        raw_traces = snapshot.get("traces")
+        if not isinstance(raw_outcome, Mapping) or not isinstance(raw_traces, list):
+            raise ValueError("Outcome snapshot requires 'outcome' mapping and 'traces' list")
+
+        self._outcome = SimulationOutcome(
+            status=OutcomeStatus(str(raw_outcome.get("status", OutcomeStatus.OK.value))),
+            failure_class=(
+                FailureClass(str(raw_outcome["failure_class"])) if raw_outcome.get("failure_class") else None
+            ),
+            failure_attribution=(
+                FailureAttribution(str(raw_outcome["failure_attribution"]))
+                if raw_outcome.get("failure_attribution")
+                else None
+            ),
+            failure_detail=str(raw_outcome.get("failure_detail") or ""),
+            n_turns=int(raw_outcome.get("n_turns") or 0),
+            n_tool_calls=int(raw_outcome.get("n_tool_calls") or 0),
+            n_user_query_attempts=int(raw_outcome.get("n_user_query_attempts") or 0),
+            n_user_followup_retries=int(raw_outcome.get("n_user_followup_retries") or 0),
+            n_assistant_inline_failures=int(raw_outcome.get("n_assistant_inline_failures") or 0),
+            n_assistant_retries=int(raw_outcome.get("n_assistant_retries") or 0),
+            n_api_response_rerolls=int(raw_outcome.get("n_api_response_rerolls") or 0),
+            n_fourth_wall_triggers=int(raw_outcome.get("n_fourth_wall_triggers") or 0),
+            n_user_role_violations=int(raw_outcome.get("n_user_role_violations") or 0),
+            n_user_language_violations=int(raw_outcome.get("n_user_language_violations") or 0),
+            warnings=[
+                SimulationWarning(
+                    kind=WarningKind(str(warning["kind"])),
+                    turn_idx=(int(warning["turn_idx"]) if warning.get("turn_idx") is not None else None),
+                    detail=str(warning.get("detail") or ""),
+                )
+                for warning in raw_outcome.get("warnings", [])
+                if isinstance(warning, Mapping)
+            ],
+            early_stop=bool(raw_outcome.get("early_stop")),
+            per_model_input_tokens={
+                str(key): int(value) for key, value in dict(raw_outcome.get("per_model_input_tokens") or {}).items()
+            },
+            per_model_output_tokens={
+                str(key): int(value) for key, value in dict(raw_outcome.get("per_model_output_tokens") or {}).items()
+            },
+            per_model_calls={
+                str(key): int(value) for key, value in dict(raw_outcome.get("per_model_calls") or {}).items()
+            },
+            wall_clock_s_by_alias={
+                str(key): float(value) for key, value in dict(raw_outcome.get("wall_clock_s_by_alias") or {}).items()
+            },
+            wall_clock_s=float(raw_outcome.get("wall_clock_s") or 0.0),
+            provenance=Provenance(
+                nemotron_personas_version=(raw_outcome.get("provenance") or {}).get("nemotron_personas_version"),
+                scenario_prompt_version=(raw_outcome.get("provenance") or {}).get("scenario_prompt_version"),
+                code_sha=(raw_outcome.get("provenance") or {}).get("code_sha"),
+                bank_version=dict((raw_outcome.get("provenance") or {}).get("bank_version") or {}),
+            ),
+        )
+        self._traces = [
+            SimulationTrace(
+                kind=TraceKind(str(trace["kind"])),
+                turn_idx=int(trace.get("turn_idx") or 0),
+                call_idx=int(trace.get("call_idx") or 0),
+                model_alias=(str(trace["model_alias"]) if trace.get("model_alias") is not None else None),
+                input_tokens=int(trace.get("input_tokens") or 0),
+                output_tokens=int(trace.get("output_tokens") or 0),
+                latency_s=float(trace.get("latency_s") or 0.0),
+                prompt_version=(str(trace["prompt_version"]) if trace.get("prompt_version") is not None else None),
+                rating=(str(trace["rating"]) if trace.get("rating") is not None else None),
+                detail=(str(trace["detail"]) if trace.get("detail") is not None else None),
+                extra=dict(trace.get("extra") or {}),
+            )
+            for trace in raw_traces
+            if isinstance(trace, Mapping)
+        ]
 
     # ── per-model aggregation (called from within the LLM layer) ──
 

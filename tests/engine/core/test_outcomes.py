@@ -193,6 +193,50 @@ class TestBuilderCounters:
         assert "per_model_reasoning_tokens" not in out.to_dict()
 
 
+class TestBuilderSnapshot:
+    def test_roundtrip_preserves_exact_sub_millisecond_timings(self) -> None:
+        builder = OutcomeBuilder(
+            Provenance(
+                nemotron_personas_version="personas-v1",
+                scenario_prompt_version="prompt-v1",
+                code_sha="abc123",
+                bank_version={"agentic": "1.2.3"},
+            )
+        )
+        builder.record_call("api_response_model", 11, 7, 0.000_123_456_789)
+        builder.set_wall_clock_s(0.000_987_654_321)
+        builder.add_trace(
+            SimulationTrace(
+                kind=TraceKind.TOOL_CALL_VERIFIER,
+                turn_idx=2,
+                call_idx=3,
+                model_alias="api_response_model",
+                input_tokens=11,
+                output_tokens=7,
+                latency_s=0.000_234_567_891,
+                rating="success",
+                detail="exact timing",
+                extra={"nested": {"value": 1}},
+            )
+        )
+        expected_outcome = builder.finalize(OutcomeStatus.OK)
+        snapshot = builder.snapshot()
+        json.dumps(snapshot)
+
+        restored = OutcomeBuilder()
+        restored.apply_snapshot(json.loads(json.dumps(snapshot)))
+        actual_outcome = restored.finalize(OutcomeStatus.OK)
+
+        assert restored.snapshot() == snapshot
+        assert actual_outcome == expected_outcome
+        assert restored.traces() == builder.traces()
+        assert snapshot["outcome"]["wall_clock_s"] == 0.000_987_654_321
+        assert snapshot["outcome"]["wall_clock_s_by_alias"]["api_response_model"] == 0.000_123_456_789
+        assert snapshot["traces"][0]["latency_s"] == 0.000_234_567_891
+        assert expected_outcome.to_dict()["wall_clock_s"] == 0.001
+        assert builder.traces()[0].to_dict()["latency_s"] == 0.0
+
+
 class TestStatusPromotion:
     def test_ok_with_no_warnings_stays_ok(self) -> None:
         b = OutcomeBuilder()
