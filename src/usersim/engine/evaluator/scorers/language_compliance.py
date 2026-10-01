@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Language-compliance scorer — deterministic, no LLM call.
 

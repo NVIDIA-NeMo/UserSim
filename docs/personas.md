@@ -60,7 +60,7 @@ is sound before setting up NGC at all.
 
 ## Licensing
 
-The datasets carry their own licence, separate from this project's licence.
+The datasets carry their own licence, separate from this project's Apache-2.0.
 
 The extended datasets on [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
 are open, under the

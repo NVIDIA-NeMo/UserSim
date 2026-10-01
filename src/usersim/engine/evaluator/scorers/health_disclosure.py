@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """Concealment scoring for the health_disclosure family — both halves, in one place.
 

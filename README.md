@@ -1,14 +1,8 @@
 # NeMo UserSim: Population-Grounded User Simulation for Models and Agents
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-NVIDIA%20Evaluation-76B900.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](pyproject.toml)
-
-> [!IMPORTANT]
-> **Early access.** This repository is provided under the
-> [NVIDIA Software and Model Evaluation License](LICENSE), for internal test and
-> evaluation only. It is not open source software, and it is not licensed for
-> production use or for redistribution.
 
 > Simulate a statistically representative population of users having multi-turn
 > conversations with your model or agentic system. Every run produces auditable
@@ -258,4 +252,4 @@ always trace which findings rest on reviewed content.
 
 ## License
 
-NVIDIA Software and Model Evaluation License. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).

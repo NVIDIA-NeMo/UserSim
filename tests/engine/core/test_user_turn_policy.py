@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NVIDIA-Software-and-Model-Evaluation
+# SPDX-License-Identifier: Apache-2.0
 
 """A probe's ``UserTurnPolicy``: the defaults change nothing, and each field changes what the loop does."""
 
