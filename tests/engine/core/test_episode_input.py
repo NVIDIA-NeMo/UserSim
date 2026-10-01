@@ -34,7 +34,9 @@ def test_materialization_resolves_theme_tools_and_restorable_config() -> None:
     assert first[0]["persona"]
     assert first[0]["theme"]
     assert first[0]["tools"]
-    assert first[0]["toolset_name"]
+    assert first[0]["toolset_category"]
+    # Some shipped toolsets carry no name, so only the column is guaranteed.
+    assert "toolset_name" in first[0]
     assert first[0]["trajectory_id"]
     assert first[0]["usersim_provenance"]["code_sha"] == get_code_sha()
     assert first[0]["usersim_config"]["random_seed"] == 73
