@@ -68,6 +68,21 @@ runtime_models = {
 locales exactly as it does for a configured model, and the scaled value arrives
 in the request's `parameters`.
 
+`tool_calling` also simulates each tool's response with `api_response_model`, a
+model UserSim calls itself rather than sending to the host. A host running
+`tool_calling` therefore passes one: anything exposing the same `acompletion()`
+as a Data Designer model facade.
+
+```python
+runtime_models["api_response_model"] = my_tool_response_model
+```
+
+`financial_services` optionally embeds its `kb_search` queries with the model
+named by `finance_embedding_model_alias` (`embedding_model` by default, anything
+exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back
+to lexical search with a warning, so results can differ from a standalone run
+that has one configured.
+
 ## Driving the episode
 
 `advance()` is the whole loop. The first call takes no result; every later call
