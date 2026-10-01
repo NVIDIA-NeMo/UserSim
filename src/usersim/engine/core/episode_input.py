@@ -129,6 +129,8 @@ def construct_episode_preamble(
     probe_family = str(getattr(probe_module, "PROBE_FAMILY", probe_type))
     prompt_version = str(getattr(probe_module, "PROMPT_VERSION", "v1.0"))
     raw_provenance = resolved.get("usersim_provenance")
+    if isinstance(raw_provenance, str):
+        raw_provenance = json.loads(raw_provenance)
     provenance = (
         Provenance(
             nemotron_personas_version=raw_provenance.get("nemotron_personas_version"),
@@ -178,7 +180,7 @@ def construct_episode_preamble(
             "probe_family": probe_family,
             "probe_variant": probe_variant,
             "trajectory_id": episode_id,
-            "usersim_provenance": provenance.to_dict(),
+            "usersim_provenance": json.dumps(provenance.to_dict(), ensure_ascii=False),
         }
     )
     return EpisodePreamble(

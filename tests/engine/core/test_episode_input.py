@@ -5,8 +5,11 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
+import pandas as pd
 import pytest
 
 from usersim.cli._pipeline import known_probes
@@ -38,15 +41,30 @@ def test_materialization_resolves_theme_tools_and_restorable_config() -> None:
     # Some shipped toolsets carry no name, so only the column is guaranteed.
     assert "toolset_name" in first[0]
     assert first[0]["trajectory_id"]
-    assert first[0]["usersim_provenance"]["code_sha"] == get_code_sha()
+    provenance = json.loads(first[0]["usersim_provenance"])
+    assert provenance["code_sha"] == get_code_sha()
     assert first[0]["usersim_config"]["random_seed"] == 73
     runtime = ProbeEpisodeRuntime.from_resolved_row(first[0], models={})
     assert runtime.preamble.trajectory_id == first[0]["trajectory_id"]
-    assert runtime.preamble.provenance.to_dict() == first[0]["usersim_provenance"]
+    assert runtime.preamble.provenance.to_dict() == provenance
+
+
+@pytest.mark.parametrize("stored_as", ["json_text", "mapping"])
+def test_a_stored_row_keeps_its_own_provenance(stored_as: str) -> None:
+    """A replayed row keeps the provenance it was materialized with, stored as JSON text or as a mapping."""
+    row = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"tool_calling": 1.0}, random_seed=73)[0]
+    stored = {**json.loads(row["usersim_provenance"]), "code_sha": "0123456789ab"}
+    row["usersim_provenance"] = json.dumps(stored) if stored_as == "json_text" else stored
+
+    runtime = ProbeEpisodeRuntime.from_resolved_row(row, models={})
+
+    assert runtime.preamble.provenance.code_sha == "0123456789ab"
+    assert json.loads(runtime.preamble.to_row()["usersim_provenance"]) == stored
 
 
 @pytest.mark.parametrize("probe_type", known_probes())
-def test_materialization_supports_every_registered_probe(probe_type: str) -> None:
+def test_materialization_supports_every_registered_probe(probe_type: str, tmp_path: Path) -> None:
+    """Every probe materializes a complete row, and the row survives the parquet write of ``--materialize-inputs``."""
     rows = materialize_episode_inputs(
         locale="en_US",
         num_rows=1,
@@ -60,6 +78,9 @@ def test_materialization_supports_every_registered_probe(probe_type: str) -> Non
     assert rows[0]["probe_variant"]
     assert rows[0]["persona_uuid"]
     assert rows[0]["trajectory_id"]
+    path = tmp_path / "rows.parquet"
+    pd.DataFrame(rows).to_parquet(path, index=False)
+    assert pd.read_parquet(path)["trajectory_id"].tolist() == [rows[0]["trajectory_id"]]
 
 
 # Trajectory identity is the resume and deduplication key for every stored row,
