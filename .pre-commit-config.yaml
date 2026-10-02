@@ -1,14 +1,13 @@
-# Local mirror of the CI lint gate, so failures surface before push rather
-# than in the pipeline. Install with `make install-dev`.
+# Local mirror of the CI lint and format gate, so failures surface before push
+# rather than in the pipeline. Install with `make install-dev`.
 #
 # The global exclude covers files no hook should touch at all. A top-level
 # directory whose name starts with `_` holds material that is not part of the
-# distribution, and uv owns uv.lock's format. Notebooks are
-# NOT global -- they are exempt per-hook from the rewriting checks (a whitespace
-# fix on notebook JSON is a large unreviewable diff) while staying subject to
-# the size check, since committed output is how 01_simulate.ipynb reached
-# 1.86 MB. Global and per-hook excludes are cumulative, so a globally excluded
-# path cannot be re-included by a single hook.
+# distribution, and uv owns uv.lock's format. Notebooks are NOT global: they
+# are exempt per-hook from the rewriting checks (a whitespace fix on notebook
+# JSON is a large unreviewable diff) while staying subject to the size check.
+# Global and per-hook excludes are cumulative, so a globally excluded path
+# cannot be re-included by a single hook.
 
 exclude: '^_[^/]+/|^uv\.lock$'
 
@@ -28,11 +27,9 @@ repos:
       - id: check-toml
       - id: debug-statements
       - id: check-added-large-files
-        # Notebooks are intentionally in scope here. 01_simulate.ipynb sits at
-        # ~489 KB after its outputs were trimmed from 1.86 MB, so 600 KB leaves
-        # headroom while catching a regrowth. uv.lock is exempt via the global
-        # exclude: at 718 KB it is a deliberately committed resolved graph that
-        # only grows as dependencies are added, not an accident.
+        # Notebooks stay in scope, so one committed with its outputs fails
+        # here. uv.lock is exempt via the global exclude: it is a committed
+        # resolved graph that grows with the dependency set.
         args: ["--maxkb=600"]
 
   # Ruff runs through `uv run` rather than pre-commit's own mirror so the
@@ -47,14 +44,14 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types: [python]
-      # A `ruff format` hook is intentionally NOT enabled yet. It would
-      # reformat each file as it is touched, scattering unrelated formatting
-      # churn through feature commits and conflicting with the in-flight MRs.
-      # It lands together with the one-shot mechanical reformat and the
-      # format-check gate in the Makefile.
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
 
-  # Notebook outputs are 66 MB of this repo when committed, and carry home
-  # directories and endpoint URLs from whoever ran them last. Source only.
+  # Notebooks are committed as source only: outputs carry run data and local
+  # paths from whoever executed them.
   - repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
     hooks:
