@@ -250,6 +250,22 @@ always trace which findings rest on reviewed content.
 
 [`docs/methodology.md`](docs/methodology.md) covers all three in depth.
 
+## Telemetry
+
+NeMo User Sim runs on [NeMo Data Designer](https://github.com/NVIDIA-NeMo/DataDesigner),
+which shares anonymous usage telemetry with NVIDIA: the names of the models used
+and their input and output token counts, with no user or device information.
+Telemetry is on by default. Disable it with `NEMO_TELEMETRY_ENABLED=false`.
+
+When User Sim is imported it sets `NEMO_SESSION_PREFIX=usersim-`, unless the
+variable is already set, so these events can be told apart from other Data
+Designer usage. Data Designer reads the prefix once, when it is first imported,
+so a program that imports Data Designer before User Sim should set the variable
+itself. Data Designer's
+[Telemetry & privacy](https://github.com/NVIDIA-NeMo/DataDesigner#telemetry-and-privacy)
+section has the details, including how the terms of third-party endpoints such
+as NVIDIA Build apply.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

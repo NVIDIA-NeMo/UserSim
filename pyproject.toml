@@ -160,6 +160,9 @@ addopts = "-q"
 # own two DataDesigner plugins and make the entry-point resolution test vacuous.
 env = [
     "USERSIM_DISABLE_EXTENSIONS=1",
+    # Data Designer's usage telemetry stays off under test, so a test run never
+    # sends usage events.
+    "NEMO_TELEMETRY_ENABLED=false",
 ]
 # Every `async def` test is collected and run without a per-test marker. The
 # alternative, strict mode, silently skips any test whose decorator was
