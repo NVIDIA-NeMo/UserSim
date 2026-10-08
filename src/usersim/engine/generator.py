@@ -42,6 +42,8 @@ from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
 
+_ABSENT = object()
+
 __all__ = [
     "MODEL_ALIASES",
     "MODEL_API_RESPONSE",
@@ -130,6 +132,7 @@ class ConversationSimulatorGenerator(
 
     async def _generate_row(self, data: dict) -> dict:
         cfg = self.config
+        input_columns = set(data)
         models = {}
         for alias in MODEL_ALIASES:
             try:
@@ -170,6 +173,7 @@ class ConversationSimulatorGenerator(
             construction_error = error
         data.clear()
         data.update(preamble.data)
+        before_dispatch = dict(data)
         persona = preamble.persona
         probe_type = preamble.probe_type
         persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
@@ -228,6 +232,20 @@ class ConversationSimulatorGenerator(
         t_sim_elapsed = time.monotonic() - t_sim_start
 
         data.update(result)
+        # A run writes back only the configured column and its declared side
+        # effects: an input column keeps its original value and any other key is
+        # dropped. So the probe loses every undeclared key it adds, and every
+        # change it makes to an undeclared input column, returned or made in place.
+        lost = {
+            column
+            for column, value in data.items()
+            if column not in input_columns or not _unchanged(value, before_dispatch.get(column, _ABSENT))
+        }
+        _warn_on_undeclared_columns(
+            probe_type,
+            lost - set(cfg.side_effect_columns) - {cfg.name},
+            already_reported=self.__dict__.setdefault("_undeclared_reported", set()),
+        )
         status = "OK" if data.get("conversation_status") else "FAIL"
         n_turns = data.get("num_turns", 0)
         n_tools = data.get("num_tool_calls", 0)
@@ -245,6 +263,48 @@ class ConversationSimulatorGenerator(
 
         flush_debug_log()
         return data
+
+
+def _unchanged(value: Any, before: Any) -> bool:
+    """Whether a column still holds what it held before the probe ran.
+
+    The same object counts as unchanged without a comparison, which covers NaN
+    (never equal to itself) and arrays (whose ``==`` is elementwise).
+    """
+    if value is before:
+        return True
+    try:
+        return bool(value == before)
+    except (TypeError, ValueError):
+        return False
+
+
+def _warn_on_undeclared_columns(
+    probe_type: str,
+    columns: set[str],
+    *,
+    already_reported: set[tuple[str, str]],
+) -> None:
+    """Report columns a probe added or changed that a Data Designer run will not keep.
+
+    A run writes back only the configured column and ``side_effect_columns``,
+    without an error, so a probe's undeclared ``build_result_extras`` key would
+    never reach the scorer that reads it. ``already_reported`` belongs to one
+    generator, which a run builds once, so each pair is reported once per run
+    and a standalone run does not use up the warning a later run should give.
+    """
+    new = sorted(column for column in columns if (probe_type, column) not in already_reported)
+    if not new:
+        return
+    already_reported.update((probe_type, column) for column in new)
+    logger.warning(
+        "probe %r returned or changed column(s) %s that are not in ConversationSimulatorConfig.side_effect_columns, "
+        "so `usersim simulate` drops them from the stored row (an input column keeps its original value). "
+        "Keep per-row data in the probe's metadata "
+        "(state.metadata), which is stored as conversation_metadata; see docs/engine/AUTHORING_A_PROBE.md.",
+        probe_type,
+        new,
+    )
 
 
 def _log_running_stats() -> None:

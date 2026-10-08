@@ -214,9 +214,9 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             # ``build_result_extras`` and read back by that probe's scorer,
             # which treats an absent value as "nothing to score" rather than
             # as an error. The engine writes the configured column plus the
-            # names declared here and silently discards anything else, so an
-            # undeclared column is computed and then dropped, and the probe
-            # scores as unscoreable. They are declared for every run rather
+            # names declared here and discards anything else (the generator
+            # logs a warning), so an undeclared column is computed and then
+            # dropped, and the probe scores as unscoreable. They are declared for every run rather
             # than per probe because the declaration is read once, before
             # any row reveals which probe produced it; rows from other
             # probes simply leave them empty.

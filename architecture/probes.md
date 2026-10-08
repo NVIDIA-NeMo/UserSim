@@ -46,15 +46,22 @@ required; the rest have working defaults on `BaseProbe`.
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
 | `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
-| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` |
+| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` (an extension probe keeps per-row data in `state.metadata`) |
 
 Anything a probe does not override inherits a default, which is what keeps a
 new probe to roughly fifty lines.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name appears in
-`ConversationSimulatorConfig.side_effect_columns`; anything else is discarded
-without a warning, and the scorer that reads it back finds nothing to score.
+`ConversationSimulatorConfig.side_effect_columns`; anything else is discarded,
+and the scorer that reads it back finds nothing to score. The generator logs a
+warning naming the probe and the column the first time it happens.
+
+An extension probe cannot add to that list without editing this repository, so
+it keeps per-row data in `state.metadata` instead, which is stored with the row
+as `conversation_metadata` and read from there by its scorer. Write it during
+the run, for example in `after_assistant_turn`: the metadata is serialized
+before `build_result_extras` runs, so anything added there is lost.
 
 Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
 `format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,

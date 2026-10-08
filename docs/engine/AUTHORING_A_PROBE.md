@@ -133,7 +133,7 @@ implementations.
 | `format_assistant_judge_prompt(response, history)` | no | generic assistant-quality rubric | When the per-turn assistant judge needs probe-specific criteria; with `max_assistant_attempts > 1`, its verdict also gates resampling |
 | `async after_assistant_turn(models, state, response, cfg)` | no | append + return content | When you intercept tool calls, simulate API responses, etc. Build the message with `assistant_message(response, content, tool_calls=..., store_reasoning=getattr(cfg, "store_reasoning", True))` from `core/probes.py` rather than a hand-written dict: it carries the model's `reasoning_content` (when there is one) onto the message it belongs to. A hand-built dict silently drops the trace, and for multi-call turns attributes it to the wrong message; omitting `store_reasoning` makes your probe ignore `--no-store-reasoning`. |
 | `supports_assistant_resampling` (class attr) | no | `True` | Set `False` when `after_assistant_turn` has side effects (tool execution, multi-message appends): it caps judge-gated assistant resampling (`max_assistant_attempts > 1`) to one attempt. `ToolCallingMixin` / `AgenticMixin` already do this |
-| `build_result_extras(state)` | no | num_turns + num_tool_calls | Always: surface the probe's join keys as top-level columns. **Every key you add here must also be listed in `ConversationSimulatorConfig.side_effect_columns`** -- see step 6 |
+| `build_result_extras(state)` | no | num_turns + num_tool_calls | Always: surface the probe's join keys as top-level columns. **Every key you add here must also be listed in `ConversationSimulatorConfig.side_effect_columns`** -- see step 6, which also covers probes outside this repository |
 | `derive_task(persona, bank, *, cfg)` | yes (BankBacked only) | raises | Always for bank-backed probes |
 | `async get_verbatim_first_user_turn(state)` | no | `None` | When turn-1 is verbatim from a bank: also seed metadata here |
 | `get_user_query_instruction(turn_idx)` | no | `None` | When turn-1 is generated from an instruction of the probe's own: return it for `turn_idx=0`, and the loop hands it to the user-LLM in place of the standard one. `CustomTurn1InstructionMixin` fills it from a template. The draft still passes the gate |
@@ -376,14 +376,31 @@ def side_effect_columns(self) -> list[str]:
 ```
 
 The engine writes the configured column plus the names declared there and
-discards everything else, without a warning. An undeclared key is computed
-on every row, dropped on the way to storage, and then read back as absent
-by your scorer -- which reports the trajectory as having nothing to score
-rather than failing. A run like that looks entirely successful.
+discards everything else. An undeclared key is computed on every row, dropped
+on the way to storage, and then read back as absent by your scorer -- which
+reports the trajectory as having nothing to score rather than failing. The
+generator logs a warning naming the probe and the column the first time it
+drops one, so check the log of your first run.
 
-`tests/engine/test_plugin_entry_points.py` drives every registered probe
-and fails on any column that is written but not declared, so this is
-caught in CI rather than in a dataset.
+For a probe in this repository, `tests/engine/test_plugin_entry_points.py`
+drives every registered probe and fails on any column that is written but not
+declared, so this is caught in CI rather than in a dataset.
+
+**A probe outside this repository** (installed through the `usersim.probes`
+entry point) cannot add to that list. Keep its per-row data in the probe's
+metadata instead: whatever is in `state.metadata` is stored with the row as
+`conversation_metadata`, which your scorer receives as a JSON string
+(`json.loads(trajectory["conversation_metadata"])`).
+
+```python
+async def after_assistant_turn(self, models, state, assistant_response, cfg):
+    content = await super().after_assistant_turn(models, state, assistant_response, cfg)
+    state.metadata.setdefault("my_probe_checks", []).append({"turn": len(state.messages), "passed": True})
+    return content
+```
+
+Write it during the run, as above. The metadata is serialized before
+`build_result_extras` runs, so anything added to it there is lost.
 
 ---
 

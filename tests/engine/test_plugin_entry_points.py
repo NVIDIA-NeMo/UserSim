@@ -146,8 +146,8 @@ class TestSimulatorRunsARow:
 
         ``build_result_extras`` is per-probe, so the columns a row carries
         depend on which probe produced it. The engine writes the configured
-        column plus the declared side-effect columns and nothing else, with
-        no warning, so a probe-specific column that is not declared is
+        column plus the declared side-effect columns and nothing else (a
+        logged warning is easy to miss), so a probe-specific column that is not declared is
         computed, dropped, and then read back as absent by the scorer that
         needs it -- which reports the trajectory as unscoreable rather than
         failing.
