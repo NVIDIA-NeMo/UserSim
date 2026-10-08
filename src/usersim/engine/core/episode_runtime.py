@@ -448,8 +448,9 @@ class ProbeEpisodeRuntime:
                     return executed.payload
         raise EpisodeContractError(
             f"Tool call {tool_call_id!r} has not been executed. Either its assistant response has not "
-            f"been recorded with advance() yet, or the probe's per-turn cap was reached and User Sim "
-            f"declined to run it; see executed_tool_calls()."
+            f"been recorded with advance() yet, the probe's per-turn cap was reached and User Sim "
+            f"declined to run it, or it is a simulated user's call, which the probe consumes rather "
+            f"than runs; see executed_tool_calls()."
         )
 
     async def executed_tool_calls(self) -> list[ExecutedToolCall]:
@@ -509,13 +510,16 @@ class ProbeEpisodeRuntime:
         tool_calls = result.response.get("tool_calls") or []
         if not tool_calls:
             return
-        if request.role != "assistant":
+        # Either side of the conversation may call tools a probe offers it (a
+        # probe can give the simulated user tools as well as the assistant), so a
+        # hosted episode records the same calls a local run would.
+        if request.role not in ("assistant", "user"):
             raise EpisodeContractError(f"A {request.role} activation cannot record tool calls")
         if not request.tools_enabled:
             raise EpisodeContractError(
                 f"Activation {request.activation_id!r} offers no tools, so the recorded response "
-                f"must not contain tool calls. User Sim disables tools when the probe's loop asks "
-                f"the assistant for its final answer."
+                f"must not contain tool calls. User Sim offers tools only where the probe's loop "
+                f"expects a call, and disables them when it asks the assistant for its final answer."
             )
         allowed = request.tool_names
         seen: set[str] = set()

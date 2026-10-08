@@ -241,9 +241,9 @@ async def assert_scorer_conforms(
 class ScriptedModel:
     """A deterministic stand-in for a configured model.
 
-    Returns the same reply for the same role, and a tool call whenever tools
-    are offered and no tool result is in view yet, which is enough to drive any
-    probe's loop to completion without a provider.
+    Returns the same reply for the same role, and a tool call whenever the
+    assistant or the user is offered tools and no tool result is in view yet,
+    which is enough to drive any probe's loop to completion without a provider.
     """
 
     #: A real model id: probes that grade the assistant's own identity refuse
@@ -264,7 +264,9 @@ class ScriptedModel:
         self.prompts: list[dict[str, Any]] = prompts if prompts is not None else []
 
     def _tool_calls(self, messages: Sequence[Any], tools: Any) -> list[dict[str, Any]] | None:
-        if self.role != "assistant" or not tools:
+        # Either side of the conversation calls a tool it is offered, so a probe
+        # whose simulated user acts through a tool is exercised as a model would.
+        if self.role not in ("assistant", "user") or not tools:
             return None
         if any(str(_message_field(message, "role")) == "tool" for message in messages):
             return None
