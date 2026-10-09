@@ -637,6 +637,27 @@ def to_data_designer_kwargs(config: ModelsConfig) -> dict[str, Any]:
     return {"model_providers": merged}
 
 
+def resolved_model_providers(config: ModelsConfig) -> list[Any]:
+    """The providers Data Designer serves this config's models through.
+
+    The config's own providers merged with the defaults, or, when it
+    declares none, the defaults Data Designer loads for itself, from the
+    user's providers file. A provider's ``extra_body`` and ``extra_headers``
+    are merged into every request it serves.
+    """
+    providers = to_data_designer_kwargs(config).get("model_providers")
+    if providers is not None:
+        return providers
+    from data_designer.config.default_model_settings import get_builtin_model_providers, get_default_providers
+
+    try:
+        return get_default_providers()
+    except FileNotFoundError:
+        # Data Designer writes its providers file, seeded with the built-ins,
+        # the first time it runs.
+        return get_builtin_model_providers()
+
+
 def to_model_configs(config: ModelsConfig) -> list[Any]:
     """Convert ``ModelsConfig`` into a list of ``dd.ModelConfig`` objects.
 

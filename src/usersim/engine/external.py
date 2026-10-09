@@ -40,6 +40,7 @@ __all__ = [
     "construct_episode_preamble",
     "construct_probe_episode",
     "materialize_episode_inputs",
+    "simulate_episode_inputs",
 ]
 
 
@@ -82,4 +83,44 @@ def materialize_episode_inputs(
         store_reasoning=store_reasoning,
         finance_tier_mix=finance_tier_mix,
         finance_retrieval_mode=finance_retrieval_mode,
+    )
+
+
+def simulate_episode_inputs(
+    rows: list[dict[str, object]],
+    *,
+    out: Path,
+    models_path: Path | None = None,
+    assets_dir: Path | None = None,
+    skip_existing: bool = True,
+):
+    """Run stored rows with the configured models and save them as a run under ``out``.
+
+    The library form of ``usersim simulate --inputs``. ``rows`` are what
+    :func:`materialize_episode_inputs` returns, or the same rows read back
+    from storage. Each row runs exactly as stored, and is saved where
+    ``usersim eval`` reads it, with a ``trajectory_id`` of its own and the
+    stored id as ``input_id``.
+
+    Each setup (models, settings, assets) gets its own run under ``out``.
+    Calling again with the same setup resumes that run and skips the rows it
+    already holds, so a caller can run a large set in batches. Raises
+    ``ValueError`` for rows that cannot run, before any model call, and for a
+    stored row that the run already holds with different contents: before any
+    model call when it is found up front, and when the rows are saved when
+    another writer saved it meanwhile. Returns an ``InputsRun`` with the run
+    id and the number of rows written and skipped.
+    """
+    from usersim.cli._inputs import prepare_episode_inputs, simulate_inputs_to_dataset
+    from usersim.cli._models import REQUIRED_SIMULATOR_ALIASES, default_models_path, load_models_config, require_aliases
+
+    path = models_path or default_models_path()
+    models = load_models_config(path)
+    require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="simulate_episode_inputs")
+    return simulate_inputs_to_dataset(
+        inputs=prepare_episode_inputs(rows, assets_dir=assets_dir),
+        models=models,
+        out=out,
+        models_path=path,
+        skip_existing=skip_existing,
     )
