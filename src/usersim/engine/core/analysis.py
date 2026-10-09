@@ -13,6 +13,8 @@ from typing import Any
 
 import pandas as pd
 
+from usersim.engine.core.missing import none_for_missing
+
 
 def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
     """Extract per-axis evaluation scores into a flat DataFrame for analysis.
@@ -24,7 +26,8 @@ def extract_eval_scores(df: pd.DataFrame) -> pd.DataFrame:
     Returns an empty DataFrame if no valid scores are found.
     """
     rows: list[dict[str, Any]] = []
-    for _, row in df.iterrows():
+    for record in df.to_dict(orient="records"):
+        row = none_for_missing(record)
         scores_raw = row.get("eval_scores")
         if not scores_raw:
             continue
