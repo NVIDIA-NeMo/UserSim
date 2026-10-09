@@ -37,6 +37,7 @@ from usersim.engine.core.storage import (
     resolve_run_or_raise,
     run_subroot,
     write_locale_partition,
+    write_parquet_file,
     write_partitioned_dataset,
     write_run_locales_partition,
     write_run_partition,
@@ -45,6 +46,33 @@ from usersim.engine.core.storage import (
 
 def _trajectory_frame(*rows):
     return pd.DataFrame(list(rows))
+
+
+class TestWriteParquetFile:
+    def test_nested_columns_reopen_with_plain_pandas(self, tmp_path: Path) -> None:
+        import pyarrow as pa
+
+        df = pa.Table.from_pandas(
+            pd.DataFrame({"id": ["a"], "tags": [["x", "y"]], "persona": [{"first_name": "Ana"}]})
+        ).to_pandas(types_mapper=pd.ArrowDtype)
+
+        out = write_parquet_file(df, tmp_path / "panel.parquet")
+
+        back = pd.read_parquet(out)
+        assert list(back["tags"][0]) == ["x", "y"]
+        assert back["persona"][0] == {"first_name": "Ana"}
+        assert [p.name for p in tmp_path.iterdir()] == ["panel.parquet"]
+
+    def test_a_failed_write_leaves_no_file(self, tmp_path: Path, monkeypatch) -> None:
+        def write_then_fail(table, where, **kwargs):
+            Path(where).write_bytes(b"partial")
+            raise OSError("disk full")
+
+        monkeypatch.setattr(pq, "write_table", write_then_fail)
+
+        with pytest.raises(OSError, match="disk full"):
+            write_parquet_file(pd.DataFrame({"id": ["a"]}), tmp_path / "panel.parquet")
+        assert list(tmp_path.iterdir()) == []
 
 
 # ─── Round-trip write + read ─────────────────────────────────────────

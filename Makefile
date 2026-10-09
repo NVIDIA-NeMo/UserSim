@@ -146,6 +146,10 @@ check-wheel:  ## Build the wheel, clean-install it, and smoke from an empty dir
 		echo "   ✗ the banks did not ship; every probe would fail at asset resolution"; \
 		exit 1; \
 	fi; \
+	if unzip -l "$$WORK"/*.whl | grep -q 'embeddings\.parquet$$'; then \
+		echo "   ✗ the wheel ships embeddings.parquet; a stale build/ directory is the usual source"; \
+		exit 1; \
+	fi; \
 	echo "→ installing into a throwaway venv"; \
 	$(UV) venv "$$WORK/venv" >/dev/null; \
 	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \

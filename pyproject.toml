@@ -149,6 +149,12 @@ include = ["usersim*"]
     "**/*.yaml",
 ]
 
+[tool.setuptools.exclude-package-data]
+# Retrieval embeds each query with the model that produced the corpus vectors,
+# so shipped vectors would tie every install to one embedding model. The
+# vectors `gen-assets` writes beside a bank stay local.
+"usersim.engine" = ["assets/financial_services/**/embeddings.parquet"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"

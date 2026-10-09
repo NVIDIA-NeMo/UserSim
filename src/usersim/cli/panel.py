@@ -124,6 +124,7 @@ def run(args: argparse.Namespace) -> int:
     from data_designer.interface import DataDesigner
 
     from usersim.engine.core.locale import persona_dataset_locale
+    from usersim.engine.core.storage import write_parquet_file
 
     personas_dir = DEFAULT_PERSONA_DATASETS_DIR
 
@@ -182,6 +183,6 @@ def run(args: argparse.Namespace) -> int:
         frames.append(df)
 
     panel_df = pd.concat(frames, ignore_index=True)
-    panel_df.to_parquet(out_path, index=False)
+    write_parquet_file(panel_df, out_path)
     print(f"wrote {len(panel_df)} personas to {out_path}")
     return 0
