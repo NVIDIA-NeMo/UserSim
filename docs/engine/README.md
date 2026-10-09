@@ -401,8 +401,10 @@ Quick orientation:
 6. Declare every column `build_result_extras` writes in
    `side_effect_columns` on
    [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).
-   An undeclared column is discarded on the way to storage, and the
-   scorer that reads it back reports nothing to score.
+   An undeclared column is discarded on the way to storage (with a
+   warning in the log), and the scorer that reads it back reports
+   nothing to score. A probe outside this repository keeps per-row data
+   in `state.metadata` instead; see the authoring guide's step 6.
 7. Run `usersim smoke` to confirm registration; copy
    `templates/probe/test_probe.py.template` for the per-probe
    regression test.

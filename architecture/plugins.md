@@ -33,6 +33,10 @@ which system they are looking at.
 my_probe = "my_package.probe:MyProbe"
 ```
 
+An extension probe's per-row data goes in its metadata (`state.metadata`),
+stored with the row as `conversation_metadata`: the list of extra columns a
+run keeps is part of the core config. See [Probes](probes.md).
+
 ## How discovery behaves
 
 **Probes and scorers are discovered by import.** `@register_probe` and

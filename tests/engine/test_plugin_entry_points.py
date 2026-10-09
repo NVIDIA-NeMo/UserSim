@@ -16,7 +16,9 @@ network guard along with everything else, so a test routed through it can
 pass with an unmocked model call underneath.
 """
 
+import logging
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -103,6 +105,24 @@ class TestDataDesignerContract:
             )
 
 
+@contextmanager
+def _undeclared_column_warnings():
+    """Collect the generator's undeclared-column warnings, on its own logger."""
+    seen: list[str] = []
+
+    class _Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            if record.levelno >= logging.WARNING and "side_effect_columns" in record.getMessage():
+                seen.append(record.getMessage())
+
+    handler, engine_logger = _Capture(), logging.getLogger("usersim.engine")
+    engine_logger.addHandler(handler)
+    try:
+        yield seen
+    finally:
+        engine_logger.removeHandler(handler)
+
+
 class TestSimulatorRunsARow:
     """The simulator, constructed and driven the way the engine does."""
 
@@ -130,7 +150,7 @@ class TestSimulatorRunsARow:
 
         The engine persists the configured column plus the declared
         side-effect columns and drops everything else, so a value written
-        under any other name is computed and then silently discarded.
+        under any other name is computed and then discarded.
         """
         row, cfg, before = await self._run_one_row()
         declarable = {cfg.name} | set(cfg.side_effect_columns)
@@ -146,11 +166,12 @@ class TestSimulatorRunsARow:
 
         ``build_result_extras`` is per-probe, so the columns a row carries
         depend on which probe produced it. The engine writes the configured
-        column plus the declared side-effect columns and nothing else, with
-        no warning, so a probe-specific column that is not declared is
-        computed, dropped, and then read back as absent by the scorer that
-        needs it -- which reports the trajectory as unscoreable rather than
-        failing.
+        column plus the declared side-effect columns and nothing else, so a
+        probe-specific column that is not declared is computed, dropped, and
+        then read back as absent by the scorer that needs it -- which reports
+        the trajectory as unscoreable rather than failing. The generator's
+        warning about it is checked too, so it stays silent for every probe
+        that declares its columns.
 
         A variant can write columns its default does not: the guarded
         ``health_*`` variants write the move/Guard ground truth that
@@ -158,7 +179,8 @@ class TestSimulatorRunsARow:
         variants write none of it. Running only the default variant would
         miss a column that only another variant writes.
         """
-        row, cfg, before = await self._run_one_row(probe_type, variant)
+        with _undeclared_column_warnings() as warnings:
+            row, cfg, before = await self._run_one_row(probe_type, variant)
         if variant != "default":
             # Some probes relabel the default variant from their own data, so
             # only a requested non-default variant is required to stick.
@@ -170,6 +192,7 @@ class TestSimulatorRunsARow:
             f"{probe_type} ({variant}) writes columns the config never declares, so they are dropped "
             f"before anything can read them: {sorted(undeclared)}"
         )
+        assert warnings == [], f"{probe_type} ({variant}) logged an undeclared-column warning: {warnings}"
 
     @pytest.mark.usefixtures("no_moves_override")
     @pytest.mark.parametrize(("probe_type", "variant"), _probe_variant_pairs())

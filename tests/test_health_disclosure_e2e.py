@@ -115,7 +115,7 @@ def _persist(extras: dict) -> dict:
     store does, so the scorer sees the persisted row rather than live objects.
 
     The filter matters because the engine discards any key not declared in
-    ``side_effect_columns`` without a warning, so a row built straight from
+    ``side_effect_columns`` (only logging a warning), so a row built straight from
     ``build_result_extras`` would hide an undeclared column.
     """
     kept = _kept_columns()

@@ -122,10 +122,14 @@ When porting one of the templates into a new module:
       that ships across multiple locales.
 - [ ] Declare every key `build_result_extras` adds in
       `side_effect_columns` on `ConversationSimulatorConfig`. The engine
-      writes the configured column plus the declared names and silently
-      discards the rest, so an undeclared join key is computed, dropped,
-      and then read back as absent by your scorer -- which reports the
-      trajectory as having nothing to score while the run looks fine.
+      writes the configured column plus the declared names and discards
+      the rest (logging a warning), so an undeclared join key is computed,
+      dropped, and then read back as absent by your scorer -- which reports
+      the trajectory as having nothing to score while the run looks fine.
+      A probe outside this repository cannot add to that list: keep its
+      per-row data in `state.metadata`, written during the run, and read it
+      from `conversation_metadata`. See step 6 of
+      `docs/engine/AUTHORING_A_PROBE.md`.
 - [ ] Add a deterministic scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
