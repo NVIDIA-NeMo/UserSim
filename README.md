@@ -169,8 +169,7 @@ with a generated dataset card.
 ### Reusing a fixed population
 
 `--locale` samples personas fresh each run. To fix the locales and per-locale
-row counts up front (for a matched-pair comparison, say), build a panel and
-pass it instead:
+row counts up front, build a panel and pass it instead:
 
 ```bash
 usersim panel    --locale en_US --num-personas 50 --out panel.parquet
@@ -179,6 +178,19 @@ usersim simulate --panel panel.parquet --out output/trajectories
 
 Note that personas are re-sampled per run either way; a panel sets the shape
 of the run, not its cast.
+
+To fix the cast as well, store the resolved rows once and run those:
+
+```bash
+usersim simulate --locale en_US --num-rows 50 --materialize-inputs --out rows.jsonl
+usersim simulate --inputs rows.jsonl --models assistant_a.toml --out output/trajectories
+usersim simulate --inputs rows.jsonl --models assistant_b.toml --out output/trajectories
+```
+
+Both runs meet the same simulated users in the same scenarios. Each setup gets
+its own run under `--out`, and each row its own `trajectory_id`; the stored
+row's id is kept as `input_id`, so the two runs pair on it. Running again with
+the same setup resumes its run.
 
 ### Models
 

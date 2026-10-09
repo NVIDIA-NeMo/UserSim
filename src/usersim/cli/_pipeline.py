@@ -559,6 +559,53 @@ def materialize_episode_inputs(
     return rows
 
 
+def build_inputs_config_builder(
+    *,
+    models: ModelsConfig,
+    config: Any,
+    rows: list[dict[str, Any]],
+):
+    """Build a Data Designer pipeline that runs stored episode rows as they are.
+
+    Each row becomes one seed row: the columns the simulator column requires
+    (``persona``, ``probe_type``, ``theme``), plus the whole stored row as JSON
+    in ``EPISODE_INPUT_COLUMN``, which the generator unpacks before the probe
+    is built, so every value keeps the type it was stored with. ``config`` is
+    the simulator column, restored from the rows' ``usersim_config``.
+
+    Returns ``(data_designer, config_builder)``, like
+    :func:`build_simulator_config_builder`.
+    """
+    import data_designer.config as dd
+    import pandas as pd
+    from data_designer.interface import DataDesigner
+
+    from usersim.engine.core.episode_input import EPISODE_INPUT_COLUMN
+
+    def _text(value: Any) -> str:
+        return value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+
+    seed = pd.DataFrame(
+        [
+            {
+                config.persona_column: _text(row[config.persona_column]),
+                config.probe_type_column: str(row[config.probe_type_column]),
+                config.theme_column: _text(row.get(config.theme_column, "")),
+                EPISODE_INPUT_COLUMN: json.dumps(
+                    {key: value for key, value in row.items() if key != "usersim_config"}, ensure_ascii=False
+                ),
+            }
+            for row in rows
+        ]
+    )
+    data_designer = DataDesigner(**to_data_designer_kwargs(models))
+    _set_run_config(data_designer, dd)
+    config_builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
+    config_builder.with_seed_dataset(dd.DataFrameSeedSource(df=seed))
+    config_builder.add_column(config)
+    return data_designer, config_builder
+
+
 def build_evaluator_config_builder(
     *,
     models: ModelsConfig,

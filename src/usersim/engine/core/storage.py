@@ -217,6 +217,8 @@ RUN_LOCK_FILENAME: str = ".usersim.lock"
 #: The kind a record gives a run of rows the simulator sampled. A resume
 #: reopens only a run of its own kind.
 RUN_KIND_SAMPLED: str = "sampled"
+#: The kind a record gives a run of stored rows that ``simulate --inputs`` ran.
+RUN_KIND_STORED: str = "stored"
 
 #: A new run is assembled in a hidden folder with this prefix, then renamed.
 _CLAIM_PREFIX: str = ".claim-"
