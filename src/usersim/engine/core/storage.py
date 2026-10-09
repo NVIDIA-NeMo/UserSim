@@ -11,10 +11,13 @@ Three partition levels:
 
 1. ``run=<unix-epoch-seconds>`` — top-level isolation per simulator
    invocation. Every fresh ``cli simulate`` (or notebook
-   ``RESUME=False``) mints a new run id; ``RESUME=True`` resumes
-   into the latest existing run. Eval and report stages inherit the
+   ``RESUME=False``) gets a new run id; ``RESUME=True`` resumes
+   into the latest run of its kind. Eval and report stages inherit the
    trajectory run's id so a single run is the unit of "X's
-   trajectories + X's evaluations + X's reports."
+   trajectories + X's evaluations + X's reports." A simulator writes
+   under ``run_write_lock``, and a new run appears only with its record
+   (``_run_settings.json``) and first rows in place; see "Run records
+   and locked writes" below.
 2. ``locale=<locale-code>`` — one directory per locale, written
    atomically per-locale so a crash mid-run leaves earlier locales'
    partitions intact and resumable.
@@ -44,12 +47,17 @@ See ``_unify_fragment_schemas_robust`` for the recovery logic.
 
 from __future__ import annotations
 
+import errno
+import json
 import logging
+import os
 import shutil
 import tempfile
 import time
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Iterator, Mapping, Sequence
 
 if TYPE_CHECKING:
     # pyarrow is imported inside functions to keep it off the import path of
@@ -186,6 +194,236 @@ def resolve_run_or_raise(
     if run not in (None, "latest", LEGACY_RUN_ID) and resolved not in available:
         raise FileNotFoundError(f"{label}={run!r} not found under {root} (available: {available})")
     return resolved
+
+
+# ---------------------------------------------------------------------------
+# Run records and locked writes
+#
+# A simulator writes into a trajectory root while holding ``run_write_lock``,
+# and a new run becomes visible only with its record and its first rows in
+# place, so two writers never share a run, a reader never sees an empty one,
+# and the checks a writer makes against a run's saved rows still hold when it
+# writes.
+# ---------------------------------------------------------------------------
+
+#: What a run was made from, written inside ``run=<id>/`` before the run is
+#: visible. Data readers skip it, as pyarrow ignores files that start with ``_``.
+RUN_RECORD_FILENAME: str = "_run_settings.json"
+
+#: The lock file every writer into a trajectory root holds. Dot-prefixed, so
+#: neither ``list_runs`` nor pyarrow reads it.
+RUN_LOCK_FILENAME: str = ".usersim.lock"
+
+#: The kind a record gives a run of rows the simulator sampled. A resume
+#: reopens only a run of its own kind.
+RUN_KIND_SAMPLED: str = "sampled"
+
+#: A new run is assembled in a hidden folder with this prefix, then renamed.
+_CLAIM_PREFIX: str = ".claim-"
+
+#: Whether ``flock`` works under a trajectory root, found once per root.
+_FLOCK_WORKS: dict[str, bool] = {}
+
+
+class RunLockUnsupportedError(OSError):
+    """A trajectory root on a filesystem without ``flock``, where no run can be written safely."""
+
+
+def read_run_record(root: str | Path, run_id: str) -> dict[str, Any] | None:
+    """Return ``run_id``'s record, or ``None`` for a run written without one."""
+    if run_id == LEGACY_RUN_ID:
+        return None
+    try:
+        return json.loads((run_subroot(root, run_id) / RUN_RECORD_FILENAME).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None
+
+
+def latest_run_where(
+    root: str | Path,
+    keep: Callable[[str, dict[str, Any] | None], bool],
+) -> str | None:
+    """Return the most recent run for which ``keep(run_id, record)`` is true.
+
+    Runs are tried newest first, in ``latest_run_id``'s order, with
+    ``"legacy"`` last.
+    """
+    runs = list_runs(root)
+    ordered = sorted((r for r in runs if r != LEGACY_RUN_ID), reverse=True)
+    ordered += [r for r in runs if r == LEGACY_RUN_ID]
+    for run_id in ordered:
+        if keep(run_id, read_run_record(root, run_id)):
+            return run_id
+    return None
+
+
+def run_started_at(root: str | Path, run_id: str) -> int | None:
+    """When ``run_id`` started, in epoch seconds.
+
+    The record's ``started_at`` (the start of the invocation that made the
+    run), else the run id itself for a numeric id from before records, else
+    ``None`` (the bare ``"legacy"`` layout).
+    """
+    record = read_run_record(root, run_id)
+    if record is not None and record.get("started_at") is not None:
+        return int(record["started_at"])
+    return int(run_id) if run_id.isdigit() else None
+
+
+@contextmanager
+def run_write_lock(root: str | Path) -> Iterator[Path]:
+    """Hold the write lock for trajectory root ``root``.
+
+    Choosing a run, checking its saved rows and writing must all happen while
+    it is held, and nothing slow should: a simulator holds it per write, never
+    while it simulates. On entry it removes any hidden claim folder, which only
+    a writer that died while holding the lock can have left.
+
+    It excludes other threads as well as other processes: each call takes its
+    own ``filelock.FileLock``, an ``flock`` lock on POSIX. It relies on locks
+    that every writing host shares, so on a mount whose ``flock`` locks are
+    local to one node (Lustre ``localflock``, NFS ``local_lock=flock``,
+    ``local_lock=all`` or ``nolock``), give each node its own root. Where
+    ``flock`` is not supported at all, it raises
+    :class:`RunLockUnsupportedError` rather than fall back to a lock file:
+    ``filelock``'s fallbacks can each let two writers in.
+    :func:`check_run_write_lock` finds that before any work starts.
+    """
+    from filelock import FileLock
+
+    root_path = check_run_write_lock(root)
+    with FileLock(root_path / RUN_LOCK_FILENAME):
+        for leftover in root_path.glob(f"{_CLAIM_PREFIX}*"):
+            shutil.rmtree(leftover, ignore_errors=True)
+        yield root_path
+
+
+def check_run_write_lock(root: str | Path) -> Path:
+    """Create ``root`` if needed, and raise if runs cannot be written there safely.
+
+    Raises :class:`RunLockUnsupportedError` when ``root``'s filesystem has no
+    ``flock``. Call it before work that ends in a write, such as simulating,
+    so a run is refused before any model call rather than at its first save.
+    Returns the resolved root.
+    """
+    root_path = Path(root).resolve()
+    root_path.mkdir(parents=True, exist_ok=True)
+    if not _flock_works(root_path):
+        raise RunLockUnsupportedError(
+            f"file locks (flock) are not supported under {root_path}, so runs cannot be written there "
+            "safely; write them to a filesystem that supports file locks, such as a local disk or "
+            "Lustre mounted with the flock option"
+        )
+    return root_path
+
+
+def _flock_works(root: Path) -> bool:
+    """Whether ``flock`` works under ``root``, tried once on a scratch file there.
+
+    Windows has no ``flock``; ``filelock`` locks with ``msvcrt`` there.
+    """
+    try:
+        import fcntl
+    except ImportError:
+        return True
+    key = str(root)
+    if key not in _FLOCK_WORKS:
+        with tempfile.TemporaryFile(dir=root) as probe:
+            try:
+                fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError as error:
+                if error.errno != errno.ENOSYS:
+                    raise
+                _FLOCK_WORKS[key] = False
+            else:
+                _FLOCK_WORKS[key] = True
+    return _FLOCK_WORKS[key]
+
+
+def publish_new_run(
+    df,
+    root: str | Path,
+    *,
+    locale: str,
+    record: Mapping[str, Any],
+    clock: Callable[[], float] = time.time,
+    sleep: Callable[[float], None] = time.sleep,
+) -> str:
+    """Make a new run visible with its record and its first rows, and return its id.
+
+    Call while holding :func:`run_write_lock`. The record and ``df``'s
+    ``locale`` rows are written into a hidden folder that is then renamed to
+    ``run=<id>``, the current second. If that id is taken, it waits for the
+    next second rather than take one a later run would mint for itself.
+    Renaming onto a run folder that holds anything fails, and every run made
+    here holds its record from the start, so two runs never share a folder.
+    """
+    root_path = Path(root).resolve()
+    # Made like any folder, so the run gets the usual permissions: the rename
+    # keeps them, and a ``tempfile.mkdtemp`` folder would be owner-only.
+    claim = root_path / f"{_CLAIM_PREFIX}{uuid.uuid4().hex}"
+    claim.mkdir()
+    published = False
+    try:
+        (claim / RUN_RECORD_FILENAME).write_text(json.dumps(dict(record), sort_keys=True), encoding="utf-8")
+        if _write_locale_rows(df, claim, locale=locale) is None:
+            raise ValueError(f"publish_new_run: no {locale} rows to publish; a run is never made empty")
+        while True:
+            run_id = new_run_id(clock())
+            try:
+                os.rename(claim, run_subroot(root_path, run_id))
+            except OSError as error:
+                if error.errno not in (errno.EEXIST, errno.ENOTEMPTY):
+                    raise
+                sleep(max(0.0, int(run_id) + 1 - clock()))
+                continue
+            published = True
+            return run_id
+    finally:
+        if not published:
+            shutil.rmtree(claim, ignore_errors=True)
+
+
+def sampled_run_to_resume(root: str | Path) -> str | None:
+    """The run a resumed simulation of sampled rows reopens: the latest one of its kind.
+
+    A run made before runs recorded their kind counts as one; a run of any
+    other kind never does.
+    """
+    return latest_run_where(root, lambda run_id, record: record is None or record.get("kind") == RUN_KIND_SAMPLED)
+
+
+def save_sampled_rows(
+    df,
+    root: str | Path,
+    *,
+    locale: str,
+    run_id: str | None,
+    started_at: float,
+) -> tuple[str | None, int]:
+    """Save one locale's sampled rows into ``run_id``, or into a new run when it is ``None``.
+
+    Under the write lock, rows already saved in ``run_id`` are skipped,
+    whoever saved them, so no id is saved twice in a run; a new run never
+    shares a folder with another; and a run of another kind is refused, so a
+    run holds one kind of rows. Returns the run the rows went to and how many
+    were written.
+    """
+    with run_write_lock(root):
+        if run_id is not None:
+            record = read_run_record(root, run_id)
+            if record is not None and record.get("kind") != RUN_KIND_SAMPLED:
+                raise ValueError(f"run {run_id} holds {record.get('kind')} rows; sampled rows need a run of their own")
+            df = df[~df["trajectory_id"].isin(existing_trajectory_ids(root, run=run_id))]
+        df = df[df["locale"].astype(str) == str(locale)]
+        if df.empty:
+            return run_id, 0
+        if run_id is None:
+            record = {"kind": RUN_KIND_SAMPLED, "started_at": started_at}
+            run_id = publish_new_run(df, root, locale=locale, record=record)
+        else:
+            write_locale_partition(df, root, locale=locale, run_id=run_id)
+    return run_id, len(df)
 
 
 def write_run_partition(
@@ -996,20 +1234,36 @@ def write_locale_partition(
     batch leaves the prior locales' partitions on disk and resumable
     (within the same run id).
     """
+    written = _write_locale_rows(
+        df,
+        run_subroot(root, run_id),
+        locale=locale,
+        partition_cols=partition_cols,
+        writer_id=writer_id,
+    )
+    return written if written is not None else Path(root).resolve()
+
+
+def _write_locale_rows(
+    df,
+    subroot: Path,
+    *,
+    locale: str,
+    partition_cols: Sequence[str] = DEFAULT_PARTITION_COLS,
+    writer_id: str | None = None,
+) -> Path | None:
+    """Write ``df``'s ``locale`` rows under ``subroot``; ``None`` when there are none."""
     if "locale" not in df.columns:
         raise ValueError("write_locale_partition: dataframe is missing 'locale' column")
     locale_mask = df["locale"].astype(str) == str(locale)
     locale_df = df[locale_mask]
     if locale_df.empty:
-        return Path(root).resolve()
-
-    import os
+        return None
 
     if writer_id is None:
         writer_id = f"pid{os.getpid()}"
     basename_template = f"part-{{i}}-{locale}-{writer_id}.parquet"
 
-    subroot = run_subroot(root, run_id)
     return write_partitioned_dataset(
         locale_df,
         subroot,

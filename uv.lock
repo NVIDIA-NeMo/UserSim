@@ -1947,6 +1947,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "data-designer" },
+    { name = "filelock" },
     { name = "httpx" },
     { name = "huggingface-hub" },
     { name = "langdetect" },
@@ -1978,6 +1979,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "data-designer", specifier = ">=0.9.4,<0.10" },
+    { name = "filelock" },
     { name = "httpx" },
     { name = "huggingface-hub" },
     { name = "langdetect" },
