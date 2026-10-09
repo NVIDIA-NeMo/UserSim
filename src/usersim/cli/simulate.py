@@ -27,6 +27,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+import tempfile
+import time
 from fractions import Fraction
 from pathlib import Path
 
@@ -466,26 +468,23 @@ def _simulate_to_parquet(
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
+        LEGACY_RUN_ID,
         existing_trajectory_ids,
-        latest_run_id,
-        new_run_id,
-        write_locale_partition,
+        run_started_at,
+        sampled_run_to_resume,
+        save_sampled_rows,
     )
 
+    started_at = time.time()
     out = Path(out).resolve()
     out.mkdir(parents=True, exist_ok=True)
 
-    # Resolve the target run id. ``--no-skip-existing`` means
-    # "fresh start" → mint a new run id. Default (``--skip-existing``)
-    # means "resume into the latest existing run". On a first
-    # invocation with no existing runs, both paths land on a fresh
-    # ``new_run_id()``.
-    if skip_existing:
-        run_id = latest_run_id(out) or new_run_id()
-    else:
-        run_id = new_run_id()
-    logger.info("run_id=%s (%s)", run_id, "resume" if skip_existing else "fresh")
-    print(f"  run_id:        {run_id}")
+    # ``--no-skip-existing`` starts a fresh run; the default resumes the
+    # latest run this command made. A fresh run is claimed only when its
+    # first rows are saved, so a failure before then leaves no empty run.
+    run_id = sampled_run_to_resume(out) if skip_existing else None
+    logger.info("run_id=%s (%s)", run_id or "new", "resume" if run_id else "fresh")
+    print(f"  run_id:        {run_id or 'new, assigned when the first rows are saved'}")
 
     # Skip-existing scopes to the resolved run only (not all runs).
     # Resuming into an existing run skips trajectory_ids already
@@ -494,7 +493,7 @@ def _simulate_to_parquet(
     # seeds — content-hashed trajectory_ids would still collide if
     # everything matched, but cross-run skipping is not the
     # behaviour we want).
-    already_done = existing_trajectory_ids(out, run=run_id) if skip_existing else set()
+    already_done = existing_trajectory_ids(out, run=run_id) if run_id else set()
     if already_done:
         logger.info(
             "run=%s already has %d trajectories — will skip",
@@ -563,23 +562,27 @@ def _simulate_to_parquet(
             n = _count_rows_for_locale(panel, locale)
         else:
             n = num_rows
-        result = data_designer.create(builder, num_records=n)
-        df = result.load_dataset()
-        if already_done:
-            df = df[~df["trajectory_id"].isin(already_done)]
-        if df.empty:
-            logger.info("locale=%s: no new trajectories", locale)
-            continue
+        # Data Designer names a batch's artifacts by the second it started, so
+        # two runs in one directory could share them; each batch gets its own
+        # folder, removed once its rows are loaded.
+        with tempfile.TemporaryDirectory(prefix="usersim_simulate_") as artifacts:
+            df = data_designer.create(builder, num_records=n, artifact_path=artifacts).load_dataset()
         # Per-locale atomic write: this locale's partition lands on
         # disk before the next locale starts. A crash mid-run leaves
         # earlier locales' partitions intact and resumable (within
         # the same run id).
-        write_locale_partition(df, out, locale=locale, run_id=run_id)
-        total_written += len(df)
+        claimed = run_id is None
+        run_id, written = save_sampled_rows(df, out, locale=locale, run_id=run_id, started_at=started_at)
+        if not written:
+            logger.info("locale=%s: no new trajectories", locale)
+            continue
+        if claimed:
+            print(f"  run_id:        {run_id}")
+        total_written += written
         logger.info(
             "locale=%s: wrote %d new trajectories",
             locale,
-            len(df),
+            written,
         )
 
     if total_written == 0:
@@ -591,13 +594,17 @@ def _simulate_to_parquet(
         f"\nNext step: score them\n  usersim eval --run {run_id} \\\n    --trajectories {out} --out output/evaluations"
     )
 
-    # Write the run manifest. ``run_id`` is the unix-epoch start time
-    # (see ``new_run_id``), so we pass it as ``started_at_epoch`` to keep
-    # the manifest's started/runtime fields meaningful even on resume.
-    # First-writer-wins: a resume into a run that already has a manifest
-    # is a noop. ``trajectories_requested`` is the per-locale request
-    # count from this invocation; the manifest's ``trajectories_completed``
-    # comes from re-reading the parquet partitions for this run.
+    if run_id == LEGACY_RUN_ID:
+        # The bare layout has no run folder to hold a manifest.
+        logger.info("run=%s is the bare legacy layout; no run manifest written", run_id)
+        return 0
+
+    # Write the run manifest. ``started_at_epoch`` is when the invocation
+    # that made the run started, kept in the run's record. First-writer-wins:
+    # a resume into a run that already has a manifest is a noop.
+    # ``trajectories_requested`` is the per-locale request count from this
+    # invocation; the manifest's ``trajectories_completed`` comes from
+    # re-reading the parquet partitions for this run.
     requested_per_locale: dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
     sim_cfg_for_manifest = _build_sim_config_for_manifest(
         max_turns=max_turns,
@@ -607,7 +614,7 @@ def _simulate_to_parquet(
     try:
         manifest_path_written = write_simulator_manifest(
             run_id=run_id,
-            started_at_epoch=int(run_id),
+            started_at_epoch=run_started_at(out, run_id) or int(started_at),
             trajectory_root=out,
             models_config=models,
             models_config_path=models_path,

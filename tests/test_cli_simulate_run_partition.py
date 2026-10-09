@@ -244,7 +244,7 @@ class TestNewRunIdWiring:
                 return _synthetic_trajectory("FRESH")
 
         class _FakeDD:
-            def create(self, builder, num_records=None):
+            def create(self, builder, num_records=None, artifact_path=None):
                 return _FakeResult()
 
         captured_builder_kwargs = {}
@@ -332,7 +332,7 @@ class TestNewRunIdWiring:
                 return _synthetic_trajectory("RESUMED")
 
         class _FakeDD:
-            def create(self, builder, num_records=None):
+            def create(self, builder, num_records=None, artifact_path=None):
                 return _FakeResult()
 
         def _fake_builder(**kwargs):
@@ -376,7 +376,7 @@ def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
             return _synthetic_context_failure()
 
     class _FakeDD:
-        def create(self, builder, num_records=None):
+        def create(self, builder, num_records=None, artifact_path=None):
             assert num_records == 1
             return _FakeResult()
 

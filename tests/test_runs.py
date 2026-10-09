@@ -296,6 +296,22 @@ def test_simulate_notebook_warns_about_already_finished_locales() -> None:
     assert "re-simulated at full LLM cost" in src
 
 
+def test_simulate_notebook_writes_runs_as_the_cli_does() -> None:
+    """The notebook saves through the same locked helpers as ``usersim simulate``.
+
+    Writing partitions itself would let it resume a run of stored rows, share
+    a run with another writer started in the same second, or save an id twice.
+    """
+    src = _simulate_notebook_source()
+    assert "sampled_run_to_resume(TRAJECTORY_PATH)" in src
+    assert "save_sampled_rows(" in src
+    assert "write_locale_partition(" not in src and "new_run_id(" not in src
+    # Each batch's Data Designer artifacts in a folder of its own.
+    assert "artifact_path=_artifacts" in src
+    # The bare legacy layout has no run folder to hold a manifest.
+    assert "elif RUN_ID == LEGACY_RUN_ID:" in src
+
+
 def test_resumed_manifest_describes_the_run_not_the_last_pass() -> None:
     """The manifest is first-writer-wins, so the pass that happens to complete a run
     writes the only manifest it will ever have. Recording `locales_requested=LOCALES`
