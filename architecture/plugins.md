@@ -99,6 +99,15 @@ register_scorer("my_scorer", score)
 A scorer declared with plain `def` is reported as non-conforming rather than
 failing later inside a run.
 
+The row a scorer receives holds every column of the trajectory, and an empty
+cell arrives as `None` whichever way pandas held it. The evaluator fills
+`conversation_messages` (a list), `persona` (a dict), `probe_family`, `locale`
+and `language` itself, so those are never `None`. A default passed to
+`row.get(key, default)` covers only an absent key, so pass a row shaped like
+your probe's trajectories to the check as well:
+`assert_scorer_conforms("my_scorer", sample_row=row)` also scores that row with
+every other field set to `None`.
+
 Each check has a `*_problems` form that returns every finding at once, so you
 fix one thing rather than rediscovering the next on each run.
 

@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 import hashlib
-import math
 import random
 from typing import Any
+
+from usersim.engine.core.missing import is_missing
 
 #: Cell values that mean "nothing here" rather than a fact about the
 #: person. ``"-"`` is what the dataset writes for a slot the person does
@@ -33,13 +34,11 @@ def _is_present_or_valid(value: Any, exempt: tuple[str, ...] = ()) -> bool:
 
     ``exempt`` lists entries of :data:`_INVALID_VALUES` this field should
     keep anyway, for columns where the word is real content rather than a
-    placeholder. It never rescues a genuinely empty cell: ``None`` and float
-    ``NaN`` are rejected before ``exempt`` is consulted, so an exempted "nan"
+    placeholder. It never rescues a genuinely empty cell: None, NaN and
+    ``pd.NA`` are rejected before ``exempt`` is consulted, so an exempted "nan"
     keeps the *string* without also letting a null through as the text "nan".
     """
-    if value is None:
-        return False
-    if isinstance(value, float) and math.isnan(value):
+    if is_missing(value):
         return False
     text = str(value).strip().lower()
     if text in exempt:

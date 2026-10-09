@@ -3,6 +3,8 @@
 
 """Tests for core/persona.py formatting."""
 
+import pandas as pd
+
 from usersim.engine.core.persona import (
     format_persona_for_prompt,
     religion_language_context,
@@ -269,7 +271,7 @@ class TestNameExemption:
         assert format_persona_for_prompt({"first_name": "Nan", "last_name": "Goldin"}).startswith("Name: Nan Goldin")
 
     def test_real_null_name_is_still_dropped(self):
-        for empty in (None, float("nan"), "", "   "):
+        for empty in (None, float("nan"), pd.NA, "", "   "):
             assert format_persona_for_prompt({"first_name": empty, "last_name": "Rao"}).startswith("Name: Rao"), repr(
                 empty
             )

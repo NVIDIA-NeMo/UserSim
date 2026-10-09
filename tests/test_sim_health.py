@@ -5,9 +5,30 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from usersim.reporting import build_sim_health
+
+
+def _with_empty_cells(trajectory_df, *, arrow_backed: bool):
+    """The fixture with no interaction style on one row and no attribution on its one failure.
+
+    ``arrow_backed`` converts it the way the run store reads it back, so empty
+    cells arrive as ``pd.NA`` rather than None or NaN.
+    """
+    pd = pytest.importorskip("pandas")
+    pa = pytest.importorskip("pyarrow")
+
+    df = trajectory_df.copy()
+    df.at[2, "user_interaction_style"] = None
+    outcome = json.loads(df.at[1, "simulation_outcome"])
+    outcome["failure_attribution"] = None
+    df.at[1, "simulation_outcome"] = json.dumps(outcome)
+    if arrow_backed:
+        df = pa.Table.from_pandas(df, preserve_index=False).to_pandas(types_mapper=pd.ArrowDtype)
+    return df
 
 
 class TestBuildSimHealth:
@@ -107,11 +128,38 @@ class TestBuildSimHealth:
         assert b.resource_profile.n_trajectories == 0
 
     def test_to_dict_serializable(self, trajectory_df) -> None:
-        import json
-
         b = build_sim_health(trajectory_df)
         # Round-trip through JSON to confirm the bundle is serializable.
         json.dumps(b.to_dict())
+
+    @pytest.mark.parametrize("arrow_backed", [False, True], ids=["in_memory", "store_read"])
+    def test_empty_style_and_attribution_serialize_as_null(self, trajectory_df, arrow_backed) -> None:
+        """The dashboard parses the bundle with JSON.parse, which rejects NaN."""
+        b = build_sim_health(_with_empty_cells(trajectory_df, arrow_backed=arrow_backed))
+
+        json.dumps(b.to_dict(), allow_nan=False)
+        assert None in {r["user_interaction_style"] for r in b.diagnostics_by_interaction_style}
+        assert [r["failure_attribution"] for r in b.failure_taxonomy] == [None]
+        assert [r["failure_attribution"] for r in b.failure_taxonomy_by_locale] == [None]
+
+    def test_all_empty_metric_group_is_null(self) -> None:
+        """A style group whose Arrow-backed metric has no values reports it as None."""
+        pd = pytest.importorskip("pandas")
+        pa = pytest.importorskip("pyarrow")
+
+        df = pd.DataFrame(
+            {
+                "user_interaction_style": ["cooperative", "terse"],
+                "d1_front_loading": pd.Series([0.5, None], dtype=pd.ArrowDtype(pa.float64())),
+            }
+        )
+
+        b = build_sim_health(df)
+
+        assert b.diagnostics_by_interaction_style == [
+            {"user_interaction_style": "cooperative", "d1_front_loading": 0.5},
+            {"user_interaction_style": "terse", "d1_front_loading": None},
+        ]
 
     def test_response_length_by_locale_populated(self, trajectory_df) -> None:
         """Per-locale response-length aggregation lands on the bundle.

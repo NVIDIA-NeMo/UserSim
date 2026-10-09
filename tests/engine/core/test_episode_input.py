@@ -14,7 +14,7 @@ import pytest
 
 from usersim.cli._pipeline import known_probes
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core.episode_input import construct_probe_episode
+from usersim.engine.core.episode_input import construct_episode_preamble, construct_probe_episode
 from usersim.engine.core.provenance import get_code_sha
 from usersim.engine.external import ProbeEpisodeRuntime, materialize_episode_inputs
 
@@ -135,8 +135,8 @@ def test_every_registered_probe_has_a_pinned_trajectory_id() -> None:
     assert set(_PINNED_TRAJECTORY_IDS) == set(known_probes())
 
 
-@pytest.mark.parametrize("probe_type", sorted(_PINNED_TRAJECTORY_IDS))
-def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
+def _pinned_inputs(probe_type: str) -> tuple[dict, ConversationSimulatorConfig, dict]:
+    """A sampled row for ``probe_type`` with the pinned persona, seed and model names."""
     sampled = materialize_episode_inputs(
         locale="en_US",
         num_rows=1,
@@ -147,14 +147,57 @@ def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
         update={"random_seed": 1234}
     )
     data = {key: value for key, value in sampled.items() if key not in _PERSONA_DERIVED_COLUMNS}
-    data["persona"] = _PINNED_PERSONA
+    data["persona"] = dict(_PINNED_PERSONA)
     models = {
         "user_model": SimpleNamespace(model_name="pinned-user-model"),
         "assistant_model": SimpleNamespace(model_name=_PINNED_ASSISTANT_MODEL),
     }
+    return data, config, models
+
+
+@pytest.mark.parametrize("probe_type", sorted(_PINNED_TRAJECTORY_IDS))
+def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
+    data, config, models = _pinned_inputs(probe_type)
 
     # construct_probe_episode, not construct_episode_preamble: the probe is built
     # here, which is where a probe-discovered variant could leak into the id.
     episode = construct_probe_episode(data, config=config, models=models)
 
     assert episode.preamble.trajectory_id == _PINNED_TRAJECTORY_IDS[probe_type]
+
+
+@pytest.mark.parametrize("empty", [float("nan"), pd.NA], ids=["nan", "na"])
+def test_an_empty_persona_field_changes_no_identity_or_setting(empty) -> None:
+    """pandas holds an empty persona field as None, NaN or NA depending on its
+    version. The persona's identity, the trajectory id and every setting drawn
+    from the persona must not depend on which."""
+    data, config, models = _pinned_inputs("tool_calling")
+    with_none = construct_episode_preamble(
+        {**data, "persona": {**data["persona"], "bachelors_field": None}}, config=config, models=models
+    )
+    with_empty = construct_episode_preamble(
+        {**data, "persona": {**data["persona"], "bachelors_field": empty}}, config=config, models=models
+    )
+
+    assert with_empty.persona["bachelors_field"] is None
+    for field in (
+        "persona_uuid",
+        "trajectory_id",
+        "behavioral_profile",
+        "disclosure_style",
+        "user_interaction_style",
+        "persona_grounding",
+    ):
+        assert getattr(with_empty, field) == getattr(with_none, field), field
+
+
+@pytest.mark.parametrize("empty", [float("nan"), pd.NA], ids=["nan", "na"])
+def test_a_toolset_without_a_name_is_described_by_its_category(empty) -> None:
+    """Some shipped toolsets have no name, which pandas may hold as NaN or NA.
+    The simulated user is then told the toolset's category instead."""
+    data, config, models = _pinned_inputs("tool_calling")
+    data.update(toolset_category="Smart Home & IoT", toolset_name=empty)
+
+    prompt = construct_probe_episode(data, config=config, models=models).probe.get_user_system_prompt()
+
+    assert "involves Smart Home & IoT capabilities" in prompt

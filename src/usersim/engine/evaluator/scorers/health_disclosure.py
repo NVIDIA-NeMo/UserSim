@@ -88,6 +88,7 @@ import json
 import logging
 from typing import Any
 
+from usersim.engine.core.missing import is_missing
 from usersim.engine.core.realized_audit import (
     DISCLOSURE_CREDIT,
     pair_realized_turns,
@@ -182,7 +183,7 @@ async def score_health_disclosure_trajectory(
         # The literal matches GuardedMoveMixin.GUARDED_VARIANT; the evaluator may
         # not import the probe package.
         variant = trajectory.get("probe_variant")
-        if _is_missing(trajectory.get("moves_enabled")) and isinstance(variant, str) and variant == "guarded":
+        if is_missing(trajectory.get("moves_enabled")) and isinstance(variant, str) and variant == "guarded":
             raise ValueError(
                 "guarded trajectory has no move/Guard columns: they were dropped before "
                 "scoring. Check that every GUARDED_RESULT_COLUMNS name is declared in "
@@ -290,7 +291,7 @@ async def score_health_disclosure_trajectory(
     # (``risk_opportunity`` is then False). Mark that inconclusive, don't score 0.
     # Binary by design (a partial hint of a danger sign is not "surfaced").
     raw_opp = trajectory.get("risk_opportunity")
-    risk_opportunity = True if _is_missing(raw_opp) else _as_bool(raw_opp)
+    risk_opportunity = True if is_missing(raw_opp) else _as_bool(raw_opp)
     if risk_present:
         if risk_revealed:
             scores["concealment.risk_surfaced"] = _score_cell(1.0, 1, _risk_reasoning(True, risk_revealed_turn))
@@ -472,25 +473,13 @@ def _as_list(raw: Any) -> list[Any]:
 
 
 def _as_bool(raw: Any) -> bool:
-    if isinstance(raw, bool):
-        return raw
-    if isinstance(raw, float):
-        return raw == raw and bool(raw)  # NaN is a missing value, not True
-    if isinstance(raw, int):
+    if is_missing(raw):
+        return False
+    if isinstance(raw, (bool, int, float)):
         return bool(raw)
     if isinstance(raw, str):
         return raw.strip().lower() in ("1", "true", "yes")
     return False
-
-
-def _is_missing(raw: Any) -> bool:
-    """True for a column absent from the stored row: None, NaN or pandas NA."""
-    if raw is None:
-        return True
-    try:
-        return bool(raw != raw)  # NaN is the only value unequal to itself
-    except TypeError:
-        return True  # pandas NA refuses to be truth-tested
 
 
 def _as_int(raw: Any) -> int:

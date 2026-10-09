@@ -106,6 +106,15 @@ class TestExtractEvalScores:
         # ``persona_country`` slot.
         assert "California" in scores_df["persona_country"].tolist()
 
+    @pytest.mark.parametrize("empty", [None, float("nan"), pd.NA, ""], ids=["none", "nan", "na", "blank"])
+    def test_an_empty_country_falls_back_to_the_region(self, sample_generated_data, empty):
+        """pandas holds an empty string cell as None, NaN or NA depending on the
+        column's dtype and version; each one must read as absent."""
+        df = sample_generated_data.copy()
+        df["persona_country"] = pd.Series([empty] * len(df), dtype=object)
+        scores_df = extract_eval_scores(df)
+        assert scores_df["persona_country"].tolist() == ["California", "São Paulo"]
+
     def test_can_compute_mean_scores(self, sample_generated_data):
         scores_df = extract_eval_scores(sample_generated_data)
         score_cols = [c for c in scores_df.columns if c.startswith("score_")]
@@ -131,6 +140,9 @@ class TestExtractEvalScores:
 
     def test_scores_as_dict_not_string(self, sample_generated_data):
         df = sample_generated_data.copy()
+        # pandas may infer a column of JSON strings as a string column, which
+        # cannot hold a dict.
+        df["eval_scores"] = df["eval_scores"].astype(object)
         df.at[0, "eval_scores"] = {
             "helpfulness": {"score": 4, "reasoning": "Good"},
             "accuracy": {"score": 3, "reasoning": "Ok"},

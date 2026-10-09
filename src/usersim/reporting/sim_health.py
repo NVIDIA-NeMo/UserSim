@@ -33,6 +33,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from usersim.engine.core.missing import none_for_missing
 from usersim.reporting.diagnostics import (
     compute_diagnostics_frame,
     compute_response_length_by_locale,
@@ -157,7 +158,7 @@ def _build_failure_taxonomy(df_exp: Any) -> list[dict[str, Any]]:
     grp["proportion"] = (grp["n"] / n).round(4)
     grp = grp.sort_values("n", ascending=False)
     out: list[dict[str, Any]] = []
-    for _, row in grp.iterrows():
+    for row in map(none_for_missing, grp.to_dict(orient="records")):
         out.append(
             {
                 "failure_class": row["_failure_class"],
@@ -188,7 +189,7 @@ def _build_failure_taxonomy_by_locale(df_exp: Any) -> list[dict[str, Any]]:
             "failure_attribution": row["_failure_attribution"],
             "n": int(row["n"]),
         }
-        for _, row in grp.iterrows()
+        for row in map(none_for_missing, grp.to_dict(orient="records"))
     ]
 
 
@@ -218,13 +219,13 @@ def _build_diagnostics_by_interaction_style(df_diag: Any) -> list[dict[str, Any]
     # rather than ``available`` to avoid KeyError on the dropped ones.
     metric_cols = [c for c in grp.columns if c != "user_interaction_style"]
     out: list[dict[str, Any]] = []
-    for _, row in grp.iterrows():
+    for row in map(none_for_missing, grp.to_dict(orient="records")):
         entry: dict[str, Any] = {
             "user_interaction_style": row["user_interaction_style"],
         }
         for c in metric_cols:
             v = row[c]
-            entry[c] = None if v is None or (isinstance(v, float) and (v != v)) else round(float(v), 4)
+            entry[c] = None if v is None else round(float(v), 4)
         out.append(entry)
     return out
 

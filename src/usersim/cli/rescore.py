@@ -129,6 +129,7 @@ def _validate_scorers(names: list[str]) -> list[str]:
 
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._async import run_coroutine
+    from usersim.engine.core.missing import none_for_missing
     from usersim.engine.core.storage import (
         read_partitioned_dataset,
         resolve_run_or_raise,
@@ -170,9 +171,9 @@ def run(args: argparse.Namespace) -> int:
             new_cells.append(raw)
             continue
 
-        # Scorers take the whole trajectory row as a dict, exactly as the
-        # evaluator hands it to them.
-        traj_row = {k: traj[k] for k in traj.index}
+        # Scorers take the whole trajectory row as a dict, with every empty
+        # cell as None.
+        traj_row = none_for_missing({k: traj[k] for k in traj.index})
         blocks = cell.setdefault("scorers", {})
         changed = False
         for name in scorers:

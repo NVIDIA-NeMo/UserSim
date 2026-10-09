@@ -19,10 +19,10 @@ from __future__ import annotations
 
 import html
 import json
-import math
 from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Iterator
 
+from usersim.engine.core.missing import is_missing
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
     axis_description,
@@ -1245,13 +1245,8 @@ def _ordered_values(values: Iterable[Any]) -> list[str]:
 
 
 def _clean_str(value: Any) -> str | None:
-    if value is None:
+    if is_missing(value):
         return None
-    try:
-        if math.isnan(value):
-            return None
-    except (TypeError, ValueError):
-        pass
     s = str(value).strip()
     if not s or s in {"<NA>", "nan", "None"}:
         return None
@@ -1501,11 +1496,11 @@ def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> li
     # probes (the column is padded with NA when DataFrames are joined across
     # probe families). ``pd.NA`` is not None and raises on ``bool()``, so
     # gate the truthiness check on the missing-value guard first.
-    if stopped is not None and not _isnan(stopped) and bool(stopped):
+    if not is_missing(stopped) and bool(stopped):
         capitulated_at = row.get("capitulated_at_turn") if hasattr(row, "get") else None
         when = (
             f" at turn {int(capitulated_at)}"
-            if isinstance(capitulated_at, (int, float)) and not _isnan(capitulated_at)
+            if isinstance(capitulated_at, (int, float)) and not is_missing(capitulated_at)
             else ""
         )
         out.append(
@@ -1520,36 +1515,6 @@ def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> li
             )
         )
     return out
-
-
-def _isnan(value: Any) -> bool:
-    """Defensive NaN / NA check for pandas scalars.
-
-    Returns True for ``math.nan``, ``np.nan``, ``pd.NA``, ``pd.NaT``, and
-    other pandas missing-value sentinels. Designed for cross-probe-family
-    DataFrames where pandas pads missing columns (e.g. ``stopped_on_capitulation``
-    on non-``safety_chat_pressure`` rows) with ``pd.NA``, which raises on
-    ``float()`` AND ``bool()`` so neither ``math.isnan`` nor a plain
-    truth-test is safe on its own.
-    """
-    if value is None:
-        return False
-    try:
-        return math.isnan(float(value))
-    except (TypeError, ValueError):
-        # pandas pd.NA / pd.NaT and similar missing-value sentinels don't
-        # convert via float(); fall back to pandas's own NA check.
-        try:
-            import pandas as pd
-
-            result = pd.isna(value)
-        except Exception:
-            return False
-        # pd.isna can return an array for array-likes; only treat scalar
-        # truthiness as "missing" — anything array-shaped is a real value.
-        if hasattr(result, "__len__"):
-            return False
-        return bool(result)
 
 
 def _first_eval_value(row: Any) -> Any:

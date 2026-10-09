@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 
+import pandas as pd
 import pytest
 
 from usersim.engine.core.identity import (
@@ -57,6 +58,13 @@ class TestPersonaUuid:
         with_extra["__internal_dd_id"] = "transient-1234"
         with_extra["nemotron_release_tag"] = "2026-04"
         assert persona_uuid(full_persona) == persona_uuid(with_extra)
+
+    @pytest.mark.parametrize("empty", [None, float("nan"), pd.NA], ids=["none", "nan", "na"])
+    def test_an_empty_field_hashes_like_an_absent_one(self, full_persona: dict, empty) -> None:
+        """pandas holds an empty persona field as None, NaN or NA depending on
+        its version, and none of them may change the persona's identity."""
+        assert "bachelors_field" not in full_persona
+        assert persona_uuid({**full_persona, "bachelors_field": empty}) == persona_uuid(full_persona)
 
     def test_changes_when_relevant_field_changes(self, full_persona: dict) -> None:
         edited = dict(full_persona)

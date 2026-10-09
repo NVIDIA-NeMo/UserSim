@@ -55,7 +55,9 @@ existing parquet renders without re-evaluation.
 ## Extending
 
 Scorers register through `register_scorer` at import, and are discovered
-out-of-tree through the `usersim.scorers` entry point. `usersim.testing`
-publishes a conformance check, including that a scorer tolerates a row
-missing any given field, since the evaluator calls it on incomplete
-trajectories. See [plugins.md](plugins.md).
+out-of-tree through the `usersim.scorers` entry point. A scorer receives the
+trajectory row as a dict in which every empty cell is `None`, apart from
+`conversation_messages`, `persona`, `probe_family`, `locale` and `language`,
+which the evaluator always fills. `usersim.testing` publishes a conformance
+check, including that a scorer tolerates a row missing any given field, since
+the evaluator calls it on incomplete trajectories. See [plugins.md](plugins.md).

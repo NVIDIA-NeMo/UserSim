@@ -30,6 +30,8 @@ import hashlib
 import json
 from typing import Any, Iterable
 
+from usersim.engine.core.missing import is_missing
+
 # Persona attributes that participate in the canonical hash. We
 # explicitly enumerate them rather than hashing the whole persona dict
 # so that:
@@ -120,15 +122,16 @@ def _canonical_value(v: Any) -> Any:
 def canonical_persona_json(persona: dict[str, Any]) -> str:
     """Build a canonical JSON string of the persona's hash-relevant attributes.
 
-    Only fields in ``_CANONICAL_PERSONA_KEYS`` that are actually present
-    on this persona contribute to the canonical form. Missing fields are
-    omitted (not represented as ``null``) so that adding a new field to
-    a future Nemotron-Personas release does not retroactively change the
-    UUIDs of personas that lack the new field.
+    Only fields in ``_CANONICAL_PERSONA_KEYS`` that hold a value on this
+    persona contribute to the canonical form. Missing and empty fields
+    (None, NaN, pandas NA) are omitted, not represented as ``null``, so
+    that adding a new field to a future Nemotron-Personas release does not
+    retroactively change the UUIDs of personas that lack the new field, and
+    the pandas version that read a persona cannot change its UUID.
     """
     canonical: dict[str, Any] = {}
     for key in _CANONICAL_PERSONA_KEYS:
-        if key in persona and persona[key] is not None:
+        if key in persona and not is_missing(persona[key]):
             canonical[key] = _canonical_value(persona[key])
     return json.dumps(canonical, sort_keys=True, ensure_ascii=False, default=str)
 

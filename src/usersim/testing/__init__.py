@@ -181,11 +181,17 @@ async def scorer_conformance_problems(
     tolerate: the evaluator calls it for trajectories that may be missing
     any given field.
 
+    A field can also be present and empty: the evaluator hands a scorer an
+    empty cell as None. So a given ``sample_row`` is scored a second time
+    with each of its fields set to None, apart from the ones the evaluator
+    always fills (``SCORER_FILLED_KEYS``).
+
     Awaitable, because a scorer is: the evaluator awaits it, so checking it
     means awaiting it here too.
     """
     import inspect
 
+    from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
     from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
 
     if name not in _REGISTRY:
@@ -219,6 +225,17 @@ async def scorer_conformance_problems(
         problems.append(
             f"returned {type(result).__name__}, expected a dict the evaluator can merge into the eval cell."
         )
+
+    emptied = sorted(key for key in sample_row or {} if key not in SCORER_FILLED_KEYS)
+    if emptied:
+        try:
+            await fn({**sample_row, **dict.fromkeys(emptied)}, {})
+        except Exception as exc:
+            problems.append(
+                f"raised {type(exc).__name__} when {', '.join(emptied)} held None: {exc}. "
+                f"The evaluator hands a scorer an empty cell as None, so a field "
+                f"can be present and still have no value."
+            )
     return problems
 
 

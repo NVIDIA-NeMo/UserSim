@@ -901,7 +901,10 @@ register_scorer("your_probe", score_your_probe_trajectory)
 `register_scorer` takes the name and the function; it is not a decorator. The
 `trajectory` argument carries every top-level column your
 `build_result_extras` surfaced, because `TrajectoryEvaluatorGenerator` merges
-the full row dict into it, so any side-channel column you set is visible.
+the full row dict into it, so any side-channel column you set is visible. A
+column that is empty on a row arrives present and `None`, so handle `None`
+wherever you read one; `usersim.testing.assert_scorer_conforms` checks that
+when you pass it a `sample_row`.
 
 Add the module path to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)

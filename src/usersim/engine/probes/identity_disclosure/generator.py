@@ -48,7 +48,6 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 from collections.abc import Callable
 from dataclasses import asdict
 from typing import Any
@@ -69,6 +68,7 @@ from usersim.engine.core.identity_spec import (
     spec_env_var,
 )
 from usersim.engine.core.locale import SHIPPED_LOCALES, india_variant
+from usersim.engine.core.missing import is_missing
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import BankBackedProbe, BankVerbatimMixin, register_probe
@@ -458,7 +458,7 @@ def _prompt_locale(locale: str) -> str:
 
 def _panel_value(value: Any) -> str | None:
     """A panel override as a string, or None when the column is absent or empty."""
-    if value is None or (isinstance(value, float) and math.isnan(value)):
+    if is_missing(value):
         return None
     text = str(value).strip()
     return text or None
