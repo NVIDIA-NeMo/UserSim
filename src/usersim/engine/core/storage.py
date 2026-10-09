@@ -443,6 +443,29 @@ def _arrow_table_for_write(df) -> "pa.Table":
     return pa.Table.from_pandas(df, preserve_index=False)
 
 
+def write_parquet_file(df, path: str | Path) -> Path:
+    """Write ``df`` to one parquet file that plain ``pd.read_parquet`` can reopen.
+
+    The single-file counterpart of :func:`write_partitioned_dataset`, for files
+    such as a persona panel that people open themselves. The file is written
+    under a temporary name beside ``path`` and moved into place, so a reader
+    never sees a partial one.
+    """
+    import os
+
+    import pyarrow.parquet as pq
+
+    out = Path(path)
+    fd, partial = tempfile.mkstemp(prefix=f".{out.name}.", suffix=".partial", dir=out.parent)
+    os.close(fd)
+    try:
+        pq.write_table(_arrow_table_for_write(df), partial)
+        os.replace(partial, out)
+    finally:
+        Path(partial).unlink(missing_ok=True)
+    return out
+
+
 def _format_partition_value(value) -> str:
     """Render a partition value as a directory-name-safe string.
 
@@ -908,8 +931,6 @@ def materialize_to_temp_file(path: str | Path) -> Path:
     for deleting it when done. Uses ``delete=False`` and a stable suffix
     so the file survives until the caller decides to clean up.
     """
-    import pyarrow.parquet as pq
-
     df = read_partitioned_dataset(path)
     tmp = tempfile.NamedTemporaryFile(
         suffix=".parquet",
@@ -917,10 +938,7 @@ def materialize_to_temp_file(path: str | Path) -> Path:
         prefix="usersim_materialize_",
     )
     tmp.close()
-    out = Path(tmp.name)
-    table = _arrow_table_for_write(df)
-    pq.write_table(table, out)
-    return out
+    return write_parquet_file(df, tmp.name)
 
 
 def is_partitioned_directory(path: str | Path) -> bool:
