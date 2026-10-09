@@ -42,8 +42,6 @@ from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
 
-_ABSENT = object()
-
 __all__ = [
     "MODEL_ALIASES",
     "MODEL_API_RESPONSE",
@@ -132,7 +130,6 @@ class ConversationSimulatorGenerator(
 
     async def _generate_row(self, data: dict) -> dict:
         cfg = self.config
-        input_columns = set(data)
         models = {}
         for alias in MODEL_ALIASES:
             try:
@@ -173,7 +170,14 @@ class ConversationSimulatorGenerator(
             construction_error = error
         data.clear()
         data.update(preamble.data)
-        before_dispatch = dict(data)
+        # The row as set-up left it, before the probe was constructed, whether
+        # the constructor then succeeded or failed.
+        if constructed is not None:
+            set_up_row = constructed.set_up_row
+        elif construction_error is not None and construction_error.set_up_row is not None:
+            set_up_row = construction_error.set_up_row
+        else:
+            set_up_row = dict(data)
         persona = preamble.persona
         probe_type = preamble.probe_type
         persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
@@ -235,11 +239,14 @@ class ConversationSimulatorGenerator(
         # A run writes back only the configured column and its declared side
         # effects: an input column keeps its original value and any other key is
         # dropped. So the probe loses every undeclared key it adds, and every
-        # change it makes to an undeclared input column, returned or made in place.
+        # change it makes to an undeclared top-level column, returned or made in
+        # place (the snapshot is shallow, so an edit inside a nested value is not
+        # seen). Comparing with the row as set-up left it, before the probe was
+        # constructed, reports only the probe's own additions and changes.
         lost = {
             column
             for column, value in data.items()
-            if column not in input_columns or not _unchanged(value, before_dispatch.get(column, _ABSENT))
+            if column not in set_up_row or not _unchanged(value, set_up_row[column])
         }
         _warn_on_undeclared_columns(
             probe_type,
@@ -299,7 +306,7 @@ def _warn_on_undeclared_columns(
     already_reported.update((probe_type, column) for column in new)
     logger.warning(
         "probe %r returned or changed column(s) %s that are not in ConversationSimulatorConfig.side_effect_columns, "
-        "so `usersim simulate` drops them from the stored row (an input column keeps its original value). "
+        "so the run drops them from the stored row (an input column keeps its original value). "
         "Keep per-row data in the probe's metadata "
         "(state.metadata), which is stored as conversation_metadata; see docs/engine/AUTHORING_A_PROBE.md.",
         probe_type,

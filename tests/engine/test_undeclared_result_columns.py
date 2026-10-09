@@ -3,7 +3,7 @@
 
 """A probe's extra result columns reach the stored row only when they are declared.
 
-``usersim simulate`` keeps a row's input columns plus
+A Data Designer run keeps a row's input columns plus
 ``ConversationSimulatorConfig.side_effect_columns`` and drops everything else. A
 column a probe returns without declaring it would vanish with no error, and the
 scorer that reads it would find nothing, so the generator warns about it. Per-row
@@ -71,6 +71,27 @@ class _InPlaceInputProbe(OpenEndedProbe):
         return await super().run_dispatch(models=models, data=data, cfg=cfg, **kwargs)
 
 
+class _ConstructorColumnProbe(OpenEndedProbe):
+    """Writes a column into its row while it is constructed."""
+
+    label = "_constructor_column_probe"
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._data["init_score"] = 1.0
+
+
+class _FailingConstructorProbe(OpenEndedProbe):
+    """Writes a column into its row, then fails to construct."""
+
+    label = "_failing_constructor_probe"
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._data["init_score"] = 1.0
+        raise ValueError("cannot build this episode")
+
+
 class _EchoingProbe(OpenEndedProbe):
     """Returns its whole row, inputs unchanged, alongside the result."""
 
@@ -85,7 +106,13 @@ class _EchoingProbe(OpenEndedProbe):
 def extra_column_probe():
     load_builtin_probes()
     snapshot = dict(_PROBE_REGISTRY)
-    for probe in (_ExtraColumnProbe, _InPlaceInputProbe, _EchoingProbe):
+    for probe in (
+        _ExtraColumnProbe,
+        _InPlaceInputProbe,
+        _ConstructorColumnProbe,
+        _FailingConstructorProbe,
+        _EchoingProbe,
+    ):
         register_probe(family="general", prompt_version="v1.0", variants=("default",))(probe)
     yield _PROBE
     clear_registry()
@@ -159,6 +186,23 @@ async def test_a_change_made_in_place_to_an_input_column_is_reported(extra_colum
     assert "input_score" in message
 
 
+async def test_a_column_the_probe_writes_while_it_is_constructed_is_reported(extra_column_probe, undeclared_warnings):
+    """The probe's constructor is the probe's own code, not the episode set-up."""
+    await _simulate(_ConstructorColumnProbe.label)
+
+    (message,) = undeclared_warnings
+    assert "init_score" in message
+
+
+async def test_a_column_written_by_a_constructor_that_then_fails_is_reported(extra_column_probe, undeclared_warnings):
+    """The row still carries what the failed constructor wrote, and the run still drops it."""
+    (row,) = await _simulate(_FailingConstructorProbe.label)
+
+    assert row["conversation_status"] is False
+    (message,) = undeclared_warnings
+    assert "init_score" in message
+
+
 @pytest.mark.parametrize("input_score", [-1.0, float("nan")])
 async def test_returning_unchanged_inputs_reports_nothing(extra_column_probe, undeclared_warnings, input_score):
     """An input handed back as it came is kept by the run, so nothing is lost (NaN included)."""
@@ -175,7 +219,20 @@ async def test_each_run_reports_for_itself(extra_column_probe, undeclared_warnin
     assert len(undeclared_warnings) == 2
 
 
-async def test_a_built_in_probe_reports_nothing(extra_column_probe, undeclared_warnings):
+async def test_a_column_added_before_the_probe_runs_is_not_blamed_on_it(
+    extra_column_probe, undeclared_warnings, monkeypatch
+):
+    """Only the probe's own additions and changes are reported, not the episode set-up's.
+
+    One column set-up adds is undeclared here, to see that the probe is not
+    blamed for it.
+    """
+    declared = ConversationSimulatorConfig.side_effect_columns.fget
+    monkeypatch.setattr(
+        ConversationSimulatorConfig,
+        "side_effect_columns",
+        property(lambda self: [column for column in declared(self) if column != "persona_uuid"]),
+    )
     await _simulate("general_open_ended")
 
     assert undeclared_warnings == []

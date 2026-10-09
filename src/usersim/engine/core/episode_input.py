@@ -10,7 +10,7 @@ import json
 import random
 import sys
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Mapping
 
 from usersim.engine.config import MODEL_ASSISTANT, MODEL_USER
@@ -62,15 +62,31 @@ class ConstructedEpisode:
     preamble: EpisodePreamble
     probe: Any
     outcome: OutcomeBuilder
+    #: The resolved row as set-up left it, before the probe was constructed. The
+    #: probe shares ``preamble.data``, so this is the baseline for what the probe
+    #: itself adds or changes, in its constructor or its run.
+    set_up_row: dict[str, Any] = field(default_factory=dict)
 
 
 class EpisodeConstructionError(ValueError):
-    """Probe-construction failure carrying its already-resolved preamble."""
+    """Probe-construction failure carrying its already-resolved preamble.
 
-    def __init__(self, preamble: EpisodePreamble, cause: Exception) -> None:
+    ``set_up_row`` is the row as set-up left it, before the failed constructor
+    ran, like ``ConstructedEpisode.set_up_row``: the constructor may have written
+    to ``preamble.data`` before it failed.
+    """
+
+    def __init__(
+        self,
+        preamble: EpisodePreamble,
+        cause: Exception,
+        *,
+        set_up_row: dict[str, Any] | None = None,
+    ) -> None:
         super().__init__(str(cause))
         self.preamble = preamble
         self.cause = cause
+        self.set_up_row = set_up_row
 
 
 def construct_episode_preamble(
@@ -213,6 +229,7 @@ def construct_probe_episode(
     resolved_provenance = provenance or preamble.provenance
     outcome = OutcomeBuilder(provenance=resolved_provenance)
     probe_cls = resolve_probe(preamble.probe_type)
+    set_up_row = dict(preamble.data)
     try:
         probe = probe_cls(
             persona=preamble.persona,
@@ -226,5 +243,5 @@ def construct_probe_episode(
             outcome_builder=outcome,
         )
     except (KeyError, ValueError, json.JSONDecodeError, BankLoadError) as error:
-        raise EpisodeConstructionError(preamble, error) from error
-    return ConstructedEpisode(preamble=preamble, probe=probe, outcome=outcome)
+        raise EpisodeConstructionError(preamble, error, set_up_row=set_up_row) from error
+    return ConstructedEpisode(preamble=preamble, probe=probe, outcome=outcome, set_up_row=set_up_row)

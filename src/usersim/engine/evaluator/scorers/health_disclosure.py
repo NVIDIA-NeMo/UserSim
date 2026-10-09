@@ -177,8 +177,9 @@ async def score_health_disclosure_trajectory(
     if not _as_bool(trajectory.get("moves_enabled")):
         # A guarded row always carries moves_enabled. Without it, the move/Guard
         # columns were lost between the probe and here (most likely undeclared in
-        # side_effect_columns, which drops them silently), so skipping it like a
-        # default-variant row would hide a broken run behind a normal-looking eval.
+        # side_effect_columns, which drops them with only a logged warning), so
+        # skipping it like a default-variant row would hide a broken run behind a
+        # normal-looking eval.
         # The literal matches GuardedMoveMixin.GUARDED_VARIANT; the evaluator may
         # not import the probe package.
         variant = trajectory.get("probe_variant")

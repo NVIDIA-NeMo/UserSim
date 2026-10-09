@@ -50,9 +50,10 @@ _MOVE_HOOK_LOCK = threading.Lock()
 
 #: Every column ``GuardedMoveMixin.build_result_extras`` adds on the guarded
 #: variant. The engine keeps only the columns named in
-#: ``ConversationSimulatorConfig.side_effect_columns`` and drops the rest without
-#: a warning, so each of these must be listed there too; the tests check both
-#: that the guarded extras are exactly these and that the config declares them.
+#: ``ConversationSimulatorConfig.side_effect_columns`` and drops the rest, with
+#: only a logged warning, so each of these must be listed there too; the tests
+#: check both that the guarded extras are exactly these and that the config
+#: declares them.
 GUARDED_RESULT_COLUMNS: tuple[str, ...] = (
     "moves_enabled",
     "moves_played",

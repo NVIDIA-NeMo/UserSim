@@ -216,10 +216,10 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             # as an error. The engine writes the configured column plus the
             # names declared here and discards anything else (the generator
             # logs a warning), so an undeclared column is computed and then
-            # dropped, and the probe scores as unscoreable. They are declared for every run rather
-            # than per probe because the declaration is read once, before
-            # any row reveals which probe produced it; rows from other
-            # probes simply leave them empty.
+            # dropped, and the probe scores as unscoreable. They are declared
+            # for every run rather than per probe because the declaration is
+            # read once, before any row reveals which probe produced it; rows
+            # from other probes simply leave them empty.
             "query_id",
             "sovereign_facts_probed",
             "probing_categories_explored",
