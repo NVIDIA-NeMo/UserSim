@@ -244,7 +244,9 @@ class ScriptedModel:
     Returns the same reply for the same role, and a tool call when tools are
     offered: the user calls whenever it is offered one, so a probe that rejects a
     call is asked again, and the assistant calls until a tool result is in view.
-    That is enough to drive any probe's loop to completion without a provider.
+    That is enough to drive a probe's loop to completion without a provider,
+    provided the probe caps its user's tool calls, as the guarded variants do
+    with ``Guard.max_resamples``.
     """
 
     #: A real model id: probes that grade the assistant's own identity refuse
