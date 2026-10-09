@@ -94,6 +94,8 @@ def run_on_disk(tmp_path):
                     ensure_ascii=False,
                 )
             ],
+            # A side-channel column that another probe family fills.
+            "sub_protocol": [None],
         }
     )
     write_run_partition(eval_df, evaluations, run_id)
@@ -174,6 +176,28 @@ class TestRoundTrip:
         assert run(run_on_disk) == 0
         block = _read_cell(run_on_disk.evaluations)["scorers"]["language_compliance"]
         assert "error" in block
+
+
+class TestScorerInput:
+    def test_empty_cells_reach_the_scorer_as_none(self, run_on_disk, monkeypatch):
+        """The store reads an empty cell back as pandas NA, which a scorer's
+        falsy fallback cannot test, so it has to arrive as None, as it does
+        from the evaluator."""
+        from usersim.cli import rescore
+        from usersim.engine.evaluator import scorers as scorers_module
+
+        seen = {}
+
+        async def spy(traj, models):
+            seen["traj_row"] = traj
+            return {"scores": {}}
+
+        monkeypatch.setitem(scorers_module._REGISTRY, "__spy__", spy)
+        monkeypatch.setattr(rescore, "DETERMINISTIC_SCORERS", (*rescore.DETERMINISTIC_SCORERS, "__spy__"))
+        run_on_disk.scorers = ["__spy__"]
+
+        assert run(run_on_disk) == 0
+        assert seen["traj_row"]["sub_protocol"] is None
 
 
 class TestRefusesToSpendMoney:

@@ -17,6 +17,9 @@ import json
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
+import pandas as pd
+import pytest
+
 from usersim.engine.evaluator import scorers as scorers_module
 from usersim.engine.evaluator.axes import select_axes
 from usersim.engine.evaluator.config import (
@@ -637,6 +640,41 @@ class TestScorerColumnPassthrough:
         traj_row = seen["traj_row"]
         assert traj_row["future_probe_side_channel"] == ["a", "b", "c"]
         assert traj_row["another_brand_new_column"] == {"nested": True}
+
+    @pytest.mark.parametrize("empty", [None, float("nan"), pd.NA], ids=["none", "nan", "na"])
+    async def test_empty_cells_reach_the_scorer_as_none(self, empty) -> None:
+        """Scorers and the row defaults fall back on a falsy cell, so an empty
+        cell has to arrive as None however the row's table held it."""
+        seen: dict[str, dict] = {}
+
+        async def spy(traj: dict, models: dict) -> dict:
+            seen["traj_row"] = traj
+            return {"spy": True}
+
+        scorers_module.register_scorer("__spy__", spy)
+
+        cfg = TrajectoryEvaluatorConfig(
+            name="eval_v2",
+            judges=_ok_judges(),
+            axes=["helpfulness"],
+            scorers=["__spy__"],
+        )
+        gen = _build_generator(
+            cfg,
+            judge_responses={
+                "judge_a": {"helpfulness": {"score": 4, "reasoning": "ok"}},
+                "judge_b": {"helpfulness": {"score": 4, "reasoning": "ok"}},
+            },
+        )
+        data = self._make_data_with_probe_columns()
+        data["sub_protocol"] = empty
+        data["locale"] = empty
+
+        await gen.agenerate(data)
+
+        traj_row = seen["traj_row"]
+        assert traj_row["sub_protocol"] is None
+        assert traj_row["locale"] == "en_US"
 
 
 class TestEnvelope:

@@ -63,6 +63,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
+from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.evaluator.axes import select_axes
 from usersim.engine.evaluator.config import TrajectoryEvaluatorConfig
@@ -146,6 +147,9 @@ class TrajectoryEvaluatorGenerator(
     async def agenerate(self, data: dict) -> dict:
         cfg = self.config
         col_name = cfg.name
+        # The defaults below and every scorer treat a falsy cell as empty, but
+        # NaN is truthy and pd.NA refuses to be truth-tested.
+        data = none_for_missing(data)
 
         # ── Resolve probe family from the row ─────────────────────
         probe_family = data.get(cfg.probe_family_column) or "general_open_ended"
