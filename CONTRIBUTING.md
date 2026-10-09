@@ -278,6 +278,9 @@ async def test_my_scorer_conforms():
 The scorer check is a coroutine, because it calls your scorer and the
 evaluator awaits every scorer. Calling it without `await` returns a
 coroutine that is never run, and the test passes having checked nothing.
+Pass `sample_row=` a row shaped like your probe's trajectories to also check
+empty cells, which the evaluator hands a scorer as `None`; see
+[`architecture/plugins.md`](architecture/plugins.md).
 
 Those same checks run against every built-in probe and scorer, so they cannot
 drift into describing a contract this project does not itself keep.

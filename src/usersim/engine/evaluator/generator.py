@@ -83,6 +83,12 @@ logger = logging.getLogger("usersim.engine")
 
 EVALUATOR_VERSION = "v1.0"
 
+#: Keys the evaluator fills itself in the row it hands a scorer: it decodes
+#: ``conversation_messages`` to a list and ``persona`` to a dict, and defaults
+#: ``probe_family``, ``locale`` and ``language``. Every other key carries the
+#: trajectory's own cell, which is None when that cell is empty.
+SCORER_FILLED_KEYS = frozenset({"conversation_messages", "persona", "probe_family", "locale", "language"})
+
 # Locales whose scripts need a higher token budget for judge responses.
 _NON_ASCII_LOCALES = frozenset(
     {
@@ -282,16 +288,13 @@ class TrajectoryEvaluatorGenerator(
             # open set — every new probe may add new keys and the
             # corresponding scorer reads them off the trajectory dict
             # directly. Forwarding the whole row is the contract that
-            # keeps that extension story friction-free; the explicit
-            # projection below wins for shared keys (decoded forms of
-            # conversation_messages / persona / simulation_outcome,
-            # plus the resolved locale / language defaults).
-            #
-            # An earlier projection enumerated only 7 keys, which was
-            # a silent bug: production scorers read probe-specific
-            # keys that never reached them and returned no-op skip
-            # envelopes. The pass-through-then-override merge below
-            # keeps the contract extension-friendly.
+            # keeps that extension story friction-free; a fixed
+            # projection would hand a scorer none of its probe's keys,
+            # and it would skip every row. The explicit keys below win
+            # for shared fields (decoded forms of conversation_messages /
+            # persona / simulation_outcome, plus the resolved locale /
+            # language defaults); SCORER_FILLED_KEYS names the ones that
+            # are never None.
             traj_row = {
                 **data,
                 "conversation_messages": messages,
