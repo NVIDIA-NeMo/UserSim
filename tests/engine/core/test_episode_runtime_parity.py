@@ -74,8 +74,21 @@ _CASES = (
     _Case("health_therapy_disclosure", 1011, {"probe_variant": "default"}),
     _Case("health_triage_disclosure", 1012, {"probe_variant": "default"}),
     _Case("health_decision_support_disclosure", 1013, {"probe_variant": "default"}),
+    # The guarded variant's simulated user commits a move with a tool call. With
+    # two turns the only follow-up is the last one, where this persona's risk
+    # pacing picks the move without asking the user, so three is the smallest
+    # budget that covers a user activation offering tools.
+    _Case("health_general_disclosure", 1015, {"probe_variant": "guarded"}, 3),
+    _Case("health_therapy_disclosure", 1016, {"probe_variant": "guarded"}, 3),
+    _Case("health_triage_disclosure", 1017, {"probe_variant": "guarded"}, 3),
+    _Case("health_decision_support_disclosure", 1018, {"probe_variant": "guarded"}, 3),
     _Case("identity_disclosure", 1014),
 )
+
+
+def _case_id(case: _Case) -> str:
+    variant = (case.probe_data or {}).get("probe_variant")
+    return f"{case.probe_type}-{variant}" if variant else case.probe_type
 
 
 def _plain_message(message: Any) -> dict[str, Any]:
@@ -144,7 +157,10 @@ class _ReplayableModel:
         )
         tool_calls = None
         has_tool_result = any(str(_message_value(message, "role")) == "tool" for message in messages)
-        if self.role == "assistant" and kwargs.get("tools") and not has_tool_result:
+        # Whichever side is offered tools calls the first one, as a model would:
+        # the assistant until a tool result ends its loop, the user every time.
+        offered = kwargs.get("tools")
+        if offered and (self.role == "user" or (self.role == "assistant" and not has_tool_result)):
             function = kwargs["tools"][0]["function"]
             arguments = _arguments_for_schema(function.get("parameters", {}))
             tool_calls = [
@@ -306,7 +322,7 @@ def _seeded_probe_variant(probe_type: str) -> str:
     return "default"
 
 
-@pytest.mark.parametrize("case", _CASES, ids=lambda case: case.probe_type)
+@pytest.mark.parametrize("case", _CASES, ids=_case_id)
 async def test_direct_and_resumable_execution_have_deterministic_parity(case: _Case) -> None:
     """Replay one resolved episode through both execution paths and compare evidence."""
     direct_runtime, direct_invocations = _runtime(case)
@@ -329,7 +345,8 @@ async def test_direct_and_resumable_execution_have_deterministic_parity(case: _C
     # A probe that discovers its own variant reports it on the finished row, but
     # identity stays keyed on the dispatcher-seeded variant so resume and
     # deduplication keep working. Changing this changes every stored trajectory_id.
-    assert direct_runtime.preamble.to_row()["probe_variant"] == _seeded_probe_variant(case.probe_type)
+    seeded = (case.probe_data or {}).get("probe_variant") or _seeded_probe_variant(case.probe_type)
+    assert direct_runtime.preamble.to_row()["probe_variant"] == seeded
     direct = {key: direct_row[key] for key in external}
     direct_normalized = _normalized_result(direct)
     external_normalized = _normalized_result(external)
@@ -536,3 +553,127 @@ async def test_the_multi_round_suite_actually_spans_more_than_one_round() -> Non
         f"expected tool calls across more than one round, saw turn indices "
         f"{sorted({call.turn_idx for call in executed})}"
     )
+
+
+_GUARDED_CASES = tuple(case for case in _CASES if (case.probe_data or {}).get("probe_variant") == "guarded")
+
+
+@pytest.mark.parametrize("case", _GUARDED_CASES, ids=_case_id)
+async def test_a_hosted_simulated_user_commits_moves_with_tool_calls(case: _Case) -> None:
+    """A user activation that offers tools takes the user's tool call, and the call stays the user's.
+
+    The moves are not the assistant's tool calls: they are neither counted in
+    ``num_tool_calls`` nor executed as tools.
+    """
+    runtime, invocations = _runtime(case)
+    committed: list[dict[str, Any]] = []
+    event = await runtime.advance()
+    while isinstance(event, ActivationRequest):
+        response = _response_dict(
+            await _ReplayableModel(event.role, invocations).acompletion(
+                list(event.messages), **_activation_kwargs(event)
+            )
+        )
+        if event.role == "user":
+            committed += [json.loads(call["function"]["arguments"]) for call in response.get("tool_calls") or []]
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert committed, "the simulated user was never offered its move tool"
+    # The move the probe recorded is the one the user's call carried, not a
+    # fallback it chose itself.
+    moves = event.result["moves_detail"]
+    moves = json.loads(moves) if isinstance(moves, str) else moves
+    played = [(move["move"], move.get("reasoning")) for move in moves]
+    assert (committed[0]["move"], committed[0].get("reasoning")) in played
+    # This family offers the assistant no tools, so a tool call or tool message
+    # in the exported conversation could only be the user's move leaking into it.
+    messages = event.result["conversation_messages"]
+    messages = json.loads(messages) if isinstance(messages, str) else messages
+    assert not any(message.get("tool_calls") or message.get("role") == "tool" for message in messages)
+    assert event.result["moves_enabled"] is True
+    assert event.result["num_tool_calls"] == 0
+    assert await runtime.executed_tool_calls() == []
+
+
+def _tool_call_response(name: str = "anything") -> dict[str, Any]:
+    call = {"id": "call-unoffered", "type": "function", "function": {"name": name, "arguments": "{}"}}
+    return {"role": "assistant", "content": "", "tool_calls": [call]}
+
+
+@pytest.mark.parametrize("role", ["judge", "summary"])
+async def test_tool_calls_are_recorded_only_where_tools_are_offered(role: str) -> None:
+    """A user activation without tools, and a judge or summary activation, still reject tool calls."""
+    # Two turns reach a summary activation, which a one-turn episode never makes.
+    runtime, invocations = _runtime(_Case("general_open_ended", 1001, None, 2))
+    event = await runtime.advance()
+    assert isinstance(event, ActivationRequest) and event.role == "user" and not event.tools_enabled
+    with pytest.raises(EpisodeContractError, match="offers no tools"):
+        await runtime.advance(ActivationResult(activation_id=event.activation_id, response=_tool_call_response()))
+
+    while isinstance(event, ActivationRequest) and event.role != role:
+        response = _response_dict(
+            await _ReplayableModel(event.role, invocations).acompletion(
+                list(event.messages), **_activation_kwargs(event)
+            )
+        )
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+    assert isinstance(event, ActivationRequest) and event.role == role
+    with pytest.raises(EpisodeContractError, match=f"{role} activation cannot record tool calls"):
+        await runtime.advance(ActivationResult(activation_id=event.activation_id, response=_tool_call_response()))
+
+
+async def test_a_vetoed_move_is_committed_again_within_the_same_user_turn(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The guide's veto path, hosted: a rejected call is answered with a tool message and asked again.
+
+    The first proposal is vetoed. The second, made with the veto in view, is the
+    move recorded; the proposal, the re-ask and the utterance are one user turn;
+    and none of the exchange reaches the exported conversation.
+    """
+    from usersim.engine.probes.health_disclosure.moves import Guard
+
+    check, checks = Guard.check, []
+
+    def veto_the_first(self: Guard, move: Any, env: Any) -> tuple[bool, str]:
+        checks.append(move.move)
+        return (False, "forced veto") if len(checks) == 1 else check(self, move, env)
+
+    monkeypatch.setattr(Guard, "check", veto_the_first)
+    case = next(case for case in _GUARDED_CASES if case.probe_type == "health_therapy_disclosure")
+    runtime, invocations = _runtime(case)
+    user_activations: list[tuple[bool, bool, bool]] = []  # (offers tools, continues_turn, tool reply in view)
+    proposals: list[dict[str, Any]] = []
+    event = await runtime.advance()
+    while isinstance(event, ActivationRequest):
+        response = _response_dict(
+            await _ReplayableModel(event.role, invocations).acompletion(
+                list(event.messages), **_activation_kwargs(event)
+            )
+        )
+        if event.role == "user":
+            in_view = any(message.get("role") == "tool" for message in event.messages)
+            user_activations.append((event.tools_enabled, event.continues_turn, in_view))
+            if event.tools_enabled:
+                call = response["tool_calls"][0]["function"]
+                arguments = {**json.loads(call["arguments"]), "reasoning": f"proposal {len(proposals) + 1}"}
+                call["arguments"] = json.dumps(arguments)
+                proposals.append(arguments)
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    first = next(i for i, (offers_tools, _, _) in enumerate(user_activations) if offers_tools)
+    assert user_activations[first : first + 3] == [
+        (True, False, False),  # the proposal opens the user's turn
+        (True, True, True),  # the re-ask, with the veto in view, continues it
+        (False, True, False),  # and so does the utterance, written without the private exchange
+    ]
+    # The vetoed check was the user's first proposal, not the probe's own risk pacing.
+    assert checks[0] == proposals[0]["move"]
+    assert event.result["guard_veto_count"] == 1
+    moves = event.result["moves_detail"]
+    moves = json.loads(moves) if isinstance(moves, str) else moves
+    assert moves[0]["reasoning"] == "proposal 2"
+    assert [veto["move"] for veto in moves[0]["vetoes"]] == [proposals[0]["move"]]
+    messages = event.result["conversation_messages"]
+    messages = json.loads(messages) if isinstance(messages, str) else messages
+    assert not any(message.get("tool_calls") or message.get("role") == "tool" for message in messages)

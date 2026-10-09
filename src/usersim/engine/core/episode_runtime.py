@@ -97,8 +97,11 @@ class ActivationRequest:
     ``messages`` is the exact input UserSim would send, so a host never has to
     assemble its own. ``tools`` is empty when UserSim is not offering tools for
     this call — recording tool calls against it is a contract error, not a
-    model failure. ``continues_turn`` marks a request that continues the turn
-    already in progress rather than opening a new one.
+    model failure. ``continues_turn`` marks a request that continues its side's
+    turn already in progress rather than opening a new one: an assistant request
+    with no user message since the assistant's previous one, or a user request
+    with no assistant message since the user's previous one. It can be a retry
+    that replaces the previous attempt rather than adding to it.
     """
 
     activation_id: str
@@ -360,9 +363,11 @@ class ProbeEpisodeRuntime:
         self._transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
         self._active_activation_id: str | None = None
         self._activation_sequence = 0
-        # A new assistant activation continues the current turn when no user
-        # message has been appended since the previous one.
+        # An activation continues its side's current turn when the other side
+        # has added no message since that side's previous activation: the
+        # assistant's turn ends at a user message, the user's at an assistant one.
         self._assistant_user_message_count: int | None = None
+        self._user_assistant_message_count: int | None = None
 
     @property
     def assistant_tools(self) -> list[dict[str, Any]]:
@@ -448,8 +453,9 @@ class ProbeEpisodeRuntime:
                     return executed.payload
         raise EpisodeContractError(
             f"Tool call {tool_call_id!r} has not been executed. Either its assistant response has not "
-            f"been recorded with advance() yet, or the probe's per-turn cap was reached and User Sim "
-            f"declined to run it; see executed_tool_calls()."
+            f"been recorded with advance() yet, the probe's per-turn cap was reached and User Sim "
+            f"declined to run it, or it is a simulated user's call, which the probe consumes rather "
+            f"than runs; see executed_tool_calls()."
         )
 
     async def executed_tool_calls(self) -> list[ExecutedToolCall]:
@@ -509,13 +515,16 @@ class ProbeEpisodeRuntime:
         tool_calls = result.response.get("tool_calls") or []
         if not tool_calls:
             return
-        if request.role != "assistant":
+        # Either side of the conversation may call tools a probe offers it (a
+        # probe can give the simulated user tools as well as the assistant), so a
+        # hosted episode records the same calls a local run would.
+        if request.role not in ("assistant", "user"):
             raise EpisodeContractError(f"A {request.role} activation cannot record tool calls")
         if not request.tools_enabled:
             raise EpisodeContractError(
                 f"Activation {request.activation_id!r} offers no tools, so the recorded response "
-                f"must not contain tool calls. User Sim disables tools when the probe's loop asks "
-                f"the assistant for its final answer."
+                f"must not contain tool calls. User Sim offers tools only where the probe's loop "
+                f"expects a call, and disables them when it asks the assistant for its final answer."
             )
         allowed = request.tool_names
         seen: set[str] = set()
@@ -607,6 +616,12 @@ class ProbeEpisodeRuntime:
             user_messages = sum(1 for message in self.state.messages if message.get("role") == "user")
             continues_turn = self._assistant_user_message_count == user_messages
             self._assistant_user_message_count = user_messages
+        elif alias == "user_model":
+            # A guarded user's move proposal, a re-ask after a veto and the
+            # utterance that follows are one turn.
+            assistant_messages = sum(1 for message in self.state.messages if message.get("role") == "assistant")
+            continues_turn = self._user_assistant_message_count == assistant_messages
+            self._user_assistant_message_count = assistant_messages
         request = ActivationRequest(
             activation_id=activation_id,
             role=_MODEL_ROLE[alias],

@@ -111,9 +111,18 @@ Each `ActivationRequest` carries:
 - `role`: `user`, `assistant`, `judge` or `summary`;
 - `messages`: the exact input User Sim would send, so the host never builds one;
 - `tools` and `tools_enabled`: whether User Sim is offering tools for *this*
-  call. It disables them when the probe's loop asks for a final answer;
-- `continues_turn`: whether this request continues the turn already in
-  progress rather than opening a new one;
+  call, usually to the assistant, and to the user when the probe's simulated
+  user acts through a tool. It disables them when the probe's loop asks the
+  assistant for a final answer;
+- `continues_turn`: whether this request continues its side's turn already in
+  progress rather than opening a new one. An assistant request continues the
+  turn when no user message has arrived since the assistant's previous request
+  (a tool loop's answer step). A user request continues it when no assistant
+  message has arrived since the user's previous request: a guarded user's move
+  proposal, a re-ask after a veto and the utterance that follows are one turn.
+  A continuing request can also be a retry whose output replaces the previous
+  attempt rather than adding to it, such as a user message regenerated after
+  the judge rejects it, or an assistant reply resampled;
 - `parameters`: the sampling options User Sim would have passed.
 
 Recording the same `activation_id` with an identical payload is idempotent and
@@ -147,10 +156,20 @@ the authoritative list of what ran.
 A host that cannot record tool calls simply returns one model response per
 request with no `tool_calls`; User Sim runs the tools either way.
 
+A user activation can offer tools too, when a probe's simulated user acts
+through one: the guarded health-disclosure variants commit each move with
+`commit_move`. Record the user's tool calls in the response as usual. The
+probe's own loop consumes them, as in a local run: they are not executed as
+tools, so do not call `tool_result()` for them, and they appear in neither
+`executed_tool_calls()` nor `num_tool_calls`. If the probe rejects a move, it
+answers the call with a `tool` message and asks again, so that answer arrives in
+the next user activation's `messages`.
+
 ## Contract errors
 
 Recording a response that breaks the probe's loop rules (tool calls when the
-request offers no tools, an unoffered tool name, a missing or repeated call id)
+request offers no tools or comes from a judge or summary activation, an
+unoffered tool name, a missing or repeated call id)
 raises `EpisodeContractError` from `advance()`. These are host bugs, so they are
 raised at the call that made them: they never consume a model retry and are
 never attributed to the model under test.
