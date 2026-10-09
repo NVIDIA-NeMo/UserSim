@@ -171,8 +171,8 @@ def run(args: argparse.Namespace) -> int:
             new_cells.append(raw)
             continue
 
-        # Scorers take the whole trajectory row as a dict, exactly as the
-        # evaluator hands it to them.
+        # Scorers take the whole trajectory row as a dict, with every empty
+        # cell as None.
         traj_row = none_for_missing({k: traj[k] for k in traj.index})
         blocks = cell.setdefault("scorers", {})
         changed = False
