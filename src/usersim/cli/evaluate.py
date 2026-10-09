@@ -78,7 +78,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default="evaluator_model",
         help=(
             "Comma-separated DD model aliases to use as judges, optionally "
-            "with ``:FAMILY`` (e.g., evaluator_model:OPENAI,evaluator_secondary:ANTHROPIC). "
+            "with ``:family`` (e.g., evaluator_model:openai,evaluator_secondary:anthropic). "
             "≥2 distinct families enforced for ensembles of size ≥2."
         ),
     )

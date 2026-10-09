@@ -659,15 +659,15 @@ class TestJudgesParser:
         assert out == [{"alias": "evaluator_model"}]
 
     def test_alias_with_family(self):
-        out = _parse_judges("evaluator_model:OPENAI,backup:ANTHROPIC")
+        out = _parse_judges("evaluator_model:openai,backup:anthropic")
         assert out == [
-            {"alias": "evaluator_model", "family": "OPENAI"},
-            {"alias": "backup", "family": "ANTHROPIC"},
+            {"alias": "evaluator_model", "family": "openai"},
+            {"alias": "backup", "family": "anthropic"},
         ]
 
     def test_strips_whitespace(self):
-        out = _parse_judges(" a , b:OPENAI ")
-        assert out == [{"alias": "a"}, {"alias": "b", "family": "OPENAI"}]
+        out = _parse_judges(" a , b:openai ")
+        assert out == [{"alias": "a"}, {"alias": "b", "family": "openai"}]
 
     def test_empty_raises(self):
         with pytest.raises(SystemExit):
@@ -737,11 +737,8 @@ class TestUndispatchedScorerWarning:
 
 
 class TestEvalCliJudgesDefault:
-    """Regression lock for the post-rename `usersim eval --judges` default.
-
-    Anyone changing the default without updating this assertion is making
-    a CLI behaviour change that affects scripted callers — the failure
-    should be loud.
+    """`usersim eval --judges`: the default scripted callers rely on, and the
+    help example, which must pass the same validation as real input.
     """
 
     def test_judges_flag_default_is_evaluator_model(self):
@@ -754,6 +751,21 @@ class TestEvalCliJudgesDefault:
         eval_mod.register(sub)
         ns = parser.parse_args(["eval", "--trajectories", "tmp.parquet", "--out", "tmp_out.parquet"])
         assert ns.judges == "evaluator_model"
+
+    def test_help_example_passes_judge_validation(self):
+        import argparse
+        import re
+
+        from usersim.cli import evaluate as eval_mod
+        from usersim.engine.evaluator.config import JudgeSpecConfig
+
+        parser = argparse.ArgumentParser()
+        sub = parser.add_subparsers(dest="cmd")
+        eval_mod.register(sub)
+        example = re.search(r"e\.g\.,\s+(\S+)\)", sub.choices["eval"].format_help()).group(1)
+
+        for judge in _parse_judges(example):
+            JudgeSpecConfig(**judge).to_spec()
 
 
 # ---------------------------------------------------------------------------
