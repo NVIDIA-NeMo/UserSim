@@ -473,11 +473,9 @@ def _as_list(raw: Any) -> list[Any]:
 
 
 def _as_bool(raw: Any) -> bool:
-    if isinstance(raw, bool):
-        return raw
-    if isinstance(raw, float):
-        return raw == raw and bool(raw)  # NaN is a missing value, not True
-    if isinstance(raw, int):
+    if is_missing(raw):
+        return False
+    if isinstance(raw, (bool, int, float)):
         return bool(raw)
     if isinstance(raw, str):
         return raw.strip().lower() in ("1", "true", "yes")
