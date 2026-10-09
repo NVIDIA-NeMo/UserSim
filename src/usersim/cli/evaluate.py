@@ -20,10 +20,17 @@ import argparse
 import logging
 import shutil
 from pathlib import Path
+from typing import Any
 
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
 logger = logging.getLogger("usersim.cli.eval")
+
+#: Seed for ``--num-records-per-locale`` sampling, recorded with each pass.
+_SAMPLE_SEED = 42
+
+#: Trajectory columns reattached to every evaluator row for partitioning and joins.
+_KEY_COLS = ("trajectory_id", "locale", "probe_family")
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -161,6 +168,42 @@ def _parse_csv_or_none(spec: str | None) -> list[str] | None:
     return items or None
 
 
+def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, int, dict[str, Any]]:
+    """The trajectory rows this pass evaluates, and how they were chosen.
+
+    Returns their key columns in seed order, the sampled rows Data Designer
+    must be seeded from under ``--num-records-per-locale`` (None when it reads
+    ``seed_path`` itself), the row count, and the pass record for the
+    eval-sample manifest.
+    """
+    import pandas as pd
+
+    if args.num_records is not None and args.num_records_per_locale is not None:
+        raise ValueError("--num-records and --num-records-per-locale are mutually exclusive")
+    if args.num_records_per_locale is None:
+        keys = pd.read_parquet(seed_path, columns=list(_KEY_COLS))
+        total = len(keys)
+        num_records = total if args.num_records is None else min(int(args.num_records), total)
+        if num_records <= 0:
+            raise ValueError("--num-records must be positive when provided")
+        if num_records < total:
+            return keys, None, num_records, {"mode": "first_n", "n": num_records, "n_total": total}
+        return keys, None, num_records, {"mode": "full", "n": None, "n_total": total}
+
+    per_locale = int(args.num_records_per_locale)
+    if per_locale <= 0:
+        raise ValueError("--num-records-per-locale must be positive when provided")
+    full = pd.read_parquet(seed_path)
+    sampled = pd.concat(
+        [
+            group.sample(n=min(per_locale, len(group)), random_state=_SAMPLE_SEED)
+            for _, group in full.groupby("locale", sort=True)
+        ]
+    ).sort_index()
+    record = {"mode": "per_locale", "n": per_locale, "n_total": len(full)}
+    return sampled[list(_KEY_COLS)].reset_index(drop=True), sampled, len(sampled), record
+
+
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._models import (
         default_models_path,
@@ -207,6 +250,7 @@ def run(args: argparse.Namespace) -> int:
         run_subroot,
         write_partitioned_dataset,
     )
+    from usersim.reporting.eval_manifest import EVAL_STORE_MANIFEST_FILENAME, record_eval_sample_pass
 
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -238,39 +282,12 @@ def run(args: argparse.Namespace) -> int:
     try:
         import tempfile
 
-        import pandas as pd
-
-        key_cols = ["trajectory_id", "locale", "probe_family"]
-        if args.num_records is not None and args.num_records_per_locale is not None:
-            raise ValueError("--num-records and --num-records-per-locale are mutually exclusive")
-
-        if args.num_records_per_locale is not None:
-            per_locale = int(args.num_records_per_locale)
-            if per_locale <= 0:
-                raise ValueError("--num-records-per-locale must be positive when provided")
-            full_seed_df = pd.read_parquet(seed_source_path)
-            seed_df = pd.concat(
-                [
-                    group.sample(
-                        n=min(per_locale, len(group)),
-                        random_state=42,
-                    )
-                    for _, group in full_seed_df.groupby("locale", sort=True)
-                ]
-            ).sort_index()
+        seed_df, sampled, num_records, sample_pass = _choose_rows(args, seed_source_path)
+        if sampled is not None:
             tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False, prefix="usersim_eval_seed_")
             tmp.close()
-            temp_sample_seed = Path(tmp.name)
-            seed_df.to_parquet(temp_sample_seed, index=False)
-            seed_source_path = temp_sample_seed
-            seed_df = seed_df[key_cols].reset_index(drop=True)
-            num_records = len(seed_df)
-        else:
-            seed_df = pd.read_parquet(seed_source_path, columns=key_cols)
-            seed_row_count = len(seed_df)
-            num_records = seed_row_count if args.num_records is None else min(int(args.num_records), seed_row_count)
-        if num_records <= 0:
-            raise ValueError("--num-records must be positive when provided")
+            temp_sample_seed = seed_source_path = Path(tmp.name)
+            sampled.to_parquet(temp_sample_seed, index=False)
 
         data_designer, builder = build_evaluator_config_builder(
             models=models,
@@ -296,7 +313,7 @@ def run(args: argparse.Namespace) -> int:
             )
         seed_df = seed_df.head(len(df)).reset_index(drop=True)
         df = df.reset_index(drop=True)
-        for col in key_cols:
+        for col in _KEY_COLS:
             if col not in df.columns:
                 df[col] = seed_df[col]
     finally:
@@ -313,6 +330,18 @@ def run(args: argparse.Namespace) -> int:
         shutil.rmtree(eval_run_root)
     eval_run_root.mkdir(parents=True, exist_ok=True)
     write_partitioned_dataset(df, eval_run_root)
+    # The report labels the run by how it was sampled, so a partial pass
+    # cannot be shown as a full one.
+    record_eval_sample_pass(
+        eval_run_root / EVAL_STORE_MANIFEST_FILENAME,
+        run_id=run_id,
+        random_seed=_SAMPLE_SEED,
+        eval_locales=None,
+        n_selected=len(df),
+        trajectory_ids=df["trajectory_id"].astype(str).tolist(),
+        fresh=True,
+        **sample_pass,
+    )
     print(f"wrote {len(df)} evaluator rows to {out}")
     print(
         f"\nNext step: render the report\n"

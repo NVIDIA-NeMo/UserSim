@@ -31,6 +31,7 @@ from usersim.reporting.eval_manifest import (
     SCHEMA_VERSION,
     EvalSampleManifest,
     EvalSamplePass,
+    eval_sample_mode,
     read_eval_sample_manifest,
     record_eval_sample_pass,
 )
@@ -523,6 +524,36 @@ class TestReadManifest:
         path.write_text(json.dumps(["not", "an", "object"]))
         with pytest.raises(ValueError, match="must be a JSON object"):
             read_eval_sample_manifest(path)
+
+
+class TestEvalSampleMode:
+    @staticmethod
+    def _record(path: Path, mode: str) -> None:
+        record_eval_sample_pass(
+            path,
+            run_id="1700000000",
+            mode=mode,
+            n=None,
+            random_seed=42,
+            eval_locales=None,
+            n_selected=1,
+            n_total=1,
+            trajectory_ids=["t1"],
+        )
+
+    def test_first_recorded_manifest_wins(self, tmp_path: Path) -> None:
+        first, second = tmp_path / "first.json", tmp_path / "second.json"
+        self._record(first, "per_locale")
+        self._record(second, "full")
+        assert eval_sample_mode(first, second) == "per_locale"
+
+    def test_paths_without_a_manifest_are_skipped(self, tmp_path: Path) -> None:
+        recorded = tmp_path / "recorded.json"
+        self._record(recorded, "first_n")
+        assert eval_sample_mode(tmp_path / "absent.json", recorded) == "first_n"
+
+    def test_unknown_when_nothing_was_recorded(self, tmp_path: Path) -> None:
+        assert eval_sample_mode(tmp_path / "absent.json") == "unknown"
 
 
 # ─── End-to-end bug reproduction lock ───────────────────────────────

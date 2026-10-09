@@ -110,7 +110,13 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 
 def run(args: argparse.Namespace) -> int:
-    from usersim.reporting import build_capability_report, write_capability_dashboard_artifacts
+    from usersim.reporting import (
+        EVAL_SAMPLE_MANIFEST_FILENAME,
+        EVAL_STORE_MANIFEST_FILENAME,
+        build_capability_report,
+        eval_sample_mode,
+        write_capability_dashboard_artifacts,
+    )
 
     if not args.trajectories.exists():
         raise SystemExit(f"trajectory parquet not found: {args.trajectories}")
@@ -156,17 +162,25 @@ def run(args: argparse.Namespace) -> int:
     logger.info("loaded %d trajectory rows", len(traj_df))
 
     eval_df = None
+    sample_mode = "full"
     if args.evaluations is not None:
         if not args.evaluations.exists():
             raise SystemExit(f"evaluations parquet not found: {args.evaluations}")
         logger.info("loading evaluations from %s", args.evaluations)
         eval_df = read_partitioned_dataset(args.evaluations, run=run_id)
+        # `usersim eval` records its pass beside the evaluations; the notebook
+        # records its passes in the report directory.
+        manifests = [out_dir / EVAL_SAMPLE_MANIFEST_FILENAME]
+        if run_id is not None:
+            manifests.insert(0, run_subroot(args.evaluations, run_id) / EVAL_STORE_MANIFEST_FILENAME)
+        sample_mode = eval_sample_mode(*manifests)
 
     report = build_capability_report(
         traj_df,
         eval_df,
         eval_column=args.eval_column,
         run_id=run_id,
+        sample_mode=sample_mode,
         trajectory_root=args.trajectories,
     )
 

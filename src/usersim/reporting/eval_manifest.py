@@ -61,6 +61,9 @@ from pathlib import Path
 from typing import Any, Iterable
 
 MANIFEST_FILENAME = "eval_sample_manifest.json"
+#: Where ``usersim eval`` records its pass: beside the evaluation partitions,
+#: underscore-prefixed so the parquet dataset readers skip it.
+EVAL_STORE_MANIFEST_FILENAME = "_eval_sample_manifest.json"
 SCHEMA_VERSION = 2
 
 
@@ -209,6 +212,19 @@ def read_eval_sample_manifest(
     if not isinstance(raw, dict):
         raise ValueError(f"eval_sample_manifest at {p} must be a JSON object, got {type(raw).__name__}")
     return EvalSampleManifest.from_dict(raw)
+
+
+def eval_sample_mode(*paths: Path | str) -> str:
+    """The sampling mode recorded at the first of ``paths`` holding a manifest.
+
+    ``"unknown"`` when none does: an evaluation that recorded nothing about
+    how it sampled cannot claim to be full.
+    """
+    for path in paths:
+        manifest = read_eval_sample_manifest(path)
+        if manifest is not None:
+            return manifest.consensus_mode
+    return "unknown"
 
 
 def record_eval_sample_pass(
