@@ -241,9 +241,10 @@ async def assert_scorer_conforms(
 class ScriptedModel:
     """A deterministic stand-in for a configured model.
 
-    Returns the same reply for the same role, and a tool call whenever the
-    assistant or the user is offered tools and no tool result is in view yet,
-    which is enough to drive any probe's loop to completion without a provider.
+    Returns the same reply for the same role, and a tool call when tools are
+    offered: the user calls whenever it is offered one, so a probe that rejects a
+    call is asked again, and the assistant calls until a tool result is in view.
+    That is enough to drive any probe's loop to completion without a provider.
     """
 
     #: A real model id: probes that grade the assistant's own identity refuse
@@ -268,7 +269,11 @@ class ScriptedModel:
         # whose simulated user acts through a tool is exercised as a model would.
         if self.role not in ("assistant", "user") or not tools:
             return None
-        if any(str(_message_field(message, "role")) == "tool" for message in messages):
+        # The assistant stops once a tool result is in view, which ends a tool
+        # loop. The user calls whenever it is offered the tool, so a probe that
+        # rejects a call is asked again as a model would be; the probe bounds
+        # its own retries.
+        if self.role == "assistant" and any(str(_message_field(message, "role")) == "tool" for message in messages):
             return None
         function = tools[0]["function"]
         return [

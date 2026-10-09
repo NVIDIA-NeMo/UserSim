@@ -127,3 +127,21 @@ async def test_the_scripted_model_calls_a_tool_it_is_offered_on_either_side(role
     reply = await ScriptedModel(role).acompletion([{"role": "user", "content": "hi"}], tools=[tool])
 
     assert [call["function"]["name"] for call in reply.message.tool_calls] == ["commit_move"]
+
+
+@pytest.mark.parametrize(("role", "calls"), [("user", True), ("assistant", False)])
+async def test_with_a_tool_reply_in_view_only_the_user_calls_again(role: str, calls: bool) -> None:
+    """The user re-commits after a rejection, as a model would; the assistant's tool loop ends at a result."""
+    tool = {"type": "function", "function": {"name": "commit_move", "parameters": {"type": "object"}}}
+    messages = [
+        {"role": "user", "content": "hi"},
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "c1", "type": "function", "function": {"name": "commit_move", "arguments": "{}"}}],
+        },
+        {"role": "tool", "tool_call_id": "c1", "content": '{"accepted": false}'},
+    ]
+    reply = await ScriptedModel(role).acompletion(messages, tools=[tool])
+
+    assert bool(reply.message.tool_calls) is calls

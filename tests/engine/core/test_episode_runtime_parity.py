@@ -157,8 +157,10 @@ class _ReplayableModel:
         )
         tool_calls = None
         has_tool_result = any(str(_message_value(message, "role")) == "tool" for message in messages)
-        # Whichever side is offered tools calls the first one, as a model would.
-        if self.role in ("assistant", "user") and kwargs.get("tools") and not has_tool_result:
+        # Whichever side is offered tools calls the first one, as a model would:
+        # the assistant until a tool result ends its loop, the user every time.
+        offered = kwargs.get("tools")
+        if offered and (self.role == "user" or (self.role == "assistant" and not has_tool_result)):
             function = kwargs["tools"][0]["function"]
             arguments = _arguments_for_schema(function.get("parameters", {}))
             tool_calls = [
@@ -599,21 +601,79 @@ def _tool_call_response(name: str = "anything") -> dict[str, Any]:
     return {"role": "assistant", "content": "", "tool_calls": [call]}
 
 
-async def test_tool_calls_are_recorded_only_where_tools_are_offered() -> None:
-    """A user activation without tools, and a judge activation, still reject tool calls."""
-    runtime, invocations = _runtime(_Case("general_open_ended", 1001))
+@pytest.mark.parametrize("role", ["judge", "summary"])
+async def test_tool_calls_are_recorded_only_where_tools_are_offered(role: str) -> None:
+    """A user activation without tools, and a judge or summary activation, still reject tool calls."""
+    # Two turns reach a summary activation, which a one-turn episode never makes.
+    runtime, invocations = _runtime(_Case("general_open_ended", 1001, None, 2))
     event = await runtime.advance()
     assert isinstance(event, ActivationRequest) and event.role == "user" and not event.tools_enabled
     with pytest.raises(EpisodeContractError, match="offers no tools"):
         await runtime.advance(ActivationResult(activation_id=event.activation_id, response=_tool_call_response()))
 
-    while isinstance(event, ActivationRequest) and event.role != "judge":
+    while isinstance(event, ActivationRequest) and event.role != role:
         response = _response_dict(
             await _ReplayableModel(event.role, invocations).acompletion(
                 list(event.messages), **_activation_kwargs(event)
             )
         )
         event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
-    assert isinstance(event, ActivationRequest) and event.role == "judge"
-    with pytest.raises(EpisodeContractError, match="judge activation cannot record tool calls"):
+    assert isinstance(event, ActivationRequest) and event.role == role
+    with pytest.raises(EpisodeContractError, match=f"{role} activation cannot record tool calls"):
         await runtime.advance(ActivationResult(activation_id=event.activation_id, response=_tool_call_response()))
+
+
+async def test_a_vetoed_move_is_committed_again_within_the_same_user_turn(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The guide's veto path, hosted: a rejected call is answered with a tool message and asked again.
+
+    The first proposal is vetoed. The second, made with the veto in view, is the
+    move recorded; the proposal, the re-ask and the utterance are one user turn;
+    and none of the exchange reaches the exported conversation.
+    """
+    from usersim.engine.probes.health_disclosure.moves import Guard
+
+    check, checks = Guard.check, []
+
+    def veto_the_first(self: Guard, move: Any, env: Any) -> tuple[bool, str]:
+        checks.append(move.move)
+        return (False, "forced veto") if len(checks) == 1 else check(self, move, env)
+
+    monkeypatch.setattr(Guard, "check", veto_the_first)
+    case = next(case for case in _GUARDED_CASES if case.probe_type == "health_therapy_disclosure")
+    runtime, invocations = _runtime(case)
+    user_activations: list[tuple[bool, bool, bool]] = []  # (offers tools, continues_turn, tool reply in view)
+    proposals: list[dict[str, Any]] = []
+    event = await runtime.advance()
+    while isinstance(event, ActivationRequest):
+        response = _response_dict(
+            await _ReplayableModel(event.role, invocations).acompletion(
+                list(event.messages), **_activation_kwargs(event)
+            )
+        )
+        if event.role == "user":
+            in_view = any(message.get("role") == "tool" for message in event.messages)
+            user_activations.append((event.tools_enabled, event.continues_turn, in_view))
+            if event.tools_enabled:
+                call = response["tool_calls"][0]["function"]
+                arguments = {**json.loads(call["arguments"]), "reasoning": f"proposal {len(proposals) + 1}"}
+                call["arguments"] = json.dumps(arguments)
+                proposals.append(arguments)
+        event = await runtime.advance(ActivationResult(activation_id=event.activation_id, response=response))
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    first = next(i for i, (offers_tools, _, _) in enumerate(user_activations) if offers_tools)
+    assert user_activations[first : first + 3] == [
+        (True, False, False),  # the proposal opens the user's turn
+        (True, True, True),  # the re-ask, with the veto in view, continues it
+        (False, True, False),  # and so does the utterance, written without the private exchange
+    ]
+    # The vetoed check was the user's first proposal, not the probe's own risk pacing.
+    assert checks[0] == proposals[0]["move"]
+    assert event.result["guard_veto_count"] == 1
+    moves = event.result["moves_detail"]
+    moves = json.loads(moves) if isinstance(moves, str) else moves
+    assert moves[0]["reasoning"] == "proposal 2"
+    assert [veto["move"] for veto in moves[0]["vetoes"]] == [proposals[0]["move"]]
+    messages = event.result["conversation_messages"]
+    messages = json.loads(messages) if isinstance(messages, str) else messages
+    assert not any(message.get("tool_calls") or message.get("role") == "tool" for message in messages)

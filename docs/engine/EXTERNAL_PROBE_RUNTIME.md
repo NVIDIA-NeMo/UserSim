@@ -114,8 +114,15 @@ Each `ActivationRequest` carries:
   call, usually to the assistant, and to the user when the probe's simulated
   user acts through a tool. It disables them when the probe's loop asks the
   assistant for a final answer;
-- `continues_turn`: whether this request continues the turn already in
-  progress rather than opening a new one;
+- `continues_turn`: whether this request continues its side's turn already in
+  progress rather than opening a new one. An assistant request continues the
+  turn when no user message has arrived since the assistant's previous request
+  (a tool loop's answer step). A user request continues it when no assistant
+  message has arrived since the user's previous request: a guarded user's move
+  proposal, a re-ask after a veto and the utterance that follows are one turn.
+  A continuing request can also be a retry whose output replaces the previous
+  attempt rather than adding to it, such as a user message regenerated after
+  the judge rejects it, or an assistant reply resampled;
 - `parameters`: the sampling options User Sim would have passed.
 
 Recording the same `activation_id` with an identical payload is idempotent and

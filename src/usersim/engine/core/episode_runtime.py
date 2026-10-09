@@ -97,8 +97,11 @@ class ActivationRequest:
     ``messages`` is the exact input UserSim would send, so a host never has to
     assemble its own. ``tools`` is empty when UserSim is not offering tools for
     this call — recording tool calls against it is a contract error, not a
-    model failure. ``continues_turn`` marks a request that continues the turn
-    already in progress rather than opening a new one.
+    model failure. ``continues_turn`` marks a request that continues its side's
+    turn already in progress rather than opening a new one: an assistant request
+    with no user message since the assistant's previous one, or a user request
+    with no assistant message since the user's previous one. It can be a retry
+    that replaces the previous attempt rather than adding to it.
     """
 
     activation_id: str
@@ -360,9 +363,11 @@ class ProbeEpisodeRuntime:
         self._transitions: dict[str, tuple[str, ActivationRequest | EpisodeLifecycleComplete]] = {}
         self._active_activation_id: str | None = None
         self._activation_sequence = 0
-        # A new assistant activation continues the current turn when no user
-        # message has been appended since the previous one.
+        # An activation continues its side's current turn when the other side
+        # has added no message since that side's previous activation: the
+        # assistant's turn ends at a user message, the user's at an assistant one.
         self._assistant_user_message_count: int | None = None
+        self._user_assistant_message_count: int | None = None
 
     @property
     def assistant_tools(self) -> list[dict[str, Any]]:
@@ -611,6 +616,12 @@ class ProbeEpisodeRuntime:
             user_messages = sum(1 for message in self.state.messages if message.get("role") == "user")
             continues_turn = self._assistant_user_message_count == user_messages
             self._assistant_user_message_count = user_messages
+        elif alias == "user_model":
+            # A guarded user's move proposal, a re-ask after a veto and the
+            # utterance that follows are one turn.
+            assistant_messages = sum(1 for message in self.state.messages if message.get("role") == "assistant")
+            continues_turn = self._user_assistant_message_count == assistant_messages
+            self._user_assistant_message_count = assistant_messages
         request = ActivationRequest(
             activation_id=activation_id,
             role=_MODEL_ROLE[alias],
