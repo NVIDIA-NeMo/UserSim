@@ -10,7 +10,7 @@ import json
 import random
 import sys
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
 
 from usersim.engine.config import MODEL_ASSISTANT, MODEL_USER
@@ -64,8 +64,9 @@ class ConstructedEpisode:
     outcome: OutcomeBuilder
     #: The resolved row as set-up left it, before the probe was constructed. The
     #: probe shares ``preamble.data``, so this is the baseline for what the probe
-    #: itself adds or changes, in its constructor or its run.
-    set_up_row: dict[str, Any] = field(default_factory=dict)
+    #: itself adds or changes, in its constructor or its run. ``None`` when not
+    #: recorded; the generator then compares with the row after construction.
+    set_up_row: dict[str, Any] | None = None
 
 
 class EpisodeConstructionError(ValueError):

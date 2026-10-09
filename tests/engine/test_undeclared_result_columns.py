@@ -21,7 +21,9 @@ from unittest.mock import patch
 
 import pytest
 
+from usersim.engine import generator as generator_module
 from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core.episode_input import ConstructedEpisode
 from usersim.engine.core.probes import _PROBE_REGISTRY, clear_registry, load_builtin_probes, register_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
 from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
@@ -233,6 +235,27 @@ async def test_a_column_added_before_the_probe_runs_is_not_blamed_on_it(
         "side_effect_columns",
         property(lambda self: [column for column in declared(self) if column != "persona_uuid"]),
     )
+    await _simulate("general_open_ended")
+
+    assert undeclared_warnings == []
+
+
+async def test_an_episode_without_a_set_up_row_does_not_blame_its_inputs(
+    extra_column_probe, undeclared_warnings, monkeypatch
+):
+    """Without a recorded set-up row, the row after construction is the baseline.
+
+    ``set_up_row`` is optional on ``ConstructedEpisode``, so an episode built
+    without one must not count its undeclared input columns, such as ``theme``,
+    as the probe's.
+    """
+    construct = generator_module.construct_probe_episode
+
+    def construct_without_set_up_row(*args: Any, **kwargs: Any) -> ConstructedEpisode:
+        built = construct(*args, **kwargs)
+        return ConstructedEpisode(preamble=built.preamble, probe=built.probe, outcome=built.outcome)
+
+    monkeypatch.setattr(generator_module, "construct_probe_episode", construct_without_set_up_row)
     await _simulate("general_open_ended")
 
     assert undeclared_warnings == []

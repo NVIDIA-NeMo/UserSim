@@ -171,12 +171,11 @@ class ConversationSimulatorGenerator(
         data.clear()
         data.update(preamble.data)
         # The row as set-up left it, before the probe was constructed, whether
-        # the constructor then succeeded or failed.
-        if constructed is not None:
-            set_up_row = constructed.set_up_row
-        elif construction_error is not None and construction_error.set_up_row is not None:
-            set_up_row = construction_error.set_up_row
-        else:
+        # the constructor then succeeded or failed. Without a recorded one, the
+        # row after construction is the baseline.
+        episode = constructed if constructed is not None else construction_error
+        set_up_row = episode.set_up_row if episode is not None else None
+        if set_up_row is None:
             set_up_row = dict(data)
         persona = preamble.persona
         probe_type = preamble.probe_type
