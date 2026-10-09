@@ -22,6 +22,7 @@ from usersim.engine.core.behavioral import (
 )
 from usersim.engine.core.identity import persona_uuid, resolve_model_name, trajectory_id
 from usersim.engine.core.locale import persona_dataset_locale
+from usersim.engine.core.missing import none_for_missing
 from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
 from usersim.engine.core.persona import religion_language_context
 from usersim.engine.core.probes import BankLoadError, resolve_probe
@@ -83,13 +84,15 @@ def construct_episode_preamble(
 
     This is the sole constructor for persona-derived settings, probe metadata,
     provenance, and trajectory identity. Both execution paths consume its
-    returned ``data`` mapping unchanged.
+    returned ``data`` mapping unchanged. Every empty cell in that mapping and
+    in the persona is None, however pandas held it, so persona hashes and
+    falsy fallbacks do not depend on the pandas version.
     """
-    resolved = deepcopy(dict(data))
+    resolved = none_for_missing(deepcopy(dict(data)))
     persona_column = config.persona_column
     probe_type_column = config.probe_type_column
     raw_persona = resolved[persona_column]
-    persona = deepcopy(raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona))
+    persona = none_for_missing(deepcopy(raw_persona if isinstance(raw_persona, dict) else json.loads(raw_persona)))
     locale = config.locale
     raw_profile = resolved.get("behavioral_profile")
     if isinstance(raw_profile, str):
