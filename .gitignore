@@ -42,6 +42,8 @@ models.local.toml
 data/
 artifacts/
 output/
+# Dense-retrieval vectors `gen-assets` writes beside a bank stay local.
+src/usersim/engine/assets/financial_services/**/embeddings.parquet
 
 # IDE
 .vscode/
