@@ -3,7 +3,7 @@ name = "nemo-usersim"
 version = "0.1.0"
 description = "Population-grounded user simulation for evaluating conversational LLMs"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 keywords = [
     "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
 ]
@@ -13,8 +13,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
@@ -66,6 +69,8 @@ dependencies = [
     # Reads credentials from a .env file so a run does not depend on what is
     # exported in the calling shell. No required dependencies of its own.
     "python-dotenv>=1.0,<2",
+    # Parses the models TOML on Python 3.10, which has no tomllib.
+    "tomli>=1.1.0; python_version < '3.11'",
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
@@ -99,6 +104,9 @@ dev = [
     # here. conftest.py fails the run if it is absent, because without it every
     # async test is skipped with a warning rather than failing.
     "pytest-asyncio>=1.0,<2",
+    # tests/test_network_guard.py unwraps exception groups, which Python 3.10
+    # has only through this backport.
+    "exceptiongroup>=1.0; python_version < '3.11'",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
@@ -179,7 +187,7 @@ asyncio_mode = "auto"
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py312"
+target-version = "py310"
 # Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
 # committed outputs, so linting them means noise and rewritten cells. Excluding
 # them keeps a bare `ruff check` equivalent to `make lint`.
