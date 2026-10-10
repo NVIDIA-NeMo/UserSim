@@ -47,6 +47,66 @@ usersim simulate --locale en_US --num-rows 1 \
   --materialize-inputs --out episode-inputs.jsonl
 ```
 
+## Running stored rows
+
+To run stored rows with your configured models, without hosting the episode,
+pass them back to `simulate`. Each row runs exactly as stored, and is saved
+where `usersim eval` reads it:
+
+```bash
+usersim simulate --inputs episode-inputs.jsonl --models my_models.toml --out output/trajectories
+```
+
+or from Python:
+
+```python
+from pathlib import Path
+
+from usersim.engine.external import simulate_episode_inputs
+
+result = simulate_episode_inputs(rows, out=Path("output/trajectories"), models_path=Path("my_models.toml"))
+print(result.run_id, result.written, result.skipped)
+```
+
+- **One run per setup.** A setup is everything that can change a
+  conversation:
+  - each simulator model as Data Designer sends it, provider settings
+    included
+  - the rows' shared settings
+  - the asset contents
+  - the `USERSIM_*` variables
+  - probe prompt versions
+  - extension, User Sim and Data Designer releases
+
+  Running again with the same setup resumes its run and skips the rows already
+  saved there, so a caller can run rows in batches. A different setup starts
+  its own run.
+- **Ids.** Each saved row gets a `trajectory_id` of its own, derived from the
+  stored row and the setup. The stored row's id is kept as `input_id`, so two
+  runs of the same rows pair on it: `x.merge(y, on="input_id")`. A stored row
+  whose contents changed under the same id is refused in the run that already
+  holds it.
+- **Stored fields are saved with the rows.** A field whose values are all one
+  plain type (text, true/false, an integer, a decimal) keeps that type;
+  anything else, such as a nested value or integers mixed with decimals, is
+  saved as JSON text. A run keeps each field's encoding, and rows whose values
+  that encoding cannot hold exactly are refused, so the run reads back
+  unchanged.
+- **The conversation runs with the stored id,** as a hosted episode does, so
+  every setup sees the same scenario (the tools `tool_calling` offers, say). A
+  move hook registered during such a run therefore reports the stored id, the
+  saved row's `input_id`.
+- **Settings come from the rows.** Each row runs with the settings it was
+  stored with, so a sampling flag (`--max-turns`, `--probe-mix`, ...) set to
+  anything but its default is refused. The rows in one call must share their
+  settings apart from locale and asset folder.
+  `--assets-dir` replaces the asset folder the rows were stored with, and is
+  required when that folder doesn't exist on this machine.
+- **Concurrent writers.** Writes into `--out` take a lock, so two calls can
+  share it. On a filesystem whose locks don't reach every node (Lustre mounted
+  with `localflock`, NFS with `local_lock` or `nolock`), give each node its own
+  `--out`.
+
 ## Declaring the host's models
 
 Trajectory identity is keyed on the resolved model id, and `identity_disclosure`

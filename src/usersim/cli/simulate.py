@@ -21,12 +21,18 @@ mid-run leaves earlier locales' partitions intact.
 Idempotent re-runs: if the output dataset already exists, rows whose
 ``trajectory_id`` is present are skipped (the simulator re-emits
 identical bytes for them anyway, but skipping avoids the LLM cost).
+
+``--inputs`` runs stored rows from ``--materialize-inputs`` exactly as
+stored instead of sampling, one run per setup; see ``cli/_inputs.py``.
 """
 
 from __future__ import annotations
 
 import argparse
 import logging
+import tempfile
+import time
+from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
@@ -61,6 +67,20 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--locale",
         action="append",
         help=("Locale to sample inline (repeatable). Use with --num-rows. Mutually exclusive with --panel."),
+    )
+    src.add_argument(
+        "--inputs",
+        type=Path,
+        help=(
+            "Run the stored rows in this .jsonl or .parquet file (from "
+            "--materialize-inputs) exactly as stored, instead of sampling, so "
+            "two setups meet the same simulated users. Each row runs with the "
+            "settings it was stored with, so a sampling flag (--probe-mix, "
+            "--max-turns, --random-seed, ...) set to anything but its default "
+            "is refused. Each setup gets its "
+            "own run under --out, and each row a trajectory_id of its own; "
+            "the stored id is kept as input_id, which pairs two runs."
+        ),
     )
 
     p.add_argument(
@@ -227,7 +247,27 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default="local",
         help="Where the run executes (default: local, in this process).",
     )
-    p.set_defaults(func=run)
+    p.set_defaults(
+        func=run,
+        _stored_row_flag_defaults={dest: p.get_default(dest) for dest in _STORED_ROW_FLAGS},
+    )
+
+
+#: Flags that set what ``--inputs`` takes from the stored rows instead, by
+#: argparse destination.
+_STORED_ROW_FLAGS = {
+    "num_rows": "--num-rows",
+    "max_turns": "--max-turns",
+    "max_assistant_attempts": "--max-assistant-attempts",
+    "probe_mix": "--probe-mix",
+    "random_seed": "--random-seed",
+    "finance_tier_mix": "--finance-tier-mix",
+    "finance_retrieval_mode": "--finance-retrieval-mode",
+    "no_store_reasoning": "--no-store-reasoning",
+    "toolset_seed_path": "--toolset-seed-path",
+    "match_persona_language": "--match-persona-language",
+    "materialize_inputs": "--materialize-inputs",
+}
 
 
 def _parse_probe_mix(spec: str) -> dict:
@@ -285,6 +325,9 @@ def run(args: argparse.Namespace) -> int:
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`")
+
+    if args.inputs is not None:
+        return _run_inputs(args, models, models_path)
 
     probe_mix = _parse_probe_mix(args.probe_mix)
 
@@ -433,6 +476,101 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
     return 0
 
 
+def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
+    """``usersim simulate --inputs``: run stored rows exactly as stored."""
+    from usersim.cli._inputs import (
+        load_episode_inputs,
+        plan_inputs_run,
+        prepare_episode_inputs,
+        simulate_inputs_to_dataset,
+    )
+    from usersim.cli._models import warn_if_missing_api_key
+
+    defaults = args._stored_row_flag_defaults
+    given = [flag for dest, flag in _STORED_ROW_FLAGS.items() if getattr(args, dest) != defaults[dest]]
+    if given:
+        raise SystemExit(
+            f"--inputs runs each row with the settings it was stored with; drop {', '.join(given)} "
+            "(to change them, materialize the rows again)"
+        )
+    try:
+        inputs = prepare_episode_inputs(
+            load_episode_inputs(args.inputs), assets_dir=args.assets_dir, source=args.inputs
+        )
+        plan = plan_inputs_run(inputs, models, args.out, skip_existing=not args.no_skip_existing)
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"--inputs {args.inputs}: {error}") from None
+
+    config = inputs.config
+    print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))
+    print(f"  inputs:        {args.inputs} ({len(inputs.rows)} rows)")
+    print(f"  locales:       {sorted({row['usersim_config']['locale'] for row in inputs.rows})}")
+    print(f"  probes:        {dict(sorted(Counter(str(row['probe_type']) for row in inputs.rows).items()))}")
+    print(
+        "  stored with:   "
+        + ", ".join(
+            f"{key}={config.get(key)!r}"
+            for key in ("max_turns", "max_assistant_attempts", "random_seed", "store_reasoning")
+        )
+    )
+    print(f"  assets_dir:    {inputs.assets_dir}")
+    print(f"  models config: {models_path}")
+    print(f"  setup:         {plan.fingerprint[:12]}")
+    if plan.matching_run is not None:
+        print(f"  run_id:        {plan.matching_run} (resume; {plan.saved} of {len(inputs.rows)} rows already saved)")
+    else:
+        print("  run_id:        new, assigned when the first rows are saved")
+    print(f"  output:        {args.out}")
+    if args.dry_run:
+        return 0
+
+    if (msg := warn_if_missing_api_key(models)) is not None:
+        logger.warning(msg)
+
+    def job() -> int:
+        try:
+            result = simulate_inputs_to_dataset(
+                inputs=inputs,
+                models=models,
+                out=args.out,
+                models_path=models_path,
+                skip_existing=not args.no_skip_existing,
+                plan=plan,
+            )
+        except ValueError as error:
+            # Another writer saved one of these rows with different contents
+            # while this run was simulating.
+            raise SystemExit(f"--inputs {args.inputs}: {error}") from None
+        if not result.written:
+            print("no new trajectories generated")
+            return 0
+        print(f"wrote {result.written} new trajectories to run={result.run_id} under {args.out}")
+        print(
+            f"\nNext step: score them\n  usersim eval --run {result.run_id} \\\n"
+            f"    --trajectories {args.out} --out output/evaluations"
+        )
+        return 0
+
+    from usersim.engine.core.backends import JobSpec, get_backend
+
+    backend = get_backend(getattr(args, "backend", "local"))
+    params = {
+        "inputs": str(args.inputs),
+        "out": str(args.out),
+        "models_path": str(models_path),
+        "assets_dir": str(inputs.assets_dir),
+        "skip_existing": not args.no_skip_existing,
+    }
+    handle = backend.submit(JobSpec(name="simulate-inputs", params=params, callable_=job))
+    status = backend.poll(handle)
+    if status.error is not None:
+        raise status.error
+    if status.state == "failed" and status.exit_code is None:
+        logger.error("simulate --inputs failed on backend %r: %s", backend.name, status.message)
+        return 1
+    return status.exit_code or 0
+
+
 def _simulate_to_parquet(
     *,
     models,
@@ -466,26 +604,23 @@ def _simulate_to_parquet(
     from usersim.engine.core.locale import persona_dataset_locale
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
+        LEGACY_RUN_ID,
         existing_trajectory_ids,
-        latest_run_id,
-        new_run_id,
-        write_locale_partition,
+        run_started_at,
+        sampled_run_to_resume,
+        save_sampled_rows,
     )
 
+    started_at = time.time()
     out = Path(out).resolve()
     out.mkdir(parents=True, exist_ok=True)
 
-    # Resolve the target run id. ``--no-skip-existing`` means
-    # "fresh start" → mint a new run id. Default (``--skip-existing``)
-    # means "resume into the latest existing run". On a first
-    # invocation with no existing runs, both paths land on a fresh
-    # ``new_run_id()``.
-    if skip_existing:
-        run_id = latest_run_id(out) or new_run_id()
-    else:
-        run_id = new_run_id()
-    logger.info("run_id=%s (%s)", run_id, "resume" if skip_existing else "fresh")
-    print(f"  run_id:        {run_id}")
+    # ``--no-skip-existing`` starts a fresh run; the default resumes the
+    # latest run this command made. A fresh run is claimed only when its
+    # first rows are saved, so a failure before then leaves no empty run.
+    run_id = sampled_run_to_resume(out) if skip_existing else None
+    logger.info("run_id=%s (%s)", run_id or "new", "resume" if run_id else "fresh")
+    print(f"  run_id:        {run_id or 'new, assigned when the first rows are saved'}")
 
     # Skip-existing scopes to the resolved run only (not all runs).
     # Resuming into an existing run skips trajectory_ids already
@@ -494,7 +629,7 @@ def _simulate_to_parquet(
     # seeds — content-hashed trajectory_ids would still collide if
     # everything matched, but cross-run skipping is not the
     # behaviour we want).
-    already_done = existing_trajectory_ids(out, run=run_id) if skip_existing else set()
+    already_done = existing_trajectory_ids(out, run=run_id) if run_id else set()
     if already_done:
         logger.info(
             "run=%s already has %d trajectories — will skip",
@@ -563,23 +698,27 @@ def _simulate_to_parquet(
             n = _count_rows_for_locale(panel, locale)
         else:
             n = num_rows
-        result = data_designer.create(builder, num_records=n)
-        df = result.load_dataset()
-        if already_done:
-            df = df[~df["trajectory_id"].isin(already_done)]
-        if df.empty:
-            logger.info("locale=%s: no new trajectories", locale)
-            continue
+        # Data Designer names a batch's artifacts by the second it started, so
+        # two runs in one directory could share them; each batch gets its own
+        # folder, removed once its rows are loaded.
+        with tempfile.TemporaryDirectory(prefix="usersim_simulate_") as artifacts:
+            df = data_designer.create(builder, num_records=n, artifact_path=artifacts).load_dataset()
         # Per-locale atomic write: this locale's partition lands on
         # disk before the next locale starts. A crash mid-run leaves
         # earlier locales' partitions intact and resumable (within
         # the same run id).
-        write_locale_partition(df, out, locale=locale, run_id=run_id)
-        total_written += len(df)
+        claimed = run_id is None
+        run_id, written = save_sampled_rows(df, out, locale=locale, run_id=run_id, started_at=started_at)
+        if not written:
+            logger.info("locale=%s: no new trajectories", locale)
+            continue
+        if claimed:
+            print(f"  run_id:        {run_id}")
+        total_written += written
         logger.info(
             "locale=%s: wrote %d new trajectories",
             locale,
-            len(df),
+            written,
         )
 
     if total_written == 0:
@@ -591,13 +730,17 @@ def _simulate_to_parquet(
         f"\nNext step: score them\n  usersim eval --run {run_id} \\\n    --trajectories {out} --out output/evaluations"
     )
 
-    # Write the run manifest. ``run_id`` is the unix-epoch start time
-    # (see ``new_run_id``), so we pass it as ``started_at_epoch`` to keep
-    # the manifest's started/runtime fields meaningful even on resume.
-    # First-writer-wins: a resume into a run that already has a manifest
-    # is a noop. ``trajectories_requested`` is the per-locale request
-    # count from this invocation; the manifest's ``trajectories_completed``
-    # comes from re-reading the parquet partitions for this run.
+    if run_id == LEGACY_RUN_ID:
+        # The bare layout has no run folder to hold a manifest.
+        logger.info("run=%s is the bare legacy layout; no run manifest written", run_id)
+        return 0
+
+    # Write the run manifest. ``started_at_epoch`` is when the invocation
+    # that made the run started, kept in the run's record. First-writer-wins:
+    # a resume into a run that already has a manifest is a noop.
+    # ``trajectories_requested`` is the per-locale request count from this
+    # invocation; the manifest's ``trajectories_completed`` comes from
+    # re-reading the parquet partitions for this run.
     requested_per_locale: dict[str, int] = {l: int(num_rows) for l in run_locales} if num_rows else {}
     sim_cfg_for_manifest = _build_sim_config_for_manifest(
         max_turns=max_turns,
@@ -607,7 +750,7 @@ def _simulate_to_parquet(
     try:
         manifest_path_written = write_simulator_manifest(
             run_id=run_id,
-            started_at_epoch=int(run_id),
+            started_at_epoch=run_started_at(out, run_id) or int(started_at),
             trajectory_root=out,
             models_config=models,
             models_config_path=models_path,
