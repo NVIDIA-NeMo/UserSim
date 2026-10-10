@@ -60,6 +60,7 @@ from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankVerbatimMixin,
+    dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.simulation import ConversationState, make_failed
@@ -316,7 +317,7 @@ async def simulate_sov_ai_facts(
         )
     except SovAiFactsProbeError as e:
         return _aborted(str(e), provenance)
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

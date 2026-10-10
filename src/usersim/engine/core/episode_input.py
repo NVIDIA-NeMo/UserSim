@@ -179,7 +179,16 @@ def construct_episode_preamble(
             user_model=resolve_model_name(models.get(MODEL_USER), MODEL_USER),
             assistant_model=resolve_model_name(models.get(MODEL_ASSISTANT), MODEL_ASSISTANT),
             prompt_version=prompt_version,
-            extra_keys=[("locale", locale)],
+            # A run that replays the assistant's reasoning is a different
+            # conversation; without replay the id is what it always was.
+            extra_keys=[
+                ("locale", locale),
+                *(
+                    [("replay_assistant_reasoning", "1")]
+                    if getattr(config, "replay_assistant_reasoning", False)
+                    else []
+                ),
+            ],
         )
     )
     language = get_conversation_language(locale)

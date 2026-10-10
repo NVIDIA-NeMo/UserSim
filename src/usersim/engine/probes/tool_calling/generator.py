@@ -45,6 +45,7 @@ from usersim.engine.core.probes import (
     BaseProbe,
     ToolCallingMixin,
     ToolExecutionMixin,
+    dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.prompt_loader import render_prompt
@@ -443,4 +444,4 @@ async def simulate_tool_calling(
         data=data,
         outcome_builder=kwargs.get("outcome_builder"),
     )
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)

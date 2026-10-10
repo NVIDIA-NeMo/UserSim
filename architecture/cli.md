@@ -49,6 +49,22 @@ top_p, max_tokens, and any model-family-specific `extra_body`. A TOML row
 overrides the catalogue per field, and the row is self-describing for
 anything it sets.
 
+`replay_reasoning = true` on the `assistant_model` row sends the assistant
+the reasoning of its own earlier messages, for a model trained to receive it.
+It becomes `ConversationSimulatorConfig.replay_assistant_reasoning`, because
+Data Designer's model configs take no extra fields. A setup that cannot
+replay fails at config construction:
+- the switch on another alias
+- `--no-store-reasoning`
+- a provider that is not OpenAI-compatible
+
+A model override that changes the assistant's model turns it off unless the
+override sets it.
+
+It only helps where the endpoint passes `reasoning_content` on earlier
+assistant messages through to the model; a server or chat template that
+drops earlier thinking makes it a no-op.
+
 ## Failure handling
 
 `usersim.cli._errors.ConfigError` is a `ValueError` subclass, never a

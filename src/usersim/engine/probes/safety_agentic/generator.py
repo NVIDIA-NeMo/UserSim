@@ -106,6 +106,7 @@ from usersim.engine.core.probes import (
     AgenticMixin,
     BankBackedProbe,
     assistant_message,
+    dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.simulation import (
@@ -585,7 +586,7 @@ async def simulate_safety_agentic(
         return _aborted(f"agentic-bank load failed: {e}", provenance)
     except SafetyAgenticProbeError as e:
         return _aborted(str(e), provenance)
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

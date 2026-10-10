@@ -1495,3 +1495,26 @@ async def _baseprobe_run_dispatch(
 
 
 BaseProbe.run_dispatch = _baseprobe_run_dispatch  # type: ignore[attr-defined]
+
+
+async def dispatch_episode(
+    probe: BaseProbe,
+    *,
+    models: dict[str, Any],
+    data: dict[str, Any],
+    cfg: Any,
+    **dispatch_kwargs: Any,
+) -> dict:
+    """Run one episode through ``probe.run_dispatch`` with ``cfg``'s per-episode settings installed.
+
+    The generator, the hosted runtime and every ``simulate_<probe>`` shortcut
+    run their episodes through here, so a setting that holds for one episode
+    (today: reasoning replay) is installed in this one place. The settings are
+    context variables, so call it in the task that runs the episode.
+    ``dispatch_kwargs`` (``state``, ``seed_state``) pass through to
+    ``run_dispatch``.
+    """
+    from usersim.engine.core.llm import replay_reasoning_scope
+
+    with replay_reasoning_scope(cfg):
+        return await probe.run_dispatch(models=models, data=data, cfg=cfg, **dispatch_kwargs)

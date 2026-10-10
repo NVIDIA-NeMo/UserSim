@@ -270,9 +270,9 @@ def make_result(
     Assistant thinking traces, when the model emits them, ride on the
     assistant message itself as ``reasoning_content`` -- the OpenAI-style
     shape ``{role, content, reasoning_content, tool_calls}``. They are
-    stored for analysis but NOT replayed to a model: ``acall_llm`` converts
-    messages with ``include_reasoning=False``, so a later turn never sees
-    an earlier turn's thinking.
+    stored for analysis, and sent back to the assistant model only when its
+    run replays reasoning (``replay_assistant_reasoning``); otherwise a later
+    turn never sees an earlier turn's thinking.
     """
     return {
         "conversation_messages": json.dumps(messages, ensure_ascii=False, default=str),

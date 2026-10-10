@@ -29,6 +29,7 @@ from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
     acall_llm,
+    replay_reasoning_scope,
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
@@ -546,12 +547,12 @@ async def test_transient_error_still_retries() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Thinking traces are stored, never replayed
+# Thinking traces are stored, and replayed only to the assistant, on request
 # ---------------------------------------------------------------------------
 
 
 def test_trace_does_not_reach_the_chat_message() -> None:
-    """A stored thinking trace must not travel back into a model call.
+    """By default, a stored thinking trace must not travel back into a model call.
 
     Trajectories keep ``reasoning_content`` on the assistant message for
     analysis, so the guarantee lives at the conversion boundary: whatever
@@ -577,6 +578,73 @@ def test_trace_does_not_reach_the_chat_message() -> None:
     payload = [m.to_dict() for m in chat]
     assert not any("reasoning_content" in m for m in payload)
     assert trace not in str(payload)
+
+
+class _RecordingFacade:
+    """Records the wire form of every request it receives."""
+
+    def __init__(self) -> None:
+        self.payloads: list[list[dict]] = []
+
+    async def acompletion(self, messages, **kwargs):
+        self.payloads.append([m.to_dict() for m in messages])
+        return SimpleNamespace(
+            message=SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None),
+            usage=None,
+        )
+
+
+_REPLAY_ON = SimpleNamespace(replay_assistant_reasoning=True)
+_REPLAY_OFF = SimpleNamespace(replay_assistant_reasoning=False)
+_TRACE = "Plan: ask about sleep first."
+_HISTORY = [
+    {"role": "user", "content": "first question"},
+    {"role": "assistant", "content": "first answer", "reasoning_content": _TRACE},
+    {"role": "user", "content": "second question"},
+]
+
+
+async def _sent(alias: str, config) -> str:
+    facade = _RecordingFacade()
+    with replay_reasoning_scope(config):
+        await acall_llm({alias: facade}, alias, _HISTORY)
+    return str(facade.payloads)
+
+
+async def test_replay_sends_the_assistant_its_earlier_reasoning() -> None:
+    assert _TRACE in await _sent("assistant_model", _REPLAY_ON)
+    assert _TRACE not in await _sent("assistant_model", _REPLAY_OFF)
+
+
+@pytest.mark.parametrize("alias", ["user_model", "judge_model", "summary_model", "api_response_model"])
+async def test_replay_never_sends_reasoning_to_another_model(alias: str) -> None:
+    """Even a request that holds an assistant message with reasoning: only the assistant's own history replays."""
+    assert _TRACE not in await _sent(alias, _REPLAY_ON)
+
+
+async def test_the_replay_setting_is_restored_after_a_failure() -> None:
+    with pytest.raises(RuntimeError), replay_reasoning_scope(_REPLAY_ON):
+        raise RuntimeError("the episode failed")
+
+    # A call outside any episode, in the same context, must not replay.
+    facade = _RecordingFacade()
+    await acall_llm({"assistant_model": facade}, "assistant_model", _HISTORY)
+    assert _TRACE not in str(facade.payloads)
+
+
+async def test_concurrent_episodes_each_keep_their_own_setting() -> None:
+    import asyncio
+
+    async def episode(config) -> str:
+        facade = _RecordingFacade()
+        with replay_reasoning_scope(config):
+            await asyncio.sleep(0)
+            await acall_llm({"assistant_model": facade}, "assistant_model", _HISTORY)
+        return str(facade.payloads)
+
+    on, off = await asyncio.gather(episode(_REPLAY_ON), episode(_REPLAY_OFF))
+
+    assert _TRACE in on and _TRACE not in off
 
 
 # ---------------------------------------------------------------------------
