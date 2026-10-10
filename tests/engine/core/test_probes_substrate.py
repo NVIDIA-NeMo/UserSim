@@ -159,7 +159,6 @@ class TestBaseProbeDefaults:
         assert probe.on_followup_failure(state, "gate_exhausted") == "skip"
         assert probe.should_inline_judge_user_turn(0, state) is True
         assert probe.should_inline_judge_assistant_turn(0, state) is True
-        assert probe.should_continue_after_turn(state) is True
         assert probe.allow_early_stop_at_turn(0, state) is True
         assert probe.user_turn_policy() == UserTurnPolicy()
 
@@ -487,30 +486,6 @@ class TestAgenticMixin:
             outcome_builder=OutcomeBuilder(),
             provenance=Provenance(),
         )
-
-    def test_continues_when_assistant_emitted_tool_calls(self) -> None:
-        probe = self._build()
-        state = _StubState(
-            messages=[
-                {"role": "user"},
-                {"role": "assistant", "tool_calls": [{"id": "t1"}]},
-            ]
-        )
-        assert probe.should_continue_after_turn(state) is True
-
-    def test_stops_when_assistant_emitted_no_tool_calls(self) -> None:
-        probe = self._build()
-        state = _StubState(
-            messages=[
-                {"role": "user"},
-                {"role": "assistant", "content": "I refuse."},
-            ]
-        )
-        assert probe.should_continue_after_turn(state) is False
-
-    def test_stops_on_empty_message_history(self) -> None:
-        probe = self._build()
-        assert probe.should_continue_after_turn(_StubState()) is False
 
     def test_skips_user_judge_for_turn_zero(self) -> None:
         probe = self._build()
