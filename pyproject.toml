@@ -3,7 +3,7 @@ name = "nemo-usersim"
 version = "0.1.0"
 description = "Population-grounded user simulation for evaluating conversational LLMs"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 keywords = [
     "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
 ]
@@ -13,8 +13,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
@@ -184,7 +187,7 @@ asyncio_mode = "auto"
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py312"
+target-version = "py310"
 # Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
 # committed outputs, so linting them means noise and rewritten cells. Excluding
 # them keeps a bare `ruff check` equivalent to `make lint`.
