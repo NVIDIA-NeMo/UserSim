@@ -66,6 +66,8 @@ dependencies = [
     # Reads credentials from a .env file so a run does not depend on what is
     # exported in the calling shell. No required dependencies of its own.
     "python-dotenv>=1.0,<2",
+    # Parses the models TOML on Python 3.10, which has no tomllib.
+    "tomli>=1.1.0; python_version < '3.11'",
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
@@ -99,6 +101,9 @@ dev = [
     # here. conftest.py fails the run if it is absent, because without it every
     # async test is skipped with a warning rather than failing.
     "pytest-asyncio>=1.0,<2",
+    # tests/test_network_guard.py unwraps exception groups, which Python 3.10
+    # has only through this backport.
+    "exceptiongroup>=1.0; python_version < '3.11'",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the

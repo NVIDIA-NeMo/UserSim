@@ -13,8 +13,12 @@ from __future__ import annotations
 
 import json
 import socket
+import sys
 
 import pytest
+
+if sys.version_info < (3, 11):
+    from exceptiongroup import BaseExceptionGroup
 
 # TEST-NET-3 (RFC 5737): reserved for documentation and guaranteed not to be
 # routable. Using a literal address keeps DNS out of the picture, so the guard

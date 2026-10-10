@@ -1992,10 +1992,12 @@ requires-dist = [
     { name = "rich" },
     { name = "seaborn" },
     { name = "tiktoken", specifier = ">=0.7,<1.0" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=1.1.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "exceptiongroup", marker = "python_full_version < '3.11'", specifier = ">=1.0" },
     { name = "jupyter" },
     { name = "pre-commit", specifier = ">=4.0,<5" },
     { name = "pytest", specifier = ">=8.0" },

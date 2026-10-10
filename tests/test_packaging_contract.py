@@ -15,12 +15,20 @@ from __future__ import annotations
 import ast
 import importlib
 import sys
-import tomllib
 from pathlib import Path
 
 import pytest
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 _REPO_ROOT = Path(__file__).resolve().parents[1]
+
+#: The running Python's standard library, plus ``tomllib``, which is new in
+#: 3.11: on 3.10 the package imports the declared ``tomli`` backport instead.
+_STDLIB = sys.stdlib_module_names | {"tomllib"}
 
 
 class TestPluginEntryPoints:
@@ -95,7 +103,7 @@ class TestDeclaredDependencies:
                     found.update(a.name.split(".")[0] for a in node.names)
                 elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
                     found.add(node.module.split(".")[0])
-        return {m for m in found if m not in sys.stdlib_module_names and m != own_package}
+        return {m for m in found if m not in _STDLIB and m != own_package}
 
     @staticmethod
     def _declared(pyproject: Path) -> set[str]:
@@ -337,8 +345,6 @@ class TestRuntimeDependencySurface:
 
     @staticmethod
     def _runtime_deps() -> set[str]:
-        import tomllib
-
         data = tomllib.load((_REPO_ROOT / "pyproject.toml").open("rb"))
         names = set()
         for spec in data["project"]["dependencies"]:
