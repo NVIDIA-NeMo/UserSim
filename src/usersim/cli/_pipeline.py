@@ -36,7 +36,12 @@ from types import SimpleNamespace
 from typing import Any
 
 from usersim.cli._errors import ConfigError
-from usersim.cli._models import ModelsConfig, to_data_designer_kwargs, to_model_configs
+from usersim.cli._models import (
+    ModelsConfig,
+    assistant_replays_reasoning,
+    to_data_designer_kwargs,
+    to_model_configs,
+)
 from usersim.cli._persona_language import (
     DEFAULT_PERSONA_DATASETS_DIR,
     persona_sampler_params,
@@ -417,6 +422,7 @@ def build_simulator_config_builder(
             max_turns=max_turns,
             max_assistant_attempts=max_assistant_attempts,
             store_reasoning=store_reasoning,
+            replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
             context_compression=True,
             compression_window=1,
             verbosity=verbosity,
@@ -539,6 +545,7 @@ def materialize_episode_inputs(
         max_turns=max_turns,
         max_assistant_attempts=max_assistant_attempts,
         store_reasoning=store_reasoning,
+        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
         finance_tier_mix=finance_tier_mix,
         finance_retrieval_mode=finance_retrieval_mode,
         **toolset_kwargs,

@@ -12,9 +12,13 @@ import os
 import random as _random
 import threading
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
+
+from usersim.engine.config import MODEL_ASSISTANT
 
 _MAX_RETRIES = 3
 _BASE_DELAY = 1.0
@@ -54,6 +58,31 @@ _PENDING_RECORDS: ContextVar[list[dict[str, Any]] | None] = ContextVar(
     "usersim_pending_debug_records",
     default=None,
 )
+#: Whether the assistant's requests carry the reasoning of its own earlier
+#: messages (``ConversationSimulatorConfig.replay_assistant_reasoning``).
+#: Installed per episode by ``replay_reasoning_scope``.
+_REPLAY_ASSISTANT_REASONING: ContextVar[bool] = ContextVar("usersim_replay_assistant_reasoning", default=False)
+
+
+@contextmanager
+def replay_reasoning_scope(config: Any) -> Iterator[None]:
+    """Install ``config``'s reasoning-replay setting for the episode run inside the block.
+
+    ``core.probes.dispatch_episode`` runs every episode inside one, in the
+    task that runs the episode, so a hosted episode replays as a local one
+    does and no episode sees another's setting. The previous setting is
+    restored on the way out, also when the episode fails.
+    """
+    token = _REPLAY_ASSISTANT_REASONING.set(bool(getattr(config, "replay_assistant_reasoning", False)))
+    try:
+        yield
+    finally:
+        _REPLAY_ASSISTANT_REASONING.reset(token)
+
+
+def replaying_assistant_reasoning() -> bool:
+    """Whether the episode running in this context replays the assistant's reasoning."""
+    return _REPLAY_ASSISTANT_REASONING.get()
 
 
 class ContextWindowError(RuntimeError):
@@ -351,17 +380,19 @@ from data_designer.engine.models.facade import ModelFacade
 from data_designer.engine.models.utils import ChatMessage
 
 
-def _dicts_to_chat_messages(messages: list[dict[str, Any]]) -> list[ChatMessage]:
+def _dicts_to_chat_messages(messages: list[dict[str, Any]], *, keep_reasoning: bool = False) -> list[ChatMessage]:
     """Convert a list of plain dicts to ChatMessage objects for ModelFacade.
 
-    A prior turn's ``reasoning_content`` is never forwarded: the
-    assistant's ``reasoning_content`` is hard-coded to ``None`` below,
-    matching ``ChatMessage``'s own default for the field. A trace is an
-    artefact of the turn that produced it, not conversation state.
+    A prior turn's ``reasoning_content`` is dropped unless ``keep_reasoning``,
+    which ``_begin_call`` sets only for the assistant model's own requests
+    when its run replays reasoning: a model trained on its own earlier
+    reasoning then sees the history it would see in deployment. Every other
+    request carries none, so during a simulation no model receives another's
+    reasoning.
 
-    Stored trajectories DO keep the trace on the assistant message (see
+    Stored trajectories keep the trace on the assistant message (see
     ``assistant_message`` in ``core/probes.py``), so it stays available
-    for analysis -- it is dropped only on the way back into a model.
+    for analysis either way.
     """
     out: list[ChatMessage] = []
     for msg in messages:
@@ -373,7 +404,7 @@ def _dicts_to_chat_messages(messages: list[dict[str, Any]]) -> list[ChatMessage]
             out.append(
                 ChatMessage.as_assistant(
                     content=content,
-                    reasoning_content=None,
+                    reasoning_content=(msg.get("reasoning_content") or None) if keep_reasoning else None,
                     tool_calls=msg.get("tool_calls") or None,
                 )
             )
@@ -437,7 +468,10 @@ def _begin_call(
 
     has_tools = "tools" in kwargs and kwargs["tools"]
     tool_tag = f" + {len(kwargs['tools'])} tools" if has_tools else ""
-    chat_messages = _dicts_to_chat_messages(messages)
+    # Only the assistant's requests hold its own earlier messages; every other
+    # model sees the conversation as text, so only the assistant may replay.
+    replay = alias == MODEL_ASSISTANT and _REPLAY_ASSISTANT_REASONING.get()
+    chat_messages = _dicts_to_chat_messages(messages, keep_reasoning=replay)
 
     logger.debug(f"  |-- LLM call: {alias} ({len(messages)} msgs{tool_tag}) ...")
     return facade, chat_messages, time.monotonic()

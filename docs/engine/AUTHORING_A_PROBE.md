@@ -580,7 +580,7 @@ from usersim.engine.core.cooking_bank import (
 )
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.probes import (
-    BankBackedProbe, BankVerbatimMixin, register_probe,
+    BankBackedProbe, BankVerbatimMixin, dispatch_episode, register_probe,
 )
 from usersim.engine.probes.cooking_advisor.prompts import (
     COOKING_GATE_PROMPT, COOKING_USER_PROMPTS,
@@ -672,7 +672,9 @@ async def simulate_cooking_advisor(
         cfg=cfg, provenance=provenance, profile=profile, data=data,
         outcome_builder=outcome_builder,
     )
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    # dispatch_episode installs the run's per-episode settings (reasoning
+    # replay) around run_dispatch, as the generator does.
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 ```
 
 ### File 6: built-in probe list

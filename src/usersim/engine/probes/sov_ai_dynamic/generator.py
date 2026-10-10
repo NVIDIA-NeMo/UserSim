@@ -58,6 +58,7 @@ from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
+    dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.probing_taxonomy import (
@@ -367,7 +368,7 @@ async def simulate_sov_ai_dynamic(
         )
     except SovAiDynamicProbeError as e:
         return _aborted(str(e), provenance)
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 
 
 def _aborted(reason: str, provenance: Any) -> dict[str, Any]:

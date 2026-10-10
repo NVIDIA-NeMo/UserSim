@@ -83,6 +83,14 @@ exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back
 to lexical search with a warning, so results can differ from a standalone run
 that has one configured.
 
+### Replaying the assistant's reasoning
+
+When the row's `usersim_config` sets `replay_assistant_reasoning` (from
+`replay_reasoning = true` on `assistant_model` in the models file), each
+assistant request's earlier assistant messages carry their
+`reasoning_content`. Forward them to the model as they are. No other role's
+messages ever carry the assistant's reasoning. Replay only helps where the endpoint passes `reasoning_content` on earlier assistant messages through to the model; a server or chat template that drops earlier thinking makes it a no-op.
+
 ## Driving the episode
 
 `advance()` is the whole loop. The first call takes no result; every later call

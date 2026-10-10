@@ -14,7 +14,7 @@ import logging
 import time
 from typing import Any
 
-from usersim.engine.core.llm import acall_llm, append_debug_record
+from usersim.engine.core.llm import acall_llm, append_debug_record, replaying_assistant_reasoning
 
 logger = logging.getLogger("usersim.engine")
 
@@ -111,9 +111,15 @@ def prepare_assistant_history(
     Compression runs before the probe transform because summary keys refer to
     canonical message positions. The finance probe uses the transform to bound
     retrieved document bodies; every other probe inherits the identity view.
+
+    An episode that replays the assistant's reasoning sends its history
+    uncompressed, so the assistant sees what it produced: a summary beside
+    the full original reasoning is a history it never produced. Read from the
+    same setting the request code reads, so the two never disagree.
     """
     messages: list[dict[str, Any]]
-    if getattr(cfg, "context_compression", False) and getattr(state, "conv_summaries", None):
+    compress = getattr(cfg, "context_compression", False) and not replaying_assistant_reasoning()
+    if compress and getattr(state, "conv_summaries", None):
         messages = compress_history(
             state.messages,
             state.conv_summaries,

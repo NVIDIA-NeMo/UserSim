@@ -37,7 +37,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
-from usersim.engine.core.probes import BankLoadError, load_builtin_probes
+from usersim.engine.core.probes import BankLoadError, dispatch_episode, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
@@ -205,7 +205,7 @@ class ConversationSimulatorGenerator(
                 if construction_error is not None:
                     raise construction_error.cause
                 assert constructed is not None
-                result = await constructed.probe.run_dispatch(models=models, data=data, cfg=cfg)
+                result = await dispatch_episode(constructed.probe, models=models, data=data, cfg=cfg)
             except ContextWindowError as e:
                 logger.warning(
                     "  |-- Context window failure for %s: %s",

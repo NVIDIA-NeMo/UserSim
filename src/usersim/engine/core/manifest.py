@@ -172,6 +172,7 @@ class SimulationConfigSnapshot:
     compression_window: int
     random_seed: int | None = None
     store_reasoning: bool = True
+    replay_assistant_reasoning: bool = False
 
 
 @dataclass(frozen=True)
@@ -337,6 +338,7 @@ def _sim_config_from_dict(d: Mapping[str, Any]) -> SimulationConfigSnapshot:
         max_query_attempts=int(d.get("max_query_attempts", 3)),
         max_assistant_attempts=int(d.get("max_assistant_attempts", 1)),
         store_reasoning=bool(d.get("store_reasoning", True)),
+        replay_assistant_reasoning=bool(d.get("replay_assistant_reasoning", False)),
         incremental_disclosure_ratio=float(d.get("incremental_disclosure_ratio", 0.6)),
         persona_grounding_ratio=float(d.get("persona_grounding_ratio", 1.0)),
         context_compression=bool(d.get("context_compression", True)),
@@ -777,6 +779,7 @@ def build_run_manifest(
         max_query_attempts=int(getattr(sim_config, "max_query_attempts", 3)),
         max_assistant_attempts=int(getattr(sim_config, "max_assistant_attempts", 1)),
         store_reasoning=bool(getattr(sim_config, "store_reasoning", True)),
+        replay_assistant_reasoning=bool(getattr(sim_config, "replay_assistant_reasoning", False)),
         incremental_disclosure_ratio=float(getattr(sim_config, "incremental_disclosure_ratio", 0.6)),
         persona_grounding_ratio=float(getattr(sim_config, "persona_grounding_ratio", 1.0)),
         context_compression=bool(getattr(sim_config, "context_compression", True)),
