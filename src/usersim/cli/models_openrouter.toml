@@ -15,12 +15,12 @@
 # under test is not scoring its own output.
 
 models = [
-  { alias = "user_model",         model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # simulated user
+  { alias = "user_model",         model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # simulated user
   { alias = "assistant_model",    model = "google/gemma-4-31b-it",       provider = "openrouter", max_parallel_requests = 8, timeout = 300 },  # model under test
   { alias = "api_response_model", model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # tool-call responses
   { alias = "judge_model",        model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8 },               # in-sim gates
   { alias = "summary_model",      model = "openai/gpt-oss-20b",          provider = "openrouter", max_parallel_requests = 8 },                 # context compression
-  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8 },               # trajectory rubric
+  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning", provider = "openrouter", max_parallel_requests = 8, timeout = 300 }, # trajectory rubric
 
   # Query side of the financial_services probe's dense and hybrid retrieval.
   # Must be the same model that produced the corpus vectors: vectors only
