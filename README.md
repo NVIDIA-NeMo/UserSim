@@ -4,8 +4,9 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
 
-> Simulate a statistically representative population of users having multi-turn
-> conversations with your model or agentic system. Every run produces auditable
+> Simulate a statistically representative population of users, sampled from
+> persona datasets (e.g., census-grounded), having multi-turn conversations with
+> your model or agentic system. Every run produces auditable
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
