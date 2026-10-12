@@ -22,8 +22,6 @@ the simulate loop directly.
 
 What ``AgenticMixin`` does:
 - Inherits from ``BankVerbatimMixin``.
-- Sets ``should_continue_after_turn = False`` once the assistant
-  emits a turn with no tool calls.
 - Sets ``should_inline_judge_user_turn = False`` for turn 0 (the
   user's verbatim action request is auditable as-is — no judge call).
 
@@ -36,7 +34,8 @@ What you provide:
   not "system prompt" — it's API surface).
 - ``run_dispatch(*, models, data, cfg)`` — your custom simulate
   loop. Inject verbatim user turn-1, loop assistant calls, intercept
-  tool calls + append mock responses.
+  tool calls + append mock responses, and stop when the assistant
+  answers without tool calls (as ``safety_agentic`` does).
 - ``build_result_extras`` — overrides ``num_turns`` to assistant-
   message count (NOT user-turn count — single user turn here).
 
