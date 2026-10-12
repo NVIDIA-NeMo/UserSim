@@ -311,6 +311,13 @@ class TestProbeAssetPreflight:
         verify_probe_assets({p: 1.0 for p in known_probes()}, ["en_US"], None)
 
 
+class TestSdistContents:
+    def test_tests_are_pruned_from_the_sdist(self) -> None:
+        """The suite runs from a checkout; a partial copy without conftest.py would not run."""
+        directives = [line.split() for line in (_REPO_ROOT / "MANIFEST.in").read_text().splitlines()]
+        assert ["prune", "tests"] in directives
+
+
 class TestManifestProvenance:
     """A run manifest records the version of the installed ``usersim`` distribution.
 
