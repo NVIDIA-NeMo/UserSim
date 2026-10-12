@@ -275,6 +275,23 @@ class TestProbeAssetPreflight:
         # Naming what *is* available turns a dead end into a next step.
         assert "available:" in message and "en_US" in message
 
+    def test_india_variant_without_its_own_bank_uses_en_in(self) -> None:
+        """A registered variant runs on its base locale's bank, as its probe and scorer resolve it."""
+        from usersim.cli._pipeline import verify_probe_assets
+
+        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
+        verify_probe_assets(mix, ["bn_Beng_IN"], None)
+
+    def test_india_variant_is_rejected_when_its_base_bank_is_absent(self, tmp_path: Path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
+        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["bn_Beng_IN"], tmp_path)
+        assert "bn_Beng_IN" in str(exc.value)
+
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
