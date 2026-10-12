@@ -54,9 +54,10 @@ Today's workarounds address none of these well:
 ## The approach
 
 NeMo User Sim takes a different path: **simulate a statistically representative
-population of users interacting with your LLM**, producing structured evaluation
-signals and training data automatically, with controllable coverage over
-languages, demographics, interaction styles, and probe complexity.
+population of users interacting with your LLM**, sampled from persona datasets
+(e.g., census-grounded; see [personas.md](personas.md)), producing structured
+evaluation signals and training data automatically, with controllable coverage
+over languages, demographics, interaction styles, and probe complexity.
 
 The parallel to autonomous driving is instructive. Waymo leaned heavily on
 simulation early on (long before they had a large fleet), running billions of

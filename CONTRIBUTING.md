@@ -90,7 +90,7 @@ passes the check automatically.
 
 ## Getting set up
 
-Requires Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync                     # installs the dev group: pytest, ruff, jupyter
@@ -205,7 +205,7 @@ Two heavier gates run in CI and are worth running locally if you touched
 packaging or the extension seams:
 
 ```bash
-make check-wheel        # builds a wheel, installs it clean, runs from an empty dir
+make check-dist         # builds and checks the sdist and wheel, installs the wheel clean, runs it from an empty dir
 make check-extensions   # installs an out-of-tree package, asserts all six seams work
 ```
 
@@ -218,8 +218,8 @@ Your PR title must follow [Conventional Commits](https://www.conventionalcommits
 ## What CI runs
 
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
-rejects reproduces locally with the same command. Tests run on Python 3.12 and
-3.13.
+rejects reproduces locally with the same command. Tests and the dependency
+licence check run on Python 3.10 to 3.14.
 
 No job triggered by a pull request has access to a credential, so a PR from a
 fork runs the complete suite. The consequence is that CI cannot tell you

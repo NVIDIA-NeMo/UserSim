@@ -46,7 +46,10 @@ of silently producing an empty column.
 One wide JSON cell per trajectory, carrying per-axis and per-judge scores
 plus deterministic outputs. Each cell embeds an envelope naming the judges,
 axes, scorers, and prompt version that produced it. On re-run, a row whose
-envelope already matches is skipped.
+envelope already matches is skipped, unless it had rubric axes and no judge
+scored any of them (every call failed, or returned output that did not parse).
+`usersim eval` exits with an error when no row got a verdict, and otherwise
+says how many rows lack one.
 
 A parquet may key the assistant score as `eval_v1` or `assistant_eval_v2`
 rather than the canonical `assistant_eval`; all three are accepted, so an

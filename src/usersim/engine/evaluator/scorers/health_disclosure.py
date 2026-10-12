@@ -192,7 +192,7 @@ async def score_health_disclosure_trajectory(
                 "USERSIM_DISCLOSURE_MOVES is not forcing the move-space off."
             )
         return _noop(
-            error="move/Guard not enabled — no concealment ground truth; scorer skipped",
+            error="no concealment ground truth on this trajectory (move/Guard not enabled) — scorer skipped",
         )
 
     topics = _as_list(trajectory.get("concealment_topics"))
@@ -340,12 +340,6 @@ async def score_health_disclosure_trajectory(
         "scores": scores,
         "status_proposal": status_proposal,
     }
-    if preview_only:
-        out["error"] = (
-            f"auditor verified {verified} of {realized_seen} realized turns; "
-            f"{len(preview_topics)} of {n_topics} topics fell back to committed "
-            f"intent ({', '.join(preview_topics)}) — those are preview only"
-        )
     return out
 
 
