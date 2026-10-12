@@ -1,5 +1,5 @@
 [project]
-name = "nemo-usersim"
+name = "usersim"
 version = "0.1.0"
 description = "Population-grounded user simulation for evaluating conversational LLMs"
 readme = "README.md"
@@ -79,7 +79,7 @@ Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 
 [dependency-groups]
 # A dependency group rather than an optional-dependency extra, so `uv sync`
-# installs it by default and `pip install nemo-usersim[dev]` cannot pull test
+# installs it by default and `pip install usersim[dev]` cannot pull test
 # and lint tooling into a user's environment. `make test` and the hermeticity
 # guard in conftest.py both depend on this group being present.
 dev = [

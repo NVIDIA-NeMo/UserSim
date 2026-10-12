@@ -2521,79 +2521,6 @@ wheels = [
 ]
 
 [[package]]
-name = "nemo-usersim"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "data-designer" },
-    { name = "httpx" },
-    { name = "huggingface-hub" },
-    { name = "langdetect" },
-    { name = "lingua-language-detector", version = "2.1.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "lingua-language-detector", version = "2.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-    { name = "matplotlib" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", version = "3.0.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pyarrow" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-    { name = "rich" },
-    { name = "seaborn" },
-    { name = "tiktoken" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
-    { name = "jupyter" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-env" },
-    { name = "pytest-xdist" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "data-designer", specifier = ">=0.9.4,<0.10" },
-    { name = "httpx" },
-    { name = "huggingface-hub" },
-    { name = "langdetect" },
-    { name = "lingua-language-detector", specifier = ">=2.0,<3.0" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "pyarrow" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "python-dotenv", specifier = ">=1.0,<2" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "rich" },
-    { name = "seaborn" },
-    { name = "tiktoken", specifier = ">=0.7,<1.0" },
-    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=1.1.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'", specifier = ">=1.0" },
-    { name = "jupyter" },
-    { name = "pre-commit", specifier = ">=4.0,<5" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-asyncio", specifier = ">=1.0,<2" },
-    { name = "pytest-cov", specifier = ">=7.0,<8" },
-    { name = "pytest-env", specifier = ">=1.1,<2" },
-    { name = "pytest-xdist", specifier = ">=3.6,<4" },
-    { name = "ruff", specifier = ">=0.14,<0.15" },
-]
-license-check = []
-
-[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4715,6 +4642,79 @@ sdist = { url = "https://files.pythonhosted.org/packages/e3/05/b17359e1cefb4f909
 wheels = [
     { url = "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl", hash = "sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3", size = 135717, upload-time = "2026-09-15T19:29:34.577Z" },
 ]
+
+[[package]]
+name = "usersim"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "data-designer" },
+    { name = "httpx" },
+    { name = "huggingface-hub" },
+    { name = "langdetect" },
+    { name = "lingua-language-detector", version = "2.1.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "lingua-language-detector", version = "2.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "matplotlib" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pyarrow" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "seaborn" },
+    { name = "tiktoken" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "jupyter" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-env" },
+    { name = "pytest-xdist" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "data-designer", specifier = ">=0.9.4,<0.10" },
+    { name = "httpx" },
+    { name = "huggingface-hub" },
+    { name = "langdetect" },
+    { name = "lingua-language-detector", specifier = ">=2.0,<3.0" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pyarrow" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "python-dotenv", specifier = ">=1.0,<2" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "rich" },
+    { name = "seaborn" },
+    { name = "tiktoken", specifier = ">=0.7,<1.0" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=1.1.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "exceptiongroup", marker = "python_full_version < '3.11'", specifier = ">=1.0" },
+    { name = "jupyter" },
+    { name = "pre-commit", specifier = ">=4.0,<5" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-asyncio", specifier = ">=1.0,<2" },
+    { name = "pytest-cov", specifier = ">=7.0,<8" },
+    { name = "pytest-env", specifier = ">=1.1,<2" },
+    { name = "pytest-xdist", specifier = ">=3.6,<4" },
+    { name = "ruff", specifier = ">=0.14,<0.15" },
+]
+license-check = []
 
 [[package]]
 name = "uvicorn"

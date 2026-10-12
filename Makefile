@@ -67,8 +67,10 @@ help:  ## Show the available targets
 
 # --- setup -----------------------------------------------------------------
 
+# Reinstalling the project restores any file that removing another distribution
+# took with it, such as the `usersim` command an earlier name also installed.
 install-dev:  ## Sync the workspace with dev tooling and install pre-commit hooks
-	$(UV) sync
+	$(UV) sync --reinstall-package usersim
 	@if [ ! -f .git/hooks/pre-commit ]; then \
 		echo "Installing pre-commit hooks..."; \
 		$(UV) run pre-commit install; \
@@ -282,8 +284,8 @@ check-extensions:  ## Install an out-of-tree package and prove all six seams wor
 
 # --- housekeeping ----------------------------------------------------------
 
-clean:  ## Remove caches, coverage output, and compiled artifacts
+clean:  ## Remove caches, coverage output, compiled artifacts and package metadata
 	find . -type d -name __pycache__ -not -path './.venv*' -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[co]' -not -path './.venv*' -delete 2>/dev/null || true
-	rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov
+	rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov src/*.egg-info
 	@echo "Cleaned."
