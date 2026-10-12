@@ -573,9 +573,12 @@ def simulate_inputs_to_dataset(
 
     Raises ``ValueError`` when the run already holds a stored row with
     different contents: before any model call when it is found up front, and
-    when the rows are saved when another writer saved them meanwhile. Raises
-    ``RunLockUnsupportedError``, before any model call, when ``out`` is on a
-    filesystem without file locks.
+    when the rows are saved when another writer saved them meanwhile, where
+    the write lock is shared. Where ``out`` is on a filesystem without file
+    locks, the rows are written without a lock shared between processes,
+    with a warning. Two calls at once with one setup can then each start a
+    run, and resuming one run from two places at once can save a row twice,
+    or both versions of a changed row.
     """
     from usersim.cli._pipeline import build_inputs_config_builder
     from usersim.engine.core.manifest import write_simulator_manifest

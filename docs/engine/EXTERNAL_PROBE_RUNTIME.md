@@ -107,10 +107,12 @@ print(result.run_id, result.written, result.skipped)
   `--assets-dir` replaces the asset folder the rows were stored with, and is
   required when that folder doesn't exist on this machine.
 - **Concurrent writers.** Writes into `--out` take a lock, so two calls can
-  share it. On a filesystem whose locks don't reach every node (Lustre mounted
-  with `localflock`, NFS with `local_lock=flock` or `nolock`), give each node
-  its own `--out`. On one without file locks at all, writing is refused
-  before any model call.
+  share it. On a filesystem without file locks, or whose locks don't reach
+  every node (Lustre mounted without `flock` or with `localflock`, NFS with
+  `local_lock=flock`, `local_lock=all` or `nolock`), writing goes ahead, with
+  a warning where file locks are missing. There, two calls at the same time
+  with one setup can each start a run, and two resumes of one run at the same
+  time can save a row twice, or both versions of a changed row.
 
 ## Declaring the host's models
 

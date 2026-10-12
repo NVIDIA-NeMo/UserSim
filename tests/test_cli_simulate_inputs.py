@@ -828,38 +828,22 @@ def test_a_dry_run_shows_the_plan_without_running(rows, tmp_path, capsys):
     assert list_runs(tmp_path / "o") == []
 
 
-def test_a_job_another_host_runs_is_submitted_whatever_this_hosts_file_locks(rows, tmp_path, monkeypatch):
-    """The lock is checked where the job runs, so a backend that runs it elsewhere still gets it."""
+def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(rows, tmp_path, monkeypatch, caplog):
+    """Shared filesystems such as Lustre are often mounted without ``flock``; stored rows run there anyway."""
     fcntl = pytest.importorskip("fcntl")
     import errno
-
-    from usersim.engine.core.backends import JobHandle, JobStatus
 
     def unsupported(*args, **kwargs):
         raise OSError(errno.ENOSYS, "flock is not supported here")
 
-    class _Elsewhere:
-        name = "elsewhere"
-
-        def __init__(self) -> None:
-            self.submitted: list[str] = []
-
-        def submit(self, spec, *, credentials=None):
-            self.submitted.append(spec.name)
-            return JobHandle(backend=self.name, job_id="1")
-
-        def poll(self, handle):
-            return JobStatus(state="succeeded", exit_code=0)
-
-        def fetch(self, handle, dest):
-            return dest
-
-    backend = _Elsewhere()
     monkeypatch.setattr(fcntl, "flock", unsupported)
-    argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "out")]
-    with patch("usersim.engine.core.backends.get_backend", return_value=backend):
-        assert cli.main(argv) == 0
-    assert backend.submitted == ["simulate-inputs"]
+    with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+        first = _run(rows[:2], tmp_path)
+        second = _run(rows, tmp_path)
+
+    assert second.run_id == first.run_id and second.resumed
+    assert set(_saved(tmp_path, first.run_id)[INPUT_ID_COLUMN]) == {row["trajectory_id"] for row in rows}
+    assert sum("not supported" in record.getMessage() for record in caplog.records) == 1
 
 
 def test_rows_stored_as_parquet_load_as_they_were_written(rows, tmp_path):

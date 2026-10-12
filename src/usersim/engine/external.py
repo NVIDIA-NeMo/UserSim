@@ -110,10 +110,13 @@ def simulate_episode_inputs(
     ``ValueError`` for rows that cannot run, before any model call, and for a
     stored row that the run already holds with different contents: before any
     model call when it is found up front, and when the rows are saved when
-    another writer saved it meanwhile. Raises ``RunLockUnsupportedError``
-    (an ``OSError``), before any model call, when ``out`` is on a filesystem
-    without file locks. Returns an ``InputsRun`` with the run
-    id and the number of rows written and skipped.
+    another writer saved it meanwhile, where the write lock is shared. Where
+    ``out`` is on a filesystem without file locks, the rows are written
+    without a lock shared between processes, with a warning. Two calls at
+    once with one setup can then each start a run, and resuming one run from
+    two places at once can save a row twice, or both versions of a changed
+    row. Returns an ``InputsRun`` with the run id and the number of rows
+    written and skipped.
     """
     from usersim.cli._inputs import prepare_episode_inputs, simulate_inputs_to_dataset
     from usersim.cli._models import REQUIRED_SIMULATOR_ALIASES, default_models_path, load_models_config, require_aliases
