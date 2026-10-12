@@ -1,8 +1,8 @@
 # NeMo User Sim: Population-Grounded User Simulation for Models and Agents
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
 
 > Simulate a statistically representative population of users having multi-turn
 > conversations with your model or agentic system. Every run produces auditable
@@ -11,7 +11,7 @@
 
 **14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
 
-<img src="docs/images/pipeline_architecture.jpg" width="800">
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/pipeline_architecture.jpg" width="800">
 
 ---
 
@@ -43,13 +43,13 @@ behavioural features depend on.
 
 The datasets are downloaded on first use rather than bundled, and carry their
 own licence separate from this project's, including an AI ethics clause. See
-[`docs/personas.md`](docs/personas.md) for how to get them and what the terms
+[`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md) for how to get them and what the terms
 allow. The reasoning behind the design, and how far the results carry, is in
-[`docs/methodology.md`](docs/methodology.md).
+[`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md).
 
 What a single simulated trajectory looks like in practice:
 
-![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](docs/images/conversation_preview.png)
+![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/conversation_preview.png)
 
 A census-grounded persona, an OCEAN-derived interaction style, a probe-driven
 multi-turn conversation, and the trajectory metadata that downstream
@@ -187,7 +187,7 @@ Data Designer's `nvidia` provider. Six aliases configure a full run:
 `user_model`, `assistant_model` and `judge_model` drive the simulation,
 `api_response_model` and `summary_model` support it, and `evaluator_model`
 scores the result. All six are catalogued in
-[`src/usersim/cli/models_default.toml`](src/usersim/cli/models_default.toml);
+[`src/usersim/cli/models_default.toml`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/src/usersim/cli/models_default.toml);
 point `--models` at your own file to change providers, endpoints or sampling.
 
 `simulate`, `eval` and `gen-assets` take `--dry-run`, which resolves the run's
@@ -197,27 +197,27 @@ full plan and exits before the first network call.
 
 **Using it**
 
-- [`docs/probes.md`](docs/probes.md): the 14 probes and which failure mode each catches
-- [`docs/outputs.md`](docs/outputs.md): the parquet columns, evaluation cells and report artifacts a run produces
-- [`docs/locales.md`](docs/locales.md): the 9 shipped locales, the 22 India preview variants, persona-language matching
-- [`docs/notebooks.md`](docs/notebooks.md): the interactive flow
-- [`architecture/selection.md`](architecture/selection.md): curating runs into training datasets
-- [`docs/methodology.md`](docs/methodology.md): why grounded simulation works, and where to trust it
+- [`docs/probes.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/probes.md): the 14 probes and which failure mode each catches
+- [`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md): the parquet columns, evaluation cells and report artifacts a run produces
+- [`docs/locales.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/locales.md): the 9 shipped locales, the 22 India preview variants, persona-language matching
+- [`docs/notebooks.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/notebooks.md): the interactive flow
+- [`architecture/selection.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/selection.md): curating runs into training datasets
+- [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md): why grounded simulation works, and where to trust it
 
 **Understanding it**
 
-- [`architecture/overview.md`](architecture/overview.md): the pipeline, the subsystems, the repository layout
-- [`architecture/engine.md`](architecture/engine.md) · [`probes.md`](architecture/probes.md) · [`evaluator.md`](architecture/evaluator.md): the simulation substrate
-- [`architecture/reporting.md`](architecture/reporting.md) · [`selection.md`](architecture/selection.md): turning trajectories into signal
-- [`architecture/cli.md`](architecture/cli.md) · [`assets.md`](architecture/assets.md): the command surface and asset resolution
-- [`architecture/plugins.md`](architecture/plugins.md): adding a probe, scorer or backend **without forking**
+- [`architecture/overview.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/overview.md): the pipeline, the subsystems, the repository layout
+- [`architecture/engine.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/engine.md) · [`probes.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/probes.md) · [`evaluator.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/evaluator.md): the simulation substrate
+- [`architecture/reporting.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/reporting.md) · [`selection.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/selection.md): turning trajectories into signal
+- [`architecture/cli.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/cli.md) · [`assets.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/assets.md): the command surface and asset resolution
+- [`architecture/plugins.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/plugins.md): adding a probe, scorer or backend **without forking**
 
 **Extending it**
 
-- [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md): end-to-end tutorial for a new probe
-- [`docs/engine/README.md`](docs/engine/README.md): the substrate's full API surface
-- [`templates/probe/`](templates/probe/): copy-and-edit starters, one per probe shape
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): setup, conventions, and how to sign off
+- [`docs/engine/AUTHORING_A_PROBE.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/AUTHORING_A_PROBE.md): end-to-end tutorial for a new probe
+- [`docs/engine/README.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/engine/README.md): the substrate's full API surface
+- [`templates/probe/`](https://github.com/NVIDIA-NeMo/UserSim/tree/main/templates/probe/): copy-and-edit starters, one per probe shape
+- [`CONTRIBUTING.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md): setup, conventions, and how to sign off
 
 ## What it's good for
 
@@ -248,7 +248,7 @@ every trajectory that drew on one records a `used_placeholder_*` warning on
 its outcome. That warning is written to the trajectory parquet, so you can
 always trace which findings rest on reviewed content.
 
-[`docs/methodology.md`](docs/methodology.md) covers all three in depth.
+[`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md) covers all three in depth.
 
 ## Telemetry
 
@@ -268,4 +268,4 @@ as NVIDIA Build apply.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE).

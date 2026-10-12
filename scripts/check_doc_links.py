@@ -1,15 +1,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Fail when a relative link in tracked markdown points at nothing.
+"""Fail when a link in tracked markdown points at nothing in this checkout.
 
-Three separate chunks of work broke documentation links without anything
-noticing: a package rename, a directory move, and a section deletion. Each
-was found by hand, weeks apart. The checker costs milliseconds.
+Checked: relative links, and absolute links into this repository's ``main``
+branch. The README uses absolute ones so its links also work on PyPI, and they
+resolve against the checkout, so moving or deleting a file still fails here.
 
-Only relative links are resolved. External URLs are left alone -- checking
-them needs network access, turns an offline gate into a flaky one, and fails
-on anything behind auth.
+Other external URLs are left alone: checking them needs network access, turns
+an offline gate into a flaky one, and fails on anything behind auth.
 """
 
 from __future__ import annotations
@@ -28,6 +27,13 @@ LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)")
 #: dead as a broken link -- and they are easy to miss when files move.
 HTML_IMG = re.compile(r'<img\s[^>]*src="([^"]+)"')
 
+#: URL prefixes that address a path in this repository's main branch.
+REPO_URLS = (
+    "https://github.com/NVIDIA-NeMo/UserSim/blob/main/",
+    "https://github.com/NVIDIA-NeMo/UserSim/tree/main/",
+    "https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/",
+)
+
 #: Paths are repo-relative, so a leading `_` marks a top-level directory that
 #: is not part of the distribution.
 SKIP_PREFIXES = ("_",)
@@ -45,15 +51,25 @@ def tracked_markdown() -> list[Path]:
     return [REPO / f for f in out if not f.startswith(SKIP_PREFIXES)]
 
 
+def link_path(path: Path, target: str) -> Path | None:
+    """What ``target`` in ``path`` points at in this checkout, or None when it is not checked.
+
+    An anchor is dropped; the file is what can be verified.
+    """
+    for prefix in REPO_URLS:
+        if target.startswith(prefix):
+            return REPO / target.removeprefix(prefix).split("#")[0]
+    if target.startswith(SKIP_SCHEMES):
+        return None
+    return path.parent / target.split("#")[0]
+
+
 def broken_links(path: Path) -> list[tuple[int, str]]:
     problems: list[tuple[int, str]] = []
     for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         for target in LINK.findall(line) + HTML_IMG.findall(line):
-            if target.startswith(SKIP_SCHEMES):
-                continue
-            # Strip an anchor; the file is what we can verify.
-            resolved = (path.parent / target.split("#")[0]).resolve()
-            if not resolved.exists():
+            resolved = link_path(path, target)
+            if resolved is not None and not resolved.resolve().exists():
                 problems.append((n, target))
     return problems
 
@@ -67,9 +83,9 @@ def main() -> int:
             total += 1
 
     if total:
-        print(f"\n✗ {total} broken relative link(s)")
+        print(f"\n✗ {total} broken link(s)")
         return 1
-    print("✓ every relative link in tracked markdown resolves")
+    print("✓ every relative link, and every link into this repository's main branch, resolves")
     return 0
 
 
