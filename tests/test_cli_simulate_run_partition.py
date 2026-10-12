@@ -458,36 +458,48 @@ def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: 
     assert tmp_path not in folders[0].parents
 
 
-def test_a_root_without_file_locks_is_refused_before_any_model_call(tmp_path: Path, monkeypatch) -> None:
-    """The user is told which folder and why, as a configuration error, before anything is simulated."""
+def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path: Path, monkeypatch, caplog) -> None:
+    """Shared filesystems such as Lustre are often mounted without ``flock``; a run is written there anyway."""
     fcntl = pytest.importorskip("fcntl")
     import errno
+    import logging
 
     from usersim.cli import simulate
-    from usersim.cli._errors import ConfigError
     from usersim.cli._models import default_models_path, load_models_config
 
     def unsupported(*args, **kwargs):
         raise OSError(errno.ENOSYS, "flock is not supported here")
 
-    def no_pipeline(**kwargs):
-        raise AssertionError("a pipeline was built")
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("FRESH")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            return _FakeResult()
 
     monkeypatch.setattr(fcntl, "flock", unsupported)
+    monkeypatch.chdir(tmp_path)
+    out = tmp_path / "trajs"
     with (
-        patch("usersim.cli._pipeline.build_simulator_config_builder", no_pipeline),
-        pytest.raises(ConfigError, match="file locks"),
+        patch("usersim.cli._pipeline.build_simulator_config_builder", lambda **kwargs: (_FakeDD(), object())),
+        caplog.at_level(logging.WARNING, logger="usersim.engine"),
     ):
-        simulate._simulate_to_parquet(
+        rc = simulate._simulate_to_parquet(
             models=load_models_config(default_models_path()),
             models_path=default_models_path(),
             panel=None,
             locales=["en_US"],
             num_rows=1,
-            out=tmp_path / "trajs",
+            out=out,
             assets_dir=packaged_assets_dir(),
             max_turns=1,
             probe_mix={"general_open_ended": 1.0},
             random_seed=42,
             skip_existing=True,
         )
+
+    assert rc == 0
+    (run_id,) = list_runs(out)
+    assert set(read_partitioned_dataset(out, run=run_id)["trajectory_id"].astype(str)) == {"FRESH"}
+    assert sum("not supported" in record.getMessage() for record in caplog.records) == 1

@@ -10,24 +10,27 @@ plain ``simulate`` never writes into a run of another kind.
 
 from __future__ import annotations
 
+import errno
 import json
+import logging
 import os
+import re
 import subprocess
 import sys
 import textwrap
 import threading
 import time
+import uuid
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
+from usersim.engine.core import storage
 from usersim.engine.core.storage import (
     LEGACY_RUN_ID,
     RUN_KIND_SAMPLED,
     RUN_RECORD_FILENAME,
-    RunLockUnsupportedError,
-    check_run_write_lock,
     existing_trajectory_ids,
     latest_run_where,
     list_runs,
@@ -38,6 +41,7 @@ from usersim.engine.core.storage import (
     run_write_lock,
     sampled_run_to_resume,
     save_sampled_rows,
+    write_locale_partition,
 )
 
 #: A kind other than sampled rows, as a later kind of run would record.
@@ -100,15 +104,105 @@ def test_a_failed_write_leaves_nothing_visible(tmp_path):
     assert not list(tmp_path.glob(".claim-*"))
 
 
-def test_the_lock_clears_a_claim_a_dead_writer_left(tmp_path):
-    abandoned = tmp_path / ".claim-abandoned"
-    abandoned.mkdir()
-    (abandoned / RUN_RECORD_FILENAME).write_text("{}")
+#: Two PID scopes on one boot: this process's, and a container's with its own PID namespace.
+_SCOPE = "0123456789abcdef0123456789abcdef.4026531836"
+_OTHER_NAMESPACE = "0123456789abcdef0123456789abcdef.4026532001"
+
+
+def _claim(root: Path, *, scope: str, pid: int, age_seconds: float) -> Path:
+    """A claim folder made by ``pid`` in ``scope``, last modified ``age_seconds`` ago."""
+    claim = root / f".claim-{scope}-{pid}-{uuid.uuid4().hex}"
+    claim.mkdir()
+    (claim / RUN_RECORD_FILENAME).write_text("{}")
+    then = time.time() - age_seconds
+    os.utime(claim, (then, then))
+    return claim
+
+
+def _dead_pid() -> int:
+    finished = subprocess.Popen([sys.executable, "-c", "pass"])
+    finished.wait()
+    return finished.pid
+
+
+def test_the_pid_scope_is_this_boot_and_pid_namespace_where_linux_shows_them():
+    scope = storage._pid_scope()
+    if Path("/proc/self/ns/pid").exists() and Path("/proc/sys/kernel/random/boot_id").exists():
+        assert re.fullmatch(r"[0-9a-f]{32}\.\d+", scope or "")
+    else:
+        assert scope is None
+
+
+@pytest.mark.skipif(os.name == "nt", reason="a PID is only probed where os.kill can probe one")
+def test_the_lock_clears_only_a_claim_whose_writer_died_in_this_pid_scope(tmp_path, monkeypatch):
+    """A slow or paused writer's claim survives, and so does one whose PID this process cannot see."""
+    monkeypatch.setattr(storage, "_pid_scope", lambda: _SCOPE)
+    two_hours = 2 * 3600
+    abandoned = _claim(tmp_path, scope=_SCOPE, pid=_dead_pid(), age_seconds=two_hours)
+    just_left = _claim(tmp_path, scope=_SCOPE, pid=_dead_pid(), age_seconds=0)
+    paused = _claim(tmp_path, scope=_SCOPE, pid=os.getpid(), age_seconds=two_hours)
+    other_namespace = _claim(tmp_path, scope=_OTHER_NAMESPACE, pid=_dead_pid(), age_seconds=two_hours)
 
     with run_write_lock(tmp_path):
         pass
 
     assert not abandoned.exists()
+    assert just_left.exists() and paused.exists() and other_namespace.exists()
+
+
+def test_where_the_pid_scope_is_unknown_no_claim_is_removed(tmp_path, monkeypatch):
+    monkeypatch.setattr(storage, "_pid_scope", lambda: None)
+    abandoned = _claim(tmp_path, scope=_SCOPE, pid=_dead_pid(), age_seconds=2 * 3600)
+
+    with run_write_lock(tmp_path):
+        pass
+
+    assert abandoned.exists()
+
+
+def test_a_new_claim_records_its_pid_scope_and_process_when_known(tmp_path, monkeypatch):
+    seen = []
+    real_rename = os.rename
+
+    def spy(src, dst):
+        seen.append(Path(src).name)
+        return real_rename(src, dst)
+
+    monkeypatch.setattr(os, "rename", spy)
+    monkeypatch.setattr(storage, "_pid_scope", lambda: _SCOPE)
+    _publish(tmp_path, "a", now=1_700_000_000.0)
+    monkeypatch.setattr(storage, "_pid_scope", lambda: None)
+    _publish(tmp_path, "b", now=1_700_000_100.0)
+
+    known, unknown = seen
+    assert storage._claim_owner(known) == (_SCOPE, os.getpid())
+    assert storage._claim_owner(unknown) is None
+
+
+def test_a_part_file_appears_whole_or_not_at_all(tmp_path, monkeypatch):
+    """A reader never meets a part file still being written, and a failed write leaves nothing behind."""
+    import pyarrow.parquet as pq
+
+    real_write = pq.write_table
+
+    def half_written(table, where, **kwargs):
+        Path(where).write_bytes(b"PAR1 not yet a parquet file")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(pq, "write_table", half_written)
+    with pytest.raises(OSError, match="disk full"):
+        write_locale_partition(_rows("a"), tmp_path, locale="en_US", run_id="1700000000")
+    assert [p for p in tmp_path.rglob("*") if p.is_file()] == []
+
+    monkeypatch.setattr(pq, "write_table", real_write)
+    previous = os.umask(0o022)
+    try:
+        write_locale_partition(_rows("b"), tmp_path, locale="en_US", run_id="1700000000")
+    finally:
+        os.umask(previous)
+    (part,) = [p for p in tmp_path.rglob("*") if p.is_file()]
+    assert not part.name.startswith(".") and part.stat().st_mode & 0o777 == 0o644
+    assert existing_trajectory_ids(tmp_path, run="1700000000") == {"b"}
 
 
 def test_the_lock_excludes_another_process(tmp_path):
@@ -257,18 +351,55 @@ def test_the_lock_excludes_another_thread(tmp_path):
     assert waited > 0.5
 
 
-def test_where_flock_is_unsupported_writing_is_refused(tmp_path, monkeypatch):
-    """No fallback lock: ``filelock``'s can each let two writers in, so a root without ``flock`` takes no runs."""
+def _without_flock(monkeypatch, code: int = errno.ENOSYS) -> None:
+    """Make ``flock`` fail as it does on a filesystem without usable locks."""
     fcntl = pytest.importorskip("fcntl")
-    import errno
 
     def unsupported(*args, **kwargs):
-        raise OSError(errno.ENOSYS, "flock is not supported here")
+        raise OSError(code, os.strerror(code))
 
     monkeypatch.setattr(fcntl, "flock", unsupported)
 
-    with pytest.raises(RunLockUnsupportedError, match="not supported"):
-        check_run_write_lock(tmp_path)
-    with pytest.raises(RunLockUnsupportedError), run_write_lock(tmp_path):
-        pass
-    assert list(tmp_path.iterdir()) == []
+
+@pytest.mark.parametrize(
+    "code",
+    [errno.ENOSYS, errno.ENOLCK, errno.EOPNOTSUPP, errno.ENOTSUP],
+    ids=["ENOSYS", "ENOLCK", "EOPNOTSUPP", "ENOTSUP"],
+)
+def test_where_flock_is_unsupported_runs_are_still_written(tmp_path, monkeypatch, caplog, recwarn, code):
+    """Written without the shared lock, with one warning per root, and never through a soft lock.
+
+    Lustre without ``flock`` fails with ``ENOSYS``, NFS without its lock
+    service with ``ENOLCK``, and some network mounts with ``EOPNOTSUPP``.
+    """
+    _without_flock(monkeypatch, code)
+
+    with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+        run_id, _ = save_sampled_rows(_rows("a"), tmp_path, locale="en_US", run_id=None, started_at=0.0)
+        save_sampled_rows(_rows("b"), tmp_path, locale="en_US", run_id=run_id, started_at=0.0)
+
+    assert existing_trajectory_ids(tmp_path, run=run_id) == {"a", "b"}
+    assert sum("not supported" in record.getMessage() for record in caplog.records) == 1
+    assert not [warning for warning in recwarn if "SoftFileLock" in str(warning.message)]
+
+
+def test_where_flock_is_unsupported_the_threads_of_a_process_still_take_turns(tmp_path, monkeypatch):
+    _without_flock(monkeypatch)
+    held = threading.Event()
+
+    def hold():
+        with run_write_lock(tmp_path):
+            held.set()
+            time.sleep(1.0)
+
+    holder = threading.Thread(target=hold)
+    holder.start()
+    try:
+        assert held.wait(timeout=30)
+        started = time.monotonic()
+        with run_write_lock(tmp_path):
+            waited = time.monotonic() - started
+    finally:
+        holder.join(timeout=30)
+
+    assert waited > 0.5

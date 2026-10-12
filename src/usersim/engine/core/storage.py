@@ -51,8 +51,10 @@ import errno
 import json
 import logging
 import os
+import re
 import shutil
 import tempfile
+import threading
 import time
 import uuid
 from contextlib import contextmanager
@@ -201,9 +203,9 @@ def resolve_run_or_raise(
 #
 # A simulator writes into a trajectory root while holding ``run_write_lock``,
 # and a new run becomes visible only with its record and its first rows in
-# place, so two writers never share a run, a reader never sees an empty one,
-# and the checks a writer makes against a run's saved rows still hold when it
-# writes.
+# place, so two writers never share a run and a reader never sees an empty
+# one. Where the lock is shared by every writer, the checks a writer makes
+# against a run's saved rows also still hold when it writes.
 # ---------------------------------------------------------------------------
 
 #: What a run was made from, written inside ``run=<id>/`` before the run is
@@ -221,12 +223,30 @@ RUN_KIND_SAMPLED: str = "sampled"
 #: A new run is assembled in a hidden folder with this prefix, then renamed.
 _CLAIM_PREFIX: str = ".claim-"
 
+#: A claim folder is removed only once it is older than this, and its writer
+#: is gone; a live one lasts only while one locale's rows are written and
+#: renamed.
+_STALE_CLAIM_SECONDS: float = 3600.0
+
 #: Whether ``flock`` works under a trajectory root, found once per root.
 _FLOCK_WORKS: dict[str, bool] = {}
 
+#: What ``flock`` fails with where a filesystem has no usable locks: not
+#: implemented (Lustre without ``flock``), no lock service (NFS without
+#: ``lockd``), or not supported (some network and FUSE mounts).
+_NO_FLOCK_ERRNOS = frozenset({errno.ENOSYS, errno.ENOLCK, errno.EOPNOTSUPP, errno.ENOTSUP})
 
-class RunLockUnsupportedError(OSError):
-    """A trajectory root on a filesystem without ``flock``, where no run can be written safely."""
+#: Where Linux names this machine's current boot, and this process's PID
+#: namespace: together, the scope in which a PID identifies one process.
+_BOOT_ID_PATH = Path("/proc/sys/kernel/random/boot_id")
+_PID_NAMESPACE_PATH = Path("/proc/self/ns/pid")
+
+#: Roots already warned about writing without ``flock``.
+_WARNED_WITHOUT_FLOCK: set[str] = set()
+
+#: Where ``flock`` is unsupported, the writers of this process still take
+#: turns through this lock.
+_IN_PROCESS_WRITES = threading.Lock()
 
 
 def read_run_record(root: str | Path, run_id: str) -> dict[str, Any] | None:
@@ -276,45 +296,121 @@ def run_write_lock(root: str | Path) -> Iterator[Path]:
 
     Choosing a run, checking its saved rows and writing must all happen while
     it is held, and nothing slow should: a simulator holds it per write, never
-    while it simulates. On entry it removes any hidden claim folder, which only
-    a writer that died while holding the lock can have left.
+    while it simulates. On entry it removes the claim folders whose writer
+    died: claims made in this process's PID scope (this boot and PID
+    namespace, on Linux), whose process is gone, and that are over an hour
+    old. A live or paused writer's claim, and any claim made in another
+    scope or where the scope can't be read, are left alone; readers never
+    see a claim either way.
 
     It excludes other threads as well as other processes: each call takes its
-    own ``filelock.FileLock``, an ``flock`` lock on POSIX. It relies on locks
-    that every writing host shares, so on a mount whose ``flock`` locks are
-    local to one node (Lustre ``localflock``, NFS ``local_lock=flock``,
-    ``local_lock=all`` or ``nolock``), give each node its own root. Where
-    ``flock`` is not supported at all, it raises
-    :class:`RunLockUnsupportedError` rather than fall back to a lock file:
-    ``filelock``'s fallbacks can each let two writers in.
-    :func:`check_run_write_lock` finds that before any work starts.
+    own ``filelock.FileLock``, an ``flock`` lock on POSIX. Where ``flock`` is
+    not supported (as on Lustre mounted without ``flock``, or NFS without its
+    lock service), only the threads of this process take turns, and a warning
+    is logged once per root. ``filelock``'s own fallback to a soft lock is not used: it can let
+    two writers in. On a mount whose ``flock`` locks are local to one node
+    (Lustre ``localflock``, NFS ``local_lock=flock``, ``local_lock=all`` or
+    ``nolock``), writers on different nodes are not excluded either.
+
+    Without a shared lock, a new run still never shares a folder with
+    another, and every write has a part file of its own. What is lost:
+    resuming one run from two places at once can save a row twice.
     """
     from filelock import FileLock
 
-    root_path = check_run_write_lock(root)
-    with FileLock(root_path / RUN_LOCK_FILENAME):
-        for leftover in root_path.glob(f"{_CLAIM_PREFIX}*"):
-            shutil.rmtree(leftover, ignore_errors=True)
+    root_path = Path(root).resolve()
+    root_path.mkdir(parents=True, exist_ok=True)
+    shared = _flock_works(root_path)
+    with FileLock(root_path / RUN_LOCK_FILENAME) if shared else _IN_PROCESS_WRITES:
+        if not shared:
+            _warn_without_flock(root_path)
+        _remove_stale_claims(root_path)
         yield root_path
 
 
-def check_run_write_lock(root: str | Path) -> Path:
-    """Create ``root`` if needed, and raise if runs cannot be written there safely.
+def _pid_scope() -> str | None:
+    """The scope in which this process's PIDs identify processes: this boot and this PID namespace.
 
-    Raises :class:`RunLockUnsupportedError` when ``root``'s filesystem has no
-    ``flock``. Call it before work that ends in a write, such as simulating,
-    so a run is refused before any model call rather than at its first save.
-    Returns the resolved root.
+    One process can tell whether another is alive only within one scope, so
+    a claim made in another (another host, a container with its own PID
+    namespace, or before a reboot) is never judged from here. ``None`` where
+    the scope cannot be read: outside Linux, or with ``/proc`` hidden.
     """
-    root_path = Path(root).resolve()
-    root_path.mkdir(parents=True, exist_ok=True)
-    if not _flock_works(root_path):
-        raise RunLockUnsupportedError(
-            f"file locks (flock) are not supported under {root_path}, so runs cannot be written there "
-            "safely; write them to a filesystem that supports file locks, such as a local disk or "
-            "Lustre mounted with the flock option"
-        )
-    return root_path
+    try:
+        boot = _BOOT_ID_PATH.read_text(encoding="ascii").strip().replace("-", "")
+        namespace = os.stat(_PID_NAMESPACE_PATH).st_ino
+    except (OSError, ValueError):
+        return None
+    if not re.fullmatch(r"[0-9a-f]{32}", boot):
+        return None
+    return f"{boot}.{namespace}"
+
+
+def _claim_name() -> str:
+    """A new claim folder's name, recording its writer's PID scope and PID where the scope is known."""
+    scope = _pid_scope()
+    owner = f"{scope}-{os.getpid()}-" if scope else ""
+    return f"{_CLAIM_PREFIX}{owner}{uuid.uuid4().hex}"
+
+
+def _claim_owner(name: str) -> tuple[str, int] | None:
+    """The PID scope and PID a claim folder's name records, or ``None`` if it records none."""
+    match = re.fullmatch(r"([0-9a-f]{32}\.\d+)-(\d+)-[0-9a-f]{32}", name[len(_CLAIM_PREFIX) :])
+    return (match.group(1), int(match.group(2))) if match else None
+
+
+def _process_alive(pid: int) -> bool:
+    """Whether process ``pid`` exists in this PID scope; assumed alive where that cannot be checked."""
+    if os.name == "nt":
+        # ``os.kill`` on Windows signals or terminates rather than probes.
+        return True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except OSError:
+        return True
+    return True
+
+
+def _remove_stale_claims(root: Path) -> None:
+    """Remove the claim folders under ``root`` whose writer, in this PID scope, is gone.
+
+    A claim is removed only when it was made in this process's PID scope
+    (:func:`_pid_scope`), its process no longer exists, and it is older than
+    ``_STALE_CLAIM_SECONDS``. Any other claim is kept, since whether its
+    writer lives cannot be told from here. A dead writer can no longer rename
+    its claim, so removing one never races a publication.
+    """
+    here = _pid_scope()
+    if here is None:
+        return
+    cutoff = time.time() - _STALE_CLAIM_SECONDS
+    for claim in root.glob(f"{_CLAIM_PREFIX}*"):
+        owner = _claim_owner(claim.name)
+        if owner is None or owner[0] != here or _process_alive(owner[1]):
+            continue
+        try:
+            stale = claim.stat().st_mtime < cutoff
+        except FileNotFoundError:
+            continue
+        if stale:
+            shutil.rmtree(claim, ignore_errors=True)
+
+
+def _warn_without_flock(root: Path) -> None:
+    """Warn, once per root, that runs under ``root`` are written without a shared lock.
+
+    Called while holding the in-process lock, so threads never warn twice.
+    """
+    if str(root) in _WARNED_WITHOUT_FLOCK:
+        return
+    _WARNED_WITHOUT_FLOCK.add(str(root))
+    logger.warning(
+        "file locks (flock) are not supported under %s, so runs there are written without a lock "
+        "shared between processes. Resuming one run from two places at once can save a row twice.",
+        root,
+    )
 
 
 def _flock_works(root: Path) -> bool:
@@ -332,7 +428,7 @@ def _flock_works(root: Path) -> bool:
             try:
                 fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except OSError as error:
-                if error.errno != errno.ENOSYS:
+                if error.errno not in _NO_FLOCK_ERRNOS:
                     raise
                 _FLOCK_WORKS[key] = False
             else:
@@ -361,7 +457,7 @@ def publish_new_run(
     root_path = Path(root).resolve()
     # Made like any folder, so the run gets the usual permissions: the rename
     # keeps them, and a ``tempfile.mkdtemp`` folder would be owner-only.
-    claim = root_path / f"{_CLAIM_PREFIX}{uuid.uuid4().hex}"
+    claim = root_path / _claim_name()
     claim.mkdir()
     published = False
     try:
@@ -404,7 +500,8 @@ def save_sampled_rows(
     """Save one locale's sampled rows into ``run_id``, or into a new run when it is ``None``.
 
     Under the write lock, rows already saved in ``run_id`` are skipped,
-    whoever saved them, so no id is saved twice in a run; a new run never
+    whoever saved them, so where the lock is shared no id is saved twice in a
+    run (see :func:`run_write_lock` for where it is not); a new run never
     shares a folder with another; and a run of another kind is refused, so a
     run holds one kind of rows. Returns the run the rows went to and how many
     were written.
@@ -639,10 +736,19 @@ def write_partitioned_dataset(
             pass
         elif existing_data_behavior == "error" and out_path.exists():
             raise FileExistsError(out_path)
-        # Subset to non-partition columns + write.
+        # Subset to non-partition columns + write. Each file is written under
+        # a hidden name and renamed once complete, so a reader (another
+        # writer's scan included) never opens a partial one. The name is not
+        # from ``mkstemp``, which would make the file readable by its owner
+        # only.
         sub_df = group_df[non_partition_cols]
         table = _arrow_table_for_write(sub_df)
-        pq.write_table(table, out_path)
+        partial = out_dir / f".{filename}.{uuid.uuid4().hex}.partial"
+        try:
+            pq.write_table(table, partial)
+            os.replace(partial, out_path)
+        finally:
+            partial.unlink(missing_ok=True)
 
     return root_path
 

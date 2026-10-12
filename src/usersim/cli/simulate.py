@@ -32,7 +32,6 @@ import time
 from fractions import Fraction
 from pathlib import Path
 
-from usersim.cli._errors import ConfigError
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
 
 logger = logging.getLogger("usersim.cli.simulate")
@@ -470,8 +469,6 @@ def _simulate_to_parquet(
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
         LEGACY_RUN_ID,
-        RunLockUnsupportedError,
-        check_run_write_lock,
         existing_trajectory_ids,
         run_started_at,
         sampled_run_to_resume,
@@ -480,11 +477,7 @@ def _simulate_to_parquet(
 
     started_at = time.time()
     out = Path(out).resolve()
-    # Refused here, before any model call, rather than at the first save.
-    try:
-        check_run_write_lock(out)
-    except RunLockUnsupportedError as error:
-        raise ConfigError(str(error)) from None
+    out.mkdir(parents=True, exist_ok=True)
 
     # ``--no-skip-existing`` starts a fresh run; the default resumes the
     # latest run this command made. A fresh run is claimed only when its
