@@ -478,19 +478,11 @@ def _detect_code_info() -> CodeInfo:
 
 
 def _own_version() -> str | None:
-    """Version of the distribution providing this package.
+    """Version of the distribution providing this package (see ``own_distribution``)."""
+    from usersim.engine.core.provenance import own_distribution
 
-    Resolved through ``packages_distributions`` rather than a hardcoded
-    distribution name, so renaming the distribution cannot silently start
-    writing a null version into every manifest.
-    """
-    try:
-        from importlib.metadata import packages_distributions
-
-        dists = packages_distributions().get("usersim", [])
-    except ImportError:  # pragma: no cover
-        return None
-    return _pkg_version(dists[0]) if dists else None
+    distribution = own_distribution()
+    return distribution.version if distribution is not None else None
 
 
 def _pkg_version(name: str) -> str | None:

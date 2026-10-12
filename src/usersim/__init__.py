@@ -11,4 +11,13 @@ import os
 # prefix the caller already set is kept.
 os.environ.setdefault("NEMO_SESSION_PREFIX", "usersim-")
 
-__version__ = "0.1.0"
+from usersim.engine.core.provenance import own_distribution
+
+
+def _installed_version() -> str:
+    """The installed distribution's version; ``0+unknown`` for a source tree never installed."""
+    distribution = own_distribution()
+    return distribution.version if distribution is not None else "0+unknown"
+
+
+__version__ = _installed_version()

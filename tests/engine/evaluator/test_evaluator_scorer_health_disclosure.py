@@ -21,6 +21,7 @@ from usersim.engine.evaluator.scorers import health_disclosure as hd  # noqa: F4
 from usersim.engine.evaluator.scorers.health_disclosure import (
     score_health_disclosure_trajectory as score,
 )
+from usersim.taxonomy.eval_cell import scorer_state
 
 # Note: the registry may hold a reloaded copy of the module's fn (importlib.reload
 # in other tests re-runs register_scorer), so the registration test asserts by name
@@ -57,20 +58,22 @@ _MISSING_KEY = object()
 
 
 class TestSkip:
+    """A row without move/Guard ground truth is not applicable, never a scorer error."""
+
     async def test_noop_when_moves_disabled(self):
         out = await score({"moves_enabled": False}, {})
         assert out["scores"] == {}
         assert out["status_proposal"] is True
-        assert "error" in out
+        assert scorer_state(out) == "not_applicable"
 
     async def test_noop_when_column_absent_on_a_default_row(self):
         out = await score({"probe_variant": "default"}, {})
-        assert out["scores"] == {} and "error" in out
+        assert out["scores"] == {} and scorer_state(out) == "not_applicable"
 
     async def test_noop_when_column_absent_and_variant_unknown(self):
         # Without probe_variant nothing marks the row as guarded, so it is skipped.
         out = await score({}, {})
-        assert out["scores"] == {} and "error" in out
+        assert out["scores"] == {} and scorer_state(out) == "not_applicable"
 
     @pytest.mark.parametrize("absent", [None, float("nan"), pd.NA, _MISSING_KEY], ids=["none", "nan", "na", "key"])
     async def test_raises_when_a_guarded_row_lost_its_columns(self, absent):
@@ -208,7 +211,7 @@ class TestPreviewOnlyGate:
         assert out["ground_truth_source"] == "committed_intent_unverified"
         # Uses committed levels (1.5/3), not the unverified realized ones (would be 1.0).
         assert out["scores"]["concealment.disclosure_coverage"]["score"] == round(1.5 / 3, 4)
-        assert "error" in out
+        assert scorer_state(out) == "ok"
 
     async def test_verified_realized_is_not_preview(self):
         out = await score(
@@ -234,7 +237,7 @@ class TestPreviewOnlyGate:
         assert out["ground_truth_source"] == "committed_intent_unverified"
         # Uses committed levels (1.5/3), not the partly-unverified realized ones.
         assert out["scores"]["concealment.disclosure_coverage"]["score"] == round(1.5 / 3, 4)
-        assert "error" in out
+        assert scorer_state(out) == "ok"
 
 
 class TestRealizedAuditRunsAtScoringTime:
@@ -414,7 +417,8 @@ class TestPerTopicVerification:
         assert out["ground_truth_source"] == "mixed_realized_intent"
         # Realized levels still used — only the one unobserved topic is caveated.
         assert out["scores"]["concealment.disclosure_coverage"]["score"] == 1.0
-        assert "core_belief" in out["error"]
+        # A caveated row is still a scored row, not a scorer error.
+        assert scorer_state(out) == "ok"
 
     async def test_nothing_audited_still_falls_back_to_intent(self):
         out = await score(
