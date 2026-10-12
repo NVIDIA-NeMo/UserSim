@@ -33,9 +33,8 @@ import argparse
 import logging
 import sys
 
+from usersim import __version__
 from usersim.cli._errors import ConfigError
-
-__version__ = "0.1.0"
 
 
 def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None:

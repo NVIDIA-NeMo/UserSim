@@ -102,6 +102,32 @@ class TestVcsInstallSha:
         assert provenance_module._vcs_install_sha(None) is None
 
 
+class TestOwnDistribution:
+    @staticmethod
+    def _installed(monkeypatch: pytest.MonkeyPatch, names: set[str], claimants: list[str]) -> None:
+        """Pretend ``names`` are installed and ``claimants`` claim the ``usersim`` package, in that order."""
+
+        def distribution(name: str):
+            if name not in names:
+                raise metadata.PackageNotFoundError(name)
+            return name
+
+        monkeypatch.setattr(provenance_module.metadata, "distribution", distribution)
+        monkeypatch.setattr(provenance_module.metadata, "packages_distributions", lambda: {"usersim": claimants})
+
+    def test_the_distribution_named_usersim_wins_over_stale_claimants(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self._installed(monkeypatch, {"usersim", "nemo-usersim"}, ["nemo-usersim", "usersim"])
+        assert provenance_module.own_distribution() == "usersim"
+
+    def test_another_claimant_is_used_when_usersim_is_not_installed(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self._installed(monkeypatch, {"nemo-usersim"}, ["nemo-usersim"])
+        assert provenance_module.own_distribution() == "nemo-usersim"
+
+    def test_nothing_installed_gives_none(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self._installed(monkeypatch, set(), [])
+        assert provenance_module.own_distribution() is None
+
+
 class TestCodeSha:
     def test_the_working_directorys_repository_is_never_recorded(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

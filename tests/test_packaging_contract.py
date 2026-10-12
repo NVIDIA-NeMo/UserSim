@@ -312,11 +312,10 @@ class TestProbeAssetPreflight:
 
 
 class TestManifestProvenance:
-    """A run manifest must record which code produced it.
+    """A run manifest records the version of the installed ``usersim`` distribution.
 
-    The version was looked up by a distribution name. When the two
-    distributions merged, that name stopped existing and every manifest
-    silently recorded ``null`` -- no error, just lost provenance.
+    It is the distribution named ``usersim`` that counts, so stale metadata from
+    another name that also claims the package cannot supply the version.
     """
 
     def test_engine_version_is_recorded(self) -> None:
@@ -328,19 +327,24 @@ class TestManifestProvenance:
         )
 
     def test_version_matches_the_installed_distribution(self) -> None:
-        """Resolved from the package, so a distribution rename cannot null it.
-
-        Asserting the value rather than inspecting the source: what matters
-        is that the recorded version tracks whatever distribution actually
-        ships ``usersim``, however that distribution is named.
-        """
-        from importlib.metadata import packages_distributions, version
+        from importlib.metadata import version
 
         from usersim.engine.core.manifest import _own_version
 
-        providing = packages_distributions().get("usersim")
-        assert providing, "no installed distribution provides the usersim package"
-        assert _own_version() == version(providing[0])
+        assert _own_version() == version("usersim")
+
+    def test_package_and_cli_report_the_installed_version(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """``pyproject.toml`` is the only place the version is written."""
+        from importlib.metadata import version
+
+        import usersim
+        from usersim import cli
+
+        assert usersim.__version__ == version("usersim")
+        with pytest.raises(SystemExit) as exc:
+            cli.main(["--version"])
+        assert exc.value.code == 0
+        assert capsys.readouterr().out.strip() == f"usersim {version('usersim')}"
 
     def test_code_info_carries_both_versions(self) -> None:
         from usersim.engine.core.manifest import _detect_code_info

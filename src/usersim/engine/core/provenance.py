@@ -53,8 +53,11 @@ def own_distribution() -> metadata.Distribution | None:
     The distribution named ``usersim`` wins over any other that claims the
     package, such as stale metadata left by an earlier name.
     """
-    names = ["usersim", *metadata.packages_distributions().get("usersim", [])]
-    for name in names:
+    try:
+        return metadata.distribution("usersim")
+    except metadata.PackageNotFoundError:
+        pass
+    for name in metadata.packages_distributions().get("usersim", []):
         try:
             return metadata.distribution(name)
         except metadata.PackageNotFoundError:
