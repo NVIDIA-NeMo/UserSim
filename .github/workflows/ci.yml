@@ -107,8 +107,8 @@ jobs:
 
       - run: make install-ci
 
-      - name: Build the wheel, install it clean, run from an empty directory
-        run: make check-wheel
+      - name: Build and check the sdist and wheel, install the wheel clean, run it from an empty directory
+        run: make check-dist
 
       - name: An out-of-tree package reaches every extension seam
         run: make check-extensions

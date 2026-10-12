@@ -58,7 +58,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-all-fix test test-fast coverage smoke check-wheel check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-all-fix test test-fast coverage smoke dist check-dist check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
 	@echo "usersim make targets:"
@@ -67,8 +67,10 @@ help:  ## Show the available targets
 
 # --- setup -----------------------------------------------------------------
 
+# Reinstalling the project restores any file that removing another distribution
+# took with it, such as the `usersim` command an earlier name also installed.
 install-dev:  ## Sync the workspace with dev tooling and install pre-commit hooks
-	$(UV) sync
+	$(UV) sync --reinstall-package usersim
 	@if [ ! -f .git/hooks/pre-commit ]; then \
 		echo "Installing pre-commit hooks..."; \
 		$(UV) run pre-commit install; \
@@ -123,37 +125,30 @@ coverage:  ## Run tests with coverage and enforce the floor
 smoke:  ## Offline self-check of config, registries, and report builders
 	$(UV) run usersim smoke
 
+dist:  ## Build the sdist, then the wheel from it, into a fresh dist/
+	rm -rf dist
+	$(UV) build -q -o dist
+	@ls -1 dist
+
 # The editable install resolves imports from the source tree and finds assets
 # next to them, so `make test` and `make smoke` stay green even when the built
-# artifact is unusable. This target is the only check that exercises what a
-# user actually installs: it builds both wheels, installs them into a throwaway
-# environment with no access to this checkout, and runs from an empty directory.
+# artifact is unusable. This target checks what a user actually installs: it
+# builds both archives, checks them (scripts/check_dist.py), installs the wheel
+# into a throwaway environment with no access to this checkout, and runs it
+# from an empty directory.
 #
 # Run it before any release, and after any change to packaging metadata, asset
 # locations, or resource loading.
-check-wheel:  ## Build the wheel, clean-install it, and smoke from an empty dir
+check-dist: dist  ## Build dist/, check both archives, clean-install the wheel and smoke it from an empty dir
 	@set -eu; \
+	$(UV) run python scripts/check_dist.py dist; \
 	WORK=$$(mktemp -d); \
 	EMPTY=$$(mktemp -d); \
 	trap 'rm -rf "$$WORK" "$$EMPTY"' EXIT; \
-	echo "→ building wheels into $$WORK"; \
-	$(UV) build --wheel -o "$$WORK" >/dev/null; \
-	echo "→ asset files in the wheel:"; \
-	BANKS=$$(unzip -l "$$WORK"/*.whl \
-		| grep -cE '\.(yaml|yml|json|parquet)$$' || true); \
-	echo "   $$BANKS"; \
-	if [ "$$BANKS" -eq 0 ]; then \
-		echo "   ✗ the banks did not ship; every probe would fail at asset resolution"; \
-		exit 1; \
-	fi; \
-	if unzip -l "$$WORK"/*.whl | grep -q 'embeddings\.parquet$$'; then \
-		echo "   ✗ the wheel ships embeddings.parquet; a stale build/ directory is the usual source"; \
-		exit 1; \
-	fi; \
-	echo "→ installing into a throwaway venv"; \
+	echo "→ installing the wheel into a throwaway venv"; \
 	$(UV) venv "$$WORK/venv" >/dev/null; \
 	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
-	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK"/*.whl; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" dist/*.whl; \
 	test -x "$$WORK/venv/bin/usersim" \
 		|| { echo "   ✗ the wheel installed but shipped no usersim entry point"; exit 1; }; \
 	echo "→ running from $$EMPTY (no repo in sight)"; \
@@ -282,8 +277,8 @@ check-extensions:  ## Install an out-of-tree package and prove all six seams wor
 
 # --- housekeeping ----------------------------------------------------------
 
-clean:  ## Remove caches, coverage output, and compiled artifacts
+clean:  ## Remove caches, coverage output, compiled artifacts, build output and package metadata
 	find . -type d -name __pycache__ -not -path './.venv*' -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[co]' -not -path './.venv*' -delete 2>/dev/null || true
-	rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov
+	rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov build dist src/*.egg-info
 	@echo "Cleaned."

@@ -33,9 +33,8 @@ import argparse
 import logging
 import sys
 
+from usersim import __version__
 from usersim.cli._errors import ConfigError
-
-__version__ = "0.1.0"
 
 
 def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None:
@@ -77,10 +76,11 @@ def _build_parser() -> argparse.ArgumentParser:
         description=(
             "🎭  NeMo User Sim \u2014 Population-Grounded User Simulation\n"
             "\n"
-            "Simulate a statistically representative, census-grounded population of\n"
-            "users having multi-turn conversations with your LLM \u2014 then score the\n"
-            "assistant and turn the trajectories into evaluation signal and shareable\n"
-            "reports. Every step runs from the command line; no notebook required.\n"
+            "Simulate a statistically representative population of users, sampled from\n"
+            "persona datasets (e.g., census-grounded), having multi-turn conversations\n"
+            "with your LLM \u2014 then score the assistant and turn the trajectories into\n"
+            "evaluation signal and shareable reports. Every step runs from the command\n"
+            "line; no notebook required.\n"
         ),
         epilog=(
             "typical flow\n"
