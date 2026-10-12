@@ -97,16 +97,14 @@ plug in through entry points without forking the repository.
 
 ## Setup
 
-Python 3.10+ and [uv](https://docs.astral.sh/uv/).
+Python 3.10+, in a virtual environment.
 
 ```bash
-# Resolve uv.lock and editable-install the project, with the dev and
-# notebook tooling.
-uv sync
-source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
+pip install "usersim>=0.2.0rc1"      # in a uv project: uv add "usersim>=0.2.0rc1"
 
-# Install the NGC CLI into .venv/bin/ngc (idempotent, sha256-verified).
-# Required to download the Nemotron-Personas datasets.
+# Install the NGC CLI into the active virtual environment (idempotent,
+# sha256-verified). Required to download the Nemotron-Personas datasets.
 usersim setup-ngc
 
 # Keys for live runs and persona download.
@@ -115,13 +113,21 @@ export NGC_CLI_API_KEY="your-key-from-ngc.nvidia.com"    # persona download
 
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke
+usersim simulate --dry-run --locale en_US --num-rows 2 --out output/trajectories
 ```
 
 `smoke` is the fastest way to confirm an install is sound: it resolves the
 model catalogue, every probe's assets, and the plugin entry points without
-making a single model call.
+making a single model call. `--dry-run` prints the plan for a run, also
+without calling a model.
+
+To work on User Sim itself, or to run the notebooks, clone the repository and
+run `uv sync`; [CONTRIBUTING.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md)
+has the details.
 
 ## Quickstart
+
+These steps make live model calls, using the keys above.
 
 ```bash
 # 1. Simulate. Pick a locale and a row count; the default probe mix is the
