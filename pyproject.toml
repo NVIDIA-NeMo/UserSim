@@ -1,6 +1,6 @@
 [project]
 name = "usersim"
-version = "0.1.0"
+version = "0.2.0.dev0"
 description = "Population-grounded user simulation for evaluating conversational LLMs"
 readme = "README.md"
 requires-python = ">=3.10"
