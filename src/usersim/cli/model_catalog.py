@@ -23,8 +23,9 @@ appears in ``ModelSpec.model`` / ``[[models]] model = "..."``):
 
 What's intentionally NOT in this catalog:
 
-- ``timeout`` -- usually only set on the critical-path alias (assistant_model)
-  to absorb reasoning latency. Lives in the TOML row.
+- ``timeout`` -- set on the aliases whose calls run longest (the model under
+  test, the simulated user and the evaluator, all of which reason before
+  answering). Data Designer's default is 60 seconds. Lives in the TOML row.
 - ``max_parallel_requests`` -- per-alias rate budget. Lives in the TOML row.
 - ``provider`` -- per-deployment routing decision. Lives in the TOML row.
 

@@ -736,6 +736,59 @@ class TestUndispatchedScorerWarning:
         assert src.index("_warn_on_undispatched_scorers(") < src.index("add_column(")
 
 
+class TestEvalJudgeVerdicts:
+    """``usersim eval`` fails when no row got a judge verdict and counts the rows missing one."""
+
+    _RUN = "1000000000"
+    _MODELS = Path(__file__).resolve().parents[1] / "src" / "usersim" / "cli" / "models_default.toml"
+
+    @staticmethod
+    def _cell(scored: bool) -> str:
+        by_judge = {"evaluator_model": {"score": 4, "reasoning": "ok"}} if scored else {}
+        return json.dumps({"envelope": {}, "axes": {"helpfulness": by_judge}, "scorers": {}, "skipped": False})
+
+    def _eval(self, monkeypatch, tmp_path, trajectory_df, cells):
+        from usersim.cli import _pipeline
+        from usersim.engine.core.storage import run_subroot, write_partitioned_dataset
+
+        traj_root = tmp_path / "trajectories"
+        write_partitioned_dataset(trajectory_df, run_subroot(traj_root, self._RUN))
+
+        class _Result:
+            def load_dataset(self):
+                return pd.DataFrame({"assistant_eval": cells})
+
+        class _DataDesigner:
+            def create(self, builder, num_records):
+                return _Result()
+
+        monkeypatch.setattr(_pipeline, "build_evaluator_config_builder", lambda **kwargs: (_DataDesigner(), object()))
+        out = tmp_path / "evaluations"
+        rc = cli.main(["eval", "--trajectories", str(traj_root), "--out", str(out), "--models", str(self._MODELS)])
+        return rc, out
+
+    def test_no_verdict_on_any_row_fails_after_writing_the_rows(self, monkeypatch, tmp_path, trajectory_df, capsys):
+        cells = [self._cell(False)] * len(trajectory_df)
+        rc, out = self._eval(monkeypatch, tmp_path, trajectory_df, cells)
+
+        assert rc == 1
+        assert f"any of the {len(cells)} rows" in capsys.readouterr().err
+        assert list((out / f"run={self._RUN}").rglob("*.parquet"))
+
+    def test_some_rows_without_a_verdict_are_counted(self, monkeypatch, tmp_path, trajectory_df, capsys):
+        cells = [self._cell(True)] * (len(trajectory_df) - 2) + [self._cell(False)] * 2
+        rc, _ = self._eval(monkeypatch, tmp_path, trajectory_df, cells)
+
+        assert rc == 0
+        assert f"for 2 of the {len(cells)} rows" in capsys.readouterr().err
+
+    def test_every_row_scored_prints_no_warning(self, monkeypatch, tmp_path, trajectory_df, capsys):
+        rc, _ = self._eval(monkeypatch, tmp_path, trajectory_df, [self._cell(True)] * len(trajectory_df))
+
+        assert rc == 0
+        assert "verdict" not in capsys.readouterr().err
+
+
 class TestEvalCliJudgesDefault:
     """`usersim eval --judges`: the default scripted callers rely on, and the
     help example, which must pass the same validation as real input.

@@ -207,6 +207,7 @@ def verify_probe_assets(
     fixes one thing rather than rediscovering the next on each attempt.
     """
     from usersim.engine.core._assets import probe_assets_dir
+    from usersim.engine.core.locale import asset_locale
 
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
@@ -220,7 +221,13 @@ def verify_probe_assets(
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
         if probe in _LOCALE_SCOPED_PROBES:
-            missing = [loc for loc in locales if not (probe_dir / loc).is_dir()]
+
+            def has_bank(loc: str) -> bool:
+                return (probe_dir / loc).is_dir()
+
+            # A variant without its own bank runs on its base locale's, as the
+            # probe and its scorer resolve it.
+            missing = [loc for loc in locales if not has_bank(asset_locale(loc, exists=has_bank))]
             if missing:
                 available = sorted(p.name for p in probe_dir.iterdir() if p.is_dir())
                 problems.append(

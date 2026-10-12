@@ -1,0 +1,3 @@
+# The test suite runs from a checkout. setuptools would otherwise ship part of
+# it in the sdist, without the conftest.py files it needs to run.
+prune tests

@@ -1,11 +1,11 @@
 [project]
-name = "nemo-usersim"
-version = "0.1.0"
-description = "Population-grounded user simulation for evaluating conversational LLMs"
+name = "usersim"
+version = "0.2.0.dev0"
+description = "Improve models and agents with population-grounded simulated users, even before production traffic exists."
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = [
-    "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
+    "llm", "agents", "evaluation", "synthetic-data", "simulation", "user-simulation", "personas", "nemotron",
 ]
 license = "Apache-2.0"
 classifiers = [
@@ -74,12 +74,13 @@ dependencies = [
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
+Documentation = "https://github.com/NVIDIA-NeMo/UserSim#documentation"
 Repository = "https://github.com/NVIDIA-NeMo/UserSim"
 Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 
 [dependency-groups]
 # A dependency group rather than an optional-dependency extra, so `uv sync`
-# installs it by default and `pip install nemo-usersim[dev]` cannot pull test
+# installs it by default and `pip install usersim[dev]` cannot pull test
 # and lint tooling into a user's environment. `make test` and the hermeticity
 # guard in conftest.py both depend on this group being present.
 dev = [
@@ -127,7 +128,9 @@ override-dependencies = [
 ]
 
 [build-system]
-requires = ["setuptools>=68.0"]
+# 77 is the first release that reads `license` as an SPDX expression (PEP 639);
+# older ones fail to build the sdist.
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -146,9 +149,9 @@ include = ["usersim*"]
     "models_*.toml",
 ]
 "usersim.engine" = [
-    # The asset banks. Hatchling shipped the whole package tree implicitly;
-    # setuptools needs them named, and a wheel without them fails every
-    # probe at asset resolution. `make check-wheel` counts these.
+    # The asset banks. setuptools ships package data only when it is named,
+    # and a wheel without the banks fails every probe at asset resolution.
+    # `make check-dist` fails if the wheel has none.
     "assets/**/*.yaml",
     "assets/**/*.yml",
     "assets/**/*.json",
