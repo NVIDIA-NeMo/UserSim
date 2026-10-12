@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "usersim-extension-fixture"
 version = "0.1.0"
 description = "Exercises every published extension seam against a real install."
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 
 # One entry per published group. If a seam stops working, installing this
 # package and asking the CLI what it can see is what notices.

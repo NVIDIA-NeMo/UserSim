@@ -33,8 +33,11 @@ reports = [{ version = "3.10.8", license = "Python Software Foundation License" 
 
 
 [exceptions.numpy]
-reason = "Core numerical dependency, BSD-3-Clause overall. The additional identifiers cover vendored components and are each permissive or public-domain-equivalent."
-reports = [{ version = "2.4.3", license = "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0" }]
+reason = "Core numerical dependency, BSD-3-Clause overall. The additional identifiers cover vendored components and are each permissive or public-domain-equivalent. Python 3.10 resolves 2.2.6, which reports the same licence as the generic BSD classifier."
+reports = [
+    { version = "2.4.3", license = "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0" },
+    { version = "2.2.6", license = "BSD License" },
+]
 
 [exceptions.pathspec]
 reason = "Unmodified transitive dependency installed as a separate package. MPL-2.0 is ASF Category B."
