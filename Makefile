@@ -58,7 +58,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-all-fix test test-fast coverage smoke dist check-dist check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
 	@echo "usersim make targets:"
@@ -156,6 +156,16 @@ check-dist: dist  ## Build dist/, check both archives, clean-install the wheel a
 	cd "$$EMPTY" && "$$WORK/venv/bin/usersim" simulate --dry-run \
 		--locale en_US --num-rows 1 --out ./out >/dev/null; \
 	echo "✓ installed package runs from a clean environment"
+
+# A tag ruleset limits who can push a `v*` tag, not which commit it names or
+# which version it claims, so the release workflow runs this on the tagged
+# commit before publishing. Run it from the commit you are about to tag.
+# A tag name may contain `$(shell ...)`, backticks or quotes. The recipe reads
+# it as $$TAG, which no shell parses, and CI passes TAG in the environment,
+# because make expands a value given on its command line.
+check-release-tag:  ## Fail unless TAG is v + the release version in dist/ and HEAD is on origin/main (TAG=v<version>)
+	@test -n "$$TAG" || { echo "usage: make check-release-tag TAG=v<version>"; exit 1; }
+	@$(UV) run python scripts/check_release_tag.py "$$TAG" dist
 
 check-dependency-licenses:  ## Check runtime dependency licenses against the policy
 	@$(UV) run --isolated --no-dev --group license-check --locked \
