@@ -1,11 +1,11 @@
 [project]
 name = "usersim"
 version = "0.2.0.dev0"
-description = "Population-grounded user simulation for evaluating conversational LLMs"
+description = "Improve models and agents with population-grounded simulated users, even before production traffic exists."
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = [
-    "llm", "evaluation", "synthetic-data", "simulation", "personas", "nemotron",
+    "llm", "agents", "evaluation", "synthetic-data", "simulation", "user-simulation", "personas", "nemotron",
 ]
 license = "Apache-2.0"
 classifiers = [
@@ -74,6 +74,7 @@ dependencies = [
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
+Documentation = "https://github.com/NVIDIA-NeMo/UserSim#documentation"
 Repository = "https://github.com/NVIDIA-NeMo/UserSim"
 Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 
