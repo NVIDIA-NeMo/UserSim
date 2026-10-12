@@ -16,7 +16,7 @@ pattern, SLURM compatibility).
 
 from __future__ import annotations
 
-from typing import Literal, Self
+from typing import Literal
 
 from data_designer.config.base import SingleColumnConfig
 from pydantic import BaseModel, Field, model_validator
@@ -150,7 +150,7 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     # ── Validators ─────────────────────────────────────────────────
     @model_validator(mode="after")
-    def _validate_judge_diversity(self) -> Self:
+    def _validate_judge_diversity(self) -> "TrajectoryEvaluatorConfig":
         """Fail fast at config-validation time if the ensemble lacks family diversity."""
         if self.judges:
             self.model_alias = self.judges[0].alias
