@@ -19,8 +19,9 @@ from __future__ import annotations
 import argparse
 import logging
 import shutil
+import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
 
@@ -204,6 +205,30 @@ def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, i
     return sampled[list(_KEY_COLS)].reset_index(drop=True), sampled, len(sampled), record
 
 
+def _report_judge_verdicts(cells: Iterable[Any]) -> bool:
+    """Warn about rows with rubric axes that no judge scored; False when no row got a verdict."""
+    from usersim.engine.evaluator.generator import JudgeVerdict, judge_verdict
+
+    verdicts = [judge_verdict(cell) for cell in cells]
+    missing = verdicts.count(JudgeVerdict.MISSING)
+    scored = verdicts.count(JudgeVerdict.SCORED)
+    if missing and not scored:
+        print(
+            f"usersim eval: no judge returned a verdict for any of the {missing} rows with rubric axes. "
+            "Every call failed or returned output that did not parse; the warnings above say which. "
+            "Check the evaluator model, then rerun the same command.",
+            file=sys.stderr,
+        )
+        return False
+    if missing:
+        print(
+            f"usersim eval: no judge returned a verdict for {missing} of the {missing + scored} rows "
+            "with rubric axes; the warnings above say why. Rerun the same command to judge them again.",
+            file=sys.stderr,
+        )
+    return True
+
+
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._models import (
         default_models_path,
@@ -343,6 +368,8 @@ def run(args: argparse.Namespace) -> int:
         **sample_pass,
     )
     print(f"wrote {len(df)} evaluator rows to {out}")
+    if not _report_judge_verdicts(df[args.output_column]):
+        return 1
     print(
         f"\nNext step: render the report\n"
         f"  usersim report --run {run_id} \\\n"

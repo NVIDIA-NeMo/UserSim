@@ -5,7 +5,7 @@ finance corpora, tool catalogues, action taxonomies) ships as **package
 data** under `usersim/engine/assets/<probe>/`.
 
 They ship inside the package so a plain `pip install` gives you working
-probes with no extra download step, and `make check-wheel` fails if that ever
+probes with no extra download step, and `make check-dist` fails if that ever
 stops being true.
 
 ## Resolution
@@ -34,7 +34,9 @@ checkout.
 
 Before any model call, a run verifies that every selected probe's assets
 exist, including the locale subtree for the locale-scoped probes:
-`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. Every missing path is
+`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. A registered India
+variant with no subtree of its own is checked against its base locale's
+(`en_IN`), the bank the probe loads in its place. Every missing path is
 reported at once, with the three remedies: point `--assets-dir` somewhere
 else, generate the bank, or drop the probe from the mix.
 
