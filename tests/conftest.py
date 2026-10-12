@@ -13,6 +13,10 @@ deliverable.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -471,3 +475,23 @@ def evaluator_df(trajectory_df):
 
     df["assistant_eval"] = eval_cells
     return df
+
+
+@pytest.fixture
+def git() -> Callable[..., str]:
+    """Run git in a repository with no user or system config, so signing or hooks never apply."""
+    env = {
+        **os.environ,
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@example.com",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@example.com",
+    }
+
+    def run(repo: Path, *args: str) -> str:
+        done = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=True, env=env)
+        return done.stdout.strip()
+
+    return run
