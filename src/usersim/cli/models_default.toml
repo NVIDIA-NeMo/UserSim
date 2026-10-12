@@ -13,12 +13,12 @@
 # under test is not scoring its own output.
 
 models = [
-  { alias = "user_model",         model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # simulated user
+  { alias = "user_model",         model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4, timeout = 300 },  # simulated user
   { alias = "assistant_model",    model = "google/gemma-4-31b-it",                 provider = "nvidia", max_parallel_requests = 4, timeout = 300 },  # model under test
   { alias = "api_response_model", model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # tool-call responses
   { alias = "judge_model",        model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 4 },                 # in-sim gates
   { alias = "summary_model",      model = "openai/gpt-oss-20b",                    provider = "nvidia", max_parallel_requests = 4 },                 # context compression
-  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 4 },                 # trajectory rubric
+  { alias = "evaluator_model",    model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 4, timeout = 300 },  # trajectory rubric
 
   # Used only by `usersim gen-assets`, which is a live, billable step. See
   # probes/financial_services/README.md for the pipeline and its tuning knobs.

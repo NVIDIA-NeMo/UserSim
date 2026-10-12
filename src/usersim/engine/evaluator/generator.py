@@ -41,7 +41,8 @@ Partial-re-run skip: if the row already has a non-null cell whose
 envelope matches the current config, the LLM judge calls are skipped
 and ``skipped=true`` / ``skipped_reason="envelope_match"`` is returned
 in place of fresh axes. ``judge_models`` is part of the envelope, so a
-row scored by another model behind the same alias is scored again.
+row scored by another model behind the same alias is scored again, and
+so is a row that no judge scored (see ``judge_verdict``).
 """
 
 from __future__ import annotations
@@ -49,6 +50,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from enum import Enum
 from typing import Any, Iterable
 
 from data_designer.engine.column_generators.generators.base import (
@@ -119,6 +121,40 @@ def _decode_json_field(raw: Any, default: Any) -> Any:
         except (json.JSONDecodeError, TypeError):
             return default
     return default
+
+
+class JudgeVerdict(str, Enum):
+    """Whether an evaluator cell holds a rubric verdict."""
+
+    SCORED = "scored"
+    #: The row had rubric axes and no judge scored any of them: every call
+    #: failed, or returned output that did not parse.
+    MISSING = "missing"
+    #: Skipped before judging (a failed simulation, no assistant turn), or no
+    #: rubric axis applies to the row's probe family.
+    NOT_APPLICABLE = "not_applicable"
+
+
+def judge_verdict(cell: Any) -> JudgeVerdict:
+    """Classify an evaluator cell, given as stored (a JSON string) or decoded.
+
+    A row carried over by an envelope match is judged by what it holds.
+    """
+    cell = _decode_json_field(cell, default=None)
+    if not isinstance(cell, dict):
+        return JudgeVerdict.NOT_APPLICABLE
+    if cell.get("skipped") and cell.get("skipped_reason") != "envelope_match":
+        return JudgeVerdict.NOT_APPLICABLE
+    axes = cell.get("axes")
+    if not isinstance(axes, dict) or not axes:
+        return JudgeVerdict.NOT_APPLICABLE
+    scored = any(
+        isinstance(verdict, dict) and verdict.get("score") is not None
+        for by_judge in axes.values()
+        if isinstance(by_judge, dict)
+        for verdict in by_judge.values()
+    )
+    return JudgeVerdict.SCORED if scored else JudgeVerdict.MISSING
 
 
 class TrajectoryEvaluatorGenerator(
@@ -200,7 +236,11 @@ class TrajectoryEvaluatorGenerator(
         # ── Partial-re-run skip ─────────────────────────────────
         if cfg.skip_if_existing:
             existing = _decode_json_field(data.get(col_name), default=None)
-            if isinstance(existing, dict) and existing.get("envelope") == envelope:
+            if (
+                isinstance(existing, dict)
+                and existing.get("envelope") == envelope
+                and judge_verdict(existing) is not JudgeVerdict.MISSING
+            ):
                 logger.debug(
                     f"  |-- evaluator: skip — envelope match for traj {data.get(cfg.trajectory_id_column, '?')}"
                 )

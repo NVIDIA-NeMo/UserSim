@@ -580,7 +580,6 @@ def simulate_inputs_to_dataset(
     from usersim.cli._pipeline import build_inputs_config_builder
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
-        check_run_write_lock,
         publish_new_run,
         run_started_at,
         run_write_lock,
@@ -588,8 +587,8 @@ def simulate_inputs_to_dataset(
     )
 
     started_at = time.time()
-    # Refused here, before any model call, where ``out`` has no file locks.
-    out = check_run_write_lock(out)
+    out = Path(out).resolve()
+    out.mkdir(parents=True, exist_ok=True)
     # A first look at the matching run, to skip saved rows before any model
     # call and refuse changed ones early. Only the check under the lock counts.
     plan = plan or plan_inputs_run(inputs, models, out, skip_existing=skip_existing)

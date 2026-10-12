@@ -36,7 +36,6 @@ from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
-from usersim.cli._errors import ConfigError
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
 
 logger = logging.getLogger("usersim.cli.simulate")
@@ -486,7 +485,6 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         simulate_inputs_to_dataset,
     )
     from usersim.cli._models import warn_if_missing_api_key
-    from usersim.engine.core.storage import RunLockUnsupportedError
 
     defaults = args._stored_row_flag_defaults
     given = [flag for dest, flag in _STORED_ROW_FLAGS.items() if getattr(args, dest) != defaults[dest]]
@@ -539,9 +537,6 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
                 skip_existing=not args.no_skip_existing,
                 plan=plan,
             )
-        except RunLockUnsupportedError as error:
-            # Found where the job runs, before any model call.
-            raise ConfigError(str(error)) from None
         except ValueError as error:
             # Another writer saved one of these rows with different contents
             # while this run was simulating.
@@ -610,8 +605,6 @@ def _simulate_to_parquet(
     from usersim.engine.core.manifest import write_simulator_manifest
     from usersim.engine.core.storage import (
         LEGACY_RUN_ID,
-        RunLockUnsupportedError,
-        check_run_write_lock,
         existing_trajectory_ids,
         run_started_at,
         sampled_run_to_resume,
@@ -620,11 +613,7 @@ def _simulate_to_parquet(
 
     started_at = time.time()
     out = Path(out).resolve()
-    # Refused here, before any model call, rather than at the first save.
-    try:
-        check_run_write_lock(out)
-    except RunLockUnsupportedError as error:
-        raise ConfigError(str(error)) from None
+    out.mkdir(parents=True, exist_ok=True)
 
     # ``--no-skip-existing`` starts a fresh run; the default resumes the
     # latest run this command made. A fresh run is claimed only when its

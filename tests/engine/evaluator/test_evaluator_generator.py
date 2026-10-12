@@ -28,8 +28,10 @@ from usersim.engine.evaluator.config import (
 )
 from usersim.engine.evaluator.generator import (
     EVALUATOR_VERSION,
+    JudgeVerdict,
     TrajectoryEvaluatorGenerator,
     _decode_json_field,
+    judge_verdict,
 )
 from usersim.engine.evaluator.scorers.health_disclosure import score_health_disclosure_trajectory
 
@@ -196,6 +198,46 @@ class TestFailedSimulation:
         gen._call_judge.assert_not_called()
 
 
+class TestJudgeVerdict:
+    @pytest.mark.parametrize(
+        ("cell", "expected"),
+        [
+            ({"axes": {"helpfulness": {"j": {"score": 4, "reasoning": "ok"}}}}, JudgeVerdict.SCORED),
+            ({"axes": {"helpfulness": {}, "accuracy": {"j": {"score": 2}}}}, JudgeVerdict.SCORED),
+            ({"axes": {"helpfulness": {}, "accuracy": {}}}, JudgeVerdict.MISSING),
+            ({"axes": {"helpfulness": {"j": {"score": None, "reasoning": ""}}}}, JudgeVerdict.MISSING),
+            ({"axes": {"helpfulness": {}}, "skipped": True, "skipped_reason": "envelope_match"}, JudgeVerdict.MISSING),
+            (
+                {"axes": {"helpfulness": {"j": {"score": 3}}}, "skipped": True, "skipped_reason": "envelope_match"},
+                JudgeVerdict.SCORED,
+            ),
+            ({"axes": {}}, JudgeVerdict.NOT_APPLICABLE),
+            ({"axes": {}, "skipped": True, "skipped_reason": "simulation_failed"}, JudgeVerdict.NOT_APPLICABLE),
+            ({"axes": {}, "skipped": True, "skipped_reason": "no_assistant_messages"}, JudgeVerdict.NOT_APPLICABLE),
+            (None, JudgeVerdict.NOT_APPLICABLE),
+            ("not json", JudgeVerdict.NOT_APPLICABLE),
+        ],
+        ids=[
+            "scored",
+            "one-axis-scored",
+            "no-judge-scored",
+            "score-is-null",
+            "carried-over-without-verdict",
+            "carried-over-with-verdict",
+            "no-applicable-axis",
+            "failed-simulation",
+            "no-assistant-turn",
+            "empty-cell",
+            "unparseable-cell",
+        ],
+    )
+    def test_classifies_a_cell(self, cell, expected) -> None:
+        assert judge_verdict(cell) is expected
+
+    def test_reads_the_stored_json_form(self) -> None:
+        assert judge_verdict(json.dumps({"axes": {"helpfulness": {}}})) is JudgeVerdict.MISSING
+
+
 class TestPartialReRunSkip:
     def _trajectory_with_assistant(self) -> dict:
         return {
@@ -252,6 +294,41 @@ class TestPartialReRunSkip:
         # Skipped marker is set.
         assert parsed["skipped"] is True
         assert parsed["skipped_reason"] == "envelope_match"
+
+    async def test_matching_envelope_without_a_verdict_is_judged_again(self) -> None:
+        """A cell no judge scored is not a finished row, so a re-run judges it."""
+        cfg = TrajectoryEvaluatorConfig(
+            name="eval_v2",
+            judges=_ok_judges(),
+            axes=["helpfulness"],
+            prompt_version="v1.0",
+        )
+        gen = _build_generator(
+            cfg,
+            judge_responses={"judge_a": {"helpfulness": {"score": 5, "reasoning": "fresh"}}},
+        )
+        existing = {
+            "envelope": {
+                "judge_aliases": ["judge_a", "judge_b"],
+                "judge_models": ["judge_a-model", "judge_b-model"],
+                "judge_families": ["openai", "nvidia_nemotron"],
+                "axes": ["helpfulness"],
+                "scorers": [],
+                "prompt_version": "v1.0",
+                "evaluator_version": EVALUATOR_VERSION,
+            },
+            "axes": {"helpfulness": {}},
+            "scorers": {},
+            "skipped": False,
+            "skipped_reason": None,
+        }
+        data = self._trajectory_with_assistant()
+        data["eval_v2"] = json.dumps(existing)
+
+        parsed = json.loads((await gen.agenerate(data))["eval_v2"])
+
+        assert parsed["skipped"] is False
+        assert parsed["axes"]["helpfulness"]["judge_a"] == {"score": 5, "reasoning": "fresh"}
 
     async def test_changed_prompt_version_invalidates(self) -> None:
         cfg = TrajectoryEvaluatorConfig(

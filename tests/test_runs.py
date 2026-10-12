@@ -303,8 +303,6 @@ def test_simulate_notebook_writes_runs_as_the_cli_does() -> None:
     a run with another writer started in the same second, or save an id twice.
     """
     src = _simulate_notebook_source()
-    # Refused before any model call where the trajectory root has no file locks.
-    assert "check_run_write_lock(TRAJECTORY_PATH)" in src
     assert "sampled_run_to_resume(TRAJECTORY_PATH)" in src
     assert "save_sampled_rows(" in src
     assert "write_locale_partition(" not in src and "new_run_id(" not in src

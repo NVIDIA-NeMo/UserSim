@@ -296,7 +296,9 @@ config_builder.add_column(
 **Partial re-run.** If `skip_if_existing=True` (the default), a row whose
 existing cell value already carries an envelope matching the current config
 is *not* re-judged; the cell's `skipped`/`skipped_reason` fields are flipped
-so downstream reporting can count skips. Bumping `prompt_version` or changing
+so downstream reporting can count skips. A cell with rubric axes that no judge
+scored (every call failed, or returned output that did not parse) is judged
+again. Bumping `prompt_version` or changing
 the axes / scorers / judges, or the model behind a judge alias, invalidates
 prior envelopes and forces a fresh run. `judge_models` also records which
 model scored each row: the capability report and the notebook's run listing
@@ -561,7 +563,7 @@ per-scorer end-to-end).
 | `test_idempotency.py` | `existing_trajectory_ids` / `is_duplicate_trajectory_id` / `filter_to_missing_trajectory_ids` |
 | `test_storage.py` | Hive-partitioned dataset reads/writes, run-isolation helpers (`new_run_id` / `latest_run_id` / `resolve_run`), legacy bare-layout fallback, schema-unification on cross-fragment drift |
 | `test_outcomes.py` | `SimulationOutcome` schema, enum exhaustiveness, status promotion, `OutcomeBuilder` |
-| `test_provenance.py` | `code_sha` env override, `nemotron_personas_version` plumbing, probe metadata |
+| `test_provenance.py` | `code_sha` sources (env override, a checkout that tracks the package, a git install's recorded commit, never the working directory's repository), `nemotron_personas_version` plumbing, probe metadata |
 | `test_locale.py` | `SHIPPED_LOCALES` parity across language-name / display-name / script-range maps; new locales caught at CI time |
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |

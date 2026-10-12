@@ -15,12 +15,20 @@ from __future__ import annotations
 import ast
 import importlib
 import sys
-import tomllib
 from pathlib import Path
 
 import pytest
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 _REPO_ROOT = Path(__file__).resolve().parents[1]
+
+#: The running Python's standard library, plus ``tomllib``, which is new in
+#: 3.11: on 3.10 the package imports the declared ``tomli`` backport instead.
+_STDLIB = sys.stdlib_module_names | {"tomllib"}
 
 
 class TestPluginEntryPoints:
@@ -95,7 +103,7 @@ class TestDeclaredDependencies:
                     found.update(a.name.split(".")[0] for a in node.names)
                 elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
                     found.add(node.module.split(".")[0])
-        return {m for m in found if m not in sys.stdlib_module_names and m != own_package}
+        return {m for m in found if m not in _STDLIB and m != own_package}
 
     @staticmethod
     def _declared(pyproject: Path) -> set[str]:
@@ -267,6 +275,23 @@ class TestProbeAssetPreflight:
         # Naming what *is* available turns a dead end into a next step.
         assert "available:" in message and "en_US" in message
 
+    def test_india_variant_without_its_own_bank_uses_en_in(self) -> None:
+        """A registered variant runs on its base locale's bank, as its probe and scorer resolve it."""
+        from usersim.cli._pipeline import verify_probe_assets
+
+        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
+        verify_probe_assets(mix, ["bn_Beng_IN"], None)
+
+    def test_india_variant_is_rejected_when_its_base_bank_is_absent(self, tmp_path: Path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
+        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["bn_Beng_IN"], tmp_path)
+        assert "bn_Beng_IN" in str(exc.value)
+
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
@@ -286,12 +311,18 @@ class TestProbeAssetPreflight:
         verify_probe_assets({p: 1.0 for p in known_probes()}, ["en_US"], None)
 
 
-class TestManifestProvenance:
-    """A run manifest must record which code produced it.
+class TestSdistContents:
+    def test_tests_are_pruned_from_the_sdist(self) -> None:
+        """The suite runs from a checkout; a partial copy without conftest.py would not run."""
+        directives = [line.split() for line in (_REPO_ROOT / "MANIFEST.in").read_text().splitlines()]
+        assert ["prune", "tests"] in directives
 
-    The version was looked up by a distribution name. When the two
-    distributions merged, that name stopped existing and every manifest
-    silently recorded ``null`` -- no error, just lost provenance.
+
+class TestManifestProvenance:
+    """A run manifest records the version of the installed ``usersim`` distribution.
+
+    It is the distribution named ``usersim`` that counts, so stale metadata from
+    another name that also claims the package cannot supply the version.
     """
 
     def test_engine_version_is_recorded(self) -> None:
@@ -303,19 +334,24 @@ class TestManifestProvenance:
         )
 
     def test_version_matches_the_installed_distribution(self) -> None:
-        """Resolved from the package, so a distribution rename cannot null it.
-
-        Asserting the value rather than inspecting the source: what matters
-        is that the recorded version tracks whatever distribution actually
-        ships ``usersim``, however that distribution is named.
-        """
-        from importlib.metadata import packages_distributions, version
+        from importlib.metadata import version
 
         from usersim.engine.core.manifest import _own_version
 
-        providing = packages_distributions().get("usersim")
-        assert providing, "no installed distribution provides the usersim package"
-        assert _own_version() == version(providing[0])
+        assert _own_version() == version("usersim")
+
+    def test_package_and_cli_report_the_installed_version(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """``pyproject.toml`` is the only place the version is written."""
+        from importlib.metadata import version
+
+        import usersim
+        from usersim import cli
+
+        assert usersim.__version__ == version("usersim")
+        with pytest.raises(SystemExit) as exc:
+            cli.main(["--version"])
+        assert exc.value.code == 0
+        assert capsys.readouterr().out.strip() == f"usersim {version('usersim')}"
 
     def test_code_info_carries_both_versions(self) -> None:
         from usersim.engine.core.manifest import _detect_code_info
@@ -337,8 +373,6 @@ class TestRuntimeDependencySurface:
 
     @staticmethod
     def _runtime_deps() -> set[str]:
-        import tomllib
-
         data = tomllib.load((_REPO_ROOT / "pyproject.toml").open("rb"))
         names = set()
         for spec in data["project"]["dependencies"]:

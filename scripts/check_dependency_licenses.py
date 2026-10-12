@@ -24,7 +24,7 @@ POLICY_PATH = Path(__file__).resolve().parents[1] / "dependency-license-policy.t
 #: installed alongside its dependencies. The policy governs what the project may
 #: depend on rather than what the project itself is licensed as, so its own entry
 #: is not a dependency and is excluded from the report.
-PROJECT_DISTRIBUTION = "nemo-usersim"
+PROJECT_DISTRIBUTION = "usersim"
 
 LICENSE_ALIASES = {
     "Apache Software License": {"Apache-2.0"},

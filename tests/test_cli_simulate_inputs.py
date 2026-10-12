@@ -828,25 +828,6 @@ def test_a_dry_run_shows_the_plan_without_running(rows, tmp_path, capsys):
     assert list_runs(tmp_path / "o") == []
 
 
-def test_a_root_without_file_locks_is_refused_before_any_model_call(rows, tmp_path, monkeypatch, caplog):
-    fcntl = pytest.importorskip("fcntl")
-    import errno
-
-    from usersim.engine.core.storage import RunLockUnsupportedError
-
-    def unsupported(*args, **kwargs):
-        raise OSError(errno.ENOSYS, "flock is not supported here")
-
-    monkeypatch.setattr(fcntl, "flock", unsupported)
-    argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "cli")]
-    with patch("usersim.cli._pipeline.build_inputs_config_builder", side_effect=AssertionError("ran")):
-        with pytest.raises(RunLockUnsupportedError):
-            _run(rows, tmp_path / "library")
-        with caplog.at_level(logging.ERROR):
-            assert cli.main(argv) == 2
-    assert "file locks" in caplog.text
-
-
 def test_a_job_another_host_runs_is_submitted_whatever_this_hosts_file_locks(rows, tmp_path, monkeypatch):
     """The lock is checked where the job runs, so a backend that runs it elsewhere still gets it."""
     fcntl = pytest.importorskip("fcntl")
