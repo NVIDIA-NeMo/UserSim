@@ -148,9 +148,9 @@ include = ["usersim*"]
     "models_*.toml",
 ]
 "usersim.engine" = [
-    # The asset banks. Hatchling shipped the whole package tree implicitly;
-    # setuptools needs them named, and a wheel without them fails every
-    # probe at asset resolution. `make check-wheel` counts these.
+    # The asset banks. setuptools ships package data only when it is named,
+    # and a wheel without the banks fails every probe at asset resolution.
+    # `make check-dist` fails if the wheel has none.
     "assets/**/*.yaml",
     "assets/**/*.yml",
     "assets/**/*.json",

@@ -5,7 +5,7 @@ finance corpora, tool catalogues, action taxonomies) ships as **package
 data** under `usersim/engine/assets/<probe>/`.
 
 They ship inside the package so a plain `pip install` gives you working
-probes with no extra download step, and `make check-wheel` fails if that ever
+probes with no extra download step, and `make check-dist` fails if that ever
 stops being true.
 
 ## Resolution

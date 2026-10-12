@@ -205,7 +205,7 @@ Two heavier gates run in CI and are worth running locally if you touched
 packaging or the extension seams:
 
 ```bash
-make check-wheel        # builds a wheel, installs it clean, runs from an empty dir
+make check-dist         # builds and checks the sdist and wheel, installs the wheel clean, runs it from an empty dir
 make check-extensions   # installs an out-of-tree package, asserts all six seams work
 ```
 
