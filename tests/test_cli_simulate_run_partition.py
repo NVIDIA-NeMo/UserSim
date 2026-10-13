@@ -38,6 +38,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 
 from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.storage import (
@@ -244,7 +245,7 @@ class TestNewRunIdWiring:
                 return _synthetic_trajectory("FRESH")
 
         class _FakeDD:
-            def create(self, builder, num_records=None):
+            def create(self, builder, num_records=None, artifact_path=None):
                 return _FakeResult()
 
         captured_builder_kwargs = {}
@@ -332,7 +333,7 @@ class TestNewRunIdWiring:
                 return _synthetic_trajectory("RESUMED")
 
         class _FakeDD:
-            def create(self, builder, num_records=None):
+            def create(self, builder, num_records=None, artifact_path=None):
                 return _FakeResult()
 
         def _fake_builder(**kwargs):
@@ -376,7 +377,7 @@ def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
             return _synthetic_context_failure()
 
     class _FakeDD:
-        def create(self, builder, num_records=None):
+        def create(self, builder, num_records=None, artifact_path=None):
             assert num_records == 1
             return _FakeResult()
 
@@ -407,3 +408,98 @@ def test_context_failure_row_survives_cli_storage(tmp_path: Path) -> None:
     assert row["finance_task_id"] == "TASK-CTX"
     assert json.loads(row["retrieved_document_ids"]) == ["d1"]
     assert "evidence" in row["conversation_messages"]
+
+
+def test_each_batch_gets_its_own_artifacts_and_the_manifest_its_start(tmp_path: Path, monkeypatch) -> None:
+    """Data Designer names a batch's artifacts by the second it started, so two runs in one directory
+    could share them. Each batch gets a folder of its own, removed once its rows are loaded, and the
+    manifest's start is when the invocation started, kept in the run's record.
+    """
+    from types import SimpleNamespace
+
+    from usersim.cli import simulate
+    from usersim.cli._models import default_models_path, load_models_config
+    from usersim.engine.core.manifest import load_run_manifest
+
+    folders: list[Path] = []
+
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("FRESH")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            folders.append(Path(artifact_path))
+            assert folders[-1].is_dir()
+            return _FakeResult()
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(simulate, "time", SimpleNamespace(time=lambda: 1_700_000_000.4))
+    out = tmp_path / "trajs"
+    with patch("usersim.cli._pipeline.build_simulator_config_builder", lambda **kwargs: (_FakeDD(), object())):
+        rc = simulate._simulate_to_parquet(
+            models=load_models_config(default_models_path()),
+            models_path=default_models_path(),
+            panel=None,
+            locales=["en_US"],
+            num_rows=1,
+            out=out,
+            assets_dir=packaged_assets_dir(),
+            max_turns=1,
+            probe_mix={"general_open_ended": 1.0},
+            random_seed=42,
+            skip_existing=True,
+        )
+
+    assert rc == 0
+    (run_id,) = list_runs(out)
+    assert load_run_manifest(run_id, out).started_at_epoch == 1_700_000_000
+    assert len(folders) == 1 and not folders[0].exists()
+    assert tmp_path not in folders[0].parents
+
+
+def test_a_root_without_file_locks_still_gets_its_run_with_one_warning(tmp_path: Path, monkeypatch, caplog) -> None:
+    """Shared filesystems such as Lustre are often mounted without ``flock``; a run is written there anyway."""
+    fcntl = pytest.importorskip("fcntl")
+    import errno
+    import logging
+
+    from usersim.cli import simulate
+    from usersim.cli._models import default_models_path, load_models_config
+
+    def unsupported(*args, **kwargs):
+        raise OSError(errno.ENOSYS, "flock is not supported here")
+
+    class _FakeResult:
+        def load_dataset(self):
+            return _synthetic_trajectory("FRESH")
+
+    class _FakeDD:
+        def create(self, builder, num_records=None, artifact_path=None):
+            return _FakeResult()
+
+    monkeypatch.setattr(fcntl, "flock", unsupported)
+    monkeypatch.chdir(tmp_path)
+    out = tmp_path / "trajs"
+    with (
+        patch("usersim.cli._pipeline.build_simulator_config_builder", lambda **kwargs: (_FakeDD(), object())),
+        caplog.at_level(logging.WARNING, logger="usersim.engine"),
+    ):
+        rc = simulate._simulate_to_parquet(
+            models=load_models_config(default_models_path()),
+            models_path=default_models_path(),
+            panel=None,
+            locales=["en_US"],
+            num_rows=1,
+            out=out,
+            assets_dir=packaged_assets_dir(),
+            max_turns=1,
+            probe_mix={"general_open_ended": 1.0},
+            random_seed=42,
+            skip_existing=True,
+        )
+
+    assert rc == 0
+    (run_id,) = list_runs(out)
+    assert set(read_partitioned_dataset(out, run=run_id)["trajectory_id"].astype(str)) == {"FRESH"}
+    assert sum("not supported" in record.getMessage() for record in caplog.records) == 1
