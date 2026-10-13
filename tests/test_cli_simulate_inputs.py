@@ -38,6 +38,7 @@ from test_simulator_pipeline_e2e import _mock_call_llm_side_effect
 
 from usersim import cli
 from usersim.cli import _inputs
+from usersim.cli._errors import ConfigError
 from usersim.cli._inputs import (
     INPUT_ID_COLUMN,
     load_episode_inputs,
@@ -95,7 +96,7 @@ def _models(provider_api_key: str = "NVIDIA_API_KEY", **by_alias: dict[str, Any]
 
 
 @contextmanager
-def _offline():
+def _offline(side_effect=_mock_call_llm_side_effect):
     """Stub every simulator-side model call and skip Data Designer's health checks."""
 
     def no_health_checks(models):
@@ -104,7 +105,7 @@ def _offline():
     with ExitStack() as stack:
         stack.enter_context(patch("usersim.cli._pipeline.to_model_configs", no_health_checks))
         for site in _LLM_SITES:
-            stack.enter_context(patch(f"{site}.acall_llm", side_effect=_mock_call_llm_side_effect))
+            stack.enter_context(patch(f"{site}.acall_llm", side_effect=side_effect))
         yield
 
 
@@ -240,10 +241,46 @@ def test_debug_logging_keeps_the_setup(rows, monkeypatch):
         pytest.param(lambda: _models(assistant_model={"temperature": 0.1}), id="temperature"),
         pytest.param(lambda: _models(judge_model={"extra_body": {"reasoning_effort": "low"}}), id="judge"),
         pytest.param(lambda: _models(assistant_model={"model": "another/model"}), id="model"),
+        pytest.param(lambda: _models(assistant_model={"replay_reasoning": True}), id="replay"),
     ],
 )
 def test_a_model_setting_that_can_change_a_conversation_is_a_new_setup(rows, models):
     assert _fingerprint(rows, models()) != _fingerprint(rows)
+
+
+def test_the_runs_models_file_decides_replay_whatever_the_rows_were_stored_with(rows, tmp_path):
+    """The assistant under test comes from the run's models file, and so does replaying its reasoning."""
+    from usersim.engine.core.llm import replaying_assistant_reasoning
+
+    seen: list[bool] = []
+
+    def recording(models, alias, msgs, **kwargs):
+        if alias == "assistant_model":
+            seen.append(replaying_assistant_reasoning())
+        return _mock_call_llm_side_effect(models, alias, msgs, **kwargs)
+
+    mixed = _edited(rows, lambda r: r[0]["usersim_config"].update(replay_assistant_reasoning=True))
+    for stored, models, replayed in [
+        (mixed, _models(), False),
+        (rows, _models(assistant_model={"replay_reasoning": True}), True),
+    ]:
+        seen.clear()
+        out = tmp_path / f"replay-{replayed}"
+        with _offline(recording):
+            result = simulate_inputs_to_dataset(inputs=prepare_episode_inputs(stored), models=models, out=out)
+        assert seen and set(seen) == {replayed}
+        assert load_run_manifest(result.run_id, out).simulation_config.replay_assistant_reasoning is replayed
+    assert _fingerprint(mixed) == _fingerprint(rows)
+
+
+def test_a_models_file_that_cannot_replay_is_refused_before_any_model_call(rows, tmp_path):
+    unstored = _edited(rows, lambda r: [row["usersim_config"].update(store_reasoning=False) for row in r])
+    replay = _models(assistant_model={"replay_reasoning": True})
+
+    with patch("usersim.cli._pipeline.build_inputs_config_builder", side_effect=AssertionError("ran")):
+        with pytest.raises(ConfigError, match="store"):
+            _run(unstored, tmp_path / "out", replay)
+    assert list_runs(tmp_path / "out") == []
 
 
 def test_a_providers_own_request_settings_are_part_of_the_setup(rows, monkeypatch):

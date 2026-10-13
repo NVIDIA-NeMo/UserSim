@@ -249,6 +249,18 @@ def test_the_provider_type_is_matched_whatever_its_case():
     assert assistant_replays_reasoning(config, store_reasoning=True) is True
 
 
+def test_without_providers_of_its_own_the_check_reads_the_ones_data_designer_loads(monkeypatch):
+    """A models file that declares no provider runs on Data Designer's own, so their type decides."""
+    from data_designer.config.models import ModelProvider
+
+    claude = ModelProvider(name="nvidia", endpoint="https://example.invalid", provider_type="anthropic", api_key="K")
+    monkeypatch.setattr("data_designer.config.default_model_settings.get_default_providers", lambda: [claude])
+    config = replace(_models(**_REPLAY), providers=())
+
+    with pytest.raises(ConfigError, match="OpenAI-compatible"):
+        assistant_replays_reasoning(config, store_reasoning=True)
+
+
 def test_an_override_that_keeps_the_model_keeps_replay(caplog):
     import logging
 

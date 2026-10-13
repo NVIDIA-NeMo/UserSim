@@ -278,24 +278,6 @@ def _replay_flag(value: Any, *, where: str) -> bool:
     return value
 
 
-def _provider_type(config: ModelsConfig, name: str) -> str | None:
-    """The ``provider_type`` Data Designer serves provider ``name`` with, if known.
-
-    The config's own providers first, then the defaults Data Designer loads
-    for itself, as :func:`to_data_designer_kwargs` merges them.
-    """
-    for provider in config.providers:
-        if provider.name == name:
-            return provider.provider_type
-    from data_designer.config.default_model_settings import get_builtin_model_providers, get_default_providers
-
-    try:
-        defaults = get_default_providers() or get_builtin_model_providers()
-    except FileNotFoundError:
-        defaults = get_builtin_model_providers()
-    return next((provider.provider_type for provider in defaults if provider.name == name), None)
-
-
 def assistant_replays_reasoning(config: ModelsConfig, *, store_reasoning: bool) -> bool:
     """Whether a run replays the assistant's own reasoning; refuses a setup that cannot.
 
@@ -318,10 +300,17 @@ def assistant_replays_reasoning(config: ModelsConfig, *, store_reasoning: bool) 
         return False
     if not store_reasoning:
         raise ConfigError(
-            "replay_reasoning on assistant_model needs the reasoning kept: drop --no-store-reasoning "
-            "(store_reasoning=False), or turn replay off"
+            "replay_reasoning on assistant_model needs the reasoning kept, but store_reasoning is off: "
+            "drop --no-store-reasoning, or for --inputs, materialize the rows without it; or turn replay off"
         )
-    provider_type = _provider_type(config, assistant.provider)
+    provider_type = next(
+        (
+            provider.provider_type
+            for provider in resolved_model_providers(config)
+            if provider.name == assistant.provider
+        ),
+        None,
+    )
     # Data Designer normalizes the type's case before choosing an adapter.
     if provider_type is not None and provider_type.lower() != "openai":
         raise ConfigError(
