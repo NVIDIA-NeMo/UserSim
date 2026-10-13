@@ -624,7 +624,6 @@ def _simulate_to_parquet(
             assets_dir=Path(assets_dir).resolve(),
             trajectories_requested=requested_per_locale,
             persona_language_filters=applied_language_filters,
-            source_kind="cli",
         )
         print(f"  manifest:      {manifest_path_written}")
     except Exception as e:  # pragma: no cover — defensive: never fail a run on manifest issues

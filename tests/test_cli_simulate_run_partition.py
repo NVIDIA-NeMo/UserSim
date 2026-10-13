@@ -34,6 +34,7 @@ DataDesigner pipeline, then asserts:
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -255,6 +256,10 @@ class TestNewRunIdWiring:
             return _FakeDD(), object()
 
         models = load_models_config(default_models_path())
+        # The command line the manifest should record.
+        monkeypatch.setattr(sys, "argv", ["usersim", "simulate", "--locale", "en_US", "--num-rows", "1"])
+        monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+        monkeypatch.setattr("usersim.engine.core.manifest._is_running_in_notebook", lambda: False)
         with patch("usersim.cli._pipeline.build_simulator_config_builder", _fake_builder):
             rc = _simulate_to_parquet(
                 models=models,
@@ -305,6 +310,8 @@ class TestNewRunIdWiring:
         assert fresh_manifest.scope.toolset_seed_path is None
         assert fresh_manifest.scope.toolset_content_hash is None
         assert fresh_manifest.simulation_config.store_reasoning is False
+        assert fresh_manifest.source.kind == "cli"
+        assert fresh_manifest.source.invocation == "usersim simulate --locale en_US --num-rows 1"
         assert load_run_manifest("1700000000", out) is None
 
     def test_simulate_helper_resumes_into_latest_when_skip_existing_true(
