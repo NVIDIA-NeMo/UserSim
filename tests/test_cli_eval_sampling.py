@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from types import SimpleNamespace
 
 import pandas as pd
@@ -62,6 +63,37 @@ class TestEvalRecordsItsSampling:
         # One row from each of en_US, pt_BR and ja_JP.
         assert (recorded.mode, recorded.n, recorded.n_selected, recorded.n_total) == ("per_locale", 1, 3, 6)
         assert recorded.random_seed == 42
+
+
+class TestEvalWarnsOnRepeatedIds:
+    """One ``trajectory_id`` is one conversation; a run that repeats one would score it more than once."""
+
+    @staticmethod
+    def _warnings(caplog):
+        return [r.getMessage() for r in caplog.records if "more than once" in r.getMessage()]
+
+    @pytest.mark.parametrize("flags", [(), ("--num-records", "1"), ("--num-records-per-locale", "1")])
+    def test_a_repeated_id_is_named_whatever_rows_the_pass_picks(
+        self, tmp_path, monkeypatch, trajectory_df, caplog, flags
+    ):
+        repeated = trajectory_df.copy()
+        twice = repeated.loc[0, "trajectory_id"]
+        repeated.loc[5, "trajectory_id"] = twice
+        with caplog.at_level(logging.WARNING, logger="usersim.cli.eval"):
+            out, _ = _evaluate(tmp_path, monkeypatch, repeated, *flags)
+
+        (warning,) = self._warnings(caplog)
+        assert f"{twice} (2 rows)" in warning
+        assert repeated.loc[1, "trajectory_id"] not in warning
+        if not flags:
+            # Every row is still evaluated.
+            assert len(read_partitioned_dataset(out, run=RUN_ID)) == len(repeated)
+
+    def test_a_run_without_repeats_gives_no_warning(self, tmp_path, monkeypatch, trajectory_df, caplog):
+        with caplog.at_level(logging.WARNING, logger="usersim.cli.eval"):
+            _evaluate(tmp_path, monkeypatch, trajectory_df)
+
+        assert self._warnings(caplog) == []
 
 
 @pytest.mark.parametrize("recorded", ["per_locale", None], ids=["recorded", "not_recorded"])

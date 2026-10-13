@@ -32,6 +32,8 @@ _SAMPLE_SEED = 42
 
 #: Trajectory columns reattached to every evaluator row for partitioning and joins.
 _KEY_COLS = ("trajectory_id", "locale", "probe_family")
+#: How many repeated ids the warning names before it only counts the rest.
+_REPEATED_IDS_SHOWN = 5
 
 
 def register(subparsers: argparse._SubParsersAction) -> None:
@@ -183,6 +185,7 @@ def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, i
         raise ValueError("--num-records and --num-records-per-locale are mutually exclusive")
     if args.num_records_per_locale is None:
         keys = pd.read_parquet(seed_path, columns=list(_KEY_COLS))
+        _warn_on_repeated_ids(keys["trajectory_id"])
         total = len(keys)
         num_records = total if args.num_records is None else min(int(args.num_records), total)
         if num_records <= 0:
@@ -195,6 +198,7 @@ def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, i
     if per_locale <= 0:
         raise ValueError("--num-records-per-locale must be positive when provided")
     full = pd.read_parquet(seed_path)
+    _warn_on_repeated_ids(full["trajectory_id"])
     sampled = pd.concat(
         [
             group.sample(n=min(per_locale, len(group)), random_state=_SAMPLE_SEED)
@@ -203,6 +207,30 @@ def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, i
     ).sort_index()
     record = {"mode": "per_locale", "n": per_locale, "n_total": len(full)}
     return sampled[list(_KEY_COLS)].reset_index(drop=True), sampled, len(sampled), record
+
+
+def _warn_on_repeated_ids(trajectory_ids: Any) -> None:
+    """Warn, naming them, when ids appear more than once among the run's rows.
+
+    One ``trajectory_id`` stands for one conversation. A writer that adds a
+    restarted conversation's row beside the earlier one, instead of replacing
+    it, gives that conversation two rows, and each is evaluated, so it counts
+    twice. The rows are evaluated as they are; the warning says which.
+    """
+    counts = trajectory_ids.astype(str).value_counts()
+    repeated = counts[counts > 1]
+    if repeated.empty:
+        return
+    shown = ", ".join(f"{tid} ({n} rows)" for tid, n in repeated.head(_REPEATED_IDS_SHOWN).items())
+    more = f", and {len(repeated) - _REPEATED_IDS_SHOWN} more" if len(repeated) > _REPEATED_IDS_SHOWN else ""
+    logger.warning(
+        "%d trajectory_id(s) appear more than once in this run: %s%s. Each copy is evaluated as a row of "
+        "its own, so such a conversation can count more than once; a restarted conversation's row should "
+        "replace the earlier one.",
+        len(repeated),
+        shown,
+        more,
+    )
 
 
 def _report_judge_verdicts(cells: Iterable[Any]) -> bool:
