@@ -31,6 +31,27 @@ from usersim.engine.core.provenance import get_code_sha, get_nemotron_personas_v
 if TYPE_CHECKING:
     from usersim.engine.config import ConversationSimulatorConfig
 
+#: A seed column that carries a stored episode row whole, as JSON. A seed table
+#: types each of its columns, so an ``int`` column with a ``float`` in another
+#: row would reach the probe as ``float``; inside one JSON cell every value
+#: keeps the type it was stored with.
+EPISODE_INPUT_COLUMN = "usersim_episode_input"
+
+
+def unpack_stored_episode(data: dict[str, Any]) -> None:
+    """Replace ``data``'s columns with the stored episode it carries, if any.
+
+    The carrier column is removed, and the stored values overwrite the seed
+    table's copies of the same columns.
+    """
+    cell = data.pop(EPISODE_INPUT_COLUMN, None)
+    if cell is None:
+        return
+    stored = json.loads(cell) if isinstance(cell, str) else cell
+    if not isinstance(stored, Mapping):
+        raise ValueError(f"{EPISODE_INPUT_COLUMN} must hold a JSON object, got {type(stored).__name__}")
+    data.update(stored)
+
 
 @dataclass(frozen=True)
 class EpisodePreamble:

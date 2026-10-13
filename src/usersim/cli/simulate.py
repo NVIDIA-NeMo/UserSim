@@ -21,6 +21,9 @@ mid-run leaves earlier locales' partitions intact.
 Idempotent re-runs: if the output dataset already exists, rows whose
 ``trajectory_id`` is present are skipped (the simulator re-emits
 identical bytes for them anyway, but skipping avoids the LLM cost).
+
+``--inputs`` runs stored rows from ``--materialize-inputs`` exactly as
+stored instead of sampling, one run per setup; see ``cli/_inputs.py``.
 """
 
 from __future__ import annotations
@@ -29,6 +32,7 @@ import argparse
 import logging
 import tempfile
 import time
+from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
@@ -63,6 +67,20 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--locale",
         action="append",
         help=("Locale to sample inline (repeatable). Use with --num-rows. Mutually exclusive with --panel."),
+    )
+    src.add_argument(
+        "--inputs",
+        type=Path,
+        help=(
+            "Run the stored rows in this .jsonl or .parquet file (from "
+            "--materialize-inputs) exactly as stored, instead of sampling, so "
+            "two setups meet the same simulated users. Each row runs with the "
+            "settings it was stored with, so a sampling flag (--probe-mix, "
+            "--max-turns, --random-seed, ...) set to anything but its default "
+            "is refused. Each setup gets its "
+            "own run under --out, and each row a trajectory_id of its own; "
+            "the stored id is kept as input_id, which pairs two runs."
+        ),
     )
 
     p.add_argument(
@@ -229,7 +247,27 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default="local",
         help="Where the run executes (default: local, in this process).",
     )
-    p.set_defaults(func=run)
+    p.set_defaults(
+        func=run,
+        _stored_row_flag_defaults={dest: p.get_default(dest) for dest in _STORED_ROW_FLAGS},
+    )
+
+
+#: Flags that set what ``--inputs`` takes from the stored rows instead, by
+#: argparse destination.
+_STORED_ROW_FLAGS = {
+    "num_rows": "--num-rows",
+    "max_turns": "--max-turns",
+    "max_assistant_attempts": "--max-assistant-attempts",
+    "probe_mix": "--probe-mix",
+    "random_seed": "--random-seed",
+    "finance_tier_mix": "--finance-tier-mix",
+    "finance_retrieval_mode": "--finance-retrieval-mode",
+    "no_store_reasoning": "--no-store-reasoning",
+    "toolset_seed_path": "--toolset-seed-path",
+    "match_persona_language": "--match-persona-language",
+    "materialize_inputs": "--materialize-inputs",
+}
 
 
 def _parse_probe_mix(spec: str) -> dict:
@@ -287,6 +325,9 @@ def run(args: argparse.Namespace) -> int:
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`")
+
+    if args.inputs is not None:
+        return _run_inputs(args, models, models_path)
 
     probe_mix = _parse_probe_mix(args.probe_mix)
 
@@ -433,6 +474,101 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
         raise SystemExit("--materialize-inputs requires --out ending in .jsonl or .parquet")
     print(f"wrote {len(rows)} resolved episode inputs to {out}")
     return 0
+
+
+def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
+    """``usersim simulate --inputs``: run stored rows exactly as stored."""
+    from usersim.cli._inputs import (
+        load_episode_inputs,
+        plan_inputs_run,
+        prepare_episode_inputs,
+        simulate_inputs_to_dataset,
+    )
+    from usersim.cli._models import warn_if_missing_api_key
+
+    defaults = args._stored_row_flag_defaults
+    given = [flag for dest, flag in _STORED_ROW_FLAGS.items() if getattr(args, dest) != defaults[dest]]
+    if given:
+        raise SystemExit(
+            f"--inputs runs each row with the settings it was stored with; drop {', '.join(given)} "
+            "(to change them, materialize the rows again)"
+        )
+    try:
+        inputs = prepare_episode_inputs(
+            load_episode_inputs(args.inputs), assets_dir=args.assets_dir, source=args.inputs
+        )
+        plan = plan_inputs_run(inputs, models, args.out, skip_existing=not args.no_skip_existing)
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"--inputs {args.inputs}: {error}") from None
+
+    config = inputs.config
+    print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))
+    print(f"  inputs:        {args.inputs} ({len(inputs.rows)} rows)")
+    print(f"  locales:       {sorted({row['usersim_config']['locale'] for row in inputs.rows})}")
+    print(f"  probes:        {dict(sorted(Counter(str(row['probe_type']) for row in inputs.rows).items()))}")
+    print(
+        "  stored with:   "
+        + ", ".join(
+            f"{key}={config.get(key)!r}"
+            for key in ("max_turns", "max_assistant_attempts", "random_seed", "store_reasoning")
+        )
+    )
+    print(f"  assets_dir:    {inputs.assets_dir}")
+    print(f"  models config: {models_path}")
+    print(f"  setup:         {plan.fingerprint[:12]}")
+    if plan.matching_run is not None:
+        print(f"  run_id:        {plan.matching_run} (resume; {plan.saved} of {len(inputs.rows)} rows already saved)")
+    else:
+        print("  run_id:        new, assigned when the first rows are saved")
+    print(f"  output:        {args.out}")
+    if args.dry_run:
+        return 0
+
+    if (msg := warn_if_missing_api_key(models)) is not None:
+        logger.warning(msg)
+
+    def job() -> int:
+        try:
+            result = simulate_inputs_to_dataset(
+                inputs=inputs,
+                models=models,
+                out=args.out,
+                models_path=models_path,
+                skip_existing=not args.no_skip_existing,
+                plan=plan,
+            )
+        except ValueError as error:
+            # Another writer saved one of these rows with different contents
+            # while this run was simulating.
+            raise SystemExit(f"--inputs {args.inputs}: {error}") from None
+        if not result.written:
+            print("no new trajectories generated")
+            return 0
+        print(f"wrote {result.written} new trajectories to run={result.run_id} under {args.out}")
+        print(
+            f"\nNext step: score them\n  usersim eval --run {result.run_id} \\\n"
+            f"    --trajectories {args.out} --out output/evaluations"
+        )
+        return 0
+
+    from usersim.engine.core.backends import JobSpec, get_backend
+
+    backend = get_backend(getattr(args, "backend", "local"))
+    params = {
+        "inputs": str(args.inputs),
+        "out": str(args.out),
+        "models_path": str(models_path),
+        "assets_dir": str(inputs.assets_dir),
+        "skip_existing": not args.no_skip_existing,
+    }
+    handle = backend.submit(JobSpec(name="simulate-inputs", params=params, callable_=job))
+    status = backend.poll(handle)
+    if status.error is not None:
+        raise status.error
+    if status.state == "failed" and status.exit_code is None:
+        logger.error("simulate --inputs failed on backend %r: %s", backend.name, status.message)
+        return 1
+    return status.exit_code or 0
 
 
 def _simulate_to_parquet(

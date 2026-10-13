@@ -13,6 +13,7 @@ simulated conversation, each carrying:
 - `simulation_outcome` (JSON) holds a row-level structured record: status, failure-class taxonomy, per-actor attribution, per-model token counts, wall-clock, provenance (code SHA + asset bank versions + prompt versions).
 - `simulation_traces` (JSON): per-turn / per-call telemetry (judge-gate ratings, fourth-wall pre-filter triggers, capitulation checks, tool-call verification, etc.).
 - A content-hashed `persona_uuid` (stable across runs) and a deterministic `trajectory_id` (hash of `persona + probe + resolved model identities + prompt version`). These are the simulator's idempotency keys.
+- In a run of stored rows (`usersim simulate --inputs`), `trajectory_id` is instead a hash of the stored row and of the setup it ran with: models as sent, the rows' shared settings, asset contents, `USERSIM_*` variables, and prompt and package versions (see [Running stored rows](engine/EXTERNAL_PROBE_RUNTIME.md#running-stored-rows)). `input_id` holds the stored row's own `trajectory_id`, so two setups run over the same stored rows pair on it. A row keeps the `usersim_provenance` it was materialized with, while the run's manifest records the code and versions the run itself used.
 
 > **Reasoning-trace export:** `usersim select` and its Hugging Face upload path
 > retain `conversation_messages`, so captured `reasoning_content` travels with

@@ -219,6 +219,8 @@ RUN_LOCK_FILENAME: str = ".usersim.lock"
 #: The kind a record gives a run of rows the simulator sampled. A resume
 #: reopens only a run of its own kind.
 RUN_KIND_SAMPLED: str = "sampled"
+#: The kind a record gives a run of stored rows that ``simulate --inputs`` ran.
+RUN_KIND_STORED: str = "stored"
 
 #: A new run is assembled in a hidden folder with this prefix, then renamed.
 _CLAIM_PREFIX: str = ".claim-"
@@ -314,7 +316,9 @@ def run_write_lock(root: str | Path) -> Iterator[Path]:
 
     Without a shared lock, a new run still never shares a folder with
     another, and every write has a part file of its own. What is lost:
-    resuming one run from two places at once can save a row twice.
+    resuming one run from two places at once can save a row twice, and two
+    writers that start a run of stored rows with one setup at once can make
+    two runs of it.
     """
     from filelock import FileLock
 
@@ -408,7 +412,8 @@ def _warn_without_flock(root: Path) -> None:
     _WARNED_WITHOUT_FLOCK.add(str(root))
     logger.warning(
         "file locks (flock) are not supported under %s, so runs there are written without a lock "
-        "shared between processes. Resuming one run from two places at once can save a row twice.",
+        "shared between processes. Resuming one run from two places at once can save a row twice, "
+        "and two writers that start a run of stored rows with one setup at once can make two runs.",
         root,
     )
 
