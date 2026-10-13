@@ -1,6 +1,6 @@
 [project]
 name = "usersim"
-version = "0.2.0.dev0"
+version = "0.2.0rc1"
 description = "Improve models and agents with population-grounded simulated users, even before production traffic exists."
 readme = "README.md"
 requires-python = ">=3.10"
