@@ -3,19 +3,13 @@
 
 """``usersim panel`` — build a frozen persona seed parquet.
 
-Why a panel? The simulator's identity scheme content-hashes the persona
-(``persona_uuid``) so two runs that draw the same persona always
-produce the same id. Persisting the panel separately from the simulator
-run gives you:
-
-- **Replayability** — re-run the simulator against the same panel after
-  fixing a bug or swapping the assistant model; every ``trajectory_id``
-  remains stable up to the bits that intentionally changed.
-- **Matched-pair evaluation** — feed the same panel to two different
-  ``assistant_model`` configurations and join their trajectories on
-  ``persona_uuid`` for paired statistical tests.
-- **Audit** — stash the panel parquet alongside a model release as
-  evidence of the population the model was evaluated against.
+A panel fixes the shape of a run: ``usersim simulate --panel`` takes its
+locales and per-locale row counts, and samples personas afresh. So a panel
+does not replay a run, and two runs from one panel are not guaranteed to
+meet the same people. To run the same simulated users under two setups,
+write them once with ``usersim simulate --materialize-inputs`` and run them
+with ``usersim simulate --inputs`` under each; the two runs pair on
+``input_id``.
 
 The panel is a thin parquet with one row per persona: ``persona``
 (JSON dict) plus the seven derived ``persona_*`` expression columns

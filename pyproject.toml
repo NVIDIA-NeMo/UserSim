@@ -60,9 +60,11 @@ dependencies = [
     # Reached directly rather than through another package's public API, so
     # declared even though each also arrives transitively today: a transitive
     # pin can be dropped by its parent without warning.
+    #   filelock        -- core/storage.py locks a trajectory root while writing
     #   httpx           -- cli/_models.py probes model endpoints
     #   huggingface_hub -- selection/io.py publishes dataset cards
     #   numpy           -- asset_gen near-duplicate detection
+    "filelock",
     "httpx",
     "huggingface-hub",
     "numpy",

@@ -145,7 +145,6 @@ class ProbeAdapter(Protocol):
     on_followup_failure(state, error_kind) -> str
     should_inline_judge_user_turn(turn_idx, state) -> bool
     should_inline_judge_assistant_turn(turn_idx, state) -> bool
-    should_continue_after_turn(state) -> bool
     allow_early_stop_at_turn(turn_idx, state) -> bool
     is_capitulation_detected(state) -> bool
     user_turn_policy() -> UserTurnPolicy
@@ -516,15 +515,6 @@ class BaseProbe:
         """
         return True
 
-    def should_continue_after_turn(self, state: Any) -> bool:
-        """Default True: continue to the next turn until ``cfg.max_turns``.
-
-        ``AgenticMixin`` returns False as soon as the assistant
-        emits a turn with no tool calls (the agentic protocol is
-        single-decision: tool call OR refusal, no follow-up).
-        """
-        return True
-
     def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
         """Whether to consider early-stop heuristics at this turn.
 
@@ -561,7 +551,7 @@ class BaseProbe:
         ``self._task`` / ``self._locale`` (set in
         ``BaseProbe.__init__``); no need to thread them through the
         hook signature. Matches the state-only convention of peer
-        hooks (``should_continue_after_turn(state)``,
+        hooks (``should_succeed(state)``,
         ``allow_early_stop_at_turn(turn_idx, state)``).
 
         Distinct from ``allow_early_stop_at_turn`` (which gates the
@@ -973,8 +963,6 @@ class AgenticMixin(BankVerbatimMixin):
 
     Sets:
 
-    - ``should_continue_after_turn`` — False when the assistant's last
-      message has no tool calls (the protocol is single-decision).
     - ``should_inline_judge_user_turn`` — False for turn 0 (the
       verbatim action request is auditable as-is; gate burns judge
       calls for no signal on agentic probes).
@@ -988,15 +976,6 @@ class AgenticMixin(BankVerbatimMixin):
     # side effects that cannot be rolled back — assistant resampling
     # is off (see the same attribute on ``ToolCallingMixin``).
     supports_assistant_resampling: bool = False
-
-    def should_continue_after_turn(self, state: Any) -> bool:
-        if not state.messages:
-            return False
-        last = state.messages[-1]
-        if last.get("role") != "assistant":
-            return False
-        tool_calls = last.get("tool_calls")
-        return bool(tool_calls)
 
     def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
         return turn_idx > 0

@@ -26,7 +26,11 @@ from usersim.engine.config import (
     ConversationSimulatorConfig,
 )
 from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
-from usersim.engine.core.episode_input import EpisodeConstructionError, construct_probe_episode
+from usersim.engine.core.episode_input import (
+    EpisodeConstructionError,
+    construct_probe_episode,
+    unpack_stored_episode,
+)
 from usersim.engine.core.llm import (
     ContextWindowError,
     flush_debug_log,
@@ -160,6 +164,9 @@ class ConversationSimulatorGenerator(
 
         t_record_start = time.monotonic()
 
+        # A replayed row carries its stored episode whole; the probe is built
+        # from those values, not from the seed table's typed copies.
+        unpack_stored_episode(data)
         construction_error: EpisodeConstructionError | None = None
         try:
             constructed = construct_probe_episode(data, config=cfg, models=models)

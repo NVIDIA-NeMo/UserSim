@@ -186,7 +186,7 @@ def test_a_plain_run_records_the_switch_in_its_manifest(tmp_path):
     )
 
     class _Designer:
-        def create(self, builder, num_records=None):
+        def create(self, builder, num_records=None, artifact_path=None):
             return type("Result", (), {"load_dataset": lambda self: rows})()
 
     with patch("usersim.cli._pipeline.build_simulator_config_builder", lambda **kwargs: (_Designer(), object())):
