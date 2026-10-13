@@ -9,6 +9,14 @@
 # Per-model sampling parameters live in cli/model_catalog.py. Per-alias knobs
 # (max_parallel_requests, timeout, max_tokens) go here and win over the catalog.
 #
+# `replay_reasoning = true` on `assistant_model` sends it the reasoning of its
+# own earlier messages, for a model trained to receive it ("preserved
+# thinking"). Off by default. It needs stored reasoning and an OpenAI-compatible
+# provider, and turns off compression of the assistant's history. It only
+# helps where the endpoint passes `reasoning_content` on earlier assistant
+# messages through to the model; a chat template that drops earlier thinking
+# makes it a no-op.
+#
 # Judges are a different model from `assistant_model` on purpose, so the model
 # under test is not scoring its own output.
 

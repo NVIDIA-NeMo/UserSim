@@ -9,7 +9,7 @@ report files.
 `output/trajectories/run=<id>/locale=<X>/probe_family=<Y>/`. One row per
 simulated conversation, each carrying:
 
-- `conversation_messages` (JSON): the full multi-turn message list. Each entry is `{role, content}`, plus `tool_calls` / `tool_call_id` on tool-using turns and `reasoning_content` on an assistant turn whose model emitted a thinking trace, unless `--no-store-reasoning` was passed. The trace is stored for analysis only; it is never replayed into a later turn (see [`docs/engine/README.md`](engine/README.md)).
+- `conversation_messages` (JSON): the full multi-turn message list. Each entry is `{role, content}`, plus `tool_calls` / `tool_call_id` on tool-using turns and `reasoning_content` on an assistant turn whose model emitted a thinking trace, unless `--no-store-reasoning` was passed. The trace is stored for analysis. It reaches a model again only when the models file sets `replay_reasoning = true` on `assistant_model`, which sends the assistant the reasoning of its own earlier messages (see [`docs/engine/README.md`](engine/README.md)).
 - `simulation_outcome` (JSON) holds a row-level structured record: status, failure-class taxonomy, per-actor attribution, per-model token counts, wall-clock, provenance (code SHA + asset bank versions + prompt versions).
 - `simulation_traces` (JSON): per-turn / per-call telemetry (judge-gate ratings, fourth-wall pre-filter triggers, capitulation checks, tool-call verification, etc.).
 - A content-hashed `persona_uuid` (stable across runs) and a deterministic `trajectory_id` (hash of `persona + probe + resolved model identities + prompt version`). These are the simulator's idempotency keys.

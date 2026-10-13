@@ -60,6 +60,9 @@ _OPERATIONAL_ENV = frozenset(
 
 #: Settings that may differ between the rows of one invocation.
 _PER_ROW_SETTINGS = ("locale", "assets_dir")
+#: Settings the run's models file decides, whatever the rows were stored with:
+#: replaying the assistant's reasoning belongs to the assistant under test.
+_RUN_SETTINGS = ("replay_assistant_reasoning",)
 
 
 @dataclass(frozen=True)
@@ -67,7 +70,8 @@ class EpisodeInputs:
     """Stored rows checked and ready to run."""
 
     rows: list[dict[str, Any]]
-    #: The ``usersim_config`` every row shares, apart from ``_PER_ROW_SETTINGS``.
+    #: The ``usersim_config`` every row shares, apart from ``_PER_ROW_SETTINGS``
+    #: and ``_RUN_SETTINGS``, which the run settles (see :func:`_run_config`).
     config: dict[str, Any]
     #: The asset root the rows run against.
     assets_dir: Path
@@ -127,8 +131,9 @@ def prepare_episode_inputs(
     """Check stored rows before any model call, and settle what they run against.
 
     Raises ``ValueError`` naming the row and the problem. The rows must share
-    one setup: their ``usersim_config`` may differ only in locale and asset
-    root, so that one run holds one setup.
+    one setup: their ``usersim_config`` may differ only in locale, asset
+    root and the settings the run's models file decides, so that one run
+    holds one setup.
     """
     from pydantic import ValidationError
 
@@ -185,7 +190,11 @@ def _shared_config(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """The setup every row shares; ``ValueError`` naming the settings that differ."""
 
     def setup(row: dict[str, Any]) -> dict[str, Any]:
-        return {key: value for key, value in row["usersim_config"].items() if key not in _PER_ROW_SETTINGS}
+        return {
+            key: value
+            for key, value in row["usersim_config"].items()
+            if key not in _PER_ROW_SETTINGS and key not in _RUN_SETTINGS
+        }
 
     first = setup(rows[0])
     for row in rows[1:]:
@@ -363,7 +372,8 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
     - every simulator model alias as Data Designer sends it, provider settings
       included (``api_key``, a provider's name and ``max_parallel_requests``
       are left out: they don't change what a model says);
-    - the shared ``usersim_config`` as loaded, defaults applied;
+    - the shared ``usersim_config`` as loaded, defaults applied, with whether
+      the assistant's reasoning is replayed as the run's models file sets it;
     - the contents of every asset root, and every non-operational
       ``USERSIM_*`` variable;
     - every probe's ``PROMPT_VERSION``, every extension's package release, and
@@ -375,7 +385,7 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
     from usersim.engine.core.manifest import _own_version
     from usersim.engine.core.storage import RUN_KIND_STORED
 
-    simulation = ConversationSimulatorConfig.model_validate(dict(inputs.config)).model_dump(mode="json")
+    simulation = ConversationSimulatorConfig.model_validate(_run_config(inputs, models)).model_dump(mode="json")
     for key in _PER_ROW_SETTINGS:
         simulation.pop(key, None)
     aliases = [*MODEL_ALIASES, simulation.get("finance_embedding_model_alias") or ""]
@@ -487,12 +497,29 @@ def plan_inputs_run(inputs: EpisodeInputs, models: Any, out: str | Path, *, skip
     return InputsPlan(fingerprint, record, matching_run=matching, pending=pending, saved=saved)
 
 
-def _column_config(inputs: EpisodeInputs, locale: str):
+def _run_config(inputs: EpisodeInputs, models: Any) -> dict[str, Any]:
+    """The rows' shared ``usersim_config``, with ``_RUN_SETTINGS`` as this run sets them.
+
+    The assistant under test comes from the run's models file, so whether its
+    earlier reasoning is replayed does too, as in a plain run. Raises
+    ``ConfigError`` for a models file that cannot replay.
+    """
+    from usersim.cli._models import assistant_replays_reasoning
+    from usersim.engine.config import ConversationSimulatorConfig
+
+    store_reasoning = ConversationSimulatorConfig.model_validate(dict(inputs.config)).store_reasoning
+    return {
+        **inputs.config,
+        "replay_assistant_reasoning": assistant_replays_reasoning(models, store_reasoning=store_reasoning),
+    }
+
+
+def _column_config(inputs: EpisodeInputs, locale: str, models: Any):
     """The simulator column for ``locale``'s rows, on the run's asset root."""
     from usersim.engine.config import ConversationSimulatorConfig
 
     return ConversationSimulatorConfig.model_validate(
-        {**inputs.config, "locale": locale, "assets_dir": str(inputs.assets_dir)}
+        {**_run_config(inputs, models), "locale": locale, "assets_dir": str(inputs.assets_dir)}
     )
 
 
@@ -615,7 +642,7 @@ def simulate_inputs_to_dataset(
     for locale, group in by_locale.items():
         requested[locale] += len(group)
         data_designer, builder = build_inputs_config_builder(
-            models=models, config=_column_config(inputs, locale), rows=[row for row, _ in group.values()]
+            models=models, config=_column_config(inputs, locale, models), rows=[row for row, _ in group.values()]
         )
         # Data Designer names a batch's artifacts by the second it started, so
         # two invocations in one directory could share them; each batch gets
@@ -652,7 +679,7 @@ def simulate_inputs_to_dataset(
                 trajectory_root=out,
                 models_config=models,
                 models_config_path=Path(models_path) if models_path else None,
-                sim_config=_column_config(inputs, next(iter(requested))),
+                sim_config=_column_config(inputs, next(iter(requested)), models),
                 locales_requested=sorted(requested),
                 probe_mix={probe: count / len(stored) for probe, count in sorted(probes.items())},
                 panel_path=inputs.source,

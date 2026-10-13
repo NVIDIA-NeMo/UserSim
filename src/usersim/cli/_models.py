@@ -102,6 +102,10 @@ class ModelSpec:
     top_p: float | None = 0.95
     timeout: float | None = None
     extra_body: dict[str, Any] | None = None
+    #: Send this model the reasoning of its own earlier messages, for a model
+    #: trained to receive it. Honoured on ``assistant_model`` only; see
+    #: :func:`assistant_replays_reasoning`.
+    replay_reasoning: bool = False
 
 
 @dataclass(frozen=True)
@@ -260,7 +264,60 @@ def _to_model_spec(d: dict[str, Any], *, source: Path) -> ModelSpec:
         top_p=_maybe_float(pick("top_p", 0.95)),
         timeout=pick("timeout"),
         extra_body=pick("extra_body"),
+        replay_reasoning=_replay_flag(pick("replay_reasoning", False), where=f"{source.name}: alias={alias!r}"),
     )
+
+
+def _replay_flag(value: Any, *, where: str) -> bool:
+    """``replay_reasoning`` as given, which must be a real boolean.
+
+    A string such as ``"false"`` is refused rather than read as true.
+    """
+    if not isinstance(value, bool):
+        raise ConfigError(f"{where}: replay_reasoning must be true or false, got {value!r}")
+    return value
+
+
+def assistant_replays_reasoning(config: ModelsConfig, *, store_reasoning: bool) -> bool:
+    """Whether a run replays the assistant's own reasoning; refuses a setup that cannot.
+
+    ``replay_reasoning`` is honoured on ``assistant_model`` only: the
+    assistant's requests are the only ones that hold its own earlier messages,
+    and a stored message does not record which model produced it. Raises
+    ``ConfigError`` when the switch is set on another alias, when reasoning is
+    not stored (there would be nothing to replay), or when the assistant's
+    provider is not OpenAI-compatible, since only that Data Designer adapter
+    sends ``reasoning_content`` back (the Anthropic one drops it).
+    """
+    others = sorted(spec.alias for spec in config.models if spec.replay_reasoning and spec.alias != "assistant_model")
+    if others:
+        raise ConfigError(
+            f"replay_reasoning is set on {others}; it applies to assistant_model only, the one model whose "
+            "requests hold its own earlier messages"
+        )
+    assistant = next((spec for spec in config.models if spec.alias == "assistant_model"), None)
+    if assistant is None or not assistant.replay_reasoning:
+        return False
+    if not store_reasoning:
+        raise ConfigError(
+            "replay_reasoning on assistant_model needs the reasoning kept, but store_reasoning is off: "
+            "drop --no-store-reasoning, or for --inputs, materialize the rows without it; or turn replay off"
+        )
+    provider_type = next(
+        (
+            provider.provider_type
+            for provider in resolved_model_providers(config)
+            if provider.name == assistant.provider
+        ),
+        None,
+    )
+    # Data Designer normalizes the type's case before choosing an adapter.
+    if provider_type is not None and provider_type.lower() != "openai":
+        raise ConfigError(
+            f"replay_reasoning on assistant_model needs an OpenAI-compatible provider; {assistant.provider!r} is "
+            f"{provider_type!r}, and Data Designer does not send reasoning back through it"
+        )
+    return True
 
 
 def require_aliases(config: ModelsConfig, *, required: tuple[str, ...], context: str) -> None:
@@ -280,6 +337,7 @@ _OVERRIDE_KNOWN_KEYS = frozenset(
         "top_p",
         "max_tokens",
         "extra_body",
+        "replay_reasoning",
     }
 )
 
@@ -356,7 +414,9 @@ def apply_model_overrides(
 
     - **dict** (extended form): per-knob override on top of the catalog.
       The dict MUST include ``"model"`` and may optionally include any
-      of ``"temperature"``, ``"top_p"``, ``"max_tokens"``, ``"extra_body"``::
+      of ``"temperature"``, ``"top_p"``, ``"max_tokens"``, ``"extra_body"``,
+      ``"replay_reasoning"``. Replay is kept when the model stays the same and
+      turned off when it changes, unless the override sets it::
 
           MODEL_OVERRIDES = {
               "assistant_model": {
@@ -580,6 +640,19 @@ def apply_model_overrides(
         else:
             new_extra_body = None
 
+        # Replay belongs to the model it was set for, not to the alias: a new
+        # model starts with it off unless the override turns it on.
+        if "replay_reasoning" in ov:
+            new_replay = _replay_flag(ov["replay_reasoning"], where=f"model override for alias {spec.alias!r}")
+        else:
+            new_replay = spec.replay_reasoning and new_model == spec.model
+            if spec.replay_reasoning and not new_replay:
+                logger.warning(
+                    "model override: alias=%r switched to model=%r, so replay_reasoning is off; set it on the "
+                    "override to keep it",
+                    spec.alias,
+                    new_model,
+                )
         new_specs.append(
             dataclasses.replace(
                 spec,
@@ -589,6 +662,7 @@ def apply_model_overrides(
                 top_p=new_top_p,
                 max_tokens=new_max_tokens,
                 extra_body=new_extra_body,
+                replay_reasoning=new_replay,
             )
         )
     return dataclasses.replace(config, models=tuple(new_specs))
@@ -1076,6 +1150,8 @@ def print_resolved_models(config: ModelsConfig) -> None:
             extras += f"  extra_body={spec.extra_body}"
         if spec.timeout:
             extras += f"  timeout={spec.timeout}"
+        if spec.replay_reasoning:
+            extras += "  replay_reasoning=True"
         print(
             f"  {spec.alias:20s} {spec.model:30s} provider={spec.provider:25s} "
             f"temp={spec.temperature}  top_p={spec.top_p}  "

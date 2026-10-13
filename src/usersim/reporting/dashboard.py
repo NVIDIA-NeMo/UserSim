@@ -1155,16 +1155,16 @@ function SimHealthPanel({{health}}) {{
     // into input + output, with the reasoning subset of output called
     // out. The "where is the gap?" answer is the input column: input
     // tokens dominate when conversations are long and judge / summary
-    // see big contexts, and they NEVER carry reasoning -- so reasoning
-    // looks tiny against total tokens but is a real share of output.
+    // see big contexts, and they carry earlier reasoning only when the run
+    // replays it -- so newly generated reasoning looks tiny against total tokens but is a real share of output.
     h("div", {{className:"sim-health-status-row"}},
       h("div", {{
         className:"sim-stat",
-        title: `Gross billable in-sim tokens across every alias (user / assistant / api_response / judge / summary). Reasoning is a subset of output tokens only -- input tokens never carry reasoning content. Out-of-sim evaluator-judge tokens are not included.`
+        title: `Gross billable in-sim tokens across every alias (user / assistant / api_response / judge / summary). The reasoning card counts newly generated reasoning, a subset of output tokens; input tokens include earlier reasoning only when the run replays assistant reasoning (replay_reasoning). Out-of-sim evaluator-judge tokens are not included.`
       }}, h("strong", null, formatTokens(totalTokens)), h("span", null, "total tokens")),
       h("div", {{
         className:"sim-stat",
-        title: "Input tokens across every alias. Input tokens never carry reasoning content -- this is the bulk of total tokens for long conversations / large summary contexts."
+        title: "Input tokens across every alias. They include earlier reasoning only when the run replays assistant reasoning (replay_reasoning) -- this is the bulk of total tokens for long conversations / large summary contexts."
       }}, h("strong", null, formatTokens(totalInputTokens)), h("span", null, "input tokens")),
       h("div", {{
         className:"sim-stat",

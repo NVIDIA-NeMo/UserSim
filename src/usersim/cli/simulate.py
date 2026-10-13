@@ -215,8 +215,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Drop the assistant's thinking trace instead of storing it on "
             "the message. Default is to store it when the model emits one "
             "(reasoning must also be enabled model-side -- see the models "
-            "TOML). Traces are never replayed to a model either way; this "
-            "only controls whether the trajectory carries them."
+            "TOML). This controls whether the trajectory carries them; a "
+            "trace reaches a model again only when the models file sets "
+            "replay_reasoning on assistant_model, which needs them stored."
         ),
     )
     p.add_argument(
@@ -316,6 +317,7 @@ def _parse_probe_mix(spec: str) -> dict:
 def run(args: argparse.Namespace) -> int:
     from usersim.cli._models import (
         REQUIRED_SIMULATOR_ALIASES,
+        assistant_replays_reasoning,
         default_models_path,
         load_models_config,
         require_aliases,
@@ -325,6 +327,8 @@ def run(args: argparse.Namespace) -> int:
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
     require_aliases(models, required=REQUIRED_SIMULATOR_ALIASES, context="`usersim simulate`")
+    # Refused here, before anything runs, rather than at the first locale.
+    replay_reasoning = assistant_replays_reasoning(models, store_reasoning=not args.no_store_reasoning)
 
     if args.inputs is not None:
         return _run_inputs(args, models, models_path)
@@ -381,6 +385,7 @@ def run(args: argparse.Namespace) -> int:
         print(f"  output:        {args.out}")
         print(f"  resumable:     {not args.no_skip_existing}")
         print(f"  store_reasoning: {not args.no_store_reasoning}")
+        print(f"  replay_reasoning: {replay_reasoning}")
         return 0
 
     if (msg := warn_if_missing_api_key(models)) is not None:
@@ -592,6 +597,7 @@ def _simulate_to_parquet(
     max_assistant_attempts=1,
     store_reasoning=True,
 ) -> int:
+    from usersim.cli._models import assistant_replays_reasoning
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
@@ -743,6 +749,7 @@ def _simulate_to_parquet(
         max_turns=max_turns,
         random_seed=random_seed,
         store_reasoning=store_reasoning,
+        replay_assistant_reasoning=assistant_replays_reasoning(models, store_reasoning=store_reasoning),
     )
     try:
         manifest_path_written = write_simulator_manifest(
@@ -772,6 +779,7 @@ def _build_sim_config_for_manifest(
     max_turns: int,
     random_seed,
     store_reasoning: bool = True,
+    replay_assistant_reasoning: bool = False,
 ):
     """Snapshot the sim-config knobs the manifest captures.
 
@@ -790,6 +798,7 @@ def _build_sim_config_for_manifest(
         compression_window=1,
         random_seed=random_seed,
         store_reasoning=store_reasoning,
+        replay_assistant_reasoning=replay_assistant_reasoning,
     )
 
 

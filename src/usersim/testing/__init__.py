@@ -499,6 +499,10 @@ def _plain_message(message: Any) -> dict[str, Any]:
         "role": str(getattr(role, "value", role)),
         "content": getattr(message, "content", "") or "",
     }
+    # Kept so parity compares replayed reasoning too.
+    reasoning = getattr(message, "reasoning_content", None)
+    if reasoning:
+        value["reasoning_content"] = str(reasoning)
     tool_calls = getattr(message, "tool_calls", None)
     if tool_calls:
         value["tool_calls"] = [

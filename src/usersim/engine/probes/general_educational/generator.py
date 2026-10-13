@@ -20,7 +20,7 @@ from usersim.engine.core.behavioral import (
 )
 from usersim.engine.core.messages import _parse_theme
 from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BaseProbe, register_probe
+from usersim.engine.core.probes import BaseProbe, dispatch_episode, register_probe
 from usersim.engine.core.prompt_loader import render_prompt
 from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.general_educational.prompts import (
@@ -122,4 +122,4 @@ async def simulate_general_educational(
         data=data,
         outcome_builder=kwargs.get("outcome_builder"),
     )
-    return await probe.run_dispatch(models=models, data=data, cfg=cfg)
+    return await dispatch_episode(probe, models=models, data=data, cfg=cfg)

@@ -1658,7 +1658,7 @@ def _render_resources_section(report: CapabilityReport) -> str:
     - **Row 1 (Overall)**: total / input / output / reasoning across
       every alias. The ``input`` card explains "where did the gap go?"
       when reasoning looks small relative to total -- input tokens
-      never carry reasoning content.
+      carry earlier reasoning only when the run replays it.
     - **Row 2 (User Tokens)**: total / output / reasoning / conversation
       for ``user_model`` alone (the simulated-user agent).
     - **Row 3 (Assistant Tokens)**: same decomposition for
@@ -1716,7 +1716,8 @@ def _render_resources_section(report: CapabilityReport) -> str:
     )
     reasoning_tooltip = (
         "Reasoning output tokens (invisible thinking content for reasoning models).\n"
-        "Subset of OUTPUT tokens only -- input tokens never carry reasoning.\n"
+        "Newly generated reasoning, a subset of OUTPUT tokens. Input tokens include\n"
+        "earlier reasoning only when the run replays assistant reasoning (replay_reasoning).\n"
         "Estimated post-hoc as: output_tokens - tiktoken(visible_content).\n"
         "\n"
         "Per-alias breakdown:\n"
@@ -1755,9 +1756,9 @@ def _render_resources_section(report: CapabilityReport) -> str:
         # Row 1 -- Overall
         "  <h3>Overall</h3>\n"
         '  <div class="stats stats-resources">\n'
-        f'    <div title="Gross billable in-sim tokens across every alias. Reasoning is a subset of OUTPUT only -- input tokens never carry reasoning content.">'
+        f'    <div title="Gross billable in-sim tokens across every alias. The reasoning card counts newly generated reasoning, a subset of OUTPUT; input tokens include earlier reasoning only when the run replays assistant reasoning (replay_reasoning).">'
         f"<strong>{total_tokens:,}</strong><span>total tokens</span></div>\n"
-        f'    <div title="Input tokens across every alias. Input tokens never carry reasoning content -- this is the bulk of total tokens for long conversations / large summary contexts.">'
+        f'    <div title="Input tokens across every alias. They include earlier reasoning only when the run replays assistant reasoning (replay_reasoning) -- this is the bulk of total tokens for long conversations / large summary contexts.">'
         f"<strong>{total_input_tokens:,}</strong><span>input tokens</span></div>\n"
         f'    <div title="Output tokens across every alias -- includes any reasoning content (gross billing convention).">'
         f"<strong>{total_output_tokens:,}</strong><span>output tokens</span></div>\n"

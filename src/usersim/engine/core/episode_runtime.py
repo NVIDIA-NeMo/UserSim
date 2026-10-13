@@ -31,7 +31,7 @@ from usersim.engine.core.episode_input import EpisodeConstructionError, EpisodeP
 from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import get_current_outcome_builder, set_current_outcome_builder
 from usersim.engine.core.outcomes import Provenance
-from usersim.engine.core.probes import BaseProbe
+from usersim.engine.core.probes import BaseProbe, dispatch_episode
 from usersim.engine.core.simulation import ConversationState
 
 if TYPE_CHECKING:
@@ -579,7 +579,8 @@ class ProbeEpisodeRuntime:
         set_current_outcome_builder(self.outcome)
         self.probe.set_tool_call_observer(self._record_executed_tool_call)
         try:
-            result = await self.probe.run_dispatch(
+            result = await dispatch_episode(
+                self.probe,
                 models=self._activation_models,
                 data=self.probe._data,
                 cfg=self.config,
@@ -698,6 +699,11 @@ def _chat_message_to_dict(message: Any) -> dict[str, Any]:
         "role": str(role_value),
         "content": getattr(message, "content", "") or "",
     }
+    # Present only on the assistant's earlier messages, when its run replays
+    # reasoning, so a host forwards exactly what a configured model receives.
+    reasoning = getattr(message, "reasoning_content", None)
+    if reasoning:
+        normalized["reasoning_content"] = str(reasoning)
     tool_calls = getattr(message, "tool_calls", None)
     if tool_calls:
         normalized["tool_calls"] = [

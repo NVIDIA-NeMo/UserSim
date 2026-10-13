@@ -72,6 +72,7 @@ print(result.run_id, result.written, result.skipped)
   conversation:
   - each simulator model as Data Designer sends it, provider settings
     included
+  - whether the assistant's earlier reasoning is replayed
   - the rows' shared settings
   - the asset contents
   - the `USERSIM_*` variables
@@ -102,8 +103,11 @@ print(result.run_id, result.written, result.skipped)
   saved row's `input_id`.
 - **Settings come from the rows.** Each row runs with the settings it was
   stored with, so a sampling flag (`--max-turns`, `--probe-mix`, ...) set to
-  anything but its default is refused. The rows in one call must share their
-  settings apart from locale and asset folder.
+  anything but its default is refused. The one exception is replaying the
+  assistant's reasoning: like the assistant itself, it comes from this run's
+  models file (`replay_reasoning` on `assistant_model`), whatever the rows were
+  stored with. The rows in one call must share their settings apart from
+  locale, asset folder and that replay setting.
   `--assets-dir` replaces the asset folder the rows were stored with, and is
   required when that folder doesn't exist on this machine.
 - **Concurrent writers.** Writes into `--out` take a lock, so two calls can
@@ -149,6 +153,14 @@ named by `finance_embedding_model_alias` (`embedding_model` by default, anything
 exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back
 to lexical search with a warning, so results can differ from a standalone run
 that has one configured.
+
+### Replaying the assistant's reasoning
+
+When the row's `usersim_config` sets `replay_assistant_reasoning` (from
+`replay_reasoning = true` on `assistant_model` in the models file), each
+assistant request's earlier assistant messages carry their
+`reasoning_content`. Forward them to the model as they are. No other role's
+messages ever carry the assistant's reasoning. Replay only helps where the endpoint passes `reasoning_content` on earlier assistant messages through to the model; a server or chat template that drops earlier thinking makes it a no-op.
 
 ## Driving the episode
 

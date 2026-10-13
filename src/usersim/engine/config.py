@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Literal
 
 from data_designer.config.base import SingleColumnConfig
-from pydantic import Field
+from pydantic import Field, model_validator
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -125,9 +125,20 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     # not stored cannot be recovered without re-simulating. Turn it off to
     # keep trajectories narrow: traces dominate the stored text rather than
     # merely adding to it, so an eval-only run that will never read them
-    # pays a large size cost for nothing. Never affects what a model
-    # receives: traces are stored, never replayed.
+    # pays a large size cost for nothing. Replaying traces needs them kept
+    # (``replay_assistant_reasoning``).
     store_reasoning: bool = True
+
+    # Send the assistant model the reasoning of its own earlier messages, for
+    # a model trained to receive it ("preserved thinking"); set from
+    # ``replay_reasoning`` on ``assistant_model`` in the models file. Off,
+    # every earlier turn's reasoning is dropped before a request. During a
+    # simulation no other model receives the assistant's reasoning: their
+    # requests show the conversation as text. Needs ``store_reasoning``. The
+    # assistant's history is not compressed while it is on, so it sees what
+    # it produced rather than a summary beside the original reasoning. A run
+    # with it on has its own trajectory ids, like any other model change.
+    replay_assistant_reasoning: bool = False
 
     # Logging verbosity: 0=quiet, 1=normal (default), 2=detailed per-call timing
     verbosity: int = 1
@@ -170,6 +181,14 @@ class ConversationSimulatorConfig(SingleColumnConfig):
         and the health check treats every alias it is given as required.
         """
         return list(REQUIRED_MODEL_ALIASES)
+
+    @model_validator(mode="after")
+    def _replay_needs_stored_reasoning(self) -> "ConversationSimulatorConfig":
+        # A trace that is not stored is gone before the next request, so
+        # there would be nothing to replay.
+        if self.replay_assistant_reasoning and not self.store_reasoning:
+            raise ValueError("replay_assistant_reasoning needs store_reasoning: an unstored trace cannot be replayed")
+        return self
 
     @property
     def required_columns(self) -> list[str]:
