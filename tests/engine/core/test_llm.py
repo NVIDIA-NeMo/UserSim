@@ -17,11 +17,16 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from data_designer.config.models import ChatCompletionInferenceParams, ModelConfig, ModelProvider
+from data_designer.engine.model_provider import resolve_model_provider_registry
 from data_designer.engine.models.clients.types import TransportKwargs
 from data_designer.engine.models.facade import _COMPLETION_REQUEST_FIELDS, ModelFacade
+from data_designer.engine.models.factory import create_model_registry
+from data_designer.engine.secret_resolver import PlaintextResolver
 
 import usersim
 from usersim.engine.core import llm, realized_audit
@@ -750,6 +755,40 @@ class TestSettingsDataDesignerWouldDrop:
         passed as a plain argument."""
         forwarded = set(_COMPLETION_REQUEST_FIELDS) & {*llm._EXTRA_BODY_SETTINGS, "max_completion_tokens"}
         assert not forwarded, f"Data Designer now forwards {sorted(forwarded)}; stop routing them through extra_body."
+
+
+def _facade_built_by_data_designer(**inference_parameters: Any) -> ModelFacade:
+    """A facade from Data Designer's own registry. Nothing is sent until a call."""
+    model = ModelConfig(
+        alias="judge_model",
+        model="vendor/model",
+        provider="local",
+        inference_parameters=ChatCompletionInferenceParams(**inference_parameters),
+    )
+    registry = create_model_registry(
+        model_configs=[model],
+        secret_resolver=PlaintextResolver(),
+        model_provider_registry=resolve_model_provider_registry(
+            [ModelProvider(name="local", endpoint="http://127.0.0.1:9/v1")]
+        ),
+    )
+    return registry.get_model(model_alias="judge_model")
+
+
+class TestSettingsReadFromAFacadeDataDesignerBuilds:
+    """``_model_config`` is private to Data Designer, and a failed read of it
+    sends nothing rather than raising. These use a facade Data Designer builds,
+    not a stand-in, so a change to that attribute fails here."""
+
+    def test_a_reasoning_setting_the_model_config_sets_is_sent(self) -> None:
+        facade = _facade_built_by_data_designer(extra_body={"reasoning_effort": "high"})
+        assert llm._request_kwargs(facade, "judge_model", {"reasoning_effort": "low"}) == {
+            "extra_body": {"reasoning_effort": "low"}
+        }
+
+    def test_the_configured_token_budget_is_scaled(self) -> None:
+        facade = _facade_built_by_data_designer(max_tokens=1000)
+        assert llm.scaled_max_tokens(facade, 2.0) == {"max_tokens": 2000}
 
 
 def test_every_argument_passed_to_a_model_can_reach_it() -> None:
