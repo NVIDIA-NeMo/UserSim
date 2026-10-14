@@ -46,9 +46,6 @@ dependencies = [
     "rich",
     "pandas",
     "pyarrow",
-    "seaborn",
-    "matplotlib",
-    "langdetect",
     # NOTE: ipykernel is deliberately NOT a runtime dependency. The only
     # IPython use in shipped code is a guarded `from IPython import
     # get_ipython` probe in core/manifest.py, so requiring a Jupyter kernel
