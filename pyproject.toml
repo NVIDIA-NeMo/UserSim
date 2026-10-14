@@ -41,7 +41,8 @@ dependencies = [
     "PyYAML>=6.0",
     # The engine's config models are Pydantic; core/preview.py renders with
     # Rich. Every third-party import must be declared here so the package
-    # installs standalone; tests/test_packaging_contract.py enforces it.
+    # installs standalone, and everything declared here must be imported;
+    # tests/test_packaging_contract.py enforces both.
     "pydantic>=2.0",
     "rich",
     "pandas",

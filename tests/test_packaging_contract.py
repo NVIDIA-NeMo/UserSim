@@ -85,13 +85,22 @@ class TestPluginEntryPoints:
 
 
 class TestDeclaredDependencies:
-    """Every third-party import must be declared by the distribution that
-    contains it. Undeclared imports resolve fine in the monorepo, where a
-    sibling package happens to pull them in, and fail on a standalone install."""
+    """Third-party imports and declared dependencies match in both directions.
+    An undeclared import resolves fine in the monorepo, where a sibling package
+    happens to pull it in, and fails on a standalone install. A declared
+    dependency nothing imports still installs, with everything it depends on,
+    for every user."""
 
     #: Imported behind try/except ImportError on purpose; must stay optional.
     #: Undeclared on purpose: a guarded notebook probe, not a dependency.
     _OPTIONAL = {"IPython"}
+
+    #: Distribution names differ from import names for a few packages.
+    _IMPORT_TO_DISTRIBUTION = {
+        "yaml": "pyyaml",
+        "lingua": "lingua_language_detector",
+        "dotenv": "python_dotenv",
+    }
 
     @staticmethod
     def _imports(src_root: Path, own_package: str) -> set[str]:
@@ -122,20 +131,22 @@ class TestDeclaredDependencies:
         imported = self._imports(root / "src", "usersim")
         declared = self._declared(root / "pyproject.toml")
 
-        # Distribution names differ from import names for a few packages.
-        aliases = {
-            "yaml": "pyyaml",
-            "lingua": "lingua_language_detector",
-            "dotenv": "python_dotenv",
-        }
         # Packages this distribution ships; they are not dependencies.
         first_party = {"usersim"}
         missing = {
             mod
             for mod in imported - self._OPTIONAL - first_party
-            if aliases.get(mod, mod).lower().replace("-", "_") not in declared
+            if self._IMPORT_TO_DISTRIBUTION.get(mod, mod).lower().replace("-", "_") not in declared
         }
         assert not missing, f"the distribution imports but does not declare: {sorted(missing)}"
+
+    def test_plugin_imports_everything_it_declares(self) -> None:
+        imported = {
+            self._IMPORT_TO_DISTRIBUTION.get(mod, mod).lower().replace("-", "_")
+            for mod in self._imports(_REPO_ROOT / "src", "usersim")
+        }
+        unused = self._declared(_REPO_ROOT / "pyproject.toml") - imported
+        assert not unused, f"the distribution declares but never imports: {sorted(unused)}"
 
     def test_optional_imports_stay_guarded(self) -> None:
         """An undeclared import is only acceptable behind try/except."""
