@@ -28,9 +28,11 @@ dependencies = [
     # Nemotron-Personas locale support: the ``NATIVE`` mode is what lets
     # expression columns use the standard Jinja ``select`` / ``join``
     # filters (the older ``SECURE`` mode ships a narrow filter allowlist
-    # that excludes both). See ``cli/_pipeline.py`` for the opt-in. 0.9.4 is
-    # the first release that supports pandas 3 and allows cryptography 50.
-    "data-designer>=0.9.4,<0.10",
+    # that excludes both). See ``cli/_pipeline.py`` for the opt-in. 0.9.5 is
+    # the first release that forwards ``tool_choice`` and merges a call's
+    # ``extra_body`` over the model's configured one, which
+    # ``engine/core/llm.py`` relies on.
+    "data-designer>=0.9.5,<0.10",
     # Language detection for the language_compliance scorer. Pure Python,
     # MIT, accurate on short conversational text. Pinned to a major version
     # to keep CI deterministic -- bump deliberately.
@@ -126,7 +128,7 @@ trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 [tool.uv]
 override-dependencies = [
     # Keep in sync with the ``dependencies`` pin above.
-    "data-designer>=0.9.4,<0.10",
+    "data-designer>=0.9.5,<0.10",
 ]
 
 [build-system]
