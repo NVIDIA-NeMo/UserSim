@@ -4673,7 +4673,7 @@ wheels = [
 
 [[package]]
 name = "usersim"
-version = "0.2.0rc1"
+version = "0.2.0rc2.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "data-designer" },
