@@ -544,11 +544,12 @@ def _configured_extra_body(facade: Any) -> dict[str, Any]:
 def _request_kwargs(facade: Any, alias: str, kwargs: dict[str, Any]) -> dict[str, Any]:
     """``kwargs`` in the form Data Designer's facade passes on to the provider.
 
-    The facade drops arguments outside its request fields, and an ``extra_body``
-    given with a call replaces the model's configured one instead of merging
-    with it. So the reasoning settings travel inside ``extra_body``, on top of
-    the model's own, and each only where the model's config already sets it: a
-    model whose provider rejects one of them is never sent it.
+    The facade drops arguments outside its request fields, so the reasoning
+    settings travel inside ``extra_body``, which the facade merges key by key
+    over the model's configured one. Each is sent only where the model's config
+    already sets it: a model whose provider rejects one of them is never sent
+    it. The facade replaces a nested value rather than merging it, so a
+    dict-valued setting is merged with the configured value here.
     ``max_completion_tokens`` only appears on the retry its provider asked for,
     so it is always sent. Any other facade, such as a hosted run's, gets
     ``kwargs`` unchanged.
@@ -559,7 +560,7 @@ def _request_kwargs(facade: Any, alias: str, kwargs: dict[str, Any]) -> dict[str
     if not moved:
         return kwargs
     configured = _configured_extra_body(facade)
-    body = {**configured, **(kwargs.get("extra_body") or {})}
+    body = dict(kwargs.get("extra_body") or {})
     for key in _EXTRA_BODY_SETTINGS:
         if key not in kwargs:
             continue

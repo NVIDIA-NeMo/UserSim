@@ -676,11 +676,13 @@ class TestSettingsDataDesignerWouldDrop:
     ``extra_body``."""
 
     async def test_a_setting_the_model_already_uses_is_sent_over_its_config(self) -> None:
+        """The call carries only the setting; the facade merges it over the rest
+        of the configured ``extra_body``."""
         facade = _data_designer_facade({"reasoning_effort": "high", "top_k": 20})
         await acall_llm({"judge_model": facade}, "judge_model", _HI, reasoning_effort="low")
         (call,) = facade.calls
         assert "reasoning_effort" not in call
-        assert call["extra_body"] == {"reasoning_effort": "low", "top_k": 20}
+        assert call["extra_body"] == {"reasoning_effort": "low"}
 
     async def test_a_setting_the_model_does_not_use_is_not_sent(self) -> None:
         """A provider can reject a setting outright, and the model config is the
@@ -719,10 +721,14 @@ class TestSettingsDataDesignerWouldDrop:
 
     def test_data_designer_builds_the_settings_into_the_request_body(self) -> None:
         """Through Data Designer's own request building, so an upstream change
-        to either step fails here instead of silently dropping the setting."""
-        configured = {"reasoning_effort": "high"}
+        to either step fails here instead of silently dropping the setting, the
+        rest of the configured ``extra_body``, or ``tool_choice``."""
+        configured = {"reasoning_effort": "high", "top_k": 20}
+        tools = [{"type": "function", "function": {"name": "commit_move", "parameters": {"type": "object"}}}]
         kwargs = llm._request_kwargs(
-            _data_designer_facade(configured), "judge_model", {"reasoning_effort": "low", "max_tokens": 100}
+            _data_designer_facade(configured),
+            "judge_model",
+            {"reasoning_effort": "low", "max_tokens": 100, "tools": tools, "tool_choice": "auto"},
         )
         owner = SimpleNamespace(
             _model_config=SimpleNamespace(
@@ -735,7 +741,9 @@ class TestSettingsDataDesignerWouldDrop:
         request = ModelFacade._build_chat_completion_request(owner, _HI, consolidated)
         body = TransportKwargs.from_request(request).body
         assert body["reasoning_effort"] == "low"
+        assert body["top_k"] == 20
         assert body["max_tokens"] == 100
+        assert body["tool_choice"] == "auto"
 
     def test_data_designer_still_drops_the_settings_routed_around_it(self) -> None:
         """If Data Designer starts forwarding one of these itself, it can be
@@ -759,9 +767,6 @@ def test_every_argument_passed_to_a_model_can_reach_it() -> None:
                 continue
             for keyword in node.keywords:
                 if keyword.arg is None or keyword.arg in reaches:
-                    continue
-                # The default whenever tools are passed, so dropping it changes nothing.
-                if keyword.arg == "tool_choice" and getattr(keyword.value, "value", None) == "auto":
                     continue
                 offenders.append(f"{path.relative_to(root)}:{node.lineno} {keyword.arg}")
     assert not offenders, f"these arguments never reach the model: {offenders}"
