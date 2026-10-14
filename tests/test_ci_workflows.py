@@ -179,29 +179,92 @@ class TestCiWrapsMakeTargets:
     what contributors run locally, and the drift only shows up as a failure
     nobody can reproduce."""
 
+    #: The jobs held to this, by workflow (None for every job). release.yml's
+    #: release job is left out: it creates the GitHub release with a token only
+    #: that job holds, which nothing local could reproduce.
+    SCOPE = {"ci.yml": None, "release.yml": {"build"}}
+
+    def _steps(self):
+        for name, jobs in self.SCOPE.items():
+            doc = _load(_WORKFLOWS / name)
+            missing = (jobs or set()) - set(doc["jobs"])
+            assert not missing, f"{name} has no job {sorted(missing)}, so nothing in it is checked."
+            for job_name, job in doc["jobs"].items():
+                if jobs is None or job_name in jobs:
+                    for step in job["steps"]:
+                        yield name, job_name, step
+
     def test_every_ci_step_is_a_make_target(self) -> None:
-        doc = _load(_WORKFLOWS / "ci.yml")
-        for job_name, job in doc["jobs"].items():
-            for step in job["steps"]:
-                if "uses" in step:
-                    continue
-                run = step["run"].strip()
-                assert run.startswith("make "), (
-                    f"ci.yml job {job_name!r} runs {run!r} directly. Add a make target and call that instead."
-                )
+        for name, job_name, step in self._steps():
+            if "uses" in step:
+                continue
+            run = step["run"].strip()
+            assert run.startswith("make "), (
+                f"{name} job {job_name!r} runs {run!r} directly. Add a make target and call that instead."
+            )
 
     def test_the_targets_it_calls_exist(self) -> None:
         makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text()
         declared = {
             line.split(":")[0] for line in makefile.splitlines() if line and not line[0].isspace() and ":" in line
         }
-        doc = _load(_WORKFLOWS / "ci.yml")
-        for job in doc["jobs"].values():
-            for step in job["steps"]:
-                if "run" not in step:
-                    continue
-                target = step["run"].strip().split()[1]
-                assert target in declared, f"ci.yml calls `make {target}`, which the Makefile does not define."
+        for name, _, step in self._steps():
+            if "run" not in step:
+                continue
+            target = step["run"].strip().split()[1]
+            assert target in declared, f"{name} calls `make {target}`, which the Makefile does not define."
+
+
+class TestReleaseWorkflow:
+    """The workflow that creates the release whose files are published. A
+    mistake here does not fail a run; it publishes something nobody checked."""
+
+    def _doc(self) -> dict:
+        return _load(_WORKFLOWS / "release.yml")
+
+    def test_only_a_version_tag_starts_it(self) -> None:
+        doc = self._doc()
+        on = doc.get("on", doc.get(True))
+        assert on == {"push": {"tags": ["v*"]}}, (
+            f"release.yml must run only when a v* tag is pushed, not on {on!r}: anything else could release a commit nobody tagged."
+        )
+
+    def test_only_the_job_behind_the_release_environment_can_write(self) -> None:
+        doc = self._doc()
+        assert doc["permissions"] == {"contents": "read"}, "release.yml must default to read-only."
+        writers = []
+        for name, job in doc["jobs"].items():
+            permissions = job.get("permissions") or {}
+            if permissions == "write-all" or (isinstance(permissions, dict) and "write" in permissions.values()):
+                writers.append(name)
+        assert writers, "No job in release.yml can write, so none can create the release."
+        for name in writers:
+            assert doc["jobs"][name].get("environment") == "release", (
+                f"release.yml job {name!r} can write without a maintainer approving the release environment."
+            )
+
+    def test_the_tag_name_is_never_parsed_as_code(self) -> None:
+        """A tag name may contain `$(shell ...)`, backticks or quotes. make expands a
+        variable given on its command line, and a recipe that writes $(TAG) hands the
+        name to the shell; only the environment passes it through untouched."""
+        steps = [step for step in self._doc()["jobs"]["build"]["steps"] if "check-release-tag" in step.get("run", "")]
+        assert len(steps) == 1, "release.yml's build job should run make check-release-tag exactly once."
+        assert steps[0]["run"].strip() == "make check-release-tag", (
+            "Pass TAG in the step's env, not on make's command line, which make expands."
+        )
+        assert steps[0].get("env", {}).get("TAG") == "${{ github.ref_name }}"
+        makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text()
+        recipe = makefile.split("\ncheck-release-tag:", 1)[1].split("\n\n", 1)[0]
+        assert "$(TAG)" not in recipe, (
+            "The check-release-tag recipe must read $$TAG; $(TAG) puts the tag name in the shell command."
+        )
+
+    def test_the_build_restores_no_cache(self) -> None:
+        steps = self._doc()["jobs"]["build"]["steps"]
+        setups = [step for step in steps if step.get("uses", "").startswith("astral-sh/setup-uv@")]
+        assert setups and all(step.get("with", {}).get("enable-cache") is False for step in setups), (
+            "release.yml's build must not restore a cache: one written by another run could reach the published files."
+        )
 
 
 class TestDcoAssistant:

@@ -15,8 +15,7 @@ from __future__ import annotations
 
 import importlib
 import json
-import os
-import subprocess
+from collections.abc import Callable
 from importlib import metadata
 from pathlib import Path
 
@@ -25,40 +24,27 @@ import pytest
 from usersim.engine.core import provenance as provenance_module
 
 
-def _git(repo: Path, *args: str) -> str:
-    """Run git in ``repo`` with no user or system config, so signing or hooks never apply."""
-    env = {
-        **os.environ,
-        "GIT_CONFIG_GLOBAL": os.devnull,
-        "GIT_CONFIG_NOSYSTEM": "1",
-        "GIT_AUTHOR_NAME": "t",
-        "GIT_AUTHOR_EMAIL": "t@example.com",
-        "GIT_COMMITTER_NAME": "t",
-        "GIT_COMMITTER_EMAIL": "t@example.com",
-    }
-    done = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=True, env=env)
-    return done.stdout.strip()
-
-
-def _repo(tmp_path: Path, tracked: list[str], untracked: tuple[str, ...] = ()) -> Path:
+def _repo(git: Callable[..., str], tmp_path: Path, tracked: list[str], untracked: tuple[str, ...] = ()) -> Path:
     repo = tmp_path / "repo"
     for rel in (*tracked, *untracked):
         (repo / rel).parent.mkdir(parents=True, exist_ok=True)
         (repo / rel).write_text("")
-    _git(repo, "init", "-q")
-    _git(repo, "add", *tracked)
-    _git(repo, "commit", "-q", "-m", "init")
+    git(repo, "init", "-q")
+    git(repo, "add", *tracked)
+    git(repo, "commit", "-q", "-m", "init")
     return repo
 
 
 class TestCheckoutSha:
-    def test_a_checkout_that_tracks_the_package_reports_its_head(self, tmp_path: Path) -> None:
-        repo = _repo(tmp_path, ["usersim/__init__.py"])
-        assert provenance_module._checkout_sha(repo / "usersim") == _git(repo, "rev-parse", "--short=12", "HEAD")
+    def test_a_checkout_that_tracks_the_package_reports_its_head(self, tmp_path: Path, git: Callable[..., str]) -> None:
+        repo = _repo(git, tmp_path, ["usersim/__init__.py"])
+        assert provenance_module._checkout_sha(repo / "usersim") == git(repo, "rev-parse", "--short=12", "HEAD")
 
-    def test_an_installed_copy_inside_another_repository_reports_nothing(self, tmp_path: Path) -> None:
+    def test_an_installed_copy_inside_another_repository_reports_nothing(
+        self, tmp_path: Path, git: Callable[..., str]
+    ) -> None:
         site = ".venv/lib/site-packages/usersim"
-        repo = _repo(tmp_path, ["app.py"], untracked=(f"{site}/__init__.py",))
+        repo = _repo(git, tmp_path, ["app.py"], untracked=(f"{site}/__init__.py",))
         assert provenance_module._checkout_sha(repo / site) is None
 
     def test_a_copy_outside_any_repository_reports_nothing(self, tmp_path: Path) -> None:
@@ -67,8 +53,10 @@ class TestCheckoutSha:
         (package / "__init__.py").write_text("")
         assert provenance_module._checkout_sha(package) is None
 
-    def test_without_git_it_reports_nothing(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        repo = _repo(tmp_path, ["usersim/__init__.py"])
+    def test_without_git_it_reports_nothing(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, git: Callable[..., str]
+    ) -> None:
+        repo = _repo(git, tmp_path, ["usersim/__init__.py"])
         monkeypatch.setenv("PATH", str(tmp_path / "no-bin"))
         assert provenance_module._checkout_sha(repo / "usersim") is None
 
@@ -130,15 +118,15 @@ class TestOwnDistribution:
 
 class TestCodeSha:
     def test_the_working_directorys_repository_is_never_recorded(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, git: Callable[..., str]
     ) -> None:
         """Running inside one's own repository must not record that repository's commit as UserSim's."""
-        repo = _repo(tmp_path, ["app.py"])
+        repo = _repo(git, tmp_path, ["app.py"])
         monkeypatch.delenv("USERSIM_CODE_SHA", raising=False)
         monkeypatch.chdir(repo)
         provenance_module.get_code_sha.cache_clear()
         try:
-            assert provenance_module.get_code_sha() != _git(repo, "rev-parse", "--short=12", "HEAD")
+            assert provenance_module.get_code_sha() != git(repo, "rev-parse", "--short=12", "HEAD")
         finally:
             provenance_module.get_code_sha.cache_clear()
 
