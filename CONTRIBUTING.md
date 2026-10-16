@@ -88,6 +88,11 @@ passes the check automatically.
         this project or the open source license(s) involved.
   ```
 
+## Coding-agent guidance
+
+Coding agents developing UserSim should start with [AGENTS.md](AGENTS.md).
+See [.agents/README.md](.agents/README.md) for shared guidance and private local files.
+
 ## Getting set up
 
 Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/).
