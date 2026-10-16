@@ -296,3 +296,15 @@ clean:  ## Remove caches, coverage output, compiled artifacts, build output and 
 	find . -type f -name '*.py[co]' -not -path './.venv*' -delete 2>/dev/null || true
 	rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov build dist src/*.egg-info
 	@echo "Cleaned."
+
+# Container validation uses only host Python and Docker; dependencies live in the image.
+CONTAINER_ARGS ?=
+.PHONY: container-audit container-build-test test-container
+container-build-test:  ## Build the CPU test image with locked dependencies
+	python3 scripts/run_container_tests.py build $(CONTAINER_ARGS)
+
+test-container: container-build-test  ## Build fresh and run offline CPU coverage and e2e
+	python3 scripts/run_container_tests.py run $(CONTAINER_ARGS)
+
+container-audit:  ## Audit the local Docker context before image build
+	python3 scripts/run_container_tests.py audit $(CONTAINER_ARGS)
