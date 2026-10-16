@@ -155,9 +155,10 @@ These steps make live model calls, using the keys and personas above.
 #    two `general` probes plus `tool_calling`.
 usersim simulate --locale en_US --num-rows 30 --out output/trajectories
 
-# 2. Score the assistant under test.
-usersim eval     --trajectories output/trajectories \
-                 --out output/evaluations --judges judge_model
+# 2. Score the assistant under test: the evaluator model's judgments, plus
+#    the scorers that match the default probe mix.
+usersim eval     --trajectories output/trajectories --out output/evaluations \
+                 --scorers tool_use,language_compliance,response_shape,refusal_basics
 
 # 3. Render the capability dashboard.
 usersim report   --trajectories output/trajectories \
@@ -174,6 +175,10 @@ usersim simulate --locale ja_JP --num-rows 30 \
   --probe-mix 'sov_ai_facts=1/3,sov_ai_dynamic=1/3,sov_ai_multilingual_parity=1/3' \
   --out output/trajectories
 ```
+
+Score a run with the scorers for its probes. For this one, step 2 takes
+`--scorers sov_ai_facts,sov_ai_dynamic,sov_ai_multilingual_parity,language_compliance`;
+[`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md) lists every scorer.
 
 ### Curate training data
 
