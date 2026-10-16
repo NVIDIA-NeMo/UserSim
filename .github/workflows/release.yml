@@ -25,10 +25,6 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-env:
-  # Fail rather than silently re-resolving when uv.lock is stale.
-  UV_FROZEN: "1"
-
 jobs:
   build:
     name: Build and check
@@ -45,7 +41,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: "latest"
+          version-file: "pyproject.toml"
           python-version: "3.12"
           # A cache written by another run could otherwise reach the
           # published files.
