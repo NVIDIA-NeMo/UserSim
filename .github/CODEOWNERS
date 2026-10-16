@@ -32,3 +32,4 @@
 /tests/test_container_runner.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_coverage_gate.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_check_ci_results.py @NVIDIA-NeMo/user_sim_maintainers
+/tests/test_release_validation_workflow.py @NVIDIA-NeMo/user_sim_maintainers
