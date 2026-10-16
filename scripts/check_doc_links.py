@@ -34,21 +34,18 @@ REPO_URLS = (
     "https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/",
 )
 
-#: Paths are repo-relative, so a leading `_` marks a top-level directory that
-#: is not part of the distribution.
-SKIP_PREFIXES = ("_",)
 SKIP_SCHEMES = ("http://", "https://", "mailto:", "tel:", "#")
 
 
 def tracked_markdown() -> list[Path]:
     out = subprocess.run(
-        ["git", "ls-files", "*.md"],
+        ["git", "ls-files", "-z", "*.md"],
         cwd=REPO,
         capture_output=True,
         text=True,
         check=True,
-    ).stdout.split()
-    return [REPO / f for f in out if not f.startswith(SKIP_PREFIXES)]
+    ).stdout.split("\0")
+    return [REPO / f for f in out if f and not f.startswith("_")]
 
 
 def link_path(path: Path, target: str) -> Path | None:

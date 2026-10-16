@@ -1,0 +1,42 @@
+[
+  {
+    "path": ".env.local",
+    "git_ignored": true
+  },
+  {
+    "path": "models.local.toml",
+    "git_ignored": true
+  },
+  {
+    "path": "spec.local.yaml",
+    "git_ignored": true
+  },
+  {
+    "path": "output/run=abc/data.parquet",
+    "git_ignored": true
+  },
+  {
+    "path": "debug_llm_responses.jsonl",
+    "git_ignored": true
+  },
+  {
+    "path": ".agent-work/plans/engineering-workflows.md",
+    "git_ignored": true
+  },
+  {
+    "path": "src/usersim/cli/models_default.toml",
+    "git_ignored": false
+  },
+  {
+    "path": "src/usersim/engine/assets/example/data/required.json",
+    "git_ignored": false
+  },
+  {
+    "path": "tests/fixtures/output/expected.json",
+    "git_ignored": false
+  },
+  {
+    "path": "data/generated.json",
+    "git_ignored": true
+  }
+]
