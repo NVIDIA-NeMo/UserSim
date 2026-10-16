@@ -274,23 +274,24 @@ wrong, red-flag symptoms that were either caught or missed. Those are also
 the checks that matter most for an agent, where the final message can look
 fine while the actions behind it were wrong.
 
-Three things are worth knowing before you quote a number.
+Three practices get the most out of the numbers.
 
-Behavioural fidelity is bounded by the model doing the simulating. Current
-models flatten personality differences relative to what a persona
-description implies, so interaction-style coverage is best read as breadth
-across styles rather than a calibrated measure of any one of them.
+**Read interaction style as coverage.** Each persona's OCEAN traits set an
+interaction style, from cooperative to impatient or confrontational, and
+whether details come upfront or a little at a time. The model doing the
+simulating renders those styles, so they measure breadth across styles rather
+than calibrating any one of them.
 
-Judges scoring simulated users is circular for subjective dimensions. A
-model's opinion of another model's helpfulness is not an independent
-measurement. Lean on the deterministic scorers where ground truth exists, and
-reserve human review for taste.
+**Pair judges with scorers.** Scorers check the assistant against ground truth
+where it exists: curated facts, the tools a task calls for, the language of
+each reply. Judges cover qualities such as helpfulness, where human review
+adds an independent view.
 
-Content review status travels with the numbers. Bank entries authored by a
-model rather than reviewed by a domain expert carry `placeholder: true`, and
-every trajectory that drew on one records a `used_placeholder_*` warning on
-its outcome. That warning is written to the trajectory parquet, so you can
-always trace which findings rest on reviewed content.
+**Follow content provenance.** Bank entries authored by a model, rather than
+reviewed by a domain expert, carry `placeholder: true`. Every trajectory that
+drew on one records a `used_placeholder_*` warning on its outcome, in the
+trajectory parquet, so you can always see which findings rest on reviewed
+content.
 
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md) covers all three in depth.
 
