@@ -22,6 +22,35 @@ from typing import Any
 import pytest
 
 
+@pytest.fixture
+def command_test_env() -> Callable[..., dict[str, str]]:
+    """Build an isolated environment for command-default contract tests.
+
+    Opt in only when testing defaults: inheritance tests should keep their
+    ambient environment. Explicit overrides are applied after removing outer
+    Make state and test selectors; tool and environment selection still inherit.
+    """
+
+    def environment(**overrides: str) -> dict[str, str]:
+        env = os.environ.copy()
+        for name in (
+            "MAKEFLAGS",
+            "MFLAGS",
+            "MAKEOVERRIDES",
+            "MAKELEVEL",
+            "PYTEST_ARGS",
+            "PYTEST_WORKERS",
+            "COV_PKGS",
+            "COV_XML",
+            "COV_FAIL_UNDER",
+        ):
+            env.pop(name, None)
+        env.update(overrides)
+        return env
+
+    return environment
+
+
 class _WordSplitEncoder:
     """Deterministic stand-in for a ``tiktoken`` encoding."""
 
