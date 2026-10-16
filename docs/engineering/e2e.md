@@ -37,7 +37,7 @@ uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --prepare-
 uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --run-only
 ```
 
-`--work-dir` must resolve outside the checkout and cannot be an ancestor of it. Paths containing `..` use their canonical locations for this check; symlinked work and artifact paths are rejected. Reuse the same path for both phases; the prepared environment and copied suite are a snapshot of setup. Changes to tests or wheels require another preparation. A new preparation removes the previous `installed.json` receipt before changing the environment, so an interrupted setup cannot advertise the old wheel as a valid prepared runtime.
+`--work-dir` must resolve outside the checkout and cannot be an ancestor of it. Paths containing `..` use their canonical locations for this check; symlinked work and artifact paths are rejected. Reuse the same path for both phases; the prepared environment and copied suite are a snapshot of setup. Changes to tests or wheels require another preparation. A new preparation removes the previous `installed.json` receipt before changing the environment, so an interrupted setup cannot advertise the old wheel as a valid prepared runtime. The container prepares these environments at image build time and runs the second command with external networking disabled.
 
 ## Scenarios and assertions
 
