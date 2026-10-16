@@ -358,3 +358,14 @@ class TestMandatoryCiAggregate:
                 and step.get("uses", "").startswith("actions/upload-artifact@")
                 for step in doc["jobs"][name]["steps"]
             ), name
+
+
+def test_dco_trailers_rechecks_range_after_retargeting() -> None:
+    doc = _load(_WORKFLOWS / "dco-trailers.yml")
+    trigger = doc.get("on", doc.get(True))["pull_request"]
+    assert "edited" in trigger["types"]
+    assert "branches" not in trigger
+    assert doc["permissions"] == {"contents": "read"}
+    env = doc["jobs"]["dco-trailers"]["env"]
+    assert env["BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
+    assert env["HEAD_SHA"] == "${{ github.event.pull_request.head.sha }}"

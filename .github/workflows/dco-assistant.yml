@@ -1,5 +1,5 @@
-# Records Developer Certificate of Origin sign-off. A contributor who forgot
-# `git commit -s` can sign by leaving a comment instead of rewriting history.
+# Records one-time Developer Certificate of Origin agreement. Commit trailers
+# are validated independently by dco-trailers.yml; a comment cannot replace them.
 #
 # This uses pull_request_target because it must comment on and store
 # signatures for pull requests from forks, which the read-only token on a
