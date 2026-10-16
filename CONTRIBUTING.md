@@ -118,7 +118,8 @@ making a single model call.
 
 ### Reproducing CI and coverage
 
-Run `make validate-ci` for the native checks and clean distribution validation.
+Run `make validate-ci` for native checks, clean distribution validation, and
+installed CLI e2e tests against that same validated wheel.
 `make validate-native` runs static checks, dependency license policy, coverage,
 the offline self-check, and installed extension checks without building the
 distribution archives. CI runs the same test suite across supported Python
@@ -129,6 +130,11 @@ change its path with `COV_XML`, or add pytest options through `PYTEST_ARGS`, for
 example `make coverage PYTEST_ARGS="--junitxml=junit.xml"`. See
 [Local and CI validation](docs/engineering/ci.md) for bundle membership, report
 artifacts, and failure diagnosis.
+
+Run `make test-e2e` for the isolated CLI workflow alone, or
+`make test-e2e WHEEL_DIR=dist` to use the single existing wheel in `dist/`
+without rebuilding. See [Installed CLI e2e tests](docs/engineering/e2e.md) for
+setup, offline execution, scenarios, and diagnostics.
 
 ### Choosing models and providers
 
