@@ -51,7 +51,7 @@ whose first language is recorded as English. It does not include every persona
 who may speak English as a second or third language and is not an estimate of
 India's real English-speaking population. The CLI logs the exact eligible
 synthetic-persona count when the managed corpus is already available locally,
-or an explicit "count unavailable" diagnostic before its first download.
+or an explicit "count unavailable" diagnostic when it hasn't been downloaded.
 
 Language matching also changes the cohort's correlated demographics. Use it
 for an explicitly primary-language-matched population, not as a neutral way to
@@ -124,6 +124,7 @@ dataset) promotes the language into the shipped-locale set above. See
 [`docs/engine/README.md`](engine/README.md#india-language-variant-resolution)
 for the `asset_locale` / `persona_dataset_locale` resolution details.
 
-Persona datasets are pulled lazily on first use from NGC; `usersim setup-ngc`
-installs the NGC CLI into your venv, so no administrator access is needed.
-See [`docs/personas.md`](personas.md) for setup and licensing.
+Each locale's persona dataset is downloaded once from NGC, with
+`data-designer download personas --locale <locale>`; the eleven languages above
+use the `en_IN` dataset. See [`docs/personas.md`](personas.md) for setup and
+licensing.

@@ -42,8 +42,9 @@ through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
 which adds the OCEAN personality traits, names and further fields that the
 behavioural features depend on.
 
-The datasets are downloaded on first use rather than bundled, and carry their
-own licence separate from this project's, including an AI ethics clause. See
+The datasets aren't bundled: you download each locale you need once, as the
+setup below shows. They carry their own licence, separate from this project's,
+including an AI ethics clause. See
 [`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md) for how to get them and what the terms
 allow. The reasoning behind the design, and how far the results carry, is in
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md).
@@ -104,14 +105,6 @@ Python 3.10+, in a virtual environment.
 python -m venv .venv && source .venv/bin/activate
 pip install "usersim>=0.2.0rc1"      # in a uv project: uv add "usersim>=0.2.0rc1"
 
-# Install the NGC CLI into the active virtual environment (idempotent,
-# sha256-verified). Required to download the Nemotron-Personas datasets.
-usersim setup-ngc
-
-# Keys for live runs and persona download.
-export NVIDIA_API_KEY="your-key-from-build.nvidia.com"   # inference
-export NGC_CLI_API_KEY="your-key-from-ngc.nvidia.com"    # persona download
-
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke
 usersim simulate --dry-run --locale en_US --num-rows 2 --out output/trajectories
@@ -126,9 +119,36 @@ To work on User Sim itself, or to run the notebooks, clone the repository and
 run `uv sync`; [CONTRIBUTING.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md)
 has the details.
 
+### Personas and keys
+
+Live runs need an inference key, an NGC key, and the persona dataset for each
+locale you run, downloaded once from NGC:
+
+```bash
+# Keys: inference on build.nvidia.com, and persona downloads from NGC. An NGC
+# account and API key come from https://org.ngc.nvidia.com/account/api-keys.
+export NVIDIA_API_KEY="your-key-from-build.nvidia.com"
+export NGC_CLI_API_KEY="your-key-from-ngc.nvidia.com"
+
+# The NGC CLI. On Linux, setup-ngc installs a pinned, sha256-verified copy into
+# the active virtual environment. On other platforms, use NVIDIA's installer:
+# https://org.ngc.nvidia.com/setup/installers/cli
+usersim setup-ngc
+
+# Store your NGC key and org for the CLI, once per machine.
+ngc config set
+
+# Download the personas for each locale you'll run (en_US is about 1.2 GB).
+data-designer download personas --locale en_US
+```
+
+`data-designer download personas --list` shows every locale and its size;
+[`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md)
+walks through each step.
+
 ## Quickstart
 
-These steps make live model calls, using the keys above.
+These steps make live model calls, using the keys and personas above.
 
 ```bash
 # 1. Simulate. Pick a locale and a row count; the default probe mix is the

@@ -30,33 +30,44 @@ corresponds to a real person.
 ## Getting the datasets
 
 The datasets are not bundled, and they are large: a single locale runs from a
-few hundred megabytes to several gigabytes. NeMo User Sim downloads them lazily from
-the [NGC catalog](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
-the first time a run needs one, into
-`~/.data-designer/managed-assets/datasets/`.
+few hundred megabytes to several gigabytes. You download each locale you need
+once, from the
+[NGC catalog](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
+with Data Designer's `data-designer download personas` command. It stores them
+in `~/.data-designer/managed-assets/datasets/`, where runs read them.
 
 There is one resource per locale, named `nemotron-personas-dataset-<locale>`,
 for example
 [`nemotron-personas-dataset-en_us`](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemotron-personas/resources/nemotron-personas-dataset-en_us).
-Browsing them is the quickest way to see which locales exist and how large
-each one is before a first run pulls one down.
+`data-designer download personas --list` shows which locales exist and how
+large each one is.
 
-You need a free NGC account and an API key from
-[org.ngc.nvidia.com/account/api-keys](https://org.ngc.nvidia.com/account/api-keys):
+The download goes through the NGC CLI, so you need:
+
+1. A free NGC account and an API key from
+   [org.ngc.nvidia.com/account/api-keys](https://org.ngc.nvidia.com/account/api-keys).
+2. The NGC CLI. On Linux, `usersim setup-ngc` installs it into the active
+   virtual environment. On other platforms, such as macOS, use
+   [NVIDIA's installer](https://org.ngc.nvidia.com/setup/installers/cli).
+3. A CLI configuration: `ngc config set` stores your key and org, once per
+   machine.
 
 ```bash
 export NGC_CLI_API_KEY="your-ngc-key"
-usersim setup-ngc     # installs the NGC CLI into .venv/bin/ngc
+usersim setup-ngc                                # Linux; elsewhere, NVIDIA's installer
+ngc config set                                   # enter your key, pick your org
+data-designer download personas --locale en_US   # repeat --locale for more
 ```
 
 `setup-ngc` is idempotent and verifies the download by sha256. It puts the CLI
-inside the project's virtualenv rather than on your system path, so a machine
-with no administrator access can still fetch datasets.
+inside the virtual environment rather than on your system path, so it needs no
+administrator access.
 
 **Which commands need this.** `usersim panel` and `usersim simulate` sample
-personas, so both need the datasets. `usersim smoke` and any `--dry-run`
-resolve their full plan without touching them, so you can confirm an install
-is sound before setting up NGC at all.
+personas, so both need the datasets; `simulate --inputs` runs stored rows and
+doesn't. `usersim smoke` and any `--dry-run` resolve their full plan without
+touching them, so you can confirm an install is sound before setting up NGC at
+all.
 
 ## Licensing
 
