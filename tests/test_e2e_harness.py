@@ -66,12 +66,12 @@ def test_archive_directory_must_have_exactly_one_wheel(count, tmp_path):
 def test_make_uses_selected_wheel_and_preserves_failure(status, tmp_path, command_test_env):
     uv = tmp_path / "fake-uv"
     recorded = tmp_path / "arguments.json"
-    version = re.search(r'required-version = "==([^"]+)"', (ROOT / "pyproject.toml").read_text()).group(1)
+    version = re.search(r'^uv = "([^"]+)"', (ROOT / ".mise.toml").read_text(), re.MULTILINE).group(1)
     uv.write_text(
         f"#!{sys.executable}\n"
         "import json, os, pathlib, sys\n"
         f"if sys.argv[1:] == ['--version']: print('uv {version}'); sys.exit(0)\n"
-        "pathlib.Path(os.environ['E2E_RECORDED_ARGS']).write_text(json.dumps(sys.argv[1:]))\n"
+        "pathlib.Path(os.environ['E2E_RECORDED_ARGS']).write_text(json.dumps({'argv':sys.argv[1:],'wheel':os.environ.get('WHEEL_DIR'),'args':os.environ.get('E2E_ARGS'),'uv':os.environ.get('UV')}))\n"
         f"sys.exit({status})\n"
     )
     uv.chmod(0o755)
@@ -87,10 +87,10 @@ def test_make_uses_selected_wheel_and_preserves_failure(status, tmp_path, comman
     )
     assert (result.returncode == 0) is (status == 0), result.stderr
     arguments = json.loads(recorded.read_text())
-    assert arguments[:4] == ["run", "--frozen", "python", "scripts/run_e2e.py"]
-    assert arguments[arguments.index("--wheel-dir") + 1] == str(wheels)
-    assert arguments[arguments.index("--uv") + 1] == str(uv)
-    assert arguments[-2:] == ["--artifacts", "output/e2e-custom"]
+    assert arguments["argv"] == ["run", "--frozen", "python", "scripts/run_e2e.py"]
+    assert arguments["wheel"] == str(wheels)
+    assert arguments["uv"] == str(uv)
+    assert arguments["args"] == "--artifacts output/e2e-custom"
 
 
 def test_ci_runs_installed_e2e_and_retains_diagnostics():
@@ -98,11 +98,82 @@ def test_ci_runs_installed_e2e_and_retains_diagnostics():
     job = workflow["jobs"]["e2e"]
     assert job["timeout-minutes"] <= 30
     commands = [step["run"] for step in job["steps"] if "run" in step]
-    assert commands == ["make install-ci", 'make test-e2e E2E_ARGS="--artifacts test-results/e2e"']
+    assert commands == [
+        "bash scripts/install_mise.sh",
+        "scripts/mise run setup:tools",
+        "scripts/mise run setup:ci",
+        "scripts/mise run test:e2e",
+    ]
+    e2e = next(step for step in job["steps"] if step.get("run") == "scripts/mise run test:e2e")
+    assert e2e["env"]["E2E_ARGS"] == "--artifacts test-results/e2e"
     upload = next(step for step in job["steps"] if step.get("uses", "").startswith("actions/upload-artifact@"))
     assert upload["if"] == "failure()"
     assert upload["with"]["path"] == "test-results/e2e/"
     assert not any(step.get("continue-on-error") for step in job["steps"])
+
+
+def test_explicit_wheel_conflicts_with_environment_directory(tmp_path):
+    import os
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/run_e2e.py"), "--wheel", str(tmp_path / "selected.whl"), "--prepare-only"],
+        env={**os.environ, "WHEEL_DIR": str(tmp_path / "old")},
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+    assert result.returncode == 2
+    assert "conflicts with the WHEEL_DIR" in result.stderr
+
+
+def test_final_explicit_directory_defeats_ambient_archive_selectors(tmp_path, monkeypatch):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("e2e_identity", RUNNER)
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    checkout = tmp_path / "checkout"
+    default_artifacts = checkout / "output/e2e"
+    default_artifacts.mkdir(parents=True)
+    prior = {
+        "operator-evidence.txt": b"untouched prior result",
+    }
+    for name, content in prior.items():
+        (default_artifacts / name).write_bytes(content)
+    monkeypatch.setattr(runner, "ROOT", checkout)
+    validated = tmp_path / "validated"
+    other = tmp_path / "other"
+    for directory in (validated, other):
+        directory.mkdir()
+        (directory / "example.whl").touch()
+    selected = []
+    monkeypatch.setenv("WHEEL_DIR", str(other))
+    monkeypatch.setenv("E2E_ARGS", f"--wheel-dir {other}")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(RUNNER),
+            "--wheel-dir",
+            str(validated),
+            "--work-dir",
+            str(tmp_path / "work"),
+            "--artifacts",
+            str(tmp_path / "artifacts"),
+            "--prepare-only",
+        ],
+    )
+    monkeypatch.setattr(
+        runner, "prepare", lambda work, args, parser: selected.append(runner.archive(work, args, parser))
+    )
+    for _ in range(2):
+        assert runner.main() == 0
+        assert {p.name: p.read_bytes() for p in default_artifacts.iterdir()} == prior
+        assert list((checkout / "output").iterdir()) == [default_artifacts]
+    assert selected == [(validated / "example.whl").resolve()] * 2
 
 
 @pytest.mark.parametrize("filename,run_only", [(".env", False), (".env.local", True)])

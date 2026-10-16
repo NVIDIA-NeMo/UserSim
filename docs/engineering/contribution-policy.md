@@ -17,7 +17,7 @@ Cryptographic signatures are independent of DCO trailers and are not required.
 was installed previously. To reinstall them directly:
 
 ```bash
-uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+scripts/mise exec -- uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
 
 Normal commits use `git commit -s`. The commit-message hook invokes

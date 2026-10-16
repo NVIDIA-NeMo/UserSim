@@ -43,7 +43,7 @@ is not required by this repository.
 Install both local hooks after setting up the development environment:
 
 ```bash
-uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+scripts/mise exec -- uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
 
 The commit-message hook checks the author identity provided by Git, including
@@ -108,30 +108,31 @@ passes the check automatically.
 ## Getting set up
 
 Supports Python 3.11 to 3.14. The default development interpreter is Python 3.12
-from `.python-version`; CI tests every supported version. Start with an existing
-[uv](https://docs.astral.sh/uv/) installation, then install the exact
-`required-version` from `pyproject.toml`:
+from `.python-version`; CI tests every supported version. Start with Bash,
+Python 3, curl, and GPG. Bootstrap installs the verified Mise release and the
+exact uv version declared in `.mise.toml`:
 
 ```bash
-make bootstrap              # installs the declared uv; ensure its bin directory is on PATH
-make install-dev            # locked dev dependencies and pre-commit hook
-uv run usersim smoke        # offline self-check; no API key, no network
+make bootstrap                 # verified Mise and locked uv registry tool
+scripts/mise run setup         # locked dev dependencies and both Git hooks
+scripts/mise run test:smoke    # offline self-check; no API key or network
 ```
 
-`make check-tools` rejects another uv version. `make check-lock` checks that
-`uv.lock` agrees with dependency metadata without rewriting it. Both setup
-targets use `--locked`, so stale metadata fails rather than updating the lock.
-After a deliberate dependency change, run `uv lock`, review `uv.lock`, and
-commit it with the metadata change. CI reads the same uv version declaration;
-update it deliberately and validate the lock before committing a tool upgrade.
+[The Mise workflow](docs/engineering/mise.md) owns tools and task definitions.
+The exact uv version lives in `.mise.toml`; `mise.lock` records platform
+artifacts. Ruff and ty remain in the locked Python development environment.
+`pyproject.toml` declares only the compatible uv family. `scripts/mise run
+check:tools` checks the actual executable against the registry, and
+`scripts/mise run check:lock` checks dependency metadata without rewriting it.
+After a deliberate dependency change, run `scripts/mise exec -- uv lock`, review
+`uv.lock`, and commit it with the metadata change.
 
-`make install-ci` performs locked setup without installing hooks. In a Git
-worktree, `make install-dev` finds the hook directory through Git rather than
-assuming `.git` is a directory.
-
-`smoke` is the fastest way to confirm an install is sound. It resolves the
-model catalog, every probe's assets, and the plugin entry points without
-making a single model call.
+`scripts/mise run setup:ci` performs locked setup without installing hooks.
+`UV_PYTHON` selects a CI interpreter; `UV_PROJECT_ENVIRONMENT` selects another
+Python environment. The wrapper uses writable repository-local Mise state and
+does not change shell profiles or global configuration. In a worktree, setup
+locates the hook directory through Git. Existing Make targets remain equivalent
+compatibility commands, including variable overrides.
 
 ### Reproducing CI and coverage
 
@@ -265,10 +266,12 @@ tracked files. Hooks may rewrite files and fail: review those changes and rerun
 CI runs the same checks even when local hooks are bypassed.
 
 The SPDX hook fixes only the staged paths passed to it. `make update-license-headers`
-adds or refreshes headers throughout `src/`, `tests/`, `scripts/`, `templates/`,
-`Makefile`, and root `conftest.py`; `make check-license-headers` checks those
-roots without writing. Python, shell, and `.template` files are covered; Markdown,
-YAML, and TOML do not require SPDX headers under this policy.
+adds or refreshes headers throughout `src/`, `tests/`, `tests_e2e/`, `scripts/`,
+`templates/`, and `.mise/tasks/`, plus `Makefile`, root `conftest.py`, and
+`.mise.toml`. `make check-license-headers` checks those paths without writing.
+Python, shell, and `.template` files are covered, including extensionless Mise
+Bash tasks and the launcher. Mise TOML definitions carry headers; other TOML,
+Markdown, and YAML files remain outside this header policy.
 
 Keep credentials and generated output local; keep required source and fixtures
 trackable. Git ignores do not control archive or Docker inclusion.
@@ -304,8 +307,9 @@ failed mandatory jobs fail that status. Run the same Make targets locally; see
 the maintainer checklist for changing required checks. DCO and PR-title checks
 remain separate required policies.
 
-Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
-rejects reproduces locally with the same command. Tests and the dependency
+CI jobs invoke shared Mise tasks through `scripts/mise`, so their checks
+reproduce locally with the same commands. Make targets remain compatibility
+wrappers. Tests and the dependency
 license check run on Python 3.11 to 3.14. Pull-request checks run for every
 base branch so stacked PRs receive CI; push checks remain scoped to `main`.
 

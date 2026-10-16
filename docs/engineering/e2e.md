@@ -11,15 +11,15 @@ make test-e2e
 The equivalent direct command is:
 
 ```bash
-uv run --frozen python scripts/run_e2e.py
+scripts/mise exec -- uv run --frozen python scripts/run_e2e.py
 ```
 
 Pass an existing wheel to test the original release artifact without rebuilding:
 
 ```bash
-uv run --frozen python scripts/run_e2e.py --wheel dist/usersim-VERSION-py3-none-any.whl
+scripts/mise exec -- uv run --frozen python scripts/run_e2e.py --wheel dist/usersim-VERSION-py3-none-any.whl
 # Or require exactly one wheel in the release directory:
-uv run --frozen python scripts/run_e2e.py --wheel-dir dist
+scripts/mise exec -- uv run --frozen python scripts/run_e2e.py --wheel-dir dist
 ```
 
 `--wheel` and `--wheel-dir` are mutually exclusive and cannot be combined with `--run-only`. An empty or ambiguous wheel directory fails setup. `--uv /path/to/uv` selects the setup executable when it is not the one on `PATH`.
@@ -33,8 +33,8 @@ The runtime receives a small environment allowlist and a synthetic local API key
 Prepare environments while network access is available, then execute them without installation or downloads:
 
 ```bash
-uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --prepare-only
-uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --run-only
+scripts/mise exec -- uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --prepare-only
+scripts/mise exec -- uv run --frozen python scripts/run_e2e.py --work-dir /tmp/usersim-e2e --run-only
 ```
 
 `--work-dir` must resolve outside the checkout and cannot be an ancestor of it. Paths containing `..` use their canonical locations for this check; symlinked work and artifact paths are rejected. Reuse the same path for both phases; the prepared environment and copied suite are a snapshot of setup. Changes to tests or wheels require another preparation. A new preparation removes the previous `installed.json` receipt before changing the environment, so an interrupted setup cannot advertise the old wheel as a valid prepared runtime. The container prepares these environments at image build time and runs the second command with external networking disabled.

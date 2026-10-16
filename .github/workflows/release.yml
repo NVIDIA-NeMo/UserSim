@@ -25,6 +25,9 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  UV_PYTHON: "3.12"
+
 jobs:
   build:
     name: Build and check
@@ -39,22 +42,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          version-file: "pyproject.toml"
-          python-version: "3.12"
-          # A cache written by another run could otherwise reach the
-          # published files.
-          enable-cache: false
+      - name: Verified Mise bootstrap
+        run: bash scripts/install_mise.sh
+      - name: Locked registry tools
+        run: scripts/mise run setup:tools
 
-      - run: make install-ci
+      - run: scripts/mise run setup:ci
 
       - name: Native checks, coverage, smoke, and extension contracts
         # Re-run the shared gates on the tagged commit, even if PR CI passed.
-        run: make validate-native
+        run: scripts/mise run validate:native
 
       - name: Build and check the sdist and wheel, install the wheel clean, run it from an empty directory
-        run: make check-dist
+        run: scripts/mise run check:dist
 
       - name: The tag names the built release version and a commit on main
         id: tag
@@ -62,15 +62,17 @@ jobs:
           # In the environment, not on make's command line: make would expand
           # a `$(shell ...)` in the tag name there.
           TAG: ${{ github.ref_name }}
-        run: make check-release-tag
+        run: scripts/mise run check:release-tag
 
       - name: Installed CLI e2e against the original release wheel
         # check-dist produced and validated this single wheel. Do not rebuild.
-        run: make test-e2e WHEEL_DIR=dist
+        env:
+          WHEEL_DIR: dist
+        run: scripts/mise run test:e2e --wheel-dir dist
 
       - name: SHA-256 digests for publication approval
         # Available from the read-only build before the release environment gate.
-        run: make release-digests
+        run: scripts/mise run release:digests
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

@@ -63,7 +63,9 @@ an automated trusted publisher would require a separately configured PyPI
 publisher and workflow permissions.
 
 Use the repository's pinned uv version (`make check-tools`) and a current
-GitHub CLI that supports `gh release verify-asset`. Download into a fresh
+GitHub CLI that supports `gh release verify-asset`. Run these commands from
+the repository checkout; `scripts/mise exec -- uv` selects the declared uv
+without requiring a global installation. Download into a fresh
 directory so an old wheel cannot be included accidentally:
 
 ```bash
@@ -93,14 +95,14 @@ upload selection with uv's dry run. The production command is intentionally a
 separate step requiring the publishing maintainer's decision:
 
 ```bash
-uv publish --dry-run --trusted-publishing never "$RELEASE_ASSETS"/*
-uv publish --trusted-publishing never "$RELEASE_ASSETS"/*
+scripts/mise exec -- uv publish --dry-run --trusted-publishing never "$RELEASE_ASSETS"/*
+scripts/mise exec -- uv publish --trusted-publishing never "$RELEASE_ASSETS"/*
 ```
 
 For a rehearsal, use a separate TestPyPI account/token and upload endpoint:
 
 ```bash
-uv publish --trusted-publishing never \
+scripts/mise exec -- uv publish --trusted-publishing never \
   --publish-url https://test.pypi.org/legacy/ "$RELEASE_ASSETS"/*
 ```
 

@@ -2,11 +2,12 @@
 
 The `notebooks/` directory mirrors the CLI flow for interactive iteration.
 They need the Jupyter kernel, which the runtime dependencies deliberately do
-not carry. It comes with the dev group, which `uv sync` installs by default:
+not carry. The locked development setup installs it with the dev group:
 
 ```bash
-uv sync
-uv run jupyter lab      # sees the kernel inside .venv
+make bootstrap
+scripts/mise run setup
+scripts/mise exec -- uv run jupyter lab      # sees the kernel inside .venv
 ```
 
 If you open the notebooks in an editor that picks kernels system-wide rather
@@ -14,7 +15,7 @@ than launching Jupyter yourself, register a named kernel once so this
 project's environment is selectable:
 
 ```bash
-make install-kernel     # appears as "User Sim (.venv)"
+scripts/mise run setup:kernel     # appears as "User Sim (.venv)"
 ```
 
 Outputs are stripped from the committed notebooks, so you will see source
@@ -59,7 +60,7 @@ interactive iteration: small row counts, locale-by-locale inspection,
 conversation previews. Prefer the CLI for unattended and reproducible runs:
 
 ```bash
-usersim simulate --locale en_US --num-rows 20 --out output/trajectories
+scripts/mise exec -- uv run usersim simulate --locale en_US --num-rows 20 --out output/trajectories
 ```
 
 `simulate`, `eval` and `gen-assets` accept `--dry-run`, which prints the

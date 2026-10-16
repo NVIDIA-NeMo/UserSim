@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+#MISE description="Remove generated Python and build artifacts"
+
+set -euo pipefail
+cd "${MISE_CONFIG_ROOT:?}"
+find . -type d -name __pycache__ -not -path './.venv*' -exec rm -rf {} + 2>/dev/null || true
+find . -type f -name '*.py[co]' -not -path './.venv*' -delete 2>/dev/null || true
+rm -rf .pytest_cache .ruff_cache .coverage coverage.xml htmlcov build dist src/*.egg-info
+echo "Cleaned."

@@ -122,8 +122,8 @@ conversation-simulator = "usersim.engine.plugin:conversation_simulator"
 trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 
 [tool.uv]
-# Shared developer and CI pin; keep at or above main's 0.13.4 security floor.
-required-version = "==0.13.4"
+# Mise owns the exact pin; retain main's uv security floor.
+required-version = ">=0.13.4,<0.14"
 override-dependencies = [
     # Keep in sync with the ``dependencies`` pin above.
     "data-designer>=0.9.7,<0.10",
