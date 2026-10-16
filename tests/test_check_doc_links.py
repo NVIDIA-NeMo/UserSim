@@ -35,3 +35,16 @@ def test_links_into_the_main_branch_resolve_against_the_checkout(tmp_path: Path)
 def test_relative_links_resolve_against_the_file(tmp_path: Path) -> None:
     (tmp_path / "there.md").write_text("")
     assert _broken(tmp_path / "doc.md", "[ok](there.md)\n[gone](missing.md#anchor)\n") == ["missing.md#anchor"]
+
+
+def test_tracked_markdown_preserves_spaces_and_private_scope(tmp_path: Path, monkeypatch) -> None:
+    import subprocess
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    for name in ["guide with spaces.md", "_private/notes.md"]:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("documentation\n")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    monkeypatch.setattr(check_doc_links, "REPO", tmp_path)
+    assert check_doc_links.tracked_markdown() == [tmp_path / "guide with spaces.md"]
