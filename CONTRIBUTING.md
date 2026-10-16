@@ -317,35 +317,11 @@ provider rejects or a file we write but cannot read back.
 
 ## Releases
 
-Maintainers release from `main`:
-
-1. Merge a pull request that sets `version` in `pyproject.toml` to the release
-   version: `X.Y.Z`, or `X.Y.ZrcN` for a release candidate.
-2. From an up-to-date `main`, run the checks the release runs, then tag the
-   merge commit and push the tag by name:
-
-   ```bash
-   git switch main && git pull --ff-only
-   make check-dist && make check-release-tag TAG=v0.2.0rc1
-   git tag -a v0.2.0rc1 -m "usersim 0.2.0rc1"
-   git push origin v0.2.0rc1
-   ```
-
-3. `.github/workflows/release.yml` runs those checks and the test suite on the
-   tagged commit. After a maintainer approves the `release` environment, it
-   creates the GitHub release with the sdist and wheel attached, marked as a
-   pre-release for a release candidate, and writes their SHA-256 digests to
-   the run summary.
-4. Merge a pull request that moves `version` to the next development version,
-   for example `0.2.0rc2.dev0`.
-
-If the workflow fails before the release is published, delete the tag
-(`git tag -d v0.2.0rc1 && git push origin --delete v0.2.0rc1`) and any draft
-release it left, fix the cause and tag again. Once a release is published,
-its tag and files stay as they are, and a fix ships as a new version. The
-files attached to a release are the ones published to PyPI;
-`gh release verify-asset v0.2.0rc1 <file>` checks a downloaded file against
-them.
+Maintainers release from `main` using the
+[release procedure](docs/engineering/releases.md). It covers version preparation,
+local validation, tags, approval of the GitHub release, and publishing the
+original verified assets to PyPI. GitHub and PyPI must receive the same archive
+bytes; do not rebuild before uploading to PyPI.
 
 ## What the tests expect
 
