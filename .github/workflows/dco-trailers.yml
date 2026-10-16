@@ -1,0 +1,28 @@
+# Commit trailers and the DCO Assistant's one-time agreement are separate checks.
+name: Validate DCO trailers
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  dco-trailers:
+    name: DCO trailers
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch base commit
+        run: git fetch --no-tags origin "$BASE_SHA"
+      - name: Validate every PR commit
+        run: python3 scripts/check_commit_signoffs.py --base "$BASE_SHA" --head "$HEAD_SHA"

@@ -87,14 +87,9 @@ check-lock: check-tools  ## Check dependency metadata against uv.lock without re
 
 # Reinstalling the project restores any file that removing another distribution
 # took with it, such as the `usersim` command an earlier name also installed.
-install-dev: check-tools  ## Sync the workspace with dev tooling and install pre-commit hooks
+install-dev: check-tools  ## Sync development tools and install static and commit-message hooks
 	$(UV) sync --locked --reinstall-package usersim
-	@if [ ! -f "$$(git rev-parse --git-path hooks/pre-commit)" ]; then \
-		echo "Installing pre-commit hooks..."; \
-		$(UV) run pre-commit install; \
-	else \
-		echo "Pre-commit hooks already installed"; \
-	fi
+	$(UV) run pre-commit install --hook-type pre-commit --hook-type commit-msg
 
 # --locked installs strictly from uv.lock and refuses to re-resolve, so
 # dependency drift becomes a build failure rather than a silent
