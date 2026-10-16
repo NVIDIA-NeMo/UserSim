@@ -229,7 +229,7 @@ async def scorer_conformance_problems(
     emptied = sorted(key for key in sample_row or {} if key not in SCORER_FILLED_KEYS)
     if emptied:
         try:
-            await fn({**sample_row, **dict.fromkeys(emptied)}, {})
+            await fn({**(sample_row or {}), **dict.fromkeys(emptied)}, {})
         except Exception as exc:
             problems.append(
                 f"raised {type(exc).__name__} when {', '.join(emptied)} held None: {exc}. "

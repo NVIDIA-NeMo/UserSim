@@ -201,7 +201,7 @@ class ScopeInfo:
     #: (``hi_Deva_IN`` filters on "\u0939\u093f\u0902\u0926\u0940",
     #: ``hi_Latn_IN`` on "Hindi"). Which people were eligible is the
     #: thing that decides whether two runs are comparable.
-    persona_language_filters: dict[str, dict[str, list[str]]] = field(default_factory=dict)
+    persona_language_filters: Mapping[str, Mapping[str, Sequence[str]]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

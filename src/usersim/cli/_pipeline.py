@@ -541,7 +541,8 @@ def build_simulator_config_builder(
     )
 
     config_builder.add_column(
-        ConversationSimulatorConfig(
+        # Registered plugin configs are accepted at runtime, outside DD's closed type union.
+        ConversationSimulatorConfig(  # ty: ignore[invalid-argument-type]
             name="conversation_messages",
             persona_column="persona",
             probe_type_column="probe_type",
@@ -795,7 +796,8 @@ def build_evaluator_config_builder(
     _warn_on_undispatched_scorers(scorers or [])
 
     config_builder.add_column(
-        TrajectoryEvaluatorConfig(
+        # Registered plugin configs are accepted at runtime, outside DD's closed type union.
+        TrajectoryEvaluatorConfig(  # ty: ignore[invalid-argument-type]
             name=output_column,
             judges=judge_specs,
             axes=axes,

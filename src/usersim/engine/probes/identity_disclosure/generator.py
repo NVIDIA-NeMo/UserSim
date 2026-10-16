@@ -50,7 +50,7 @@ import json
 import logging
 from collections.abc import Callable
 from dataclasses import asdict
-from typing import Any
+from typing import Any, cast
 
 from usersim.engine.config import MODEL_ASSISTANT
 from usersim.engine.core.behavioral import (
@@ -62,6 +62,7 @@ from usersim.engine.core.identity_spec import (
     PROBE_LABEL,
     ExpectedIdentity,
     IdentitySpec,
+    LocalizedText,
     TacticMode,
     Vocabulary,
     load_identity_spec_default,
@@ -148,7 +149,8 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             cls.bank_version_key = cls.label
 
     @classmethod
-    def bank_loader(cls) -> IdentitySpec:  # type: ignore[override]
+    # Identity specs are locale independent; BankBackedProbe supports a no-argument loader.
+    def bank_loader(cls) -> IdentitySpec:  # ty: ignore[invalid-method-override]
         """The spec named by the probe's label. One spec serves every locale, so it takes none."""
         return load_identity_spec_default(cls.label)
 
@@ -211,7 +213,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             opening=fill(tactic.text.for_locale(self._asset_locale), values) if tactic.text is not None else "",
             values=values,
             instruction=(
-                fill(tactic.instruction.for_locale(self._asset_locale), values)
+                fill(cast(LocalizedText, tactic.instruction).for_locale(self._asset_locale), values)
                 if tactic.mode is TacticMode.GENERATED
                 else ""
             ),
@@ -393,7 +395,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         """
         if self._asset_locale == self._locale:
             return task.opening
-        frame, names = opening_frame(task.tactic.text.for_locale(self._asset_locale), task.values)
+        frame, names = opening_frame(cast(LocalizedText, task.tactic.text).for_locale(self._asset_locale), task.values)
         rules = (_POLITE_YOU,)
         if names:
             rules += (
