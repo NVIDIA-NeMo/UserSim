@@ -36,12 +36,21 @@ def connect_ex(sock, address):
     return _connect_ex(sock, address)
 
 
-def getaddrinfo(host, *args, **kwargs):
+def getaddrinfo(
+    host: bytes | str | None,
+    port: bytes | str | int | None,
+    family: int = 0,
+    type: int = 0,
+    proto: int = 0,
+    flags: int = 0,
+):
     if host is not None:
         local(host)
-    return _getaddrinfo(host, *args, **kwargs)
+    return _getaddrinfo(host, port, family, type, proto, flags)
 
 
 socket.socket.connect = connect
 socket.socket.connect_ex = connect_ex
-socket.getaddrinfo = getaddrinfo
+# The wrapper preserves the stdlib call signature and forwards its return unchanged.
+# ty cannot infer the stdlib alias return through this monkeypatch.
+socket.getaddrinfo = getaddrinfo  # ty: ignore[invalid-assignment]

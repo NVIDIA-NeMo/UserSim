@@ -281,9 +281,23 @@ Your PR title must follow [Conventional Commits](https://www.conventionalcommits
 the settings in the [contribution policy](docs/engineering/contribution-policy.md),
 the title check alone does not guarantee the commit subject on `main`.
 
+## Type checking
+
+`make typecheck` runs the locked `ty` version against shipped `src/usersim`,
+repository gate scripts, and installed CLI e2e helpers. The checker targets
+Python 3.11, the supported minimum, even when the development interpreter is
+newer. Ordinary unit-test fixtures are outside the initial type-check scope.
+
+Type checking runs in pre-commit, `make check-all`, the native validation
+bundle, and CI. Keep annotations consistent with runtime contracts; the
+existing tests still establish behavior. Dynamic Pydantic schema construction
+and upstream library annotation limitations have local, rule-specific
+suppressions with explanations. New suppressions need the same justification;
+do not disable a rule globally to make the gate pass.
+
 ## What CI runs
 
-`CI Status` aggregates static checks, all supported Python versions, packaging,
+`CI Status` aggregates static checks, type checking, all supported Python versions, packaging,
 installed CLI e2e tests, and CPU container tests. Missing, skipped, cancelled, or
 failed mandatory jobs fail that status. Run the same Make targets locally; see
 [local and CI validation](docs/engineering/ci.md) for commands, diagnostics, and

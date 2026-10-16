@@ -35,7 +35,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, cast
 
 from pydantic import BaseModel, Field
 
@@ -1447,6 +1447,8 @@ def _embed_documents(
             time.sleep(delay)
 
     # ORDERED seed + reset_index preserves row order, so ids align by position.
+    # A completed embedding attempt assigns result; failures re-raise above.
+    result = cast(pd.DataFrame, result)
     id_to_vec = {doc_id: r["body_embedding"]["embeddings"][0] for doc_id, (_, r) in zip(edf["id"], result.iterrows())}
     for ib in institutions:
         ib.embeddings = {d["id"]: id_to_vec[d["id"]] for d in ib.documents if d["id"] in id_to_vec}

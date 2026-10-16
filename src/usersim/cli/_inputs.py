@@ -30,7 +30,7 @@ import sys
 import tempfile
 import time
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -123,7 +123,7 @@ def _plain(value: Any) -> Any:
 
 
 def prepare_episode_inputs(
-    rows: list[Mapping[str, Any]],
+    rows: Sequence[Mapping[str, Any]],
     *,
     assets_dir: str | Path | None = None,
     source: str | Path | None = None,
