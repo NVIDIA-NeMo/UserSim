@@ -2,7 +2,7 @@
 
 CI calls repository Make targets so failures can be reproduced locally. After
 `make install-dev`, run `make validate-ci` to execute the native validation
-bundle, including distribution checks.
+bundle, including distribution checks and installed CLI tests.
 
 | Target | Checks |
 | --- | --- |
@@ -13,12 +13,19 @@ bundle, including distribution checks.
 | `make check-extensions` | Out-of-tree installed extension behavior. |
 | `make validate-native` | The five targets above. |
 | `make check-dist` | Build and validate archives, then check a clean wheel installation. |
-| `make validate-ci` | `validate-native` plus `check-dist`. |
+| `make test-e2e` | Installed CLI workflow against a loopback provider in isolated environments. |
+| `make validate-ci` | `validate-native` and `check-dist`, followed by e2e against the resulting wheel. |
 
 The distribution archives are produced by `check-dist`; extension checks build
 a separate temporary wheel. CI also runs the test suite across Python 3.11
 through 3.14; a local bundle checks the active
 Python environment. Provider health checks run separately and need credentials.
+
+The separate `Installed CLI e2e` job runs the [installed workflow](e2e.md) on
+Python 3.12 through `make test-e2e`. It retains failure diagnostics under
+`test-results/e2e/` as `e2e-failure` for 14 days. The local bundle passes
+`WHEEL_DIR=dist` after archive validation so the e2e test installs that same
+wheel without rebuilding.
 
 ## Coverage
 
