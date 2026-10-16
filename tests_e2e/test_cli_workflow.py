@@ -33,7 +33,9 @@ class Provider(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    def log_message(self, *args):
+    server: Provider
+
+    def log_message(self, format: str, *args: object) -> None:
         pass
 
     def send(self, code, body):

@@ -244,7 +244,7 @@ def verify_identity_schema(
     }
 
 
-def framework_primitive_tool(name: str) -> dict[str, Any] | None:
+def framework_primitive_tool(name: str | None) -> dict[str, Any] | None:
     """Canonical ``{description, parameters}`` for a framework primitive.
 
     Returns ``None`` for non-primitive (per-institution DB) tools. Callers get a

@@ -35,6 +35,7 @@ import time
 from collections import Counter
 from fractions import Fraction
 from pathlib import Path
+from typing import cast
 
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
 
@@ -737,6 +738,8 @@ def _simulate_to_parquet(
         # The bare layout has no run folder to hold a manifest.
         logger.info("run=%s is the bare legacy layout; no run manifest written", run_id)
         return 0
+
+    run_id = cast(str, run_id)  # At least one successful save_sampled_rows assigned it.
 
     # Write the run manifest. ``started_at_epoch`` is when the invocation
     # that made the run started, kept in the run's record. First-writer-wins:

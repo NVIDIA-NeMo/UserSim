@@ -227,7 +227,7 @@ def run(args: argparse.Namespace) -> int:
     if args.stratify_by and args.stratify_by.strip().lower() != "none":
         stratify_by = tuple(c.strip() for c in args.stratify_by.split(",") if c.strip())
     # --run accepts a single id, 'latest', or a comma-separated list.
-    runs: object = args.run
+    runs: str | list[str] | None = args.run
     if isinstance(args.run, str) and "," in args.run:
         runs = [r.strip() for r in args.run.split(",") if r.strip()]
 

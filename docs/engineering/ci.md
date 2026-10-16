@@ -6,7 +6,7 @@ bundle, including distribution checks and installed CLI tests.
 
 | Target | Checks |
 | --- | --- |
-| `make check-all` | Static checks defined by the repository. |
+| `make check-all` | Static checks, including the configured type-check scope. |
 | `make check-dependency-licenses` | Dependency license policy. |
 | `make coverage` | Ordinary test suite with an 84% minimum total coverage. |
 | `make smoke` | Offline configuration, registry, asset, and reporting self-check. |
@@ -26,6 +26,18 @@ Python 3.12 through `make test-e2e`. It retains failure diagnostics under
 `test-results/e2e/` as `e2e-failure` for 14 days. The local bundle passes
 `WHEEL_DIR=dist` after archive validation so the e2e test installs that same
 wheel without rebuilding.
+
+## Type checking
+
+`make typecheck` uses the locked `ty==0.0.69` against `src/usersim`, `scripts`,
+and `tests_e2e`, targeting Python 3.11 with `src` as the module root. The
+dedicated CI job runs this target after locked setup; hooks, static validation,
+and release validation inherit it through `check-all`.
+Ordinary unit-test fixtures are outside this initial scope.
+
+Keep annotations aligned with runtime behavior. Rule-specific suppressions
+cover documented runtime schema construction or upstream annotation limits;
+do not disable a rule across the repository.
 
 ## Coverage
 
@@ -54,7 +66,7 @@ setup stops before XML is produced, inspect the failed step's logs.
 
 ## Mandatory jobs and aggregate status
 
-`CI Status` waits for static checks, the complete Python test matrix, packaging,
+`CI Status` waits for static checks, the dedicated `Type checking` job, the complete Python test matrix, packaging,
 installed CLI e2e, and CPU container tests. Every job must report `success`.
 Failures, cancellation, missing results, malformed results, and skipped jobs fail
 the aggregate; there are no intentional job skips. Conditional coverage steps

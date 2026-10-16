@@ -14,8 +14,9 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 logger = logging.getLogger("usersim.engine")
 
@@ -1114,7 +1115,7 @@ class ConversationLoop:
         # path runs — both preserve pre-seeded metadata via setdefault.
         if seed_state and hasattr(probe, "seed_state_metadata"):
             try:
-                probe.seed_state_metadata(state)
+                cast(Callable[[ConversationState], None], probe.seed_state_metadata)(state)
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: seed_state_metadata raised "
@@ -1125,7 +1126,9 @@ class ConversationLoop:
         query_instruction = USER_QUERY_INSTRUCTION_GROUNDED if use_grounded else USER_QUERY_INSTRUCTION
         if hasattr(probe, "get_user_query_instruction"):
             try:
-                query_instruction = probe.get_user_query_instruction(0) or query_instruction
+                query_instruction = (
+                    cast(Callable[[int], str | None], probe.get_user_query_instruction)(0) or query_instruction
+                )
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: get_user_query_instruction raised "
@@ -1145,7 +1148,9 @@ class ConversationLoop:
         verbatim_first = None
         if hasattr(probe, "get_verbatim_first_user_turn"):
             try:
-                verbatim_first = await probe.get_verbatim_first_user_turn(state)
+                verbatim_first = await cast(
+                    Callable[[ConversationState], Awaitable[str | None]], probe.get_verbatim_first_user_turn
+                )(state)
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: get_verbatim_first_user_turn "
@@ -1385,7 +1390,9 @@ class ConversationLoop:
             # how frustration_events / assistant_judge_ratings /
             # user_judge_ratings are written by the simulator today.
             try:
-                capitulated = await probe.is_capitulation_detected(state)
+                capitulated = await cast(
+                    Callable[[ConversationState], Awaitable[bool]], getattr(probe, "is_capitulation_detected")
+                )(state)
             except Exception as e:
                 logger.warning(
                     f"  |-- {probe.label}: is_capitulation_detected raised {type(e).__name__}: {e}; treating as False"
@@ -1458,7 +1465,10 @@ class ConversationLoop:
             # bank-driven reframings for safety_chat_pressure).
             if hasattr(probe, "format_followup_user_instructions"):
                 try:
-                    extras = await probe.format_followup_user_instructions(
+                    extras = await cast(
+                        Callable[[int, ConversationState], Awaitable[list[str]]],
+                        probe.format_followup_user_instructions,
+                    )(
                         turn_idx + 1,
                         state,
                     )
@@ -1722,7 +1732,7 @@ class ConversationLoop:
                 policy = "skip"
                 if hasattr(probe, "on_followup_failure"):
                     try:
-                        policy = probe.on_followup_failure(
+                        policy = cast(Callable[[ConversationState, str], str], probe.on_followup_failure)(
                             state,
                             "gate_exhausted",
                         )
@@ -1779,7 +1789,9 @@ class ConversationLoop:
             # the generic LLM check on the user follow-up message
             # would mis-fire on polite "Thanks!" reframing closers).
             try:
-                allow_early_stop = probe.allow_early_stop_at_turn(
+                allow_early_stop = cast(
+                    Callable[[int, ConversationState], bool], getattr(probe, "allow_early_stop_at_turn")
+                )(
                     turn_idx,
                     state,
                 )

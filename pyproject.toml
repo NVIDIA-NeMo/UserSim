@@ -90,6 +90,7 @@ dev = [
     "ruff>=0.14,<0.15",
     "pytest-cov>=7.0,<8",
     "pre-commit>=4.0,<5",
+    "ty==0.0.69",
     # Distributes the test suite across cores. It is CPU-bound with every LLM
     # call mocked, so it parallelises well. `make test` passes -n and fails
     # without this.
@@ -233,3 +234,10 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
 ]
+
+[tool.ty.src]
+include = ["src/usersim", "scripts", "tests_e2e"]
+
+[tool.ty.environment]
+python-version = "3.11"
+root = ["src"]

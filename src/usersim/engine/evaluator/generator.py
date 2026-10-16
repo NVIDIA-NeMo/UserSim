@@ -61,6 +61,7 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
     create_judge_response_model,
     create_judge_structured_output_model,
 )
+from pydantic import BaseModel
 
 from usersim.engine.core.identity import resolve_model_name
 from usersim.engine.core.llm import acall_llm
@@ -186,7 +187,8 @@ class TrajectoryEvaluatorGenerator(
             f"Await agenerate(data) instead of calling generate(data)."
         )
 
-    async def agenerate(self, data: dict) -> dict:
+    # This cell generator intentionally specializes DD's batch-or-cell overload.
+    async def agenerate(self, data: dict) -> dict:  # ty: ignore[invalid-method-override]
         cfg = self.config
         col_name = cfg.name
         # The defaults below and every scorer treat a falsy cell as empty, but
@@ -384,7 +386,7 @@ class TrajectoryEvaluatorGenerator(
         models: dict[str, Any],
         judge_alias: str,
         prompt: str,
-        schema_model: type,
+        schema_model: type[BaseModel],
         max_tokens: int,
     ) -> dict[str, Any]:
         """One judge call, structured-output enforced. Returns parsed dict."""
@@ -418,7 +420,7 @@ class TrajectoryEvaluatorGenerator(
         return parsed if isinstance(parsed, dict) else {}
 
 
-def _build_schema_for(axes: Iterable) -> type:
+def _build_schema_for(axes: Iterable) -> type[BaseModel]:
     """Build a Pydantic schema for the given axis list using DD's factory."""
     response_models = [create_judge_response_model(s) for s in axes]
     return create_judge_structured_output_model(response_models)
