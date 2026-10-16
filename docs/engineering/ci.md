@@ -1,6 +1,6 @@
 # Local and CI validation
 
-CI calls repository Make targets so failures can be reproduced locally. After
+CI calls repository Mise tasks (Make targets remain compatibility wrappers) so failures can be reproduced locally. After
 `make install-dev`, run `make validate-ci` to execute the native validation
 bundle, including distribution checks and installed CLI tests.
 
@@ -22,17 +22,17 @@ through 3.14; a local bundle checks the active
 Python environment. Provider health checks run separately and need credentials.
 
 The separate `Installed CLI e2e` job runs the [installed workflow](e2e.md) on
-Python 3.12 through `make test-e2e`. It retains failure diagnostics under
+Python 3.12 through `scripts/mise run test:e2e`. It retains failure diagnostics under
 `test-results/e2e/` as `e2e-failure` for 14 days. The local bundle passes
-`WHEEL_DIR=dist` after archive validation so the e2e test installs that same
+`--wheel-dir dist` after archive validation so the e2e test installs that same
 wheel without rebuilding.
 
 ## Type checking
 
 `make typecheck` uses the locked `ty==0.0.69` against `src/usersim`, `scripts`,
 and `tests_e2e`, targeting Python 3.11 with `src` as the module root. The
-dedicated CI job runs this target after locked setup; hooks, static validation,
-and release validation inherit it through `check-all`.
+dedicated CI job runs `scripts/mise run check:type` after locked setup; hooks,
+static validation, and release validation inherit it through the `check` task.
 Ordinary unit-test fixtures are outside this initial scope.
 
 Keep annotations aligned with runtime behavior. Rule-specific suppressions
@@ -41,9 +41,9 @@ do not disable a rule across the repository.
 
 ## Coverage
 
-The Python 3.12 CI matrix job runs `make coverage`; the other Python versions
-run `make test`. Both test paths use the same ordinary suite. Coverage failures
-fail the existing `Tests (Python 3.12)` check. The 84% floor lives in the Makefile
+The Python 3.12 CI matrix job runs `scripts/mise run test:ci`; the other Python
+versions run `scripts/mise run test`. Both test paths use the same ordinary suite. Coverage failures
+fail the existing `Tests (Python 3.12)` check. The 84% floor lives in the shared pytest coordinator
 and applies to local runs as well as CI.
 
 ```bash
@@ -72,10 +72,11 @@ Failures, cancellation, missing results, malformed results, and skipped jobs fai
 the aggregate; there are no intentional job skips. Conditional coverage steps
 inside the test matrix do not skip their enclosing job.
 
-The aggregate runs with `always()` and invokes `make check-ci-status` with
+The aggregate runs with `always()` and invokes `python3 scripts/check_ci_results.py` with
 `CI_JOB_RESULTS` set to GitHub's `toJSON(needs)` object. Its result checker uses
-only Python's standard library so dependency installation failures in other jobs
-can still be reported. When adding a mandatory job, update both the workflow's
+only Python's standard library, so it can report dependency or tool-bootstrap
+failures in other jobs. The DCO job likewise invokes its shared Python checker
+directly. Both checkers remain available as local Mise tasks. When adding a mandatory job, update both the workflow's
 `needs` list and the explicit registry in `scripts/check_ci_results.py`; workflow
 tests reject an omitted dependency or unregistered job.
 
@@ -140,3 +141,6 @@ validation introduced by the contribution-policy change must also remain
 required according to that change's checklist. These independent policies are
 not members of this workflow's aggregate. Retest a successful PR and a PR with
 a deliberately failing mandatory check after the authorized ruleset update.
+
+See [Mise tools and tasks](mise.md) for canonical commands, tool ownership,
+bootstrap prerequisites, and the continuing Make compatibility interface.

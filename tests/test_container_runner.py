@@ -99,7 +99,8 @@ def test_inside_runs_both_shared_targets_and_propagates_failure(monkeypatch, tmp
     monkeypatch.setenv("COVERAGE_FILE", "original")
     monkeypatch.setattr(runner, "run_logged", fake_logged)
     assert runner.inside(tmp_path) == expected
-    assert [command for command, _ in calls] == [["make", "coverage"], ["make", "test-e2e"]]
+    assert [command[-2:] for command, _ in calls] == [["run", "test:ci"], ["run", "test:e2e"]]
+    assert all(command[0] == str(runner.ROOT / "scripts/mise") for command, _ in calls)
     assert [log.name for _, log in calls] == ["unit.log", "e2e.log"]
 
     assert "E2E_ARGS" not in environments[0]

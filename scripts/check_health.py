@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -106,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--locale", default="ja_JP")
     parser.add_argument("--probe", default="sov_ai_dynamic")
     parser.add_argument("--timeout", type=float, default=900, help="maximum seconds per CLI command (default: 900)")
-    parser.add_argument("--summary-file", type=Path)
+    parser.add_argument("--summary-file", type=Path, default=os.environ.get("HEALTH_SUMMARY_FILE") or None)
     args = parser.parse_args(argv)
     outcome = {"status": "failure", "stage": "preflight", "detail": ""}
     try:

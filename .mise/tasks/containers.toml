@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+["container:audit"]
+description = "Require local Docker and verify synthetic context exclusions"
+run = 'python3 scripts/run_container_tests.py audit'
+
+["container:build:test"]
+description = "Audit context and build the digest-pinned CPU validation image"
+run = 'python3 scripts/run_container_tests.py build'
+
+["test:ci-container"]
+description = "Build fresh and run CPU coverage and installed e2e offline with bounded resources"
+run = [
+    { task = "container:build:test" },
+    'python3 scripts/run_container_tests.py run',
+]

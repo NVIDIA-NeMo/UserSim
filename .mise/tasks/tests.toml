@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+[test]
+description = "Run the ordinary offline test suite with PYTEST_ARGS and worker overrides"
+run = 'python3 scripts/run_test_suite.py'
+
+["test:fast"]
+description = "Run the ordinary suite serially and stop at the first failure"
+run = '"${UV:-uv}" run pytest -x -q'
+
+["test:ci"]
+description = "Run the ordinary suite with coverage XML and enforce the 84 percent floor"
+run = 'python3 scripts/run_test_suite.py --coverage'
+
+["test:smoke"]
+description = "Run the offline installed-resource self-check"
+run = '"${UV:-uv}" run usersim smoke'
+
+["test:e2e"]
+description = "Run the installed CLI suite against the local fake provider"
+depends = ["check:tools"]
+run = '"${UV:-uv}" run --frozen python scripts/run_e2e.py'
+
+["test:health"]
+description = "Run the live credentialed provider pipeline; missing keys explicitly skip"
+run = '"${UV:-uv}" run python scripts/check_health.py --models "${PROVIDER_CONFIG:-src/usersim/cli/models_default.toml}" --locale "${HEALTH_LOCALE:-ja_JP}" --probe "${HEALTH_PROBE:-sov_ai_dynamic}" --timeout "${HEALTH_TIMEOUT:-900}"'

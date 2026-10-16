@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -108,6 +109,10 @@ def prepare(work: Path, args: argparse.Namespace, parser: argparse.ArgumentParse
     python = runtime / "bin/python"
     env = environment(work)
     wheel = archive(work, args, parser)
+    resolved_uv = shutil.which(args.uv)
+    if not resolved_uv:
+        parser.error(f"uv executable not found: {args.uv}")
+    args.uv = str(Path(resolved_uv).resolve())
     # Export locked runtime dependencies without the editable project or dev tools.
     requirements = work / "runtime-requirements.txt"
     command(
@@ -237,7 +242,10 @@ def main() -> int:
     wheel_source = parser.add_mutually_exclusive_group()
     wheel_source.add_argument("--wheel", type=Path, help="Use an existing wheel instead of building one.")
     wheel_source.add_argument(
-        "--wheel-dir", type=Path, help="Use the single existing wheel in this directory; never build."
+        "--wheel-dir",
+        type=Path,
+        default=os.environ.get("WHEEL_DIR") or None,
+        help="Use the single existing wheel in this directory; never build.",
     )
     parser.add_argument(
         "--work-dir", type=Path, help="Persistent external work directory (default: a new temporary one)."
@@ -252,7 +260,13 @@ def main() -> int:
     mode.add_argument(
         "--run-only", action="store_true", help="Run prepared environments without installing or downloading."
     )
-    args = parser.parse_args()
+    args = parser.parse_args([*shlex.split(os.environ.get("E2E_ARGS", "")), *sys.argv[1:]])
+    wheel_directory = os.environ.get("WHEEL_DIR")
+    if wheel_directory:
+        if args.wheel:
+            parser.error("--wheel conflicts with the WHEEL_DIR environment selector")
+        if not args.wheel_dir:
+            args.wheel_dir = Path(wheel_directory)
     if args.run_only and (args.wheel or args.wheel_dir):
         parser.error("--run-only cannot be combined with --wheel or --wheel-dir; prepare that wheel first")
     work = (

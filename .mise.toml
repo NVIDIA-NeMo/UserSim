@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Mise owns the uv release; Python quality tools remain owned by uv.lock.
+min_version = "2026.8.5"
+
+[tools]
+uv = "0.13.1"
+
+[task_config]
+includes = [".mise/tasks", ".mise/tasks/*.toml"]
+
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64", "macos-x64"]
+task.run_auto_install = false
+idiomatic_version_file_enable_tools = []
