@@ -17,6 +17,12 @@ env/
 coverage.xml
 htmlcov/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ty_cache/
+.coverage.*
+junit*.xml
+test-results/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -39,9 +45,9 @@ models.local.toml
 *.local.yaml
 
 # Data artifacts
-data/
-artifacts/
-output/
+/data/
+/artifacts/
+/output/
 # Dense-retrieval vectors `gen-assets` writes beside a bank stay local.
 src/usersim/engine/assets/financial_services/**/embeddings.parquet
 # So do the judge scorecards `evaluate-assets` writes there.
@@ -61,11 +67,15 @@ Thumbs.db
 # Local DataDesigner branch checkout
 .dd-branch/
 
-# uv lockfiles. The lock is COMMITTED: CI installs from it with --locked so
-# dependency drift is a build failure rather than a silent re-resolution.
-
 # Cursor
 .cursor/
+
+# Private agent overrides and session artifacts; shared guidance stays trackable.
+AGENTS.local.md
+CLAUDE.local.md
+.claude/settings.local.json
+.codex/config.local.toml
+.worktrees/
 
 # Local agent working notes
 /.agent-work/

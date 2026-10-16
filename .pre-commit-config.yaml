@@ -1,14 +1,8 @@
 # Local mirror of the CI lint and format gate, so failures surface before push
 # rather than in the pipeline. Install with `make install-dev`.
 #
-# The global exclude covers files no hook should touch at all. A top-level
-# directory whose name starts with `_` holds material that is not part of the
-# distribution, and uv owns uv.lock's format. Notebooks are NOT global: they
-# are exempt per-hook from the rewriting checks (a whitespace fix on notebook
-# JSON is a large unreviewable diff) while staying subject to the size check.
-# Global and per-hook excludes are cumulative, so a globally excluded path
-# cannot be re-included by a single hook.
-
+# Top-level underscore directories contain private, non-distribution material.
+# uv owns lock formatting; notebooks skip rewriting text hooks individually.
 exclude: '^_[^/]+/|^uv\.lock$'
 
 repos:
@@ -22,6 +16,7 @@ repos:
       - id: mixed-line-ending
         exclude: '\.ipynb$'
       - id: check-merge-conflict
+        args: ["--assume-in-merge"]
       - id: check-yaml
       - id: check-json
       - id: check-toml
@@ -30,7 +25,10 @@ repos:
         # Notebooks stay in scope, so one committed with its outputs fails
         # here. uv.lock is exempt via the global exclude: it is a committed
         # resolved graph that grows with the dependency set.
-        args: ["--maxkb=600"]
+        args: ["--maxkb=600", "--enforce-all"]
+        # Existing shipped corpora exceed the budget; only these two files
+        # are exempt. They still receive syntax and conflict checks.
+        exclude: '^src/usersim/engine/assets/(safety_chat_pressure|safety_agentic)/sample\.yaml$'
 
   # Ruff runs through `uv run` rather than pre-commit's own mirror so the
   # version always matches the pin in pyproject.toml. A mirrored rev drifts
@@ -39,6 +37,17 @@ repos:
   # identify tags .ipynb as `jupyter`, not `python`.
   - repo: local
     hooks:
+      - id: check-lock
+        name: dependency lock consistency
+        entry: make check-lock
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: spdx-headers
+        name: SPDX headers (staged files)
+        entry: uv run python scripts/update_license_headers.py
+        language: system
+        files: '^(src/|tests/|scripts/|templates/|Makefile$|conftest\.py$)'
       - id: ruff
         name: ruff (lint)
         entry: uv run ruff check --fix
