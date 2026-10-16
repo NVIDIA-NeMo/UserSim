@@ -1,42 +1,62 @@
 [
   {
     "path": ".env.local",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": "models.local.toml",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": "spec.local.yaml",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": "output/run=abc/data.parquet",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": "debug_llm_responses.jsonl",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": ".agent-work/plans/engineering-workflows.md",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   },
   {
     "path": "src/usersim/cli/models_default.toml",
-    "git_ignored": false
+    "git_ignored": false,
+    "docker_included": true
   },
   {
     "path": "src/usersim/engine/assets/example/data/required.json",
-    "git_ignored": false
+    "git_ignored": false,
+    "docker_included": true
   },
   {
     "path": "tests/fixtures/output/expected.json",
-    "git_ignored": false
+    "git_ignored": false,
+    "docker_included": true
+  },
+  {
+    "path": "src/usersim/engine/assets/financial_services/example/embeddings.parquet",
+    "git_ignored": true,
+    "docker_included": false
+  },
+  {
+    "path": "src/usersim/engine/assets/financial_services/example/bank.json",
+    "git_ignored": false,
+    "docker_included": true
   },
   {
     "path": "data/generated.json",
-    "git_ignored": true
+    "git_ignored": true,
+    "docker_included": false
   }
 ]
