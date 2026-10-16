@@ -10,7 +10,7 @@
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
-**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 3,200+ tests · offline `usersim smoke` in seconds**
+**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/pipeline_architecture.jpg" width="800">
 
@@ -42,8 +42,9 @@ through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
 which adds the OCEAN personality traits, names and further fields that the
 behavioural features depend on.
 
-The datasets are downloaded on first use rather than bundled, and carry their
-own licence separate from this project's, including an AI ethics clause. See
+The datasets aren't bundled: you download each locale you need once, as the
+setup below shows. They carry their own licence, separate from this project's,
+including an AI ethics clause. See
 [`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md) for how to get them and what the terms
 allow. The reasoning behind the design, and how far the results carry, is in
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md).
@@ -104,14 +105,6 @@ Python 3.10+, in a virtual environment.
 python -m venv .venv && source .venv/bin/activate
 pip install "usersim>=0.2.0rc1"      # in a uv project: uv add "usersim>=0.2.0rc1"
 
-# Install the NGC CLI into the active virtual environment (idempotent,
-# sha256-verified). Required to download the Nemotron-Personas datasets.
-usersim setup-ngc
-
-# Keys for live runs and persona download.
-export NVIDIA_API_KEY="your-key-from-build.nvidia.com"   # inference
-export NGC_CLI_API_KEY="your-key-from-ngc.nvidia.com"    # persona download
-
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke
 usersim simulate --dry-run --locale en_US --num-rows 2 --out output/trajectories
@@ -126,18 +119,46 @@ To work on User Sim itself, or to run the notebooks, clone the repository and
 run `uv sync`; [CONTRIBUTING.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md)
 has the details.
 
+### Personas and keys
+
+Live runs need an inference key, an NGC key, and the persona dataset for each
+locale you run, downloaded once from NGC:
+
+```bash
+# Keys: inference on build.nvidia.com, and persona downloads from NGC. An NGC
+# account and API key come from https://org.ngc.nvidia.com/account/api-keys.
+export NVIDIA_API_KEY="your-key-from-build.nvidia.com"
+export NGC_CLI_API_KEY="your-key-from-ngc.nvidia.com"
+
+# The NGC CLI. On Linux, setup-ngc installs a pinned, sha256-verified copy into
+# the active virtual environment. On other platforms, use NVIDIA's installer:
+# https://org.ngc.nvidia.com/setup/installers/cli
+usersim setup-ngc
+
+# Store your NGC key and org for the CLI, once per machine.
+ngc config set
+
+# Download the personas for each locale you'll run (en_US is about 1.2 GB).
+data-designer download personas --locale en_US
+```
+
+`data-designer download personas --list` shows every locale and its size;
+[`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md)
+walks through each step.
+
 ## Quickstart
 
-These steps make live model calls, using the keys above.
+These steps make live model calls, using the keys and personas above.
 
 ```bash
 # 1. Simulate. Pick a locale and a row count; the default probe mix is the
 #    two `general` probes plus `tool_calling`.
 usersim simulate --locale en_US --num-rows 30 --out output/trajectories
 
-# 2. Score the assistant under test.
-usersim eval     --trajectories output/trajectories \
-                 --out output/evaluations --judges judge_model
+# 2. Score the assistant under test: the evaluator model's judgments, plus
+#    the scorers that match the default probe mix.
+usersim eval     --trajectories output/trajectories --out output/evaluations \
+                 --scorers tool_use,language_compliance,response_shape,refusal_basics
 
 # 3. Render the capability dashboard.
 usersim report   --trajectories output/trajectories \
@@ -154,6 +175,10 @@ usersim simulate --locale ja_JP --num-rows 30 \
   --probe-mix 'sov_ai_facts=1/3,sov_ai_dynamic=1/3,sov_ai_multilingual_parity=1/3' \
   --out output/trajectories
 ```
+
+Score a run with the scorers for its probes. For this one, step 2 takes
+`--scorers sov_ai_facts,sov_ai_dynamic,sov_ai_multilingual_parity,language_compliance`;
+[`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md) lists every scorer.
 
 ### Curate training data
 
@@ -249,23 +274,24 @@ wrong, red-flag symptoms that were either caught or missed. Those are also
 the checks that matter most for an agent, where the final message can look
 fine while the actions behind it were wrong.
 
-Three things are worth knowing before you quote a number.
+Three practices get the most out of the numbers.
 
-Behavioural fidelity is bounded by the model doing the simulating. Current
-models flatten personality differences relative to what a persona
-description implies, so interaction-style coverage is best read as breadth
-across styles rather than a calibrated measure of any one of them.
+**Read interaction style as coverage.** Each persona's OCEAN traits set an
+interaction style, from cooperative to impatient or confrontational, and
+whether details come upfront or a little at a time. The model doing the
+simulating renders those styles, so they measure breadth across styles rather
+than calibrating any one of them.
 
-Judges scoring simulated users is circular for subjective dimensions. A
-model's opinion of another model's helpfulness is not an independent
-measurement. Lean on the deterministic scorers where ground truth exists, and
-reserve human review for taste.
+**Pair judges with scorers.** Scorers check the assistant against ground truth
+where it exists: curated facts, the tools a task calls for, the language of
+each reply. Judges cover qualities such as helpfulness, where human review
+adds an independent view.
 
-Content review status travels with the numbers. Bank entries authored by a
-model rather than reviewed by a domain expert carry `placeholder: true`, and
-every trajectory that drew on one records a `used_placeholder_*` warning on
-its outcome. That warning is written to the trajectory parquet, so you can
-always trace which findings rest on reviewed content.
+**Follow content provenance.** Bank entries authored by a model, rather than
+reviewed by a domain expert, carry `placeholder: true`. Every trajectory that
+drew on one records a `used_placeholder_*` warning on its outcome, in the
+trajectory parquet, so you can always see which findings rest on reviewed
+content.
 
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md) covers all three in depth.
 
