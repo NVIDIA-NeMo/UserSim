@@ -65,10 +65,24 @@ jobs:
       - run: make install-ci
 
       - name: Test suite
+        if: matrix.python-version != '3.12'
         # Durations are reported because a slow test is invisible until
         # someone profiles the suite, and the runner is the only place that
         # measures the hardware CI actually runs on.
         run: make test PYTEST_ARGS="--durations=25"
+
+      - name: Test suite with coverage
+        if: matrix.python-version == '3.12'
+        run: make coverage PYTEST_ARGS="--durations=25"
+
+      - name: Coverage report
+        if: always() && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-python-3.12
+          path: coverage.xml
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Offline self-check
         run: make smoke
