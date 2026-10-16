@@ -75,8 +75,12 @@ def test_ci_enforces_coverage_once_and_retains_failure_artifacts():
     job = workflow["jobs"]["test"]
     assert job["name"] == "Tests (Python ${{ matrix.python-version }})"
     assert "3.12" in job["strategy"]["matrix"]["python-version"]
-    tests = [step for step in job["steps"] if step.get("run", "").startswith("make test ")]
-    coverage = [step for step in job["steps"] if step.get("run", "").startswith("make coverage ")]
+    tests = [
+        step
+        for step in job["steps"]
+        if step.get("run", "").startswith("scripts/mise run test") and step.get("run", "") == "scripts/mise run test"
+    ]
+    coverage = [step for step in job["steps"] if step.get("run", "").startswith("scripts/mise run test:ci")]
     assert len(tests) == len(coverage) == 1
     assert tests[0]["if"] == "matrix.python-version != '3.12'"
     assert coverage[0]["if"] == "matrix.python-version == '3.12'"
@@ -89,26 +93,11 @@ def test_ci_enforces_coverage_once_and_retains_failure_artifacts():
 
 
 def test_native_and_ci_bundle_membership():
-    result = subprocess.run(
-        ["make", "--question", "--print-data-base", "validate-ci"],
-        cwd=_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=30,
-    )
-    # --question returns 1 when any prerequisite would need executing.
-    assert result.returncode in (0, 1), result.stderr
-    graph = dict(
-        line.split(":", 1)
-        for line in result.stdout.splitlines()
-        if line.startswith(("validate-native:", "validate-ci:"))
-    )
-    assert set(graph["validate-native"].split()) == {
-        "check-all",
-        "check-dependency-licenses",
-        "coverage",
-        "smoke",
-        "check-extensions",
-    }
-    assert set(graph["validate-ci"].split()) == {"validate-native", "check-dist"}
+    import tomllib
+
+    tasks = tomllib.loads((_ROOT / ".mise/tasks/packaging.toml").read_text())
+    native = [step["task"] for step in tasks["validate:native"]["run"]]
+    assert native == ["check", "check:license:dependencies", "test:ci", "test:smoke", "check:extensions"]
+    ci = tasks["validate:ci"]["run"]
+    assert ci[:2] == [{"task": "validate:native"}, {"task": "check:dist"}]
+    assert ci[2] == "mise run test:e2e --wheel-dir dist"

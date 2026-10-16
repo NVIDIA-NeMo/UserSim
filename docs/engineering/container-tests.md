@@ -1,12 +1,14 @@
 # CPU container tests
 
 The test image prepares a source unit-test environment and a separate installed-wheel
-e2e environment during build. Execution uses the same `make coverage` and
-`make test-e2e` commands as native validation, with external networking disabled.
+e2e environment during build. Execution uses the same `test:ci` and `test:e2e`
+Mise tasks as native validation, with external networking disabled. Make targets
+remain compatibility wrappers.
 
 Install Docker with a running daemon. Build dependencies require internet access;
 test execution needs no provider credentials. The image uses Python 3.12 pinned by
-manifest digest and reads the exact uv version from `pyproject.toml`.
+manifest digest and installs uv from `.mise.toml` and `mise.lock` through the
+same verified Mise bootstrap used locally and in CI.
 
 ```bash
 make container-build-test
@@ -40,6 +42,7 @@ Run this bounded check separately with:
 
 ```bash
 make container-audit
+# Or: scripts/mise run container:audit
 ```
 
 The audit, image build, execution, and cleanup require `/var/run/docker.sock`

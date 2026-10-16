@@ -152,9 +152,9 @@ model catalog, every probe's assets, and the plugin entry points without
 making a single model call. `--dry-run` prints the plan for a run, also
 without calling a model.
 
-To work on User Sim itself, or to run the notebooks, clone the repository and
-run `uv sync`; [CONTRIBUTING.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md)
-has the details.
+To develop User Sim or run its notebooks, clone the repository and follow
+the [contributor setup](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md#getting-set-up). It bootstraps the pinned
+tools through Mise and installs the development environment.
 
 ### Personas and keys
 

@@ -26,10 +26,15 @@
 /tests/test_ignore_policy.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_update_license_headers.py @NVIDIA-NeMo/user_sim_maintainers
 /docs/engineering/ @NVIDIA-NeMo/user_sim_maintainers
-/tests/fixtures/exclusion-policy.json @NVIDIA-NeMo/user_sim_maintainers
 /containers/ @NVIDIA-NeMo/user_sim_maintainers
 /.dockerignore @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_container_runner.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_coverage_gate.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_check_ci_results.py @NVIDIA-NeMo/user_sim_maintainers
 /tests/test_release_validation_workflow.py @NVIDIA-NeMo/user_sim_maintainers
+
+/.mise.toml @NVIDIA-NeMo/user_sim_maintainers
+/mise.lock @NVIDIA-NeMo/user_sim_maintainers
+/.mise/ @NVIDIA-NeMo/user_sim_maintainers
+
+/tests/fixtures/exclusion-policy.json @NVIDIA-NeMo/user_sim_maintainers

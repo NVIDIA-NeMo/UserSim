@@ -32,7 +32,7 @@ def run_logged(
             try:
                 code = process.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
-                # Stop descendants as well as Make; leave no timed-out suite running.
+                # Stop descendants as well as Mise; leave no timed-out suite running.
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
                 print(f"Timed out after {timeout}s; see {log}", file=sys.stderr)
@@ -96,7 +96,7 @@ def cleanup_container(client: list[str], environment: dict[str, str], name: str,
 
 
 def inside(artifacts: Path = Path("/artifacts")) -> int:
-    """Use the same Make contracts as native validation."""
+    """Use the same Mise contracts as native validation."""
     artifacts.mkdir(exist_ok=True)
     common: dict[str, str] = {**os.environ, "COVERAGE_FILE": str(artifacts / ".coverage")}
     unit: dict[str, str] = {
@@ -112,8 +112,8 @@ def inside(artifacts: Path = Path("/artifacts")) -> int:
         "E2E_ARGS": shlex.join(["--work-dir", "/opt/e2e", "--run-only", "--artifacts", str(artifacts / "e2e")]),
     }
     codes = [
-        run_logged(["make", task], artifacts / f"{name}.log", timeout=1500, env=environment)
-        for name, task, environment in (("unit", "coverage", unit), ("e2e", "test-e2e", e2e))
+        run_logged([str(ROOT / "scripts/mise"), "run", task], artifacts / f"{name}.log", timeout=1500, env=environment)
+        for name, task, environment in (("unit", "test:ci", unit), ("e2e", "test:e2e", e2e))
     ]
     return next((code for code in codes if code), 0)
 
