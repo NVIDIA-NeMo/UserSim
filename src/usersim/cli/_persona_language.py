@@ -1,7 +1,11 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Persona-language cohort resolution and user-facing diagnostics.
+"""Persona datasets, persona-language cohort resolution, and user-facing diagnostics.
+
+A run samples each locale's personas from a Nemotron-Personas dataset that is
+downloaded separately; :func:`persona_dataset_report` names any that are not
+in place, so a run can stop before its first model call.
 
 The sampler configuration is corpus-driven: each persona dataset declares
 which field represents its matchable language and how language names are
@@ -21,6 +25,61 @@ from typing import Any, Mapping, Sequence
 logger = logging.getLogger("usersim.cli.persona_language")
 
 DEFAULT_PERSONA_DATASETS_DIR = Path.home() / ".data-designer" / "managed-assets" / "datasets"
+
+
+def persona_datasets_dir() -> Path:
+    """The folder Data Designer's persona sampler reads: ``<managed assets>/datasets``.
+
+    Read at call time from the default ``DataDesigner`` falls back on when it is
+    constructed without ``managed_assets_path``, as User Sim constructs it, so the
+    answer matches the sampler's, including when ``DATA_DESIGNER_MANAGED_ASSETS_PATH``
+    or ``DATA_DESIGNER_HOME`` moves the folder.
+    """
+    from data_designer.interface import data_designer as data_designer_interface
+
+    return Path(data_designer_interface.MANAGED_ASSETS_PATH) / "datasets"
+
+
+def persona_dataset_report(locales: Sequence[str], *, datasets_dir: Path | None = None) -> str | None:
+    """Why personas can't be sampled for ``locales``, with the fix; ``None`` when they can.
+
+    Each locale is checked against the dataset it samples, so an India language
+    variant needs ``en_IN`` until it has a dataset of its own. Data Designer
+    samples only the locales it manages, from files downloaded once per locale.
+    """
+    from data_designer.config.utils.constants import LOCALES_WITH_MANAGED_DATASETS
+
+    from usersim.engine.core.locale import persona_dataset_locale
+
+    root = Path(datasets_dir) if datasets_dir is not None else persona_datasets_dir()
+    needed: dict[str, list[str]] = {}
+    for locale in dict.fromkeys(locales):
+        needed.setdefault(persona_dataset_locale(locale, datasets_dir=root), []).append(locale)
+
+    problems: list[str] = []
+    to_download: list[str] = []
+    for dataset, run_locales in needed.items():
+        label = dataset if run_locales == [dataset] else f"{dataset} (for {', '.join(run_locales)})"
+        if dataset not in LOCALES_WITH_MANAGED_DATASETS:
+            problems.append(f"{label}: Data Designer provides no persona dataset for this locale")
+        elif not (root / f"{dataset}.parquet").is_file():
+            to_download.append(dataset)
+            problems.append(f"{label}: not downloaded; expected at {root / f'{dataset}.parquet'}")
+    if not problems:
+        return None
+
+    lines = ["persona datasets are not available for this run:", *(f"  - {p}" for p in problems)]
+    if to_download:
+        lines += [
+            "",
+            "Download them once with:",
+            "  data-designer download personas " + " ".join(f"--locale {d}" for d in to_download),
+            "The download uses the NGC CLI: `usersim setup-ngc` installs it on Linux (elsewhere, use "
+            "NVIDIA's installer), and `ngc config set` stores your NGC key. See docs/personas.md.",
+        ]
+    if len(to_download) < len(problems):
+        lines += ["", f"Data Designer provides persona datasets for: {', '.join(LOCALES_WITH_MANAGED_DATASETS)}."]
+    return "\n".join(lines)
 
 
 def persona_language_for_locale(

@@ -50,6 +50,14 @@ class TestSmokeCommand:
         out = capsys.readouterr().out
         assert "All checks passed." in out
         assert "[FAIL]" not in out
+        assert "download personas" not in out
+
+    def test_next_step_includes_the_persona_download_when_it_is_missing(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr("data_designer.interface.data_designer.MANAGED_ASSETS_PATH", tmp_path)
+        assert cli.main(["smoke"]) == 0
+        out = capsys.readouterr().out
+        assert "  data-designer download personas --locale en_US" in out
+        assert out.index("download personas") < out.index("usersim simulate --locale en_US")
 
     def test_help_advertises_subcommand(self, capsys):
         with pytest.raises(SystemExit) as excinfo:

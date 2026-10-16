@@ -157,8 +157,12 @@ def run(args: argparse.Namespace) -> int:
         if fixtures_path is not None:
             print(f"Fixtures written to: {fixtures_path}")
         print()
+        from usersim.cli._persona_language import persona_dataset_report
+
         print("To run a real simulation:")
         print("  export NVIDIA_API_KEY=...")
+        if persona_dataset_report(["en_US"]) is not None:
+            print("  data-designer download personas --locale en_US   # once; needs the NGC CLI, see docs/personas.md")
         print("  usersim simulate --locale en_US --num-rows 5 \\")
         print("    --out output/trajectories")
         return 0
