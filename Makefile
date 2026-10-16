@@ -61,7 +61,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-hooks check-all-fix validate-native validate-ci test test-fast test-e2e coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-ci-status check-hooks check-all-fix validate-native validate-ci test test-fast test-e2e coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 
 help:  ## Show the available targets
@@ -308,3 +308,9 @@ test-container: container-build-test  ## Build fresh and run offline CPU coverag
 
 container-audit:  ## Audit the local Docker context before image build
 	python3 scripts/run_container_tests.py audit $(CONTAINER_ARGS)
+
+
+# The aggregate uses only the runner's standard library; setup failures in other
+# jobs must not prevent their results from being checked.
+check-ci-status:  ## Reject missing or unsuccessful jobs in CI_JOB_RESULTS JSON
+	python3 scripts/check_ci_results.py
