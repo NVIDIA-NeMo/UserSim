@@ -36,6 +36,8 @@ from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
+from usersim.cli._errors import ConfigError
+from usersim.cli._persona_language import persona_dataset_report
 from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
 
 logger = logging.getLogger("usersim.cli.simulate")
@@ -363,12 +365,21 @@ def run(args: argparse.Namespace) -> int:
             pinned_assets_dir,
             args.toolset_seed_path,
         )
+        # Reported, not refused: the offline check a new install runs comes
+        # before the persona download.
+        persona_locales = (
+            _locales_from_panel(args.panel) if args.panel and Path(args.panel).is_file() else list(args.locale or [])
+        )
+        persona_report = persona_dataset_report(persona_locales) if persona_locales else None
         print("usersim simulate — dry run")
         if args.panel:
             print(f"  panel:         {args.panel}")
         else:
             print(f"  locales:       {args.locale}")
             print(f"  per-locale:    {args.num_rows}")
+        if persona_locales:
+            ready = "ready" if persona_report is None else "not available, so a live run stops before any model call"
+            print(f"  personas:      {ready}")
         print(f"  probe mix:     {probe_mix}")
         print(f"  max_turns:     {args.max_turns}")
         print(f"  max_assistant_attempts: {args.max_assistant_attempts}")
@@ -386,6 +397,8 @@ def run(args: argparse.Namespace) -> int:
         print(f"  resumable:     {not args.no_skip_existing}")
         print(f"  store_reasoning: {not args.no_store_reasoning}")
         print(f"  replay_reasoning: {replay_reasoning}")
+        if persona_report is not None:
+            print(f"\n{persona_report}")
         return 0
 
     if (msg := warn_if_missing_api_key(models)) is not None:
@@ -449,6 +462,8 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
     from usersim.cli._pipeline import materialize_episode_inputs
 
     locales = _locales_from_panel(args.panel) if args.panel else list(args.locale or [])
+    if (report := persona_dataset_report(locales)) is not None:
+        raise ConfigError(report)
     rows = []
     for locale in locales:
         count = _count_rows_for_locale(args.panel, locale) if args.panel else args.num_rows
@@ -657,7 +672,10 @@ def _simulate_to_parquet(
         seed_source = None
 
     # Fail before any model call rather than from inside a loader mid-run.
+    # Checked here, where the run executes, since that host holds the datasets.
     verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
+    if (report := persona_dataset_report(run_locales)) is not None:
+        raise ConfigError(report)
 
     total_written = 0
     # What the persona sampler actually narrowed to, per locale. Recorded

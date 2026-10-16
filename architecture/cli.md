@@ -26,8 +26,9 @@ and `evaluate-assets` are live, paid steps and are not needed to use the
 shipped banks.
 
 `simulate`, `eval` and `gen-assets` accept `--dry-run`, which resolves the
-run's plan (for `simulate`, the models, probe mix, asset paths and toolset
-seed) and exits before the first network call.
+run's plan (for `simulate`, the models, probe mix, asset paths, toolset seed
+and whether each locale's persona dataset is downloaded) and exits before the
+first network call.
 
 ## Model configuration
 
@@ -70,6 +71,16 @@ drops earlier thinking makes it a no-op.
 `usersim.cli._errors.ConfigError` is a `ValueError` subclass, never a
 `SystemExit`, so library callers can catch it. `main()` catches it at the
 boundary and prints a message rather than a traceback, exiting 2.
+
+`simulate`, `panel` and `simulate --materialize-inputs` sample personas from
+the Nemotron-Personas datasets Data Designer manages, so each locale's dataset
+is checked before the first model call. A dataset that isn't downloaded raises
+a `ConfigError` naming the `data-designer download personas` command that
+fetches it, and a locale Data Designer has no dataset for raises one listing
+the locales it has. An India language variant needs the `en_IN` dataset.
+`--dry-run` reports the same without failing, and
+`simulate --inputs` replays the personas stored on each row, so it needs no
+dataset.
 
 ## Execution backends
 

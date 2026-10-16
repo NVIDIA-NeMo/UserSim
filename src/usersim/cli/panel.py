@@ -23,6 +23,8 @@ import argparse
 import logging
 from pathlib import Path
 
+from usersim.cli._errors import ConfigError
+
 logger = logging.getLogger("usersim.cli.panel")
 
 
@@ -95,6 +97,7 @@ def run(args: argparse.Namespace) -> int:
     from usersim.cli._persona_language import (
         DEFAULT_PERSONA_DATASETS_DIR,
         log_persona_language_population,
+        persona_dataset_report,
         persona_language_filter,
         persona_sampler_params,
     )
@@ -102,16 +105,23 @@ def run(args: argparse.Namespace) -> int:
 
     models_path = args.models or default_models_path()
     models = load_models_config(models_path)
+    persona_report = persona_dataset_report(args.locale)
 
     if args.dry_run:
+        ready = "ready" if persona_report is None else "not available, so a live run stops before sampling"
         print("usersim panel — dry run")
         print(f"  locales:       {args.locale}")
         print(f"  per-locale:    {args.num_personas}")
         print(f"  total rows:    {len(args.locale) * args.num_personas}")
+        print(f"  personas:      {ready}")
         print(f"  match_persona_language: {args.match_persona_language}")
         print(f"  models config: {models_path}")
         print(f"  output:        {args.out}")
+        if persona_report is not None:
+            print(f"\n{persona_report}")
         return 0
+    if persona_report is not None:
+        raise ConfigError(persona_report)
 
     import data_designer.config as dd
     import pandas as pd
