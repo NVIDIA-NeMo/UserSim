@@ -5,6 +5,9 @@
 # uv owns lock formatting; notebooks skip rewriting text hooks individually.
 exclude: '^_[^/]+/|^uv\.lock$'
 
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -47,7 +50,13 @@ repos:
         name: SPDX headers (staged files)
         entry: uv run python scripts/update_license_headers.py
         language: system
-        files: '^(src/|tests/|scripts/|templates/|Makefile$|conftest\.py$)'
+        files: '^(src/|tests/|tests_e2e/|scripts/|templates/|Makefile$|conftest\.py$)'
+      - id: dco-trailers
+        name: DCO author and co-author sign-offs
+        entry: python3 scripts/check_commit_signoffs.py --commit-msg
+        language: system
+        stages: [commit-msg]
+        always_run: true
       - id: ruff
         name: ruff (lint)
         entry: uv run ruff check --fix
