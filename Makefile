@@ -42,6 +42,7 @@ PYTEST_WORKERS ?= auto
 
 # Importable package names for coverage (not paths -- src/
 # installs as `usersim.engine`).
+COV_XML ?= coverage.xml
 COV_PKGS ?= usersim
 COV_ARGS := $(foreach pkg,$(COV_PKGS),--cov=$(pkg))
 
@@ -59,7 +60,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-hooks check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-hooks check-all-fix validate-native validate-ci test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 
 help:  ## Show the available targets
@@ -138,8 +139,12 @@ test-fast:  ## Stop at the first failure, serially (tight debugging loop)
 coverage:  ## Run tests with coverage and enforce the floor
 	$(UV) run pytest -n $(PYTEST_WORKERS) $(COV_ARGS) \
 		--cov-report=term-missing \
-		--cov-report=xml \
-		--cov-fail-under=$(COV_FAIL_UNDER)
+		--cov-report="xml:$(COV_XML)" \
+		--cov-fail-under=$(COV_FAIL_UNDER) $(PYTEST_ARGS)
+
+validate-native: check-all check-dependency-licenses coverage smoke check-extensions  ## Check source and installed extension behavior
+
+validate-ci: validate-native check-dist  ## Run the native CI checks, including distribution validation
 
 smoke:  ## Offline self-check of config, registries, and report builders
 	$(UV) run usersim smoke
