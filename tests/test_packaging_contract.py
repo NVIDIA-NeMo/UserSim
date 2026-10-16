@@ -333,6 +333,7 @@ class TestSdistContents:
         """The suite runs from a checkout; a partial copy without conftest.py would not run."""
         directives = [line.split() for line in (_REPO_ROOT / "MANIFEST.in").read_text().splitlines()]
         assert ["prune", "tests"] in directives
+        assert ["prune", "tests_e2e"] in directives
 
 
 class TestManifestProvenance:
