@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
 
 > Simulate a statistically representative population of users, sampled from
 > persona datasets (e.g., census-grounded), having multi-turn conversations with
@@ -98,7 +98,7 @@ plug in through entry points without forking the repository.
 
 ## Setup
 
-Python 3.10+, in a virtual environment.
+Python 3.11–3.14, in a virtual environment.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
