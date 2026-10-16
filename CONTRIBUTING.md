@@ -34,6 +34,23 @@ it, start with the [README](README.md).
   git rebase --signoff main
   ```
 
+Every commit requires an exact name and email match between its author and a
+`Signed-off-by` trailer. Bots have no trailer exemption. Each declared
+`Co-authored-by` identity also needs a matching sign-off; obtain their DCO
+certification before adding it. Cryptographic commit signing is separate and
+is not required by this repository.
+
+Install both local hooks after setting up the development environment:
+
+```bash
+uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+```
+
+The commit-message hook checks the author identity provided by Git, including
+`--author` overrides. CI independently checks every submitted commit. See
+[contribution policy](docs/engineering/contribution-policy.md) for recovery,
+stacked PRs, and the maintainer settings checklist.
+
 ### Recording your signature, once
 
 The first pull request you open will get a comment from the DCO Assistant bot
@@ -260,7 +277,9 @@ policy through `.github/CODEOWNERS`.
 
 Your PR title must follow [Conventional Commits](https://www.conventionalcommits.org/)
 (`feat:`, `fix:`, `docs:`, `ci:`, `chore:`, `refactor:`, `test:`, `style:`,
-`perf:`), because it becomes the squashed commit subject on `main`.
+`perf:`). Squash-only merging is the proposed policy. Until maintainers apply
+the settings in the [contribution policy](docs/engineering/contribution-policy.md),
+the title check alone does not guarantee the commit subject on `main`.
 
 ## What CI runs
 
