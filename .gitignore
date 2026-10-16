@@ -74,5 +74,8 @@ CLAUDE.local.md
 .codex/config.local.toml
 .worktrees/
 
+# Repository-scoped Mise installations and runtime state
+.cache/
+
 # Local agent working notes
 /.agent-work/

@@ -46,6 +46,8 @@ _*/
 **/AGENTS.local.md
 **/CLAUDE.local.md
 
+.cache
+
 # Generated model-specific vectors; retain the source asset banks.
 src/usersim/engine/assets/financial_services/**/embeddings.parquet
 **/junit.xml

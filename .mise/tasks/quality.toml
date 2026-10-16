@@ -1,0 +1,97 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+["check:tools"]
+description = "Reject uv versions that differ from the Mise registry"
+run = 'python3 scripts/check_tool_versions.py'
+
+["check:lock"]
+description = "Verify uv.lock without rewriting it"
+depends = ["check:tools"]
+run = '"${UV:-uv}" lock --check'
+
+["check:lint"]
+description = "Lint source, scripts, templates and tests without changes"
+run = 'python3 scripts/run_ruff.py check --output-format=full'
+
+["lint:fix"]
+description = "Fix Ruff lint findings in the same source scope"
+run = 'python3 scripts/run_ruff.py check --fix'
+
+["check:format"]
+description = "Check Python formatting without changes"
+run = 'python3 scripts/run_ruff.py format --check'
+
+[format]
+description = "Format Python source, scripts, templates and tests"
+run = 'python3 scripts/run_ruff.py format'
+
+["format:all"]
+description = "Run lint fixes and Python formatting"
+run = [{ task = "lint:fix" }, { task = "format" }]
+
+["check:license:headers"]
+description = "Verify SPDX headers in source and gate scripts"
+run = '"${UV:-uv}" run python scripts/update_license_headers.py --check'
+
+["license:headers:fix"]
+description = "Fix SPDX headers in all source or supplied staged files"
+run = '"${UV:-uv}" run python scripts/update_license_headers.py'
+
+["check:license:dependencies"]
+description = "Check runtime dependencies in a locked isolated license environment"
+run = '"${UV:-uv}" run --isolated --no-dev --group license-check --locked python scripts/check_dependency_licenses.py'
+
+["check:docs"]
+description = "Check tracked relative documentation links"
+run = '"${UV:-uv}" run python scripts/check_doc_links.py'
+
+["check:notebooks"]
+description = "Reject committed notebook output and execution counts"
+run = '"${UV:-uv}" run python scripts/check_notebooks.py'
+
+["notebooks:clean"]
+description = "Strip tracked notebook outputs"
+run = '"${UV:-uv}" run --with nbstripout nbstripout $(git ls-files "*.ipynb" | grep -v "^_")'
+
+["check:hooks"]
+description = "Run all tracked-file hooks and fail after any rewrite"
+run = '"${UV:-uv}" run pre-commit run --all-files --show-diff-on-failure'
+
+["check:tasks"]
+description = "Validate Mise task definitions and gate shell syntax"
+run = ["mise tasks validate", "python3 scripts/check_task_scripts.py"]
+
+[check]
+description = "Run the shared static gates; hooks may rewrite files"
+run = [
+    { task = "check:tools" }, { task = "check:lock" },
+    { task = "check:type" }, { task = "check:lint" }, { task = "check:format" },
+    { task = "check:license:headers" }, { task = "check:docs" },
+    { task = "check:notebooks" }, { task = "check:tasks" }, { task = "check:hooks" },
+]
+
+["lint:files"]
+description = "Fix Ruff lint for filenames supplied by hooks"
+run = '"${UV:-uv}" run ruff check --fix'
+
+["format:files"]
+description = "Format filenames supplied by hooks"
+run = '"${UV:-uv}" run ruff format'
+
+["check:dco"]
+description = "Validate commit-message signoff trailers"
+run = 'python3 scripts/check_commit_signoffs.py --commit-msg'
+
+["check:type"]
+description = "Check shipped code, gate scripts and e2e helpers against Python 3.11"
+depends = ["check:tools"]
+run = '"${UV:-uv}" run --locked ty check --error-on-warning'
+
+["check:ci-status"]
+description = "Require every mandatory CI job to complete successfully"
+run = 'python3 scripts/check_ci_results.py'
+
+["check:dco:range"]
+description = "Validate every commit between the PR base and head"
+run = 'python3 scripts/check_commit_signoffs.py --base "$BASE_SHA" --head "$HEAD_SHA"'

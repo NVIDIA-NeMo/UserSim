@@ -119,8 +119,8 @@ conversation-simulator = "usersim.engine.plugin:conversation_simulator"
 trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 
 [tool.uv]
-# Shared developer and CI version; setup-uv reads this declaration directly.
-required-version = "==0.13.1"
+# Mise owns the exact uv pin; this declares the compatible tool family.
+required-version = ">=0.13,<0.14"
 override-dependencies = [
     # Keep in sync with the ``dependencies`` pin above.
     "data-designer>=0.9.5,<0.10",

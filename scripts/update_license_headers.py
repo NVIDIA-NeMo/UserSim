@@ -39,7 +39,7 @@ SUPPORTED_EXTENSIONS = frozenset([".py", ".sh", ".template"])
 #: Files that the folder globs cannot reach: ``Makefile`` has no suffix, and
 #: ``conftest.py`` sits at the repository root rather than inside a package
 #: tree. Both carry `#` comments, so the standard header applies unchanged.
-ROOT_FILES = frozenset(["Makefile", "conftest.py"])
+ROOT_FILES = frozenset(["Makefile", "conftest.py", "scripts/mise", ".mise.toml"])
 
 # Maximum number of lines to search for SPDX license header
 MAX_HEADER_SEARCH_LINES = 10
@@ -257,7 +257,14 @@ def check_license_header_matches(file_path: Path, license_header: str) -> tuple[
 
 def should_process_file(file_path: Path) -> bool:
     """Determine if a file should be processed for license headers."""
-    if file_path.name not in ROOT_FILES and file_path.suffix not in SUPPORTED_EXTENSIONS:
+    mise_file = ".mise" in file_path.parts and "tasks" in file_path.parts
+    launcher = file_path.name == "mise" and file_path.parent.name == "scripts"
+    if (
+        file_path.name not in ROOT_FILES
+        and file_path.suffix not in SUPPORTED_EXTENSIONS
+        and not mise_file
+        and not launcher
+    ):
         return False
 
     try:
@@ -348,7 +355,7 @@ def main(
     files_needing_update: list[Path] = []
 
     if files is None:
-        files = (f for ext in SUPPORTED_EXTENSIONS for f in path.glob(f"**/*{ext}"))
+        files = path.rglob("*")
 
     for file_path in files:
         if not file_path.is_file() or not should_process_file(file_path):
@@ -403,7 +410,7 @@ if __name__ == "__main__":
     total_processed = total_updated = total_skipped = 0
 
     # This project is one distribution under src/, so the roots are flat.
-    for folder in [] if args.files else ["src", "tests", "tests_e2e", "scripts", "templates"]:
+    for folder in [] if args.files else ["src", "tests", "tests_e2e", "scripts", "templates", ".mise/tasks"]:
         folder_path = repo_path / folder
         if not folder_path.exists():
             continue
