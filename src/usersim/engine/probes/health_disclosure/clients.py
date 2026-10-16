@@ -23,7 +23,7 @@ probe — the evaluator does not import this package. See this probe's README
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 from usersim.engine.probes.health_disclosure.prompts import (
     CDS_STANDIN_SYSTEM_PROMPT,
@@ -260,11 +260,11 @@ def get(label: str) -> dict:
     return CLIENTS[label]
 
 
-def gated_topics(client: dict) -> tuple:
+def gated_topics(client: Mapping[str, Any]) -> tuple:
     return tuple(client["topics"]["gated"])
 
 
-def topics_for(profile: dict, client: dict) -> list[str]:
+def topics_for(profile: dict, client: Mapping[str, Any]) -> list[str]:
     """Topics this persona carries: all general topics + gated topics whose
     presence predicate holds for the clinical profile (absent profile → all)."""
     spec = client["topics"]

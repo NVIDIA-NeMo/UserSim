@@ -145,7 +145,8 @@ def _column_value_counts(
     frequencies = tuple(
         sorted(
             (str(entry["values"]), int(entry["counts"]))
-            for entry in pc.value_counts(table[column]).to_pylist()
+            # Arrow installs its compute kernels dynamically; the attribute is public.
+            for entry in pc.value_counts(table[column]).to_pylist()  # ty: ignore[unresolved-attribute]
             if entry["values"] is not None
         )
     )

@@ -22,6 +22,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 # Lead with assistant_model in the manifest-derived "models" block;
 # everything else follows in the order users care about (the simulator
@@ -125,7 +129,7 @@ def print_available_runs(
     report_root: Path | str,
     *,
     eval_column: str = "assistant_eval",
-    console: object | None = None,
+    console: Console | None = None,
 ) -> None:
     """Render a ``rich.Table`` of trajectory runs with their eval/report
     status + actor models (from each run's manifest, when present).
@@ -213,7 +217,7 @@ def print_available_runs(
 def print_comparison_runs(
     paths: list[Path | str],
     *,
-    console: object | None = None,
+    console: Console | None = None,
 ) -> None:
     """Render a ``rich.Table`` of report manifests selected for comparison.
 
@@ -230,10 +234,10 @@ def print_comparison_runs(
     from rich.console import Console
     from rich.table import Table
 
-    paths = [Path(p) for p in paths]
+    normalized_paths = [Path(p) for p in paths]
     console = console or Console(width=200)
 
-    if not paths:
+    if not normalized_paths:
         console.print(
             "[yellow]No reports selected for comparison. Build at least two "
             "via cell 14 (Capability Dashboard), or check COMPARE_RUN_IDS.[/yellow]"
@@ -241,7 +245,7 @@ def print_comparison_runs(
         return
 
     table = Table(
-        title=f"Selected for comparison ({len(paths)} run{'s' if len(paths) != 1 else ''})",
+        title=f"Selected for comparison ({len(normalized_paths)} run{'s' if len(normalized_paths) != 1 else ''})",
         title_style="bold cyan",
         header_style="bold",
         show_lines=True,
@@ -253,7 +257,7 @@ def print_comparison_runs(
     table.add_column("sample mode", justify="center", no_wrap=True, min_width=12)
     table.add_column("eval column", style="dim", no_wrap=True, min_width=14)
 
-    for path in paths:
+    for path in normalized_paths:
         try:
             manifest = _json.loads(Path(path).read_text())
         except (OSError, ValueError) as exc:
@@ -278,5 +282,5 @@ def print_comparison_runs(
         )
 
     console.print(table)
-    if len(paths) < 2:
-        console.print(f"[yellow]\u26a0  Comparison requires \u22652 runs; found {len(paths)}.[/yellow]")
+    if len(normalized_paths) < 2:
+        console.print(f"[yellow]\u26a0  Comparison requires \u22652 runs; found {len(normalized_paths)}.[/yellow]")

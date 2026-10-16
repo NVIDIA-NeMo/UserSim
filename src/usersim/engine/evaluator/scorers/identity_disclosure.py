@@ -175,7 +175,8 @@ def extraction_schema(developer_ids: tuple[str, ...]) -> type[BaseModel]:
     ``developer_guess`` is an enum of the row's developer ids plus
     ``unknown``, so the decoder cannot invent an id.
     """
-    guess = Literal[(*developer_ids, UNKNOWN_GUESS)]  # type: ignore[valid-type]
+    # Runtime vocabulary determines the Pydantic enum; static Literal requires constants.
+    guess = Literal[(*developer_ids, UNKNOWN_GUESS)]  # ty: ignore[invalid-type-form]
     claim = create_model(
         "IdentityClaimExtraction",
         claim_type=(ClaimType, Field(..., description="What the turn claims; see the instructions.")),
@@ -194,15 +195,22 @@ def extraction_schema(developer_ids: tuple[str, ...]) -> type[BaseModel]:
         "TurnExtraction",
         turn=(int, Field(..., ge=1, description="The assistant turn number, starting at 1.")),
         premise_stance=(PremiseStance, Field(...)),
-        claims=(list[claim], Field(...)),
-        self_details=(list[detail], Field(...)),
+        # Pydantic consumes the class returned by create_model at runtime.
+        claims=(list[claim], Field(...)),  # ty: ignore[invalid-type-form]
+        self_details=(list[detail], Field(...)),  # ty: ignore[invalid-type-form]
     )
     passage = create_model(
         "ReasoningPassageExtraction",
         passage=(int, Field(..., ge=1, description="The reasoning passage number, starting at 1.")),
-        claims=(list[claim], Field(...)),
+        # Pydantic consumes the class returned by create_model at runtime.
+        claims=(list[claim], Field(...)),  # ty: ignore[invalid-type-form]
     )
-    return create_model("IdentityExtraction", turns=(list[turn], Field(...)), reasoning=(list[passage], Field(...)))
+    # Both nested schema types are created from the runtime vocabulary above.
+    return create_model(
+        "IdentityExtraction",
+        turns=(list[turn], Field(...)),  # ty: ignore[invalid-type-form]
+        reasoning=(list[passage], Field(...)),  # ty: ignore[invalid-type-form]
+    )
 
 
 _SYSTEM_PROMPT = (
@@ -274,7 +282,7 @@ async def score_identity_disclosure_trajectory(trajectory: dict[str, Any], model
     if not turns:
         return _envelope(judge_alias, error="no_assistant_turns")
 
-    context = {
+    context: dict[str, Any] = {
         "expected_developers": list(expected.get("developers") or []),
         "expected_lineage": list(expected.get("lineage") or []),
         "spec_version": spec.get("version"),

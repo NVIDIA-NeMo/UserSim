@@ -46,6 +46,12 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: typecheck
+        name: type checking (Python 3.11)
+        entry: make typecheck
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: spdx-headers
         name: SPDX headers (staged files)
         entry: uv run python scripts/update_license_headers.py

@@ -50,10 +50,13 @@ import importlib
 import logging
 import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Protocol,
     Sequence,
+    TypeVar,
+    cast,
     runtime_checkable,
 )
 
@@ -244,6 +247,18 @@ class BaseProbe:
     doesn't store, so subclasses can pass through additional context
     (the dispatcher calls every probe class with the same kwarg set).
     """
+
+    if TYPE_CHECKING:
+
+        async def run_dispatch(
+            self,
+            *,
+            models: dict[str, Any],
+            data: dict[str, Any],
+            cfg: Any,
+            state: Any = None,
+            seed_state: bool = True,
+        ) -> dict: ...
 
     label: str = "<unset>"
 
@@ -740,7 +755,7 @@ class BankBackedProbe(BaseProbe):
                     bank = loader(cand)
                 except TypeError:
                     # Shared, locale-independent loader.
-                    bank = loader()
+                    bank = cast(Callable[[], Any], loader)()
                     self._asset_locale = base if base is not None else locale
                     return bank
             except Exception as e:  # noqa: BLE001 — try the next candidate
@@ -749,7 +764,7 @@ class BankBackedProbe(BaseProbe):
             self._asset_locale = cand
             return bank
         raise BankLoadError(
-            f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(last_exc).__name__}: {last_exc}"
+            f"{type(self).__name__}: bank loader {getattr(loader, '__qualname__')!r} raised {type(last_exc).__name__}: {last_exc}"
         ) from last_exc
 
     async def _localize_verbatim(self, text: str, *, rules: tuple[str, ...] = (), warn: bool = True) -> str:
@@ -1046,6 +1061,21 @@ class ToolExecutionMixin:
     # including ``financial_services``.
     supports_assistant_resampling: bool = False
 
+    if TYPE_CHECKING:
+
+        def get_tools_for_assistant(self) -> list | None: ...
+
+        def on_tool_call_executed(
+            self,
+            *,
+            tool_call_id: str,
+            tool_name: str,
+            arguments: dict[str, Any],
+            payload: str,
+            turn_idx: int,
+            call_idx: int,
+        ) -> None: ...
+
     tool_loop_mode: str = "single"
     tool_max_calls_per_turn: int = 8
 
@@ -1305,12 +1335,15 @@ class ProbeRegistrationError(ValueError):
     """Raised when ``@register_probe`` cannot register a class."""
 
 
+_ProbeT = TypeVar("_ProbeT", bound=BaseProbe)
+
+
 def register_probe(
     *,
     family: str,
     prompt_version: str,
     variants: Sequence[str],
-) -> Callable[[type[BaseProbe]], type[BaseProbe]]:
+) -> Callable[[type[_ProbeT]], type[_ProbeT]]:
     """Single-annotation registration of a ``BaseProbe`` subclass.
 
     Sets ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``
@@ -1336,7 +1369,7 @@ def register_probe(
             ...
     """
 
-    def decorator(cls: type[BaseProbe]) -> type[BaseProbe]:
+    def decorator(cls: type[_ProbeT]) -> type[_ProbeT]:
         if not isinstance(cls, type) or not issubclass(cls, BaseProbe):
             raise ProbeRegistrationError(f"@register_probe: {cls!r} is not a subclass of BaseProbe")
         label = getattr(cls, "label", "<unset>")
@@ -1347,9 +1380,9 @@ def register_probe(
 
         module = sys.modules.get(cls.__module__)
         if module is not None:
-            module.PROBE_FAMILY = family
-            module.PROMPT_VERSION = prompt_version
-            module.PROBE_VARIANTS = tuple(variants)
+            setattr(module, "PROBE_FAMILY", family)
+            setattr(module, "PROMPT_VERSION", prompt_version)
+            setattr(module, "PROBE_VARIANTS", tuple(variants))
 
         if label in _PROBE_REGISTRY and _PROBE_REGISTRY[label] is not cls:
             logger.debug(

@@ -35,8 +35,9 @@ import json
 import logging
 import os
 import threading
-from typing import Any, Mapping
+from typing import Any, Mapping, cast
 
+from usersim.engine.core.probes import ProbeAdapter
 from usersim.engine.probes.health_disclosure import move_runtime as mr
 
 logger = logging.getLogger("usersim.engine")
@@ -98,6 +99,7 @@ class GuardedMoveMixin:
 
     #: ``probe_variant`` label that turns the guarded move-space ON.
     GUARDED_VARIANT: str = "guarded"
+    _models: dict[str, Any]  # Supplied by the existing BaseProbe host.
     #: Optional env var name that overrides the variant (local dev only). Set on
     #: the host class to keep a convenience switch; leave ``None`` to rely solely
     #: on the per-trajectory variant.
@@ -273,7 +275,7 @@ class GuardedMoveMixin:
 
     def build_result_extras(self, state: Any) -> dict:
         """Add the move/Guard audit columns on top of the host's extras."""
-        extras = super().build_result_extras(state)  # type: ignore[misc]
+        extras = cast(ProbeAdapter, super()).build_result_extras(state)
         if not getattr(self, "_moves_on", False):
             return extras
         moves = state.metadata.get("disclosure_moves", []) or []
