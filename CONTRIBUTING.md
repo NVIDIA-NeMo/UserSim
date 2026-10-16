@@ -256,10 +256,8 @@ route it to raises `ConfigError` rather than guessing an endpoint.
 ## Before you open a pull request
 
 ```bash
-make check-all               # ruff lint
+make check-all               # lock, lint, format, SPDX, docs, notebooks, and all tracked-file hooks
 make test                    # the full suite
-make check-license-headers   # SPDX header on every source file
-make check-doc-links         # every relative link in markdown resolves
 ```
 
 Licensing has its own gate, worth running if you added a dependency:
@@ -276,7 +274,21 @@ make check-dist         # builds and checks the sdist and wheel, installs the wh
 make check-extensions   # installs an out-of-tree package, asserts all six seams work
 ```
 
-`make update-license-headers` adds the SPDX header to new files.
+`make check-all` includes `make check-hooks`, which runs pre-commit against all
+tracked files. Hooks may rewrite files and fail: review those changes and rerun
+`make check-all`. Use `make install-dev` to install local pre-commit hooks;
+CI runs the same checks even when local hooks are bypassed.
+
+The SPDX hook fixes only the staged paths passed to it. `make update-license-headers`
+adds or refreshes headers throughout `src/`, `tests/`, `scripts/`, `templates/`,
+`Makefile`, and root `conftest.py`; `make check-license-headers` checks those
+roots without writing. Python, shell, and `.template` files are covered; Markdown,
+YAML, and TOML do not require SPDX headers under this policy.
+
+Keep credentials and generated output local; keep required source and fixtures
+trackable. Git ignores do not control archive or Docker inclusion.
+Maintainers own gate scripts, tool declarations, hook configuration, and exclusion
+policy through `.github/CODEOWNERS`.
 
 Your PR title must follow [Conventional Commits](https://www.conventionalcommits.org/)
 (`feat:`, `fix:`, `docs:`, `ci:`, `chore:`, `refactor:`, `test:`, `style:`,

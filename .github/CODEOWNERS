@@ -13,3 +13,17 @@
 /LICENSE @NVIDIA-NeMo/user_sim_maintainers
 /DCO @NVIDIA-NeMo/user_sim_maintainers
 /pyproject.toml @NVIDIA-NeMo/user_sim_maintainers
+
+# These define or validate the acceptance gates and their exclusions.
+/Makefile @NVIDIA-NeMo/user_sim_maintainers
+/.pre-commit-config.yaml @NVIDIA-NeMo/user_sim_maintainers
+/.gitignore @NVIDIA-NeMo/user_sim_maintainers
+/.gitattributes @NVIDIA-NeMo/user_sim_maintainers
+/MANIFEST.in @NVIDIA-NeMo/user_sim_maintainers
+/uv.lock @NVIDIA-NeMo/user_sim_maintainers
+/scripts/ @NVIDIA-NeMo/user_sim_maintainers
+/tests/test_ci_workflows.py @NVIDIA-NeMo/user_sim_maintainers
+/tests/test_ignore_policy.py @NVIDIA-NeMo/user_sim_maintainers
+/tests/test_update_license_headers.py @NVIDIA-NeMo/user_sim_maintainers
+/docs/engineering/ @NVIDIA-NeMo/user_sim_maintainers
+/tests/fixtures/exclusion-policy.json @NVIDIA-NeMo/user_sim_maintainers
