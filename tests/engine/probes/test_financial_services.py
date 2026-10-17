@@ -12,6 +12,7 @@ deterministic verifier scorer (good / unauthorized / skip / Tier-2).
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import json
 import re
 import textwrap
@@ -2161,6 +2162,71 @@ class TestRegionAwareKyc:
         pan = probe._synth_pan()
         assert re.fullmatch(r"[A-Z]{5}[0-9]{4}[A-Z]", pan), pan
         assert probe._synth_pan() == pan  # deterministic within a persona
+
+
+def _chandrika_instance():
+    inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+    tpl = next(t for t in inst.templates if t.account_state.get("balance"))
+    return build_instance(tpl, inst, persona_uuid="u1", locale="en_IN", seed=1)
+
+
+def _regional(bank, locale: str, **region_meta):
+    return dataclasses.replace(bank, locale=locale, region_meta={**bank.region_meta, **region_meta})
+
+
+class TestRegionalConventions:
+    """Prompts and tools use the region's currency and date format, not the US's."""
+
+    def test_money_follows_the_region(self):
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_money("123456.5") == "$123,456.50"
+        assert load_finance_bank_for_locale("en_IN").format_money("123456.5") == "₹1,23,456.50"
+        france = _regional(us, "fr_FR", currency_symbol="€", number_format="fr_FR")
+        germany = _regional(us, "de_DE", currency_symbol="€", number_format="de_DE")
+        britain = _regional(us, "en_GB", currency_symbol="£", number_format="en_GB")
+        assert france.format_money("123456.5") == "123 456,50 €"
+        assert germany.format_money("123456.5") == "123.456,50 €"
+        assert britain.format_money("123456.5") == "£123,456.50"
+        assert us.format_money("-12") == "-$12.00"
+        assert us.format_money("n/a") == "$n/a"
+
+    def test_dates_follow_the_region(self):
+        day = datetime.date(1980, 3, 27)
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_date(day) == "03/27/1980"
+        assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
+        for locale, expected in (
+            ("fr_FR", "27/03/1980"),
+            ("en_GB", "27/03/1980"),
+            ("de_DE", "27.03.1980"),
+            ("ja_JP", "1980-03-27"),
+        ):
+            assert _regional(us, locale).format_date(day) == expected
+
+    def test_an_india_customer_hears_their_balance_in_rupees(self):
+        inst = _chandrika_instance()
+        probe, _ = _probe_on("en_IN", inst)
+        ctx = probe._account_context(inst)
+        balance = probe._grounding_accounts(inst)[0]["balance"]
+        assert probe._bank.format_money(balance) in ctx
+        assert "₹" in ctx and "$" not in ctx
+
+    def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
+        us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
+        india_dob = _probe_on("en_IN", _chandrika_instance())[0]._synth_dob()
+        month, day, year = us_dob.split("/")
+        assert india_dob == f"{day}/{month}/{year}"
+
+    def test_opening_an_account_records_no_brand_name(self):
+        state: dict = {}
+        G._apply_tool("open_account", {"account_type": "savings"}, state)
+        assert state == {"opened_account_id": "acct_new_0001"}
+
+    def test_the_kb_search_example_names_no_country_specific_product(self):
+        from usersim.engine.core.finance_bank import FRAMEWORK_PRIMITIVE_TOOLS
+
+        description = FRAMEWORK_PRIMITIVE_TOOLS["kb_search"]["parameters"]["properties"]["query"]["description"]
+        assert "401(k)" not in description and "IRA" not in description
 
 
 # ---------------------------------------------------------------------------
