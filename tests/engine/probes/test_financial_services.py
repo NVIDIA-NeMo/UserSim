@@ -12,10 +12,12 @@ deterministic verifier scorer (good / unauthorized / skip / Tier-2).
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import json
 import re
 import textwrap
 import types
+import unicodedata
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
@@ -1713,17 +1715,50 @@ class TestVerbatimOpeningLocalization:
         assert await probe.get_verbatim_first_user_turn(state) is None
 
 
+def _with_vectors(institution):
+    return dataclasses.replace(institution, embeddings={d.id: (0.1, 0.2) for d in institution.documents})
+
+
+class TestQueryEmbedding:
+    """A query is embedded only when the bank has document vectors to compare it with.
+
+    Packaged banks ship none, so embedding every query would be a model call per
+    search whose result is never used.
+    """
+
+    @staticmethod
+    async def _search(probe):
+        state = G.ConversationState(messages=[], metadata={})
+        probe.seed_state_metadata(state)
+        with patch("usersim.engine.core.embeddings.aembed_query", return_value=[0.1, 0.2]) as embed:
+            await probe.execute_tool_call(
+                "kb_search", {"query": "dispute a card charge"}, {}, state, {}, turn_idx=0, call_idx=0
+            )
+        return embed
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_without_vectors_is_searched_without_embedding_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = dataclasses.replace(probe._institution, embeddings={})
+        (await self._search(probe)).assert_not_called()
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_with_vectors_embeds_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = _with_vectors(probe._institution)
+        (await self._search(probe)).assert_called_once()
+
+
 class TestSearchQueryTranslation:
     """A borrowed corpus is in another language, so the QUERY has to cross too.
 
     ``_localize_verbatim`` carries bank text out to the conversation language.
     Retrieval needs the mirror image: a stop-gap locale searches an English
-    corpus, and lexical ranking tokenizes on ``[a-z0-9]+``, so a native-script
-    query yields ZERO tokens. An empty token set makes ``_lexical_rank`` return
-    the corpus's first k documents regardless of the query, and zeroes the
-    lexical half of ``hybrid`` — leaving pure dense, measured on this corpus at
-    4% precision@8 against hybrid's 88%. Nothing failed; retrieval just went
-    blind and the scorer computed a recall from it.
+    corpus, and a native-script query shares no word with it, so every lexical
+    score ties and the ranking ignores the query, and ``hybrid`` loses its
+    lexical half, leaving dense alone, measured on this corpus at 4%
+    precision@8 against hybrid's 88%. Nothing fails; retrieval just goes blind
+    and the scorer computes a recall from it.
     """
 
     def _variant_probe(self, **cfg_kw):
@@ -1776,8 +1811,9 @@ class TestSearchQueryTranslation:
         its output has to reach both halves of retrieval. Passing the original to
         ``retrieve`` would leave the lexical collapse exactly as it was while
         looking, from the trace, as though the query had been translated."""
-        # hybrid, so the embedding half is exercised too (golden skips it).
+        # hybrid, with document vectors, so the embedding half is exercised too.
         probe, _ = self._variant_probe(finance_retrieval_mode="hybrid")
+        probe._institution = _with_vectors(probe._institution)
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with (
@@ -1916,33 +1952,90 @@ class TestSearchQueryTranslation:
         assert state.metadata["kb_search_queries"] == [""]
 
 
-class TestNativeScriptQueryCollapsesLexicalRanking:
+class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
     """The measurement that motivated query translation, pinned.
 
-    If ``_tokens`` ever becomes Unicode-aware, the zero-token collapse changes
-    shape and this test should be revisited — but query translation is still
-    what makes a Tamil query MATCH an English document, which tokenizing alone
-    would not.
+    Native-script words tokenize whole, but a Tamil or Hindi query shares no word
+    with an English corpus, so every document ties and the ranking ignores the
+    query. Translating the query is what lets it match.
     """
 
-    def test_a_native_script_query_yields_no_lexical_tokens(self):
-        assert R._tokens("சேமிப்பு கணக்கு கட்டணம்") == set()
-        assert R._tokens("बचत खाते पर शुल्क") == set()
-        assert R._tokens("savings account charge")
+    TAMIL = "சேமிப்பு கணக்கு கட்டணம்"
+    HINDI = "बचत खाते पर शुल्क"
 
-    def test_a_zero_token_query_returns_corpus_order_not_relevance(self):
+    def test_native_script_words_tokenize_whole(self):
+        assert R._tokens(self.TAMIL) == {"சேமிப்பு", "கணக்கு", "கட்டணம்"}
+        assert R._tokens(self.HINDI) == {"बचत", "खाते", "पर", "शुल्क"}
+
+    def test_a_native_script_query_ranks_the_same_whatever_it_asks(self):
         from usersim.engine.core.finance_bank import load_finance_bank_for_locale
 
-        bank = load_finance_bank_for_locale("en_IN")
-        inst = bank.institution("chandrika_bank")
-        tamil = R._lexical_rank(inst, "சேமிப்பு கணக்கு கட்டணம்", 4)
-        hindi = R._lexical_rank(inst, "बचत खाते पर शुल्क", 4)
+        inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+        corpus = set().union(*(R._tokens(f"{d.title} {d.body}") for d in inst.documents))
+        assert not (R._tokens(self.TAMIL) | R._tokens(self.HINDI)) & corpus
+
+        tamil = R._lexical_rank(inst, self.TAMIL, 4)
+        hindi = R._lexical_rank(inst, self.HINDI, 4)
         english = R._lexical_rank(inst, "minimum average balance charge", 4)
         # Two unrelated queries in different languages returning the identical
         # list is the tell: neither influenced the ranking at all.
         assert [d.id for d in tamil] == [d.id for d in hindi]
-        assert [d.id for d in tamil] == [d.id for d in inst.documents[:4]]
         assert [d.id for d in english] != [d.id for d in tamil]
+
+
+class TestLexicalTokensAreUnicodeWords:
+    """French and German banks retrieve on whole words, not ASCII fragments."""
+
+    @staticmethod
+    def _inst():
+        from usersim.engine.core.finance_bank import Document, Institution
+
+        def doc(doc_id, title, body):
+            return Document(
+                id=doc_id,
+                title=title,
+                body=body,
+                product_category="p",
+                document_type="faq",
+                source_authority="official",
+                placeholder=True,
+            )
+
+        return Institution(
+            institution_id="acme",
+            display_name="Acme",
+            type="bank",
+            brand_voice="traditional",
+            domains=("retail_banking",),
+            documents=(
+                doc("D_a", "Horaires des agences", "Les agences ouvrent à neuf heures."),
+                doc("D_b", "Relevé de compte", "Le relevé mensuel détaille chaque opération."),
+                doc("D_c", "Überweisung ins Ausland", "Eine Überweisung dauert zwei Tage."),
+                doc("D_d", "Adresse ändern", "Geben Sie die neue Straße und Hausnummer an."),
+            ),
+            tools=(),
+            templates=(),
+        )
+
+    def test_accented_words_and_eszett_tokenize_whole(self):
+        assert R._tokens("Épargne réglementée") == {"épargne", "réglementée"}
+        assert R._tokens("Überweisung an die Straße") == {"überweisung", "an", "die", "strasse"}
+
+    def test_composed_and_decomposed_accents_compare_equal(self):
+        composed = "relevé de compte"
+        decomposed = unicodedata.normalize("NFD", composed)
+        assert decomposed != composed
+        assert R._tokens(decomposed) == R._tokens(composed)
+
+    def test_punctuation_apostrophes_and_underscores_separate_words(self):
+        assert R._tokens("l'épargne, open_account (401k)") == {"l", "épargne", "open", "account", "401k"}
+
+    def test_an_accented_query_ranks_the_document_that_uses_those_words_first(self):
+        inst = self._inst()
+        assert R._lexical_rank(inst, "relevé mensuel", 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "Überweisung", 1)[0].id == "D_c"
+        assert R._lexical_rank(inst, unicodedata.normalize("NFD", "relevé"), 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "neue Strasse", 1)[0].id == "D_d"
 
 
 class TestDynamicTierCarriesLanguageDirective:
@@ -2104,6 +2197,71 @@ class TestRegionAwareKyc:
         pan = probe._synth_pan()
         assert re.fullmatch(r"[A-Z]{5}[0-9]{4}[A-Z]", pan), pan
         assert probe._synth_pan() == pan  # deterministic within a persona
+
+
+def _chandrika_instance():
+    inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+    tpl = next(t for t in inst.templates if t.account_state.get("balance"))
+    return build_instance(tpl, inst, persona_uuid="u1", locale="en_IN", seed=1)
+
+
+def _regional(bank, locale: str, **region_meta):
+    return dataclasses.replace(bank, locale=locale, region_meta={**bank.region_meta, **region_meta})
+
+
+class TestRegionalConventions:
+    """Prompts and tools use the region's currency and date format, not the US's."""
+
+    def test_money_follows_the_region(self):
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_money("123456.5") == "$123,456.50"
+        assert load_finance_bank_for_locale("en_IN").format_money("123456.5") == "₹1,23,456.50"
+        france = _regional(us, "fr_FR", currency_symbol="€", number_format="fr_FR")
+        germany = _regional(us, "de_DE", currency_symbol="€", number_format="de_DE")
+        britain = _regional(us, "en_GB", currency_symbol="£", number_format="en_GB")
+        assert france.format_money("123456.5") == "123 456,50 €"
+        assert germany.format_money("123456.5") == "123.456,50 €"
+        assert britain.format_money("123456.5") == "£123,456.50"
+        assert us.format_money("-12") == "-$12.00"
+        assert us.format_money("n/a") == "$n/a"
+
+    def test_dates_follow_the_region(self):
+        day = datetime.date(1980, 3, 27)
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_date(day) == "03/27/1980"
+        assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
+        for locale, expected in (
+            ("fr_FR", "27/03/1980"),
+            ("en_GB", "27/03/1980"),
+            ("de_DE", "27.03.1980"),
+            ("ja_JP", "1980-03-27"),
+        ):
+            assert _regional(us, locale).format_date(day) == expected
+
+    def test_an_india_customer_hears_their_balance_in_rupees(self):
+        inst = _chandrika_instance()
+        probe, _ = _probe_on("en_IN", inst)
+        ctx = probe._account_context(inst)
+        balance = probe._grounding_accounts(inst)[0]["balance"]
+        assert probe._bank.format_money(balance) in ctx
+        assert "₹" in ctx and "$" not in ctx
+
+    def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
+        us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
+        india_dob = _probe_on("en_IN", _chandrika_instance())[0]._synth_dob()
+        month, day, year = us_dob.split("/")
+        assert india_dob == f"{day}/{month}/{year}"
+
+    def test_opening_an_account_records_no_brand_name(self):
+        state: dict = {}
+        G._apply_tool("open_account", {"account_type": "savings"}, state)
+        assert state == {"opened_account_id": "acct_new_0001"}
+
+    def test_the_kb_search_example_names_no_country_specific_product(self):
+        from usersim.engine.core.finance_bank import FRAMEWORK_PRIMITIVE_TOOLS
+
+        description = FRAMEWORK_PRIMITIVE_TOOLS["kb_search"]["parameters"]["properties"]["query"]["description"]
+        assert "401(k)" not in description and "IRA" not in description
 
 
 # ---------------------------------------------------------------------------

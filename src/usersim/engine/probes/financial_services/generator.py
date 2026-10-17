@@ -95,7 +95,7 @@ logger = logging.getLogger("usersim.engine")
 
 PROBE_FAMILY: str = "financial_services"
 PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.1"
+PROMPT_VERSION: str = "v1.2"
 
 _KB_BODY_RETENTION_USER_TURNS = 8
 
@@ -652,12 +652,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
         A stop-gap locale borrows the en_IN corpus, so the assistant is talking
         to (say) a Tamil user about English documents and tends to search in
-        Tamil. Lexical ranking tokenizes on ``[a-z0-9]+``: a native-script query
-        produces zero tokens, which makes the lexical fallback return the
-        corpus's first k documents irrespective of the query and reduces
-        ``hybrid`` to pure dense — the mode this corpus measures at 4%
-        precision@8 against hybrid's 88%. Translating the query into the
-        corpus's language restores both halves of the ranking.
+        Tamil. A Tamil query shares no word with an English document, so every
+        lexical score ties and the ranking ignores the query, and ``hybrid``
+        loses its lexical half, leaving dense alone: the mode this corpus
+        measures at 4% precision@8 against hybrid's 88%. Translating the query
+        into the corpus's language restores both halves of the ranking.
 
         No-op whenever the corpus is already in the conversation language, so
         en_US / en_IN runs are untouched and a graduated native bank turns this
@@ -737,7 +736,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                 call_idx=call_idx,
             )
             query_embedding = None
-            if self._retrieval_mode in ("hybrid", "dense"):
+            # A query vector is only compared with the bank's document vectors;
+            # without them it would be an embedding call whose result goes unused.
+            if self._retrieval_mode in ("hybrid", "dense") and getattr(self._institution, "embeddings", None):
                 from usersim.engine.core.embeddings import aembed_query
 
                 query_embedding = await aembed_query(
@@ -896,9 +897,10 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         )
 
     def _synth_dob(self) -> str:
-        """A stable date of birth (MM/DD/YYYY) for the persona. Derived from the
-        persona's age when present; the verifier only checks that a DOB is
-        provided, so this just needs to be consistent within the conversation."""
+        """A stable date of birth for the persona, written as the region writes
+        dates. Derived from the persona's age when present; the verifier only
+        checks that a DOB is provided, so this just needs to be consistent within
+        the conversation."""
         import datetime
 
         p = self._persona
@@ -911,7 +913,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             age = 40
         year = datetime.date.today().year - max(18, min(age, 95))
         h = int(hashlib.sha1(f"{p.get('first_name', '')}{p.get('last_name', '')}".encode()).hexdigest(), 16)
-        return f"{h % 12 + 1:02d}/{h // 12 % 28 + 1:02d}/{year}"
+        return self._bank.format_date(datetime.date(year, h % 12 + 1, h // 12 % 28 + 1))
 
     def _synth_pan(self) -> str:
         """A stable, well-formed but fictional Indian PAN (``AAAAA9999A``).
@@ -1050,7 +1052,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         return (
             "For reference, your account on file with this institution is your "
             f"{a['account_type']} ending {a['last4']} (current balance "
-            f"${a['balance']}). If the agent needs specific account details, use "
+            f"{self._bank.format_money(a['balance'])}). If the agent needs specific account details, use "
             "THESE exact ones — never invent a different account number or last-4."
         )
 
@@ -1284,7 +1286,7 @@ def _apply_tool(
             "eta_business_days": 7,
         }
     if tool_name == "open_account":
-        account_state["evergreen_account"] = "acct_new_0001"
+        account_state["opened_account_id"] = "acct_new_0001"
         return {"account_id": "acct_new_0001", "status": "OPEN", "account_type": args.get("account_type")}
     if tool_name == "initiate_rollover":
         account_state["rollover_status"] = "IN_PROGRESS"

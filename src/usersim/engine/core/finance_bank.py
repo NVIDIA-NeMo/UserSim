@@ -38,6 +38,8 @@ import os
 import re
 import threading
 from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import (
     Any,
@@ -128,6 +130,37 @@ DEFAULT_DOMAIN_ACCOUNT_LABELS: dict[str, str] = {
     "crypto": "crypto account",
 }
 
+#: Digit-group separator, decimal mark, and whether the currency symbol follows
+#: the amount, for number formats that differ from English, keyed by language.
+_MONEY_STYLES: dict[str, tuple[str, str, bool]] = {
+    "fr": (" ", ",", True),
+    "de": (".", ",", True),
+}
+
+#: Date patterns by locale, then by language. Anything else writes day/month/year,
+#: the most common convention.
+_DATE_FORMATS: dict[str, str] = {
+    "en_US": "%m/%d/%Y",
+    "de": "%d.%m.%Y",
+    "ja": "%Y-%m-%d",
+    "ko": "%Y-%m-%d",
+    "zh": "%Y-%m-%d",
+}
+_DEFAULT_DATE_FORMAT = "%d/%m/%Y"
+
+
+def _indian_grouped(digits: str) -> str:
+    """``"123456"`` -> ``"1,23,456"``: the last three digits, then pairs."""
+    head, tail = digits[:-3], digits[-3:]
+    pairs: list[str] = []
+    while len(head) > 2:
+        pairs.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        pairs.insert(0, head)
+    return ",".join([*pairs, tail])
+
+
 # Every institution offers these two primitives, and the PROBE services them in
 # its ``execute_tool_call`` (they are not per-institution DB tools). Their schema
 # is therefore fixed HERE — the single source of truth shared by the generator
@@ -154,7 +187,7 @@ FRAMEWORK_PRIMITIVE_TOOLS: dict[str, dict[str, Any]] = {
                     "description": (
                         "Natural-language description of what to find, e.g. "
                         "'dispute an unauthorized debit card transaction' or "
-                        "'roll over a 401(k) to an IRA'."
+                        "'update the address on my account'."
                     ),
                 },
             },
@@ -409,6 +442,43 @@ class FinanceBank:
             if label:
                 return label
         return DEFAULT_DOMAIN_ACCOUNT_LABELS.get(domain, "account")
+
+    def format_money(self, amount: Any) -> str:
+        """``amount`` in this region's currency and number format.
+
+        ``$1,234.50`` in the US, ``₹1,23,456.00`` in India, ``1 234,50 €`` in
+        France and ``1.234,50 €`` in Germany, from ``region_meta``'s
+        ``currency_symbol`` and ``number_format`` (else the locale). A value that
+        isn't a number comes back as given, after the symbol.
+        """
+        symbol = str(self.region_meta.get("currency_symbol") or "")
+        try:
+            value = Decimal(str(amount))
+        except InvalidOperation:
+            return f"{symbol}{amount}"
+        if not value.is_finite():
+            return f"{symbol}{amount}"
+        sign = "-" if value < 0 else ""
+        whole, cents = f"{abs(value):.2f}".split(".")
+        number_format = str(self.region_meta.get("number_format") or self.locale)
+        if number_format.endswith("_IN"):
+            return f"{sign}{symbol}{_indian_grouped(whole)}.{cents}"
+        group, decimal_mark, symbol_after = _MONEY_STYLES.get(number_format.split("_")[0].lower(), (",", ".", False))
+        number = f"{int(whole):,}".replace(",", group) + decimal_mark + cents
+        if symbol_after:
+            return f"{sign}{number} {symbol}".rstrip()
+        return f"{sign}{symbol}{number}"
+
+    def format_date(self, value: date) -> str:
+        """``value`` as this region writes dates.
+
+        ``03/27/1980`` in the US, ``27.03.1980`` in Germany, and day/month/year
+        (``27/03/1980``) in most other places.
+        """
+        pattern = _DATE_FORMATS.get(self.locale) or _DATE_FORMATS.get(
+            self.locale.split("_")[0].lower(), _DEFAULT_DATE_FORMAT
+        )
+        return value.strftime(pattern)
 
     def all_domains(self) -> tuple[str, ...]:
         out: list[str] = []
