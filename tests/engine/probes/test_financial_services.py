@@ -1715,6 +1715,40 @@ class TestVerbatimOpeningLocalization:
         assert await probe.get_verbatim_first_user_turn(state) is None
 
 
+def _with_vectors(institution):
+    return dataclasses.replace(institution, embeddings={d.id: (0.1, 0.2) for d in institution.documents})
+
+
+class TestQueryEmbedding:
+    """A query is embedded only when the bank has document vectors to compare it with.
+
+    Packaged banks ship none, so embedding every query would be a model call per
+    search whose result is never used.
+    """
+
+    @staticmethod
+    async def _search(probe):
+        state = G.ConversationState(messages=[], metadata={})
+        probe.seed_state_metadata(state)
+        with patch("usersim.engine.core.embeddings.aembed_query", return_value=[0.1, 0.2]) as embed:
+            await probe.execute_tool_call(
+                "kb_search", {"query": "dispute a card charge"}, {}, state, {}, turn_idx=0, call_idx=0
+            )
+        return embed
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_without_vectors_is_searched_without_embedding_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = dataclasses.replace(probe._institution, embeddings={})
+        (await self._search(probe)).assert_not_called()
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_with_vectors_embeds_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = _with_vectors(probe._institution)
+        (await self._search(probe)).assert_called_once()
+
+
 class TestSearchQueryTranslation:
     """A borrowed corpus is in another language, so the QUERY has to cross too.
 
@@ -1777,8 +1811,9 @@ class TestSearchQueryTranslation:
         its output has to reach both halves of retrieval. Passing the original to
         ``retrieve`` would leave the lexical collapse exactly as it was while
         looking, from the trace, as though the query had been translated."""
-        # hybrid, so the embedding half is exercised too (golden skips it).
+        # hybrid, with document vectors, so the embedding half is exercised too.
         probe, _ = self._variant_probe(finance_retrieval_mode="hybrid")
+        probe._institution = _with_vectors(probe._institution)
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with (

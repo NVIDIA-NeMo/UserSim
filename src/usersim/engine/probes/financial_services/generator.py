@@ -736,7 +736,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                 call_idx=call_idx,
             )
             query_embedding = None
-            if self._retrieval_mode in ("hybrid", "dense"):
+            # A query vector is only compared with the bank's document vectors;
+            # without them it would be an embedding call whose result goes unused.
+            if self._retrieval_mode in ("hybrid", "dense") and getattr(self._institution, "embeddings", None):
                 from usersim.engine.core.embeddings import aembed_query
 
                 query_embedding = await aembed_query(
