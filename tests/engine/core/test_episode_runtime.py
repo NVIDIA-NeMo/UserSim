@@ -593,6 +593,103 @@ async def test_recorded_usage_reaches_the_outcome() -> None:
     assert any("reasoning" in json.dumps(message) for message in json.loads(event.result["conversation_messages"]))
 
 
+class _ReportsCallProbe(BaseProbe):
+    """Returns what ``acall_llm`` reports about the call alongside its content."""
+
+    async def run_dispatch(self, *, models, data, cfg, state=None, seed_state=True):
+        del data, cfg, state, seed_state
+        reply = await acall_llm(models, "assistant_model", [{"role": "user", "content": "Hello"}])
+        return {"finish_reason": reply["finish_reason"], "usage": reply["usage"]}
+
+
+def _reports_call_runtime(monkeypatch: pytest.MonkeyPatch) -> ProbeEpisodeRuntime:
+    monkeypatch.setitem(_PROBE_REGISTRY, "reports_call", _ReportsCallProbe)
+    return ProbeEpisodeRuntime(
+        probe_type="reports_call",
+        persona={"first_name": "A", "last_name": "User", "age": 35},
+        locale="en_US",
+        language="English",
+        models={"assistant_model": HostRoleModel(model_name="host/assistant-model")},
+        config=ConversationSimulatorConfig(name="episode_runtime_test"),
+        data={},
+    )
+
+
+@pytest.mark.parametrize(("recorded", "reported"), [("length", "length"), ("max_tokens", "length"), (None, None)])
+async def test_a_recorded_finish_reason_reaches_the_probe_as_a_configured_models_would(
+    monkeypatch: pytest.MonkeyPatch, recorded: str | None, reported: str | None
+) -> None:
+    runtime = _reports_call_runtime(monkeypatch)
+    request = await runtime.advance()
+    assert isinstance(request, ActivationRequest)
+
+    complete = await runtime.advance(
+        {
+            "activation_id": request.activation_id,
+            "response": {"role": "assistant", "content": "Hi"},
+            "usage": {"input_tokens": 5, "output_tokens": 2},
+            "finish_reason": recorded,
+        }
+    )
+
+    assert isinstance(complete, EpisodeLifecycleComplete)
+    assert complete.result["finish_reason"] == reported
+    assert complete.result["usage"] == {"input_tokens": 5, "output_tokens": 2}
+
+
+@pytest.mark.parametrize("recorded", [None, {}, {"input_tokens": None, "output_tokens": None}])
+async def test_without_recorded_token_counts_the_probe_sees_none(
+    monkeypatch: pytest.MonkeyPatch, recorded: dict | None
+) -> None:
+    runtime = _reports_call_runtime(monkeypatch)
+    request = await runtime.advance()
+
+    complete = await runtime.advance(
+        {"activation_id": request.activation_id, "response": {"role": "assistant", "content": "Hi"}, "usage": recorded}
+    )
+
+    assert complete.result["usage"] is None
+    assert complete.result["finish_reason"] is None
+
+
+def test_finish_reason_is_part_of_the_recorded_payload() -> None:
+    """It round-trips through the wire form, and a non-string is rejected."""
+    result = ActivationResult.from_value(
+        {"activation_id": "a-1", "response": {"role": "assistant", "content": "x"}, "finish_reason": "length"}
+    )
+    assert result.finish_reason == "length"
+    assert ActivationResult.from_value(result.to_dict()) == result
+    with pytest.raises(TypeError, match="finish_reason"):
+        ActivationResult(activation_id="a-1", response={"role": "assistant", "content": "x"}, finish_reason=1)
+
+
+async def test_finish_reason_and_usage_stay_out_of_the_transcript_and_later_requests() -> None:
+    """The host's finish_reason and usage describe a call: no later request and
+    no stored message carries them."""
+    runtime = _open_ended_runtime()
+    seen: list[ActivationRequest] = []
+
+    event = await runtime.advance()
+    while isinstance(event, ActivationRequest):
+        seen.append(event)
+        event = await runtime.advance(
+            ActivationResult(
+                activation_id=event.activation_id,
+                response=_text(event),
+                usage=ActivationUsage(input_tokens=3, output_tokens=2),
+                finish_reason="length",
+            )
+        )
+
+    assert isinstance(event, EpisodeLifecycleComplete)
+    assert len(seen) > 2, "the episode must make later requests for this to check anything"
+    sent = [message for request in seen for message in request.messages]
+    stored = json.loads(event.result["conversation_messages"])
+    for message in sent + stored:
+        assert "finish_reason" not in message
+        assert "usage" not in message
+
+
 async def test_close_cancels_a_running_episode(safety_runtime: ProbeEpisodeRuntime) -> None:
     activation = await safety_runtime.advance()
     assert isinstance(activation, ActivationRequest)

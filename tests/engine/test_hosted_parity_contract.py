@@ -9,11 +9,15 @@ so the published check is exercised by the probes it describes.
 
 from __future__ import annotations
 
+import json
+from types import SimpleNamespace
+
 import pytest
 
 import usersim.engine.generator  # noqa: F401  -- registers the built-in probes
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core.probes import known_probes
+from usersim.engine.core.probes import _PROBE_REGISTRY, known_probes
+from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
 from usersim.testing import ScriptedModel, assert_hosted_parity, hosted_parity_report
 
 _PERSONA = {
@@ -118,6 +122,60 @@ async def test_a_probe_whose_simulated_user_calls_tools_reproduces_a_standalone_
         data={**_data(probe_type), "probe_variant": "guarded"},
         profile=_PROFILE,
     )
+
+
+class _ReportingModel(ScriptedModel):
+    """A scripted model whose replies carry a finish reason and token counts, as a provider's do."""
+
+    def __init__(self, role: str, *, input_tokens: int | None, output_tokens: int | None) -> None:
+        super().__init__(role)
+        self._usage = SimpleNamespace(input_tokens=input_tokens, output_tokens=output_tokens)
+
+    async def acompletion(self, messages, **kwargs):
+        reply = await super().acompletion(messages, **kwargs)
+        reply.usage = self._usage
+        reply.choices = [SimpleNamespace(message=reply.message, finish_reason="max_tokens")]
+        return reply
+
+
+class _RecordsCallProbe(OpenEndedProbe):
+    """Keeps what each assistant call reported, where the parity check compares it."""
+
+    async def after_assistant_turn(self, models, state, assistant_response, cfg):
+        state.metadata.setdefault("calls", []).append(
+            [assistant_response["finish_reason"], assistant_response["usage"]]
+        )
+        return await super().after_assistant_turn(models, state, assistant_response, cfg)
+
+
+@pytest.mark.parametrize(
+    ("input_tokens", "output_tokens", "usage"),
+    [
+        (11, 7, {"input_tokens": 11, "output_tokens": 7}),
+        # An explicit zero is a count, not "not reported".
+        (0, 0, {"input_tokens": 0, "output_tokens": 0}),
+        (0, None, {"input_tokens": 0, "output_tokens": 0}),
+    ],
+)
+async def test_the_host_records_each_replys_finish_reason_and_usage(
+    monkeypatch: pytest.MonkeyPatch, input_tokens: int | None, output_tokens: int | None, usage: dict[str, int]
+) -> None:
+    """A probe that reads them sees the same values hosted as standalone."""
+    monkeypatch.setitem(_PROBE_REGISTRY, "records_call", _RecordsCallProbe)
+
+    report = await hosted_parity_report(
+        "records_call",
+        config=_config("general_open_ended"),
+        persona=_PERSONA,
+        data=_data("general_open_ended"),
+        profile=_PROFILE,
+        model_factory=lambda role: _ReportingModel(role, input_tokens=input_tokens, output_tokens=output_tokens),
+    )
+
+    assert report.differences == []
+    calls = json.loads(report.hosted_row["conversation_metadata"])["calls"]
+    assert calls, "the episode must call the assistant for this to check anything"
+    assert all(call == ["length", usage] for call in calls)
 
 
 @pytest.mark.parametrize("role", ["assistant", "user"])

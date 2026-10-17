@@ -448,6 +448,110 @@ async def test_call_llm_falls_back_to_openai_shaped_token_names() -> None:
     assert outcome.per_model_output_tokens == {"assistant_model": 15}
 
 
+# ---------------------------------------------------------------------------
+# The reply reports why the model stopped and what the call cost
+# ---------------------------------------------------------------------------
+
+
+def _replying(response: Any) -> SimpleNamespace:
+    """A facade whose every call returns ``response``."""
+
+    async def acompletion(messages, **kwargs):
+        return response
+
+    return SimpleNamespace(acompletion=acompletion)
+
+
+def _response(finish_reason: Any = None, *, usage: Any = None, choices: bool = True) -> SimpleNamespace:
+    message = SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None)
+    response = SimpleNamespace(message=message, usage=usage)
+    if choices:
+        response.choices = [SimpleNamespace(message=message, finish_reason=finish_reason)]
+    return response
+
+
+async def _reply(response: Any) -> dict[str, Any]:
+    return await acall_llm({"m": _replying(response)}, "m", [{"role": "user", "content": "hi"}])
+
+
+class TestFinishReasonAndUsage:
+    async def test_the_providers_finish_reason_is_returned(self) -> None:
+        assert (await _reply(_response("length")))["finish_reason"] == "length"
+
+    @pytest.mark.parametrize(
+        ("anthropic", "openai"),
+        [("max_tokens", "length"), ("end_turn", "stop"), ("stop_sequence", "stop"), ("tool_use", "tool_calls")],
+    )
+    async def test_anthropic_stop_reasons_read_as_openais(self, anthropic: str, openai: str) -> None:
+        """A cut-off reply reads ``length`` whichever provider produced it."""
+        assert (await _reply(_response(anthropic)))["finish_reason"] == openai
+
+    async def test_a_reason_without_an_openai_equivalent_passes_through(self) -> None:
+        assert (await _reply(_response("refusal")))["finish_reason"] == "refusal"
+
+    async def test_a_cut_off_through_data_designers_anthropic_adapter_reads_length(self) -> None:
+        """Data Designer's Anthropic adapter passes ``stop_reason`` through as
+        ``finish_reason``; the reply reports it in OpenAI's vocabulary."""
+        from data_designer.engine.models.clients.adapters.anthropic_translation import parse_anthropic_response
+
+        response = parse_anthropic_response(
+            {
+                "content": [{"type": "text", "text": "cut o"}],
+                "stop_reason": "max_tokens",
+                "usage": {"input_tokens": 9, "output_tokens": 4},
+            }
+        )
+        reply = await _reply(response)
+
+        # If the adapter starts normalising itself, the mapping is dead code.
+        assert response.choices[0].finish_reason == "max_tokens"
+        assert reply["finish_reason"] == "length"
+        assert reply["usage"] == {"input_tokens": 9, "output_tokens": 4}
+
+    @pytest.mark.parametrize("response", [_response(None), _response(""), _response(7), _response(choices=False)])
+    async def test_no_usable_finish_reason_is_none(self, response: SimpleNamespace) -> None:
+        reply = await _reply(response)
+        assert "finish_reason" in reply
+        assert reply["finish_reason"] is None
+
+    async def test_usage_is_the_tokens_the_call_recorded(self) -> None:
+        reply = await _reply(_response("stop", usage=SimpleNamespace(input_tokens=12, output_tokens=7)))
+        assert reply["usage"] == {"input_tokens": 12, "output_tokens": 7}
+
+    async def test_openai_shaped_usage_is_returned_under_the_same_names(self) -> None:
+        reply = await _reply(_response("stop", usage=SimpleNamespace(prompt_tokens=20, completion_tokens=15)))
+        assert reply["usage"] == {"input_tokens": 20, "output_tokens": 15}
+
+    async def test_no_reported_usage_is_none(self) -> None:
+        reply = await _reply(_response("stop"))
+        assert "usage" in reply
+        assert reply["usage"] is None
+
+    async def test_usage_without_token_counts_is_none_not_zero(self) -> None:
+        """A provider that reports only a total gets a Data Designer ``Usage``
+        whose counts are None: that is not "0 tokens"."""
+        from data_designer.engine.models.clients.types import Usage
+
+        assert (await _reply(_response("stop", usage=Usage(total_tokens=5))))["usage"] is None
+
+    async def test_one_missing_count_reads_zero(self) -> None:
+        reply = await _reply(_response("stop", usage=SimpleNamespace(input_tokens=8, output_tokens=None)))
+        assert reply["usage"] == {"input_tokens": 8, "output_tokens": 0}
+
+    async def test_neither_reaches_a_stored_message_or_a_later_request(self) -> None:
+        """Both describe the call, not the message: a transcript built from the
+        reply, and the next request built from that transcript, carry neither."""
+        from usersim.engine.core.probes import assistant_message
+
+        reply = await _reply(_response("length", usage=SimpleNamespace(input_tokens=1, output_tokens=1)))
+        stored = assistant_message(reply, reply["content"], tool_calls=None)
+        assert set(stored) == {"role", "content", "tool_calls"}
+
+        # Even the raw reply, resent as history, leaves only the message's fields.
+        payload = [m.to_dict() for m in _dicts_to_chat_messages([{"role": "user", "content": "hi"}, reply])]
+        assert not any(key in message for message in payload for key in ("finish_reason", "usage"))
+
+
 class _ReasoningFieldFacade:
     """Provider that exposes reasoning fields the wrapper deliberately
     does NOT read (regression lock that we don't accidentally re-enable

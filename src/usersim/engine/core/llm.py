@@ -626,7 +626,17 @@ async def acall_llm(
     """Call a model and return its reply as a message dict.
 
     Returns role, content, and where the model supplied them
-    reasoning_content and tool_calls.
+    reasoning_content and tool_calls. Two keys describe the call rather than
+    the message, and are always present:
+
+    - ``finish_reason``: why the model stopped, in OpenAI's vocabulary
+      (``"stop"``, ``"length"``, ``"tool_calls"``, ...), or None when the
+      provider gave none. ``"length"`` means the reply was cut off.
+    - ``usage``: ``{"input_tokens": int, "output_tokens": int}``, or None when
+      the provider reported no token counts. One count missing reads 0.
+
+    Neither reaches a transcript: ``assistant_message`` copies only the
+    message's own fields.
     """
     _normalize_response_format(kwargs)
     facade, chat_messages, t0 = _begin_call(models, alias, messages, kwargs)
@@ -643,6 +653,37 @@ async def acall_llm(
                 await asyncio.sleep(backoff)
 
     return _finish_call(response, alias, messages, time.monotonic() - t0)
+
+
+#: Anthropic's stop reasons with an exact OpenAI equivalent. Data Designer's
+#: Anthropic adapter passes ``stop_reason`` through as ``finish_reason``, so
+#: without this a cut-off reply reads ``max_tokens`` there and ``length``
+#: everywhere else. Values without an exact equivalent pass through unchanged.
+_ANTHROPIC_FINISH_REASONS = {
+    "end_turn": "stop",
+    "stop_sequence": "stop",
+    "max_tokens": "length",
+    "tool_use": "tool_calls",
+}
+
+
+def _reports_token_counts(usage: Any) -> bool:
+    """Whether the provider reported any token count.
+
+    Data Designer returns a ``Usage`` even when a provider reports only a
+    total, with both counts None; that is "not reported", not zero tokens.
+    """
+    names = ("input_tokens", "output_tokens", "prompt_tokens", "completion_tokens")
+    return usage is not None and any(getattr(usage, name, None) is not None for name in names)
+
+
+def _finish_reason(response: Any) -> str | None:
+    """The first choice's finish reason in OpenAI's vocabulary, or None."""
+    choices = getattr(response, "choices", None) or []
+    reason = getattr(choices[0], "finish_reason", None) if choices else None
+    if not isinstance(reason, str) or not reason:
+        return None
+    return _ANTHROPIC_FINISH_REASONS.get(reason, reason)
 
 
 def _finish_call(
@@ -675,9 +716,15 @@ def _finish_call(
         input_tokens = getattr(usage, "input_tokens", None) or getattr(usage, "prompt_tokens", None) or 0
         output_tokens = getattr(usage, "output_tokens", None) or getattr(usage, "completion_tokens", None) or 0
     token_tag = f", {input_tokens}+{output_tokens} tok" if (input_tokens or output_tokens) else ""
+    finish_reason = _finish_reason(response)
+    result["finish_reason"] = finish_reason
+    result["usage"] = (
+        {"input_tokens": input_tokens, "output_tokens": output_tokens} if _reports_token_counts(usage) else None
+    )
 
     logger.debug(
-        f"  |-- LLM done: {alias} in {elapsed:.1f}s ({content_len} chars / {word_cnt} words{tc_tag}{token_tag})"
+        f"  |-- LLM done: {alias} in {elapsed:.1f}s ({content_len} chars / {word_cnt} words{tc_tag}{token_tag}"
+        f", finish_reason={finish_reason})"
     )
     _record_stat(alias, elapsed, content_len, word_cnt, input_tokens, output_tokens)
     _feed_outcome_builder(alias, input_tokens, output_tokens, elapsed)

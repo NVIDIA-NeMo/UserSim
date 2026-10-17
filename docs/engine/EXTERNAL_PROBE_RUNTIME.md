@@ -180,10 +180,18 @@ while isinstance(event, ActivationRequest):
             "tool_calls": reply.tool_calls,
         },
         "usage": {"input_tokens": reply.input_tokens, "output_tokens": reply.output_tokens},
+        "finish_reason": reply.finish_reason,
     })
 
 row = await runtime.finalize()
 ```
+
+`usage` and `finish_reason` are optional; pass them when your provider reports
+them. `finish_reason` is the provider's, as on an OpenAI choice (`"length"` for
+a cut-off reply); Anthropic's stop reasons are mapped to OpenAI's as for a
+configured model, so `"max_tokens"` also reads `"length"`. Probes see both
+exactly as they would from a configured model, and neither is written into the
+transcript.
 
 Each `ActivationRequest` carries:
 
