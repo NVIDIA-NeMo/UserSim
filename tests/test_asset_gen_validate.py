@@ -226,6 +226,54 @@ def test_numeric_faithfulness_still_rejects_a_wrong_number():
     assert not _value_present(250_000, "no figure at all here")
 
 
+def test_numeric_faithfulness_accepts_french_and_german_number_formats():
+    """A French or German bank writes values in its own format, and they are faithful."""
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    for space in (" ", "\u00a0", "\u202f"):
+        assert _value_present(1234, f"des frais de 1{space}234 € par an", "fr_FR")
+        assert _value_present(1234.56, f"un plafond de 1{space}234,56 €", "fr_FR")
+    assert _value_present(12.5, "un taux de 12,5 % par an", "fr_FR")
+    assert _value_present(1234, "eine Gebühr von 1.234 € pro Jahr", "de_DE")
+    assert _value_present(1234.56, "ein Limit von 1.234,56 €", "de_DE")
+    assert _value_present(0.5, "0,5 % Zinsen", "de_DE")
+    assert _value_present(1234, "1234 € pro Jahr", "de_DE")
+
+
+def test_a_decimal_comma_format_does_not_read_an_english_rendering_as_the_value():
+    """There ``1,234`` reads as a decimal, so it is no evidence of 1234."""
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    assert not _value_present(1234, "eine Gebühr von 1,234 €", "de_DE")
+    assert not _value_present(1234, "des frais de 1,234 €", "fr_FR")
+    assert not _value_present(1234.56, "ein Limit von 1.234,57 €", "de_DE")
+
+
+def test_english_formats_are_unchanged():
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    for number_format in (None, "en_US", "en_IN", "en_GB"):
+        assert _value_present(1234, "a fee of $1,234 a year", number_format)
+        assert _value_present(1234.56, "a cap of $1,234.56", number_format)
+        assert not _value_present(1234, "a fee of 1 234 a year", number_format)
+
+
+def test_validate_bank_reads_values_in_the_spec_number_format(tmp_path: Path):
+    import copy
+
+    spec_dict = copy.deepcopy(_SPEC_DICT)
+    spec_dict.update(locale="fr_FR", region="FR", currency="EUR", currency_symbol="€", language="French")
+    spec_dict["number_format"] = "fr_FR"
+    spec_dict["institutions"][0]["products"][0]["variables"]["overdraft_fee"]["value"] = 1234.5
+    spec = RegionSpec.model_validate(spec_dict)
+
+    french = _write_bank(tmp_path / "fr", "fr_FR", [_doc("D1", "Les frais s'élèvent à 1\u202f234,50 € par an.")])
+    assert _status(validate_bank(french, spec), "numeric_faithfulness", "testbank") == PASS
+
+    english = _write_bank(tmp_path / "en", "fr_FR", [_doc("D1", "Les frais s'élèvent à 1,234.50 € par an.")])
+    assert _status(validate_bank(english, spec), "numeric_faithfulness", "testbank") == FAIL
+
+
 def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
     """A doc that prints a spec FIELD KEY reads like an unfilled template.
 
