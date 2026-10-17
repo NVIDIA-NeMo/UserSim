@@ -63,3 +63,20 @@ Thumbs.db
 
 # Cursor
 .cursor/
+
+# Private agent overrides and session artifacts; shared guidance stays trackable.
+AGENTS.local.md
+CLAUDE.local.md
+.agents/local/
+.agents/logs/
+.agents/sessions/
+.claude/settings.json
+.claude/settings.local.json
+.claude/logs/
+.claude/hooks/
+.codex/config.toml
+.codex/config.local.toml
+.codex/hooks.json
+.codex/sessions/
+.worktrees/
+/.agent-work/
