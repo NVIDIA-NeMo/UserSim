@@ -179,7 +179,8 @@ ever seeing the product documents. Blending in the lexical signal restores
 topical discrimination while cosine still supplies paraphrase matching.
 
 The mode is selected at run time with `--finance-retrieval-mode` (`usersim
-simulate`) or `FINANCE_RETRIEVAL_MODE` (`notebooks/01_simulate.ipynb`).
+simulate`, default `hybrid`) or `FINANCE_RETRIEVAL_MODE`
+(`notebooks/01_simulate.ipynb`).
 
 **Disentangling retrieval from reasoning.** Success is scored on the verifiable
 state/action outcome, *not* on retrieval. Retrieval is reported separately, on two

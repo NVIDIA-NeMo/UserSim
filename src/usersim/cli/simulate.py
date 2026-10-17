@@ -195,18 +195,18 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     )
     p.add_argument(
         "--finance-retrieval-mode",
-        choices=("golden", "dense"),
-        default="dense",
+        choices=("hybrid", "dense", "golden"),
+        default="hybrid",
         help=(
-            "financial_services only: kb_search backend. 'dense' (default) "
-            "ranks the institution's precomputed doc embeddings against the "
-            "query vector (embedded via the 'embedding_model' alias) so BOTH "
-            "tiers retrieve from the KB (tau-style); degrades to lexical when "
-            "no embedding endpoint is reachable. 'golden' is a reasoning-"
-            "isolation ABLATION that injects the verifiable task's gold "
-            "documents (removes retrieval quality as a variable); the dynamic "
-            "tier has no gold docs so golden degrades to lexical there. "
-            "Retrieval quality is measured separately by the "
+            "financial_services only: kb_search backend. 'hybrid' (default) "
+            "blends word overlap with cosine similarity over the institution's "
+            "document vectors (embeddings.parquet, written by gen-assets; the "
+            "query is embedded with the 'embedding_model' alias), and ranks on "
+            "word overlap alone when the bank has no vectors. 'dense' uses "
+            "cosine alone, as an ablation. 'golden' is a reasoning-isolation "
+            "ablation that injects the verifiable task's gold documents; the "
+            "dynamic tier has no gold documents, so it ranks on word overlap "
+            "there. Retrieval quality is measured separately by the "
             "financial_retrieval_recall capability."
         ),
     )
