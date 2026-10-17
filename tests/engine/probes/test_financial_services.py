@@ -16,6 +16,7 @@ import json
 import re
 import textwrap
 import types
+import unicodedata
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
@@ -1718,12 +1719,11 @@ class TestSearchQueryTranslation:
 
     ``_localize_verbatim`` carries bank text out to the conversation language.
     Retrieval needs the mirror image: a stop-gap locale searches an English
-    corpus, and lexical ranking tokenizes on ``[a-z0-9]+``, so a native-script
-    query yields ZERO tokens. An empty token set makes ``_lexical_rank`` return
-    the corpus's first k documents regardless of the query, and zeroes the
-    lexical half of ``hybrid`` — leaving pure dense, measured on this corpus at
-    4% precision@8 against hybrid's 88%. Nothing failed; retrieval just went
-    blind and the scorer computed a recall from it.
+    corpus, and a native-script query shares no word with it, so every lexical
+    score ties and the ranking ignores the query, and ``hybrid`` loses its
+    lexical half, leaving dense alone, measured on this corpus at 4%
+    precision@8 against hybrid's 88%. Nothing fails; retrieval just goes blind
+    and the scorer computes a recall from it.
     """
 
     def _variant_probe(self, **cfg_kw):
@@ -1916,33 +1916,90 @@ class TestSearchQueryTranslation:
         assert state.metadata["kb_search_queries"] == [""]
 
 
-class TestNativeScriptQueryCollapsesLexicalRanking:
+class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
     """The measurement that motivated query translation, pinned.
 
-    If ``_tokens`` ever becomes Unicode-aware, the zero-token collapse changes
-    shape and this test should be revisited — but query translation is still
-    what makes a Tamil query MATCH an English document, which tokenizing alone
-    would not.
+    Native-script words tokenize whole, but a Tamil or Hindi query shares no word
+    with an English corpus, so every document ties and the ranking ignores the
+    query. Translating the query is what lets it match.
     """
 
-    def test_a_native_script_query_yields_no_lexical_tokens(self):
-        assert R._tokens("சேமிப்பு கணக்கு கட்டணம்") == set()
-        assert R._tokens("बचत खाते पर शुल्क") == set()
-        assert R._tokens("savings account charge")
+    TAMIL = "சேமிப்பு கணக்கு கட்டணம்"
+    HINDI = "बचत खाते पर शुल्क"
 
-    def test_a_zero_token_query_returns_corpus_order_not_relevance(self):
+    def test_native_script_words_tokenize_whole(self):
+        assert R._tokens(self.TAMIL) == {"சேமிப்பு", "கணக்கு", "கட்டணம்"}
+        assert R._tokens(self.HINDI) == {"बचत", "खाते", "पर", "शुल्क"}
+
+    def test_a_native_script_query_ranks_the_same_whatever_it_asks(self):
         from usersim.engine.core.finance_bank import load_finance_bank_for_locale
 
-        bank = load_finance_bank_for_locale("en_IN")
-        inst = bank.institution("chandrika_bank")
-        tamil = R._lexical_rank(inst, "சேமிப்பு கணக்கு கட்டணம்", 4)
-        hindi = R._lexical_rank(inst, "बचत खाते पर शुल्क", 4)
+        inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+        corpus = set().union(*(R._tokens(f"{d.title} {d.body}") for d in inst.documents))
+        assert not (R._tokens(self.TAMIL) | R._tokens(self.HINDI)) & corpus
+
+        tamil = R._lexical_rank(inst, self.TAMIL, 4)
+        hindi = R._lexical_rank(inst, self.HINDI, 4)
         english = R._lexical_rank(inst, "minimum average balance charge", 4)
         # Two unrelated queries in different languages returning the identical
         # list is the tell: neither influenced the ranking at all.
         assert [d.id for d in tamil] == [d.id for d in hindi]
-        assert [d.id for d in tamil] == [d.id for d in inst.documents[:4]]
         assert [d.id for d in english] != [d.id for d in tamil]
+
+
+class TestLexicalTokensAreUnicodeWords:
+    """French and German banks retrieve on whole words, not ASCII fragments."""
+
+    @staticmethod
+    def _inst():
+        from usersim.engine.core.finance_bank import Document, Institution
+
+        def doc(doc_id, title, body):
+            return Document(
+                id=doc_id,
+                title=title,
+                body=body,
+                product_category="p",
+                document_type="faq",
+                source_authority="official",
+                placeholder=True,
+            )
+
+        return Institution(
+            institution_id="acme",
+            display_name="Acme",
+            type="bank",
+            brand_voice="traditional",
+            domains=("retail_banking",),
+            documents=(
+                doc("D_a", "Horaires des agences", "Les agences ouvrent à neuf heures."),
+                doc("D_b", "Relevé de compte", "Le relevé mensuel détaille chaque opération."),
+                doc("D_c", "Überweisung ins Ausland", "Eine Überweisung dauert zwei Tage."),
+                doc("D_d", "Adresse ändern", "Geben Sie die neue Straße und Hausnummer an."),
+            ),
+            tools=(),
+            templates=(),
+        )
+
+    def test_accented_words_and_eszett_tokenize_whole(self):
+        assert R._tokens("Épargne réglementée") == {"épargne", "réglementée"}
+        assert R._tokens("Überweisung an die Straße") == {"überweisung", "an", "die", "strasse"}
+
+    def test_composed_and_decomposed_accents_compare_equal(self):
+        composed = "relevé de compte"
+        decomposed = unicodedata.normalize("NFD", composed)
+        assert decomposed != composed
+        assert R._tokens(decomposed) == R._tokens(composed)
+
+    def test_punctuation_apostrophes_and_underscores_separate_words(self):
+        assert R._tokens("l'épargne, open_account (401k)") == {"l", "épargne", "open", "account", "401k"}
+
+    def test_an_accented_query_ranks_the_document_that_uses_those_words_first(self):
+        inst = self._inst()
+        assert R._lexical_rank(inst, "relevé mensuel", 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "Überweisung", 1)[0].id == "D_c"
+        assert R._lexical_rank(inst, unicodedata.normalize("NFD", "relevé"), 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "neue Strasse", 1)[0].id == "D_d"
 
 
 class TestDynamicTierCarriesLanguageDirective:

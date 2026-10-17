@@ -652,12 +652,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
         A stop-gap locale borrows the en_IN corpus, so the assistant is talking
         to (say) a Tamil user about English documents and tends to search in
-        Tamil. Lexical ranking tokenizes on ``[a-z0-9]+``: a native-script query
-        produces zero tokens, which makes the lexical fallback return the
-        corpus's first k documents irrespective of the query and reduces
-        ``hybrid`` to pure dense — the mode this corpus measures at 4%
-        precision@8 against hybrid's 88%. Translating the query into the
-        corpus's language restores both halves of the ranking.
+        Tamil. A Tamil query shares no word with an English document, so every
+        lexical score ties and the ranking ignores the query, and ``hybrid``
+        loses its lexical half, leaving dense alone: the mode this corpus
+        measures at 4% precision@8 against hybrid's 88%. Translating the query
+        into the corpus's language restores both halves of the ranking.
 
         No-op whenever the corpus is already in the conversation language, so
         en_US / en_IN runs are untouched and a graduated native bank turns this
