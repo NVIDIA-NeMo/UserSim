@@ -157,6 +157,13 @@ institution. Three interchangeable backends:
   embedding endpoint. Only the verifiable tier has gold documents; the dynamic
   tier has none, so `golden` degrades to lexical there.
 
+**Lexical matching works on whole words in any script.** A word is a run of
+letters, combining marks and digits, compared after case folding and Unicode
+normalisation, so accented French and German words and `ß` match as written.
+Words still have to be in the corpus's language: when a locale borrows another
+locale's corpus, the probe translates the assistant's query into that language
+before ranking.
+
 **Why the default is hybrid rather than pure dense.** An institution's corpus is
 deliberately narrow (a few hundred documents about a handful of products at one
 brand, in one register), and a general-purpose embedding model does not
@@ -172,7 +179,8 @@ ever seeing the product documents. Blending in the lexical signal restores
 topical discrimination while cosine still supplies paraphrase matching.
 
 The mode is selected at run time with `--finance-retrieval-mode` (`usersim
-simulate`) or `FINANCE_RETRIEVAL_MODE` (`notebooks/01_simulate.ipynb`).
+simulate`, default `hybrid`) or `FINANCE_RETRIEVAL_MODE`
+(`notebooks/01_simulate.ipynb`).
 
 **Disentangling retrieval from reasoning.** Success is scored on the verifiable
 state/action outcome, *not* on retrieval. Retrieval is reported separately, on two

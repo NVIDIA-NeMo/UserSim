@@ -189,7 +189,47 @@ def _scale_word_forms(iv: int) -> set:
     return out
 
 
-def _value_candidates(val: Any) -> list[str]:
+#: Digit-group separators of the number formats that write a decimal comma, keyed
+#: by language: French writes ``1 234,56`` (the space is often a no-break or narrow
+#: no-break one), German and Brazilian Portuguese ``1.234,56``.
+_DECIMAL_COMMA_GROUP_SEPARATORS: dict[str, tuple[str, ...]] = {
+    "fr": (" ", "\u00a0", "\u202f"),
+    "de": (".",),
+    "pt": (".",),
+}
+
+
+def _decimal_comma_group_separators(number_format: str | None) -> tuple[str, ...] | None:
+    """The group separators of a decimal-comma ``number_format``; ``None`` for others."""
+    if not number_format:
+        return None
+    return _DECIMAL_COMMA_GROUP_SEPARATORS.get(number_format.split("_")[0].lower())
+
+
+def _decimal_comma_candidates(val: Any, group_separators: tuple[str, ...]) -> list[str]:
+    """Renderings in a format that writes ``1.234,56`` or ``1 234,56``.
+
+    Only the format's own forms count: there ``1,234`` reads as a decimal, so
+    accepting the English rendering could pass a wrong value.
+    """
+    if isinstance(val, bool):
+        return [str(val)]
+    cands: set[str] = set()
+    if isinstance(val, int) or (isinstance(val, float) and float(val).is_integer()):
+        iv = int(val)
+        cands.add(str(iv))
+        cands.update(f"{iv:,}".replace(",", sep) for sep in group_separators)
+    if isinstance(val, float):
+        for english in (f"{val}", f"{val:.2f}", f"{val:,.2f}"):
+            for sep in group_separators:
+                cands.add(english.replace(",", "\0").replace(".", ",").replace("\0", sep))
+    return [c for c in cands if c]
+
+
+def _value_candidates(val: Any, number_format: str | None = None) -> list[str]:
+    group_separators = _decimal_comma_group_separators(number_format)
+    if group_separators is not None:
+        return _decimal_comma_candidates(val, group_separators)
     cands = {str(val)}
     if isinstance(val, bool):
         return list(cands)
@@ -205,14 +245,15 @@ def _value_candidates(val: Any) -> list[str]:
     return [c for c in cands if c]
 
 
-def _value_present(val: Any, text: str) -> bool:
-    return any(c in text for c in _value_candidates(val))
+def _value_present(val: Any, text: str, number_format: str | None = None) -> bool:
+    return any(c in text for c in _value_candidates(val, number_format))
 
 
 def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     if spec is None:
         rep.add("numeric_faithfulness", "bank", WARN, "skipped: no region_spec provided (cannot ground values)")
         return
+    number_format = spec.number_format or spec.locale
     for inst in spec.institutions:
         idata = insts.get(inst.id)
         if idata is None:
@@ -224,7 +265,7 @@ def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstD
             missing = [
                 f"{name}={var.value}"
                 for name, var in product.variables.items()
-                if isinstance(var.value, (int, float)) and not _value_present(var.value, text)
+                if isinstance(var.value, (int, float)) and not _value_present(var.value, text, number_format)
             ]
             if not prod_docs:
                 rep.add("numeric_faithfulness", inst.id, FAIL, f"{product.id}: no documents produced for product")

@@ -41,35 +41,57 @@ ruled out — the hub ignores the parameter (cosine 0.9999 between modes).
 
 Both return whole ``Document`` objects and never mutate the bank.
 
-The lexical term is ASCII-only
-------------------------------
-``_WORD_RE`` matches ``[a-z0-9]+``, so a native-script query (Tamil, Devanagari)
-tokenizes to the EMPTY SET. That is not merely a weak signal: an empty query set
-makes ``_lexical_rank`` return the institution's first k documents irrespective
-of the query, and in ``hybrid`` it zeroes the lexical term and leaves pure dense
-— the 4%-precision mode above. A romanized query tokenizes but its tokens do not
-overlap English prose, so it ranks on accidental collisions.
+Lexical tokens are Unicode words
+--------------------------------
+A token is a run of letters, combining marks and decimal digits, after case
+folding and NFC normalisation. Accented French and German words, ``ß`` (folded
+to ``ss``) and Indic scripts therefore tokenize whole, and composed and
+decomposed accents compare equal. Other number characters, such as ``½``,
+separate words, so ``59½`` still matches a search for ``59``. Scripts written
+without spaces between words, such as Japanese, form one token per unbroken run,
+so lexical matching is coarse there.
 
-Making the regex Unicode-aware would fix the tokenizing but not the MATCHING: a
-Tamil token still cannot overlap an English document. So the probe translates the
-query into the corpus's language before calling in (``_search_query`` in
-``generator.py``), which is a no-op whenever the corpus is already in the
-conversation language. Keep that in mind before "fixing" the regex here.
+Tokenizing is not matching: a Tamil query still shares no word with an English
+document, so every document's lexical score ties and the ranking ignores the
+query. The probe therefore translates the query into the corpus's language
+before calling in (``_search_query`` in ``generator.py``), which is a no-op
+whenever the corpus is already in the conversation language.
 """
 
 from __future__ import annotations
 
+import functools
 import math
-import re
+import unicodedata
 from typing import Sequence
 
 from usersim.engine.core.finance_bank import Document, Institution
 
-_WORD_RE = re.compile(r"[a-z0-9]+")
+
+def _is_word_char(ch: str) -> bool:
+    """Letters, combining marks and decimal digits, in any script."""
+    category = unicodedata.category(ch)
+    return category[0] in "LM" or category == "Nd"
 
 
-def _tokens(text: str) -> set:
-    return set(_WORD_RE.findall(text.lower()))
+@functools.lru_cache(maxsize=16384)
+def _tokens(text: str) -> frozenset[str]:
+    """The case-folded words in ``text``.
+
+    Cached because every query re-scores the institution's whole corpus, and a
+    document's words never change.
+    """
+    words: set[str] = set()
+    current: list[str] = []
+    for ch in unicodedata.normalize("NFC", text.casefold()):
+        if _is_word_char(ch):
+            current.append(ch)
+        elif current:
+            words.add("".join(current))
+            current.clear()
+    if current:
+        words.add("".join(current))
+    return frozenset(words)
 
 
 def _lexical_rank(institution: Institution, query: str, k: int) -> list[Document]:

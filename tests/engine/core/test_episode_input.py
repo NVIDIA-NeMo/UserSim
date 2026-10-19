@@ -113,7 +113,7 @@ _PERSONA_DERIVED_COLUMNS = (
 )
 _PINNED_ASSISTANT_MODEL = "nvidia/llama-3.1-nemotron-70b-instruct"
 _PINNED_TRAJECTORY_IDS = {
-    "financial_services": "e736ac84d4d9438a",
+    "financial_services": "f29c0dac38c0ba2a",
     "general_educational": "fef0f90231a81da0",
     "general_open_ended": "0fb84850f75a3f00",
     "health_decision_support_disclosure": "fd69ae7b7cfc94a9",
