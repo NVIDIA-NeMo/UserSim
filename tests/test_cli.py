@@ -966,6 +966,38 @@ class TestDryRuns:
                 ]
             )
 
+    @staticmethod
+    def _finance_only(assets: Path, *args: str) -> list[str]:
+        return ["simulate", *args, "--probe-mix", "financial_services=1", "--assets-dir", str(assets)]
+
+    def test_a_dry_run_refuses_a_locale_whose_bank_does_not_load(
+        self, tmp_path, finance_assets_without_fr_tasks, caplog
+    ):
+        argv = self._finance_only(finance_assets_without_fr_tasks, "--dry-run", "--locale", "fr_FR", "--num-rows", "1")
+        with caplog.at_level(logging.ERROR):
+            assert cli.main([*argv, "--out", str(tmp_path / "out")]) == 2
+        assert "financial_services can't run fr_FR: its bank does not load" in caplog.text
+
+    def test_a_panel_dry_run_checks_the_panel_locales(self, tmp_path, finance_assets_without_fr_tasks, caplog):
+        panel = tmp_path / "panel.parquet"
+        pd.DataFrame({"locale": ["en_US", "fr_FR"], "persona": [{"first_name": "A"}, {"first_name": "B"}]}).to_parquet(
+            panel
+        )
+        argv = self._finance_only(finance_assets_without_fr_tasks, "--dry-run", "--panel", str(panel))
+        with caplog.at_level(logging.ERROR):
+            assert cli.main([*argv, "--out", str(tmp_path / "out")]) == 2
+        assert "can't run fr_FR" in caplog.text
+
+    def test_materializing_refuses_a_locale_whose_bank_does_not_load(
+        self, tmp_path, finance_assets_without_fr_tasks, caplog
+    ):
+        out = tmp_path / "rows.jsonl"
+        argv = self._finance_only(finance_assets_without_fr_tasks, "--locale", "fr_FR", "--num-rows", "1")
+        with caplog.at_level(logging.ERROR):
+            assert cli.main([*argv, "--materialize-inputs", "--out", str(out)]) == 2
+        assert "can't run fr_FR" in caplog.text
+        assert not out.exists()
+
     def test_eval_dry_run(self, tmp_path, capsys):
         traj = tmp_path / "trajs.parquet"
         # The dry-run path doesn't open the file, so an empty placeholder is fine.
