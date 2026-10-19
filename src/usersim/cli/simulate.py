@@ -38,7 +38,7 @@ from pathlib import Path
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._persona_language import persona_dataset_report
-from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets
+from usersim.cli._pipeline import resolve_toolset_seed_for_mix, verify_probe_assets, verify_probe_locales
 
 logger = logging.getLogger("usersim.cli.simulate")
 
@@ -354,12 +354,15 @@ def run(args: argparse.Namespace) -> int:
         raise SystemExit("--locale requires --num-rows")
 
     if args.materialize_inputs:
-        return _materialize_inputs(args, models, probe_mix)
+        return _materialize_inputs(args, models, probe_mix, pinned_assets_dir)
 
     if args.dry_run:
+        run_locales = (
+            _locales_from_panel(args.panel) if args.panel and Path(args.panel).is_file() else list(args.locale or [])
+        )
         # Resolved before anything is printed so a bad config fails cleanly
         # instead of interleaving with a half-written plan.
-        verify_probe_assets(probe_mix, args.locale or [], pinned_assets_dir)
+        verify_probe_assets(probe_mix, run_locales, pinned_assets_dir)
         seed = resolve_toolset_seed_for_mix(
             probe_mix,
             pinned_assets_dir,
@@ -367,9 +370,7 @@ def run(args: argparse.Namespace) -> int:
         )
         # Reported, not refused: the offline check a new install runs comes
         # before the persona download.
-        persona_locales = (
-            _locales_from_panel(args.panel) if args.panel and Path(args.panel).is_file() else list(args.locale or [])
-        )
+        persona_locales = run_locales
         persona_report = persona_dataset_report(persona_locales) if persona_locales else None
         print("usersim simulate — dry run")
         if args.panel:
@@ -453,7 +454,7 @@ def run(args: argparse.Namespace) -> int:
     return status.exit_code or 0
 
 
-def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
+def _materialize_inputs(args, models, probe_mix: dict[str, float], pinned_assets_dir) -> int:
     """CLI adapter for the public no-model-call materialization seam."""
     import json
 
@@ -462,6 +463,7 @@ def _materialize_inputs(args, models, probe_mix: dict[str, float]) -> int:
     from usersim.cli._pipeline import materialize_episode_inputs
 
     locales = _locales_from_panel(args.panel) if args.panel else list(args.locale or [])
+    verify_probe_assets(probe_mix, locales, pinned_assets_dir)
     if (report := persona_dataset_report(locales)) is not None:
         raise ConfigError(report)
     rows = []
@@ -520,6 +522,10 @@ def _run_inputs(args: argparse.Namespace, models, models_path: Path) -> int:
         plan = plan_inputs_run(inputs, models, args.out, skip_existing=not args.no_skip_existing)
     except (OSError, ValueError) as error:
         raise SystemExit(f"--inputs {args.inputs}: {error}") from None
+    probe_locales: dict[str, list[str]] = {}
+    for row in inputs.rows:
+        probe_locales.setdefault(str(row["probe_type"]), []).append(row["usersim_config"]["locale"])
+    verify_probe_locales(probe_locales, inputs.assets_dir)
 
     config = inputs.config
     print("usersim simulate --inputs" + (" — dry run" if args.dry_run else ""))

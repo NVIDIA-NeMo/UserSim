@@ -847,6 +847,32 @@ def test_a_flag_the_stored_rows_settle_is_refused(rows, tmp_path, flag, value):
         cli.main([*argv, flag, *([value] if value else []), "--dry-run"])
 
 
+def test_stored_rows_get_the_asset_pre_flight_against_the_root_they_run_on(rows, tmp_path, caplog):
+    empty = tmp_path / "assets"
+    empty.mkdir()
+    rows_path = _write(rows, tmp_path / "rows.jsonl")
+    argv = ["simulate", "--inputs", str(rows_path), "--assets-dir", str(empty), "--out", str(tmp_path / "o")]
+    with caplog.at_level(logging.ERROR):
+        assert cli.main([*argv, "--dry-run"]) == 2
+    assert "no asset directory" in caplog.text
+
+
+def test_stored_rows_are_checked_probe_by_probe(rows, tmp_path):
+    """Each probe is checked in the locales its own rows use, not every locale of the run."""
+    checked: dict[str, list[str]] = {}
+
+    def record(probe_locales, assets_dir):
+        checked.update({probe: sorted(set(locales)) for probe, locales in probe_locales.items()})
+
+    argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
+    with patch("usersim.cli.simulate.verify_probe_locales", record):
+        assert cli.main([*argv, "--dry-run"]) == 0
+    expected: dict[str, set[str]] = {}
+    for row in rows:
+        expected.setdefault(row["probe_type"], set()).add(row["usersim_config"]["locale"])
+    assert checked == {probe: sorted(locales) for probe, locales in expected.items()}
+
+
 def test_a_dry_run_shows_the_plan_without_running(rows, tmp_path, capsys):
     argv = [
         "simulate",
