@@ -282,9 +282,21 @@ class TestProbeAssetPreflight:
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["ja_JP"], None)
         message = str(exc.value)
-        assert "ja_JP" in message
-        # Naming what *is* available turns a dead end into a next step.
-        assert "available:" in message and "en_US" in message
+        assert "ja_JP: no bank" in message
+        # Naming the locales that can run turns a dead end into a next step.
+        assert "en_US" in message.split("Locales that can run: ")[1].splitlines()[0]
+
+    def test_a_locale_whose_bank_does_not_load_is_rejected(self, finance_assets_without_fr_tasks: Path) -> None:
+        """A locale folder that exists is not enough: without tasks, every row aborts."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["fr_FR"], finance_assets_without_fr_tasks)
+        message = str(exc.value)
+        assert "fr_FR: its bank does not load" in message and "tasks.yaml" in message
+        assert message.split("Locales that can run: ")[1].splitlines()[0] == "en_US"
+        verify_probe_assets({"financial_services": 1.0}, ["en_US"], finance_assets_without_fr_tasks)
 
     def test_india_variant_without_its_own_bank_uses_en_in(self) -> None:
         """A registered variant runs on its base locale's bank, as its probe and scorer resolve it."""

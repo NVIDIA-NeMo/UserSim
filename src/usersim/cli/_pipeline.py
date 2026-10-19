@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -184,16 +185,33 @@ def resolve_toolset_seed_path(
     return present[0] if present else None
 
 
-#: Probe asset trees that are partitioned by locale rather than flat. For
-#: these, having the probe directory is not enough -- the run's locale must
-#: have its own subtree, or the loader fails once the run is already going.
-_LOCALE_SCOPED_PROBES: frozenset[str] = frozenset(
-    {
-        "financial_services",
-        "sov_ai_dynamic",
-        "sov_ai_facts",
-    }
-)
+def _load_finance_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.finance_bank import load_finance_bank
+
+    load_finance_bank(locale_dir)
+
+
+def _load_facts_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.fact_bank import load_fact_bank
+
+    load_fact_bank(locale_dir / "sample.yaml")
+
+
+def _load_dynamic_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.probing_taxonomy import load_probing_taxonomy
+
+    load_probing_taxonomy(locale_dir / "categories.yaml")
+
+
+#: Probe asset trees that are partitioned by locale rather than flat, with the
+#: loader for one locale's subtree. The subtree existing is not enough: a finance
+#: bank without tasks aborts every row once the run is already going, so the
+#: pre-flight loads it.
+_LOCALE_SCOPED_PROBES: dict[str, Callable[[Path], None]] = {
+    "financial_services": _load_finance_locale,
+    "sov_ai_dynamic": _load_dynamic_locale,
+    "sov_ai_facts": _load_facts_locale,
+}
 
 
 def verify_probe_assets(
@@ -201,23 +219,34 @@ def verify_probe_assets(
     locales: "list[str] | tuple[str, ...]",
     assets_dir: Path | str | None = None,
 ) -> None:
-    """Fail before any model call if a selected probe's assets are absent.
+    """Fail before any model call if a selected probe can't run in a run locale.
 
-    Without this, a missing bank surfaces from deep inside a loader partway
-    through a run -- after the other probes in the mix have already been
-    billed for. ``--dry-run`` reports the plan and exits 0, which is worse
-    than an unclear error: it says the run is fine.
+    Without this, a missing or unusable bank surfaces from deep inside a loader
+    partway through a run -- after the other probes in the mix have already been
+    billed for. ``--dry-run`` reports the plan and exits 0, which is worse than
+    an unclear error: it says the run is fine.
 
-    Raises ``ConfigError`` naming every missing path at once, so a caller
-    fixes one thing rather than rediscovering the next on each attempt.
+    Raises ``ConfigError`` naming every problem at once, so a caller fixes one
+    thing rather than rediscovering the next on each attempt.
+    """
+    verify_probe_locales({probe: tuple(locales) for probe in probe_mix}, assets_dir)
+
+
+def verify_probe_locales(
+    probe_locales: Mapping[str, Sequence[str]],
+    assets_dir: Path | str | None = None,
+) -> None:
+    """:func:`verify_probe_assets` for runs whose probes each have their own locales.
+
+    Stored rows pair each probe with the locales it runs in; checking every probe
+    against every locale would refuse pairs the rows never ask for.
     """
     from usersim.engine.core._assets import probe_assets_dir
-    from usersim.engine.core.locale import asset_locale
 
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
 
-    for probe in sorted(probe_mix):
+    for probe in sorted(probe_locales):
         probe_dir = probe_assets_dir(probe, assets_root=root)
         if not probe_dir.is_dir():
             problems.append(f"{probe}: no asset directory at {probe_dir}")
@@ -225,29 +254,59 @@ def verify_probe_assets(
         if not any(probe_dir.rglob("*.yaml")) and not any(probe_dir.rglob("*.json")):
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
-        if probe in _LOCALE_SCOPED_PROBES:
-
-            def has_bank(loc: str) -> bool:
-                return (probe_dir / loc).is_dir()
-
-            # A variant without its own bank runs on its base locale's, as the
-            # probe and its scorer resolve it.
-            missing = [loc for loc in locales if not has_bank(asset_locale(loc, exists=has_bank))]
-            if missing:
-                available = sorted(p.name for p in probe_dir.iterdir() if p.is_dir())
-                problems.append(
-                    f"{probe}: no assets for locale(s) {', '.join(missing)} "
-                    f"(available: {', '.join(available) or 'none'})"
-                )
+        load = _LOCALE_SCOPED_PROBES.get(probe)
+        if load is not None:
+            problems.extend(_locale_bank_problems(probe, probe_dir, probe_locales[probe], load))
 
     if problems:
         raise ConfigError(
-            "probe assets are missing for this run:\n  - "
+            "probe assets are missing or unusable for this run:\n  - "
             + "\n  - ".join(problems)
-            + "\n\nEither point --assets-dir at a tree that has them, "
+            + "\n\nPoint --assets-dir at a tree that has them, "
             "generate the bank (`usersim gen-assets --domain <d>`), "
-            "or drop the probe from --probe-mix."
+            "or drop the probe from --probe-mix or the locale from the run."
         )
+
+
+def _locale_bank_problems(
+    probe: str,
+    probe_dir: Path,
+    locales: Sequence[str],
+    load: Callable[[Path], None],
+) -> list[str]:
+    """The locales ``probe`` can't run in, as one line naming those that can."""
+    from usersim.engine.core.locale import asset_locale
+
+    errors: dict[Path, str | None] = {}
+
+    def load_error(locale_dir: Path) -> str | None:
+        if locale_dir not in errors:
+            try:
+                load(locale_dir)
+                errors[locale_dir] = None
+            except Exception as exc:  # whatever stops the loader stops every row
+                errors[locale_dir] = f"{type(exc).__name__}: {exc}"
+        return errors[locale_dir]
+
+    def has_bank(loc: str) -> bool:
+        return (probe_dir / loc).is_dir()
+
+    failures: list[str] = []
+    for loc in dict.fromkeys(locales):
+        # A variant without its own bank runs on its base locale's, as the
+        # probe and its scorer resolve it.
+        bank_locale = asset_locale(loc, exists=has_bank)
+        via = "" if bank_locale == loc else f" (through {bank_locale})"
+        if not has_bank(bank_locale):
+            failures.append(f"{loc}{via}: no bank")
+        elif (error := load_error(probe_dir / bank_locale)) is not None:
+            failures.append(f"{loc}{via}: its bank does not load ({error})")
+    if not failures:
+        return []
+    runnable = sorted(d.name for d in probe_dir.iterdir() if d.is_dir() and load_error(d) is None)
+    return [
+        f"{probe} can't run {'; '.join(failures)}. Locales that can run: {', '.join(runnable) or 'none'}",
+    ]
 
 
 def resolve_toolset_seed_for_mix(

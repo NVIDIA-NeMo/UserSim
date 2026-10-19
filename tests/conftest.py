@@ -120,6 +120,29 @@ def synthetic_persona_dataset(tmp_path_factory):
         yield root
 
 
+@pytest.fixture
+def finance_assets_without_fr_tasks(tmp_path: Path) -> Path:
+    """An asset root whose financial_services bank runs in en_US but not in fr_FR.
+
+    The fr_FR folder is a copy of the en_US bank without its tasks, the shape of a
+    bank whose corpus has been generated but whose tasks are not written yet:
+    present on disk, yet every row would abort.
+    """
+    import shutil
+
+    from usersim.engine.core._assets import packaged_assets_dir
+
+    source = packaged_assets_dir() / "financial_services" / "en_US"
+    root = tmp_path / "assets"
+    for locale in ("en_US", "fr_FR"):
+        dest = root / "financial_services" / locale
+        (dest / "bank").mkdir(parents=True)
+        shutil.copy(source / "region_meta.yaml", dest / "region_meta.yaml")
+        shutil.copytree(source / "bank" / "northwind_bank", dest / "bank" / "northwind_bank")
+    (root / "financial_services" / "fr_FR" / "bank" / "northwind_bank" / "tasks.yaml").unlink()
+    return root
+
+
 def _outcome(
     *,
     status: str = "ok",
