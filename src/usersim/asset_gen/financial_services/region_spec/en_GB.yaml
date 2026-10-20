@@ -19,6 +19,60 @@ locale: en_GB
 currency: GBP
 currency_symbol: "£"
 language: English (United Kingdom)
+# British spelling and usage for the generated prose. Both prompts pass the
+# guidance and the respellings to the model, generation respells any form that
+# still appears in a body, and validate-assets fails a document that uses one.
+# "license" stays off the list: it is the British verb.
+language_conventions:
+  guidance: >-
+    Write British English throughout: -ise and -isation (authorise, recognise,
+    organisation), -yse (analyse), -our (favour, behaviour), -re (centre), licence
+    as the noun (driving licence), towards, ageing, fulfilment, acknowledgement,
+    and programme for a scheme. Quote savings rates as AER.
+  respell:
+    unauthorized: unauthorised
+    authorized: authorised
+    authorize: authorise
+    authorization: authorisation
+    recognize: recognise
+    recognized: recognised
+    recognizing: recognising
+    unrecognized: unrecognised
+    specialized: specialised
+    utilize: utilise
+    utilized: utilised
+    utilizes: utilises
+    utilizing: utilising
+    utilization: utilisation
+    maximize: maximise
+    personalized: personalised
+    prioritize: prioritise
+    emphasize: emphasise
+    emphasizes: emphasises
+    emphasizing: emphasising
+    standardized: standardised
+    synchronization: synchronisation
+    realized: realised
+    analyze: analyse
+    organization: organisation
+    organize: organise
+    center: centre
+    centered: centred
+    color: colour
+    favor: favour
+    favorite: favourite
+    honor: honour
+    behavior: behaviour
+    toward: towards
+    aging: ageing
+    fulfillment: fulfilment
+    acknowledgment: acknowledgement
+    rigor: rigour
+    annual percentage yield: annual equivalent rate
+    APY: AER
+    "driver's license": driving licence
+    checking account: current account
+    zip code: postcode
 number_format: en_GB
 privacy_regime: UK GDPR
 
@@ -237,9 +291,19 @@ domain_regulators:
       Ombudsman Service or, for workplace schemes, the Pensions Ombudsman.
       Customer service gives no regulated advice and no individual tax advice.
 
-# Titles the deterministic doc plan builds from; the remaining title vocabulary
-# keeps its English defaults.
+# Titles the deterministic doc plan builds from. Rate sheets and security
+# advisories use UK terms and spelling (AER, unauthorised); the remaining title
+# vocabulary keeps its English defaults.
 doc_titles:
+  product_genre_angles:
+    rate_sheet:
+    - interest rate / AER schedule
+    - how rates are tiered and applied
+    security_advisory:
+    - fraud and unauthorised-activity protection
+    - account security best practices
+    - recognising scams targeting this product
+
   domain_labels:
     retail_banking: Current accounts and savings
     cards: Cards

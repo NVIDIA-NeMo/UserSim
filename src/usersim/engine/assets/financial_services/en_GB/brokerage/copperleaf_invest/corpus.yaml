@@ -324,10 +324,10 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 95f7b3df-57f1-5b7a-84e4-a212c6d0eeb7
-  title: Copperleaf Stocks and Shares ISA — interest rate / APY schedule
+  title: Copperleaf Stocks and Shares ISA — interest rate / AER schedule
   body: 'The Copperleaf Stocks and Shares ISA is an investment account, not a cash
     savings account. Therefore, it does not offer a single, flat annual interest rate
-    or APY on the total balance.
+    or AER on the total balance.
 
 
     Instead, the growth of your account is derived from the performance of the assets
@@ -384,7 +384,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 46213315-db61-58e4-bfd5-76fc4122fcb6
-  title: Copperleaf Stocks and Shares ISA — fraud and unauthorized-activity protection
+  title: Copperleaf Stocks and Shares ISA — fraud and unauthorised-activity protection
   body: 'At Copperleaf Invest, we believe that security is the foundation of trust.
     When comparing our Copperleaf Stocks and Shares ISA against other market alternatives,
     it is important to understand the rigorous safeguards we employ to protect your
@@ -652,7 +652,7 @@ documents:
     \ obligations, all prospective customers must provide the following documentation.\
     \ Full verification is mandatory before any state-changing action can be performed.\n\
     \n| Document Category | Required Item | Outcome | \n| :--- | :--- | :--- |\n|\
-    \ Proof of Identity | Valid Passport or UK Driver's License | Verification Successful\
+    \ Proof of Identity | Valid Passport or UK Driving Licence | Verification Successful\
     \ / Pending further check |\n| Proof of Address | Utility bill or Council Tax\
     \ statement (dated within last 3 months) | Residential status confirmed |\n| Tax\
     \ Identification | National Insurance (NI) Number | Eligibility for £20,000 ISA\
@@ -1017,7 +1017,7 @@ documents:
     Escalation: If these steps do not resolve the problem, we will raise a technical
     case with our operations management team. You will receive a reference number
     and a resolution timeline via email. For further security guidance, see Copperleaf
-    Stocks and Shares ISA — fraud and unauthorized-activity protection.'
+    Stocks and Shares ISA — fraud and unauthorised-activity protection.'
   domain: brokerage_investing
   product_category: stocks_shares_isa
   document_type: troubleshooting
@@ -1048,7 +1048,7 @@ documents:
 
 
     If a prospect fails any of the above conditions, they are ineligible for this
-    specific product. In such cases, agents should guide the customer toward a General
+    specific product. In such cases, agents should guide the customer towards a General
     Investment Account, subject to the relevant capital gains and dividend allowances.
     For documentation requirements, refer to Copperleaf Stocks and Shares ISA — required
     documentation.'
@@ -1153,7 +1153,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 460d4642-a324-5a6e-a6e2-ee7835f090d0
-  title: Copperleaf Stocks and Shares ISA — recognizing scams targeting this product
+  title: Copperleaf Stocks and Shares ISA — recognising scams targeting this product
   body: 'As you compare investment options, it is vital to remain vigilant against
     fraudulent activity. Scammers often target individuals seeking tax-efficient growth,
     such as those interested in the Copperleaf Stocks and Shares ISA, by promising
@@ -1190,7 +1190,7 @@ documents:
     of character for our professional and transparent tone, notify us immediately.
     Prompt reporting is essential for our compliance team to take action in accordance
     with FCA guidelines and to protect your capital. For more information on our general
-    protections, you may refer to Copperleaf Stocks and Shares ISA — fraud and unauthorized-activity
+    protections, you may refer to Copperleaf Stocks and Shares ISA — fraud and unauthorised-activity
     protection.'
   domain: brokerage_investing
   product_category: stocks_shares_isa
@@ -1254,7 +1254,7 @@ documents:
 
     No. The £20,000 limit applies only to the net contributions you make from your
     cash. Any growth, dividends, or interest earned within the Copperleaf Stocks and
-    Shares ISA does not count toward your annual allowance.'
+    Shares ISA does not count towards your annual allowance.'
   domain: brokerage_investing
   product_category: stocks_shares_isa
   document_type: faq
@@ -1940,9 +1940,9 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 171346a8-6a53-5f28-aeed-f6811075c701
-  title: Copperleaf Lifetime ISA — interest rate / APY schedule
+  title: Copperleaf Lifetime ISA — interest rate / AER schedule
   body: 'The Copperleaf Lifetime ISA is an investment-based product; therefore, it
-    does not offer a fixed interest rate or a guaranteed APY on the balance. Instead,
+    does not offer a fixed interest rate or a guaranteed AER on the balance. Instead,
     your returns are driven by the performance of the assets you choose and the government''s
     contribution.
 
@@ -1988,7 +1988,7 @@ documents:
     \ first home (up to a price cap of £450,000) or preparing for your later years,\
     \ this bonus provides an immediate increase to your invested capital. \n\nPlease\
     \ be mindful that this is a long-term vehicle; withdrawals for non-eligible purposes\
-    \ incur a 25% charge. \n\nStart your journey toward wealth creation today. For\
+    \ incur a 25% charge. \n\nStart your journey towards wealth creation today. For\
     \ a full overview of the product's terms, refer to Copperleaf Lifetime ISA — overview."
   domain: brokerage_investing
   product_category: lifetime_isa
@@ -1998,7 +1998,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 06003b88-eb60-5254-8707-d346120352dd
-  title: Copperleaf Lifetime ISA — fraud and unauthorized-activity protection
+  title: Copperleaf Lifetime ISA — fraud and unauthorised-activity protection
   body: 'At Copperleaf Invest, we treat the security of your long-term savings as
     our highest priority. Because the Copperleaf Lifetime ISA is designed for significant
     life milestones, such as purchasing a first home or retirement, it can be a target
@@ -2006,7 +2006,7 @@ documents:
     your capital remains protected.
 
 
-    To prevent unauthorized activity, we use multi-factor authentication (MFA) for
+    To prevent unauthorised activity, we use multi-factor authentication (MFA) for
     all account access and perform strict identity checks. We require full verification
     before any state-changing action is processed, including the alteration of account
     details or the request for withdrawals. Be aware that scammers may attempt to
@@ -2021,13 +2021,13 @@ documents:
 
 
     If you notice any suspicious activity on your account—such as unexpected login
-    notifications or changes to your personal details that you did not authorize—you
+    notifications or changes to your personal details that you did not authorise—you
     must notify us immediately. Once reported, the activity is escalated immediately
     to our compliance team and handled in strict accordance with FCA guidelines to
     mitigate further risk.
 
 
-    Our commitment to transparency extends to our dispute process. If unauthorized
+    Our commitment to transparency extends to our dispute process. If unauthorised
     activity has occurred, we provide a clear timeline for resolution and a commitment
     to fairness. We also remind you that your funds are protected by the Financial
     Services Compensation Scheme (FSCS) for up to £85,000 per person, should the brokerage
@@ -2077,7 +2077,7 @@ documents:
 
     Withdrawals are permitted without penalty only for the purchase of a first home
     (within the £450,000 cap), retirement (after age 60), or in cases of terminal
-    illness. Any other withdrawal is deemed unauthorized and will incur a withdrawal
+    illness. Any other withdrawal is deemed unauthorised and will incur a withdrawal
     charge of 25%. This charge ensures the recovery of the government bonus and a
     portion of the original investment, meaning the investor may receive back less
     than they originally invested.
@@ -2104,7 +2104,7 @@ documents:
   institution_id: copperleaf_invest
 - id: 9b2eff09-b907-569f-9aaf-132116dc2b77
   title: Copperleaf Lifetime ISA — who it is best for and common use cases
-  body: 'The Copperleaf Lifetime ISA is a specialized, tax-efficient vehicle designed
+  body: 'The Copperleaf Lifetime ISA is a specialised, tax-efficient vehicle designed
     for individuals with specific long-term savings goals. It is most effective for
     those who are focused on two primary objectives: purchasing their first home or
     building a supplement for retirement.
@@ -2122,7 +2122,7 @@ documents:
 
     Best for Retirement Planning
 
-    For those who have already purchased a home or prefer to prioritize their later
+    For those who have already purchased a home or prefer to prioritise their later
     years, the Copperleaf Lifetime ISA serves as a strong retirement tool. The 25%
     government bonus continues to apply to contributions up to the annual limit of
     £4,000, allowing the balance to compound over decades. Funds can be accessed penalty-free
@@ -2132,7 +2132,7 @@ documents:
     Common Use Cases
 
     1. The ''Deposit Accelerator'': A young professional contributing the full £4,000
-    annual limit to maximize the 25% government bonus and reach a house deposit goal
+    annual limit to maximise the 25% government bonus and reach a house deposit goal
     faster.
 
     2. The ''Retirement Bridge'': An investor using the account alongside a workplace
@@ -2142,7 +2142,7 @@ documents:
     Key Constraints to Consider
 
     This product is not suitable for those who may need flexible access to their cash.
-    Because unauthorized withdrawals incur a withdrawal charge of 25%, this account
+    Because unauthorised withdrawals incur a withdrawal charge of 25%, this account
     should only be used for funds intended for a home or retirement. Furthermore,
     as the maximum opening age is 39, it is a tool specifically for those starting
     their wealth creation journey in early to mid-adulthood.
@@ -2219,7 +2219,7 @@ documents:
     the home is within the property price cap of £450,000.
 
     3. Confirm Withdrawal Type: We will confirm whether the withdrawal is ''qualifying''
-    (no charge) or ''unauthorized''. If unauthorized, we will provide a statement
+    (no charge) or ''unauthorised''. If unauthorised, we will provide a statement
     showing the 25% withdrawal charge that will be applied to the balance.
 
     4. Asset Liquidation: We will sell any investments held within the ISA. This process
@@ -2337,7 +2337,7 @@ documents:
 
     Cost and Fees
 
-    Many competitors utilize complex fee structures or hidden transaction costs. We
+    Many competitors utilise complex fee structures or hidden transaction costs. We
     maintain a transparent 0.25% platform fee for infrastructure and maintenance,
     ensuring you know exactly what you pay. While the government bonus rate is standard
     across all providers at 25%, the way we present and manage these credits is designed
@@ -2349,14 +2349,14 @@ documents:
     We provide the same FCA-regulated safety as other top-tier firms, including FSCS
     protection of up to £85,000 per person if the brokerage fails. However, we differentiate
     ourselves with a digital-first support model and rigorous identity checks for
-    all state-changing actions, reducing the risk of unauthorized withdrawals.
+    all state-changing actions, reducing the risk of unauthorised withdrawals.
 
 
     Who should choose Copperleaf?
 
     Our offering is best for the resident who values a professional, traditional-voice
     brokerage with a modern digital interface. It is ideal for those who want a clear,
-    unambiguous path to utilizing their £4,000 annual limit without worrying about
+    unambiguous path to utilising their £4,000 annual limit without worrying about
     hidden costs.
 
 
@@ -2393,7 +2393,7 @@ documents:
     your first home (up to the property price cap of £450,000), retirement (age 60+),
     or terminal illness, you will be subject to a withdrawal charge of 25%. This charge
     is designed to recoup the 25% government bonus and a portion of your original
-    investment. Consequently, unauthorized withdrawals will almost always result in
+    investment. Consequently, unauthorised withdrawals will almost always result in
     a loss of capital.
 
 
@@ -2424,7 +2424,7 @@ documents:
   institution_id: copperleaf_invest
 - id: 4be82013-509e-53d7-b716-5307e1c51c35
   title: Copperleaf Lifetime ISA — how rates are tiered and applied
-  body: 'The Copperleaf Lifetime ISA utilizes a flat-rate bonus structure and a transparent
+  body: 'The Copperleaf Lifetime ISA utilises a flat-rate bonus structure and a transparent
     platform fee; there are no tiered interest rates based on balance for this product.
 
 
@@ -2445,7 +2445,7 @@ documents:
 
     Withdrawal Penalty
 
-    An unauthorized withdrawal (one not meeting the first-home price cap of £450,000
+    An unauthorised withdrawal (one not meeting the first-home price cap of £450,000
     or retirement criteria) triggers a flat withdrawal charge of 25% of the total
     amount being withdrawn.
 
@@ -2526,7 +2526,7 @@ documents:
     can be.
 
 
-    By following these guidelines and utilizing our secure digital-first support model,
+    By following these guidelines and utilising our secure digital-first support model,
     you can ensure your path to wealth creation remains secure and transparent.'
   domain: brokerage_investing
   product_category: lifetime_isa
@@ -2616,7 +2616,7 @@ documents:
     **Step 3: Clarifying the Account Purpose**
 
     Ensure the customer understands the two primary purposes of the account: retirement
-    or the purchase of a first home. For home purchases, emphasize the property price
+    or the purchase of a first home. For home purchases, emphasise the property price
     cap of £450,000. Advise the customer that using the funds for other purposes will
     trigger a 25% withdrawal charge.
 
@@ -2740,7 +2740,7 @@ documents:
     \ have forgotten your password, ask us to initiate a password reset. We will send\
     \ a secure reset link to your registered email address. Once the new password\
     \ is set, you will be able to log in normally.\n\n**Symptom: MFA Code Not Received**\n\
-    **Likely Cause:** Network delay, outdated phone number, or device synchronization\
+    **Likely Cause:** Network delay, outdated phone number, or device synchronisation\
     \ issues.\n**What to check:** Verify that your device has a stable cellular or\
     \ Wi-Fi connection. Check if you have any SMS filters blocking short-code messages.\n\
     **The Fix:** Ask us to resend the code. If you have changed your phone number\
@@ -2898,7 +2898,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: afa8fc10-1b75-59d8-871f-25af7b69b5c9
-  title: Copperleaf Lifetime ISA — recognizing scams targeting this product
+  title: Copperleaf Lifetime ISA — recognising scams targeting this product
   body: 'As you compare our offerings with other providers, it is vital to remain
     vigilant regarding the security of your assets. The Copperleaf Lifetime ISA is
     a popular vehicle for long-term wealth, and unfortunately, this makes it a target
@@ -3055,7 +3055,7 @@ documents:
     If additional verification is required, we will notify you immediately.
 
     3. **Document Delivery**: We will provide a digital statement that lists every
-    contribution made toward your £4,000 annual limit and the corresponding 25% government
+    contribution made towards your £4,000 annual limit and the corresponding 25% government
     bonuses credited to your account.
 
     4. **Review History**: Review the statement to confirm your total contributions
@@ -3557,7 +3557,7 @@ documents:
 - id: f534ad29-4fd5-5b7f-9b5c-b241e4957ac3
   title: Copperleaf Junior ISA — eligibility requirements
   body: 'To open a Copperleaf Junior ISA, the following conditions must be met. The
-    outcome is based on the simultaneous fulfillment of all requirements.
+    outcome is based on the simultaneous fulfilment of all requirements.
 
 
     | Condition | Requirement | Outcome |
@@ -3677,9 +3677,9 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 14d076e7-5b14-5731-8413-0eac40a51499
-  title: Copperleaf Junior ISA — interest rate / APY schedule
+  title: Copperleaf Junior ISA — interest rate / AER schedule
   body: 'The Copperleaf Junior ISA is a brokerage investment account, meaning it does
-    not offer a single, fixed annual percentage yield (APY) like a traditional savings
+    not offer a single, fixed annual equivalent rate (AER) like a traditional savings
     account. Instead, the return on the account is determined by the performance of
     the specific assets selected by the investor.
 
@@ -3746,10 +3746,10 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: ba0a3d72-f8b4-5351-a490-df7f6e638c06
-  title: Copperleaf Junior ISA — fraud and unauthorized-activity protection
+  title: Copperleaf Junior ISA — fraud and unauthorised-activity protection
   body: 'At Copperleaf Invest, we treat the security of your child''s future savings
     with the utmost seriousness. When choosing a provider for a Copperleaf Junior
-    ISA, it is vital to understand how we protect these assets from unauthorized activity
+    ISA, it is vital to understand how we protect these assets from unauthorised activity
     and the specific patterns fraudsters may use to target long-term savings accounts.
 
 
@@ -3757,7 +3757,7 @@ documents:
     and rigorous identity checks. We maintain a strict policy where full verification
     is mandatory before any state-changing action is performed. This means that whether
     you are processing a withdrawal (where permitted by regulation) or altering account
-    details, we will verify your identity to prevent unauthorized access.
+    details, we will verify your identity to prevent unauthorised access.
 
 
     Fraudsters often attempt to target Junior ISAs by impersonating the account holder''s
@@ -3768,7 +3768,7 @@ documents:
     processes should be treated as a scam.
 
 
-    If you notice any unauthorized activity or receive a suspicious communication
+    If you notice any unauthorised activity or receive a suspicious communication
     regarding a Copperleaf Junior ISA, your first action should be to notify us immediately
     via our secure in-app messaging or email. Prompt reporting is essential; any fraudulent
     activity is escalated immediately to our compliance team and handled in strict
@@ -3831,7 +3831,7 @@ documents:
     and data privacy standards.
 
 
-    5. Risk Acknowledgment
+    5. Risk Acknowledgement
 
     The signatory acknowledges that the Copperleaf Junior ISA is an investment vehicle.
     We clearly state that the value of investments can fall as well as rise, and capital
@@ -3857,7 +3857,7 @@ documents:
 
 
     • The Long-Term Education Fund: For those who want to build a substantial pot
-    to support a child''s higher education or vocational training. By utilizing the
+    to support a child''s higher education or vocational training. By utilising the
     £9,000 annual allowance, a guardian can consistently build wealth that remains
     protected from tax until the child reaches adulthood.
 
@@ -3962,7 +3962,7 @@ documents:
 
     We will conduct a rigorous identity check. You will be asked to provide the necessary
     verification to confirm you are the authorised signatory. This is a mandatory
-    step to protect the child''s assets from unauthorized-activity.
+    step to protect the child''s assets from unauthorised-activity.
 
 
     Step 3: Settlement of assets
@@ -3984,7 +3984,7 @@ documents:
     Please note that once a Junior ISA is closed and funds are removed, they cannot
     be ''paid back in'' to a new ISA without counting towards the £9,000 annual allowance.
     For more information on how we handle account security during this process, see
-    Copperleaf Junior ISA — fraud and unauthorized-activity protection.'
+    Copperleaf Junior ISA — fraud and unauthorised-activity protection.'
   domain: brokerage_investing
   product_category: junior_isa
   document_type: how_to_guide
@@ -4072,7 +4072,7 @@ documents:
 
 
     All documentation must be current and clear. Full verification is mandatory before
-    the account is activated and before any contributions toward the £9,000 annual
+    the account is activated and before any contributions towards the £9,000 annual
     allowance are accepted.'
   domain: brokerage_investing
   product_category: junior_isa
@@ -4624,7 +4624,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 206027b2-fd86-50cb-af42-24f5e4a47485
-  title: Copperleaf Junior ISA — recognizing scams targeting this product
+  title: Copperleaf Junior ISA — recognising scams targeting this product
   body: "At Copperleaf Invest, we believe the security of your child's future savings\
     \ is paramount. Because the Copperleaf Junior ISA is designed for long-term growth,\
     \ it can unfortunately attract fraudsters who attempt to exploit the trust and\
@@ -5296,10 +5296,10 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 7f86b7f5-7b23-5296-9855-62bbb2d8e750
-  title: Copperleaf General Investment Account — interest rate / APY schedule
+  title: Copperleaf General Investment Account — interest rate / AER schedule
   body: 'The Copperleaf General Investment Account is a brokerage vehicle for self-directed
     investing rather than a cash savings account. Consequently, there is no fixed
-    annual interest rate or APY applied to the balance of the account.
+    annual interest rate or AER applied to the balance of the account.
 
 
     Returns on this account are generated through the performance of the underlying
@@ -5345,10 +5345,10 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: c565e64a-9255-583a-8a62-6dbe4dbbcde4
-  title: Copperleaf General Investment Account — fraud and unauthorized-activity protection
+  title: Copperleaf General Investment Account — fraud and unauthorised-activity protection
   body: "When choosing a brokerage for a general investment account, security is as\
     \ critical as the cost structure. We protect the Copperleaf General Investment\
-    \ Account through a multi-layered security framework designed to prevent unauthorized\
+    \ Account through a multi-layered security framework designed to prevent unauthorised\
     \ access and fraudulent activity. Unlike some alternative providers who may rely\
     \ on simple password protection, we employ mandatory multi-factor authentication\
     \ (MFA) for all account access.\n\nBecause the Copperleaf General Investment Account\
@@ -5506,7 +5506,7 @@ documents:
 
     A: Yes, the £3,000 limit is an annual allowance that applies to your total chargeable
     gains across all non-ISA investments. We recommend consulting a qualified tax
-    professional for personalized guidance on your specific situation.'
+    professional for personalised guidance on your specific situation.'
   domain: brokerage_investing
   product_category: general_investment_account
   document_type: faq
@@ -5996,7 +5996,7 @@ documents:
 
     - Incorrect password or username.
 
-    - Multi-factor authentication (MFA) synchronization failure.
+    - Multi-factor authentication (MFA) synchronisation failure.
 
     - Account lock following multiple unsuccessful login attempts.
 
@@ -6178,7 +6178,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 22b78066-302e-5037-aec7-0d841f9dee6d
-  title: Copperleaf General Investment Account — recognizing scams targeting this
+  title: Copperleaf General Investment Account — recognising scams targeting this
     product
   body: 'As you consider the Copperleaf General Investment Account, it is important
     to remain vigilant against fraudulent activity. Because this account is subject
@@ -6242,7 +6242,7 @@ documents:
     the platform but do not offer individual tax advice. The current relevant thresholds
     are:
 
-    - Capital Gains Allowance: A limit of £3,000 applies. Gains realized above this
+    - Capital Gains Allowance: A limit of £3,000 applies. Gains realised above this
     amount may be subject to Capital Gains Tax.
 
     - Dividend Allowance: A limit of £500 applies. Dividends received above this amount
@@ -6468,7 +6468,7 @@ documents:
 
     Our General Investment Accounts are available to UK residents who are seeking
     a flexible path to wealth creation. Because these accounts do not have the strict
-    residency or age restrictions of some specialized ISAs, they are an accessible
+    residency or age restrictions of some specialised ISAs, they are an accessible
     option for most adult residents.
 
 
@@ -6737,7 +6737,7 @@ documents:
 
 
     For further details on account security, see the Copperleaf Monthly Investing
-    — fraud and unauthorized-activity protection.'
+    — fraud and unauthorised-activity protection.'
   domain: brokerage_investing
   product_category: monthly_investing
   document_type: troubleshooting
@@ -6841,17 +6841,17 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: 7147f5c5-c621-53fa-a27b-b1ed2f6f3e31
-  title: Copperleaf Monthly Investing — interest rate / APY schedule
+  title: Copperleaf Monthly Investing — interest rate / AER schedule
   body: "Copperleaf Monthly Investing is an investment facility, not a cash savings\
     \ account. Therefore, it does not have a fixed interest rate or a guaranteed Annual\
-    \ Percentage Yield (APY).\n\nReturns on the capital invested via this service\
-    \ are determined by the performance of the underlying assets, funds, or stocks\
-    \ selected by the customer. Because these are market-linked investments, the yield\
-    \ can fluctuate daily and is not guaranteed. \n\nAll accounts using this service\
-    \ are subject to the 0.25% platform fee. This fee is deducted from the account\
-    \ to cover infrastructure costs and does not represent an interest rate. As the\
-    \ value of investments can fall as well as rise, your total return will be the\
-    \ net result of asset growth (or decline) minus the platform fee."
+    \ Equivalent Rate (AER).\n\nReturns on the capital invested via this service are\
+    \ determined by the performance of the underlying assets, funds, or stocks selected\
+    \ by the customer. Because these are market-linked investments, the yield can\
+    \ fluctuate daily and is not guaranteed. \n\nAll accounts using this service are\
+    \ subject to the 0.25% platform fee. This fee is deducted from the account to\
+    \ cover infrastructure costs and does not represent an interest rate. As the value\
+    \ of investments can fall as well as rise, your total return will be the net result\
+    \ of asset growth (or decline) minus the platform fee."
   domain: brokerage_investing
   product_category: monthly_investing
   document_type: rate_sheet
@@ -6862,7 +6862,7 @@ documents:
 - id: ad4079ce-e2f4-5095-b36e-1ca849ef71f4
   title: Copperleaf Monthly Investing — current offer
   body: 'We are pleased to highlight a current commitment to our long-term investors.
-    From 1st January 2026 to 31st March 2026, we are emphasizing our accessibility
+    From 1st January 2026 to 31st March 2026, we are emphasising our accessibility
     for all UK residents through our Copperleaf Monthly Investing plan.
 
 
@@ -6884,7 +6884,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: cafcd76e-613b-58c8-b7b1-5cd6013cb3a9
-  title: Copperleaf Monthly Investing — fraud and unauthorized-activity protection
+  title: Copperleaf Monthly Investing — fraud and unauthorised-activity protection
   body: 'At Copperleaf Invest, we recognise that the ''set and forget'' nature of
     Copperleaf Monthly Investing can make customers a target for specific types of
     fraudulent activity. Because these accounts involve recurring payments, fraudsters
@@ -7206,7 +7206,7 @@ documents:
     Some platforms charge a flat fee per trade, even for regular investments, which
     can significantly erode the returns of a small monthly contribution. We offer
     a regular dealing fee of £0, ensuring that every penny of your monthly contribution
-    goes toward your assets rather than transaction costs.
+    goes towards your assets rather than transaction costs.
 
 
     **Platform Sustainability**
@@ -7323,7 +7323,7 @@ documents:
     \ loyalty bonus of £20. To qualify, the referred friend must complete their full\
     \ identity verification and successfully execute their first monthly investment.\n\
     \nThis offer is designed to encourage the habit of regular, diversified investing.\
-    \ By utilizing Copperleaf Monthly Investing, your referred friends will benefit\
+    \ By utilising Copperleaf Monthly Investing, your referred friends will benefit\
     \ from our £0 regular dealing fee, ensuring more of their money stays invested\
     \ for the long term. \n\nPlease note that this offer is available for a limited\
     \ time only. For a full breakdown of our cost structures, you may wish to view\
@@ -7726,7 +7726,7 @@ documents:
   mentions_tools: []
   institution_id: copperleaf_invest
 - id: f8be73cb-2a4f-563d-ba82-fa06100a7d0b
-  title: Copperleaf Monthly Investing — recognizing scams targeting this product
+  title: Copperleaf Monthly Investing — recognising scams targeting this product
   body: 'As you explore the options for wealth creation, it is important to be aware
     of the specific fraud patterns that target regular investment plans. Copperleaf
     Monthly Investing is designed for consistent, long-term growth, and scammers often
@@ -7758,7 +7758,7 @@ documents:
     shared sensitive information, you must notify us immediately. Prompt reporting
     is essential to secure your account and limit potential liability. We recommend
     reviewing our general security protocols in Copperleaf Monthly Investing — fraud
-    and unauthorized-activity protection for further guidance on keeping your assets
+    and unauthorised-activity protection for further guidance on keeping your assets
     safe.'
   domain: brokerage_investing
   product_category: monthly_investing
@@ -7800,7 +7800,7 @@ documents:
 
     - **Wrapper Compatibility:** Monthly investing can be integrated with tax-efficient
     wrappers. Agents should refer clients to the appropriate guide, such as Copperleaf
-    Stocks and Shares ISA — overview, to ensure they are utilizing their annual allowances
+    Stocks and Shares ISA — overview, to ensure they are utilising their annual allowances
     correctly.
 
 
@@ -7968,7 +7968,7 @@ documents:
     \ into a Stocks and Shares ISA. This allows them to benefit from the £20,000 annual\
     \ allowance while maintaining the £0 regular dealing fee.\n- **Large Lump Sums:**\
     \ When a client receives a windfall, the £25 minimum monthly commitment is irrelevant.\
-    \ They should be guided toward lump-sum investing, though they should be cautioned\
+    \ They should be guided towards lump-sum investing, though they should be cautioned\
     \ that this removes the 'averaging' benefit of monthly contributions.\n\n**Key\
     \ Decision Metric:**\nIf the client's priority is automation and low entry cost\
     \ (£25 minimum, £0 dealing fee), they should stay with Copperleaf Monthly Investing.\
@@ -8154,7 +8154,7 @@ documents:
     trade execution date in the account history. Explain that while the debit is immediate,
     the market trade may occur shortly after.
 
-    2. **Analyze Fee Entries:** Check for the 0.25% platform fee. Clarify that while
+    2. **Analyse Fee Entries:** Check for the 0.25% platform fee. Clarify that while
     the regular dealing fee is £0, the platform fee is an ongoing charge for maintenance.
 
     3. **Verify the Plan Amount:** Check the registered monthly contribution amount.
@@ -8760,7 +8760,7 @@ documents:
   body: 'The `manage_authorized_users` tool is used when a customer needs to register
     a power of attorney on their account. This allows a trusted third party to manage
     the account on the customer''s behalf, ensuring the continuity of wealth management
-    under legal authorization.
+    under legal authorisation.
 
 
     Agent Procedural Steps:
@@ -8776,11 +8776,11 @@ documents:
     this authority.
 
     5. Call the `manage_authorized_users` tool with the account ID and the details
-    of the authorized user.
+    of the authorised user.
 
 
-    We treat the registration of authorized users with the highest level of security
-    to prevent unauthorized access to client funds. Any disputes regarding the validity
+    We treat the registration of authorised users with the highest level of security
+    to prevent unauthorised access to client funds. Any disputes regarding the validity
     of a power of attorney should be escalated to operations management for resolution.'
   domain: brokerage_investing
   product_category: procedure
@@ -8803,10 +8803,10 @@ documents:
 
     - Full Name: The legal name of the person being granted authority.
 
-    - Date of Birth: The birth date of the authorized user for identity verification
+    - Date of Birth: The birth date of the authorised user for identity verification
     purposes.
 
-    - Contact Information: The email address and phone number of the authorized user.
+    - Contact Information: The email address and phone number of the authorised user.
 
 
     Executing this tool updates the account permissions, allowing the named individual
@@ -8918,7 +8918,7 @@ documents:
   body: 'At Copperleaf Invest, we provide a digital-first support model to ensure
     our clients have clear and accessible paths to wealth creation. The get_accounts
     tool is the primary mechanism for agents to identify which accounts a customer
-    holds with us, enabling us to provide precise and personalized support.
+    holds with us, enabling us to provide precise and personalised support.
 
 
     Agents must use this tool whenever a customer refers to ''my account'' in the
@@ -9153,7 +9153,7 @@ documents:
   title: When to use get_statements
   body: 'We believe in total transparency regarding cost structures and investment
     performance. Providing customers with their statements is a key part of our service
-    model, allowing them to track their progress toward wealth creation.
+    model, allowing them to track their progress towards wealth creation.
 
 
     **Procedure for Retrieving Statements**
@@ -9480,7 +9480,7 @@ documents:
     \ Investment Account is still pending, this tool provides the necessary transparency.\n\
     \n**Agent Procedure**\n\n1. **Identity Verification**: Before disclosing any specific\
     \ order details, the agent must call the `verify_identity` tool to ensure the\
-    \ customer is the authorized account holder.\n2. **Request Order Details**: The\
+    \ customer is the authorised account holder.\n2. **Request Order Details**: The\
     \ agent should ask the customer for the order reference number. If the customer\
     \ is unsure, the agent can use `get_accounts` to identify the account and then\
     \ search for recent orders.\n3. **Execution**: The agent calls the `get_order_status`\

@@ -602,7 +602,7 @@ class TestPlanOwnedTitles:
         )
         assert docs[0]["title"] == "Something The Model Made Up"
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "en_GB"])
     def test_shipped_english_titles_are_unchanged(self, locale: str):
         """LOCK: localizing the plan vocabulary must not touch the shipped banks.
 
@@ -610,6 +610,8 @@ class TestPlanOwnedTitles:
         ``display_name_local``, so every committed title must still be reproducible
         from the plan. This is what makes the change a provable no-op for en_US /
         en_IN rather than a silent corpus rewrite on their next regeneration.
+        en_GB authors ``doc_titles`` for its labels and British-spelled angles, and
+        its committed titles must match its plan the same way.
         """
         import yaml
 
@@ -620,6 +622,20 @@ class TestPlanOwnedTitles:
         ]
         assert titles, f"no committed corpus for {locale}"
         assert [t for t in titles if t not in planned] == []
+
+    def test_uk_titles_use_uk_terms_and_spelling(self):
+        titles = self._plan_titles("en_GB")
+        assert [t for t in titles if any(us in t for us in ("APY", "unauthorized", "recognizing"))] == []
+
+    def test_uk_corpus_follows_its_language_conventions(self):
+        from usersim.asset_gen.financial_services.validate import FAIL, validate_bank
+
+        spec = load_region_spec(self._SPEC_DIR / "en_GB.yaml")
+        assert spec.language_conventions.respell
+        report = validate_bank(packaged_assets_dir() / "financial_services" / "en_GB", spec)
+        results = [r for r in report.results if r.check == "language_conventions"]
+        assert len(results) == len(spec.institutions)
+        assert [r.detail for r in results if r.status == FAIL] == []
 
     def test_language_overlay_localizes_the_planned_titles(self):
         """The whole point: a language overlay's vocabulary reaches the title."""

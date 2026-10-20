@@ -12,7 +12,7 @@ documents:
 
     We have removed the typical barriers to saving; for instance, you can open this
     account with a minimum opening deposit of £1. This ensures that anyone, regardless
-    of their current financial standing, can begin their journey toward a more secure
+    of their current financial standing, can begin their journey towards a more secure
     future with us. Once opened, your funds remain accessible, providing the liquidity
     you need for peace of mind.
 
@@ -68,7 +68,7 @@ documents:
 
 
     For a concise summary of the current rates, please refer to the Fernbridge Easy
-    Access Saver — interest rate / APY schedule. If you have further questions about
+    Access Saver — interest rate / AER schedule. If you have further questions about
     how your savings are growing, we are available via telephone and secure digital
     messaging during UK business hours.'
   domain: retail_banking
@@ -339,7 +339,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: b3f3f1b6-3716-530d-b7b6-f9d841d6893b
-  title: Fernbridge Easy Access Saver — interest rate / APY schedule
+  title: Fernbridge Easy Access Saver — interest rate / AER schedule
   body: "The Fernbridge Easy Access Saver operates on a flat interest rate structure,\
     \ meaning there are no tiered balances or complex thresholds to manage. \n\n**Current\
     \ Interest Rate**: 3.6% AER\n\nThis single rate of 3.6% applies to all balances\
@@ -392,7 +392,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 2e972f5e-8138-509d-956d-cec17b97d999
-  title: Fernbridge Easy Access Saver — fraud and unauthorized-activity protection
+  title: Fernbridge Easy Access Saver — fraud and unauthorised-activity protection
   body: 'At Fernbridge Building Society, we believe that accessibility should never
     come at the cost of security. When choosing a savings home, it is important to
     understand how your funds are protected against unauthorised activity and fraud.
@@ -850,7 +850,7 @@ documents:
 
 
     Prospective members who open a Fernbridge Easy Access Saver during this period
-    can begin their journey toward financial wellbeing with a minimum opening deposit
+    can begin their journey towards financial wellbeing with a minimum opening deposit
     of just £1. All accounts opened under this offer will benefit from our competitive
     interest rate of 3.6%.
 
@@ -904,7 +904,7 @@ documents:
     immediately through our secure digital messaging service or by telephone. Prompt
     reporting is the most effective way to limit potential losses and allows us to
     take immediate action to freeze the account if necessary. For further information
-    on how we protect you, please see Fernbridge Easy Access Saver — fraud and unauthorized-activity
+    on how we protect you, please see Fernbridge Easy Access Saver — fraud and unauthorised-activity
     protection.'
   domain: retail_banking
   product_category: easy_access_saver
@@ -1257,7 +1257,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: a5c16464-7b54-5efb-9f93-51849a8b18db
-  title: Fernbridge Easy Access Saver — recognizing scams targeting this product
+  title: Fernbridge Easy Access Saver — recognising scams targeting this product
   body: 'As a member-owned mutual, we are committed to the financial wellbeing of
     our members. This means protecting your funds from fraudulent activity is our
     highest priority. Members of the Fernbridge Easy Access Saver should be aware
@@ -1295,7 +1295,7 @@ documents:
 
 
     For more information on our general security protocols, please see Fernbridge
-    Easy Access Saver — fraud and unauthorized-activity protection.'
+    Easy Access Saver — fraud and unauthorised-activity protection.'
   domain: retail_banking
   product_category: easy_access_saver
   document_type: security_advisory
@@ -2014,7 +2014,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 8f558b8e-c51d-59f9-a33b-6e41b3e4c488
-  title: Fernbridge Members' Regular Saver — interest rate / APY schedule
+  title: Fernbridge Members' Regular Saver — interest rate / AER schedule
   body: 'The Fernbridge Members'' Regular Saver offers a single, competitive interest
     rate designed to reward consistent saving habits over a fixed period.
 
@@ -2065,7 +2065,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 60bcce7f-5361-56d7-afb8-6d6f2a3622f5
-  title: Fernbridge Members' Regular Saver — fraud and unauthorized-activity protection
+  title: Fernbridge Members' Regular Saver — fraud and unauthorised-activity protection
   body: 'At Fernbridge Building Society, the security of your savings is our primary
     concern. Because the Fernbridge Members'' Regular Saver is designed for consistent
     growth, it can occasionally be targeted by fraudsters using ''high-yield'' lures
@@ -2879,7 +2879,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 2f7c11cb-1224-516c-af38-5bb9755d66ba
-  title: Fernbridge Members' Regular Saver — recognizing scams targeting this product
+  title: Fernbridge Members' Regular Saver — recognising scams targeting this product
   body: 'As a member-owned mutual, Fernbridge Building Society is committed to the
     financial wellbeing of our members. Because the Fernbridge Members'' Regular Saver
     offers a competitive interest rate of 6.5%, it can unfortunately be used as a
@@ -2910,7 +2910,7 @@ documents:
 
 
     For further information on how we keep your account safe, you may wish to refer
-    to Fernbridge Members'' Regular Saver — fraud and unauthorized-activity protection.'
+    to Fernbridge Members'' Regular Saver — fraud and unauthorised-activity protection.'
   domain: retail_banking
   product_category: members_regular_saver
   document_type: security_advisory
@@ -3001,7 +3001,7 @@ documents:
   institution_id: fernbridge_building_society
 - id: 6dade3a2-9268-54b2-a040-cc71bead6818
   title: Fernbridge Members' Regular Saver — check status or history
-  body: 'Monitoring your progress toward your saving goals is a key part of using
+  body: 'Monitoring your progress towards your saving goals is a key part of using
     the Fernbridge Members'' Regular Saver. Whether you want to verify that your most
     recent deposit was successful or check how much interest has accrued at the 6.5%
     rate, follow these steps:
@@ -3158,7 +3158,7 @@ documents:
 
     • Large Lump Sums: If you have £5,000 ready to save today, this product is not
     the right choice because of the maximum monthly deposit of £250. You would only
-    be able to utilize a small fraction of your funds each month, leaving the rest
+    be able to utilise a small fraction of your funds each month, leaving the rest
     in a lower-interest account. In this case, a product like the Fernbridge One-Year
     Fixed Rate Bond may be more suitable.
 
@@ -3173,7 +3173,7 @@ documents:
 
 
     In summary, the Fernbridge Members'' Regular Saver is best for the disciplined
-    saver who wants to maximize the growth of a monthly surplus. If you prefer to
+    saver who wants to maximise the growth of a monthly surplus. If you prefer to
     deposit a large sum once and let it grow, or if you require total flexibility,
     our other savings products will serve you better. For more information on different
     saving paths, see Fernbridge Easy Access Saver — overview.'
@@ -3375,7 +3375,7 @@ documents:
 
 
     A: For a comprehensive breakdown, please refer to the Fernbridge One-Year Fixed
-    Rate Bond — interest rate / APY schedule.'
+    Rate Bond — interest rate / AER schedule.'
   domain: retail_banking
   product_category: fixed_rate_bond
   document_type: faq
@@ -3607,7 +3607,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: ff039a1d-a042-5c67-b93b-51b16db6b5e7
-  title: Fernbridge One-Year Fixed Rate Bond — interest rate / APY schedule
+  title: Fernbridge One-Year Fixed Rate Bond — interest rate / AER schedule
   body: 'The Fernbridge One-Year Fixed Rate Bond offers a single, flat interest rate
     applicable to all qualifying balances. There are no tiered rates for this product.
 
@@ -3656,7 +3656,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 815671d5-5c7e-552b-9f5b-8109a9af963e
-  title: Fernbridge One-Year Fixed Rate Bond — fraud and unauthorized-activity protection
+  title: Fernbridge One-Year Fixed Rate Bond — fraud and unauthorised-activity protection
   body: 'At Fernbridge Building Society, the security of your savings is our primary
     concern. Because the Fernbridge One-Year Fixed Rate Bond requires a commitment
     of funds for 12 months, it can occasionally be targeted by sophisticated fraud
@@ -4144,7 +4144,7 @@ documents:
 
 
     For further information on how we handle potential threats, you may refer to Fernbridge
-    One-Year Fixed Rate Bond — fraud and unauthorized-activity protection. By adhering
+    One-Year Fixed Rate Bond — fraud and unauthorised-activity protection. By adhering
     to these simple steps, we can work together to ensure your savings remain safe
     throughout the duration of your bond.'
   domain: retail_banking
@@ -4513,7 +4513,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 1964c7fc-2d54-5537-b14f-f578c90eb61d
-  title: Fernbridge One-Year Fixed Rate Bond — recognizing scams targeting this product
+  title: Fernbridge One-Year Fixed Rate Bond — recognising scams targeting this product
   body: 'As a member-owned mutual, we are committed to protecting your financial wellbeing.
     Because the Fernbridge One-Year Fixed Rate Bond offers a competitive interest
     rate of 4.45%, it can occasionally be used as a lure by fraudsters attempting
@@ -4543,7 +4543,7 @@ documents:
 
 
     For more information on how we protect your accounts, you may wish to refer to
-    Fernbridge One-Year Fixed Rate Bond — fraud and unauthorized-activity protection.'
+    Fernbridge One-Year Fixed Rate Bond — fraud and unauthorised-activity protection.'
   domain: retail_banking
   product_category: fixed_rate_bond
   document_type: security_advisory
@@ -4985,7 +4985,7 @@ documents:
 
 
     For more detailed information on how our rates are applied, please refer to Fernbridge
-    Easy Access ISA — interest rate / APY schedule.'
+    Easy Access ISA — interest rate / AER schedule.'
   domain: retail_banking
   product_category: cash_isa
   document_type: faq
@@ -5237,7 +5237,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 44a3374f-d539-5151-b39c-409ac8a8eea9
-  title: Fernbridge Easy Access ISA — interest rate / APY schedule
+  title: Fernbridge Easy Access ISA — interest rate / AER schedule
   body: 'The Fernbridge Easy Access ISA provides a straightforward interest structure
     to ensure members know exactly how their money is growing.
 
@@ -5284,7 +5284,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 78cbde50-41bf-5968-996e-f34cd0372598
-  title: Fernbridge Easy Access ISA — fraud and unauthorized-activity protection
+  title: Fernbridge Easy Access ISA — fraud and unauthorised-activity protection
   body: 'At Fernbridge Building Society, we are committed to protecting your savings
     and ensuring your peace of mind. The Fernbridge Easy Access ISA is designed to
     be a secure environment for your tax-efficient savings, and we employ rigorous
@@ -6219,7 +6219,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: f2efb710-88f5-5591-aa71-166a9a6f10de
-  title: Fernbridge Easy Access ISA — recognizing scams targeting this product
+  title: Fernbridge Easy Access ISA — recognising scams targeting this product
   body: "As you compare your options for tax-efficient savings, it is important to\
     \ be aware of how fraudsters may attempt to target individuals interested in ISAs.\
     \ Because the Fernbridge Easy Access ISA offers a competitive interest rate of\
@@ -6936,7 +6936,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: ca5231d9-ca15-5356-a65b-b4b51d458534
-  title: Fernbridge Cash Lifetime ISA — interest rate / APY schedule
+  title: Fernbridge Cash Lifetime ISA — interest rate / AER schedule
   body: 'The Fernbridge Cash Lifetime ISA features a simple, transparent interest
     structure to help our members grow their savings with confidence.
 
@@ -7006,9 +7006,9 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: cc27d5f0-4b73-5ee1-bb87-a5636cf89e94
-  title: Fernbridge Cash Lifetime ISA — fraud and unauthorized-activity protection
+  title: Fernbridge Cash Lifetime ISA — fraud and unauthorised-activity protection
   body: 'At Fernbridge Building Society, we are committed to protecting your savings
-    and ensuring your journey toward homeownership or retirement is secure. Because
+    and ensuring your journey towards homeownership or retirement is secure. Because
     the Fernbridge Cash Lifetime ISA attracts a significant government bonus, it can
     occasionally be a target for sophisticated fraud patterns.
 
@@ -7377,10 +7377,10 @@ documents:
 
     Property Price Restrictions
 
-    The government bonus can only be used toward the purchase of a first home if the
-    property price does not exceed the property price cap of £450,000. If you purchase
-    a property above this value, you cannot use the account for that purchase without
-    incurring the 25% withdrawal charge.
+    The government bonus can only be used towards the purchase of a first home if
+    the property price does not exceed the property price cap of £450,000. If you
+    purchase a property above this value, you cannot use the account for that purchase
+    without incurring the 25% withdrawal charge.
 
 
     Contribution Limits
@@ -7879,7 +7879,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 20ae66c1-8a0f-593b-a956-ecc7f43a58d6
-  title: Fernbridge Cash Lifetime ISA — recognizing scams targeting this product
+  title: Fernbridge Cash Lifetime ISA — recognising scams targeting this product
   body: 'As you compare the Fernbridge Cash Lifetime ISA against other savings options,
     it is important to be aware of specific fraudulent patterns that target individuals
     saving for their first home. Because this account offers a generous 25% government
@@ -7999,7 +7999,7 @@ documents:
   institution_id: fernbridge_building_society
 - id: bb36d373-2c6b-5c89-aec2-e0a863c6c90b
   title: Fernbridge Cash Lifetime ISA — check status or history
-  body: 'As an existing member, you can easily review your progress toward your home
+  body: 'As an existing member, you can easily review your progress towards your home
     ownership goal by checking your account status and transaction history.
 
 
@@ -8261,7 +8261,7 @@ documents:
     2. Complete the security verification process we initiate to ensure your account
     remains protected.
 
-    3. We will then analyze your account records to determine the total amount of
+    3. We will then analyse your account records to determine the total amount of
     personal contributions made within the current tax year, up to the £4,000 limit.
 
     4. We will calculate the total 25% government bonus that has been credited to
@@ -8397,12 +8397,12 @@ documents:
 
     A: Once the fixed term ends, your mortgage will transition to our Standard Variable
     Rate (SVR), which is currently 7.24%. Because the SVR can fluctuate, your monthly
-    payments may change at that point. We recommend reviewing your options toward
+    payments may change at that point. We recommend reviewing your options towards
     the end of your fixed term to see if another product better suits your needs.
 
 
     For a full breakdown of all applicable rates, please see the Fernbridge First
-    Home Five-Year Fixed Mortgage — interest rate / APY schedule.'
+    Home Five-Year Fixed Mortgage — interest rate / AER schedule.'
   domain: lending_mortgage
   product_category: first_home_mortgage
   document_type: faq
@@ -8636,7 +8636,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: 9df1a742-b8d2-5c4c-b94a-9fd26fc32897
-  title: Fernbridge First Home Five-Year Fixed Mortgage — interest rate / APY schedule
+  title: Fernbridge First Home Five-Year Fixed Mortgage — interest rate / AER schedule
   body: 'The Fernbridge First Home Five-Year Fixed Mortgage employs a two-stage interest
     rate structure:
 
@@ -8655,7 +8655,7 @@ documents:
 
 
     Because this is a lending product, the rates are quoted as the cost of borrowing
-    rather than a yield (APY). The overall cost of the mortgage over the full term
+    rather than a yield (AER). The overall cost of the mortgage over the full term
     is reflected in the APRC of 7.1%.'
   domain: lending_mortgage
   product_category: first_home_mortgage
@@ -8684,7 +8684,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: d78d973b-dde7-5af3-9f4f-5b4ca64d9caf
-  title: Fernbridge First Home Five-Year Fixed Mortgage — fraud and unauthorized-activity
+  title: Fernbridge First Home Five-Year Fixed Mortgage — fraud and unauthorised-activity
     protection
   body: 'At Fernbridge Building Society, we are committed to protecting our members
     from the evolving threats of financial fraud. When considering the Fernbridge
@@ -9117,7 +9117,7 @@ documents:
     in accordance with our standard notification policy.
 
     - If a member wishes to avoid the SVR after their fix ends, they should be guided
-    toward a product transfer request.'
+    towards a product transfer request.'
   domain: lending_mortgage
   product_category: first_home_mortgage
   document_type: rate_sheet
@@ -9134,13 +9134,13 @@ documents:
     \ reward of £50 upon the successful completion of the new member's mortgage. \n\
     \nThe referred member can take advantage of our Fernbridge First Home Five-Year\
     \ Fixed Mortgage, which features a competitive fixed rate of 6.39% and a product\
-    \ fee of £0 to ensure that more of their hard-earned savings go toward their deposit\
-    \ rather than administrative costs. \n\nThis offer is designed to reward the disciplined\
-    \ savers and community-minded individuals who make our mutual society a success.\
-    \ To participate, simply ensure the prospective buyer mentions your member name\
-    \ during their initial affordability assessment. This reward is subject to our\
-    \ standard terms and conditions and the successful completion of all legal and\
-    \ valuation checks."
+    \ fee of £0 to ensure that more of their hard-earned savings go towards their\
+    \ deposit rather than administrative costs. \n\nThis offer is designed to reward\
+    \ the disciplined savers and community-minded individuals who make our mutual\
+    \ society a success. To participate, simply ensure the prospective buyer mentions\
+    \ your member name during their initial affordability assessment. This reward\
+    \ is subject to our standard terms and conditions and the successful completion\
+    \ of all legal and valuation checks."
   domain: lending_mortgage
   product_category: first_home_mortgage
   document_type: promo_notice
@@ -9480,7 +9480,7 @@ documents:
   mentions_tools: []
   institution_id: fernbridge_building_society
 - id: fcfa146e-33db-54e2-b004-3ff79ef5306a
-  title: Fernbridge First Home Five-Year Fixed Mortgage — recognizing scams targeting
+  title: Fernbridge First Home Five-Year Fixed Mortgage — recognising scams targeting
     this product
   body: 'As you explore the Fernbridge First Home Five-Year Fixed Mortgage and compare
     it with other market options, it is vital to remain vigilant against fraudulent
@@ -10174,7 +10174,7 @@ documents:
 - id: 8847847f-54f9-5eea-9073-5538141ac325
   title: make_mortgage_overpayment tool reference
   body: 'The `make_mortgage_overpayment` tool processes a one-off or regular payment
-    toward a mortgage principal, reducing the total balance faster than the standard
+    towards a mortgage principal, reducing the total balance faster than the standard
     schedule.
 
 
@@ -10533,11 +10533,11 @@ documents:
     3. For power of attorney requests, verify that the legal documentation has been
     received and validated by the Member Relations team.
 
-    4. Clearly explain to the member the level of access the authorized user will
+    4. Clearly explain to the member the level of access the authorised user will
     have (e.g., read-only vs. full transaction authority).
 
     5. Execute the manage_authorized_users tool to register, update, or remove the
-    authorization.
+    authorisation.
 
 
     For technical details on how this is processed, see the manage_authorized_users
@@ -10567,12 +10567,12 @@ documents:
     tool.
 
     - person_details: The full name, date of birth, and contact information of the
-    person being authorized or removed.
+    person being authorised or removed.
 
     - authorization_type: The type of access being granted or revoked (e.g., ''power_of_attorney'',
     ''third_party_mandate'').
 
-    - action: Whether the authorized user is being ''added'' or ''removed''.
+    - action: Whether the authorised user is being ''added'' or ''removed''.
 
 
     Effect: The tool updates the account''s permission settings, allowing or restricting
@@ -10968,7 +10968,7 @@ documents:
   body: 'At Fernbridge Building Society, we believe that transparency and proactive
     communication are essential to the financial wellbeing of our members. We provide
     alerting services to help our members monitor their savings growth, track their
-    progress toward first-time home ownership, and maintain a disciplined approach
+    progress towards first-time home ownership, and maintain a disciplined approach
     to their finances. The set_alerts tool should be used whenever a member requests
     automated notifications regarding their account activity or balance thresholds.
 

@@ -350,7 +350,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: d779dd31-6841-538a-8857-8d618fbb42d4
-  title: Wrenfield Current Account — interest rate / APY schedule
+  title: Wrenfield Current Account — interest rate / AER schedule
   body: 'The Wrenfield Current Account is designed as a transactional hub for daily
     banking rather than a high-yield savings vehicle. Please find the applicable rates
     below.
@@ -405,7 +405,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 5ce84de0-5178-5361-b4b9-65df22b03c35
-  title: Wrenfield Current Account — fraud and unauthorized-activity protection
+  title: Wrenfield Current Account — fraud and unauthorised-activity protection
   body: 'At Wrenfield Bank, the security of your assets is our primary concern. We
     maintain a rigorous ''verify-first'' stance, meaning we require full identity
     authentication before any state-changing action is taken or any account information
@@ -536,7 +536,7 @@ documents:
     pay monthly bills via Direct Debit, benefiting from our commitment to the Direct
     Debit Guarantee for immediate error refunds.
 
-    - Emergency Buffer: Utilizing an arranged overdraft for short-term liquidity needs,
+    - Emergency Buffer: Utilising an arranged overdraft for short-term liquidity needs,
     with a transparent variable interest rate of 39.9%.
 
     - Gateway to Savings: Using the account as a central hub to distribute funds into
@@ -921,7 +921,7 @@ documents:
     take is to notify us immediately so that we can freeze your account and prevent
     further unauthorised activity. We aim for rapid resolution and will work with
     you to secure your funds. For more information on how we handle suspicious activity,
-    please refer to Wrenfield Current Account — fraud and unauthorized-activity protection.'
+    please refer to Wrenfield Current Account — fraud and unauthorised-activity protection.'
   domain: retail_banking
   product_category: current_account
   document_type: security_advisory
@@ -976,7 +976,7 @@ documents:
   title: Wrenfield Current Account — getting started walkthrough
   body: 'This walkthrough is intended for support agents assisting customers with
     the opening and initial setup of a Wrenfield Current Account. Our goal is to provide
-    a professional and welcoming onboarding experience that emphasizes transparency.
+    a professional and welcoming onboarding experience that emphasises transparency.
 
 
     Step 1: Identity Verification
@@ -1148,7 +1148,7 @@ documents:
 - id: 7c747679-549f-5516-b17c-d522b66ac51a
   title: Wrenfield Current Account — qualification tiers
   body: 'This matrix is for support agents to determine the qualification level for
-    the Wrenfield Current Account. As this is a standardized retail product, there
+    the Wrenfield Current Account. As this is a standardised retail product, there
     is a single qualification tier for all applicants.
 
 
@@ -1269,7 +1269,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: b76fa3e2-754e-5f41-b4d2-70206413806b
-  title: Wrenfield Current Account — recognizing scams targeting this product
+  title: Wrenfield Current Account — recognising scams targeting this product
   body: 'As you compare banking options, it is important to be aware of the specific
     ways fraudsters may attempt to target new and existing customers of the Wrenfield
     Current Account. We maintain a rigorous ''verify-first'' stance to protect your
@@ -1301,7 +1301,7 @@ documents:
     We are committed to supporting victims of APP scams and providing clear guidance
     on how to recover funds where possible. For more detailed information on how we
     safeguard your assets, we recommend reviewing Wrenfield Current Account — fraud
-    and unauthorized-activity protection.'
+    and unauthorised-activity protection.'
   domain: retail_banking
   product_category: current_account
   document_type: security_advisory
@@ -1578,7 +1578,7 @@ documents:
 
     - **Complex Investment Needs:** This account is a daily banking hub. If your primary
     goal is sophisticated wealth management or high-yield investing, you may find
-    our specialized savings products more appropriate.
+    our specialised savings products more appropriate.
 
 
     For more on who this account suits, see Wrenfield Current Account — who it is
@@ -1748,7 +1748,7 @@ documents:
     to keep your surplus cash, the Wrenfield Everyday Saver offers the stability and
     fairness you expect from a high-street institution. For a detailed breakdown of
     how our interest is calculated and applied, please refer to the Wrenfield Everyday
-    Saver — interest rate / APY schedule.'
+    Saver — interest rate / AER schedule.'
   domain: retail_banking
   product_category: everyday_saver
   document_type: product_sheet
@@ -1779,7 +1779,7 @@ documents:
     Interest is calculated daily based on your balance and credited to your account
     periodically. You can view your accrued interest and the date of the next credit
     by reviewing your most recent statement or by checking the Wrenfield Everyday
-    Saver — interest rate / APY schedule.'
+    Saver — interest rate / AER schedule.'
   domain: retail_banking
   product_category: everyday_saver
   document_type: faq
@@ -2026,7 +2026,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 9b994696-7ea9-5be3-aa95-dad7523b4256
-  title: Wrenfield Everyday Saver — interest rate / APY schedule
+  title: Wrenfield Everyday Saver — interest rate / AER schedule
   body: 'The Wrenfield Everyday Saver features a simplified interest structure to
     ensure transparency and ease of understanding for all our customers.
 
@@ -2079,7 +2079,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 749c5058-8c85-57d8-86b4-8315e0529f32
-  title: Wrenfield Everyday Saver — fraud and unauthorized-activity protection
+  title: Wrenfield Everyday Saver — fraud and unauthorised-activity protection
   body: 'At Wrenfield Bank, we are committed to ensuring your savings remain secure.
     For customers comparing the Wrenfield Everyday Saver against other options, it
     is important to understand the specific protections we provide and the fraud patterns
@@ -2585,7 +2585,7 @@ documents:
     Your deposits are protected by the FSCS up to £120,000 per person, and temporary
     high balances are protected up to £1.4 million, providing you with peace of mind
     regarding the stability of your savings. For more information on identifying specific
-    threats, see Wrenfield Everyday Saver — recognizing scams targeting this product.'
+    threats, see Wrenfield Everyday Saver — recognising scams targeting this product.'
   domain: retail_banking
   product_category: everyday_saver
   document_type: security_advisory
@@ -2997,7 +2997,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 0cfd6825-5650-5e43-a71b-72ee44453f3d
-  title: Wrenfield Everyday Saver — recognizing scams targeting this product
+  title: Wrenfield Everyday Saver — recognising scams targeting this product
   body: "As you compare our savings options with other providers, it is vital to remain\
     \ vigilant against the evolving nature of financial fraud. At Wrenfield Bank,\
     \ we are committed to your security and want to ensure you can grow your savings\
@@ -3267,7 +3267,7 @@ documents:
 
 
     Always ensure a full affordability assessment is conducted if the customer is
-    moving funds toward a lending product.'
+    moving funds towards a lending product.'
   domain: retail_banking
   product_category: everyday_saver
   document_type: comparison
@@ -3498,7 +3498,7 @@ documents:
     The Wrenfield Regular Saver is built around a straightforward model: you commit
     to saving a set amount each month for a fixed period, and in return, we provide
     a significantly higher interest rate than a standard flexible account. This product
-    is ideal for customers saving toward a specific short-term goal, such as a holiday,
+    is ideal for customers saving towards a specific short-term goal, such as a holiday,
     a home improvement project, or an emergency fund.
 
 
@@ -3839,7 +3839,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 9c5a8569-e246-5624-bf57-64544fee4c24
-  title: Wrenfield Regular Saver — interest rate / APY schedule
+  title: Wrenfield Regular Saver — interest rate / AER schedule
   body: "The Wrenfield Regular Saver offers a simple, transparent pricing structure\
     \ to help our customers save with confidence.\n\n- Current Interest Rate: 6%\n\
     - Rate Type: Fixed\n- Quote Basis: Annual Equivalent Rate (AER)\n\nThis flat rate\
@@ -3883,7 +3883,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: c97e3d34-581a-5960-849a-e56ba3a60e85
-  title: Wrenfield Regular Saver — fraud and unauthorized-activity protection
+  title: Wrenfield Regular Saver — fraud and unauthorised-activity protection
   body: 'At Wrenfield Bank, we are committed to ensuring your savings remain secure.
     The Wrenfield Regular Saver is a popular choice for goal-oriented saving, but
     its structured nature can occasionally be targeted by fraudsters using specific
@@ -4750,7 +4750,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: a053dd42-ae1d-518f-af18-c7c70e5b8e71
-  title: Wrenfield Regular Saver — recognizing scams targeting this product
+  title: Wrenfield Regular Saver — recognising scams targeting this product
   body: 'At Wrenfield Bank, we are committed to protecting your assets. Because the
     Wrenfield Regular Saver offers a competitive interest rate of 6%, it can sometimes
     be used as a lure by fraudsters attempting to mimic our services. We want to ensure
@@ -4877,7 +4877,7 @@ documents:
   institution_id: wrenfield_bank
 - id: 47a13bb3-ab0d-575d-892c-cfd864b70ccc
   title: Wrenfield Regular Saver — check status or history
-  body: 'If you are an existing customer, monitoring your progress toward your savings
+  body: 'If you are an existing customer, monitoring your progress towards your savings
     goal is simple. Follow these steps to check your current balance, interest earned,
     and deposit history for your Wrenfield Regular Saver.
 
@@ -5029,7 +5029,7 @@ documents:
 
     The primary advantage is the interest rate. At 6%, this account offers a significantly
     higher yield than our more flexible options. It is ideal for those who can commit
-    to saving a set amount each month for a duration of 12 months and want to maximize
+    to saving a set amount each month for a duration of 12 months and want to maximise
     their returns on those specific funds.
 
 
@@ -5268,7 +5268,7 @@ documents:
 
 
     For more details on how our rates are structured, please refer to the Wrenfield
-    Easy Access Cash ISA — interest rate / APY schedule.'
+    Easy Access Cash ISA — interest rate / AER schedule.'
   domain: retail_banking
   product_category: cash_isa
   document_type: faq
@@ -5525,7 +5525,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: c95a3cf2-9281-59d4-89aa-28d55644de1e
-  title: Wrenfield Easy Access Cash ISA — interest rate / APY schedule
+  title: Wrenfield Easy Access Cash ISA — interest rate / AER schedule
   body: 'The Wrenfield Easy Access Cash ISA features a simplified interest structure
     to ensure transparency and fairness for all our retail customers.
 
@@ -5595,7 +5595,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 971a936c-da02-5098-9511-b8fbf575087b
-  title: Wrenfield Easy Access Cash ISA — fraud and unauthorized-activity protection
+  title: Wrenfield Easy Access Cash ISA — fraud and unauthorised-activity protection
   body: 'At Wrenfield Bank, we believe that the security of your life savings is paramount.
     When comparing our Wrenfield Easy Access Cash ISA against other market alternatives,
     it is important to understand the rigorous protections we have in place to safeguard
@@ -5990,7 +5990,7 @@ documents:
 
 
     For further information on the general protections provided by the bank, you may
-    refer to the Wrenfield Easy Access Cash ISA — fraud and unauthorized-activity
+    refer to the Wrenfield Easy Access Cash ISA — fraud and unauthorised-activity
     protection.'
   domain: retail_banking
   product_category: cash_isa
@@ -6002,7 +6002,7 @@ documents:
 - id: e4f874bd-d758-5ec7-bfef-325286692135
   title: Wrenfield Easy Access Cash ISA — how rates are tiered and applied
   body: 'As a support agent, please use the following information to explain interest
-    application to customers. The Wrenfield Easy Access Cash ISA does not utilize
+    application to customers. The Wrenfield Easy Access Cash ISA does not utilise
     a tiered interest structure; therefore, the same rate applies regardless of the
     balance held in the account.
 
@@ -6282,7 +6282,7 @@ documents:
     - Your account has been temporarily locked due to multiple unsuccessful login
     attempts.
 
-    - Security flags triggered by an unrecognized device or location.
+    - Security flags triggered by an unrecognised device or location.
 
 
     What to check and do:
@@ -6437,7 +6437,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 597dfb94-7d82-549d-89b9-e0f8f3554f34
-  title: Wrenfield Easy Access Cash ISA — recognizing scams targeting this product
+  title: Wrenfield Easy Access Cash ISA — recognising scams targeting this product
   body: "At Wrenfield Bank, we are committed to protecting your assets. Because the\
     \ Wrenfield Easy Access Cash ISA is a tax-efficient savings tool, it can occasionally\
     \ be targeted by fraudsters using sophisticated tactics to gain access to your\
@@ -6462,7 +6462,7 @@ documents:
     \ £1.4 million. This ensures that your hard-earned savings remain secure under\
     \ the highest regulatory standards.\n\nTo learn more about our general security\
     \ practices, you may wish to review Wrenfield Easy Access Cash ISA — fraud and\
-    \ unauthorized-activity protection."
+    \ unauthorised-activity protection."
   domain: retail_banking
   product_category: cash_isa
   document_type: security_advisory
@@ -6993,7 +6993,7 @@ documents:
     the majority of successful applicants. We use this transparency to ensure you
     can compare our products fairly against others in the market. For further details
     on how we price our credit products, you may refer to the Wrenfield Rewards Credit
-    Card — interest rate / APY schedule.'
+    Card — interest rate / AER schedule.'
   domain: cards
   product_category: credit_card
   document_type: faq
@@ -7243,8 +7243,8 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 4b2ac2b4-1085-5ace-9339-71c18e02932f
-  title: Wrenfield Rewards Credit Card — interest rate / APY schedule
-  body: 'The Wrenfield Rewards Credit Card utilizes a representative pricing model
+  title: Wrenfield Rewards Credit Card — interest rate / AER schedule
+  body: 'The Wrenfield Rewards Credit Card utilises a representative pricing model
     to ensure transparency for all prospective customers.
 
 
@@ -7310,7 +7310,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: cbcb521a-00f5-5caf-ad34-f2714b0ae4eb
-  title: Wrenfield Rewards Credit Card — fraud and unauthorized-activity protection
+  title: Wrenfield Rewards Credit Card — fraud and unauthorised-activity protection
   body: "At Wrenfield Bank, we prioritise the security of your assets and the integrity\
     \ of your account. The Wrenfield Rewards Credit Card is protected by our rigorous\
     \ 'verify-first' stance; we will never disclose your account information or perform\
@@ -7334,7 +7334,7 @@ documents:
     \ the first action you should take is to inform us so we can freeze the card and\
     \ prevent further unauthorised access. For more information on how we protect\
     \ your funds across all our products, you may wish to refer to Wrenfield Current\
-    \ Account — fraud and unauthorized-activity protection."
+    \ Account — fraud and unauthorised-activity protection."
   domain: cards
   product_category: credit_card
   document_type: security_advisory
@@ -7535,7 +7535,7 @@ documents:
     \nEscalation:\nIf the customer disagrees with the fee and a resolution cannot\
     \ be reached, we will raise the matter to senior management. We provide final\
     \ responses for payment service complaints within 15 business days. If the customer\
-    \ remains dissatisfied, we will guide them toward the Financial Ombudsman Service."
+    \ remains dissatisfied, we will guide them towards the Financial Ombudsman Service."
   domain: cards
   product_category: credit_card
   document_type: troubleshooting
@@ -8119,7 +8119,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 32160e11-458b-528a-9a7f-b339f0b92c27
-  title: Wrenfield Rewards Credit Card — recognizing scams targeting this product
+  title: Wrenfield Rewards Credit Card — recognising scams targeting this product
   body: 'At Wrenfield Bank, we are committed to the security of your assets. Because
     the Wrenfield Rewards Credit Card is a popular choice for retail customers, it
     can sometimes be targeted by fraudsters using sophisticated methods to gain unauthorised
@@ -8835,7 +8835,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: f0fad887-25c2-553f-ac1e-19ed3e0d91ab
-  title: Wrenfield Two-Year Fixed Mortgage — interest rate / APY schedule
+  title: Wrenfield Two-Year Fixed Mortgage — interest rate / AER schedule
   body: 'The following interest rates apply to the Wrenfield Two-Year Fixed Mortgage:
 
 
@@ -8900,7 +8900,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: d106294b-61b9-54c6-9488-a8c18128401b
-  title: Wrenfield Two-Year Fixed Mortgage — fraud and unauthorized-activity protection
+  title: Wrenfield Two-Year Fixed Mortgage — fraud and unauthorised-activity protection
   body: 'At Wrenfield Bank, we are committed to protecting your home and your finances.
     Mortgage products can occasionally be targets for sophisticated fraud, and we
     encourage all customers—especially those comparing our offerings with other institutions—to
@@ -9682,7 +9682,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 0d6e585c-2670-51fc-8a7f-e67cb75a8f58
-  title: Wrenfield Two-Year Fixed Mortgage — recognizing scams targeting this product
+  title: Wrenfield Two-Year Fixed Mortgage — recognising scams targeting this product
   body: 'As you compare your mortgage options, it is important to remain vigilant
     against fraudulent activity. Scammers often target those in the process of securing
     a home loan by impersonating bank officials or legal representatives to steal
@@ -9713,7 +9713,7 @@ documents:
 
 
     For more general information on protecting your assets, you may wish to review
-    Wrenfield Two-Year Fixed Mortgage — fraud and unauthorized-activity protection.'
+    Wrenfield Two-Year Fixed Mortgage — fraud and unauthorised-activity protection.'
   domain: lending_mortgage
   product_category: two_year_fixed_mortgage
   document_type: security_advisory
@@ -10165,14 +10165,14 @@ documents:
     It allows you to compare our loan product with other lenders on a like-for-like
     basis. It includes not only the interest rate but also any mandatory charges,
     providing a comprehensive view of the cost. For a detailed breakdown of how our
-    interest is applied, please see Wrenfield Personal Loan — interest rate / APY
+    interest is applied, please see Wrenfield Personal Loan — interest rate / AER
     schedule.
 
 
     What happens if I am offered a different rate?
 
 
-    We will disclose your specific APR clearly in your personalized offer before you
+    We will disclose your specific APR clearly in your personalised offer before you
     sign the agreement. This ensures you have full transparency regarding the total
     cost of your borrowing.'
   domain: lending_mortgage
@@ -10455,7 +10455,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 1f711e75-efbb-51a1-bc74-cc6c0483b14d
-  title: Wrenfield Personal Loan — interest rate / APY schedule
+  title: Wrenfield Personal Loan — interest rate / AER schedule
   body: 'The Wrenfield Personal Loan features a transparent interest structure to
     ensure you know exactly what your borrowing will cost.
 
@@ -10523,7 +10523,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 5f2efa18-5944-5ec7-bd87-5953ee4da586
-  title: Wrenfield Personal Loan — fraud and unauthorized-activity protection
+  title: Wrenfield Personal Loan — fraud and unauthorised-activity protection
   body: "At Wrenfield Bank, we are committed to protecting your assets and ensuring\
     \ your borrowing experience is secure. Loan products can sometimes be targeted\
     \ by fraudsters using sophisticated tactics, and we encourage you to remain vigilant\
@@ -10931,7 +10931,7 @@ documents:
 
 
     For further guidance on spotting broader threats, you may find Wrenfield Personal
-    Loan — recognizing scams targeting this product helpful.'
+    Loan — recognising scams targeting this product helpful.'
   domain: lending_mortgage
   product_category: personal_loan
   document_type: security_advisory
@@ -11296,7 +11296,7 @@ documents:
   mentions_tools: []
   institution_id: wrenfield_bank
 - id: 290a72e0-9749-5f62-b172-9c5f227d2228
-  title: Wrenfield Personal Loan — recognizing scams targeting this product
+  title: Wrenfield Personal Loan — recognising scams targeting this product
   body: 'When comparing borrowing options, it is vital to remain vigilant against
     fraudulent activity. Scammers often target individuals seeking personal loans
     by posing as reputable lenders or ''loan brokers'' who promise guaranteed approval
@@ -11335,7 +11335,7 @@ documents:
 
 
     For more information on how we protect your overall banking experience, you may
-    wish to read Wrenfield Current Account — fraud and unauthorized-activity protection.'
+    wish to read Wrenfield Current Account — fraud and unauthorised-activity protection.'
   domain: lending_mortgage
   product_category: personal_loan
   document_type: security_advisory
@@ -11687,7 +11687,7 @@ documents:
     - Payment Misallocation: The payment may have been credited to a different account
     if the customer provided incorrect references.
 
-    - Technical Discrepancy: A rare synchronization error between the digital channel
+    - Technical Discrepancy: A rare synchronisation error between the digital channel
     and the lending ledger.
 
 
@@ -11853,7 +11853,7 @@ documents:
 
     Transparency in Pricing
 
-    We utilize a Representative APR to ensure customers can compare our credit products
+    We utilise a Representative APR to ensure customers can compare our credit products
     fairly. For the Wrenfield Rewards Credit Card, the representative APR is 24.9%.
     By definition, this means we must be able to offer this rate (or a better one)
     to at least 51% of successful applicants.
@@ -12200,7 +12200,7 @@ documents:
 
 
     For further guidance on how we protect our customers from unauthorised activity,
-    please refer to Wrenfield Current Account — fraud and unauthorized-activity protection.'
+    please refer to Wrenfield Current Account — fraud and unauthorised-activity protection.'
   domain: retail_banking
   product_category: procedure
   document_type: policy_procedure
@@ -12451,7 +12451,7 @@ documents:
     days.
 
 
-    For general advice on spotting scams, please see Wrenfield Current Account — recognizing
+    For general advice on spotting scams, please see Wrenfield Current Account — recognising
     scams targeting this product.'
   domain: retail_banking
   product_category: procedure
@@ -13545,7 +13545,7 @@ documents:
 
 
     If the customer is attempting to move funds to an external institution, they should
-    be guided toward the payment process or, if they are moving their entire relationship,
+    be guided towards the payment process or, if they are moving their entire relationship,
     the initiate_account_switch process. For internal movements, this transfer policy
     is the standard operating procedure. For technical details on the tool''s operation,
     refer to the transfer_funds tool reference.'
