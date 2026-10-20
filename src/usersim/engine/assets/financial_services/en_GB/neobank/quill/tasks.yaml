@@ -1,0 +1,453 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for quill, an app-only digital bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in British English. Read-only tools
+# (get_account_transactions, get_statements, dispute_status) carry no gold state
+# change.
+templates:
+- id: TPL-QU-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I left my Quill card {{place}}. Can you freeze it until I find it?
+  - >-
+    Please freeze my card ending 0001, I think I left it {{place}}.
+  - >-
+    My card's missing, probably {{place}}. Can you lock it for now?
+  account_state:
+    account_id: acct_qu_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_qu_0001, status: active}
+  param_space:
+    place: [in a taxi, at the pub last night, on the train]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_qu_0001.status: frozen}
+- id: TPL-QU-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I paid £{{amount}} to {{merchant}} with my Quill card and the order never
+    arrived. They won't reply. Can you get my money back?
+  - >-
+    {{merchant}} took £{{amount}} from my card for something I never received. Can
+    you raise a chargeback?
+  - >-
+    I ordered something for £{{amount}} from {{merchant}} weeks ago and it hasn't
+    come. Please dispute the payment.
+  account_state:
+    account_id: acct_qu_0001
+    cards:
+    - {card_id: card_qu_0001, status: active}
+    transactions:
+    - {transaction_id: txn_qu_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Trailhead Footwear, Pixel Parade, Brook & Bloom Online]
+    amount: ['64.99', '139.00', '420.00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_qu_0001.status: UNDER_REVIEW}
+- id: TPL-QU-SCAM-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Someone who said they were from Quill's fraud team told me my account was at
+    risk and got me to move £{{amount}} to a "safe account". I think it was a scam.
+  - >-
+    I was told to transfer £{{amount}} to a safe account by a caller pretending to
+    be Quill. Now I can't reach them. What do I do?
+  - >-
+    I've sent £{{amount}} to a fraudster who posed as your security team. Please
+    report it and help me get it back.
+  account_state:
+    account_id: acct_qu_0001
+    transactions:
+    - {transaction_id: txn_qu_0002, merchant: Faster Payment to A WALKER, amount: '{{amount}}', status: posted}
+  param_space:
+    amount: ['600.00', '2,300.00', '7,900.00']
+  gold_tool_sequence: [report_scam_payment]
+  expected_state_deltas: {scam_claim_status: OPEN}
+- id: TPL-QU-GAMBLING-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Can you turn on the gambling block on my card? I want to stop betting.
+  - >-
+    Please block gambling payments on my Quill card.
+  - >-
+    I've been spending too much on betting apps. How do I switch on the gambling
+    block?
+  account_state:
+    account_id: acct_qu_0001
+    cards:
+    - {card_id: card_qu_0001, status: active}
+  param_space: {}
+  gold_tool_sequence: [block_gambling_payments]
+  expected_state_deltas: {gambling_block: ON}
+- id: TPL-QU-OVERDRAFT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Could I get my overdraft changed to £{{limit}}?
+  - >-
+    I'd like an arranged overdraft of £{{limit}} on my Quill account.
+  - >-
+    Please set my overdraft limit to £{{limit}}.
+  account_state:
+    account_id: acct_qu_0001
+    overdraft_limit: '500'
+  param_space:
+    limit: ['0', '250', '1,000']
+  gold_tool_sequence: [change_overdraft_limit]
+  expected_state_deltas: {overdraft_limit_updated: true}
+- id: TPL-QU-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:18-24, age:25-34]
+  opening_user_messages:
+  - >-
+    I want Quill to be my main account. Can you switch everything over from
+    {{old_bank}}?
+  - >-
+    Please start a full switch from my {{old_bank}} account, including my Direct
+    Debits.
+  - >-
+    How do I move my salary and bills from {{old_bank}} to Quill? I'd like to
+    switch.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    old_bank: [Wrenfield Bank, Castlegate Bank, Northern Union Bank]
+  gold_tool_sequence: [initiate_account_switch]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS}
+- id: TPL-QU-PLAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to {{change}}.
+  - >-
+    Can you help me {{change}}?
+  - >-
+    Please {{change}} from today.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    change: [upgrade to Quill Plus, move back to the free account]
+  gold_tool_sequence: [change_plan]
+  expected_state_deltas: {plan_updated: true}
+- id: TPL-QU-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Can you add {{payee}} as a payee? I've got their sort code and account number.
+  - >-
+    I need to set up {{payee}} as a new payee in the app.
+  - >-
+    Please add a payee for {{payee}}.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    payee: [my flatmate, my piano teacher, my landlord]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-QU-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please cancel my Direct Debit to {{creditor}}.
+  - >-
+    I've cancelled my {{creditor}} subscription; can you stop the Direct Debit too?
+  - >-
+    Can you cancel the Direct Debit {{creditor}} takes each month?
+  account_state:
+    account_id: acct_qu_0001
+    payments:
+    - {payment_id: pay_qu_0001, payee: '{{creditor}}', type: direct_debit, status: active}
+  param_space:
+    creditor: [Northgate Fitness, StreamHub Premium, Brightside Mobile]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {pay_qu_0001.status: STOPPED}
+- id: TPL-QU-SAVINGS-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open an Instant Access Savings account with Quill.
+  - >-
+    Can you set me up with your instant access savings account?
+  - >-
+    Please open a savings account for me alongside my current account.
+  account_state:
+    account_id: acct_qu_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-QU-TOSAVINGS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Can you move £{{amount}} into my Instant Access Savings?
+  - >-
+    Please transfer £{{amount}} from my current account to my savings.
+  - >-
+    I want to put £{{amount}} aside in my savings account.
+  account_state:
+    account_id: acct_qu_0001
+    balance: '2650.00'
+  param_space:
+    amount: ['100', '500', '1,200']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-QU-ACTIVATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My new Quill card has arrived. Can you activate it?
+  - >-
+    The replacement card ending 0002 came today. How do I turn it on?
+  - >-
+    Please activate my new card, the one ending 0002.
+  account_state:
+    account_id: acct_qu_0001
+    cards:
+    - {card_id: card_qu_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_qu_0002.status: active}
+- id: TPL-QU-PAYBILL-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to pay a {{bill}} of £{{amount}}. The bank details are on the letter.
+  - >-
+    Can you help me pay my {{bill}}? It's £{{amount}}.
+  - >-
+    Please pay £{{amount}} for my {{bill}} using the reference they gave me.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    bill: [parking fine, dentist's bill, council tax bill]
+    amount: ['35.00', '112.00', '178.40']
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {payment_status: SCHEDULED}
+- id: TPL-QU-MANDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm working abroad for six months. Can you give my {{relative}} a third-party
+    mandate so they can sort things out on my account?
+  - >-
+    Please add my {{relative}} to my account with a third-party mandate.
+  - >-
+    I'd like my {{relative}} to be able to manage my Quill account while I'm away.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    relative: [brother, mum, partner]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-QU-STOLEN-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My phone case with my card in it was stolen: freeze the card ending 0001, send
+    me a new one, and notify me of every payment.
+  - >-
+    Someone nicked my card. Please freeze it, order a replacement, and switch on
+    alerts for all payments.
+  - >-
+    Can you lock my stolen card ending 0001, post a replacement, and alert me about
+    any spending?
+  account_state:
+    account_id: acct_qu_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_qu_0001, status: active}
+  param_space: {}
+  gold_tool_sequence: [freeze_card, order_replacement_card, set_alerts]
+  expected_state_deltas: {card_qu_0001.status: frozen, card_qu_0001.replacement: ordered, alerts_updated: true}
+- id: TPL-QU-SCAM-CARD-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I fell for a fake parcel-delivery text: I paid £{{amount}} to the scammers by
+    bank transfer and typed in my card details. Please report the scam, freeze my
+    card, and send me a new one.
+  - >-
+    Scammers got £{{amount}} from me by transfer and have my card number too. Can
+    you open a scam claim, lock my card, and order a replacement?
+  - >-
+    I sent £{{amount}} to a fraudster and gave them my card details. Report it,
+    freeze the card ending 0001, and get me a new card, please.
+  account_state:
+    account_id: acct_qu_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_qu_0001, status: active}
+    transactions:
+    - {transaction_id: txn_qu_0002, merchant: Faster Payment to D HUGHES, amount: '{{amount}}', status: posted}
+  param_space:
+    amount: ['240.00', '1,150.00']
+  gold_tool_sequence: [report_scam_payment, freeze_card, order_replacement_card]
+  expected_state_deltas: {scam_claim_status: OPEN, card_qu_0001.status: frozen, card_qu_0001.replacement: ordered}
+- id: TPL-QU-NEWCUSTOMER-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:18-24, age:25-34]
+  opening_user_messages:
+  - >-
+    I've just joined Quill: please switch my account over from {{old_bank}}, upgrade
+    me to Quill Plus, and send me a notification when my salary lands.
+  - >-
+    Can you start a full switch from {{old_bank}}, put me on Quill Plus, and alert
+    me each payday?
+  - >-
+    I want to move from {{old_bank}} with the switch service, take Quill Plus, and
+    get an alert when my wages arrive.
+  account_state:
+    account_id: acct_qu_0001
+  param_space:
+    old_bank: [Wrenfield Bank, Castlegate Bank]
+  gold_tool_sequence: [initiate_account_switch, change_plan, set_alerts]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS, plan_updated: true, alerts_updated: true}
+- id: TPL-QU-FRESHSTART-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm trying to get my spending under control: turn on the gambling block, remove
+    my overdraft completely, and alert me about every payment I make.
+  - >-
+    Please block gambling on my card, take my overdraft down to zero, and send me a
+    notification for each payment.
+  - >-
+    Can you switch on the gambling block, cancel my arranged overdraft, and set up
+    alerts for all spending? I need a fresh start.
+  account_state:
+    account_id: acct_qu_0001
+    overdraft_limit: '500'
+    cards:
+    - {card_id: card_qu_0001, status: active}
+  param_space: {}
+  gold_tool_sequence: [block_gambling_payments, change_overdraft_limit, set_alerts]
+  expected_state_deltas: {gambling_block: ON, overdraft_limit_updated: true, alerts_updated: true}
+- id: TPL-QU-LEAVING-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'm moving abroad for good: move my savings back into my current account,
+    cancel my Direct Debit to {{creditor}}, and then close my Quill account.
+  - >-
+    Please empty my savings into my current account, stop the {{creditor}} Direct
+    Debit, and close everything once that's done.
+  - >-
+    Can you transfer my savings to my current account, cancel {{creditor}}'s Direct
+    Debit, and close my account?
+  account_state:
+    account_id: acct_qu_0001
+    balance: '1320.00'
+    payments:
+    - {payment_id: pay_qu_0001, payee: '{{creditor}}', type: direct_debit, status: active}
+  param_space:
+    creditor: [Brightside Mobile, Northgate Fitness]
+  gold_tool_sequence: [transfer_funds, stop_payment, close_account]
+  expected_state_deltas: {transfer_status: COMPLETED, pay_qu_0001.status: STOPPED, acct_qu_0001.status: CLOSED}
+- id: TPL-QU-MOVEHOUSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've moved flat: please change my address to {{address}}, cancel the standing
+    order to my old landlord, and add my new landlord as a payee.
+  - >-
+    New address is {{address}}. Can you update it, stop my rent standing order to
+    the old landlord, and set up the new landlord as a payee?
+  - >-
+    Please update my address to {{address}}, cancel my old rent standing order, and
+    add a payee for my new landlord.
+  account_state:
+    account_id: acct_qu_0001
+    payments:
+    - {payment_id: pay_qu_0002, payee: Old landlord, type: standing_order, status: active}
+  param_space:
+    address: ['Flat 6, 18 Canal Street, Manchester M1 3EZ', 'Flat 2, 7 Leith Walk, Edinburgh EH6 8LN']
+  gold_tool_sequence: [update_contact_info, stop_payment, update_beneficiary]
+  expected_state_deltas: {contact_updated: true, pay_qu_0002.status: STOPPED, beneficiary_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_GB/dynamic.yaml), not scripted templates.

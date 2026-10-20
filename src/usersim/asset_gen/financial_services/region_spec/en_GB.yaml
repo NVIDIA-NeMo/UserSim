@@ -1,0 +1,888 @@
+# Structured region_spec for en_GB, the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# this into the committed per-institution assets/financial_services/en_GB/ bank.
+#
+# The institution set follows the UK retail market: a high-street bank, a
+# building society (a mutual offering savings and mortgages), a digital bank, an
+# investment platform, a workplace and personal pension provider, and an insurer
+# (car, home, pet and life cover). Brands are fictional.
+#
+# Content fields are written in British English, with UK product vocabulary
+# (current account, AER, ISA, sort code, standard variable rate).
+#
+# Regulated values (deposit and investment protection, ISA and pension
+# allowances, the State Pension age timetable) are those in force in October
+# 2026. Entries carry `placeholder: true`, as in the other banks.
+schema_version: v0.1
+region: GB
+locale: en_GB
+currency: GBP
+currency_symbol: "£"
+language: English (United Kingdom)
+number_format: en_GB
+privacy_regime: UK GDPR
+
+# UK firms identify a customer by name and date of birth before acting on an
+# account, as in the default contract.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: current account
+  cards: card
+  payments: current account
+  lending_mortgage: loan account
+  insurance: policy
+  brokerage_investing: investment account
+  retirement: pension
+
+document_types:
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief. Both the
+# high-street bank and the building society are banks, so the bank entry covers
+# each.
+concept_guidance:
+  bank: >-
+    For a high-street bank, emphasise: the current account with no monthly fee;
+    the arranged overdraft charged at a single interest rate (EAR) with no fixed
+    fees, and the support offered to customers who use it repeatedly; the
+    Current Account Switch Service (seven working days, Direct Debits and
+    incoming payments moved automatically, backed by a guarantee); the basic
+    bank account for anyone who cannot get a standard account; easy-access and
+    regular savings quoted as AER; the cash ISA and its allowance, including the
+    lower cash ISA allowance for under-65s from 6 April 2027; the credit card
+    (representative APR, balance transfers, section 75 protection on purchases
+    between £100 and £30,000); the fixed-rate mortgage (loan to value, product
+    fee, early repayment charges, the yearly overpayment allowance, the standard
+    variable rate after the deal ends, and product transfers to a new deal); and
+    the personal loan (representative APR and example, the 14-day right to
+    withdraw, the credit check). A building society of this kind keeps no
+    current accounts and issues no cards; for it, emphasise: a mutual owned by
+    its members rather than shareholders, with a vote at the AGM; savings (easy
+    access, a members' regular saver, fixed-rate bonds, the cash ISA, the
+    Lifetime ISA with its 25% government bonus and 25% withdrawal charge);
+    mortgages for first-time buyers at high loan to value; and withdrawals paid
+    to a nominated bank account.
+  neobank: >-
+    Emphasise: an app-only current account with no monthly fee, instant spending
+    notifications, freezing and unfreezing the card in the app, the gambling
+    block, savings pots and an instant-access savings account quoted as AER, the
+    arranged overdraft quoted as EAR, fee-free card spending abroad with a
+    monthly allowance for cash withdrawals, the paid Quill Plus plan, Faster
+    Payments with Confirmation of Payee, the Current Account Switch Service,
+    reimbursement of authorised push payment scams, and FSCS protection of
+    eligible deposits up to £120,000.
+  brokerage: >-
+    Emphasise: the Stocks and Shares ISA and the £20,000 ISA allowance shared
+    across all of a customer's ISAs; the Lifetime ISA (opened between 18 and 39,
+    up to £4,000 a year until 50, a 25% government bonus, and a 25% withdrawal
+    charge unless the money buys a first home costing £450,000 or less, or is
+    taken at 60 or over or in terminal illness); the Junior ISA (£9,000 a year,
+    with the child taking control at 18); the General Investment Account with
+    the capital gains tax annual exempt amount and the dividend allowance; the
+    platform fee and dealing charges; monthly investing; ISA transfers that keep
+    the tax-free status (never withdraw and pay back in); the warning that the
+    value of investments can fall as well as rise and capital is at risk; FSCS
+    protection of up to £85,000 for investments; and that the platform gives no
+    personal recommendation.
+  retirement_provider: >-
+    Emphasise: the workplace pension under automatic enrolment (a minimum of 8%
+    of qualifying earnings, at least 3% from the employer, and a full refund for
+    opting out within one month); the personal pension with 20% basic-rate tax
+    relief added to contributions (higher-rate relief claimed through
+    self-assessment); the £60,000 annual allowance and the £10,000 money
+    purchase annual allowance once a pension has been flexibly accessed;
+    tax-free cash of 25% up to the £268,275 lump sum allowance; drawdown,
+    annuities and uncrystallised lump sums; emergency tax on a first flexible
+    withdrawal; the minimum pension age of 55, rising to 57 on 6 April 2028; the
+    State Pension age rising to 67; the expression of wish; unused pensions
+    counting towards an estate for inheritance tax from 6 April 2027; free
+    Pension Wise guidance from age 50; and the checks on pension transfers that
+    protect against scams. Never give regulated advice or individual tax advice.
+  insurer: >-
+    Emphasise: car insurance (comprehensive cover, compulsory and voluntary
+    excesses, the no-claims discount and its protection, named drivers, the rule
+    that a renewal price cannot exceed the price for an equivalent new customer,
+    turning off automatic renewal); home insurance (buildings and contents,
+    accidental damage, the escape-of-water excess, telling the insurer about
+    changes); lifetime pet insurance (a vet fee limit that renews each year, the
+    excess); level term life insurance (fixed cover for a fixed term, written in
+    trust); reporting a claim promptly; the 14-day cooling-off period (30 days
+    for life cover); and the free Financial Ombudsman Service. Never promise the
+    outcome of a claim.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [FCA, PRA]
+    regulator_text: >-
+      Banks and building societies are authorised by the Prudential Regulation
+      Authority and regulated by the Financial Conduct Authority. The Financial
+      Services Compensation Scheme (FSCS) protects eligible deposits up to
+      £120,000 per person per institution, and temporary high balances from life
+      events such as a house sale or an inheritance up to £1.4 million for six
+      months. The Consumer Duty requires firms to deliver good outcomes, avoid
+      foreseeable harm and support customers in vulnerable circumstances. The
+      largest banks must offer a fee-free basic bank account. The Current Account
+      Switch Service completes a switch in seven working days and redirects
+      payments, with a guarantee that refunds any interest or charges caused by
+      a problem with the switch. Arranged overdrafts are charged at a single
+      interest rate with no fixed fees, and an unarranged overdraft cannot cost
+      more. Complaints about payment services get a final response within 15
+      business days and other complaints within eight weeks, after which the
+      customer can go to the Financial Ombudsman Service free of charge.
+      Customer service verifies identity before sharing or changing account
+      information.
+  cards:
+    regulators: [FCA]
+    regulator_text: >-
+      Card payments follow the Payment Services Regulations and, for credit
+      cards, the Consumer Credit Act. Under section 75 the card provider is
+      jointly liable with the retailer for a credit card purchase between £100
+      and £30,000; a debit card purchase can be disputed through the card
+      scheme's chargeback process. A customer is liable for at most £35 of
+      unauthorised payments made before a lost or stolen card is reported,
+      unless they acted fraudulently or with gross negligence, and an
+      unauthorised payment is refunded by the end of the next business day.
+      Credit card providers must step in when a customer is in persistent debt,
+      having paid more in interest, fees and charges than in capital over 18
+      months. Customer service must not misstate rates, fees or refund rights.
+  payments:
+    regulators: [FCA, Payment Systems Regulator]
+    regulator_text: >-
+      Faster Payments usually arrive within seconds, and Confirmation of Payee
+      checks the payee's name against the account before a first payment.
+      Victims of an authorised push payment scam over Faster Payments or CHAPS
+      must be reimbursed up to £85,000 within five business days, with an
+      optional excess of up to £100 that cannot be applied to vulnerable
+      customers, for claims made within 13 months of the last payment. The
+      Direct Debit Guarantee gives an immediate refund of a payment taken in
+      error. Customer service verifies identity before making a payment or
+      changing payment details.
+  lending_mortgage:
+    regulators: [FCA, PRA]
+    regulator_text: >-
+      Consumer credit follows the Consumer Credit Act and the FCA's rules:
+      lenders must check affordability, advertise a representative APR with a
+      representative example, and give a 14-day right to withdraw from a credit
+      agreement. A loan can be repaid early at any time, with any compensation
+      capped at 1% of the amount repaid early, or 0.5% when less than a year
+      remains. Since 15 July 2026, new buy now, pay later agreements from
+      third-party lenders are regulated, with affordability checks and access to
+      the Financial Ombudsman Service. Mortgages follow the FCA's mortgage rules:
+      an affordability assessment, disclosure of the APRC and of any early
+      repayment charges, and fair treatment of customers in payment difficulty,
+      with repossession only as a last resort. Customer service never promises
+      that credit will be approved and never hides costs.
+  insurance:
+    regulators: [FCA, PRA]
+    regulator_text: >-
+      Insurers are authorised by the PRA and regulated by the FCA. A customer can
+      cancel within 14 days of buying a policy or receiving its documents, or 30
+      days for life insurance. At renewal, a home or car insurance price cannot
+      be higher than the price the insurer would offer an equivalent new
+      customer through the same channel, and automatic renewal must be easy to
+      turn off. Claims must be handled promptly and fairly. If an insurer fails,
+      the FSCS protects 90% of most general insurance claims, and 100% of
+      compulsory insurance such as third-party motor cover and of life
+      insurance. Complaints can be taken to the Financial Ombudsman Service free
+      of charge. Customer service does not promise the outcome of a claim.
+  brokerage_investing:
+    regulators: [FCA]
+    regulator_text: >-
+      Investment platforms are regulated by the FCA. Client money and assets are
+      held separately from the firm's own, and the FSCS protects up to £85,000
+      per person per firm if a firm fails and cannot return them, but not
+      against falls in the value of investments. ISA rules set a £20,000
+      allowance per tax year across all ISAs. The Lifetime ISA counts towards
+      it with up to £4,000 a year and carries a 25% charge on withdrawals that
+      are not for a first home, taken at 60 or over, or in terminal illness; the
+      government has consulted on a First Time Buyer ISA to replace it, and until
+      then it can still be opened. The Junior ISA allowance is £9,000. An ISA
+      moved between providers must be transferred, not withdrawn, to keep its
+      tax-free status. Firms must disclose costs and charges, warn that capital
+      is at risk, and check that a complex product is appropriate. Customer
+      service gives no personal recommendation and no individual tax advice.
+  retirement:
+    regulators: [FCA, The Pensions Regulator]
+    regulator_text: >-
+      Personal pensions are regulated by the FCA, and workplace pension schemes
+      are overseen by The Pensions Regulator, which enforces employers'
+      automatic enrolment duties. Before a customer accesses their pension, the
+      provider must offer to book free, impartial Pension Wise guidance. Pension
+      transfers go through checks designed to stop pension scams. Tax rules set
+      the £60,000 annual allowance, the £10,000 money purchase annual allowance
+      after flexible access, and the £268,275 lump sum allowance for tax-free
+      cash. The normal minimum pension age is 55 and rises to 57 on 6 April
+      2028; the State Pension age is rising from 66 to 67 between 2026 and 2028.
+      Unused pension funds count towards an estate for inheritance tax for
+      deaths on or after 6 April 2027. Complaints can go to the Financial
+      Ombudsman Service or, for workplace schemes, the Pensions Ombudsman.
+      Customer service gives no regulated advice and no individual tax advice.
+
+# Titles the deterministic doc plan builds from; the remaining title vocabulary
+# keeps its English defaults.
+doc_titles:
+  domain_labels:
+    retail_banking: Current accounts and savings
+    cards: Cards
+    payments: Payments
+    lending_mortgage: Loans and mortgages
+    insurance: Insurance
+    brokerage_investing: Investing
+    retirement: Pensions
+
+  # Every variable in this spec; an unmapped one falls back to its machine name.
+  variable_labels:
+    access_age: age at which the child takes control of the account
+    annual_allowance: pension annual allowance
+    annual_income_per_100k_at_65: guaranteed yearly income per £100,000 at age 65 (single life, level)
+    annual_limit: Lifetime ISA limit each tax year
+    annual_management_charge: annual management charge
+    annual_premium_example: example annual premium
+    annual_vet_fee_limit: vet fee limit each policy year
+    aprc: APRC (overall cost for comparison) on £200,000 over 25 years
+    arranged_overdraft_rate: arranged overdraft interest rate (EAR, variable)
+    assumed_credit_limit: assumed credit limit in the representative example
+    atm_fee_above_allowance: fee on cash withdrawals abroad above the monthly allowance
+    balance_transfer_fee: balance transfer fee
+    balance_transfer_months: 0% balance transfer period (months)
+    basic_rate_tax_relief: basic-rate tax relief added to personal contributions
+    buildings_cover_limit: buildings cover limit
+    capital_gains_allowance: capital gains tax annual exempt amount
+    cash_isa_allowance_from_april_2027: cash ISA allowance for under-65s from 6 April 2027
+    compulsory_excess: compulsory excess
+    contents_cover_limit: contents cover limit
+    cover_amount_example: example amount of cover
+    dividend_allowance: dividend allowance
+    early_repayment_charge_year_one: early repayment charge in year one
+    early_repayment_charge_year_two: early repayment charge in year two
+    escape_of_water_excess: escape-of-water excess
+    excess: excess per condition each policy year
+    faster_payment_daily_limit: daily limit for Faster Payments
+    faster_payment_fee: fee for a Faster Payment
+    fee_free_atm_abroad_monthly: fee-free cash withdrawals abroad each month
+    fixed_rate: initial fixed interest rate
+    foreign_transaction_fee: non-sterling transaction fee
+    fund_dealing_fee: fund dealing charge
+    government_bonus_rate: government bonus on payments in
+    interest_rate: interest rate (AER)
+    isa_allowance: ISA allowance for the 2026/27 tax year
+    junior_isa_allowance: Junior ISA allowance for the 2026/27 tax year
+    lump_sum_allowance: lump sum allowance (lifetime cap on tax-free cash)
+    maximum_loan_amount: maximum loan amount
+    maximum_ltv: maximum loan to value
+    maximum_monthly_deposit: maximum monthly payment in
+    maximum_opening_age: oldest age at which the account can be opened
+    minimum_deposit: minimum deposit
+    minimum_employer_contribution: minimum employer contribution (% of qualifying earnings)
+    minimum_monthly_amount: minimum monthly investment
+    minimum_monthly_contribution: minimum monthly contribution
+    minimum_opening_deposit: minimum deposit to open
+    minimum_pension_age: normal minimum pension age
+    minimum_pension_age_from_april_2028: normal minimum pension age from 6 April 2028
+    minimum_purchase_price: minimum pot to buy an annuity
+    minimum_term_months: minimum subscription period (months)
+    minimum_total_contribution: minimum total contribution (% of qualifying earnings)
+    money_purchase_annual_allowance: money purchase annual allowance
+    monthly_account_fee: monthly account fee
+    monthly_fee: monthly fee
+    monthly_premium_example: example monthly premium
+    overpayment_allowance: overpayments allowed each year without a charge
+    platform_fee: annual platform fee
+    product_fee: product fee
+    property_price_cap: maximum price of a first home bought with the Lifetime ISA
+    protected_ncd_cost: yearly cost of protecting the no-claims discount
+    regular_dealing_fee: dealing charge for monthly investments
+    representative_amount: amount of credit in the representative example
+    representative_apr: representative APR
+    representative_duration_months: term in the representative example (months)
+    representative_monthly_payment: monthly repayment in the representative example
+    representative_total_payable: total amount payable in the representative example
+    share_dealing_fee: share dealing charge
+    standard_excess: standard excess
+    standard_variable_rate: standard variable rate after the deal ends
+    switching_incentive: payment for switching with the Current Account Switch Service
+    tax_free_cash_pct: tax-free cash (% of the pot)
+    term_months: term (months)
+    term_years_example: example term (years)
+    withdrawal_charge: withdrawal charge on unauthorised withdrawals
+
+institutions:
+# ── 1. High-street bank ───────────────────────────────────────────────
+- id: wrenfield_bank
+  display_name: Wrenfield Bank
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, payments, lending_mortgage]
+  products:
+  - id: current_account
+    display_name: Wrenfield Current Account
+    domain: retail_banking
+    variables:
+      monthly_account_fee: {type: money, value: 0}
+      arranged_overdraft_rate: {type: percent, value: 39.9}
+      switching_incentive: {type: money, value: 175}
+  - id: everyday_saver
+    display_name: Wrenfield Everyday Saver
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 2.1}
+      minimum_opening_deposit: {type: money, value: 1}
+  - id: regular_saver
+    display_name: Wrenfield Regular Saver
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 6}
+      maximum_monthly_deposit: {type: money, value: 300}
+      term_months: {type: int, value: 12}
+  - id: cash_isa
+    display_name: Wrenfield Easy Access Cash ISA
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 2.85}
+      isa_allowance: {type: money, value: 20000}
+      cash_isa_allowance_from_april_2027: {type: money, value: 12000}
+  - id: credit_card
+    display_name: Wrenfield Rewards Credit Card
+    domain: cards
+    variables:
+      representative_apr: {type: percent, value: 24.9}
+      assumed_credit_limit: {type: money, value: 1200}
+      balance_transfer_fee: {type: percent, value: 3.49}
+      balance_transfer_months: {type: int, value: 24}
+      foreign_transaction_fee: {type: percent, value: 2.99}
+  - id: two_year_fixed_mortgage
+    display_name: Wrenfield Two-Year Fixed Mortgage
+    domain: lending_mortgage
+    variables:
+      fixed_rate: {type: percent, value: 5.64}
+      maximum_ltv: {type: percent, value: 90}
+      product_fee: {type: money, value: 999}
+      standard_variable_rate: {type: percent, value: 7.49}
+      aprc: {type: percent, value: 7.4}
+      early_repayment_charge_year_one: {type: percent, value: 3}
+      early_repayment_charge_year_two: {type: percent, value: 2}
+      overpayment_allowance: {type: percent, value: 10}
+  - id: personal_loan
+    display_name: Wrenfield Personal Loan
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 6.9}
+      representative_amount: {type: money, value: 10000}
+      representative_duration_months: {type: int, value: 60}
+      representative_monthly_payment: {type: money, value: 196.56}
+      representative_total_payable: {type: money, value: 11793.6}
+      maximum_loan_amount: {type: money, value: 35000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: Dispute a card payment, through a chargeback for a debit card or a section 75 claim for a credit card purchase.
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: initiate_account_switch
+    discoverable: true
+    side_effect_class: state_changing
+    description: Start a switch through the Current Account Switch Service, which moves the balance, Direct Debits, standing orders and incoming payments in seven working days.
+  - name: change_overdraft_limit
+    discoverable: true
+    side_effect_class: state_changing
+    description: Apply for, increase, reduce or remove an arranged overdraft, after an affordability check.
+  - name: report_scam_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Report an authorised push payment scam and open a reimbursement claim.
+  - name: make_mortgage_overpayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Make a one-off or regular mortgage overpayment, within the yearly allowance or with the early repayment charge shown first.
+  - name: request_product_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Move an existing mortgage onto a new fixed or tracker deal when the current deal ends, without a new mortgage application.
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Apply for a personal loan (amount, term, purpose); a credit check follows.
+  # Common operations whose meaning differs in the UK, declared with the
+  # procedure they carry here.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Add, change or delete a payee (name, sort code and account number) on the current account.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Cancel a Direct Debit or a standing order, or stop a cheque.
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: Pay a bill by bank transfer using the sort code, account number and reference on the bill.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Register a power of attorney, or add or remove a third-party mandate on the account.
+  task_templates:
+  - {id: TPL-WB-SWITCH-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [initiate_account_switch]}
+  - {id: TPL-WB-OVERDRAFT-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Building society ───────────────────────────────────────────────
+- id: fernbridge_building_society
+  display_name: Fernbridge Building Society
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, lending_mortgage]
+  # A savings-and-mortgage society keeps no current accounts and issues no cards.
+  omit_common_operations: [order_replacement_card, activate_card, dispute_status, pay_bill, stop_payment]
+  products:
+  - id: easy_access_saver
+    display_name: Fernbridge Easy Access Saver
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 3.6}
+      minimum_opening_deposit: {type: money, value: 1}
+  - id: members_regular_saver
+    display_name: Fernbridge Members' Regular Saver
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 6.5}
+      maximum_monthly_deposit: {type: money, value: 250}
+      term_months: {type: int, value: 12}
+  - id: fixed_rate_bond
+    display_name: Fernbridge One-Year Fixed Rate Bond
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 4.45}
+      minimum_deposit: {type: money, value: 1000}
+      term_months: {type: int, value: 12}
+  - id: cash_isa
+    display_name: Fernbridge Easy Access ISA
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 3.85}
+      isa_allowance: {type: money, value: 20000}
+      cash_isa_allowance_from_april_2027: {type: money, value: 12000}
+  - id: cash_lifetime_isa
+    display_name: Fernbridge Cash Lifetime ISA
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 3.75}
+      annual_limit: {type: money, value: 4000}
+      government_bonus_rate: {type: percent, value: 25}
+      withdrawal_charge: {type: percent, value: 25}
+      property_price_cap: {type: money, value: 450000}
+      maximum_opening_age: {type: int, value: 39}
+  - id: first_home_mortgage
+    display_name: Fernbridge First Home Five-Year Fixed Mortgage
+    domain: lending_mortgage
+    variables:
+      fixed_rate: {type: percent, value: 6.39}
+      maximum_ltv: {type: percent, value: 95}
+      product_fee: {type: money, value: 0}
+      standard_variable_rate: {type: percent, value: 7.24}
+      aprc: {type: percent, value: 7.1}
+      early_repayment_charge_year_one: {type: percent, value: 5}
+      overpayment_allowance: {type: percent, value: 10}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: transfer_isa_in
+    discoverable: true
+    side_effect_class: state_changing
+    description: Transfer an ISA held with another provider into a Fernbridge ISA without losing its tax-free status.
+  - name: claim_lisa_home_purchase
+    discoverable: true
+    side_effect_class: irreversible
+    description: Release Lifetime ISA savings and the government bonus to the member's conveyancer for a first home purchase.
+  - name: make_mortgage_overpayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Make a one-off or regular mortgage overpayment, within the yearly allowance or with the early repayment charge shown first.
+  - name: request_product_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Move an existing mortgage onto a new fixed or tracker deal when the current deal ends, without a new mortgage application.
+  - name: apply_mortgage
+    discoverable: true
+    side_effect_class: state_changing
+    description: Start a mortgage application or an agreement in principle (property price, deposit, term).
+  - name: transfer_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: Withdraw money from a savings account or ISA to the member's nominated bank account.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change the nominated bank account that withdrawals are paid to.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Register a power of attorney, or add or remove a third-party mandate on the account.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Open a savings account, an ISA or a Lifetime ISA.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Close a savings account or ISA and pay the balance to the nominated bank account.
+  task_templates:
+  - {id: TPL-FB-LISA-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [claim_lisa_home_purchase]}
+  - {id: TPL-FB-SAVINGS-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 3. Digital bank ───────────────────────────────────────────────────
+- id: quill
+  display_name: Quill
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards, payments]
+  products:
+  - id: current_account
+    display_name: Quill Current Account
+    domain: retail_banking
+    variables:
+      monthly_account_fee: {type: money, value: 0}
+      arranged_overdraft_rate: {type: percent, value: 29}
+  - id: quill_plus
+    display_name: Quill Plus
+    domain: retail_banking
+    variables:
+      monthly_fee: {type: money, value: 7}
+      minimum_term_months: {type: int, value: 3}
+  - id: instant_access_savings
+    display_name: Quill Instant Access Savings
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 3.75}
+  - id: debit_card
+    display_name: Quill Debit Card
+    domain: cards
+    variables:
+      foreign_transaction_fee: {type: percent, value: 0}
+      fee_free_atm_abroad_monthly: {type: money, value: 200}
+      atm_fee_above_allowance: {type: percent, value: 3}
+  - id: payments
+    display_name: Quill Payments
+    domain: payments
+    variables:
+      faster_payment_fee: {type: money, value: 0}
+      faster_payment_daily_limit: {type: money, value: 10000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: Dispute a card payment through the card scheme's chargeback process.
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: report_scam_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Report an authorised push payment scam and open a reimbursement claim.
+  - name: block_gambling_payments
+    discoverable: true
+    side_effect_class: state_changing
+    description: Turn the gambling block on the card on or off; switching it off takes effect after a 48-hour cooling-off period.
+  - name: change_overdraft_limit
+    discoverable: true
+    side_effect_class: state_changing
+    description: Apply for, increase, reduce or remove an arranged overdraft, after an affordability check.
+  - name: initiate_account_switch
+    discoverable: true
+    side_effect_class: state_changing
+    description: Start a switch through the Current Account Switch Service, which moves the balance, Direct Debits, standing orders and incoming payments in seven working days.
+  - name: change_plan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Move between the free account and the paid Quill Plus plan.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Add, change or delete a payee (name, sort code and account number).
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Cancel a Direct Debit or a standing order.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Register a power of attorney, or add or remove a third-party mandate on the account.
+  task_templates:
+  - {id: TPL-QU-SCAM-001, tier: verifiable, task_type: complaint_dispute, persona_tags: [region:any, age:any], gold_tool_sequence: [report_scam_payment]}
+  - {id: TPL-QU-ABROAD-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Investment platform ────────────────────────────────────────────
+- id: copperleaf_invest
+  display_name: Copperleaf Invest
+  type: brokerage
+  brand_voice: traditional
+  domains: [brokerage_investing]
+  products:
+  - id: stocks_shares_isa
+    display_name: Copperleaf Stocks and Shares ISA
+    domain: brokerage_investing
+    variables:
+      platform_fee: {type: percent, value: 0.25}
+      share_dealing_fee: {type: money, value: 5.95}
+      fund_dealing_fee: {type: money, value: 0}
+      isa_allowance: {type: money, value: 20000}
+  - id: lifetime_isa
+    display_name: Copperleaf Lifetime ISA
+    domain: brokerage_investing
+    variables:
+      annual_limit: {type: money, value: 4000}
+      government_bonus_rate: {type: percent, value: 25}
+      withdrawal_charge: {type: percent, value: 25}
+      property_price_cap: {type: money, value: 450000}
+      maximum_opening_age: {type: int, value: 39}
+  - id: junior_isa
+    display_name: Copperleaf Junior ISA
+    domain: brokerage_investing
+    variables:
+      junior_isa_allowance: {type: money, value: 9000}
+      platform_fee: {type: percent, value: 0.25}
+      access_age: {type: int, value: 18}
+  - id: general_investment_account
+    display_name: Copperleaf General Investment Account
+    domain: brokerage_investing
+    variables:
+      platform_fee: {type: percent, value: 0.25}
+      capital_gains_allowance: {type: money, value: 3000}
+      dividend_allowance: {type: money, value: 500}
+  - id: monthly_investing
+    display_name: Copperleaf Monthly Investing
+    domain: brokerage_investing
+    variables:
+      minimum_monthly_amount: {type: money, value: 25}
+      regular_dealing_fee: {type: money, value: 0}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - name: set_up_regular_investment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Set up, change or pause a monthly investment (amount, date, investments).
+  - name: transfer_isa_in
+    discoverable: true
+    side_effect_class: state_changing
+    description: Transfer an ISA held with another provider to Copperleaf without losing its tax-free status.
+  - name: claim_lisa_home_purchase
+    discoverable: true
+    side_effect_class: irreversible
+    description: Sell Lifetime ISA investments and release the proceeds and the government bonus to the customer's conveyancer for a first home purchase.
+  - name: request_lisa_withdrawal
+    discoverable: true
+    side_effect_class: irreversible
+    description: Make a Lifetime ISA withdrawal that is not for a first home, which carries the 25% government withdrawal charge unless the customer is 60 or over or terminally ill.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change the nominated bank account that withdrawals are paid to.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Register a power of attorney on the account.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Open a Stocks and Shares ISA, a Lifetime ISA, a Junior ISA or a General Investment Account.
+  task_templates:
+  - {id: TPL-CI-ISA-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [transfer_isa_in]}
+  - {id: TPL-CI-TAX-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 5. Pension provider ───────────────────────────────────────────────
+- id: oakhaven_pensions
+  display_name: Oakhaven Pensions
+  type: retirement_provider
+  brand_voice: traditional
+  domains: [retirement]
+  # UK pensions cannot lend to their members.
+  omit_common_operations: [plan_loan]
+  products:
+  - id: workplace_pension
+    display_name: Oakhaven Workplace Pension
+    domain: retirement
+    variables:
+      minimum_total_contribution: {type: percent, value: 8}
+      minimum_employer_contribution: {type: percent, value: 3}
+      annual_management_charge: {type: percent, value: 0.45}
+  - id: personal_pension
+    display_name: Oakhaven Personal Pension
+    domain: retirement
+    variables:
+      annual_management_charge: {type: percent, value: 0.6}
+      minimum_monthly_contribution: {type: money, value: 50}
+      basic_rate_tax_relief: {type: percent, value: 20}
+      annual_allowance: {type: money, value: 60000}
+  - id: flexible_drawdown
+    display_name: Oakhaven Flexible Drawdown
+    domain: retirement
+    variables:
+      tax_free_cash_pct: {type: percent, value: 25}
+      lump_sum_allowance: {type: money, value: 268275}
+      money_purchase_annual_allowance: {type: money, value: 10000}
+      minimum_pension_age: {type: int, value: 55}
+      minimum_pension_age_from_april_2028: {type: int, value: 57}
+  - id: lifetime_annuity
+    display_name: Oakhaven Lifetime Annuity
+    domain: retirement
+    variables:
+      annual_income_per_100k_at_65: {type: money, value: 7100}
+      minimum_purchase_price: {type: money, value: 10000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: request_withdrawal
+    discoverable: true
+    side_effect_class: irreversible
+    description: Take money from a pension, as tax-free cash, a drawdown income payment or an uncrystallised lump sum.
+  - name: update_investment_election
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change the funds that future contributions and the existing pot are invested in.
+  - name: change_contributions
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change, pause or restart personal contributions to a pension.
+  - name: request_pension_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Transfer a pension in from, or out to, another provider, after the checks against pension scams.
+  - name: start_drawdown
+    discoverable: true
+    side_effect_class: irreversible
+    description: Move all or part of a pot into flexible drawdown and pay the tax-free cash.
+  - name: request_annuity_quote
+    discoverable: true
+    side_effect_class: read_only
+    description: Give a personalised quote for a lifetime annuity.
+  - name: purchase_annuity
+    discoverable: true
+    side_effect_class: irreversible
+    description: Buy a lifetime annuity with all or part of a pot.
+  - name: opt_out_of_workplace_pension
+    discoverable: true
+    side_effect_class: state_changing
+    description: Opt out of the workplace pension within one month of being enrolled, with a full refund of contributions.
+  - name: update_selected_retirement_age
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change the selected retirement age that the investment strategy moves towards.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Record or update an expression of wish naming who should receive the pension after death.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Open a personal pension.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Close a pension once it has been transferred out or fully withdrawn.
+  task_templates:
+  - {id: TPL-OP-TRANSFER-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [request_pension_transfer]}
+  - {id: TPL-OP-CASH-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 6. Insurer ────────────────────────────────────────────────────────
+- id: kingsmere_insurance
+  display_name: Kingsmere Insurance
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: car_insurance
+    display_name: Kingsmere Comprehensive Car Insurance
+    domain: insurance
+    variables:
+      annual_premium_example: {type: money, value: 640}
+      compulsory_excess: {type: money, value: 250}
+      protected_ncd_cost: {type: money, value: 45}
+  - id: home_insurance
+    display_name: Kingsmere Home Insurance
+    domain: insurance
+    variables:
+      annual_premium_example: {type: money, value: 340}
+      buildings_cover_limit: {type: money, value: 1000000}
+      contents_cover_limit: {type: money, value: 75000}
+      standard_excess: {type: money, value: 100}
+      escape_of_water_excess: {type: money, value: 350}
+  - id: pet_insurance
+    display_name: Kingsmere Lifetime Pet Insurance
+    domain: insurance
+    variables:
+      monthly_premium_example: {type: money, value: 32}
+      annual_vet_fee_limit: {type: money, value: 7500}
+      excess: {type: money, value: 99}
+  - id: life_insurance
+    display_name: Kingsmere Level Term Life Insurance
+    domain: insurance
+    variables:
+      monthly_premium_example: {type: money, value: 12}
+      cover_amount_example: {type: money, value: 200000}
+      term_years_example: {type: int, value: 25}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: file_claim
+    discoverable: true
+    side_effect_class: state_changing
+    description: Make a claim on car, home or pet insurance and give the claim reference.
+  - name: update_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: Change a policy after a new car, a house move, a new job or a change in annual mileage.
+  - name: add_named_driver
+    discoverable: true
+    side_effect_class: state_changing
+    description: Add or remove a named driver on a car insurance policy.
+  - name: protect_no_claims_discount
+    discoverable: true
+    side_effect_class: state_changing
+    description: Add or remove no-claims discount protection on a car insurance policy.
+  - name: send_no_claims_proof
+    discoverable: true
+    side_effect_class: read_only
+    description: Send proof of the no-claims discount earned, for use with a new insurer.
+  - name: set_auto_renewal
+    discoverable: true
+    side_effect_class: state_changing
+    description: Turn automatic renewal on or off for a policy.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Place a life insurance policy in trust, or change the trustees of a policy already in trust.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Buy a new car, home, pet or life insurance policy.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Cancel a policy, with a refund of the premium within the 14-day cooling-off period (30 days for life cover) or a pro-rata refund after it.
+  task_templates:
+  - {id: TPL-KM-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-KM-RENEWAL-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

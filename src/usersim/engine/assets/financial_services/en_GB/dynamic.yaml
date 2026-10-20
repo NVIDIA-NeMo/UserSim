@@ -1,0 +1,309 @@
+schema_version: v0.1
+locale: en_GB
+taxonomy_id: en_GB_financial_services_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+# Dynamic-tier taxonomy: authored open-ended topic neighbourhoods for the
+# `dynamic` tier, written for the UK institution set (bank | neobank |
+# brokerage | retirement_provider | insurer). The high-street bank and the
+# building society are both banks, so the bank categories favour topics both
+# serve (savings, ISAs, mortgages). At runtime the probe scopes categories to
+# the single institution the conversation is grounded in. Invitations set a
+# topic boundary in the persona's voice (NOT a question); subtopic_hints are
+# neighbourhoods (NOT questions). >=2 hints each. Some hints are deliberately
+# COMPARATIVE / MULTI-DOCUMENT so a grounded answer requires synthesising across
+# several knowledge-base documents. Optional persona_affinities SOFT-WEIGHT
+# selection toward ecologically-valid personas; a soft prior only (never a hard
+# filter).
+categories:
+# ── Banks (high-street bank and building society) ──────────────────────
+- id: everyday-account-and-overdraft
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to talk through how your current account and overdraft fit the way you manage money day to day, in your own words.
+  subtopic_hints:
+  - what the current account includes and whether any fees apply
+  - how the arranged overdraft is charged and what the EAR means in pounds
+  - the help available when you're in your overdraft every month
+  - the basic bank account and who can get one
+  - switching banks with the Current Account Switch Service
+  - what happens to Direct Debits and standing orders when you switch
+  - the overdraft, a personal loan and a credit card compared on the cost of borrowing the same amount
+  - the whole cost of the account over a year, from the overdraft to card use abroad
+- id: savings-and-isas
+  applies_to_types: [bank]
+  persona_affinities: [age:45-54, age:55-64, age:65+]
+  invitation: You want to work out where to keep your savings so they earn more without tying them up longer than you'd like.
+  subtopic_hints:
+  - easy access, regular saver and fixed-rate bond for the same savings goal
+  - what AER means and how often interest is paid
+  - the cash ISA, the £20,000 allowance and the lower cash ISA limit from April 2027
+  - the Personal Savings Allowance and when interest becomes taxable
+  - what happens when a regular saver or fixed bond reaches the end of its term
+  - FSCS protection and the extra cover for a temporary high balance
+  - the easy access saver, cash ISA and fixed-rate bond compared on rate, access and tax
+  - a year of saving traced from opening the account to the interest landing, including any tax due
+- id: mortgages
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, age:35-44, age:45-54]
+  invitation: You want to understand your mortgage options, from your current deal to what happens when it ends.
+  subtopic_hints:
+  - fixed rate versus tracker and how long to fix for
+  - loan to value and how a bigger deposit changes the rate
+  - product fees, early repayment charges and the yearly overpayment allowance
+  - the standard variable rate and what it costs to drift onto it
+  - a product transfer compared with remortgaging elsewhere
+  - support if you're struggling to make your payments
+  - a two-year fix and a five-year fix compared on monthly cost, fees and flexibility
+  - the whole route from agreement in principle to completion, with each document and deadline
+- id: credit-cards-and-loans
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, financial-literacy:low]
+  invitation: You want to understand what borrowing on a card or a loan would really cost you, and your rights if something goes wrong.
+  subtopic_hints:
+  - the representative APR and why your own rate may differ
+  - balance transfers, the transfer fee and what happens when the 0% period ends
+  - section 75 protection on credit card purchases
+  - what persistent debt is and the help on offer
+  - repaying a personal loan early and what it saves
+  - how applying for credit shows on your credit file
+  - a personal loan and a credit card compared for the same purchase
+  - the total cost of a loan from the representative example through to early repayment
+# ── Lifetime ISA (building society and investment platform) ────────────
+- id: first-home-and-lifetime-isa
+  applies_to_types: [bank, brokerage]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: You want to understand how the Lifetime ISA can help you buy your first home, and what happens if your plans change.
+  subtopic_hints:
+  - who can open a Lifetime ISA and the £4,000 yearly limit
+  - the 25% government bonus and when it's paid
+  - the £450,000 price cap and the 12-month rule
+  - how the money reaches your conveyancer at completion
+  - the 25% withdrawal charge and when it doesn't apply
+  - the planned First Time Buyer ISA and what it means for existing savers
+  - a cash Lifetime ISA and a stocks and shares Lifetime ISA compared on risk and growth
+  - the full path from opening the ISA to using it at completion, with each rule along the way
+# ── Digital bank ───────────────────────────────────────────────────────
+- id: app-banking
+  applies_to_types: [neobank]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: You want to know how banking entirely through the app works in practice and whether the paid plan is worth it.
+  subtopic_hints:
+  - savings pots, the instant access savings rate and how interest is paid
+  - spending abroad and the monthly allowance for cash withdrawals
+  - what Quill Plus adds and the minimum subscription
+  - getting help in the app when something goes wrong
+  - the arranged overdraft and how its rate is set
+  - paying in cash or cheques without a branch
+  - the free account and Quill Plus compared over a year of typical use
+  - a trip abroad from start to finish, from card payments to cash withdrawals and fees
+- id: spending-control
+  applies_to_types: [neobank]
+  persona_affinities: [financial-literacy:low]
+  invitation: You want to get your spending under control and find out which tools in the app can help.
+  subtopic_hints:
+  - the gambling block and the cooling-off period before it can be removed
+  - spending notifications and balance alerts
+  - setting money aside in pots before payday
+  - reducing or removing the overdraft
+  - getting free debt advice
+  - spotting subscriptions you've forgotten about
+  - the gambling block, alerts and the overdraft compared as ways to limit spending
+  - a month of tighter spending from payday to payday using the app's tools
+# ── Investment platform ────────────────────────────────────────────────
+- id: investing-in-an-isa
+  applies_to_types: [brokerage]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: You want to start investing through a Stocks and Shares ISA, or review the one you have, and talk it through in your own words.
+  subtopic_hints:
+  - funds compared with individual shares, and the risk behind each
+  - monthly investing compared with a lump sum
+  - the platform fee and dealing charges
+  - what happens when markets fall
+  - transferring an old ISA without losing the tax wrapper
+  - why investments can fall as well as rise and capital is at risk
+  - a Stocks and Shares ISA and a cash ISA compared on return, risk and access
+  - the total cost of investing £200 a month for ten years, including every charge
+- id: investment-tax-and-allowances
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: You want to understand the tax on your investments and how to use your allowances before the tax year ends.
+  subtopic_hints:
+  - the £20,000 ISA allowance and when it resets
+  - capital gains tax and the £3,000 annual exempt amount
+  - the £500 dividend allowance
+  - Bed and ISA and how it works
+  - what changes for cash held in ISAs from April 2027
+  - the records you need for a tax return
+  - an ISA and a General Investment Account compared on the tax due over ten years
+  - the steps before 5 April, from using the allowance to the paperwork
+- id: investing-for-children
+  applies_to_types: [brokerage]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: You want to put money aside for a child and understand who controls it and when.
+  subtopic_hints:
+  - the Junior ISA and the £9,000 yearly allowance
+  - who can open a Junior ISA and who can pay in
+  - what happens when the child turns 18
+  - cash compared with investments for a child's savings
+  - grandparents and family paying in
+  - the fees on a Junior ISA
+  - a Junior ISA and saving in the parent's own name compared
+  - eighteen years of saving for a child, from opening the account to handing it over
+# ── Pension provider ───────────────────────────────────────────────────
+- id: workplace-pension
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:18-24, age:25-34, age:35-44]
+  invitation: You want to understand your workplace pension and whether you're paying in enough.
+  subtopic_hints:
+  - automatic enrolment and the minimum contributions
+  - what your employer pays in and whether they'll match more
+  - tax relief on your contributions
+  - opting out and what you would lose
+  - the default fund and the annual management charge
+  - changing funds, including ethical and Shariah options
+  - staying in the scheme compared with opting out, over a working life
+  - what a year of contributions adds up to, from your payslip to your pension pot
+- id: accessing-your-pension
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: You want to understand your options for taking money from your pension and what each one means for tax.
+  subtopic_hints:
+  - the 25% tax-free cash and the lump sum allowance
+  - drawdown, an annuity and an uncrystallised lump sum
+  - emergency tax on a first withdrawal and getting it back
+  - the money purchase annual allowance after flexible access
+  - the minimum pension age of 55 and the rise to 57 in 2028
+  - free Pension Wise guidance before you decide
+  - drawdown and an annuity compared on income, risk and flexibility
+  - the route from choosing an option to the first payment, with every tax step along the way
+- id: pension-transfers-and-scams
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: You want to bring old pensions together safely and understand what could go wrong.
+  subtopic_hints:
+  - finding a pension you've lost track of
+  - transferring an old workplace pension in
+  - the checks on a transfer and why they are there
+  - warning signs of a pension scam
+  - guarantees or benefits you might lose by transferring
+  - how long a transfer takes
+  - keeping pensions separate compared with consolidating them
+  - a transfer from request to completion, including each check
+- id: pensions-and-inheritance
+  applies_to_types: [retirement_provider]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: You want to understand what happens to your pension when you die and how to make sure it goes to the right people.
+  subtopic_hints:
+  - the expression of wish and keeping it up to date
+  - inheritance tax on unused pensions from April 2027
+  - how beneficiaries are taxed on what they receive
+  - what happens to an annuity or drawdown pot on death
+  - updating your wishes after marriage, divorce or a new child
+  - where a will fits alongside your pension
+  - an expression of wish and a will compared on who decides and when
+  - the steps for your family after a death, from the first call to the payment
+# ── Insurer ────────────────────────────────────────────────────────────
+- id: car-insurance
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:45-54]
+  invitation: You want to understand your car insurance, from the cover you have to what happens at renewal.
+  subtopic_hints:
+  - comprehensive cover compared with third party, fire and theft
+  - compulsory and voluntary excesses
+  - the no-claims discount and whether to protect it
+  - adding a named driver and why fronting is illegal
+  - renewal prices and the rule against charging loyal customers more
+  - turning off automatic renewal
+  - two levels of excess compared on premium and the cost of a claim
+  - a claim from the accident to the repair, including the excess and the no-claims discount
+- id: home-and-pet-insurance
+  applies_to_types: [insurer]
+  persona_affinities: [age:35-44, age:45-54]
+  invitation: You want to check your home or pet insurance covers what you think it does, before you need to claim.
+  subtopic_hints:
+  - buildings cover compared with contents cover
+  - accidental damage and the escape-of-water excess
+  - leaving your home empty for a long time
+  - lifetime pet cover and the yearly vet fee limit
+  - pre-existing conditions and pet insurance
+  - telling the insurer when something changes
+  - lifetime and time-limited pet cover compared over a pet's life
+  - a home claim from the leak to the repair, with each step and cost
+- id: life-insurance
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: You want to work out how much life cover your family would need and how to set it up properly.
+  subtopic_hints:
+  - level term compared with decreasing term
+  - how much cover and for how long
+  - writing a policy in trust and why it matters
+  - the health questions and why honest answers matter
+  - the 30-day cooling-off period
+  - what happens if you stop paying
+  - level and decreasing term cover compared on cost and what they pay out
+  - setting up cover from the first quote to the policy in trust
+# ── Cross-cutting servicing neighbourhoods (span several institution types) ──
+- id: account-lifecycle
+  applies_to_types: [bank, neobank, brokerage, retirement_provider, insurer]
+  invitation: You want to think through opening something new here or closing something old, and what that involves.
+  subtopic_hints:
+  - what you need to open an account or policy and how long it takes
+  - opening something new compared with changing what you already have
+  - closing an account and where the money goes
+  - what happens to regular payments when an account closes
+  - cooling-off and cancellation rights
+  - moving to another provider without losing anything
+  - closing completely compared with switching to a different product
+  - opening and closing compared on requirements, timing, costs and paperwork
+- id: fraud-and-scams
+  applies_to_types: [bank, neobank, brokerage]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: You want to feel confident your money is safe and know what to do if someone tries to scam you.
+  subtopic_hints:
+  - common scams, from fake bank staff to safe account and investment scams
+  - what to do straight away if you've been scammed
+  - reimbursement for authorised push payment scams and its limits
+  - Confirmation of Payee and why a name mismatch matters
+  - your liability for card payments you didn't make
+  - alerts and limits that lower the risk
+  - the full response to a scam, from the first call to the refund
+  - how payment checks, alerts and reimbursement rules work together
+- id: complaints-and-ombudsman
+  applies_to_types: [bank, neobank, brokerage, retirement_provider, insurer]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: You want to resolve a dispute with the firm and know what you can do if you're not happy with the answer.
+  subtopic_hints:
+  - how to make a complaint and how long the firm has to reply
+  - when you can take it to the Financial Ombudsman Service
+  - the Pensions Ombudsman for workplace pension complaints
+  - what evidence helps your case
+  - what the ombudsman can award
+  - going to court as a last resort
+  - a complaint, the ombudsman and court compared on time, cost and outcome
+  - a dispute from the first complaint to the ombudsman's decision
+- id: help-and-authority
+  applies_to_types: [bank, neobank, brokerage, retirement_provider]
+  persona_affinities: [age:65+]
+  invitation: You want to know how someone you trust can help manage your money, and the support available if your circumstances change.
+  subtopic_hints:
+  - a lasting power of attorney compared with a third-party mandate
+  - what an attorney can and cannot do
+  - support for customers in vulnerable circumstances
+  - telling the firm about a bereavement
+  - removing someone's access when things change
+  - who is responsible if an attorney makes a mistake
+  - attorney, mandate and joint account compared on rights and duties
+  - access from start to finish, from setting it up to taking it away
+- id: money-movement
+  applies_to_types: [bank, neobank]
+  invitation: You want to talk about sending and receiving money, from Faster Payments to Direct Debits, and the limits and timings involved.
+  subtopic_hints:
+  - Faster Payments, CHAPS and how long each takes
+  - Confirmation of Payee before a first payment
+  - setting up and cancelling standing orders
+  - the Direct Debit Guarantee
+  - payment limits and why a payment might be held
+  - getting back money sent to the wrong account
+  - Faster Payments and CHAPS compared on speed, cost and limits
+  - a payment traced from the instruction to the money arriving, including every check
