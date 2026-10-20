@@ -2225,6 +2225,16 @@ class TestRegionalConventions:
         assert us.format_money("-12") == "-$12.00"
         assert us.format_money("n/a") == "$n/a"
 
+    def test_percentages_and_whole_amounts_follow_the_region(self):
+        from usersim.engine.core.finance_bank import format_amount, format_percent
+
+        assert format_percent(15.9, number_format="fr_FR") == "15,9 %"
+        assert format_percent(1.70, number_format="de_DE") == "1,7 %"
+        assert format_percent(50, number_format="en_GB") == "50%"
+        assert format_amount(22950, currency_symbol="€", number_format="fr_FR", drop_zero_cents=True) == "22 950 €"
+        assert format_amount(7.9, currency_symbol="€", number_format="de_DE", drop_zero_cents=True) == "7,90 €"
+        assert format_amount(7.9, currency_symbol="£", number_format="en_GB") == "£7.90"
+
     def test_dates_follow_the_region(self):
         day = datetime.date(1980, 3, 27)
         us = load_finance_bank_for_locale("en_US")

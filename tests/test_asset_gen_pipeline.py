@@ -78,6 +78,38 @@ def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     assert out["file_transaction_dispute"]["description"] == ""
 
 
+def test_prompt_values_carry_the_locale_notation():
+    """The prompts hand the model each typed value with its rendering in the
+    locale's notation, so a decimal-comma corpus does not copy ``7.9`` from JSON."""
+    import copy
+
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    product = raw["institutions"][0]["products"][0]
+    product["variables"] = {
+        "monthly_fee": {"type": "money", "value": 7.9},
+        "ceiling": {"type": "money", "value": 22950},
+        "rate": {"type": "percent", "value": 15.9},
+        "term_months": {"type": "int", "value": 48},
+    }
+    us = validate_region_spec(copy.deepcopy(raw))
+    raw.update(locale="fr_FR", region="FR", currency="EUR", currency_symbol="€", number_format="fr_FR")
+    france = validate_region_spec(raw)
+
+    def displays(spec):
+        variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+        return {name: var["display"] for name, var in variables.items()}
+
+    assert displays(france) == {"monthly_fee": "7,90 €", "ceiling": "22 950 €", "rate": "15,9 %", "term_months": "48"}
+    assert displays(us) == {"monthly_fee": "$7.90", "ceiling": "$22,950", "rate": "15.9%", "term_months": "48"}
+    seed = build_institution_seed(france)
+    assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
+
+
 def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
     """A spec description reaches the shared clusters that write a discoverable
     tool's doc, while tools.yaml ships it empty: the assistant learns the tool

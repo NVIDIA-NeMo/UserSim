@@ -550,6 +550,32 @@ def _batches(items: list[Any], cap: int) -> Iterator[list[Any]]:
 # ── Phase 1: institution seed + brief config ────────────────────────────
 
 
+def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[str, Any]]:
+    """Each product with a ``display`` rendering of every typed value in the
+    locale's own notation (``7,90 €``, ``15,9 %``), which the prompts ask the
+    model to write instead of the raw ``value``."""
+    from usersim.engine.core.finance_bank import format_amount, format_percent
+
+    number_format = spec.number_format or spec.locale
+    out: list[dict[str, Any]] = []
+    for product in products:
+        dumped = product.model_dump()
+        for var in dumped["variables"].values():
+            if var["type"] == "money":
+                var["display"] = format_amount(
+                    var["value"],
+                    currency_symbol=spec.currency_symbol,
+                    number_format=number_format,
+                    drop_zero_cents=True,
+                )
+            elif var["type"] == "percent":
+                var["display"] = format_percent(var["value"], number_format=number_format)
+            else:
+                var["display"] = str(var["value"])
+        out.append(dumped)
+    return out
+
+
 def build_institution_seed(spec: RegionSpec):
     """One seed row per institution for the Phase-1 brief (pure)."""
     import pandas as pd
@@ -568,7 +594,7 @@ def build_institution_seed(spec: RegionSpec):
                 "brand_voice": inst.brand_voice,
                 "language": spec.language,
                 "currency_symbol": spec.currency_symbol,
-                "products_json": json.dumps([p.model_dump() for p in inst.products], ensure_ascii=False),
+                "products_json": json.dumps(products_for_prompt(inst.products, spec), ensure_ascii=False),
                 "regulators_json": json.dumps(regulators, ensure_ascii=False),
                 # Market-specific emphasis: region override else region-neutral
                 # default, resolved here so the prompt stays free of any one
@@ -667,8 +693,8 @@ def explode_to_cluster_rows(
             "sibling_doc_index": json.dumps(sibling_index, ensure_ascii=False),
         }
 
-        for product in inst.products:
-            focus = json.dumps(product.model_dump(), ensure_ascii=False)
+        for product, prompt_product in zip(inst.products, products_for_prompt(inst.products, spec)):
+            focus = json.dumps(prompt_product, ensure_ascii=False)
             for batch in _batches(product_plans[product.id], max_docs_per_cluster):
                 rows.append(
                     {

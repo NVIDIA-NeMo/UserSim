@@ -149,6 +149,49 @@ _DATE_FORMATS: dict[str, str] = {
 _DEFAULT_DATE_FORMAT = "%d/%m/%Y"
 
 
+def format_amount(amount: Any, *, currency_symbol: str, number_format: str, drop_zero_cents: bool = False) -> str:
+    """``amount`` in a region's currency and number format.
+
+    ``$1,234.50`` in the US, ``₹1,23,456.00`` in India, ``1 234,50 €`` in France
+    and ``1.234,50 €`` in Germany. ``drop_zero_cents`` writes a whole amount
+    without decimals (``22 950 €``). A value that isn't a number comes back as
+    given, after the symbol.
+    """
+    try:
+        value = Decimal(str(amount))
+    except InvalidOperation:
+        return f"{currency_symbol}{amount}"
+    if not value.is_finite():
+        return f"{currency_symbol}{amount}"
+    sign = "-" if value < 0 else ""
+    whole, cents = f"{abs(value):.2f}".split(".")
+    if number_format.endswith("_IN"):
+        grouped, decimal_mark, symbol_after = _indian_grouped(whole), ".", False
+    else:
+        group, decimal_mark, symbol_after = _MONEY_STYLES.get(number_format.split("_")[0].lower(), (",", ".", False))
+        grouped = f"{int(whole):,}".replace(",", group)
+    number = grouped if drop_zero_cents and cents == "00" else f"{grouped}{decimal_mark}{cents}"
+    if symbol_after:
+        return f"{sign}{number} {currency_symbol}".rstrip()
+    return f"{sign}{currency_symbol}{number}"
+
+
+def format_percent(value: Any, *, number_format: str) -> str:
+    """``value`` as a percentage in a region's number format, without trailing
+    zeros: ``15.9%`` in English, ``15,9 %`` in French and German."""
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation:
+        return f"{value}%"
+    if not number.is_finite():
+        return f"{value}%"
+    text = format(number.normalize(), "f")
+    style = _MONEY_STYLES.get(number_format.split("_")[0].lower())
+    if style is None:
+        return f"{text}%"
+    return f"{text.replace('.', style[1])} %"
+
+
 def _indian_grouped(digits: str) -> str:
     """``"123456"`` -> ``"1,23,456"``: the last three digits, then pairs."""
     head, tail = digits[:-3], digits[-3:]
@@ -444,30 +487,14 @@ class FinanceBank:
         return DEFAULT_DOMAIN_ACCOUNT_LABELS.get(domain, "account")
 
     def format_money(self, amount: Any) -> str:
-        """``amount`` in this region's currency and number format.
-
-        ``$1,234.50`` in the US, ``₹1,23,456.00`` in India, ``1 234,50 €`` in
-        France and ``1.234,50 €`` in Germany, from ``region_meta``'s
-        ``currency_symbol`` and ``number_format`` (else the locale). A value that
-        isn't a number comes back as given, after the symbol.
-        """
-        symbol = str(self.region_meta.get("currency_symbol") or "")
-        try:
-            value = Decimal(str(amount))
-        except InvalidOperation:
-            return f"{symbol}{amount}"
-        if not value.is_finite():
-            return f"{symbol}{amount}"
-        sign = "-" if value < 0 else ""
-        whole, cents = f"{abs(value):.2f}".split(".")
-        number_format = str(self.region_meta.get("number_format") or self.locale)
-        if number_format.endswith("_IN"):
-            return f"{sign}{symbol}{_indian_grouped(whole)}.{cents}"
-        group, decimal_mark, symbol_after = _MONEY_STYLES.get(number_format.split("_")[0].lower(), (",", ".", False))
-        number = f"{int(whole):,}".replace(",", group) + decimal_mark + cents
-        if symbol_after:
-            return f"{sign}{number} {symbol}".rstrip()
-        return f"{sign}{symbol}{number}"
+        """``amount`` in this region's currency and number format, from
+        ``region_meta``'s ``currency_symbol`` and ``number_format`` (else the
+        locale); see :func:`format_amount`."""
+        return format_amount(
+            amount,
+            currency_symbol=str(self.region_meta.get("currency_symbol") or ""),
+            number_format=str(self.region_meta.get("number_format") or self.locale),
+        )
 
     def format_date(self, value: date) -> str:
         """``value`` as this region writes dates.
