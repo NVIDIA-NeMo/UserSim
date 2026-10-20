@@ -1076,9 +1076,11 @@ def _institution_meta(inst: Institution) -> dict[str, Any]:
 
 
 def _tool_dict(tool: Tool) -> dict[str, Any]:
+    # A discoverable tool is learned from its retrieved doc, so tools.yaml keeps
+    # its description empty even when the spec supplies one to steer that doc.
     return {
         "name": tool.name,
-        "description": tool.description,
+        "description": "" if tool.discoverable else tool.description,
         "discoverable": tool.discoverable,
         "side_effect_class": tool.side_effect_class,
         "parameters": tool.parameters,

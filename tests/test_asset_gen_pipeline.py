@@ -78,6 +78,38 @@ def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     assert out["file_transaction_dispute"]["description"] == ""
 
 
+def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
+    """A spec description reaches the shared clusters that write a discoverable
+    tool's doc, while tools.yaml ships it empty: the assistant learns the tool
+    only by retrieving that doc."""
+    import json
+
+    import pandas as pd
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    bank = raw["institutions"][0]
+    described = "Block the card until the customer asks to unblock it."
+    bank["tool_taxonomy"] = [
+        {**t, "description": described} if t["name"] == "freeze_card" else t for t in bank["tool_taxonomy"]
+    ]
+    spec = validate_region_spec(raw)
+    tool = next(t for t in spec.institutions[0].tool_taxonomy if t.name == "freeze_card")
+    assert tool.discoverable and tool.description == described
+
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    rows = explode_to_cluster_rows(brief_df, spec, docs_per_product=10, max_docs_per_cluster=10)
+    shared = rows[(rows.institution_id == spec.institutions[0].id) & (rows.cluster_kind == "shared")]
+    focus_tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert focus_tools["freeze_card"]["description"] == described
+    assert _tool_dict(tool)["description"] == ""
+
+
 def test_build_institution_seed_one_row_per_institution():
     spec = load_region_spec(_REGION_SPEC)
     seed = build_institution_seed(spec)
