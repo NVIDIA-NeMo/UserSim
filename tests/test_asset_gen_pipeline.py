@@ -39,6 +39,11 @@ def _asset_gen_dir() -> Path:
 
 _REGION_SPEC = _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
 
+#: Region specs that author their own title vocabulary.
+_LABELLED_SPECS = sorted(
+    p.stem for p in _REGION_SPEC.parent.glob("*.yaml") if "variable_labels:" in p.read_text(encoding="utf-8")
+)
+
 
 def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     """Region specs list kb_search / verify_identity by name only; serialization
@@ -639,11 +644,12 @@ class TestPlanOwnedTitles:
         latin = {t for t in titles if devanagari_fraction(t) < 0.25}
         assert all("टूल संदर्भ" in t or "का उपयोग कब करें" in t for t in latin)
 
-    def test_hindi_labels_cover_every_variable_and_domain(self):
+    @pytest.mark.parametrize("locale", _LABELLED_SPECS)
+    def test_localized_labels_cover_every_variable_and_domain(self, locale: str):
         """An unmapped name falls back to the machine field name, which lands a raw
         ``below_mab_charge`` / ``retail_banking`` in reader-facing prose. Adding a
         product to the region model must not silently reintroduce that."""
-        spec = load_region_spec(self._SPEC_DIR / "hi_Deva_IN.yaml")
+        spec = load_region_spec(self._SPEC_DIR / f"{locale}.yaml")
         variables = {v for inst in spec.institutions for p in inst.products for v in p.variables}
         domains = {str(d) for inst in spec.institutions for d in inst.domains}
         assert variables - set(spec.doc_titles.variable_labels) == set()
