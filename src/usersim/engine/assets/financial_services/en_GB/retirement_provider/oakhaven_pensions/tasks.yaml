@@ -1,0 +1,387 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for oakhaven_pensions, a workplace and personal
+# pension provider. Every state-changing tool it offers is gold in at least one
+# task. Each task ships THREE opening phrasings in British English. Tasks that
+# access a pension are tagged to customers of 55 and over, the minimum pension
+# age. Read-only tools (request_annuity_quote, get_statements) carry no gold
+# state change.
+templates:
+- id: TPL-OP-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    I've got an old workplace pension with {{old_provider}} worth about £{{amount}}.
+    Can I transfer it into my Oakhaven pension?
+  - >-
+    Please bring my pension from {{old_provider}} over to Oakhaven; it's around
+    £{{amount}}.
+  - >-
+    I want to combine my pensions. Can you transfer my £{{amount}} pot from
+    {{old_provider}} to you?
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '48200.00'
+  param_space:
+    old_provider: [Thistle Life, Harbourline Pensions, a previous employer's scheme]
+    amount: ['9,400', '23,000', '61,500']
+  gold_tool_sequence: [request_pension_transfer]
+  expected_state_deltas: {pension_transfer_status: REQUESTED}
+- id: TPL-OP-CONTRIB-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    I'd like to {{change}} to my personal pension.
+  - >-
+    Can you help me {{change}}?
+  - >-
+    Please {{change}} from next month.
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '48200.00'
+  param_space:
+    change: [increase my monthly contribution to £300, pause my contributions for six months, restart my contributions at £150 a month]
+  gold_tool_sequence: [change_contributions]
+  expected_state_deltas: {contributions_updated: true}
+- id: TPL-OP-OPTOUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:18-24]
+  opening_user_messages:
+  - >-
+    My new job has just put me in the Oakhaven workplace pension. I'd like to opt
+    out.
+  - >-
+    I was enrolled into the workplace pension two weeks ago and don't want to be in
+    it right now. Can I opt out?
+  - >-
+    Please opt me out of the workplace pension my employer signed me up for last
+    week.
+  account_state:
+    account_id: wp_op_0001
+    account_type: Oakhaven Workplace Pension
+    balance: '84.60'
+    enrolled_days_ago: 14
+  param_space: {}
+  gold_tool_sequence: [opt_out_of_workplace_pension]
+  expected_state_deltas: {workplace_pension_status: OPTED_OUT}
+- id: TPL-OP-FUNDS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to move my pension into the {{fund}}.
+  - >-
+    Can you switch my pension investments and future contributions to the {{fund}}?
+  - >-
+    Please change my pension fund to the {{fund}}.
+  account_state:
+    account_id: wp_op_0001
+    account_type: Oakhaven Workplace Pension
+    balance: '36900.00'
+  param_space:
+    fund: [Oakhaven Ethical Growth Fund, Oakhaven Shariah Fund, Oakhaven Cautious Fund]
+  gold_tool_sequence: [update_investment_election]
+  expected_state_deltas: {investment_election: '{{fund}}'}
+- id: TPL-OP-RETIREAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    I now plan to retire at {{age}}. Can you change my selected retirement age?
+  - >-
+    Please update my selected retirement age to {{age}}.
+  - >-
+    My plans have changed and I'll stop work at {{age}}. Can you adjust my pension
+    to that age?
+  account_state:
+    account_id: wp_op_0001
+    account_type: Oakhaven Workplace Pension
+    balance: '142000.00'
+  param_space:
+    age: ['58', '60', '63']
+  gold_tool_sequence: [update_selected_retirement_age]
+  expected_state_deltas: {selected_retirement_age: '{{age}}'}
+- id: TPL-OP-EOW-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to name {{beneficiary}} in my expression of wish for my pension.
+  - >-
+    Can you update who gets my pension if I die? I want it to go to {{beneficiary}}.
+  - >-
+    Please change my expression of wish so that {{beneficiary}} receives my pension.
+  account_state:
+    account_id: wp_op_0001
+    account_type: Oakhaven Workplace Pension
+    balance: '36900.00'
+  param_space:
+    beneficiary: [my wife, my husband, my partner, my two children equally]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-OP-TAXFREECASH-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:55-64]
+  opening_user_messages:
+  - >-
+    I'd like to take my 25% tax-free cash and leave the rest of my pension invested
+    in drawdown.
+  - >-
+    Can I take the tax-free lump sum from my pension now and move the remainder into
+    drawdown?
+  - >-
+    Please start drawdown on my pension and pay me the tax-free cash.
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '186000.00'
+  param_space: {}
+  gold_tool_sequence: [start_drawdown]
+  expected_state_deltas: {drawdown_status: STARTED}
+- id: TPL-OP-INCOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:55-64, age:65+]
+  opening_user_messages:
+  - >-
+    Please pay me £{{amount}} from my drawdown pot this month.
+  - >-
+    Can I take a one-off withdrawal of £{{amount}} from my drawdown?
+  - >-
+    I need £{{amount}} from my pension drawdown for home repairs.
+  account_state:
+    account_id: dd_op_0001
+    account_type: Oakhaven Flexible Drawdown
+    balance: '131000.00'
+  param_space:
+    amount: ['2,000', '6,500', '15,000']
+  gold_tool_sequence: [request_withdrawal]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-OP-ANNUITY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    I'd like to use £{{amount}} of my pension to buy a lifetime annuity.
+  - >-
+    Can you buy me an annuity with £{{amount}} from my pot? I want a guaranteed
+    income.
+  - >-
+    Please go ahead and purchase a lifetime annuity with £{{amount}} of my pension.
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '214000.00'
+  param_space:
+    amount: ['60,000', '100,000', '150,000']
+  gold_tool_sequence: [purchase_annuity]
+  expected_state_deltas: {annuity_status: PURCHASED}
+- id: TPL-OP-OPEN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    I've gone self-employed and need my own pension. Can I open a personal pension
+    with you?
+  - >-
+    Please open an Oakhaven Personal Pension for me; I don't have a workplace scheme
+    any more.
+  - >-
+    I'd like to start a personal pension. How do I open one?
+  account_state:
+    customer_id: cust_op_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-OP-NEWJOB-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    I've changed jobs: transfer my old pension in from {{old_provider}}, raise my
+    personal contribution to £{{amount}} a month, and name {{beneficiary}} in my
+    expression of wish.
+  - >-
+    Please bring over my {{old_provider}} pension, increase my contributions to
+    £{{amount}} a month, and update my expression of wish to {{beneficiary}}.
+  - >-
+    Can you transfer my pension from {{old_provider}}, set my contributions at
+    £{{amount}} monthly, and put {{beneficiary}} down to receive it if I die?
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '48200.00'
+  param_space:
+    old_provider: [Thistle Life, Harbourline Pensions]
+    amount: ['200', '400']
+    beneficiary: [my partner, my wife, my husband]
+  gold_tool_sequence: [request_pension_transfer, change_contributions, update_beneficiary]
+  expected_state_deltas: {pension_transfer_status: REQUESTED, contributions_updated: true, beneficiary_updated: true}
+- id: TPL-OP-RETIRE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:55-64]
+  opening_user_messages:
+  - >-
+    I'm retiring next month: move my pension into drawdown with the tax-free cash,
+    pay me £{{amount}} as my first income payment, and remind me before each
+    payment.
+  - >-
+    Please start drawdown and pay my tax-free lump sum, take an income payment of
+    £{{amount}}, and set up a reminder ahead of every payment.
+  - >-
+    Can you put my pot into drawdown with the 25% tax-free cash, withdraw
+    £{{amount}} as income, and alert me before each payment?
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '186000.00'
+  param_space:
+    amount: ['1,200', '2,500']
+  gold_tool_sequence: [start_drawdown, request_withdrawal, set_alerts]
+  expected_state_deltas: {drawdown_status: STARTED, withdrawal_status: PROCESSING, alerts_updated: true}
+- id: TPL-OP-FAMILY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    We've had a baby and moved house: name {{beneficiary}} in my expression of wish,
+    update my address to {{address}}, and pause my personal contributions for six
+    months.
+  - >-
+    Please update my expression of wish to {{beneficiary}}, change my address to
+    {{address}}, and pause my pension contributions while I'm on parental leave.
+  - >-
+    Can you put {{beneficiary}} in my expression of wish, record my new address
+    {{address}}, and stop my contributions for six months?
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '48200.00'
+  param_space:
+    beneficiary: [my partner, my partner and our baby equally]
+    address: ['16 Elm Grove, Bristol BS6 6AH', '2 Mill Close, Ipswich IP4 5RT']
+  gold_tool_sequence: [update_beneficiary, update_contact_info, change_contributions]
+  expected_state_deltas: {beneficiary_updated: true, contact_updated: true, contributions_updated: true}
+- id: TPL-OP-LEAVING-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:45-54]
+  opening_user_messages:
+  - >-
+    I'm moving my pension to {{new_provider}}: please transfer it out, close my
+    Oakhaven account once it's gone, and email me when the transfer completes.
+  - >-
+    Can you transfer my pension to {{new_provider}}, then close my account, and let
+    me know when the money arrives with them?
+  - >-
+    Please send my pension over to {{new_provider}}, close the plan afterwards, and
+    alert me when it's done.
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '96400.00'
+  param_space:
+    new_provider: [Thistle Life, Harbourline Pensions]
+  gold_tool_sequence: [request_pension_transfer, close_account, set_alerts]
+  expected_state_deltas: {pension_transfer_status: REQUESTED, pp_op_0001.status: CLOSED, alerts_updated: true}
+- id: TPL-OP-WINDDOWN-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:55-64]
+  opening_user_messages:
+  - >-
+    I'm planning to retire at {{age}}: move my pension into the {{fund}}, change my
+    selected retirement age to {{age}}, and send me my yearly statement by email.
+  - >-
+    Please switch my pension to the {{fund}}, set my retirement age to {{age}}, and
+    alert me when each annual statement is ready.
+  - >-
+    Can you move me into the {{fund}}, update my selected retirement age to {{age}},
+    and notify me about my statements?
+  account_state:
+    account_id: wp_op_0001
+    account_type: Oakhaven Workplace Pension
+    balance: '142000.00'
+  param_space:
+    age: ['65', '67']
+    fund: [Oakhaven Cautious Fund, Oakhaven Pre-Retirement Fund]
+  gold_tool_sequence: [update_investment_election, update_selected_retirement_age, set_alerts]
+  expected_state_deltas: {investment_election: '{{fund}}', selected_retirement_age: '{{age}}', alerts_updated: true}
+- id: TPL-OP-RETIRE-FULL-001
+  tier: verifiable
+  task_type: transactional
+  domain: retirement
+  placeholder: true
+  persona_tags: [region:any, age:55-64]
+  opening_user_messages:
+  - >-
+    I'm retiring this year: transfer in my old pension from {{old_provider}}, move
+    everything into drawdown with my tax-free cash, pay me £{{amount}} as my first
+    income payment, and remind me before each payment.
+  - >-
+    Please bring my {{old_provider}} pension over, start drawdown and pay my
+    tax-free lump sum, take £{{amount}} as income, and set up payment reminders.
+  - >-
+    Can you transfer my pension from {{old_provider}}, put the whole pot into
+    drawdown with the 25% tax-free cash, withdraw £{{amount}} as income, and alert
+    me before every payment?
+  account_state:
+    account_id: pp_op_0001
+    account_type: Oakhaven Personal Pension
+    balance: '186000.00'
+  param_space:
+    old_provider: [Thistle Life, Harbourline Pensions]
+    amount: ['1,500', '2,200']
+  gold_tool_sequence: [request_pension_transfer, start_drawdown, request_withdrawal, set_alerts]
+  expected_state_deltas: {pension_transfer_status: REQUESTED, drawdown_status: STARTED, withdrawal_status: PROCESSING, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_GB/dynamic.yaml), not scripted templates.
