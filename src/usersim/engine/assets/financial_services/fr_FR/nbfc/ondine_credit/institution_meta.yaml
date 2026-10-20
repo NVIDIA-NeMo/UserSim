@@ -1,0 +1,9 @@
+institution_id: ondine_credit
+display_name: Ondine Crédit
+type: nbfc
+brand_voice: neobank
+domains:
+- lending_mortgage
+- payments
+placeholder: true
+schema_version: v0.1

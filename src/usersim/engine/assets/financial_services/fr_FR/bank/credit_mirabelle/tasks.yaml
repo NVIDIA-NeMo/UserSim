@@ -1,0 +1,529 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for credit_mirabelle, a cooperative regional bank.
+# Every state-changing tool it offers is gold in at least one task. Each task
+# ships THREE opening phrasings in French (build_instance picks one per
+# trajectory) so the assistant sees varied turn-1 wording while the gold stays
+# fixed. Read-only tools (get_account_transactions, get_statements,
+# dispute_status) carry no gold state change.
+templates:
+- id: TPL-CM-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bonjour, en consultant mon compte je vois un paiement par carte que je ne
+    reconnais pas : {{amount}} € chez {{merchant}}. Je n'ai jamais fait cet achat.
+    Pouvez-vous m'aider ?
+  - >-
+    Il y a une opération de {{amount}} € de {{merchant}} sur mon relevé qui n'est
+    pas de moi. Comment je fais pour la faire annuler ?
+  - >-
+    Je crois qu'on m'a débité un achat que je n'ai pas fait : {{merchant}},
+    {{amount}} €. Vous pouvez lancer une contestation ?
+  account_state:
+    account_id: acct_cm_0001
+    cards:
+    - {card_id: card_cm_0001, status: active}
+    transactions:
+    - {transaction_id: txn_cm_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Média Flux Plus, Club Forme Azur, Électro Nova, Mode Rivoli en ligne]
+    amount: ['89,99', '250,00', '1 499,00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_cm_0001.status: UNDER_REVIEW}
+  # blocking the compromised card and ordering a replacement are legitimate
+  # actions a customer often requests during a fraud dispute — permitted (not
+  # required).
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-CM-FREEZECARD-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je crois que ma carte bancaire a été {{event}}. Pouvez-vous la bloquer tout de
+    suite pour que personne ne puisse s'en servir ?
+  - >-
+    Merci de bloquer ma carte se terminant par 0001 : elle a été {{event}} et j'ai
+    peur d'une fraude.
+  - >-
+    Quelque chose ne va pas, ma carte a été {{event}}. Vous pouvez bloquer
+    temporairement la carte se terminant par 0001, le temps que je m'organise ?
+  account_state:
+    account_id: acct_cm_0001
+    # openings reference "carte se terminant par 0001"; pin last4 so the account
+    # grounding the user is given matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_cm_0001, status: active}
+  param_space:
+    event: [perdue, égarée, volée]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_cm_0001.status: frozen}
+- id: TPL-CM-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bonjour, pouvez-vous virer {{amount}} € de mon compte courant vers mon livret
+    A ?
+  - >-
+    J'aimerais transférer {{amount}} € de mon compte courant sur mon livret A. Vous
+    pouvez faire le virement ?
+  - >-
+    Merci de passer {{amount}} € de mon compte courant à mon livret A.
+  account_state:
+    account_id: acct_cm_0001
+    savings_account_id: acct_cm_liv_0001
+    checking_balance: '10000.00'
+  param_space:
+    amount: ['250', '1 000', '5 000']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-CM-STOPPAYMENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # French law allows a cheque opposition only for loss, theft, fraudulent use
+  # or the payee's insolvency, so the cheque openings give one of those grounds;
+  # the other opening stops a pending SEPA direct debit.
+  opening_user_messages:
+  - >-
+    J'ai perdu un chèque n° {{check_no}} que j'avais rempli à l'ordre de
+    {{payee}}, avant de l'envoyer. Pouvez-vous faire opposition dessus ?
+  - >-
+    Pouvez-vous bloquer le prélèvement de {{amount}} € de {{payee}} en attente sur
+    mon compte ? Je n'ai plus de contrat avec eux.
+  - >-
+    On m'a volé un chèque n° {{check_no}} libellé à l'ordre de {{payee}}. Il faut
+    faire opposition avant qu'il soit encaissé : vous pouvez vous en occuper ?
+  account_state:
+    account_id: acct_cm_0001
+    pending_payments:
+    - {payment_id: pay_cm_0001, payee: '{{payee}}', amount: '{{amount}}', check_no: '{{check_no}}'}
+  param_space:
+    payee: [Cabinet Immobilier Lacroix, Mutuelle Sérénité, Garage Duval]
+    amount: ['320,00', '1 200,00']
+    check_no: ['4217035', '4217041']
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {pay_cm_0001.status: STOPPED}
+- id: TPL-CM-ACTIVATECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens de recevoir ma nouvelle carte bancaire par courrier. Vous pouvez
+    l'activer ?
+  - >-
+    J'ai reçu ma carte de remplacement. Comment je l'active ? Vous pouvez le faire
+    de votre côté ?
+  - >-
+    Ma nouvelle carte est arrivée, merci de l'activer pour que je puisse m'en
+    servir.
+  account_state:
+    account_id: acct_cm_0001
+    cards:
+    - {card_id: card_cm_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_cm_0002.status: active}
+- id: TPL-CM-OPENACCT-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais ouvrir un {{acct_type}} au Crédit Mirabelle. Vous pouvez m'aider à
+    démarrer ?
+  - >-
+    Est-ce que je peux ouvrir un {{acct_type}} ? J'ai déjà un compte chez vous.
+  - >-
+    Je voudrais ajouter un {{acct_type}} à mon espace client. Qu'est-ce qu'il me
+    faut ?
+  account_state:
+    customer_id: cust_cm_0001
+  param_space:
+    acct_type: [livret A, compte joint]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-CM-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens de déménager. Pouvez-vous mettre à jour mon adresse : {{address}} ?
+  - >-
+    J'ai changé de numéro de portable, le nouveau est le {{phone}}. Vous pouvez le
+    mettre à jour dans mon dossier ?
+  - >-
+    Merci de remplacer mon adresse e-mail par {{email}} dans mon espace client.
+  account_state:
+    customer_id: cust_cm_0001
+  param_space:
+    address: ['21 rue Victor-Hugo, 59000 Lille', '6 impasse des Vignes, 21000 Dijon']
+    phone: ['06 39 98 42 17', '06 39 98 15 63']
+    email: [c.martin@example.com, l.moreau@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-CM-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je voudrais ajouter {{payee}} comme bénéficiaire de virement sur mon compte.
+    L'IBAN est {{iban}}.
+  - >-
+    Pouvez-vous enregistrer un nouveau bénéficiaire pour mes virements :
+    {{payee}}, IBAN {{iban}} ?
+  - >-
+    J'ai besoin de faire des virements réguliers à {{payee}}. Vous pouvez
+    l'ajouter à mes bénéficiaires ? Voici l'IBAN : {{iban}}.
+  account_state:
+    account_id: acct_cm_0001
+  param_space:
+    payee: [ma fille, mon propriétaire, la crèche Les Petits Pas]
+    iban: ['FR76 1111 2222 3333 4444 5555 601', 'FR76 9999 8888 7777 6666 5555 402']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-CM-PROCURATION-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais donner une procuration sur mon compte à {{person}}. Qu'est-ce qu'il
+    vous faut de ma part ?
+  - >-
+    Pouvez-vous ajouter {{person}} comme mandataire sur mon compte pour lui
+    permettre d'y accéder ?
+  - >-
+    Merci de donner à {{person}} une procuration sur mon compte.
+  account_state:
+    account_id: acct_cm_0001
+  param_space:
+    person: [mon conjoint, mon fils, ma sœur]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-CM-EARLYREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens de toucher un héritage et je voudrais rembourser par anticipation
+    {{amount}} € de mon prêt immobilier. Vous pouvez lancer la demande ?
+  - >-
+    J'aimerais faire un remboursement anticipé partiel de {{amount}} € sur mon
+    crédit immobilier. Comment on procède ?
+  - >-
+    Merci d'enregistrer un remboursement anticipé de {{amount}} € sur mon prêt
+    immobilier ; je préfère réduire la durée plutôt que les mensualités.
+  account_state:
+    account_id: loan_cm_0001
+    account_type: prêt immobilier
+    balance: '182000.00'
+  param_space:
+    amount: ['10 000', '25 000', '40 000']
+  gold_tool_sequence: [request_early_repayment]
+  expected_state_deltas: {early_repayment_status: REQUESTED}
+- id: TPL-CM-BORROWERINS-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai trouvé une assurance emprunteur moins chère, chez {{insurer}}, avec les
+    mêmes garanties. Je voudrais remplacer celle de mon prêt immobilier, c'est
+    possible ?
+  - >-
+    On m'a dit qu'on pouvait changer d'assurance emprunteur à tout moment.
+    J'aimerais faire la substitution sur mon prêt avec un contrat de {{insurer}}.
+  - >-
+    Pouvez-vous enregistrer ma demande de changement d'assurance emprunteur ? J'ai
+    une offre de {{insurer}} avec des garanties équivalentes.
+  account_state:
+    account_id: loan_cm_0001
+    account_type: prêt immobilier
+    balance: '182000.00'
+  param_space:
+    insurer: [Assurances du Lys, Prévoyance Horizon]
+  gold_tool_sequence: [change_borrower_insurance]
+  expected_state_deltas: {borrower_insurance_change: REQUESTED}
+- id: TPL-CM-MODULATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens d'avoir une augmentation et j'aimerais augmenter mes mensualités de
+    prêt immobilier de {{delta}} € pour finir plus tôt.
+  - >-
+    Avec l'arrivée de notre deuxième enfant, notre budget est serré : est-ce que
+    je peux baisser mes mensualités de prêt de {{delta}} € ?
+  - >-
+    Pouvez-vous moduler les échéances de mon crédit immobilier de {{delta}} € par
+    mois ?
+  account_state:
+    account_id: loan_cm_0001
+    account_type: prêt immobilier
+    balance: '182000.00'
+  param_space:
+    delta: ['100', '150', '200']
+  gold_tool_sequence: [modulate_loan_payments]
+  expected_state_deltas: {loan_payments_modulated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-CM-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai perdu mon portefeuille avec ma carte se terminant par 0001 dedans, et je
+    viens de voir un paiement de {{amount}} € chez {{merchant}} que je n'ai jamais
+    fait. Pouvez-vous bloquer la carte, contester ce paiement et m'envoyer une
+    nouvelle carte ?
+  - >-
+    Ma carte se terminant par 0001 a disparu et il y a un paiement frauduleux de
+    {{amount}} € chez {{merchant}}. Merci de la bloquer, de contester le paiement
+    et de m'envoyer une nouvelle carte.
+  - >-
+    Quelqu'un a peut-être ma carte se terminant par 0001 : bloquez-la, ouvrez une
+    contestation sur le paiement de {{amount}} € chez {{merchant}} et
+    commandez-moi une nouvelle carte.
+  account_state:
+    account_id: acct_cm_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_cm_0001, status: active}
+    transactions:
+    - {transaction_id: txn_cm_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Club Forme Azur, Électro Nova, Média Flux Plus]
+    amount: ['129,99', '480,00']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_cm_0001.status: frozen, txn_cm_0002.status: UNDER_REVIEW, card_cm_0001.replacement: ordered}
+- id: TPL-CM-NEWACCT-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais ouvrir un {{acct_type}}, donner une procuration dessus à {{person}}
+    et activer les alertes de solde. Vous pouvez tout mettre en place ?
+  - >-
+    Merci de m'ouvrir un {{acct_type}}, de donner une procuration à {{person}} et
+    d'activer des alertes sur ce compte.
+  - >-
+    Pouvez-vous m'ouvrir un {{acct_type}}, y ajouter {{person}} comme mandataire
+    et mettre en place des alertes pour suivre le solde ?
+  account_state:
+    account_id: acct_cm_0001
+  param_space:
+    acct_type: [deuxième compte courant, livret A]
+    person: [mon conjoint, mon fils]
+  gold_tool_sequence: [open_account, manage_authorized_users, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, authorized_users_updated: true, alerts_updated: true}
+- id: TPL-CM-REORG-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  # A LEP must be closed once the household's income exceeds the ceiling two
+  # years running, which is the situation these openings describe.
+  opening_user_messages:
+  - >-
+    Mes revenus dépassent le plafond du LEP depuis deux ans, donc il doit être
+    clôturé : virez les 2 500 € qui restent dessus sur mon compte courant,
+    clôturez-le, puis ouvrez-moi un livret A avec une alerte de solde.
+  - >-
+    Je ne suis plus éligible au LEP. Merci de transférer son solde (2 500 €) sur
+    mon compte courant, de le fermer, d'ouvrir un livret A et d'y activer des
+    alertes.
+  - >-
+    On fait le ménage : videz mon LEP (2 500 €) sur mon compte courant, clôturez
+    ce livret, ouvrez-moi un livret A et ajoutez une alerte de solde.
+  account_state:
+    account_id: acct_cm_lep_0001
+    account_type: LEP
+    last4: '0001'
+    # the openings quote this balance; it stays machine-readable for format_money.
+    balance: '2500.00'
+    checking_account_id: acct_cm_0001
+  param_space: {}
+  gold_tool_sequence: [transfer_funds, close_account, open_account, set_alerts]
+  expected_state_deltas: {acct_cm_lep_0001.status: CLOSED, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-CM-DISPUTE-STOP-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Deux soucis : merci de faire opposition au chèque n° {{check_no}} que j'ai
+    perdu, de contester le paiement en double de {{amount}} € chez {{merchant}},
+    puis de régler correctement ma facture {{payee}}.
+  - >-
+    J'ai besoin que vous fassiez opposition au chèque n° {{check_no}}, qui m'a été
+    volé, que vous contestiez le double débit de {{amount}} € de {{merchant}} et
+    que vous fassiez le bon paiement à {{payee}}.
+  - >-
+    Pouvez-vous faire opposition au chèque n° {{check_no}} que j'ai égaré, ouvrir
+    une contestation sur le paiement de {{amount}} € débité deux fois par
+    {{merchant}}, et payer {{payee}} ?
+  account_state:
+    account_id: acct_cm_0001
+    payments:
+    - {payment_id: pay_cm_0002, payee: '{{payee}}', amount: '{{amount}}', check_no: '{{check_no}}'}
+    transactions:
+    - {transaction_id: txn_cm_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    check_no: ['4217035', '4217058']
+    amount: ['85,00', '240,00']
+    merchant: [Électro Nova, Mode Rivoli en ligne]
+    payee: [Eaux de la Métropole, Mutuelle Sérénité]
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, pay_bill]
+  expected_state_deltas: {pay_cm_0002.status: STOPPED, txn_cm_0003.status: UNDER_REVIEW, bill_paid: true}
+- id: TPL-CM-MOVE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je change de banque. Merci de mettre à jour mon adresse : {{address}}, de
+    virer mon solde sur mon livret A, puis de clôturer mon compte courant.
+  - >-
+    Mettez à jour mon adresse ({{address}}), transférez le solde de mon compte
+    courant sur mon livret A et clôturez le compte courant.
+  - >-
+    J'ai déménagé au {{address}} : mettez à jour mon dossier, virez le solde de mon
+    compte courant sur mon livret A, puis fermez le compte courant.
+  account_state:
+    account_id: acct_cm_0001
+    savings_account_id: acct_cm_liv_0001
+  param_space:
+    address: ['21 rue Victor-Hugo, 59000 Lille', '6 impasse des Vignes, 21000 Dijon']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_updated: true, transfer_status: COMPLETED, acct_cm_0001.status: CLOSED}
+- id: TPL-CM-DIVORCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Après mon divorce, je dois retirer la procuration de {{ex}} sur mon compte,
+    supprimer son IBAN de mes bénéficiaires de virement et mettre à jour mon
+    adresse : {{address}}.
+  - >-
+    Merci de retirer {{ex}} comme mandataire, d'effacer son compte de mes
+    bénéficiaires et de changer mon adresse pour {{address}}.
+  - >-
+    Suite à ma séparation : supprimez la procuration de {{ex}}, retirez son IBAN
+    de la liste de mes bénéficiaires et mettez à jour mon adresse ({{address}}).
+  account_state:
+    account_id: acct_cm_0001
+  param_space:
+    ex: [mon ex-conjoint, mon ancien compagnon, mon ancienne compagne]
+    address: ['21 rue Victor-Hugo, 59000 Lille', '6 impasse des Vignes, 21000 Dijon']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, update_contact_info]
+  expected_state_deltas: {authorized_users_updated: true, payee_removed: true, contact_updated: true}
+- id: TPL-CM-TRAVEL-PREP-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je pars bientôt en voyage. Ma carte se terminant par 0001 est usée :
+    commandez-m'en une nouvelle, activez les alertes pour les paiements à
+    l'étranger et réglez ma facture {{payee}} en avance.
+  - >-
+    Avant mon départ : envoyez-moi une nouvelle carte pour remplacer celle se
+    terminant par 0001, qui est usée, mettez en place des alertes et payez
+    {{payee}} dès maintenant.
+  - >-
+    Pouvez-vous commander une carte de remplacement pour ma carte usée se
+    terminant par 0001, activer les alertes de voyage et régler ma facture
+    {{payee}} en avance ?
+  account_state:
+    account_id: acct_cm_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_cm_0001, status: active}
+  param_space:
+    payee: [Eaux de la Métropole, Mutuelle Sérénité]
+  gold_tool_sequence: [order_replacement_card, set_alerts, pay_bill]
+  expected_state_deltas: {card_cm_0001.replacement: ordered, alerts_updated: true, bill_paid: true}
+- id: TPL-CM-HOMELOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Je revois le budget de mon prêt immobilier : je veux remplacer mon assurance
+    emprunteur par l'offre moins chère de {{insurer}}, baisser mes mensualités de
+    {{delta}} € et recevoir une alerte avant chaque échéance.
+  - >-
+    Merci d'enregistrer la substitution de mon assurance emprunteur au profit de
+    {{insurer}}, de réduire mes échéances de {{delta}} € par mois et d'activer une
+    alerte de prélèvement.
+  - >-
+    Pouvez-vous changer l'assurance de mon prêt immobilier pour celle de
+    {{insurer}}, moduler mes mensualités à la baisse de {{delta}} € et me prévenir
+    avant chaque prélèvement ?
+  account_state:
+    account_id: loan_cm_0001
+    account_type: prêt immobilier
+    balance: '182000.00'
+  param_space:
+    insurer: [Assurances du Lys, Prévoyance Horizon]
+    delta: ['100', '200']
+  gold_tool_sequence: [change_borrower_insurance, modulate_loan_payments, set_alerts]
+  expected_state_deltas: {borrower_insurance_change: REQUESTED, loan_payments_modulated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/fr_FR/dynamic.yaml), not scripted templates.

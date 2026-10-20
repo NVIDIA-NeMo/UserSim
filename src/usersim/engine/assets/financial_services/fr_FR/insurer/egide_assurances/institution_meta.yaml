@@ -1,0 +1,8 @@
+institution_id: egide_assurances
+display_name: Égide Assurances
+type: insurer
+brand_voice: traditional
+domains:
+- insurance
+placeholder: true
+schema_version: v0.1

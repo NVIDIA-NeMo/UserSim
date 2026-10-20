@@ -1,0 +1,264 @@
+schema_version: v0.1
+locale: fr_FR
+taxonomy_id: fr_FR_financial_services_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+# Dynamic-tier taxonomy: authored open-ended topic neighborhoods for the
+# `dynamic` tier, written for the French institution set (bank | neobank |
+# insurer | nbfc | brokerage). At runtime the probe scopes categories to the
+# single institution the conversation is grounded in. Invitations set a topic
+# boundary in the persona's voice (NOT a question); subtopic_hints are
+# neighborhoods (NOT questions). >=2 hints each. Some hints are deliberately
+# COMPARATIVE / MULTI-DOCUMENT so a grounded answer requires synthesizing
+# across several knowledge-base documents (multiple kb_search calls) rather
+# than one lookup. Optional persona_affinities SOFT-WEIGHT selection toward
+# ecologically-valid personas; a soft prior only (never a hard filter).
+categories:
+# ── Cooperative bank ───────────────────────────────────────────────────
+- id: banking-account-fit
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: Vous voulez réfléchir, avec vos propres mots, au compte ou au livret de la banque qui correspond vraiment à votre façon de gérer votre argent.
+  subtopic_hints:
+  - compte courant, livret A ou LEP selon l'usage que vous en avez au quotidien
+  - le poids de la cotisation de l'offre groupée et de la carte dans votre budget
+  - qui peut ouvrir un LEP et ce qui se passe quand les revenus dépassent le plafond
+  - le découvert autorisé, son taux et ce qu'il coûte vraiment
+  - devenir sociétaire avec des parts sociales, et ce que cela change
+  - garder une épargne de précaution à part de l'argent du quotidien
+  - le compte courant, le livret A et le LEP comparés côte à côte sur les frais, les plafonds et la disponibilité
+  - le découvert dans son ensemble, de l'autorisation et son taux aux commissions d'intervention et leur plafonnement
+- id: banking-fees-and-disputes
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: Vous voulez démêler des frais, un prélèvement ou un problème de carte sur votre compte et comprendre vos options.
+  subtopic_hints:
+  - les frais qui peuvent être évités ou remboursés, et comment
+  - l'offre réservée aux clients en situation de fragilité financière
+  - la différence entre contester une opération et signaler une fraude
+  - les délais pour contester une opération et pour être remboursé
+  - faire opposition à un chèque perdu ou à un prélèvement
+  - les justificatifs utiles si vous devez aller plus loin
+  - le parcours complet d'une contestation, des frais en jeu au sort de la carte, et ce qui la distingue d'un signalement de fraude
+  - chaque frais d'incident du compte comparé avec son plafond et le moyen de l'éviter
+- id: home-loan
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: Vous voulez comprendre comment fonctionne un crédit immobilier et ce que vous pouvez y changer en cours de route.
+  subtopic_hints:
+  - taux fixe, durée et taux d'endettement, et ce qui décide d'un dossier
+  - le délai de réflexion avant d'accepter une offre de prêt
+  - changer d'assurance emprunteur en cours de prêt
+  - rembourser par anticipation, en partie ou en totalité, et les indemnités
+  - augmenter ou baisser ses mensualités quand sa situation change
+  - les frais de dossier et le coût total du crédit
+  - réduire la durée ou réduire les mensualités après un remboursement anticipé, comparés sur le coût final
+  - le coût complet d'un prêt immobilier, entre taux, assurance emprunteur, frais de dossier et indemnités éventuelles
+# ── Payment-account neobank ────────────────────────────────────────────
+- id: neobank-account-basics
+  applies_to_types: [neobank]
+  persona_affinities: [financial-literacy:low, age:18-24]
+  invitation: Vous voulez comprendre ce qu'un compte ouvert chez un buraliste vous permet de faire au quotidien, et ses limites.
+  subtopic_hints:
+  - ouvrir le compte en point de vente et les papiers à apporter
+  - la cotisation annuelle et les frais de dépôt d'espèces ou de retrait
+  - pourquoi il n'y a ni découvert ni chéquier
+  - recevoir son salaire ou ses allocations sur ce compte
+  - la protection de l'argent déposé et la différence avec une banque
+  - payer et retirer à l'étranger avec la carte
+  - ce compte et un compte bancaire classique comparés sur les frais, les services et la protection des fonds
+  - le coût d'une année d'utilisation, entre cotisation, dépôts d'espèces, retraits et carte
+- id: neobank-family-and-teens
+  applies_to_types: [neobank]
+  persona_affinities: [age:35-44, age:45-54]
+  invitation: Vous voulez voir comment un compte pour un adolescent peut fonctionner et quelle place vous y gardez en tant que parent.
+  subtopic_hints:
+  - à partir de quel âge ouvrir un compte à son enfant et avec quel accord
+  - verser de l'argent de poche de façon régulière
+  - fixer et ajuster les plafonds de paiement de l'enfant
+  - ce que le parent voit et peut faire sur le compte de l'enfant
+  - ce qui se passe à la majorité
+  - les achats en ligne et les risques d'arnaque pour un adolescent
+  - le compte ado et le compte classique comparés sur l'autonomie, les plafonds et les frais
+  - l'accompagnement complet d'un premier compte, de l'ouverture au passage à la majorité
+# ── Mutual insurer ─────────────────────────────────────────────────────
+- id: life-insurance-and-retirement-savings
+  applies_to_types: [insurer]
+  persona_affinities: [age:45-54, age:55-64, financial-literacy:high]
+  invitation: Vous voulez réfléchir à la place de l'assurance-vie et du PER dans votre épargne, avec vos propres mots.
+  subtopic_hints:
+  - fonds en euros ou unités de compte selon votre horizon et votre rapport au risque
+  - les frais sur versements et les frais de gestion, et leur effet dans la durée
+  - la fiscalité de l'assurance-vie avant et après huit ans
+  - la déduction des versements sur le PER et le plafond à respecter
+  - les cas où l'on peut débloquer un PER avant la retraite
+  - sortir en capital ou en rente au moment de la retraite
+  - l'assurance-vie et le PER comparés sur la disponibilité de l'argent, la fiscalité et la transmission
+  - le parcours complet d'un PER, des versements déductibles jusqu'à la sortie à la retraite
+- id: home-and-car-claims
+  applies_to_types: [insurer]
+  invitation: Vous voulez savoir comment se passe un sinistre sur votre logement ou votre voiture, et ce qui sera remboursé.
+  subtopic_hints:
+  - les délais pour déclarer un sinistre et les justificatifs à fournir
+  - le dégât des eaux venu d'un voisin et qui prend en charge quoi
+  - le constat amiable après un accrochage
+  - la franchise et ce qui reste à votre charge
+  - les catastrophes naturelles et la franchise légale
+  - changer de contrat ou résilier après un an, en ligne
+  - le dégât des eaux, le vol et l'inondation comparés sur les délais de déclaration, les franchises et l'indemnisation
+  - le parcours complet d'un sinistre auto, du constat amiable à l'indemnisation et à l'effet sur le bonus
+- id: health-cover
+  applies_to_types: [insurer]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: Vous voulez comprendre ce que votre complémentaire santé rembourse vraiment, en plus de l'Assurance Maladie.
+  subtopic_hints:
+  - ce qui reste à payer après le remboursement de l'Assurance Maladie
+  - le tiers payant et quand il ne s'applique pas
+  - les lunettes, les soins dentaires et les aides auditives du panier 100 % Santé
+  - le forfait journalier en cas d'hospitalisation
+  - ajouter un enfant ou un conjoint au contrat
+  - résilier ou changer de formule après un an
+  - les formules comparées sur l'optique, le dentaire et l'hospitalisation pour une même famille
+  - le chemin complet d'une demande de remboursement hors tiers payant, de la facture au virement
+# ── Consumer-credit lender ─────────────────────────────────────────────
+- id: consumer-credit-choice
+  applies_to_types: [nbfc]
+  persona_affinities: [age:25-34, financial-literacy:low]
+  invitation: Vous voulez comprendre quel type de crédit conviendrait à votre projet et ce qu'il vous coûterait vraiment.
+  subtopic_hints:
+  - prêt personnel, crédit renouvelable ou crédit auto selon le projet
+  - lire le TAEG, la mensualité et le coût total d'un exemple
+  - le taux d'usure et ce qu'il protège
+  - le paiement en 3 ou 4 fois et ce qui change pour lui en novembre
+  - ce que le prêteur vérifie avant d'accorder un crédit
+  - le délai de rétractation après la signature
+  - le prêt personnel et le crédit renouvelable comparés sur le coût total pour un même montant
+  - le coût complet d'un crédit auto, du TAEG à la mensualité et au coût total
+- id: repayment-difficulties
+  applies_to_types: [nbfc]
+  persona_affinities: [financial-literacy:low]
+  invitation: Vous voulez savoir quoi faire si vous avez du mal à rembourser un crédit, avant que la situation ne s'aggrave.
+  subtopic_hints:
+  - régulariser une mensualité impayée
+  - demander un report ou une baisse temporaire des mensualités
+  - ce qu'est le FICP et quand on y est inscrit
+  - le dossier de surendettement à la Banque de France
+  - rembourser par anticipation pour alléger son budget
+  - changer la date de prélèvement pour l'aligner sur son salaire
+  - le report d'échéance et le remboursement anticipé comparés sur le coût et les conséquences
+  - le parcours complet d'une difficulté de remboursement, du premier impayé aux solutions d'accompagnement
+# ── Online broker ──────────────────────────────────────────────────────
+- id: brokerage-account-choice
+  applies_to_types: [brokerage]
+  persona_affinities: [age:18-24, age:25-34, financial-literacy:high]
+  invitation: Vous voulez réfléchir à voix haute au type de compte d'investissement qui convient à votre situation.
+  subtopic_hints:
+  - PEA ou compte-titres ordinaire selon votre objectif et votre horizon
+  - le PEA Jeune pour les 18-25 ans encore dans le foyer fiscal de leurs parents
+  - le PEA-PME et ce qu'il ajoute par rapport au PEA classique
+  - ce que la fiscalité du PEA implique dans la durée, entre l'âge du plan et les retraits
+  - transférer un compte existant ou repartir de zéro
+  - investir un petit montant chaque mois plutôt qu'en une fois
+  - le PEA, le PEA Jeune, le PEA-PME et le compte-titres comparés côte à côte sur l'éligibilité, les plafonds et la fiscalité
+  - la façon dont le type de compte, l'âge et l'horizon de l'argent désignent ensemble un choix
+- id: brokerage-costs-and-mechanics
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: Vous voulez comprendre comment les frais du courtier et le fonctionnement des ordres s'appliqueraient à vous.
+  subtopic_hints:
+  - les opérations qui entraînent des frais de courtage, de garde ou de transfert
+  - les types d'ordres, au marché ou à cours limité, et leur exécution
+  - le règlement-livraison et le moment où l'argent devient disponible
+  - les frais de transfert d'un PEA et leur plafonnement
+  - l'investissement programmé en ETF et ses frais
+  - ce que deviennent vos titres si vous transférez votre compte
+  - le PEA et le compte-titres comparés sur les frais de courtage, de garde et de transfert
+  - le coût complet d'un transfert de compte, entre frais par ligne, plafond et délais
+# ── Cross-cutting servicing neighborhoods (span several institution types) ──
+- id: account-lifecycle
+  applies_to_types: [bank, neobank, insurer, nbfc, brokerage]
+  invitation: Vous voulez réfléchir à l'ouverture d'un nouveau compte ou contrat ici, ou à la fermeture d'un compte ou contrat dont vous n'avez plus besoin, et à ce que cela implique.
+  subtopic_hints:
+  - les pièces à préparer pour ouvrir un compte ou souscrire un contrat, et les délais
+  - ouvrir un nouveau compte ou faire évoluer celui que vous avez
+  - ce que deviennent les prélèvements et virements quand on ferme un compte
+  - résilier un contrat d'assurance ou un crédit renouvelable, et quand c'est possible
+  - les frais, documents fiscaux ou minimums liés à l'ouverture ou à la fermeture
+  - changer d'établissement sans interruption de service
+  - la fermeture complète, entre solde, documents fiscaux et opérations en cours, comparée à un simple changement de formule
+  - l'ouverture et la fermeture comparées de bout en bout sur les conditions, les délais, les frais et les formalités
+- id: beneficiaries-and-estate
+  applies_to_types: [bank, insurer, brokerage]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: Vous voulez comprendre ce que deviendra cet argent après vous et comment l'organiser correctement.
+  subtopic_hints:
+  - rédiger ou modifier la clause bénéficiaire d'une assurance-vie
+  - ce qui se passe pour un compte courant, un livret ou un PEA au décès du titulaire
+  - les bénéficiaires de premier rang et de rang subsidiaire, et le partage entre eux
+  - mettre à jour une clause après une naissance, un mariage ou un divorce
+  - la différence entre la succession et la transmission par assurance-vie
+  - les points qui demandent encore un notaire
+  - l'assurance-vie, le compte bancaire et le PEA comparés sur ce qui se passe au décès
+  - premier rang, rang subsidiaire, répartition et articulation avec un testament, vus ensemble
+- id: authorized-access
+  applies_to_types: [bank, neobank, brokerage]
+  invitation: Vous voulez savoir comment permettre à quelqu'un d'autre de vous aider sur ce compte ou d'y accéder, et dans quelles limites.
+  subtopic_hints:
+  - procuration ou compte joint
+  - ce qu'un mandataire peut faire et ne peut pas faire
+  - donner un accès en consultation à un proche
+  - retirer une procuration quand la situation change
+  - ce que change une mesure de protection comme la tutelle ou la curatelle
+  - l'accès d'un parent au compte d'un mineur
+  - procuration, compte joint et mesure de protection comparés sur ce que chacun permet et sur qui est responsable
+  - l'accès dans son ensemble, entre ce que chaque formule accorde, ses limites et la façon d'y mettre fin
+- id: money-movement
+  applies_to_types: [bank, neobank, brokerage]
+  invitation: Vous voulez parler des mouvements d'argent vers ce compte, depuis ce compte ou entre vos comptes, et de ce qu'il faut attendre en délais et en plafonds.
+  subtopic_hints:
+  - virement interne, virement SEPA et virement instantané, et leurs délais
+  - ajouter un bénéficiaire de virement et la vérification du nom
+  - les plafonds de virement et de retrait
+  - le moment où l'argent viré est réellement disponible
+  - virements permanents ou ponctuels
+  - ce que signifie un virement rejeté ou un prélèvement impayé
+  - virement interne, SEPA et instantané comparés ensemble sur les délais, les plafonds et les frais
+  - les délais dans leur ensemble, entre disponibilité de l'argent, plafonds et vérification du bénéficiaire
+- id: card-and-payments
+  applies_to_types: [bank, neobank]
+  invitation: Vous voulez régler un problème de carte ou de paiement sur votre compte.
+  subtopic_hints:
+  - remplacer une carte perdue, volée ou abîmée, et les délais
+  - activer une nouvelle carte et choisir son code
+  - ce que fait un blocage temporaire par rapport à une opposition définitive
+  - les plafonds de paiement et de retrait, et leur ajustement avant un achat ou un voyage
+  - payer et retirer hors de la zone euro
+  - un paiement refusé alors que le compte est approvisionné
+  - le parcours de bout en bout pour remplacer et sécuriser une carte, du blocage à l'activation de la nouvelle carte
+  - ce qui distingue et relie l'opposition, la contestation d'une opération passée et l'ajustement des plafonds
+- id: account-security
+  applies_to_types: [bank, neobank, nbfc, brokerage]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: Vous voulez vous assurer que votre compte est protégé et savoir repérer une fraude et y réagir.
+  subtopic_hints:
+  - reconnaître les arnaques qui visent les clients, du faux conseiller au SMS frauduleux
+  - les gestes à faire tout de suite si vous pensez avoir été piégé
+  - les alertes et réglages qui réduisent le risque d'utilisation frauduleuse
+  - la façon dont l'établissement vérifie que c'est bien vous
+  - les protections en cas d'opération non autorisée
+  - un crédit souscrit à votre nom par quelqu'un d'autre
+  - la réaction complète à une compromission, des premiers gestes aux alertes et aux protections couvrant les opérations non autorisées
+  - la façon dont alertes, vérification d'identité et protections sur les opérations se complètent pour réduire le risque
+- id: complaints-and-mediation
+  applies_to_types: [bank, neobank, insurer, nbfc, brokerage]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: Vous voulez faire valoir un désaccord avec l'établissement et savoir jusqu'où vous pouvez aller.
+  subtopic_hints:
+  - adresser une réclamation écrite et les délais de réponse
+  - escalader vers le service réclamations quand le conseiller ne règle rien
+  - saisir le médiateur compétent et ce que cela coûte
+  - les pièces qui appuient une réclamation
+  - ce que le médiateur peut décider ou non
+  - les recours possibles après la médiation
+  - réclamation, médiation et recours en justice comparés sur les délais, le coût et ce qu'on peut obtenir
+  - le parcours complet d'un désaccord, de la première réclamation à la décision du médiateur

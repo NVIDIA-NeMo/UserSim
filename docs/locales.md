@@ -32,6 +32,11 @@ by locale, education, age cohort, and occupation in the capability dashboard.
 > (`expected_language_name = None`). Its probe assets are transliterated from
 > `hi_Deva_IN` and carry `placeholder: true` until a native reviewer signs off.
 
+> `financial_services` runs where a locale has a bank of its own: `en_US`,
+> `en_IN` and `fr_FR`, plus the India language variants through `en_IN`. Like
+> the others, the French bank carries `placeholder: true`, so its scorecards
+> stay preview-only.
+
 ### India persona-language matching
 
 Conversation language and persona-cohort selection are separate controls.
@@ -100,8 +105,8 @@ How it works, all handled for you:
   **machine-translated** from the `en_IN` bank into the target language (a
   single cached `summary_model` call, with false premises preserved);
   generate-and-gate probes write in the target language directly.
-  `financial_services` needs a per-locale bank with its own task set, so it
-  stays on the two markets that have one: `en_US` and `en_IN`.
+  `financial_services` needs a per-locale bank with its own task set, so these
+  languages run it on the `en_IN` bank.
 - **Language enforcement** mirrors the shipped locales: native scripts are
   enforced by Unicode-range checks (with a real lingua scorer where the ✅
   column allows); romanized twins ride the LLM-judge language clause like

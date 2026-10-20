@@ -1,0 +1,511 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for valbreuil_bourse, an online broker, adapted from
+# en_US/solstice_invest. Every state-changing tool it offers is gold in at least
+# one task. Each task ships THREE opening phrasings in French. A French
+# compte-titres or PEA carries no transfer-on-death beneficiary: here
+# update_beneficiary sets the reference IBAN that withdrawals go to, and the
+# en_US beneficiary steps become a power of attorney (manage_authorized_users)
+# or a contact update. Withdrawals target the compte-titres: an early PEA
+# withdrawal closes the plan. Read-only tools (get_positions, get_order_status)
+# carry no gold state change.
+templates:
+- id: TPL-VB-TRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bonjour, je voudrais transférer mon PEA de {{from_broker}} chez Valbreuil
+    Bourse. Vous pouvez m'aider à lancer le transfert ?
+  - >-
+    Je veux rapatrier mon PEA qui est chez {{from_broker}}. Comment je lance le
+    transfert vers Valbreuil ?
+  - >-
+    Pouvez-vous démarrer le transfert de mon PEA détenu chez {{from_broker}} vers
+    Valbreuil ?
+  account_state:
+    account_id: acct_vb_0001
+    account_type: PEA
+    delivering_firm: '{{from_broker}}'
+    transfer_status: none
+  param_space:
+    from_broker: [Banque Armorique, Courtage Lumen, Crédit des Alpes]
+  gold_tool_sequence: [initiate_securities_transfer]
+  expected_state_deltas: {transfer_status: IN_PROGRESS}
+- id: TPL-VB-CANCELORDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai passé un ordre sur {{ticker}} tout à l'heure et il n'est pas encore
+    exécuté. Vous pouvez l'annuler ?
+  - >-
+    Merci d'annuler mon ordre en cours sur {{ticker}} avant qu'il ne soit exécuté.
+  - >-
+    Pouvez-vous supprimer mon ordre en attente sur {{ticker}} ? J'ai changé d'avis.
+  account_state:
+    account_id: acct_vb_0001
+    open_orders:
+    - {order_id: ord_vb_0001, ticker: '{{ticker}}', status: open}
+  param_space:
+    ticker: [Air Liquide, TotalEnergies, un ETF MSCI World]
+  gold_tool_sequence: [cancel_order]
+  expected_state_deltas: {ord_vb_0001.status: CANCELLED}
+- id: TPL-VB-DEPOSIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais verser {{amount}} € sur mon PEA.
+  - >-
+    Pouvez-vous prélever {{amount}} € sur mon compte bancaire lié pour alimenter
+    mon PEA Valbreuil ?
+  - >-
+    Merci d'ajouter {{amount}} € à mon PEA depuis mon compte courant lié.
+  account_state:
+    account_id: acct_vb_0001
+    account_type: PEA
+    linked_bank: bank_vb_0001
+  param_space:
+    amount: ['1 000', '5 000', '20 000']
+  gold_tool_sequence: [deposit_funds]
+  expected_state_deltas: {deposit_status: INITIATED}
+- id: TPL-VB-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Pouvez-vous retirer {{amount}} € de mon compte-titres vers mon compte bancaire
+    lié ?
+  - >-
+    J'ai besoin de sortir {{amount}} € de liquidités de mon compte-titres
+    Valbreuil pour les virer sur mon compte courant.
+  - >-
+    Merci de virer {{amount}} € de liquidités de mon compte-titres vers mon compte
+    bancaire.
+  account_state:
+    account_id: acct_vb_0001
+    cash_balance: '30000.00'
+    linked_bank: bank_vb_0001
+  param_space:
+    amount: ['2 000', '10 000']
+  gold_tool_sequence: [withdraw_funds]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-VB-TRANSFERCASH-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Virez {{amount}} € des liquidités de mon compte-titres vers mon compte courant
+    lié, s'il vous plaît.
+  - >-
+    Pouvez-vous transférer {{amount}} € de mes liquidités disponibles vers mon
+    compte bancaire ?
+  - >-
+    J'aimerais basculer {{amount}} € de liquidités de mon compte-titres vers ma
+    banque.
+  account_state:
+    account_id: acct_vb_0001
+    cash_balance: '30000.00'
+  param_space:
+    amount: ['500', '3 000']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-VB-OPENACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais ouvrir un {{acct_type}} chez Valbreuil Bourse.
+  - >-
+    Pouvez-vous m'ouvrir un nouveau {{acct_type}} ?
+  - >-
+    Je souhaite ouvrir un {{acct_type}} : de quoi avez-vous besoin ?
+  account_state:
+    customer_id: cust_vb_0001
+  param_space:
+    acct_type: [PEA, compte-titres, PEA-PME]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-VB-CLOSEACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais clôturer mon {{acct_type}} une fois le solde réglé.
+  - >-
+    Merci de clôturer mon {{acct_type}} chez Valbreuil.
+  - >-
+    Pouvez-vous fermer mon {{acct_type}} ? Il est vide maintenant.
+  account_state:
+    account_id: acct_vb_0002
+    account_type: '{{acct_type}}'
+    balance: '0.00'
+  param_space:
+    acct_type: [compte-titres, PEA-PME]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_vb_0002.status: CLOSED}
+- id: TPL-VB-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai déménagé récemment : merci de mettre à jour mon adresse postale, c'est
+    maintenant {{address}}.
+  - >-
+    Pouvez-vous changer mon numéro de téléphone pour le {{phone}} ?
+  - >-
+    Merci de mettre à jour mon adresse e-mail : {{email}}.
+  account_state:
+    customer_id: cust_vb_0001
+  param_space:
+    address: ['12 rue des Lilas, 69003 Lyon', '4 allée des Tilleuls, 33000 Bordeaux']
+    phone: ['06 39 98 73 05', '01 99 00 46 92']
+    email: [a.dubois@example.com, e.laurent@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-VB-ALERTS-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Pouvez-vous créer une alerte qui me prévient quand {{ticker}} varie de plus de
+    {{pct}} % ?
+  - >-
+    J'aimerais recevoir des notifications pour {{alert}}. Vous pouvez les activer ?
+  - >-
+    Merci d'activer les notifications pour {{alert}} sur mon compte.
+  account_state:
+    account_id: acct_vb_0001
+  param_space:
+    ticker: [Air Liquide, TotalEnergies]
+    pct: ['5', '10']
+    alert: [chaque ordre exécuté, les retraits importants, les relevés mensuels]
+  gold_tool_sequence: [set_alerts]
+  expected_state_deltas: {alerts_updated: true}
+- id: TPL-VB-AUTHUSER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais donner à {{person}} un accès en consultation à mon compte-titres.
+  - >-
+    Pouvez-vous ajouter {{person}} comme mandataire sur le compte ?
+  - >-
+    Merci d'autoriser {{person}} à accéder à mon compte.
+  account_state:
+    account_id: acct_vb_0001
+  param_space:
+    person: [mon conseiller en gestion de patrimoine, mon conjoint]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-VB-TRADE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais acheter {{qty}} actions {{ticker}} sur mon PEA, au prix du marché.
+  - >-
+    Pouvez-vous passer un ordre d'achat de {{qty}} actions {{ticker}} sur mon
+    PEA ?
+  - >-
+    Merci d'acheter {{qty}} titres {{ticker}} pour mon PEA, avec un ordre au
+    marché.
+  account_state:
+    account_id: acct_vb_0001
+    account_type: PEA
+    cash_balance: '8000.00'
+  param_space:
+    ticker: [Air Liquide, Schneider Electric, TotalEnergies]
+    qty: ['5', '10', '25']
+  gold_tool_sequence: [place_trade]
+  expected_state_deltas: {order_status: PLACED}
+- id: TPL-VB-PLAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je voudrais investir {{amount}} € chaque mois dans un ETF {{etf}},
+    automatiquement. Vous pouvez mettre ça en place ?
+  - >-
+    Pouvez-vous créer un investissement programmé de {{amount}} € par mois sur un
+    ETF {{etf}} dans mon PEA ?
+  - >-
+    Merci de programmer un achat mensuel de {{amount}} € d'ETF {{etf}}.
+  account_state:
+    account_id: acct_vb_0001
+    account_type: PEA
+    cash_balance: '2000.00'
+  param_space:
+    etf: [MSCI World, S&P 500, Stoxx Europe 600]
+    amount: ['50', '100', '250']
+  gold_tool_sequence: [set_up_investment_plan]
+  expected_state_deltas: {investment_plan_status: ACTIVE}
+- id: TPL-VB-REFIBAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai changé de banque : les retraits de mon compte-titres doivent maintenant
+    arriver sur l'IBAN {{iban}}.
+  - >-
+    Pouvez-vous remplacer le compte bancaire de référence de mon compte Valbreuil
+    par celui-ci : {{iban}} ?
+  - >-
+    Merci de mettre à jour l'IBAN vers lequel vous virez mes retraits : {{iban}}.
+  account_state:
+    account_id: acct_vb_0001
+  param_space:
+    iban: ['FR76 1111 2222 3333 4444 5555 601', 'FR76 9999 8888 7777 6666 5555 402']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {reference_account_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered and called;
+# the verifier requires the full sequence with no unauthorized state changes.
+# Run with a higher max_turns (~10-12).
+- id: TPL-VB-ONBOARD-FUND-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais ouvrir un {{acct_type}}, y verser {{amount}} € et donner une
+    procuration à {{person}} sur ce compte.
+  - >-
+    Pouvez-vous ouvrir un {{acct_type}}, l'alimenter avec {{amount}} € et ajouter
+    {{person}} comme mandataire ?
+  - >-
+    Merci d'ouvrir un {{acct_type}}, d'y déposer {{amount}} € et d'autoriser
+    {{person}} à y accéder.
+  account_state:
+    account_id: acct_vb_0001
+    linked_bank: bank_vb_0001
+  param_space:
+    acct_type: [PEA, compte-titres]
+    amount: ['5 000', '25 000']
+    person: [mon conjoint, mon frère]
+  gold_tool_sequence: [open_account, deposit_funds, manage_authorized_users]
+  expected_state_deltas: {new_account_status: OPEN, deposit_status: COMPLETED, authorized_users_updated: true}
+- id: TPL-VB-TRANSFER-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Je veux ouvrir un {{acct_type}}, y transférer les titres que je détiens chez
+    {{other_broker}} et mettre en place des alertes de cours.
+  - >-
+    Merci d'ouvrir un {{acct_type}}, de lancer le transfert depuis
+    {{other_broker}} et d'activer les alertes.
+  - >-
+    Pouvez-vous ouvrir un {{acct_type}}, rapatrier mon portefeuille depuis
+    {{other_broker}} et activer des alertes de cours ?
+  account_state:
+    account_id: acct_vb_0001
+  param_space:
+    acct_type: [PEA, compte-titres]
+    other_broker: [mon ancienne banque, un autre courtier en ligne]
+  gold_tool_sequence: [open_account, initiate_securities_transfer, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, transfer_status: INITIATED, alerts_updated: true}
+- id: TPL-VB-CANCEL-WITHDRAW-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Merci d'annuler mon ordre en cours, de retirer les {{amount}} € de liquidités
+    vers ma banque, puis de clôturer le compte-titres.
+  - >-
+    Je veux annuler mon ordre en attente, sortir les {{amount}} € et fermer mon
+    compte-titres.
+  - >-
+    Pouvez-vous annuler l'ordre en cours, virer {{amount}} € sur mon compte
+    bancaire lié et clôturer le compte-titres ?
+  account_state:
+    account_id: acct_vb_0002
+    account_type: compte-titres
+    cash_balance: '{{amount}}'
+    orders:
+    - {order_id: ord_vb_0002, ticker: '{{ticker}}', status: open}
+  param_space:
+    amount: ['3 000', '12 000']
+    ticker: [un ETF MSCI World, Air Liquide]
+  gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
+  # strict chain: cancel the open order to free the cash, withdraw it, THEN close.
+  ordered: true
+  expected_state_deltas: {ord_vb_0002.status: CANCELLED, withdrawal_status: COMPLETED, acct_vb_0002.status: CLOSED}
+- id: TPL-VB-DEPOSIT-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens de déménager : merci de verser {{amount}} € sur mon PEA, de donner une
+    procuration à {{person}} et de mettre à jour mon adresse : {{address}}.
+  - >-
+    Pouvez-vous alimenter mon compte de {{amount}} €, ajouter {{person}} comme
+    mandataire et changer mon adresse pour {{address}} ?
+  - >-
+    Versez {{amount}} € sur mon compte, autorisez {{person}} à y accéder et mettez
+    à jour mon adresse ({{address}}).
+  account_state:
+    account_id: acct_vb_0001
+    account_type: PEA
+    linked_bank: bank_vb_0001
+  param_space:
+    amount: ['2 000', '9 000']
+    person: [mon conjoint, mon frère]
+    address: ['12 rue des Lilas, 69003 Lyon', '4 allée des Tilleuls, 33000 Bordeaux']
+  gold_tool_sequence: [deposit_funds, manage_authorized_users, update_contact_info]
+  expected_state_deltas: {deposit_status: COMPLETED, authorized_users_updated: true, contact_updated: true}
+- id: TPL-VB-TRANSFER-IN-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    J'aimerais ouvrir un {{acct_type}}, y transférer mes titres détenus chez
+    {{other_broker}}, donner une procuration à {{person}} et activer des alertes.
+  - >-
+    Ouvrez un {{acct_type}}, rapatriez mon portefeuille depuis {{other_broker}},
+    ajoutez {{person}} comme mandataire et activez les alertes.
+  - >-
+    Pouvez-vous ouvrir un {{acct_type}}, lancer le transfert depuis
+    {{other_broker}}, autoriser {{person}} sur le compte et mettre en place des
+    alertes ?
+  account_state:
+    account_id: acct_vb_0001
+  param_space:
+    acct_type: [compte-titres, PEA]
+    other_broker: [mon ancienne banque, un autre courtier en ligne]
+    person: [mon conjoint, mon frère]
+  gold_tool_sequence: [open_account, initiate_securities_transfer, manage_authorized_users, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, transfer_status: INITIATED, authorized_users_updated: true, alerts_updated: true}
+- id: TPL-VB-CASH-OUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Merci d'annuler mon ordre en cours, de retirer les {{amount}} € de liquidités
+    vers ma banque et de mettre à jour mon adresse : {{address}}.
+  - >-
+    Annulez mon ordre en attente, sortez {{amount}} € et changez mon adresse pour
+    {{address}}.
+  - >-
+    Pouvez-vous annuler l'ordre en cours, virer {{amount}} € sur mon compte
+    bancaire lié et mettre à jour mon adresse ({{address}}) ?
+  account_state:
+    account_id: acct_vb_0001
+    cash_balance: '{{amount}}'
+    orders:
+    - {order_id: ord_vb_0003, ticker: '{{ticker}}', status: open}
+  param_space:
+    amount: ['4 000', '15 000']
+    ticker: [un ETF MSCI World, TotalEnergies]
+    address: ['12 rue des Lilas, 69003 Lyon', '4 allée des Tilleuls, 33000 Bordeaux']
+  gold_tool_sequence: [cancel_order, withdraw_funds, update_contact_info]
+  expected_state_deltas: {ord_vb_0003.status: CANCELLED, withdrawal_status: COMPLETED, contact_updated: true}
+- id: TPL-VB-FUND-AUTH-ALERT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais verser {{amount}} €, ajouter {{person}} comme mandataire et mettre
+    en place des alertes de cours.
+  - >-
+    Merci d'alimenter mon compte de {{amount}} €, d'autoriser {{person}} et
+    d'activer les alertes.
+  - >-
+    Versez {{amount}} €, donnez un accès à {{person}} et activez les alertes de
+    cours.
+  account_state:
+    account_id: acct_vb_0001
+    linked_bank: bank_vb_0001
+  param_space:
+    amount: ['3 000', '11 000']
+    person: [mon conseiller en gestion de patrimoine, mon conjoint]
+  gold_tool_sequence: [deposit_funds, manage_authorized_users, set_alerts]
+  expected_state_deltas: {deposit_status: COMPLETED, authorized_users_updated: true, alerts_updated: true}
+- id: TPL-VB-YOUNG-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:18-24]
+  opening_user_messages:
+  - >-
+    Je suis encore à la charge de mes parents pour les impôts : je voudrais ouvrir
+    un PEA Jeune, y verser {{amount}} € et mettre en place un investissement
+    programmé de {{monthly}} € par mois sur un ETF MSCI World.
+  - >-
+    Merci de m'ouvrir un PEA Jeune (je fais partie du foyer fiscal de mes parents),
+    d'y déposer {{amount}} € et de programmer {{monthly}} € d'achat d'ETF chaque
+    mois.
+  - >-
+    Pouvez-vous ouvrir un PEA Jeune pour moi (je suis encore dans le foyer fiscal
+    de mes parents), l'alimenter avec {{amount}} € et lancer un investissement
+    programmé de {{monthly}} € par mois ?
+  account_state:
+    customer_id: cust_vb_0001
+    linked_bank: bank_vb_0001
+  param_space:
+    amount: ['500', '1 000']
+    monthly: ['25', '50']
+  gold_tool_sequence: [open_account, deposit_funds, set_up_investment_plan]
+  expected_state_deltas: {new_account_status: OPEN, deposit_status: COMPLETED, investment_plan_status: ACTIVE}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/fr_FR/dynamic.yaml), not scripted templates.
