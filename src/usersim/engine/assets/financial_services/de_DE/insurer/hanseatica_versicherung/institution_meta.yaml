@@ -1,0 +1,8 @@
+institution_id: hanseatica_versicherung
+display_name: Hanseatica Versicherung
+type: insurer
+brand_voice: traditional
+domains:
+- insurance
+placeholder: true
+schema_version: v0.1

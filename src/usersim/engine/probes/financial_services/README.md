@@ -31,7 +31,13 @@ built today:
 - `fr_FR`: 5 institutions, 1156 documents, 92 tasks, generated in French from
   a French-market institution set (a cooperative bank, a payment-account
   neobank, an insurer, a consumer lender and an online broker).
+- `de_DE`: 5 institutions, 1036 documents, 85 tasks, generated in German (a
+  savings bank, a direct bank, a neobroker, an insurer and a building-savings
+  bank).
 
+`usersim simulate` stops before any model call for `de_DE`, because Data
+Designer provides no persona dataset for that locale. The bank loads and is
+covered by the tests.
 `hi_Deva_IN` has a generated corpus but no task set yet, so it cannot be
 simulated; the remaining shipped locales have the persona substrate in place but
 no region spec. See [Authoring a new locale](#authoring-a-new-locale).

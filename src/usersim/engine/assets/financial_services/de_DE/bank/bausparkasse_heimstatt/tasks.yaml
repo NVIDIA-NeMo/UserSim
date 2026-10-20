@@ -1,0 +1,366 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for bausparkasse_heimstatt, a building-savings bank.
+# Every state-changing tool it offers is gold in at least one task. Each task
+# ships THREE opening phrasings in German. Read-only tools (get_statements)
+# carry no gold state change.
+templates:
+- id: TPL-BH-OPEN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte einen Bausparvertrag über {{sum}} € abschließen.
+  - >-
+    Können Sie mir einen Bausparvertrag Classic mit einer Bausparsumme von {{sum}} €
+    einrichten?
+  - >-
+    Ich spare auf eine Eigentumswohnung und möchte bei Ihnen einen Bausparvertrag
+    über {{sum}} € abschließen.
+  account_state:
+    customer_id: cust_bh_0001
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '3200.00'
+  param_space:
+    sum: ['30.000', '50.000', '80.000']
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-BH-SUM-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte die Bausparsumme meines Vertrags über 50.000 € auf {{new_sum}} €
+    erhöhen.
+  - >-
+    Können Sie meinen Bausparvertrag teilen? Einen Teil möchte ich schon jetzt
+    nutzen.
+  - >-
+    Bitte erhöhen Sie meine Bausparsumme auf {{new_sum}} €, wir planen inzwischen
+    ein größeres Haus.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    new_sum: ['80.000', '100.000']
+  gold_tool_sequence: [change_contract_sum]
+  expected_state_deltas: {contract_sum_updated: true}
+- id: TPL-BH-RATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte meinen monatlichen Sparbeitrag auf {{amount}} € erhöhen.
+  - >-
+    Können Sie meinen Bausparbeitrag für ein halbes Jahr auf {{amount}} € senken?
+    Ich bin gerade knapp bei Kasse.
+  - >-
+    Bitte verbuchen Sie eine Sonderzahlung von {{extra}} € auf meinen
+    Bausparvertrag.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    amount: ['150', '300']
+    extra: ['2.000', '5.000']
+  gold_tool_sequence: [change_savings_rate]
+  expected_state_deltas: {savings_rate_updated: true}
+- id: TPL-BH-ALLOCATION-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mein Bausparvertrag ist zugeteilt worden. Ich möchte die Zuteilung annehmen und
+    Guthaben und Darlehen für den Kauf unserer Wohnung abrufen.
+  - >-
+    Bitte nehmen Sie die Zuteilung meines Bausparvertrags an, wir kaufen ein
+    Reihenhaus.
+  - >-
+    Ich habe die Zuteilungsnachricht bekommen und möchte das Bauspardarlehen für
+    die Sanierung unseres Hauses nutzen.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '24000.00'
+    allocation_status: offered
+  param_space: {}
+  gold_tool_sequence: [accept_allocation]
+  expected_state_deltas: {allocation_status: ACCEPTED}
+- id: TPL-BH-BONUS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte die Wohnungsbauprämie für {{year}} beantragen.
+  - >-
+    Können Sie meinen Antrag auf Wohnungsbauprämie für {{year}} aufnehmen? Mein
+    Einkommen liegt unter der Grenze.
+  - >-
+    Bitte reichen Sie für meinen Bausparvertrag den Antrag auf Wohnungsbauprämie
+    für {{year}} ein.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    year: ['2025', '2026']
+  gold_tool_sequence: [apply_housing_bonus]
+  expected_state_deltas: {housing_bonus_application: SUBMITTED}
+- id: TPL-BH-VL-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mein Arbeitgeber zahlt vermögenswirksame Leistungen. Ich möchte sie auf meinen
+    Bausparvertrag einzahlen lassen.
+  - >-
+    Können Sie mir die Bescheinigung für meinen Arbeitgeber ausstellen, damit die
+    VL auf meinen Bausparvertrag fließen?
+  - >-
+    Bitte richten Sie die vermögenswirksamen Leistungen von {{employer}} auf meinem
+    Bausparvertrag ein.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    employer: [meinem Arbeitgeber, der Stadtverwaltung, der Firma Brandt Logistik]
+  gold_tool_sequence: [set_up_employee_savings]
+  expected_state_deltas: {employee_savings_active: true}
+- id: TPL-BH-LOAN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte ein Modernisierungsdarlehen über {{amount}} € für {{purpose}}
+    beantragen.
+  - >-
+    Wir brauchen {{amount}} € für {{purpose}}. Können Sie ein
+    Modernisierungsdarlehen für uns beantragen?
+  - >-
+    Bitte nehmen Sie einen Antrag auf ein Darlehen über {{amount}} € auf, es geht
+    um {{purpose}}.
+  account_state:
+    customer_id: cust_bh_0001
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '3200.00'
+  param_space:
+    amount: ['15.000', '30.000', '45.000']
+    purpose: [neue Fenster, eine Wärmepumpe, ein barrierefreies Bad]
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-BH-BEGUENSTIGUNG-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte für meinen Bausparvertrag eine Begünstigung im Todesfall zugunsten
+    von {{person}} festlegen.
+  - >-
+    Können Sie in meinem Bausparvertrag eine Begünstigung für den Todesfall
+    zugunsten von {{person}} eintragen?
+  - >-
+    Bitte ändern Sie die Begünstigung im Todesfall meines Bausparvertrags
+    zugunsten von {{person}}.
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    person: [meiner Frau, meinem Mann, meinem Sohn]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-BH-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich brauche das Geld für etwas anderes und möchte meinen Bausparvertrag
+    kündigen.
+  - >-
+    Bitte kündigen Sie meinen Bausparvertrag und überweisen Sie das Guthaben auf
+    mein Girokonto.
+  - >-
+    Wir bauen doch nicht. Können Sie meinen Bausparvertrag auflösen?
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '9800.00'
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {bsv_bh_0001.status: CLOSED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-BH-YOUNG-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:18-24]
+  opening_user_messages:
+  - >-
+    Ich habe gerade meine Ausbildung angefangen: Schließen Sie bitte einen
+    Bausparvertrag über {{sum}} € ab, lassen Sie meine vermögenswirksamen
+    Leistungen darauf einzahlen und beantragen Sie die Wohnungsbauprämie für meine
+    eigenen Einzahlungen.
+  - >-
+    Bitte richten Sie mir einen Bausparvertrag über {{sum}} € ein, verbinden Sie
+    ihn mit den VL von meinem Arbeitgeber und stellen Sie für meine eigenen
+    Beiträge den Antrag auf Wohnungsbauprämie.
+  - >-
+    Können Sie für mich einen Bausparvertrag über {{sum}} € abschließen, die
+    vermögenswirksamen Leistungen einrichten und die Wohnungsbauprämie für meine
+    eigenen Sparbeiträge beantragen?
+  account_state:
+    customer_id: cust_bh_0001
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '3200.00'
+  param_space:
+    sum: ['20.000', '30.000']
+  gold_tool_sequence: [open_account, set_up_employee_savings, apply_housing_bonus]
+  expected_state_deltas: {new_account_status: OPEN, employee_savings_active: true, housing_bonus_application: SUBMITTED}
+- id: TPL-BH-FIRSTHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Unser Bausparvertrag ist zugeteilt: Nehmen Sie bitte die Zuteilung für den Kauf
+    unserer Wohnung an, beantragen Sie zusätzlich ein Modernisierungsdarlehen über
+    {{amount}} € für die Renovierung und benachrichtigen Sie mich bei jeder
+    Auszahlung.
+  - >-
+    Bitte nehmen Sie die Zuteilung an, wir kaufen eine Wohnung, beantragen Sie
+    ein Modernisierungsdarlehen über {{amount}} € für die Sanierung und schicken
+    Sie mir eine Nachricht zu jeder Auszahlung.
+  - >-
+    Können Sie die Zuteilung meines Bausparvertrags annehmen, für die Renovierung
+    ein Darlehen über {{amount}} € beantragen und mich über jede Auszahlung
+    informieren?
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '24000.00'
+    allocation_status: offered
+  param_space:
+    amount: ['20.000', '35.000']
+  gold_tool_sequence: [accept_allocation, apply_loan, set_alerts]
+  expected_state_deltas: {allocation_status: ACCEPTED, loan_application_status: SUBMITTED, alerts_updated: true}
+- id: TPL-BH-MARRIAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Wir haben geheiratet: Erhöhen Sie bitte die Bausparsumme auf {{new_sum}} €,
+    legen Sie eine Begünstigung im Todesfall zugunsten von {{partner}} fest und
+    erteilen Sie {{partner}} eine Vollmacht für den Vertrag.
+  - >-
+    Nach unserer Hochzeit möchte ich die Bausparsumme auf {{new_sum}} € anheben,
+    eine Begünstigung im Todesfall zugunsten von {{partner}} eintragen lassen und
+    {{partner}} Vollmacht für meinen Bausparvertrag geben.
+  - >-
+    Können Sie meine Bausparsumme auf {{new_sum}} € erhöhen, eine Begünstigung für
+    den Todesfall zugunsten von {{partner}} hinterlegen und {{partner}} eine
+    Vollmacht erteilen?
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    new_sum: ['80.000', '120.000']
+    partner: [meiner Frau, meinem Mann]
+  gold_tool_sequence: [change_contract_sum, update_beneficiary, manage_authorized_users]
+  expected_state_deltas: {contract_sum_updated: true, beneficiary_updated: true, authorized_users_updated: true}
+- id: TPL-BH-RENOVATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Wir wollen das Dach dämmen: Beantragen Sie bitte ein Modernisierungsdarlehen
+    über {{amount}} €, senken Sie meinen Sparbeitrag auf {{rate}} €, solange ich
+    den Kredit abzahle, und erinnern Sie mich an jede Rate.
+  - >-
+    Bitte nehmen Sie einen Antrag auf ein Modernisierungsdarlehen über {{amount}} €
+    auf, reduzieren Sie meinen Bausparbeitrag auf {{rate}} € und schicken Sie mir
+    vor jeder Rate eine Erinnerung.
+  - >-
+    Können Sie ein Darlehen über {{amount}} € für die Dämmung beantragen, meinen
+    Sparbeitrag auf {{rate}} € herabsetzen und mich an die Raten erinnern?
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '14500.00'
+  param_space:
+    amount: ['25.000', '40.000']
+    rate: ['50', '100']
+  gold_tool_sequence: [apply_loan, change_savings_rate, set_alerts]
+  expected_state_deltas: {loan_application_status: SUBMITTED, savings_rate_updated: true, alerts_updated: true}
+- id: TPL-BH-ABROAD-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich ziehe ins Ausland: Tragen Sie bitte meine neue Adresse {{address}} ein,
+    kündigen Sie meinen Bausparvertrag und benachrichtigen Sie mich, wenn das
+    Guthaben ausgezahlt wird.
+  - >-
+    Bitte ändern Sie meine Adresse auf {{address}}, lösen Sie meinen
+    Bausparvertrag auf und schicken Sie mir eine Nachricht, sobald das Geld
+    überwiesen ist.
+  - >-
+    Können Sie meine neue Adresse im Ausland ({{address}}) hinterlegen, den
+    Bausparvertrag kündigen und mich über die Auszahlung informieren?
+  account_state:
+    account_id: bsv_bh_0001
+    account_type: Bausparvertrag
+    balance: '9800.00'
+  param_space:
+    address: ['Calle Mayor 5, 28013 Madrid', 'Wiedner Hauptstraße 20, 1040 Wien']
+  gold_tool_sequence: [update_contact_info, close_account, set_alerts]
+  expected_state_deltas: {contact_updated: true, bsv_bh_0001.status: CLOSED, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/de_DE/dynamic.yaml), not scripted templates.

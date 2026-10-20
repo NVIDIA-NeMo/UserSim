@@ -1,0 +1,578 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for sparkasse_lindenhain, a public savings bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in German (build_instance picks one per trajectory).
+# Cheques are all but gone in Germany, so stop_payment covers direct debits and
+# standing orders. Read-only tools (get_account_transactions, get_statements,
+# dispute_status) carry no gold state change.
+templates:
+- id: TPL-SK-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Guten Tag, auf meinem Kontoauszug steht eine Kartenzahlung über {{amount}} €
+    bei {{merchant}}, die ich nicht kenne. Ich habe dort nie eingekauft. Können
+    Sie mir helfen?
+  - >-
+    Da ist eine Abbuchung von {{amount}} € von {{merchant}}, die nicht von mir
+    stammt. Wie bekomme ich das Geld zurück?
+  - >-
+    Mir wurde ein Kauf bei {{merchant}} über {{amount}} € belastet, den ich nicht
+    getätigt habe. Können Sie die Zahlung reklamieren?
+  account_state:
+    account_id: acct_sk_0001
+    cards:
+    - {card_id: card_sk_0001, status: active}
+    transactions:
+    - {transaction_id: txn_sk_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Elektronik Pfeil, Fitnesswerk Süd, Medienstrom Plus, Modehaus Rhein online]
+    amount: ['89,99', '249,00', '1.299,00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_sk_0001.status: UNDER_REVIEW}
+  # blocking the compromised card and ordering a replacement are legitimate
+  # actions a customer often requests during a fraud dispute — permitted (not
+  # required).
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-SK-FREEZECARD-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich glaube, meine Sparkassen-Card ist {{event}}. Können Sie sie sofort sperren,
+    damit niemand damit bezahlen kann?
+  - >-
+    Bitte sperren Sie meine Karte mit den Endziffern 0001, sie ist {{event}}.
+  - >-
+    Meine Karte mit den Endziffern 0001 ist {{event}}. Können Sie sie vorübergehend
+    sperren, bis ich weiß, was los ist?
+  account_state:
+    account_id: acct_sk_0001
+    # openings reference "Endziffern 0001"; pin last4 so the account grounding
+    # the user is given matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_sk_0001, status: active}
+  param_space:
+    event: [verloren gegangen, gestohlen worden]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_sk_0001.status: frozen}
+- id: TPL-SK-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Von meinem Konto wurde eine Lastschrift über {{amount}} € von {{creditor}}
+    abgebucht, die ich nicht zahlen will. Können Sie die zurückgeben?
+  - >-
+    Ich möchte dem Lastschriftmandat von {{creditor}} widersprechen; der Vertrag
+    ist längst gekündigt.
+  - >-
+    Bitte geben Sie die letzte Lastschrift von {{creditor}} über {{amount}} €
+    zurück.
+  account_state:
+    account_id: acct_sk_0001
+    mandates:
+    - {mandate_id: mdt_sk_0001, creditor: '{{creditor}}', status: active}
+    transactions:
+    - {transaction_id: txn_sk_0004, merchant: '{{creditor}}', amount: '{{amount}}', status: posted}
+  param_space:
+    creditor: [Fitnesswerk Süd, Medienstrom Plus, Telefonica Mobil Direkt]
+    amount: ['29,90', '49,99']
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_sk_0001.status: REVOKED}
+- id: TPL-SK-OVERDRAFT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte meinen Dispo auf {{limit}} € erhöhen. Geht das?
+  - >-
+    Bitte senken Sie meinen Dispositionsrahmen auf {{limit}} €, ich will nicht
+    mehr so tief ins Minus rutschen.
+  - >-
+    Können Sie meinen Disporahmen auf {{limit}} € anpassen?
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+    balance: '1240.00'
+  param_space:
+    limit: ['500', '1.000', '2.500']
+  gold_tool_sequence: [change_overdraft_limit]
+  expected_state_deltas: {overdraft_limit_updated: true}
+- id: TPL-SK-PKONTO-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mir wurde eine Kontopfändung angekündigt. Können Sie mein Girokonto in ein
+    P-Konto umwandeln?
+  - >-
+    Ich brauche ein Pfändungsschutzkonto. Bitte wandeln Sie mein bestehendes
+    Girokonto um.
+  - >-
+    Bitte stellen Sie mein Konto auf ein P-Konto um, damit mein Grundfreibetrag
+    geschützt ist.
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+    balance: '310.00'
+  param_space: {}
+  gold_tool_sequence: [convert_to_protected_account]
+  expected_state_deltas: {protected_account: true}
+- id: TPL-SK-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte mit meinem Gehaltskonto von der {{old_bank}} zu Ihnen wechseln.
+    Können Sie die Kontowechselhilfe starten?
+  - >-
+    Bitte übernehmen Sie meine Daueraufträge und Lastschriften von meinem alten
+    Konto bei der {{old_bank}}.
+  - >-
+    Ich ziehe mit meinem Konto von der {{old_bank}} zur Sparkasse um. Wie läuft die
+    Kontowechselhilfe?
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+  param_space:
+    old_bank: [Volksbank Mittelland, Commerzhaus Bank, Nordbank Direkt]
+  gold_tool_sequence: [initiate_account_switch]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS}
+- id: TPL-SK-SPECIALREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte eine Sondertilgung von {{amount}} € auf meine Baufinanzierung
+    leisten.
+  - >-
+    Können Sie für dieses Jahr eine Sondertilgung über {{amount}} € auf mein
+    Immobiliendarlehen einplanen?
+  - >-
+    Bitte beauftragen Sie eine Sondertilgung von {{amount}} € für meine
+    Baufinanzierung.
+  account_state:
+    account_id: loan_sk_0001
+    account_type: Baufinanzierung
+    balance: '284000.00'
+  param_space:
+    amount: ['5.000', '10.000', '14.000']
+  gold_tool_sequence: [request_special_repayment]
+  expected_state_deltas: {special_repayment_status: SCHEDULED}
+- id: TPL-SK-LOAN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich würde gern einen Privatkredit über {{amount}} € für {{purpose}} beantragen,
+    mit einer Laufzeit von {{months}} Monaten.
+  - >-
+    Können Sie einen Kreditantrag über {{amount}} € aufnehmen? Es geht um
+    {{purpose}}, die Laufzeit soll {{months}} Monate sein.
+  - >-
+    Ich brauche {{amount}} € für {{purpose}} und möchte das in {{months}} Monaten
+    zurückzahlen. Wie beantrage ich den Kredit?
+  account_state:
+    customer_id: cust_sk_0001
+  param_space:
+    amount: ['5.000', '12.000', '20.000']
+    purpose: [ein gebrauchtes Auto, eine neue Küche, die Renovierung des Badezimmers]
+    months: ['36', '60', '84']
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-SK-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bitte legen Sie {{payee}} mit der IBAN {{iban}} als Empfänger in meinem
+    Girokonto an.
+  - >-
+    Ich möchte regelmäßig an {{payee}} überweisen. Können Sie die IBAN {{iban}} als
+    Empfänger speichern?
+  - >-
+    Können Sie einen neuen Empfänger anlegen: {{payee}}, IBAN {{iban}}?
+  account_state:
+    account_id: acct_sk_0001
+  param_space:
+    payee: [meine Tochter, meinen Vermieter, den Sportverein TSV Lindenhain]
+    iban: ['DE00 1234 5678 9012 3456 78', 'DE00 8765 4321 0987 6543 21']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-SK-VOLLMACHT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte {{person}} eine Kontovollmacht erteilen. Was brauchen Sie dafür
+    von mir?
+  - >-
+    Können Sie {{person}} eine Vollmacht für mein Girokonto einräumen?
+  - >-
+    Bitte richten Sie für mein Konto eine Vollmacht zugunsten von {{person}} ein.
+  account_state:
+    account_id: acct_sk_0001
+  param_space:
+    person: [meinem Mann, meiner Frau, meiner Tochter]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-SK-ACTIVATECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Meine neue Sparkassen-Card ist mit der Post gekommen. Können Sie sie
+    freischalten?
+  - >-
+    Ich habe meine Ersatzkarte bekommen. Wie aktiviere ich sie? Können Sie das für
+    mich erledigen?
+  - >-
+    Die neue Karte ist da, bitte aktivieren Sie sie, damit ich sie nutzen kann.
+  account_state:
+    account_id: acct_sk_0001
+    cards:
+    - {card_id: card_sk_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_sk_0002.status: active}
+- id: TPL-SK-OPENACCT-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte zusätzlich {{acct_type}} bei Ihnen eröffnen. Können Sie mir dabei
+    helfen?
+  - >-
+    Geht es, dass ich {{acct_type}} eröffne? Mein Girokonto habe ich schon bei der
+    Sparkasse.
+  - >-
+    Bitte eröffnen Sie für mich {{acct_type}}. Was brauchen Sie dafür?
+  account_state:
+    customer_id: cust_sk_0001
+  param_space:
+    acct_type: [ein Sparkassenbuch, ein Gemeinschaftskonto, ein Jugendgirokonto für meine Tochter]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-SK-BASISKONTO-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    Ich bin vor Kurzem nach Deutschland gekommen und habe noch kein Konto. Kann
+    ich bei Ihnen ein Basiskonto eröffnen?
+  - >-
+    Eine andere Bank hat mir ein Konto verweigert. Ich habe doch ein Recht auf ein
+    Basiskonto, oder? Bitte eröffnen Sie eines für mich.
+  - >-
+    Ich habe gerade keinen festen Wohnsitz, brauche aber ein Konto für meinen
+    Lohn. Können Sie mir ein Basiskonto einrichten?
+  account_state:
+    customer_id: cust_sk_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12).
+- id: TPL-SK-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe mein Portemonnaie mit meiner Karte mit den Endziffern 0001 verloren
+    und sehe gerade eine Zahlung über {{amount}} € bei {{merchant}}, die nicht von
+    mir ist. Bitte sperren Sie die Karte, reklamieren Sie die Zahlung und schicken
+    Sie mir eine neue Karte.
+  - >-
+    Meine Karte mit den Endziffern 0001 ist weg, und es gibt eine betrügerische
+    Zahlung über {{amount}} € bei {{merchant}}. Können Sie sie sperren, die
+    Zahlung zurückholen und mir eine Ersatzkarte bestellen?
+  - >-
+    Jemand hat vielleicht meine Karte mit den Endziffern 0001: sperren Sie sie,
+    reklamieren Sie die {{amount}} € bei {{merchant}} und bestellen Sie mir eine
+    neue Karte.
+  account_state:
+    account_id: acct_sk_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_sk_0001, status: active}
+    transactions:
+    - {transaction_id: txn_sk_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Fitnesswerk Süd, Elektronik Pfeil, Medienstrom Plus]
+    amount: ['129,99', '480,00']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_sk_0001.status: frozen, txn_sk_0002.status: UNDER_REVIEW, card_sk_0001.replacement: ordered}
+- id: TPL-SK-NEWJOB-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich wechsle mit meinem Gehaltskonto zu Ihnen: Starten Sie bitte die
+    Kontowechselhilfe von der {{old_bank}}, richten Sie einen Dispo von {{limit}} €
+    ein und benachrichtigen Sie mich, wenn das Gehalt eingeht.
+  - >-
+    Bitte übernehmen Sie meine Daueraufträge von der {{old_bank}}, räumen Sie mir
+    einen Disporahmen von {{limit}} € ein und aktivieren Sie eine Nachricht bei
+    Gehaltseingang.
+  - >-
+    Können Sie den Kontowechsel von der {{old_bank}} anstoßen, mir {{limit}} € Dispo
+    geben und eine Benachrichtigung für Geldeingänge einrichten?
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+  param_space:
+    old_bank: [Volksbank Mittelland, Commerzhaus Bank]
+    limit: ['1.000', '2.000']
+  gold_tool_sequence: [initiate_account_switch, change_overdraft_limit, set_alerts]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS, overdraft_limit_updated: true, alerts_updated: true}
+- id: TPL-SK-DEBT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    Ich habe Schulden und mir droht eine Pfändung: Wandeln Sie bitte mein Konto in
+    ein P-Konto um, kündigen Sie meinen Dispo und warnen Sie mich, wenn der
+    Kontostand unter {{threshold}} € fällt.
+  - >-
+    Bitte stellen Sie mein Girokonto auf ein Pfändungsschutzkonto um, streichen Sie
+    meinen Disporahmen und schicken Sie mir eine Nachricht, sobald ich unter
+    {{threshold}} € komme.
+  - >-
+    Können Sie mein Konto in ein P-Konto umwandeln, den Dispo auf null setzen und
+    mich benachrichtigen, wenn mein Guthaben unter {{threshold}} € sinkt?
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+    balance: '180.00'
+  param_space:
+    threshold: ['50', '100']
+  gold_tool_sequence: [convert_to_protected_account, change_overdraft_limit, set_alerts]
+  expected_state_deltas: {protected_account: true, overdraft_limit_updated: true, alerts_updated: true}
+- id: TPL-SK-HOMEOWNER-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe Geld geerbt: Übertragen Sie bitte {{amount}} € von meinem
+    Sparkassenbuch auf mein Girokonto, beauftragen Sie damit eine Sondertilgung auf
+    meine Baufinanzierung und schicken Sie mir eine Bestätigung als Nachricht.
+  - >-
+    Bitte buchen Sie {{amount}} € vom Sparkassenbuch aufs Girokonto, leisten Sie
+    damit eine Sondertilgung für mein Immobiliendarlehen und benachrichtigen Sie
+    mich, wenn sie verbucht ist.
+  - >-
+    Können Sie {{amount}} € von meinem Sparbuch auf das Girokonto übertragen, das
+    Geld als Sondertilgung auf meine Baufinanzierung einsetzen und mir Bescheid
+    geben, sobald alles erledigt ist?
+  account_state:
+    account_id: loan_sk_0001
+    account_type: Baufinanzierung
+    balance: '284000.00'
+    savings_account_id: acct_sk_spb_0001
+  param_space:
+    amount: ['8.000', '12.000']
+  gold_tool_sequence: [transfer_funds, request_special_repayment, set_alerts]
+  expected_state_deltas: {transfer_status: COMPLETED, special_repayment_status: SCHEDULED, alerts_updated: true}
+- id: TPL-SK-DISPUTE-STOP-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Zwei Probleme: Geben Sie bitte die Lastschrift von {{creditor}} zurück, die
+    nach meiner Kündigung noch kam, reklamieren Sie die doppelte Kartenzahlung
+    über {{amount}} € bei {{merchant}}, und bezahlen Sie dann meine Rechnung von
+    {{payee}}.
+  - >-
+    Ich brauche drei Dinge: die Lastschrift von {{creditor}} zurückgeben, die
+    zweimal abgebuchten {{amount}} € bei {{merchant}} reklamieren und die Rechnung
+    von {{payee}} überweisen.
+  - >-
+    Können Sie die unberechtigte Lastschrift von {{creditor}} zurückbuchen, die
+    Doppelbuchung über {{amount}} € von {{merchant}} beanstanden und meine
+    Rechnung bei {{payee}} begleichen?
+  account_state:
+    account_id: acct_sk_0001
+    mandates:
+    - {mandate_id: mdt_sk_0002, creditor: '{{creditor}}', status: active}
+    transactions:
+    - {transaction_id: txn_sk_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+    payees:
+    - {payee_id: payee_sk_0001, name: '{{payee}}'}
+  param_space:
+    creditor: [Fitnesswerk Süd, Medienstrom Plus]
+    amount: ['85,00', '240,00']
+    merchant: [Elektronik Pfeil, Modehaus Rhein online]
+    payee: [Stadtwerke Lindenhain, Wohnbau Becker GmbH]
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, pay_bill]
+  expected_state_deltas: {mdt_sk_0002.status: REVOKED, txn_sk_0003.status: UNDER_REVIEW, bill_paid: true}
+- id: TPL-SK-MOVE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich ziehe weg und wechsle die Bank: Ändern Sie bitte meine Adresse auf
+    {{address}}, überweisen Sie das Restguthaben auf mein Sparkassenbuch und
+    schließen Sie dann mein Girokonto.
+  - >-
+    Bitte tragen Sie meine neue Adresse ({{address}}) ein, übertragen Sie das
+    Guthaben vom Girokonto auf mein Sparkassenbuch und kündigen Sie das
+    Girokonto.
+  - >-
+    Neue Adresse: {{address}}. Können Sie das Guthaben meines Girokontos auf das
+    Sparkassenbuch übertragen und das Girokonto danach auflösen?
+  account_state:
+    account_id: acct_sk_0001
+    account_type: Girokonto
+    savings_account_id: acct_sk_spb_0001
+  param_space:
+    address: ['Lindenstraße 12, 04109 Leipzig', 'Am Markt 3, 50667 Köln']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_updated: true, transfer_status: COMPLETED, acct_sk_0001.status: CLOSED}
+- id: TPL-SK-DIVORCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Nach meiner Scheidung: Widerrufen Sie bitte die Kontovollmacht {{ex}}, löschen
+    Sie die IBAN {{ex}} aus meiner Empfängerliste und ändern Sie meine Adresse auf
+    {{address}}.
+  - >-
+    Bitte widerrufen Sie die Vollmacht {{ex}} für mein Konto, entfernen Sie die
+    gespeicherte IBAN aus meinen Empfängern und tragen Sie meine neue Adresse ein:
+    {{address}}.
+  - >-
+    Wir haben uns getrennt. Können Sie die Vollmacht {{ex}} widerrufen, die IBAN
+    aus meinen Empfängern löschen und meine Adresse auf {{address}} ändern?
+  account_state:
+    account_id: acct_sk_0001
+  param_space:
+    ex: [meines Ex-Mannes, meiner Ex-Frau]
+    address: ['Hauptstraße 45, 70173 Stuttgart', 'Hafenstraße 21, 20457 Hamburg']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, update_contact_info]
+  expected_state_deltas: {authorized_users_updated: true, payee_removed: true, contact_updated: true}
+- id: TPL-SK-TRAVEL-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich verreise bald, und meine Karte mit den Endziffern 0001 ist abgenutzt:
+    Bestellen Sie mir bitte eine neue, aktivieren Sie Benachrichtigungen für
+    Zahlungen im Ausland und bezahlen Sie vorab meine Rechnung von {{payee}}.
+  - >-
+    Vor meiner Reise: Schicken Sie mir eine Ersatzkarte für die abgenutzte Karte
+    mit den Endziffern 0001, richten Sie Zahlungsbenachrichtigungen ein und
+    überweisen Sie die Rechnung von {{payee}} schon jetzt.
+  - >-
+    Können Sie eine neue Karte für meine abgenutzte Karte mit den Endziffern 0001
+    bestellen, Auslandsbenachrichtigungen einschalten und die Rechnung von
+    {{payee}} vorab bezahlen?
+  account_state:
+    account_id: acct_sk_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_sk_0001, status: active}
+    payees:
+    - {payee_id: payee_sk_0002, name: '{{payee}}'}
+  param_space:
+    payee: [Stadtwerke Lindenhain, Wohnbau Becker GmbH]
+  gold_tool_sequence: [order_replacement_card, set_alerts, pay_bill]
+  expected_state_deltas: {card_sk_0001.replacement: ordered, alerts_updated: true, bill_paid: true}
+- id: TPL-SK-PFAENDUNG-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    Mein Konto ist gepfändet worden: Wandeln Sie es bitte in ein P-Konto um, setzen
+    Sie meinen Dispo auf null, geben Sie die Lastschrift von {{creditor}} zurück und
+    benachrichtigen Sie mich bei jedem Geldeingang.
+  - >-
+    Gegen mich läuft eine Kontopfändung. Bitte machen Sie mein Girokonto zum
+    Pfändungsschutzkonto, streichen Sie den Dispo, widersprechen Sie der Lastschrift
+    von {{creditor}} und schicken Sie mir eine Nachricht, wenn Geld eingeht.
+  - >-
+    Können Sie mein Konto nach der Pfändung in ein P-Konto umwandeln, den
+    Dispositionsrahmen kündigen, die Lastschrift von {{creditor}} zurückgeben und
+    mich über jeden Zahlungseingang informieren?
+  account_state:
+    account_id: acct_sk_0001
+    balance: '-420.00'
+    overdraft_limit: '1000'
+    payments:
+    - {payment_id: pay_sk_0001, payee: '{{creditor}}', type: direct_debit, status: active}
+  param_space:
+    creditor: [Fitnesswerk Süd, Medienstrom Plus]
+  gold_tool_sequence: [convert_to_protected_account, change_overdraft_limit, stop_payment, set_alerts]
+  expected_state_deltas: {protected_account: true, overdraft_limit_updated: true, pay_sk_0001.status: STOPPED, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/de_DE/dynamic.yaml), not scripted templates.

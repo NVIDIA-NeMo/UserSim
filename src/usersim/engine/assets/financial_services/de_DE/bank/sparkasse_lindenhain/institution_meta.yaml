@@ -1,0 +1,10 @@
+institution_id: sparkasse_lindenhain
+display_name: Sparkasse Lindenhain
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- cards
+- lending_mortgage
+placeholder: true
+schema_version: v0.1
