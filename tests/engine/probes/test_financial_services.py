@@ -2255,6 +2255,15 @@ class TestRegionalConventions:
         assert probe._bank.format_money(balance) in ctx
         assert "₹" in ctx and "$" not in ctx
 
+    def test_a_uk_customer_hears_their_balance_in_pounds(self):
+        inst = load_finance_bank_for_locale("en_GB").institution("wrenfield_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-WB-BONUS-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="en_GB", seed=1)
+        probe, _ = _probe_on("en_GB", instance)
+        ctx = probe._account_context(instance)
+        assert "Wrenfield Current Account" in ctx
+        assert "£9,800.00" in ctx and "$" not in ctx and "€" not in ctx
+
     def test_a_france_customer_hears_their_balance_in_euros(self):
         inst = load_finance_bank_for_locale("fr_FR").institution("credit_mirabelle")
         tpl = next(t for t in inst.templates if t.id == "TPL-CM-REORG-001")
