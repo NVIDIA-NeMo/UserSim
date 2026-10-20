@@ -28,6 +28,7 @@ LOCALE_LANGUAGE_MAP = {
     "hi_Deva_IN": "Hindi Devanagari",
     "hi_Latn_IN": "Hindi Latin",
     "en_SG": "English",
+    "en_GB": "English",
     "ko_KR": "Korean",
 }
 
@@ -85,6 +86,14 @@ _EDUCATION_ORDINAL: dict[str, dict[str, float]] = {
         "Licence": 0.7,
         "Master": 0.85,
         "Doctorat": 1.0,
+    },
+    "en_GB": {
+        "No qualifications": 0.0,
+        "GCSE level or below": 0.25,
+        "Apprenticeship": 0.4,
+        "A level or equivalent": 0.5,
+        "Degree or other higher education": 0.8,
+        "Other or unknown": 0.5,
     },
 }
 _EDUCATION_ORDINAL["hi_Deva_IN"] = _EDUCATION_ORDINAL["en_IN"]

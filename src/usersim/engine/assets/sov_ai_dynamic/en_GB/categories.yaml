@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: en_GB
+taxonomy_id: en_GB_sov_ai_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+categories:
+- id: uk-geography
+  invitation: You want to ask something about the UK's geography in your own voice. Could be about where you live, your commute, the weather, a walk in the hills, or somewhere you went on holiday without leaving the country.
+  subtopic_hints:
+  - the difference between Great Britain, the United Kingdom and the British Isles, and where the Crown Dependencies fit
+  - national parks, National Landscapes and the right to roam in Scotland compared with England
+  - mountains, lochs and lakes, from Ben Nevis and Yr Wyddfa (Snowdon) to Loch Ness and Lough Neagh
+  - rivers, tides and flooding, such as the Severn bore, the Thames Barrier and the Somerset Levels
+  - county, council and postcode boundaries, and why an address doesn't always match where you think you live
+  - islands such as the Hebrides, Orkney, Shetland, Anglesey and the Isle of Wight, and how you get to them
+  - the weather, the Met Office's named storms, and why the west gets more rain
+  - what to do when a road sign, a map app and a local's directions all disagree
+- id: uk-history
+  invitation: You want to ask about British history in your own voice. Bring up something from school, a castle or museum you visited, a family story, or a blue plaque you walked past.
+  subtopic_hints:
+  - the Acts of Union and how England, Wales, Scotland and Ireland came together
+  - the Second World War at home, from the Blitz and evacuation to rationing and Bletchley Park
+  - the Industrial Revolution where you live, with its mills, mines, canals and railways
+  - the Troubles in Northern Ireland and the Good Friday Agreement
+  - Roman Britain, Hadrian's Wall, and what the Anglo-Saxons and Vikings left behind
+  - devolution in 1999 and the creation of the Scottish Parliament, the Senedd and the Northern Ireland Assembly
+  - the post-war welfare state, the founding of the NHS and the Windrush generation
+  - what to do when a family story says one thing and the history books say another
+- id: uk-culture
+  invitation: You want to ask about British culture in your own voice. Food, sport, festivals, telly, the way people talk where you live — bring up something you noticed in daily life.
+  subtopic_hints:
+  - regional accents and dialects, and words that mean different things in different parts of the UK
+  - pub culture, buying rounds, Sunday roasts and regional food such as haggis, Welsh cakes, an Ulster fry or a Cornish pasty
+  - bank holidays and why they differ between England, Scotland, Wales and Northern Ireland
+  - football, rugby and cricket rivalries, and why the home nations play separately
+  - Bonfire Night, Burns Night, St David's Day, St Patrick's Day and other dates in the calendar
+  - the BBC, the licence fee and British television traditions
+  - Welsh, Scottish Gaelic and Irish, and where you hear them spoken today
+  - multicultural Britain, from Diwali in Leicester to Notting Hill Carnival and Eid in Bradford
+- id: uk-poetry-and-music
+  invitation: You want to ask about British poetry, songs or music in your own voice. Bring up something you learnt at school, a song you sing at matches, or lyrics you only half remember.
+  subtopic_hints:
+  - poems people learn at school, by Wordsworth, Burns, Wilfred Owen, Tennyson or Dylan Thomas
+  - hymns and anthems such as "Jerusalem", "God Save the King", "Flower of Scotland" and "Hen Wlad Fy Nhadau"
+  - Burns Night, and "Auld Lang Syne" at New Year
+  - the Beatles, Britpop, and the music that came out of Liverpool, Manchester and Sheffield
+  - folk songs and ballads from different parts of the UK
+  - football songs and where they came from
+  - the Poet Laureate, and the national poets of Scotland and Wales
+  - what to do when you only half remember a line and everyone sings it differently
+- id: uk-public-services
+  invitation: You want to ask about a UK public service in your own voice. The council, GOV.UK, passports, driving licences, the electoral register, the bins — bring up the actual situation that's giving you trouble.
+  subtopic_hints:
+  - council tax bands, discounts, and what the council actually provides for it
+  - renewing a passport or driving licence, and DVLA paperwork
+  - registering to vote, postal votes, and photo ID at polling stations
+  - GOV.UK One Login and proving your identity online
+  - bin collections and recycling rules, and why they differ from council to council
+  - the TV licence and who needs one
+  - planning permission, building control, and the neighbours' extension
+  - what to do when the website says one thing and the council's phone line says another
+- id: uk-health-systems
+  invitation: You want to ask about the NHS or health care in the UK in your own voice. GP appointments, NHS 111, prescriptions, waiting lists, dentists — bring up the concrete confusion.
+  subtopic_hints:
+  - getting a GP appointment, and what the receptionist can and can't decide
+  - NHS 111, A&E and urgent treatment centres, and when to ring 999
+  - prescription charges in England compared with free prescriptions in Scotland, Wales and Northern Ireland
+  - finding an NHS dentist, and what the charge bands cover
+  - waiting times for referrals, and your right to choose a hospital
+  - mental health support, from talking therapies to crisis lines and waiting lists
+  - private health insurance alongside the NHS, and when people go private
+  - what to do when the hospital letter, the GP and the NHS App all say different things
+- id: uk-education
+  invitation: You want to ask about education in the UK in your own voice. Nursery places, school admissions, GCSEs, A levels, Highers, university, apprenticeships — bring up the real decision in front of you.
+  subtopic_hints:
+  - school admissions, catchment areas and appeals
+  - GCSEs and A levels, and Scotland's Nationals and Highers
+  - inspection reports from Ofsted, Estyn or Education Scotland, and what they mean
+  - applying to university through UCAS, and tuition fees and student finance in each nation
+  - apprenticeships and T levels as alternatives to university
+  - funded childcare hours and who qualifies
+  - support for special educational needs, such as EHC plans in England, and how to get it
+  - what to do when the school's policy and the council's guidance don't match
+- id: uk-labor-and-benefits
+  invitation: You want to ask about work, employment rights or benefits in the UK in your own voice. Contracts, sick pay, Universal Credit, pensions — bring up the actual situation.
+  subtopic_hints:
+  - the National Minimum Wage and National Living Wage rates by age
+  - statutory sick pay, holiday entitlement and notice periods
+  - claiming Universal Credit, sanctions, and how earnings change the payment
+  - zero-hours contracts, gig work and employment status
+  - workplace pensions, auto-enrolment and the State Pension age
+  - redundancy pay, settlement agreements and employment tribunals
+  - maternity, paternity and shared parental leave
+  - what to do when HR's reading of your contract and Acas guidance disagree
+- id: uk-finance-and-consumer
+  invitation: You want to ask about money, banking, tax or a consumer problem in the UK in your own voice. Bring up the real, concrete issue.
+  subtopic_hints:
+  - Self Assessment tax returns, tax codes and letters from HMRC
+  - ISAs (cash, stocks and shares, Lifetime) and the annual allowance
+  - mortgages, remortgaging, and how the Bank of England base rate feeds through
+  - section 75 claims, chargebacks and the Consumer Rights Act
+  - complaining to a bank, and taking it to the Financial Ombudsman Service
+  - the FSCS, and what's protected if a bank or investment firm fails
+  - energy bills, the price cap and switching supplier
+  - what to do when the banking app, your statement and a letter all show different figures
+- id: uk-digital-services
+  invitation: You want to ask about UK digital services or online accounts in your own voice. GOV.UK sign-in, the NHS App, online banking, scams — bring up the actual issue.
+  subtopic_hints:
+  - the NHS App for repeat prescriptions, records and appointments
+  - GOV.UK One Login and the HMRC app
+  - scam texts claiming to be from HMRC, Royal Mail or your bank, and forwarding them to 7726
+  - age checks under the Online Safety Act and what they mean for your accounts
+  - your rights under UK data protection law, such as subject access requests and deletion
+  - broadband and mobile contracts, and switching provider
+  - online banking, Confirmation of Payee, and reimbursement after an authorised push payment scam
+  - what to do when a WhatsApp message claims to be from a family member who has lost their phone

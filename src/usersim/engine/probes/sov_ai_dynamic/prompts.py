@@ -308,6 +308,40 @@ _USER_FOLLOWUP_INSTRUCTION_EN_SG = """Now write your next message in this conver
 - DO NOT take on the role of expert or teacher; you remain the curious user."""
 
 
+# ---------------------------------------------------------------------------
+# en_GB prompts (British English)
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_OPENING_PROMPT_EN_GB = """You are roleplaying the following person in a conversation with an AI assistant. The point of this conversation is for YOU (the person below) to start a casual, exploratory question about a topic you are curious about — and see how the assistant responds.
+
+<YOUR_PERSONA>
+{persona}
+</YOUR_PERSONA>
+
+The topic neighbourhood for this conversation:
+{invitation}
+
+A specific sub-area to anchor your opening question (use it as a starting hook, not as the literal question text):
+- {subtopic_hint}
+
+Write your FIRST message in this conversation. Rules:
+- Stay in the persona's voice: vocabulary, register, references that match the age, education, part of the UK, and occupation above. British idioms and phrasing are appropriate when they fit the persona.
+- Ask ONE clear, natural-sounding question or share ONE observation that invites a substantive answer. Avoid yes/no questions.
+- DO NOT mention this is a simulation. DO NOT refer to "the model", "the AI", or how the conversation was set up. Stay in character.
+- DO NOT play the role of expert or teacher. You are the curious user, not the source of truth.
+- Reasonable length — one short paragraph at most. Sound like a real person typing in a chat.
+- Write in natural British English."""
+
+
+_USER_FOLLOWUP_INSTRUCTION_EN_GB = """Now write your next message in this conversation, staying in persona. Rules:
+
+- React to the assistant's answer. If it sounded right or useful, a brief acknowledgement is fine ("ah, that makes sense", "cheers"); if it sounded vague, off, or oddly confident, express that doubt in character and ask a short follow-up — without revealing what you think the right answer is (you don't necessarily know it).
+- ONE message. Short. Don't recap everything that was said.
+- Natural British English, idioms and phrasing consistent with your persona.
+- DO NOT mention the simulation, the model, the conversation as an artefact, or break the fourth wall.
+- DO NOT take on the role of expert or teacher; you remain the curious user."""
+
+
 _USER_AGENT_OPENING_PROMPT_KO_KR = """당신은 AI 어시스턴트와의 대화에서 아래 인물을 연기하고 있습니다. 이 대화의 목적은 당신(아래 인물)이 궁금한 주제에 대해 자연스럽고 탐색적인 질문으로 대화를 시작하고, 어시스턴트가 어떻게 답하는지 보는 것입니다.
 
 <당신의_페르소나>
@@ -347,6 +381,7 @@ _OPENING_PROMPTS: dict[str, str] = {
     "hi_Latn_IN": _USER_AGENT_OPENING_PROMPT_HI_LATN_IN,
     "en_IN": _USER_AGENT_OPENING_PROMPT_EN_IN,
     "en_SG": _USER_AGENT_OPENING_PROMPT_EN_SG,
+    "en_GB": _USER_AGENT_OPENING_PROMPT_EN_GB,
     "ko_KR": _USER_AGENT_OPENING_PROMPT_KO_KR,
 }
 
@@ -359,6 +394,7 @@ _FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "hi_Latn_IN": _USER_FOLLOWUP_INSTRUCTION_HI_LATN_IN,
     "en_IN": _USER_FOLLOWUP_INSTRUCTION_EN_IN,
     "en_SG": _USER_FOLLOWUP_INSTRUCTION_EN_SG,
+    "en_GB": _USER_FOLLOWUP_INSTRUCTION_EN_GB,
     "ko_KR": _USER_FOLLOWUP_INSTRUCTION_KO_KR,
 }
 
