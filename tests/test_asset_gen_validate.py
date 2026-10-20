@@ -274,6 +274,33 @@ def test_validate_bank_reads_values_in_the_spec_number_format(tmp_path: Path):
     assert _status(validate_bank(english, spec), "numeric_faithfulness", "testbank") == FAIL
 
 
+def test_a_decimal_comma_corpus_fails_on_any_english_decimal(tmp_path: Path):
+    """The numeric check passes once the locale's form appears anywhere, so a
+    corpus with mostly English decimals would slip through without this gate."""
+    import copy
+
+    spec_dict = copy.deepcopy(_SPEC_DICT)
+    spec_dict.update(locale="fr_FR", region="FR", currency="EUR", currency_symbol="€", language="French")
+    spec_dict["number_format"] = "fr_FR"
+    spec_dict["institutions"][0]["products"][0]["variables"]["overdraft_fee"]["value"] = 7.9
+    spec = RegionSpec.model_validate(spec_dict)
+
+    mixed = _write_bank(
+        tmp_path / "mixed",
+        "fr_FR",
+        [_doc("D1", "Les frais s'élèvent à 7,90 € par mois."), _doc("D2", "Un taux de 15.9% s'applique.")],
+    )
+    report = validate_bank(mixed, spec)
+    assert _status(report, "numeric_faithfulness", "testbank") == PASS
+    assert _status(report, "number_notation", "testbank") == FAIL
+
+    french = _write_bank(tmp_path / "fr", "fr_FR", [_doc("D1", "Les frais s'élèvent à 7,90 € ; un taux de 15,9 %.")])
+    assert _status(validate_bank(french, spec), "number_notation", "testbank") == PASS
+
+    english = _write_bank(tmp_path / "en", "en_US", [_doc("D1", "The overdraft fee is $34 per item, or 15.9%.")])
+    assert _status(validate_bank(english, _spec()), "number_notation", "testbank") is None
+
+
 def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
     """A doc that prints a spec FIELD KEY reads like an unfilled template.
 
@@ -289,6 +316,17 @@ def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
 
     clean = _write_bank(tmp_path / "clean", "en_US", [_doc("D1", "Our overdraft fee is $34 per item.")])
     rep = validate_bank(clean, _spec())
+    assert _status(rep, "variable_name_leak", "testbank") == PASS
+
+
+def test_a_one_word_field_key_is_not_mistaken_for_a_leak(tmp_path: Path):
+    """``excess`` is a field key and also the everyday insurance word for it."""
+    import copy
+
+    spec_dict = copy.deepcopy(_SPEC_DICT)
+    spec_dict["institutions"][0]["products"][0]["variables"]["excess"] = {"type": "money", "value": 99}
+    bank = _write_bank(tmp_path, "en_US", [_doc("D1", "Our overdraft fee is $34 per item; the excess is $99.")])
+    rep = validate_bank(bank, RegionSpec.model_validate(spec_dict))
     assert _status(rep, "variable_name_leak", "testbank") == PASS
 
 

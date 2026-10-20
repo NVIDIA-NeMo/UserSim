@@ -242,7 +242,11 @@ institution offers (`open_account`, `close_account`, `update_contact_info`,
 `update_policy`), injected by `asset_gen/financial_services/spec.py`. Most are
 never gold: they are realistic, gold-ADJACENT tool docs that make retrieval
 (and the discoverable-tool gate) non-trivial, and they stay consistent across
-locales.
+locales. An institution that does not offer one of them lists it in its region
+spec's `omit_common_operations` (a building-savings bank issues no cards), and
+one whose local procedure differs declares the tool with a `description` that
+steers its generated documentation; `tools.yaml` still ships that description
+empty.
 
 ## tasks.yaml
 

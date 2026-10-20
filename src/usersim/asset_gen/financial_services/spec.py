@@ -198,9 +198,9 @@ class Tool(BaseModel):
 # A region spec that explicitly declares a tool of the same name wins (no dup).
 COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
     # Read primitive that lists a VERIFIED customer's accounts (id, type, last4,
-    # balance). Analogous to tau-Banking's get_user_details: it lets the agent
-    # resolve a last-4 the customer gives into the account_id that every
-    # state-changing tool requires, instead of fabricating an id or deflecting.
+    # balance). It lets the agent resolve a last-4 the customer gives into the
+    # account_id that every state-changing tool requires, instead of fabricating
+    # an id or deflecting.
     ("get_accounts", "read_only"),
     ("open_account", "state_changing"),
     ("close_account", "irreversible"),
@@ -213,8 +213,8 @@ COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
 # Deposit-taking institutions (bank / neobank / credit_union) share a servicing
 # set; brokerages / robo-advisors share a trading + cash set. Most of these are
 # never gold for a task — they exist as realistic, gold-ADJACENT tool docs so
-# retrieval must discriminate the right procedure among many similar ones (the
-# tau-Knowledge difficulty), and so the discoverable-tool gate is non-trivial.
+# retrieval must discriminate the right procedure among many similar ones, and
+# so the discoverable-tool gate is non-trivial.
 _DEPOSIT_OPS: tuple[tuple[str, SideEffectClass], ...] = (
     ("transfer_funds", "state_changing"),
     ("order_replacement_card", "state_changing"),
@@ -309,6 +309,10 @@ class Institution(BaseModel):
     domains: list[Domain] = Field(min_length=1)
     products: list[Product] = Field(default_factory=list)
     tool_taxonomy: list[Tool] = Field(min_length=1)
+    #: Common operations of this institution's type that it does not offer, by
+    #: name: a building-savings bank issues no cards, so it omits the card
+    #: operations every ``bank`` would otherwise be given.
+    omit_common_operations: list[str] = Field(default_factory=list)
     task_templates: list[TaskTemplate] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -316,10 +320,20 @@ class Institution(BaseModel):
         """Merge the common-operations layer (account lifecycle + servicing +
         per-type ops) into the tool taxonomy. Runs FIRST so injected tools count
         as in-scope for the gold-tool check below; an explicitly-declared tool of
-        the same name is left untouched (no duplicate)."""
+        the same name is left untouched (no duplicate), and a name listed in
+        ``omit_common_operations`` is not injected."""
+        common = {name for name, _ in common_operations_for_type(self.type)}
+        omitted = set(self.omit_common_operations)
+        if unknown := sorted(omitted - common):
+            raise ValueError(
+                f"{self.id}: omit_common_operations lists {unknown}, which a {self.type!r} is not "
+                f"given; its common operations are {sorted(common)}"
+            )
         existing = {t.name for t in self.tool_taxonomy}
+        if both := sorted(omitted & existing):
+            raise ValueError(f"{self.id}: {both} both declared in tool_taxonomy and omitted")
         for name, side_effect in common_operations_for_type(self.type):
-            if name not in existing:
+            if name not in existing and name not in omitted:
                 self.tool_taxonomy.append(Tool(name=name, discoverable=True, side_effect_class=side_effect))
                 existing.add(name)
         return self

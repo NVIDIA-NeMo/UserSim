@@ -128,10 +128,25 @@ def test_common_operations_do_not_override_explicit_tools():
     assert open_tools[0].description == "custom"  # explicit declaration wins
 
 
-def test_no_rho_bank_contamination():
-    """Contamination policy: no reuse of tau-Banking's fictional institution."""
-    raw = _EN_US.read_text().lower()
-    assert "rho-bank" not in raw and "rho bank" not in raw
+def test_an_institution_can_omit_common_operations_it_does_not_offer():
+    """A building-savings bank issues no cards, so it must be able to drop the
+    card operations its type injects; a name its type is not given, or a tool
+    both declared and omitted, is an authoring error."""
+    raw = _raw(_EN_US)
+    bank = raw["institutions"][0]
+    bank["omit_common_operations"] = ["order_replacement_card", "activate_card"]
+    names = {t.name for t in validate_region_spec(raw).institutions[0].tool_taxonomy}
+    assert not names & {"order_replacement_card", "activate_card"}
+    assert {"transfer_funds", "open_account"} <= names
+
+    bank["omit_common_operations"] = ["file_claim"]
+    with pytest.raises(RegionSpecError, match="file_claim"):
+        validate_region_spec(raw)
+
+    bank["tool_taxonomy"].append({"name": "stop_payment", "discoverable": True, "side_effect_class": "state_changing"})
+    bank["omit_common_operations"] = ["stop_payment"]
+    with pytest.raises(RegionSpecError, match="stop_payment"):
+        validate_region_spec(raw)
 
 
 def test_validator_rejects_unknown_institution_type():

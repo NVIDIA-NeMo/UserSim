@@ -277,6 +277,33 @@ def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstD
                 rep.add("numeric_faithfulness", inst.id, PASS, f"{product.id}: all typed values present")
 
 
+def _check_number_notation(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """A decimal-comma locale must not quote amounts or rates in English notation.
+
+    ``7.9 €`` or ``15.9 %`` in a French or German document is a visible error, and
+    the numeric check cannot see it: it only asks whether the locale's own form
+    appears somewhere in a product's documents, so a corpus can pass while most
+    of its decimals are written the English way.
+    """
+    if spec is None:
+        return
+    if _decimal_comma_group_separators(spec.number_format or spec.locale) is None:
+        return
+    units = "|".join(re.escape(u) for u in ("%", spec.currency_symbol, spec.currency) if u)
+    english = re.compile(rf"(?<![\d.,])\d{{1,3}}(?:,\d{{3}})*\.\d{{1,2}}(?=\s?(?:{units}))")
+    for iid, idata in insts.items():
+        bad = [d.get("id") for d in idata.documents if english.search(d.get("body", ""))]
+        if bad:
+            rep.add(
+                "number_notation",
+                iid,
+                FAIL,
+                f"{len(bad)}/{len(idata.documents)} doc(s) write an amount or rate with a decimal point: {bad[:3]}",
+            )
+        else:
+            rep.add("number_notation", iid, PASS, "amounts and rates use the locale's decimal comma")
+
+
 def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     """Flag customer-facing prose that prints a spec FIELD KEY.
 
@@ -293,7 +320,9 @@ def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstDat
         idata = insts.get(inst.id)
         if idata is None:
             continue
-        keys = {k for p in inst.products for k in p.variables}
+        # A one-word key such as ``excess`` is also an ordinary word, which an exact
+        # token match cannot tell apart from prose.
+        keys = {k for p in inst.products for k in p.variables if "_" in k}
         if not keys:
             continue
         pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len, reverse=True)) + r")\b")
@@ -675,6 +704,7 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     _check_structural(bank_dir, insts, rep)
     _check_coverage(insts, rep)
     _check_numeric_faithfulness(region_spec, insts, rep)
+    _check_number_notation(region_spec, insts, rep)
     _check_variable_name_leak(region_spec, insts, rep)
     _check_tool_name_leak(insts, rep)
     _check_doc_key_leak(insts, rep)

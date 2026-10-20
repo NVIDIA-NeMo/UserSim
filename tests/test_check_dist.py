@@ -58,9 +58,14 @@ def test_a_matching_pair_passes(tmp_path: Path) -> None:
             [*_PACKAGE, "usersim/engine/assets/x/embeddings.parquet"],
             "embeddings.parquet",
         ),
+        (
+            ["pyproject.toml", *(f"src/{f}" for f in [*_PACKAGE, "usersim/engine/assets/x/_eval_scorecard.parquet"])],
+            [*_PACKAGE, "usersim/engine/assets/x/_eval_scorecard.parquet"],
+            "scorecard",
+        ),
         (["pyproject.toml", "tests/test_x.py", *(f"src/{f}" for f in _PACKAGE)], None, "under tests/"),
     ],
-    ids=["file-not-from-the-sdist", "no-banks", "embeddings", "tests-in-sdist"],
+    ids=["file-not-from-the-sdist", "no-banks", "embeddings", "scorecard", "tests-in-sdist"],
 )
 def test_each_problem_is_reported(tmp_path: Path, sdist, wheel, expected: str) -> None:
     problems = check_dist.check_archives(*_pair(tmp_path, sdist, wheel))

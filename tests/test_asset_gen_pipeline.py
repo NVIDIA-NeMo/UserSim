@@ -39,6 +39,11 @@ def _asset_gen_dir() -> Path:
 
 _REGION_SPEC = _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
 
+#: Region specs that author their own title vocabulary.
+_LABELLED_SPECS = sorted(
+    p.stem for p in _REGION_SPEC.parent.glob("*.yaml") if "variable_labels:" in p.read_text(encoding="utf-8")
+)
+
 
 def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     """Region specs list kb_search / verify_identity by name only; serialization
@@ -76,6 +81,70 @@ def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     # retrieved KB doc via the call_tool gate, not a typed schema.
     assert out["file_transaction_dispute"]["parameters"] == {}
     assert out["file_transaction_dispute"]["description"] == ""
+
+
+def test_prompt_values_carry_the_locale_notation():
+    """The prompts hand the model each typed value with its rendering in the
+    locale's notation, so a decimal-comma corpus does not copy ``7.9`` from JSON."""
+    import copy
+
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    product = raw["institutions"][0]["products"][0]
+    product["variables"] = {
+        "monthly_fee": {"type": "money", "value": 7.9},
+        "ceiling": {"type": "money", "value": 22950},
+        "rate": {"type": "percent", "value": 15.9},
+        "term_months": {"type": "int", "value": 48},
+    }
+    us = validate_region_spec(copy.deepcopy(raw))
+    raw.update(locale="fr_FR", region="FR", currency="EUR", currency_symbol="€", number_format="fr_FR")
+    france = validate_region_spec(raw)
+
+    def displays(spec):
+        variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+        return {name: var["display"] for name, var in variables.items()}
+
+    assert displays(france) == {"monthly_fee": "7,90 €", "ceiling": "22 950 €", "rate": "15,9 %", "term_months": "48"}
+    assert displays(us) == {"monthly_fee": "$7.90", "ceiling": "$22,950", "rate": "15.9%", "term_months": "48"}
+    seed = build_institution_seed(france)
+    assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
+
+
+def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
+    """A spec description reaches the shared clusters that write a discoverable
+    tool's doc, while tools.yaml ships it empty: the assistant learns the tool
+    only by retrieving that doc."""
+    import json
+
+    import pandas as pd
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    bank = raw["institutions"][0]
+    described = "Block the card until the customer asks to unblock it."
+    bank["tool_taxonomy"] = [
+        {**t, "description": described} if t["name"] == "freeze_card" else t for t in bank["tool_taxonomy"]
+    ]
+    spec = validate_region_spec(raw)
+    tool = next(t for t in spec.institutions[0].tool_taxonomy if t.name == "freeze_card")
+    assert tool.discoverable and tool.description == described
+
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    rows = explode_to_cluster_rows(brief_df, spec, docs_per_product=10, max_docs_per_cluster=10)
+    shared = rows[(rows.institution_id == spec.institutions[0].id) & (rows.cluster_kind == "shared")]
+    focus_tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert focus_tools["freeze_card"]["description"] == described
+    assert _tool_dict(tool)["description"] == ""
 
 
 def test_build_institution_seed_one_row_per_institution():
@@ -575,11 +644,12 @@ class TestPlanOwnedTitles:
         latin = {t for t in titles if devanagari_fraction(t) < 0.25}
         assert all("टूल संदर्भ" in t or "का उपयोग कब करें" in t for t in latin)
 
-    def test_hindi_labels_cover_every_variable_and_domain(self):
+    @pytest.mark.parametrize("locale", _LABELLED_SPECS)
+    def test_localized_labels_cover_every_variable_and_domain(self, locale: str):
         """An unmapped name falls back to the machine field name, which lands a raw
         ``below_mab_charge`` / ``retail_banking`` in reader-facing prose. Adding a
         product to the region model must not silently reintroduce that."""
-        spec = load_region_spec(self._SPEC_DIR / "hi_Deva_IN.yaml")
+        spec = load_region_spec(self._SPEC_DIR / f"{locale}.yaml")
         variables = {v for inst in spec.institutions for p in inst.products for v in p.variables}
         domains = {str(d) for inst in spec.institutions for d in inst.domains}
         assert variables - set(spec.doc_titles.variable_labels) == set()

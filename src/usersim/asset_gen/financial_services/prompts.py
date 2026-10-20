@@ -32,7 +32,9 @@ You are the brand and operations lead for a FICTIONAL {{ institution_type }} cal
 form in {{ language }} prose, and keep it identical everywhere){% endif %} (id: {{ institution_id }}). Author a concise internal BRIEF that
 every downstream document will follow, so the institution's voice and policies stay
 consistent. Write ALL prose in {{ language }}; keep product ids and tool/function
-names verbatim. Use the {{ currency_symbol }} symbol for money.
+names verbatim. Use the {{ currency_symbol }} symbol for money, and write every number
+the way {{ language }} writes it: each typed value carries a `display` form, so quote
+that form rather than the raw `value`.
 
 Products offered (authoritative typed values -- reference exactly, never invent):
 {{ products_json }}
@@ -115,7 +117,9 @@ Follow this institution BRIEF exactly (voice, positioning, fee/dispute/advice po
 {{ institution_brief }}
 
 Write ALL body prose in {{ language }}. Keep tool/function identifiers, product ids, and
-doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money.
+doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money, and write every number
+the way {{ language }} writes it (its decimal mark and digit grouping), never another
+language's notation.
 TITLES ARE GIVEN, NOT AUTHORED: copy each entry's `topic` into its `title` EXACTLY as
 provided -- already in {{ language }} -- and do not translate, shorten, re-word, or
 re-punctuate it. The same string is what every sibling document is told to cite when it
@@ -124,8 +128,9 @@ NAMING CONSISTENCY: when a product carries a `display_name_local`, use exactly t
 {{ language }} prose -- never re-translate it and never vary it between documents, because
 readers (and retrieval) rely on one product having one name across the knowledge base.
 NUMERIC FIDELITY IS THE #1 REQUIREMENT: reproduce every fee, rate, yield, balance, limit,
-threshold, duration, date, and percentage from the focus values EXACTLY as given (same digits,
-symbol, %, and units) -- never round, approximate, paraphrase, bucket, omit, or invent a number.
+threshold, duration, date, and percentage from the focus values EXACTLY, written as its
+`display` form (the same digits, with {{ language }}'s decimal mark, digit grouping, symbol,
+%, and units) -- never round, approximate, paraphrase, bucket, omit, or invent a number.
 The VALUE is verbatim; its NAME is not. The focus keys are machine field names, so write what
 each one means in ordinary prose and NEVER print the key itself: say "an annual interest rate
 of 0%", not "an interest_rate_annual of 0%"; "a one-time processing fee of {{ currency_symbol }}499",
@@ -153,7 +158,7 @@ Sibling documents you may cross-reference by their exact title (doc_key -> title
 
 Requirements:
 - Faithfulness (HIGHEST PRIORITY -- overrides brevity): every numeric value present in the
-  focus values MUST appear VERBATIM in the document(s) where it belongs. If stating all exact
+  focus values MUST appear, in its `display` form, in the document(s) where it belongs. If stating all exact
   values conflicts with the length target, keep the exact values and cut prose instead -- a
   document that rounds, buckets, or omits a value is a failure even if it reads well.
 - Length: aim for each body's per-entry `length` target -- a SOFT target that yields to
@@ -265,6 +270,9 @@ Authoritative product values -- the ONLY numbers to check for NumericFaithfulnes
 other numbers in the documents (dates, illustrative examples, regulatory citations) are
 EXPECTED and must NOT lower the faithfulness score. If this context lists no product
 values (e.g. an institution-wide shared set), there is nothing to contradict -> score 4.
+Each value carries a `display` form, its notation in the documents' language: a value
+written that way is faithful, while the right digits in another language's notation (a
+decimal point where the language uses a decimal comma) are a notation error.
 {{ focus_json }}
 
 Generated document set:
