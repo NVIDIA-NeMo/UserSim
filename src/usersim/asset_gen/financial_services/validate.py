@@ -320,7 +320,9 @@ def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstDat
         idata = insts.get(inst.id)
         if idata is None:
             continue
-        keys = {k for p in inst.products for k in p.variables}
+        # A one-word key such as ``excess`` is also an ordinary word, which an exact
+        # token match cannot tell apart from prose.
+        keys = {k for p in inst.products for k in p.variables if "_" in k}
         if not keys:
             continue
         pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len, reverse=True)) + r")\b")

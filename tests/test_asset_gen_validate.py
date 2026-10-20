@@ -319,6 +319,17 @@ def test_variable_name_leak_flags_field_keys_in_prose(tmp_path: Path):
     assert _status(rep, "variable_name_leak", "testbank") == PASS
 
 
+def test_a_one_word_field_key_is_not_mistaken_for_a_leak(tmp_path: Path):
+    """``excess`` is a field key and also the everyday insurance word for it."""
+    import copy
+
+    spec_dict = copy.deepcopy(_SPEC_DICT)
+    spec_dict["institutions"][0]["products"][0]["variables"]["excess"] = {"type": "money", "value": 99}
+    bank = _write_bank(tmp_path, "en_US", [_doc("D1", "Our overdraft fee is $34 per item; the excess is $99.")])
+    rep = validate_bank(bank, RegionSpec.model_validate(spec_dict))
+    assert _status(rep, "variable_name_leak", "testbank") == PASS
+
+
 # ── tool names and doc_keys must not appear in customer-facing prose ─────────
 
 
