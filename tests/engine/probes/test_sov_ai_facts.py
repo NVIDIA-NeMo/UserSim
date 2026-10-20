@@ -149,6 +149,40 @@ class TestPersonaToTags:
         tags = task_derivation.persona_to_tags(persona, "pt_BR")
         assert expected_region in tags
 
+    @pytest.mark.parametrize(
+        "region, expected_nation",
+        [
+            ("London", "region:england"),
+            ("Yorkshire and The Humber", "region:england"),
+            ("South West", "region:england"),
+            ("Scotland", "region:scotland"),
+            ("Wales", "region:wales"),
+            ("Northern Ireland", "region:northern-ireland"),
+        ],
+    )
+    def test_uk_regions_map_to_their_nation(self, region: str, expected_nation: str) -> None:
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("region:")] == sorted(["region:any", expected_nation])
+
+    def test_an_unrecognised_uk_region_adds_no_nation(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Atlantis", "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("region:")] == ["region:any"]
+
+    def test_uk_nations_are_only_derived_for_en_gb(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Scotland", "age": 30}, "en_US")
+        assert "region:scotland" not in tags
+
+    @pytest.mark.parametrize(
+        "region, nation",
+        [("London", "england"), ("Scotland", "scotland"), ("Wales", "wales"), ("Northern Ireland", "northern-ireland")],
+    )
+    def test_the_uk_bank_serves_each_nation_its_own_facts(self, region: str, nation: str) -> None:
+        bank = load_fact_bank(packaged_assets_dir() / "sov_ai_facts/en_GB/sample.yaml")
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "en_GB")
+        own = {f.id for f in bank.by_tag(f"region:{nation}")}
+        assert len(own) >= 8
+        assert own <= {f.id for f in bank.matching_persona_tags(tags)}
+
     def test_unknown_locale_still_returns_fallback_tags(self) -> None:
         persona = {"age": 40, "occupation": "Teacher"}
         tags = task_derivation.persona_to_tags(persona, "xx_YY")
