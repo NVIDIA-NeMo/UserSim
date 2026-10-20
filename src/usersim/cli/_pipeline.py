@@ -954,6 +954,8 @@ def _add_persona_expressions(config_builder, dd) -> None:
     #   - ``fr_FR``, ``ja_JP``, ``pt_BR``, ``en_IN``,
     #     ``hi_Deva_IN``: district (city-equivalent) + region
     #     (state-equivalent) + country — city always null
+    #   - ``en_GB``: district (local authority) + region (English
+    #     region, or Scotland / Wales / Northern Ireland) + country
     #
     # ``persona_location`` projects the four fields in small→large
     # order, deduped + truthy-filtered, producing strings like:
@@ -963,6 +965,7 @@ def _add_persona_expressions(config_builder, dd) -> None:
     #   - fr_FR:      "Iffendic, Ille-et-Vilaine, France"
     #   - ja_JP:      "関東地方, 東京都, 日本"
     #   - en_IN:      "Raipur, Chhattisgarh, India"
+    #   - en_GB:      "Wandsworth, London, United Kingdom"
     #
     # ``persona_country`` is a separate single-field projection for
     # downstream stratification (analysis.py / cohort reports) where

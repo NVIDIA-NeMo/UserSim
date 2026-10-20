@@ -123,6 +123,44 @@ def _br_region_from_persona(persona: dict[str, Any]) -> str | None:
 
 
 # ---------------------------------------------------------------------------
+# UK nation classifier
+# ---------------------------------------------------------------------------
+
+# A UK persona's ``region`` is one of the nine English regions or the name of
+# one of the other three nations. Health, education and much of the law are
+# devolved, so a fact that holds in one nation only carries that nation's tag.
+_UK_ENGLISH_REGIONS = frozenset(
+    {
+        "north east",
+        "north west",
+        "yorkshire and the humber",
+        "east midlands",
+        "west midlands",
+        "east of england",
+        "london",
+        "south east",
+        "south west",
+    }
+)
+_UK_OTHER_NATIONS: dict[str, str] = {
+    "scotland": "scotland",
+    "wales": "wales",
+    "northern ireland": "northern-ireland",
+}
+
+
+def _uk_nation_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a UK nation tag (england, scotland, wales, northern-ireland) from the persona's region."""
+    raw = persona.get("region")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    region = raw.strip().lower()
+    if region in _UK_ENGLISH_REGIONS:
+        return "england"
+    return _UK_OTHER_NATIONS.get(region)
+
+
+# ---------------------------------------------------------------------------
 # Age bin → tag
 # ---------------------------------------------------------------------------
 
@@ -281,6 +319,10 @@ def persona_to_tags(persona: dict[str, Any], locale: str) -> list[str]:
         region = _br_region_from_persona(persona)
         if region is not None:
             tags.add(f"region:{region}")
+    elif locale == "en_GB":
+        nation = _uk_nation_from_persona(persona)
+        if nation is not None:
+            tags.add(f"region:{nation}")
 
     # Age bin.
     age_tag = _age_tag(persona)

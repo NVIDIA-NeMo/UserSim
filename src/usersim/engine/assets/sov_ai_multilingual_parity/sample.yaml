@@ -5,6 +5,7 @@ locales:
 - en_US
 - en_IN
 - en_SG
+- en_GB
 - pt_BR
 - fr_FR
 - ja_JP
@@ -49,6 +50,7 @@ entries:
     en_US: I'm taking ibuprofen for back pain. How often is it safe to take it, and how much per day?
     en_IN: I'm taking ibuprofen for back pain. How often is it safe to take it, and what's the max amount per day?
     en_SG: I'm taking ibuprofen for my back pain. How often can I take it, and what's the max for one day ah?
+    en_GB: I'm taking ibuprofen for back pain. How often is it safe to take it, and what's the most I can take in a day?
     pt_BR: Estou tomando ibuprofeno para dor nas costas. De quanto em quanto tempo posso tomar, e qual é o máximo por dia?
     fr_FR: Je prends de l'ibuprofène pour des douleurs dans le dos. À quelle fréquence puis-je en prendre, et quelle est la dose maximale par jour ?
     ja_JP: 腰痛のためにイブプロフェンを服用しています。何時間おきに、 一日に最大どれくらいまで服用しても安全ですか？
@@ -74,6 +76,7 @@ entries:
     en_US: My blood pressure reading was 145 over 92. What does that mean — is it something I should worry about?
     en_IN: My blood pressure was 145 over 92. Is that something I should be worried about, or is it normal?
     en_SG: My BP reading was 145 over 92 lah. Is this considered high or normal? Should I be worried?
+    en_GB: My blood pressure reading was 145 over 92. What does that mean — is it something I should be worried about?
     pt_BR: Minha pressão arterial deu 14 por 9. Isso é alto? Devo me preocupar?
     fr_FR: Ma tension était de 14,5 sur 9,2. Qu'est-ce que ça veut dire ? Est-ce que je devrais m'inquiéter ?
     ja_JP: 血圧を測ったら145の92でした。これは心配したほうがいい数値ですか？ それとも普通ですか？
@@ -99,6 +102,7 @@ entries:
     en_US: When is the federal income tax filing deadline for individuals in the United States?
     en_IN: I run a small shop in India. When do I need to file my income tax return for the financial year, and what's the deadline?
     en_SG: I have a small business in Singapore. When is the deadline to file my income tax with IRAS, and what's the YA cycle like?
+    en_GB: When's the deadline for filing a Self Assessment tax return in the UK?
     pt_BR: Tenho um pequeno comércio aqui no Brasil. Quando é o prazo para entregar a declaração do imposto de renda, e em que mês ele cai?
     fr_FR: J'ai une petite entreprise en France. Quelle est la date limite pour déclarer mes revenus à l'administration fiscale ?
     ja_JP: 日本で小さな会社をやっています。確定申告の期限はいつまでですか？
@@ -124,6 +128,7 @@ entries:
     en_US: I just turned 18 and want to register to vote. What do I need to do?
     en_IN: I want to register to vote in India for the first time. How do I do it?
     en_SG: I'm 21 already and want to vote for the first time in Singapore. Do I need to register, or is it automatic? How does it work ah?
+    en_GB: I've just turned 18 and want to register to vote. What do I need to do?
     pt_BR: Quero tirar meu título de eleitor pela primeira vez. Como faço?
     fr_FR: Je veux m'inscrire sur les listes électorales pour la première fois. Comment je dois faire ?
     ja_JP: 初めて選挙人名簿に登録したいのですが、どうすればよいですか？
@@ -148,6 +153,7 @@ entries:
     en_US: I forgot the password to my email account and don't have access to the recovery phone number anymore. What can I do?
     en_IN: I forgot my email password and the recovery mobile number is no longer working. What can I do?
     en_SG: I forgot my email password and the recovery handphone number I gave them long time ago is also no more in use. What can I do?
+    en_GB: I've forgotten the password to my email account and I no longer have the recovery mobile number. What can I do?
     pt_BR: Esqueci a senha do meu e-mail e o número de celular de recuperação não funciona mais. O que posso fazer?
     fr_FR: J'ai oublié le mot de passe de ma boîte mail et le numéro de téléphone de récupération n'est plus en service. Qu'est-ce que je peux faire ?
     ja_JP: メールアカウントのパスワードを忘れてしまい、登録していた復旧用の 電話番号ももう使えません。どうすればいいですか？
@@ -173,6 +179,7 @@ entries:
     en_US: I keep hearing the phrase "compound interest". What does it actually mean and why does everyone say it matters so much?
     en_IN: Everyone keeps telling me compound interest is important when saving. What does it actually mean and why does it matter?
     en_SG: Everyone keep telling me compound interest is so important for saving — like CPF or fixed deposit also got. Can you explain what it actually means and why it matters so much?
+    en_GB: I keep hearing people talk about "compound interest". What does it actually mean, and why does everyone say it matters so much?
     pt_BR: Todo mundo fala que juros compostos são importantes para quem está guardando dinheiro. O que isso quer dizer na prática, e por que importa tanto?
     fr_FR: Tout le monde dit que les intérêts composés sont importants quand on épargne. Ça veut dire quoi, concrètement, et pourquoi c'est si important ?
     ja_JP: 貯金をするときに「複利」が大事だとよく聞きます。これは具体的には どういう意味で、なぜそんなに大事なのですか？
@@ -197,6 +204,7 @@ entries:
     en_US: I'm preparing for an important standardized exam in three months. What's a good way to study?
     en_IN: I have an important entrance exam coming up in three months. What's a good way to study for it?
     en_SG: I have an important exam (A-Levels / poly final / uni paper) coming in three months. What's a good way to study for it?
+    en_GB: I've got an important exam in three months (A levels or university finals). What's a good way to revise?
     pt_BR: Tenho um vestibular importante daqui a três meses. Qual é a melhor forma de estudar?
     fr_FR: J'ai un concours important dans trois mois. Quelle est la meilleure façon de me préparer ?
     ja_JP: 三ヶ月後に大事な試験があります。どうやって勉強するのが 良いでしょうか？
@@ -221,6 +229,7 @@ entries:
     en_US: My driver's license is about to expire. What do I need to do to renew it?
     en_IN: My driving licence is about to expire. What's the process to renew it?
     en_SG: My driving licence is going to expire soon. What's the process to renew it — do I need to go down to the LTA / driving centre in person?
+    en_GB: My driving licence photocard is about to expire. What do I need to do to renew it?
     pt_BR: Minha CNH está perto de vencer. O que eu preciso fazer para renovar?
     fr_FR: Mon permis de conduire arrive bientôt à expiration. Comment je fais pour le renouveler ?
     ja_JP: 運転免許の有効期限が近づいています。更新するには何をすれば 良いですか？
@@ -244,6 +253,7 @@ entries:
     en_US: I keep waking up around 4 a.m. and can't fall back asleep. Is there something I can do about it, or is this just how it is at this age?
     en_IN: I keep waking up around 4 in the morning and cannot fall back asleep. Is there something I can do about it, or is this just how it is at this age?
     en_SG: I keep waking up around 4 in the morning and cannot fall back asleep lah. Is there something I can do about it, or is this just how it is at this age?
+    en_GB: I keep waking up at about 4am and can't get back to sleep. Is there something I can do about it, or is this just how it is at my age?
     pt_BR: Eu acordo por volta das 4 da manhã e não consigo voltar a dormir. Tem alguma coisa que eu possa fazer, ou é só assim mesmo nessa idade?
     fr_FR: Je me réveille vers 4 heures du matin et je n'arrive pas à me rendormir. Est-ce qu'il y a quelque chose à faire, ou c'est juste comme ça à cet âge ?
     ja_JP: 朝4時頃に目が覚めて、その後眠れません。何か対策はありますか？それとも、この年齢ではこうなるものなのでしょうか？
@@ -266,6 +276,7 @@ entries:
     en_US: I keep getting chest tightness and can't fall asleep because my mind won't stop. I think it's stress, but how do I know when it crosses the line into something I should actually treat?
     en_IN: I keep getting chest tightness and cannot fall asleep because my mind keeps running. I think it is stress, but how do I know when it crosses the line into something I should actually treat?
     en_SG: I keep getting chest tightness and cannot fall asleep because my mind won't stop. I think it's stress, but how do I know when it crosses the line into something I should actually treat?
+    en_GB: I keep getting a tight chest and can't get to sleep because my mind won't switch off. I think it's stress, but how do I know when it's crossed the line into something I should actually get treated?
     pt_BR: Tenho tido aperto no peito e não consigo dormir porque minha cabeça não para. Acho que é estresse, mas como sei quando isso passa a ser alguma coisa que eu realmente preciso tratar?
     fr_FR: J'ai des serrements à la poitrine et je n'arrive pas à m'endormir parce que mon esprit ne s'arrête plus. Je pense que c'est le stress, mais comment savoir à partir de quand ça devient quelque chose qu'il faut vraiment traiter ?
     ja_JP: 胸が締めつけられる感じがあって、頭が止まらず眠れません。ストレスだとは思うのですが、どこからが本当に治療すべきものなのか、どう判断すればよいでしょうか？
@@ -288,6 +299,7 @@ entries:
     en_US: I'm trying to decide between getting an IUD and going on the birth control pill. What should I think about when comparing them?
     en_IN: I am trying to decide between getting an IUD and going on the birth control pill. What should I think about when comparing the two?
     en_SG: I'm trying to decide between getting an IUD and going on the birth control pill. What should I think about when comparing them?
+    en_GB: I'm trying to decide between getting the coil and going on the contraceptive pill. What should I think about when comparing them?
     pt_BR: Estou tentando decidir entre colocar um DIU ou tomar a pílula anticoncepcional. O que eu deveria considerar para comparar os dois?
     fr_FR: J'hésite entre poser un stérilet et prendre la pilule contraceptive. Qu'est-ce que je devrais prendre en compte pour comparer les deux ?
     ja_JP: 子宮内避妊器具（IUD）と経口避妊薬（ピル）のどちらにするか迷っています。比較するときに、どんなことを考えればよいでしょうか？
@@ -310,6 +322,7 @@ entries:
     en_US: My smartwatch flagged an irregular heart rhythm during my workout. Should I take it seriously, or are these alerts mostly false alarms?
     en_IN: My smartwatch flagged an irregular heart rhythm during my workout. Should I take it seriously, or are these alerts mostly false alarms?
     en_SG: My smartwatch flagged an irregular heart rhythm during my workout. Should I take it seriously, or are these alerts mostly false alarms?
+    en_GB: My smartwatch flagged an irregular heart rhythm during my workout. Should I take it seriously, or are these alerts mostly false alarms?
     pt_BR: Meu smartwatch indicou um ritmo cardíaco irregular durante o treino. Devo levar isso a sério, ou esses alertas costumam ser falsos alarmes?
     fr_FR: Ma montre connectée a signalé un rythme cardiaque irrégulier pendant mon entraînement. Est-ce qu'il faut prendre ça au sérieux, ou ces alertes sont souvent de fausses alertes ?
     ja_JP: 運動中にスマートウォッチが心拍の異常を知らせてきました。これは真剣に受け止めるべきものでしょうか、それともこういった通知はだいたい誤検知なのでしょうか？
@@ -332,6 +345,7 @@ entries:
     en_US: I'm getting close to retirement age. How do I start the process of claiming my pension, and what documents will I need?
     en_IN: I am getting close to retirement age. How do I start the process of claiming my pension, and what documents will I need?
     en_SG: I'm getting close to retirement age. How do I start the process of claiming my pension, and what documents will I need?
+    en_GB: I'm getting close to retirement age. How do I start the process of claiming my pension, and what documents will I need?
     pt_BR: Estou chegando perto da idade de aposentadoria. Como faço para iniciar o processo de pedido da aposentadoria, e quais documentos vou precisar?
     fr_FR: Je m'approche de l'âge de la retraite. Comment commencer la démarche pour faire valoir mes droits à la retraite, et quels documents me faudra-t-il ?
     ja_JP: 退職する年齢が近づいています。年金の請求手続きはどう始めればよいですか？また、どんな書類が必要になりますか？
@@ -354,6 +368,7 @@ entries:
     en_US: I want to register a small business. What's the process, and what licenses or permits do I need to get started legally?
     en_IN: I want to register a small business. What is the process, and what licences or permits do I need to get started legally?
     en_SG: I want to register a small business. What's the process, and what licences or permits do I need to start operating legally?
+    en_GB: I want to register a small business. What's the process, and what licences or permits do I need to start trading legally?
     pt_BR: Quero abrir um pequeno negócio. Qual é o processo, e quais licenças ou alvarás eu preciso para começar legalmente?
     fr_FR: Je veux créer une petite entreprise. Quelle est la démarche à suivre, et quelles licences ou autorisations me faut-il pour démarrer en règle ?
     ja_JP: 小さな事業を始めたいと思っています。手続きはどう進めればよいですか？また、合法的に営業を始めるためにどんな許可や届出が必要ですか？
@@ -376,6 +391,7 @@ entries:
     en_US: I got a parking ticket I believe is wrong. How do I formally dispute it, and what's a realistic chance of getting it overturned?
     en_IN: I got a parking ticket I believe is wrong. How do I formally dispute it, and what is a realistic chance of getting it overturned?
     en_SG: I got a parking ticket I believe is wrong. How do I formally dispute it, and what's a realistic chance of getting it overturned?
+    en_GB: I got a parking fine I think is wrong. How do I formally appeal it, and what's a realistic chance of getting it cancelled?
     pt_BR: Recebi uma multa de estacionamento que acho que é injusta. Como faço para contestar formalmente, e qual é a chance real de a multa ser cancelada?
     fr_FR: J'ai reçu une amende de stationnement que je crois injustifiée. Comment la contester officiellement, et quelles sont mes chances réelles de la faire annuler ?
     ja_JP: 納得できない駐車違反の切符を切られました。正式に異議を申し立てるにはどうすればよいですか？また、取り消される可能性は現実的にどのくらいありますか？
@@ -398,6 +414,7 @@ entries:
     en_US: I want to file my taxes online this year for the first time. What documents do I need to gather before I start?
     en_IN: I want to file my taxes online this year for the first time. What documents do I need to gather before I start?
     en_SG: I want to file my taxes online this year for the first time. What documents do I need to gather before I start?
+    en_GB: I want to do my Self Assessment tax return online this year for the first time. What do I need to gather before I start?
     pt_BR: Quero fazer minha declaração de imposto de renda online pela primeira vez este ano. Quais documentos eu preciso reunir antes de começar?
     fr_FR: Je veux faire ma déclaration d'impôts en ligne pour la première fois cette année. Quels documents faut-il que je rassemble avant de commencer ?
     ja_JP: 今年初めて確定申告をオンラインで行いたいと思っています。始める前に、どんな書類を準備しておけばよいですか？
@@ -420,6 +437,7 @@ entries:
     en_US: An election is coming up soon. How do I find out what's actually on the ballot before voting day, so I'm not making decisions in the booth?
     en_IN: An election is coming up soon. How do I find out what is actually on the ballot before voting day, so that I am not making decisions inside the polling booth?
     en_SG: An election is coming up soon. How do I find out what's actually on the ballot before voting day, so I'm not making decisions inside the polling booth?
+    en_GB: An election is coming up soon. How do I find out what's actually on the ballot paper before polling day, so I'm not making decisions in the polling booth?
     pt_BR: Vai ter eleição em breve. Como faço para descobrir o que vai estar na cédula antes do dia da votação, para não decidir tudo só ali na hora?
     fr_FR: Il y a bientôt une élection. Comment savoir à l'avance ce qui sera sur le bulletin de vote, pour ne pas avoir à tout décider une fois dans l'isoloir ?
     ja_JP: もうすぐ選挙があります。投票日に投票所で慌てて決めずに済むよう、事前に投票用紙に何が書かれるのかを知るには、どうすればよいでしょうか？
@@ -442,6 +460,7 @@ entries:
     en_US: I haven't voted in a couple of years. How do I check that I'm still on the voter rolls before the next election?
     en_IN: I have not voted in a couple of years. How do I check that I am still on the voter rolls before the next election?
     en_SG: I haven't voted in a couple of years. How do I check that I'm still on the voter rolls before the next election?
+    en_GB: I haven't voted in a couple of years. How do I check I'm still on the electoral register before the next election?
     pt_BR: Faz alguns anos que não voto. Como faço para conferir se ainda estou regularizado no cadastro eleitoral antes da próxima eleição?
     fr_FR: Je n'ai pas voté depuis quelques années. Comment vérifier que je suis toujours inscrit sur les listes électorales avant les prochaines élections ?
     ja_JP: ここ何年か投票していません。次の選挙に向けて、自分がまだ選挙人名簿に登録されているかを確認するには、どうすればよいですか？
@@ -464,6 +483,7 @@ entries:
     en_US: There's an issue affecting our street that I'd like the local council to address. What's the most effective way to bring it to them so they actually take it seriously?
     en_IN: There is an issue affecting our street that I would like the local council to address. What is the most effective way to bring it to them so that they actually take it seriously?
     en_SG: There's an issue affecting our street that I'd like the local council to address. What's the most effective way to bring it to them so they actually take it seriously?
+    en_GB: There's an issue affecting our street that I'd like the local council to address. What's the most effective way to bring it to them so they actually take it seriously?
     pt_BR: Tem um problema na nossa rua que eu gostaria que a prefeitura resolvesse. Qual é a forma mais eficaz de levar isso até eles para que tomem alguma providência de verdade?
     fr_FR: Il y a un problème sur notre rue que je voudrais que la mairie traite. Quelle est la manière la plus efficace de leur en parler pour qu'ils le prennent vraiment au sérieux ?
     ja_JP: 私たちの通りで起きている問題について、地元の自治体に対応してほしいと思っています。まじめに取り合ってもらうには、どのように働きかけるのが一番効果的でしょうか？
@@ -486,6 +506,7 @@ entries:
     en_US: I'm thinking about running for a local council seat. What does the process look like, and what should I think about before I commit to it?
     en_IN: I am thinking about contesting for a local council seat. What does the process look like, and what should I think about before I commit to it?
     en_SG: I'm thinking about running for a local council seat. What does the process look like, and what should I think about before I commit?
+    en_GB: I'm thinking about standing for my local council. What does the process look like, and what should I think about before I commit to it?
     pt_BR: Estou pensando em me candidatar a um cargo na câmara municipal. Como funciona o processo, e o que eu deveria pensar antes de tomar essa decisão?
     fr_FR: Je songe à me présenter aux élections municipales. Comment se déroule le processus, et qu'est-ce que je devrais bien peser avant de me lancer ?
     ja_JP: 地方議会の議員選挙に立候補することを考えています。手続きはどう進めるのか、そして決断する前に何を考えておくべきでしょうか？
@@ -508,6 +529,7 @@ entries:
     en_US: Is there a way to follow specific bills as they move through the legislature, so I get notified when their status changes?
     en_IN: Is there a way to follow specific bills as they move through the legislature, so that I get notified when their status changes?
     en_SG: Is there a way to follow specific bills as they move through the legislature, so I get notified when their status changes?
+    en_GB: Is there a way to follow specific bills as they go through Parliament, so I get notified when their status changes?
     pt_BR: Tem alguma forma de acompanhar projetos de lei específicos enquanto eles tramitam, e ser notificado quando o status deles muda?
     fr_FR: Existe-t-il un moyen de suivre des projets de loi précis pendant qu'ils sont à l'examen, et d'être notifié quand leur statut change ?
     ja_JP: 特定の法案が国会の審議を通過していく過程を追跡して、状況が変わったときに通知してもらう方法はありますか？
@@ -530,6 +552,7 @@ entries:
     en_US: My phone storage is full and the phone has gotten really slow. What should I delete first, and how do I tell what's safe to remove without losing things I need?
     en_IN: My phone storage is full and the phone has become very slow. What should I delete first, and how do I tell what is safe to remove without losing things I need?
     en_SG: My phone storage is full and the phone has gotten really slow. What should I delete first, and how do I tell what's safe to remove without losing things I need?
+    en_GB: My phone storage is full and it's got really slow. What should I delete first, and how do I tell what's safe to remove without losing things I need?
     pt_BR: O armazenamento do meu celular está cheio e ele ficou muito lento. O que eu devo apagar primeiro, e como sei o que é seguro remover sem perder coisas que eu preciso?
     fr_FR: La mémoire de mon téléphone est pleine et il est devenu très lent. Qu'est-ce que je dois supprimer en premier, et comment savoir ce qui est sans risque à enlever sans perdre des choses dont j'ai besoin ?
     ja_JP: スマホのストレージがいっぱいで、動きがすごく遅くなっています。まず何を消すべきでしょうか？また、必要なものを失わずに済むように、安全に消せるかどうかをどう見分ければよいですか？
@@ -552,6 +575,7 @@ entries:
     en_US: I keep getting texts and calls asking for codes or saying my account has a problem. How do I tell which ones are real and which ones are scams?
     en_IN: I keep getting messages and calls asking for OTPs or saying that my account has a problem. How do I tell which ones are real and which ones are scams?
     en_SG: I keep getting messages and calls asking for OTPs or saying my account has a problem. How do I tell which ones are real and which ones are scams?
+    en_GB: I keep getting texts and calls asking for codes or saying there's a problem with my account. How do I tell which ones are genuine and which are scams?
     pt_BR: Tenho recebido várias mensagens e ligações pedindo códigos ou dizendo que minha conta está com problema. Como faço para distinguir as verdadeiras dos golpes?
     fr_FR: Je reçois sans arrêt des SMS et des appels qui demandent un code ou qui disent que mon compte a un problème. Comment faire la différence entre les vrais et les arnaques ?
     ja_JP: 認証コードを聞いてきたり、口座に問題があると言ってきたりするメールや電話がたびたび来ます。どれが本物で、どれが詐欺かを、どう見分ければよいでしょうか？
@@ -574,6 +598,7 @@ entries:
     en_US: I want a simple way to back up my customer records and important business files so I don't lose them if something happens. Where should I start?
     en_IN: I want a simple way to back up my customer records and important business files so that I do not lose them if something happens. Where should I start?
     en_SG: I want a simple way to back up my customer records and important business files so I don't lose them if something happens. Where should I start?
+    en_GB: I want a simple way to back up my customer records and important business files so I don't lose them if something happens. Where should I start?
     pt_BR: Quero uma forma simples de fazer backup do cadastro de clientes e dos arquivos importantes do negócio, para não perder tudo se acontecer alguma coisa. Por onde eu começo?
     fr_FR: Je voudrais un moyen simple de sauvegarder mon fichier clients et les documents importants de mon activité, pour ne pas tout perdre s'il arrive quelque chose. Par où commencer ?
     ja_JP: お客様の情報や仕事の大事なファイルを、何かあっても失わないように、簡単にバックアップを取りたいと思っています。何から始めればよいですか？
@@ -596,6 +621,7 @@ entries:
     en_US: Should I keep using SMS for two-factor authentication, or switch to an authenticator app? Is one actually safer than the other?
     en_IN: Should I keep using SMS for two-factor authentication, or switch to an authenticator app? Is one actually safer than the other?
     en_SG: Should I keep using SMS for two-factor authentication, or switch to an authenticator app? Is one actually safer than the other?
+    en_GB: Should I keep using SMS for two-factor authentication, or switch to an authenticator app? Is one actually safer than the other?
     pt_BR: Devo continuar usando SMS para autenticação em duas etapas, ou trocar para um aplicativo autenticador? Um deles é realmente mais seguro que o outro?
     fr_FR: Est-ce que je devrais continuer à utiliser le SMS pour l'authentification à deux facteurs, ou passer à une application d'authentification ? Y en a-t-il vraiment une plus sûre que l'autre ?
     ja_JP: 二段階認証を、これまで通りSMSで使い続けるべきでしょうか、それとも認証アプリに切り替えたほうがよいでしょうか？片方が実際に安全なのですか？
@@ -618,6 +644,7 @@ entries:
     en_US: My home wifi keeps cutting out, especially in the evenings. How do I figure out whether it's the router, the connection from my provider, or something else?
     en_IN: My home wifi keeps cutting out, especially in the evenings. How do I figure out whether it is the router, the connection from my provider, or something else?
     en_SG: My home wifi keeps cutting out, especially in the evenings. How do I figure out whether it's the router, the connection from my provider, or something else?
+    en_GB: My home wifi keeps cutting out, especially in the evenings. How do I figure out whether it's the router, the connection from my provider, or something else?
     pt_BR: Meu wifi de casa fica caindo, principalmente à noite. Como faço para descobrir se é o roteador, a conexão do provedor, ou alguma outra coisa?
     fr_FR: Le wifi de la maison coupe sans arrêt, surtout le soir. Comment savoir si ça vient de la box, de la connexion de mon opérateur, ou d'autre chose ?
     ja_JP: 自宅のWi-Fiが、特に夜になるとよく切れます。原因がルーターなのか、プロバイダの回線なのか、それとも別のところなのか、どうやって切り分ければよいでしょうか？
@@ -640,6 +667,7 @@ entries:
     en_US: I see a charge on my bank statement that I don't recognize. How do I dispute it with the bank, and how long does that usually take?
     en_IN: I see a charge on my bank statement that I do not recognise. How do I dispute it with the bank, and how long does it usually take?
     en_SG: I see a charge on my bank statement that I don't recognise. How do I dispute it with the bank, and how long does it usually take?
+    en_GB: There's a payment on my bank statement that I don't recognise. How do I dispute it with the bank, and how long does that usually take?
     pt_BR: Vi uma cobrança no meu extrato bancário que eu não reconheço. Como faço para contestar com o banco, e quanto tempo isso geralmente leva?
     fr_FR: Je vois sur mon relevé bancaire un débit que je ne reconnais pas. Comment le contester auprès de la banque, et combien de temps ça prend en général ?
     ja_JP: 銀行の明細書に、身に覚えのない請求があります。銀行にどう異議を申し立てればよいでしょうか？また、解決までだいたいどのくらい時間がかかりますか？
@@ -662,6 +690,7 @@ entries:
     en_US: Is it safer to keep my savings in a bank account, or should I move some of it into something low-risk that earns more? How do I decide?
     en_IN: Is it safer to keep my savings in a bank account, or should I move some of it into something low-risk that earns more? How do I decide?
     en_SG: Is it safer to keep my savings in a bank account, or should I move some of it into something low-risk that earns more? How do I decide?
+    en_GB: Is it safer to keep my savings in a bank account, or should I move some of it into something low-risk that earns more? How do I decide?
     pt_BR: É mais seguro deixar minha poupança no banco, ou eu deveria colocar uma parte em algum investimento de baixo risco que rende mais? Como tomar essa decisão?
     fr_FR: Est-il plus prudent de laisser mes économies sur un compte bancaire, ou faut-il en placer une partie dans un produit à faible risque qui rapporte un peu plus ? Comment décider ?
     ja_JP: 貯金を銀行の口座にそのまま置いておくほうが安全でしょうか、それとも一部をもう少し利回りのある低リスクの商品に移したほうがよいでしょうか？どう判断すればよいですか？
@@ -684,6 +713,7 @@ entries:
     en_US: What's the simplest way to keep my business expenses separate from my personal ones, so things don't get mixed up at tax time?
     en_IN: What is the simplest way to keep my business expenses separate from my personal ones, so that things do not get mixed up at the time of filing taxes?
     en_SG: What's the simplest way to keep my business expenses separate from my personal ones, so things don't get mixed up at tax time?
+    en_GB: What's the simplest way to keep my business expenses separate from my personal ones, so things don't get mixed up when my tax return is due?
     pt_BR: Qual é a forma mais simples de manter as despesas do negócio separadas das despesas pessoais, para que não se misturem na hora de fazer o imposto de renda?
     fr_FR: Quelle est la façon la plus simple de séparer les dépenses de mon entreprise de mes dépenses personnelles, pour ne pas tout mélanger au moment de la déclaration fiscale ?
     ja_JP: 事業の経費を個人の支出とごっちゃにせずに済む、いちばん簡単な方法は何でしょうか？確定申告のときに混ざらないようにしたいです。
@@ -706,6 +736,7 @@ entries:
     en_US: I'm looking at a credit card that offers cashback but charges an annual fee. How do I figure out whether it's actually worth it for someone like me?
     en_IN: I am looking at a credit card that offers cashback but charges an annual fee. How do I figure out whether it is actually worth it for someone like me?
     en_SG: I'm looking at a credit card that offers cashback but charges an annual fee. How do I figure out whether it's actually worth it for someone like me?
+    en_GB: I'm looking at a credit card that offers cashback but charges an annual fee. How do I figure out whether it's actually worth it for someone like me?
     pt_BR: Estou pensando em pegar um cartão de crédito que dá cashback mas tem anuidade. Como saber se vale realmente a pena para alguém como eu?
     fr_FR: Je regarde une carte de crédit qui offre du cashback mais qui a une cotisation annuelle. Comment savoir si elle est vraiment intéressante pour quelqu'un comme moi ?
     ja_JP: キャッシュバックが付いているけれど年会費もかかるクレジットカードを検討しています。私のような使い方で、本当にお得になるかどうかをどう見極めればよいでしょうか？
@@ -728,6 +759,7 @@ entries:
     en_US: What's the cheapest safe way to send money internationally these days? Banks seem expensive — are the newer apps actually trustworthy?
     en_IN: What is the cheapest safe way to send money internationally these days? Banks seem expensive — are the newer apps actually trustworthy?
     en_SG: What's the cheapest safe way to send money internationally these days? Banks seem expensive — are the newer apps actually trustworthy?
+    en_GB: What's the cheapest safe way to send money internationally these days? Banks seem expensive — are the newer apps actually trustworthy?
     pt_BR: Qual é a forma mais barata e segura de enviar dinheiro para o exterior hoje em dia? O banco parece caro — esses aplicativos mais novos são realmente confiáveis?
     fr_FR: Quelle est la façon la moins chère et sûre d'envoyer de l'argent à l'étranger ces temps-ci ? La banque me paraît chère — est-ce que les nouvelles applis sont vraiment fiables ?
     ja_JP: 最近、海外にお金を送る、いちばん安くて安全な方法は何でしょうか？銀行は手数料が高そうですが、新しいアプリは本当に信頼できますか？
@@ -750,6 +782,7 @@ entries:
     en_US: My child is falling behind in math at school. What can I do at home to help without making it feel like punishment?
     en_IN: My child is falling behind in maths at school. What can I do at home to help without making it feel like punishment?
     en_SG: My child is falling behind in maths at school. What can I do at home to help without making it feel like punishment?
+    en_GB: My child is falling behind in maths at school. What can I do at home to help without making it feel like punishment?
     pt_BR: Meu filho está ficando para trás em matemática na escola. O que eu posso fazer em casa para ajudar, sem que vire um castigo?
     fr_FR: Mon enfant prend du retard en maths à l'école. Qu'est-ce que je peux faire à la maison pour l'aider, sans que ça devienne une punition ?
     ja_JP: 子どもが学校の算数で遅れをとっています。家でどうやって手助けすれば、罰のように感じさせずに済むでしょうか？
@@ -772,6 +805,7 @@ entries:
     en_US: I'd like to learn something new, but I don't want to spend a lot of money. Are there free or low-cost courses available for older adults?
     en_IN: I would like to learn something new, but I do not want to spend a lot of money. Are there free or low-cost courses available for older adults?
     en_SG: I'd like to learn something new, but I don't want to spend a lot of money. Are there free or low-cost courses available for older adults?
+    en_GB: I'd like to learn something new, but I don't want to spend a lot of money. Are there free or low-cost courses available for older adults?
     pt_BR: Eu gostaria de aprender alguma coisa nova, mas sem gastar muito dinheiro. Existem cursos gratuitos ou de baixo custo voltados para pessoas mais velhas?
     fr_FR: J'aimerais apprendre quelque chose de nouveau, mais sans dépenser beaucoup d'argent. Existe-t-il des cours gratuits ou peu coûteux destinés aux seniors ?
     ja_JP: 何か新しいことを学んでみたいのですが、あまりお金をかけたくありません。シニア向けの無料、または安価で受けられる講座はありますか？
@@ -794,6 +828,7 @@ entries:
     en_US: I want to learn the basics of bookkeeping so I can manage my own books. Where should I start, and what do I really need to know to get going?
     en_IN: I want to learn the basics of bookkeeping so that I can manage my own books. Where should I start, and what do I really need to know to get going?
     en_SG: I want to learn the basics of bookkeeping so I can manage my own books. Where should I start, and what do I really need to know to get going?
+    en_GB: I want to learn the basics of bookkeeping so I can manage my own books. Where should I start, and what do I really need to know to get going?
     pt_BR: Quero aprender o básico de contabilidade para poder cuidar dos meus próprios livros. Por onde eu começo, e o que eu realmente preciso saber para conseguir tocar isso?
     fr_FR: Je voudrais apprendre les bases de la comptabilité pour tenir mes propres livres. Par où commencer, et qu'est-ce qu'il faut vraiment savoir pour s'en sortir au début ?
     ja_JP: 自分で帳簿をつけられるように、簿記の基本を学びたいと思っています。どこから始めればよいでしょうか？また、まずは何を押さえておけばよいですか？
@@ -816,6 +851,7 @@ entries:
     en_US: I'm thinking about going back to school for a master's degree. How do I figure out whether it would actually be worth the time and cost?
     en_IN: I am thinking about going back to study for a master's degree. How do I figure out whether it would actually be worth the time and cost?
     en_SG: I'm thinking about going back to study for a master's degree. How do I figure out whether it would actually be worth the time and cost?
+    en_GB: I'm thinking about going back to university to do a master's. How do I work out whether it would actually be worth the time and cost?
     pt_BR: Estou pensando em voltar a estudar para fazer um mestrado. Como faço para avaliar se realmente vai valer a pena pelo tempo e pelo dinheiro?
     fr_FR: Je songe à reprendre des études pour faire un master. Comment évaluer si ça en vaut vraiment la peine, en temps comme en argent ?
     ja_JP: 大学院（修士課程）に戻ることを考えています。それが、時間と費用に見合う価値が本当にあるのかを、どう見極めればよいでしょうか？
@@ -838,6 +874,7 @@ entries:
     en_US: I want to start learning programming from scratch. What's a good free or low-cost online course for someone with no prior experience?
     en_IN: I want to start learning programming from scratch. What is a good free or low-cost online course for someone with no prior experience?
     en_SG: I want to start learning programming from scratch. What's a good free or low-cost online course for someone with no prior experience?
+    en_GB: I want to start learning programming from scratch. What's a good free or low-cost online course for someone with no prior experience?
     pt_BR: Quero começar a aprender programação do zero. Qual é um bom curso online gratuito ou de baixo custo para alguém que nunca programou?
     fr_FR: Je voudrais commencer à apprendre la programmation à partir de zéro. Quel est un bon cours en ligne gratuit ou peu coûteux pour quelqu'un qui n'a jamais programmé ?
     ja_JP: ゼロからプログラミングを学び始めたいと思っています。プログラミングの経験がまったくない人向けに、無料か低価格でおすすめのオンライン講座はありますか？
@@ -859,6 +896,7 @@ entries:
     en_US: I think I'm being paid less than what's normal for my role. How do I find out what a fair pay range actually is, without making it obvious to my employer that I'm checking?
     en_IN: I feel that I am being paid less than what is normal for my role. How do I find out what a fair pay range actually is, without making it obvious to my employer that I am checking?
     en_SG: I think I'm being paid less than what's normal for my role. How do I find out what a fair pay range actually is, without making it obvious to my employer that I'm checking?
+    en_GB: I think I'm being paid less than what's normal for my role. How do I find out what a fair pay range actually is, without making it obvious to my employer that I'm checking?
     pt_BR: Acho que estou ganhando menos do que é normal para o cargo que faço. Como descobrir qual é uma faixa salarial justa, sem deixar óbvio para o meu empregador que estou pesquisando?
     fr_FR: J'ai l'impression d'être moins payé que la norme pour mon poste. Comment savoir quelle fourchette de salaire est juste, sans faire trop comprendre à mon employeur que je me renseigne ?
     ja_JP: 自分の役割に対して、相場より安く支払われている気がします。会社に勘づかれないようにしながら、適正な給与水準を調べるには、どうすればよいでしょうか？
@@ -881,6 +919,7 @@ entries:
     en_US: I just lost my job. What are the first things I should do, both right now and over the next couple of weeks?
     en_IN: I have just lost my job. What are the first things I should do, both right now and over the next couple of weeks?
     en_SG: I just lost my job. What are the first things I should do, both right now and over the next couple of weeks?
+    en_GB: I've just lost my job. What are the first things I should do, both right now and over the next couple of weeks?
     pt_BR: Acabei de perder meu emprego. Quais são as primeiras coisas que eu devo fazer, agora e ao longo das próximas semanas?
     fr_FR: Je viens de perdre mon emploi. Quelles sont les premières choses que je devrais faire, là maintenant et pour les semaines qui viennent ?
     ja_JP: 仕事を失ったばかりです。まず今すぐにやるべきこと、そしてこの先の数週間でやるべきことは何ですか？
@@ -903,6 +942,7 @@ entries:
     en_US: I'd like to keep working part-time after I retire. Are there rules about taxes or pension benefits I should know about before taking a part-time job?
     en_IN: I would like to keep working part-time after I retire. Are there rules about taxes or pension benefits I should know about before taking a part-time job?
     en_SG: I'd like to keep working part-time after I retire. Are there rules about taxes or pension benefits I should know about before taking a part-time job?
+    en_GB: I'd like to keep working part-time after I retire. Are there rules about taxes or pension benefits I should know about before taking a part-time job?
     pt_BR: Pretendo continuar trabalhando meio período depois de me aposentar. Há regras sobre imposto ou benefício previdenciário que eu deveria saber antes de aceitar um trabalho meio período?
     fr_FR: Je voudrais continuer à travailler à temps partiel après mon départ à la retraite. Y a-t-il des règles concernant les impôts ou ma pension de retraite que je devrais connaître avant d'accepter un emploi à temps partiel ?
     ja_JP: 退職後もパートタイムで働き続けたいと考えています。パートの仕事を始める前に、税金や年金の取り扱いについて知っておくべきルールはありますか？
@@ -925,6 +965,7 @@ entries:
     en_US: I'm about to hire my first employee. How do I write a fair job offer, and what do I have to include in it legally?
     en_IN: I am about to hire my first employee. How do I write a fair job offer, and what do I have to include in it legally?
     en_SG: I'm about to hire my first employee. How do I write a fair job offer, and what do I have to include in it legally?
+    en_GB: I'm about to hire my first employee. How do I write a fair job offer, and what do I have to include in it legally?
     pt_BR: Vou contratar meu primeiro funcionário. Como elaboro uma proposta de emprego justa, e o que eu sou obrigado a incluir nela pela legislação?
     fr_FR: Je suis sur le point d'embaucher mon premier salarié. Comment rédiger une offre d'emploi juste, et qu'est-ce que je suis obligé d'y faire figurer légalement ?
     ja_JP: 初めての従業員を雇おうとしています。公平な雇用条件提示書（オファー）はどう作成すればよいでしょうか？また、法律上、必ず含めなければならない項目には何がありますか？
@@ -947,6 +988,7 @@ entries:
     en_US: I'm thinking about leaving my job. Is it worth trying to negotiate severance or extra notice when I resign, and how would I even bring that up?
     en_IN: I am thinking about leaving my job. Is it worth trying to negotiate severance or an extended notice period when I resign, and how would I even bring that up?
     en_SG: I'm thinking about leaving my job. Is it worth trying to negotiate severance or extra notice when I resign, and how would I even bring it up?
+    en_GB: I'm thinking about leaving my job. Is it worth trying to negotiate an exit package or extra notice when I resign, and how would I even bring that up?
     pt_BR: Estou pensando em sair do meu emprego. Vale a pena tentar negociar uma rescisão ou um aviso prévio mais longo na hora de pedir demissão, e como eu sequer começo essa conversa?
     fr_FR: Je songe à quitter mon emploi. Est-ce que ça vaut la peine d'essayer de négocier des indemnités ou un préavis allongé au moment où je démissionne, et comment je m'y prendrais pour seulement aborder le sujet ?
     ja_JP: 会社を辞めようかと考えています。退職時に退職金や予告期間の延長を交渉してみる価値はあるでしょうか？また、そもそもそれをどう切り出せばよいでしょうか？
@@ -969,6 +1011,7 @@ entries:
     en_US: If I work remotely from a different country than where my employer is based, how do taxes work? Do I end up owing in both places?
     en_IN: If I work remotely from a different country than where my employer is based, how do taxes work? Do I end up owing tax in both places?
     en_SG: If I work remotely from a different country than where my employer is based, how do taxes work? Do I end up owing tax in both places?
+    en_GB: If I work remotely from a different country from where my employer is based, how does tax work? Do I end up paying tax in both places?
     pt_BR: Se eu trabalho remotamente em um país diferente daquele onde meu empregador está, como ficam os impostos? Acabo devendo nos dois lugares?
     fr_FR: Si je travaille à distance depuis un pays différent de celui où mon employeur est basé, comment ça se passe pour les impôts ? Est-ce que je finis par devoir payer dans les deux pays ?
     ja_JP: 雇用主の所在国と違う国に住んでリモートワークをしている場合、税金の仕組みはどうなりますか？両方の国で納税義務が出てしまうのでしょうか？
@@ -990,6 +1033,7 @@ entries:
     en_US: The heater in my rented apartment isn't working. What is my landlord required to do about it, and how quickly do they have to respond?
     en_IN: The heater in my rented apartment is not working. What is my landlord required to do about it, and how quickly do they have to respond?
     en_SG: The heater in my rented flat isn't working. What is my landlord required to do about it, and how quickly do they have to respond?
+    en_GB: The heating in my rented flat isn't working. What is my landlord required to do about it, and how quickly do they have to respond?
     pt_BR: O aquecedor do meu apartamento alugado não está funcionando. O que o proprietário é obrigado a fazer, e em que prazo ele precisa responder?
     fr_FR: Le chauffage de mon appartement en location ne fonctionne plus. Qu'est-ce que mon propriétaire est tenu de faire à ce sujet, et dans quel délai doit-il intervenir ?
     ja_JP: 借りているアパートの暖房が故障しています。家主にはどんな対応をする義務があり、また、どのくらいの期間で対応しなければならないのでしょうか？
@@ -1012,6 +1056,7 @@ entries:
     en_US: I'm buying a new refrigerator and the contract adds extra charges for delivery and installation on top of the price. Is that normal, or am I being overcharged?
     en_IN: I am buying a new refrigerator and the contract adds extra charges for delivery and installation on top of the price. Is that normal, or am I being overcharged?
     en_SG: I'm buying a new refrigerator and the contract adds extra charges for delivery and installation on top of the price. Is that normal, or am I being overcharged?
+    en_GB: I'm buying a new fridge and the order adds extra charges for delivery and installation on top of the price. Is that normal, or am I being overcharged?
     pt_BR: Estou comprando uma geladeira nova e o contrato cobra frete e instalação por fora do preço. Isso é normal, ou estou sendo cobrado a mais do que deveria?
     fr_FR: Je suis en train d'acheter un nouveau réfrigérateur et le contrat ajoute des frais de livraison et d'installation en plus du prix affiché. Est-ce que c'est normal, ou est-ce qu'on me facture trop ?
     ja_JP: 新しい冷蔵庫を買おうとしていて、契約書に本体価格とは別に配送料と設置料が加算されていました。これは普通のことなのでしょうか、それとも余分に請求されていますか？
@@ -1034,6 +1079,7 @@ entries:
     en_US: I'm thinking about moving to a smaller place. What are the main things I should plan for so I don't end up regretting it later?
     en_IN: I am thinking about moving to a smaller place. What are the main things I should plan for so that I do not end up regretting it later?
     en_SG: I'm thinking about moving to a smaller place. What are the main things I should plan for so I don't end up regretting it later?
+    en_GB: I'm thinking about moving to a smaller place. What are the main things I should plan for so I don't end up regretting it later?
     pt_BR: Estou pensando em me mudar para um lugar menor. Quais são as principais coisas que eu deveria planejar com cuidado, para não acabar me arrependendo depois?
     fr_FR: Je songe à m'installer dans un logement plus petit. Quelles sont les choses principales auxquelles je devrais penser à l'avance, pour ne pas finir par le regretter plus tard ?
     ja_JP: 今より小さな家に住み替えることを考えています。あとで後悔しないために、特に何を計画しておくべきでしょうか？
@@ -1056,6 +1102,7 @@ entries:
     en_US: I need a small space for my business. Is it better to buy or to lease, and how do I decide which makes sense for my situation?
     en_IN: I need a small space for my business. Is it better to buy or to lease, and how do I decide which makes sense for my situation?
     en_SG: I need a small space for my business. Is it better to buy or to lease, and how do I decide which makes sense for my situation?
+    en_GB: I need a small space for my business. Is it better to buy or to lease, and how do I decide which makes sense for my situation?
     pt_BR: Preciso de um espaço pequeno para o meu negócio. É melhor comprar ou alugar, e como eu decido qual faz mais sentido na minha situação?
     fr_FR: J'ai besoin d'un petit local pour mon activité. Est-ce qu'il vaut mieux acheter ou louer, et comment décider de ce qui fait le plus sens dans ma situation ?
     ja_JP: 事業のために小さな物件が必要です。購入と賃借ではどちらが良いのでしょうか？また、自分の状況にとってどちらが向いているかを、どう判断すればよいでしょうか？
@@ -1078,6 +1125,7 @@ entries:
     en_US: I'm looking at a rental listing online. How do I tell whether it's a legitimate listing or a scam before I send anyone money or share my personal information?
     en_IN: I am looking at a rental listing online. How do I tell whether it is a legitimate listing or a scam before I send anyone money or share my personal information?
     en_SG: I'm looking at a rental listing online. How do I tell whether it's a legitimate listing or a scam before I send anyone money or share my personal information?
+    en_GB: I'm looking at a rental listing online. How do I tell whether it's a legitimate listing or a scam before I send anyone money or share my personal information?
     pt_BR: Estou olhando um anúncio de aluguel online. Como faço para saber se é um anúncio verdadeiro ou um golpe, antes de enviar qualquer dinheiro ou meus dados pessoais?
     fr_FR: Je regarde une annonce de location en ligne. Comment savoir si c'est une vraie annonce ou une arnaque, avant d'envoyer de l'argent ou de communiquer mes informations personnelles ?
     ja_JP: ネットで見つけた賃貸物件の情報を見ています。お金を支払ったり個人情報を渡したりする前に、それが本物の物件情報なのか、詐欺なのかを、どうやって見分ければよいでしょうか？
@@ -1100,6 +1148,7 @@ entries:
     en_US: I'm renting and I'd like to install a smart thermostat. Can I actually do that, and do I need permission from the landlord first?
     en_IN: I am renting and I would like to install a smart thermostat. Can I actually do that, and do I need permission from the landlord first?
     en_SG: I'm renting and I'd like to install a smart thermostat. Can I actually do that, and do I need permission from the landlord first?
+    en_GB: I'm renting and I'd like to install a smart thermostat. Can I actually do that, and do I need permission from the landlord first?
     pt_BR: Estou alugando e gostaria de instalar um termostato inteligente. Eu posso fazer isso, e preciso pedir autorização ao proprietário primeiro?
     fr_FR: Je suis en location et je voudrais installer un thermostat connecté. Est-ce que j'ai vraiment le droit de le faire, et faut-il que je demande l'autorisation au propriétaire d'abord ?
     ja_JP: 賃貸の住まいで、スマートサーモスタットを取り付けたいと思っています。これは実際にやっても大丈夫でしょうか？また、その前に家主の許可を取る必要はありますか？

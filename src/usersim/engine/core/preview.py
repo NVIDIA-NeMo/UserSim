@@ -57,6 +57,7 @@ _LOCALE_FLAGS = {
     "hi_Deva_IN": "🇮🇳",
     "hi_Latn_IN": "🇮🇳",
     "en_SG": "🇸🇬",
+    "en_GB": "🇬🇧",
     "ko_KR": "🇰🇷",
 }
 
@@ -104,6 +105,7 @@ _LOCALE_COUNTRIES = {
     "hi_Deva_IN": "India",
     "hi_Latn_IN": "India",
     "en_SG": "Singapore",
+    "en_GB": "United Kingdom",
     "ko_KR": "South Korea",
 }
 

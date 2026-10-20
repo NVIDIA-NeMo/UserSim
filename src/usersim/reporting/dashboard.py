@@ -320,6 +320,7 @@ def _language_count_from_locales(locales: list[str]) -> int:
 
 def _locale_label(locale: str) -> str:
     flags = {
+        "en_GB": "🇬🇧",
         "en_IN": "🇮🇳",
         "en_SG": "🇸🇬",
         "en_US": "🇺🇸",
@@ -566,7 +567,7 @@ const formatTokens = (n) => {{
   return n.toLocaleString();
 }};
 const localeLabel = (locale) => {{
-  const flags = {{en_IN:"🇮🇳", en_SG:"🇸🇬", en_US:"🇺🇸", fr_FR:"🇫🇷", hi_Deva_IN:"🇮🇳", ja_JP:"🇯🇵", ko_KR:"🇰🇷", pt_BR:"🇧🇷"}};
+  const flags = {{en_GB:"🇬🇧", en_IN:"🇮🇳", en_SG:"🇸🇬", en_US:"🇺🇸", fr_FR:"🇫🇷", hi_Deva_IN:"🇮🇳", ja_JP:"🇯🇵", ko_KR:"🇰🇷", pt_BR:"🇧🇷"}};
   return `${{flags[locale] ?? (locale.endsWith("_IN") ? "🇮🇳" : "🌐")}}  ${{locale}}`;
 }};
 const ageLabel = (summary) => {{

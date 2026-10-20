@@ -440,7 +440,7 @@ def _model_failure_result(
 # (ja_JP / hi_Deva_IN / fr_FR / pt_BR) the framework currently ships.
 
 _FOURTH_WALL_PHRASES = (
-    # ── English (en_US / en_IN / en_SG) ─────────────────────────────
+    # ── English (en_US / en_IN / en_SG / en_GB) ─────────────────────
     "opening line",
     "opening message",
     "start the chat",
