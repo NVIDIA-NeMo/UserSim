@@ -11,7 +11,8 @@ project and version, and:
   from the sdist, so a file only the wheel has came from somewhere else, such
   as a stale ``build/`` directory;
 - the wheel ships the asset banks, and no ``embeddings.parquet`` (retrieval
-  vectors stay with the embedding model that produced them);
+  vectors stay with the embedding model that produced them) or
+  ``evaluate-assets`` scorecard;
 - the sdist ships no ``tests/``.
 """
 
@@ -61,6 +62,8 @@ def check_archives(sdist: Path, wheel: Path) -> list[str]:
         problems.append("the wheel ships no asset banks, so every probe would fail at asset resolution")
     if any(f.endswith("embeddings.parquet") for f in wheel_files):
         problems.append("the wheel ships embeddings.parquet")
+    if any(f.endswith("_eval_scorecard.parquet") or "/_scorecards/" in f for f in wheel_files):
+        problems.append("the wheel ships an evaluate-assets scorecard")
     tests = [f for f in sdist_files if f.startswith("tests/")]
     if tests:
         problems.append(f"the sdist ships {len(tests)} file(s) under tests/")
