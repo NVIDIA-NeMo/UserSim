@@ -1,0 +1,440 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for kompass_direktbank, a direct bank without
+# branches. Every state-changing tool it offers is gold in at least one task.
+# Each task ships THREE opening phrasings in German. Read-only tools
+# (get_account_transactions, get_statements, dispute_status) carry no gold state
+# change.
+templates:
+- id: TPL-KD-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich finde meine Visa-Debitkarte nicht mehr. Können Sie sie sofort sperren?
+  - >-
+    Meine Karte mit den Endziffern 0001 ist {{event}}. Bitte sperren Sie sie.
+  - >-
+    Bitte sperren Sie vorsorglich meine Karte mit den Endziffern 0001, ich weiß
+    nicht, wo sie ist.
+  account_state:
+    account_id: acct_kd_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_kd_0001, status: active}
+  param_space:
+    event: [verloren gegangen, gestohlen worden]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_kd_0001.status: frozen}
+  # ordering a new card right after blocking a lost one is a step customers
+  # often ask for — permitted, not required.
+  allowed_tools: [order_replacement_card]
+- id: TPL-KD-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Auf meinem Konto ist eine Kartenzahlung über {{amount}} € bei {{merchant}},
+    die ich nicht gemacht habe. Können Sie das reklamieren?
+  - >-
+    Ich sehe eine Abbuchung von {{amount}} € von {{merchant}}, die ich nicht
+    kenne. Wie bekomme ich mein Geld zurück?
+  - >-
+    Bei {{merchant}} wurden {{amount}} € mit meiner Karte bezahlt, das war ich
+    nicht. Bitte leiten Sie eine Reklamation ein.
+  account_state:
+    account_id: acct_kd_0001
+    cards:
+    - {card_id: card_kd_0001, status: active}
+    transactions:
+    - {transaction_id: txn_kd_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Spielewelt Online, Reiseportal Nordlicht, Modehaus Rhein online]
+    amount: ['39,90', '74,50', '219,00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_kd_0001.status: UNDER_REVIEW}
+  allowed_tools: [freeze_card]
+- id: TPL-KD-INSTANT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich muss {{payee}} sofort {{amount}} € überweisen. Können Sie eine
+    Echtzeitüberweisung machen?
+  - >-
+    Bitte schicken Sie {{payee}} {{amount}} € per Echtzeitüberweisung, es ist
+    dringend.
+  - >-
+    Können Sie {{payee}} jetzt {{amount}} € schicken, damit das Geld sofort
+    ankommt?
+  account_state:
+    account_id: acct_kd_0001
+    balance: '1850.00'
+    payees:
+    - {payee_id: payee_kd_0001, name: '{{payee}}'}
+  param_space:
+    payee: [meinem Mitbewohner, meiner Schwester, meinem Freund Jonas]
+    amount: ['50', '150', '400']
+  gold_tool_sequence: [send_instant_transfer]
+  expected_state_deltas: {instant_transfer_status: SENT}
+- id: TPL-KD-LIMITS-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich muss diese Woche {{purchase}} bezahlen, aber mein Kartenlimit ist zu
+    niedrig. Können Sie es erhöhen?
+  - >-
+    Bitte erhöhen Sie den Verfügungsrahmen meiner Visa-Debitkarte, ich muss
+    {{purchase}} bezahlen.
+  - >-
+    Können Sie mein Kartenlimit anheben? Ich habe einen größeren Einkauf vor:
+    {{purchase}}.
+  account_state:
+    account_id: acct_kd_0001
+    cards:
+    - {card_id: card_kd_0001, status: active}
+  param_space:
+    purchase: [einen Flug, die Kaution für meine Wohnung, einen neuen Laptop]
+  gold_tool_sequence: [set_card_limits]
+  expected_state_deltas: {card_limits_updated: true}
+- id: TPL-KD-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte mein Girokonto von der {{old_bank}} zu Kompass umziehen. Können Sie
+    die digitale Kontowechselhilfe starten?
+  - >-
+    Bitte übernehmen Sie meine Daueraufträge und Lastschriften von der
+    {{old_bank}}.
+  - >-
+    Wie funktioniert der Kontowechsel von der {{old_bank}} zu Ihnen? Ich möchte
+    ihn gleich starten.
+  account_state:
+    account_id: acct_kd_0001
+    account_type: Girokonto
+  param_space:
+    old_bank: [Stadtsparkasse Wiesenau, Volksbank Mittelland, Commerzhaus Bank]
+  gold_tool_sequence: [initiate_account_switch]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS}
+- id: TPL-KD-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bitte legen Sie {{payee}} mit der IBAN {{iban}} als Empfänger an.
+  - >-
+    Ich überweise öfter an {{payee}}. Können Sie die IBAN {{iban}} als Empfänger
+    speichern?
+  - >-
+    Können Sie einen neuen Empfänger für mich anlegen? Es geht um {{payee}}, IBAN
+    {{iban}}.
+  account_state:
+    account_id: acct_kd_0001
+  param_space:
+    payee: [meinen Vermieter, meine Mutter, meinen Fußballverein]
+    iban: ['DE00 1234 5678 9012 3456 78', 'DE00 8765 4321 0987 6543 21']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-KD-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe mein Abo bei {{creditor}} gekündigt, trotzdem wurde wieder
+    abgebucht. Können Sie die Lastschrift zurückgeben?
+  - >-
+    Bitte widersprechen Sie dem Lastschriftmandat von {{creditor}}.
+  - >-
+    Können Sie verhindern, dass {{creditor}} weiter von meinem Konto abbucht?
+  account_state:
+    account_id: acct_kd_0001
+    mandates:
+    - {mandate_id: mdt_kd_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [Fitnesswerk Süd, Medienstrom Plus, Spielewelt Online]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_kd_0001.status: REVOKED}
+- id: TPL-KD-OPEN-TAGESGELD-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte ein Tagesgeldkonto eröffnen und den Neukundenzins mitnehmen.
+  - >-
+    Können Sie mir zusätzlich zum Girokonto ein Tagesgeldkonto einrichten?
+  - >-
+    Bitte eröffnen Sie für mich ein Kompass Tagesgeld.
+  account_state:
+    customer_id: cust_kd_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-KD-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte mein Kompass-Girokonto kündigen.
+  - >-
+    Bitte schließen Sie mein Girokonto und überweisen Sie das Restguthaben auf mein
+    neues Konto.
+  - >-
+    Können Sie mein Konto auflösen? Ich brauche es nicht mehr.
+  account_state:
+    account_id: acct_kd_0001
+    account_type: Girokonto
+    balance: '62.00'
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_kd_0001.status: CLOSED}
+  # one opening asks to send the remaining balance out first -- permitted.
+  allowed_tools: [send_instant_transfer]
+- id: TPL-KD-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe eine neue Handynummer, {{phone}}. Bitte aktualisieren Sie sie, damit
+    ich die Freigabe-Codes bekomme.
+  - >-
+    Bitte ändern Sie meine E-Mail-Adresse auf {{email}}.
+  - >-
+    Ich bin umgezogen, meine neue Adresse lautet {{address}}.
+  account_state:
+    customer_id: cust_kd_0001
+  param_space:
+    phone: ['0151 00000101', '0170 00000202']
+    email: [k.schneider@example.com, m.yilmaz@example.com]
+    address: ['Bergweg 7, 80331 München', 'Hafenstraße 21, 20457 Hamburg']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-KD-STOLEN-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mir wurde die Tasche mit meiner Karte mit den Endziffern 0001 gestohlen, und
+    es gibt schon eine Zahlung über {{amount}} € bei {{merchant}}. Sperren Sie die
+    Karte, reklamieren Sie die Zahlung und schicken Sie mir eine neue Karte.
+  - >-
+    Meine Karte mit den Endziffern 0001 wurde gestohlen, und jemand hat bei
+    {{merchant}} {{amount}} € bezahlt. Bitte sperren Sie sie, leiten Sie eine
+    Reklamation ein und bestellen Sie eine Ersatzkarte.
+  - >-
+    Können Sie meine gestohlene Karte mit den Endziffern 0001 sperren, die
+    {{amount}} € bei {{merchant}} reklamieren und mir eine neue Karte schicken?
+  account_state:
+    account_id: acct_kd_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_kd_0001, status: active}
+    transactions:
+    - {transaction_id: txn_kd_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Spielewelt Online, Modehaus Rhein online]
+    amount: ['59,99', '180,00']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_kd_0001.status: frozen, txn_kd_0002.status: UNDER_REVIEW, card_kd_0001.replacement: ordered}
+- id: TPL-KD-NEWCUSTOMER-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich bin neu bei Kompass: Starten Sie bitte den Kontowechsel von der
+    {{old_bank}}, eröffnen Sie mir ein Tagesgeldkonto und benachrichtigen Sie mich
+    bei jedem Gehaltseingang.
+  - >-
+    Bitte übernehmen Sie meine Daueraufträge von der {{old_bank}}, richten Sie mir
+    ein Tagesgeld ein und schicken Sie mir eine Nachricht, wenn das Gehalt kommt.
+  - >-
+    Können Sie den Kontowechsel von der {{old_bank}} anstoßen, ein Tagesgeldkonto
+    für mich eröffnen und Benachrichtigungen für Gehaltseingänge einschalten?
+  account_state:
+    account_id: acct_kd_0001
+    account_type: Girokonto
+  param_space:
+    old_bank: [Stadtsparkasse Wiesenau, Volksbank Mittelland]
+  gold_tool_sequence: [initiate_account_switch, open_account, set_alerts]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-KD-RENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich bin gerade eingezogen: Legen Sie bitte meinen neuen Vermieter mit der IBAN
+    {{iban}} als Empfänger an, überweisen Sie ihm {{amount}} € Miete in Echtzeit
+    und warnen Sie mich, wenn mein Kontostand unter {{threshold}} € fällt.
+  - >-
+    Bitte speichern Sie meinen Vermieter mit der IBAN {{iban}}, schicken Sie ihm
+    sofort {{amount}} € für die Miete und richten Sie eine Warnung bei einem
+    Kontostand unter {{threshold}} € ein.
+  - >-
+    Können Sie die IBAN meines Vermieters ({{iban}}) anlegen, ihm {{amount}} € per
+    Echtzeitüberweisung schicken und mich benachrichtigen, sobald ich unter
+    {{threshold}} € komme?
+  account_state:
+    account_id: acct_kd_0001
+    balance: '1900.00'
+  param_space:
+    iban: ['DE00 1234 5678 9012 3456 78', 'DE00 8765 4321 0987 6543 21']
+    amount: ['680', '920']
+    threshold: ['100', '200']
+  gold_tool_sequence: [update_beneficiary, send_instant_transfer, set_alerts]
+  expected_state_deltas: {payee_added: true, instant_transfer_status: SENT, alerts_updated: true}
+- id: TPL-KD-SUBSCRIPTION-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{creditor}} bucht weiter ab, obwohl ich gekündigt habe: Widersprechen Sie dem
+    Lastschriftmandat, reklamieren Sie die letzte Abbuchung über {{amount}} € und
+    benachrichtigen Sie mich bei jeder Lastschrift.
+  - >-
+    Bitte stoppen Sie die Lastschriften von {{creditor}}, holen Sie die
+    {{amount}} € von diesem Monat zurück und schalten Sie Benachrichtigungen für
+    Lastschriften ein.
+  - >-
+    Können Sie das Mandat von {{creditor}} widerrufen, die Abbuchung über
+    {{amount}} € beanstanden und mich künftig bei jeder Lastschrift informieren?
+  account_state:
+    account_id: acct_kd_0001
+    mandates:
+    - {mandate_id: mdt_kd_0002, creditor: '{{creditor}}', status: active}
+    transactions:
+    - {transaction_id: txn_kd_0003, merchant: '{{creditor}}', amount: '{{amount}}', status: posted}
+  param_space:
+    creditor: [Medienstrom Plus, Fitnesswerk Süd]
+    amount: ['13,99', '29,90']
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, set_alerts]
+  expected_state_deltas: {mdt_kd_0002.status: REVOKED, txn_kd_0003.status: UNDER_REVIEW, alerts_updated: true}
+- id: TPL-KD-NEWCARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Meine neue Visa-Debitkarte ist angekommen: Aktivieren Sie sie bitte, erhöhen
+    Sie das Kartenlimit für meinen Urlaub und bezahlen Sie meine Rechnung von
+    {{payee}} über {{amount}} €.
+  - >-
+    Bitte schalten Sie meine neue Karte frei, heben Sie den Verfügungsrahmen an
+    und überweisen Sie die Rechnung von {{payee}} ({{amount}} €).
+  - >-
+    Können Sie die Karte aktivieren, die ich gerade bekommen habe, mein Limit
+    erhöhen und die {{amount}} € für {{payee}} bezahlen?
+  account_state:
+    account_id: acct_kd_0001
+    cards:
+    - {card_id: card_kd_0002, status: inactive}
+    payees:
+    - {payee_id: payee_kd_0002, name: '{{payee}}'}
+  param_space:
+    payee: [Stadtwerke Lindenhain, Telefonica Mobil Direkt]
+    amount: ['62,40', '35,99']
+  gold_tool_sequence: [activate_card, set_card_limits, pay_bill]
+  expected_state_deltas: {card_kd_0002.status: active, card_limits_updated: true, bill_paid: true}
+- id: TPL-KD-FAMILY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich ordne meine Finanzen: Erteilen Sie bitte meiner Tochter eine
+    Kontovollmacht, buchen Sie {{amount}} € vom Girokonto auf mein Tagesgeld um
+    und benachrichtigen Sie mich bei Abbuchungen über {{threshold}} €.
+  - >-
+    Bitte geben Sie meiner Tochter eine Vollmacht für mein Konto, übertragen Sie
+    {{amount}} € auf mein Tagesgeldkonto und richten Sie eine Nachricht für
+    Abbuchungen über {{threshold}} € ein.
+  - >-
+    Können Sie meiner Tochter Vollmacht erteilen, {{amount}} € vom Girokonto aufs
+    Tagesgeld schieben und mich bei jeder Abbuchung über {{threshold}} € warnen?
+  account_state:
+    account_id: acct_kd_0001
+    savings_account_id: acct_kd_tg_0001
+    balance: '6400.00'
+  param_space:
+    amount: ['1.000', '3.000']
+    threshold: ['200', '500']
+  gold_tool_sequence: [manage_authorized_users, transfer_funds, set_alerts]
+  expected_state_deltas: {authorized_users_updated: true, transfer_status: COMPLETED, alerts_updated: true}
+- id: TPL-KD-MAINACCOUNT-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    Ich mache Kompass zu meinem Hauptkonto: Starten Sie bitte die Kontowechselhilfe
+    von der {{old_bank}}, eröffnen Sie mir ein Tagesgeldkonto, buchen Sie
+    {{amount}} € dorthin um und benachrichtigen Sie mich, wenn mein Gehalt eingeht.
+  - >-
+    Bitte übernehmen Sie mit der Kontowechselhilfe alles von der {{old_bank}},
+    richten Sie ein Tagesgeldkonto ein, überweisen Sie {{amount}} € darauf und
+    schicken Sie mir eine Nachricht bei jedem Gehaltseingang.
+  - >-
+    Können Sie den Wechsel von der {{old_bank}} starten, ein Tagesgeld eröffnen,
+    {{amount}} € vom Girokonto dorthin übertragen und mich über Gehaltseingänge
+    informieren?
+  account_state:
+    account_id: acct_kd_0001
+    balance: '3400.00'
+  param_space:
+    old_bank: [Sparkasse Lindenhain, Volksbank Mittelland]
+    amount: ['1.000', '2.500']
+  gold_tool_sequence: [initiate_account_switch, open_account, transfer_funds, set_alerts]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS, new_account_status: OPEN, transfer_status: COMPLETED, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/de_DE/dynamic.yaml), not scripted templates.

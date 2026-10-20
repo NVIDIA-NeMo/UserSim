@@ -1,0 +1,108 @@
+locale: de_DE
+region: DE
+currency: EUR
+currency_symbol: €
+bank_id: de_DE_financial_services
+bank_version: v0.1.0
+task_contract_version: v0.1.0
+domain_regulators:
+  retail_banking:
+    regulators:
+    - BaFin
+    - Deutsche Bundesbank
+    regulator_text: Einlagenkreditinstitute werden von der BaFin und der Deutschen
+      Bundesbank beaufsichtigt. Die gesetzliche Einlagensicherung schützt Guthaben
+      bis 100.000 Euro pro Kunde und Bank, für sechs Monate nach der Gutschrift bis
+      500.000 Euro, wenn das Geld aus bestimmten Lebensereignissen stammt, etwa aus
+      dem Verkauf einer selbst genutzten Wohnimmobilie, einer Abfindung oder bestimmten
+      Versicherungsleistungen. Jeder Verbraucher mit rechtmäßigem Aufenthalt in der
+      EU hat Anspruch auf ein Basiskonto, und die Kontowechselhilfe nach dem Zahlungskontengesetz
+      überträgt Daueraufträge und Lastschriften auf das neue Konto. Eine SEPA-Lastschrift
+      kann ohne Angabe von Gründen acht Wochen lang zurückgegeben werden, eine nicht
+      autorisierte Zahlung 13 Monate lang. Bei dauerhafter und erheblicher Inanspruchnahme
+      des Dispositionskredits muss die Bank eine Beratung über günstigere Alternativen
+      anbieten. Ab dem 20. November 2026 besteht für eingeräumte Überziehungsmöglichkeiten
+      ein Widerrufsrecht; einen unbefristeten Dispo kann die Bank nur mit einer Frist
+      von mindestens zwei Monaten kündigen, und vor einer Zwangsvollstreckung muss
+      sie anbieten, den in Anspruch genommenen Betrag ohne zusätzliche Kosten in zwölf
+      gleichen Monatsraten zurückzuzahlen. Jedes Girokonto kann kostenlos in ein Pfändungsschutzkonto
+      umgewandelt werden, nach einer Pfändung spätestens nach vier Geschäftstagen;
+      der Grundfreibetrag wird jährlich zum 1. Juli angepasst. Der Kundenservice prüft
+      die Identität, bevor er Kontoinformationen mitteilt oder ändert.
+  cards:
+    regulators:
+    - BaFin
+    - Deutsche Bundesbank
+    regulator_text: Für Debit- und Kreditkarten gelten die Vorschriften über Zahlungsdienste
+      im BGB. Nach der Sperrung einer verlorenen oder gestohlenen Karte, etwa über
+      den Sperr-Notruf 116 116, haftet der Kunde nicht mehr für spätere Verfügungen;
+      vor der Sperrung ist seine Haftung auf 50 Euro begrenzt, außer bei grober Fahrlässigkeit.
+      Online-Zahlungen erfordern eine starke Kundenauthentifizierung. Der Kundenservice
+      darf Entgelte, Verfügungsrahmen und Erstattungsrechte nicht falsch darstellen.
+  payments:
+    regulators:
+    - BaFin
+    regulator_text: Zahlungsdienste unterliegen dem Zahlungsdiensteaufsichtsgesetz
+      und der Aufsicht der BaFin. Echtzeitüberweisungen in Euro dürfen nicht mehr
+      kosten als Standardüberweisungen, und vor jeder Überweisung gleicht die Bank
+      Name und IBAN des Empfängers ab (Empfängerüberprüfung). Eine SEPA-Lastschrift
+      kann acht Wochen lang ohne Angabe von Gründen zurückgegeben werden. Der Kundenservice
+      prüft die Identität, bevor er eine Zahlung auslöst oder Daten ändert.
+  lending_mortgage:
+    regulators:
+    - BaFin
+    regulator_text: Verbraucherdarlehen regelt das BGB. Der effektive Jahreszins ist
+      anzugeben, und Werbung mit Zinsangaben muss ein repräsentatives Beispiel enthalten.
+      Bei einem Allgemein-Verbraucherdarlehen hat der Kunde ein Widerrufsrecht von
+      14 Tagen und kann jederzeit vorzeitig zurückzahlen; die Vorfälligkeitsentschädigung
+      ist auf 1 Prozent des vorzeitig zurückgezahlten Betrags begrenzt, bei einer
+      Restlaufzeit von höchstens einem Jahr auf 0,5 Prozent. Ein Kredit darf nur vergeben
+      werden, wenn die Kreditwürdigkeitsprüfung ergibt, dass der Kunde ihn voraussichtlich
+      zurückzahlen kann. Ab dem 20. November 2026 fallen auch Zahlungsaufschübe wie
+      „Buy now, pay later“ und Kredite unter 200 Euro unter das Verbraucherkreditrecht.
+      Ein Immobiliar- Verbraucherdarlehen mit Sollzinsbindung kann zehn Jahre nach
+      der vollständigen Auszahlung mit einer Frist von sechs Monaten ohne Vorfälligkeitsentschädigung
+      gekündigt werden. Bauspardarlehen haben einen festen Sollzins und lassen jederzeit
+      kostenfreie Sondertilgungen zu. Der Kundenservice sagt nie eine Kreditzusage
+      zu und verschweigt keine Kosten.
+  insurance:
+    regulators:
+    - BaFin
+    regulator_text: Versicherungsunternehmen werden von der BaFin beaufsichtigt; die
+      Verträge regelt das Versicherungsvertragsgesetz. Der Versicherungsnehmer kann
+      innerhalb von 14 Tagen widerrufen, bei Lebens- und Rentenversicherungen innerhalb
+      von 30 Tagen. Ein Schaden ist unverzüglich zu melden. Die Kfz-Haftpflichtversicherung
+      ist gesetzlich vorgeschrieben; Kfz-Verträge mit Hauptfälligkeit zum 1. Januar
+      können mit einer Kündigung, die bis zum 30. November eingeht, zum Jahresende
+      beendet werden, und nach einer Beitragserhöhung oder einem Schadenfall besteht
+      ein Sonderkündigungsrecht. Lebens- und Rentenversicherer sind über den Sicherungsfonds
+      Protektor abgesichert. Beschwerden können kostenlos beim Versicherungsombudsmann
+      eingereicht werden. Der Kundenservice garantiert keine Wertentwicklung und gibt
+      keine individuelle Steuerberatung.
+  brokerage_investing:
+    regulators:
+    - BaFin
+    regulator_text: 'Wertpapierdienstleistungen beaufsichtigt die BaFin nach dem Wertpapierhandelsgesetz
+      und MiFID II: Vor einer Empfehlung wird die Geeignetheit oder Angemessenheit
+      geprüft, Kosten werden offengelegt, und es wird auf das Verlustrisiko hingewiesen.
+      Die Wertpapiere der Kunden werden als Sondervermögen verwahrt und fallen bei
+      einer Insolvenz des Instituts nicht in die Insolvenzmasse; die gesetzliche Anlegerentschädigung
+      deckt zudem 90 Prozent der Forderungen aus Wertpapiergeschäften, höchstens 20.000
+      Euro. Kapitalerträge unterliegen der Abgeltungsteuer; mit einem Freistellungsauftrag
+      bleiben sie bis zum Sparer-Pauschbetrag steuerfrei. Ein Depotübertrag ist kostenlos.
+      Der Kundenservice garantiert keine Rendite und gibt keine individuelle Steuerberatung.'
+identity_verification:
+  required_fields:
+  - full_name
+  - date_of_birth
+placeholder: true
+account_labels:
+  retail_banking: Girokonto
+  cards: Karte
+  payments: Zahlungskonto
+  lending_mortgage: Darlehen
+  insurance: Versicherungsvertrag
+  brokerage_investing: Depot
+number_format: de_DE
+privacy_regime: DSGVO
+schema_version: v0.1

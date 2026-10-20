@@ -1,0 +1,394 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for kranich_invest, a neobroker. Every state-changing
+# tool it offers is gold in at least one task. Each task ships THREE opening
+# phrasings in German. Here update_beneficiary sets the reference account (IBAN)
+# that withdrawals go to. Read-only tools (get_positions, get_order_status) carry
+# no gold state change.
+templates:
+- id: TPL-KR-TRADE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte {{qty}} Aktien von {{stock}} zum Marktpreis kaufen.
+  - >-
+    Bitte kaufen Sie {{qty}} {{stock}}-Aktien für mein Depot.
+  - >-
+    Können Sie eine Kauforder über {{qty}} Aktien von {{stock}} aufgeben?
+  account_state:
+    account_id: acct_kr_0001
+    account_type: Depot
+    cash_balance: '6000.00'
+  param_space:
+    stock: [Siemens, SAP, Allianz]
+    qty: ['5', '10', '20']
+  gold_tool_sequence: [place_trade]
+  expected_state_deltas: {order_status: PLACED}
+- id: TPL-KR-CANCELORDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe vorhin eine Order für {{stock}} aufgegeben, die noch nicht ausgeführt
+    ist. Können Sie sie streichen?
+  - >-
+    Bitte löschen Sie meine offene Order für {{stock}}.
+  - >-
+    Können Sie meine noch nicht ausgeführte {{stock}}-Order stornieren? Ich habe es
+    mir anders überlegt.
+  account_state:
+    account_id: acct_kr_0001
+    open_orders:
+    - {order_id: ord_kr_0001, ticker: '{{stock}}', status: open}
+  param_space:
+    stock: [Siemens, SAP, Allianz]
+  gold_tool_sequence: [cancel_order]
+  expected_state_deltas: {ord_kr_0001.status: CANCELLED}
+- id: TPL-KR-SPARPLAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte jeden Monat {{amount}} € in einen {{etf}} investieren. Können Sie
+    einen Sparplan einrichten?
+  - >-
+    Bitte legen Sie einen Sparplan über {{amount}} € pro Monat auf den {{etf}} an.
+  - >-
+    Können Sie meinen Sparplan auf den {{etf}} auf {{amount}} € im Monat erhöhen?
+  account_state:
+    account_id: acct_kr_0001
+    account_type: Depot
+  param_space:
+    etf: [MSCI World ETF, DAX ETF, Stoxx Europe 600 ETF]
+    amount: ['25', '100', '250']
+  gold_tool_sequence: [set_up_savings_plan]
+  expected_state_deltas: {savings_plan_status: ACTIVE}
+- id: TPL-KR-FSA-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte bei Ihnen einen Freistellungsauftrag über {{amount}} € erteilen.
+  - >-
+    Bitte richten Sie für mein Depot einen Freistellungsauftrag in Höhe von
+    {{amount}} € ein, damit meine Kapitalerträge nicht sofort versteuert werden.
+  - >-
+    Können Sie meinen Freistellungsauftrag auf {{amount}} € ändern? Den Rest habe
+    ich bei meiner anderen Bank eingetragen.
+  account_state:
+    account_id: acct_kr_0001
+    account_type: Depot
+  param_space:
+    amount: ['500', '800', '1.000']
+  gold_tool_sequence: [set_tax_exemption_order]
+  expected_state_deltas: {tax_exemption_order_updated: true}
+- id: TPL-KR-TRANSFER-IN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte mein Depot von der {{old_bank}} zu Kranich übertragen. Können Sie
+    den Depotübertrag beauftragen?
+  - >-
+    Bitte holen Sie meine Wertpapiere aus meinem alten Depot bei der {{old_bank}}
+    zu Ihnen.
+  - >-
+    Wie starte ich den Depotübertrag von der {{old_bank}}? Ich möchte ihn gleich
+    beauftragen.
+  account_state:
+    account_id: acct_kr_0001
+    delivering_firm: '{{old_bank}}'
+    transfer_status: none
+  param_space:
+    old_bank: [Stadtsparkasse Wiesenau, Volksbank Mittelland, Commerzhaus Bank]
+  gold_tool_sequence: [initiate_securities_transfer]
+  expected_state_deltas: {transfer_status: IN_PROGRESS}
+- id: TPL-KR-DEPOSIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte {{amount}} € von meinem Referenzkonto auf mein Verrechnungskonto
+    einzahlen.
+  - >-
+    Bitte ziehen Sie {{amount}} € von meinem Girokonto ein, damit ich im Depot
+    investieren kann.
+  - >-
+    Können Sie {{amount}} € auf mein Kranich-Konto überweisen lassen?
+  account_state:
+    account_id: acct_kr_0001
+    linked_bank: bank_kr_0001
+  param_space:
+    amount: ['500', '2.000', '10.000']
+  gold_tool_sequence: [deposit_funds]
+  expected_state_deltas: {deposit_status: INITIATED}
+- id: TPL-KR-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bitte zahlen Sie {{amount}} € von meinem Verrechnungskonto auf mein
+    Referenzkonto aus.
+  - >-
+    Ich brauche {{amount}} € von meinem Guthaben auf meinem Girokonto. Können Sie
+    das auszahlen?
+  - >-
+    Können Sie {{amount}} € aus meinem Depot-Guthaben an meine Bank überweisen?
+  account_state:
+    account_id: acct_kr_0001
+    cash_balance: '12000.00'
+    linked_bank: bank_kr_0001
+  param_space:
+    amount: ['1.500', '4.000']
+  gold_tool_sequence: [withdraw_funds]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-KR-REFIBAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe die Bank gewechselt. Auszahlungen sollen künftig auf die IBAN {{iban}}
+    gehen.
+  - >-
+    Bitte ändern Sie mein Referenzkonto auf die IBAN {{iban}}.
+  - >-
+    Können Sie die IBAN {{iban}} als neues Referenzkonto für Auszahlungen
+    hinterlegen?
+  account_state:
+    account_id: acct_kr_0001
+  param_space:
+    iban: ['DE00 1234 5678 9012 3456 78', 'DE00 8765 4321 0987 6543 21']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {reference_account_updated: true}
+- id: TPL-KR-VOLLMACHT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte {{person}} eine Depotvollmacht erteilen.
+  - >-
+    Können Sie {{person}} Zugriff auf mein Depot geben? Eine Vollmacht wäre gut.
+  - >-
+    Bitte richten Sie eine Depotvollmacht zugunsten von {{person}} ein.
+  account_state:
+    account_id: acct_kr_0001
+  param_space:
+    person: [meinem Mann, meiner Frau, meinem Sohn]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-KR-OPEN-KIDS-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte für {{child}} ein Kinderdepot eröffnen.
+  - >-
+    Können Sie für {{child}} ein Depot einrichten? Wir wollen früh mit dem Sparen
+    anfangen.
+  - >-
+    Wie eröffne ich ein Kinderdepot für {{child}}? Ich würde das gern gleich
+    machen.
+  account_state:
+    customer_id: cust_kr_0001
+  param_space:
+    child: [meine Tochter, meinen Sohn]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-KR-ONBOARD-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich bin neu hier: Eröffnen Sie bitte ein Depot für mich, übertragen Sie meine
+    Wertpapiere von der {{old_bank}} und richten Sie einen Freistellungsauftrag
+    über {{amount}} € ein.
+  - >-
+    Bitte legen Sie mir ein Depot an, beauftragen Sie den Depotübertrag von der
+    {{old_bank}} und erteilen Sie einen Freistellungsauftrag in Höhe von
+    {{amount}} €.
+  - >-
+    Können Sie ein Depot für mich eröffnen, meine Papiere von der {{old_bank}}
+    herüberholen und einen Freistellungsauftrag über {{amount}} € einrichten?
+  account_state:
+    customer_id: cust_kr_0001
+  param_space:
+    old_bank: [Stadtsparkasse Wiesenau, Commerzhaus Bank]
+    amount: ['500', '1.000']
+  gold_tool_sequence: [open_account, initiate_securities_transfer, set_tax_exemption_order]
+  expected_state_deltas: {new_account_status: OPEN, transfer_status: IN_PROGRESS, tax_exemption_order_updated: true}
+- id: TPL-KR-KIDS-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte für {{child}} ein Kinderdepot eröffnen, {{amount}} € einzahlen und
+    einen Sparplan über {{monthly}} € im Monat auf einen MSCI World ETF anlegen.
+  - >-
+    Bitte richten Sie für {{child}} ein Depot ein, zahlen Sie {{amount}} € ein und
+    starten Sie dort einen ETF-Sparplan mit {{monthly}} € monatlich.
+  - >-
+    Können Sie ein Kinderdepot für {{child}} eröffnen, es mit {{amount}} €
+    befüllen und einen monatlichen Sparplan von {{monthly}} € einrichten?
+  account_state:
+    customer_id: cust_kr_0001
+    linked_bank: bank_kr_0001
+  param_space:
+    child: [meine Tochter, meinen Sohn]
+    amount: ['500', '1.000']
+    monthly: ['25', '50']
+  gold_tool_sequence: [open_account, deposit_funds, set_up_savings_plan]
+  expected_state_deltas: {new_account_status: OPEN, deposit_status: COMPLETED, savings_plan_status: ACTIVE}
+- id: TPL-KR-CASHOUT-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich löse mein Depot auf: Streichen Sie bitte meine offene Order, zahlen Sie
+    das Guthaben von {{amount}} € auf mein Referenzkonto aus und kündigen Sie
+    danach das Depot.
+  - >-
+    Bitte stornieren Sie meine offene Order, überweisen Sie die {{amount}} € auf
+    mein Girokonto und schließen Sie anschließend mein Depot.
+  - >-
+    Können Sie die offene Order löschen, mir die {{amount}} € auszahlen und dann
+    mein Depot kündigen?
+  account_state:
+    account_id: acct_kr_0002
+    account_type: Depot
+    cash_balance: '{{amount}}'
+    orders:
+    - {order_id: ord_kr_0002, ticker: '{{stock}}', status: open}
+  param_space:
+    amount: ['3.000', '12.000']
+    stock: [SAP, Allianz]
+  gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
+  # strict chain: cancel the open order to free the cash, withdraw it, THEN close.
+  ordered: true
+  expected_state_deltas: {ord_kr_0002.status: CANCELLED, withdrawal_status: COMPLETED, acct_kr_0002.status: CLOSED}
+- id: TPL-KR-MARRIED-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Wir haben geheiratet: Stellen Sie bitte meinen Freistellungsauftrag auf einen
+    gemeinsamen über 2.000 € um, tragen Sie unsere gemeinsame Adresse {{address}}
+    ein und erteilen Sie {{partner}} eine Depotvollmacht.
+  - >-
+    Nach unserer Hochzeit möchte ich einen gemeinsamen Freistellungsauftrag über
+    2.000 € und meine neue Adresse ({{address}}) eintragen lassen und {{partner}}
+    eine Depotvollmacht erteilen.
+  - >-
+    Können Sie meinen Freistellungsauftrag in einen gemeinsamen über 2.000 €
+    ändern, meine Adresse auf {{address}} aktualisieren und {{partner}} Vollmacht
+    für mein Depot geben?
+  account_state:
+    account_id: acct_kr_0001
+    account_type: Depot
+  param_space:
+    address: ['Bergweg 7, 80331 München', 'Lindenstraße 12, 04109 Leipzig']
+    partner: [meinem Mann, meiner Frau]
+  gold_tool_sequence: [set_tax_exemption_order, update_contact_info, manage_authorized_users]
+  expected_state_deltas: {tax_exemption_order_updated: true, contact_updated: true, authorized_users_updated: true}
+- id: TPL-KR-REBALANCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Ich stelle mein Depot um: Kaufen Sie bitte {{qty}} Aktien von {{stock}},
+    erhöhen Sie meinen ETF-Sparplan auf {{amount}} € im Monat und benachrichtigen
+    Sie mich bei Kursbewegungen über 5 Prozent.
+  - >-
+    Bitte ordern Sie {{qty}} {{stock}}-Aktien, setzen Sie meinen Sparplan auf
+    {{amount}} € monatlich hoch und richten Sie einen Kursalarm bei 5 Prozent ein.
+  - >-
+    Können Sie {{qty}} Aktien von {{stock}} kaufen, meinen Sparplan auf {{amount}} €
+    anheben und mich bei größeren Kursschwankungen warnen?
+  account_state:
+    account_id: acct_kr_0001
+    account_type: Depot
+    cash_balance: '9000.00'
+  param_space:
+    stock: [Siemens, SAP]
+    qty: ['10', '15']
+    amount: ['150', '300']
+  gold_tool_sequence: [place_trade, set_up_savings_plan, set_alerts]
+  expected_state_deltas: {order_status: PLACED, savings_plan_status: ACTIVE, alerts_updated: true}
+- id: TPL-KR-FAMILY-TOPUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Übertragen Sie bitte {{amount}} € von meinem Verrechnungskonto auf das
+    Kinderdepot meiner Tochter, legen Sie dort einen Sparplan über {{monthly}} €
+    an und benachrichtigen Sie mich bei jeder Ausführung.
+  - >-
+    Bitte schieben Sie {{amount}} € in das Kinderdepot meiner Tochter, starten Sie
+    dort einen Sparplan mit {{monthly}} € im Monat und schicken Sie mir eine
+    Nachricht, wenn er ausgeführt wird.
+  - >-
+    Können Sie {{amount}} € auf das Depot meiner Tochter umbuchen, einen
+    monatlichen Sparplan von {{monthly}} € einrichten und mich über jede
+    Ausführung informieren?
+  account_state:
+    account_id: acct_kr_0001
+    kid_account_id: acct_kr_kid_0001
+    cash_balance: '5000.00'
+  param_space:
+    amount: ['500', '1.500']
+    monthly: ['25', '50']
+  gold_tool_sequence: [transfer_funds, set_up_savings_plan, set_alerts]
+  expected_state_deltas: {transfer_status: COMPLETED, savings_plan_status: ACTIVE, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/de_DE/dynamic.yaml), not scripted templates.

@@ -2264,6 +2264,15 @@ class TestRegionalConventions:
         assert "LEP ending 0001" in ctx
         assert "2 500,00 €" in ctx and "$" not in ctx
 
+    def test_a_germany_customer_hears_their_balance_in_euros(self):
+        inst = load_finance_bank_for_locale("de_DE").institution("bausparkasse_heimstatt")
+        tpl = next(t for t in inst.templates if t.id == "TPL-BH-ALLOCATION-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="de_DE", seed=1)
+        probe, _ = _probe_on("de_DE", instance)
+        ctx = probe._account_context(instance)
+        assert "Bausparvertrag" in ctx
+        assert "24.000,00 €" in ctx and "$" not in ctx
+
     def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
         us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
         india_dob = _probe_on("en_IN", _chandrika_instance())[0]._synth_dob()
