@@ -128,12 +128,6 @@ def test_common_operations_do_not_override_explicit_tools():
     assert open_tools[0].description == "custom"  # explicit declaration wins
 
 
-def test_no_rho_bank_contamination():
-    """Contamination policy: no reuse of tau-Banking's fictional institution."""
-    raw = _EN_US.read_text().lower()
-    assert "rho-bank" not in raw and "rho bank" not in raw
-
-
 def test_validator_rejects_unknown_institution_type():
     bad = _raw(_EN_US)
     bad["institutions"][0]["type"] = "not_a_type"

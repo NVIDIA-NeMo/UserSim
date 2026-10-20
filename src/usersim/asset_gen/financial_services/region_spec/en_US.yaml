@@ -1,9 +1,8 @@
 # Structured region_spec for en_US — the generation INPUT (data, not code).
 # Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
 # this into the committed per-institution assets/financial_services/en_US/ bank.
-# A locale is a SET of institutions; each spans one or more domains. Fictional
-# brands only; do not reuse tau-Banking's fictional bank or product names
-# (contamination-avoidance policy).
+# A locale is a SET of institutions; each spans one or more domains. Brands are
+# fictional.
 schema_version: v0.1
 region: US
 locale: en_US

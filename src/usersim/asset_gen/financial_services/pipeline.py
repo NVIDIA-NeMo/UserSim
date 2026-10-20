@@ -933,10 +933,9 @@ _TOOLS_YAML_HEADER = (
     "# parameters here. Their real schema (signature + args) lives in each tool's\n"
     "# discoverable_tool_doc in corpus.yaml -- the assistant learns a tool + its\n"
     "# arguments by RETRIEVING that doc via kb_search, then calls it through the\n"
-    "# call_tool gate (the tau-Banking discoverable-tool mechanic). Putting schemas\n"
-    "# here would defeat that discovery challenge. Only the always-offered\n"
-    "# primitives (kb_search / verify_identity) carry a schema; side_effect_class\n"
-    "# is always set (the scorer uses it).\n"
+    "# call_tool gate. Putting schemas here would defeat that discovery challenge.\n"
+    "# Only the always-offered primitives (kb_search / verify_identity) carry a\n"
+    "# schema; side_effect_class is always set (the scorer uses it).\n"
 )
 
 

@@ -198,9 +198,9 @@ class Tool(BaseModel):
 # A region spec that explicitly declares a tool of the same name wins (no dup).
 COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
     # Read primitive that lists a VERIFIED customer's accounts (id, type, last4,
-    # balance). Analogous to tau-Banking's get_user_details: it lets the agent
-    # resolve a last-4 the customer gives into the account_id that every
-    # state-changing tool requires, instead of fabricating an id or deflecting.
+    # balance). It lets the agent resolve a last-4 the customer gives into the
+    # account_id that every state-changing tool requires, instead of fabricating
+    # an id or deflecting.
     ("get_accounts", "read_only"),
     ("open_account", "state_changing"),
     ("close_account", "irreversible"),
@@ -213,8 +213,8 @@ COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
 # Deposit-taking institutions (bank / neobank / credit_union) share a servicing
 # set; brokerages / robo-advisors share a trading + cash set. Most of these are
 # never gold for a task — they exist as realistic, gold-ADJACENT tool docs so
-# retrieval must discriminate the right procedure among many similar ones (the
-# tau-Knowledge difficulty), and so the discoverable-tool gate is non-trivial.
+# retrieval must discriminate the right procedure among many similar ones, and
+# so the discoverable-tool gate is non-trivial.
 _DEPOSIT_OPS: tuple[tuple[str, SideEffectClass], ...] = (
     ("transfer_funds", "state_changing"),
     ("order_replacement_card", "state_changing"),

@@ -94,8 +94,8 @@ flowchart TD
 
 - **Knowledge-base search** (`kb_search`) returns whole documents scoped to the
   institution.
-- **Discoverable tools** follow the tau-Banking mechanic: a tool is only callable
-  once a document describing it has been retrieved.
+- **Discoverable tools**: a tool is only callable once a document describing it
+  has been retrieved.
 - **Account state** is a lightweight in-memory record mutated by tool calls, so
   within-conversation responses stay consistent.
 - A `verifiable` conversation is only considered complete once the assistant has
@@ -457,7 +457,7 @@ in-memory account record rather than a full mutable database; conversations are
 multilingual across many institutions and domains rather than English-only
 against a single bank; the open-ended `dynamic` tier is generated from an
 authored taxonomy; and every institution is a distinct fictional brand authored
-per locale (no reuse of tau-Banking's names or products).
+per locale.
 
 ## Deferred
 
