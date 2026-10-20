@@ -24,8 +24,8 @@ default), so a non-US locale does not inherit US instruments or statutes.
 from __future__ import annotations
 
 # Phase 1 seed columns: institution_id, display_name, institution_type,
-# brand_voice, language, currency_symbol, products_json, regulators_json,
-# concept_guidance.
+# brand_voice, language, language_guidance, currency_symbol, products_json,
+# regulators_json, concept_guidance.
 BRIEF_PROMPT = """\
 You are the brand and operations lead for a FICTIONAL {{ institution_type }} called
 "{{ display_name }}"{% if display_name_local %} (written "{{ display_name_local }}" in {{ language }} — use that
@@ -34,7 +34,8 @@ every downstream document will follow, so the institution's voice and policies s
 consistent. Write ALL prose in {{ language }}; keep product ids and tool/function
 names verbatim. Use the {{ currency_symbol }} symbol for money, and write every number
 the way {{ language }} writes it: each typed value carries a `display` form, so quote
-that form rather than the raw `value`.
+that form rather than the raw `value`.{% if language_guidance %}
+Spelling and usage: {{ language_guidance }}{% endif %}
 
 Products offered (authoritative typed values -- reference exactly, never invent):
 {{ products_json }}
@@ -106,8 +107,21 @@ def concept_guidance_for(institution_type: str, overrides: dict[str, str] | None
     return DEFAULT_TYPE_CONCEPT_GUIDANCE.get(institution_type, "")
 
 
+def language_guidance_for(guidance: str, respell: dict[str, str] | None = None) -> str:
+    """The spelling-and-usage line for both prompts, pairing each form to avoid with
+    the form to write instead.
+
+    Returns ``""`` when the region spec sets no conventions, so the prompts render
+    exactly as they do without them.
+    """
+    parts = [guidance.strip()] if guidance.strip() else []
+    if respell:
+        parts.append("Write " + ", ".join(f'"{new}" for "{old}"' for old, new in respell.items()) + ".")
+    return " ".join(parts)
+
+
 # Phase 2 seed columns: institution_id, display_name, institution_type, brand_voice,
-# language, currency_symbol, institution_brief, cluster_kind, focus_json, doc_plan_json
+# language, language_guidance, currency_symbol, institution_brief, cluster_kind, focus_json, doc_plan_json
 # (each entry carries doc_key/document_type/topic/angle/audience/length), sibling_doc_index,
 # target_doc_count.
 DOCSET_PROMPT = """\
@@ -119,7 +133,8 @@ Follow this institution BRIEF exactly (voice, positioning, fee/dispute/advice po
 Write ALL body prose in {{ language }}. Keep tool/function identifiers, product ids, and
 doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money, and write every number
 the way {{ language }} writes it (its decimal mark and digit grouping), never another
-language's notation.
+language's notation.{% if language_guidance %}
+Spelling and usage: {{ language_guidance }}{% endif %}
 TITLES ARE GIVEN, NOT AUTHORED: copy each entry's `topic` into its `title` EXACTLY as
 provided -- already in {{ language }} -- and do not translate, shorten, re-word, or
 re-punctuate it. The same string is what every sibling document is told to cite when it

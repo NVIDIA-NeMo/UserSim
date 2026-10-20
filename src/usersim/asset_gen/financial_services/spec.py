@@ -514,6 +514,62 @@ class DocTitleVocabulary(BaseModel):
         return self
 
 
+class LanguageConventions(BaseModel):
+    """Spelling and usage the generated prose follows, for a language whose regional
+    variants share a script (British and US English), which the script check cannot
+    tell apart.
+
+    ``guidance`` goes into the brief and doc-gen prompts. ``respell`` maps each form
+    the prose must not contain to the form written instead: the prompts name both,
+    generation rewrites any that still appear in a document body, and
+    ``validate-assets`` fails a document title or body that uses one. Both empty
+    adds nothing to the prompts or the corpus.
+    """
+
+    guidance: str = ""
+    #: Whole words or phrases, matched case-insensitively. A replacement follows the
+    #: capitalisation of the form it replaces: all capitals, a leading capital, or
+    #: as written here.
+    respell: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("respell")
+    @classmethod
+    def _no_blank_forms(cls, v: dict[str, str]) -> dict[str, str]:
+        """A blank form would match at every word boundary."""
+        if any(not form.strip() or not replacement.strip() for form, replacement in v.items()):
+            raise ValueError("language_conventions.respell forms and replacements must not be blank")
+        return {form.strip(): replacement.strip() for form, replacement in v.items()}
+
+    def _pattern(self) -> re.Pattern[str] | None:
+        if not self.respell:
+            return None
+        alternatives = "|".join(sorted((re.escape(form) for form in self.respell), key=len, reverse=True))
+        return re.compile(rf"(?<!\w)({alternatives})(?!\w)", re.IGNORECASE)
+
+    def find(self, text: str) -> list[str]:
+        """The forms in ``respell`` that ``text`` uses, lowercased, in order."""
+        pattern = self._pattern()
+        return [form.lower() for form in pattern.findall(text)] if pattern else []
+
+    def apply(self, text: str) -> str:
+        """``text`` with every form in ``respell`` replaced."""
+        pattern = self._pattern()
+        if pattern is None:
+            return text
+        replacements = {form.lower(): replacement for form, replacement in self.respell.items()}
+
+        def replace(match: re.Match[str]) -> str:
+            found = match.group(1)
+            replacement = replacements[found.lower()]
+            if len(found) > 1 and found.isupper():
+                return replacement.upper()
+            if found[0].isupper():
+                return replacement[0].upper() + replacement[1:]
+            return replacement
+
+        return pattern.sub(replace, text)
+
+
 class RegionSpec(BaseModel):
     schema_version: str = "v0.1"
     #: Optional locale of a BASE spec in the same directory to inherit from.
@@ -534,6 +590,9 @@ class RegionSpec(BaseModel):
     #: non-English locale produces native-language docs. Region-specific data, not
     #: derived from ``locale``, so authors control script/register explicitly.
     language: str
+    #: Optional spelling and usage for ``language``; see :class:`LanguageConventions`.
+    #: A LANGUAGE surface, like ``doc_titles``.
+    language_conventions: LanguageConventions = Field(default_factory=LanguageConventions)
     number_format: str | None = None
     privacy_regime: str | None = None
     #: Optional; omitted means the region-agnostic name + DOB default.

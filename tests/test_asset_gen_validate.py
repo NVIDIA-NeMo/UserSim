@@ -578,3 +578,35 @@ def test_the_check_actually_reads_the_documents(tmp_path: Path):
     assert _status(rep, "unsourced_tool_argument", "testbank") == WARN
     detail = next(r.detail for r in rep.results if r.check == "unsourced_tool_argument" and r.scope == "testbank")
     assert "2 tool doc(s)" in detail
+
+
+def _spec_respelling(respell: dict[str, str]) -> RegionSpec:
+    return RegionSpec.model_validate({**_SPEC_DICT, "language_conventions": {"respell": respell}})
+
+
+def test_language_conventions_fail_a_doc_that_uses_a_respelled_form(tmp_path: Path):
+    bank = _write_bank(
+        tmp_path,
+        "en_US",
+        [
+            _doc("D1", "The overdraft fee is $34. Bring your driver's license to the branch."),
+            _doc("D2", "The overdraft fee is $34 per item."),
+        ],
+    )
+    rep = validate_bank(bank, _spec_respelling({"unauthorized": "unauthorised", "driver's license": "driving licence"}))
+    assert _status(rep, "language_conventions", "testbank") == FAIL
+    assert rep.failed
+
+
+def test_language_conventions_match_whole_words_in_any_case(tmp_path: Path):
+    spec = _spec_respelling({"authorized": "authorised"})
+    clean = _write_bank(tmp_path / "clean", "en_US", [_doc("D1", "The overdraft fee is $34; unauthorized use.")])
+    assert _status(validate_bank(clean, spec), "language_conventions", "testbank") == PASS
+    shouted = _write_bank(tmp_path / "shouted", "en_US", [_doc("D1", "The overdraft fee is $34. AUTHORIZED users.")])
+    assert _status(validate_bank(shouted, spec), "language_conventions", "testbank") == FAIL
+
+
+def test_language_conventions_check_runs_only_with_respellings(tmp_path: Path):
+    bank = _write_bank(tmp_path, "en_US", [_doc("D1", "The overdraft fee is $34. Report unauthorized payments.")])
+    assert _status(validate_bank(bank, _spec()), "language_conventions") is None
+    assert _status(validate_bank(bank, None), "language_conventions") is None

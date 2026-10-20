@@ -14,8 +14,8 @@ structural ``load_finance_bank`` round-trip is reported as skipped (not failed)
 for a corpus-only bank. Reference-agent solvability is deferred to task-gen.
 
 Checks: structural_load, numeric_faithfulness (the key one -- spec typed values
-appear in the prose), language_script, near_duplicate, coverage,
-placeholder_discipline, scope, qc_scores.
+appear in the prose), language_script, language_conventions, near_duplicate,
+coverage, placeholder_discipline, scope, qc_scores.
 """
 
 from __future__ import annotations
@@ -485,6 +485,36 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
             rep.add("language_script", iid, PASS, "prose in expected script")
 
 
+def _check_language_conventions(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """Fail a document title or body that uses a form the region spec's language
+    conventions respell (a US spelling in a British-English bank, say).
+
+    The script check passes either variant. Generation respells bodies, so a hit
+    means a plan title that needs ``doc_titles``, a hand edit, or a bank generated
+    without the conventions.
+    """
+    if spec is None or not spec.language_conventions.respell:
+        return
+    for iid, idata in insts.items():
+        offenders: list[str] = []
+        seen: set = set()
+        for d in idata.documents:
+            found = spec.language_conventions.find(f"{d.get('title', '')} {d.get('body', '')}")
+            if found:
+                offenders.append(str(d.get("id")))
+                seen.update(found)
+        if offenders:
+            rep.add(
+                "language_conventions",
+                iid,
+                FAIL,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) use a form the region spec avoids "
+                f"(e.g. {sorted(seen)[:4]}); regenerate or hand-fix: {offenders[:5]}",
+            )
+        else:
+            rep.add("language_conventions", iid, PASS, "no avoided forms in prose")
+
+
 def _check_near_duplicate(insts: dict[str, _InstData], rep: ValidationReport) -> None:
     import numpy as np
 
@@ -692,7 +722,8 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     """Vet a generated financial_services bank; returns a :class:`ValidationReport`.
 
     ``region_spec`` is the source of truth for the numeric-faithfulness check; if
-    omitted that check is skipped (WARN).
+    omitted that check is skipped (WARN). Its ``language_conventions`` drive the
+    language-conventions check, which runs only when they respell any form.
     """
     bank_dir = Path(bank_dir)
     rep = ValidationReport()
@@ -709,6 +740,7 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     _check_tool_name_leak(insts, rep)
     _check_doc_key_leak(insts, rep)
     _check_language_script(region_meta, insts, rep)
+    _check_language_conventions(region_spec, insts, rep)
     _check_near_duplicate(insts, rep)
     _check_placeholder(insts, rep)
     _check_scope(insts, rep)
