@@ -20,7 +20,7 @@ documents:
     To give you an idea of the costs involved, an example annual premium for this
     product is £640, though final pricing is risk-based to ensure sustainability and
     fairness for all our policyholders. As part of your policy, there is a compulsory
-    excess of £250, which is the amount you will contribute toward a claim.
+    excess of £250, which is the amount you will contribute towards a claim.
 
 
     For those who have maintained a clean driving record, we offer the ability to
@@ -135,7 +135,7 @@ documents:
     quality.
 
 
-    - **Compulsory Excess**: £250 (This is the amount the policyholder pays toward
+    - **Compulsory Excess**: £250 (This is the amount the policyholder pays towards
     any claim).
 
     - **No Claims Discount (NCD) Protection**: £45 (An annual cost to protect your
@@ -335,11 +335,11 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 90b3f3c4-20d0-5ff4-953f-1e7158d333fb
-  title: Kingsmere Comprehensive Car Insurance — interest rate / APY schedule
+  title: Kingsmere Comprehensive Car Insurance — interest rate / AER schedule
   body: 'As Kingsmere Comprehensive Car Insurance is an insurance product rather than
     a financial investment account, it does not accrue interest or provide an Annual
-    Percentage Yield (APY). Instead, our ''rates'' are based on a risk-assessment
-    model used to determine premiums.
+    Equivalent Rate (AER). Instead, our ''rates'' are based on a risk-assessment model
+    used to determine premiums.
 
 
     - **Annual Premium**: Our pricing is risk-based. For illustrative purposes, a
@@ -397,7 +397,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 2e75d128-64ef-56ab-8afb-f2657f05e960
-  title: Kingsmere Comprehensive Car Insurance — fraud and unauthorized-activity protection
+  title: Kingsmere Comprehensive Car Insurance — fraud and unauthorised-activity protection
   body: 'At Kingsmere Insurance, we are committed to ensuring your motor protection
     remains secure. When comparing our services to other providers, it is important
     to understand the specific protections we employ to safeguard your policy and
@@ -412,7 +412,7 @@ documents:
     authentication (MFA) codes over the telephone or via an unverified link.
 
 
-    To prevent unauthorized activity, we mandate rigorous identity verification and
+    To prevent unauthorised activity, we mandate rigorous identity verification and
     multi-factor authentication before any state-changing action is performed on your
     account. This means that only a verified policyholder can modify coverage, add
     named drivers, or access sensitive personal data. If you are comparing this against
@@ -422,7 +422,7 @@ documents:
 
 
     If you suspect that your policy details have been compromised or if you notice
-    any unauthorized changes to your coverage, you must notify us immediately. Prompt
+    any unauthorised changes to your coverage, you must notify us immediately. Prompt
     reporting is essential to limit your liability and allow us to secure your account.
     We recommend regularly reviewing your policy documents via our secure web portal
     to ensure all details remain accurate.
@@ -451,7 +451,7 @@ documents:
     \ may void the cover.\n\nFinancial Obligations:\nPolicyholders are responsible\
     \ for the payment of premiums, which are risk-based to ensure sustainable claims\
     \ delivery. A compulsory excess of £250 applies to claims, representing the amount\
-    \ the policyholder must contribute toward a claim. If the policyholder has opted\
+    \ the policyholder must contribute towards a claim. If the policyholder has opted\
     \ to protect their No Claims Discount, an additional cost of £45 is applied to\
     \ the premium.\n\nChanges and Terminations:\nWe reserve the right to amend terms\
     \ to reflect regulatory changes or risk profile shifts, provided sufficient notice\
@@ -476,7 +476,7 @@ documents:
 - id: 4ee330e4-4f5f-5e86-943f-1a0c56e8b9bc
   title: Kingsmere Comprehensive Car Insurance — who it is best for and common use
     cases
-  body: 'Kingsmere Comprehensive Car Insurance is designed for UK motorists who prioritize
+  body: 'Kingsmere Comprehensive Car Insurance is designed for UK motorists who prioritise
     long-term reliability, transparency, and fair renewal pricing over the lowest
     possible entry-level quote. We position ourselves as a premium provider for those
     who value a partnership with their insurer.
@@ -525,9 +525,9 @@ documents:
 
 
     The compulsory excess is a fixed amount that you, the policyholder, are required
-    to pay toward any claim you make. For Kingsmere Comprehensive Car Insurance, the
-    compulsory excess is £250. This amount is set by us based on the risk level of
-    the product and cannot be removed from the policy.
+    to pay towards any claim you make. For Kingsmere Comprehensive Car Insurance,
+    the compulsory excess is £250. This amount is set by us based on the risk level
+    of the product and cannot be removed from the policy.
 
 
     If you make a claim for £1,000, we will deduct the £250 compulsory excess from
@@ -738,8 +738,8 @@ documents:
     Financial Contributions:
 
     All policyholders are subject to a compulsory excess of £250. This is the amount
-    you must contribute toward any successful claim. Failure to account for this amount
-    may result in unexpected out-of-pocket expenses during the claims process.
+    you must contribute towards any successful claim. Failure to account for this
+    amount may result in unexpected out-of-pocket expenses during the claims process.
 
 
     No Claims Discount (NCD):
@@ -866,7 +866,7 @@ documents:
 
 
     For more information on how we protect your account from external threats, please
-    see Kingsmere Comprehensive Car Insurance — fraud and unauthorized-activity protection.'
+    see Kingsmere Comprehensive Car Insurance — fraud and unauthorised-activity protection.'
   domain: insurance
   product_category: car_insurance
   document_type: security_advisory
@@ -929,16 +929,16 @@ documents:
 
     Use the risk-based pricing model to generate a quote. For a standard profile,
     you might use an annual premium example of £640 to illustrate how our pricing
-    is structured. Emphasize that this is a risk-based figure to ensure fair pricing
+    is structured. Emphasise that this is a risk-based figure to ensure fair pricing
     for all policyholders.
 
 
     Step 3: Explaining the Excess
 
     Clearly state the compulsory excess, which for this product is £250. The customer
-    must understand that this is the amount they pay toward a claim. Ensure they know
-    the difference between this compulsory amount and any voluntary excess they may
-    choose to add to lower their premium.
+    must understand that this is the amount they pay towards a claim. Ensure they
+    know the difference between this compulsory amount and any voluntary excess they
+    may choose to add to lower their premium.
 
 
     Step 4: NCD Protection Offer
@@ -1224,7 +1224,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 33561f43-9bc3-50a5-b14b-85a6aac00b75
-  title: Kingsmere Comprehensive Car Insurance — recognizing scams targeting this
+  title: Kingsmere Comprehensive Car Insurance — recognising scams targeting this
     product
   body: 'At Kingsmere Insurance, we are committed to your financial security. As you
     compare your protection options, it is vital to remain vigilant against fraudulent
@@ -1233,7 +1233,7 @@ documents:
     data or divert premium payments.
 
 
-    Common patterns to recognize include:
+    Common patterns to recognise include:
 
 
     1. Unsolicited Renewal Quotes: You may receive emails or phone calls from individuals
@@ -1281,7 +1281,7 @@ documents:
     Financial Limits and Thresholds:
 
     - Compulsory Excess: Every claim is subject to a compulsory excess of £250. This
-    is the minimum amount the policyholder must contribute toward any claim. This
+    is the minimum amount the policyholder must contribute towards any claim. This
     cannot be waived.
 
     - No Claims Discount (NCD) Protection: To protect their NCD from being impacted
@@ -1333,10 +1333,10 @@ documents:
     a qualifying driver may be an annual premium of £640.
 
 
-    **What amount must I pay toward a claim?**
+    **What amount must I pay towards a claim?**
 
     Our policies include a compulsory excess of £250, which is the amount you contribute
-    toward any claim you make.
+    towards any claim you make.
 
 
     **How can I protect my No Claims Discount?**
@@ -1584,7 +1584,7 @@ documents:
 
     **Prerequisites**
 
-    - The full name and license details of the driver to be added.
+    - The full name and licence details of the driver to be added.
 
     - Your policy number.
 
@@ -1601,8 +1601,8 @@ documents:
     (MFA) process.
 
     3. Provide Driver Information: Give us the driver''s full name, date of birth,
-    and driver''s license number. If the driver has their own No Claims Discount,
-    provide those details as well.
+    and driving licence number. If the driver has their own No Claims Discount, provide
+    those details as well.
 
     4. Premium Assessment: We will calculate the risk associated with the new driver.
     We will then inform you if this results in an increase to your annual premium
@@ -1821,7 +1821,7 @@ documents:
 
     **Policy Excesses**
 
-    - **Standard Excess**: £100 (The amount the policyholder pays toward a standard
+    - **Standard Excess**: £100 (The amount the policyholder pays towards a standard
     claim)
 
     - **Escape-of-Water Excess**: £350 (The specific amount payable for claims resulting
@@ -2038,11 +2038,11 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 95a17320-48da-5b9d-923e-62b1316b7de5
-  title: Kingsmere Home Insurance — interest rate / APY schedule
+  title: Kingsmere Home Insurance — interest rate / AER schedule
   body: "As Kingsmere Home Insurance is a comprehensive insurance protection product\
     \ and not a financial savings or investment account, it does not accrue interest\
-    \ and does not have an Annual Percentage Yield (APY).\n\n**Applicable Rate**:\
-    \ 0%\n\n**Details on Pricing**\nBecause this is a risk-bearing product, our financial\
+    \ and does not have an Annual Equivalent Rate (AER).\n\n**Applicable Rate**: 0%\n\
+    \n**Details on Pricing**\nBecause this is a risk-bearing product, our financial\
     \ structure is based on premiums rather than interest rates. Your annual premium\
     \ (for example, £340) is determined by a risk-based assessment to ensure the sustainable\
     \ delivery of claims for all policyholders. \n\n**What affects your premium?**\n\
@@ -2097,7 +2097,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 0025231d-0aa0-5b3a-afe8-22a006c40ba8
-  title: Kingsmere Home Insurance — fraud and unauthorized-activity protection
+  title: Kingsmere Home Insurance — fraud and unauthorised-activity protection
   body: "At Kingsmere Insurance, we are committed to the security of your home and\
     \ your personal data. Because we provide a premium service for UK households,\
     \ we are mindful that our customers may be targeted by sophisticated fraud attempts.\
@@ -2148,7 +2148,7 @@ documents:
     2. Excesses
 
     All claims are subject to an excess, which is the amount the policyholder pays
-    toward a claim. The standard excess for this product is £100. However, specific
+    towards a claim. The standard excess for this product is £100. However, specific
     risks carry different requirements; for instance, the escape-of-water excess is
     £350. These amounts are deducted from any final claim settlement.
 
@@ -2288,7 +2288,7 @@ documents:
 
     2. Complete Identity Verification: To protect your account, we will perform a
     rigorous identity verification. This includes multi-factor authentication to ensure
-    that only the verified policyholder can authorize a state-changing action.
+    that only the verified policyholder can authorise a state-changing action.
 
 
     3. Review the Terms: We will confirm the effective date of the cancellation or
@@ -2522,7 +2522,7 @@ documents:
     fees may be waived entirely as a reward for their continued partnership.
 
     - Cover Adjustments: Any increase in coverage—such as raising the contents cover
-    limit toward the £75,000 maximum—will result in a risk-based recalculation of
+    limit towards the £75,000 maximum—will result in a risk-based recalculation of
     the premium.'
   domain: insurance
   product_category: home_insurance
@@ -2776,7 +2776,7 @@ documents:
     (MFA) to confirm you are the verified policyholder.
 
     2. **Specify the Update:** Clearly state the change you wish to make. For example,
-    you may wish to increase your contents cover limit toward the £75,000 ceiling
+    you may wish to increase your contents cover limit towards the £75,000 ceiling
     or update your home address.
 
     3. **Review Premium Impact:** We will calculate how the change affects your risk
@@ -2998,7 +2998,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: c8f855c3-6652-5566-81b0-7f08377304c4
-  title: Kingsmere Home Insurance — recognizing scams targeting this product
+  title: Kingsmere Home Insurance — recognising scams targeting this product
   body: 'As you compare our comprehensive protection against other providers, it is
     important to understand how we protect your security and how to recognise fraudulent
     activity targeting home insurance policyholders. At Kingsmere Insurance, we maintain
@@ -3031,7 +3031,7 @@ documents:
     If you suspect you have been targeted by a scam or have encountered an unusual
     request, you should inform us immediately. We will then initiate our internal
     security protocols to secure your account. For further details on our general
-    security approach, you may refer to Kingsmere Home Insurance — fraud and unauthorized-activity
+    security approach, you may refer to Kingsmere Home Insurance — fraud and unauthorised-activity
     protection.'
   domain: insurance
   product_category: home_insurance
@@ -3097,7 +3097,7 @@ documents:
   title: Kingsmere Home Insurance — standard excess explained
   body: 'What is a standard excess?
 
-    An excess is the amount you agree to pay toward a claim before Kingsmere Insurance
+    An excess is the amount you agree to pay towards a claim before Kingsmere Insurance
     covers the remaining balance. For Kingsmere Home Insurance, the standard excess
     is £100. This means if you make a claim for £500, we will provide £400, and you
     will cover the first £100.
@@ -3172,7 +3172,7 @@ documents:
 
 
     Symptom: You attempt to modify your coverage (such as increasing your contents
-    cover limit toward the £75,000 maximum) or access sensitive data, but the request
+    cover limit towards the £75,000 maximum) or access sensitive data, but the request
     is declined.
 
 
@@ -3240,8 +3240,8 @@ documents:
 
     - The customer no longer owns the property and only requires contents protection.
 
-    - The customer''s needs have shifted toward a different risk profile that is better
-    served by another of our comprehensive products.
+    - The customer''s needs have shifted towards a different risk profile that is
+    better served by another of our comprehensive products.
 
 
     When recommending an upgrade, remind the customer that premiums are risk-based
@@ -3403,7 +3403,7 @@ documents:
     or vice versa.
 
     - Outdated Limits: The customer recently requested an upgrade to their contents
-    cover limit (toward the £75,000 max), but the statement still reflects the previous
+    cover limit (towards the £75,000 max), but the statement still reflects the previous
     value.
 
     - Premium Miscalculation: The annual premium (e.g., £340) does not reflect a recently
@@ -3461,10 +3461,10 @@ documents:
 
 
     To ensure a fair distribution of risk, a standard excess of £99 applies to claims.
-    This is the amount the policyholder pays toward a claim before the insurance coverage
-    begins. We also apply administrative fees to maintain our operational quality;
-    these are presented transparently at the point of purchase and may be waived for
-    customers who reach specific long-term loyalty tiers.
+    This is the amount the policyholder pays towards a claim before the insurance
+    coverage begins. We also apply administrative fees to maintain our operational
+    quality; these are presented transparently at the point of purchase and may be
+    waived for customers who reach specific long-term loyalty tiers.
 
 
     Our commitment to your peace of mind is underpinned by strict adherence to FCA
@@ -3476,7 +3476,7 @@ documents:
 
 
     We position ourselves as a partner in your pet''s health. We provide educational
-    guidance to help you understand your coverage and emphasize the importance of
+    guidance to help you understand your coverage and emphasise the importance of
     reporting any claims promptly to ensure a smooth resolution process. For more
     details on how these costs are structured, please refer to Kingsmere Lifetime
     Pet Insurance — fee schedule.'
@@ -3570,7 +3570,7 @@ documents:
   body: "This schedule outlines the applicable costs associated with Kingsmere Lifetime\
     \ Pet Insurance. All fees are applied transparently in accordance with our risk-based\
     \ pricing philosophy.\n\n- Claim Excess: £99\n  (This is the standard amount the\
-    \ policyholder must pay toward any valid claim before the insurance cover pays\
+    \ policyholder must pay towards any valid claim before the insurance cover pays\
     \ the remaining balance.)\n\n- Example Monthly Premium: £32\n  (This is a representative\
     \ figure; actual premiums are calculated based on individual risk factors at the\
     \ time of quote and renewal.)\n\n- Annual Vet Fee Limit: £7,500\n  (This is the\
@@ -3603,7 +3603,7 @@ documents:
     - Identity Verification Failure: The most common cause is a failure in the mandatory
     multi-factor authentication (MFA) or a discrepancy in the identity documents provided.
 
-    - Payment Authorization Issue: The initial premium payment (e.g., the £32 example
+    - Payment Authorisation Issue: The initial premium payment (e.g., the £32 example
     monthly premium) may have been declined by your bank.
 
     - Incomplete Medical History: Required details regarding your pet''s health may
@@ -3749,10 +3749,10 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 270fd751-0190-56e7-b5cb-eb40a0b8baa5
-  title: Kingsmere Lifetime Pet Insurance — interest rate / APY schedule
+  title: Kingsmere Lifetime Pet Insurance — interest rate / AER schedule
   body: "As Kingsmere Lifetime Pet Insurance is a comprehensive protection product\
     \ and not a savings or investment account, it does not accrue interest, nor does\
-    \ it have an Annual Percentage Yield (APY).\n\nInstead of interest rates, this\
+    \ it have an Annual Equivalent Rate (AER).\n\nInstead of interest rates, this\
     \ product is governed by risk-based premium rates. These rates are calculated\
     \ based on the probability of a claim, ensuring that all policyholders pay a fair\
     \ price that sustains the delivery of claims for the entire group. \n\nFor illustrative\
@@ -3801,10 +3801,10 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 5ca79fb6-26ea-5147-9b5e-c303af6d0b64
-  title: Kingsmere Lifetime Pet Insurance — fraud and unauthorized-activity protection
+  title: Kingsmere Lifetime Pet Insurance — fraud and unauthorised-activity protection
   body: 'At Kingsmere Insurance, we believe that transparency and security are the
     cornerstones of a trusted partnership. To protect your pets and your finances,
-    we employ rigorous security measures designed to prevent fraud and unauthorized
+    we employ rigorous security measures designed to prevent fraud and unauthorised
     policy amendments.
 
 
@@ -3833,7 +3833,7 @@ documents:
 
     Our commitment to security extends to the verification of all claims. We work
     closely with registered veterinary surgeons to ensure that all treatments reported
-    are legitimate and consistent with the medical history of the animal. This rigor
+    are legitimate and consistent with the medical history of the animal. This rigour
     ensures the sustainability of our fund and the fairness of our pricing for all
     policyholders.'
   domain: insurance
@@ -3865,8 +3865,8 @@ documents:
 
     We provide lifetime health support for pets, subject to an annual vet fee limit
     of £7,500. This limit resets each policy year, providing ongoing care for chronic
-    conditions. The policyholder is responsible for an excess of £99 toward each claim,
-    which must be paid before we provide reimbursement for the remaining eligible
+    conditions. The policyholder is responsible for an excess of £99 towards each
+    claim, which must be paid before we provide reimbursement for the remaining eligible
     costs.
 
 
@@ -3929,7 +3929,7 @@ documents:
     Common Use Cases:
 
     - Chronic Condition Management: A pet diagnosed with diabetes or arthritis can
-    receive treatment every year, utilizing the £7,500 limit annually rather than
+    receive treatment every year, utilising the £7,500 limit annually rather than
     exhausting a single lifetime cap.
 
     - Emergency Surgery: For sudden accidents or acute illnesses, the high vet fee
@@ -3956,7 +3956,7 @@ documents:
 
 
     A: For Kingsmere Lifetime Pet Insurance, we provide an annual vet fee limit of
-    £7,500. This is the maximum amount we will pay toward veterinary fees in a single
+    £7,500. This is the maximum amount we will pay towards veterinary fees in a single
     policy year. Because this is a ''lifetime'' product, this £7,500 limit resets
     at the start of every new policy year. This means if your pet has a chronic condition
     requiring £2,000 of care every year, they can receive that care indefinitely,
@@ -3966,7 +3966,7 @@ documents:
     Q: Does the excess apply to this limit?
 
 
-    A: Yes. The excess of £99 is the amount you pay toward a claim. The annual vet
+    A: Yes. The excess of £99 is the amount you pay towards a claim. The annual vet
     fee limit of £7,500 refers to the total amount available for coverage within the
     year after your excess has been applied.
 
@@ -4649,7 +4649,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 289debe2-0abf-5d44-a953-5c8bb7232eeb
-  title: Kingsmere Lifetime Pet Insurance — recognizing scams targeting this product
+  title: Kingsmere Lifetime Pet Insurance — recognising scams targeting this product
   body: "As you evaluate your options for pet protection, it is important to remain\
     \ vigilant against fraudulent activity. We have observed specific scam patterns\
     \ targeting pet owners, often designed to mimic the professional and reassuring\
@@ -4674,7 +4674,7 @@ documents:
     \ If you believe you have been the victim of a scam, reporting it to us promptly\
     \ allows us to secure your account and assist you in notifying the relevant authorities.\
     \ For more information on our general security protocols, you may wish to refer\
-    \ to Kingsmere Lifetime Pet Insurance — fraud and unauthorized-activity protection."
+    \ to Kingsmere Lifetime Pet Insurance — fraud and unauthorised-activity protection."
   domain: insurance
   product_category: pet_insurance
   document_type: security_advisory
@@ -4694,7 +4694,7 @@ documents:
     \ our product from 'maximum benefit' policies that cap the total payout for a\
     \ single condition over the pet's entire life.\n\n**The Excess**\nEvery claim\
     \ is subject to an excess of £99. This is the amount the policyholder must contribute\
-    \ toward the cost of the claim. Agents should clarify that the excess is applied\
+    \ towards the cost of the claim. Agents should clarify that the excess is applied\
     \ per condition per policy year; it is not a one-time fee for the life of the\
     \ policy.\n\n**Restrictions and Edge Cases**\n1. **Pre-existing Conditions**:\
     \ We do not provide cover for conditions that existed before the policy start\
@@ -4724,7 +4724,7 @@ documents:
     \ for this cover is £32. We pride ourselves on the transparency of our renewal\
     \ pricing, ensuring you receive a fair rate year after year.\n\n**What is the\
     \ excess I have to pay?**\nFor every claim made under your policy, there is an\
-    \ excess of £99. This is the amount you contribute toward the veterinary bill\
+    \ excess of £99. This is the amount you contribute towards the veterinary bill\
     \ before we provide the remaining cover. \n\n**Are there any other fees?**\nAdministrative\
     \ fees may apply to maintain our high operational quality. However, these are\
     \ applied transparently, and we may waive these fees for customers who reach our\
@@ -4777,7 +4777,7 @@ documents:
     \ identity verification process was not completed successfully.\n- **MFA Timeout**:\
     \ The multi-factor authentication code was not entered within the required timeframe.\n\
     - **Unverified User**: The person requesting the change is not the registered\
-    \ policyholder or a verified authorized representative.\n\n**What to Check and\
+    \ policyholder or a verified authorised representative.\n\n**What to Check and\
     \ How to Fix**\n1. **Check your MFA Device**: Ensure you have access to the mobile\
     \ device or email associated with your account. If you have changed your phone\
     \ number recently, this is the likely cause.\n2. **Re-initiate Verification**:\
@@ -4805,20 +4805,20 @@ documents:
   body: "Support agents should use the following guidance to help customers determine\
     \ if they should switch to or upgrade to Kingsmere Lifetime Pet Insurance.\n\n\
     **When to Recommend an Upgrade**\nCustomers currently on 'Accident Only' or 'Maximum\
-    \ Benefit' policies should consider upgrading if their pet is aging or has a history\
-    \ of recurring health issues. Because we provide an annual vet fee limit of £7,500\
-    \ that resets every year, our product is superior for managing chronic conditions\
-    \ that require ongoing medication or treatment.\n\n**Comparing the Value**\n-\
-    \ **Our Product**: Resets the £7,500 limit annually. This ensures long-term reliability\
-    \ for the pet's entire life.\n- **Alternatives**: Many competitors offer a lifetime\
-    \ cap for a specific condition (e.g., £2,000 total). Once that cap is reached,\
-    \ the customer pays everything. \n\n**Who it Suits**\n- **Kingsmere Lifetime**:\
-    \ Best for owners who value comprehensive, long-term protection and are comfortable\
-    \ with a standard excess of £99 to ensure high-quality, sustainable cover.\n-\
-    \ **Basic Alternatives**: May suit owners of very low-risk pets who only require\
-    \ minimal, short-term protection.\n\nFor a deeper analysis of these trade-offs,\
-    \ see Kingsmere Lifetime Pet Insurance — comparison vs. alternatives and when\
-    \ not to choose it."
+    \ Benefit' policies should consider upgrading if their pet is ageing or has a\
+    \ history of recurring health issues. Because we provide an annual vet fee limit\
+    \ of £7,500 that resets every year, our product is superior for managing chronic\
+    \ conditions that require ongoing medication or treatment.\n\n**Comparing the\
+    \ Value**\n- **Our Product**: Resets the £7,500 limit annually. This ensures long-term\
+    \ reliability for the pet's entire life.\n- **Alternatives**: Many competitors\
+    \ offer a lifetime cap for a specific condition (e.g., £2,000 total). Once that\
+    \ cap is reached, the customer pays everything. \n\n**Who it Suits**\n- **Kingsmere\
+    \ Lifetime**: Best for owners who value comprehensive, long-term protection and\
+    \ are comfortable with a standard excess of £99 to ensure high-quality, sustainable\
+    \ cover.\n- **Basic Alternatives**: May suit owners of very low-risk pets who\
+    \ only require minimal, short-term protection.\n\nFor a deeper analysis of these\
+    \ trade-offs, see Kingsmere Lifetime Pet Insurance — comparison vs. alternatives\
+    \ and when not to choose it."
   domain: insurance
   product_category: pet_insurance
   document_type: comparison
@@ -5283,9 +5283,9 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 6782cf69-f7d1-500e-9c32-8f79921039cf
-  title: Kingsmere Level Term Life Insurance — interest rate / APY schedule
+  title: Kingsmere Level Term Life Insurance — interest rate / AER schedule
   body: "Kingsmere Level Term Life Insurance is a protection product and not an investment\
-    \ account; therefore, it does not accrue interest and does not have an APY.\n\n\
+    \ account; therefore, it does not accrue interest and does not have an AER.\n\n\
     Our pricing is based on risk-based premiums. These premiums are calculated at\
     \ the start of the policy and remain level for the duration of the term. \n\n\
     Example Rate Application:\nFor a policyholder with a standard risk profile, the\
@@ -5332,7 +5332,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 0bcbafa2-69e3-5333-b0e2-d14c62591771
-  title: Kingsmere Level Term Life Insurance — fraud and unauthorized-activity protection
+  title: Kingsmere Level Term Life Insurance — fraud and unauthorised-activity protection
   body: 'When choosing a life insurance provider, the security of your personal data
     and the certainty of the payout for your beneficiaries are paramount. At Kingsmere
     Insurance, we employ a rigorous security framework to ensure that Kingsmere Level
@@ -5565,8 +5565,8 @@ documents:
 
 
     Symptom: The customer states that the amount debited from their account is higher
-    or different than the expected monthly premium (e.g., they expected £12 but were
-    charged more).
+    than or different from the expected monthly premium (e.g., they expected £12 but
+    were charged more).
 
 
     Likely Causes:
@@ -5793,7 +5793,7 @@ documents:
     To illustrate the affordability of our protection, a typical policy might feature
     a monthly premium of £12 for a cover amount of £200,000 over a term of 25 years.
     By removing the administrative fees, we ensure more of your investment goes directly
-    toward your comprehensive protection.
+    towards your comprehensive protection.
 
 
     This offer is available for a limited window and applies to all new policies written
@@ -6220,7 +6220,7 @@ documents:
   mentions_tools: []
   institution_id: kingsmere_insurance
 - id: 24af39f2-d06c-5132-be57-999d27564eea
-  title: Kingsmere Level Term Life Insurance — recognizing scams targeting this product
+  title: Kingsmere Level Term Life Insurance — recognising scams targeting this product
   body: 'As you evaluate your options for long-term financial security, it is important
     to remain vigilant against fraudulent activities. Scammers often target individuals
     seeking life insurance by promising ''guaranteed'' low premiums or immediate payouts
@@ -6446,7 +6446,7 @@ documents:
   institution_id: kingsmere_insurance
 - id: def3a190-4a1b-5136-8872-b11186725c5c
   title: Kingsmere Level Term Life Insurance — when to switch or upgrade
-  body: "As a support agent, you should guide customers toward upgrading or switching\
+  body: "As a support agent, you should guide customers towards upgrading or switching\
     \ their cover based on changes in their life circumstances. \n\n**When to Upgrade**\n\
     Customers should consider increasing their cover amount—for example, moving beyond\
     \ a £200,000 payout—if they have taken on new financial obligations, such as a\
@@ -6791,7 +6791,7 @@ documents:
     the filing process. All claims are subject to review based on the policy terms.
 
     - Remind the customer that their policy includes an Excess (the amount they must
-    pay toward a claim), which may vary depending on the specific risk, such as escape-of-water
+    pay towards a claim), which may vary depending on the specific risk, such as escape-of-water
     provisions in home insurance.
 
     - For further information on how claims are assessed, agents may refer customers

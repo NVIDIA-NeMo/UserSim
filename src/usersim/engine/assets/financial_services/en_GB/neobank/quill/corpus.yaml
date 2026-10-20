@@ -318,7 +318,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 5dbd0b88-6d42-512a-b4d2-c51bd7cc79a7
-  title: Quill Current Account — interest rate / APY schedule
+  title: Quill Current Account — interest rate / AER schedule
   body: 'The Quill Current Account is a non-interest-bearing account. No interest
     is paid on the credit balance of this account.
 
@@ -369,7 +369,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: b3aa5900-6a24-54a2-bed6-6d921c2f3734
-  title: Quill Current Account — fraud and unauthorized-activity protection
+  title: Quill Current Account — fraud and unauthorised-activity protection
   body: 'When comparing your banking options, security is often the deciding factor.
     We believe that agility should never come at the cost of safety. The Quill Current
     Account is designed with a ''security-first'' architecture, integrating multi-factor
@@ -421,7 +421,7 @@ documents:
 
 
     2. Overdraft Facilities: If a customer is granted an arranged overdraft, interest
-    will be charged on the utilized balance. The current arranged overdraft rate is
+    will be charged on the utilised balance. The current arranged overdraft rate is
     29% EAR. This rate is variable, meaning we may adjust it based on market conditions
     or regulatory changes. Interest is calculated daily and applied monthly to the
     account.
@@ -702,9 +702,9 @@ documents:
     **Fraud Protection**
 
     While most banks provide basic fraud monitoring, Quill offers an aggressive posture
-    toward customer protection. We provide reimbursement for eligible authorised push
-    payment (APP) scams up to £85,000, a threshold that is often significantly higher
-    than the discretionary limits found at other institutions.
+    towards customer protection. We provide reimbursement for eligible authorised
+    push payment (APP) scams up to £85,000, a threshold that is often significantly
+    higher than the discretionary limits found at other institutions.
 
 
     **User Experience**
@@ -855,7 +855,7 @@ documents:
     \ money to a fraudster—we provide reimbursement for eligible scams up to £85,000.\
     \ \n\nFurthermore, your peace of mind is supported by the fact that eligible deposits\
     \ are protected by the FSCS up to £120,000 per person, per institution. For more\
-    \ details on how we protect you, see Quill Current Account — fraud and unauthorized-activity\
+    \ details on how we protect you, see Quill Current Account — fraud and unauthorised-activity\
     \ protection."
   domain: retail_banking
   product_category: current_account
@@ -1188,7 +1188,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: c30b2aa9-8659-587f-92a2-ce0920bb12ac
-  title: Quill Current Account — recognizing scams targeting this product
+  title: Quill Current Account — recognising scams targeting this product
   body: 'As you compare different banking providers, it is important to understand
     how we protect you and how to spot attempts by fraudsters to target your funds.
     Because the Quill Current Account is app-first and agile, scams often attempt
@@ -1202,7 +1202,7 @@ documents:
     APP scams up to £85,000.
 
 
-    To recognize a scam, remember that we will never ask you for your full password,
+    To recognise a scam, remember that we will never ask you for your full password,
     your multi-factor authentication (MFA) codes, or for you to move your money to
     a ''safe account''. Any request to do so is a definitive sign of fraud. Furthermore,
     we will never pressure you to bypass our security checks or ask you to share your
@@ -1219,7 +1219,7 @@ documents:
     We operate under the strict supervision of the FCA and PRA, ensuring that our
     security posture is designed to provide fair outcomes. For a deeper look at our
     protection mechanisms, you may wish to review Quill Current Account — fraud and
-    unauthorized-activity protection.'
+    unauthorised-activity protection.'
   domain: retail_banking
   product_category: current_account
   document_type: security_advisory
@@ -1449,7 +1449,7 @@ documents:
     them on the standard account.
 
     - **Feature Requirement:** If the customer asks for premium enhancements not available
-    in the core product, guide them toward Quill Plus.
+    in the core product, guide them towards Quill Plus.
 
 
     For a more detailed breakdown of the premium benefits, refer to Quill Plus — overview.'
@@ -1938,14 +1938,14 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: e012ec9a-c625-597e-aa48-93ff9884bf47
-  title: Quill Plus — interest rate / APY schedule
+  title: Quill Plus — interest rate / AER schedule
   body: 'Quill Plus is a premium subscription tier that provides enhanced features
     and value-added services for a monthly fee of £7. It is not a standalone interest-bearing
     savings account.
 
 
     Because Quill Plus is a service enhancement for your account rather than a separate
-    financial instrument, there is no specific interest rate or APY attached to the
+    financial instrument, there is no specific interest rate or AER attached to the
     subscription itself. The balance in your account continues to be subject to the
     standard terms of your underlying account.
 
@@ -1996,7 +1996,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 08646ba0-cc91-54db-991f-99ca2885e3fd
-  title: Quill Plus — fraud and unauthorized-activity protection
+  title: Quill Plus — fraud and unauthorised-activity protection
   body: "When choosing a premium banking tier, the quality of security and fraud protection\
     \ is often the deciding factor. At Quill, we integrate the advanced protections\
     \ of our core platform into Quill Plus to ensure your enhanced features never\
@@ -2012,7 +2012,7 @@ documents:
     \ account are protected by the FSCS up to £120,000 per person, per institution.\n\
     \nWe believe in proactive security. Users can employ instant card control and\
     \ gambling blocks directly within the app to mitigate risk before fraud occurs.\
-    \ If you do encounter unauthorized activity, we prioritise rapid resolution; we\
+    \ If you do encounter unauthorised activity, we prioritise rapid resolution; we\
     \ provide final responses for payment services disputes within 15 business days.\n\
     \nTo maintain this level of security, please be aware that we will never ask you\
     \ for your full PIN, password, or biometric data over a phone call or email. If\
@@ -2477,7 +2477,7 @@ documents:
     Remember that eligible deposits in your account are protected by the FSCS up to
     £120,000 per person, per institution, providing you with a robust layer of regulatory
     security. For further guidance on identifying threats, please refer to Quill Plus
-    — recognizing scams targeting this product.'
+    — recognising scams targeting this product.'
   domain: retail_banking
   product_category: quill_plus
   document_type: security_advisory
@@ -2800,7 +2800,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 105d4377-27ce-5279-ac0d-93f8c8364a5f
-  title: Quill Plus — recognizing scams targeting this product
+  title: Quill Plus — recognising scams targeting this product
   body: "As we continue to grow, we have seen an increase in sophisticated phishing\
     \ attempts that specifically target customers interested in our premium features.\
     \ Because Quill Plus offers enhanced value-added services, fraudsters may attempt\
@@ -2818,7 +2818,7 @@ documents:
     \nIf you receive a suspicious communication, do not click any links or download\
     \ any attachments. Instead, report the incident to us immediately through the\
     \ in-app chat. For more information on how we protect your account from unauthorised\
-    \ activity, please refer to Quill Plus — fraud and unauthorized-activity protection.\
+    \ activity, please refer to Quill Plus — fraud and unauthorised-activity protection.\
     \ Remember, your eligible deposits are protected by the FSCS up to £120,000 per\
     \ person, per institution, and our security team is available 24/7 to help you\
     \ secure your account if you suspect a breach."
@@ -3040,7 +3040,7 @@ documents:
     3 months, it is not suitable for those who may need to close or downgrade their
     account within a very short timeframe.
 
-    - **You do not use premium features:** If you find that you do not utilize the
+    - **You do not use premium features:** If you find that you do not utilise the
     value-added services, the £7 monthly fee becomes an unnecessary expense.
 
 
@@ -3256,8 +3256,8 @@ documents:
     can do this by requesting a new savings goal through our chat interface.
 
     2. Provide a name for your pot. Whether it is ''Emergency Fund'', ''New Car'',
-    or ''Summer Holiday'', naming your pots helps you track your progress toward specific
-    financial wellness goals.
+    or ''Summer Holiday'', naming your pots helps you track your progress towards
+    specific financial wellness goals.
 
     3. We will then perform a quick biometric check via your app to verify your identity.
     This rigorous verification is mandatory for all state-changing actions to ensure
@@ -3482,7 +3482,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 28ee1590-57be-5679-a863-54b8d320c0db
-  title: Quill Instant Access Savings — interest rate / APY schedule
+  title: Quill Instant Access Savings — interest rate / AER schedule
   body: 'The following rate applies to all Quill Instant Access Savings pots, regardless
     of the balance held or the number of pots created.
 
@@ -3530,7 +3530,7 @@ documents:
     your pots.
 
 
-    Start growing your savings today and take a proactive step toward your financial
+    Start growing your savings today and take a proactive step towards your financial
     goals.'
   domain: retail_banking
   product_category: instant_access_savings
@@ -3540,7 +3540,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: bcacbe86-94e4-517b-b21f-35f257f8b3ee
-  title: Quill Instant Access Savings — fraud and unauthorized-activity protection
+  title: Quill Instant Access Savings — fraud and unauthorised-activity protection
   body: 'When choosing where to keep your savings, security should be your primary
     consideration. At Quill, we protect your Quill Instant Access Savings with the
     same rigour as our spending accounts, ensuring your funds remain secure while
@@ -3630,7 +3630,7 @@ documents:
     to your current account instantly if an emergency arises.
 
     - Short-Term Goals: Whether you are saving for a holiday or a tech upgrade, our
-    intuitive savings pots allow you to track your progress toward a specific target.
+    intuitive savings pots allow you to track your progress towards a specific target.
 
     - High-Yield Parking: For those who have a surplus in their current account (which
     carries a monthly fee of £0), moving those funds into this savings product allows
@@ -3899,7 +3899,7 @@ documents:
     \ notification for a login you did not initiate, tell us immediately. We prioritise\
     \ the rapid resolution of disputes and can apply instant card control or account\
     \ freezes to stop further loss. For more information on how we handle fraud, please\
-    \ see Quill Instant Access Savings — fraud and unauthorized-activity protection."
+    \ see Quill Instant Access Savings — fraud and unauthorised-activity protection."
   domain: retail_banking
   product_category: instant_access_savings
   document_type: security_advisory
@@ -4169,7 +4169,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 0b09a819-d9b0-5900-a9fb-bb0e00b02e28
-  title: Quill Instant Access Savings — recognizing scams targeting this product
+  title: Quill Instant Access Savings — recognising scams targeting this product
   body: 'As you compare our savings options against other providers, it is important
     to remain vigilant against fraud. Scammers often target those looking for high-yield
     opportunities by promising returns significantly higher than our standard 3.75%
@@ -4420,7 +4420,7 @@ documents:
     immediately.
 
     - If the customer needs a loan: Savings pots cannot be used as collateral for
-    overdrafts; they should be directed toward the standard Current Account for spending
+    overdrafts; they should be directed towards the standard Current Account for spending
     and credit needs.
 
 
@@ -4924,9 +4924,9 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 60caa821-9efa-514d-b319-67cac3153149
-  title: Quill Debit Card — interest rate / APY schedule
+  title: Quill Debit Card — interest rate / AER schedule
   body: 'The Quill Debit Card is a payment and spending tool; as such, it does not
-    earn interest. The interest rate (APY) applicable to the card itself is 0%.
+    earn interest. The interest rate (AER) applicable to the card itself is 0%.
 
 
     Because the card is linked to your current account, the funds you spend are drawn
@@ -4977,7 +4977,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 31938a34-c9b5-5e93-9577-a826808f9a9f
-  title: Quill Debit Card — fraud and unauthorized-activity protection
+  title: Quill Debit Card — fraud and unauthorised-activity protection
   body: 'At Quill, we prioritise the security of your funds and the integrity of your
     account. The Quill Debit Card is designed with proactive security features to
     protect you against unauthorised activity, but we encourage all our customers
@@ -5403,7 +5403,7 @@ documents:
 
 
     For more detailed information on how we protect you, please refer to Quill Debit
-    Card — fraud and unauthorized-activity protection.'
+    Card — fraud and unauthorised-activity protection.'
   domain: cards
   product_category: debit_card
   document_type: security_advisory
@@ -5427,7 +5427,7 @@ documents:
     \ do not agree to the updated terms, you have the right to close your account\
     \ or downgrade your services. We operate under the strict supervision of the FCA\
     \ and PRA, meaning our change-of-terms process is designed to be fair and non-misleading.\
-    \ \n\nOur fee philosophy is centered on accessibility. While the core features\
+    \ \n\nOur fee philosophy is centred on accessibility. While the core features\
     \ of the Quill Debit Card are designed to be frictionless, any changes to the\
     \ cost of services will be communicated with a full explanation of why the change\
     \ is occurring and how it impacts you. Your deposits remain protected by the FSCS\
@@ -5730,10 +5730,10 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 53ec073c-95d1-5c66-97c7-19537b22dea9
-  title: Quill Debit Card — recognizing scams targeting this product
+  title: Quill Debit Card — recognising scams targeting this product
   body: 'At Quill, we are committed to protecting your money. Because the Quill Debit
     Card is designed for global use and high agility, it can sometimes be a target
-    for sophisticated fraudsters. Recognizing the signs of a scam is your first line
+    for sophisticated fraudsters. Recognising the signs of a scam is your first line
     of defence.
 
 
@@ -5766,7 +5766,7 @@ documents:
     Remember, we will never ask for your PIN or your full security credentials over
     the phone. If a request feels urgent or unusual, it is likely a scam. For more
     on our general security approach, you can refer to Quill Debit Card — fraud and
-    unauthorized-activity protection.'
+    unauthorised-activity protection.'
   domain: cards
   product_category: debit_card
   document_type: security_advisory
@@ -5975,7 +5975,7 @@ documents:
   title: Quill Debit Card — comparison vs. alternatives and when not to choose it
   body: 'The Quill Debit Card is built for the digitally native consumer who prioritises
     transparency and global mobility. When compared to traditional banking alternatives,
-    our value proposition is centered on the removal of common ''hidden'' costs.
+    our value proposition is centred on the removal of common ''hidden'' costs.
 
 
     Why choose the Quill Debit Card?
@@ -6007,7 +6007,7 @@ documents:
     unsuitable.
 
     - Those Seeking Credit: This is a debit tool for spending existing funds. Those
-    requiring a revolving credit line or a credit-builder product should look toward
+    requiring a revolving credit line or a credit-builder product should look towards
     traditional credit card offerings.
 
 
@@ -6160,14 +6160,14 @@ documents:
     \ is built for the digitally native user, providing an agile way to manage your\
     \ funds without leaving the app. Whether you are splitting a dinner bill or sending\
     \ money to a family member, we ensure the process is secure and immediate. Every\
-    \ transfer utilizes Confirmation of Payee, a security service that verifies the\
+    \ transfer utilises Confirmation of Payee, a security service that verifies the\
     \ recipient's name matches the account details before any money is sent, significantly\
     \ reducing the risk of errors or fraud.\n\nWe are committed to a fair fee structure.\
     \ Consequently, we charge a fee of £0 for Faster Payments. There are no hidden\
     \ costs or monthly charges to use our transfer tools; it is a core part of our\
     \ commitment to financial wellness and accessibility.\n\nTo balance agility with\
     \ security, we implement a daily limit of £10,000 on transfers. This threshold\
-    \ helps protect your account from large, unauthorized outflows while providing\
+    \ helps protect your account from large, unauthorised outflows while providing\
     \ ample headroom for the vast majority of our customers' daily needs. \n\nAll\
     \ payments are conducted within the secure ecosystem of your account. To ensure\
     \ the highest standard of security, every payment requires rigorous identity verification,\
@@ -6455,7 +6455,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: 7fda8ceb-bfa9-5aa5-8ba6-c8a525fee979
-  title: Quill Payments — interest rate / APY schedule
+  title: Quill Payments — interest rate / AER schedule
   body: 'Quill Payments is a transactional service designed for the agile movement
     of funds. As such, it is not an interest-bearing product.
 
@@ -6505,7 +6505,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: bc32f0a3-48e7-5548-8777-c42811f8622e
-  title: Quill Payments — fraud and unauthorized-activity protection
+  title: Quill Payments — fraud and unauthorised-activity protection
   body: "At Quill, we take a proactive approach to safeguarding your money. When using\
     \ Quill Payments, your primary defence against fraud is our integration of Confirmation\
     \ of Payee. This security service verifies that the recipient's name matches the\
@@ -6520,7 +6520,7 @@ documents:
     \ of account security, we employ multi-factor authentication and in-app biometric\
     \ checks. Rigorous identity verification is mandatory before any state-changing\
     \ action or payment is processed. We will never ask you to disclose your full\
-    \ biometric data or passwords over a chat or email.\n\nIf you notice any unauthorized\
+    \ biometric data or passwords over a chat or email.\n\nIf you notice any unauthorised\
     \ activity or believe you have fallen victim to a scam, the first action you must\
     \ take is to report it to us immediately via the app. Rapid reporting is essential\
     \ for the recovery of funds. For any payment service disputes, we prioritise a\
@@ -6537,7 +6537,7 @@ documents:
 - id: 33a43545-56eb-508b-87f9-e3343a104876
   title: Quill Payments — account agreement
   body: 'This agreement outlines the terms governing the use of Quill Payments. By
-    utilizing our payment services, you agree to adhere to the following conditions:
+    utilising our payment services, you agree to adhere to the following conditions:
 
 
     1. Service Obligations: We provide a frictionless, app-first payment experience
@@ -7233,7 +7233,7 @@ documents:
   mentions_tools: []
   institution_id: quill
 - id: cdb16780-4973-5e56-9557-788124eec500
-  title: Quill Payments — recognizing scams targeting this product
+  title: Quill Payments — recognising scams targeting this product
   body: 'At Quill, we are committed to your financial wellness, which includes protecting
     you from the evolving tactics of fraudsters. When using Quill Payments, the most
     common threat is the Authorised Push Payment (APP) Scam. This occurs when you
@@ -7792,7 +7792,7 @@ documents:
 - id: ecd2e49c-2cbb-5b4d-8268-32d00aac8017
   title: Regulatory notes for Cards
   body: 'The issuance and management of the Quill Debit Card are governed by the regulatory
-    frameworks set by the FCA and PRA. Our approach is centered on the Consumer Duty,
+    frameworks set by the FCA and PRA. Our approach is centred on the Consumer Duty,
     ensuring that the features of our cards—such as instant card control and gambling
     blocks—are implemented to provide fair and beneficial outcomes for the user.
 
@@ -8481,7 +8481,7 @@ documents:
   body: 'We use the `update_beneficiary` process whenever a customer needs to manage
     the recipients of their outgoing payments. This includes adding a new payee for
     the first time, correcting the details of an existing beneficiary, or deleting
-    a payee who is no longer required. Because we prioritize the security of Quill
+    a payee who is no longer required. Because we prioritise the security of Quill
     Payments, rigorous identity verification is mandatory before any beneficiary changes
     are processed.
 
@@ -8649,7 +8649,7 @@ documents:
     holder''s assets.
 
 
-    To manage authorized users, follow these steps:
+    To manage authorised users, follow these steps:
 
 
     1. Complete rigorous identity verification for the account holder using multi-factor
@@ -8658,7 +8658,7 @@ documents:
     2. Use the `get_accounts` tool to resolve the `account_id` from the customer''s
     account information.
 
-    3. Determine the nature of the request: adding a new authorized user (e.g., registering
+    3. Determine the nature of the request: adding a new authorised user (e.g., registering
     a power of attorney), modifying an existing mandate, or removing a third-party
     user.
 
@@ -8671,13 +8671,13 @@ documents:
     6. Call the `manage_authorized_users` tool using the `account_id` and the person''s
     details collected.
 
-    7. Confirm to the customer that the authorized user status has been updated. Remind
+    7. Confirm to the customer that the authorised user status has been updated. Remind
     them that they can remove this authority at any time by following a similar process.
 
 
     This procedure ensures we adhere to the Consumer Duty by providing fair outcomes
     and secure access for those legally entitled to manage an account, while preventing
-    unauthorized access.'
+    unauthorised access.'
   domain: retail_banking
   product_category: procedure
   document_type: policy_procedure
@@ -8703,7 +8703,7 @@ documents:
 
     - `account_id`: The unique identifier for the account, retrieved using `get_accounts`.
 
-    - `action`: The operation to perform: `add` (to register a new authorized user)
+    - `action`: The operation to perform: `add` (to register a new authorised user)
     or `remove` (to revoke existing authority).
 
     - `person_details`: An object containing the details of the third party. This
@@ -9360,7 +9360,7 @@ documents:
     **Effect**
 
     Calling this tool triggers the production and dispatch of a new physical debit
-    card to the customer''s verified mailing address. If the reason is ''lost'' or
+    card to the customer''s verified postal address. If the reason is ''lost'' or
     ''stolen'', the system will automatically invalidate the previous card''s credentials
     if they were not already frozen. The new card will arrive in an inactive state
     and will require activation before it can be used for spending or ATM withdrawals.'
@@ -9539,7 +9539,7 @@ documents:
     \ the customer on how to upload the required documents via the app.\n\nFor further\
     \ information on how we protect customers from fraud and the reimbursement of\
     \ authorised push payment scams up to £85,000, refer to Quill Payments — fraud\
-    \ and unauthorized-activity protection."
+    \ and unauthorised-activity protection."
   domain: retail_banking
   product_category: procedure
   document_type: policy_procedure

@@ -353,10 +353,10 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: e1135404-8546-5e20-99ce-4ebd8cf526bd
-  title: Oakhaven Workplace Pension — interest rate / APY schedule
+  title: Oakhaven Workplace Pension — interest rate / AER schedule
   body: 'The Oakhaven Workplace Pension is an investment-based retirement product;
-    therefore, it does not offer a fixed interest rate or a guaranteed Annual Percentage
-    Yield (APY) as a cash savings account would. Instead, the growth of your pension
+    therefore, it does not offer a fixed interest rate or a guaranteed Annual Equivalent
+    Rate (AER) as a cash savings account would. Instead, the growth of your pension
     pot depends on the performance of the underlying investments chosen for the scheme.
 
 
@@ -422,7 +422,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: bf274ce7-6712-56d9-b0ff-c07e99ea30ab
-  title: Oakhaven Workplace Pension — fraud and unauthorized-activity protection
+  title: Oakhaven Workplace Pension — fraud and unauthorised-activity protection
   body: 'At Oakhaven Pensions, we recognise that your retirement savings represent
     a lifetime of hard work. Consequently, the Oakhaven Workplace Pension is protected
     by a rigorous security framework designed to thwart fraud and prevent unauthorised
@@ -693,7 +693,7 @@ documents:
     operations specialist for a balance correction.
 
     - If the customer remains dissatisfied, route the matter to a compliance officer
-    for a formal review, with a clear path toward the Pensions Ombudsman if required.'
+    for a formal review, with a clear path towards the Pensions Ombudsman if required.'
   domain: retirement
   product_category: workplace_pension
   document_type: troubleshooting
@@ -926,7 +926,7 @@ documents:
     an email or text message that seems suspicious, do not click any links. Instead,
     log in to your portal directly or call us during UK business hours (GMT) to verify
     the request. For more information on how we handle security incidents, please
-    see Oakhaven Workplace Pension — fraud and unauthorized-activity protection.'
+    see Oakhaven Workplace Pension — fraud and unauthorised-activity protection.'
   domain: retirement
   product_category: workplace_pension
   document_type: security_advisory
@@ -987,7 +987,7 @@ documents:
   title: Oakhaven Workplace Pension — getting started walkthrough
   body: 'This guide provides the necessary steps for support agents to assist new
     members in the onboarding process for the Oakhaven Workplace Pension. Ensure the
-    customer understands that this is an employer-sponsored solution utilizing automatic
+    customer understands that this is an employer-sponsored solution utilising automatic
     enrolment.
 
 
@@ -1303,7 +1303,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: 66ca3346-a340-58ad-aa1d-2e91180c212a
-  title: Oakhaven Workplace Pension — recognizing scams targeting this product
+  title: Oakhaven Workplace Pension — recognising scams targeting this product
   body: 'As you compare retirement options to secure your future, it is vital to remain
     vigilant against the sophisticated scams that target pension savers. Fraudsters
     often prey on those seeking stability and clarity, using high-pressure tactics
@@ -1457,7 +1457,7 @@ documents:
 
 
     Once these steps are complete, you will have a comprehensive record of your fund''s
-    growth and the contributions made toward your retirement.'
+    growth and the contributions made towards your retirement.'
   domain: retirement
   product_category: workplace_pension
   document_type: how_to_guide
@@ -2088,10 +2088,10 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: fc5dcee2-8c92-5eed-90fd-8af6b39cb264
-  title: Oakhaven Personal Pension — interest rate / APY schedule
+  title: Oakhaven Personal Pension — interest rate / AER schedule
   body: 'Unlike a fixed-term savings account, the Oakhaven Personal Pension is an
     investment-linked product. Therefore, it does not provide a single, guaranteed
-    interest rate or APY. The growth of your pension pot depends on the performance
+    interest rate or AER. The growth of your pension pot depends on the performance
     of the underlying investment funds you select.
 
 
@@ -2163,7 +2163,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: 0fc6f95c-cf6d-5200-8ca0-7aae7714913f
-  title: Oakhaven Personal Pension — fraud and unauthorized-activity protection
+  title: Oakhaven Personal Pension — fraud and unauthorised-activity protection
   body: 'At Oakhaven Pensions, the security of your retirement wealth is our primary
     concern. For members of the Oakhaven Personal Pension, we employ a rigorous security
     framework designed to protect assets from unauthorised access and fraudulent activity,
@@ -2283,7 +2283,7 @@ documents:
     long term.
 
     - Managing Tax Efficiency: High earners may use the account to utilise their annual
-    allowance of £60,000, ensuring they maximize the tax advantages of pension contributions.
+    allowance of £60,000, ensuring they maximise the tax advantages of pension contributions.
 
 
     Key Financials:
@@ -3038,7 +3038,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: 6e41eb08-8539-5c5b-9dbf-34c5373deeb8
-  title: Oakhaven Personal Pension — recognizing scams targeting this product
+  title: Oakhaven Personal Pension — recognising scams targeting this product
   body: 'As you compare retirement options, it is vital to remain vigilant against
     fraudulent activity. Scammers often target individuals with personal pensions
     by promising ''guaranteed'' high returns or offering ''pension liberation''—the
@@ -3069,7 +3069,7 @@ documents:
 
 
     For more information on our protective measures, please see Oakhaven Personal
-    Pension — fraud and unauthorized-activity protection.'
+    Pension — fraud and unauthorised-activity protection.'
   domain: retirement
   product_category: personal_pension
   document_type: security_advisory
@@ -3230,7 +3230,7 @@ documents:
     senior operations specialist and a compliance officer for a detailed review. You
     will receive a notification once the review is complete and the action is either
     approved or permanently declined. For more on our security approach, see Oakhaven
-    Personal Pension — fraud and unauthorized-activity protection.'
+    Personal Pension — fraud and unauthorised-activity protection.'
   domain: retirement
   product_category: personal_pension
   document_type: troubleshooting
@@ -3256,7 +3256,7 @@ documents:
     **When to suggest a switch:**
 
     - **Employer Matching:** If the customer has joined a company that offers a workplace
-    scheme with employer contributions, they should move toward the Oakhaven Workplace
+    scheme with employer contributions, they should move towards the Oakhaven Workplace
     Pension to benefit from the minimum total contribution of 8% (including employer
     funds), which significantly outweighs the slightly higher cost of a personal pension.
 
@@ -3372,7 +3372,7 @@ documents:
     \ least £50).\n\n**Steps to set up your contribution:**\n\n1. **Specify your contribution\
     \ amount:** Tell us the exact amount you wish to contribute each month. To meet\
     \ the product requirements, this must be a minimum monthly contribution of £50.\
-    \ \n2. **Provide payment authorization:** Provide us with your bank account details\
+    \ \n2. **Provide payment authorisation:** Provide us with your bank account details\
     \ and the date of the month you wish the payment to be taken. We will then set\
     \ up the direct debit instruction.\n3. **Confirm tax relief eligibility:** Confirm\
     \ that you are a UK taxpayer. We will then apply the 20% basic-rate tax relief\
@@ -3781,10 +3781,10 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: 92635d31-6a41-5335-bad9-3977c7b0e3d3
-  title: Oakhaven Flexible Drawdown — interest rate / APY schedule
+  title: Oakhaven Flexible Drawdown — interest rate / AER schedule
   body: 'Because Oakhaven Flexible Drawdown is an investment-based product rather
     than a fixed-term deposit account, it does not have a single flat interest rate
-    or APY. Instead, the growth of your funds is determined by the performance of
+    or AER. Instead, the growth of your funds is determined by the performance of
     the underlying investment portfolios you have selected.
 
 
@@ -3839,7 +3839,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: 90bee02c-7ca2-5238-aed1-b0bcadb5e550
-  title: Oakhaven Flexible Drawdown — fraud and unauthorized-activity protection
+  title: Oakhaven Flexible Drawdown — fraud and unauthorised-activity protection
   body: When comparing retirement options, the security of your assets is as critical
     as the potential for growth. Oakhaven Flexible Drawdown is engineered with a rigorous
     security framework designed to protect your pension wealth from unauthorised access
@@ -4243,7 +4243,7 @@ documents:
     reporting is critical; fraudulent activity triggers the immediate suspension of
     your account and a comprehensive forensic investigation to recover assets. For
     more information on how we protect you, please refer to Oakhaven Flexible Drawdown
-    — fraud and unauthorized-activity protection.'
+    — fraud and unauthorised-activity protection.'
   domain: retirement
   product_category: flexible_drawdown
   document_type: security_advisory
@@ -4570,7 +4570,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: e9d91bcd-8b24-5815-9321-aae3c208a8e4
-  title: Oakhaven Flexible Drawdown — recognizing scams targeting this product
+  title: Oakhaven Flexible Drawdown — recognising scams targeting this product
   body: 'As you consider the Oakhaven Flexible Drawdown, it is vital to be aware of
     the specific fraud patterns that target individuals seeking flexibility in their
     retirement income. Because this product allows for the withdrawal of funds, it
@@ -4603,7 +4603,7 @@ documents:
     If you suspect a scam or if you have already shared your details, you must notify
     us immediately. Fraudulent activity triggers an immediate account suspension and
     a comprehensive forensic investigation to protect your assets. We also strongly
-    recommend that all members eligible to access their funds from age 50 utilize
+    recommend that all members eligible to access their funds from age 50 utilise
     the free, impartial Pension Wise guidance before making any significant transfer
     decisions.'
   domain: retirement
@@ -4684,7 +4684,7 @@ documents:
   institution_id: oakhaven_pensions
 - id: c095c5bd-f7a9-5599-be59-00f345b6a194
   title: Oakhaven Flexible Drawdown — check status or history
-  body: 'To review your current fund balance, your tax-free cash utilization, or your
+  body: 'To review your current fund balance, your tax-free cash utilisation, or your
     history of withdrawals from your Oakhaven Flexible Drawdown account, please follow
     these steps:
 
@@ -5289,9 +5289,9 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: dc309493-5c23-5cb2-a15f-a9243b3770ea
-  title: Oakhaven Lifetime Annuity — interest rate / APY schedule
+  title: Oakhaven Lifetime Annuity — interest rate / AER schedule
   body: 'The Oakhaven Lifetime Annuity provides a guaranteed income based on the purchase
-    price at the time of contract. Unlike a savings account with a variable APY, an
+    price at the time of contract. Unlike a savings account with a variable AER, an
     annuity provides a fixed lifelong payment.
 
 
@@ -5331,7 +5331,7 @@ documents:
   body: "Exclusive Loyalty Offer for Oakhaven Pension Members\n\nWe are pleased to\
     \ offer a limited-time incentive for our existing members who are planning their\
     \ transition to a guaranteed retirement income. \n\nOffer: Receive a £100 welcome\
-    \ credit toward your first year of retirement administration when you establish\
+    \ credit towards your first year of retirement administration when you establish\
     \ a new Oakhaven Lifetime Annuity.\n\nValidity Period:\n- Start Date: 1 November\
     \ 2024\n- End Date: 31 December 2024\n\nEligibility:\nThis offer is available\
     \ to all existing Oakhaven members who purchase an annuity with a minimum purchase\
@@ -5347,7 +5347,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: fe057174-df95-5c21-9ef7-4f969d15e168
-  title: Oakhaven Lifetime Annuity — fraud and unauthorized-activity protection
+  title: Oakhaven Lifetime Annuity — fraud and unauthorised-activity protection
   body: 'Protecting your retirement income is a priority at Oakhaven Pensions. The
     Oakhaven Lifetime Annuity is designed to provide stability, but the guaranteed
     nature of this product can occasionally make it a target for sophisticated fraud,
@@ -6215,7 +6215,7 @@ documents:
   mentions_tools: []
   institution_id: oakhaven_pensions
 - id: a6cdfbf5-20e6-5265-a3ea-e01db085d943
-  title: Oakhaven Lifetime Annuity — recognizing scams targeting this product
+  title: Oakhaven Lifetime Annuity — recognising scams targeting this product
   body: 'As you compare retirement options, it is vital to remain vigilant against
     fraudulent schemes specifically designed to target those seeking the stability
     of a guaranteed income. The Oakhaven Lifetime Annuity is designed for long-term
@@ -6293,7 +6293,7 @@ documents:
     Members may choose to take a portion of their pension as a tax-free lump sum before
     purchasing an annuity. Agents should remind members that any reduction in the
     capital used to buy the annuity will proportionally reduce the guaranteed annual
-    income. For instance, if the member utilizes the 25% tax-free cash option available
+    income. For instance, if the member utilises the 25% tax-free cash option available
     via Oakhaven Flexible Drawdown before purchasing an annuity, the remaining 75%
     is what will be used to calculate the final annuity payment.
 

@@ -44,6 +44,7 @@ from usersim.asset_gen.financial_services.prompts import (
     DOCSET_PROMPT,
     DOCSET_QC_PROMPT,
     concept_guidance_for,
+    language_guidance_for,
 )
 from usersim.asset_gen.financial_services.spec import (
     DocTitleVocabulary,
@@ -593,6 +594,9 @@ def build_institution_seed(spec: RegionSpec):
                 "institution_type": inst.type,
                 "brand_voice": inst.brand_voice,
                 "language": spec.language,
+                "language_guidance": language_guidance_for(
+                    spec.language_conventions.guidance, spec.language_conventions.respell
+                ),
                 "currency_symbol": spec.currency_symbol,
                 "products_json": json.dumps(products_for_prompt(inst.products, spec), ensure_ascii=False),
                 "regulators_json": json.dumps(regulators, ensure_ascii=False),
@@ -688,6 +692,9 @@ def explode_to_cluster_rows(
             "institution_type": inst.type,
             "brand_voice": inst.brand_voice,
             "language": spec.language,
+            "language_guidance": language_guidance_for(
+                spec.language_conventions.guidance, spec.language_conventions.respell
+            ),
             "currency_symbol": spec.currency_symbol,
             "institution_brief": brief_json,
             "sibling_doc_index": json.dumps(sibling_index, ensure_ascii=False),
@@ -1215,7 +1222,9 @@ def _as_docset(val: Any) -> dict[str, Any]:
 
 
 def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
-    """Group cluster rows by institution, QC-gate, explode, and de-dupe doc ids.
+    """Group cluster rows by institution, QC-gate, explode, respell, and de-dupe doc ids.
+
+    Respelling applies the region spec's ``language_conventions`` to each body.
 
     QC-drop policy: an unparseable/empty cluster is dropped (with a warning);
     a low-faithfulness cluster is KEPT (already ``placeholder: true``) and logged,
@@ -1223,6 +1232,8 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     """
     spec_by_id = {i.id: i for i in spec.institutions}
     docs_by_inst: dict[str, dict[str, dict[str, Any]]] = {}
+    conventions = spec.language_conventions
+    respelled = 0
 
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
@@ -1250,8 +1261,14 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
         )
         bucket = docs_by_inst.setdefault(iid, {})
         for d in docs:
+            # The body only: the PLAN owns the title, so a title using an avoided
+            # form is a doc_titles gap, which validate-assets reports.
+            respelled += len(conventions.find(d["body"]))
+            d["body"] = conventions.apply(d["body"])
             bucket.setdefault(d["id"], d)  # de-dupe ids across the institution's rows
 
+    if respelled:
+        logger.info("respelled %d form(s) the region spec's language conventions avoid", respelled)
     institutions: list[InstitutionBank] = []
     for inst in spec.institutions:
         institutions.append(

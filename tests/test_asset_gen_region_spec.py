@@ -920,3 +920,121 @@ def test_tool_docs_must_not_invent_unobtainable_arguments():
     # signature, so spending their budget on this would be noise.
     product = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind="product"))
     assert "must be something the agent can actually obtain" not in product
+
+
+# ── language conventions: spelling and usage for a language with regional variants ──
+
+
+def _with_conventions(guidance: str, respell: dict[str, str]):
+    raw = _raw(_EN_US)
+    raw["language_conventions"] = {"guidance": guidance, "respell": respell}
+    return validate_region_spec(raw)
+
+
+def test_language_guidance_pairs_each_form_with_its_replacement():
+    from usersim.asset_gen.financial_services.prompts import language_guidance_for
+
+    assert language_guidance_for("", {}) == ""
+    assert language_guidance_for(" Write British English. ", {}) == "Write British English."
+    assert language_guidance_for("Write British English.", {"toward": "towards", "APY": "AER"}) == (
+        'Write British English. Write "towards" for "toward", "AER" for "APY".'
+    )
+
+
+@pytest.mark.parametrize("respell", [{"toward": "towards", " ": "x"}, {"toward": " "}])
+def test_validator_rejects_a_blank_respelling(respell):
+    with pytest.raises(RegionSpecError):
+        _with_conventions("Write British English.", respell)
+
+
+def test_respelling_matches_whole_words_and_keeps_capitalisation():
+    conventions = _with_conventions(
+        "",
+        {
+            "toward": "towards",
+            "APY": "AER",
+            "annual percentage yield": "annual equivalent rate",
+            "authorized": "authorised",
+        },
+    ).language_conventions
+    text = "Toward savings: the APY, or Annual Percentage Yield, covers unauthorized and AUTHORIZED payments."
+    assert conventions.find(text) == ["toward", "apy", "annual percentage yield", "authorized"]
+    assert conventions.apply(text) == (
+        "Towards savings: the AER, or Annual equivalent rate, covers unauthorized and AUTHORISED payments."
+    )
+
+
+@pytest.mark.parametrize("prompt_name", ["BRIEF_PROMPT", "DOCSET_PROMPT"])
+def test_language_guidance_adds_exactly_one_line_to_each_prompt(prompt_name):
+    """Without conventions both prompts render as they do for a spec that has none;
+    with them, the only difference is the spelling-and-usage line."""
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services import prompts
+
+    seed = {
+        "display_name": "X",
+        "display_name_local": "",
+        "institution_id": "x",
+        "institution_type": "bank",
+        "brand_voice": "traditional",
+        "language": "English (United Kingdom)",
+        "currency_symbol": "£",
+        "products_json": "[]",
+        "regulators_json": "{}",
+        "concept_guidance": "",
+        "institution_brief": "{}",
+        "focus_json": "{}",
+        "doc_plan_json": "[]",
+        "sibling_doc_index": "{}",
+        "target_doc_count": 1,
+        "cluster_kind": "product",
+    }
+    template = Template(getattr(prompts, prompt_name))
+    without = template.render(**seed, language_guidance="")
+    with_guidance = template.render(**seed, language_guidance="Write British English.")
+    assert "Spelling and usage" not in without
+    assert with_guidance.replace("\nSpelling and usage: Write British English.", "", 1) == without
+
+
+def test_language_conventions_reach_the_brief_and_every_cluster_row():
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import build_institution_seed, explode_to_cluster_rows
+
+    spec = _with_conventions("Write British English.", {"toward": "towards"})
+    expected = 'Write British English. Write "towards" for "toward".'
+    assert set(build_institution_seed(spec)["language_guidance"]) == {expected}
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    assert set(clusters["language_guidance"]) == {expected}
+    assert set(build_institution_seed(load_region_spec(_EN_US))["language_guidance"]) == {""}
+
+
+def test_generation_respells_bodies_and_leaves_plan_titles_alone():
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import collect_institutions
+
+    spec = _with_conventions("", {"toward": "towards"})
+    inst = spec.institutions[0]
+    plan = [{"doc_key": "k1", "topic": "Saving toward a goal", "uuid": "u1", "domain": inst.domains[0]}]
+    body = "Toward the end of the term, interest moves toward the cap."
+    result_df = pd.DataFrame(
+        [
+            {
+                "institution_id": inst.id,
+                "cluster_kind": "product",
+                "doc_set": {"documents": [{"doc_key": "k1", "title": "t", "document_type": "faq", "body": body}]},
+                "numeric_faithfulness_score": 4,
+                "doc_plan_json": json.dumps(plan),
+            }
+        ]
+    )
+    doc = next(d for bank in collect_institutions(result_df, spec) for d in bank.documents)
+    assert doc["body"] == "Towards the end of the term, interest moves towards the cap."
+    assert doc["title"] == "Saving toward a goal"
