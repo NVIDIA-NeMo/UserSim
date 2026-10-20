@@ -2216,10 +2216,9 @@ class TestRegionalConventions:
         us = load_finance_bank_for_locale("en_US")
         assert us.format_money("123456.5") == "$123,456.50"
         assert load_finance_bank_for_locale("en_IN").format_money("123456.5") == "₹1,23,456.50"
-        france = _regional(us, "fr_FR", currency_symbol="€", number_format="fr_FR")
+        assert load_finance_bank_for_locale("fr_FR").format_money("123456.5") == "123 456,50 €"
         germany = _regional(us, "de_DE", currency_symbol="€", number_format="de_DE")
         britain = _regional(us, "en_GB", currency_symbol="£", number_format="en_GB")
-        assert france.format_money("123456.5") == "123 456,50 €"
         assert germany.format_money("123456.5") == "123.456,50 €"
         assert britain.format_money("123456.5") == "£123,456.50"
         assert us.format_money("-12") == "-$12.00"
@@ -2240,8 +2239,8 @@ class TestRegionalConventions:
         us = load_finance_bank_for_locale("en_US")
         assert us.format_date(day) == "03/27/1980"
         assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
+        assert load_finance_bank_for_locale("fr_FR").format_date(day) == "27/03/1980"
         for locale, expected in (
-            ("fr_FR", "27/03/1980"),
             ("en_GB", "27/03/1980"),
             ("de_DE", "27.03.1980"),
             ("ja_JP", "1980-03-27"),
@@ -2255,6 +2254,15 @@ class TestRegionalConventions:
         balance = probe._grounding_accounts(inst)[0]["balance"]
         assert probe._bank.format_money(balance) in ctx
         assert "₹" in ctx and "$" not in ctx
+
+    def test_a_france_customer_hears_their_balance_in_euros(self):
+        inst = load_finance_bank_for_locale("fr_FR").institution("credit_mirabelle")
+        tpl = next(t for t in inst.templates if t.id == "TPL-CM-REORG-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="fr_FR", seed=1)
+        probe, _ = _probe_on("fr_FR", instance)
+        ctx = probe._account_context(instance)
+        assert "LEP ending 0001" in ctx
+        assert "2 500,00 €" in ctx and "$" not in ctx
 
     def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
         us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()

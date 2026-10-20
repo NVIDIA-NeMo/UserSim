@@ -1,0 +1,430 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for kiosque, a payment-account neobank sold through
+# tobacconists and newsagents. The account has no overdraft and no chequebook,
+# so payment problems are card disputes and SEPA direct-debit oppositions. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in French. Read-only tools (get_account_transactions,
+# get_statements, dispute_status) carry no gold state change.
+templates:
+- id: TPL-KI-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai perdu ma carte Kiosque, je crois que c'était dans le bus. Vous pouvez la
+    bloquer tout de suite ?
+  - >-
+    Ma carte se terminant par 0001 a été {{event}}. Merci de la bloquer
+    immédiatement.
+  - >-
+    Je n'arrive plus à remettre la main sur ma carte Kiosque. Bloquez-la par
+    précaution, s'il vous plaît.
+  account_state:
+    account_id: acct_ki_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_ki_0001, status: active}
+  param_space:
+    event: [volée, perdue]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_ki_0001.status: frozen}
+  # ordering a new card right after blocking a lost one is a step customers
+  # often ask for — permitted, not required.
+  allowed_tools: [order_replacement_card]
+- id: TPL-KI-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Il y a un paiement de {{amount}} € chez {{merchant}} sur mon compte Kiosque
+    que je n'ai pas fait. Vous pouvez le contester ?
+  - >-
+    Je vois un débit de {{amount}} € chez {{merchant}} que je ne reconnais pas.
+    Comment je fais pour récupérer mon argent ?
+  - >-
+    On m'a débité {{amount}} € pour {{merchant}}, ce n'est pas moi. Merci d'ouvrir
+    une contestation.
+  account_state:
+    account_id: acct_ki_0001
+    cards:
+    - {card_id: card_ki_0001, status: active}
+    transactions:
+    - {transaction_id: txn_ki_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Boutique Céleste en ligne, Jeux Arcadia, Voyages Mistral]
+    amount: ['39,90', '74,50', '210,00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_ki_0001.status: UNDER_REVIEW}
+  allowed_tools: [freeze_card]
+- id: TPL-KI-INSTANT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je dois rembourser {{amount}} € à {{payee}} tout de suite. Vous pouvez faire
+    un virement instantané ?
+  - >-
+    Merci d'envoyer {{amount}} € en virement instantané à {{payee}}, c'est urgent.
+  - >-
+    Pouvez-vous virer {{amount}} € à {{payee}} maintenant, pour que l'argent
+    arrive dans la minute ?
+  account_state:
+    account_id: acct_ki_0001
+    balance: '1250.00'
+    payees:
+    - {payee_id: payee_ki_0001, name: '{{payee}}'}
+  param_space:
+    payee: [mon colocataire, ma sœur, mon ami Karim]
+    amount: ['50', '150', '400']
+  gold_tool_sequence: [send_instant_transfer]
+  expected_state_deltas: {instant_transfer_status: SENT}
+- id: TPL-KI-LIMITS-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je dois payer {{purchase}} cette semaine, mais mon plafond de paiement est
+    trop bas. Vous pouvez l'augmenter ?
+  - >-
+    Pouvez-vous relever le plafond de paiement de ma carte Kiosque ? J'ai un achat
+    important à faire : {{purchase}}.
+  - >-
+    Merci d'augmenter les plafonds de ma carte, j'ai besoin de régler
+    {{purchase}}.
+  account_state:
+    account_id: acct_ki_0001
+    cards:
+    - {card_id: card_ki_0001, status: active}
+  param_space:
+    purchase: [un billet d'avion, la caution de mon appartement, un ordinateur portable]
+  gold_tool_sequence: [set_card_limits]
+  expected_state_deltas: {card_limits_updated: true}
+- id: TPL-KI-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je voudrais enregistrer {{payee}} comme bénéficiaire pour mes virements.
+    L'IBAN est {{iban}}.
+  - >-
+    Pouvez-vous ajouter un bénéficiaire sur mon compte Kiosque : {{payee}}, IBAN
+    {{iban}} ?
+  - >-
+    Merci d'ajouter {{payee}} à mes bénéficiaires de virement. Voici l'IBAN :
+    {{iban}}.
+  account_state:
+    account_id: acct_ki_0001
+  param_space:
+    payee: [mon propriétaire, ma mère, mon club de foot]
+    iban: ['FR76 1111 2222 3333 4444 5555 601', 'FR76 9999 8888 7777 6666 5555 402']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-KI-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai résilié mon abonnement chez {{creditor}}, mais ils continuent de me
+    prélever. Vous pouvez bloquer leurs prochains prélèvements ?
+  - >-
+    Merci de faire opposition aux prélèvements de {{creditor}} sur mon compte
+    Kiosque.
+  - >-
+    Pouvez-vous révoquer le mandat de prélèvement de {{creditor}} ? Je ne veux
+    plus qu'ils prélèvent sur mon compte.
+  account_state:
+    account_id: acct_ki_0001
+    mandates:
+    - {mandate_id: mdt_ki_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [Salle Forme Azur, StreamPlus, Télécom Hexa]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_ki_0001.status: REVOKED}
+- id: TPL-KI-POCKETMONEY-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Pouvez-vous virer {{amount}} € d'argent de poche sur le compte Kiosque de
+    {{child}} ?
+  - >-
+    Je voudrais transférer {{amount}} € de mon compte vers celui de {{child}}, qui
+    a un compte Kiosque 12-17 ans.
+  - >-
+    Merci de mettre {{amount}} € sur le compte ado de {{child}}.
+  account_state:
+    account_id: acct_ki_0001
+    teen_account_id: acct_ki_ado_0001
+    balance: '640.00'
+  param_space:
+    child: [ma fille, mon fils]
+    amount: ['20', '30', '50']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-KI-OPEN-TEEN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je voudrais ouvrir un compte Kiosque pour {{child}}, qui a {{age}} ans. Comment
+    on fait ?
+  - >-
+    J'aimerais ouvrir un compte Kiosque à {{child}}, qui vient d'avoir {{age}}
+    ans. C'est possible ?
+  - >-
+    Merci de m'aider à ouvrir un compte Kiosque 12-17 ans pour {{child}}
+    ({{age}} ans).
+  account_state:
+    customer_id: cust_ki_0001
+  param_space:
+    child: [ma fille, mon fils]
+    age: ['13', '15', '16']
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-KI-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je n'utilise plus mon compte Kiosque et je voudrais le clôturer.
+  - >-
+    Merci de fermer mon compte Kiosque et de virer le solde restant sur mon compte
+    bancaire.
+  - >-
+    Pouvez-vous résilier mon compte Kiosque ? J'ai maintenant un compte dans une
+    banque.
+  account_state:
+    account_id: acct_ki_0001
+    account_type: compte Kiosque
+    balance: '35.00'
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {acct_ki_0001.status: CLOSED}
+  # one opening asks to send the remaining balance out first -- permitted.
+  allowed_tools: [send_instant_transfer]
+- id: TPL-KI-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai changé de numéro de téléphone, le nouveau est le {{phone}}. Il faut le
+    mettre à jour pour que je reçoive les codes de validation.
+  - >-
+    Merci de remplacer mon adresse e-mail par {{email}}.
+  - >-
+    Je viens de déménager : ma nouvelle adresse est {{address}}.
+  account_state:
+    customer_id: cust_ki_0001
+  param_space:
+    phone: ['06 39 98 52 07', '06 39 98 88 31']
+    email: [k.diallo@example.com, s.nguyen@example.com]
+    address: ['14 rue des Acacias, 93200 Saint-Denis', '3 cours Lafayette, 69003 Lyon']
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-KI-STOLEN-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    On m'a volé mon sac avec ma carte Kiosque se terminant par 0001, et je vois
+    déjà un paiement de {{amount}} € chez {{merchant}}. Bloquez la carte,
+    contestez ce paiement et envoyez-moi une nouvelle carte.
+  - >-
+    Ma carte se terminant par 0001 a été volée et quelqu'un a payé {{amount}} €
+    chez {{merchant}}. Merci de la bloquer, d'ouvrir une contestation et de me
+    commander une carte de remplacement.
+  - >-
+    Je me suis fait voler ma carte se terminant par 0001 : pouvez-vous la
+    bloquer, contester le paiement de {{amount}} € chez {{merchant}} et m'en
+    renvoyer une nouvelle ?
+  account_state:
+    account_id: acct_ki_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_ki_0001, status: active}
+    transactions:
+    - {transaction_id: txn_ki_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Jeux Arcadia, Boutique Céleste en ligne]
+    amount: ['59,99', '180,00']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_ki_0001.status: frozen, txn_ki_0002.status: UNDER_REVIEW, card_ki_0001.replacement: ordered}
+- id: TPL-KI-TEEN-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je veux ouvrir un compte Kiosque pour {{child}}, qui a {{age}} ans, avoir
+    accès à son compte en tant que parent, et limiter ses paiements à {{limit}} €
+    par semaine.
+  - >-
+    Merci d'ouvrir un compte 12-17 ans pour {{child}} ({{age}} ans), de m'y donner
+    un accès de représentant légal et de régler son plafond de paiement à
+    {{limit}} € par semaine.
+  - >-
+    Pouvez-vous ouvrir un compte Kiosque à {{child}}, qui a {{age}} ans, me donner
+    la main dessus et plafonner ses paiements à {{limit}} € par semaine ?
+  account_state:
+    customer_id: cust_ki_0001
+  param_space:
+    child: [ma fille, mon fils]
+    age: ['12', '14', '17']
+    limit: ['50', '100']
+  gold_tool_sequence: [open_account, manage_authorized_users, set_card_limits]
+  expected_state_deltas: {new_account_status: OPEN, authorized_users_updated: true, card_limits_updated: true}
+- id: TPL-KI-RENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je viens d'emménager : ajoutez mon nouveau propriétaire à mes bénéficiaires
+    (IBAN {{iban}}), envoyez-lui {{amount}} € de loyer en virement instantané, et
+    activez une alerte quand mon solde passe sous {{threshold}} €.
+  - >-
+    Merci d'enregistrer mon propriétaire comme bénéficiaire avec l'IBAN {{iban}},
+    de lui virer {{amount}} € tout de suite pour le loyer et de me prévenir si mon
+    solde descend sous {{threshold}} €.
+  - >-
+    Pouvez-vous ajouter le compte de mon propriétaire ({{iban}}), lui envoyer
+    {{amount}} € en instantané et mettre une alerte de solde à {{threshold}} € ?
+  account_state:
+    account_id: acct_ki_0001
+    balance: '1400.00'
+  param_space:
+    iban: ['FR76 1111 2222 3333 4444 5555 601', 'FR76 9999 8888 7777 6666 5555 402']
+    amount: ['480', '650']
+    threshold: ['50', '100']
+  gold_tool_sequence: [update_beneficiary, send_instant_transfer, set_alerts]
+  expected_state_deltas: {payee_added: true, instant_transfer_status: SENT, alerts_updated: true}
+- id: TPL-KI-SUBSCRIPTION-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{creditor}} continue de me prélever alors que j'ai résilié : bloquez leurs
+    prochains prélèvements, contestez le dernier de {{amount}} €, et prévenez-moi
+    à chaque prélèvement.
+  - >-
+    Merci de révoquer le mandat de {{creditor}}, de contester leur prélèvement de
+    {{amount}} € de ce mois-ci et d'activer une alerte pour chaque prélèvement.
+  - >-
+    Pouvez-vous faire opposition aux prélèvements de {{creditor}}, ouvrir une
+    contestation sur les {{amount}} € qu'ils viennent de prendre et m'alerter à
+    chaque nouveau prélèvement ?
+  account_state:
+    account_id: acct_ki_0001
+    mandates:
+    - {mandate_id: mdt_ki_0002, creditor: '{{creditor}}', status: active}
+    transactions:
+    - {transaction_id: txn_ki_0003, merchant: '{{creditor}}', amount: '{{amount}}', status: posted}
+  param_space:
+    creditor: [StreamPlus, Salle Forme Azur]
+    amount: ['13,99', '29,90']
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, set_alerts]
+  expected_state_deltas: {mdt_ki_0002.status: REVOKED, txn_ki_0003.status: UNDER_REVIEW, alerts_updated: true}
+- id: TPL-KI-NEWCARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ma nouvelle carte Kiosque est arrivée : activez-la, augmentez mon plafond de
+    paiement pour mes achats de rentrée, et réglez ma facture {{payee}} de
+    {{amount}} €.
+  - >-
+    Merci d'activer ma nouvelle carte, de relever son plafond de paiement et de
+    payer ma facture {{payee}} ({{amount}} €).
+  - >-
+    Pouvez-vous activer la carte que je viens de recevoir, monter mon plafond de
+    paiement et régler les {{amount}} € de ma facture {{payee}} ?
+  account_state:
+    account_id: acct_ki_0001
+    cards:
+    - {card_id: card_ki_0002, status: inactive}
+    payees:
+    - {payee_id: payee_ki_0002, name: '{{payee}}'}
+  param_space:
+    payee: [Énergie du Rhône, Télécom Hexa]
+    amount: ['62,40', '35,99']
+  gold_tool_sequence: [activate_card, set_card_limits, pay_bill]
+  expected_state_deltas: {card_ki_0002.status: active, card_limits_updated: true, bill_paid: true}
+- id: TPL-KI-TRAVEL-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je pars au Portugal : augmentez mon plafond de retrait, activez des alertes
+    pour mes paiements à l'étranger, et envoyez {{amount}} € en virement
+    instantané à ma cousine à Lisbonne, qui est déjà dans mes bénéficiaires.
+  - >-
+    Avant mon départ pour Lisbonne, merci de relever mon plafond de retrait, de
+    m'alerter à chaque paiement à l'étranger et de virer tout de suite
+    {{amount}} € à ma cousine, déjà enregistrée comme bénéficiaire.
+  - >-
+    Pouvez-vous monter mon plafond de retrait pour mon voyage au Portugal, activer
+    des alertes de paiement et envoyer {{amount}} € en instantané à ma cousine
+    (elle est dans mes bénéficiaires) ?
+  account_state:
+    account_id: acct_ki_0001
+    balance: '900.00'
+    cards:
+    - {card_id: card_ki_0001, status: active}
+    payees:
+    - {payee_id: payee_ki_0003, name: ma cousine}
+  param_space:
+    amount: ['100', '200']
+  gold_tool_sequence: [set_card_limits, set_alerts, send_instant_transfer]
+  expected_state_deltas: {card_limits_updated: true, alerts_updated: true, instant_transfer_status: SENT}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/fr_FR/dynamic.yaml), not scripted templates.

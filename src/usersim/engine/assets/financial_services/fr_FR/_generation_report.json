@@ -1,0 +1,1041 @@
+{
+  "generated_at": "2026-10-19T04:24:17.771140+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.6-terra",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "credit_mirabelle": {
+      "n_documents": 285,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 5,
+          "produced": 5,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Crédit Mirabelle est une banque coopérative ancrée localement, s'adressant aux particuliers et aux sociétaires. Elle se distingue par son modèle de gouvernance démocratique et son engagement fort envers l'inclusion financière et la proximité.",
+        "brand_voice_guide": "Le ton est institutionnel, bienveillant et transparent, utilisant le 'nous' pour l'institution et le 'vous' pour le client. Le niveau de langue est accessible, limitant le jargon technique ou en l'expliquant systématiquement. Les mentions légales et les avertissements sont présentés de manière distincte et exhaustive.",
+        "service_model": "Le support est assuré via les agences physiques, un centre d'appels et une interface numérique. Les horaires d'ouverture suivent le fuseau CET, avec un processus d'escalade allant du conseiller à la direction d'agence, puis au médiateur de la banque.",
+        "fee_philosophy": "Les frais reflètent le coût réel des services et la sécurité des opérations, avec une volonté de transparence totale. Une offre spécifique, facturée \"3 €\" par mois au plus, est dédiée aux clients en situation de fragilité financière pour limiter l'impact des frais d'incidents.",
+        "risk_and_compliance_posture": "Conformité stricte aux directives de l'ACPR et de la Banque de France, avec une protection des dépôts via le FGDR jusqu'à \"100 000 €\" par client. La transparence sur les coûts, le respect du Code monétaire et financier et le traitement équitable des clients sont les piliers de notre approche.",
+        "security_and_verification": "L'authentification forte et la vérification rigoureuse de l'identité sont obligatoires avant toute action modifiant l'état d'un compte ou la communication d'informations sensibles. Aucun changement de données n'est effectué sans une validation d'identité conforme aux normes KYC.",
+        "dispute_and_fraud_handling": "Nous traitons les fraudes avec diligence, en garantissant le remboursement des opérations non autorisées selon les délais légaux. Les clients disposent d'un délai de 13 mois pour contester une opération mal exécutée ou non autorisée.",
+        "advice_boundaries": "Nous fournissons une éducation financière et des recommandations de produits basées sur le profil du client, sans jamais donner de conseils fiscaux ou juridiques individualisés. Nous n'engageons jamais l'octroi d'un crédit avant l'analyse complète de la solvabilité et ne minimisons jamais le coût total du prêt.",
+        "product_positionings": "[{'product_id': 'compte_courant_essentiel', 'one_liner': 'La solution de gestion quotidienne fondamentale incluant une carte à débit immédiat et un ensemble de services essentiels.'}\n {'product_id': 'livret_a', 'one_liner': \"Épargne réglementée, liquide et exonérée d'impôts, accessible à tous les clients.\"}\n {'product_id': 'lep', 'one_liner': 'Épargne réglementée à taux bonifié, réservée aux foyers dont le revenu fiscal de référence est modeste.'}\n {'product_id': 'carte_premier', 'one_liner': 'Carte haut de gamme offrant des plafonds de paiement et de retrait étendus pour une plus grande liberté financière.'}\n {'product_id': 'pret_immobilier', 'one_liner': \"Financement long terme à taux fixe pour l'acquisition immobilière, encadré par des règles strictes d'endettement.\"}\n {'product_id': 'parts_sociales', 'one_liner': 'Titre de propriété permettant de devenir sociétaire et de participer activement à la gouvernance de la banque.'}]",
+        "key_terms_glossary": "[{'term': 'Sociétaire', 'definition': \"Client détenteur de parts sociales, participant à la gouvernance locale et disposant d'une voix en assemblée générale.\"}\n {'term': 'FGDR', 'definition': 'Fonds de Garantie des Dépôts et de Résolution, assurant la protection des avoirs jusqu\\'à \"100 000 €\" par client et par banque.'}\n {'term': 'Délai de réflexion', 'definition': \"Période obligatoire de dix jours durant laquelle un emprunteur immobilier doit réfléchir avant d'accepter son offre de prêt.\"}\n {'term': \"Commission d'intervention\", 'definition': 'Frais appliqués lors d\\'une opération entraînant un dépassement du découvert autorisé, plafonnés à \"8 €\" par opération et \"80 €\" par mois.'}]"
+      }
+    },
+    "kiosque": {
+      "n_documents": 203,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 3,
+          "produced": 3,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Kiosque est une néobanque inclusive se positionnant sur l'accessibilité universelle et la rapidité d'exécution. Nous ciblons le grand public, les populations sous-bancarisées et les jeunes, en concurrençant sur la simplicité d'ouverture en points de vente agréés sans condition de revenus.",
+        "brand_voice_guide": "Le ton est transparent, accueillant et pédagogique, utilisant la première personne du pluriel (« nous »). Le langage doit rester accessible (niveau lecture standard), limiter le jargon technique et présenter les mentions légales de manière claire et non ambiguë.",
+        "service_model": "L'assistance est fournie via des canaux numériques et dans les points de vente partenaires (bureaux de tabac, marchands de journaux) selon les horaires français. Les demandes complexes sont escaladées vers le support centralisé de Kiosque.",
+        "fee_philosophy": "Nous adoptons une tarification forfaitaire et transparente pour assurer la viabilité du service tout en restant abordable. Les frais, tels que les '2 %' de dépôt d'espèces, reflètent les coûts opérationnels des points de vente partenaires.",
+        "risk_and_compliance_posture": "L'institution opère sous la supervision de l'ACPR et de la Banque de France, respectant strictement le Code monétaire et financier. La protection est assurée par le FGDR pour la banque de détail et par le cantonnement des fonds auprès d'une banque partenaire pour les services de paiement.",
+        "security_and_verification": "La vérification de l'identité via une pièce officielle est obligatoire avant toute modification d'information ou opération sur le compte. L'authentification forte est systématiquement appliquée pour sécuriser les paiements en ligne.",
+        "dispute_and_fraud_handling": "Nous appliquons une politique de protection rigoureuse avec un délai de contestation de 13 mois pour les opérations non autorisées. Le remboursement intervient selon les délais réglementaires, généralement dès le premier jour ouvré suivant la notification.",
+        "advice_boundaries": "Kiosque fournit des informations à vocation éducative et descriptive sur ses produits. Nous ne délivrons aucun conseil fiscal ou juridique individualisé et nous nous engageons à une transparence totale sur les coûts et plafonds.",
+        "product_positionings": "[{'product_id': 'compte_kiosque', 'one_liner': \"L'accès bancaire universel, ouvert en '5' minutes sans condition de revenus ni patrimoine.\"}\n {'product_id': 'carte_kiosque_voyage', 'one_liner': \"L'outil optimisé pour les voyageurs, supprimant les frais de paiement à l'étranger.\"}\n {'product_id': 'compte_kiosque_ado', 'one_liner': \"L'initiation financière sécurisée pour les '12'-'17' ans avec un plafond hebdomadaire de '150 €'.\"}\n {'product_id': 'virement_instantane', 'one_liner': 'Le transfert de fonds immédiat et gratuit, sécurisé par la vérification du nom du bénéficiaire.'}]",
+        "key_terms_glossary": "[{'term': 'Cantonnement', 'definition': \"Protection des fonds des clients par leur dépôt auprès d'un établissement de crédit partenaire, distincts des fonds de l'entreprise.\"}\n {'term': 'Carte à autorisation systématique', 'definition': 'Carte de paiement vérifiant le solde en temps réel avant chaque transaction, interdisant ainsi tout découvert.'}\n {'term': 'Droit au compte', 'definition': \"Procédure légale permettant à toute personne domiciliée en France d'obtenir l'ouverture d'un compte de dépôt.\"}]"
+      }
+    },
+    "egide_assurances": {
+      "n_documents": 239,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Égide Assurances est une société d'assurance mutuelle privilégiant la transparence et l'éthique, ciblant les particuliers et les familles. Nous nous distinguons par notre modèle coopératif où les assurés sont sociétaires, nous positionnant comme un partenaire de confiance plutôt qu'un simple prestataire.",
+        "brand_voice_guide": "Le ton est professionnel, rassurant et pédagogique, utilisant systématiquement le « nous ». Le niveau de langage est accessible, limitant le jargon technique au strict nécessaire, avec des mentions légales et des avertissements (disclaimers) clairs, visibles et non ambigus.",
+        "service_model": "L'accompagnement s'effectue via un portail client numérique, par email et par téléphone durant les heures ouvrables (CET). Les dossiers complexes sont escaladés vers un gestionnaire spécialisé ou, en dernier recours, vers la Médiation de l'assurance.",
+        "fee_philosophy": "Nos frais sont transparents et justifiés par la gestion active des fonds et la maintenance d'une infrastructure sécurisée. Cette structure tarifaire garantit l'équité entre tous les sociétaires et la pérennité du modèle mutuel.",
+        "risk_and_compliance_posture": "Nous opérons sous la surveillance de l'ACPR et respectons strictement le Code des assurances, incluant la protection du FGAP jusqu'à « 70 000 € » pour les contrats de personnes. La protection des données et le traitement équitable des sociétaires sont au cœur de notre cadre opérationnel.",
+        "security_and_verification": "Une authentification forte et une vérification rigoureuse de l'identité sont obligatoires avant toute action modifiant l'état d'un contrat, tout retrait ou tout transfert de fonds.",
+        "dispute_and_fraud_handling": "Nous appliquons une politique de tolérance zéro envers la fraude et traitons les réclamations avec impartialité. Les délais légaux de déclaration, notamment les « 5 » jours ouvrés pour les sinistres, sont strictement appliqués pour garantir la validité des garanties.",
+        "advice_boundaries": "Nous fournissons des informations produits et une éducation financière générale, sans jamais garantir de performance. Nous ne délivrons aucun conseil fiscal, juridique ou médical personnalisé, renvoyant les sociétaires vers des experts certifiés pour ces besoins.",
+        "product_positionings": "[{'product_id': 'assurance_vie_multisupport', 'one_liner': \"Solution d'épargne flexible alliant la sécurité du fonds en euros et le potentiel de croissance des unités de compte.\"}\n {'product_id': 'per_individuel', 'one_liner': \"Plan d'épargne retraite optimisé fiscalement avec versements déductibles pour préparer l'avenir.\"}\n {'product_id': 'assurance_habitation', 'one_liner': 'Protection résidentielle complète et agile, caractérisée par une résiliation simplifiée après un an.'}\n {'product_id': 'assurance_auto', 'one_liner': 'Couverture automobile fiable avec un système de bonus optimisé et une gestion rapide des sinistres.'}\n {'product_id': 'complementaire_sante', 'one_liner': \"Mutuelle santé responsable garantissant l'accès aux paniers 100 % Santé sans reste à charge.\"}]",
+        "key_terms_glossary": "[{'term': 'Sociétaire', 'definition': \"Membre d'une société d'assurance mutuelle, ayant la qualité d'associé et participant à la gouvernance.\"}\n {'term': 'Unités de Compte', 'definition': \"Supports d'investissement dont la valeur varie selon les marchés et qui exposent le sociétaire à un risque de perte en capital.\"}\n {'term': 'Franchise', 'definition': \"Montant restant à la charge de l'assuré après l'indemnisation d'un sinistre.\"}\n {'term': 'Tiers Payant', 'definition': \"Dispositif permettant à l'assuré de ne pas avancer les frais de santé auprès des professionnels de santé.\"}]"
+      }
+    },
+    "ondine_credit": {
+      "n_documents": 192,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 2,
+          "produced": 2,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Ondine Crédit se positionne comme un partenaire financier transparent et accessible pour les particuliers. Nous ciblons les segments cherchant des solutions de financement responsables, en nous distinguant par une rigueur réglementaire exemplaire et une clarté absolue des coûts.",
+        "brand_voice_guide": "Le ton est institutionnel, rassurant et pédagogique, utilisant le « vous » pour s'adresser au client. Le niveau de langue est standard, limitant le jargon technique aux termes légaux obligatoires. Les mentions légales et avertissements sont systématiquement mis en évidence et rédigés de manière concise et non ambiguë.",
+        "service_model": "L'assistance est accessible via canaux numériques et téléphone durant les heures ouvrables (CET). Les dossiers complexes ou les litiges sont escaladés vers un gestionnaire de compte puis vers le responsable de la conformité.",
+        "fee_philosophy": "Nos frais sont transparents, justifiés par la gestion du risque et les coûts opérationnels. Les frais de remboursement anticipé sont strictement plafonnés conformément à la loi pour garantir la flexibilité de l'emprunteur.",
+        "risk_and_compliance_posture": "Nous opérons sous la supervision de l'ACPR et de la Banque de France, garantissant un TAEG toujours inférieur au taux d'usure. Nous appliquons strictement la vérification de la solvabilité, le droit de rétractation de « 14 » jours, et l'orientation vers la commission de surendettement en cas de difficultés durables.",
+        "security_and_verification": "Une vérification d'identité rigoureuse est impérative avant toute opération modifiant l'état du compte ou tout déblocage de fonds. L'authentification forte est systématiquement exigée pour sécuriser les transactions et les données personnelles.",
+        "dispute_and_fraud_handling": "Les contestations sont traitées avec diligence, notamment pour les prélèvements SEPA contestables sous huit semaines. Nous adoptons une posture de protection active des fonds clients et de signalement rapide des fraudes aux autorités compétentes.",
+        "advice_boundaries": "Ondine Crédit propose une éducation financière et une aide au choix de produit, mais ne fournit aucun conseil fiscal ou juridique individualisé. Nous nous engageons à ne jamais promettre l'octroi d'un crédit et à ne jamais minimiser son coût total.",
+        "product_positionings": "[{'product_id': 'pret_personnel', 'one_liner': 'Solution de financement polyvalente et stable pour tout projet personnel.'}\n {'product_id': 'credit_renouvelable', 'one_liner': 'Réserve de crédit flexible et disponible pour répondre aux besoins ponctuels.'}\n {'product_id': 'credit_auto', 'one_liner': \"Financement optimisé et spécifique pour l'acquisition d'un véhicule.\"}\n {'product_id': 'paiement_fractionne', 'one_liner': 'Option de paiement agile et rapide pour les achats de consommation courante.'}]",
+        "key_terms_glossary": "[{'term': 'TAEG', 'definition': \"Taux Annuel Effectif Global, reflétant le coût total du crédit pour l'emprunteur.\"}\n {'term': 'FICP', 'definition': 'Fichier national des Incidents de remboursement des Crédits aux Particuliers.'}\n {'term': 'Délai de rétractation', 'definition': \"Période légale de « 14 » jours permettant à l'emprunteur d'annuler son contrat sans pénalité.\"}]"
+      }
+    },
+    "valbreuil_bourse": {
+      "n_documents": 237,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 7,
+          "produced": 7,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Valbreuil Bourse se positionne comme un courtier numérique premium pour les résidents français, ciblant les investisseurs avertis et les jeunes actifs. L'institution mise sur la rigueur réglementaire, la transparence des coûts et l'optimisation fiscale via des enveloppes spécifiques.",
+        "brand_voice_guide": "Le ton est institutionnel, transparent et pédagogique, utilisant le vouvoiement et un niveau de langue soutenu. Le jargon technique est limité ou systématiquement expliqué, et les avertissements sur les risques sont intégrés de manière claire et non ambiguë.",
+        "service_model": "L'assistance est assurée via messagerie sécurisée et e-mail, disponible durant les jours ouvrés selon le fuseau horaire CET. Les demandes complexes sont escaladées vers le responsable de la conformité ou la direction des opérations.",
+        "fee_philosophy": "La tarification est conçue pour être compétitive tout en respectant strictement les plafonds réglementaires. Les frais couvrent la sécurisation des actifs et le reporting réglementaire, avec une gratuité totale sur certains plans d'investissement automatisés.",
+        "risk_and_compliance_posture": "L'institution suit strictement les cadres de l'AMF et de l'ACPR conformément à MiFID II, incluant l'évaluation de l'adéquation et du caractère approprié. Le capital investi n'est jamais garanti, mais les titres sont protégés par le FGDR jusqu'à 70 000 euros.",
+        "security_and_verification": "Une authentification forte et une vérification d'identité rigoureuse sont obligatoires avant toute action modifiant l'état du compte ou tout retrait de fonds. Aucun changement de coordonnées ne peut être effectué sans validation sécurisée.",
+        "dispute_and_fraud_handling": "Toute réclamation est traitée selon un processus transparent avec un accusé de réception immédiat et un délai de résolution normé. En cas de suspicion de fraude, les comptes sont gelés conservatoirement pour protéger les actifs du client.",
+        "advice_boundaries": "Valbreuil Bourse fournit une éducation financière et vérifie la pertinence des produits, mais ne délivre aucun conseil fiscal ou juridique personnalisé. L'agent ne garantit aucun rendement et se limite à un standard de soin basé sur le profil de risque du client.",
+        "product_positionings": "[{'product_id': 'pea', 'one_liner': 'L\\'enveloppe fiscale de référence pour les actions européennes, avec un plafond de versement de \"150 000 €\".'}\n {'product_id': 'pea_pme', 'one_liner': 'Une variante optimisée pour le soutien aux PME, offrant un plafond de versement élargi à \"225 000 €\".'}\n {'product_id': 'pea_jeune', 'one_liner': 'Un produit d\\'initiation réservé aux 18-25 ans rattachés au foyer fiscal de leurs parents, limité à \"20 000 €\".'}\n {'product_id': 'investissement_programme', 'one_liner': 'Une solution d\\'investissement automatisée en ETF pour lisser le risque, accessible dès \"25 €\".'}\n {'product_id': 'compte_titres', 'one_liner': \"L'option la plus flexible et sans plafond pour investir sur les marchés mondiaux sans contrainte fiscale.\"}]",
+        "key_terms_glossary": "[{'term': 'Règlement-livraison', 'definition': \"Délai conventionnel entre l'exécution d'un ordre boursier et le transfert effectif de la propriété des titres.\"}\n {'term': \"Évaluation de l'adéquation\", 'definition': \"Processus MiFID II visant à s'assurer qu'un produit financier correspond aux connaissances, à l'expérience et aux objectifs du client.\"}\n {'term': 'FGDR', 'definition': \"Fonds de Garantie des Dépôts et de Résolution, garantissant la protection des actifs clients jusqu'à 70 000 euros.\"}]"
+      }
+    }
+  }
+}

@@ -23,12 +23,18 @@ At a glance:
 
 <img src="financial_services_probe.jpg" width="800">
 
-The diagram describes the approach, not current coverage. Two markets are built
-today: `en_US` (4 institutions, 851 documents, 70 verifiable tasks) and `en_IN`
-(5 institutions, 1066 documents, 60 tasks). `hi_Deva_IN` has a generated corpus
-but no task set yet, so it cannot be simulated; the remaining shipped locales
-have the persona substrate in place but no region spec. See
-[Authoring a new locale](#authoring-a-new-locale).
+The diagram describes the approach, not current coverage. These markets are
+built today:
+
+- `en_US`: 4 institutions, 851 documents, 70 verifiable tasks.
+- `en_IN`: 5 institutions, 1066 documents, 60 tasks.
+- `fr_FR`: 5 institutions, 1156 documents, 92 tasks, generated in French from
+  a French-market institution set (a cooperative bank, a payment-account
+  neobank, an insurer, a consumer lender and an online broker).
+
+`hi_Deva_IN` has a generated corpus but no task set yet, so it cannot be
+simulated; the remaining shipped locales have the persona substrate in place but
+no region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
 > For the asset-bank contract see
 > [SCHEMA.md](../../assets/financial_services/SCHEMA.md). A file-by-file

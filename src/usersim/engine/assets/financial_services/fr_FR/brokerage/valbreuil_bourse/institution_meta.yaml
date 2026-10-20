@@ -1,0 +1,8 @@
+institution_id: valbreuil_bourse
+display_name: Valbreuil Bourse
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+schema_version: v0.1
