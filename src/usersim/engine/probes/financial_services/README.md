@@ -342,11 +342,12 @@ If the endpoint starts returning timeouts or 5xx, lower
 too many heavy structured generations in flight, and a dropped call loses the
 whole cluster.
 
-`asset_judge_model` grades the output, so it is deliberately a different model
-family from `doc_gen_model` and runs at `temperature = 0.0`. That reduces
-run-to-run drift but does not remove it, since a reasoning model samples its
-own thinking whatever the output temperature says. Read corpus-wide means
-rather than any single document's score.
+`asset_judge_model` grades the output, so it shares `doc_gen_model`'s
+`timeout`, is deliberately a different model family, and runs at
+`temperature = 0.0`. That reduces run-to-run drift but does not remove it,
+since a reasoning model samples its own thinking whatever the output
+temperature says. Read corpus-wide means rather than any single document's
+score.
 
 The embedding model used here must be the same one the simulator queries with,
 or retrieval compares vectors from two different embedding spaces and silently
