@@ -666,6 +666,15 @@ def test_axis_description_is_absent_for_judged_axes():
     assert axis_description("helpfulness") == ""
 
 
+def test_dashboard_probe_descriptions_match_the_preview():
+    """The dashboard keeps its own copy of the preview's probe descriptions so
+    reporting doesn't import Rich; the two copies must say the same thing."""
+    from usersim.engine.core import preview
+    from usersim.reporting import capability_report
+
+    assert capability_report._PROBE_DESCRIPTIONS == preview._PROBE_DESCRIPTIONS
+
+
 def test_dashboard_prefers_reasoning_then_description(tmp_path):
     from usersim.reporting import write_capability_dashboard_artifacts
 
