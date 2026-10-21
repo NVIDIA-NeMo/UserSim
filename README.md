@@ -10,7 +10,7 @@
 > trajectories: evaluation signal, failure analysis, and curated training data,
 > before you have production traffic to learn from.
 
-**14 probes · 9 shipped locales across 7 countries (+ 22 preview India-language variants) · 7M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
+**14 probes · 11 shipped locales across 9 countries (+ 22 preview India-language variants) · 8M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/pipeline_architecture.jpg" width="800">
 
@@ -243,7 +243,7 @@ full plan and exits before the first network call.
 
 - [`docs/probes.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/probes.md): the 14 probes and which failure mode each catches
 - [`docs/outputs.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/outputs.md): the parquet columns, evaluation cells and report artifacts a run produces
-- [`docs/locales.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/locales.md): the 9 shipped locales, the 22 India preview variants, persona-language matching
+- [`docs/locales.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/locales.md): the 11 shipped locales, the 22 India preview variants, persona-language matching
 - [`docs/notebooks.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/notebooks.md): the interactive flow
 - [`architecture/selection.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/selection.md): curating runs into training datasets
 - [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md): why grounded simulation works, and where to trust it

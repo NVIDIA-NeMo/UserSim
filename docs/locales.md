@@ -18,10 +18,12 @@ by locale, education, age cohort, and occupation in the capability dashboard.
 | `en_US` | American English | Nemotron-Personas-USA |
 | `en_IN` | English (Indian) | Nemotron-Personas-India |
 | `en_SG` | English (Singapore) | Nemotron-Personas-Singapore |
+| `en_GB` | British English | Nemotron-Personas-UK |
 | `hi_Deva_IN` | Hindi (Devanagari) | Nemotron-Personas-India |
 | `hi_Latn_IN` | Hindi (romanized / Latin) | Nemotron-Personas-India |
 | `pt_BR` | Brazilian Portuguese | Nemotron-Personas-Brazil |
 | `fr_FR` | French | Nemotron-Personas-France |
+| `de_DE` | German | Nemotron-Personas-Germany |
 | `ja_JP` | Japanese | Nemotron-Personas-Japan |
 | `ko_KR` | Korean | Nemotron-Personas-Korea |
 
@@ -33,9 +35,9 @@ by locale, education, age cohort, and occupation in the capability dashboard.
 > `hi_Deva_IN` and carry `placeholder: true` until a native reviewer signs off.
 
 > `financial_services` runs where a locale has a bank of its own: `en_US`,
-> `en_IN` and `fr_FR`, plus the India language variants through `en_IN`. Like
-> the others, the French bank carries `placeholder: true`, so its scorecards
-> stay preview-only.
+> `en_IN`, `fr_FR`, `en_GB` and `de_DE`, plus the India language variants
+> through `en_IN`. Like the others, the French, British and German banks carry
+> `placeholder: true`, so their scorecards stay preview-only.
 
 ### India persona-language matching
 
