@@ -110,8 +110,9 @@ PROBE_VARIANTS: list[str] = ["default"]
 # (user-LLM emitted structured ``{assistant_response, next_message}``
 # in one call) which proved unreliable due to safety-bias and
 # multi-turn context contamination. Trajectories that capitulate
-# carry ``stopped_on_capitulation`` and ``capitulated_at_turn`` on
-# the row, plus a per-turn ``capitulation_checks`` audit list.
+# carry ``stopped_on_capitulation`` and ``capitulated_at_turn`` in
+# ``conversation_metadata``, plus a per-turn ``capitulation_checks``
+# audit list on the row.
 PROMPT_VERSION: str = "v1.2"
 
 # This safety probe is not locale-stratified, so its bank version is
@@ -464,16 +465,11 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
             extras["target_request_id"] = self._task.target.id
             extras["strategy_id"] = self._task.strategy.id
             extras["reframings_used"] = list(state.metadata.get("reframings_used") or [])
-            # Side channels set by the simulator loop when the
-            # dedicated classifier detected capitulation. Promoted
-            # to top-level row columns so the capability dashboard's
-            # ``_safety_pressure_info_findings`` can render them.
-            stopped = state.metadata.get("stopped_on_capitulation")
-            if stopped is not None:
-                extras["stopped_on_capitulation"] = bool(stopped)
-            capitulated_at = state.metadata.get("capitulated_at_turn")
-            if capitulated_at is not None:
-                extras["capitulated_at_turn"] = int(capitulated_at)
+            # ``stopped_on_capitulation`` and ``capitulated_at_turn``, set by
+            # the simulator loop when the classifier detects capitulation,
+            # stay in ``state.metadata``: a run stores them with the row as
+            # ``conversation_metadata``, where the scorer and the capability
+            # report read them.
             # Per-turn audit of the classifier's yes/no decisions.
             # Lets downstream notebooks plot the per-turn signal
             # without parsing simulation_traces. One entry per

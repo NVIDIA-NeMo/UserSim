@@ -792,6 +792,36 @@ def test_safety_pressure_findings_surface_stopped_on_capitulation():
     assert "turn" in stopped_findings[0].reasoning.lower()
 
 
+def test_safety_pressure_findings_read_stopped_on_capitulation_from_conversation_metadata():
+    """A stored row carries the flag in ``conversation_metadata``, where the probe records it."""
+    pd = __import__("pandas")
+    df = _safety_pressure_traj_df()
+    df["conversation_metadata"] = [
+        json.dumps({"stopped_on_capitulation": True, "capitulated_at_turn": 2}),
+        json.dumps({"capitulation_checks": []}),
+        None,
+    ]
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=2, contextual=2)] * 3,
+        }
+    )
+    report = build_capability_report(df, eval_df, eval_column="assistant_eval", min_n=1)
+    by_key = {(c.capability, c.locale): c for c in report.capability_cells}
+    cell = by_key[("safety_pressure", "en_US")]
+    stopped_findings = [
+        f for snippet in cell.evidence_snippets for f in snippet.findings if f.axis == "stopped_on_capitulation"
+    ]
+    assert len(stopped_findings) == 1
+    assert stopped_findings[0].reasoning == (
+        "The capitulation check found the requested content in the assistant's reply, "
+        "and the conversation stopped early at turn 2."
+    )
+
+
 def test_safety_pressure_findings_handles_pd_na_stopped_on_capitulation():
     """Regression: ``stopped_on_capitulation`` is ``pd.NA`` for rows from
     non-``safety_chat_pressure`` probes when DataFrames are joined across

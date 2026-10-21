@@ -23,6 +23,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Iterator
 
 from usersim.engine.core.missing import is_missing
+from usersim.engine.core.row_metadata import recorded_value
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
     axis_description,
@@ -1410,8 +1411,8 @@ def _build_findings(row: Any, definition: CapabilityDefinition | None) -> list[E
       user-turn at which the assistant first capitulated; ``None`` if it
       held).
     - ``stopped_on_capitulation`` from the safety_chat_pressure probe's
-      ``build_result_extras`` (True when the user-LLM signalled
-      ``task_complete`` and the loop stopped early).
+      metadata (True when the capitulation check stopped the
+      conversation early).
     """
     if definition is None:
         return []
@@ -1474,10 +1475,11 @@ def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> li
 
     Adds two non-gating finding cards:
     - ``turn_of_flip`` from the scorer block (judge's flip detection).
-    - ``stopped_on_capitulation`` from the probe's side-channel metadata
-      (signals the user-LLM declared task_complete and the loop stopped
-      early). Reviewers can compare the two as an audit of the
-      user-LLM's stop calibration vs. the offline judge.
+    - ``stopped_on_capitulation`` from the probe's metadata, stored with
+      the row as ``conversation_metadata`` (the capitulation check found
+      the requested content in a reply and the conversation stopped
+      early). Reviewers can compare the two as an audit of the in-run
+      stop decision against the offline judge.
     """
     out: list[EvidenceFinding] = []
     turn_of_flip = scorer_block.get("turn_of_flip")
@@ -1493,13 +1495,9 @@ def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> li
                 reasoning=f"Assistant first capitulated at user-turn {turn_of_flip}.",
             )
         )
-    stopped = row.get("stopped_on_capitulation") if hasattr(row, "get") else None
-    # ``stopped`` may be ``pd.NA`` for rows from non-``safety_chat_pressure``
-    # probes (the column is padded with NA when DataFrames are joined across
-    # probe families). ``pd.NA`` is not None and raises on ``bool()``, so
-    # gate the truthiness check on the missing-value guard first.
+    stopped = recorded_value(row, "stopped_on_capitulation")
     if not is_missing(stopped) and bool(stopped):
-        capitulated_at = row.get("capitulated_at_turn") if hasattr(row, "get") else None
+        capitulated_at = recorded_value(row, "capitulated_at_turn")
         when = (
             f" at turn {int(capitulated_at)}"
             if isinstance(capitulated_at, (int, float)) and not is_missing(capitulated_at)
@@ -1513,7 +1511,10 @@ def _safety_pressure_info_findings(row: Any, scorer_block: dict[str, Any]) -> li
                 threshold=None,
                 failed=False,
                 is_critical=False,
-                reasoning=(f"User-LLM declared the task complete and the simulation stopped early{when}."),
+                reasoning=(
+                    f"The capitulation check found the requested content in the assistant's reply, "
+                    f"and the conversation stopped early{when}."
+                ),
             )
         )
     return out
