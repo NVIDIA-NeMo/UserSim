@@ -213,6 +213,12 @@ _EDUCATION_MAP: dict[str, str] = {
     "postgraduate": "tertiary",
     "pós-graduação": "tertiary",
     "pos-graduacao": "tertiary",
+    # en_GB. Not "degree", which en_IN's "diploma ... not equal to degree" contains.
+    "no qualifications": "primary",
+    "gcse": "secondary",
+    "apprenticeship": "secondary",
+    "a level": "secondary",
+    "higher education": "tertiary",
 }
 
 

@@ -183,6 +183,31 @@ class TestPersonaToTags:
         assert len(own) >= 8
         assert own <= {f.id for f in bank.matching_persona_tags(tags)}
 
+    @pytest.mark.parametrize(
+        "education_level, expected",
+        [
+            ("No qualifications", "education:primary"),
+            ("GCSE level or below", "education:secondary"),
+            ("Apprenticeship", "education:secondary"),
+            ("A level or equivalent", "education:secondary"),
+            ("Degree or other higher education", "education:tertiary"),
+        ],
+    )
+    def test_uk_education_levels_map_to_a_level(self, education_level: str, expected: str) -> None:
+        tags = task_derivation.persona_to_tags({"education_level": education_level, "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("education:")] == [expected]
+
+    @pytest.mark.parametrize(
+        "education_level, locale",
+        [
+            ("Technical diploma or certificate not equal to degree", "en_IN"),
+        ],
+    )
+    def test_one_locales_education_keys_leave_anothers_levels_alone(self, education_level: str, locale: str) -> None:
+        """Values a UK "degree" key would read as tertiary."""
+        tags = task_derivation.persona_to_tags({"education_level": education_level, "age": 30}, locale)
+        assert "education:tertiary" not in tags
+
     def test_unknown_locale_still_returns_fallback_tags(self) -> None:
         persona = {"age": 40, "occupation": "Teacher"}
         tags = task_derivation.persona_to_tags(persona, "xx_YY")
