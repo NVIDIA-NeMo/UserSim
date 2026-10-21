@@ -365,7 +365,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 # Taxonomies not yet audited by a native-speaker reviewer, which therefore
 # carry ``placeholder: true``.
-_AWAITING_NATIVE_REVIEW = frozenset({"en_GB"})
+_AWAITING_NATIVE_REVIEW = frozenset({"en_GB", "de_DE"})
 
 # Locales that share a country topic universe (en_IN + hi_Deva_IN both
 # cover India) get the same category prefix.
@@ -374,6 +374,7 @@ _CATEGORY_PREFIX_BY_LOCALE = {
     "pt_BR": "brazil",
     "ja_JP": "japan",
     "fr_FR": "france",
+    "de_DE": "germany",
     "hi_Deva_IN": "india",
     "hi_Latn_IN": "india",
     "en_IN": "india",
@@ -394,6 +395,7 @@ _LANGUAGE_MARKERS = {
     "pt_BR": ("você", "sua", "seu", "para"),
     "ja_JP": ("について", "です", "ます", "あなた"),
     "fr_FR": ("vous", "votre", "votre"),
+    "de_DE": ("sie", "ihre", "ihnen"),
     "hi_Deva_IN": ("आप", "के", "में", "है"),
     "hi_Latn_IN": ("aap", "mein", "ke", "hai"),
     "en_SG": ("you", "your", "singapore"),

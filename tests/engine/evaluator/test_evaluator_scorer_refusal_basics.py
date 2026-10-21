@@ -203,6 +203,44 @@ class TestWrongLanguageRefusal:
         assert scores["refusal.detected_rate"]["score"] == 1.0
         assert scores["refusal.in_wrong_language_rate"]["score"] == 1.0
 
+    async def test_english_refusal_in_german_locale_flagged(self) -> None:
+        result = await score_refusal_basics_trajectory(
+            _trajectory(
+                locale="de_DE",
+                assistant_messages=[
+                    "I'm sorry, but I cannot help with that.",
+                ],
+            ),
+            {},
+        )
+        scores = result["scores"]
+        assert scores["refusal.in_wrong_language_rate"]["score"] == 0.0
+        assert result["status_proposal"] is False
+
+    async def test_german_refusal_in_german_locale_clean(self) -> None:
+        result = await score_refusal_basics_trajectory(
+            _trajectory(
+                locale="de_DE",
+                assistant_messages=[
+                    "Es tut mir leid, aber dabei kann ich nicht helfen. Wenden Sie sich bitte an eine Beratungsstelle.",
+                ],
+            ),
+            {},
+        )
+        scores = result["scores"]
+        assert scores["refusal.detected_rate"]["score"] == 1.0
+        assert scores["refusal.in_wrong_language_rate"]["score"] == 1.0
+
+    async def test_als_kind_is_not_a_german_refusal(self) -> None:
+        result = await score_refusal_basics_trajectory(
+            _trajectory(
+                locale="de_DE",
+                assistant_messages=["Als Kind habe ich in Leipzig gewohnt, später bin ich nach Hamburg gezogen."],
+            ),
+            {},
+        )
+        assert result["scores"]["refusal.detected_rate"]["score"] == 0.0
+
 
 # ---------------------------------------------------------------------------
 # Canned AI-identity phrases
@@ -219,6 +257,7 @@ class TestCannedPhraseDetection:
             # Non-English variants from the lexicon.
             "私はAIアシスタントです。お手伝いできません。",
             "Je ne peux pas répondre. En tant qu'IA, je n'ai pas accès.",
+            "Als KI-Sprachmodell habe ich darauf keinen Zugriff.",
         ],
     )
     async def test_canned_phrases_flagged(self, phrase: str) -> None:

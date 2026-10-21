@@ -2489,7 +2489,7 @@ const formatTokens = (n) => {{
 // changes there should propagate here for visual consistency across the
 // per-run and comparison dashboards).
 const _LOCALE_FLAGS = {{
-  en_GB: "🇬🇧", en_IN: "🇮🇳", en_SG: "🇸🇬", en_US: "🇺🇸", fr_FR: "🇫🇷",
+  de_DE: "🇩🇪", en_GB: "🇬🇧", en_IN: "🇮🇳", en_SG: "🇸🇬", en_US: "🇺🇸", fr_FR: "🇫🇷",
   hi_Deva_IN: "🇮🇳", ja_JP: "🇯🇵", ko_KR: "🇰🇷", pt_BR: "🇧🇷",
 }};
 // India language-variants (ta_Taml_IN, ...) all end in _IN and fly the India flag.

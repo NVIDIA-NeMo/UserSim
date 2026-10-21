@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from usersim.reporting.capability_report import (
+    _build_persona_summary,
     _capability_from_definition,
     build_capability_report,
     render_capability_report_html,
@@ -1408,3 +1409,10 @@ def test_dashboard_labels_a_scored_but_unmeasured_cell(trajectory_df, tmp_path):
     assert "not measured" in html.lower()
     # And the heatmap warns that language is scored on its own.
     assert "Language is scored separately" in html
+
+
+def test_the_persona_summary_counts_german_sex_labels():
+    import pandas as pd
+
+    df = pd.DataFrame({"persona_sex": ["Männlich", "Weiblich", "Weiblich", None]})
+    assert _build_persona_summary(df)["sex_ratio"] == "1:2"

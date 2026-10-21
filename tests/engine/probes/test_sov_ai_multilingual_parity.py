@@ -474,8 +474,8 @@ class TestPrompts:
         assert isinstance(text, str) and len(text) > 100
 
     def test_unknown_locale_raises(self) -> None:
-        with pytest.raises(prompts.PromptsUnavailableError, match="de_DE"):
-            prompts.get_system_prompt("de_DE")
+        with pytest.raises(prompts.PromptsUnavailableError, match="it_IT"):
+            prompts.get_system_prompt("it_IT")
 
     def test_no_half_shipped_locales(self) -> None:
         # Both registries must have the same key set — a locale with a
@@ -668,8 +668,8 @@ class TestSimulateSovAiMultilingualParity:
                 data={},
                 persona=br_persona_southeast,
                 profile={},
-                locale="de_DE",  # not in shipped sample bank
-                language="German",
+                locale="it_IT",  # not in shipped sample bank
+                language="Italian",
                 cfg=simulator_cfg,
                 provenance=Provenance(),
             )
@@ -677,7 +677,7 @@ class TestSimulateSovAiMultilingualParity:
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] == OutcomeStatus.FAILED.value
         assert outcome["failure_class"] == FailureClass.SCENARIO_ABORTED.value
-        assert "de_DE" in outcome["failure_detail"]
+        assert "it_IT" in outcome["failure_detail"]
 
     async def test_no_matching_query_returns_structured_failure(
         self,

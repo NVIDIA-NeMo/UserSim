@@ -64,6 +64,7 @@ class TestExpectedLanguage:
             ("en_GB", "ENGLISH"),
             ("pt_BR", "PORTUGUESE"),
             ("fr_FR", "FRENCH"),
+            ("de_DE", "GERMAN"),
             ("ja_JP", "JAPANESE"),
             ("hi_Deva_IN", "HINDI"),
             ("hi_Latn_IN", None),
@@ -84,6 +85,7 @@ class TestExpectedLanguage:
         assert expected_language_display("ko_KR") == "Korean"
         assert expected_language_display("en_SG") == "English"
         assert expected_language_display("en_GB") == "English"
+        assert expected_language_display("de_DE") == "German"
 
     def test_lingua_language_names_resolve(self) -> None:
         """Every name we declare must be a real lingua Language enum."""
@@ -111,6 +113,7 @@ class TestPersonaDatasetLocale:
             ("en_GB", "en_GB"),
             ("pt_BR", "pt_BR"),
             ("fr_FR", "fr_FR"),
+            ("de_DE", "de_DE"),
             ("ja_JP", "ja_JP"),
             ("ko_KR", "ko_KR"),
             # Hindi is NOT an India language-variant: Nemotron-Personas-India
@@ -138,7 +141,7 @@ class TestPersonaDatasetLocale:
 
 class TestExpectedScript:
     def test_latin_locales_get_latin_ranges(self) -> None:
-        for locale in ("en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "hi_Latn_IN"):
+        for locale in ("en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"):
             assert expected_script_ranges(locale) == LATIN_RANGES
 
     def test_japanese_includes_three_scripts(self) -> None:
@@ -180,9 +183,11 @@ class TestSampleCodepoints:
         "char, expected_locales",
         [
             # Latin (hi_Latn_IN is romanized Hindi -> Latin ranges)
-            ("a", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "hi_Latn_IN"]),
-            ("Z", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "hi_Latn_IN"]),
-            ("é", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "hi_Latn_IN"]),
+            ("a", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"]),
+            ("Z", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"]),
+            ("é", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"]),
+            ("ß", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"]),
+            ("ü", ["en_US", "en_IN", "en_SG", "en_GB", "pt_BR", "fr_FR", "de_DE", "hi_Latn_IN"]),
             # Devanagari
             ("क", ["hi_Deva_IN"]),
             ("ष", ["hi_Deva_IN"]),

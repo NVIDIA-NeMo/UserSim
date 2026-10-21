@@ -433,11 +433,12 @@ def _model_failure_result(
 # the user-judge gate downstream catches the residue.
 #
 # Substring matching on lowercased text works for every shipped script:
-# Latin scripts (English / French / Portuguese) need lowercasing for case
-# robustness; Japanese (hiragana / katakana / kanji) and Hindi (Devanagari)
-# have no case so `.lower()` is a no-op for the script-native phrases. We
-# include both English-meta-talk phrases and the 4 non-English locales
-# (ja_JP / hi_Deva_IN / fr_FR / pt_BR) the framework currently ships.
+# Latin scripts (English / French / German / Portuguese) need lowercasing for
+# case robustness; Japanese (hiragana / katakana / kanji), Hindi (Devanagari)
+# and Korean (Hangul) have no case so `.lower()` is a no-op for the
+# script-native phrases. The set covers English meta-talk and every shipped
+# non-English language. A phrase must not be the start of an ordinary word:
+# German "als ki " keeps its trailing space so "als Kind" never matches.
 
 _FOURTH_WALL_PHRASES = (
     # ── English (en_US / en_IN / en_SG / en_GB) ─────────────────────
@@ -458,6 +459,21 @@ _FOURTH_WALL_PHRASES = (
     "démarrer la conversation",
     "premier message",
     "ouvrir la conversation",
+    # ── German (de_DE) ──────────────────────────────────────────────
+    "als ki ",
+    "als ki,",
+    "als ki-assistent",
+    "als ki-modell",
+    "als ki-sprachmodell",
+    "als sprachmodell",
+    "als künstliche intelligenz",
+    "ich bin eine ki ",
+    "in dieser simulation",
+    "das gespräch beginnen",
+    "das gespräch starten",
+    "die unterhaltung beginnen",
+    "erste nachricht",
+    "eröffnungsnachricht",
     # ── Portuguese (pt_BR) ──────────────────────────────────────────
     "como uma ia",
     "como ia",
@@ -520,11 +536,11 @@ _ASSISTANT_REFUSAL_ECHO_PHRASES = (
 def _is_fourth_wall_break(text: str, allowed: frozenset[str] = frozenset()) -> bool:
     """Deterministic check for common fourth-wall patterns in user messages.
 
-    Substring match against the (English + 4-locale) phrase set in
+    Substring match against the multi-language phrase set in
     ``_FOURTH_WALL_PHRASES``, less the probe's ``allowed`` phrases.
-    Lowercases the input first; `.lower()` is a no-op for Japanese /
-    Devanagari scripts that have no case, so the same matching path
-    works across all five shipped languages.
+    Lowercases the input first; `.lower()` is a no-op for the scripts
+    that have no case, so the same matching path works for every
+    shipped language.
     """
     lower = text.lower()
     return any(phrase in lower for phrase in _FOURTH_WALL_PHRASES if phrase not in allowed)

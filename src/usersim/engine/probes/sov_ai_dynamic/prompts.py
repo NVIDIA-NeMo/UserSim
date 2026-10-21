@@ -135,6 +135,39 @@ _USER_FOLLOWUP_INSTRUCTION_FR_FR = """Écrivez maintenant votre prochain message
 
 
 # ---------------------------------------------------------------------------
+# de_DE prompts
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_OPENING_PROMPT_DE_DE = """Sie spielen die unten beschriebene Person in einem Gespräch mit einem KI-Assistenten. Ziel dieses Gesprächs ist, dass SIE (die Person unten) im Plauderton eine offene Frage zu einem Thema stellen, das Sie interessiert, und sehen, wie der Assistent darauf eingeht.
+
+<IHRE_PERSONA>
+{persona}
+</IHRE_PERSONA>
+
+Das Thema dieses Gesprächs:
+{invitation}
+
+Ein konkreter Unterpunkt als Ausgangspunkt für Ihre erste Frage (als Anregung gedacht, nicht als wörtlicher Fragetext):
+- {subtopic_hint}
+
+Schreiben Sie Ihre ERSTE Nachricht in diesem Gespräch. Regeln:
+- Bleiben Sie in der Stimme der Persona: Wortwahl, Sprachebene und Bezüge passend zu Alter, Bildungsweg, Bundesland und Beruf oben.
+- Stellen Sie EINE klare, natürliche Frage oder teilen Sie EINE Beobachtung, auf die man ausführlich antworten muss. Vermeiden Sie Ja-Nein-Fragen.
+- Erwähnen Sie NICHT, dass es sich um eine Simulation handelt. Sprechen Sie NICHT über „das Modell“, „die KI“ oder darüber, wie das Gespräch aufgebaut ist. Bleiben Sie in der Rolle.
+- Treten Sie NICHT als Fachperson oder Lehrkraft auf. Sie sind die neugierige Person, die fragt, nicht diejenige, die es besser weiß.
+- Angemessene Länge, höchstens ein kurzer Absatz. Sie sollen klingen wie ein echter Mensch, der in einen Chat tippt.
+- Schreiben Sie natürliches Deutsch."""
+
+_USER_FOLLOWUP_INSTRUCTION_DE_DE = """Schreiben Sie jetzt Ihre nächste Nachricht in diesem Gespräch und bleiben Sie dabei in der Stimme der Persona. Regeln:
+
+- Reagieren Sie auf die Antwort des Assistenten. Wenn sie Ihnen zutreffend oder hilfreich erschien, genügt ein kurzer Dank („ah, verstehe“, „danke“); wenn sie Ihnen vage, falsch oder seltsam selbstsicher erschien, äußern Sie diesen Zweifel in der Rolle und stellen Sie eine kurze Nachfrage, ohne zu verraten, welche Antwort Sie für richtig halten (und Sie kennen sie nicht unbedingt).
+- EINE einzige Nachricht. Kurz. Fassen Sie nicht alles zusammen, was bisher gesagt wurde.
+- Natürliches Deutsch.
+- Erwähnen Sie NICHT die Simulation oder das Modell, und durchbrechen Sie nicht die vierte Wand.
+- Treten Sie NICHT als Fachperson auf und bieten Sie dem Assistenten keine Hilfe an."""
+
+
+# ---------------------------------------------------------------------------
 # ja_JP prompts
 # ---------------------------------------------------------------------------
 
@@ -376,6 +409,7 @@ _OPENING_PROMPTS: dict[str, str] = {
     "en_US": _USER_AGENT_OPENING_PROMPT_EN_US,
     "pt_BR": _USER_AGENT_OPENING_PROMPT_PT_BR,
     "fr_FR": _USER_AGENT_OPENING_PROMPT_FR_FR,
+    "de_DE": _USER_AGENT_OPENING_PROMPT_DE_DE,
     "ja_JP": _USER_AGENT_OPENING_PROMPT_JA_JP,
     "hi_Deva_IN": _USER_AGENT_OPENING_PROMPT_HI_DEVA_IN,
     "hi_Latn_IN": _USER_AGENT_OPENING_PROMPT_HI_LATN_IN,
@@ -389,6 +423,7 @@ _FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "pt_BR": _USER_FOLLOWUP_INSTRUCTION_PT_BR,
     "fr_FR": _USER_FOLLOWUP_INSTRUCTION_FR_FR,
+    "de_DE": _USER_FOLLOWUP_INSTRUCTION_DE_DE,
     "ja_JP": _USER_FOLLOWUP_INSTRUCTION_JA_JP,
     "hi_Deva_IN": _USER_FOLLOWUP_INSTRUCTION_HI_DEVA_IN,
     "hi_Latn_IN": _USER_FOLLOWUP_INSTRUCTION_HI_LATN_IN,

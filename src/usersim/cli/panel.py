@@ -43,7 +43,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         action="append",
         required=True,
         help=(
-            "Locale to sample from (repeatable). Examples: en_US, pt_BR, ja_JP, fr_FR, hi_Deva_IN, en_IN, en_SG, en_GB, ko_KR."
+            "Locale to sample from (repeatable). Examples: en_US, pt_BR, ja_JP, fr_FR, de_DE, hi_Deva_IN, en_IN, en_SG, en_GB, ko_KR."
         ),
     )
     p.add_argument(
