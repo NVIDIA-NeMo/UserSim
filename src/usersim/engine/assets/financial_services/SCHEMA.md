@@ -19,8 +19,10 @@ stable when a brand is renamed and multiple brands can share a vertical. The loa
 discovers institutions by finding each `institution_meta.yaml` (layout-agnostic).
 
 All files share `schema_version: v0.1`. All AI-authored beta content carries
-`placeholder: true`; any trajectory that touches a placeholder document or
-template emits `WarningKind.USED_PLACEHOLDER_FINANCE` (scorecards stay preview-only).
+`placeholder: true`. A trajectory built on a placeholder task template (verifiable
+tier), or on a placeholder institution or taxonomy (dynamic tier), records
+`WarningKind.USED_PLACEHOLDER_FINANCE`, and subject-matter expert (SME)
+verification is recommended before relying on its results.
 
 Every document / tool / template is scoped to its institution (`institution_id`
 comes from `institution_meta.yaml`; the leaf directory is named for it) and carries a

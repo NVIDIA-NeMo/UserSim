@@ -118,60 +118,49 @@ class WarningKind(str, Enum):
     COMPRESSION_FALLBACK = "compression_fallback"
     POOR_ASSISTANT_RESPONSE = "poor_assistant_response"
     # Flagged when a trajectory probed a fact that was marked
-    # ``placeholder: true`` in its bank. Downstream scorecards refuse to
-    # render a "ready for sovereign-AI claim" headline whenever any
-    # trajectory carries this warning.
+    # ``placeholder: true`` in its bank. Like every ``USED_PLACEHOLDER_*``
+    # kind below, it is recorded on the outcome so a reader can tell which
+    # findings rest on placeholder content.
     USED_PLACEHOLDER_FACT = "used_placeholder_fact"
     # Flagged when a trajectory probed against a sov_ai_dynamic
     # taxonomy that was marked ``placeholder: true`` at the file level.
-    # Same epistemic discipline as ``USED_PLACEHOLDER_FACT`` but for the
-    # `sov_ai_dynamic` probe, where the gate is at taxonomy
-    # granularity (the invitation + sub-topic hints share one reviewer
-    # audit, not per-hint).
+    # The flag is per taxonomy rather than per category, because the
+    # invitations and sub-topic hints share one reviewer audit.
     USED_PLACEHOLDER_TAXONOMY = "used_placeholder_taxonomy"
     # Flagged when a trajectory probed against a query that was marked
-    # ``placeholder: true`` in its query bank. Same epistemic discipline
-    # as ``USED_PLACEHOLDER_FACT`` and ``USED_PLACEHOLDER_TAXONOMY``, but
-    # for the cross-locale ``sov_ai_multilingual_parity`` probe. The
-    # gate is at single-query granularity (each entry holds N locale
-    # renderings, all sharing one reviewer audit).
+    # ``placeholder: true`` in its query bank, for the cross-locale
+    # ``sov_ai_multilingual_parity`` probe. The flag is per query, because
+    # an entry's N locale renderings share one reviewer audit.
     USED_PLACEHOLDER_QUERY = "used_placeholder_query"
     # Flagged when a safety_chat_pressure trajectory probed against a
     # target_request marked ``placeholder: true`` in its
-    # pressure-strategy bank. Downstream readers (capability dashboard,
-    # scorers) treat placeholder-tainted safety trajectories as
-    # preview-only — same epistemic discipline as the sovereign-AI
-    # placeholder warnings.
+    # pressure-strategy bank.
     USED_PLACEHOLDER_TARGET = "used_placeholder_target"
     # Flagged when a safety_agentic trajectory probed against an
     # action_request marked ``placeholder: true`` in its agentic-action
-    # bank. Downstream readers treat placeholder-tainted agentic-safety
-    # trajectories as preview-only.
+    # bank.
     USED_PLACEHOLDER_AGENTIC_ACTION = "used_placeholder_agentic_action"
     # Flagged when a financial_services trajectory ran against a task
-    # template or document corpus marked ``placeholder: true`` (AI-authored
-    # beta content). Downstream scorecards treat placeholder-tainted
-    # financial-services trajectories as preview-only — same epistemic
-    # discipline as the sovereign-AI / safety placeholder warnings.
+    # template (verifiable tier), or an institution or taxonomy (dynamic
+    # tier), marked ``placeholder: true`` (AI-authored beta content).
     USED_PLACEHOLDER_FINANCE = "used_placeholder_finance"
     # Flagged when a health_disclosure trajectory used a clinical profile
     # marked ``placeholder: true`` in its clinical-profile bank (the bundled
     # synthetic banks are all placeholders until a customer ships real ground
-    # truth). Same epistemic discipline: scorecards stay preview-only for any
-    # trajectory whose concealment ground truth was synthetic.
+    # truth).
     USED_PLACEHOLDER_CLINICAL_PROFILE = "used_placeholder_clinical_profile"
     # Flagged when an identity_disclosure trajectory drew on a spec, tactic
     # or strategy marked ``placeholder: true`` (phrasings, vocabulary and
-    # expected identities awaiting native review). Same epistemic discipline:
-    # scorecards stay preview-only for such trajectories.
+    # expected identities awaiting native review).
     USED_PLACEHOLDER_IDENTITY = "used_placeholder_identity"
     # Flagged when a trajectory's verbatim turn-1 was machine-translated
     # from an India base-locale (en_IN) bank into the conversation
-    # language because no native per-language bank exists yet (India
-    # language-variant stop-gap). Downstream scorecards treat these cells
-    # as preview-only, same discipline as the placeholder warnings above.
-    # Automatically stops appearing once a native asset lands (the probe
-    # resolves the variant's own asset -> no translation).
+    # language, because that language has no native bank of its own;
+    # financial_services also flags it when kb_search queries are
+    # translated to search the base-locale corpus. Recorded on the outcome
+    # so a reader can tell which findings rest on machine-translated
+    # content. A locale with its own native asset never translates, so its
+    # rows never carry this warning.
     USED_MACHINE_TRANSLATION = "used_machine_translation"
 
 

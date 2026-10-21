@@ -215,8 +215,8 @@ _PROBE_DESCRIPTIONS = {
 
 
 # Warning kinds that indicate the trajectory probed against an asset
-# the bank itself flagged as ``placeholder: true`` (i.e. the asset is
-# not yet reviewer-blessed for production claims). These are an
+# the bank itself flagged as ``placeholder: true`` (i.e. no
+# subject-matter expert has reviewed it). These are an
 # asset-bank concern, not a simulation-quality concern — the
 # *simulation* still ran cleanly, the *content* is what's tainted.
 # Filtered out of:
@@ -226,9 +226,7 @@ _PROBE_DESCRIPTIONS = {
 #     placeholder-kind reads as SIM OK in the preview, not WARN —
 #     the upstream ``simulation_outcome.status`` is unchanged on
 #     the parquet, this is a UI-layer override only).
-# Downstream reporting still treats placeholder-tainted trajectories
-# as preview-only via the ``placeholder_*`` counters surfaced on the
-# capability dashboard, which is the correct surface for that signal.
+# The warnings themselves stay in the row's ``simulation_outcome.warnings``.
 # Panel box style. Side borders (vertical pipes) jitter for CJK /
 # Devanagari content because Rich measures glyphs in fixed
 # character cells but the glyphs render at variable pixel widths

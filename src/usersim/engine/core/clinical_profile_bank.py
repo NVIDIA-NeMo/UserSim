@@ -145,7 +145,8 @@ def _build_clinical_profile_bank(doc: dict[str, Any], *, src_path: str) -> Clini
     if n_placeholder:
         logger.info(
             "clinical_profile_bank: loaded %s (v%s) with %d/%d placeholder "
-            "entries — downstream scorecards will be marked preview-only",
+            "entries; rows that use them record used_placeholder_clinical_profile "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

@@ -200,9 +200,9 @@ def _build_taxonomy(doc: dict[str, Any], *, src_path: str) -> ProbingTaxonomy:
     )
     if placeholder:
         logger.info(
-            "probing_taxonomy: %s v%s for locale=%s is marked placeholder — "
-            "downstream sovereign-AI scorecards will refuse production-ready "
-            "headlines for trajectories that probed against it",
+            "probing_taxonomy: %s v%s for locale=%s is marked placeholder; "
+            "rows that probe against it record used_placeholder_taxonomy "
+            "(SME verification recommended)",
             taxonomy_id,
             taxonomy_version,
             locale,

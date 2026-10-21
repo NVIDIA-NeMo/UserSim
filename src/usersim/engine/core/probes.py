@@ -764,9 +764,9 @@ class BankBackedProbe(BaseProbe):
         ``rules`` are extra instructions for the translator. ``warn=False``
         skips the warning, for a second translation of a turn already flagged.
 
-        Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder
-        so downstream scorecards treat the row as preview-only. Never raises
-        (the translation helper falls back to the input text on failure).
+        Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder,
+        so the row records that its opening turn was machine-translated. Never
+        raises (the translation helper falls back to the input text on failure).
         """
         if not text or self._asset_locale == self._locale:
             return text
@@ -791,8 +791,8 @@ class BankBackedProbe(BaseProbe):
                 detail=(
                     f"turn-1 machine-translated from asset_locale="
                     f"{self._asset_locale} into {language} for conversation "
-                    f"locale={self._locale}; downstream scorecard preview-only "
-                    "until a native bank lands"
+                    f"locale={self._locale}; native-speaker verification "
+                    "recommended"
                 ),
             )
         return translated

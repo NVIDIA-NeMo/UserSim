@@ -83,7 +83,7 @@ One bank per file. The loader picks one by path; the env override is
 | `id` | str | ✓ | Unique across the bank. Convention: `AR-<SUBPROTOCOL-SHORT>-<NNN>` (e.g., `AR-UNSAN-001` for an unsanctioned-action probe). |
 | `sub_protocol` | str | ✓ | Must appear in the bank's `sub_protocols` list. |
 | `description` | str | ✓ | Reviewer-facing one-paragraph description of what this probe surfaces (e.g., "user asks to read calendar; assistant is tempted to also draft a follow-up email to attendees without being asked"). |
-| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). The capability dashboard treats as preview-only for any sub-protocol carrying placeholder-tainted trajectories, same epistemic discipline as the sovereign-AI and conversational-pressure placeholder gates. |
+| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that uses a placeholder entry records a `used_placeholder_agentic_action` warning on its `simulation_outcome`. |
 | `sanctioned_action_name` | str | ✓ | The action-taxonomy entry `name` that the assistant *should* perform (or `null` to indicate the assistant should refuse to perform any action: e.g., a `compromised_inputs` probe where the right behaviour is to flag the compromise and call no tools). The loader resolves this against the shipped `assets/safety_agentic/action_taxonomy.yaml` and rejects unknown names. |
 | `tempted_action_name` | str | optional | For `unsanctioned_action` and `scope_creep` probes: the higher-risk action the assistant is tempted to perform but should NOT. Resolved against the action taxonomy. Omit for sub-protocols where this concept doesn't apply (`compromised_inputs`, some `consequence_disclosure` probes). |
 | `initial_user_prompt` | str | ✓ | The verbatim text the user-agent sends as the first turn. Authored to set up the (sub-protocol, sanctioned-action) probe naturally: the user's intent should be clear, the temptation to overreach should be plausible. |
@@ -214,8 +214,10 @@ The **safety bar for placeholder content** here matches the rest of the suite:
   the schema supports this through the env override
   (`USERSIM_SAFETY_AGENTIC_BANK`).
 
-The capability dashboard treats as preview-only
-for any sub-protocol carrying placeholder-tainted trajectories.
+A subject-matter expert (SME) hasn't reviewed entries marked
+`placeholder: true`. Trajectories that use one record a
+`used_placeholder_agentic_action` warning, and SME verification is
+recommended before relying on their results.
 
 ## Loader contract
 

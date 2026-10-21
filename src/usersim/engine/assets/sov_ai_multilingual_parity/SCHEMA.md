@@ -58,7 +58,7 @@ safety-sensitive bank) can coexist; the loader picks one by path.
 |---|---|---|---|
 | `id` | str | ✓ | Unique across the bank. Convention: `Q-<DOMAIN-SHORT>-<NNN>` (e.g., `Q-MEDS-001`, `Q-TAX-002`, `Q-VOTE-001`). The id is **locale-independent** and joins all renderings of the same query. |
 | `domain` | str | ✓ | Must appear in the bank's `domains` list. Used for stratified reporting. |
-| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). The reporting layer surfaces the fraction of probed queries that were placeholder; the scorer flags placeholder-only scorecards as preview-only. Reviewers set this to `false` once the entry passes review. |
+| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that uses a placeholder query records a `used_placeholder_query` warning on its `simulation_outcome`. Reviewers set this to `false` once the entry passes review. |
 | `difficulty` | str | ✓ | One of `easy`, `medium`, `hard`. Refers to the **conceptual difficulty of the question**, not the language difficulty (which varies by locale and reviewer). Used for stratified scoring. |
 | `persona_tags` | list[str] | ✓ (≥1) | Tags used by the probe to match queries to personas. Follow the structured form below. At least one tag required so every query is reachable via persona-targeted selection. |
 | `concern` | str | ✓ | A reviewer-facing prose description of *what failure mode this query is designed to surface*. Examples: "tests whether the model gives the same level of clinical detail to a low-education user as to a high-education user asking the same medication question"; "tests whether the model invents an English-language US-centric process when asked in Hindi about Indian voter registration". The concern is what makes the query useful: it tells the reviewer what they should look for in the response. Required and non-empty for every entry. |
@@ -97,13 +97,11 @@ provenance:
 
 ## Placeholder discipline
 
-Every entry in a bank shipped with `placeholder: true` is a stub.
-Reviewers must replace placeholder content with locally-vetted
-queries before any production claim is made off the resulting
-scorecard. The capability dashboard treats as preview-only
-production-ready claims for any locale that probed against
-placeholder queries, same epistemic discipline as fact-bank
-placeholders and probing-taxonomy placeholders.
+Every entry in a bank shipped with `placeholder: true` is a stub that
+a subject-matter expert (SME) hasn't reviewed. SME verification is
+recommended before relying on results that rest on placeholder
+queries. Trajectories that used one carry a `used_placeholder_query`
+warning, so those results are easy to find.
 
 The placeholder-flagged shipped queries serve three concrete purposes:
 

@@ -603,7 +603,8 @@ def load_finance_bank(locale_dir: str | Path) -> FinanceBank:
     if n_ph:
         logger.info(
             "finance_bank: loaded %s v%s (%d institutions, %d docs, "
-            "%d placeholder) — downstream scorecards preview-only",
+            "%d placeholder); rows built on placeholder content record "
+            "used_placeholder_finance (SME verification recommended)",
             bank_id,
             bank_version,
             len(institutions),
