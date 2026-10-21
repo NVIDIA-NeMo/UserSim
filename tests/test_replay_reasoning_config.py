@@ -12,6 +12,7 @@ one that does not, while ids without replay stay what they were.
 
 from __future__ import annotations
 
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -137,12 +138,17 @@ def test_simulate_refuses_replay_without_stored_reasoning_before_running(tmp_pat
 
     from usersim import cli
 
-    models = tmp_path / "models.toml"
-    models.write_text(
-        Path(default_models_path())
-        .read_text()
-        .replace('alias = "assistant_model",', 'alias = "assistant_model", replay_reasoning = true,', 1)
+    # Only an active entry: a local models file may list commented-out alternatives first.
+    text, edits = re.subn(
+        r'^(\s*\{\s*alias = "assistant_model",)',
+        r"\1 replay_reasoning = true,",
+        Path(default_models_path()).read_text(),
+        count=1,
+        flags=re.MULTILINE,
     )
+    assert edits == 1, "no active assistant_model entry to switch replay_reasoning on"
+    models = tmp_path / "models.toml"
+    models.write_text(text)
     argv = ["simulate", "--locale", "en_US", "--num-rows", "1", "--out", str(tmp_path / "o"), "--models", str(models)]
 
     with caplog.at_level(logging.ERROR):
@@ -253,9 +259,11 @@ def test_without_providers_of_its_own_the_check_reads_the_ones_data_designer_loa
     """A models file that declares no provider runs on Data Designer's own, so their type decides."""
     from data_designer.config.models import ModelProvider
 
-    claude = ModelProvider(name="nvidia", endpoint="https://example.invalid", provider_type="anthropic", api_key="K")
-    monkeypatch.setattr("data_designer.config.default_model_settings.get_default_providers", lambda: [claude])
     config = replace(_models(**_REPLAY), providers=())
+    claude = ModelProvider(
+        name=_assistant(config).provider, endpoint="https://example.invalid", provider_type="anthropic", api_key="K"
+    )
+    monkeypatch.setattr("data_designer.config.default_model_settings.get_default_providers", lambda: [claude])
 
     with pytest.raises(ConfigError, match="OpenAI-compatible"):
         assistant_replays_reasoning(config, store_reasoning=True)
