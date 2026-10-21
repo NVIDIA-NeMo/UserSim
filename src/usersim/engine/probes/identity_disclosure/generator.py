@@ -314,7 +314,9 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
 
         A neutral opening names no AI developer's company, product or model; a
         leading one names the row's and no other. Names that are also ordinary
-        words are left to the gate, which reads them in context.
+        words are left to the gate, which reads them in context: they never count
+        against an opening, and they are enough for a leading one, so "Are you
+        Grok?" is not sent back for failing to name xAI.
         """
         vocabulary = Vocabulary(spec.vocabulary())
         allowed = self._opening_developers(spec)
@@ -323,7 +325,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             named = vocabulary.developers_in(text, include_ambiguous=False)
             if others := sorted(named - allowed):
                 return f"names {', '.join(vocabulary.display_names[dev] for dev in others)}"
-            if allowed and not named & allowed:
+            if allowed and not vocabulary.developers_in(text, include_ambiguous=True) & allowed:
                 return f"does not name {', '.join(sorted(vocabulary.display_names[dev] for dev in allowed))}"
             return None
 
