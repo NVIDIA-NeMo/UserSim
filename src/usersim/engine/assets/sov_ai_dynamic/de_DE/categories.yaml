@@ -1,0 +1,116 @@
+schema_version: v0.1
+locale: de_DE
+taxonomy_id: de_DE_sov_ai_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+categories:
+- id: germany-geography
+  invitation: Sie möchten in Ihren eigenen Worten etwas über die Geografie Deutschlands fragen. Es kann um Ihre Gegend gehen, Ihren Arbeitsweg, das Wetter, eine Wanderung oder einen Ausflug innerhalb Deutschlands.
+  subtopic_hints:
+  - die 16 Länder, die drei Stadtstaaten und warum manche Landesgrenzen mitten durch Ballungsräume verlaufen
+  - Gebirge und Höhenzüge von der Zugspitze über den Harz bis zum Feldberg im Schwarzwald
+  - Flüsse und Hochwasser an Rhein, Elbe, Donau und Oder, und was Deiche und Polder leisten
+  - Nord- und Ostsee, das Wattenmeer, die Halligen und die Inseln von Sylt bis Rügen
+  - Nationalparks, Biosphärenreservate und was man dort darf und was nicht
+  - Landkreise, kreisfreie Städte und Gemeinden, und warum die Postleitzahl nicht immer zur Gemeinde passt
+  - das Wetter, Föhn, Starkregen und Hitzesommer, und woher der Deutsche Wetterdienst seine Warnungen nimmt
+  - was man tut, wenn Navi, Straßenschild und die Auskunft von Einheimischen sich widersprechen
+- id: germany-history
+  invitation: Sie möchten in Ihren eigenen Worten etwas zur deutschen Geschichte fragen. Bringen Sie etwas aus der Schulzeit ein, ein Museum oder eine Gedenkstätte, die Sie besucht haben, eine Familiengeschichte oder einen Stolperstein vor Ihrer Haustür.
+  subtopic_hints:
+  - die Reichsgründung 1871, die Weimarer Republik und warum die erste deutsche Demokratie scheiterte
+  - die Zeit des Nationalsozialismus, der Holocaust und wie Gedenkstätten heute daran erinnern
+  - die Teilung, der Bau der Mauer 1961 und der Alltag in der DDR
+  - die Friedliche Revolution 1989, der Mauerfall und die Wiedervereinigung am 3. Oktober 1990
+  - das Grundgesetz von 1949 und warum es ursprünglich als Provisorium gedacht war
+  - das Wirtschaftswunder, die Anwerbung von Gastarbeitern und wie beides die Bundesrepublik geprägt hat
+  - die Römer am Limes, die Hanse, die Reformation und was davon bis heute zu sehen ist
+  - was man tut, wenn eine Familiengeschichte etwas anderes erzählt als die Geschichtsbücher
+- id: germany-culture
+  invitation: 'Sie möchten in Ihren eigenen Worten etwas über die Kultur in Deutschland fragen. Essen, Sport, Feste, Fernsehen oder die Art, wie man bei Ihnen spricht: Greifen Sie etwas auf, das Ihnen im Alltag auffällt.'
+  subtopic_hints:
+  - Dialekte und regionale Ausdrücke, und warum ein Brötchen je nach Gegend Semmel, Schrippe oder Weck heißt
+  - Feiertage, die nur in manchen Ländern gelten, wie Fronleichnam, der Reformationstag oder der Frauentag in Berlin
+  - Karneval, Fasching und Fastnacht, Volksfeste wie das Oktoberfest und die Weihnachtsmärkte
+  - Vereinsleben, vom Sportverein über den Schützenverein bis zur Freiwilligen Feuerwehr
+  - Fußball, die Bundesliga und regionale Rivalitäten
+  - regionale Küche, von Labskaus über Maultaschen bis zur Thüringer Rostbratwurst
+  - Mülltrennung, Pfandsystem und Ruhezeiten, und warum der Sonntag meist ein Ruhetag ist
+  - 'nationale Minderheiten und ihre Sprachen: Sorben, Dänen, Friesen sowie Sinti und Roma'
+- id: germany-poetry-and-music
+  invitation: Sie möchten in Ihren eigenen Worten etwas über Gedichte, Lieder und Musik aus Deutschland fragen. Vielleicht ein Gedicht aus der Schulzeit, ein Volkslied, einen Schlager, den Ihre Eltern hörten, oder einen Song, der Sie an einen bestimmten Moment erinnert.
+  subtopic_hints:
+  - Gedichte, die man in der Schule auswendig lernte, etwa von Goethe, Schiller, Heine oder Eichendorff
+  - Volks- und Kinderlieder und woher sie stammen
+  - die Nationalhymne, ihre Geschichte und warum nur die dritte Strophe gesungen wird
+  - Bach, Beethoven, Brahms und Wagner, und welche Orte man mit ihnen verbindet
+  - Schlager, Liedermacher und die Rockmusik der DDR
+  - Krautrock, die Neue Deutsche Welle und deutscher Hip-Hop
+  - Kirchen- und Weihnachtslieder wie „O du fröhliche“ und wo sie gesungen werden
+  - wie man ein Lied wiederfindet, von dem man nur noch eine Zeile im Kopf hat
+- id: germany-public-services
+  invitation: Sie möchten in Ihren eigenen Worten etwas zu Behörden und öffentlichen Diensten in Deutschland fragen. Etwa einen Behördengang, einen Antrag, den Nahverkehr oder etwas, das bei Ihnen vor Ort nicht so läuft, wie es sollte.
+  subtopic_hints:
+  - die Anmeldung beim Bürgeramt nach einem Umzug und welche Frist dafür gilt
+  - Personalausweis, Reisepass und Führerschein beantragen oder verlängern
+  - das Deutschlandticket und wie der Nahverkehr in Verkehrsverbünden organisiert ist
+  - Mülltonnen, Sperrmüll und Wertstoffhöfe, und wer das in Ihrer Gemeinde regelt
+  - der Rundfunkbeitrag, wer ihn zahlen muss und wer sich befreien lassen kann
+  - Polizei, Ordnungsamt und Feuerwehr, und welche Nummer man wann wählt
+  - Wahlen im Bund, im Land und in der Gemeinde, und wie die Briefwahl funktioniert
+  - was man tut, wenn ein Amt einen Bescheid schickt, den man für falsch hält
+- id: germany-health-systems
+  invitation: Sie möchten in Ihren eigenen Worten etwas zum Gesundheitswesen in Deutschland fragen. Vielleicht einen Arzttermin, Ihre Krankenkasse, ein Rezept oder eine Erfahrung im Krankenhaus.
+  subtopic_hints:
+  - gesetzliche und private Krankenversicherung, und wer sich wie versichern kann
+  - die elektronische Gesundheitskarte, das E-Rezept und die elektronische Patientenakte
+  - einen Facharzttermin bekommen, die Terminservicestellen und die Nummer 116 117
+  - die Notaufnahme, den ärztlichen Bereitschaftsdienst und den Notruf 112
+  - Zuzahlungen in der Apotheke und wann man davon befreit werden kann
+  - die Krankmeldung, die elektronische Arbeitsunfähigkeitsbescheinigung und was der Arbeitgeber davon erfährt
+  - Pflegegrade, die Pflegeversicherung und was sie bezahlt
+  - was man tut, wenn die Krankenkasse eine Leistung ablehnt
+- id: germany-education
+  invitation: Sie möchten in Ihren eigenen Worten etwas zum Bildungssystem in Deutschland fragen. Etwa Kita, Schule, Ausbildung, Studium oder Weiterbildung, aus eigener Erfahrung oder aus der Ihrer Kinder.
+  subtopic_hints:
+  - warum Schulformen, Ferien und Abiturregeln von Land zu Land verschieden sind
+  - Grundschule, Gymnasium, Realschule, Gesamtschule und der Wechsel nach der vierten Klasse
+  - G8 oder G9, und nach wie vielen Jahren man das Abitur macht
+  - die duale Ausbildung, die Berufsschule und die Prüfung vor der Kammer
+  - der Rechtsanspruch auf einen Kitaplatz und was die Kita kostet
+  - Semesterbeitrag, Studiengebühren und BAföG
+  - Meister, Techniker und berufliche Weiterbildung, und wie das Aufstiegs-BAföG hilft
+  - was man tut, wenn man mit einer Note oder einer Schulempfehlung nicht einverstanden ist
+- id: germany-labor-and-benefits
+  invitation: Sie möchten in Ihren eigenen Worten etwas zu Arbeit, Sozialleistungen und Rente in Deutschland fragen. Vielleicht Ihren Arbeitsvertrag, Urlaub, Elternzeit, Bürgergeld oder Ihre spätere Rente.
+  subtopic_hints:
+  - Mindestlohn, Minijob und Midijob, und was dabei mit Abgaben und Rentenansprüchen passiert
+  - Urlaubsanspruch, Krankheit im Urlaub und Überstunden
+  - Elterngeld, Elternzeit und Kindergeld
+  - Kündigungsschutz, Kündigungsfristen und das Arbeitszeugnis
+  - Arbeitslosengeld, Bürgergeld und die Rolle des Jobcenters
+  - die gesetzliche Rente, die jährliche Renteninformation und das Rentenalter
+  - Betriebsrat, Tarifverträge und Gewerkschaften
+  - was man tut, wenn der Arbeitgeber den Lohn zu spät oder nicht vollständig zahlt
+- id: germany-finance-and-consumer
+  invitation: Sie möchten in Ihren eigenen Worten etwas zu Geld, Verträgen und Verbraucherrechten in Deutschland fragen. Etwa Ihr Girokonto, die Steuererklärung, einen Handyvertrag, die Miete oder einen Kauf, der schiefgegangen ist.
+  subtopic_hints:
+  - die Steuererklärung, die Steuerklassen und was man absetzen kann
+  - Girokonto, Dispozinsen und die gesetzliche Einlagensicherung bis 100.000 Euro
+  - Widerrufsrecht, Gewährleistung und Garantie beim Online-Kauf
+  - die Kündigung von Handy-, Strom- und Fitnessstudioverträgen und die Regeln zur Laufzeit
+  - Mietrecht, Nebenkostenabrechnung, Kaution und Mietpreisbremse
+  - die Schufa, wie die Bonität bewertet wird und wie man eine kostenlose Selbstauskunft bekommt
+  - Kirchensteuer, Solidaritätszuschlag und warum die Gehaltsabrechnung so viele Abzüge zeigt
+  - was man tut, wenn eine Rechnung oder eine Inkassoforderung nicht stimmt
+- id: germany-digital-services
+  invitation: Sie möchten in Ihren eigenen Worten etwas zu digitalen Diensten in Deutschland fragen. Vielleicht Behördengänge im Internet, Datenschutz, Ihren Internetanschluss oder einen Betrugsversuch per SMS.
+  subtopic_hints:
+  - die Online-Ausweisfunktion des Personalausweises und das Nutzerkonto BundID
+  - welche Behördengänge schon online gehen und welche noch nicht
+  - Datenschutz nach der DSGVO und wie man Auskunft über die eigenen Daten verlangt
+  - Glasfaser, Funklöcher und was man tun kann, wenn das Internet langsamer ist als vereinbart
+  - Phishing per SMS, gefälschte Paketnachrichten und Betrug mit „Hallo Mama“-Nachrichten
+  - ELSTER und die elektronische Steuererklärung
+  - Cookie-Banner, Einwilligungen und das Recht, sie zu widerrufen
+  - was man tut, wenn ein Konto gehackt wurde oder Geld nach einer Online-Überweisung verschwunden ist

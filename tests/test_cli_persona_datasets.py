@@ -44,10 +44,11 @@ def test_india_language_variants_share_one_en_IN_download():
     assert report.count("--locale en_IN") == 1
 
 
-def test_a_locale_without_a_data_designer_dataset_lists_the_ones_with_one():
-    report = persona_dataset_report(["en_GB"])
+@pytest.mark.parametrize("locale", ["en_GB", "de_DE"])
+def test_a_locale_without_a_data_designer_dataset_lists_the_ones_with_one(locale):
+    report = persona_dataset_report([locale])
 
-    assert "  - en_GB: Data Designer provides no persona dataset for this locale" in report
+    assert f"  - {locale}: Data Designer provides no persona dataset for this locale" in report
     assert "download personas" not in report
     assert f"Data Designer provides persona datasets for: {', '.join(LOCALES_WITH_MANAGED_DATASETS)}." in report
 

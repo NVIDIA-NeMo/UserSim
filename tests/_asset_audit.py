@@ -39,6 +39,7 @@ SUPPORTED_LOCALES: tuple[str, ...] = (
     "en_GB",
     "pt_BR",
     "fr_FR",
+    "de_DE",
     "ja_JP",
     "hi_Deva_IN",
     "hi_Latn_IN",
@@ -75,6 +76,7 @@ _TEMPLATE_RES = [(name, re.compile(pat, re.IGNORECASE)) for name, pat in TEMPLAT
 
 
 BANK_PATHS: tuple[str, ...] = (
+    "assets/sov_ai_facts/de_DE/sample.yaml",
     "assets/sov_ai_facts/en_GB/sample.yaml",
     "assets/sov_ai_facts/en_IN/sample.yaml",
     "assets/sov_ai_facts/en_SG/sample.yaml",
@@ -89,6 +91,7 @@ BANK_PATHS: tuple[str, ...] = (
     "assets/safety_agentic/sample.yaml",
     "assets/safety_agentic/action_taxonomy.yaml",
     "assets/sov_ai_multilingual_parity/sample.yaml",
+    "assets/sov_ai_dynamic/de_DE/categories.yaml",
     "assets/sov_ai_dynamic/en_GB/categories.yaml",
     "assets/sov_ai_dynamic/en_IN/categories.yaml",
     "assets/sov_ai_dynamic/en_SG/categories.yaml",

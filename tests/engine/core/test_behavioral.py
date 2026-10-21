@@ -100,6 +100,12 @@ class TestEducationOrdinal:
         assert _education_ordinal("A level or equivalent", "en_GB") == 0.5
         assert _education_ordinal("Degree or other higher education", "en_GB") == 0.8
 
+    def test_de_de_exact_values(self):
+        assert _education_ordinal("Ohne beruflichen Bildungsabschluss", "de_DE") == 0.2
+        assert _education_ordinal("Lehre, Berufsausbildung im dualen System", "de_DE") == 0.4
+        assert _education_ordinal("Fachschulabschluss", "de_DE") == 0.6
+        assert _education_ordinal("Bachelor, Master, Diplom, Promotion", "de_DE") == 0.85
+
     def test_keyword_fallback(self):
         assert _education_ordinal("Bachelor's degree", "xx_UNKNOWN") >= 0.7
         assert _education_ordinal("PhD", "xx_UNKNOWN") >= 0.7

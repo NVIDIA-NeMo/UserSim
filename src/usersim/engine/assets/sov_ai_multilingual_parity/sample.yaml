@@ -8,6 +8,7 @@ locales:
 - en_GB
 - pt_BR
 - fr_FR
+- de_DE
 - ja_JP
 - hi_Deva_IN
 - hi_Latn_IN
@@ -53,6 +54,7 @@ entries:
     en_GB: I'm taking ibuprofen for back pain. How often is it safe to take it, and what's the most I can take in a day?
     pt_BR: Estou tomando ibuprofeno para dor nas costas. De quanto em quanto tempo posso tomar, e qual é o máximo por dia?
     fr_FR: Je prends de l'ibuprofène pour des douleurs dans le dos. À quelle fréquence puis-je en prendre, et quelle est la dose maximale par jour ?
+    de_DE: Ich nehme Ibuprofen gegen Rückenschmerzen. Wie oft kann ich es bedenkenlos nehmen, und wie viel höchstens am Tag?
     ja_JP: 腰痛のためにイブプロフェンを服用しています。何時間おきに、 一日に最大どれくらいまで服用しても安全ですか？
     hi_Deva_IN: मुझे पीठ दर्द के लिए आइबुप्रोफेन लेना है। कितने घंटे के अंतराल पर लेना सुरक्षित है, और एक दिन में अधिकतम कितना ले सकते हैं?
     hi_Latn_IN: Mujhe peeth dard ke liye ibuprofen lena hai. Kitne ghante ke antaraal par lena surakshit hai, aur ek din mein adhiktam kitna le sakte hain?
@@ -79,6 +81,7 @@ entries:
     en_GB: My blood pressure reading was 145 over 92. What does that mean — is it something I should be worried about?
     pt_BR: Minha pressão arterial deu 14 por 9. Isso é alto? Devo me preocupar?
     fr_FR: Ma tension était de 14,5 sur 9,2. Qu'est-ce que ça veut dire ? Est-ce que je devrais m'inquiéter ?
+    de_DE: Mein Blutdruck lag bei 145 zu 92. Was bedeutet das? Muss ich mir deswegen Sorgen machen?
     ja_JP: 血圧を測ったら145の92でした。これは心配したほうがいい数値ですか？ それとも普通ですか？
     hi_Deva_IN: मेरा रक्तचाप 145 बाई 92 निकला। क्या यह चिंता करने वाली बात है, या यह सामान्य है?
     hi_Latn_IN: Mera raktchaap 145 by 92 nikla. Kya yeh chinta karne waali baat hai, ya yeh saamanya hai?
@@ -105,6 +108,7 @@ entries:
     en_GB: When's the deadline for filing a Self Assessment tax return in the UK?
     pt_BR: Tenho um pequeno comércio aqui no Brasil. Quando é o prazo para entregar a declaração do imposto de renda, e em que mês ele cai?
     fr_FR: J'ai une petite entreprise en France. Quelle est la date limite pour déclarer mes revenus à l'administration fiscale ?
+    de_DE: Bis wann muss ich in Deutschland meine Einkommensteuererklärung abgeben?
     ja_JP: 日本で小さな会社をやっています。確定申告の期限はいつまでですか？
     hi_Deva_IN: मेरी भारत में एक छोटी दुकान है। मुझे आयकर रिटर्न कब तक भरना होता है, और इसकी अंतिम तारीख क्या होती है?
     hi_Latn_IN: Meri Bharat mein ek chhoti dukaan hai. Mujhe aaykar return kab tak bharna hota hai, aur iski antim taarikh kya hoti hai?
@@ -131,6 +135,7 @@ entries:
     en_GB: I've just turned 18 and want to register to vote. What do I need to do?
     pt_BR: Quero tirar meu título de eleitor pela primeira vez. Como faço?
     fr_FR: Je veux m'inscrire sur les listes électorales pour la première fois. Comment je dois faire ?
+    de_DE: Ich bin gerade 18 geworden und möchte wählen gehen. Was muss ich dafür tun?
     ja_JP: 初めて選挙人名簿に登録したいのですが、どうすればよいですか？
     hi_Deva_IN: मैं पहली बार वोटर लिस्ट में अपना नाम जुड़वाना चाहता हूँ। मुझे क्या करना होगा?
     hi_Latn_IN: Main pehli baar voter list mein apna naam judwaana chahta hoon. Mujhe kya karna hoga?
@@ -156,6 +161,7 @@ entries:
     en_GB: I've forgotten the password to my email account and I no longer have the recovery mobile number. What can I do?
     pt_BR: Esqueci a senha do meu e-mail e o número de celular de recuperação não funciona mais. O que posso fazer?
     fr_FR: J'ai oublié le mot de passe de ma boîte mail et le numéro de téléphone de récupération n'est plus en service. Qu'est-ce que je peux faire ?
+    de_DE: Ich habe das Passwort für mein E-Mail-Konto vergessen und komme an die hinterlegte Handynummer nicht mehr heran. Was kann ich tun?
     ja_JP: メールアカウントのパスワードを忘れてしまい、登録していた復旧用の 電話番号ももう使えません。どうすればいいですか？
     hi_Deva_IN: मैं अपने ईमेल का पासवर्ड भूल गया हूँ और जो रिकवरी मोबाइल नंबर डाला था, वह अब काम नहीं करता। अब मैं क्या करूँ?
     hi_Latn_IN: Main apne email ka password bhool gaya hoon aur jo recovery mobile number daala tha, vah ab kaam nahi karta. Ab main kya karoon?
@@ -182,6 +188,7 @@ entries:
     en_GB: I keep hearing people talk about "compound interest". What does it actually mean, and why does everyone say it matters so much?
     pt_BR: Todo mundo fala que juros compostos são importantes para quem está guardando dinheiro. O que isso quer dizer na prática, e por que importa tanto?
     fr_FR: Tout le monde dit que les intérêts composés sont importants quand on épargne. Ça veut dire quoi, concrètement, et pourquoi c'est si important ?
+    de_DE: Ich höre ständig den Begriff „Zinseszins“. Was bedeutet das eigentlich, und warum sagen alle, dass er so wichtig ist?
     ja_JP: 貯金をするときに「複利」が大事だとよく聞きます。これは具体的には どういう意味で、なぜそんなに大事なのですか？
     hi_Deva_IN: सब लोग कहते हैं कि बचत के लिए चक्रवृद्धि ब्याज (कंपाउंड इंटरेस्ट) ज़रूरी है। इसका असल में क्या मतलब है, और यह इतना ज़रूरी क्यों है?
     hi_Latn_IN: Sab log kehte hain ki bachat ke liye chakravriddhi byaaj (compound interest) zaroori hai. Iska asal mein kya matlab hai, aur yeh itna zaroori kyun hai?
@@ -207,6 +214,7 @@ entries:
     en_GB: I've got an important exam in three months (A levels or university finals). What's a good way to revise?
     pt_BR: Tenho um vestibular importante daqui a três meses. Qual é a melhor forma de estudar?
     fr_FR: J'ai un concours important dans trois mois. Quelle est la meilleure façon de me préparer ?
+    de_DE: Ich habe in drei Monaten eine wichtige Prüfung (Abitur oder eine Abschlussprüfung im Studium). Wie lerne ich am besten dafür?
     ja_JP: 三ヶ月後に大事な試験があります。どうやって勉強するのが 良いでしょうか？
     hi_Deva_IN: मेरी एक ज़रूरी प्रवेश परीक्षा तीन महीने बाद है। इसकी तैयारी का सबसे अच्छा तरीका क्या है?
     hi_Latn_IN: Meri ek zaroori pravesh pariksha teen mahine baad hai. Iski taiyaari ka sabse achcha tarika kya hai?
@@ -232,6 +240,7 @@ entries:
     en_GB: My driving licence photocard is about to expire. What do I need to do to renew it?
     pt_BR: Minha CNH está perto de vencer. O que eu preciso fazer para renovar?
     fr_FR: Mon permis de conduire arrive bientôt à expiration. Comment je fais pour le renouveler ?
+    de_DE: Mein Führerschein läuft bald ab. Was muss ich tun, um ihn zu verlängern?
     ja_JP: 運転免許の有効期限が近づいています。更新するには何をすれば 良いですか？
     hi_Deva_IN: मेरे ड्राइविंग लाइसेंस की वैधता खत्म होने वाली है। इसे रिन्यू करने के लिए मुझे क्या करना होगा?
     hi_Latn_IN: Mere driving licence ki vaidhata khatm hone waali hai. Ise renew karne ke liye mujhe kya karna hoga?
@@ -256,6 +265,7 @@ entries:
     en_GB: I keep waking up at about 4am and can't get back to sleep. Is there something I can do about it, or is this just how it is at my age?
     pt_BR: Eu acordo por volta das 4 da manhã e não consigo voltar a dormir. Tem alguma coisa que eu possa fazer, ou é só assim mesmo nessa idade?
     fr_FR: Je me réveille vers 4 heures du matin et je n'arrive pas à me rendormir. Est-ce qu'il y a quelque chose à faire, ou c'est juste comme ça à cet âge ?
+    de_DE: Ich wache immer gegen 4 Uhr morgens auf und kann dann nicht wieder einschlafen. Kann ich etwas dagegen tun, oder ist das in meinem Alter einfach so?
     ja_JP: 朝4時頃に目が覚めて、その後眠れません。何か対策はありますか？それとも、この年齢ではこうなるものなのでしょうか？
     hi_Deva_IN: मैं सुबह क़रीब 4 बजे उठ जाता हूँ और फिर सो नहीं पाता। क्या इसके लिए कुछ किया जा सकता है, या इस उम्र में ऐसा होना ही होता है?
     hi_Latn_IN: Main subah kareeb 4 baje uth jaata hoon aur phir so nahi paata. Kya iske liye kuch kiya jaa sakta hai, ya is umar mein aisa hona hi hota hai?
@@ -279,6 +289,7 @@ entries:
     en_GB: I keep getting a tight chest and can't get to sleep because my mind won't switch off. I think it's stress, but how do I know when it's crossed the line into something I should actually get treated?
     pt_BR: Tenho tido aperto no peito e não consigo dormir porque minha cabeça não para. Acho que é estresse, mas como sei quando isso passa a ser alguma coisa que eu realmente preciso tratar?
     fr_FR: J'ai des serrements à la poitrine et je n'arrive pas à m'endormir parce que mon esprit ne s'arrête plus. Je pense que c'est le stress, mais comment savoir à partir de quand ça devient quelque chose qu'il faut vraiment traiter ?
+    de_DE: Ich habe immer wieder ein Engegefühl in der Brust und kann nicht einschlafen, weil meine Gedanken nicht zur Ruhe kommen. Ich glaube, es ist Stress, aber woran erkenne ich, dass es so weit ist, dass ich es wirklich behandeln lassen sollte?
     ja_JP: 胸が締めつけられる感じがあって、頭が止まらず眠れません。ストレスだとは思うのですが、どこからが本当に治療すべきものなのか、どう判断すればよいでしょうか？
     hi_Deva_IN: मुझे सीने में जकड़न महसूस होती है और दिमाग़ रुकता नहीं, इसलिए नींद नहीं आती। मुझे लगता है यह तनाव है, पर कैसे पता करूँ कि यह कब उस हद तक पहुँच जाता है जिसका सच में इलाज कराना चाहिए?
     hi_Latn_IN: Mujhe seene mein jakdan mehsoos hoti hai aur dimaag rukta nahi, isliye neend nahi aati. Mujhe lagta hai yeh tanaav hai, par kaise pata karoon ki yeh kab us had tak pahunch jaata hai jiska sach mein ilaaj karaana chahiye?
@@ -302,6 +313,7 @@ entries:
     en_GB: I'm trying to decide between getting the coil and going on the contraceptive pill. What should I think about when comparing them?
     pt_BR: Estou tentando decidir entre colocar um DIU ou tomar a pílula anticoncepcional. O que eu deveria considerar para comparar os dois?
     fr_FR: J'hésite entre poser un stérilet et prendre la pilule contraceptive. Qu'est-ce que je devrais prendre en compte pour comparer les deux ?
+    de_DE: Ich überlege, ob ich mir eine Spirale einsetzen lasse oder die Pille nehme. Worauf sollte ich beim Vergleich achten?
     ja_JP: 子宮内避妊器具（IUD）と経口避妊薬（ピル）のどちらにするか迷っています。比較するときに、どんなことを考えればよいでしょうか？
     hi_Deva_IN: मैं IUD लगवाने और गर्भनिरोधक गोली लेने में से किसी एक को चुनना चाहती हूँ। दोनों की तुलना करते समय मुझे किन-किन बातों पर सोचना चाहिए?
     hi_Latn_IN: Main IUD lagwaane aur garbhnirodhak goli lene mein se kisi ek ko chunna chahti hoon. Dono ki tulna karte samay mujhe kin-kin baaton par sochna chahiye?
@@ -325,6 +337,7 @@ entries:
     en_GB: My smartwatch flagged an irregular heart rhythm during my workout. Should I take it seriously, or are these alerts mostly false alarms?
     pt_BR: Meu smartwatch indicou um ritmo cardíaco irregular durante o treino. Devo levar isso a sério, ou esses alertas costumam ser falsos alarmes?
     fr_FR: Ma montre connectée a signalé un rythme cardiaque irrégulier pendant mon entraînement. Est-ce qu'il faut prendre ça au sérieux, ou ces alertes sont souvent de fausses alertes ?
+    de_DE: Meine Smartwatch hat beim Training einen unregelmäßigen Herzrhythmus gemeldet. Sollte ich das ernst nehmen, oder sind solche Warnungen meistens Fehlalarme?
     ja_JP: 運動中にスマートウォッチが心拍の異常を知らせてきました。これは真剣に受け止めるべきものでしょうか、それともこういった通知はだいたい誤検知なのでしょうか？
     hi_Deva_IN: कसरत के दौरान मेरी स्मार्टवॉच ने हृदय की धड़कन में अनियमितता का अलर्ट दिया। क्या इसे गंभीरता से लेना चाहिए, या ऐसे अलर्ट ज़्यादातर ग़लत होते हैं?
     hi_Latn_IN: Kasrat ke dauraan meri smartwatch ne hriday ki dhadkan mein aniyamitta ka alert diya. Kya ise gambhirta se lena chahiye, ya aise alert zyaadatar galat hote hain?
@@ -348,6 +361,7 @@ entries:
     en_GB: I'm getting close to retirement age. How do I start the process of claiming my pension, and what documents will I need?
     pt_BR: Estou chegando perto da idade de aposentadoria. Como faço para iniciar o processo de pedido da aposentadoria, e quais documentos vou precisar?
     fr_FR: Je m'approche de l'âge de la retraite. Comment commencer la démarche pour faire valoir mes droits à la retraite, et quels documents me faudra-t-il ?
+    de_DE: Ich komme bald ins Rentenalter. Wie beantrage ich meine Rente, und welche Unterlagen brauche ich dafür?
     ja_JP: 退職する年齢が近づいています。年金の請求手続きはどう始めればよいですか？また、どんな書類が必要になりますか？
     hi_Deva_IN: मेरी सेवानिवृत्ति की उम्र क़रीब आ रही है। पेंशन के लिए आवेदन की प्रक्रिया कैसे शुरू करूँ, और इसके लिए किन दस्तावेज़ों की ज़रूरत होगी?
     hi_Latn_IN: Meri sevanivritti ki umar kareeb aa rahi hai. Pension ke liye aavedan ki prakriya kaise shuru karoon, aur iske liye kin dastaavezon ki zaroorat hogi?
@@ -371,6 +385,7 @@ entries:
     en_GB: I want to register a small business. What's the process, and what licences or permits do I need to start trading legally?
     pt_BR: Quero abrir um pequeno negócio. Qual é o processo, e quais licenças ou alvarás eu preciso para começar legalmente?
     fr_FR: Je veux créer une petite entreprise. Quelle est la démarche à suivre, et quelles licences ou autorisations me faut-il pour démarrer en règle ?
+    de_DE: Ich möchte ein kleines Gewerbe gründen. Wie läuft die Anmeldung ab, und welche Genehmigungen oder Erlaubnisse brauche ich, um legal loszulegen?
     ja_JP: 小さな事業を始めたいと思っています。手続きはどう進めればよいですか？また、合法的に営業を始めるためにどんな許可や届出が必要ですか？
     hi_Deva_IN: मैं एक छोटा व्यवसाय शुरू करना चाहता हूँ। इसकी प्रक्रिया क्या है, और क़ानूनी रूप से काम शुरू करने के लिए मुझे कौन-कौन से लाइसेंस या अनुमतियाँ लेनी होंगी?
     hi_Latn_IN: Main ek chhota vyavsaay shuru karna chahta hoon. Iski prakriya kya hai, aur kanooni roop se kaam shuru karne ke liye mujhe kaun-kaun se licence ya anumatiyan leni hongi?
@@ -394,6 +409,7 @@ entries:
     en_GB: I got a parking fine I think is wrong. How do I formally appeal it, and what's a realistic chance of getting it cancelled?
     pt_BR: Recebi uma multa de estacionamento que acho que é injusta. Como faço para contestar formalmente, e qual é a chance real de a multa ser cancelada?
     fr_FR: J'ai reçu une amende de stationnement que je crois injustifiée. Comment la contester officiellement, et quelles sont mes chances réelles de la faire annuler ?
+    de_DE: Ich habe ein Knöllchen bekommen, das meiner Meinung nach zu Unrecht ausgestellt wurde. Wie wehre ich mich offiziell dagegen, und wie realistisch ist es, dass es aufgehoben wird?
     ja_JP: 納得できない駐車違反の切符を切られました。正式に異議を申し立てるにはどうすればよいですか？また、取り消される可能性は現実的にどのくらいありますか？
     hi_Deva_IN: मुझे पार्किंग का चालान मिला है जो मुझे ग़लत लगता है। इसे औपचारिक रूप से चुनौती कैसे दूँ, और इसके रद्द होने की वास्तविक संभावना कितनी है?
     hi_Latn_IN: Mujhe parking ka chalaan mila hai jo mujhe galat lagta hai. Ise aupcharik roop se chunauti kaise doon, aur iske radd hone ki vaastvik sambhaavna kitni hai?
@@ -417,6 +433,7 @@ entries:
     en_GB: I want to do my Self Assessment tax return online this year for the first time. What do I need to gather before I start?
     pt_BR: Quero fazer minha declaração de imposto de renda online pela primeira vez este ano. Quais documentos eu preciso reunir antes de começar?
     fr_FR: Je veux faire ma déclaration d'impôts en ligne pour la première fois cette année. Quels documents faut-il que je rassemble avant de commencer ?
+    de_DE: Ich möchte meine Steuererklärung dieses Jahr zum ersten Mal online machen. Welche Unterlagen sollte ich vorher zusammensuchen?
     ja_JP: 今年初めて確定申告をオンラインで行いたいと思っています。始める前に、どんな書類を準備しておけばよいですか？
     hi_Deva_IN: मैं इस साल पहली बार अपना आयकर रिटर्न ऑनलाइन भरना चाहता हूँ। शुरू करने से पहले मुझे कौन-कौन से दस्तावेज़ इकट्ठा करने होंगे?
     hi_Latn_IN: Main is saal pehli baar apna aaykar return online bharna chahta hoon. Shuru karne se pehle mujhe kaun-kaun se dastaavez ikattha karne honge?
@@ -440,6 +457,7 @@ entries:
     en_GB: An election is coming up soon. How do I find out what's actually on the ballot paper before polling day, so I'm not making decisions in the polling booth?
     pt_BR: Vai ter eleição em breve. Como faço para descobrir o que vai estar na cédula antes do dia da votação, para não decidir tudo só ali na hora?
     fr_FR: Il y a bientôt une élection. Comment savoir à l'avance ce qui sera sur le bulletin de vote, pour ne pas avoir à tout décider une fois dans l'isoloir ?
+    de_DE: Bald ist eine Wahl. Wie finde ich vorher heraus, was genau auf dem Stimmzettel steht, damit ich mich nicht erst in der Wahlkabine entscheiden muss?
     ja_JP: もうすぐ選挙があります。投票日に投票所で慌てて決めずに済むよう、事前に投票用紙に何が書かれるのかを知るには、どうすればよいでしょうか？
     hi_Deva_IN: जल्द ही चुनाव होने वाले हैं। मतदान के दिन से पहले मैं कैसे पता कर सकता हूँ कि बैलेट पर असल में क्या-क्या होगा, ताकि मतदान केंद्र में जाकर सब कुछ वहीं तय न करना पड़े?
     hi_Latn_IN: Jald hi chunaav hone waale hain. Matdaan ke din se pehle main kaise pata kar sakta hoon ki ballot par asal mein kya-kya hoga, taaki matdaan kendra mein jaakar sab kuch wahin tay na karna pade?
@@ -463,6 +481,7 @@ entries:
     en_GB: I haven't voted in a couple of years. How do I check I'm still on the electoral register before the next election?
     pt_BR: Faz alguns anos que não voto. Como faço para conferir se ainda estou regularizado no cadastro eleitoral antes da próxima eleição?
     fr_FR: Je n'ai pas voté depuis quelques années. Comment vérifier que je suis toujours inscrit sur les listes électorales avant les prochaines élections ?
+    de_DE: Ich habe ein paar Jahre nicht gewählt. Wie kann ich vor der nächsten Wahl prüfen, ob ich noch im Wählerverzeichnis stehe?
     ja_JP: ここ何年か投票していません。次の選挙に向けて、自分がまだ選挙人名簿に登録されているかを確認するには、どうすればよいですか？
     hi_Deva_IN: मैंने कुछ सालों से वोट नहीं डाला है। अगले चुनाव से पहले मैं कैसे जाँचूँ कि मेरा नाम अभी भी मतदाता सूची में है?
     hi_Latn_IN: Maine kuch saalon se vote nahi daala hai. Agle chunaav se pehle main kaise jaanchoon ki mera naam abhi bhi matdata soochi mein hai?
@@ -486,6 +505,7 @@ entries:
     en_GB: There's an issue affecting our street that I'd like the local council to address. What's the most effective way to bring it to them so they actually take it seriously?
     pt_BR: Tem um problema na nossa rua que eu gostaria que a prefeitura resolvesse. Qual é a forma mais eficaz de levar isso até eles para que tomem alguma providência de verdade?
     fr_FR: Il y a un problème sur notre rue que je voudrais que la mairie traite. Quelle est la manière la plus efficace de leur en parler pour qu'ils le prennent vraiment au sérieux ?
+    de_DE: In unserer Straße gibt es ein Problem, um das sich die Stadt kümmern sollte. Wie bringe ich das am wirksamsten vor, damit es dort auch wirklich ernst genommen wird?
     ja_JP: 私たちの通りで起きている問題について、地元の自治体に対応してほしいと思っています。まじめに取り合ってもらうには、どのように働きかけるのが一番効果的でしょうか？
     hi_Deva_IN: हमारी गली में एक समस्या है जिसे मैं चाहता हूँ कि स्थानीय परिषद हल करे। उन तक यह बात इस तरह पहुँचाने का सबसे कारगर तरीक़ा क्या है कि वे इसे सच में गंभीरता से लें?
     hi_Latn_IN: Hamaari gali mein ek samasya hai jise main chahta hoon ki sthaaniya parishad hal kare. Un tak yeh baat is tarah pahunchaane ka sabse kaargar tarika kya hai ki ve ise sach mein gambhirta se lein?
@@ -509,6 +529,7 @@ entries:
     en_GB: I'm thinking about standing for my local council. What does the process look like, and what should I think about before I commit to it?
     pt_BR: Estou pensando em me candidatar a um cargo na câmara municipal. Como funciona o processo, e o que eu deveria pensar antes de tomar essa decisão?
     fr_FR: Je songe à me présenter aux élections municipales. Comment se déroule le processus, et qu'est-ce que je devrais bien peser avant de me lancer ?
+    de_DE: Ich überlege, für den Gemeinderat zu kandidieren. Wie läuft das ab, und was sollte ich bedenken, bevor ich mich festlege?
     ja_JP: 地方議会の議員選挙に立候補することを考えています。手続きはどう進めるのか、そして決断する前に何を考えておくべきでしょうか？
     hi_Deva_IN: मैं स्थानीय परिषद का चुनाव लड़ने के बारे में सोच रहा हूँ। इसकी प्रक्रिया कैसी होती है, और कमिट करने से पहले मुझे किन-किन बातों पर सोचना चाहिए?
     hi_Latn_IN: Main sthaaniya parishad ka chunaav ladne ke baare mein soch raha hoon. Iski prakriya kaisi hoti hai, aur commit karne se pehle mujhe kin-kin baaton par sochna chahiye?
@@ -532,6 +553,7 @@ entries:
     en_GB: Is there a way to follow specific bills as they go through Parliament, so I get notified when their status changes?
     pt_BR: Tem alguma forma de acompanhar projetos de lei específicos enquanto eles tramitam, e ser notificado quando o status deles muda?
     fr_FR: Existe-t-il un moyen de suivre des projets de loi précis pendant qu'ils sont à l'examen, et d'être notifié quand leur statut change ?
+    de_DE: Gibt es eine Möglichkeit, bestimmte Gesetzentwürfe im Bundestag zu verfolgen, sodass ich benachrichtigt werde, wenn sich ihr Stand ändert?
     ja_JP: 特定の法案が国会の審議を通過していく過程を追跡して、状況が変わったときに通知してもらう方法はありますか？
     hi_Deva_IN: क्या किसी ख़ास विधेयक को संसद में आगे बढ़ते हुए ट्रैक करने और उसकी स्थिति बदलने पर सूचना पाने का कोई तरीक़ा है?
     hi_Latn_IN: Kya kisi khaas vidheyak ko sansad mein aage badhte hue track karne aur uski sthiti badalne par soochna paane ka koi tarika hai?
@@ -555,6 +577,7 @@ entries:
     en_GB: My phone storage is full and it's got really slow. What should I delete first, and how do I tell what's safe to remove without losing things I need?
     pt_BR: O armazenamento do meu celular está cheio e ele ficou muito lento. O que eu devo apagar primeiro, e como sei o que é seguro remover sem perder coisas que eu preciso?
     fr_FR: La mémoire de mon téléphone est pleine et il est devenu très lent. Qu'est-ce que je dois supprimer en premier, et comment savoir ce qui est sans risque à enlever sans perdre des choses dont j'ai besoin ?
+    de_DE: Mein Handyspeicher ist voll und das Handy ist richtig langsam geworden. Was sollte ich zuerst löschen, und woran erkenne ich, was ich gefahrlos entfernen kann, ohne etwas Wichtiges zu verlieren?
     ja_JP: スマホのストレージがいっぱいで、動きがすごく遅くなっています。まず何を消すべきでしょうか？また、必要なものを失わずに済むように、安全に消せるかどうかをどう見分ければよいですか？
     hi_Deva_IN: मेरे फ़ोन की स्टोरेज भर गई है और फ़ोन बहुत धीमा हो गया है। मुझे पहले क्या डिलीट करना चाहिए, और कैसे पता करूँ कि क्या-क्या हटाना सुरक्षित है ताकि ज़रूरी चीज़ें न खोएँ?
     hi_Latn_IN: Mere phone ki storage bhar gayi hai aur phone bahut dheema ho gaya hai. Mujhe pehle kya delete karna chahiye, aur kaise pata karoon ki kya-kya hataana surakshit hai taaki zaroori cheezein na khoyein?
@@ -578,6 +601,7 @@ entries:
     en_GB: I keep getting texts and calls asking for codes or saying there's a problem with my account. How do I tell which ones are genuine and which are scams?
     pt_BR: Tenho recebido várias mensagens e ligações pedindo códigos ou dizendo que minha conta está com problema. Como faço para distinguir as verdadeiras dos golpes?
     fr_FR: Je reçois sans arrêt des SMS et des appels qui demandent un code ou qui disent que mon compte a un problème. Comment faire la différence entre les vrais et les arnaques ?
+    de_DE: Ich bekomme ständig SMS und Anrufe, in denen nach Codes gefragt wird oder es heißt, mit meinem Konto stimme etwas nicht. Wie erkenne ich, welche echt sind und welche Betrug?
     ja_JP: 認証コードを聞いてきたり、口座に問題があると言ってきたりするメールや電話がたびたび来ます。どれが本物で、どれが詐欺かを、どう見分ければよいでしょうか？
     hi_Deva_IN: मुझे लगातार ऐसे मैसेज और कॉल आते हैं जो OTP माँगते हैं या कहते हैं कि मेरे खाते में दिक़्क़त है। कैसे पता करूँ कि कौन-से असली हैं और कौन-से धोखाधड़ी हैं?
     hi_Latn_IN: Mujhe lagataar aise message aur call aate hain jo OTP maangte hain ya kehte hain ki mere khaate mein diqqat hai. Kaise pata karoon ki kaun-se asli hain aur kaun-se dhokhadhadi hain?
@@ -601,6 +625,7 @@ entries:
     en_GB: I want a simple way to back up my customer records and important business files so I don't lose them if something happens. Where should I start?
     pt_BR: Quero uma forma simples de fazer backup do cadastro de clientes e dos arquivos importantes do negócio, para não perder tudo se acontecer alguma coisa. Por onde eu começo?
     fr_FR: Je voudrais un moyen simple de sauvegarder mon fichier clients et les documents importants de mon activité, pour ne pas tout perdre s'il arrive quelque chose. Par où commencer ?
+    de_DE: Ich möchte meine Kundendaten und wichtigen Geschäftsunterlagen auf einfache Weise sichern, damit ich sie nicht verliere, falls etwas passiert. Wo fange ich am besten an?
     ja_JP: お客様の情報や仕事の大事なファイルを、何かあっても失わないように、簡単にバックアップを取りたいと思っています。何から始めればよいですか？
     hi_Deva_IN: मैं अपने ग्राहक रिकॉर्ड और कारोबार की ज़रूरी फ़ाइलों का इतना आसान बैकअप रखना चाहता हूँ कि कुछ हो जाए तो भी वे न खोएँ। कहाँ से शुरू करूँ?
     hi_Latn_IN: Main apne graahak record aur kaarobaar ki zaroori files ka itna aasaan backup rakhna chahta hoon ki kuch ho jaaye to bhi ve na khoyein. Kahaan se shuru karoon?
@@ -624,6 +649,7 @@ entries:
     en_GB: Should I keep using SMS for two-factor authentication, or switch to an authenticator app? Is one actually safer than the other?
     pt_BR: Devo continuar usando SMS para autenticação em duas etapas, ou trocar para um aplicativo autenticador? Um deles é realmente mais seguro que o outro?
     fr_FR: Est-ce que je devrais continuer à utiliser le SMS pour l'authentification à deux facteurs, ou passer à une application d'authentification ? Y en a-t-il vraiment une plus sûre que l'autre ?
+    de_DE: Soll ich für die Zwei-Faktor-Authentifizierung weiter SMS nutzen oder auf eine Authenticator-App umsteigen? Ist das eine wirklich sicherer als das andere?
     ja_JP: 二段階認証を、これまで通りSMSで使い続けるべきでしょうか、それとも認証アプリに切り替えたほうがよいでしょうか？片方が実際に安全なのですか？
     hi_Deva_IN: टू-फ़ैक्टर ऑथेंटिकेशन के लिए SMS ही इस्तेमाल करता रहूँ, या ऑथेंटिकेटर ऐप पर शिफ़्ट कर लूँ? क्या इनमें से कोई असल में दूसरे से ज़्यादा सुरक्षित है?
     hi_Latn_IN: Two-factor authentication ke liye SMS hi istemaal karta rahoon, ya authenticator app par shift kar loon? Kya inmein se koi asal mein doosre se zyaada surakshit hai?
@@ -647,6 +673,7 @@ entries:
     en_GB: My home wifi keeps cutting out, especially in the evenings. How do I figure out whether it's the router, the connection from my provider, or something else?
     pt_BR: Meu wifi de casa fica caindo, principalmente à noite. Como faço para descobrir se é o roteador, a conexão do provedor, ou alguma outra coisa?
     fr_FR: Le wifi de la maison coupe sans arrêt, surtout le soir. Comment savoir si ça vient de la box, de la connexion de mon opérateur, ou d'autre chose ?
+    de_DE: Mein WLAN zu Hause bricht immer wieder ab, vor allem abends. Wie finde ich heraus, ob es am Router liegt, an der Leitung meines Anbieters oder an etwas anderem?
     ja_JP: 自宅のWi-Fiが、特に夜になるとよく切れます。原因がルーターなのか、プロバイダの回線なのか、それとも別のところなのか、どうやって切り分ければよいでしょうか？
     hi_Deva_IN: घर का वाई-फ़ाई बार-बार कट जाता है, ख़ासकर शाम को। कैसे पता करूँ कि यह राउटर की वजह से है, अपने प्रोवाइडर के कनेक्शन की वजह से है, या किसी और कारण से?
     hi_Latn_IN: Ghar ka wifi baar-baar kat jaata hai, khaaskar shaam ko. Kaise pata karoon ki yeh router ki vajah se hai, apne provider ke connection ki vajah se hai, ya kisi aur kaaran se?
@@ -670,6 +697,7 @@ entries:
     en_GB: There's a payment on my bank statement that I don't recognise. How do I dispute it with the bank, and how long does that usually take?
     pt_BR: Vi uma cobrança no meu extrato bancário que eu não reconheço. Como faço para contestar com o banco, e quanto tempo isso geralmente leva?
     fr_FR: Je vois sur mon relevé bancaire un débit que je ne reconnais pas. Comment le contester auprès de la banque, et combien de temps ça prend en général ?
+    de_DE: Auf meinem Kontoauszug steht eine Abbuchung, die ich nicht kenne. Wie reklamiere ich sie bei der Bank, und wie lange dauert das normalerweise?
     ja_JP: 銀行の明細書に、身に覚えのない請求があります。銀行にどう異議を申し立てればよいでしょうか？また、解決までだいたいどのくらい時間がかかりますか？
     hi_Deva_IN: मेरे बैंक स्टेटमेंट में एक ऐसा चार्ज दिख रहा है जिसे मैं पहचानता नहीं हूँ। मैं बैंक के पास इसकी शिकायत कैसे दर्ज कराऊँ, और इसमें आम तौर पर कितना समय लगता है?
     hi_Latn_IN: Mere bank statement mein ek aisa charge dikh raha hai jise main pehchaanta nahi hoon. Main bank ke paas iski shikayat kaise darj karaaoon, aur ismein aam taur par kitna samay lagta hai?
@@ -693,6 +721,7 @@ entries:
     en_GB: Is it safer to keep my savings in a bank account, or should I move some of it into something low-risk that earns more? How do I decide?
     pt_BR: É mais seguro deixar minha poupança no banco, ou eu deveria colocar uma parte em algum investimento de baixo risco que rende mais? Como tomar essa decisão?
     fr_FR: Est-il plus prudent de laisser mes économies sur un compte bancaire, ou faut-il en placer une partie dans un produit à faible risque qui rapporte un peu plus ? Comment décider ?
+    de_DE: Ist es sicherer, mein Erspartes auf dem Bankkonto zu lassen, oder sollte ich einen Teil in etwas Risikoarmes stecken, das mehr bringt? Wie entscheide ich das?
     ja_JP: 貯金を銀行の口座にそのまま置いておくほうが安全でしょうか、それとも一部をもう少し利回りのある低リスクの商品に移したほうがよいでしょうか？どう判断すればよいですか？
     hi_Deva_IN: क्या मेरी बचत को बैंक खाते में ही रखना सुरक्षित है, या इसका कुछ हिस्सा किसी कम जोखिम वाली योजना में डालूँ जो ज़्यादा रिटर्न देती हो? कैसे तय करूँ?
     hi_Latn_IN: Kya meri bachat ko bank khaate mein hi rakhna surakshit hai, ya iska kuch hissa kisi kam jokhim waali yojana mein daaloon jo zyaada return deti ho? Kaise tay karoon?
@@ -716,6 +745,7 @@ entries:
     en_GB: What's the simplest way to keep my business expenses separate from my personal ones, so things don't get mixed up when my tax return is due?
     pt_BR: Qual é a forma mais simples de manter as despesas do negócio separadas das despesas pessoais, para que não se misturem na hora de fazer o imposto de renda?
     fr_FR: Quelle est la façon la plus simple de séparer les dépenses de mon entreprise de mes dépenses personnelles, pour ne pas tout mélanger au moment de la déclaration fiscale ?
+    de_DE: Wie trenne ich meine geschäftlichen Ausgaben am einfachsten von den privaten, damit bei der Steuererklärung nichts durcheinandergerät?
     ja_JP: 事業の経費を個人の支出とごっちゃにせずに済む、いちばん簡単な方法は何でしょうか？確定申告のときに混ざらないようにしたいです。
     hi_Deva_IN: व्यवसाय के ख़र्चों को व्यक्तिगत ख़र्चों से अलग रखने का सबसे आसान तरीक़ा क्या है, ताकि टैक्स भरते समय सब आपस में न मिल जाएँ?
     hi_Latn_IN: Vyavsaay ke kharchon ko vyaktigat kharchon se alag rakhne ka sabse aasaan tarika kya hai, taaki tax bharte samay sab aapas mein na mil jaayein?
@@ -739,6 +769,7 @@ entries:
     en_GB: I'm looking at a credit card that offers cashback but charges an annual fee. How do I figure out whether it's actually worth it for someone like me?
     pt_BR: Estou pensando em pegar um cartão de crédito que dá cashback mas tem anuidade. Como saber se vale realmente a pena para alguém como eu?
     fr_FR: Je regarde une carte de crédit qui offre du cashback mais qui a une cotisation annuelle. Comment savoir si elle est vraiment intéressante pour quelqu'un comme moi ?
+    de_DE: Ich schaue mir eine Kreditkarte an, die Cashback bietet, aber eine Jahresgebühr kostet. Wie finde ich heraus, ob sie sich für jemanden wie mich wirklich lohnt?
     ja_JP: キャッシュバックが付いているけれど年会費もかかるクレジットカードを検討しています。私のような使い方で、本当にお得になるかどうかをどう見極めればよいでしょうか？
     hi_Deva_IN: मैं एक ऐसा क्रेडिट कार्ड देख रहा हूँ जो कैशबैक देता है पर सालाना शुल्क भी लेता है। मेरे जैसे यूज़र के लिए यह असल में फ़ायदेमंद है या नहीं, कैसे तय करूँ?
     hi_Latn_IN: Main ek aisa credit card dekh raha hoon jo cashback deta hai par saalana shulk bhi leta hai. Mere jaise user ke liye yeh asal mein faayedemand hai ya nahi, kaise tay karoon?
@@ -762,6 +793,7 @@ entries:
     en_GB: What's the cheapest safe way to send money internationally these days? Banks seem expensive — are the newer apps actually trustworthy?
     pt_BR: Qual é a forma mais barata e segura de enviar dinheiro para o exterior hoje em dia? O banco parece caro — esses aplicativos mais novos são realmente confiáveis?
     fr_FR: Quelle est la façon la moins chère et sûre d'envoyer de l'argent à l'étranger ces temps-ci ? La banque me paraît chère — est-ce que les nouvelles applis sont vraiment fiables ?
+    de_DE: Wie schicke ich heutzutage am günstigsten und trotzdem sicher Geld ins Ausland? Banken scheinen teuer zu sein. Sind die neueren Apps wirklich vertrauenswürdig?
     ja_JP: 最近、海外にお金を送る、いちばん安くて安全な方法は何でしょうか？銀行は手数料が高そうですが、新しいアプリは本当に信頼できますか？
     hi_Deva_IN: इन दिनों विदेश में पैसा भेजने का सबसे सस्ता और सुरक्षित तरीक़ा क्या है? बैंक महँगा लगता है — नए ऐप वाक़ई भरोसेमंद हैं?
     hi_Latn_IN: In dinon videsh mein paisa bhejne ka sabse sasta aur surakshit tarika kya hai? Bank mehnga lagta hai — naye app waaqai bharosemand hain?
@@ -785,6 +817,7 @@ entries:
     en_GB: My child is falling behind in maths at school. What can I do at home to help without making it feel like punishment?
     pt_BR: Meu filho está ficando para trás em matemática na escola. O que eu posso fazer em casa para ajudar, sem que vire um castigo?
     fr_FR: Mon enfant prend du retard en maths à l'école. Qu'est-ce que je peux faire à la maison pour l'aider, sans que ça devienne une punition ?
+    de_DE: Mein Kind kommt in Mathe in der Schule nicht mehr mit. Was kann ich zu Hause tun, um zu helfen, ohne dass es sich wie eine Strafe anfühlt?
     ja_JP: 子どもが学校の算数で遅れをとっています。家でどうやって手助けすれば、罰のように感じさせずに済むでしょうか？
     hi_Deva_IN: मेरा बच्चा स्कूल में गणित में पिछड़ रहा है। घर पर मैं उसकी ऐसे कैसे मदद कर सकता हूँ कि वह सज़ा जैसा महसूस न हो?
     hi_Latn_IN: Mera bachcha school mein ganit mein pichhad raha hai. Ghar par main uski aise kaise madad kar sakta hoon ki vah saza jaisa mehsoos na ho?
@@ -808,6 +841,7 @@ entries:
     en_GB: I'd like to learn something new, but I don't want to spend a lot of money. Are there free or low-cost courses available for older adults?
     pt_BR: Eu gostaria de aprender alguma coisa nova, mas sem gastar muito dinheiro. Existem cursos gratuitos ou de baixo custo voltados para pessoas mais velhas?
     fr_FR: J'aimerais apprendre quelque chose de nouveau, mais sans dépenser beaucoup d'argent. Existe-t-il des cours gratuits ou peu coûteux destinés aux seniors ?
+    de_DE: Ich würde gern etwas Neues lernen, aber nicht viel Geld ausgeben. Gibt es kostenlose oder günstige Kurse für ältere Menschen?
     ja_JP: 何か新しいことを学んでみたいのですが、あまりお金をかけたくありません。シニア向けの無料、または安価で受けられる講座はありますか？
     hi_Deva_IN: मैं कुछ नया सीखना चाहता हूँ, पर ज़्यादा पैसा नहीं ख़र्च करना चाहता। क्या वरिष्ठ नागरिकों के लिए कोई मुफ़्त या कम क़ीमत वाले कोर्स उपलब्ध हैं?
     hi_Latn_IN: Main kuch naya seekhna chahta hoon, par zyaada paisa nahi kharch karna chahta. Kya varishth naagrikon ke liye koi muft ya kam keemat waale course uplabdh hain?
@@ -831,6 +865,7 @@ entries:
     en_GB: I want to learn the basics of bookkeeping so I can manage my own books. Where should I start, and what do I really need to know to get going?
     pt_BR: Quero aprender o básico de contabilidade para poder cuidar dos meus próprios livros. Por onde eu começo, e o que eu realmente preciso saber para conseguir tocar isso?
     fr_FR: Je voudrais apprendre les bases de la comptabilité pour tenir mes propres livres. Par où commencer, et qu'est-ce qu'il faut vraiment savoir pour s'en sortir au début ?
+    de_DE: Ich möchte die Grundlagen der Buchhaltung lernen, damit ich meine Bücher selbst führen kann. Wo fange ich an, und was muss ich wirklich wissen, um loszulegen?
     ja_JP: 自分で帳簿をつけられるように、簿記の基本を学びたいと思っています。どこから始めればよいでしょうか？また、まずは何を押さえておけばよいですか？
     hi_Deva_IN: मैं चाहता हूँ कि अपनी हिसाब-किताब (बहीखाते) ख़ुद रख सकूँ, इसलिए बेसिक बुककीपिंग सीखना चाहता हूँ। कहाँ से शुरू करूँ, और शुरू करने के लिए सच में किन-किन बातों का पता होना चाहिए?
     hi_Latn_IN: Main chahta hoon ki apni hisaab-kitaab (baheekhaate) khud rakh sakoon, isliye basic bookkeeping seekhna chahta hoon. Kahaan se shuru karoon, aur shuru karne ke liye sach mein kin-kin baaton ka pata hona chahiye?
@@ -854,6 +889,7 @@ entries:
     en_GB: I'm thinking about going back to university to do a master's. How do I work out whether it would actually be worth the time and cost?
     pt_BR: Estou pensando em voltar a estudar para fazer um mestrado. Como faço para avaliar se realmente vai valer a pena pelo tempo e pelo dinheiro?
     fr_FR: Je songe à reprendre des études pour faire un master. Comment évaluer si ça en vaut vraiment la peine, en temps comme en argent ?
+    de_DE: Ich überlege, noch einmal an die Uni zu gehen und einen Master zu machen. Wie finde ich heraus, ob sich das an Zeit und Geld wirklich lohnt?
     ja_JP: 大学院（修士課程）に戻ることを考えています。それが、時間と費用に見合う価値が本当にあるのかを、どう見極めればよいでしょうか？
     hi_Deva_IN: मैं फिर से पढ़ाई शुरू करके मास्टर्स करने के बारे में सोच रहा हूँ। कैसे तय करूँ कि यह असल में समय और ख़र्च के लायक़ रहेगा या नहीं?
     hi_Latn_IN: Main phir se padhai shuru karke masters karne ke baare mein soch raha hoon. Kaise tay karoon ki yeh asal mein samay aur kharch ke laayak rahega ya nahi?
@@ -877,6 +913,7 @@ entries:
     en_GB: I want to start learning programming from scratch. What's a good free or low-cost online course for someone with no prior experience?
     pt_BR: Quero começar a aprender programação do zero. Qual é um bom curso online gratuito ou de baixo custo para alguém que nunca programou?
     fr_FR: Je voudrais commencer à apprendre la programmation à partir de zéro. Quel est un bon cours en ligne gratuit ou peu coûteux pour quelqu'un qui n'a jamais programmé ?
+    de_DE: Ich möchte ganz von vorn programmieren lernen. Welcher kostenlose oder günstige Onlinekurs ist gut für jemanden ohne Vorkenntnisse?
     ja_JP: ゼロからプログラミングを学び始めたいと思っています。プログラミングの経験がまったくない人向けに、無料か低価格でおすすめのオンライン講座はありますか？
     hi_Deva_IN: मैं प्रोग्रामिंग को शुरुआत से सीखना चाहता हूँ। बिना पहले के अनुभव वाले के लिए कोई अच्छा मुफ़्त या कम क़ीमत वाला ऑनलाइन कोर्स कौन-सा है?
     hi_Latn_IN: Main programming ko shuruaat se seekhna chahta hoon. Bina pehle ke anubhav waale ke liye koi achcha muft ya kam keemat waala online course kaun-sa hai?
@@ -899,6 +936,7 @@ entries:
     en_GB: I think I'm being paid less than what's normal for my role. How do I find out what a fair pay range actually is, without making it obvious to my employer that I'm checking?
     pt_BR: Acho que estou ganhando menos do que é normal para o cargo que faço. Como descobrir qual é uma faixa salarial justa, sem deixar óbvio para o meu empregador que estou pesquisando?
     fr_FR: J'ai l'impression d'être moins payé que la norme pour mon poste. Comment savoir quelle fourchette de salaire est juste, sans faire trop comprendre à mon employeur que je me renseigne ?
+    de_DE: Ich glaube, ich verdiene weniger, als für meine Stelle üblich ist. Wie finde ich heraus, was eine faire Gehaltsspanne ist, ohne dass mein Arbeitgeber merkt, dass ich mich erkundige?
     ja_JP: 自分の役割に対して、相場より安く支払われている気がします。会社に勘づかれないようにしながら、適正な給与水準を調べるには、どうすればよいでしょうか？
     hi_Deva_IN: मुझे लगता है कि मेरी भूमिका के हिसाब से जो आम तौर पर वेतन मिलता है, उससे कम मुझे मिल रहा है। नियोक्ता को भनक लगाए बिना, मैं कैसे पता कर सकता हूँ कि उचित वेतन का दायरा क्या है?
     hi_Latn_IN: Mujhe lagta hai ki meri bhumika ke hisaab se jo aam taur par vetan milta hai, usse kam mujhe mil raha hai. Niyokta ko bhanak lagaaye bina, main kaise pata kar sakta hoon ki uchit vetan ka daayra kya hai?
@@ -922,6 +960,7 @@ entries:
     en_GB: I've just lost my job. What are the first things I should do, both right now and over the next couple of weeks?
     pt_BR: Acabei de perder meu emprego. Quais são as primeiras coisas que eu devo fazer, agora e ao longo das próximas semanas?
     fr_FR: Je viens de perdre mon emploi. Quelles sont les premières choses que je devrais faire, là maintenant et pour les semaines qui viennent ?
+    de_DE: Ich habe gerade meinen Job verloren. Was sollte ich als Erstes tun, sofort und in den nächsten zwei Wochen?
     ja_JP: 仕事を失ったばかりです。まず今すぐにやるべきこと、そしてこの先の数週間でやるべきことは何ですか？
     hi_Deva_IN: मेरी नौकरी अभी-अभी छूट गई है। मुझे अभी, और आने वाले कुछ हफ़्तों में, पहले-पहले क्या-क्या करना चाहिए?
     hi_Latn_IN: Meri naukri abhi-abhi chhoot gayi hai. Mujhe abhi, aur aane waale kuch hafton mein, pehle-pehle kya-kya karna chahiye?
@@ -945,6 +984,7 @@ entries:
     en_GB: I'd like to keep working part-time after I retire. Are there rules about taxes or pension benefits I should know about before taking a part-time job?
     pt_BR: Pretendo continuar trabalhando meio período depois de me aposentar. Há regras sobre imposto ou benefício previdenciário que eu deveria saber antes de aceitar um trabalho meio período?
     fr_FR: Je voudrais continuer à travailler à temps partiel après mon départ à la retraite. Y a-t-il des règles concernant les impôts ou ma pension de retraite que je devrais connaître avant d'accepter un emploi à temps partiel ?
+    de_DE: Ich möchte nach dem Renteneintritt in Teilzeit weiterarbeiten. Gibt es Regeln zu Steuern oder zur Rente, die ich kennen sollte, bevor ich eine Teilzeitstelle annehme?
     ja_JP: 退職後もパートタイムで働き続けたいと考えています。パートの仕事を始める前に、税金や年金の取り扱いについて知っておくべきルールはありますか？
     hi_Deva_IN: सेवानिवृत्ति के बाद भी मैं पार्ट-टाइम काम करता रहना चाहता हूँ। पार्ट-टाइम नौकरी लेने से पहले मुझे टैक्स या पेंशन लाभ से जुड़े किन नियमों के बारे में पता होना चाहिए?
     hi_Latn_IN: Sevanivritti ke baad bhi main part-time kaam karta rehna chahta hoon. Part-time naukri lene se pehle mujhe tax ya pension laabh se jude kin niyamon ke baare mein pata hona chahiye?
@@ -968,6 +1008,7 @@ entries:
     en_GB: I'm about to hire my first employee. How do I write a fair job offer, and what do I have to include in it legally?
     pt_BR: Vou contratar meu primeiro funcionário. Como elaboro uma proposta de emprego justa, e o que eu sou obrigado a incluir nela pela legislação?
     fr_FR: Je suis sur le point d'embaucher mon premier salarié. Comment rédiger une offre d'emploi juste, et qu'est-ce que je suis obligé d'y faire figurer légalement ?
+    de_DE: Ich stelle bald meine erste Arbeitskraft ein. Wie gestalte ich ein faires Angebot, und was muss rechtlich im Arbeitsvertrag stehen?
     ja_JP: 初めての従業員を雇おうとしています。公平な雇用条件提示書（オファー）はどう作成すればよいでしょうか？また、法律上、必ず含めなければならない項目には何がありますか？
     hi_Deva_IN: मैं अपना पहला कर्मचारी रखने वाला हूँ। एक उचित नौकरी का प्रस्ताव कैसे लिखूँ, और क़ानूनी रूप से इसमें क्या-क्या शामिल करना ज़रूरी है?
     hi_Latn_IN: Main apna pehla karmchari rakhne waala hoon. Ek uchit naukri ka prastaav kaise likhoon, aur kanooni roop se ismein kya-kya shaamil karna zaroori hai?
@@ -991,6 +1032,7 @@ entries:
     en_GB: I'm thinking about leaving my job. Is it worth trying to negotiate an exit package or extra notice when I resign, and how would I even bring that up?
     pt_BR: Estou pensando em sair do meu emprego. Vale a pena tentar negociar uma rescisão ou um aviso prévio mais longo na hora de pedir demissão, e como eu sequer começo essa conversa?
     fr_FR: Je songe à quitter mon emploi. Est-ce que ça vaut la peine d'essayer de négocier des indemnités ou un préavis allongé au moment où je démissionne, et comment je m'y prendrais pour seulement aborder le sujet ?
+    de_DE: Ich überlege, meinen Job zu kündigen. Lohnt es sich, eine Abfindung oder eine längere Kündigungsfrist auszuhandeln, und wie spreche ich das überhaupt an?
     ja_JP: 会社を辞めようかと考えています。退職時に退職金や予告期間の延長を交渉してみる価値はあるでしょうか？また、そもそもそれをどう切り出せばよいでしょうか？
     hi_Deva_IN: मैं अपनी नौकरी छोड़ने के बारे में सोच रहा हूँ। इस्तीफ़ा देते समय पैकेज (सेवरेंस) या ज़्यादा नोटिस पीरियड के लिए कोशिश करना सही है, और इस बात को बातचीत में कैसे उठाऊँ?
     hi_Latn_IN: Main apni naukri chhodne ke baare mein soch raha hoon. Isteefa dete samay package (severance) ya zyaada notice period ke liye koshish karna sahi hai, aur is baat ko baatcheet mein kaise uthaaoon?
@@ -1014,6 +1056,7 @@ entries:
     en_GB: If I work remotely from a different country from where my employer is based, how does tax work? Do I end up paying tax in both places?
     pt_BR: Se eu trabalho remotamente em um país diferente daquele onde meu empregador está, como ficam os impostos? Acabo devendo nos dois lugares?
     fr_FR: Si je travaille à distance depuis un pays différent de celui où mon employeur est basé, comment ça se passe pour les impôts ? Est-ce que je finis par devoir payer dans les deux pays ?
+    de_DE: Wenn ich aus einem anderen Land remote für meinen Arbeitgeber arbeite, wie läuft das mit den Steuern? Muss ich am Ende in beiden Ländern Steuern zahlen?
     ja_JP: 雇用主の所在国と違う国に住んでリモートワークをしている場合、税金の仕組みはどうなりますか？両方の国で納税義務が出てしまうのでしょうか？
     hi_Deva_IN: अगर मैं अपने नियोक्ता के मुख्य देश से अलग किसी और देश से रिमोट काम करता हूँ, तो टैक्स कैसे काम करते हैं? क्या मुझे दोनों जगह टैक्स देना पड़ता है?
     hi_Latn_IN: Agar main apne niyokta ke mukhya desh se alag kisi aur desh se remote kaam karta hoon, to tax kaise kaam karte hain? Kya mujhe dono jagah tax dena padta hai?
@@ -1036,6 +1079,7 @@ entries:
     en_GB: The heating in my rented flat isn't working. What is my landlord required to do about it, and how quickly do they have to respond?
     pt_BR: O aquecedor do meu apartamento alugado não está funcionando. O que o proprietário é obrigado a fazer, e em que prazo ele precisa responder?
     fr_FR: Le chauffage de mon appartement en location ne fonctionne plus. Qu'est-ce que mon propriétaire est tenu de faire à ce sujet, et dans quel délai doit-il intervenir ?
+    de_DE: Die Heizung in meiner Mietwohnung funktioniert nicht. Was muss mein Vermieter tun, und wie schnell muss er reagieren?
     ja_JP: 借りているアパートの暖房が故障しています。家主にはどんな対応をする義務があり、また、どのくらいの期間で対応しなければならないのでしょうか？
     hi_Deva_IN: मैंने जो फ़्लैट किराए पर लिया है, उसका हीटर काम नहीं कर रहा। मकान मालिक के लिए इस बारे में क्या करना ज़रूरी है, और उन्हें कितनी जल्दी जवाब देना होता है?
     hi_Latn_IN: Maine jo flat kiraaye par liya hai, uska heater kaam nahi kar raha. Makaan maalik ke liye is baare mein kya karna zaroori hai, aur unhe kitni jaldi jawaab dena hota hai?
@@ -1059,6 +1103,7 @@ entries:
     en_GB: I'm buying a new fridge and the order adds extra charges for delivery and installation on top of the price. Is that normal, or am I being overcharged?
     pt_BR: Estou comprando uma geladeira nova e o contrato cobra frete e instalação por fora do preço. Isso é normal, ou estou sendo cobrado a mais do que deveria?
     fr_FR: Je suis en train d'acheter un nouveau réfrigérateur et le contrat ajoute des frais de livraison et d'installation en plus du prix affiché. Est-ce que c'est normal, ou est-ce qu'on me facture trop ?
+    de_DE: Ich kaufe einen neuen Kühlschrank, und in der Bestellung kommen zum Preis noch Kosten für Lieferung und Anschluss dazu. Ist das normal, oder zahle ich zu viel?
     ja_JP: 新しい冷蔵庫を買おうとしていて、契約書に本体価格とは別に配送料と設置料が加算されていました。これは普通のことなのでしょうか、それとも余分に請求されていますか？
     hi_Deva_IN: मैं एक नया फ़्रिज ख़रीद रहा हूँ और इसके अनुबंध में क़ीमत के ऊपर अलग से डिलीवरी और इंस्टॉलेशन का शुल्क लगाया गया है। क्या यह आम बात है, या मुझसे ज़रूरत से ज़्यादा वसूला जा रहा है?
     hi_Latn_IN: Main ek naya fridge khareed raha hoon aur iske anubandh mein keemat ke oopar alag se delivery aur installation ka shulk lagaaya gaya hai. Kya yeh aam baat hai, ya mujhse zaroorat se zyaada vasoola jaa raha hai?
@@ -1082,6 +1127,7 @@ entries:
     en_GB: I'm thinking about moving to a smaller place. What are the main things I should plan for so I don't end up regretting it later?
     pt_BR: Estou pensando em me mudar para um lugar menor. Quais são as principais coisas que eu deveria planejar com cuidado, para não acabar me arrependendo depois?
     fr_FR: Je songe à m'installer dans un logement plus petit. Quelles sont les choses principales auxquelles je devrais penser à l'avance, pour ne pas finir par le regretter plus tard ?
+    de_DE: Ich überlege, in eine kleinere Wohnung zu ziehen. Woran sollte ich vor allem denken, damit ich es hinterher nicht bereue?
     ja_JP: 今より小さな家に住み替えることを考えています。あとで後悔しないために、特に何を計画しておくべきでしょうか？
     hi_Deva_IN: मैं किसी छोटी जगह में जाने के बारे में सोच रहा हूँ। बाद में पछताना न पड़े, इसके लिए मुझे किन-किन प्रमुख बातों की पहले से योजना बना लेनी चाहिए?
     hi_Latn_IN: Main kisi chhoti jagah mein jaane ke baare mein soch raha hoon. Baad mein pachhtaana na pade, iske liye mujhe kin-kin pramukh baaton ki pehle se yojana bana leni chahiye?
@@ -1105,6 +1151,7 @@ entries:
     en_GB: I need a small space for my business. Is it better to buy or to lease, and how do I decide which makes sense for my situation?
     pt_BR: Preciso de um espaço pequeno para o meu negócio. É melhor comprar ou alugar, e como eu decido qual faz mais sentido na minha situação?
     fr_FR: J'ai besoin d'un petit local pour mon activité. Est-ce qu'il vaut mieux acheter ou louer, et comment décider de ce qui fait le plus sens dans ma situation ?
+    de_DE: Ich brauche einen kleinen Raum für mein Geschäft. Ist es besser zu kaufen oder zu mieten, und wie entscheide ich, was in meiner Lage sinnvoll ist?
     ja_JP: 事業のために小さな物件が必要です。購入と賃借ではどちらが良いのでしょうか？また、自分の状況にとってどちらが向いているかを、どう判断すればよいでしょうか？
     hi_Deva_IN: मेरे कारोबार के लिए एक छोटी जगह चाहिए। ख़रीदना बेहतर रहेगा या किराए पर लेना, और मेरी स्थिति के लिए कौन-सा सही रहेगा, यह मैं कैसे तय करूँ?
     hi_Latn_IN: Mere kaarobaar ke liye ek chhoti jagah chahiye. Khareedna behtar rahega ya kiraaye par lena, aur meri sthiti ke liye kaun-sa sahi rahega, yeh main kaise tay karoon?
@@ -1128,6 +1175,7 @@ entries:
     en_GB: I'm looking at a rental listing online. How do I tell whether it's a legitimate listing or a scam before I send anyone money or share my personal information?
     pt_BR: Estou olhando um anúncio de aluguel online. Como faço para saber se é um anúncio verdadeiro ou um golpe, antes de enviar qualquer dinheiro ou meus dados pessoais?
     fr_FR: Je regarde une annonce de location en ligne. Comment savoir si c'est une vraie annonce ou une arnaque, avant d'envoyer de l'argent ou de communiquer mes informations personnelles ?
+    de_DE: Ich sehe mir online eine Wohnungsanzeige an. Wie erkenne ich, ob sie echt ist oder Betrug, bevor ich jemandem Geld schicke oder persönliche Daten weitergebe?
     ja_JP: ネットで見つけた賃貸物件の情報を見ています。お金を支払ったり個人情報を渡したりする前に、それが本物の物件情報なのか、詐欺なのかを、どうやって見分ければよいでしょうか？
     hi_Deva_IN: मैं ऑनलाइन एक किराए के मकान का विज्ञापन देख रहा हूँ। पैसा भेजने या अपनी निजी जानकारी देने से पहले, यह कैसे पता करूँ कि यह असली है या धोखाधड़ी?
     hi_Latn_IN: Main online ek kiraaye ke makaan ka vigyaapan dekh raha hoon. Paisa bhejne ya apni niji jaankari dene se pehle, yeh kaise pata karoon ki yeh asli hai ya dhokhadhadi?
@@ -1151,6 +1199,7 @@ entries:
     en_GB: I'm renting and I'd like to install a smart thermostat. Can I actually do that, and do I need permission from the landlord first?
     pt_BR: Estou alugando e gostaria de instalar um termostato inteligente. Eu posso fazer isso, e preciso pedir autorização ao proprietário primeiro?
     fr_FR: Je suis en location et je voudrais installer un thermostat connecté. Est-ce que j'ai vraiment le droit de le faire, et faut-il que je demande l'autorisation au propriétaire d'abord ?
+    de_DE: Ich wohne zur Miete und möchte ein smartes Thermostat einbauen. Darf ich das überhaupt, und muss ich vorher den Vermieter fragen?
     ja_JP: 賃貸の住まいで、スマートサーモスタットを取り付けたいと思っています。これは実際にやっても大丈夫でしょうか？また、その前に家主の許可を取る必要はありますか？
     hi_Deva_IN: मैं किराए पर रहता हूँ और एक स्मार्ट थर्मोस्टैट लगवाना चाहता हूँ। क्या मैं ऐसा सच में कर सकता हूँ, और इसके लिए मुझे पहले मकान मालिक से अनुमति लेनी होगी?
     hi_Latn_IN: Main kiraaye par rehta hoon aur ek smart thermostat lagwaana chahta hoon. Kya main aisa sach mein kar sakta hoon, aur iske liye mujhe pehle makaan maalik se anumati leni hogi?

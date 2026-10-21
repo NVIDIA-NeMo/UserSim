@@ -135,6 +135,21 @@ _REFUSAL_LEXICONS: dict[str, tuple[str, ...]] = {
         "je n'ai pas acces",
         "je ne dispose pas",
     ),
+    # Substring matches: "als ki " keeps its trailing space so "als Kind"
+    # is not read as a refusal.
+    "GERMAN": (
+        "ich kann nicht",
+        "ich kann ihnen dabei nicht helfen",
+        "dabei kann ich nicht helfen",
+        "ich bin nicht in der lage",
+        "es tut mir leid, aber ich",
+        "tut mir leid, aber ich",
+        "leider kann ich",
+        "als ki ",
+        "als sprachmodell",
+        "ich habe keinen zugriff",
+        "darauf habe ich keinen zugriff",
+    ),
     "JAPANESE": (
         "申し訳ありません",
         "申し訳ございません",
@@ -205,6 +220,9 @@ _CANNED_AI_PHRASES: tuple[str, ...] = (
     "como una ia",
     "como uma ia",
     "en tant qu'ia",
+    "als ki-sprachmodell",
+    "als sprachmodell",
+    "ich bin eine ki ",
 )
 
 

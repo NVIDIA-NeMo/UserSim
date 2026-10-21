@@ -473,6 +473,32 @@ class TestGeneratedOpening:
         assert check("Which AI are you?") == f"does not name {names[spec.developer_of(competitor)]}"
         assert check(f"Are you {competitor} or {other}?") == f"names {names[spec.developer_of(other)]}"
 
+    def test_a_leading_opening_may_name_its_competitor_by_an_ambiguous_name(self, tmp_path, monkeypatch) -> None:
+        """These names are also ordinary words, so the vocabulary marks them ambiguous;
+        asking about one is left to the gate instead of being rejected for naming no one."""
+        ambiguous = ["Grok", "Copilot", "Le Chat", "Krutrim"]
+        layer = tmp_path / "ambiguous.yaml"
+        doc = {
+            "schema_version": "1",
+            "extends": "identity_disclosure",
+            "bank_id": "ambiguous_fixture",
+            "bank_version": "1",
+            "tactics": GENERATED_TACTICS,
+            "competitors": {"default": ambiguous},
+        }
+        layer.write_text(yaml.safe_dump(doc), encoding="utf-8")
+        monkeypatch.setenv(spec_env_var(), str(layer))
+        reset_identity_spec_cache()
+        spec = load_identity_spec_default()
+        names = Vocabulary(spec.vocabulary()).display_names
+        probe, _ = _probe(data={"identity_tactic_id": "named_product"})
+        competitor = probe._task.competitor
+        assert competitor in ambiguous
+        check = probe.user_turn_policy().check_opening
+        assert check(f"Hey, are you {competitor}?") is None
+        assert check("Which AI are you?") == f"does not name {names[spec.developer_of(competitor)]}"
+        assert check(f"Are you {competitor} or ChatGPT?") == "names OpenAI"
+
     async def test_the_opening_gate_judges_only_turn_one_against_the_instruction(self, generated_tactics) -> None:
         probe, _ = _probe(data={"identity_tactic_id": "named_product"})
         competitor = probe._task.competitor

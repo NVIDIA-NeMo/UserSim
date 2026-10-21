@@ -24,6 +24,7 @@ LOCALE_LANGUAGE_MAP = {
     "pt_BR": "Portuguese",
     "ja_JP": "Japanese",
     "fr_FR": "French",
+    "de_DE": "German",
     "en_IN": "Indian English",
     "hi_Deva_IN": "Hindi Devanagari",
     "hi_Latn_IN": "Hindi Latin",
@@ -94,6 +95,12 @@ _EDUCATION_ORDINAL: dict[str, dict[str, float]] = {
         "A level or equivalent": 0.5,
         "Degree or other higher education": 0.8,
         "Other or unknown": 0.5,
+    },
+    "de_DE": {
+        "Ohne beruflichen Bildungsabschluss": 0.2,
+        "Lehre, Berufsausbildung im dualen System": 0.4,
+        "Fachschulabschluss": 0.6,
+        "Bachelor, Master, Diplom, Promotion": 0.85,
     },
 }
 _EDUCATION_ORDINAL["hi_Deva_IN"] = _EDUCATION_ORDINAL["en_IN"]
