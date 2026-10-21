@@ -327,8 +327,8 @@ def select_runs_for_comparison(
 def _short_label(model_id: str | None) -> str:
     """Strip provider prefix from a ``model_id`` for the chart label.
 
-    ``"nvidia/google/gemma-4-31b-it"`` -> ``"gemma-4-31b-it"``
-    ``"openai/openai/gpt-5.4"`` -> ``"gpt-5.4"``
+    ``"google/gemma-4-31b-it"`` -> ``"gemma-4-31b-it"``
+    ``"openai/gpt-oss-20b"`` -> ``"gpt-oss-20b"``
     Falls back to ``"<unknown>"`` for None / empty.
     """
     if not model_id:

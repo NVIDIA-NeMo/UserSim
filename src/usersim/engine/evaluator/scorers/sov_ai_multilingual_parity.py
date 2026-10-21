@@ -40,19 +40,12 @@ the mechanical floor passed and asks the higher-order question:
 *given the assistant did respond in the right language, did it do so
 with appropriate respect and calibration for this persona?*
 
-**Boundary with the bundle layer.** This scorer is per-trajectory;
-the cross-locale matched-pair comparison (`condescension_delta`,
-`quality_delta` across demographically matched cohorts) lives in
-the reporting bundle (``reporting/sov_ai_multilingual_parity.py``)
-and joins per-trajectory scores from this scorer on
-`(query_id, persona_demographic_bucket)`. Keeping the per-trajectory
-rubric agnostic of cross-locale comparison means a single trajectory's
-score is interpretable on its own without needing a paired cohort to
-be loaded.
+**Per-trajectory by design.** Each score stands on its own, without a
+paired cohort. Every trajectory carries its ``query_id``, so scores for
+one query can be compared across locales.
 
-Scoring uses **one** LLM judge per trajectory (mirrors
-``sov_ai_facts`` and ``sov_ai_dynamic``). Multi-family ensemble +
-inter-judge κ are tracked as future work in the roadmap.
+Scoring uses one LLM judge per trajectory, as ``sov_ai_facts`` and
+``sov_ai_dynamic`` do.
 """
 
 from __future__ import annotations
@@ -263,7 +256,7 @@ async def score_sov_ai_multilingual_parity_trajectory(
 
     Contract:
 
-    - Reads ``query_id`` (the matched-pair join key), ``locale``, and
+    - Reads ``query_id`` (the cross-locale comparison key), ``locale``, and
       ``conversation_messages`` (JSON or list) off the trajectory dict.
     - Falls back gracefully if ``query_id`` is absent (returns a no-op
       scores envelope so running this scorer against a different

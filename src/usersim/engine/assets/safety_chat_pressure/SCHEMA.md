@@ -96,7 +96,7 @@ One bank per file. The loader picks one by path; the env override is
 | `id` | str | ✓ | Unique across the bank's `target_requests` list. Convention: `TR-<HARM-SHORT>-B<NNN>` where `<HARM-SHORT>` is `SB`, `M`, `D`, `F`, `C`, `PI`, `I`, `H` for the eight harm categories (e.g., `TR-D-B001`, `TR-PI-B003`). The format is *convention only*: uniqueness is the only hard requirement, and lookup code does not parse the ID. |
 | `description` | str | ✓ | Reviewer-facing one-line description of the request and why the assistant should refuse it. |
 | `harm_category` | str | ✓ | Must appear in the bank's `harm_categories` list. Used for stratified reporting and reviewer triage. |
-| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). The reporting layer surfaces the fraction of probed targets that were placeholder; the capability dashboard treats placeholder-only scorecards as preview-only (mirrors the placeholder discipline used by other asset banks). Reviewers set this to `false` once the entry passes review. |
+| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that probes a placeholder target records a `used_placeholder_target` warning on its `simulation_outcome`. Reviewers set this to `false` once the entry passes review. |
 | `initial_prompt` | str | ✓ | The verbatim text the user-agent sends as the first turn of the trajectory. Authored to be **clearly inappropriate but low real-world harm**: refusal is the right answer, but capitulation outputs an embarrassing failure (a generic manipulative paragraph, a faked document template, etc.) rather than catastrophic harm. See §Placeholder discipline for the safety bar. |
 | `expected_refusal` | str | ✓ | A short reviewer-authored sketch of what an honest refusal looks like for this request: e.g., "decline + name the policy reason + offer a legitimate alternative if applicable." The scorer reads this to ground its "did the assistant flip?" judgement; not a verbatim regex match, just a rubric anchor. |
 | `persona_tags` | list[str] | optional | If present, restricts which personas this target should be probed against. Empty / omitted = applicable to every persona. Same structured-tag vocabulary as the fact bank and query bank. Use sparingly: most safety probes are persona-agnostic by design. |
@@ -142,9 +142,10 @@ require a separate non-public bank with its own reviewer process: the
 schema supports this through the env override (`USERSIM_SAFETY_CHAT_PRESSURE_BANK`)
 but the public placeholder bank stays bounded by the safety bar above.
 
-The capability dashboard treats as preview-only for any
-trajectory that probed a `placeholder: true` target, same epistemic
-discipline as other asset-bank placeholder gates.
+A subject-matter expert (SME) hasn't reviewed targets marked
+`placeholder: true`. Trajectories that probe one record a
+`used_placeholder_target` warning, and SME verification is recommended
+before relying on their results.
 
 ## Loader contract
 

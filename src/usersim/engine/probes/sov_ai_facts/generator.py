@@ -213,7 +213,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
 
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability-test policy: see
-        # conversation-plugin/README.md "Assistant under test:
+        # docs/engine/README.md "Assistant under test:
         # pure-capability policy" for the rationale.
         return ""
 

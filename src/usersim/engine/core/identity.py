@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Stable identity for personas and trajectories — the reproducibility spine.
+"""Stable identity for personas and trajectories.
 
-Two derived IDs anchor every replay / matched-pair / canary / idempotent
-re-run in this framework:
+Two derived IDs identify personas and trajectories:
 
 - ``persona_uuid`` is the SHA-256 (16 hex chars) of the persona's
   canonical JSON form. **It is observed, not assigned.** Two runs that
@@ -13,15 +12,16 @@ re-run in this framework:
 - ``trajectory_id`` is the SHA-256 (16 hex chars) of all the inputs
   that determine what a row's content depends on: persona, probe
   family + variant, ``scenario_seed`` (the per-row seed input column),
-  the resolved model identities for each role, and the probe's
-  ``PROMPT_VERSION``. Deterministic given the same inputs — so the
-  simulator can dedup on it cheaply.
+  the resolved user and assistant model ids, the probe's
+  ``PROMPT_VERSION``, and any ``extra_keys`` (the simulator adds the
+  row's locale, and a flag when the assistant's reasoning is replayed).
+  Deterministic given the same inputs, so the simulator can dedup on it
+  cheaply.
 
-See the design plan §2.6 ("Reproducibility spine") and the roadmap
-load-bearing-decisions section for the rationale: dynamic persona
-sampling is preserved (not replaced by a fixed panel); identity is
-content-derived; replay is a special case of "load a trajectory parquet
-as a seed."
+Design: personas are sampled per run rather than fixed by a panel,
+identity is derived from content, and running the same rows again means
+storing them with ``--materialize-inputs`` and running them with
+``--inputs``.
 """
 
 from __future__ import annotations
@@ -42,10 +42,9 @@ from usersim.engine.core.missing import is_missing
 #   - The same persona drawn at different times — same content, no
 #     transient noise — yields the same UUID by construction.
 #
-# The list reflects the PGM-grounded fields shipped today across
-# en_US / pt_BR / ja_JP / en_IN / hi_Deva_IN / fr_FR. Locale-specific
-# region keys (state, prefecture, departement, region) are handled
-# below by always projecting whichever ones are present.
+# Fields a persona dataset lacks are skipped, so one list serves every
+# locale. Locale-specific region keys (state, prefecture, departement,
+# region) are handled by always projecting whichever ones are present.
 _CANONICAL_PERSONA_KEYS: tuple[str, ...] = (
     "first_name",
     "middle_name",
@@ -196,10 +195,9 @@ def trajectory_id(
                              | scenario_seed | user_model | assistant_model
                              | prompt_version | *extra_keys)[:16]``
 
-    ``extra_keys`` is an optional iterable of ``(name, value)`` pairs for
-    probe-specific salting (e.g., for the ``safety_chat_pressure`` probe
-    we may include the `pressure_strategy_seed` to discriminate cohorts
-    that share persona + probe_family + variant).
+    ``extra_keys`` is an optional iterable of ``(name, value)`` pairs
+    appended to the hash. The simulator passes the row's ``locale`` and,
+    when the assistant's reasoning is replayed, ``replay_assistant_reasoning``.
     """
     parts: list[str] = [
         persona_uuid,

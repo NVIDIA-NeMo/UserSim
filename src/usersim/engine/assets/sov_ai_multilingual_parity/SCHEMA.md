@@ -1,4 +1,4 @@
-## Query bank schema
+# Query bank schema
 
 A **query bank** is a curated YAML file containing **cross-locale query
 templates** used by the `sov_ai_multilingual_parity` probe
@@ -8,9 +8,9 @@ and respect.
 
 The unit is the **conceptual question**, not the locale-specific
 phrasing. Each entry holds N locale renderings of the same underlying
-query, plus a single `query_id` so trajectories that probed the same
-conceptual question (in different locales, by different personas) can
-be joined for matched-pair / similarity-based comparison downstream.
+query, plus a single `query_id`, carried on every trajectory, so
+results for the same conceptual question can be compared across
+locales and personas.
 
 This schema is structurally different from the fact bank
 (`assets/sov_ai_facts/SCHEMA.md`) and the probing taxonomy
@@ -22,10 +22,9 @@ This schema is structurally different from the fact bank
 | Probing taxonomy | One topic category per entry | One file per locale, content authored separately per locale | ✗ | ✗ |
 | **Query bank** | **One conceptual query per entry** | **One file shared across locales; N renderings per entry** | ✗ (scoring is respect-parity, not correctness) | ✗ (queries are neutral; the bias is in the model's response) |
 
-The cross-locale design is the load-bearing feature: matched-pair
-comparison ("how does the model respond to *the same question* in
-Hindi vs. English by *demographically matched* personas?") needs the
-same conceptual content to appear in N locales tied by a shared
+The cross-locale design is the key feature: comparing how a model
+answers *the same question* in Hindi and in English needs the same
+conceptual content to appear in N locales, tied by a shared
 identifier. Per-locale separate authoring would not give us this.
 
 ## File layout
@@ -58,7 +57,7 @@ safety-sensitive bank) can coexist; the loader picks one by path.
 |---|---|---|---|
 | `id` | str | ✓ | Unique across the bank. Convention: `Q-<DOMAIN-SHORT>-<NNN>` (e.g., `Q-MEDS-001`, `Q-TAX-002`, `Q-VOTE-001`). The id is **locale-independent** and joins all renderings of the same query. |
 | `domain` | str | ✓ | Must appear in the bank's `domains` list. Used for stratified reporting. |
-| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). The reporting layer surfaces the fraction of probed queries that were placeholder; the scorer flags placeholder-only scorecards as preview-only. Reviewers set this to `false` once the entry passes review. |
+| `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that uses a placeholder query records a `used_placeholder_query` warning on its `simulation_outcome`. Reviewers set this to `false` once the entry passes review. |
 | `difficulty` | str | ✓ | One of `easy`, `medium`, `hard`. Refers to the **conceptual difficulty of the question**, not the language difficulty (which varies by locale and reviewer). Used for stratified scoring. |
 | `persona_tags` | list[str] | ✓ (≥1) | Tags used by the probe to match queries to personas. Follow the structured form below. At least one tag required so every query is reachable via persona-targeted selection. |
 | `concern` | str | ✓ | A reviewer-facing prose description of *what failure mode this query is designed to surface*. Examples: "tests whether the model gives the same level of clinical detail to a low-education user as to a high-education user asking the same medication question"; "tests whether the model invents an English-language US-centric process when asked in Hindi about Indian voter registration". The concern is what makes the query useful: it tells the reviewer what they should look for in the response. Required and non-empty for every entry. |
@@ -84,7 +83,7 @@ Every entry carries a `provenance` block:
 
 ```yaml
 provenance:
-  source: "internal authorship 2026-04 (placeholder)"
+  source: "placeholder"
   last_reviewed: "2026-04-20"
   references: []
 ```
@@ -92,18 +91,16 @@ provenance:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `source` | str | ✓ | Human-readable description of where the query came from (and who reviewed it). `"placeholder"` is allowed only when `placeholder: true`. |
-| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. Used by the loader to flag stale entries. |
+| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. The loader checks the `YYYY-MM-DD` format. |
 | `references` | list[str] | optional | URLs / citations. Useful when the query is derived from a real-world report or benchmark; non-placeholder entries SHOULD have at least one. |
 
 ## Placeholder discipline
 
-Every entry in a bank shipped with `placeholder: true` is a stub.
-Reviewers must replace placeholder content with locally-vetted
-queries before any production claim is made off the resulting
-scorecard. The capability dashboard treats as preview-only
-production-ready claims for any locale that probed against
-placeholder queries, same epistemic discipline as fact-bank
-placeholders and probing-taxonomy placeholders.
+Every entry in a bank shipped with `placeholder: true` is a stub that
+a subject-matter expert (SME) hasn't reviewed. SME verification is
+recommended before relying on results that rest on placeholder
+queries. Trajectories that used one carry a `used_placeholder_query`
+warning, so those results are easy to find.
 
 The placeholder-flagged shipped queries serve three concrete purposes:
 

@@ -695,8 +695,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                     f"kb_search queries machine-translated into "
                     f"{corpus_language} to search the "
                     f"{self._asset_locale} corpus for conversation "
-                    f"locale={self._locale}; retrieval metrics are "
-                    "preview-only until a native bank lands"
+                    f"locale={self._locale}; retrieval metrics depend on "
+                    "the translation (native-speaker verification recommended)"
                 ),
             )
         return translated

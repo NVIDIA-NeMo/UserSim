@@ -224,8 +224,7 @@ class ConversationSimulatorConfig(SingleColumnConfig):
             "simulation_traces",
             "probe_family",
             "probe_variant",
-            # Stable identity for replay / matched-pair / canary /
-            # idempotent re-runs. See core/identity.py.
+            # Stable identity for idempotent re-runs. See core/identity.py.
             "persona_uuid",
             "trajectory_id",
             "usersim_provenance",

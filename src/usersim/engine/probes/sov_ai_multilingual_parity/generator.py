@@ -17,16 +17,16 @@ sim-side ``should_succeed`` invariant, and the per-row metadata.
 
 Side channels emitted on the trajectory:
 
-- ``state.metadata["query_id"]`` — the cross-locale matched-pair join
-  key (load-bearing for downstream cross-locale parity analysis).
+- ``state.metadata["query_id"]``: the cross-locale comparison key,
+  shared by every rendering of one query.
 - ``state.metadata["query_domain"]`` / ``query_difficulty`` /
   ``query_concern`` — for stratified reporting and reviewer triage.
 - ``state.metadata["bank_id"]`` / ``bank_version`` — so the scorer
   can re-load the bank and the reporter can stratify by bank version.
 - ``result["probe_variant"]`` — set to the picked ``query.id``
   (per-row discriminator).
-- ``result["query_id"]`` — top-level for evaluator scorer + matched-
-  pair join (the load-bearing column).
+- ``result["query_id"]``: top-level column the evaluator scorer reads,
+  and the key for comparing one query across locales.
 - ``SimulationOutcome.provenance.bank_version["<locale>"]`` — bank
   version used (locale-keyed; ``BankBackedProbe`` substrate handles
   this via ``bank_version_key=None``).
@@ -205,7 +205,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         Presence-aware: if this is an India variant whose own rendering the
         shared bank already ships, use it (graduation); otherwise use the
         India base (en_IN) that the substrate resolved into
-        ``self._asset_locale``. The matched-pair join key (``query_id``) is
+        ``self._asset_locale``. The comparison key (``query_id``) is
         identical across India variants because they share the same en_IN
         persona hash + bank salt + seed.
         """
@@ -250,7 +250,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         # right language is exactly part of what `language_compliance`
         # and the multilingual scorer measure — an out-of-the-box
         # response that defaults to English IS a finding, not a
-        # missing affordance. See conversation-plugin/README.md
+        # missing affordance. See docs/engine/README.md
         # "Assistant under test: pure-capability policy".
         return ""
 
@@ -274,7 +274,8 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         # The rendering is the en_IN (base) authored text for an India
         # variant without its own rendering; machine-translate it into the
         # conversation language (no-op for shipped locales / native
-        # renderings). query_id is unchanged, so matched pairs still join.
+        # renderings). query_id is unchanged, so the row still compares
+        # with the same query in other locales.
         return await self._localize_verbatim(self._rendering)
 
     async def format_followup_user_instructions(

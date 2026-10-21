@@ -155,33 +155,40 @@ _PROBE_DESCRIPTIONS = {
         "schema validation, and recovery from tool-call failures."
     ),
     "general_open_ended": (
-        "Tests open-ended conversational quality across diverse "
-        "personas — coherence, follow-through, calibration to the "
-        "user's apparent expertise."
+        "Tests information-seeking conversations across diverse "
+        "personas: accurate, coherent answers pitched to the user's "
+        "apparent expertise, and a clarifying question rather than an "
+        "information dump when a request is vague."
     ),
     "general_educational": (
-        "Tests general_educational / explanatory response quality — "
-        "structure, accuracy, calibration to the user's stated "
-        "background."
+        "Tests tutoring: a persona-grounded learner asks about a "
+        "subject, and the probe looks at whether explanations are "
+        "accurate, pitched at the learner's level and scaffolded "
+        "with examples, without condescension."
     ),
     "sov_ai_facts": (
-        "Tests recall and reasoning over locale-specific (sovereign) "
-        "facts drawn from a curated bank — ground-truth answers + "
-        "false-premise probes."
+        "Tests recall of locale-specific (sovereign) facts drawn from "
+        "a curated bank, graded against ground-truth answers. Some "
+        "questions embed a false premise to correct; others give a "
+        "partial verse for the assistant to continue."
     ),
     "sov_ai_dynamic": (
-        "Tests for biased framing, condescension, or stereotyped "
-        "assumptions when a persona-driven user explores topics "
-        "tied to their demographic profile."
+        "Tests locale-specific knowledge where no curated answer "
+        "exists: a persona-voiced user explores a topic from the "
+        "locale's taxonomy (history, geography, culture, public "
+        "services and more), and a judge flags suspected fabrication, "
+        "self-contradiction across turns and confident guesses where "
+        "declining was better."
     ),
     "sov_ai_multilingual_parity": (
-        "Tests response consistency across languages for the same "
-        "matched-pair query — does the assistant treat speakers of "
-        "low-resource languages with the same respect / depth as "
-        "English speakers?"
+        "Tests respect and calibration on the same question asked in "
+        "every locale: does the assistant engage each user as a peer "
+        "and pitch a helpful answer to them, rather than condescend or "
+        "deflect? Each row records its query_id, so answers to one "
+        "question can be compared across locales."
     ),
     "safety_chat_pressure": (
-        "Tests safety under multi-turn conversational pressure — "
+        "Tests safety under multi-turn conversational pressure: "
         "does the assistant hold the line when the user persists, "
         "reframes, or escalates a target request?"
     ),
@@ -202,21 +209,54 @@ _PROBE_DESCRIPTIONS = {
         "(param-locked tasks scored by a deterministic tool/retrieval "
         "verifier) and dynamic (open-ended questions from an authored "
         "taxonomy, scored by a reference-grounded judge on grounding, "
-        "numeric faithfulness, boundary adherence, and no-fabrication). "
+        "numeric faithfulness, boundary adherence, no fabrication, "
+        "graceful unknowns and self-consistency). "
         "Retrieval is scoped to a single institution."
     ),
     "identity_disclosure": (
         "Tests whether the assistant names the developer that made it "
         "when a persona asks who it is or who made it, with no system "
-        "prompt: neutral questions, and 'Are you made by X?' naming the "
-        "true developer or a competitor."
+        "prompt: neutral questions, 'Are you made by X?' naming the "
+        "true developer or a competitor, and, in multi-turn runs, a "
+        "user who keeps pressing the competitor."
+    ),
+    "health_therapy_disclosure": (
+        "Tests whether a therapy assistant draws out what a guarded "
+        "client discloses only gradually, including self-harm or "
+        "crisis risk. In the guarded variant the user paces disclosure "
+        "by plan, and the health_disclosure_concealment scorer "
+        "measures how much the assistant drew out."
+    ),
+    "health_triage_disclosure": (
+        "Tests whether a care-navigation (triage) assistant surfaces "
+        "urgent red-flag symptoms that a patient downplays and reveals "
+        "only when asked directly. In the guarded variant the user "
+        "paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
+    ),
+    "health_decision_support_disclosure": (
+        "Tests whether a clinical decision-support assistant asks the "
+        "questions that surface a key finding or red-flag danger sign "
+        "a clinician leaves out when first presenting a case. In the "
+        "guarded variant the user paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
+    ),
+    "health_general_disclosure": (
+        "Tests whether a general health assistant surfaces the "
+        "red-flag symptoms and medication lapses that a patient with "
+        "an ongoing condition downplays. In the guarded variant the "
+        "user paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
     ),
 }
 
 
 # Warning kinds that indicate the trajectory probed against an asset
-# the bank itself flagged as ``placeholder: true`` (i.e. the asset is
-# not yet reviewer-blessed for production claims). These are an
+# the bank itself flagged as ``placeholder: true`` (i.e. no
+# subject-matter expert has reviewed it). These are an
 # asset-bank concern, not a simulation-quality concern — the
 # *simulation* still ran cleanly, the *content* is what's tainted.
 # Filtered out of:
@@ -226,9 +266,7 @@ _PROBE_DESCRIPTIONS = {
 #     placeholder-kind reads as SIM OK in the preview, not WARN —
 #     the upstream ``simulation_outcome.status`` is unchanged on
 #     the parquet, this is a UI-layer override only).
-# Downstream reporting still treats placeholder-tainted trajectories
-# as preview-only via the ``placeholder_*`` counters surfaced on the
-# capability dashboard, which is the correct surface for that signal.
+# The warnings themselves stay in the row's ``simulation_outcome.warnings``.
 # Panel box style. Side borders (vertical pipes) jitter for CJK /
 # Devanagari content because Rich measures glyphs in fixed
 # character cells but the glyphs render at variable pixel widths
@@ -1415,7 +1453,7 @@ def preview_row(
                     persona_text.append(label, style=pill_style or "")
                 persona_text.append(f" ({score_str})")
                 if desc:
-                    persona_text.append(f" — {desc}", style="dim")
+                    persona_text.append(f": {desc}", style="dim")
                 persona_text.append("\n")
 
     console.print(

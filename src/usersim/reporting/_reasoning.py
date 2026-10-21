@@ -43,9 +43,9 @@ encoding lookup is deferred -- the model string lives on the run manifest
 between ``cl100k_base`` and the provider's actual tokenizer is the
 dominant error term and is what the noise floor is sized to swallow.
 
-Future direction: if DataDesigner adds provider-captured reasoning to
-``Usage`` (`tracked here for follow-up`), Phase A capture can be
-reintroduced as a faster / more accurate path.
+If DataDesigner adds provider-captured reasoning counts to ``Usage``,
+reading them at sim time would be faster and more accurate than this
+estimate.
 """
 
 from __future__ import annotations
@@ -62,17 +62,16 @@ _VISIBLE_OUTPUT_ALIASES: tuple[str, ...] = (
 )
 
 # Aliases whose output isn't preserved on the trajectory -- always
-# ``unavailable`` because Phase B has no visible content to tokenize.
+# ``unavailable`` because there is no visible content to tokenize.
 _UNAVAILABLE_ALIASES: tuple[str, ...] = ("judge_model", "summary_model")
 
 
 # Per-alias noise floor: aggregate reasoning estimates below this fraction
 # of the alias's output tokens are clamped to zero and flagged
 # ``unavailable``. Sized to swallow tokenizer-mismatch drift between
-# ``cl100k_base`` and the provider's actual tokenizer (we've seen ~1%
-# drift on Gemma / NVIDIA inference hub). Real reasoning models clear
-# this floor by 4-10x in practice (see roadmap entry for the empirical
-# evidence).
+# ``cl100k_base`` and the provider's actual tokenizer (about 1% drift
+# observed on Gemma behind an OpenAI-compatible endpoint). Reasoning
+# models clear this floor by 4-10x in practice.
 _REASONING_NOISE_FLOOR_RATIO: float = 0.05
 
 

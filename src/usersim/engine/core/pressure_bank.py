@@ -346,8 +346,8 @@ def _build_pressure_bank(doc: dict[str, Any], *, src_path: str) -> PressureBank:
     if n_placeholder:
         logger.info(
             "pressure_bank: loaded %s v%s with %d placeholder target(s) of %d "
-            "total — downstream readers (capability dashboard, scorers) treat "
-            "trajectories that probed against placeholder targets as preview-only",
+            "total; rows that use one record used_placeholder_target "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

@@ -21,11 +21,11 @@ Traffic crosses that boundary in BOTH directions, so there are two helpers:
   handed to the user; translating turn-1 localizes the whole asset for every
   other probe.
 
-This is a stop-gap. It runs ONLY when a probe fell back to a base-locale asset
-(i.e. no native per-language bank exists yet); once native assets land, the
-probe resolves the variant's own asset and no translation happens. Translated
-rows are flagged ``WarningKind.USED_MACHINE_TRANSLATION`` so downstream
-scorecards treat them as preview-only.
+It runs ONLY when a probe falls back to a base-locale asset because the locale
+has no native asset of its own; a locale with a native asset resolves it, and
+no translation happens. Translated rows are flagged
+``WarningKind.USED_MACHINE_TRANSLATION``, and native-speaker verification is
+recommended before relying on their results.
 
 The helper is deliberately defensive: it never raises. On any failure (LLM
 error, empty output) it returns the input text unchanged, so the caller's

@@ -376,8 +376,8 @@ def _build_bank(doc: dict[str, Any], *, src_path: str) -> AgenticBank:
     if n_placeholder:
         logger.info(
             "agentic_bank: loaded %s v%s with %d placeholder action request(s) "
-            "of %d total — downstream readers (capability dashboard, scorers) "
-            "treat placeholder-tainted trajectories as preview-only",
+            "of %d total; rows that use one record used_placeholder_agentic_action "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

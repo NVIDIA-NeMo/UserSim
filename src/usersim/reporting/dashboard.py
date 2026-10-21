@@ -666,7 +666,7 @@ function FindingCard({{finding, dim}}) {{
             h("span", {{className:"finding-why-label"}}, "Measures: "),
             h("span", {{className:"finding-why-text"}}, finding.description)
           )
-        : h("p", {{className:"muted finding-reasoning-empty"}}, "Computed by a deterministic scorer, which records no per-conversation reasoning.")
+        : h("p", {{className:"muted finding-reasoning-empty"}}, "This scorer records no per-conversation reasoning for this axis.")
   );
 }}
 function ConversationPanel({{snippet, exampleNumber}}) {{

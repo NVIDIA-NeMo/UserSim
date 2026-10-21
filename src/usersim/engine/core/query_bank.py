@@ -320,9 +320,9 @@ def _build_query_bank(doc: dict[str, Any], *, src_path: str) -> QueryBank:
     n_placeholder = sum(1 for q in bank.queries if q.placeholder)
     if n_placeholder:
         logger.info(
-            "query_bank: loaded %s v%s with %d placeholder query(ies) of %d total "
-            "— downstream sovereign-AI scorecards will refuse production-ready "
-            "headlines for trajectories that probed against placeholder queries",
+            "query_bank: loaded %s v%s with %d placeholder query(ies) of %d total; "
+            "rows that use one record used_placeholder_query "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

@@ -14,7 +14,7 @@ Two tiers, one scorer, branched on the trajectory's ``task_tier``:
   diagnostic (surfaced as the ``financial_retrieval_recall`` capability) so
   retrieval and reasoning stay disentangled. No LLM call, no re-derivation of gold
   (avoids sim-time/score-time drift). Rate axes carry the ``_rate`` suffix so
-  ``reporting/eval_cell.axis_scale`` classifies them on the 0-1 scale.
+  ``taxonomy/eval_cell.axis_scale`` classifies them on the 0-1 scale.
 
 - ``dynamic`` — a REFERENCE-GROUNDED LLM judge (open-ended, no gold sequence):
   the judge sees the retrieved KB excerpts (the authoritative reference), the
