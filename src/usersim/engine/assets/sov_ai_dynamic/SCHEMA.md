@@ -14,16 +14,14 @@ Scoring happens via heuristic LLM judges (suspected fabrication,
 self-inconsistency, graceful unknown) that read the assistant's
 response on its own terms; ground truth is intentionally absent.
 
-The category vocabulary today is identical to the fact bank's
-(`brazil-geography`, `brazil-history`, `brazil-culture`,
-`brazil-poetry-and-music`, `brazil-public-services`) so per-category
-comparison between the two probes is direct. The two taxonomies
+Today each locale's category vocabulary is identical to its fact
+bank's (for pt_BR, for example, `brazil-geography`, `brazil-history`
+and `brazil-culture`), so per-category comparison between the two
+probes is direct. The two taxonomies
 are deliberately stored separately (`assets/sov_ai_facts/<locale>/*.yaml`
 vs. `assets/sov_ai_dynamic/<locale>/categories.yaml`) so they can
 diverge as runs reveal what's worth curating vs. what's worth probing
-dynamically. The documented discovery loop
-("Why sovereign-AI readiness ships as two complementary probes")
-explicitly relies on that separation.
+dynamically.
 
 ## File layout
 
@@ -33,8 +31,8 @@ assets/sov_ai_dynamic/
 ├── pt_BR/
 │   └── categories.yaml   # the pt_BR taxonomy
 ├── ja_JP/
-│   └── categories.yaml   # (future)
-└── …
+│   └── categories.yaml   # the ja_JP taxonomy
+└── …                     # one directory per shipped locale
 ```
 
 One taxonomy per locale per file. Override the default path with the
@@ -73,9 +71,9 @@ env var `USERSIM_SOV_AI_DYNAMIC_TAXONOMY_<LOCALE>` (e.g.
 `taxonomy_version` is consumed exactly like `bank_version`: it lands
 on `simulation_outcome.provenance.bank_version[locale]` (we re-use
 the same provenance slot: the field name is historical, the value
-is generic), and the `sov_ai_dynamic` scorer compare against the
-currently-loaded taxonomy version to surface a drift flag per
-trajectory when a taxonomy revision lands mid-run.
+is generic), and the `sov_ai_dynamic` scorer compares it against the
+currently-loaded taxonomy version, setting `taxonomy_version_mismatch`
+on a trajectory when a taxonomy revision lands mid-run.
 
 `schema_version` gates the loader. Bumping it requires lock-step
 loader work + an explicit migration of existing taxonomy files.

@@ -1,4 +1,4 @@
-## Query bank schema
+# Query bank schema
 
 A **query bank** is a curated YAML file containing **cross-locale query
 templates** used by the `sov_ai_multilingual_parity` probe
@@ -8,9 +8,9 @@ and respect.
 
 The unit is the **conceptual question**, not the locale-specific
 phrasing. Each entry holds N locale renderings of the same underlying
-query, plus a single `query_id` so trajectories that probed the same
-conceptual question (in different locales, by different personas) can
-be joined for matched-pair / similarity-based comparison downstream.
+query, plus a single `query_id`, carried on every trajectory, so
+results for the same conceptual question can be compared across
+locales and personas.
 
 This schema is structurally different from the fact bank
 (`assets/sov_ai_facts/SCHEMA.md`) and the probing taxonomy
@@ -22,10 +22,9 @@ This schema is structurally different from the fact bank
 | Probing taxonomy | One topic category per entry | One file per locale, content authored separately per locale | ✗ | ✗ |
 | **Query bank** | **One conceptual query per entry** | **One file shared across locales; N renderings per entry** | ✗ (scoring is respect-parity, not correctness) | ✗ (queries are neutral; the bias is in the model's response) |
 
-The cross-locale design is the load-bearing feature: matched-pair
-comparison ("how does the model respond to *the same question* in
-Hindi vs. English by *demographically matched* personas?") needs the
-same conceptual content to appear in N locales tied by a shared
+The cross-locale design is the key feature: comparing how a model
+answers *the same question* in Hindi and in English needs the same
+conceptual content to appear in N locales, tied by a shared
 identifier. Per-locale separate authoring would not give us this.
 
 ## File layout
@@ -84,7 +83,7 @@ Every entry carries a `provenance` block:
 
 ```yaml
 provenance:
-  source: "internal authorship 2026-04 (placeholder)"
+  source: "placeholder"
   last_reviewed: "2026-04-20"
   references: []
 ```
@@ -92,7 +91,7 @@ provenance:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `source` | str | ✓ | Human-readable description of where the query came from (and who reviewed it). `"placeholder"` is allowed only when `placeholder: true`. |
-| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. Used by the loader to flag stale entries. |
+| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. The loader checks the `YYYY-MM-DD` format. |
 | `references` | list[str] | optional | URLs / citations. Useful when the query is derived from a real-world report or benchmark; non-placeholder entries SHOULD have at least one. |
 
 ## Placeholder discipline

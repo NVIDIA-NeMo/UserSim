@@ -19,6 +19,6 @@ from __future__ import annotations
 # prompt would prime it and contaminate the signal. The OpenAI
 # ``tools=`` parameter still exposes the tool schemas (the model
 # knows what tools exist), but no behavioral instruction. See
-# conversation-plugin/README.md "Assistant under test:
+# docs/engine/README.md "Assistant under test:
 # pure-capability policy".
 ASSISTANT_SYSTEM_PROMPT: str = ""

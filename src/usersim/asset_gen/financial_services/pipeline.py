@@ -79,7 +79,7 @@ DEFAULT_DOCS_PER_PRODUCT = 40  # ~220 docs/institution, so retrieval is a real
 DEFAULT_MAX_DOCS_PER_CLUSTER = 10  # per-call cap; larger targets fan into batches.
 # 10, not 12: each doc_set call returns that many
 # documents as ONE structured object, and larger
-# clusters made the hub 5xx / time out, dropping
+# clusters made the endpoint 5xx / time out, dropping
 # whole clusters. Coherence does not need big
 # clusters -- the shared brief, the deterministic
 # angle plan and the whole-institution sibling
@@ -1002,7 +1002,7 @@ def doc_uuid(locale: str, institution_id: str, doc_key: str) -> str:
 def _cluster_id(institution_id: str, cluster_kind: str, batch: list[dict[str, Any]]) -> str:
     """Stable id for one generation cluster, minted from its batch's deterministic
     doc uuids. Used to match a seed row to its generated output so dropped clusters
-    (transient hub failures) can be detected and regenerated on their own -- and, being
+    (transient endpoint failures) can be detected and regenerated on their own -- and, being
     deterministic, it is identical across regenerations."""
     keys = "|".join(sorted(str(s.get("uuid") or s.get("doc_key")) for s in batch))
     return str(uuid.uuid5(_DOC_UUID_NAMESPACE, f"cluster:{institution_id}:{cluster_kind}:{keys}"))
@@ -1282,7 +1282,7 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     return institutions
 
 
-#: Doc-set (Phase 2) backfill policy. The doc-gen hub can transiently 5xx an
+#: Doc-set (Phase 2) backfill policy. The doc-gen endpoint can transiently 5xx an
 #: individual cluster; DD drops that record instead of retrying, so we re-run
 #: generation for ONLY the dropped clusters (matched by ``cluster_id``) up to a few
 #: attempts. This makes an unattended, many-region run robust to flaky per-record
@@ -1323,7 +1323,7 @@ def _generate_docsets_with_backfill(
     Two things can go wrong, and both are equally recoverable:
 
     - **The record is dropped.** DD omits a record on a generation error (a
-      transient hub 5xx), so the result frame is short of the seed.
+      transient endpoint 5xx), so the result frame is short of the seed.
     - **The record arrives unusable.** A response can be truncated mid-body,
       schema-valid but empty, or refused, and still carry its ``cluster_id``.
 
@@ -1367,7 +1367,7 @@ def _generate_docsets_with_backfill(
             delay = base_delay * attempt
             logger.warning(
                 "doc_set backfill: %d/%d clusters dropped or came back unusable "
-                "(transient hub error, or a truncated/empty response); "
+                "(a transient endpoint error, or a truncated or empty response); "
                 "regenerating just those in %.0fs (attempt %d/%d)",
                 n_missing,
                 total,
@@ -1392,7 +1392,7 @@ def _generate_docsets_with_backfill(
     return result_df
 
 
-#: Embedding-pass retry policy. The hub's /embeddings route can throw transient
+#: Embedding-pass retry policy. The endpoint's /embeddings route can throw transient
 #: 5xx / timeouts on the health-check probe; embeddings are idempotent + cheap, so
 #: retry with linear backoff before giving up (the caller keeps the corpus either way).
 EMBED_MAX_ATTEMPTS = 4
@@ -1485,7 +1485,7 @@ def generate_corpus(
     )
 
     # Phase 2: generate each cluster conditioned on the brief. Auto-backfills any
-    # clusters the hub transiently drops so a full corpus doesn't need a manual re-run.
+    # clusters the endpoint transiently drops so a full corpus doesn't need a manual re-run.
     result_df = _generate_docsets_with_backfill(models, cluster_seed)
 
     institutions = collect_institutions(result_df, spec)

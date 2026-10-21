@@ -1,18 +1,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Judge family registry + ensemble diversity validator.
+"""Judge family registry and ensemble diversity check.
 
-Per the design plan §4.1: "judge ensemble diversity is operationalized
-via an explicit registry; two variants of the same family do not
-satisfy the constraint." This module is that registry.
-
-Why this matters: inter-judge agreement (Cohen's κ / Krippendorff's α)
-is meaningful only across architecturally diverse models. Two
-fine-tunes of the same base produce spurious agreement that masks
-genuine miscalibration. The ensemble diversity check enforces ≥2
-distinct families up front, at config-validation time, before any
-judging cost is incurred.
+Two judges from the same model family tend to share blind spots, so
+their scores can agree without being right. An ensemble of two or more
+judges must therefore span at least two families from this registry;
+two variants of one family do not count. The check runs when the
+config is validated, before any judge call, and again for each row
+once the judges' model ids are resolved.
 """
 
 from __future__ import annotations
@@ -123,9 +119,8 @@ def validate_ensemble_diversity(
 ) -> None:
     """Raise ``EnsembleDiversityError`` if the ensemble lacks family diversity.
 
-    Per the design plan: ``min_distinct_families = 2`` is the default.
-    A single-judge ensemble is allowed (it explicitly opts out of κ
-    reporting); the constraint only applies once you have ≥2 judges.
+    ``min_distinct_families`` defaults to 2. A single judge is allowed;
+    the constraint applies once there are two or more judges.
 
     ``resolved_model_ids`` is an optional ``{alias: model_id}`` map
     used to refine family inference at run time when ``JudgeSpec.family``
@@ -151,6 +146,6 @@ def validate_ensemble_diversity(
             f"Judge ensemble must span at least {min_distinct_families} distinct "
             f"families (per evaluator/judges.py JudgeFamily); got {sorted(f.value for f in distinct)} "
             f"for aliases {[s.alias for s in judges_list]}. Two variants of the "
-            f"same family produce spurious inter-judge agreement and do not "
-            f"satisfy this constraint."
+            f"same family tend to share blind spots and do not satisfy this "
+            f"constraint."
         )

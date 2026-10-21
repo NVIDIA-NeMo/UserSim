@@ -173,10 +173,8 @@ class WarningKind(str, Enum):
 class Provenance:
     """Everything needed to audit what a trajectory was built against.
 
-    A panel / cohort / canary parquet built against v1 that is replayed
-    against a v2 persona dataset must be a schema-mismatch error at
-    load time, not a silent drift — this record is what makes that
-    possible.
+    Recorded on every row, so rows built against different persona
+    dataset, prompt, code or bank versions can be told apart.
     """
 
     nemotron_personas_version: str | None = None

@@ -37,7 +37,7 @@ products at one institution in one register span a cosine range of roughly
 margin systematically because they are short (104 median words vs 219 for a
 product sheet, so less diluted) and their bodies are dense with the
 account-action vocabulary every query contains. Query/passage ``input_type`` was
-ruled out — the hub ignores the parameter (cosine 0.9999 between modes).
+ruled out: the endpoint ignores the parameter (cosine 0.9999 between modes).
 
 Both return whole ``Document`` objects and never mutate the bank.
 

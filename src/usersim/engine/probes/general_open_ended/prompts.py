@@ -181,7 +181,7 @@ def assistant_system_prompt() -> str:
     Defaults to ``""``: the assistant under test gets no system prompt, so
     that whether it behaves helpfully, answers in the right language or
     refuses is what the probe measures rather than what it was told. See
-    the pure-capability policy in ``conversation-plugin/README.md``.
+    the pure-capability policy in ``docs/engine/README.md``.
     Resolved like every other prompt so the mechanism is uniform, not
     because filling it in is expected -- a non-empty value here changes
     what the probe measures and wants a rationale in the module docstring.

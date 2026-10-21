@@ -22,8 +22,7 @@ This schema lives here so:
 assets/sov_ai_facts/
 ├── SCHEMA.md          # this file
 ├── pt_BR/
-│   ├── sample.yaml    # placeholder bank (see §Placeholder discipline)
-│   └── v1.yaml        # reviewer-authored bank (future)
+│   └── sample.yaml    # placeholder bank (see §Placeholder discipline)
 ├── ja_JP/
 ├── fr_FR/
 └── …
@@ -68,15 +67,21 @@ deterministically. Allowed prefixes:
 
 | Prefix | Example | Source persona attribute |
 |---|---|---|
-| `region:` | `region:nordeste` / `region:southeast` / `region:any` | `persona.region` or `persona.state` normalized |
-| `age:` | `age:18-24` / `age:65+` / `age:any` | `persona.age_bin` |
+| `region:` | `region:northeast` / `region:scotland` / `region:any` | derived for pt_BR (macro-region, from the persona's state), en_GB (nation) and de_DE (Land); personas in other locales carry only `region:any` |
+| `age:` | `age:18-24` / `age:65+` / `age:any` | the persona's age, binned (`under-18`, `18-24`, `25-44`, `45-64`, `65+`) |
 | `occupation-family:` | `occupation-family:teacher` / `occupation-family:healthcare` | coarse-grained occupation categories |
 | `education:` | `education:primary` / `education:tertiary` / `education:any` | `persona.education_level` |
 | `interest:` | `interest:music` / `interest:geography` / `interest:literature` | free-form; the default matcher accepts any `interest:*` tag |
 
-Use `*:any` to opt an entry in for every persona; use specific values
-to target a demographic (e.g., a fact about SUS pediatric services
-might be tagged `age:18-44`, `interest:health`).
+Tag an entry with the values it is about (e.g., a fact about SUS
+pediatric services might be tagged `age:25-44`, `interest:health`);
+`*:any` marks an entry as relevant to every persona. The tags don't
+narrow which personas a fact reaches, though: every persona also
+carries `region:any` and `age:any`, and a persona's `any` tag matches
+every fact tag with the same prefix, so any fact with a `region:` or
+`age:` tag is a candidate for every persona. In the shipped banks, that
+is every fact. `derive_task` picks one by a hash of the persona, the
+bank's id and version, and the seed.
 
 The matcher policy is documented alongside `derive_task` in the
 probe module; the fact bank just declares the tags.
@@ -96,7 +101,7 @@ provenance:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `source` | str | ✓ | Human-readable description of where the fact came from (and who reviewed it). `"placeholder"` is allowed only when `placeholder: true`. |
-| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. Used by the loader to flag stale entries. |
+| `last_reviewed` | str (ISO-8601 date) | ✓ | `YYYY-MM-DD`. The loader checks that it is a real calendar date. |
 | `references` | list[str] | optional | URLs / citations. Non-placeholder entries should have at least one. |
 
 The loader enforces:
@@ -133,9 +138,8 @@ model to continue. The scorer evaluates:
   wrong text?
 - **fabrication**: did the response produce content that is *neither*
   the canonical continuation *nor* a graceful refusal: i.e., an
-  invented verse presented as if it were the real one? This is the
-  failure mode that surfaced strongly for Indian-language models and
-  the reason `completion` gets its own rubric.
+  invented verse presented as if it were the real one? This failure
+  mode is the reason `completion` gets its own rubric.
 
 ## Placeholder discipline
 
@@ -162,11 +166,12 @@ A reviewer promoting an entry out of placeholder status does so by:
 
 ## Versioning and drift detection
 
-Bumping `bank_version` invalidates any downstream reporting that was
-computed against a prior version of the bank, because the
-`simulation_outcome.provenance.bank_version` carried on every trajectory
-row will no longer match. Re-run the simulator + evaluator against the
-new bank to refresh.
+Every trajectory records the `bank_version` it used
+(`simulation_outcome.provenance.bank_version`), so results computed
+against an earlier version can be told apart, and the scorer sets
+`bank_version_mismatch: true` on a row whose recorded version differs
+from the bank it loads. Re-run the simulator and evaluator against the
+new bank to refresh them.
 
 The `schema_version` field gates the loader. When we need to introduce
 a breaking change to this schema, we bump `schema_version` in lock-step
