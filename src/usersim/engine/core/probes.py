@@ -388,7 +388,7 @@ class BaseProbe:
         """Default: counters from ``state.messages`` / ``state.metadata``.
 
         Override to add probe-specific top-level columns (e.g.
-        ``query_id``, ``sovereign_facts_probed``, ``attempted_actions``)
+        ``query_id``, ``sovereign_facts_probed``, ``action_request_id``)
         — those columns are what the matching scorer reads off the
         trajectory dict.
         """

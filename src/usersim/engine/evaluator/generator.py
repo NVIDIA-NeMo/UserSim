@@ -323,7 +323,7 @@ class TrajectoryEvaluatorGenerator(
             # columns each probe writes (sovereign_facts_probed /
             # query_id / target_request_id / strategy_id /
             # reframings_used / action_request_id / sub_protocol /
-            # attempted_actions / probing_categories_explored /
+            # probing_categories_explored /
             # probing_subtopic_hints_used / tool_subset / ...) is an
             # open set — every new probe may add new keys and the
             # corresponding scorer reads them off the trajectory dict
