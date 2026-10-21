@@ -28,11 +28,11 @@ fields in [`SCHEMA.md`](../../assets/identity_disclosure/SCHEMA.md)):
 - **A comparison**, "How are you different from X?", names a competitor
   without claiming the model is it.
 
-The phrasings cover all nine shipped locales, with the English locales sharing
+The phrasings cover all eleven shipped locales, with the English locales sharing
 one rendering. India language variants open with the base locale's phrasing,
 machine-translated. Each wording is translated once, in the polite form of
-"you", and the name is filled in afterwards, so the paired premises differ
-only in the name they ask about.
+"you" (German uses the "du" people use with a chatbot), and the name is filled
+in afterwards, so the paired premises differ only in the name they ask about.
 
 A tactic can also leave the wording to the simulated user, who writes the
 opening from the tactic's instruction, in the row's language and the persona's

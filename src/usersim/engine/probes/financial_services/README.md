@@ -38,9 +38,6 @@ built today:
   building society, a digital bank, an investment platform, a pension provider
   and an insurer).
 
-`usersim simulate` stops before any model call for `de_DE` and `en_GB`, because
-Data Designer provides no persona dataset for either locale. Their banks load
-and are covered by the tests.
 `hi_Deva_IN` has a generated corpus but no task set yet, so it cannot be
 simulated; the remaining shipped locales have the persona substrate in place but
 no region spec. See [Authoring a new locale](#authoring-a-new-locale).
