@@ -41,9 +41,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "eval",
         help="⚖️  Run the trajectory-evaluator and write an evaluations parquet.",
         description=(
-            "Score the assistant under test on a stored trajectory "
-            "parquet using a multi-family judge ensemble + probe-specific "
-            "scorers. Produces a wide JSON cell per row."
+            "Score the assistant under test on a stored trajectory run "
+            "with an LLM judge (or an ensemble from at least two model "
+            "families, set with --judges) plus any scorers you name with "
+            "--scorers. Writes one wide JSON cell per row."
         ),
     )
     p.add_argument(
@@ -80,16 +81,21 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--models",
         type=Path,
         default=None,
-        help="Path to models TOML. Defaults to cli/models_default.toml.",
+        help=(
+            "Path to a models TOML. Default: $USERSIM_MODELS_CONFIG, else a "
+            "models.local.toml in this directory or a parent, else the bundled "
+            "models_default.toml."
+        ),
     )
     p.add_argument(
         "--judges",
         type=str,
         default="evaluator_model",
         help=(
-            "Comma-separated DD model aliases to use as judges, optionally "
-            "with ``:family`` (e.g., evaluator_model:openai,evaluator_secondary:anthropic). "
-            "≥2 distinct families enforced for ensembles of size ≥2."
+            "Comma-separated model aliases to use as judges, each optionally "
+            "suffixed with :family (e.g., evaluator_model,my_second_judge:anthropic). "
+            "An ensemble of two or more judges must span at least two model "
+            "families."
         ),
     )
     p.add_argument(
@@ -103,8 +109,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=str,
         default=None,
         help=(
-            "Comma-separated deterministic scorer names (registered in "
-            "evaluator/scorers/). Default: empty (no scorers)."
+            "Comma-separated scorer names to run beside the judges, for "
+            "example tool_use,language_compliance. Most scorers use an LLM "
+            "judge; language_compliance, response_shape and refusal_basics "
+            "are rule-based. Default: none."
         ),
     )
     p.add_argument(

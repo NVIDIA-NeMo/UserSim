@@ -23,7 +23,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "gen-assets",
         help="🏦 Generate an asset bank for a domain (--domain).",
         description=(
-            "Expand a domain's region_spec into a committed asset bank (corpus + "
+            "Expand a domain's region_spec into an asset bank (corpus and "
             "embeddings). Use --dry-run to preview the plan without any LLM calls. "
             "Per-domain flags are added based on --domain (see the domain's help)."
         ),
@@ -35,7 +35,16 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--region-spec", type=Path, default=None, help="Override the region_spec path (defaults to the bundled one)."
     )
-    p.add_argument("--out", type=Path, default=None, help="Output locale dir (defaults to assets/<domain>/<locale>).")
+    p.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help=(
+            "Output locale directory (default: the package's own "
+            "assets/<domain>/<locale>, which suits a checkout; pass --out for "
+            "an installed package)."
+        ),
+    )
     p.add_argument(
         "--models", type=Path, default=None, help="Models TOML (only needed for live generation, not --dry-run)."
     )
@@ -45,8 +54,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         metavar="ALIAS=MODEL",
         help="Override a model alias, e.g. --model asset_judge_model="
-        "openai/openai/gpt-5.4. Repeatable. Provider auto-routes via "
-        "cli/model_catalog.py.",
+        "openai/gpt-oss-120b. Repeatable. The provider is chosen from "
+        "cli/model_catalog.py; a model it does not list as self-hostable "
+        "needs a [[providers]] entry in the models file.",
     )
     p.add_argument(
         "--max-parallel",
@@ -54,8 +64,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         metavar="ALIAS=N",
         help="Override an alias's concurrency, e.g. --max-parallel "
-        "doc_gen_model=8. Repeatable. Lower it if the hub throws "
-        "5xx/timeouts under load.",
+        "doc_gen_model=8. Repeatable. Lower it if the endpoint returns "
+        "5xx errors or times out under load.",
     )
     p.add_argument("--dry-run", action="store_true", help="Validate the region_spec and print the plan; no LLM calls.")
     for name in domain_names():

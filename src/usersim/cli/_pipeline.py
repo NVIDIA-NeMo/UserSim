@@ -698,14 +698,14 @@ def build_evaluator_config_builder(
 
     ``judges`` is a list of dicts shaped like::
 
-        [{"alias": "evaluator_model"}, {"alias": "evaluator_model_secondary", "family": "OPENAI"}]
+        [{"alias": "evaluator_model"}, {"alias": "evaluator_secondary", "family": "anthropic"}]
 
     matching ``JudgeSpecConfig``. Defaults to a single-judge ensemble
     keyed on the ``evaluator_model`` alias — which is what
     ``REQUIRED_EVALUATOR_ALIASES`` guarantees is present in the
-    ``ModelsConfig``. Multi-judge ensembles for inter-judge κ work
-    pass an explicit list. ``axes`` defaults to the universal set;
-    ``scorers`` defaults to the empty list (opt in per probe).
+    ``ModelsConfig``. Pass an explicit list for a multi-judge ensemble;
+    it must span at least two model families. ``axes`` defaults to the
+    universal set; ``scorers`` defaults to the empty list (opt in per probe).
     """
     if judges is None:
         judges = [{"alias": "evaluator_model"}]
@@ -850,9 +850,8 @@ def evaluate_dataframe(
     Encapsulates the temp-parquet seed-source dance that DataDesigner's
     ``LocalFileSeedSource`` requires (it reads from a path, not a
     DataFrame). ``judges`` defaults to a single-judge ensemble keyed on
-    the ``evaluator_model`` alias; pass an explicit list only for
-    multi-judge inter-κ work. Three quirks preserved from the prior
-    notebook flow:
+    the ``evaluator_model`` alias; pass an explicit list for a
+    multi-judge ensemble. Three details callers rely on:
 
     - Temp-parquet prefix ``usersim_eval_seed_`` (so log filtering and
       cleanup hooks that key on this prefix keep working).

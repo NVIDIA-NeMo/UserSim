@@ -7,10 +7,10 @@ Thin orchestration layer over the simulator + evaluator + reporting
 packages. Mirrors the notebook flow so a user can drive an end-to-end
 run from a script or CI without opening Jupyter:
 
-    usersim panel    --locale en_US --num-personas 50  --out panel.parquet
-    usersim simulate --panel panel.parquet            --out trajectories.parquet
-    usersim eval     --trajectories trajectories.parquet --out evaluations.parquet
-    usersim report   --trajectories trajectories.parquet --evaluations evaluations.parquet --out report/
+    usersim panel    --locale en_US --num-personas 50 --out panel.parquet
+    usersim simulate --panel panel.parquet            --out output/trajectories
+    usersim eval     --trajectories output/trajectories --out output/evaluations
+    usersim report   --trajectories output/trajectories --evaluations output/evaluations --out output/report/
 
 Each subcommand is implemented in its own module under :mod:`cli`.
 The shared pipeline-construction helpers live in :mod:`cli._pipeline`
@@ -18,13 +18,13 @@ The shared pipeline-construction helpers live in :mod:`cli._pipeline`
 configuration is loaded from a TOML file via :mod:`cli._models`; a
 sensible default ships at ``cli/models_default.toml``.
 
-Reproducibility note: the CLI does not invent identity. ``persona_uuid``
-and ``trajectory_id`` are computed by the simulator plugin from input
-content + probe metadata + resolved model identities, so the same
-panel + same model config + same plugin code yields the same trajectory
-ids. The CLI can therefore safely be re-run; the simulator's idempotency
-helpers skip rows whose ``trajectory_id`` already exists in the output
-parquet.
+Identity: ``persona_uuid`` is a content hash of the persona, and
+``trajectory_id`` hashes it with the probe, the locale, the scenario
+seed, the user and assistant models and the probe's prompt version; the
+simulator computes both. A panel fixes a run's locales and row counts,
+and personas are sampled afresh, so to run the same simulated users
+again, store them with ``usersim simulate --materialize-inputs`` and run
+them with ``--inputs``.
 """
 
 from __future__ import annotations
