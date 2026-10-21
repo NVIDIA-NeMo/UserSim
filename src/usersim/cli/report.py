@@ -44,9 +44,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         description=(
             "Read a trajectory parquet (and optionally an evaluations "
             "parquet) and write the capability-dashboard artifacts: "
-            "``index.html`` plus four JSON cells "
-            "(``report_manifest`` / ``capability_matrix`` / "
-            "``coverage_summary`` / ``triage_queue``)."
+            "index.html plus four JSON files (report_manifest, "
+            "capability_matrix, coverage_summary, triage_queue)."
         ),
     )
     p.add_argument(
@@ -62,7 +61,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help=(
             "Evaluations parquet (output of `usersim eval`). When "
             "omitted, the report still writes a manifest and coverage "
-            "but the capability cells render as ``not measured``."
+            'but the capability cells render as "not measured".'
         ),
     )
     p.add_argument(
@@ -71,8 +70,8 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default="assistant_eval",
         help=(
             "Name of the wide eval cell column in the evaluations "
-            "parquet (default ``assistant_eval``). Legacy column names "
-            "``eval_v1`` and ``assistant_eval_v2`` are auto-aliased."
+            "parquet (default assistant_eval). If it is missing, eval_v1 "
+            "or assistant_eval_v2 is read instead."
         ),
     )
     p.add_argument(
@@ -93,7 +92,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Run id to report on (must exist under --trajectories AND "
             "--evaluations). Defaults to the most-recent run under "
             "--trajectories. Pass an explicit Unix-epoch run id to "
-            "report on a historical run, or ``all`` for cross-run."
+            "report on a historical run, or 'all' for cross-run."
         ),
     )
     p.add_argument(

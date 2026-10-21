@@ -450,7 +450,7 @@ def _check_asset_paths(report: SmokeReport) -> None:
     """Verify every shipped probe's default asset path exists + loads.
 
     The user-facing analog of
-    ``conversation-plugin/tests/core/test_default_asset_paths.py``:
+    ``tests/engine/core/test_default_asset_paths.py``:
     fails the smoke if a default-path constant in any ``core/``
     loader points at a directory that doesn't exist on disk. The
     test-suite version catches this for contributors at PR time;

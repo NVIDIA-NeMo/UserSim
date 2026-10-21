@@ -155,7 +155,8 @@ INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
         "top_p": 0.95,
         "max_tokens": 4096,
     },
-    # Gemma-4-31B-Instruct via the NVIDIA inference hub.
+    # Gemma-4-31B-Instruct through an OpenAI-compatible gateway that
+    # prefixes ids with the vendor namespace.
     # Reasoning is gated by the chat template's ``enable_thinking`` flag,
     # reachable only by forwarding ``chat_template_kwargs`` through to
     # vLLM. The other documented triggers (a top-level ``enable_thinking``,
@@ -370,8 +371,9 @@ def resolve_inference_defaults(model: str) -> dict[str, Any]:
 def resolve_vllm_defaults(model: str) -> dict[str, Any]:
     """Return a copy of the vLLM defaults for ``model``.
 
-    Returns an empty dict if the model is not self-hosted (e.g.
-    externally served by the NVIDIA inference hub).
+    Returns an empty dict if the catalog does not list the model as
+    self-hostable (for example, a model reached only over a hosted
+    endpoint).
     """
     return dict(VLLM_DEFAULTS.get(model, {}))
 

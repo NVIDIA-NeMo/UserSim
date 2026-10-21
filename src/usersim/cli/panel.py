@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""``usersim panel`` — build a frozen persona seed parquet.
+"""``usersim panel``: sample a panel parquet that fixes a run's locales and per-locale row counts.
 
 A panel fixes the shape of a run: ``usersim simulate --panel`` takes its
 locales and per-locale row counts, and samples personas afresh. So a panel
@@ -31,7 +31,7 @@ logger = logging.getLogger("usersim.cli.panel")
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
         "panel",
-        help="👥 Build a frozen persona seed parquet (no LLM calls).",
+        help="👥 Sample a panel that fixes a run's locales and row counts (no LLM calls).",
         description=(
             "Sample N personas per locale from Nemotron-Personas and "
             "write a parquet that can be re-fed to `usersim simulate` to "
@@ -58,8 +58,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=Path,
         default=None,
         help=(
-            "Path to models TOML. Defaults to the bundled "
-            "cli/models_default.toml (only providers section is consulted "
+            "Path to a models TOML. Default: $USERSIM_MODELS_CONFIG, else a "
+            "models.local.toml in this directory or a parent, else the bundled "
+            "models_default.toml (only the providers section is consulted "
             "for sampling; no LLM is invoked)."
         ),
     )

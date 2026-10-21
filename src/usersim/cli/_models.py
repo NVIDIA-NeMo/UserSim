@@ -408,7 +408,7 @@ def apply_model_overrides(
 
     ``overrides`` maps alias to either:
 
-    - **str** (simple form): ``{"judge_model": "openai/openai/gpt-5.5"}``
+    - **str** (simple form): ``{"judge_model": "openai/gpt-oss-120b"}``
       Just swap the model. Catalog defaults for the new model fill in
       ``temperature`` / ``top_p`` / ``max_tokens`` / ``extra_body``.
 
@@ -418,15 +418,15 @@ def apply_model_overrides(
       ``"replay_reasoning"``. Replay is kept when the model stays the same and
       turned off when it changes, unless the override sets it::
 
-          MODEL_OVERRIDES = {
+          overrides = {
               "assistant_model": {
-                  "model": "nvidia/google/gemma-4-31b-it",
+                  "model": "google/gemma-4-31b-it",
                   "extra_body": {},   # disable catalog's enable_thinking
               },
               "judge_model": {
-                  "model": "openai/openai/gpt-5.5",
+                  "model": "openai/gpt-oss-120b",
                   "temperature": 0.0, # deterministic eval
-                  "max_tokens": 4096, # tighter than catalog default
+                  "max_tokens": 2048, # tighter than catalog default
               },
           }
 
@@ -456,11 +456,11 @@ def apply_model_overrides(
 
     Catalog re-resolution handles edge cases like swapping
     ``openai/gpt-oss-120b`` (catalog supplies
-    ``{"reasoning_effort": "high"}``) for ``openai/openai/gpt-5.5``
-    (catalog has no ``extra_body`` -- gpt-5.5 rejects
-    ``reasoning_effort``). Without re-resolving, the swap would carry
-    over the gpt-oss knob and the inference call would 400. Same idea
-    for provider: swapping a hub-served model in for a self-hosted one
+    ``{"reasoning_effort": "high"}``) for ``gpt-5.6-terra`` (catalog
+    omits ``temperature`` and ``top_p``, which the endpoint rejects
+    alongside ``reasoning_effort``). Without re-resolving, the swap would
+    carry over gpt-oss's sampling values and the call would 400. Same idea
+    for provider: swapping a hosted model in for a self-hosted one
     would otherwise leave the alias pointing at the wrong endpoint.
 
     **Unknown-model safety.** When the new model isn't in the catalog

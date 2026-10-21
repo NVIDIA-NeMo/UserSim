@@ -404,6 +404,19 @@ class TestLoaderAutofill:
                 "must use only the built-in nvidia / openai / openrouter"
             )
 
+    def test_every_shipped_chat_alias_has_a_long_timeout(self):
+        """No chat alias in a shipped config keeps Data Designer's 60-second default.
+
+        A judge, summary or tool-response call over a long conversation, or an
+        asset judge grading a whole document cluster, can take minutes, and a
+        timeout ends the call as a failure the model under test did not cause.
+        """
+        for toml_path in _shipped_model_tomls():
+            for spec in load_models_config(toml_path).models:
+                if spec.alias == "embedding_model":
+                    continue
+                assert (spec.timeout or 0) >= 300, f"{toml_path.name}: {spec.alias} has timeout={spec.timeout}"
+
     def test_evaluator_model_alias_shipped_in_both_tomls(self):
         """Regression lock: both shipped model TOMLs must declare an
         `evaluator_model` row so post-hoc trajectory evaluation works out

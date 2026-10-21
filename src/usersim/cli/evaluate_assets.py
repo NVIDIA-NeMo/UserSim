@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""``usersim evaluate-assets --domain <d>`` — DD-judge quality scorecard for a bank.
+"""``usersim evaluate-assets --domain <d>``: LLM-judge quality scorecard for a bank.
 
 Generic, domain-registry-backed (see ``asset_gen/registry.py``). Runs the domain's
 LLM-judge evaluation over a generated bank and prints a per-axis quality scorecard
@@ -21,7 +21,7 @@ from usersim.engine.core._assets import packaged_assets_dir
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
         "evaluate-assets",
-        help="⚖️  DD-judge quality scorecard for a generated asset bank (--domain).",
+        help="⚖️  LLM-judge quality scorecard for a generated asset bank (--domain).",
         description=(
             "Run a domain's LLM-judge evaluation over a generated bank and print a "
             "per-axis quality scorecard. Complements the deterministic validate-assets "
@@ -40,7 +40,14 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help="region_spec for authoritative-value context (defaults to bundled).",
     )
     p.add_argument(
-        "--models", type=Path, default=None, help="Models TOML (judge alias); defaults to the bundled config."
+        "--models",
+        type=Path,
+        default=None,
+        help=(
+            "Models TOML (judge alias). Default: $USERSIM_MODELS_CONFIG, else a "
+            "models.local.toml in this directory or a parent, else the bundled "
+            "models_default.toml."
+        ),
     )
     p.add_argument(
         "--model",
@@ -48,8 +55,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         metavar="ALIAS=MODEL",
         help="Override a model alias, e.g. --model asset_judge_model="
-        "openai/openai/gpt-5.4. Repeatable. Provider auto-routes via "
-        "cli/model_catalog.py.",
+        "openai/gpt-oss-120b. Repeatable. The provider is chosen from "
+        "cli/model_catalog.py; a model it does not list as self-hostable "
+        "needs a [[providers]] entry in the models file.",
     )
     p.add_argument(
         "--max-parallel",

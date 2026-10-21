@@ -34,12 +34,14 @@ logger = logging.getLogger("usersim.cli.setup_ngc")
 def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser(
         "setup-ngc",
-        help="⚙️  Install NGC CLI into the project's venv (idempotent).",
+        help="⚙️  Install the NGC CLI into the active virtual environment (Linux; idempotent).",
         description=(
-            "Download a pinned, sha256-verified NGC CLI release into "
-            ".venv/opt/ngc-cli/ and symlink it to .venv/bin/ngc. NGC CLI "
-            "is required by `data-designer download personas`, which the "
-            "simulator's persona-panel step relies on."
+            "On Linux (x86_64 or aarch64), download a pinned, sha256-verified "
+            "NGC CLI release into the active virtual environment "
+            "(<venv>/opt/ngc-cli/, linked from <venv>/bin/ngc). "
+            "`data-designer download personas` uses the NGC CLI to fetch the "
+            "persona datasets. On macOS and Windows, use NVIDIA's installer: "
+            "https://org.ngc.nvidia.com/setup/installers/cli"
         ),
     )
     p.add_argument(

@@ -18,9 +18,14 @@ Per-locale atomic writes: each locale's batch lands as its own set of
 partition files immediately after that locale completes. A crash
 mid-run leaves earlier locales' partitions intact.
 
-Idempotent re-runs: if the output dataset already exists, rows whose
-``trajectory_id`` is present are skipped (the simulator re-emits
-identical bytes for them anyway, but skipping avoids the LLM cost).
+Resuming: by default a run reopens the latest sampled run under ``--out``
+(not one made by ``--inputs``) and adds its rows there. Every requested
+row is simulated, and a row whose ``trajectory_id`` that run already
+holds is dropped when the rows are saved. Personas are sampled afresh
+each run, so to run the same rows again, store them with
+``--materialize-inputs`` and use ``--inputs``, which plans the run before
+any model call and simulates only the rows not yet saved.
+``--no-skip-existing`` starts a new run.
 
 ``--inputs`` runs stored rows from ``--materialize-inputs`` exactly as
 stored instead of sampling, one run per setup; see ``cli/_inputs.py``.
@@ -49,9 +54,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         help="🗣  Run the conversation simulator and write a trajectory parquet.",
         description=(
             "Run the simulator pipeline against a panel parquet (or an "
-            "inline locale + sampler) and write trajectories. Resumable: "
-            "rows whose trajectory_id already exists in the output "
-            "parquet are skipped."
+            "inline locale + sampler) and write trajectories. By default a "
+            "run adds to the latest sampled run under --out and leaves out "
+            "rows that run already holds; --no-skip-existing starts a new run."
         ),
     )
 
@@ -104,7 +109,11 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--models",
         type=Path,
         default=None,
-        help="Path to models TOML. Defaults to cli/models_default.toml.",
+        help=(
+            "Path to a models TOML. Default: $USERSIM_MODELS_CONFIG, else a "
+            "models.local.toml in this directory or a parent, else the bundled "
+            "models_default.toml."
+        ),
     )
     p.add_argument(
         "--assets-dir",
@@ -157,7 +166,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Assistant-turn resampling budget. 1 (default) keeps the "
             "per-turn assistant judge flag-only; >1 discards a "
             "judge-rejected assistant candidate and regenerates it "
-            "within the budget (SDG-style runs). Probes with "
+            "within the budget (for synthetic-data runs). Probes with "
             "side-effectful after_assistant_turn are capped to 1."
         ),
     )
@@ -166,21 +175,29 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=str,
         default="tool_calling=0.34,general_open_ended=0.33,general_educational=0.33",
         help=(
-            "Comma-separated probe_type=weight pairs. Weights are "
-            "renormalized to 1.0 if they don't sum to 1. Available "
-            "probes: tool_calling, general_open_ended, general_educational, "
-            "sov_ai_facts, sov_ai_dynamic, "
-            "sov_ai_multilingual_parity, "
-            "safety_chat_pressure, safety_agentic. "
-            "financial_services is OPT-IN (asset-backed; not in the default "
-            "mix) — add e.g. 'financial_services=1.0'."
+            "Comma-separated probe=weight pairs. A weight can be an integer, "
+            "a decimal or a fraction (1/3); weights are normalized to sum to "
+            "1. The default runs tool_calling and the two general probes. "
+            "Built-in probes: general_open_ended, general_educational, "
+            "tool_calling, financial_services, sov_ai_facts, sov_ai_dynamic, "
+            "sov_ai_multilingual_parity, safety_chat_pressure, safety_agentic, "
+            "identity_disclosure, health_general_disclosure, "
+            "health_triage_disclosure, health_therapy_disclosure, "
+            "health_decision_support_disclosure. An unknown name is refused "
+            "with the full registered list, including installed extensions, "
+            "and a probe that cannot run in a requested locale stops the run "
+            "before any model call."
         ),
     )
     p.add_argument(
         "--random-seed",
         type=int,
         default=None,
-        help="Random seed for reproducible tool sampling (per row).",
+        help=(
+            "Seed for scenario selection: the bank entry each persona gets and "
+            "the tools drawn from its toolset. It does not fix persona sampling "
+            "or model outputs."
+        ),
     )
     p.add_argument(
         "--finance-tier-mix",
@@ -225,7 +242,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--no-skip-existing",
         action="store_true",
-        help="Force re-simulation of rows whose trajectory_id is already in --out.",
+        help="Start a new run instead of adding to the latest one under --out.",
     )
     p.add_argument(
         "--dry-run",
@@ -829,9 +846,9 @@ def _build_sim_config_for_manifest(
 def _locales_from_panel(panel_path: Path) -> list[str]:
     """Read the unique locales from a panel parquet (single-file).
 
-    The panel parquet is intentionally NOT a partitioned dataset —
-    it is a frozen persona seed and probe assignment happens at
-    simulate time, not at panel-build time.
+    The panel parquet is intentionally a single file, not a partitioned
+    dataset. It records locales and row counts; personas and probe
+    assignment are drawn at simulate time.
     """
     import pyarrow.parquet as pq
 
