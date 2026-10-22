@@ -243,45 +243,15 @@ PROVIDER_CONFIG ?= src/usersim/cli/models_default.toml
 HEALTH_LOCALE   ?= ja_JP
 HEALTH_PROBE    ?= sov_ai_dynamic
 
-# A provider you have no key for is skipped rather than failed. Without this
-# the target is red for everyone who has one key, and the scheduled workflow
-# is red until every secret is provisioned, which trains people to ignore it.
-define REQUIRE_KEYS_PY
-import sys
-from usersim.cli._models import load_models_config, required_api_key_env_vars
-config = sys.argv[1]
-missing = sorted(v for v in required_api_key_env_vars(load_models_config(config)) if not __import__("os").environ.get(v))
-if missing:
-    print(f"SKIP  {config}: {', '.join(missing)} not set")
-    sys.exit(1)
-endef
-export REQUIRE_KEYS_PY
+# Only missing credentials skip; configuration and execution errors fail.
+HEALTH_TIMEOUT ?= 900
+HEALTH_SUMMARY_FILE ?=
 
 health-check:  ## Live one-row simulate + eval + report against a provider
-	@set -eu; \
-	if ! $(UV) run python -c "$$REQUIRE_KEYS_PY" "$(PROVIDER_CONFIG)"; then exit 0; fi; \
-	OUT=$$(mktemp -d); \
-	trap 'rm -rf "$$OUT"' EXIT; \
-	echo "==> simulate  ($(HEALTH_LOCALE), $(PROVIDER_CONFIG))"; \
-	$(UV) run usersim simulate \
-		--locale $(HEALTH_LOCALE) --num-rows 1 --max-turns 2 \
-		--probe-mix "$(HEALTH_PROBE)=1.0" \
-		--models $(PROVIDER_CONFIG) \
-		--out "$$OUT/trajectories"; \
-	RUN=$$(basename $$(ls -d "$$OUT"/trajectories/run=* | head -1) | cut -d= -f2); \
-	echo "==> eval      (run $$RUN)"; \
-	$(UV) run usersim eval --run "$$RUN" \
-		--trajectories "$$OUT/trajectories" \
-		--models $(PROVIDER_CONFIG) \
-		--out "$$OUT/evaluations"; \
-	echo "==> report    (run $$RUN)"; \
-	$(UV) run usersim report --run "$$RUN" \
-		--trajectories "$$OUT/trajectories" \
-		--evaluations "$$OUT/evaluations" \
-		--out "$$OUT/report"; \
-	test -f "$$OUT/report/run=$$RUN/index.html" \
-		|| { echo "report produced no index.html"; exit 1; }; \
-	echo "✓ simulate, eval and report all completed"
+	@$(UV) run python scripts/check_health.py \
+		--models "$(PROVIDER_CONFIG)" --locale "$(HEALTH_LOCALE)" \
+		--probe "$(HEALTH_PROBE)" --timeout "$(HEALTH_TIMEOUT)" \
+		$(if $(HEALTH_SUMMARY_FILE),--summary-file "$(HEALTH_SUMMARY_FILE)")
 
 check-extensions:  ## Install an out-of-tree package and prove all six seams work
 	@set -eu; \

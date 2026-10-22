@@ -354,3 +354,9 @@ not**. See [SECURITY.md](SECURITY.md) for the private disclosure channels.
 ## Code of conduct
 
 Participation is governed by the [Contributor Covenant](CODE_OF_CONDUCT.md).
+
+## Live provider checks
+
+See [Live provider health checks](docs/engineering/health-checks.md) for credential
+precedence, local commands, and the pass, skip, and failure outcomes. These checks
+make real model requests and are separate from offline contributor validation.
