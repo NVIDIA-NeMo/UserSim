@@ -16,7 +16,7 @@ resolution-markers = [
 
 [manifest]
 constraints = [{ name = "certifi", specifier = ">=2026.10.19" }]
-overrides = [{ name = "data-designer", specifier = ">=0.9.6,<0.10" }]
+overrides = [{ name = "data-designer", specifier = ">=0.9.7,<0.10" }]
 
 [[package]]
 name = "annotated-doc"
@@ -668,7 +668,7 @@ wheels = [
 
 [[package]]
 name = "data-designer"
-version = "0.9.6"
+version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "data-designer-config" },
@@ -688,16 +688,17 @@ dependencies = [
     { name = "rich" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/21/8b/a91edb2920304b050dc88690ae31cb23b56da174542d40c49622f1a5c25d/data_designer-0.9.6.tar.gz", hash = "sha256:83cc5371a0d59f2df26e2a4516020c30407c3b84549bcd3c7068279071678ecb", size = 247512, upload-time = "2026-10-21T01:11:55.345Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/5b/775137cf838d1c06635ae8fb03a6732a47db808cbd06f6aee8f17e01ab7a/data_designer-0.9.7.tar.gz", hash = "sha256:c1358fb5e1ccad7140148788cd36302672b1b8b7d529b86e5e01e3c29d69ad77", size = 248195, upload-time = "2026-10-22T02:00:20.094Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/8d/fae7d8b50a943c8f938c25931e275595b0e86fa25916609e33f057a28276/data_designer-0.9.6-py3-none-any.whl", hash = "sha256:9ee77ad1c00d6f36b5aa54b8d050726e5ebad7de4636481f29075410de897171", size = 160872, upload-time = "2026-10-21T01:11:54.108Z" },
+    { url = "https://files.pythonhosted.org/packages/12/f3/75c578f1286f052d18967b9d27a5c68ad8d566c9309aba95ca0981a7dc9a/data_designer-0.9.7-py3-none-any.whl", hash = "sha256:7a8fe33d88b8927e103d585dc9129a3c335191440e73a0e451f13702b4b08410", size = 160876, upload-time = "2026-10-22T02:00:18.759Z" },
 ]
 
 [[package]]
 name = "data-designer-config"
-version = "0.9.6"
+version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "certifi" },
     { name = "httpx" },
     { name = "jinja2" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -713,14 +714,14 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/42/370c8602147783272f46fcd0978ef23fc482d8231c5a6ab126a29859a788/data_designer_config-0.9.6.tar.gz", hash = "sha256:72d1d1c958ec62ac35637cca133c358abafa001b9aa6609b41deb2c3fc62597a", size = 152994, upload-time = "2026-10-21T01:11:47.76Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/f9/a2a1c3e1abe4e5d2cf1c8d55ed5609a95082da4c166cb5fc041298445192/data_designer_config-0.9.7.tar.gz", hash = "sha256:fc6a72f6ea9223e11222f513796be8df3cdf0e67d528524c14840c98cadf3e7a", size = 153073, upload-time = "2026-10-22T02:00:11.926Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2b/4b/16a9586b6562e5e104b8b6993af58f5554179d6dc26fd3ec55b3d425110e/data_designer_config-0.9.6-py3-none-any.whl", hash = "sha256:06385cbad54869babb6f3bceef8ae873c177ceeba209c128311c8d01baf556b3", size = 129925, upload-time = "2026-10-21T01:11:46.544Z" },
+    { url = "https://files.pythonhosted.org/packages/96/87/90ebf0662a80e5be2d0ae18e3817e2a0f5fcb59d9c8fa4ded7b88c9b7a56/data_designer_config-0.9.7-py3-none-any.whl", hash = "sha256:b17913a76cad92672d2350aa10399899aabf3b04783d61d5f8ebd7210cb145d1", size = 129938, upload-time = "2026-10-22T02:00:10.207Z" },
 ]
 
 [[package]]
 name = "data-designer-engine"
-version = "0.9.6"
+version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
@@ -755,9 +756,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/4c/f8ef15b8a369699663b468d7eb1d2cc59ccae3e0bc7349964b1dd6e39ef1/data_designer_engine-0.9.6.tar.gz", hash = "sha256:b00c41dc1a48886c2c16b107da5b1e7285dbe23e9273d6f7c2ac4a67cec12bd9", size = 938167, upload-time = "2026-10-21T01:11:52.3Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/e1/9225b78bb2c049fee24dda80eeb1d52821ea91e559aefcc571d2692ae189/data_designer_engine-0.9.7.tar.gz", hash = "sha256:ba9578c13abb278ce2b0e1ecb63dc2b9da0b2ca7c8198e3db66b37aa756d53c9", size = 939761, upload-time = "2026-10-22T02:00:16.221Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/8b/c63174887f40d637dfd4e3452161d9425a642811b7e36af54b45f9821d0d/data_designer_engine-0.9.6-py3-none-any.whl", hash = "sha256:8f791e5be2f5fc2c21b6d0985a0b0663a0932819c0553ae488b0a488edc3ce5b", size = 711530, upload-time = "2026-10-21T01:11:50.562Z" },
+    { url = "https://files.pythonhosted.org/packages/58/a7/d5d9023a39ad970f5bc8d862ba5ba5af64606680542f11ff11a48fc65378/data_designer_engine-0.9.7-py3-none-any.whl", hash = "sha256:2a1f4f7f1717adee4bb4447b6636d397d0ee1a7edba8bf6081c8bbefc8cd6936", size = 711961, upload-time = "2026-10-22T02:00:13.994Z" },
 ]
 
 [[package]]
@@ -4249,7 +4250,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "data-designer", specifier = ">=0.9.6,<0.10" },
+    { name = "data-designer", specifier = ">=0.9.7,<0.10" },
     { name = "filelock" },
     { name = "httpx" },
     { name = "huggingface-hub" },
