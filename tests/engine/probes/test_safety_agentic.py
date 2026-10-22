@@ -517,7 +517,7 @@ class TestSimulateAgenticSafety:
         # for generated rows; either warning state is valid depending on
         # which action request the persona-derived picker chose.
         # Bank version pinned on provenance under "agentic" key.
-        assert outcome["provenance"]["bank_version"].get("agentic") == "v0.5.4"
+        assert outcome["provenance"]["bank_version"].get("agentic") == "v0.5.5"
 
     async def test_first_user_turn_is_initial_user_prompt_verbatim(
         self,

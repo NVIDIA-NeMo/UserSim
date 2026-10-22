@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: en_SG
 bank_id: en_SG_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - singapore-geography
 - singapore-history
@@ -48,10 +48,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-GEO-002
   category: singapore-geography
   question_type: factual_recall
@@ -67,10 +66,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-HIS-001
   category: singapore-history
   question_type: factual_recall
@@ -86,10 +84,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-HIS-002
   category: singapore-history
   question_type: factual_recall
@@ -104,10 +101,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-CUL-001
   category: singapore-culture
   question_type: factual_recall
@@ -124,10 +120,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-CUL-002
   category: singapore-culture
   question_type: factual_recall
@@ -142,10 +137,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-PAM-001
   category: singapore-poetry-and-music
   question_type: factual_recall
@@ -161,10 +155,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-PAM-002
   category: singapore-poetry-and-music
   question_type: completion
@@ -179,10 +172,9 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-SVC-001
   category: singapore-public-services
   question_type: factual_recall
@@ -196,10 +188,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SG-EN-SVC-002
   category: singapore-public-services
   question_type: factual_recall
@@ -213,10 +204,9 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Singapore beta review of original sample entry
+    source: Original UserSim sample entry (Singapore)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: SINGAPORE-GEOG-B003
   category: singapore-geography
   question_type: factual_recall
@@ -234,10 +224,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pub.gov.sg, Water Agreement 1962, NEWater visitor centre materials.
+    - Synthetic factual entry (AI-authored). Standard reference points — pub.gov.sg, Water Agreement 1962, NEWater visitor centre materials.
 - id: SINGAPORE-GEOG-B004
   category: singapore-geography
   question_type: factual_recall
@@ -254,10 +244,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Singapore Department of Statistics; URA Master Plan; Singapore Land Authority (SLA); JTC.
+    - Synthetic factual entry (AI-authored). Standard reference points — Singapore Department of Statistics; URA Master Plan; Singapore Land Authority (SLA); JTC.
 - id: SINGAPORE-GEOG-B005
   category: singapore-geography
   question_type: factual_recall
@@ -275,10 +265,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Meteorological Service Singapore (weather.gov.sg); NEA climate pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — Meteorological Service Singapore (weather.gov.sg); NEA climate pages.
 - id: SINGAPORE-GEOG-B006
   category: singapore-geography
   question_type: factual_recall
@@ -296,10 +286,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — NParks Pulau Ubin pages; Sentosa Development Corporation; SAF BMTC; SLA.
+    - Synthetic factual entry (AI-authored). Standard reference points — NParks Pulau Ubin pages; Sentosa Development Corporation; SAF BMTC; SLA.
 - id: SINGAPORE-HIST-B003
   category: singapore-history
   question_type: factual_recall
@@ -316,10 +306,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board (NLB) Singapore Infopedia; National Heritage Board.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Library Board (NLB) Singapore Infopedia; National Heritage Board.
 - id: SINGAPORE-HIST-B004
   category: singapore-history
   question_type: factual_recall
@@ -336,10 +326,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board Infopedia; National Archives of Singapore; PAP party history.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Library Board Infopedia; National Archives of Singapore; PAP party history.
 - id: SINGAPORE-HIST-B005
   category: singapore-history
   question_type: factual_recall
@@ -357,10 +347,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Library Board Infopedia (Stop at Two; Have Three or More); Singapore Department of Statistics; MSF Marriage and Parenthood Package.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Library Board Infopedia (Stop at Two; Have Three or More); Singapore Department of Statistics; MSF Marriage and Parenthood Package.
 - id: SINGAPORE-HIST-B006
   category: singapore-history
   question_type: completion
@@ -390,10 +380,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Singapore National Pledge, drafted by S. Rajaratnam, 1966.
+    - Synthetic factual entry (AI-authored). Reference text — Singapore National Pledge, drafted by S. Rajaratnam, 1966.
 - id: SINGAPORE-CULT-B003
   category: singapore-culture
   question_type: factual_recall
@@ -411,10 +401,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Constitution of Singapore (Article 153A); Speak Mandarin Campaign; Speak Good English Movement; Ministry of Culture, Community and Youth (MCCY).
+    - Synthetic factual entry (AI-authored). Standard reference points — Constitution of Singapore (Article 153A); Speak Mandarin Campaign; Speak Good English Movement; Ministry of Culture, Community and Youth (MCCY).
 - id: SINGAPORE-CULT-B004
   category: singapore-culture
   question_type: factual_recall
@@ -431,10 +421,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Holidays Act, Ministry of Manpower (mom.gov.sg) annual public-holiday notices.
+    - Synthetic factual entry (AI-authored). Standard reference points — Holidays Act, Ministry of Manpower (mom.gov.sg) annual public-holiday notices.
 - id: SINGAPORE-CULT-B005
   category: singapore-culture
   question_type: factual_recall
@@ -452,10 +442,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Peranakan Museum (peranakanmuseum.org.sg); National Heritage Board; URA conservation areas listing.
+    - Synthetic factual entry (AI-authored). Standard reference points — Peranakan Museum (peranakanmuseum.org.sg); National Heritage Board; URA conservation areas listing.
 - id: SINGAPORE-CULT-B006
   category: singapore-culture
   question_type: completion
@@ -488,10 +478,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — "Majulah Singapura" (1958), composed by Zubir Said; National Anthem of Singapore.
+    - Synthetic factual entry (AI-authored). Reference text — "Majulah Singapura" (1958), composed by Zubir Said; National Anthem of Singapore.
 - id: SINGAPORE-POET-B003
   category: singapore-poetry-and-music
   question_type: completion
@@ -523,10 +513,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Lee Tzu Pheng, "My Country and My People" (1976), in collected works including "Prospect of a Drowning" (1980).
+    - Synthetic factual entry (AI-authored). Reference text — Lee Tzu Pheng, "My Country and My People" (1976), in collected works including "Prospect of a Drowning" (1980).
 - id: SINGAPORE-POET-B004
   category: singapore-poetry-and-music
   question_type: completion
@@ -560,10 +550,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Hugh Harrison, "Count On Me, Singapore" (1986), MCCY / NDP songbook archive.
+    - Synthetic factual entry (AI-authored). Reference text — Hugh Harrison, "Count On Me, Singapore" (1986), MCCY / NDP songbook archive.
 - id: SINGAPORE-POET-B005
   category: singapore-poetry-and-music
   question_type: completion
@@ -596,10 +586,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Arthur Yap, "2 Mothers in a HDB Playground", in "Down the Line" (1980).
+    - Synthetic factual entry (AI-authored). Reference text — Arthur Yap, "2 Mothers in a HDB Playground", in "Down the Line" (1980).
 - id: SINGAPORE-POET-B006
   category: singapore-poetry-and-music
   question_type: completion
@@ -641,10 +631,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Dick Lee (composer) / Kit Chan (vocalist), "Home", NDP 1998 official theme song.
+    - Synthetic factual entry (AI-authored). Reference text — Dick Lee (composer) / Kit Chan (vocalist), "Home", NDP 1998 official theme song.
 - id: SINGAPORE-PUBL-B003
   category: singapore-public-services
   question_type: factual_recall
@@ -662,10 +652,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS GST guides; Goods and Services Tax Act (GST Act); Ministry of Finance Budget speeches.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRAS GST guides; Goods and Services Tax Act (GST Act); Ministry of Finance Budget speeches.
 - id: SINGAPORE-PUBL-B004
   category: singapore-public-services
   question_type: factual_recall
@@ -683,10 +673,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg); CPF Board (cpf.gov.sg); HealthHub.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Health (moh.gov.sg); CPF Board (cpf.gov.sg); HealthHub.
 - id: SINGAPORE-PUBL-B005
   category: singapore-public-services
   question_type: factual_recall
@@ -705,10 +695,10 @@ entries:
   - age:18-44
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — HDB (hdb.gov.sg); Housing & Development Act; PLH guidelines.
+    - Synthetic factual entry (AI-authored). Standard reference points — HDB (hdb.gov.sg); Housing & Development Act; PLH guidelines.
 - id: SINGAPORE-PUBL-B006
   category: singapore-public-services
   question_type: completion
@@ -733,10 +723,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Total Defence framework, MINDEF Singapore (totaldefence.sg).
+    - Synthetic factual entry (AI-authored). Reference text — Total Defence framework, MINDEF Singapore (totaldefence.sg).
 - id: SINGAPORE-HEAL-B001
   category: singapore-health-systems
   question_type: factual_recall
@@ -753,10 +743,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Community Health Assist Scheme (chas.sg); Ministry of Health (moh.gov.sg).
+    - Synthetic factual entry (AI-authored). Standard reference points — Community Health Assist Scheme (chas.sg); Ministry of Health (moh.gov.sg).
 - id: SINGAPORE-HEAL-B002
   category: singapore-health-systems
   question_type: factual_recall
@@ -774,10 +764,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CPF Act; MediSave usage tables (cpf.gov.sg, moh.gov.sg); Chronic Disease Management Programme (CDMP).
+    - Synthetic factual entry (AI-authored). Standard reference points — CPF Act; MediSave usage tables (cpf.gov.sg, moh.gov.sg); Chronic Disease Management Programme (CDMP).
 - id: SINGAPORE-HEAL-B003
   category: singapore-health-systems
   question_type: factual_recall
@@ -795,10 +785,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg) IP guidance; MAS Notice 1607.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Health (moh.gov.sg) IP guidance; MAS Notice 1607.
 - id: SINGAPORE-HEAL-B004
   category: singapore-health-systems
   question_type: factual_recall
@@ -817,10 +807,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — careshieldlife.gov.sg; Ministry of Health.
+    - Synthetic factual entry (AI-authored). Standard reference points — careshieldlife.gov.sg; Ministry of Health.
 - id: SINGAPORE-HEAL-B005
   category: singapore-health-systems
   question_type: factual_recall
@@ -838,10 +828,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pioneers.gov.sg; merdeka.gov.sg; moh.gov.sg.
+    - Synthetic factual entry (AI-authored). Standard reference points — pioneers.gov.sg; merdeka.gov.sg; moh.gov.sg.
 - id: SINGAPORE-HEAL-B006
   category: singapore-health-systems
   question_type: factual_recall
@@ -859,10 +849,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Health (moh.gov.sg); NHGP / SingHealth / NUP polyclinic websites; HealthHub.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Health (moh.gov.sg); NHGP / SingHealth / NUP polyclinic websites; HealthHub.
 - id: SINGAPORE-EDUC-B001
   category: singapore-education
   question_type: factual_recall
@@ -880,10 +870,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); SEAB.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Education (moe.gov.sg); SEAB.
 - id: SINGAPORE-EDUC-B002
   category: singapore-education
   question_type: factual_recall
@@ -902,10 +892,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); polytechnic and JC websites.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Education (moe.gov.sg); polytechnic and JC websites.
 - id: SINGAPORE-EDUC-B003
   category: singapore-education
   question_type: factual_recall
@@ -922,10 +912,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); SEAB; IBO Singapore school list.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Education (moe.gov.sg); SEAB; IBO Singapore school list.
 - id: SINGAPORE-EDUC-B004
   category: singapore-education
   question_type: factual_recall
@@ -943,10 +933,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — moe.gov.sg; nus.edu.sg; ntu.edu.sg; smu.edu.sg; sutd.edu.sg; singaporetech.edu.sg; suss.edu.sg.
+    - Synthetic factual entry (AI-authored). Standard reference points — moe.gov.sg; nus.edu.sg; ntu.edu.sg; smu.edu.sg; sutd.edu.sg; singaporetech.edu.sg; suss.edu.sg.
 - id: SINGAPORE-EDUC-B005
   category: singapore-education
   question_type: factual_recall
@@ -964,10 +954,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education (moe.gov.sg); CPF PSEA pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Education (moe.gov.sg); CPF PSEA pages.
 - id: SINGAPORE-EDUC-B006
   category: singapore-education
   question_type: factual_recall
@@ -985,10 +975,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Education P1 Registration; moe.gov.sg.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Education P1 Registration; moe.gov.sg.
 - id: SINGAPORE-LABO-B001
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1006,10 +996,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employment Act (Cap. 91); Ministry of Manpower (mom.gov.sg).
+    - Synthetic factual entry (AI-authored). Standard reference points — Employment Act (Cap. 91); Ministry of Manpower (mom.gov.sg).
 - id: SINGAPORE-LABO-B002
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1026,10 +1016,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Child Development Co-Savings Act; made-for-families.gov.sg; mom.gov.sg.
+    - Synthetic factual entry (AI-authored). Standard reference points — Child Development Co-Savings Act; made-for-families.gov.sg; mom.gov.sg.
 - id: SINGAPORE-LABO-B003
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1046,10 +1036,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Enlistment Act; mindef.gov.sg; cmpb.gov.sg.
+    - Synthetic factual entry (AI-authored). Standard reference points — Enlistment Act; mindef.gov.sg; cmpb.gov.sg.
 - id: SINGAPORE-LABO-B004
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1066,10 +1056,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Retirement and Re-employment Act; Ministry of Manpower (mom.gov.sg); TAFEP.
+    - Synthetic factual entry (AI-authored). Standard reference points — Retirement and Re-employment Act; Ministry of Manpower (mom.gov.sg); TAFEP.
 - id: SINGAPORE-LABO-B005
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1087,10 +1077,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Ministry of Manpower (mom.gov.sg) Foreign Workforce Levy pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — Ministry of Manpower (mom.gov.sg) Foreign Workforce Levy pages.
 - id: SINGAPORE-LABO-B006
   category: singapore-labor-and-benefits
   question_type: factual_recall
@@ -1108,10 +1098,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — workfare.gov.sg; CPF Board; Progressive Wage Model.
+    - Synthetic factual entry (AI-authored). Standard reference points — workfare.gov.sg; CPF Board; Progressive Wage Model.
 - id: SINGAPORE-FINA-B001
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1129,10 +1119,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS SRS pages (iras.gov.sg); SRS Operator bank guides.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRAS SRS pages (iras.gov.sg); SRS Operator bank guides.
 - id: SINGAPORE-FINA-B002
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1150,10 +1140,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CPF Board (cpf.gov.sg); CPFIS Approved Products List.
+    - Synthetic factual entry (AI-authored). Standard reference points — CPF Board (cpf.gov.sg); CPFIS Approved Products List.
 - id: SINGAPORE-FINA-B003
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1171,10 +1161,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — MAS (mas.gov.sg) Singapore Savings Bonds.
+    - Synthetic factual entry (AI-authored). Standard reference points — MAS (mas.gov.sg) Singapore Savings Bonds.
 - id: SINGAPORE-FINA-B004
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1192,10 +1182,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS Stamp Duty pages (iras.gov.sg); Stamp Duties Act.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRAS Stamp Duty pages (iras.gov.sg); Stamp Duties Act.
 - id: SINGAPORE-FINA-B005
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1213,10 +1203,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRAS Income Tax pages; Income Tax Act; annual Budget speeches.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRAS Income Tax pages; Income Tax Act; annual Budget speeches.
 - id: SINGAPORE-FINA-B006
   category: singapore-finance-and-consumer
   question_type: factual_recall
@@ -1234,10 +1224,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Singapore Deposit Insurance Corporation (sdic.org.sg); MAS.
+    - Synthetic factual entry (AI-authored). Standard reference points — Singapore Deposit Insurance Corporation (sdic.org.sg); MAS.
 - id: SINGAPORE-DIGI-B001
   category: singapore-digital-services
   question_type: factual_recall
@@ -1256,10 +1246,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — singpass.gov.sg; GovTech Singapore (tech.gov.sg); MyInfo.
+    - Synthetic factual entry (AI-authored). Standard reference points — singpass.gov.sg; GovTech Singapore (tech.gov.sg); MyInfo.
 - id: SINGAPORE-DIGI-B002
   category: singapore-digital-services
   question_type: factual_recall
@@ -1277,10 +1267,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Association of Banks in Singapore (abs.org.sg); MAS; SGQR.
+    - Synthetic factual entry (AI-authored). Standard reference points — Association of Banks in Singapore (abs.org.sg); MAS; SGQR.
 - id: SINGAPORE-DIGI-B003
   category: singapore-digital-services
   question_type: factual_recall
@@ -1299,10 +1289,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — ScamShield (scamshield.org.sg); Singapore Police Force scam-alert pages (police.gov.sg); MAS / IMDA scam advisories.
+    - Synthetic factual entry (AI-authored). Standard reference points — ScamShield (scamshield.org.sg); Singapore Police Force scam-alert pages (police.gov.sg); MAS / IMDA scam advisories.
 - id: SINGAPORE-DIGI-B004
   category: singapore-digital-services
   question_type: factual_recall
@@ -1320,10 +1310,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — healthhub.sg; Synapxe (synapxe.sg); Ministry of Health.
+    - Synthetic factual entry (AI-authored). Standard reference points — healthhub.sg; Synapxe (synapxe.sg); Ministry of Health.
 - id: SINGAPORE-DIGI-B005
   category: singapore-digital-services
   question_type: factual_recall
@@ -1341,10 +1331,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Personal Data Protection Act (PDPA); Public Sector (Governance) Act 2018; Cybersecurity Act 2018; Healthcare Services Act 2020.
+    - Synthetic factual entry (AI-authored). Standard reference points — Personal Data Protection Act (PDPA); Public Sector (Governance) Act 2018; Cybersecurity Act 2018; Healthcare Services Act 2020.
 - id: SINGAPORE-DIGI-B006
   category: singapore-digital-services
   question_type: factual_recall
@@ -1362,7 +1352,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_SG, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_SG, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Smart Nation and Digital Government Group (sndgg.gov.sg); GovTech (tech.gov.sg); IMDA.
+    - Synthetic factual entry (AI-authored). Standard reference points — Smart Nation and Digital Government Group (sndgg.gov.sg); GovTech (tech.gov.sg); IMDA.

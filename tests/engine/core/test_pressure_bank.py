@@ -524,7 +524,7 @@ class TestShippedSampleBank:
 
     def test_loads_clean(self, sample_bank: PressureBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
-        assert sample_bank.bank_version == "v0.5.4"
+        assert sample_bank.bank_version == "v0.5.5"
 
     def test_six_strategies_with_ten_reframings_each(
         self,

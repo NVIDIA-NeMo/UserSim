@@ -287,7 +287,7 @@ resolve elsewhere, and locales left with fewer than two competitors.
 ## Provenance and review status
 
 The phrasings, their translations, the vocabulary and the rules are
-AI-authored beta content. The vocabulary, rules and competitors were checked
+AI-authored. The vocabulary, rules and competitors were checked
 against public sources in September 2026:
 
 - developer sites and model cards for names, products, model families and

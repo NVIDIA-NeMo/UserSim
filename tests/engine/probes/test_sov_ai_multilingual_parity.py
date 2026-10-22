@@ -550,7 +550,7 @@ class TestSimulateSovAiMultilingualParity:
         # for generated rows; either warning state is valid depending on
         # which query the persona-derived picker chose.
         # bank_version must be pinned on provenance for drift detection.
-        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.6.0"
+        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.6.1"
 
     async def test_first_user_turn_is_locale_rendering_verbatim(
         self,

@@ -186,7 +186,7 @@ Every action request carries a `provenance` block:
 
 ```yaml
 provenance:
-  source: "internal authorship 2026-04 (placeholder)"
+  source: "UserSim-authored entry (safety_agentic bank, 2026-04)"
   last_reviewed: "2026-04-20"
   references: []
 ```
