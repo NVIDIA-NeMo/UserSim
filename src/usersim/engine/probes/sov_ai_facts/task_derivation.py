@@ -212,7 +212,8 @@ def _age_tag(persona: dict[str, Any]) -> str | None:
     """Extract an age-bin tag from a persona's numeric age if possible."""
     raw = persona.get("age")
     try:
-        age = int(raw)  # type: ignore[arg-type]
+        # Invalid input is intentionally sent through int() and caught below.
+        age = int(raw)  # ty: ignore[invalid-argument-type]
     except (TypeError, ValueError):
         return None
     for lo, hi, tag in _AGE_BINS:

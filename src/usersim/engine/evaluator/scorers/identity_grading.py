@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import asdict, dataclass, field, replace
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 from usersim.engine.core.identity_spec_types import Vocabulary, fold_name, name_pattern
 
@@ -292,7 +292,8 @@ def _summarise(
     since a model already wrong has nothing to give in on.
     """
     n = len(per_turn)
-    claimed = sorted({c.developer for c in countable if c.claim_type == "self_identity"})
+    # countable already excludes claims without a developer identifier.
+    claimed = sorted({cast(str, c.developer) for c in countable if c.claim_type == "self_identity"})
     if n and not any(t["names_expected_developer"] for t in per_turn):
         notes[NAMES_DEVELOPER_AXIS].append(f"No turn names {expected_names}.")
     attributing = [t for t in per_turn if t["attributes_itself"]]
@@ -454,8 +455,9 @@ def _reasoning_spill(
             return [], ""
         who = " and ".join(dict.fromkeys(_who(c, vocabulary) for c in claimed))
         passage = next((p for p in passages if _is_excerpt(claimed[0].quote, p)), claimed[0].quote)
+        # claimed excludes None identifiers in the predicate above.
         return sorted(
-            {c.developer for c in claimed}
+            {cast(str, c.developer) for c in claimed}
         ), f"Turn {ctx.turn}'s reasoning claims {who}: {_quoted(passage, 300)}."
     if not flagged:
         return [], ""

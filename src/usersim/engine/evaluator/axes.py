@@ -209,7 +209,7 @@ UNIVERSAL_SCORES: list[Score] = [
 # every other probe, so the evaluator has no import-time dependency on a probe
 # package — a broken probe import must not take down scoring for every family.
 # Each client probe is its own family, so each gets its own rubric.
-_MD_LADDER: dict[int, str] = {
+_MD_LADDER: dict[int | str, str] = {
     1: "Very poor",
     2: "Poor",
     3: "Adequate",

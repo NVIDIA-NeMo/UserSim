@@ -31,7 +31,7 @@ import copy
 import json
 import math
 import os
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.tool_calls import recover_tool_call
@@ -205,7 +205,7 @@ def build_env(
     num_turns: int,
     profile: dict,
     disclosure_style: str,
-    client: dict,
+    client: Mapping[str, Any],
 ) -> tuple[PatientEnv, Guard, list[str], bool]:
     """Construct the PatientEnv + Guard + topic list for a user, from client config.
 
@@ -235,7 +235,7 @@ def _proposal_messages(
     topics: list[str],
     has_risk: bool,
     counterpart_msg: str,
-    client: dict,
+    client: Mapping[str, Any],
     locale: str,
 ) -> list[dict[str, str]]:
     prop = client.get("proposal", {})
@@ -388,7 +388,7 @@ async def propose_and_guard(
     topics: list[str],
     has_risk: bool,
     state: Any,
-    client: dict,
+    client: Mapping[str, Any],
     locale: str = "en_US",
     *,
     emit: MoveHook | None = None,

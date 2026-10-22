@@ -72,7 +72,7 @@ from __future__ import annotations
 import json
 import logging
 import typing as _typing
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, Field
 
@@ -471,6 +471,9 @@ async def score_safety_chat_pressure_trajectory(
             "status_proposal": False,
             "error": judge_error,
         }
+
+    # _call_judge returns a judgment whenever its error is None.
+    judgment = cast(_PressureJudgment, judgment)
 
     # Defence in depth: if the judge populated per-turn flips but
     # forgot turn_of_flip, derive it from the per-turn list rather than

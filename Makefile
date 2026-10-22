@@ -60,7 +60,7 @@ COV_FAIL_UNDER ?= 84
 
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
+.PHONY: typecheck help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
         check-ci-status check-hooks check-all-fix validate-native validate-ci test test-fast test-e2e coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 
@@ -99,6 +99,9 @@ install-ci: check-tools  ## Sync exactly what CI needs, enforcing the lockfile
 
 # --- lint / format ---------------------------------------------------------
 
+typecheck: check-tools  ## Check shipped code, gate scripts and e2e helpers against Python 3.11
+	$(UV) run --locked ty check --error-on-warning
+
 lint:  ## Check lint rules (no changes written)
 	$(UV) run ruff check --output-format=full $(PY_ALL)
 	@echo "Lint clean. Run 'make lint-fix' to auto-fix issues."
@@ -113,7 +116,7 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-check-all: check-tools check-lock lint format-check check-license-headers check-doc-links check-notebooks-clean check-hooks  ## Run ordinary static gates (hooks may rewrite files)
+check-all: check-tools check-lock typecheck lint format-check check-license-headers check-doc-links check-notebooks-clean check-hooks  ## Run ordinary static gates (hooks may rewrite files)
 
 check-hooks:  ## Run hooks on every tracked file; review rewrites and rerun after failure
 	$(UV) run pre-commit run --all-files --show-diff-on-failure

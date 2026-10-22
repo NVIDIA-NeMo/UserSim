@@ -51,6 +51,20 @@ jobs:
         run: make check-dependency-licenses
 
 
+  typecheck:
+    name: Type checking
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version-file: "pyproject.toml"
+          python-version: "3.12"
+          enable-cache: true
+      - run: make install-ci
+      - run: make typecheck
+
   test:
     name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
@@ -173,7 +187,7 @@ jobs:
   status:
     name: CI Status
     if: always()
-    needs: [static, test, packaging, e2e, container]
+    needs: [static, typecheck, test, packaging, e2e, container]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

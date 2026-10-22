@@ -57,7 +57,7 @@ import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from usersim.cli._errors import ConfigError
 
@@ -396,7 +396,7 @@ def apply_parallel_overrides(config: ModelsConfig, overrides: dict[str, int]) ->
 
 def apply_model_overrides(
     config: ModelsConfig,
-    overrides: dict[str, str | dict[str, Any]],
+    overrides: Mapping[str, str | dict[str, Any]],
 ) -> ModelsConfig:
     """Return a new ``ModelsConfig`` with ``model`` strings (and optionally
     other per-model knobs) swapped per alias.
@@ -1002,7 +1002,9 @@ def smoke_test_models(
         if key_pair in seen:
             # Inherit the prior result for the same (model, provider).
             prior_alias = next(
-                a for a, (_, m) in results.items() if (config.get(a).model, config.get(a).provider) == key_pair
+                a
+                for a, (_, m) in results.items()
+                if (prior_spec := config.get(a)) is not None and (prior_spec.model, prior_spec.provider) == key_pair
             )
             results[spec.alias] = results[prior_alias]
             continue

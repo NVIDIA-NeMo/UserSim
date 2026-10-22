@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import random
 import re
-from typing import Any
+from typing import Any, TypedDict
 
 _OCEAN_TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
 
@@ -612,7 +612,14 @@ def format_disclosure_instructions(style: str) -> str:
 # Sim2Real: User interaction style (Option C + G)
 # ---------------------------------------------------------------------------
 
-INTERACTION_STYLES = {
+
+class _InteractionStyle(TypedDict):
+    base_frustration: int
+    escalation_rate: float
+    description: str
+
+
+INTERACTION_STYLES: dict[str, _InteractionStyle] = {
     "confrontational": {
         "base_frustration": 2,
         "escalation_rate": 2.0,
@@ -731,7 +738,7 @@ def compute_frustration_level(
     base = info["base_frustration"]
     rate = info["escalation_rate"]
 
-    frustration = base
+    frustration: float = base
     if assistant_failures >= 2:
         frustration += assistant_failures * rate
 
