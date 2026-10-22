@@ -21,7 +21,7 @@ single institution.
 
 At a glance:
 
-<img src="../../../../../docs/images/financial_services_probe.jpg" width="800">
+<img src="../../../../../docs/images/financial_services_probe.jpg" width="800" alt="How the financial_services probe works: describe a country in its own language, generate its fictional institutions and their documents, simulate customers who ask in their own language, then measure and train. The assistant earns tool access by retrieving the tool's document first.">
 
 These markets ship:
 

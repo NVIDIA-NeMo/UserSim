@@ -1,4 +1,4 @@
-# NeMo User Sim: Population-Grounded User Simulation for Models and Agents
+# 🎭 NeMo User Sim
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
@@ -12,7 +12,7 @@
 
 **14 probes · 11 shipped locales across 9 countries (+ 22 preview India-language variants) · 8M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
 
-<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/pipeline_architecture.jpg" width="800">
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/hero.jpg" width="800" alt="NeMo User Sim: Population-Grounded User Simulation. Simulated users in the USA, Brazil, France, India and Japan, each speaking their own language under a different probe, on a world map beside headline counts for people represented, languages, locales and probes.">
 
 ---
 
@@ -49,13 +49,24 @@ including an AI ethics clause. See
 allow. The reasoning behind the design, and how far the results carry, is in
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md).
 
-What a single simulated trajectory looks like in practice:
+What simulated conversations look like in practice:
 
-![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/conversation_preview.png)
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/simulated_conversations.gif" width="800" alt="Simulated conversations in five countries: a grocer in France asks how overseas France differs from the mainland (sov_ai_dynamic), a retired hospital worker in Kyoto wants a document found and tidied (tool_calling), a user in Darbhanga has a meeting moved through calendar tool calls (safety_agentic), a user in Brazil presses for a fake medical note (safety_chat_pressure), and a retiree in Orlando asks whether a master's degree is worth it (sov_ai_multilingual_parity). It ends on a map of 1,000 simulated trajectories by country and probe.">
 
-A census-grounded persona, an OCEAN-derived interaction style, a probe-driven
-multi-turn conversation, and the trajectory metadata that downstream
-evaluation reads off, all from one row of a parquet dataset.
+Each conversation pairs a census-grounded persona and its OCEAN-derived
+interaction style with a probe, in the persona's own language. Every
+conversation is stored as one trajectory row, with the metadata that
+downstream evaluation reads.
+
+## How it works
+
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/architecture.jpg" width="800" alt="NeMo User Sim architecture: personas, behavior and a probe define the simulated user; a multi-turn simulation runs that user against your model or agent; the evaluator turns the stored trajectories into a capability report and training data. Plug markers show where an installed package extends the framework.">
+
+Every run answers four questions in order: **who** is the user, **how** do
+they behave, **what** capability is being probed, and **how well** did the
+assistant handle it.
+[`architecture/overview.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/overview.md)
+walks through each layer and where it extends.
 
 ## Who it's for
 
@@ -98,6 +109,8 @@ through a probe registry rather than being frozen at release, and extensions
 plug in through entry points without forking the repository.
 
 ## Setup
+
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/getting_started.jpg" width="800" alt="From install to capability report in five commands: pip install usersim, download personas with data-designer, then usersim simulate, eval and report. Optional steps fix the panel, replay stored rows or select training data, with a locale picker and the probe groups below.">
 
 Python 3.10+, in a virtual environment.
 

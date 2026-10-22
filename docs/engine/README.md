@@ -28,7 +28,7 @@ the host to answer, and executes the assistant's tool calls itself.
 
 ## Architecture
 
-<img src="../images/plugin_architecture.jpg" width="700">
+<img src="../images/conversation_engine.jpg" width="800" alt="The conversation loop a new probe runs on: the simulated user writes a turn, filters and a judge gate check it, your model or agent replies, and a reply judge drives the user's frustration, until a stop condition ends the conversation. Hook labels mark what a probe can override, and each conversation becomes one trajectory row for the evaluator and report.">
 
 Every probe except `safety_agentic` drives the shared
 `core/simulation.py::ConversationLoop` via `BaseProbe.run_dispatch`:

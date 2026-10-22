@@ -5,7 +5,7 @@ Every NeMo User Sim run answers four questions in order: **who** is the user,
 the assistant handle it. Each is a separate layer you can replace without
 touching the others, which is the whole design in one sentence.
 
-<img src="../docs/images/pipeline_architecture.jpg" width="800">
+<img src="../docs/images/architecture.jpg" width="800" alt="NeMo User Sim architecture: personas, behavior and a probe define the simulated user; a multi-turn simulation runs that user against your model or agent; the evaluator turns the stored trajectories into a capability report and training data. Plug markers show where an installed package extends the framework.">
 
 **Who** comes from [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
 synthetic individuals grounded in real census distributions, sampled from the
@@ -22,6 +22,8 @@ user."
 **What** is a probe: the interaction pattern, the opening turn, and the
 definition of failure. Fourteen ship, and a new one inherits the conversation
 loop, so it declares only what is specific to it.
+
+<img src="../docs/images/conversation_engine.jpg" width="800" alt="The conversation loop a new probe runs on: the simulated user writes a turn, filters and a judge gate check it, your model or agent replies, and a reply judge drives the user's frustration, until a stop condition ends the conversation. Hook labels mark what a probe can override, and each conversation becomes one trajectory row for the evaluator and report.">
 
 **How well** is the evaluator, and it runs *after* simulation rather than
 inside it. Trajectories land in a parquet file, and scoring reads that file.
@@ -66,8 +68,6 @@ generators:
 
 - `conversation-simulator` → `usersim.engine.plugin:conversation_simulator`
 - `trajectory-evaluator` → `usersim.engine.plugin:trajectory_evaluator`
-
-<img src="../docs/images/plugin_architecture.jpg" width="800">
 
 You inherit Data Designer's orchestration, parallelism and provider handling
 rather than reimplementing them, and the two generators compose with anything
