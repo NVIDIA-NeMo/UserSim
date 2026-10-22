@@ -39,23 +39,12 @@ jobs:
 
       - run: make install-ci
 
-      - name: Lint and formatting
+      - name: Static checks and all tracked-file hooks
         run: make check-all
-
-      - name: SPDX headers
-        run: make check-license-headers
-
-      - name: Relative links in markdown
-        run: make check-doc-links
 
       - name: Dependency licences
         run: make check-dependency-licenses
 
-      - name: Notebook outputs are stripped
-        # nbstripout runs from a pre-commit hook that only exists if a
-        # contributor ran `make install-dev`. A fresh clone has no hooks, so
-        # this is the only thing that actually keeps outputs out of the repo.
-        run: make check-notebooks-clean
 
   test:
     name: Tests (Python ${{ matrix.python-version }})
