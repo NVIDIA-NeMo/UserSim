@@ -28,8 +28,6 @@ What you provide:
 - ``after_assistant_turn`` — intercepts tool calls, executes them
   (or simulates execution), appends tool-response messages, records
   in ``state.metadata["tools_called"]``.
-- ``should_succeed`` — `len(tools_called) > 0` (no tool calls = sim
-  failure).
 - ``build_result_extras`` — surface ``num_tool_calls`` and the tool
   subset used.
 
@@ -132,11 +130,6 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
                     call_idx=idx,
                 )
         return content or ""
-
-    def should_succeed(self, state: Any) -> bool:
-        # Sim-side guardrail: zero tool calls = the probe didn't
-        # really happen. Mirrors the tool_calling probe's policy.
-        return len(state.metadata.get("tools_called", [])) > 0
 
     def build_result_extras(self, state: Any) -> dict:
         # Every key added here must also be listed in

@@ -962,3 +962,45 @@ class TestShouldSucceed:
 
         state = ConversationState(outcome=OutcomeBuilder())
         assert probe_gen.should_succeed(state) is False
+
+    async def test_a_failing_check_fails_the_row(
+        self,
+        en_persona: dict[str, Any],
+        simulator_cfg: Any,
+    ) -> None:
+        from usersim.engine.core.outcomes import FailureAttribution, OutcomeBuilder
+        from usersim.engine.core.probes import dispatch_episode
+
+        class _CheckFailingProbe(probe_gen.SafetyAgenticProbe):
+            def should_succeed(self, state: Any) -> bool:
+                return False
+
+        models = {"assistant_model": object()}
+        with (
+            patch.dict(os.environ, _shipped_bank_env()),
+            patch(
+                "usersim.engine.probes.safety_agentic.generator.acall_llm",
+                side_effect=_mock_call_llm([{"role": "assistant", "content": "I should ask first."}]),
+            ),
+        ):
+            probe = _CheckFailingProbe(
+                persona=en_persona,
+                locale="en_US",
+                language="English",
+                models=models,
+                cfg=simulator_cfg,
+                provenance=Provenance(),
+                profile={},
+                data={},
+                outcome_builder=OutcomeBuilder(provenance=Provenance()),
+            )
+            result = await dispatch_episode(probe, models=models, data={}, cfg=simulator_cfg)
+
+        outcome = json.loads(result["simulation_outcome"])
+        assert result["conversation_status"] is False
+        assert (outcome["status"], outcome["failure_class"], outcome["failure_attribution"]) == (
+            OutcomeStatus.FAILED.value,
+            FailureClass.SCENARIO_ABORTED.value,
+            FailureAttribution.SCENARIO_LOGIC.value,
+        )
+        assert any(w["kind"] == WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION.value for w in outcome["warnings"])

@@ -358,22 +358,41 @@ class ConversationState:
 from usersim.engine.core.probes import ProbeAdapter  # noqa: E402
 
 
-def _probe_should_succeed(probe: ProbeAdapter, state: ConversationState) -> bool:
-    """Honour the optional ``should_succeed(state)`` adapter hook (default True).
+def _protocol_failure(probe: ProbeAdapter, state: ConversationState) -> str:
+    """Say why the probe's optional ``should_succeed(state)`` check failed, or return "".
 
-    This is the sim-side guardrail mechanism that replaced the
-    in-sim trajectory-judge override of ``conversation_status``.
-    Tool_calling uses it to flag sim-quality issues like "no tools
-    were called by the assistant despite a tool-required probe."
+    A probe without the hook passes. A hook that raises fails: a protocol
+    that can't be checked doesn't count as completed.
     """
     fn = getattr(probe, "should_succeed", None)
     if fn is None:
-        return True
+        return ""
     try:
-        return bool(fn(state))
+        if fn(state):
+            return ""
     except Exception as e:
-        logger.debug(f"  |-- probe.should_succeed raised {type(e).__name__}: {e}; defaulting to True")
-        return True
+        logger.warning(f"  |-- probe.should_succeed raised {type(e).__name__}: {e}")
+        return f"should_succeed raised {type(e).__name__}: {e}"
+    return "should_succeed returned False"
+
+
+def finalize_completed(probe: ProbeAdapter, state: ConversationState) -> tuple[bool, SimulationOutcome]:
+    """Finalize a conversation that ran to its end.
+
+    Returns the probe's verdict on its own protocol, which becomes the row's
+    ``conversation_status``, and the finalized outcome. A conversation whose
+    probe didn't complete its protocol is failed, so the evaluator never
+    scores it as assistant-quality evidence.
+    """
+    failure = _protocol_failure(probe, state)
+    if not failure:
+        return True, state.outcome.finalize(status=OutcomeStatus.OK)
+    return False, state.outcome.finalize(
+        status=OutcomeStatus.FAILED,
+        failure_class=FailureClass.SCENARIO_ABORTED,
+        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
+        failure_detail=failure,
+    )
 
 
 def _failure_attribution_for_alias(alias: str) -> FailureAttribution:
@@ -1862,13 +1881,10 @@ class ConversationLoop:
         state.outcome.set_n_tool_calls(len(state.metadata.get("tools_called", [])))
         state.outcome.set_wall_clock_s(time.monotonic() - _t_loop_start)
 
-        sim_success = _probe_should_succeed(probe, state)
-
-        # Turn-limit-reached is not a failure — the conversation
-        # naturally ran to max_turns. Keep status=OK (possibly
-        # promoted to COMPLETED_WITH_WARNINGS by finalize if warnings
-        # accumulated).
-        outcome = state.outcome.finalize(status=OutcomeStatus.OK)
+        # Reaching max_turns is not a failure: the row stays OK, or
+        # COMPLETED_WITH_WARNINGS if warnings accumulated, unless the
+        # probe's own protocol check fails.
+        sim_success, outcome = finalize_completed(probe, state)
 
         result = make_result(
             state.messages,

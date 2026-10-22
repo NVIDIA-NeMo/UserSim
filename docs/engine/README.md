@@ -35,9 +35,11 @@ retries, role-violation telemetry, follow-up generation, reactive
 frustration escalation, and early-stop heuristics all live in one place.
 The simulator does **not** judge the assistant under test: that is the
 trajectory-evaluator's job. A probe MAY optionally override
-`should_succeed(state)` for sim-side guardrails (e.g., `tool_calling`
-flips `conversation_status` to False when the assistant called zero
-tools). `safety_agentic` overrides `run_dispatch` itself because its
+`should_succeed(state)` to check that it completed its own protocol
+(e.g., `sov_ai_facts` returns False when no fact is on the trajectory).
+A False sets `conversation_status` to False and finalizes the row as
+failed, so the evaluator doesn't score it. `safety_agentic` overrides
+`run_dispatch` itself because its
 shape (single user turn + multi-assistant-turn tool-interception, no
 user-LLM at all) is genuinely incompatible with the unified loop's
 back-and-forth assumption: it still inherits the substrate's bank-load
@@ -474,7 +476,7 @@ what each one carries:
 | `probe_variant` | str | Probe-specific discriminator (first entry of `PROBE_VARIANTS`, or an explicit row value when provided). Part of `trajectory_id` and the evaluator's stratification key. |
 | `conversation_messages` | str (JSON) | Full message list. Each entry is `{role, content}`; assistant entries add `tool_calls` when the turn called a tool, `tool` entries add `tool_call_id`, and an assistant entry adds **`reasoning_content`** when that model call emitted a thinking trace **and `store_reasoning` is on** (the default; `--no-store-reasoning` suppresses it). The key is absent (not empty) whenever either condition fails; the run manifest's `simulation_config.store_reasoning` records which was requested. Traces are attributed per call, so a tool-calling turn that appends several assistant messages carries each trace on the message that produced it. Stored for analysis: `core/llm.py::_dicts_to_chat_messages` drops it on the way back into a model, so a later turn never sees an earlier turn's thinking, unless the run sets `replay_assistant_reasoning`, which sends the assistant its own earlier traces. |
 | `conversation_metadata` | str (JSON) | Loose per-turn judge / event log surfaced to interactive previews and the deep-dive analysis script. |
-| `conversation_status` | bool | True if the trajectory ran to completion (no gate exhaustion / no infrastructure failure) AND any optional `should_succeed(state)` hook returned True. |
+| `conversation_status` | bool | True if the trajectory ran to completion (no gate exhaustion / no infrastructure failure) AND any optional `should_succeed(state)` hook returned True. When the hook returns False or raises, `simulation_outcome.status` is `failed`. |
 | `behavioral_profile` | str (JSON) | Computed behavioral parameters |
 | `persona_religion_language_context` | str (JSON) | Normalized audit view of the religion, ordered spoken languages, religious background, and linguistic background rendered into the user-agent prompt. Keys are present with null/empty values when the source persona has no such fields. Written to the trajectory parquet, but protected attributes, so curated exports omit it unless you ask for it by name or with the `persona_protected` group (`--schema full` includes it). Review before sharing. |
 | `locale` | str | Locale for this row |
@@ -558,7 +560,7 @@ per-scorer end-to-end).
 | `test_probes_substrate.py` | The probe-authoring substrate: `BaseProbe` defaults, `BankBackedProbe` bank-load + placeholder-warning + version-pinning pipeline, the five mixins (MRO ordering invariant), `LocalePromptPack` validation, `@register_probe` registry semantics, `resolve_probe` |
 | `test_simulation.py` | Shared simulation helpers (`language_instruction`, `make_result`, `make_failed`) |
 | `test_user_turn_policy.py` | `UserTurnPolicy`: phrase groups pinned to the loop's filter lists, allowed phrases and ignored names, and loop runs showing compression and the wrap-up anchor on by default and off under a policy, a probe's turn-1 instruction reaching the user-LLM, and a rejected opening written again before the gate |
-| `test_engine_e2e.py` | End-to-end `ConversationLoop` with mocked LLM: status promotion, gates with retries, frustration injection, early-stop, role-violation telemetry |
+| `test_engine_e2e.py` | End-to-end `ConversationLoop` with mocked LLM: status promotion, the probe's protocol check, gates with retries, frustration injection, early-stop, role-violation telemetry |
 | `test_behavioral.py` | OCEAN extraction, behavioral params (patience / verbosity / cooperativeness / tech_literacy / error_proneness), language mapping, Sim2Real features |
 | `test_identity.py` | `persona_uuid` content-hashing stability + invariance, `trajectory_id` determinism, `resolve_model_name` |
 | `test_idempotency.py` | `existing_trajectory_ids` / `is_duplicate_trajectory_id` / `filter_to_missing_trajectory_ids` |
@@ -592,7 +594,7 @@ per-scorer end-to-end).
 | Test File | Coverage |
 |-----------|----------|
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
-| `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check, `should_succeed` on zero tool calls |
+| `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
 | `test_verifiers.py` | Tool-call JSON-schema validator |
 | `test_sov_ai_facts.py` | `sov_ai_facts` probe: persona→tag, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
 | `test_sov_ai_dynamic.py` | `sov_ai_dynamic` probe: persona→tag, deterministic `derive_probe` + hint rotation (taxonomy-version salted), all-locale prompt availability, e2e with mocked LLM |

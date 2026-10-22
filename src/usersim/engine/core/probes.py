@@ -439,11 +439,12 @@ class BaseProbe:
     def should_succeed(self, state: Any) -> bool:
         """Sim-side guardrail: did the probe complete its protocol?
 
-        Default True (the trajectory ran to completion without an
-        explicit failure). Override to assert a probe-specific
-        invariant — e.g. tool_calling returns False on zero tool
-        calls; sov_ai_facts returns False if no fact id is on the
-        trajectory.
+        Default True. Override to assert a probe-specific invariant,
+        e.g. sov_ai_facts returns False if no fact id is on the
+        trajectory. A False, or an exception, finalizes the row as
+        failed (``scenario_aborted``), and the evaluator doesn't score
+        it. Check the probe's protocol here, not the assistant's
+        behaviour: judging that is the evaluator's job.
         """
         return True
 
