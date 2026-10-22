@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+#MISE description="Validate archives and a clean wheel installation"
+#MISE depends=["build:dist"]
+
+set -euo pipefail
+cd "${MISE_CONFIG_ROOT:?}"
+"${UV:-uv}" run python scripts/check_dist.py dist; \
+WORK=$(mktemp -d); \
+EMPTY=$(mktemp -d); \
+trap 'rm -rf "$WORK" "$EMPTY"' EXIT; \
+echo "→ installing the wheel into a throwaway venv"; \
+"${UV:-uv}" venv "$WORK/venv" >/dev/null; \
+test -x "$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
+"${UV:-uv}" pip install --quiet --python "$WORK/venv/bin/python" dist/*.whl; \
+test -x "$WORK/venv/bin/usersim" \
+    || { echo "   ✗ the wheel installed but shipped no usersim entry point"; exit 1; }; \
+echo "→ running from $EMPTY (no repo in sight)"; \
+cd "$EMPTY" && "$WORK/venv/bin/usersim" smoke; \
+cd "$EMPTY" && "$WORK/venv/bin/usersim" simulate --dry-run \
+    --locale en_US --num-rows 1 --out ./out >/dev/null; \
+echo "✓ installed package runs from a clean environment"

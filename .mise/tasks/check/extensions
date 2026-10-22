@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+#MISE description="Validate installed extension seams"
+
+set -euo pipefail
+cd "${MISE_CONFIG_ROOT:?}"
+WORK=$(mktemp -d); \
+EMPTY=$(mktemp -d); \
+trap 'rm -rf "$WORK" "$EMPTY"' EXIT; \
+echo "→ building wheels into $WORK"; \
+"${UV:-uv}" build --wheel -o "$WORK" >/dev/null; \
+echo "→ installing them plus the fixture extension into a throwaway venv"; \
+"${UV:-uv}" venv "$WORK/venv" >/dev/null; \
+test -x "$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
+"${UV:-uv}" pip install --quiet --python "$WORK/venv/bin/python" "$WORK"/*.whl; \
+cp -R tests/fixtures/extension_package "$WORK/ext"; \
+"${UV:-uv}" pip install --quiet --python "$WORK/venv/bin/python" "$WORK/ext"; \
+echo "→ asking the installed CLI what it can see, from $EMPTY"; \
+cp tests/fixtures/extension_package/verify_seams.py "$EMPTY/"; \
+cd "$EMPTY" && "$WORK/venv/bin/python" verify_seams.py

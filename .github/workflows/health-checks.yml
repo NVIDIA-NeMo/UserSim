@@ -32,6 +32,9 @@ concurrency:
   group: health-checks
   cancel-in-progress: false
 
+env:
+  UV_PYTHON: "3.12"
+
 jobs:
   live:
     name: ${{ matrix.provider }} end to end
@@ -66,13 +69,17 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Verified Mise bootstrap
+        run: bash scripts/install_mise.sh
+      - name: Cache locked Python dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          version-file: "pyproject.toml"
-          python-version: "3.12"
-          enable-cache: true
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ runner.arch }}-${{ env.UV_PYTHON }}-${{ hashFiles('uv.lock', 'mise.lock') }}
+      - name: Locked registry tools
+        run: scripts/mise run setup:tools
 
-      - run: make install-ci
+      - run: scripts/mise run setup:ci
 
       - name: Simulate, evaluate and report
         env:
@@ -90,11 +97,8 @@ jobs:
           HEALTH_LOCALE: ${{ matrix.locale }}
         run: |
           export "$KEY_ENV=$PROVIDER_API_KEY"
-          make health-check \
-            PROVIDER_CONFIG="$PROVIDER_CONFIG" \
-            HEALTH_LOCALE="$HEALTH_LOCALE" \
-            HEALTH_SUMMARY_FILE=/tmp/usersim-health-summary.md \
-            | tee /tmp/health.log
+          export HEALTH_SUMMARY_FILE=/tmp/usersim-health-summary.md
+          scripts/mise run test:health | tee /tmp/health.log
 
       - name: Summary
         if: always()

@@ -176,10 +176,8 @@ class TestLiveChecksStayOutOfPullRequests:
         )
 
 
-class TestCiWrapsMakeTargets:
-    """CI that restates commands instead of calling the Makefile drifts from
-    what contributors run locally, and the drift only shows up as a failure
-    nobody can reproduce."""
+class TestCiWrapsMiseTasks:
+    """CI shares local tasks; standalone stdlib checkers need no tool setup."""
 
     #: The jobs held to this, by workflow (None for every job). release.yml's
     #: release job is left out: it creates the GitHub release with a token only
@@ -196,25 +194,33 @@ class TestCiWrapsMakeTargets:
                     for step in job["steps"]:
                         yield name, job_name, step
 
-    def test_every_ci_step_is_a_make_target(self) -> None:
+    def test_ci_steps_share_tasks_or_the_standalone_status_checker(self) -> None:
         for name, job_name, step in self._steps():
             if "uses" in step:
                 continue
             run = step["run"].strip()
-            assert run.startswith("make "), (
-                f"{name} job {job_name!r} runs {run!r} directly. Add a make target and call that instead."
+            if (name, job_name) == ("ci.yml", "status"):
+                assert run == "python3 scripts/check_ci_results.py"
+                continue
+            assert run == "bash scripts/install_mise.sh" or run.startswith("scripts/mise run "), (
+                f"{name} job {job_name!r} runs {run!r} directly. Add a shared Mise task and call that instead."
             )
 
     def test_the_targets_it_calls_exist(self) -> None:
-        makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text()
-        declared = {
-            line.split(":")[0] for line in makefile.splitlines() if line and not line[0].isspace() and ":" in line
-        }
-        for name, _, step in self._steps():
-            if "run" not in step:
+        root = _WORKFLOWS.parents[1] / ".mise/tasks"
+        declared = set()
+        for path in root.rglob("*"):
+            if not path.is_file():
                 continue
-            target = step["run"].strip().split()[1]
-            assert target in declared, f"{name} calls `make {target}`, which the Makefile does not define."
+            if path.suffix == ".toml":
+                declared.update(tomllib.loads(path.read_text()))
+            else:
+                declared.add(":".join(path.relative_to(root).parts))
+        for name, _, step in self._steps():
+            run = step.get("run", "")
+            if run.startswith("scripts/mise run "):
+                target = run.split()[2]
+                assert target in declared, f"{name} calls missing Mise task {target}"
 
 
 class TestReleaseWorkflow:
@@ -249,9 +255,9 @@ class TestReleaseWorkflow:
         """A tag name may contain `$(shell ...)`, backticks or quotes. make expands a
         variable given on its command line, and a recipe that writes $(TAG) hands the
         name to the shell; only the environment passes it through untouched."""
-        steps = [step for step in self._doc()["jobs"]["build"]["steps"] if "check-release-tag" in step.get("run", "")]
+        steps = [step for step in self._doc()["jobs"]["build"]["steps"] if "check:release-tag" in step.get("run", "")]
         assert len(steps) == 1, "release.yml's build job should run make check-release-tag exactly once."
-        assert steps[0]["run"].strip() == "make check-release-tag", (
+        assert steps[0]["run"].strip() == "scripts/mise run check:release-tag", (
             "Pass TAG in the step's env, not on make's command line, which make expands."
         )
         assert steps[0].get("env", {}).get("TAG") == "${{ github.ref_name }}"
@@ -263,9 +269,8 @@ class TestReleaseWorkflow:
 
     def test_the_build_restores_no_cache(self) -> None:
         steps = self._doc()["jobs"]["build"]["steps"]
-        setups = [step for step in steps if step.get("uses", "").startswith("astral-sh/setup-uv@")]
-        assert setups and all(step.get("with", {}).get("enable-cache") is False for step in setups), (
-            "release.yml's build must not restore a cache: one written by another run could reach the published files."
+        assert not any("cache@" in step.get("uses", "") for step in steps), (
+            "release builds must not restore caches written by another run"
         )
 
 
@@ -308,14 +313,6 @@ class TestDcoAssistant:
         )
 
 
-def test_native_matrix_matches_package_python_support() -> None:
-    project = tomllib.loads((_WORKFLOWS.parents[1] / "pyproject.toml").read_text())["project"]
-    supported = SpecifierSet(project["requires-python"])
-    expected = [f"3.{minor}" for minor in range(30) if f"3.{minor}" in supported]
-    matrix = _load(_WORKFLOWS / "ci.yml")["jobs"]["test"]["strategy"]["matrix"]
-    assert matrix["python-version"] == expected
-
-
 class TestMandatoryCiAggregate:
     def test_aggregate_waits_for_every_job_and_checks_explicit_results(self) -> None:
         import importlib.util
@@ -331,7 +328,7 @@ class TestMandatoryCiAggregate:
         assert status["if"] == "always()"
         assert status["name"] == "CI Status"
         assert status["env"]["CI_JOB_RESULTS"] == "${{ toJSON(needs) }}"
-        assert any(step.get("run") == "make check-ci-status" for step in status["steps"])
+        assert [step["run"] for step in status["steps"] if "run" in step] == ["python3 scripts/check_ci_results.py"]
 
     def test_mandatory_jobs_cannot_be_optional_or_ignore_failures(self) -> None:
         jobs = _load(_WORKFLOWS / "ci.yml")["jobs"]
@@ -364,3 +361,15 @@ def test_dco_trailers_rechecks_range_after_retargeting() -> None:
     env = doc["jobs"]["dco-trailers"]["env"]
     assert env["BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
     assert env["HEAD_SHA"] == "${{ github.event.pull_request.head.sha }}"
+    assert [step["run"] for step in doc["jobs"]["dco-trailers"]["steps"] if "run" in step] == [
+        'git fetch --no-tags origin "$BASE_SHA"',
+        'python3 scripts/check_commit_signoffs.py --base "$BASE_SHA" --head "$HEAD_SHA"',
+    ]
+
+
+def test_native_matrix_matches_package_python_support() -> None:
+    project = tomllib.loads((_WORKFLOWS.parents[1] / "pyproject.toml").read_text())["project"]
+    supported = SpecifierSet(project["requires-python"])
+    expected = [f"3.{minor}" for minor in range(30) if f"3.{minor}" in supported]
+    matrix = _load(_WORKFLOWS / "ci.yml")["jobs"]["test"]["strategy"]["matrix"]
+    assert matrix["python-version"] == expected
