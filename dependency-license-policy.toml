@@ -39,8 +39,11 @@ reason = "Unmodified transitive dependency installed as a separate package. MPL-
 reports = [{ version = "1.0.4", license = "Mozilla Public License 2.0 (MPL 2.0)" }]
 
 [exceptions.pillow]
-reason = "Image handling for the reporting layer, under the permissive MIT-CMU licence."
-reports = [{ version = "12.3.0", license = "MIT-CMU" }]
+reason = "Image library required by data-designer-config, under the permissive MIT-CMU license. Python 3.10 resolves 12.3.0, since Pillow 13 requires Python 3.11."
+reports = [
+    { version = "13.0.0", license = "MIT-CMU" },
+    { version = "12.3.0", license = "MIT-CMU" },
+]
 
 [exceptions.regex]
 reason = "Transitive dependency of the tokenizer, dual-licensed. CNRI-Python is part of the Python licence family; both identifiers are ASF Category A."

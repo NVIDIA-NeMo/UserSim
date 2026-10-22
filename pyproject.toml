@@ -32,8 +32,10 @@ dependencies = [
     # the first release that forwards ``tool_choice`` and merges a call's
     # ``extra_body`` over the model's configured one, which
     # ``engine/core/llm.py`` relies on. 0.9.6 is the first that provides
-    # persona datasets for ``en_GB`` and ``de_DE``.
-    "data-designer>=0.9.6,<0.10",
+    # persona datasets for ``en_GB`` and ``de_DE``. 0.9.7 is the first whose
+    # ``data-designer-config`` requires ``certifi>=2026.10.19``, a bundle
+    # without the emSign ECC Root CA - G3.
+    "data-designer>=0.9.7,<0.10",
     # Language detection for the language_compliance scorer. Pure Python,
     # MIT, accurate on short conversational text. Pinned to a major version
     # to keep CI deterministic -- bump deliberately.
@@ -130,11 +132,11 @@ trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 required-version = ">=0.13.4"
 override-dependencies = [
     # Keep in sync with the ``dependencies`` pin above.
-    "data-designer>=0.9.6,<0.10",
+    "data-designer>=0.9.7,<0.10",
 ]
 # The same root, for everything that verifies TLS through certifi. Constraints
-# apply to this project's resolution only; an install from PyPI resolves
-# certifi itself.
+# apply to this project's resolution only; installs from PyPI get the same
+# floor through ``data-designer-config``.
 constraint-dependencies = [
     "certifi>=2026.10.19",
 ]
