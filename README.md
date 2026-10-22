@@ -108,6 +108,28 @@ with the same care as the system under test. The test surface grows
 through a probe registry rather than being frozen at release, and extensions
 plug in through entry points without forking the repository.
 
+## 🤝 NeMo User Sim × NeMo Gym: Better Together
+
+NeMo User Sim is a native [NeMo Gym](https://github.com/NVIDIA-NeMo/Gym)
+environment. Gym brings scale, any model or agent harness, and a direct path
+into RL and SFT training. NeMo User Sim brings realistic, population-grounded
+users and probes for the behaviors that matter. Together, models are trained
+and evaluated against realistic multi-turn users, not single prompts.
+
+- **RL and SFT on realistic conversations.** Every episode is a full
+  conversation with a census-grounded user. Gym turns the judge scores into a
+  reward and captures training tokens from the assistant alone, so the
+  population's diversity and coverage carry straight into training.
+- **M³: multi-turn, multilingual, multimodal.** Users hold a conversation
+  across turns in their own language, on NeMo Data Designer, which handles
+  multiple modalities out of the box.
+- **New probes reach Gym.** Gym builds one task per registered probe, so a
+  probe you add here becomes a Gym task.
+
+To get started, see the
+[`nemo_user_sim` environment](https://github.com/NVIDIA-NeMo/Gym/tree/main/environments/nemo_user_sim)
+in the NeMo Gym repository.
+
 ## Setup
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/getting_started.jpg" width="800" alt="From install to capability report in five commands: pip install usersim, download personas with data-designer, then usersim simulate, eval and report. Optional steps fix the panel, replay stored rows or select training data, with a locale picker and the probe groups below.">
