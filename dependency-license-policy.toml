@@ -21,7 +21,7 @@ allowed_licenses = [
 
 [exceptions.certifi]
 reason = "Unmodified TLS certificate bundle installed as a separate transitive dependency. MPL-2.0 is ASF Category B, which permits redistribution of an unmodified dependency."
-reports = [{ version = "2026.2.25", license = "Mozilla Public License 2.0 (MPL 2.0)" }]
+reports = [{ version = "2026.10.19", license = "Mozilla Public License 2.0 (MPL 2.0)" }]
 
 [exceptions.chardet]
 reason = "Unmodified character-detection library installed as a separate transitive dependency, imported rather than incorporated."
