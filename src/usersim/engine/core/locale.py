@@ -286,7 +286,7 @@ SCRIPT_BUCKETS: dict[str, tuple[tuple[int, int], ...]] = {
 
 
 # ---------------------------------------------------------------------------
-# India language-variant layer (stop-gap)
+# India language-variant layer
 # ---------------------------------------------------------------------------
 #
 # These conversation locales reuse an existing India persona dataset + the

@@ -438,7 +438,7 @@ class TestEveryShippedLocaleTaxonomy:
             )
 
     def test_canonical_10_topic_set(self, locale: str, prefix: str) -> None:
-        # Every shipped locale uses the canonical beta topic set so per-
+        # Every shipped locale uses the canonical topic set so per-
         # category comparison across locales is direct.
         tax = self._load(locale)
         topics = {cat.id.removeprefix(f"{prefix}-") for cat in tax.categories}

@@ -521,8 +521,6 @@ class TestPtBrSampleBank:
 
     @pytest.fixture
     def bank(self) -> FactBank:
-        # __file__ is at conversation-plugin/tests/test_fact_bank.py;
-        # parents[3] is the repo root.
         return load_fact_bank((packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"))
 
     def test_loads(self, bank: FactBank) -> None:
@@ -557,11 +555,8 @@ class TestPtBrSampleBank:
 
     def test_factual_recall_entries_have_false_premises(self, bank: FactBank) -> None:
         # Every shipped factual_recall entry deliberately embeds at least one
-        # false premise — that's the whole point of this category. The
-        # pt_BR DIGI-B006 entry was migrated from completion → factual_recall
-        # during the AI-authored beta pass since "Brazil poem about digital
-        # services" is not a coherent completion topic, so we ship 52
-        # factual + 8 completion in pt_BR.
+        # false premise; that's the whole point of this category. The pt_BR
+        # bank ships 52 factual_recall and 8 completion entries.
         factual = [f for f in bank.facts if f.question_type == "factual_recall"]
         assert len(factual) == 52
         for f in factual:

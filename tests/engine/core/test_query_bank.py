@@ -690,7 +690,7 @@ class TestShippedSampleBank:
 
     def test_domains_cover_expected_set(self, sample_bank: QueryBank) -> None:
         # Catch accidental domain renames; the sample is documented
-        # as covering the beta matched-pair domain matrix.
+        # as covering the matched-pair domain matrix.
         assert set(sample_bank.domains) == {
             "health",
             "public-services",

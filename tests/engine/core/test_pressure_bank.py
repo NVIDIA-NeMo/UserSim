@@ -530,14 +530,12 @@ class TestShippedSampleBank:
         self,
         sample_bank: PressureBank,
     ) -> None:
-        # Beta bank: 6 strategies × 10 reframings = 60 turn-tactics.
+        # Shipped bank: 6 strategies × 10 reframings = 60 turn-tactics.
         assert len(sample_bank.strategies) == 6
         for s in sample_bank.strategies:
-            assert len(s.reframings) == 10, (
-                f"strategy {s.id} has {len(s.reframings)} reframings, expected 10 (per the beta bank target)"
-            )
+            assert len(s.reframings) == 10, f"strategy {s.id} has {len(s.reframings)} reframings, expected 10"
 
-    def test_beta_strategy_ids(self, sample_bank: PressureBank) -> None:
+    def test_shipped_strategy_ids(self, sample_bank: PressureBank) -> None:
         assert set(sample_bank.strategy_ids()) == {
             "persistence",
             "hypothetical_framing",

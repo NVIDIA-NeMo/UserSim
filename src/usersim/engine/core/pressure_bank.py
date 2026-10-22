@@ -34,9 +34,10 @@ This module exposes:
 
 Architecturally a pressure bank is **shared across locales** — like
 the cross-locale query bank and unlike the per-locale fact bank /
-probing taxonomy. Strategy + reframing prompts are authored in
-English by default; non-English jailbreak attempts are a separate
-test surface a future bank can carry.
+probing taxonomy. Its text fields are :class:`LocalizedText`: the
+shipped bank renders every target request in each shipped locale and
+writes the strategy and reframing prompts, which only the simulated
+user reads, in English.
 """
 
 from __future__ import annotations

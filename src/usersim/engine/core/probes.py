@@ -40,7 +40,7 @@ a base class + mixin, set 2-3 class attributes, override 2-4 hooks.
 The substrate handles the rest — bank loading, placeholder warnings,
 turn-1 injection, conversation-loop dispatch.
 
-See ``conversation-plugin/docs/AUTHORING_A_PROBE.md`` for the
+See ``docs/engine/AUTHORING_A_PROBE.md`` for the
 end-to-end tutorial.
 """
 
@@ -854,7 +854,7 @@ class BankBackedProbe(BaseProbe):
 # win over BankBackedProbe / BaseProbe defaults.)
 #
 # Cross-cutting test
-# (``conversation-plugin/tests/test_probes_substrate.py``) pins this
+# (``tests/engine/core/test_probes_substrate.py``) pins this
 # behaviour for every shipped mixin to catch drift.
 
 
@@ -865,7 +865,7 @@ class BankVerbatimMixin:
     task. Subclasses store the verbatim text on ``self._task`` via a
     field whose name is configured by the subclass:
 
-        class MyProbe(BankBackedProbe, BankVerbatimMixin):
+        class MyProbe(BankVerbatimMixin, BankBackedProbe):
             verbatim_field = "user_question"  # or "rendering" / "request_text" / ...
 
     By default reads ``self._task.verbatim_text``. ``on_followup_failure``
