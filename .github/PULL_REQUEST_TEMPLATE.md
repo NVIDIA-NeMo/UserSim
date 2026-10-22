@@ -2,7 +2,8 @@
 The PR title must follow Conventional Commits (feat:, fix:, docs:, ci:,
 chore:, refactor:, test:, style:, perf:). CI checks this.
 
-Every commit needs a DCO sign-off: `git commit -s`. See CONTRIBUTING.md.
+Every commit author and declared co-author needs a matching DCO sign-off.
+Use `git commit -s`; bots follow the same rule. See CONTRIBUTING.md.
 -->
 
 ## What changed and why
