@@ -90,7 +90,7 @@ passes the check automatically.
 
 ## Getting set up
 
-Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/) 0.13.4 or newer.
 
 ```bash
 uv sync                     # installs the dev group: pytest, ruff, jupyter
