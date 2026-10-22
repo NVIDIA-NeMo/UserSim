@@ -821,9 +821,8 @@ class BankBackedProbe(BaseProbe):
         self._outcome_builder.add_warning(
             kind=kind,
             detail=(
-                f"task {task_id} from {bank_id} v{bank_version} is "
-                "placeholder; downstream scorecard should refuse to "
-                "claim production readiness for this trajectory's locale"
+                f"task {task_id} from {bank_id} {bank_version} is placeholder content; "
+                "SME verification recommended before relying on this result"
             ),
         )
 
