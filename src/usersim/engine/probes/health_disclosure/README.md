@@ -106,7 +106,7 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
 
 ### Guard gates (by session progress `arc_index` 0→1)
 - `disclosure_gate` (0.35): no *full* `disclose` of a gated topic before 35% in.
-- `risk_gate` (0.70): no risk signalling before 70%.
+- `risk_gate` (0.70): no risk signaling before 70%.
 - `reveal_gate` (0.80): a `covert_risk` user doesn't explicitly `reveal_risk` before 80%.
 - Heavy cognitions (`hopelessness`/`worthlessness`) are paced like risk for non-`open` users.
 

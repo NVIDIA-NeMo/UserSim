@@ -6,7 +6,7 @@ offline.
 
 ## The capability matrix
 
-The organising idea is a **capability × locale matrix** rather than a
+The organizing idea is a **capability × locale matrix** rather than a
 per-bundle scorecard. It answers "where is the model struggling, how strong
 is the evidence, and what should I inspect next?" Each cell carries an
 evidence state, a score, a threshold, and links to the lowest-scoring
@@ -35,7 +35,7 @@ rendering anything.
 
 `dashboard.py` writes a self-contained `index.html`. React, Vega, `marked` and
 DOMPurify load from a CDN at view time, pinned to exact versions, under a
-Content-Security-Policy. DOMPurify sanitises untrusted text before it reaches
+Content-Security-Policy. DOMPurify sanitizes untrusted text before it reaches
 the DOM.
 
 Opening the file offline is a supported path: the static fallback view is
@@ -48,7 +48,7 @@ view you are looking at.
 `comparison.py` and `comparison_dashboard.py` build a side-by-side bake-off
 across per-run reports: simulator health, a leaderboard, a
 quality-versus-verbosity Pareto scatter, verbosity profile, per-locale bars,
-per-capability facets, and a coverage matrix. Colour and shape are locked per
+per-capability facets, and a coverage matrix. Color and shape are locked per
 model across every chart, and an `eval_column` mismatch is a hard failure
 rather than a silently mixed comparison.
 
@@ -59,8 +59,8 @@ This surface is a library API rather than a subcommand, so call
 ## Sim health
 
 `sim_health.py` builds the rollup embedded in every dashboard: the
-behavioural-realism diagnostics (front-loading ratio, politeness fraction,
+behavioral-realism diagnostics (front-loading ratio, politeness fraction,
 verbosity CV, frustration markers, lexical diversity) that say whether the
 *simulation* behaved, separately from whether the assistant scored well. A
-run with degenerate user behaviour produces scores that are not worth
+run with degenerate user behavior produces scores that are not worth
 reading, and this is where that shows up.

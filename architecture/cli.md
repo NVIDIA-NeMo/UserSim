@@ -34,7 +34,7 @@ first network call.
 
 Models are declared in TOML rather than code, so a deployment can repoint
 providers without touching Python. `src/usersim/cli/models_default.toml` is
-the shipped catalogue, with `models_openai.toml` and `models_openrouter.toml`
+the shipped catalog, with `models_openai.toml` and `models_openrouter.toml`
 alongside it for those providers; `--models` points at your own file.
 
 Three aliases are required for a simulation run: `user_model`,
@@ -50,7 +50,7 @@ construction, not mid-run.
 
 `usersim.cli.model_catalog` holds per-model inference defaults: temperature,
 top_p, max_tokens, and any model-family-specific `extra_body`. A TOML row
-overrides the catalogue per field, and the row is self-describing for
+overrides the catalog per field, and the row is self-describing for
 anything it sets.
 
 `replay_reasoning = true` on the `assistant_model` row sends the assistant

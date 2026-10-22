@@ -70,7 +70,7 @@ have to take on faith.
 ## Content banks
 
 Probe content (fact banks, query banks, pressure banks, clinical profiles,
-finance corpora, tool catalogues) ships with the package and resolves along
+finance corpora, tool catalogs) ships with the package and resolves along
 a search path, so you can layer your own content over the shipped set without
 replacing it. See [assets.md](assets.md).
 

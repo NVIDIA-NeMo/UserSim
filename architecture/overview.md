@@ -13,7 +13,7 @@ extended NGC version that carries the OCEAN traits, and downloaded once per
 locale. Every later layer reads the persona from the row, so stored rows
 (`usersim simulate --inputs`) bring the same people back under any setup.
 
-**How** is behaviour. A persona's OCEAN traits become an interaction style and
+**How** is behavior. A persona's OCEAN traits become an interaction style and
 a tendency to push back when the assistant underperforms, and each persona
 draws a disclosure pattern (everything up front, or a little at a time). This
 is what separates a simulated population from a prompt that says "act as a
@@ -56,7 +56,7 @@ the arrow pointing one direction, and a test enforces it.
 | `usersim.testing` | Conformance checks for extensions you write | [plugins.md](plugins.md) |
 
 Probes get their own page: [probes.md](probes.md) for the substrate,
-[`docs/probes.md`](../docs/probes.md) for the catalogue. The entry-point
+[`docs/probes.md`](../docs/probes.md) for the catalog. The entry-point
 seams that let an installed package join any registry are in
 [plugins.md](plugins.md).
 
@@ -82,7 +82,7 @@ throughout, so a name tells you which one you are reading about.
 
 ```
 src/usersim/
-├── cli/               console driver; models_*.toml catalogues
+├── cli/               console driver; models_*.toml catalogs
 ├── engine/
 │   ├── core/          the conversation loop, probe base classes, banks,
 │   │                  identity, outcomes, storage

@@ -166,7 +166,7 @@ Resolution order for the reported label, most specific first: a task's authored
 `account_state.account_type`, then this block, then a region-NEUTRAL per-domain
 default (`deposit account`, `payment account`, `loan account`, `policy`, ...). A
 locale that omits the block is therefore generic rather than silently
-US-flavoured. Keys must be known domains.
+US-flavored. Keys must be known domains.
 
 ## <institution_id>/institution_meta.yaml
 

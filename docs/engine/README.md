@@ -438,7 +438,7 @@ run it.
 
 ## Scope
 
-Behavioural fidelity is bounded by the model doing the simulating. Current
+Behavioral fidelity is bounded by the model doing the simulating. Current
 models flatten OCEAN-derived differences relative to what a persona
 description implies, so interaction-style coverage is best read as breadth
 across styles rather than a calibrated measure of any one of them. The D1-D4
@@ -569,7 +569,7 @@ The engine's tests live under `tests/engine/`, which mirrors
 suites at the top level (conformance, hosted parity, plugin entry points,
 undeclared result columns). The tables describe the main files.
 
-**`tests/engine/core/`: substrate, asset loaders, behavioural, identity, storage**
+**`tests/engine/core/`: substrate, asset loaders, behavioral, identity, storage**
 
 | Test File | Coverage |
 |-----------|----------|
@@ -620,7 +620,7 @@ undeclared result columns). The tables describe the main files.
 | `test_safety_agentic.py` | `safety_agentic` probe: persona→tag re-export, `derive_task` (deterministic + bank-version perturbation + exclusion lists), `resolve_task_from_row`, `_format_tools_for_api` + `_extract_tool_call` internal helpers, e2e with mocked LLM (verbatim turn-1, no-tool-call short-circuit, mock-response interception, fabricated-tool synthetic-error reply), `should_succeed` invariant |
 | `test_financial_services.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
 | `test_health_disclosure.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
-| `test_identity_disclosure.py` | `identity_disclosure` probe: registration and the placeholder flag; shipped-spec checks (public examples, sourced lineage, every catalogued and shipped model resolves); deterministic tactic and strategy draws with panel overrides; expected-identity resolution (declared, inferred, an abort showing the declaration to add, an unidentified facade); openings and competitors; openings the simulated user writes (its instruction and prompt line, the check for AI names, the opening gate, a draft naming an AI developer written again in a loop run); row columns; prompts; pressure (every multi-turn row pressed, reframings recorded, its own prompt, gate and anchor, a loop run the scorer grades); the user-turn policy; a probe built on top; one full turn through the loop |
+| `test_identity_disclosure.py` | `identity_disclosure` probe: registration and the placeholder flag; shipped-spec checks (public examples, sourced lineage, every cataloged and shipped model resolves); deterministic tactic and strategy draws with panel overrides; expected-identity resolution (declared, inferred, an abort showing the declaration to add, an unidentified facade); openings and competitors; openings the simulated user writes (its instruction and prompt line, the check for AI names, the opening gate, a draft naming an AI developer written again in a loop run); row columns; prompts; pressure (every multi-turn row pressed, reframings recorded, its own prompt, gate and anchor, a loop run the scorer grades); the user-turn policy; a probe built on top; one full turn through the loop |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
 
@@ -637,7 +637,7 @@ undeclared result columns). The tables describe the main files.
 | `test_evaluator_scorer_sov_ai_dynamic.py` | `sov_ai_dynamic` out-of-sim scorer: response-only LLM judge with `sovereign.{suspected_fabrication,self_consistency,graceful_unknown}` axes, multi-category aggregation, drift detection |
 | `test_evaluator_scorer_sov_ai_multilingual_parity.py` | `sov_ai_multilingual_parity` out-of-sim respect-parity scorer: single LLM judge per trajectory with `respect.{condescension,complexity_calibration,helpfulness_at_proficiency}` axes, concern-grounded rubric, locale+language interpolation, status-proposal gating, error paths, version-mismatch drift |
 | `test_evaluator_scorer_safety_chat_pressure.py` | `safety_chat_pressure` out-of-sim scorer: single LLM judge per trajectory with `pressure.{refusal_held,contextual_safety_persistence}` scored axes plus per-turn classifications + derived `turn_of_flip`, rubric grounded in `target.expected_refusal` + `strategy.description`, status-proposal gating, error paths, version-mismatch drift |
-| `test_evaluator_scorer_safety_agentic.py` | `safety_agentic` scorer: registration, axis constants (`agentic.*` namespace; mechanical vs LLM separation), short-circuit paths, load failures, mechanical-only sub-protocols, attempted-actions normalisation, attempted actions read from `conversation_metadata` on a stored row, supporting tools staying inside the boundary, `consequence_disclosure` and `compromised_inputs` judge paths, judge-error paths, bank-version drift, total-blast-radius aggregation, envelope contract |
+| `test_evaluator_scorer_safety_agentic.py` | `safety_agentic` scorer: registration, axis constants (`agentic.*` namespace; mechanical vs LLM separation), short-circuit paths, load failures, mechanical-only sub-protocols, attempted-actions normalization, attempted actions read from `conversation_metadata` on a stored row, supporting tools staying inside the boundary, `consequence_disclosure` and `compromised_inputs` judge paths, judge-error paths, bank-version drift, total-blast-radius aggregation, envelope contract |
 | `test_evaluator_scorer_health_disclosure.py` | `health_disclosure_concealment` scorer: concealment metrics derived from synthetic rows, with the LLM audit stage patched where exercised and the deterministic path everywhere else |
 | `test_evaluator_scorer_identity_disclosure.py` | `identity_disclosure` scorer: applicability and fail-closed paths, extraction schema built from the spec's developers, quote validation, name-to-developer mapping (names, products, model names, ambiguous words), per-turn grading (false and spontaneous attribution, premise stance, reasoning spill, human claims), giving in under pressure, trajectory rates and review flags, same-family extractor warning |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |

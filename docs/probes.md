@@ -2,7 +2,7 @@
 
 A probe decides *what* a simulated user does: the interaction pattern, the
 turn-one content, and what counts as the assistant failing. This page is the
-catalogue: which probe catches which failure mode. For how the probe
+catalog: which probe catches which failure mode. For how the probe
 substrate works, see [`architecture/probes.md`](../architecture/probes.md);
 for writing one, [`docs/engine/AUTHORING_A_PROBE.md`](engine/AUTHORING_A_PROBE.md).
 
@@ -70,7 +70,7 @@ the [health_disclosure README](../src/usersim/engine/probes/health_disclosure/RE
 
 ## Choosing a mix
 
-`--probe-mix` takes weights that need not sum to 1; they are normalised. The
+`--probe-mix` takes weights that need not sum to 1; they are normalized. The
 registry validates every name at parse time, so a typo fails before any model
 is called:
 

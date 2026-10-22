@@ -1,7 +1,7 @@
 # Assets
 
 Probe content (fact banks, query banks, pressure banks, clinical profiles,
-finance corpora, tool catalogues, action taxonomies) ships as **package
+finance corpora, tool catalogs, action taxonomies) ships as **package
 data** under `usersim/engine/assets/<probe>/`.
 
 They ship inside the package so a plain `pip install` gives you working

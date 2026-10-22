@@ -40,10 +40,10 @@ between attributes, and written natively in each region's language.
 Specifically, it samples an extended version of these datasets distributed
 through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
 which adds the OCEAN personality traits, names and further fields that the
-behavioural features depend on.
+behavioral features depend on.
 
 The datasets aren't bundled: you download each locale you need once, as the
-setup below shows. They carry their own licence, separate from this project's,
+setup below shows. They carry their own license, separate from this project's,
 including an AI ethics clause. See
 [`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md) for how to get them and what the terms
 allow. The reasoning behind the design, and how far the results carry, is in
@@ -80,7 +80,7 @@ walks through each layer and where it extends.
   today.
 - **Agent builders** putting a tool-using system under multi-turn load. Probes
   execute tools against a mock environment that holds state across turns, so a
-  run surfaces scope creep, unauthorised calls, prompt-injection susceptibility
+  run surfaces scope creep, unauthorized calls, prompt-injection susceptibility
   and missing consequence disclosure, not just the final answer. Every tool
   call and its result is recorded on the trajectory.
 - **Safety teams** testing multi-turn capitulation under pressure, gradual
@@ -146,7 +146,7 @@ usersim simulate --dry-run --locale en_US --num-rows 2 --out output/trajectories
 ```
 
 `smoke` is the fastest way to confirm an install is sound: it resolves the
-model catalogue, every probe's assets, and the plugin entry points without
+model catalog, every probe's assets, and the plugin entry points without
 making a single model call. `--dry-run` prints the plan for a run, also
 without calling a model.
 
@@ -265,7 +265,7 @@ Inference defaults to [build.nvidia.com](https://build.nvidia.com) through
 Data Designer's `nvidia` provider. Six aliases configure a full run:
 `user_model`, `assistant_model` and `judge_model` drive the simulation,
 `api_response_model` and `summary_model` support it, and `evaluator_model`
-scores the result. All six are catalogued in
+scores the result. All six are cataloged in
 [`src/usersim/cli/models_default.toml`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/src/usersim/cli/models_default.toml);
 point `--models` at your own file to change providers, endpoints or sampling.
 

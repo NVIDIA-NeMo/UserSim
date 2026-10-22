@@ -135,11 +135,11 @@ built to absorb:
   bank by bank. See [`docs/locales.md`](../docs/locales.md) for how a preview
   locale graduates to a shipped one.
 - **Agent benchmark integrations.** Task suites define the *task*; this
-  defines the *user*. Wrapping one adds behavioural diversity and demographic
+  defines the *user*. Wrapping one adds behavioral diversity and demographic
   grounding that task-only benchmarks lack.
 - **Custom evaluation axes.** The multi-axis schema is extensible, so a
   domain-specific quality dimension does not require touching the core.
-- **Behavioural-realism mitigations.** The realism layer (incremental
+- **Behavioral-realism mitigations.** The realism layer (incremental
   disclosure, OCEAN-derived interaction style, reactive frustration) is
   modular. Typo injection, device switching, session abandonment and
   non-native language patterns are all additive.

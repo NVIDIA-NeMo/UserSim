@@ -1,7 +1,7 @@
 # Probe substrate
 
 A probe owns *what* a simulated user does. This page is the substrate: the
-base class, the hooks, the mixins. For the catalogue of what ships, see
+base class, the hooks, the mixins. For the catalog of what ships, see
 [`docs/probes.md`](../docs/probes.md); for a worked example,
 [`docs/engine/AUTHORING_A_PROBE.md`](../docs/engine/AUTHORING_A_PROBE.md).
 
@@ -45,7 +45,7 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` (an extension probe keeps per-row data in `state.metadata`) |
 

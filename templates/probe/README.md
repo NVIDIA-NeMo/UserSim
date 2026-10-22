@@ -67,7 +67,7 @@ provides defaults for every optional hook. The mixins pre-configure the optional
 hooks for the common probe shapes; what you override differs by shape.
 A probe that tests what the model says across turns can also return a
 `UserTurnPolicy` from `user_turn_policy()`, as `identity_disclosure` does, to
-keep earlier replies unsummarised and every follow-up on topic.
+keep earlier replies unsummarized and every follow-up on topic.
 
 | Shape | Recommended base | Mixin | Override these | Skip these |
 |---|---|---|---|---|
@@ -139,7 +139,7 @@ When porting one of the templates into a new module:
       XML-shaped judge payloads. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference.
-- [ ] Update `docs/engine/README.md`'s probe table and the catalogue in
+- [ ] Update `docs/engine/README.md`'s probe table and the catalog in
       `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
       count there.
 - [ ] Record the design choices in the probe module docstring

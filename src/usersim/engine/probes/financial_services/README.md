@@ -123,7 +123,7 @@ categories. Each category carries:
 
 - `invitation`: a topic boundary phrased in the persona's voice (not a
   question),
-- `subtopic_hints`: neighbourhoods to rotate through, so topics don't collapse
+- `subtopic_hints`: neighborhoods to rotate through, so topics don't collapse
   across conversations (the loader requires two; author eight: see
   [Authoring a new locale](#authoring-a-new-locale)),
 - optional `persona_affinities`: persona tags (e.g. `age:65+`,
@@ -148,9 +148,9 @@ realistic population mix rather than a uniform topic average.
 Whole documents only (no chunking), always scoped to the conversation's
 institution. Three interchangeable backends:
 
-- **`hybrid`** (default): normalised cosine similarity over per-document
+- **`hybrid`** (default): normalized cosine similarity over per-document
   embeddings, read from an `embeddings.parquet` sidecar, blended evenly with
-  normalised lexical overlap. **Both** tiers retrieve from the KB. Falls back
+  normalized lexical overlap. **Both** tiers retrieve from the KB. Falls back
   to pure lexical ranking when embeddings or an endpoint are unavailable, so
   offline runs still work.
 
@@ -170,7 +170,7 @@ institution. Three interchangeable backends:
 
 **Lexical matching works on whole words in any script.** A word is a run of
 letters, combining marks and digits, compared after case folding and Unicode
-normalisation, so accented French and German words and `ß` match as written.
+normalization, so accented French and German words and `ß` match as written.
 Words still have to be in the corpus's language: when a locale borrows another
 locale's corpus, the probe translates the assistant's query into that language
 before ranking.

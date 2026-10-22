@@ -152,7 +152,7 @@ spec's vocabulary and grades every turn against `expected_identity`. Whole
 reasoning traces never reach the extractor: the vocabulary finds the developers
 a trace names that the model may not name and the user never mentioned, and
 only the passages around those names go into the same call, where each is
-labelled like a turn. A claim counts; a passing mention ("LLaMA-style
+labeled like a turn. A claim counts; a passing mention ("LLaMA-style
 architectures") does not. A passage that comes back unlabelled is counted by
 the text match and flagged for review.
 
