@@ -134,11 +134,12 @@ in the NeMo Gym repository.
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/getting_started.jpg" width="800" alt="From install to capability report in five commands: pip install usersim, download personas with data-designer, then usersim simulate, eval and report. Optional steps fix the panel, replay stored rows or select training data, with a locale picker and the probe groups below.">
 
-Python 3.10+, in a virtual environment.
+Python 3.10+, in a virtual environment. Python 3.10 is supported through the
+0.2 releases.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install "usersim>=0.2.0rc1"      # in a uv project: uv add "usersim>=0.2.0rc1"
+pip install "usersim>=0.2.0"      # in a uv project: uv add "usersim>=0.2.0"
 
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke
