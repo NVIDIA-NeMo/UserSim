@@ -116,6 +116,20 @@ assuming `.git` is a directory.
 model catalog, every probe's assets, and the plugin entry points without
 making a single model call.
 
+### Reproducing CI and coverage
+
+Run `make validate-ci` for the native checks and clean distribution validation.
+`make validate-native` runs static checks, dependency license policy, coverage,
+the offline self-check, and installed extension checks without building the
+distribution archives. CI runs the same test suite across supported Python
+versions and enforces the 84% coverage floor on Python 3.12.
+
+Use `make coverage PYTEST_WORKERS=2` locally. The XML report is `coverage.xml`;
+change its path with `COV_XML`, or add pytest options through `PYTEST_ARGS`, for
+example `make coverage PYTEST_ARGS="--junitxml=junit.xml"`. See
+[Local and CI validation](docs/engineering/ci.md) for bundle membership, report
+artifacts, and failure diagnosis.
+
 ### Choosing models and providers
 
 Three providers are built in, each needing only a credential. Pick the shipped
