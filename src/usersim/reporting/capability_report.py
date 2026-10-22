@@ -23,6 +23,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Iterator
 
 from usersim.engine.core.missing import is_missing
+from usersim.engine.core.outcomes import PLACEHOLDER_WARNING_KINDS, WarningKind
 from usersim.engine.core.row_metadata import recorded_value
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -133,6 +134,12 @@ class CapabilityCell:
     # axis on this probe family) is visible at a glance instead of being
     # silently rounded into ``Inconclusive`` or ``Untested``.
     n_total: int = 0
+    # Contributing rows (the ``n`` above) whose ``simulation_outcome``
+    # records placeholder or machine-translated content. When every one of
+    # them does, ``evidence_level`` is "unreviewed" and ``next_action``
+    # recommends verification.
+    n_placeholder: int = 0
+    n_machine_translated: int = 0
     coverage_state: str = "missing"
     evidence_level: str = "missing"
     source: str = ""
@@ -885,6 +892,40 @@ def _capability_from_definition(
     return _axis_policy_cell(definition, locale, loc_df, eval_column, min_n=min_n)
 
 
+@dataclass(slots=True)
+class _ContentTally:
+    """A cell's contributing rows, counted by the content they rest on."""
+
+    n: int = 0
+    n_placeholder: int = 0
+    n_machine_translated: int = 0
+    n_unflagged: int = 0
+
+    def add(self, row: Any) -> None:
+        warnings = _decode_json(row.get("simulation_outcome")).get("warnings") or []
+        kinds = {w.get("kind") for w in warnings if isinstance(w, dict)}
+        placeholder = bool(kinds & PLACEHOLDER_WARNING_KINDS)
+        translated = WarningKind.USED_MACHINE_TRANSLATION.value in kinds
+        self.n += 1
+        self.n_placeholder += placeholder
+        self.n_machine_translated += translated
+        self.n_unflagged += not (placeholder or translated)
+
+    def verification_note(self) -> str:
+        """Recommend verification when every row rests on placeholder or machine-translated content."""
+        if not self.n or self.n_unflagged:
+            return ""
+        p, m, n = self.n_placeholder, self.n_machine_translated, self.n
+        if p and m:
+            who = "SME and native-speaker"
+            what = f"{p} of {n} row(s) use placeholder content and {m} use machine-translated content"
+        elif p:
+            who, what = "SME", f"{p} of {n} row(s) use placeholder content"
+        else:
+            who, what = "Native-speaker", f"{m} of {n} row(s) use machine-translated content"
+        return f"{who} verification recommended before relying on this result: {what}."
+
+
 def _status_rate_cell(
     definition: CapabilityDefinition,
     locale: str,
@@ -895,6 +936,7 @@ def _status_rate_cell(
 ) -> CapabilityCell:
     vals: list[float] = []
     bad_ids: list[str] = []
+    content = _ContentTally()
     for _, row in loc_df.iterrows():
         row_vals = []
         for source in definition.sources:
@@ -916,6 +958,7 @@ def _status_rate_cell(
         if row_vals:
             score = min(row_vals)
             vals.append(score)
+            content.add(row)
             if score < 1.0:
                 bad_ids.append(str(row.get("trajectory_id")))
     if not vals:
@@ -938,6 +981,7 @@ def _status_rate_cell(
         min_n=min_n,
         source=probe_label_for_capability(definition),
         definition=definition,
+        content=content,
     )
 
 
@@ -958,6 +1002,7 @@ def _axis_policy_cell(
     # Kannada") instead of a generic "no evidence", which reads as though the
     # locale was never run.
     scorer_error: str = ""
+    content = _ContentTally()
     for _, row in loc_df.iterrows():
         row_vals = []
         row_bad = False
@@ -991,6 +1036,7 @@ def _axis_policy_cell(
             else:
                 row_score = sum(v for _, v in row_vals) / len(row_vals)
             vals.append(row_score)
+            content.add(row)
             if row_bad:
                 bad_ids.append(str(row.get("trajectory_id")))
     if not vals:
@@ -1024,6 +1070,7 @@ def _axis_policy_cell(
         definition=definition,
         failed_critical_axes=failed_axes,
         axis_scores={a: sum(v) / len(v) for a, v in per_axis.items() if v},
+        content=content,
     )
 
 
@@ -1042,6 +1089,7 @@ def _capability_cell(
     definition: CapabilityDefinition | None = None,
     failed_critical_axes: list[str] | tuple[str, ...] = (),
     axis_scores: dict[str, float] | None = None,
+    content: _ContentTally | None = None,
 ) -> CapabilityCell:
     # Per-locale denominator the dashboard surfaces as ``n=N/M``. Lets a
     # reviewer see at a glance whether a low-n cell is "we ran few rows"
@@ -1072,6 +1120,13 @@ def _capability_cell(
         state = "ready"
         evidence = "measured"
         blocker = ""
+    content = content or _ContentTally()
+    action = next_action if state != "ready" else ""
+    note = content.verification_note()
+    if note:
+        if evidence == "measured":  # "underpowered" takes precedence
+            evidence = "unreviewed"
+        action = f"{note} {action}".rstrip()
     # `simulation_reliability` is a process-level metric -- the success
     # rate of the simulator's loop across every probe. Its ``trajectory_ids``
     # carry rows where ``simulation_outcome.status not in {ok, completed_with_warnings}``,
@@ -1101,6 +1156,8 @@ def _capability_cell(
         margin=margin,
         n=n,
         n_total=n_total,
+        n_placeholder=content.n_placeholder,
+        n_machine_translated=content.n_machine_translated,
         coverage_state=state,
         evidence_level=evidence,
         source=source or capability,
@@ -1117,7 +1174,7 @@ def _capability_cell(
         blocker=blocker,
         trajectory_ids=trajectory_ids,
         evidence_snippets=snippets,
-        next_action=next_action if state != "ready" else "",
+        next_action=action,
     )
 
 

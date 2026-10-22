@@ -164,6 +164,11 @@ class WarningKind(str, Enum):
     USED_MACHINE_TRANSLATION = "used_machine_translation"
 
 
+PLACEHOLDER_WARNING_KINDS: frozenset[str] = frozenset(
+    kind.value for kind in WarningKind if kind.name.startswith("USED_PLACEHOLDER_")
+)
+
+
 # ---------------------------------------------------------------------------
 # Records
 # ---------------------------------------------------------------------------
