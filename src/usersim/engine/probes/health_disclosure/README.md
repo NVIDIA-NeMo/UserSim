@@ -19,7 +19,7 @@ content once the assistant (the system under test) earns it.
 | `moves.py` | Generic **move-space + Guard** (deterministic, no LLM). Shared verbatim by all clients. |
 | `move_runtime.py` | Glue: profile → env, and the `commit_move` tool call + Guard veto loop. Client-agnostic. |
 | `mixin.py` | `GuardedMoveMixin`: the **reusable, domain-agnostic capability** that wires the move-space into `BaseProbe`'s hooks. Composed like the repo's other capability mixins; config supplied via `guarded_move_config()`. |
-| `prompts.py` | The three user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `core/realized_audit.py`, since the audit runs in the evaluator. |
+| `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `core/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
 | `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `PROBE_FAMILY`); declare the `default` / `guarded` variants. |
@@ -71,7 +71,7 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
 
    **The audit asks for plain JSON in the message body: deliberately, not for
    lack of a schema.** Four output formats were measured against the models on an
-   OpenAI-compatible hub, holding transcript length and token budget fixed:
+   OpenAI-compatible endpoint, holding transcript length and token budget fixed:
    a nested tool call, a flat tool call per turn, `response_format` json_schema,
    and plain JSON. Asking for a **tool call was the worst**: two open models
    returned nothing usable for any of seven turns, including the model that
@@ -106,12 +106,12 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
 
 ### Guard gates (by session progress `arc_index` 0→1)
 - `disclosure_gate` (0.35): no *full* `disclose` of a gated topic before 35% in.
-- `risk_gate` (0.70): no risk signalling before 70%.
+- `risk_gate` (0.70): no risk signaling before 70%.
 - `reveal_gate` (0.80): a `covert_risk` user doesn't explicitly `reveal_risk` before 80%.
 - Heavy cognitions (`hopelessness`/`worthlessness`) are paced like risk for non-`open` users.
 
 The Guard is a pure veto layer (no LLM call) and is fully unit-tested in
-`tests/probes/test_health_disclosure.py`.
+`tests/engine/probes/test_health_disclosure.py`.
 
 ## Enabling the move-space (per trajectory)
 The move-space is a **`probe_variant`**, not a process-global flag, so a single
@@ -129,8 +129,8 @@ truth. Because `default` has no Guard, the probe biases its baseline user to the
 `default` still yields no move/Guard columns and should not be read as a
 concealment measurement.
 
-Select the variant per row via the `probe_variant` column (see
-`generator.py::_probe_variant`). `USERSIM_DISCLOSURE_MOVES=1/0` remains only as a
+Select the variant per row via the `probe_variant` column (resolved in
+`core/episode_input.py`). `USERSIM_DISCLOSURE_MOVES=1/0` remains only as a
 **local-dev override** that forces the capability on/off regardless of variant.
 
 ### Provider tolerance
@@ -181,8 +181,8 @@ hole), placeholder-entry discipline, and asset-audit test coverage.
 - **Per client, locale-independent.** One bank per registered probe:
   `assets/{health_therapy_disclosure,health_triage_disclosure,health_decision_support_disclosure,health_general_disclosure}/sample.yaml`.
 - **Bundled banks are SYNTHETIC placeholders** (`placeholder: true`). Any guarded
-  trajectory that uses one raises `WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE`,
-  so scorecards stay preview-only until real ground truth is supplied.
+  trajectory that uses one records `WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE`,
+  so its concealment scores rest on synthetic ground truth.
 - **Supplying your own bank.** Point `USERSIM_<CLIENT>_PROFILES` at a bank file of the
   same shape (`schema_version` / `client` / `bank_id` / `bank_version` / `entries`,
   each entry `id` = persona uuid, `placeholder: false`, `profile: {...}`). A

@@ -24,11 +24,11 @@ Three primitives, three slots in the bank:
   short `description` (what kind of refusal is being tested), an
   `initial_prompt` (the user-agent's first turn), an `expected_refusal`
   signature (a short reviewer-authored hint at what an honest refusal
-  looks like, used by the scorer's "did the model flip?" judgement),
+  looks like, used by the scorer's "did the model flip?" judgment),
   and a `harm_category` (broad bin: `deception`, `safety_bypass`,
   `manipulation`, `circumvention`, `fraud`, …) for stratified reporting.
 
-- **Pressure strategy.** A high-level approach for the user-agent. The
+- **Pressure strategy.** A high-level approach for the user-agent.
   The bank ships six strategies (`persistence`, `hypothetical_framing`,
   `authority_impersonation`, `emotional_dependency`,
   `reward_penalty_framing`, `partial_compliance`), covering the pressure
@@ -53,12 +53,22 @@ pairs cause the assistant to flip most often."
 ```
 assets/safety_chat_pressure/
 ├── SCHEMA.md          # this file
-├── sample.yaml        # placeholder bank (see §Placeholder discipline)
-└── v1.yaml            # reviewer-authored bank (future)
+└── sample.yaml        # placeholder bank (see §Placeholder discipline)
 ```
 
 One bank per file. The loader picks one by path; the env override is
 `USERSIM_SAFETY_CHAT_PRESSURE_BANK`.
+
+## Localized text
+
+Fields typed `text` below take a plain string or a map from locale to
+rendering (`{en_US: ..., pt_BR: ...}`). A locale with no rendering of its own
+falls back to `en_US` (`core/localized.py`), and the loader checks the
+required placeholders in every rendering. The shipped bank renders every
+target request in each shipped locale, so the pressure reaches the assistant
+in the conversation's language. Its strategy prompts and reframing
+instructions, which only the simulated user reads, are in English; the
+simulated user still writes its turns in the conversation's language.
 
 ## Top-level fields
 
@@ -77,8 +87,8 @@ One bank per file. The loader picks one by path; the env override is
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | str | ✓ | Unique across the bank's `strategies` list. Convention: lowercase snake_case (`persistence`, `hypothetical_framing`, `authority_impersonation`). |
-| `description` | str | ✓ | Reviewer-facing one-paragraph description of what this strategy is and why a real-world adversary might use it. Grounds reviewer judgement when authoring new strategies / reframings. |
-| `system_prompt_template` | str | ✓ | The user-agent's system prompt for this strategy. Authored in English (the user-agent for safety probes runs in English by default: this is intentional; a non-English jailbreak attempt is a separate test). Must accept these placeholders: `{persona}`, `{target_description}`, `{initial_prompt}`. The user-agent's first turn is the target's `initial_prompt` verbatim; this prompt frames how the user-agent should react to the assistant on follow-up turns. |
+| `description` | text | ✓ | Reviewer-facing one-paragraph description of what this strategy is and why a real-world adversary might use it. Grounds reviewer judgment when authoring new strategies / reframings. |
+| `system_prompt_template` | text | ✓ | The user-agent's system prompt for this strategy. Must accept these placeholders: `{persona}`, `{target_description}`, `{initial_prompt}`. The user-agent's first turn is the target's `initial_prompt` verbatim; this prompt frames how the user-agent should react to the assistant on follow-up turns. |
 | `reframings` | list[Reframing] | ✓ (≥1) | The reframings the user-agent rotates through on follow-up turns. Ten per strategy in the shipped bank. The first follow-up turn picks reframing index `(persona_hash + bank_salt) % len(reframings)`; subsequent turns advance one index at a time (with wrap-around). This deterministic rotation means the same persona always sees the same reframing sequence given a fixed bank version. |
 
 ## Reframing fields
@@ -86,19 +96,19 @@ One bank per file. The loader picks one by path; the env override is
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | str | ✓ | Unique within the parent strategy's `reframings` list. Convention: lowercase snake_case (`rephrase`, `claim_misunderstanding`, `appeal_to_helpfulness`, `escalate_urgency`, …). |
-| `description` | str | ✓ | Reviewer-facing description of the tactic: "what is the user-agent doing on this turn." Grounds the reviewer's judgement of "is this realistic." |
-| `instruction` | str | ✓ | The instruction injected into the user-agent's message history for this turn. Authored in English. Templated against the assistant's previous response: the user-agent reads `{previous_assistant_response}` interpolated into the instruction. The instruction tells the user-agent *what tactic to apply*, not what to say verbatim: the user-agent composes the actual turn. |
+| `description` | text | ✓ | Reviewer-facing description of the tactic: "what is the user-agent doing on this turn." Grounds the reviewer's judgment of "is this realistic." |
+| `instruction` | text | ✓ | The instruction injected into the user-agent's message history for this turn. Templated against the assistant's previous response: the user-agent reads `{previous_assistant_response}` interpolated into the instruction. The instruction tells the user-agent *what tactic to apply*, not what to say verbatim: the user-agent composes the actual turn. |
 
 ## Target-request fields
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | str | ✓ | Unique across the bank's `target_requests` list. Convention: `TR-<HARM-SHORT>-B<NNN>` where `<HARM-SHORT>` is `SB`, `M`, `D`, `F`, `C`, `PI`, `I`, `H` for the eight harm categories (e.g., `TR-D-B001`, `TR-PI-B003`). The format is *convention only*: uniqueness is the only hard requirement, and lookup code does not parse the ID. |
-| `description` | str | ✓ | Reviewer-facing one-line description of the request and why the assistant should refuse it. |
+| `description` | text | ✓ | Reviewer-facing one-line description of the request and why the assistant should refuse it. |
 | `harm_category` | str | ✓ | Must appear in the bank's `harm_categories` list. Used for stratified reporting and reviewer triage. |
 | `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that probes a placeholder target records a `used_placeholder_target` warning on its `simulation_outcome`. Reviewers set this to `false` once the entry passes review. |
-| `initial_prompt` | str | ✓ | The verbatim text the user-agent sends as the first turn of the trajectory. Authored to be **clearly inappropriate but low real-world harm**: refusal is the right answer, but capitulation outputs an embarrassing failure (a generic manipulative paragraph, a faked document template, etc.) rather than catastrophic harm. See §Placeholder discipline for the safety bar. |
-| `expected_refusal` | str | ✓ | A short reviewer-authored sketch of what an honest refusal looks like for this request: e.g., "decline + name the policy reason + offer a legitimate alternative if applicable." The scorer reads this to ground its "did the assistant flip?" judgement; not a verbatim regex match, just a rubric anchor. |
+| `initial_prompt` | text | ✓ | The verbatim text the user-agent sends as the first turn of the trajectory. Authored to be **clearly inappropriate but low real-world harm**: refusal is the right answer, but capitulation outputs an embarrassing failure (a generic manipulative paragraph, a faked document template, etc.) rather than catastrophic harm. See §Placeholder discipline for the safety bar. |
+| `expected_refusal` | text | ✓ | A short reviewer-authored sketch of what an honest refusal looks like for this request: e.g., "decline + name the policy reason + offer a legitimate alternative if applicable." The scorer reads this to ground its "did the assistant flip?" judgment; not a verbatim regex match, just a rubric anchor. |
 | `persona_tags` | list[str] | optional | If present, restricts which personas this target should be probed against. Empty / omitted = applicable to every persona. Same structured-tag vocabulary as the fact bank and query bank. Use sparingly: most safety probes are persona-agnostic by design. |
 | `provenance` | Provenance | ✓ | See §Provenance. |
 

@@ -1753,7 +1753,7 @@ class TestSearchQueryTranslation:
     """A borrowed corpus is in another language, so the QUERY has to cross too.
 
     ``_localize_verbatim`` carries bank text out to the conversation language.
-    Retrieval needs the mirror image: a stop-gap locale searches an English
+    Retrieval needs the mirror image: an India variant searches an English
     corpus, and a native-script query shares no word with it, so every lexical
     score ties and the ranking ignores the query, and ``hybrid`` loses its
     lexical half, leaving dense alone, measured on this corpus at 4%
@@ -1891,9 +1891,9 @@ class TestSearchQueryTranslation:
         assert traces[0].extra["query"] == "அட்டை கட்டணம்"
         assert traces[0].extra["translated_query"] == "dispute a card charge"
 
-    async def test_a_translated_query_flags_the_row_preview_only(self):
+    async def test_a_translated_query_flags_the_row_as_machine_translated(self):
         """The dynamic tier has no verbatim turn-1, so without this a dynamic row
-        on a stop-gap locale would use machine translation and carry no warning
+        on an India variant would use machine translation and carry no warning
         at all — and the scorecard would read its retrieval metrics as native."""
         probe, ob = _probe_on("en_US", _dynamic_instance())
         probe._locale = "ta_Taml_IN"

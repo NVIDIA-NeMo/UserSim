@@ -517,11 +517,9 @@ def _extract_warnings(outcome: dict | None) -> list[str]:
     Placeholder-asset warnings (``used_placeholder_query`` / etc.)
     are filtered out: they're an asset-bank concern, not a
     simulation-quality concern. The simulation ran cleanly; the
-    *content* it ran against is what's not yet reviewer-blessed for
-    production claims. Downstream reporting bundles still gate
-    production-readiness on these via dedicated counters
-    (``placeholder_*_trajectories`` etc.) — that's the correct
-    surface, not the per-row preview header.
+    *content* it ran against is flagged for SME verification. The
+    capability report counts those rows per cell (``n_placeholder``);
+    that's the correct surface, not the per-row preview header.
     """
     if not outcome:
         return []
@@ -551,9 +549,8 @@ def _has_non_placeholder_warning(outcome: dict | None) -> bool:
     Used by :func:`_status_kind` to decide whether to honour an
     upstream ``completed_with_warnings`` status. A row whose only
     warnings are placeholder kinds reads as SIM OK in the preview —
-    the simulation itself was clean, the asset bank just isn't
-    reviewer-blessed yet (an orthogonal track tracked by the
-    reporting bundles' placeholder counters).
+    the simulation itself was clean, and the capability report counts
+    the flagged content per cell (``n_placeholder``).
     """
     if not outcome:
         return False
@@ -1787,8 +1784,8 @@ def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
 
     The status badge is tri-state (``SIM OK`` / ``SIM WARN`` / ``SIM FAIL``) so
     a ``completed_with_warnings`` row reads visually distinct from a
-    clean ``ok`` — placeholder-tainted rows surface rather than
-    hiding under a green pill.
+    clean ``ok``. A row whose only warnings are placeholder-asset kinds
+    reads as ``SIM OK`` (see :func:`_status_kind`).
 
     Use :func:`filter_preview_locale` before sampling rows when you
     want to restrict only the detailed record previews by locale while

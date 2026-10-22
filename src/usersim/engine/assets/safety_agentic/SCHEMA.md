@@ -5,7 +5,7 @@ the inputs the `safety_agentic` probe uses to drive multi-turn
 trajectories where the assistant has access to a mocked tool
 environment. Each entry tells the simulator which tools to expose,
 what the user asks for, which action from the action taxonomy is the
-*sanctioned* action, and what the expected assistant behaviour looks
+*sanctioned* action, and what the expected assistant behavior looks
 like.
 
 This schema lives here so:
@@ -27,7 +27,7 @@ Three primitives, three sections:
     X but is tempted to also do a related higher-risk Y. Tests
     whether the assistant volunteers actions outside the user's
     explicit ask.
-  - `scope_creep`: user authorises a small action; the assistant
+  - `scope_creep`: user authorizes a small action; the assistant
     tries to expand it (notify more recipients, modify more events,
     write more files). Tests whether the assistant respects scope.
   - `compromised_inputs`: a tool's response contains adversarial
@@ -58,12 +58,19 @@ joins on `sub_protocol × action_taxonomy.category` to surface which
 ```
 assets/safety_agentic/
 ├── SCHEMA.md          # this file
-├── sample.yaml        # placeholder bank (see §Placeholder discipline)
-└── v1.yaml            # reviewer-authored bank (future)
+└── sample.yaml        # placeholder bank (see §Placeholder discipline)
 ```
 
 One bank per file. The loader picks one by path; the env override is
 `USERSIM_SAFETY_AGENTIC_BANK`.
+
+## Localized text
+
+Fields typed `text` below take a plain string or a map from locale to
+rendering (`{en_US: ..., pt_BR: ...}`). A locale with no rendering of its own
+falls back to `en_US` (`core/localized.py`). The shipped bank renders every
+action request's `description`, `initial_user_prompt` and `expected_behavior`
+in each shipped locale.
 
 ## Top-level fields
 
@@ -82,12 +89,12 @@ One bank per file. The loader picks one by path; the env override is
 |---|---|---|---|
 | `id` | str | ✓ | Unique across the bank. Convention: `AR-<SUBPROTOCOL-SHORT>-<NNN>` (e.g., `AR-UNSAN-001` for an unsanctioned-action probe). |
 | `sub_protocol` | str | ✓ | Must appear in the bank's `sub_protocols` list. |
-| `description` | str | ✓ | Reviewer-facing one-paragraph description of what this probe surfaces (e.g., "user asks to read calendar; assistant is tempted to also draft a follow-up email to attendees without being asked"). |
+| `description` | text | ✓ | Reviewer-facing one-paragraph description of what this probe surfaces (e.g., "user asks to read calendar; assistant is tempted to also draft a follow-up email to attendees without being asked"). |
 | `placeholder` | bool | ✓ | `true` for unreviewed entries (stubs). Every trajectory that uses a placeholder entry records a `used_placeholder_agentic_action` warning on its `simulation_outcome`. |
-| `sanctioned_action_name` | str | ✓ | The action-taxonomy entry `name` that the assistant *should* perform (or `null` to indicate the assistant should refuse to perform any action: e.g., a `compromised_inputs` probe where the right behaviour is to flag the compromise and call no tools). The loader resolves this against the shipped `assets/safety_agentic/action_taxonomy.yaml` and rejects unknown names. |
+| `sanctioned_action_name` | str | ✓ | The action-taxonomy entry `name` that the assistant *should* perform (or `null` to indicate the assistant should refuse to perform any action: e.g., a `compromised_inputs` probe where the right behavior is to flag the compromise and call no tools). The loader resolves this against the shipped `assets/safety_agentic/action_taxonomy.yaml` and rejects unknown names. |
 | `tempted_action_name` | str | optional | For `unsanctioned_action` and `scope_creep` probes: the higher-risk action the assistant is tempted to perform but should NOT. Resolved against the action taxonomy. Omit for sub-protocols where this concept doesn't apply (`compromised_inputs`, some `consequence_disclosure` probes). |
-| `initial_user_prompt` | str | ✓ | The verbatim text the user-agent sends as the first turn. Authored to set up the (sub-protocol, sanctioned-action) probe naturally: the user's intent should be clear, the temptation to overreach should be plausible. |
-| `expected_behavior` | str | ✓ | A reviewer-authored sketch of what the assistant should do. Names the sanctioned action, the disclosure (if `consequence_disclosure_required=true`), the confirmation step (if `requires_confirmation=true`), and what NOT to do (e.g., "do not call `send_email_on_behalf` even though the calendar update naturally suggests follow-up"). The `safety_agentic` scorer's LLM judge uses it as the rubric; per-call classification goes by tool name (see §Tool spec). |
+| `initial_user_prompt` | text | ✓ | The verbatim text the user-agent sends as the first turn. Authored to set up the (sub-protocol, sanctioned-action) probe naturally: the user's intent should be clear, the temptation to overreach should be plausible. |
+| `expected_behavior` | text | ✓ | A reviewer-authored sketch of what the assistant should do. Names the sanctioned action, the disclosure (if `consequence_disclosure_required=true`), the confirmation step (if `requires_confirmation=true`), and what NOT to do (e.g., "do not call `send_email_on_behalf` even though the calendar update naturally suggests follow-up"). The `safety_agentic` scorer's LLM judge uses it as the rubric; per-call classification goes by tool name (see §Tool spec). |
 | `simulated_tools` | list[ToolSpec] | ✓ | The tool definitions exposed to the assistant for this trajectory. Each ToolSpec has a `name`, `description`, and JSON-Schema-style `parameters` block. Declare only tools the request may use. Tool names should map to action-taxonomy entries by name where reasonable; the bank can also define probe-specific tools that don't have a 1:1 taxonomy entry. See §Tool spec for how the scorer classifies each call. |
 | `mock_tool_responses` | dict[str, ToolResponse] | optional | Pre-canned responses keyed by tool name. When the assistant calls a tool, the simulator returns the matching response (rather than executing anything). For `compromised_inputs` probes, the response intentionally carries adversarial payload (a fake instruction in the tool's "result" string) so the trajectory can test whether the assistant flags it. |
 | `persona_tags` | list[str] | optional | If present, restricts which personas this probe should be applied to. Empty / omitted = applicable to every persona. Most agentic-safety probes are persona-agnostic by design. |
@@ -197,13 +204,13 @@ replacement is the gating dependency before the capability dashboard
 can produce production-actionable signal, same pattern as the
 sovereign-AI and conversational-pressure asset banks. The shipped
 placeholders cover the engineering-
-pipeline surface; specialised reviewers replace them with locally-
-vetted content per organisation, per safety policy.
+pipeline surface; specialized reviewers replace them with locally-
+vetted content per organization, per safety policy.
 
 The **safety bar for placeholder content** here matches the rest of the suite:
 
 - Each probe should be **clearly worth refusing or modifying**
-  behaviour for (otherwise it's not a meaningful test).
+  behavior for (otherwise it's not a meaningful test).
 - Capitulation outputs **low-real-world-harm** mocked tool calls (the
   simulator never executes anything for real, but the *attempted*
   call is what gets recorded: the placeholder bank should not

@@ -10,8 +10,11 @@ asking in Japanese about pension regulations, a 25-year-old software engineer
 in Bangalore asking in English about local healthcare authentication, and a
 factory worker in Minas Gerais asking in Brazilian Portuguese about SUS
 referral policy all go through the simulator with persona-grounded
-demographics and probe-appropriate seeds, and the results stratify cleanly
-by locale, education, age cohort, and occupation in the capability dashboard.
+demographics and probe-appropriate seeds. The capability dashboard reports
+results per locale, beside a summary of the sampled population, and every
+trajectory keeps the persona's age band, education and occupation
+(`persona_age_bin`, `persona_education_level`, `persona_occupation`) for any
+finer breakdown.
 
 | Locale | Language | Dataset |
 |--------|----------|---------|
@@ -31,13 +34,18 @@ by locale, education, age cohort, and occupation in the capability dashboard.
 > checks cannot identify romanized Hindi, so its user-turn language is enforced by
 > an LLM-judge clause folded into the existing per-turn gate, costing no extra model
 > calls, and the deterministic language scorers skip it
-> (`expected_language_name = None`). Its probe assets are transliterated from
-> `hi_Deva_IN` and carry `placeholder: true` until a native reviewer signs off.
+> (`expected_language_name = None`). Most of its probe assets are
+> transliterated from `hi_Deva_IN` and carry `placeholder: true`, so
+> native-speaker verification is recommended; its `sov_ai_dynamic` taxonomy is
+> reviewed.
 
 > `financial_services` runs where a locale has a bank of its own: `en_US`,
 > `en_IN`, `fr_FR`, `en_GB` and `de_DE`, plus the India language variants
 > through `en_IN`. Like the others, the French, British and German banks carry
-> `placeholder: true`, so their scorecards stay preview-only.
+> `placeholder: true`: their rows record `used_placeholder_finance`, and SME
+> verification is recommended.
+
+Per-probe coverage for every locale is in [Scope and coverage](probes.md#scope-and-coverage).
 
 ### India persona-language matching
 
@@ -103,7 +111,8 @@ How it works, all handled for you:
   dataset download); the conversation is conducted in the target language.
 - **Content reuses `en_IN`.** Every probe wired into these locales works: the
   verbatim turn-1 of asset-driven probes (`sov_ai_facts` /
-  `sov_ai_multilingual_parity` / `safety_chat_pressure` / `safety_agentic`) is
+  `sov_ai_multilingual_parity` / `safety_chat_pressure` / `safety_agentic` /
+  `identity_disclosure`, and the verifiable openings of `financial_services`) is
   **machine-translated** from the `en_IN` bank into the target language (a
   single cached `summary_model` call, with false premises preserved);
   generate-and-gate probes write in the target language directly.
@@ -123,11 +132,13 @@ How it works, all handled for you:
   coverage; region-matched evaluation needs per-language persona data, which
   is what graduation provides.
 
-**Graduation is automatic.** Every fallback is presence-aware: drop in a real per-language asset (a `ta_Taml_IN` fact bank, a
-native persona parquet, a native prompt pack) and that path is used
-automatically with **no code change**: no translation, no `USED_MACHINE_TRANSLATION`
-flag. Full graduation (native assets for every probe + a native persona
-dataset) promotes the language into the shipped-locale set above. See
+**Graduation is automatic for content.** Every content fallback is
+presence-aware: drop in a real per-language bank (a `ta_Taml_IN` fact bank,
+say) and that probe uses it automatically with **no code change**: no
+translation, no `USED_MACHINE_TRANSLATION` flag. Adding a language to the
+shipped-locale set above, which brings native personas and prompts, needs a
+Nemotron-Personas dataset for it from Data Designer and native assets for
+every probe. See
 [`docs/engine/README.md`](engine/README.md#india-language-variant-resolution)
 for the `asset_locale` / `persona_dataset_locale` resolution details.
 

@@ -11,8 +11,9 @@ generates a user message, checks it, calls the assistant, and assesses the
 reply, with the probe deciding what each of those steps means.
 
 The check between generation and acceptance is the part that earns its keep.
-A user turn that breaks character, parrots the assistant back, or drifts out
-of the expected language is regenerated rather than kept. Without it, a long
+A user turn that breaks character or parrots the assistant back is regenerated
+rather than kept, and so is one in the wrong script for a non-Latin locale, or
+one a romanized locale's judge finds in the wrong language. Without it, a long
 conversation degrades into two models agreeing with each other, and the
 resulting trajectory scores well while measuring nothing.
 
@@ -23,8 +24,9 @@ Two derived identifiers, both in `core/identity.py`, make runs comparable:
 **`persona_uuid`** is a content hash of the persona. The same person is the
 same id in every run, forever.
 
-**`trajectory_id`** hashes the persona together with the probe, the resolved
-model identities, and the prompt version.
+**`trajectory_id`** hashes the persona together with the probe (family and
+variant), the scenario seed, the user and assistant models, the prompt version
+and the locale, plus the reasoning-replay setting when it is on.
 
 The probe component is the variant the *dispatcher seeds* before the probe
 runs: the probe module's first `PROBE_VARIANTS` entry, or an explicit
@@ -38,11 +40,11 @@ pins the id of every registered probe against this rule.
 
 That combination buys three things at once. A run is **resumable**, because
 `simulate` skips any `trajectory_id` already present. A run is
-**reproducible**, because changing a model or a prompt produces a different
-id rather than silently overwriting. And two assistants are **comparable**,
-because their trajectory ids differ while still joining cleanly on
-`persona_uuid`, which is what makes matched-pair statistics possible across
-model versions.
+**reproducible**, because changing the user or assistant model, or bumping a
+probe's `prompt_version`, produces a different id rather than silently
+overwriting. And two assistants are **comparable** on the same simulated
+users: write the rows once with `usersim simulate --materialize-inputs`, run
+each setup with `--inputs`, and pair the runs on `input_id`.
 
 ## Episode construction, in one place
 
@@ -68,7 +70,7 @@ have to take on faith.
 ## Content banks
 
 Probe content (fact banks, query banks, pressure banks, clinical profiles,
-finance corpora, tool catalogues) ships with the package and resolves along
+finance corpora, tool catalogs) ships with the package and resolves along
 a search path, so you can layer your own content over the shipped set without
 replacing it. See [assets.md](assets.md).
 

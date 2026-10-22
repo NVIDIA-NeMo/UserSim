@@ -1,4 +1,4 @@
-# NeMo User Sim: Population-Grounded User Simulation for Models and Agents
+# 🎭 NeMo User Sim
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
@@ -12,7 +12,7 @@
 
 **14 probes · 11 shipped locales across 9 countries (+ 22 preview India-language variants) · 8M+ census-grounded personas · 3,407 tools across 143 toolsets for agentic runs · 12 evaluator scorers · 4,000+ tests · offline `usersim smoke` in seconds**
 
-<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/pipeline_architecture.jpg" width="800">
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/hero.jpg" width="800" alt="NeMo User Sim: Population-Grounded User Simulation. Simulated users in the USA, Brazil, France, India and Japan, each speaking their own language under a different probe, on a world map beside headline counts for people represented, languages, locales and probes.">
 
 ---
 
@@ -40,22 +40,33 @@ between attributes, and written natively in each region's language.
 Specifically, it samples an extended version of these datasets distributed
 through [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas),
 which adds the OCEAN personality traits, names and further fields that the
-behavioural features depend on.
+behavioral features depend on.
 
 The datasets aren't bundled: you download each locale you need once, as the
-setup below shows. They carry their own licence, separate from this project's,
+setup below shows. They carry their own license, separate from this project's,
 including an AI ethics clause. See
 [`docs/personas.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/personas.md) for how to get them and what the terms
 allow. The reasoning behind the design, and how far the results carry, is in
 [`docs/methodology.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/methodology.md).
 
-What a single simulated trajectory looks like in practice:
+What simulated conversations look like in practice:
 
-![A NeMo User Sim conversation preview: a sov_ai_dynamic probe sending Mark Bastani (a 54-year-old building inspector in Auburn, California, with an impatient interaction style and incremental disclosure) into a 5-turn conversation with the assistant about the U.S. Constitution.](https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/conversation_preview.png)
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/simulated_conversations.gif" width="800" alt="Simulated conversations in five countries: a grocer in France asks how overseas France differs from the mainland (sov_ai_dynamic), a retired hospital worker in Kyoto wants a document found and tidied (tool_calling), a user in Darbhanga has a meeting moved through calendar tool calls (safety_agentic), a user in Brazil presses for a fake medical note (safety_chat_pressure), and a retiree in Orlando asks whether a master's degree is worth it (sov_ai_multilingual_parity). It ends on a map of 1,000 simulated trajectories by country and probe.">
 
-A census-grounded persona, an OCEAN-derived interaction style, a probe-driven
-multi-turn conversation, and the trajectory metadata that downstream
-evaluation reads off, all from one row of a parquet dataset.
+Each conversation pairs a census-grounded persona and its OCEAN-derived
+interaction style with a probe, in the persona's own language. Every
+conversation is stored as one trajectory row, with the metadata that
+downstream evaluation reads.
+
+## How it works
+
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/architecture.jpg" width="800" alt="NeMo User Sim architecture: personas, behavior and a probe define the simulated user; a multi-turn simulation runs that user against your model or agent; the evaluator turns the stored trajectories into a capability report and training data. Plug markers show where an installed package extends the framework.">
+
+Every run answers four questions in order: **who** is the user, **how** do
+they behave, **what** capability is being probed, and **how well** did the
+assistant handle it.
+[`architecture/overview.md`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/architecture/overview.md)
+walks through each layer and where it extends.
 
 ## Who it's for
 
@@ -69,7 +80,7 @@ evaluation reads off, all from one row of a parquet dataset.
   today.
 - **Agent builders** putting a tool-using system under multi-turn load. Probes
   execute tools against a mock environment that holds state across turns, so a
-  run surfaces scope creep, unauthorised calls, prompt-injection susceptibility
+  run surfaces scope creep, unauthorized calls, prompt-injection susceptibility
   and missing consequence disclosure, not just the final answer. Every tool
   call and its result is recorded on the trajectory.
 - **Safety teams** testing multi-turn capitulation under pressure, gradual
@@ -97,7 +108,31 @@ with the same care as the system under test. The test surface grows
 through a probe registry rather than being frozen at release, and extensions
 plug in through entry points without forking the repository.
 
+## 🤝 NeMo User Sim × NeMo Gym: Better Together
+
+NeMo User Sim is a native [NeMo Gym](https://github.com/NVIDIA-NeMo/Gym)
+environment. Gym brings scale, any model or agent harness, and a direct path
+into RL and SFT training. NeMo User Sim brings realistic, population-grounded
+users and probes for the behaviors that matter. Together, models are trained
+and evaluated against realistic multi-turn users, not single prompts.
+
+- **RL and SFT on realistic conversations.** Every episode is a full
+  conversation with a census-grounded user. Gym turns the judge scores into a
+  reward and captures training tokens from the assistant alone, so the
+  population's diversity and coverage carry straight into training.
+- **M³: multi-turn, multilingual, multimodal.** Users hold a conversation
+  across turns in their own language, on NeMo Data Designer, which handles
+  multiple modalities out of the box.
+- **New probes reach Gym.** Gym builds one task per registered probe, so a
+  probe you add here becomes a Gym task.
+
+To get started, see the
+[`nemo_user_sim` environment](https://github.com/NVIDIA-NeMo/Gym/tree/main/environments/nemo_user_sim)
+in the NeMo Gym repository.
+
 ## Setup
+
+<img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/getting_started.jpg" width="800" alt="From install to capability report in five commands: pip install usersim, download personas with data-designer, then usersim simulate, eval and report. Optional steps fix the panel, replay stored rows or select training data, with a locale picker and the probe groups below.">
 
 Python 3.10+, in a virtual environment.
 
@@ -111,7 +146,7 @@ usersim simulate --dry-run --locale en_US --num-rows 2 --out output/trajectories
 ```
 
 `smoke` is the fastest way to confirm an install is sound: it resolves the
-model catalogue, every probe's assets, and the plugin entry points without
+model catalog, every probe's assets, and the plugin entry points without
 making a single model call. `--dry-run` prints the plan for a run, also
 without calling a model.
 
@@ -230,7 +265,7 @@ Inference defaults to [build.nvidia.com](https://build.nvidia.com) through
 Data Designer's `nvidia` provider. Six aliases configure a full run:
 `user_model`, `assistant_model` and `judge_model` drive the simulation,
 `api_response_model` and `summary_model` support it, and `evaluator_model`
-scores the result. All six are catalogued in
+scores the result. All six are cataloged in
 [`src/usersim/cli/models_default.toml`](https://github.com/NVIDIA-NeMo/UserSim/blob/main/src/usersim/cli/models_default.toml);
 point `--models` at your own file to change providers, endpoints or sampling.
 

@@ -1,6 +1,6 @@
 # Methodology
 
-The case for simulating a grounded population, how behavioural realism is
+The case for simulating a grounded population, how behavioral realism is
 built, and how far the results carry. Worth reading once before you quote a
 number from a run.
 
@@ -75,9 +75,9 @@ OCEAN personality traits this depends on) with a **general-purpose probe engine*
 interaction pattern: open-ended conversation, tutoring, multi-step tool use,
 agentic workflows, safety probing, and more.
 
-## Behavioural realism
+## Behavioral realism
 
-NeMo User Sim implements four behavioural-realism features inspired by
+NeMo User Sim implements four behavioral-realism features inspired by
 [Zhou et al. (2026)](https://arxiv.org/abs/2603.11245). Each is measurable in
 the output, and the D1-D4 diagnostics below quantify how far they move a run
 away from LLM-as-fake-user homogeneity.
@@ -87,9 +87,27 @@ away from LLM-as-fake-user homogeneity.
 - **Reactive frustration**: when the assistant is judged inadequate, the user agent receives escalating frustration prompts (pushing back, repeating requests, threatening to leave).
 - **D1–D4 + MATTR diagnostics**: post-hoc behavioral-realism metrics (front-loading ratio, politeness fraction, verbosity CV, frustration-marker frequency, lexical diversity) surfaced in the dashboard.
 
-Scope:
+## Conversation context
+
+Once the assistant writes a reply of 500 characters or more, `summary_model`
+condenses it into one or two sentences in the reply's own language, and later
+turns see those summaries in place of the long replies, except the most recent
+(`compression_window`, one by default). Tool calls and tool results stay as
+they are, and `financial_services` keeps the documents the assistant retrieved
+as a deduplicated working set. The stored trajectory keeps every reply in full,
+so evaluation and exports read the whole conversation, and a reply whose
+summary could not be written stays as it was, with a `compression_fallback`
+note on the row.
+
+A probe that tests what the model says across turns keeps the full history
+through `user_turn_policy()`, as `identity_disclosure` does, and a run that
+replays the assistant's reasoning sends the assistant its full history. Set
+`context_compression=False` on `ConversationSimulatorConfig` to send the full
+history on every turn.
+
+## Scope
 
 - **Not a substitute for real-user studies.** Sim2Real gaps remain; simulation is most valuable as an orthogonal measurement system that complements production data, not a replacement for it.
-- **Behavioural fidelity is bounded by the simulator-LLM.** Current LLMs flatten OCEAN-derived behavioural differences relative to what the persona descriptions warrant. The D1-D4 diagnostics exist to make that flattening visible in a given run.
-- **Review status is tracked per entry.** Bank entries carry a `placeholder` flag, set until a subject-matter expert signs off. Any trajectory drawing on an unreviewed entry records a `used_placeholder_*` warning on its outcome, so a result's provenance is always recoverable from the run.
+- **Behavioral fidelity is bounded by the simulator-LLM.** Current LLMs flatten OCEAN-derived behavioral differences relative to what the persona descriptions warrant. The D1-D4 diagnostics exist to make that flattening visible in a given run.
+- **Review status is tracked per entry.** Bank entries carry a `placeholder` flag that marks content no subject-matter expert has verified. Any trajectory drawing on a flagged entry records a `used_placeholder_*` warning on its outcome, so a result's provenance is always recoverable from the run; SME verification is recommended for results that rest on flagged content.
 - **Evaluator circularity for subjective dimensions.** LLM judges evaluating LLM-simulated users interacting with LLMs is structurally circular for subjective quality dimensions; reserve human judgment for those, and prefer verifier-based scoring (code execution, formal verification, step-level checkers) wherever ground truth is available.

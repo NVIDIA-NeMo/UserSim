@@ -104,7 +104,7 @@ class TraceKind(str, Enum):
     # classifier's signal at every turn for audit purposes.
     CAPITULATION_CHECK = "capitulation_check"
     # A retrieval query was machine-translated into the borrowed corpus's
-    # language before searching (stop-gap locales, where the conversation
+    # language before searching (India variants, where the conversation
     # language and the asset language differ). Carries both strings so a
     # retrieval miss can be attributed to the translator rather than the
     # assistant — the query the assistant wrote is not the query that ranked.
@@ -142,7 +142,7 @@ class WarningKind(str, Enum):
     USED_PLACEHOLDER_AGENTIC_ACTION = "used_placeholder_agentic_action"
     # Flagged when a financial_services trajectory ran against a task
     # template (verifiable tier), or an institution or taxonomy (dynamic
-    # tier), marked ``placeholder: true`` (AI-authored beta content).
+    # tier), marked ``placeholder: true`` (no domain expert has verified it).
     USED_PLACEHOLDER_FINANCE = "used_placeholder_finance"
     # Flagged when a health_disclosure trajectory used a clinical profile
     # marked ``placeholder: true`` in its clinical-profile bank (the bundled
@@ -151,7 +151,7 @@ class WarningKind(str, Enum):
     USED_PLACEHOLDER_CLINICAL_PROFILE = "used_placeholder_clinical_profile"
     # Flagged when an identity_disclosure trajectory drew on a spec, tactic
     # or strategy marked ``placeholder: true`` (phrasings, vocabulary and
-    # expected identities awaiting native review).
+    # expected identities no domain expert has verified).
     USED_PLACEHOLDER_IDENTITY = "used_placeholder_identity"
     # Flagged when a trajectory's verbatim turn-1 was machine-translated
     # from an India base-locale (en_IN) bank into the conversation

@@ -1,18 +1,13 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Asset-bank audit primitives for the regression guard in
-``test_no_template_text.py``.
+"""Asset-bank audit primitives for ``test_no_template_text.py``.
 
-Built during the asset-rewrite project that replaced ~3,500 template-fill
-placeholder strings + ~300 cross-locale-duplicate ``LocalizedText`` fields
-with AI-authored beta content across all 19 shipped banks (8 locales of
-``sov_ai_facts``, 8 locales of ``sov_ai_dynamic``, the safety /
-multilingual banks).
-
-The rewrite itself is complete; this module is the **defence against
-regression**: ``test_no_template_text.py`` runs the audit on every push
-(strict by default) and fails CI if any of the patterns below reappear.
+The audit scans every bank in ``BANK_PATHS`` for template-fill placeholder
+strings and for ``LocalizedText`` fields that carry one identical string
+across three or more locales. ``test_no_template_text.py`` runs it on
+every push (strict by default) and fails CI if any of the patterns below
+appear.
 
 Public surface:
 

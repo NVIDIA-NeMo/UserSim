@@ -1,8 +1,7 @@
 # Fact bank schema
 
 A **fact bank** is a curated, per-locale YAML file that pins the ground
-truth used by the `sov_ai_facts` probe (and future
-probes that need authoritative factual probes). Every entry is meant to
+truth used by the `sov_ai_facts` probe. Every entry is meant to
 be reviewed by a subject-matter expert (SME) for the locale. Every entry
 in the shipped banks carries `placeholder: true`: that review hasn't
 happened, and SME verification is recommended before relying on results

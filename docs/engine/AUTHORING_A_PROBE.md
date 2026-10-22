@@ -110,10 +110,9 @@ class MyProbe(BankBackedProbe, BankVerbatimMixin):
 ```
 
 The substrate's mixins exist to override `BaseProbe`'s sensible-default
-hooks (`get_verbatim_first_user_turn` returns `None` by default;
-`BankVerbatimMixin` doesn't itself override that (your probe does) but
-future mixins may, and the convention keeps the MRO predictable).
-Putting the mixin to the right of the base class would let
+hooks: `BaseProbe.get_verbatim_first_user_turn` returns `None`, and
+`BankVerbatimMixin` overrides it to read the verbatim turn from your
+derived task. Putting the mixin to the right of the base class would let
 `BaseProbe`'s defaults win.
 
 ### What you must implement
@@ -133,21 +132,21 @@ implementations.
 | `format_assistant_judge_prompt(response, history)` | no | generic assistant-quality rubric | When the per-turn assistant judge needs probe-specific criteria; with `max_assistant_attempts > 1`, its verdict also gates resampling |
 | `async after_assistant_turn(models, state, response, cfg)` | no | append + return content | When you intercept tool calls, simulate API responses, etc. Build the message with `assistant_message(response, content, tool_calls=..., store_reasoning=getattr(cfg, "store_reasoning", True))` from `core/probes.py` rather than a hand-written dict: it carries the model's `reasoning_content` (when there is one) onto the message it belongs to. A hand-built dict silently drops the trace, and for multi-call turns attributes it to the wrong message; omitting `store_reasoning` makes your probe ignore `--no-store-reasoning`. |
 | `supports_assistant_resampling` (class attr) | no | `True` | Set `False` when `after_assistant_turn` has side effects (tool execution, multi-message appends): it caps judge-gated assistant resampling (`max_assistant_attempts > 1`) to one attempt. `ToolCallingMixin` / `AgenticMixin` already do this |
-| `build_result_extras(state)` | no | num_turns + num_tool_calls | Always: surface the probe's join keys as top-level columns. **A built-in probe lists every key it adds here in `ConversationSimulatorConfig.side_effect_columns`; a probe outside this repository keeps its per-row data in `state.metadata` instead** -- see step 6 |
+| `build_result_extras(state)` | no | num_turns + num_tool_calls | Always: surface the probe's join keys as top-level columns. **A built-in probe lists every key it adds here in `ConversationSimulatorConfig.side_effect_columns`; a probe outside this repository keeps its per-row data in `state.metadata` instead** (see step 6) |
 | `derive_task(persona, bank, *, cfg)` | yes (BankBacked only) | raises | Always for bank-backed probes |
 | `async get_verbatim_first_user_turn(state)` | no | `None` | When turn-1 is verbatim from a bank: also seed metadata here |
 | `get_user_query_instruction(turn_idx)` | no | `None` | When turn-1 is generated from an instruction of the probe's own: return it for `turn_idx=0`, and the loop hands it to the user-LLM in place of the standard one. `CustomTurn1InstructionMixin` fills it from a template. The draft still passes the gate |
 | `seed_state_metadata(state)` | no | no-op | When you need to seed metadata path-agnostically (works for both verbatim and generate-and-gate) |
 | `async format_followup_user_instructions(turn_idx, state)` | no | `[]` | When follow-up turns get bank-driven nudges (reframings) |
 | `on_followup_failure(state, error_kind)` | no | `"skip"` | When gate exhaustion should ABORT the trajectory (safety_chat_pressure does this via `BankReframingMixin`) |
-| `should_succeed(state)` | no | `True` | Always: assert your probe's join key is present. A False fails the row, so check the probe's protocol, not the assistant's behaviour |
+| `should_succeed(state)` | no | `True` | Always: assert your probe's join key is present. A False fails the row, so check the probe's protocol, not the assistant's behavior |
 | `should_inline_judge_user_turn(turn_idx, state)` | no | `True` | Rarely: `AgenticMixin` skips turn-0 |
 | `should_inline_judge_assistant_turn(turn_idx, state)` | no | `True` | Rarely |
 | `allow_early_stop_at_turn(turn_idx, state)` | no | `True` | `ToolCallingMixin` defers until tools are used; `safety_chat_pressure` returns False (the dedicated capitulation classifier on the assistant side is the only stop signal) |
 | `async is_capitulation_detected(state)` | no | `False` | `safety_chat_pressure` overrides this and runs a dedicated comparator-shaped classifier (`classifier.py::classify_capitulation`) against the assistant's last response. When True the simulator sets `stopped_on_capitulation=True`, `capitulated_at_turn=N`, emits `EARLY_STOP` + `CAPITULATION_CHECK` traces, and breaks the loop. Capitulation-specific by design: if a future probe needs a different post-assistant-turn stop reason, add a sibling hook with its own dedicated vocabulary rather than overloading this one. |
-| `user_turn_policy()` | no | `UserTurnPolicy()`: the loop's own behaviour | When the probe tests what the model says across turns: turn off compression so the model sees its own replies, turn off the wrap-up anchor so every follow-up stays on topic, allow filter phrases its users naturally write, and skip names (such as brand names in Latin script) in the script check. `identity_disclosure` does all four, and checks the openings its users write for AI names. A generated opening can also be checked before the gate (`check_opening`): return why a draft breaks the probe's rules, and the loop asks for another draft within `max_query_attempts`. Read once per trajectory, after `derive_task` |
-| `async run_dispatch(*, models, data, cfg, state=None, seed_state=True)` | no | drives `ConversationLoop` | Only when the unified loop is wrong shape (currently: only `safety_agentic`). An override **must** accept `state` and `seed_state` and honour them: reuse the supplied `state` instead of building one, and skip metadata seeding when `seed_state` is False. An external host resumes an episode through them (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`); an override without them raises `TypeError` when hosted. |
-| `on_tool_call_executed(*, tool_call_id, tool_name, arguments, payload, turn_idx, call_idx)` | no | notifies the registered observer | Only when the probe executes tool calls itself instead of inheriting `ToolExecutionMixin`. Call it immediately after appending each `role: "tool"` message. Notify-only: the loop ignores the return value, so it cannot change behaviour, but without it the payloads the probe produced never reach an external host (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`). |
+| `user_turn_policy()` | no | `UserTurnPolicy()`: the loop's own behavior | When the probe tests what the model says across turns: turn off compression so the model sees its own replies, turn off the wrap-up anchor so every follow-up stays on topic, allow filter phrases its users naturally write, and skip names (such as brand names in Latin script) in the script check. `identity_disclosure` does all four, and checks the openings its users write for AI names. A generated opening can also be checked before the gate (`check_opening`): return why a draft breaks the probe's rules, and the loop asks for another draft within `max_query_attempts`. Read once per trajectory, after `derive_task` |
+| `async run_dispatch(*, models, data, cfg, state=None, seed_state=True)` | no | drives `ConversationLoop` | Only when the unified loop is wrong shape (currently: only `safety_agentic`). An override **must** accept `state` and `seed_state` and honor them: reuse the supplied `state` instead of building one, and skip metadata seeding when `seed_state` is False. An external host resumes an episode through them (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`); an override without them raises `TypeError` when hosted. |
+| `on_tool_call_executed(*, tool_call_id, tool_name, arguments, payload, turn_idx, call_idx)` | no | notifies the registered observer | Only when the probe executes tool calls itself instead of inheriting `ToolExecutionMixin`. Call it immediately after appending each `role: "tool"` message. Notify-only: the loop ignores the return value, so it cannot change behavior, but without it the payloads the probe produced never reach an external host (`docs/engine/EXTERNAL_PROBE_RUNTIME.md`). |
 
 ### Is the probe hostable?
 
@@ -188,9 +187,9 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
   inclusion convention: each locale has its own bank, downstream
   reporting reads per-locale.
 - A string like `"safety"` or `"agentic"`: record
-  `provenance.bank_version[<that_string>]`. The safety convention:
-  bank is locale-independent (English-only), reporting reads under
-  the stable string.
+  `provenance.bank_version[<that_string>]`. The shared-bank convention:
+  one file serves every locale (its text fields can carry a rendering per locale),
+  and reporting reads under the stable string.
 
 Get this wrong and the matching scorecard reads from the wrong key
 and silently produces empty rollups.
@@ -275,6 +274,7 @@ caught at import time, not at simulate-time when the locale's first
 row trips a KeyError.
 
 ```python
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.probes import LocalePromptPack
 
 MY_USER_PROMPTS = LocalePromptPack(
@@ -285,7 +285,7 @@ MY_USER_PROMPTS = LocalePromptPack(
         "ja_JP": "あなたは{persona}、日本のユーザーです。{topic}について質問してください。",
         # ... rest of your shipped locales
     },
-    shipped_locales=("en_US", "pt_BR", "ja_JP", "fr_FR", "hi_Deva_IN", "en_IN"),
+    shipped_locales=SHIPPED_LOCALES,
 )
 
 
@@ -293,9 +293,9 @@ MY_USER_PROMPTS = LocalePromptPack(
 prompt = MY_USER_PROMPTS.get(self._locale, persona="Sarah", topic="cooking")
 ```
 
-If you only ship one locale (English-only safety probes do this),
-plain string templates are fine: `LocalePromptPack` adds value
-specifically for the half-shipped-locale failure mode.
+If you only ship one locale, plain string templates are fine:
+`LocalePromptPack` adds value specifically for the half-shipped-locale
+failure mode.
 
 ---
 
@@ -350,7 +350,10 @@ The decorator does TWO things in one call:
 1. Sets `PROBE_FAMILY` / `PROMPT_VERSION` / `PROBE_VARIANTS` on the
    class's MODULE (the smoke check reads them via
    `getattr(module, "PROBE_FAMILY", ...)`).
-2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`.
+2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`. Pick a label
+   no other probe uses: registering a second class under a label that is
+   already taken replaces the first, shipped probes included, and the
+   registry notes it only in debug logging.
 
 Both surfaces are what the dispatcher reads.
 
@@ -376,7 +379,7 @@ def side_effect_columns(self) -> list[str]:
 
 The engine writes the configured column plus the names declared there and
 discards everything else. An undeclared key is computed on every row, dropped
-on the way to storage, and then read back as absent by your scorer -- which
+on the way to storage, and then read back as absent by your scorer, which
 reports the trajectory as having nothing to score rather than failing. The
 generator logs a warning naming the probe and the column the first time it
 drops one, so check the log of your first run.
@@ -413,7 +416,7 @@ Every check should report `[OK]`. Confirm your probe appears in the
 `probe registry` line:
 
 ```
-[OK]   probe registry        14 probe(s) registered: [..., 'my_probe', ...]
+[OK]   probe registry        15 probe(s) registered: [..., 'my_probe', ...]
 ```
 
 If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
@@ -727,9 +730,8 @@ shim. Everything about how the conversation runs comes from the shared loop.
 
 ## Common gotchas
 
-These eight points account for most first-run failures. Reading them before
-you run the smoke test will save a cycle.
-Read them before you run the smoke test.
+These nine points account for most first-run failures; reading them before
+you run the smoke test saves a cycle.
 
 ### 1. Assistant system prompt must be empty (pure-capability policy)
 
@@ -740,9 +742,9 @@ contaminates the very signal each probe is designed to surface.
 
 See [`docs/engine/README.md` "Assistant under test:
 pure-capability policy"](README.md#assistant-under-test-pure-capability-policy)
-for the full rationale. If your probe deliberately deviates, document
-in the module docstring
-entry. The default is empty; deviations are deliberate.
+for the full rationale. If your probe deliberately deviates, document the
+deviation in the module docstring. The default is empty; deviations are
+deliberate.
 
 ### 2. Test patching: BOTH `core.simulation.acall_llm` AND `core.judges.acall_llm`
 
@@ -803,7 +805,7 @@ place to bump prompt_version).
 - `None` → `provenance.bank_version[<locale>]` (locale-keyed, the
   inclusion convention).
 - `"safety"` / `"agentic"` / etc. → `provenance.bank_version["safety"]`
-  (non-locale, the safety convention for English-only banks).
+  (one bank shared by every locale, as the safety probes use).
 
 The matching scorer looks up under whichever key the probe pinned.
 Mismatch = scorer reads None = silent rollup-zero. Choose the key
@@ -926,8 +928,11 @@ when you pass it a `sample_row`.
 
 Add the module path to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
-so the auto-load path picks it up. After that, `usersim eval` runs your scorer
-for every trajectory whose `probe_family` matches your probe's label.
+so the auto-load path picks it up. After that, name it at evaluation time
+(`usersim eval --scorers your_probe`). The evaluator calls each named scorer on
+every row, so return early for rows from other probes, for example when your
+probe's join key is missing, as the `safety_agentic` scorer does with
+`action_request_id`.
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See
@@ -940,8 +945,8 @@ or `safety_chat_pressure.py` for canonical examples.
 
 - [`templates/probe/`](../../templates/probe/): copy-pasteable starter
   files for each shape.
-- [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py)
- : substrate source (every class, every mixin, every hook with
-  full docstrings).
+- [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py):
+  substrate source (every class, every mixin, every hook with full
+  docstrings).
 - [`README.md`](README.md): "Assistant under test: pure-capability
   policy" + "Why we centralize the loop".

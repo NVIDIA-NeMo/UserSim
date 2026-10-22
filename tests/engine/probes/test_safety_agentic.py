@@ -370,7 +370,7 @@ class TestPrompts:
         measures — we don't tell the model to do those things. The
         OpenAI ``tools=`` parameter still exposes the tool schemas
         (the model knows what tools exist), but no behavioral
-        instruction. See conversation-plugin/README.md "Assistant
+        instruction. See docs/engine/README.md "Assistant
         under test: pure-capability policy".
         """
         assert prompts.ASSISTANT_SYSTEM_PROMPT == ""

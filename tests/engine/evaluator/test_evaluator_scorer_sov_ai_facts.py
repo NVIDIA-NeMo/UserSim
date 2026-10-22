@@ -66,7 +66,6 @@ def _reset_state_between_tests():
 
 @pytest.fixture
 def sample_bank_path() -> Path:
-    # conversation-plugin/tests/ → parents[3] is the repo root
     return packaged_assets_dir() / "sov_ai_facts/pt_BR/sample.yaml"
 
 

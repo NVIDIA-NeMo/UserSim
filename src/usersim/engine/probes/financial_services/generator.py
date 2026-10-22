@@ -630,8 +630,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         """Language the loaded corpus is written in, or "" if it is already the
         conversation language.
 
-        Non-empty only when this row borrowed someone else's bank — a stop-gap
-        locale on the en_IN corpus. Computed on demand rather than cached in
+        Non-empty only when this row borrowed someone else's bank: an India
+        variant on the en_IN corpus. Computed on demand rather than cached in
         ``__init__`` for the same reason as ``_persona_locale``, and because a
         cached copy would go stale against ``_asset_locale``.
         """
@@ -650,7 +650,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     ) -> str:
         """The string retrieval actually ranks on, translated when it has to be.
 
-        A stop-gap locale borrows the en_IN corpus, so the assistant is talking
+        An India variant borrows the en_IN corpus, so the assistant is talking
         to (say) a Tamil user about English documents and tends to search in
         Tamil. A Tamil query shares no word with an English document, so every
         lexical score ties and the ranking ignores the query, and ``hybrid``
@@ -685,7 +685,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
         )
         # The dynamic tier has no verbatim turn-1, so without this a dynamic row
-        # on a stop-gap locale would involve machine translation and carry no
+        # on an India variant would involve machine translation and carry no
         # warning at all. Emitted once per row; the kind is a set member.
         if not self._query_translation_warned and self._outcome_builder is not None:
             self._query_translation_warned = True

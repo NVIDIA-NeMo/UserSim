@@ -128,7 +128,7 @@ def merge_extensions(
     """Merge discovered extensions into ``builtins`` without displacing them.
 
     A built-in always wins a name collision. An extension that silently
-    shadowed a shipped probe or scorer would change the meaning of a run
+    shadowed a shipped backend or asset domain would change the meaning of a run
     while every config file and report still named the original, so the
     collision is reported and the extension dropped.
 

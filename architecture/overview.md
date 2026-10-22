@@ -5,25 +5,29 @@ Every NeMo User Sim run answers four questions in order: **who** is the user,
 the assistant handle it. Each is a separate layer you can replace without
 touching the others, which is the whole design in one sentence.
 
-<img src="../docs/images/pipeline_architecture.jpg" width="800">
+<img src="../docs/images/architecture.jpg" width="800" alt="NeMo User Sim architecture: personas, behavior and a probe define the simulated user; a multi-turn simulation runs that user against your model or agent; the evaluator turns the stored trajectories into a capability report and training data. Plug markers show where an installed package extends the framework.">
 
 **Who** comes from [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
 synthetic individuals grounded in real census distributions, sampled from the
 extended NGC version that carries the OCEAN traits, and downloaded once per
-locale. Swap in your own population source and everything downstream keeps
-working.
+locale. Every later layer reads the persona from the row, so stored rows
+(`usersim simulate --inputs`) bring the same people back under any setup.
 
-**How** is behaviour. A persona's OCEAN traits become an interaction style, a
-disclosure pattern, and a tendency to push back when the assistant
-underperforms. This is what separates a simulated population from a prompt
-that says "act as a user."
+**How** is behavior. A persona's OCEAN traits become an interaction style and
+a tendency to push back when the assistant underperforms, and each persona
+draws a disclosure pattern (everything up front, or a little at a time). This
+is what separates a simulated population from a prompt that says "act as a
+user."
 
 **What** is a probe: the interaction pattern, the opening turn, and the
-definition of failure. Fourteen ship; adding one is roughly fifty lines.
+definition of failure. Fourteen ship, and a new one inherits the conversation
+loop, so it declares only what is specific to it.
+
+<img src="../docs/images/conversation_engine.jpg" width="800" alt="The conversation loop a new probe runs on: the simulated user writes a turn, filters and a judge gate check it, your model or agent replies, and a reply judge drives the user's frustration, until a stop condition ends the conversation. Hook labels mark what a probe can override, and each conversation becomes one trajectory row for the evaluator and report.">
 
 **How well** is the evaluator, and it runs *after* simulation rather than
 inside it. Trajectories land in a parquet file, and scoring reads that file.
-Rewrite a rubric, re-score in seconds, never re-simulate.
+Rewrite a rubric and re-score without re-simulating.
 
 ## The data flows one way
 
@@ -44,7 +48,7 @@ the arrow pointing one direction, and a test enforces it.
 |---|---|---|
 | `usersim.cli` | The command surface, and resolving which models a run uses | [cli.md](cli.md) |
 | `usersim.engine` | Running conversations: the loop, probes, banks, identity, storage | [engine.md](engine.md) |
-| `usersim.engine.evaluator` | Scoring assistants: judges, axes, deterministic scorers | [evaluator.md](evaluator.md) |
+| `usersim.engine.evaluator` | Scoring assistants: judges, axes, scorers | [evaluator.md](evaluator.md) |
 | `usersim.reporting` | Turning parquets into a capability dashboard | [reporting.md](reporting.md) |
 | `usersim.selection` | Curating trajectories into exportable datasets | [selection.md](selection.md) |
 | `usersim.taxonomy` | The shared vocabulary of capabilities and evidence | above |
@@ -52,7 +56,7 @@ the arrow pointing one direction, and a test enforces it.
 | `usersim.testing` | Conformance checks for extensions you write | [plugins.md](plugins.md) |
 
 Probes get their own page: [probes.md](probes.md) for the substrate,
-[`docs/probes.md`](../docs/probes.md) for the catalogue. The entry-point
+[`docs/probes.md`](../docs/probes.md) for the catalog. The entry-point
 seams that let an installed package join any registry are in
 [plugins.md](plugins.md).
 
@@ -64,8 +68,6 @@ generators:
 
 - `conversation-simulator` → `usersim.engine.plugin:conversation_simulator`
 - `trajectory-evaluator` → `usersim.engine.plugin:trajectory_evaluator`
-
-<img src="../docs/images/plugin_architecture.jpg" width="800">
 
 You inherit Data Designer's orchestration, parallelism and provider handling
 rather than reimplementing them, and the two generators compose with anything
@@ -80,7 +82,7 @@ throughout, so a name tells you which one you are reading about.
 
 ```
 src/usersim/
-├── cli/               console driver; models_*.toml catalogues
+├── cli/               console driver; models_*.toml catalogs
 ├── engine/
 │   ├── core/          the conversation loop, probe base classes, banks,
 │   │                  identity, outcomes, storage

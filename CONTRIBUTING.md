@@ -167,7 +167,7 @@ file fills gaps rather than overriding a deliberate export. Nothing is required:
 a missing file is normal, and the notebooks prompt for any key still missing.
 
 **Reasoning models reject sampling parameters.** Most return an HTTP 400 for
-any non-default `temperature`, and some reject `top_p` outright. Catalogued
+any non-default `temperature`, and some reject `top_p` outright. Cataloged
 models handle this already. For one the catalog does not know, such as a model
 behind your own provider, name the parameters to leave out of the request.
 TOML has no null literal, so this is how a row says "send nothing here":
@@ -198,7 +198,7 @@ make check-doc-links         # every relative link in markdown resolves
 Licensing has its own gate, worth running if you added a dependency:
 
 ```bash
-make check-dependency-licenses   # runtime licences against the policy allowlist
+make check-dependency-licenses   # runtime licenses against the policy allowlist
 ```
 
 Two heavier gates run in CI and are worth running locally if you touched
@@ -219,7 +219,7 @@ Your PR title must follow [Conventional Commits](https://www.conventionalcommits
 
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
 rejects reproduces locally with the same command. Tests and the dependency
-licence check run on Python 3.10 to 3.14.
+license check run on Python 3.10 to 3.14.
 
 No job triggered by a pull request has access to a credential, so a PR from a
 fork runs the complete suite. The consequence is that CI cannot tell you
@@ -293,7 +293,9 @@ Two conventions matter more than they look:
 You do not need to modify this repository. Probes, scorers, asset domains,
 execution backends, capabilities, and CLI subcommands are all discovered
 through entry points; see the seven groups in
-`src/usersim/engine/core/_extensions.py`.
+`src/usersim/engine/core/_extensions.py`. Give a probe or scorer a name no
+built-in uses, since registering one under a taken name replaces the earlier
+one.
 
 To check your extension satisfies the contract:
 

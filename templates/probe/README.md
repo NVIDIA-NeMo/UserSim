@@ -19,8 +19,8 @@ do we need to surface?* Each probe owns:
   keeps the user-agent from slipping into "AI helpful assistant" mode).
 - An optional asset bank (curated facts / queries / strategies /
   action requests) that grounds the probe in reviewer-vetted content.
-- Probe-specific side-channel columns (`facts_probed`, `query_id`,
-  `target_request_id`, `attempted_actions`, …) that the matching
+- Probe-specific side-channel columns (`sovereign_facts_probed`, `query_id`,
+  `target_request_id`, `action_request_id`, …) that the matching
   out-of-sim scorer reads.
 
 If the new "probe" is just a different prompt for an existing probe,
@@ -64,10 +64,10 @@ tool accessor, `after_assistant_turn`, and `build_result_extras`.
 `BaseProbe` supplies defaults for five of them, so a normal subclass only
 sets `label` and implements the two system-prompt accessors. It also
 provides defaults for every optional hook. The mixins pre-configure the optional
-hooks for the four common probe shapes; what you override differs by shape.
+hooks for the common probe shapes; what you override differs by shape.
 A probe that tests what the model says across turns can also return a
 `UserTurnPolicy` from `user_turn_policy()`, as `identity_disclosure` does, to
-keep earlier replies unsummarised and every follow-up on topic.
+keep earlier replies unsummarized and every follow-up on topic.
 
 | Shape | Recommended base | Mixin | Override these | Skip these |
 |---|---|---|---|---|
@@ -100,7 +100,7 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
   `evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES` so the
   auto-load path picks it up.
 
-See the "in-sim / out-of-sim boundary" discussion
+See [Wiring the out-of-sim scorer](../../docs/engine/AUTHORING_A_PROBE.md#wiring-the-out-of-sim-scorer)
 for the rationale.
 
 ## Wiring checklist
@@ -124,13 +124,13 @@ When porting one of the templates into a new module:
       `side_effect_columns` on `ConversationSimulatorConfig`. The engine
       writes the configured column plus the declared names and discards
       the rest (logging a warning), so an undeclared join key is computed,
-      dropped, and then read back as absent by your scorer -- which reports
+      dropped, and then read back as absent by your scorer, which reports
       the trajectory as having nothing to score while the run looks fine.
       A probe outside this repository cannot add to that list: keep its
       per-row data in `state.metadata`, written during the run, and read it
       from `conversation_metadata`. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
-- [ ] Add a deterministic scorer under
+- [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
 - [ ] Write tests using the patterns in `test_probe.py.template`:
@@ -139,6 +139,8 @@ When porting one of the templates into a new module:
       XML-shaped judge payloads. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference.
-- [ ] Update `docs/engine/README.md`'s probe table.
+- [ ] Update `docs/engine/README.md`'s probe table and the catalog in
+      `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
+      count there.
 - [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

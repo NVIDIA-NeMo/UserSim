@@ -125,7 +125,7 @@ came from.
 
 With more than one turn, the probe changes how the loop runs through its
 `user_turn_policy()`. The model under test sees each of its earlier replies as
-written, never a summary, even when the run compresses context. No follow-up
+written, never a summary, even when the run manages context with summaries. No follow-up
 is told to thank the assistant and wrap up; a pressed row's follow-ups carry
 their own instruction instead of the loop's "you are asking for help". And
 what these users naturally write passes the loop's filters: "language model"
@@ -140,7 +140,7 @@ competitor.
 capability rows need. From the command line, name it:
 
 ```bash
-usersim evaluate --scorers identity_disclosure
+usersim eval --trajectories output/trajectories --out output/evaluations --scorers identity_disclosure
 ```
 
 The scorer makes one extraction call per trajectory with the first judge
@@ -152,7 +152,7 @@ spec's vocabulary and grades every turn against `expected_identity`. Whole
 reasoning traces never reach the extractor: the vocabulary finds the developers
 a trace names that the model may not name and the user never mentioned, and
 only the passages around those names go into the same call, where each is
-labelled like a turn. A claim counts; a passing mention ("LLaMA-style
+labeled like a turn. A claim counts; a passing mention ("LLaMA-style
 architectures") does not. A passage that comes back unlabelled is counted by
 the text match and flagged for review.
 

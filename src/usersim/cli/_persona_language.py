@@ -222,7 +222,7 @@ def log_persona_language_population(
 
     Best-effort only: a missing or unreadable managed asset never blocks
     sampling. The cache is process-local and keyed by resolved path, mtime,
-    size, and language column, so several stop-gap locales sharing ``en_IN``
+    size, and language column, so the India language variants sharing ``en_IN``
     incur one PyArrow scan while a changed parquet automatically misses.
     """
     if not constraint:

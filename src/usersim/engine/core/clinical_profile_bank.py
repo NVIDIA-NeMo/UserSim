@@ -11,8 +11,8 @@ everything the ad-hoc JSON loader it replaces did not have:
 - ``provenance.bank_version`` pinning (so a trajectory records which profile set
   it ran against — no replay/drift hole),
 - ``placeholder``-entry discipline (the shipped bundled banks are SYNTHETIC
-  placeholders; using one raises ``WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE``
-  so a scorecard never claims production readiness on placeholder ground truth),
+  placeholders; using one raises ``WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE``,
+  which the capability report counts per cell as placeholder content),
 - asset-path discovery + audit-test coverage.
 
 Unlike the locale-keyed banks (fact_bank), clinical profiles are **per-client**

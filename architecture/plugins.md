@@ -26,7 +26,7 @@ which system they are looking at.
 | `usersim.backends` | an `ExecutionBackend` implementation | `--backend` choices |
 | `usersim.capabilities` | a `CapabilityDefinition` or an iterable | the capability matrix |
 | `usersim.commands` | a `register(subparsers)` callable | `usersim --help` |
-| `usersim.toolset_sources` | *(declared; consumed by future work)* | n/a |
+| `usersim.toolset_sources` | *(reserved)* | n/a |
 
 ```toml
 [project.entry-points."usersim.probes"]
@@ -44,16 +44,17 @@ run keeps is part of the core config. See [Probes](probes.md).
 identical code path as a built-in and inherits its validation. There is no
 parallel registration path to drift.
 
-**A built-in always wins a name collision.** An extension that silently
-shadowed a shipped probe would change what a run means while every config
-file and report still named the original. The collision is reported and the
-extension dropped.
+**Collisions.** Commands, backends, asset domains and capabilities keep the
+built-in: an extension under a taken name is reported and dropped. Probes and
+scorers register at import, so the last registration under a name replaces the
+earlier one, shipped probes included, noted only in debug logging. Give an
+extension probe or scorer a name of its own.
 
-**A broken extension is skipped, not fatal.** An entry point that fails to
-import is logged with the exception and omitted, so one bad package cannot
-make `--help` unusable. The log is a warning rather than a debug line,
-because a probe that silently fails to appear is far harder to diagnose than
-a noisy startup.
+**An extension that fails to load is skipped, not fatal.** An entry point
+that fails to import is logged with the exception and omitted, so one bad
+package cannot make `--help` unusable. The log is a warning rather than a
+debug line, because a probe that silently fails to appear is far harder to
+diagnose than a noisy startup.
 
 **Ordering is by entry-point name**, not install order, so registry contents
 do not depend on the sequence of `pip install` commands.
@@ -127,19 +128,18 @@ search order, so the shipped banks remain reachable. See
 Beyond the mechanics above, four contributions the design is specifically
 built to absorb:
 
-- **New persona datasets and locales.** Any census-grounded or
-  domain-specific persona dataset can slot in as a population source. A
-  sovereign-AI team contributing a national dataset (grounded in local
-  census data, written in the local language) gains the whole simulation,
-  evaluation and reporting pipeline with it. See
-  [`docs/locales.md`](../docs/locales.md) for how a preview locale graduates
-  to a shipped one.
+- **New persona datasets and locales.** A national persona dataset, grounded
+  in local census data and written in the local language, is the foundation
+  of a new locale: once Data Designer serves it, the locale gains the whole
+  simulation, evaluation and reporting pipeline, and probe content follows
+  bank by bank. See [`docs/locales.md`](../docs/locales.md) for how a preview
+  locale graduates to a shipped one.
 - **Agent benchmark integrations.** Task suites define the *task*; this
-  defines the *user*. Wrapping one adds behavioural diversity and demographic
+  defines the *user*. Wrapping one adds behavioral diversity and demographic
   grounding that task-only benchmarks lack.
 - **Custom evaluation axes.** The multi-axis schema is extensible, so a
   domain-specific quality dimension does not require touching the core.
-- **Behavioural-realism mitigations.** The realism layer (incremental
+- **Behavioral-realism mitigations.** The realism layer (incremental
   disclosure, OCEAN-derived interaction style, reactive frustration) is
   modular. Typo injection, device switching, session abandonment and
   non-native language patterns are all additive.
