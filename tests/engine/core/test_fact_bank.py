@@ -534,17 +534,8 @@ class TestPtBrSampleBank:
         for cat in bank.categories:
             assert len(bank.by_category(cat)) == 6, f"category {cat} expected to have 6 entries"
 
-    def test_all_entries_placeholder_until_real_refs(self, bank: FactBank) -> None:
-        # Per the schema's promotion convention, an entry promoted to
-        # ``placeholder: false`` MUST carry a real (non-stub) reference
-        # citation. The current bank carries authored content but only
-        # boilerplate "URLs pending native/SME audit" stubs in its
-        # ``provenance.references`` fields, so all 60 entries remain
-        # ``placeholder: true``. A reviewer attaching real Wikipedia /
-        # government / academic citations re-flips entries to
-        # ``placeholder: false`` and bumps ``bank_version``; this test
-        # then needs an updated invariant matching the new mix. See
-        # rationale.
+    def test_every_entry_is_a_placeholder(self, bank: FactBank) -> None:
+        # No domain expert has verified any pt_BR entry.
         assert bank.placeholder_fraction() == 1.0
         assert len(bank.non_placeholder()) == 0
 

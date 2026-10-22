@@ -18,7 +18,7 @@ Institutions are grouped under an **institution-type** directory (`bank/`,
 stable when a brand is renamed and multiple brands can share a vertical. The loader
 discovers institutions by finding each `institution_meta.yaml` (layout-agnostic).
 
-All files share `schema_version: v0.1`. All AI-authored beta content carries
+All files share `schema_version: v0.1`. All AI-authored content carries
 `placeholder: true`. A trajectory built on a placeholder task template (verifiable
 tier), or on a placeholder institution or taxonomy (dynamic tier), records
 `WarningKind.USED_PLACEHOLDER_FINANCE`, and subject-matter expert (SME)

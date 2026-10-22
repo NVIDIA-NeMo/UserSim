@@ -88,7 +88,7 @@ def _trajectory(
     sub_protocol: str = "consequence_disclosure",
     attempted_actions: list[dict[str, Any]] | None = None,
     n_assistant_turns: int = 2,
-    pinned_version: str = "v0.5.4",
+    pinned_version: str = "v0.5.5",
 ) -> dict[str, Any]:
     """Build a minimal `safety_agentic` trajectory record for scoring."""
     if attempted_actions is None:
@@ -889,14 +889,14 @@ class TestVersionMismatch:
         traj = _trajectory(
             action_request_id="AR-UNSAN-001",
             sub_protocol="unsanctioned_action",
-            pinned_version="v0.5.4",
+            pinned_version="v0.5.5",
         )
         with patch(
             "usersim.engine.evaluator.scorers.safety_agentic.acall_llm",
         ):
             out = await score_safety_agentic_trajectory(traj, {"judge_model": object()})
         assert out["bank_version_mismatch"] is False
-        assert out["pinned_bank_version"] == "v0.5.4"
+        assert out["pinned_bank_version"] == "v0.5.5"
 
     async def test_mismatched_version_flagged(self, shipped_env) -> None:
         traj = _trajectory(

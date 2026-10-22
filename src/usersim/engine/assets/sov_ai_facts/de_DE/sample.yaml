@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: de_DE
 bank_id: de_DE_sample
-bank_version: v0.1.0
+bank_version: v0.1.1
 categories:
 - germany-geography
 - germany-history
@@ -65,7 +65,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Statistisches Bundesamt (Destatis): ‚Geografie: Grenzen und Fläche Deutschlands‘'
@@ -87,7 +87,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bayerische Vermessungsverwaltung: ‚Höchste Berge Bayerns‘'
@@ -110,7 +110,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Statistisches Landesamt Bremen: ‚Bremen in Zahlen‘'
@@ -133,7 +133,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Wasserstraßen- und Schifffahrtsverwaltung des Bundes: ‚Nord-Ostsee-Kanal‘'
@@ -155,7 +155,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Statistisches Amt Mecklenburg-Vorpommern: ‚Gebiet und Bevölkerung‘'
@@ -179,7 +179,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Nationalpark Harz: ‚Der Brocken‘'
@@ -202,7 +202,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Deutscher Bundestag: ‚Das Grundgesetz: Entstehung‘'
@@ -226,7 +226,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bundesregierung: ‚Tag der Deutschen Einheit‘'
@@ -250,7 +250,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Stiftung Hambacher Schloss: ‚Das Hambacher Fest 1832‘'
@@ -272,7 +272,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Landesportal Saarland: ‚Geschichte des Saarlandes‘'
@@ -296,7 +296,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Stiftung Luthergedenkstätten in Sachsen-Anhalt: ‚Luther und die 95 Thesen‘'
@@ -319,7 +319,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Hessischer Landtag: ‚Volksabstimmungen über Verfassungsänderungen 2018‘'
@@ -342,7 +342,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Landeshauptstadt München: ‚Oktoberfest: Geschichte und Termine‘'
@@ -365,7 +365,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Gesetz über die Sonn- und Feiertage (Berlin)
@@ -389,7 +389,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Thüringer Feiertagsgesetz
@@ -412,7 +412,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Niedersächsisches Gesetz über die Feiertage
@@ -435,7 +435,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Gesetz über die Sonn- und Feiertage (Saarland)
@@ -459,7 +459,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'UNESCO: ‚Town Hall and Roland on the Marketplace of Bremen‘'
@@ -480,7 +480,7 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Projekt Gutenberg-DE: Johann Wolfgang von Goethe, ‚Erlkönig‘'
@@ -501,7 +501,7 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Projekt Gutenberg-DE: Heinrich Heine, ‚Buch der Lieder‘'
@@ -522,7 +522,7 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Projekt Gutenberg-DE: Friedrich Schiller, ‚An die Freude‘'
@@ -542,7 +542,7 @@ entries:
   - education:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Projekt Gutenberg-DE: Annette von Droste-Hülshoff, ‚Der Knabe im Moor‘'
@@ -563,7 +563,7 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bundespräsidialamt: ‚Die Nationalhymne‘'
@@ -587,7 +587,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bach-Archiv Leipzig: ‚Johann Sebastian Bach in Leipzig‘'
@@ -609,7 +609,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Bundesmeldegesetz (BMG), §§ 17, 19 und 54
@@ -631,7 +631,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bundesministerium für Verkehr: ‚Deutschlandticket‘'
@@ -654,7 +654,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Verfassung der Freien und Hansestadt Hamburg
@@ -676,7 +676,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Verfassung von Berlin
@@ -700,7 +700,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'IT.NRW, Statistisches Landesamt: ‚Bevölkerung in Nordrhein-Westfalen‘'
@@ -723,7 +723,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Landeswahlgesetz Schleswig-Holstein
@@ -746,7 +746,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Fünftes Buch Sozialgesetzbuch (SGB V), §§ 31 und 61
@@ -768,7 +768,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Kassenärztliche Bundesvereinigung: ‚116117: Der ärztliche Bereitschaftsdienst‘'
@@ -791,7 +791,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Fünftes Buch Sozialgesetzbuch (SGB V), § 62
@@ -814,7 +814,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bundesministerium für Gesundheit: ‚Die elektronische Patientenakte für alle‘'
@@ -838,7 +838,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Elftes Buch Sozialgesetzbuch (SGB XI), § 58
@@ -862,7 +862,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Entgeltfortzahlungsgesetz (EntgFG), § 5
@@ -885,7 +885,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Brandenburgisches Schulgesetz
@@ -907,7 +907,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Ministerium für Bildung und Kindertagesförderung Mecklenburg-Vorpommern: ‚Das Abitur‘'
@@ -929,7 +929,7 @@ entries:
   - age:25-44
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Achtes Buch Sozialgesetzbuch (SGB VIII), § 24
@@ -953,7 +953,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Schulgesetze der Länder, etwa das Schulgesetz für das Land Nordrhein-Westfalen
@@ -976,7 +976,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Hamburgisches Schulgesetz
@@ -1001,7 +1001,7 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Landeshochschulgebührengesetz Baden-Württemberg
@@ -1024,7 +1024,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Mindestlohngesetz (MiLoG)
@@ -1048,7 +1048,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Bundesurlaubsgesetz (BUrlG), §§ 3, 7 und 9
@@ -1070,7 +1070,7 @@ entries:
   - age:25-44
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Einkommensteuergesetz (EStG), §§ 62 bis 78
@@ -1092,7 +1092,7 @@ entries:
   - age:45-64
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Sechstes Buch Sozialgesetzbuch (SGB VI), §§ 35, 36, 38 und 235 bis 236b
@@ -1114,7 +1114,7 @@ entries:
   - age:25-44
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Bundeselterngeld- und Elternzeitgesetz (BEEG)
@@ -1137,7 +1137,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Hessisches Gesetz über den Anspruch auf Bildungsurlaub (HBUG)
@@ -1159,7 +1159,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Kirchensteuergesetz Baden-Württemberg
@@ -1182,7 +1182,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Einlagensicherungsgesetz (EinSiG), § 8
@@ -1204,7 +1204,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Bürgerliches Gesetzbuch (BGB), §§ 312g, 355 und 356
@@ -1226,7 +1226,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Grunderwerbsteuergesetz (GrEStG), § 11
@@ -1250,7 +1250,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Gesetz über die Überführung der Anteilsrechte an der Volkswagenwerk Gesellschaft mit beschränkter Haftung in private Hand (VW-Gesetz)
@@ -1274,7 +1274,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Solidaritätszuschlaggesetz 1995
@@ -1298,7 +1298,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Bundesministerium des Innern: ‚Online-Ausweisfunktion‘'
@@ -1322,7 +1322,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'ELSTER: ‚Über ELSTER‘'
@@ -1345,7 +1345,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Datenschutz-Grundverordnung (DSGVO), Artikel 12 und 15
@@ -1367,7 +1367,7 @@ entries:
   - age:45-64
   difficulty: easy
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'Polizeiliche Kriminalprävention der Länder und des Bundes: ‚Betrug über Messenger-Dienste‘'
@@ -1390,7 +1390,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - Akteneinsichts- und Informationszugangsgesetz Brandenburg (AIG)
@@ -1414,7 +1414,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt; muttersprachliche und fachliche Prüfung steht aus
+    source: Für die de_DE-Bank aus den angegebenen öffentlichen Quellen erstellt
     last_reviewed: '2026-10-20'
     references:
     - 'nora: ‚Die offizielle Notruf-App der Bundesländer‘'

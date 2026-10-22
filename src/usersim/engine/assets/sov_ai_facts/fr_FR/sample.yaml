@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: fr_FR
 bank_id: fr_FR_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - france-geography
 - france-history
@@ -48,10 +48,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-GEO-002
   category: france-geography
   question_type: factual_recall
@@ -67,10 +66,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-GEO-003
   category: france-geography
   question_type: factual_recall
@@ -87,10 +85,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-GEO-004
   category: france-geography
   question_type: factual_recall
@@ -106,10 +103,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-GEO-005
   category: france-geography
   question_type: factual_recall
@@ -125,10 +121,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-HIS-001
   category: france-history
   question_type: factual_recall
@@ -143,10 +138,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-HIS-002
   category: france-history
   question_type: factual_recall
@@ -161,10 +155,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-HIS-003
   category: france-history
   question_type: factual_recall
@@ -180,10 +173,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-HIS-004
   category: france-history
   question_type: factual_recall
@@ -199,10 +191,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-HIS-005
   category: france-history
   question_type: factual_recall
@@ -218,10 +209,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-CUL-001
   category: france-culture
   question_type: factual_recall
@@ -236,10 +226,9 @@ entries:
   - education:tertiary
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-CUL-002
   category: france-culture
   question_type: factual_recall
@@ -255,10 +244,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-CUL-003
   category: france-culture
   question_type: factual_recall
@@ -274,10 +262,9 @@ entries:
   - education:tertiary
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-CUL-004
   category: france-culture
   question_type: factual_recall
@@ -293,10 +280,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-CUL-005
   category: france-culture
   question_type: factual_recall
@@ -313,10 +299,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-POE-001
   category: france-poetry-and-music
   question_type: completion
@@ -335,10 +320,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-POE-002
   category: france-poetry-and-music
   question_type: completion
@@ -357,10 +341,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-POE-003
   category: france-poetry-and-music
   question_type: completion
@@ -379,10 +362,9 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-POE-004
   category: france-poetry-and-music
   question_type: completion
@@ -401,10 +383,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-POE-005
   category: france-poetry-and-music
   question_type: completion
@@ -423,10 +404,9 @@ entries:
   - education:tertiary
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-SVC-001
   category: france-public-services
   question_type: factual_recall
@@ -442,10 +422,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-SVC-002
   category: france-public-services
   question_type: factual_recall
@@ -461,10 +440,9 @@ entries:
   - occupation-family:small-business
   difficulty: medium
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-SVC-003
   category: france-public-services
   question_type: factual_recall
@@ -480,10 +458,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-SVC-004
   category: france-public-services
   question_type: factual_recall
@@ -499,10 +476,9 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FR-SVC-005
   category: france-public-services
   question_type: factual_recall
@@ -518,10 +494,9 @@ entries:
   - interest:literature
   difficulty: easy
   provenance:
-    source: France beta review of original sample entry
+    source: Original UserSim sample entry (France)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: FRANCE-GEOG-B006
   category: france-geography
   question_type: factual_recall
@@ -538,10 +513,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi NOTRe 2015-991 ; Constitution arts. 72, 73, 74, titre XIII ; insee.fr ; outre-mer.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi NOTRe 2015-991 ; Constitution arts. 72, 73, 74, titre XIII ; insee.fr ; outre-mer.gouv.fr.
 - id: FRANCE-HIST-B006
   category: france-history
   question_type: completion
@@ -569,10 +544,10 @@ entries:
   - education:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources for the Appel du 18 juin — Fondation Charles de Gaulle (charles-de-gaulle.org) ; Archives nationales (archives.gouv.fr) ; UNESCO Memory of the World register entry "Appel du 18 juin 1940".
+    - Synthetic completion entry (AI-authored). Canonical sources for the Appel du 18 juin — Fondation Charles de Gaulle (charles-de-gaulle.org) ; Archives nationales (archives.gouv.fr) ; UNESCO Memory of the World register entry "Appel du 18 juin 1940".
 - id: FRANCE-CULT-B006
   category: france-culture
   question_type: completion
@@ -597,10 +572,10 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — Constitution du 4 octobre 1958 (arts. 1 et 2) sur legifrance.gouv.fr et conseil-constitutionnel.fr ; Loi du 23 juillet 2008 sur la modernisation des institutions ; Loi constitutionnelle du 28 mars 2003.
+    - Synthetic completion entry (AI-authored). Canonical sources — Constitution du 4 octobre 1958 (arts. 1 et 2) sur legifrance.gouv.fr et conseil-constitutionnel.fr ; Loi du 23 juillet 2008 sur la modernisation des institutions ; Loi constitutionnelle du 28 mars 2003.
 - id: FRANCE-POET-B006
   category: france-poetry-and-music
   question_type: completion
@@ -639,10 +614,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical source — Paul Verlaine, Poèmes saturniens, Alphonse Lemerre éditeur, Paris, 1866 (numérisation Gallica/BnF) ; édition critique Pléiade.
+    - Synthetic completion entry (AI-authored). Canonical source — Paul Verlaine, Poèmes saturniens, Alphonse Lemerre éditeur, Paris, 1866 (numérisation Gallica/BnF) ; édition critique Pléiade.
 - id: FRANCE-PUBL-B006
   category: france-public-services
   question_type: completion
@@ -679,10 +654,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — Constitution du 4 octobre 1958 (art. 2) ; texte officiel La Marseillaise sur elysee.fr ; manuscrits Rouget de Lisle à la BnF ; vie-publique.fr (notice "La Marseillaise").
+    - Synthetic completion entry (AI-authored). Canonical sources — Constitution du 4 octobre 1958 (art. 2) ; texte officiel La Marseillaise sur elysee.fr ; manuscrits Rouget de Lisle à la BnF ; vie-publique.fr (notice "La Marseillaise").
 - id: FRANCE-HEAL-B001
   category: france-health-systems
   question_type: factual_recall
@@ -700,10 +675,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale ; CNAM / Assurance Maladie (ameli.fr) ; convention médicale 2024 ; HAS (has-sante.fr).
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de la sécurité sociale ; CNAM / Assurance Maladie (ameli.fr) ; convention médicale 2024 ; HAS (has-sante.fr).
 - id: FRANCE-HEAL-B002
   category: france-health-systems
   question_type: factual_recall
@@ -721,10 +696,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale art. L911-7 ; ANI du 11 janvier 2013 ; Loi de sécurisation de l''emploi du 14 juin 2013 ; service-public.fr ; ameli.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de la sécurité sociale art. L911-7 ; ANI du 11 janvier 2013 ; Loi de sécurisation de l''emploi du 14 juin 2013 ; service-public.fr ; ameli.fr.
 - id: FRANCE-HEAL-B003
   category: france-health-systems
   question_type: factual_recall
@@ -742,10 +717,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la sécurité sociale arts. L322-3 et R322-1 ; ameli.fr/ald ; HAS guides ALD ; CNAM.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de la sécurité sociale arts. L322-3 et R322-1 ; ameli.fr/ald ; HAS guides ALD ; CNAM.
 - id: FRANCE-HEAL-B004
   category: france-health-systems
   question_type: factual_recall
@@ -763,10 +738,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — LFSS 2019 art. 52 ; Code de la sécurité sociale arts. L861-1 et suivants ; ameli.fr/css ; complementaire-sante-solidaire.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — LFSS 2019 art. 52 ; Code de la sécurité sociale arts. L861-1 et suivants ; ameli.fr/css ; complementaire-sante-solidaire.gouv.fr.
 - id: FRANCE-HEAL-B005
   category: france-health-systems
   question_type: factual_recall
@@ -784,10 +759,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — service-public.fr (numéros d''urgence) ; samu.fr ; SDIS / pompiers.fr ; arrêté du 23 mars 2007 sur la régulation médicale.
+    - Synthetic factual entry (AI-authored). Standard reference points — service-public.fr (numéros d''urgence) ; samu.fr ; SDIS / pompiers.fr ; arrêté du 23 mars 2007 sur la régulation médicale.
 - id: FRANCE-HEAL-B006
   category: france-health-systems
   question_type: factual_recall
@@ -805,10 +780,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — LFSS 2019 art. 50 ; CNAM ; monespacesante.fr ; ameli.fr ; Délégation ministérielle au numérique en santé.
+    - Synthetic factual entry (AI-authored). Standard reference points — LFSS 2019 art. 50 ; CNAM ; monespacesante.fr ; ameli.fr ; Délégation ministérielle au numérique en santé.
 - id: FRANCE-EDUC-B001
   category: france-education
   question_type: factual_recall
@@ -826,10 +801,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation ; Loi du 26 juillet 2019 « école de la confiance » ; Loi du 24 août 2021 confortant les principes de la République ; education.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de l''éducation ; Loi du 26 juillet 2019 « école de la confiance » ; Loi du 24 août 2021 confortant les principes de la République ; education.gouv.fr.
 - id: FRANCE-EDUC-B002
   category: france-education
   question_type: factual_recall
@@ -847,10 +822,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi ORE du 8 mars 2018 ; parcoursup.fr ; enseignementsup-recherche.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi ORE du 8 mars 2018 ; parcoursup.fr ; enseignementsup-recherche.gouv.fr.
 - id: FRANCE-EDUC-B003
   category: france-education
   question_type: factual_recall
@@ -868,10 +843,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Réforme du bac 2021 (Loi du 26 juillet 2019 école de la confiance) ; Code de l''éducation ; education.gouv.fr ; eduscol.education.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Réforme du bac 2021 (Loi du 26 juillet 2019 école de la confiance) ; Code de l''éducation ; education.gouv.fr ; eduscol.education.fr.
 - id: FRANCE-EDUC-B004
   category: france-education
   question_type: factual_recall
@@ -889,10 +864,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation ; CNOUS / CROUS ; etudiant.gouv.fr ; arrêtés annuels MESR sur les BCS.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de l''éducation ; CNOUS / CROUS ; etudiant.gouv.fr ; arrêtés annuels MESR sur les BCS.
 - id: FRANCE-EDUC-B005
   category: france-education
   question_type: factual_recall
@@ -910,10 +885,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de l''éducation arts. L612-1 et suivants ; arrêtés ministériels CPGE ; enseignementsup-recherche.gouv.fr ; rapports CDEFI (écoles d''ingénieurs).
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de l''éducation arts. L612-1 et suivants ; arrêtés ministériels CPGE ; enseignementsup-recherche.gouv.fr ; rapports CDEFI (écoles d''ingénieurs).
 - id: FRANCE-EDUC-B006
   category: france-education
   question_type: factual_recall
@@ -931,10 +906,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 9 décembre 1905 ; Constitution art. 1 ; Loi du 15 mars 2004 ; Loi du 24 août 2021 confortant les principes de la République ; Conseil d''État avis Marteaux 2000 ; Conseil des sages de la laïcité.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi du 9 décembre 1905 ; Constitution art. 1 ; Loi du 15 mars 2004 ; Loi du 24 août 2021 confortant les principes de la République ; Conseil d''État avis Marteaux 2000 ; Conseil des sages de la laïcité.
 - id: FRANCE-LABO-B001
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -952,10 +927,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L3121-27 et suivants ; Loi 1998-461 du 13 juin 1998 ; Loi 2000-37 du 19 janvier 2000 ; travail-emploi.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code du travail arts. L3121-27 et suivants ; Loi 1998-461 du 13 juin 1998 ; Loi 2000-37 du 19 janvier 2000 ; travail-emploi.gouv.fr.
 - id: FRANCE-LABO-B002
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -973,10 +948,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L3231-1 et suivants ; décret annuel de revalorisation ; service-public.fr ; INSEE.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code du travail arts. L3231-1 et suivants ; décret annuel de revalorisation ; service-public.fr ; INSEE.
 - id: FRANCE-LABO-B003
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -993,10 +968,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 14 avril 2023 (réforme des retraites Macron) ; Code de la sécurité sociale ; CNAV / CARSAT ; AGIRC-ARRCO ; info-retraite.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi du 14 avril 2023 (réforme des retraites Macron) ; Code de la sécurité sociale ; CNAV / CARSAT ; AGIRC-ARRCO ; info-retraite.fr.
 - id: FRANCE-LABO-B004
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -1014,10 +989,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 18 décembre 2023 (France Travail) ; Code du travail Livre 4e Partie 5 ; UNEDIC ; francetravail.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi du 18 décembre 2023 (France Travail) ; Code du travail Livre 4e Partie 5 ; UNEDIC ; francetravail.fr.
 - id: FRANCE-LABO-B005
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -1035,10 +1010,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L1225-17 et suivants ; Code de la sécurité sociale arts. L331-3 et suivants ; service-public.fr ; ameli.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code du travail arts. L1225-17 et suivants ; Code de la sécurité sociale arts. L331-3 et suivants ; service-public.fr ; ameli.fr.
 - id: FRANCE-LABO-B006
   category: france-labor-and-benefits
   question_type: factual_recall
@@ -1056,10 +1031,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code du travail arts. L1237-11 à L1237-16 ; Loi du 25 juin 2008 modernisation du marché du travail ; service-public.fr ; TéléRC.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code du travail arts. L1237-11 à L1237-16 ; Loi du 25 juin 2008 modernisation du marché du travail ; service-public.fr ; TéléRC.
 - id: FRANCE-FINA-B001
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1077,10 +1052,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier ; arrêtés annuels du ministre de l''Économie ; Banque de France ; Caisse des Dépôts ; service-public.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code monétaire et financier ; arrêtés annuels du ministre de l''Économie ; Banque de France ; Caisse des Dépôts ; service-public.fr.
 - id: FRANCE-FINA-B002
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1098,10 +1073,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code général des impôts ; loi de finances annuelle ; impots.gouv.fr ; DGFiP ; service-public.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code général des impôts ; loi de finances annuelle ; impots.gouv.fr ; DGFiP ; service-public.fr.
 - id: FRANCE-FINA-B003
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1119,10 +1094,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier arts. L221-30 et suivants ; loi du 16 juillet 1992 ; loi PACTE du 22 mai 2019 ; AMF ; economie.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code monétaire et financier arts. L221-30 et suivants ; loi du 16 juillet 1992 ; loi PACTE du 22 mai 2019 ; AMF ; economie.gouv.fr.
 - id: FRANCE-FINA-B004
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1139,10 +1114,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code monétaire et financier arts. L312-1 et suivants ; Loi du 25 juin 1999 ; Directive 2014/49/UE ; FGDR ; ACPR.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code monétaire et financier arts. L312-1 et suivants ; Loi du 25 juin 1999 ; Directive 2014/49/UE ; FGDR ; ACPR.
 - id: FRANCE-FINA-B005
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1159,10 +1134,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code général des impôts arts. 256 et suivants ; Directive TVA 2006/112/CE ; impots.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code général des impôts arts. 256 et suivants ; Directive TVA 2006/112/CE ; impots.gouv.fr.
 - id: FRANCE-FINA-B006
   category: france-finance-and-consumer
   question_type: factual_recall
@@ -1180,10 +1155,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code de la consommation arts. L221-18 et suivants ; Loi Hamon du 17 mars 2014 ; Directive 2011/83/UE ; DGCCRF ; signal-conso.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code de la consommation arts. L221-18 et suivants ; Loi Hamon du 17 mars 2014 ; Directive 2011/83/UE ; DGCCRF ; signal-conso.gouv.fr.
 - id: FRANCE-DIGI-B001
   category: france-digital-services
   question_type: factual_recall
@@ -1201,10 +1176,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — DINUM ; règlement eIDAS UE 910/2014 et eIDAS 2 du 11 avril 2024 ; franceconnect.gouv.fr ; numerique.gouv.fr.
+    - Synthetic factual entry (AI-authored). Standard reference points — DINUM ; règlement eIDAS UE 910/2014 et eIDAS 2 du 11 avril 2024 ; franceconnect.gouv.fr ; numerique.gouv.fr.
 - id: FRANCE-DIGI-B002
   category: france-digital-services
   question_type: factual_recall
@@ -1222,10 +1197,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 6 janvier 1978 modifiée ; Règlement UE 2016/679 (RGPD) ; CNIL (cnil.fr) ; CEPD/EDPB.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi du 6 janvier 1978 modifiée ; Règlement UE 2016/679 (RGPD) ; CNIL (cnil.fr) ; CEPD/EDPB.
 - id: FRANCE-DIGI-B003
   category: france-digital-services
   question_type: factual_recall
@@ -1243,10 +1218,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Règlement UE 2019/1157 ; Règlement UE 2252/2004 ; ANTS (ants.gouv.fr) ; service-public.fr ; eIDAS / eIDAS 2.
+    - Synthetic factual entry (AI-authored). Standard reference points — Règlement UE 2019/1157 ; Règlement UE 2252/2004 ; ANTS (ants.gouv.fr) ; service-public.fr ; eIDAS / eIDAS 2.
 - id: FRANCE-DIGI-B004
   category: france-digital-services
   question_type: factual_recall
@@ -1264,10 +1239,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Plan France Très Haut Débit (PFTHD, 2013) ; Code des postes et des communications électroniques ; ARCEP ; arcep.fr ; economie.gouv.fr/cge.
+    - Synthetic factual entry (AI-authored). Standard reference points — Plan France Très Haut Débit (PFTHD, 2013) ; Code des postes et des communications électroniques ; ARCEP ; arcep.fr ; economie.gouv.fr/cge.
 - id: FRANCE-DIGI-B005
   category: france-digital-services
   question_type: factual_recall
@@ -1285,10 +1260,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Loi du 5 mars 2014 ; Loi Avenir Professionnel du 5 septembre 2018 ; Code du travail arts. L6323-1 et suivants ; moncompteformation.gouv.fr ; France Compétences.
+    - Synthetic factual entry (AI-authored). Standard reference points — Loi du 5 mars 2014 ; Loi Avenir Professionnel du 5 septembre 2018 ; Code du travail arts. L6323-1 et suivants ; moncompteformation.gouv.fr ; France Compétences.
 - id: FRANCE-DIGI-B006
   category: france-digital-services
   question_type: factual_recall
@@ -1306,7 +1281,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts fr_FR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts fr_FR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Décret du 7 juillet 2009 instituant l''ANSSI ; Loi 2024-1039 du 30 octobre 2024 (transposition NIS2) ; ANSSI (ssi.gouv.fr) ; cybermalveillance.gouv.fr ; SGDSN.
+    - Synthetic factual entry (AI-authored). Standard reference points — Décret du 7 juillet 2009 instituant l''ANSSI ; Loi 2024-1039 du 30 octobre 2024 (transposition NIS2) ; ANSSI (ssi.gouv.fr) ; cybermalveillance.gouv.fr ; SGDSN.

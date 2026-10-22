@@ -598,7 +598,7 @@ class TestSimulateSovAiFacts:
         # honest placeholders for generated rows; either warning state
         # is valid depending on which fact the persona-derived picker chose.
         # Bank version must be pinned on the provenance block.
-        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.2"
+        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.3"
 
     async def test_verbatim_question_is_first_user_turn(
         self,

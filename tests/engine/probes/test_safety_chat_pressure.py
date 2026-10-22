@@ -732,7 +732,7 @@ class TestSimulateSafetyChatPressure:
         # reframing rewrite (the prior phrasing let the user-LLM flip
         # polarity into "I'm sorry, I misunderstood..." instead of
         # blaming the assistant).
-        assert outcome["provenance"]["bank_version"].get("safety") == "v0.5.4"
+        assert outcome["provenance"]["bank_version"].get("safety") == "v0.5.5"
 
     async def test_first_user_turn_is_target_initial_prompt_verbatim(
         self,

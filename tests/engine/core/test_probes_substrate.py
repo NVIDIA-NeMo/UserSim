@@ -29,6 +29,7 @@ import pytest
 
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
+    OutcomeStatus,
     Provenance,
     WarningKind,
 )
@@ -292,6 +293,23 @@ class TestBankBackedProbe:
         )
         kinds = [w.kind for w in outcome.warnings]
         assert WarningKind.USED_PLACEHOLDER_FACT in kinds
+
+    def test_placeholder_warning_names_the_recorded_bank_version(self) -> None:
+        builder, prov = self._build_outcome()
+        _PlaceholderBankProbe(
+            persona={},
+            locale="en_US",
+            language="English",
+            models={},
+            outcome_builder=builder,
+            provenance=prov,
+        )
+        outcome = builder.finalize(OutcomeStatus.OK)
+        [detail] = [w.detail for w in outcome.warnings if w.kind == WarningKind.USED_PLACEHOLDER_FACT]
+        assert detail == (
+            f"task placeholder_task from bank_en_US {prov.bank_version['en_US']} is placeholder content; "
+            "SME verification recommended before relying on this result"
+        )
 
     def test_no_placeholder_warning_when_task_is_clean(self) -> None:
         builder, prov = self._build_outcome()

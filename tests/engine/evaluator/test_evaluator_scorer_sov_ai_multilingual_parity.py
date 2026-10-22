@@ -78,7 +78,7 @@ def _trajectory(
     *,
     query_id: str = "Q-MEDS-001",
     locale: str = "pt_BR",
-    pinned_version: str = "v0.6.0",
+    pinned_version: str = "v0.6.1",
     n_assistant_turns: int = 1,
     persona: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -279,9 +279,9 @@ class TestHappyPath:
         assert out["query_difficulty"] == "easy"
         assert out["query_placeholder"] is False
         assert out["bank_id"] == "sample_v1"
-        assert out["bank_version"] == "v0.6.0"
+        assert out["bank_version"] == "v0.6.1"
         assert out["bank_version_mismatch"] is False
-        assert out["pinned_bank_version"] == "v0.6.0"
+        assert out["pinned_bank_version"] == "v0.6.1"
         assert out["status_proposal"] is True
         assert out["judge_alias"] == "judge_a"
         # Per-axis cells.
@@ -382,7 +382,7 @@ class TestErrorPaths:
         assert out["status_proposal"] is False
         # Bank metadata still pinned for downstream drift detection.
         assert out["bank_id"] == "sample_v1"
-        assert out["bank_version"] == "v0.6.0"
+        assert out["bank_version"] == "v0.6.1"
 
     async def test_bank_load_failure_returns_structured_error(self) -> None:
         traj = _trajectory()
@@ -560,7 +560,7 @@ class TestVersionMismatch:
         self,
         mock_bank_env: Path,
     ) -> None:
-        traj = _trajectory(pinned_version="v0.6.0")
+        traj = _trajectory(pinned_version="v0.6.1")
         with patch(
             "usersim.engine.evaluator.scorers.sov_ai_multilingual_parity.acall_llm",
             side_effect=_mock_judge_call(
@@ -603,7 +603,7 @@ class TestVersionMismatch:
             )
         assert out["bank_version_mismatch"] is True
         assert out["pinned_bank_version"] == "v0.0.5"
-        assert out["bank_version"] == "v0.6.0"
+        assert out["bank_version"] == "v0.6.1"
         # Drift does NOT block status — it's surfaced as informational.
         assert out["status_proposal"] is True
 

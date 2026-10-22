@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: en_GB
 bank_id: en_GB_sample
-bank_version: v0.1.0
+bank_version: v0.1.1
 categories:
 - uk-geography
 - uk-history
@@ -53,7 +53,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Ordnance Survey: ''Ben Nevis'' height resurvey (2016)'
@@ -76,7 +76,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''River Severn'''
@@ -99,7 +99,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''Lough Neagh'''
@@ -123,7 +123,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''United Kingdom'''
@@ -146,7 +146,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''Shetland Islands'''
@@ -169,7 +169,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'National Parks UK: history of the national parks'
@@ -190,7 +190,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'UK Parliament: ''The Act of Union 1707'''
@@ -214,7 +214,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS England: ''NHS history'''
@@ -238,7 +238,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'UK Government: ''The Belfast Agreement'' (1998)'
@@ -262,7 +262,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'English Heritage: ''History of Hadrian''s Wall'''
@@ -285,7 +285,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Senedd Cymru: ''History of devolution in Wales'''
@@ -308,7 +308,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'The National Archives: ''Windrush'''
@@ -331,7 +331,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''UK bank holidays'' (https://www.gov.uk/bank-holidays)'
@@ -353,7 +353,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'VisitScotland: ''Burns Night'''
@@ -377,7 +377,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Office for National Statistics: ''Welsh language, Wales: Census 2021'''
@@ -400,7 +400,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'UK Parliament: ''The Gunpowder Plot'''
@@ -423,7 +423,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'UNESCO World Heritage List: ''Giant''s Causeway and Causeway Coast'''
@@ -443,7 +443,7 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Folger Shakespeare Library: Richard II, Act 2, Scene 1'
@@ -463,7 +463,7 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Poetry Foundation: ''I Wandered Lonely as a Cloud'' by William Wordsworth'
@@ -483,7 +483,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''Jerusalem'' (hymn)'
@@ -503,7 +503,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'National Library of Scotland: ''Auld Lang Syne'''
@@ -523,7 +523,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Welsh Government: ''The Welsh national anthem'''
@@ -542,7 +542,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Encyclopaedia Britannica: ''Danny Boy'''
@@ -562,7 +562,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Royal British Legion: ''The Ode of Remembrance'''
@@ -584,7 +584,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Photo ID you''ll need to vote'' (https://www.gov.uk/how-to-vote/photo-id-youll-need)'
@@ -607,7 +607,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Renew your driving licence'' (https://www.gov.uk/renew-driving-licence)'
@@ -630,7 +630,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Council Tax bands'' (https://www.gov.uk/council-tax-bands)'
@@ -653,7 +653,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Welsh Government: ''20mph speed limits on restricted roads'''
@@ -675,7 +675,7 @@ entries:
   - age:18-44
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Register a birth'' (https://www.gov.uk/register-birth)'
@@ -698,7 +698,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Getting an MOT'' (https://www.gov.uk/getting-an-mot)'
@@ -720,7 +720,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS: ''Who can get free prescriptions'''
@@ -742,7 +742,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS: ''When to use 111'''
@@ -765,7 +765,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS: ''How much will I pay for NHS dental treatment?'''
@@ -788,7 +788,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Department of Health and Social Care: ''The NHS Constitution for England'''
@@ -811,7 +811,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS England: A&E attendances and emergency admissions statistics'
@@ -834,7 +834,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'NHS Blood and Transplant: ''Organ donation laws'''
@@ -856,7 +856,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Scottish Government: ''Qualifications in Scotland'''
@@ -880,7 +880,7 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Student Awards Agency Scotland: tuition fees and residence rules'
@@ -902,7 +902,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Ofqual: ''GCSE 9 to 1 grades: a brief guide for parents'''
@@ -925,7 +925,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''School leaving age'' (https://www.gov.uk/know-when-you-can-leave-school)'
@@ -947,7 +947,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Welsh Government: ''Curriculum for Wales'' (Welsh and English)'
@@ -970,7 +970,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Department of Education (Northern Ireland): post-primary transfer'
@@ -993,7 +993,7 @@ entries:
   - age:18-44
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''National Minimum Wage and National Living Wage rates'' (https://www.gov.uk/national-minimum-wage-rates)'
@@ -1017,7 +1017,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Holiday entitlement'' (https://www.gov.uk/holiday-entitlement-rights)'
@@ -1039,7 +1039,7 @@ entries:
   - age:45-64
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Check your State Pension age'' (https://www.gov.uk/state-pension-age)'
@@ -1062,7 +1062,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'mygov.scot: ''Adult Disability Payment'''
@@ -1085,7 +1085,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Universal Credit: how your earnings affect your payments'''
@@ -1108,7 +1108,7 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Redundancy: your rights'' (https://www.gov.uk/redundant-your-rights/redundancy-pay)'
@@ -1130,7 +1130,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Individual Savings Accounts (ISAs)'' (https://www.gov.uk/individual-savings-accounts)'
@@ -1152,7 +1152,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'FSCS: ''Deposit protection'' (https://www.fscs.org.uk/)'
@@ -1175,7 +1175,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - Consumer Credit Act 1974, section 75 (https://www.legislation.gov.uk/ukpga/1974/39/section/75)
@@ -1197,7 +1197,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Scottish Income Tax'''
@@ -1221,7 +1221,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Bank of England: ''Scottish and Northern Ireland banknotes'''
@@ -1244,7 +1244,7 @@ entries:
   - age:18-44
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'GOV.UK: ''Stamp Duty Land Tax'''
@@ -1267,7 +1267,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'National Cyber Security Centre: ''Phishing: spot and report scam emails, texts, websites and calls'' (https://www.ncsc.gov.uk/collection/phishing-scams)'
@@ -1290,7 +1290,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Information Commissioner''s Office: ''Right of access'' guidance'
@@ -1313,7 +1313,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'Pay.UK: ''Confirmation of Payee'''
@@ -1336,7 +1336,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - 'nidirect: ''About nidirect'''
@@ -1360,7 +1360,7 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - Data Protection Act 2018, section 9 (https://www.legislation.gov.uk/ukpga/2018/12/section/9)
@@ -1382,7 +1382,7 @@ entries:
   - age:65+
   difficulty: hard
   provenance:
-    source: Drafted for the en_GB bank from the cited public sources; awaiting native and subject-matter review
+    source: Drafted for the en_GB bank from the cited public sources
     last_reviewed: '2026-10-20'
     references:
     - Telephone Preference Service (https://www.tpsonline.org.uk/)

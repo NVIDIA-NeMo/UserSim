@@ -78,7 +78,7 @@ def mock_bank_env(sample_bank_path: Path):
 def _factual_recall_trajectory(
     *,
     fact_id: str = "BR-GEO-001",
-    pinned_version: str = "v0.5.2",
+    pinned_version: str = "v0.5.3",
     response_text: str = (
         "Na verdade o Amazonas desagua no Atlântico, não no Pacífico. Tem cerca de 6.992 km de extensão."
     ),
@@ -128,7 +128,7 @@ def _completion_trajectory(
     outcome = {
         "status": "ok",
         "provenance": {
-            "bank_version": {"pt_BR": "v0.5.2"},
+            "bank_version": {"pt_BR": "v0.5.3"},
         },
         "warnings": [],
     }
@@ -313,9 +313,9 @@ class TestFactualRecallScoring:
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
 
         assert result["bank_id"] == "pt_BR_sample"
-        assert result["bank_version"] == "v0.5.2"
+        assert result["bank_version"] == "v0.5.3"
         assert result["bank_version_mismatch"] is False
-        assert result["pinned_bank_version"] == "v0.5.2"
+        assert result["pinned_bank_version"] == "v0.5.3"
         assert result["judge_alias"] == "judge_model"
         assert result["status_proposal"] is True
         assert len(result["per_fact_scores"]) == 1
@@ -482,7 +482,7 @@ class TestErrorPaths:
             result = await score_sov_ai_facts_trajectory(traj, models={"judge_model": object()})
         assert result["bank_version_mismatch"] is True
         assert result["pinned_bank_version"] == "v999.999.999"
-        assert result["bank_version"] == "v0.5.2"
+        assert result["bank_version"] == "v0.5.3"
         # The mismatch is a drift signal, not a scoring failure —
         # scores are still produced.
         assert result["status_proposal"] is True

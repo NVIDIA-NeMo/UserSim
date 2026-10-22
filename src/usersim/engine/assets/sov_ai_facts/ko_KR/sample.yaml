@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: ko_KR
 bank_id: ko_KR_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - korea-geography
 - korea-history
@@ -48,10 +48,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-GEO-002
   category: korea-geography
   question_type: factual_recall
@@ -67,10 +66,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-HIS-001
   category: korea-history
   question_type: factual_recall
@@ -86,10 +84,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-HIS-002
   category: korea-history
   question_type: factual_recall
@@ -105,10 +102,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-CUL-001
   category: korea-culture
   question_type: factual_recall
@@ -124,10 +120,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-CUL-002
   category: korea-culture
   question_type: factual_recall
@@ -143,10 +138,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-PAM-001
   category: korea-poetry-and-music
   question_type: completion
@@ -161,10 +155,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-PAM-002
   category: korea-poetry-and-music
   question_type: factual_recall
@@ -180,10 +173,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-SVC-001
   category: korea-public-services
   question_type: factual_recall
@@ -199,10 +191,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KR-SVC-002
   category: korea-public-services
   question_type: factual_recall
@@ -217,10 +208,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: South Korea beta review of original sample entry
+    source: Original UserSim sample entry (South Korea)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: KOREA-GEOG-B003
   category: korea-geography
   question_type: factual_recall
@@ -238,10 +228,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 지방자치법 ; 행정안전부 (mois.go.kr); 통계청 (kostat.go.kr); 강원특별자치도 설치 등에 관한 특별법 ; 전북특별자치도 설치 등에 관한 특별법.
+    - Synthetic factual entry (AI-authored). Standard reference points — 지방자치법 ; 행정안전부 (mois.go.kr); 통계청 (kostat.go.kr); 강원특별자치도 설치 등에 관한 특별법 ; 전북특별자치도 설치 등에 관한 특별법.
 - id: KOREA-GEOG-B004
   category: korea-geography
   question_type: factual_recall
@@ -258,10 +248,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국토교통부 (molit.go.kr); 국토지리정보원 (ngii.go.kr); 환경부 한강유역환경청.
+    - Synthetic factual entry (AI-authored). Standard reference points — 국토교통부 (molit.go.kr); 국토지리정보원 (ngii.go.kr); 환경부 한강유역환경청.
 - id: KOREA-GEOG-B005
   category: korea-geography
   question_type: factual_recall
@@ -278,10 +268,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 외교부 (mofa.go.kr); 국방부 (mnd.go.kr); 통일부 (unikorea.go.kr); SCAPIN-677(1946); 정전협정(1953).
+    - Synthetic factual entry (AI-authored). Standard reference points — 외교부 (mofa.go.kr); 국방부 (mnd.go.kr); 통일부 (unikorea.go.kr); SCAPIN-677(1946); 정전협정(1953).
 - id: KOREA-GEOG-B006
   category: korea-geography
   question_type: factual_recall
@@ -317,10 +307,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국방부 (mnd.go.kr); 국가보훈부 (mpva.go.kr); 국가기록원 (archives.go.kr); 정전협정(1953).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국방부 (mnd.go.kr); 국가보훈부 (mpva.go.kr); 국가기록원 (archives.go.kr); 정전협정(1953).
 - id: KOREA-HIST-B004
   category: korea-history
   question_type: factual_recall
@@ -338,10 +328,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국사편찬위원회 (history.go.kr); 국립국어원 (korean.go.kr); 훈민정음 해례본(국보 제70호); 문화재청 (cha.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국사편찬위원회 (history.go.kr); 국립국어원 (korean.go.kr); 훈민정음 해례본(국보 제70호); 문화재청 (cha.go.kr).
 - id: KOREA-HIST-B005
   category: korea-history
   question_type: factual_recall
@@ -392,10 +382,10 @@ entries:
   - education:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 기미독립선언서 (1919); 국가기록원 (archives.go.kr); 독립기념관 (i815.or.kr); 국립중앙도서관.
+    - Synthetic completion entry (AI-authored). Canonical sources — 기미독립선언서 (1919); 국가기록원 (archives.go.kr); 독립기념관 (i815.or.kr); 국립중앙도서관.
 - id: KOREA-CULT-B003
   category: korea-culture
   question_type: factual_recall
@@ -412,10 +402,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 관공서의 공휴일에 관한 규정 ; 공휴일에 관한 법률(2021); 인사혁신처 (mpm.go.kr); 법제처 (moleg.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 관공서의 공휴일에 관한 규정 ; 공휴일에 관한 법률(2021); 인사혁신처 (mpm.go.kr); 법제처 (moleg.go.kr).
 - id: KOREA-CULT-B004
   category: korea-culture
   question_type: factual_recall
@@ -432,10 +422,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국가유산청 (cha.go.kr); 한국문화재재단 (chf.or.kr); 국립민속박물관 (nfm.go.kr); 문화체육관광부 (mcst.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국가유산청 (cha.go.kr); 한국문화재재단 (chf.or.kr); 국립민속박물관 (nfm.go.kr); 문화체육관광부 (mcst.go.kr).
 - id: KOREA-CULT-B005
   category: korea-culture
   question_type: factual_recall
@@ -453,10 +443,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 한국콘텐츠진흥원 (kocca.kr); 문화체육관광부 (mcst.go.kr); 각 엔터테인먼트사 IR 자료.
+    - Synthetic factual entry (AI-authored). Standard reference points — 한국콘텐츠진흥원 (kocca.kr); 문화체육관광부 (mcst.go.kr); 각 엔터테인먼트사 IR 자료.
 - id: KOREA-CULT-B006
   category: korea-culture
   question_type: completion
@@ -502,10 +492,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 김소월, 「진달래꽃」, 『개벽』 25호 (1922.7); 시집 『진달래꽃』 (매문사, 1925); 등록문화재 제470호.
+    - Synthetic completion entry (AI-authored). Canonical sources — 김소월, 「진달래꽃」, 『개벽』 25호 (1922.7); 시집 『진달래꽃』 (매문사, 1925); 등록문화재 제470호.
 - id: KOREA-POET-B003
   category: korea-poetry-and-music
   question_type: completion
@@ -545,10 +535,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 윤동주, 「서시」(1941); 시집 『하늘과 바람과 별과 시』(정음사, 1948); 윤동주문학관 ; 연세대 윤동주기념관.
+    - Synthetic completion entry (AI-authored). Canonical sources — 윤동주, 「서시」(1941); 시집 『하늘과 바람과 별과 시』(정음사, 1948); 윤동주문학관 ; 연세대 윤동주기념관.
 - id: KOREA-POET-B004
   category: korea-poetry-and-music
   question_type: completion
@@ -598,10 +588,10 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 「애국가」 표준 가사 (1955); 「국기에 관한 법률」; 국가 등 행사 의식에 관한 규정 ; 안익태기념재단 ; 국립국악원.
+    - Synthetic completion entry (AI-authored). Canonical sources — 「애국가」 표준 가사 (1955); 「국기에 관한 법률」; 국가 등 행사 의식에 관한 규정 ; 안익태기념재단 ; 국립국악원.
 - id: KOREA-POET-B005
   category: korea-poetry-and-music
   question_type: completion
@@ -643,10 +633,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 한용운, 「님의 침묵」 시집 『님의 침묵』 (회동서관, 1926); 만해문학관 (강원도 인제); 심우장 (서울 성북구).
+    - Synthetic completion entry (AI-authored). Canonical sources — 한용운, 「님의 침묵」 시집 『님의 침묵』 (회동서관, 1926); 만해문학관 (강원도 인제); 심우장 (서울 성북구).
 - id: KOREA-POET-B006
   category: korea-poetry-and-music
   question_type: completion
@@ -713,10 +703,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 정지용, 「향수」, 『조선지광』 65호 (1927.3); 『정지용 시집』 (시문학사, 1935); 정지용문학관 (충북 옥천).
+    - Synthetic completion entry (AI-authored). Canonical sources — 정지용, 「향수」, 『조선지광』 65호 (1927.3); 『정지용 시집』 (시문학사, 1935); 정지용문학관 (충북 옥천).
 - id: KOREA-PUBL-B003
   category: korea-public-services
   question_type: factual_recall
@@ -733,10 +723,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 소방청 (fire.go.kr); 경찰청 (police.go.kr); 국민권익위원회 (acrc.go.kr); e-gen.or.kr.
+    - Synthetic factual entry (AI-authored). Standard reference points — 소방청 (fire.go.kr); 경찰청 (police.go.kr); 국민권익위원회 (acrc.go.kr); e-gen.or.kr.
 - id: KOREA-PUBL-B004
   category: korea-public-services
   question_type: factual_recall
@@ -753,10 +743,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 우정사업본부 (kostat.go.kr ; epost.kr); 정부24 (gov.kr); 도로교통공단 (safedriving.or.kr); 행정안전부 (mois.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 우정사업본부 (kostat.go.kr ; epost.kr); 정부24 (gov.kr); 도로교통공단 (safedriving.or.kr); 행정안전부 (mois.go.kr).
 - id: KOREA-PUBL-B005
   category: korea-public-services
   question_type: factual_recall
@@ -774,10 +764,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 대한민국 헌법 제39조 ; 병역법 ; 국방부 (mnd.go.kr); 병무청 (mma.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 대한민국 헌법 제39조 ; 병역법 ; 국방부 (mnd.go.kr); 병무청 (mma.go.kr).
 - id: KOREA-PUBL-B006
   category: korea-public-services
   question_type: completion
@@ -826,10 +816,10 @@ entries:
   - education:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 대한민국 헌법 (1987년 개정, 1988년 시행); 국가법령정보센터 (law.go.kr); 헌법재판소 (ccourt.go.kr).
+    - Synthetic completion entry (AI-authored). Canonical sources — 대한민국 헌법 (1987년 개정, 1988년 시행); 국가법령정보센터 (law.go.kr); 헌법재판소 (ccourt.go.kr).
 - id: KOREA-HEAL-B001
   category: korea-health-systems
   question_type: factual_recall
@@ -846,10 +836,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국민건강보험법 ; 국민건강보험공단 (nhis.or.kr); 건강보험심사평가원 (hira.or.kr); 보건복지부 (mohw.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국민건강보험법 ; 국민건강보험공단 (nhis.or.kr); 건강보험심사평가원 (hira.or.kr); 보건복지부 (mohw.go.kr).
 - id: KOREA-HEAL-B002
   category: korea-health-systems
   question_type: factual_recall
@@ -866,10 +856,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국민건강보험법 ; 의료법 ; 보건복지부 (mohw.go.kr); 국민건강보험공단 (nhis.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국민건강보험법 ; 의료법 ; 보건복지부 (mohw.go.kr); 국민건강보험공단 (nhis.or.kr).
 - id: KOREA-HEAL-B003
   category: korea-health-systems
   question_type: factual_recall
@@ -886,10 +876,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 노인장기요양보험법(2007); 보건복지부 (mohw.go.kr); 국민건강보험공단 (nhis.or.kr); 노인장기요양보험 (longtermcare.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 노인장기요양보험법(2007); 보건복지부 (mohw.go.kr); 국민건강보험공단 (nhis.or.kr); 노인장기요양보험 (longtermcare.or.kr).
 - id: KOREA-HEAL-B004
   category: korea-health-systems
   question_type: factual_recall
@@ -906,10 +896,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 모자보건법 ; 저출산·고령사회기본법 ; 보건복지부 (mohw.go.kr); 저출산·고령사회위원회 (betterfuture.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 모자보건법 ; 저출산·고령사회기본법 ; 보건복지부 (mohw.go.kr); 저출산·고령사회위원회 (betterfuture.go.kr).
 - id: KOREA-HEAL-B005
   category: korea-health-systems
   question_type: factual_recall
@@ -927,10 +917,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 약사법 ; 의료법 ; 식품의약품안전처 (mfds.go.kr); 보건복지부 (mohw.go.kr); 건강보험심사평가원 (hira.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 약사법 ; 의료법 ; 식품의약품안전처 (mfds.go.kr); 보건복지부 (mohw.go.kr); 건강보험심사평가원 (hira.or.kr).
 - id: KOREA-HEAL-B006
   category: korea-health-systems
   question_type: factual_recall
@@ -947,10 +937,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 감염병의 예방 및 관리에 관한 법률 ; 질병관리청 (kdca.go.kr); 보건복지부 (mohw.go.kr); 식품의약품안전처 (mfds.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 감염병의 예방 및 관리에 관한 법률 ; 질병관리청 (kdca.go.kr); 보건복지부 (mohw.go.kr); 식품의약품안전처 (mfds.go.kr).
 - id: KOREA-EDUC-B001
   category: korea-education
   question_type: factual_recall
@@ -968,10 +958,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 교육기본법 ; 초·중등교육법 ; 고등교육법 ; 교육부 (moe.go.kr); 한국교육개발원 (kedi.re.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 교육기본법 ; 초·중등교육법 ; 고등교육법 ; 교육부 (moe.go.kr); 한국교육개발원 (kedi.re.kr).
 - id: KOREA-EDUC-B002
   category: korea-education
   question_type: factual_recall
@@ -989,10 +979,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 한국교육과정평가원 (kice.re.kr); 교육부 (moe.go.kr); 한국대학교육협의회 대입정보포털 (adiga.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 한국교육과정평가원 (kice.re.kr); 교육부 (moe.go.kr); 한국대학교육협의회 대입정보포털 (adiga.kr).
 - id: KOREA-EDUC-B003
   category: korea-education
   question_type: factual_recall
@@ -1009,10 +999,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 고등교육법 ; 교육부 (moe.go.kr); 한국장학재단 (kosaf.go.kr); 대학알리미 (academyinfo.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 고등교육법 ; 교육부 (moe.go.kr); 한국장학재단 (kosaf.go.kr); 대학알리미 (academyinfo.go.kr).
 - id: KOREA-EDUC-B004
   category: korea-education
   question_type: factual_recall
@@ -1030,10 +1020,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 학원의 설립·운영 및 과외교습에 관한 법률(학원법, 1989); 통계청 사교육비조사 ; EBS (ebs.co.kr); EBSi (ebsi.co.kr); 교육부 (moe.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 학원의 설립·운영 및 과외교습에 관한 법률(학원법, 1989); 통계청 사교육비조사 ; EBS (ebs.co.kr); EBSi (ebsi.co.kr); 교육부 (moe.go.kr).
 - id: KOREA-EDUC-B005
   category: korea-education
   question_type: factual_recall
@@ -1050,10 +1040,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 학교폭력 예방 및 대책에 관한 법률(학폭법, 2004); 교육부 (moe.go.kr); 117 학교폭력신고센터.
+    - Synthetic factual entry (AI-authored). Standard reference points — 학교폭력 예방 및 대책에 관한 법률(학폭법, 2004); 교육부 (moe.go.kr); 117 학교폭력신고센터.
 - id: KOREA-EDUC-B006
   category: korea-education
   question_type: factual_recall
@@ -1071,10 +1061,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 교원자격검정령 ; 교육공무원법 ; 교육부 (moe.go.kr); 한국교육개발원 (kedi.re.kr); 각 시·도교육청 임용시험 공고.
+    - Synthetic factual entry (AI-authored). Standard reference points — 교원자격검정령 ; 교육공무원법 ; 교육부 (moe.go.kr); 한국교육개발원 (kedi.re.kr); 각 시·도교육청 임용시험 공고.
 - id: KOREA-LABO-B001
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1091,10 +1081,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 최저임금법(1986); 고용노동부 (moel.go.kr); 최저임금위원회 (minimumwage.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 최저임금법(1986); 고용노동부 (moel.go.kr); 최저임금위원회 (minimumwage.go.kr).
 - id: KOREA-LABO-B002
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1111,10 +1101,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 근로기준법 ; 근로자퇴직급여 보장법 ; 고용노동부 (moel.go.kr); 1350 고용노동부 고객상담센터.
+    - Synthetic factual entry (AI-authored). Standard reference points — 근로기준법 ; 근로자퇴직급여 보장법 ; 고용노동부 (moel.go.kr); 1350 고용노동부 고객상담센터.
 - id: KOREA-LABO-B003
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1131,10 +1121,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 국민건강보험법 ; 국민연금법 ; 고용보험법 ; 산업재해보상보험법 ; 국민건강보험공단 (nhis.or.kr); 국민연금공단 (nps.or.kr); 근로복지공단 (comwel.or.kr); 고용노동부 (moel.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 국민건강보험법 ; 국민연금법 ; 고용보험법 ; 산업재해보상보험법 ; 국민건강보험공단 (nhis.or.kr); 국민연금공단 (nps.or.kr); 근로복지공단 (comwel.or.kr); 고용노동부 (moel.go.kr).
 - id: KOREA-LABO-B004
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1151,10 +1141,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 남녀고용평등과 일·가정 양립 지원에 관한 법률 ; 고용보험법 ; 근로기준법 ; 고용노동부 (moel.go.kr); 고용보험 (ei.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 남녀고용평등과 일·가정 양립 지원에 관한 법률 ; 고용보험법 ; 근로기준법 ; 고용노동부 (moel.go.kr); 고용보험 (ei.go.kr).
 - id: KOREA-LABO-B005
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1172,10 +1162,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 고용보험법 ; 고용노동부 (moel.go.kr); 고용보험 (ei.go.kr); 워크넷 (work.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 고용보험법 ; 고용노동부 (moel.go.kr); 고용보험 (ei.go.kr); 워크넷 (work.go.kr).
 - id: KOREA-LABO-B006
   category: korea-labor-and-benefits
   question_type: factual_recall
@@ -1193,10 +1183,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 헌법 제33조 ; 노동조합 및 노동관계조정법(노조법, 1953); 공무원노조법 ; 교원노조법 ; 고용노동부 (moel.go.kr); 노동위원회 (nlrc.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 헌법 제33조 ; 노동조합 및 노동관계조정법(노조법, 1953); 공무원노조법 ; 교원노조법 ; 고용노동부 (moel.go.kr); 노동위원회 (nlrc.go.kr).
 - id: KOREA-FINA-B001
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1213,10 +1203,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 부가가치세법(1976); 국세청 (nts.go.kr); 홈택스 (hometax.go.kr); 기획재정부 (moef.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 부가가치세법(1976); 국세청 (nts.go.kr); 홈택스 (hometax.go.kr); 기획재정부 (moef.go.kr).
 - id: KOREA-FINA-B002
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1234,10 +1224,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 소득세법 ; 국세청 (nts.go.kr); 홈택스 (hometax.go.kr); 기획재정부 (moef.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 소득세법 ; 국세청 (nts.go.kr); 홈택스 (hometax.go.kr); 기획재정부 (moef.go.kr).
 - id: KOREA-FINA-B003
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1254,10 +1244,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 예금자보호법(1995); 예금보험공사 (kdic.or.kr); 금융위원회 (fsc.go.kr); 금융감독원 (fss.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 예금자보호법(1995); 예금보험공사 (kdic.or.kr); 금융위원회 (fsc.go.kr); 금융감독원 (fss.or.kr).
 - id: KOREA-FINA-B004
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1275,10 +1265,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 주택공급에 관한 규칙 ; 국토교통부 (molit.go.kr); 한국부동산원 청약Home (applyhome.co.kr); 주택법.
+    - Synthetic factual entry (AI-authored). Standard reference points — 주택공급에 관한 규칙 ; 국토교통부 (molit.go.kr); 한국부동산원 청약Home (applyhome.co.kr); 주택법.
 - id: KOREA-FINA-B005
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1296,10 +1286,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 조세특례제한법 ; 금융위원회 (fsc.go.kr); 기획재정부 (moef.go.kr); 금융감독원 (fss.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 조세특례제한법 ; 금융위원회 (fsc.go.kr); 기획재정부 (moef.go.kr); 금융감독원 (fss.or.kr).
 - id: KOREA-FINA-B006
   category: korea-finance-and-consumer
   question_type: factual_recall
@@ -1316,10 +1306,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 채무자 회생 및 파산에 관한 법률 ; 서민의 금융생활 지원에 관한 법률(2002); 신용회복위원회 (ccrs.or.kr); 금융감독원 (fss.or.kr); 회생법원 (slb.scourt.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 채무자 회생 및 파산에 관한 법률 ; 서민의 금융생활 지원에 관한 법률(2002); 신용회복위원회 (ccrs.or.kr); 금융감독원 (fss.or.kr); 회생법원 (slb.scourt.go.kr).
 - id: KOREA-DIGI-B001
   category: korea-digital-services
   question_type: factual_recall
@@ -1337,10 +1327,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 전자서명법(2020 개정); 전자정부법 ; 행정안전부 (mois.go.kr); 과학기술정보통신부 (msit.go.kr); 한국인터넷진흥원 (KISA, kisa.or.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 전자서명법(2020 개정); 전자정부법 ; 행정안전부 (mois.go.kr); 과학기술정보통신부 (msit.go.kr); 한국인터넷진흥원 (KISA, kisa.or.kr).
 - id: KOREA-DIGI-B002
   category: korea-digital-services
   question_type: factual_recall
@@ -1357,10 +1347,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 개인정보보호법(2011, 2020·2023 개정); 개인정보보호위원회 (pipc.go.kr); 한국인터넷진흥원 KISA (kisa.or.kr); EU GDPR(참고).
+    - Synthetic factual entry (AI-authored). Standard reference points — 개인정보보호법(2011, 2020·2023 개정); 개인정보보호위원회 (pipc.go.kr); 한국인터넷진흥원 KISA (kisa.or.kr); EU GDPR(참고).
 - id: KOREA-DIGI-B003
   category: korea-digital-services
   question_type: factual_recall
@@ -1378,10 +1368,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 전기통신사업법 ; 과학기술정보통신부 (msit.go.kr); 방송통신위원회 (kcc.go.kr); 한국통신사업자연합회 (KTOA); 통신3사 공식 자료.
+    - Synthetic factual entry (AI-authored). Standard reference points — 전기통신사업법 ; 과학기술정보통신부 (msit.go.kr); 방송통신위원회 (kcc.go.kr); 한국통신사업자연합회 (KTOA); 통신3사 공식 자료.
 - id: KOREA-DIGI-B004
   category: korea-digital-services
   question_type: factual_recall
@@ -1398,10 +1388,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 전기통신금융사기 피해방지 및 피해금 환급에 관한 특별법(2011); 전자금융거래법 ; 금융감독원 (fss.or.kr) 1332; 경찰청 112; 사이버범죄 신고시스템 (ecrm.cyber.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 전기통신금융사기 피해방지 및 피해금 환급에 관한 특별법(2011); 전자금융거래법 ; 금융감독원 (fss.or.kr) 1332; 경찰청 112; 사이버범죄 신고시스템 (ecrm.cyber.go.kr).
 - id: KOREA-DIGI-B005
   category: korea-digital-services
   question_type: factual_recall
@@ -1419,10 +1409,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 정보통신망법 ; 개인정보보호법 ; 전기통신사업법 ; 통신비밀보호법 ; 카카오 IR (kakaocorp.com); 개인정보보호위원회 (pipc.go.kr); 한국인터넷진흥원 (KISA).
+    - Synthetic factual entry (AI-authored). Standard reference points — 정보통신망법 ; 개인정보보호법 ; 전기통신사업법 ; 통신비밀보호법 ; 카카오 IR (kakaocorp.com); 개인정보보호위원회 (pipc.go.kr); 한국인터넷진흥원 (KISA).
 - id: KOREA-DIGI-B006
   category: korea-digital-services
   question_type: factual_recall
@@ -1439,7 +1429,7 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ko_KR, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ko_KR, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 전자정부법 ; 행정안전부 (mois.go.kr); 정부24 (gov.kr); 국세청 (nts.go.kr); 디지털플랫폼정부위원회 (digital.go.kr).
+    - Synthetic factual entry (AI-authored). Standard reference points — 전자정부법 ; 행정안전부 (mois.go.kr); 정부24 (gov.kr); 국세청 (nts.go.kr); 디지털플랫폼정부위원회 (digital.go.kr).
