@@ -21,10 +21,9 @@ single institution.
 
 At a glance:
 
-<img src="financial_services_probe.jpg" width="800">
+<img src="../../../../../docs/images/financial_services_probe.jpg" width="800">
 
-The diagram describes the approach, not current coverage. These markets are
-built today:
+These markets ship:
 
 - `en_US`: 4 institutions, 851 documents, 70 verifiable tasks.
 - `en_IN`: 5 institutions, 1066 documents, 60 tasks.
