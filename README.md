@@ -138,7 +138,7 @@ Python 3.10+, in a virtual environment.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install "usersim>=0.2.0rc1"      # in a uv project: uv add "usersim>=0.2.0rc1"
+pip install "usersim>=0.2.0"      # in a uv project: uv add "usersim>=0.2.0"
 
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke
