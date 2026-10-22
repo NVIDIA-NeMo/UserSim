@@ -293,7 +293,9 @@ Two conventions matter more than they look:
 You do not need to modify this repository. Probes, scorers, asset domains,
 execution backends, capabilities, and CLI subcommands are all discovered
 through entry points; see the seven groups in
-`src/usersim/engine/core/_extensions.py`.
+`src/usersim/engine/core/_extensions.py`. Give a probe or scorer a name no
+built-in uses, since registering one under a taken name replaces the earlier
+one.
 
 To check your extension satisfies the contract:
 

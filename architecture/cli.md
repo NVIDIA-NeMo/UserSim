@@ -11,7 +11,7 @@ implements; see [plugins.md](plugins.md).
 |---|:---:|---|
 | `panel` | no | Sample personas into a parquet that fixes a run's locales and per-locale row counts |
 | `simulate` | yes | Run the conversation simulator, write a partitioned trajectory dataset |
-| `eval` | yes | Score trajectories with the judge ensemble and deterministic scorers |
+| `eval` | yes | Score trajectories with an LLM judge (or ensemble) and the scorers you name |
 | `rescore` | no | Recompute deterministic scorers on an existing evaluation parquet |
 | `select` | no | Curate trajectories into an exportable dataset |
 | `report` | no | Render the capability dashboard from trajectory + evaluation parquets |
@@ -19,7 +19,7 @@ implements; see [plugins.md](plugins.md).
 | `validate-assets` | no | Vet a generated bank offline |
 | `evaluate-assets` | yes | Judge-scored quality scorecard for a generated bank |
 | `smoke` | no | Offline end-to-end verification |
-| `setup-ngc` | no | Install the NGC CLI into the project venv |
+| `setup-ngc` | no | Install the NGC CLI into the project venv (Linux) |
 
 The commands that make no LLM calls are free and work offline. `gen-assets`
 and `evaluate-assets` are live, paid steps and are not needed to use the
@@ -39,11 +39,14 @@ alongside it for those providers; `--models` points at your own file.
 
 Three aliases are required for a simulation run: `user_model`,
 `assistant_model` and `judge_model`. Two more are used when a run reaches for
-them: `api_response_model` for tool-calling probes and `summary_model` for
-context compression. `eval` requires `evaluator_model`, kept distinct from
-`judge_model` so the in-sim gate and the post-hoc rubric can be sized
-independently. A missing required alias fails at config construction, not
-mid-run.
+them: `api_response_model` for tool-calling probes and `summary_model` for the
+loop's light work: summaries for context management, early-stop checks, the
+pressure probe's capitulation check, and translating India-variant openings
+and `financial_services` search queries.
+Without it, `user_model` does that work. `eval` requires `evaluator_model`,
+kept distinct from `judge_model` so the in-sim gate and the post-hoc rubric
+can be sized independently. A missing required alias fails at config
+construction, not mid-run.
 
 `usersim.cli.model_catalog` holds per-model inference defaults: temperature,
 top_p, max_tokens, and any model-family-specific `extra_body`. A TOML row

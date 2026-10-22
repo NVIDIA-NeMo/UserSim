@@ -18,7 +18,8 @@ class OpenEndedProbe(BaseProbe):
 ```
 
 The class *is* the registration; there is no separate label table to edit. A
-duplicate label is rejected rather than silently overwriting.
+second class registered under a taken label replaces the first, so give each
+probe a label of its own.
 
 Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
 (`core/probes.py`); the registry imports them the first time a probe is
@@ -44,12 +45,12 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` (an extension probe keeps per-row data in `state.metadata`) |
 
-Anything a probe does not override inherits a default, which is what keeps a
-new probe to roughly fifty lines.
+Anything a probe does not override inherits a default, so a new probe declares
+only what is specific to it.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name appears in
@@ -77,8 +78,8 @@ Six mixins cover the shapes that recur, all in `core/probes.py`:
 - **`BankReframingMixin`**: turn 1 from a bank, then reframed under pressure.
 - **`CustomTurn1InstructionMixin`**: turn 1 generated from an instruction
   rather than a bank.
-- **`ToolCallingMixin`**: the assistant is offered tools; the probe checks
-  call/clarify/refuse behaviour.
+- **`ToolCallingMixin`**: the assistant is offered tools, and the conversation
+  cannot stop early until it has used one.
 - **`ToolExecutionMixin`**: tool calls are actually executed against a mock
   environment.
 - **`AgenticMixin`**: bank-seeded, tool-executing, multi-step.

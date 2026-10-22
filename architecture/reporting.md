@@ -12,7 +12,7 @@ is the evidence, and what should I inspect next?" Each cell carries an
 evidence state, a score, a threshold, and links to the lowest-scoring
 trajectories behind it.
 
-A capability is defined in [`usersim.taxonomy`](overview.md#taxonomy), not
+A capability is defined in [`usersim.taxonomy`](overview.md#the-data-flows-one-way), not
 here: reporting reads definitions, it does not own them.
 
 ## Artifacts

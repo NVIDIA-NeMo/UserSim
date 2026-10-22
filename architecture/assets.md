@@ -65,11 +65,12 @@ trajectory parquet alongside the scores.
 
 Building a locale bank is a two-stage process, generate then review, and the
 framework tracks which stage each entry is at so a scorecard's evidence base
-stays traceable. When a native reviewer signs off on an entry, flip the flag
-and every later run reflects it.
+stays traceable. Once a native speaker or domain expert has verified an entry,
+set `placeholder: false` and every later run reflects it.
 
-Review status is per entry rather than per bank. The `general` and
-`sov_ai_dynamic` banks carry reviewed content throughout; `safety_agentic`,
-`safety_chat_pressure` and `sov_ai_multilingual_parity` mix reviewed entries
-with entries still marked; the finance, sovereign-AI fact and health banks are
-awaiting review. A bank's own YAML is the authority on which is which.
+Review status is per entry rather than per bank. The `sov_ai_dynamic`
+taxonomies are reviewed for nine locales, with the `en_GB` and `de_DE`
+taxonomies flagged; `safety_agentic`, `safety_chat_pressure` and
+`sov_ai_multilingual_parity` mix reviewed and flagged entries; the finance,
+sovereign-AI fact and health banks and the identity spec are flagged. A bank's
+own YAML is the authority on which is which.

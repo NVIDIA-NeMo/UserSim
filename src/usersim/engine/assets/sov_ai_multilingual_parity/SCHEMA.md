@@ -32,8 +32,7 @@ identifier. Per-locale separate authoring would not give us this.
 ```
 assets/sov_ai_multilingual_parity/
 ├── SCHEMA.md          # this file
-├── sample.yaml        # placeholder bank (see §Placeholder discipline)
-└── v1.yaml            # reviewer-authored bank (future)
+└── sample.yaml        # placeholder bank (see §Placeholder discipline)
 ```
 
 One bank per file. Multiple banks (e.g., a public bank + a

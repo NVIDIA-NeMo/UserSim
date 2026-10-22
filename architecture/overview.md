@@ -10,20 +10,22 @@ touching the others, which is the whole design in one sentence.
 **Who** comes from [Nemotron-Personas](https://huggingface.co/collections/nvidia/nemotron-personas):
 synthetic individuals grounded in real census distributions, sampled from the
 extended NGC version that carries the OCEAN traits, and downloaded once per
-locale. Swap in your own population source and everything downstream keeps
-working.
+locale. Every later layer reads the persona from the row, so stored rows
+(`usersim simulate --inputs`) bring the same people back under any setup.
 
-**How** is behaviour. A persona's OCEAN traits become an interaction style, a
-disclosure pattern, and a tendency to push back when the assistant
-underperforms. This is what separates a simulated population from a prompt
-that says "act as a user."
+**How** is behaviour. A persona's OCEAN traits become an interaction style and
+a tendency to push back when the assistant underperforms, and each persona
+draws a disclosure pattern (everything up front, or a little at a time). This
+is what separates a simulated population from a prompt that says "act as a
+user."
 
 **What** is a probe: the interaction pattern, the opening turn, and the
-definition of failure. Fourteen ship; adding one is roughly fifty lines.
+definition of failure. Fourteen ship, and a new one inherits the conversation
+loop, so it declares only what is specific to it.
 
 **How well** is the evaluator, and it runs *after* simulation rather than
 inside it. Trajectories land in a parquet file, and scoring reads that file.
-Rewrite a rubric, re-score in seconds, never re-simulate.
+Rewrite a rubric and re-score without re-simulating.
 
 ## The data flows one way
 
@@ -44,7 +46,7 @@ the arrow pointing one direction, and a test enforces it.
 |---|---|---|
 | `usersim.cli` | The command surface, and resolving which models a run uses | [cli.md](cli.md) |
 | `usersim.engine` | Running conversations: the loop, probes, banks, identity, storage | [engine.md](engine.md) |
-| `usersim.engine.evaluator` | Scoring assistants: judges, axes, deterministic scorers | [evaluator.md](evaluator.md) |
+| `usersim.engine.evaluator` | Scoring assistants: judges, axes, scorers | [evaluator.md](evaluator.md) |
 | `usersim.reporting` | Turning parquets into a capability dashboard | [reporting.md](reporting.md) |
 | `usersim.selection` | Curating trajectories into exportable datasets | [selection.md](selection.md) |
 | `usersim.taxonomy` | The shared vocabulary of capabilities and evidence | above |

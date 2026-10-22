@@ -37,7 +37,7 @@ These markets ship:
   building society, a digital bank, an investment platform, a pension provider
   and an insurer).
 
-`hi_Deva_IN` has a generated corpus but no task set yet, so it cannot be
+`hi_Deva_IN` has a generated corpus but no task set, so it cannot be
 simulated; the remaining shipped locales have the persona substrate in place but
 no region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
@@ -150,9 +150,9 @@ institution. Three interchangeable backends:
 
 - **`hybrid`** (default): normalised cosine similarity over per-document
   embeddings, read from an `embeddings.parquet` sidecar, blended evenly with
-  normalised lexical overlap. **Both** tiers retrieve from the KB like a
-  production support agent. Falls back to pure lexical ranking when embeddings
-  or an endpoint are unavailable, so offline runs still work.
+  normalised lexical overlap. **Both** tiers retrieve from the KB. Falls back
+  to pure lexical ranking when embeddings or an endpoint are unavailable, so
+  offline runs still work.
 
   **No locale ships that sidecar.** Vectors are only comparable within the
   embedding space that produced them, so shipping ours would silently pin every
@@ -265,9 +265,8 @@ Capability rows feed the dashboard:
   with recall: recall high and quality low means the retriever found the tool docs
   and nothing else, so no grounding score above it can be trusted.
 - **Grounded open-ended advice** (`dynamic_grounding`): a **cross-domain**
-  capability keyed on the `dynamic.*` axes. Financial services is its first
-  contributor; future grounded-advisory domains report on the same axes and roll
-  up together.
+  capability keyed on the `dynamic.*` axes, so any grounded-advisory probe that
+  reports on them rolls up with financial services.
 
 ## Training data
 
@@ -282,9 +281,9 @@ the dataset export. The two tiers map to different record types:
 - **`dynamic`** → grounded supervised examples and preference pairs (grounded and
   faithful vs. ungrounded or fabricated, labeled by the judge).
 
-Retrieval-augmented training assembles context from the gold documents plus
-distractors drawn from the *same* institution. Record shaping itself lives in
-the training-data extraction notebook.
+For retrieval-augmented training, `gold_document_ids` and `institution_id` let
+you pair the gold documents with distractors drawn from the *same*
+institution. Record shaping lives in the training-data extraction notebook.
 
 ## Realistic user behavior
 
@@ -300,8 +299,8 @@ limits, and trade-offs and notices vague answers.
 The probe is opt-in: it is not part of the default probe mix. Run it with:
 
 ```bash
-usersim simulate --locale en_US --probe-mix 'financial_services=1.0' \
-  --finance-tier-mix 0.5   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
+usersim simulate --locale en_US --num-rows 20 --probe-mix 'financial_services=1.0' \
+  --finance-tier-mix 0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
 ```
 
 Configuration (all optional):
@@ -417,7 +416,7 @@ enough to cover the tool surface with depth left over.
 
 ### Sanity checks before freezing
 
-Measure rather than eyeball: every one of these caught a real defect:
+Measure rather than eyeball:
 
 1. Depth histogram and the share at >= 3.
 2. State-changing tools with no gold task, per institution.
@@ -471,15 +470,6 @@ against a single bank; the open-ended `dynamic` tier is generated from an
 authored taxonomy; and every institution is a distinct fictional brand authored
 per locale.
 
-## Deferred
-
-- The other shipped locales (region overlays + per-locale `dynamic.yaml`).
-- Healthcare / insurance as separate grounded-advisory probes.
-- A cross-institution advisory tier; more finance domains as institutions
-  (lending/mortgage, payments, crypto, tax).
-- A live stateful environment (verifiable rewards for emergent open-ended goals);
-  long-document chunking; corpus scale-up.
-
 ## Code layout
 
 Files in this package:
@@ -488,7 +478,7 @@ Files in this package:
 | --- | --- |
 | `generator.py` | The probe class + its hooks, the trajectory-column contract, and the entry-point shim. |
 | `tools.py` | Offered-tool schemas and the discoverable-tool gate helpers. |
-| `retrieval.py` | Institution-scoped whole-document retrieval (`golden` + `dense`). |
+| `retrieval.py` | Institution-scoped whole-document retrieval: `hybrid` (default), `dense` and `golden`, with a lexical fallback. |
 | `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
 | `prompts.py` | User-simulator prompts and behavior instruction blocks. |
 | `__init__.py` | Package marker. |
@@ -502,7 +492,7 @@ Related code elsewhere:
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
 | Query embedding (dense retrieval) | `core/embeddings.py` |
 | Scorer | `evaluator/scorers/financial_services.py` |
-| Capabilities | `reporting/capabilities.py` |
+| Capabilities | `taxonomy/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
 | Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
 | Offline generation | `asset_gen/financial_services/` + `asset_gen/notebooks/finance_assets.ipynb` |

@@ -1,16 +1,15 @@
 # Evaluator
 
 Scoring runs *out of sim*. The simulator writes a trajectory parquet; the
-evaluator reads it. That separation is the reason iterating on a judge or a
-rubric costs nothing: no conversation is regenerated.
+evaluator reads it. That separation is why iterating on a judge or a rubric
+never regenerates a conversation.
 
 ## Two kinds of signal
 
 **Judges** are LLM calls that score subjective axes against a rubric. An
 ensemble of two or more must span at least two architecturally diverse model
-families, validated at config construction rather than at run time, because a
-single-family ensemble measures agreement with itself. A single judge is
-allowed and opts out of inter-judge agreement reporting.
+families, validated when the config is built and again at run time, so an
+ensemble never rests on one model family. A single judge is allowed.
 
 **Scorers** are per-probe functions over stored columns, each returning a
 structured verdict rather than a free-form opinion. Three are fully
@@ -26,7 +25,7 @@ Twelve ship:
 | `tool_use` | tool calls against the offered schema |
 | `sov_ai_facts` | answers against a per-locale fact bank |
 | `sov_ai_dynamic` | self-consistency where no ground truth exists |
-| `sov_ai_multilingual_parity` | matched-pair joins on `query_id` |
+| `sov_ai_multilingual_parity` | respect and calibration of each answer, grounded in the query's `concern` |
 | `safety_chat_pressure` | capitulation, turn-of-flip, refusal consistency |
 | `safety_agentic` | boundary violations, scope creep, consequence disclosure |
 | `financial_services` | verifiable task state plus reference grounding |
@@ -44,10 +43,12 @@ of silently producing an empty column.
 ## The evaluation cell
 
 One wide JSON cell per trajectory, carrying per-axis and per-judge scores
-plus deterministic outputs. Each cell embeds an envelope naming the judges,
-axes, scorers, and prompt version that produced it. On re-run, a row whose
-envelope already matches is skipped, unless it had rubric axes and no judge
+plus the scorers' outputs. Each cell embeds an envelope naming the judges,
+axes, scorers, and prompt version that produced it. When the evaluator's input
+rows already carry a cell (a pipeline that feeds stored evaluations back in),
+a row whose envelope matches is skipped, unless it had rubric axes and no judge
 scored any of them (every call failed, or returned output that did not parse).
+`usersim eval` writes a fresh evaluation of the run each time.
 `usersim eval` exits with an error when no row got a verdict, and otherwise
 says how many rows lack one.
 

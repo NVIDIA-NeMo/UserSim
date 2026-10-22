@@ -269,10 +269,8 @@ class TestProductNaming:
 class TestDocumentedCounts:
     """README counts must match the registries they describe.
 
-    These had all drifted: the README advertised 12 probes and 10 scorers
-    against 13 and 11 actually registered. A reader checks the headline
-    number, not the code, so a stale count is a false claim about what
-    ships -- and nothing was watching it.
+    A reader checks the headline number, not the code, so a stale count is
+    a false claim about what ships.
     """
 
     @staticmethod
@@ -295,12 +293,12 @@ class TestDocumentedCounts:
     @staticmethod
     def _registries() -> tuple[int, int, int]:
         import usersim.engine.generator  # noqa: F401  (populates the registry)
-        from usersim.engine.core.probes import known_probes
+        from usersim.engine.core.probes import BankBackedProbe, known_probes, resolve_probe
         from usersim.engine.evaluator.scorers import list_scorers
 
         probes = known_probes()
-        non_general = [p for p in probes if not p.startswith("general")]
-        return len(probes), len(list_scorers()), len(non_general)
+        bank_backed = [p for p in probes if issubclass(resolve_probe(p), BankBackedProbe)]
+        return len(probes), len(list_scorers()), len(bank_backed)
 
     #: Spelled-out forms the prose uses.
     WORDS = {
@@ -326,12 +324,12 @@ class TestDocumentedCounts:
         assert f"· {scorers} evaluator scorers ·" in readme
         assert f"{self.WORDS[scorers]} ship today" in readme
 
-    def test_non_general_probe_count_matches(self) -> None:
-        _, _, non_general = self._registries()
-        assert f"The {self.WORDS[non_general]} non-`general` probes" in self._readme()
+    def test_bank_backed_probe_count_matches(self) -> None:
+        _, _, bank_backed = self._registries()
+        assert f"{self.WORDS[bank_backed].capitalize()} probes draw on curated banks" in self._readme()
 
     def test_no_superseded_counts_remain(self) -> None:
-        """The specific wrong numbers this test was written to catch."""
+        """Superseded counts do not reappear in the docs."""
         readme = self._readme()
         for stale in ("**12 probes ·", "· 10 evaluator scorers ·", "Twelve probes ship today", "2500+ tests"):
             assert stale not in readme, f"stale count survives: {stale!r}"

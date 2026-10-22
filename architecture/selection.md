@@ -11,7 +11,7 @@ No LLM calls.
 `selection/profiles.py` declares what "good" means for an export: which
 capabilities must have evidence, which thresholds must be met, and how much
 evidence is enough. Profiles reference capability definitions from
-[`usersim.taxonomy`](overview.md#taxonomy), so a profile cannot silently
+[`usersim.taxonomy`](overview.md#the-data-flows-one-way), so a profile cannot silently
 drift from what the report measures.
 
 ## The engine

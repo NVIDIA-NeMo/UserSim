@@ -12,7 +12,7 @@ simulated conversation, each carrying:
 - `conversation_messages` (JSON): the full multi-turn message list. Each entry is `{role, content}`, plus `tool_calls` / `tool_call_id` on tool-using turns and `reasoning_content` on an assistant turn whose model emitted a thinking trace, unless `--no-store-reasoning` was passed. The trace is stored for analysis. It reaches a model again only when the models file sets `replay_reasoning = true` on `assistant_model`, which sends the assistant the reasoning of its own earlier messages (see [`docs/engine/README.md`](engine/README.md)).
 - `simulation_outcome` (JSON) holds a row-level structured record: status, failure-class taxonomy, per-actor attribution, per-model token counts, wall-clock, provenance (code SHA + asset bank versions + prompt versions).
 - `simulation_traces` (JSON): per-turn / per-call telemetry (judge-gate ratings, fourth-wall pre-filter triggers, capitulation checks, tool-call verification, etc.).
-- A content-hashed `persona_uuid` (stable across runs) and a deterministic `trajectory_id` (hash of `persona + probe + resolved model identities + prompt version`). These are the simulator's idempotency keys.
+- A content-hashed `persona_uuid` (stable across runs) and a deterministic `trajectory_id` (hash of the persona, the probe and its seed, the user and assistant models, the probe's prompt version and the locale, plus the reasoning-replay setting when it is on). These are the simulator's idempotency keys.
 - In a run of stored rows (`usersim simulate --inputs`), `trajectory_id` is instead a hash of the stored row and of the setup it ran with: models as sent, the rows' shared settings, asset contents, `USERSIM_*` variables, and prompt and package versions (see [Running stored rows](engine/EXTERNAL_PROBE_RUNTIME.md#running-stored-rows)). `input_id` holds the stored row's own `trajectory_id`, so two setups run over the same stored rows pair on it. A row keeps the `usersim_provenance` it was materialized with, while the run's manifest records the code and versions the run itself used.
 - One `trajectory_id` is one conversation, once per run. A probe or extension that writes its own rows should keep what the conversation stands for (for a multi-session benchmark, say: member, arc and session, not the attempt) in `input_id`, and derive `trajectory_id` from it plus the setup, as `--inputs` does, so runs of different setups don't share ids. It should replace a restarted conversation's row rather than add one beside it. `usersim eval` warns, naming the ids, when one appears more than once in a run, and evaluates each copy as a row of its own.
 
@@ -25,17 +25,18 @@ simulated conversation, each carrying:
 > before sharing a dataset.
 
 **Evaluations**: a wide JSON cell per trajectory containing per-axis × per-judge
-scores plus deterministic scorer outputs. The `trajectory-evaluator` plugin
+scores plus the scorers' outputs. The `trajectory-evaluator` plugin
 configures a judge ensemble (a single judge by default; any ensemble of two or
-more must span at least two architecturally diverse model families, validated at
-config-construct time, so inter-judge agreement means something) and a set of
+more must span at least two architecturally diverse model families, validated
+when the config is built) and a set of
 scorers, of which twelve ship today (`tool_use`, `sov_ai_facts`,
 `sov_ai_dynamic`, `sov_ai_multilingual_parity`, `safety_chat_pressure`,
 `safety_agentic`, `financial_services`, `health_disclosure_concealment`,
 `identity_disclosure`, plus the deterministic `language_compliance` / `response_shape` / `refusal_basics`). Cells carry an
 envelope describing exactly which judges / axes / scorers / prompt version
-produced them, and the evaluator skips rows whose envelope already matches
-on re-run, so iterating on a judge or rubric is cheap.
+produced them. Because scoring reads stored trajectories, changing a judge or
+rubric re-scores a run without re-simulating it; `usersim rescore` recomputes
+the model-free scorers with no model call at all.
 
 **Capability dashboard**: a static React/Vega report keyed off the
 trajectory + evaluator parquets. Rather than a per-bundle scorecard, the
