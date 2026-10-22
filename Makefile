@@ -186,6 +186,10 @@ check-dist: dist  ## Build dist/, check both archives, clean-install the wheel a
 		--locale en_US --num-rows 1 --out ./out >/dev/null; \
 	echo "✓ installed package runs from a clean environment"
 
+.PHONY: release-digests
+release-digests:  ## Print validated archive hashes; append to the CI summary when available
+	@python3 scripts/release_digests.py dist
+
 # A tag ruleset limits who can push a `v*` tag, not which commit it names or
 # which version it claims, so the release workflow runs this on the tagged
 # commit before publishing. Run it from the commit you are about to tag.
