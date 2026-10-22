@@ -76,7 +76,7 @@ keep earlier replies unsummarised and every follow-up on topic.
 | Bank-anchored generated turn-1 | `BankBackedProbe` | `CustomTurn1InstructionMixin` | `derive_task`, `seed_state_metadata`, `get_user_query_instruction`, `should_succeed`, `build_result_extras` | reframings (no follow-up template logic) |
 | Multi-turn bank-driven reframings | `BankBackedProbe` | `BankReframingMixin` | `derive_task`, `get_verbatim_first_user_turn`, `format_followup_user_instructions`, `should_succeed`, `build_result_extras` | the follow-up failure mode (mixin sets `"abort"`) |
 | Agentic single-user-turn + tool loop | `BankBackedProbe` | `AgenticMixin` | `derive_task`, `run_dispatch` (custom loop, not `ConversationLoop`), `build_result_extras` | follow-up generation (no user-LLM at all) |
-| Tool-calling capability test | `BaseProbe` | `ToolCallingMixin` | tool-sampling logic in `__init__`, `after_assistant_turn` (tool execution), `should_succeed`, `build_result_extras` | early-stop heuristic (mixin gates on tool-use first) |
+| Tool-calling capability test | `BaseProbe` | `ToolCallingMixin` | tool-sampling logic in `__init__`, `after_assistant_turn` (tool execution), `build_result_extras` | early-stop heuristic (mixin gates on tool-use first) |
 
 Six of those hooks can reach a model and the loop awaits them, so declare an
 override with `async def`: `get_verbatim_first_user_turn`,

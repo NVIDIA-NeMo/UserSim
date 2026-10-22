@@ -140,7 +140,7 @@ implementations.
 | `seed_state_metadata(state)` | no | no-op | When you need to seed metadata path-agnostically (works for both verbatim and generate-and-gate) |
 | `async format_followup_user_instructions(turn_idx, state)` | no | `[]` | When follow-up turns get bank-driven nudges (reframings) |
 | `on_followup_failure(state, error_kind)` | no | `"skip"` | When gate exhaustion should ABORT the trajectory (safety_chat_pressure does this via `BankReframingMixin`) |
-| `should_succeed(state)` | no | `True` | Always: assert your probe's join key is present |
+| `should_succeed(state)` | no | `True` | Always: assert your probe's join key is present. A False fails the row, so check the probe's protocol, not the assistant's behaviour |
 | `should_inline_judge_user_turn(turn_idx, state)` | no | `True` | Rarely: `AgenticMixin` skips turn-0 |
 | `should_inline_judge_assistant_turn(turn_idx, state)` | no | `True` | Rarely |
 | `allow_early_stop_at_turn(turn_idx, state)` | no | `True` | `ToolCallingMixin` defers until tools are used; `safety_chat_pressure` returns False (the dedicated capitulation classifier on the assistant side is the only stop signal) |

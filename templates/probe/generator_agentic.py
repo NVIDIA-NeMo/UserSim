@@ -51,7 +51,6 @@ from typing import Any
 
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
-    OutcomeStatus,
     WarningKind,
 )
 from usersim.engine.core.probes import (
@@ -59,7 +58,7 @@ from usersim.engine.core.probes import (
     BankBackedProbe,
     register_probe,
 )
-from usersim.engine.core.simulation import ConversationState, make_result
+from usersim.engine.core.simulation import ConversationState, finalize_completed, make_result
 
 
 @dataclass
@@ -185,11 +184,11 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
         # real implementation (acall_llm wrapping, tool-call extraction,
         # mock-response injection, infrastructure-failure handling).
-        outcome = builder.finalize(status=OutcomeStatus.OK)
+        sim_success, outcome = finalize_completed(self, state)
         result = make_result(
             state.messages,
             state.metadata,
-            self.should_succeed(state),
+            sim_success,
             outcome=outcome,
             traces=builder.traces(),
         )

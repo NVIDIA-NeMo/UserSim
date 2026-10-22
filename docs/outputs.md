@@ -60,6 +60,13 @@ drill in. A single cell looks like:
 }
 ```
 
+A cell also counts how many of its rows used placeholder or
+machine-translated content (`n_placeholder`, `n_machine_translated`), read
+from each row's `simulation_outcome` warnings. When every row behind a cell
+used such content, its `evidence_level` is `unreviewed` and its next action
+recommends verification by a subject-matter expert (SME), or by a native
+speaker for machine-translated content, before relying on the result.
+
 The dashboard surfaces a **coverage matrix** (which probe / locale combinations
 are populated, with how many rows), a **capability heatmap** (one row per
 capability, one column per locale), and a **triage queue** (failed cells

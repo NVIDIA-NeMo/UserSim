@@ -307,6 +307,183 @@ def test_failed_simulations_do_not_enter_quality_denominators():
     assert actual.score == expected.score
 
 
+_PLACEHOLDER = "used_placeholder_fact"
+_MT = "used_machine_translation"
+
+
+def _flagged_row(i: int, *kinds: str, status: str = "", helpfulness: int = 4) -> dict:
+    """A scored row whose outcome records the given warning kinds."""
+    return {
+        "trajectory_id": f"w{i:015d}",
+        "locale": "en_US",
+        "probe_family": "general_open_ended",
+        "simulation_outcome": json.dumps(
+            {
+                "status": status or ("completed_with_warnings" if kinds else "ok"),
+                "warnings": [{"kind": kind, "turn_idx": None, "detail": ""} for kind in kinds],
+            }
+        ),
+        "assistant_eval": _eval_cell(helpfulness=helpfulness),
+    }
+
+
+def _quality_cell(*rows: dict, min_n: int = 1):
+    import pandas as pd
+
+    return _capability_from_definition(
+        capability_by_id("assistant_quality"),
+        "en_US",
+        pd.DataFrame(list(rows)),
+        "assistant_eval",
+        min_n=min_n,
+    )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "used_placeholder_fact",
+        "used_placeholder_taxonomy",
+        "used_placeholder_query",
+        "used_placeholder_target",
+        "used_placeholder_agentic_action",
+        "used_placeholder_finance",
+        "used_placeholder_clinical_profile",
+        "used_placeholder_identity",
+    ],
+)
+def test_every_placeholder_warning_counts_as_placeholder_content(kind):
+    cell = _quality_cell(_flagged_row(0, kind))
+
+    assert (cell.n_placeholder, cell.n_machine_translated) == (1, 0)
+
+
+def test_cells_count_their_rows_on_placeholder_and_machine_translated_content():
+    cell = _quality_cell(
+        _flagged_row(0, _PLACEHOLDER),
+        _flagged_row(1, _MT),
+        _flagged_row(2, _PLACEHOLDER, _MT),
+        _flagged_row(3, "compression_fallback"),
+        _flagged_row(4, _PLACEHOLDER, status="failed"),
+    )
+
+    assert cell.n == 4
+    assert (cell.n_placeholder, cell.n_machine_translated) == (2, 2)
+
+
+def test_a_cell_with_any_unflagged_row_is_measured_without_a_note():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, _MT), _flagged_row(2))
+
+    assert cell.state == "ready"
+    assert cell.evidence_level == "measured"
+    assert cell.next_action == ""
+
+
+def test_a_cell_resting_only_on_placeholder_content_recommends_sme_verification():
+    flagged = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, "used_placeholder_finance"))
+    unflagged = _quality_cell(_flagged_row(0), _flagged_row(1))
+
+    assert flagged.evidence_level == "unreviewed"
+    assert flagged.next_action == (
+        "SME verification recommended before relying on this result: 2 of 2 row(s) use placeholder content."
+    )
+    assert (flagged.state, flagged.score) == (unflagged.state, unflagged.score)
+
+
+def test_a_cell_resting_only_on_machine_translated_content_recommends_native_speaker_verification():
+    cell = _quality_cell(_flagged_row(0, _MT), _flagged_row(1, _MT))
+
+    assert cell.evidence_level == "unreviewed"
+    assert cell.next_action == (
+        "Native-speaker verification recommended before relying on this result: "
+        "2 of 2 row(s) use machine-translated content."
+    )
+
+
+def test_a_cell_on_both_kinds_of_content_recommends_both_verifications():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, _PLACEHOLDER, _MT), _flagged_row(2, _MT))
+
+    assert cell.next_action == (
+        "SME and native-speaker verification recommended before relying on this result: "
+        "2 of 3 row(s) use placeholder content and 2 use machine-translated content."
+    )
+
+
+def test_the_note_precedes_the_next_action_of_a_blocked_cell():
+    cell = _quality_cell(
+        _flagged_row(0, _PLACEHOLDER, helpfulness=1),
+        _flagged_row(1, _PLACEHOLDER, helpfulness=1),
+    )
+
+    assert cell.state == "blocked"
+    assert cell.next_action == (
+        "SME verification recommended before relying on this result: 2 of 2 row(s) use placeholder content. "
+        + capability_by_id("assistant_quality").next_action
+    )
+
+
+def test_an_underpowered_cell_stays_underpowered_and_carries_the_note():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), min_n=5)
+
+    assert cell.state == "insufficient_evidence"
+    assert cell.evidence_level == "underpowered"
+    assert cell.next_action.startswith("SME verification recommended before relying on this result")
+
+
+def test_status_rate_cells_count_their_content():
+    import pandas as pd
+
+    from usersim.reporting.capability_report import _status_rate_cell
+    from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
+
+    definition = CapabilityDefinition(
+        id="status_rate_probe",
+        label="Status rate",
+        description="Capability scored by the scorer's status proposal.",
+        sources=(EvidenceSource(probe="safety_chat_pressure", scorer="safety_chat_pressure", axes=()),),
+        threshold=0.95,
+        scale="rate",
+        aggregation_policy="status_rate",
+    )
+    rows = pd.DataFrame(
+        [
+            {
+                **_flagged_row(i, "used_placeholder_target"),
+                "probe_family": "safety_chat_pressure",
+                "assistant_eval": _safety_pressure_eval_cell(refusal_held=5, contextual=5),
+            }
+            for i in range(2)
+        ]
+    )
+
+    cell = _status_rate_cell(definition, "en_US", rows, "assistant_eval", min_n=1)
+
+    assert (cell.n, cell.n_placeholder) == (2, 2)
+    assert cell.evidence_level == "unreviewed"
+
+
+def test_the_rendered_report_recommends_verification_of_placeholder_evidence(trajectory_df):
+    import pandas as pd
+
+    def with_placeholder_warning(raw: str) -> str:
+        outcome = json.loads(raw)
+        outcome["warnings"] = [{"kind": _PLACEHOLDER, "turn_idx": None, "detail": ""}]
+        return json.dumps(outcome)
+
+    flagged = trajectory_df.assign(simulation_outcome=trajectory_df["simulation_outcome"].map(with_placeholder_warning))
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t000000000000001"],
+            "locale": ["en_US"],
+            "probe_family": ["general_open_ended"],
+            "assistant_eval": [_eval_cell()],
+        }
+    )
+    report = build_capability_report(flagged, eval_df, eval_column="assistant_eval", min_n=1)
+
+    assert "SME verification recommended before relying on this result" in render_capability_report_html(report)
+
+
 def test_simulation_reliability_cells_carry_no_conversation_evidence(trajectory_df):
     """Regression lock: the ``simulation_reliability`` capability is a
     process-level metric across every probe (success rate of simulator-loop

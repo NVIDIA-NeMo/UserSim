@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from usersim.engine.core.outcomes import FailureAttribution, FailureClass, OutcomeStatus
 from usersim.engine.core.probes import BaseProbe
 from usersim.engine.core.simulation import (
     ConversationLoop,
@@ -240,6 +241,57 @@ class TestConversationLoopSimple:
         result = await loop.run(models, data, cfg, adapter)
 
         assert result["conversation_status"] is True
+
+
+class _CheckedProbe(_StubProbe):
+    """A stub whose protocol check returns ``verdict``, or raises it."""
+
+    def __init__(self, verdict: bool | Exception) -> None:
+        super().__init__()
+        self._verdict = verdict
+
+    def should_succeed(self, state: Any) -> bool:
+        if isinstance(self._verdict, Exception):
+            raise self._verdict
+        return self._verdict
+
+
+class TestProtocolCheck:
+    """A conversation counts only if the probe's ``should_succeed`` check passes."""
+
+    async def _run(self, verdict: bool | Exception) -> tuple[dict[str, Any], dict[str, Any]]:
+        models = _build_models(
+            user_responses=["What is Python?", "Tell me more about types."],
+            assistant_responses=["Python is a language.", "Python has dynamic types."],
+            judge_responses=[_judge_success(), _judge_success(), _judge_success()],
+        )
+        result = await ConversationLoop().run(models, {}, StubConfig(max_turns=2), _CheckedProbe(verdict))
+        return result, json.loads(result["simulation_outcome"])
+
+    async def test_a_passing_check_completes_the_row(self):
+        result, outcome = await self._run(True)
+
+        assert result["conversation_status"] is True
+        assert outcome["status"] == OutcomeStatus.OK.value
+        assert outcome["failure_class"] is None
+
+    async def test_a_failing_check_fails_the_row(self):
+        result, outcome = await self._run(False)
+
+        assert result["conversation_status"] is False
+        assert (outcome["status"], outcome["failure_class"], outcome["failure_attribution"]) == (
+            OutcomeStatus.FAILED.value,
+            FailureClass.SCENARIO_ABORTED.value,
+            FailureAttribution.SCENARIO_LOGIC.value,
+        )
+        assert outcome["failure_detail"] == "should_succeed returned False"
+
+    async def test_a_check_that_raises_fails_the_row(self):
+        result, outcome = await self._run(KeyError("facts_probed"))
+
+        assert result["conversation_status"] is False
+        assert outcome["status"] == OutcomeStatus.FAILED.value
+        assert outcome["failure_detail"] == "should_succeed raised KeyError: 'facts_probed'"
 
 
 # ---------------------------------------------------------------------------
