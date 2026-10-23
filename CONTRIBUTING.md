@@ -3,6 +3,52 @@
 Thanks for your interest. This guide covers **developing** User Sim. To *use*
 it, start with the [README](README.md).
 
+## Issues before pull requests
+
+Start with an issue. Open one with the
+[issue forms](https://github.com/NVIDIA-NeMo/UserSim/issues/new/choose),
+describing the problem and what you have already tried. A maintainer reviews
+it and adds the `triaged` label when the change fits the project, often with
+pointers to existing work or a simpler route. Open a pull request once the
+issue has that label. Security vulnerabilities are the exception: report them
+privately, as [SECURITY.md](SECURITY.md) describes.
+
+If you do not have write access to this repository, your pull request must
+link that issue. Put one of these in its description:
+
+- `Fixes #<issue-number>`
+- `Closes #<issue-number>`
+- `Resolves #<issue-number>`
+
+Only the first one in the description counts. Other forms GitHub recognises,
+such as `Fix #<issue-number>` or a link to the issue, are not read.
+
+A check reads the description each time the pull request is opened, edited or
+updated. If the linked issue is missing, closed or not triaged, the check
+fails and comments with the reason, and a new or reopened pull request is
+closed. GitHub does not let you reopen a pull request the check closed, so
+once the issue is triaged, open a new one from the same branch. The check also
+runs again on open pull requests when their issue gains or loses the `triaged`
+label, or is closed or reopened. People with write access to this repository,
+and Dependabot, skip the check.
+
+A maintainer can add `keep-open` to keep a pull request open while its issue
+is discussed; the check still fails until the description links a triaged
+issue. Adding the label before reopening a pull request the check closed stops
+the check from closing it again.
+
+## AI-assisted contributions
+
+You are welcome to use coding agents, and you stay accountable for everything
+you submit: review each change yourself, and be ready to explain it.
+
+- **Put your agent's findings in the issue.** The issue forms have a "Prior
+  investigation" field for what it searched, ran and concluded, so a
+  maintainer can triage from that evidence.
+- **Describe the change, not the session.** Branch names, commit messages and
+  the pull request description say what changed and why. Leave out prompts
+  and transcripts.
+
 ## Developer Certificate of Origin
 
 ### Signing Off Your Work
@@ -214,6 +260,9 @@ make check-extensions   # installs an out-of-tree package, asserts all six seams
 Your PR title must follow [Conventional Commits](https://www.conventionalcommits.org/)
 (`feat:`, `fix:`, `docs:`, `ci:`, `chore:`, `refactor:`, `test:`, `style:`,
 `perf:`), because it becomes the squashed commit subject on `main`.
+
+If you do not have write access, the description also links a triaged issue;
+see [Issues before pull requests](#issues-before-pull-requests).
 
 ## What CI runs
 

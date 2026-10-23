@@ -2,6 +2,14 @@ name: ✨ Feature Request
 description: Suggest a capability, probe or scorer
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: >-
+        A maintainer reviews each issue and adds the `triaged` label when a
+        change is wanted. If you plan to build this yourself, open the pull
+        request once the issue has that label; see
+        [Issues before pull requests](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md#issues-before-pull-requests).
+
   - type: textarea
     id: problem
     attributes:
@@ -40,3 +48,23 @@ body:
     attributes:
       label: Alternatives you have considered
       description: Including anything you tried that did not work.
+
+  - type: textarea
+    id: investigation
+    attributes:
+      label: Prior investigation
+      description: >-
+        What you or your coding agent found in the code, documentation and
+        existing issues, such as whether a probe, scorer or extension already
+        covers part of this. If an agent investigated, paste its findings.
+      placeholder: Paste the agent's findings, or describe what you checked.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the documentation, or had my agent do so
+          required: true
+        - label: If an agent helped, its findings are under Prior investigation
+          required: false
