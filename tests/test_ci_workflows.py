@@ -13,10 +13,12 @@ the API key" is always to add the key.
 from __future__ import annotations
 
 import re
+import tomllib
 from pathlib import Path
 
 import pytest
 import yaml
+from packaging.specifiers import SpecifierSet
 
 _WORKFLOWS = Path(__file__).resolve().parents[1] / ".github" / "workflows"
 
@@ -309,3 +311,11 @@ class TestDcoAssistant:
         assert not unsubstituted, (
             f"signed-commit-message uses {sorted(unsubstituted)}, which the action never replaces."
         )
+
+
+def test_native_matrix_matches_package_python_support() -> None:
+    project = tomllib.loads((_WORKFLOWS.parents[1] / "pyproject.toml").read_text())["project"]
+    supported = SpecifierSet(project["requires-python"])
+    expected = [f"3.{minor}" for minor in range(30) if f"3.{minor}" in supported]
+    matrix = _load(_WORKFLOWS / "ci.yml")["jobs"]["test"]["strategy"]["matrix"]
+    assert matrix["python-version"] == expected

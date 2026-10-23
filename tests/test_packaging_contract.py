@@ -15,20 +15,14 @@ from __future__ import annotations
 import ast
 import importlib
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
-
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
-#: The running Python's standard library, plus ``tomllib``, which is new in
-#: 3.11: on 3.10 the package imports the declared ``tomli`` backport instead.
-_STDLIB = sys.stdlib_module_names | {"tomllib"}
+_STDLIB = sys.stdlib_module_names
 
 
 class TestPluginEntryPoints:
