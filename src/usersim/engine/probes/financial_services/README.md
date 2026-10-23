@@ -171,12 +171,15 @@ institution. Three interchangeable backends:
   embedding endpoint. Only the verifiable tier has gold documents; the dynamic
   tier has none, so `golden` degrades to lexical there.
 
-**Lexical matching works on whole words in any script.** A word is a run of
-letters, combining marks and digits, compared after case folding and Unicode
-normalization, so accented French and German words and `ß` match as written.
-Words still have to be in the corpus's language: when a locale borrows another
-locale's corpus, the probe translates the assistant's query into that language
-before ranking.
+**Lexical matching works in any script.** A word is a run of letters, combining
+marks and digits, compared after case folding and Unicode normalization, so
+accented French and German words and `ß` match as written. Japanese and Korean
+text is compared in overlapping pairs of characters instead, because Japanese
+doesn't put spaces between words and Korean attaches particles to them: `계좌를`
+and `계좌가` match on `계좌`. Full-width letters and digits match their ASCII
+forms. Words still have to be in the corpus's language: when a locale borrows
+another locale's corpus, the probe translates the assistant's query into that
+language before ranking.
 
 **Why the default is hybrid rather than pure dense.** An institution's corpus is
 deliberately narrow (a few hundred documents about a handful of products at one

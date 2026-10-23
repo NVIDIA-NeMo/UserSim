@@ -2030,15 +2030,18 @@ class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
         assert [d.id for d in english] != [d.id for d in tamil]
 
 
-class TestLexicalTokensAreUnicodeWords:
-    """French and German banks retrieve on whole words, not ASCII fragments."""
+def _institution_with(*docs):
+    """An institution holding only the given ``(id, title, body)`` documents."""
+    from usersim.engine.core.finance_bank import Document, Institution
 
-    @staticmethod
-    def _inst():
-        from usersim.engine.core.finance_bank import Document, Institution
-
-        def doc(doc_id, title, body):
-            return Document(
+    return Institution(
+        institution_id="acme",
+        display_name="Acme",
+        type="bank",
+        brand_voice="traditional",
+        domains=("retail_banking",),
+        documents=tuple(
+            Document(
                 id=doc_id,
                 title=title,
                 body=body,
@@ -2047,21 +2050,23 @@ class TestLexicalTokensAreUnicodeWords:
                 source_authority="official",
                 placeholder=True,
             )
+            for doc_id, title, body in docs
+        ),
+        tools=(),
+        templates=(),
+    )
 
-        return Institution(
-            institution_id="acme",
-            display_name="Acme",
-            type="bank",
-            brand_voice="traditional",
-            domains=("retail_banking",),
-            documents=(
-                doc("D_a", "Horaires des agences", "Les agences ouvrent à neuf heures."),
-                doc("D_b", "Relevé de compte", "Le relevé mensuel détaille chaque opération."),
-                doc("D_c", "Überweisung ins Ausland", "Eine Überweisung dauert zwei Tage."),
-                doc("D_d", "Adresse ändern", "Geben Sie die neue Straße und Hausnummer an."),
-            ),
-            tools=(),
-            templates=(),
+
+class TestLexicalTokensAreUnicodeWords:
+    """French and German banks retrieve on whole words, not ASCII fragments."""
+
+    @staticmethod
+    def _inst():
+        return _institution_with(
+            ("D_a", "Horaires des agences", "Les agences ouvrent à neuf heures."),
+            ("D_b", "Relevé de compte", "Le relevé mensuel détaille chaque opération."),
+            ("D_c", "Überweisung ins Ausland", "Eine Überweisung dauert zwei Tage."),
+            ("D_d", "Adresse ändern", "Geben Sie die neue Straße und Hausnummer an."),
         )
 
     def test_accented_words_and_eszett_tokenize_whole(self):
@@ -2083,6 +2088,45 @@ class TestLexicalTokensAreUnicodeWords:
         assert R._lexical_rank(inst, "Überweisung", 1)[0].id == "D_c"
         assert R._lexical_rank(inst, unicodedata.normalize("NFD", "relevé"), 1)[0].id == "D_b"
         assert R._lexical_rank(inst, "neue Strasse", 1)[0].id == "D_d"
+
+
+class TestCjkTextTokenizesInCharacterPairs:
+    """Japanese and Korean banks retrieve on character pairs, not whole clauses."""
+
+    def test_a_run_of_han_or_kana_becomes_overlapping_pairs(self):
+        assert R._tokens("定期預金") == {"定期", "期預", "預金"}
+        assert R._tokens("ATMの利用") == {"atm", "の利", "利用"}
+
+    def test_korean_words_share_their_stem_across_particles(self):
+        assert R._tokens("계좌를 해지") == {"계좌", "좌를", "해지"}
+        assert "계좌" in R._tokens("계좌를") & R._tokens("계좌가")
+
+    def test_a_run_of_one_character_stays_whole(self):
+        assert R._tokens("円") == {"円"}
+        assert R._tokens("2026年") == {"2026", "年"}
+        assert R._tokens("人々") == {"人々"}
+
+    def test_full_width_forms_fold_and_nothing_else_does(self):
+        assert R._tokens("ＡＴＭ ３") == {"atm", "3"}
+        assert R._tokens("ｶｰﾄﾞ") == R._tokens("カード")
+        assert R._tokens("ｶﾞｲﾄﾞ") == R._tokens("ガイド")
+        assert R._tokens("59½") == {"59"}
+
+    def test_a_japanese_query_ranks_the_document_that_uses_those_words_first(self):
+        inst = _institution_with(
+            ("D_a", "住所変更の手続き", "お届けの住所を変更するには、本人確認書類が必要です。"),
+            ("D_b", "カードの紛失", "カードを紛失した場合は、すぐにご連絡ください。"),
+            ("D_c", "定期預金の解約", "定期預金を満期前に解約すると、所定の利率が適用されます。"),
+        )
+        assert R._lexical_rank(inst, "定期預金を解約したい", 1)[0].id == "D_c"
+
+    def test_a_korean_query_matches_a_document_with_other_particles(self):
+        inst = _institution_with(
+            ("D_a", "대출 금리 안내", "대출 금리는 매월 변동될 수 있습니다."),
+            ("D_b", "카드 분실 신고", "카드를 분실하면 즉시 신고해 주세요."),
+            ("D_c", "계좌 해지 안내", "계좌가 해지되면 잔액은 지정 계좌로 이체됩니다."),
+        )
+        assert R._lexical_rank(inst, "계좌를 해지하고 싶어요", 1)[0].id == "D_c"
 
 
 class TestDynamicTierCarriesLanguageDirective:
