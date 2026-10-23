@@ -140,6 +140,10 @@ _MONEY_STYLES: dict[str, tuple[str, str, bool]] = {
     "de": (".", ",", True),
 }
 
+#: Languages whose currency has no minor unit and is written straight after the
+#: number: ``1,234円`` in Japanese and ``1,234원`` in Korean.
+_WHOLE_UNIT_AFTER: frozenset[str] = frozenset({"ja", "ko"})
+
 #: Date patterns by locale, then by language. Anything else writes day/month/year,
 #: the most common convention.
 _DATE_FORMATS: dict[str, str] = {
@@ -156,9 +160,10 @@ def format_amount(amount: Any, *, currency_symbol: str, number_format: str, drop
     """``amount`` in a region's currency and number format.
 
     ``$1,234.50`` in the US, ``₹1,23,456.00`` in India, ``1 234,50 €`` in France
-    and ``1.234,50 €`` in Germany. ``drop_zero_cents`` writes a whole amount
-    without decimals (``22 950 €``). A value that isn't a number comes back as
-    given, after the symbol.
+    and ``1.234,50 €`` in Germany. Japan and Korea write a whole amount without
+    decimals, since yen and won have no minor unit (``1,234円``, ``1,234원``);
+    elsewhere ``drop_zero_cents`` does that (``22 950 €``). A value that isn't a
+    number comes back as given, after the symbol.
     """
     try:
         value = Decimal(str(amount))
@@ -168,6 +173,9 @@ def format_amount(amount: Any, *, currency_symbol: str, number_format: str, drop
         return f"{currency_symbol}{amount}"
     sign = "-" if value < 0 else ""
     whole, cents = f"{abs(value):.2f}".split(".")
+    if number_format.split("_")[0].lower() in _WHOLE_UNIT_AFTER:
+        number = f"{int(whole):,}" if cents == "00" else f"{int(whole):,}.{cents}"
+        return f"{sign}{number}{currency_symbol}"
     if number_format.endswith("_IN"):
         grouped, decimal_mark, symbol_after = _indian_grouped(whole), ".", False
     else:
