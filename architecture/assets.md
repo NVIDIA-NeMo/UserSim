@@ -34,11 +34,16 @@ checkout.
 
 Before any model call, a run verifies that every selected probe's assets
 exist, including the locale subtree for the locale-scoped probes:
-`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. A registered India
-variant with no subtree of its own is checked against its base locale's
-(`en_IN`), the bank the probe loads in its place. Every missing path is
-reported at once, with the three remedies: point `--assets-dir` somewhere
-else, generate the bank, or drop the probe from the mix.
+`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. A locale that runs
+on another locale's bank is checked against that bank, the one the probe loads
+in its place: a registered India variant with no subtree of its own runs on
+`en_IN`'s. For `financial_services` a subtree counts once it has tasks, and
+`hi_Deva_IN` and `hi_Latn_IN` run on `en_IN`'s until theirs does. Every
+missing path is reported at once, with what to do: drop the probe or the
+locale from the run, or point `--assets-dir` somewhere else. When a probe
+can't run one of the run's locales, the refusal also names the locales it can
+run and links the feature-request form, and for `financial_services` the guide
+to authoring a bank.
 
 Without this, a missing bank surfaces from inside a loader partway through a
 run, after the other probes in the mix have already been paid for, while

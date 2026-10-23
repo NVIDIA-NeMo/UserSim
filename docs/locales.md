@@ -40,8 +40,10 @@ finer breakdown.
 > reviewed.
 
 > `financial_services` runs where a locale has a bank of its own: `en_US`,
-> `en_IN`, `fr_FR`, `en_GB` and `de_DE`, plus the India language variants
-> through `en_IN`. Like the others, the French, British and German banks carry
+> `en_IN`, `fr_FR`, `en_GB` and `de_DE`. `hi_Deva_IN`, `hi_Latn_IN` and the
+> India language variants run on the `en_IN` bank, with the opening and the
+> assistant's searches machine-translated; a locale's own bank takes over once
+> it has a task set. Like the others, the French, British and German banks carry
 > `placeholder: true`: their rows record `used_placeholder_finance`, and SME
 > verification is recommended.
 

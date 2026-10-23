@@ -27,6 +27,8 @@ import pytest
 from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.finance_bank import (
     FinanceBankError,
+    finance_bank_locale,
+    has_finance_tasks,
     load_finance_bank,
     load_finance_bank_for_locale,
 )
@@ -140,9 +142,10 @@ def test_kb_search_offered_with_query_parameter():
 
 
 # Locales that ship a searchable corpus but no ``tasks.yaml`` and no
-# locale-level ``dynamic.yaml``, so the probe cannot instantiate a scenario on
-# them and aborts at runtime. Authoring those assets must move the locale out of
-# here and into the runnable set -- and delete this tuple's test once it empties.
+# locale-level ``dynamic.yaml``. Their own bank cannot instantiate a scenario, so
+# their rows run on their base locale's bank (see ``finance_bank_locale``).
+# Authoring those assets must move the locale out of here and into the runnable
+# set -- and delete this tuple's test once it empties.
 _CORPUS_ONLY_LOCALES: tuple[str, ...] = ("hi_Deva_IN",)
 
 
@@ -194,6 +197,36 @@ def test_corpus_only_banks_are_declared_and_still_unrunnable():
     for locale_dir in corpus_only:
         with pytest.raises(FinanceBankError, match=r"tasks\.yaml"):
             load_finance_bank(locale_dir)
+
+
+class TestFinanceBankLocale:
+    """A row runs on its locale's own bank once it has tasks, and India's on en_IN's until then."""
+
+    def test_a_locale_with_tasks_runs_on_its_own_bank(self):
+        assert finance_bank_locale("en_US") == "en_US"
+
+    def test_the_hindi_locales_run_on_en_IN_until_they_have_tasks(self):
+        # hi_Deva_IN ships a corpus without tasks; hi_Latn_IN ships no bank at all.
+        for loc in ("hi_Deva_IN", "hi_Latn_IN"):
+            assert finance_bank_locale(loc) == "en_IN"
+            assert finance_bank_locale(loc, has_tasks=lambda _: True) == loc
+
+    def test_a_variant_runs_on_en_IN_until_it_has_tasks(self):
+        assert finance_bank_locale("ta_Latn_IN") == "en_IN"
+        assert finance_bank_locale("ta_Latn_IN", has_tasks=lambda _: True) == "ta_Latn_IN"
+
+    def test_a_locale_with_no_base_keeps_its_own_name(self):
+        assert finance_bank_locale("ja_JP") == "ja_JP"
+
+    def test_a_task_set_in_the_bank_rows_load_takes_over(self, tmp_path, monkeypatch):
+        (tmp_path / "bank" / "acme").mkdir(parents=True)
+        (tmp_path / "bank" / "acme" / "corpus.yaml").write_text("{}\n")
+        monkeypatch.setenv("USERSIM_FINANCIAL_SERVICES_BANK_HI_DEVA_IN", str(tmp_path))
+        assert not has_finance_tasks(tmp_path)
+        assert finance_bank_locale("hi_Deva_IN") == "en_IN"
+        (tmp_path / "bank" / "acme" / "tasks.yaml").write_text("{}\n")
+        assert has_finance_tasks(tmp_path)
+        assert finance_bank_locale("hi_Deva_IN") == "hi_Deva_IN"
 
 
 def test_bank_loads_four_institutions():
@@ -1709,6 +1742,20 @@ class TestVerbatimOpeningLocalization:
         translate.assert_called_once()
         assert WarningKind.USED_MACHINE_TRANSLATION in _warning_kinds(ob)
 
+    @pytest.mark.parametrize(("locale", "romanized"), [("hi_Deva_IN", False), ("hi_Latn_IN", True)])
+    async def test_a_hindi_opening_is_translated_from_the_en_IN_bank(self, locale, romanized):
+        probe, ob = _probe_on(locale, _chandrika_instance())
+        assert probe._asset_locale == "en_IN"
+        state = G.ConversationState(messages=[], metadata={})
+        with patch(
+            "usersim.engine.core.translation.translate_user_turn",
+            return_value="Hindi opening",
+        ) as translate:
+            got = await probe.get_verbatim_first_user_turn(state)
+        assert got == "Hindi opening"
+        assert translate.call_args.kwargs["romanize"] is romanized
+        assert WarningKind.USED_MACHINE_TRANSLATION in _warning_kinds(ob)
+
     async def test_dynamic_tier_still_has_no_scripted_opening(self):
         probe, _ = _probe_on("en_US", _dynamic_instance())
         state = G.ConversationState(messages=[], metadata={})
@@ -2061,12 +2108,17 @@ class TestScorerResolvesTheSameBankAsTheSim:
     def test_non_variant_locale_unchanged(self):
         assert FS._bank_locale("en_US") == "en_US"
 
-    def test_hindi_unchanged(self):
-        # Hindi is first-class; it must not be redirected to en_IN.
-        assert FS._bank_locale("hi_Deva_IN") == "hi_Deva_IN"
+    def test_hindi_without_tasks_of_its_own_scores_against_en_IN(self):
+        for loc in ("hi_Deva_IN", "hi_Latn_IN"):
+            assert FS._bank_locale(loc) == "en_IN"
 
     def test_variant_without_its_own_bank_scores_against_the_base(self):
         assert FS._bank_locale("ta_Taml_IN") == "en_IN"
+
+    @pytest.mark.parametrize("locale", ["en_IN", "hi_Deva_IN", "hi_Latn_IN", "ta_Latn_IN"])
+    def test_the_probe_runs_on_the_bank_the_scorer_reads(self, locale):
+        probe, _ = _probe_on(locale, _chandrika_instance())
+        assert probe._asset_locale == FS._bank_locale(locale) == "en_IN"
 
 
 # ---------------------------------------------------------------------------
