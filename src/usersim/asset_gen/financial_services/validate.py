@@ -189,6 +189,32 @@ def _scale_word_forms(iv: int) -> set:
     return out
 
 
+def _myriad_forms(iv: int) -> set:
+    """Japanese and Korean renderings of a value (``10000000`` -> ``'1,000万'``, ``'1천만'``).
+
+    Both languages count large amounts in units of 10^4 (万, 만) and 10^8 (億, 억),
+    so ten million yen is ``1,000万円`` and 150 million won ``1억 5,000만 원``: the
+    exact value is present without its digit string. A value that isn't a multiple
+    of 10^4 has none.
+    """
+    out: set = set()
+    if iv < 10_000 or iv % 10_000:
+        return out
+    oku, man = divmod(iv // 10_000, 10_000)
+    for man_unit, oku_unit, thousand in (("万", "億", "千"), ("만", "억", "천")):
+        lows = {f"{man:,}{man_unit}", f"{man}{man_unit}"}
+        if man % 1000 == 0:
+            lows.add(f"{man // 1000}{thousand}{man_unit}")
+        highs = {f"{oku:,}{oku_unit}", f"{oku}{oku_unit}"}
+        if not oku:
+            out |= lows
+        elif not man:
+            out |= highs
+        else:
+            out |= {f"{high}{space}{low}" for high in highs for low in lows for space in ("", " ")}
+    return out
+
+
 #: Digit-group separators of the number formats that write a decimal comma, keyed
 #: by language: French writes ``1 234,56`` (the space is often a no-break or narrow
 #: no-break one), German and Brazilian Portuguese ``1.234,56``.
@@ -235,11 +261,13 @@ def _value_candidates(val: Any, number_format: str | None = None) -> list[str]:
         return list(cands)
     if isinstance(val, int) or (isinstance(val, float) and float(val).is_integer()):
         iv = int(val)
-        # Plain digits, Western grouping, and Indian grouping / scale words, so a
-        # locale-natural rendering counts as faithful (a US corpus will never
-        # contain "lakh", so this cannot mask a wrong number).
+        # Plain digits, Western grouping, Indian grouping and scale words, and
+        # Japanese and Korean units of 10^4, so a locale-natural rendering counts
+        # as faithful (a US corpus will never contain "lakh" or "万", so none of
+        # these can mask a wrong number).
         cands.update({str(iv), f"{iv:,}", _indian_grouped(iv)})
         cands.update(_scale_word_forms(iv))
+        cands.update(_myriad_forms(iv))
     if isinstance(val, float):
         cands.update({f"{val}", f"{val:.2f}", f"{val:,.2f}"})
     return [c for c in cands if c]

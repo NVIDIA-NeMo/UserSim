@@ -514,10 +514,35 @@ class DocTitleVocabulary(BaseModel):
         return self
 
 
+def _whole_word_pattern(forms: list[str]) -> re.Pattern[str]:
+    """A case-insensitive regex whose group 1 is any of ``forms`` as a whole word
+    or phrase, longest first.
+
+    An edge of a form in Japanese or Korean script may meet any character. Any
+    other edge must not run into a letter or digit of a script that spaces its
+    words. The forms that need that check before them share one, which keeps the
+    regex as fast as a plain word-boundary pattern.
+    """
+    from usersim.engine.core.locale import HAN_RANGES, HANGUL_RANGES, HIRAGANA_RANGES, KATAKANA_RANGES
+
+    ranges = HAN_RANGES + HIRAGANA_RANGES + KATAKANA_RANGES + HANGUL_RANGES
+    unspaced = "".join(f"{chr(lo)}-{chr(hi)}" for lo, hi in ranges)
+    spaced = rf"[^\W{unspaced}]"
+    checked: list[str] = []
+    open_start: list[str] = []
+    for form in sorted(forms, key=len, reverse=True):
+        alternative = re.escape(form) + ("" if re.search(f"[{unspaced}]$", form) else rf"(?!{spaced})")
+        (open_start if re.match(f"[{unspaced}]", form) else checked).append(alternative)
+    branches = [rf"(?<!{spaced})(?:{'|'.join(checked)})"] if checked else []
+    if open_start:
+        branches.append(f"(?:{'|'.join(open_start)})")
+    return re.compile(f"({'|'.join(branches)})", re.IGNORECASE)
+
+
 class LanguageConventions(BaseModel):
-    """Spelling and usage the generated prose follows, for a language whose regional
-    variants share a script (British and US English), which the script check cannot
-    tell apart.
+    """Spelling and usage the generated prose follows, such as the spelling of a
+    regional variant that shares its script with another (British and US English),
+    which the script check cannot tell apart.
 
     ``guidance`` goes into the brief and doc-gen prompts. ``respell`` maps each form
     the prose must not contain to the form written instead: the prompts name both,
@@ -527,9 +552,11 @@ class LanguageConventions(BaseModel):
     """
 
     guidance: str = ""
-    #: Whole words or phrases, matched case-insensitively. A replacement follows the
-    #: capitalisation of the form it replaces: all capitals, a leading capital, or
-    #: as written here.
+    #: Whole words or phrases, matched case-insensitively. In Japanese or Korean
+    #: script a form also matches inside a longer word, since Japanese runs words
+    #: together and Korean writes particles onto them (``직불카드를``). A replacement
+    #: follows the capitalisation of the form it replaces: all capitals, a leading
+    #: capital, or as written here.
     respell: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("respell")
@@ -541,10 +568,7 @@ class LanguageConventions(BaseModel):
         return {form.strip(): replacement.strip() for form, replacement in v.items()}
 
     def _pattern(self) -> re.Pattern[str] | None:
-        if not self.respell:
-            return None
-        alternatives = "|".join(sorted((re.escape(form) for form in self.respell), key=len, reverse=True))
-        return re.compile(rf"(?<!\w)({alternatives})(?!\w)", re.IGNORECASE)
+        return _whole_word_pattern(list(self.respell)) if self.respell else None
 
     def find(self, text: str) -> list[str]:
         """The forms in ``respell`` that ``text`` uses, lowercased, in order."""

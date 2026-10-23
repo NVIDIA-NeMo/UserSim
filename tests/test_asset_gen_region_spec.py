@@ -964,6 +964,14 @@ def test_respelling_matches_whole_words_and_keeps_capitalisation():
     )
 
 
+def test_respelling_matches_inside_japanese_and_korean_words():
+    """A form in Japanese or Korean script needs no space beside it; a Latin edge still does."""
+    conventions = _with_conventions("", {"ATMカード": "キャッシュカード", "직불카드": "체크카드"}).language_conventions
+    text = "新しいATMカードが届きました。직불카드를 해지하려면 XATMカード"
+    assert conventions.find(text) == ["atmカード", "직불카드"]
+    assert conventions.apply(text) == "新しいキャッシュカードが届きました。체크카드를 해지하려면 XATMカード"
+
+
 @pytest.mark.parametrize("prompt_name", ["BRIEF_PROMPT", "DOCSET_PROMPT"])
 def test_language_guidance_adds_exactly_one_line_to_each_prompt(prompt_name):
     """Without conventions both prompts render as they do for a spec that has none;

@@ -2330,6 +2330,18 @@ class TestRegionalConventions:
         assert format_amount(7.9, currency_symbol="€", number_format="de_DE", drop_zero_cents=True) == "7,90 €"
         assert format_amount(7.9, currency_symbol="£", number_format="en_GB") == "£7.90"
 
+    def test_yen_and_won_are_whole_amounts_with_the_unit_after(self):
+        from usersim.engine.core.finance_bank import format_percent
+
+        us = load_finance_bank_for_locale("en_US")
+        japan = _regional(us, "ja_JP", currency_symbol="円", number_format="ja_JP")
+        korea = _regional(us, "ko_KR", currency_symbol="원", number_format="ko_KR")
+        assert japan.format_money("1234567") == "1,234,567円"
+        assert korea.format_money("-50000") == "-50,000원"
+        assert japan.format_money("1234.5") == "1,234.50円"
+        assert format_percent(0.25, number_format="ja_JP") == "0.25%"
+        assert format_percent(3.5, number_format="ko_KR") == "3.5%"
+
     def test_dates_follow_the_region(self):
         day = datetime.date(1980, 3, 27)
         us = load_finance_bank_for_locale("en_US")

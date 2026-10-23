@@ -217,6 +217,19 @@ def test_numeric_faithfulness_accepts_lakh_and_crore_phrasing():
     assert _value_present(10_000_000, "cover up to Rs 1 crore")
 
 
+def test_numeric_faithfulness_accepts_japanese_and_korean_units_of_ten_thousand():
+    """``1,000万円`` and ``1억 원`` state the value without its digit string."""
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    assert _value_present(10_000_000, "預金保険で1,000万円まで保護されます", "ja_JP")
+    assert _value_present(18_000_000, "非課税保有限度額は1,800万円です", "ja_JP")
+    assert _value_present(2_400_000, "年間240万円まで投資できます", "ja_JP")
+    assert _value_present(150_000_000, "保障額は1億5,000万円です", "ja_JP")
+    assert _value_present(100_000_000, "예금자 보호 한도는 1억 원입니다", "ko_KR")
+    assert _value_present(50_000_000, "최대 5천만 원까지 보호됩니다", "ko_KR")
+    assert _value_present(150_000_000, "대출 한도는 1억 5,000만 원입니다", "ko_KR")
+
+
 def test_numeric_faithfulness_still_rejects_a_wrong_number():
     """Tolerating locale formats must not tolerate a DIFFERENT value."""
     from usersim.asset_gen.financial_services.validate import _value_present
@@ -224,6 +237,9 @@ def test_numeric_faithfulness_still_rejects_a_wrong_number():
     assert not _value_present(250_000, "minimum balance of Rs 2,60,000 applies")
     assert not _value_present(250_000, "a ceiling of Rs 3 lakh per year")
     assert not _value_present(250_000, "no figure at all here")
+    assert not _value_present(10_000_000, "上限は2,000万円です", "ja_JP")
+    assert not _value_present(150_000_000, "保障額は1億6,000万円です", "ja_JP")
+    assert not _value_present(100_000_000, "한도는 2억 원입니다", "ko_KR")
 
 
 def test_numeric_faithfulness_accepts_french_and_german_number_formats():
