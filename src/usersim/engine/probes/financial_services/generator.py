@@ -45,6 +45,7 @@ from usersim.engine.core.finance_bank import (
     DEFAULT_DOMAIN_ACCOUNT_LABELS,
     DEFAULT_IDENTITY_REQUIRED_FIELDS,
     FinanceBank,
+    finance_bank_locale,
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
@@ -67,6 +68,7 @@ from usersim.engine.core.outcomes import (
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
+    BankLoadError,
     ToolExecutionMixin,
     dispatch_episode,
     register_probe,
@@ -361,6 +363,25 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 
+    def _load_bank_for_locale(self, locale: str) -> FinanceBank:
+        """Load the bank :func:`finance_bank_locale` picks for ``locale``, which the scorer reads too.
+
+        ``hi_Deva_IN``, ``hi_Latn_IN`` and the India variants run on the ``en_IN``
+        bank until they have tasks of their own. ``self._asset_locale`` records
+        which bank loaded, and a borrowed bank turns on translation of the
+        opening and of ``kb_search`` queries.
+        """
+        bank_locale = finance_bank_locale(locale)
+        loader = type(self).bank_loader
+        try:
+            bank = loader(bank_locale)
+        except Exception as e:
+            raise BankLoadError(
+                f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(e).__name__}: {e}"
+            ) from e
+        self._asset_locale = bank_locale
+        return bank
+
     def _persona_locale(self) -> str:
         """Locale whose PERSONA-ATTRIBUTE vocabulary this run's personas use.
 
@@ -369,7 +390,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         - ``self._locale`` — the CONVERSATION locale (language / script /
           partitioning). Drives the language instruction.
         - ``self._asset_locale`` — the locale whose BANK / taxonomy / renderings
-          loaded (an India language-variant falls back to its base).
+          loaded (an India language-variant, or a Hindi locale without tasks
+          of its own, falls back to en_IN).
         - this — the locale whose persona parquet the personas were sampled
           from, which is what ``_education_ordinal`` is keyed on. A variant like
           ``ta_Taml_IN`` samples ``en_IN`` personas, so deriving literacy against
@@ -535,9 +557,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
         The opening is authored in the bank's language, so it is routed through
         ``_localize_verbatim``: a pure pass-through whenever the bank we loaded
-        matches the conversation locale (every locale with its own bank,
-        including native Hindi), and a machine translation only when we fell
-        back to a base-locale bank for a language variant.
+        matches the conversation locale (every locale with its own bank), and a
+        machine translation only when we fell back to the en_IN bank for a
+        language variant or a Hindi locale.
         """
         return await self._localize_verbatim(self._instance.opening_user_message) or None
 
@@ -631,9 +653,10 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         conversation language.
 
         Non-empty only when this row borrowed someone else's bank: an India
-        variant on the en_IN corpus. Computed on demand rather than cached in
-        ``__init__`` for the same reason as ``_persona_locale``, and because a
-        cached copy would go stale against ``_asset_locale``.
+        variant or a Hindi locale on the en_IN corpus. Computed on demand
+        rather than cached in ``__init__`` for the same reason as
+        ``_persona_locale``, and because a cached copy would go stale against
+        ``_asset_locale``.
         """
         if self._asset_locale == self._locale:
             return ""

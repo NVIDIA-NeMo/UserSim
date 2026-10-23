@@ -756,14 +756,17 @@ class BankBackedProbe(BaseProbe):
     async def _localize_verbatim(self, text: str, *, rules: tuple[str, ...] = (), warn: bool = True) -> str:
         """Translate a verbatim bank turn into the conversation language.
 
-        No-op unless this probe fell back to a base-locale (en_IN) asset for
-        an India language-variant (``self._asset_locale != self._locale``) —
-        i.e. only when the bank text is in English but the conversation must
-        be in another Indian language. Shipped locales and variants with a
-        native asset (``asset_locale == locale``) return ``text`` unchanged,
-        so this is a pure graduation-aware pass-through by default.
-        ``rules`` are extra instructions for the translator. ``warn=False``
-        skips the warning, for a second translation of a turn already flagged.
+        No-op unless this probe fell back to a base-locale (en_IN) asset
+        (``self._asset_locale != self._locale``): an India language-variant,
+        or a Hindi locale in a probe with no Hindi bank of its own. That is,
+        only when the bank text is in English but the conversation must be in
+        another Indian language. Locales with a native asset
+        (``asset_locale == locale``) return ``text`` unchanged, so this is a
+        pure graduation-aware pass-through by default. A romanized locale
+        (``hi_Latn_IN`` and the ``*_Latn_IN`` variants) gets the translation in
+        Latin letters. ``rules`` are extra instructions for the translator.
+        ``warn=False`` skips the warning, for a second translation of a turn
+        already flagged.
 
         Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder,
         so the row records that its opening turn was machine-translated. Never
@@ -771,19 +774,16 @@ class BankBackedProbe(BaseProbe):
         """
         if not text or self._asset_locale == self._locale:
             return text
-        from usersim.engine.core.locale import (
-            expected_language_display,
-            india_variant,
-        )
+        from usersim.engine.core.locale import expected_language_display
+        from usersim.engine.core.simulation import ROMANIZED_LOCALES
         from usersim.engine.core.translation import translate_user_turn
 
-        variant = india_variant(self._locale)
         language = expected_language_display(self._locale) or self._language
         translated = await translate_user_turn(
             self._models,
             text,
             target_language=language,
-            romanize=bool(variant and variant.romanized),
+            romanize=self._locale in ROMANIZED_LOCALES,
             rules=rules,
         )
         if warn and translated != text and self._outcome_builder is not None:

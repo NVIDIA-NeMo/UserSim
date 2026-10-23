@@ -70,18 +70,15 @@ def _loads(value: Any, default: Any) -> Any:
 
 
 def _bank_locale(locale: str) -> str:
-    """Locale whose finance bank this row is scored against.
+    """Locale whose finance bank this row is scored against: the one the probe ran on.
 
-    Presence-aware, mirroring the sim-side ``BankBackedProbe`` resolution (and
-    the ``sov_ai_facts`` / ``sov_ai_dynamic`` scorers): an India language-variant
-    with no bank of its own scores against its base locale's bank, so the scorer
-    reads the SAME assets the simulator ran on. Non-variant locales (including
-    Hindi, which ships its own bank) are returned unchanged.
+    The probe resolves through the same :func:`finance_bank_locale`, so an India
+    language variant or a Hindi locale without tasks of its own is scored
+    against the ``en_IN`` bank its conversation used.
     """
-    from usersim.engine.core.finance_bank import finance_bank_dir_for
-    from usersim.engine.core.locale import asset_locale
+    from usersim.engine.core.finance_bank import finance_bank_locale
 
-    return asset_locale(locale, exists=lambda loc: finance_bank_dir_for(loc).exists())
+    return finance_bank_locale(locale)
 
 
 def _ordered_subsequence(needles: list[str], haystack: list[str]) -> bool:

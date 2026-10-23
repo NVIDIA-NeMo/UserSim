@@ -43,9 +43,12 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Iterable,
     Sequence,
 )
+
+from usersim.engine.core.locale import india_variant
 
 logger = logging.getLogger("usersim.engine")
 
@@ -707,6 +710,40 @@ def finance_bank_dir_for(locale: str) -> Path:
     if override:
         return Path(override)
     return default_finance_bank_dir(locale)
+
+
+#: Shipped locales that run on another locale's bank until they have tasks of
+#: their own. The India language variants name their base in ``locale.py``.
+_FINANCE_BASE_LOCALE: dict[str, str] = {"hi_Deva_IN": "en_IN", "hi_Latn_IN": "en_IN"}
+
+
+def has_finance_tasks(locale_dir: str | Path) -> bool:
+    """Whether a locale bank has scenarios to run: a ``tasks.yaml`` in one of its institutions.
+
+    A corpus alone is not a bank the probe can run, so it does not stop a locale
+    from running on its base locale's bank.
+    """
+    return any(Path(locale_dir).rglob("tasks.yaml"))
+
+
+def finance_bank_locale(locale: str, *, has_tasks: Callable[[str], bool] | None = None) -> str:
+    """The locale whose bank a ``financial_services`` row in ``locale`` runs on.
+
+    The locale's own bank once it has tasks; otherwise ``en_IN``'s for an India
+    language variant, ``hi_Deva_IN`` or ``hi_Latn_IN``; otherwise ``locale``
+    itself, which then has no bank to run on. The probe, its scorer and the
+    pre-flight all resolve through here, so they read the same bank.
+    ``has_tasks`` defaults to checking the directory rows load from.
+    """
+
+    def has_tasks_where_rows_load(loc: str) -> bool:
+        return has_finance_tasks(finance_bank_dir_for(loc))
+
+    if (has_tasks or has_tasks_where_rows_load)(locale):
+        return locale
+    variant = india_variant(locale)
+    base = variant.base_locale if variant is not None else _FINANCE_BASE_LOCALE.get(locale)
+    return base if base is not None else locale
 
 
 def load_finance_bank_for_locale(locale: str) -> FinanceBank:

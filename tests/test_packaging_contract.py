@@ -315,6 +315,33 @@ class TestProbeAssetPreflight:
             verify_probe_assets({"financial_services": 1.0}, ["bn_Beng_IN"], tmp_path)
         assert "bn_Beng_IN" in str(exc.value)
 
+    def test_the_hindi_locales_run_finance_on_the_en_in_bank(self) -> None:
+        """hi_Deva_IN ships a corpus without tasks and hi_Latn_IN no bank; both run on en_IN's."""
+        from usersim.cli._pipeline import verify_probe_assets
+
+        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
+        verify_probe_assets(mix, ["hi_Deva_IN", "hi_Latn_IN"], None)
+
+    def test_the_hindi_locales_are_rejected_when_the_en_in_bank_is_absent(self, tmp_path: Path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
+        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["hi_Deva_IN", "hi_Latn_IN"], tmp_path)
+        assert "hi_Deva_IN (through en_IN): no bank; hi_Latn_IN (through en_IN): no bank" in str(exc.value)
+
+    def test_a_refusal_names_the_locales_that_run_on_another_bank(self) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["ko_KR"], None)
+        can_run = str(exc.value).split("Locales that can run: ")[1].splitlines()[0]
+        assert "en_US" in can_run
+        assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
+
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets

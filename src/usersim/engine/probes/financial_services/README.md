@@ -37,9 +37,12 @@ These markets ship:
   building society, a digital bank, an investment platform, a pension provider
   and an insurer).
 
-`hi_Deva_IN` has a generated corpus but no task set, so it cannot be
-simulated; the remaining shipped locales have the persona substrate in place but
-no region spec. See [Authoring a new locale](#authoring-a-new-locale).
+`hi_Deva_IN` has a generated corpus but no task set. It and `hi_Latn_IN` run on
+the `en_IN` bank, as the India language variants do: the opening and the
+assistant's `kb_search` queries are machine-translated, and those rows record
+`used_machine_translation`. A locale's own bank takes over once it has a task
+set. The remaining shipped locales have the persona substrate in place but no
+region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
 > For the asset-bank contract see
 > [SCHEMA.md](../../assets/financial_services/SCHEMA.md). A file-by-file

@@ -214,6 +214,26 @@ _LOCALE_SCOPED_PROBES: dict[str, Callable[[Path], None]] = {
 }
 
 
+def _finance_bank_locale(probe_dir: Path, locale: str) -> str:
+    from usersim.engine.core.finance_bank import finance_bank_locale, has_finance_tasks
+
+    return finance_bank_locale(locale, has_tasks=lambda loc: has_finance_tasks(probe_dir / loc))
+
+
+def _own_or_base_bank_locale(probe_dir: Path, locale: str) -> str:
+    from usersim.engine.core.locale import asset_locale
+
+    return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
+
+
+#: Which locale's bank a row in a locale runs on, resolved as the probe and its
+#: scorer resolve it. A probe not listed uses an India variant's own bank when
+#: it has one, and its base locale's otherwise.
+_BANK_LOCALE: dict[str, Callable[[Path, str], str]] = {
+    "financial_services": _finance_bank_locale,
+}
+
+
 def verify_probe_assets(
     probe_mix: dict[str, float],
     locales: "list[str] | tuple[str, ...]",
@@ -275,8 +295,7 @@ def _locale_bank_problems(
     load: Callable[[Path], None],
 ) -> list[str]:
     """The locales ``probe`` can't run in, as one line naming those that can."""
-    from usersim.engine.core.locale import asset_locale
-
+    resolve = _BANK_LOCALE.get(probe, _own_or_base_bank_locale)
     errors: dict[Path, str | None] = {}
 
     def load_error(locale_dir: Path) -> str | None:
@@ -293,9 +312,8 @@ def _locale_bank_problems(
 
     failures: list[str] = []
     for loc in dict.fromkeys(locales):
-        # A variant without its own bank runs on its base locale's, as the
-        # probe and its scorer resolve it.
-        bank_locale = asset_locale(loc, exists=has_bank)
+        # A locale without a bank of its own may run on its base locale's.
+        bank_locale = resolve(probe_dir, loc)
         via = "" if bank_locale == loc else f" (through {bank_locale})"
         if not has_bank(bank_locale):
             failures.append(f"{loc}{via}: no bank")
@@ -304,9 +322,25 @@ def _locale_bank_problems(
     if not failures:
         return []
     runnable = sorted(d.name for d in probe_dir.iterdir() if d.is_dir() and load_error(d) is None)
-    return [
-        f"{probe} can't run {'; '.join(failures)}. Locales that can run: {', '.join(runnable) or 'none'}",
-    ]
+    can_run = _runnable_locales(runnable, lambda loc: resolve(probe_dir, loc))
+    return [f"{probe} can't run {'; '.join(failures)}. Locales that can run: {can_run}"]
+
+
+def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]) -> str:
+    """``runnable``, plus the shipped locales and India variants that run on one of their banks."""
+    from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES
+
+    if not runnable:
+        return "none"
+    described = ", ".join(runnable)
+    for base in runnable:
+        borrowers = sorted(loc for loc in SHIPPED_LOCALES if loc not in runnable and bank_locale(loc) == base)
+        if any(loc not in runnable and bank_locale(loc) == base for loc in INDIA_VARIANT_LOCALES):
+            borrowers.append("the India language variants")
+        if borrowers:
+            names = borrowers[0] if len(borrowers) == 1 else f"{', '.join(borrowers[:-1])} and {borrowers[-1]}"
+            described += f", plus {names} through {base}"
+    return described
 
 
 def resolve_toolset_seed_for_mix(
