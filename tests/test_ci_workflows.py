@@ -20,9 +20,13 @@ import yaml
 
 _WORKFLOWS = Path(__file__).resolve().parents[1] / ".github" / "workflows"
 
-#: Workflows that run automatically against code the author controls. Anyone
-#: can open a pull request, so whatever these can reach, anyone can reach.
-_UNTRUSTED_TRIGGERS = {"pull_request", "pull_request_target"}
+#: Workflows that anyone can start. Anyone can open a pull request or an issue,
+#: or comment on one, so whatever these can reach, anyone can reach.
+_UNTRUSTED_TRIGGERS = {"pull_request", "pull_request_target", "issues", "issue_comment"}
+
+#: The untrusted triggers that run with this repository's writable token and
+#: its secrets, rather than with a fork's read-only token.
+_PRIVILEGED_TRIGGERS = _UNTRUSTED_TRIGGERS - {"pull_request"}
 
 
 def _workflows():
@@ -72,8 +76,9 @@ class TestForkSafety:
         """Credentials and untrusted code must not meet.
 
         `pull_request` runs the fork's code but gets no secrets, which is
-        safe. `pull_request_target` gets secrets but must never check the
-        fork's code out, which is safe only as long as it does not.
+        safe. `pull_request_target`, `issues` and `issue_comment` get secrets
+        and a writable token but must never check code out, which is safe only
+        as long as they do not.
         """
         doc = _load(path)
         triggers = _triggers(doc)
@@ -87,12 +92,12 @@ class TestForkSafety:
                 f"workflow_dispatch."
             )
 
-        if "pull_request_target" in triggers:
+        privileged = sorted(triggers & _PRIVILEGED_TRIGGERS)
+        if privileged:
             assert "actions/checkout" not in body, (
-                f"{path.name} runs on pull_request_target, which holds a "
-                f"writable token, and also checks code out. If that checkout "
-                f"is the pull request head, the fork's code runs with that "
-                f"token."
+                f"{path.name} runs on {privileged}, which hold a writable "
+                f"token, and also checks code out. If that checkout is a pull "
+                f"request's head, the fork's code runs with that token."
             )
 
     def test_piped_commands_cannot_swallow_a_failure(self, path: Path) -> None:
