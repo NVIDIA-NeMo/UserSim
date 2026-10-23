@@ -273,7 +273,9 @@ class TestProbeAssetPreflight:
         assert "financial_services" in message
         assert "no asset directory" in message
         # The error must say what to do, not just what is wrong.
-        assert "--assets-dir" in message and "gen-assets" in message
+        assert "--probe-mix" in message and "--assets-dir" in message
+        # A missing probe directory is a wrong assets tree, not a locale to ask for.
+        assert "feature request" not in message
 
     def test_missing_locale_subtree_is_rejected(self) -> None:
         from usersim.cli._errors import ConfigError
@@ -341,6 +343,32 @@ class TestProbeAssetPreflight:
         can_run = str(exc.value).split("Locales that can run: ")[1].splitlines()[0]
         assert "en_US" in can_run
         assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
+
+    def test_a_locale_without_a_bank_says_how_to_ask_for_one(self) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["ko_KR"], None)
+        assert str(exc.value).split("\n\n", 1)[1].splitlines() == [
+            "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them.",
+            "To ask for a locale, open a feature request: "
+            "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml",
+            "To build a financial_services bank yourself, see https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
+            "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale",
+        ]
+
+    def test_the_refusal_links_point_at_files_in_this_repository(self) -> None:
+        """The links are absolute, to work from an installed package; moving a file must not break them quietly."""
+        from usersim.cli._pipeline import _BANK_AUTHORING_GUIDES, _FEATURE_REQUEST_URL
+
+        template = _FEATURE_REQUEST_URL.split("?template=", 1)[1]
+        assert (_REPO_ROOT / ".github" / "ISSUE_TEMPLATE" / template).is_file()
+        for url in _BANK_AUTHORING_GUIDES.values():
+            path, anchor = url.removeprefix("https://github.com/NVIDIA-NeMo/UserSim/blob/main/").split("#")
+            lines = (_REPO_ROOT / path).read_text(encoding="utf-8").splitlines()
+            headings = {line.lstrip("#").strip().lower().replace(" ", "-") for line in lines if line.startswith("#")}
+            assert anchor in headings, f"{path} has no heading for #{anchor}"
 
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError

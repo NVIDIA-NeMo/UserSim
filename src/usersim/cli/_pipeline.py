@@ -233,6 +233,17 @@ _BANK_LOCALE: dict[str, Callable[[Path, str], str]] = {
     "financial_services": _finance_bank_locale,
 }
 
+#: Where to ask for a probe in a locale it has no bank for.
+_FEATURE_REQUEST_URL = "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml"
+
+#: How to build a probe's bank for another locale, for the probes that document it.
+_BANK_AUTHORING_GUIDES: dict[str, str] = {
+    "financial_services": (
+        "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
+        "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
+    ),
+}
+
 
 def verify_probe_assets(
     probe_mix: dict[str, float],
@@ -265,6 +276,7 @@ def verify_probe_locales(
 
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
+    probes_missing_a_locale: list[str] = []
 
     for probe in sorted(probe_locales):
         probe_dir = probe_assets_dir(probe, assets_root=root)
@@ -275,17 +287,35 @@ def verify_probe_locales(
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
         load = _LOCALE_SCOPED_PROBES.get(probe)
-        if load is not None:
-            problems.extend(_locale_bank_problems(probe, probe_dir, probe_locales[probe], load))
+        if load is None:
+            continue
+        locale_problems = _locale_bank_problems(probe, probe_dir, probe_locales[probe], load)
+        problems.extend(locale_problems)
+        if locale_problems:
+            probes_missing_a_locale.append(probe)
 
     if problems:
         raise ConfigError(
             "probe assets are missing or unusable for this run:\n  - "
             + "\n  - ".join(problems)
-            + "\n\nPoint --assets-dir at a tree that has them, "
-            "generate the bank (`usersim gen-assets --domain <d>`), "
-            "or drop the probe from --probe-mix or the locale from the run."
+            + "\n\n"
+            + "\n".join(_remedies(probes_missing_a_locale))
         )
+
+
+def _remedies(probes_missing_a_locale: Sequence[str]) -> list[str]:
+    """What to do about a refusal, with links when a probe can't run one of the run's locales."""
+    remedies = [
+        "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
+    ]
+    if probes_missing_a_locale:
+        remedies.append(f"To ask for a locale, open a feature request: {_FEATURE_REQUEST_URL}")
+    remedies.extend(
+        f"To build a {probe} bank yourself, see {_BANK_AUTHORING_GUIDES[probe]}"
+        for probe in probes_missing_a_locale
+        if probe in _BANK_AUTHORING_GUIDES
+    )
+    return remedies
 
 
 def _locale_bank_problems(
