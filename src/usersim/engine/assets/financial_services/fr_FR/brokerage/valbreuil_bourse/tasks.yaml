@@ -96,7 +96,7 @@ templates:
     bancaire.
   account_state:
     account_id: acct_vb_0001
-    cash_balance: '30000.00'
+    balance: '30000.00'
     linked_bank: bank_vb_0001
   param_space:
     amount: ['2 000', '10 000']
@@ -120,7 +120,7 @@ templates:
     banque.
   account_state:
     account_id: acct_vb_0001
-    cash_balance: '30000.00'
+    balance: '30000.00'
   param_space:
     amount: ['500', '3 000']
   gold_tool_sequence: [transfer_funds]
@@ -246,7 +246,7 @@ templates:
   account_state:
     account_id: acct_vb_0001
     account_type: PEA
-    cash_balance: '8000.00'
+    balance: '8000.00'
   param_space:
     ticker: [Air Liquide, Schneider Electric, TotalEnergies]
     qty: ['5', '10', '25']
@@ -270,7 +270,7 @@ templates:
   account_state:
     account_id: acct_vb_0001
     account_type: PEA
-    cash_balance: '2000.00'
+    balance: '2000.00'
   param_space:
     etf: [MSCI World, S&P 500, Stoxx Europe 600]
     amount: ['50', '100', '250']
@@ -357,22 +357,22 @@ templates:
   persona_tags: [region:any, age:any]
   opening_user_messages:
   - >-
-    Merci d'annuler mon ordre en cours, de retirer les {{amount}} € de liquidités
-    vers ma banque, puis de clôturer le compte-titres.
+    Merci d'annuler mon ordre en cours, de retirer toutes mes liquidités vers ma
+    banque, puis de clôturer le compte-titres.
   - >-
-    Je veux annuler mon ordre en attente, sortir les {{amount}} € et fermer mon
-    compte-titres.
+    Je veux annuler mon ordre en attente, sortir toutes mes liquidités et fermer
+    mon compte-titres.
   - >-
-    Pouvez-vous annuler l'ordre en cours, virer {{amount}} € sur mon compte
-    bancaire lié et clôturer le compte-titres ?
+    Pouvez-vous annuler l'ordre en cours, virer la totalité de mes liquidités sur
+    mon compte bancaire lié et clôturer le compte-titres ?
   account_state:
     account_id: acct_vb_0002
     account_type: compte-titres
-    cash_balance: '{{amount}}'
+    balance: '{{amount}}'
     orders:
     - {order_id: ord_vb_0002, ticker: '{{ticker}}', status: open}
   param_space:
-    amount: ['3 000', '12 000']
+    amount: ['3000.00', '12000.00']
     ticker: [un ETF MSCI World, Air Liquide]
   gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
   # strict chain: cancel the open order to free the cash, withdraw it, THEN close.
@@ -437,21 +437,21 @@ templates:
   persona_tags: [region:any, age:any]
   opening_user_messages:
   - >-
-    Merci d'annuler mon ordre en cours, de retirer les {{amount}} € de liquidités
-    vers ma banque et de mettre à jour mon adresse : {{address}}.
+    Merci d'annuler mon ordre en cours, de retirer toutes mes liquidités vers ma
+    banque et de mettre à jour mon adresse : {{address}}.
   - >-
-    Annulez mon ordre en attente, sortez {{amount}} € et changez mon adresse pour
-    {{address}}.
+    Annulez mon ordre en attente, sortez toutes mes liquidités et changez mon
+    adresse pour {{address}}.
   - >-
-    Pouvez-vous annuler l'ordre en cours, virer {{amount}} € sur mon compte
-    bancaire lié et mettre à jour mon adresse ({{address}}) ?
+    Pouvez-vous annuler l'ordre en cours, virer la totalité de mes liquidités sur
+    mon compte bancaire lié et mettre à jour mon adresse ({{address}}) ?
   account_state:
     account_id: acct_vb_0001
-    cash_balance: '{{amount}}'
+    balance: '{{amount}}'
     orders:
     - {order_id: ord_vb_0003, ticker: '{{ticker}}', status: open}
   param_space:
-    amount: ['4 000', '15 000']
+    amount: ['4000.00', '15000.00']
     ticker: [un ETF MSCI World, TotalEnergies]
     address: ['12 rue des Lilas, 69003 Lyon', '4 allée des Tilleuls, 33000 Bordeaux']
   gold_tool_sequence: [cancel_order, withdraw_funds, update_contact_info]

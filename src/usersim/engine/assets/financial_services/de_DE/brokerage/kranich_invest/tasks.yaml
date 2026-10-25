@@ -21,7 +21,7 @@ templates:
   account_state:
     account_id: acct_kr_0001
     account_type: Depot
-    cash_balance: '6000.00'
+    balance: '6000.00'
   param_space:
     stock: [Siemens, SAP, Allianz]
     qty: ['5', '10', '20']
@@ -157,7 +157,7 @@ templates:
     Können Sie {{amount}} € aus meinem Depot-Guthaben an meine Bank überweisen?
   account_state:
     account_id: acct_kr_0001
-    cash_balance: '12000.00'
+    balance: '12000.00'
     linked_bank: bank_kr_0001
   param_space:
     amount: ['1.500', '4.000']
@@ -287,22 +287,22 @@ templates:
   opening_user_messages:
   - >-
     Ich löse mein Depot auf: Streichen Sie bitte meine offene Order, zahlen Sie
-    das Guthaben von {{amount}} € auf mein Referenzkonto aus und kündigen Sie
-    danach das Depot.
+    mein gesamtes Guthaben auf mein Referenzkonto aus und kündigen Sie danach
+    das Depot.
   - >-
-    Bitte stornieren Sie meine offene Order, überweisen Sie die {{amount}} € auf
-    mein Girokonto und schließen Sie anschließend mein Depot.
+    Bitte stornieren Sie meine offene Order, überweisen Sie mein komplettes
+    Guthaben auf mein Girokonto und schließen Sie anschließend mein Depot.
   - >-
-    Können Sie die offene Order löschen, mir die {{amount}} € auszahlen und dann
-    mein Depot kündigen?
+    Können Sie die offene Order löschen, mir das ganze Guthaben auszahlen und
+    dann mein Depot kündigen?
   account_state:
     account_id: acct_kr_0002
     account_type: Depot
-    cash_balance: '{{amount}}'
+    balance: '{{amount}}'
     orders:
     - {order_id: ord_kr_0002, ticker: '{{stock}}', status: open}
   param_space:
-    amount: ['3.000', '12.000']
+    amount: ['3000.00', '12000.00']
     stock: [SAP, Allianz]
   gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
   # strict chain: cancel the open order to free the cash, withdraw it, THEN close.
@@ -355,7 +355,7 @@ templates:
   account_state:
     account_id: acct_kr_0001
     account_type: Depot
-    cash_balance: '9000.00'
+    balance: '9000.00'
   param_space:
     stock: [Siemens, SAP]
     qty: ['10', '15']
@@ -384,7 +384,7 @@ templates:
   account_state:
     account_id: acct_kr_0001
     kid_account_id: acct_kr_kid_0001
-    cash_balance: '5000.00'
+    balance: '5000.00'
   param_space:
     amount: ['500', '1.500']
     monthly: ['25', '50']

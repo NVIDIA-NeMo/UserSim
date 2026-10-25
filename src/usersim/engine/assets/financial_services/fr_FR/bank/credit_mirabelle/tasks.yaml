@@ -83,7 +83,7 @@ templates:
   account_state:
     account_id: acct_cm_0001
     savings_account_id: acct_cm_liv_0001
-    checking_balance: '10000.00'
+    balance: '10000.00'
   param_space:
     amount: ['250', '1 000', '5 000']
   gold_tool_sequence: [transfer_funds]

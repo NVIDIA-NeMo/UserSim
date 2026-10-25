@@ -401,6 +401,12 @@ enough to cover the tool surface with depth left over.
 - **Pin the parameters the opening names.** If the user says "card ending 0001",
   the seeded `account_state` must contain that card, or the agent resolves
   against something the user never mentioned.
+- **Hold the account's money under `balance`.** It is the one amount the account
+  view reports and the simulated customer is told, so money under another key
+  (`cash_balance`, `checking_balance`) reads as 0.00 while the opening asks to
+  move it. Write it as a plain number like `12000.00`: a localized `3.000` reads
+  as 3. Amounts beside it, such as a second account's balance, a limit or a
+  contribution, can stay.
 - **Only use persona tags a persona can actually carry.** See the table in
   SCHEMA.md. An unreachable tag doesn't error: the task just never gets
   selected.
