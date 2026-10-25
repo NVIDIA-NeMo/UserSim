@@ -1,0 +1,10 @@
+institution_id: sorairo_bank
+display_name: Sorairo Bank
+type: neobank
+brand_voice: neobank
+domains:
+- retail_banking
+- cards
+placeholder: true
+display_name_local: そらいろ銀行
+schema_version: v0.1

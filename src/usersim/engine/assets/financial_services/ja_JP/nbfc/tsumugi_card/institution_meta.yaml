@@ -1,0 +1,10 @@
+institution_id: tsumugi_card
+display_name: Tsumugi Card
+type: nbfc
+brand_voice: traditional
+domains:
+- payments
+- lending_mortgage
+placeholder: true
+display_name_local: つむぎカード
+schema_version: v0.1

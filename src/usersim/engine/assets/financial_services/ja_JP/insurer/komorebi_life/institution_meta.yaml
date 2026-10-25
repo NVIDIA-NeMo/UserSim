@@ -1,0 +1,9 @@
+institution_id: komorebi_life
+display_name: Komorebi Life
+type: insurer
+brand_voice: traditional
+domains:
+- insurance
+placeholder: true
+display_name_local: こもれび生命
+schema_version: v0.1

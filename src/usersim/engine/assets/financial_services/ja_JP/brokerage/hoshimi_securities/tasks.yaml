@@ -1,0 +1,400 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for hoshimi_securities, an online broker. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in Japanese (build_instance picks one per
+# trajectory) so the assistant sees varied turn-1 wording while the gold stays
+# fixed. Read-only tools (get_positions, get_order_status, get_accounts,
+# get_statements) carry no gold state change.
+#
+# Each opening stays on one line: YAML folds a line break into a space, which
+# Japanese does not write.
+templates:
+- id: TPL-HS-NISA-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    星見証券でNISA口座を開きたいです。総合口座はもう持っています。
+  - >-
+    新NISAを始めたいので、NISA口座の開設を申し込みたいです。
+  - >-
+    NISAのつみたて投資枠を使いたいのですが、まだNISA口座がありません。開設の手続きをお願いできますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 証券総合口座
+  param_space: {}
+  gold_tool_sequence: [open_nisa_account]
+  expected_state_deltas: {nisa_account_status: APPLIED}
+- id: TPL-HS-NISAMOVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    今は{{other_provider}}でNISAを使っていますが、来年から星見証券に移したいです。金融機関変更の手続きをお願いします。
+  - >-
+    {{other_provider}}のNISA口座を星見証券に変更したいのですが、何をすればいいですか。
+  - >-
+    NISAの金融機関を{{other_provider}}から星見証券に変えたいです。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 証券総合口座
+  param_space:
+    other_provider: [朝凪銀行, みらい橋証券]
+  gold_tool_sequence: [change_nisa_provider]
+  expected_state_deltas: {nisa_provider_change: REQUESTED}
+- id: TPL-HS-PLAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    NISAのつみたて投資枠で、{{fund}}を毎月{{amount}}円積み立てる設定をしたいです。
+  - >-
+    {{fund}}の積立を始めたいです。毎月{{amount}}円で、支払いはクレジットカードにできますか。
+  - >-
+    毎月{{amount}}円ずつ{{fund}}を買う積立設定をお願いします。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: NISA口座
+  param_space:
+    fund: [全世界株式インデックスファンド, 米国株式インデックスファンド, 8資産均等型バランスファンド]
+    amount: ['10,000', '30,000', '50,000']
+  gold_tool_sequence: [set_up_investment_plan]
+  expected_state_deltas: {investment_plan_status: ACTIVE}
+- id: TPL-HS-IDECO-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    iDeCoを始めたいので、星見証券で加入の申込みをしたいです。会社員で、勤め先に企業年金はありません。
+  - >-
+    老後のためにiDeCoに加入したいです。手続きをお願いできますか。
+  - >-
+    iDeCoの申込みをしたいです。掛金は月{{amount}}円くらいで考えています。
+  account_state:
+    customer_id: cust_hs_0001
+  param_space:
+    amount: ['10,000', '20,000']
+  gold_tool_sequence: [apply_ideco]
+  expected_state_deltas: {ideco_application_status: SUBMITTED}
+- id: TPL-HS-IDECOCHANGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    iDeCoの掛金を月{{amount}}円に変更したいです。手続きをお願いできますか。
+  - >-
+    12月分から上限が変わると聞いたので、iDeCoの掛金を月{{amount}}円に見直したいです。
+  - >-
+    iDeCoの毎月の掛金を{{amount}}円にしてください。
+  account_state:
+    account_id: ideco_hs_0001
+    account_type: iDeCo
+    balance: '1250000.00'
+  param_space:
+    amount: ['30,000', '45,000']
+  gold_tool_sequence: [change_ideco_contribution]
+  expected_state_deltas: {ideco_contribution_change: REQUESTED}
+- id: TPL-HS-TRANSFERIN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{other_broker}}の特定口座にある株を、星見証券に移管したいです。
+  - >-
+    {{other_broker}}で持っている投資信託と株式を、星見証券の特定口座にまとめたいです。移管の手続きをお願いします。
+  - >-
+    証券口座を一つにまとめたいので、{{other_broker}}から星見証券への移管を始めてください。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 特定口座
+    delivering_firm: '{{other_broker}}'
+    transfer_status: none
+  param_space:
+    other_broker: [みらい橋証券]
+  gold_tool_sequence: [initiate_securities_transfer]
+  expected_state_deltas: {transfer_status: IN_PROGRESS}
+- id: TPL-HS-TRADE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    NISAの成長投資枠で、{{ticker}}を{{qty}}株、成行で買いたいです。
+  - >-
+    {{ticker}}を{{qty}}株購入してください。NISA口座でお願いします。
+  - >-
+    成長投資枠を使って{{ticker}}を{{qty}}株買いたいのですが、注文をお願いできますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: NISA口座
+    balance: '800000.00'
+  param_space:
+    ticker: [こはく電機, しろがね製薬, ほしぞら通信]
+    qty: ['100', '200']
+  gold_tool_sequence: [place_trade]
+  expected_state_deltas: {order_status: PLACED}
+- id: TPL-HS-CANCELORDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    さっき出した{{ticker}}の注文を取り消したいです。
+  - >-
+    {{ticker}}の買い注文がまだ約定していないので、キャンセルしてください。
+  - >-
+    間違えて{{ticker}}の注文を出してしまいました。取消しをお願いします。
+  account_state:
+    account_id: acct_hs_0001
+    open_orders:
+    - {order_id: ord_hs_0001, ticker: '{{ticker}}', status: open}
+  param_space:
+    ticker: [こはく電機, しろがね製薬, ほしぞら通信]
+  gold_tool_sequence: [cancel_order]
+  expected_state_deltas: {ord_hs_0001.status: CANCELLED}
+- id: TPL-HS-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    証券口座の預り金から{{amount}}円を、登録している銀行口座に出金したいです。
+  - >-
+    預り金を{{amount}}円出金してください。
+  - >-
+    引っ越し費用に使いたいので、預り金の{{amount}}円を銀行口座に戻してもらえますか。
+  account_state:
+    account_id: acct_hs_0001
+    balance: '500000.00'
+    linked_bank: bank_hs_0001
+  param_space:
+    amount: ['100,000', '300,000']
+  gold_tool_sequence: [withdraw_funds]
+  expected_state_deltas: {withdrawal_status: PROCESSING}
+- id: TPL-HS-BANKACCT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    出金先の銀行口座を{{bank_account}}に変更したいです。
+  - >-
+    給与口座を変えたので、星見証券の出金先も{{bank_account}}にしてください。
+  - >-
+    登録している出金先の口座を変更したいです。新しい口座は{{bank_account}}です。
+  account_state:
+    account_id: acct_hs_0001
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {reference_account_updated: true}
+- id: TPL-HS-GUARDIAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    中学生の子どもの未成年口座について、{{person}}も法定代理人として登録したいです。
+  - >-
+    子どもの未成年口座で、親権者の{{person}}も手続きできるように、法定代理人の登録をお願いします。
+  - >-
+    子ども名義の未成年口座の法定代理人に、{{person}}を追加してもらえますか。
+  account_state:
+    account_id: acct_hs_minor_0001
+    account_type: 未成年口座
+  param_space:
+    person: [妻, 夫]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-HS-YOUNG-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:18-24]
+  opening_user_messages:
+  - >-
+    社会人になったので投資を始めたいです。星見証券の口座を作って、NISA口座も開き、{{fund}}を毎月{{amount}}円積み立てたいです。
+  - >-
+    初めての投資です。総合口座とNISA口座を開設して、つみたて投資枠で{{fund}}を月{{amount}}円積み立てる設定までお願いできますか。
+  - >-
+    口座の開設、NISAの申込み、{{fund}}の毎月{{amount}}円の積立設定をまとめてお願いします。
+  account_state:
+    customer_id: cust_hs_0001
+  param_space:
+    fund: [全世界株式インデックスファンド, 米国株式インデックスファンド]
+    amount: ['5,000', '10,000', '30,000']
+  gold_tool_sequence: [open_account, open_nisa_account, set_up_investment_plan]
+  expected_state_deltas: {new_account_status: OPEN, nisa_account_status: APPLIED, investment_plan_status: ACTIVE}
+- id: TPL-HS-MOVEIN-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    {{other_broker}}から星見証券に全部移したいです。特定口座の株の移管と、NISAの金融機関変更をして、約定したら通知が来るようにしてください。
+  - >-
+    証券会社を星見証券に一本化します。{{other_broker}}からの株式の移管、NISAの金融機関変更、約定通知の設定をお願いします。
+  - >-
+    {{other_broker}}の口座をやめて星見証券にまとめたいので、株の移管とNISAの移動、それから約定のお知らせの設定をお願いできますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 証券総合口座
+  param_space:
+    other_broker: [みらい橋証券]
+  gold_tool_sequence: [initiate_securities_transfer, change_nisa_provider, set_alerts]
+  expected_state_deltas: {transfer_status: IN_PROGRESS, nisa_provider_change: REQUESTED, alerts_updated: true}
+- id: TPL-HS-DEPOSIT-TRADE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    提携銀行から{{amount}}円を即時入金して、成長投資枠で{{ticker}}を{{qty}}株買いたいです。約定したら通知も欲しいです。
+  - >-
+    {{amount}}円を即時入金してから、NISAで{{ticker}}を{{qty}}株注文してください。約定の通知も設定したいです。
+  - >-
+    即時入金で{{amount}}円入れて、{{ticker}}を{{qty}}株買い、約定のお知らせが届くようにしてもらえますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: NISA口座
+    balance: '20000.00'
+    linked_bank: bank_hs_0001
+  param_space:
+    amount: ['300,000', '500,000']
+    ticker: [こはく電機, しろがね製薬, ほしぞら通信]
+    qty: ['100']
+  gold_tool_sequence: [deposit_funds, place_trade, set_alerts]
+  expected_state_deltas: {deposit_status: INITIATED, order_status: PLACED, alerts_updated: true}
+- id: TPL-HS-JOBCHANGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    転職して、新しい会社には企業年金がありません。iDeCoの掛金を月{{amount}}円に増やして、住所も{{address}}に変更し、掛金の引落しの前に通知が来るようにしてください。
+  - >-
+    転職に合わせて、iDeCoの掛金を月{{amount}}円に変更し、住所を{{address}}に更新して、引落しのお知らせも設定したいです。
+  - >-
+    三つお願いします。iDeCoの掛金を月{{amount}}円にすること、住所を{{address}}に変えること、掛金の引落し前に通知が届くようにすることです。
+  account_state:
+    account_id: ideco_hs_0001
+    account_type: iDeCo
+    balance: '1250000.00'
+  param_space:
+    amount: ['30,000', '50,000']
+    address: ['埼玉県さいたま市浦和区高砂3-15-9', '兵庫県神戸市灘区六甲台町8-2']
+  gold_tool_sequence: [change_ideco_contribution, update_contact_info, set_alerts]
+  expected_state_deltas: {ideco_contribution_change: REQUESTED, contact_updated: true, alerts_updated: true}
+- id: TPL-HS-CLOSEOUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    星見証券の口座を解約したいです。まだ約定していない{{ticker}}の注文を取り消して、預り金を全部出金してから、口座を閉じてください。
+  - >-
+    口座を解約する前に、{{ticker}}の未約定の注文を取り消し、預り金を全額出金してください。そのあと解約をお願いします。
+  - >-
+    証券口座をやめます。{{ticker}}の注文の取消し、預り金の出金、口座の解約の順でお願いできますか。
+  # Each step needs the one before it: an open order blocks the withdrawal,
+  # and the account closes only once it holds no cash.
+  ordered: true
+  account_state:
+    account_id: acct_hs_0002
+    account_type: 証券総合口座
+    balance: '186400.00'
+    orders:
+    - {order_id: ord_hs_0002, ticker: '{{ticker}}', status: open}
+  param_space:
+    ticker: [こはく電機, しろがね製薬, ほしぞら通信]
+  gold_tool_sequence: [cancel_order, withdraw_funds, close_account]
+  expected_state_deltas: {ord_hs_0002.status: CANCELLED, withdrawal_status: PROCESSING, acct_hs_0002.status: CLOSED}
+- id: TPL-HS-NISA-SWITCH-001
+  tier: verifiable
+  task_type: transactional
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    来年からNISAを{{other_provider}}から星見証券に移したいです。金融機関変更の手続きをして、即時入金で{{amount}}円入れ、つみたて投資枠で{{fund}}の積立を設定してください。
+  - >-
+    NISAの金融機関を{{other_provider}}から星見証券に変更し、{{amount}}円を即時入金して、{{fund}}の毎月の積立を始めたいです。
+  - >-
+    {{other_provider}}から星見証券へのNISAの変更、{{amount}}円の即時入金、{{fund}}の積立設定をお願いできますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 証券総合口座
+    balance: '0.00'
+    linked_bank: bank_hs_0001
+  param_space:
+    other_provider: [朝凪銀行, みらい橋証券]
+    amount: ['100,000', '200,000']
+    fund: [全世界株式インデックスファンド, 8資産均等型バランスファンド]
+  gold_tool_sequence: [change_nisa_provider, deposit_funds, set_up_investment_plan]
+  expected_state_deltas: {nisa_provider_change: REQUESTED, deposit_status: INITIATED, investment_plan_status: ACTIVE}
+- id: TPL-HS-RETIRE-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: brokerage_investing
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    老後資金の準備を始めたいです。iDeCoに加入して、NISA口座も開設し、つみたて投資枠で{{fund}}を毎月{{amount}}円積み立てて、積立のたびに通知が来るようにしてください。
+  - >-
+    iDeCoへの加入、NISA口座の開設、{{fund}}の毎月{{amount}}円の積立設定、それに積立の通知の設定をお願いします。
+  - >-
+    退職後に備えて、iDeCoとNISAを両方始めたいです。{{fund}}を月{{amount}}円で積み立てて、約定したらお知らせが届くようにしてもらえますか。
+  account_state:
+    account_id: acct_hs_0001
+    account_type: 証券総合口座
+  param_space:
+    fund: [全世界株式インデックスファンド, 8資産均等型バランスファンド]
+    amount: ['20,000', '50,000']
+  gold_tool_sequence: [apply_ideco, open_nisa_account, set_up_investment_plan, set_alerts]
+  expected_state_deltas: {ideco_application_status: SUBMITTED, nisa_account_status: APPLIED, investment_plan_status: ACTIVE, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ja_JP/dynamic.yaml), not scripted templates.

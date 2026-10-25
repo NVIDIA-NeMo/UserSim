@@ -36,6 +36,9 @@ These markets ship:
 - `en_GB`: 6 institutions, 1480 documents, 109 tasks (a high-street bank, a
   building society, a digital bank, an investment platform, a pension provider
   and an insurer).
+- `ja_JP`: 5 institutions, 1299 documents, 90 tasks, generated in Japanese (a
+  regional bank, an internet-only bank, an online broker, a life insurer and a
+  card company).
 
 `hi_Deva_IN` has a generated corpus but no task set. It and `hi_Latn_IN` run on
 the `en_IN` bank, as the India language variants do: the opening and the

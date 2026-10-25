@@ -282,9 +282,9 @@ class TestProbeAssetPreflight:
         from usersim.cli._pipeline import verify_probe_assets
 
         with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["ja_JP"], None)
+            verify_probe_assets({"financial_services": 1.0}, ["en_SG"], None)
         message = str(exc.value)
-        assert "ja_JP: no bank" in message
+        assert "en_SG: no bank" in message
         # Naming the locales that can run turns a dead end into a next step.
         assert "en_US" in message.split("Locales that can run: ")[1].splitlines()[0]
 
