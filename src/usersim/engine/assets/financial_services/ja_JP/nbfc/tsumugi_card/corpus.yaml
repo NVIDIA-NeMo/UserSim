@@ -1,0 +1,5362 @@
+schema_version: v0.1
+documents:
+- id: 2ec809e6-ec5b-5893-b5e1-ddb430a4034a
+  title: つむぎカード：商品概要
+  body: 'つむぎカードは、日々の生活に寄り添い、無理のない柔軟な支払いを提案することで、お客様の経済的な安心を「紡ぐ」ことを目指す汎用決済カードです。若年層からファミリー層まで、幅広い方々に安心感と利便性を提供いたします。
+
+
+    【基本スペック】
+
+    ・年会費：1,375円
+
+    ・ポイント還元率：0.5%
+
+    ・ショッピング利用限度額：最大1,000,000円
+
+    ・ETCカード年会費：550円
+
+
+    透明性の高い手数料体系を採用しており、日常的な決済から計画的な支出管理まで幅広くご利用いただけます。詳細な費用については「つむぎカード：手数料一覧」をご確認ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bee552e7-dc38-5a05-891c-e29e5a971f2c
+  title: つむぎカード：年会費について
+  body: '【よくあるご質問】
+
+
+    Q：つむぎカードの年会費はいくらですか？
+
+    A：年会費は1,375円となっております。
+
+
+    Q：ETCカードを別途申し込む場合、費用はかかりますか？
+
+    A：はい、ETCカードの年会費として別途550円をいただいております。
+
+
+    その他の費用詳細については、「つむぎカード：手数料一覧」をご参照ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 0712f188-6398-54fc-87f6-71ef2a58aa52
+  title: つむぎカード：お申込みとご利用開始
+  body: 'つむぎカードのお申込みからご利用開始までの手順をご案内いたします。
+
+
+    1. **必要書類の提示**：ご本人確認書類（運転免許証など）と、年収等の情報を弊社へ提示してください。
+
+    2. **審査と限度額の決定**：弊社にて支払可能見込額の調査を行い、ショッピング利用限度額（最大1,000,000円）を決定いたします。
+
+    3. **カードの受取と暗証番号設定**：ご自宅に届いたカードを確認し、指定の方法で暗証番号の設定を完了させてください。
+
+    4. **利用開始の確認**：公式アプリにてカードの状態が「有効」になっていることをご確認いただければ、すぐにご利用いただけます。
+
+
+    お手続きの詳細や条件については、「つむぎカード：お申込みいただける方」をご覧ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b3e687ad-d556-53dc-876a-76525ce3719e
+  title: つむぎカード：手数料一覧
+  body: 'つむぎカードの適用手数料は以下の通りです。
+
+
+    ・年会費：1,375円
+
+    ・ETCカード年会費：550円
+
+
+    ※1回払いでのご利用分については、別途手数料は発生いたしません。リボ払いなどの信用供与を伴うサービスをご利用の際は、別途所定の手数料が課金されます。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 171bc462-8b73-5d1e-aefa-0fefb20eef2f
+  title: つむぎカード：お手続きが完了しない・保留中のまま
+  body: '【症状】
+
+    お申込み手続きを行ったが、ステータスが「保留中」のまま進まない。
+
+
+    【考えられる原因】
+
+    ・ご本人確認書類の画像が不鮮明で、認証が完了していない。
+
+    ・入力された個人情報と信用情報機関の登録内容に相違がある。
+
+
+    【確認・解決方法】
+
+    1. アップロードした書類の画像に、文字切れや光の反射がないか再度ご確認ください。
+
+    2. 住所や氏名の表記（漢字・カナ）が最新の住民票と一致しているかご確認ください。
+
+    3. 不備がある場合は、正しい情報を再提示してください。
+
+
+    【解決しない場合】
+
+    上記を確認しても状況が変わらない場合は、弊社にて詳細を確認いたします。専門のコンプライアンス担当者へエスカレーションし、審査状況を精査した上で、結果を改めてご連絡差し上げます。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9ef6c03a-0c3b-5689-a7cc-86494ade09a5
+  title: つむぎカード：お申込みいただける方
+  body: 'つむぎカードのお申込み条件は以下の通りです。
+
+
+    ・**満年令および居住地**：日本国内に居住し、安定した収入がある方 → お申込みいただけます。
+
+    ・**信用状況**：指定信用情報機関による審査で、支払能力が認められた方 → お申込みいただけます。
+
+    ・**支払可能見込額**：年収や生活維持費、他社のクレジット債務から見て、無理なく支払える範囲の方 → お申込みいただけます。キャッシング枠は、他社借入を含め原則として年収の3分の1まで（貸金業法の総量規制）です。
+
+
+    審査の結果、ショッピング利用限度額は最大1,000,000円の範囲内で個別に設定されます。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c2253ae0-0f4e-5df7-a1a0-149918381af7
+  title: つむぎカード：当社の似た商品との比較
+  body: 'つむぎカードは、日常の決済を基本とする汎用カードです。
+
+
+    ・**つむぎカード**：年会費1,375円。0.5%の還元率で日々の買い物を効率的に行いたい方向けです。
+
+    ・**つむぎカードローン**：より大きな金額を計画的に借りたい方向けの低金利商品です。
+
+
+    日常的な支払いとポイント還元を重視される場合は、つむぎカードが最適です。資金調達を目的とされる場合は、つむぎカードローンをご検討ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4d476e7e-5fe9-50ba-a11f-0743824357d8
+  title: つむぎカード：重要事項のご説明
+  body: '本製品のご利用にあたり、以下の重要事項をご確認ください。
+
+
+    **【信用供与と限度額】**
+
+    つむぎカードのショッピング利用限度額は、審査に基づき最大1,000,000円まで設定されます。これはお客様の支払可能見込額を調査し、過剰債務を防止するための措置です。
+
+
+    **【個人情報の取扱い】**
+
+    お申込みに際し、指定信用情報機関への登録および照会を行います。取得した個人情報は、割賦販売法および貸金業法に基づき厳正に管理いたします。
+
+
+    **【費用負担】**
+
+    年1回、1,375円の年会費が発生します。また、ETCカードを併用される場合は別途550円の年会費を申し受けます。支払期限を過ぎた場合は、遅延損害金が発生する場合がありますのでご注意ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1d2e1b3a-e61e-5cec-b263-e498be4056e4
+  title: つむぎカード：金利・料率一覧
+  body: 'つむぎカードに適用される還元率は以下の通りです。
+
+
+    ・**ショッピングポイント還元率：0.5%**
+
+
+    本還元率は、すべての加盟店でのご利用に対して一律に適用されます。利用金額に応じてポイントが付与され、お客様のライフスタイルに合わせて柔軟にご利用いただけます。還元率の変更を行う場合は、事前にお知らせいたします。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e0b49c06-28b3-59db-bde0-9fb17aa58539
+  title: つむぎカード：実施中のキャンペーン
+  body: '【2026年限定：つむぎスタート応援キャンペーン】
+
+
+    2026年12月31日までにお申込みいただいたお客様を対象に、つむぎカードの基本還元率0.5%を最大限にご活用いただけるよう、ご利用ガイドのご案内を実施しております。
+
+
+    日々の生活に寄り添うつむぎカードで、無理のない柔軟な支払いプランと、確かな安心感をぜひご体験ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9ef3c026-d2a1-55fe-9197-82a89c23c680
+  title: つむぎカード：不正利用からお客さまを守るために
+  body: 'つむぎカードでは、お客様に安心してお使いいただくため、業界基準の厳格なセキュリティを導入しています。特にインターネットショッピングにおいては、最新の本人認証サービスである**EMV
+    3-Dセキュア**を導入し、なりすましによる不正利用を未然に防止しています。
+
+
+    また、利用限度額の変更（最大1,000,000円まで）やローンのご契約など、重要なお手続きの前には必ず**多要素認証**による厳格な本人確認を実施いたします。これにより、第三者による不正な操作を遮断します。
+
+
+    万が一、カードの紛失や盗難、身に覚えのない請求に気づいた場合は、直ちにご連絡ください。規定に基づき、迅速な利用停止と再発行、および不正利用に対する補償手続きを行います。安全な決済環境を維持することが、私たちの最優先事項です。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bf94ad4e-ff20-5331-820e-02b4c9e427b2
+  title: つむぎカード：規定・約款
+  body: '本規定は、つむぎカードのご利用に関するお客様と当社の合意事項を定めるものです。お客様は、本約款に基づき、設定された利用限度額（最大1,000,000円）の範囲内で決済サービスを利用することができます。
+
+
+    **主な費用および義務**
+
+    *   **年会費**：1,375円（税込）を毎年ご負担いただきます。
+
+    *   **ETCカード発行手数料**：550円（税込）を別途申し受けます。
+
+    *   **支払義務**：利用金額および所定の手数料を、指定の期日までにお支払いください。
+
+
+    **契約の変更および終了**
+
+    規定の変更がある場合は、事前にお知らせいたします。お客様が解約を希望される場合は、所定の手続きを経て契約を終了させることができます。なお、解約時においても未払いの残高がある場合は、速やかに清算していただく必要があります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4012af4d-9827-5288-9299-d4b5e11fc16c
+  title: つむぎカード：おすすめの方と主な使い方
+  body: "つむぎカードは、日々の生活における決済をシンプルにまとめたい方や、無理のない計画的な支出を目指す方に最適な汎用決済カードです。\n\n**このような方におすすめです**\n\
+    *   日常的なお買い物で、着実にポイントを貯めたい方（還元率0.5%）\n*   信頼感のあるサポート体制のもとで、安心してカードを利用したい方\n* \
+    \  最大1,000,000円の利用限度額を活かし、大きな買い物も柔軟に行いたい方\n\n**主な使い方の例**\n*   **日常決済**：スーパーやコンビニなど、あらゆるシーンで利用し、0.5%のポイントを還元。\
+    \ \n*   **ETC利用**：550円の手数料でETCカードを発行し、高速道路の支払いをスムーズに。\n*   **計画的な支払い**：年会費1,375円で、安心の決済インフラを維持し、家計管理に役立ててください。"
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 3edec5bd-1fc2-5428-ba21-2f5f9f17b538
+  title: つむぎカード：ポイント還元率について
+  body: '**Q: つむぎカードのポイント還元率はどのくらいですか？**
+
+    A: つむぎカードの基本ポイント還元率は**0.5%**です。ご利用金額に応じてポイントが貯まります。
+
+
+    **Q: ポイント還元には条件がありますか？**
+
+    A: 通常のショッピング利用が対象となります。詳細は「つむぎカード：商品概要」をご確認ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4b63bc93-1d78-54c5-bf91-40f7d7c82521
+  title: つむぎカード：解約・変更・プランの切替え
+  body: 'つむぎカードの解約や、登録情報の変更、プランの切替えをご希望の方は、以下の手順で手続きを行ってください。
+
+
+    1.  **お手続き内容の提示**：解約、または変更したい内容（住所、氏名、プラン等）を当社にお伝えください。
+
+    2.  **本人確認の実施**：セキュリティ保護のため、多要素認証による厳格な本人確認を行います。画面の指示に従って認証を完了させてください。
+
+    3.  **内容の確認と承諾**：変更後の条件や、解約に伴うカード利用停止についてのご案内を確認し、承諾いただきます。
+
+    4.  **完了通知の受領**：お手続きが完了すると、確認の通知が届きます。これにより、正式に変更または解約が適用されたことになります。
+
+
+    なお、解約時点での年会費（1,375円）の取り扱いについては、ご契約時期により異なります。詳細は担当者までお問い合わせください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 82271b8c-eb98-5d0d-b15e-2cd6222e3cfd
+  title: つむぎカード：想定外の手数料・金額
+  body: 'お客様より「身に覚えのない手数料が請求されている」とのご連絡をいただいた際は、以下の順序で確認を行ってください。
+
+
+    **確認ステップ**
+
+    1.  **固定費の確認**：年会費の**1,375円**、またはETCカード発行手数料の**550円**が請求タイミングで発生していないか確認します。
+
+    2.  **支払い方法の確認**：1回払い以外の「リボ払い」や「分割払い」を選択されており、それに伴う信用供与手数料が発生していないかを確認します。
+
+    3.  **利用明細の照合**：利用した店舗名や金額が、お客様の記憶と一致しているか照合します。
+
+
+    **解決とエスカレーション**
+
+    *   上記で解消しない場合、または不正利用の疑いがある場合は、速やかにカードを停止し、専門のコンプライアンス担当者へエスカレーションしてください。調査後、規定に基づいた補償手続きを案内します。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 12cd9b5a-f887-540f-b683-8cb41c618b23
+  title: つむぎカード：必要書類
+  body: 'つむぎカードのお申込みには、以下の書類が必要です。
+
+
+    *   **本人確認書類**：運転免許証、マイナンバーカードなどの公的証明書（必須）。
+
+    *   **年収証明書類**：利用限度額を最大1,000,000円まで引き上げる場合や、審査基準により提出をお願いすることがあります。
+
+
+    ご用意いただいた書類に基づき、支払可能見込額を適切に調査いたします。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7c4fdcac-fa4a-5e96-b28f-c81844e72c1c
+  title: つむぎカード：他社の一般的な商品との比較
+  body: '他社の一般的なカードと比較し、つむぎカードは「透明性と安心感」に重点を置いています。
+
+
+    *   **コストと還元**：年会費1,375円、還元率0.5%という適正な設定により、持続可能なサービス提供と十分な還元を両立しています。
+
+    *   **安心感**：最大1,000,000円の限度額は、割賦販売法に基づく支払可能見込額の調査を踏まえて設定し、過剰債務を防止する姿勢を徹底しています。
+
+
+    低コストのみを追求される方には他社商品が向く場合もありますが、誠実なサポートと無理のない支払いを提案する金融サービスをお求めの方には、つむぎカードが最適です。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 938a9804-db36-5288-8dd0-0c75e2447960
+  title: つむぎカード：リスクについてのご説明
+  body: 'つむぎカードのご利用にあたり、以下のリスクと規制についてご理解ください。
+
+
+    **過剰債務の防止について**
+
+    当社は、ショッピングのご利用については割賦販売法に基づく**支払可能見込額**の調査を、キャッシングについては貸金業法に基づく総量規制（原則として年収の3分の1まで）を徹底しています。これにより、無理のない返済計画をサポートし、経済的な安心を「紡ぐ」ことを目指しています。
+
+
+    **限度額と責任**
+
+    最大1,000,000円のショッピング利用可能枠が付与されますが、これはお客様の返済能力に基づいた審査結果によるものです。限度額を最大限に利用される場合は、将来的な支払負担が増加するリスクがあることを十分にご認識ください。
+
+
+    **個人情報の取り扱い**
+
+    ご提供いただいた個人情報は、指定信用情報機関への登録を含め、適切に管理され、公正に取り扱われます。詳細は「つむぎカード：個人情報の取扱い」をご参照ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2bf395b1-5a83-52c4-a659-b49ef1e0e6c9
+  title: つむぎカード：金利・料率の決まり方と適用
+  body: 'つむぎカードに適用される主要な料率は以下の通りです。
+
+
+    *   **ポイント還元率**：一律**0.5%**が適用されます。利用金額に基づき算出されます。
+
+    *   **年会費**：一律**1,375円**です。契約更新時に適用されます。
+
+    *   **ETCカード発行手数料**：一律**550円**です。発行時に一度のみ適用されます。
+
+
+    これらの料率は、安全な決済インフラの維持と持続的なサービス向上のための適正価格として設定されており、原則として一律に適用されます。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 924d2752-9cb0-599f-8219-e3ef2d36dcad
+  title: つむぎカード：ご紹介・継続利用の特典
+  body: '【2026年1月1日から2026年3月31日まで】
+
+
+    日々の生活に寄り添い、安心を紡ぐ「つむぎカード」では、ご紹介および継続利用の特典をご用意しております。
+
+
+    **特典内容**
+
+    ・ご利用金額に応じて、**0.5%**のポイント還元を継続的に提供いたします。
+
+    ・ご紹介いただいた方、および新しくお申し込みいただいた方双方に、日々の決済をよりお得にしていただける還元プランを適用いたします。
+
+
+    透明性の高い手数料体系で、無理のない柔軟な支払いをぜひご体験ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b6eb20d1-6fc8-5785-9bde-b221729eac1d
+  title: つむぎカード：安全にご利用いただくためのポイント
+  body: 'お客様に安心してお買い物をお楽しみいただくため、以下のセキュリティ対策を徹底しております。
+
+
+    **1. 本人認証サービスの導入**
+
+    インターネットショッピングの際は、**EMV 3-Dセキュア**などの本人認証サービスを導入しており、第三者による不正利用を未然に防止します。
+
+
+    **2. 多要素認証の実施**
+
+    利用限度額の変更や重要な契約内容の変更など、状態を変更する操作の前には、必ず**多要素認証**による厳格な本人確認を実施いたします。
+
+
+    **3. 万が一のトラブル対応**
+
+    カードの紛失や盗難に気づいた際は、すぐに利用停止の手続きを行ってください。規定に基づき、迅速な補償対応をさせていただきます。
+
+
+    不審なメールや電話があった際は、決して個人情報を伝えず、速やかに当社までご連絡ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 429eeef2-bea3-5e0d-ac6a-19e4fcea421d
+  title: つむぎカード：規定・約款の変更
+  body: 'つむぎカードのご利用規定および約款は、法令の改正やサービス向上のため、適宜変更される場合がございます。
+
+
+    **主な変更の対象となる項目**
+
+    ・**年会費（1,375円）**および**ETCカード年会費（550円）**の改定
+
+    ・**ショッピング利用可能枠（最大1,000,000円）**の算定基準の変更
+
+    ・ポイント還元率（0.5%）の変更
+
+
+    **変更の手続きと告知**
+
+    規定の変更を行う場合は、適用日の前に公式アプリ、ウェブサイト、または書面にて十分な余裕をもって告知いたします。告知後、一定期間内に異議申し立てがない場合は、変更後の規定に同意いただいたものとみなされます。
+
+
+    お客様の経済的な安心を紡ぐため、常に公正で透明性の高い約款運用に努めてまいります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 0f710179-28f1-5e2d-8bb8-8e07ba8846ea
+  title: つむぎカード：ご利用開始までの手順
+  body: "本ドキュメントは、お客様をサポートする担当者が参照するためのご利用開始フローです。\n\n**【ご利用開始までのステップ】**\n\n1. **お申し込みの受付**\n\
+    \   お客様より、公式アプリまたはウェブサイトを通じてお申し込みをいただきます。\n2. **支払可能見込額の調査および審査**\n   年収や生活維持費、既存のクレジット債務に基づき、無理なく支払える金額を調査します。ショッピング利用可能枠は、割賦販売法に基づくこの調査の範囲内で設定し、過剰債務を防止します。\n\
+    3. **カードの発行・送付**\n   審査完了後、つむぎカードを発行し、お客様のご登録住所へ郵送いたします。\n4. **カードの有効化（アクティベーション）**\n\
+    \   お客様にカードが届いた後、多要素認証による本人確認を経て、利用可能状態となります。\n\n**【基本設定値】**\n・年会費：1,375円\n・ショッピング利用可能枠：最大1,000,000円まで（審査により決定）"
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 15c1c458-e1d8-5fcb-8f8b-1448380b71a4
+  title: つむぎカード：ショッピング利用可能枠の上限について
+  body: '**Q. ショッピングで利用できる金額の上限はいくらですか？**
+
+
+    **A.** つむぎカードのショッピング利用可能枠は、最大で**1,000,000円**となっております。ただし、実際にご設定いただく限度額は、お客様の年収、生活維持費、および他社様での借入状況などの「支払可能見込額」を審査した上で、個別に決定させていただきます。
+
+
+    **Q. 限度額を上げてもらうことは可能ですか？**
+
+
+    **A.** はい、可能です。ただし、割賦販売法に基づく支払可能見込額の調査を含む厳格な審査を行った上でご案内いたします。
+
+
+    詳細は「つむぎカード：限度額・制限と注意事項」をご確認ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: de70954a-9e0f-5063-a984-115e5610216b
+  title: つむぎカード：登録内容の変更
+  body: "ご住所、お電話番号、メールアドレスなどのご登録内容を変更する手順をご案内します。\n\n**【ご準備いただくもの】**\n・つむぎカード（または会員番号）\n\
+    ・本人確認書類（住所変更の場合）\n\n**【お手続きの流れ】**\n1. **変更内容の提示**\n   担当者に、変更したい項目（例：新住所、新しい電話番号）を伝えてください。\n\
+    2. **本人確認（多要素認証）**\n   セキュリティ保護のため、ご登録の端末への通知や認証コードを用いた厳格な本人確認を実施します。\n3. **変更内容の確認と確定**\n\
+    \   担当者が入力した内容に間違いがないか、最終的な確認画面または口頭での確認を行い、確定させます。\n4. **完了通知の受領**\n   手続き完了後、ご登録のメールアドレスまたはアプリへ完了通知が届きますので、内容をご確認ください。\n\
+    \n**注意点**：重要な変更の前には、必ず多要素認証による本人確認が行われます。"
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 97a7dc7e-2241-5bc8-8d3d-344856c79063
+  title: つむぎカード：ログインできない・アクセスできない
+  body: "アプリやウェブサイトにログインできず、サービスを利用できない場合の対処法です。\n\n**【考えられる原因と対処法】**\n\n- **パスワードの誤入力**\n\
+    \  - **症状**：「パスワードが正しくありません」というエラーが表示される。\n  - **対処**：大文字・小文字の区別や、不要なスペースが入っていないかを確認し、再度入力してください。\n\
+    \n- **多要素認証の通知が届かない**\n  - **症状**：認証コードが届かず、先に進めない。\n  - **対処**：通信環境を確認し、アプリの通知設定が「オン」になっているかをご確認ください。\n\
+    \n- **アカウントの一時ロック**\n  - **症状**：正解のパスワードを入れてもログインが拒否される。\n  - **対処**：短時間に複数回誤入力をした場合、セキュリティのためロックがかかります。一定時間の経過後にお試しいただくか、担当者へ解除を依頼してください。\n\
+    \n**【解決しない場合】**\n上記を確認しても改善しない場合は、専門の担当者が状況を確認し、認証情報の再設定手続きをサポートいたします。"
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b51c11bb-6318-5910-a171-5bdfe0c58f63
+  title: つむぎカード：ご利用条件による違い
+  body: 'お客様の条件に基づき、設定される利用可能枠や審査基準の方向性を以下にまとめます（担当者参照用）。
+
+
+    | ご利用条件 | 設定される利用可能枠の傾向 | 審査の重点ポイント |
+
+    | :--- | :--- | :--- |
+
+    | **安定した収入がある方** | 最大**1,000,000円**までの範囲で、審査に基づき高めに設定 | 支払可能見込額および継続的な返済能力 |
+
+    | **若年層（社会人1年目など）** | 支払可能見込額に基づき、控えめな金額から設定 | 将来的な支払い能力と生活維持費のバランス |
+
+    | **他社借入がある方** | **支払可能見込額**の範囲内で枠を設定（キャッシング枠は年収の3分の1まで） | 他社のクレジット債務・借入額と年収 |
+
+
+    ※すべての設定は、経済産業省および金融庁の監督指針に基づき、過剰債務を防止する観点から決定されます。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7bf4b8db-1bb3-55de-9d34-4cdd32918c4a
+  title: つむぎカード：プランの選び方
+  body: "お客様のライフスタイルに合わせた「つむぎカード」の活用方法をご提案します。\n\n**【このような方におすすめです】**\n- **日常的な決済をシンプルにまとめたい方**\n\
+    \  - **年会費 1,375円**で、あらゆるシーンで利用可能な汎用決済カードをお探しの方に最適です。\n- **効率的にポイントを貯めたい方**\n\
+    \  - 全ての利用に対して**0.5%**のポイント還元があるため、日々の買い物で着実にメリットを得たい方向けです。\n- **安心感を重視される方**\n\
+    \  - 最大**1,000,000円**の利用可能枠（審査による）があり、急な出費にも対応できる安心感があります。\n\n**【他プランとの考え方】**\n\
+    月々の支払額を一定に抑えたい場合は、オプションの「リボ払い」を、高額な買い物を計画的に返済したい場合は「分割払い」を組み合わせることで、より柔軟な家計管理が可能です。"
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 15f4ffaa-39ed-5635-9959-819d3f088327
+  title: つむぎカード：個人情報の取扱い
+  body: 'つむぎカードでは、お客様の個人情報を適切に管理し、公正に取り扱うことをお約束いたします。
+
+
+    **1. 個人情報の利用目的**
+
+    ご提供いただいた個人情報は、カードの発行、利用限度額（最大**1,000,000円**）の審査、およびサービス向上のための分析に利用いたします。
+
+
+    **2. 信用情報機関への登録**
+
+    法令に基づき、ご契約内容や支払状況などの個人信用情報を、指定信用情報機関に登録し、またそこから情報を取得いたします。これは、過剰債務を防止し、安全な決済インフラを維持するために不可欠な手続きです。
+
+
+    **3. 情報の開示と管理**
+
+    お客様からご自身の個人情報の開示を求められた場合は、透明性のある手続きに基づき、迅速に開示いたします。
+
+
+    **4. 安全管理措置**
+
+    重要な操作の前には多要素認証を導入し、不正なアクセスや情報漏洩を防止するための厳格な管理体制を構築しております。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 92804016-1932-5a01-8635-c9eb09117a5c
+  title: つむぎカード：この商品をかたる詐欺にご注意ください
+  body: '最近、つむぎカードの社員をかたり、お客様の個人情報やカード情報を聞き出そうとする不審な電話やメールが増えております。以下の点に十分ご注意ください。
+
+
+    **【つむぎカードから絶対に行わないこと】**
+
+    *   **暗証番号（PIN）やセキュリティコードを電話やメールで伺うことはございません。**
+
+    *   **メールに記載されたURLから、パスワードの再設定を急かして個人情報を入力させることはございません。**
+
+    *   **ギフトカードなどの金券による支払いを要求することはございません。**
+
+
+    もし「限度額の引き上げに必要」などの理由で不審な連絡を受けた場合は、すぐにお電話を切り、当社カスタマーセンターまでご連絡ください。万が一、情報を伝えてしまった可能性がある場合は、**直ちにカードの利用停止手続き**を行ってください。迅速な対応が被害を最小限に抑えることにつながります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 94d5a8aa-3ee5-5549-a726-d3f7d0f3490e
+  title: つむぎカード：限度額・制限と注意事項
+  body: '本ドキュメントは、サポート担当者がお客様へ限度額や利用制限について案内するための資料です。
+
+
+    **【ショッピング利用限度額】**
+
+    つむぎカードのショッピング利用限度額の最大値は**1,000,000円**です。ただし、個別の限度額は、お客様の年収や生活維持費、既存の借入状況に基づき、無理なく支払えると考えられる「支払可能見込額」を審査した上で決定されます。
+
+
+    **【利用制限と注意事項】**
+
+    *   **総量規制の適用**: キャッシングは貸金業法の総量規制の対象で、他社を含む借入合計額は原則として年収の3分の1までに制限されます。ショッピングは対象外です。
+
+    *   **本人確認の徹底**: 利用限度額の変更や契約内容の変更を行う際は、必ず多要素認証による厳格な本人確認を実施してください。
+
+    *   **不正利用防止**: インターネットショッピングではEMV 3-Dセキュア等の本人認証サービスを推奨し、不正利用の未然防止に努めてください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 762cf3fc-b057-59e8-bb25-d05d8aa8fc65
+  title: つむぎカード：ETCカードの年会費について
+  body: '**Q: つむぎカードでETCカードを申し込む場合、年会費はかかりますか？**
+
+
+    **A: はい、ETCカードの年会費として550円（税込）をいただいております。**
+
+
+    つむぎカード本体の年会費とは別に設定されておりますので、あわせてご確認ください。詳細な料金体系については「つむぎカード：手数料一覧」をご参照ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d9766aba-b3e1-5faf-8741-0e4a98ddcf09
+  title: つむぎカード：状況・履歴の確認
+  body: 'つむぎカードのご利用状況や、過去のお取引履歴を確認する手順をご案内します。
+
+
+    **【確認の手順】**
+
+    1.  **利用履歴の照会を依頼する**: 当社カスタマーセンターまたは公式アプリにて、確認したい期間の利用明細の照会を伝えてください。
+
+    2.  **明細内容の確認**: 表示された各利用店舗名、利用日時、および決済金額（円）を確認します。ここで、リボ払いや分割払いが適用されているかどうかも併せてご確認いただけます。
+
+    3.  **現在の利用可能枠の確認**: ショッピング利用限度額（最大1,000,000円）に対し、現在いくらまで利用可能かを確認します。
+
+
+    **【完了の目安】**
+
+    最新の決済状況が正しく反映されており、次回の請求予定金額が提示された時点で確認完了となります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 47c44897-593e-5517-8bd4-5b5f9b5e4600
+  title: つむぎカード：お取引が拒否された・制限された
+  body: '「店舗でカードが使えなかった」「オンライン決済でエラーが出た」という場合の確認事項です。
+
+
+    **【考えられる原因と確認手順】**
+
+    1.  **利用限度額への到達**: ショッピング利用限度額（最大1,000,000円）に達していないか、現在の利用残高をご確認ください。
+
+    2.  **セキュリティロックの作動**: 短時間に高額な決済や、不自然な場所での利用があった場合、不正利用防止のため一時的に制限がかかることがあります。
+
+    3.  **カード情報の不一致**: 有効期限やセキュリティコードの入力に誤りがないか、再度ご確認ください。
+
+
+    **【解決方法とエスカレーション】**
+
+    *   限度額不足の場合は、繰上返済をご検討いただくか、審査を経て限度額変更を申請してください。
+
+    *   セキュリティロックの場合は、本人確認後に制限を解除いたします。
+
+    *   原因が不明な場合は、当社にて詳細な取引ログを確認し、必要に応じて専門のコンプライアンス担当者へエスカレーションして調査いたします。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4348a8d3-616c-5efa-9dfd-35191f98e791
+  title: つむぎカード：切替えや上位プランを検討するとき
+  body: 'お客様が現在のつむぎカードから、より高機能なプランへの切替えを検討されている場合の案内指針です。
+
+
+    **【判断基準】**
+
+    *   **還元率の重視**: 現在の還元率0.5%以上のメリットを求めるか、あるいは年会費1,375円を上回る付帯サービスの価値を重視されるかを確認してください。
+
+    *   **利用限度額のニーズ**: 最大1,000,000円の枠で不足が生じているかを確認し、より高い信用供与が必要な場合は上位プランをご提案ください。
+
+
+    お客様の現在の返済能力を十分に審査した上で、誠実な提案を行ってください。詳細なプラン選びについては「つむぎカード：プランの選び方」をご参照ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 757810d7-19f7-5bbe-a580-1b78e4eec68f
+  title: つむぎカード：ほかの選択肢との比較と向かない場合
+  body: 'つむぎカードは、日々の生活に寄り添い、透明性の高いサービスを提供します。一方で、以下のようなニーズをお持ちの方には、他の選択肢の方が適している場合がございます。
+
+
+    **【つむぎカードが向かないケース】**
+
+    *   **極めて高いポイント還元を最優先する場合**: つむぎカードの還元率は0.5%です。特定の加盟店で特化して高い還元率を求める方は、専門特化型のカードが向いています。
+
+    *   **年会費無料にこだわりたい場合**: 本カードは年会費1,375円をいただいております。コストを完全にゼロにしたい方は、無料プランのある他社商品をご検討ください。
+
+    *   **非常に高額な限度額を必要とする場合**: ショッピング利用限度額は最大1,000,000円となっております。これを超える決済を日常的に行う方は、プラチナクラスのカードが適しています。
+
+
+    **【つむぎカードが最適な方】**
+
+    誠実なサポートと、無理のない柔軟な支払いを重視し、安心してカードを利用したい方に最適です。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6fe6d709-2939-5002-80c4-6088b1feb049
+  title: つむぎカード：手数料と費用
+  body: '**Q: つむぎカードを利用する際にかかる主な費用を教えてください。**
+
+
+    **A: 主な費用は以下の通りです。**
+
+    *   **年会費**: 1,375円
+
+    *   **ETCカード年会費**: 550円
+
+
+    なお、1回払いなどの手数料無料プランを基本としておりますが、リボ払いなどの信用供与を伴うサービスをご利用の際は、別途所定の手数料がかかります。詳細は「つむぎカード：手数料一覧」をご確認ください。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 867b2353-b87f-5036-9156-ab7134590c2f
+  title: つむぎカード：よくあるお手続きの流れ
+  body: 'つむぎカードのお申込みからご利用開始までの一般的な流れをご案内します。
+
+
+    **【お手続きのステップ】**
+
+    1.  **お申込みの意思伝達**: ご希望のカード種別を当社にお伝えください。
+
+    2.  **審査書類の提出**: 本人確認書類および収入証明書などを提出いただき、支払可能見込額の調査を行います。
+
+    3.  **審査結果のご案内**: 審査に基づき、ショッピング利用限度額（最大1,000,000円まで）を決定し、結果をご通知します。
+
+    4.  **カードの受取と有効化**: ご自宅に届いたカードを確認し、初回利用時の設定を行ってください。
+
+
+    **【完了の目安】**
+
+    カードが手元に届き、初回の決済（またはアプリでの利用状況確認）が正常に行えた時点で、お手続きは完了となります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 3743e96f-4a64-5694-9f6e-e23b513a54fd
+  title: つむぎカード：明細や記録と合わない
+  body: 'お客様から「請求金額が利用した金額と異なる」「身に覚えのない請求がある」とのお問い合わせを受けた際の対応手順です。
+
+
+    **【原因の切り分けと確認事項】**
+
+    1.  **未確定取引の確認**: 仮売上（オーソリゼーション）の状態であり、確定後の金額が変動する場合があるため、最新の確定明細を確認してください。
+
+    2.  **返金処理のタイミング**: キャンセルや返品が行われた場合、処理に時間を要し、次月以降の明細に相殺されることがあります。
+
+    3.  **利用店舗名の相違**: 店舗名ではなく、決済代行会社の名称で記載されている場合がございます。利用日時と金額から照合してください。
+
+
+    **【解決とエスカレーション】**
+
+    *   確認しても不一致が解消されない場合は、至急「不正利用」の可能性を疑い、カードの停止を検討してください。
+
+    *   正当な理由をもって支払いを拒む「支払停止の抗弁」に該当する場合は、速やかに専門のコンプライアンス担当者へエスカレーションし、日本クレジット協会とも連携した誠実な解決を図ります。'
+  domain: payments
+  product_category: tsumugi_card_standard
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 90491ee7-cee3-57f6-9ac6-875e2753b1b8
+  title: リボ払い：商品概要
+  body: 'リボ払いは、月々の支払額を一定に抑えることで、家計の変動を緩やかにし、経済的な安心を「紡ぐ」ことができる柔軟な支払いオプションです。高額な買い物をした際や、月々の支出を管理したい方に最適です。
+
+
+    【主な仕様】
+
+    ・手数料（実質年率）：15%
+
+    ・毎月の最低支払額：5,000円
+
+
+    ご利用いただく際は、お客様の年収や生活維持費に基づいた「支払可能見込額」の調査を行い、無理のない返済計画をご提案いたします。適正な手数料を設定することで、安全な決済インフラの維持と持続的なサービス向上に努めております。
+
+
+    詳細な手数料については「リボ払い：手数料一覧」をご確認ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a44dd99c-27c7-53b1-a321-054e32a40d07
+  title: リボ払い：リボ払いの手数料率（実質年率）について
+  body: '【Q】リボ払いを利用する場合の手数料率はどのくらいですか？
+
+    【A】実質年率15%となります。
+
+
+    【Q】手数料はどのように計算されますか？
+
+    【A】ご利用残高に対して日割りで計算されます。繰上返済を行うことで、将来的に支払う手数料を軽減することが可能です。
+
+
+    詳細は「リボ払い：金利・料率一覧」をご覧ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c8ca4b83-6d99-5ac0-8289-d09c4813ce97
+  title: リボ払い：お申込みとご利用開始
+  body: 'リボ払いのご利用開始までの手順をご案内いたします。
+
+
+    1. お手続きの依頼：担当者へリボ払いへの変更または新規申し込みを伝えてください。
+
+    2. 本人確認：多要素認証による厳格な本人確認を実施します。画面の指示に従い認証を完了させてください。
+
+    3. 審査と確認：割賦販売法に基づきお客様の「支払可能見込額」を調査し、無理のない返済能力があるかを確認します。
+
+    4. 条件の合意：実質年率15%の手数料と、毎月の最低支払額5,000円について、内容に同意していただきます。
+
+    5. 利用開始：手続き完了の通知をもって、リボ払いをご利用いただけます。
+
+
+    ご利用状況の確認については「リボ払い：状況・履歴の確認」をご参照ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1ed54dc7-46ea-5808-9ecb-9a8f5d5348f4
+  title: リボ払い：手数料一覧
+  body: 'リボ払いにかかる手数料は以下の通りです。
+
+
+    ・リボ払い手数料（実質年率）：15%
+
+
+    ※1回払いなどの手数料無料プランとは異なり、信用供与が発生するサービスのため、リスクと利便性に見合った手数料を課金しております。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 5d586df3-fcaf-567d-ac10-776973912057
+  title: リボ払い：お手続きが完了しない・保留中のまま
+  body: '【症状】リボ払いの申し込み手続き中に画面が止まる、または「保留中」のまま完了しない。
+
+
+    【考えられる原因】
+
+    ・多要素認証による本人確認が正常に完了していない。
+
+    ・支払可能見込額の調査において、追加の確認事項が発生している。
+
+
+    【確認と解決策】
+
+    1. 認証通知が届いていないか、再度デバイスを確認してください。
+
+    2. 入力内容に誤りがないか、再度確認をお願いいたします。
+
+
+    【解決しない場合】
+
+    担当者が状況を確認し、必要に応じて専門のコンプライアンス担当者へエスカレーションいたします。審査状況や不備の内容について、折り返しのご連絡を差し上げますので、今しばらくお待ちください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bc61c8c3-03e3-5cce-b863-25f549ef226e
+  title: リボ払い：お申込みいただける方
+  body: '【お申込み条件と結果】
+
+    ・支払可能見込額の調査において、無理のない返済能力があると判断された方 → ご利用いただけます
+
+    ・ご利用額が支払可能見込額の範囲内に収まる方 → ご利用いただけます
+
+    ・上記条件を満たさない場合 → お申込みいただけない場合がございます'
+  domain: payments
+  product_category: ribo_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 461d7ff7-2090-5931-b543-4b17615fe5cc
+  title: リボ払い：当社の似た商品との比較
+  body: '【リボ払い】
+
+    実質年率15%の手数料で、毎月の支払額を5,000円などの一定額に抑えられます。家計の変動を避けたい方に最適です。
+
+
+    【分割払い】
+
+    あらかじめ決められた回数で計画的に返済します。高額商品の購入など、完済時期を明確にしたい方に適しています。
+
+
+    柔軟性を重視される場合は「リボ払い」を、計画性を重視される場合は「分割払い」をお選びください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8abacdbf-73b6-599d-a738-44bd263f731b
+  title: リボ払い：重要事項のご説明
+  body: '本サービスのご利用にあたり、以下の重要事項をご確認ください。
+
+
+    リボ払いは、実質年率15%の手数料が発生いたします。毎月の最低支払額は5,000円となります。支払額を低く設定しすぎると、元金の減少が進まず、結果として手数料の総額が増加し、完済までにかかる期間が長期化するリスクがあります。
+
+
+    当社は、割賦販売法に基づく支払可能見込額の調査を徹底することで、お客様の過剰債務を防止します。ショッピングのリボ払いは貸金業法の総量規制の対象外ですが、ご自身の返済能力に見合った計画的なご利用をお願いいたします。
+
+
+    詳細なリスクについては「リボ払い：リスクについてのご説明」をご参照ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 0d26c9ba-00aa-5724-8481-59440b5da6ab
+  title: リボ払い：金利・料率一覧
+  body: 'リボ払いにおける適用金利は以下の通りです。
+
+
+    ・実質年率：15%
+
+
+    上記金利はすべてのお客様に一律で適用されます。利用残高に応じて日割りで計算されます。繰上返済を行うことで、将来的な利息負担を軽減することが可能です。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: abbe9010-6dda-5f91-a3c3-2956d3e2b5b2
+  title: リボ払い：実施中のキャンペーン
+  body: '【家計の安心を紡ぐサポートキャンペーン】
+
+    無理のない柔軟な支払いを提案する「リボ払い」のご利用を促進しております。月々の支払額を一定に保ち、心にゆとりある生活を実現しませんか。
+
+
+    期間：2026年1月1日から2026年6月30日まで
+
+
+    適用条件は実質年率15%の通常プランとなります。詳しくはお手続き時に担当者へお問い合わせください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9bdbd93c-48ce-5546-97df-9731ee9d7990
+  title: リボ払い：不正利用からお客さまを守るために
+  body: 'リボ払いの設定変更を装ったフィッシング詐欺などの不正利用にご注意ください。
+
+
+    **つむぎカードから、メールやSMSでパスワードや暗証番号を伺うことはございません。**
+
+
+    不審な連絡を受け、リボ払いのプラン変更や限度額の調整を誘導された場合は、決して情報を入力せず、すぐに弊社カスタマーセンターまでご連絡ください。また、ご利用限度額の変更や契約内容の変更時には、必ず多要素認証による厳格な本人確認を実施しております。
+
+
+    もしカードの紛失や盗難、または身に覚えのない請求に気づかれた場合は、**直ちに利用停止の手続き**をお願いいたします。迅速な報告により、規定に基づいた補償をスムーズに行うことが可能です。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1052e0bd-ee6f-56d8-8ea9-b5552e0afc1f
+  title: リボ払い：規定・約款
+  body: 'リボ払いサービスのご利用にあたり、以下の規定を適用いたします。
+
+
+    *   **お支払い義務**: お客様は、毎月の最低支払額である5,000円、またはリボ残高のいずれか少ない金額を、指定の期日までにお支払いいただく義務を負います。
+
+    *   **手数料の適用**: リボ払い残高に対し、実質年率15%の手数料が日割り計算で課金されます。
+
+    *   **契約の変更**: 弊社は、法令の改正や経済状況の変化に基づき、事前の通知をもって本約款を変更することがあります。
+
+    *   **契約の終了**: お客様による解約のお申し出、または支払不能等の事由により弊社が契約を解除した場合に終了します。
+
+
+    詳細なリスクおよび重要事項については、「リボ払い：重要事項のご説明」をご確認ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: cbb1fee4-be1a-5500-8488-12b10ba1fbba
+  title: リボ払い：おすすめの方と主な使い方
+  body: 'リボ払いは、月々の支払額を一定に抑えることで、家計の変動を緩やかにしたい方におすすめの柔軟な支払いオプションです。
+
+
+    **【おすすめの方】**
+
+    *   季節的に出費が増える月があり、月々の予算を安定させたい方
+
+    *   高額な買い物をしながらも、無理のない範囲で返済を計画したい方
+
+
+    **【主な使い方】**
+
+    毎月の最低支払額を5,000円に設定することで、急な出費があっても月々の負担を一定に保てます。なお、本サービスのご利用には実質年率15%の手数料がかかります。余裕がある時に「繰上返済」を行うことで、将来的な手数料負担を軽減することが可能です。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 0db8d64c-e8e5-5640-bea2-0cfa9d630a53
+  title: リボ払い：リボ払いの毎月の最低支払額について
+  body: '**Q: リボ払いの毎月の最低支払額はいくらですか？**
+
+    A: つむぎカードのリボ払いにおける毎月の最低支払額は5,000円です。残高が5,000円未満の場合は、その全額がお支払い額となります。
+
+
+    **Q: 最低支払額以上の金額を支払うことはできますか？**
+
+    A: はい、可能です。「繰上返済」として追加でお支払いいただくことで、効率的に残高を減らし、実質年率15%の手数料を節約いただけます。詳細は「リボ払い：手数料一覧」をご覧ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 3a50ad86-c750-52bd-9a59-fe00a354d9df
+  title: リボ払い：解約・変更・プランの切替え
+  body: 'リボ払いの設定変更や解約の手順をご案内します。
+
+
+    **【お手続きの流れ】**
+
+    1.  **変更内容の提示**: カスタマーセンターへ、リボ払いの解約、または月々の支払額の変更（5,000円以上の金額への変更など）を伝えます。
+
+    2.  **現状の確認**: 現在のリボ残高および、変更後に適用される支払スケジュールについて弊社よりご説明いたします。
+
+    3.  **本人確認**: 多要素認証による厳格な本人確認を実施し、操作を承認します。
+
+    4.  **完了通知**: 設定変更が完了した旨を、公式アプリまたはメールにて通知いたします。
+
+
+    ※リボ払いを解約する場合、原則として残高を全額一括で返済いただく必要があります。詳細なプラン比較は「リボ払い：当社の似た商品との比較」をご参照ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2058d19b-ea33-5d06-a876-2fdb63f11549
+  title: リボ払い：想定外の手数料・金額
+  body: '「請求金額が予想より高い」と感じられた場合の確認事項です。
+
+
+    **【考えられる原因】**
+
+    *   **手数料の累積**: リボ残高に対し実質年率15%の手数料が日々加算されているため、支払額を最低限（5,000円）に設定している場合、元金の減少速度が緩やかになり、総支払額が増加します。
+
+    *   **利用額の増加**: リボ設定後の新たな買い物が累積している可能性があります。
+
+
+    **【対応策】**
+
+    1.  最新の明細書にて、元金と手数料の内訳を確認してください。
+
+    2.  返済期間を短縮したい場合は、繰上返済をご検討ください。
+
+
+    解決しない場合や、計算に不備があると思われる場合は、専門のコンプライアンス担当者へエスカレーションし、誠実に調査いたします。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8649863d-c32b-5bd1-8172-86969dec628d
+  title: リボ払い：必要書類
+  body: 'リボ払いのご利用開始、または利用限度額の変更に伴い、以下の書類が必要となる場合がございます。
+
+
+    *   **本人確認書類**: 運転免許証、マイナンバーカード等の公的証明書（必須）
+
+    *   **収入証明書**: 源泉徴収票や確定申告書（限度額の増枠を希望される場合など、支払可能見込額の調査に必要な場合に提出を求めます）
+
+
+    **【審査結果】**
+
+    提出書類に基づき、支払可能見込額の調査を行い、適切であると判断された場合にリボ払い機能をご提供いたします。詳細は「リボ払い：お申込みいただける方」をご確認ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: dd071b9b-c724-5630-a6d8-dd6a6b8acef6
+  title: リボ払い：他社の一般的な商品との比較
+  body: '他社の一般的なリボ払いサービスと、つむぎカードの「リボ払い」を比較します。
+
+
+    *   **手数料体系**: 他社では利用金額や契約期間に応じて変動金利を採用する場合がありますが、つむぎカードは実質年率15%という透明性の高い単一料金体系を採用しています。
+
+    *   **最低支払額**: 多くの他社サービスと同様に、無理のない返済を実現するため、最低支払額を5,000円に設定しております。
+
+
+    **【選び方】**
+
+    *   **つむぎカード**: 手数料率が明確で、シンプルに家計管理を行いたい方に向いています。
+
+    *   **他社サービス**: 特定の条件で低金利キャンペーン等がある場合、短期間の利用には適している可能性があります。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 26322fac-f173-5c0f-92fb-74dc36b1c6af
+  title: リボ払い：リスクについてのご説明
+  body: 'リボ払いのご利用にあたっては、以下のリスクを十分にご理解ください。
+
+
+    **【過剰債務のリスク】**
+
+    毎月の支払額を最低額の5,000円に設定し続けると、実質年率15%の手数料が優先的に充当されるため、元金の減少が遅くなります。その結果、完済までにかかる期間が長期化し、最終的な支払総額が大幅に増加する恐れがあります。
+
+
+    **【法令遵守】**
+
+    弊社は割賦販売法に基づき、お客様の支払可能見込額を厳格に審査します。無理のない返済計画を立てることが重要です。詳細な重要事項は「リボ払い：重要事項のご説明」に記載しております。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 29a73823-04e6-5fee-a330-706eec744d8f
+  title: リボ払い：金利・料率の決まり方と適用
+  body: 'リボ払いに適用される金利（手数料率）の仕組みをご説明します。
+
+
+    *   **適用金利**: すべてのお客様に一律で実質年率15%が適用されます。残高や利用期間による変動はありません。
+
+    *   **計算方法**: 「リボ残高 × 実質年率15% ÷ 365日 × 利用日数」として、日割りで計算されます。
+
+    *   **適用タイミング**: 決済が行われた日から、当該金額が完済されるまで適用されます。
+
+
+    手数料を軽減させる唯一の方法は、繰上返済によりリボ残高を早期に減らすことです。詳細な一覧は「リボ払い：金利・料率一覧」をご参照ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 779e98e0-ae3b-525a-bdec-2e510258b543
+  title: リボ払い：ご紹介・継続利用の特典
+  body: '【ご紹介キャンペーンのご案内】
+
+    2026年1月1日から2026年3月31日までの期間中、つむぎカードの「リボ払い」を初めてご利用の方、またはご友人に紹介してご利用いただいた方に、特典として1,000円分のポイントを進呈いたします。
+
+
+    日々の支払額を一定に抑えられる柔軟なリボ払いで、無理のない家計管理を始めてみませんか。詳細については、担当者までお問い合わせください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7eb541e0-ed8c-5837-a1be-c4580b5b34e7
+  title: リボ払い：安全にご利用いただくためのポイント
+  body: 'リボ払いを安心・安全にご利用いただくために、以下の点にご注意ください。
+
+
+    **セキュリティの基本ポイント**
+
+    *   **多要素認証の活用**：利用限度額の変更や契約内容の変更時には、必ず多要素認証による厳格な本人確認を実施します。認証コードを第三者に教えないでください。
+
+    *   **不正利用の防止**：インターネットショッピングでは、EMV 3-Dセキュアなどの本人認証サービスを導入しています。不審な決済通知が届いた場合は、すぐにご連絡ください。
+
+    *   **パスワードの管理**：暗証番号やログインパスワードをメモしてカードと一緒に保管することは避け、定期的に変更することをお勧めします。
+
+
+    もしカードの紛失や盗難、身に覚えのない請求に気づいた場合は、直ちにご連絡ください。規定に基づき、迅速な利用停止と補償手続きを行います。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 28c121c0-b8a2-5e8c-a20d-8c0eea444669
+  title: リボ払い：規定・約款の変更
+  body: '本サービス「リボ払い」の規定および約款に変更が生じる場合、つむぎカードは事前にお客様へ通知いたします。
+
+
+    **変更に関する重要事項**
+
+    *   **通知方法**：約款の変更は、公式アプリ、ウェブサイトへの掲載、または書面にてお知らせいたします。変更後の規定は、指定された適用日から有効となります。
+
+    *   **手数料の改定**：実質年率15%の手数料率や、毎月の最低支払額5,000円などの重要な条件を変更する場合、十分な猶予期間をもって告知します。
+
+    *   **同意の扱い**：変更適用日以降に本サービスを継続して利用された場合、新しい約款に同意したものとみなされます。
+
+
+    本約款は、経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の監督指針に基づき、公正に運用されます。内容にご不明点がある場合は、いつでもお問い合わせください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: eb3a8457-7940-5cf2-a2fb-3e872519b365
+  title: リボ払い：ご利用開始までの手順
+  body: '【サポート担当者向け：リボ払い利用開始ガイダンス】
+
+    お客様が「リボ払い」の利用を開始される際の手順は以下の通りです。誠実かつ丁寧に案内してください。
+
+
+    1.  **意向確認と説明**：お客様に、月々の支払額を一定に抑えられる利便性と、実質年率15%の手数料が発生することを明確に説明します。
+
+    2.  **支払可能見込額の調査**：年収、生活維持費、既存のクレジット債務に基づき、無理のない返済計画が可能かを確認します。
+
+    3.  **本人確認の実施**：契約内容の変更となるため、多要素認証を用いて厳格な本人確認を行います。
+
+    4.  **設定の完了**：最低支払額（5,000円）を含む、月々の支払金額を決定し、設定を完了させます。
+
+    5.  **完了通知**：設定内容を改めてお客様に伝え、手続きが完了したことを案内します。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d30861a1-1453-5f18-86b4-30549a47a648
+  title: リボ払い：手数料と費用
+  body: '**Q: リボ払いを利用する場合、どのような手数料がかかりますか？**
+
+    A: リボ払いのご利用には、実質年率15%の手数料がかかります。これは、柔軟な支払いプランを提供するためのリスクと利便性に見合った適正な設定となっております。
+
+
+    **Q: 毎月最低いくらから支払うことができますか？**
+
+    A: 毎月の最低支払額は5,000円からとなっております。お客様のご都合に合わせて、この金額以上の範囲で月々のお支払額を設定いただけます。
+
+
+    詳細は「リボ払い：手数料一覧」をご参照ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c0609f9d-7abc-524c-a4e5-bc411a05a12f
+  title: リボ払い：登録内容の変更
+  body: 'リボ払いの月々の支払金額などの登録内容を変更される際の手順をご案内します。
+
+
+    **変更手続きの流れ**
+
+    1.  **変更希望の提示**：担当者に「リボ払いの月々支払額を変更したい」旨をお伝えください。
+
+    2.  **金額の指定**：新しく設定したい支払金額を提示してください。なお、最低支払額は5,000円となりますので、この金額以上の設定をお願いいたします。
+
+    3.  **本人確認**：安全のため、多要素認証による本人確認を行います。画面の指示に従って認証を完了させてください。
+
+    4.  **内容の確認と確定**：担当者が変更後の金額と、それに伴う返済期間の目安を案内します。内容に間違いがなければ、確定を依頼してください。
+
+    5.  **完了の確認**：手続き完了後、変更内容が反映された旨の通知を受け取ったことで、変更は完了となります。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 024ba31a-95db-510c-96fd-044732a5a2b8
+  title: リボ払い：ログインできない・アクセスできない
+  body: 'リボ払いの設定確認や変更を行う際、アプリやウェブサイトにログインできない場合の対処法です。
+
+
+    **考えられる原因と解決策**
+
+    *   **パスワードの入力誤り**：大文字・小文字の区別が正しく行われているか、不要なスペースが入っていないかをご確認ください。解決しない場合は、パスワードの再設定をお願いします。
+
+    *   **認証エラー**：多要素認証のコードが届かない場合は、通信状況を確認し、再送を依頼してください。
+
+    *   **アカウントのロック**：短時間に何度も誤ったパスワードを入力すると、セキュリティのためロックがかかります。この場合は、本人確認手続きが必要です。
+
+
+    **解決しない場合の対応**
+
+    上記を試してもログインできない場合は、担当者がお客様の本人確認を改めて実施し、アクセス権限の復旧やパスワードのリセットを行います。状況に応じて専門のコンプライアンス担当者が対応し、安全にアクセスを再開できるようサポートいたします。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: aff73ff4-944a-5769-ac8c-7060e7273daa
+  title: リボ払い：ご利用条件による違い
+  body: "【サポート担当者向け：リボ払い利用判定基準】\nお客様の状況に応じた提供可否の判断基準です。\n\n*   **支払可能見込額の調査結果 ＞ 希望利用額**\
+    \ → **承認**：規定の手数料（実質年率15%）にて提供可能です。\n*   **希望利用額 ＞ 支払可能見込額の調査結果**\
+    \ → **不可**：割賦販売法に基づき、支払可能見込額を超える利用可能枠は設定できません。\n*   **信用情報機関への登録内容に重大な懸念あり**\
+    \ → **審査保留/否決**：社内審査基準に基づき、個別に判断します。\n*   **本人確認（多要素認証）不可** →\
+    \ **手続き停止**：厳格な本人確認が完了するまで、設定変更は行えません。"
+  domain: payments
+  product_category: ribo_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 21834d88-263e-5044-8ce5-17f5bd100fa5
+  title: リボ払い：プランの選び方
+  body: 'つむぎカードでは、お買い物の金額や返済計画に合わせて、「リボ払い」と「分割払い」を選択いただけます。
+
+
+    **リボ払い（本プラン）**
+
+    *   **特徴**：利用金額に関わらず、月々の支払額を一定（最低5,000円から）に設定できます。家計の変動を緩やかにしたい方に最適です。
+
+    *   **コスト**：実質年率15%の手数料がかかります。
+
+
+    **分割払い**
+
+    *   **特徴**：あらかじめ決められた回数で計画的に返済します。高額な買い物を完結させたい方に適しています。
+
+
+    **選び方の目安**
+
+    *   毎月の支出を固定して、無理のない柔軟な支払いを希望される方は「リボ払い」をお選びください。
+
+    *   いつまでに完済するかという期限を明確にしたい方は「分割払い」が適しています。
+
+
+    詳細は「分割払い：商品概要」と併せてご確認ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 47892796-d5fd-5a29-b0bd-09c2ddeefc66
+  title: リボ払い：個人情報の取扱い
+  body: 'つむぎカードは、お客様の個人情報を適切に管理し、透明性のある開示を行います。本サービス「リボ払い」のご利用に際し、以下の通り取り扱います。
+
+
+    **個人情報の収集と利用**
+
+    *   **信用情報の照会**：適切な信用供与を行うため、指定信用情報機関に登録されている情報を参照し、支払可能見込額の調査を実施します。
+
+    *   **利用目的**：収集した情報は、審査、契約管理、および割賦販売法に基づく支払可能見込額の調査のために利用いたします。
+
+    *   **第三者提供**：法令に基づき、またはお客様の同意がある場合を除き、正当な理由なく第三者に個人情報を提供することはありません。
+
+
+    **お客様の権利**
+
+    お客様は、ご自身の個人情報の開示や訂正を求めることができます。また、不適切な取り扱いがある場合は、日本クレジット協会の相談窓口とも連携し、誠実かつ迅速に解決を図ります。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9ef8dc68-2dca-5db4-bbe7-b3c7705e8de7
+  title: リボ払い：この商品をかたる詐欺にご注意ください
+  body: '最近、つむぎカードの「リボ払い」をかたる不審な連絡が増えております。特に「特別に低金利でリボ払いに切り替えられる」や「未払金があるため至急手続きが必要」といった内容で、個人情報やパスワードを巧みに聞き出そうとする手口にご注意ください。
+
+
+    **つむぎカードから、メールや電話でお客様のパスワード、暗証番号、または多要素認証のコードを伺うことは絶対にございません。**
+
+
+    不審な連絡を受けた場合は、指示に従わず、すぐに当社のカスタマーセンターまでご連絡ください。また、身に覚えのない請求や不審な操作履歴がある場合は、速やかに利用停止の手続きを行ってください。お客様の安心と安全を守るため、不審な案内には十分にご警戒いただけますようお願い申し上げます。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 590473b6-3786-506d-8047-b6e938033ffd
+  title: リボ払い：限度額・制限と注意事項
+  body: '「リボ払い」のご利用にあたっては、以下の限度額および制限事項をご案内ください。
+
+
+    **【適用される手数料と支払額】**
+
+    *   実質年率：15%
+
+    *   毎月の最低支払額：5,000円
+
+
+    **【利用制限と注意事項】**
+
+    *   **支払可能見込額の調査**：割賦販売法に基づき、カードの発行時と利用可能枠の増額時に支払可能見込額を調査し、過剰債務を防止するための厳格な審査を実施しております。ショッピングのリボ払いは貸金業法の総量規制の対象外です。
+
+    *   **利息の発生**：リボ払いは、支払額を一定に抑えられる利便性がある一方、返済期間が長くなるほど、15%の手数料負担が増加します。
+
+    *   **最低支払額の遵守**：毎月5,000円以上の支払いが必須となります。この金額を下回る設定はできず、支払いが滞った場合は遅延損害金が発生する可能性があります。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f05a5fff-2e4d-53a4-ae5d-f776570f089b
+  title: リボ払い：お申込みとご利用条件
+  body: '**Q. リボ払いの申し込みにはどのような条件がありますか？**
+
+    A. つむぎカードをお持ちで、当社の定める審査基準を満たしたお客様がご利用いただけます。適用される手数料は実質年率15%となります。
+
+
+    **Q. 利用にあたっての最低条件はありますか？**
+
+    A. 毎月の最低支払額として5,000円を維持していただく必要があります。詳細は「リボ払い：お申込みいただける方」をご確認ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: ee076b2e-b15c-5f51-9c32-00ae0f30d262
+  title: リボ払い：状況・履歴の確認
+  body: '現在のリボ払いのご利用状況や返済履歴を確認する手順は以下の通りです。
+
+
+    1.  **現在の残高確認を依頼する**：お客様から「リボ払いの現在の利用残高と、次回の支払予定額を知りたい」とお申し付けください。
+
+    2.  **最新状況の回答**：当社より、現在のリボ払い残高、適用されている15%の手数料、および次回の請求予定額を回答いたします。
+
+    3.  **返済履歴の照会を依頼する**：さらに詳細な履歴が必要な場合は、「過去の支払履歴を確認したい」とお伝えください。
+
+    4.  **履歴の提示**：当社より、過去の支払回数、元金の充当額、および支払った手数料の明細を提示し、返済が進んでいることをご確認いただきます。
+
+
+    これにより、現在の債務状況と今後の返済計画を正確に把握いただけます。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9637cc72-0d0c-5b6c-b851-b3911bfb5cf0
+  title: リボ払い：お取引が拒否された・制限された
+  body: '「リボ払いに切り替えたいが、手続きが拒否された」という場合の対処法をご案内します。
+
+
+    **【考えられる原因】**
+
+    *   **利用可能枠の不足**：ショッピング利用可能枠の上限に達している場合、リボ払いへの変更が制限されることがあります。
+
+    *   **審査基準への抵触**：最新の支払可能見込額の調査により、追加の信用供与が困難と判断された可能性があります。
+
+    *   **支払可能見込額による制限**：ご利用額が、支払可能見込額の調査で設定した利用可能枠に達している場合、制限がかかります。
+
+
+    **【確認と解決策】**
+
+    1.  現在の利用残高を確認し、枠に余裕があるかチェックしてください。
+
+    2.  余裕がない場合は、繰上返済を行い、利用可能枠を確保してください。
+
+
+    **【エスカレーション】**
+
+    上記を確認しても解決せず、個別の状況判断が必要な場合は、専門のコンプライアンス担当者が詳細な審査を行い、制限解除の可否を判断いたします。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b770333e-3bbb-518f-a857-c449b19d931b
+  title: リボ払い：切替えや上位プランを検討するとき
+  body: 'お客様が「リボ払い」か「分割払い」かで迷われている場合は、以下の基準でご案内ください。
+
+
+    *   **リボ払い**：月々の支払額を5,000円などの一定額に抑え、家計の変動を緩やかにしたい方向けです。柔軟に支払額を変更でき、利便性に優れています。
+
+    *   **分割払い**：高額な買い物を、あらかじめ決まった回数で計画的に返済したい方向けです。終了時期が明確であるため、完済計画が立てやすくなります。
+
+
+    月々の負担軽減を最優先される場合はリボ払いが適していますが、総支払額を明確に管理したい場合は分割払いがより安心な選択肢となります。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d12e1494-36b7-5ed1-aed6-f9186c25e79a
+  title: リボ払い：ほかの選択肢との比較と向かない場合
+  body: '「リボ払い」をご検討の方へ、他の支払い方法との比較と、ご利用を控えていただきたいケースをご案内します。
+
+
+    **【他の選択肢との比較】**
+
+    *   **1回払い**：手数料はかかりません。最も経済的ですが、高額利用時に月々の負担が大きくなります。
+
+    *   **リボ払い**：実質年率15%の手数料が発生しますが、月々の支払額を5,000円からと低く抑えられ、家計にゆとりを持たせることができます。
+
+
+    **【リボ払いが向かない場合】**
+
+    *   **短期間で全額返済できる場合**：15%の手数料を支払うため、1回払いで十分に対応できる場合はおすすめしません。
+
+    *   **厳格な完済期限を設けたい場合**：支払額を低く設定しすぎると完済まで時間がかかり、結果的に手数料負担が増えます。
+
+    *   **月々5,000円の最低支払額の維持が困難な場合**：無理のない返済計画が立てられない場合は、他の支払い方法をご検討ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 10cc271a-4db9-5066-b49d-87f8f1757414
+  title: リボ払い：ご利用方法の手順
+  body: '**Q. リボ払いを使い始めるにはどうすればよいですか？**
+
+    A. 当社へ「リボ払いの設定をしたい」とお申し付けください。お手続きの流れをご案内します。
+
+
+    **Q. 支払額を増やして早く返済したい場合は？**
+
+    A. 「繰上返済」の手続きが可能です。ご希望の金額を当社へお伝えください。手数料負担を軽減でき、効率的な返済が可能です。詳細は「リボ払い：よくあるお手続きの流れ」をご覧ください。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a679ff72-95e1-5a9c-968a-b9674f537d73
+  title: リボ払い：よくあるお手続きの流れ
+  body: '特定の利用分を「リボ払い」へ切り替える際の手続きの流れをご案内します。
+
+
+    1.  **対象取引の指定**：お客様から「〇月〇日の〇〇円の利用分をリボ払いに変更したい」とお申し付けください。
+
+    2.  **条件の提示と確認**：当社より、リボ払い適用後の実質年率15%の手数料についてご説明し、同意をいただきます。
+
+    3.  **支払額の決定**：毎月の支払額を決定します。最低支払額である5,000円以上の金額をご指定ください。
+
+    4.  **手続きの完了**：当社にて設定を完了し、次回の請求からリボ払いとして適用されることを回答いたします。
+
+
+    **【完了の確認】**
+
+    手続き後、次回の請求明細にて、対象の取引がリボ払いとして計上され、ご指定の金額（5,000円以上）が請求されていることでご確認いただけます。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d8a5828e-905e-5dbb-889c-1224838ff4f8
+  title: リボ払い：明細や記録と合わない
+  body: '「リボ払いの残高が、自分の計算よりも減っていないように感じる」というお問い合わせへの対応です。
+
+
+    **【想定される原因】**
+
+    *   **手数料の加算**：リボ払いは実質年率15%の手数料が日割りで計算され、元金に加算されます。支払額の多くがまず手数料の充当に充てられるため、元金が減りにくいと感じられることがあります。
+
+    *   **最低支払額の設定**：毎月5,000円の最低支払額に近い設定の場合、返済期間が長期化し、利息負担の割合が高まります。
+
+
+    **【確認手順】**
+
+    1.  直近の明細で「手数料」としていくら請求されているかを確認してください。
+
+    2.  支払った金額のうち、いくらが元金に充当され、いくらが手数料に充当されたかを照合します。
+
+
+    **【エスカレーション】**
+
+    計算に明らかな誤りがあると思われる場合や、詳細な再計算が必要な場合は、請求管理専門チームへエスカレーションし、正確な算出根拠を提示いたします。'
+  domain: payments
+  product_category: ribo_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b66e569c-4251-58bd-bdd3-e06f9fe15214
+  title: 分割払い：商品概要
+  body: '「分割払い」は、高額な買い物などの際にご利用いただける、計画的な返済をサポートする決済サービスです。あらかじめ決められた回数で、月々の支払額を分散させることで、家計への急激な負担を抑えながらお買い物を楽しんでいただけます。
+
+
+    **【ご利用条件と手数料】**
+
+    *   **最大支払回数**：最大24回まで設定可能です。
+
+    *   **実質年率**：12% ～ 15%（審査により決定いたします）。
+
+    *   **3回払い手数料**：利用金額100円あたり2.01円となります。
+
+
+    日々の生活に寄り添い、無理のない柔軟な支払いをご提案することで、お客様の経済的な安心を「紡ぐ」お手伝いをいたします。詳細な金利については、「分割払い：金利・料率一覧」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7870f2e4-91c4-51a5-8b91-83f04a3ce5bb
+  title: 分割払い：分割払いの手数料率（実質年率、下限）について
+  body: '**Q：分割払いを利用する際の手数料（実質年率）の下限はいくらですか？**
+
+
+    A：分割払いの実質年率の下限は12%となっております。実際にお客様に適用される金利は、審査の結果に基づき12%から15%の範囲内で決定されます。
+
+
+    詳細な料率については、「分割払い：金利・料率一覧」にてご確認いただけます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 26e2248a-17d7-57cf-959b-1196804d756b
+  title: 分割払い：お申込みとご利用開始
+  body: '分割払いのご利用は、以下の手順で簡単にお手続きいただけます。計画的な返済プランを立てて、安心してお買い物をご利用ください。
+
+
+    1.  **利用希望の提示**：対象となるお買い物の金額と、分割払いへの変更希望を私たちにお伝えください。
+
+    2.  **回数の選択**：ご希望の支払回数をお選びください。最大24回まで設定が可能です。
+
+    3.  **条件の確認**：適用される実質年率（12% ～ 15%）に基づいた月々の返済額と、最終的な手数料額を提示いたします。内容をご確認ください。
+
+    4.  **承諾と確定**：提示内容にご同意いただけましたら、分割払いへの変更が完了し、次回以降の請求に適用されます。
+
+
+    お申込みにあたっては、お客様の返済能力を審査し、適切かつ誠実なご提案をさせていただきます。概要は「分割払い：商品概要」をご覧ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 490c5bbc-17fc-50b0-b82a-118dab58f9fe
+  title: 分割払い：手数料一覧
+  body: '分割払い適用時に発生する手数料は以下の通りです。お客様へのご案内時には、正確な数値を用いて提示してください。
+
+
+    *   **実質年率（下限）**：12%
+
+    *   **実質年率（上限）**：15%
+
+    *   **3回払い手数料（利用金額100円あたり）**：2.01円
+
+    *   **最大支払回数**：24回'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e199902d-2863-5f71-9215-e12c97038b7f
+  title: 分割払い：お手続きが完了しない・保留中のまま
+  body: '分割払いの変更手続きが完了せず、「保留中」のままとなっている場合は、以下の点をご確認ください。
+
+
+    **【考えられる原因と確認事項】**
+
+    *   **本人確認の未完了**：状態変更の前に必要な多要素認証が完了していない可能性があります。認証手続きが正しく行われたか再度ご確認ください。
+
+    *   **利用限度額の不足**：分割払いの適用により、一時的に利用可能枠の計算が変動し、制限がかかっている場合があります。
+
+    *   **審査への回付**：お申込み内容に基づき、詳細な審査を行っております。通常、数営業日以内に結果が反映されます。
+
+
+    **【解決しない場合】**
+
+    上記を確認しても解決しない場合は、専門のコンプライアンス担当者が審査状況を確認し、個別に結果を通知いたします。適用条件については「分割払い：お申込みいただける方」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6f7910c9-c1fc-535c-b879-e8037617f1e4
+  title: 分割払い：お申込みいただける方
+  body: '分割払いのお申込み可否は、以下の条件に基づいて判断されます。
+
+
+    | 条件 | 判定 |
+
+    | :--- | :--- |
+
+    | つむぎカード（標準）を所有し、有効な状態である | 申請可能 |
+
+    | 支払可能見込額の範囲内である | 申請可能 |
+
+    | 支払可能見込額の調査により、返済能力が十分であると認められた | 利用可能 |
+
+    | 信用情報機関への照会により、規定の審査基準を満たしている | 利用可能 |
+
+
+    詳細なカードの仕様については「つむぎカード：商品概要」をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: ff32247f-452b-52f1-9339-f3169cda7986
+  title: 分割払い：当社の似た商品との比較
+  body: "「分割払い」と「リボ払い」は、どちらも支払額を分散できるサービスですが、仕組みが異なります。\n\n*   **分割払い**：最大24回というあらかじめ決められた回数で計画的に返済します。終了時期が明確であるため、高額な買い物の返済計画を立てたい方に最適です。\n\
+    *   **リボ払い**：月々の支払額を一定に抑え、家計の変動を緩やかにします。利用金額が増えても月々の負担が変わらないため、日常的な支出を管理したい方に適しています。\n\
+    \n**【選び方】**\n*   特定の高額商品について、期限を決めて完済したい場合 $\rightarrow$ **分割払い**\n*   月々の支払額を固定し、柔軟に家計を管理したい場合\
+    \ $\rightarrow$ **リボ払い**\n\n詳細は「リボ払い：商品概要」をご覧ください。"
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e07e6950-d6b1-531a-ba6f-d22948644103
+  title: 分割払い：重要事項のご説明
+  body: '本サービスは、経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の監督指針を厳守して提供されます。
+
+
+    **【重要事項】**
+
+    *   **手数料について**：分割払いのご利用には、実質年率12% ～ 15%の手数料が発生します。これは安全な決済インフラの維持とサービス向上のための適正な料金です。
+
+    *   **支払回数**：最大24回までとなります。
+
+    *   **過剰債務の防止**：当社は割賦販売法に基づきお客様の支払可能見込額を調査し、その範囲内で利用可能枠を設定することで、無理のないご利用を促します。
+
+    *   **個人情報の取り扱い**：指定信用情報機関への登録を含め、適切に管理し、透明性のある開示を行います。
+
+
+    金利の詳細については「分割払い：金利・料率一覧」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: fda51dae-3168-5e80-9b48-f2983fb6e968
+  title: 分割払い：金利・料率一覧
+  body: '分割払いにおける金利および手数料の詳細は以下の通りです。
+
+
+    **【適用金利・料率】**
+
+    *   **実質年率（下限）**：12%
+
+    *   **実質年率（上限）**：15%
+
+    *   **3回払い手数料**：利用金額100円あたり2.01円
+
+
+    **【適用条件】**
+
+    上記の実質年率は、お客様の信用状況や返済能力を審査した結果に基づき、12%から15%の範囲で個別に適用されます。一律の固定金利ではなく、審査により決定される点にご留意ください。
+
+
+    商品全体の概要は「分割払い：商品概要」でご確認いただけます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 5c862f6b-569b-5e19-80e8-dd21572b607d
+  title: 分割払い：実施中のキャンペーン
+  body: 'いつも「分割払い」をご利用いただき、誠にありがとうございます。
+
+
+    誠に恐れ入りますが、現在、分割払いサービスに関する特別な金利優待や手数料無料などのキャンペーンは実施しておりません。
+
+
+    今後、お得なプランやキャンペーンが開始された際には、公式アプリまたはウェブサイトにて速やかにご案内させていただきます。あわせて「分割払い：商品概要」にて、現在の標準的なサービス内容をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7faa2a9a-2333-56a0-bcc7-0a641f1e6f55
+  title: 分割払い：不正利用からお客さまを守るために
+  body: 'つむぎカードの「分割払い」をご利用いただく際は、安心してお買い物ができるよう、以下のセキュリティ対策を導入しております。
+
+
+    **不正利用防止の取り組み**
+
+    インターネットショッピングにおいては、EMV 3-Dセキュアなどの本人認証サービスを導入し、第三者による不正な決済を未然に防止しています。また、高額な決済を分割払いでご利用いただく場合など、不自然な利用パターンが検知された際は、多要素認証による厳格な本人確認を実施することがございます。
+
+
+    **ご注意いただきたい点**
+
+    つむぎカードから、メールや電話でカードの暗証番号やセキュリティコードを伺うことは決してございません。不審な連絡があった場合は、すぐにご連絡ください。
+
+
+    **万が一のときは**
+
+    カードの紛失や盗難、または身に覚えのない請求に気づいた場合は、直ちに利用停止の手続きをお願いいたします。規定に基づき、迅速な補償手続きを行います。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 0d368e7c-a0c6-51e4-8162-ba298d0cc5bc
+  title: 分割払い：規定・約款
+  body: '「分割払い」のご利用に関する規定および約款をご案内いたします。
+
+
+    **1. サービス内容と支払回数**
+
+    お客様は、加盟店でのショッピング利用時に、あらかじめ決められた回数で計画的に返済する「分割払い」を選択いただけます。最大支払回数は24回までとなっております。
+
+
+    **2. 手数料（金利）の適用**
+
+    分割払いのご利用には、実質年率12%から15%の範囲内で設定された手数料が課金されます。適用される具体的な利率は、審査結果に基づき決定いたします。
+
+
+    **3. お支払い義務**
+
+    お客様は、毎月定まった期日に、元金と所定の手数料を合わせてお支払いいただく義務を負います。支払いが遅延した場合、規定の遅延損害金が発生することがあります。
+
+
+    **4. 契約の変更と終了**
+
+    支払回数の変更や繰上返済を希望される場合は、所定の手続きが必要です。また、当社は法令に基づき、支払可能見込額の調査結果により利用を制限する場合があることをご了承ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e8d322f1-badd-5b1d-8460-56fe5cbfc840
+  title: 分割払い：おすすめの方と主な使い方
+  body: '「分割払い」は、高額な買い物をされた際に、月々の負担を抑えて計画的に返済したい方に最適なサービスです。
+
+
+    **このような方におすすめです**
+
+    *   家電製品や家具など、まとまった金額の買い物をされる方
+
+    *   月々の家計の支出を一定に保ちながら、余裕を持って返済したい方
+
+    *   リボ払いよりも、いつ完済できるかが明確なプランを好まれる方
+
+
+    **主な使い方**
+
+    お買い物時に「分割払い」を選択し、ご希望の回数（最大24回まで）をご指定ください。これにより、一度に全額を支払うのではなく、期間を分散して無理のない支払いを実現できます。
+
+
+    **ご利用時のポイント**
+
+    実質年率12%〜15%の手数料がかかりますが、あらかじめ返済計画が立てられるため、経済的な安心感を「紡ぐ」ことができます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a5d6e368-e0fa-5c77-b73c-1cd042caa297
+  title: 分割払い：分割払いの手数料率（実質年率、上限）について
+  body: '**Q: 分割払いを利用した際の手数料（実質年率）の上限はいくらですか？**
+
+
+    A: 「分割払い」に適用される実質年率の上限は15%となっております。お客様の審査結果に基づき、12%から15%の範囲内で適用利率が決定いたします。
+
+
+    詳細な金利の決まり方については、「分割払い：金利・料率の決まり方と適用」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 72ad5751-4b62-5c7a-b0a0-1c6e5f781f30
+  title: 分割払い：解約・変更・プランの切替え
+  body: '「分割払い」のプラン変更や、他のお支払い方法への切り替え手順をご案内いたします。
+
+
+    **1. プラン変更・繰上返済のご依頼**
+
+    現在ご利用中の分割払いについて、残高をまとめて返済（繰上返済）したい場合や、支払回数の変更を希望される場合は、その旨をお伝えください。現在の残高と、精算に必要な金額を確認いたします。
+
+
+    **2. 内容の確認と承諾**
+
+    ご提案した精算金額や、変更後の月々のお支払い額をご確認いただき、承諾のお返事をいただきます。
+
+
+    **3. 手続きの完了**
+
+    承諾後、速やかに変更処理を行います。処理が完了すると、次回の請求明細に反映されます。
+
+
+    なお、分割払いから「リボ払い」への切り替えを検討される場合は、月々の支払額をより柔軟に設定できるため、併せてご検討ください。詳細は「リボ払い：商品概要」をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4b8196e9-c4c5-5bc2-a203-846d1df7846e
+  title: 分割払い：想定外の手数料・金額
+  body: '請求金額や手数料が想定と異なる場合の確認手順をご案内します。
+
+
+    **考えられる原因と確認事項**
+
+    *   **適用利率の確認**: 「分割払い」の手数料は実質年率12%から15%の間で決定されます。ご自身の適用利率がどちらであるかをご確認ください。
+
+    *   **3回払い手数料の計算**: 3回払いをご利用の場合、利用金額100円あたり2.01円の手数料が適用されています。計算に相違がないかご確認ください。
+
+    *   **端数処理**: 回数によって月々の支払額に数円の端数調整が発生する場合がございます。
+
+
+    **解決しない場合の対応**
+
+    上記を確認しても金額に納得がいかない場合は、詳細な計算内訳を提示させていただきます。弊社にて再計算を行い、誤りがある場合は速やかに修正し、次回の請求分で調整いたします。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 58bd9f94-70fe-55b9-9ce7-bce1174214f9
+  title: 分割払い：必要書類
+  body: '「分割払い」を初めてご利用いただく際、または利用限度額の変更を伴う場合に必要となる書類は以下の通りです。
+
+
+    *   **本人確認書類**: 運転免許証、マイナンバーカードなどの公的証明書（原本または有効な写し）
+
+    *   **収入証明書類**: 源泉徴収票や確定申告書など（支払可能見込額の調査が必要な場合に提示をお願いしております）
+
+
+    ※すでに「つむぎカード」をご利用中の方は、多くの場合、追加書類なしでご利用いただけます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 902db277-c83a-5c63-aaa4-3ed0cbf12ee7
+  title: 分割払い：他社の一般的な商品との比較
+  body: '他社の一般的な分割払いサービスと比較した、つむぎカードの「分割払い」の特徴は以下の通りです。
+
+
+    *   **支払回数の柔軟性**: 最大24回まで設定可能であり、長期的な計画が立てやすくなっています。
+
+    *   **透明性の高い手数料**: 実質年率12%〜15%という明確なレンジを提示し、誠実な運用を行っております。
+
+    *   **安心の審査体制**: 割賦販売法に基づく支払可能見込額の調査を徹底し、無理のないお支払い方法を提案します。
+
+
+    他社サービスの中には、より短期間の回数制限があるものや、手数料率が変動的に設定されているものがございます。計画的に返済し、将来的なコストを明確にしたい方は、当社の「分割払い」が適しています。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 787afeae-798a-50ba-b22c-88cfb1cd0b53
+  title: 分割払い：リスクについてのご説明
+  body: '「分割払い」のご利用にあたり、以下のリスクについて十分にご理解ください。
+
+
+    **手数料による負担増**
+
+    分割払いを利用すると、実質年率12%から15%の手数料が発生します。一括払いに比べて、最終的な支払総額は多くなります。特に回数を長く設定する場合、手数料の負担が増える点にご注意ください。
+
+
+    **過剰債務の防止**
+
+    無理な分割支払いは、家計を圧迫する原因となります。当社では、割賦販売法に基づき、お客様の「支払可能見込額」に基づいた適切な審査を行い、過剰な債務を抱えないよう配慮いたします。
+
+
+    **お支払い遅延のリスク**
+
+    支払いが遅れた場合、遅延損害金が発生し、信用情報機関への登録を通じて今後のカード利用やローン契約に影響を及ぼす可能性があります。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 24525dac-8268-50e3-8044-ff4ebc8c8513
+  title: 分割払い：金利・料率の決まり方と適用
+  body: '「分割払い」に適用される金利・料率の決定方法についてご案内いたします。
+
+
+    **適用利率の範囲**
+
+    本サービスでは、実質年率12%から15%の範囲内で利率を設定しております。
+
+
+    **利率の決定要因**
+
+    具体的な適用利率は、お客様の信用状況、年収、既存の借入状況などの審査結果に基づき、個別に決定されます。一度決定した利率は、原則としてそのお取引の完了まで適用されます。
+
+
+    **特例手数料**
+
+    3回払いをご利用の場合、利用金額100円あたり2.01円の手数料を適用しております。これにより、短期間の分割利用におけるコストを明確にしています。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 3ba7eb56-75a5-5342-9d2c-f6fd90729847
+  title: 分割払い：ご紹介・継続利用の特典
+  body: 2026年1月1日から2026年3月31日までの期間中、初めて「分割払い」をご利用いただくお客様に、計画的な家計管理をサポートする特典をご案内いたします。3回払いをご選択の場合、利用金額100円あたり2.01円という透明性の高い手数料で、無理のないお支払いが可能です。日々の安心を紡ぐ、柔軟な決済プランをぜひこの機会にご検討ください。
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9e59bf67-7d95-5f78-aad0-a1ce7c980f1e
+  title: 分割払い：安全にご利用いただくためのポイント
+  body: '「分割払い」を安全にご利用いただくために、以下の点にご注意ください。
+
+
+    ・**多要素認証の徹底**：お支払い回数の変更や契約内容の変更など、重要な操作の前には必ず多要素認証による本人確認を実施いたします。認証コードを第三者に教えないでください。
+
+    ・**不審な連絡への警戒**：つむぎカードから、メールやSMSで暗証番号やセキュリティコードを伺うことはございません。不自然なリンクが含まれるメッセージには十分ご注意ください。
+
+    ・**不正利用の早期発見**：ご利用明細を定期的にご確認いただき、心当たりのない分割決済がある場合は、直ちにご連絡ください。
+
+
+    万が一、カードの紛失や盗難、不正利用が疑われる場合は、迅速に利用停止手続きを行います。詳細は「つむぎカード：不正利用からお客さまを守るために」をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: fc4f8a57-4164-5768-8bec-332a23697d84
+  title: 分割払い：規定・約款の変更
+  body: '「分割払い」の規定および約款の変更に関する事項をご案内いたします。
+
+
+    本サービスにおける実質年率は、お客様の審査結果に基づき12%から15%の範囲で設定されます。経済情勢の変化や法令の改正に伴い、これらの利率や手数料体系を変更させていただく場合がございます。変更がある場合は、事前に公式アプリまたはウェブサイトにて通知いたします。
+
+
+    **主な遵守事項**：
+
+    ・お支払回数は最大24回までとし、定められた期日までにご返済いただく義務を負います。
+
+    ・支払可能見込額の調査に基づき、利用限度額が制限される場合があります。
+
+
+    本約款の詳細や、他社サービスとの比較検討をされる際は、最新の「分割払い：商品概要」をご参照ください。ご同意いただけない場合は、速やかに解約手続きをお願いいたします。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7e57086a-169a-574f-bd3b-6b5a0230b95d
+  title: 分割払い：ご利用開始までの手順
+  body: '【サポート担当者向け：分割払い利用開始の案内フロー】
+
+
+    お客様が「分割払い」の利用を希望された際は、以下の手順で案内し、手続きを完了させてください。
+
+
+    1. **本人確認の実施**：状態変更を伴う操作となるため、多要素認証を用いて厳格な本人確認を行ってください。
+
+    2. **支払可能見込額の確認**：お客様の年収や既存の借入状況を確認し、過剰債務を防止するための審査基準を満たしているか確認します。
+
+    3. **条件の提示と合意**：適用される実質年率（12%から15%の範囲内）および、最大24回までの分割回数について説明し、お客様の同意を得てください。
+
+    4. **設定の完了**：ご希望の回数に基づき決済設定を適用し、完了した旨を通知します。
+
+
+    注意点として、3回払いを選択される場合は、利用金額100円あたり2.01円の手数料が発生することを明確に伝えてください。詳細な料金体系は「分割払い：手数料一覧」を併せて参照してください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2ae4570c-1c3f-59b2-b685-a60f858d79d1
+  title: 分割払い：3回払いの手数料（利用金額100円あたり）について
+  body: 'Q：分割払いで「3回払い」を選択した場合の手数料はいくらになりますか？
+
+
+    A：「分割払い」の3回払い手数料は、利用金額100円あたり2.01円となります。
+
+
+    例として、10,000円のお買い物を3回払いにされた場合、手数料は201円となります。詳細な料金プランについては、「分割払い：手数料一覧」をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: dd4a2604-30d2-505e-8cdb-c0c63f56043c
+  title: 分割払い：登録内容の変更
+  body: '「分割払い」に関する登録内容（ご連絡先やご請求先など）を変更する手順は以下の通りです。
+
+
+    1. **変更内容の提示**：変更したい登録項目と、新しい内容を当社担当者へお伝えください。
+
+    2. **本人確認の実施**：セキュリティ保護のため、多要素認証による本人確認を行います。画面に表示された指示に従い、認証を完了させてください。
+
+    3. **変更内容の確認**：担当者が変更内容を復唱し、間違いがないか最終確認を行います。
+
+    4. **完了通知の受領**：手続き完了後、登録内容が更新された旨の通知が届きますので、内容をご確認ください。
+
+
+    ※お支払い回数の変更（例：24回から12回への変更）を希望される場合は、別途審査が必要となる場合がございます。その際は「分割払い：商品概要」に基づいた案内をさせていただきます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4e9adae9-1d66-511a-9c59-12d841da523a
+  title: 分割払い：ログインできない・アクセスできない
+  body: '「分割払い」の設定変更画面にアクセスできない、またはログインできない場合の対処法です。
+
+
+    **考えられる原因と確認事項**：
+
+    1. **認証情報の誤り**：IDまたはパスワードが正しく入力されているか再度ご確認ください。
+
+    2. **多要素認証の不備**：認証デバイスが手元にあるか、通信環境に問題がないかをご確認ください。
+
+    3. **アカウントの制限**：セキュリティ上の理由で一時的にアクセスが制限されている可能性があります。
+
+
+    **解決策**：
+
+    ・パスワードを忘れた場合は、再設定手続きを行ってください。
+
+    ・認証エラーが続く場合は、ブラウザのキャッシュ消去またはアプリの再起動をお試しください。
+
+
+    上記を確認しても解決せず、至急の設定変更が必要な場合は、当社にて状況を確認いたします。専門のコンプライアンス担当者および技術チームへエスカレーションし、最短1営業日以内に解決策を回答させていただきます。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: eea6f3e4-c0ae-57cd-a33c-220342d6979e
+  title: 分割払い：ご利用条件による違い
+  body: 'お客様のご利用条件による適用内容の違いは以下の通りです。
+
+
+    ・**審査結果（標準）**：実質年率 12%〜15% / 最大支払回数 24回
+
+    ・**支払可能見込額の範囲内**：利用可能（上限は個別の利用限度額に準じます）
+
+    ・**支払可能見込額の調査**：年収や生活維持費、他社のクレジット債務に基づき、利用枠が調整されます。
+
+
+    詳細な審査基準は「分割払い：お申込みいただける方」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c3631504-ae0a-5d31-893f-d8a4bf524706
+  title: 分割払い：プランの選び方
+  body: '「分割払い」と「リボ払い」の選び方についてご案内します。
+
+
+    ・**分割払い**：最大24回という期限が決まっており、計画的に返済したい高額商品のお買い物に適しています。実質年率は12%から15%です。
+
+    ・**リボ払い**：月々の支払額を一定に抑え、家計の変動を緩やかにしたい方に適しています。
+
+
+    明確な完済時期を設けたい場合は「分割払い」をおすすめします。詳細は「リボ払い：商品概要」と比較してご検討ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6e3dd069-9583-57e6-89c9-e67e932c3617
+  title: 分割払い：個人情報の取扱い
+  body: '「分割払い」のご利用にあたり、当社はお客様の個人情報を以下の通り適切に管理いたします。
+
+
+    **情報の収集と利用目的**：
+
+    本サービスでは、割賦販売法および貸金業法に基づき、お客様の年収、生活維持費、既存の借入状況などの情報を収集し、「支払可能見込額」の調査を実施します。これは過剰債務を防止し、お客様の経済的な安心を紡ぐための不可欠な手続きです。
+
+
+    **信用情報機関への登録**：
+
+    ご契約内容およびお支払い状況は、指定信用情報機関に登録され、適切に管理されます。これらの情報は、公正な取引と透明性の確保のために利用されます。
+
+
+    **情報の開示と管理**：
+
+    お客様からの請求に基づき、登録情報の開示を行います。また、個人情報保護法を遵守し、厳格なセキュリティ体制の下で管理しております。個人情報の詳細な取り扱いについては「つむぎカード：個人情報の取扱い」をご確認ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 16620a96-0d67-5429-bef9-fc6fecca6c69
+  title: 分割払い：この商品をかたる詐欺にご注意ください
+  body: 'つむぎカードの「分割払い」サービスをかたる巧妙な詐欺が発生しています。お客様にご注意いただきたい点をご案内いたします。
+
+
+    **【想定される詐欺の手口】**
+
+    *   「特別な低金利の分割プランが適用された」という虚偽のメールやSMSを送り、外部サイトへ誘導する。
+
+    *   「分割払いの回数変更手続きを行うため」として、カード番号、セキュリティコード、または暗証番号を要求する。
+
+
+    **【重要：つむぎカードからのお願い】**
+
+    当社がメールやSMSで、お客様の**暗証番号やパスワード、セキュリティコードを伺うことは絶対にございません。**
+
+
+    もし不審な連絡を受け、不安を感じられた場合は、すぐに利用停止の手続きを行ってください。不正利用が疑われる場合は、速やかに当社カスタマーセンターまでご連絡をお願いいたします。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 62af9e60-f04a-509c-accf-d2b299352bf5
+  title: 分割払い：限度額・制限と注意事項
+  body: '「分割払い」のご利用に関する制限および注意事項についてご案内いたします。サポート担当者は、お客様への案内時に以下の基準を遵守してください。
+
+
+    **【利用制限と限度額】**
+
+    *   **最大支払回数：** 最長で24回まで設定可能です。
+
+    *   **利用可能枠：** 割賦販売法に基づくお客様の「支払可能見込額」の調査結果をもとに、個別に設定されたショッピング利用限度額の範囲内でご利用いただけます。
+
+
+    **【注意事項】**
+
+    *   高額な決済を分割払いに設定される場合、審査の結果、希望回数が適用されない場合がございます。
+
+    *   分割払いのご利用には、実質年率12%から15%の手数料が発生します。
+
+
+    詳細なリスクについては、「分割払い：リスクについてのご説明」をご参照ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c956758e-87bb-50b5-81d9-92095ae52613
+  title: 分割払い：分割払いの最大支払回数について
+  body: '**Q：分割払いは最大で何回まで分けることができますか？**
+
+
+    A：つむぎカードの「分割払い」では、最大24回までのお支払回数を選択いただけます。
+
+
+    **Q：利用金額によって回数に制限はありますか？**
+
+
+    A：はい。ご利用金額に応じて選択可能な回数が異なります。また、最終的な回数の適用には審査がございますので、あらかじめご了承ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 87b6e1a9-f703-585b-a12c-c2f4e7e820c1
+  title: 分割払い：状況・履歴の確認
+  body: '現在ご利用中の「分割払い」の残高や、お支払いの状況を確認する手順をご案内いたします。
+
+
+    1.  担当者に「分割払いの利用状況を確認したい」旨をお伝えください。
+
+    2.  多要素認証によるご本人確認を実施いたします。画面に表示される指示に従い、認証を完了させてください。
+
+    3.  担当者が、現在のご利用金額、支払回数の状況（例：24回中の5回目）、および今後の返済予定額を提示いたします。
+
+    4.  提示された内容が、お客様のお手元の記録と相違ないかをご確認ください。
+
+
+    ご確認後、もし早めに返済を完了させたい場合は、「繰上返済」の手続きについてもあわせてご相談ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 078cb225-6b19-59f2-8b14-4732a7b2462b
+  title: 分割払い：お取引が拒否された・制限された
+  body: '店舗での決済時やアプリでの変更時に、「分割払い」が選択できず拒否された場合の対処法です。
+
+
+    **【考えられる原因】**
+
+    *   **利用限度額の超過：** 分割払いの元金と予定手数料の合計が、ショッピング利用可能枠を超えている。
+
+    *   **支払可能見込額による制限：** 他社のクレジット債務を含めた支払可能見込額の調査の結果、審査基準を満たさなかった。
+
+    *   **本人認証の不備：** 多要素認証などの本人確認が正常に完了しなかった。
+
+
+    **【確認と解決策】**
+
+    1.  現在の利用可能枠に十分な余裕があるかをご確認ください。
+
+    2.  認証エラーが出ている場合は、再度、正確な情報を入力して認証をやり直してください。
+
+
+    上記を確認しても解決せず、正当な理由で利用を希望される場合は、担当者が専門のコンプライアンス担当者へエスカレーションし、再審査の可否を判断いたします。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e4972a71-39ce-5dff-a4d3-a1a330f0f29c
+  title: 分割払い：切替えや上位プランを検討するとき
+  body: 'お客様が「分割払い」から他の支払い方法への切り替えを検討される際、サポート担当者は以下の基準でご案内ください。
+
+
+    **【分割払い vs リボ払い】**
+
+    *   **分割払い：** 支払回数（最大24回）が固定されており、いつ完済するかが明確です。特定の高額商品を購入し、計画的に返済したい方に適しています。
+
+    *   **リボ払い：** 毎月の支払額を一定に抑えることができます。月々の家計の変動を緩やかにしたい方に適しています。
+
+
+    **【判断基準】**
+
+    *   「この買い物だけを数回で済ませたい」場合は**分割払い**を推奨してください。
+
+    *   「月々の支払額を固定して、家計管理を楽にしたい」場合は、**リボ払い**をご提案ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f61c8b66-6ad9-5b4c-ae5b-403536a651ba
+  title: 分割払い：ほかの選択肢との比較と向かない場合
+  body: '「分割払い」を検討される際、どのような場合に最適で、どのような場合に不向きかをご説明します。
+
+
+    **【分割払いが適しているケース】**
+
+    *   家電製品や家具など、高額な買い物をした際に、あらかじめ24回までの期間を決めて計画的に返済したい場合。
+
+
+    **【向かないケースと代替案】**
+
+    *   **少額の日常決済：** 手数料が発生するため、1回払いでの決済をおすすめします。
+
+    *   **毎月の支払額を変動させたくない：** 返済期間ではなく「月々の支払額」を固定したい場合は、「リボ払い」が適しています。
+
+    *   **より大きな金額を低金利で借りたい：** ショッピング枠ではなく、計画的な資金調達が必要な場合は「つむぎカードローン」をご検討ください。
+
+
+    **【注意点】**
+
+    分割払いは、一度設定すると原則として回数を増やすことはできません。無理のない返済計画を立ててご利用ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6b2c3eaa-3c19-5770-99ad-f3825c1e7f02
+  title: 分割払い：手数料と費用
+  body: '**Q：分割払いを利用する場合の手数料はいくらですか？**
+
+
+    A：分割払いの実質年率は12%から15%の範囲で設定されており、お客様の審査結果に基づき適用されます。
+
+
+    **Q：3回払いの場合の具体的な手数料を教えてください。**
+
+
+    A：3回払いの場合は、利用金額100円あたり2.01円の手数料を申し受けます。
+
+
+    **Q：手数料を安くする方法はありますか？**
+
+
+    A：お支払回数を少なく設定されるか、または「繰上返済」を行うことで、将来的に支払う手数料を軽減させることが可能です。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 3300d1d9-f768-5a8b-94e8-c39e729889c9
+  title: 分割払い：よくあるお手続きの流れ
+  body: 'ショッピングのご利用分を「分割払い」へ変更する際のお手続きの流れをご案内いたします。
+
+
+    1.  担当者に、分割払いに変更したい「利用店舗名」と「利用金額」、および「希望の支払回数（最大24回まで）」をお伝えください。
+
+    2.  当社にて、お客様の「支払可能見込額」に基づき、分割払いへの変更が可能か審査を行います。
+
+    3.  審査通過後、適用される実質年率（12%〜15%）と、それに基づく合計手数料額を提示いたします。
+
+    4.  提示内容に同意いただいた後、お手続きを完了いたします。完了後、変更内容が確認できる通知をいたします。
+
+
+    ※多要素認証による本人確認が必要な場合がございます。あらかじめご了承ください。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 46bcbfca-7beb-5f68-8710-54440d1f2ce5
+  title: 分割払い：明細や記録と合わない
+  body: 'お客様から「分割払いの明細金額や、残高の記録が想定と異なる」とのお問い合わせをいただいた際の対応手順です。
+
+
+    **【確認すべき事項】**
+
+    1.  **適用回数の再確認：** 設定された支払回数が、お客様の記憶している回数（最大24回まで）と一致しているか確認してください。
+
+    2.  **手数料の計算：** 実質年率12%〜15%に基づき、正しく手数料が加算されているか再計算してください。
+
+    3.  **繰上返済の有無：** 過去に「繰上返済」を行っていないか、履歴を確認してください。これにより残高が変動します。
+
+
+    **【解決策】**
+
+    *   計算の不一致が判明した場合は、正しい内訳を丁寧にご説明ください。
+
+    *   もしシステム上の不備や、計算根拠に疑義がある場合は、担当者が速やかにコンプライアンス担当者へエスカレーションし、精査した結果を後日お客様へ回答いたします。'
+  domain: payments
+  product_category: bunkatsu_barai
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e268cb14-4f76-5dda-9676-7100efe26447
+  title: キャッシング：商品概要
+  body: "つむぎカードの「キャッシング」は、ATMを通じて急な資金ニーズに即座に対応できる、短期的な小口融資機能です。お客様の経済的な安心を紡ぐため、シンプルで透明性の高いサービスを提供いたします。\n\
+    \n**【主な仕様と条件】**\n- **実質年率**：18%\n- **利用限度額**：最大 500,000円\n- **ATM利用手数料**：\n  -\
+    \ 10,000円以下のご利用：110円\n  - 10,000円超のご利用：220円\n\n本サービスは、日々の生活の中での一時的な資金不足を補うためのものです。ご利用にあたっては、お客様の返済能力を適切に審査させていただきます。\n\
+    \n詳細な金利については「キャッシング：金利・料率一覧」を、手数料の詳細については「キャッシング：手数料一覧」をご参照ください。"
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b955dd5a-99c6-5545-ba6a-39b49eb708ac
+  title: キャッシング：キャッシングの金利（実質年率）について
+  body: '**Q. キャッシングを利用した際の実質年率はいくらになりますか？**
+
+
+    A. つむぎカードのキャッシングにおける実質年率は 18% です。この利率は、ご利用金額に対して日割りで計算されます。
+
+
+    **Q. 金利は利用金額によって変動しますか？**
+
+
+    A. いいえ、本サービスでは一律で 18% の実質年率を適用しております。個別の金利適用条件については「キャッシング：金利・料率一覧」をご確認ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 49888cbf-60c7-53bf-ba28-5fc4e8ebe059
+  title: キャッシング：お申込みとご利用開始
+  body: 'キャッシングのご利用開始までの手順をご案内いたします。
+
+
+    **【ご準備いただくもの】**
+
+    - ご本人確認書類（運転免許証など）
+
+    - 収入証明書（年収に応じてご提示をお願いする場合がございます）
+
+
+    **【ご利用開始までのステップ】**
+
+    1. **お申込みの意思提示**：キャッシング機能の利用希望をお伝えください。
+
+    2. **本人確認と審査**：ご提示いただいた書類に基づき、支払可能見込額の調査と審査を行います。ここで、貸金業法に基づく「総量規制（原則として年収の3分の1まで）」の確認が行われます。
+
+    3. **限度額の決定**：審査結果に基づき、最大 500,000円 までの範囲内でご利用限度額を決定し、お知らせいたします。
+
+    4. **設定完了の通知**：キャッシング機能が有効になったことを通知いたします。これにより、ATM等でのお引き出しが可能となります。
+
+
+    審査の詳細については「キャッシング：お申込みいただける方」をご参照ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 624beaac-b2a7-541d-a34b-2f1837331f03
+  title: キャッシング：手数料一覧
+  body: 'キャッシング利用時に発生する手数料は以下の通りです。誠実で透明性の高い料金体系を維持しております。
+
+
+    **【ATM利用手数料】**
+
+    - 1回のお引き出し額が 10,000円 以下の場合：110円
+
+    - 1回のお引き出し額が 10,000円 を超える場合：220円
+
+
+    ※上記手数料は、ご利用されるATMの規定に基づき加算される場合があります。金利（実質年率 18%）は別途発生いたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 5c7b7cda-468d-5f36-8935-6e9ec5723644
+  title: キャッシング：お手続きが完了しない・保留中のまま
+  body: 'キャッシングのお申込み手続きが完了せず、「保留中」の状態が続いている場合に考えられる原因と対処法をご案内します。
+
+
+    **【考えられる原因】**
+
+    - **書類の不備**：ご提出いただいた本人確認書類の画像が不鮮明であるか、有効期限が切れている可能性があります。
+
+    - **審査の時間を要している**：支払可能見込額の調査に時間を要している場合がございます。
+
+    - **認証の未完了**：多要素認証による本人確認が完了していない可能性があります。
+
+
+    **【確認と解決方法】**
+
+    1. **提出書類の再確認**：最新かつ鮮明な書類が提出されているかをご確認ください。不備がある場合は、改めて正しくご提示いただきます。
+
+    2. **認証状況の確認**：認証通知が届いている場合は、速やかに完了させてください。
+
+
+    **【エスカレーションについて】**
+
+    上記を確認しても解決せず、3営業日以上経過している場合は、当社コンプライアンス担当者が個別に状況を確認し、結果を通知いたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8d8fcd82-a370-5f15-a35f-4e4902064230
+  title: キャッシング：お申込みいただける方
+  body: 'キャッシングのご利用には、以下の条件を満たしている必要があります。
+
+
+    | 条件項目 | 内容・基準 | 結果 |
+
+    | :--- | :--- | :--- |
+
+    | **本人確認** | 有効な公的証明書の提示が可能であること | 必須 |
+
+    | **返済能力** | 支払可能見込額の調査により、無理のない返済が可能と判断されること | 必須 |
+
+    | **借入制限** | 他社借入を含め、原則として年収の3分の1（総量規制）を超えないこと | 必須 |
+
+    | **審査結果** | 当社所定の信用審査を通過すること | 必須 |
+
+
+    上記すべてを満たし、審査に合格された方に、最大 500,000円 の限度額の範囲内でご利用を承認いたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d26e70c3-a220-5c53-bc83-162258b18152
+  title: キャッシング：当社の似た商品との比較
+  body: '急な資金ニーズがある場合、「キャッシング」と「つむぎカードローン」のどちらが適しているかをご案内します。
+
+
+    | 比較軸 | キャッシング | つむぎカードローン |
+
+    | :--- | :--- | :--- |
+
+    | **目的** | 短期的な小口融資（即時性重視） | 計画的な中長期の借入（低コスト重視） |
+
+    | **金利（年率）** | 18% | より低金利（詳細は個別審査） |
+
+    | **限度額** | 最大 500,000円 | キャッシングより大きな金額が可能 |
+
+    | **利便性** | ATMで即座に現金化可能 | 返済プランを事前に設定 |
+
+
+    **【選び方の目安】**
+
+    - 数日〜数週間で返済可能な少額の資金が必要な方は、利便性の高い**キャッシング**が最適です。
+
+    - より大きな金額を、低金利で計画的に返済したい方は、**つむぎカードローン**をお勧めいたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 02c2c3c3-4978-5e53-876b-3c420a02d337
+  title: キャッシング：重要事項のご説明
+  body: '本サービスは、貸金業法および金融庁の監督指針を厳守して運営されています。
+
+
+    **【重要事項】**
+
+    - **金利について**：本サービスの実質年率は 18% です。借入残高に対して日割りで計算され、毎月のご請求額に含まれます。
+
+    - **限度額と総量規制**：ご利用限度額は最大 500,000円 ですが、貸金業法に基づき、原則として年収の3分の1を超える借入はできません（総量規制）。
+
+    - **信用情報機関への登録**：ご契約内容およびお支払い状況は、指定信用情報機関に登録されます。適切に管理し、公正に取り扱います。
+
+    - **本人確認**：限度額変更などの重要な操作の前には、多要素認証による厳格な本人確認を実施いたします。
+
+
+    過剰債務を防止し、お客様が無理のない返済計画を維持できるよう、審査および限度額の設定を徹底しております。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 645b8129-2a2c-53bd-9a2f-fc1be614509c
+  title: キャッシング：金利・料率一覧
+  body: 'つむぎカードのキャッシングに適用される金利は以下の通りです。
+
+
+    **【適用金利】**
+
+    - **実質年率**：18%
+
+
+    本金利は、すべての利用金額に対して一律に適用されます。金利は借入日から返済日まで、残高に対して日割りで計算されます。金利の変更が行われる場合は、事前に公式アプリまたはウェブサイトにてお知らせいたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a0a36733-b171-5b43-a72b-63fcc2ebf93c
+  title: キャッシング：実施中のキャンペーン
+  body: '**【ATM利用手数料 特別還元キャンペーン】**
+
+
+    日頃のご愛顧に感謝し、キャッシングの利便性をより実感していただくためのキャンペーンを実施いたします。
+
+
+    - **期間**：2026年4月1日 〜 2026年6月30日
+
+    - **内容**：期間中、初めてキャッシングをご利用的にATMでお引き出しされた際の手数料（110円または220円）を、翌月のご請求時に全額還元いたします。
+
+    - **条件**：本キャンペーン期間中に、初めてキャッシング機能を利用し、ATMから現金を引き出したお客様が対象となります。
+
+
+    ※実質年率 18% は通常通り適用されます。詳細はカスタマーセンターまでお問い合わせください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 4f224f95-c07e-56c1-a597-094247fcb876
+  title: キャッシング：不正利用からお客さまを守るために
+  body: 'つむぎカードでは、お客様の資産と安心を守るため、キャッシング機能に厳格なセキュリティを導入しています。
+
+
+    **不正利用を防ぐための取り組み**
+
+    ・利用限度額の変更など、重要な設定変更の前には必ず**多要素認証**による本人確認を実施いたします。
+
+    ・ATM利用時の暗証番号は、第三者に推測されにくい数字に設定し、適切に管理してください。
+
+
+    **ご注意いただきたい点**
+
+    当社からメールや電話で、暗証番号やセキュリティコードを直接お伺いすることはございません。不審な連絡があった場合は、十分にご注意ください。
+
+
+    **万が一のときは**
+
+    カードの紛失や盗難、身に覚えのない利用に気づいた場合は、直ちに当社カスタマーセンターへご連絡ください。迅速に利用停止手続きを行い、規定に基づいた補償対応をさせていただきます。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d9f63ea5-923a-5226-8922-39a490f18b70
+  title: キャッシング：規定・約款
+  body: '本規定は、キャッシングサービスの利用に関する合意事項を定めたものです。
+
+
+    **1. 信用供与と限度額**
+
+    お客様には、審査に基づき最大500,000円までの利用限度額を付与します。ただし、貸金業法に基づく「総量規制」により、借入合計額は原則として年収の3分の1までに制限されます。
+
+
+    **2. 手数料および金利**
+
+    ・適用金利：実質年率18%にて運用いたします。
+
+    ・ATM利用手数料：10,000円以下の場合は110円、10,000円を超える場合は220円を課金いたします。
+
+
+    **3. 返済義務**
+
+    お客様は、約定した支払日に、元金および利息を遅滞なく支払う義務を負います。
+
+
+    **4. 契約の終了**
+
+    限度額の変更やサービスの解約を希望される場合は、多要素認証による本人確認を経て手続きを行います。また、支払可能見込額に著しい変動がある場合、当社は限度額を制限することがあります。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: fbd99606-6910-57b4-b325-bef101992858
+  title: キャッシング：おすすめの方と主な使い方
+  body: "キャッシングは、ATMを通じて急な資金ニーズに即座に対応できる、短期的な小口融資機能です。\n\n**このような方におすすめです**\n・急な出費があり、一時的に少額の現金が必要な方\n\
+    ・複雑なローン審査を待たず、手軽に資金を調達したい方\n\n**ご利用の仕組みとコスト**\n・**利用限度額**：最大500,000円（審査により決定）\n\
+    ・**適用金利**：実質年率18%\n・**ATM手数料**：\n  - 10,000円以下の引き出し：110円\n  - 10,000円を超える引き出し：220円\n\
+    \n**主な使い方**\n全国の対応ATMにて、お手持ちのカードと暗証番号で簡単にお引き出しいただけます。短期間で返済することで、利息負担を最小限に抑えながら、家計の急な変動を柔軟にカバーすることが可能です。"
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: ed99a5d3-3b77-56b2-bfcc-a37dc43fb4ff
+  title: キャッシング：キャッシング利用可能枠の上限について
+  body: '**Q: キャッシングの利用限度額は最大でいくらまで設定できますか？**
+
+
+    A: 最大500,000円まで設定可能です。ただし、お客様の年収や生活維持費、他社借入状況に基づく「支払可能見込額」の調査、および年収の3分の1までという「総量規制」に基づき審査を行い、個別に決定させていただきます。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: dc28a6c0-60da-51e9-91e4-f251aeee3b36
+  title: キャッシング：解約・変更・プランの切替え
+  body: 'キャッシング機能の解約や利用限度額の変更をご希望の方は、以下の手順でお手続きください。
+
+
+    **お手続きの手順**
+
+    1. **ご要望の提示**：限度額の増減またはキャッシング機能の解約を当社へお申し付けください。
+
+    2. **本人確認の実施**：セキュリティ保護のため、多要素認証による厳格な本人確認を行います。画面の指示に従い認証を完了させてください。
+
+    3. **審査および内容確認**：限度額変更の場合、改めて支払可能見込額の調査を行い、適用可能な金額を提示いたします。
+
+    4. **手続き完了の通知**：変更内容または解約が完了した旨を、アプリまたはメールにて通知いたします。
+
+
+    **ご注意点**
+
+    ・解約手続きを行う際は、まず現在のお借入残高をすべて完済していただく必要がございます。完済後の手続きとなりますのでご了承ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d012b6e1-f1ce-5fcf-8a40-3cf10b3e8845
+  title: キャッシング：想定外の手数料・金額
+  body: "お客様より「ATM手数料が想定と異なる」または「請求金額が予想より高い」との申し出があった場合は、以下の順で確認してください。\n\n**1. ATM手数料の確認**\n\
+    引き出し金額に応じて手数料が変動します。正しく適用されているか確認してください。\n・10,000円以下の場合 $\rightarrow$ 110円\n・10,000円超の場合\
+    \ $\rightarrow$ 220円\n\n**2. 利息計算の確認**\nキャッシングの金利は実質年率18%であり、お借入残高に対して日割りで計算されます。利用期間が長いほど利息額が増加します。\n\
+    \n**3. 対処とエスカレーション**\n上記を確認しても不整合がある場合、またはお客様が納得されない場合は、速やかに専門のコンプライアンス担当者へエスカレーションし、詳細な取引履歴の精査と回答を依頼してください。"
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6ded9627-e2db-58f1-bf90-2642a89d4aa7
+  title: キャッシング：必要書類
+  body: 'キャッシングのお申込みおよび限度額設定にあたり、以下の書類が必要となります。
+
+
+    ・**本人確認書類**：運転免許証、マイナンバーカード等の公的証明書（必須）
+
+    ・**収入証明書類**：源泉徴収票や所得証明書など（一定額以上の限度額設定を希望される場合に必要）
+
+
+    審査において、支払可能見込額の確認が行われます。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a3a9415d-95f2-5663-86a8-cfb24c54b7f8
+  title: キャッシング：他社の一般的な商品との比較
+  body: '他社の一般的なキャッシングと比較して、つむぎカードは「短期的な利便性」に特化しています。実質年率18%という金利設定は業界標準であり、最大500,000円の枠を迅速に活用できる点が強みです。
+
+
+    一方、より大きな金額を長期的に、かつ低い金利で借りたい場合は、キャッシングよりも「つむぎカードローン：商品概要」の方が適しています。用途に合わせて最適な手段をお選びください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 26312ffc-16d7-58ff-89ac-ece5ea8cfdaa
+  title: キャッシング：リスクについてのご説明
+  body: 'キャッシングをご利用いただく前に、以下のリスクについて十分にご確認ください。
+
+
+    **金利負担について**
+
+    本サービスの実質年率は18%です。利息は日割りで計算されるため、返済期間が長くなるほど、支払う手数料（利息）の総額が増加します。
+
+
+    **過剰債務の防止について**
+
+    当社では、貸金業法に基づき、原則として年収の3分の1までという「総量規制」を厳守しています。無理な借入は経済的な不安につながるため、お客様の返済能力に応じた適切な利用をお願いいたします。
+
+
+    **返済の義務**
+
+    キャッシングはあくまで借入であり、将来的に必ず返済する必要があります。支払いが遅延した場合は、遅延損害金が発生し、信用情報機関への登録を通じて今後の金融サービス利用に影響が出る可能性があります。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e34c7151-276b-53e0-ab09-8421959ca2d8
+  title: キャッシング：金利・料率の決まり方と適用
+  body: 'キャッシングに適用される金利および手数料の基準は以下の通りです。
+
+
+    **1. 適用金利**
+
+    ・実質年率：18%
+
+    本金利はすべてのお客様に一律で適用され、お借入残高に対して日割り計算で算出されます。
+
+
+    **2. ATM利用手数料**
+
+    一度の引き出し金額に応じて、以下の手数料が適用されます。
+
+    ・10,000円以下：110円
+
+    ・10,000円超：220円
+
+
+    金利および手数料は、安全な決済インフラの維持と持続的なサービス向上のため、適正な水準に設定しております。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bca05d46-6877-5e5a-91a1-713efe1cfe8e
+  title: キャッシング：ご紹介・継続利用の特典
+  body: つむぎカードのキャッシングを継続的にご利用いただいているお客様や、ご友人にご紹介いただいたお客様へ、感謝の気持ちを込めて特別な特典をご用意しております。詳細な条件や現在のキャンペーン内容については、ぜひ担当スタッフまでお問い合わせください。お客様の生活に寄り添い、安心を紡ぐサービスをぜひご体験ください。
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2bc363fd-0347-571c-b5c1-9d734af26e59
+  title: キャッシング：安全にご利用いただくためのポイント
+  body: 'キャッシングを安全にご利用いただくために、以下の点に十分ご注意ください。
+
+
+    **暗証番号の管理**：推測されやすい番号を避け、第三者に教えないでください。
+
+    **利用状況の確認**：不審な利用がないか、定期的にご利用明細をご確認ください。
+
+    **本人確認の徹底**：利用限度額の変更や契約内容の変更時には、必ず多要素認証による厳格な本人確認を実施いたします。
+
+
+    万が一、カードの紛失や盗難が発生した場合は、直ちに利用停止の手続きを行ってください。規定に基づいた迅速な補償対応により、お客様の資産を守ります。
+
+
+    詳細は「キャッシング：不正利用からお客さまを守るために」もあわせてご覧ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9121c79f-a188-50f0-ab7e-4a2f1431a142
+  title: キャッシング：規定・約款の変更
+  body: 'つむぎカードのキャッシング利用規定および約款は、法令の改正や経済状況の変化に伴い変更される場合がございます。
+
+
+    **変更の通知**：規定の変更がある場合は、公式ウェブサイトへの掲載または書面にて事前にお知らせいたします。
+
+    **適用される条件**：現在、実質年率18%の手数料、最大500,000円の利用限度額に基づき運用しております。
+
+    **同意の扱い**：変更後も継続して本サービスを利用された場合、変更後の規定に同意したものとみなされます。
+
+
+    お客様の過剰債務を防止するため、総量規制（原則として年収の3分の1まで）を厳守し、適正な信用供与を維持いたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 6dc8ad9d-761e-5545-9805-e797debb0b74
+  title: キャッシング：ご利用開始までの手順
+  body: 'お客様がキャッシングのご利用を開始されるまでの標準的なフローは以下の通りです。
+
+
+    1. **お申込みと審査**：お客様から申込みを受け、年収や生活維持費に基づき「支払可能見込額」の調査を行います。
+
+    2. **限度額の決定**：審査結果に基づき、最大500,000円の範囲内で利用限度額を設定します。
+
+    3. **ご契約・カード発行**：貸金業法および銀行法等の監督指針に基づき契約を締結し、カードを発行します。
+
+    4. **ご利用開始**：ATMにてキャッシングが利用可能となります。
+
+
+    操作に伴う本人確認は多要素認証で厳格に行います。詳細な条件は「キャッシング：お申込みいただける方」をご確認ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: dc70fba8-330d-5966-8110-0d3269e37d45
+  title: キャッシング：ATM利用手数料（1万円以下）について
+  body: '**Q: 10,000円以下の金額をATMでキャッシングする場合、手数料はいくらになりますか？**
+
+
+    A: 10,000円以下のご利用の場合、ATM利用手数料は110円となります。
+
+    なお、ご利用金額が10,000円を超える場合は、別途手数料（220円）が適用されます。詳細は「キャッシング：手数料一覧」にてご確認いただけます。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 53709ed9-9ce7-5d35-973a-6dca7a654646
+  title: キャッシング：登録内容の変更
+  body: 'ご登録情報の変更をご希望の場合は、以下の手順でお手続きください。
+
+
+    1. **変更内容の提示**：住所や電話番号など、変更したい内容を私たちにお知らせください。
+
+    2. **本人確認の実施**：セキュリティ保護のため、多要素認証による厳格な本人確認を行います。画面の指示に従い認証を完了させてください。
+
+    3. **変更内容の確定**：担当者が変更内容を確認し、登録を更新します。
+
+    4. **完了通知の受領**：お手続きが完了した後、確認の通知が届きます。
+
+
+    ご不明な点は「キャッシング：状況・履歴の確認」をご参照ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e8171f47-582d-5e7a-b8e4-b3072d53f148
+  title: キャッシング：ログインできない・アクセスできない
+  body: 'キャッシングの管理画面にログインできない場合は、以下の点をご確認ください。
+
+
+    **考えられる原因と対処法**：
+
+    - **ID・パスワードの誤入力**：大文字・小文字が正しく入力されているかご確認ください。
+
+    - **アカウントのロック**：認証失敗が続いた場合、セキュリティのため一時的に制限されます。
+
+    - **通信環境の不安定**：ネットワーク接続を再確認し、再度お試しください。
+
+
+    **解決しない場合**：
+
+    私たちにお知らせいただければ、本人確認の上、パスワードの再設定やロック解除をサポートいたします。複雑な不具合については、専門のコンプライアンス担当者へエスカレーションし、迅速に解決を図ります。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 16a11a1d-b285-5703-939e-80f490adc57a
+  title: キャッシング：ご利用条件による違い
+  body: 'お客様の状況に応じたキャッシング利用可否の判断基準は以下の通りです。
+
+
+    - **年収の3分の1以下（借入合計額）**：原則として審査通過後、最大500,000円の範囲内で限度額を設定。
+
+    - **年収の3分の1を超える借入がある場合**：総量規制に基づき、原則として新規利用不可。
+
+    - **支払可能見込額が不足している場合**：過剰債務防止のため、利用不可または限度額を制限。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7a0c076c-941a-5c33-a279-102516b96ff5
+  title: キャッシング：プランの選び方
+  body: '短期的な資金ニーズには「キャッシング」、より大きな金額を計画的に返済したい場合は「つむぎカードローン」が適しています。
+
+
+    キャッシングは実質年率18%で、ATMから即座に利用できる利便性が特徴です。一方、カードローンはより低金利で長期的なプランが可能です。お客様の返済能力に合わせて誠実にご提案いたします。詳細は「キャッシング：当社の似た商品との比較」をご覧ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f3ce42d7-fd31-51f4-8f28-78db5b4259d8
+  title: キャッシング：個人情報の取扱い
+  body: 'つむぎカードでは、お客様の個人情報を金融庁および経済産業省の監督指針に基づき、厳重に管理しております。
+
+
+    **信用情報機関への登録**：適切な信用供与と過剰債務防止のため、ご契約内容およびお支払い状況を指定信用情報機関に登録し、照会させていただきます。
+
+    **利用目的**：個人情報は、審査、契約維持、および法令に基づく報告にのみ利用し、公正に取り扱います。
+
+    **開示請求**：お客様ご自身の情報の開示をご希望の場合は、所定の手続きにより透明性のある開示を行います。
+
+
+    多要素認証の導入により、不正アクセスからお客様の情報を守る体制を整えています。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b81caba7-da54-5628-bf1c-58dd8fd61b44
+  title: キャッシング：この商品をかたる詐欺にご注意ください
+  body: '最近、つむぎカードの「キャッシング」サービスを装い、「審査なしで即日融資」や「特別な低金利での提供」を謳う偽のメールやSMSによる詐欺が発生しております。このような案内はすべて虚偽であり、当社がこのような手法でお客様にアプローチすることはありません。
+
+
+    **特にご注意いただきたい点**
+
+    - 当社が電話やメールで、暗証番号やセキュリティコード、パスワードなどの個人情報を伺うことは絶対にございません。
+
+    - 公式アプリや公式サイト以外で、キャッシングの申し込みを促す不審なURLをクリックしないでください。
+
+
+    万が一、不審な連絡を受けたり、心当たりのない取引がある場合は、速やかに当社のカスタマーセンターへご連絡ください。また、不正利用の防止策については「つむぎカード：不正利用からお客さまを守るために」でもご確認いただけます。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1aa961a6-cd54-5f69-a47a-5bdbae495a0f
+  title: キャッシング：限度額・制限と注意事項
+  body: 'キャッシングサービスのご利用にあたっては、以下の限度額および制限事項が適用されます。安全なご利用のため、必ず内容をご確認ください。
+
+
+    **限度額と金利**
+
+    - **最大利用限度額**: 500,000円
+
+    - **実質年率**: 18%
+
+
+    **ご利用上の重要な制限**
+
+    - **総量規制の適用**: 貸金業法に基づき、お客様の年収の3分の1までという借入制限（総量規制）を厳守しております。これを超えるご利用はいただけません。
+
+    - **支払可能見込額の調査**: 無理のないご返済をいただくため、年収や生活維持費、他社借入状況に基づき、適切に支払可能見込額を審査しております。
+
+
+    **注意事項**
+
+    - 限度額の変更や契約内容の変更を行う際は、多要素認証による厳格な本人確認を実施いたします。
+
+    - ご返済が遅延した場合、ご利用が一時的に制限される場合がございます。詳細は「キャッシング：規定・約款」をご参照ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bdc7e33c-8d27-52c4-8186-ce584f586c78
+  title: キャッシング：ATM利用手数料（1万円超）について
+  body: '**Q: ATMで10,000円を超える金額をキャッシングした場合、手数料はいくらになりますか？**
+
+
+    A: 10,000円を超える金額をお引出しの場合、ATM利用手数料は220円となります。
+
+
+    なお、10,000円以下のお引出しの場合は110円となります。手数料の詳細については「キャッシング：手数料一覧」をご確認ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b9591b41-1ff2-5a37-b0de-299a7a05bac4
+  title: キャッシング：状況・履歴の確認
+  body: '現在のご利用残高や、過去のキャッシング履歴を確認する手順をご案内します。
+
+
+    1. **確認の依頼**: 当社カスタマーセンターにて、キャッシングの現在の利用状況と履歴の照会を申し出てください。
+
+    2. **本人確認の実施**: セキュリティ保護のため、多要素認証による厳格な本人確認を行います。画面の指示に従い、認証を完了させてください。
+
+    3. **内容の確認**: 本人確認完了後、オペレーターより「現在の利用残高」および「直近のご利用明細（日付、金額、ATM手数料など）」をご案内いたします。
+
+
+    **確認できる項目**
+
+    - 利用可能枠（最大500,000円までのうち、あといくら利用できるか）
+
+    - 直近の引出金額および適用されたATM手数料（110円または220円）
+
+    - 現在の未返済残高'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 97b17e45-22fa-5e43-a32e-219f8042a910
+  title: キャッシング：お取引が拒否された・制限された
+  body: 'ATMなどでキャッシングの取引が拒否された場合、以下の原因が考えられます。順にご確認ください。
+
+
+    **考えられる原因と確認事項**
+
+    1. **利用限度額への到達**: 現在の利用残高が、お客様に設定された限度額（最大500,000円）に達していないかご確認ください。
+
+    2. **暗証番号の誤入力**: 暗証番号を複数回間違えた場合、セキュリティのため一時的にロックがかかります。
+
+    3. **ご返済の遅延**: お支払いに遅れがある場合、法令および規定に基づき、利用制限がかかっている可能性がございます。
+
+
+    **解決策と対応**
+
+    - 限度額内であるにもかかわらず利用できない場合は、当社にてカードの状態を確認いたします。本人確認後、制限の解除が可能か審査させていただきます。
+
+    - 暗証番号のロック解除や再設定が必要な場合は、改めてお手続きをご案内します。
+
+
+    解決しない場合は、専門のコンプライアンス担当者へエスカレーションし、詳細な調査結果をご報告いたします。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 11fb28e1-47fd-5a69-be43-56fa9fc89b11
+  title: キャッシング：切替えや上位プランを検討するとき
+  body: '急な資金ニーズへの対応に便利な「キャッシング」と、より計画的なご利用が可能な「つむぎカードローン」の使い分けについてご案内します。
+
+
+    - **キャッシング**: ATMで即座に現金を得られる利便性が特徴です。実質年率は18%となります。短期的な小口資金の調達に適しています。
+
+    - **つむぎカードローン**: キャッシングよりも大きな金額を、より低金利で、計画的な返済プランに基づいて利用できます。
+
+
+    **選び方の目安**
+
+    - 数日間から数週間で完済できる短期的な資金が必要な場合は、「キャッシング」が最適です。
+
+    - 返済期間を長く設定し、月々の負担を軽減しながらまとまった金額を借りたい場合は、「つむぎカードローン」への切り替えをご検討ください。詳細は「つむぎカードローン：商品概要」をご参照ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 780b8d6d-bc2c-5312-9e94-2b2a882d0fe5
+  title: キャッシング：ほかの選択肢との比較と向かない場合
+  body: '「キャッシング」は非常に利便性の高いサービスですが、コスト面から見て最適ではない場合がございます。以下の比較をご参考にしてください。
+
+
+    **他の支払いオプションとの比較**
+
+    - **キャッシング**: 実質年率18%と高めに設定されており、ATM利用手数料（110円または220円）もかかります。即時性は最大ですが、コストは最も高くなります。
+
+    - **分割払い**: 高額な買い物を計画的に返済する場合に適しています。キャッシングで現金を借りて支払うよりも手数料を抑えられる場合があります。
+
+    - **つむぎカードローン**: より低金利で、まとまった資金を計画的に借りたい場合に適しています。
+
+
+    **向かないケース**
+
+    - **長期的な借入を検討している方**: 18%という金利は短期利用を前提としたものです。長期にわたる借入は、利息負担が大きくなるため推奨いたしません。
+
+    - **計画的な出費が決まっている方**: 物品購入が目的であれば、「分割払い」の方が経済的である可能性が高いです。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1df0ba5e-ec02-5a29-97f1-f79ef5640d1e
+  title: キャッシング：手数料と費用
+  body: "**Q: キャッシングを利用した際にかかる費用について教えてください。**\n\nA: 主に「利息（手数料）」と「ATM利用手数料」の2点がございます。\n\
+    \n- **利息**: ご利用金額に対し、実質年率18%の手数料が日割りで計算されます。\n- **ATM利用手数料**: \n  - 10,000円以下のお引出し：110円\n\
+    \  - 10,000円超のお引出し：220円\n\nこれらはご利用金額や回数に応じて加算されます。詳細な計算方法は「キャッシング：金利・料率一覧」をご確認ください。"
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 173fdd14-81ec-5a16-aa51-796174e7c885
+  title: キャッシング：よくあるお手続きの流れ
+  body: 'キャッシングのご利用限度額の設定や、お申し込みの一般的な流れをご案内します。
+
+
+    1. **利用申請の依頼**: 当社にキャッシング利用枠の設定を申し出てください。
+
+    2. **情報の提供**: 正確な審査のため、年収、就業状況、および他社からの借入状況についてお知らせください。
+
+    3. **支払可能見込額の審査**: ご提供いただいた情報に基づき、貸金業法に則った「支払可能見込額」の調査と「総量規制（原則として年収の3分の1まで）」の確認を行います。
+
+    4. **審査結果の通知**: 審査の結果、お客様に最適な利用限度額（最大500,000円まで）を決定し、通知いたします。
+
+    5. **ご利用開始**: 通知後、すぐにATMにてキャッシングのご利用が可能となります。
+
+
+    ※審査の結果、ご希望の限度額に届かない場合や、ご利用いただけない場合がございますので、あらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bbb4636d-eb78-5e58-80d0-095a6323eb18
+  title: キャッシング：明細や記録と合わない
+  body: 'お客様が記録している金額と、当社の明細上の残高に相違がある場合、以下の要因が考えられます。
+
+
+    **確認すべきポイント**
+
+    1. **ATM利用手数料の計上**: お引出し金額とは別に、110円または220円の手数料が加算されているかご確認ください。
+
+    2. **利息の日割り計算**: キャッシングの利息（実質年率18%）は日割りで計算されます。前回の請求から当日までの経過日数により、想定より金額が変動することがあります。
+
+    3. **未処理の取引**: ATMでの取引直後は、システムへの反映に時間がかかる場合がございます。
+
+
+    **解決方法**
+
+    - 解決しない場合は、当社にて詳細な取引履歴を再照合いたします。本人確認の上、お取引日ごとの「元金」「利息」「手数料」の内訳を詳しくご案内します。
+
+    - 明らかな計上ミスが判明した場合は、速やかに修正手続きを行い、正しい残高を通知いたします。不明点がある場合は「キャッシング：手数料一覧」と照らし合わせてご確認ください。'
+  domain: lending_mortgage
+  product_category: cashing
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 88c9014f-af74-5c4b-977c-4c80389ace7f
+  title: つむぎカードローン：商品概要
+  body: 'つむぎカードローンは、キャッシングよりも大きな金額を、より計画的な返済プランで利用できる低金利のローン商品です。お客様の経済的な安心を「紡ぐ」ため、無理のない柔軟な借り入れを提案いたします。
+
+
+    【主な特徴と条件】
+
+    ・利用限度額：最大5,000,000円
+
+    ・貸付金利：年4.5% ～ 18%
+
+    ・最低月々返済額：4,000円
+
+
+    審査により、お客様に最適な金利と限度額を決定いたします。詳細な金利設定については、「つむぎカードローン：金利・料率一覧」をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2fdeaa81-ff52-58a6-94ef-8f9bf4ad9339
+  title: つむぎカードローン：貸付金利（下限）について
+  body: 'Q：つむぎカードローンの貸付金利の最低金利はどのくらいですか？
+
+
+    A：つむぎカードローンの下限金利は年4.5%です。実際にご適用となる金利は、お客様の年収や生活維持費、既存の借入状況に基づき、年4.5%から18%の範囲内で審査により決定されます。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a48e126e-d56f-544a-8293-cd6d13865e8f
+  title: つむぎカードローン：お申込みとご利用開始
+  body: 'つむぎカードローンのお申込みからご利用開始までの手順をご案内します。
+
+
+    1. お申込みの意思をお伝えいただき、本人確認書類および収入証明書をご提示ください。
+
+    2. 当社にて、年収や生活維持費に基づく「支払可能見込額」の調査および信用情報機関への照会を行い、審査を実施いたします。
+
+    3. 審査結果に基づき、最大5,000,000円までの利用限度額を決定し、ご案内いたします。
+
+    4. ご契約手続き後、多要素認証による厳格な本人確認を経て、ご指定の口座へ資金を振り込ませていただきます。
+
+
+    手続き完了後、公式アプリやウェブサイトにて、適用金利（年4.5% ～ 18%）と限度額をご確認いただけます。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 38c59fc9-c9a1-58f9-a442-ede98900fa16
+  title: つむぎカードローン：手数料一覧
+  body: 'つむぎカードローンのご利用に伴う主な費用は以下の通りです。
+
+
+    ・貸付金利（実質年率）：4.5% ～ 18%
+
+    ・毎月の最低返済額：4,000円
+
+
+    ※金利は審査結果により決定されます。その他の重要事項については、「つむぎカードローン：重要事項のご説明」をご参照ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 22725985-62d8-55b6-949c-8003e9c99137
+  title: つむぎカードローン：お手続きが完了しない・保留中のまま
+  body: '【症状】お申込み手続きが完了せず、画面が「保留中」のままとなっている。
+
+
+    【考えられる原因】
+
+    ・提出された本人確認書類の不備や、画像が不鮮明である。
+
+    ・多要素認証（MFA）による本人確認が正常に完了していない。
+
+    ・入力された情報と、指定信用情報機関の登録内容に相違がある。
+
+
+    【確認および解決方法】
+
+    1. ご提示いただいた書類の有効期限が切れていないか、再度ご確認ください。
+
+    2. 認証メールやSMSが届いているかご確認いただき、必要に応じて再送手続きを行ってください。
+
+
+    上記を確認しても解決しない場合は、専門のコンプライアンス担当者へエスカレーションし、審査状況の詳細を確認いたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: d22e1f07-f46e-5bac-a1f5-b648fcc86296
+  title: つむぎカードローン：お申込みいただける方
+  body: "【お申込み条件と結果】\n・安定した収入があり、当社の審査基準を満たしている方 $\rightarrow$ ご利用可能（利用限度額は最大5,000,000円まで）\n\
+    ・総量規制に基づき、借入合計額が原則として年収の3分の1を超える方 $\rightarrow$ 原則としてお申込みいただけません\n\n審査の詳細は「つむぎカードローン：重要事項のご説明」をご確認ください。"
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9fbddaf4-cb17-557a-bdc7-20829073b482
+  title: つむぎカードローン：当社の似た商品との比較
+  body: 'つむぎカードローンは、最大5,000,000円という大きな金額を、年4.5%から18%の低金利で計画的に返済したい方向けの商品です。
+
+
+    一方、「キャッシング：商品概要」でご案内しているキャッシングは、ATM等を通じて急な資金ニーズに即座に対応するための短期的な小口融資機能です。ご利用目的や金額に応じて、最適な機能をお選びください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: cd553a65-1b8b-5720-b3a2-9268a3322bf1
+  title: つむぎカードローン：重要事項のご説明
+  body: '本商品は、経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の監督指針を厳守して提供されます。過剰債務を防止するため、原則として年収の3分の1までとする「総量規制」および「支払可能見込額」の調査を徹底しております。
+
+
+    【契約内容の要点】
+
+    ・貸付金利：年4.5% ～ 18%（審査により決定）
+
+    ・最大利用限度額：5,000,000円
+
+    ・毎月の最低返済額：4,000円
+
+
+    お客様の個人情報は指定信用情報機関へ登録され、適切に管理されます。公正な取り扱いと透明性のある開示に努めてまいります。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 45221468-32a5-5abc-a88d-19fd0e151568
+  title: つむぎカードローン：金利・料率一覧
+  body: 'つむぎカードローンの適用金利は以下の通りです。
+
+
+    ・貸付金利（実質年率）：年4.5% ～ 18%
+
+
+    金利は、お客様の年収、生活維持費、既存の借入状況などの審査結果に基づき、上記範囲内で決定されます。金利の適用に関する詳細は、「つむぎカードローン：重要事項のご説明」をご覧ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a03d52e8-ab43-56c4-8232-1885b4872037
+  title: つむぎカードローン：実施中のキャンペーン
+  body: '【計画的返済サポートのご案内】
+
+    現在、つむぎカードローンをご利用中のお客様を対象に、繰上返済による利息軽減を促進するご案内を行っております。年4.5%から18%の金利が適用される本ローンを、より低コストで完済するための計画的な返済を推奨いたします。詳細な返済シミュレーションは、カスタマーセンターまでお問い合わせください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 66b74e98-572f-585f-aaaa-19c272e6c8d3
+  title: つむぎカードローン：不正利用からお客さまを守るために
+  body: 'つむぎカードローンでは、お客さまの資産を守るため、厳格なセキュリティ体制を整えております。
+
+
+    **【安全にご利用いただくための仕組み】**
+
+    ・利用限度額の変更やご契約内容の変更など、重要な操作の前には必ず**多要素認証**による本人確認を実施いたします。
+
+    ・インターネット経由での手続きには、最新の認証規格を導入し、第三者によるなりすましを防止しています。
+
+
+    **【ご注意いただきたい点】**
+
+    当社が、メールや電話で暗証番号やパスワードを直接お伺いすることはございません。不審な連絡があった場合は、すぐに利用停止の手続きを行ってください。万が一、不正利用の疑いがある場合は、迅速に補償手続きを承りますので、速やかに当社までお知らせください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: c6d66ac2-457d-5533-9d26-82f8f6447d95
+  title: つむぎカードローン：規定・約款
+  body: '本規定は、つむぎカードローンの利用に関する合意事項を定めるものです。
+
+
+    **1. 貸付条件と限度額**
+
+    お客様の審査に基づき、最大5,000,000円までの利用限度額を設定いたします。適用金利は年4.5%から18%の範囲内で決定されます。
+
+
+    **2. お支払い義務**
+
+    お客様は、毎月最低4,000円以上の返済を行う義務を負います。返済日の遅延が発生した場合、規定に基づき遅延損害金が加算されることがあります。
+
+
+    **3. 契約の変更と終了**
+
+    ご契約内容の変更は、多要素認証による本人確認完了後に承ります。また、残高をすべて完済し、解約手続きを完了させることで本契約は終了いたします。
+
+
+    詳細な法令遵守事項については、「法令・制度に関するご案内：ローン」をご参照ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 5f607ca0-5702-5867-9a51-79d6a8aa09f3
+  title: つむぎカードローン：おすすめの方と主な使い方
+  body: 'つむぎカードローンは、短期的な資金ニーズではなく、中長期的な視点で計画的に資金を準備したい方におすすめの商品です。
+
+
+    **【このような方におすすめです】**
+
+    ・キャッシングよりも大きな金額を、より低金利で利用したい方
+
+    ・月々の返済額をコントロールし、無理のない計画的な返済を目指す方
+
+
+    **【商品の特徴】**
+
+    ・**利用限度額：** 最大5,000,000円まで
+
+    ・**適用金利：** 年4.5% ～ 18%
+
+    ・**最低返済額：** 毎月4,000円から
+
+
+    急な出費への備えとしてだけでなく、生活基盤を整えるための柔軟な資金調達手段としてご活用ください。詳細な条件については「つむぎカードローン：商品概要」をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: e34f6841-df1b-5c57-bfc3-a5c4ac254d9a
+  title: つむぎカードローン：貸付金利（上限）について
+  body: '**Q. 貸付金利の上限はいくらですか？**
+
+
+    A. つむぎカードローンの適用金利の上限は年18%となっております。金利は審査結果に基づき、年4.5%から18%の間で決定されます。利便性と信用供与のリスクに見合った適正な手数料として設定しております。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b87eb794-0d4c-50ea-a789-88119d577ee4
+  title: つむぎカードローン：解約・変更・プランの切替え
+  body: 'つむぎカードローンの解約、またはご契約内容の変更をご希望の方は、以下の手順でお手続きください。
+
+
+    **【お手続きの流れ】**
+
+    1. **意思のご提示：** 当社担当者に、解約または変更（限度額の変更など）の希望をお伝えください。
+
+    2. **本人確認：** セキュリティ保護のため、多要素認証による厳格な本人確認を実施します。画面の指示に従い認証を完了させてください。
+
+    3. **内容の確認：** 解約の場合は、現在の借入残高および精算すべき利息の合計額を確認し、同意いただきます。
+
+    4. **手続きの完了：** 当社にて処理を行い、手続き完了の通知をお送りします。
+
+
+    **【完了の確認】**
+
+    手続き完了後、公式アプリまたはウェブサイトのマイページにて、契約状態が「解約済み」または「変更後」になっていることをご確認いただけます。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 9034cf4d-a8e7-5bbd-b46c-a4221b9b057b
+  title: つむぎカードローン：想定外の手数料・金額
+  body: 'お客様より「請求金額が想定より高い」とのご相談を受けた際は、以下の点をご確認ください。
+
+
+    **【考えられる原因】**
+
+    ・**金利の適用：** 適用金利が年4.5%から18%の範囲で設定されており、借入残高に応じて日割り計算で利息が発生しているためです。
+
+    ・**返済サイクルのずれ：** 返済日の変更や、繰上返済が行われなかったことにより、利息の累積額が変動した可能性があります。
+
+
+    **【対応手順】**
+
+    1. 直近の利用明細と適用金利（最大18%）を確認します。
+
+    2. 利息計算の根拠を具体的にご説明し、ご納得いただけるか確認します。
+
+    3. 計算に不備がある場合や、解決が困難な場合は、専門のコンプライアンス担当者へエスカレーションし、精査いたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8e8ed0e5-a192-5caf-909d-d120d14b8022
+  title: つむぎカードローン：必要書類
+  body: 'お申込みにあたり、以下の書類をご用意ください。
+
+
+    ・**本人確認書類：** 運転免許証、マイナンバーカード等の公的証明書（必須）
+
+    ・**収入証明書類：** 源泉徴収票や確定申告書（原則として年収の3分の1までの総量規制を確認するため、必要に応じてご提出いただきます）'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: a9b183e5-dbb5-5a34-8984-b813c45c3d28
+  title: つむぎカードローン：他社の一般的な商品との比較
+  body: '他社の一般的なカードローンと比較して、つむぎカードローンは「計画的な返済」と「透明性」を重視しています。
+
+
+    ・**限度額：** 最大5,000,000円と、幅広いニーズに対応可能です。
+
+    ・**金利：** 年4.5%から18%の範囲で、審査に基づき誠実に提案いたします。
+
+
+    短期的な資金調達にはキャッシングが適していますが、より大きな金額を低金利で、ゆとりを持って返済したい方には、本商品が最適な選択肢となります。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 24ddec24-432b-5339-822f-ef55a56d8383
+  title: つむぎカードローン：リスクについてのご説明
+  body: 'つむぎカードローンのご利用にあたり、以下のリスクについて十分にご理解ください。
+
+
+    **【過剰債務の防止について】**
+
+    当社は貸金業法に基づき、原則として年収の3分の1までという「総量規制」を厳守しております。支払可能見込額を超えた借入は、生活の安定を損なう恐れがあります。
+
+
+    **【金利に関するリスク】**
+
+    適用金利は年4.5%から最大18%まで変動します。金利が高い設定となった場合、返済期間が長期化し、支払利息の総額が増加する可能性があります。
+
+
+    **【返済の義務】**
+
+    毎月最低4,000円の返済が必要となります。無理のない返済計画を立て、誠実にご利用ください。ご不安がある場合は、専門家への相談を推奨いたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: cb2356b7-fe54-5e32-8c18-ff12276d94f7
+  title: つむぎカードローン：金利・料率の決まり方と適用
+  body: 'つむぎカードローンの金利は、お客様の信用状況や審査結果に基づき決定されます。
+
+
+    ・**適用金利範囲：** 年4.5% ～ 18%
+
+
+    審査において、返済能力が十分に認められた場合には下限に近い金利が適用されます。一度決定した金利は原則として固定されますが、契約内容の変更や審査の再実施により変動する場合があります。正確な適用金利は契約書にてご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 7091220e-594d-51d0-87a2-1fcc45bf44c2
+  title: つむぎカードローン：ご紹介・継続利用の特典
+  body: つむぎカードローンでは、現在、お友だちをご紹介いただいた方と、継続してご利用いただいているお客様へ向けた特別な特典をご用意しております。無理のない返済プランとあわせて、ぜひお得な機会をご活用ください。最新の特典内容については、「つむぎカードローン：実施中のキャンペーン」をご確認ください。
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 58dc6e6c-93bf-5c60-97ad-ecf6f2d7f3d4
+  title: つむぎカードローン：安全にご利用いただくためのポイント
+  body: 'つむぎカードローンを安全にご利用いただくために、以下の点に十分ご注意ください。
+
+
+    **本人確認について**
+
+    限度額の変更やご契約内容の変更操作の前には、必ず多要素認証による厳格な本人確認を実施いたします。
+
+
+    **ご注意いただきたいこと**
+
+    ・弊社からメールや電話で、暗証番号やパスワードを直接お伺いすることはございません。
+
+    ・不審な連絡があった場合は、すぐに弊社カスタマーセンターまでお知らせください。
+
+
+    万が一、不正利用が疑われる場合は、規定に基づき迅速な補償を行うため、速やかにご連絡をお願いいたします。詳細は「つむぎカードローン：不正利用からお客さまを守るために」をご参照ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 98619de7-7769-5590-8dc4-efce58ffa3b1
+  title: つむぎカードローン：規定・約款の変更
+  body: 'つむぎカードローンでは、法令遵守およびサービス向上のため、規定・約款を適宜見直しております。
+
+
+    **変更の適用について**
+
+    変更内容は、適用日の前にウェブサイトまたは公式アプリにてご案内いたします。
+
+
+    **主な適用基準**
+
+    ・貸付金利は年4.5%から18%の範囲で設定されており、審査に基づき決定されます。
+
+    ・利用限度額は最大5,000,000円までとなります。
+
+    ・毎月の最低返済額は4,000円と定めております。
+
+
+    これらの基準に変更が生じる場合は、事前にお客様へ通知いたします。他社サービスと比較される際は、最新の「つむぎカードローン：金利・料率一覧」と併せて、変更履歴をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 223c0704-ffc7-576e-81a7-55cd73264220
+  title: つむぎカードローン：ご利用開始までの手順
+  body: 'つむぎカードローンのご利用開始までの流れをご案内します。
+
+
+    1. **お申込み**：必要事項を入力し、お申込みください。
+
+    2. **本人確認書類の提出**：ご案内した書類を提出いただき、弊社にて審査を行います。
+
+    3. **審査・限度額の決定**：年収や借入状況に基づき、支払可能見込額を調査し、最大5,000,000円までの利用限度額を決定します。
+
+    4. **ご契約完了**：審査通過後、ご契約手続きが完了し、年4.5%～18%の貸付金利および毎月の最低返済額4,000円が適用されます。
+
+    5. **ご利用開始**：指定の口座へお振込み、またはATM等を通じてご利用いただけます。
+
+
+    詳細な必要書類については、「つむぎカードローン：必要書類」をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: cf1cb4b2-733f-50d7-9ccd-952cf774a730
+  title: つむぎカードローン：利用限度額の上限について
+  body: 'Q：つむぎカードローンの利用限度額は最大でいくらまでですか？
+
+
+    A：最大5,000,000円までとなっております。ただし、お客様の年収や生活維持費、既存の借入状況に基づいた「支払可能見込額」の調査および総量規制に基づき、個別に審査させていただきます。詳細は「つむぎカードローン：商品概要」をご覧ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f3192b03-7533-5c84-9a13-d45ab4d7c0db
+  title: つむぎカードローン：登録内容の変更
+  body: 'ご住所や電話番号などの登録内容を変更される際の手順をご案内します。
+
+
+    **準備するもの**
+
+    ・ご本人様確認書類（運転免許証など）
+
+
+    **お手続きの流れ**
+
+    1. **変更内容の伝達**：変更したい項目（住所、連絡先など）を弊社担当にお伝えください。
+
+    2. **本人確認の実施**：セキュリティ保護のため、多要素認証による厳格な本人確認を行います。
+
+    3. **書類の提出**：住所変更などの場合は、最新の確認書類をご提出ください。
+
+    4. **完了通知の受領**：弊社にて内容を確認後、変更完了の通知をお送りいたします。
+
+
+    ご返済口座の変更については、「つむぎカードローン：解約・変更・プランの切替え」をご参照ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b228f07d-79d2-5185-ba3e-402abe7700eb
+  title: つむぎカードローン：ログインできない・アクセスできない
+  body: '公式アプリやウェブサイトにログインできない場合は、以下の点をご確認ください。
+
+
+    **考えられる原因と対処法**
+
+    ・**ID・パスワードの誤入力**：大文字・小文字、全角・半角が正しく入力されているかご確認ください。
+
+    ・**通信環境の不安定**：Wi-Fiやモバイルデータ通信の接続状況をご確認ください。
+
+    ・**アカウントのロック**：認証に複数回失敗した場合、セキュリティのため一時的にロックされます。
+
+
+    **解決しない場合**
+
+    上記を確認しても解決しない場合は、弊社にて本人確認を行った後、パスワードの再設定を承ります。なお、他社サービスからの移行をご検討中の方で、アクセス制限などの不安がある場合は「つむぎカードローン：商品概要」にて当社のサポート体制をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f82536fb-73bf-5169-8c80-11e6646df18b
+  title: つむぎカードローン：ご利用条件による違い
+  body: 'ご利用条件による審査結果および適用内容の違いは以下の通りです。
+
+
+    ・**審査基準を満たす場合**：最大5,000,000円の限度額、および年4.5%～18%の範囲内で金利を決定します。
+
+    ・**総量規制に抵触する場合**：原則として年収の3分の1までという制限に基づき、利用限度額が調整されます。
+
+    ・**支払可能見込額が不足する場合**：無理のない返済プランをご提案するため、限度額を低く設定するか、お申込みをお断りすることがあります。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: f30778d4-cf1c-598b-81b7-34d5825298c2
+  title: つむぎカードローン：プランの選び方
+  body: '資金ニーズに合わせて、適切な商品をお選びください。
+
+
+    **つむぎカードローン**
+
+    大きな金額を計画的に返済したい方向けです。金利は年4.5%～18%で、最大5,000,000円までご利用いただけます。
+
+
+    **キャッシング**
+
+    ATM等で即座に小口の資金が必要な方向けです。
+
+
+    返済能力に応じた誠実な提案をいたしますので、詳細は「つむぎカードローン：当社の似た商品との比較」をご参照ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2f1711a9-1a4f-57bd-988f-91b4afe3de15
+  title: つむぎカードローン：個人情報の取扱い
+  body: 'つむぎカードローンでは、お客様の個人情報を適切に管理し、公正に取り扱います。
+
+
+    **情報の利用目的**
+
+    ご提供いただいた情報は、審査における支払可能見込額の調査、およびご契約後の債権管理に利用いたします。
+
+
+    **信用情報機関への登録**
+
+    法令に基づき、指定信用情報機関へ情報の登録および照会を行います。これにより、過剰債務を防止し、お客様の経済的な安心を紡ぎます。
+
+
+    **情報の開示と管理**
+
+    個人情報の開示や訂正をご希望の場合は、所定の手続きを経て対応いたします。多要素認証による厳格な本人確認を実施した上で、適切に開示します。詳細は「つむぎカードローン：重要事項のご説明」をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 057f1c0d-40ff-5b40-a909-32de8ae988d8
+  title: つむぎカードローン：この商品をかたる詐欺にご注意ください
+  body: '最近、つむぎカードローンをかたる第三者による詐欺行為が報告されています。お客様の安心を「紡ぐ」当行として、以下の点に十分ご注意ください。
+
+
+    **【特にご注意いただきたい点】**
+
+    * **手数料の先払い要求：** 融資手続きのために「保証料」や「事務手数料」などの名目で、事前にお金を振り込ませることは一切ございません。
+
+    * **機密情報の要求：** メールや電話で、暗証番号や多要素認証のコードを直接伺うことはございません。
+
+    * **不自然な低金利の提示：** 当商品の金利は4.5%から18%の範囲で審査により決定いたします。これらを大幅に下回る条件を提示し、個人情報を求める案内にはご注意ください。
+
+
+    もし不審な連絡を受けられた場合は、すぐに当社のカスタマーセンターまでお知らせください。迅速に状況を確認し、お客様をサポートいたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2738c3e9-eee1-527c-836f-87ba6cbfb33b
+  title: つむぎカードローン：限度額・制限と注意事項
+  body: 'つむぎカードローンの利用限度額および制限に関する規定です。オペレーターの方は、お客様へのご案内時に以下の数値を正確に提示してください。
+
+
+    **【限度額と金利】**
+
+    * **最大利用限度額：** 5,000,000円
+
+    * **適用金利：** 年4.5% ～ 18%
+
+
+    **【制限と遵守事項】**
+
+    * **総量規制の遵守：** 貸金業法に基づき、原則として年収の3分の1までという総量規制を厳守します。支払可能見込額の調査を徹底し、過剰債務を防止します。
+
+    * **本人確認の厳格化：** 限度額の変更や新規契約などの状態変更操作の前には、必ず多要素認証による厳格な本人確認を実施してください。
+
+
+    **【注意点】**
+
+    審査結果により、最大限度額の5,000,000円に満たない金額が設定される場合がございます。あらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: b150d1a8-ba98-5f69-8e4e-239d74010bdf
+  title: つむぎカードローン：毎月の最低返済額について
+  body: '**Q: 毎月、最低いくらから返済すればよいのでしょうか？**
+
+
+    A: つむぎカードローンの毎月の最低返済額は4,000円です。
+
+
+    この金額は、お客様が無理なく返済を継続し、経済的な安心を維持していただくための最低ラインとして設定されています。余裕がある際は繰上返済を行うことで、将来的に支払う手数料を軽減させることが可能です。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bd18e170-c722-5e45-9004-21d0c96c7a81
+  title: つむぎカードローン：状況・履歴の確認
+  body: 'つむぎカードローンの現在の借入残高や、これまでの返済履歴を確認する手順をご案内いたします。
+
+
+    **【ご確認の手順】**
+
+    1. **確認内容の提示：** ご利用状況の確認を希望される旨を、私たちにお伝えください。
+
+    2. **本人確認の実施：** ご本人様であることを確認するため、多要素認証による確認手続きを行います。画面の指示に従って操作をお願いいたします。
+
+    3. **状況の提示：** 確認が完了次第、現在の借入残高、適用されている金利（4.5% ～ 18%の範囲内）、および次回のお支払い予定額を提示いたします。
+
+    4. **履歴の提供：** 過去の返済履歴や詳細な明細が必要な場合は、その旨をお申し付けください。後ほど正式なご利用明細書をご案内いたします。
+
+
+    これにより、計画的な返済プランの再検討や、家計の状況把握に役立てていただけます。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 23c9699f-c9c9-5bce-9f3c-44a563b29c86
+  title: つむぎカードローン：お取引が拒否された・制限された
+  body: 'つむぎカードローンにおいて、借入や手続きが拒否された場合の原因と対処法をご案内いたします。
+
+
+    **【考えられる原因】**
+
+    * **利用限度額への到達：** 設定された限度額（最大5,000,000円）に達している場合、追加の借入はできません。
+
+    * **お支払いの遅延：** 毎月の最低返済額4,000円のお支払いが滞っている場合、一時的に利用が制限されることがあります。
+
+    * **セキュリティロック：** 短時間に不自然な操作があった場合、不正利用防止のため制限がかかる場合がございます。
+
+
+    **【対処方法】**
+
+    1. まずは最新の利用残高と、お支払いの状況をご確認ください。
+
+    2. お支払いに遅延がある場合は、至急ご返済のお手続きをお願いいたします。
+
+    3. それでも解決しない場合は、私たちに状況をお知らせください。本人確認の上、制限を解除できるか審査いたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 86269b52-e9fd-555a-8ba3-ed7af343aa1b
+  title: つむぎカードローン：切替えや上位プランを検討するとき
+  body: 'お客様が「キャッシング」から「つむぎカードローン」への切替えを検討される際は、以下の視点でご案内ください。
+
+
+    キャッシングはATMでの即時利用に適した短期的な小口融資ですが、つむぎカードローンは最大5,000,000円までという大きな金額を、年4.5% ～ 18%という計画的な返済プランで利用できる点がメリットです。まとまった資金が必要で、より低金利で長期的に返済したいお客様には、つむぎカードローンが適しています。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: bca85803-c67e-5991-876f-93b3d80deda8
+  title: つむぎカードローン：ほかの選択肢との比較と向かない場合
+  body: 'つむぎカードローンをご検討中の方へ、本商品の特徴と、他商品が適しているケースをご案内いたします。
+
+
+    **【つむぎカードローンが適している方】**
+
+    * まとまった金額の資金調達が必要な方（最大5,000,000円まで対応）
+
+    * 計画的な返済プランを立て、低金利（最低4.5%）での利用を希望される方
+
+
+    **【ほかの選択肢が適している方】**
+
+    * **少額をすぐに、一時的に借りたい方：** ATMで即座に利用できる「キャッシング」の方が利便性が高く適しています。
+
+    * **月々の支払額を変動させたくない方：** ショッピング利用を前提とした「リボ払い」などの柔軟な支払いオプションをご検討ください。
+
+
+    **【本商品の基本スペック】**
+
+    * **金利：** 年4.5% ～ 18%
+
+    * **限度額：** 最大5,000,000円
+
+    * **最低返済額：** 月々4,000円'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: fe2abe55-44c0-571e-85bc-cbc937df083f
+  title: つむぎカードローン：手数料と費用
+  body: '**Q: つむぎカードローンを利用する際の手数料や費用について教えてください。**
+
+
+    A: 本商品の主な費用は、借入金額に対して発生する利息（貸付金利）です。金利は年4.5% ～ 18%の範囲で、お客様の審査結果に基づき決定いたします。
+
+
+    なお、無理のない返済をサポートするため、毎月の最低返済額を4,000円と設定しております。詳細な金利の適用については、ご契約時の条件をご確認ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: ac18b9f3-8573-51cc-ab63-99bfef198132
+  title: つむぎカードローン：よくあるお手続きの流れ
+  body: 'つむぎカードローンのご契約からご利用開始までの一般的な流れをご案内いたします。
+
+
+    **【お手続きの流れ】**
+
+    1. **お申込み：** 年収や生活維持費などの情報をご提示いただき、お申込み手続きを行います。
+
+    2. **審査：** ご提示いただいた情報に基づき、「支払可能見込額」の調査および審査を行います。ここでは総量規制（年収の3分の1まで）に基づいた適切な限度額を決定します。
+
+    3. **本人確認：** 審査通過後、多要素認証による厳格な本人確認を実施します。
+
+    4. **契約締結：** 適用金利（4.5% ～ 18%）および利用限度額（最大5,000,000円）を確認し、ご契約を締結します。
+
+    5. **資金の利用：** 指定の口座等へ資金を振り込み、ご利用可能となります。
+
+
+    審査結果によっては、ご希望の限度額に達しない場合や、お申込みをお断りする場合があることをあらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 2bb521c1-e128-5552-af99-f5b5ce85eb41
+  title: つむぎカードローン：明細や記録と合わない
+  body: 'お客様から「借入残高や利息の計算が明細と合わない」とのお問い合わせをいただいた際の対応フローです。
+
+
+    **【確認すべき事項】**
+
+    1. **計算期間の確認：** 利息は日割りで計算されます。年4.5% ～ 18%の金利が、どの期間に適用されているかを確認してください。
+
+    2. **返済タイミングの確認：** 毎月の最低返済額4,000円の引き落とし日と、実際の入金日のズレによる利息の変動がないかを確認します。
+
+    3. **繰上返済の反映：** 予定外の返済（繰上返済）が行われた場合、残高の減少に伴い、その後の利息計算額が変わります。
+
+
+    **【解決しない場合の対応】**
+
+    上記を確認しても不一致がある場合は、速やかに専門のコンプライアンス担当者へエスカレーションし、詳細な再計算と原因究明を行ってください。お客様には誠実かつ迅速に調査結果を報告いたします。'
+  domain: lending_mortgage
+  product_category: tsumugi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 44a5d07d-f34a-533f-9a73-a9a4cdfb28d9
+  title: 手数料・料金のご案内
+  body: つむぎカードでは、安全な決済インフラの維持とサービス向上のため、適正な手数料を設定しております。1回払いなどの手数料無料プランを基本としておりますが、リボ払いや分割払いなど信用供与を伴うサービスについては、リスクと利便性に見合った手数料を課金させていただきます。
+  domain: payments
+  product_category: general
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8f86b76e-a86a-5703-b374-5e616e016625
+  title: よくあるご質問
+  body: '【サポート窓口はどこですか？】
+
+    公式アプリ、ウェブサイト、およびカスタマーセンターにて、マルチチャネルでサポートを提供しております。
+
+
+    【複雑な相談や苦情がある場合は？】
+
+    専門のコンプライアンス担当者へエスカレーションし、誠実に解決を図ります。詳細は「法令・制度に関するご案内：クレジットカードのショッピング」をご確認ください。'
+  domain: payments
+  product_category: general
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 62a0f71f-51b1-53c7-b2a6-151217bcc49f
+  title: 法令・制度に関するご案内：クレジットカードのショッピング
+  body: 'つむぎカードは、経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の監督指針を厳守しております。
+
+
+    **重要事項**
+
+    ・**支払可能見込額の調査**：お客様の年収や生活維持費、既存の借入状況に基づき、無理のない支払額を事前に調査し、過剰債務を防止します。
+
+    ・**支払停止の抗弁**：販売店とのトラブルがある場合、正当な理由をもって当社への支払いを一時的に拒める権利を認めております。
+
+
+    当社は、個人情報を指定信用情報機関へ適切に登録・管理し、透明性の高い開示を行う義務を負っております。'
+  domain: payments
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 1873ebf8-143c-595e-98b1-4d287e1d14f7
+  title: 法令・制度に関するご案内：ローン
+  body: 'キャッシングおよびつむぎカードローンの提供にあたり、当社は金融庁の監督指針および貸金業法を厳格に遵守いたします。
+
+
+    **総量規制について**
+
+    貸金業法に基づき、貸金業者からの借入合計額は、原則として**年収の3分の1**までに制限されます。これにより、お客様が返済能力を超えた借入れを行うことを防ぎ、経済的な安心を維持することを目的としています。
+
+
+    審査の際は、返済能力を十分に確認し、適切かつ誠実な提案を行います。個別の税務相談や法的助言、投資銘柄の推奨は行いませんので、専門家へご相談ください。'
+  domain: lending_mortgage
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: tsumugi_card
+- id: 8574e72c-de59-503e-94f0-f2c054aa05c1
+  title: get_account_transactions を使う場面
+  body: 'お客様からショッピングまたはキャッシングの利用明細について問い合わせがあった際に、以下の手順で対応します。
+
+
+    1. `verify_identity` を使用し、お客様の本人確認を厳格に実施します。
+
+    2. `get_accounts` を使用し、お客様が提示したカード番号の下4桁から正確な `account_id` を特定します。
+
+    3. `get_account_transactions` を呼び出し、該当口座の利用履歴を取得して、お客様に詳細を案内します。
+
+
+    明細の内容に心当たりがない場合は、「file_transaction_dispute を使う場面」に従い、不正利用の調査手続きへ移行してください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: tsumugi_card
+- id: 5cb7e6ac-69d4-5831-b1c4-c1cecb896d65
+  title: get_account_transactions ツールリファレンス
+  body: '**ツール名**: `get_account_transactions`
+
+    **引数**: `account_id` (特定された口座識別子)
+
+    **効果**: 指定された口座のショッピングおよびキャッシングの利用明細を取得します。
+
+
+    エージェントはこのツールを直接呼び出すことで明細を確認し、お客様に回答します。お客様に外部サイトへ誘導して自己完結させるのではなく、会話内で情報を提示してください。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: tsumugi_card
+- id: 8aa40902-1391-5b2c-b36a-a15fe1b46f36
+  title: file_transaction_dispute を使う場面
+  body: '身に覚えのない請求や、二重請求などのトラブルが発生し、お客様から調査・補償の依頼があった場合に実施します。
+
+
+    1. `verify_identity` で本人確認を完了させます。
+
+    2. `get_accounts` で対象の口座を特定し、`get_account_transactions` で問題の取引を特定します。
+
+    3. お客様から不整合の内容（理由）を確認します。
+
+    4. `file_transaction_dispute` を呼び出し、不正利用の補償手続きと調査を開始します。
+
+
+    紛争解決にあたっては、日本クレジット協会の相談窓口とも連携し、誠実かつ迅速に対応いたします。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: tsumugi_card
+- id: a36fa9f5-7841-547a-b4b4-8840ac04f693
+  title: file_transaction_dispute ツールリファレンス
+  body: '**ツール名**: `file_transaction_dispute`
+
+    **引数**: `account_id`, `transaction_id`, `reason` (お客様から伺った理由)
+
+    **効果**: 特定の取引に対する異議申し立てを受け付け、不正利用の調査および規定に基づく補償手続きを開始します。
+
+
+    エージェントは、特定した取引IDと理由を引数として本ツールを直接実行してください。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: tsumugi_card
+- id: 5ca51abe-8642-5965-9971-991b36509689
+  title: freeze_card を使う場面
+  body: 'カードの紛失、盗難、または不正利用の疑いがあるとの連絡を受けた際、被害を最小限に抑えるために即座に実施します。
+
+
+    1. `verify_identity` を使用し、迅速に本人確認を行います。
+
+    2. `get_accounts` を用いて対象の `account_id` を特定します。
+
+    3. 直ちに `freeze_card` を呼び出し、カードの利用停止処理を完了させます。
+
+    4. 利用停止後、必要に応じて `order_replacement_card` を案内し、新しいカード番号での再発行手続きをサポートしてください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: tsumugi_card
+- id: 9aa11710-cdd0-55ba-9434-c685994570fb
+  title: freeze_card ツールリファレンス
+  body: '**ツール名**: `freeze_card`
+
+    **引数**: `account_id` (特定された口座識別子)
+
+    **効果**: 対象カードの利用を即時に停止します。紛失・盗難届出への対応として使用されます。
+
+
+    エージェントは、本人確認および口座特定後、直ちに本ツールを呼び出して利用停止を実行してください。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: tsumugi_card
+- id: c8ad552f-9fce-58ae-a48b-6a248843e187
+  title: order_replacement_card を使う場面
+  body: 'お客様が「つむぎカード」を紛失、または盗難に遭われた際、カードの利用停止手続き完了後に新しいカードを再発行するために本ツールを使用します。カード番号が新しくなるため、セキュリティ上の安全を確保しつつ、引き続きサービスをご利用いただくための重要な手続きです。
+
+
+    【手続き手順】
+
+    1. 多要素認証を用い、お客様の本人確認を厳格に実施します。
+
+    2. カードの下4桁を確認し、get_accounts を使用して対象の account_id を特定します。
+
+    3. カードの紛失・盗難届が完了し、利用停止状態であることを確認します（未完了の場合は、まず freeze_card の手続きを優先してください）。
+
+    4. order_replacement_card を呼び出し、新しいカードの再発行手続きを完了させます。
+
+
+    再発行の手続きが完了した旨をお客様へ丁寧に伝え、お届けまでの目安期間をご案内ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: tsumugi_card
+- id: 2c21d5c9-b62c-5ce5-a398-3987e048ca18
+  title: order_replacement_card ツールリファレンス
+  body: '指定されたアカウントのクレジットカードを再発行し、新しいカード番号を割り当てます。
+
+
+    【引数】
+
+    - account_id: get_accounts 等で特定した、再発行対象となるアカウントの識別子
+
+
+    【効果】
+
+    オペレーターが本ツールを直接実行することで、カードの再発行処理がシステム的に行われます。お客様に外部サイトやアプリでの操作を依頼する必要はありません。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: tsumugi_card
+- id: 59751945-b60a-5659-98e2-eed6996f4fdb
+  title: change_to_revolving を使う場面
+  body: 'お客様が、すでに「1回払い」で利用したショッピング決済を、お支払日前に「リボ払い」へ変更することを希望される場合（あとからリボ）に使用します。月々の支払額を一定に抑え、家計の変動を緩やかにしたいというニーズに応えるための手続きです。
+
+
+    【手続き手順】
+
+    1. 多要素認証により、お客様の本人確認を適切に実施します。
+
+    2. get_accounts を使用して、対象となる account_id を特定します。
+
+    3. get_account_transactions を使用し、リボ払いへ変更したい決済の transaction_id を特定します。
+
+    4. リボ払い適用後の手数料について、リボ払い：商品概要に基づき、お客様に十分な説明を行い、同意を得ます。
+
+    5. change_to_revolving を呼び出し、支払方法の変更を完了させます。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_to_revolving
+  institution_id: tsumugi_card
+- id: bf9c2213-db4e-5323-85be-eebea2218ac7
+  title: change_to_revolving ツールリファレンス
+  body: '1回払いのショッピング利用分を、リボ払いへと変更します。
+
+
+    【引数】
+
+    - account_id: 対象アカウントの識別子
+
+    - transaction_id: 変更対象となる決済の識別子
+
+
+    【効果】
+
+    オペレーターが本ツールを直接実行することで、指定された取引の支払方法がリボ払いに変更されます。お客様にセルフサービスでの操作を求める必要はありません。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_to_revolving
+  institution_id: tsumugi_card
+- id: 8a512d4a-fac3-590d-ad02-197d4c21ef26
+  title: change_to_installments を使う場面
+  body: 'お客様が、高額な買い物などの「1回払い」決済を、後から指定の回数で計画的に返済する「分割払い」へ変更することを希望される場合（あとから分割）に使用します。
+
+
+    【手続き手順】
+
+    1. 多要素認証により、お客様の本人確認を適切に実施します。
+
+    2. get_accounts を使用して、対象となる account_id を特定します。
+
+    3. get_account_transactions を使用し、分割払いに変更したい決済の transaction_id を特定します。
+
+    4. お客様に希望の分割回数を確認します。
+
+    5. 分割払い：商品概要に基づき、適用される手数料について説明し、同意を得ます。
+
+    6. change_to_installments を呼び出し、回数を指定して支払方法の変更を完了させます。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_to_installments
+  institution_id: tsumugi_card
+- id: faa57d63-fc11-5d99-b60c-9c5fdbb24f54
+  title: change_to_installments ツールリファレンス
+  body: '1回払いのショッピング利用分を、指定した回数の分割払いへと変更します。
+
+
+    【引数】
+
+    - account_id: 対象アカウントの識別子
+
+    - transaction_id: 変更対象となる決済の識別子
+
+    - installments: 希望する分割回数（数値）
+
+
+    【効果】
+
+    オペレーターが本ツールを直接実行することで、指定された取引が分割払いに変更されます。お客様側での操作は不要です。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_to_installments
+  institution_id: tsumugi_card
+- id: 21ca6048-4cd6-5936-905e-ea0e7bad7ed6
+  title: change_revolving_payment を使う場面
+  body: 'お客様が、現在設定されているリボ払いの「毎月の支払額（約定支払額）」を変更したい場合に本ツールを使用します。収支状況に合わせて、返済スピードを調整することで、経済的な安心をサポートします。
+
+
+    【手続き手順】
+
+    1. 多要素認証により、お客様の本人確認を適切に実施します。
+
+    2. get_accounts を使用して、対象となる account_id を特定します。
+
+    3. お客様に、変更後の毎月の支払希望額を確認します。
+
+    4. 支払額を減らす場合は、完済までの期間が延び、結果として支払手数料が増加することを丁寧に説明し、同意を得ます。
+
+    5. change_revolving_payment を呼び出し、月々の支払額の変更を完了させます。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_revolving_payment
+  institution_id: tsumugi_card
+- id: e1396618-a1aa-5381-8951-1f43a6a28666
+  title: change_revolving_payment ツールリファレンス
+  body: 'リボ払いにおける毎月の支払金額の設定を変更します。
+
+
+    【引数】
+
+    - account_id: 対象アカウントの識別子
+
+    - new_monthly_amount: 変更後の月々支払額（例：5,000円）
+
+
+    【効果】
+
+    オペレーターが本ツールを直接実行することで、次回の請求サイクルから適用されるリボ払いの月々支払額が更新されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_revolving_payment
+  institution_id: tsumugi_card
+- id: 5695c50b-f084-5d1a-bdfd-095867c43c48
+  title: prepay_revolving_balance を使う場面
+  body: 'お客様が、リボ払いの残高の一部または全部を予定より早く返済したい（繰上返済）と希望される場合に使用します。繰上返済を行うことで、将来的に支払う手数料を軽減することができ、お客様の負担軽減につながります。
+
+
+    【手続き手順】
+
+    1. 多要素認証により、お客様の本人確認を適切に実施します。
+
+    2. get_accounts を使用して、対象となる account_id を特定します。
+
+    3. get_loan_details 等を用いて現在のリボ残高を確認し、お客様に繰上返済したい金額を確認します。
+
+    4. 振込やATMでの返済手続きについて案内し、お客様の同意を得ます。
+
+    5. prepay_revolving_balance を呼び出し、繰上返済の受付手続きを完了させます。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - prepay_revolving_balance
+  institution_id: tsumugi_card
+- id: 21641526-a7b8-54aa-8dbc-c7cba9813296
+  title: prepay_revolving_balance ツールリファレンス
+  body: 'リボ払いの残高に対する繰上返済手続きを受け付けます。
+
+
+    【引数】
+
+    - account_id: 対象アカウントの識別子
+
+    - amount: 繰上返済を行う金額（例：10,000円）
+
+
+    【効果】
+
+    オペレーターが本ツールを直接実行することで、指定された金額の繰上返済予約が行われ、手数料の軽減処理に繋がります。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - prepay_revolving_balance
+  institution_id: tsumugi_card
+- id: c31a282c-cac2-5448-b55a-cdc78fb3f821
+  title: request_limit_change を使う場面
+  body: 'お客様から、ショッピング枠やキャッシング枠の利用限度額を変更したいというご要望をいただいた際に本手続きを行います。増枠（限度額を上げる）と減枠（限度額を下げる）の両方に対応します。
+
+
+    **手続きの流れ**
+
+    1. 多要素認証等を用いて、お客様の本人確認を厳格に実施します。
+
+    2. `get_accounts` を使用し、お客様のカード番号の下4桁などから該当する account_id を特定します。
+
+    3. 変更を希望される枠（ショッピング枠またはキャッシング枠）と、具体的な希望金額を確認します。
+
+    4. **増枠の場合**は、審査が必要となる旨を事前にお伝えください。
+
+    5. `request_limit_change` を呼び出し、変更申請を完了させます。
+
+
+    限度額の詳細は、「つむぎカード：限度額・制限と注意事項」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - request_limit_change
+  institution_id: tsumugi_card
+- id: f14f35ed-455f-59cb-80e5-b244a7cdc4a1
+  title: request_limit_change ツールリファレンス
+  body: 'オペレーターが `request_limit_change` ツールを直接呼び出すことで、お客様の利用限度額の変更申請を行います。
+
+
+    **引数**
+
+    - `account_id`: `get_accounts` 等で特定した、対象口座の識別子です。
+
+    - `limit_type`: 変更対象の枠を指定します（ショッピング枠またはキャッシング枠）。
+
+    - `new_limit_amount`: 変更後の希望限度額を数値（円）で指定します。
+
+
+    **効果**
+
+    指定された口座の限度額変更申請が受理されます。増枠申請の場合は、社内審査を経て結果が通知されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - request_limit_change
+  institution_id: tsumugi_card
+- id: b910f72c-fa50-5e9f-94d1-962eed58ab03
+  title: get_loan_details を使う場面
+  body: "お客様が、現在の借入状況や今後の返済計画を確認したいと希望された際に本手続きを行います。キャッシングおよび「つむぎカードローン」の両方の詳細を確認いただけます。\n\
+    \n**手続きの流れ**\n1. 多要素認証等を用いて、お客様の本人確認を実施します。\n2. `get_accounts` を使用し、お客様の account_id\
+    \ を特定します。\n3. `get_loan_details` を呼び出し、以下の情報を取得します。\n    - 現在の借入残高（円）\n    - 適用されている金利（%）\n\
+    \    - 次回の返済日および返済予定額（円）\n4. 取得した内容を、丁寧にお客様へご案内します。\n\n金利の詳細については、「つむぎカードローン：金利・料率一覧」をご確認ください。"
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_loan_details
+  institution_id: tsumugi_card
+- id: 5c9b9fe5-e1ab-5c49-8231-0a6a384cf364
+  title: get_loan_details ツールリファレンス
+  body: 'オペレーターが `get_loan_details` ツールを直接呼び出すことで、借入に関する最新の詳細情報を取得します。
+
+
+    **引数**
+
+    - `account_id`: `get_accounts` 等で特定した、対象口座の識別子です。
+
+
+    **効果**
+
+    指定された口座に紐づくキャッシングおよびカードローンの借入残高、適用金利、次回返済日、次回返済額を返します。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_loan_details
+  institution_id: tsumugi_card
+- id: 3ca58642-2193-57e5-b22f-a1846968667f
+  title: apply_loan を使う場面
+  body: 'お客様から「つむぎカードローン」の新規申し込みを承る際に本手続きを行います。
+
+
+    **手続きの流れ**
+
+    1. 多要素認証等を用いて、お客様の本人確認を実施します。
+
+    2. `get_accounts` を使用し、お客様の account_id を特定します。
+
+    3. ご希望の借入金額を確認します。
+
+    4. **総量規制の確認**: 貸金業法に基づき、借入合計額が原則として年収の3分の1までとなるよう、支払可能見込額の調査を行います。
+
+    5. `apply_loan` を呼び出し、申し込み手続きを完了させます。
+
+
+    **注意点**
+
+    本手続きは申し込みであり、最終的な融資可否は審査の結果に基づきます。詳細は「つむぎカードローン：お申込みいただける方」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - apply_loan
+  institution_id: tsumugi_card
+- id: e40cddfa-53b6-55fa-bb71-5679ce22665f
+  title: apply_loan ツールリファレンス
+  body: 'オペレーターが `apply_loan` ツールを直接呼び出すことで、「つむぎカードローン」の申し込み手続きを行います。
+
+
+    **引数**
+
+    - `account_id`: `get_accounts` 等で特定した、対象口座の識別子です。
+
+    - `requested_amount`: お客様が希望される借入金額を数値（円）で指定します。
+
+
+    **効果**
+
+    ローン申し込みが受理され、審査プロセスに移行します。審査通過後、指定の口座へ融資が行われます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - apply_loan
+  institution_id: tsumugi_card
+- id: 9d62b3ce-b009-519b-b35f-fa4510d299a7
+  title: pay_emi を使う場面
+  body: '口座引落しができなかった月の支払いや、キャッシング・「つむぎカードローン」の返済を、振込やATMを通じて行いたいというお客様のご要望に対応する際に本手続きを行います。
+
+
+    **手続きの流れ**
+
+    1. 多要素認証等を用いて、お客様の本人確認を実施します。
+
+    2. `get_accounts` を使用し、お客様の account_id を特定します。
+
+    3. 今回お支払いいただく金額（円）および、支払い方法（振込またはATM）を確認します。
+
+    4. `pay_emi` を呼び出し、返済手続きを受け付けます。
+
+
+    返済に関するその他の詳細は、「つむぎカードローン：よくあるお手続きの流れ」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_emi
+  institution_id: tsumugi_card
+- id: 723870eb-c2f5-52a5-9cd2-f07dc26e9fd8
+  title: pay_emi ツールリファレンス
+  body: 'オペレーターが `pay_emi` ツールを直接呼び出すことで、未払金やローンの個別返済手続きを処理します。
+
+
+    **引数**
+
+    - `account_id`: `get_accounts` 等で特定した、対象口座の識別子です。
+
+    - `payment_amount`: 返済する金額を数値（円）で指定します。
+
+    - `payment_method`: 支払い手段（「振込」または「ATM」）を指定します。
+
+
+    **効果**
+
+    指定された金額の返済手続きが受理され、残高に反映されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_emi
+  institution_id: tsumugi_card
+- id: f90824b1-6446-59a6-b4bf-d791eecc8260
+  title: foreclose_loan を使う場面
+  body: 'お客様が、キャッシングや「つむぎカードローン」の借入残高をすべて一括で返済したい（完済したい）と希望された際に本手続きを行います。
+
+
+    **手続きの流れ**
+
+    1. 多要素認証等を用いて、お客様の本人確認を実施します。
+
+    2. `get_accounts` を使用し、お客様の account_id を特定します。
+
+    3. `get_loan_details` を呼び出し、現在の正確な借入残高（円）を確認します。
+
+    4. お客様に一括返済に必要な総額を提示し、同意を得ます。
+
+    5. `foreclose_loan` を呼び出し、一括返済手続きを完了させます。
+
+
+    一括返済後は、当該借入枠の残高が0円となります。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - foreclose_loan
+  institution_id: tsumugi_card
+- id: cecc2749-f070-54b8-a9d6-6713c2ce38d0
+  title: foreclose_loan ツールリファレンス
+  body: 'オペレーターが `foreclose_loan` ツールを直接呼び出すことで、借入残高の全額返済（一括返済）を処理します。
+
+
+    **引数**
+
+    - `account_id`: `get_accounts` 等で特定した、対象口座の識別子です。
+
+
+    **効果**
+
+    指定された口座のキャッシングおよびカードローンの全残高が返済され、完済状態となります。この操作は不可逆的な手続きです。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - foreclose_loan
+  institution_id: tsumugi_card
+- id: 08a5fb9a-9b4a-59b0-9190-c8f6535ff184
+  title: update_repayment_mandate を使う場面
+  body: 'お客様が、つむぎカードの月々の支払いに利用する引落口座を変更したい場合に本手続きを行います。口座変更を適切に行わない場合、支払遅延が発生し、信用情報に影響を及ぼす可能性があるため、迅速かつ正確に処理してください。
+
+
+    【手続き手順】
+
+    1. 多要素認証等を用いて、お客様の本人確認を厳格に実施します。
+
+    2. ツール get_accounts を使用し、お客様が保有するカードの account_id を特定します。
+
+    3. 新しい引落口座の情報（金融機関名、支店名、口座種別、口座番号、名義人）を確認します。
+
+    4. ツール update_repayment_mandate を呼び出し、口座情報を更新します。
+
+
+    **注意点：**
+
+    *   変更のタイミングによっては、次回の支払いに反映されない場合があります。その際は、お客様に最新の支払日にご注意いただくよう案内してください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_repayment_mandate
+  institution_id: tsumugi_card
+- id: 44d3c002-50f6-5ec7-8adf-9d9d4ce2b141
+  title: update_repayment_mandate ツールリファレンス
+  body: '指定された口座の引落設定を更新します。エージェントはこのツールを直接呼び出すことで、外部サイトへ誘導することなく口座変更を完了させます。
+
+
+    【引数】
+
+    *   account_id: 対象となるカード口座の識別子（get_accounts で取得）。
+
+    *   bank_details: 新しい引落口座の詳細情報。
+
+
+    【効果】
+
+    月々の支払いに利用される金融機関口座が更新されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_repayment_mandate
+  institution_id: tsumugi_card
+- id: 6e0d9c4e-5185-5a1d-8a68-c2ec9a94b16f
+  title: update_beneficiary を使う場面
+  body: 'つむぎカードローンの融資金（借入金）を受け取るための振込先口座を変更したい場合に本手続きを行います。融資金の誤送金を防ぐため、情報の整合性を十分に確認してください。
+
+
+    【手続き手順】
+
+    1. 多要素認証等を用いて、お客様の本人確認を厳格に実施します。
+
+    2. ツール get_accounts または get_loan_details を使用し、対象となる loan_id を特定します。
+
+    3. 融資金の振込先として希望される新しい口座情報を確認します。
+
+    4. ツール update_beneficiary を呼び出し、振込先口座を更新します。
+
+
+    **注意点：**
+
+    *   振込先口座の名義人は、必ずご本人様である必要があります。他名義への変更は原則として認められませんのでご注意ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: tsumugi_card
+- id: e6cb9fd4-7f54-58a4-9d4f-92daa9ba1a11
+  title: update_beneficiary ツールリファレンス
+  body: 'ローン融資金の振込先口座を更新します。エージェントはこのツールを直接呼び出すことで、手続きを完結させます。
+
+
+    【引数】
+
+    *   loan_id: 対象となるローンの識別子。
+
+    *   new_account_details: 新しい振込先口座の詳細情報。
+
+
+    【効果】
+
+    つむぎカードローンでの借入時に、融資金が振り込まれる口座が変更されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: tsumugi_card
+- id: f250a3db-250a-5955-bee7-356782f283b4
+  title: open_account を使う場面
+  body: 'つむぎカードの家族カードの追加発行、またはETCカードの発行を希望される場合に本手続きを行います。家族カードの発行には、本会員様の同意と家族の方の基本情報の提供が必要です。
+
+
+    【手続き手順】
+
+    1. 多要素認証等を用いて、本会員様の本人確認を厳格に実施します。
+
+    2. ツール get_accounts を使用して、本会員様の account_id を特定します。
+
+    3. 発行希望のカード種別（家族カードまたはETCカード）と、必要となる申込者情報（氏名、生年月日、連絡先など）を確認します。
+
+    4. ツール open_account を呼び出し、追加発行の申し込みを完了させます。
+
+
+    **注意点：**
+
+    *   家族カードの利用限度額は、本会員様の限度額の範囲内で設定されます。審査の結果、発行できない場合があることをあらかじめお伝えください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: tsumugi_card
+- id: 317039fc-9306-5be3-b382-734f35528abb
+  title: open_account ツールリファレンス
+  body: '家族カードやETCカードの追加発行申し込みを行います。エージェントはこのツールを直接呼び出し、申し込み処理を完結させます。
+
+
+    【引数】
+
+    *   primary_account_id: 本会員様の口座識別子。
+
+    *   card_type: 発行するカードの種類（例：家族カード、ETCカード）。
+
+    *   applicant_details: 申込者の氏名、生年月日等の詳細情報。
+
+
+    【効果】
+
+    指定された種類のカード発行手続きが開始されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: tsumugi_card
+- id: f0345870-bdd3-5165-b028-5ddda4a12cdc
+  title: close_account を使う場面
+  body: 'お客様が、つむぎカードの解約（退会）を希望される場合に本手続きを行います。解約後も、未精算の残高がある場合は支払いが継続することを明確に説明してください。
+
+
+    【手続き手順】
+
+    1. 多要素認証等を用いて、お客様の本人確認を厳格に実施します。
+
+    2. ツール get_accounts を使用し、解約対象の account_id を特定します。
+
+    3. 現在の利用残高（リボ払い、分割払い、キャッシング等の残高）を確認し、解約後もこれらの支払いは続くことをお客様に承諾いただきます。
+
+    4. ツール close_account を呼び出し、解約手続きを完了させます。
+
+
+    **注意点：**
+
+    *   解約手続きは不可逆的な操作です。一度完了すると、同一カードの再開はできず、新規申し込みとして審査が必要になることを案内してください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: tsumugi_card
+- id: 9955ebc1-fa67-589e-bfa4-bfd5777c83b8
+  title: close_account ツールリファレンス
+  body: '指定されたカード口座を解約します。エージェントはこのツールを直接呼び出し、解約処理を実行します。
+
+
+    【引数】
+
+    *   account_id: 解約対象となる口座の識別子。
+
+
+    【効果】
+
+    カードの利用権限が消滅し、口座が解約されます。ただし、既存の借入金やリボ・分割の残高がある場合は、完済まで支払義務が継続します。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: tsumugi_card
+- id: f00c1182-0d11-517c-9dc5-810697b7cecb
+  title: get_accounts を使う場面
+  body: 'お客様が保有するカード口座の情報を確認し、個別の account_id を特定する場合に本手続きを行います。他の多くの変更手続きにおいて、正しい口座を特定するための前提ステップとして利用します。
+
+
+    【手続き手順】
+
+    1. 多要素認証等を用いて、お客様の本人確認を厳格に実施します。
+
+    2. ツール get_accounts を呼び出し、お客様に紐づく口座一覧を取得します。
+
+    3. 提示された一覧から、お客様が操作を希望しているカード（例：カード番号の下4桁等で照合）の account_id を特定します。
+
+
+    **注意点：**
+
+    *   複数のカードを保有しているお客様の場合、誤った口座を操作すると重大な問題につながるため、必ずお客様にどのカードに関する手続きかを確認し、照合してください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: tsumugi_card
+- id: afb193d0-2ddf-5386-9843-3cdba7aebdf7
+  title: get_accounts ツールリファレンス
+  body: 'お客様に紐づくすべての口座情報を取得します。エージェントはこのツールを呼び出し、後続の手続きに必要な account_id を特定します。
+
+
+    【引数】
+
+    *   なし（現在認証済みのユーザーコンテキストに基づいて取得されます）。
+
+
+    【効果】
+
+    保有しているカードのリストと、それぞれの account_id が返されます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: tsumugi_card
+- id: bdfd9bc4-70cf-54bb-8a46-7333f8815287
+  title: update_contact_info を使う場面
+  body: 'お客様のご住所、電話番号、メールアドレスなどのご連絡先変更を承る際に本手続きを行います。
+
+
+    1. 多要素認証を用いて、厳格な本人確認を完了させます。
+
+    2. `get_accounts` を使用し、対象となるアカウントの account_id を特定します。
+
+    3. 変更後の正確なご連絡先情報を、お客様から直接伺い確認します。
+
+    4. `update_contact_info` を呼び出し、登録情報を最新の状態に更新します。
+
+
+    登録内容の変更に関する一般的な流れについては、「つむぎカード：登録内容の変更」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: tsumugi_card
+- id: 343613d4-8f99-5dd7-b921-f62d7e8d8fdd
+  title: update_contact_info ツールリファレンス
+  body: '`update_contact_info` は、お客様の登録連絡先情報を更新するツールです。
+
+
+    引数：
+
+    - account_id：対象アカウントの識別子
+
+    - 更新後の連絡先詳細：新しい住所、電話番号、メールアドレスなどの情報
+
+
+    エージェントがこのツールを直接呼び出すことで、システム上の登録情報を即時に書き換えます。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: tsumugi_card
+- id: d0301fd8-c271-5037-adcd-0051f72cedf7
+  title: get_statements を使う場面
+  body: '過去のご利用明細書（ステートメント）の照会を希望される場合に本手続きを行います。
+
+
+    1. 多要素認証を用いて、厳格な本人確認を完了させます。
+
+    2. `get_accounts` を使用し、対象となる account_id を特定します。
+
+    3. 確認したい明細の対象期間（年月）をお客様に確認します。
+
+    4. `get_statements` を呼び出し、該当期間の明細情報を取得して提示します。
+
+
+    履歴の確認方法に関する詳細は、「つむぎカード：状況・履歴の確認」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: tsumugi_card
+- id: 3d09de46-8ff7-5a14-94c1-2fe795899ab5
+  title: get_statements ツールリファレンス
+  body: '`get_statements` は、指定された期間の利用明細書を取得するツールです。
+
+
+    引数：
+
+    - account_id：対象アカウントの識別子
+
+    - 対象期間：照会したい明細の年月
+
+
+    エージェントがこのツールを直接呼び出すことで、お客様の過去の決済履歴および請求明細を照会します。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: tsumugi_card
+- id: 1dd757a9-5571-5559-b484-7394efb21577
+  title: set_alerts を使う場面
+  body: '利用金額の通知や、セキュリティ上の重要な通知設定を変更したい場合に本手続きを行います。
+
+
+    1. 多要素認証を用いて、厳格な本人確認を完了させます。
+
+    2. `get_accounts` を使用し、対象となる account_id を特定します。
+
+    3. 通知を希望する項目（例：一定金額以上の利用通知など）とその条件を確認します。
+
+    4. `set_alerts` を呼び出し、アラート設定を有効化または変更します。
+
+
+    安全なご利用に関するポイントについては、「つむぎカード：安全にご利用いただくためのポイント」をご参照ください。'
+  domain: payments
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: tsumugi_card
+- id: 3b30b34b-9487-58ca-9ca5-f4cbf146f9e5
+  title: set_alerts ツールリファレンス
+  body: '`set_alerts` は、お客様への通知（アラート）設定を管理するツールです。
+
+
+    引数：
+
+    - account_id：対象アカウントの識別子
+
+    - 通知の種類：設定したいアラートの項目
+
+    - 通知条件：通知をトリガーする金額や条件
+
+
+    エージェントがこのツールを直接呼び出すことで、指定された条件に基づいた自動通知を設定します。'
+  domain: payments
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: tsumugi_card

@@ -1,0 +1,5857 @@
+schema_version: v0.1
+documents:
+- id: ba3251c1-3afb-5ffa-bea3-4fdfd365239b
+  title: 普通預金：商品概要
+  body: '朝凪銀行の「普通預金」は、公共料金のお支払い振替や、給与・年金の受取口座として最適な、日常的な決済と貯蓄の基本口座です。いつでも自由にお預入れやご出金ができるため、生活資金の管理に非常に便利です。
+
+
+    【金利・手数料】
+
+    ・適用金利：年 0.4%
+
+    ・他行あて振込手数料（オンラインバンキング利用時）：220円
+
+    ・時間外ATM利用手数料：110円
+
+    ・キャッシュカード等再発行手数料：1,100円
+
+
+    地域の皆様に安心感を提供し、デジタルサービスとの融合により利便性を高めております。詳細な手数料については「普通預金：手数料一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 601ed1c1-ad7a-541f-b0be-36932f369397
+  title: 普通預金：普通預金の金利について
+  body: 'Q：普通預金の金利はどのくらいですか？
+
+    A：当行の普通預金に適用される金利は年 0.4%です。お預入れいただいた金額に対し、この利率に基づき利息が計算されます。
+
+
+    Q：金利は変動しますか？
+
+    A：はい。市場金利の変動等に伴い、金利は改定される場合がございます。最新の情報は「普通預金：金利・料率一覧」にてご確認いただけます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4ba8e54e-dc9d-5522-b84c-a1d609cbdd4e
+  title: 普通預金：お申込みとご利用開始
+  body: '普通預金口座の開設からご利用開始までの手順をご案内いたします。
+
+
+    1. 本人確認書類のご提示：犯罪収益移転防止法に基づき、運転免許証やマイナンバーカードによる「取引時確認」を実施いたします。必要書類を提示し、ご本人様の確認を受けてください。
+
+    2. 口座開設のお申込み：ご希望の利用目的（給与受取など）を伝え、口座開設の手続きを行います。
+
+    3. 口座情報の受領：手続き完了後、口座番号のご案内とともに、キャッシュカード等の発行手続きを行います。
+
+    4. ご利用開始：カードの受け取り後、ATMまたはオンラインバンキングにて初回のお預入れを行うことで、正式にご利用いただけます。
+
+
+    お手続きの詳細や必要書類については「普通預金：お申込みいただける方」をご参照ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: cd473c4d-f113-55e5-b7d9-9e4f03f0aa3e
+  title: 普通預金：手数料一覧
+  body: '普通預金のご利用にかかる主な手数料は以下の通りです。
+
+
+    ・他行あて振込手数料（オンラインバンキング）：220円
+
+    ・時間外ATM利用手数料：110円
+
+    ・キャッシュカード等再発行手数料：1,100円
+
+
+    なお、給与受取などの条件を満たすことで手数料が無料になる優遇制度がございます。詳細は「給与・年金受取特典：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c102ac0b-5b74-5153-bedd-11b9ce5fa851
+  title: 普通預金：お手続きが完了しない・保留中のまま
+  body: '口座開設のお申込み後、手続きが完了せず「保留中」のままとなっている場合の対応方法です。
+
+
+    【考えられる原因と確認事項】
+
+    ・本人確認書類の不備：ご提示いただいた書類の有効期限が切れている、または画像が不鮮明な場合、確認に時間を要します。改めて書類に不備がないかご確認ください。
+
+    ・入力情報の相違：ご入力いただいた住所や氏名が、公的証明書と完全に一致しているかをご確認ください。
+
+
+    【解決策】
+
+    不足している書類がある場合は、追加でご提示をお願いいたします。書類に問題がないにもかかわらず数営業日経過している場合は、当行にて状況を確認いたします。当行にて調査を行い、必要に応じて専門部署へエスカレーションし、手続きを再開させます。完了次第、改めて通知いたします。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c5613e1a-1f49-5252-bcb4-b8a13a8a2865
+  title: 普通預金：お申込みいただける方
+  body: '【お申込み条件および結果】
+
+    ・日本国内に居住する個人の方 → お申込みいただけます。要：取引時確認（本人確認書類の提示）。
+
+    ・法人または団体の方 → 別途、審査および法人用書類のご提示により、お申込みいただけます。
+
+    ・非居住者の方 → 原則としてお申込みいただけませんが、個別に状況を確認させていただきます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: af35b404-7007-5291-af9f-de514b492add
+  title: 普通預金：当社の似た商品との比較
+  body: '「普通預金」と「スーパー定期」を比較します。
+
+
+    ・普通預金：金利 0.4%。いつでも自由に出し入れが可能で、日常的な支払いや生活資金の管理に適しています。
+
+    ・スーパー定期：期間に応じた金利が設定され、効率的な資産形成に適しています。
+
+
+    利便性と流動性を重視される方は「普通預金」を、一定期間資金を固定してより効率的に増やしたい方は「スーパー定期」をお選びください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 72bf5e5c-d76e-522d-ace7-4b8332fcfec4
+  title: 普通預金：重要事項のご説明
+  body: '当行の普通預金をご利用いただくにあたり、以下の事項をご確認ください。
+
+
+    【預金者保護について】
+
+    当行は金融庁の監督を受けております。預金保険制度により、1金融機関につき預金者1人当たり元本1,000万円までと破綻日までの利息等が保護されます。
+
+
+    【法令遵守】
+
+    個人情報保護法および犯罪収益移転防止法を遵守し、口座開設時には厳格な「取引時確認」を実施いたします。
+
+
+    【コストについて】
+
+    他行あて振込（オンライン）に220円、時間外ATM利用に110円、カード再発行に1,100円の手数料を申し受けます。これらの料金体系は透明性を維持し、適切に反映させております。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 52a7093c-0642-53c8-98b9-6bc71fa9ce90
+  title: 普通預金：金利・料率一覧
+  body: '【適用金利】
+
+    ・普通預金金利：年 0.4%
+
+
+    本金利は、口座の残高にかかわらず一律に適用されます。利息は、預入金額に対して上記の利率に基づき計算され、定期的にお客様の口座へ入金されます。市場環境の変化により、金利は改定される場合がございますのでご了承ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 20017394-dfc3-51a9-a00c-8f46c8943381
+  title: 普通預金：実施中のキャンペーン
+  body: '【新生活応援キャンペーン】
+
+    期間：2026年3月1日から2026年5月31日まで
+
+
+    期間中に普通預金口座を新規に開設されたお客様に対し、年 0.4%の金利を適用し、地域の皆様の新しい生活をサポートいたします。日々の決済から貯蓄まで、ぜひ朝凪銀行の普通預金をご活用ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 69969bc6-ed4b-5ec7-83d7-ac5a0b8472e0
+  title: 普通預金：不正利用からお客さまを守るために
+  body: '朝凪銀行では、お客さまの資産を安全に守るため、多層的な認証プロセスを導入しております。最近では、銀行員や公的機関を装い、暗証番号やセキュリティカードの情報を聞き出そうとする詐欺が発生しております。当行が電話やメールでお客さまの暗証番号を伺うことは決してございません。
+
+
+    万が一、キャッシュカードの紛失や盗難、または身に覚えのないお取引に気づかれた場合は、直ちにご連絡ください。預金者保護法に基づき、偽造・盗難カードによる被害は原則として補償いたします。また、当行の預金は預金保険制度により、元本1,000万円までが保護されております。安心してお取引いただくため、不審な連絡があった際は、一度落ち着いてご確認をお願いいたします。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: caef32b3-2085-59b7-8401-180b2a42f2b7
+  title: 普通預金：規定・約款
+  body: '本口座の利用にあたっては、当行の規定および約款が適用されます。お客さまは、口座開設時の取引時確認を含む本人確認手続きを完了させ、正確な情報を届け出る義務を負います。
+
+
+    【金利と手数料】
+
+    適用金利は0.4%とし、市場環境に基づき変更される場合があります。また、インターネットバンキングを利用した他行あて振込手数料として220円、時間外ATM利用手数料として110円を申し受けます。キャッシュカード等の再発行手数料は1,100円となります。
+
+
+    【契約の変更と終了】
+
+    約款の変更を行う際は、事前に書面または当行の告知方法によりお知らせいたします。口座の解約を希望される場合は、所定の手続きを経て、残高を精算することで契約を終了します。不適切な利用が認められた場合、当行は口座を制限または解約することがあります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d4cf65f6-4483-5996-b9bb-12dac1949d26
+  title: 普通預金：おすすめの方と主な使い方
+  body: '普通預金は、公共料金の振替や給与・年金受取に最適な、日常的な決済と貯蓄の基本口座です。いつでも自由にお引き出しやご送金が可能なため、以下のような方におすすめです。
+
+
+    【おすすめの方】
+
+    ・生活費の管理を一つの口座で効率的に行いたい方
+
+    ・給与や年金を確実に受け取りたい方
+
+    ・いつでも利用できる安心感と、0.4%という適正な金利を両立させたい方
+
+
+    【主な使い方】
+
+    ・給与や年金の受取口座として指定し、日々の支払いに活用する
+
+    ・インターネットバンキングを利用し、他行へ220円の手数料で迅速に送金する
+
+    ・急な出金が必要な際は、時間外でも110円の手数料でATMから引き出す
+
+
+    より詳細な条件については、「普通預金：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d86c2c81-34ae-5e45-829a-96d42f61a05c
+  title: 普通預金：他行あて振込手数料（インターネットバンキング）について
+  body: 'Q：インターネットバンキングで他行に振り込む際の手数料はいくらですか？
+
+
+    A：他行あて振込手数料は、1回につき220円となります。
+
+
+    Q：手数料を無料にする方法はありますか？
+
+
+    A：給与や年金の受取口座に指定いただくことで、手数料の優遇を受けられる「給与・年金受取特典：商品概要」がございます。条件を満たした場合、無料回数の提供がございますので、ぜひご検討ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 66b241f4-676a-541e-8a8f-e9c4d36579c3
+  title: 普通預金：解約・変更・プランの切替え
+  body: '口座の解約や登録内容の変更をご希望の方は、以下の手順でお手続きください。
+
+
+    【解約の手順】
+
+    1. お手続きを希望される旨を当行へお伝えください。
+
+    2. 本人確認書類（運転免許証等）をご提示いただき、厳格な本人確認を実施します。
+
+    3. 口座残高を確認し、全額を引き出すか、指定の他口座へ送金します。この際、他行あての場合は220円の振込手数料がかかります。
+
+    4. 通帳およびキャッシュカードを回収し、解約手続きを完了します。手続き完了後、解約証明書を発行いたします。
+
+
+    【内容変更の手順】
+
+    1. 住所や氏名など、変更したい項目を当行へお伝えください。
+
+    2. 最新の本人確認書類をご提示ください。
+
+    3. 当行にて内容を更新し、変更完了の通知を差し上げます。
+
+
+    詳細は「普通預金：お申込みとご利用開始」も併せてご覧ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: cc7c9003-20e3-5ab1-92fa-1c4d5c2e1609
+  title: 普通預金：想定外の手数料・金額
+  body: 'お客さまから「明細に想定していなかった手数料が記載されている」とのご相談をいただいた際の対応フローです。
+
+
+    【確認事項と原因】
+
+    1. 時間外のATM利用がなかったか：平日15:00以降や土日にATMをご利用の場合、110円の手数料が発生します。
+
+    2. インターネットバンキングでの他行振込がなかったか：他行あての振込を行った場合、220円の手数料が発生します。
+
+    3. カードの再発行手続きが行われなかったか：再発行時には1,100円の手数料を申し受けております。
+
+
+    【解決策】
+
+    上記に該当する場合、規定通りの請求であることを丁寧にご説明ください。もし、重複して請求されている、または条件を満たしているにもかかわらず手数料が発生している場合は、速やかに専門部署へエスカレーションし、調査および返金処理を行います。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e498a0bc-145b-5387-ad5b-5b1dc498dddc
+  title: 普通預金：必要書類
+  body: '普通預金口座を開設される際は、犯罪収益移転防止法に基づき、以下の書類による取引時確認が必要です。
+
+
+    【個人のお客さま】
+
+    ・運転免許証、マイナンバーカード、パスポートなどの公的証明書（いずれか1点）
+
+    ・現住所を確認できる住民票または公共料金の領収書（免許証に現住所が記載されていない場合）
+
+
+    【法人のお客さま】
+
+    ・登記事項証明書（発行から6ヶ月以内）
+
+    ・代表者および実質的支配者の本人確認書類
+
+
+    これらの書類をご提示いただいた後、厳正な審査を経て口座開設となります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5fe7fbad-2112-5124-ae65-9543520f73f2
+  title: 普通預金：他社の一般的な商品との比較
+  body: '他社の一般的な普通預金商品と比較し、当行の普通預金は「地域密着の安心感」と「競争力のある金利」を重視しています。
+
+
+    【金利面】
+
+    他社で0.001%〜0.1%程度の金利が一般的であるなか、当行は0.4%という高い水準を提供し、効率的な資産形成を支援します。
+
+
+    【コスト面】
+
+    インターネットバンキングの他行あて振込手数料（220円）や、時間外ATM利用料（110円）は業界標準と同等ですが、給与受取等の条件を満たした際の優遇制度が充実しています。
+
+
+    【結論】
+
+    高い金利を享受しながら、地域に根ざした対面サポートも受けたい方に、当行の普通預金は最適な選択肢となります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5d3c79df-aee4-5911-baa8-289e249ba645
+  title: 普通預金：リスクについてのご説明
+  body: '普通預金のご利用にあたり、以下のリスクと制度についてご理解ください。
+
+
+    【元本保証と預金保険制度】
+
+    当行の普通預金は、預金保険制度の対象となっております。万が一、当行が破綻した場合であっても、1金融機関につき、預金者1人あたり元本1,000万円までとその利息を合わせて保護されます。
+
+
+    【金利変動リスク】
+
+    現在適用している0.4%の金利は、市場金利の変動に伴い、将来自由に変更される可能性があります。金利が低下した場合、受取利息が減少するリスクがあります。
+
+
+    【法令遵守】
+
+    当行は個人情報保護法および犯罪収益移転防止法を厳格に遵守しております。口座開設時や重要な手続きの際には、取引時確認を実施いたします。不審な取引が認められた場合は、法令に基づき口座を凍結することがあります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: df7b4aa5-a758-5853-beb3-35dce7e82fef
+  title: 普通預金：金利・料率の決まり方と適用
+  body: '普通預金に適用される金利の仕組みについてご案内します。
+
+
+    【適用金利】
+
+    全ての普通預金口座に対し、一律で0.4%の年利率を適用いたします。残高の多寡にかかわらず、同一の利率が適用されるフラットな構造となっております。
+
+
+    【利息の計算と適用】
+
+    利息は日次で計算され、定期的（年2回）に口座へ入金されます。適用金利は、市場金利や当行の資金調達状況に基づき決定され、変更がある場合は店頭掲示およびホームページにてお知らせいたします。
+
+
+    【注意点】
+
+    本金利は税引前であり、実際にお受け取りになる金額は、ここから所得税および地方税（合わせて20.315%）が差し引かれた金額となります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ba352e21-8e87-5376-a995-38f3dca17e0b
+  title: 普通預金：ご紹介・継続利用の特典
+  body: 朝凪銀行の普通預金をご利用いただきありがとうございます。新しく口座を開設される方を、ご家族やご友人がご紹介いただいた場合や、継続的にご利用いただくお客様には、特別な優遇をご用意しております。特に給与受取口座や年金受取口座にご指定いただくことで、ATM利用料などの手数料が無料となる特典を適用させていただきます。
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0cb253e8-599e-5d29-ab24-29123361deaf
+  title: 普通預金：安全にご利用いただくためのポイント
+  body: 'お客様のの大切な資産を守るため、普通預金をご利用の際は以下のポイントにご注意ください。
+
+
+    1. 多層的な認証の活用：当行ではセキュリティカードや生体認証を導入しております。これらを適切に設定し、第三者に認証情報を教えないでください。
+
+    2. 暗証番号の管理：単純な数字を避け、定期的に変更することをお勧めします。
+
+    3. 不審な連絡への警戒：当行からメールや電話で、暗証番号やパスワードを直接お伺いすることはございません。
+
+
+    万が一、カードの紛失や不正利用の疑いがある場合は、直ちにご報告ください。預金者保護法に基づき、規定の期間に基づき誠実に調査・対応させていただきます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4ffa0891-6ab8-50b3-b280-83f01d9e8ef0
+  title: 普通預金：規定・約款の変更
+  body: '普通預金のご利用に関する規定および約款は、法令の改正や経済情勢の変化に応じて変更される場合がございます。金利（例：0.4%）や、他行あて振込手数料（220円）、時間外ATM利用手数料（110円）などの改定を含む重要な変更を行う際は、事前に店頭掲示や書面、オンラインバンキング等でお客様へ通知いたします。
+
+
+    通知後、一定期間までにご異議がない場合は、変更後の規定に同意いただいたものとみなされます。最新の約款内容については、店頭または当行の窓口にていつでもご確認いただけます。お客様には、常に不透明感のない料金体系と誠実なサービスを提供することに努めております。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1a1c3949-d3c9-56d4-9efd-7b0ac47b2a2d
+  title: 普通預金：ご利用開始までの手順
+  body: 'お客様が普通預金のご利用を開始するまでの手順は以下の通りです。サポート担当者は、お客様に以下の流れをご案内ください。
+
+
+    1. 本人確認（取引時確認）：犯罪収益移転防止法に基づき、運転免許証などの本人確認書類をご提示いただき、厳格な本人確認を実施します。
+
+    2. 口座開設手続き：必要事項をご記入いただき、口座開設を完了させます。この際、0.4%の金利適用についてご説明します。
+
+    3. キャッシュカード・通帳の発行：手続き完了後、カードおよび通帳を発行します。再発行が必要な場合は、1,100円の手数料がかかる旨をお伝えください。
+
+    4. サービス設定：オンラインバンキングの利用設定や、給与・年金受取の指定手続きを行い、利便性の高い環境を整えていただきます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5563a56f-1b59-5ccd-824b-664dedc4d4a8
+  title: 普通預金：時間外のATM利用手数料について
+  body: '【質問】時間外にATMを利用した場合、手数料はかかりますか？
+
+    【回答】はい、時間外ATM利用手数料として110円をいただいております。
+
+
+    なお、給与や年金の受取口座としてご指定いただいているお客様は、特典により手数料が無料となる場合がございます。詳細は「給与・年金受取特典：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ad25598d-4080-51fb-95f5-ad2c590e516b
+  title: 普通預金：登録内容の変更
+  body: '普通預金の登録内容（住所、氏名、電話番号など）を変更する手順は以下の通りです。
+
+
+    1. 変更内容の提示：変更したい項目と、新しい情報を当行にお伝えください。
+
+    2. 本人確認書類の提出：住所変更などの重要な手続きには、最新の住所が記載された住民票や免許証などの本人確認書類をご提示いただきます。
+
+    3. 内容の照合と更新：当行にてご提示いただいた書類と登録内容を照合し、変更手続きを行います。
+
+    4. 完了の確認：手続き完了後、変更内容が正しく反映されたことを確認し、手続き完了となります。
+
+
+    ※重要な登録内容の変更にあたっては、セキュリティ確保のため厳格な本人確認を実施させていただきます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a68d9f36-8326-5054-bbde-d13b22ea020b
+  title: 普通預金：ログインできない・アクセスできない
+  body: 'オンラインバンキングで普通預金口座にアクセスできない場合、以下の点をご確認ください。
+
+
+    【考えられる原因と対処法】
+
+    ・ログインIDやパスワードの入力誤り：大文字・小文字の区別を含め、正しく入力されているか再度ご確認ください。
+
+    ・認証エラー：セキュリティカードの有効期限切れや、生体認証の一時的な不具合が考えられます。
+
+    ・アカウントのロック：短時間に複数回入力を間違えた場合、セキュリティのため口座が一時的にロックされます。
+
+
+    【解決しない場合】
+
+    上記を確認しても解決しない場合は、当行へお知らせください。専門部署へエスカレーションし、本人確認の上でパスワードの再発行やロック解除の手続きを誠実に行わせていただきます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1008f542-b9d0-598d-bc9a-fc8548617ec7
+  title: 普通預金：ご利用条件による違い
+  body: 'お客様のご利用条件による手数料の適用は以下の通りです。
+
+
+    ・給与・年金受取口座に指定あり：ATM利用料、振込手数料などの優遇制度が適用され、条件に応じて無料となります。
+
+    ・給与・年金受取口座に指定なし：通常の手数料（例：時間外ATM利用料 110円、他行あてオンライン振込手数料 220円）が適用されます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6a68d493-a2bf-5725-9d7e-4c8c42156873
+  title: 普通預金：プランの選び方
+  body: '日常的な決済と資産形成の目的に合わせてお選びください。
+
+
+    ・普通預金：公共料金の振替や給与受取など、自由に出し入れしたい方に最適です。金利は0.4%で、利便性を最優先します。
+
+    ・スーパー定期：一定期間預け入れ、効率的に資産を増やしたい方向けです。期間に応じた金利設定となります。
+
+
+    まずは普通預金で基本口座を作成し、余裕資金を定期預金へ移行されるプランをお勧めいたします。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: bedfd342-fc89-51e1-9ada-8ce312f3f469
+  title: 普通預金：個人情報の取扱い
+  body: '当行は、個人情報保護法および犯罪収益移転防止法を遵守し、お客様の個人情報を厳重に管理いたします。
+
+
+    【個人情報の収集と利用】
+
+    口座開設時や重要手続き時に実施する「取引時確認」により、お客様の本人確認情報を収集します。これは法令に基づき、公正かつ透明性の高い取引を徹底し、金融犯罪を防止することを目的としております。
+
+
+    【情報の管理】
+
+    収集した情報は、口座管理、サービスの提供、および法令に基づく報告以外の目的で使用することはありません。また、預金保険制度により、元本1,000万円までが保護されます。個人情報の取り扱いについてのご質問や、開示請求等がございましたら、窓口までお申し付けください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7697cc1d-c276-5bc5-bcb5-a74745ded084
+  title: 普通預金：この商品をかたる詐欺にご注意ください
+  body: '当行の普通預金をかたり、「特別な高金利プランへの案内」や「口座凍結を防ぐための手続き」を求める不審なメールやSMSにご注意ください。当行の普通預金金利は0.4%であり、個別のメールで急激に高い金利を提示して個人情報を求めることはございません。
+
+
+    当行では、お客様の暗証番号やセキュリティカードの番号、オンラインバンキングのパスワードをメールや電話でお伺いすることは絶対にございません。不審な連絡を受けた場合は、決してURLをクリックせず、速やかに当行までご連絡ください。万が一、情報を伝えてしまった場合は、被害を最小限に抑えるため、直ちにお取引の停止手続きをお願いいたします。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0c1d5b57-436c-5090-ab27-3c93c8990ce9
+  title: 普通預金：限度額・制限と注意事項
+  body: '普通預金のご利用にあたっては、安全な取引を維持するため、1日あたりおよび1回あたりのお取引限度額が設定されております。限度額の詳細や変更については、店頭またはオンラインバンキングにてご確認いただけます。
+
+
+    特に高額の出金や振込、口座情報の変更などの重要な手続きの前には、犯罪収益移転防止法に基づき、厳格な本人確認である「取引時確認」を実施させていただきます。また、ATMをご利用の際は、時間外利用手数料として110円などの費用が発生いたしますのでご注意ください。不審な取引が検知された場合は、セキュリティ保護のため一時的に口座が制限されることがあり、その際は多層的な認証プロセスによる本人確認が必要となります。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7402e1af-f420-50df-96c5-42b14852470b
+  title: 普通預金：キャッシュカード・通帳の再発行手数料について
+  body: 'Q：キャッシュカードや通帳を紛失してしまった場合、再発行に費用はかかりますか？
+
+
+    A：はい、再発行手数料として1,100円を申し受けます。お手続きの際は、ご本人確認書類をご持参の上、窓口までお越しください。なお、紛失・盗難の届出を迅速に行うことで、預金者保護法に基づいた補償を受けられる場合がございます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: bc739b08-bc1a-55b9-9cb1-c546e3cc3520
+  title: 普通預金：状況・履歴の確認
+  body: '普通預金のお取引履歴や現在の残高を確認する手順をご案内します。
+
+
+    1. 確認したい口座番号と、照会したい期間（例：直近1ヶ月分）を当行スタッフへお伝えください。
+
+    2. 厳格な本人確認（取引時確認）のため、キャッシュカードまたはご本人確認書類をご提示ください。
+
+    3. 当行にて照会を行い、入出金明細および現在の残高をご案内します。
+
+
+    また、オンラインバンキングをご利用いただくと、いつでもリアルタイムで履歴がご確認いただけます。適用されている金利0.4%に基づく利息の入金記録なども、明細から容易に確認することが可能です。詳細なご利用方法は「普通預金：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 47455abf-6f48-5324-9ca9-016a26662303
+  title: 普通預金：お取引が拒否された・制限された
+  body: 'ATMやオンラインバンキングでの取引が拒否された場合、以下の原因が考えられます。
+
+
+    【考えられる原因】
+
+    ・暗証番号の入力回数制限を超えた
+
+    ・1日の出金・振込限度額に達した
+
+    ・セキュリティ上の理由で口座に制限がかけられた
+
+
+    【対処方法】
+
+    まずは、入力内容に誤りがないか、または限度額を超えていないかをご確認ください。制限がかかっている場合は、当行へ制限解除をご依頼ください。その際、セキュリティカードや生体認証を含む多層的な本人確認を実施させていただきます。本人確認が完了し、正当な取引であることが確認され次第、制限を解除いたします。解決しない場合は、専門部署へエスカレーションし、詳細な調査を行います。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e0a990d5-cf10-50be-b020-9b9f54ff8136
+  title: 普通預金：切替えや上位プランを検討するとき
+  body: お客様がより効率的な資産形成を希望される場合は、普通預金（金利0.4%）から「スーパー定期」への切替えをご提案ください。また、ATM利用料や振込手数料の負担を軽減したい場合は、「給与・年金受取特典」の適用条件を満たすようご案内することで、利便性を最大化できます。
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6d1d3188-0958-591a-8fb9-fb94e22d8295
+  title: 普通預金：ほかの選択肢との比較と向かない場合
+  body: '普通預金は、0.4%の金利を享受しながら、いつでも自由に入出金ができるため、公共料金の振替や給与・年金の受取など、日常的な決済に最適です。
+
+
+    一方、以下のような目的の方には、他の商品がより適しています。
+
+    ・中長期的に効率よく資産を増やしたい方：一定期間預け入れることで、より高い金利設定が適用される「スーパー定期」をおすすめします。
+
+    ・支出をリアルタイムで管理し、キャッシュレス決済をメインにしたい方：口座残高から即時引き落としされる「朝凪Visaデビット」の併用をご検討ください。
+
+
+    普通預金は利便性に特化した口座であるため、資産形成のベースとしてご利用いただき、目的に応じて他の商品と組み合わせて活用してください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 980d28ec-6cc1-500b-8730-c9a94ec7cdc9
+  title: 普通預金：手数料と費用
+  body: 'Q：他行宛てにオンラインで振り込む際の手数料はいくらですか？
+
+
+    A：他行宛てのオンライン振込手数料は220円です。
+
+
+    Q：営業時間外にATMを利用する場合の費用を教えてください。
+
+
+    A：時間外ATM利用手数料として110円を申し受けます。なお、「給与・年金受取特典」などの条件を満たすことで、これらの手数料が無料になる優遇制度がございます。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ae528b53-3b69-5c20-8cfb-391aed2a66ce
+  title: 普通預金：よくあるお手続きの流れ
+  body: '普通預金口座を開設し、ご利用を開始するまでの流れをご案内します。
+
+
+    1. 窓口にて口座開設の意思をお伝えください。この際、犯罪収益移転防止法に基づき、運転免許証などの本人確認書類をご提示いただき、「取引時確認」を実施します。
+
+    2. お名前やご住所などの基本情報を確認し、口座の種別を決定します。普通預金は金利0.4%で、日常的な決済に最適な口座です。
+
+    3. 内容を確認後、ご署名をいただき、通帳とキャッシュカードの発行手続きを行います。
+
+    4. キャッシュカードをお受け取りいただければ、すぐにATMやオンラインバンキングでのご利用が可能です。
+
+
+    あわせて「給与・年金受取特典」へのご指定をいただくことで、手数料の優遇を受けられるため、併せてご検討ください。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3b5f4dab-4c2d-5fb1-8132-c3c865f492ac
+  title: 普通預金：明細や記録と合わない
+  body: 'お客様から「明細の金額が想定と異なる」「心当たりのない出金がある」とのお問い合わせを受けた際は、以下の手順で確認してください。
+
+
+    【確認ステップ】
+
+    1. 直近の取引履歴を確認し、時間外ATM利用手数料（110円）や他行宛てオンライン振込手数料（220円）などの手数料が適切に計上されていないか照合します。
+
+    2. 自動振替や公共料金の引き落としなど、定期的な決済が行われていないか確認します。
+
+    3. 入金側で、金利0.4%に基づく利息の計算が正しく行われているか確認します。
+
+
+    【対応とエスカレーション】
+
+    上記を確認しても不一致が解消されない場合、または不正利用の疑いがある場合は、速やかに口座を一時凍結し、専門部署へエスカレーションしてください。その後、預金者保護法に基づき、誠実に調査および補償手続きを行います。'
+  domain: retail_banking
+  product_category: futsu_yokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1c65c5df-8647-5a84-92ce-035d96cfaabf
+  title: スーパー定期：商品概要
+  body: 'スーパー定期は、期間に応じた金利設定により、効率的な資産形成を支援する定期預金商品です。一定期間、大切なお預金を預けていただくことで、普通預金よりも高い金利を適用いたします。
+
+
+    【適用金利（年率）】
+
+    ・1年預入：0.55%
+
+    ・3年預入：0.85%
+
+    ・5年預入：1.05%
+
+
+    【最低預入金額】
+
+    1,000円からお申込みいただけます。
+
+
+    利息には20.315%の税金がかかりますが、計画的な貯蓄に最適な口座です。詳細な金利については「スーパー定期：金利・料率一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d123f158-d3df-5799-96e6-9d9e2ce7d75c
+  title: スーパー定期：1年ものの金利について
+  body: '【質問】1年で預け入れた場合の金利はどのくらいになりますか？
+
+
+    【回答】スーパー定期の1年預入の適用金利は、年0.55%となります。こちらの金利は税引前の数値であり、実際にお受け取りいただく利息からは20.315%の税金が差し引かれます。詳細については「スーパー定期：金利・料率一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f4c43d89-1660-5a80-bd53-e8df70f8841c
+  title: スーパー定期：お申込みとご利用開始
+  body: 'スーパー定期のお申込み手順をご案内いたします。あらかじめ、普通預金口座に最低預入金額の1,000円以上の残高をご用意ください。
+
+
+    1. 預け入れたい金額（1,000円以上）と、預入期間（1年、3年、5年のいずれか）を当社にお伝えください。
+
+    2. 指定された普通預金口座から、スーパー定期口座への資金振替処理を行います。
+
+    3. 振替完了後、適用金利（0.55%、0.85%、または1.05%）と満期日を記載した開設確認書を提示いたします。
+
+
+    以上で、資産形成に向けた運用が開始されます。運用中の状況確認については「スーパー定期：状況・履歴の確認」をご覧ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 30d77168-d008-5d23-ad25-525962abf4c2
+  title: スーパー定期：手数料一覧
+  body: 'スーパー定期のご利用に関する手数料は以下の通りです。
+
+
+    ・口座開設手数料：0円
+
+    ・定期預金解約手数料：0円
+
+
+    なお、給与受取などの条件を満たすことで、その他の銀行取引手数料が無料となる優遇制度がございます。詳細は「給与・年金受取特典：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4dffd2e1-94ad-58e8-984a-82454b9568f1
+  title: スーパー定期：お手続きが完了しない・保留中のまま
+  body: 'スーパー定期の開設手続きが完了せず、「保留中」のままとなっている場合は、以下の点をご確認ください。
+
+
+    【考えられる原因と確認事項】
+
+    1. 資金不足：振替元となる普通預金口座に、指定した預入金額（最低1,000円）以上の残高があるかご確認ください。
+
+    2. 本人確認の不備：取引時確認に必要な書類や情報が不足している可能性がございます。
+
+
+    【解決策】
+
+    ・不足金がある場合は、普通預金へ入金し、再度手続きを依頼してください。
+
+    ・本人確認に不備がある場合は、最新の身分証明書をご提示ください。
+
+
+    上記を確認しても解決しない場合は、専門部署へエスカレーションし、詳細な調査を行います。調査結果は後日、改めてご連絡いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 12dc7956-e1c4-57f1-8a60-62d789e77ebf
+  title: スーパー定期：お申込みいただける方
+  body: "スーパー定期のお申込み条件は以下の通りです。\n\n・当行の普通預金口座をお持ちの方 $\rightarrow$ お申込みいただけます\n・預入金額が1,000円以上の方\
+    \ $\rightarrow$ お申込みいただけます\n・上記条件をいずれか満たさない方 $\rightarrow$ お申込みいただけません\n\nまずは「普通預金：商品概要」にて口座開設をご検討ください。"
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7793e524-bcaf-59c4-85e5-782eeedba8ed
+  title: スーパー定期：当社の似た商品との比較
+  body: 'スーパー定期と普通預金を比較します。
+
+
+    【スーパー定期】
+
+    ・金利：最大1.05%（5年預入時）と高い
+
+    ・流動性：満期まで原則として預け入れるため、低くなる
+
+    ・向いている方：一定期間、資金を動かさず効率的に増やしたい方
+
+
+    【普通預金】
+
+    ・金利：スーパー定期より低い
+
+    ・流動性：いつでも自由に出し入れが可能で、非常に高い
+
+    ・向いている方：日常的な決済や急な出金に備えたい方
+
+
+    詳細は「普通預金：商品概要」をご覧ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 133127ae-9e01-5f9e-8ebd-343bd1aacf5e
+  title: スーパー定期：重要事項のご説明
+  body: '【預金保険制度について】
+
+    当行は金融庁の監督を受けております。当行の預金は預金保険制度により、1金融機関につき預金者1人当たり元本1,000万円までと破綻日までの利息等が保護されます。
+
+
+    【税金について】
+
+    お支払する利息には、所得税および地方税として20.315%の税金が課せられます。
+
+
+    【中途解約について】
+
+    満期前に解約される場合は「中途解約利率」が適用されます。この利率は、当初ご契約時の適用金利（0.55%〜1.05%）よりも低くなるため、ご注意ください。
+
+
+    【本人確認について】
+
+    犯罪収益移転防止法に基づき、口座開設時には厳格な取引時確認を実施いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1821a471-0086-52ab-b950-1de1b5529c55
+  title: スーパー定期：金利・料率一覧
+  body: 'スーパー定期に適用される金利（年率・税引前）は以下の通りです。
+
+
+    ・1年預入：0.55%
+
+    ・3年預入：0.85%
+
+    ・5年預入：1.05%
+
+
+    ※これらの金利は、最低預入金額である1,000円からすべてのお客様に等しく適用されます。金利は市場動向により変動する場合があり、その際は改めてご案内いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: eb88036d-3290-515d-b5cb-a645d8e4c68b
+  title: スーパー定期：実施中のキャンペーン
+  body: '【資産形成応援キャンペーン】
+
+    2026年1月1日から2026年3月31日までの期間中、スーパー定期への新規預入をされるお客様に、以下の好金利を適用いたします。
+
+
+    ・5年預入：1.05%
+
+    ・3年預入：0.85%
+
+    ・1年預入：0.55%
+
+
+    最低預入金額1,000円から、どなたでも本キャンペーン金利での運用が可能です。この機会にぜひ効率的な資産形成をご検討ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1c2c2209-670e-5012-aa95-63ae3a3e994b
+  title: スーパー定期：不正利用からお客さまを守るために
+  body: '大切な資産を預ける定期預金において、最近では「特別な高金利プランへの切り替え」を謳い、口座情報を聞き出そうとする詐欺の手口が報告されています。
+
+
+    朝凪銀行では、いかなる場合もお電話やメールで、お客様の暗証番号やセキュリティカードの番号を伺うことはございません。不審な連絡を受けた際は、決して情報を伝えずに、すぐにご相談ください。
+
+
+    万が一、不正な取引が発覚した場合は、預金者保護法に基づき、迅速に調査を行い誠実に対応いたします。また、当行の預金は預金保険制度により、元本1,000万円までが保護されておりますのでご安心ください。異常を感じた際は、直ちにお手続きの停止をご依頼ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d4fcc2e8-ffb3-5604-b6ee-90604050a9e9
+  title: スーパー定期：規定・約款
+  body: '本商品は、お客様からお預かりした資金を一定期間預けることで、あらかじめ定められた金利を適用する定期預金です。預入金額は1,000円以上の金額で、1,000円単位でのお申込みとなります。
+
+
+    【金利の適用】
+
+    預入期間に応じて、年利率0.55%（1年）、0.85%（3年）、1.05%（5年）を適用します。利息については、20.315%の税金が差し引かれた後にお支払いいたします。
+
+
+    【中途解約について】
+
+    満期前に解約される場合は「中途解約利率」が適用され、当初の約定金利よりも低い利率となりますのでご注意ください。
+
+
+    【保護制度】
+
+    預金保険制度に基づき、1金融機関につき元本1,000万円までが保護されます。本約款は、法令の改正または当行の規定変更により改定される場合がございます。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 129a8318-a8a2-540e-bbd2-05645bb95e64
+  title: スーパー定期：おすすめの方と主な使い方
+  body: 'スーパー定期は、将来のライフイベントに向けて、確実かつ効率的に資産を形成したい方におすすめの商品です。
+
+
+    【このような方におすすめです】
+
+    ・数年後に使う予定の資金（教育資金や住宅購入資金など）を安全に保管したい方
+
+    ・普通預金よりも高い金利で、確実な運用を行いたい方
+
+
+    【主な活用方法】
+
+    最低預入金額1,000円から、ライフプランに合わせて期間を選択いただけます。
+
+    ・1年プラン（年利率0.55%）：短期的な資金準備に
+
+    ・3年プラン（年利率0.85%）：中長期的な蓄財に
+
+    ・5年プラン（年利率1.05%）：長期的な資産形成に
+
+
+    日々の決済には「普通預金：商品概要」をご参照の普通預金をご利用いただき、貯蓄分を本商品で運用することで、利便性と収益性を両立させた管理が可能です。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7727e817-030e-5647-a10a-0e4b784b87cc
+  title: スーパー定期：3年ものの金利について
+  body: 'Q：3年もののスーパー定期に預けた場合、金利はどのくらいになりますか？
+
+
+    A：3年ものの年利率は0.85%です。なお、お受取時の利息からは20.315%の税金が差し引かれます。詳細な金利適用については「スーパー定期：金利・料率の決まり方と適用」をご確認ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1773dd67-6410-5150-835a-8e260fcf3e6b
+  title: スーパー定期：解約・変更・プランの切替え
+  body: 'スーパー定期の解約、または期間プランの変更（切替え）をご希望の方は、以下の手順でお手続きください。
+
+
+    1. お手続きの内容（解約またはプラン切替え）を当行窓口またはお電話にてお申し出ください。
+
+    2. 本人確認のため、運転免許証などの公的な証明書をご提示ください。
+
+    3. 当行より、現在の預入金額および適用される利息（中途解約の場合は中途解約利率を適用）を算出し、提示いたします。内容をご確認ください。
+
+    4. お手続き完了後、元本と利息を合わせた金額がお客様の普通預金口座へ振り込まれます。
+
+
+    ※プランの切替えは、一度現在の定期預金を解約し、改めて新しい期間で預け直す形となります。この際、解約時点での利率が適用されるため、当初の金利（0.55%〜1.05%）とは異なる場合があります。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7877d9cf-0d60-532f-88d2-d49e24b78fdc
+  title: スーパー定期：想定外の手数料・金額
+  body: 'お客様より「満期に受け取った金額が、想定していた利息よりも少ない」というお問い合わせをいただいた場合の対応手順です。
+
+
+    【考えられる原因と確認事項】
+
+    1. 税金の差し引き：利息に対して20.315%の税金が適用されているか確認してください。
+
+    2. 中途解約の有無：満期まで保有せず、途中で解約された場合、「中途解約利率」が適用されており、当初の年利率（0.55%〜1.05%）よりも低くなっている可能性があります。
+
+
+    【解決策】
+
+    お客様に、税引前利息、差し引かれた税額、および適用利率を具体的に提示し、計算根拠をご説明ください。
+
+
+    【エスカレーション】
+
+    計算根拠を説明してもご納得いただけない場合や、システム上の誤りが疑われる場合は、速やかに専門部署へエスカレーションし、詳細な取引履歴の調査を依頼してください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d009279e-26c2-50fd-9582-a8e446b9b407
+  title: スーパー定期：必要書類
+  body: 'スーパー定期のお申込みに必要な書類は、お客様のご状況によって異なります。
+
+
+    | お客さまの区分 | 必要書類 | 判定 |
+
+    | :--- | :--- | :--- |
+
+    | 個人（口座あり） | ご印鑑、またはご署名 | 即時受付可能 |
+
+    | 個人（新規口座） | 本人確認書類（運転免許証等）、ご印鑑 | 取引時確認後、受付 |
+
+    | 法人 | 法人実印、登記簿謄本、代表者本人確認書類 | 書類確認後、受付 |
+
+
+    ※最低預入金額として1,000円以上の資金をご用意ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: cd89d272-8f3b-5f3f-96d2-11b277720f7f
+  title: スーパー定期：他社の一般的な商品との比較
+  body: '他社様の一般的な定期預金と、当行のスーパー定期を比較いたします。
+
+
+    【当行スーパー定期】
+
+    ・金利：期間に応じて年利率0.55%（1年）、0.85%（3年）、1.05%（5年）と、明確なステップアップを提供します。
+
+    ・ハードル：最低預入金額1,000円からと、少額からでも資産形成を始められます。
+
+    ・安心感：地域に根ざした店舗ネットワークによる対面サポートを重視しています。
+
+
+    【他社の一般的商品（ネット銀行等）】
+
+    ・金利：キャンペーン等で一時的に高い金利を提示することがありますが、変動しやすく、期間の制約が厳しい場合があります。
+
+    ・利便性：オンライン完結の操作性に優れていますが、複雑な相談には不向きです。
+
+
+    確実な金利での運用と、対面での安心感を重視される方には、当行のスーパー定期を推奨いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e6f79e82-97a8-5c9f-b0ed-f3c818f56c22
+  title: スーパー定期：リスクについてのご説明
+  body: '本商品をご利用いただくにあたり、以下のリスクについてご理解ください。
+
+
+    【流動性リスク】
+
+    本商品は一定期間資金を預ける商品です。満期前に解約される場合は「中途解約利率」が適用されるため、当初の約定金利（0.55%〜1.05%）よりも受取利息が大幅に少なくなります。
+
+
+    【インフレーションリスク】
+
+    物価上昇率が適用金利を上回った場合、実質的な資産価値が目減りする可能性があります。
+
+
+    【元本保証について】
+
+    本商品は元本保証の商品です。また、預金保険制度により、1金融機関につき元本1,000万円までが保護されます。
+
+
+    個別の税務上の取り扱いについては、税理士等の専門家にご相談ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 88bc2056-5d98-5cb6-a9ac-a73278885896
+  title: スーパー定期：金利・料率の決まり方と適用
+  body: 'スーパー定期の金利は、お申込み時の預入期間に応じて以下の年利率が適用されます。
+
+
+    ・1年預入：0.55%
+
+    ・3年預入：0.85%
+
+    ・5年預入：1.05%
+
+
+    【適用の仕組み】
+
+    ・金利は預入時に確定し、満期まで変更されません（固定金利）。
+
+    ・利息計算は単利方式で行われます。
+
+    ・お支払い時に20.315%の税金が差し引かれます。
+
+
+    満期前に解約された場合は、上記の約定金利ではなく、別途定める「中途解約利率」が適用されます。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 06959db5-ec1d-55e1-b18d-fe0846e97289
+  title: スーパー定期：ご紹介・継続利用の特典
+  body: '【期間限定キャンペーン】
+
+    2026年4月1日から2026年6月30日までの期間中、当行をご利用中のお客様からのご紹介で「スーパー定期」を新規に開設された方に、1年もの適用金利0.55%に上乗せして、さらに0.10%の特典金利を適用させていただきます。地域のみなさまの資産形成を応援する特別な機会にぜひご利用ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 66ecaabd-0d84-5d3d-ab21-1fa9c88ef528
+  title: スーパー定期：安全にご利用いただくためのポイント
+  body: '大切なお預金を安全に管理するため、以下のポイントにご注意ください。
+
+
+    1. 多層的な認証の活用：
+
+    オンラインバンキングでの操作時には、セキュリティカードや生体認証を必ず併用し、第三者による不正アクセスを防止してください。
+
+    2. 秘密情報の管理：
+
+    当行がメールや電話、SNS等で、お客様の暗証番号やセキュリティカードの情報を伺うことは絶対にございません。このような連絡があった場合は、詐欺の可能性がありますので十分にご注意ください。
+
+    3. 迅速な報告：
+
+    万が一、パスワードの漏洩や不審な取引に気づかれた場合は、直ちにご報告ください。被害を最小限に抑えるため、迅速な停止手続きを行います。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b8ee95d3-1784-5b59-a24c-ee0cbee7bb98
+  title: スーパー定期：規定・約款の変更
+  body: '本商品の規定および約款は、法令の改正や経済情勢の変化に応じて変更される場合がございます。
+
+
+    【変更の手続き】
+
+    約款を変更する場合、当行は変更内容および施行日を、店頭への掲示またはオンラインバンキング等の方法で事前に告知いたします。
+
+    【適用条件の変更】
+
+    現在、本商品の最低預入金額は1,000円と定められておりますが、この金額基準を含む重要な条件が変更される場合は、明確に区別して記載した通知を行います。
+
+    【合意と終了】
+
+    変更後の約款についてお客様が承諾いただけない場合は、規定に基づき本商品の解約手続きを行うことができます。解約に際しては、中途解約利率が適用される場合がございますのでご注意ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 55c9abad-e5e1-5112-b77e-71d76c4bbe1d
+  title: スーパー定期：ご利用開始までの手順
+  body: 'お客様が「スーパー定期」の利用を開始されるまでの手順は以下の通りです。
+
+
+    1. 期間と金額の決定：
+
+    お客様に、ご希望の預入期間（1年、3年、または5年）と預入金額を確認します。最低預入金額である1,000円以上であることを確認してください。
+
+    2. 本人確認の実施：
+
+    犯罪収益移転防止法に基づき、ご本人確認書類をご提示いただき、厳格な取引時確認を実施します。
+
+    3. 資金の移動と契約：
+
+    普通預金口座等の指定口座から、決定した金額をスーパー定期口座へ振り替えます。この時点で契約が成立し、適用金利（1年もの：0.55%、3年もの：0.85%、5年もの：1.05%）に基づいた運用が開始されます。
+
+
+    詳細は「スーパー定期：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8e26b09b-f446-56ce-b7ed-8f44f4e0ca95
+  title: スーパー定期：5年ものの金利について
+  body: 'Q: 5年ものの金利はどのくらいになりますか？
+
+
+    A: 「スーパー定期」の5年ものの適用金利は1.05%（税引前）です。期間が長い分、1年もの（0.55%）や3年もの（0.85%）よりも高い金利設定となっており、効率的な資産形成を支援します。
+
+
+    金利の詳細については、「スーパー定期：金利・料率一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d694dae2-df9a-527c-b81e-ed7a6462a1c6
+  title: スーパー定期：登録内容の変更
+  body: '「スーパー定期」のご利用に伴う登録内容（住所、氏名、連絡先など）を変更する手順をご案内します。
+
+
+    1. 変更内容の提示：
+
+    変更を希望される項目と、新しい登録内容を当行へお伝えください。
+
+    2. 本人確認の実施：
+
+    重要な情報の変更となるため、運転免許証などの公的証明書をご提示いただき、厳格な取引時確認を行います。必要に応じてセキュリティカードによる認証も実施します。
+
+    3. 変更内容の確定：
+
+    当行にて登録情報の更新処理を行います。手続き完了後、オンラインバンキングの顧客情報画面などで、正しく変更されたことをご確認いただけます。
+
+
+    なお、口座名義の変更など、複雑な案件については専門部署へエスカレーションし、対応させていただきます。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: dee6f326-f696-50c8-8d76-959f9319e10e
+  title: スーパー定期：ログインできない・アクセスできない
+  body: '【症状】
+
+    オンラインバンキングにログインしようとした際、エラーが表示され「スーパー定期」の残高や詳細を確認できない。
+
+
+    【考えられる原因】
+
+    ・パスワードの入力間違い
+
+    ・セキュリティカードの入力ミスによるアカウントロック
+
+    ・長時間操作がなかったことによるセッションタイムアウト
+
+
+    【確認と対処法】
+
+    1. 入力内容の再確認：
+
+    半角英数字が正しく入力されているか、再度お試しください。
+
+    2. ブラウザの再起動：
+
+    一度ログアウトし、ブラウザを閉じてから再度アクセスしてください。
+
+
+    【解決しない場合】
+
+    上記を試してもアクセスできない場合は、当行にて認証状況を確認いたします。専門部署へエスカレーションし、パスワードの再発行またはロック解除の手続きをご案内いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: acf70983-75ca-59dc-bae4-0ddc50f6ab49
+  title: スーパー定期：ご利用条件による違い
+  body: '【預入金額による条件】
+
+    ・1,000円以上：スーパー定期の開設が可能です。期間に応じた金利（0.55%〜1.05%）が適用されます。
+
+    ・1,000円未満：本商品をご利用いただけません。日常的な決済に適した「普通預金」等のご案内をしてください。
+
+
+    【取引時確認の状況】
+
+    ・確認完了済み：即時にお手続きが可能です。
+
+    ・確認未完了：本人確認書類のご提示後、お手続きいただけます。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3fdc9cb0-ae1e-59fa-9076-e7e73a887dab
+  title: スーパー定期：プランの選び方
+  body: 'お客様の資産形成の目的に合わせて、最適な期間をお選びください。
+
+
+    ・1年もの（金利0.55%）：
+
+    近い将来に資金を利用する予定がある方や、まずは短期間で試したい方に向いています。
+
+    ・3年もの（金利0.85%）：
+
+    数年後のライフイベントに向けて、安定した運用を希望される方に適しています。
+
+    ・5年もの（金利1.05%）：
+
+    当行で最も高い金利を提供しており、中長期的に効率よく資産を増やしたい方に最適です。
+
+
+    いずれのプランも最低預入金額は1,000円からとなっております。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8f00bb50-b050-5d6b-8238-92a5e537398c
+  title: スーパー定期：個人情報の取扱い
+  body: '朝凪銀行では、個人情報保護法および犯罪収益移転防止法を厳格に遵守し、お客様の個人情報を適切に取り扱います。
+
+
+    【取得目的】
+
+    「スーパー定期」の口座開設および維持に不可欠な本人確認（取引時確認）を目的として、氏名、住所、生年月日などの情報を取得いたします。これらの情報は、公正かつ透明性の高い取引を徹底し、金融犯罪を防止するために利用されます。
+
+    【情報の保護】
+
+    お預かりした個人情報は、当行の厳格なセキュリティ体制のもとで管理され、法令に基づく場合を除き、お客様の同意なく第三者に提供することはございません。
+
+    【権利について】
+
+    お客様は、ご自身の個人情報の開示、訂正、利用停止を請求することが可能です。お手続きについては、店舗窓口またはオンラインバンキングにて承ります。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e3bbe3de-54a6-55ce-b528-a59aee94f6a4
+  title: スーパー定期：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「スーパー定期」をかたる不審な電話やメール、SMSによる詐欺被害が報告されています。「特別な高金利プランがある」「手続きのために暗証番号が必要」といった案内はすべて詐欺です。当行からお客様の暗証番号やセキュリティカードの番号を伺うことは、どのような場合でもございません。
+
+
+    特に、他社商品と比較検討中の方を狙い、「限定の優遇金利で資産を増やせる」と誘い、外部サイトへ誘導して個人情報を盗み出す手法が確認されています。不審な連絡を受けた場合は、決して指示に従わず、すぐに当行の窓口または電話にてご相談ください。万が一、情報を伝えてしまった場合は、被害拡大を防ぐため迅速に届出をお願いいたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 80cd175c-cee9-526a-92d7-0848e864ce04
+  title: スーパー定期：限度額・制限と注意事項
+  body: '【預入制限と条件】
+
+    ・最低預入金額：1,000円からお申し込みいただけます。
+
+    ・預入期間：1年、3年、5年の期間から選択いただけます。それぞれの期間に応じた金利（0.55%、0.85%、1.05%）が適用されます。
+
+
+    【注意事項】
+
+    ・税金：利息には20.315%の税金（所得税および復興特別所得税、地方税）が課せられます。税引後の金額が口座に入金されます。
+
+    ・中途解約：満期前に解約される場合は「中途解約利率」が適用され、当初の約定金利よりも低い利率となりますのでご注意ください。
+
+    ・本人確認：口座開設や金額変更などの重要な手続きには、犯罪収益移転防止法に基づく「取引時確認」が必要です。
+
+
+    詳細は「スーパー定期：重要事項のご説明」をご確認ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a8951702-ef5f-5c88-88c7-353cdb45aabf
+  title: スーパー定期：最低預入金額について
+  body: 'Q：スーパー定期を始めるために、最低限いくら預ける必要がありますか？
+
+
+    A：「スーパー定期」の最低預入金額は1,000円です。少額からでも計画的な資産形成を始めていただけます。お申し込みの際は、ご希望の期間（1年、3年、5年）に合わせてご準備ください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6ec19cb7-4cb4-5e35-8d7a-7d40159ea2fb
+  title: スーパー定期：状況・履歴の確認
+  body: 'お手持ちの定期預金の残高や、満期日、利息の付与履歴を確認する手順をご案内します。
+
+
+    1. お客様から、確認を希望される「スーパー定期」の口座番号をご提示いただくか、通帳をご提示ください。
+
+    2. 当行にて、現在の預入金額、適用されている金利（0.55%、0.85%、1.05%のいずれか）、および満期日を確認します。
+
+    3. これまでの利息付与額や、税引後の入金履歴について、明細形式でご案内いたします。
+
+
+    手続き完了後、最新の残高と次回の満期予定日について改めてご確認いただき、相違がないかをご確認ください。詳細な履歴が必要な場合は、改めてお申し付けください。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 08232c55-83c4-52b6-8cfc-b7712fdb401b
+  title: スーパー定期：お取引が拒否された・制限された
+  body: '「スーパー定期」の預入や解約などの手続きができない場合、以下の原因が考えられます。
+
+
+    【考えられる原因と確認事項】
+
+    1. 資金不足：預入時に指定した「普通預金」口座の残高が、預入金額（最低1,000円）に満っていない可能性があります。
+
+    2. 本人確認の未完了：最新の「取引時確認」が完了していない場合、重要な手続きが制限されます。有効な身分証明書をご提示ください。
+
+    3. 期間制限：満期前の解約において、手続き上の制限があるか、あるいは中途解約の手続きとして正しく受理されていない場合があります。
+
+
+    【解決策】
+
+    ・普通預金の残高を確認し、不足している場合は入金をお願いします。
+
+    ・身分証明書をご提示いただき、本人確認手続きを完了させてください。
+
+
+    上記を確認しても解決しない場合は、専門部署にて口座の状態を詳細に調査いたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 41915db2-3bef-5ed4-9fcb-a8c6d3a7a351
+  title: スーパー定期：切替えや上位プランを検討するとき
+  body: '「普通預金」から「スーパー定期」への切替えを検討される際は、資金の流動性と金利のバランスをご確認ください。
+
+
+    ・普通預金：いつでも自由に出し入れが可能ですが、金利は低めに設定されています。
+
+    ・スーパー定期：1,000円から預入可能で、期間に応じて0.55%（1年）、0.85%（3年）、1.05%（5年）という高い金利を確保できます。ただし、満期まで資金が拘束されます。
+
+
+    近い将来に使用する予定のない余裕資金については、スーパー定期への切替えが効率的な資産形成につながります。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5a47f6a7-6f35-5031-833a-069d96fd6ff3
+  title: スーパー定期：ほかの選択肢との比較と向かない場合
+  body: '【他商品との比較】
+
+    「普通預金」は利便性に優れていますが、「スーパー定期」は確実な利回り提供に特化した商品です。1年、3年、5年と預入期間を長く設定するほど、適用金利（0.55%、0.85%、1.05%）が高くなる仕組みとなっています。
+
+
+    【向かないお客様】
+
+    ・急な出費の可能性があり、いつでも全額を引き出したい方。満期前の解約には「中途解約利率」が適用されるため、想定していた利息が得られない場合があります。
+
+    ・預入金額が1,000円に満たない方。
+
+
+    【おすすめのお客様】
+
+    ・まとまった資金を一定期間、安全に保管しつつ、普通預金よりも高い金利で運用したい方。特に5年以上の長期視点で資産を形成したい方に最適です。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 36ba83be-7301-5147-923c-df17cadd8907
+  title: スーパー定期：手数料と費用
+  body: 'Q：「スーパー定期」の口座開設や維持に手数料はかかりますか？
+
+
+    A：いいえ、「スーパー定期」の口座開設および維持に手数料はかかりません。無料でご利用いただけます。なお、ATM利用料などの手数料を無料にするには、「給与・年金受取特典」の適用条件を満たすことをおすすめいたします。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 78b177d1-348d-5852-b86d-467879e75524
+  title: スーパー定期：よくあるお手続きの流れ
+  body: '「スーパー定期」の新規預入における一般的なお手続きの流れをご案内します。
+
+
+    1. 預入内容の決定：預入金額（1,000円以上）と、預入期間（1年、3年、5年のいずれか）をお申し付けください。
+
+    2. 本人確認の実施：犯罪収益移転防止法に基づき、「取引時確認」のため、運転免許証などの公的証明書をご提示ください。
+
+    3. 金利の確認と承諾：選択した期間に応じた適用金利（0.55%、0.85%、または1.05%）をご案内し、ご了承をいただきます。
+
+    4. 預入完了：普通預金口座から指定金額が振り替えられ、定期預金口座が開設されます。完了後、預金証書または通帳にて内容をご確認ください。
+
+
+    以上で手続きは完了です。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b0f12fc3-2a79-5f03-8e5c-42c03b210905
+  title: スーパー定期：明細や記録と合わない
+  body: 'お客様が計算された利息額と、実際の明細上の金額に相違がある場合の確認手順です。
+
+
+    【確認ステップ】
+
+    1. 税金の控除確認：利息には20.315%の税金が課せられます。提示された金利（0.55%、0.85%、1.05%）で計算した額から、この税率分が差し引かれているかをご確認ください。
+
+    2. 解約時期の確認：満期前に解約された場合、約定金利ではなく「中途解約利率」が適用されます。解約日の記録と照らし合わせ、適用利率が変更されていないか確認してください。
+
+    3. 預入期間の再確認：選択した期間（1年、3年、5年）が正しく適用されているかを確認します。
+
+
+    【対応】
+
+    上記を確認しても不一致がある場合は、当行にて再計算を行い、詳細な内訳を提示いたします。計算根拠についてご不明な点は、専門部署にて詳しく解説させていただきます。'
+  domain: retail_banking
+  product_category: super_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 948ca124-3b9c-5e72-b319-5045c487cd80
+  title: 給与・年金受取特典：商品概要
+  body: '「給与・年金受取特典」は、当行の口座を給与受取または年金受取口座にご指定いただいたお客様へ提供される、利便性と経済性を兼ね備えた優遇制度です。日常的な決済コストを軽減し、安心感のある資産管理をサポートします。
+
+
+    【主な特典内容】
+
+    ■他行あて振込手数料：毎月3回まで無料
+
+    ■ATM利用手数料：毎月5回まで無料
+
+    ■年金受取の方への金利優遇：年金受取口座に指定された方向けに、0.1%の金利上乗せを適用します。
+
+
+    本特典を適用することで、公共料金の振替や日々の送金にかかるコストを抑えながら、効率的な貯蓄が可能です。詳細は「給与・年金受取特典：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ff09b633-f411-5225-9e87-6f4fa1ff6df6
+  title: 給与・年金受取特典：他行あて振込手数料の無料回数（月）について
+  body: 'Q：給与・年金受取特典を適用している場合、他行への振込手数料は月に何回まで無料になりますか？
+
+
+    A：毎月3回まで手数料が無料となります。4回目以降のご利用分につきましては、通常の手数料が適用されます。無料回数の詳細やその他の手数料については、「給与・年金受取特典：手数料一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: eeab43ae-a60a-5ec1-a673-b1e5e8640de4
+  title: 給与・年金受取特典：お申込みとご利用開始
+  body: '本特典のご利用を開始するための手順をご案内します。
+
+
+    1. 担当者へ、当行口座を給与または年金の受取口座に指定したい旨をお伝えください。
+
+    2. 当行より、受取口座として指定いただくための支店名および口座番号をご案内します。
+
+    3. ご案内した口座情報を、お勤め先の給与担当部署または年金支給元（年金事務所等）へご提出ください。
+
+    4. 指定後の初回振込が当行口座に確認できた時点で、特典の適用が開始されます。
+
+
+    適用後は、毎月の他行あて振込3回分およびATM利用5回分が無料でご利用いただけます。適用状況の確認方法は「給与・年金受取特典：状況・履歴の確認」をご覧ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 541ffdbf-4b7c-5560-8cd7-b94bed51035e
+  title: 給与・年金受取特典：手数料一覧
+  body: '給与・年金受取特典が適用されているお客様に適用される手数料は以下の通りです。
+
+
+    ■他行あて振込手数料
+
+    ・月1回目から3回まで：0円
+
+    ・4回目以降：通常手数料を適用
+
+
+    ■ATM利用手数料
+
+    ・月1回目から5回まで：0円
+
+    ・6回目以降：通常手数料を適用
+
+
+    ※本特典は、給与または年金の受取口座として当行を指定されていることが条件となります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7414cc74-41d0-5f15-9dd7-30f8e5ffd487
+  title: 給与・年金受取特典：お手続きが完了しない・保留中のまま
+  body: '「受取口座の指定手続きをしたはずなのに、特典が適用されていない」と感じられる場合は、以下の点をご確認ください。
+
+
+    【考えられる原因と確認事項】
+
+    1. 初回振込の未完了：受取口座の指定後、実際に給与や年金の振込が当行口座に行われるまで適用されません。支給日を過ぎて数営業日経過しているかご確認ください。
+
+    2. 指定情報の不備：支給元への提出書類に誤りがあり、振込が正常に行われていない可能性がございます。
+
+
+    【解決策】
+
+    ・通帳またはオンラインバンキングで、直近の支給日に正しい名義で入金があるかをご確認ください。
+
+    ・入金が確認できない場合は、支給元へ手続き状況をお問い合わせください。
+
+
+    上記を確認しても解決せず、入金があるにもかかわらず特典が適用されない場合は、当行にて調査いたしますので、その旨をお申し付けください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 923cb143-2910-58a8-ae83-3d653907db99
+  title: 給与・年金受取特典：お申込みいただける方
+  body: '本特典の適用条件は以下の通りです。
+
+
+    【条件】
+
+    ・当行の普通預金口座を保有し、かつ以下のいずれかを満たす方
+
+    　- 給与の受取口座として指定し、継続的に受取がある
+
+    　- 年金の受取口座として指定し、継続的に受取がある
+
+
+    【結果】
+
+    ・上記条件を満たす場合、他行あて振込手数料（月3回まで）およびATM利用手数料（月5回まで）が無料となります。また、年金受取の方は別途金利優遇が適用されます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: cba6d45d-d87a-51ad-84aa-c781f51cd373
+  title: 給与・年金受取特典：当社の似た商品との比較
+  body: '「普通預金：商品概要」の基本口座と、本特典を適用した際の違いを比較します。
+
+
+    ■他行あて振込手数料
+
+    ・普通預金（基本）：毎回所定の手数料が発生
+
+    ・給与・年金受取特典：月3回まで0円
+
+
+    ■ATM利用手数料
+
+    ・普通預金（基本）：時間外利用時などに手数料が発生
+
+    ・給与・年金受取特典：月5回まで0円
+
+
+    ■金利面（年金受取の場合）
+
+    ・普通預金（基本）：基本金利のみ
+
+    ・給与・年金受取特典：基本金利に0.1%を上乗せ
+
+
+    日々の振込やATM利用が多い方、または年金受取で効率的に資産を管理したい方は、本特典の適用が最適です。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d5657e80-f6e4-56b9-9fb1-257b5e3911d8
+  title: 給与・年金受取特典：重要事項のご説明
+  body: '本特典は、お客様の利便性向上を目的とした優遇制度です。以下の事項についてあらかじめご了承ください。
+
+
+    ■適用条件の維持
+
+    給与または年金の受取指定を解除された場合、あるいは受取が停止された場合、本特典による手数料無料および金利優遇（年金受取の0.1%上乗せ）は適用外となります。
+
+
+    ■手数料の適用
+
+    無料回数（振込月3回、ATM利用月5回）を超えた分につきましては、当行の規定に基づき所定の手数料を申し受けます。
+
+
+    ■法令遵守
+
+    本制度の運用にあたっては、個人情報保護法および犯罪収益移転防止法を遵守し、公正な取引を徹底いたします。また、預金保険制度により、元本1,000万円までが保護されます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 782eb980-7385-5f53-ba82-16ad37b6de68
+  title: 給与・年金受取特典：金利・料率一覧
+  body: '本特典における金利優遇の内容は以下の通りです。
+
+
+    ■年金受取口座指定特典
+
+    ・金利上乗せ幅：0.1%
+
+
+    【適用内容】
+
+    年金受取口座として当行をご指定いただいたお客様に対し、適用される預金金利に0.1%を加算して提供いたします。この上乗せ金利は、年金受取の条件を満たしている期間中、継続的に適用されます。適用される基本金利の詳細については、「普通預金：金利・料率一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a983973f-930a-5c64-85f4-34c88dbd666b
+  title: 給与・年金受取特典：実施中のキャンペーン
+  body: '【地域住民応援キャンペーン】
+
+    2026年1月1日から2026年3月31日まで、新たに受取口座をご指定いただいたお客様を対象に、本特典のメリットを最大限にご活用いただくための案内キャンペーンを実施しております。
+
+
+    今なら受取口座への切り替えで、毎月の他行あて振込3回分とATM利用5回分が無料となるほか、年金受取の方には0.1%の金利上乗せを適用いたします。
+
+
+    地域の皆様の生活をサポートするため、ぜひこの機会に「給与・年金受取特典」をご利用ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c4aa50b6-3989-561e-957e-df91ecde4292
+  title: 給与・年金受取特典：不正利用からお客さまを守るために
+  body: '給与・年金受取口座は、生活の基盤となる重要な資金が管理されるため、犯罪グループによる標的になりやすい傾向があります。「給与振込の手続きに不備がある」などの虚偽の内容で、口座番号や暗証番号を聞き出そうとする不審な電話やメールにご注意ください。
+
+
+    朝凪銀行では、いかなる場合においても、電話やメールで暗証番号やセキュリティカードの情報を伺うことはございません。もし不審な連絡を受けたり、身に覚えのない出金があったりした場合は、直ちにご報告ください。迅速に口座の利用停止措置を講じ、被害の拡大を防ぎます。また、万が一カードを紛失・盗難された場合でも、預金者保護法に基づき、規定の範囲内で誠実に補償対応をさせていただきます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3f0c1175-e364-5a20-b436-6a3e1b2127c9
+  title: 給与・年金受取特典：規定・約款
+  body: '本特典は、当行の普通預金口座を給与受取口座または年金受取口座に指定し、継続的に利用されるお客さまに適用されます。
+
+
+    【特典の内容と条件】
+
+    1. 他行あて振込手数料の無料回数：月3回まで。
+
+    2. 時間外ATM利用手数料の無料回数：月5回まで。
+
+    3. 年金受取口座に指定された場合、規定の条件に基づき0.1%の金利上乗せを適用します。
+
+
+    【適用の中止】
+
+    受取口座の指定が解除された場合、または一定期間受取実績が確認できない場合は、翌月より本特典の適用を停止いたします。適用停止後の手数料は、通常の手数料体系に基づきご請求させていただきます。本規定は、法令の改正や当行の判断により、事前の告知をもって変更される場合があります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0eea1d64-604e-506c-b30f-0909218887ae
+  title: 給与・年金受取特典：おすすめの方と主な使い方
+  body: '「給与・年金受取特典」は、日々の生活資金を管理される皆さまに、安心と利便性を提供するためのサービスです。特に以下の方におすすめしております。
+
+
+    ・毎月の給与や年金を当行で受け取り、公共料金の支払いや他行への送金を頻繁に行う方
+
+    ・時間外にATMを利用することが多く、手数料を抑えたい方
+
+
+    【主な活用方法とメリット】
+
+    本特典を適用することで、他行あて振込手数料が月3回まで無料となり、効率的な資金移動が可能です。また、時間外ATM利用手数料が月5回まで無料となるため、急な現金需要にも柔軟に対応いただけます。さらに、年金受取口座にご指定の方は、0.1%の金利上乗せという資産形成のサポートを同時に受けられます。日常的な決済口座として、ぜひご活用ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d92d4b6a-3229-57e0-96a0-1dde4c40cec7
+  title: 給与・年金受取特典：時間外ATM手数料の無料回数（月）について
+  body: 'Q：時間外ATM手数料の無料回数は、月に何回までですか？
+
+    A：本特典をご利用のお客さまは、時間外ATM利用手数料が月に5回まで無料となります。
+
+
+    Q：無料回数を超えた場合はどうなりますか？
+
+    A：6回目以降のご利用分より、通常の手数料が適用されます。詳細は「給与・年金受取特典：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: dbf38b9f-d824-5cf5-8c7b-40de0558f6ef
+  title: 給与・年金受取特典：解約・変更・プランの切替え
+  body: '給与・年金受取口座の変更や、特典の適用停止を希望される際の手順をご案内します。
+
+
+    1. 当行の窓口またはお電話にて、受取口座の変更または特典の解約を希望される旨をお伝えください。その際、ご本人様確認のため、キャッシュカードや印鑑などの必要書類をご提示いただきます。
+
+    2. お勤め先または年金事務所等の支給元へ、受取口座の変更手続きを行ってください。当行から支給元へ直接手続きを行うことはできませんので、お客さまご自身でのお手続きをお願いいたします。
+
+    3. 支給元での手続きが完了し、当行口座に給与または年金の入金が確認された時点で、新しいプランへの切替えまたは特典の適用が確定します。
+
+
+    手続き完了後、次回の明細にて特典の適用状況（無料回数のリセット等）をご確認いただけます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 264b90d9-7222-5b68-a687-ede6283f91fe
+  title: 給与・年金受取特典：想定外の手数料・金額
+  body: '「特典を適用しているはずなのに、手数料が引かれている」という場合に確認すべき事項をご案内します。
+
+
+    【原因の確認】
+
+    ・無料回数の超過：今月の他行あて振込が3回、または時間外ATM利用が5回を超えていないか、取引明細をご確認ください。
+
+    ・受取実績の不足：前月に給与または年金の入金実績がなかった場合、一時的に特典が停止している可能性がございます。
+
+
+    【解決策】
+
+    回数制限内であるにもかかわらず手数料が発生している場合は、当行にて適用状況を調査いたします。至急、対象の取引日時と金額をお知らせください。
+
+
+    【エスカレーション】
+
+    原因が特定できない複雑な案件については、専門部署へエスカレーションし、精査した上で正当な手数料であるか、または返金が必要かを判断いたします。調査結果は改めてご連絡いたします。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f043d4ad-087a-57f7-84ce-cc17c354147a
+  title: 給与・年金受取特典：必要書類
+  body: '特典適用の申請時に必要な書類は以下の通りです。
+
+
+    ・給与受取特典をご希望の方：
+
+    　ご本人確認書類、および給与振込指定書（またはお勤め先が発行する受取口座確認書類）
+
+
+    ・年金受取特典をご希望の方：
+
+    　ご本人確認書類、および年金証書または年金受給権者確認書
+
+
+    ※書類の内容により、追加で確認事項をお願いする場合がございます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 69dd09aa-5ed8-5263-a3e2-d25e4d3b2be6
+  title: 給与・年金受取特典：他社の一般的な商品との比較
+  body: '他社の一般的な受取口座特典と比較し、当行の「給与・年金受取特典」は「振込」と「ATM」の両面でバランスの良い利便性を提供しています。
+
+
+    【当行の特典内容】
+
+    ・他行あて振込手数料：月3回まで無料
+
+    ・時間外ATM利用手数料：月5回まで無料
+
+    ・年金受取金利：0.1%上乗せ
+
+
+    他社ではATM手数料のみが無料となるケースが多く、振込手数料まで月3回無料で提供するプランは希少です。特に、月々の送金回数が多い方や、年金受取による金利優遇を重視される方に、当行のプランは最適です。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b1579e65-c70c-58c1-8864-c8f7cde89331
+  title: 給与・年金受取特典：リスクについてのご説明
+  body: '本特典のご利用にあたり、以下の点にご留意ください。
+
+
+    【特典適用の条件について】
+
+    本特典は、継続的に給与または年金をお受け取りいただくことが条件となります。転職や受給状況の変化により受取実績がなくなった場合、自動的に特典適用が停止されます。この場合、振込手数料やATM利用手数料が通常料金で発生いたしますのでご注意ください。
+
+
+    【預金保護について】
+
+    本特典を適用した口座の預金も預金保険制度の対象で、当行のほかの預金と合算して、預金者1人当たり元本1,000万円までと破綻日までの利息等が保護されます。
+
+
+    【金利の変動について】
+
+    年金受取に伴う0.1%の金利上乗せ分を含め、適用金利は市場環境や当行の金利改定方針に基づき変更される場合がございます。変更の際は、店頭掲示等でご案内いたします。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f3f581e2-6ec6-5093-be98-e5831f8d0f7a
+  title: 給与・年金受取特典：金利・料率の決まり方と適用
+  body: '本特典における金利および手数料無料枠の適用ルールは以下の通りです。
+
+
+    【金利上乗せ】
+
+    年金受取口座に指定された場合、普通預金金利に0.1%の上乗せを適用します。この金利は、年金受取実績が確認できる期間中、継続して適用されます。
+
+
+    【無料枠の算定】
+
+    ・他行あて振込手数料：毎月1日にリセットされ、月3回まで無料となります。
+
+    ・時間外ATM利用手数料：毎月1日にリセットされ、月5回まで無料となります。
+
+
+    いずれの無料枠も、暦月（1日から末日まで）でカウントし、翌月に繰り越すことはできません。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3ef0f58a-0713-5c55-abce-48b24dff56e7
+  title: 給与・年金受取特典：ご紹介・継続利用の特典
+  body: '【2026年1月1日から2026年3月31日まで】
+
+    当行の「給与・年金受取特典」を継続してご利用いただいているお客さま、およびご友人に本特典をご紹介いただいたお客さまへ、日頃の感謝を込めて、月3回の他行あて振込手数料無料と、月5回のATM利用手数料無料の優遇を適用いたします。地域に根ざした安心のサポートを、ぜひご体感ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c7788ca6-b4eb-5898-bd99-9bd9612bfcaa
+  title: 給与・年金受取特典：安全にご利用いただくためのポイント
+  body: '「給与・年金受取特典」を安全にご利用いただくため、以下の点にご注意ください。
+
+
+    当行では、セキュリティカードや生体認証を用いた多層的な認証プロセスを導入しております。また、口座情報の変更などの重要な手続きの前には、必ず厳格な本人確認（取引時確認）を実施いたします。
+
+
+    不審なメールや電話で、暗証番号やセキュリティカードの情報を求めることは絶対にございません。万が一、不自然な連絡を受けた場合は、速やかに当行までお知らせください。あわせて「普通預金：不正利用からお客さまを守るために」をご一読いただき、安全な運用の徹底をお願い申し上げます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5d579727-f641-5e80-87ba-6e5449911568
+  title: 給与・年金受取特典：規定・約款の変更
+  body: '本特典の適用条件および提供内容（月3回の他行あて振込手数料無料、月5回のATM利用手数料無料、および年金受取の方への0.1%の金利上乗せ）は、当行の規定および約款に基づき決定されます。
+
+
+    法令の改正や経済状況の変化に伴い、これらの規定を変更する場合、当行は事前にお客様へ通知し、店頭またはオンラインバンキングにて告知いたします。変更後の条件は、告知された適用開始日から有効となります。本特典をご利用の際は、常に最新の規定をご確認ください。なお、本特典の適用を維持するためには、継続的に給与または年金の受取口座として当行をご指定いただく必要がございます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6eef4e46-4524-5376-aec5-7a90833f5b0b
+  title: 給与・年金受取特典：ご利用開始までの手順
+  body: 'お客様が「給与・年金受取特典」のご利用を開始するための手順は以下の通りです。
+
+
+    1. 普通預金口座の確認：お客様が「普通預金：商品概要」に準じた口座を保有しているか確認します。
+
+    2. 受取口座の指定：お客様ご自身で、勤務先または年金事務所等に対し、当行の口座を給与・年金の受取口座として指定していただきます。
+
+    3. 受取の確認：当行にて、実際に給与または年金の振込が確認された時点で、特典の適用対象となります。
+
+    4. 特典の適用：適用後は、月3回までの他行あて振込手数料が無料となり、月5回までATM利用手数料が無料となります。年金受取の方には、さらに定期預金の金利に0.1%が上乗せされます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2a928566-9b5f-5fcb-ba2b-450c28b59f0c
+  title: 給与・年金受取特典：年金受取の方の定期預金金利の上乗せ幅について
+  body: '問：年金受取口座に指定した場合、定期預金の金利はどのくらい上乗せされますか？
+
+    答：「給与・年金受取特典」の適用により、年金を受取られているお客さまは、定期預金の適用金利に0.1%が上乗せされます。効率的な資産形成にぜひお役立てください。詳細は「スーパー定期：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8b6e3c3e-d222-501e-a717-3432cbc608f0
+  title: 給与・年金受取特典：登録内容の変更
+  body: '特典適用のための登録内容を変更される際の手順をご案内します。
+
+
+    1. 変更内容の提示：受取口座の変更や、給与・年金の受取状況に変更があった旨をお知らせください。
+
+    2. 本人確認の実施：犯罪収益移転防止法に基づき、厳格な本人確認（取引時確認）を行います。必要な本人確認書類をご提示ください。
+
+    3. 内容の更新：当行にて登録情報を更新し、変更内容を確定させます。
+
+    4. 適用の確認：変更後、改めて給与または年金の振込が確認され次第、月3回の振込手数料無料、月5回のATM利用手数料無料、および年金受取の方への0.1%金利上乗せなどの特典が適用されます。手続き完了後、確認通知をいたします。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f720156c-e409-52b3-bb3b-cc07bcf7f595
+  title: 給与・年金受取特典：ログインできない・アクセスできない
+  body: 'オンラインバンキングで特典の利用状況が確認できない、またはログインできない場合の対応です。
+
+
+    【症状】ログイン時にエラーが表示される、または特典の無料回数が正しく表示されない。
+
+    【原因と確認事項】
+
+    ・パスワードの入力間違いや、ロックがかかっていないかご確認ください。
+
+    ・生体認証やセキュリティカードの認証が正常に完了しているかご確認ください。
+
+
+    【解決策】
+
+    ・パスワードを忘れた場合は、再設定手続きを行ってください。
+
+    ・認証エラーが続く場合は、認証デバイスの再起動をお試しください。
+
+
+    【エスカレーション】
+
+    上記で解決しない場合は、当行の専門部署にてアカウント状況を調査いたします。調査完了後、ログイン可能となった旨を改めてご連絡いたします。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 39548208-0ff0-58d6-9ae9-60e57930f24f
+  title: 給与・年金受取特典：ご利用条件による違い
+  body: '【ご利用条件と適用特典】
+
+
+    ・給与または年金の受取口座に指定：
+
+    　→ 他行あて振込手数料：月3回まで無料
+
+    　→ ATM利用手数料：月5回まで無料
+
+
+    ・年金の受取口座に指定（上記に加えて適用）：
+
+    　→ 定期預金金利：0.1%の上乗せ'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3ffe2d41-affb-5954-843a-0762db1c2609
+  title: 給与・年金受取特典：プランの選び方
+  body: 「普通預金：商品概要」の基本口座のみをご利用の場合と比べ、本特典を適用させることで、月3回までの振込手数料と月5回までのATM利用手数料が無料となり、維持コストを大幅に抑えられます。特に年金受取の方は、定期預金に0.1%の金利上乗せが適用されるため、日常的な決済と効率的な資産形成を両立させたい方に最適です。
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b1f79716-c2f1-50dc-a661-336cc553f751
+  title: 給与・年金受取特典：個人情報の取扱い
+  body: '当行は、個人情報保護法および犯罪収益移転防止法を遵守し、お客様の個人情報を適切に管理いたします。
+
+
+    「給与・年金受取特典」の適用にあたり、当行は口座への振込履歴を確認することで、給与または年金の受取状況を判定いたします。この目的で得られた情報は、特典の適用判定および維持管理のみに使用し、それ以外の目的で第三者に提供することはありません。また、口座開設時や重要手続き時に実施する取引時確認に基づき、公正かつ透明性の高い取引を徹底しております。個人情報の取扱いに関する詳細については、当行のプライバシーポリシーをご確認ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4521da27-ddf3-5337-b598-94cb2ddfbc29
+  title: 給与・年金受取特典：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「給与・年金受取特典」を悪用し、「特典内容をアップグレードするため」や「手数料無料回数を増やすため」などと称して、お客様の個人情報を聞き出そうとする不審な電話やメールが報告されています。
+
+
+    当行から、特典の適用条件としてセキュリティカードの暗証番号やパスワードを伺うことは絶対にございません。また、不自然なURLへのアクセスを求めることもございません。もしこのような連絡があった場合は、すぐにお電話を切り、当行の窓口までご連絡ください。
+
+
+    万が一、情報を伝えてしまった可能性がある場合は、被害を最小限に抑えるため、至急に口座の利用停止手続きを行ってください。迅速なご報告が、大切な資産を守ることにつながります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 509262a6-978a-579e-bd91-59e3eb73422d
+  title: 給与・年金受取特典：限度額・制限と注意事項
+  body: '本特典の適用における制限および注意事項は以下の通りです。サポート担当者は、お客様へご案内する際に正確な数値を用いて説明してください。
+
+
+    【無料回数の制限】
+
+    ・他行あて振込手数料の無料回数：月3回まで
+
+    ・ATM利用手数料の無料回数：月5回まで
+
+    ※月間の無料回数を超えた分については、所定の手数料が発生します。
+
+
+    【金利優遇の制限】
+
+    ・年金受取の方への上乗せ金利：0.1%
+
+    ※本金利は年金受取口座として指定されている場合に限り適用されます。
+
+
+    【適用条件】
+
+    本特典は、当行の口座を給与受取または年金受取口座として指定しているお客様が対象です。指定が解除された場合、または受取実績が確認できなくなった場合は、翌月より特典の適用外となります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e5c5e401-ab2e-5edf-b57a-398bd28dab08
+  title: 給与・年金受取特典：手数料と費用
+  body: 'Q：この特典を利用するために、別途費用や年会費はかかりますか？
+
+    A：いいえ、本特典のご利用に費用は一切かかりません。給与や年金の受取口座に指定いただくことで無料で適用されます。
+
+
+    Q：具体的にどのような手数料が無料になりますか？
+
+    A：月3回までの他行あて振込手数料と、月5回までのATM利用手数料が無料となります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 11e37c0a-90ab-53d8-84b1-4d87637824bb
+  title: 給与・年金受取特典：状況・履歴の確認
+  body: '現在適用されている特典の利用状況や、無料回数の消化履歴を確認する手順をご案内します。
+
+
+    1. 担当者へ「給与・年金受取特典の今月の利用状況を確認したい」とお申し付けください。
+
+    2. ご本人確認のため、口座番号などの必要事項を伺いますので、お答えください。
+
+    3. 担当者が現在の月間無料回数の消費数（振込：最大3回、ATM利用：最大5回）を確認し、残り回数をご案内します。
+
+    4. 過去の適用履歴を確認したい場合は、あわせて「特典適用後の取引明細の確認」を依頼してください。手数料が免除された取引内容を順に提示いたします。
+
+
+    これにより、今月あと何回まで無料でサービスを利用できるかが明確になります。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e4b63c6e-10ef-5182-99e4-176ff798f9c1
+  title: 給与・年金受取特典：お取引が拒否された・制限された
+  body: '「振込やATM利用時にエラーが出て手続きができない」といった症状がある場合の確認事項です。
+
+
+    【考えられる原因】
+
+    ・月間の無料回数（振込3回、ATM利用5回）をすべて使い切り、手数料の不足により取引が制限されている。
+
+    ・口座自体の利用制限（セキュリティロック等）がかかっている。
+
+
+    【確認と解決策】
+
+    1. まずは今月の利用回数が上限に達していないかご確認ください。上限に達している場合は、所定の手数料を口座にご準備いただく必要があります。
+
+    2. 回数に余裕があるにもかかわらず制限される場合は、当行で制限状況を調査します。本人確認書類をご提示いただき、制限を解除いたします。
+
+
+    解決しない場合は、専門部署へエスカレーションし、詳細な取引ログの調査を行い、結果をご連絡いたします。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 20dd57c0-77ac-5a38-8c01-bc30ba9b6f34
+  title: 給与・年金受取特典：切替えや上位プランを検討するとき
+  body: 本特典（月3回の振込無料、月5回のATM無料、年金受取0.1%金利上乗せ）と一般口座を比較します。日常的に他行への送金やATM利用がある方は、本特典への切替えでコストを大幅に削減できます。一方で、受取口座の指定が難しい場合は、通常の普通預金での運用となります。お客様のライフステージに合わせた最適な選択をご提案してください。
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 46bd5b76-712e-5164-b5d7-3988ab4b2311
+  title: 給与・年金受取特典：ほかの選択肢との比較と向かない場合
+  body: '本特典は、地域に根ざした当行をメインバンクとしてご利用いただく方に最適な制度です。
+
+
+    【本特典が適している方】
+
+    ・給与や年金を当行で受け取り、月々の支払いで他行への振込（月3回まで無料）や、コンビニ等のATM利用（月5回まで無料）が多い方。
+
+    ・年金受取口座として指定し、0.1%の金利上乗せによる効率的な資産形成を目指す方。
+
+
+    【向かない場合】
+
+    ・給与や年金の受取先を他行に固定されており、変更が困難な方。
+
+    ・月間の振込回数が極めて多く、月3回の無料枠では不十分な方。
+
+
+    本特典は特定の受取条件を満たすことで利便性を最大化する仕組みとなっております。条件を満たさない場合は、通常の普通預金口座をご利用ください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 67c0edea-49e0-51d5-a56c-06059c3d2242
+  title: 給与・年金受取特典：お申込みとご利用条件
+  body: 'Q：この特典を適用してもらうにはどうすればよいですか？
+
+    A：当行の普通預金口座を開設し、勤務先や年金事務所にて、受取口座として当行を指定してください。
+
+
+    Q：給与受取と年金受取の両方を指定した場合、特典は重複しますか？
+
+    A：はい。振込無料3回、ATM利用無料5回などの基本特典に加え、年金受取の方への金利上乗せ0.1%が適用されます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2b664f48-aff7-58cd-92ff-61c30770f931
+  title: 給与・年金受取特典：よくあるお手続きの流れ
+  body: '給与・年金受取特典を適用させるためのお手続きの流れをご案内します。
+
+
+    1. 担当者に「給与または年金の受取口座に指定したい」旨をお伝えください。
+
+    2. 受取口座として指定するための「店番・口座番号」が記載された書類、または通帳をご提示ください。
+
+    3. お客さまご自身で、勤務先（給与の場合）または年金事務所（年金の場合）へ、受取口座変更の手続きを行ってください。
+
+    4. 当行にて受取実績が確認できた時点で、特典の適用を開始いたします。
+
+    5. 適用後は、月3回までの他行あて振込手数料および月5回までのATM利用手数料が無料となります。また、年金受取の場合は0.1%の金利上乗せが適用されます。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c001b345-266d-5d8e-8ad2-9c27147a010e
+  title: 給与・年金受取特典：明細や記録と合わない
+  body: 'お客様より「無料回数内のはずなのに手数料が引かれている」「金利上乗せが反映されていない」とのお問い合わせがあった場合の対応手順です。
+
+
+    【確認手順】
+
+    1. 取引履歴を確認し、当該月の他行あて振込回数が3回を超えていないか、またはATM利用回数が5回を超えていないかを確認します。
+
+    2. 年金受取金利の上乗せ（0.1%）について、受取実績が途切れた月がないか、または適用対象の口座であるかを再確認します。
+
+
+    【解決策】
+
+    ・回数オーバーによる課金であれば、その旨を丁寧にご説明ください。
+
+    ・当行のシステム不備で正しく適用されていなかった場合は、速やかに不足分を精査し、差額を返金処理いたします。この際は、専門部署へエスカレーションし、正当な適用期間を確定させてください。'
+  domain: retail_banking
+  product_category: kyuyo_nenkin_tokuten
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8c5e12cf-e05d-512b-ba4c-55b4f136212f
+  title: 朝凪Visaデビット：商品概要
+  body: '朝凪Visaデビットは、お支払いのと同時に口座残高から即時引き落とされるため、支出管理が容易な決済カードです。Visa加盟店にて幅広くご利用いただけます。
+
+
+    【基本スペック】
+
+    ・年会費：0円
+
+    ・1日あたりの利用限度額：500,000円
+
+    ・キャッシュバック率：0.2%
+
+    ・海外利用事務手数料：3%
+
+
+    本カードをご利用いただくことで、日々のショッピングにおいて0.2%のキャッシュバックを受けられるほか、年会費0円でコストを抑えた運用が可能です。海外でのご利用時には3%の手数料が発生いたしますので、あらかじめご了承ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b3256fa8-1862-5d72-9e87-771cafb22048
+  title: 朝凪Visaデビット：年会費について
+  body: 'Q：朝凪Visaデビットの年会費はいくらですか？
+
+    A：本カードの年会費は0円です。どなたでも無料でご利用いただけます。
+
+
+    Q：更新時に手数料が発生することはありますか？
+
+    A：いいえ、更新時を含め年会費は一貫して0円となっております。維持コストを気にせず、安心してお使いください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 39f6fc0d-d051-5fcb-a483-f95302a768b1
+  title: 朝凪Visaデビット：お申込みとご利用開始
+  body: '朝凪Visaデビットのお申込みからご利用開始までの手順をご案内いたします。
+
+
+    1. 本人確認書類（運転免許証、マイナンバーカードなど）をご用意ください。
+
+    2. 当行の窓口またはオンラインバンキングにて、お申し込み手続きを行います。
+
+    3. 当行にて厳格な本人確認（取引時確認）および審査を実施します。
+
+    4. ご登録住所へカードが郵送されますので、お届けをお待ちください。
+
+    5. お手元のカードを有効化していただくことで、Visa加盟店での即時引き落とし決済が開始されます。
+
+
+    カードの有効化が完了すれば、すぐに日々のショッピングでご利用いただけます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6b6ce8e0-9c02-50dd-9b49-d8094274088e
+  title: 朝凪Visaデビット：手数料一覧
+  body: '【朝凪Visaデビット 手数料一覧】
+
+
+    ・年会費：0円
+
+    ・海外利用事務手数料：ご利用金額の3%
+
+
+    ※海外利用事務手数料は、外貨建てのお取引の際に適用されます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b3bc4914-7c66-5e31-8030-316520f60fba
+  title: 朝凪Visaデビット：お手続きが完了しない・保留中のまま
+  body: '【症状】
+
+    オンラインでのお申込み手続き中、画面が切り替わらない、または「手続き保留中」の状態が続いている。
+
+
+    【考えられる原因】
+
+    ・本人確認書類の画像が不鮮明である、または端が切れている。
+
+    ・通信環境が不安定なため、データの送信が完了していない。
+
+
+    【確認・対応手順】
+
+    1. アップロードした書類の画像に不備がないか改めてご確認ください。
+
+    2. 通信環境を切り替え、再度手続きをお試しください。
+
+
+    【解決しない場合】
+
+    当行にて申請状況を確認し、不足している情報の再提出をご案内いたします。専門部署にて審査状況を調査し、改めて結果を通知させていただきます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b95cf0da-54e9-581c-a568-ab4aecbaf34e
+  title: 朝凪Visaデビット：お申込みいただける方
+  body: '【お申込み条件および判定】
+
+
+    ・当行の普通預金口座を保有している方 $\rightarrow$ お申込みいただけます
+
+    ・有効な本人確認書類を提示できる方 $\rightarrow$ お申込みいただけます
+
+    ・犯罪収益移転防止法に基づく「取引時確認」に同意いただける方 $\rightarrow$ お申込みいただけます'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e1e88bc5-44c2-55da-8a90-b331d701cd04
+  title: 朝凪Visaデビット：当社の似た商品との比較
+  body: '朝凪Visaデビットと、基本となる普通預金（キャッシュカード）の特性を比較します。
+
+
+    【朝凪Visaデビット】
+
+    ・決済手段：Visa加盟店でのショッピング決済が可能
+
+    ・コスト：年会費0円
+
+    ・特典：0.2%のキャッシュバックあり
+
+    ・向いている方：支出を即座に管理し、ポイント還元を享受したい方
+
+
+    【普通預金】
+
+    ・決済手段：ATMでの現金引き出しが主目的
+
+    ・コスト：詳細は「普通預金：手数料一覧」を参照
+
+    ・向いている方：シンプルな現金管理と貯蓄を優先される方'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 84b701af-d253-5143-8860-248cd8cfced7
+  title: 朝凪Visaデビット：重要事項のご説明
+  body: '朝凪Visaデビットのご利用にあたり、以下の重要事項をご了承ください。
+
+
+    1. 利用限度額：1日あたりの利用限度額は500,000円です。この金額を超えるお取引は、口座残高に関わらずご利用いただけません。
+
+    2. 海外利用手数料：海外での外貨建て決済には、3%の事務手数料が加算されます。
+
+    3. 取引時確認：犯罪収益移転防止法に基づき、厳格な本人確認を実施いたします。
+
+    4. 残高不足時の扱い：決済時に口座残高が不足している場合、お取引は拒否されます。あらかじめ十分な残高を確保してください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d630351c-d4dd-5f7a-8ab5-eeb5b354aac1
+  title: 朝凪Visaデビット：金利・料率一覧
+  body: '【朝凪Visaデビット 適用料率】
+
+
+    ・キャッシュバック率：0.2%
+
+    （すべてのVisa加盟店でのご利用額に対して一律に適用されます）
+
+
+    ・海外利用事務手数料率：3%
+
+    （外貨建てで決済された際、利用金額に対して適用されます）
+
+
+    上記料率はすべてのお客様に共通して適用されます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4140c2bd-a918-5abe-b1ab-2bfb08b21b88
+  title: 朝凪Visaデビット：実施中のキャンペーン
+  body: '【キャッシュバック増量キャンペーンのご案内】
+
+
+    期間：2025年4月1日から2025年6月30日まで
+
+
+    内容：期間中に朝凪Visaデビットを新規にお申し込みいただき、合計10,000円以上のショッピング利用をされた方を対象に、通常0.2%のキャッシュバックに加えて、一律1,000円をプレゼントいたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 20b4f1f2-2933-503f-b62f-0f0c461d702c
+  title: 朝凪Visaデビット：不正利用からお客さまを守るために
+  body: '朝凪Visaデビットを安心してお使いいただくために、不正利用への対策についてご案内いたします。当行では、多層的な認証プロセスを導入し、お客さまの資産を保護しております。
+
+
+    【ご注意いただきたい点】
+
+    当行の職員が、電話やメールでお客さまの暗証番号やセキュリティカードの情報を伺うことはございません。不審な連絡があった場合は、決して情報を伝えず、すぐにご相談ください。
+
+
+    【万が一の対応】
+
+    カードの紛失や盗難、身に覚えのない請求にお気づきになった際は、迅速に届出をお願いいたします。預金者保護法に基づき、偽造・盗難カードによる被害は原則として補償いたします。当行にて誠実に調査し、対応させていただきます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1bc14d33-7594-5618-b064-a65541bf90a0
+  title: 朝凪Visaデビット：規定・約款
+  body: '本カードのご利用にあたっては、以下の規定を適用いたします。
+
+
+    1. 利用限度額：1日あたりの利用限度額は500,000円までとなります。
+
+    2. 手数料：年会費は0円です。ただし、海外加盟店でのご利用時には3%の事務手数料が発生いたします。
+
+    3. 決済方法：お取引と同時に、連携する普通預金口座から即時引き落としが行われます。残高不足の場合は決済が完了いたしません。
+
+    4. 特典：規定の条件を満たした場合、利用金額に対して0.2%のキャッシュバックを提供いたします。
+
+    5. 解約：お客さまのご依頼に基づき、または当行が不適当と判断した場合には、本契約を終了させていただきます。
+
+
+    詳細は「朝凪Visaデビット：商品概要」と合わせてご確認ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d3333256-a95e-5a00-8527-c905a649c378
+  title: 朝凪Visaデビット：おすすめの方と主な使い方
+  body: '朝凪Visaデビットは、日々の支出をスマートに管理したい方におすすめの決済カードです。
+
+
+    【このような方におすすめです】
+
+    ・クレジットカードのような後払いではなく、予算内で支出を管理したい方
+
+    ・キャッシュレス決済を利用しつつ、口座残高をリアルタイムに把握したい方
+
+
+    【主な特徴とメリット】
+
+    ・コスト負担なし：年会費は0円で、どなたでも気軽にご利用いただけます。
+
+    ・お得な還元：ご利用額に応じて0.2%のキャッシュバックが還元されます。
+
+    ・安心の限度額：1日あたり500,000円までのお取引が可能です。
+
+    ・シンプルな管理：お支払いと同時に口座から即時引き落とされるため、使いすぎを防げます。
+
+
+    日々のショッピングから公共料金のお支払いまで、幅広くご活用ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 966d2bf0-8b08-5597-8967-302d235aa124
+  title: 朝凪Visaデビット：海外利用時の事務手数料について
+  body: 'Q：海外の店舗やサイトで利用した場合、別途手数料はかかりますか？
+
+
+    A：はい。海外加盟店でご利用いただいた際は、事務手数料として利用金額の3%を申し受けます。この手数料は、お取引金額に加算された状態で口座から即時引き落とされます。
+
+
+    詳細については「朝凪Visaデビット：手数料一覧」をご確認ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2541f424-4369-5229-9f6b-0e3c7ebab211
+  title: 朝凪Visaデビット：解約・変更・プランの切替え
+  body: 'カードの解約やご登録内容の変更をご希望の場合は、以下の手順でお手続きください。
+
+
+    1. お手続きの依頼：担当窓口にて、解約または変更のご希望をお伝えください。
+
+    2. 本人確認：犯罪収益移転防止法に基づき、厳格な取引時確認（ご本人様確認書類のご提示）を実施いたします。
+
+    3. 内容の確認：変更内容や解約に伴う注意点について、担当者よりご説明いたします。
+
+    4. 手続き完了：手続き完了後、変更内容の通知または解約完了の旨をご案内いたします。
+
+
+    なお、カードの利用限度額（500,000円）の変更についても同様の手順で承っております。ご不明な点は「朝凪Visaデビット：商品概要」をご参照ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 486c8170-f732-5ab9-a8b0-30195b2aeb12
+  title: 朝凪Visaデビット：想定外の手数料・金額
+  body: '【症状】
+
+    「利用した金額よりも多く口座から引き落とされている」または「身に覚えのない手数料がある」と感じられる場合。
+
+
+    【原因と確認事項】
+
+    1. 海外利用の有無：海外のサイトや店舗で利用されていませんか？海外利用時は3%の事務手数料が加算されます。
+
+    2. キャッシュバックの適用：0.2%の還元は即時ではなく、規定のタイミングで処理されます。明細上の金額と還元タイミングに相違がないかご確認ください。
+
+
+    【対応】
+
+    上記に心当たりがない場合は、当行にて取引履歴の詳細を調査いたします。調査結果に基づき、誠実に対応させていただきます。必要に応じて専門部署へエスカレーションし、詳細な照会を行います。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3de85846-2f51-5867-9c94-2dc668a55b6e
+  title: 朝凪Visaデビット：必要書類
+  body: '朝凪Visaデビットのお申込みには、以下の書類が必要となります。
+
+
+    ・本人確認書類：運転免許証、マイナンバーカード等の公的証明書（取引時確認のため）。
+
+    ・口座確認書類：連携させる当行の普通預金口座がお分かりになるもの。
+
+
+    これらをご提示いただくことで、お申込み手続きへと進ませていただきます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a025f029-56b6-5108-b839-6caab3d5def4
+  title: 朝凪Visaデビット：他社の一般的な商品との比較
+  body: 他社様の一般的なデビットカードと比較した際、朝凪Visaデビットは年会費0円というコスト面での安心感と、0.2%という明確なキャッシュバック率を兼ね備えています。また、海外事務手数料3%という水準は、多くの国内金融機関と同等であり、競争力のある設定です。クレジットカードのような支払いの繰り延べはできませんが、その分、支出をリアルタイムに管理したい方に最適です。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 85becb23-0989-557a-901c-67788df172b5
+  title: 朝凪Visaデビット：リスクについてのご説明
+  body: '朝凪Visaデビットをご利用いただくにあたり、以下のリスクと制限事項をご理解ください。
+
+
+    【残高不足による決済不能】
+
+    本カードは口座残高から即時引き落としを行うため、残高が不足している場合は決済が拒否されます。クレジットカードのような信用供与（後払い）はございません。
+
+
+    【海外利用時のコスト】
+
+    海外でのご利用時には3%の事務手数料が課されます。為替レートの変動と合わせ、想定より高い金額が引き落とされる場合がございます。
+
+
+    【利用限度額】
+
+    1日あたりの利用限度額は500,000円となっております。これを超えるお取引はできませんのでご注意ください。
+
+
+    【キャッシュバック】
+
+    0.2%の還元率が適用されますが、還元対象外の取引がある場合がございます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a72b4ded-c773-5521-9a01-db718dd3ce08
+  title: 朝凪Visaデビット：金利・料率の決まり方と適用
+  body: '本カードに適用される料率は以下の通りです。
+
+
+    ・年会費：0円（すべてのお客様に一律で適用されます）。
+
+    ・海外事務手数料：3%（外貨建て取引の決済時に、取引金額に対して一律で適用されます）。
+
+    ・キャッシュバック率：0.2%（規定の条件を満たすご利用分に対し、所定のサイクルで還元されます）。
+
+
+    これらの料率は当行の規定に基づき決定しており、原則として一律に適用されます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 286f8af1-6f34-5054-b735-409daf277638
+  title: 朝凪Visaデビット：ご紹介・継続利用の特典
+  body: 2025年4月1日から2025年6月30日まで、朝凪Visaデビットを新しくお申し込みいただいた方に、通常のご利用還元0.2%に加え、さらに500円をプレゼントいたします。また、ご友人をご紹介いただき、その方がカードを開設された場合、条件達成後に1,000円を還元いたします。地域に根ざした安心の決済手段をぜひこの機会にご検討ください。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0028304e-e3e1-5702-9c60-27d7b257b0b8
+  title: 朝凪Visaデビット：安全にご利用いただくためのポイント
+  body: 朝凪Visaデビットを安全にご利用いただくため、以下の点にご注意ください。最近では、銀行員を装い「セキュリティ更新が必要」として暗証番号やセキュリティカードの情報を聞き出そうとする詐欺が発生しております。当行が電話やメールで、お客様の暗証番号やパスワードをお伺いすることは一切ございません。不審な連絡を受けた場合や、身に覚えのない取引明細を確認された際は、直ちにご報告ください。紛失・盗難の届出を迅速に受け付け、規定の期間に基づき誠実に調査・対応いたします。また、1日あたりの利用限度額は初期設定で500,000円となっておりますので、ご自身の利用状況に合わせて適切に管理いただくことをお勧めいたします。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a987bd77-6b29-5e78-a6d4-7a30cc073262
+  title: 朝凪Visaデビット：規定・約款の変更
+  body: 朝凪Visaデビットのご利用規定および約款は、法令の改正やサービス維持コストの変動に伴い、変更される場合がございます。変更の内容がお客様に重要な影響を及ぼす場合は、書面または当行ホームページにて事前に告知いたします。本カードは年会費0円でご提供しておりますが、海外利用時には3%の事務手数料が発生いたします。また、1日あたりの利用限度額は500,000円と定められており、審査状況により変動する場合があります。お客様は、カードの管理責任を負い、紛失時は速やかに届出を行う義務がございます。約款の変更に同意いただけない場合は、いつでもカードの解約を申請いただけます。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 20b50539-a20d-5cd5-a7b0-e96400dd0fc2
+  title: 朝凪Visaデビット：ご利用開始までの手順
+  body: 朝凪Visaデビットのご利用開始までの手順についてご案内します。まず、お客様に取引時確認（本人確認）を実施し、ご本人であることを厳格に確認します。その後、お申し込みを受け付け、審査を経てカードを発行いたします。カードがお手元に届きましたら、指定の手続きにてアクティベーションを行っていただくことで、即時引き落としによる決済が可能となります。本カードは年会費0円で、1日あたりの利用限度額は初期設定で500,000円です。また、ご利用額に対して0.2%のキャッシュバックが適用されます。海外でのご利用時には3%の手数料がかかる点をご説明ください。詳細は「朝凪Visaデビット：商品概要」をご参照ください。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7034764e-949e-599f-bf1b-72e5d940fbf2
+  title: 朝凪Visaデビット：1日あたりの利用限度額（初期設定）について
+  body: 'Q: 1日に利用できる金額に制限はありますか？
+
+    A: はい。朝凪Visaデビットの1日あたりの利用限度額は、初期設定で500,000円となっております。
+
+
+    Q: 限度額の変更は可能ですか？
+
+    A: はい、お手続きにより変更可能です。具体的な変更手順については「朝凪Visaデビット：登録内容の変更」をご確認ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7b030ba1-dc47-5c07-af8c-6d27627a02cc
+  title: 朝凪Visaデビット：登録内容の変更
+  body: '朝凪Visaデビットの登録内容（住所・電話番号・利用限度額など）を変更する手順は以下の通りです。
+
+    1. 変更したい内容を当行スタッフにお伝えください。
+
+    2. 住所変更などの場合は、最新の住所が確認できる本人確認書類をご提示ください。
+
+    3. 1日あたりの利用限度額（初期設定500,000円）の変更を希望される場合は、希望額を提示し、審査結果の確認を受けてください。
+
+    4. 当行にて内容の更新処理を行い、変更が完了したことを口頭または書面にて通知いたします。
+
+
+    これにより、最新の情報で安全にカードをご利用いただけます。お手続きの詳細は「朝凪Visaデビット：商品概要」にてご確認いただけます。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3b130cd4-ac86-5af4-9e26-a298f35bbebb
+  title: 朝凪Visaデビット：ログインできない・アクセスできない
+  body: 'オンラインバンキングにて朝凪Visaデビットの利用明細や設定にアクセスできない場合、以下の点をご確認ください。
+
+
+    【確認事項】
+
+    ・パスワードやセキュリティカードの入力内容に誤りがないか。
+
+    ・通信環境が安定しているか。
+
+
+    【原因と対処法】
+
+    ・パスワードを一定回数以上誤入力した場合、セキュリティ保護のため口座が一時的にロックされます。この場合は、本人確認書類をご用意の上、当行へロック解除を依頼してください。
+
+    ・生体認証に失敗し続ける場合は、認証設定の再登録をお願いいたします。
+
+
+    上記を確認しても解決しない場合は、専門部署へエスカレーションし、認証システムのログを調査いたします。調査結果は追ってご連絡いたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6ccc0b35-fff7-528c-ac96-b0f518f7e244
+  title: 朝凪Visaデビット：ご利用条件による違い
+  body: '【ご利用条件と適用内容】
+
+    ・口座保有状況：当行の普通預金口座をお持ちの方 ⇒ 朝凪Visaデビットの発行が可能。
+
+    ・本人確認：取引時確認を完了された方 ⇒ カードの利用および1日あたり500,000円の限度額を適用。
+
+    ・利用地域：国内店舗 ⇒ 通常利用。海外店舗 ⇒ 3%の手数料を適用。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: edced73f-3656-5e03-8896-093d2e1b9189
+  title: 朝凪Visaデビット：プランの選び方
+  body: 朝凪Visaデビットは、年会費0円で、利用と同時に口座から即時引き落とされるため、支出管理を徹底したい方に最適です。一方、後払いを希望される場合はクレジットカードをご検討ください。本カードは、利用額の0.2%が還元されるため、日常的なお買い物での利便性と安心感を両立したい方にお勧めです。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: bc56d808-8ead-5591-8a29-933dbc27efb5
+  title: 朝凪Visaデビット：個人情報の取扱い
+  body: 朝凪銀行は、個人情報保護法および犯罪収益移転防止法を厳格に遵守し、お客様の個人情報を適切に管理いたします。朝凪Visaデビットのお申し込みおよびご利用にあたり、収集した個人情報は、口座管理、不正利用の検知、および法令に基づく取引時確認の目的のみに使用いたします。具体的に、1日あたりの利用限度額500,000円の管理や、海外利用時の3%の手数料計算、0.2%のキャッシュバック処理等のサービス提供に利用されます。収集した情報は、厳重なセキュリティ体制の下で保管され、第三者への提供は法令に基づく場合を除き、あらかじめ本人の同意を得た上で実施いたします。
+  domain: cards
+  product_category: asanagi_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3d10f08d-9e65-50ca-9ebb-bb246810ebd2
+  title: 朝凪Visaデビット：この商品をかたる詐欺にご注意ください
+  body: '最近、朝凪Visaデビットをかたる不審なメールやSMS（ショートメッセージ）が報告されています。「カードの利用制限が解除されました」や「不審な利用が検知されたため、至急確認が必要です」といった内容で、偽のウェブサイトへ誘導し、個人情報を盗み出そうとする手口に十分ご注意ください。
+
+
+    当行が、メールや電話で暗証番号、セキュリティカードの全桁、またはオンラインバンキングのパスワードをお伺いすることは絶対にございません。もし不審な連絡を受け、情報を入力してしまった場合や、身に覚えのない取引がある場合は、直ちにご報告ください。迅速な停止手続きを行うことで、被害を最小限に抑えることが可能です。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2bad9358-5fbf-5bdf-aeee-8409fa4e5a4b
+  title: 朝凪Visaデビット：限度額・制限と注意事項
+  body: '朝凪Visaデビットのご利用における制限事項および注意事項です。お客様へのご案内時にご活用ください。
+
+
+    【利用限度額】
+
+    1日あたりの利用限度額は500,000円となっております。この金額を超えるお取引は、カードの有効性に関わらず拒否されます。
+
+
+    【注意事項】
+
+    ・本商品はデビットカードであるため、お取引と同時に口座残高から即時引き落としが行われます。口座残高が不足している場合は、決済が完了いたしません。
+
+    ・決済時点の残高に基づき処理されるため、振替待機中の金額などは利用可能額に含まれません。
+
+    ・限度額の変更や一時的な制限解除については、規定の本人確認手続きが必要です。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7680a11f-22f5-526f-ad09-6a3e3d167262
+  title: 朝凪Visaデビット：キャッシュバック率について
+  body: 'Q：朝凪Visaデビットを利用すると、特典としてキャッシュバックは受けられますか？
+
+
+    A：はい。朝凪Visaデビットをご利用いただくと、ご利用金額に対して0.2%のキャッシュバックを差し上げます。日々の決済でお得に資産形成をサポートいたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 60577aee-329f-5aea-91dd-1a086d67ccc1
+  title: 朝凪Visaデビット：状況・履歴の確認
+  body: '朝凪Visaデビットのご利用状況や取引履歴を確認する手順をご案内します。
+
+
+    1. ご本人確認書類をご提示いただき、口座所有者であることを確認します。
+
+    2. 履歴の確認を希望される期間（例：直近1ヶ月分など）をお伝えください。
+
+    3. 当行にて、決済日、利用店名、および引き落とし金額の詳細を照会します。
+
+    4. ご案内した内容が、お客様のご記憶にある利用履歴と一致しているかをご確認いただきます。
+
+
+    なお、決済直後の取引は「仮売上」として処理され、後日確定額で正しく反映されます。確定まで数日かかる場合がございますので、あらかじめご了承ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 11c6de99-5127-5fdf-9149-4b4917204fde
+  title: 朝凪Visaデビット：お取引が拒否された・制限された
+  body: '「お店でカードを使ったが、決済が拒否された」という場合に考えられる原因と対処法です。
+
+
+    【確認事項と原因】
+
+    1. 口座残高の不足：決済金額以上の残高があるかご確認ください。即時引き落としのため、残高不足ですぐに拒否されます。
+
+    2. 利用限度額の超過：1日あたりの利用限度額である500,000円を超えていないかご確認ください。
+
+    3. カードの有効期限切れ：カード表面の有効期限が切れていないかご確認ください。
+
+    4. セキュリティロック：短時間に不自然な利用があった場合、当行で一時的に制限をかけている可能性があります。
+
+
+    【解決策】
+
+    ・残高不足の場合は、不足分を口座に入金してください。
+
+    ・限度額超過やセキュリティロックの場合は、ご本人確認の上で制限の解除や調整を承ります。専門部署にて調査し、解除完了後にご案内いたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 764805eb-6488-579f-8f26-f8b73b291137
+  title: 朝凪Visaデビット：切替えや上位プランを検討するとき
+  body: 'お客様がクレジットカードへの切り替えやプラン変更を検討されている際、朝凪Visaデビットの優位性を以下のようにご案内ください。
+
+
+    【朝凪Visaデビットの特長】
+
+    ・年会費：0円であり、維持コストがかかりません。
+
+    ・支出管理：即時引き落としのため、予算以上の使い過ぎを防げます。
+
+    ・還元：0.2%のキャッシュバックを享受いただけます。
+
+
+    クレジットカード（後払い）は、一時的に資金を調達できるメリットがありますが、朝凪Visaデビットは「今ある資金で管理する」という安心感を提供します。年会費を抑えつつ、シンプルな決済手段を求めるお客様に最適です。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d42f37d7-f83a-5d85-81f2-554c468ba3fd
+  title: 朝凪Visaデビット：ほかの選択肢との比較と向かない場合
+  body: '朝凪Visaデビットは利便性の高い商品ですが、お客様のご利用目的によっては他の選択肢が適している場合がございます。
+
+
+    【本商品が適さないケース】
+
+    ・高額決済を頻繁に行う方：1日あたりの利用限度額が500,000円であるため、これを超えるお買い物をされる場合は、クレジットカード等をご検討ください。
+
+    ・支払いを猶予したい方：即時引き落としのため、給与日までの支払いを待つといった機能はございません。
+
+
+    【本商品のメリット】
+
+    ・年会費が0円であるため、どなたでも気兼ねなくお持ちいただけます。
+
+    ・0.2%のキャッシュバックがあり、現金払いよりもお得に利用いただけます。
+
+
+    お客様のライフスタイルに合わせ、最適な決済手段をご提案いたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 518c1a9f-96e7-5914-9af5-2394a1465ce5
+  title: 朝凪Visaデビット：手数料と費用
+  body: 'Q：朝凪Visaデビットを維持するための費用や、利用時の手数料について教えてください。
+
+
+    A：本カードの年会費は0円です。国内でのご利用に手数料はかかりません。ただし、海外でご利用の際は、事務手数料としてご利用金額の3%が別途加算されますのでご注意ください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 20c7e9be-6152-51c9-b9cd-694d9c768652
+  title: 朝凪Visaデビット：よくあるお手続きの流れ
+  body: '朝凪Visaデビットのお申込みからご利用開始までの流れをご案内します。
+
+
+    1. お申込み内容の確認：ご希望のカード種類と、紐付ける普通預金口座をご指定いただきます。
+
+    2. 取引時確認（本人確認）：犯罪収益移転防止法に基づき、運転免許証などの公的証明書をご提示いただき、ご本人確認を行います。
+
+    3. 審査および発行手続き：当行にて規定の審査を行い、カードの発行手続きをいたします。
+
+    4. カードの受領：ご登録住所へカードを郵送いたします。
+
+    5. 利用開始：カードがお手元に届き、暗証番号等の設定（または確認）が完了した時点から、すぐにショッピングにご利用いただけます。
+
+
+    お手続きに際して不明な点がございましたら、お気軽にお申し付けください。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 797ede45-2b13-52bb-b7b7-2c247471eb90
+  title: 朝凪Visaデビット：明細や記録と合わない
+  body: 'お客様から「口座の引き落とし金額が、お店での支払額と合わない」とのお問い合わせがあった際の対応手順です。
+
+
+    【想定される原因】
+
+    1. 海外利用の手数料：海外加盟店での利用時、ご利用金額に加えて3%の海外利用手数料が加算されている可能性があります。これが原因で、請求額が想定より高くなるケースが多く見られます。
+
+    2. 仮売上と確定額の差：ホテルやレンタカー等の利用で、一時的に保証金（デポジット）として多めに引き落とされ、後日差額が返金される場合があります。
+
+    3. キャッシュバックの反映タイミング：0.2%のキャッシュバックは即時ではなく、規定のタイミングで一括して口座に払い戻されます。
+
+
+    【対応策】
+
+    ・取引日時と金額を照合し、海外利用がある場合は3%の手数料が適用されているかを計算して説明してください。解決しない場合は、詳細な調査のため専門部署へエスカレーションし、調査結果をお客様へ回答いたします。'
+  domain: cards
+  product_category: asanagi_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 818f6f8b-1b94-507d-a447-df18490f4c6a
+  title: 住宅ローン：商品概要
+  body: '朝凪銀行の「住宅ローン」は、お客様の理想の住まいづくりをサポートする融資商品です。借入限度額は最大100,000,000円まで、最長で35年の返済期間を設定いただけます。
+
+
+    金利プランは、市場に合わせて変動する変動金利（1.375%）と、10年間の金利を固定できる固定金利（3.7%）からお選びいただけます。融資手数料として借入金額の2.2%を申し受けますが、オンラインでの繰上返済手数料は0円となっており、計画的な資産形成を支援します。
+
+
+    また、変動金利をご選択の場合、5年ごとの返済額見直しを行い、上昇幅に上限を設ける125%ルールを適用することで、急激な返済額の変化を抑え、安心感のある生活設計をサポートいたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f30e66da-358b-58bc-baa4-862d5fd2dbf4
+  title: 住宅ローン：変動金利（優遇後）について
+  body: '【ご質問】変動金利を選択した場合、適用される金利はいくらになりますか？
+
+
+    【回答】変動金利（優遇後）は1.375%となります。市場金利の変動に伴い定期的に見直しが行われます。詳細については「住宅ローン：金利・料率一覧」をご確認ください。また、返済額の見直しは5年ごとに行われ、上昇幅は前回の125%が上限となります。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a06953fd-4185-5481-ac1c-77da4504427d
+  title: 住宅ローン：お申込みとご利用開始
+  body: '「住宅ローン」のお申込みからご利用開始までの手順をご案内いたします。
+
+
+    1. ご相談とシミュレーション：まず、ご希望の借入金額や期間をお知らせください。最大100,000,000円の限度額内で、最適な返済計画を提案いたします。
+
+    2. 必要書類のご提出：本人確認書類および収入証明書をご提示ください。当行にて厳格な取引時確認を実施いたします。
+
+    3. 審査：ご提出いただいた書類に基づき、返済能力の審査を行います。
+
+    4. ご契約手続き：審査承認後、金利プラン（変動金利1.375%または固定金利3.7%）を決定し、ご契約を締結します。この際、借入金額の2.2%の融資手数料が発生いたします。
+
+    5. 融資実行：手続き完了後、指定の口座へ融資が実行され、ご利用開始となります。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c4e195a8-1ae6-5250-9ee8-93d11ce85bba
+  title: 住宅ローン：手数料一覧
+  body: '「住宅ローン」にご適用される手数料は以下の通りです。
+
+
+    ■融資手数料：借入金額の2.2%
+
+    ■オンライン繰上返済手数料：0円
+
+
+    ※融資手数料は、ご契約時の借入金額に基づいて算出されます。繰上返済をオンラインで行われる場合は、手数料はかかりません。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3b601105-5689-53c4-9064-6883ec6cc4e2
+  title: 住宅ローン：お手続きが完了しない・保留中のまま
+  body: '【症状】住宅ローンの申込み手続きをした後、ステータスが「保留中」のまま完了しない。
+
+
+    【考えられる原因】
+
+    ・ご提出いただいた本人確認書類や収入証明書の不備（期限切れや記載漏れ）。
+
+    ・取引時確認における情報の不足。
+
+
+    【確認・解決手順】
+
+    1. 必要書類の再確認：最新の証明書が正しく提出されているかご確認ください。
+
+    2. 不足情報の提供：当行から案内がある不足分について、追加で書類をご提示ください。
+
+
+    【解決しない場合】
+
+    審査に時間を要している場合がございます。当行にて専門部署へエスカレーションし、現在の進捗状況を確認いたします。確認後、担当者より改めてご連絡を差し上げます。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2dca3582-e736-572b-8bf4-93da765ee5e3
+  title: 住宅ローン：お申込みいただける方
+  body: '「住宅ローン」のお申込み条件は以下の通りです。
+
+
+    ・借入希望額：最大100,000,000円まで
+
+    ・借入期間：最長35年まで
+
+    ・審査基準：当行の厳正な返済能力審査により、十分な支払い能力があると認められた方
+
+    ・確認事項：犯罪収益移転防止法に基づき、適正な取引時確認を完了できる方
+
+
+    上記条件を満たし、審査を通過されたお客様にご利用いただけます。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a1299e5f-bf42-5e0e-a58f-65d6d9d144ee
+  title: 住宅ローン：当社の似た商品との比較
+  body: '「住宅ローン」と「朝凪カードローン」の主な違いは以下の通りです。
+
+
+    ■住宅ローン
+
+    ・目的：住宅の購入・新築・改装
+
+    ・限度額：最大100,000,000円
+
+    ・期間：最長35年
+
+    ・金利：1.375%（変動）～
+
+    ・適した方：長期的に計画的な返済でマイホームを構えたい方
+
+
+    ■朝凪カードローン
+
+    ・目的：自由な使途
+
+    ・期間：柔軟な返済計画
+
+    ・適した方：急な資金需要に幅広く対応したい方
+
+
+    目的と借入期間に応じて、最適な商品をお選びください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 3d962fbd-2be5-567f-81be-8aaafd147571
+  title: 住宅ローン：重要事項のご説明
+  body: '本商品は、住宅の取得を目的とした融資です。以下の重要事項を必ずご確認ください。
+
+
+    1. 金利変動リスク：変動金利（1.375%）を選択された場合、将来的に金利が上昇し、返済額が増加する可能性があります。
+
+    2. 返済額の見直し：変動金利の場合、5年ごとに返済額の見直しを行います。その際、返済額の上昇幅は前回の125%を上限とするルールを適用します。
+
+    3. 費用負担：ご契約時に借入金額の2.2%の融資手数料が発生します。
+
+    4. 団体信用生命保険：借入者が死亡または高度障害状態になった際、保険金でローン残高が完済される仕組みがございます。
+
+
+    個別の税務や法務に関する助言は専門家へご案内いたします。適合性の原則に基づき、お客様の状況に最適な提案をさせていただきます。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 21409c76-b3b6-54f9-a614-d85305d83d8a
+  title: 住宅ローン：金利・料率一覧
+  body: '「住宅ローン」に適用される金利および料率は以下の通りです。
+
+
+    ■適用金利
+
+    ・変動金利（優遇後）：1.375%
+
+    ・固定金利（10年選択型）：3.7%
+
+
+    ■適用料率
+
+    ・融資手数料：2.2%（借入金額に対して的に適用）
+
+
+    ※金利は市場状況により変動する場合があります。最新の金利については、お申込み時の審査結果および契約書にて確定いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 651e2f78-f3e1-5648-aa99-66569b154659
+  title: 住宅ローン：実施中のキャンペーン
+  body: '【住宅ローン特別金利キャンペーン】
+
+
+    2026年3月31日までにお申込みをいただいたお客様を対象に、変動金利を優遇後の1.375%にてご提供いたします。
+
+
+    また、本キャンペーン期間中にご契約いただいた場合、オンラインでの繰上返済手数料は永続的に0円となります。この機会にぜひ、最大100,000,000円、最長35年の安心のプランをご検討ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5d7dfe2b-dd4e-5d90-a600-080eabbcaacf
+  title: 住宅ローン：不正利用からお客さまを守るために
+  body: '住宅ローンのご契約に関わる重要な手続きにおいて、なりすましによる不正申請などのリスクがございます。当行では、犯罪収益移転防止法に基づき、厳格な取引時確認を実施しております。
+
+
+    当行の職員が、電話やメールで暗証番号やセキュリティカードの全番号を伺うことは一切ございません。不審な連絡を受けた場合は、直ちにご案内を中断し、当行までお知らせください。
+
+
+    万が一、個人情報の流出や不正利用の疑いがある場合は、速やかに届出をお願いいたします。迅速な対応により、被害の拡大を最小限に抑えることが可能です。詳細な手続きについては「住宅ローン：商品概要」をご確認ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 78e596ff-1b5f-529a-8875-492030256e6e
+  title: 住宅ローン：規定・約款
+  body: '本ローン契約における主要な規定は以下の通りです。
+
+
+    1. 借入期間：最長借入期間は35年とします。
+
+    2. 手数料：借入時に、借入金額に対して2.2%の融資手数料が発生いたします。
+
+    3. 返済額の改定：変動金利を選択された場合、5年ごとの返済額見直しを実施します。その際、新たな返済額は前回までの返済額の125%を上限とします。
+
+    4. 契約の終了：完済または全額繰上返済により本契約は終了します。オンラインでの繰上返済手数料は0円です。
+
+
+    本約款の変更または重要事項の改定がある場合は、事前にお客様へ通知いたします。個別の税務・法務に関する助言は専門家へご案内しております。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1c4ab4ec-f624-5cf4-8de4-56f207655bd5
+  title: 住宅ローン：おすすめの方と主な使い方
+  body: '「住宅ローン」は、マイホームを計画されている方や、お住み替えをご検討の方に最適な融資商品です。地域に根ざした安心感と、デジタルサービスの利便性を兼ね備えています。
+
+
+    【本商品の特長】
+
+    ・最大100,000,000円までのお借入が可能です。
+
+    ・金利プランは、柔軟な変動金利（1.375%）と、10年間の安心が得られる固定金利期間選択型（3.7%）からお選びいただけます。
+
+    ・オンラインでの繰上返済手数料が0円となっており、効率的な資産形成を支援します。
+
+    ・最長35年の長期借入により、月々の負担を抑えた計画的な返済が可能です。
+
+
+    ライフプランに合わせて、最適な金利タイプをご提案いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b9cad86b-ee50-5952-8774-f517f2d880a2
+  title: 住宅ローン：固定金利期間選択型10年の金利（優遇後）について
+  body: 'Q：固定金利期間選択型10年を選択した場合、適用される金利はいくらになりますか？
+
+    A：優遇後の金利は3.7%となります。
+
+
+    Q：この金利はいつまで適用されますか？
+
+    A：借入日から10年間の固定期間が経過するまで適用されます。期間終了後は、再度金利設定が行われます。詳細は「住宅ローン：金利・料率一覧」をご参照ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4bfc7b63-80b4-50c6-923d-31b2e6d940db
+  title: 住宅ローン：解約・変更・プランの切替え
+  body: 'プランの切替えや解約（全額繰上返済）のお手続きは、以下の手順で進めてください。
+
+
+    1. ご希望の変更内容または解約の旨をお伝えください。
+
+    2. 本人確認書類および、プラン変更に伴い必要な物件確認書類をご提出いただきます。
+
+    3. 当行にて審査および変更内容の確認を行います。
+
+    4. 変更後の返済額や完了日についてのご案内を受け、内容を確認してください。
+
+
+    【ポイント】
+
+    オンラインバンキングを通じて繰上返済を行われる場合、手数料は0円です。手続き完了後、残高証明書などで正しく処理されたことをご確認いただけます。複雑な条件変更が伴う場合は、専門部署にて詳細を案内いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a7ee4b0d-cfa8-5d95-b764-ed13a3189daa
+  title: 住宅ローン：想定外の手数料・金額
+  body: '【症状】
+
+    お客様より「返済額が想定より高くなっている」「身に覚えのない手数料が引かれている」との問い合わせがある場合。
+
+
+    【確認事項と原因】
+
+    1. 融資手数料の確認：借入金額に対し2.2%の手数料が正しく適用されているか確認してください。
+
+    2. 返済額見直しの確認：変動金利において5年ごとの見直し時期を迎えていないか、また、返済額が前回比125%の上限まで上昇していないかを確認してください。
+
+
+    【対応】
+
+    上記で解決しない、あるいは計算に不整合がある場合は、速やかに専門部署へエスカレーションし、詳細な再計算と調査を実施してください。結果は誠実かつ透明性を持ってお客様へ回答いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 778ee551-4db0-5073-9651-4979d248c0d5
+  title: 住宅ローン：必要書類
+  body: 'お申込みにあたり、以下の書類をご用意ください。
+
+
+    ・本人確認書類：運転免許証、マイナンバーカードなどの公的証明書（取引時確認のため必須）
+
+    ・収入証明書類：源泉徴収票、確定申告書など、返済能力を確認できる書類
+
+    ・物件関連書類：不動産売買契約書、登記事項証明書、重要事項説明書
+
+
+    すべての書類が揃い次第、審査プロセスへと移行いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 045e7720-374a-58cc-af5c-4217f5ff4996
+  title: 住宅ローン：他社の一般的な商品との比較
+  body: '他社の一般的な住宅ローンと比較し、当行の「住宅ローン」は、変動金利における「5年ごとの返済額見直し」および「上昇幅上限125%」というルールにより、急激な返済額増加を抑える仕組みを導入しています。
+
+
+    また、オンラインでの繰上返済手数料を0円に設定しており、利便性とコストパフォーマンスを両立しています。返済計画の安定性を重視される方には、当行のプランが適しています。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0a9c88e5-8e42-5c21-aefd-20c4aaf5ee7c
+  title: 住宅ローン：リスクについてのご説明
+  body: '本ローンをご利用いただくにあたり、以下のリスクについて十分にご確認ください。
+
+
+    1. 金利変動リスク：変動金利（1.375%）を選択した場合、市場金利の上昇に伴い、利息負担が増加する可能性があります。
+
+    2. 返済額上昇リスク：返済額の見直しは5年ごとに行われ、金利上昇時には前回の返済額の最大125%まで月々の支払額が増加することがあります。
+
+    3. 長期借入のリスク：最長35年の借入となるため、ライフステージの変化により返済計画の見直しが必要になる場合があります。
+
+
+    これらのリスクを考慮し、適合性の原則に基づき、お客様の状況に最適なプランをご提案いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 791cce1c-845a-539b-b1f5-969bdf4a652c
+  title: 住宅ローン：金利・料率の決まり方と適用
+  body: '本商品の金利および料率は以下の通り適用されます。
+
+
+    ・変動金利：1.375%（市場金利に連動し、5年ごとに返済額を見直します）
+
+    ・固定金利期間選択型（10年）：3.7%（借入から10年間は金利が固定されます）
+
+    ・融資手数料：2.2%（借入金額に対して一回限りの手数料として適用されます）
+
+
+    金利の適用は、審査結果およびご選択のプランに基づいて決定いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ec13075b-145e-5e5b-ad89-1dd81e08cf8b
+  title: 住宅ローン：ご紹介・継続利用の特典
+  body: 地域に根ざした朝凪銀行では、大切な方にご紹介いただいた方と、日頃より当行をご利用いただいているお客様へ向けた特別な優待をご用意しております。信頼ある地域コミュニティの一員として、皆様の理想の住まいづくりを誠心誠意サポートいたします。詳細な適用条件については、窓口にてご案内させていただきます。
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 60455147-ddb3-5046-88b2-0daab7b8a210
+  title: 住宅ローン：安全にご利用いただくためのポイント
+  body: '住宅ローンをご利用中のお客様へ、安全にお取引いただくための重要なポイントをご案内いたします。
+
+
+    当行がメールや電話で、暗証番号やセキュリティカードの全桁を伺うことは決してございません。不審な連絡があった場合は、すぐに当行へご連絡ください。また、口座情報の変更や重要な手続きの前には、犯罪収益移転防止法に基づき厳格な「取引時確認」を実施いたします。本人確認書類のご提示をお願いすることがございますので、ご協力をお願い申し上げます。
+
+
+    万が一、身に覚えのない通知や不正利用の疑いがある場合は、被害を最小限に抑えるため、速やかに当行までお届けください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 174c12f3-a540-5eb1-a86e-4f884422c6ab
+  title: 住宅ローン：規定・約款の変更
+  body: '当行の住宅ローン規定および約款は、法令の改正や経済情勢の変化に伴い変更される場合がございます。変更の際は、事前に書面または当行の告知によりお知らせいたします。
+
+
+    特に変動金利プランをご利用の場合、返済額の見直しは5年ごとに行われます。その際、金利上昇による返済額の増加には上限が設けられており、前回の改定後のお支払額の125%が上限となります。この「5年ルール」と「125%ルール」は、お客様の急激な負担増を抑え、生活の安定を図るための重要な規定です。他社プランと比較される際は、これらの見直し周期と上昇幅の制限についてご確認いただくことをお勧めいたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ba0ac261-a038-5b63-81cb-a922d8807d05
+  title: 住宅ローン：ご利用開始までの手順
+  body: '【担当者用：住宅ローン提供フロー】
+
+    お客様が住宅ローンをご利用開始されるまでの標準的な手順は以下の通りです。
+
+
+    1. ご相談・事前審査：お客様の希望額（最大借入金額：100,000,000円）と借入期間（最長35年）を確認し、事前審査を行います。
+
+    2. 本審査：物件資料および収入証明書を提出いただき、厳正な返済能力審査を実施します。
+
+    3. 金利プランの決定：変動金利（1.375%）または固定金利期間選択型10年（3.7%）のいずれかを選択いただきます。
+
+    4. 契約手続き：融資手数料（借入金額の2.2%）および契約内容についてご説明し、ご署名・ご捺印をいただきます。
+
+    5. 融資実行：物件の引き渡しに合わせて、ご指定の口座へ融資を実行します。
+
+
+    ※複雑な審査案件については、専門部署へエスカレーションしてください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b4e9c8cb-d74e-5127-b1a4-f26082e2be6d
+  title: 住宅ローン：融資手数料（借入金額に対する割合）について
+  body: 'Q：住宅ローンの契約時に支払う融資手数料はいくらになりますか？
+
+
+    A：当行の住宅ローンでは、融資手数料として借入金額の2.2%を申し受けます。例えば、1,000万円をご借入の場合、手数料は220,000円となります。
+
+
+    詳細な費用内訳については「住宅ローン：手数料一覧」をご確認ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f2847f6c-0f4a-5646-a141-acf37f49aab1
+  title: 住宅ローン：登録内容の変更
+  body: '住宅ローンのご契約者様で、住所、電話番号、またはご連絡先などの登録内容を変更される際の手順をご案内します。
+
+
+    1. 変更内容の提示：変更したい項目（例：転居による住所変更）を当行担当者へお伝えください。
+
+    2. 本人確認の実施：犯罪収益移転防止法に基づき、最新の本人確認書類（運転免許証など）をご提示いただき、「取引時確認」を行います。
+
+    3. 内容の照合と更新：提示された書類と申請内容に相違がないかを確認し、当行にて登録情報を更新します。
+
+    4. 完了の通知：登録内容の変更が完了した旨を、書面またはオンラインバンキングを通じてお客様に通知いたします。
+
+
+    これにより、今後の重要なお知らせが正しく届くようになります。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 465f9311-b710-59a5-9a22-c359d8b7bc3b
+  title: 住宅ローン：ログインできない・アクセスできない
+  body: '【症状】オンラインバンキングで住宅ローンの残高照会や返済スケジュールの確認画面にアクセスできない。
+
+
+    【考えられる原因と対策】
+
+    ・パスワードの入力間違い：大文字・小文字の区別に注意して再入力してください。
+
+    ・アカウントのロック：短時間に複数回認証に失敗すると、セキュリティのためロックされます。
+
+    ・認証情報の期限切れ：セキュリティカード等の有効期限が切れている可能性があります。
+
+
+    【解決方法】
+
+    1. まずはIDとパスワードを再度正確に入力してください。
+
+    2. それでも解消しない場合は、当行にて厳格な本人確認（取引時確認）を行った後、パスワードの再発行またはロック解除を行います。
+
+
+    【エスカレーション】
+
+    認証不備が解消せず、システムエラーが表示される場合は、当行の専門部署にてアカウント状態を調査し、復旧完了後に改めてご連絡いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: aee4164b-7973-5119-8388-ff9bff1dc941
+  title: 住宅ローン：ご利用条件による違い
+  body: 'お客様が選択される金利タイプにより、適用される利率が異なります。
+
+
+    ・変動金利プランを選択される場合：適用金利 1.375%
+
+    ・固定金利期間選択型（10年）を選択される場合：適用金利 3.7%
+
+
+    いずれのプランにおいても、最長借入期間は35年、最大借入金額は100,000,000円までとなっております。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f5b3230b-a535-5d03-9dc7-e2fe8a8ade7c
+  title: 住宅ローン：プランの選び方
+  body: 'お客様のライフプランに合わせて、2つのプランからお選びいただけます。
+
+
+    ・変動金利プラン（1.375%）：金利を低く抑えたい方向けです。ただし、市場金利に応じて返済額が変動するリスクがあります。
+
+    ・固定金利期間選択型10年（3.7%）：将来の金利上昇に備え、10年間返済額を確定させたい方向けです。計画的に資産形成を行いたい方に適しています。
+
+
+    どちらが最適か迷われる場合は、専門の担当者がお客様の状況に合わせてご提案いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 83dc5364-a026-51a1-b89f-24c3afab4da4
+  title: 住宅ローン：個人情報の取扱い
+  body: '朝凪銀行は、個人情報保護法および犯罪収益移転防止法を遵守し、お客様の個人情報を厳重に管理いたします。
+
+
+    住宅ローンのお申込みにあたり、ご提供いただいた個人情報は、以下の目的で利用いたします。
+
+    ・審査および融資額（最大100,000,000円まで）の決定のための信用情報照会
+
+    ・ローン契約の締結および返済管理（最長35年）
+
+    ・重要なお知らせの送付および本人確認（取引時確認）の実施
+
+
+    当行は、お客様の同意なく個人情報を第三者に提供することはございません。ただし、法令に基づき開示を求められた場合はこの限りではありません。個人情報の取り扱いに関する詳細や開示請求については、当行の個人情報保護方針をご確認ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c3350573-0929-51dd-87d4-a2cf3f0d5176
+  title: 住宅ローン：この商品をかたる詐欺にご注意ください
+  body: '当行の住宅ローンをかたり、「特別な低金利プランへの切り替え」や「審査なしでの限度額増額」をうたって個人情報を聞き出そうとする詐欺が発生しております。十分にご注意ください。
+
+
+    朝凪銀行が、メールやSMSでセキュリティカードの暗証番号や、オンラインバンキングのログインパスワードを伺うことは決してございません。また、不自然な手数料の事前支払いを求めることもございません。
+
+
+    もし不審な連絡を受け、個人情報を伝えてしまった場合や、金銭的な要求を受けた場合は、直ちにご相談ください。迅速な対応により被害を最小限に抑えます。日頃から不審な連絡に警戒し、信頼できる窓口でご確認いただくようお願い申し上げます。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: b1e17b3d-936d-5ffd-9adf-332d51628a25
+  title: 住宅ローン：限度額・制限と注意事項
+  body: '【住宅ローン：限度額および制限事項】
+
+
+    ■借入限度額
+
+    最大100,000,000円まで。ただし、お客様の返済能力審査に基づき決定いたします。
+
+
+    ■借入期間
+
+    最長35年までとなります。
+
+
+    ■融資手数料
+
+    借入金額に対し2.2%の融資手数料を申し受けます。
+
+
+    ■返済額の見直し（変動金利選択時）
+
+    金利変動に伴う返済額の見直しは5年ごとに行われます。また、見直し後の返済額が前回の125%を超える場合は、原則として前回の返済額に据え置く上限設定（125%ルール）を導入しております。
+
+
+    【注意事項】
+
+    審査の結果、限度額に至らない場合や、ご希望の期間での借入ができない場合がございます。詳細な条件については、個別審査後のご案内となります。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1c0e3f61-740a-52ff-903e-08a3b99d2f80
+  title: 住宅ローン：借入限度額について
+  body: 'Q：住宅ローンで最大いくらまで借りることができますか？
+
+
+    A：当行の住宅ローンでは、最大100,000,000円までお借入いただけます。ただし、実際のご融資額は、お客様のご年収や現在の債務状況などの返済能力審査に基づき、個別に決定させていただきます。
+
+
+    詳細は「住宅ローン：商品概要」をご確認ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 911ccb76-d55c-51df-9b8a-3b357d2de7cd
+  title: 住宅ローン：状況・履歴の確認
+  body: '現在の借入残高や、これまでの返済履歴を確認する手順をご案内いたします。
+
+
+    1. 本人確認書類（運転免許証など）をご提示いただき、口座情報の照会を依頼してください。
+
+    2. 「現在のローン残高」および「返済スケジュール（履歴）」の提示を希望される旨をお伝えください。
+
+    3. 当行にて最新のデータを確認し、現在の借入残高、適用金利、および次回の返済予定日を回答いたします。
+
+    4. 詳細な明細が必要な場合は、返済履歴書の発行を依頼してください。後日、書面にてお届けいたします。
+
+
+    これにより、現在の資産状況と今後の返済計画を正確に把握いただけます。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: af70d77b-9812-5052-89a1-b9c1fa616550
+  title: 住宅ローン：お取引が拒否された・制限された
+  body: '【症状】
+
+    ローンのお申込み手続き中や、繰上返済などの手続きにおいて「取引が制限されている」旨のメッセージが表示される、または手続きを拒否される。
+
+
+    【考えられる原因】
+
+    ・本人確認手続き（取引時確認）が未完了である。
+
+    ・ご登録情報の変更（住所・氏名など）が反映されていない。
+
+    ・セキュリティ上の理由により、一時的に口座に制限がかけられている。
+
+
+    【対処法】
+
+    1. 最新の本人確認書類をご提示いただき、登録情報に相違がないか確認してください。
+
+    2. 必要な本人確認手続きがすべて完了しているか、担当者が確認いたします。
+
+
+    【解決しない場合】
+
+    上記で解決しない場合は、専門部署にて制限の原因を精査いたします。調査完了後、結果をご連絡いたしますので、今しばらくお待ちください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1a4025d4-2c0b-549f-8b17-cc19af721534
+  title: 住宅ローン：切替えや上位プランを検討するとき
+  body: '【金利プランの比較】
+
+
+    ■変動金利プラン：1.375%
+
+    金利変動リスクはありますが、初期の返済額を低く抑えたい方に適しています。
+
+
+    ■固定金利期間選択型（10年）：3.7%
+
+    10年間の金利を固定し、返済額を確定させたい方に適しています。将来の金利上昇に備えたい方向けのプランです。
+
+
+    【切替えの検討】
+
+    現在の金利状況と将来のライフプランを照らし合わせ、「支払額の変動を避けたいか」または「現在の低金利を最大限に活用したいか」で選択してください。切替えには再審査および手数料が発生する場合があるため、個別のシミュレーションを推奨いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 84385fb4-4e32-551a-8e74-3f70fced7933
+  title: 住宅ローン：ほかの選択肢との比較と向かない場合
+  body: '【ほかの選択肢との比較】
+
+
+    ■住宅ローン
+
+    ・金利：変動1.375%、固定(10年)3.7%
+
+    ・特徴：住宅という担保があるため低金利で多額の借入（最大100,000,000円）が可能。最長35年の長期返済で月々の負担を軽減できます。
+
+
+    ■朝凪カードローン
+
+    ・特徴：担保不要で柔軟に借入可能。住宅購入ではなく、一時的な資金不足や少額の資金調達に適しています。
+
+
+    【住宅ローンが向かない場合】
+
+    ・購入物件を担保に設定できない場合。
+
+    ・極めて短期間（数年以内）で完済することを前提としており、長期的な返済計画を必要としない場合。
+
+    ・融資手数料（借入金額の2.2%）の初期費用を避けたい場合。
+
+
+    お客様の資金使途と返済期間のご希望に合わせて、最適な商品をご提案いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 374a4c29-1c5b-5c7f-bef7-0afa47351a3c
+  title: 住宅ローン：最長借入期間（年）について
+  body: 'Q：住宅ローンを借りる場合、最長で何年まで返済期間を設定できますか？
+
+
+    A：当行の住宅ローンでは、最長で35年まで借入期間を設定することが可能です。お客様のご年齢や完済予定年齢、および審査結果により、上限期間が変動する場合がございます。
+
+
+    詳細は「住宅ローン：商品概要」にてご確認ください。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1912a9d4-1db4-59c5-bcf8-97f0b3337edf
+  title: 住宅ローン：よくあるお手続きの流れ
+  body: '住宅ローンのお申込みからご融資までの一般的な流れをご案内いたします。
+
+
+    1. ご相談・事前審査：希望借入額や期間をお伝えいただき、概算の借入可能額を確認します。
+
+    2. 正式申込み：必要書類（所得証明書、物件資料など）をご提示いただき、正式に審査を依頼してください。
+
+    3. 本審査・承認：当行にて厳正な返済能力審査を行い、ご融資額（最大100,000,000円まで）と適用金利を決定します。
+
+    4. ご契約・ご融資：金銭消費貸借契約を締結し、融資手数料（2.2%）を合わせて精算後、指定口座へ融資を実行いたします。
+
+
+    各ステップで必要な書類やお手続きについて、担当者が丁寧にサポートいたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8c95e233-0bbc-51e6-a594-2fc681665c50
+  title: 住宅ローン：明細や記録と合わない
+  body: '【症状】
+
+    お客様が計算した返済残高や利息額が、当行の発行する明細書の金額と一致しない。
+
+
+    【確認事項】
+
+    1. 繰上返済の有無：オンラインでの繰上返済（手数料0円）を行った場合、その反映タイミングを確認してください。
+
+    2. 利息計算タイミング：利息は日割り計算等で行われるため、計算期間にズレがないか確認します。
+
+    3. 金利変更の適用日：変動金利の場合、5年ごとの見直しや金利変更が適用された日付を照合してください。
+
+
+    【対処法】
+
+    返済履歴を一件ずつ照合し、不一致が生じている期間を特定します。
+
+
+    【エスカレーション】
+
+    照合しても原因が不明な場合は、専門部署にて再計算および監査を実施します。調査結果は、後日書面またはご連絡にて回答いたします。'
+  domain: lending_mortgage
+  product_category: jutaku_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0755d2c5-c8c2-5a8f-a6b4-e2ad48303b1a
+  title: 朝凪カードローン：商品概要
+  body: '朝凪カードローンは、地域住民の皆様の急な資金ニーズや、将来への備えとして柔軟にご利用いただける無担保ローン商品です。当行では、お客様お一人おひとりの返済能力を厳正に審査し、個別に最適な利用限度額を決定いたします。利用限度額の最大は8,000,000円となっており、幅広い用途にご活用いただけます。
+
+
+    貸付金利は年2%から14.5%の範囲内で、審査結果に応じて適用されます。また、毎月の最低返済額を2,000円からに設定することで、無理のない計画的なご返済をサポートいたします。総量規制の対象外として、より柔軟な融資体制を整えつつ、公正かつ透明性の高い取引を徹底しております。日々の生活を支える安心のパートナーとして、ぜひご活用ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 800bf986-967d-56ef-bce7-32e442f4118f
+  title: 朝凪カードローン：貸付金利（下限）について
+  body: 'Q：貸付金利の最低水準はどのくらいに設定されていますか？
+
+
+    A：朝凪カードローンの貸付金利の下限は年2%となっております。実際にご適用される金利は、お客様のご審査結果やご契約内容に基づき決定いたします。詳細な金利体系については、「朝凪カードローン：金利・料率一覧」をご参照ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5ff9c52c-fe21-5c61-a075-cc550ee9edbe
+  title: 朝凪カードローン：お申込みとご利用開始
+  body: '朝凪カードローンのお申込みからご利用開始までの手順をご案内いたします。
+
+
+    1. お申込み内容の提示：まず、借入希望額とお申込みの目的をお伝えください。併せて、運転免許証などの本人確認書類をご提示いただきます。
+
+    2. 審査の実施：当行にて厳正な返済能力審査を行います。審査に基づき、適用金利（年2%〜14.5%）と利用限度額（最大8,000,000円）を決定いたします。結果のご案内までしばらくお待ちください。
+
+    3. ご契約内容の確認と同意：審査承認後、決定した金利や返済条件などの契約内容をご説明いたします。内容にご同意いただき、契約手続きを完了させてください。
+
+    4. ご利用開始：お手続き完了後、設定された利用限度額の範囲内でいつでもお借入れが可能となります。毎月の最低返済額は2,000円からとなります。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 577e8116-b94f-5f06-ac46-18dda24f5aa1
+  title: 朝凪カードローン：手数料一覧
+  body: '朝凪カードローンでは、不透明感のない料金体系を維持しております。以下に主要な費用をご案内いたします。
+
+
+    ・貸付手数料：無料
+
+    ・保証料：金利に含まれています
+
+    ・毎月の最低返済額：2,000円
+
+
+    サービスの維持コストを適切に反映させつつ、お客様のご利便性を最大化しております。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: e312b9d4-e503-5e82-b07d-c98b02a0d7aa
+  title: 朝凪カードローン：お手続きが完了しない・保留中のまま
+  body: '【症状】お申込み手続きを完了させたが、ステータスが「保留中」のまま進まない。
+
+
+    【考えられる原因】
+
+    ・ご提示いただいた本人確認書類に不備（有効期限切れや記載内容の不鮮明など）がある。
+
+    ・審査に時間を要する特別な確認事項が発生している。
+
+
+    【対処法】
+
+    1. 書類の再確認：提出された書類が最新であり、不備がないか改めてご確認ください。必要に応じて不足書類の追加提出をお願いいたします。
+
+    2. 状況照会：当行にて現在の審査進捗を照会いたしますので、お申し付けください。
+
+
+    【解決しない場合】
+
+    審査専門部署へエスカレーションし、詳細な調査を行います。通常、数営業日以内に審査結果または不足書類のご案内を差し上げます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 6d4c0443-227c-5030-b041-0c5e1d89868a
+  title: 朝凪カードローン：お申込みいただける方
+  body: '【条件】 → 【結果】
+
+    ・当行の審査基準を満たし、安定した収入がある方 → ご利用可能（最大利用限度額 8,000,000円）
+
+    ・返済能力が十分にあると判断された方 → 審査に基づき個別金利（2%〜14.5%）を決定
+
+    ・法令に基づく本人確認（取引時確認）が完了した方 → ご契約手続きへの進行が可能'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 2ac19809-d749-5641-b1f9-26538e95df69
+  title: 朝凪カードローン：当社の似た商品との比較
+  body: '朝凪カードローンは、最大8,000,000円まで柔軟に借入ができる無担保ローンです。一方、「住宅ローン」は住宅購入に特化した融資であり、金利はより低く設定されていますが、不動産担保が必要です。
+
+
+    ・急な資金ニーズや自由な使途を重視される方：朝凪カードローン（金利 2%〜14.5%）
+
+    ・低金利での長期返済と住宅購入を目的とされる方：住宅ローン
+
+
+    用途に合わせて最適な商品をお選びください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f281ad36-1777-5248-8423-33daa352ae7b
+  title: 朝凪カードローン：重要事項のご説明
+  body: 本商品は、厳正な返済能力審査に基づき利用限度額を決定いたします。最大利用限度額は8,000,000円です。貸付金利は年2%から14.5%の範囲内で適用され、借入残高に対して日割り計算で利息が発生します。毎月の最低返済額は2,000円であり、この金額を下回る返済となった場合は、契約違反として遅延損害金が発生する可能性があります。また、金利は経済情勢により変動する場合があり、その際は事前にお知らせいたします。借入額の増大は将来の返済負担を増加させるため、ご自身の返済能力に見合った計画的なご利用をお願いいたします。
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 7f223819-6a41-5ca5-9b85-23930441573f
+  title: 朝凪カードローン：金利・料率一覧
+  body: '朝凪カードローンの適用金利は以下の通りです。
+
+
+    ・貸付金利（下限）：年2%
+
+    ・貸付金利（上限）：年14.5%
+
+
+    適用される金利は、お客様の信用状況、年収、お取引実績などの審査結果に基づき、個別に決定されます。金利は変動金利であり、市場金利の変動に応じて改定される場合がございます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1222b76f-4637-5e00-81e3-af8c68e83332
+  title: 朝凪カードローン：実施中のキャンペーン
+  body: '【2026年・お借入れ金利優待キャンペーン】
+
+    期間：2026年1月1日から2026年6月30日まで
+
+    内容：期間中に新規でお申込みいただき、審査を通過されたお客様を対象に、初回借入から3か月間、適用金利を最大で1.0%引き下げさせていただきます（適用金利の下限は年2%となります）。
+
+    ※本キャンペーンの適用条件については、窓口にて詳細をご案内いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 5da59091-59eb-5a5b-938f-9c566964be9e
+  title: 朝凪カードローン：不正利用からお客さまを守るために
+  body: '朝凪カードローンをご利用のお客さまに、不正利用を防ぐための重要なご注意を申し上げます。当行が、電話やメール、SMSなどで、セキュリティカードの暗証番号やログインパスワードを直接お伺いすることはございません。このような要求があった場合は、詐欺の可能性が高いため、絶対に応じないでください。
+
+
+    万が一、カードの紛失や盗難、または身に覚えのない利用があった場合は、直ちにご連絡ください。当行では預金者保護法に基づき、偽造・盗難カードによる被害を原則として補償いたします。迅速な届出が被害を最小限に抑える唯一の方法です。また、不審な取引を検知した際は、当行にて一時的に利用制限を設ける場合がございますので、あらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0c9ca147-d58d-540d-bcd1-d162a0ed97a7
+  title: 朝凪カードローン：規定・約款
+  body: '本規定は、朝凪カードローンの利用に関する合意事項を定めるものです。お客さまは、厳正な返済能力審査に基づき決定された利用限度額（最大8,000,000円）の範囲内で借入を行うことができます。
+
+
+    【返済義務】借入金および適用金利（年2%から14.5%）に基づき算出された利息を、指定の期日までに支払う義務を負います。毎月の最低返済額は2,000円となります。
+
+    【条件の変更】当行は、法令の変更や社会情勢の変化、またはお客さまの信用状況の変化に基づき、金利や限度額を変更できるものとします。変更の際は、事前にお知らせいたします。
+
+    【契約の終了】完済による解約のほか、規定の違反があった場合は当行より契約を解除し、残高の一括返済を求めることがあります。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 4e4eb51d-4c90-5fdc-a669-de54742e832f
+  title: 朝凪カードローン：おすすめの方と主な使い方
+  body: '朝凪カードローンは、急な出費や一時的な資金不足を解消したい方に最適な、柔軟な融資商品です。地域に根ざした当行ならではの安心感と、便利な決済機能を兼ね備えています。
+
+
+    【おすすめの方】
+
+    ・将来的にまとまった金額を利用できる安心感を持ちたい方
+
+    ・毎月の返済負担を最小限に抑えつつ、計画的に返済したい方
+
+
+    【主な特徴と条件】
+
+    ・利用限度額：最大8,000,000円まで、審査により決定します。
+
+    ・貸付金利：年2%から14.5%の範囲内で、個別の審査に基づき適用されます。
+
+    ・返済負担：毎月の最低返済額を2,000円からに設定しており、無理のない返済計画が可能です。
+
+
+    一度のお申込みで、必要な時にいつでもご利用いただける便利な枠を確保いただけます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 73479f25-5b64-5dbc-a237-ac5fc5266179
+  title: 朝凪カードローン：貸付金利（上限）について
+  body: 'Q：貸付金利の上限はどのくらいですか？
+
+
+    A：本商品の貸付金利は、最大で年14.5%となっております。実際にご適用される金利は、審査における返済能力に基づき、年2%から14.5%の間で決定されます。
+
+
+    Q：上限金利が適用されるのはどのような場合ですか？
+
+
+    A：審査結果に基づき、リスク評価が上限に達する場合に適用されます。詳細は個別にご案内いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c70cd12c-deec-51d3-9783-f33b73bdbf56
+  title: 朝凪カードローン：解約・変更・プランの切替え
+  body: '朝凪カードローンの解約、または契約内容の変更手続きは以下の手順で行ってください。
+
+
+    1. 本人確認書類をご提示いただき、犯罪収益移転防止法に基づいた取引時確認を実施します。
+
+    2. 解約または変更（限度額の変更等）の内容を当行へお申し出ください。
+
+    3. 解約の場合、借入残高がある場合は、利息を含む全額の返済手続きを行います。完済が確認できるまで解約は完了いたしません。
+
+    4. 当行にて手続きを処理し、解約完了または変更完了の通知をいたします。
+
+
+    なお、限度額の変更（増枠）を希望される場合は、改めて返済能力の審査を実施させていただきます。審査の結果によっては、ご希望の金額にご対応できない場合がございますので、あらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 931e7f8f-30b7-5e8c-9bc5-f94a789830cf
+  title: 朝凪カードローン：想定外の手数料・金額
+  body: 'お客さまより「返済額が想定より高い」または「不明な金額が引き落とされている」というお問い合わせがあった場合の対応手順です。
+
+
+    【考えられる原因】
+
+    1. 利息の加算：適用金利（最大14.5%）に基づき、借入残高に応じた利息が日割りで計算されています。借入期間が長くなると、利息分が増加します。
+
+    2. 最低返済額の適用：残高が少なくても、規定の最低返済額である2,000円が適用されている場合があります。
+
+    3. 遅延損害金：返済期日を過ぎた場合、所定の遅延損害金が加算されます。
+
+
+    【確認と解決策】
+
+    ・まず、直近の利用明細と適用金利を確認してください。
+
+    ・計算根拠についてご納得いただけない場合は、詳細な利息計算書を提示します。
+
+    ・解決しない場合は、専門部署へエスカレーションし、精査した結果をお客さまへ回答します。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 62baf09b-03bc-5812-9e21-0914aa579e31
+  title: 朝凪カードローン：必要書類
+  body: 'お申込み時にご用意いただく書類は以下の通りです。
+
+
+    ・本人確認書類：運転免許証、マイナンバーカードなどの公的証明書（取引時確認に使用します）
+
+    ・収入証明書類：源泉徴収票や給与明細書など（利用限度額を最大8,000,000円までご希望の場合に必須となります）
+
+
+    ※書類に不備がある場合、審査にお時間をいただくか、お申込みをお断りすることがございます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 9b29651b-7936-552c-b90d-47cb67f5b97a
+  title: 朝凪カードローン：他社の一般的な商品との比較
+  body: '他社の一般的なカードローンと比較し、朝凪カードローンは地域密着型の信頼性と、透明性の高い審査体制に強みがあります。
+
+
+    ・金利：年2%から14.5%と幅があり、個別の状況に応じた適切な設定を行います。
+
+    ・限度額：最大8,000,000円まで対応しており、幅広いニーズをカバーします。
+
+    ・安心感：対面での相談が可能な店舗ネットワークがあり、不透明な手数料を排除しています。
+
+
+    極めて高い限度額を優先される場合は他社商品が選択肢となりますが、誠実な審査と地域に根ざしたサポートを重視される方には、当行の商品が最適です。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f44e1d68-3764-55be-9871-1f12cb1d2355
+  title: 朝凪カードローン：リスクについてのご説明
+  body: '朝凪カードローンをご利用にあたり、以下のリスクについて十分にご理解ください。
+
+
+    【金利負担のリスク】
+
+    本商品は年2%から14.5%の金利が適用されます。借入金額や利用期間に応じて利息が発生するため、返済が長期化すると、当初の想定よりも利息負担が増加します。
+
+
+    【過剰借入のリスク】
+
+    最大8,000,000円という高い利用限度額が設定される場合がありますが、これはあくまで返済能力に基づいた枠であり、限度額まで借りることが適切であるとは限りません。ご自身の収入に見合った計画的な利用をお願いいたします。
+
+
+    【返済遅延のリスク】
+
+    毎月の最低返済額である2,000円以上の支払いが滞った場合、遅延損害金が発生し、信用情報に影響を及ぼす可能性があります。返済が困難になった場合は、速やかに当行へご相談ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 8b422f9c-7b1f-5c34-b5bd-f691abc06136
+  title: 朝凪カードローン：金利・料率の決まり方と適用
+  body: '本商品の貸付金利は、年2%から14.5%の範囲内で決定されます。
+
+
+    【決定方法】
+
+    厳正な返済能力審査に基づき、お客様個別の信用状況、年収、勤務先、他社借入状況などを総合的に判断して決定します。
+
+
+    【適用】
+
+    決定した金利は、借入残高に対して日割りで計算され、毎月の返済額に加算されます。金利は固定ではなく、当行の規定に基づき見直される場合があります。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 10ed1811-b657-5e54-857f-08971e5b3976
+  title: 朝凪カードローン：ご紹介・継続利用の特典
+  body: '【ご紹介キャンペーン】
+
+    2025年10月1日から2025年12月31日まで、ご友人やご家族に「朝凪カードローン」をご紹介いただき、ご成約に至った場合、ご紹介者様とご成約者様それぞれに1,000円の特典を差し上げます。地域に根ざした安心のサポートを、ぜひ大切な方にもご紹介ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 914748ec-81ae-551b-b8e4-8e70e32f83ec
+  title: 朝凪カードローン：安全にご利用いただくためのポイント
+  body: '「朝凪カードローン」を安全にご利用いただくため、以下の点にご注意ください。
+
+
+    ■不審な連絡への警戒
+
+    当行からメールやSMSで、暗証番号やセキュリティカードの全番号を伺うことは絶対にございません。心当たりのないURLリンクは開かず、速やかに削除してください。
+
+
+    ■カードの管理
+
+    カードの紛失や盗難に心当たりがある場合は、直ちに当行までご連絡ください。迅速な届出により、被害を最小限に抑えることができます。
+
+
+    ■万が一のときは
+
+    身に覚えのない利用明細を確認した場合は、すぐに当行へお知らせください。ご報告から一定期間に基づき、誠実に調査と対応を行います。詳細は「朝凪カードローン：商品概要」をご確認ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: bf4c7207-abcb-5ab9-8b88-680c93bbee1b
+  title: 朝凪カードローン：規定・約款の変更
+  body: '本規定は、「朝凪カードローン」の利用条件を定めるものです。お客様と当行の合意に基づき、以下の条件で契約を締結します。
+
+
+    ■金利および限度額
+
+    貸付金利は年2%から14.5%の範囲内で、審査に基づき決定します。利用限度額は最大8,000,000円までとし、個別の返済能力審査により決定されます。
+
+
+    ■返済義務
+
+    お客様は、毎月2,000円以上の最低返済額を期日までに支払う義務を負います。
+
+
+    ■約款の変更
+
+    法令の改正や経済情勢の変化に伴い、当行は規定・約款を変更することがあります。変更内容は、適用日の1ヶ月前までにお知らせします。変更後の内容に同意いただけない場合は、本契約を解約いただけます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: c2b3b783-dd24-556e-b54b-974d8f0e64e2
+  title: 朝凪カードローン：ご利用開始までの手順
+  body: '「朝凪カードローン」のご利用開始までの標準的なフローは以下の通りです。サポート担当者は、お客様の状況に合わせてご案内ください。
+
+
+    1. お申込み：お客様より必要事項の申告および本人確認書類のご提示をいただきます。
+
+    2. 審査：厳正な返済能力審査を行い、適用金利（年2%から14.5%）および利用限度額（最大8,000,000円）を決定します。
+
+    3. ご契約：決定した条件をご提示し、ご同意いただいた後、契約手続きを完了します。
+
+    4. カード発行：ご登録住所へカードを郵送します。
+
+
+    本商品は、毎月の最低返済額が2,000円からとなっており、お客様の負担を軽減しつつ柔軟な資金調達を支援します。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 97a57de5-12bc-5c8f-a520-fb0e301a535a
+  title: 朝凪カードローン：利用限度額の上限について
+  body: 'Q：利用限度額は最大でいくらまで設定可能ですか？
+
+
+    A：「朝凪カードローン」の利用限度額は、最大8,000,000円となります。ただし、実際の設定額は、お客様の年収や勤続年数、他社借入状況などの審査に基づき、個別に決定させていただきます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 33d1eb9e-ba76-5914-a78c-acc6ea183f38
+  title: 朝凪カードローン：登録内容の変更
+  body: 'ご住所やご連絡先などの登録内容を変更する際の手順をご案内します。
+
+
+    1. 変更内容の提示：変更したい項目（住所、電話番号など）と新しい内容を当行にお伝えください。
+
+    2. 本人確認の実施：犯罪収益移転防止法に基づき、最新の本人確認書類をご提示いただきます。これにより、安全な取引時確認を行います。
+
+    3. 内容の照合：当行にてご提示いただいた書類と申請内容に相違がないかを確認します。
+
+    4. 変更完了の通知：手続きが完了した後、変更内容を確定した旨を回答いたします。
+
+
+    お手続き完了後、次回の利用明細から新しい登録内容が適用されます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 246ee1d9-5bbd-5dae-b304-e43f24e87bb0
+  title: 朝凪カードローン：ログインできない・アクセスできない
+  body: 'オンラインサービスでログインできない場合の確認事項です。
+
+
+    ■症状：ログインボタンを押してもエラー画面になる、または「認証に失敗しました」と表示される。
+
+
+    ■確認順序と対処法
+
+    1. 入力内容の再確認：IDやパスワードに不要なスペースが入っていないか、大文字・小文字が正しく入力されているかを確認してください。
+
+    2. 通信環境の確認：ネットワーク接続が不安定な場合、アクセスが遮断されることがあります。一度接続を切り、再度お試しください。
+
+    3. パスワードの再設定：心当たりがない場合は、パスワードの再設定手続きを案内いたします。
+
+
+    ■解決しない場合
+
+    上記で解決しない場合は、当行にてアカウントの状態を調査します。状況に応じて専門部署へエスカレーションし、復旧までのお時間を改めてご案内いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 66627f7e-4e4f-5e41-b76b-f8106f4c9bc7
+  title: 朝凪カードローン：ご利用条件による違い
+  body: '審査結果に基づく適用条件の例です。
+
+
+    ・高い返済能力が認められた場合 → 低い貸付金利（下限2%に近い設定）および高い限度額（最大8,000,000円まで）を適用。
+
+    ・標準的な審査結果の場合 → 中間的な金利設定および個別の限度額を適用。
+
+    ・返済能力に懸念がある場合 → 高めの貸付金利（上限14.5%に近い設定）および限定的な限度額を適用。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0ca6fe88-43f1-5289-81c3-36173d560b53
+  title: 朝凪カードローン：プランの選び方
+  body: 「朝凪カードローン」は、最大8,000,000円という高い限度額と、年2%から14.5%という幅広い金利設定が特徴です。毎月の最低返済額が2,000円からと低く設定されているため、月々の負担を抑えたい方に最適です。短期的な急ぎの資金から、まとまった金額の融資まで、お客様の状況に合わせた柔軟な利用が可能です。
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 1681eab8-9cdc-590c-b994-6276c2d9d273
+  title: 朝凪カードローン：個人情報の取扱い
+  body: '当行は、個人情報保護法および犯罪収益移転防止法を遵守し、お客様の個人情報を厳重に管理いたします。
+
+
+    ■利用目的
+
+    「朝凪カードローン」のお申込み時にご提供いただいた個人情報は、主に以下の目的で利用します。
+
+    ・貸付審査（返済能力の確認）および利用限度額（最大8,000,000円）の決定
+
+    ・貸付金利（年2%から14.5%）の算定
+
+    ・ご契約内容の管理および返済状況の確認
+
+
+    ■第三者への提供
+
+    信用情報機関への照会および登録を行い、公正かつ透明性の高い取引を徹底します。また、法令に基づく正当な要請がある場合を除き、お客様の同意なく第三者に情報を提供することはありません。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 05f7d7a4-c68f-5289-9864-ebd87b73cbd3
+  title: 朝凪カードローン：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「朝凪カードローン」をかたる不審な電話やメールにより、個人情報を盗み出そうとする詐欺が発生しております。誠に恐れ入りますが、当行が電話やメールで、お客様の暗証番号やセキュリティカードの番号、合言葉などを伺うことは決してございません。
+
+
+    特に「低金利への切り替え」や「限度額の増枠」を条件に、至急の手続きを求める内容には十分ご注意ください。もし不審な連絡を受けた場合や、カード情報の流出が疑われる場合は、直ちにご相談ください。迅速な届出により、被害を最小限に抑えることが可能です。お客様の安心と安全のため、多層的な認証プロセスを導入しておりますので、不自然な手続きを求められた際は一度手を止め、ご確認をお願いいたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 88607d25-a6a4-5192-887c-6925f79ac953
+  title: 朝凪カードローン：限度額・制限と注意事項
+  body: '「朝凪カードローン」のご利用における限度額および制限事項についてご案内します。本商品は厳正な返済能力審査に基づき、お客様ごとに利用限度額を決定いたします。最大利用限度額は8,000,000円です。
+
+
+    適用される貸付金利は年2%から14.5%の範囲内で、審査結果に応じて決定されます。本商品は総量規制の対象外となりますが、適正な借入金額を維持するため、個別の審査を徹底しております。
+
+
+    【注意事項】
+
+    ・審査結果により、ご希望の限度額に達しない場合がございます。
+
+    ・返済状況により、利用限度額が一時的に制限される場合があります。
+
+    ・重要な手続きの前には、犯罪収益移転防止法に基づく厳格な本人確認を実施いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: f2fd4e50-047e-533b-bbbe-ae787595e656
+  title: 朝凪カードローン：毎月の最低返済額について
+  body: '【質問】毎月最低いくらから返済すればよいですか？
+
+    【回答】「朝凪カードローン」の毎月の最低返済額は2,000円からとなっております。ご利用金額に応じて設定されますが、最低2,000円以上の返済が必要です。なお、最低返済額以上の金額を随時ご返済いただくことで、利息負担を軽減し、より効率的に完済することが可能です。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 07356eca-274b-5918-993c-77b61dfb6497
+  title: 朝凪カードローン：状況・履歴の確認
+  body: '「朝凪カードローン」のご利用状況およびお取引履歴を確認する手順をご案内します。
+
+
+    1. 貸付残高とご利用履歴の照会を依頼してください。その際、ご本人様確認のため、セキュリティカードや生体認証による認証を行います。
+
+    2. 現在の貸付残高、および直近の返済実績についてのご案内をいたします。
+
+    3. 適用されている金利（年2%から14.5%の範囲内）と、それに基づいた利息の計算結果をご確認ください。
+
+    4. 返済計画の変更や、限度額（最大8,000,000円）に対する現在の利用率について詳細が必要な場合は、合わせてお知らせください。
+
+
+    上記の手順により、現在の債務状況を正確に把握し、計画的な返済にご活用いただけます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ad0a470c-c55f-5e69-8c28-104aa3c087d7
+  title: 朝凪カードローン：お取引が拒否された・制限された
+  body: '【症状】カードローンでの借入や出金が拒否される、または利用制限がかかっている。
+
+
+    【考えられる原因と確認事項】
+
+    1. 利用限度額への到達：現在の利用額が、設定された限度額（最大8,000,000円）に達していないかご確認ください。
+
+    2. お支払いの遅延：前月分などの返済が滞っている場合、制限がかかることがございます。
+
+    3. セキュリティロック：短期間に不自然な操作があった場合、保護のため制限される場合がございます。
+
+
+    【解消方法】
+
+    まずはお取引状況を確認し、未払金がある場合は速やかなご返済をお願いいたします。
+
+
+    【エスカレーション】
+
+    審査状況の変更や、制限の解除に時間を要する場合、または理由が不明な場合は、専門部署にて詳細な信用状況の再確認を行い、結果をご案内いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 90e3472d-bffc-53dd-b5fa-fda11f9990cb
+  title: 朝凪カードローン：切替えや上位プランを検討するとき
+  body: 他商品のローンからの切り替えを検討される際は、柔軟性を重視するか、固定コストの低減を重視するかで選択が変わります。「朝凪カードローン」は、年2%から14.5%の金利範囲で、最大8,000,000円まで柔軟に借入・返済が可能です。特定の目的で低金利を固定したい場合は住宅ローン等が適していますが、急な支出への対応や自由な返済計画を優先される方には、本商品が最適です。
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: aced7d52-b969-52c5-81ae-d3705e9519f9
+  title: 朝凪カードローン：ほかの選択肢との比較と向かない場合
+  body: '「朝凪カードローン」は、限度額の範囲内で繰り返し借入ができる利便性の高い商品です。最大8,000,000円まで、審査に基づき設定されます。
+
+
+    【他商品との比較】
+
+    ・目的別ローン：金利が固定される傾向にあり、長期的に低コストで借りたい場合に適しています。対して本商品は、年2%から14.5%という幅のある金利設定ですが、使いたい時にすぐに使える柔軟性があります。
+
+
+    【本商品が向かない場合】
+
+    ・絶対的な低金利を最優先し、一度に多額を借りて長期的に返済したい方は、固定金利の商品をご検討ください。
+
+    ・厳格な予算管理が必要な方は、借入が容易なカードローン形式よりも、使途を限定した融資の方が適している場合がございます。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: d5166b5c-96b6-5676-a73f-4dd35ea5a41d
+  title: 朝凪カードローン：手数料と費用
+  body: '【質問】利用にあたっての手数料はかかりますか？
+
+    【回答】本商品のご利用における主なコストは貸付金利です。金利は年2%から14.5%の範囲内で、審査結果に基づき適用されます。ご返済時には、この金利に基づいた利息と元金をあわせてお支払いいただきます。詳細な金利適用については、審査時に改めてご案内いたします。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: ff1484d7-4e9d-5108-9d1a-d31c0a58dc2c
+  title: 朝凪カードローン：よくあるお手続きの流れ
+  body: '「朝凪カードローン」のお申込みからご利用開始までの流れをご案内します。
+
+
+    1. お申込み内容の提示：お名前、ご住所、および年収などの収入情報を提示してください。
+
+    2. 取引時確認の実施：犯罪収益移転防止法に基づき、運転免許証等の本人確認書類をご提示いただき、厳格な本人確認を行います。
+
+    3. 審査および条件決定：当行にて返済能力を審査し、利用限度額（最大8,000,000円）と適用金利（年2%から14.5%）を決定いたします。
+
+    4. 結果のご案内：審査結果および契約内容を通知いたします。内容にご同意いただいた後、お手続きが完了し、借入が可能となります。
+
+
+    審査結果によっては、ご希望の条件に沿えない場合がございますので、あらかじめご了承ください。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 40ded84a-0b2d-53e0-b89c-33096215d557
+  title: 朝凪カードローン：明細や記録と合わない
+  body: '【症状】お客様が管理されている返済記録と、当行の貸付残高明細に相違がある。
+
+
+    【確認手順】
+
+    1. 入金日の確認：ご返済いただいた日付が、当行の処理日（営業日ベース）と一致しているか照合してください。
+
+    2. 利息計算の再確認：適用金利（年2%から14.5%）に基づき、前回の返済日から起算して正しく利息が計算されているかを確認します。
+
+    3. 最低返済額の確認：毎月の最低返済額2,000円が正しく充当されているかを確認してください。
+
+
+    【解消方法】
+
+    計算上の不一致が判明した場合は、正しい残高を再提示し、根拠となる計算式をご説明します。
+
+
+    【エスカレーション】
+
+    システム上の処理不備や、計算結果に合理的な説明がつかない場合は、専門のローン管理部署へ案件を上げ、精査した上で修正対応を行います。'
+  domain: lending_mortgage
+  product_category: asanagi_card_loan
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 100e4477-2fde-52d5-8372-7c65fe6a7b3b
+  title: 手数料・料金のご案内
+  body: 当行では、サービスの維持コストを適切に反映した料金体系を採用しております。一方で、給与受取や年金受取などの条件を満たされるお客様には、手数料を無料とする優遇制度をご用意しております。詳細な手数料は商品ごとに異なりますので、各商品の手数料一覧をご確認ください。
+  domain: retail_banking
+  product_category: general
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 75f88e1d-7237-59d9-8ee1-58243230d827
+  title: よくあるご質問
+  body: '【営業時間は？】
+
+    平日9:00から15:00までとなっております。
+
+
+    【複雑な手続きはどうすればいい？】
+
+    窓口や電話にて承ります。内容に応じて専門部署へエスカレーションし、適切にご案内いたします。
+
+
+    【口座開設の流れは？】
+
+    本人確認書類をご用意の上、店舗またはオンラインでお申込みください。'
+  domain: retail_banking
+  product_category: general
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 34f27076-2f91-528d-be07-24499628e628
+  title: 法令・制度に関するご案内：預金・日常のお取引
+  body: '当行は金融庁の監督を受け、法令を遵守して運営しております。預金は預金保険制度により、1金融機関につき預金者1人当たり元本1,000万円までと破綻日までの利息等が保護されます。
+
+
+    また、個人情報保護法および犯罪収益移転防止法に基づき、厳格な個人情報の取り扱いと、口座開設時等の「取引時確認」を徹底しております。公正かつ透明性の高い取引を通じて、地域住民の皆様に安心感を提供いたします。'
+  domain: retail_banking
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 11938198-8965-5f60-898d-fdf21cfb608d
+  title: 法令・制度に関するご案内：デビットカード
+  body: 'デビットカードのご利用に関しては、預金者保護法に基づき、偽造または盗難カードによる不正利用被害を原則として補償いたします。被害を最小限に抑えるため、カードの紛失や盗難に気づいた際は、速やかに当行へ届出を行ってください。規定の期間に基づき、誠実に調査および対応を実施いたします。
+
+
+    なお、口座情報の変更や出金等の重要な手続きの前には、多層的な認証プロセス（セキュリティカードや生体認証など）による厳格な本人確認を実施いたします。'
+  domain: cards
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: a0dcf0ab-5a9d-5262-b3b2-a904a1347132
+  title: 法令・制度に関するご案内：ローン
+  body: '当行は適合性の原則に基づき、お客様の資産状況や返済能力に最適な商品を提案いたします。住宅ローンにおいては、変動金利を選択された場合、5年ごとの返済額見直しが行われ、上昇幅は前回の125%を上限として制限されます。
+
+
+    朝凪カードローンにつきましては、総量規制の対象外となる商品ではございますが、厳正な返済能力審査に基づき、個別の利用限度額を決定しております。なお、個別の税務や法務に関する具体的な助言は専門家へご案内しております。'
+  domain: lending_mortgage
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: asanagi_bank
+- id: 0b5cb1f2-ac13-5e6d-82a1-b1da7cbc9c90
+  title: get_account_transactions を使う場面
+  body: 'お客様から入出金明細や取引履歴の照会依頼を受けた際に、以下の手順で対応します。
+
+
+    1. `verify_identity` を用いて、お客様の本人確認を完了させます。
+
+    2. お客様から提示された口座番号の下4桁を用い、`get_accounts` を呼び出して、対象となる正確な account_id を特定します。
+
+    3. 特定した account_id を引数として `get_account_transactions` を実行し、最新の取引履歴を取得して、お客様に提示します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: asanagi_bank
+- id: 52fda76c-de51-5959-8ae1-40bd6476e4b2
+  title: get_account_transactions ツールリファレンス
+  body: '指定された口座の取引履歴を取得するツールです。オペレーターは `get_accounts` 等で取得した account_id を引数として直接このツールを呼び出し、履歴を提示します。
+
+
+    引数:
+
+    - account_id: 照会対象の口座識別子'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: asanagi_bank
+- id: 0a02d72b-fde9-59e3-9e42-0a968715b882
+  title: file_transaction_dispute を使う場面
+  body: '朝凪Visaデビットにおいて、身に覚えのない利用や二重引落しなどの不備が報告された場合、以下の手順で補償申請を受け付けます。
+
+
+    1. `verify_identity` で厳格な本人確認を行います。
+
+    2. `get_accounts` で対象口座を特定し、`get_account_transactions` で問題の取引内容（取引日時、金額、相手先等）を具体的に確認します。
+
+    3. 調査に必要な情報を揃えた上で、`file_transaction_dispute` を呼び出し、正式に調査と補償の申出を登録します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: asanagi_bank
+- id: 809f2389-5deb-56aa-bae7-32bd8691a760
+  title: file_transaction_dispute ツールリファレンス
+  body: 'デビットカードの不正利用や誤請求について、調査と補償の申出を登録するツールです。オペレーターが直接呼び出すことで、正式な紛争処理プロセスを開始します。
+
+
+    引数:
+
+    - account_id: 対象の口座識別子
+
+    - transaction_id: 対象取引の識別子
+
+    - reason: 申出の理由（例：身に覚えのない利用）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: asanagi_bank
+- id: e239f2fe-f48a-52ae-a2f0-6c0e72947fb8
+  title: freeze_card を使う場面
+  body: 'キャッシュカードまたは朝凪Visaデビットの紛失・盗難の届出を受けた際は、二次被害を防止するため、直ちに以下の手順で利用停止措置を講じます。
+
+
+    1. `verify_identity` を実行し、届け出者が正当な権限を持つ方であることを確認します。
+
+    2. `get_accounts` を用いて、停止対象となるカードが紐付いている account_id を特定します。
+
+    3. 即座に `freeze_card` を呼び出し、当該カードの利用を停止させます。その後、再発行の手続きについて案内します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: asanagi_bank
+- id: 991b7b57-7b3e-5add-9959-ab97201e46ea
+  title: freeze_card ツールリファレンス
+  body: '`freeze_card`
+
+    引数: カード番号、届出理由
+
+    効果: キャッシュカードまたは朝凪Visaデビットの利用を即時停止します。
+
+    オペレーターは、お客様からカードの紛失や盗難の報告を受けた際、このツールを直接呼び出してカードを停止させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: asanagi_bank
+- id: 050aa692-69ef-5c27-a8a4-66887f0118a5
+  title: open_time_deposit を使う場面
+  body: 'お客様が普通預金からスーパー定期への預け入れを希望される場合に本手続きを行います。
+
+
+    1. 本人確認（取引時確認）を完了させます。
+
+    2. `get_accounts` を使用し、原資となる普通預金の口座番号を特定します。
+
+    3. 預入金額および預入期間について、お客様の意向を確認します。
+
+    4. `open_time_deposit` を呼び出し、指定された金額と期間でスーパー定期を開設します。
+
+
+    詳細な商品内容については「スーパー定期：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_time_deposit
+  institution_id: asanagi_bank
+- id: 70e53027-4527-5696-aceb-fddc686e0dfb
+  title: open_time_deposit ツールリファレンス
+  body: '`open_time_deposit`
+
+    引数: 普通預金口座番号、預入金額、預入期間
+
+    効果: 普通預金から指定金額を差し引き、スーパー定期を開設します。
+
+    オペレーターは、お客様の要望に基づき、このツールを直接呼び出して定期預金の手続きを完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_time_deposit
+  institution_id: asanagi_bank
+- id: 3002dc65-56fb-5330-8d6b-3c4ba4e4295c
+  title: cancel_time_deposit を使う場面
+  body: 'お客様がスーパー定期を満期前に解約し、普通預金へ戻すことを希望される際に本手続きを行います。
+
+
+    1. 本人確認（取引時確認）を完了させます。
+
+    2. `get_accounts` を使用し、対象となるスーパー定期の口座番号を特定します。
+
+    3. 中途解約利率が適用されるため、適用される利息が通常の預入金利よりも低くなる点について説明し、同意を得ます。
+
+    4. `cancel_time_deposit` を呼び出し、元金と中途解約利率で計算した利息を普通預金に入金します。
+
+
+    中途解約の詳細については「スーパー定期：規定・約款」をご確認ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - cancel_time_deposit
+  institution_id: asanagi_bank
+- id: 11f0633f-2085-57ee-b217-e9137a275ee8
+  title: cancel_time_deposit ツールリファレンス
+  body: '`cancel_time_deposit`
+
+    引数: スーパー定期口座番号
+
+    効果: スーパー定期を満期前に解約し、元金と中途解約利率に基づく利息を普通預金へ入金します。
+
+    オペレーターは、お客様の解約依頼に基づき、このツールを直接呼び出して手続きを完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - cancel_time_deposit
+  institution_id: asanagi_bank
+- id: e105faeb-cd92-5c4c-bf0d-cd8c5942cb5f
+  title: request_loan_prepayment を使う場面
+  body: 'お客様が住宅ローンの繰上返済を希望される場合に本手続きを行います。
+
+
+    1. 本人確認（取引時確認）を完了させます。
+
+    2. `get_accounts` を使用し、対象の住宅ローン口座を特定します。
+
+    3. 返済方法（期間短縮型または返済額軽減型）および返済金額について確認します。全額返済を希望される場合はその旨を確認します。
+
+    4. `request_loan_prepayment` を呼び出し、繰上返済の申し込みを完了させます。
+
+
+    返済の詳細な条件については「住宅ローン：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - request_loan_prepayment
+  institution_id: asanagi_bank
+- id: 36f80a79-21c0-58cb-9dec-10666c39c652
+  title: request_loan_prepayment ツールリファレンス
+  body: '`request_loan_prepayment`
+
+    引数: 住宅ローン口座番号、返済金額、返済タイプ（期間短縮型/返済額軽減型/全額繰上返済）
+
+    効果: 住宅ローンの繰上返済申し込みを受け付けます。
+
+    オペレーターは、お客様の指示に基づき、このツールを直接呼び出して返済手続きを行います。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - request_loan_prepayment
+  institution_id: asanagi_bank
+- id: b65bf3e1-2cda-5d91-9305-ec092242925b
+  title: change_loan_rate_type を使う場面
+  body: 'お客様が住宅ローンの金利タイプを変更（変動金利から固定金利期間選択型へ変更など）することを希望される場合に本手続きを行います。
+
+
+    1. 本人確認（取引時確認）を完了させます。
+
+    2. `get_accounts` を使用し、対象の住宅ローン口座を特定します。
+
+    3. 変更後の金利タイプおよび、固定金利期間が終わるときの金利タイプの選び直しについて確認します。
+
+    4. `change_loan_rate_type` を呼び出し、金利タイプの変更手続きを完了させます。
+
+
+    金利の詳細については「住宅ローン：金利・料率一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_loan_rate_type
+  institution_id: asanagi_bank
+- id: 4695237a-2c5e-53a2-994a-91fc3d46731d
+  title: change_loan_rate_type ツールリファレンス
+  body: '`change_loan_rate_type`
+
+    引数: 住宅ローン口座番号、変更後の金利タイプ、期間終了後の選択肢
+
+    効果: 住宅ローンの金利タイプを変動金利から固定金利期間選択型へ、またはその逆へ変更します。
+
+    オペレーターは、お客様の依頼に基づき、このツールを直接呼び出して変更手続きを行います。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - change_loan_rate_type
+  institution_id: asanagi_bank
+- id: a6be88fe-0f4a-59b9-a690-c33069e2824e
+  title: apply_card_loan を使う場面
+  body: 'お客様が朝凪カードローンの新規申し込みを希望される場合に本手続きを行います。
+
+
+    1. 本人確認（取引時確認）を完了させます。
+
+    2. 厳正な返済能力審査を行うため、勤務先や年収などの必要情報を確認します。
+
+    3. `apply_card_loan` を呼び出し、申し込み手続きを完了させます。
+
+    4. 利用限度額は審査の結果に基づき決定されることをお客様に説明します。
+
+
+    詳細な条件については「朝凪カードローン：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - apply_card_loan
+  institution_id: asanagi_bank
+- id: 38f66c38-1501-5aa6-b44b-894e9e09adc3
+  title: apply_card_loan ツールリファレンス
+  body: 'このツールは、「朝凪カードローン」の申込みを受け付けるために使用します。オペレーターがこのツールを直接呼び出すことで、審査プロセスへと回します。利用限度額は、厳正な返済能力審査に基づき決定されます。
+
+
+    引数：
+
+    ・申込者の氏名、生年月日、連絡先、年収、勤務先などの詳細情報'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - apply_card_loan
+  institution_id: asanagi_bank
+- id: b9dfb34f-79f5-53e5-9d24-d52d2f1d391b
+  title: transfer_funds を使う場面
+  body: 'お客様の普通預金口座から、当行または他行の口座へ資金を振り込む際に本手続きを行います。以下の手順で操作してください。
+
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. `get_accounts` を使用し、お客様が提示した口座番号（下4桁など）から該当する内部口座IDを特定します。
+
+    3. 振込先の金融機関名、支店名、口座番号、受取人名、および振込金額を確認します。
+
+    4. `transfer_funds` を呼び出し、振込処理を完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - transfer_funds
+  institution_id: asanagi_bank
+- id: 5ce7a905-a44c-58d2-9b82-a078d850e6af
+  title: transfer_funds ツールリファレンス
+  body: 'このツールは、指定された普通預金口座から、当行または他行の口座へ振込を行うために使用します。オペレーターが直接呼び出すことで即時に送金処理が行われます。
+
+
+    引数：
+
+    ・出金元口座ID
+
+    ・振込先金融機関コード
+
+    ・振込先支店コード
+
+    ・振込先口座番号
+
+    ・受取人名
+
+    ・振込金額（例：1,234円）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - transfer_funds
+  institution_id: asanagi_bank
+- id: 6a69dd39-aceb-51ca-bae3-fcc2d71b1627
+  title: update_beneficiary を使う場面
+  body: 'インターネットバンキングにおける登録振込先の追加、変更、または削除を承る際に本手続きを行います。以下の手順で操作してください。
+
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. `get_accounts` を使用し、対象となるお客様の口座IDを特定します。
+
+    3. 振込先の追加・変更・削除のいずれを希望されるかを確認し、金融機関、支店、口座番号、受取人名の詳細情報を伺います。
+
+    4. `update_beneficiary` を呼び出し、登録情報を更新します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: asanagi_bank
+- id: f9ac270d-9bc5-52ea-9b1c-88c80e85398f
+  title: update_beneficiary ツールリファレンス
+  body: 'このツールは、インターネットバンキングの登録振込先リストを管理するために使用します。オペレーターが直接呼び出すことで、振込先の追加、変更、または削除が実行されます。
+
+
+    引数：
+
+    ・対象口座ID
+
+    ・操作内容（追加、変更、削除）
+
+    ・金融機関名、支店名、口座番号、受取人名などの振込先詳細情報'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: asanagi_bank
+- id: 10bf9f74-771b-5800-8818-22192a920947
+  title: stop_payment を使う場面
+  body: '公共料金やクレジットカード代金などの口座振替（自動引落し）の停止手続きを承る際に本手続きを行います。以下の手順で操作してください。
+
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. `get_accounts` を使用し、お客様の口座IDを特定します。
+
+    3. 停止を希望される振替項目の名称や契約内容などの詳細を確認します。
+
+    4. `stop_payment` を呼び出し、口座振替の停止処理を完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - stop_payment
+  institution_id: asanagi_bank
+- id: 686dea2a-d934-5a09-99f5-54446b92025f
+  title: stop_payment ツールリファレンス
+  body: 'このツールは、指定された口座からの公共料金やクレジットカード等の自動引落し（口座振替）を停止させるために使用します。オペレーターが直接呼び出すことで停止手続きが行われます。
+
+
+    引数：
+
+    ・対象口座ID
+
+    ・停止対象となる振替内容の詳細情報'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - stop_payment
+  institution_id: asanagi_bank
+- id: b49b05ab-cefe-57b1-ad74-3392d874c47d
+  title: pay_bill を使う場面
+  body: '税金や公共料金などの払込みを、ペイジー（Pay-easy）を利用して口座から行う際に本手続きを行います。以下の手順で操作してください。
+
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. `get_accounts` を使用し、出金元となる口座IDを特定します。
+
+    3. 払込票に基づき、収納機関番号、確認番号、参考番号などの必要情報を伺います。
+
+    4. `pay_bill` を呼び出し、払込み処理を完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_bill
+  institution_id: asanagi_bank
+- id: 9373067a-0948-5e98-8205-031db7ce0b80
+  title: pay_bill ツールリファレンス
+  body: 'このツールは、ペイジー（Pay-easy）の仕組みを用いて、口座から税金や公共料金などの払込みを行うために使用します。オペレーターが直接呼び出すことで決済が実行されます。
+
+
+    引数：
+
+    ・出金元口座ID
+
+    ・ペイジー払込みに必要な詳細情報（収納機関番号、確認番号、参考番号など）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_bill
+  institution_id: asanagi_bank
+- id: f3809abd-1929-5ed6-b628-b0693dba7181
+  title: activate_card を使う場面
+  body: 'お客様がお手元に「朝凪Visaデビット」カードを受領され、利用開始の手続きを希望される際に本手続きを行います。以下の手順で操作してください。
+
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. お客様が正しくカードを受領されたことを確認します。
+
+    3. カードの有効化に必要な情報を確認します。
+
+    4. `activate_card` を呼び出し、カードの利用開始手続きを完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - activate_card
+  institution_id: asanagi_bank
+- id: 01ab34cd-9e07-5bfa-910f-495dae16f3e0
+  title: activate_card ツールリファレンス
+  body: activate_cardツールは、お客様の手元に届いた朝凪Visaデビットなどのカードの利用開始手続きを行うために使用します。オペレーターはこのツールを直接呼び出すことで、カードを有効化し、利用可能な状態にします。引数として、カード番号などの必要な認証情報を入力します。
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - activate_card
+  institution_id: asanagi_bank
+- id: d4fe4c70-9597-58e2-b209-e398d47a21c1
+  title: order_replacement_card を使う場面
+  body: 'キャッシュカードや朝凪Visaデビットを紛失された場合や、磁気不良等で利用できなくなった場合に、本ツールを用いて再発行の手続きを行います。
+
+
+    1. 厳格な本人確認（取引時確認）を実施し、ご本人であることを確認します。
+
+    2. get_accountsを使用して、再発行対象となる口座のaccount_idを特定します。
+
+    3. order_replacement_cardを呼び出し、カードの再発行を申し込みます。
+
+
+    なお、再発行には所定の手数料がかかります。詳細は「普通預金：キャッシュカード・通帳の再発行手数料について」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: asanagi_bank
+- id: acfde9d9-2503-5061-b14c-eca138c1d7ce
+  title: order_replacement_card ツールリファレンス
+  body: order_replacement_cardツールは、キャッシュカードや朝凪Visaデビットの再発行手続きを行うために使用します。オペレーターがこのツールを呼び出すことで、カードの再発行申し込みが完了します。引数には、対象の口座IDおよび再発行するカードの種類を指定します。
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: asanagi_bank
+- id: 4a19164e-4531-5d3a-8b58-c74a60671f60
+  title: manage_authorized_users を使う場面
+  body: '同居のご家族が利用する代理人カードの発行、または既にある代理人カードの利用停止を希望される場合に本ツールを使用します。
+
+
+    1. 取引時確認に基づき、口座名義人であることの厳格な本人確認を行います。
+
+    2. get_accountsを使用して、対象口座のaccount_idを確認します。
+
+    3. manage_authorized_usersを呼び出し、代理人カードの発行または停止手続きを実行します。
+
+
+    手続きにあたっては、代理人となるご家族の氏名、生年月日、連絡先などの正確な情報が必要となります。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - manage_authorized_users
+  institution_id: asanagi_bank
+- id: a98893af-7097-5587-91bb-6121f509d277
+  title: manage_authorized_users ツールリファレンス
+  body: manage_authorized_usersツールは、同居家族向けの代理人カードの発行や利用停止手続きを行うために使用します。オペレーターがこのツールを直接呼び出すことで手続きが完了します。引数には、対象口座のIDおよび代理人となる方の氏名、生年月日などの詳細情報を入力します。
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - manage_authorized_users
+  institution_id: asanagi_bank
+- id: 7a117f03-f89f-524d-963c-2a382a6c29a4
+  title: get_accounts を使う場面
+  body: 'お客様が当行に保有している口座の一覧を確認し、特定の手続きに必要な内部識別子（account_id）を特定するために本ツールを使用します。
+
+
+    1. 犯罪収益移転防止法に基づき、厳格な本人確認（取引時確認）を実施します。
+
+    2. get_accountsを呼び出し、お客様に紐付く全ての口座情報を取得します。
+
+    3. お客さまから提示された口座番号の下4桁などに基づき、操作対象となる正しい口座を特定します。
+
+
+    本ツールは、振込やカード再発行など、口座を特定する必要がある多くのお手続きにおいて必須のステップとなります。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: asanagi_bank
+- id: 7958eaee-f3ed-5f6d-ad0e-3140fb896948
+  title: get_accounts ツールリファレンス
+  body: get_accountsツールは、お客様が当行に保有している口座の一覧および詳細情報を取得するために使用します。オペレーターがこのツールを呼び出すことで、内部的なaccount_idを含む口座リストが返されます。本ツールは、認証済みの顧客コンテキストに基づいて動作します。
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: asanagi_bank
+- id: 5b4367e9-a4fb-5ae7-ab0a-888e3abf414d
+  title: open_account を使う場面
+  body: '新しく普通預金口座などの開設を希望される場合に、本ツールを用いて手続きを行います。
+
+
+    1. 犯罪収益移転防止法に基づき、厳格な本人確認（取引時確認）を実施し、必要書類の提示を確認します。
+
+    2. open_accountを呼び出し、口座開設の手続きを完了させます。
+
+    3. 開設完了後、発行された口座番号および今後のご利用開始手順についてご案内します。
+
+
+    なお、お申込みいただける方の条件については「普通預金：お申込みいただける方」をご確認ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: asanagi_bank
+- id: 9cddd22f-d652-5483-b772-82845ba113b1
+  title: open_account ツールリファレンス
+  body: open_accountツールは、新規の口座開設手続きを行うために使用します。オペレーターがこのツールを直接呼び出すことで、口座開設が実行されます。引数として、お客様の氏名、住所、生年月日などの本人確認情報を入力し、手続きを完了させます。
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: asanagi_bank
+- id: 14b7c5ac-8942-565c-b1d9-8ebfbcdf8357
+  title: close_account を使う場面
+  body: 'お客様から口座の解約（閉鎖）を依頼された場合に、本ツールを用いて手続きを行います。
+
+
+    1. 取引時確認に基づき、厳格な本人確認を実施します。
+
+    2. get_accountsを使用して、解約対象となる口座のaccount_idを正しく特定します。
+
+    3. close_accountを呼び出し、口座の閉鎖手続きを完了させます。
+
+
+    なお、口座に残高がある場合は、あらかじめ他口座への振替などの処理が必要となります。詳細な流れは「普通預金：解約・変更・プランの切替え」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: asanagi_bank
+- id: a2a870d7-79ae-5a88-8da0-f294593d9882
+  title: close_account ツールリファレンス
+  body: 'このツールは、指定された口座を完全に解約し、閉鎖するために使用します。一度実行すると取り消し不可能な操作となります。
+
+
+    【引数】
+
+    ・account_id：解約対象となる口座の識別子
+
+
+    オペレーターは、本人確認および解約手続きの合意を得た後、このツールを直接呼び出して口座解約を実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: asanagi_bank
+- id: 2752ec61-d5a8-5d08-86de-384c49e7a2fb
+  title: update_contact_info を使う場面
+  body: 'お客様の住所、電話番号、メールアドレスなどの登録連絡先に変更があった場合、本ツールを使用して情報を更新します。正確な顧客情報を維持することは、犯罪収益移転防止法に基づく義務であり、重要な通知を確実にお届けするために不可欠です。
+
+
+    【手続き手順】
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. get_accounts を使用し、お客様の口座番号（下4桁など）から該当する account_id を特定します。
+
+    3. 更新したい最新の連絡先情報を詳細に伺います。
+
+    4. update_contact_info を呼び出し、情報を更新します。
+
+
+    詳細な操作方法は「update_contact_info ツールリファレンス」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: asanagi_bank
+- id: 2fc9d971-79a4-5b24-baca-95341d74668f
+  title: update_contact_info ツールリファレンス
+  body: 'このツールは、お客様の登録連絡先情報を最新の状態に更新するために使用します。
+
+
+    【引数】
+
+    ・account_id：更新対象の口座識別子
+
+    ・contact_details：変更後の氏名、住所、電話番号、メールアドレスなどの詳細情報
+
+
+    オペレーターは、お客様から提示された最新の情報を基に、このツールを直接呼び出して更新処理を行います。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: asanagi_bank
+- id: 809ba988-8f76-59ee-9e5a-969a53a6f774
+  title: get_statements を使う場面
+  body: 'お客様から、特定の期間における取引明細書や残高証明書の提示を求められた場合に使用します。確定申告や住宅ローンの審査、あるいは支出管理のために明細が必要なケースが想定されます。
+
+
+    【手続き手順】
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. get_accounts を使用し、対象となる account_id を特定します。
+
+    3. 明細が必要な対象期間（開始日と終了日）を確認します。
+
+    4. get_statements を呼び出し、該当期間の明細情報を取得します。
+
+
+    操作の詳細については「get_statements ツールリファレンス」をご確認ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: asanagi_bank
+- id: 97a4b336-2c0a-5070-b76b-7d9c4952fa07
+  title: get_statements ツールリファレンス
+  body: 'このツールは、指定された期間の口座取引明細書を取得するために使用します。
+
+
+    【引数】
+
+    ・account_id：明細を取得する口座の識別子
+
+    ・start_date：抽出期間の開始日
+
+    ・end_date：抽出期間の終了日
+
+
+    オペレーターは、お客様が希望する期間を指定し、このツールを直接呼び出して明細情報を取得します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: asanagi_bank
+- id: ee1db5cf-255b-5ae0-9b70-96ceeb71c52e
+  title: set_alerts を使う場面
+  body: 'お客様が口座残高の変動や、一定金額以上の高額取引があった際に通知を受け取りたいと希望される場合に設定します。これにより、不正利用の早期発見や、計画的な資金管理をサポートします。
+
+
+    【手続き手順】
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. get_accounts を使用し、通知設定対象の account_id を特定します。
+
+    3. 通知を希望する条件（通知の種類、金額のしきい値など）を確認します。
+
+    4. set_alerts を呼び出し、アラート設定を完了させます。
+
+
+    設定可能な詳細項目は「set_alerts ツールリファレンス」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: asanagi_bank
+- id: 06a4eefc-143a-53b4-961c-c4db7e7806b9
+  title: set_alerts ツールリファレンス
+  body: 'このツールは、口座の取引や残高に関する自動通知（アラート）を設定するために使用します。
+
+
+    【引数】
+
+    ・account_id：アラートを設定する口座の識別子
+
+    ・alert_type：通知の条件（例：入金、出金、残高低下など）
+
+    ・threshold_amount：通知をトリガーとする金額のしきい値
+
+
+    オペレーターは、お客様の希望条件に基づき、このツールを直接呼び出して設定を行います。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: asanagi_bank
+- id: 2b3873ad-39ff-52a3-b201-211e14170e64
+  title: dispute_status を使う場面
+  body: '朝凪Visaデビットなどで、身に覚えのない利用や二重引落しについて調査を依頼（file_transaction_dispute を実行）したお客様が、その後の調査進捗を確認したい場合に提供します。預金者保護法に基づき、誠実に調査・対応いたします。
+
+
+    【手続き手順】
+
+    1. 厳格な本人確認（取引時確認）を実施します。
+
+    2. 調査依頼時に発行された dispute_id を確認します（不明な場合は、取引履歴等から特定します）。
+
+    3. dispute_status を呼び出し、現在の調査状況を取得します。
+
+    4. 取得したステータスに基づき、お客様へ現在の進捗状況を丁寧にご案内します。
+
+
+    ツールの詳細仕様は「dispute_status ツールリファレンス」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - dispute_status
+  institution_id: asanagi_bank
+- id: 47bf178c-c233-5070-8903-eb201783db90
+  title: dispute_status ツールリファレンス
+  body: 'このツールは、提出済みの取引紛争（調査依頼）の現在の処理状況を確認するために使用します。
+
+
+    【引数】
+
+    ・dispute_id：file_transaction_dispute 実行時に発行された調査依頼固有の識別子
+
+
+    オペレーターは、該当する dispute_id を指定してこのツールを直接呼び出し、調査の進捗ステータスを取得します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - dispute_status
+  institution_id: asanagi_bank

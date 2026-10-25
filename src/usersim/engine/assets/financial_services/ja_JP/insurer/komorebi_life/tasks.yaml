@@ -1,0 +1,398 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for komorebi_life, a life insurer with medical and
+# cancer cover. Every state-changing tool it offers is gold in at least one
+# task. Each task ships THREE opening phrasings in Japanese (build_instance
+# picks one per trajectory) so the assistant sees varied turn-1 wording while
+# the gold stays fixed. Read-only tools (get_claim_status,
+# send_deduction_certificate, get_accounts, get_statements) carry no gold
+# state change.
+#
+# Each opening stays on one line: YAML folds a line break into a space, which
+# Japanese does not write.
+templates:
+- id: TPL-KL-HOSPITAL-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{days}}日間入院して手術も受けました。医療保険の給付金を請求したいです。
+  - >-
+    先月、{{reason}}で{{days}}日入院しました。入院給付金の請求の手続きをお願いできますか。
+  - >-
+    退院したので、入院と手術の給付金を請求したいです。{{reason}}で{{days}}日間の入院でした。
+  account_state:
+    account_id: iryo_kl_0001
+    account_type: こもれび医療保険
+  param_space:
+    days: ['5', '12', '20']
+    reason: [虫垂炎, 骨折, 胆石]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-KL-CANCER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    がんと診断されました。がん保険の診断一時金を請求したいです。
+  - >-
+    先週、医師から{{diagnosis}}と言われました。がん保険の給付金はどう請求すればいいですか。
+  - >-
+    がん保険の診断一時金の請求をお願いします。{{diagnosis}}の診断書はこれから病院でもらいます。
+  account_state:
+    account_id: gan_kl_0001
+    account_type: こもれびがん保険
+    # Past the 90-day waiting period, so the claim is payable.
+    contract_date: '2023-06-01'
+  param_space:
+    diagnosis: [乳がん, 胃がん, 大腸がん]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-KL-POLICYLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    終身保険の契約者貸付を利用したいです。{{amount}}円借りられますか。
+  - >-
+    急な出費があって、終身保険から{{amount}}円の貸付を受けたいです。
+  - >-
+    解約はしたくないのですが、終身保険を使って{{amount}}円を借りる手続きをお願いします。
+  account_state:
+    account_id: shushin_kl_0001
+    account_type: こもれび終身保険
+    # A whole-life policy's balance is its surrender value, which caps the loan.
+    balance: '1450000.00'
+  param_space:
+    amount: ['100,000', '300,000']
+  gold_tool_sequence: [request_policy_loan]
+  expected_state_deltas: {policy_loan_status: REQUESTED}
+- id: TPL-KL-REINSTATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    保険料の引落しができていなかったようで、医療保険が失効したと通知が来ました。元に戻したいです。
+  - >-
+    失効してしまった医療保険を復活させる手続きをお願いできますか。
+  - >-
+    口座の残高が足りなくて医療保険の保険料が払えず、失効してしまいました。復活できますか。
+  account_state:
+    account_id: iryo_kl_0002
+    account_type: こもれび医療保険
+    status: lapsed
+  param_space: {}
+  gold_tool_sequence: [reinstate_policy]
+  expected_state_deltas: {reinstatement_status: REQUESTED}
+- id: TPL-KL-PAYMETHOD-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    保険料の払込方法を、口座振替からクレジットカード払いに変更したいです。
+  - >-
+    保険料の引落口座を{{bank_account}}に変えてください。
+  - >-
+    給与口座を変えたので、保険料の引落口座を{{bank_account}}にする手続きをお願いします。
+  account_state:
+    account_id: teiki_kl_0001
+    account_type: こもれび定期保険
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [change_payment_method]
+  expected_state_deltas: {payment_method_updated: true}
+- id: TPL-KL-COOLINGOFF-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{days}}日前に申し込んだ{{product}}を、やはりやめたいです。クーリング・オフできますか。
+  - >-
+    先日申し込んだ{{product}}をクーリング・オフしたいです。
+  - >-
+    家族と相談して、{{product}}の申込みを撤回することにしました。手続きをお願いします。
+  account_state:
+    customer_id: cust_kl_0001
+    application_id: app_kl_0001
+  param_space:
+    days: ['3', '5']
+    product: [こもれびがん保険, こもれび個人年金保険]
+  gold_tool_sequence: [withdraw_application]
+  expected_state_deltas: {application_status: WITHDRAWN}
+- id: TPL-KL-NEWPOLICY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{product}}に申し込みたいです。手続きをお願いできますか。
+  - >-
+    子どもが生まれたので、{{product}}に入っておきたいです。申込みをお願いします。
+  - >-
+    {{product}}の申込みをしたいです。告知が必要なら答えます。
+  account_state:
+    customer_id: cust_kl_0001
+  param_space:
+    product: [こもれび定期保険, こもれび医療保険]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-KL-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    終身保険の死亡保険金受取人を{{beneficiary}}に変更したいです。
+  - >-
+    結婚したので、終身保険の受取人を親から{{beneficiary}}に変えてください。
+  - >-
+    終身保険の受取人を{{beneficiary}}にしたいのですが、手続きをお願いします。
+  account_state:
+    account_id: shushin_kl_0001
+    account_type: こもれび終身保険
+  param_space:
+    beneficiary: [妻, 夫]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-KL-REDUCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    子どもが独立したので、定期保険の保険金額を{{amount}}円に減らしたいです。
+  - >-
+    定期保険の保険金額を{{amount}}円に減額する手続きをお願いします。
+  - >-
+    保険料を下げたいので、定期保険の保障額を{{amount}}円にしてもらえますか。
+  account_state:
+    account_id: teiki_kl_0001
+    account_type: こもれび定期保険
+  param_space:
+    amount: ['1,000万', '1,500万']
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_updated: true}
+- id: TPL-KL-SURRENDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{product}}を解約したいです。解約返戻金があれば振り込んでください。
+  - >-
+    保険を見直したので、{{product}}を解約する手続きをお願いします。
+  - >-
+    {{product}}をやめたいです。解約するといくら戻りますか。
+  account_state:
+    account_id: shushin_kl_0002
+    account_type: '{{product}}'
+  param_space:
+    product: [こもれび終身保険, こもれび個人年金保険]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {shushin_kl_0002.status: CLOSED}
+- id: TPL-KL-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    引っ越したので、保険の契約の住所を{{address}}に変更してください。
+  - >-
+    電話番号が{{phone}}に変わりました。登録を変更していただけますか。
+  - >-
+    ご案内を受け取るメールアドレスを{{email}}に変えたいです。
+  account_state:
+    customer_id: cust_kl_0001
+  param_space:
+    address: ['宮城県仙台市青葉区春日町7-21-3', '広島県広島市南区段原山崎2-5-17']
+    phone: ['090-3998-4217', '080-3998-1563']
+    email: [h.yamamoto@example.com, r.nakamura@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-KL-MARRIAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    結婚して住所が変わりました。住所を{{address}}に変更し、終身保険の受取人を{{beneficiary}}にして、定期保険の保険金額を{{amount}}円に増やしたいです。
+  - >-
+    結婚に合わせて、住所の変更（{{address}}）、終身保険の受取人を{{beneficiary}}に変更、定期保険の保険金額を{{amount}}円に増額する手続きをお願いします。
+  - >-
+    三つお願いします。住所を{{address}}に、終身保険の受取人を{{beneficiary}}に、定期保険の保険金額を{{amount}}円に変えたいです。
+  account_state:
+    account_id: shushin_kl_0001
+    account_type: こもれび終身保険
+    term_policy_id: teiki_kl_0001
+  param_space:
+    address: ['宮城県仙台市青葉区春日町7-21-3', '広島県広島市南区段原山崎2-5-17']
+    beneficiary: [妻, 夫]
+    amount: ['3,000万', '5,000万']
+  gold_tool_sequence: [update_contact_info, update_beneficiary, update_policy]
+  expected_state_deltas: {contact_updated: true, beneficiary_updated: true, policy_updated: true}
+- id: TPL-KL-JOBLOSS-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    仕事を失って、保険料の支払いが厳しくなりました。保険料の引落口座を{{bank_account}}に変えて、定期保険の保険金額を{{amount}}円に減らし、終身保険の契約者貸付で{{loan}}円借りたいです。
+  - >-
+    失業したので保険を見直したいです。引落口座を{{bank_account}}に変更、定期保険を{{amount}}円に減額、終身保険から{{loan}}円の契約者貸付をお願いします。
+  - >-
+    収入が減ったので、保険料の引落口座の変更（{{bank_account}}）、定期保険の保険金額を{{amount}}円に下げること、終身保険での{{loan}}円の貸付をお願いできますか。
+  account_state:
+    account_id: teiki_kl_0001
+    account_type: こもれび定期保険
+    whole_life_policy_id: shushin_kl_0001
+    surrender_value: '1450000.00'
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+    amount: ['1,000万']
+    loan: ['200,000', '300,000']
+  gold_tool_sequence: [change_payment_method, update_policy, request_policy_loan]
+  expected_state_deltas: {payment_method_updated: true, policy_updated: true, policy_loan_status: REQUESTED}
+- id: TPL-KL-LAPSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    引落口座を解約していたのを忘れていて、医療保険が失効してしまいました。引落口座を{{bank_account}}に変更して、契約を復活させ、引落しの前に通知が来るようにしてください。
+  - >-
+    医療保険が失効したので、引落口座を{{bank_account}}に変えたうえで復活を申し込みたいです。今後は引落し前のお知らせも欲しいです。
+  - >-
+    失効した医療保険について、引落口座の変更（{{bank_account}}）、契約の復活、引落し前の通知の設定をお願いします。
+  account_state:
+    account_id: iryo_kl_0002
+    account_type: こもれび医療保険
+    status: lapsed
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [change_payment_method, reinstate_policy, set_alerts]
+  expected_state_deltas: {payment_method_updated: true, reinstatement_status: REQUESTED, alerts_updated: true}
+- id: TPL-KL-NEWBORN-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    子どもが生まれて、家族で{{address}}に引っ越しました。住所を変更して、定期保険の受取人を{{beneficiary}}に変え、私も{{product}}に申し込みたいです。
+  - >-
+    出産と引っ越しが重なりました。住所の変更（{{address}}）、定期保険の受取人を{{beneficiary}}に変更、それから{{product}}への申込みをお願いします。
+  - >-
+    家族が増えたので、住所を{{address}}に、定期保険の受取人を{{beneficiary}}に変えて、{{product}}にも加入したいです。
+  account_state:
+    account_id: teiki_kl_0001
+    account_type: こもれび定期保険
+    customer_id: cust_kl_0001
+  param_space:
+    address: ['宮城県仙台市青葉区春日町7-21-3', '広島県広島市南区段原山崎2-5-17']
+    beneficiary: [妻, 夫]
+    product: [こもれび医療保険, こもれびがん保険]
+  gold_tool_sequence: [update_contact_info, update_beneficiary, open_account]
+  expected_state_deltas: {contact_updated: true, beneficiary_updated: true, new_account_status: OPEN}
+- id: TPL-KL-CANCERPROXY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    がんと診断されたので、がん保険の診断一時金を請求したいです。治療で手続きが難しくなるかもしれないので、指定代理請求人を{{person}}にして、支払いが済んだら通知が来るようにしてください。
+  - >-
+    がん保険の診断一時金の請求と、指定代理請求人を{{person}}にする変更をお願いします。支払いのお知らせも届くようにしたいです。
+  - >-
+    がんの治療が始まります。診断一時金の請求、指定代理請求人の{{person}}への変更、支払い時の通知の設定をお願いできますか。
+  account_state:
+    account_id: gan_kl_0001
+    account_type: こもれびがん保険
+    contract_date: '2023-06-01'
+  param_space:
+    person: [妻, 夫, 長女]
+  gold_tool_sequence: [file_claim, update_beneficiary, set_alerts]
+  expected_state_deltas: {claim_status: FILED, beneficiary_updated: true, alerts_updated: true}
+- id: TPL-KL-COOLINGOFF-SWITCH-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{days}}日前に申し込んだがん保険をクーリング・オフして、代わりにこもれび医療保険に申し込みたいです。保険料の引落し日の前に通知も欲しいです。
+  - >-
+    がん保険の申込みを撤回して、医療保険のほうに申し込み直したいです。引落し前のお知らせも設定してください。申し込んだのは{{days}}日前です。
+  - >-
+    {{days}}日前に申し込んだがん保険はクーリング・オフにして、こもれび医療保険に申し込み、引落しの通知を設定してもらえますか。
+  account_state:
+    customer_id: cust_kl_0001
+    application_id: app_kl_0002
+  param_space:
+    days: ['2', '4']
+  gold_tool_sequence: [withdraw_application, open_account, set_alerts]
+  expected_state_deltas: {application_status: WITHDRAWN, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-KL-RETIRE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:55-64]
+  opening_user_messages:
+  - >-
+    定年退職したので、個人年金保険の年金の受取方法を見直し、保険料の引落口座を{{bank_account}}に、住所を{{address}}に変更して、年金の支払日に通知が来るようにしてください。
+  - >-
+    退職に合わせて、個人年金保険の受取方法の変更、引落口座の変更（{{bank_account}}）、住所の変更（{{address}}）、支払日の通知の設定をしたいです。
+  - >-
+    退職したので、個人年金保険について四つお願いします。年金の受取方法の見直し、引落口座を{{bank_account}}に、住所を{{address}}に変更、それに支払日のお知らせです。
+  account_state:
+    account_id: kojin_kl_0001
+    account_type: こもれび個人年金保険
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+    address: ['宮城県仙台市青葉区春日町7-21-3', '広島県広島市南区段原山崎2-5-17']
+  gold_tool_sequence: [update_policy, change_payment_method, update_contact_info, set_alerts]
+  expected_state_deltas: {policy_updated: true, payment_method_updated: true, contact_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ja_JP/dynamic.yaml), not scripted templates.

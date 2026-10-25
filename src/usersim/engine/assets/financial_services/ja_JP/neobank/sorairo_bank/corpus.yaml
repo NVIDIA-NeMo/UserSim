@@ -1,0 +1,5502 @@
+schema_version: v0.1
+documents:
+- id: ffa5429c-11ec-57ce-a42b-06d41508a0fe
+  title: 普通預金：商品概要
+  body: 'そらいろ銀行の「普通預金」は、スマートフォンひとつで完結する利便性と、業界内で競争力のある高い金利を両立させた、当行のメイン口座です。
+
+
+    【主な特徴】
+
+    ■ 業界最高水準の金利：年0.45%の金利を提供し、日常的な決済と効率的な資産形成を同時に実現します。
+
+    ■ 手数料の無料枠：月2回まで、他行あて振込手数料および提携ATM出金手数料が無料です。
+
+    ■ 安心の保護制度：預金保険制度により、1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    【コストについて】
+
+    無料回数を超えたご利用の場合、以下の手数料がかかります。
+
+    ・他行あて振込手数料：145円/回
+
+    ・提携ATM出金手数料：110円/回
+
+
+    詳細は「普通預金：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9afaede3-1a1d-53ae-a7a4-418bf64e1ee0
+  title: 普通預金：普通預金の金利について
+  body: 'Q. 普通預金の金利はどのくらいですか？
+
+    A. 年0.45%の金利を適用しております。デジタルネイティブ世代の皆様に効率的な資産管理を行っていただけるよう、競争力のある金利を設定しています。
+
+
+    Q. 金利はどのように適用されますか？
+
+    A. 口座残高に対して適用され、定期的に計算されます。最新の金利情報は「普通預金：金利・料率一覧」にてご確認いただけます。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eb103409-5de2-5f7e-9a6d-331506575208
+  title: 普通預金：お申込みとご利用開始
+  body: '普通預金口座の開設は、スマートフォンアプリから最短数分で完了します。
+
+
+    【ご準備いただくもの】
+
+    ・マイナンバーカード
+
+    ・スマートフォン
+
+
+    【お手続きの流れ】
+
+    1. アプリをダウンロードし、「口座開設」を選択します。
+
+    2. マイナンバーカードのICチップをスマートフォンの読み取り位置に合わせ、オンライン本人確認（eKYC）を行います。
+
+    3. ご利用目的や職種などの必要事項を入力し、取引時確認を完了させます。
+
+    4. ログイン用のパスワードを設定し、二段階認証の登録を行います。
+
+    5. 審査完了後、アプリ内で口座開設の通知が届き、すぐにご利用いただけます。
+
+
+    お申込みの条件については、「普通預金：お申込みいただける方」をご覧ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9da6cb90-35d6-5c77-a1cf-77018fae3987
+  title: 普通預金：手数料一覧
+  body: '普通預金のご利用にかかる手数料は以下の通りです。
+
+
+    ■ 他行あて振込手数料
+
+    ・月2回まで：0円
+
+    ・3回目以降：145円/回
+
+
+    ■ 提携ATM出金手数料
+
+    ・月2回まで：0円
+
+    ・3回目以降：110円/回
+
+
+    ※無料回数は毎月1日にリセットされます。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1b00353c-d68f-50a2-a5c7-84b41a65994b
+  title: 普通預金：お手続きが完了しない・保留中のまま
+  body: '【症状】
+
+    口座開設の申し込み後、ステータスが「審査中」や「保留中」のまま進まない。
+
+
+    【考えられる原因と確認事項】
+
+    1. マイナンバーカードの読み取り不備：ICチップの読み取りが不完全だった可能性があります。
+
+    2. 本人確認書類の不鮮明：撮影した画像が不鮮明な場合、確認に時間を要します。
+
+    3. 通信環境の影響：認証処理中にネットワークが切断された可能性があります。
+
+
+    【解決方法】
+
+    ・アプリを再起動し、指示に従ってマイナンバーカードの再読み取りをお試しください。
+
+    ・通信環境の良い場所（Wi-Fi環境など）で再度お手続きください。
+
+
+    【エスカレーション】
+
+    上記を確認しても解決しない場合は、当行の専門オペレーターが個別に審査状況を確認いたします。確認後、不足書類の再提出依頼または審査完了のご案内をアプリ内通知にてお送りします。
+
+
+    手順の詳細は「普通預金：お申込みとご利用開始」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: f3da7cc8-5a29-571c-8a66-0058d707501e
+  title: 普通預金：お申込みいただける方
+  body: '普通預金口座をお申し込みいただける条件は以下の通りです。
+
+
+    ■ 条件 $\rightarrow$ 結果
+
+    ・日本国内に居住し、有効なマイナンバーカードを保有している $\rightarrow$ お申し込み可能
+
+    ・スマートフォンを所有し、当行アプリをインストールできる $\rightarrow$ お申し込み可能
+
+    ・上記いずれか1つでも満たさない $\rightarrow$ お申し込み不可'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 428d7953-3c92-5c26-84b9-8db7015b24d8
+  title: 普通預金：当社の似た商品との比較
+  body: '当行で提供している貯蓄・決済手段の比較です。
+
+
+    ■ 普通預金
+
+    金利：年0.45%
+
+    特徴：いつでも出し入れが可能で、日常的な支払いに最適です。
+
+
+    ■ 目的別口座
+
+    金利：年0.45%
+
+    特徴：普通預金と同じ金利で、最大10個まで資金を分けて管理でき、計画的な貯蓄に向いています。
+
+
+    ■ 定期預金
+
+    金利：最大年0.9%
+
+    特徴：期間を定めて預けることで、より高い金利を確実に得られます。
+
+
+    自由度を優先するなら「普通預金」、目的別に管理したいなら「目的別口座」、確実な資産形成なら「定期預金」が適しています。詳細は「目的別口座：商品概要」をご覧ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ac9e4c15-7d59-5525-9a42-7f08f11eb4b0
+  title: 普通預金：重要事項のご説明
+  body: '【法令遵守と保護制度について】
+
+    当行は金融庁の監督の下、銀行法および個人情報保護法を厳格に遵守して運営しております。本口座は預金保険制度の対象であり、当行が破綻した場合でも、預金保険機構により、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    【セキュリティについて】
+
+    不正アクセス防止のため、ログインおよび振込時には二段階認証が必須となります。機種変更時には認証の再登録が必要です。万が一、不正送金等の被害に遭われた場合は、迅速に利用停止手続きを行ってください。預金者保護法に基づき、故意や重大な過失がない限り、原則として当行が補償いたします。
+
+
+    詳細は「普通預金：不正利用からお客さまを守るために」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: dbed2f86-1066-5122-91a7-2415f0685bff
+  title: 普通預金：金利・料率一覧
+  body: '普通預金に適用される金利は以下の通りです。
+
+
+    ■ 普通預金金利（年率）：0.45%
+
+
+    本金利は、口座残高にかかわらず一律で適用されます。金利は市場動向等に基づき変動する場合があり、その際はアプリ内通知およびヘルプセンターにて速やかにご案内いたします。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 191bacfe-e5ce-5da8-bf78-806fdd0b11b9
+  title: 普通預金：実施中のキャンペーン
+  body: '【高金利提供キャンペーン】
+
+    現在、そらいろ銀行ではデジタルネイティブ層の皆様の資産管理を応援するため、普通預金の金利を年0.45%という競争力のある水準で提供しております。
+
+
+    特別な条件なく、口座をお持ちのすべてのお客さまにこの高金利を適用いたします。日々の決済口座としてご利用いただきながら、効率的に利息を得ることが可能です。
+
+
+    サービスの詳細は「普通預金：商品概要」をご覧ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 537de6b1-d2a7-52f5-b52f-3b5e6cb27ebb
+  title: 普通預金：不正利用からお客さまを守るために
+  body: 'そらいろ銀行では、大切なお資産を守るために厳格なセキュリティ体制を構築しています。普通預金をご利用の際は、以下の点にご注意ください。
+
+
+    **【当行のセキュリティ対策】**
+
+    * **厳格な本人確認**：口座開設時にマイナンバーカードのICチップ読み取りによるオンライン本人確認を必須としています。
+
+    * **二段階認証の導入**：ログイン時および振込時には、パスワード以外の認証を組み合わせる二段階認証を行い、不正アクセスを徹底的に防止します。
+
+
+    **【ご注意いただきたいこと】**
+
+    当行がメールやチャットで、暗証番号や二段階認証のコードを直接お伺いすることはございません。不審な連絡があった場合は、すぐに詳細を当行へお知らせください。
+
+
+    **【万が一のときは】**
+
+    不正送金やフィッシング詐欺の疑いがある場合は、速やかにご連絡ください。迅速に口座の利用停止と調査を行います。預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として当行が補償いたします。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e228d5a6-4a08-5e53-b981-41e1bd88d85b
+  title: 普通預金：規定・約款
+  body: '本規定は、そらいろ銀行の普通預金のご利用条件を定めるものです。サポート担当者は、顧客への案内時に以下の項目を遵守してください。
+
+
+    **1. 預金金利**
+
+    本口座には、年0.45%の金利を適用します。金利の改定が必要な場合は、事前にアプリ内等でお知らせします。
+
+
+    **2. 手数料の適用**
+
+    * **振込手数料**：月2回まで無料で提供し、3回目以降の利用については1回につき145円を課金します。
+
+    * **ATM利用手数料**：月2回まで無料で提供し、3回目以降の利用については1回につき110円を課金します。
+
+
+    **3. 口座の維持と解約**
+
+    口座開設時の取引時確認に基づき、適正な利用を求めます。解約を希望される場合は、アプリ内の手続きに従い、残高を全額出金した上で手続きを完了させてください。
+
+
+    **4. 法令遵守**
+
+    当行は銀行法および個人情報保護法を厳格に遵守し、顧客の個人情報を適切に管理します。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0ea95f33-9262-56e1-886c-1da026ed7062
+  title: 普通預金：おすすめの方と主な使い方
+  body: 'そらいろ銀行の普通預金は、日々の決済への利便性と、効率的な資産管理を両立させたい方に最適です。
+
+
+    **【このような方におすすめです】**
+
+    * **高い金利で貯蓄したい方**：0.45%という競争力のある金利を提供しており、普通に預けておくだけで効率的に資産を増やせます。
+
+    * **スマホ完結の利便性を求める方**：店舗に行かず、すべてアプリで完結するスムーズな操作性を重視するデジタルネイティブ層の方に最適です。
+
+    * **コストを抑えたい方**：月2回までの振込手数料とATM利用手数料が無料となるため、日常的な利用での負担を軽減できます。
+
+
+    **【主な活用方法】**
+
+    * **メイン口座として**：給与受取や公共料金の支払いに利用し、0.45%の金利を享受しながら、月2回までの無料枠を活用して他行へ資金を移動させる使い方が効率的です。
+
+    * **短期的な待機資金の保管**：いつでも引き出せる柔軟性を持ちながら、高い金利で運用できます。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8775fed8-1c14-5c2e-ba76-ab8d3adb2744
+  title: 普通預金：他行あて振込手数料の無料回数（月、基本）について
+  body: '**Q. 他行への振込手数料が無料になる回数は月に何回までですか？**
+
+
+    A. 普通預金口座をご利用のお客さまは、月に2回まで無料で他行あて振込をご利用いただけます。
+
+
+    **Q. 無料回数を超えた場合は、いくらの手数料がかかりますか？**
+
+
+    A. 月に3回目以降の振込からは、1回につき145円の手数料がかかります。詳細は「普通預金：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1d0b6d80-efe9-5343-bf69-6db1c93296f0
+  title: 普通預金：解約・変更・プランの切替え
+  body: '普通預金口座の解約や登録内容の変更、プランの切り替えを希望される際の手順をご案内します。
+
+
+    **【口座の解約手順】**
+
+    1. **残高の確認と移動**：口座内の残高を0円にする必要があります。他口座への振込やATM出金にて、すべてのお金を移動させてください。
+
+    2. **解約の申し出**：チャットサポートにて「口座解約」と伝えてください。
+
+    3. **本人確認**：ご案内する認証手順に従い、二段階認証による本人確認を行います。
+
+    4. **完了通知**：手続きが完了すると、アプリ内で解約完了のメッセージが表示されます。
+
+
+    **【登録内容の変更手順】**
+
+    1. **変更箇所の伝達**：住所や氏名など、変更したい内容をチャットで伝えてください。
+
+    2. **書類の提出**：変更内容に応じて、マイナンバーカードなどの最新の本人確認書類をアプリ経由で提出してください。
+
+    3. **審査と反映**：当行で確認を行い、承認後、登録情報が更新されます。
+
+
+    **【プランの切替えについて】**
+
+    プラン変更をご希望の場合は、現在の利用状況に基づき最適なプランをご案内しますので、チャットにてご相談ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ab1bc9c5-af2d-552a-b828-48296baf223b
+  title: 普通預金：想定外の手数料・金額
+  body: "お客さまから「身に覚えのない手数料が引かれている」などのご相談をいただいた場合の対応フローです。\n\n**【考えられる原因】**\n* **無料回数の超過**：月2回までの無料枠（振込およびATM利用）を超えて利用した場合、以下の手数料が自動的に課金されます。\n\
+    \    * 振込手数料：145円 / 回\n    * ATM利用手数料：110円 / 回\n* **他社サービス等の自動引き落とし**：連携している外部サービスからの課金が発生している可能性があります。\n\
+    \n**【確認ステップ】**\n1. **利用履歴の照会**：直近1か月間の振込回数とATM利用回数を確認し、無料枠の2回を超えていないか照合してください。\n\
+    2. **明細の精査**：手数料の金額が145円または110円であるかを確認し、利用タイミングと一致しているかを確認します。\n\n**【解決策とエスカレーション】**\n\
+    * **利用超過の場合**：無料枠の仕組みについて丁寧にご説明し、納得いただければ解決となります。\n* **不正利用の疑いがある場合**：至急、不正利用調査チームへ案件をエスカレーションし、口座の利用停止措置を検討してください。調査結果はお客さまへ速やかに通知します。"
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 45455f57-914b-51b2-8511-ef405e9f2eec
+  title: 普通預金：必要書類
+  body: '普通預金口座を開設いただくために必要な書類は以下の通りです。
+
+
+    | 確認項目 | 必要書類 | 確認方法 |
+
+    | :--- | :--- | :--- |
+
+    | 本人確認・住所確認 | マイナンバーカード | アプリによるICチップ読み取り（必須） |
+
+    | 取引時確認 | マイナンバーカード | オンライン本人確認による照合 |
+
+
+    **【重要】**
+
+    そらいろ銀行では、セキュリティ強化のため、マイナンバーカードのICチップ読み取りによるオンライン本人確認を必須としております。その他の書類では受付できかねますのでご了承ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4ada2978-2f38-5d0a-b2e4-eacdea602733
+  title: 普通預金：他社の一般的な商品との比較
+  body: '伝統的な金融機関の普通預金と、そらいろ銀行の普通預金を比較します。
+
+
+    | 比較項目 | 一般的な伝統的銀行 | そらいろ銀行（普通預金） |
+
+    | :--- | :--- | :--- |
+
+    | **適用金利** | 低金利（0.001%〜0.02%程度） | **0.45%**（高い競争力） |
+
+    | **店舗利用** | 店舗での手続きが可能 | **店舗なし（アプリ完結）** |
+
+    | **振込手数料** | 有料または条件付き無料 | **月2回まで無料**（以降145円） |
+
+    | **ATM手数料** | 時間外手数料などが複雑 | **月2回まで無料**（以降110円） |
+
+
+    **【どちらが向いているか】**
+
+    * **そらいろ銀行が向いている方**：スマートフォンでの操作に慣れており、高い金利で効率的に資産管理を行いたい方。店舗に行く手間を省きたい方。
+
+    * **伝統的銀行が向いている方**：対面での相談を重視し、窓口で手続きを行いたい方。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 99c0bca4-ce35-5d13-a56f-f5ad82991c71
+  title: 普通預金：リスクについてのご説明
+  body: '普通預金のご利用にあたり、以下のリスクと保護制度についてご理解ください。
+
+
+    **【預金保険制度について】**
+
+    当行は預金保険制度の対象となっております。万が一、当行が破綻した場合であっても、預金保険機構により、利息のつく預金は1金融機関につき預金者1人当たり**元本1,000万円までとその利息等**が保護されます。これにより、お客さまの資産の安心感を担保しています。
+
+
+    **【金利変動のリスク】**
+
+    普通預金に適用される0.45%の金利は、市場金利の変動や当行の判断により変更される場合があります。金利が低下した場合、期待していた利息収入が得られない可能性があります。
+
+
+    **【利便性とセキュリティ】**
+
+    スマートフォンアプリで完結する利便性を提供しておりますが、端末の紛失やパスワードの漏洩による不正利用のリスクが伴います。二段階認証を正しく設定し、安全にご利用ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 99bfacc1-db78-54fe-bdd9-575fc1625dca
+  title: 普通預金：金利・料率の決まり方と適用
+  body: '普通預金に適用される金利の決定方法と適用ルールについてご案内します（サポート担当者向け）。
+
+
+    **【適用金利】**
+
+    * **年率 0.45%**
+
+
+    **【金利の適用ルール】**
+
+    * **一律適用**：残高金額にかかわらず、すべての普通預金口座に対して一律で0.45%の金利を適用します。金額に応じた段階的な金利設定（ティア構造）はありません。
+
+    * **計算方法**：預金残高に対し日次で計算され、所定の利払日にまとめて口座へ入金されます。
+
+    * **変動の可能性**：金利は固定ではなく、経済情勢や当行の資金調達状況に応じて改定される場合があります。改定時は、アプリ内通知および公式サイトにて告知します。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: dd2e355c-dd0b-53bb-8f6a-f53bbd6a1d3a
+  title: 普通預金：ご紹介・継続利用の特典
+  body: 【2026年12月末まで】お友達をご紹介いただくと、ご紹介者様とご友人様の両方に特典を差し上げます。そらいろ銀行の普通預金なら、業界最高水準の0.45%という高い金利で効率的に資産を増やせます。さらに、月2回までの振込手数料とATM利用手数料が無料で、日常の決済を賢くサポートします。
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e7ac18e0-0593-5054-ae8c-e2a69866d70a
+  title: 普通預金：安全にご利用いただくためのポイント
+  body: 'お客さまの大切な資産を守るため、以下のポイントを必ずご確認ください。
+
+
+    **【セキュリティ強化のポイント】**
+
+    * **二段階認証の活用**: ログイン時および振込時には必ず二段階認証を行い、不正アクセスを防止してください。
+
+    * **機種変更時の対応**: スマートフォンを買い替えた際は、必ず認証の再登録をお願いいたします。
+
+    * **不審な連絡への注意**: 当行がメールやSMSで、暗証番号やパスワードを伺うことはございません。
+
+
+    万が一、不正送金などの被害に遭われた場合は、速やかに当行までご連絡ください。預金者保護法に基づき、故意や重大な過失がない限り、原則として当行が補償いたします。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 11b2390f-82c7-5f96-b634-df7107f7844f
+  title: 普通預金：規定・約款の変更
+  body: '当行は、法令の改正や経済状況の変化に伴い、普通預金の規定および約款を変更することがあります。変更の内容は、アプリ内のお知らせまたは電子メールにて事前にお知らせいたします。
+
+
+    **【変更の対象となる主な項目】**
+
+    * **適用金利**: 現在の0.45%から変動する可能性があります。
+
+    * **手数料体系**: 月2回までの無料枠や、無料回数を超えた際の振込手数料（145円）、ATM利用手数料（110円）などの改定が含まれます。
+
+
+    変更後の約款に同意いただけない場合は、口座の解約手続きを行うことができます。詳細については「普通預金：規定・約款」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: da647bf0-b5db-5942-8960-b47a113964e7
+  title: 普通預金：ご利用開始までの手順
+  body: 'サポート担当者は、お客さまに以下の手順をご案内ください。普通預金の開設はスマートフォンアプリで完結します。
+
+
+    **【ご利用開始までのフロー】**
+
+    1. **アプリのインストール**: 公式ストアからそらいろ銀行アプリをダウンロードしていただきます。
+
+    2. **本人確認手続き**: マイナンバーカードのICチップ読み取りによるオンライン本人確認（取引時確認）を必須として案内してください。
+
+    3. **口座情報の登録**: 氏名、住所、生年月日などの必要情報を入力し、口座開設を完了させます。
+
+    4. **二段階認証の設定**: セキュリティ確保のため、ログインおよび振込時に使用する二段階認証の設定を完了していただきます。
+
+
+    以上の手順が完了し、口座開設の審査が承認された時点で、0.45%の金利が適用される普通預金のご利用が可能になります。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: f75a40c5-884f-5fc1-8886-d4c0da3394a6
+  title: 普通預金：提携ATMの出金手数料の無料回数（月、基本）について
+  body: '**Q: 提携ATMでのおろしの手数料は、月に何回まで無料になりますか？**
+
+
+    A: 普通預金口座をお持ちのお客さまは、月に2回まで無料でATMをご利用いただけます。3回目以降の利用につきましては、1回あたり110円の手数料がかかります。詳細は「普通預金：手数料一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 14ae5b59-2f2d-5ff8-81c1-1cdd289fd892
+  title: 普通預金：登録内容の変更
+  body: 'ご登録内容（住所や氏名など）を変更する手順は以下の通りです。
+
+
+    1. **変更申請**: チャットまたはオンラインヘルプセンターから「登録内容の変更」を申し出てください。
+
+    2. **新情報の提示**: 変更後の情報を伝え、必要に応じて最新の本人確認書類をアプリを通じて提出してください。
+
+    3. **当行による確認**: 当行にて提出書類の内容と登録情報の整合性を確認いたします。
+
+    4. **完了通知**: 変更手続きが完了すると、アプリ内の通知にてお知らせいたします。
+
+
+    **【ご注意】**
+
+    お名前やご住所の変更など、重要な情報の変更時には、改めて取引時確認が必要となる場合がございますので、あらかじめご了承ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eaf9cf26-7c60-573e-a508-174412abf7f1
+  title: 普通預金：ログインできない・アクセスできない
+  body: 'アプリにログインできない、またはアクセスできない場合は、以下の点を確認してください。
+
+
+    **【確認事項と解決策】**
+
+    * **二段階認証の不整合**: ワンタイムパスワードが正しく入力されているか確認してください。
+
+    * **端末の変更**: 機種変更をされた場合、前端末の認証設定が残っているためログインできません。アプリの「認証再登録」から手続きを行ってください。
+
+    * **通信環境**: インターネット接続が安定しているかご確認ください。
+
+
+    **【解決しない場合】**
+
+    上記を確認してもログインできない場合は、専門のオペレーターによるオンライン相談へエスカレーションいたします。本人確認後、認証情報の初期化などの対応を行い、再ログインが可能な状態になります。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: d28afd90-c53d-5e02-b8ac-c4e1c667f89f
+  title: 普通預金：ご利用条件による違い
+  body: '普通預金の基本条件と適用内容は以下の通りです。
+
+
+    * **対象**: 本人確認（マイナンバーカードICチップ読み取り）を完了し、口座開設が承認されたすべてのお客さま
+
+    * **適用金利**: 年 0.45%
+
+    * **無料枠**: 他行あて振込 月2回まで、提携ATM出金 月2回まで
+
+    * **無料回数超過後**: 振込 145円/回、ATM出金 110円/回'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 585be092-c7bd-5e5e-9291-f3af9358a7f7
+  title: 普通預金：プランの選び方
+  body: 日々の決済と貯蓄を両立させたい方は、0.45%の金利が付与される「普通預金」が最適です。もし、旅行や車などの目的別に資金を分けて管理したい場合は、「目的別口座」を併用することをおすすめします。目的別口座でも普通預金と同じ0.45%の金利を維持しつつ、最大10個まで資金を分けて計画的に貯蓄することが可能です。
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a583d0a1-3c0d-553d-ba42-499a8b8dd705
+  title: 普通預金：個人情報の取扱い
+  body: 'そらいろ銀行では、個人情報保護法および銀行法を厳格に遵守し、お客さまの個人情報を適切に管理いたします。
+
+
+    **【個人情報の利用目的】**
+
+    * 口座開設時の取引時確認（マイナンバーカードICチップ読み取りを含む）
+
+    * 二段階認証による不正アクセス防止およびセキュリティ維持
+
+    * 法令に基づく報告および当局への提出
+
+
+    **【安全管理措置】**
+
+    お客さまのデータは高度に暗号化され、厳格なアクセス制限の下で管理されています。また、預金保険制度に基づき、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。これにより、安心してお取引いただける体制を整えております。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1700fffa-9a45-51cb-b50b-adceff6b231d
+  title: 普通預金：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「普通預金」をかたる偽のメールやSMSにより、個人情報を盗み出そうとするフィッシング詐欺が発生しています。
+
+
+    **【特にご注意いただきたい点】**
+
+    * 当行がメールやSMSで、パスワードや暗証番号、二段階認証コードを伺うことは絶対にございません。
+
+    * 「口座が凍結されました」などの不安を煽り、外部サイトへ誘導するメッセージには十分ご注意ください。
+
+
+    もし不審な連絡を受け、情報を入力してしまった場合は、直ちにお知らせください。迅速に口座の利用停止と調査を行います。預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として当行が補償いたします。
+
+
+    詳細は「普通預金：不正利用からお客さまを守るために」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0f3a4376-f8a1-5325-936c-88d3890878ba
+  title: 普通預金：限度額・制限と注意事項
+  body: '「普通預金」をご案内する際は、以下の制限および手数料の適用条件を正確にお伝えください。
+
+
+    **【金利と基本仕様】**
+
+    * 年利：0.45%
+
+
+    **【手数料の無料枠と制限】**
+
+    * 他行あて振込手数料：毎月2回まで無料です。無料回数を超えた後は、1回につき145円の手数料がかかります。
+
+    * ATM出金手数料：毎月2回まで無料です。無料回数を超えた後は、1回につき110円の手数料がかかります。
+
+
+    **【注意事項】**
+
+    * 本口座の利用には、マイナンバーカードによるオンライン本人確認が必須となります。
+
+    * ログインおよび振込時には二段階認証が適用され、セキュリティが確保されています。
+
+
+    詳細な料金体系については「普通預金：手数料一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 921cb91d-41fb-5412-ba77-285985c6d5f7
+  title: 普通預金：無料回数を超えた他行あて振込手数料について
+  body: '**Q. 他行への振込手数料が無料になる回数を超えた場合、いくらかかりますか？**
+
+
+    A. 「普通預金」では、毎月2回まで他行あて振込手数料が無料となります。この無料回数を超えてご利用いただいた場合は、1回につき145円の手数料を申し受けます。
+
+
+    手数料の詳細は「普通預金：手数料一覧」にてご確認いただけます。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: d15705a8-33c9-5789-bbd7-6b2420b9aedd
+  title: 普通預金：状況・履歴の確認
+  body: '「普通預金」の残高や入出金履歴を確認する手順をご案内します。
+
+
+    **【事前準備】**
+
+    * スマートフォンアプリにログインできる状態であること。
+
+
+    **【確認の手順】**
+
+    1. アプリのホーム画面から「普通預金」の口座を選択します。
+
+    2. 口座詳細画面が表示され、現在の最新残高が確認できます。
+
+    3. 画面下の「入出金履歴」タブをタップし、過去の取引一覧を表示します。
+
+    4. 特定の取引内容を詳しく知りたい場合は、該当する履歴項目をタップしてください。
+
+
+    **【完了の目安】**
+
+    * 取引日時、金額、相手先名などの詳細が表示されれば完了です。履歴はリアルタイムで更新されます。
+
+
+    詳細な利用方法は「普通預金：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 96464648-3598-57b4-bfcc-c3c4184c1c2e
+  title: 普通預金：お取引が拒否された・制限された
+  body: '**【症状】**
+
+    振込や出金の手続き中にエラーが表示され、取引が完了できない。
+
+
+    **【考えられる原因と確認事項】**
+
+    1. **残高不足**：振込金額や手数料（無料枠を超えている場合は145円または110円）を含めた十分な残高があるか確認してください。
+
+    2. **認証エラー**：二段階認証のコード入力に誤りがないか、または機種変更後の再登録が完了しているか確認してください。
+
+    3. **制限の適用**：犯罪収益移転防止法に基づく取引時確認が必要な場合や、不審なアクセスを検知して一時的に制限がかかっている可能性があります。
+
+
+    **【解決策】**
+
+    * 残高を補充するか、認証情報を正しく再入力してください。
+
+    * 制限がかかっている場合は、当行の専門オペレーターによるオンライン相談にて、本人確認手続きを行ってください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 48909f63-8774-5dfa-950c-19f928d989bd
+  title: 普通預金：切替えや上位プランを検討するとき
+  body: '顧客が資産運用の効率化を検討している場合は、以下の視点で提案してください。
+
+
+    * **流動性と金利の両立を求める場合**：年利0.45%の「普通預金」が最適です。
+
+    * **より高い金利で確実に貯めたい場合**：最大0.9%の金利が得られる「定期預金」への移行を提案してください。
+
+    * **目的別に資金を整理したい場合**：同じ金利で最大10個まで管理できる「目的別口座」の併用を案内してください。
+
+
+    詳細は「普通預金：当社の似た商品との比較」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 94ad854e-d17d-533e-b9bc-4b55103d54e9
+  title: 普通預金：ほかの選択肢との比較と向かない場合
+  body: '「普通預金」は、0.45%という高い金利を維持しながら、いつでも自由に出し入れができる利便性を重視した口座です。
+
+
+    **【本商品が向いている方】**
+
+    * 日常的な決済（振込や出金）と貯蓄を一つの口座で効率的に行いたい方。
+
+    * 銀行の店舗に行かず、すべてアプリで完結させたいデジタルネイティブ層の方。
+
+
+    **【本商品が向かない方】**
+
+    * **さらなる高金利を追求される方**：一定期間資金を固定できる「定期預金」の方が、最大0.9%まで金利を高められるため、長期的な資産形成には適しています。
+
+    * **厳格な予算管理をしたい方**：単一の口座では使い分けが難しいため、資金を分けて管理できる「目的別口座」の利用を推奨します。
+
+
+    使い分けの詳細は「普通預金：当社の似た商品との比較」をご覧ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 5b47d5be-d9b0-5cca-a4b6-1be012c8888c
+  title: 普通預金：無料回数を超えたATM手数料について
+  body: '**Q. ATMでの出金手数料が無料になる回数を超えた場合、いくらかかりますか？**
+
+
+    A. 「普通預金」では、提携ATMでの出金手数料が毎月2回まで無料となります。この無料回数を超えてご利用いただいた場合は、1回につき110円の手数料を申し受けます。
+
+
+    手数料の詳細については「普通預金：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: f80e855e-2950-56cf-90af-6afac424e15f
+  title: 普通預金：よくあるお手続きの流れ
+  body: '「普通預金」の開設から利用開始までの一般的な流れをご案内します。
+
+
+    **【事前準備】**
+
+    * マイナンバーカード（ICチップ読み取り可能なもの）をご用意ください。
+
+
+    **【お手続きの手順】**
+
+    1. アプリから口座開設を申し込み、マイナンバーカードのICチップを読み取り、オンライン本人確認（取引時確認）を行います。
+
+    2. 規約に同意し、登録内容を確認します。
+
+    3. 当行による審査後、口座開設完了の通知が届き、口座番号が発行されます。
+
+    4. 0.45%の金利が適用される「普通預金」口座が利用可能になります。
+
+
+    **【完了の目安】**
+
+    * アプリのホーム画面に「普通預金」の残高表示が出れば、即座に振込や入出金などの取引を開始いただけます。
+
+
+    詳細は「普通預金：ご利用開始までの手順」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7aea2fe2-f013-552d-8fc2-b30b9167d785
+  title: 普通預金：明細や記録と合わない
+  body: '**【症状】**
+
+    お客様から「アプリ上の残高や取引明細が、自身の記録と一致しない」と問い合わせがあった場合。
+
+
+    **【確認ステップ】**
+
+    1. **手数料の適用確認**：無料回数（振込2回、ATM出金2回）を超えて利用し、145円または110円の手数料が差し引かれていないか確認してください。
+
+    2. **反映タイミングの確認**：他行からの振込などの場合、処理のタイミングにより明細への反映に時間がかかっている可能性があります。
+
+    3. **未確定取引の確認**：デビット決済などの場合、一時的に「仮押さえ」の状態となり、最終的な確定金額と異なる場合があります。
+
+
+    **【対応】**
+
+    * 上記を確認しても不一致がある場合は、当行にて詳細な調査を行います。専門チームへエスカレーションし、調査結果をお客様へ通知いたします。'
+  domain: retail_banking
+  product_category: sorairo_futsu
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 84599f9b-3148-5bdc-b227-2c98cc67a101
+  title: 目的別口座：商品概要
+  body: '目的別口座は、一つの普通預金口座の中で、貯金したい目的ごとに最大10個まで資金を分けて管理できる便利なツールです。「旅行代」「車への買い替え」など、名前をつけて管理することで、計画的な資産形成をサポートします。
+
+
+    【主な特徴と条件】
+
+    ・金利：年0.45%（普通預金と同じ高い金利が適用されます）
+
+    ・作成可能数：最大10個まで
+
+    ・自動入金設定：最低1,000円から設定可能
+
+
+    日々の決済に使うお金と、将来のために貯めるお金を明確に分けることで、効率的な資産管理を実現します。詳細は「目的別口座：お申込みとご利用開始」をご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 205cdbe2-5c25-520d-8506-e9b3b0f2e05a
+  title: 目的別口座：作成できる目的別口座の数について
+  body: 'Q：目的別口座は最大でいくつまで作成できますか？
+
+
+    A：最大10個まで作成いただけます。旅行やイベント、予備費など、用途に合わせて自由にお名前をつけて管理してください。
+
+
+    詳しい仕様については「目的別口座：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 037accc8-57cc-56b9-a53b-462754431753
+  title: 目的別口座：お申込みとご利用開始
+  body: '目的別口座の作成は、アプリから簡単に行えます。以下の手順でお手続きください。
+
+
+    【準備するもの】
+
+    ・普通預金口座の残高（自動入金を利用される場合は最低1,000円以上の資金）
+
+
+    【お手続きの手順】
+
+    1. 目的別口座の作成を依頼してください。
+
+    2. 口座の「目的（名前）」を入力してください（例：〇〇旅行、貯蓄など）。
+
+    3. 初回入金額、または毎月の自動入金額を設定してください。自動入金を利用する場合、最低金額は1,000円からとなります。
+
+    4. 設定内容を確認し、完了ボタンを押してください。
+
+
+    【完了の確認】
+
+    手続き完了後、口座一覧に指定した名前の目的別口座が表示され、設定した金額が振り替えられたことを確認して完了です。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7214c631-3e1f-5da5-8607-5d8e239a662f
+  title: 目的別口座：手数料一覧
+  body: '目的別口座の作成、名称変更、および普通預金からの資金移動（振り替え）に手数料はかかりません。すべて0円でご利用いただけます。
+
+
+    なお、外部口座への振込手数料等については「普通預金：手数料一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7208cab9-1eee-57cf-bcf0-5ae67bfffacb
+  title: 目的別口座：お手続きが完了しない・保留中のまま
+  body: '目的別口座の作成手続きが「保留中」のまま完了しない場合、以下の点をご確認ください。
+
+
+    【考えられる原因と確認事項】
+
+    ・残高不足：初回入金額や自動入金設定額が、普通預金口座の現在の残高を上回っていないかご確認ください。特に自動入金を設定される場合は、最低1,000円以上の残高が必要です。
+
+    ・通信環境：電波の不安定な場所で操作された場合、処理が中断することがあります。
+
+
+    【対処法】
+
+    1. 普通預金口座の残高を改めてご確認ください。
+
+    2. 一度アプリを再起動し、再度手続きを試行してください。
+
+
+    上記を確認しても解決せず、保留状態が続く場合は、当行にて取引ログの調査を行いますので、担当オペレーターへ詳細をお知らせください。調査結果は後ほどのご連絡にて回答いたします。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 07afcab1-466f-54d3-bb17-df3188a354cc
+  title: 目的別口座：お申込みいただける方
+  body: "【お申込み条件と結果】\n・そらいろ銀行の普通預金口座を保有し、口座が有効な状態である方 \n　→ 目的別口座を最大10個まで作成いただけます。\n\
+    \n普通預金口座をお持ちでない方は、先に「普通預金：お申込みとご利用開始」の手順にて口座開設をお願いいたします。"
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4d72ed34-5bd7-5386-b795-edd046fc3f68
+  title: 目的別口座：当社の似た商品との比較
+  body: '目的別口座と定期預金を比較します。
+
+
+    ・目的別口座：金利0.45%。いつでも自由に出し入れが可能で、最大10個まで目的別に分けられます。柔軟に貯金したい方に最適です。
+
+    ・定期預金：最大0.9%の金利。期間中の原則解約不可という制約がありますが、より高い金利で確実に資産を形成したい方に適しています。
+
+
+    利便性を優先される方は目的別口座を、「定期預金：商品概要」で詳細を確認し、確実な運用を優先される方は定期預金をお選びください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e34bdeb8-afc2-5531-9fdc-509456eb5a3e
+  title: 目的別口座：重要事項のご説明
+  body: '【金利について】
+
+    適用金利は年0.45%ですが、市場金利の変動に伴い、予告なく変更される場合があります。
+
+
+    【預金保険制度について】
+
+    目的別口座を含む預金は、預金保険制度に基づき、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    【注意事項】
+
+    ・本サービスは資産管理を効率化するためのツールであり、個別の投資判断や税務、法律に関する助言を行うものではありません。
+
+    ・詳細な法令遵守事項については「法令・制度に関するご案内：預金・日常のお取引」をご参照ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b63d8c40-38fb-5095-b327-b224333a1bc0
+  title: 目的別口座：金利・料率一覧
+  body: '目的別口座に適用される金利は以下の通りです。
+
+
+    ・適用金利（年率）：0.45%
+
+
+    この金利は、作成したすべての目的別口座に一律に適用されます。普通預金と同等の金利であり、預入金額にかかわらず適用されます。金利の適用タイミングや詳細は「普通預金：金利・料率の決まり方と適用」をご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a5168062-8c45-5271-9319-58fb7d5337ee
+  title: 目的別口座：実施中のキャンペーン
+  body: '現在、目的別口座に特化した期間限定のキャンペーンは実施しておりません。
+
+
+    しかし、目的別口座では常時0.45%という競争力のある高い金利を提供しております。最大10個まで作成可能な本機能を活用し、効率的な貯蓄計画をぜひお立てください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 85f36319-66ef-5d23-9dea-db9d88031876
+  title: 目的別口座：不正利用からお客さまを守るために
+  body: '目的別口座を安全にご利用いただくために、以下の点にご注意ください。
+
+
+    **なりすましやフィッシング詐欺への対策**
+
+    当行が、メールやSMSで「口座の凍結を解除するためにパスワードを入力してください」といった要求をすることはありません。不審なリンクはクリックせず、必ず公式アプリから操作してください。
+
+
+    **二段階認証の徹底**
+
+    ログイン時および振込時には二段階認証を導入しており、不正アクセスを防止しています。認証コードを第三者に教えることは絶対におやめください。
+
+
+    **万が一の被害に遭われた場合**
+
+    速やかに当行へご連絡ください。迅速な利用停止と調査を行います。預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として当行が補償いたします。
+
+
+    また、預金保険制度により、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されますのでご安心ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 96e35ca8-1395-527f-993c-c3dd8e602b79
+  title: 目的別口座：規定・約款
+  body: '本規定は、目的別口座の利用条件を定めるものです。
+
+
+    **1. サービスの提供範囲**
+
+    お客さまは、普通預金口座に紐づく形で、最大10個まで目的別口座を作成し、資金を分けて管理することができます。
+
+
+    **2. 金利の適用**
+
+    目的別口座に預け入れた資金には、普通預金と同様の年率0.45%の金利が適用されます。金利は市場状況により変動する場合があり、その際はアプリ内でお知らせいたします。
+
+
+    **3. 自動入金機能**
+
+    自動入金設定をご利用の場合、1回あたりの最低設定金額は1,000円となります。残高不足等により入金ができなかった場合の責任は負いかねます。
+
+
+    **4. 合意の終了**
+
+    目的別口座の解約、または親口座となる普通預金口座の解約により、本契約は終了します。解約時に残高がある場合は、速やかに普通預金口座へ払い戻されます。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 2d2efe71-06c7-5f9f-8636-33ce8bb71909
+  title: 目的別口座：おすすめの方と主な使い方
+  body: '目的別口座は、「貯金したいけれど、何にいくら使うか整理したい」という方に最適です。
+
+
+    **こんな方におすすめです**
+
+    * 旅行、車などの大きな買い物に向けて計画的に貯めたい方
+
+    * 年間の税金や保険料など、将来の支払いに備えて資金を分けておきたい方
+
+    * 家計簿アプリを使わずに、アプリ内でシンプルに資金管理を行いたい方
+
+
+    **主な特徴と活用方法**
+
+    * **最大10個まで作成可能**： 「旅行」「車」「教育資金」など、目的ごとに最大10個までポケットを作れます。
+
+    * **高い金利を維持**： 分けて管理していても、普通預金と同じ年率0.45%の金利が得られるため、効率的に資産を増やせます。
+
+    * **簡単移動**： 普通預金口座と目的別口座の間で、アプリからいつでも即時に資金を移動できます。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: aa9bc78e-a379-5982-b415-31dbe14440f4
+  title: 目的別口座：普通預金の金利について
+  body: '**Q. 目的別口座に資金を分けると、金利は下がりますか？**
+
+
+    A. いいえ、下がりません。目的別口座に預けていただいた資金にも、普通預金と同じ年率0.45%の金利が適用されます。資金を分けて管理しながら、高い金利をそのまま享受いただけます。
+
+
+    詳細は「目的別口座：金利・料率一覧」をご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b2c6dfb6-65e6-54bf-8aa1-07f89184263c
+  title: 目的別口座：解約・変更・プランの切替え
+  body: '目的別口座の名称変更や、不要になった口座の解約手順をご案内します。
+
+
+    **目的別口座の名称を変更する**
+
+    1. アプリの口座一覧から、変更したい目的別口座を選択します。
+
+    2. 「設定」ボタンを押し、新しい名称を入力して保存してください。
+
+
+    **目的別口座を解約する**
+
+    1. 解約したい口座を選択し、「口座を閉じる」を選択します。
+
+    2. 口座内に残高がある場合は、まずその資金を普通預金口座へ移動させる必要があります。「全額を普通預金へ戻す」を選択してください。
+
+    3. 残高が0円になったことを確認し、「解約を確定する」を選択してください。これで解約が完了します。
+
+
+    **注意点**
+
+    * 自動入金設定をしている場合は、解約前に設定を解除してください。
+
+    * 一度解約した口座の履歴は復元できませんのでご注意ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: cb60aeb8-be57-513b-9e5f-8b17594e5ffe
+  title: 目的別口座：想定外の手数料・金額
+  body: '「目的別口座に予定していた金額が入っていない」「身に覚えのない金額が移動している」と感じた場合は、以下をご確認ください。
+
+
+    **原因1：自動入金設定の最低金額**
+
+    自動入金機能をご利用の場合、設定金額が1,000円未満になっていないかご確認ください。当行の仕様により、自動入金の最低金額は1,000円からとなっております。設定金額が下回っている場合、入金が行われません。
+
+
+    **原因2：普通預金側での不足**
+
+    自動入金は普通預金口座の残高から行われます。普通預金口座の残高が設定額に満たない場合、入金はスキップされます。
+
+
+    **解決しない場合**
+
+    アプリの明細画面で、移動履歴にエラーが表示されていないかご確認ください。それでも原因が不明な場合は、専門オペレーターへオンライン相談をご依頼ください。調査の上、不足分等の正当な処理を行います。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: cd26ad92-40f6-5b92-8f1a-1e3012d77fe0
+  title: 目的別口座：必要書類
+  body: '目的別口座は、当行の普通預金口座をお持ちの方であれば、追加の書類提出なしで即時に作成いただけます。
+
+
+    | 条件 | 必要書類 | 判定 |
+
+    | :--- | :--- | :--- |
+
+    | 普通預金口座を保有している | 不要（アプリ内で完結） | 作成可能 |
+
+    | 普通預金口座を未保有 | マイナンバーカード（ICチップ読み取り必須） | 口座開設後に作成可能 |
+
+
+    ※口座開設時には、厳格な取引時確認のため、マイナンバーカードによるオンライン本人確認が必要です。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b8b8a724-8814-5d08-9954-96ca75122853
+  title: 目的別口座：他社の一般的な商品との比較
+  body: '一般的な金融機関の「貯金箱」機能や「目的別口座」と、そらいろ銀行の目的別口座を比較します。
+
+
+    | 比較項目 | 一般的な他社商品 | そらいろ銀行 目的別口座 |
+
+    | :--- | :--- | :--- |
+
+    | **適用金利** | 低金利または0%が多い | **年率0.45%**（普通預金と同等） |
+
+    | **作成可能数** | 制限が厳しい場合がある | **最大10個まで** |
+
+    | **利便性** | 振替に時間がかかる場合がある | アプリで即時に資金移動可能 |
+
+
+    **どちらを選ぶべきか**
+
+    * **そらいろ銀行が向いている方**： 資金を細かく分けて管理しながらも、高い金利で効率的に資産を増やしたいデジタルネイティブ層の方に最適です。
+
+    * **他社が向いている方**： 対面での相談や、物理的な通帳による管理を重視される方は、伝統的な金融機関が適している場合があります。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a131d0c3-078b-530a-965a-1ec1a13b0053
+  title: 目的別口座：リスクについてのご説明
+  body: '目的別口座のご利用にあたり、以下のリスクおよび制度についてご理解ください。
+
+
+    **金利変動リスク**
+
+    適用される年率0.45%の金利は固定ではありません。経済情勢や当行の判断により、将来的に変動する可能性があります。
+
+
+    **預金保険制度について**
+
+    当行は預金保険制度の適用を受けています。万が一当行が破綻した場合、預金保険機構により、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    **資金管理上の注意**
+
+    目的別口座はあくまで資金を視覚的に分ける機能であり、法的に独立した別口座ではありません。親口座となる普通預金口座を解約された場合、全ての目的別口座も同時に解約されますのでご注意ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c531c151-c544-5b95-a76e-e2d39c9e5a62
+  title: 目的別口座：金利・料率の決まり方と適用
+  body: '目的別口座に適用される金利の仕組みについてご説明します。
+
+
+    **適用金利**
+
+    * **年率0.45%**
+
+
+    **金利の適用ルール**
+
+    * **一律適用**： 預入金額にかかわらず、全ての目的別口座に対して一律で年率0.45%が適用されます。特別なティア（段階）設定はありません。
+
+    * **計算方法**： 普通預金と同様の計算方式で算出され、定期的に利息が加算されます。
+
+    * **適用範囲**： 目的別口座に振り分けられた残高全てが対象となります。
+
+
+    金利の変更が行われる場合は、アプリ内のお知らせおよびヘルプセンターにて速やかに公表いたします。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4d61f89e-13a5-5c26-8320-ac7c8a5fe8b9
+  title: 目的別口座：ご紹介・継続利用の特典
+  body: '【期間限定キャンペーン】
+
+    2026年1月1日から2026年3月31日まで、お友だちをご紹介いただいた方と、ご紹介で「目的別口座」を開設し継続してご利用いただいた方それぞれに、特典として500円をプレゼントいたします。貯蓄の習慣化を応援する特別な機会にぜひご利用ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 05b9f87d-8644-5fb5-af6d-e2bffea9a5b6
+  title: 目的別口座：安全にご利用いただくためのポイント
+  body: '目的別口座を安全にご利用いただくために、以下の点にご注意ください。
+
+
+    ・**二段階認証の徹底**：ログイン時や振込時に導入されている二段階認証を必ず有効にし、第三者による不正アクセスを防止してください。
+
+    ・**不審な連絡への警戒**：当行がメールやSMSで、パスワードや暗証番号を直接伺うことはございません。不審なリンクは絶対にクリックしないでください。
+
+    ・**異常を感じたらすぐに報告**：身に覚えのない資金移動がある場合は、直ちにご利用停止の手続きをお願いします。
+
+
+    万が一、フィッシング詐欺などの被害に遭われた場合は、迅速にご報告ください。預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として当行が補償いたします。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: fda64e6f-bef7-53b9-844f-95e9ab469fdb
+  title: 目的別口座：規定・約款の変更
+  body: '目的別口座のご利用に関する規定および約款は、法令の改正やサービス向上のため、当行の判断により変更される場合があります。
+
+
+    **【変更の手続き】**
+
+    約款を変更する場合、変更内容および適用開始日をアプリ内のお知らせや公式サイトにて事前にお知らせいたします。周知期間を経て適用された時点で、お客さまは同意したものとみなされます。
+
+
+    **【適用される制限】**
+
+    本サービスでは、最大10個までの目的別口座の作成が可能です。また、適用金利（普通預金と同等の0.45%）などの条件が変更される場合も、同様に事前告知を行います。ご不明な点は、いつでもチャットサポートまでお問い合わせください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: df58595a-651f-526b-939e-93aa788d25c4
+  title: 目的別口座：ご利用開始までの手順
+  body: '目的別口座を使い始めるための手順をご案内します。本サービスは、普通預金口座をお持ちの方であれば、アプリ内で完結してすぐに開始いただけます。
+
+
+    **【開始までのステップ】**
+
+    1. **機能の選択**：アプリのメニューから「目的別口座」を選択します。
+
+    2. **目的の設定**：貯金したい目的（例：「旅行」「車」など）の名前を入力します。
+
+    3. **金額の設定**：最初に振り分ける金額、または自動入金の設定を行います。
+
+    4. **完了**：設定後、即座に目的別の管理画面が表示され、利用可能となります。
+
+
+    **【基本スペック】**
+
+    ・作成可能数：最大10個まで
+
+    ・適用金利：0.45%（普通預金と同金利）
+
+    ・自動入金：最低1,000円から設定可能
+
+
+    詳細は「目的別口座：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3c341238-4cbc-58ca-b7f9-f6121839ff64
+  title: 目的別口座：自動入金の最低金額について
+  body: '**Q：目的別口座への自動入金を設定する場合、最低いくらから設定できますか？**
+
+
+    A：自動入金機能をご利用いただく際は、最低1,000円から設定いただけます。少額から計画的に貯蓄を始めたい方に最適な機能です。設定方法は「目的別口座：お申込みとご利用開始」をご参照ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: bc76e3da-a430-5eaf-abd9-952f0c3a9ddb
+  title: 目的別口座：登録内容の変更
+  body: '目的別口座に設定した名前や、自動入金の金額を変更する手順をご案内します。
+
+
+    **【準備するもの】**
+
+    ・ログイン済みのスマートフォンアプリ
+
+
+    **【変更ステップ】**
+
+    1. アプリのホーム画面から、変更したい「目的別口座」を選択します。
+
+    2. 画面内の「設定」または「編集」ボタンをタップします。
+
+    3. **名称の変更**：新しい目的の名前を入力し、「保存」をタップします。
+
+    4. **入金設定の変更**：自動入金金額を変更したい場合は、金額入力欄に新しい数字（1,000円以上の金額）を入力します。
+
+    5. **確認**：変更内容が保存されたことを確認し、トップ画面に戻ります。
+
+
+    設定変更は即時に反映されます。もし変更が反映されない場合は、アプリを再起動して再度ご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c17fa2eb-2f78-5155-99eb-240d78aebbc1
+  title: 目的別口座：ログインできない・アクセスできない
+  body: '目的別口座の管理画面にアクセスできない、またはアプリにログインできない場合の対処法です。
+
+
+    **【考えられる原因と確認事項】**
+
+    1. **通信環境の不安定**：Wi-Fiまたはモバイルデータ通信が正常に動作しているかご確認ください。
+
+    2. **認証情報の不一致**：パスワードの入力ミスがないか、または二段階認証の通知が届いているか確認してください。
+
+    3. **機種変更による未登録**：機種変更後に認証の再登録を行っていない場合、セキュリティのためアクセスが制限されます。
+
+
+    **【解決策】**
+
+    ・認証エラーが続く場合は、パスワードの再設定をお試しください。
+
+    ・機種変更をされた方は、マイナンバーカードを用いた本人確認を行い、認証の再登録手続きをお願いします。
+
+
+    **【解決しない場合】**
+
+    上記を試しても解決しない場合は、専門オペレーターによるオンライン相談へエスカレーションし、個別に状況を確認させていただきます。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: cc4a1c3f-37e4-57c0-97e3-20717542622e
+  title: 目的別口座：ご利用条件による違い
+  body: "目的別口座のご利用条件は以下の通りです。\n\n・**当行の普通預金口座を保有している方** $\rightarrow$ 全ての機能（最大10個の口座作成、0.45%の金利適用）をご利用いただけます。\n\
+    ・**普通預金口座を保有していない方** $\rightarrow$ まずは「普通預金：お申込みとご利用開始」の手順に従い、口座開設をお願いいたします。"
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: d5bb28bf-e44c-51ae-9899-d63e49086367
+  title: 目的別口座：プランの選び方
+  body: '「普通預金」のみの利用か、「目的別口座」を併用するかでお悩みの方へ。どちらも金利は0.45%で変わりません。
+
+
+    ・**普通預金のみ**：シンプルに1つの口座で全資金を管理したい方向けです。
+
+    ・**目的別口座を併用**：旅行や車などの目標を立て、最大10個まで資金を分けて視覚的に管理したい方向けです。
+
+
+    計画的に貯蓄したい方は、目的別口座の活用を強くおすすめします。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 6749e1c3-24f8-5256-9564-3ab5a2e1d780
+  title: 目的別口座：個人情報の取扱い
+  body: '当行は、個人情報保護法および金融庁の監督に基づき、お客さまの個人情報を厳格に管理いたします。
+
+
+    **【目的別口座における情報の取扱い】**
+
+    本サービスで設定される「口座の目的名」などの情報は、お客さまの利便性向上および資産管理のサポートを目的として利用されます。これらの情報は、法令に基づく場合を除き、第三者に提供されることはございません。
+
+
+    **【安心の保護制度】**
+
+    目的別口座に預けられた資金は、預金保険制度の対象となります。当行が破綻した場合でも、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されますので、安心してご利用ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9936ba3a-b45f-5272-ab8a-9349e71154c1
+  title: 目的別口座：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「目的別口座」をかたる巧妙なフィッシング詐欺が発生しています。特に「特別な金利が適用される目的別口座をご案内します」や「口座の制限を解除するために認証が必要です」といった偽のメールやSMSにご注意ください。
+
+
+    **【ご注意いただきたい点】**
+
+    *   そらいろ銀行が、メールやSMSでパスワードや二段階認証のコードを伺うことは絶対にありません。
+
+    *   不審なリンクから個人情報を入力させようとするサイトは偽物です。
+
+
+    もし不審な連絡を受けたり、誤って情報を入力してしまった場合は、すぐにアプリから利用停止手続きを行うか、チャットサポートまでご連絡ください。迅速に調査し、被害を最小限に抑える対応をいたします。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: fee40b6b-1899-5de1-95e5-b330dc483f6a
+  title: 目的別口座：限度額・制限と注意事項
+  body: 'オペレーターの方は、顧客へ案内する際に以下の制限事項と仕様を正確に伝えてください。
+
+
+    **【利用限度と制限】**
+
+    *   **作成可能な口座数**：最大10個まで作成いただけます。10個に達した場合は、既存の口座を解約しない限り新しい目的別口座は作成できません。
+
+    *   **適用金利**：普通預金と同様の年0.45%が適用されます。
+
+
+    **【注意事項】**
+
+    *   目的別口座は、あくまで普通預金口座の中での「資金管理上の区分」であり、個別の口座番号は発行されません。
+
+    *   外部からの振込指定口座として目的別口座を個別に指定することはできません。一度普通預金口座に入金された後、アプリ内で振り分ける必要があります。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7ea05f02-778a-5d34-930f-14e500d0abad
+  title: 目的別口座：手数料と費用
+  body: '**Q. 目的別口座の作成や管理に手数料はかかりますか？**
+
+
+    A. いいえ、目的別口座の作成、名称変更、および普通預金との資金移動に手数料は一切かかりません。無料で最大10個まで作成し、効率的に資産管理をご利用いただけます。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0ec792c2-e00e-5d29-825e-4c9fe0a5c267
+  title: 目的別口座：状況・履歴の確認
+  body: '目的別口座の現在の残高や、過去にいくら移動させたかを確認する手順です。
+
+
+    1.  アプリのホーム画面から「目的別口座」のメニューを選択します。
+
+    2.  現在作成している口座の一覧が表示されます。確認したい目的（例：「旅行資金」など）をタップしてください。
+
+    3.  その口座の現在の残高と、年0.45%の金利が適用されていることが確認できます。
+
+    4.  画面下部の「履歴」をタップすると、普通預金からいくら移動し、いつ戻したかの履歴が日付順に表示されます。
+
+
+    **【確認のポイント】**
+
+    残高が想定と異なる場合は、自動入金設定が正しく動作しているか、または他の目的別口座へ資金を移動させていないかをご確認ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8eb0230b-ea32-5195-b17a-a62acb0b6e14
+  title: 目的別口座：お取引が拒否された・制限された
+  body: '「目的別口座から資金を戻そうとしたがエラーになる」「口座が作成できない」といった場合の確認事項です。
+
+
+    **【考えられる原因と解決策】**
+
+    *   **残高不足**：移動させようとしている金額が、その目的別口座の残高を超えていないかご確認ください。
+
+    *   **作成上限への到達**：すでに10個の目的別口座を作成している場合、新しい口座は作成できません。不要な口座を解約してから再度お試しください。
+
+    *   **二段階認証の不一致**：金額の移動時に認証エラーが出る場合は、最新の認証デバイスで操作しているかご確認ください。
+
+
+    **【解決しない場合】**
+
+    上記を確認しても解消されない場合は、当行にてアカウントの状態を確認いたします。詳細なエラーメッセージを添えてチャットにてお知らせください。専門オペレーターが調査し、制限の解除手続きを行います。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c1529c49-80ae-51d4-b152-77aab4872522
+  title: 目的別口座：切替えや上位プランを検討するとき
+  body: '顧客が「より高い金利」や「確実な貯蓄」を求めている場合の案内です。
+
+
+    *   **目的別口座**：年0.45%の金利で、いつでも自由に入出金が可能。短期・中期の目的貯金に向いています。
+
+    *   **定期預金**：期間に応じて最大0.9%の金利が得られます。一定期間資金を固定できるため、より確実な資産形成を求める方に適しています。
+
+
+    自由度を優先するなら目的別口座、金利を優先し資金をロックしても良い場合は「定期預金：商品概要」をご案内してください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8bc3280b-2bb0-532f-8572-205c121f88cf
+  title: 目的別口座：ほかの選択肢との比較と向かない場合
+  body: '目的別口座は非常に便利ですが、目的によっては他の商品の方が適している場合があります。
+
+
+    **【目的別口座が向いている方】**
+
+    *   「旅行」「車」など、複数の貯金目標を同時に管理したい方。
+
+    *   年0.45%の金利を維持しつつ、いつでも自由にお金を使いたい方。
+
+
+    **【向かない方と推奨される代替案】**
+
+    *   **より高い金利で確実に貯めたい方**：目的別口座の金利（年0.45%）よりも、最大0.9%の金利が得られる「定期預金」がおすすめです。
+
+    *   **11個以上の細かな管理をしたい方**：本サービスでは最大10個までの作成制限があるため、それ以上の区分が必要な場合は、家計簿アプリ等との併用をご検討ください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4f1ef7d7-ddf8-5452-9e40-2d0207afa675
+  title: 目的別口座：お申込みとご利用条件
+  body: '**Q. 目的別口座を利用するために、別途申し込み手続きは必要ですか？**
+
+
+    A. いいえ、別途のお申し込みは不要です。当行の普通預金口座をお持ちであれば、アプリ内のメニューからいつでも即時に作成いただけます。作成上限は10個までとなっております。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4f884e00-6f40-5578-a647-5ac72c9fadd7
+  title: 目的別口座：よくあるお手続きの流れ
+  body: "目的別口座を新しく作成し、自動的に貯金を始めるまでの流れです。\n\n1.  アプリの「目的別口座」メニューから「新しく作る」ボタンをタップします。\n\
+    2.  口座に名前を付けます（例：「2026年旅行資金」など）。\n3.  最初に移動させる金額を入力し、確定します。これで口座が作成され、年0.45%の金利が適用されます。\n\
+    4.  （任意）「自動入金設定」を選択し、毎月移動させる金額を指定します。\n    *   **注意点**：自動入金を設定する場合、最低1,000円から指定いただけます。\n\
+    5.  設定内容を確認し「完了」をタップすると、次回の指定日から自動的に普通預金から資金が振り分けられます。\n\nこれで、意識しなくても自動的に目的別の貯蓄が進む状態になります。"
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: aaee5333-792c-5711-83fd-7218a5395be0
+  title: 目的別口座：明細や記録と合わない
+  body: '顧客から「目的別口座の残高や明細が、自分の計算と合わない」と問い合わせがあった際の確認フローです。
+
+
+    **【確認すべきチェックポイント】**
+
+    1.  **内部移動の有無**：目的別口座間の資金移動は、外部への出金ではなく「内部移動」として記録されます。普通預金全体の残高は変わりませんが、個別の口座残高が変動していることを説明してください。
+
+    2.  **自動入金の実行タイミング**：設定した自動入金（最低1,000円〜）が、予定日に正しく実行されているか履歴を確認してください。
+
+    3.  **利息の付与**：年0.45%の金利に基づき付与された利息が、どのタイミングで反映されているかをご確認ください。
+
+
+    **【エスカレーション基準】**
+
+    上記を確認しても、明らかに計算が合わない（例：移動させていないのに残高が減っている等）場合は、至急システムログの調査が必要です。詳細な不一致金額と発生日を添えて、バックオフィス専門チームへ調査を依頼してください。'
+  domain: retail_banking
+  product_category: mokutekibetsu_koza
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9dad8365-59da-5c94-80c9-46c35745753c
+  title: 定期預金：商品概要
+  body: "そらいろ銀行の「定期預金」は、一定期間お金を預けることで、普通預金よりも高い金利が得られる安心の資産形成商品です。\n\n**【商品概要】**\n\
+    - **最低預入金額**：1,000円から\n- **適用金利**：\n  - 6か月定期：0.7%\n  - 1年定期：0.9%\n\n**【安心のポイント】**\n\
+    預金保険制度の対象となっており、当行が破綻した場合でも、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。\n\
+    \n少額からでも確実な資産形成を始めたい方に最適です。詳細な金利については「定期預金：金利・料率一覧」をご確認ください。"
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8bf7db81-d36f-5cdb-891e-ab89c2a1a715
+  title: 定期預金：6か月ものの金利について
+  body: '**Q：6か月定期預金の金利はいくらですか？**
+
+
+    A：年0.7%の金利が適用されます。短期間で効率的に資産を増やしたい方におすすめのプランです。なお、より高い金利をご希望の場合は、1年定期（0.9%）もご検討ください。
+
+
+    詳細は「定期預金：金利・料率一覧」に記載しております。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: f64c4b25-87db-53a9-930d-dcb5411720fc
+  title: 定期預金：お申込みとご利用開始
+  body: '定期預金のお申込みは、アプリからいつでも簡単に行っていただけます。
+
+
+    **【ご準備いただくもの】**
+
+    - そらいろ銀行の普通預金口座
+
+    - 預入希望額（最低1,000円以上）
+
+
+    **【お手続きの手順】**
+
+    1. アプリの定期預金メニューから、預け入れたい金額（1,000円〜）を入力します。
+
+    2. 預入期間（6か月または1年）を選択します。
+
+    3. 資金を移動させる普通預金口座を指定し、内容を確認します。
+
+    4. 「確定」を選択すると、即座に定期預金口座が開設されます。
+
+
+    **【完了の確認】**
+
+    お手続き後、アプリのトップ画面または口座一覧に「定期預金」が表示され、指定した金額が反映されていれば完了です。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eb7869d9-2cd4-5441-aff4-fde6fa253783
+  title: 定期預金：手数料一覧
+  body: '定期預金に関する手数料は以下の通りです。
+
+
+    - **口座開設手数料**：0円
+
+    - **預入手数料**：0円
+
+    - **満期解約手数料**：0円
+
+    - **中途解約手数料**：0円
+
+
+    ※中途解約時に手数料はかかりませんが、適用金利が変更となる場合がございます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 03eef751-eb3e-5133-b2fb-b6571096d34e
+  title: 定期預金：お手続きが完了しない・保留中のまま
+  body: '定期預金のお申込み中に画面が停止したり、「保留中」のまま進まない場合の対処法をご案内します。
+
+
+    **【考えられる原因と確認事項】**
+
+    - **資金不足**：普通預金口座の残高が、預入希望額（最低1,000円〜）を下回っていないかご確認ください。
+
+    - **通信環境**：電波の不安定な場所で操作されている可能性があります。
+
+
+    **【解決方法】**
+
+    1. アプリを一度完全に終了し、再起動して再度お手続きをお試しください。
+
+    2. 普通預金口座に十分な残高があることを確認してください。
+
+
+    **【解決しない場合】**
+
+    上記を試しても改善しない場合は、当行にて調査いたします。状況を確認後、専門チームが原因を特定し、アプリ内通知にて結果をご報告いたします。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 45cd316c-04f1-5508-a6f3-4a0df187ca5d
+  title: 定期預金：お申込みいただける方
+  body: "定期預金のお申込み条件は以下の通りです。\n\n- **そらいろ銀行の口座を保有している** $\rightarrow$ お申込みいただけます\n\
+    - **預入金額が1,000円以上である** $\rightarrow$ お申込みいただけます\n- **上記いずれかを満たさない** $\rightarrow$\
+    \ お申込みいただけません\n\nまずは「普通預金：商品概要」をご参照いただき、口座開設をお願いいたします。"
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 394529e0-e8a4-5253-b51b-d88c25312aff
+  title: 定期預金：当社の似た商品との比較
+  body: '目的や期間に合わせて、以下の商品からお選びください。
+
+
+    - **定期預金**：金利を重視する方に。6か月（0.7%）または1年（0.9%）の期間、資金を固定して効率的に増やせます。
+
+    - **目的別口座**：柔軟性を重視する方に。普通預金と同じ金利（0.45%）で、最大10個まで用途別に分けて管理できます。
+
+
+    確実に資産を増やしたい場合は「定期預金」、使い道を決めつつ貯めたい場合は「目的別口座」が適しています。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 267c5b5a-fe95-55cd-88dd-a7df2f88dd6e
+  title: 定期預金：重要事項のご説明
+  body: '定期預金のご利用にあたり、以下の重要事項を必ずご確認ください。
+
+
+    **【預金保険制度について】**
+
+    当行は預金保険制度の加入金融機関です。預金保険法に基づき、利息のつく預金は、1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    **【金利と税金について】**
+
+    - 適用金利は6か月 0.7%、1年 0.9%（税引前）です。
+
+    - お受取となる利息には、所得税および住民税などの税金が課せられます。
+
+
+    **【中途解約について】**
+
+    満期日前に解約される場合は、当初の適用金利ではなく、中途解約利率が適用されます。あらかじめご了承ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8cd28e21-c5d7-5d5a-a560-31db95ddc15e
+  title: 定期預金：金利・料率一覧
+  body: '定期預金の適用金利は以下の通りです。すべての預入金額に対して一律の金利が適用されます。
+
+
+    - **6か月定期**：年 0.7%
+
+    - **1年定期**：年 0.9%
+
+
+    ※金利は年率（税引前）です。市場金利の変動に伴い、予告なく変更となる場合がございます。最新の金利はアプリ内でご確認いただけます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eebd9fda-b7d0-523f-a52a-7526776d4739
+  title: 定期預金：実施中のキャンペーン
+  body: '**【2026年 資産形成応援キャンペーン】**
+
+
+    現在、初めて定期預金をご利用いただくお客さまを対象に、競争力のある金利を提供しております。
+
+
+    - **1年定期預金**：年 0.9%
+
+    - **6か月定期預金**：年 0.7%
+
+
+    対象のお客さまは、最低1,000円からこの金利で資産形成をスタートいただけます。ぜひこの機会にご活用ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1fea39d5-8d46-5e37-9fa5-370bd9ceed9c
+  title: 定期預金：不正利用からお客さまを守るために
+  body: 'そらいろ銀行では、大切なお資産を守るため、ログイン時および振込時に「二段階認証」を必須としています。定期預金の解約や資金移動の際は、必ずこの認証が行われますので、認証コードを第三者に教えないでください。
+
+
+    **ご注意いただきたい点**
+
+    * 銀行員が電話やメールで、暗証番号や認証コードを聞くことは絶対にありません。
+
+    * 不審なメールのリンクから個人情報を入力しないようご注意ください。
+
+
+    万が一、不正利用の疑いがある場合は、すぐにアプリから利用停止のお手続きをお願いいたします。預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として銀行が補償いたします。また、預金保険制度により、元本1,000万円までとその利息等が保護されますのでご安心ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 18faff9d-fe94-50e9-8dd5-307aeab083a0
+  title: 定期預金：規定・約款
+  body: '本定期預金のご利用にあたっては、以下の規定を適用します。
+
+
+    **1. 預入条件**
+
+    最低預入金額は1,000円とします。預入金額は1円単位で指定いただけます。
+
+
+    **2. 適用金利**
+
+    預入期間に応じて、以下の年利率を適用します。
+
+    * 6か月：0.7%
+
+    * 1年：0.9%
+
+    金利は預入時に決定し、満期まで変更されません。
+
+
+    **3. 解約と返金**
+
+    満期前解約の場合、適用金利が変更されることがあります。解約手続き完了後、元本および利息（税引後）を普通預金口座へ払い戻します。
+
+
+    **4. 預金保護**
+
+    預金保険制度に基づき、1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    規定の変更がある場合は、アプリ内のお知らせにて事前に通知いたします。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 47e2e19a-5f0e-546a-bd58-f9ba47c4769b
+  title: 定期預金：おすすめの方と主な使い方
+  body: '「定期預金」は、使う予定のない資金を安全に、かつ効率的に増やしたい方に最適な商品です。
+
+
+    **このような方におすすめです**
+
+    * 1,000円からという少額から資産形成を始めたい方
+
+    * 普通預金よりも高い金利で、確実にお金を貯めたい方
+
+    * 6か月や1年という期間を決めて、計画的に貯蓄したい方
+
+
+    **商品の特徴**
+
+    * **競争力のある金利**：期間に応じて年0.7%（6か月）または年0.9%（1年）の金利を提供します。
+
+    * **少額から開始可能**：最低1,000円から預け入れが可能です。
+
+    * **シンプルな管理**：スマートフォンアプリで完結するため、いつでも残高や満期日を確認できます。
+
+
+    日々の決済には「普通預金：商品概要」でご紹介している普通預金を併用し、貯蓄分を定期預金に分けることで、効率的な資産管理が実現します。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a2544597-9bcc-5306-9040-a5d714d3ee29
+  title: 定期預金：1年ものの金利について
+  body: '**Q. 1年ものの定期預金の金利はどのくらいですか？**
+
+
+    A. 1年ものの定期預金の適用金利は、年0.9%です。これは預入時に適用される金利であり、満期までこの利率で運用されます。詳細については「定期預金：金利・料率の決まり方と適用」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 37710242-f948-5e45-846d-5324570d9e9e
+  title: 定期預金：解約・変更・プランの切替え
+  body: '定期預金の解約や期間の変更は、アプリから以下の手順でお手続きいただけます。
+
+
+    **お手続きの流れ**
+
+    1. アプリの口座一覧から、対象の定期預金を選択し、「解約」または「プラン変更」を依頼してください。
+
+    2. 二段階認証画面が表示されますので、認証コードを入力して本人確認を完了させてください。
+
+    3. 解約の場合、現在の解約時点での適用金利に基づいた受取金額（元本＋利息）が表示されますので、内容を確認して確定してください。
+
+    4. 手続きが完了すると、即座に指定の普通預金口座へ資金が振り込まれます。
+
+
+    **完了の確認**
+
+    手続き完了後、アプリの取引履歴に「定期預金解約」として金額が記載され、普通預金の残高が増加していれば完了です。プラン変更の場合は、新しく設定した期間と金利が詳細画面に反映されます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3efd0928-a852-585b-9b96-ff58687daeea
+  title: 定期預金：想定外の手数料・金額
+  body: '「解約時の受取金額が予想より少ない」と感じられた場合は、以下の点をご確認ください。
+
+
+    **考えられる原因と確認事項**
+
+    1. **税金の差し引き**：利息には所得税および地方税がかかります。表示金額は税引後の金額となっているかご確認ください。
+
+    2. **中途解約による金利変更**：満期前に解約された場合、当初の約定金利（0.7%または0.9%）ではなく、中途解約者向けの低い金利が適用されるため、利息額が減少します。
+
+
+    **解決方法**
+
+    アプリの「取引明細」から、適用された正確な利息額と税額をご確認ください。
+
+
+    **エスカレーションについて**
+
+    明細を確認しても計算が合わない場合は、専門のオペレーターへお問い合わせください。弊社にて再計算を行い、正当な金額であるか、または処理に不備がなかったかを調査し、結果をアプリ内メッセージで回答いたします。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 46b233c4-7719-5c92-a341-29d885a683c3
+  title: 定期預金：必要書類
+  body: '定期預金のご開設に必要な書類は以下の通りです。
+
+
+    * **本人確認書類**：マイナンバーカード（必須）
+
+    * **確認方法**：スマートフォンアプリによるICチップ読み取り（オンライン本人確認）
+
+
+    すでにそらいろ銀行の普通預金口座をお持ちの方は、追加の書類提出なしで、アプリ内で完結して定期預金をご開設いただけます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 21fa0421-18a8-53bb-b5c3-f6e40864435b
+  title: 定期預金：他社の一般的な商品との比較
+  body: '伝統的な金融機関の定期預金と比較して、当行はデジタル完結による低コスト運営を活かし、高い金利（6か月 0.7%、1年 0.9%）を提供しています。
+
+
+    * **金利**：他社では0.1%以下の低金利が一般的ですが、当行は競争力のある高水準な金利を実現しています。
+
+    * **利便性**：店舗への訪問や書類への押印は一切不要で、アプリで完結します。
+
+    * **少額運用**：1,000円から預け入れが可能であり、少額からでも効率的に資産を増やせます。
+
+
+    高い金利と手続きの簡便さを求める方に最適です。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3298249b-adb9-5a92-8978-ca6fa63d0bc5
+  title: 定期預金：リスクについてのご説明
+  body: '定期預金をご利用いただくにあたり、以下のリスクをご理解ください。
+
+
+    **1. 流動性リスク（資金拘束）**
+
+    定期預金は、あらかじめ定めた期間（6か月または1年）資金を預ける商品です。満期前に解約することは可能ですが、その場合は当初の約定金利（0.7%または0.9%）よりも低い金利が適用されるため、期待していた利息が得られない場合があります。
+
+
+    **2. インフレリスク**
+
+    物価が上昇した場合、預金金利を上回るペースで物価が上がると、実質的な資産の価値が目減りする可能性があります。
+
+
+    **3. 預金保護について**
+
+    当行は預金保険制度の対象となっております。万が一、当行が破綻した場合であっても、預金保険機構により、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9efae040-1254-561d-9780-91d0e64bcba3
+  title: 定期預金：金利・料率の決まり方と適用
+  body: '定期預金の金利は、預入時に選択した期間に応じて以下の固定金利が適用されます。
+
+
+    * **6か月定期預金**：年 0.7%
+
+    * **1年定期預金**：年 0.9%
+
+
+    金利は一律で適用され、預入金額による変動（ティア構造）はありません。最低預入金額の1,000円以上であれば、どなたでも上記の金利を適用いただけます。金利は預入時点の利率で確定し、満期まで維持されます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 5e323da4-e641-507e-9145-1a36a322605f
+  title: 定期預金：ご紹介・継続利用の特典
+  body: '【ご紹介キャンペーン実施中】
+
+    期間：2026年1月1日から2026年3月31日まで
+
+
+    ご友人のご紹介で定期預金を開設いただくと、最大0.9%の高金利に加え、ご紹介者様とご友人様それぞれに500円のキャッシュバックをプレゼントいたします。1,000円から始められる確実な資産形成を、ぜひこの機会にご体験ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ab85a3a5-34c4-5ddc-8d63-eea521c22d7d
+  title: 定期預金：安全にご利用いただくためのポイント
+  body: '定期預金を安心してお取引いただくために、以下のポイントを必ずご確認ください。
+
+
+    **セキュリティの徹底**
+
+    ・ログイン時および振込時には、必ず二段階認証をご利用ください。
+
+    ・機種変更の際は、速やかに認証の再登録をお願いいたします。
+
+
+    **不審な連絡への注意**
+
+    ・当社がメールやSMSで、暗証番号やパスワードを伺うことは一切ございません。
+
+    ・「金利をさらに引き上げるため」などの理由で外部サイトへ誘導し、個人情報を求めるフィッシング詐欺にご注意ください。
+
+
+    **異常を感じたら**
+
+    万が一、身に覚えのない取引や不審な通知があった場合は、直ちにご報告ください。迅速に口座の利用停止と調査を行います。預金者保護法に基づき、故意や重大な過失がない限り、原則として当行が補償いたします。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 11d06639-a25f-5072-ab6a-896938aa303f
+  title: 定期預金：規定・約款の変更
+  body: '定期預金に関する規定および約款の変更についてご案内いたします。
+
+
+    **変更の手続き**
+
+    当行は、法令の改正や経済状況の変化に伴い、規定や約款を変更することがあります。変更の内容は、アプリ内通知またはご登録のメールアドレスにて事前にお知らせいたします。
+
+
+    **金利の適用について**
+
+    ・6か月もの（0.7%）および1年もの（0.9%）の金利は、預入時の約定に基づき適用されます。
+
+    ・約定後の金利変更は原則として行われませんが、規定の変更により適用条件が変わる場合は、事前通知の上で実施いたします。
+
+
+    **合意と解約**
+
+    変更後の規定に同意いただけない場合は、本商品を解約することが可能です。解約手続きの詳細については、「定期預金：解約・変更・プランの切替え」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 614a55f7-544a-5c35-9f27-b9548eb52e55
+  title: 定期預金：ご利用開始までの手順
+  body: '【オペレーター用：定期預金開設フロー】
+
+    顧客が定期預金を利用開始するまでの手順は以下の通りです。必ず必要条件を確認してください。
+
+
+    **1. 準備確認**
+
+    ・普通預金口座（sorairo_futsu）が開設済みであること。
+
+    ・普通預金残高が最低預入金額の1,000円以上あること。
+
+
+    **2. プランの選択**
+
+    顧客の希望に合わせて、以下のいずれかの期間を選択していただきます。
+
+    ・6か月もの：金利0.7%
+
+    ・1年もの：金利0.9%
+
+
+    **3. 預入手続き**
+
+    ・顧客に預入金額（1,000円以上の整数値）を確認し、手続きを完了させます。
+
+    ・普通預金から定期預金口座へ資金が移動したことを確認し、完了メッセージを伝えてください。
+
+
+    **4. 確認事項**
+
+    ・預金保険制度により、元本1,000万円までとその利息が保護されることを案内してください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: deb6821b-a79e-5aec-abc1-85d2f2691530
+  title: 定期預金：最低預入金額について
+  body: '**Q: 定期預金を始めるには、最低いくらから預け入れる必要がありますか？**
+
+
+    A: 定期預金は、1,000円からお預け入れいただけます。少額からでも、6か月もの（0.7%）や1年もの（0.9%）といった競争力のある金利で資産形成を始めていただけます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 37e281e5-5614-5726-8840-542ed7bf9fbb
+  title: 定期預金：登録内容の変更
+  body: '定期預金に紐づく登録内容（受取人などの設定）を変更する手順をご案内します。
+
+
+    **事前準備**
+
+    ・ご本人様確認が完了しているスマートフォンアプリを準備してください。
+
+
+    **変更手順**
+
+    1. アプリ内の定期預金詳細画面から、「登録内容の変更」を依頼してください。
+
+    2. 変更したい項目（例：満期時の自動更新設定など）を指定し、新しい内容を伝えてください。
+
+    3. 当行にて内容を確認し、変更手続きを行います。
+
+    4. 完了後、アプリの通知またはメールで変更完了のお知らせが届きます。
+
+
+    **確認ポイント**
+
+    ・変更後、詳細画面に正しい内容が反映されていることをご確認ください。もし不備がある場合は、すぐにお知らせください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: d42e2f81-275c-5215-8bd1-f3494da41d31
+  title: 定期預金：ログインできない・アクセスできない
+  body: 'アプリにログインできず、定期預金の残高や金利（0.7%または0.9%）が確認できない場合の対処法です。
+
+
+    **1. 通信環境の確認**
+
+    ・Wi-Fiやモバイルデータ通信が安定しているかご確認ください。一度機内モードをオン・オフにすると改善する場合があります。
+
+
+    **2. 二段階認証の不整合**
+
+    ・機種変更後に認証の再登録を行っていない場合、ログインが制限されます。この場合は、デバイスの再登録手続きが必要です。
+
+
+    **3. アプリのバージョン確認**
+
+    ・最新バージョンが適用されているか、アプリストアでご確認ください。
+
+
+    **解決しない場合**
+
+    上記を確認しても解消されない場合は、当行でアカウントの状態を確認いたします。本人確認後、専門のオペレーターが認証のリセットまたは再登録をサポートし、アクセスを復旧させます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: bd8d6f62-4db5-5e0d-bf1f-7829080506db
+  title: 定期預金：ご利用条件による違い
+  body: "【定期預金 ご利用条件一覧】\n\n・普通預金口座を保有している $\rightarrow$ 1,000円以上の預入で定期預金を開設可能\n・普通預金口座を保有していない\
+    \ $\rightarrow$ 先に普通預金の開設が必要です\n・預入金額が1,000円未満 $\rightarrow$ 定期預金の開設はできません"
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e1860449-5721-5200-8b7a-9b2cdfeddb49
+  title: 定期預金：プランの選び方
+  body: '定期預金では、期間に応じて2つのプランからお選びいただけます。
+
+
+    **・6か月もの（金利 0.7%）**
+
+    半年後に資金を利用する予定がある方や、まずは短期間で試したい方に適しています。
+
+
+    **・1年もの（金利 0.9%）**
+
+    より高い金利で効率的に資産を増やしたい方、1年以上は使う予定のない余裕資金を運用したい方に最適です。
+
+
+    どちらのプランも1,000円からご利用いただけます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9280bffd-4e6d-5b79-8213-4fb045ebc249
+  title: 定期預金：個人情報の取扱い
+  body: '当行は、銀行法および個人情報保護法を厳格に遵守し、お客様の個人情報を適切に管理いたします。
+
+
+    **情報の利用目的**
+
+    定期預金の口座管理、金利（0.7%または0.9%）の計算、および法令に基づく報告などの目的のみに利用いたします。
+
+
+    **第三者提供の制限**
+
+    法令に基づく場合を除き、お客様の同意なく個人情報を第三者に提供することはありません。
+
+
+    **預金保険制度について**
+
+    本商品は預金保険制度の対象です。当行が破綻した場合でも、預金保険機構により、利息のつく預金として1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。これにより、お客様に安心してお預けいただける体制を確保しております。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: cb95b1a1-d793-5c6a-95d7-fe8d5f5c5cd2
+  title: 定期預金：この商品をかたる詐欺にご注意ください
+  body: '定期預金をかたる巧妙な詐欺にご注意ください。特に、「短期間で相場を大きく上回る高金利を保証する」といった勧誘メールやSMSには十分ご注意ください。当行の定期預金金利は最大で0.9%であり、これを超える不自然に高い金利を提示して送金を促すものは詐欺の可能性が非常に高いです。
+
+
+    **ご注意いただきたい点**
+
+    ・そらいろ銀行が、メールや電話でパスワードや暗証番号、二段階認証コードを伺うことは絶対にございません。
+
+    ・「特別なプラン」への案内として、外部サイトへの誘導や個人情報の入力を求めることはございません。
+
+
+    もし不審な連絡を受けたり、誤って情報を伝えてしまった場合は、すぐに利用停止の手続きを行ってください。迅速な対応が被害を最小限に抑えます。詳細なリスクについては「定期預金：リスクについてのご説明」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 31c25484-5a47-554b-b918-611f9789983b
+  title: 定期預金：限度額・制限と注意事項
+  body: '定期預金をご利用いただく際の制限および重要な注意事項は以下の通りです。
+
+
+    **ご利用制限**
+
+    ・最低預入金額：1,000円からお申し込みいただけます。1,000円未満の金額では口座を開設することができません。
+
+
+    **預金保護について**
+
+    ・本商品は預金保険制度の対象です。当行が破綻した場合でも、預金保険機構により、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されますので、安心してご利用ください。
+
+
+    **注意事項**
+
+    ・原則として満期まで資金を預ける商品です。中途解約をされる場合は、適用金利が変更となることがございます。
+
+    ・口座開設時には、マイナンバーカードによるオンライン本人確認を必須としております。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8071d408-4988-5e80-a33d-a2cda7c7efbb
+  title: 定期預金：手数料と費用
+  body: 'Q：定期預金の口座開設や解約に手数料はかかりますか？
+
+    A：いいえ、定期預金の開設および満期による解約に手数料は一切かかりません。0円でご利用いただけます。
+
+
+    Q：運用中に費用が発生することはありますか？
+
+    A：口座維持などの手数料はございません。安心してお使いください。その他の手数料については「手数料・料金のご案内」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 773bf73a-926a-5b11-a7f3-c14fa26c45f4
+  title: 定期預金：状況・履歴の確認
+  body: 'お手持ちの定期預金の運用状況や履歴を確認する手順をご案内します。
+
+
+    1. 私たちに、確認したい定期預金口座の番号、または預け入れ期間（6か月もの、1年もの）をお知らせください。
+
+    2. 私たちがシステムより、現在の預入金額、適用されている金利（0.7% または 0.9%）、および満期日を照会します。
+
+    3. 照会した最新の状況をお客さまに提示し、現在の運用内容についてご確認いただきます。
+
+    4. 必要に応じて、これまでについた利息の計算履歴や、次回満期時の予定金額についてご説明いたします。
+
+
+    上記の手順により、アプリを開かなくても現在の資産状況を正確に把握することが可能です。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a5aea6a2-b259-5f7b-9ed2-ab00b900a80b
+  title: 定期預金：お取引が拒否された・制限された
+  body: '定期預金の開設や解約、金額変更などの操作ができない場合の対処法です。
+
+
+    **考えられる原因とチェック事項**
+
+    ・**預入金額の不足**：預け入れ金額が最低金額の1,000円に満たない場合、開設手続きが拒否されます。普通預金残高をご確認ください。
+
+    ・**本人確認の未完了**：マイナンバーカードによる取引時確認が最新の状態でない場合、制限がかかることがあります。
+
+    ・**二段階認証の不一致**：機種変更後などに認証情報の再登録が行われていない場合、セキュリティ保護のため取引が制限されます。
+
+
+    **解決策**
+
+    ・不足分を普通預金へ入金し、再度1,000円以上の金額で手続きを行ってください。
+
+    ・認証に問題がある場合は、最新のデバイスで再登録の手続きをお願いします。
+
+
+    解決しない場合は、私たちが詳細なエラーログを調査し、必要に応じて専門チームへエスカレーションいたします。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ec7466b7-9219-52ed-bcb3-1614f8d64c42
+  title: 定期預金：切替えや上位プランを検討するとき
+  body: '運用期間の変更を検討される際は、金利の違いをご確認ください。
+
+
+    ・**6か月もの**：金利 0.7%。半年後に資金を利用する予定がある方、または短期間で様子を見たい方に適しています。
+
+    ・**1年もの**：金利 0.9%。より高い利回りを優先し、1年間資金を固定できる方に最適です。
+
+
+    より高い金利を求める場合は、1年ものへの切り替えがおすすめです。詳細は「定期預金：商品概要」をご参照ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4c7ea357-1ac2-5a4a-9afe-73d64897c5ff
+  title: 定期預金：ほかの選択肢との比較と向かない場合
+  body: 'お客様の資産管理目的により、最適な商品は異なります。定期預金と他の選択肢を比較してください。
+
+
+    **普通預金（そらいろ普通預金）との比較**
+
+    ・金利：普通預金は0.45%ですが、定期預金は0.7%（6か月）または 0.9%（1年）と高い金利を提供します。
+
+    ・自由度：普通預金はいつでも出金可能ですが、定期預金は満期まで預けることが前提となります。
+
+
+    **定期預金が向かない方**
+
+    ・急な出費に備えて、いつでも全額を自由に引き出したい方（→普通預金や目的別口座がおすすめです）。
+
+    ・1,000円未満の少額から貯蓄を始めたい方。
+
+
+    **定期預金がおすすめの方**
+
+    ・使う予定のない資金を、普通預金よりも高い金利で効率的に増やしたい方。確実な資産形成を求める方に最適です。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 6b7270bc-7cec-5149-871d-7a86665fc55b
+  title: 定期預金：お申込みとご利用条件
+  body: 'Q：定期預金を始めるのに必要な最低金額はいくらですか？
+
+    A：最低預入金額は1,000円からとなっております。
+
+
+    Q：申し込みに特別な条件はありますか？
+
+    A：当行の普通預金口座をお持ちの方であれば、どなたでもアプリから簡単にお申し込みいただけます。詳細は「定期預金：お申込みいただける方」をご確認ください。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 6a23fbf4-abcc-5c74-80cf-204c0459fc15
+  title: 定期預金：よくあるお手続きの流れ
+  body: '定期預金を開設する際の手続きの流れをご案内します。
+
+
+    1. まず、運用したい期間を「6か月（金利 0.7%）」か「1年（金利 0.9%）」からお選びください。
+
+    2. 次に、預け入れたい金額を教えてください。最低 1,000円から設定可能です。
+
+    3. 私たちが、選択された条件に基づいた満期日と、満期時に受け取れる概算利息を提示します。
+
+    4. 内容にご同意いただいた後、普通預金口座から指定の金額を定期預金口座へ振り替えます。
+
+    5. 振り替えが完了し、口座が開設されたことを私たちが通知いたします。
+
+
+    以上のステップで、簡単にご利用を開始いただけます。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4bbc855f-b55f-53f1-affa-0b43b16c5dbb
+  title: 定期預金：明細や記録と合わない
+  body: '「アプリ上の残高や利息の計算結果が、自分の想定と異なる」という場合、以下の点をご確認ください。
+
+
+    **考えられる原因**
+
+    ・**税金の控除**：利息には所得税および住民税がかかります。提示されている金額が「税引き後」であるため、計算上の額より少なく見えることがあります。
+
+    ・**日割り計算の影響**：利息は日単位で計算されるため、預け入れ日によって端数が発生します。
+
+
+    **解決の手順**
+
+    1. まず、私たちが利息の計算根拠となる「税引き前金額」と「控除された税額」の内訳を提示します。
+
+    2. お客さまにご自身の計算と照らし合わせていただき、相違点があるか確認します。
+
+    3. それでも解決しない、または計算に誤りがあると思われる場合は、専門のオペレーターによるオンライン相談へエスカレーションし、詳細な再照会を行います。'
+  domain: retail_banking
+  product_category: sorairo_teiki
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c886cadd-113d-5d51-9673-878c97c43e4c
+  title: そらいろVisaデビット：商品概要
+  body: 'そらいろVisaデビットは、お支払いの瞬間に口座から代金が引き落とされる、便利で透明性の高いVisaデビットカードです。クレジットカードのような後払いの心配がなく、日々の支出をリアルタイムで管理できます。
+
+
+    【本商品の特徴と条件】
+
+
+    ・年会費：0円で、どなたでも永年無料でご利用いただけます。
+
+    ・キャッシュバック：ご利用金額の0.8%を還元し、効率的な資産管理をサポートします。
+
+    ・1日あたりの利用限度額：300,000円までご利用いただけます。
+
+    ・海外利用手数料：海外でのご利用時には2%の手数料がかかります。
+
+
+    日々の決済をシンプルにしたい方や、支払いのたびにポイント以上の還元を求めるデジタルネイティブ層の方に最適なカードです。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a3573674-2c81-513e-a9b5-f96a54df8135
+  title: そらいろVisaデビット：年会費について
+  body: '【質問】そらいろVisaデビットを利用する際、年会費はかかりますか？
+
+
+    【回答】いいえ、年会費は0円です。お申し込みからご利用期間中、ずっと無料で安心してお使いいただけます。維持コストを気にせず、Visa加盟店でのショッピングやサービス利用にご活用ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 88a7919d-be1c-5390-809d-e1c5f944e8d9
+  title: そらいろVisaデビット：お申込みとご利用開始
+  body: 'そらいろVisaデビットのお申込みからご利用開始までの手順をご案内します。
+
+
+    【ご準備いただくもの】
+
+    ・マイナンバーカード（ICチップ読み取りが必要です）
+
+
+    【お手続きの流れ】
+
+    1. スマートフォンアプリのメニューから「カードを申し込む」を選択してください。
+
+    2. マイナンバーカードをスマートフォンにかざし、ICチップによるオンライン本人確認を行ってください。これにより、厳格な取引時確認が完了します。
+
+    3. 登録内容を確認し、発行を確定させてください。
+
+    4. 数日後、ご自宅にカードが届きます。カード到着後、アプリ内で「利用開始」の手続きを行ってください。
+
+
+    以上の手続きが完了すると、すぐにVisa加盟店でのお買い物が可能になります。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3bd292e2-2b3a-5022-b77c-da50f9838481
+  title: そらいろVisaデビット：手数料一覧
+  body: 'そらいろVisaデビットに適用される手数料は以下の通りです。
+
+
+    ・年会費：0円
+
+    ・海外利用事務手数料：2%
+
+
+    ※国内でのご利用における決済手数料は無料です。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: a9ec4259-93f8-51d8-a2b4-53427ff73056
+  title: そらいろVisaデビット：お手続きが完了しない・保留中のまま
+  body: 'カードのお申込み手続きが完了せず、「保留中」のままとなっている場合は、以下の点をご確認ください。
+
+
+    【確認事項と解決策】
+
+    1. 本人確認の読み取りエラー：マイナンバーカードのICチップ読み取り時に、カードを動かしたり離したりしていませんか。平らな場所に置き、読み取りが完了するまで固定してください。
+
+    2. 登録情報の不一致：口座開設時の氏名・住所と、カード申請時の情報に相違がないかご確認ください。
+
+
+    【解決しない場合】
+
+    上記を確認しても状況が変わらない場合は、私たちにお知らせください。専門の担当者が提出書類の内容を個別に確認し、審査状況のアップデートや再手続きのご案内をいたします。確認完了後、手続きの結果をアプリ通知にてお知らせします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 9d144688-f171-587f-94a7-c5749c34c9d7
+  title: そらいろVisaデビット：お申込みいただける方
+  body: 'そらいろVisaデビットのお申込み条件は以下の通りです。
+
+
+    ・そらいろ銀行の普通預金口座をお持ちの方：お申込み可能
+
+    ・日本国内に居住されている方：お申込み可能
+
+    ・18歳以上の方：お申込み可能
+
+
+    ※口座をお持ちでない方は、先に「普通預金：商品概要」をご確認いただき、口座開設のお手続きをお願いいたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 2f0cf04d-2b40-5d77-a2df-221f01afc1b7
+  title: そらいろVisaデビット：当社の似た商品との比較
+  body: '一般的なクレジットカードと比較すると、そらいろVisaデビットは「即時決済」である点が異なります。
+
+
+    ・そらいろVisaデビット：利用した瞬間に口座から引き落とされるため、使いすぎを防げます。年会費0円で0.8%のキャッシュバックが得られ、管理が非常にシンプルです。
+
+    ・一般的なクレジットカード：後払い形式のため、支払いの管理に注意が必要です。
+
+
+    計画的に支出を管理したい方には、当行のデビットカードを強くおすすめします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 647ad553-35c0-540b-8258-712f0ce5c29f
+  title: そらいろVisaデビット：重要事項のご説明
+  body: 'そらいろVisaデビットのご利用にあたり、以下の重要事項を必ずご確認ください。
+
+
+    【利用制限について】
+
+    ・1日あたりの利用限度額は300,000円となっております。これを超えるお支払いはできませんのでご注意ください。
+
+
+    【海外利用時の費用】
+
+    ・海外加盟店でのお取引には、Visaの規定に基づく換算レートに加え、当行所定の海外利用事務手数料2%が加算されます。
+
+
+    【キャッシュバックについて】
+
+    ・還元率0.8%のキャッシュバックは、所定の条件を満たしたご利用分に適用されます。詳細な適用条件はアプリ内の利用規約をご確認ください。
+
+
+    【セキュリティ】
+
+    ・不正利用が疑われる場合は、迅速にカードの利用停止手続きを行ってください。預金者保護法に基づき、原則として当行が補償いたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0fb943ee-ebc4-5acf-9f45-972fe62c24ca
+  title: そらいろVisaデビット：金利・料率一覧
+  body: 'そらいろVisaデビットに適用される料率は以下の通りです。
+
+
+    ・キャッシュバック率：0.8%（すべての対象ご利用分に適用されます）
+
+    ・海外利用手数料率：2%（海外での決済時に適用されます）
+
+    ・年会費：0円（すべてのお客様に適用されます）'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3dca231f-4f67-5e1b-93df-7ca3e036f2d8
+  title: そらいろVisaデビット：実施中のキャンペーン
+  body: '【2026年限定：キャッシュバック活用キャンペーン】
+
+
+    日頃のご愛顧に感謝して、そらいろVisaデビットの還元メリットを再周知するキャンペーンを実施いたします。
+
+
+    ・期間：2026年1月1日から2026年12月31日まで
+
+    ・内容：期間中のすべてのご利用に対し、通常通り0.8%のキャッシュバックを還元いたします。
+
+
+    年会費0円で、使うたびに0.8%が戻ってくるお得な機会に、ぜひ日々の決済を「そらいろVisaデビット」へ集約してください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: afdcf2b6-5bd8-5618-9cfb-c7d2ce5ab541
+  title: そらいろVisaデビット：不正利用からお客さまを守るために
+  body: 'そらいろVisaデビットをご利用のお客さまは、フィッシング詐欺などの不正利用に十分ご注意ください。銀行員やカード会社を装い、メールやSMSで「口座を制限した」と不安を煽り、個人情報を入力させる手口が増えています。
+
+
+    **【当行が絶対にしないこと】**
+
+    *   メールやチャットで暗証番号や二段階認証のコードを伺うことはありません。
+
+    *   不自然なURLへ誘導し、パスワードの再設定を急かすことはありません。
+
+
+    **【異変に気づいたら】**
+
+    身に覚えのない利用明細を見つけたり、カードを紛失したりした場合は、すぐにカードの利用停止手続きを依頼してください。迅速な対応により被害を最小限に抑えられます。
+
+
+    なお、預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として当行が補償を行う体制を整えております。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 36ead963-c410-536c-a90c-c6cbd452adee
+  title: そらいろVisaデビット：規定・約款
+  body: '本規定は、そらいろVisaデビットの利用条件を定めるものです。
+
+
+    **1. 費用と限度額**
+
+    *   **年会費**: 0円とします。
+
+    *   **利用限度額**: 1日あたりの利用限度額は300,000円です。この限度額はセキュリティ確保のため設定されており、原則として変更できません。
+
+    *   **海外利用手数料**: 外国通貨建てで決済が行われた場合、決済金額に対して2%の手数料を課します。
+
+
+    **2. お客さまの義務**
+
+    カードの暗証番号を第三者に知られないよう厳重に管理してください。また、機種変更時には速やかに認証の再登録を行う必要があります。
+
+
+    **3. 契約の終了**
+
+    口座の解約またはカードの利用停止依頼があった場合、本契約は終了します。未精算の利用分がある場合は、速やかに清算するものとします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 892a2c48-62d6-5e24-8c9a-c030d9e41a5b
+  title: そらいろVisaデビット：おすすめの方と主な使い方
+  body: 'そらいろVisaデビットは、日々の支払いを効率化しながら、賢く資産を管理したい方に最適です。
+
+
+    **【おすすめの方】**
+
+    *   クレジットカードのような後払いではなく、口座残高の範囲内で計画的に支出したい方
+
+    *   年会費などの固定コストを抑えたい方（本カードは0円です）
+
+    *   日常的な買い物で効率よく還元を受けたい方
+
+
+    **【主な活用方法】**
+
+    *   **日常のショッピング**: 決済額の0.8%がキャッシュバックされるため、コンビニやスーパーでの支払いに便利です。
+
+    *   **オンライン決済**: Visa加盟店であれば世界中でご利用いただけます。
+
+    *   **予算管理**: 1日300,000円という利用限度額が設定されており、使いすぎを防止できます。
+
+
+    詳細な条件については「そらいろVisaデビット：重要事項のご説明」をご確認ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 79a4497d-3b3e-537b-9ade-46ecbeb1e1a2
+  title: そらいろVisaデビット：キャッシュバック率について
+  body: '**Q. そらいろVisaデビットのキャッシュバック率はどのくらいですか？**
+
+
+    A. ご利用金額の0.8%がキャッシュバックされます。特別な条件はなく、日常的なお買い物で効率的に還元を得られる仕組みです。
+
+
+    **Q. キャッシュバックはいつ受け取れますか？**
+
+
+    A. 月次の集計後、ご登録の普通預金口座へ自動的に入金されます。詳細はアプリ内の利用明細よりご確認いただけます。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 6b613f62-5ab2-5446-97d3-0eadd9fede74
+  title: そらいろVisaデビット：解約・変更・プランの切替え
+  body: 'そらいろVisaデビットの解約手続きは以下の手順で行ってください。
+
+
+    **【ご準備いただくもの】**
+
+    *   ご本人様確認済みのスマートフォン（ログイン状態であること）
+
+
+    **【お手続きの流れ】**
+
+    1.  オペレーターに「そらいろVisaデビットの解約」を希望する旨を伝えてください。
+
+    2.  カードに紐付いている口座の残高に問題がないか、および未決済の利用分がないかを確認します。
+
+    3.  解約に伴い、カードの機能が即時に停止することを確認し、同意してください。
+
+    4.  手続き完了後、解約完了の通知が届きます。
+
+
+    **【ご確認事項】**
+
+    *   解約後は、これまでにご利用いただいていた0.8%のキャッシュバック特典も適用されなくなります。
+
+    *   カードの物理的な破棄はお客さまご自身の責任で行ってください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 88156454-4fa0-5856-af8c-1399341c0dc1
+  title: そらいろVisaデビット：想定外の手数料・金額
+  body: '**【症状】**
+
+    「海外での利用後、明細を確認すると想定より高い金額が引き落とされている」
+
+
+    **【考えられる原因】**
+
+    海外でのご利用には、外貨決済に伴う事務手数料が発生します。そらいろVisaデビットでは、決済金額に対して2%の手数料を課しております。
+
+
+    **【確認手順】**
+
+    1.  利用明細の「利用通貨」を確認し、日本円以外での決済であるかを確認してください。
+
+    2.  決済額に2%の手数料が加算されていないか計算してください。
+
+
+    **【解決策】**
+
+    上記の手数料によるものである場合は、正常な動作となります。
+
+
+    **【エスカレーション】**
+
+    もし2%の手数料を差し引いても金額が不自然である場合や、心当たりのない利用である場合は、直ちにカードの利用停止を行い、不正利用の調査を依頼してください。当行にて迅速に調査を実施します。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: db586ae4-3d8c-5d9f-a00d-027e764229bb
+  title: そらいろVisaデビット：必要書類
+  body: 'そらいろVisaデビットのお申し込みには、以下の書類による本人確認が必須となります。
+
+
+    | 必要書類 | 確認方法 | 判定 |
+
+    | :--- | :--- | :--- |
+
+    | マイナンバーカード | ICチップ読み取りによるオンライン本人確認 | 必須（これのみで完了） |
+
+
+    ※マイナンバーカードをお持ちでない場合、現状オンラインでの口座開設およびカード発行はいただけません。あらかじめご了承ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0c0430f9-dc5c-57c2-8492-42fbdb19e255
+  title: そらいろVisaデビット：他社の一般的な商品との比較
+  body: '他社の一般的なデビットカードと比較して、そらいろVisaデビットは「コストの低さ」と「還元率」に特化しています。
+
+
+    *   **コスト**: 多くのカードでは条件付きの無料や数百円の年会費がかかる場合がありますが、当行は0円です。
+
+    *   **還元**: 一般的なカードの還元率（0.1%〜0.5%程度）に対し、本カードは0.8%という高いキャッシュバック率を提供しています。
+
+    *   **利便性**: 1日300,000円の限度額により、日常的な決済から高額な買い物まで幅広く対応可能です。
+
+
+    物理的な店舗での相談を重視される方は伝統的な金融機関が向いていますが、アプリで完結し効率的な資産管理を求める方には、そらいろVisaデビットが最適です。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4908d5a3-2db5-5125-8089-49b7a0e4f8e1
+  title: そらいろVisaデビット：リスクについてのご説明
+  body: 'そらいろVisaデビットをご利用いただく際は、以下のリスクと制限について十分にご理解ください。
+
+
+    **【即時決済のリスク】**
+
+    本カードはデビット方式のため、決済と同時に口座から資金が引き落とされます。残高が不足している場合は決済が完了しませんのでご注意ください。
+
+
+    **【利用限度額の制限】**
+
+    セキュリティ上の理由から、1日あたりの利用限度額は300,000円に制限されています。これを超えるお支払いはできません。
+
+
+    **【海外利用時のコスト】**
+
+    海外で外貨決済を行う場合、決済金額に対して2%の手数料が発生します。為替レートの変動により、日本円での請求額が変動するリスクがあります。
+
+
+    **【管理責任】**
+
+    カードおよび二段階認証などの認証情報を第三者に知られた場合、不正利用のリスクが高まります。適切に管理をお願いいたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 768a9306-6fd3-5082-8bb1-42ffbe42e555
+  title: そらいろVisaデビット：金利・料率の決まり方と適用
+  body: "そらいろVisaデビットに適用される料率は以下の通りです。これらの料率はすべてのユーザーに一律で適用され、利用実績による変動はありません。\n\n\
+    *   **キャッシュバック率**: 0.8%\n    *   適用タイミング：Visa加盟店での決済が確定した後、月次で集計し、ご登録の普通預金口座に還元されます。\n\
+    *   **海外事務手数料率**: 2%\n    *   適用タイミング：日本円以外の通貨で決済が行われた際、決済金額に加算して課金されます。\n*  \
+    \ **年会費**: 0円\n    *   適用タイミング：入会時および毎年の更新時に適用されますが、費用は発生しません。"
+  domain: cards
+  product_category: sorairo_debit
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 5f17955c-727d-5e0f-a3dd-0e9c662ed4d5
+  title: そらいろVisaデビット：ご紹介・継続利用の特典
+  body: そらいろVisaデビットでは、お友だちのご紹介や継続してご利用いただくお客さまへ、特別な特典をご用意しております。年会費は0円で、日々の支払いで0.8%のキャッシュバックが受けられるため、使えば使うほどお得に資産を管理できます。デジタルネイティブ世代に最適な、シンプルで効率的な決済体験をぜひ今すぐ始めてください。
+  domain: cards
+  product_category: sorairo_debit
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1979b429-affe-5d7d-90d5-0789bcaf25b2
+  title: そらいろVisaデビット：安全にご利用いただくためのポイント
+  body: 'そらいろVisaデビットを安全にご利用いただくために、以下のポイントをご確認ください。
+
+
+    - **二段階認証の徹底**: ログイン時や振込時には必ず二段階認証を行い、第三者による不正アクセスを防止してください。
+
+    - **利用限度額の管理**: 1日あたりの利用限度額は300,000円に設定されており、これにより万が一の際の大規模な不正利用リスクを軽減しています。
+
+    - **不審な通知への注意**: 当行がメールやSMSで暗証番号を伺うことはございません。
+
+    - **迅速な報告**: 不正利用の疑いがある場合は、すぐにアプリから利用停止手続きを行ってください。
+
+
+    預金者保護法に基づき、故意や重大な過失がない限り、原則として銀行が補償いたします。詳細は「そらいろVisaデビット：不正利用からお客さまを守るために」をご覧ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7f9e6a7d-918e-54a4-92fc-c5eaeec55889
+  title: そらいろVisaデビット：規定・約款の変更
+  body: '本規定・約款は、法令の改正やサービス内容の変更に伴い、適宜見直しが行われます。
+
+
+    **【変更の手続き】**
+
+    規定の変更を行う場合は、適用日の1か月前までにアプリ内通知または電子メールにてお客さまへ周知いたします。
+
+
+    **【主な適用範囲】**
+
+    - **手数料**: 年会費0円および海外利用時の事務手数料2%などの料金体系。
+
+    - **特典**: キャッシュバック率0.8%の適用条件。
+
+    - **制限**: 1日あたりの利用限度額300,000円の変更。
+
+
+    他社サービスと比較して、透明性の高い手数料体系を維持することを基本方針としております。変更に同意いただけない場合は、本サービスの解約が可能です。詳細は「そらいろVisaデビット：商品概要」にてご確認ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: dcee7548-adb7-5e17-97ee-97c209caa611
+  title: そらいろVisaデビット：ご利用開始までの手順
+  body: 'お客さまがそらいろVisaデビットのご利用を開始するまでの手順を案内します。
+
+
+    1. **本人確認（KYC）**: マイナンバーカードのICチップ読み取りによるオンライン本人確認を完了していただきます。
+
+    2. **カード発行申請**: アプリ内のメニューから「そらいろVisaデビット」を申請します。
+
+    3. **カードの受取**: ご登録住所へカードが郵送されます。
+
+    4. **利用開始設定**: アプリでカードの有効化を行い、1日あたりの利用限度額（初期設定300,000円）を確認していただきます。
+
+    5. **利用開始**: Visa加盟店にてお買い物をされると、0.8%のキャッシュバックが適用されます。
+
+
+    なお、年会費は0円であるため、維持コストはかかりません。不備がある場合は「そらいろVisaデビット：必要書類」をご案内ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 218f9b33-b111-582c-9047-9c9575e5eb47
+  title: そらいろVisaデビット：海外利用時の事務手数料について
+  body: '**Q: 海外でそらいろVisaデビットを利用した場合、手数料はかかりますか？**
+
+    A: はい。海外加盟店でのご利用時には、事務手数料として2%が課金されます。
+
+
+    **Q: 海外利用時の限度額に制限はありますか？**
+
+    A: 国内利用と同様、1日あたりの利用限度額は300,000円となります。
+
+
+    詳細は「そらいろVisaデビット：手数料一覧」をご確認ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e43d2f02-4ed3-5e40-ac57-f3d53eafd675
+  title: そらいろVisaデビット：登録内容の変更
+  body: 'ご登録内容（住所、電話番号、メールアドレスなど）を変更する手順をご案内します。
+
+
+    1. **変更内容の提示**: 変更したい項目と新しい情報を当社にお伝えください。
+
+    2. **本人確認の再実施**: 機種変更時や重要な情報変更の際は、セキュリティ保護のため、二段階認証による再登録または本人確認書類の提示をお願いする場合があります。
+
+    3. **変更内容の確認**: 当社にて情報の照合を行い、変更を適用します。
+
+    4. **完了通知の受信**: アプリの通知またはメールにて、変更が完了した旨を通知いたします。
+
+
+    これにより、カードの配送先変更などが正しく反映されます。なお、1日あたりの利用限度額（300,000円）の変更を希望される場合は、別途設定メニューよりお手続きください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: f3e317de-65f2-525c-8c25-8ce396735ce8
+  title: そらいろVisaデビット：ログインできない・アクセスできない
+  body: 'アプリにログインできず、カードの利用状況や0.8%のキャッシュバック履歴が確認できない場合の対処法です。
+
+
+    **【考えられる原因とチェック項目】**
+
+    - **認証情報の誤り**: パスワードが正しいか、大文字・小文字を含めて再確認してください。
+
+    - **二段階認証の不整合**: 端末を変更された場合、認証の再登録が必要です。
+
+    - **通信環境の不安定**: Wi-Fiやモバイルデータ通信が正常に動作しているかご確認ください。
+
+
+    **【解決策】**
+
+    - パスワードを忘れた場合は、アプリの「パスワード再設定」から手続きを行ってください。
+
+    - 認証デバイスを変更した場合は、本人確認を経て認証の再登録をお願いします。
+
+
+    上記で解決しない場合は、専門オペレーターへエスカレーションし、口座の状態を調査いたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 4d95c25c-4cbb-5a34-b0c6-b307049b825d
+  title: そらいろVisaデビット：ご利用条件による違い
+  body: 'そらいろVisaデビットの利用条件は以下の通りです。
+
+
+    - **口座保有者**: そらいろ銀行の普通預金口座をお持ちの方（どなたでも申請可能）。
+
+    - **初期設定**: 年会費0円、1日あたりの利用限度額300,000円。
+
+    - **特典適用**: Visa加盟店での利用に対し、一律0.8%のキャッシュバックを適用。
+
+
+    条件に合致する場合、即時の発行申請が可能です。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7364b8f3-4c49-50a3-948d-1e5ba52be070
+  title: そらいろVisaデビット：プランの選び方
+  body: そらいろVisaデビットは、年会費0円で維持でき、0.8%のキャッシュバックが得られるため、コストを抑えて効率的に資産管理をしたい方に最適です。審査に時間がかかる一般的なクレジットカードとは異なり、口座開設と同時にスムーズに導入できます。1日あたりの利用限度額（300,000円）が十分な日常決済を求める方におすすめです。
+  domain: cards
+  product_category: sorairo_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1a5a1567-f6d3-54e3-b25d-aae76f0dad0a
+  title: そらいろVisaデビット：個人情報の取扱い
+  body: 'そらいろ銀行は、個人情報保護法に基づき、お客さまの情報を厳格に管理しております。そらいろVisaデビットのご利用に伴い、以下の通り個人情報を取り扱います。
+
+
+    **【利用目的】**
+
+    - **決済処理**: Visaネットワークを通じて決済を完了させるため。
+
+    - **特典の提供**: 0.8%のキャッシュバックを正確に計算し、口座へ還元するため。
+
+    - **不正利用防止**: 1日あたりの利用限度額300,000円の監視および、不審な取引の検知のため。
+
+    - **法令遵守**: 犯罪収益移転防止法に基づく取引時確認のため。
+
+
+    **【第三者提供】**
+
+    法令に基づく場合を除き、お客さまの同意なく個人情報を第三者に提供することはありません。詳細は「そらいろVisaデビット：重要事項のご説明」をご参照ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 2d429da1-e5d8-500b-b8ae-45811bb5c349
+  title: そらいろVisaデビット：この商品をかたる詐欺にご注意ください
+  body: '現在、「そらいろVisaデビット」の利用限度額の更新や、キャッシュバック率0.8%の適用確認などを名目とした不審なメールやSMSが報告されています。
+
+
+    **【ご注意いただきたい点】**
+
+    * 当行が、メールやSMSで暗証番号やログインパスワードを伺うことは絶対にございません。
+
+    * 「アカウントが停止されるため、至急URLから手続きをしてください」といった急かす内容は詐欺の可能性が非常に高いです。
+
+
+    もし不審な連絡を受け取った場合や、心当たりのない取引がある場合は、すぐに当行へご連絡ください。迅速に利用停止と調査を行い、預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として銀行が補償いたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b17b1e7b-010b-5b21-bf88-82c22d9a26a1
+  title: そらいろVisaデビット：限度額・制限と注意事項
+  body: '「そらいろVisaデビット」をご利用いただく際の重要な制限事項と注意事項についてご案内します。
+
+
+    **【利用限度額と手数料】**
+
+    * **1日あたりの利用限度額**：300,000円（初期設定）
+
+    * **海外利用事務手数料**：ご利用金額に対し2%を別途課金します。
+
+    * **年会費**：0円
+
+
+    **【ご利用上の注意点】**
+
+    * デビットカードは、お支払い時に「そらいろVisaデビット」が紐づいた口座から即時に引き落とされます。口座残高が不足している場合は、お取引が拒否されますのでご注意ください。
+
+    * キャッシュバック率0.8%の適用条件や詳細については、「そらいろVisaデビット：キャッシュバック率について」をご確認ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ffb5e62f-5f30-51de-b235-7289ac41f14a
+  title: そらいろVisaデビット：1日あたりの利用限度額（初期設定）について
+  body: '**Q: カードを利用して1日に支払える上限額はいくらですか？**
+
+
+    **A:** 「そらいろVisaデビット」の1日あたりの利用限度額（初期設定）は300,000円です。この金額を超えてのお買い物や決済はご利用いただけません。
+
+
+    詳細な制限事項については、「そらいろVisaデビット：限度額・制限と注意事項」をご参照ください。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b7e8711c-fb20-5588-ab72-a3b0402021d9
+  title: そらいろVisaデビット：状況・履歴の確認
+  body: '「そらいろVisaデビット」のご利用状況や履歴を確認する手順をご案内します。
+
+
+    **【確認の手順】**
+
+    1. 当行のチャットまたはオンラインサポートにて、「デビットカードの利用履歴を確認したい」とお伝えください。
+
+    2. ご本人確認後、直近の取引一覧が表示されます。ここで、利用日、利用店名、および決済金額を確認してください。
+
+    3. 同時に、0.8%のキャッシュバックが正しく計算されているかもご確認いただけます。
+
+
+    **【確認後のポイント】**
+
+    * 決済直後は「処理中」となる場合があります。確定後に正式な明細として記録されます。
+
+    * 1日あたりの利用限度額である300,000円まで、あといくら利用可能かも併せてご確認いただけます。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7d411233-94e6-5654-83eb-7a3a3e6cb91a
+  title: そらいろVisaデビット：お取引が拒否された・制限された
+  body: 'カードを利用しようとした際に、決済が拒否される場合の確認事項をご案内します。
+
+
+    **【考えられる原因とチェック項目】**
+
+    1. **口座残高の不足**：引き落とし口座に、決済金額以上の残高があるかご確認ください。
+
+    2. **利用限度額への到達**：1日の利用限度額である300,000円を超えていないかご確認ください。
+
+    3. **セキュリティロック**：短時間に連続して高額決済を行った場合など、不正利用防止のため一時的に制限がかかっている可能性があります。
+
+
+    **【解決方法】**
+
+    * 残高不足の場合は、口座へ入金してください。
+
+    * 限度額に達している場合や、ロックが疑われる場合は、当行へ制限解除の依頼をしてください。専門のオペレーターが確認を行い、必要に応じて制限を解除いたします。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3d2418ea-1794-5dba-b974-2c3c4947e389
+  title: そらいろVisaデビット：切替えや上位プランを検討するとき
+  body: 「そらいろVisaデビット」は年会費0円でどなたでもご利用いただけるため、個別の「上位プラン」は設けておりません。しかし、より高度な資産管理を希望される場合は、本カードをベースに「目的別口座：商品概要」などの貯蓄ツールを併用することで、計画的な支出と管理を両立させることが可能です。
+  domain: cards
+  product_category: sorairo_debit
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b4069e6b-0996-53f9-9f55-4ad2abbe1d5d
+  title: そらいろVisaデビット：ほかの選択肢との比較と向かない場合
+  body: '「そらいろVisaデビット」がどのような方に向いているか、また向かないかを解説します。
+
+
+    **【向いている方】**
+
+    * **コストを抑えたい方**：年会費0円で、維持費を気にせず利用したい方に最適です。
+
+    * **効率的に還元を受けたい方**：0.8%という高いキャッシュバック率を活かし、日常の支払いを効率化したい方に向いています。
+
+
+    **【向かない可能性がある方】**
+
+    * **1日の決済額が非常に大きい方**：1日あたりの利用限度額が300,000円であるため、これを超える高額決済を頻繁に行う方には不向きです。
+
+    * **海外利用がメインの方**：海外利用時に2%の手数料がかかるため、海外特化型のカードと比較してコストが高くなる場合があります。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 23711517-6e63-5674-aff4-2f9301367572
+  title: そらいろVisaデビット：手数料と費用
+  body: '**Q: カードを所有し続けるための費用はかかりますか？**
+
+
+    **A:** いいえ、「そらいろVisaデビット」の年会費は0円です。どなたでも無料でご利用いただけます。
+
+
+    **Q: 海外で利用した場合に手数料はかかりますか？**
+
+
+    **A:** はい。海外でご利用いただいた際は、ご利用金額に対して2%の海外利用事務手数料がかかります。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 47fb8ce3-fd42-56df-ab66-c0e161fba926
+  title: そらいろVisaデビット：よくあるお手続きの流れ
+  body: '「そらいろVisaデビット」のお申し込みから利用開始までの流れをご案内します。
+
+
+    **【お手続きの手順】**
+
+    1. **お申し込み**：チャットにて「デビットカードを申し込みたい」とお伝えください。
+
+    2. **本人確認**：マイナンバーカードのICチップ読み取りによるオンライン本人確認（eKYC）を行います。画面の指示に従って読み取りを完了させてください。
+
+    3. **審査・発行**：当行にて厳格な取引時確認を行い、発行手続きに入ります。
+
+    4. **カード受取**：ご登録住所にカードが届きます。届いたカードをアプリで有効化してください。
+
+
+    **【完了の目安】**
+
+    カードの有効化が完了し、アプリ上のステータスが「利用可能」になれば、即座に0.8%のキャッシュバック付き決済が開始できます。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 128704bf-e56b-543c-a739-7aea4b375703
+  title: そらいろVisaデビット：明細や記録と合わない
+  body: 'ご利用明細の金額が予想と異なる場合の確認手順をご案内します。
+
+
+    **【確認すべきポイント】**
+
+    1. **海外利用事務手数料の有無**：海外加盟店で利用した場合、決済金額に加えて2%の手数料が加算されています。これが原因で金額が増えている可能性があります。
+
+    2. **キャッシュバックの計算**：還元額は0.8%で計算されます。端数処理により、想定額とわずかに異なる場合があります。
+
+    3. **仮押さえ（オーソリゼーション）**：ホテルやレンタカーなどの利用時、実際より高い金額が一時的に「保留」として記録されることがあります。
+
+
+    **【対応策】**
+
+    上記を確認しても不一致がある場合は、当行へ詳細を伝えてください。調査を行い、不適切な請求が判明した場合は、預金者保護法に基づき適切な補償手続きを行います。'
+  domain: cards
+  product_category: sorairo_debit
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 63774c58-b9e7-5c1f-b64f-14269780925d
+  title: スマホ送金：商品概要
+  body: '「スマホ送金」は、相手の口座番号や店番号を調べる手間なく、電話番号だけで簡単にお金を送ることができるサービスです。ご友人やご家族間での割り勘や少額のやり取りを、よりスムーズでシンプルにします。
+
+
+    **【サービスの特徴】**
+
+    *   **手数料：** 常に0円でご利用いただけます。
+
+    *   **利便性：** 電話番号を指定するだけで送金が完了します。
+
+
+    **【ご利用限度額】**
+
+    *   **1回あたりの送金上限額：** 100,000円
+
+    *   **1か月あたりの送金合計上限額：** 500,000円
+
+
+    日常的な小さなお金のやり取りに最適なツールです。詳細な条件については、「スマホ送金：お申込みいただける方」をご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 46bf0be7-220f-5623-aeda-4e7d47fdc2aa
+  title: スマホ送金：1回あたりの送金上限額について
+  body: '**Q：1回の送金で最大いくらまで送ることができますか？**
+
+
+    A：1回あたりの送金上限額は100,000円です。これを超える金額を送金したい場合は、回数を分けてお手続きいただくか、通常の振込機能をご利用ください。
+
+
+    **Q：上限額の設定を変更することはできますか？**
+
+
+    A：恐れ入りますが、スマホ送金の1回あたりの上限額である100,000円を変更することはできません。あらかじめご了承ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 956fedec-9130-5530-b78c-de15d78744cf
+  title: スマホ送金：お申込みとご利用開始
+  body: 'スマホ送金を使い始めるための手順をご案内します。本サービスは、当行の普通預金口座をお持ちの方にのみ提供されます。
+
+
+    **【準備するもの】**
+
+    *   そらいろ銀行のスマートフォンアプリ
+
+    *   ご自身の電話番号が登録済みの口座
+
+
+    **【ご利用開始までのステップ】**
+
+    1.  アプリのホーム画面から「スマホ送金」を選択します。
+
+    2.  利用規約を確認し、「同意して開始する」をタップします。
+
+    3.  ご自身の電話番号が正しく登録されていることを確認し、認証を完了させます。
+
+    4.  「設定完了」の画面が表示されれば、すぐに送金が可能です。
+
+
+    これで、お相手の電話番号を指定して0円で送金できるようになりました。詳しい制限については「スマホ送金：商品概要」をご覧ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eb37e472-623d-5ce4-ad64-062e9ebdea96
+  title: スマホ送金：手数料一覧
+  body: 'スマホ送金のご利用に関わる手数料は以下の通りです。
+
+
+    *   **スマホ送金手数料：** 0円
+
+
+    本サービスでは、送金回数や金額にかかわらず、一律で0円の手数料を適用しております。お客様の日常的な利便性を最大化するための料金体系となっております。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0ffb8f17-4774-5645-9999-e0d67a900fc2
+  title: スマホ送金：お手続きが完了しない・保留中のまま
+  body: '送金手続きをした後、画面に「保留中」と表示され、完了しない場合の対処法をご案内します。
+
+
+    **【考えられる原因と確認事項】**
+
+    1.  **通信環境の不安定：** 一時的にネットワークが遮断された可能性があります。通信状況を確認し、アプリを再起動してください。
+
+    2.  **残高不足：** 送金金額および必要額が普通預金口座にあるか確認してください。
+
+    3.  **相手側の未受取：** 送金は完了していても、お相手が受け取り操作を行っていない場合に「保留」に近い状態に見えることがあります。
+
+
+    **【解決しない場合】**
+
+    上記を確認しても状況が変わらない場合は、弊社にて取引履歴の調査を行います。調査後、結果をアプリ内通知またはメッセージにてお知らせいたします。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 89004dbd-6f04-57c8-9c25-1129009585fb
+  title: スマホ送金：お申込みいただける方
+  body: 'スマホ送金のご利用条件は以下の通りです。
+
+
+    | 条件 | 判定 | 備考 |
+
+    | :--- | :--- | :--- |
+
+    | そらいろ銀行の普通預金口座を保有している | 必須 | 「普通預金：商品概要」をご参照ください |
+
+    | アプリに登録済みの有効な電話番号がある | 必須 | 本人確認済みの番号に限ります |
+
+    | 18歳以上である | 必須 | 口座開設時の年齢基準に基づきます |
+
+
+    上記すべての条件を満たす方は、アプリ内からいつでもすぐにご利用を開始いただけます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 75709135-99de-5795-8113-b086881c8f98
+  title: スマホ送金：当社の似た商品との比較
+  body: '「スマホ送金」と、通常の「普通預金」からの振込機能を比較します。
+
+
+    **【比較表】**
+
+    *   **指定方法：** スマホ送金は「電話番号」のみ。通常振込は「店番号・口座番号」が必要です。
+
+    *   **手数料：** スマホ送金は一律0円。通常振込は無料枠を超えると手数料が発生します。
+
+    *   **送金限度額：** スマホ送金は1回100,000円まで。通常振込はより高額な送金が可能です。
+
+
+    **【選び方】**
+
+    *   **スマホ送金が向いている方：** 友人・家族と少額を頻繁にやり取りし、手間なく0円で済ませたい方。
+
+    *   **通常振込が向いている方：** 100,000円を超える金額を送る必要がある方や、正確な口座情報を指定して送金したい方。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 14a559af-88e9-51ad-bdd6-5e9f7a79cf7b
+  title: スマホ送金：重要事項のご説明
+  body: 'スマホ送金をご利用いただく際は、以下の重要事項を必ずご確認ください。
+
+
+    **【送金制限について】**
+
+    本サービスは少額決済を目的としており、以下の制限が設けられています。
+
+    *   1回あたりの送金上限額：100,000円
+
+    *   1か月あたりの送金合計上限額：500,000円
+
+
+    **【手数料について】**
+
+    *   本サービスの送金手数料は0円です。
+
+
+    **【ご注意事項】**
+
+    *   電話番号による指定のため、番号の入力間違いにご注意ください。誤送金が発生した場合、銀行側での返金処理は原則として困難です。
+
+    *   本サービスを通じて送金された資金は、預金保険制度の保護対象となる普通預金から差し引かれます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: fd656f2e-9596-5efe-bd8f-4d21e21a1b09
+  title: スマホ送金：金利・料率一覧
+  body: 'スマホ送金における適用手数料（料率）をご案内します。
+
+
+    *   **送金手数料：** 0円
+
+
+    本サービスは送金機能であるため、預金のような金利は適用されませんが、利用にかかる費用はすべて0円です。どなたでも、どのような金額（上限額の範囲内）であっても、一律の0円手数料が適用されます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 41ef5ca0-2beb-59c1-97be-5aa0fe8db2dc
+  title: スマホ送金：実施中のキャンペーン
+  body: '**【スマホ送金・デビューキャンペーン】**
+
+
+    スマホ送金を初めてご利用いただくお客様を対象に、以下の特典をご用意いたしました。
+
+
+    *   **期間：** 2026年1月1日から2026年3月31日まで
+
+    *   **内容：** 期間中に初めて「スマホ送金」を利用し、合計1,000円以上の送金を行った方に、抽選でAmazonギフト券500円分をプレゼントいたします。
+
+
+    **【ご利用条件】**
+
+    *   送金手数料は通常通り0円です。
+
+    *   1回あたりの上限額100,000円、月間上限額500,000円の範囲内でご利用ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: eeff5a1b-d402-5449-8fad-d19d48e810f7
+  title: スマホ送金：不正利用からお客さまを守るために
+  body: 'スマホ送金をご利用の際は、以下の点に十分ご注意ください。
+
+
+    **【特にご注意いただきたい詐欺の手口】**
+
+    「至急、送金を完了させてください」といった不安を煽るSMSやメールが届き、偽のログイン画面へ誘導して二段階認証コードを盗み出すフィッシング詐欺が報告されています。
+
+
+    **【当行が絶対に行わないこと】**
+
+    そらいろ銀行が、メールやチャットで二段階認証コードや暗証番号を直接お伺いすることはありません。
+
+
+    **【異常を感じた時の対応】**
+
+    身に覚えのない送金通知が届いた場合や、認証情報を教えてしまった場合は、直ちにご連絡ください。迅速に口座の利用停止と調査を行います。
+
+
+    預金者保護法に基づき、お客さまに故意や重大な過失がない限り、原則として銀行が補償を行う体制を整えています。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 37981f34-2b00-5381-9c6b-4b2baefb9599
+  title: スマホ送金：規定・約款
+  body: 'スマホ送金サービスの利用にあたっては、以下の規定が適用されます。
+
+
+    **1. 利用限度額**
+
+    本サービスでの送金は、1回あたり100,000円、1か月あたりの合計500,000円を上限とします。これらの限度額はセキュリティ維持のため設定されており、原則として変更はできません。
+
+
+    **2. 手数料**
+
+    本サービスによる送金手数料は、すべて0円とします。
+
+
+    **3. 送金完了の定義**
+
+    受取人が当行の口座を保有し、正しく認証された時点で送金手続きが完了します。誤送信による資金回収は、受取人の同意が得られない限り困難であるため、送金前に必ず電話番号を確認してください。
+
+
+    **4. サービスの停止**
+
+    不正利用の疑いがある場合や、法令遵守のため取引時確認が必要と判断された場合、当行は事前の通知なく本サービスの利用を停止できるものとします。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 51a09113-99d4-58ff-9920-0ae91978fb80
+  title: スマホ送金：おすすめの方と主な使い方
+  body: 'スマホ送金は、相手の口座番号を知らなくても、電話番号だけで簡単にお金を送れるサービスです。
+
+
+    **【こんな方におすすめ】**
+
+    ・友人や家族との割り勘を、手間なくスムーズに済ませたい方
+
+    ・口座番号を教え合う手間や、入力ミスによる誤送金のリスクを減らしたい方
+
+    ・少額の送金を頻繁に行うため、手数料を一切かけたくない方
+
+
+    **【主な使い方】**
+
+    アプリの連絡先から送金したい相手を選び、金額を入力して送信するだけで完了します。送金手数料は0円ですので、日常的なやり取りに最適です。
+
+
+    **【ご利用上の制限】**
+
+    ・1回あたりの送金上限額：100,000円
+
+    ・1か月の送金合計限度額：500,000円
+
+
+    詳細は「スマホ送金：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: fbdc29ca-3aa6-5c1d-b160-b718ed9a77b5
+  title: スマホ送金：送金手数料について
+  body: '**Q: スマホ送金を利用した際、手数料はかかりますか？**
+
+
+    A: いいえ、スマホ送金の手数料はすべて0円です。回数に関わらず、無料でご利用いただけます。
+
+
+    **Q: 手数料が無料になる条件はありますか？**
+
+
+    A: 特に条件はありません。どなたでも0円でご利用いただけます。
+
+
+    詳細は「スマホ送金：手数料一覧」をご参照ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8906a2a3-8885-56c4-a0e9-53a5531055da
+  title: スマホ送金：解約・変更・プランの切替え
+  body: 'スマホ送金機能の停止や、登録電話番号の変更手続きについてご案内します。
+
+
+    **【機能の停止（解約）手順】**
+
+    1. チャットにて「スマホ送金の利用停止」を申し出てください。
+
+    2. 当行が本人確認を行い、機能の無効化処理を行います。
+
+    3. 処理完了後、アプリの送金メニューにアクセスできなくなったことを確認してください。
+
+
+    **【登録電話番号の変更手順】**
+
+    1. チャットにて「スマホ送金の登録番号変更」を依頼してください。
+
+    2. 新しい電話番号と、変更理由を伝えてください。
+
+    3. 新しい番号宛に認証コードが送信されますので、そのコードをチャットに入力してください。
+
+    4. 当行が変更完了を通知します。以降、新しい番号での送受信が可能になります。
+
+
+    なお、本サービスは単一のプランであるため、プランの切替えはありません。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 13aee733-db75-5409-a075-247bbd07d6ee
+  title: スマホ送金：想定外の手数料・金額
+  body: '「手数料が引かれている気がする」「送金金額が正しくない」と感じられた場合は、以下の順に確認してください。
+
+
+    **1. 手数料の再確認**
+
+    スマホ送金の手数料は0円です。明細に記載されている金額が、送金指示額と一致しているかご確認ください。もし他の振込サービス（銀行振込など）をご利用の場合、そちらは手数料が発生している可能性があります。
+
+
+    **2. 送金限度額の確認**
+
+    1回に送金できる上限額は100,000円です。これを超える金額を一度に送ることはできません。また、月間の合計限度額500,000円に達している場合、手続きが拒否されます。
+
+
+    **3. 対処法とエスカレーション**
+
+    上記を確認しても金額に不整合がある場合は、お取引日時と金額を添えてお知らせください。当行にて取引ログを調査し、誤りのある場合は速やかに修正および返金処理を行います。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 2472650d-bcfc-5ed9-ac4b-1053d05c8379
+  title: スマホ送金：必要書類
+  body: 'スマホ送金をご利用いただくには、まず当行の口座開設が必要です。開設時に以下の書類をご用意ください。
+
+
+    ・**マイナンバーカード**：ICチップ読み取りによるオンライン本人確認が必須です。
+
+
+    口座開設が完了し、「取引時確認」が済んでいるお客さまは、追加書類なしでそのままスマホ送金をご利用いただけます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b612309f-ef18-5d69-aeca-15d09f81dbd7
+  title: スマホ送金：他社の一般的な商品との比較
+  body: "一般的な銀行の振込サービスと比較した、スマホ送金の特徴は以下の通りです。\n\n・**指定方法**：他社は「金融機関名・支店名・口座番号」が必要ですが、本サービスは「電話番号」のみで完結します。\n\
+    ・**コスト**：他社では振込手数料が発生することが一般的ですが、本サービスは0円です。\n・**速度**：即時に資金が移動するため、相手への通知も迅速です。\n\
+    \n**【どちらが適しているか】**\n・少額のやり取りを頻繁に行う方、利便性を最優先する方 $\rightarrow$ **スマホ送金**\n・100,000円を超える高額な送金を行う必要がある方\
+    \ $\rightarrow$ **一般的な銀行振込**"
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: cdd6142c-1975-5456-b0c6-ba9fd40e39f0
+  title: スマホ送金：リスクについてのご説明
+  body: 'スマホ送金をご利用いただく前に、以下のリスクについて十分にご理解ください。
+
+
+    **【誤送金のリスク】**
+
+    電話番号による指定のため、連絡先の選択ミスにより、意図しない相手に送金してしまう可能性があります。一度完了した送金は、当行の操作のみで取り消すことはできず、受取人の同意が必要です。必ず送信前に相手の名前と番号を再確認してください。
+
+
+    **【利用制限による制約】**
+
+    安全な取引を確保するため、1回あたり100,000円、1か月あたり500,000円という限度額を設けております。急ぎでこれ以上の金額を送金したい場合は、他の振込手段をご検討ください。
+
+
+    **【なりすましリスク】**
+
+    スマートフォンの紛失や、二段階認証コードの漏洩により、第三者に不正に送金されるリスクがあります。端末のロックおよび認証情報の管理を徹底してください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 46fb9216-6784-5dd7-9e80-92ccafc8c7b7
+  title: スマホ送金：金利・料率の決まり方と適用
+  body: 'スマホ送金における手数料の適用ルールについてご案内します。
+
+
+    本サービスでは、送金金額や利用回数、受取人の口座種別に関わらず、一律で送金手数料を0円として適用します。変動的な料率や、条件付きの無料枠などは設定されておりません。すべての取引において、一律0円の料金体系となります。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: rate_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 08f4456d-86e0-56ea-a451-e462c6fe1793
+  title: スマホ送金：ご紹介・継続利用の特典
+  body: '【キャンペーン実施期間：2026年1月1日〜2026年3月31日】
+
+
+    お友達に「スマホ送金」をご紹介ください！ご紹介した方が口座開設し、初めての送金を完了すると、紹介者様とご利用者様の両方に、それぞれ500円をプレゼントいたします。また、期間中に月3回以上の継続利用があった方には、抽選でAmazonギフト券を贈呈します。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: promo_notice
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 49800cf2-9be9-520c-987e-d83b64f22748
+  title: スマホ送金：安全にご利用いただくためのポイント
+  body: '「スマホ送金」を安全にご利用いただくために、以下の点に十分ご注意ください。
+
+
+    **【特にご注意いただきたいこと】**
+
+    ・**二段階認証**を必ず有効にし、パスワードやワンタイムパスワードを第三者に教えないでください。
+
+    ・面識のない相手から「送金してほしい」という突然の連絡があった場合は、詐欺の可能性があります。十分にご注意ください。
+
+    ・不審なSMSやメールのリンクからログインせず、必ず公式アプリから操作してください。
+
+
+    **【異常を感じたときは】**
+
+    万が一、身に覚えのない送金があった場合や、アカウントの不正利用が疑われる場合は、すぐに利用停止の手続きをしてください。迅速に調査を行い、預金者保護法に基づき、故意や重大な過失がない限り原則として銀行が補償いたします。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ab6c3cd0-5645-5016-af92-56f90aaadaa9
+  title: スマホ送金：規定・約款の変更
+  body: '本サービスの規定および約款は、法令の改正やサービス向上に伴い変更されることがあります。変更の内容は、アプリ内のお知らせまたは電子メールにて事前に通知いたします。
+
+
+    **【主な適用条件と制限】**
+
+    ・送金手数料は原則として0円とします。
+
+    ・1回あたりの送金限度額は100,000円、1か月あたりの送金合計限度額は500,000円とします。これらの限度額は、セキュリティ維持のため銀行の判断で変更される場合があります。
+
+
+    本約款に同意いただけない場合は、サービスの利用を停止し、口座を解約することが可能です。なお、変更後の規定は、通知された適用開始日から有効となります。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: terms_conditions
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3825cae9-ebfc-59dd-bf00-3bf4e80320b0
+  title: スマホ送金：ご利用開始までの手順
+  body: '「スマホ送金」をご利用いただくまでの流れをご案内します。オペレーターの方は、お客様が迷わず手続きできるようサポートしてください。
+
+
+    1. **口座開設の完了**: マイナンバーカードのICチップ読み取りによるオンライン本人確認を完了し、「普通預金：商品概要」にある口座を保有している必要があります。
+
+    2. **電話番号の紐付け**: アプリ設定画面から、現在利用しているスマートフォンの電話番号を口座に登録します。この際、SMSによる認証が行われます。
+
+    3. **相手の登録**: 送金したい相手の電話番号をアプリに入力します。
+
+    4. **送金実行**: 金額を入力し、二段階認証を経て送金を完了します。
+
+
+    **【サービスのポイント】**
+
+    ・手数料：0円
+
+    ・1回あたりの限度額：100,000円
+
+    ・1か月の合計限度額：500,000円'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3b477f64-c1ba-5001-834c-0ab83f92cd9c
+  title: スマホ送金：1か月あたりの送金上限額について
+  body: 'Q：スマホ送金で1か月に送金できる金額に上限はありますか？
+
+
+    A：はい。1か月あたりの送金合計限度額は500,000円となっております。この金額を超えて送金したい場合は、通常の振込機能をご検討ください。詳細は「スマホ送金：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 8c53a0e7-e95c-5e25-89be-7f41f2d964d2
+  title: スマホ送金：登録内容の変更
+  body: 'スマートフォンの機種変更や電話番号の変更に伴い、登録内容を変更する手順をご案内します。
+
+
+    **【準備するもの】**
+
+    ・新しく利用する電話番号が設定済みのスマートフォン
+
+    ・マイナンバーカード（本人確認が必要な場合）
+
+
+    **【変更の手順】**
+
+    1. お客様から「登録電話番号を変更したい」旨を伝えていただきます。
+
+    2. 私たちがご本人確認（二段階認証等）を行います。
+
+    3. 新しい電話番号を提示していただき、私たちがシステムへの登録更新を行います。
+
+    4. 新しい端末に認証SMSが届き、認証コードを入力して登録を完了させます。
+
+
+    **【完了の確認】**
+
+    アプリの「設定」画面にて、新しい電話番号が正しく表示されていれば完了です。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 0577e8d2-3dd9-5a21-9045-2de552863475
+  title: スマホ送金：ログインできない・アクセスできない
+  body: '「スマホ送金が利用できない」「ログインできない」という場合、以下の内容をご確認ください。
+
+
+    **【よくある原因と解決策】**
+
+    1. **パスワードの誤入力**: 正しいパスワードか再度ご確認ください。心当たりのない場合は再設定を行います。
+
+    2. **二段階認証の不備**: ワンタイムパスワードが届かない場合、電波状況やSMS受信設定を確認してください。
+
+    3. **機種変更後の未登録**: 機種変更をした際は、認証の再登録が必要です。手続きを行ってください。
+
+
+    **【解決しない場合】**
+
+    上記を確認してもログインできない場合は、専門のオペレーターへエスカレーションいたします。お客様のご本人確認を行った後、アカウントの状態を調査し、制限の解除や認証情報の再設定をサポートいたします。完了まで通常1〜3営業日いただきます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 63fe1b3a-17ae-5beb-b093-a7bd6ded28f5
+  title: スマホ送金：ご利用条件による違い
+  body: '【ご利用条件と結果】
+
+    ・そらいろ銀行の口座を保有し、電話番号の登録が完了している方 → **「スマホ送金」の全機能を利用可能（手数料0円）**
+
+    ・口座は保有しているが電話番号を未登録の方 → **機能制限あり（要電話番号登録）**
+
+    ・口座を保有していない方 → **利用不可（要口座開設）**'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: eligibility_matrix
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 6f14c3e8-8385-5ede-8f65-67bd5958b551
+  title: スマホ送金：プランの選び方
+  body: '送金方法に迷われている方へ、「スマホ送金」と「通常の振込」を比較します。
+
+
+    ・**スマホ送金**: 手数料0円、電話番号だけで完結するため、友人や家族との少額のやり取りに最適です（1回100,000円まで）。
+
+    ・**通常の振込**: 口座番号を指定して送金します。高額な送金や、ビジネス利用など、より確実な指定が必要な場合に適しています。
+
+
+    日常的なやり取りであれば、コストがかからず簡単な「スマホ送金」がおすすめです。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 072ffca0-ba00-5d31-b3b8-3b144a73ba41
+  title: スマホ送金：個人情報の取扱い
+  body: '「スマホ送金」のご利用にあたり、お客様の個人情報は銀行法および個人情報保護法に基づき厳格に管理いたします。
+
+
+    **【収集する情報とその目的】**
+
+    ・**電話番号**: 送金先の特定および本人確認（二段階認証）のために利用します。
+
+    ・**取引履歴**: 法令に基づく取引時確認および、不正送金防止のためのモニタリングに利用します。
+
+
+    **【第三者への提供について】**
+
+    法令に基づく場合を除き、お客様の同意なく電話番号等の個人情報を第三者に提供することはありません。また、送金時に相手方に通知される情報は、送金者の氏名などの必要最小限の内容に限定されます。詳細な取り扱いについては、当行のプライバシーポリシーをご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: disclosure
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 1f8f56d7-8547-5401-a551-0a1a044c9290
+  title: スマホ送金：この商品をかたる詐欺にご注意ください
+  body: '最近、当行の「スマホ送金」サービスをかたった、巧妙なフィッシング詐欺の報告が増えています。不審なSMSやメールに記載されたURLを安易にクリックしないでください。
+
+
+    **特にご注意いただきたい点**
+
+    - 当行がメールやSMSで、二段階認証のコードやパスワードを直接伺うことは絶対にございません。
+
+    - 「限度額を上げるため」に外部サイトへ誘導し、個人情報を入力させる手口にご注意ください。
+
+
+    万が一、不審なメッセージを受け取った場合や、誤って情報を入力してしまった場合は、直ちにご連絡ください。迅速に口座の利用停止と調査を行い、お客様の資産を守ります。詳細は「スマホ送金：不正利用からお客さまを守るために」をご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: security_advisory
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 23e5df2f-42f8-5ed6-a855-15651ecd9e68
+  title: スマホ送金：限度額・制限と注意事項
+  body: '「スマホ送金」をご利用いただく際の限度額と制限事項についてご案内いたします。安全かつ円滑な送金を実現するため、以下の制限を設けております。
+
+
+    **ご利用限度額**
+
+    - 1回あたりの送金限度額：100,000円
+
+    - 1か月あたりの送金合計限度額：500,000円
+
+
+    **注意事項**
+
+    - 上記の限度額は、セキュリティ保持のため変更することができません。限度額を超える送金が必要な場合は、通常の振込機能をご利用ください。
+
+    - 送金先の電話番号に誤りがある場合、誤送金となる可能性があります。確定前に必ず宛先をご確認ください。
+
+    - お取引の際は、常に最新の二段階認証を完了していただく必要があります。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7b1095f7-c59e-5e32-9e29-085437edf99e
+  title: スマホ送金：手数料と費用
+  body: '**Q: スマホ送金を利用する際の手数料はかかりますか？**
+
+
+    A: いいえ、かかりません。スマホ送金のご利用手数料は、回数に関わらず一律0円です。
+
+
+    **Q: 送金金額に応じて別途費用が発生することはありますか？**
+
+
+    A: ございません。送金金額に関わらず、手数料は0円でご利用いただけます。安心してお気軽にご利用ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c998c74d-1126-5940-861c-81134ac81d93
+  title: スマホ送金：状況・履歴の確認
+  body: '送金したお金が正しく相手に届いたか、過去にいくら送金したかを確認する手順をご案内します。
+
+
+    **確認の手順**
+
+    1. スマートフォンアプリにログインし、ホーム画面から「スマホ送金」メニューを選択します。
+
+    2. 画面内の「送金履歴」タブをタップします。
+
+    3. これまでの送金一覧が表示されます。確認したい取引を選択してください。
+
+    4. 送金日時、送金先の電話番号、および送金金額（最大100,000円まで）が表示され、現在の処理状況（完了・保留など）がご確認いただけます。
+
+
+    もし履歴に反映されていない場合や、状況についてご不明な点がある場合は、お気軽にお問い合わせください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 72757145-a130-593b-89b5-c3173cf733c3
+  title: スマホ送金：お取引が拒否された・制限された
+  body: "「スマホ送金」の操作中にエラーが表示され、送金が完了できない場合の対処法をご案内します。\n\n**考えられる原因と確認事項**\n1. **限度額への到達**\n\
+    \   - 1回あたり100,000円を超えて送金しようとしていないかご確認ください。\n   - 今月の送金合計額が500,000円に達していないかご確認ください。\n\
+    2. **認証エラー**\n   - 二段階認証のコードが正しく入力されているか、または有効期限が切れていないかをご確認ください。\n3. **口座残高の不足**\n\
+    \   - 送金金額と手数料（0円）を合わせた金額が、普通預金口座にあるかご確認ください。\n\n**解決しない場合**\n上記を確認しても解決しない場合、当行にてセキュリティ上の制限をかけている可能性がございます。その際は、専門のオペレーターが詳細を調査し、制限解除の手続きを案内いたします。"
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: ce0ad2e9-4082-50ad-ae24-af1e6bde93f7
+  title: スマホ送金：切替えや上位プランを検討するとき
+  body: '「スマホ送金」は、電話番号だけで手軽に0円で送金できる便利なツールですが、利用目的によっては他の方法が適している場合があります。
+
+
+    - **スマホ送金が適している場合**：友人や家族間での少額のやり取り（1回100,000円以内、月間500,000円以内）。
+
+    - **通常の振込への切替えが適している場合**：100,000円を超える高額な送金が必要な場合や、ビジネス用途で正確な振込名義人を指定したい場合。
+
+
+    より詳細な振込手数料や条件については、「普通預金：商品概要」をご確認ください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: comparison
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 70429678-2233-57ac-b1fa-d6ff7920041b
+  title: スマホ送金：ほかの選択肢との比較と向かない場合
+  body: '「スマホ送金」は、スピードとコストパフォーマンスを重視したサービスです。他の送金手段と比較して、どのような場合に最適で、どのような場合に不向きかをご案内します。
+
+
+    **スマホ送金が最適なケース**
+
+    - 手数料を一切かけたくない（手数料0円）。
+
+    - 相手の口座番号が分からなくても、電話番号だけで送金したい。
+
+    - 100,000円以下の少額決済を頻繁に行う。
+
+
+    **向かないケース**
+
+    - **高額送金が必要な場合**：1回100,000円、月間500,000円の限度額があるため、これを超える送金には不向きです。
+
+    - **正式な証明が必要な場合**：簡易的な送金であるため、詳細な振込明細を公的な証明として利用したい場合は、通常の銀行振込を推奨いたします。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: product_sheet
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3d794088-394e-5b2b-9b06-99bd795c0b46
+  title: スマホ送金：お申込みとご利用条件
+  body: '**Q: スマホ送金を利用するために別途申し込みは必要ですか？**
+
+
+    A: いいえ、特別な申し込み手続きは不要です。当行の口座をお持ちで、アプリをご利用であればどなたでもそのままご利用いただけます。
+
+
+    **Q: 利用するための条件はありますか？**
+
+
+    A: 口座開設時にマイナンバーカードによる本人確認（取引時確認）を完了させていただけていることが条件となります。未完了の方は、アプリの案内に従って認証を行ってください。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 3d4e5f04-d22a-5d68-8589-b6fad83165b5
+  title: スマホ送金：よくあるお手続きの流れ
+  body: '「スマホ送金」を使って、お友達やご家族に送金する際の流れをステップ形式でご案内します。
+
+
+    **送金の手順**
+
+    1. アプリの「スマホ送金」メニューを開き、送金先の電話番号を入力します。
+
+    2. 送金したい金額を入力します（1回あたり100,000円まで）。
+
+    3. 送金先のお名前と金額に間違いがないか、確認画面でチェックします。この際、手数料が0円であることをご確認ください。
+
+    4. 二段階認証画面が表示されますので、認証を完了させてください。
+
+    5. 「送金が完了しました」という画面が表示されれば手続き終了です。
+
+
+    相手の方には、即座に送金が完了します。履歴は「スマホ送金：状況・履歴の確認」からいつでもご確認いただけます。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: how_to_guide
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: b6ffde7c-2a77-579a-997a-043a2402894d
+  title: スマホ送金：明細や記録と合わない
+  body: 'お客様から「送金したはずなのに残高と合わない」「履歴に反映されていない」といったお問い合わせをいただいた際の対応手順です。
+
+
+    **確認フロー**
+
+    1. **履歴の同期確認**：アプリの「送金履歴」画面で、最新の状態に更新されているかを確認してください。
+
+    2. **処理ステータスの確認**：送金が「完了」になっているか、「保留」や「エラー」になっていないかを確認します。
+
+    3. **金額の照合**：1回100,000円、月間500,000円の限度額内で、正しく処理されているかを確認します（手数料は0円のため、送金額と減少額は一致します）。
+
+
+    **エスカレーション基準**
+
+    - 履歴には「完了」とあるが、相手に届いていないという申告があった場合。
+
+    - システム上の不整合が疑われる場合。
+
+    これらの場合は、専門チームにて取引ログを詳細に調査し、必要に応じて預金者保護法に基づいた補償手続きを含めた対応を行います。'
+  domain: retail_banking
+  product_category: sumaho_sokin
+  document_type: troubleshooting
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: c3e984fa-343d-5ef5-8dfc-674ff98f4489
+  title: 手数料・料金のご案内
+  body: そらいろ銀行では、お客さまの日常的な利便性を最優先し、基本的な振込やATM利用に無料枠を設けております。無料回数を超えたご利用にのみ手数料を課す体系となっており、コスト負担を軽減した効率的な資産管理をサポートいたします。各商品ごとの詳細な無料回数や手数料については、それぞれの「手数料一覧」をご確認ください。
+  domain: retail_banking
+  product_category: general
+  document_type: fee_schedule
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 63382f92-6d4d-5154-9df6-cd43209d8816
+  title: よくあるご質問
+  body: '【お問い合わせ方法について】
+
+    Q：サポートはどのように受けられますか？
+
+    A：スマートフォンアプリ内のチャットおよびオンラインヘルプセンターにて、いつでも簡単にご利用いただけます。
+
+
+    Q：複雑な相談をしたい場合はどうすればよいですか？
+
+    A：チャットで解決しない複雑な案件については、専門のオペレーターによるオンライン相談へエスカレーションし、個別にご案内いたします。'
+  domain: retail_banking
+  product_category: general
+  document_type: faq
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 7a94fdfd-8800-5aae-902a-6dffb69f1e5d
+  title: 法令・制度に関するご案内：預金・日常のお取引
+  body: 'そらいろ銀行は、金融庁の監督の下、銀行法および個人情報保護法を厳格に遵守して運営しております。お客さまに安心してお取引いただくため、以下の制度を導入しています。
+
+
+    ■預金保険制度について
+
+    預金保険制度に基づき、利息のつく預金は、1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されます。
+
+
+    ■本人確認について
+
+    犯罪収益移転防止法に基づき、口座開設時にはマイナンバーカードのICチップ読み取りによる厳格なオンライン本人確認（取引時確認）を実施しております。'
+  domain: retail_banking
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: 67b5e16a-2479-5b81-be06-fb67a7f02fc3
+  title: 法令・制度に関するご案内：デビットカード
+  body: 'そらいろVisaデビットのご利用にあたり、お客さまの資産を守るため以下の体制を整えております。
+
+
+    ■不正利用への対応
+
+    フィッシング詐欺や不正送金などの被害報告を受けた際は、迅速にカードの利用停止および調査を行います。
+
+
+    ■補償について
+
+    預金者保護法に基づき、お客さまに故意または重大な過失がない限り、原則として銀行が被害額を補償いたします。万が一、身に覚えのない利用がある場合は、速やかにアプリまたはサポートセンターまでご連絡ください。'
+  domain: cards
+  product_category: compliance
+  document_type: regulatory_note
+  source_authority: official
+  placeholder: true
+  mentions_tools: []
+  institution_id: sorairo_bank
+- id: e440e8b2-49a9-53b7-9a3a-28bdb1a490c9
+  title: get_account_transactions を使う場面
+  body: 'お客さまから入出金明細の確認や、特定の取引内容について問い合わせがあった際に、取引履歴を照会するために使用します。
+
+
+    【手続き手順】
+
+    1. 本人確認を行い、認証が完了していることを確認します。
+
+    2. お客さまから提示された口座番号の下4桁などの情報に基づき、get_accounts を使用して対象の account_id を特定します。
+
+    3. get_account_transactions を呼び出し、該当口座の取引履歴を取得します。
+
+    4. 取得した情報をもとに、お客さまへ取引日時、金額、相手先などの詳細を案内します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: sorairo_bank
+- id: 7d146d49-b23c-5027-bb21-eeb1310bb097
+  title: get_account_transactions ツールリファレンス
+  body: '指定された口座の取引履歴を取得するツールです。オペレーターはこのツールを直接呼び出すことで、お客さまの最新の入出金明細を確認し、案内を行います。
+
+
+    引数：
+
+    - account_id: 取引履歴を取得したい口座の識別子'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_account_transactions
+  institution_id: sorairo_bank
+- id: cdcde593-853b-50e4-a758-cd5962b64091
+  title: file_transaction_dispute を使う場面
+  body: 'そらいろVisaデビットにおいて、お客さまが「身に覚えのない利用がある」と報告された場合に、調査と補償の申出を受け付けるために使用します。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. get_account_transactions を使用して取引履歴を確認し、問題となっている取引の transaction_id を特定します。
+
+    3. 預金者保護法に基づき、故意や重大な過失がない限り原則補償される方針であることを説明します。
+
+    4. file_transaction_dispute を呼び出し、正式に調査依頼を起票します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: sorairo_bank
+- id: fa610e30-34b1-5b14-a5a3-730070b97f59
+  title: file_transaction_dispute ツールリファレンス
+  body: 'そらいろVisaデビットの身に覚えのない利用について、調査および補償の申出を記録するツールです。オペレーターはこのツールを呼び出すことで、正式な異議申し立て手続きを開始します。
+
+
+    引数：
+
+    - account_id: 対象口座の識別子
+
+    - transaction_id: 異議がある取引の識別子
+
+    - dispute_reason: 申出の理由（例：カードを所持していたが利用に心当たりがない等）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - file_transaction_dispute
+  institution_id: sorairo_bank
+- id: 56790170-0a15-5ab1-a1e2-7dcd1fcc409b
+  title: freeze_card を使う場面
+  body: 'そらいろVisaデビットの紛失、盗難、または不正利用の疑いがある場合に、被害拡大を防ぐため、即座にカード機能を停止させるために使用します。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. 二次被害を防ぐため、最優先で freeze_card を呼び出し、カードの利用を一時停止します。
+
+    3. カードの紛失または盗難である場合は、そのまま order_replacement_card を案内し、カードの再発行手続きへ進みます。
+
+    4. 状況に応じて、不審な取引がないか取引履歴を確認します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: sorairo_bank
+- id: 3e260823-b659-5604-bc4c-d0fa9875893e
+  title: freeze_card ツールリファレンス
+  body: 'そらいろVisaデビットの利用を即座に一時停止するツールです。オペレーターはこのツールを直接呼び出すことで、紛失や不正利用時に迅速にカード機能をロックします。
+
+
+    引数：
+
+    - account_id: 停止対象のカードが紐づく口座の識別子'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - freeze_card
+  institution_id: sorairo_bank
+- id: fe88c87d-58e2-5902-8f4d-d6604b766f73
+  title: set_card_limits を使う場面
+  body: 'お客さまから「そらいろVisaデビットの1日あたりの利用限度額を変更したい」というご要望をいただいた際に、本手続きを行います。
+
+
+    【手続きの流れ】
+
+    1. 本人確認を行い、お客さまの身元を確定させます。
+
+    2. get_accounts を使用して、対象となる口座の account_id を特定します。
+
+    3. お客さまに、変更後の1日あたりの利用限度額（希望金額）を伺います。
+
+    4. set_card_limits を呼び出し、限度額の変更を完了させます。
+
+
+    ※設定可能な範囲については、そらいろVisaデビット：限度額・制限と注意事項をご案内ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_card_limits
+  institution_id: sorairo_bank
+- id: ce028753-3611-5bd3-bcb6-8f44effd20fe
+  title: set_card_limits ツールリファレンス
+  body: 'そらいろVisaデビットの1日あたりの利用限度額を変更するツールです。オペレーターが直接このツールを呼び出すことで、即時に限度額が更新されます。
+
+
+    【引数】
+
+    ・account_id: 対象口座の識別子（get_accounts で取得）
+
+    ・daily_limit_amount: 設定したい1日あたりの限度額（円）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_card_limits
+  institution_id: sorairo_bank
+- id: 4e428a74-052a-51b7-8cae-4a0bebed7a89
+  title: create_goal_pocket を使う場面
+  body: 'お客さまが「目的別口座を作って貯金を管理したい」と希望された際に、本手続きを行います。目的別口座は最大10個まで作成可能です。
+
+
+    【手続きの流れ】
+
+    1. 本人確認を行い、お客さまの身元を確定させます。
+
+    2. get_accounts を使用して、親口座となる普通預金の account_id を特定します。
+
+    3. 以下の情報を伺います：
+
+    　・口座の名前（例：旅行資金）
+
+    　・目標金額（円）
+
+    　・毎月の自動入金額（円）
+
+    4. create_goal_pocket を呼び出し、口座の作成を完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - create_goal_pocket
+  institution_id: sorairo_bank
+- id: 3c71d30e-c5d7-5c60-b285-1c5df59d69b0
+  title: create_goal_pocket ツールリファレンス
+  body: '目的別口座を新規作成するツールです。オペレーターが直接呼び出すことで、アプリに新しい貯蓄枠が追加されます。
+
+
+    【引数】
+
+    ・account_id: 親口座の識別子（get_accounts で取得）
+
+    ・pocket_name: 口座の名称
+
+    ・target_amount: 目標金額（円）
+
+    ・monthly_auto_deposit: 毎月の自動入金額（円）
+
+
+    目的別口座は最大10個まで作成できます。毎月の自動入金額は1,000円以上で指定します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - create_goal_pocket
+  institution_id: sorairo_bank
+- id: f57c9af5-6fb5-56da-b72c-f798e840cded
+  title: send_phone_transfer を使う場面
+  body: 'お客さまから「電話番号を使って、友人に少額の送金をしたい」という依頼を受けた際に、本手続きを行います。スマホ送金の手数料は0円です。
+
+
+    【手続きの流れ】
+
+    1. 本人確認を行い、お客さまの身元を確定させます。
+
+    2. get_accounts を使用して、送金元口座の account_id を特定します。
+
+    3. 送金先の携帯電話番号と送金金額（1回100,000円まで）を伺います。
+
+    4. **「送金完了後は取り消しができない」**ことを明確に伝え、同意を得ます。
+
+    5. send_phone_transfer を呼び出し、送金を完了させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - send_phone_transfer
+  institution_id: sorairo_bank
+- id: a9ae4cb3-4744-5598-9aca-3774427edc6f
+  title: send_phone_transfer ツールリファレンス
+  body: '相手の電話番号を指定して即時に送金を行うツールです。オペレーターが直接呼び出して実行します。一度実行すると取り消せません。
+
+
+    【引数】
+
+    ・account_id: 送金元口座の識別子（get_accounts で取得）
+
+    ・phone_number: 送金先の電話番号
+
+    ・amount: 送金金額（最大100,000円まで）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - send_phone_transfer
+  institution_id: sorairo_bank
+- id: 21d9f5e6-c114-5eca-8ece-488cb976faf5
+  title: open_time_deposit を使う場面
+  body: 'お客さまから「定期預金を開設して、確実に資産形成をしたい」という相談を受けた際に、本手続きを行います。
+
+
+    【手続きの流れ】
+
+    1. 本人確認を行い、お客さまの身元を確定させます。
+
+    2. get_accounts を使用して、資金を移動させる普通預金の account_id を特定します。
+
+    3. 預け入れる金額（最低1,000円から）と、預入期間（月数）を伺います。
+
+    4. open_time_deposit を呼び出し、定期預金口座の開設と預入を完了させます。
+
+
+    ※金利等の詳細は、定期預金：金利・料率一覧をご確認ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_time_deposit
+  institution_id: sorairo_bank
+- id: 07d97408-ccaf-5b3f-9199-063aae6dc839
+  title: open_time_deposit ツールリファレンス
+  body: '普通預金から資金を移し、定期預金口座を開設するツールです。オペレーターが直接呼び出し、指定期間の預け入れを完了させます。
+
+
+    【引数】
+
+    ・account_id: 資金を出す普通預金の識別子（get_accounts で取得）
+
+    ・amount: 預入金額（1,000円以上の正の整数）
+
+    ・term_months: 預入期間（月単位）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_time_deposit
+  institution_id: sorairo_bank
+- id: 731d5792-418e-5695-811a-2edf0666ee2b
+  title: reregister_device を使う場面
+  body: 'お客さまが「機種変更をしたため、アプリにログインできない」「二段階認証が使えなくなった」とお問い合わせいただいた際に、本手続きを行います。
+
+
+    【手続きの流れ】
+
+    1. 本人確認を厳格に行い、お客さまの身元を確定させます。
+
+    2. get_accounts を使用して、対象となる口座の account_id を特定します。
+
+    3. 新しいデバイスでの認証設定を有効にするため、reregister_device を呼び出します。
+
+    4. お客さまに、アプリを再度開き、認証の再登録手続きを完了させるよう案内します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - reregister_device
+  institution_id: sorairo_bank
+- id: 5b557135-8857-5aab-9750-fa1f30c2a52d
+  title: reregister_device ツールリファレンス
+  body: '機種変更などでスマートフォン認証が不能になった場合に、認証の再登録を許可するツールです。オペレーターが直接呼び出します。
+
+
+    【引数】
+
+    ・account_id: 対象口座の識別子（get_accounts で取得）
+
+    ・device_identifier: 新しい端末の識別情報または再登録に必要な認証トークン'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - reregister_device
+  institution_id: sorairo_bank
+- id: 147f7508-67d7-567d-a424-47af97be91bb
+  title: transfer_funds を使う場面
+  body: 'お客様が、ご自身の口座間または他行の口座へ資金を移動させたい場合にこの手続きを行います。具体的には、「普通預金」から「目的別口座」への資金移動や、他行口座への振込などが対象です。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. `get_accounts` を使用して、送金元となる口座の口座IDを特定します。
+
+    3. 送金先の口座情報（口座番号や金融機関など）と送金金額を確認します。
+
+    4. `transfer_funds` を呼び出して送金処理を実行します。
+
+
+    なお、友人や家族への少額送金で電話番号のみを利用したい場合は、「スマホ送金」のご案内を検討してください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - transfer_funds
+  institution_id: sorairo_bank
+- id: 01b8a3ba-97c6-5b52-8eba-aa0002e137fc
+  title: transfer_funds ツールリファレンス
+  body: '指定した口座から別の口座へ資金を移動させるツールです。オペレーターがこのツールを直接呼び出すことで、普通預金、目的別口座、または他行口座への資金移動を完結させます。
+
+
+    ・引数：送金元口座ID、送金先口座情報、送金金額
+
+    ・効果：指定金額の資金移動を実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - transfer_funds
+  institution_id: sorairo_bank
+- id: 73987261-a3f2-5d11-a07b-99f777855e81
+  title: update_beneficiary を使う場面
+  body: 'お客様が、振込先として登録している口座情報の追加、変更、または削除を希望される場合に利用します。あらかじめ登録しておくことで、次回以降の振込手続きをスムーズに行うことが可能です。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. 登録振込先の「追加」「変更」「削除」のいずれを希望されるか確認します。
+
+    3. 金融機関名、支店名、口座番号、受取人名などの正確な情報を伺います。
+
+    4. `update_beneficiary` を呼び出して、登録内容の更新処理を実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: sorairo_bank
+- id: c525f907-0437-5cc0-915d-78cf473ee252
+  title: update_beneficiary ツールリファレンス
+  body: '登録済みの振込先情報を管理するためのツールです。オペレーターがこのツールを直接呼び出すことで、顧客の振込先リストを更新します。
+
+
+    ・引数：操作内容（追加/変更/削除）、金融機関名、支店名、口座番号、受取人名
+
+    ・効果：振込先登録リストの内容を更新します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_beneficiary
+  institution_id: sorairo_bank
+- id: 9baacaeb-16a9-551b-a0d5-fc04a82f627f
+  title: stop_payment を使う場面
+  body: 'お客様が、設定している口座振替（自動引落し）の停止を希望される場合に利用します。なお、そらいろ銀行では小切手および手形を取り扱っていないため、本手続きは口座振替のみが対象となります。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. `get_accounts` を使用して、対象となる口座IDを特定します。
+
+    3. 停止したい振替内容（引落先など）を確認します。
+
+    4. `stop_payment` を呼び出して、口座振替の停止手続きを実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - stop_payment
+  institution_id: sorairo_bank
+- id: db01d605-6bc0-5594-a040-6869e283c2b7
+  title: stop_payment ツールリファレンス
+  body: '口座振替（自動引落し）の設定を停止させるツールです。オペレーターがこのツールを直接呼び出すことで、指定された振替設定を無効化します。
+
+
+    ・引数：口座ID、停止対象の振替詳細情報
+
+    ・効果：指定された口座振替の支払いを停止します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - stop_payment
+  institution_id: sorairo_bank
+- id: 13f17046-6cee-515e-a668-6e645ef179cb
+  title: pay_bill を使う場面
+  body: 'お客様が、税金や公共料金などの払込みをペイジー（Pay-easy）経由で口座から行いたい場合に利用します。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. `get_accounts` を使用して、支払いに利用する口座IDを特定します。
+
+    3. 払込票などに記載されている収納機関番号、お客様番号などの支払い情報を正確に確認します。
+
+    4. `pay_bill` を呼び出して、ペイジーによる払込み処理を実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_bill
+  institution_id: sorairo_bank
+- id: 59c4e1b5-cf89-59d7-b832-fb7ad3fd1183
+  title: pay_bill ツールリファレンス
+  body: 'ペイジーを利用して、口座から公共料金や税金などの支払いを実行するツールです。オペレーターがこのツールを直接呼び出すことで決済を完了させます。
+
+
+    ・引数：口座ID、ペイジー支払い情報（収納機関番号等）
+
+    ・効果：指定口座から指定の請求先へ払込みを実行します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - pay_bill
+  institution_id: sorairo_bank
+- id: d04317b9-dedf-5d0f-9e84-75015164227b
+  title: activate_card を使う場面
+  body: 'お客様の手元に「そらいろVisaデビット」カードが届き、その利用を開始（有効化）したい場合に利用します。カードは発行直後の状態では利用できないため、この手続きが必要です。
+
+
+    【手続き手順】
+
+    1. 本人確認を完了させます。
+
+    2. `get_accounts` を使用して、カードが紐付いている口座IDを特定します。
+
+    3. カードがお手元に届いていることを確認します。
+
+    4. `activate_card` を呼び出して、デビットカードの利用を開始させます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - activate_card
+  institution_id: sorairo_bank
+- id: 1dfb06d4-9a72-5285-b65a-703fefc8b869
+  title: activate_card ツールリファレンス
+  body: '発行済みの「そらいろVisaデビット」カードを利用可能な状態にするツールです。オペレーターがこのツールを直接呼び出すことで、カードの有効化処理を行います。
+
+
+    ・引数：口座ID（またはカード識別情報）
+
+    ・効果：指定されたデビットカードを有効化し、利用可能にします。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - activate_card
+  institution_id: sorairo_bank
+- id: d8540aa9-171f-5cfd-ac13-9a5db4c3dec9
+  title: order_replacement_card を使う場面
+  body: 'お客さまから「そらいろVisaデビット」の紛失、盗難、またはカードの破損による再発行の依頼を受けた際に本手続きを行います。
+
+
+    **【重要】**
+
+    カードの紛失や盗難の場合、再発行前に必ずカードの利用停止処理を行ってください。詳細は「freeze_card を使う場面」をご確認ください。
+
+
+    **【手続きの流れ】**
+
+    1. 本人確認を行い、お客さまの本人性を確認します。
+
+    2. `get_accounts` を使用して、対象となる口座の account_id を特定します。
+
+    3. お客さまに再発行にかかる日数と配送方法を案内します。
+
+    4. `order_replacement_card` を呼び出し、カードの再発行申請を完了させます。
+
+    5. 手続き完了後、新しいカードが届くまでのお時間を改めてお伝えします。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: sorairo_bank
+- id: 649a35cb-44a9-5a18-804a-3d5684213781
+  title: order_replacement_card ツールリファレンス
+  body: '指定された口座に紐づく「そらいろVisaデビット」の再発行手続きを行います。オペレーターはこのツールを直接呼び出すことで、カードの再発行申請を完了させます。
+
+
+    **引数：**
+
+    - account_id：`get_accounts` 等で取得した、再発行対象の口座識別子。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - order_replacement_card
+  institution_id: sorairo_bank
+- id: c117f406-6877-5049-b599-7b712ad92fe1
+  title: get_accounts を使う場面
+  body: 'お客さまが保有している口座の一覧を確認し、特定の手続き（振込、解約、再発行など）に必要な口座識別子（account_id）を特定する際に使用します。
+
+
+    **【手続きの流れ】**
+
+    1. 本人確認を完了させ、操作権限があることを確認します。
+
+    2. `get_accounts` を呼び出し、お客さまが保有する口座（普通預金、目的別口座、定期預金など）の一覧を取得します。
+
+    3. お客さまが提示した「口座番号の下4桁」などの情報と、取得した一覧を照合して、対象の account_id を決定します。
+
+    4. 特定した account_id を用いて、次のお手続き（資金移動や設定変更など）へ進みます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: sorairo_bank
+- id: 300a0290-ebc9-5f65-9de9-7f35826982da
+  title: get_accounts ツールリファレンス
+  body: '認証済みのお客さまが保有するすべての口座情報を取得します。オペレーターはこのツールを呼び出すことで、口座の種類や account_id を一覧で確認できます。
+
+
+    **引数：**
+
+    - なし（認証済みのセッション情報に基づき、自動的に当該ユーザーの口座が取得されます）'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_accounts
+  institution_id: sorairo_bank
+- id: 1b75420c-755c-5b3d-858b-cebd5e8bfe58
+  title: open_account を使う場面
+  body: '新規にお客さまが「普通預金」口座を開設することを希望される場合に本手続きを行います。当行はインターネット専業銀行であるため、すべてオンラインで完結させます。
+
+
+    **【重要】**
+
+    口座開設には、マイナンバーカードのICチップ読み取りによる厳格なオンライン本人確認が必須となります。
+
+
+    **【手続きの流れ】**
+
+    1. お客さまから、氏名、生年月日、住所、連絡先などの必要情報を伺います。
+
+    2. マイナンバーカードによる本人確認（取引時確認）が完了していることを確認します。
+
+    3. `open_account` を呼び出し、口座開設処理を実行します。
+
+    4. 開設完了後、アプリでの利用開始方法を案内します。詳細は「普通預金：ご利用開始までの手順」をご参照ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: sorairo_bank
+- id: 54bd3c8e-dbd1-5987-9a4c-f50923b8c00e
+  title: open_account ツールリファレンス
+  body: '新規の口座開設処理を行います。オペレーターはこのツールを直接呼び出すことで、お客さまの情報を登録し、口座を有効化します。
+
+
+    **引数：**
+
+    - full_name：お客さまのフルネーム
+
+    - date_of_birth：生年月日
+
+    - address：現住所
+
+    - contact_phone：連絡先電話番号
+
+    - email_address：メールアドレス'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - open_account
+  institution_id: sorairo_bank
+- id: 41aec122-9d3a-540d-b41c-c6b19c8a00a8
+  title: close_account を使う場面
+  body: 'お客さまから口座の解約依頼を受けた際に本手続きを行います。なお、本操作は取り消し不可（不可逆的）であるため、十分な注意が必要です。
+
+
+    **【手続きの流れ】**
+
+    1. 本人確認を完了させます。
+
+    2. `get_accounts` を使用して、解約対象の account_id を特定します。
+
+    3. 対象口座の残高が 0円 であることを確認します。残高がある場合は、先に `transfer_funds` 等で資金を移動していただくよう案内してください。
+
+    4. 解約後の資金返還先や、紐づくサービスの停止について説明し、同意を得ます。
+
+    5. `close_account` を呼び出し、口座を完全に閉鎖します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: sorairo_bank
+- id: 4a02c875-1320-5ef2-94dc-c7795912a3f5
+  title: close_account ツールリファレンス
+  body: '指定された口座を解約し、閉鎖します。この操作は取り消しができないため、実行前に必ず残高確認と顧客同意を得てください。
+
+
+    **引数：**
+
+    - account_id：`get_accounts` 等で取得した、解約対象の口座識別子。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - close_account
+  institution_id: sorairo_bank
+- id: 21b528e9-385d-5ac7-9060-51d38b102451
+  title: update_contact_info を使う場面
+  body: 'お客さまの住所変更、電話番号の変更、またはメールアドレスの変更依頼があった際に本手続きを行います。正確な連絡先情報は、重要な通知の送付やセキュリティ維持に不可欠です。
+
+
+    **【手続きの流れ】**
+
+    1. 本人確認を行い、変更権限があることを確認します。
+
+    2. 変更後の新しい連絡先情報（新住所、新電話番号、新メールアドレスなど）を正確に伺います。
+
+    3. `update_contact_info` を呼び出し、登録情報を更新します。
+
+    4. 更新が完了したことをお客さまに伝え、登録内容の確認を促します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: sorairo_bank
+- id: bf6ae989-1c36-5741-982e-40036e03b713
+  title: update_contact_info ツールリファレンス
+  body: 'お客さまの登録連絡先情報を更新します。オペレーターはこのツールを呼び出すことで、データベース上の顧客情報を最新の状態に変更します。
+
+
+    **引数：**
+
+    - full_name：本人確認に使用する氏名
+
+    - new_address：変更後の住所
+
+    - new_phone：変更後の電話番号
+
+    - new_email：変更後のメールアドレス'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - update_contact_info
+  institution_id: sorairo_bank
+- id: abdfc532-4b41-57a6-977a-589716cfdd37
+  title: get_statements を使う場面
+  body: 'お客さまから、確定申告やローン審査などの提出書類として、または過去のお取引内容を詳しく確認したいというご要望があった際に利用します。
+
+
+    【対応手順】
+
+    1. 本人確認（`verify_identity`）を完了させます。
+
+    2. 口座番号の下4桁を確認し、`get_accounts` を使用して正確な `account_id` を特定します。
+
+    3. 必要となる期間（月次や年次など）を確認します。
+
+    4. `get_statements` を呼び出し、該当する明細書を取得してお客さまへ提示します。
+
+
+    ※もし提示した明細の内容についてお客さまから疑問を持たれた場合は、「普通預金：明細や記録と合わない」をご案内ください。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: sorairo_bank
+- id: 3190f082-5689-57a7-8818-b3ce21403701
+  title: get_statements ツールリファレンス
+  body: '`get_statements`
+
+
+    【概要】指定した口座の利用明細書を取得します。オペレーターが本ツールを直接呼び出すことで、お客さまに代わってデータを抽出します。
+
+
+    【引数】
+
+    ・`account_id`: 対象口座の識別ID
+
+    ・`period`: 取得したい期間（例：2025年1月〜2025年3月）
+
+
+    【効果】指定期間の取引明細データが返却されます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - get_statements
+  institution_id: sorairo_bank
+- id: ab31acc7-3bfe-51dd-9953-54bb514a3a5f
+  title: set_alerts を使う場面
+  body: 'お客さまが支出を効率的に管理したい場合や、想定外の高額な振込があった際に即時通知を受け取りたいというご要望があった際に利用します。
+
+
+    【対応手順】
+
+    1. 本人確認（`verify_identity`）を完了させます。
+
+    2. 口座番号の下4桁を確認し、`get_accounts` を使用して `account_id` を特定します。
+
+    3. 通知を希望される条件（例：10,000円以上の出金があった時など）を確認します。
+
+    4. `set_alerts` を呼び出し、通知設定を有効にします。
+
+
+    これにより、条件に合致した取引が発生した際、お客さまのスマートフォンアプリへリアルタイムで通知が届くようになります。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: sorairo_bank
+- id: a1b744c9-6e3c-5a85-9f6e-aca6e500370a
+  title: set_alerts ツールリファレンス
+  body: '`set_alerts`
+
+
+    【概要】口座の入出金に関する通知設定（アラート）を作成または変更します。オペレーターが本ツールを直接呼び出して設定を行います。
+
+
+    【引数】
+
+    ・`account_id`: 対象口座の識別ID
+
+    ・`alert_type`: 通知の種類（入金・出金など）
+
+    ・`threshold`: 通知をトリガーとする金額（例：10,000円）
+
+
+    【効果】指定された条件に合致する取引が発生した際に、プッシュ通知が送信されるようになります。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - set_alerts
+  institution_id: sorairo_bank
+- id: 9a62d651-a894-5251-b9da-34ea95cb2fc0
+  title: dispute_status を使う場面
+  body: '「そらいろVisaデビット」などで身に覚えのない利用があり、既に `file_transaction_dispute` を通じて調査依頼を提出済みのお客さまから、現在の進捗状況について確認があった際に利用します。
+
+
+    【対応手順】
+
+    1. 本人確認（`verify_identity`）を完了させます。
+
+    2. 調査依頼時に発行された「照会番号（dispute_id）」をお客さまに確認します。
+
+    3. `dispute_status` を呼び出し、現在の調査状況（調査中、完了、補償決定など）を確認します。
+
+    4. 確認した最新の状況をお客さまへ丁寧にご説明します。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: policy_procedure
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - dispute_status
+  institution_id: sorairo_bank
+- id: 76cd829a-c548-5c0f-a0ad-02d9fd7ab5fe
+  title: dispute_status ツールリファレンス
+  body: '`dispute_status`
+
+
+    【概要】提出された不正利用などの異議申し立て（ディスピュート）の現在の処理状況を確認します。オペレーターが本ツールを呼び出して状況を取得します。
+
+
+    【引数】
+
+    ・`dispute_id`: 異議申し立て時に割り当てられた固有の識別ID
+
+
+    【効果】該当する調査案件の現在のステータス（進捗状況）が返却されます。'
+  domain: retail_banking
+  product_category: procedure
+  document_type: discoverable_tool_doc
+  source_authority: official
+  placeholder: true
+  mentions_tools:
+  - dispute_status
+  institution_id: sorairo_bank

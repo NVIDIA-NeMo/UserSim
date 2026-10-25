@@ -216,7 +216,7 @@ class TestFinanceBankLocale:
         assert finance_bank_locale("ta_Latn_IN", has_tasks=lambda _: True) == "ta_Latn_IN"
 
     def test_a_locale_with_no_base_keeps_its_own_name(self):
-        assert finance_bank_locale("ja_JP") == "ja_JP"
+        assert finance_bank_locale("ja_JP", has_tasks=lambda _: False) == "ja_JP"
 
     def test_a_task_set_in_the_bank_rows_load_takes_over(self, tmp_path, monkeypatch):
         (tmp_path / "bank" / "acme").mkdir(parents=True)
@@ -2313,6 +2313,7 @@ class TestRegionalConventions:
         assert us.format_money("123456.5") == "$123,456.50"
         assert load_finance_bank_for_locale("en_IN").format_money("123456.5") == "₹1,23,456.50"
         assert load_finance_bank_for_locale("fr_FR").format_money("123456.5") == "123 456,50 €"
+        assert load_finance_bank_for_locale("ja_JP").format_money("123456") == "123,456円"
         germany = _regional(us, "de_DE", currency_symbol="€", number_format="de_DE")
         britain = _regional(us, "en_GB", currency_symbol="£", number_format="en_GB")
         assert germany.format_money("123456.5") == "123.456,50 €"
@@ -2334,7 +2335,7 @@ class TestRegionalConventions:
         from usersim.engine.core.finance_bank import format_percent
 
         us = load_finance_bank_for_locale("en_US")
-        japan = _regional(us, "ja_JP", currency_symbol="円", number_format="ja_JP")
+        japan = load_finance_bank_for_locale("ja_JP")
         korea = _regional(us, "ko_KR", currency_symbol="원", number_format="ko_KR")
         assert japan.format_money("1234567") == "1,234,567円"
         assert korea.format_money("-50000") == "-50,000원"
@@ -2348,10 +2349,10 @@ class TestRegionalConventions:
         assert us.format_date(day) == "03/27/1980"
         assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
         assert load_finance_bank_for_locale("fr_FR").format_date(day) == "27/03/1980"
+        assert load_finance_bank_for_locale("ja_JP").format_date(day) == "1980-03-27"
         for locale, expected in (
             ("en_GB", "27/03/1980"),
             ("de_DE", "27.03.1980"),
-            ("ja_JP", "1980-03-27"),
         ):
             assert _regional(us, locale).format_date(day) == expected
 
@@ -2389,6 +2390,15 @@ class TestRegionalConventions:
         ctx = probe._account_context(instance)
         assert "Bausparvertrag" in ctx
         assert "24.000,00 €" in ctx and "$" not in ctx
+
+    def test_a_japan_customer_hears_their_balance_in_yen(self):
+        inst = load_finance_bank_for_locale("ja_JP").institution("asanagi_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-AN-TEIKI-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="ja_JP", seed=1)
+        probe, _ = _probe_on("ja_JP", instance)
+        ctx = probe._account_context(instance)
+        assert "普通預金" in ctx
+        assert "3,500,000円" in ctx and "$" not in ctx and "¥" not in ctx
 
     def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
         us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
@@ -2601,7 +2611,7 @@ class TestAuthoredPersonaTagsAreReachable:
         )
         assert {t.split(":")[0] for t in tags} <= ({"age", "financial-literacy"} | _FREEFORM_PREFIXES)
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP"])
     def test_task_persona_tags_are_reachable(self, locale):
         bank = load_finance_bank_for_locale(locale)
         dead = {
@@ -2613,7 +2623,7 @@ class TestAuthoredPersonaTagsAreReachable:
         }
         assert not dead, f"{locale} tasks carry tags no persona can have: {sorted(dead)}"
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP"])
     def test_dynamic_persona_affinities_are_reachable(self, locale):
         import yaml
 
