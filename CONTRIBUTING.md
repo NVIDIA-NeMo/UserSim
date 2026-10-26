@@ -447,3 +447,10 @@ Participation is governed by the [Contributor Covenant](CODE_OF_CONDUCT.md).
 See [Live provider health checks](docs/engineering/health-checks.md) for credential
 precedence, local commands, and the pass, skip, and failure outcomes. These checks
 make real model requests and are separate from offline contributor validation.
+
+## Container validation
+
+Run `make test-container` to build a fresh CPU test image and run coverage plus
+installed-wheel e2e without external networking. See
+[CPU container tests](docs/engineering/container-tests.md) for Docker prerequisites,
+resource limits, context policy, and exported diagnostics.
