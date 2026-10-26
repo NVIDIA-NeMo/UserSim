@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+["setup:tools"]
+description = "Install the exact registry tools from mise.lock"
+run = "mise install --locked uv"
+
+["setup:ci"]
+description = "Sync locked dependencies for the requested UV_PYTHON, without hooks"
+depends = ["check:tools"]
+run = '"${UV:-uv}" sync --locked'
+
+[setup]
+description = "Sync development dependencies and install static and commit-message hooks"
+depends = ["check:tools"]
+run = [
+    '"${UV:-uv}" sync --locked --reinstall-package usersim',
+    '"${UV:-uv}" run pre-commit install --hook-type pre-commit --hook-type commit-msg',
+]
+
+["setup:kernel"]
+description = "Register the project Jupyter kernel for this user"
+run = '"${UV:-uv}" run python -m ipykernel install --user --name usersim --display-name "User Sim (.venv)"'

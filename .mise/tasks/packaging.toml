@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+["check:release-tag"]
+description = "Verify the tag/version and origin/main ancestry against existing dist archives"
+run = 'test -n "$TAG" && "${UV:-uv}" run python scripts/check_release_tag.py "$TAG" dist'
+
+["validate:native"]
+description = "Validate static gates, dependency licenses, coverage, smoke and extension seams"
+run = [
+    { task = "check" }, { task = "check:license:dependencies" },
+    { task = "test:ci" }, { task = "test:smoke" }, { task = "check:extensions" },
+]
+
+["validate:ci"]
+description = "Validate source, build archives once, then run e2e against the same wheel"
+run = [
+    { task = "validate:native" }, { task = "check:dist" },
+    'mise run test:e2e --wheel-dir dist',
+]
+
+["build:dist"]
+description = "Build fresh distribution archives, sdist then wheel"
+run = ["rm -rf dist", '"${UV:-uv}" build -q -o dist', "ls -1 dist"]
+
+["release:digests"]
+description = "Print original release archive digests and append the approval summary"
+run = 'python3 scripts/release_digests.py dist'

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Keep compatibility calls usable without changing a shell profile or globals.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+export MISE_DATA_DIR="${MISE_DATA_DIR:-$root/.cache/mise/data}"
+export MISE_CACHE_DIR="${MISE_CACHE_DIR:-$root/.cache/mise/cache}"
+export MISE_CONFIG_DIR="${MISE_CONFIG_DIR:-$root/.cache/mise/config}"
+export MISE_STATE_DIR="${MISE_STATE_DIR:-$root/.cache/mise/state}"
+export MISE_TRUSTED_CONFIG_PATHS="${MISE_TRUSTED_CONFIG_PATHS:-$root}"
+if [[ -n "${MISE_BIN:-}" ]]; then
+    binary="$MISE_BIN"
+elif [[ -n "${MISE_INSTALL_PATH:-}" ]]; then
+    binary="$MISE_INSTALL_PATH"
+elif [[ -x "$root/.cache/tools/mise" ]]; then
+    binary="$root/.cache/tools/mise"
+elif command -v mise >/dev/null 2>&1; then
+    binary="$(command -v mise)"
+else
+    echo 'Mise is missing. Run make bootstrap.' >&2
+    exit 1
+fi
+[[ -x "$binary" ]] || { echo "Mise is not executable at $binary; run make bootstrap." >&2; exit 1; }
+binary="$(cd "$(dirname "$binary")" && pwd -P)/$(basename "$binary")"
+export PATH="$(dirname "$binary"):$PATH"
+exec "$binary" "$@"

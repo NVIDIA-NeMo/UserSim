@@ -3,7 +3,7 @@
 #
 # Top-level underscore directories contain private, non-distribution material.
 # uv owns lock formatting; notebooks skip rewriting text hooks individually.
-exclude: '^_[^/]+/|^uv\.lock$'
+exclude: '^_[^/]+/|^(uv\.lock|mise\.lock)$'
 
 default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
@@ -42,35 +42,35 @@ repos:
     hooks:
       - id: check-lock
         name: dependency lock consistency
-        entry: make check-lock
+        entry: scripts/mise run check:lock
         language: system
         pass_filenames: false
         always_run: true
       - id: typecheck
         name: type checking (Python 3.11)
-        entry: make typecheck
+        entry: scripts/mise run check:type
         language: system
         pass_filenames: false
         always_run: true
       - id: spdx-headers
         name: SPDX headers (staged files)
-        entry: uv run python scripts/update_license_headers.py
+        entry: scripts/mise run license:headers:fix
         language: system
-        files: '^(src/|tests/|tests_e2e/|scripts/|templates/|Makefile$|conftest\.py$)'
+        files: '^(\.mise/|\.mise\.toml$|src/|tests/|tests_e2e/|scripts/|templates/|Makefile$|conftest\.py$)'
       - id: dco-trailers
         name: DCO author and co-author sign-offs
-        entry: python3 scripts/check_commit_signoffs.py --commit-msg
+        entry: scripts/mise run check:dco
         language: system
         stages: [commit-msg]
         always_run: true
       - id: ruff
         name: ruff (lint)
-        entry: uv run ruff check --fix
+        entry: scripts/mise run lint:files
         language: system
         types: [python]
       - id: ruff-format
         name: ruff format
-        entry: uv run ruff format
+        entry: scripts/mise run format:files
         language: system
         types: [python]
 
