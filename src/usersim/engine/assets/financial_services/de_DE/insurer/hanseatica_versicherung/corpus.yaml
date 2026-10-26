@@ -6817,7 +6817,7 @@ documents:
     | Identitätsprüfung | Erfolgreicher Multi-Faktor-Authentifizierung / KYC-Prozess
     | Zwingend für Aktivierung |
 
-    | Finanzielle Kapazität | Monatlicher Beitrag $\ge$ 25 € | Vertragsschluss möglich
+    | Finanzielle Kapazität | Monatlicher Beitrag ≥ 25 € | Vertragsschluss möglich
     |
 
     | Alter | Gesetzliche Mindestvoraussetzungen für Versicherungsverträge | Vertragsschluss
@@ -7700,7 +7700,7 @@ documents:
     | **Wohnsitz/Rechtsstatus** | Deutschland / EU | Vollständiger Zugang möglich
     |
 
-    | **Monatlicher Beitrag** | $\ge$ 25 € | Vertragsschluss möglich |
+    | **Monatlicher Beitrag** | ≥ 25 € | Vertragsschluss möglich |
 
     | **Monatlicher Beitrag** | $<$ 25 € | Kein Zugang (Mindestbeitrag nicht erfüllt)
     |

@@ -7476,7 +7476,7 @@ documents:
 
     | Premium Payment | ₹9,500 paid in full | Policy coverage activated |
 
-    | Room Rent | $\le$ 1% of Sum Insured | Full eligible room rent covered |
+    | Room Rent | ≤ 1% of Sum Insured | Full eligible room rent covered |
 
     | Room Rent | $>$ 1% of Sum Insured | Excess amount borne by policyholder |'
   domain: insurance

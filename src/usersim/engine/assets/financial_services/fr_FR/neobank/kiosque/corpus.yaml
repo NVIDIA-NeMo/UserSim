@@ -3335,11 +3335,11 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Âge du bénéficiaire | $\ge$ 12 ans | Éligible |
+    | Âge du bénéficiaire | ≥ 12 ans | Éligible |
 
     | Âge du bénéficiaire | < 12 ans | Non éligible |
 
-    | Âge du bénéficiaire | $\ge$ 18 ans | Non éligible (S''orienter vers Compte Kiosque)
+    | Âge du bénéficiaire | ≥ 18 ans | Non éligible (S''orienter vers Compte Kiosque)
     |
 
     | Domiciliation | France | Éligible |

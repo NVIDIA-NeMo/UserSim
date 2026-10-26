@@ -2939,10 +2939,10 @@ documents:
     | Monthly Contribution < £50 | Ineligible | Account cannot be opened or will be
     marked as ''Inactive'' |
 
-    | Monthly Contribution $\ge$ £50 | Standard Member | Eligible for full account
+    | Monthly Contribution ≥ £50 | Standard Member | Eligible for full account
     features and 20% basic-rate tax relief |
 
-    | Total Annual Contribution $\le$ £60,000 | Tax-Efficient | Fully within the current
+    | Total Annual Contribution ≤ £60,000 | Tax-Efficient | Fully within the current
     Annual Allowance for tax relief |
 
     | Total Annual Contribution > £60,000 | Allowance Excess | Eligible for account,

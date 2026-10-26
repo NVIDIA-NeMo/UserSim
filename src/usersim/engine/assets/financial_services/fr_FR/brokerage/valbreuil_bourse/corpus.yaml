@@ -2160,11 +2160,10 @@ documents:
   body: "L'ouverture d'un PEA-PME requiert la validation de plusieurs critères d'éligibilité.\
     \ Veuillez fournir les documents suivants pour permettre l'activation de votre\
     \ compte :\n\n- Pièce d'identité officielle en cours de validité (CNI ou Passeport)\
-    \ $\rightarrow$ Validation de l'identité et lutte contre le blanchiment (KYC).\n\
-    - Justificatif de domicile de moins de trois mois $\rightarrow$ Confirmation de\
-    \ la résidence fiscale française.\n- Questionnaire de profil d'investisseur $\r\
-    ightarrow$ Réalisation de l'évaluation de l'adéquation MiFID II.\n- Relevé d'Identité\
-    \ Bancaire (RIB) $\rightarrow$ Configuration des flux de versement et de retrait.\n\
+    \ → Validation de l'identité et lutte contre le blanchiment (KYC).\n\
+    - Justificatif de domicile de moins de trois mois → Confirmation de\
+    \ la résidence fiscale française.\n- Questionnaire de profil d'investisseur → Réalisation de l'évaluation de l'adéquation MiFID II.\n- Relevé d'Identité\
+    \ Bancaire (RIB) → Configuration des flux de versement et de retrait.\n\
     \nL'absence de l'un de ces documents ou une discordance dans les informations\
     \ fournies entraînera le refus d'ouverture du compte jusqu'à régularisation. Une\
     \ fois tous les justificatifs validés, le compte est activé avec un plafond de\
@@ -3254,7 +3253,7 @@ documents:
     | Statut Fiscal | Rattachement au foyer fiscal des parents | Éligible | Non éligible
     |
 
-    | Plafond Versements | $\le$ 20 000 € | Versements autorisés | Versements bloqués
+    | Plafond Versements | ≤ 20 000 € | Versements autorisés | Versements bloqués
     |
 
 

@@ -1136,13 +1136,13 @@ documents:
     | **Identität** | Gültiges Ausweisdokument vorhanden | Zugänglich (nach Verifikation)
     |
 
-    | **Mindestrate** | Monatliche Sparrate $\ge$ 0,4 % der Bausparsumme | Vertragsschluss
+    | **Mindestrate** | Monatliche Sparrate ≥ 0,4 % der Bausparsumme | Vertragsschluss
     möglich |
 
     | **Finanzielle Basis** | Fähigkeit zur Zahlung der Abschlussgebühr (1,6 %) |
     Vertrag aktivierbar |
 
-    | **Zuteilungsreife** | Sparguthaben $\ge$ 40 % der Bausparsumme + nötige Bewertung
+    | **Zuteilungsreife** | Sparguthaben ≥ 40 % der Bausparsumme + nötige Bewertung
     | Darlehensanspruch (2,45 %) |
 
     | **Wohnsitz/Recht** | Handlungsfähigkeit gemäß BGB | Vertragsschluss möglich
@@ -5010,8 +5010,8 @@ documents:
     aus Sparen und späterem Bauen mit festen Zinsen.
 
 
-    Zusammenfassend: Schnell und unbürokratisch bis 50.000 € $\rightarrow$ Modernisierungsdarlehen.
-    Strategisch, langfristig und für höhere Summen $\rightarrow$ Bausparen.'
+    Zusammenfassend: Schnell und unbürokratisch bis 50.000 € → Modernisierungsdarlehen.
+    Strategisch, langfristig und für höhere Summen → Bausparen.'
   domain: lending_mortgage
   product_category: modernisierungsdarlehen
   document_type: product_sheet

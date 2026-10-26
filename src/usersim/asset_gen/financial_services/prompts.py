@@ -183,6 +183,8 @@ Requirements:
   eligibility_matrix, promo_notice, faq, rate_sheet, comparison) stay tight. Value-bearing docs
   MAY exceed their target if needed to state every applicable value exactly.
 - Consistency: names, numbers, and fees must match the focus values and the brief exactly.
+- Plain text: write every body as Markdown with no LaTeX or other math markup. Write a
+  symbol as the character itself (≥, ≤, →, ×) or in words.
 - Distinctness: every document must be materially different in scope, framing, and detail --
   driven by its `angle` and `audience`. Two documents of the same document_type MUST NOT
   restate the same content; if two angles feel close, deepen one and keep the other high-level.
@@ -260,7 +262,7 @@ Requirements:
       product whose values you were given; for an outside offering compare on structure
       and trade-offs rather than inventing its numbers. Then say who each suits. Never
       disparage the alternative; state where it is the better choice.
-    eligibility_matrix: conditions -> outcome rows, with exact thresholds/limits.
+    eligibility_matrix: one row per condition, stating its outcome and its exact threshold or limit.
     terms_conditions: the binding terms in formal register -- obligations on each side,
       what triggers a change, notice periods, and how the agreement ends. Anchor every
       clause in THIS product's actual fees, limits and thresholds rather than generic

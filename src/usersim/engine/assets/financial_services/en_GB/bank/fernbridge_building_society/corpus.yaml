@@ -4389,7 +4389,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Minimum Deposit | Balance $\ge$ £1,000 | Eligible to open account |
+    | Minimum Deposit | Balance ≥ £1,000 | Eligible to open account |
 
     | Minimum Deposit | Balance $<$ £1,000 | Ineligible (Suggest Easy Access Saver)
     |

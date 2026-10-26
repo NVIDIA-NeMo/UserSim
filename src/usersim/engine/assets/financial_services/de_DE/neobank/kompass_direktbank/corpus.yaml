@@ -1070,7 +1070,7 @@ documents:
     | Monatlicher Geldeingang < 700 € | Kontoführungsgebühr von 4,90 € wird erhoben
     |
 
-    | Monatlicher Geldeingang $\ge$ 700 € | Kontoführungsgebühr von 4,90 € wird erlassen
+    | Monatlicher Geldeingang ≥ 700 € | Kontoführungsgebühr von 4,90 € wird erlassen
     |
 
     | Nutzung eines Überziehungsrahmens | Anwendung des Dispozinses von 9,89 % |
@@ -4933,7 +4933,7 @@ documents:
     \ bei uns haben, ist die Identitätsprüfung bereits hinterlegt. Ihr Konto ist sofort\
     \ nach der Bestätigung aktiv.\n\n**Schritt 2: Guthaben aufbauen (Einzahlung)**\n\
     Um von den Zinsen zu profitieren, müssen Sie Geld auf das Konto übertragen. Gehen\
-    \ Sie auf „Transfer“ $\rightarrow$ „Interner Transfer“. Wählen Sie Ihr Girokonto\
+    \ Sie auf „Transfer“ → „Interner Transfer“. Wählen Sie Ihr Girokonto\
     \ als Quelle und das Kompass Tagesgeld als Ziel. Geben Sie den gewünschten Betrag\
     \ ein und bestätigen Sie den Vorgang per SCA. Das Geld ist sofort auf dem Tagesgeld-Konto\
     \ verfügbar und beginnt ab dem nächsten Werktag zu verzinsen.\n\n**Schritt 3:\
@@ -5230,7 +5230,7 @@ documents:
 
     | Verifiziertes Gerät für SCA | Erfüllt | Freigabe der Zahlung möglich |
 
-    | Transaktionsbetrag $\le$ 5.000 € (täglich) | Erfüllt | Zahlung kann als Echtzeit
+    | Transaktionsbetrag ≤ 5.000 € (täglich) | Erfüllt | Zahlung kann als Echtzeit
     gesendet werden |
 
     | Transaktionsbetrag $>$ 5.000 € (täglich) | Nicht erfüllt | Nur Standard-Überweisung

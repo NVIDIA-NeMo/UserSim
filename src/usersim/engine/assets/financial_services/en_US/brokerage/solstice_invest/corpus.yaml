@@ -2747,7 +2747,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | **Age** | All joint owners $\ge$ 18 years old | Eligible to open account |
+    | **Age** | All joint owners ≥ 18 years old | Eligible to open account |
 
     | **Identity** | Both owners pass strict MFA & KYC | Account Approved |
 
@@ -6896,13 +6896,13 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | **Initial Account Opening** | Equity $\ge$ $2000 | Eligible for Margin Activation
+    | **Initial Account Opening** | Equity ≥ $2000 | Eligible for Margin Activation
     |
 
     | **Initial Account Opening** | Equity < $2000 | Ineligible; must use Individual
     Brokerage |
 
-    | **Ongoing Account Status** | Equity $\ge$ 25% of Total Value | Account in Good
+    | **Ongoing Account Status** | Equity ≥ 25% of Total Value | Account in Good
     Standing |
 
     | **Ongoing Account Status** | Equity < 25% of Total Value | Margin Call Triggered

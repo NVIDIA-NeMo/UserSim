@@ -1276,9 +1276,9 @@ documents:
   institution_id: hoshimi_securities
 - id: 3c6b2ed7-e37b-59f5-8813-8627e5228bea
   title: NISA（成長投資枠）：ご利用条件による違い
-  body: "【NISA（成長投資枠）利用条件一覧】\n\n・日本国内居住者であること $\rightarrow$ 利用可能（年間2,400,000円の枠を適用）\n\
-    ・18歳未満であること $\rightarrow$ 利用不可（制度上の制限）\n・他社で既にNISA口座を開設していること $\rightarrow$ 金融機関変更手続き後に利用可能\n\
-    ・非課税保有限度額（12,000,000円）に達していること $\rightarrow$ 新規買い付け不可（売却による枠の再利用のみ可能）"
+  body: "【NISA（成長投資枠）利用条件一覧】\n\n・日本国内居住者であること → 利用可能（年間2,400,000円の枠を適用）\n\
+    ・18歳未満であること → 利用不可（制度上の制限）\n・他社で既にNISA口座を開設していること → 金融機関変更手続き後に利用可能\n\
+    ・非課税保有限度額（12,000,000円）に達していること → 新規買い付け不可（売却による枠の再利用のみ可能）"
   domain: brokerage_investing
   product_category: nisa_seicho
   document_type: eligibility_matrix

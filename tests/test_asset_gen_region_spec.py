@@ -922,6 +922,42 @@ def test_tool_docs_must_not_invent_unobtainable_arguments():
     assert "must be something the agent can actually obtain" not in product
 
 
+def test_documents_are_asked_for_plain_text_symbols():
+    """A model that typesets a symbol writes LaTeX math, which every reader sees raw,
+    and a single backslash in its JSON turns ``\\rightarrow`` into a carriage return.
+    The rule sits in the requirements every cluster gets, and the eligibility-matrix
+    convention shows no arrow for the model to copy into its rows.
+    """
+    import re
+
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+
+    base = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+    )
+    for kind in ("product", "shared"):
+        text = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind=kind)).lower()
+        assert "no latex" in text, kind
+        assert all(symbol in text for symbol in "≥≤→×"), kind
+
+    block = re.search(r"^    eligibility_matrix:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
+    assert block, "no convention for eligibility_matrix"
+    assert "->" not in block.group(1) and "→" not in block.group(1)
+
+
 # ── language conventions: spelling and usage for a language with regional variants ──
 
 

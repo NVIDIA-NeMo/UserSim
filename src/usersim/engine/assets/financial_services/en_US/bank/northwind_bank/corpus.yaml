@@ -1031,7 +1031,7 @@ documents:
     | Account Balance < $500 | Subject to standard monthly maintenance fees (currently
     $0) |
 
-    | Account Balance $\ge$ $500 | Monthly maintenance fee waived |
+    | Account Balance ≥ $500 | Monthly maintenance fee waived |
 
     | Unauthorized Transaction Reported | Protected by Regulation E timelines; investigation
     initiated |
