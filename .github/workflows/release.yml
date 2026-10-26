@@ -49,6 +49,10 @@ jobs:
 
       - run: make install-ci
 
+      - name: Native checks, coverage, smoke, and extension contracts
+        # Re-run the shared gates on the tagged commit, even if PR CI passed.
+        run: make validate-native
+
       - name: Build and check the sdist and wheel, install the wheel clean, run it from an empty directory
         run: make check-dist
 
@@ -60,10 +64,13 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: make check-release-tag
 
-      - name: Test suite
-        # A tag can name a commit on main whose CI failed, or a merge that was
-        # never tested as merged; the release does not rely on either.
-        run: make test
+      - name: Installed CLI e2e against the original release wheel
+        # check-dist produced and validated this single wheel. Do not rebuild.
+        run: make test-e2e WHEEL_DIR=dist
+
+      - name: SHA-256 digests for publication approval
+        # Available from the read-only build before the release environment gate.
+        run: make release-digests
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
