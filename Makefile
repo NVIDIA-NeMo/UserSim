@@ -26,7 +26,8 @@ UV_VERSION := $(shell sed -n 's/^required-version = "==\([^"]*\)"/\1/p' pyprojec
 # change would trigger a second repo-wide reformat.
 PY_SRC   ?= src scripts templates
 PY_TESTS ?= tests conftest.py
-PY_ALL   := $(PY_SRC) $(PY_TESTS)
+PY_E2E   ?= tests_e2e
+PY_ALL   := $(PY_SRC) $(PY_TESTS) $(PY_E2E)
 
 # Worker count for the parallel suite. `auto` follows the local core count,
 # which suits a CPU-bound suite with every LLM call mocked (~2x on a laptop).
@@ -60,7 +61,7 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-hooks check-all-fix validate-native validate-ci test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-hooks check-all-fix validate-native validate-ci test test-fast test-e2e coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 
 help:  ## Show the available targets
@@ -128,6 +129,9 @@ check-all-fix: lint-fix format  ## Fix everything fixable, then you re-review
 
 # PYTEST_ARGS is a passthrough, so a one-off run does not need a new target:
 #   make test PYTEST_ARGS="--durations=25 -k financial"
+E2E_ARGS ?=
+WHEEL_DIR ?=
+
 PYTEST_ARGS ?=
 
 test:  ## Run the full test suite (parallel)
@@ -142,9 +146,15 @@ coverage:  ## Run tests with coverage and enforce the floor
 		--cov-report="xml:$(COV_XML)" \
 		--cov-fail-under=$(COV_FAIL_UNDER) $(PYTEST_ARGS)
 
+# Keep the installed suite separate: ordinary pytest's root conftest blocks
+# loopback, and the e2e runner must never import the editable source tree.
+test-e2e: check-tools  ## Test an installed wheel through CLI subprocesses and a local HTTP provider
+	$(UV) run --frozen python scripts/run_e2e.py --uv "$(UV)" $(if $(WHEEL_DIR),--wheel-dir "$(WHEEL_DIR)") $(E2E_ARGS)
+
 validate-native: check-all check-dependency-licenses coverage smoke check-extensions  ## Check source and installed extension behavior
 
-validate-ci: validate-native check-dist  ## Run the native CI checks, including distribution validation
+validate-ci: validate-native check-dist  ## Validate source, then test the same clean distribution artifacts
+	$(MAKE) test-e2e WHEEL_DIR=dist
 
 smoke:  ## Offline self-check of config, registries, and report builders
 	$(UV) run usersim smoke
