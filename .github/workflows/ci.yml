@@ -24,10 +24,15 @@ concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  PYTEST_WORKERS: "2"
+  NEMO_TELEMETRY_ENABLED: "false"
+
 jobs:
   static:
     name: Lint, format, docs and licences
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -49,6 +54,7 @@ jobs:
   test:
     name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -69,11 +75,11 @@ jobs:
         # Durations are reported because a slow test is invisible until
         # someone profiles the suite, and the runner is the only place that
         # measures the hardware CI actually runs on.
-        run: make test PYTEST_ARGS="--durations=25"
+        run: make test PYTEST_ARGS="--durations=25 --junitxml=junit.xml"
 
       - name: Test suite with coverage
         if: matrix.python-version == '3.12'
-        run: make coverage PYTEST_ARGS="--durations=25"
+        run: make coverage PYTEST_ARGS="--durations=25 --junitxml=junit.xml"
 
       - name: Coverage report
         if: always() && matrix.python-version == '3.12'
@@ -82,6 +88,15 @@ jobs:
           name: coverage-python-3.12
           path: coverage.xml
           if-no-files-found: error
+          retention-days: 14
+
+      - name: Test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-failure-python-${{ matrix.python-version }}
+          path: junit.xml
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Offline self-check
@@ -95,6 +110,7 @@ jobs:
   packaging:
     name: Wheel and extension seams
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -152,3 +168,16 @@ jobs:
           path: test-results/container/
           include-hidden-files: true
           if-no-files-found: warn
+          retention-days: 14
+
+  status:
+    name: CI Status
+    if: always()
+    needs: [static, test, packaging, e2e, container]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CI_JOB_RESULTS: ${{ toJSON(needs) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make check-ci-status

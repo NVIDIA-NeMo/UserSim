@@ -319,3 +319,42 @@ def test_native_matrix_matches_package_python_support() -> None:
     expected = [f"3.{minor}" for minor in range(30) if f"3.{minor}" in supported]
     matrix = _load(_WORKFLOWS / "ci.yml")["jobs"]["test"]["strategy"]["matrix"]
     assert matrix["python-version"] == expected
+
+
+class TestMandatoryCiAggregate:
+    def test_aggregate_waits_for_every_job_and_checks_explicit_results(self) -> None:
+        import importlib.util
+
+        script = _WORKFLOWS.parents[1] / "scripts" / "check_ci_results.py"
+        spec = importlib.util.spec_from_file_location("check_ci_results", script)
+        checker = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(checker)
+        jobs = _load(_WORKFLOWS / "ci.yml")["jobs"]
+        status = jobs["status"]
+        assert set(jobs) - {"status"} == checker.REQUIRED_JOBS
+        assert set(status["needs"]) == checker.REQUIRED_JOBS
+        assert status["if"] == "always()"
+        assert status["name"] == "CI Status"
+        assert status["env"]["CI_JOB_RESULTS"] == "${{ toJSON(needs) }}"
+        assert any(step.get("run") == "make check-ci-status" for step in status["steps"])
+
+    def test_mandatory_jobs_cannot_be_optional_or_ignore_failures(self) -> None:
+        jobs = _load(_WORKFLOWS / "ci.yml")["jobs"]
+        for name, job in jobs.items():
+            assert job.get("timeout-minutes", 0) > 0, name
+            assert not job.get("continue-on-error"), name
+            if name != "status":
+                assert "if" not in job, name
+            for step in job["steps"]:
+                assert not step.get("continue-on-error"), (name, step)
+
+    def test_native_matrix_workers_and_diagnostics_are_bounded(self) -> None:
+        doc = _load(_WORKFLOWS / "ci.yml")
+        assert doc["env"]["PYTEST_WORKERS"] == "2"
+        assert doc["env"]["NEMO_TELEMETRY_ENABLED"] == "false"
+        for name in ["test", "e2e", "container"]:
+            assert any(
+                step.get("if") in {"failure()", "always()"}
+                and step.get("uses", "").startswith("actions/upload-artifact@")
+                for step in doc["jobs"][name]["steps"]
+            ), name

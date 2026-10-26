@@ -319,6 +319,13 @@ see [Issues before pull requests](#issues-before-pull-requests).
 
 ## What CI runs
 
+`CI Status` aggregates static checks, all supported Python versions, packaging,
+installed CLI e2e tests, and CPU container tests. Missing, skipped, cancelled, or
+failed mandatory jobs fail that status. Run the same Make targets locally; see
+[local and CI validation](docs/engineering/ci.md) for commands, diagnostics, and
+the maintainer checklist for changing required checks. DCO and PR-title checks
+remain separate required policies.
+
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
 rejects reproduces locally with the same command. Tests and the dependency
 license check run on Python 3.11 to 3.14. Pull-request checks run for every
