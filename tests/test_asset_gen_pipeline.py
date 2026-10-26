@@ -373,6 +373,16 @@ def test_doc_length_hint_gives_romanized_locales_the_latin_budget():
     assert "words" in doc_length_hint("hi_Latn_IN", "Hindi Latin")
 
 
+def test_japanese_and_korean_documents_match_the_latin_token_size():
+    """Japanese and Korean cost the document model about 0.6 tokens per character, so
+    their character band is the Latin word band scaled to the same token count."""
+    for locale, language in (("ja_JP", "Japanese"), ("ko_KR", "Korean")):
+        assert doc_length_hint(locale, language, "faq") == "roughly 320-460 characters"
+        assert doc_length_hint(locale, language, "product_sheet") == "roughly 680-960 characters"
+    assert doc_length_hint("en_US", "English", "faq") == "roughly 150-210 words"
+    assert doc_length_hint("zh_CN", "Chinese", "faq") == "roughly 150-220 characters"
+
+
 def test_doc_length_hint_is_genre_aware():
     # Narrative genres get a larger band than structured/terse genres, same locale.
     lo = lambda g: int(doc_length_hint("en_US", "English", g).split()[1].split("-")[0])

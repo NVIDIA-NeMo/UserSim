@@ -9,6 +9,13 @@ import hashlib
 import random
 from typing import Any
 
+from usersim.engine.core.locale import (
+    HAN_RANGES,
+    HANGUL_RANGES,
+    HIRAGANA_RANGES,
+    KATAKANA_RANGES,
+    expected_script_ranges,
+)
 from usersim.engine.core.missing import is_missing
 
 #: Cell values that mean "nothing here" rather than a fact about the
@@ -56,6 +63,38 @@ def _field_text(
     return str(value) if _is_present_or_valid(value, exempt) else ""
 
 
+#: Scripts whose names are written family name first, with what joins the family and
+#: given names: Korean writes 최도화, Japanese 東 小由美.
+_FAMILY_NAME_FIRST: tuple[tuple[tuple[tuple[int, int], ...], str], ...] = (
+    (HANGUL_RANGES, ""),
+    (HIRAGANA_RANGES + KATAKANA_RANGES + HAN_RANGES, " "),
+)
+
+
+def persona_full_name(persona: dict[str, Any]) -> str:
+    """The persona's name in the order its own script writes it, or ``""``.
+
+    A name in Hangul, kana or kanji puts the family name first (최도화, 東 小由美);
+    any other name puts the given name first (Sarah Johnson).
+    """
+    first = _field_text(persona, "first_name", _NAME_EXEMPT)
+    last = _field_text(persona, "last_name", _NAME_EXEMPT)
+    for ranges, separator in _FAMILY_NAME_FIRST:
+        if any(lo <= ord(ch) <= hi for ch in last + first for lo, hi in ranges):
+            return separator.join(part for part in (last, first) if part)
+    return " ".join(part for part in (first, last) if part)
+
+
+def persona_name_template(locale: str) -> str:
+    """A Jinja expression for the persona name of ``locale``, ordered as
+    :func:`persona_full_name` orders a name in that locale's script."""
+    script = set(expected_script_ranges(locale))
+    for ranges, separator in _FAMILY_NAME_FIRST:
+        if script & set(ranges):
+            return "{{ persona.last_name }}" + separator + "{{ persona.first_name }}"
+    return "{{ persona.first_name }} {{ persona.last_name }}"
+
+
 def religion_language_context(persona: dict[str, Any]) -> dict[str, Any]:
     """Structured audit view of religion/language fields shown to the user agent.
 
@@ -97,11 +136,7 @@ def format_persona_for_prompt(persona: dict[str, Any]) -> str:
     # excludes age, stayed the same, so two runs would disagree under one id.
     age_str = f("age")
 
-    name_parts = [
-        f("first_name", _NAME_EXEMPT),
-        f("last_name", _NAME_EXEMPT),
-    ]
-    name = " ".join(p for p in name_parts if p) or "Unknown"
+    name = persona_full_name(persona) or "Unknown"
 
     demographics: list[str] = []
     if age_str:

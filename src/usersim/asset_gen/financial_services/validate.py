@@ -525,6 +525,11 @@ def _script_fraction(text: str, ranges: tuple[tuple[int, int], ...]) -> float | 
     return in_expected / len(letters)
 
 
+#: Genres outside the script check. A tool reference spells the tool, its arguments and
+#: their types as English identifiers, so its script share measures the identifiers.
+_SCRIPT_EXEMPT_GENRES: frozenset = frozenset({"discoverable_tool_doc"})
+
+
 def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
     try:
@@ -540,6 +545,8 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
     for iid, idata in insts.items():
         bad = []
         for d in idata.documents:
+            if d.get("document_type") in _SCRIPT_EXEMPT_GENRES:
+                continue
             frac = _script_fraction(f"{d.get('title', '')} {d.get('body', '')}", ranges)
             if frac is not None and frac < MIN_SCRIPT_FRACTION:
                 bad.append(f"{d.get('id')}={frac:.2f}")

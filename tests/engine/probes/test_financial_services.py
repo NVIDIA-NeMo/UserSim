@@ -1353,6 +1353,34 @@ def test_financial_literacy_derivation_and_tag():
     assert any(t.startswith("financial-literacy:") for t in persona_to_tags(high))
 
 
+def test_korean_personas_span_every_literacy_level():
+    """ko_KR's education values map onto the shared scale, so Korean personas reach the
+    low, medium and high literacy tags that tasks and dynamic categories select on."""
+    from usersim.engine.probes.financial_services.task_derivation import derive_financial_literacy
+
+    def level(education: str) -> str:
+        return derive_financial_literacy({"education_level": education, "occupation": "회사원"}, "ko_KR")
+
+    assert [level(e) for e in ("고등학교", "2~3년제 전문대학", "4년제 대학교", "대학원")] == [
+        "low",
+        "medium",
+        "high",
+        "high",
+    ]
+
+
+def test_the_customer_prompt_names_a_korean_persona_family_name_first():
+    """The customer's own name, the persona block and the full name they verify with
+    all read 최도화, the order a Korean name is written in."""
+    probe, _ = _probe_on("en_US", _northwind_dispute_instance())
+    probe._persona = {**_PERSONA, "first_name": "도화", "last_name": "최"}
+    prompt = probe._build_user_system_prompt()
+    assert "You are 최도화," in prompt
+    assert "Name: 최도화" in prompt
+    assert "full name 최도화" in prompt
+    assert "도화 최" not in prompt
+
+
 async def test_dynamic_tier_generates_turn_1_and_emits_columns():
     """The dynamic tier has no scripted opening: the loop GENERATES turn-1 via
     the user-LLM (persona + invitation + subtopic hint), then the assistant

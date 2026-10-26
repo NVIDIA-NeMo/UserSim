@@ -93,6 +93,14 @@ DEFAULT_MAX_DOCS_PER_CLUSTER = 10  # per-call cap; larger targets fan into batch
 TARGET_DOC_TOKENS_TIGHT = 250  # ~150-210 words (Latin): fee tables, matrices, FAQs, tool docs
 TARGET_DOC_TOKENS_RICH = 520  # ~300-450 words (Latin): sheets, disclosures, policies, reg notes
 
+#: Latin-script words per budget token, as a (low, high) band.
+_LATIN_WORDS_PER_TOKEN = (0.6, 0.85)
+#: Tokens the document model spends per Latin-script word and per Japanese or Korean
+#: character, measured on its tokenizer: English 1.25-1.32 per word, Japanese
+#: 0.52-0.57 and Korean 0.53-0.63 per character, spaces included.
+TOKENS_PER_LATIN_WORD = 1.3
+TOKENS_PER_JA_KO_CHAR = 0.6
+
 #: Genres that warrant longer, narrative bodies. Everything else defaults to tight.
 _RICH_GENRES = frozenset(
     {
@@ -511,10 +519,16 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
     # latin"), which would otherwise match the Indic branch below on "hindi" and
     # hand a romanized doc the much tighter Indic word budget.
     if "latn" in tag or "latin" in tag:
-        lo, hi = _band(0.6, 0.85)
+        lo, hi = _band(*_LATIN_WORDS_PER_TOKEN)
         return f"roughly {lo}-{hi} words"
-    # CJK: instruct in CHARACTERS (~1 token/char; "words" undefined).
-    if any(k in tag for k in ("ja_", "japanese", "ko_", "korean", "zh_", "chinese", "hant", "hans")):
+    # Japanese and Korean: instruct in CHARACTERS ("words" are undefined), at the token
+    # count of the Latin word band.
+    if any(k in tag for k in ("ja_", "japanese", "ko_", "korean")):
+        scale = TOKENS_PER_LATIN_WORD / TOKENS_PER_JA_KO_CHAR
+        lo, hi = _band(*(ratio * scale for ratio in _LATIN_WORDS_PER_TOKEN))
+        return f"roughly {lo}-{hi} characters"
+    # Chinese: characters, at about one token per character.
+    if any(k in tag for k in ("zh_", "chinese", "hant", "hans")):
         lo, hi = _band(0.6, 0.9)
         return f"roughly {lo}-{hi} characters"
     # Indic scripts (Devanagari etc.): heavy subword tokenization -> ~0.4 words/token.
@@ -538,7 +552,7 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
         lo, hi = _band(0.3, 0.45)
         return f"roughly {lo}-{hi} words"
     # Latin scripts (English, Portuguese, French, ...): ~0.75 words/token.
-    lo, hi = _band(0.6, 0.85)
+    lo, hi = _band(*_LATIN_WORDS_PER_TOKEN)
     return f"roughly {lo}-{hi} words"
 
 

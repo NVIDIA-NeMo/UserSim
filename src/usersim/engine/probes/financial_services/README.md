@@ -340,9 +340,11 @@ Generation batches documents into clusters: one model call emits a whole
 cluster as a single structured object, which is why `doc_gen_model` needs a
 large `max_tokens` and a generous `timeout`. `--docs-per-product` and
 `--max-docs-per-cluster` set how much each call produces, so raising either
-means raising `max_tokens` with it. Non-Latin locales tokenize two to three
-times denser than English, so a cluster size that fits for `en_US` may not for
-`ja_JP` or `hi_Deva_IN`.
+means raising `max_tokens` with it. Each document's length is set per script so
+that it costs about the same number of tokens in every locale (the Japanese and
+Korean bands use the document model's measured tokens per character), so one
+cluster size suits every locale on that model. Another document model's
+tokenizer can count differently, so check `max_tokens` again when you change it.
 
 If the endpoint starts returning timeouts or 5xx, lower
 `--max-parallel doc_gen_model=N` before raising the timeout: the usual cause is
