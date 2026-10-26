@@ -19,6 +19,7 @@ import textwrap
 import types
 import unicodedata
 from contextlib import contextmanager
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from unittest.mock import patch
 
@@ -178,6 +179,47 @@ def test_all_committed_banks_load():
     assert runnable, "no runnable committed banks found"
     for locale_dir in runnable:
         load_finance_bank(locale_dir)  # raises FinanceBankError on any gold/scope break
+
+
+def _decimal_places(value: object) -> int:
+    """Digits after the decimal point when ``value`` reads as a number, else 0."""
+    try:
+        exponent = Decimal(str(value)).as_tuple().exponent
+    except InvalidOperation:
+        return 0
+    return -exponent if isinstance(exponent, int) else 0
+
+
+def test_every_task_holds_the_account_money_under_balance():
+    """The account view and the customer's grounding read only ``account_state.balance``,
+    so money held under another key such as ``cash_balance`` shows as 0.00 and the
+    customer is told their account is empty while asking to move money out of it.
+    Amounts beside a ``balance`` (a second account, a limit, a contribution) stay
+    allowed. A ``balance`` that reads as a number carries at most two decimals, so a
+    localized ``3.000`` cannot pass for 3; one filled from a slot is checked for every
+    value the slot can take.
+    """
+    runnable, _ = _partition_committed_banks()
+    assert runnable, "no runnable committed banks found"
+    templates = [
+        (f"{locale_dir.name} {tpl.id}", tpl)
+        for locale_dir in runnable
+        for inst in load_finance_bank(locale_dir).institutions
+        for tpl in inst.templates
+    ]
+    hidden, misread = [], []
+    for where, tpl in templates:
+        state = tpl.account_state
+        if "balance" not in state:
+            if any(key.endswith("_balance") for key in state):
+                hidden.append(where)
+            continue
+        raw = state["balance"]
+        slot = re.fullmatch(r"\{\{\s*(\w+)\s*\}\}", str(raw))
+        values = tpl.param_space.get(slot.group(1), ()) if slot else (raw,)
+        misread += [f"{where}: {value!r}" for value in values if _decimal_places(value) > 2]
+    assert not hidden, f"tasks hold the account's money outside balance: {hidden}"
+    assert not misread, f"balances with more than two decimals: {misread}"
 
 
 def test_corpus_only_banks_are_declared_and_still_unrunnable():

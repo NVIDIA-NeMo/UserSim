@@ -257,8 +257,10 @@ A task is a **parameterized generator**, not a fixed string. `tasks.yaml` holds
 (see `dynamic.yaml` below), not scripted here. `templates`: each `id`, `tier`
 (verifiable), `task_type`, `domain`, `placeholder`, `persona_tags` (see below),
 `opening_user_messages` (a LIST of `{{slot}}` templates; author >=3),
-`account_state` (seed state the tools mutate), `param_space` (per-instance
-slot values), `gold_tool_sequence`, `ordered` (OPTIONAL, default `false`),
+`account_state` (seed state the tools mutate; hold the account's money under
+`balance`, the one amount the account view and the simulated customer see, as a
+plain number like `12000.00`), `param_space` (per-instance slot values),
+`gold_tool_sequence`, `ordered` (OPTIONAL, default `false`),
 `gold_document_ids` (OPTIONAL -- see below), `expected_state_deltas`,
 `allowed_tools` (OPTIONAL). Verifiable templates carry a
 derivable gold spec whose docs/tools MUST live within the SAME institution (scope

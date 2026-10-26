@@ -81,7 +81,7 @@ templates:
   - Please move ${{amount}} of cash out to my bank account.
   account_state:
     account_id: acct_si_0001
-    cash_balance: '30000.00'
+    balance: '30000.00'
     linked_bank: bank_si_0001
   param_space:
     amount: ['2000.00', '10000.00']
@@ -99,7 +99,7 @@ templates:
   - I'd like to sweep ${{amount}} of cash from my brokerage over to my bank.
   account_state:
     account_id: acct_si_0001
-    cash_balance: '30000.00'
+    balance: '30000.00'
   param_space:
     amount: ['500.00', '3000.00']
   gold_tool_sequence: [transfer_funds]
@@ -275,7 +275,7 @@ templates:
     the account down?
   account_state:
     account_id: acct_si_0002
-    cash_balance: '{{amount}}'
+    balance: '{{amount}}'
     orders:
     - {order_id: ord_si_0002, ticker: '{{ticker}}', status: open}
   param_space:
@@ -351,7 +351,7 @@ templates:
     update my address to {{address}}?
   account_state:
     account_id: acct_si_0001
-    cash_balance: '{{amount}}'
+    balance: '{{amount}}'
     orders:
     - {order_id: ord_si_0003, ticker: '{{ticker}}', status: open}
   param_space:
