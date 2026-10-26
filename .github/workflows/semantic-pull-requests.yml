@@ -1,5 +1,5 @@
-# The PR title becomes the squashed commit subject, so this is what keeps the
-# history on main parseable and the changelog derivable.
+# Validate the PR title. It becomes the main-branch subject when maintainers
+# squash merge; squash-only repository settings are a separate policy change.
 name: Validate PR title
 
 on:
