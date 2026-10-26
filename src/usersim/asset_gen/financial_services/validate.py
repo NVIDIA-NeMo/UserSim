@@ -14,8 +14,8 @@ structural ``load_finance_bank`` round-trip is reported as skipped (not failed)
 for a corpus-only bank. Reference-agent solvability is deferred to task-gen.
 
 Checks: structural_load, numeric_faithfulness (the key one -- spec typed values
-appear in the prose), language_script, language_conventions, near_duplicate,
-coverage, placeholder_discipline, scope, qc_scores.
+appear in the prose), plain_text, language_script, language_conventions,
+near_duplicate, coverage, placeholder_discipline, scope, qc_scores.
 """
 
 from __future__ import annotations
@@ -475,6 +475,44 @@ def _check_doc_key_leak(insts: dict[str, _InstData], rep: ValidationReport) -> N
             rep.add("doc_key_leak", iid, PASS, "cross-references use titles, not doc_keys")
 
 
+#: LaTeX math (``$\ge$``, ``$\rightarrow$``) or a bare command, where the character
+#: itself (``≥``, ``→``) belongs.
+_LATEX_RE = re.compile(
+    r"\$\s*\\[A-Za-z]+|\\(?:rightarrow|leftarrow|Rightarrow|geq?|leq?|neq|times|approx|cdot|frac|text)\b"
+)
+#: Control characters other than tab and newline. A single backslash in the model's
+#: JSON turns ``\rightarrow`` into a carriage return followed by ``ightarrow``.
+_CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+
+
+def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """Fail a document whose title or body carries LaTeX math or a control character.
+
+    Documents are Markdown that the customer and the assistant read as text, so a
+    typeset symbol reaches them raw (``Balance $\\ge$ $500``).
+    """
+    for iid, idata in sorted(insts.items()):
+        offenders: list[str] = []
+        seen: set = set()
+        for d in idata.documents:
+            text = f"{d.get('title', '')}\n{d.get('body', '')}"
+            found = _LATEX_RE.findall(text) + [repr(c) for c in _CONTROL_RE.findall(text)]
+            if found:
+                offenders.append(str(d.get("id")))
+                seen.update(found)
+        if offenders:
+            rep.add(
+                "plain_text",
+                iid,
+                FAIL,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) carry LaTeX math or control "
+                f"characters (e.g. {sorted(seen)[:4]}); write the symbol itself (≥, ≤, →, ×): "
+                f"{offenders[:5]}",
+            )
+        else:
+            rep.add("plain_text", iid, PASS, "no LaTeX math or control characters")
+
+
 def _in_ranges(cp: int, ranges: tuple[tuple[int, int], ...]) -> bool:
     return any(lo <= cp <= hi for lo, hi in ranges)
 
@@ -767,6 +805,7 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     _check_variable_name_leak(region_spec, insts, rep)
     _check_tool_name_leak(insts, rep)
     _check_doc_key_leak(insts, rep)
+    _check_plain_text(insts, rep)
     _check_language_script(region_meta, insts, rep)
     _check_language_conventions(region_spec, insts, rep)
     _check_near_duplicate(insts, rep)

@@ -626,3 +626,48 @@ def test_language_conventions_check_runs_only_with_respellings(tmp_path: Path):
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "The overdraft fee is $34. Report unauthorized payments.")])
     assert _status(validate_bank(bank, _spec()), "language_conventions") is None
     assert _status(validate_bank(bank, None), "language_conventions") is None
+
+
+# ── documents are plain text: no LaTeX math, no control characters ───────────
+
+
+def test_latex_math_in_a_title_or_body_fails(tmp_path: Path):
+    bank = _write_bank(
+        tmp_path,
+        "en_US",
+        [
+            _doc("D1", "| Balance $\\ge$ $500 | Monthly fee waived |"),
+            {**_doc("D2", "The overdraft fee is $34 per item."), "title": "Fees $\\times$ 2"},
+            _doc("D3", "The overdraft fee is $34 per item."),
+        ],
+    )
+    rep = validate_bank(bank, None)
+    assert _status(rep, "plain_text", "testbank") == FAIL
+    assert rep.failed
+    detail = next(r.detail for r in rep.results if r.check == "plain_text")
+    assert detail.startswith("2/3 doc(s)") and "D1" in detail and "D2" in detail
+
+
+def test_a_control_character_fails(tmp_path: Path):
+    """A single backslash in the model's JSON turns ``\\rightarrow`` into a carriage
+    return followed by ``ightarrow``."""
+    bank = _write_bank(tmp_path, "en_US", [_doc("D1", "Account holder $" + "\r" + "ightarrow$ eligible")])
+    assert _status(validate_bank(bank, None), "plain_text", "testbank") == FAIL
+
+
+def test_symbols_and_dollar_amounts_are_plain_text(tmp_path: Path):
+    body = "| Balance ≥ $500 | Fee waived |\n| Balance < $500 | $12 fee → waived with direct deposit |"
+    bank = _write_bank(tmp_path, "en_US", [_doc("D1", body)])
+    assert _status(validate_bank(bank, None), "plain_text", "testbank") == PASS
+
+
+def test_every_committed_bank_is_plain_text():
+    from usersim.engine.core._assets import packaged_assets_dir
+
+    banks = sorted(p.parent for p in (packaged_assets_dir() / "financial_services").glob("*/region_meta.yaml"))
+    assert banks, "no committed banks found"
+    for bank in banks:
+        results = [r for r in validate_bank(bank, None).results if r.check == "plain_text"]
+        institutions = list(bank.rglob("institution_meta.yaml"))
+        assert institutions and len(results) == len(institutions), bank.name
+        assert [f"{bank.name} {r.scope}: {r.detail}" for r in results if r.status == FAIL] == []

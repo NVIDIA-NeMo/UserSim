@@ -326,7 +326,7 @@ Assets are authored offline and committed; the runtime never generates them. A
 two-phase Data Designer pipeline produces each institution's brief, then its
 document clusters (with the institution's authoritative numbers), plus
 embeddings. `validate-assets` runs a deterministic quality gate (numeric
-faithfulness, language/script, near-duplicates, coverage, scope) and
+faithfulness, language/script, plain text, near-duplicates, coverage, scope) and
 `evaluate-assets` runs an LLM-judge scorecard. Document ids are stable across
 regenerations, and a task's gold documents are derived from its tool sequence at
 load time. The authoring workflow lives in
