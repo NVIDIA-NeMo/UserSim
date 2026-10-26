@@ -407,6 +407,11 @@ enough to cover the tool surface with depth left over.
   move it. Write it as a plain number like `12000.00`: a localized `3.000` reads
   as 3. Amounts beside it, such as a second account's balance, a limit or a
   contribution, can stay.
+- **Hold open orders under `orders`.** `get_order_status` lists them and
+  `cancel_order` acts on one by its `order_id`, so an order under another key
+  can't be found or cancelled. Give each order an `order_id`, a `status`, and
+  what the customer would call it (a `ticker`, or an `instrument` and `side`),
+  and expect its cancellation as `<order_id>.status: CANCELLED`.
 - **Only use persona tags a persona can actually carry.** See the table in
   SCHEMA.md. An unreachable tag doesn't error: the task just never gets
   selected.

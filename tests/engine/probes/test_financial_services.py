@@ -2545,6 +2545,55 @@ class TestApplyToolFallbacks:
         assert "file_transaction_dispute" not in probe._read_only_tools
 
 
+class TestOrderTools:
+    """``get_order_status`` lists the account's orders, which is where the assistant finds
+    the id ``cancel_order`` needs, and ``cancel_order`` acts only on an order the account
+    holds."""
+
+    _READ_ONLY = frozenset({"get_order_status"})
+
+    @staticmethod
+    def _state() -> dict:
+        return {
+            "account_id": "acct_si_0001",
+            "orders": [
+                {"order_id": "ord_si_0001", "ticker": "VTI", "status": "open"},
+                {"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"},
+            ],
+        }
+
+    def test_order_status_lists_the_account_orders(self):
+        state = self._state()
+        payload = G._apply_tool("get_order_status", {"account_id": "acct_si_0001"}, state, self._READ_ONLY)
+        assert payload["orders"] == self._state()["orders"]
+        assert [a["account_id"] for a in payload["accounts"]] == ["acct_si_0001"]
+
+    def test_order_status_narrows_to_the_named_order(self):
+        payload = G._apply_tool("get_order_status", {"order_id": "ord_si_0002"}, self._state(), self._READ_ONLY)
+        assert payload["orders"] == [{"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"}]
+
+    def test_cancel_order_cancels_only_the_named_order(self):
+        state = self._state()
+        payload = G._apply_tool("cancel_order", {"order_id": "ord_si_0001"}, state, self._READ_ONLY)
+        assert payload == {"order_id": "ord_si_0001", "status": "CANCELLED"}
+        assert [o["status"] for o in state["orders"]] == ["CANCELLED", "pending"]
+
+    @pytest.mark.parametrize(
+        ("tool", "args"),
+        [
+            ("cancel_order", {"order_id": "VTI"}),
+            ("cancel_order", {}),
+            ("get_order_status", {"order_id": "VTI"}),
+        ],
+    )
+    def test_an_order_the_account_does_not_hold_is_refused(self, tool, args):
+        state = self._state()
+        payload = G._apply_tool(tool, args, state, self._READ_ONLY)
+        assert set(payload) == {"error", "tool_name"}
+        assert payload["tool_name"] == tool
+        assert state == self._state()
+
+
 class TestLocalBrandNameReachesTheRuntime:
     """A non-Latin locale's corpus is generated under the in-language brand, so
     the CONVERSATION has to use the same form."""
