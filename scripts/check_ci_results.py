@@ -9,7 +9,7 @@ import json
 import os
 import sys
 
-REQUIRED_JOBS = frozenset({"static", "test", "packaging", "e2e", "container"})
+REQUIRED_JOBS = frozenset({"static", "typecheck", "test", "packaging", "e2e", "container"})
 
 
 def validate_results(raw: str) -> list[str]:

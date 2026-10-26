@@ -91,7 +91,8 @@ class ConversationSimulatorGenerator(
         ``acompletion``.
         """
         registry = SimpleNamespace(get_model=lambda *, model_alias: dict(models)[model_alias])
-        return cls(config, SimpleNamespace(model_registry=registry))
+        # Standalone mode supplies exactly the model_registry resource used by this generator.
+        return cls(config, SimpleNamespace(model_registry=registry))  # ty: ignore[invalid-argument-type]
 
     def _initialize(self) -> None:
         """Prepare process-wide state once, before any row runs.
@@ -121,7 +122,8 @@ class ConversationSimulatorGenerator(
             f"Await agenerate(data) instead of calling generate(data)."
         )
 
-    async def agenerate(self, data: dict) -> dict:
+    # This cell generator intentionally specializes DD's batch-or-cell overload.
+    async def agenerate(self, data: dict) -> dict:  # ty: ignore[invalid-method-override]
         """Run one row with the configured asset root installed for its duration.
 
         The root is scoped to the row rather than to the process, so a row that

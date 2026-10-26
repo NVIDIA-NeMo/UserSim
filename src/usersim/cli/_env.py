@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Iterable
 from pathlib import Path
 
 logger = logging.getLogger("usersim.cli.env")
@@ -69,6 +70,6 @@ def describe_loaded_env(paths: list[Path]) -> str:
     return f"read {names} (existing environment variables take precedence)"
 
 
-def missing_keys(names: object) -> list[str]:
+def missing_keys(names: Iterable[str]) -> list[str]:
     """Return which of ``names`` are absent or empty in the environment."""
-    return [n for n in names if not os.environ.get(str(n))]  # type: ignore[union-attr]
+    return [n for n in names if not os.environ.get(str(n))]
