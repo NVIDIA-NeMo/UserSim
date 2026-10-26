@@ -15,7 +15,11 @@ resolution-markers = [
 
 [manifest]
 constraints = [{ name = "certifi", specifier = ">=2026.10.19" }]
-overrides = [{ name = "data-designer", specifier = ">=0.9.7,<0.10" }]
+overrides = [
+    { name = "data-designer", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
+    { name = "data-designer-config", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-config&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
+    { name = "data-designer-engine", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-engine&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
+]
 
 [[package]]
 name = "annotated-doc"
@@ -576,8 +580,8 @@ wheels = [
 
 [[package]]
 name = "data-designer"
-version = "0.9.7"
-source = { registry = "https://pypi.org/simple" }
+version = "0.9.8.dev10+7a62d75"
+source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
 dependencies = [
     { name = "data-designer-config" },
     { name = "data-designer-engine" },
@@ -595,15 +599,11 @@ dependencies = [
     { name = "rich" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/44/5b/775137cf838d1c06635ae8fb03a6732a47db808cbd06f6aee8f17e01ab7a/data_designer-0.9.7.tar.gz", hash = "sha256:c1358fb5e1ccad7140148788cd36302672b1b8b7d529b86e5e01e3c29d69ad77", size = 248195, upload-time = "2026-10-22T02:00:20.094Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/f3/75c578f1286f052d18967b9d27a5c68ad8d566c9309aba95ca0981a7dc9a/data_designer-0.9.7-py3-none-any.whl", hash = "sha256:7a8fe33d88b8927e103d585dc9129a3c335191440e73a0e451f13702b4b08410", size = 160876, upload-time = "2026-10-22T02:00:18.759Z" },
-]
 
 [[package]]
 name = "data-designer-config"
-version = "0.9.7"
-source = { registry = "https://pypi.org/simple" }
+version = "0.9.8.dev10+7a62d75"
+source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-config&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
 dependencies = [
     { name = "certifi" },
     { name = "httpx" },
@@ -619,15 +619,11 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/f9/a2a1c3e1abe4e5d2cf1c8d55ed5609a95082da4c166cb5fc041298445192/data_designer_config-0.9.7.tar.gz", hash = "sha256:fc6a72f6ea9223e11222f513796be8df3cdf0e67d528524c14840c98cadf3e7a", size = 153073, upload-time = "2026-10-22T02:00:11.926Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/87/90ebf0662a80e5be2d0ae18e3817e2a0f5fcb59d9c8fa4ded7b88c9b7a56/data_designer_config-0.9.7-py3-none-any.whl", hash = "sha256:b17913a76cad92672d2350aa10399899aabf3b04783d61d5f8ebd7210cb145d1", size = 129938, upload-time = "2026-10-22T02:00:10.207Z" },
-]
 
 [[package]]
 name = "data-designer-engine"
-version = "0.9.7"
-source = { registry = "https://pypi.org/simple" }
+version = "0.9.8.dev10+7a62d75"
+source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-engine&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
 dependencies = [
     { name = "anyascii" },
     { name = "asciichartpy" },
@@ -656,10 +652,6 @@ dependencies = [
     { name = "sqlfluff" },
     { name = "tiktoken" },
     { name = "wcwidth" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/e1/9225b78bb2c049fee24dda80eeb1d52821ea91e559aefcc571d2692ae189/data_designer_engine-0.9.7.tar.gz", hash = "sha256:ba9578c13abb278ce2b0e1ecb63dc2b9da0b2ca7c8198e3db66b37aa756d53c9", size = 939761, upload-time = "2026-10-22T02:00:16.221Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/a7/d5d9023a39ad970f5bc8d862ba5ba5af64606680542f11ff11a48fc65378/data_designer_engine-0.9.7-py3-none-any.whl", hash = "sha256:2a1f4f7f1717adee4bb4447b6636d397d0ee1a7edba8bf6081c8bbefc8cd6936", size = 711961, upload-time = "2026-10-22T02:00:13.994Z" },
 ]
 
 [[package]]
@@ -1992,55 +1984,55 @@ wheels = [
 
 [[package]]
 name = "opentelemetry-api"
-version = "1.43.0"
+version = "1.45.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/cc/e4c9584181f86494df0f6bdec1a4f3280c50db44704dc2a407e994fc87bb/opentelemetry_api-1.43.0.tar.gz", hash = "sha256:107d0d03857ea8fc7c5fcbbbd83f800c281f0d560553d61c1d675fccfd1761c1", size = 73476, upload-time = "2026-06-24T15:19:55.323Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2e/02/6e0ae9cc61bd3169d401077b507b3ebc344745171e1051ab430be012dcd9/opentelemetry_api-1.45.1.tar.gz", hash = "sha256:aa38ed19bcc084ba42782a73255b3582283eced7ad6dddbd6695189e69adfb75", size = 72804, upload-time = "2026-10-06T17:32:58.133Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/17/83/6dba32b85f31868400440dc7ad2ca1eab94cbbf3a7b0459ed39f8311a9e2/opentelemetry_api-1.43.0-py3-none-any.whl", hash = "sha256:20acf45e9b21851926835292e4045d290acade1edd2ff3de86d2f069687ba1fd", size = 61912, upload-time = "2026-06-24T15:19:35.434Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/41/f7dcf80b81ee8e71c1a2b59f14208bc723edbd89ed027a73b175abf6348e/opentelemetry_api-1.45.1-py3-none-any.whl", hash = "sha256:b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb", size = 60256, upload-time = "2026-10-06T17:32:33.506Z" },
 ]
 
 [[package]]
 name = "opentelemetry-exporter-prometheus"
-version = "0.64b0"
+version = "0.66b1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-sdk" },
     { name = "prometheus-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/97/b3/f778f705289ea5f1c54589ae4494d318c9cede052f18ca33979fda0ef016/opentelemetry_exporter_prometheus-0.64b0.tar.gz", hash = "sha256:96fec79be9527cb9dc994d7e663051df35161eb936fe2d41954725e4595abbc1", size = 16405, upload-time = "2026-06-24T15:20:02.278Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/58/e552853748c3a1478d3f0db31bb4e3bef2e45385f64d658148693183410e/opentelemetry_exporter_prometheus-0.66b1.tar.gz", hash = "sha256:1c702a0cc7a1b8c5e1f3f246aeb4273dbd707179af30dbb66182a75e16a06ed8", size = 16987, upload-time = "2026-10-06T17:33:06.358Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fe/dd/d95db7ac5bec037b3dcc8ea6fe64cd5dc4bc87017d2e06e7410318e85dc0/opentelemetry_exporter_prometheus-0.64b0-py3-none-any.whl", hash = "sha256:9979a15f8d007d442bc7a6e16f4cbde5e8e0c5e99689887ceb5f33da251f0655", size = 13031, upload-time = "2026-06-24T15:19:44.159Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/8a/5e7262d970586a8d69dd159bebc68fbee7457088883b179599a562881a6f/opentelemetry_exporter_prometheus-0.66b1-py3-none-any.whl", hash = "sha256:a938e6af7295d5bacf82da9ca845cab9a9cb1c5f565abe39f54ef8bf511c05d9", size = 13222, upload-time = "2026-10-06T17:32:44.94Z" },
 ]
 
 [[package]]
 name = "opentelemetry-sdk"
-version = "1.43.0"
+version = "1.45.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-semantic-conventions" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3e/eb/5041074274ac0956b03637cc039d434569112468e875eddfcc9a0674ce06/opentelemetry_sdk-1.43.0.tar.gz", hash = "sha256:d8187c81c162df9913e4003dd6485f7390d9a24fc17026ec7387b8b8218b08e9", size = 254744, upload-time = "2026-06-24T15:20:08.467Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/79/7392e21a1c8f0c61d90b223e31c7e48cb9d452e91a6b820ad24cca5f23c4/opentelemetry_sdk-1.45.1.tar.gz", hash = "sha256:63d24a6ca645019a631e6a51999c73e93adcac1196ca640b8ae78a7cc4762bf3", size = 218324, upload-time = "2026-10-06T17:33:13.26Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/e3/b17be23af124201c9f52eececd4cc8ddfed1597d37b4ee771895d325805c/opentelemetry_sdk-1.43.0-py3-none-any.whl", hash = "sha256:d1323a547c1ce69d6a069a17a44b7da82bb8b332051ecb074041f87642c86823", size = 178852, upload-time = "2026-06-24T15:19:52.169Z" },
+    { url = "https://files.pythonhosted.org/packages/95/3c/87c42b4bd6dd297536f04cd9383d212ac557ecd49f2cbdcd46da1c9ef5c8/opentelemetry_sdk-1.45.1-py3-none-any.whl", hash = "sha256:c604c11dc429810812348989115fa44bd558772a3d7442afc43d024f2c250ca4", size = 140063, upload-time = "2026-10-06T17:32:55.04Z" },
 ]
 
 [[package]]
 name = "opentelemetry-semantic-conventions"
-version = "0.64b0"
+version = "0.66b1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/30/5f26df29509eccd86b99b481ac9ffa39da49ba9577cc69071c552ae30447/opentelemetry_semantic_conventions-0.64b0.tar.gz", hash = "sha256:72f76fb2d1582d9d033dd1fcd84532e961e6ff3d90d24ba6fabc72975a83864c", size = 148340, upload-time = "2026-06-24T15:20:09.267Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/e4/dbbfb2a010c4db2224a5114638acede6fe563d33cc20fb1752cebcbe6298/opentelemetry_semantic_conventions-0.66b1.tar.gz", hash = "sha256:497ca63bf383723411e8eaf60c8779e9877633c936bb641080adab59d0eb6ec8", size = 150250, upload-time = "2026-10-06T17:33:14.073Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/ca/23ba87a221b574a7c5a99d48849d80bfe8b047624681357e2b002e566187/opentelemetry_semantic_conventions-0.64b0-py3-none-any.whl", hash = "sha256:ea77e85e354b8f604ddbe5f3d9135216f982fa4d77e5859ac30f6d8a50505aa6", size = 203713, upload-time = "2026-06-24T15:19:53.339Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/14/67f8aa798857f8cf686f515bf93d9bb877ce952ddc8efae0fa25b45ce0d6/opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl", hash = "sha256:d4cddeb4315490b35213f55e2bdc9ac54bb1e4d318927475bed62b35545e581b", size = 206279, upload-time = "2026-10-06T17:32:56.103Z" },
 ]
 
 [[package]]
@@ -3541,7 +3533,7 @@ wheels = [
 
 [[package]]
 name = "usersim"
-version = "0.2.1.dev0"
+version = "0.3.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "data-designer" },
@@ -3574,7 +3566,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "data-designer", specifier = ">=0.9.7,<0.10" },
+    { name = "data-designer", specifier = ">=0.9.7,<0.11" },
     { name = "filelock" },
     { name = "httpx" },
     { name = "huggingface-hub" },

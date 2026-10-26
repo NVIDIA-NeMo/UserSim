@@ -154,6 +154,12 @@ After a deliberate dependency change, run `uv lock`, review `uv.lock`, and
 commit it with the metadata change. CI reads the same uv version declaration;
 update it deliberately and validate the lock before committing a tool upgrade.
 
+The 0.3 development branch temporarily pins Data Designer’s Python 3.11
+transition commit through `[tool.uv.override-dependencies]`. Use `uv sync` or
+the Make setup targets to consume that preview. Once DD 0.10.0 is published,
+remove the Git overrides and `no-sources`, require `data-designer>=0.10,<0.11`, and regenerate
+`uv.lock`.
+
 `make install-ci` performs locked setup without installing hooks. In a Git
 worktree, `make install-dev` finds the hook directory through Git rather than
 assuming `.git` is a directory.
@@ -317,9 +323,9 @@ Maintainers release from `main`:
 
    ```bash
    git switch main && git pull --ff-only
-   make check-dist && make check-release-tag TAG=v0.2.0rc1
-   git tag -a v0.2.0rc1 -m "usersim 0.2.0rc1"
-   git push origin v0.2.0rc1
+   make check-dist && make check-release-tag TAG=v0.3.0rc1
+   git tag -a v0.3.0rc1 -m "usersim 0.3.0rc1"
+   git push origin v0.3.0rc1
    ```
 
 3. `.github/workflows/release.yml` runs those checks and the test suite on the
@@ -328,14 +334,14 @@ Maintainers release from `main`:
    pre-release for a release candidate, and writes their SHA-256 digests to
    the run summary.
 4. Merge a pull request that moves `version` to the next development version,
-   for example `0.2.0rc2.dev0`.
+   for example `0.3.1.dev0`.
 
 If the workflow fails before the release is published, delete the tag
-(`git tag -d v0.2.0rc1 && git push origin --delete v0.2.0rc1`) and any draft
+(`git tag -d v0.3.0rc1 && git push origin --delete v0.3.0rc1`) and any draft
 release it left, fix the cause and tag again. Once a release is published,
 its tag and files stay as they are, and a fix ships as a new version. The
 files attached to a release are the ones published to PyPI;
-`gh release verify-asset v0.2.0rc1 <file>` checks a downloaded file against
+`gh release verify-asset v0.3.0rc1 <file>` checks a downloaded file against
 them.
 
 ## What the tests expect
