@@ -168,7 +168,7 @@ templates:
     間違えて{{ticker}}の注文を出してしまいました。取消しをお願いします。
   account_state:
     account_id: acct_hs_0001
-    open_orders:
+    orders:
     - {order_id: ord_hs_0001, ticker: '{{ticker}}', status: open}
   param_space:
     ticker: [こはく電機, しろがね製薬, ほしぞら通信]

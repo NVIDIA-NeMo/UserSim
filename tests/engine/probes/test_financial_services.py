@@ -11,6 +11,7 @@ deterministic verifier scorer (good / unauthorized / skip / Tier-2).
 
 from __future__ import annotations
 
+import copy
 import dataclasses
 import datetime
 import json
@@ -220,6 +221,40 @@ def test_every_task_holds_the_account_money_under_balance():
         misread += [f"{where}: {value!r}" for value in values if _decimal_places(value) > 2]
     assert not hidden, f"tasks hold the account's money outside balance: {hidden}"
     assert not misread, f"balances with more than two decimals: {misread}"
+
+
+def test_every_cancel_task_lists_the_order_it_cancels():
+    """``get_order_status`` lists ``account_state.orders`` and ``cancel_order`` acts on an
+    order there, so an order held under another key such as ``open_orders`` can be
+    neither found nor cancelled. Every task whose gold cancels an order lists the
+    orders its ``expected_state_deltas`` cancel, and cancelling each listed id leaves
+    it ``CANCELLED``.
+    """
+    runnable, _ = _partition_committed_banks()
+    assert runnable, "no runnable committed banks found"
+    templates = [
+        (f"{locale_dir.name} {tpl.id}", tpl)
+        for locale_dir in runnable
+        for inst in load_finance_bank(locale_dir).institutions
+        for tpl in inst.templates
+    ]
+    hidden = [
+        where for where, tpl in templates if any(k != "orders" and k.endswith("orders") for k in tpl.account_state)
+    ]
+    cancel_tasks = [(where, tpl) for where, tpl in templates if "cancel_order" in tpl.gold_tool_sequence]
+    assert cancel_tasks, "no committed task cancels an order"
+    unsolvable = []
+    for where, tpl in cancel_tasks:
+        state = copy.deepcopy(dict(tpl.account_state))
+        expected = {key.split(".")[0] for key, value in tpl.expected_state_deltas.items() if value == "CANCELLED"}
+        listed = {o["order_id"] for o in G._apply_tool("get_order_status", {}, state).get("orders", [])}
+        for order_id in sorted(expected & listed):
+            G._apply_tool("cancel_order", {"order_id": order_id}, state)
+        statuses = {o["order_id"]: o["status"] for o in state.get("orders", [])}
+        if not expected or any(statuses.get(order_id) != "CANCELLED" for order_id in expected):
+            unsolvable.append(where)
+    assert not hidden, f"tasks hold orders outside orders: {hidden}"
+    assert not unsolvable, f"cancel tasks whose order the tools can't list and cancel: {unsolvable}"
 
 
 def test_corpus_only_banks_are_declared_and_still_unrunnable():
@@ -2475,8 +2510,6 @@ class TestApplyToolFallbacks:
     }
 
     def _state(self):
-        import copy
-
         return copy.deepcopy(self._STATE)
 
     def test_read_tools_return_a_definitive_view_not_a_bare_ack(self):
@@ -2543,6 +2576,55 @@ class TestApplyToolFallbacks:
         assert "get_statements" in probe._read_only_tools
         # State-changing tools must NOT be treated as reads.
         assert "file_transaction_dispute" not in probe._read_only_tools
+
+
+class TestOrderTools:
+    """``get_order_status`` lists the account's orders, which is where the assistant finds
+    the id ``cancel_order`` needs, and ``cancel_order`` acts only on an order the account
+    holds."""
+
+    _READ_ONLY = frozenset({"get_order_status"})
+
+    @staticmethod
+    def _state() -> dict:
+        return {
+            "account_id": "acct_si_0001",
+            "orders": [
+                {"order_id": "ord_si_0001", "ticker": "VTI", "status": "open"},
+                {"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"},
+            ],
+        }
+
+    def test_order_status_lists_the_account_orders(self):
+        state = self._state()
+        payload = G._apply_tool("get_order_status", {"account_id": "acct_si_0001"}, state, self._READ_ONLY)
+        assert payload["orders"] == self._state()["orders"]
+        assert [a["account_id"] for a in payload["accounts"]] == ["acct_si_0001"]
+
+    def test_order_status_narrows_to_the_named_order(self):
+        payload = G._apply_tool("get_order_status", {"order_id": "ord_si_0002"}, self._state(), self._READ_ONLY)
+        assert payload["orders"] == [{"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"}]
+
+    def test_cancel_order_cancels_only_the_named_order(self):
+        state = self._state()
+        payload = G._apply_tool("cancel_order", {"order_id": "ord_si_0001"}, state, self._READ_ONLY)
+        assert payload == {"order_id": "ord_si_0001", "status": "CANCELLED"}
+        assert [o["status"] for o in state["orders"]] == ["CANCELLED", "pending"]
+
+    @pytest.mark.parametrize(
+        ("tool", "args"),
+        [
+            ("cancel_order", {"order_id": "VTI"}),
+            ("cancel_order", {}),
+            ("get_order_status", {"order_id": "VTI"}),
+        ],
+    )
+    def test_an_order_the_account_does_not_hold_is_refused(self, tool, args):
+        state = self._state()
+        payload = G._apply_tool(tool, args, state, self._READ_ONLY)
+        assert set(payload) == {"error", "tool_name"}
+        assert payload["tool_name"] == tool
+        assert state == self._state()
 
 
 class TestLocalBrandNameReachesTheRuntime:

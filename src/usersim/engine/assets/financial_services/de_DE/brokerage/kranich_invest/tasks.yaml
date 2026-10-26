@@ -44,7 +44,7 @@ templates:
     mir anders überlegt.
   account_state:
     account_id: acct_kr_0001
-    open_orders:
+    orders:
     - {order_id: ord_kr_0001, ticker: '{{stock}}', status: open}
   param_space:
     stock: [Siemens, SAP, Allianz]

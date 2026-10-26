@@ -50,7 +50,7 @@ templates:
     Pouvez-vous supprimer mon ordre en attente sur {{ticker}} ? J'ai changé d'avis.
   account_state:
     account_id: acct_vb_0001
-    open_orders:
+    orders:
     - {order_id: ord_vb_0001, ticker: '{{ticker}}', status: open}
   param_space:
     ticker: [Air Liquide, TotalEnergies, un ETF MSCI World]

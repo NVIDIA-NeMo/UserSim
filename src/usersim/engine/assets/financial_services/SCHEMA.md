@@ -259,7 +259,9 @@ A task is a **parameterized generator**, not a fixed string. `tasks.yaml` holds
 `opening_user_messages` (a LIST of `{{slot}}` templates; author >=3),
 `account_state` (seed state the tools mutate; hold the account's money under
 `balance`, the one amount the account view and the simulated customer see, as a
-plain number like `12000.00`), `param_space` (per-instance slot values),
+plain number like `12000.00`, and its open orders under `orders`, a list of
+entries with an `order_id` and a `status` that `get_order_status` lists and
+`cancel_order` acts on), `param_space` (per-instance slot values),
 `gold_tool_sequence`, `ordered` (OPTIONAL, default `false`),
 `gold_document_ids` (OPTIONAL -- see below), `expected_state_deltas`,
 `allowed_tools` (OPTIONAL). Verifiable templates carry a
