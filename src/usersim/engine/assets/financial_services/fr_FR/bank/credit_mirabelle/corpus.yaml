@@ -4168,7 +4168,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | RFR $\le$ 23 028 € (pour 1 part) | Accès Autorisé | Le client peut ouvrir un
+    | RFR ≤ 23 028 € (pour 1 part) | Accès Autorisé | Le client peut ouvrir un
     LEP avec un versement initial de 30 €. |
 
     | RFR $>$ 23 028 € (pour 1 part) | Accès Refusé | Le client n''est pas éligible
@@ -6278,11 +6278,11 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Taux d''endettement | $\le$ 35 % | Éligible |
+    | Taux d''endettement | ≤ 35 % | Éligible |
 
     | Taux d''endettement | $>$ 35 % | Non éligible |
 
-    | Durée du prêt demandée | $\le$ 25 ans | Éligible |
+    | Durée du prêt demandée | ≤ 25 ans | Éligible |
 
     | Durée du prêt demandée | $>$ 25 ans | Non éligible |
 
@@ -6751,7 +6751,7 @@ documents:
     **Règle d''or de l''éligibilité** :
 
     Une fois ces documents analysés, le critère déterminant est le taux d''endettement.
-    Si le ratio charges/revenus est $\le$ 35 %, le dossier est éligible à l''étude
+    Si le ratio charges/revenus est ≤ 35 %, le dossier est éligible à l''étude
     finale. Si le ratio est > 35 %, le prêt sera refusé ou nécessitera un apport plus
     conséquent pour réduire le montant emprunté.'
   domain: lending_mortgage
@@ -7137,13 +7137,13 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | **Taux d''endettement** | $\le$ 35 % | Dossier admissible pour analyse de solvabilité
+    | **Taux d''endettement** | ≤ 35 % | Dossier admissible pour analyse de solvabilité
     |
 
     | **Taux d''endettement** | > 35 % | Demande refusée (non conforme aux règles
     de sécurité) |
 
-    | **Durée du prêt** | $\le$ 25 ans | Option de taux fixe applicable (3,35 % ou
+    | **Durée du prêt** | ≤ 25 ans | Option de taux fixe applicable (3,35 % ou
     3,55 %) |
 
     | **Durée du prêt** | > 25 ans | Demande irrecevable (dépassement de la durée

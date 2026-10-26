@@ -2336,7 +2336,7 @@ documents:
     | **Wohnsitznachweis** | Aktuelle Meldebescheinigung (falls Ausweis nicht aktuell)
     | Regionaler Bezug bestätigt |
 
-    | **Volljährigkeit** | Geburtsdatum gemäß Ausweis $\ge$ 18 Jahre | Vertragspartner
+    | **Volljährigkeit** | Geburtsdatum gemäß Ausweis ≥ 18 Jahre | Vertragspartner
     kann eigenständig schließen |
 
     | **Gesetzliche Vertretung** | Bei Minderjährigen: Unterschrift beider Sorgeberechtigten
@@ -6143,7 +6143,7 @@ documents:
 
     | :--- | :--- |
 
-    | Nachgewiesene Bonität (sehr gut) + Eigenkapitalquote $\ge$ 20 % | Standard-Zugang:
+    | Nachgewiesene Bonität (sehr gut) + Eigenkapitalquote ≥ 20 % | Standard-Zugang:
     Direkte Prüfung der gewünschten Zinsbindung (z. B. 3,68 % oder 3,91 %) |
 
     | Nachgewiesene Bonität (gut) + Eigenkapitalquote 10 % - 19 % | Erweiterter Zugang:

@@ -1116,13 +1116,13 @@ documents:
 
     | :--- | :--- | :--- | :--- |
 
-    | Salaried Professional | High | $\ge$ 2 Years | **Preferred Tier**: Fast-track
+    | Salaried Professional | High | ≥ 2 Years | **Preferred Tier**: Fast-track
     sanction, tenure up to 60 months, interest rate 14.5% |
 
-    | Emerging Middle Class | Medium | $\ge$ 1 Year | **Standard Tier**: Standard
+    | Emerging Middle Class | Medium | ≥ 1 Year | **Standard Tier**: Standard
     sanction timeline, tenure up to 60 months, interest rate 14.5% |
 
-    | New to Credit | N/A | $\ge$ 6 Months | **Basic Tier**: Subject to additional
+    | New to Credit | N/A | ≥ 6 Months | **Basic Tier**: Subject to additional
     verification, tenure up to 60 months, interest rate 14.5% |
 
     | High Risk/Low Score | Low | Variable | **Ineligible**: Unable to offer unsecured
@@ -1851,10 +1851,10 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | **Collateral Value** | Gold must be appraised at $\ge$ ₹33,334 | Eligible for
+    | **Collateral Value** | Gold must be appraised at ≥ ₹33,334 | Eligible for
     minimum loan of ₹25000 (at 75% LTV) |
 
-    | **Minimum Loan Request** | Request $\ge$ ₹25000 | Eligible for processing |
+    | **Minimum Loan Request** | Request ≥ ₹25000 | Eligible for processing |
 
     | **Verification** | Valid KYC + MFA completion | Eligible for disbursement |
 
@@ -2764,21 +2764,21 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | **Minimum Loan Amount** | $\ge$ ₹25000 | Eligible for processing |
+    | **Minimum Loan Amount** | ≥ ₹25000 | Eligible for processing |
 
     | **Minimum Loan Amount** | $<$ ₹25000 | Ineligible for Gold Loan product |
 
-    | **Collateral Value** | Appraised Gold Value $\times$ 75% $\ge$ Requested Amount
+    | **Collateral Value** | Appraised Gold Value × 75% ≥ Requested Amount
     | Loan amount approved within LTV cap |
 
-    | **Collateral Value** | Appraised Gold Value $\times$ 75% $<$ Requested Amount
+    | **Collateral Value** | Appraised Gold Value × 75% $<$ Requested Amount
     | Loan amount capped at 75% of value |
 
     | **KYC Status** | Verified & MFA complete | Proceed to disbursement |
 
     | **KYC Status** | Unverified/Incomplete | Application on hold |
 
-    | **Tenure Request** | $\le$ 12 months | Standard terms apply |
+    | **Tenure Request** | ≤ 12 months | Standard terms apply |
 
     | **Tenure Request** | $>$ 12 months | Ineligible (Max tenure is 12 months) |
 

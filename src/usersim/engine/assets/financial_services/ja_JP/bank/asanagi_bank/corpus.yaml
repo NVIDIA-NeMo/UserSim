@@ -897,8 +897,8 @@ documents:
   institution_id: asanagi_bank
 - id: 12dc7956-e1c4-57f1-8a60-62d789e77ebf
   title: スーパー定期：お申込みいただける方
-  body: "スーパー定期のお申込み条件は以下の通りです。\n\n・当行の普通預金口座をお持ちの方 $\rightarrow$ お申込みいただけます\n・預入金額が1,000円以上の方\
-    \ $\rightarrow$ お申込みいただけます\n・上記条件をいずれか満たさない方 $\rightarrow$ お申込みいただけません\n\nまずは「普通預金：商品概要」にて口座開設をご検討ください。"
+  body: "スーパー定期のお申込み条件は以下の通りです。\n\n・当行の普通預金口座をお持ちの方 → お申込みいただけます\n・預入金額が1,000円以上の方\
+    \ → お申込みいただけます\n・上記条件をいずれか満たさない方 → お申込みいただけません\n\nまずは「普通預金：商品概要」にて口座開設をご検討ください。"
   domain: retail_banking
   product_category: super_teiki
   document_type: eligibility_matrix
@@ -2631,11 +2631,11 @@ documents:
   body: '【お申込み条件および判定】
 
 
-    ・当行の普通預金口座を保有している方 $\rightarrow$ お申込みいただけます
+    ・当行の普通預金口座を保有している方 → お申込みいただけます
 
-    ・有効な本人確認書類を提示できる方 $\rightarrow$ お申込みいただけます
+    ・有効な本人確認書類を提示できる方 → お申込みいただけます
 
-    ・犯罪収益移転防止法に基づく「取引時確認」に同意いただける方 $\rightarrow$ お申込みいただけます'
+    ・犯罪収益移転防止法に基づく「取引時確認」に同意いただける方 → お申込みいただけます'
   domain: cards
   product_category: asanagi_debit
   document_type: eligibility_matrix

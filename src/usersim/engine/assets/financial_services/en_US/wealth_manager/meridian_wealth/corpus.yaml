@@ -929,7 +929,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Initial Funding | $\geq$ $250,000 | Eligible for Account Opening |
+    | Initial Funding | ≥ $250,000 | Eligible for Account Opening |
 
     | Initial Funding | < $250,000 | Ineligible for Managed Portfolio |
 
@@ -1660,7 +1660,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Minimum Capital | $\ge$ $500,000 | Eligible for activation |
+    | Minimum Capital | ≥ $500,000 | Eligible for activation |
 
     | Minimum Capital | < $500,000 | Ineligible; see Managed Portfolio — overview
     |
@@ -2075,7 +2075,7 @@ documents:
     | Identity Verification | Government-issued Photo ID & Proof of Address | Verified
     Identity Status |
 
-    | Capital Qualification | Recent Brokerage Statements showing $\ge$ $500,000 |
+    | Capital Qualification | Recent Brokerage Statements showing ≥ $500,000 |
     Minimum Investment Met |
 
     | Risk Alignment | Completed Risk Profiling Questionnaire | Documented Risk Profile
@@ -2117,7 +2117,7 @@ documents:
     - A competitor''s offering may suit investors who prefer a lower initial entry
     point or those who do not require a fiduciary guarantee.
 
-    - The Tax-Managed Portfolio is ideal for high-net-worth individuals with $\ge$
+    - The Tax-Managed Portfolio is ideal for high-net-worth individuals with ≥
     $500,000 in investable assets who prioritize tax efficiency and a steadfast commitment
     to their best interest.'
   domain: wealth_management
@@ -3188,12 +3188,12 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Initial Funding | $\ge$ $250,000 | Eligible for activation |
+    | Initial Funding | ≥ $250,000 | Eligible for activation |
 
     | Initial Funding | < $250,000 | Ineligible; refer to Managed Portfolio — overview
     |
 
-    | Account Balance | $\ge$ $250,000 | Maintain product status |
+    | Account Balance | ≥ $250,000 | Maintain product status |
 
     | Account Balance | < $250,000 | Subject to review or conversion to a lower-tier
     product |
@@ -5099,7 +5099,7 @@ documents:
     | Account Eligibility Confirmed |
 
     | Financial Qualification | Certified Bank Statements or Brokerage Reports showing
-    $\text{min investment of } \$1,000,000$ | Tier Access Granted |
+    min investment of $1,000,000 | Tier Access Granted |
 
     | Risk Alignment | Completed and signed Risk Profiling Questionnaire | Investment
     Strategy Baseline Established |
@@ -5475,7 +5475,7 @@ documents:
 
     Condition: Investable Assets
 
-    Requirement: $\ge$ $1,000,000
+    Requirement: ≥ $1,000,000
 
     Outcome: Qualified for Private Wealth Advisory
 

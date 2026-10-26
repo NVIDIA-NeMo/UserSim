@@ -9579,7 +9579,7 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Loan to Value (LTV) | $\le$ 90% | Eligible for consideration |
+    | Loan to Value (LTV) | ≤ 90% | Eligible for consideration |
 
     | Loan to Value (LTV) | > 90% | Ineligible for this product |
 

@@ -2309,19 +2309,19 @@ documents:
     | :--- | :--- | :--- |
 
     | Proof of Identity | Valid Passport or UK Driving Licence | Identity Verified
-    $\rightarrow$ Proceed to Address Check |
+    → Proceed to Address Check |
 
     | Proof of Residency | Utility Bill or Council Tax Statement (last 3 months) |
-    Residency Confirmed $\rightarrow$ Proceed to Age Check |
+    Residency Confirmed → Proceed to Age Check |
 
-    | Proof of Age | Valid Government ID (Must show age $\le$ 39) | Age Verified $\rightarrow$
+    | Proof of Age | Valid Government ID (Must show age ≤ 39) | Age Verified →
     Account Eligible |
 
     | Tax Residency | Self-certification of UK tax residency | Tax Status Confirmed
-    $\rightarrow$ Account Activated |
+    → Account Activated |
 
     | Account Verification | Multi-factor authentication (MFA) setup | Security Confirmed
-    $\rightarrow$ Ready for Deposits |'
+    → Ready for Deposits |'
   domain: brokerage_investing
   product_category: lifetime_isa
   document_type: eligibility_matrix
@@ -3152,8 +3152,8 @@ documents:
     \ risen above £450,000, or if they need access to their capital before age 60\
     \ without the 25% penalty, the flexibility of a Stocks and Shares ISA is a better\
     \ choice.\n\n**Decision Matrix**\n- **Goal: First Home (<£450k) or Retirement**\
-    \ $\rightarrow$ Copperleaf Lifetime ISA (for the 25% bonus).\n- **Goal: General\
-    \ Wealth/Flexibility** $\rightarrow$ Copperleaf Stocks and Shares ISA (to avoid\
+    \ → Copperleaf Lifetime ISA (for the 25% bonus).\n- **Goal: General\
+    \ Wealth/Flexibility** → Copperleaf Stocks and Shares ISA (to avoid\
     \ the 25% charge).\n\nFor more on the alternative, see Copperleaf Stocks and Shares\
     \ ISA — overview."
   domain: brokerage_investing
@@ -6066,7 +6066,7 @@ documents:
 
     | Balance < £1,000,000 | Standard Reporting | Standard platform fee of 0.25% |
 
-    | Balance $\ge$ £1,000,000 | High Net Worth Reporting | Subject to enhanced KYC
+    | Balance ≥ £1,000,000 | High Net Worth Reporting | Subject to enhanced KYC
     and reporting |
 
 

@@ -3449,9 +3449,9 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Montant du prêt | Minimum 3 000 € | Éligible si $\ge$ 3 000 € |
+    | Montant du prêt | Minimum 3 000 € | Éligible si ≥ 3 000 € |
 
-    | Durée du prêt | Maximum 84 mois | Éligible si $\le$ 84 mois |
+    | Durée du prêt | Maximum 84 mois | Éligible si ≤ 84 mois |
 
     | Identité | Vérification d''identité rigoureuse réussie | Obligatoire pour tout
     déblocage |
@@ -5776,9 +5776,9 @@ documents:
 
     | :--- | :--- | :--- |
 
-    | Montant de l''achat (Min) | $\ge$ 100 € | Accès Autorisé |
+    | Montant de l''achat (Min) | ≥ 100 € | Accès Autorisé |
 
-    | Montant de l''achat (Max) | $\le$ 3 000 € | Accès Autorisé |
+    | Montant de l''achat (Max) | ≤ 3 000 € | Accès Autorisé |
 
     | Vérification d''identité | Complétée et Validée | Accès Autorisé |
 

@@ -1664,12 +1664,12 @@ documents:
 
     | Investment Amount | Less than ₹500 | Ineligible; below minimum limit |
 
-    | Pause Request | Duration $\le$ 6 months | Request Approved |
+    | Pause Request | Duration ≤ 6 months | Request Approved |
 
     | Pause Request | Duration $>$ 6 months | Ineligible; suggest SIP cancellation
     |
 
-    | Redemption | Holding period $\ge$ 365 days | 0% Exit Load |
+    | Redemption | Holding period ≥ 365 days | 0% Exit Load |
 
     | Redemption | Holding period $<$ 365 days | 1% Exit Load applied |'
   domain: brokerage_investing
@@ -7254,8 +7254,8 @@ documents:
     \ to Mutual Fund SIP if:**\nThe customer prefers disciplined, automated investing\
     \ over active stock picking. SIPs offer lower entry barriers and a structured\
     \ approach to growth compared to the manual nature of a trading account.\n\n**Summary\
-    \ for Agent**\n- Long-term/Retail $\rightarrow$ Demat & Trading Account\n- Leverage/Active\
-    \ $\rightarrow$ Margin Trading Facility\n- Disciplined/Passive $\rightarrow$ Mutual\
+    \ for Agent**\n- Long-term/Retail → Demat & Trading Account\n- Leverage/Active\
+    \ → Margin Trading Facility\n- Disciplined/Passive → Mutual\
     \ Fund SIP"
   domain: brokerage_investing
   product_category: demat_trading_account

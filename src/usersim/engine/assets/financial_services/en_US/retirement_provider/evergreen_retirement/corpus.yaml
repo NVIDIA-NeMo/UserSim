@@ -4338,9 +4338,9 @@ documents:
 
     | Must have a valid business Tax ID (EIN) or SSN | Eligible to open account |
 
-    | Annual contribution is $\le$ 25% of compensation | Contribution accepted |
+    | Annual contribution is ≤ 25% of compensation | Contribution accepted |
 
-    | Annual contribution is $\le$ $70,000 | Contribution accepted |
+    | Annual contribution is ≤ $70,000 | Contribution accepted |
 
     | Annual contribution exceeds $70,000 | Contribution rejected / excess must be
     removed |
