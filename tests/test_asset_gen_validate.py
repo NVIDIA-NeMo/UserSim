@@ -152,6 +152,23 @@ def test_non_latin_locale_fails_language_script(tmp_path: Path):
     assert _status(rep, "language_script", "testbank") == FAIL
 
 
+def test_a_tool_reference_is_outside_the_script_check(tmp_path: Path):
+    """A tool reference names its tool and arguments in English, so it isn't held to the
+    locale's script share; the same text in a customer document still fails."""
+    body = "`withdraw_funds(account_id: string, amount: number)` を使います。"
+    tool_doc = {**_doc("D1", body), "document_type": "discoverable_tool_doc"}
+    assert (
+        _status(validate_bank(_write_bank(tmp_path / "tool", "ja_JP", [tool_doc])), "language_script", "testbank")
+        == PASS
+    )
+    assert (
+        _status(
+            validate_bank(_write_bank(tmp_path / "faq", "ja_JP", [_doc("D1", body)])), "language_script", "testbank"
+        )
+        == FAIL
+    )
+
+
 def test_duplicate_embeddings_warn(tmp_path: Path):
     docs = [_doc("D1", "Overdraft fee is $34."), _doc("D2", "Overdraft fee is $34.")]
     emb = {"D1": [1.0, 0.0, 0.0], "D2": [1.0, 0.0, 0.0]}
