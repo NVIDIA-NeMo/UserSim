@@ -65,7 +65,7 @@ from usersim.engine.core.outcomes import (
     TraceKind,
     WarningKind,
 )
-from usersim.engine.core.persona import format_persona_for_prompt
+from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankLoadError,
@@ -872,10 +872,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
         else:
             behavioral = ""
-        persona_name = (
-            " ".join(str(self._persona.get(k, "")).strip() for k in ("first_name", "last_name")).strip()
-            or "the customer"
-        )
+        persona_name = persona_full_name(self._persona) or "the customer"
         inst = self._instance
         literacy = derive_financial_literacy(self._persona, self._persona_locale())
         common = dict(

@@ -41,6 +41,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
+from usersim.engine.core.persona import persona_full_name
 from usersim.engine.core.probes import BankLoadError, dispatch_episode, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
@@ -186,7 +187,7 @@ class ConversationSimulatorGenerator(
             set_up_row = dict(data)
         persona = preamble.persona
         probe_type = preamble.probe_type
-        persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
+        persona_name = persona_full_name(persona) or "?"
         logger.info(
             f"  |-- Starting {probe_type} sim for {persona_name} "
             f"[{preamble.user_interaction_style}, {preamble.disclosure_style}] (max_turns={cfg.max_turns})"

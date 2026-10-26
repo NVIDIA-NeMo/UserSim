@@ -599,7 +599,7 @@ def _add_episode_input_columns(
             ),
         )
     )
-    _add_persona_expressions(config_builder, dd)
+    _add_persona_expressions(config_builder, dd, persona_locale)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="probe_type",
@@ -963,10 +963,15 @@ def evaluate_dataframe(
     return eval_df
 
 
-def _add_persona_expressions(config_builder, dd) -> None:
-    """Add the seven persona-* expression columns shared by the notebook."""
+def _add_persona_expressions(config_builder, dd, persona_locale: str) -> None:
+    """Add the seven persona-* expression columns shared by the notebook.
+
+    ``persona_locale`` is the persona dataset's locale; it sets the name order.
+    """
+    from usersim.engine.core.persona import persona_name_template
+
     config_builder.add_column(
-        dd.ExpressionColumnConfig(name="persona_name", expr="{{ persona.first_name }} {{ persona.last_name }}")
+        dd.ExpressionColumnConfig(name="persona_name", expr=persona_name_template(persona_locale))
     )
     config_builder.add_column(dd.ExpressionColumnConfig(name="persona_age", expr="{{ persona.age }}"))
     # ``persona_sex`` was added after the original 7-column projection

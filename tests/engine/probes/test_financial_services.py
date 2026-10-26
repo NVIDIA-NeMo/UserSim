@@ -1369,6 +1369,18 @@ def test_korean_personas_span_every_literacy_level():
     ]
 
 
+def test_the_customer_prompt_names_a_korean_persona_family_name_first():
+    """The customer's own name, the persona block and the full name they verify with
+    all read 최도화, the order a Korean name is written in."""
+    probe, _ = _probe_on("en_US", _northwind_dispute_instance())
+    probe._persona = {**_PERSONA, "first_name": "도화", "last_name": "최"}
+    prompt = probe._build_user_system_prompt()
+    assert "You are 최도화," in prompt
+    assert "Name: 최도화" in prompt
+    assert "full name 최도화" in prompt
+    assert "도화 최" not in prompt
+
+
 async def test_dynamic_tier_generates_turn_1_and_emits_columns():
     """The dynamic tier has no scripted opening: the loop GENERATES turn-1 via
     the user-LLM (persona + invitation + subtopic hint), then the assistant

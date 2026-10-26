@@ -181,7 +181,7 @@ def run(args: argparse.Namespace) -> int:
                 ),
             )
         )
-        _add_persona_expressions(builder, dd)
+        _add_persona_expressions(builder, dd, persona_locale)
         result = data_designer.create(builder, num_records=args.num_personas)
         df = result.load_dataset()
         df["locale"] = locale
