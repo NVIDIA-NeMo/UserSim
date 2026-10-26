@@ -59,7 +59,8 @@ COV_FAIL_UNDER ?= 84
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
-        check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+        check-hooks check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
+
 
 help:  ## Show the available targets
 	@echo "usersim make targets:"
@@ -115,7 +116,10 @@ format-check:  ## Check formatting (no changes written)
 format:  ## Reformat in place
 	$(UV) run ruff format $(PY_ALL)
 
-check-all: lint format-check  ## Run every static check CI enforces
+check-all: check-tools check-lock lint format-check check-license-headers check-doc-links check-notebooks-clean check-hooks  ## Run ordinary static gates (hooks may rewrite files)
+
+check-hooks:  ## Run hooks on every tracked file; review rewrites and rerun after failure
+	$(UV) run pre-commit run --all-files --show-diff-on-failure
 
 check-all-fix: lint-fix format  ## Fix everything fixable, then you re-review
 

@@ -33,15 +33,6 @@ SKIP_PATTERNS = frozenset(
     ]
 )
 
-#: A top-level directory whose name starts with `_` holds material that is not
-#: part of the distribution, so its files are never stamped. This is matched on
-#: the first path component alone: `_private.py` modules inside the package are
-#: ordinary source and do get stamped.
-PRIVATE_TOP_LEVEL_PREFIX = "_"
-
-# Skip auto-generated version files (hatch-vcs generates these at build time)
-SKIP_FILES = frozenset(["_version.py"])
-
 # File extensions to process for license headers
 SUPPORTED_EXTENSIONS = frozenset([".py", ".sh", ".template"])
 
@@ -269,18 +260,13 @@ def should_process_file(file_path: Path) -> bool:
     if file_path.name not in ROOT_FILES and file_path.suffix not in SUPPORTED_EXTENSIONS:
         return False
 
-    if file_path.name in SKIP_FILES:
-        return False
-
     try:
         relative = file_path.resolve().relative_to(REPO_ROOT)
     except ValueError:
-        relative = None
-    if relative and relative.parts[0].startswith(PRIVATE_TOP_LEVEL_PREFIX):
+        relative = file_path
+    if relative.parts and relative.parts[0].startswith("_"):
         return False
-
-    file_str = str(file_path)
-    return not any(pattern in file_str for pattern in SKIP_PATTERNS)
+    return not any(part in SKIP_PATTERNS for part in file_path.parts)
 
 
 def get_file_creation_year(file_path: Path) -> int | None:
@@ -408,14 +394,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Check if all files have correct license headers without modifying files",
     )
+    parser.add_argument("files", nargs="*", type=Path, help="Only process these paths (for staged-file hooks)")
     args = parser.parse_args()
+    args.files = [path.resolve() for path in args.files]
 
     repo_path = Path(__file__).parent.parent
     all_files_needing_update: list[Path] = []
     total_processed = total_updated = total_skipped = 0
 
     # This project is one distribution under src/, so the roots are flat.
-    for folder in ["src", "tests", "scripts", "templates"]:
+    for folder in [] if args.files else ["src", "tests", "scripts", "templates"]:
         folder_path = repo_path / folder
         if not folder_path.exists():
             continue
@@ -437,7 +425,7 @@ if __name__ == "__main__":
             print(f"   ✏️  Updated: {updated}")
             print(f"   ⏭️  Skipped: {skipped}")
 
-    root_files = [repo_path / name for name in sorted(ROOT_FILES) if (repo_path / name).is_file()]
+    root_files = args.files or [repo_path / name for name in sorted(ROOT_FILES) if (repo_path / name).is_file()]
     if root_files:
         action = "Checking" if args.check else "Processing"
         print(f"\n📂 {action} repository root")
