@@ -102,6 +102,15 @@ _EDUCATION_ORDINAL: dict[str, dict[str, float]] = {
         "Fachschulabschluss": 0.6,
         "Bachelor, Master, Diplom, Promotion": 0.85,
     },
+    "ko_KR": {
+        "무학": 0.0,
+        "초등학교": 0.1,
+        "중학교": 0.15,
+        "고등학교": 0.3,
+        "2~3년제 전문대학": 0.5,
+        "4년제 대학교": 0.7,
+        "대학원": 1.0,
+    },
 }
 _EDUCATION_ORDINAL["hi_Deva_IN"] = _EDUCATION_ORDINAL["en_IN"]
 # ``hi_Latn_IN`` cannot alias ``en_IN``: the India persona dataset, when
