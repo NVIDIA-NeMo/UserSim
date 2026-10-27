@@ -32,10 +32,13 @@ models = [
   # probes/financial_services/README.md for the pipeline and its tuning knobs.
   #
   # `doc_gen_model` emits a whole document cluster per call, hence max_tokens.
+  # It comes out of the model's 32,768-token window, which the prompt shares: a
+  # ten-document cluster with its reasoning takes about 5,200 tokens, and the
+  # largest Korean and Japanese prompts run past 16,000, so 12,288 leaves both room.
   # `asset_judge_model` grades that output, so it shares the timeout, is a
   # different family and runs at temperature 0 to keep scores stable between
   # runs.
-  { alias = "doc_gen_model",      model = "google/gemma-4-31b-it",                 provider = "nvidia", max_parallel_requests = 8, timeout = 600, max_tokens = 16384 },
+  { alias = "doc_gen_model",      model = "google/gemma-4-31b-it",                 provider = "nvidia", max_parallel_requests = 8, timeout = 600, max_tokens = 12288 },
   { alias = "asset_judge_model",  model = "nvidia/nemotron-3.5-lightning-30b-a3b", provider = "nvidia", max_parallel_requests = 8, timeout = 600, temperature = 0.0 },
 
   # Query side of the financial_services probe's dense and hybrid retrieval.
