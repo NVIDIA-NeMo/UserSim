@@ -115,6 +115,40 @@ def test_prompt_values_carry_the_locale_notation():
     assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
 
 
+def test_common_operations_the_simulator_reads_arguments_from_are_described():
+    """get_order_status called without an order_id lists the account's orders, which is
+    how the agent finds the id cancel_order needs. The operations whose arguments the
+    simulator reads carry a description, and it reaches the cluster that writes their
+    tool docs."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict, explode_to_cluster_rows
+    from usersim.asset_gen.financial_services.spec import (
+        COMMON_OPERATION_DESCRIPTIONS,
+        COMMON_TYPE_OPERATIONS,
+        COMMON_UNIVERSAL_OPERATIONS,
+    )
+
+    common = {name for name, _ in COMMON_UNIVERSAL_OPERATIONS}
+    common |= {name for ops in COMMON_TYPE_OPERATIONS.values() for name, _ in ops}
+    assert set(COMMON_OPERATION_DESCRIPTIONS) <= common
+    assert "without one, it returns every order" in COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+    spec = load_region_spec(_REGION_SPEC)
+    brokerage = next(i for i in spec.institutions if i.type == "brokerage")
+    tool = next(t for t in brokerage.tool_taxonomy if t.name == "get_order_status")
+    assert tool.description == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+    assert _tool_dict(tool)["description"] == ""  # tools.yaml ships it empty
+
+    brief_df = pd.DataFrame([{"institution_id": brokerage.id, "institution_brief": {"positioning": "p"}}])
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    shared = clusters[(clusters["institution_id"] == brokerage.id) & (clusters["cluster_kind"] == "shared")]
+    tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert tools["get_order_status"]["description"] == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+
 def test_prompt_values_carry_the_spec_label():
     """A value's key is a machine name and its label says what the value means, so
     each value the region spec labels carries its label into the prompt."""
