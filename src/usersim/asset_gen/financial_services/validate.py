@@ -483,6 +483,45 @@ _LATEX_RE = re.compile(
 #: Control characters other than tab and newline. A single backslash in the model's
 #: JSON turns ``\rightarrow`` into a carriage return followed by ``ightarrow``.
 _CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+#: One command in math mode, either as written (``$\times$``) or after the JSON parser
+#: read the model's single backslash and the letter after it as an escape: ``\times``
+#: arrives as a tab and ``imes``, ``\neq`` as a newline and ``eq``. Tab and newline are
+#: ordinary text, so only this pattern sees those two.
+_MATH_RE = re.compile(r"\$ *(?:\\([A-Za-z]+)|([\t\n\r\f\b])([A-Za-z]+)) *\$")
+_JSON_ESCAPES = {"\t": "t", "\n": "n", "\r": "r", "\f": "f", "\b": "b"}
+#: The character each LaTeX symbol command stands for.
+_LATEX_SYMBOLS = {
+    "rightarrow": "→",
+    "leftarrow": "←",
+    "Rightarrow": "⇒",
+    "ge": "≥",
+    "geq": "≥",
+    "le": "≤",
+    "leq": "≤",
+    "ne": "≠",
+    "neq": "≠",
+    "times": "×",
+    "approx": "≈",
+    "cdot": "·",
+    "pm": "±",
+}
+
+
+def plain_symbols(text: str) -> tuple[str, int]:
+    """``text`` with each LaTeX symbol in math mode written as its character, and how
+    many it replaced. A command with no character here is left as it is, for
+    ``plain_text`` to fail."""
+    replaced = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal replaced
+        command = match.group(1) or _JSON_ESCAPES[match.group(2)] + match.group(3)
+        if command not in _LATEX_SYMBOLS:
+            return match.group(0)
+        replaced += 1
+        return _LATEX_SYMBOLS[command]
+
+    return _MATH_RE.sub(replace, text), replaced
 
 
 def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -496,7 +535,11 @@ def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> Non
         seen: set = set()
         for d in idata.documents:
             text = f"{d.get('title', '')}\n{d.get('body', '')}"
-            found = _LATEX_RE.findall(text) + [repr(c) for c in _CONTROL_RE.findall(text)]
+            found = (
+                _LATEX_RE.findall(text)
+                + [repr(m.group(0)) for m in _MATH_RE.finditer(text) if m.group(2)]
+                + [repr(c) for c in _CONTROL_RE.findall(text)]
+            )
             if found:
                 offenders.append(str(d.get("id")))
                 seen.update(found)

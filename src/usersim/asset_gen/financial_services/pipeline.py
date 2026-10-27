@@ -53,6 +53,7 @@ from usersim.asset_gen.financial_services.spec import (
     RegionSpec,
     Tool,
 )
+from usersim.asset_gen.financial_services.validate import plain_symbols
 
 logger = logging.getLogger("usersim.asset_gen.financial_services.pipeline")
 
@@ -1274,7 +1275,10 @@ def _as_docset(val: Any) -> dict[str, Any]:
 def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     """Group cluster rows by institution, QC-gate, explode, respell, and de-dupe doc ids.
 
-    Respelling applies the region spec's ``language_conventions`` to each body.
+    Respelling applies the region spec's ``language_conventions`` to each body, and
+    writes each LaTeX symbol the model typesets as its character: the prompt asks for
+    plain text, but the model still typesets some symbols, and a single backslash in
+    its JSON arrives here already read as an escape.
 
     QC-drop policy: an unparseable/empty cluster is dropped (with a warning);
     a low-faithfulness cluster is KEPT (already ``placeholder: true``) and logged,
@@ -1284,6 +1288,7 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     docs_by_inst: dict[str, dict[str, dict[str, Any]]] = {}
     conventions = spec.language_conventions
     respelled = 0
+    symbols = 0
 
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
@@ -1314,11 +1319,14 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
             # The body only: the PLAN owns the title, so a title using an avoided
             # form is a doc_titles gap, which validate-assets reports.
             respelled += len(conventions.find(d["body"]))
-            d["body"] = conventions.apply(d["body"])
+            d["body"], replaced = plain_symbols(conventions.apply(d["body"]))
+            symbols += replaced
             bucket.setdefault(d["id"], d)  # de-dupe ids across the institution's rows
 
     if respelled:
         logger.info("respelled %d form(s) the region spec's language conventions avoid", respelled)
+    if symbols:
+        logger.info("wrote %d LaTeX symbol(s) as characters", symbols)
     institutions: list[InstitutionBank] = []
     for inst in spec.institutions:
         institutions.append(

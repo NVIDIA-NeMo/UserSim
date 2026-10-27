@@ -952,6 +952,8 @@ def test_documents_are_asked_for_plain_text_symbols():
         text = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind=kind)).lower()
         assert "no latex" in text, kind
         assert all(symbol in text for symbol in "≥≤→×"), kind
+        # Where math markup slips in: condition-to-outcome lines, steps and formulas.
+        assert "maps a condition to its outcome" in text and "a formula" in text, kind
 
     block = re.search(r"^    eligibility_matrix:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, "no convention for eligibility_matrix"
@@ -1212,3 +1214,32 @@ def test_generation_respells_bodies_and_leaves_plan_titles_alone():
     doc = next(d for bank in collect_institutions(result_df, spec) for d in bank.documents)
     assert doc["body"] == "Towards the end of the term, interest moves towards the cap."
     assert doc["title"] == "Saving toward a goal"
+
+
+def test_generation_writes_latex_symbols_as_characters():
+    """The model's single backslash reaches the pipeline already read as a JSON escape:
+    ``\\rightarrow`` as a carriage return and ``ightarrow``, ``\\times`` as a tab and
+    ``imes``. Generation writes the characters, so the bank needs no cleanup."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import collect_institutions
+
+    spec = load_region_spec(_EN_US)
+    inst = spec.institutions[0]
+    plan = [{"doc_key": "k1", "topic": "Fees", "uuid": "u1", "domain": inst.domains[0]}]
+    body = "Balance under $500 $" + "\r" + "ightarrow$ $12 fee. Interest is the principal $" + "\t" + "imes$ the rate."
+    result_df = pd.DataFrame(
+        [
+            {
+                "institution_id": inst.id,
+                "cluster_kind": "product",
+                "doc_set": {"documents": [{"doc_key": "k1", "title": "t", "document_type": "faq", "body": body}]},
+                "numeric_faithfulness_score": 4,
+                "doc_plan_json": json.dumps(plan),
+            }
+        ]
+    )
+    doc = next(d for bank in collect_institutions(result_df, spec) for d in bank.documents)
+    assert doc["body"] == "Balance under $500 → $12 fee. Interest is the principal × the rate."

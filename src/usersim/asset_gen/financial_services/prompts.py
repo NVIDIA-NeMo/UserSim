@@ -196,7 +196,9 @@ Requirements:
   MAY exceed their target if needed to state every applicable value exactly.
 - Consistency: names, numbers, and fees must match the focus values and the brief exactly.
 - Plain text: write every body as Markdown with no LaTeX or other math markup. Write a
-  symbol as the character itself (≥, ≤, →, ×) or in words.
+  symbol as the character itself (≥, ≤, →, ×) or in words, including in the places math
+  markup slips in: a line that maps a condition to its outcome, a sequence of steps, and
+  a formula.
 - Distinctness: every document must be materially different in scope, framing, and detail --
   driven by its `angle` and `audience`. Two documents of the same document_type MUST NOT
   restate the same content; if two angles feel close, deepen one and keep the other high-level.

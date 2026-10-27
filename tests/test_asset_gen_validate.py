@@ -8,11 +8,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 from usersim.asset_gen.financial_services.pipeline import InstitutionBank, serialize_bank
 from usersim.asset_gen.financial_services.spec import RegionSpec
-from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, validate_bank
+from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, plain_symbols, validate_bank
 
 _SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
@@ -670,6 +671,39 @@ def test_a_control_character_fails(tmp_path: Path):
     return followed by ``ightarrow``."""
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "Account holder $" + "\r" + "ightarrow$ eligible")])
     assert _status(validate_bank(bank, None), "plain_text", "testbank") == FAIL
+
+
+def test_a_tab_or_newline_read_from_a_latex_escape_fails(tmp_path: Path):
+    """``\\times`` and ``\\neq`` with a single backslash arrive as a tab and a newline,
+    which are ordinary text, so only their place between ``$`` signs gives them away."""
+    bank = _write_bank(
+        tmp_path,
+        "en_US",
+        [_doc("D1", "Interest is the principal $" + "\t" + "imes$ the rate."), _doc("D2", "Fee $" + "\n" + "eq$ $0")],
+    )
+    rep = validate_bank(bank, None)
+    assert _status(rep, "plain_text", "testbank") == FAIL
+    detail = next(r.detail for r in rep.results if r.check == "plain_text")
+    assert detail.startswith("2/2 doc(s)")
+
+
+@pytest.mark.parametrize(
+    "written, expected",
+    [
+        ("Balance $\\ge$ $500", "Balance ≥ $500"),
+        ("Holder $ \\rightarrow $ eligible", "Holder → eligible"),
+        ("Holder $" + "\r" + "ightarrow$ eligible", "Holder → eligible"),
+        ("Principal $" + "\t" + "imes$ rate", "Principal × rate"),
+        ("Fee $" + "\n" + "eq$ $0", "Fee ≠ $0"),
+    ],
+)
+def test_latex_symbols_are_written_as_characters(written: str, expected: str):
+    assert plain_symbols(written) == (expected, 1)
+
+
+def test_dollar_amounts_and_unknown_commands_are_left_for_the_check():
+    text = "From $500 → $600; $\\frac$ and $\\text$ have no single character."
+    assert plain_symbols(text) == (text, 0)
 
 
 def test_symbols_and_dollar_amounts_are_plain_text(tmp_path: Path):
