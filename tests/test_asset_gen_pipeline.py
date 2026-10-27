@@ -264,14 +264,16 @@ def test_explode_to_cluster_rows_assigns_unique_cluster_ids():
 _GOOD_DOCSET = {"documents": [{"doc_key": "faq_1", "title": "t", "body": "b"}]}
 
 
-def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
+def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None, score_by_attempt=None):
     """Stub Phase-2 generation. ``drop_by_attempt[i]`` are the cluster_ids DD omits
     entirely on attempt i; ``bad_by_attempt[i]`` are the ones that come BACK but
-    with an unusable payload (the truncated-response shape)."""
+    with an unusable payload (the truncated-response shape); ``score_by_attempt[i]``
+    maps a cluster_id to the faithfulness score the judge gives it (default 4)."""
     from usersim.asset_gen.financial_services import pipeline as P
 
     calls: list = []
     bad_by_attempt = bad_by_attempt or {}
+    score_by_attempt = score_by_attempt or {}
 
     class _Res:
         def __init__(self, df):
@@ -281,10 +283,11 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
             return self._df
 
     class _Eng:
-        def __init__(self, seed_df, drop, bad):
+        def __init__(self, seed_df, drop, bad, scores):
             self._seed = seed_df
             self._drop = drop
             self._bad = bad
+            self._scores = scores
 
         def create(self, builder, num_records=None):
             df = self._seed[~self._seed["cluster_id"].isin(self._drop)].copy()
@@ -294,13 +297,19 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
                 '{"documents": [{"doc_key": "faq_1", "title": "t", "body": "trunc' if cid in self._bad else _GOOD_DOCSET
                 for cid in df["cluster_id"]
             ]
+            df["numeric_faithfulness_score"] = [self._scores.get(cid, 4.0) for cid in df["cluster_id"]]
             return _Res(df.reset_index(drop=True))
 
     def fake_build(models, cluster_seed):
         attempt = len(calls)
         calls.append(list(cluster_seed["cluster_id"]))
         return (
-            _Eng(cluster_seed, drop_by_attempt.get(attempt, set()), bad_by_attempt.get(attempt, set())),
+            _Eng(
+                cluster_seed,
+                drop_by_attempt.get(attempt, set()),
+                bad_by_attempt.get(attempt, set()),
+                score_by_attempt.get(attempt, {}),
+            ),
             object(),
         )
 
@@ -365,6 +374,33 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
 
     assert set(result["cluster_id"]) == {"c1", "c3"}
     assert len(calls) == P.DOCSET_MAX_ATTEMPTS
+
+
+def test_generate_docsets_with_backfill_regenerates_a_cluster_below_the_faithfulness_floor(monkeypatch):
+    """A cluster the judge scores below the floor is regenerated, and a better attempt
+    replaces it."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt={0: {"c2": 1.0}, 1: {"c2": 4.0}})
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert calls[1] == ["c2"]
+    scores = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert scores == {"c1": 4.0, "c2": 4.0, "c3": 4.0}
+
+
+def test_generate_docsets_with_backfill_keeps_the_best_attempt_below_the_floor(monkeypatch):
+    """When no attempt reaches the floor, the cluster is still written, flagged, from
+    its best-scoring attempt: dropping it would leave gaps in the corpus."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    scores = {0: {"c2": 1.0}, 1: {"c2": 2.0}, 2: {"c2": 1.0}}
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt=scores)
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert len(calls) == P.DOCSET_MAX_ATTEMPTS
+    kept = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert kept == {"c1": 4.0, "c2": 2.0, "c3": 4.0}
 
 
 def test_usable_docset_rows_keeps_low_faithfulness_clusters():

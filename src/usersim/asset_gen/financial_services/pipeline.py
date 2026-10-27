@@ -62,8 +62,9 @@ DOC_GEN_MODEL_ALIAS = "doc_gen_model"
 DOCSET_JUDGE_MODEL_ALIAS = "asset_judge_model"
 EMBEDDING_MODEL_ALIAS = "embedding_model"
 
-#: Minimum DocSet QC faithfulness score (0-4); below this a cluster is kept but
-#: flagged + logged (it is already ``placeholder: true``), never silently dropped.
+#: Minimum DocSet QC faithfulness score (0-4); below this a cluster is regenerated,
+#: and if no attempt reaches it the best is kept but flagged + logged (it is already
+#: ``placeholder: true``), never silently dropped.
 MIN_FAITHFULNESS_SCORE = 3
 
 #: Default document-count knobs (overridable via CLI / generate_corpus params).
@@ -1342,9 +1343,10 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
 
 #: Doc-set (Phase 2) backfill policy. The doc-gen endpoint can transiently 5xx an
 #: individual cluster; DD drops that record instead of retrying, so we re-run
-#: generation for ONLY the dropped clusters (matched by ``cluster_id``) up to a few
-#: attempts. This makes an unattended, many-region run robust to flaky per-record
-#: failures without regenerating the whole (expensive) corpus.
+#: generation for ONLY the dropped clusters (matched by ``cluster_id``), and those the
+#: judge scored below the faithfulness floor, up to a few attempts. This makes an
+#: unattended, many-region run robust to flaky per-record failures without
+#: regenerating the whole (expensive) corpus.
 DOCSET_MAX_ATTEMPTS = 3
 DOCSET_RETRY_BASE_DELAY_S = 10.0
 
@@ -1357,9 +1359,10 @@ def _usable_docset_rows(df):
     response still carries its ``cluster_id``, so a presence test counts it as a
     success and retries nothing.
 
-    Deliberately does NOT filter on faithfulness. A low-faithfulness cluster is
-    kept and flagged by ``collect_institutions``; that is a judgement about
-    quality, not about whether the call produced anything to judge.
+    Deliberately does NOT filter on faithfulness: that is a judgement about
+    quality, not about whether the call produced anything to judge. The backfill
+    loop regenerates a low-faithfulness cluster separately, and
+    ``collect_institutions`` flags one that no attempt lifts to the floor.
     """
     if "doc_set" not in df.columns:
         # Nothing to inspect (a shape we do not produce, but the loop must not
@@ -1392,6 +1395,11 @@ def _generate_docsets_with_backfill(
     cluster done, and the only thing that noticed was ``collect_institutions``
     dropping it with a warning and no path back to regeneration.
 
+    A cluster the judge scores below ``MIN_FAITHFULNESS_SCORE`` (a limit written with
+    three extra zeros, say) is regenerated the same way, since a fresh attempt usually
+    gets the numbers right. Its best-scoring version is kept, flagged, if no attempt
+    reaches the floor.
+
     Returns the combined result frame (usable clusters only); logs a clear
     warning if any clusters remain missing after the final attempt (the corpus
     is still written without them, and a later run can fill the gap since ids
@@ -1406,12 +1414,22 @@ def _generate_docsets_with_backfill(
     total = len(cluster_seed)
     frames: list[Any] = []
     done: set = set()
+    #: cluster_id -> its best-scoring row so far, for clusters still below the floor.
+    below_floor: dict[Any, Any] = {}
     remaining = cluster_seed
     for attempt in range(1, max_attempts + 1):
         batch_seed = remaining.reset_index(drop=True)
         engine, builder = build_docset_config(models, batch_seed)
         df = engine.create(builder, num_records=len(batch_seed)).load_dataset().reset_index(drop=True)
         usable = _usable_docset_rows(df)
+        if "numeric_faithfulness_score" in usable.columns:
+            scores = pd.to_numeric(usable["numeric_faithfulness_score"], errors="coerce").fillna(0)
+            low = scores < MIN_FAITHFULNESS_SCORE
+            for (_, row), score in zip(usable[low].iterrows(), scores[low]):
+                best = below_floor.get(row["cluster_id"])
+                if best is None or score > pd.to_numeric(best["numeric_faithfulness_score"], errors="coerce"):
+                    below_floor[row["cluster_id"]] = row
+            usable = usable[~low]
         frames.append(usable)
         if "cluster_id" in usable.columns:
             done |= set(usable["cluster_id"].dropna())
@@ -1421,28 +1439,44 @@ def _generate_docsets_with_backfill(
             if attempt > 1:
                 logger.info("doc_set backfill: all %d clusters generated after %d attempt(s)", total, attempt)
             break
+        n_low = sum(1 for cid in remaining["cluster_id"] if cid in below_floor)
         if attempt < max_attempts:
             delay = base_delay * attempt
             logger.warning(
                 "doc_set backfill: %d/%d clusters dropped or came back unusable "
-                "(a transient endpoint error, or a truncated or empty response); "
-                "regenerating just those in %.0fs (attempt %d/%d)",
-                n_missing,
+                "(a transient endpoint error, or a truncated or empty response), "
+                "and %d scored below the faithfulness floor %d; regenerating just "
+                "those in %.0fs (attempt %d/%d)",
+                n_missing - n_low,
                 total,
+                n_low,
+                MIN_FAITHFULNESS_SCORE,
                 delay,
                 attempt + 1,
                 max_attempts,
             )
             time.sleep(delay)
         else:
-            logger.warning(
-                "doc_set backfill exhausted: %d/%d clusters still missing after %d "
-                "attempts; writing the corpus WITHOUT them -- re-run gen-assets to "
-                "fill the gap (doc ids are deterministic)",
-                n_missing,
-                total,
-                max_attempts,
-            )
+            kept = [row for cid, row in below_floor.items() if cid not in done]
+            if kept:
+                frames.append(pd.DataFrame(kept))
+                logger.warning(
+                    "doc_set backfill: %d/%d clusters stayed below the faithfulness floor "
+                    "%d after %d attempts; keeping each one's best version, flagged",
+                    len(kept),
+                    total,
+                    MIN_FAITHFULNESS_SCORE,
+                    max_attempts,
+                )
+            if n_missing > len(kept):
+                logger.warning(
+                    "doc_set backfill exhausted: %d/%d clusters still missing after %d "
+                    "attempts; writing the corpus WITHOUT them -- re-run gen-assets to "
+                    "fill the gap (doc ids are deterministic)",
+                    n_missing - len(kept),
+                    total,
+                    max_attempts,
+                )
     result_df = pd.concat(frames, ignore_index=True)
     # We only retry missing clusters, so duplicates shouldn't occur -- guard anyway.
     if "cluster_id" in result_df.columns:
