@@ -1,9 +1,9 @@
 [project]
 name = "usersim"
-version = "0.2.1.dev0"
+version = "0.3.0.dev0"
 description = "Improve models and agents with population-grounded simulated users, even before production traffic exists."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11,<3.15"
 keywords = [
     "llm", "agents", "evaluation", "synthetic-data", "simulation", "user-simulation", "personas", "nemotron",
 ]
@@ -13,7 +13,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -35,7 +34,7 @@ dependencies = [
     # persona datasets for ``en_GB`` and ``de_DE``. 0.9.7 is the first whose
     # ``data-designer-config`` requires ``certifi>=2026.10.19``, a bundle
     # without the emSign ECC Root CA - G3.
-    "data-designer>=0.9.7,<0.10",
+    "data-designer>=0.9.7,<0.11",
     # Language detection for the language_compliance scorer. Pure Python,
     # MIT, accurate on short conversational text. Pinned to a major version
     # to keep CI deterministic -- bump deliberately.
@@ -74,8 +73,6 @@ dependencies = [
     # Reads credentials from a .env file so a run does not depend on what is
     # exported in the calling shell. No required dependencies of its own.
     "python-dotenv>=1.0,<2",
-    # Parses the models TOML on Python 3.10, which has no tomllib.
-    "tomli>=1.1.0; python_version < '3.11'",
 ]
 [project.urls]
 Homepage = "https://github.com/NVIDIA-NeMo/UserSim"
@@ -110,9 +107,6 @@ dev = [
     # here. conftest.py fails the run if it is absent, because without it every
     # async test is skipped with a warning rather than failing.
     "pytest-asyncio>=1.0,<2",
-    # tests/test_network_guard.py unwraps exception groups, which Python 3.10
-    # has only through this backport.
-    "exceptiongroup>=1.0; python_version < '3.11'",
 ]
 # Empty on purpose: the gate runs a pinned pip-licenses through `uv tool run`,
 # so this group exists only to scope an isolated environment holding the
@@ -130,9 +124,14 @@ trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 # uv checks TLS against certificates it bundles. Before 0.13.4 they include
 # emSign ECC Root CA - G3, whose intermediates have compromised keys.
 required-version = ">=0.13.4"
+# Temporary immutable preview; replace all three overrides with the released
+# DD >=0.10,<0.11 requirement when 0.10.0 is published.
+# Ignore DD's workspace-only sources; the overrides below supply all siblings.
+no-sources = true
 override-dependencies = [
-    # Keep in sync with the ``dependencies`` pin above.
-    "data-designer>=0.9.7,<0.10",
+    "data-designer @ git+https://github.com/NVIDIA-NeMo/DataDesigner.git@7a62d75378bfc5b5ba7205eed6554959560deed9#subdirectory=packages/data-designer",
+    "data-designer-config @ git+https://github.com/NVIDIA-NeMo/DataDesigner.git@7a62d75378bfc5b5ba7205eed6554959560deed9#subdirectory=packages/data-designer-config",
+    "data-designer-engine @ git+https://github.com/NVIDIA-NeMo/DataDesigner.git@7a62d75378bfc5b5ba7205eed6554959560deed9#subdirectory=packages/data-designer-engine",
 ]
 # The same root, for everything that verifies TLS through certifi. Constraints
 # apply to this project's resolution only; installs from PyPI get the same
@@ -209,7 +208,7 @@ asyncio_mode = "auto"
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py310"
+target-version = "py311"
 # Ruff lints .ipynb by default. The notebooks are user-facing walkthroughs with
 # committed outputs, so linting them means noise and rewritten cells. Excluding
 # them keeps a bare `ruff check` equivalent to `make lint`.

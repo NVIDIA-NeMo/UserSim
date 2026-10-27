@@ -136,12 +136,19 @@ passes the check automatically.
 
 ## Getting set up
 
-Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/) 0.13.4 or newer.
+Requires Python 3.11 to 3.14 and [uv](https://docs.astral.sh/uv/) 0.13.4 or newer.
+The default development interpreter is Python 3.12 from `.python-version`;
+CI tests every supported version.
 
 ```bash
 uv sync                     # installs the dev group: pytest, ruff, jupyter
 uv run usersim smoke        # offline self-check; no API key, no network
 ```
+
+The 0.3 development branch temporarily pins Data Designer’s Python 3.11
+transition commit through uv's `override-dependencies`. Use `uv sync` to
+consume that preview. Once DD 0.10.0 is published, remove the Git overrides
+and `no-sources`, require `data-designer>=0.10,<0.11`, and regenerate `uv.lock`.
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
 model catalog, every probe's assets, and the plugin entry points without
@@ -268,7 +275,7 @@ see [Issues before pull requests](#issues-before-pull-requests).
 
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
 rejects reproduces locally with the same command. Tests and the dependency
-license check run on Python 3.10 to 3.14.
+license check run on Python 3.11 to 3.14.
 
 No job triggered by a pull request has access to a credential, so a PR from a
 fork runs the complete suite. The consequence is that CI cannot tell you
@@ -301,9 +308,9 @@ Maintainers release from `main`:
 
    ```bash
    git switch main && git pull --ff-only
-   make check-dist && make check-release-tag TAG=v0.2.0rc1
-   git tag -a v0.2.0rc1 -m "usersim 0.2.0rc1"
-   git push origin v0.2.0rc1
+   make check-dist && make check-release-tag TAG=v0.3.0rc1
+   git tag -a v0.3.0rc1 -m "usersim 0.3.0rc1"
+   git push origin v0.3.0rc1
    ```
 
 3. `.github/workflows/release.yml` runs those checks and the test suite on the
@@ -312,14 +319,14 @@ Maintainers release from `main`:
    pre-release for a release candidate, and writes their SHA-256 digests to
    the run summary.
 4. Merge a pull request that moves `version` to the next development version,
-   for example `0.2.0rc2.dev0`.
+   for example `0.3.1.dev0`.
 
 If the workflow fails before the release is published, delete the tag
-(`git tag -d v0.2.0rc1 && git push origin --delete v0.2.0rc1`) and any draft
+(`git tag -d v0.3.0rc1 && git push origin --delete v0.3.0rc1`) and any draft
 release it left, fix the cause and tag again. Once a release is published,
 its tag and files stay as they are, and a fix ships as a new version. The
 files attached to a release are the ones published to PyPI;
-`gh release verify-asset v0.2.0rc1 <file>` checks a downloaded file against
+`gh release verify-asset v0.3.0rc1 <file>` checks a downloaded file against
 them.
 
 ## What the tests expect

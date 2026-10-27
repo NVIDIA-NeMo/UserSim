@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml/badge.svg)](https://github.com/NVIDIA-NeMo/UserSim/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/NVIDIA-NeMo/UserSim/blob/main/pyproject.toml)
 
 > Simulate a statistically representative population of users, sampled from
 > persona datasets (e.g., census-grounded), having multi-turn conversations with
@@ -134,12 +134,13 @@ in the NeMo Gym repository.
 
 <img src="https://raw.githubusercontent.com/NVIDIA-NeMo/UserSim/main/docs/images/getting_started.jpg" width="800" alt="From install to capability report in five commands: pip install usersim, download personas with data-designer, then usersim simulate, eval and report. Optional steps fix the panel, replay stored rows or select training data, with a locale picker and the probe groups below.">
 
-Python 3.10+, in a virtual environment. Python 3.10 is supported through the
-0.2 releases.
+UserSim 0.3 requires Python 3.11–3.14. Create a virtual environment with a
+supported interpreter before upgrading from Python 3.10. Python 3.10 users
+should stay on the 0.2 release line (`usersim>=0.2,<0.3`).
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install "usersim>=0.2.0"      # in a uv project: uv add "usersim>=0.2.0"
+pip install "usersim>=0.3.0"      # in a uv project: uv add "usersim>=0.3.0"
 
 # Verify the install offline: no LLM calls, no network, CI-ready.
 usersim smoke

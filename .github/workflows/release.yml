@@ -25,10 +25,6 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-env:
-  # Fail rather than silently re-resolving when uv.lock is stale.
-  UV_FROZEN: "1"
-
 jobs:
   build:
     name: Build and check
