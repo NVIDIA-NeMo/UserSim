@@ -568,14 +568,22 @@ def _batches(items: list[Any], cap: int) -> Iterator[list[Any]]:
 def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[str, Any]]:
     """Each product with a ``display`` rendering of every typed value in the
     locale's own notation (``7,90 €``, ``15,9 %``), which the prompts ask the
-    model to write instead of the raw ``value``."""
+    model to write instead of the raw ``value``, and the value's ``label`` where the
+    region spec gives one.
+
+    Without the label the model reads a meaning off the key's English words, so a
+    tax-credit base named ``combined_credit_base_limit`` reads as a credit line.
+    """
     from usersim.engine.core.finance_bank import format_amount, format_percent
 
     number_format = spec.number_format or spec.locale
+    labels = spec.doc_titles.variable_labels
     out: list[dict[str, Any]] = []
     for product in products:
         dumped = product.model_dump()
-        for var in dumped["variables"].values():
+        for name, var in dumped["variables"].items():
+            if labels.get(name):
+                var["label"] = labels[name]
             if var["type"] == "money":
                 var["display"] = format_amount(
                     var["value"],
@@ -591,13 +599,18 @@ def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[
     return out
 
 
+def regulators_json(spec: RegionSpec, domains: list[Any]) -> str:
+    """The region spec's regulators and regulator text for ``domains``, as both prompts read them."""
+    regulators = {d: spec.domain_regulators[d].model_dump() for d in domains if d in spec.domain_regulators}
+    return json.dumps(regulators, ensure_ascii=False)
+
+
 def build_institution_seed(spec: RegionSpec):
     """One seed row per institution for the Phase-1 brief (pure)."""
     import pandas as pd
 
     rows: list[dict[str, Any]] = []
     for inst in spec.institutions:
-        regulators = {d: spec.domain_regulators[d].model_dump() for d in inst.domains if d in spec.domain_regulators}
         rows.append(
             {
                 "institution_id": inst.id,
@@ -613,7 +626,7 @@ def build_institution_seed(spec: RegionSpec):
                 ),
                 "currency_symbol": spec.currency_symbol,
                 "products_json": json.dumps(products_for_prompt(inst.products, spec), ensure_ascii=False),
-                "regulators_json": json.dumps(regulators, ensure_ascii=False),
+                "regulators_json": regulators_json(spec, inst.domains),
                 # Market-specific emphasis: region override else region-neutral
                 # default, resolved here so the prompt stays free of any one
                 # market's instruments.
@@ -666,6 +679,13 @@ def explode_to_cluster_rows(
     Each emitted row carries the generated ``institution_brief`` plus its own
     ``cluster_kind`` / ``focus_json`` / ``doc_plan_json`` / ``sibling_doc_index`` /
     ``target_doc_count`` so Phase 2 can generate the cluster conditioned on the brief.
+
+    It also carries the region spec's own rules: the regulator text for every domain
+    the institution operates in, and the institution type's concept guidance. The
+    brief summarizes each in a sentence, which drops a rule's scope: a debt-service
+    rule that covers only the card loan reads as covering every card product. Every
+    domain, not just the product's own, because a rule can scope a sibling: a lending
+    rule can name the payment products it leaves out.
     """
     import pandas as pd
 
@@ -710,6 +730,8 @@ def explode_to_cluster_rows(
                 spec.language_conventions.guidance, spec.language_conventions.respell
             ),
             "currency_symbol": spec.currency_symbol,
+            "concept_guidance": concept_guidance_for(inst.type, spec.concept_guidance),
+            "regulators_json": regulators_json(spec, inst.domains),
             "institution_brief": brief_json,
             "sibling_doc_index": json.dumps(sibling_index, ensure_ascii=False),
         }

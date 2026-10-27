@@ -115,6 +115,29 @@ def test_prompt_values_carry_the_locale_notation():
     assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
 
 
+def test_prompt_values_carry_the_spec_label():
+    """A value's key is a machine name and its label says what the value means, so
+    each value the region spec labels carries its label into the prompt."""
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    raw["institutions"][0]["products"][0]["variables"] = {
+        "credit_base_limit": {"type": "money", "value": 9000000},
+        "term_months": {"type": "int", "value": 48},
+    }
+    raw.setdefault("doc_titles", {})["variable_labels"] = {"credit_base_limit": "tax-credit base for contributions"}
+    spec = validate_region_spec(raw)
+
+    variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+    assert variables["credit_base_limit"]["label"] == "tax-credit base for contributions"
+    assert "label" not in variables["term_months"]
+    assert "When a value carries a `label`, the label says what the value IS" in " ".join(DOCSET_PROMPT.split())
+
+
 def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
     """A spec description reaches the shared clusters that write a discoverable
     tool's doc, while tools.yaml ships it empty: the assistant learns the tool

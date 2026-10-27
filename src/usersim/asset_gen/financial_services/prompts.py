@@ -121,7 +121,8 @@ def language_guidance_for(guidance: str, respell: dict[str, str] | None = None) 
 
 
 # Phase 2 seed columns: institution_id, display_name, institution_type, brand_voice,
-# language, language_guidance, currency_symbol, institution_brief, cluster_kind, focus_json, doc_plan_json
+# language, language_guidance, currency_symbol, concept_guidance, institution_brief,
+# regulators_json (every domain of the institution), cluster_kind, focus_json, doc_plan_json
 # (each entry carries doc_key/document_type/topic/angle/audience/length), sibling_doc_index,
 # target_doc_count.
 DOCSET_PROMPT = """\
@@ -130,6 +131,15 @@ You are authoring part of the internal knowledge base for the FICTIONAL institut
 Follow this institution BRIEF exactly (voice, positioning, fee/dispute/advice posture):
 {{ institution_brief }}
 
+The rules that govern these documents, from the market's regulators. They are
+AUTHORITATIVE: where the brief or your own knowledge of the market says otherwise, these
+win. Apply each rule only to the products and cases it names -- a rule written for one
+product (a loan, an account type) does not extend to its siblings:
+{{ regulators_json }}
+{% if concept_guidance %}
+What this kind of institution's documents cover in this market, and the facts they rest on:
+{{ concept_guidance }}
+{% endif %}
 Write ALL body prose in {{ language }}. Keep tool/function identifiers, product ids, and
 doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money, and write every number
 the way {{ language }} writes it (its decimal mark and digit grouping), never another
@@ -150,7 +160,9 @@ The VALUE is verbatim; its NAME is not. The focus keys are machine field names, 
 each one means in ordinary prose and NEVER print the key itself: say "an annual interest rate
 of 0%", not "an interest_rate_annual of 0%"; "a one-time processing fee of {{ currency_symbol }}499",
 not "a processing_fee of {{ currency_symbol }}499". A document that shows a snake_case field name
-reads like an unfilled template and is a failure even if the number is right.
+reads like an unfilled template and is a failure even if the number is right. When a value
+carries a `label`, the label says what the value IS: describe it as the label does, and never
+read a different meaning off the key's English words.
 
 {% if cluster_kind == 'shared' %}
 This is the institution's SHARED, cross-cutting document set (applies across all products).

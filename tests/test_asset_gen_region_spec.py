@@ -1057,6 +1057,61 @@ def test_language_conventions_reach_the_brief_and_every_cluster_row():
     assert set(build_institution_seed(load_region_spec(_EN_US))["language_guidance"]) == {""}
 
 
+def test_each_cluster_gets_the_institutions_rules_and_the_types_guidance():
+    """The brief summarizes each field in a sentence, which drops a rule's scope, so
+    every cluster gets the regulator text of every domain the institution operates in
+    (a lending rule can name the payment products it leaves out) and the type's
+    concept guidance."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import explode_to_cluster_rows
+    from usersim.asset_gen.financial_services.prompts import concept_guidance_for
+
+    spec = load_region_spec(_EN_US)
+    spec_by_id = {i.id: i for i in spec.institutions}
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    for _, row in clusters.iterrows():
+        inst = spec_by_id[row["institution_id"]]
+        assert set(json.loads(row["regulators_json"])) == set(inst.domains) & set(spec.domain_regulators), inst.id
+        assert row["concept_guidance"] == concept_guidance_for(inst.type, spec.concept_guidance)
+
+
+def test_document_prompt_puts_the_rules_above_the_brief():
+    import re
+
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+
+    seed = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="nbfc",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        regulators_json='{"lending_mortgage": {"regulator_text": "DSR covers the card loan."}}',
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+        cluster_kind="product",
+    )
+    text = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**seed, concept_guidance="Cover installments."))
+    assert "DSR covers the card loan." in text and "Cover installments." in text
+    assert "where the brief or your own knowledge of the market says otherwise, these win" in text
+    assert "does not extend to its siblings" in text
+    bare = Template(DOCSET_PROMPT).render(**seed, concept_guidance="")
+    assert "What this kind of institution's documents cover" not in bare
+
+
 def test_generation_respells_bodies_and_leaves_plan_titles_alone():
     import json
 
