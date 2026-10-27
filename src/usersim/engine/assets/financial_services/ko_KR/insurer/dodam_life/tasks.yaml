@@ -1,0 +1,370 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for dodam_life, a life insurer with health and cancer
+# cover. Every state-changing tool it offers is gold in at least one task. Each
+# task ships THREE opening phrasings in Korean (build_instance picks one per
+# trajectory) so the assistant sees varied turn-1 wording while the gold stays
+# fixed. Read-only tools (get_claim_status, send_deduction_certificate,
+# get_accounts, get_statements) carry no gold state change.
+templates:
+- id: TPL-DD-CLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{reason}} {{days}}일 입원했다가 퇴원했어요. 도담 건강보험으로 입원비랑 수술비를 청구하고 싶어요.
+  - >-
+    지난달에 {{days}}일 동안 입원했어요. {{reason}} 수술도 받았는데, 보험금 청구는 어떻게 하나요?
+  - >-
+    보험금 청구할게요. {{reason}} 수술을 받고 {{days}}일 입원했어요. 필요한 서류도 알려 주세요.
+  account_state:
+    account_id: pol_dd_0001
+    account_type: 도담 건강보험
+  param_space:
+    reason: [맹장염으로, 허리 디스크로, 무릎 연골 때문에]
+    days: ['5', '8', '12']
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: SUBMITTED}
+- id: TPL-DD-REINSTATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    보험료가 몇 달 밀려서 계약이 실효됐다는 안내를 받았어요. 다시 살릴 수 있나요?
+  - >-
+    {{policy}} 보험료를 깜빡하고 안 냈더니 효력이 없어졌대요. 부활 신청을 하고 싶어요.
+  - >-
+    실효된 {{policy}} 계약을 부활시키고 싶어요. 밀린 보험료는 낼게요.
+  account_state:
+    account_id: pol_dd_0002
+    account_type: '{{policy}}'
+    status: lapsed
+  param_space:
+    policy: [도담 정기보험, 도담 암보험]
+  gold_tool_sequence: [reinstate_policy]
+  expected_state_deltas: {pol_dd_0002.status: REINSTATEMENT_REQUESTED}
+- id: TPL-DD-PAYMETHOD-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    보험료 자동이체 계좌를 {{bank_account}}로 바꾸고 싶어요.
+  - >-
+    월급 통장이 바뀌어서 보험료 출금 계좌도 변경하려고요. 새 계좌는 {{bank_account}}입니다.
+  - >-
+    보험료 납입 방법 변경 부탁드려요. 앞으로는 {{bank_account}}에서 빠져나가게 해 주세요.
+  account_state:
+    account_id: pol_dd_0001
+    account_type: 도담 건강보험
+  param_space:
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [change_payment_method]
+  expected_state_deltas: {payment_method_updated: true}
+- id: TPL-DD-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{days}}일 전에 {{policy}}에 가입했는데, 다시 생각해 보니 필요 없을 것 같아요. 청약을 철회하고 싶어요.
+  - >-
+    보험증권을 받은 지 {{days}}일 됐어요. {{policy}} 청약철회 가능한가요? 가능하면 철회해 주세요.
+  - >-
+    가입한 지 얼마 안 된 {{policy}} 계약을 취소하고 싶어요. 증권은 {{days}}일 전에 받았어요.
+  account_state:
+    account_id: pol_dd_0003
+    account_type: '{{policy}}'
+  param_space:
+    policy: [도담 종신보험, 도담 연금보험]
+    days: ['5', '10']
+  gold_tool_sequence: [withdraw_application]
+  expected_state_deltas: {pol_dd_0003.status: WITHDRAWN}
+- id: TPL-DD-NEWPOLICY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{reason}} 도담 암보험에 가입하고 싶어요. 청약 진행해 주세요.
+  - >-
+    암보험을 하나 들어 두려고요. {{reason}} 도담 암보험으로 신청할게요.
+  - >-
+    도담 암보험 가입 신청 부탁드려요. {{reason}} 미리 준비하고 싶어서요.
+  account_state:
+    customer_id: cust_dd_0001
+  param_space:
+    reason: [가족 중에 암 투병한 사람이 있어서, 건강검진 결과를 보고 걱정이 돼서]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_policy_status: APPLIED}
+- id: TPL-DD-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    종신보험의 사망보험금 수익자를 {{beneficiary}} 이름으로 바꾸고 싶어요.
+  - >-
+    수익자 변경 신청할게요. 새 수익자는 {{beneficiary}}입니다.
+  - >-
+    {{reason}} 도담 종신보험 수익자를 {{beneficiary}} 앞으로 변경해 주세요.
+  account_state:
+    account_id: pol_dd_0004
+    account_type: 도담 종신보험
+  param_space:
+    beneficiary: [배우자, 큰딸, 아들]
+    reason: [결혼을 해서, 아이가 성인이 돼서]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-DD-UPDATEPOLICY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    보험료가 부담돼서 {{policy}}의 보험가입금액을 줄이고 싶어요.
+  - >-
+    {{policy}} 계약 내용을 바꾸려고요. 가입금액을 낮춰서 보험료를 줄일 수 있나요?
+  - >-
+    {{policy}} 보험료를 낮추고 싶어요. 가입금액 감액 신청 부탁드려요.
+  account_state:
+    account_id: pol_dd_0004
+    account_type: '{{policy}}'
+  param_space:
+    policy: [도담 종신보험, 도담 정기보험]
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_change: REQUESTED}
+- id: TPL-DD-SURRENDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{policy}}을 해지하고 싶어요. 해약환급금은 등록된 계좌로 받을게요.
+  - >-
+    더 이상 {{policy}} 보험료를 낼 형편이 안 돼서 해지하려고요.
+  - >-
+    {{policy}} 계약 해지 부탁드려요. 환급금이 얼마인지도 알려 주세요.
+  account_state:
+    account_id: pol_dd_0005
+    account_type: '{{policy}}'
+  param_space:
+    policy: [도담 정기보험, 도담 연금보험]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {pol_dd_0005.status: CLOSED}
+  # A customer short of money may reasonably take a policy loan instead.
+  allowed_tools: [request_policy_loan]
+- id: TPL-DD-CONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이사를 해서 주소를 바꾸고 싶어요. 새 주소는 {{address}}입니다.
+  - >-
+    휴대폰 번호가 바뀌었어요. 새 번호는 {{phone}}입니다. 등록 정보 수정해 주세요.
+  - >-
+    등록된 이메일을 {{email}} 주소로 바꾸고 싶어요.
+  account_state:
+    customer_id: cust_dd_0001
+  param_space:
+    address: ['전라북도 전주시 완산구 효자로 225', '강원특별자치도 춘천시 중앙로 32']
+    phone: ['010-3998-4217', '010-5521-1563']
+    email: [jiyoung.kim@example.com, minsu.lee@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-DD-POLICYLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    급하게 {{amount}}원이 필요한데, 보험을 깨지 않고 보험계약대출을 받을 수 있나요?
+  - >-
+    종신보험으로 보험계약대출 {{amount}}원 신청하고 싶어요.
+  - >-
+    해지 말고 약관대출로 {{amount}}원 받고 싶어요. 가능한 범위인지 확인하고 신청해 주세요.
+  account_state:
+    account_id: pol_dd_0004
+    account_type: 도담 종신보험
+    surrender_value: '12500000'
+  param_space:
+    amount: ['300만', '500만']
+  gold_tool_sequence: [request_policy_loan]
+  expected_state_deltas: {policy_loan_status: REQUESTED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-DD-HOSPITAL-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{reason}} {{days}}일 입원했어요. 입원비 보험금을 청구하고, 퇴원하면서 이사도 해서 주소를 바꾸고(새 주소는 {{address}}입니다), 청구 진행 상황 알림을 받고 싶어요.
+  - >-
+    입원 보험금 청구({{reason}} {{days}}일 입원), 주소 변경({{address}}), 처리 알림 설정을 부탁드려요.
+  - >-
+    세 가지 부탁드려요. {{days}}일 입원한 보험금 청구, 새 주소({{address}})로 변경, 진행 알림 설정이요. 입원은 {{reason}} 했어요.
+  account_state:
+    account_id: pol_dd_0001
+    account_type: 도담 건강보험
+  param_space:
+    reason: [폐렴으로, 골절로]
+    days: ['6', '14']
+    address: ['전라북도 전주시 완산구 효자로 225', '강원특별자치도 춘천시 중앙로 32']
+  gold_tool_sequence: [file_claim, update_contact_info, set_alerts]
+  expected_state_deltas: {claim_status: SUBMITTED, contact_updated: true, alerts_updated: true}
+- id: TPL-DD-CANCER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    얼마 전에 {{diagnosis}} 진단을 받았어요. 암 진단비를 청구하고, 치료 중에는 보험료를 {{bank_account}}에서 내도록 바꾸고, 진행 상황을 알림으로 받고 싶어요.
+  - >-
+    {{diagnosis}} 진단을 받아서 진단비 청구를 하려고요. 보험료 출금 계좌를 {{bank_account}}로 변경하고 처리 알림도 설정해 주세요.
+  - >-
+    암 진단비 청구({{diagnosis}}), 보험료 납입 계좌 변경({{bank_account}}), 진행 알림 설정을 부탁드려요.
+  account_state:
+    account_id: pol_dd_0006
+    account_type: 도담 암보험
+  param_space:
+    diagnosis: [위암, 대장암, 유방암]
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [file_claim, change_payment_method, set_alerts]
+  expected_state_deltas: {claim_status: SUBMITTED, payment_method_updated: true, alerts_updated: true}
+- id: TPL-DD-MARRIAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    결혼을 했어요. 종신보험 수익자를 배우자로 바꾸고, 보험가입금액을 늘리는 쪽으로 계약 내용을 바꾸고, 주소도 바꿔 주세요. 새 주소는 {{address}}입니다.
+  - >-
+    결혼해서 정리할 게 있어요. 수익자를 배우자로 변경, 종신보험 계약 내용 변경(가입금액 증액), 주소 변경({{address}})을 부탁드려요.
+  - >-
+    세 가지요. 사망보험금 수익자를 배우자로, 가입금액 증액 신청, 주소 변경({{address}})이요.
+  account_state:
+    account_id: pol_dd_0004
+    account_type: 도담 종신보험
+  param_space:
+    address: ['서울특별시 마포구 월드컵북로 396', '경기도 고양시 일산동구 중앙로 1275']
+  gold_tool_sequence: [update_beneficiary, update_policy, update_contact_info]
+  expected_state_deltas: {beneficiary_updated: true, policy_change: REQUESTED, contact_updated: true}
+- id: TPL-DD-LAPSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    통장 잔액이 모자라서 보험료가 빠져나가지 못해 계약이 실효됐대요. 부활 신청하고, 앞으로는 신용카드로 내도록 바꾸고, 납입일 전에 알림이 오게 해 주세요.
+  - >-
+    실효된 {{policy}}을 부활시키고 싶어요. 납입 방법도 신용카드로 바꾸고 납입 알림을 설정해 주세요.
+  - >-
+    {{policy}} 부활 신청, 보험료 카드 납부로 변경, 납입일 알림 설정을 부탁드려요.
+  account_state:
+    account_id: pol_dd_0002
+    account_type: '{{policy}}'
+    status: lapsed
+  param_space:
+    policy: [도담 정기보험, 도담 건강보험]
+  gold_tool_sequence: [reinstate_policy, change_payment_method, set_alerts]
+  expected_state_deltas: {pol_dd_0002.status: REINSTATEMENT_REQUESTED, payment_method_updated: true, alerts_updated: true}
+- id: TPL-DD-CASHNEED-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    해지는 하기 싫은데 {{amount}}원이 급해요. 종신보험으로 보험계약대출을 받고, 보험료 출금 계좌를 {{bank_account}}로 바꾸고, 대출 이자 납입일 알림을 받고 싶어요.
+  - >-
+    보험계약대출 {{amount}}원 신청, 보험료 출금 계좌 변경({{bank_account}}), 납입 알림 설정 부탁드려요.
+  - >-
+    목돈이 필요해서요. 종신보험에서 {{amount}}원 대출받고, 보험료는 {{bank_account}}에서 내게 하고, 알림도 켜 주세요.
+  account_state:
+    account_id: pol_dd_0004
+    account_type: 도담 종신보험
+    surrender_value: '12500000'
+  param_space:
+    amount: ['300만', '500만']
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [request_policy_loan, change_payment_method, set_alerts]
+  expected_state_deltas: {policy_loan_status: REQUESTED, payment_method_updated: true, alerts_updated: true}
+- id: TPL-DD-SWITCH-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{days}}일 전에 받은 종신보험 증권이 있는데 청약을 철회하고, 대신 지금 있는 정기보험의 수익자를 {{beneficiary}} 앞으로 바꾸고 특약을 하나 추가하고 싶어요.
+  - >-
+    새로 든 종신보험(증권 받은 지 {{days}}일)은 청약철회하고, 기존 정기보험은 수익자를 {{beneficiary}}로 변경하고 특약 추가해 주세요.
+  - >-
+    종신보험 청약철회(증권 수령 {{days}}일째), 정기보험 수익자 변경({{beneficiary}}), 정기보험 특약 추가를 부탁드려요.
+  account_state:
+    account_id: pol_dd_0003
+    account_type: 도담 종신보험
+  param_space:
+    days: ['4', '9']
+    beneficiary: [배우자, 큰딸]
+  gold_tool_sequence: [withdraw_application, update_beneficiary, update_policy]
+  expected_state_deltas: {pol_dd_0003.status: WITHDRAWN, beneficiary_updated: true, policy_change: REQUESTED}
+- id: TPL-DD-NEWFAMILY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    아이가 태어났어요. 도담 건강보험에 새로 가입하고, 종신보험 수익자에 아이를 넣고, 주소도 바꾸고(새 주소는 {{address}}입니다), 보험료 납입 알림을 받고 싶어요.
+  - >-
+    출산하고 정리할 게 많네요. 건강보험 가입, 종신보험 수익자 변경(아이로), 주소 변경({{address}}), 납입 알림 설정 부탁드려요.
+  - >-
+    네 가지요. 도담 건강보험 청약, 종신보험 수익자를 아이로 변경, 새 주소({{address}}) 등록, 보험료 알림 설정이요.
+  account_state:
+    customer_id: cust_dd_0001
+    account_id: pol_dd_0004
+    account_type: 도담 종신보험
+  param_space:
+    address: ['서울특별시 마포구 월드컵북로 396', '경기도 고양시 일산동구 중앙로 1275']
+  gold_tool_sequence: [open_account, update_beneficiary, update_contact_info, set_alerts]
+  expected_state_deltas: {new_policy_status: APPLIED, beneficiary_updated: true, contact_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ko_KR/dynamic.yaml), not scripted templates.

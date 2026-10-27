@@ -339,7 +339,7 @@ class TestProbeAssetPreflight:
         from usersim.cli._pipeline import verify_probe_assets
 
         with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["ko_KR"], None)
+            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
         can_run = str(exc.value).split("Locales that can run: ")[1].splitlines()[0]
         assert "en_US" in can_run
         assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
@@ -349,7 +349,7 @@ class TestProbeAssetPreflight:
         from usersim.cli._pipeline import verify_probe_assets
 
         with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["ko_KR"], None)
+            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
         assert str(exc.value).split("\n\n", 1)[1].splitlines() == [
             "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them.",
             "To ask for a locale, open a feature request: "
