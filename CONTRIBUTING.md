@@ -136,33 +136,19 @@ passes the check automatically.
 
 ## Getting set up
 
-Supports Python 3.11 to 3.14. The default development interpreter is Python 3.12
-from `.python-version`; CI tests every supported version. Start with an existing
-[uv](https://docs.astral.sh/uv/) installation, then install the exact
-`required-version` from `pyproject.toml`:
+Requires Python 3.11 to 3.14 and [uv](https://docs.astral.sh/uv/) 0.13.4 or newer.
+The default development interpreter is Python 3.12 from `.python-version`;
+CI tests every supported version.
 
 ```bash
-make bootstrap              # installs the declared uv; ensure its bin directory is on PATH
-make install-dev            # locked dev dependencies and pre-commit hook
+uv sync                     # installs the dev group: pytest, ruff, jupyter
 uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
-`make check-tools` rejects another uv version. `make check-lock` checks that
-`uv.lock` agrees with dependency metadata without rewriting it. Both setup
-targets use `--locked`, so stale metadata fails rather than updating the lock.
-After a deliberate dependency change, run `uv lock`, review `uv.lock`, and
-commit it with the metadata change. CI reads the same uv version declaration;
-update it deliberately and validate the lock before committing a tool upgrade.
-
 The 0.3 development branch temporarily pins Data Designer’s Python 3.11
-transition commit through `[tool.uv.override-dependencies]`. Use `uv sync` or
-the Make setup targets to consume that preview. Once DD 0.10.0 is published,
-remove the Git overrides and `no-sources`, require `data-designer>=0.10,<0.11`, and regenerate
-`uv.lock`.
-
-`make install-ci` performs locked setup without installing hooks. In a Git
-worktree, `make install-dev` finds the hook directory through Git rather than
-assuming `.git` is a directory.
+transition commit through uv's `override-dependencies`. Use `uv sync` to
+consume that preview. Once DD 0.10.0 is published, remove the Git overrides
+and `no-sources`, require `data-designer>=0.10,<0.11`, and regenerate `uv.lock`.
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
 model catalog, every probe's assets, and the plugin entry points without
@@ -289,8 +275,7 @@ see [Issues before pull requests](#issues-before-pull-requests).
 
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
 rejects reproduces locally with the same command. Tests and the dependency
-license check run on Python 3.11 to 3.14. Pull-request checks run for every
-base branch so stacked PRs receive CI; push checks remain scoped to `main`.
+license check run on Python 3.11 to 3.14.
 
 No job triggered by a pull request has access to a credential, so a PR from a
 fork runs the complete suite. The consequence is that CI cannot tell you

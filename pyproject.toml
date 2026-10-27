@@ -121,8 +121,9 @@ conversation-simulator = "usersim.engine.plugin:conversation_simulator"
 trajectory-evaluator = "usersim.engine.plugin:trajectory_evaluator"
 
 [tool.uv]
-# Shared developer and CI pin; keep at or above main's 0.13.4 security floor.
-required-version = "==0.13.4"
+# uv checks TLS against certificates it bundles. Before 0.13.4 they include
+# emSign ECC Root CA - G3, whose intermediates have compromised keys.
+required-version = ">=0.13.4"
 # Temporary immutable preview; replace all three overrides with the released
 # DD >=0.10,<0.11 requirement when 0.10.0 is published.
 # Ignore DD's workspace-only sources; the overrides below supply all siblings.

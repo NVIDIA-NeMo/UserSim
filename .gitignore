@@ -66,6 +66,3 @@ Thumbs.db
 
 # Cursor
 .cursor/
-
-# Local agent working notes
-/.agent-work/

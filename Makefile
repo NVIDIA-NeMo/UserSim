@@ -11,7 +11,6 @@
 SHELL := /bin/bash
 
 UV ?= uv
-UV_VERSION := $(shell sed -n 's/^required-version = "==\([^"]*\)"/\1/p' pyproject.toml)
 
 # A top-level `_`-prefixed directory holds material that is not part of the
 # distribution and may carry its own targets. Absent one, this expands to
@@ -58,7 +57,7 @@ COV_FAIL_UNDER ?= 84
 
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap check-tools check-lock install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
+.PHONY: help install-dev install-ci install-kernel health-check check-notebooks-clean lint lint-fix format format-check check-all \
         check-all-fix test test-fast coverage smoke dist check-dist check-release-tag check-extensions check-doc-links clean-notebooks check-license-headers update-license-headers check-dependency-licenses clean
 
 help:  ## Show the available targets
@@ -68,25 +67,11 @@ help:  ## Show the available targets
 
 # --- setup -----------------------------------------------------------------
 
-# Requires an existing uv installation; installs the declared release on PATH.
-bootstrap:  ## Install the repository's required uv version as a standalone tool
-	$(UV) tool install --force "uv==$(UV_VERSION)"
-
-check-tools:  ## Reject an unsupported uv version
-	@actual=$$($(UV) --version 2>/dev/null | awk '{print $$2}'); \
-	if [ -z "$(UV_VERSION)" ] || [ "$$actual" != "$(UV_VERSION)" ]; then \
-		echo "Expected uv $(UV_VERSION), found $${actual:-none}. Install uv, then run make bootstrap and ensure its bin directory is on PATH." >&2; \
-		exit 1; \
-	fi
-
-check-lock: check-tools  ## Check dependency metadata against uv.lock without rewriting it
-	$(UV) lock --check
-
 # Reinstalling the project restores any file that removing another distribution
 # took with it, such as the `usersim` command an earlier name also installed.
-install-dev: check-tools  ## Sync the workspace with dev tooling and install pre-commit hooks
-	$(UV) sync --locked --reinstall-package usersim
-	@if [ ! -f "$$(git rev-parse --git-path hooks/pre-commit)" ]; then \
+install-dev:  ## Sync the workspace with dev tooling and install pre-commit hooks
+	$(UV) sync --reinstall-package usersim
+	@if [ ! -f .git/hooks/pre-commit ]; then \
 		echo "Installing pre-commit hooks..."; \
 		$(UV) run pre-commit install; \
 	else \
@@ -96,7 +81,7 @@ install-dev: check-tools  ## Sync the workspace with dev tooling and install pre
 # --locked installs strictly from uv.lock and refuses to re-resolve, so
 # dependency drift becomes a build failure rather than a silent
 # re-resolution. No pre-commit hooks -- CI has no working tree to guard.
-install-ci: check-tools  ## Sync exactly what CI needs, enforcing the lockfile
+install-ci:  ## Sync exactly what CI needs, enforcing the lockfile
 	$(UV) sync --locked
 
 # --- lint / format ---------------------------------------------------------
