@@ -170,6 +170,17 @@ def test_a_tool_reference_is_outside_the_script_check(tmp_path: Path):
     )
 
 
+def test_a_procedure_that_names_its_tools_is_measured_on_its_prose(tmp_path: Path):
+    """An agent procedure names each tool and argument it uses; the check counts the
+    prose around those names, so a short procedure in Korean passes."""
+    body = (
+        "`verify_identity` 도구로 본인 인증을 하고 `get_account_transactions`로 거래의 "
+        "`transaction_id`를 확인한 뒤 `file_transaction_dispute`를 호출하십시오."
+    )
+    doc = {**_doc("D1", body), "title": "file_transaction_dispute 사용 기준", "document_type": "policy_procedure"}
+    assert _status(validate_bank(_write_bank(tmp_path, "ko_KR", [doc])), "language_script", "testbank") == PASS
+
+
 def test_duplicate_embeddings_warn(tmp_path: Path):
     docs = [_doc("D1", "Overdraft fee is $34."), _doc("D2", "Overdraft fee is $34.")]
     emb = {"D1": [1.0, 0.0, 0.0], "D2": [1.0, 0.0, 0.0]}

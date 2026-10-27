@@ -578,6 +578,10 @@ def _script_fraction(text: str, ranges: tuple[tuple[int, int], ...]) -> float | 
 #: their types as English identifiers, so its script share measures the identifiers.
 _SCRIPT_EXEMPT_GENRES: frozenset = frozenset({"discoverable_tool_doc"})
 
+#: A tool or argument name (``verify_identity``, ``account_id``). An agent procedure names
+#: the tools it calls in every locale, so the script share is measured on the prose around them.
+_SNAKE_CASE_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+(?![A-Za-z0-9_])")
+
 
 def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
@@ -596,7 +600,7 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
         for d in idata.documents:
             if d.get("document_type") in _SCRIPT_EXEMPT_GENRES:
                 continue
-            frac = _script_fraction(f"{d.get('title', '')} {d.get('body', '')}", ranges)
+            frac = _script_fraction(_SNAKE_CASE_RE.sub(" ", f"{d.get('title', '')} {d.get('body', '')}"), ranges)
             if frac is not None and frac < MIN_SCRIPT_FRACTION:
                 bad.append(f"{d.get('id')}={frac:.2f}")
         if bad:
