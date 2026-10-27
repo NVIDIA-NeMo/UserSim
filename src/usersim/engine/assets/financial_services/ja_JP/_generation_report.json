@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T23:43:03.721603+00:00",
+  "generated_at": "2026-10-27T12:50:05.816804+00:00",
   "models": {
     "doc_gen": "nvidia/google/gemma-4-31b-it",
     "judge": "openai/openai/gpt-5.6-terra",
@@ -24,7 +24,7 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
+          "cohesion": 2.0,
           "distinctness": 4.0
         },
         {
@@ -33,118 +33,6 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 3.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 3.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 3.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
           "distinctness": 4.0
         },
         {
@@ -204,11 +92,107 @@
           "distinctness": 4.0
         },
         {
-          "cluster_kind": "shared",
+          "cluster_kind": "product",
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 2.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
           "distinctness": 4.0
         },
         {
@@ -216,7 +200,7 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 2.0,
+          "cohesion": 1.0,
           "distinctness": 4.0
         },
         {
@@ -225,6 +209,14 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
           "distinctness": 4.0
         },
         {
@@ -240,26 +232,154 @@
           "target": 9,
           "produced": 9,
           "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
           "distinctness": 4.0
         }
       ],
       "brief": {
-        "positioning": "地域に根ざした地方銀行として、信頼と安心感を提供し、幅広い世代の地域住民の生活をサポートします。利便性の高い店舗ネットワークとデジタルサービスの融合により、地域経済の活性化に貢献します。",
-        "brand_voice_guide": "誠実で丁寧な「です・ます」調を用い、専門用語は避けつつ正確に伝えます。金額は「1,234円」のように半角数字とカンマを用い、重要な注釈は明確に区別して記載します。",
-        "service_model": "店舗窓口、電話、およびオンラインバンキングを通じてサポートを提供します。営業時間は平日9:00から15:00までとし、複雑な案件は専門部署へエスカレーションします。",
-        "fee_philosophy": "サービスの維持コストを適切に反映させつつ、給与受取などの条件を満たすことで手数料を無料にする優遇制度を設けています。お客様の利便性を最大化し、不透明感のない料金体系を維持します。",
-        "risk_and_compliance_posture": "金融庁の監督を受け、預金保険制度により元本1,000万円までを保護します。個人情報保護法および犯罪収益移転防止法を遵守し、公正かつ透明性の高い取引を徹底します。",
-        "security_and_verification": "口座情報の変更や出金などの重要な手続きの前には、必ず厳格な本人確認（取引時確認）を実施します。セキュリティカードや生体認証など、多層的な認証プロセスを導入します。",
-        "dispute_and_fraud_handling": "預金者保護法に基づき、偽造・盗難カードによる被害を原則として補償します。紛失・盗難の届出を迅速に受け付け、規定の期間に基づき誠実に調査・対応します。",
-        "advice_boundaries": "制度や商品の一般的な仕組みについての説明に留め、個別の税務や法務に関する助言は専門家へ案内します。適合性の原則に基づき、お客様の状況に最適な商品を提案します。",
-        "product_positionings": "[{'product_id': 'futsu_yokin', 'one_liner': '公共料金の振替や給与・年金受取に最適な、日常的な決済と貯蓄の基本口座です。'}\n {'product_id': 'super_teiki', 'one_liner': '期間に応じた金利設定で、20.315%の税引後でも効率的な資産形成を支援する定期預金です。'}\n {'product_id': 'kyuyo_nenkin_tokuten', 'one_liner': '給与や年金の受取口座に指定することで、ATM利用料や振込手数料の優遇を受けられる特典です。'}\n {'product_id': 'asanagi_debit', 'one_liner': '利用と同時に口座残高から即時引き落とされるため、支出管理が容易な決済カードです。'}\n {'product_id': 'jutaku_loan', 'one_liner': '変動・固定金利を選択でき、5年ごとの返済額見直し（上限125%）や住宅ローン控除に対応した融資です。'}\n {'product_id': 'asanagi_card_loan', 'one_liner': '総量規制の対象外ながら、厳正な返済能力審査に基づき利用限度額を決定する柔軟なローンです。'}]",
-        "key_terms_glossary": "[{'term': '取引時確認', 'definition': '犯罪収益移転防止法に基づき、口座開設時等に顧客の本人確認を行う手続きのこと。'}\n {'term': '中途解約利率', 'definition': '定期預金を満期前に解約した際に適用される、通常の預入金利よりも低い利率のこと。'}\n {'term': '団体信用生命保険', 'definition': '住宅ローン借入者が死亡または高度障害状態になった際、保険金でローン残高が完済される保険。'}]"
+        "positioning": "地域に根ざした地方銀行として、幅広い世代の地域住民に信頼される金融サービスの提供を目指します。特に、給与・年金受取口座としての利用を促進し、日常の決済から資産形成、住宅購入までを包括的にサポートすることで、地域社会の発展に寄与します。",
+        "brand_voice_guide": "誠実さと信頼感を重視し、丁寧で礼儀正しい「です・ます」調の敬語を使用します。専門用語はなるべく避け、お客様に分かりやすい平易な表現を心がけ、重要な注意点や免責事項は明確に提示します。書式は清潔感のある構成とし、不必要な装飾を排除したプロフェッショナルな形式を維持します。",
+        "service_model": "店舗窓口、インターネットバンキング、および電話サポートによるオムニチャネル体制で提供します。営業時間は日本標準時（JST）に従い、複雑な案件や苦情については、担当者から支店責任者または専門部署へと速やかにエスカレーションします。",
+        "fee_philosophy": "システム維持および安全な取引環境の提供のための適正な手数料を設定しています。一方で、給与・年金の受取など、当行をメインバンクとしてご利用いただいているお客様には、手数料無料枠などの特典を提供し、長期的な関係性を構築します。",
+        "risk_and_compliance_posture": "金融庁の監督および銀行法に基づき、厳格なコンプライアンス体制を構築しています。預金保険制度により、1金融機関につき預金者1人当たり元本1,000万円までとその利息が保護されることを明示し、個人情報保護法および犯罪収益移転防止法に従った適正な本人確認を徹底します。",
+        "security_and_verification": "口座情報の照会や変更などの状態変更を伴う操作を行う前に、必ず本人確認を実施します。確認事項は「フルネーム（氏名）」および「生年月日」の2点のみとし、これ以外の暗証番号、パスワード、カード番号、身分証番号などは一切求めません。",
+        "dispute_and_fraud_handling": "キャッシュカードの紛失や盗難などの不正利用に対しては、迅速な利用停止措置を行い、預金者保護法に基づき誠実に対応します。苦情や紛争については、当行の規定および全国銀行協会相談室の指針に従い、透明性のあるプロセスで迅速に解決を図ります。",
+        "advice_boundaries": "商品の特徴や制度（NISAのつみたて投資枠や成長投資枠など）に関する教育的な情報提供を行いますが、個別の税務相談や法的助言は行わず、専門家への相談を促します。商品の推奨にあたっては、お客様の意向と返済能力を適切に審査し、誠実な説明責任を果たします。",
+        "product_positionings": "[{'product_id': 'futsu_yokin', 'one_liner': '日常的な決済や給与・年金の受取に適した、利便性の高い基本口座です。'}\n {'product_id': 'super_teiki', 'one_liner': '確実な資産形成を目指す方向けの、期間に応じた金利を設定した定期預金です。'}\n {'product_id': 'kyuyo_nenkin_tokuten', 'one_liner': '給与や年金の受取口座にすることで、振込やATM手数料の負担を軽減する特典制度です。'}\n {'product_id': 'asanagi_debit', 'one_liner': '現金不要で口座から即時引き落としができる、利便性と安心感を兼ね備えたVisaデビットカードです。'}\n {'product_id': 'jutaku_loan', 'one_liner': 'ライフプランに合わせて変動金利と固定金利から選択できる、住まいの夢を叶える住宅ローンです。'}\n {'product_id': 'asanagi_card_loan', 'one_liner': '審査を経て柔軟な利用限度額を設定し、急な資金ニーズに迅速に応えるカードローンです。'}]",
+        "key_terms_glossary": "[{'term': '中途解約利率', 'definition': '定期預金を満期前に解約した場合に適用される、当初の約定金利よりも低い利率のこと。'}\n {'term': '団体信用生命保険', 'definition': '住宅ローンの借入者が死亡または高度障害状態になった際、保険金でローン残高が完済される保険のこと。'}\n {'term': '総量規制', 'definition': '貸金業法に基づき、個人の借入合計額を原則として年収の3分の1までとする制限（銀行のカードローンは対象外）。'}\n {'term': 'つみたて投資枠', 'definition': '2024年から開始された新NISA制度における、一定の投資信託を長期・積立・分散投資するための非課税枠。'}]"
       }
     },
     "sorairo_bank": {
       "n_documents": 246,
       "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
         {
           "cluster_kind": "product",
           "target": 10,
@@ -273,8 +393,8 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
+          "cohesion": 4.0,
+          "distinctness": 3.0
         },
         {
           "cluster_kind": "product",
@@ -282,54 +402,6 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 2.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 2.0,
           "distinctness": 4.0
         },
         {
@@ -338,78 +410,6 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 2.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 2.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
           "distinctness": 4.0
         },
         {
@@ -462,16 +462,16 @@
         }
       ],
       "brief": {
-        "positioning": "店舗を持たないインターネット専業銀行として、スマートフォンアプリで完結する利便性と競争力のある金利を提供し、デジタルネイティブ層を中心とした効率的な資産管理を求める顧客層にアプローチします。利便性の高いUI/UXと透明性の高い手数料体系で、既存の伝統的金融機関との差別化を図ります。",
-        "brand_voice_guide": "信頼感と親しみやすさを両立させた、丁寧な「です・ます」調で統一します。専門用語は避け、中学生でも理解できる平易な表現を用い、重要な免責事項や注意点は箇条書きや太字を用いて明確に提示します。",
-        "service_model": "スマートフォンアプリ内のチャットおよびオンラインヘルプセンターを主軸としたサポート体制を提供します。複雑な案件については、専門のオペレーターによるオンライン相談へエスカレーションするフローを構築します。",
-        "fee_philosophy": "ユーザーの日常的な利便性を最大化するため、基本的な振込やATM利用には無料枠を設け、コスト負担を軽減します。無料回数を超えた利用にのみ手数料を課すことで、サービスの持続可能性と運営コストを確保します。",
-        "risk_and_compliance_posture": "金融庁の監督の下、銀行法および個人情報保護法を厳格に遵守します。預金保険制度に基づき、利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護されることを明示し、顧客の安心感を担保します。",
-        "security_and_verification": "口座開設時のマイナンバーカードICチップ読み取りによるオンライン本人確認を必須とし、厳格な取引時確認を行います。ログイン時および振込時には二段階認証を導入し、機種変更時には認証の再登録を求めることで、不正アクセスを徹底的に防止します。",
-        "dispute_and_fraud_handling": "不正送金やフィッシング詐欺の被害報告に対し、迅速な利用停止と調査を行う体制を整えます。預金者保護法に基づき、預金者に故意や重大な過失がない限り、原則として銀行が補償を行う姿勢を堅持します。",
-        "advice_boundaries": "金融リテラシー向上のための一般的な教育情報の提供に留まり、個別の税務、法律、または個別の投資判断に関する助言は行いません。製品の推奨に際しては、顧客の属性に基づいた適切な情報の提供という善管注意義務を果たします。",
-        "product_positionings": "[{'product_id': 'sorairo_futsu', 'one_liner': '0.45%という高い金利で日常的な決済と貯蓄を両立させる、サービスの基盤となる口座です。'}\n {'product_id': 'mokutekibetsu_koza', 'one_liner': '普通預金と同じ金利を維持しつつ、最大10個まで目的別に資金を分けて管理できる計画的な貯蓄ツールです。'}\n {'product_id': 'sorairo_teiki', 'one_liner': '最低1,000円から預けられ、期間に応じて最大0.9%の金利が得られる確実な資産形成手段です。'}\n {'product_id': 'sorairo_debit', 'one_liner': '0.8%のキャッシュバックを備え、日々の支払いを効率化する手数料無料のVisaデビットカードです。'}\n {'product_id': 'sumaho_sokin', 'one_liner': '電話番号だけで簡単かつ0円で少額送金ができ、友人や家族間でのやり取りを簡素化するサービスです。'}]",
-        "key_terms_glossary": "[{'term': '二段階認証', 'definition': 'パスワードに加え、ワンタイムパスワードなどの別の認証手段を組み合わせることでセキュリティを強化する方式です。'}\n {'term': '預金保険制度', 'definition': '金融機関が破綻した場合に、預金保険機構が一定額まで預金を保護する制度です。'}\n {'term': '取引時確認', 'definition': '犯罪収益移転防止法に基づき、口座開設時に顧客の氏名、住所、生年月日などを確認する手続きです。'}\n {'term': 'つみたて投資枠', 'definition': '新NISA制度において、一定の投資信託を継続的に購入するための非課税投資枠のことです。'}]"
+        "positioning": "そらいろ銀行は、店舗を持たないインターネット専業銀行として、デジタルネイティブ層を主なターゲットに据えています。アプリ完結の利便性と競争力のある金利、直感的なユーザー体験で差別化を図ります。",
+        "brand_voice_guide": "信頼感と親しみやすさを両立させた、丁寧な「です・ます」調で統一します。専門用語は最小限に留め、誰にでも分かりやすい平易な表現を用い、免責事項は明確かつ簡潔に提示します。",
+        "service_model": "スマートフォンアプリを主軸としたデジタルチャネルによるサポートを提供します。基本的にはアプリ内で完結させ、複雑な案件は専門のオペレーターへエスカレーションする体制をとります。",
+        "fee_philosophy": "ユーザーの利便性を最大化するため、基本回数の無料枠を設けて心理的ハードルを下げ、日常的な利用を促進します。無料回数を超えた際の手数料は、持続可能なサービス提供のためのコストとして適切に設定しています。",
+        "risk_and_compliance_posture": "金融庁の監督を受け、預金保険制度により元本1,000万円まで（決済用預金は全額）保護される安全な環境を提供します。犯罪収益移転防止法に基づいた厳格な本人確認と、個人情報保護法の遵守を徹底します。",
+        "security_and_verification": "口座情報の照会や変更などの手続きを行う前には、必ずお客様のフルネームと生年月日の確認を行います。暗証番号、パスワード、カード番号、CVV、身分証番号などは一切聞き出しません。",
+        "dispute_and_fraud_handling": "不正利用や紛失の届出を迅速に受け付け、預金者保護法および銀行規定に基づき、公正な調査と補償手続きを速やかに行います。",
+        "advice_boundaries": "商品の仕組みや活用方法に関する教育的な案内は行いますが、個別の税務判断や法的助言、投資助言は行いません。具体的な判断が必要な場合は、税理士や弁護士などの専門家への相談を案内します。",
+        "product_positionings": "[{'product_id': 'sorairo_futsu', 'one_liner': '高い金利設定により、日常的な資金管理の基盤となるメイン口座です。'}\n {'product_id': 'mokutekibetsu_koza', 'one_liner': '貯金目的ごとに資金を分けて管理でき、計画的な資産形成を支援する機能です。'}\n {'product_id': 'sorairo_teiki', 'one_liner': '普通預金よりも高い金利で、確実な資産形成を目指すための預金商品です。'}\n {'product_id': 'sorairo_debit', 'one_liner': 'キャッシュバック特典を備え、家計管理と決済を一本化できるVisaデビットカードです。'}\n {'product_id': 'sumaho_sokin', 'one_liner': '電話番号だけで手軽に少額の送金ができる、利便性に特化した送金サービスです。'}]",
+        "key_terms_glossary": "[{'term': 'つみたて投資枠', 'definition': '新NISAにおいて、一定の要件を満たす投資信託などで長期・積立・分散投資を行うための投資枠です。'}\n {'term': '成長投資枠', 'definition': '新NISAにおいて、株式や投資信託など幅広い商品に投資できる投資枠です。'}\n {'term': '目的別口座', 'definition': '一つの普通預金口座の中で、仮想的に最大10個まで貯金箱のように資金を分けることができる管理機能です。'}]"
       }
     },
     "hoshimi_securities": {
@@ -490,15 +490,7 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
+          "cohesion": 3.0,
           "distinctness": 4.0
         },
         {
@@ -508,6 +500,110 @@
           "numeric_faithfulness": 4.0,
           "cohesion": 2.0,
           "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
         },
         {
           "cluster_kind": "product",
@@ -546,79 +642,7 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 3.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 2.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 3.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 2.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
+          "cohesion": 3.0,
           "distinctness": 4.0
         },
         {
@@ -643,38 +667,6 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "shared",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 2.0,
           "distinctness": 4.0
         },
         {
@@ -698,7 +690,15 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
           "distinctness": 4.0
         },
         {
@@ -711,16 +711,16 @@
         }
       ],
       "brief": {
-        "positioning": "星見証券は、透明性の高い手数料体系と高度なデジタル体験を提供し、若年層から熟練投資家まで幅広い層の資産形成を支援するネット証券です。低コストな取引環境と使いやすいインターフェースにより、個人投資家の長期的な資産最大化を競合上の強みとしています。",
-        "brand_voice_guide": "信頼感と誠実さを重視した丁寧な「です・ます」調を用い、簡潔で明快な表現を徹底します。専門用語は適切に使用しますが、読み手の理解度に配慮し、過度な専門 jargon は避け、必要に応じて補足説明を添えます。免責事項やリスク説明は、視認性を確保しながら誠実なトーンで記載します。",
-        "service_model": "チャット、メール、およびWebフォームを中心としたデジタルチャネルでサポートを提供し、日本標準時の平日 9:00〜17:00 で対応します。複雑な照会や苦情については、専任のコンプライアンス担当者への明確なエスカレーションパスを運用しています。",
-        "fee_philosophy": "顧客の長期的な資産形成を阻害しないよう、国内株式手数料の0円化など、業界最安水準の低コスト戦略を追求しています。手数料を最小限に抑えることで投資効率を高め、一部の運営費用はサービスの安定性とセキュリティ維持のためにのみ設定しています。",
-        "risk_and_compliance_posture": "金融庁および日本証券業協会の監督の下、適合性の原則を遵守し、顧客の最善の利益を追求します。顧客資産は分別管理され、万一の際は日本投資者保護基金により1人当たり1,000万円まで補償されますが、相場の変動による元本割れは補償対象外となることを明確に伝えます。",
-        "security_and_verification": "口座開設時のマイナンバー届出を必須とし、厳格な本人確認プロセスを導入しています。出金や口座情報の変更など、資産の状態を変化させる操作の前には、必ず多要素認証による本人確認を実施します。",
-        "dispute_and_fraud_handling": "苦情や紛争には誠実かつ迅速に対応し、解決に至らない場合は証券・金融商品あっせん相談センター（FINMAC）への案内を行います。不正利用の疑いがある場合は、直ちに口座を凍結し、社内規定に基づいたタイムラインで調査と報告を行います。",
-        "advice_boundaries": "投資制度の解説や一般的な資産形成の教育は行いますが、個別の税務助言や法的助言、および特定の銘柄の売買推奨は行いません。顧客が自らの判断で投資決定を行うための情報提供に徹し、元本保証がないリスクを十分に提示します。",
-        "product_positionings": "[{'product_id': 'nisa_tsumitate', 'one_liner': '年間1,200,000円の枠で、長期・積立・分散投資を非課税で実現する資産形成の基盤です。'}\n {'product_id': 'nisa_seicho', 'one_liner': '年間2,400,000円の枠で、個別株や多様な投資信託に柔軟に投資できる非課税制度です。'}\n {'product_id': 'tokutei_koza', 'one_liner': '20.315%の税率で源泉徴収を行い、原則として確定申告が不要な利便性の高い課税口座です。'}\n {'product_id': 'ideco', 'one_liner': '所得控除のメリットを最大限に活用し、原則60歳まで非課税で運用する老後資金準備制度です。'}\n {'product_id': 'beikoku_kabu', 'one_liner': '0.495%（上限22）の取引手数料で、世界最大の米国株式市場へアクセスできる取引サービスです。'}\n {'product_id': 'toshin_tsumitate', 'one_liner': '100円から開始でき、クレジットカード積立による0.5%の還元も受けられる自動投資ツールです。'}]",
-        "key_terms_glossary": "[{'term': '分別管理', 'definition': '顧客から預かった金銭や有価証券を、証券会社自身の財産とは明確に分けて管理すること。'}\n {'term': '適合性の原則', 'definition': '顧客の知識、経験、財産の状況、投資目的に照らして不適当な勧誘を行ってはならないという原則。'}\n {'term': '非課税保有限度額', 'definition': 'NISA口座で非課税で保有できる商品取得価額の合計限度額（最大1,800万円）。'}]"
+        "positioning": "星見証券は、幅広い層の投資家に向けたデジタル完結型のネット証券として、資産形成の民主化を目指します。透明性の高い手数料体系と、税制優遇制度の使いやすさを競争力の源泉として、顧客の長期的な資産成長を支援します。",
+        "brand_voice_guide": "信頼感と誠実さを重視し、丁寧な「です・ます」調で統一します。専門用語は控えめにし、顧客の理解度に合わせた平易な表現を用いつつ、重要なリスク告知や免責事項は明確かつ断定的に記載します。",
+        "service_model": "原則としてデジタルチャネルでのサポートを提供し、日本標準時（JST）の営業時間内にヘルプデスクを運営します。複雑な案件や重要事項は、社内のコンプライアンス担当または専門の運用責任者へエスカレーションします。",
+        "fee_philosophy": "国内株式などの主要商品の手数料を0円とすることで、投資への心理的・経済的ハードルを最小限に抑えます。海外取引等の手数料は、適正なインフラ維持と規制遵守のためのコストとして設定しています。",
+        "risk_and_compliance_posture": "金融庁および日本証券業協会の監督下で、金融商品取引法に基づき「適合性の原則」を徹底します。顧客資産は分別管理され、万一の際は日本投資者保護基金により1人当たり1,000万円まで補償されますが、相場変動による損失は補償対象外となります。",
+        "security_and_verification": "口座情報の変更などの重要な手続きを行う前に、必ず顧客の本人確認を行います。確認は、お客様の「フルネーム」と「生年月日」の照合のみで実施し、その他の認証ステップや機密情報の要求は行いません。",
+        "dispute_and_fraud_handling": "不正利用や紛争に対しては誠実かつ迅速に対応し、透明性のある調査プロセスを提示します。解決に至らない苦情や紛争については、証券・金融商品あっせん相談センター（FINMAC）への案内を行います。",
+        "advice_boundaries": "一般的な投資教育および商品情報の提供を行い、顧客の最善の利益を追求しますが、個別の税務相談や法的助言、および利益の保証は行いません。推奨商品の提示は、顧客の知識、経験、目的に照らして適切であるかを確認した上で行います。",
+        "product_positionings": "[{'product_id': 'nisa_tsumitate', 'one_liner': '少額からコツコツと長期的な資産形成を行うための、非課税の積立専用枠です。'}\n {'product_id': 'nisa_seicho', 'one_liner': '株式などの幅広い商品に柔軟に投資でき、利益が非課税となる成長投資枠です。'}\n {'product_id': 'tokutei_koza', 'one_liner': '税金の計算を自動的に行い、原則として確定申告の手間を省ける便利な課税口座です。'}\n {'product_id': 'ideco', 'one_liner': '掛金が全額所得控除となり、老後資金を効率的に準備できる個人型確定拠出年金です。'}\n {'product_id': 'beikoku_kabu', 'one_liner': '世界をリードする米国企業の株式に直接投資し、グローバルな成長を享受できます。'}\n {'product_id': 'toshin_tsumitate', 'one_liner': '投資信託による自動積立で、クレジットカード決済による効率的な資産形成が可能です。'}]",
+        "key_terms_glossary": "[{'term': '適合性の原則', 'definition': '顧客の知識、経験、財産の状況、投資目的に照らして不適当な勧誘を行わないという原則です。'}\n {'term': '分別管理', 'definition': '顧客から預かった金銭や有価証券を、証券会社自身の財産と分けて管理することです。'}\n {'term': '非課税保有限度額', 'definition': 'NISA口座で非課税で保有できる資産の最大金額のことです。'}]"
       }
     },
     "komorebi_life": {
@@ -730,87 +730,23 @@
           "cluster_kind": "product",
           "target": 10,
           "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 3.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 3.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
           "numeric_faithfulness": 3.0,
-          "cohesion": 3.0,
+          "cohesion": 4.0,
           "distinctness": 4.0
         },
         {
           "cluster_kind": "product",
           "target": 10,
           "produced": 10,
-          "numeric_faithfulness": 3.0,
-          "cohesion": 3.0,
-          "distinctness": 3.0
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
         },
         {
           "cluster_kind": "product",
           "target": 10,
           "produced": 10,
-          "numeric_faithfulness": 3.0,
+          "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
           "distinctness": 4.0
         },
@@ -836,78 +772,142 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
-          "distinctness": 2.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
           "distinctness": 4.0
         },
         {
           "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "shared",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 1.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "shared",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 1.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "shared",
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 3.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 3.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 3.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
           "distinctness": 4.0
         },
         {
@@ -916,20 +916,20 @@
           "produced": 3,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
-          "distinctness": 4.0
+          "distinctness": 3.0
         }
       ],
       "brief": {
-        "positioning": "安心で誠実な保障を提供し、あらゆる世代の方々が将来への不安を解消できるパートナーを目指します。透明性の高い商品設計と、お客様一人ひとりのライフステージに寄り添うコンサルティングを通じて、信頼される生命保険会社としての地位を確立します。",
-        "brand_voice_guide": "常に丁寧で誠実な「です・ます」調を用い、金融機関としての信頼感と親しみやすさを両立させます。専門用語を避け、誰にでも分かりやすい平易な表現を心がけ、重要な免責事項や注意点は視覚的に明確に区分して記載します。",
-        "service_model": "ウェブサイト、電話、および担当エージェントによるマルチチャネル体制でサポートを提供します。受付時間は日本標準時（JST）に基づき、複雑な案件や苦情は専門部署およびコンプライアンス部門へエスカレーションする体制を整えています。",
-        "fee_philosophy": "保険料はリスクと年齢に基づき適正に設定し、長期にわたって持続可能な保障を提供することを最優先します。契約者貸付の手数料や事務手数料は、公平なプラン維持と運営コストの回収のために設定されており、その根拠を明確に提示します。",
-        "risk_and_compliance_posture": "金融庁の監督および保険業法を厳格に遵守し、生命保険契約者保護機構により責任準備金等の90%まで補償される旨を適切に案内します。告知義務違反による契約解除のリスクや、書面受取後8日以内のクーリング・オフ権利について、お客様が十分に理解できるよう周知します。",
-        "security_and_verification": "受取人の変更や契約内容の変更など、状態を変化させるすべての手続きの前には、本人確認書類および契約者番号を用いた厳格な本人認証を行います。認証が完了するまで、機密性の高い情報の開示や手続きの実行は行いません。",
-        "dispute_and_fraud_handling": "苦情や紛争については、生命保険協会の生命保険相談所と連携し、誠実かつ迅速に解決を図ります。不正請求や詐欺的な行為に対しては厳格な調査を行い、契約解除を含む断固とした措置を講じます。",
-        "advice_boundaries": "一般的な制度解説や教育的な案内は行いますが、個別の税務相談や具体的な医療診断などの専門的助言は行いません。商品提案にあたっては、お客様の意向とリスク許容度を尊重し、客観的なデータに基づいた最善の提案を行う基準を設けています。",
-        "product_positionings": "[{'product_id': 'teiki_hoken', 'one_liner': '少ない保険料で、必要な期間だけ大きな保障を確保できる効率的なプランです。'}\n {'product_id': 'shushin_hoken', 'one_liner': '低解約返戻金型により、生涯にわたる保障を無理なく準備できるプランです。'}\n {'product_id': 'iryo_hoken', 'one_liner': '公的医療保険の高額療養費制度を補完し、入院・手術時の不安を軽減する包括的なプランです。'}\n {'product_id': 'gan_hoken', 'one_liner': '診断時のまとまった給付金により、がん治療に専念できる環境を整える特化型プランです。'}\n {'product_id': 'kojin_nenkin', 'one_liner': '老後の資金形成を目的として、計画的に資産を積み立てるプランです。'}]",
-        "key_terms_glossary": "[{'term': '告知義務', 'definition': '契約時に健康状態などを正しく伝える義務で、事実と異なる告知をした場合、契約解除や保険金・給付金が支払われないことがあります。'}\n {'term': 'クーリング・オフ', 'definition': '申込日または契約内容を記載した書面を受け取った日のいずれか遅い日から8日以内であれば、契約を無条件で撤回できる制度です。'}\n {'term': '解約返戻金', 'definition': '保険契約を途中で解約した際に、保険会社から契約者に払い戻されるお金のことです。'}\n {'term': '生命保険料控除', 'definition': '所得税において、新制度の契約では一般・介護医療・個人年金の各区分で最高4万円、合計で最高12万円まで控除される制度です。'}\n {'term': '高額療養費制度', 'definition': '公的医療保険により、所得に応じた月ごとの自己負担上限額が設けられている制度です。'}]"
+        "positioning": "こもれび生命は、透明性の高い商品設計と誠実な顧客対応により、あらゆる世代の顧客が将来に安心を持てるライフプランニングを提供します。シンプルで分かりやすい保障内容を強みに、顧客一人ひとりの人生に寄り添うパートナーとしての地位を確立します。",
+        "brand_voice_guide": "丁寧で誠実な「です・ます」調を用い、専門用語を避け、中学生でも理解できる平易な表現を心がけます。金額は「1,234円」のように半角数字とカンマを用いて表記し、重要な免責事項や注釈は明確に区分して記載します。",
+        "service_model": "カスタマーセンターでの電話対応およびWebチャットを通じてサポートを提供し、平日の9時から17時まで運営します。複雑な案件や苦情については、内部規定に基づき速やかに専門のコンプライアンス部門へエスカレーションします。",
+        "fee_philosophy": "顧客の長期的な安心を第一に考え、合理的かつ透明性の高い保険料体系を採用しています。保険料はリスクの分散と安定した給付金支払いのための原資として運用し、プラン内容に応じた適正価格を維持します。",
+        "risk_and_compliance_posture": "金融庁の監督および保険業法に基づき、公正な取引と厳格なデータプライバシー保護を徹底します。万が一の破綻時には、生命保険契約者保護機構により責任準備金等の90%まで（高予定利率契約を除く）が補償されることを適切に案内します。",
+        "security_and_verification": "契約内容の変更等の手続きを行う前に、お客様のフルネームと生年月日を確認し、本人確認を完了させます。クレジットカード番号、暗証番号、パスワード、または身分証明書番号などの機密情報は一切要求しません。",
+        "dispute_and_fraud_handling": "顧客の不利益を最小限に抑えるため、苦情や不正疑義には迅速かつ誠実に対応し、透明性のある解決プロセスを提供します。必要に応じて生命保険協会の生命保険相談所と連携し、公正な解決を図ります。",
+        "advice_boundaries": "保険制度の一般的な解説や教育的な案内は行いますが、個別の税務相談や医療的な助言は行いません。商品推奨にあたっては、顧客の意向と客観的なデータに基づき、誠実な標準的ケアをもって提案します。",
+        "product_positionings": "[{'product_id': 'teiki_hoken', 'one_liner': '低コストで一定期間の大きな保障を効率的に確保できる、掛け捨て型のプランです。'}\n {'product_id': 'shushin_hoken', 'one_liner': '低解約返戻金型により、将来の死亡保障と貯蓄性をバランスよく両立させたプランです。'}\n {'product_id': 'iryo_hoken', 'one_liner': '入院や手術などの医療費負担を幅広くカバーし、公的医療保険の不足分を補完するプランです。'}\n {'product_id': 'gan_hoken', 'one_liner': 'がん診断時のまとまった一時金と治療費を重点的に保障する、特化型のプランです。'}\n {'product_id': 'kojin_nenkin', 'one_liner': '計画的な積立により、老後の安定した資金準備を実現する個人年金プランです。'}]",
+        "key_terms_glossary": "[{'term': '告知義務', 'definition': '契約時に健康状態等を正確に伝える義務であり、事実に反する告知をした場合、契約解除や保険金・給付金が支払われないことがあります。'}\n {'term': 'クーリング・オフ', 'definition': '申込日または契約内容を記載した書面を受け取った日のいずれか遅い日から8日以内であれば、申し込みを撤回できる制度です。'}\n {'term': '生命保険料控除', 'definition': '所得税の軽減措置で、新制度では一般生命保険料、介護医療保険料、個人年金保険料の区分ごとに最高4万円、合計で最高12万円まで適用されます。なお、2026年分と2027年分は、23歳未満の扶養親族がいる方の一般生命保険料控除が最高6万円となります（合計上限は12万円のまま）。'}\n {'term': '待ち期間', 'definition': 'がん保険等において、契約後一定期間（例：90日）は保障が適用されない期間のことです。'}\n {'term': '高額療養費制度', 'definition': '公的医療保険により、所得に応じた月ごとの自己負担上限が設けられている制度で、2026年8月の診療分からは年間の上限も設けられています。'}]"
       }
     },
     "tsumugi_card": {
@@ -964,7 +964,31 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
           "distinctness": 4.0
         },
         {
@@ -997,6 +1021,22 @@
           "produced": 10,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
           "distinctness": 4.0
         },
         {
@@ -1020,7 +1060,15 @@
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
           "distinctness": 4.0
         },
         {
@@ -1033,70 +1081,6 @@
         },
         {
           "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "product",
-          "target": 10,
-          "produced": 10,
-          "numeric_faithfulness": 4.0,
-          "cohesion": 4.0,
-          "distinctness": 4.0
-        },
-        {
-          "cluster_kind": "shared",
           "target": 10,
           "produced": 10,
           "numeric_faithfulness": 4.0,
@@ -1129,24 +1113,40 @@
         },
         {
           "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
           "target": 6,
           "produced": 6,
           "numeric_faithfulness": 4.0,
           "cohesion": 4.0,
           "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 2.0
         }
       ],
       "brief": {
-        "positioning": "つむぎカードは、日々の生活に寄り添い、無理のない柔軟な支払いを提案することで、お客様の経済的な安心を「紡ぐ」ことを目指す金融サービスです。主に若年層からファミリー層までをターゲットとし、透明性の高い手数料体系と、使いやすさと安心感を両立させた利便性で競合他社と差別化します。",
-        "brand_voice_guide": "信頼感のある丁寧な「です・ます」調を徹底し、誠実で親しみやすい金融機関としてのトーンを維持します。専門用語は極力避け、必要な場合は平易に解説し、読みやすさを重視した構成と、重要な注意点は太字や箇条書きで明確に提示する形式を採用します。",
-        "service_model": "公式アプリ、ウェブサイト、およびカスタマーセンターによるマルチチャネルでのサポートを提供します。営業時間は日本標準時（JST）に基づき、複雑な相談や苦情については、専門のコンプライアンス担当者へエスカレーションする体制を整えています。",
-        "fee_philosophy": "安全な決済インフラの維持と持続的なサービス向上のため、適正な手数料を設定しています。1回払いなどの手数料無料プランを基本としつつ、リボ払いや分割払いなどの信用供与が発生するサービスについては、そのリスクと利便性に見合った手数料を課金します。",
-        "risk_and_compliance_posture": "経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の監督指針を厳守し、支払可能見込額の調査や総量規制（原則として年収の3分の1まで）を徹底することで、過剰債務を防止します。お客様の個人情報は指定信用情報機関への登録を含め適切に管理し、公正な取り扱いと透明性のある開示を行います。",
-        "security_and_verification": "利用限度額の変更やローンの契約など、状態を変更する操作の前には、必ず多要素認証による厳格な本人確認を実施します。インターネットショッピングにおいては、EMV 3-Dセキュアなどの本人認証サービスを導入し、不正利用を未然に防止します。",
-        "dispute_and_fraud_handling": "カードの紛失・盗難時には即時の利用停止と再発行を行い、不正利用に対しては規定に基づいた迅速な補償を行います。お客様からの苦情や紛争については、日本クレジット協会の相談窓口とも連携し、誠実かつ迅速に解決を図る姿勢を堅持します。",
-        "advice_boundaries": "一般的な金融教育や製品の仕組みに関する案内は行いますが、個別の税務相談や法的助言、投資の個別銘柄推奨などは行わず、専門家への相談を促します。製品の推奨にあたっては、お客様の返済能力を十分に審査し、適切かつ誠実な提案を行うことを基準とします。",
-        "product_positionings": "[{'product_id': 'tsumugi_card_standard', 'one_liner': '日常的な決済とポイント還元を基本とした、つむぎカードのメインとなる汎用決済カードです。'}\n {'product_id': 'ribo_barai', 'one_liner': '月々の支払額を一定に抑えて家計の変動を緩やかにできる、柔軟な支払いオプションです。'}\n {'product_id': 'bunkatsu_barai', 'one_liner': '高額な買い物に対して、あらかじめ決められた回数で計画的に返済できる分割決済サービスです。'}\n {'product_id': 'cashing', 'one_liner': 'ATMを通じて急な資金ニーズに即座に対応できる、短期的な小口融資機能です。'}\n {'product_id': 'tsumugi_card_loan', 'one_liner': 'キャッシングよりも大きな金額を、より計画的な返済プランで利用できる低金利のローン商品です。'}]",
-        "key_terms_glossary": "[{'term': '支払可能見込額', 'definition': 'お客様の年収や生活維持費、既存の借入状況に基づき、無理なく支払えると考えられる金額のことです。'}\n {'term': '総量規制', 'definition': '貸金業者からの借入合計額を、原則として年収の3分の1までに制限する貸金業法の規定です。'}\n {'term': '支払停止の抗弁', 'definition': '販売店とのトラブルがある場合に、正当な理由をもってカード会社への支払いを一時的に拒める権利のことです。'}\n {'term': '繰上返済', 'definition': 'リボ払いなどの残高を予定より早く返済することで、将来的に支払う手数料を軽減させる手続きです。'}]"
+        "positioning": "つむぎカードは、日々の決済から柔軟な資金調達までをワンストップで提供し、幅広い客層に信頼される生活基盤としての金融サービスを目指します。透明性の高い手数料体系と、顧客のライフステージに寄り添った利便性で競合他社と差別化します。",
+        "brand_voice_guide": "誠実で丁寧な「です・ます」調を用い、日本の金融機関として安心感と信頼感を与えるトーンを維持します。専門用語は避け、中学生程度の方でも理解できる平易な表現を心がけ、重要な注意点や免責事項は明確な箇条書きで提示します。",
+        "service_model": "電話、チャット、Webフォームによるマルチチャネルサポートを日本時間で提供します。複雑な審査や法的相談が必要な案件は、専門の審査部門またはコンプライアンス担当へエスカレーションします。",
+        "fee_philosophy": "手数料は、信用リスクの管理およびサービスの維持・向上に必要な実費として設定しています。一方で、1回払い等の基本決済では手数料を無料とし、顧客の利便性とコスト負担のバランスを最適化します。",
+        "risk_and_compliance_posture": "経済産業省（割賦販売法）および金融庁（銀行法・貸金業法）の規制を厳格に遵守し、顧客の支払能力に基づいた適正な利用枠を設定します。総量規制などの法令に基づき、過剰借入を防止し、指定信用情報機関への適切な登録を通じて健全な信用環境を維持します。",
+        "security_and_verification": "本人確認が必要な操作の前には、必ず「フルネーム（氏名）」と「生年月日」の2点を確認します。それ以外の認証ステップ（ワンタイムパスワードやアプリ承認など）は行わず、またカード番号、CVV、暗証番号、パスワード、身分証番号などは一切聞き出さないでください。",
+        "dispute_and_fraud_handling": "不正利用の疑いがある場合は、迅速に利用停止および再発行手続きを行い、規約に基づいた補償を適用します。紛争解決にあたっては公正な調査を行い、進捗状況を定期的かつ透明性を持って顧客へ報告します。",
+        "advice_boundaries": "一般的な金融知識の提供や製品の機能説明は行いますが、個別の税務相談や法的助言、投資の個別銘柄推奨は行いません。製品推奨にあたっては、顧客の属性と返済能力に照らして適切であるかという誠実義務に基づいた基準で案内します。",
+        "product_positionings": "[{'product_id': 'tsumugi_card_standard', 'one_liner': '日々の決済とポイント還元を基本とする、つむぎカードのメイン決済サービスです。'}\n {'product_id': 'ribo_barai', 'one_liner': '月々の支払額を一定に抑え、家計の管理を柔軟にするための支払い方法です。'}\n {'product_id': 'bunkatsu_barai', 'one_liner': '高額な買い物でも、回数を分けて計画的に支払うことができるサービスです。'}\n {'product_id': 'cashing', 'one_liner': 'ATMなどを通じて、短期的かつ急な資金ニーズに即座に対応する少額融資です。'}\n {'product_id': 'tsumugi_card_loan', 'one_liner': 'より大きな資金需要に対し、余裕を持った返済計画で利用できる低利の融資商品です。'}]",
+        "key_terms_glossary": "[{'term': 'ショッピング支払方法', 'definition': '1回払い、2回払い、ボーナス一括払いは手数料がかからず、分割払いとリボ払いは手数料がかかります。「あとからリボ」や「あとから分割」への変更も可能です。'}\n {'term': 'リボ払いの仕組み', 'definition': '月々の支払額をほぼ一定に設定できますが、残高に対して手数料がかかり続けるため支払総額が増えやすい仕組みです。繰上返済を行うことで手数料を軽減できます。'}\n {'term': '総量規制', 'definition': '貸金業法に基づき、貸金業者からの借入れの合計額は原則として年収の3分の1までと制限される制度です。'}\n {'term': '上限金利', 'definition': '利息制限法により、元本10万円未満は年20%、10万円以上100万円未満は年18%、100万円以上は年15%が上限となります。'}\n {'term': '支払可能見込額の調査', 'definition': '割賦販売法に基づき、カード発行時や利用可能枠の増枠時に、顧客の年収や生活維持費等を踏まえて設定される利用限度額の算定プロセスです。'}\n {'term': 'EMV 3-Dセキュア', 'definition': 'インターネット決済において、カード番号だけでなく本人認証を追加することで不正利用を防止するセキュリティサービスです。'}]"
       }
     }
   }
