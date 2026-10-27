@@ -274,7 +274,13 @@ def _value_candidates(val: Any, number_format: str | None = None) -> list[str]:
 
 
 def _value_present(val: Any, text: str, number_format: str | None = None) -> bool:
-    return any(c in text for c in _value_candidates(val, number_format))
+    """Whether ``text`` states ``val`` as a whole number in one of its renderings. A
+    rendering inside a longer number doesn't count: 5,000,000,000원 doesn't state a
+    5,000,000원 limit."""
+    return any(
+        re.search(rf"(?<![0-9])(?<![0-9][.,]){re.escape(c)}(?![0-9]|[.,][0-9])", text)
+        for c in _value_candidates(val, number_format)
+    )
 
 
 def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:

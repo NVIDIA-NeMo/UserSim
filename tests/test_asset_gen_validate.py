@@ -260,6 +260,19 @@ def test_numeric_faithfulness_still_rejects_a_wrong_number():
     assert not _value_present(100_000_000, "한도는 2억 원입니다", "ko_KR")
 
 
+def test_numeric_faithfulness_matches_whole_numbers_only():
+    """A rendering inside a longer number states a different value: 5,000,000,000원
+    doesn't state a 5,000,000원 limit."""
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    assert not _value_present(5_000_000, "현금서비스 이용한도 최고액은 5,000,000,000원입니다", "ko_KR")
+    assert not _value_present(5_000_000, "a limit of $15,000,000")
+    assert not _value_present(5, "a fee of 0.5%")
+    assert _value_present(5_000_000, "현금서비스 이용한도 최고액은 5,000,000원입니다.", "ko_KR")
+    assert _value_present(5_000_000, "a limit of $5,000,000.")
+    assert _value_present(5, "a fee of 5%, waived")
+
+
 def test_numeric_faithfulness_accepts_french_and_german_number_formats():
     """A French or German bank writes values in its own format, and they are faithful."""
     from usersim.asset_gen.financial_services.validate import _value_present
