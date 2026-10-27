@@ -1,0 +1,9 @@
+institution_id: garam_securities
+display_name: Garam Securities
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+display_name_local: 가람증권
+schema_version: v0.1

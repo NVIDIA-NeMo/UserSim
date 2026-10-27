@@ -2439,9 +2439,8 @@ class TestRegionalConventions:
     def test_yen_and_won_are_whole_amounts_with_the_unit_after(self):
         from usersim.engine.core.finance_bank import format_percent
 
-        us = load_finance_bank_for_locale("en_US")
         japan = load_finance_bank_for_locale("ja_JP")
-        korea = _regional(us, "ko_KR", currency_symbol="원", number_format="ko_KR")
+        korea = load_finance_bank_for_locale("ko_KR")
         assert japan.format_money("1234567") == "1,234,567円"
         assert korea.format_money("-50000") == "-50,000원"
         assert japan.format_money("1234.5") == "1,234.50円"
@@ -2455,6 +2454,7 @@ class TestRegionalConventions:
         assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
         assert load_finance_bank_for_locale("fr_FR").format_date(day) == "27/03/1980"
         assert load_finance_bank_for_locale("ja_JP").format_date(day) == "1980-03-27"
+        assert load_finance_bank_for_locale("ko_KR").format_date(day) == "1980-03-27"
         for locale, expected in (
             ("en_GB", "27/03/1980"),
             ("de_DE", "27.03.1980"),
@@ -2504,6 +2504,15 @@ class TestRegionalConventions:
         ctx = probe._account_context(instance)
         assert "普通預金" in ctx
         assert "3,500,000円" in ctx and "$" not in ctx and "¥" not in ctx
+
+    def test_a_korea_customer_hears_their_balance_in_won(self):
+        inst = load_finance_bank_for_locale("ko_KR").institution("yunseul_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-YS-YEGEUM-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="ko_KR", seed=1)
+        probe, _ = _probe_on("ko_KR", instance)
+        ctx = probe._account_context(instance)
+        assert "입출금통장" in ctx
+        assert "6,500,000원" in ctx and "$" not in ctx and "₩" not in ctx
 
     def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
         us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
@@ -2763,7 +2772,7 @@ class TestAuthoredPersonaTagsAreReachable:
         )
         assert {t.split(":")[0] for t in tags} <= ({"age", "financial-literacy"} | _FREEFORM_PREFIXES)
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP", "ko_KR"])
     def test_task_persona_tags_are_reachable(self, locale):
         bank = load_finance_bank_for_locale(locale)
         dead = {
@@ -2775,7 +2784,7 @@ class TestAuthoredPersonaTagsAreReachable:
         }
         assert not dead, f"{locale} tasks carry tags no persona can have: {sorted(dead)}"
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP", "ko_KR"])
     def test_dynamic_persona_affinities_are_reachable(self, locale):
         import yaml
 

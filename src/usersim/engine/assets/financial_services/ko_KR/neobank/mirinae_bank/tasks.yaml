@@ -1,0 +1,414 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for mirinae_bank, an internet-only bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in Korean (build_instance picks one per trajectory) so
+# the assistant sees varied turn-1 wording while the gold stays fixed. Read-only
+# tools (get_account_transactions, get_accounts, get_statements, dispute_status)
+# carry no gold state change.
+templates:
+- id: TPL-MR-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    미리내 체크카드 내역에 {{merchant}} {{amount}}원 결제가 있는데 제가 한 게 아니에요. 확인 좀 해 주세요.
+  - >-
+    앱 알림을 보니 {{merchant}}에서 {{amount}}원이 결제됐대요. 저는 그런 결제를 한 적이 없어요.
+  - >-
+    체크카드로 모르는 결제가 나갔어요. {{merchant}}, {{amount}}원이요. 이의 제기하고 싶어요.
+  account_state:
+    account_id: acct_mr_0001
+    cards:
+    - {card_id: card_mr_0001, status: active}
+    transactions:
+    - {transaction_id: txn_mr_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 도토리TV, 해오름게임즈]
+    amount: ['14,900', '59,000', '210,000']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_mr_0001.status: UNDER_REVIEW}
+  # Stopping the card and reissuing it are reasonable during a fraud dispute.
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-MR-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    끝자리 0001 체크카드가 안 보여요. {{event}} 것 같으니 일단 정지해 주세요.
+  - >-
+    체크카드(끝자리 0001)를 {{event}} 것 같아요. 앱에서 정지하는 방법을 모르겠는데, 대신 막아 주실 수 있나요?
+  - >-
+    카드를 {{event}} 모양이에요. 끝자리 0001이에요. 혹시 모르니 사용을 멈춰 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    # The openings name the card ending 0001; pin last4 so the account the
+    # user is grounded to matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_mr_0001, status: active}
+  param_space:
+    event: [잃어버린, 택시에 두고 내린, 도난당한]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_mr_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-MR-LIMIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    체크카드 하루 이용한도를 {{limit}}원으로 바꾸고 싶어요.
+  - >-
+    {{reason}} 체크카드 하루 한도를 {{limit}}원으로 조정해 주세요.
+  - >-
+    체크카드 일일 한도 변경 부탁드려요. {{limit}}원으로 해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    cards:
+    - {card_id: card_mr_0001, status: active, daily_limit: '6000000'}
+  param_space:
+    limit: ['100만', '300만', '50만']
+    reason: [가전제품을 사려고 해서, 혹시 모를 부정 사용이 걱정돼서]
+  gold_tool_sequence: [set_card_limits]
+  expected_state_deltas: {card_mr_0001.daily_limit: '{{limit}}'}
+- id: TPL-MR-SAFEBOX-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    세이프박스를 만들어서 {{amount}}원을 옮겨 두고 싶어요.
+  - >-
+    당장 안 쓸 돈 {{amount}}원을 세이프박스에 넣어 두려고요. 만들어 주실 수 있나요?
+  - >-
+    입출금통장에 있는 {{amount}}원을 이자 붙는 세이프박스로 옮기고 싶어요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '5200000.00'
+  param_space:
+    amount: ['100만', '200만', '300만']
+  gold_tool_sequence: [create_safe_box]
+  expected_state_deltas: {safe_box_status: OPEN}
+- id: TPL-MR-MOIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{group}} 회비를 모으려고 모임통장을 만들고 싶어요. 매달 {{fee}}원씩 걷을 거예요.
+  - >-
+    모임통장 하나 개설해 주세요. {{group}} 용도이고, 회비는 월 {{fee}}원이에요.
+  - >-
+    {{group}} 사람들이랑 같이 쓸 모임통장이 필요해요. 회비 {{fee}}원으로 만들어 주세요.
+  account_state:
+    account_id: acct_mr_0001
+  param_space:
+    group: [동창 모임, 가족 여행 모임, 독서 동아리]
+    fee: ['3만', '5만', '10만']
+  gold_tool_sequence: [create_group_account]
+  expected_state_deltas: {group_account_status: OPEN}
+- id: TPL-MR-INVITE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    제가 모임주인 모임통장에 {{member}} 초대하고 싶어요. 연락처는 {{phone}}입니다.
+  - >-
+    모임통장 멤버를 한 명 추가하려고요. {{member}}, 번호는 {{phone}}입니다.
+  - >-
+    모임통장에 새 멤버 초대 부탁드려요. 대상은 {{member}}, 휴대폰 번호는 {{phone}}입니다.
+  account_state:
+    account_id: grp_mr_0001
+    account_type: 모임통장
+    balance: '640000.00'
+  param_space:
+    member: [동생, 대학 동기, 회사 동료]
+    phone: ['010-3998-4217', '010-5521-1563']
+  gold_tool_sequence: [invite_group_member]
+  expected_state_deltas: {group_member_invited: true}
+- id: TPL-MR-YEGEUM-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    입출금통장에서 {{amount}}원을 정기예금 {{term}} 상품에 넣고 싶어요.
+  - >-
+    {{amount}}원으로 미리내 정기예금 {{term}} 가입 부탁드려요.
+  - >-
+    정기예금에 가입하려고요. 금액은 {{amount}}원, 기간은 {{term}}입니다.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '8400000.00'
+  param_space:
+    amount: ['200만', '500만']
+    term: [6개월, 1년]
+  gold_tool_sequence: [open_time_deposit]
+  expected_state_deltas: {time_deposit_status: OPEN}
+- id: TPL-MR-DEVICE-001
+  tier: verifiable
+  task_type: troubleshooting
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    휴대폰을 새로 바꿨더니 미리내뱅크 앱 인증이 안 돼요. 새 기기로 다시 등록해 주세요.
+  - >-
+    앱을 지웠다가 다시 깔았는데 로그인 인증이 계속 실패해요. 기기 등록을 다시 해야 하나요?
+  - >-
+    {{reason}} 앱 인증을 다시 등록해야 할 것 같아요. 도와주세요.
+  account_state:
+    account_id: acct_mr_0001
+  param_space:
+    reason: [휴대폰을 바꿔서, 휴대폰을 초기화해서]
+  gold_tool_sequence: [reregister_device]
+  expected_state_deltas: {device_registration: REREGISTERED}
+- id: TPL-MR-PHISHING-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{message}} 문자를 받고 링크를 눌렀는데, 그 뒤에 {{amount}}원이 빠져나갔어요. 피해 신고하고 싶어요.
+  - >-
+    스미싱을 당한 것 같아요. {{message}} 문자를 믿고 시키는 대로 했더니 {{amount}}원이 이체됐어요.
+  - >-
+    사기를 당했어요. {{message}} 문자를 받고 나서 {{amount}}원을 보냈어요. 상대 계좌를 막을 수 있나요?
+  account_state:
+    account_id: acct_mr_0001
+    balance: '730000.00'
+    transactions:
+    - {transaction_id: txn_mr_0002, merchant: 계좌이체, amount: '{{amount}}', status: posted}
+  param_space:
+    message: [택배 주소 확인, 자녀를 사칭한, 정부 지원금 신청]
+    amount: ['150만', '480만']
+  gold_tool_sequence: [report_voice_phishing]
+  expected_state_deltas: {phishing_report_status: SUBMITTED}
+  allowed_tools: [freeze_card, set_alerts]
+- id: TPL-MR-ACTIVATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    미리내 체크카드를 받았어요. 사용 시작하게 해 주세요.
+  - >-
+    재발급받은 체크카드가 도착했는데 아직 결제가 안 돼요. 사용 등록 부탁드려요.
+  - >-
+    새 체크카드를 받았는데 어떻게 쓰기 시작하나요? 처리해 주실 수 있으면 해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    cards:
+    - {card_id: card_mr_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_mr_0002.status: active}
+- id: TPL-MR-PAYBILL-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    받은 {{bill}}에 적힌 금액을 미리내 통장에서 내고 싶어요.
+  - >-
+    {{bill}} 납부를 앱에서 하려니 잘 안 되네요. 대신 납부해 주실 수 있나요?
+  - >-
+    {{bill}} 내야 하는데, 입출금통장에서 바로 처리해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '1150000.00'
+  param_space:
+    bill: [자동차세 고지서, 재산세 고지서, 주민세 고지서]
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {bill_paid: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-MR-LOSTPHONE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    휴대폰을 잃어버려서 새로 샀어요. 체크카드(끝자리 0001)는 혹시 모르니 정지하고, 새 휴대폰으로 앱을 다시 등록하고, 출금될 때마다 알림이 오게 해 주세요.
+  - >-
+    폰을 잃어버렸어요. 끝자리 0001 체크카드 정지, 새 폰 기기 등록, 출금 알림 설정을 부탁드려요.
+  - >-
+    세 가지 부탁드려요. 체크카드 정지(끝자리 0001), 새 휴대폰으로 인증 재등록, 출금 알림 켜기요.
+  account_state:
+    account_id: acct_mr_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_mr_0001, status: active}
+  param_space: {}
+  gold_tool_sequence: [freeze_card, reregister_device, set_alerts]
+  expected_state_deltas: {card_mr_0001.status: frozen, device_registration: REREGISTERED, alerts_updated: true}
+- id: TPL-MR-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    지갑을 잃어버렸는데 끝자리 0001 체크카드로 {{merchant}}에서 {{amount}}원이 결제됐어요. 카드 정지하고, 결제 조사하고, 새 카드 보내 주세요.
+  - >-
+    끝자리 0001 카드로 {{merchant}} {{amount}}원 결제가 나갔어요. 제가 한 게 아니에요. 정지, 조사, 재발급 부탁드려요.
+  - >-
+    누가 제 카드를 썼어요(끝자리 0001). 먼저 정지하고, {{merchant}} {{amount}}원 결제 조사랑 재발급도 해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_mr_0001, status: active}
+    transactions:
+    - {transaction_id: txn_mr_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 해오름게임즈]
+    amount: ['79,000', '320,000']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_mr_0001.status: frozen, txn_mr_0003.status: UNDER_REVIEW, card_mr_0001.replacement: ordered}
+- id: TPL-MR-TRIP-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    친구들이랑 {{trip}} 여행 경비를 모으려고요. 모임통장을 만들고, {{member}} 초대하고, 제 통장에서 첫 회비 {{fee}}원을 넣어 주세요.
+  - >-
+    {{trip}} 여행용 모임통장이 필요해요. 만들고 나서 {{member}} 초대랑 첫 회비 {{fee}}원 이체까지 부탁드려요.
+  - >-
+    모임통장 개설({{trip}} 여행용), {{member}} 초대, 제 입출금통장에서 {{fee}}원 입금을 해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '2900000.00'
+  param_space:
+    trip: [제주도, 강릉, 부산]
+    member: [고등학교 친구, 대학 동기]
+    fee: ['10만', '20만']
+  gold_tool_sequence: [create_group_account, invite_group_member, transfer_funds]
+  expected_state_deltas: {group_account_status: OPEN, group_member_invited: true, transfer_status: COMPLETED}
+- id: TPL-MR-SAVINGS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    성과급이 들어와서 나눠 두려고요. {{safe}}원은 세이프박스에, {{deposit}}원은 1년 정기예금에 넣고, 입출금 알림도 설정해 주세요.
+  - >-
+    세이프박스 만들어서 {{safe}}원 옮기고, 정기예금 1년에 {{deposit}}원 가입하고, 알림 설정까지 부탁드려요.
+  - >-
+    목돈 정리를 하려고요. 세이프박스 {{safe}}원, 정기예금 {{deposit}}원(1년), 그리고 입출금 알림이요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '9600000.00'
+  param_space:
+    safe: ['200만', '300만']
+    deposit: ['300만', '500만']
+  gold_tool_sequence: [create_safe_box, open_time_deposit, set_alerts]
+  expected_state_deltas: {safe_box_status: OPEN, time_deposit_status: OPEN, alerts_updated: true}
+- id: TPL-MR-PHISHING-002
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{message}} 문자에 속아서 {{amount}}원을 보냈어요. 피해 신고하고, 체크카드 하루 한도를 {{limit}}원으로 낮추고, 출금 알림도 켜 주세요.
+  - >-
+    스미싱 피해를 입었어요({{message}} 문자였어요, {{amount}}원). 피해구제 신청, 체크카드 한도 {{limit}}원으로 하향, 출금 알림 설정 부탁드려요.
+  - >-
+    세 가지 해 주세요. {{amount}}원 사기 피해 신고({{message}} 문자), 체크카드 일일 한도 {{limit}}원으로 변경, 출금 알림 설정이요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '420000.00'
+    cards:
+    - {card_id: card_mr_0001, status: active, daily_limit: '6000000'}
+    transactions:
+    - {transaction_id: txn_mr_0004, merchant: 계좌이체, amount: '{{amount}}', status: posted}
+  param_space:
+    message: [택배 주소 확인, 자녀를 사칭한]
+    amount: ['200만', '350만']
+    limit: ['30만', '50만']
+  gold_tool_sequence: [report_voice_phishing, set_card_limits, set_alerts]
+  expected_state_deltas: {phishing_report_status: SUBMITTED, card_mr_0001.daily_limit: '{{limit}}', alerts_updated: true}
+- id: TPL-MR-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    미리내뱅크를 그만 쓰려고요. 남은 잔액은 {{bank_account}}로 보내고, {{creditor}} 자동이체는 해지하고, 계좌를 닫아 주세요.
+  - >-
+    계좌 해지하기 전에 잔액을 {{bank_account}}로 옮기고 {{creditor}} 자동이체도 끊어 주세요. 그다음 해지 부탁드려요.
+  - >-
+    통장 정리할게요. 잔액 이체({{bank_account}}), {{creditor}} 자동이체 해지, 계좌 해지 순서로 해 주세요.
+  account_state:
+    account_id: acct_mr_0001
+    balance: '863000.00'
+    mandates:
+    - {mandate_id: mdt_mr_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    bank_account: ['윤슬은행 412-08-772104']
+    creditor: [도토리TV, 하늘숲피트니스]
+  gold_tool_sequence: [transfer_funds, stop_payment, close_account]
+  expected_state_deltas: {transfer_status: COMPLETED, mdt_mr_0001.status: REVOKED, acct_mr_0001.status: CLOSED}
+- id: TPL-MR-MOVE-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이사를 했어요. 새 주소는 {{address}}입니다. 주소를 바꾸고, 체크카드를 새로 신청하고, 월세 보낼 {{payee}} 계좌({{bank_account}})를 등록하고, 입출금 알림도 설정해 주세요.
+  - >-
+    이사 후 정리 부탁드려요. 주소 변경({{address}}), 체크카드 신청, {{payee}} 계좌({{bank_account}}) 등록, 입출금 알림 설정이요.
+  - >-
+    네 가지예요. 주소를 바꿔 주시고(새 주소는 {{address}}입니다), 체크카드 발급 신청, 자주 쓰는 계좌에 {{payee}}({{bank_account}}) 추가, 입출금 알림 설정이요.
+  account_state:
+    account_id: acct_mr_0001
+    customer_id: cust_mr_0001
+  param_space:
+    address: ['인천광역시 연수구 컨벤시아대로 165', '경기도 성남시 분당구 판교역로 235']
+    payee: [집주인, 관리사무소]
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-7781204']
+  gold_tool_sequence: [update_contact_info, open_account, update_beneficiary, set_alerts]
+  expected_state_deltas: {contact_updated: true, new_account_status: OPEN, payee_added: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ko_KR/dynamic.yaml), not scripted templates.

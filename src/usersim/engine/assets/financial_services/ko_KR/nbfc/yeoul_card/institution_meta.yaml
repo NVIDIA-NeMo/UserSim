@@ -1,0 +1,10 @@
+institution_id: yeoul_card
+display_name: Yeoul Card
+type: nbfc
+brand_voice: traditional
+domains:
+- payments
+- lending_mortgage
+placeholder: true
+display_name_local: 여울카드
+schema_version: v0.1

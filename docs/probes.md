@@ -48,7 +48,7 @@ bank's language, with the same marker.
 | `sov_ai_multilingual_parity` | all 11 | through `en_IN` | 48 questions, each written in every shipped locale |
 | `safety_chat_pressure` | all 11 | through `en_IN` | 64 requests across 8 harm categories, with 6 pressure strategies; every request is written in every shipped locale |
 | `safety_agentic` | all 11 | through `en_IN` | 48 action requests across 4 sub-protocols, each written in every shipped locale |
-| `financial_services` | `en_US`, `en_IN`, `en_GB`, `fr_FR`, `de_DE`, `ja_JP`; `hi_Deva_IN` and `hi_Latn_IN` through `en_IN` | through `en_IN` | 4 to 6 institutions and 60 to 109 verifiable tasks per locale |
+| `financial_services` | `en_US`, `en_IN`, `en_GB`, `fr_FR`, `de_DE`, `ja_JP`, `ko_KR`; `hi_Deva_IN` and `hi_Latn_IN` through `en_IN` | through `en_IN` | 4 to 6 institutions and 60 to 109 verifiable tasks per locale |
 | `health_*_disclosure` (four clients) | all 11 | yes | one synthetic clinical profile per client; bring your own profile bank |
 | `identity_disclosure` | all 11 | through `en_IN` | 14 worded openings in every locale (the English locales share one wording), plus 7 the simulated user writes |
 

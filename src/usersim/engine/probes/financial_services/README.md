@@ -39,6 +39,9 @@ These markets ship:
 - `ja_JP`: 5 institutions, 1299 documents, 90 tasks, generated in Japanese (a
   regional bank, an internet-only bank, an online broker, a life insurer and a
   card company).
+- `ko_KR`: 5 institutions, 1309 documents, 89 tasks, generated in Korean (a
+  commercial bank, an internet-only bank, an online securities firm, a life
+  insurer and a card company).
 
 `hi_Deva_IN` has a generated corpus but no task set. It and `hi_Latn_IN` run on
 the `en_IN` bank, as the India language variants do: the opening and the
