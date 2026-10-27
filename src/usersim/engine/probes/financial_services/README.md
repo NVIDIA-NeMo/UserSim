@@ -345,6 +345,10 @@ that it costs about the same number of tokens in every locale (the Japanese and
 Korean bands use the document model's measured tokens per character), so one
 cluster size suits every locale on that model. Another document model's
 tokenizer can count differently, so check `max_tokens` again when you change it.
+`max_tokens` also comes out of the model's context window, which the prompt
+shares: Gemma 4 31B has 32,768 tokens, and the largest Korean and Japanese
+prompts run past 16,000, so the default reserves 12,288 for the cluster and its
+reasoning rather than half the window.
 
 If the endpoint starts returning timeouts or 5xx, lower
 `--max-parallel doc_gen_model=N` before raising the timeout: the usual cause is

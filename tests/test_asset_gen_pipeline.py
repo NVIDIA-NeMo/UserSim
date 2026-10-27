@@ -115,6 +115,63 @@ def test_prompt_values_carry_the_locale_notation():
     assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
 
 
+def test_common_operations_the_simulator_reads_arguments_from_are_described():
+    """get_order_status called without an order_id lists the account's orders, which is
+    how the agent finds the id cancel_order needs. The operations whose arguments the
+    simulator reads carry a description, and it reaches the cluster that writes their
+    tool docs."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict, explode_to_cluster_rows
+    from usersim.asset_gen.financial_services.spec import (
+        COMMON_OPERATION_DESCRIPTIONS,
+        COMMON_TYPE_OPERATIONS,
+        COMMON_UNIVERSAL_OPERATIONS,
+    )
+
+    common = {name for name, _ in COMMON_UNIVERSAL_OPERATIONS}
+    common |= {name for ops in COMMON_TYPE_OPERATIONS.values() for name, _ in ops}
+    assert set(COMMON_OPERATION_DESCRIPTIONS) <= common
+    assert "without one, it returns every order" in COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+    spec = load_region_spec(_REGION_SPEC)
+    brokerage = next(i for i in spec.institutions if i.type == "brokerage")
+    tool = next(t for t in brokerage.tool_taxonomy if t.name == "get_order_status")
+    assert tool.description == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+    assert _tool_dict(tool)["description"] == ""  # tools.yaml ships it empty
+
+    brief_df = pd.DataFrame([{"institution_id": brokerage.id, "institution_brief": {"positioning": "p"}}])
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    shared = clusters[(clusters["institution_id"] == brokerage.id) & (clusters["cluster_kind"] == "shared")]
+    tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert tools["get_order_status"]["description"] == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+
+def test_prompt_values_carry_the_spec_label():
+    """A value's key is a machine name and its label says what the value means, so
+    each value the region spec labels carries its label into the prompt."""
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    raw["institutions"][0]["products"][0]["variables"] = {
+        "credit_base_limit": {"type": "money", "value": 9000000},
+        "term_months": {"type": "int", "value": 48},
+    }
+    raw.setdefault("doc_titles", {})["variable_labels"] = {"credit_base_limit": "tax-credit base for contributions"}
+    spec = validate_region_spec(raw)
+
+    variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+    assert variables["credit_base_limit"]["label"] == "tax-credit base for contributions"
+    assert "label" not in variables["term_months"]
+    assert "When a value carries a `label`, the label says what the value IS" in " ".join(DOCSET_PROMPT.split())
+
+
 def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
     """A spec description reaches the shared clusters that write a discoverable
     tool's doc, while tools.yaml ships it empty: the assistant learns the tool
@@ -207,14 +264,16 @@ def test_explode_to_cluster_rows_assigns_unique_cluster_ids():
 _GOOD_DOCSET = {"documents": [{"doc_key": "faq_1", "title": "t", "body": "b"}]}
 
 
-def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
+def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None, score_by_attempt=None):
     """Stub Phase-2 generation. ``drop_by_attempt[i]`` are the cluster_ids DD omits
     entirely on attempt i; ``bad_by_attempt[i]`` are the ones that come BACK but
-    with an unusable payload (the truncated-response shape)."""
+    with an unusable payload (the truncated-response shape); ``score_by_attempt[i]``
+    maps a cluster_id to the faithfulness score the judge gives it (default 4)."""
     from usersim.asset_gen.financial_services import pipeline as P
 
     calls: list = []
     bad_by_attempt = bad_by_attempt or {}
+    score_by_attempt = score_by_attempt or {}
 
     class _Res:
         def __init__(self, df):
@@ -224,10 +283,11 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
             return self._df
 
     class _Eng:
-        def __init__(self, seed_df, drop, bad):
+        def __init__(self, seed_df, drop, bad, scores):
             self._seed = seed_df
             self._drop = drop
             self._bad = bad
+            self._scores = scores
 
         def create(self, builder, num_records=None):
             df = self._seed[~self._seed["cluster_id"].isin(self._drop)].copy()
@@ -237,13 +297,19 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
                 '{"documents": [{"doc_key": "faq_1", "title": "t", "body": "trunc' if cid in self._bad else _GOOD_DOCSET
                 for cid in df["cluster_id"]
             ]
+            df["numeric_faithfulness_score"] = [self._scores.get(cid, 4.0) for cid in df["cluster_id"]]
             return _Res(df.reset_index(drop=True))
 
     def fake_build(models, cluster_seed):
         attempt = len(calls)
         calls.append(list(cluster_seed["cluster_id"]))
         return (
-            _Eng(cluster_seed, drop_by_attempt.get(attempt, set()), bad_by_attempt.get(attempt, set())),
+            _Eng(
+                cluster_seed,
+                drop_by_attempt.get(attempt, set()),
+                bad_by_attempt.get(attempt, set()),
+                score_by_attempt.get(attempt, {}),
+            ),
             object(),
         )
 
@@ -308,6 +374,33 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
 
     assert set(result["cluster_id"]) == {"c1", "c3"}
     assert len(calls) == P.DOCSET_MAX_ATTEMPTS
+
+
+def test_generate_docsets_with_backfill_regenerates_a_cluster_below_the_faithfulness_floor(monkeypatch):
+    """A cluster the judge scores below the floor is regenerated, and a better attempt
+    replaces it."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt={0: {"c2": 1.0}, 1: {"c2": 4.0}})
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert calls[1] == ["c2"]
+    scores = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert scores == {"c1": 4.0, "c2": 4.0, "c3": 4.0}
+
+
+def test_generate_docsets_with_backfill_keeps_the_best_attempt_below_the_floor(monkeypatch):
+    """When no attempt reaches the floor, the cluster is still written, flagged, from
+    its best-scoring attempt: dropping it would leave gaps in the corpus."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    scores = {0: {"c2": 1.0}, 1: {"c2": 2.0}, 2: {"c2": 1.0}}
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt=scores)
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert len(calls) == P.DOCSET_MAX_ATTEMPTS
+    kept = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert kept == {"c1": 4.0, "c2": 2.0, "c3": 4.0}
 
 
 def test_usable_docset_rows_keeps_low_faithfulness_clusters():

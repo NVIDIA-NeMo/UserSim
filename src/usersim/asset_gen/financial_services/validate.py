@@ -274,7 +274,13 @@ def _value_candidates(val: Any, number_format: str | None = None) -> list[str]:
 
 
 def _value_present(val: Any, text: str, number_format: str | None = None) -> bool:
-    return any(c in text for c in _value_candidates(val, number_format))
+    """Whether ``text`` states ``val`` as a whole number in one of its renderings. A
+    rendering inside a longer number doesn't count: 5,000,000,000원 doesn't state a
+    5,000,000원 limit."""
+    return any(
+        re.search(rf"(?<![0-9])(?<![0-9][.,]){re.escape(c)}(?![0-9]|[.,][0-9])", text)
+        for c in _value_candidates(val, number_format)
+    )
 
 
 def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -483,6 +489,45 @@ _LATEX_RE = re.compile(
 #: Control characters other than tab and newline. A single backslash in the model's
 #: JSON turns ``\rightarrow`` into a carriage return followed by ``ightarrow``.
 _CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+#: One command in math mode, either as written (``$\times$``) or after the JSON parser
+#: read the model's single backslash and the letter after it as an escape: ``\times``
+#: arrives as a tab and ``imes``, ``\neq`` as a newline and ``eq``. Tab and newline are
+#: ordinary text, so only this pattern sees those two.
+_MATH_RE = re.compile(r"\$ *(?:\\([A-Za-z]+)|([\t\n\r\f\b])([A-Za-z]+)) *\$")
+_JSON_ESCAPES = {"\t": "t", "\n": "n", "\r": "r", "\f": "f", "\b": "b"}
+#: The character each LaTeX symbol command stands for.
+_LATEX_SYMBOLS = {
+    "rightarrow": "→",
+    "leftarrow": "←",
+    "Rightarrow": "⇒",
+    "ge": "≥",
+    "geq": "≥",
+    "le": "≤",
+    "leq": "≤",
+    "ne": "≠",
+    "neq": "≠",
+    "times": "×",
+    "approx": "≈",
+    "cdot": "·",
+    "pm": "±",
+}
+
+
+def plain_symbols(text: str) -> tuple[str, int]:
+    """``text`` with each LaTeX symbol in math mode written as its character, and how
+    many it replaced. A command with no character here is left as it is, for
+    ``plain_text`` to fail."""
+    replaced = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal replaced
+        command = match.group(1) or _JSON_ESCAPES[match.group(2)] + match.group(3)
+        if command not in _LATEX_SYMBOLS:
+            return match.group(0)
+        replaced += 1
+        return _LATEX_SYMBOLS[command]
+
+    return _MATH_RE.sub(replace, text), replaced
 
 
 def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -496,7 +541,11 @@ def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> Non
         seen: set = set()
         for d in idata.documents:
             text = f"{d.get('title', '')}\n{d.get('body', '')}"
-            found = _LATEX_RE.findall(text) + [repr(c) for c in _CONTROL_RE.findall(text)]
+            found = (
+                _LATEX_RE.findall(text)
+                + [repr(m.group(0)) for m in _MATH_RE.finditer(text) if m.group(2)]
+                + [repr(c) for c in _CONTROL_RE.findall(text)]
+            )
             if found:
                 offenders.append(str(d.get("id")))
                 seen.update(found)
@@ -529,6 +578,10 @@ def _script_fraction(text: str, ranges: tuple[tuple[int, int], ...]) -> float | 
 #: their types as English identifiers, so its script share measures the identifiers.
 _SCRIPT_EXEMPT_GENRES: frozenset = frozenset({"discoverable_tool_doc"})
 
+#: A tool or argument name (``verify_identity``, ``account_id``). An agent procedure names
+#: the tools it calls in every locale, so the script share is measured on the prose around them.
+_SNAKE_CASE_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+(?![A-Za-z0-9_])")
+
 
 def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
     locale = str(region_meta.get("locale", ""))
@@ -547,7 +600,7 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
         for d in idata.documents:
             if d.get("document_type") in _SCRIPT_EXEMPT_GENRES:
                 continue
-            frac = _script_fraction(f"{d.get('title', '')} {d.get('body', '')}", ranges)
+            frac = _script_fraction(_SNAKE_CASE_RE.sub(" ", f"{d.get('title', '')} {d.get('body', '')}"), ranges)
             if frac is not None and frac < MIN_SCRIPT_FRACTION:
                 bad.append(f"{d.get('id')}={frac:.2f}")
         if bad:

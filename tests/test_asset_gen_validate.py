@@ -8,11 +8,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 from usersim.asset_gen.financial_services.pipeline import InstitutionBank, serialize_bank
 from usersim.asset_gen.financial_services.spec import RegionSpec
-from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, validate_bank
+from usersim.asset_gen.financial_services.validate import FAIL, PASS, WARN, plain_symbols, validate_bank
 
 _SPEC_DICT: dict[str, Any] = {
     "locale": "en_US",
@@ -169,6 +170,17 @@ def test_a_tool_reference_is_outside_the_script_check(tmp_path: Path):
     )
 
 
+def test_a_procedure_that_names_its_tools_is_measured_on_its_prose(tmp_path: Path):
+    """An agent procedure names each tool and argument it uses; the check counts the
+    prose around those names, so a short procedure in Korean passes."""
+    body = (
+        "`verify_identity` 도구로 본인 인증을 하고 `get_account_transactions`로 거래의 "
+        "`transaction_id`를 확인한 뒤 `file_transaction_dispute`를 호출하십시오."
+    )
+    doc = {**_doc("D1", body), "title": "file_transaction_dispute 사용 기준", "document_type": "policy_procedure"}
+    assert _status(validate_bank(_write_bank(tmp_path, "ko_KR", [doc])), "language_script", "testbank") == PASS
+
+
 def test_duplicate_embeddings_warn(tmp_path: Path):
     docs = [_doc("D1", "Overdraft fee is $34."), _doc("D2", "Overdraft fee is $34.")]
     emb = {"D1": [1.0, 0.0, 0.0], "D2": [1.0, 0.0, 0.0]}
@@ -257,6 +269,19 @@ def test_numeric_faithfulness_still_rejects_a_wrong_number():
     assert not _value_present(10_000_000, "上限は2,000万円です", "ja_JP")
     assert not _value_present(150_000_000, "保障額は1億6,000万円です", "ja_JP")
     assert not _value_present(100_000_000, "한도는 2억 원입니다", "ko_KR")
+
+
+def test_numeric_faithfulness_matches_whole_numbers_only():
+    """A rendering inside a longer number states a different value: 5,000,000,000원
+    doesn't state a 5,000,000원 limit."""
+    from usersim.asset_gen.financial_services.validate import _value_present
+
+    assert not _value_present(5_000_000, "현금서비스 이용한도 최고액은 5,000,000,000원입니다", "ko_KR")
+    assert not _value_present(5_000_000, "a limit of $15,000,000")
+    assert not _value_present(5, "a fee of 0.5%")
+    assert _value_present(5_000_000, "현금서비스 이용한도 최고액은 5,000,000원입니다.", "ko_KR")
+    assert _value_present(5_000_000, "a limit of $5,000,000.")
+    assert _value_present(5, "a fee of 5%, waived")
 
 
 def test_numeric_faithfulness_accepts_french_and_german_number_formats():
@@ -670,6 +695,39 @@ def test_a_control_character_fails(tmp_path: Path):
     return followed by ``ightarrow``."""
     bank = _write_bank(tmp_path, "en_US", [_doc("D1", "Account holder $" + "\r" + "ightarrow$ eligible")])
     assert _status(validate_bank(bank, None), "plain_text", "testbank") == FAIL
+
+
+def test_a_tab_or_newline_read_from_a_latex_escape_fails(tmp_path: Path):
+    """``\\times`` and ``\\neq`` with a single backslash arrive as a tab and a newline,
+    which are ordinary text, so only their place between ``$`` signs gives them away."""
+    bank = _write_bank(
+        tmp_path,
+        "en_US",
+        [_doc("D1", "Interest is the principal $" + "\t" + "imes$ the rate."), _doc("D2", "Fee $" + "\n" + "eq$ $0")],
+    )
+    rep = validate_bank(bank, None)
+    assert _status(rep, "plain_text", "testbank") == FAIL
+    detail = next(r.detail for r in rep.results if r.check == "plain_text")
+    assert detail.startswith("2/2 doc(s)")
+
+
+@pytest.mark.parametrize(
+    "written, expected",
+    [
+        ("Balance $\\ge$ $500", "Balance ≥ $500"),
+        ("Holder $ \\rightarrow $ eligible", "Holder → eligible"),
+        ("Holder $" + "\r" + "ightarrow$ eligible", "Holder → eligible"),
+        ("Principal $" + "\t" + "imes$ rate", "Principal × rate"),
+        ("Fee $" + "\n" + "eq$ $0", "Fee ≠ $0"),
+    ],
+)
+def test_latex_symbols_are_written_as_characters(written: str, expected: str):
+    assert plain_symbols(written) == (expected, 1)
+
+
+def test_dollar_amounts_and_unknown_commands_are_left_for_the_check():
+    text = "From $500 → $600; $\\frac$ and $\\text$ have no single character."
+    assert plain_symbols(text) == (text, 0)
 
 
 def test_symbols_and_dollar_amounts_are_plain_text(tmp_path: Path):

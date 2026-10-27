@@ -266,6 +266,26 @@ COMMON_TYPE_OPERATIONS: dict[str, tuple[tuple[str, SideEffectClass], ...]] = {
 }
 
 
+#: What a common operation does and takes, for those whose simulator reads specific
+#: arguments. The description steers the operation's generated doc (tools.yaml ships
+#: it empty). Without one, the operation reaches the generator as a bare name and its
+#: doc invents the arguments: get_order_status asking for an order id the customer
+#: doesn't have, where the simulator lists the account's orders when called without one.
+COMMON_OPERATION_DESCRIPTIONS: dict[str, str] = {
+    "get_accounts": (
+        "Lists the verified customer's accounts (account_id, type, last 4 digits, balance, status) "
+        "and any cards (card_id). Takes no arguments. Use it to turn the last 4 digits a customer "
+        "gives into the account_id or card_id another tool takes."
+    ),
+    "get_order_status": (
+        "Lists the orders on the customer's account, with each order's order_id, security and "
+        "status. Takes an optional order_id; called without one, it returns every order, which is "
+        "how the agent finds the order_id of an order the customer describes by what it trades."
+    ),
+    "cancel_order": "Cancels one open order. Takes its order_id, which get_order_status returns.",
+}
+
+
 def common_operations_for_type(
     institution_type: str,
 ) -> tuple[tuple[str, SideEffectClass], ...]:
@@ -334,7 +354,14 @@ class Institution(BaseModel):
             raise ValueError(f"{self.id}: {both} both declared in tool_taxonomy and omitted")
         for name, side_effect in common_operations_for_type(self.type):
             if name not in existing and name not in omitted:
-                self.tool_taxonomy.append(Tool(name=name, discoverable=True, side_effect_class=side_effect))
+                self.tool_taxonomy.append(
+                    Tool(
+                        name=name,
+                        discoverable=True,
+                        side_effect_class=side_effect,
+                        description=COMMON_OPERATION_DESCRIPTIONS.get(name, ""),
+                    )
+                )
                 existing.add(name)
         return self
 

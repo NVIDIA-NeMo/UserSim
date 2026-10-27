@@ -952,10 +952,87 @@ def test_documents_are_asked_for_plain_text_symbols():
         text = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**base, cluster_kind=kind)).lower()
         assert "no latex" in text, kind
         assert all(symbol in text for symbol in "≥≤→×"), kind
+        # Where math markup slips in: condition-to-outcome lines, steps and formulas.
+        assert "maps a condition to its outcome" in text and "a formula" in text, kind
 
     block = re.search(r"^    eligibility_matrix:(.*?)(?=^    \w+:|^-|\Z)", DOCSET_PROMPT, re.M | re.S)
     assert block, "no convention for eligibility_matrix"
     assert "->" not in block.group(1) and "→" not in block.group(1)
+
+
+# ── identity: one check, on the details verify_identity takes ──
+
+
+def test_identity_fields_are_the_regions_verify_identity_fields():
+    from usersim.asset_gen.financial_services.pipeline import identity_fields_for
+
+    assert identity_fields_for(load_region_spec(_EN_US)) == "full name and date of birth"
+    assert identity_fields_for(load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")) == "full name, date of birth and pan"
+
+
+def test_identity_fields_reach_the_brief_and_every_cluster_row():
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import build_institution_seed, explode_to_cluster_rows
+
+    spec = load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")
+    assert set(build_institution_seed(spec)["identity_fields"]) == {"full name, date of birth and pan"}
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    assert set(clusters["identity_fields"]) == {"full name, date of birth and pan"}
+
+
+def test_documents_verify_identity_once_and_add_no_other_step():
+    """verify_identity checks the region's identity fields and nothing else, so a
+    procedure that adds a one-time code, MFA or a card number can never be completed.
+    Every prompt that shapes a verification step names the one check and its fields and
+    rules the other steps out; the customer-facing guide names the fields without the
+    tool."""
+    import re
+
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services.prompts import BRIEF_PROMPT, DOCSET_PROMPT
+
+    seed = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        identity_fields="full name and date of birth",
+        products_json="[]",
+        regulators_json="{}",
+        concept_guidance="",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+    )
+
+    def render(template: str, **extra) -> str:
+        return re.sub(r"\s+", " ", Template(template).render(**seed, **extra))
+
+    brief = render(BRIEF_PROMPT)
+    assert "ONE check, on the customer's full name and date of birth" in brief
+    assert "no one-time code, MFA" in brief
+    # Every cluster reads the brief, customer-facing ones included, so it names no tool.
+    assert "verify_identity" not in brief
+
+    shared = render(DOCSET_PROMPT, cluster_kind="shared")
+    assert "calling `verify_identity` with the customer's full name and date of birth" in shared
+    assert "no one-time code, MFA" in shared
+    assert "no PIN, one-time code, or other verification argument" in shared
+
+    product = render(DOCSET_PROMPT, cluster_kind="product")
+    assert "they give their full name and date of birth" in product
+    # Customer-facing documents name no tool, this one included.
+    assert "verify_identity" not in product
 
 
 # ── language conventions: spelling and usage for a language with regional variants ──
@@ -1057,6 +1134,61 @@ def test_language_conventions_reach_the_brief_and_every_cluster_row():
     assert set(build_institution_seed(load_region_spec(_EN_US))["language_guidance"]) == {""}
 
 
+def test_each_cluster_gets_the_institutions_rules_and_the_types_guidance():
+    """The brief summarizes each field in a sentence, which drops a rule's scope, so
+    every cluster gets the regulator text of every domain the institution operates in
+    (a lending rule can name the payment products it leaves out) and the type's
+    concept guidance."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import explode_to_cluster_rows
+    from usersim.asset_gen.financial_services.prompts import concept_guidance_for
+
+    spec = load_region_spec(_EN_US)
+    spec_by_id = {i.id: i for i in spec.institutions}
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    for _, row in clusters.iterrows():
+        inst = spec_by_id[row["institution_id"]]
+        assert set(json.loads(row["regulators_json"])) == set(inst.domains) & set(spec.domain_regulators), inst.id
+        assert row["concept_guidance"] == concept_guidance_for(inst.type, spec.concept_guidance)
+
+
+def test_document_prompt_puts_the_rules_above_the_brief():
+    import re
+
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+
+    seed = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="nbfc",
+        language="English",
+        currency_symbol="$",
+        institution_brief="{}",
+        regulators_json='{"lending_mortgage": {"regulator_text": "DSR covers the card loan."}}',
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+        cluster_kind="product",
+    )
+    text = re.sub(r"\s+", " ", Template(DOCSET_PROMPT).render(**seed, concept_guidance="Cover installments."))
+    assert "DSR covers the card loan." in text and "Cover installments." in text
+    assert "where the brief or your own knowledge of the market says otherwise, these win" in text
+    assert "does not extend to its siblings" in text
+    bare = Template(DOCSET_PROMPT).render(**seed, concept_guidance="")
+    assert "What this kind of institution's documents cover" not in bare
+
+
 def test_generation_respells_bodies_and_leaves_plan_titles_alone():
     import json
 
@@ -1082,3 +1214,32 @@ def test_generation_respells_bodies_and_leaves_plan_titles_alone():
     doc = next(d for bank in collect_institutions(result_df, spec) for d in bank.documents)
     assert doc["body"] == "Towards the end of the term, interest moves towards the cap."
     assert doc["title"] == "Saving toward a goal"
+
+
+def test_generation_writes_latex_symbols_as_characters():
+    """The model's single backslash reaches the pipeline already read as a JSON escape:
+    ``\\rightarrow`` as a carriage return and ``ightarrow``, ``\\times`` as a tab and
+    ``imes``. Generation writes the characters, so the bank needs no cleanup."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import collect_institutions
+
+    spec = load_region_spec(_EN_US)
+    inst = spec.institutions[0]
+    plan = [{"doc_key": "k1", "topic": "Fees", "uuid": "u1", "domain": inst.domains[0]}]
+    body = "Balance under $500 $" + "\r" + "ightarrow$ $12 fee. Interest is the principal $" + "\t" + "imes$ the rate."
+    result_df = pd.DataFrame(
+        [
+            {
+                "institution_id": inst.id,
+                "cluster_kind": "product",
+                "doc_set": {"documents": [{"doc_key": "k1", "title": "t", "document_type": "faq", "body": body}]},
+                "numeric_faithfulness_score": 4,
+                "doc_plan_json": json.dumps(plan),
+            }
+        ]
+    )
+    doc = next(d for bank in collect_institutions(result_df, spec) for d in bank.documents)
+    assert doc["body"] == "Balance under $500 → $12 fee. Interest is the principal × the rate."
