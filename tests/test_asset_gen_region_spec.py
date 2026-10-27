@@ -958,6 +958,81 @@ def test_documents_are_asked_for_plain_text_symbols():
     assert "->" not in block.group(1) and "→" not in block.group(1)
 
 
+# ── identity: one check, on the details verify_identity takes ──
+
+
+def test_identity_fields_are_the_regions_verify_identity_fields():
+    from usersim.asset_gen.financial_services.pipeline import identity_fields_for
+
+    assert identity_fields_for(load_region_spec(_EN_US)) == "full name and date of birth"
+    assert identity_fields_for(load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")) == "full name, date of birth and pan"
+
+
+def test_identity_fields_reach_the_brief_and_every_cluster_row():
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import build_institution_seed, explode_to_cluster_rows
+
+    spec = load_region_spec(_REGION_SPEC_DIR / "en_IN.yaml")
+    assert set(build_institution_seed(spec)["identity_fields"]) == {"full name, date of birth and pan"}
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    assert set(clusters["identity_fields"]) == {"full name, date of birth and pan"}
+
+
+def test_documents_verify_identity_once_and_add_no_other_step():
+    """verify_identity checks the region's identity fields and nothing else, so a
+    procedure that adds a one-time code, MFA or a card number can never be completed.
+    Every prompt that shapes a verification step names the one check and its fields and
+    rules the other steps out; the customer-facing guide names the fields without the
+    tool."""
+    import re
+
+    from jinja2 import Template
+
+    from usersim.asset_gen.financial_services.prompts import BRIEF_PROMPT, DOCSET_PROMPT
+
+    seed = dict(
+        display_name="X",
+        display_name_local="",
+        institution_id="x",
+        brand_voice="traditional",
+        institution_type="bank",
+        language="English",
+        currency_symbol="$",
+        identity_fields="full name and date of birth",
+        products_json="[]",
+        regulators_json="{}",
+        concept_guidance="",
+        institution_brief="{}",
+        focus_json="{}",
+        doc_plan_json="[]",
+        sibling_doc_index="{}",
+        target_doc_count=1,
+    )
+
+    def render(template: str, **extra) -> str:
+        return re.sub(r"\s+", " ", Template(template).render(**seed, **extra))
+
+    brief = render(BRIEF_PROMPT)
+    assert "ONE check, on the customer's full name and date of birth" in brief
+    assert "no one-time code, MFA" in brief
+    # Every cluster reads the brief, customer-facing ones included, so it names no tool.
+    assert "verify_identity" not in brief
+
+    shared = render(DOCSET_PROMPT, cluster_kind="shared")
+    assert "calling `verify_identity` with the customer's full name and date of birth" in shared
+    assert "no one-time code, MFA" in shared
+    assert "no PIN, one-time code, or other verification argument" in shared
+
+    product = render(DOCSET_PROMPT, cluster_kind="product")
+    assert "they give their full name and date of birth" in product
+    # Customer-facing documents name no tool, this one included.
+    assert "verify_identity" not in product
+
+
 # ── language conventions: spelling and usage for a language with regional variants ──
 
 

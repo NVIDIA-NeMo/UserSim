@@ -599,6 +599,18 @@ def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[
     return out
 
 
+def identity_fields_for(spec: RegionSpec) -> str:
+    """What ``verify_identity`` takes in this region, in words ("full name and date of
+    birth"): the required set the simulator gates on and advertises to the assistant.
+
+    The prompts name it because a model told only to verify identity invents the rest:
+    one-time codes, card numbers and ID numbers that no tool in the conversation can
+    check, so a procedure that requires them can never be completed.
+    """
+    words = [field.replace("_", " ") for field in spec.identity_verification.required_fields]
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
 def regulators_json(spec: RegionSpec, domains: list[Any]) -> str:
     """The region spec's regulators and regulator text for ``domains``, as both prompts read them."""
     regulators = {d: spec.domain_regulators[d].model_dump() for d in domains if d in spec.domain_regulators}
@@ -625,6 +637,7 @@ def build_institution_seed(spec: RegionSpec):
                     spec.language_conventions.guidance, spec.language_conventions.respell
                 ),
                 "currency_symbol": spec.currency_symbol,
+                "identity_fields": identity_fields_for(spec),
                 "products_json": json.dumps(products_for_prompt(inst.products, spec), ensure_ascii=False),
                 "regulators_json": regulators_json(spec, inst.domains),
                 # Market-specific emphasis: region override else region-neutral
@@ -730,6 +743,7 @@ def explode_to_cluster_rows(
                 spec.language_conventions.guidance, spec.language_conventions.respell
             ),
             "currency_symbol": spec.currency_symbol,
+            "identity_fields": identity_fields_for(spec),
             "concept_guidance": concept_guidance_for(inst.type, spec.concept_guidance),
             "regulators_json": regulators_json(spec, inst.domains),
             "institution_brief": brief_json,
