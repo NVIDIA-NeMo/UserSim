@@ -15,11 +15,10 @@ What is asserted here (vs in per-probe test files):
   with the canonical labels. Catches the regression where a rename
   drops one or where the bootstrap silently fails to import a
   module.
-- **Module constants** — every registered probe's metadata module
-  exposes ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``
-  with the right shapes. Mirrors the smoke-check #8 surface as a
-  fast unit test, so a CI-time regression doesn't require a full
-  smoke run to surface.
+- **Probe metadata** — every registered probe class carries
+  ``family`` / ``prompt_version`` / ``variants`` with the right shapes.
+  Mirrors the smoke-check #7 surface as a fast unit test, so a CI-time
+  regression doesn't require a full smoke run to surface.
 - **ProbeAdapter conformance** — every registered probe class
   satisfies the ``ProbeAdapter`` Protocol's required surface.
   Catches the regression where a method is renamed on the Protocol
@@ -194,31 +193,25 @@ class TestRegistryCompleteness:
 # ---------------------------------------------------------------------------
 
 
-class TestModuleConstants:
-    """Each registered probe's module exposes well-formed metadata constants."""
+class TestProbeMetadata:
+    """Each registered probe class carries well-formed metadata."""
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
-    def test_probe_family_is_non_empty_string(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        family = getattr(module, "PROBE_FAMILY", None)
-        assert isinstance(family, str) and family, f"{label}: PROBE_FAMILY missing or non-string"
+    def test_family_is_non_empty_string(self, label: str) -> None:
+        family = resolve_probe(label).family
+        assert isinstance(family, str) and family, f"{label}: family missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_prompt_version_is_non_empty_string(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        prompt_version = getattr(module, "PROMPT_VERSION", None)
-        assert isinstance(prompt_version, str) and prompt_version, f"{label}: PROMPT_VERSION missing or non-string"
+        prompt_version = resolve_probe(label).prompt_version
+        assert isinstance(prompt_version, str) and prompt_version, f"{label}: prompt_version missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
-    def test_probe_variants_is_non_empty_sequence(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        variants = getattr(module, "PROBE_VARIANTS", None)
-        assert isinstance(variants, (list, tuple)) and variants, f"{label}: PROBE_VARIANTS missing or empty"
+    def test_variants_is_non_empty_tuple(self, label: str) -> None:
+        variants = resolve_probe(label).variants
+        assert isinstance(variants, tuple) and variants, f"{label}: variants missing or empty"
         assert all(isinstance(v, str) and v for v in variants), (
-            f"{label}: PROBE_VARIANTS contains non-string or empty entries: {variants!r}"
+            f"{label}: variants contains non-string or empty entries: {variants!r}"
         )
 
 

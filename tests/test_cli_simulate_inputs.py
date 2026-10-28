@@ -24,7 +24,6 @@ import importlib
 import json
 import logging
 import shutil
-import sys
 from contextlib import ExitStack, contextmanager
 from dataclasses import replace
 from pathlib import Path
@@ -78,8 +77,7 @@ def _probe_variant_pairs() -> list[tuple[str, str]]:
 
     pairs = []
     for probe in sorted(known_probes()):
-        module = sys.modules[resolve_probe(probe).__module__]
-        pairs.extend((probe, str(v)) for v in module.PROBE_VARIANTS)
+        pairs.extend((probe, v) for v in resolve_probe(probe).variants)
     return pairs
 
 
@@ -353,8 +351,7 @@ def test_a_prompt_version_is_part_of_the_setup(rows, monkeypatch):
     from usersim.engine.core.probes import resolve_probe
 
     before = _fingerprint(rows)
-    module = sys.modules[resolve_probe("general_open_ended").__module__]
-    monkeypatch.setattr(module, "PROMPT_VERSION", "v999", raising=False)
+    monkeypatch.setattr(resolve_probe("general_open_ended"), "prompt_version", "v999")
 
     assert _fingerprint(rows) != before
 

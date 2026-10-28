@@ -6,14 +6,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 import pandas as pd
 import pytest
 
 from usersim.cli._pipeline import known_probes
 from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core import probes
 from usersim.engine.core.episode_input import construct_episode_preamble, construct_probe_episode
 from usersim.engine.core.provenance import get_code_sha
 from usersim.engine.external import ProbeEpisodeRuntime, materialize_episode_inputs
@@ -164,6 +166,32 @@ def test_trajectory_id_is_pinned_per_probe(probe_type: str) -> None:
     episode = construct_probe_episode(data, config=config, models=models)
 
     assert episode.preamble.trajectory_id == _PINNED_TRAJECTORY_IDS[probe_type]
+
+
+def test_two_probes_in_one_module_record_their_own_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A probe's family, variant and prompt version come from its own class, so
+    two probes defined in one module each record their own."""
+    data, config, models = _pinned_inputs("general_open_ended")
+    module = ModuleType("_two_probes_module")
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
+    for label, version, variant in (("_first_probe", "v1.0", "alpha"), ("_second_probe", "v2.0", "beta")):
+        cls = type(label, (probes.BaseProbe,), {"label": label, "__module__": module.__name__})
+        probes.register_probe(family=label, prompt_version=version, variants=(variant,))(cls)
+
+    first = construct_episode_preamble({**data, "probe_type": "_first_probe"}, config=config, models=models)
+    second = construct_episode_preamble({**data, "probe_type": "_second_probe"}, config=config, models=models)
+
+    assert (first.probe_family, first.probe_variant, first.provenance.scenario_prompt_version) == (
+        "_first_probe",
+        "alpha",
+        "v1.0",
+    )
+    assert (second.probe_family, second.probe_variant, second.provenance.scenario_prompt_version) == (
+        "_second_probe",
+        "beta",
+        "v2.0",
+    )
 
 
 @pytest.mark.parametrize("empty", [float("nan"), pd.NA], ids=["nan", "na"])

@@ -13,7 +13,7 @@ Two derived IDs identify personas and trajectories:
   that determine what a row's content depends on: persona, probe
   family + variant, ``scenario_seed`` (the per-row seed input column),
   the resolved user and assistant model ids, the probe's
-  ``PROMPT_VERSION``, and any ``extra_keys`` (the simulator adds the
+  ``prompt_version``, and any ``extra_keys`` (the simulator adds the
   row's locale, and a flag when the assistant's reasoning is replayed).
   Deterministic given the same inputs, so the simulator can dedup on it
   cheaply.

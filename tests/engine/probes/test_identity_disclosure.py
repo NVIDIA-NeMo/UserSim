@@ -134,7 +134,7 @@ def _probe(
 class TestRegistration:
     def test_registered_under_its_label(self) -> None:
         assert resolve_probe("identity_disclosure") is IdentityDisclosureProbe
-        assert probe_gen.PROBE_FAMILY == "identity_disclosure"
+        assert IdentityDisclosureProbe.family == "identity_disclosure"
 
     def test_placeholder_content_is_flagged_on_the_outcome(self) -> None:
         _, builder = _probe()

@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-import sys
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
@@ -157,18 +156,16 @@ def construct_episode_preamble(
     )
     probe_type = str(resolved[probe_type_column])
     probe_cls = resolve_probe(probe_type)
-    probe_module = sys.modules.get(probe_cls.__module__)
-    variants = getattr(probe_module, "PROBE_VARIANTS", None)
     explicit_variant = resolved.get("probe_variant")
     probe_variant = (
         explicit_variant
         if isinstance(explicit_variant, str) and explicit_variant
-        else str(variants[0])
-        if variants and isinstance(variants, (list, tuple))
+        else str(probe_cls.variants[0])
+        if probe_cls.variants
         else "default"
     )
-    probe_family = str(getattr(probe_module, "PROBE_FAMILY", probe_type))
-    prompt_version = str(getattr(probe_module, "PROMPT_VERSION", "v1.0"))
+    probe_family = str(probe_cls.family or probe_type)
+    prompt_version = str(probe_cls.prompt_version or "v1.0")
     raw_provenance = resolved.get("usersim_provenance")
     if isinstance(raw_provenance, str):
         raw_provenance = json.loads(raw_provenance)

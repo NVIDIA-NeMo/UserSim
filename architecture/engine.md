@@ -29,7 +29,7 @@ variant), the scenario seed, the user and assistant models, the prompt version
 and the locale, plus the reasoning-replay setting when it is on.
 
 The probe component is the variant the *dispatcher seeds* before the probe
-runs: the probe module's first `PROBE_VARIANTS` entry, or an explicit
+runs: the first entry of the probe class's `variants`, or an explicit
 `probe_variant` column. Seven probes discover a finer-grained variant only
 once they have picked a task (a fact category, a pressure strategy, a
 sanctioned action). That discovered value lands on the finished row for

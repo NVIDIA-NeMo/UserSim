@@ -22,7 +22,7 @@ content once the assistant (the system under test) earns it.
 | `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `core/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
-| `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `PROBE_FAMILY`); declare the `default` / `guarded` variants. |
+| `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `family`); declare the `default` / `guarded` variants. |
 
 Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
 + its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under

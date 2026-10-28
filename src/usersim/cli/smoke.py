@@ -24,8 +24,8 @@ Checks performed:
    their typical argument sets without touching the network.
 7. **probe registry** — every probe in
    ``usersim.engine.core.probes.known_probes()`` resolves
-   to a callable + a module that exposes ``PROBE_FAMILY`` /
-   ``PROMPT_VERSION`` / ``PROBE_VARIANTS`` metadata.
+   to a class that carries ``family`` / ``prompt_version`` /
+   ``variants`` metadata.
 8. **asset paths** — every shipped probe's default asset path
    (``probe_assets_dir(probe) / ...``) resolves to a real file on
    disk for every supported locale. Catches the regression class
@@ -383,17 +383,13 @@ def _check_scorer_registry(report: SmokeReport) -> None:
 def _check_probe_registry(report: SmokeReport) -> None:
     """Confirm every registered probe resolves and exposes metadata.
 
-    Catches the regression where a probe module is renamed or its
-    metadata constants are dropped: each probe class registered in
-    ``_PROBE_REGISTRY`` must live in a module exposing
-    ``PROBE_FAMILY`` (string), ``PROMPT_VERSION`` (string), and
-    ``PROBE_VARIANTS`` (non-empty sequence). These constants drive
-    trajectory metadata and reporting joins; missing them silently
-    corrupts downstream aggregation.
+    Catches the regression where a probe's metadata is dropped: each
+    probe class registered in ``_PROBE_REGISTRY`` must carry ``family``
+    (string), ``prompt_version`` (string), and ``variants`` (non-empty
+    sequence). These drive trajectory metadata and reporting joins;
+    missing them silently corrupts downstream aggregation.
     """
     try:
-        import sys
-
         from usersim.engine.core.probes import known_probes, resolve_probe
 
         probe_names = known_probes()
@@ -416,21 +412,13 @@ def _check_probe_registry(report: SmokeReport) -> None:
         except Exception as e:
             failures.append(f"{probe_name}: resolve raised {type(e).__name__}: {e}")
             continue
-        # All probes self-register via ``@register_probe`` and live
-        # in their own module; the constants live there too.
-        module = sys.modules.get(probe_cls.__module__)
-        if module is None:
-            failures.append(f"{probe_name}: probe metadata module {probe_cls.__module__!r} not in sys.modules")
-            continue
-        family = getattr(module, "PROBE_FAMILY", None)
-        if not isinstance(family, str) or not family:
-            failures.append(f"{probe_name}: PROBE_FAMILY missing or non-string")
-        prompt_version = getattr(module, "PROMPT_VERSION", None)
-        if not isinstance(prompt_version, str) or not prompt_version:
-            failures.append(f"{probe_name}: PROMPT_VERSION missing or non-string")
-        variants = getattr(module, "PROBE_VARIANTS", None)
-        if not isinstance(variants, (list, tuple)) or not variants:
-            failures.append(f"{probe_name}: PROBE_VARIANTS missing or empty")
+        # ``@register_probe`` sets these on the class.
+        if not isinstance(probe_cls.family, str) or not probe_cls.family:
+            failures.append(f"{probe_name}: family missing or non-string")
+        if not isinstance(probe_cls.prompt_version, str) or not probe_cls.prompt_version:
+            failures.append(f"{probe_name}: prompt_version missing or non-string")
+        if not isinstance(probe_cls.variants, (list, tuple)) or not probe_cls.variants:
+            failures.append(f"{probe_name}: variants missing or empty")
 
     if failures:
         report.add(
