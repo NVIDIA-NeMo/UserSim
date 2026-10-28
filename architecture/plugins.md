@@ -45,9 +45,13 @@ identical code path as a built-in and inherits its validation. There is no
 parallel registration path to drift.
 
 **Collisions.** Commands, backends, asset domains and capabilities keep the
-built-in: an extension under a taken name is reported and dropped. Probes and
-scorers register at import, so the last registration under a name replaces the
-earlier one, shipped probes included, noted only in debug logging. Give an
+built-in: an extension under a taken name is reported and dropped. A probe
+label or scorer name belongs to the first class or function registered under
+it. Registering a different one under a taken name raises
+`ProbeRegistrationError` or `ScorerRegistrationError`, naming both
+definitions; for an extension, that is a load failure, so the extension is
+skipped with a warning and the shipped probe or scorer stays. Registering the
+same definition again, as a reloaded module does, updates the entry. Give an
 extension probe or scorer a name of its own.
 
 **An extension that fails to load is skipped, not fatal.** An entry point

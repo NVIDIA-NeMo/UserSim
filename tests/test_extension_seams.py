@@ -14,6 +14,7 @@ against a genuinely installed distribution is ``make check-extensions``.
 
 from __future__ import annotations
 
+import logging
 from importlib.metadata import EntryPoint
 
 import pytest
@@ -112,6 +113,20 @@ class PartnerProbe(BaseProbe):
         monkeypatch.setenv(DISABLE_ENV_VAR, "1")
         assert "partner_probe" not in known_probes()
 
+    def test_a_contributed_probe_cannot_take_a_builtin_label(self, extension, probe_registry, caplog) -> None:
+        from usersim.engine.core.probes import known_probes, resolve_probe
+
+        builtin = resolve_probe("tool_calling")
+        extension(
+            "ext_probe_taken.py",
+            self.SOURCE.replace('"partner_probe"', '"tool_calling"'),
+            ("tool_calling", "ext_probe_taken:PartnerProbe", PROBES),
+        )
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            assert "tool_calling" in known_probes()
+        assert resolve_probe("tool_calling") is builtin
+        assert "'tool_calling' is already registered by usersim.engine.probes.tool_calling.generator" in caplog.text
+
 
 @pytest.fixture
 def scorer_registry():
@@ -155,6 +170,20 @@ register_scorer("partner_scorer", _score)
             ("partner_scorer", "ext_scorer_mod2", SCORERS),
         )
         assert "partner_scorer" in list_scorers()
+
+    def test_a_contributed_scorer_cannot_take_a_builtin_name(self, extension, scorer_registry, caplog) -> None:
+        from usersim.engine.evaluator.scorers import get_scorer, list_scorers
+
+        builtin = get_scorer("tool_use")
+        extension(
+            "ext_scorer_taken.py",
+            self.SOURCE.replace('"partner_scorer"', '"tool_use"'),
+            ("tool_use", "ext_scorer_taken", SCORERS),
+        )
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            assert "tool_use" in list_scorers()
+        assert get_scorer("tool_use") is builtin
+        assert "'tool_use' is already registered by usersim.engine.evaluator.scorers.tool_use" in caplog.text
 
 
 class TestAssetDomainDiscovery:

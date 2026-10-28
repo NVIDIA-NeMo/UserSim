@@ -107,8 +107,9 @@ for the rationale.
 
 When porting one of the templates into a new module:
 
-- [ ] Pick a `label` for `@register_probe`, used by `--probe-mix`
-      and the `_PROBE_REGISTRY` lookup. Underscores, lowercase.
+- [ ] Pick a `label` for `@register_probe` that no other probe uses,
+      used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
+      Underscores, lowercase.
 - [ ] Pick a `family` (the `PROBE_FAMILY` constant the decorator
       sets). The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the

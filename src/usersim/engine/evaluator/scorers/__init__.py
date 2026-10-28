@@ -189,14 +189,30 @@ ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 _REGISTRY: dict[str, ScorerFn] = {}
 
 
+class ScorerRegistrationError(ValueError):
+    """Raised when ``register_scorer`` is given a name another scorer holds."""
+
+
+def _definition(fn: Any) -> str:
+    """Where a scorer is defined. A module imported or reloaded again redefines the same one."""
+    return f"{getattr(fn, '__module__', '?')}.{getattr(fn, '__qualname__', repr(fn))}"
+
+
 def register_scorer(name: str, fn: ScorerFn) -> None:
     """Register a scorer under a stable name.
 
-    Idempotent re-registration (replacing the old fn) is allowed —
-    useful in test harnesses. Logs at debug-level when this happens.
+    A name belongs to one scorer. Registering the same function again, or
+    the function a reloaded module redefines, updates the entry; a
+    different function under a taken name raises
+    ``ScorerRegistrationError`` naming both, so an installed package
+    cannot replace a scorer a run asks for by name.
     """
-    if name in _REGISTRY:
-        logger.debug(f"  |-- evaluator.scorers: replacing existing scorer {name!r}")
+    existing = _REGISTRY.get(name)
+    if existing is not None and existing is not fn and _definition(existing) != _definition(fn):
+        raise ScorerRegistrationError(
+            f"scorer {name!r} is already registered by {_definition(existing)}, "
+            f"so {_definition(fn)} cannot take it. Give the scorer a name no other scorer uses."
+        )
     _REGISTRY[name] = fn
 
 
