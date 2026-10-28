@@ -424,6 +424,10 @@ is the most likely cause. If it shows up but `PROBE_FAMILY missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
 
+For a probe in its own package, the `extensions` line names the package and
+fails with the reason when an entry point contributes nothing, such as an
+import error or a name another package already uses.
+
 ---
 
 ## Worked example: a `cooking_advisor` probe end-to-end

@@ -12,10 +12,12 @@ import pytest
 
 from usersim.engine.core import _extensions
 from usersim.engine.core._extensions import (
+    BACKENDS,
     DISABLE_ENV_VAR,
     ENTRY_POINT_GROUPS,
     PROBES,
     clear_extension_cache,
+    extension_records,
     extensions_disabled,
     load_extensions,
     merge_extensions,
@@ -149,3 +151,46 @@ class TestMergePolicy:
         builtins: dict = {"builtin": object()}
         merge_extensions(PROBES, builtins, what="probe")
         assert set(builtins) == {"builtin"}
+
+    def test_a_name_a_builtin_holds_is_reported_with_its_source(self, monkeypatch, discovery_enabled, caplog) -> None:
+        _fake_entry_points(monkeypatch, ("local", "json:dumps"), group=BACKENDS)
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            merge_extensions(BACKENDS, {"local": object()}, what="backend")
+        assert "backend 'local' from an unknown package (json:dumps) is already built in" in caplog.text
+        (record,) = extension_records()
+        assert record.problem == "backend 'local' is already built in"
+
+
+class TestOneOwnerPerName:
+    """A name two packages advertise must not go to whichever sorts first."""
+
+    PACKAGES = {"json:dumps": "pkg-a 1.0", "json:loads": "pkg-b 2.0"}
+
+    def test_a_name_two_packages_advertise_loads_from_neither(self, monkeypatch, discovery_enabled, caplog) -> None:
+        _fake_entry_points(monkeypatch, ("shared", "json:dumps"), ("shared", "json:loads"), ("solo", "json:dumps"))
+        monkeypatch.setattr(_extensions, "_package", lambda ep: self.PACKAGES[ep.value])
+        with caplog.at_level(logging.WARNING, logger="usersim.engine"):
+            loaded = load_extensions(PROBES)
+        assert [n for n, _ in loaded] == ["solo"]
+        assert {r.target: r.problem for r in extension_records() if r.problem} == {
+            "json:dumps": "also advertised by pkg-b 2.0, so neither is loaded",
+            "json:loads": "also advertised by pkg-a 1.0, so neither is loaded",
+        }
+        assert "pkg-a 1.0" in caplog.text and "pkg-b 2.0" in caplog.text
+
+
+class TestRecords:
+    def test_each_entry_point_is_recorded_with_what_happened(self, monkeypatch, discovery_enabled) -> None:
+        _fake_entry_points(monkeypatch, ("broken", "no_such_module_xyz:thing"), ("working", "json:dumps"))
+        load_extensions(PROBES)
+        records = {r.name: r for r in extension_records()}
+        assert records["working"].problem == ""
+        assert records["broken"].problem.startswith("failed to load:")
+        # A hand-built entry point has no installed distribution behind it.
+        assert records["working"].source == "an unknown package (json:dumps)"
+
+    def test_clearing_the_cache_clears_the_records(self, monkeypatch, discovery_enabled) -> None:
+        _fake_entry_points(monkeypatch, ("working", "json:dumps"))
+        load_extensions(PROBES)
+        clear_extension_cache()
+        assert extension_records() == ()

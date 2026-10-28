@@ -34,6 +34,9 @@ Checks performed:
    instead of install time).
 9. **reporting bundles** — both bundles build from a tiny synthetic
    trajectory + evaluator frame and produce non-empty HTML.
+10. **extensions** — what each installed extension package contributes.
+    Fails when an entry point contributes nothing: it failed to load,
+    another package advertises the same name, or a built-in holds it.
 
 Optional second tier: pass ``--with-fixtures`` to also write the
 synthetic fixture parquets and rendered HTML to a temp directory so a
@@ -49,6 +52,7 @@ import json
 import logging
 import sys
 import tempfile
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -147,6 +151,7 @@ def run(args: argparse.Namespace) -> int:
         fixtures_dir=args.fixtures_dir,
     )
     _check_comparison_dashboard(report)
+    _check_extensions(report)
 
     print("usersim smoke")
     print("=" * 14)
@@ -860,6 +865,56 @@ def _check_comparison_dashboard(report: SmokeReport) -> None:
         )
     except Exception as e:
         report.add("comparison dashboard", False, f"{type(e).__name__}: {e}")
+
+
+def _check_extensions(report: SmokeReport) -> None:
+    """List what installed extensions contribute, and fail on any that contribute nothing.
+
+    Every registry is loaded first, because a registry notes an extension
+    that names one of its built-ins only when it merges extensions in.
+    """
+    try:
+        from usersim.asset_gen.registry import domain_names
+        from usersim.cli import _build_parser
+        from usersim.engine.core._extensions import (
+            DISABLE_ENV_VAR,
+            ENTRY_POINT_GROUPS,
+            extension_records,
+            extensions_disabled,
+            load_extensions,
+        )
+        from usersim.engine.core.backends import known_backends
+        from usersim.engine.core.probes import known_probes
+        from usersim.engine.evaluator.scorers import list_scorers
+        from usersim.taxonomy.capabilities import capability_definitions
+
+        if extensions_disabled():
+            report.add("extensions", True, f"discovery is off ({DISABLE_ENV_VAR} is set)")
+            return
+        for group in ENTRY_POINT_GROUPS:
+            load_extensions(group)
+        known_probes()
+        list_scorers()
+        domain_names()
+        known_backends()
+        capability_definitions()
+        _build_parser()
+
+        records = extension_records()
+        problems = [r for r in records if r.problem]
+        if problems:
+            report.add("extensions", False, "; ".join(f"{r.name} from {r.source}: {r.problem}" for r in problems))
+        elif records:
+            packages = Counter(r.package for r in records)
+            report.add(
+                "extensions",
+                True,
+                ", ".join(f"{package}: {count} entry point(s)" for package, count in sorted(packages.items())),
+            )
+        else:
+            report.add("extensions", True, "none installed")
+    except Exception as e:
+        report.add("extensions", False, f"{type(e).__name__}: {e}")
 
 
 # ---------------------------------------------------------------------------

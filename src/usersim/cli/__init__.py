@@ -50,23 +50,32 @@ def _register_extension_commands(subparsers: argparse._SubParsersAction) -> None
     """
     import logging
 
-    from usersim.engine.core._extensions import COMMANDS, load_extensions
+    from usersim.engine.core._extensions import (
+        COMMANDS,
+        extension_source,
+        load_extensions,
+        note_extension_problem,
+    )
 
     for name, register in load_extensions(COMMANDS):
         if name in subparsers.choices:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r is already provided by this package; ignoring the contributed one.",
+                "  |-- extensions: command %r from %s is already built in; ignoring it.",
                 name,
+                extension_source(COMMANDS, name),
             )
+            note_extension_problem(COMMANDS, name, f"command {name!r} is already built in")
             continue
         try:
             register(subparsers)
         except Exception as exc:
             logging.getLogger("usersim.engine").warning(
-                "  |-- extensions: command %r failed to register and was skipped: %s",
+                "  |-- extensions: command %r from %s failed to register and was skipped: %s",
                 name,
+                extension_source(COMMANDS, name),
                 exc,
             )
+            note_extension_problem(COMMANDS, name, f"failed to register: {exc}")
 
 
 def _build_parser() -> argparse.ArgumentParser:
