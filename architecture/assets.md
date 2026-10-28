@@ -5,8 +5,9 @@ finance corpora, tool catalogs, action taxonomies) ships as **package
 data** under `usersim/engine/assets/<probe>/`.
 
 They ship inside the package so a plain `pip install` gives you working
-probes with no extra download step, and `make check-dist` fails if that ever
-stops being true.
+probes with no extra download step. `make check-dist` fails if the wheel
+misses a file git tracks under `src/usersim/`, apart from notebooks and
+Markdown outside the banks.
 
 ## Resolution
 
@@ -55,6 +56,10 @@ run, after the other probes in the mix have already been paid for, while
 offline and `evaluate-assets` scores it with a judge. Generation and
 evaluation are **live, paid** steps and are not needed to use the shipped
 banks.
+
+Each domain's region specs (`<locale>.yaml`, one per locale it can generate)
+ship as package data, so all three commands find them from an installed
+package without `--region-spec`.
 
 Domains are discovered through the `usersim.asset_domains` entry point, so a
 new domain does not require modifying this project. See
