@@ -770,6 +770,43 @@ class TestRegisterProbe:
         assert mod.PROMPT_VERSION == "v1.2"
         assert mod.PROBE_VARIANTS == ("default", "alt")
 
+    @staticmethod
+    def _probe_class(name: str, label: str, module: str) -> type[BaseProbe]:
+        """A minimal probe class with the given name, label and defining module."""
+        return type(
+            name,
+            (BaseProbe,),
+            {
+                "label": label,
+                "__module__": module,
+                "get_user_system_prompt": lambda self: "",
+                "get_assistant_system_prompt": lambda self: "",
+            },
+        )
+
+    def test_a_second_class_under_a_taken_label_is_refused(self) -> None:
+        mod = self._make_module()
+        first = register_probe(family="general", prompt_version="v1.0", variants=("default",))(
+            self._probe_class("_First", "_contested_probe", mod.__name__)
+        )
+        second = self._probe_class("_Second", "_contested_probe", mod.__name__)
+
+        with pytest.raises(
+            ProbeRegistrationError,
+            match=r"'_contested_probe' is already registered by _probe_test_module\._First, "
+            r"so _probe_test_module\._Second cannot take it",
+        ):
+            register_probe(family="general", prompt_version="v2.0", variants=("default",))(second)
+        assert resolve_probe("_contested_probe") is first
+        assert mod.PROMPT_VERSION == "v1.0"
+
+    def test_a_redefined_class_updates_its_entry(self) -> None:
+        mod = self._make_module()
+        register = register_probe(family="general", prompt_version="v1.0", variants=("default",))
+        register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
+        reloaded = register(self._probe_class("_Reloaded", "_reloaded_probe", mod.__name__))
+        assert resolve_probe("_reloaded_probe") is reloaded
+
     def test_rejects_non_baseprobe_class(self) -> None:
         class _NotAProbe:
             label = "not_a_probe"

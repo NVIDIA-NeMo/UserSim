@@ -18,8 +18,8 @@ class OpenEndedProbe(BaseProbe):
 ```
 
 The class *is* the registration; there is no separate label table to edit. A
-second class registered under a taken label replaces the first, so give each
-probe a label of its own.
+second class registered under a taken label raises `ProbeRegistrationError`,
+naming both classes, so give each probe a label of its own.
 
 Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
 (`core/probes.py`); the registry imports them the first time a probe is

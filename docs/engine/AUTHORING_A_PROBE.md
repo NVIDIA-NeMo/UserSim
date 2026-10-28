@@ -352,8 +352,7 @@ The decorator does TWO things in one call:
    `getattr(module, "PROBE_FAMILY", ...)`).
 2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`. Pick a label
    no other probe uses: registering a second class under a label that is
-   already taken replaces the first, shipped probes included, and the
-   registry notes it only in debug logging.
+   already taken raises `ProbeRegistrationError`, naming both classes.
 
 Both surfaces are what the dispatcher reads.
 
@@ -918,7 +917,9 @@ bottom of the module, the way every shipped scorer does:
 register_scorer("your_probe", score_your_probe_trajectory)
 ```
 
-`register_scorer` takes the name and the function; it is not a decorator. The
+`register_scorer` takes the name and the function; it is not a decorator.
+Give it a name no other scorer uses: a different function under a taken name
+raises `ScorerRegistrationError`. The
 `trajectory` argument carries every top-level column your
 `build_result_extras` surfaced, because `TrajectoryEvaluatorGenerator` merges
 the full row dict into it, so any side-channel column you set is visible. A

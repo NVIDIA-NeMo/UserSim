@@ -1305,6 +1305,11 @@ class ProbeRegistrationError(ValueError):
     """Raised when ``@register_probe`` cannot register a class."""
 
 
+def _definition(cls: type) -> str:
+    """Where a class is defined. A module imported or reloaded again redefines the same one."""
+    return f"{cls.__module__}.{cls.__qualname__}"
+
+
 def register_probe(
     *,
     family: str,
@@ -1317,6 +1322,11 @@ def register_probe(
     on the class's module (the constants the dispatcher reads via
     ``getattr(module, "PROBE_FAMILY", ...)``) AND adds the class
     to ``_PROBE_REGISTRY`` keyed by ``cls.label``.
+
+    A label belongs to one probe. Registering the same class again, or the
+    class a reloaded module redefines, updates the entry; a different class
+    under a taken label raises ``ProbeRegistrationError`` naming both, so
+    an installed package cannot replace a probe a run asks for by name.
 
     Replaces the 6-files-to-touch friction of adding a new probe
     today: register in the central registry, define
@@ -1344,6 +1354,12 @@ def register_probe(
             raise ProbeRegistrationError(
                 f"@register_probe: {cls.__name__} must set a class-level `label` string before decoration"
             )
+        existing = _PROBE_REGISTRY.get(label)
+        if existing is not None and existing is not cls and _definition(existing) != _definition(cls):
+            raise ProbeRegistrationError(
+                f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
+                f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
+            )
 
         module = sys.modules.get(cls.__module__)
         if module is not None:
@@ -1351,13 +1367,6 @@ def register_probe(
             module.PROMPT_VERSION = prompt_version
             module.PROBE_VARIANTS = tuple(variants)
 
-        if label in _PROBE_REGISTRY and _PROBE_REGISTRY[label] is not cls:
-            logger.debug(
-                "  |-- @register_probe: replacing existing probe %r (was %s, now %s)",
-                label,
-                _PROBE_REGISTRY[label].__qualname__,
-                cls.__qualname__,
-            )
         _PROBE_REGISTRY[label] = cls
         return cls
 
