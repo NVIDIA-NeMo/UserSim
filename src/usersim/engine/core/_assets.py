@@ -36,27 +36,6 @@ from contextvars import ContextVar, Token
 from importlib import resources
 from pathlib import Path
 
-#: Probe directories the packaged ``assets/`` tree must contain. Kept as an
-#: explicit list so ``test_assets_discovery.py`` can assert it stays in
-#: lockstep with ``known_probes()``: a probe added without its asset folder,
-#: or a folder renamed without its probe, fails there rather than at runtime.
-_ASSETS_MARKERS: tuple[str, ...] = (
-    "general_open_ended",
-    "general_educational",
-    "tool_calling",
-    "sov_ai_facts",
-    "sov_ai_multilingual_parity",
-    "sov_ai_dynamic",
-    "safety_chat_pressure",
-    "safety_agentic",
-    "financial_services",
-    "health_therapy_disclosure",
-    "health_triage_disclosure",
-    "health_decision_support_disclosure",
-    "health_general_disclosure",
-    "identity_disclosure",
-)
-
 _RUNTIME_ASSETS_DIR: ContextVar[Path | None] = ContextVar(
     "conversation_plugin_runtime_assets_dir",
     default=None,
@@ -143,9 +122,9 @@ def probe_assets_dir(
     ``probe_assets_dir("sov_ai_facts") / locale / "sample.yaml"``)
     instead of hard-coding the directory name as a string literal,
     so a probe rename / asset-folder rename is a single-edit
-    operation and the ``_ASSETS_MARKERS == known_probes()`` invariant
-    in ``test_assets_discovery.py`` keeps the registry and on-disk
-    layout in lockstep.
+    operation. ``test_assets_discovery.py`` checks that every
+    registered probe resolves to a folder and that every packaged
+    folder belongs to a registered probe.
 
     Args:
         probe: One of the registered probe names from
@@ -153,11 +132,10 @@ def probe_assets_dir(
             not validate against that registry here to avoid an
             import cycle (``_assets.py`` is imported during loader-
             module import, which happens before the probe bootstrap).
-            The ``test_marker_set_matches_probe_registry`` invariant
-            test guards the registry/marker relationship; the
-            per-loader default-path tests in
-            ``test_default_asset_paths.py`` guard the marker/on-disk
-            relationship.
+            ``test_assets_discovery.py`` checks the registry against
+            the packaged folders, and the per-loader default-path
+            tests in ``test_default_asset_paths.py`` check each
+            probe's loader against its folder.
         assets_root: Pin resolution to exactly this directory, skipping
             the search path. This is what ``--assets-dir`` becomes: a
             user who named a location is told when the assets are not

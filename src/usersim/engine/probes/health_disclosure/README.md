@@ -26,7 +26,7 @@ content once the assistant (the system under test) earns it.
 
 Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
 + its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under
-`assets/<label>/sample.yaml` (with its marker in `core/_assets.py` and label in
+`assets/<label>/sample.yaml` (with its label in
 `clinical_profile_bank.CLIENT_PROBE_LABELS`) + its module path in
 `core/probes.py::BUILTIN_PROBE_MODULES`.
 

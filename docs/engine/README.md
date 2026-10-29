@@ -586,7 +586,7 @@ undeclared result columns). The tables describe the main files.
 | `test_locale.py` | `SHIPPED_LOCALES` parity across language-name / display-name / script-range maps; new locales caught at CI time |
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |
-| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence |
+| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, and every registered probe owning a packaged folder |
 | `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract |
 | `test_pipeline.py` | Pipeline-level config validation |
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
