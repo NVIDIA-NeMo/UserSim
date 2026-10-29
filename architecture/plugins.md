@@ -41,6 +41,9 @@ the built-ins. The registries refuse a name that is already taken, so the
 prefix is what keeps two packages, or a package and a later built-in, from
 claiming the same one.
 
+[`docs/extensions.md`](../docs/extensions.md) builds a whole extension
+package: a probe with its own bank, a scorer, their tests and a CI recipe.
+
 An extension probe declares the columns it writes in its class's
 `output_columns`, and a run keeps them alongside the core columns. Other
 per-row data goes in its metadata (`state.metadata`), stored with the row as

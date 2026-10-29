@@ -351,7 +351,8 @@ error naming both, and an extension that does so is skipped. Start every name
 your package adds with its own prefix, such as `acme_recipes`; unprefixed
 names belong to the built-ins, and
 [`architecture/plugins.md`](architecture/plugins.md) lists the names this
-covers.
+covers. [`docs/extensions.md`](docs/extensions.md) builds a whole extension
+package, a probe with its bank, a scorer and their tests, step by step.
 
 To check your extension satisfies the contract:
 

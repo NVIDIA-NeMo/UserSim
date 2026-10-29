@@ -232,6 +232,9 @@ def load_my_bank(locale: str) -> MyBank:
     return MyBank.from_yaml(path.read_text(encoding="utf-8"))
 ```
 
+[`docs/extensions.md`](../extensions.md) builds a whole package around such a
+probe.
+
 ---
 
 ## Step 3: wire the asset bank
