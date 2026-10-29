@@ -71,45 +71,31 @@ DEFAULT_PROBE_MIX: dict[str, float] = {
     "general_educational": 1 / 3,
 }
 
-# Probes that consume the ``theme`` column. Other probes are
-# persona-derived (they read curated assets like fact / query / pressure
-# / agentic banks) and the ``theme`` column is irrelevant to them.
-THEME_DRIVEN_PROBES: frozenset = frozenset(
-    {
-        "tool_calling",
-        "general_open_ended",
-        "general_educational",
-    }
-)
-
-# Sentinel value used in the SubcategorySamplerParams entry for
-# non-theme-driven probes. The probe never reads this; it
-# exists so DD's SubcategorySampler has a value to draw when the
-# probe_type sampled is one that doesn't use themes.
+# The ``theme`` value of a row whose probe reads no theme. The probe never
+# reads it; it exists so DD's SubcategorySampler has a value to draw.
 _NO_THEME_PLACEHOLDER: str = "__not_used__"
 
 
-def seed_themes(
-    locale: str,
-    probe: str,
-    kind: str,
-    assets_dir: Path | str | None = None,
-) -> list[str]:
-    """Load a theme-driven probe's seeds and JSON-encode them for the sampler.
+def _probe_themes(probe: str, locale: str, assets_dir: Path) -> list[str]:
+    """``probe``'s themes in ``locale``, JSON-encoded for the sampler.
 
-    Called only for probes actually present in the run's ``probe_mix``, so an
-    assets root that ships seeds for just one general probe stays usable
-    (``load_seeds`` raises ``FileNotFoundError`` when neither the locale nor
-    the ``base`` seed file exists).
-
-    ``ensure_ascii=False`` so non-Latin theme descriptions (Japanese / Hindi /
-    Chinese / etc.) survive serialization as readable native script rather
-    than ``\\uXXXX`` escapes. Downstream ``json.loads`` reads either form
-    correctly; the parquet column is just easier on human eyeballs this way.
+    Read with ``assets_dir`` installed as the run installs it for each row, so
+    a probe finds its themes where its rows find their banks. ``ensure_ascii``
+    is off so non-Latin descriptions stay readable in the stored column.
     """
-    from usersim.engine.core.seeds import load_seeds
+    from usersim.engine.core._assets import reset_runtime_assets_dir, set_runtime_assets_dir
+    from usersim.engine.core.probes import resolve_probe
 
-    return [json.dumps(t, ensure_ascii=False) for t in load_seeds(locale, probe, kind, assets_dir)]
+    token = set_runtime_assets_dir(assets_dir)
+    try:
+        themes = resolve_probe(probe).themes(locale)
+    finally:
+        reset_runtime_assets_dir(token)
+    if themes is None:
+        return [_NO_THEME_PLACEHOLDER]
+    if not themes:
+        raise ConfigError(f"{probe} has no themes for {locale}, so none of its rows can be sampled.")
+    return [json.dumps(theme, ensure_ascii=False) for theme in themes]
 
 
 #: Seed-file suffixes the ``tool_calling`` toolset seed may use. Both are
@@ -560,14 +546,11 @@ def _add_episode_input_columns(
     toolset_kwargs: dict[str, Any] = {}
     for probe in probe_mix:
         if probe == "tool_calling":
+            # Its themes and toolsets are settings of the run.
             themes[probe] = list(tool_calling_themes or DEFAULT_TOOL_CALLING_THEMES)
             toolset_kwargs = _wire_toolsets(config_builder, dd, resolved_toolset_seed)
-        elif probe == "general_open_ended":
-            themes[probe] = seed_themes(locale, probe, "topics", assets_dir)
-        elif probe == "general_educational":
-            themes[probe] = seed_themes(locale, probe, "subjects", assets_dir)
         else:
-            themes[probe] = [_NO_THEME_PLACEHOLDER]
+            themes[probe] = _probe_themes(probe, locale, assets_dir)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="theme",

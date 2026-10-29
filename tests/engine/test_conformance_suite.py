@@ -191,11 +191,12 @@ class TestTheChecksCanFail:
                 {"authoring_guide": "README.md#locales"},
                 "PreflightProbe.authoring_guide must be None or an https:// URL",
             ),
+            ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
         ],
-        ids=["check-not-callable", "bank-locale-not-a-classmethod", "relative-guide"],
+        ids=["check-not-callable", "bank-locale-not-a-classmethod", "relative-guide", "themes-not-a-classmethod"],
     )
     async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
-        """The pre-flight reads these on the class before any row runs, so a wrong one fails the whole run."""
+        """A run reads these on the class before any row runs, so a wrong one fails the whole run."""
         cls = type("PreflightProbe", (BaseProbe,), {"label": "preflight_probe", **attributes})
 
         problems = probe_conformance_problems(cls)
@@ -211,7 +212,11 @@ class TestTheChecksCanFail:
             def bank_locale(cls, locale, probe_dir):
                 return locale
 
-        declarations = ("locale_bank_check", "bank_locale", "authoring_guide")
+            @classmethod
+            def themes(cls, locale):
+                return [{"type": "cooking"}]
+
+        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes")
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 
     @pytest.mark.parametrize(

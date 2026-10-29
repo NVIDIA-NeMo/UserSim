@@ -116,3 +116,9 @@ pre-flight calls on the bank the class's `bank_locale` names. The refusal names
 the probe, the locale and the locales that can run, rather than failing from
 inside a loader mid-run. `simulate` and its `--dry-run`, `--materialize-inputs`,
 `--inputs` and notebook 01 all run the check. See [assets.md](assets.md).
+
+A probe whose conversations vary by topic lists its themes in a `themes`
+classmethod, read under its asset folder. A run draws one per row into the
+`theme` column, and the probe reads it back with `theme()`. A probe that lists
+none gets a placeholder it never reads. `tool_calling` takes its themes and
+toolsets from the run's settings instead.

@@ -122,6 +122,18 @@ check(
     refusal,
 )
 
+# A contributed probe's themes come from its installed assets, read as a run
+# reads them, with the run's asset root installed.
+from usersim.cli._pipeline import _probe_themes  # noqa: E402
+from usersim.engine.core._assets import default_assets_dir  # noqa: E402
+
+themes = _probe_themes("fixture_probe", "en_US", default_assets_dir())
+check(
+    "themes come from the contributed assets",
+    themes == ['{"type": "fixture topic", "description": "A topic every fixture row draws."}'],
+    str(themes),
+)
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 

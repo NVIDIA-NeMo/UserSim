@@ -18,10 +18,10 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
-from usersim.engine.core.messages import _parse_theme
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import BaseProbe, dispatch_episode, register_probe
 from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core.seeds import load_seeds
 from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.general_open_ended.prompts import (
     assistant_system_prompt,
@@ -50,9 +50,14 @@ class OpenEndedProbe(BaseProbe):
 
     label = "general_open_ended"
 
+    @classmethod
+    def themes(cls, locale: str) -> list[dict[str, Any]]:
+        """The topics in ``locale``'s seed file, or in the base file when the locale has none."""
+        return load_seeds(locale, cls.label, "topics")
+
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        theme = _parse_theme(self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}"))
+        theme = self.theme()
         # Parsed once; the prompt itself is rendered per call in
         # get_user_system_prompt so all three prompt hooks resolve alike.
         self._topic = theme.get("description", theme.get("type", "general topic"))

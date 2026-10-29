@@ -3,6 +3,8 @@
 
 from pathlib import Path
 
+import yaml
+
 from usersim.engine.core.probes import BaseProbe, register_probe
 
 
@@ -18,6 +20,10 @@ class FixtureProbe(BaseProbe):
     output_columns = ("fixture_probe_marker",)
     locale_bank_check = staticmethod(_check_locale_bank)
     authoring_guide = "https://example.com/fixture-probe/locales"
+
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 
     def get_user_system_prompt(self) -> str:
         return "You are a fixture user."

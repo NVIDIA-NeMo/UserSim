@@ -117,6 +117,25 @@ class TestBaseProbeDefaults:
     def test_get_tools_for_assistant_default_none(self) -> None:
         assert self._build().get_tools_for_assistant() is None
 
+    @pytest.mark.parametrize(
+        "stored",
+        [
+            '{"type": "cooking", "description": "Weeknight dinners"}',
+            {"type": "cooking", "description": "Weeknight dinners"},
+        ],
+        ids=["json-text", "mapping"],
+    )
+    def test_a_row_reads_its_theme_back_as_a_mapping(self, stored) -> None:
+        """A run stores the theme as JSON text; a caller of run_episode may pass the mapping itself."""
+        probe = _MinimalProbe(persona={}, locale="en_US", language="English", models={}, data={"theme": stored})
+        assert probe.theme() == {"type": "cooking", "description": "Weeknight dinners"}
+
+    def test_a_row_without_a_theme_reads_as_empty(self) -> None:
+        assert self._build().theme() == {}
+
+    def test_a_probe_reads_no_theme_by_default(self) -> None:
+        assert _MinimalProbe.themes("en_US") is None
+
     def test_format_gate_prompt_substitutes(self) -> None:
         probe = self._build()
         prompt = probe.format_gate_prompt("Hello?", "(no history)")

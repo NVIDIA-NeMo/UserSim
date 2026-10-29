@@ -51,6 +51,7 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
+    Mapping,
     Protocol,
     Sequence,
     runtime_checkable,
@@ -58,6 +59,7 @@ from typing import (
 
 from usersim.engine.core.columns import output_columns_problem
 from usersim.engine.core.locale import asset_locale, india_variant
+from usersim.engine.core.messages import _parse_theme
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
@@ -299,6 +301,16 @@ class BaseProbe:
         """
         return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
 
+    @classmethod
+    def themes(cls, locale: str) -> Sequence[Mapping[str, Any]] | None:
+        """The themes this probe's rows in ``locale`` draw from, read under ``assets_dir()``.
+
+        A run samples one theme per row and stores it, JSON-encoded, in the
+        row's ``theme`` column, where the probe reads it back. ``None``, the
+        default, is a probe that reads no theme.
+        """
+        return None
+
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
     # every registered probe's ``output_columns`` and drops any other key, so
@@ -360,6 +372,14 @@ class BaseProbe:
             "neutral",
         )
         self._patience = float(self._profile.get("patience", 0.5))
+
+    def theme(self) -> dict[str, Any]:
+        """This row's theme, the one the run drew from ``themes``, as a mapping.
+
+        A run stores it as JSON text, and ``run_episode`` passes the value it is
+        given; both read back the same. A row without one reads as ``{}``.
+        """
+        return _parse_theme(self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}"))
 
     # ── Required hooks (must be overridden) ─────────────────────────
 

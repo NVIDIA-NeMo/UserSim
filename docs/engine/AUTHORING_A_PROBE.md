@@ -330,6 +330,35 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
   for another locale. The refusal links it when a run asks for a locale the
   probe has no bank for.
 
+### Give each row a theme
+
+A probe whose conversations vary by topic lists the topics in a `themes`
+classmethod. A run draws one per row, stores it in the row's `theme` column,
+and the probe reads it back with `self.theme()`:
+
+```python
+class MyProbe(BaseProbe):
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        path = cls.assets_dir() / locale / "topics.json"
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._topic = self.theme().get("description", "a topic of their choice")
+```
+
+- **`themes(locale)`** returns the themes as mappings, read under
+  `assets_dir()`, so the run's asset root reaches them as it reaches the bank
+  loader. A run refuses a probe that returns none for a run locale.
+  `general_open_ended` and `general_educational` read theirs from their seed
+  files.
+- **`self.theme()`** returns the row's theme as a mapping, whether the row
+  holds it as JSON text, as a run stores it, or as the mapping a test passes
+  to `run_episode`.
+- **`None`**, the default `themes`, is a probe that reads no theme. Its rows
+  hold a placeholder.
+
 ---
 
 ## Step 4: write your `LocalePromptPack`

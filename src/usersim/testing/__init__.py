@@ -184,15 +184,16 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
-    # The pre-flight reads these on the class, before any row runs.
+    # A run reads these on the class, before any row runs.
     check = getattr(cls, "locale_bank_check", None)
     if check is not None and not callable(check):
         problems.append(
             f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
             f"locale's bank folder; got {check!r}"
         )
-    if not isinstance(inspect.getattr_static(cls, "bank_locale", None), classmethod):
-        problems.append(f"{cls.__qualname__}.bank_locale must be a classmethod; the pre-flight calls it on the class.")
+    for hook in ("bank_locale", "themes"):
+        if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
+            problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
     guide = getattr(cls, "authoring_guide", None)
     if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
         problems.append(
