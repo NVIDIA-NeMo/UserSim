@@ -36,6 +36,7 @@ from __future__ import annotations
 import copy
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Mapping, Sequence
 
@@ -152,10 +153,19 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                     f"docs/engine/EXTERNAL_PROBE_RUNTIME.md."
                 )
 
+    declared = getattr(cls, "assets_root", None)
+    if declared is not None and not Path(declared).is_absolute():
+        problems.append(
+            f"{cls.__qualname__}.assets_root is the relative path {str(declared)!r}, which resolves against "
+            "the working directory. Build it from the module's location, such as "
+            'Path(__file__).parent / "assets".'
+        )
+
     assets = probe_assets_dir(label)
     if not assets.is_dir():
         problems.append(
-            f"no assets for {label!r} at {assets}. Ship them in the package, or add their root to USERSIM_ASSET_PATH."
+            f"no assets for {label!r} at {assets}. Ship them in the package and point the class's "
+            f"assets_root at the directory that holds {label}/, or add that directory to USERSIM_ASSET_PATH."
         )
 
     return problems

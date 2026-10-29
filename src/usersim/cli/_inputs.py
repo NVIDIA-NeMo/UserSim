@@ -289,18 +289,21 @@ def _model_settings(models: Any, aliases: list[str]) -> tuple[dict[str, Any], di
 
 
 def _asset_roots_digest(assets_dir: Path) -> list[str]:
-    """The contents of every asset root a run searches, in priority order.
+    """The contents of every asset root a run can read, in priority order.
 
+    The search path, then the ``assets_root`` each registered probe declares.
     Every root counts, not just the first copy of each file: an identity spec
     that ``extends`` its own probe reads the copy below it on the path. Where a
     root is does not count, so the same assets in another folder are the same
     setup.
     """
-    from usersim.engine.core._assets import asset_search_path, reset_runtime_assets_dir, set_runtime_assets_dir
+    from usersim.engine.core._assets import asset_roots_in_use, reset_runtime_assets_dir, set_runtime_assets_dir
+    from usersim.engine.core.probes import known_probes
 
+    known_probes()  # registers every probe, so each declared root is seen
     token = set_runtime_assets_dir(assets_dir)
     try:
-        roots = asset_search_path()
+        roots = asset_roots_in_use()
     finally:
         reset_runtime_assets_dir(token)
     return [_contents_digest(root) if root.exists() else "missing" for root in roots]
@@ -370,8 +373,8 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
       are left out: they don't change what a model says);
     - the shared ``usersim_config`` as loaded, defaults applied, with whether
       the assistant's reasoning is replayed as the run's models file sets it;
-    - the contents of every asset root, and every non-operational
-      ``USERSIM_*`` variable;
+    - the contents of every asset root, a probe's declared ``assets_root``
+      included, and every non-operational ``USERSIM_*`` variable;
     - every probe's prompt version, every extension's package release, and
       the User Sim and Data Designer releases.
 

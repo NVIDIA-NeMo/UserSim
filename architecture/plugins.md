@@ -136,10 +136,26 @@ advertises the same name, or a built-in holds it.
 
 ## Asset paths
 
-An extension that ships its own banks adds them to `$USERSIM_ASSET_PATH`
-rather than replacing the tree. The packaged directory stays last in the
-search order, so the shipped banks remain reachable. See
-[assets.md](assets.md).
+An extension that ships its own banks keeps them under `assets/<label>/` in
+its package and names that `assets` directory on the probe class:
+
+```python
+from pathlib import Path
+
+from usersim.engine.core.probes import BaseProbe
+
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    assets_root = Path(__file__).parent / "assets"
+```
+
+The probe then finds its banks wherever the package is installed. That root
+is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
+deployment can override it and the shipped banks remain reachable.
+`@register_probe` refuses a relative `assets_root`, which would resolve against
+the working directory. `$USERSIM_ASSET_PATH` stays the way to layer
+content over a probe you don't ship, such as a patch to the shipped
+`identity_disclosure` spec. See [assets.md](assets.md).
 
 ## Testing an extension
 

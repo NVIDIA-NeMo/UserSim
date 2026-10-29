@@ -15,14 +15,21 @@ Resolution is an ordered **search path**, highest priority first:
 3. ``$USERSIM_ASSETS_DIR``;
 4. the packaged ``usersim/engine/assets/`` directory.
 
+A probe class may also declare ``assets_root``, the root that holds its
+``<label>/`` folder, as a probe shipped in its own package does. That root
+is searched for that probe after the first three entries and before the
+packaged directory, so a deliberate override wins over it.
+
 :func:`probe_assets_dir` walks that path and takes the first root that
 actually holds the probe, so a package contributing one probe's banks
 does not have to restate the shipped ones to be usable.
 
-An explicit ``assets_root`` -- what ``--assets-dir`` becomes -- is not
-part of the search. It pins resolution to exactly that directory. A user
-who named a location wants to be told when the assets are not there,
-rather than to be quietly served the packaged copies instead.
+A pinned root -- what ``--assets-dir`` becomes, passed to
+:func:`probe_assets_dir` as ``assets_root`` -- is not part of the search.
+It pins resolution to exactly that directory, for every probe, including
+one whose class declares a root. A user who named a location wants to be
+told when the assets are not there, rather than to be quietly served
+another copy instead.
 
 There is deliberately no CWD fallback: resolving against whatever
 directory the process happened to start in makes a broken install look
@@ -35,6 +42,8 @@ import os
 from contextvars import ContextVar, Token
 from importlib import resources
 from pathlib import Path
+
+from usersim.engine.core import probes
 
 _RUNTIME_ASSETS_DIR: ContextVar[Path | None] = ContextVar(
     "conversation_plugin_runtime_assets_dir",
@@ -73,12 +82,8 @@ def packaged_assets_dir() -> Path:
 ASSET_PATH_ENV_VAR = "USERSIM_ASSET_PATH"
 
 
-def asset_search_path() -> tuple[Path, ...]:
-    """Asset roots in priority order, duplicates removed.
-
-    Always ends with the packaged directory, so the shipped banks remain
-    reachable no matter what a deployment prepends.
-    """
+def _override_roots() -> list[Path]:
+    """The roots a run or a deployment sets on purpose, highest priority first."""
     roots: list[Path] = []
 
     runtime_override = _RUNTIME_ASSETS_DIR.get()
@@ -93,8 +98,49 @@ def asset_search_path() -> tuple[Path, ...]:
     if env_override:
         roots.append(Path(env_override))
 
-    roots.append(packaged_assets_dir())
+    return roots
+
+
+def asset_search_path() -> tuple[Path, ...]:
+    """Asset roots in priority order, duplicates removed.
+
+    Always ends with the packaged directory, so the shipped banks remain
+    reachable no matter what a deployment prepends.
+    """
+    return tuple(dict.fromkeys([*_override_roots(), packaged_assets_dir()]))
+
+
+def declared_assets_roots() -> dict[str, Path]:
+    """The ``assets_root`` each registered probe class declares, by label.
+
+    Probes that declare none, the built-ins among them, are left out. Reads
+    the registry as it stands, so a probe counts once its module is imported.
+    """
+    return {
+        label: Path(cls.assets_root)
+        for label, cls in sorted(probes._PROBE_REGISTRY.items())
+        if getattr(cls, "assets_root", None) is not None
+    }
+
+
+def probe_asset_roots(probe: str) -> tuple[Path, ...]:
+    """The roots searched for ``probe``'s assets, highest priority first.
+
+    The search path, with the root ``probe``'s class declares placed just
+    ahead of the packaged directory.
+    """
+    declared = declared_assets_roots().get(probe)
+    roots = [*_override_roots(), *([declared] if declared is not None else []), packaged_assets_dir()]
     return tuple(dict.fromkeys(roots))
+
+
+def asset_roots_in_use() -> tuple[Path, ...]:
+    """Every root a lookup can read: the search path, then each declared root.
+
+    In that order, so a setup whose probes declare no root lists exactly the
+    search path.
+    """
+    return tuple(dict.fromkeys([*asset_search_path(), *declared_assets_roots().values()]))
 
 
 def default_assets_dir() -> Path:
@@ -127,30 +173,25 @@ def probe_assets_dir(
     folder belongs to a registered probe.
 
     Args:
-        probe: One of the registered probe names from
-            ``usersim.engine.core.probes.known_probes()``. We do
-            not validate against that registry here to avoid an
-            import cycle (``_assets.py`` is imported during loader-
-            module import, which happens before the probe bootstrap).
-            ``test_assets_discovery.py`` checks the registry against
-            the packaged folders, and the per-loader default-path
-            tests in ``test_default_asset_paths.py`` check each
-            probe's loader against its folder.
+        probe: A registered probe label. Its class's ``assets_root``,
+            when declared, joins the search; a label not registered yet
+            is looked up on the search path alone.
         assets_root: Pin resolution to exactly this directory, skipping
             the search path. This is what ``--assets-dir`` becomes: a
             user who named a location is told when the assets are not
             there rather than quietly served the packaged copies.
-            When ``None``, :func:`asset_search_path` is walked and the
+            When ``None``, :func:`probe_asset_roots` is walked and the
             first root holding ``probe`` wins.
     """
     if assets_root is not None:
         return Path(assets_root) / probe
 
-    search = asset_search_path()
-    for root in search:
+    roots = probe_asset_roots(probe)
+    for root in roots:
         candidate = root / probe
         if candidate.is_dir():
             return candidate
-    # Nothing matched. Return the highest-priority candidate so the caller
-    # reports the location a user would most expect it to have been.
-    return search[0] / probe
+    # Nothing matched. Report where a user would most expect it to have
+    # been: the root the probe declares, else the highest-priority root.
+    declared = declared_assets_roots().get(probe)
+    return (declared if declared is not None else roots[0]) / probe

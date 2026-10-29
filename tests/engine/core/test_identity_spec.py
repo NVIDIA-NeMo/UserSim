@@ -344,6 +344,21 @@ class TestLayering:
         spec = load_identity_spec_default("derived_fixture")
         assert spec.layers == ("derived_fixture@1", "identity_fixture@1.0.0")
 
+    def test_specs_resolve_from_the_roots_their_probes_declare(
+        self, tmp_path, monkeypatch, register_test_probe
+    ) -> None:
+        """Two packages, each declaring its own assets_root: one spec extends
+        the other's, with no asset path set."""
+        monkeypatch.delenv("USERSIM_ASSET_PATH", raising=False)
+        register_test_probe("ext_parent", assets_root=tmp_path / "pkg_a")
+        register_test_probe("ext_child", assets_root=tmp_path / "pkg_b")
+        _write(tmp_path / "pkg_a", "ext_parent", BASE)
+        _write(tmp_path / "pkg_b", "ext_child", _layer("ext_child", extends="ext_parent"))
+
+        spec = load_identity_spec_default("ext_child")
+
+        assert spec.layers == ("ext_child@1", "identity_fixture@1.0.0")
+
     def test_extending_with_nothing_below_is_an_error(self, roots) -> None:
         path = _write(roots[0], LABEL, _layer("lonely", extends=LABEL))
         assert _codes(_load_problems(path)) == {ProblemCode.NO_PARENT}

@@ -271,6 +271,8 @@ A probe that asks about identity its own way, with its own tactics,
 strategies or models, can subclass this one under a label of its own:
 
 ```python
+from pathlib import Path
+
 from usersim.engine.core.probes import register_probe
 from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosureProbe
 
@@ -278,9 +280,11 @@ from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosu
 @register_probe(family="my_identity", prompt_version="v1.0", variants=("default",))
 class MyIdentityProbe(IdentityDisclosureProbe):
     label = "my_identity"
+    assets_root = Path(__file__).parent / "assets"  # holds my_identity/spec.yaml
 ```
 
-Its spec is `my_identity/spec.yaml` on the asset search path, or the file
+Its spec is `my_identity/spec.yaml` under the class's `assets_root` or on the
+asset search path, or the file
 `USERSIM_MY_IDENTITY_SPEC` names, and is usually a layer with
 `extends: identity_disclosure`. Its rows record that spec's version under
 their own label and carry an `expected_identity`, so the `identity_disclosure`

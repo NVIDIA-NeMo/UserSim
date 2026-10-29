@@ -47,6 +47,7 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -250,6 +251,15 @@ class BaseProbe:
     family: str = ""
     prompt_version: str = ""
     variants: tuple[str, ...] = ()
+
+    # The directory that holds this probe's ``<label>/`` asset folder, for a
+    # probe whose assets ship outside ``usersim``: an absolute path, such as
+    # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
+    # relative one). Searched after the deliberate overrides (the runtime
+    # override, ``USERSIM_ASSET_PATH`` and ``USERSIM_ASSETS_DIR``) and before
+    # the packaged banks. ``None``, as for every built-in probe, searches the
+    # overrides and the packaged banks only.
+    assets_root: Path | None = None
 
     # Whether the simulator may discard a judge-rejected assistant
     # candidate and regenerate it (``max_assistant_attempts > 1``).
@@ -1335,6 +1345,8 @@ def register_probe(
     class a reloaded module redefines, updates the entry; a different class
     under a taken label raises ``ProbeRegistrationError`` naming both, so
     an installed package cannot replace a probe a run asks for by name.
+    A class whose ``assets_root`` is a relative path is refused as well: it
+    would resolve against whatever directory a run starts in.
 
     The class itself IS the registration: there is no central registry
     entry or ``simulate_*`` function to add alongside it.
@@ -1364,6 +1376,12 @@ def register_probe(
             raise ProbeRegistrationError(
                 f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
                 f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
+            )
+        if cls.assets_root is not None and not Path(cls.assets_root).is_absolute():
+            raise ProbeRegistrationError(
+                f"@register_probe: {_definition(cls)} declares the relative assets_root "
+                f"{str(cls.assets_root)!r}, which would resolve against the working directory. Build it "
+                'from the module\'s location, such as Path(__file__).parent / "assets".'
             )
 
         cls.family = family

@@ -36,7 +36,7 @@ from typing import Any, Mapping
 
 import yaml
 
-from usersim.engine.core._assets import asset_search_path, probe_assets_dir
+from usersim.engine.core._assets import asset_roots_in_use, probe_asset_roots, probe_assets_dir
 from usersim.engine.core.identity_spec_types import (
     Developer,
     ExpectedIdentity,
@@ -140,7 +140,7 @@ def spec_env_var(label: str = PROBE_LABEL) -> str:
 
 
 def default_identity_spec_path(label: str = PROBE_LABEL) -> Path:
-    """Where ``label``'s spec lives on the asset search path."""
+    """Where ``label``'s spec lives among its asset roots."""
     return probe_assets_dir(label) / SPEC_FILENAME
 
 
@@ -153,7 +153,7 @@ def identity_spec_path(label: str = PROBE_LABEL) -> Path:
 
 
 def load_identity_spec(path: str | Path) -> IdentitySpec:
-    """Load the spec at ``path``, following ``extends`` down the asset search path."""
+    """Load the spec at ``path``, following ``extends`` down the asset roots."""
     merged, layers, sources = _load_layers(Path(path), visited=())
     return _build_spec(merged, layers, sources)
 
@@ -165,11 +165,11 @@ _CACHE_LOCK = threading.Lock()
 def load_identity_spec_default(label: str = PROBE_LABEL) -> IdentitySpec:
     """The spec ``label`` runs with, loaded once per process and then cached.
 
-    The cache key includes the asset search path, because the layers a spec
-    inherits depend on it.
+    The cache key includes every asset root in use, because the layers a
+    spec inherits depend on them.
     """
     top = identity_spec_path(label)
-    key = (label, str(top), tuple(str(root) for root in asset_search_path()))
+    key = (label, str(top), tuple(str(root) for root in asset_roots_in_use()))
     with _CACHE_LOCK:
         cached = _CACHE.get(key)
         if cached is not None:
@@ -232,18 +232,19 @@ def _load_layers(path: Path, *, visited: tuple[Path, ...]) -> tuple[dict[str, An
 def _parent_path(parent_label: str, *, below: Path) -> Path:
     """The ``parent_label`` spec that ``below`` inherits from.
 
-    The first copy on the asset search path, unless ``below`` is itself one
+    The first copy among ``parent_label``'s asset roots (the search path,
+    plus the root its probe class declares), unless ``below`` is itself one
     of those copies, in which case the next one down.
     """
     candidates: list[Path] = []
-    for root in asset_search_path():
+    for root in probe_asset_roots(parent_label):
         candidate = Path(root) / parent_label / SPEC_FILENAME
         if candidate.is_file():
             candidates.append(candidate.resolve())
     if below in candidates:
         candidates = candidates[candidates.index(below) + 1 :]
     if not candidates:
-        detail = f"extends {parent_label!r}, but no {parent_label}/{SPEC_FILENAME} was found below it on the asset search path"
+        detail = f"extends {parent_label!r}, but no {parent_label}/{SPEC_FILENAME} was found below it on the asset search path or in the assets_root of the {parent_label!r} probe"
         raise IdentitySpecError([SpecProblem(ProblemCode.NO_PARENT, str(below), detail)])
     return candidates[0]
 

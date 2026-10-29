@@ -23,9 +23,18 @@ probe. The packaged directory is always last, so prepending a root never
 hides the shipped banks, which is what lets a package contribute one
 probe's assets without restating the rest.
 
+A probe class can also declare `assets_root`, the directory that holds its
+`<label>/` folder. A probe shipped in its own package points it inside that
+package, such as `Path(__file__).parent / "assets"`, so the probe finds its
+banks wherever the package is installed, with no environment variable to
+set. Registration refuses a relative root. That root is searched for that probe only, after the first three
+entries and before the packaged directory, so a deliberate override wins
+over it. The built-in probes declare none.
+
 An explicit `--assets-dir` is **not** part of the search. It pins resolution
-to exactly that directory, because a user who named a location should be told
-when the assets are not there rather than quietly served the packaged copies.
+to exactly that directory, for every probe in the run, including one that
+declares `assets_root`, because a user who named a location should be told
+when the assets are not there rather than quietly served another copy.
 
 There is no fallback to the working directory. Resolving against wherever the
 process happened to start makes a broken install look healthy from a source

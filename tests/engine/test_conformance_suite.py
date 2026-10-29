@@ -98,6 +98,19 @@ class TestTheChecksCanFail:
         problems = probe_conformance_problems(SyncHook)
         assert any("is_capitulation_detected" in p and "async def" in p for p in problems)
 
+    async def test_a_relative_assets_root_is_reported(self) -> None:
+        """A relative root resolves against whatever directory a run starts in."""
+        from pathlib import Path
+
+        from usersim.engine.core.probes import BaseProbe
+
+        class RelativeRoot(BaseProbe):
+            label = "relative_root"
+            assets_root = Path("assets")
+
+        problems = probe_conformance_problems(RelativeRoot)
+        assert any("RelativeRoot.assets_root" in p and "relative path" in p for p in problems)
+
     async def test_async_hook_override_is_accepted(self) -> None:
         from usersim.engine.core.probes import BaseProbe
 

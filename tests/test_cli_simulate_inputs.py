@@ -327,6 +327,18 @@ def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp
     assert _inputs._asset_roots_digest(top) != before
 
 
+def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_test_probe, tmp_path):
+    """A probe shipped in its own package reads its banks from the root its class declares."""
+    bank = tmp_path / "pkg" / "ext_probe" / "sample.yaml"
+    bank.parent.mkdir(parents=True)
+    bank.write_text("items: []\n")
+    register_test_probe("ext_probe", assets_root=tmp_path / "pkg")
+    before = _inputs._asset_roots_digest(packaged_assets_dir())
+    bank.write_text("items: [edited]\n")
+
+    assert _inputs._asset_roots_digest(packaged_assets_dir()) != before
+
+
 def test_a_data_designer_release_is_part_of_the_setup(rows, monkeypatch):
     before = _fingerprint(rows)
     monkeypatch.setattr(_inputs, "_data_designer_version", lambda: "999.0")

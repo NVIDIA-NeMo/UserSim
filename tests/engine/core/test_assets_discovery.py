@@ -8,8 +8,8 @@ The banks are package data under ``usersim/engine/assets/``, resolved
 through :mod:`importlib.resources`.
 
 The invariants here fall into two groups: that resolution works and honours
-its overrides, and that the probe registry and the on-disk layout stay in
-lockstep.
+its overrides and a probe's declared ``assets_root``, and that the probe
+registry and the on-disk layout stay in lockstep.
 
 Loader-level tests live in the per-bank test files (``test_agentic_bank.py``,
 ``test_pressure_bank.py``, …) and exercise these helpers indirectly via the
@@ -22,8 +22,11 @@ import os
 from pathlib import Path
 
 from usersim.engine.core._assets import (
+    asset_roots_in_use,
+    asset_search_path,
     default_assets_dir,
     packaged_assets_dir,
+    probe_asset_roots,
     probe_assets_dir,
     reset_runtime_assets_dir,
     set_runtime_assets_dir,
@@ -184,3 +187,62 @@ class TestAssetSearchPath:
 
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path))
         assert probe_assets_dir("no_such_probe").parent == tmp_path
+
+
+class TestDeclaredAssetsRoot:
+    """A probe whose assets ship outside ``usersim`` names their root on its
+    class, so it resolves without anyone setting ``USERSIM_ASSET_PATH``."""
+
+    def test_a_declared_root_serves_its_probe(self, register_test_probe, tmp_path) -> None:
+        (tmp_path / "ext_probe").mkdir()
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert probe_assets_dir("ext_probe") == tmp_path / "ext_probe"
+
+    def test_it_is_searched_after_the_overrides_and_before_the_packaged_banks(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        override = tmp_path / "override"
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_asset_roots("ext_probe") == (override, tmp_path / "declared", packaged_assets_dir())
+
+    def test_a_deliberate_override_wins_over_the_declared_root(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        override, declared = tmp_path / "override", tmp_path / "declared"
+        (override / "ext_probe").mkdir(parents=True)
+        (declared / "ext_probe").mkdir(parents=True)
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
+        register_test_probe("ext_probe", assets_root=declared)
+
+        assert probe_assets_dir("ext_probe") == override / "ext_probe"
+
+    def test_a_pinned_root_ignores_the_declared_root(self, register_test_probe, tmp_path) -> None:
+        (tmp_path / "declared" / "ext_probe").mkdir(parents=True)
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_assets_dir("ext_probe", assets_root=tmp_path / "pinned") == tmp_path / "pinned" / "ext_probe"
+
+    def test_missing_assets_are_reported_under_the_declared_root(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path / "override"))
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_assets_dir("ext_probe") == tmp_path / "declared" / "ext_probe"
+
+    def test_a_declared_root_serves_only_its_own_probe(self, register_test_probe, tmp_path) -> None:
+        """A package's root may hold other folders; only its probe reads from it."""
+        (tmp_path / "tool_calling").mkdir()
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert probe_assets_dir("tool_calling") == packaged_assets_dir() / "tool_calling"
+
+    def test_roots_in_use_add_declared_roots_after_the_search_path(self, register_test_probe, tmp_path) -> None:
+        assert asset_roots_in_use() == asset_search_path()
+
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert asset_roots_in_use() == (*asset_search_path(), tmp_path)
