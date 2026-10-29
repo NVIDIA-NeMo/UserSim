@@ -368,9 +368,10 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
 
     Returns the fingerprint and the run record that names it. Covered:
 
-    - every simulator model alias as Data Designer sends it, provider settings
-      included (``api_key``, a provider's name and ``max_parallel_requests``
-      are left out: they don't change what a model says);
+    - every simulator model alias, and every alias a registered probe names in
+      ``model_aliases``, as Data Designer sends it, provider settings included
+      (``api_key``, a provider's name and ``max_parallel_requests`` are left
+      out: they don't change what a model says);
     - the shared ``usersim_config`` as loaded, defaults applied, with whether
       the assistant's reasoning is replayed as the run's models file sets it;
     - the contents of every asset root, a probe's declared ``assets_root``
@@ -382,13 +383,14 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
     """
     from usersim.engine.config import MODEL_ALIASES, ConversationSimulatorConfig
     from usersim.engine.core.manifest import _own_version
+    from usersim.engine.core.probes import declared_model_aliases
     from usersim.engine.core.storage import RUN_KIND_STORED
 
-    simulation = ConversationSimulatorConfig.model_validate(_run_config(inputs, models)).model_dump(mode="json")
+    config = ConversationSimulatorConfig.model_validate(_run_config(inputs, models))
+    simulation = config.model_dump(mode="json")
     for key in _PER_ROW_SETTINGS:
         simulation.pop(key, None)
-    aliases = [*MODEL_ALIASES, simulation.get("finance_embedding_model_alias") or ""]
-    readable, hashed = _model_settings(models, [alias for alias in aliases if alias])
+    readable, hashed = _model_settings(models, [*MODEL_ALIASES, *declared_model_aliases(config)])
     fingerprint = _digest(
         {
             "models": hashed,

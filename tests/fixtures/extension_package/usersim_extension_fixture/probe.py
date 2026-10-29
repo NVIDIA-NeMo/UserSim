@@ -22,6 +22,10 @@ class FixtureProbe(BaseProbe):
     authoring_guide = "https://example.com/fixture-probe/locales"
 
     @classmethod
+    def model_aliases(cls, cfg) -> tuple[str, ...]:
+        return ("fixture_critic_model",)
+
+    @classmethod
     def themes(cls, locale: str) -> list[dict]:
         return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 

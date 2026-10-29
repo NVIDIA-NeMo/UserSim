@@ -192,8 +192,20 @@ class TestTheChecksCanFail:
                 "PreflightProbe.authoring_guide must be None or an https:// URL",
             ),
             ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
+            ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
+            (
+                {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
+                "PreflightProbe.model_aliases must return a tuple of alias names; got 'critic_model'",
+            ),
         ],
-        ids=["check-not-callable", "bank-locale-not-a-classmethod", "relative-guide", "themes-not-a-classmethod"],
+        ids=[
+            "check-not-callable",
+            "bank-locale-not-a-classmethod",
+            "relative-guide",
+            "themes-not-a-classmethod",
+            "model-aliases-not-a-classmethod",
+            "model-aliases-a-bare-string",
+        ],
     )
     async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
         """A run reads these on the class before any row runs, so a wrong one fails the whole run."""
@@ -216,7 +228,11 @@ class TestTheChecksCanFail:
             def themes(cls, locale):
                 return [{"type": "cooking"}]
 
-        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes")
+            @classmethod
+            def model_aliases(cls, cfg):
+                return ("critic_model",)
+
+        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes", "model_aliases")
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 
     @pytest.mark.parametrize(

@@ -148,6 +148,7 @@ as a Data Designer model facade.
 runtime_models["api_response_model"] = my_tool_response_model
 ```
 
+A probe names any other model it calls in `model_aliases` on its class.
 `financial_services` optionally embeds its `kb_search` queries with the model
 named by `finance_embedding_model_alias` (`embedding_model` by default, anything
 exposing `agenerate_text_embeddings()`); without one, dense retrieval falls back

@@ -128,6 +128,9 @@ When porting one of the templates into a new module:
 - [ ] If the probe's conversations vary by topic, list the topics in a
       `themes` classmethod and read the row's with `self.theme()` (step 3
       of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe calls a model beyond the conversation's own, name its
+      alias in a `model_aliases` classmethod (step 2 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] Keep the probe's own per-row data under metadata keys of its own.
       The loop writes the keys in `RESERVED_METADATA_KEYS`
       (`core/simulation.py`); a probe reads them, and

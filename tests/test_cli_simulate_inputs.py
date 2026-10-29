@@ -246,6 +246,18 @@ def test_a_model_setting_that_can_change_a_conversation_is_a_new_setup(rows, mod
     assert _fingerprint(rows, models()) != _fingerprint(rows)
 
 
+def test_a_model_a_probe_declares_is_part_of_the_setup(rows, register_test_probe):
+    """A model a probe calls changes what its conversations say, like the conversation's own models."""
+    register_test_probe("ext_critic", model_aliases=classmethod(lambda cls, cfg: ("ext_critic_model",)))
+
+    def with_critic(model: str) -> ModelsConfig:
+        base = _models()
+        critic = replace(base.models[0], alias="ext_critic_model", model=model)
+        return ModelsConfig(providers=base.providers, models=(*base.models, critic))
+
+    assert _fingerprint(rows, with_critic("acme/critic-a")) != _fingerprint(rows, with_critic("acme/critic-b"))
+
+
 def test_the_runs_models_file_decides_replay_whatever_the_rows_were_stored_with(rows, tmp_path):
     """The assistant under test comes from the run's models file, and so does replaying its reasoning."""
     from usersim.engine.core.llm import replaying_assistant_reasoning

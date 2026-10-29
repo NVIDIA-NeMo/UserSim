@@ -134,6 +134,12 @@ check(
     str(themes),
 )
 
+# A model a contributed probe declares joins the models every row resolves.
+from usersim.engine.core.probes import declared_model_aliases  # noqa: E402
+
+declared = declared_model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
+check("model_aliases joins the run's models", "fixture_critic_model" in declared, str(declared))
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 

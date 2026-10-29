@@ -311,6 +311,19 @@ class BaseProbe:
         """
         return None
 
+    @classmethod
+    def model_aliases(cls, cfg: Any) -> tuple[str, ...]:
+        """Models this probe calls beyond the user, assistant, tool-response, judge and summary models.
+
+        Each is an alias in the models file. Every row's ``models`` holds each
+        alias a registered probe names here that the models file defines; one
+        the file lacks is left out, and the probe handles its absence. A run's
+        setup fingerprint counts each one's settings.
+        ``cfg`` is the run's ``ConversationSimulatorConfig``, for a probe whose
+        alias is one of its settings.
+        """
+        return ()
+
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
     # every registered probe's ``output_columns`` and drops any other key, so
@@ -1538,6 +1551,14 @@ def declared_output_columns() -> tuple[str, ...]:
     for label in known_probes():
         columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
     return tuple(columns)
+
+
+def declared_model_aliases(cfg: Any) -> tuple[str, ...]:
+    """The aliases every registered probe names in ``model_aliases``, each once, in label order."""
+    aliases: dict[str, None] = {}
+    for label in known_probes():
+        aliases.update(dict.fromkeys(alias for alias in _PROBE_REGISTRY[label].model_aliases(cfg) if alias))
+    return tuple(aliases)
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:

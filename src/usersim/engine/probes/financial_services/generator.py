@@ -376,11 +376,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             t.name for t in self._institution.tools if t.side_effect_class == "read_only"
         )
         self._retrieval_mode = getattr(self._cfg, "finance_retrieval_mode", "hybrid")
-        self._embedding_alias = getattr(
-            self._cfg,
-            "finance_embedding_model_alias",
-            "embedding_model",
-        )
+        (self._embedding_alias,) = self.model_aliases(self._cfg)
         # Tripped the first time dense mode has to fall back to lexical (no query
         # vector) so a misconfigured run -- dense requested but no embedding model
         # -- is loud instead of silently degrading to word overlap.
@@ -391,6 +387,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         self._user_system_prompt = self._build_user_system_prompt()
 
     # ── BankBackedProbe API ─────────────────────────────────────────
+
+    @classmethod
+    def model_aliases(cls, cfg: Any) -> tuple[str, ...]:
+        """The model that embeds ``kb_search`` queries; without it, dense retrieval falls back to lexical."""
+        return (getattr(cfg, "finance_embedding_model_alias", "embedding_model"),)
 
     @classmethod
     def bank_locale(cls, locale: str, probe_dir: Path) -> str:

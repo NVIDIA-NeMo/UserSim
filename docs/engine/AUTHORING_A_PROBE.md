@@ -235,6 +235,28 @@ def load_my_bank(locale: str) -> MyBank:
 [`docs/extensions.md`](../extensions.md) builds a whole package around such a
 probe.
 
+### Call a model of your own
+
+A probe that calls a model beyond the conversation's own (the user, assistant,
+tool-response, judge and summary models) names its alias in the models file in
+a `model_aliases` classmethod:
+
+```python
+class MyProbe(BaseProbe):
+    @classmethod
+    def model_aliases(cls, cfg) -> tuple[str, ...]:
+        return ("my_probe_critic_model",)
+```
+
+Each row's `models` holds every declared alias the models file defines, so the
+probe reads its model as `self._models.get("my_probe_critic_model")`. An alias
+the file lacks is left out, and the probe handles its absence: `get` returns
+`None`, and the probe can fall back or raise an error that names the alias. A
+run's setup fingerprint counts the settings of each declared model. `cfg` is
+the run's `ConversationSimulatorConfig`, for an alias that is itself a setting:
+`financial_services` declares the model named by `finance_embedding_model_alias`,
+which embeds its search queries, and searches lexically without it.
+
 ---
 
 ## Step 3: wire the asset bank

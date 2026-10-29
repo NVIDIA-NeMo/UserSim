@@ -191,9 +191,11 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
             f"locale's bank folder; got {check!r}"
         )
-    for hook in ("bank_locale", "themes"):
+    for hook in ("bank_locale", "themes", "model_aliases"):
         if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
             problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
+    if isinstance(inspect.getattr_static(cls, "model_aliases", None), classmethod):
+        problems.extend(_model_aliases_problems(cls))
     guide = getattr(cls, "authoring_guide", None)
     if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
         problems.append(
@@ -215,6 +217,19 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     return problems
+
+
+def _model_aliases_problems(cls: type) -> list[str]:
+    """What is wrong with the aliases ``cls.model_aliases`` gives a run with default settings."""
+    from usersim.engine.config import ConversationSimulatorConfig
+
+    try:
+        aliases = cls.model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
+    except Exception as error:
+        return [f"{cls.__qualname__}.model_aliases raised {type(error).__name__}: {error}"]
+    if not isinstance(aliases, tuple) or not all(isinstance(alias, str) and alias for alias in aliases):
+        return [f"{cls.__qualname__}.model_aliases must return a tuple of alias names; got {aliases!r}"]
+    return []
 
 
 def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:
