@@ -84,6 +84,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     """Single-user-turn + multi-assistant-turn tool-interception probe."""
 
     label = "demo_agentic"
+    output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_demo_agentic_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = "agentic"  # non-locale
@@ -132,10 +133,9 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         if self._task is not None:
             extras["probe_variant"] = f"{self._task.sub_protocol}::demo"
             extras["action_request_id"] = self._task.id

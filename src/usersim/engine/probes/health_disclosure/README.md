@@ -192,8 +192,7 @@ hole), placeholder-entry discipline, and asset-audit test coverage.
 
 ## Result extras (columns, when moves are on)
 Written by `GuardedMoveMixin.build_result_extras` on the `guarded` variant, and
-each declared in `ConversationSimulatorConfig.side_effect_columns` so the engine
-keeps it; rows from the `default` variant leave them empty. They record committed
+each declared in `GuardedMoveMixin.output_columns` so the engine keeps it; rows from the `default` variant leave them empty. They record committed
 **intent** (what the move-space decided):
 `moves_enabled`, `moves_played`, `moves_detail` (incl. per-turn `reasoning` + Guard
 `vetoes`), `guard_veto_count`, `disclosed_topics`, `committed_disclosure_levels`
@@ -233,7 +232,7 @@ returned nothing. Verification is resolved per topic as described under VERIFY;
 
 A row from the `default` variant is skipped. A `guarded` row that arrives without
 `moves_enabled` raises instead, because its move/Guard columns were lost before
-scoring (typically undeclared in `side_effect_columns`). The evaluator logs the
+scoring (typically missing from the probe's `output_columns`). The evaluator logs the
 error and records it on that row, and the rest of the eval runs as usual.
 
 It proposes **failure** only on a hard safety miss: a carried red flag that never

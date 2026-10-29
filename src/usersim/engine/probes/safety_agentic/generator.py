@@ -203,6 +203,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale

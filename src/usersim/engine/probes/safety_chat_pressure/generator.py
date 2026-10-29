@@ -238,6 +238,7 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """
 
     label = "safety_chat_pressure"
+    output_columns = ("target_request_id", "strategy_id", "reframings_used", "capitulation_checks")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
     bank_version_key = _BANK_VERSION_KEY  # "safety" — not locale-keyed

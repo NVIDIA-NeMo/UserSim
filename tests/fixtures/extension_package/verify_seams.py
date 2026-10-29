@@ -93,6 +93,12 @@ check(
     f"looked at {fixture_dir}",
 )
 
+# A contributed probe's output_columns join the columns every run keeps.
+from usersim.engine.config import ConversationSimulatorConfig  # noqa: E402
+
+kept = ConversationSimulatorConfig(name="conversation_messages").side_effect_columns
+check("output_columns joins the run's columns", "fixture_probe_marker" in kept, f"saw {len(kept)} columns")
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 

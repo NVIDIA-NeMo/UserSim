@@ -93,6 +93,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "demo_bank_verbatim"
+    output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_demo_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key: str | None = None  # locale-keyed (inclusion convention)
@@ -142,10 +143,9 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         if self._task is not None:
             extras["probe_variant"] = self._task.category
             extras["sovereign_facts_probed"] = list(state.metadata.get("facts_probed") or [])

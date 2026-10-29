@@ -858,6 +858,25 @@ class TestRegisterProbe:
         assert "_relative_root_probe" not in known_probes()
         assert relative.family == ""
 
+    def test_rejects_an_output_column_the_engine_writes(self) -> None:
+        """A core column is written for every probe; a probe declaring one would collide with it."""
+        mod = self._make_module()
+        clashing = self._probe_class("_Clashing", "_clashing_columns_probe", mod.__name__)
+        clashing.output_columns = ("my_score", "trajectory_id")
+
+        with pytest.raises(ProbeRegistrationError, match=r"_Clashing\.output_columns names \['trajectory_id'\]"):
+            register_probe(family="general", prompt_version="v1.0", variants=("default",))(clashing)
+        assert "_clashing_columns_probe" not in known_probes()
+
+    def test_rejects_output_columns_given_as_one_string(self) -> None:
+        """A bare string would be read as one column per character."""
+        mod = self._make_module()
+        bare = self._probe_class("_Bare", "_bare_columns_probe", mod.__name__)
+        bare.output_columns = "my_score"
+
+        with pytest.raises(ProbeRegistrationError, match="must be a tuple of column names"):
+            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bare)
+
     def test_resolve_probe_raises_keyerror_for_unknown(self) -> None:
         with pytest.raises(KeyError, match="bogus_probe"):
             resolve_probe("bogus_probe")

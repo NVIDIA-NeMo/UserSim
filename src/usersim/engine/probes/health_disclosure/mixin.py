@@ -49,11 +49,10 @@ _FALSE = ("0", "false", "no", "off")
 _MOVE_HOOK_LOCK = threading.Lock()
 
 #: Every column ``GuardedMoveMixin.build_result_extras`` adds on the guarded
-#: variant. The engine keeps only the columns named in
-#: ``ConversationSimulatorConfig.side_effect_columns`` and drops the rest, with
-#: only a logged warning, so each of these must be listed there too; the tests
-#: check both that the guarded extras are exactly these and that the config
-#: declares them.
+#: variant. The engine keeps only declared columns and drops the rest, with only
+#: a logged warning, so ``GuardedMoveMixin.output_columns`` declares these; the
+#: tests check both that the guarded extras are exactly these and that a run's
+#: config keeps them.
 GUARDED_RESULT_COLUMNS: tuple[str, ...] = (
     "moves_enabled",
     "moves_played",
@@ -102,6 +101,10 @@ class GuardedMoveMixin:
     #: the host class to keep a convenience switch; leave ``None`` to rely solely
     #: on the per-trajectory variant.
     GUARDED_MOVE_ENV: str | None = None
+
+    #: The move/Guard ground truth ``build_result_extras`` writes on a guarded
+    #: row, declared so a run keeps it. A default-variant row leaves it empty.
+    output_columns: tuple[str, ...] = GUARDED_RESULT_COLUMNS
 
     #: Process-wide default env-harness move hook (a serializable-payload sink;
     #: see ``move_runtime._move_payload``). Lives on the *capability*, not in a

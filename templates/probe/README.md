@@ -123,15 +123,13 @@ When porting one of the templates into a new module:
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
       that ships across multiple locales.
-- [ ] Declare every key `build_result_extras` adds in
-      `side_effect_columns` on `ConversationSimulatorConfig`. The engine
-      writes the configured column plus the declared names and discards
-      the rest (logging a warning), so an undeclared join key is computed,
-      dropped, and then read back as absent by your scorer, which reports
-      the trajectory as having nothing to score while the run looks fine.
-      A probe outside this repository cannot add to that list: keep its
-      per-row data in `state.metadata`, written during the run, and read it
-      from `conversation_metadata`. See step 6 of
+- [ ] Declare every key `build_result_extras` adds beyond the core
+      columns in the class's `output_columns`, as each template does. The
+      engine keeps the core columns plus every registered probe's
+      `output_columns` and discards the rest (logging a warning), so an
+      undeclared join key is computed, dropped, and then read back as
+      absent by your scorer, which reports the trajectory as having
+      nothing to score while the run looks fine. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
 - [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module

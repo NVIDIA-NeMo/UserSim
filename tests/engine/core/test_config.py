@@ -7,6 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.core.columns import CORE_RESULT_COLUMNS
 
 
 class TestConversationSimulatorConfig:
@@ -56,6 +57,17 @@ class TestConversationSimulatorConfig:
         declared = set(cfg.side_effect_columns)
         for column in ("query_id", "sovereign_facts_probed", "probing_categories_explored", "finance_task_id"):
             assert column in declared, f"{column} would be dropped before any scorer could read it"
+
+    def test_registered_probes_output_columns_follow_the_core_columns(self, register_test_probe):
+        """A run keeps every registered probe's columns; a name two probes declare appears once."""
+        register_test_probe("ext_a", output_columns=("ext_a_score", "shared_id"))
+        register_test_probe("ext_b", output_columns=("shared_id", "ext_b_flag"))
+
+        columns = ConversationSimulatorConfig(name="test").side_effect_columns
+
+        assert columns[: len(CORE_RESULT_COLUMNS)] == list(CORE_RESULT_COLUMNS)
+        assert {"ext_a_score", "shared_id", "ext_b_flag"} <= set(columns)
+        assert len(columns) == len(set(columns))
 
     def test_random_seed_can_be_set(self):
         cfg = ConversationSimulatorConfig(name="test", random_seed=42)

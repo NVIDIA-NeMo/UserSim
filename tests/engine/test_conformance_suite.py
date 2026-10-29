@@ -111,6 +111,26 @@ class TestTheChecksCanFail:
         problems = probe_conformance_problems(RelativeRoot)
         assert any("RelativeRoot.assets_root" in p and "relative path" in p for p in problems)
 
+    @pytest.mark.parametrize(
+        ("columns", "expected"),
+        [
+            ("my_score", "must be a tuple of column names"),
+            (("my_score", ""), "must be a tuple of non-empty column names"),
+            (("my_score", "trajectory_id"), "names ['trajectory_id']"),
+        ],
+        ids=["bare-string", "empty-name", "core-column"],
+    )
+    async def test_unusable_output_columns_are_reported(self, columns, expected) -> None:
+        """Registration refuses these too; the check reports them on a class that is not registered."""
+        from usersim.engine.core.probes import BaseProbe
+
+        class Columns(BaseProbe):
+            label = "columns_probe"
+            output_columns = columns
+
+        problems = probe_conformance_problems(Columns)
+        assert any("Columns.output_columns " in p and expected in p for p in problems), problems
+
     async def test_async_hook_override_is_accepted(self) -> None:
         from usersim.engine.core.probes import BaseProbe
 
