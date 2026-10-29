@@ -380,15 +380,77 @@ class TestProbeAssetPreflight:
 
     def test_the_refusal_links_point_at_files_in_this_repository(self) -> None:
         """The links are absolute, to work from an installed package; moving a file must not break them quietly."""
-        from usersim.cli._pipeline import _BANK_AUTHORING_GUIDES, _FEATURE_REQUEST_URL
+        import usersim.engine.generator  # noqa: F401  (populates registry)
+        from usersim.cli._pipeline import _FEATURE_REQUEST_URL
+        from usersim.engine.core.probes import known_probes, resolve_probe
 
         template = _FEATURE_REQUEST_URL.split("?template=", 1)[1]
         assert (_REPO_ROOT / ".github" / "ISSUE_TEMPLATE" / template).is_file()
-        for url in _BANK_AUTHORING_GUIDES.values():
+        guides = [resolve_probe(p).authoring_guide for p in known_probes() if resolve_probe(p).authoring_guide]
+        assert guides, "no built-in probe links a guide, so this test checks nothing"
+        for url in guides:
             path, anchor = url.removeprefix("https://github.com/NVIDIA-NeMo/UserSim/blob/main/").split("#")
             lines = (_REPO_ROOT / path).read_text(encoding="utf-8").splitlines()
             headings = {line.lstrip("#").strip().lower().replace(" ", "-") for line in lines if line.startswith("#")}
             assert anchor in headings, f"{path} has no heading for #{anchor}"
+
+    @staticmethod
+    def _bank_check(locale_dir: Path) -> None:
+        if not (locale_dir / "bank.yaml").read_text(encoding="utf-8").strip():
+            raise ValueError("the bank is empty")
+
+    def test_a_probe_declares_its_locale_pre_flight(self, tmp_path: Path, register_test_probe) -> None:
+        """A probe from another package is checked by its own class, and its refusal links its own guide."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        for locale, bank in (("en_US", "recipes: [curry]\n"), ("de_DE", "")):
+            (tmp_path / "ext_banks" / locale).mkdir(parents=True)
+            (tmp_path / "ext_banks" / locale / "bank.yaml").write_text(bank, encoding="utf-8")
+        register_test_probe(
+            "ext_banks",
+            assets_root=tmp_path,
+            locale_bank_check=staticmethod(self._bank_check),
+            authoring_guide="https://example.com/ext-banks/locales",
+        )
+
+        verify_probe_assets({"ext_banks": 1.0}, ["en_US"], None)
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"ext_banks": 1.0}, ["de_DE", "fr_FR"], None)
+        problems, remedies = str(exc.value).split("\n\n", 1)
+        assert problems.splitlines()[1:] == [
+            "  - ext_banks can't run de_DE: its bank does not load (ValueError: the bank is empty); "
+            "fr_FR: no bank. Locales that can run: en_US"
+        ]
+        # A feature request here is for the probes that ship with User Sim.
+        assert remedies.splitlines() == [
+            "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them.",
+            "To build a ext_banks bank yourself, see https://example.com/ext-banks/locales",
+        ]
+
+    def test_a_probe_names_the_bank_a_locale_runs_on(self, tmp_path: Path, register_test_probe) -> None:
+        """The pre-flight checks the bank the class's bank_locale picks, not the locale's own folder."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "ext_banks" / "shared").mkdir(parents=True)
+        bank = tmp_path / "ext_banks" / "shared" / "bank.yaml"
+        bank.write_text("recipes: [curry]\n", encoding="utf-8")
+        register_test_probe(
+            "ext_banks",
+            assets_root=tmp_path,
+            locale_bank_check=staticmethod(self._bank_check),
+            bank_locale=classmethod(lambda cls, locale, probe_dir: "shared"),
+        )
+
+        verify_probe_assets({"ext_banks": 1.0}, ["de_DE", "fr_FR"], None)
+        bank.write_text("", encoding="utf-8")
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"ext_banks": 1.0}, ["de_DE"], None)
+        assert str(exc.value).splitlines()[1] == (
+            "  - ext_banks can't run de_DE (through shared): its bank does not load (ValueError: the bank is empty)."
+            " Locales that can run: none"
+        )
 
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError

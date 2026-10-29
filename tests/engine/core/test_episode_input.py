@@ -132,6 +132,52 @@ _PINNED_TRAJECTORY_IDS = {
 }
 
 
+@pytest.mark.parametrize(
+    ("probe_type", "kind"), [("general_open_ended", "topics"), ("general_educational", "subjects")]
+)
+def test_a_general_probe_draws_its_theme_from_its_seeds(probe_type: str, kind: str) -> None:
+    from usersim.engine.core.seeds import load_seeds
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={probe_type: 1.0}, random_seed=5)
+
+    assert json.loads(row["theme"]) in load_seeds("en_US", probe_type, kind)
+
+
+def _themes_from_its_folder(cls: type, locale: str) -> list[dict]:
+    return json.loads((cls.assets_dir() / locale / "themes.json").read_text(encoding="utf-8"))
+
+
+def test_a_probes_themes_reach_its_rows(register_test_probe, tmp_path: Path) -> None:
+    """A probe's themes, read under its own asset folder as its banks are, are what its rows sample."""
+    (tmp_path / "ext_themes" / "en_US").mkdir(parents=True)
+    bread = {"type": "Baking", "description": "Pain de campagne à la maison"}
+    (tmp_path / "ext_themes" / "en_US" / "themes.json").write_text(json.dumps([bread]), encoding="utf-8")
+    register_test_probe("ext_themes", assets_root=tmp_path, themes=classmethod(_themes_from_its_folder))
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_themes": 1.0}, random_seed=5)
+
+    assert json.loads(row["theme"]) == bread
+    assert "à la maison" in row["theme"]
+
+
+def test_a_probe_that_reads_no_theme_gets_a_placeholder(register_test_probe) -> None:
+    register_test_probe("ext_no_themes")
+
+    (row,) = materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
+
+    assert row["theme"] == "__not_used__"
+
+
+def test_a_probe_with_no_themes_for_the_locale_is_refused(register_test_probe) -> None:
+    """An empty list leaves the sampler nothing to draw for the probe's rows."""
+    from usersim.cli._errors import ConfigError
+
+    register_test_probe("ext_no_themes", themes=classmethod(lambda cls, locale: []))
+
+    with pytest.raises(ConfigError, match="ext_no_themes has no themes for en_US"):
+        materialize_episode_inputs(locale="en_US", num_rows=1, probe_mix={"ext_no_themes": 1.0}, random_seed=5)
+
+
 def test_every_registered_probe_has_a_pinned_trajectory_id() -> None:
     """Guard against a probe landing without a trajectory-identity decision."""
     assert set(_PINNED_TRAJECTORY_IDS) == set(known_probes())

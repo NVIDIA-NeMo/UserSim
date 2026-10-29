@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.behavioral import get_conversation_language
@@ -63,6 +64,7 @@ from usersim.engine.core.probes import (
 )
 from usersim.engine.core.probing_taxonomy import (
     Category,
+    load_probing_taxonomy,
     load_probing_taxonomy_for_locale,
     reset_probing_taxonomy_cache,
 )
@@ -109,6 +111,10 @@ _reset_taxonomy_cache = reset_probing_taxonomy_cache
 def _bank_loader(locale: str):
     """Indirection through the module-level alias for test patchability."""
     return _load_taxonomy_for_locale(locale)
+
+
+def _check_locale_bank(locale_dir: Path) -> None:
+    load_probing_taxonomy(locale_dir / "categories.yaml")
 
 
 def should_succeed(state: ConversationState) -> bool:
@@ -178,6 +184,7 @@ class SovAiDynamicProbe(BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
     bank_version_key = None  # locale-keyed (the inclusion convention)
+    locale_bank_check = staticmethod(_check_locale_bank)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

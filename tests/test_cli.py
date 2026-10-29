@@ -36,7 +36,6 @@ from usersim.cli._models import (
 )
 from usersim.cli._pipeline import (
     DEFAULT_PROBE_MIX,
-    THEME_DRIVEN_PROBES,
     build_simulator_config_builder,
     known_probes,
 )
@@ -368,11 +367,6 @@ class TestPipelineFactory:
             "general_open_ended",
             "general_educational",
         }
-
-    def test_theme_driven_set_matches_subcategory_branches(self):
-        # The pipeline's theme-column dispatcher only has explicit
-        # branches for these three; everything else uses the placeholder.
-        assert THEME_DRIVEN_PROBES == frozenset({"tool_calling", "general_open_ended", "general_educational"})
 
     @pytest.mark.parametrize(
         "probe",

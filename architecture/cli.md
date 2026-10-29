@@ -43,10 +43,13 @@ them: `api_response_model` for tool-calling probes and `summary_model` for the
 loop's light work: summaries for context management, early-stop checks, the
 pressure probe's capitulation check, and translating India-variant openings
 and `financial_services` search queries.
-Without it, `user_model` does that work. `eval` requires `evaluator_model`,
-kept distinct from `judge_model` so the in-sim gate and the post-hoc rubric
-can be sized independently. A missing required alias fails at config
-construction, not mid-run.
+Without it, `user_model` does that work. A probe that calls a model of its own
+names the alias in `model_aliases` on its class, as `financial_services` does
+for the model that embeds its search queries: each declared alias the file
+defines reaches the probe, and one it lacks is left out. `eval` requires
+`evaluator_model`, kept distinct from `judge_model` so the in-sim gate and the
+post-hoc rubric can be sized independently. A missing required alias fails at
+config construction, not mid-run.
 
 `usersim.cli.model_catalog` holds per-model inference defaults: temperature,
 top_p, max_tokens, and any model-family-specific `extra_body`. A TOML row

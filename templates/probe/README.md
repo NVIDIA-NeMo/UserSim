@@ -121,7 +121,16 @@ When porting one of the templates into a new module:
 - [ ] Wire the asset bank (if applicable): set `bank_loader`,
       `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
       member), `bank_version_key`. See
-      `core/probes.py::BankBackedProbe` for the contract.
+      `core/probes.py::BankBackedProbe` for the contract. A bank split
+      by locale also sets `locale_bank_check`, so a run refuses a locale
+      whose bank is missing before any model call (step 3 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe's conversations vary by topic, list the topics in a
+      `themes` classmethod and read the row's with `self.theme()` (step 3
+      of `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe calls a model beyond the conversation's own, name its
+      alias in a `model_aliases` classmethod (step 2 of
+      `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] Keep the probe's own per-row data under metadata keys of its own.
       The loop writes the keys in `RESERVED_METADATA_KEYS`
       (`core/simulation.py`); a probe reads them, and

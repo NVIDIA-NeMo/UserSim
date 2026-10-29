@@ -180,6 +180,62 @@ class TestTheChecksCanFail:
         )
 
     @pytest.mark.parametrize(
+        ("attributes", "expected"),
+        [
+            ({"locale_bank_check": "sample.yaml"}, "PreflightProbe.locale_bank_check must be None or a function"),
+            (
+                {"bank_locale": lambda self, locale, probe_dir: locale},
+                "PreflightProbe.bank_locale must be a classmethod",
+            ),
+            (
+                {"authoring_guide": "README.md#locales"},
+                "PreflightProbe.authoring_guide must be None or an https:// URL",
+            ),
+            ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
+            ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
+            (
+                {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
+                "PreflightProbe.model_aliases must return a tuple of alias names; got 'critic_model'",
+            ),
+        ],
+        ids=[
+            "check-not-callable",
+            "bank-locale-not-a-classmethod",
+            "relative-guide",
+            "themes-not-a-classmethod",
+            "model-aliases-not-a-classmethod",
+            "model-aliases-a-bare-string",
+        ],
+    )
+    async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
+        """A run reads these on the class before any row runs, so a wrong one fails the whole run."""
+        cls = type("PreflightProbe", (BaseProbe,), {"label": "preflight_probe", **attributes})
+
+        problems = probe_conformance_problems(cls)
+        assert any(expected in p for p in problems), problems
+
+    async def test_usable_preflight_declarations_are_accepted(self) -> None:
+        class Declared(BaseProbe):
+            label = "declared_probe"
+            locale_bank_check = staticmethod(lambda locale_dir: None)
+            authoring_guide = "https://example.com/declared-probe/locales"
+
+            @classmethod
+            def bank_locale(cls, locale, probe_dir):
+                return locale
+
+            @classmethod
+            def themes(cls, locale):
+                return [{"type": "cooking"}]
+
+            @classmethod
+            def model_aliases(cls, cfg):
+                return ("critic_model",)
+
+        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes", "model_aliases")
+        assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
+
+    @pytest.mark.parametrize(
         ("probe", "key"), [(_WritesEarlyStop, "early_stop"), (_SeedsJudgeRatings, "user_judge_ratings")]
     )
     async def test_writing_a_metadata_key_the_loop_owns_is_reported(self, probe, key) -> None:

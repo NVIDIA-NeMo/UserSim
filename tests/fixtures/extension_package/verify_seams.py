@@ -100,6 +100,46 @@ from usersim.engine.config import ConversationSimulatorConfig  # noqa: E402
 kept = ConversationSimulatorConfig(name="conversation_messages").side_effect_columns
 check("output_columns joins the run's columns", "fixture_probe_marker" in kept, f"saw {len(kept)} columns")
 
+# The pre-flight checks a contributed probe's locale banks with the check its
+# class declares, and a refusal links the probe's own authoring guide.
+from usersim.cli._errors import ConfigError  # noqa: E402
+from usersim.cli._pipeline import verify_probe_assets  # noqa: E402
+
+
+def preflight_refusal(locales: list[str]) -> str:
+    try:
+        verify_probe_assets({"fixture_probe": 1.0}, locales)
+    except ConfigError as error:
+        return str(error)
+    return ""
+
+
+check("pre-flight passes a locale with a bank", not preflight_refusal(["en_US"]), preflight_refusal(["en_US"]))
+refusal = preflight_refusal(["fr_FR"])
+check(
+    "pre-flight refuses a locale without one, linking the probe's guide",
+    "fixture_probe can't run fr_FR: no bank" in refusal and "https://example.com/fixture-probe/locales" in refusal,
+    refusal,
+)
+
+# A contributed probe's themes come from its installed assets, read as a run
+# reads them, with the run's asset root installed.
+from usersim.cli._pipeline import _probe_themes  # noqa: E402
+from usersim.engine.core._assets import default_assets_dir  # noqa: E402
+
+themes = _probe_themes("fixture_probe", "en_US", default_assets_dir())
+check(
+    "themes come from the contributed assets",
+    themes == ['{"type": "fixture topic", "description": "A topic every fixture row draws."}'],
+    str(themes),
+)
+
+# A model a contributed probe declares joins the models every row resolves.
+from usersim.engine.core.probes import declared_model_aliases  # noqa: E402
+
+declared = declared_model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
+check("model_aliases joins the run's models", "fixture_critic_model" in declared, str(declared))
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 

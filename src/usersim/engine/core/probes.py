@@ -51,13 +51,15 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
+    Mapping,
     Protocol,
     Sequence,
     runtime_checkable,
 )
 
 from usersim.engine.core.columns import output_columns_problem
-from usersim.engine.core.locale import india_variant
+from usersim.engine.core.locale import asset_locale, india_variant
+from usersim.engine.core.messages import _parse_theme
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
@@ -278,6 +280,50 @@ class BaseProbe:
 
         return probe_assets_dir(cls.label)
 
+    # Loads one locale's bank from its folder, ``<asset folder>/<locale>/``,
+    # and raises when no row could run on it. A probe whose banks are split by
+    # locale sets it, and a run's pre-flight then loads the bank each run
+    # locale resolves to (``bank_locale``) before any model call. ``None``
+    # checks only that the probe's asset folder holds bank files.
+    locale_bank_check: Callable[[Path], object] | None = None
+
+    # Where to read how to build this probe's bank for another locale. The
+    # pre-flight links it when a run asks for a locale the probe has no bank for.
+    authoring_guide: str | None = None
+
+    @classmethod
+    def bank_locale(cls, locale: str, probe_dir: Path) -> str:
+        """The locale whose bank in ``probe_dir`` a row in ``locale`` runs on.
+
+        The pre-flight resolves it as the probe's bank loader does. By default,
+        an India language variant runs on its own bank when ``probe_dir`` holds
+        one and on its base locale's otherwise; any other locale runs on its own.
+        """
+        return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
+
+    @classmethod
+    def themes(cls, locale: str) -> Sequence[Mapping[str, Any]] | None:
+        """The themes this probe's rows in ``locale`` draw from, read under ``assets_dir()``.
+
+        A run samples one theme per row and stores it, JSON-encoded, in the
+        row's ``theme`` column, where the probe reads it back. ``None``, the
+        default, is a probe that reads no theme.
+        """
+        return None
+
+    @classmethod
+    def model_aliases(cls, cfg: Any) -> tuple[str, ...]:
+        """Models this probe calls beyond the user, assistant, tool-response, judge and summary models.
+
+        Each is an alias in the models file. Every row's ``models`` holds each
+        alias a registered probe names here that the models file defines; one
+        the file lacks is left out, and the probe handles its absence. A run's
+        setup fingerprint counts each one's settings.
+        ``cfg`` is the run's ``ConversationSimulatorConfig``, for a probe whose
+        alias is one of its settings.
+        """
+        return ()
+
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
     # every registered probe's ``output_columns`` and drops any other key, so
@@ -339,6 +385,14 @@ class BaseProbe:
             "neutral",
         )
         self._patience = float(self._profile.get("patience", 0.5))
+
+    def theme(self) -> dict[str, Any]:
+        """This row's theme, the one the run drew from ``themes``, as a mapping.
+
+        A run stores it as JSON text, and ``run_episode`` passes the value it is
+        given; both read back the same. A row without one reads as ``{}``.
+        """
+        return _parse_theme(self._data.get(getattr(self._cfg, "theme_column", "theme"), "{}"))
 
     # ── Required hooks (must be overridden) ─────────────────────────
 
@@ -1497,6 +1551,14 @@ def declared_output_columns() -> tuple[str, ...]:
     for label in known_probes():
         columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
     return tuple(columns)
+
+
+def declared_model_aliases(cfg: Any) -> tuple[str, ...]:
+    """The aliases every registered probe names in ``model_aliases``, each once, in label order."""
+    aliases: dict[str, None] = {}
+    for label in known_probes():
+        aliases.update(dict.fromkeys(alias for alias in _PROBE_REGISTRY[label].model_aliases(cfg) if alias))
+    return tuple(aliases)
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:

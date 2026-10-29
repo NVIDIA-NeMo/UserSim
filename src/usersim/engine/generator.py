@@ -42,7 +42,7 @@ from usersim.engine.core.llm import (
 )
 from usersim.engine.core.outcomes import Provenance
 from usersim.engine.core.persona import persona_full_name
-from usersim.engine.core.probes import BankLoadError, dispatch_episode, load_builtin_probes
+from usersim.engine.core.probes import BankLoadError, declared_model_aliases, dispatch_episode, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
 logger = logging.getLogger("usersim.engine")
@@ -148,20 +148,16 @@ class ConversationSimulatorGenerator(
                 else:
                     raise
 
-        # The embedding model is NOT a chat alias, so it's absent from
-        # MODEL_ALIASES -- but the financial_services probe needs its facade in
-        # the models dict to embed kb_search queries for dense retrieval. Add it
-        # best-effort: if it isn't configured/resolvable, dense retrieval falls
-        # back to lexical (the probe logs a loud warning), never a hard failure.
-        embed_alias = getattr(self.config, "finance_embedding_model_alias", None)
-        if embed_alias and embed_alias not in models:
+        # The models probes call beyond the conversation's own, best-effort:
+        # one the registry lacks is left out, and the probe that names it
+        # handles its absence.
+        for alias in declared_model_aliases(cfg):
+            if alias in models:
+                continue
             try:
-                models[embed_alias] = self.get_model(embed_alias)
+                models[alias] = self.get_model(alias)
             except Exception:
-                logger.debug(
-                    "  |-- embedding model %r not in registry; finance dense retrieval will fall back to lexical",
-                    embed_alias,
-                )
+                logger.debug("  |-- model alias %r not in the model registry; probes run without it", alias)
 
         t_record_start = time.monotonic()
 

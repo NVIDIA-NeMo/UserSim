@@ -235,6 +235,28 @@ def load_my_bank(locale: str) -> MyBank:
 [`docs/extensions.md`](../extensions.md) builds a whole package around such a
 probe.
 
+### Call a model of your own
+
+A probe that calls a model beyond the conversation's own (the user, assistant,
+tool-response, judge and summary models) names its alias in the models file in
+a `model_aliases` classmethod:
+
+```python
+class MyProbe(BaseProbe):
+    @classmethod
+    def model_aliases(cls, cfg) -> tuple[str, ...]:
+        return ("my_probe_critic_model",)
+```
+
+Each row's `models` holds every declared alias the models file defines, so the
+probe reads its model as `self._models.get("my_probe_critic_model")`. An alias
+the file lacks is left out, and the probe handles its absence: `get` returns
+`None`, and the probe can fall back or raise an error that names the alias. A
+run's setup fingerprint counts the settings of each declared model. `cfg` is
+the run's `ConversationSimulatorConfig`, for an alias that is itself a setting:
+`financial_services` declares the model named by `finance_embedding_model_alias`,
+which embeds its search queries, and searches lexically without it.
+
 ---
 
 ## Step 3: wire the asset bank
@@ -301,6 +323,63 @@ or `None` if nothing matched. The substrate:
 
 Your probe then reads `self._task` from the prompt-formatting hooks
 and from `should_succeed` / `build_result_extras`.
+
+### Check each locale's bank before a run
+
+Before any model call, a run checks that each selected probe's asset folder
+exists and holds bank files. A probe whose banks are split by locale also sets
+`locale_bank_check`, and the run then loads the bank each run locale runs on
+and refuses a locale whose bank is missing or does not load:
+
+```python
+def _check_locale_bank(locale_dir: Path) -> None:
+    MyBank.from_yaml((locale_dir / "sample.yaml").read_text(encoding="utf-8"))
+
+
+class MyProbe(BankVerbatimMixin, BankBackedProbe):
+    locale_bank_check = staticmethod(_check_locale_bank)
+    authoring_guide = "https://example.com/my-probe/README.md#adding-a-locale"
+```
+
+- **`locale_bank_check`** takes one locale's folder, `<asset folder>/<locale>/`,
+  and raises whatever would stop the bank loader. The refusal quotes the error.
+- **`bank_locale(locale, probe_dir)`**, a classmethod, names the locale whose
+  bank a row in `locale` runs on, as the bank loader picks it. By default, an
+  India language variant runs on its own bank when it has one and on `en_IN`'s
+  otherwise; any other locale runs on its own. `financial_services` overrides
+  it, since its bank for a locale counts only once it has tasks.
+- **`authoring_guide`** is an `https://` link to how to build the probe's bank
+  for another locale. The refusal links it when a run asks for a locale the
+  probe has no bank for.
+
+### Give each row a theme
+
+A probe whose conversations vary by topic lists the topics in a `themes`
+classmethod. A run draws one per row, stores it in the row's `theme` column,
+and the probe reads it back with `self.theme()`:
+
+```python
+class MyProbe(BaseProbe):
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        path = cls.assets_dir() / locale / "topics.json"
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._topic = self.theme().get("description", "a topic of their choice")
+```
+
+- **`themes(locale)`** returns the themes as mappings, read under
+  `assets_dir()`, so the run's asset root reaches them as it reaches the bank
+  loader. A run refuses a probe that returns none for a run locale.
+  `general_open_ended` and `general_educational` read theirs from their seed
+  files.
+- **`self.theme()`** returns the row's theme as a mapping, whether the row
+  holds it as JSON text, as a run stores it, or as the mapping a test passes
+  to `run_episode`.
+- **`None`**, the default `themes`, is a probe that reads no theme. Its rows
+  hold a placeholder.
 
 ---
 

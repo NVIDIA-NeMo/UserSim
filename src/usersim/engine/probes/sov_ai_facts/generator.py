@@ -48,10 +48,12 @@ Side channels emitted on the trajectory:
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.fact_bank import (
     Fact,
+    load_fact_bank,
     load_fact_bank_for_locale,
     reset_fact_bank_cache,
 )
@@ -117,6 +119,10 @@ def _bank_loader(locale: str):
     return _load_bank_for_locale(locale)
 
 
+def _check_locale_bank(locale_dir: Path) -> None:
+    load_fact_bank(locale_dir / "sample.yaml")
+
+
 def should_succeed(state: ConversationState) -> bool:
     """Sim-side guardrail: did we actually probe a fact?
 
@@ -160,6 +166,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key = None  # locale-keyed (the inclusion convention)
+    locale_bank_check = staticmethod(_check_locale_bank)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

@@ -46,6 +46,7 @@ Total LOC: ~80. ``sov_ai_facts`` is a real example at ~190 LOC
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
@@ -80,6 +81,15 @@ def _demo_bank_loader(locale: str = "en_US"):
     raise NotImplementedError("replace with your real bank loader")
 
 
+def _demo_locale_bank_check(locale_dir: Path) -> None:
+    """Stub check: load the bank in ``locale_dir``, one locale's folder.
+
+    A run's pre-flight calls it for each run locale before any model
+    call; whatever it raises refuses that locale.
+    """
+    raise NotImplementedError("replace with a load of one locale's bank")
+
+
 @register_probe(
     family="demo_bank_verbatim",
     prompt_version="v1.0",
@@ -97,6 +107,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     bank_loader = staticmethod(_demo_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key: str | None = None  # locale-keyed (inclusion convention)
+    locale_bank_check = staticmethod(_demo_locale_bank_check)
 
     def derive_task(
         self,

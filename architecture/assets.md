@@ -45,17 +45,18 @@ checkout.
 ## Pre-flight
 
 Before any model call, a run verifies that every selected probe's assets
-exist, including the locale subtree for the locale-scoped probes:
-`financial_services`, `sov_ai_facts` and `sov_ai_dynamic`. A locale that runs
-on another locale's bank is checked against that bank, the one the probe loads
-in its place: a registered India variant with no subtree of its own runs on
-`en_IN`'s. For `financial_services` a subtree counts once it has tasks, and
-`hi_Deva_IN` and `hi_Latn_IN` run on `en_IN`'s until theirs does. Every
-missing path is reported at once, with what to do: drop the probe or the
-locale from the run, or point `--assets-dir` somewhere else. When a probe
-can't run one of the run's locales, the refusal also names the locales it can
-run and links the feature-request form, and for `financial_services` the guide
-to authoring a bank.
+exist. A probe whose banks are split by locale declares a `locale_bank_check`
+on its class, and the run loads the bank each run locale runs on with it:
+`financial_services`, `sov_ai_facts` and `sov_ai_dynamic` declare one. The
+class's `bank_locale` names that bank, the one the probe loads in the locale's
+place when it has none of its own: a registered India variant with no subtree
+of its own runs on `en_IN`'s. For `financial_services` a subtree counts once it
+has tasks, and `hi_Deva_IN` and `hi_Latn_IN` run on `en_IN`'s until theirs
+does. Every missing path is reported at once, with what to do: drop the probe
+or the locale from the run, or point `--assets-dir` somewhere else. When a
+probe can't run one of the run's locales, the refusal also names the locales it
+can run and the guide the class's `authoring_guide` links, if any, and for a
+probe that ships with User Sim, the feature-request form.
 
 Without this, a missing bank surfaces from inside a loader partway through a
 run, after the other probes in the mix have already been paid for, while
