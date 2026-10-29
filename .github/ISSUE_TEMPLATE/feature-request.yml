@@ -9,6 +9,7 @@ body:
         change is wanted. If you plan to build this yourself, open the pull
         request once the issue has that label; see
         [Issues before pull requests](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md#issues-before-pull-requests).
+        To propose a probe you plan to build, use the New probe form instead.
 
   - type: textarea
     id: problem

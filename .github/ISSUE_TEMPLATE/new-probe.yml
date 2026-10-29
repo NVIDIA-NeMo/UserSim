@@ -1,0 +1,85 @@
+name: 🧪 New probe
+description: Propose a probe you plan to build, in this repository or as an extension package
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        A maintainer reviews each issue, decides where the probe should live
+        (in this repository, as an extension package, or as an extension
+        first) and adds the `triaged` label when it is wanted here.
+        [Where should a probe live?](https://github.com/NVIDIA-NeMo/UserSim/blob/main/CONTRIBUTING.md#where-should-a-probe-live)
+        lists what a probe in this repository needs.
+
+  - type: textarea
+    id: measures
+    attributes:
+      label: What will the probe measure?
+      description: >-
+        The behaviour it catches, and why the existing probes in
+        [docs/probes.md](https://github.com/NVIDIA-NeMo/UserSim/blob/main/docs/probes.md)
+        do not cover it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: assets
+    attributes:
+      label: Where do its assets come from, and under what license?
+      description: >-
+        For each source: who wrote it, its license, and whether it holds
+        personal data. Content a model wrote is marked placeholder until a
+        subject-matter expert reviews it.
+    validations:
+      required: true
+
+  - type: input
+    id: locales
+    attributes:
+      label: Which locales will it support?
+      placeholder: en_US, de_DE, ja_JP
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: Who will own it?
+      description: >-
+        A GitHub team with write access to this repository. If you do not
+        have write access, say so, and co-ownership by a maintainer is agreed
+        at triage.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: home
+    attributes:
+      label: Where do you intend it to live?
+      options:
+        - In this repository
+        - As an extension package
+        - As an extension package first, then in this repository
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: investigation
+    attributes:
+      label: Prior investigation
+      description: >-
+        What you or your coding agent found in the code, documentation and
+        existing issues, such as a probe, scorer or extension that already
+        covers part of this. If an agent investigated, paste its findings.
+      placeholder: Paste the agent's findings, or describe what you checked.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the documentation, or had my agent do so
+          required: true
+        - label: If an agent helped, its findings are under Prior investigation
+          required: false

@@ -407,6 +407,41 @@ If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)
 is the end-to-end walkthrough.
 
+### Where should a probe live?
+
+A probe belongs in this repository when all of these hold:
+
+- **It measures something of general interest**, a behaviour that matters
+  across assistants rather than in one product.
+- **Its assets can be published:** a license that allows redistribution, no
+  personal data, and provenance recorded as
+  [`architecture/assets.md`](architecture/assets.md) describes. Content a model
+  wrote stays `placeholder: true` until a subject-matter expert reviews it.
+- **It is tested offline:** it passes `assert_probe_conforms`, its tests run it
+  with `ScriptedModel` and no provider, as `run_episode` does, and it passes
+  `assert_hosted_parity`, so a host driving it through `ProbeEpisodeRuntime`
+  reproduces a standalone run.
+- **Its README** says which locales it supports, how its assets were produced
+  and how to add a locale.
+- **It has an owner:** a GitHub team with write access to this repository,
+  listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) for the probe's
+  directories and in `KNOWN_TEAMS` in `tests/test_ci_workflows.py`, which
+  refuses a CODEOWNERS team missing from that list. A probe from a contributor
+  without write access is co-owned by a maintainer who agrees to it when the
+  issue is triaged.
+- **Its pull request fills in "Results impact"**, saying what the probe adds to
+  a run's results.
+
+Anything else ships as an extension package, through the entry points above. A
+probe can start as an extension and move here once it meets these points.
+[`docs/probes.md`](docs/probes.md#community-probes) links to probes published
+as extensions, without endorsing them.
+
+To propose a probe, open the
+[New probe form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=new-probe.yml).
+Triage settles where it lives: in this repository, as an extension, or as an
+extension first.
+
 ## Code style
 
 `ruff` owns formatting and linting; there is no separate style config to
