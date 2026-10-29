@@ -263,6 +263,21 @@ class BaseProbe:
     # overrides and the packaged banks only.
     assets_root: Path | None = None
 
+    @classmethod
+    def assets_dir(cls) -> Path:
+        """This probe's asset folder, ``<root>/<label>/``, where its bank loader reads.
+
+        Resolved as every bank loader in this package resolves its folder: the
+        deliberate overrides first, then the class's ``assets_root``, then the
+        packaged banks. A probe shipped in its own package calls this from its
+        loader, so an override reaches its banks too.
+        """
+        # _assets imports this module at its top, so importing it here at the
+        # top would be circular.
+        from usersim.engine.core._assets import probe_assets_dir
+
+        return probe_assets_dir(cls.label)
+
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
     # every registered probe's ``output_columns`` and drops any other key, so

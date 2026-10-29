@@ -246,3 +246,27 @@ class TestDeclaredAssetsRoot:
         register_test_probe("ext_probe", assets_root=tmp_path)
 
         assert asset_roots_in_use() == (*asset_search_path(), tmp_path)
+
+
+class TestProbeAssetsDir:
+    """``BaseProbe.assets_dir()`` is the folder a probe's own bank loader reads."""
+
+    def test_a_built_in_probe_reads_its_packaged_folder(self) -> None:
+        from usersim.engine.core.probes import resolve_probe
+
+        assert resolve_probe("sov_ai_facts").assets_dir() == packaged_assets_dir() / "sov_ai_facts"
+
+    def test_a_probe_reads_the_folder_under_its_declared_root(self, register_test_probe, tmp_path) -> None:
+        (tmp_path / "ext_probe").mkdir()
+        probe = register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert probe.assets_dir() == tmp_path / "ext_probe"
+
+    def test_a_deliberate_override_reaches_the_probe(self, register_test_probe, monkeypatch, tmp_path) -> None:
+        override, declared = tmp_path / "override", tmp_path / "declared"
+        (override / "ext_probe").mkdir(parents=True)
+        (declared / "ext_probe").mkdir(parents=True)
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
+        probe = register_test_probe("ext_probe", assets_root=declared)
+
+        assert probe.assets_dir() == override / "ext_probe"

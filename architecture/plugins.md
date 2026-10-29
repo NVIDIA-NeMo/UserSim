@@ -167,9 +167,11 @@ The probe then finds its banks wherever the package is installed. That root
 is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
 deployment can override it and the shipped banks remain reachable.
 `@register_probe` refuses a relative `assets_root`, which would resolve against
-the working directory. `$USERSIM_ASSET_PATH` stays the way to layer
-content over a probe you don't ship, such as a patch to the shipped
-`identity_disclosure` spec. See [assets.md](assets.md).
+the working directory. The probe's bank loader reads under `MyProbe.assets_dir()`,
+its folder on that search, so an override reaches the loader too.
+`$USERSIM_ASSET_PATH` stays the way to layer content over a probe you don't
+ship, such as a patch to the shipped `identity_disclosure` spec. See
+[assets.md](assets.md).
 
 ## Testing an extension
 

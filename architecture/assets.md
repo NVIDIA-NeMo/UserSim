@@ -27,9 +27,11 @@ A probe class can also declare `assets_root`, the directory that holds its
 `<label>/` folder. A probe shipped in its own package points it inside that
 package, such as `Path(__file__).parent / "assets"`, so the probe finds its
 banks wherever the package is installed, with no environment variable to
-set. Registration refuses a relative root. That root is searched for that probe only, after the first three
-entries and before the packaged directory, so a deliberate override wins
-over it. The built-in probes declare none.
+set. Registration refuses a relative root. That root is searched for that
+probe only, after the first three entries and before the packaged directory,
+so a deliberate override wins over it. The built-in probes declare none. A
+probe's bank loader reads under its class's `assets_dir()`, the folder this
+search finds for the probe.
 
 An explicit `--assets-dir` is **not** part of the search. It pins resolution
 to exactly that directory, for every probe in the run, including one that

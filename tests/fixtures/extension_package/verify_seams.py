@@ -82,14 +82,15 @@ check("commands: built-ins survive", "simulate" in choices)
 
 # The seams must compose: a contributed probe's assets resolve from the
 # assets_root its class declares, with no USERSIM_ASSET_PATH set, which is
-# what makes the probe runnable as installed.
-from usersim.engine.core._assets import probe_assets_dir  # noqa: E402
+# what makes the probe runnable as installed. Its bank loader reads under
+# assets_dir(), the public way to find them.
+from usersim.engine.core.probes import resolve_probe  # noqa: E402
 
 check("no asset path set", "USERSIM_ASSET_PATH" not in os.environ, os.environ.get("USERSIM_ASSET_PATH", ""))
-fixture_dir = probe_assets_dir("fixture_probe")
+fixture_dir = resolve_probe("fixture_probe").assets_dir()
 check(
     "assets_root resolves a contributed bank",
-    fixture_dir.is_dir() and "site-packages" in fixture_dir.parts,
+    (fixture_dir / "en_US" / "sample.yaml").is_file() and "site-packages" in fixture_dir.parts,
     f"looked at {fixture_dir}",
 )
 
