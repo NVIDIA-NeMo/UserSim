@@ -1,20 +1,24 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Every registered probe reproduces a standalone run when hosted.
+"""The episode runners in ``usersim.testing``, run against every registered probe.
 
-Run through the same ``usersim.testing`` entry point a probe author would use,
-so the published check is exercised by the probes it describes.
+``run_episode`` runs a probe offline with scripted models, and every registered
+probe reproduces that standalone run when hosted. Both go through the same
+``usersim.testing`` entry points a probe author would use, so the published
+checks are exercised by the probes they describe.
 """
 
 from __future__ import annotations
+
+import json
 
 import pytest
 
 import usersim.engine.generator  # noqa: F401  -- registers the built-in probes
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.probes import known_probes
-from usersim.testing import ScriptedModel, assert_hosted_parity, hosted_parity_report
+from usersim.testing import ScriptedModel, assert_hosted_parity, hosted_parity_report, run_episode
 
 _PERSONA = {
     "first_name": "Sarah",
@@ -66,6 +70,37 @@ def _data(probe_type: str) -> dict[str, object]:
     if probe_type == "tool_calling":
         data["tools"] = [_TOOL]
     return data
+
+
+@pytest.mark.parametrize("probe_type", known_probes())
+async def test_every_registered_probe_runs_to_completion_with_scripted_models(probe_type: str) -> None:
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    assert run.row["conversation_status"] is True
+    assert json.loads(run.row["simulation_outcome"])["status"] != "failed"
+    assert run.row["trajectory_id"]
+    assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
+
+
+async def test_a_model_factory_scripts_the_replies() -> None:
+    """A ``ScriptedModel`` subclass answers in place of the default, with nothing patched."""
+
+    class _Wordy(ScriptedModel):
+        CONTENT = {**ScriptedModel.CONTENT, "assistant": "A reply only this subclass gives."}
+
+    run = await run_episode(
+        "general_open_ended",
+        config=_config("general_open_ended"),
+        persona=_PERSONA,
+        data=_data("general_open_ended"),
+        model_factory=_Wordy,
+    )
+
+    replies = [m["content"] for m in json.loads(run.row["conversation_messages"]) if m["role"] == "assistant"]
+    assert replies and set(replies) == {"A reply only this subclass gives."}
+    assert {prompt["role"] for prompt in run.prompts} >= {"assistant", "user", "judge"}
 
 
 @pytest.mark.parametrize("probe_type", known_probes())

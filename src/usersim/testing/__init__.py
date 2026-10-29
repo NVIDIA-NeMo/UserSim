@@ -24,6 +24,10 @@ These checks are also run against the built-in probes and scorers, so the
 suite cannot drift into describing a contract this project does not itself
 keep.
 
+``run_episode`` runs one episode of a probe offline with ``ScriptedModel``
+answering for every model alias, and returns the generator's row and the
+prompts sent, so a probe's tests patch nothing.
+
 ``usersim.testing.pytest_plugin`` is the hermetic harness the built-in tests
 run under, for a suite to load with
 ``pytest_plugins = ["usersim.testing.pytest_plugin"]`` in its top-level
@@ -41,6 +45,7 @@ from types import SimpleNamespace
 from typing import Any, Callable, Mapping, Sequence
 
 __all__ = [
+    "EpisodeRun",
     "HostedParityReport",
     "ScriptedModel",
     "assert_hosted_parity",
@@ -48,6 +53,7 @@ __all__ = [
     "assert_scorer_conforms",
     "hosted_parity_report",
     "probe_conformance_problems",
+    "run_episode",
     "scorer_conformance_problems",
 ]
 
@@ -348,6 +354,87 @@ class ScriptedModel:
         )
 
 
+#: The model alias each ``ScriptedModel`` role answers for.
+_SCRIPTED_ROLES = {
+    "api_response_model": "api",
+    "assistant_model": "assistant",
+    "judge_model": "judge",
+    "summary_model": "summary",
+    "user_model": "user",
+}
+
+
+def _scripted_models(model_factory: Callable[[str], Any], prompts: list[dict[str, Any]]) -> dict[str, Any]:
+    """One model per alias from ``model_factory``, all recording into ``prompts``."""
+    models = {}
+    for alias, role in _SCRIPTED_ROLES.items():
+        model = model_factory(role)
+        model.prompts = prompts
+        models[alias] = model
+    return models
+
+
+def _episode_runtime(
+    probe: str,
+    models: Mapping[str, Any],
+    *,
+    config: Any,
+    persona: Mapping[str, Any],
+    data: Mapping[str, Any] | None,
+    profile: Mapping[str, Any] | None,
+    language: str,
+) -> Any:
+    from usersim.engine.core.episode_runtime import ProbeEpisodeRuntime
+
+    return ProbeEpisodeRuntime(
+        probe_type=probe,
+        persona=dict(persona),
+        locale=config.locale,
+        language=language,
+        models=dict(models),
+        config=config,
+        data=dict(data or {}),
+        profile=dict(profile) if profile is not None else None,
+    )
+
+
+@dataclass(frozen=True)
+class EpisodeRun:
+    """One episode run offline: the generator's row, and every prompt sent."""
+
+    row: dict[str, Any]
+    prompts: list[dict[str, Any]]
+
+
+async def run_episode(
+    probe: str,
+    *,
+    config: Any,
+    persona: Mapping[str, Any],
+    data: Mapping[str, Any] | None = None,
+    profile: Mapping[str, Any] | None = None,
+    language: str = "English",
+    model_factory: Callable[[str], Any] = ScriptedModel,
+) -> EpisodeRun:
+    """Run one episode of ``probe`` with scripted models, as ``usersim simulate`` runs it.
+
+    Every model alias gets ``model_factory(role)``, a ``ScriptedModel`` by
+    default, so the episode needs no provider and nothing is patched. The row
+    comes from the same generator a run uses; ``prompts`` holds each request
+    the models received, in order. Subclass ``ScriptedModel`` to script other
+    replies.
+    """
+    from usersim.engine.generator import ConversationSimulatorGenerator
+
+    prompts: list[dict[str, Any]] = []
+    models = _scripted_models(model_factory, prompts)
+    runtime = _episode_runtime(
+        probe, models, config=config, persona=persona, data=data, profile=profile, language=language
+    )
+    row = await ConversationSimulatorGenerator.with_models(config, models).agenerate(runtime.preamble.to_row())
+    return EpisodeRun(row=row, prompts=prompts)
+
+
 @dataclass(frozen=True)
 class HostedParityReport:
     """Outcome of running one episode standalone and through a host."""
@@ -381,48 +468,15 @@ async def hosted_parity_report(
         ActivationRequest,
         ActivationResult,
         EpisodeLifecycleComplete,
-        ProbeEpisodeRuntime,
     )
-    from usersim.engine.generator import ConversationSimulatorGenerator
 
-    aliases = ("api_response_model", "assistant_model", "judge_model", "summary_model", "user_model")
-    role_of = {
-        "api_response_model": "api",
-        "assistant_model": "assistant",
-        "judge_model": "judge",
-        "summary_model": "summary",
-        "user_model": "user",
-    }
-
-    def _build(prompts: list[dict[str, Any]]) -> dict[str, Any]:
-        models = {}
-        for alias in aliases:
-            model = model_factory(role_of[alias])
-            model.prompts = prompts
-            models[alias] = model
-        return models
-
-    def _runtime(models: Mapping[str, Any]) -> Any:
-        return ProbeEpisodeRuntime(
-            probe_type=probe,
-            persona=dict(persona),
-            locale=config.locale,
-            language=language,
-            models=dict(models),
-            config=config,
-            data=dict(data or {}),
-            profile=dict(profile) if profile is not None else None,
-        )
-
-    direct_prompts: list[dict[str, Any]] = []
-    direct_models = _build(direct_prompts)
-    direct_runtime = _runtime(direct_models)
-    generator = ConversationSimulatorGenerator.with_models(config, direct_models)
-    direct_row = await generator.agenerate(direct_runtime.preamble.to_row())
+    inputs = {"config": config, "persona": persona, "data": data, "profile": profile, "language": language}
+    direct = await run_episode(probe, model_factory=model_factory, **inputs)
+    direct_row, direct_prompts = direct.row, direct.prompts
 
     hosted_prompts: list[dict[str, Any]] = []
-    hosted_models = _build(hosted_prompts)
-    hosted_runtime = _runtime(hosted_models)
+    hosted_models = _scripted_models(model_factory, hosted_prompts)
+    hosted_runtime = _episode_runtime(probe, hosted_models, **inputs)
     event = await hosted_runtime.advance()
     while isinstance(event, ActivationRequest):
         kwargs = dict(event.parameters)

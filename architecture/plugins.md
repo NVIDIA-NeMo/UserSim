@@ -192,6 +192,12 @@ Set the variable for the run with `pytest-env`:
 With discovery off, the tests import the extension's own package to register
 its probes and scorers.
 
+`run_episode` runs one episode of a probe offline, through the same generator
+as `usersim simulate`, with a `ScriptedModel` answering for every model alias.
+It returns the row the generator produces and every prompt the models
+received, so a probe's tests need neither a provider nor a patch of the
+engine's internals.
+
 Installing `usersim` does not load the plugin. It has no `pytest11` entry
 point, because it blocks outbound connections, and a project that installs
 `usersim` for another reason keeps its tests as they are.

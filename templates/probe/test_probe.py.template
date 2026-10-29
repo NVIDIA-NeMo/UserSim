@@ -4,8 +4,10 @@
 """Test scaffold for a new probe.
 
 Copy this to ``tests/engine/probes/test_<your_probe>.py`` and
-edit the marked sections. The 8 standard tests every probe should
-have are stubbed below. For real working examples, see:
+edit the marked sections. The first test runs the probe end to end
+with ``usersim.testing.run_episode`` and scripted models, with nothing
+patched; the 8 standard tests every probe should have are stubbed
+after it. For real working examples, see:
 
 - ``test_sov_ai_facts.py`` — banked-verbatim probe (the canonical
   reference for the alias-dispatching mock + dual-module patching
@@ -16,8 +18,8 @@ have are stubbed below. For real working examples, see:
   no user-LLM, simpler mock pattern — FIFO-only since there's only
   one acall_llm caller).
 
-CRITICAL gotchas the substrate's loop reveals — the per-probe test
-files all hit these:
+CRITICAL gotchas for the standard tests, which patch ``acall_llm`` to
+control each reply:
 
 1. **Patch BOTH ``core.simulation.acall_llm`` AND
    ``core.judges.acall_llm``** in the same context manager. Both
@@ -55,10 +57,12 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — bootstraps registry
+from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.outcomes import (
     FailureClass, OutcomeStatus, Provenance, WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
+from usersim.testing import run_episode
 
 # Replace with your probe's module + names.
 from usersim.engine.probes.YOUR_PROBE import (
@@ -172,6 +176,17 @@ def models() -> Dict[str, Any]:
 
 
 class TestSimulateYourProbe:
+
+    # 0. End to end with scripted models: no provider, nothing patched.
+    async def test_runs_end_to_end_with_scripted_models(self, en_persona) -> None:
+        run = await run_episode(
+            PROBE_LABEL,
+            config=ConversationSimulatorConfig(name="conversation_messages", max_turns=2),
+            persona=en_persona,
+            # The row inputs your probe reads, such as its theme.
+            data={"theme": {"type": "your topic", "description": "What the user wants."}},
+        )
+        assert run.row["conversation_status"] is True
 
     # 1. Registry registration.
     def test_registered_in_probe_registry(self) -> None:
