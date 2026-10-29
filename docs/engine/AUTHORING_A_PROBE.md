@@ -868,8 +868,8 @@ is the canonical scaffold. Copy it; substitute your probe's name;
 fill in the 8 standard test stubs:
 
 1. **Registry registration**: the probe label is in `_PROBE_REGISTRY` and
-   resolves to a class, and `sys.modules[probe_cls.__module__]` exposes the
-   three metadata constants.
+   resolves to a class whose `family`, `prompt_version` and `variants` are
+   set.
 2. **Single-turn end-to-end**: minimal mocked-LLM run produces a
    trajectory with `conversation_status=True`.
 3. **First user turn shape** (verbatim probes only):
