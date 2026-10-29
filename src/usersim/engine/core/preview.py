@@ -41,7 +41,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from usersim.engine.core.outcomes import PLACEHOLDER_WARNING_KINDS
+from usersim.engine.core.outcomes import is_placeholder_warning_kind
 
 # Flags + country names cover only the LOCALES we actually ship
 # today (the keys of
@@ -523,7 +523,7 @@ def _extract_warnings(outcome: dict | None) -> list[str]:
         kind = entry.get("kind")
         if not isinstance(kind, str) or not kind:
             continue
-        if kind in PLACEHOLDER_WARNING_KINDS:
+        if is_placeholder_warning_kind(kind):
             continue
         counts[kind] = counts.get(kind, 0) + 1
     chips: list[str] = []
@@ -550,7 +550,7 @@ def _has_non_placeholder_warning(outcome: dict | None) -> bool:
     for entry in raw:
         if isinstance(entry, dict):
             kind = entry.get("kind")
-            if isinstance(kind, str) and kind not in PLACEHOLDER_WARNING_KINDS:
+            if isinstance(kind, str) and not is_placeholder_warning_kind(kind):
                 return True
     return False
 
@@ -565,7 +565,7 @@ def _status_kind(row: pd.Series, outcome: dict | None) -> str:
 
     A ``completed_with_warnings`` outcome demotes to ``ok`` when its
     *only* warnings are placeholder-asset kinds (see
-    ``PLACEHOLDER_WARNING_KINDS``): those are content-track issues,
+    ``is_placeholder_warning_kind``): those are content-track issues,
     not simulation-track issues, and showing them as WARN in the
     preview drowns out actually-concerning simulation-quality
     warnings (``poor_assistant_response``, ``id_fabrication``,

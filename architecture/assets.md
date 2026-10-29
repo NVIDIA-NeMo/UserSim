@@ -79,8 +79,9 @@ new domain does not require modifying this project. See
 Bank entries carry a review status. Content authored by a model rather than
 reviewed by a subject-matter expert is marked `placeholder: true`, and that
 marking propagates: every trajectory that draws on such an entry records a
-`used_placeholder_*` warning on its outcome, which is written to the
-trajectory parquet alongside the scores.
+`used_placeholder_*` warning on its outcome (`<prefix>_used_placeholder_*` for
+a probe shipped in its own package), which is written to the trajectory
+parquet alongside the scores.
 
 Building a locale bank is a two-stage process, generate then review, and the
 framework tracks which stage each entry is at so a scorecard's evidence base

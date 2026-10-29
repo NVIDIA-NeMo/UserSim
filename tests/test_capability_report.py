@@ -358,6 +358,14 @@ def test_every_placeholder_warning_counts_as_placeholder_content(kind):
     assert (cell.n_placeholder, cell.n_machine_translated) == (1, 0)
 
 
+@pytest.mark.parametrize(("kind", "placeholder"), [("acme_used_placeholder_recipe", 1), ("acme_slow_tool", 0)])
+def test_a_prefixed_kind_counts_as_placeholder_content_only_when_it_says_so(kind, placeholder):
+    """A probe outside this package names its placeholder kind ``<prefix>_used_placeholder_<thing>``."""
+    cell = _quality_cell(_flagged_row(0, kind))
+
+    assert (cell.n_placeholder, cell.n_machine_translated) == (placeholder, 0)
+
+
 def test_cells_count_their_rows_on_placeholder_and_machine_translated_content():
     cell = _quality_cell(
         _flagged_row(0, _PLACEHOLDER),

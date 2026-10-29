@@ -33,6 +33,7 @@ separation.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -112,7 +113,11 @@ class TraceKind(str, Enum):
 
 
 class WarningKind(str, Enum):
-    """Structured warning kinds for ``SimulationOutcome.warnings``."""
+    """Structured warning kinds for ``SimulationOutcome.warnings``.
+
+    The kinds this package emits. A probe shipped in its own package may emit
+    a kind of its own as a string instead (see ``warning_kind_problem``).
+    """
 
     ID_FABRICATION = "id_fabrication"
     COMPRESSION_FALLBACK = "compression_fallback"
@@ -168,6 +173,51 @@ PLACEHOLDER_WARNING_KINDS: frozenset[str] = frozenset(
     kind.value for kind in WarningKind if kind.name.startswith("USED_PLACEHOLDER_")
 )
 
+#: A warning kind a probe outside this package defines: lowercase words joined
+#: by underscores, led by the package's own prefix, such as ``acme_slow_tool``.
+_EXTENSION_WARNING_KIND = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
+
+
+def warning_kind_problem(kind: object) -> str | None:
+    """Why ``kind`` cannot be a warning kind, or ``None`` when it can.
+
+    A ``WarningKind`` member, or a string: either a built-in kind's value or a
+    prefixed lowercase name such as ``acme_slow_tool``.
+    """
+    if isinstance(kind, WarningKind):
+        return None
+    if isinstance(kind, str) and _EXTENSION_WARNING_KIND.fullmatch(kind):
+        return None
+    return f"must be a WarningKind or a prefixed lowercase name such as 'acme_slow_tool', got {kind!r}"
+
+
+def is_placeholder_warning_kind(kind: object) -> bool:
+    """Whether a warning kind marks placeholder content.
+
+    A built-in ``used_placeholder_*`` kind, or a kind of the form
+    ``<prefix>_used_placeholder_<thing>`` from a probe outside this package.
+    Stored rows hold the kind as a string; either form is read.
+    """
+    value = kind.value if isinstance(kind, WarningKind) else kind
+    return isinstance(value, str) and (value in PLACEHOLDER_WARNING_KINDS or "_used_placeholder_" in value)
+
+
+def placeholder_warning_kind_problem(kind: object) -> str | None:
+    """Why ``kind`` cannot be a probe's ``placeholder_warning_kind``, or ``None`` when it can.
+
+    It must be a valid warning kind that marks placeholder content, so the
+    report counts the rows that carry it as resting on placeholder content.
+    """
+    problem = warning_kind_problem(kind)
+    if problem:
+        return problem
+    if not is_placeholder_warning_kind(kind):
+        return (
+            "must mark placeholder content: a WarningKind.USED_PLACEHOLDER_* member, or a name of "
+            f"the form '<prefix>_used_placeholder_<thing>', got {kind!r}"
+        )
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Records
@@ -198,15 +248,31 @@ class Provenance:
 
 @dataclass
 class SimulationWarning:
-    """Structured warning entry. Stored in ``SimulationOutcome.warnings``."""
+    """Structured warning entry. Stored in ``SimulationOutcome.warnings``.
 
-    kind: WarningKind
+    A string equal to a built-in kind's value becomes that ``WarningKind``;
+    any other string must pass ``warning_kind_problem``.
+    """
+
+    kind: WarningKind | str
     turn_idx: int | None = None
     detail: str = ""
 
+    def __post_init__(self) -> None:
+        if isinstance(self.kind, WarningKind):
+            return
+        try:
+            self.kind = WarningKind(self.kind)
+            return
+        except ValueError:
+            pass
+        problem = warning_kind_problem(self.kind)
+        if problem:
+            raise ValueError(f"warning kind {problem}")
+
     def to_dict(self) -> dict[str, Any]:
         return {
-            "kind": self.kind.value,
+            "kind": self.kind.value if isinstance(self.kind, WarningKind) else self.kind,
             "turn_idx": self.turn_idx,
             "detail": self.detail,
         }
@@ -366,7 +432,7 @@ class OutcomeBuilder:
 
     def add_warning(
         self,
-        kind: WarningKind,
+        kind: WarningKind | str,
         turn_idx: int | None = None,
         detail: str = "",
     ) -> None:

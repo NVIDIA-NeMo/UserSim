@@ -118,7 +118,8 @@ When porting one of the templates into a new module:
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.
 - [ ] Wire the asset bank (if applicable): set `bank_loader`,
-      `placeholder_warning_kind`, `bank_version_key`. See
+      `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
+      member), `bank_version_key`. See
       `core/probes.py::BankBackedProbe` for the contract.
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt

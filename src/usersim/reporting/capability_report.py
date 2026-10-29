@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Iterator
 
 from usersim.engine.core.missing import is_missing
-from usersim.engine.core.outcomes import PLACEHOLDER_WARNING_KINDS, WarningKind
+from usersim.engine.core.outcomes import WarningKind, is_placeholder_warning_kind
 from usersim.engine.core.row_metadata import recorded_value
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -904,7 +904,7 @@ class _ContentTally:
     def add(self, row: Any) -> None:
         warnings = _decode_json(row.get("simulation_outcome")).get("warnings") or []
         kinds = {w.get("kind") for w in warnings if isinstance(w, dict)}
-        placeholder = bool(kinds & PLACEHOLDER_WARNING_KINDS)
+        placeholder = any(is_placeholder_warning_kind(kind) for kind in kinds)
         translated = WarningKind.USED_MACHINE_TRANSLATION.value in kinds
         self.n += 1
         self.n_placeholder += placeholder

@@ -544,6 +544,19 @@ class TestStatusTriState:
         assert "SIM WARN" not in out
         assert kind not in out
 
+    @pytest.mark.parametrize(
+        ("kind", "status"), [("acme_used_placeholder_recipe", "SIM OK"), ("acme_slow_tool", "SIM WARN")]
+    )
+    def test_a_prefixed_kind_reads_by_whether_it_marks_placeholder_content(self, kind: str, status: str) -> None:
+        row = _general_row()
+        row["simulation_outcome"] = _outcome(
+            status="completed_with_warnings",
+            warnings=[{"kind": kind, "turn_idx": 0, "detail": ""}],
+        )
+        out = _record([row])
+        assert status in out
+        assert (kind in out) is (status == "SIM WARN")
+
     def test_real_warning_alongside_placeholder_still_warns(self) -> None:
         # Mixed bag: when a placeholder warning fires alongside an
         # actual simulation-quality warning (e.g. ``id_fabrication``
