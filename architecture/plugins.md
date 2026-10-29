@@ -41,6 +41,9 @@ the built-ins. The registries refuse a name that is already taken, so the
 prefix is what keeps two packages, or a package and a later built-in, from
 claiming the same one.
 
+[`docs/extensions.md`](../docs/extensions.md) builds a whole extension
+package: a probe with its own bank, a scorer, their tests and a CI recipe.
+
 An extension probe declares the columns it writes in its class's
 `output_columns`, and a run keeps them alongside the core columns. Other
 per-row data goes in its metadata (`state.metadata`), stored with the row as
@@ -167,9 +170,11 @@ The probe then finds its banks wherever the package is installed. That root
 is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
 deployment can override it and the shipped banks remain reachable.
 `@register_probe` refuses a relative `assets_root`, which would resolve against
-the working directory. `$USERSIM_ASSET_PATH` stays the way to layer
-content over a probe you don't ship, such as a patch to the shipped
-`identity_disclosure` spec. See [assets.md](assets.md).
+the working directory. The probe's bank loader reads under `MyProbe.assets_dir()`,
+its folder on that search, so an override reaches the loader too.
+`$USERSIM_ASSET_PATH` stays the way to layer content over a probe you don't
+ship, such as a patch to the shipped `identity_disclosure` spec. See
+[assets.md](assets.md).
 
 ## Testing an extension
 

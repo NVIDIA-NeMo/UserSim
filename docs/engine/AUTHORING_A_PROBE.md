@@ -219,8 +219,21 @@ class MyProbe(BaseProbe):
 ```
 
 It must be absolute: `@register_probe` refuses a relative path, which would
-resolve against the working directory. Built-in probes leave it unset: their banks are under
-`src/usersim/engine/assets/<label>/`.
+resolve against the working directory. Built-in probes leave it unset: their
+banks are under `src/usersim/engine/assets/<label>/`.
+
+Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,
+resolved as the built-in loaders resolve theirs, so a folder `--assets-dir` or
+`USERSIM_ASSET_PATH` names reaches it too:
+
+```python
+def load_my_bank(locale: str) -> MyBank:
+    path = MyProbe.assets_dir() / locale / "sample.yaml"
+    return MyBank.from_yaml(path.read_text(encoding="utf-8"))
+```
+
+[`docs/extensions.md`](../extensions.md) builds a whole package around such a
+probe.
 
 ---
 
