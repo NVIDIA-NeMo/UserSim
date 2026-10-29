@@ -53,10 +53,9 @@ authoring tutorial.
 ## The contract a probe class must satisfy
 
 A probe class is a `BaseProbe` subclass (plus an optional mixin)
-decorated with `@register_probe(...)`. Three module-level constants
-land automatically via the decorator (`PROBE_FAMILY` /
-`PROMPT_VERSION` / `PROBE_VARIANTS`); the smoke check verifies
-they're present.
+decorated with `@register_probe(...)`. The decorator sets three
+class attributes (`family` / `prompt_version` / `variants`); the
+smoke check verifies they're present.
 
 The runtime `ProbeAdapter` contract has 8 required hooks: class-level
 `label`, two system-prompt accessors, two judge-prompt formatters, the
@@ -110,8 +109,8 @@ When porting one of the templates into a new module:
 - [ ] Pick a `label` for `@register_probe` that no other probe uses,
       used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
       Underscores, lowercase.
-- [ ] Pick a `family` (the `PROBE_FAMILY` constant the decorator
-      sets). The reporting layer stratifies on this.
+- [ ] Pick a `family` (the class attribute the decorator sets).
+      The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.

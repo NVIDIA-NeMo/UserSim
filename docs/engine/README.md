@@ -408,9 +408,9 @@ Quick orientation:
 3. Subclass `BaseProbe` (or `BankBackedProbe`) + the right mixin;
    set 2-3 class attributes; override 2-4 hooks.
 4. `@register_probe(family=, prompt_version=, variants=)` to wire
-   into `_PROBE_REGISTRY` (and the per-module `PROBE_FAMILY` /
-   `PROMPT_VERSION` / `PROBE_VARIANTS` constants the smoke check
-   reads).
+   into `_PROBE_REGISTRY` and set the class's `family` /
+   `prompt_version` / `variants`, which the dispatcher and the smoke
+   check read.
 5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
    [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
    registry imports it and runs your probe's `@register_probe`.
@@ -485,12 +485,12 @@ what each one carries:
 | Column | Type | Description |
 |--------|------|-------------|
 | `persona_uuid` | str | Content-hashed persona identity (16 hex chars) computed at simulation write time. Stable across runs given identical persona content; replay-safe. See `core/identity.py`. |
-| `trajectory_id` | str | Deterministic 16-hex-char identifier composed from `persona_uuid`, `probe_family`, `probe_variant`, probe seed, resolved user/assistant model identities, the probe's `PROMPT_VERSION` and the row's `locale`, plus `replay_assistant_reasoning` when it is on. The simulator's idempotency key (driver scripts skip rows whose `trajectory_id` is already in the output dataset). See `core/identity.py` and `core/idempotency.py`. |
-| `usersim_provenance` | str (JSON) | What the episode was resolved against: `code_sha`, `nemotron_personas_version`, `scenario_prompt_version` (the probe's `PROMPT_VERSION`) and `bank_version`. A replayed row (`ProbeEpisodeRuntime.from_resolved_row`) keeps the provenance it was materialized with. It is recorded before the probe loads its banks, so the bank versions a trajectory used are in `simulation_outcome`'s provenance. See `core/episode_input.py`. |
+| `trajectory_id` | str | Deterministic 16-hex-char identifier composed from `persona_uuid`, `probe_family`, `probe_variant`, probe seed, resolved user/assistant model identities, the probe's `prompt_version` and the row's `locale`, plus `replay_assistant_reasoning` when it is on. The simulator's idempotency key (driver scripts skip rows whose `trajectory_id` is already in the output dataset). See `core/identity.py` and `core/idempotency.py`. |
+| `usersim_provenance` | str (JSON) | What the episode was resolved against: `code_sha`, `nemotron_personas_version`, `scenario_prompt_version` (the probe's `prompt_version`) and `bank_version`. A replayed row (`ProbeEpisodeRuntime.from_resolved_row`) keeps the provenance it was materialized with. It is recorded before the probe loads its banks, so the bank versions a trajectory used are in `simulation_outcome`'s provenance. See `core/episode_input.py`. |
 | `simulation_outcome` | str? (JSON) | Row-level structured outcome: status, failure_class, failure_attribution, counters (n_turns, n_tool_calls, n_user_query_attempts, n_user_followup_retries, n_assistant_inline_failures, n_assistant_retries, n_api_response_rerolls, n_fourth_wall_triggers, n_user_role_violations, n_user_language_violations), warnings, early_stop, per-model tokens / calls / wall-clock-by-alias, provenance. See `core/outcomes.py` for the schema. |
 | `simulation_traces` | str? (JSON) | Per-turn / per-call telemetry (keyed `turn_idx` x `call_idx`) with `kind` discriminator: `user_query_gate`, `user_followup_gate`, `fourth_wall_prefilter`, `assistant_quality`, `early_stop`, `api_response_reroll`, `tool_call_verifier`, etc. The debugging surface: **not** the assistant-evaluation surface. |
-| `probe_family` | str | Probe module's `PROBE_FAMILY` constant (e.g., `"general_open_ended"`, `"sov_ai_facts"`). |
-| `probe_variant` | str | Probe-specific discriminator (first entry of `PROBE_VARIANTS`, or an explicit row value when provided). Part of `trajectory_id` and the evaluator's stratification key. |
+| `probe_family` | str | The probe class's `family` (e.g., `"general_open_ended"`, `"sov_ai_facts"`). |
+| `probe_variant` | str | Probe-specific discriminator (first entry of the probe class's `variants`, or an explicit row value when provided). Part of `trajectory_id` and the evaluator's stratification key. |
 | `conversation_messages` | str (JSON) | Full message list. Each entry is `{role, content}`; assistant entries add `tool_calls` when the turn called a tool, `tool` entries add `tool_call_id`, and an assistant entry adds **`reasoning_content`** when that model call emitted a thinking trace **and `store_reasoning` is on** (the default; `--no-store-reasoning` suppresses it). The key is absent (not empty) whenever either condition fails; the run manifest's `simulation_config.store_reasoning` records which was requested. Traces are attributed per call, so a tool-calling turn that appends several assistant messages carries each trace on the message that produced it. Stored for analysis: `core/llm.py::_dicts_to_chat_messages` drops it on the way back into a model, so a later turn never sees an earlier turn's thinking, unless the run sets `replay_assistant_reasoning`, which sends the assistant its own earlier traces. |
 | `conversation_metadata` | str (JSON) | Loose per-turn judge / event log surfaced to interactive previews and the deep-dive analysis script. |
 | `conversation_status` | bool | True if the trajectory ran to completion (no gate exhaustion / no infrastructure failure) AND any optional `should_succeed(state)` hook returned True. When the hook returns False or raises, `simulation_outcome.status` is `failed`. |

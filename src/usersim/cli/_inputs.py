@@ -26,7 +26,6 @@ import hashlib
 import json
 import logging
 import os
-import sys
 import tempfile
 import time
 from collections import Counter
@@ -324,13 +323,10 @@ def _environment_settings() -> dict[str, list[str]]:
 
 
 def _prompt_versions() -> dict[str, str]:
-    """``PROMPT_VERSION`` of every registered probe, read as the episode preamble reads it."""
+    """The prompt version of every registered probe, read as the episode preamble reads it."""
     from usersim.engine.core.probes import known_probes, resolve_probe
 
-    return {
-        label: str(getattr(sys.modules.get(resolve_probe(label).__module__), "PROMPT_VERSION", "v1.0"))
-        for label in known_probes()
-    }
+    return {label: str(resolve_probe(label).prompt_version or "v1.0") for label in known_probes()}
 
 
 def _extension_identities() -> list[dict[str, Any]]:
@@ -376,7 +372,7 @@ def setup_fingerprint(models: Any, inputs: EpisodeInputs) -> tuple[str, dict[str
       the assistant's reasoning is replayed as the run's models file sets it;
     - the contents of every asset root, and every non-operational
       ``USERSIM_*`` variable;
-    - every probe's ``PROMPT_VERSION``, every extension's package release, and
+    - every probe's prompt version, every extension's package release, and
       the User Sim and Data Designer releases.
 
     A code change that bumps none of these versions is not seen.

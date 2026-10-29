@@ -28,10 +28,8 @@ Public surface for new probe authors:
   or-fail validation at construction time. Replaces the per-probe
   ``_SYSTEM_PROMPTS: dict`` + ``PromptsUnavailableError`` boilerplate.
 - ``@register_probe`` — single-annotation registration. Sets the
-  per-module constants (``PROBE_FAMILY`` / ``PROMPT_VERSION`` /
-  ``PROBE_VARIANTS``) AND registers the class in ``_PROBE_REGISTRY``
-  in one call. Replaces the 6-files-to-touch friction of adding a new
-  probe.
+  class's ``family`` / ``prompt_version`` / ``variants`` AND registers
+  the class in ``_PROBE_REGISTRY`` in one call.
 - ``known_probes()`` / ``resolve_probe()`` — the public read surface
   on the registry.
 
@@ -246,6 +244,12 @@ class BaseProbe:
     """
 
     label: str = "<unset>"
+    # Set by ``@register_probe``. The family, the first variant and the
+    # prompt version go into ``trajectory_id``; the prompt version is also
+    # recorded in provenance.
+    family: str = ""
+    prompt_version: str = ""
+    variants: tuple[str, ...] = ()
 
     # Whether the simulator may discard a judge-rejected assistant
     # candidate and regenerate it (``max_assistant_attempts > 1``).
@@ -1318,21 +1322,22 @@ def register_probe(
 ) -> Callable[[type[BaseProbe]], type[BaseProbe]]:
     """Single-annotation registration of a ``BaseProbe`` subclass.
 
-    Sets ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``
-    on the class's module (the constants the dispatcher reads via
-    ``getattr(module, "PROBE_FAMILY", ...)``) AND adds the class
-    to ``_PROBE_REGISTRY`` keyed by ``cls.label``.
+    Sets ``family`` / ``prompt_version`` / ``variants`` on the class (the
+    attributes the dispatcher reads) AND adds the class to
+    ``_PROBE_REGISTRY`` keyed by ``cls.label``.
+
+    The same values are also set on the class's module as
+    ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``. Two probes
+    defined in one module overwrite each other's module constants, so
+    read the class.
 
     A label belongs to one probe. Registering the same class again, or the
     class a reloaded module redefines, updates the entry; a different class
     under a taken label raises ``ProbeRegistrationError`` naming both, so
     an installed package cannot replace a probe a run asks for by name.
 
-    Replaces the 6-files-to-touch friction of adding a new probe
-    today: register in the central registry, define
-    PROBE_FAMILY/PROMPT_VERSION/PROBE_VARIANTS module
-    constants, expose a ``simulate_*`` function, etc. After this
-    decorator, the class itself IS the registration.
+    The class itself IS the registration: there is no central registry
+    entry or ``simulate_*`` function to add alongside it.
 
     Example::
 
@@ -1360,6 +1365,10 @@ def register_probe(
                 f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
                 f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
             )
+
+        cls.family = family
+        cls.prompt_version = prompt_version
+        cls.variants = tuple(variants)
 
         module = sys.modules.get(cls.__module__)
         if module is not None:

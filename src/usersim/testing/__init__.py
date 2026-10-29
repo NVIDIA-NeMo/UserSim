@@ -101,18 +101,12 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}. Two probes cannot share a label."
         )
 
-    # @register_probe sets these on the defining module; the dispatcher
-    # reads them from there rather than from the class.
-    module = getattr(cls, "__module__", None)
-    if module:
-        import sys
-
-        mod = sys.modules.get(module)
-        for const in ("PROBE_FAMILY", "PROMPT_VERSION", "PROBE_VARIANTS"):
-            if getattr(mod, const, None) in (None, "", ()):
-                problems.append(
-                    f"{module}.{const} is unset. Use @register_probe rather than assigning to the registry directly."
-                )
+    # @register_probe sets these on the class, where the dispatcher reads them.
+    for attr in ("family", "prompt_version", "variants"):
+        if getattr(cls, attr, None) in (None, "", ()):
+            problems.append(
+                f"{cls.__qualname__}.{attr} is unset. Use @register_probe rather than assigning to the registry directly."
+            )
 
     for method in _REQUIRED_PROBE_METHODS:
         impl = getattr(cls, method, None)

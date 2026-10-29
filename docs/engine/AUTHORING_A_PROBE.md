@@ -336,9 +336,9 @@ from usersim.engine.core.probes import register_probe
 
 
 @register_probe(
-    family="my_probe",         # PROBE_FAMILY constant
-    prompt_version="v1.0",     # PROMPT_VERSION constant
-    variants=("default",),     # PROBE_VARIANTS constant
+    family="my_probe",         # MyProbe.family
+    prompt_version="v1.0",     # MyProbe.prompt_version
+    variants=("default",),     # MyProbe.variants
 )
 class MyProbe(BankVerbatimMixin, BankBackedProbe):
     label = "my_probe"
@@ -347,9 +347,11 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
 
 The decorator does TWO things in one call:
 
-1. Sets `PROBE_FAMILY` / `PROMPT_VERSION` / `PROBE_VARIANTS` on the
-   class's MODULE (the smoke check reads them via
-   `getattr(module, "PROBE_FAMILY", ...)`).
+1. Sets `family` / `prompt_version` / `variants` on the class, where
+   the dispatcher and the smoke check read them. It also sets them on
+   the class's module as `PROBE_FAMILY` / `PROMPT_VERSION` /
+   `PROBE_VARIANTS`; with two probes in one module, those hold whichever
+   was registered last.
 2. Adds the class to `_PROBE_REGISTRY` keyed by `cls.label`. Pick a label
    no other probe uses: registering a second class under a label that is
    already taken raises `ProbeRegistrationError`, naming both classes.
@@ -419,7 +421,7 @@ Every check should report `[OK]`. Confirm your probe appears in the
 ```
 
 If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
-is the most likely cause. If it shows up but `PROBE_FAMILY missing` fires, the
+is the most likely cause. If it shows up but `family missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
 
@@ -795,13 +797,14 @@ Python's MRO resolves left-to-right; mixin overrides need to come
 first so they shadow `BaseProbe` defaults. Get this wrong and the
 mixin's hooks silently never fire.
 
-### 5. `@register_probe` sets module constants AND the registry entry
+### 5. `@register_probe` sets the class metadata AND the registry entry
 
-The decorator does both in one call. Don't manually set
-`PROBE_FAMILY` / `PROMPT_VERSION` / `PROBE_VARIANTS` at module level
-AND use the decorator: the decorator overwrites them. Pick one.
-The decorator path is the recommended one (one source of truth, one
-place to bump prompt_version).
+The decorator does both in one call. Pass the family, prompt version
+and variants to it rather than assigning `family` / `prompt_version` /
+`variants` on the class: the decorator overwrites them. That keeps one
+place to bump `prompt_version`. Read them from the class
+(`MyProbe.prompt_version`), not from the module's `PROMPT_VERSION`,
+which two probes in one module overwrite.
 
 ### 6. `bank_version_key` controls where reporting reads the bank version
 
@@ -869,8 +872,8 @@ is the canonical scaffold. Copy it; substitute your probe's name;
 fill in the 8 standard test stubs:
 
 1. **Registry registration**: the probe label is in `_PROBE_REGISTRY` and
-   resolves to a class, and `sys.modules[probe_cls.__module__]` exposes the
-   three metadata constants.
+   resolves to a class whose `family`, `prompt_version` and `variants` are
+   set.
 2. **Single-turn end-to-end**: minimal mocked-LLM run produces a
    trajectory with `conversation_status=True`.
 3. **First user turn shape** (verbatim probes only):

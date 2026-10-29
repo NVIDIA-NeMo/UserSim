@@ -741,7 +741,7 @@ class TestRegisterProbe:
         sys.modules[name] = mod
         return mod
 
-    def test_registers_class_under_label_and_sets_module_constants(self) -> None:
+    def test_registers_class_under_label_and_sets_its_metadata(self) -> None:
         mod = self._make_module()
 
         @register_probe(family="general", prompt_version="v1.2", variants=("default", "alt"))
@@ -766,6 +766,9 @@ class TestRegisterProbe:
 
         assert "_decorated_probe" in known_probes()
         assert resolve_probe("_decorated_probe") is _Decorated
+        assert _Decorated.family == "general"
+        assert _Decorated.prompt_version == "v1.2"
+        assert _Decorated.variants == ("default", "alt")
         assert mod.PROBE_FAMILY == "general"
         assert mod.PROMPT_VERSION == "v1.2"
         assert mod.PROBE_VARIANTS == ("default", "alt")
@@ -798,7 +801,21 @@ class TestRegisterProbe:
         ):
             register_probe(family="general", prompt_version="v2.0", variants=("default",))(second)
         assert resolve_probe("_contested_probe") is first
+        assert first.prompt_version == "v1.0"
+        assert second.prompt_version == ""
         assert mod.PROMPT_VERSION == "v1.0"
+
+    def test_two_probes_in_one_module_keep_their_own_metadata(self) -> None:
+        mod = self._make_module()
+        first = register_probe(family="first", prompt_version="v1.0", variants=("alpha",))(
+            self._probe_class("_First", "_first_probe", mod.__name__)
+        )
+        second = register_probe(family="second", prompt_version="v2.0", variants=("beta",))(
+            self._probe_class("_Second", "_second_probe", mod.__name__)
+        )
+
+        assert (first.family, first.prompt_version, first.variants) == ("first", "v1.0", ("alpha",))
+        assert (second.family, second.prompt_version, second.variants) == ("second", "v2.0", ("beta",))
 
     def test_a_redefined_class_updates_its_entry(self) -> None:
         mod = self._make_module()

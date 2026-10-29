@@ -8,8 +8,12 @@ base class, the hooks, the mixins. For the catalog of what ships, see
 ## Registration
 
 `@register_probe` on a `BaseProbe` subclass does everything: it sets the
-module constants the dispatcher reads (`PROBE_FAMILY`, `PROMPT_VERSION`,
-`PROBE_VARIANTS`) and adds the class to the registry under its `label`.
+class attributes the dispatcher reads (`family`, `prompt_version`,
+`variants`) and adds the class to the registry under its `label`. Each
+probe carries its own, so two probes defined in one module record their own
+prompt versions. The decorator also sets the same values on the module as
+`PROBE_FAMILY`, `PROMPT_VERSION` and `PROBE_VARIANTS`; with two probes in one
+module those hold whichever was registered last.
 
 ```python
 @register_probe(family="general", prompt_version="v1.0", variants=("default",))
