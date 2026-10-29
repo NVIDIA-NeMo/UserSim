@@ -53,7 +53,7 @@ the arrow pointing one direction, and a test enforces it.
 | `usersim.selection` | Curating trajectories into exportable datasets | [selection.md](selection.md) |
 | `usersim.taxonomy` | The shared vocabulary of capabilities and evidence | above |
 | `usersim.asset_gen` | Generating new asset banks for a domain | [assets.md](assets.md) |
-| `usersim.testing` | Conformance checks for extensions you write | [plugins.md](plugins.md) |
+| `usersim.testing` | Conformance checks and the test harness for extensions you write | [plugins.md](plugins.md) |
 
 Probes get their own page: [probes.md](probes.md) for the substrate,
 [`docs/probes.md`](../docs/probes.md) for the catalog. The entry-point

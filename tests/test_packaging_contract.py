@@ -95,6 +95,11 @@ class TestDeclaredDependencies:
     #: Undeclared on purpose: a guarded notebook probe, not a dependency.
     _OPTIONAL = {"IPython"}
 
+    #: Imported only by a module that the importing tool itself loads, so the
+    #: tool is present whenever the module is. Undeclared on purpose: a user
+    #: who never runs pytest should not install it.
+    _HOST_PROVIDED = {"pytest": {"usersim/testing/pytest_plugin.py"}}
+
     #: Distribution names differ from import names for a few packages.
     _IMPORT_TO_DISTRIBUTION = {
         "yaml": "pyyaml",
@@ -103,15 +108,21 @@ class TestDeclaredDependencies:
     }
 
     @staticmethod
-    def _imports(src_root: Path, own_package: str) -> set[str]:
+    def _imports_of(path: Path) -> set[str]:
+        """Top-level names of the absolute imports in one file."""
+        found: set[str] = set()
+        for node in ast.walk(ast.parse(path.read_text(), filename=str(path))):
+            if isinstance(node, ast.Import):
+                found.update(a.name.split(".")[0] for a in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                found.add(node.module.split(".")[0])
+        return found
+
+    @classmethod
+    def _imports(cls, src_root: Path, own_package: str) -> set[str]:
         found: set[str] = set()
         for path in src_root.rglob("*.py"):
-            tree = ast.parse(path.read_text(), filename=str(path))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    found.update(a.name.split(".")[0] for a in node.names)
-                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
-                    found.add(node.module.split(".")[0])
+            found |= cls._imports_of(path)
         return {m for m in found if m not in _STDLIB and m != own_package}
 
     @staticmethod
@@ -135,10 +146,19 @@ class TestDeclaredDependencies:
         first_party = {"usersim"}
         missing = {
             mod
-            for mod in imported - self._OPTIONAL - first_party
+            for mod in imported - self._OPTIONAL - set(self._HOST_PROVIDED) - first_party
             if self._IMPORT_TO_DISTRIBUTION.get(mod, mod).lower().replace("-", "_") not in declared
         }
         assert not missing, f"the distribution imports but does not declare: {sorted(missing)}"
+
+    def test_host_provided_imports_stay_in_their_modules(self) -> None:
+        """pytest is importable only where pytest is the one loading the module."""
+        src = _REPO_ROOT / "src"
+        for mod, allowed in self._HOST_PROVIDED.items():
+            importers = {
+                path.relative_to(src).as_posix() for path in src.rglob("*.py") if mod in self._imports_of(path)
+            }
+            assert importers == allowed, f"{mod} is imported by {sorted(importers)}, expected only {sorted(allowed)}"
 
     def test_plugin_imports_everything_it_declares(self) -> None:
         imported = {

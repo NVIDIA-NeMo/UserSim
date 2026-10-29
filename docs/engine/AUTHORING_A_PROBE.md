@@ -902,6 +902,15 @@ For real working examples: `tests/engine/probes/test_sov_ai_facts.py`
 abort policy), `tests/engine/probes/test_safety_agentic.py` (custom
 run_dispatch and a simpler mock).
 
+Every test under `tests/` runs inside the hermetic harness that
+`usersim.testing.pytest_plugin` provides, which the root `conftest.py` loads.
+An outbound connection, such as a model call nothing mocked, fails the test
+with `BlockedNetworkCall`; the tokenizer is stubbed; and persona sampling
+reads four synthetic `en_US` personas. A probe shipped in its own package
+gets the same harness by loading the plugin from its suite's top-level
+`conftest.py`; [Testing an extension](../../architecture/plugins.md#testing-an-extension)
+covers the setup.
+
 ---
 
 ## Wiring the out-of-sim scorer

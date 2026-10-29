@@ -127,6 +127,39 @@ rather than replacing the tree. The packaged directory stays last in the
 search order, so the shipped banks remain reachable. See
 [assets.md](assets.md).
 
+## Testing an extension
+
+`usersim.testing.pytest_plugin` is the harness the built-in tests run under.
+An extension's suite loads it from its top-level `conftest.py`:
+
+```python
+pytest_plugins = ["usersim.testing.pytest_plugin"]
+```
+
+With the plugin loaded, a test run:
+
+- fails any outbound connection with `BlockedNetworkCall`. It is a
+  `BaseException`, so the retry and fallback paths that catch `Exception`
+  cannot absorb it and pass the test down a fallback;
+- stops before collecting unless `USERSIM_DISABLE_EXTENSIONS` is set, so other
+  packages installed in the environment cannot register themselves and change
+  what the tests see;
+- stops unless `pytest-asyncio` is installed, because the awaited probe hooks
+  and `assert_scorer_conforms` are async;
+- stubs the tokenizer behind the reasoning-token estimate, which otherwise
+  downloads its vocabulary on first use;
+- points Data Designer's persona sampler at four synthetic `en_US` personas.
+  The `synthetic_persona_dataset` fixture yields the directory they are in.
+
+Set the variable for the run with `pytest-env`:
+`env = ["USERSIM_DISABLE_EXTENSIONS=1"]` under `[tool.pytest.ini_options]`.
+With discovery off, the tests import the extension's own package to register
+its probes and scorers.
+
+Installing `usersim` does not load the plugin. It has no `pytest11` entry
+point, because it blocks outbound connections, and a project that installs
+`usersim` for another reason keeps its tests as they are.
+
 ## What the community can bring
 
 Beyond the mechanics above, four contributions the design is specifically
