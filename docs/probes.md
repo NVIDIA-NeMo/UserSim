@@ -86,3 +86,13 @@ usersim simulate --locale en_US --num-rows 30 \
 Probes are discovered through the `usersim.probes` entry point, so an
 installed package can add one without modifying this project. See
 [`architecture/plugins.md`](../architecture/plugins.md).
+
+## Community probes
+
+Probes published as extension packages are listed here, each with what it
+measures and where to install it from. A listing is not an endorsement: these
+probes are maintained by their authors, outside this repository's review and
+tests. To list one, open a pull request that adds its name, a link to its
+package and one line on what it catches.
+[`CONTRIBUTING.md`](../CONTRIBUTING.md#where-should-a-probe-live) says which
+probes belong in this repository instead.
