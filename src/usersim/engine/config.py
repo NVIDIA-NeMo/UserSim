@@ -10,6 +10,8 @@ from typing import Literal
 from data_designer.config.base import SingleColumnConfig
 from pydantic import Field, model_validator
 
+from usersim.engine.core.columns import CORE_RESULT_COLUMNS
+
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
 MODEL_API_RESPONSE = "api_response_model"
@@ -201,33 +203,7 @@ class ConversationSimulatorConfig(SingleColumnConfig):
     @property
     def side_effect_columns(self) -> list[str]:
         return [
-            "conversation_messages",
-            "user_query",
-            "conversation_metadata",
-            "conversation_status",
-            "behavioral_profile",
-            "locale",
-            "conversation_language",
-            "num_turns",
-            "num_tool_calls",
-            "tool_subset",
-            "disclosure_style",
-            "user_interaction_style",
-            "persona_grounding",
-            # Normalized protected fields rendered into the user-agent prompt.
-            # The raw persona input is dropped, so this compact JSON audit view
-            # preserves what influenced the simulated user.
-            "persona_religion_language_context",
-            # Structured per-trajectory outcome + per-turn telemetry sidecar.
-            # See core/outcomes.py for the schema.
-            "simulation_outcome",
-            "simulation_traces",
-            "probe_family",
-            "probe_variant",
-            # Stable identity for idempotent re-runs. See core/identity.py.
-            "persona_uuid",
-            "trajectory_id",
-            "usersim_provenance",
+            *CORE_RESULT_COLUMNS,
             # Probe-specific side channels. Each is written by one probe's
             # ``build_result_extras`` and read back by that probe's scorer,
             # which treats an absent value as "nothing to score" rather than
