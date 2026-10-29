@@ -804,9 +804,9 @@ that depends on probe shape and gate retries. A FIFO queue makes the
 test brittle to internal refactors. Use the `_mock_call_llm` helper
 that pops from the matching queue based on the alias kwarg.
 
-Judge responses MUST include `<rating>PASS</rating>` or
-`<rating>FAIL</rating>` XML: `run_inline_judge` in `core/judges.py`
-parses XML, not plain text. Plain-text judge responses make the
+Judge responses MUST include `<rating>success</rating>`,
+`<rating>warn</rating>` or `<rating>failure</rating>` XML:
+`run_inline_judge` in `core/judges.py` parses XML, not plain text. Plain-text judge responses make the
 gate fail-retry until exhausted, which then trips
 `USER_QUERY_GATE_EXHAUSTED` failures that look like a probe bug
 but are actually a test-fixture bug.

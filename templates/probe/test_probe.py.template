@@ -30,7 +30,8 @@ files all hit these:
 
 2. **Mock returns must match the caller's expected shape.** For
    judge calls (``judge_model``), return a string with
-   ``<rating>...</rating>`` XML — ``run_inline_judge`` parses XML,
+   ``<rating>success</rating>``, ``warn`` or ``failure`` XML;
+   ``run_inline_judge`` parses XML,
    not plain text. For user/assistant calls, return a dict with
    ``content`` (and optionally ``tool_calls``).
 
@@ -83,9 +84,9 @@ def _mock_call_llm(
     user/judge calls within a single user turn.
 
     Judge responses MUST be XML-shaped strings:
-        '<rating>PASS</rating><explanation>...</explanation>'
-    or:
-        '<rating>FAIL</rating><explanation>...</explanation>'
+        '<explanation>...</explanation><rating>success</rating>'
+    or, to fail the gate:
+        '<explanation>...</explanation><rating>failure</rating>'
 
     See run_inline_judge in core/judges.py for the parser.
     """
@@ -215,7 +216,7 @@ class TestSimulateYourProbe:
     ) -> None:
         # Provide 2 assistant responses; the loop drives turn 2 via
         # the user-agent (user_responses needed) + judge gate
-        # (judge_responses needed with PASS XML).
+        # (judge_responses needed with success XML).
         pass
 
     # 5. probe_variant overridden in build_result_extras.
