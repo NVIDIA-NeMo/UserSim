@@ -23,6 +23,12 @@ Usage from an extension's own tests::
 These checks are also run against the built-in probes and scorers, so the
 suite cannot drift into describing a contract this project does not itself
 keep.
+
+``usersim.testing.pytest_plugin`` is the hermetic harness the built-in tests
+run under, for a suite to load with
+``pytest_plugins = ["usersim.testing.pytest_plugin"]`` in its top-level
+``conftest.py``. This module does not import it, so ``usersim.testing``
+works without pytest installed.
 """
 
 from __future__ import annotations

@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""The repo-wide network guard must actually be armed.
+"""The network guard must actually be armed.
 
-Without this, the guard in the root ``conftest.py`` could be removed or
-silently stop applying and nothing would notice until a test started
-depending on network egress again -- which is the failure that took out 43
-tests across five files.
+The guard comes from ``usersim.testing.pytest_plugin``, which the root
+``conftest.py`` loads. Without these tests, the plugin could stop being
+loaded, or the guard stop applying, and nothing would notice until a test
+depended on network access.
 """
 
 from __future__ import annotations
@@ -17,6 +17,8 @@ import sys
 
 import pytest
 
+from usersim.testing.pytest_plugin import BlockedNetworkCall
+
 if sys.version_info < (3, 11):
     from exceptiongroup import BaseExceptionGroup
 
@@ -25,9 +27,7 @@ if sys.version_info < (3, 11):
 # is what fails rather than name resolution.
 _UNROUTABLE = ("203.0.113.1", 80)
 
-# The guard lives in the root conftest, which cannot be imported here because
-# `conftest` resolves to this directory's one.
-_GUARD_NAME = "BlockedNetworkCall"
+_GUARD_NAME = BlockedNetworkCall.__name__
 
 
 def _guard_names(raised: BaseException) -> set[str]:

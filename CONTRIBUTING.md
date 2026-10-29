@@ -326,6 +326,9 @@ them.
 
 The suite is hermetic: every model call is mocked, and a network guard fails
 any test that tries to reach out. It runs in well under a minute on a laptop.
+The guard, and the stubs that keep the tokenizer and the persona dataset
+offline, come from `usersim.testing.pytest_plugin`, which the root
+`conftest.py` loads.
 
 Two conventions matter more than they look:
 
@@ -367,6 +370,28 @@ empty cells, which the evaluator hands a scorer as `None`; see
 
 Those same checks run against every built-in probe and scorer, so they cannot
 drift into describing a contract this project does not itself keep.
+
+To test your extension under the same harness as this repository's suite,
+load the plugin from your suite's top-level `conftest.py` and turn extension
+discovery off for the run:
+
+```python
+pytest_plugins = ["usersim.testing.pytest_plugin"]
+```
+
+```toml
+[tool.pytest.ini_options]
+env = ["USERSIM_DISABLE_EXTENSIONS=1"]
+asyncio_mode = "auto"
+```
+
+The `env` setting needs `pytest-env`, and the plugin stops the run without
+`pytest-asyncio`; `asyncio_mode = "auto"` runs `async def` tests without a
+marker. With discovery off, your tests import your package to
+register its probes and scorers. Installing `usersim` does not load the
+plugin: it blocks outbound connections, so it applies only to a suite that
+asks for it. [`architecture/plugins.md`](architecture/plugins.md) lists what
+it does.
 
 If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)

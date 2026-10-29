@@ -138,7 +138,8 @@ When porting one of the templates into a new module:
       AND `core.judges.acall_llm`; use the alias-dispatching mock with
       XML-shaped judge payloads. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
-      for a real reference.
+      for a real reference. The tests run under `usersim.testing.pytest_plugin`,
+      so a model call nothing mocked fails with `BlockedNetworkCall`.
 - [ ] Update `docs/engine/README.md`'s probe table and the catalog in
       `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
       count there.

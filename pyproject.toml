@@ -87,7 +87,8 @@ Issues = "https://github.com/NVIDIA-NeMo/UserSim/issues"
 # A dependency group rather than an optional-dependency extra, so `uv sync`
 # installs it by default and `pip install usersim[dev]` cannot pull test
 # and lint tooling into a user's environment. `make test` and the hermeticity
-# guard in conftest.py both depend on this group being present.
+# checks in usersim.testing.pytest_plugin both depend on this group being
+# present.
 dev = [
     "jupyter",
     "pytest>=8.0",
@@ -101,14 +102,15 @@ dev = [
     # without this.
     "pytest-xdist>=3.6,<4",
     # Applies the [tool.pytest.ini_options] env block below, which sets
-    # USERSIM_DISABLE_EXTENSIONS before any conftest loads. A root conftest.py
-    # would run after one that imports a registry, which is too late to keep
-    # discovery out of the suite. conftest.py fails the run if this is absent.
+    # USERSIM_DISABLE_EXTENSIONS before any conftest loads. Setting it from the
+    # root conftest.py, or the plugin it loads, would come after any conftest
+    # that imports a registry, which is too late to keep discovery out of the
+    # suite. usersim.testing.pytest_plugin fails the run if this is absent.
     "pytest-env>=1.1,<2",
     # Collects `async def` tests. `asyncio_mode = "auto"` below means they need
     # no decorator, so a contributor writing one does not have to know this is
-    # here. conftest.py fails the run if it is absent, because without it every
-    # async test is skipped with a warning rather than failing.
+    # here. usersim.testing.pytest_plugin fails the run if it is absent,
+    # because without it no async test runs.
     "pytest-asyncio>=1.0,<2",
     # tests/test_network_guard.py unwraps exception groups, which Python 3.10
     # has only through this backport.
