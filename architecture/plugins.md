@@ -33,6 +33,14 @@ which system they are looking at.
 my_probe = "my_package.probe:MyProbe"
 ```
 
+**Every name an extension adds carries its prefix.** Probe labels, scorer
+names, capability ids, asset domains, command names, output columns, warning
+kinds and metadata keys all start with the package's own prefix, such as
+`acme_recipes` or `acme_used_placeholder_recipe`. Unprefixed names belong to
+the built-ins. The registries refuse a name that is already taken, so the
+prefix is what keeps two packages, or a package and a later built-in, from
+claiming the same one.
+
 An extension probe declares the columns it writes in its class's
 `output_columns`, and a run keeps them alongside the core columns. Other
 per-row data goes in its metadata (`state.metadata`), stored with the row as
