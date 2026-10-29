@@ -72,7 +72,8 @@ have to take on faith.
 Probe content (fact banks, query banks, pressure banks, clinical profiles,
 finance corpora, tool catalogs) ships with the package and resolves along
 a search path, so you can layer your own content over the shipped set without
-replacing it. See [assets.md](assets.md).
+replacing it. A probe shipped in its own package names the root that holds its
+banks. See [assets.md](assets.md).
 
 ## Storage that survives interruption
 

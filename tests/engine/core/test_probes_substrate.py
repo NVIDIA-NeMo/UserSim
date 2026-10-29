@@ -23,6 +23,7 @@ import subprocess
 import sys
 import types
 from dataclasses import dataclass, field
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -845,6 +846,17 @@ class TestRegisterProbe:
                 prompt_version="v1.0",
                 variants=("default",),
             )(_NoLabel)
+
+    def test_rejects_a_relative_assets_root(self) -> None:
+        """A relative root would resolve against whatever directory a run starts in."""
+        mod = self._make_module()
+        relative = self._probe_class("_Relative", "_relative_root_probe", mod.__name__)
+        relative.assets_root = Path("assets")
+
+        with pytest.raises(ProbeRegistrationError, match=r"_Relative declares the relative assets_root 'assets'"):
+            register_probe(family="general", prompt_version="v1.0", variants=("default",))(relative)
+        assert "_relative_root_probe" not in known_probes()
+        assert relative.family == ""
 
     def test_resolve_probe_raises_keyerror_for_unknown(self) -> None:
         with pytest.raises(KeyError, match="bogus_probe"):

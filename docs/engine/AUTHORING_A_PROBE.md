@@ -196,6 +196,22 @@ and silently produces empty rollups.
 
 For `BaseProbe`-only subclasses, just `label` is required.
 
+A probe shipped in its own package, rather than in this repository, also
+sets `assets_root` to the directory that holds its `<label>/` asset folder,
+so it finds its banks wherever the package is installed:
+
+```python
+from pathlib import Path
+
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    assets_root = Path(__file__).parent / "assets"  # holds my_probe/
+```
+
+It must be absolute: `@register_probe` refuses a relative path, which would
+resolve against the working directory. Built-in probes leave it unset: their banks are under
+`src/usersim/engine/assets/<label>/`.
+
 ---
 
 ## Step 3: wire the asset bank

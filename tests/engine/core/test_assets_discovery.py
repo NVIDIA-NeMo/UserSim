@@ -8,8 +8,8 @@ The banks are package data under ``usersim/engine/assets/``, resolved
 through :mod:`importlib.resources`.
 
 The invariants here fall into two groups: that resolution works and honours
-its overrides, and that the marker tuple, the probe registry, and the on-disk
-layout stay in lockstep.
+its overrides and a probe's declared ``assets_root``, and that the probe
+registry and the on-disk layout stay in lockstep.
 
 Loader-level tests live in the per-bank test files (``test_agentic_bank.py``,
 ``test_pressure_bank.py``, …) and exercise these helpers indirectly via the
@@ -22,9 +22,11 @@ import os
 from pathlib import Path
 
 from usersim.engine.core._assets import (
-    _ASSETS_MARKERS,
+    asset_roots_in_use,
+    asset_search_path,
     default_assets_dir,
     packaged_assets_dir,
+    probe_asset_roots,
     probe_assets_dir,
     reset_runtime_assets_dir,
     set_runtime_assets_dir,
@@ -77,50 +79,35 @@ class TestOverrides:
         assert probe_assets_dir("sov_ai_facts", assets_root=tmp_path) == (tmp_path / "sov_ai_facts")
 
 
-class TestMarkerAndRegistryInvariants:
-    """Pins the relationship between three concepts: the marker tuple, the
-    probe registry, and the directories actually present on disk.
+class TestRegistryAndLayoutInvariants:
+    """Every registered probe resolves to an asset folder, and every packaged
+    folder belongs to a registered probe. Importing the generator triggers the
+    probe bootstrap that populates the registry."""
 
-    Checking the marker tuple alone is not enough: a marker can name a
-    directory that does not exist, and a probe can exist with no directory
-    at all. Each of the three pairings is asserted separately.
-    """
-
-    def test_every_marker_resolves_to_a_real_subdir(self) -> None:
-        root = default_assets_dir()
-        missing = [m for m in _ASSETS_MARKERS if not (root / m).exists()]
-        assert not missing, (
-            f"_ASSETS_MARKERS lists subdirectories absent under {root}: "
-            f"{missing}. Either ship the directory or remove the marker."
-        )
-
-    def test_marker_set_matches_probe_registry(self) -> None:
-        """Every probe owns an asset folder named after itself, and every
-        asset folder is owned by a probe. Importing the generator triggers
-        the probe bootstrap that populates the registry."""
+    @staticmethod
+    def _labels() -> set[str]:
         import usersim.engine.generator  # noqa: F401
         from usersim.engine.core.probes import known_probes
 
-        registry = set(known_probes())
-        markers = set(_ASSETS_MARKERS)
-        assert markers == registry, (
-            "_ASSETS_MARKERS and the probe registry have drifted apart.\n"
-            f"  Probes without an asset marker: {sorted(registry - markers)}\n"
-            f"  Markers without a probe:        {sorted(markers - registry)}"
-        )
+        return set(known_probes())
 
-    def test_probe_assets_dir_resolves_for_every_marker(self) -> None:
-        for marker in _ASSETS_MARKERS:
-            path = probe_assets_dir(marker)
-            assert path.is_dir(), f"probe_assets_dir({marker!r}) -> {path}, not a directory"
+    def test_every_registered_probe_resolves_to_a_folder(self) -> None:
+        unresolved = {
+            label: probe_assets_dir(label) for label in self._labels() if not probe_assets_dir(label).is_dir()
+        }
+        assert not unresolved, f"registered probes without an asset folder: {unresolved}"
+
+    def test_every_built_in_probe_ships_its_folder_in_the_package(self) -> None:
+        missing = sorted(label for label in self._labels() if not (packaged_assets_dir() / label).is_dir())
+        assert not missing, f"built-in probes whose assets are not under {packaged_assets_dir()}: {missing}"
 
     def test_packaged_tree_has_no_stray_top_level_entries(self) -> None:
         """Everything shipped under assets/ should be a probe folder. Catches
-        a doc image or scratch file riding into the wheel."""
+        a doc image or scratch file riding into the wheel, and a folder left
+        behind by a renamed probe."""
+        labels = self._labels()
         stray = [
-            p.name
-            for p in packaged_assets_dir().iterdir()
-            if p.name not in _ASSETS_MARKERS and not p.name.startswith("__")
+            p.name for p in packaged_assets_dir().iterdir() if p.name not in labels and not p.name.startswith("__")
         ]
         assert not stray, f"unexpected entries in packaged assets/: {stray}"
 
@@ -200,3 +187,62 @@ class TestAssetSearchPath:
 
         monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path))
         assert probe_assets_dir("no_such_probe").parent == tmp_path
+
+
+class TestDeclaredAssetsRoot:
+    """A probe whose assets ship outside ``usersim`` names their root on its
+    class, so it resolves without anyone setting ``USERSIM_ASSET_PATH``."""
+
+    def test_a_declared_root_serves_its_probe(self, register_test_probe, tmp_path) -> None:
+        (tmp_path / "ext_probe").mkdir()
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert probe_assets_dir("ext_probe") == tmp_path / "ext_probe"
+
+    def test_it_is_searched_after_the_overrides_and_before_the_packaged_banks(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        override = tmp_path / "override"
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_asset_roots("ext_probe") == (override, tmp_path / "declared", packaged_assets_dir())
+
+    def test_a_deliberate_override_wins_over_the_declared_root(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        override, declared = tmp_path / "override", tmp_path / "declared"
+        (override / "ext_probe").mkdir(parents=True)
+        (declared / "ext_probe").mkdir(parents=True)
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(override))
+        register_test_probe("ext_probe", assets_root=declared)
+
+        assert probe_assets_dir("ext_probe") == override / "ext_probe"
+
+    def test_a_pinned_root_ignores_the_declared_root(self, register_test_probe, tmp_path) -> None:
+        (tmp_path / "declared" / "ext_probe").mkdir(parents=True)
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_assets_dir("ext_probe", assets_root=tmp_path / "pinned") == tmp_path / "pinned" / "ext_probe"
+
+    def test_missing_assets_are_reported_under_the_declared_root(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        monkeypatch.setenv("USERSIM_ASSET_PATH", str(tmp_path / "override"))
+        register_test_probe("ext_probe", assets_root=tmp_path / "declared")
+
+        assert probe_assets_dir("ext_probe") == tmp_path / "declared" / "ext_probe"
+
+    def test_a_declared_root_serves_only_its_own_probe(self, register_test_probe, tmp_path) -> None:
+        """A package's root may hold other folders; only its probe reads from it."""
+        (tmp_path / "tool_calling").mkdir()
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert probe_assets_dir("tool_calling") == packaged_assets_dir() / "tool_calling"
+
+    def test_roots_in_use_add_declared_roots_after_the_search_path(self, register_test_probe, tmp_path) -> None:
+        assert asset_roots_in_use() == asset_search_path()
+
+        register_test_probe("ext_probe", assets_root=tmp_path)
+
+        assert asset_roots_in_use() == (*asset_search_path(), tmp_path)

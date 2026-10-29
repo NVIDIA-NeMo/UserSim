@@ -80,21 +80,17 @@ choices = cli._build_parser()._subparsers._group_actions[0].choices
 check("usersim.commands", "fixture-cmd" in choices, f"saw {sorted(choices)}")
 check("commands: built-ins survive", "simulate" in choices)
 
-# The seams must compose: a contributed probe's assets resolve through the
-# search path, which is what makes the probe actually runnable.
+# The seams must compose: a contributed probe's assets resolve from the
+# assets_root its class declares, with no USERSIM_ASSET_PATH set, which is
+# what makes the probe runnable as installed.
 from usersim.engine.core._assets import probe_assets_dir  # noqa: E402
 
-fixture_assets = (
-    os.path.dirname(sys.modules["usersim_extension_fixture"].__file__)
-    if "usersim_extension_fixture" in sys.modules
-    else None
-)
-if fixture_assets:
-    os.environ["USERSIM_ASSET_PATH"] = os.path.join(fixture_assets, "assets")
+check("no asset path set", "USERSIM_ASSET_PATH" not in os.environ, os.environ.get("USERSIM_ASSET_PATH", ""))
+fixture_dir = probe_assets_dir("fixture_probe")
 check(
-    "USERSIM_ASSET_PATH resolves a contributed bank",
-    probe_assets_dir("fixture_probe").is_dir(),
-    f"looked at {probe_assets_dir('fixture_probe')}",
+    "assets_root resolves a contributed bank",
+    fixture_dir.is_dir() and "site-packages" in fixture_dir.parts,
+    f"looked at {fixture_dir}",
 )
 
 # The published conformance suite must pass for a real external probe.

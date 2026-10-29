@@ -586,7 +586,7 @@ undeclared result columns). The tables describe the main files.
 | `test_locale.py` | `SHIPPED_LOCALES` parity across language-name / display-name / script-range maps; new locales caught at CI time |
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |
-| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence |
+| `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, a probe's declared `assets_root`, and every registered probe owning a packaged folder |
 | `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract |
 | `test_pipeline.py` | Pipeline-level config validation |
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
@@ -603,7 +603,7 @@ undeclared result columns). The tables describe the main files.
 | `test_pressure_bank.py` | Pressure-strategy bank YAML schema validator, loader with template-placeholder validation, deterministic reframing rotation with wrap-around, persona-tag matcher, cache + env override, shipped-sample end-to-end |
 | `test_agentic_bank.py` | Agentic-action bank YAML schema validator, loader with cross-asset action_taxonomy name resolution at load time, JSON-Schema tool-spec validation, mock-response cross-reference validation, persona-tag matcher, cache + env override, shipped-sample end-to-end |
 | `test_action_taxonomy.py` | Rich action-taxonomy loader (consumed by `safety_agentic` scorer): schema validation, cache + env override (`USERSIM_SAFETY_AGENTIC_ACTION_TAXONOMY`), `by_name` / `blast_radius_rank` lookups |
-| `test_identity_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
+| `test_identity_spec.py` | Identity spec loader: loading, the env override and the cache; model-id resolution (a family name after any separator, declarations over patterns, hosts never deciding); name folding; layering down the asset search path and the roots probes declare (inheritance, in-place patches, probes built on top, cycles); merging and `select` / `exclude` narrowing; the content digest; validation reporting every problem at once |
 
 **`tests/engine/probes/`: the probe generators, verifier and invariants**
 
