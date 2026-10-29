@@ -139,10 +139,12 @@ When porting one of the templates into a new module:
 - [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
-- [ ] Write tests using the patterns in `test_probe.py.template`:
-      use `_patched_call_llm` to patch BOTH `core.simulation.acall_llm`
-      AND `core.judges.acall_llm`; use the alias-dispatching mock with
-      XML-shaped judge payloads. See
+- [ ] Write tests from `test_probe.py.template`. Its first test runs
+      the probe end to end with `usersim.testing.run_episode` and
+      scripted models. The standard tests after it control each reply:
+      `_patched_call_llm` patches BOTH `core.simulation.acall_llm` AND
+      `core.judges.acall_llm`, and the alias-dispatching mock returns
+      XML-shaped judge verdicts. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
       for a real reference. The tests run under `usersim.testing.pytest_plugin`,
       so a model call nothing mocked fails with `BlockedNetworkCall`.

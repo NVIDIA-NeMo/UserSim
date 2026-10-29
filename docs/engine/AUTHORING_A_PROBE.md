@@ -785,37 +785,53 @@ for the full rationale. If your probe deliberately deviates, document the
 deviation in the module docstring. The default is empty; deviations are
 deliberate.
 
-### 2. Test patching: BOTH `core.simulation.acall_llm` AND `core.judges.acall_llm`
+### 2. Test the whole probe with `run_episode`, without patching
 
-Both modules locally re-import `acall_llm` from `core.llm` at module
-load. Patching `core.llm.acall_llm` doesn't affect the imported
-bindings. Use the `_patched_call_llm` context manager from the test
-template, which patches both call sites at once:
+`usersim.testing.run_episode` runs one episode the way `usersim simulate` does,
+with a `ScriptedModel` answering for every model alias, so the test needs no
+provider and patches nothing:
 
 ```python
-with patch(
-    "usersim.engine.core.simulation.acall_llm",
-    side_effect=side_effect,
-), patch(
-    "usersim.engine.core.judges.acall_llm",
-    side_effect=side_effect,
-):
-    result = await probe_gen.simulate_my_probe(...)
+from usersim.engine.config import ConversationSimulatorConfig
+from usersim.testing import run_episode
+
+
+async def test_my_probe_runs_end_to_end():
+    run = await run_episode(
+        "my_probe",
+        config=ConversationSimulatorConfig(name="conversation_messages", max_turns=2),
+        persona={"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle",
+                 "education_level": "Bachelor", "occupation": "Software Engineer"},
+        data={"theme": {"type": "cooking", "description": "Planning weeknight dinners."}},
+    )
+    assert run.row["conversation_status"] is True
 ```
 
-### 3. Mock must be alias-dispatching with judge XML payloads
+`run.row` is the row the simulator's generator returns, from which a run stores
+the declared columns; its JSON columns, such as `conversation_messages` and
+`simulation_outcome`, hold strings. `run.prompts`
+lists every request the models received, in order, with its role and messages.
+To script other replies, subclass `ScriptedModel`, override `CONTENT`, and pass
+the class as `model_factory`.
 
-The loop calls user_model + judge_model + assistant_model in an order
-that depends on probe shape and gate retries. A FIFO queue makes the
-test brittle to internal refactors. Use the `_mock_call_llm` helper
-that pops from the matching queue based on the alias kwarg.
+A test that controls each reply turn by turn can patch `acall_llm` instead. Two
+modules import it, `core.simulation` and `core.judges`, so patch both, as the
+template's `_patched_call_llm` does. Those are internal modules, so a probe
+shipped in its own package tests with `run_episode`.
 
-Judge responses MUST include `<rating>PASS</rating>` or
-`<rating>FAIL</rating>` XML: `run_inline_judge` in `core/judges.py`
-parses XML, not plain text. Plain-text judge responses make the
-gate fail-retry until exhausted, which then trips
-`USER_QUERY_GATE_EXHAUSTED` failures that look like a probe bug
-but are actually a test-fixture bug.
+### 3. Judge replies carry an XML verdict
+
+A judge reply, scripted or patched, must include `<rating>success</rating>`,
+`<rating>warn</rating>` or `<rating>failure</rating>`: `run_inline_judge` in
+`core/judges.py` parses XML, not plain text. Plain-text judge responses make
+the gate fail-retry until exhausted, which then trips
+`USER_QUERY_GATE_EXHAUSTED` failures that look like a probe bug but are a test
+fixture bug.
+
+When you patch `acall_llm`, dispatch on the alias rather than popping from one
+queue: the loop calls the user, judge and assistant models in an order that
+depends on the probe's shape and the gate's retries. The template's
+`_mock_call_llm` pops from the queue for the alias it is called with.
 
 ### 4. Mixin BEFORE the BaseProbe subclass in MRO
 
@@ -902,8 +918,9 @@ def test_my_probe_conforms():
 ## Test authoring
 
 [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template)
-is the canonical scaffold. Copy it; substitute your probe's name;
-fill in the 8 standard test stubs:
+is the canonical scaffold. Copy it and substitute your probe's name. Its
+first test runs the probe end to end with `run_episode` (gotcha 2); then fill
+in the 8 standard test stubs:
 
 1. **Registry registration**: the probe label is in `_PROBE_REGISTRY` and
    resolves to a class whose `family`, `prompt_version` and `variants` are

@@ -375,6 +375,12 @@ empty cells, which the evaluator hands a scorer as `None`; see
 Those same checks run against every built-in probe and scorer, so they cannot
 drift into describing a contract this project does not itself keep.
 
+To run your probe end to end without a provider, `usersim.testing.run_episode`
+runs one episode the way `usersim simulate` does, with scripted models, and
+returns the generator's row and every prompt sent; gotcha 2 in
+[`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md) shows a
+test.
+
 To test your extension under the same harness as this repository's suite,
 load the plugin from your suite's top-level `conftest.py` and turn extension
 discovery off for the run:
