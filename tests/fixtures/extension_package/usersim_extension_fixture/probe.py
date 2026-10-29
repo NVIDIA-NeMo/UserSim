@@ -10,9 +10,13 @@ from usersim.engine.core.probes import BaseProbe, register_probe
 class FixtureProbe(BaseProbe):
     label = "fixture_probe"
     assets_root = Path(__file__).parent / "assets"
+    output_columns = ("fixture_probe_marker",)
 
     def get_user_system_prompt(self) -> str:
         return "You are a fixture user."
 
     def get_assistant_system_prompt(self) -> str:
         return "You are a fixture assistant."
+
+    def build_result_extras(self, state) -> dict:
+        return {**super().build_result_extras(state), "fixture_probe_marker": True}

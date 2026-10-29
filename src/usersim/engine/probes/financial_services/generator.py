@@ -315,6 +315,26 @@ class _PickedTask:
 )
 class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     label = "financial_services"
+    output_columns = (
+        "finance_task_id",
+        "task_type",
+        "task_tier",
+        "task_contract_version",
+        "taxonomy_version",
+        "domain",
+        "region",
+        "institution_id",
+        "institution_type",
+        "dynamic_category_id",
+        "dynamic_subtopic_hint",
+        "expected_state_deltas",
+        "gold_document_ids",
+        "gold_tool_sequence",
+        "retrieved_document_ids",
+        "kb_search_queries",
+        "num_kb_searches",
+        "attempted_tool_names",
+    )
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FINANCE
     bank_version_key = None  # per-locale

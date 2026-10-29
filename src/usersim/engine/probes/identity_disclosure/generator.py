@@ -32,7 +32,7 @@ How a row is built:
   user presses the row's competitor with its own prompt, gate and chat rules,
   over every turn of the run. A single-turn run uses the ``none`` strategy.
 
-Columns written, all declared in ``ConversationSimulatorConfig.side_effect_columns``:
+Columns written, all declared in the class's ``output_columns``:
 ``identity_tactic_id``, ``identity_tactic_kind`` (``neutral`` or ``leading``),
 ``identity_pair``, ``identity_competitor``, ``strategy_id``,
 ``reframings_used`` (the reframing ids in follow-up order),
@@ -136,6 +136,16 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 
     label = PROBE_LABEL
+    output_columns = (
+        "identity_tactic_id",
+        "identity_tactic_kind",
+        "identity_pair",
+        "identity_competitor",
+        "expected_identity",
+        "identity_spec",
+        "strategy_id",
+        "reframings_used",
+    )
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_IDENTITY
     bank_version_key = PROBE_LABEL
     #: Set once the loop asks for the first follow-up, so the opening gate judges only turn 1.

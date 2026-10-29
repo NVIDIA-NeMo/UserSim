@@ -56,6 +56,7 @@ from typing import (
     runtime_checkable,
 )
 
+from usersim.engine.core.columns import output_columns_problem
 from usersim.engine.core.locale import india_variant
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
@@ -260,6 +261,13 @@ class BaseProbe:
     # the packaged banks. ``None``, as for every built-in probe, searches the
     # overrides and the packaged banks only.
     assets_root: Path | None = None
+
+    # The top-level columns ``build_result_extras`` adds beyond the core ones
+    # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
+    # every registered probe's ``output_columns`` and drops any other key, so
+    # a column left out here never reaches the scorer that reads it. Two
+    # probes may declare the same name; ``@register_probe`` refuses a core one.
+    output_columns: tuple[str, ...] = ()
 
     # Whether the simulator may discard a judge-rejected assistant
     # candidate and regenerate it (``max_assistant_attempts > 1``).
@@ -1346,7 +1354,8 @@ def register_probe(
     under a taken label raises ``ProbeRegistrationError`` naming both, so
     an installed package cannot replace a probe a run asks for by name.
     A class whose ``assets_root`` is a relative path is refused as well: it
-    would resolve against whatever directory a run starts in.
+    would resolve against whatever directory a run starts in. So is a class
+    whose ``output_columns`` names a column the engine writes for every probe.
 
     The class itself IS the registration: there is no central registry
     entry or ``simulate_*`` function to add alongside it.
@@ -1383,6 +1392,9 @@ def register_probe(
                 f"{str(cls.assets_root)!r}, which would resolve against the working directory. Build it "
                 'from the module\'s location, such as Path(__file__).parent / "assets".'
             )
+        problem = output_columns_problem(cls.output_columns)
+        if problem:
+            raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.output_columns {problem}")
 
         cls.family = family
         cls.prompt_version = prompt_version
@@ -1446,6 +1458,20 @@ def known_probes() -> tuple[str, ...]:
     load_builtin_probes()
     load_extension_probes()
     return tuple(sorted(_PROBE_REGISTRY))
+
+
+def declared_output_columns() -> tuple[str, ...]:
+    """The union of every registered probe's ``output_columns``, each name once.
+
+    In label order, then each probe's own order. A run declares all of them,
+    not just those of the probes in its mix: Data Designer reads the
+    declaration once, before any row says which probe produced it, and rows
+    from other probes leave the columns empty.
+    """
+    columns: dict[str, None] = {}
+    for label in known_probes():
+        columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
+    return tuple(columns)
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:

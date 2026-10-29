@@ -143,6 +143,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_multilingual_parity"
+    output_columns = ("query_id",)
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.
     bank_loader = staticmethod(_bank_loader)

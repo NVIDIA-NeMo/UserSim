@@ -414,13 +414,11 @@ Quick orientation:
 5. Add your module's import path to `BUILTIN_PROBE_MODULES` in
    [`core/probes.py`](../../src/usersim/engine/core/probes.py), so the
    registry imports it and runs your probe's `@register_probe`.
-6. Declare every column `build_result_extras` writes in
-   `side_effect_columns` on
-   [`ConversationSimulatorConfig`](../../src/usersim/engine/config.py).
-   An undeclared column is discarded on the way to storage (with a
-   warning in the log), and the scorer that reads it back reports
-   nothing to score. A probe outside this repository keeps per-row data
-   in `state.metadata` instead; see the authoring guide's step 6.
+6. Declare every column `build_result_extras` writes beyond the core
+   ones in the class's `output_columns`. An undeclared column is
+   discarded on the way to storage (with a warning in the log), and the
+   scorer that reads it back reports nothing to score; see the
+   authoring guide's step 6.
 7. Run `usersim smoke` to confirm registration; copy
    `templates/probe/test_probe.py.template` for the per-probe
    regression test.
@@ -587,7 +585,7 @@ undeclared result columns). The tables describe the main files.
 | `test_language_detection.py` | Lazy `lingua` detector loading, `script_compliance_fraction`, `script_dominance` helpers |
 | `test_default_asset_paths.py` | Every shipped probe's default asset path resolves to a real file across every supported locale |
 | `test_assets_discovery.py` | Runtime assets-dir resolution (`set_runtime_assets_dir`, `probe_assets_dir`), env-override precedence, a probe's declared `assets_root`, and every registered probe owning a packaged folder |
-| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract |
+| `test_config.py` | `ConversationSimulatorConfig` defaults, optional fields, side-effect-columns contract (the core columns plus every registered probe's `output_columns`) |
 | `test_pipeline.py` | Pipeline-level config validation |
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
 | `test_messages.py` | Message / tool / theme formatting helpers |

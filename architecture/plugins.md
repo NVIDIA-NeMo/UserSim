@@ -33,9 +33,10 @@ which system they are looking at.
 my_probe = "my_package.probe:MyProbe"
 ```
 
-An extension probe's per-row data goes in its metadata (`state.metadata`),
-stored with the row as `conversation_metadata`: the list of extra columns a
-run keeps is part of the core config. See [Probes](probes.md).
+An extension probe declares the columns it writes in its class's
+`output_columns`, and a run keeps them alongside the core columns. Other
+per-row data goes in its metadata (`state.metadata`), stored with the row as
+`conversation_metadata`. See [Probes](probes.md).
 
 ## How discovery behaves
 

@@ -51,22 +51,26 @@ required; the rest have working defaults on `BaseProbe`.
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
 | `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
-| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` (an extension probe keeps per-row data in `state.metadata`) |
+| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
 
 Anything a probe does not override inherits a default, so a new probe declares
 only what is specific to it.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
-`build_result_extras` returns is written only if the name appears in
-`ConversationSimulatorConfig.side_effect_columns`; anything else is discarded,
-and the scorer that reads it back finds nothing to score. The generator logs a
-warning naming the probe and the column the first time it happens.
+`build_result_extras` returns is written only if the name is a core column or
+appears in some registered probe's `output_columns`; anything else is
+discarded, and the scorer that reads it back finds nothing to score. The
+generator logs a warning naming the probe and the column the first time it
+happens. A run declares the core columns plus the union of every registered
+probe's `output_columns` as `ConversationSimulatorConfig.side_effect_columns`,
+because Data Designer reads the declaration once, before any row says which
+probe produced it.
 
-An extension probe cannot add to that list without editing this repository, so
-it keeps per-row data in `state.metadata` instead, which is stored with the row
-as `conversation_metadata` and read from there by its scorer. Write it during
-the run, for example in `after_assistant_turn`: the metadata is serialized
-before `build_result_extras` runs, so anything added there is lost.
+Per-row data that is not a column of its own goes in `state.metadata`, which is
+stored with the row as `conversation_metadata` and read from there by the
+probe's scorer. Write it during the run, for example in `after_assistant_turn`:
+the metadata is serialized before `build_result_extras` runs, so anything added
+there is lost.
 
 Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
 `format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,

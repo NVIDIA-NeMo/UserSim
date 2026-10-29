@@ -132,10 +132,9 @@ class DemoToolCallingProbe(ToolCallingMixin, BaseProbe):
         return content or ""
 
     def build_result_extras(self, state: Any) -> dict:
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         return {
             "num_turns": sum(1 for m in state.messages if m.get("role") == "user"),
             "num_tool_calls": len(state.metadata.get("tools_called", [])),

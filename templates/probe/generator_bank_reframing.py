@@ -116,6 +116,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     """Multi-turn reframing-rotation probe."""
 
     label = "demo_bank_reframing"
+    output_columns = ("target_request_id", "strategy_id", "reframings_used")
     bank_loader = staticmethod(_demo_pressure_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
     bank_version_key = "safety"  # non-locale (this probe is locale-independent)
@@ -207,10 +208,9 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         if self._task is not None:
             extras["probe_variant"] = self._task.id  # strategy::target
             extras["target_request_id"] = self._task.target.id

@@ -11,6 +11,7 @@ from data_designer.config.base import SingleColumnConfig
 from pydantic import Field, model_validator
 
 from usersim.engine.core.columns import CORE_RESULT_COLUMNS
+from usersim.engine.core.probes import declared_output_columns
 
 MODEL_USER = "user_model"
 MODEL_ASSISTANT = "assistant_model"
@@ -202,71 +203,12 @@ class ConversationSimulatorConfig(SingleColumnConfig):
 
     @property
     def side_effect_columns(self) -> list[str]:
-        return [
-            *CORE_RESULT_COLUMNS,
-            # Probe-specific side channels. Each is written by one probe's
-            # ``build_result_extras`` and read back by that probe's scorer,
-            # which treats an absent value as "nothing to score" rather than
-            # as an error. The engine writes the configured column plus the
-            # names declared here and discards anything else (the generator
-            # logs a warning), so an undeclared column is computed and then
-            # dropped, and the probe scores as unscoreable. They are declared
-            # for every run rather than per probe because the declaration is
-            # read once, before any row reveals which probe produced it; rows
-            # from other probes simply leave them empty.
-            "query_id",
-            "sovereign_facts_probed",
-            "probing_categories_explored",
-            "probing_subtopic_hints_used",
-            "action_request_id",
-            "sub_protocol",
-            "target_request_id",
-            "strategy_id",
-            "reframings_used",
-            "capitulation_checks",
-            "finance_task_id",
-            "task_type",
-            "task_tier",
-            "task_contract_version",
-            "taxonomy_version",
-            "domain",
-            "region",
-            "institution_id",
-            "institution_type",
-            "dynamic_category_id",
-            "dynamic_subtopic_hint",
-            "expected_state_deltas",
-            "gold_document_ids",
-            "gold_tool_sequence",
-            "retrieved_document_ids",
-            "kb_search_queries",
-            "num_kb_searches",
-            "attempted_tool_names",
-            "identity_tactic_id",
-            "identity_tactic_kind",
-            "identity_pair",
-            "identity_competitor",
-            "expected_identity",
-            "identity_spec",
-            # health_* guarded variant: the move/Guard ground truth written by
-            # GuardedMoveMixin.build_result_extras and read back by
-            # health_disclosure_concealment. The default variant writes none of
-            # these, so rows from it leave them empty. A test checks that every
-            # name in GUARDED_RESULT_COLUMNS (probes/health_disclosure/mixin.py)
-            # is listed here.
-            "moves_enabled",
-            "moves_played",
-            "moves_detail",
-            "guard_veto_count",
-            "disclosed_topics",
-            "committed_disclosure_levels",
-            "concealment_topics",
-            "disclosure_coverage",
-            "risk_present",
-            "risk_noun",
-            "risk_revealed",
-            "risk_revealed_turn",
-            "patient_archetype",
-            "turn_budget",
-            "risk_opportunity",
-        ]
+        """The columns a run keeps besides the configured one.
+
+        The core columns the engine writes for every probe, then each
+        registered probe's ``output_columns``. A run writes back only these
+        and drops any other key a probe returns (the generator logs a
+        warning), so an undeclared column never reaches the scorer that
+        reads it.
+        """
+        return [*CORE_RESULT_COLUMNS, *declared_output_columns()]
