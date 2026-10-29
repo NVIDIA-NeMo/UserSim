@@ -72,6 +72,14 @@ probe's scorer. Write it during the run, for example in `after_assistant_turn`:
 the metadata is serialized before `build_result_extras` runs, so anything added
 there is lost.
 
+The conversation loop writes eight keys of its own there, listed with what each
+holds in `RESERVED_METADATA_KEYS` (`core/simulation.py`): `user_judge_ratings`,
+`assistant_judge_ratings`, `frustration_events`, `capitulation_checks`,
+`stopped_on_capitulation`, `capitulated_at_turn`, `user_followup_retries` and
+`early_stop`. A probe reads them and writes keys of its own;
+`assert_probe_conforms` reads a probe's classes and reports any that write a
+reserved key.
+
 Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
 `format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,
 `execute_tool_call` and `run_dispatch`. Declare an override of any of these with
