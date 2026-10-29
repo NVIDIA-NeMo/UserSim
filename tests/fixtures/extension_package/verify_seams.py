@@ -129,6 +129,18 @@ if not spec_problems:
 identity_problems = probe_conformance_problems("fixture_identity")
 check("identity probe conformance", not identity_problems, str(identity_problems))
 
+# `usersim smoke` names the installed package and finds nothing wrong with it.
+from usersim.cli.smoke import SmokeReport, _check_extensions  # noqa: E402
+
+smoke = SmokeReport()
+_check_extensions(smoke)
+(extensions,) = smoke.results
+check(
+    "usersim smoke reports the package",
+    extensions.ok and extensions.detail == "usersim-extension-fixture 0.1.0: 7 entry point(s)",
+    extensions.detail,
+)
+
 if failures:
     print(f"\n{len(failures)} seam(s) failed: {', '.join(failures)}")
     sys.exit(1)

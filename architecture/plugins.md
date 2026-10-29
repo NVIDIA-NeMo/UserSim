@@ -63,6 +63,11 @@ diagnose than a noisy startup.
 **Ordering is by entry-point name**, not install order, so registry contents
 do not depend on the sequence of `pip install` commands.
 
+**A name two packages advertise in a group is loaded from neither.** Choosing
+one would make what a run uses depend on which package sorts first, so both
+are skipped with a warning naming each package. Every discovery warning names
+the package an entry point comes from.
+
 **`USERSIM_DISABLE_EXTENSIONS` suppresses all of it.** The test suite sets
 this, because an extension installed in a developer's virtualenv would
 otherwise change what the suite sees and make results depend on the machine.
@@ -119,6 +124,15 @@ every other field set to `None`.
 
 Each check has a `*_problems` form that returns every finding at once, so you
 fix one thing rather than rediscovering the next on each run.
+
+`usersim smoke` reports what discovery found. Its `extensions` line lists each
+installed package with the number of entry points it contributes, and fails
+when an entry point contributes nothing: it failed to load, another package
+advertises the same name, or a built-in holds it.
+
+```
+[OK]   extensions            my-probes 0.3.0: 3 entry point(s)
+```
 
 ## Asset paths
 
