@@ -433,6 +433,12 @@ async def after_assistant_turn(self, models, state, assistant_response, cfg):
 Write it during the run, as above. The metadata is serialized before
 `build_result_extras` runs, so anything added to it there is lost.
 
+The conversation loop keeps its own record in the same dict, under the keys in
+`RESERVED_METADATA_KEYS` (`core/simulation.py`), such as `user_judge_ratings`
+and `early_stop`. Read them, but write keys of your probe's own, led by its
+label or prefix as `my_probe_checks` is. `assert_probe_conforms` reads your
+probe's classes and reports any that write a reserved key.
+
 ---
 
 ## Step 7: run the smoke test

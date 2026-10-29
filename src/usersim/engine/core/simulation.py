@@ -327,6 +327,22 @@ def make_failed(
 # ---------------------------------------------------------------------------
 
 
+#: The ``ConversationState.metadata`` keys the conversation loop writes, and
+#: what each holds. A probe reads them but writes keys of its own, led by its
+#: prefix; ``usersim.testing.assert_probe_conforms`` reads a probe's classes
+#: and reports any that write one of these.
+RESERVED_METADATA_KEYS: dict[str, str] = {
+    "user_judge_ratings": "the user judge's verdict on each simulated user turn",
+    "assistant_judge_ratings": "the in-simulation judge's rating of each assistant turn",
+    "frustration_events": "the turns at which the simulated user grew frustrated, with the level",
+    "capitulation_checks": "each capitulation check, its turn and whether it stopped the run",
+    "stopped_on_capitulation": "whether the run stopped on a capitulation",
+    "capitulated_at_turn": "the turn the assistant capitulated at",
+    "user_followup_retries": "how many follow-up user turn attempts failed the gate",
+    "early_stop": "whether the conversation ended before its last turn",
+}
+
+
 @dataclass
 class ConversationState:
     """First-class representation of simulation state during a conversation.
@@ -336,6 +352,8 @@ class ConversationState:
     ``SimulationOutcome`` when ``make_result`` / ``make_failed`` is called.
     The ``metadata`` dict is the loose per-turn judge / event log
     surfaced to interactive previews and the deep-dive analysis script.
+    The loop writes the keys in ``RESERVED_METADATA_KEYS``; a probe writes
+    keys of its own.
     """
 
     messages: list[dict[str, Any]] = field(default_factory=list)

@@ -11,14 +11,18 @@ author who trusts it.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 import usersim.engine.generator  # noqa: F401  (populates the registry)
-from usersim.engine.core.probes import known_probes
+from usersim.engine.core import simulation
+from usersim.engine.core.probes import BaseProbe, known_probes
 from usersim.engine.evaluator import scorers
 from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
 from usersim.engine.evaluator.scorers import list_scorers
 from usersim.testing import (
+    _metadata_keys_written,
     assert_probe_conforms,
     assert_scorer_conforms,
     probe_conformance_problems,
@@ -29,6 +33,38 @@ from usersim.testing import (
 @pytest.mark.parametrize("probe", known_probes())
 def test_shipped_probe_conforms(probe: str) -> None:
     assert_probe_conforms(probe)
+
+
+def test_the_reserved_metadata_keys_are_the_ones_the_engine_core_writes() -> None:
+    """Every key the engine core writes is reserved, so the conformance check covers it."""
+    core = Path(simulation.__file__).parent
+    written = set().union(*(_metadata_keys_written(path.read_text(encoding="utf-8")) for path in core.glob("*.py")))
+    assert written == set(simulation.RESERVED_METADATA_KEYS)
+
+
+# Defined at module level so their source can be read on every supported Python.
+class _WritesEarlyStop(BaseProbe):
+    label = "writes_early_stop"
+
+    async def after_assistant_turn(self, models, state, assistant_response, cfg):
+        state.metadata["early_stop"] = True
+        return ""
+
+
+class _SeedsJudgeRatings(BaseProbe):
+    label = "seeds_judge_ratings"
+
+    def seed_state_metadata(self, state):
+        state.metadata.setdefault("user_judge_ratings", [])
+
+
+class _WritesItsOwnKeys(BaseProbe):
+    label = "writes_its_own_keys"
+
+    def seed_state_metadata(self, state):
+        state.metadata["acme_checks"] = []
+        state.metadata.update({"acme_seen": True})
+        state.metadata.setdefault("acme_turns", 0)
 
 
 #: A row shaped like one the evaluator hands a scorer. Passing it makes the
@@ -142,6 +178,16 @@ class TestTheChecksCanFail:
         assert any("Mislabelled.placeholder_warning_kind must mark placeholder content" in p for p in problems), (
             problems
         )
+
+    @pytest.mark.parametrize(
+        ("probe", "key"), [(_WritesEarlyStop, "early_stop"), (_SeedsJudgeRatings, "user_judge_ratings")]
+    )
+    async def test_writing_a_metadata_key_the_loop_owns_is_reported(self, probe, key) -> None:
+        problems = probe_conformance_problems(probe)
+        assert any(f"{probe.__qualname__} writes state.metadata[{key!r}]" in p for p in problems), problems
+
+    async def test_a_probes_own_metadata_keys_are_accepted(self) -> None:
+        assert not [p for p in probe_conformance_problems(_WritesItsOwnKeys) if "state.metadata" in p]
 
     async def test_async_hook_override_is_accepted(self) -> None:
         from usersim.engine.core.probes import BaseProbe

@@ -121,6 +121,10 @@ When porting one of the templates into a new module:
       `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
       member), `bank_version_key`. See
       `core/probes.py::BankBackedProbe` for the contract.
+- [ ] Keep the probe's own per-row data under metadata keys of its own.
+      The loop writes the keys in `RESERVED_METADATA_KEYS`
+      (`core/simulation.py`); a probe reads them, and
+      `assert_probe_conforms` reports a probe class that writes one.
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
       that ships across multiple locales.

@@ -347,7 +347,11 @@ execution backends, capabilities, and CLI subcommands are all discovered
 through entry points; see the seven groups in
 `src/usersim/engine/core/_extensions.py`. Give a probe or scorer a name no
 other probe or scorer uses: registering one under a taken name raises an
-error naming both, and an extension that does so is skipped.
+error naming both, and an extension that does so is skipped. Start every name
+your package adds with its own prefix, such as `acme_recipes`; unprefixed
+names belong to the built-ins, and
+[`architecture/plugins.md`](architecture/plugins.md) lists the names this
+covers.
 
 To check your extension satisfies the contract:
 

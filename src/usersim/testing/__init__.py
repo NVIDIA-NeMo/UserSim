@@ -33,12 +33,20 @@ works without pytest installed.
 
 from __future__ import annotations
 
+import ast
 import copy
+import inspect
 import json
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Mapping, Sequence
+
+# Engine imports stay inside the functions that use them: loading
+# ``usersim.testing.pytest_plugin`` imports this package first, and a suite
+# that opts in to the plugin does not load the probe registry or the
+# conversation loop just to start.
 
 __all__ = [
     "HostedParityReport",
@@ -127,8 +135,6 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                 f"calls it on every turn and the base version raises."
             )
 
-    import inspect
-
     for hook in _AWAITED_PROBE_HOOKS:
         impl = getattr(cls, hook, None)
         if impl is None or getattr(BaseProbe, hook, None) is impl:
@@ -172,6 +178,12 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
+    for klass, key in _reserved_metadata_writes(cls):
+        problems.append(
+            f"{klass} writes state.metadata[{key!r}], which the conversation loop owns. "
+            f"Read it there, and give the probe's own metadata keys its prefix."
+        )
+
     assets = probe_assets_dir(label)
     if not assets.is_dir():
         problems.append(
@@ -180,6 +192,69 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     return problems
+
+
+def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:
+    """``(class, key)`` for each reserved metadata key the probe's own classes write.
+
+    Reads the source of every class the probe inherits from outside the engine
+    core. A class defined without source, such as with ``type()``, has nothing
+    to read.
+    """
+    from usersim.engine.core.simulation import RESERVED_METADATA_KEYS
+
+    found: set[tuple[str, str]] = set()
+    for klass in cls.__mro__:
+        if klass is object or klass.__module__.startswith("usersim.engine.core"):
+            continue
+        try:
+            source = textwrap.dedent(inspect.getsource(klass))
+        except (OSError, TypeError):
+            continue
+        for key in _metadata_keys_written(source):
+            if key in RESERVED_METADATA_KEYS:
+                found.add((klass.__qualname__, key))
+    return sorted(found)
+
+
+def _metadata_keys_written(source: str) -> set[str]:
+    """The constant ``state.metadata`` keys a piece of source writes.
+
+    Counts ``x.metadata[key] = ...`` (also augmented and annotated),
+    ``del x.metadata[key]``, and ``x.metadata.setdefault / pop / update``
+    with a literal key, on any object's ``metadata``.
+    """
+
+    def subscript_key(node: ast.AST) -> str | None:
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Attribute)
+            and node.value.attr == "metadata"
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+        ):
+            return node.slice.value
+        return None
+
+    keys: set[str] = set()
+    for node in ast.walk(ast.parse(source)):
+        targets: list[ast.AST] = []
+        if isinstance(node, (ast.Assign, ast.Delete)):
+            targets = list(node.targets)
+        elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+            targets = [node.target]
+        keys.update(key for key in map(subscript_key, targets) if key)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Attribute)
+            and node.func.value.attr == "metadata"
+        ):
+            if node.func.attr in ("setdefault", "pop") and node.args and isinstance(node.args[0], ast.Constant):
+                keys.add(node.args[0].value)
+            elif node.func.attr == "update" and node.args and isinstance(node.args[0], ast.Dict):
+                keys.update(k.value for k in node.args[0].keys if isinstance(k, ast.Constant))
+    return {key for key in keys if isinstance(key, str)}
 
 
 def assert_probe_conforms(probe: str | type) -> None:
@@ -210,8 +285,6 @@ async def scorer_conformance_problems(
     Awaitable, because a scorer is: the evaluator awaits it, so checking it
     means awaiting it here too.
     """
-    import inspect
-
     from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
     from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
 
