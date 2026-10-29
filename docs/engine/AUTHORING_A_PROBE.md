@@ -302,6 +302,34 @@ or `None` if nothing matched. The substrate:
 Your probe then reads `self._task` from the prompt-formatting hooks
 and from `should_succeed` / `build_result_extras`.
 
+### Check each locale's bank before a run
+
+Before any model call, a run checks that each selected probe's asset folder
+exists and holds bank files. A probe whose banks are split by locale also sets
+`locale_bank_check`, and the run then loads the bank each run locale runs on
+and refuses a locale whose bank is missing or does not load:
+
+```python
+def _check_locale_bank(locale_dir: Path) -> None:
+    MyBank.from_yaml((locale_dir / "sample.yaml").read_text(encoding="utf-8"))
+
+
+class MyProbe(BankVerbatimMixin, BankBackedProbe):
+    locale_bank_check = staticmethod(_check_locale_bank)
+    authoring_guide = "https://example.com/my-probe/README.md#adding-a-locale"
+```
+
+- **`locale_bank_check`** takes one locale's folder, `<asset folder>/<locale>/`,
+  and raises whatever would stop the bank loader. The refusal quotes the error.
+- **`bank_locale(locale, probe_dir)`**, a classmethod, names the locale whose
+  bank a row in `locale` runs on, as the bank loader picks it. By default, an
+  India language variant runs on its own bank when it has one and on `en_IN`'s
+  otherwise; any other locale runs on its own. `financial_services` overrides
+  it, since its bank for a locale counts only once it has tasks.
+- **`authoring_guide`** is an `https://` link to how to build the probe's bank
+  for another locale. The refusal links it when a run asks for a locale the
+  probe has no bank for.
+
 ---
 
 ## Step 4: write your `LocalePromptPack`

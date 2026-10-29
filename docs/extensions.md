@@ -113,11 +113,14 @@ class RecipeBank:
     recipes: tuple[Recipe, ...]
 
 
+def read_recipe_bank(locale_dir: Path) -> RecipeBank:
+    doc = yaml.safe_load((locale_dir / "recipes.yaml").read_text(encoding="utf-8"))
+    return RecipeBank(doc["bank_id"], doc["bank_version"], tuple(Recipe(**r) for r in doc["recipes"]))
+
+
 @cache
 def load_recipe_bank(locale: str) -> RecipeBank:
-    path = RecipeProbe.assets_dir() / locale / "recipes.yaml"
-    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return RecipeBank(doc["bank_id"], doc["bank_version"], tuple(Recipe(**r) for r in doc["recipes"]))
+    return read_recipe_bank(RecipeProbe.assets_dir() / locale)
 
 
 @register_probe(family="acme_recipes", prompt_version="v1.0", variants=("default",))
@@ -125,6 +128,7 @@ class RecipeProbe(BankBackedProbe):
     label = "acme_recipes"
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_recipe_bank)
+    locale_bank_check = staticmethod(read_recipe_bank)
     placeholder_warning_kind = "acme_used_placeholder_recipe"
     output_columns = ("acme_recipe_id",)
 
@@ -147,6 +151,8 @@ class RecipeProbe(BankBackedProbe):
 - **`load_recipe_bank`** reads under `RecipeProbe.assets_dir()`, the probe's
   folder on the asset search path, so a folder `--assets-dir` or
   `USERSIM_ASSET_PATH` names reaches it too.
+- **`locale_bank_check`** reads one locale's bank, so a run in a locale with no
+  bank that loads stops before any model call rather than failing every row.
 - **`placeholder_warning_kind`** is the warning a row records when its recipe
   is marked `placeholder: true`. Its `<prefix>_used_placeholder_<thing>` form is
   what the capability report counts as placeholder content.
@@ -272,5 +278,7 @@ usersim simulate --locale en_US --num-rows 5 \
   --probe-mix "acme_recipes=1.0" --out output/trajectories
 ```
 
-`--assets-dir` pins every probe in a run to the folder it names, this one
-included, so a run that passes it needs `acme_recipes/` there too.
+The package has a bank for `en_US` only, so a run with `--locale fr_FR` stops
+before any model call and says the probe has no bank for it. `--assets-dir`
+pins every probe in a run to the folder it names, this one included, so a run
+that passes it needs `acme_recipes/` there too.

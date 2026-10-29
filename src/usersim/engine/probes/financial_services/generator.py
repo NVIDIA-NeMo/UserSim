@@ -34,6 +34,7 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Sequence
 
 from usersim.engine.core.behavioral import (
@@ -46,6 +47,8 @@ from usersim.engine.core.finance_bank import (
     DEFAULT_IDENTITY_REQUIRED_FIELDS,
     FinanceBank,
     finance_bank_locale,
+    has_finance_tasks,
+    load_finance_bank,
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
@@ -338,6 +341,12 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FINANCE
     bank_version_key = None  # per-locale
+    # A bank without tasks aborts every row, so the pre-flight loads it.
+    locale_bank_check = staticmethod(load_finance_bank)
+    authoring_guide = (
+        "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
+        "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
+    )
     # Agentic shape: re-offer tools until the assistant stops (search -> read
     # -> act -> confirm), capped per turn by ToolExecutionMixin.
     tool_loop_mode = "multi"
@@ -382,6 +391,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         self._user_system_prompt = self._build_user_system_prompt()
 
     # ── BankBackedProbe API ─────────────────────────────────────────
+
+    @classmethod
+    def bank_locale(cls, locale: str, probe_dir: Path) -> str:
+        """The locale :func:`finance_bank_locale` picks for ``locale`` among the banks in ``probe_dir``."""
+        return finance_bank_locale(locale, has_tasks=lambda loc: has_finance_tasks(probe_dir / loc))
 
     def _load_bank_for_locale(self, locale: str) -> FinanceBank:
         """Load the bank :func:`finance_bank_locale` picks for ``locale``, which the scorer reads too.

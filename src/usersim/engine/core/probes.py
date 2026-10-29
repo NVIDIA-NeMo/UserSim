@@ -57,7 +57,7 @@ from typing import (
 )
 
 from usersim.engine.core.columns import output_columns_problem
-from usersim.engine.core.locale import india_variant
+from usersim.engine.core.locale import asset_locale, india_variant
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
@@ -277,6 +277,27 @@ class BaseProbe:
         from usersim.engine.core._assets import probe_assets_dir
 
         return probe_assets_dir(cls.label)
+
+    # Loads one locale's bank from its folder, ``<asset folder>/<locale>/``,
+    # and raises when no row could run on it. A probe whose banks are split by
+    # locale sets it, and a run's pre-flight then loads the bank each run
+    # locale resolves to (``bank_locale``) before any model call. ``None``
+    # checks only that the probe's asset folder holds bank files.
+    locale_bank_check: Callable[[Path], object] | None = None
+
+    # Where to read how to build this probe's bank for another locale. The
+    # pre-flight links it when a run asks for a locale the probe has no bank for.
+    authoring_guide: str | None = None
+
+    @classmethod
+    def bank_locale(cls, locale: str, probe_dir: Path) -> str:
+        """The locale whose bank in ``probe_dir`` a row in ``locale`` runs on.
+
+        The pre-flight resolves it as the probe's bank loader does. By default,
+        an India language variant runs on its own bank when ``probe_dir`` holds
+        one and on its base locale's otherwise; any other locale runs on its own.
+        """
+        return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
 
     # The top-level columns ``build_result_extras`` adds beyond the core ones
     # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of

@@ -111,7 +111,8 @@ A probe's content lives at `engine/assets/<label>/`, resolved through
 `probe_assets_dir()`. A run fails pre-flight, before any model call, if a
 selected probe's bank is missing or, for the probes whose banks are split by
 locale, doesn't load for a run locale (a finance bank without tasks, for
-instance). The refusal names the probe, the locale and the locales that can
-run, rather than failing from inside a loader mid-run. `simulate` and its
-`--dry-run`, `--materialize-inputs`, `--inputs` and notebook 01 all run the
-check. See [assets.md](assets.md).
+instance). Those probes declare a `locale_bank_check` on the class, which the
+pre-flight calls on the bank the class's `bank_locale` names. The refusal names
+the probe, the locale and the locales that can run, rather than failing from
+inside a loader mid-run. `simulate` and its `--dry-run`, `--materialize-inputs`,
+`--inputs` and notebook 01 all run the check. See [assets.md](assets.md).

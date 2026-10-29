@@ -184,6 +184,22 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
+    # The pre-flight reads these on the class, before any row runs.
+    check = getattr(cls, "locale_bank_check", None)
+    if check is not None and not callable(check):
+        problems.append(
+            f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
+            f"locale's bank folder; got {check!r}"
+        )
+    if not isinstance(inspect.getattr_static(cls, "bank_locale", None), classmethod):
+        problems.append(f"{cls.__qualname__}.bank_locale must be a classmethod; the pre-flight calls it on the class.")
+    guide = getattr(cls, "authoring_guide", None)
+    if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
+        problems.append(
+            f"{cls.__qualname__}.authoring_guide must be None or an https:// URL, which works from an "
+            f"installed package; got {guide!r}"
+        )
+
     for klass, key in _reserved_metadata_writes(cls):
         problems.append(
             f"{klass} writes state.metadata[{key!r}], which the conversation loop owns. "

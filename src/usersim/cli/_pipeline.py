@@ -34,7 +34,7 @@ from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from usersim.cli._errors import ConfigError
 from usersim.cli._models import (
@@ -48,6 +48,9 @@ from usersim.cli._persona_language import (
     persona_sampler_params,
 )
 from usersim.engine.evaluator.prompts import EVAL_PROMPT_VERSION
+
+if TYPE_CHECKING:
+    from usersim.engine.core.probes import BaseProbe
 
 logger = logging.getLogger("usersim.cli.pipeline")
 
@@ -185,64 +188,8 @@ def resolve_toolset_seed_path(
     return present[0] if present else None
 
 
-def _load_finance_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.finance_bank import load_finance_bank
-
-    load_finance_bank(locale_dir)
-
-
-def _load_facts_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.fact_bank import load_fact_bank
-
-    load_fact_bank(locale_dir / "sample.yaml")
-
-
-def _load_dynamic_locale(locale_dir: Path) -> None:
-    from usersim.engine.core.probing_taxonomy import load_probing_taxonomy
-
-    load_probing_taxonomy(locale_dir / "categories.yaml")
-
-
-#: Probe asset trees that are partitioned by locale rather than flat, with the
-#: loader for one locale's subtree. The subtree existing is not enough: a finance
-#: bank without tasks aborts every row once the run is already going, so the
-#: pre-flight loads it.
-_LOCALE_SCOPED_PROBES: dict[str, Callable[[Path], None]] = {
-    "financial_services": _load_finance_locale,
-    "sov_ai_dynamic": _load_dynamic_locale,
-    "sov_ai_facts": _load_facts_locale,
-}
-
-
-def _finance_bank_locale(probe_dir: Path, locale: str) -> str:
-    from usersim.engine.core.finance_bank import finance_bank_locale, has_finance_tasks
-
-    return finance_bank_locale(locale, has_tasks=lambda loc: has_finance_tasks(probe_dir / loc))
-
-
-def _own_or_base_bank_locale(probe_dir: Path, locale: str) -> str:
-    from usersim.engine.core.locale import asset_locale
-
-    return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
-
-
-#: Which locale's bank a row in a locale runs on, resolved as the probe and its
-#: scorer resolve it. A probe not listed uses an India variant's own bank when
-#: it has one, and its base locale's otherwise.
-_BANK_LOCALE: dict[str, Callable[[Path, str], str]] = {
-    "financial_services": _finance_bank_locale,
-}
-
-#: Where to ask for a probe in a locale it has no bank for.
+#: Where to ask for a locale of a probe that ships with User Sim.
 _FEATURE_REQUEST_URL = "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml"
-
-#: How to build a probe's bank for another locale, for the probes that document it.
-_BANK_AUTHORING_GUIDES: dict[str, str] = {
-    "financial_services": (
-        "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
-        "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
-    ),
-}
 
 
 def verify_probe_assets(
@@ -273,10 +220,11 @@ def verify_probe_locales(
     against every locale would refuse pairs the rows never ask for.
     """
     from usersim.engine.core._assets import probe_assets_dir
+    from usersim.engine.core.probes import resolve_probe
 
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
-    probes_missing_a_locale: list[str] = []
+    probes_missing_a_locale: list[type[BaseProbe]] = []
 
     for probe in sorted(probe_locales):
         probe_dir = probe_assets_dir(probe, assets_root=root)
@@ -286,13 +234,13 @@ def verify_probe_locales(
         if not any(probe_dir.rglob("*.yaml")) and not any(probe_dir.rglob("*.json")):
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
-        load = _LOCALE_SCOPED_PROBES.get(probe)
-        if load is None:
+        cls = resolve_probe(probe)
+        if cls.locale_bank_check is None:
             continue
-        locale_problems = _locale_bank_problems(probe, probe_dir, probe_locales[probe], load)
+        locale_problems = _locale_bank_problems(cls, probe_dir, probe_locales[probe])
         problems.extend(locale_problems)
         if locale_problems:
-            probes_missing_a_locale.append(probe)
+            probes_missing_a_locale.append(cls)
 
     if problems:
         raise ConfigError(
@@ -303,35 +251,36 @@ def verify_probe_locales(
         )
 
 
-def _remedies(probes_missing_a_locale: Sequence[str]) -> list[str]:
+def _remedies(probes_missing_a_locale: Sequence[type[BaseProbe]]) -> list[str]:
     """What to do about a refusal, with links when a probe can't run one of the run's locales."""
+    from usersim.engine.core.probes import BUILTIN_PROBE_MODULES
+
     remedies = [
         "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
     ]
-    if probes_missing_a_locale:
+    if any(cls.__module__ in BUILTIN_PROBE_MODULES for cls in probes_missing_a_locale):
         remedies.append(f"To ask for a locale, open a feature request: {_FEATURE_REQUEST_URL}")
     remedies.extend(
-        f"To build a {probe} bank yourself, see {_BANK_AUTHORING_GUIDES[probe]}"
-        for probe in probes_missing_a_locale
-        if probe in _BANK_AUTHORING_GUIDES
+        f"To build a {cls.label} bank yourself, see {cls.authoring_guide}"
+        for cls in probes_missing_a_locale
+        if cls.authoring_guide
     )
     return remedies
 
 
-def _locale_bank_problems(
-    probe: str,
-    probe_dir: Path,
-    locales: Sequence[str],
-    load: Callable[[Path], None],
-) -> list[str]:
-    """The locales ``probe`` can't run in, as one line naming those that can."""
-    resolve = _BANK_LOCALE.get(probe, _own_or_base_bank_locale)
+def _locale_bank_problems(cls: type[BaseProbe], probe_dir: Path, locales: Sequence[str]) -> list[str]:
+    """The locales ``cls`` can't run in, as one line naming those that can."""
+    probe = cls.label
+    check = cls.locale_bank_check
     errors: dict[Path, str | None] = {}
+
+    def resolve(loc: str) -> str:
+        return cls.bank_locale(loc, probe_dir)
 
     def load_error(locale_dir: Path) -> str | None:
         if locale_dir not in errors:
             try:
-                load(locale_dir)
+                check(locale_dir)
                 errors[locale_dir] = None
             except Exception as exc:  # whatever stops the loader stops every row
                 errors[locale_dir] = f"{type(exc).__name__}: {exc}"
@@ -343,7 +292,7 @@ def _locale_bank_problems(
     failures: list[str] = []
     for loc in dict.fromkeys(locales):
         # A locale without a bank of its own may run on its base locale's.
-        bank_locale = resolve(probe_dir, loc)
+        bank_locale = resolve(loc)
         via = "" if bank_locale == loc else f" (through {bank_locale})"
         if not has_bank(bank_locale):
             failures.append(f"{loc}{via}: no bank")
@@ -352,7 +301,7 @@ def _locale_bank_problems(
     if not failures:
         return []
     runnable = sorted(d.name for d in probe_dir.iterdir() if d.is_dir() and load_error(d) is None)
-    can_run = _runnable_locales(runnable, lambda loc: resolve(probe_dir, loc))
+    can_run = _runnable_locales(runnable, resolve)
     return [f"{probe} can't run {'; '.join(failures)}. Locales that can run: {can_run}"]
 
 
