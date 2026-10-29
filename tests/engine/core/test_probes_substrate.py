@@ -868,6 +868,25 @@ class TestRegisterProbe:
             register_probe(family="general", prompt_version="v1.0", variants=("default",))(clashing)
         assert "_clashing_columns_probe" not in known_probes()
 
+    def test_accepts_a_prefixed_placeholder_warning_kind(self) -> None:
+        mod = self._make_module()
+        bank_probe = self._probe_class("_Recipes", "_recipe_bank_probe", mod.__name__)
+        bank_probe.placeholder_warning_kind = "acme_used_placeholder_recipe"
+
+        registered = register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+
+        assert resolve_probe("_recipe_bank_probe") is registered
+
+    def test_rejects_a_placeholder_warning_kind_that_marks_no_placeholder(self) -> None:
+        """The report counts placeholder rows by kind, so any other kind would hide them."""
+        mod = self._make_module()
+        bank_probe = self._probe_class("_Mislabelled", "_mislabelled_bank_probe", mod.__name__)
+        bank_probe.placeholder_warning_kind = "acme_slow_tool"
+
+        with pytest.raises(ProbeRegistrationError, match="placeholder_warning_kind must mark placeholder content"):
+            register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
+        assert "_mislabelled_bank_probe" not in known_probes()
+
     def test_rejects_output_columns_given_as_one_string(self) -> None:
         """A bare string would be read as one column per character."""
         mod = self._make_module()

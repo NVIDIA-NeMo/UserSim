@@ -62,6 +62,7 @@ from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
     WarningKind,
+    placeholder_warning_kind_problem,
 )
 from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
@@ -657,8 +658,11 @@ class BankBackedProbe(BaseProbe):
       a locale and returns the bank. ``Bank`` is duck-typed: the
       substrate only requires ``bank.bank_id``, ``bank.bank_version``,
       and whatever ``derive_task`` consumes.
-    - ``placeholder_warning_kind: WarningKind`` — emitted when the
-      derived task has ``placeholder=True``.
+    - ``placeholder_warning_kind: WarningKind | str`` — emitted when the
+      derived task has ``placeholder=True``: a
+      ``WarningKind.USED_PLACEHOLDER_*`` member, or, for a probe shipped
+      in its own package, a name of the form
+      ``<prefix>_used_placeholder_<thing>``.
     - ``bank_version_key: str | None`` — key under which to record
       ``provenance.bank_version[KEY] = bank.bank_version``. ``None``
       (the default) means locale-keyed (the inclusion convention);
@@ -688,7 +692,7 @@ class BankBackedProbe(BaseProbe):
     """
 
     bank_loader: Callable[[str], Any]
-    placeholder_warning_kind: WarningKind
+    placeholder_warning_kind: WarningKind | str
     bank_version_key: str | None = None  # None = locale-keyed
 
     def __init__(
@@ -1355,7 +1359,9 @@ def register_probe(
     an installed package cannot replace a probe a run asks for by name.
     A class whose ``assets_root`` is a relative path is refused as well: it
     would resolve against whatever directory a run starts in. So is a class
-    whose ``output_columns`` names a column the engine writes for every probe.
+    whose ``output_columns`` names a column the engine writes for every probe,
+    and one whose ``placeholder_warning_kind`` does not mark placeholder
+    content, since the report would not count its rows as placeholder.
 
     The class itself IS the registration: there is no central registry
     entry or ``simulate_*`` function to add alongside it.
@@ -1395,6 +1401,10 @@ def register_probe(
         problem = output_columns_problem(cls.output_columns)
         if problem:
             raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.output_columns {problem}")
+        if hasattr(cls, "placeholder_warning_kind"):
+            problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
+            if problem:
+                raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.placeholder_warning_kind {problem}")
 
         cls.family = family
         cls.prompt_version = prompt_version

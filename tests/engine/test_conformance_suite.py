@@ -131,6 +131,18 @@ class TestTheChecksCanFail:
         problems = probe_conformance_problems(Columns)
         assert any("Columns.output_columns " in p and expected in p for p in problems), problems
 
+    async def test_a_placeholder_warning_kind_that_marks_no_placeholder_is_reported(self) -> None:
+        from usersim.engine.core.probes import BaseProbe
+
+        class Mislabelled(BaseProbe):
+            label = "mislabelled_probe"
+            placeholder_warning_kind = "acme_slow_tool"
+
+        problems = probe_conformance_problems(Mislabelled)
+        assert any("Mislabelled.placeholder_warning_kind must mark placeholder content" in p for p in problems), (
+            problems
+        )
+
     async def test_async_hook_override_is_accepted(self) -> None:
         from usersim.engine.core.probes import BaseProbe
 

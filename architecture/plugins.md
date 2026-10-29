@@ -38,6 +38,11 @@ An extension probe declares the columns it writes in its class's
 per-row data goes in its metadata (`state.metadata`), stored with the row as
 `conversation_metadata`. See [Probes](probes.md).
 
+An extension's warnings carry its prefix too: a bank-backed probe names its
+placeholder warning `<prefix>_used_placeholder_<thing>`, which the capability
+report counts as placeholder content, and any other warning it records is a
+prefixed name such as `acme_slow_tool`.
+
 ## How discovery behaves
 
 **Probes and scorers are discovered by import.** `@register_probe` and

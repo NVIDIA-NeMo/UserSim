@@ -36,6 +36,7 @@ import pandas as pd
 import pytest
 from rich.console import Console
 
+from usersim.engine.core.outcomes import PLACEHOLDER_WARNING_KINDS
 from usersim.engine.core.preview import (
     filter_preview_locale,
     preview_row,
@@ -529,6 +530,32 @@ class TestStatusTriState:
         # header — readers see SIM OK without distractor chips.
         assert "used_placeholder_query" not in out
         assert "used_placeholder_target" not in out
+
+    @pytest.mark.parametrize("kind", sorted(PLACEHOLDER_WARNING_KINDS))
+    def test_every_placeholder_kind_reads_as_ok(self, kind: str) -> None:
+        """Each placeholder warning kind the engine defines, whichever probe emits it."""
+        row = _general_row()
+        row["simulation_outcome"] = _outcome(
+            status="completed_with_warnings",
+            warnings=[{"kind": kind, "turn_idx": 0, "detail": ""}],
+        )
+        out = _record([row])
+        assert "SIM OK" in out
+        assert "SIM WARN" not in out
+        assert kind not in out
+
+    @pytest.mark.parametrize(
+        ("kind", "status"), [("acme_used_placeholder_recipe", "SIM OK"), ("acme_slow_tool", "SIM WARN")]
+    )
+    def test_a_prefixed_kind_reads_by_whether_it_marks_placeholder_content(self, kind: str, status: str) -> None:
+        row = _general_row()
+        row["simulation_outcome"] = _outcome(
+            status="completed_with_warnings",
+            warnings=[{"kind": kind, "turn_idx": 0, "detail": ""}],
+        )
+        out = _record([row])
+        assert status in out
+        assert (kind in out) is (status == "SIM WARN")
 
     def test_real_warning_alongside_placeholder_still_warns(self) -> None:
         # Mixed bag: when a placeholder warning fires alongside an

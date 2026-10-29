@@ -76,6 +76,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
     from usersim.engine.core._assets import probe_assets_dir
     from usersim.engine.core.columns import output_columns_problem
+    from usersim.engine.core.outcomes import placeholder_warning_kind_problem
     from usersim.engine.core.probes import (
         _PROBE_REGISTRY,
         BaseProbe,
@@ -165,6 +166,11 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     columns_problem = output_columns_problem(getattr(cls, "output_columns", ()))
     if columns_problem:
         problems.append(f"{cls.__qualname__}.output_columns {columns_problem}")
+
+    if hasattr(cls, "placeholder_warning_kind"):
+        kind_problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
+        if kind_problem:
+            problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
     assets = probe_assets_dir(label)
     if not assets.is_dir():

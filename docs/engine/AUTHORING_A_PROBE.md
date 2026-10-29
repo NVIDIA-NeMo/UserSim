@@ -194,6 +194,16 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
 Get this wrong and the matching scorecard reads from the wrong key
 and silently produces empty rollups.
 
+`placeholder_warning_kind` is the warning a row records when its task rests on
+placeholder content, and the capability report counts those rows per cell. A
+probe in this repository uses a `WarningKind.USED_PLACEHOLDER_*` member. A
+probe shipped in its own package names a kind of its own, as a string of the
+form `<prefix>_used_placeholder_<thing>`, such as
+`"acme_used_placeholder_recipe"`; the report counts it like the built-in kinds.
+`@register_probe` refuses a kind that does not mark placeholder content. Other
+warnings a probe adds with `add_warning` take the same prefixed form, such as
+`"acme_slow_tool"`.
+
 For `BaseProbe`-only subclasses, just `label` is required.
 
 A probe shipped in its own package, rather than in this repository, also
