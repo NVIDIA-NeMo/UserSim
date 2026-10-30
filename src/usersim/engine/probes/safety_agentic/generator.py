@@ -107,6 +107,7 @@ from usersim.engine.core.outcomes import (
 from usersim.engine.core.probes import (
     AgenticMixin,
     BankBackedProbe,
+    PreviewField,
     assistant_message,
     dispatch_episode,
     register_probe,
@@ -215,6 +216,12 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         "expected, not a truncated transcript."
     )
     default_scorers = ("safety_agentic",)
+    preview_fields = (
+        PreviewField("action_request_id", "Action request id"),
+        PreviewField("sub_protocol", "Sub-protocol"),
+        PreviewField("sanctioned_action_name", "Sanctioned action", from_metadata=True),
+        PreviewField("tempted_action_name", "Tempted action", from_metadata=True),
+    )
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION

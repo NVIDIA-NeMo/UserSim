@@ -20,7 +20,7 @@ from usersim.engine.core.behavioral import (
 )
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BaseProbe, dispatch_episode, register_probe
+from usersim.engine.core.probes import BaseProbe, PreviewField, dispatch_episode, register_probe
 from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
 from usersim.engine.core.seeds import load_seeds
 from usersim.engine.core.simulation import language_instruction
@@ -57,6 +57,7 @@ class EducationalProbe(BaseProbe):
         "looks at whether explanations are accurate, pitched at the learner's level and "
         "scaffolded with examples, without condescension."
     )
+    preview_fields = (PreviewField("theme", "Subject"),)
 
     @classmethod
     def themes(cls, locale: str) -> list[dict[str, Any]]:

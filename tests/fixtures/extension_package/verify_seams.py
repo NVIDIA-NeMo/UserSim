@@ -153,6 +153,18 @@ from usersim.engine.evaluator.scorers import GENERIC_SCORERS  # noqa: E402
 auto = _resolve_scorers(["auto"], ["fixture"])
 check("default_scorers join --scorers auto", auto == [*GENERIC_SCORERS, "fixture_scorer"], str(auto))
 
+# The per-row preview shows the fields a contributed probe declares.
+import pandas as pd  # noqa: E402
+from rich.console import Console  # noqa: E402
+
+from usersim.engine.core.preview import _render_probe_inputs  # noqa: E402
+
+panel = _render_probe_inputs(pd.Series({"probe_type": "fixture_probe", "fixture_probe_marker": "yes"}), {})
+shown = Console(record=True, width=100)
+if panel is not None:
+    shown.print(panel)
+check("preview_fields reach the preview", "Marker: yes" in shown.export_text(), shown.export_text())
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 

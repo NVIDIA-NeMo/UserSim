@@ -47,6 +47,7 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
@@ -225,6 +226,20 @@ _DEFAULT_GATE_PROMPT_TEMPLATE = (
 )
 
 
+@dataclass(frozen=True)
+class PreviewField:
+    """One line of the per-row preview's Probe Inputs panel: a value from the row, and the label it is shown with.
+
+    ``key`` names a column of the row, or with ``from_metadata`` a key the
+    probe writes to ``state.metadata``, read back from the row's conversation
+    metadata.
+    """
+
+    key: str
+    label: str
+    from_metadata: bool = False
+
+
 class BaseProbe:
     """Concrete probe with sensible defaults for every optional hook.
 
@@ -259,6 +274,12 @@ class BaseProbe:
     # A paragraph on what the probe tests, shown with each of its rows in the
     # per-row preview and in the capability report's evidence. Empty shows none.
     description: str = ""
+
+    # What the per-row preview's Probe Inputs panel shows for each of this
+    # probe's rows, top to bottom, such as the bank entry the row drew. A
+    # field whose value is empty is left out, and so is the panel when every
+    # field is. Empty shows no panel.
+    preview_fields: tuple[PreviewField, ...] = ()
 
     # The registered scorers that ``usersim eval --scorers auto`` runs when the
     # run holds this probe's rows, beside the generic rule-based ones it runs
@@ -1584,6 +1605,17 @@ def probe_description(label: str) -> str:
     if label not in known_probes():
         return ""
     return _PROBE_REGISTRY[label].description
+
+
+def probe_preview_fields(label: str) -> tuple[PreviewField, ...]:
+    """The ``preview_fields`` of the probe registered as ``label``, or none for a label no probe holds.
+
+    A stored row can name a probe that is not installed, so an unknown
+    label is not an error here.
+    """
+    if label not in known_probes():
+        return ()
+    return _PROBE_REGISTRY[label].preview_fields
 
 
 def default_scorers_by_family() -> dict[str, tuple[str, ...]]:

@@ -45,6 +45,7 @@ from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankVerbatimMixin,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
@@ -151,6 +152,12 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         "to one question can be compared across locales."
     )
     default_scorers = ("sov_ai_multilingual_parity",)
+    preview_fields = (
+        PreviewField("query_id", "Query id"),
+        PreviewField("query_concern", "Concern axis", from_metadata=True),
+        PreviewField("query_domain", "Domain", from_metadata=True),
+        PreviewField("query_difficulty", "Difficulty", from_metadata=True),
+    )
     output_columns = ("query_id",)
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.

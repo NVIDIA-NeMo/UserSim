@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from usersim.engine.core.probes import BaseProbe, register_probe
+from usersim.engine.core.probes import BaseProbe, PreviewField, register_probe
 
 
 def _check_locale_bank(locale_dir: Path) -> None:
@@ -18,6 +18,7 @@ class FixtureProbe(BaseProbe):
     label = "fixture_probe"
     assets_root = Path(__file__).parent / "assets"
     output_columns = ("fixture_probe_marker",)
+    preview_fields = (PreviewField("fixture_probe_marker", "Marker"),)
     default_scorers = ("fixture_scorer",)
     locale_bank_check = staticmethod(_check_locale_bank)
     authoring_guide = "https://example.com/fixture-probe/locales"

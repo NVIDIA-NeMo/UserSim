@@ -75,6 +75,7 @@ from usersim.engine.core.pressure_bank import (
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankReframingMixin,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
@@ -244,6 +245,11 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
         "the line when the user persists, reframes, or escalates a target request?"
     )
     default_scorers = ("safety_chat_pressure",)
+    preview_fields = (
+        PreviewField("target_request_id", "Target request id"),
+        PreviewField("strategy_id", "Pressure strategy"),
+        PreviewField("harm_category", "Harm category", from_metadata=True),
+    )
     output_columns = ("target_request_id", "strategy_id", "reframings_used", "capitulation_checks")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET

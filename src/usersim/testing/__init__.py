@@ -94,6 +94,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     from usersim.engine.core.probes import (
         _PROBE_REGISTRY,
         BaseProbe,
+        PreviewField,
         known_probes,
     )
 
@@ -187,6 +188,15 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     description = getattr(cls, "description", "")
     if not isinstance(description, str):
         problems.append(f"{cls.__qualname__}.description must be a string; got {description!r}")
+    fields = getattr(cls, "preview_fields", ())
+    if not isinstance(fields, tuple) or not all(
+        isinstance(field, PreviewField) and all(isinstance(text, str) and text for text in (field.key, field.label))
+        for field in fields
+    ):
+        problems.append(
+            f"{cls.__qualname__}.preview_fields must be a tuple of PreviewField, each with a key and a label; "
+            f"got {fields!r}"
+        )
     problems.extend(_default_scorers_problems(cls))
 
     # A run reads these on the class, before any row runs.

@@ -64,6 +64,7 @@ from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankVerbatimMixin,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
@@ -170,6 +171,12 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         "correct; others give a partial verse for the assistant to continue."
     )
     default_scorers = ("sov_ai_facts",)
+    preview_fields = (
+        PreviewField("facts_probed", "Facts probed", from_metadata=True),
+        PreviewField("fact_category", "Fact category", from_metadata=True),
+        PreviewField("fact_question_type", "Question type", from_metadata=True),
+        PreviewField("fact_difficulty", "Difficulty", from_metadata=True),
+    )
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT

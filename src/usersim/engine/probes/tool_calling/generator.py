@@ -44,6 +44,7 @@ from usersim.engine.core.outcomes import (
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BaseProbe,
+    PreviewField,
     ToolCallingMixin,
     ToolExecutionMixin,
     dispatch_episode,
@@ -247,6 +248,12 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         "tool-call failures."
     )
     default_scorers = ("tool_use",)
+    preview_fields = (
+        PreviewField("theme", "Theme"),
+        PreviewField("toolset_name", "Toolset"),
+        PreviewField("toolset_category", "Toolset category"),
+        PreviewField("num_tools", "Tools available"),
+    )
 
     @classmethod
     def asset_problems(cls) -> list[str]:

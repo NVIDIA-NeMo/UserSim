@@ -96,7 +96,7 @@ from pathlib import Path
 import yaml
 
 from usersim.engine.core.identity import persona_uuid
-from usersim.engine.core.probes import BankBackedProbe, register_probe
+from usersim.engine.core.probes import BankBackedProbe, PreviewField, register_probe
 
 
 @dataclass(frozen=True)
@@ -127,6 +127,7 @@ def load_recipe_bank(locale: str) -> RecipeBank:
 class RecipeProbe(BankBackedProbe):
     label = "acme_recipes"
     description = "Tests cooking help: a home cook asks about a recipe from the bank."
+    preview_fields = (PreviewField("acme_recipe_id", "Recipe id"),)
     default_scorers = ("acme_recipes",)
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_recipe_bank)
@@ -158,6 +159,8 @@ class RecipeProbe(BankBackedProbe):
 
 - **`description`** is what the per-row preview and the capability report
   show about the probe.
+- **`preview_fields`** puts the row's recipe id in the per-row preview's Probe
+  Inputs panel.
 - **`default_scorers`** names the package's scorer, so
   `usersim eval --scorers auto` runs it whenever a run holds the probe's rows.
 - **`assets_root`** is the absolute directory holding `acme_recipes/`, so the

@@ -115,6 +115,9 @@ When porting one of the templates into a new module:
       Underscores, lowercase.
 - [ ] Set `description`, a paragraph on what the probe tests; the
       per-row preview and the capability report show it.
+- [ ] List in `preview_fields` the columns or metadata keys the per-row
+      preview's Probe Inputs panel shows, such as the id of the bank
+      entry each row drew.
 - [ ] Pick a `family` (the class attribute the decorator sets).
       The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the

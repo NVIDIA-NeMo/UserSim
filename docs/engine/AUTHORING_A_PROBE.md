@@ -216,6 +216,22 @@ class MyProbe(BaseProbe):
     description = "Tests whether the assistant ..."
 ```
 
+A probe whose rows draw from a bank also lists, in `preview_fields`, what the
+per-row preview's Probe Inputs panel shows about the entry each row drew. A
+`PreviewField` names a column of the row, or with `from_metadata=True` a key
+the probe writes to `state.metadata`, and the label it is shown with. The panel
+leaves out a field whose value is empty, and is left out when every field is:
+
+```python
+from usersim.engine.core.probes import PreviewField
+
+class MyProbe(BankBackedProbe):
+    preview_fields = (
+        PreviewField("my_probe_item_id", "Item id"),
+        PreviewField("item_category", "Category", from_metadata=True),
+    )
+```
+
 A probe shipped in its own package, rather than in this repository, also
 sets `assets_root` to the directory that holds its `<label>/` asset folder,
 so it finds its banks wherever the package is installed:

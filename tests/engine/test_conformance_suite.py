@@ -17,7 +17,7 @@ import pytest
 
 import usersim.engine.generator  # noqa: F401  (populates the registry)
 from usersim.engine.core import simulation
-from usersim.engine.core.probes import BaseProbe, known_probes
+from usersim.engine.core.probes import BaseProbe, PreviewField, known_probes
 from usersim.engine.evaluator import scorers
 from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
 from usersim.engine.evaluator.scorers import list_scorers
@@ -194,6 +194,22 @@ class TestTheChecksCanFail:
             ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
             ({"description": ("Tests", "cooking")}, "PreflightProbe.description must be a string"),
             (
+                {"preview_fields": PreviewField("theme", "Topic")},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (("theme", "Topic"),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", ""),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", 1),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
                 {"default_scorers": "tool_use"},
                 "PreflightProbe.default_scorers must be a tuple of scorer names; got 'tool_use'",
             ),
@@ -226,6 +242,10 @@ class TestTheChecksCanFail:
             "relative-guide",
             "themes-not-a-classmethod",
             "description-not-a-string",
+            "preview-fields-a-bare-field",
+            "preview-fields-plain-tuples",
+            "preview-field-without-a-label",
+            "preview-field-with-a-label-that-is-not-text",
             "default-scorers-a-bare-string",
             "default-scorers-naming-no-scorer",
             "model-aliases-not-a-classmethod",
@@ -249,6 +269,10 @@ class TestTheChecksCanFail:
             locale_bank_check = staticmethod(lambda locale_dir: None)
             authoring_guide = "https://example.com/declared-probe/locales"
             default_scorers = ("tool_use", "language_compliance")
+            preview_fields = (
+                PreviewField("theme", "Topic"),
+                PreviewField("taxonomy_id", "Taxonomy", from_metadata=True),
+            )
 
             @classmethod
             def bank_locale(cls, locale, probe_dir):
@@ -274,6 +298,7 @@ class TestTheChecksCanFail:
             "model_aliases",
             "default_scorers",
             "asset_problems",
+            "preview_fields",
         )
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 

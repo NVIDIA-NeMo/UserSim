@@ -55,9 +55,10 @@ required; the rest have working defaults on `BaseProbe`.
 
 Anything a probe does not override inherits a default, so a new probe declares
 only what is specific to it. Its `description`, a paragraph on what it tests, is
-what the per-row preview and the capability report show with its rows. Its
-`default_scorers` are the scorers `usersim eval --scorers auto` runs when a run
-holds its rows.
+what the per-row preview and the capability report show with its rows, and its
+`preview_fields` are what the preview's Probe Inputs panel shows about the bank
+entry or theme each row drew. Its `default_scorers` are the scorers
+`usersim eval --scorers auto` runs when a run holds its rows.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name is a core column or

@@ -60,6 +60,7 @@ from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
@@ -190,6 +191,11 @@ class SovAiDynamicProbe(BankBackedProbe):
         "declining was better."
     )
     default_scorers = ("sov_ai_dynamic",)
+    preview_fields = (
+        PreviewField("taxonomy_id", "Taxonomy id", from_metadata=True),
+        PreviewField("probing_categories_explored", "Categories explored"),
+        PreviewField("probing_subtopic_hints_used", "Sub-topic hints"),
+    )
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY

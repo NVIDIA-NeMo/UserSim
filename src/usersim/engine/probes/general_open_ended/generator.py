@@ -20,7 +20,7 @@ from usersim.engine.core.behavioral import (
 )
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.persona import format_persona_for_prompt
-from usersim.engine.core.probes import BaseProbe, dispatch_episode, register_probe
+from usersim.engine.core.probes import BaseProbe, PreviewField, dispatch_episode, register_probe
 from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
 from usersim.engine.core.seeds import load_seeds
 from usersim.engine.core.simulation import language_instruction
@@ -56,6 +56,7 @@ class OpenEndedProbe(BaseProbe):
         "coherent answers pitched to the user's apparent expertise, and a clarifying "
         "question rather than an information dump when a request is vague."
     )
+    preview_fields = (PreviewField("theme", "Topic"),)
 
     @classmethod
     def themes(cls, locale: str) -> list[dict[str, Any]]:
