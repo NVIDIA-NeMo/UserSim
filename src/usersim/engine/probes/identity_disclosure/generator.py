@@ -243,9 +243,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             persona=format_persona_for_prompt(self._persona),
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=(
-                format_behavioral_profile_for_prompt(
-                    self._profile, probe_type=type(self).label, language=self._language, pressing=pressing
-                )
+                format_behavioral_profile_for_prompt(self._profile, language=self._language, pressing=pressing)
                 if self._profile
                 else ""
             ),

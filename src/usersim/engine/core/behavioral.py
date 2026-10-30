@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import random
 import re
+from enum import Enum
 from typing import Any
 
 _OCEAN_TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
@@ -373,7 +374,20 @@ def _chat_realism_style(language: str) -> str:
     return _CHAT_REALISM_STYLE_NON_EN
 
 
-def _build_chat_realism(language: str, probe_type: str, *, pressing: bool = False) -> str:
+class ChatRealism(str, Enum):
+    """The rules a simulated user follows when writing in chat.
+
+    ``ASKING``: the user asks for help and gives only what the assistant asks
+    for. ``SHARING_DETAILS``: the user may also give IDs, reference numbers,
+    short lists and dates when the task needs them, as when an assistant works
+    through tools on the user's behalf.
+    """
+
+    ASKING = "asking"
+    SHARING_DETAILS = "sharing_details"
+
+
+def _build_chat_realism(language: str, chat_realism: ChatRealism, *, pressing: bool = False) -> str:
     style = _chat_realism_style(language)
     if pressing:
         return (
@@ -392,7 +406,7 @@ def _build_chat_realism(language: str, probe_type: str, *, pressing: bool = Fals
             "- Never mention that you are simulated, or how these messages are produced.\n"
             "</CHAT_REALISM>"
         )
-    if probe_type == "tool_calling":
+    if chat_realism is ChatRealism.SHARING_DETAILS:
         return (
             "<CHAT_REALISM>\n"
             "CRITICAL — You are typing in a chat window, not writing a document:\n"
@@ -488,9 +502,9 @@ ROLE_ANCHOR_PROMPT_WRAPUP = (
 
 def format_behavioral_profile_for_prompt(
     profile: dict[str, Any],
-    probe_type: str = "",
     language: str = "English",
     *,
+    chat_realism: ChatRealism = ChatRealism.ASKING,
     pressing: bool = False,
 ) -> str:
     """Format a BehavioralProfile dict into a prompt injection block.
@@ -504,11 +518,12 @@ def format_behavioral_profile_for_prompt(
     descriptions (extraversion -> verbosity, agreeableness -> cooperativeness,
     agreeableness + neuroticism -> patience).
 
-    For tool_calling, uses relaxed content rules that allow the
-    user to share structured data (IDs, lists, reference numbers) when the
-    workflow requires it. ``pressing`` swaps in rules for a user who presses
-    a point rather than asks for help, since the default rules say the user
-    has no answers and never provides information.
+    ``chat_realism`` picks the rules the user writes by:
+    ``ChatRealism.SHARING_DETAILS`` lets the user share structured data (IDs,
+    lists, reference numbers) when the workflow requires it. ``pressing``
+    swaps in rules for a user who presses a point rather than asks for help,
+    since the default rules say the user has no answers and never provides
+    information.
     """
     lines: list[str] = []
 
@@ -539,7 +554,7 @@ def format_behavioral_profile_for_prompt(
     lines.append(f"- {error_desc}")
 
     lines.append("")
-    lines.append(_build_chat_realism(language, probe_type, pressing=pressing))
+    lines.append(_build_chat_realism(language, ChatRealism(chat_realism), pressing=pressing))
 
     return "\n".join(lines)
 

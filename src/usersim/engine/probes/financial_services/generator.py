@@ -908,11 +908,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     def _build_user_system_prompt(self) -> str:
         prof = self._profile or {}
         if "tech_literacy" in prof and "error_proneness" in prof:
-            behavioral = format_behavioral_profile_for_prompt(
-                prof,
-                probe_type="financial_services",
-                language=self._language,
-            )
+            behavioral = format_behavioral_profile_for_prompt(prof, language=self._language)
         else:
             behavioral = ""
         persona_name = persona_full_name(self._persona) or "the customer"

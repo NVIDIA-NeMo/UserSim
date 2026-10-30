@@ -26,6 +26,7 @@ import random
 from typing import Any
 
 from usersim.engine.core.behavioral import (
+    ChatRealism,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -282,8 +283,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             language_instruction=_language_instruction(self._language, self._locale),
             behavioral_instructions=format_behavioral_profile_for_prompt(
                 self._profile,
-                probe_type="tool_calling",
                 language=self._language,
+                chat_realism=ChatRealism.SHARING_DETAILS,
             ),
             disclosure_instructions=format_disclosure_instructions(
                 self._data.get("disclosure_style", "upfront"),
