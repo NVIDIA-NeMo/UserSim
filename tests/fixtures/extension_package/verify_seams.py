@@ -44,6 +44,11 @@ from usersim.engine.evaluator.scorers import list_scorers  # noqa: E402
 
 check("usersim.scorers", "fixture_scorer" in list_scorers())
 
+# A contributed scorer registered as deterministic is one usersim rescore reruns.
+from usersim.cli.rescore import _validate_scorers  # noqa: E402
+
+check("deterministic scorer is rescorable", _validate_scorers(["fixture_scorer"]) == ["fixture_scorer"])
+
 # 3. Asset domain
 from usersim.asset_gen.registry import domain_names  # noqa: E402
 

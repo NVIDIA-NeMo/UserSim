@@ -189,12 +189,14 @@ async def score(row, models):
     return {"acme_recipe_grounded": 1.0 if row.get("acme_recipe_id") else 0.0}
 
 
-register_scorer("acme_recipes", score)
+register_scorer("acme_recipes", score, deterministic=True)
 ```
 
 The evaluator awaits a scorer once per trajectory, with the row and the
 models, and merges the mapping it returns into the row's evaluation. A field
-the row holds empty arrives as `None`.
+the row holds empty arrives as `None`. `deterministic=True` says the scorer
+never calls a model, so `usersim rescore` can recompute it on a stored
+evaluation.
 
 ## Tests
 

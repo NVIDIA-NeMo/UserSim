@@ -13,7 +13,9 @@ ensemble never rests on one model family. A single judge is allowed.
 
 **Scorers** are per-probe functions over stored columns, each returning a
 structured verdict rather than a free-form opinion. Three are fully
-deterministic (`language_compliance`, `refusal_basics`, `response_shape`); the
+deterministic (`language_compliance`, `refusal_basics`, `response_shape`) and
+register with `deterministic=True`, which is what lets `usersim rescore`
+recompute them on a stored evaluation; the
 other nine call a model to reach a judgment the stored columns cannot settle on
 their own, such as whether a retrieved fact is actually supported or what a
 free-form turn actually disclosed (`health_disclosure_concealment`, which falls

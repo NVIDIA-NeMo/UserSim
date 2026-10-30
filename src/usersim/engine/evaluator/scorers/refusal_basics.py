@@ -476,4 +476,4 @@ def _noop(*, error: str) -> dict[str, Any]:
 
 
 # Auto-register on import.
-register_scorer("refusal_basics", score_refusal_basics_trajectory)
+register_scorer("refusal_basics", score_refusal_basics_trajectory, deterministic=True)

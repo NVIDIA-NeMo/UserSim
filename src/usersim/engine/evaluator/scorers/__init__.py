@@ -187,6 +187,8 @@ ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 _REGISTRY: dict[str, ScorerFn] = {}
+#: The names registered with ``deterministic=True``.
+_DETERMINISTIC: set[str] = set()
 
 
 class ScorerRegistrationError(ValueError):
@@ -198,7 +200,7 @@ def _definition(fn: Any) -> str:
     return f"{getattr(fn, '__module__', '?')}.{getattr(fn, '__qualname__', repr(fn))}"
 
 
-def register_scorer(name: str, fn: ScorerFn) -> None:
+def register_scorer(name: str, fn: ScorerFn, *, deterministic: bool = False) -> None:
     """Register a scorer under a stable name.
 
     A name belongs to one scorer. Registering the same function again, or
@@ -206,6 +208,11 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
     different function under a taken name raises
     ``ScorerRegistrationError`` naming both, so an installed package
     cannot replace a scorer a run asks for by name.
+
+    ``deterministic`` marks a scorer that never calls or looks up a model, on
+    any row, so ``usersim rescore`` may rerun it on a stored evaluation. A
+    scorer that calls a model on some rows, or whenever one is wired, leaves
+    it unset.
     """
     existing = _REGISTRY.get(name)
     if existing is not None and existing is not fn and _definition(existing) != _definition(fn):
@@ -214,6 +221,10 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
             f"so {_definition(fn)} cannot take it. Give the scorer a name no other scorer uses."
         )
     _REGISTRY[name] = fn
+    if deterministic:
+        _DETERMINISTIC.add(name)
+    else:
+        _DETERMINISTIC.discard(name)
 
 
 def load_extension_scorers() -> None:
@@ -240,6 +251,12 @@ def get_scorer(name: str) -> ScorerFn:
             f"imported (which triggers register_scorer())."
         )
     return _REGISTRY[name]
+
+
+def deterministic_scorers() -> list[str]:
+    """The registered scorers marked ``deterministic``, in registration order."""
+    load_extension_scorers()
+    return [name for name in _REGISTRY if name in _DETERMINISTIC]
 
 
 def list_scorers() -> list[str]:

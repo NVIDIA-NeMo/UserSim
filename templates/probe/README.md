@@ -148,7 +148,8 @@ When porting one of the templates into a new module:
       `docs/engine/AUTHORING_A_PROBE.md`.
 - [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
-      path in `DEFAULT_SCORER_MODULES`.
+      path in `DEFAULT_SCORER_MODULES`. Register it with
+      `deterministic=True` when it never calls a model.
 - [ ] Write tests from `test_probe.py.template`. Its first test runs
       the probe end to end with `usersim.testing.run_episode` and
       scripted models. The standard tests after it control each reply:

@@ -8,4 +8,4 @@ async def score(row, models):
     return {"fixture_axis": 1.0}
 
 
-register_scorer("fixture_scorer", score)
+register_scorer("fixture_scorer", score, deterministic=True)

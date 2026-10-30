@@ -1078,7 +1078,10 @@ register_scorer("your_probe", score_your_probe_trajectory)
 
 `register_scorer` takes the name and the function; it is not a decorator.
 Give it a name no other scorer uses: a different function under a taken name
-raises `ScorerRegistrationError`. The
+raises `ScorerRegistrationError`. A scorer that never calls or looks up a model
+also passes `deterministic=True`, so `usersim rescore` can recompute it on a
+stored evaluation; `assert_scorer_conforms` reports one that looks up a model
+anyway. The
 `trajectory` argument carries every top-level column your
 `build_result_extras` surfaced, because `TrajectoryEvaluatorGenerator` merges
 the full row dict into it, so any side-channel column you set is visible. A

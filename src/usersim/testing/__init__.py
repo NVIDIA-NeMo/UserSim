@@ -303,6 +303,26 @@ def assert_probe_conforms(probe: str | type) -> None:
         raise AssertionError(f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems))
 
 
+class _ModelLookups(dict):
+    """An empty ``models`` mapping that records each alias a scorer looks up in it."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.asked: list[str] = []
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        self.asked.append(key)
+        return default
+
+    def __getitem__(self, key: Any) -> Any:
+        self.asked.append(key)
+        raise KeyError(key)
+
+    def __contains__(self, key: object) -> bool:
+        self.asked.append(str(key))
+        return False
+
+
 async def scorer_conformance_problems(
     name: str,
     *,
@@ -324,7 +344,7 @@ async def scorer_conformance_problems(
     means awaiting it here too.
     """
     from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
-    from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
+    from usersim.engine.evaluator.scorers import _REGISTRY, deterministic_scorers, list_scorers
 
     if name not in _REGISTRY:
         return [
@@ -343,8 +363,9 @@ async def scorer_conformance_problems(
             f"{name!r} is not an async function. The evaluator awaits every scorer, so declare it with 'async def'."
         ]
 
+    models = _ModelLookups()
     try:
-        result = await fn(dict(sample_row or {}), {})
+        result = await fn(dict(sample_row or {}), models)
     except Exception as exc:
         problems.append(
             f"raised {type(exc).__name__} on an empty row: {exc}. The "
@@ -356,6 +377,11 @@ async def scorer_conformance_problems(
     if not isinstance(result, dict):
         problems.append(
             f"returned {type(result).__name__}, expected a dict the evaluator can merge into the eval cell."
+        )
+    if models.asked and name in deterministic_scorers():
+        problems.append(
+            f"{name!r} is registered as deterministic but looked up {', '.join(sorted(set(models.asked)))}. "
+            f"usersim rescore reruns a deterministic scorer on the promise that it calls no model."
         )
 
     emptied = sorted(key for key in sample_row or {} if key not in SCORER_FILLED_KEYS)

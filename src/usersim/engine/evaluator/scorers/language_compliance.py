@@ -423,4 +423,4 @@ def _noop(*, error: str) -> dict[str, Any]:
 
 # Auto-register on import so the evaluator picks this up once the
 # module is listed in DEFAULT_SCORER_MODULES.
-register_scorer("language_compliance", score_language_compliance_trajectory)
+register_scorer("language_compliance", score_language_compliance_trajectory, deterministic=True)
