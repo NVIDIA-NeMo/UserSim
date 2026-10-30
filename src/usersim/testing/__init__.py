@@ -94,6 +94,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     from usersim.engine.core.probes import (
         _PROBE_REGISTRY,
         BaseProbe,
+        PreviewField,
         known_probes,
     )
 
@@ -184,6 +185,20 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
+    description = getattr(cls, "description", "")
+    if not isinstance(description, str):
+        problems.append(f"{cls.__qualname__}.description must be a string; got {description!r}")
+    fields = getattr(cls, "preview_fields", ())
+    if not isinstance(fields, tuple) or not all(
+        isinstance(field, PreviewField) and all(isinstance(text, str) and text for text in (field.key, field.label))
+        for field in fields
+    ):
+        problems.append(
+            f"{cls.__qualname__}.preview_fields must be a tuple of PreviewField, each with a key and a label; "
+            f"got {fields!r}"
+        )
+    problems.extend(_default_scorers_problems(cls))
+
     # A run reads these on the class, before any row runs.
     check = getattr(cls, "locale_bank_check", None)
     if check is not None and not callable(check):
@@ -191,11 +206,13 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
             f"locale's bank folder; got {check!r}"
         )
-    for hook in ("bank_locale", "themes", "model_aliases"):
+    for hook in ("bank_locale", "themes", "model_aliases", "asset_problems"):
         if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
             problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
     if isinstance(inspect.getattr_static(cls, "model_aliases", None), classmethod):
         problems.extend(_model_aliases_problems(cls))
+    if isinstance(inspect.getattr_static(cls, "asset_problems", None), classmethod):
+        problems.extend(_asset_check_problems(cls))
     guide = getattr(cls, "authoring_guide", None)
     if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
         problems.append(
@@ -219,6 +236,24 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     return problems
 
 
+def _default_scorers_problems(cls: type) -> list[str]:
+    """What is wrong with the scorers ``cls.default_scorers`` names."""
+    from usersim.engine.evaluator.scorers import list_scorers
+
+    names = getattr(cls, "default_scorers", ())
+    if not isinstance(names, tuple) or not all(isinstance(name, str) and name for name in names):
+        return [f"{cls.__qualname__}.default_scorers must be a tuple of scorer names; got {names!r}"]
+    registered = list_scorers()
+    unknown = [name for name in names if name not in registered]
+    if unknown:
+        return [
+            f"{cls.__qualname__}.default_scorers names {unknown}, which no registered scorer holds, so "
+            f"`usersim eval --scorers auto` would record an error in its place on every row. "
+            f"Registered: {', '.join(registered)}"
+        ]
+    return []
+
+
 def _model_aliases_problems(cls: type) -> list[str]:
     """What is wrong with the aliases ``cls.model_aliases`` gives a run with default settings."""
     from usersim.engine.config import ConversationSimulatorConfig
@@ -230,6 +265,17 @@ def _model_aliases_problems(cls: type) -> list[str]:
     if not isinstance(aliases, tuple) or not all(isinstance(alias, str) and alias for alias in aliases):
         return [f"{cls.__qualname__}.model_aliases must return a tuple of alias names; got {aliases!r}"]
     return []
+
+
+def _asset_check_problems(cls: type) -> list[str]:
+    """What ``cls.asset_problems`` finds in the probe's shipped assets, or what is wrong with the check itself."""
+    try:
+        found = cls.asset_problems()
+    except Exception as error:
+        return [f"{cls.__qualname__}.asset_problems raised {type(error).__name__}: {error}"]
+    if not isinstance(found, list) or not all(isinstance(problem, str) for problem in found):
+        return [f"{cls.__qualname__}.asset_problems must return a list of strings; got {found!r}"]
+    return [f"{cls.__qualname__}.asset_problems: {problem}" for problem in found]
 
 
 def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:
@@ -303,6 +349,26 @@ def assert_probe_conforms(probe: str | type) -> None:
         raise AssertionError(f"probe {name!r} does not conform:\n  - " + "\n  - ".join(problems))
 
 
+class _ModelLookups(dict):
+    """An empty ``models`` mapping that records each alias a scorer looks up in it."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.asked: list[str] = []
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        self.asked.append(key)
+        return default
+
+    def __getitem__(self, key: Any) -> Any:
+        self.asked.append(key)
+        raise KeyError(key)
+
+    def __contains__(self, key: object) -> bool:
+        self.asked.append(str(key))
+        return False
+
+
 async def scorer_conformance_problems(
     name: str,
     *,
@@ -324,7 +390,7 @@ async def scorer_conformance_problems(
     means awaiting it here too.
     """
     from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
-    from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
+    from usersim.engine.evaluator.scorers import _REGISTRY, deterministic_scorers, list_scorers
 
     if name not in _REGISTRY:
         return [
@@ -343,8 +409,9 @@ async def scorer_conformance_problems(
             f"{name!r} is not an async function. The evaluator awaits every scorer, so declare it with 'async def'."
         ]
 
+    models = _ModelLookups()
     try:
-        result = await fn(dict(sample_row or {}), {})
+        result = await fn(dict(sample_row or {}), models)
     except Exception as exc:
         problems.append(
             f"raised {type(exc).__name__} on an empty row: {exc}. The "
@@ -356,6 +423,11 @@ async def scorer_conformance_problems(
     if not isinstance(result, dict):
         problems.append(
             f"returned {type(result).__name__}, expected a dict the evaluator can merge into the eval cell."
+        )
+    if models.asked and name in deterministic_scorers():
+        problems.append(
+            f"{name!r} is registered as deterministic but looked up {', '.join(sorted(set(models.asked)))}. "
+            f"usersim rescore reruns a deterministic scorer on the promise that it calls no model."
         )
 
     emptied = sorted(key for key in sample_row or {} if key not in SCORER_FILLED_KEYS)

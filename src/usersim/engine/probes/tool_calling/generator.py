@@ -26,6 +26,7 @@ import random
 from typing import Any
 
 from usersim.engine.core.behavioral import (
+    ChatRealism,
     format_behavioral_profile_for_prompt,
     format_disclosure_instructions,
     format_interaction_style_instructions,
@@ -43,12 +44,13 @@ from usersim.engine.core.outcomes import (
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BaseProbe,
+    PreviewField,
     ToolCallingMixin,
     ToolExecutionMixin,
     dispatch_episode,
     register_probe,
 )
-from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
 from usersim.engine.core.simulation import (
     ConversationState,
     make_failed,
@@ -57,6 +59,7 @@ from usersim.engine.core.simulation import (
     language_instruction as _language_instruction,
 )
 from usersim.engine.probes.tool_calling.prompts import (
+    _SCENARIO,
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
@@ -239,6 +242,29 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """
 
     label = "tool_calling"
+    description = (
+        "Tests the assistant's ability to invoke tools correctly in response to user "
+        "requests, including argument shaping, schema validation, and recovery from "
+        "tool-call failures."
+    )
+    default_scorers = ("tool_use",)
+    preview_fields = (
+        PreviewField("theme", "Theme"),
+        PreviewField("toolset_name", "Toolset"),
+        PreviewField("toolset_category", "Toolset category"),
+        PreviewField("num_tools", "Tools available"),
+    )
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The prompts file the prompt defaults would mask, and the toolset seed rows draw their tools from."""
+        problems = []
+        if not load_prompt_file(_SCENARIO):
+            problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
+        toolsets = cls.assets_dir() / "toolsets_seed.parquet"
+        if not toolsets.exists():
+            problems.append(f"no toolset seed at {toolsets}, so every row would fail at construction")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -277,8 +303,8 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
             language_instruction=_language_instruction(self._language, self._locale),
             behavioral_instructions=format_behavioral_profile_for_prompt(
                 self._profile,
-                probe_type="tool_calling",
                 language=self._language,
+                chat_realism=ChatRealism.SHARING_DETAILS,
             ),
             disclosure_instructions=format_disclosure_instructions(
                 self._data.get("disclosure_style", "upfront"),

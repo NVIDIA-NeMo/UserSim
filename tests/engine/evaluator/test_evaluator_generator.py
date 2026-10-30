@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 
 from usersim.engine.evaluator import scorers as scorers_module
-from usersim.engine.evaluator.axes import select_axes
+from usersim.engine.evaluator.axes import UNIVERSAL_SCORES, select_axes
 from usersim.engine.evaluator.config import (
     JudgeSpecConfig,
     TrajectoryEvaluatorConfig,
@@ -136,6 +136,20 @@ class TestJudgePrompt:
             assert all(anchor in prompts[0] for anchor in axis.options.values()), (
                 f"an anchor of {axis.name} is missing from the judge prompt"
             )
+
+    async def test_a_row_with_no_family_is_judged_on_the_universal_axes_alone(self) -> None:
+        gen = _build_generator(TrajectoryEvaluatorConfig(name="eval_v2", judges=_ok_judges()))
+        row = {
+            "conversation_messages": json.dumps(
+                [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+            ),
+            "persona": json.dumps({"first_name": "A", "last_name": "B"}),
+            "probe_family": None,
+        }
+
+        cell = json.loads((await gen.agenerate(row))["eval_v2"])
+
+        assert cell["envelope"]["axes"] == [s.name for s in UNIVERSAL_SCORES]
 
 
 class TestNoAssistantMessages:
@@ -683,6 +697,14 @@ class TestScorerColumnPassthrough:
         traj_row = await self._scorer_row(data)
         assert traj_row["sub_protocol"] is None
         assert traj_row["locale"] == "en_US"
+
+    @pytest.mark.parametrize("empty", [None, float("nan"), pd.NA, ""], ids=["none", "nan", "na", "blank"])
+    async def test_a_row_with_no_family_reaches_the_scorer_with_an_empty_one(self, empty) -> None:
+        """A row that names no probe is attributed to none."""
+        data = self._make_data_with_probe_columns()
+        data["probe_family"] = empty
+
+        assert (await self._scorer_row(data))["probe_family"] == ""
 
 
 class TestEmptyCellsReachAShippedScorer:

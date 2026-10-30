@@ -45,11 +45,13 @@ from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankVerbatimMixin,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.query_bank import (
     Query,
+    default_query_bank_path,
     load_query_bank_default,
     reset_query_bank_cache,
 )
@@ -143,12 +145,31 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_multilingual_parity"
+    description = (
+        "Tests respect and calibration on the same question asked in every locale: does "
+        "the assistant engage each user as a peer and pitch a helpful answer to them, "
+        "rather than condescend or deflect? Each row records its query_id, so answers "
+        "to one question can be compared across locales."
+    )
+    default_scorers = ("sov_ai_multilingual_parity",)
+    preview_fields = (
+        PreviewField("query_id", "Query id"),
+        PreviewField("query_concern", "Concern axis", from_metadata=True),
+        PreviewField("query_domain", "Domain", from_metadata=True),
+        PreviewField("query_difficulty", "Difficulty", from_metadata=True),
+    )
     output_columns = ("query_id",)
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_QUERY
     bank_version_key = None  # locale-keyed (the inclusion convention)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The query bank, which serves every locale."""
+        path = default_query_bank_path()
+        return [] if path.exists() else [f"no query bank at {path}"]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

@@ -113,6 +113,11 @@ When porting one of the templates into a new module:
 - [ ] Pick a `label` for `@register_probe` that no other probe uses,
       used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
       Underscores, lowercase.
+- [ ] Set `description`, a paragraph on what the probe tests; the
+      per-row preview and the capability report show it.
+- [ ] List in `preview_fields` the columns or metadata keys the per-row
+      preview's Probe Inputs panel shows, such as the id of the bank
+      entry each row drew.
 - [ ] Pick a `family` (the class attribute the decorator sets).
       The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the
@@ -125,6 +130,9 @@ When porting one of the templates into a new module:
       by locale also sets `locale_bank_check`, so a run refuses a locale
       whose bank is missing before any model call (step 3 of
       `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe ships banks, check them in an `asset_problems`
+      classmethod, so `usersim smoke` reports an install that is missing
+      one (step 3 of `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe's conversations vary by topic, list the topics in a
       `themes` classmethod and read the row's with `self.theme()` (step 3
       of `docs/engine/AUTHORING_A_PROBE.md`).
@@ -148,7 +156,10 @@ When porting one of the templates into a new module:
       `docs/engine/AUTHORING_A_PROBE.md`.
 - [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
-      path in `DEFAULT_SCORER_MODULES`.
+      path in `DEFAULT_SCORER_MODULES`. Register it with
+      `deterministic=True` when it never calls a model, and list it in
+      the class's `default_scorers` so `usersim eval --scorers auto`
+      runs it.
 - [ ] Write tests from `test_probe.py.template`. Its first test runs
       the probe end to end with `usersim.testing.run_episode` and
       scripted models. The standard tests after it control each reply:

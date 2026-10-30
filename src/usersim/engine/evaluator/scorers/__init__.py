@@ -187,10 +187,20 @@ ScorerFn = Callable[[dict[str, Any], dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
 _REGISTRY: dict[str, ScorerFn] = {}
+#: The names registered with ``deterministic=True``.
+_DETERMINISTIC: set[str] = set()
+
+#: The ``usersim eval --scorers`` entry that stands for ``GENERIC_SCORERS``
+#: plus the ``default_scorers`` of every probe in the run. No scorer may be
+#: registered under it.
+AUTO_SCORERS = "auto"
+#: The rule-based scorers that apply to every probe's rows, which ``auto``
+#: runs beside the probes' own.
+GENERIC_SCORERS: tuple[str, ...] = ("language_compliance", "refusal_basics", "response_shape")
 
 
 class ScorerRegistrationError(ValueError):
-    """Raised when ``register_scorer`` is given a name another scorer holds."""
+    """Raised when ``register_scorer`` is given a name another scorer holds, or ``auto``."""
 
 
 def _definition(fn: Any) -> str:
@@ -198,7 +208,7 @@ def _definition(fn: Any) -> str:
     return f"{getattr(fn, '__module__', '?')}.{getattr(fn, '__qualname__', repr(fn))}"
 
 
-def register_scorer(name: str, fn: ScorerFn) -> None:
+def register_scorer(name: str, fn: ScorerFn, *, deterministic: bool = False) -> None:
     """Register a scorer under a stable name.
 
     A name belongs to one scorer. Registering the same function again, or
@@ -206,7 +216,20 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
     different function under a taken name raises
     ``ScorerRegistrationError`` naming both, so an installed package
     cannot replace a scorer a run asks for by name.
+
+    ``deterministic`` marks a scorer that never calls or looks up a model, on
+    any row, so ``usersim rescore`` may rerun it on a stored evaluation. A
+    scorer that calls a model on some rows, or whenever one is wired, leaves
+    it unset.
+
+    ``auto`` (``AUTO_SCORERS``) is refused, since ``--scorers auto`` names
+    a set of scorers rather than one.
     """
+    if name == AUTO_SCORERS:
+        raise ScorerRegistrationError(
+            f"scorer name {name!r} is reserved: `usersim eval --scorers {name}` runs the generic scorers "
+            "and the default_scorers of the run's probes. Give the scorer another name."
+        )
     existing = _REGISTRY.get(name)
     if existing is not None and existing is not fn and _definition(existing) != _definition(fn):
         raise ScorerRegistrationError(
@@ -214,6 +237,10 @@ def register_scorer(name: str, fn: ScorerFn) -> None:
             f"so {_definition(fn)} cannot take it. Give the scorer a name no other scorer uses."
         )
     _REGISTRY[name] = fn
+    if deterministic:
+        _DETERMINISTIC.add(name)
+    else:
+        _DETERMINISTIC.discard(name)
 
 
 def load_extension_scorers() -> None:
@@ -240,6 +267,12 @@ def get_scorer(name: str) -> ScorerFn:
             f"imported (which triggers register_scorer())."
         )
     return _REGISTRY[name]
+
+
+def deterministic_scorers() -> list[str]:
+    """The registered scorers marked ``deterministic``, in registration order."""
+    load_extension_scorers()
+    return [name for name in _REGISTRY if name in _DETERMINISTIC]
 
 
 def list_scorers() -> list[str]:

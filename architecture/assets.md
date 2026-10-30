@@ -62,6 +62,16 @@ Without this, a missing bank surfaces from inside a loader partway through a
 run, after the other probes in the mix have already been paid for, while
 `--dry-run` would report the plan and exit 0.
 
+## Install check
+
+`usersim smoke` runs each registered probe's `asset_problems` classmethod,
+which checks the assets the probe ships without a model call. For example,
+`sov_ai_facts` and `sov_ai_dynamic` look for a bank in every shipped locale,
+`financial_services` loads its `en_US` bank and that bank's dynamic-tier
+taxonomy, and `identity_disclosure` loads its spec through every layer. A probe
+from another package is checked the same way, and `assert_probe_conforms`
+reports what its check finds.
+
 ## Generating a bank
 
 `usersim gen-assets --domain <d>` generates one; `validate-assets` vets it

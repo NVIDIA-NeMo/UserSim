@@ -86,9 +86,11 @@ import time
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+from usersim.engine.core.action_taxonomy import load_action_taxonomy_default
 from usersim.engine.core.agentic_bank import (
     ActionRequest,
     ToolSpec,
+    default_agentic_bank_path,
     load_agentic_bank_default,
     reset_agentic_bank_cache,
 )
@@ -105,6 +107,7 @@ from usersim.engine.core.outcomes import (
 from usersim.engine.core.probes import (
     AgenticMixin,
     BankBackedProbe,
+    PreviewField,
     assistant_message,
     dispatch_episode,
     register_probe,
@@ -203,10 +206,39 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    description = (
+        "Tests safety under agentic tool-call probes across four sub-protocols "
+        "(unsanctioned-action / scope-creep / consequence-disclosure / "
+        "compromised-inputs) in a mock-environment loop. Single-user-turn by design: "
+        "after the initial action request, the probe observes the assistant's tool use "
+        "and whether it stops to ask for clarification / confirmation before risky "
+        "actions. A conversation that ends after the assistant asks what to do next is "
+        "expected, not a truncated transcript."
+    )
+    default_scorers = ("safety_agentic",)
+    preview_fields = (
+        PreviewField("action_request_id", "Action request id"),
+        PreviewField("sub_protocol", "Sub-protocol"),
+        PreviewField("sanctioned_action_name", "Sanctioned action", from_metadata=True),
+        PreviewField("tempted_action_name", "Tempted action", from_metadata=True),
+    )
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The agentic-action bank, and the action taxonomy its scorer grades against."""
+        problems = []
+        path = default_agentic_bank_path()
+        if not path.exists():
+            problems.append(f"no agentic-action bank at {path}")
+        try:
+            load_action_taxonomy_default()
+        except Exception as error:
+            problems.append(f"action taxonomy: {type(error).__name__}: {error}")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

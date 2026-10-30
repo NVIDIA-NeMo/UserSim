@@ -44,6 +44,11 @@ from usersim.engine.evaluator.scorers import list_scorers  # noqa: E402
 
 check("usersim.scorers", "fixture_scorer" in list_scorers())
 
+# A contributed scorer registered as deterministic is one usersim rescore reruns.
+from usersim.cli.rescore import _validate_scorers  # noqa: E402
+
+check("deterministic scorer is rescorable", _validate_scorers(["fixture_scorer"]) == ["fixture_scorer"])
+
 # 3. Asset domain
 from usersim.asset_gen.registry import domain_names  # noqa: E402
 
@@ -140,6 +145,26 @@ from usersim.engine.core.probes import declared_model_aliases  # noqa: E402
 declared = declared_model_aliases(ConversationSimulatorConfig(name="conversation_messages"))
 check("model_aliases joins the run's models", "fixture_critic_model" in declared, str(declared))
 
+# `usersim eval --scorers auto` adds a contributed probe's default_scorers for
+# the rows stored under its family, which differs from its label.
+from usersim.cli.evaluate import _resolve_scorers  # noqa: E402
+from usersim.engine.evaluator.scorers import GENERIC_SCORERS  # noqa: E402
+
+auto = _resolve_scorers(["auto"], ["fixture"])
+check("default_scorers join --scorers auto", auto == [*GENERIC_SCORERS, "fixture_scorer"], str(auto))
+
+# The per-row preview shows the fields a contributed probe declares.
+import pandas as pd  # noqa: E402
+from rich.console import Console  # noqa: E402
+
+from usersim.engine.core.preview import _render_probe_inputs  # noqa: E402
+
+panel = _render_probe_inputs(pd.Series({"probe_type": "fixture_probe", "fixture_probe_marker": "yes"}), {})
+shown = Console(record=True, width=100)
+if panel is not None:
+    shown.print(panel)
+check("preview_fields reach the preview", "Marker: yes" in shown.export_text(), shown.export_text())
+
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
 
@@ -173,7 +198,7 @@ identity_problems = probe_conformance_problems("fixture_identity")
 check("identity probe conformance", not identity_problems, str(identity_problems))
 
 # `usersim smoke` names the installed package and finds nothing wrong with it.
-from usersim.cli.smoke import SmokeReport, _check_extensions  # noqa: E402
+from usersim.cli.smoke import SmokeReport, _check_extensions, _check_probe_assets  # noqa: E402
 
 smoke = SmokeReport()
 _check_extensions(smoke)
@@ -182,6 +207,18 @@ check(
     "usersim smoke reports the package",
     extensions.ok and extensions.detail == "usersim-extension-fixture 0.1.0: 7 entry point(s)",
     extensions.detail,
+)
+
+# It also runs the contributed probes' asset checks beside the shipped ones:
+# the fixture probe's own, and the spec check the identity probe inherits.
+assets = SmokeReport()
+_check_probe_assets(assets)
+(probe_assets,) = assets.results
+checked = probe_assets.detail.split(": ", 1)[-1].split(", ")
+check(
+    "usersim smoke runs the contributed asset checks",
+    probe_assets.ok and {"fixture_probe", "fixture_identity", "tool_calling"} <= set(checked),
+    probe_assets.detail,
 )
 
 if failures:

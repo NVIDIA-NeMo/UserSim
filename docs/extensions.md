@@ -96,7 +96,7 @@ from pathlib import Path
 import yaml
 
 from usersim.engine.core.identity import persona_uuid
-from usersim.engine.core.probes import BankBackedProbe, register_probe
+from usersim.engine.core.probes import BankBackedProbe, PreviewField, register_probe
 
 
 @dataclass(frozen=True)
@@ -126,11 +126,22 @@ def load_recipe_bank(locale: str) -> RecipeBank:
 @register_probe(family="acme_recipes", prompt_version="v1.0", variants=("default",))
 class RecipeProbe(BankBackedProbe):
     label = "acme_recipes"
+    description = "Tests cooking help: a home cook asks about a recipe from the bank."
+    preview_fields = (PreviewField("acme_recipe_id", "Recipe id"),)
+    default_scorers = ("acme_recipes",)
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_recipe_bank)
     locale_bank_check = staticmethod(read_recipe_bank)
     placeholder_warning_kind = "acme_used_placeholder_recipe"
     output_columns = ("acme_recipe_id",)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        try:
+            read_recipe_bank(cls.assets_dir() / "en_US")
+        except Exception as error:
+            return [f"en_US: {type(error).__name__}: {error}"]
+        return []
 
     def derive_task(self, persona, bank, *, cfg):
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
@@ -146,6 +157,12 @@ class RecipeProbe(BankBackedProbe):
         return {**super().build_result_extras(state), "acme_recipe_id": self._task.id}
 ```
 
+- **`description`** is what the per-row preview and the capability report
+  show about the probe.
+- **`preview_fields`** puts the row's recipe id in the per-row preview's Probe
+  Inputs panel.
+- **`default_scorers`** names the package's scorer, so
+  `usersim eval --scorers auto` runs it whenever a run holds the probe's rows.
 - **`assets_root`** is the absolute directory holding `acme_recipes/`, so the
   probe finds its banks wherever the package is installed.
 - **`load_recipe_bank`** reads under `RecipeProbe.assets_dir()`, the probe's
@@ -153,6 +170,8 @@ class RecipeProbe(BankBackedProbe):
   `USERSIM_ASSET_PATH` names reaches it too.
 - **`locale_bank_check`** reads one locale's bank, so a run in a locale with no
   bank that loads stops before any model call rather than failing every row.
+- **`asset_problems`** reads the bank the package ships, so `usersim smoke` and
+  `assert_probe_conforms` report an install that is missing it.
 - **`placeholder_warning_kind`** is the warning a row records when its recipe
   is marked `placeholder: true`. Its `<prefix>_used_placeholder_<thing>` form is
   what the capability report counts as placeholder content.
@@ -189,12 +208,14 @@ async def score(row, models):
     return {"acme_recipe_grounded": 1.0 if row.get("acme_recipe_id") else 0.0}
 
 
-register_scorer("acme_recipes", score)
+register_scorer("acme_recipes", score, deterministic=True)
 ```
 
 The evaluator awaits a scorer once per trajectory, with the row and the
 models, and merges the mapping it returns into the row's evaluation. A field
-the row holds empty arrives as `None`.
+the row holds empty arrives as `None`. `deterministic=True` says the scorer
+never calls a model, so `usersim rescore` can recompute it on a stored
+evaluation.
 
 ## Tests
 

@@ -39,6 +39,13 @@ def _bank_loader():
 @register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class ClinicalDecisionSupportProbe(HealthDisclosureProbe):
     label = _LABEL
+    description = (
+        "Tests whether a clinical decision-support assistant asks the questions that "
+        "surface a key finding or red-flag danger sign a clinician leaves out when "
+        "first presenting a case. In the guarded variant the user paces disclosure by "
+        "plan, and the health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
+    )
     CLIENT = _CFG
     bank_loader = staticmethod(_bank_loader)
     bank_version_key = _LABEL  # per-client (locale-independent) provenance slot

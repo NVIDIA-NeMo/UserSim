@@ -11,11 +11,12 @@ trajectory:
    header rule. ``completed_with_warnings`` rows render yellow with
    warning chips listing each :class:`WarningKind` value, distinct
    from clean ``ok`` rows.
-2. **What was the model probed against?** Side-channel asset metadata
-   (``action_request_id`` / ``sub_protocol`` / ``query_id`` / etc.)
-   is resolved against ``conversation_metadata`` and rendered in a
-   dedicated *Probe Inputs* panel — no grep-the-bank dance to figure
-   out what ``probe_aadhaar_001`` means.
+2. **What was the model probed against?** The fields the row's probe
+   lists in ``preview_fields`` (``action_request_id`` / ``sub_protocol``
+   / ``query_id`` / etc.), read from the row or its
+   ``conversation_metadata``, are rendered in a dedicated *Probe Inputs*
+   panel — no grep-the-bank dance to figure out what
+   ``probe_aadhaar_001`` means.
 3. **What did the model do?** The conversation panel renders turns
    with an inline judge chip (``✓`` / ``✗``) lifted from the
    in-sim ``assistant_judge_ratings`` so you can see where things
@@ -42,6 +43,7 @@ from rich.table import Table
 from rich.text import Text
 
 from usersim.engine.core.outcomes import is_placeholder_warning_kind
+from usersim.engine.core.probes import probe_description, probe_preview_fields
 
 # Flags + country names cover only the LOCALES we actually ship
 # today (the keys of
@@ -148,114 +150,6 @@ _COUNTRY_COLUMN_MIN_WIDTH = max(len(c) for c in _LOCALE_COUNTRIES.values()) + 3
 # persona-driven exploration; "Probe" as the meta-label means
 # "the test protocol for this row".
 #
-# Short descriptions for each shipped probe. Surface in the
-# "Probe" panel right above Persona.
-_PROBE_DESCRIPTIONS = {
-    "tool_calling": (
-        "Tests the assistant's ability to invoke tools correctly "
-        "in response to user requests, including argument shaping, "
-        "schema validation, and recovery from tool-call failures."
-    ),
-    "general_open_ended": (
-        "Tests information-seeking conversations across diverse "
-        "personas: accurate, coherent answers pitched to the user's "
-        "apparent expertise, and a clarifying question rather than an "
-        "information dump when a request is vague."
-    ),
-    "general_educational": (
-        "Tests tutoring: a persona-grounded learner asks about a "
-        "subject, and the probe looks at whether explanations are "
-        "accurate, pitched at the learner's level and scaffolded "
-        "with examples, without condescension."
-    ),
-    "sov_ai_facts": (
-        "Tests recall of locale-specific (sovereign) facts drawn from "
-        "a curated bank, graded against ground-truth answers. Some "
-        "questions embed a false premise to correct; others give a "
-        "partial verse for the assistant to continue."
-    ),
-    "sov_ai_dynamic": (
-        "Tests locale-specific knowledge where no curated answer "
-        "exists: a persona-voiced user explores a topic from the "
-        "locale's taxonomy (history, geography, culture, public "
-        "services and more), and a judge flags suspected fabrication, "
-        "self-contradiction across turns and confident guesses where "
-        "declining was better."
-    ),
-    "sov_ai_multilingual_parity": (
-        "Tests respect and calibration on the same question asked in "
-        "every locale: does the assistant engage each user as a peer "
-        "and pitch a helpful answer to them, rather than condescend or "
-        "deflect? Each row records its query_id, so answers to one "
-        "question can be compared across locales."
-    ),
-    "safety_chat_pressure": (
-        "Tests safety under multi-turn conversational pressure: "
-        "does the assistant hold the line when the user persists, "
-        "reframes, or escalates a target request?"
-    ),
-    "safety_agentic": (
-        "Tests safety under agentic tool-call probes across four "
-        "sub-protocols (unsanctioned-action / scope-creep / "
-        "consequence-disclosure / compromised-inputs) in a "
-        "mock-environment loop. Single-user-turn by design: after "
-        "the initial action request, the probe observes the assistant's "
-        "tool use and whether it stops to ask for clarification / "
-        "confirmation before risky actions. A conversation that ends "
-        "after the assistant asks what to do next is expected, not a "
-        "truncated transcript."
-    ),
-    "financial_services": (
-        "Tests financial customer-support / advisory grounded in a "
-        "per-institution knowledge base, across two tiers: verifiable "
-        "(param-locked tasks scored by a deterministic tool/retrieval "
-        "verifier) and dynamic (open-ended questions from an authored "
-        "taxonomy, scored by a reference-grounded judge on grounding, "
-        "numeric faithfulness, boundary adherence, no fabrication, "
-        "graceful unknowns and self-consistency). "
-        "Retrieval is scoped to a single institution."
-    ),
-    "identity_disclosure": (
-        "Tests whether the assistant names the developer that made it "
-        "when a persona asks who it is or who made it, with no system "
-        "prompt: neutral questions, 'Are you made by X?' naming the "
-        "true developer or a competitor, and, in multi-turn runs, a "
-        "user who keeps pressing the competitor."
-    ),
-    "health_therapy_disclosure": (
-        "Tests whether a therapy assistant draws out what a guarded "
-        "client discloses only gradually, including self-harm or "
-        "crisis risk. In the guarded variant the user paces disclosure "
-        "by plan, and the health_disclosure_concealment scorer "
-        "measures how much the assistant drew out."
-    ),
-    "health_triage_disclosure": (
-        "Tests whether a care-navigation (triage) assistant surfaces "
-        "urgent red-flag symptoms that a patient downplays and reveals "
-        "only when asked directly. In the guarded variant the user "
-        "paces disclosure by plan, and the "
-        "health_disclosure_concealment scorer measures how much the "
-        "assistant drew out."
-    ),
-    "health_decision_support_disclosure": (
-        "Tests whether a clinical decision-support assistant asks the "
-        "questions that surface a key finding or red-flag danger sign "
-        "a clinician leaves out when first presenting a case. In the "
-        "guarded variant the user paces disclosure by plan, and the "
-        "health_disclosure_concealment scorer measures how much the "
-        "assistant drew out."
-    ),
-    "health_general_disclosure": (
-        "Tests whether a general health assistant surfaces the "
-        "red-flag symptoms and medication lapses that a patient with "
-        "an ongoing condition downplays. In the guarded variant the "
-        "user paces disclosure by plan, and the "
-        "health_disclosure_concealment scorer measures how much the "
-        "assistant drew out."
-    ),
-}
-
-
 # Warning kinds that indicate the trajectory probed against an asset
 # the bank itself flagged as ``placeholder: true`` (i.e. no
 # subject-matter expert has reviewed it). These are an
@@ -821,7 +715,7 @@ def _render_probe_panel(row: pd.Series) -> Panel:
     probe = row.get("probe_type", "?")
     family = _str_or_none(row.get("probe_family")) or "—"
     variant = _str_or_none(row.get("probe_variant"))
-    description = _PROBE_DESCRIPTIONS.get(probe, "(no description registered)")
+    description = probe_description(probe) or "(no description registered)"
 
     body = Text()
     body.append("Probe: ", style="bold")
@@ -847,91 +741,25 @@ def _render_probe_panel(row: pd.Series) -> Panel:
 # Scenario inputs panel — resolves side-channel asset metadata
 # ---------------------------------------------------------------------------
 
-# Probe-specific metadata keys to surface in the Probe Inputs
-# panel. Order matters — items are rendered top-to-bottom in the
-# panel. Values come from ``conversation_metadata`` (set by each
-# probe via ``state.metadata[...]``) and are joined read-only into
-# the panel; we never re-load the asset bank from inside the preview
-# (cross-module coupling we don't want).
-_PROBE_INPUT_FIELDS: dict[str, list[tuple[str, str, str]]] = {
-    # (column-or-meta-key, display-label, source: "row" | "meta")
-    # General family: theme-driven probes (no curated asset bank).
-    # The ``theme`` column carries whatever was sampled from the
-    # locale's seed YAML (open_ended_topics / educational_subjects)
-    # or the toolset bundle (for tool_calling). Showing it here +
-    # the toolset metadata makes "what was the probe seeded with"
-    # answerable at a glance for the general family too.
-    "tool_calling": [
-        ("theme", "Theme", "row"),
-        ("toolset_name", "Toolset", "row"),
-        ("toolset_category", "Toolset category", "row"),
-        ("num_tools", "Tools available", "row"),
-    ],
-    "general_open_ended": [
-        ("theme", "Topic", "row"),
-    ],
-    "general_educational": [
-        ("theme", "Subject", "row"),
-    ],
-    # Inclusion / safety family: curated-asset-driven.
-    "safety_agentic": [
-        ("action_request_id", "Action request id", "row"),
-        ("sub_protocol", "Sub-protocol", "row"),
-        ("sanctioned_action_name", "Sanctioned action", "meta"),
-        ("tempted_action_name", "Tempted action", "meta"),
-    ],
-    "safety_chat_pressure": [
-        ("target_request_id", "Target request id", "row"),
-        ("strategy_id", "Pressure strategy", "row"),
-        ("harm_category", "Harm category", "meta"),
-    ],
-    "sov_ai_multilingual_parity": [
-        ("query_id", "Query id", "row"),
-        ("query_concern", "Concern axis", "meta"),
-        ("query_domain", "Domain", "meta"),
-        ("query_difficulty", "Difficulty", "meta"),
-    ],
-    "sov_ai_facts": [
-        ("facts_probed", "Facts probed", "meta"),
-        ("fact_category", "Fact category", "meta"),
-        ("fact_question_type", "Question type", "meta"),
-        ("fact_difficulty", "Difficulty", "meta"),
-    ],
-    "sov_ai_dynamic": [
-        ("taxonomy_id", "Taxonomy id", "meta"),
-        ("probing_categories_explored", "Categories explored", "row"),
-        ("probing_subtopic_hints_used", "Sub-topic hints", "row"),
-    ],
-}
-
 
 def _render_probe_inputs(row: pd.Series, metadata: dict | None) -> Panel | None:
-    """Build the Probe Inputs panel for the row, if applicable.
+    """Build the Probe Inputs panel from the ``preview_fields`` of the row's probe.
 
-    Returns ``None`` for the ``general`` family (no curated-asset
-    side channel) or when none of the probe-specific fields are
-    populated. The panel deliberately surfaces *what we have on the
-    parquet* — full asset text (the actual concern/query/action body)
-    lives in the asset YAML; we surface enough metadata
-    (id + category + difficulty / sub_protocol + sanctioned action /
-    etc.) to disambiguate without making the preview reach into the
-    bank loaders.
+    Returns ``None`` when the probe declares no fields, is not installed, or
+    left every field empty. The panel shows what the row stored: enough of
+    the bank entry the row drew (its id, category, difficulty and so on) to
+    tell rows apart, without the preview loading any bank.
     """
-    probe = row.get("probe_type", "")
-    fields = _PROBE_INPUT_FIELDS.get(probe)
-    if not fields:
-        return None
-
     rows: list[tuple[str, str]] = []
-    for key, label, source in fields:
-        if source == "row":
-            value = row.get(key)
+    for field in probe_preview_fields(row.get("probe_type", "")):
+        if field.from_metadata:
+            value = metadata.get(field.key) if isinstance(metadata, dict) else None
         else:
-            value = metadata.get(key) if isinstance(metadata, dict) else None
+            value = row.get(field.key)
         rendered = _render_field_value(value)
         if rendered is None:
             continue
-        rows.append((label, rendered))
+        rows.append((field.label, rendered))
 
     if not rows:
         return None
@@ -1205,15 +1033,16 @@ def preview_row(
        (``general`` family rows omit this entirely).
     3. **Probe panel** (always renders) — what is being tested.
        Probe name, family (general / inclusion / safety), variant
-       (when distinct from the probe name), and a short hardcoded
-       description. The reader's mental flow is *what is being
+       (when distinct from the probe name), and the probe's
+       ``description``. The reader's mental flow is *what is being
        tested* (this panel) → *which curated asset* (Probe Inputs
        panel) → *who is being tested* (Persona panel) → *what
        happened* (Full Conversation panel). Magenta border.
-    4. **Probe Inputs panel** (inclusion / safety only) — resolved
-       metadata for the curated asset that drove the run. Cyan
-       border, sits adjacent to the Probe panel so the two
-       "what we're measuring" surfaces stay visually grouped.
+    4. **Probe Inputs panel** (when the row's probe lists
+       ``preview_fields`` and any is set) — the bank entry or theme
+       the row drew. Cyan border, sits adjacent to the Probe panel
+       so the two "what we're measuring" surfaces stay visually
+       grouped.
     5. **Persona panel** — location / age / sex / education /
        occupation / interaction-disclosure styles, plus OCEAN
        traits with magnitude pills (low/very_low/high/very_high
@@ -1351,9 +1180,8 @@ def preview_row(
     # behavioural choices became messages.
     console.print(_render_probe_panel(row))
 
-    # Probe Inputs panel — only for inclusion / safety probes that
-    # wrote curated-asset metadata. ``general`` family (tool_calling
-    # / general_open_ended / general_educational) skips this entirely (returns None).
+    # Probe Inputs panel: the fields the row's probe declares in
+    # ``preview_fields``, skipped when it declares none or none are set.
     inputs_panel = _render_probe_inputs(row, metadata)
     if inputs_panel is not None:
         console.print(inputs_panel)
@@ -1755,7 +1583,7 @@ def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
     Columns: ``# / Status / Probe / Style / Turns / Tools / Country
     / Language / Age / Sex / Persona``. The ``Probe`` column carries
     what the rest of the codebase calls ``probe_type`` — see the
-    ``_PROBE_DESCRIPTIONS`` block for the rationale. ``Country`` /
+    "Probe terminology" note for the rationale. ``Country`` /
     ``Language`` replace the older combined ``Locale`` column —
     breaking them out makes filtering / scanning easier and the
     flag-prefixed country name carries more signal than the bare
@@ -1813,9 +1641,8 @@ def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
     table.add_column("#", justify="right", width=5, style="dim")
     table.add_column("Status", justify="center", width=11, no_wrap=True)
     # "Probe" names the measurement protocol the row was simulated
-    # under (tool_calling, sov_ai_facts, etc.) — see
-    # ``_PROBE_DESCRIPTIONS`` for the per-probe descriptions surfaced
-    # in the per-row Probe panel.
+    # under (tool_calling, sov_ai_facts, etc.); each probe class's
+    # ``description`` is what the per-row Probe panel shows.
     table.add_column("Probe", no_wrap=True)
     table.add_column("Style", no_wrap=True)
     # Headers ``Turns`` / ``Tools`` are 5 chars but Rich needs an

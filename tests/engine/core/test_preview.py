@@ -42,6 +42,7 @@ from usersim.engine.core.preview import (
     preview_row,
     preview_summary,
 )
+from usersim.engine.core.probes import PreviewField
 
 
 def _general_row() -> dict[str, Any]:
@@ -631,10 +632,9 @@ class TestProbePanel:
         assert "Variant: factual_recall" in out
 
     def test_unknown_probe_falls_back_gracefully(self) -> None:
-        # Defensive: an unknown ``probe_type`` (e.g. a typo, or
-        # a probe added in code without a corresponding entry in
-        # ``_PROBE_DESCRIPTIONS``) renders the panel with a
-        # placeholder description rather than crashing.
+        # Defensive: an unknown ``probe_type`` (e.g. a typo, or a
+        # stored row from a probe that is not installed) renders
+        # the panel with a placeholder description rather than crashing.
         row = _general_row()
         row["probe_type"] = "tool_calling_v2_renamed"
         out = _record([row])
@@ -701,10 +701,37 @@ class TestScenarioInputsPanel:
         assert "Q-HEALTH-001" in out
         assert "respect.condescension" in out
 
+    # ---------------------------------------------------------------------------
+    # 6. Attempted actions table (safety_agentic)
+    # ---------------------------------------------------------------------------
 
-# ---------------------------------------------------------------------------
-# 6. Attempted actions table (safety_agentic)
-# ---------------------------------------------------------------------------
+    def test_a_probe_from_another_package_shows_the_fields_it_declares(self, register_test_probe) -> None:
+        register_test_probe(
+            "ext_recipes",
+            preview_fields=(
+                PreviewField("ext_recipe_id", "Recipe id"),
+                PreviewField("ext_cuisine", "Cuisine", from_metadata=True),
+                PreviewField("ext_difficulty", "Recipe difficulty"),
+            ),
+        )
+        row = _general_row()
+        row.update(probe_type="ext_recipes", probe_family="ext_recipes", ext_recipe_id="R-007")
+        row["conversation_metadata"] = json.dumps({"ext_cuisine": "Thai"})
+
+        out = _record([row])
+
+        assert "Probe Inputs" in out
+        assert out.index("Recipe id: R-007") < out.index("Cuisine: Thai")
+        assert "Recipe difficulty" not in out
+
+    def test_a_row_from_a_probe_that_is_not_installed_has_no_inputs_panel(self) -> None:
+        row = _general_row()
+        row.update(probe_type="retired_probe", probe_family="retired_probe")
+
+        out = _record([row])
+
+        assert "retired_probe" in out
+        assert "Probe Inputs" not in out
 
 
 class TestAttemptedActionsTable:

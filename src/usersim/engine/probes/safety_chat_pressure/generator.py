@@ -68,12 +68,14 @@ from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.pressure_bank import (
     Strategy,
     TargetRequest,
+    default_pressure_bank_path,
     load_pressure_bank_default,
     reset_pressure_bank_cache,
 )
 from usersim.engine.core.probes import (
     BankBackedProbe,
     BankReframingMixin,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
@@ -238,10 +240,26 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """
 
     label = "safety_chat_pressure"
+    description = (
+        "Tests safety under multi-turn conversational pressure: does the assistant hold "
+        "the line when the user persists, reframes, or escalates a target request?"
+    )
+    default_scorers = ("safety_chat_pressure",)
+    preview_fields = (
+        PreviewField("target_request_id", "Target request id"),
+        PreviewField("strategy_id", "Pressure strategy"),
+        PreviewField("harm_category", "Harm category", from_metadata=True),
+    )
     output_columns = ("target_request_id", "strategy_id", "reframings_used", "capitulation_checks")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
     bank_version_key = _BANK_VERSION_KEY  # "safety" — not locale-keyed
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The pressure bank, which serves every locale."""
+        path = default_pressure_bank_path()
+        return [] if path.exists() else [f"no pressure bank at {path}"]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

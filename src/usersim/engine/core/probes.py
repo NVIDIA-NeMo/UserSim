@@ -47,6 +47,7 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Any,
@@ -225,6 +226,20 @@ _DEFAULT_GATE_PROMPT_TEMPLATE = (
 )
 
 
+@dataclass(frozen=True)
+class PreviewField:
+    """One line of the per-row preview's Probe Inputs panel: a value from the row, and the label it is shown with.
+
+    ``key`` names a column of the row, or with ``from_metadata`` a key the
+    probe writes to ``state.metadata``, read back from the row's conversation
+    metadata.
+    """
+
+    key: str
+    label: str
+    from_metadata: bool = False
+
+
 class BaseProbe:
     """Concrete probe with sensible defaults for every optional hook.
 
@@ -255,6 +270,22 @@ class BaseProbe:
     family: str = ""
     prompt_version: str = ""
     variants: tuple[str, ...] = ()
+
+    # A paragraph on what the probe tests, shown with each of its rows in the
+    # per-row preview and in the capability report's evidence. Empty shows none.
+    description: str = ""
+
+    # What the per-row preview's Probe Inputs panel shows for each of this
+    # probe's rows, top to bottom, such as the bank entry the row drew. A
+    # field whose value is empty is left out, and so is the panel when every
+    # field is. Empty shows no panel.
+    preview_fields: tuple[PreviewField, ...] = ()
+
+    # The registered scorers that ``usersim eval --scorers auto`` runs when the
+    # run holds this probe's rows, beside the generic rule-based ones it runs
+    # for every probe. Each runs on every row of the run and decides for
+    # itself which rows it applies to. Empty adds none.
+    default_scorers: tuple[str, ...] = ()
 
     # The directory that holds this probe's ``<label>/`` asset folder, for a
     # probe whose assets ship outside ``usersim``: an absolute path, such as
@@ -300,6 +331,18 @@ class BaseProbe:
         one and on its base locale's otherwise; any other locale runs on its own.
         """
         return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """Each problem with the assets this probe ships, such as a locale's missing bank. Empty when none.
+
+        ``usersim smoke`` runs it for every registered probe, and
+        ``assert_probe_conforms`` reports what it finds, so a missing or broken
+        bank surfaces at install time rather than partway through a run. Check
+        what the probe's loaders read, without calling a model or the network.
+        The default checks nothing.
+        """
+        return []
 
     @classmethod
     def themes(cls, locale: str) -> Sequence[Mapping[str, Any]] | None:
@@ -1551,6 +1594,42 @@ def declared_output_columns() -> tuple[str, ...]:
     for label in known_probes():
         columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
     return tuple(columns)
+
+
+def probe_description(label: str) -> str:
+    """The ``description`` of the probe registered as ``label``, or empty for a label no probe holds.
+
+    A stored row can name a probe that is not installed, so an unknown
+    label is not an error here.
+    """
+    if label not in known_probes():
+        return ""
+    return _PROBE_REGISTRY[label].description
+
+
+def probe_preview_fields(label: str) -> tuple[PreviewField, ...]:
+    """The ``preview_fields`` of the probe registered as ``label``, or none for a label no probe holds.
+
+    A stored row can name a probe that is not installed, so an unknown
+    label is not an error here.
+    """
+    if label not in known_probes():
+        return ()
+    return _PROBE_REGISTRY[label].preview_fields
+
+
+def default_scorers_by_family() -> dict[str, tuple[str, ...]]:
+    """Each ``probe_family`` a registered probe stores its rows under, with the ``default_scorers`` of those probes.
+
+    A row's ``probe_family`` is its probe's ``family``, or its label when the
+    probe sets none. Families come in label order, and so do the scorers of
+    two probes sharing one, each name once.
+    """
+    scorers: dict[str, dict[str, None]] = {}
+    for label in known_probes():
+        cls = _PROBE_REGISTRY[label]
+        scorers.setdefault(cls.family or label, {}).update(dict.fromkeys(cls.default_scorers))
+    return {family: tuple(names) for family, names in scorers.items()}
 
 
 def declared_model_aliases(cfg: Any) -> tuple[str, ...]:

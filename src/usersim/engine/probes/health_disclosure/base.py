@@ -64,6 +64,8 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
     GUARDED_MOVE_ENV = _MOVES_ENV
     #: Emitted (by BankBackedProbe) whenever the derived profile is a placeholder.
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE
+    #: The concealment scorer, which scores each client's ``guarded`` rows and skips the rest.
+    default_scorers = ("health_disclosure_concealment",)
 
     # ── BankBackedProbe hook ────────────────────────────────────────
     def derive_task(

@@ -17,7 +17,7 @@ import pytest
 
 import usersim.engine.generator  # noqa: F401  (populates the registry)
 from usersim.engine.core import simulation
-from usersim.engine.core.probes import BaseProbe, known_probes
+from usersim.engine.core.probes import BaseProbe, PreviewField, known_probes
 from usersim.engine.evaluator import scorers
 from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
 from usersim.engine.evaluator.scorers import list_scorers
@@ -192,10 +192,48 @@ class TestTheChecksCanFail:
                 "PreflightProbe.authoring_guide must be None or an https:// URL",
             ),
             ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
+            ({"description": ("Tests", "cooking")}, "PreflightProbe.description must be a string"),
+            (
+                {"preview_fields": PreviewField("theme", "Topic")},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (("theme", "Topic"),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", ""),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
+                {"preview_fields": (PreviewField("theme", 1),)},
+                "PreflightProbe.preview_fields must be a tuple of PreviewField, each with a key and a label",
+            ),
+            (
+                {"default_scorers": "tool_use"},
+                "PreflightProbe.default_scorers must be a tuple of scorer names; got 'tool_use'",
+            ),
+            (
+                {"default_scorers": ("tool_use", "no_such_scorer")},
+                "PreflightProbe.default_scorers names ['no_such_scorer'], which no registered scorer holds",
+            ),
             ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
             (
                 {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
                 "PreflightProbe.model_aliases must return a tuple of alias names; got 'critic_model'",
+            ),
+            ({"asset_problems": lambda self: []}, "PreflightProbe.asset_problems must be a classmethod"),
+            (
+                {"asset_problems": classmethod(lambda cls: "no bank for fr_FR")},
+                "PreflightProbe.asset_problems must return a list of strings; got 'no bank for fr_FR'",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: ["no bank for fr_FR"])},
+                "PreflightProbe.asset_problems: no bank for fr_FR",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: {}["fr_FR"])},
+                "PreflightProbe.asset_problems raised KeyError: 'fr_FR'",
             ),
         ],
         ids=[
@@ -203,8 +241,19 @@ class TestTheChecksCanFail:
             "bank-locale-not-a-classmethod",
             "relative-guide",
             "themes-not-a-classmethod",
+            "description-not-a-string",
+            "preview-fields-a-bare-field",
+            "preview-fields-plain-tuples",
+            "preview-field-without-a-label",
+            "preview-field-with-a-label-that-is-not-text",
+            "default-scorers-a-bare-string",
+            "default-scorers-naming-no-scorer",
             "model-aliases-not-a-classmethod",
             "model-aliases-a-bare-string",
+            "asset-check-not-a-classmethod",
+            "asset-check-a-bare-string",
+            "asset-check-finding-a-problem",
+            "asset-check-raising",
         ],
     )
     async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
@@ -219,6 +268,11 @@ class TestTheChecksCanFail:
             label = "declared_probe"
             locale_bank_check = staticmethod(lambda locale_dir: None)
             authoring_guide = "https://example.com/declared-probe/locales"
+            default_scorers = ("tool_use", "language_compliance")
+            preview_fields = (
+                PreviewField("theme", "Topic"),
+                PreviewField("taxonomy_id", "Taxonomy", from_metadata=True),
+            )
 
             @classmethod
             def bank_locale(cls, locale, probe_dir):
@@ -232,7 +286,20 @@ class TestTheChecksCanFail:
             def model_aliases(cls, cfg):
                 return ("critic_model",)
 
-        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes", "model_aliases")
+            @classmethod
+            def asset_problems(cls):
+                return []
+
+        declarations = (
+            "locale_bank_check",
+            "bank_locale",
+            "authoring_guide",
+            "themes",
+            "model_aliases",
+            "default_scorers",
+            "asset_problems",
+            "preview_fields",
+        )
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 
     @pytest.mark.parametrize(
@@ -288,6 +355,23 @@ class TestTheChecksCanFail:
         monkeypatch.setitem(scorers._REGISTRY, "defaulted", defaulted)
         problems = await scorer_conformance_problems("defaulted", sample_row={"sub_protocol": "Triage"})
         assert any("AttributeError" in p and "sub_protocol" in p for p in problems)
+
+    @pytest.mark.parametrize(("deterministic", "reported"), [(True, True), (False, False)])
+    async def test_a_deterministic_scorer_that_looks_up_a_model_is_reported(
+        self, monkeypatch, deterministic, reported
+    ) -> None:
+        """usersim rescore reruns a deterministic scorer with no models, trusting it calls none."""
+
+        async def judged_when_wired(row, models):
+            return {"judged": models.get("judge_model") is not None}
+
+        monkeypatch.setattr(scorers, "_REGISTRY", dict(scorers._REGISTRY))
+        monkeypatch.setattr(scorers, "_DETERMINISTIC", set(scorers._DETERMINISTIC))
+        scorers.register_scorer("judged_when_wired", judged_when_wired, deterministic=deterministic)
+
+        problems = await scorer_conformance_problems("judged_when_wired")
+        expected = "'judged_when_wired' is registered as deterministic but looked up judge_model"
+        assert any(expected in p for p in problems) is reported, problems
 
     async def test_keys_the_evaluator_fills_are_never_emptied(self, monkeypatch) -> None:
         async def relies_on_filled_keys(row, models):

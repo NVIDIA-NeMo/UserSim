@@ -55,15 +55,18 @@ from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.behavioral import get_conversation_language
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
     BankBackedProbe,
+    PreviewField,
     dispatch_episode,
     register_probe,
 )
 from usersim.engine.core.probing_taxonomy import (
     Category,
+    default_probing_taxonomy_path,
     load_probing_taxonomy,
     load_probing_taxonomy_for_locale,
     reset_probing_taxonomy_cache,
@@ -180,11 +183,34 @@ class SovAiDynamicProbe(BankBackedProbe):
     """
 
     label = "sov_ai_dynamic"
+    description = (
+        "Tests locale-specific knowledge where no curated answer exists: a "
+        "persona-voiced user explores a topic from the locale's taxonomy (history, "
+        "geography, culture, public services and more), and a judge flags suspected "
+        "fabrication, self-contradiction across turns and confident guesses where "
+        "declining was better."
+    )
+    default_scorers = ("sov_ai_dynamic",)
+    preview_fields = (
+        PreviewField("taxonomy_id", "Taxonomy id", from_metadata=True),
+        PreviewField("probing_categories_explored", "Categories explored"),
+        PreviewField("probing_subtopic_hints_used", "Sub-topic hints"),
+    )
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
     bank_version_key = None  # locale-keyed (the inclusion convention)
     locale_bank_check = staticmethod(_check_locale_bank)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """A probing taxonomy for every shipped locale."""
+        problems = []
+        for locale in SHIPPED_LOCALES:
+            path = default_probing_taxonomy_path(locale)
+            if not path.exists():
+                problems.append(f"no probing taxonomy for {locale} at {path}")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

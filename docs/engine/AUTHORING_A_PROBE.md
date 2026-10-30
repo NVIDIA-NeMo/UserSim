@@ -206,6 +206,32 @@ warnings a probe adds with `add_warning` take the same prefixed form, such as
 
 For `BaseProbe`-only subclasses, just `label` is required.
 
+Every probe also sets `description`, a paragraph on what it tests. The per-row
+preview and the capability report's evidence show it with each of the probe's
+rows:
+
+```python
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    description = "Tests whether the assistant ..."
+```
+
+A probe whose rows draw from a bank also lists, in `preview_fields`, what the
+per-row preview's Probe Inputs panel shows about the entry each row drew. A
+`PreviewField` names a column of the row, or with `from_metadata=True` a key
+the probe writes to `state.metadata`, and the label it is shown with. The panel
+leaves out a field whose value is empty, and is left out when every field is:
+
+```python
+from usersim.engine.core.probes import PreviewField
+
+class MyProbe(BankBackedProbe):
+    preview_fields = (
+        PreviewField("my_probe_item_id", "Item id"),
+        PreviewField("item_category", "Category", from_metadata=True),
+    )
+```
+
 A probe shipped in its own package, rather than in this repository, also
 sets `assets_root` to the directory that holds its `<label>/` asset folder,
 so it finds its banks wherever the package is installed:
@@ -351,6 +377,29 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
 - **`authoring_guide`** is an `https://` link to how to build the probe's bank
   for another locale. The refusal links it when a run asks for a locale the
   probe has no bank for.
+
+### Check the assets you ship
+
+`usersim smoke` runs each registered probe's `asset_problems` classmethod, and
+`assert_probe_conforms` reports what it finds, so an install that is missing a
+bank fails a check rather than a run. Return one string per problem, or an
+empty list, and read what your loaders read without calling a model:
+
+```python
+class MyProbe(BankVerbatimMixin, BankBackedProbe):
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        problems = []
+        for locale in ("en_US", "fr_FR"):
+            try:
+                _check_locale_bank(cls.assets_dir() / locale)
+            except Exception as error:
+                problems.append(f"{locale}: {type(error).__name__}: {error}")
+        return problems
+```
+
+The default checks nothing. An exception the check raises is reported like a
+problem it returns.
 
 ### Give each row a theme
 
@@ -550,6 +599,9 @@ If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
 is the most likely cause. If it shows up but `family missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
+
+A probe that checks its assets is named on the `probe assets` line, which
+fails with the first problems its `asset_problems` finds.
 
 For a probe in its own package, the `extensions` line names the package and
 fails with the reason when an entry point contributes nothing, such as an
@@ -1078,7 +1130,10 @@ register_scorer("your_probe", score_your_probe_trajectory)
 
 `register_scorer` takes the name and the function; it is not a decorator.
 Give it a name no other scorer uses: a different function under a taken name
-raises `ScorerRegistrationError`. The
+raises `ScorerRegistrationError`. A scorer that never calls or looks up a model
+also passes `deterministic=True`, so `usersim rescore` can recompute it on a
+stored evaluation; `assert_scorer_conforms` reports one that looks up a model
+anyway. The
 `trajectory` argument carries every top-level column your
 `build_result_extras` surfaced, because `TrajectoryEvaluatorGenerator` merges
 the full row dict into it, so any side-channel column you set is visible. A
@@ -1089,10 +1144,22 @@ when you pass it a `sample_row`.
 Add the module path to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
 so the auto-load path picks it up. After that, name it at evaluation time
-(`usersim eval --scorers your_probe`). The evaluator calls each named scorer on
-every row, so return early for rows from other probes, for example when your
-probe's join key is missing, as the `safety_agentic` scorer does with
-`action_request_id`.
+(`usersim eval --scorers your_probe`), or list it in the probe's
+`default_scorers`:
+
+```python
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    default_scorers = ("your_probe",)
+```
+
+`usersim eval --scorers auto` then runs it whenever the run holds the probe's
+rows, beside the rule-based `language_compliance`, `refusal_basics` and
+`response_shape`, which `auto` runs for every probe. `assert_probe_conforms`
+reports a name in `default_scorers` that no registered scorer holds. The
+evaluator calls each scorer it runs on every row, so return early for rows from
+other probes, for example when your probe's join key is missing, as the
+`safety_agentic` scorer does with `action_request_id`.
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See

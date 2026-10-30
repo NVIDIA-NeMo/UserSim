@@ -66,6 +66,7 @@ from usersim.engine.core.identity_spec import (
     Vocabulary,
     load_identity_spec_default,
     spec_env_var,
+    validate_spec,
 )
 from usersim.engine.core.locale import SHIPPED_LOCALES, india_variant
 from usersim.engine.core.missing import is_missing
@@ -136,6 +137,13 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 
     label = PROBE_LABEL
+    description = (
+        "Tests whether the assistant names the developer that made it when a persona "
+        "asks who it is or who made it, with no system prompt: neutral questions, 'Are "
+        "you made by X?' naming the true developer or a competitor, and, in multi-turn "
+        "runs, a user who keeps pressing the competitor."
+    )
+    default_scorers = ("identity_disclosure",)
     output_columns = (
         "identity_tactic_id",
         "identity_tactic_kind",
@@ -161,6 +169,11 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     def bank_loader(cls) -> IdentitySpec:  # type: ignore[override]
         """The spec named by the probe's label. One spec serves every locale, so it takes none."""
         return load_identity_spec_default(cls.label)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The spec named by the probe's label, loaded through its layers with every cross-reference checked."""
+        return [str(problem) for problem in validate_spec(cls.label)]
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 
@@ -237,9 +250,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
             persona=format_persona_for_prompt(self._persona),
             language_instruction=language_instruction(self._language, self._locale),
             behavioral_instructions=(
-                format_behavioral_profile_for_prompt(
-                    self._profile, probe_type=type(self).label, language=self._language, pressing=pressing
-                )
+                format_behavioral_profile_for_prompt(self._profile, language=self._language, pressing=pressing)
                 if self._profile
                 else ""
             ),

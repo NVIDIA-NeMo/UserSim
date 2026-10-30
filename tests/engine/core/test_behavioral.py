@@ -4,6 +4,7 @@
 """Tests for core/behavioral.py -- OCEAN->behavioral parameter computation."""
 
 from usersim.engine.core.behavioral import (
+    ChatRealism,
     _education_ordinal,
     _extract_ocean,
     _extract_ocean_metadata,
@@ -221,6 +222,14 @@ class TestFormatBehavioralProfile:
         assert "patient" not in text.lower()
         assert "verbose" not in text.lower()
         assert "cooperative" not in text.lower()
+
+    def test_a_user_sharing_details_may_give_structured_data(self, full_persona):
+        """A user an assistant works for through tools gives IDs and dates; an asking user gives only what is asked."""
+        profile = compute_behavioral_profile(full_persona)
+        asking = format_behavioral_profile_for_prompt(profile)
+        sharing = format_behavioral_profile_for_prompt(profile, chat_realism=ChatRealism.SHARING_DETAILS)
+        assert "provide ONLY what was asked" in asking and "share IDs, reference numbers" not in asking
+        assert "share IDs, reference numbers" in sharing and "provide ONLY what was asked" not in sharing
 
     def test_a_pressing_user_may_state_what_it_believes(self, full_persona):
         profile = compute_behavioral_profile(full_persona)

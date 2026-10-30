@@ -40,6 +40,12 @@ def _bank_loader():
 @register_probe(family=PROBE_FAMILY, prompt_version=PROMPT_VERSION, variants=tuple(PROBE_VARIANTS))
 class HealthGeneralDisclosureProbe(HealthDisclosureProbe):
     label = _LABEL
+    description = (
+        "Tests whether a general health assistant surfaces the red-flag symptoms and "
+        "medication lapses that a patient with an ongoing condition downplays. In the "
+        "guarded variant the user paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the assistant drew out."
+    )
     CLIENT = _CFG
     bank_loader = staticmethod(_bank_loader)
     bank_version_key = _LABEL  # per-client (locale-independent) provenance slot

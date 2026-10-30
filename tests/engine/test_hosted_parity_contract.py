@@ -84,6 +84,20 @@ async def test_every_registered_probe_runs_to_completion_with_scripted_models(pr
     assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
 
 
+@pytest.mark.parametrize(("probe_type", "shares_details"), [("tool_calling", True), ("general_open_ended", False)])
+async def test_only_the_tool_calling_user_may_share_details(probe_type: str, shares_details: bool) -> None:
+    """Its user hands the assistant the identifiers a tool call needs; an asking user gives only what is asked."""
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    system = next(
+        m["content"] for p in run.prompts if p["role"] == "user" for m in p["messages"] if m["role"] == "system"
+    )
+    assert ("share IDs, reference numbers" in system) is shares_details
+    assert ("provide ONLY what was asked" in system) is not shares_details
+
+
 async def test_a_model_factory_scripts_the_replies() -> None:
     """A ``ScriptedModel`` subclass answers in place of the default, with nothing patched."""
 
