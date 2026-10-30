@@ -260,6 +260,12 @@ class BaseProbe:
     # per-row preview and in the capability report's evidence. Empty shows none.
     description: str = ""
 
+    # The registered scorers that ``usersim eval --scorers auto`` runs when the
+    # run holds this probe's rows, beside the generic rule-based ones it runs
+    # for every probe. Each runs on every row of the run and decides for
+    # itself which rows it applies to. Empty adds none.
+    default_scorers: tuple[str, ...] = ()
+
     # The directory that holds this probe's ``<label>/`` asset folder, for a
     # probe whose assets ship outside ``usersim``: an absolute path, such as
     # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
@@ -1566,6 +1572,20 @@ def probe_description(label: str) -> str:
     if label not in known_probes():
         return ""
     return _PROBE_REGISTRY[label].description
+
+
+def default_scorers_by_family() -> dict[str, tuple[str, ...]]:
+    """Each ``probe_family`` a registered probe stores its rows under, with the ``default_scorers`` of those probes.
+
+    A row's ``probe_family`` is its probe's ``family``, or its label when the
+    probe sets none. Families come in label order, and so do the scorers of
+    two probes sharing one, each name once.
+    """
+    scorers: dict[str, dict[str, None]] = {}
+    for label in known_probes():
+        cls = _PROBE_REGISTRY[label]
+        scorers.setdefault(cls.family or label, {}).update(dict.fromkeys(cls.default_scorers))
+    return {family: tuple(names) for family, names in scorers.items()}
 
 
 def declared_model_aliases(cfg: Any) -> tuple[str, ...]:

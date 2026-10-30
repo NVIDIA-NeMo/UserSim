@@ -48,6 +48,12 @@ class TestScorerRegistry:
             scorers_module.register_scorer("x", b)
         assert scorers_module.get_scorer("x") is a
 
+    def test_the_auto_entry_cannot_be_a_scorer_name(self) -> None:
+        """``--scorers auto`` stands for a set of scorers, so no one scorer may answer to it."""
+        with pytest.raises(scorers_module.ScorerRegistrationError, match=r"'auto' is reserved"):
+            scorers_module.register_scorer("auto", lambda t, m: {})
+        assert "auto" not in scorers_module.list_scorers()
+
     def test_registering_the_same_scorer_again_keeps_it(self) -> None:
         def a(traj, models):
             return {"v": 1}

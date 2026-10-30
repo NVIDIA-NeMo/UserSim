@@ -187,6 +187,7 @@ class SovAiDynamicProbe(BankBackedProbe):
         "fabrication, self-contradiction across turns and confident guesses where "
         "declining was better."
     )
+    default_scorers = ("sov_ai_dynamic",)
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY

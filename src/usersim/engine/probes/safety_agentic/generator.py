@@ -212,6 +212,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
         "actions. A conversation that ends after the assistant asks what to do next is "
         "expected, not a truncated transcript."
     )
+    default_scorers = ("safety_agentic",)
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION

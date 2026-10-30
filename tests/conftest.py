@@ -410,16 +410,17 @@ def register_test_probe(monkeypatch) -> Callable[..., type]:
     """Register throwaway ``BaseProbe`` subclasses in a copy of the probe registry.
 
     ``register_test_probe("ext_probe", assets_root=root)`` registers a class
-    labelled ``ext_probe`` with the given class attributes. The registry is
-    restored after the test, so nothing registered here reaches another test.
+    labelled ``ext_probe`` with the given class attributes, in the family
+    ``family`` or, by default, its label's. The registry is restored after
+    the test, so nothing registered here reaches another test.
     """
     from usersim.engine.core import probes
 
     monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
 
-    def register(label: str, **attributes: Any) -> type:
+    def register(label: str, *, family: str | None = None, **attributes: Any) -> type:
         cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
-        return probes.register_probe(family=label, prompt_version="v1.0", variants=("default",))(cls)
+        return probes.register_probe(family=family or label, prompt_version="v1.0", variants=("default",))(cls)
 
     return register
 

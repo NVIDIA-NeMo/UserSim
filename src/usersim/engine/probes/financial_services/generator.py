@@ -326,6 +326,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         "numeric faithfulness, boundary adherence, no fabrication, graceful unknowns "
         "and self-consistency). Retrieval is scoped to a single institution."
     )
+    default_scorers = ("financial_services",)
     output_columns = (
         "finance_task_id",
         "task_type",

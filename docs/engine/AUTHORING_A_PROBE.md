@@ -1102,10 +1102,22 @@ when you pass it a `sample_row`.
 Add the module path to
 [`evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES`](../../src/usersim/engine/evaluator/scorers/__init__.py)
 so the auto-load path picks it up. After that, name it at evaluation time
-(`usersim eval --scorers your_probe`). The evaluator calls each named scorer on
-every row, so return early for rows from other probes, for example when your
-probe's join key is missing, as the `safety_agentic` scorer does with
-`action_request_id`.
+(`usersim eval --scorers your_probe`), or list it in the probe's
+`default_scorers`:
+
+```python
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    default_scorers = ("your_probe",)
+```
+
+`usersim eval --scorers auto` then runs it whenever the run holds the probe's
+rows, beside the rule-based `language_compliance`, `refusal_basics` and
+`response_shape`, which `auto` runs for every probe. `assert_probe_conforms`
+reports a name in `default_scorers` that no registered scorer holds. The
+evaluator calls each scorer it runs on every row, so return early for rows from
+other probes, for example when your probe's join key is missing, as the
+`safety_agentic` scorer does with `action_request_id`.
 
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See

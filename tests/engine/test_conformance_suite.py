@@ -193,6 +193,14 @@ class TestTheChecksCanFail:
             ),
             ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
             ({"description": ("Tests", "cooking")}, "PreflightProbe.description must be a string"),
+            (
+                {"default_scorers": "tool_use"},
+                "PreflightProbe.default_scorers must be a tuple of scorer names; got 'tool_use'",
+            ),
+            (
+                {"default_scorers": ("tool_use", "no_such_scorer")},
+                "PreflightProbe.default_scorers names ['no_such_scorer'], which no registered scorer holds",
+            ),
             ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
             (
                 {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
@@ -205,6 +213,8 @@ class TestTheChecksCanFail:
             "relative-guide",
             "themes-not-a-classmethod",
             "description-not-a-string",
+            "default-scorers-a-bare-string",
+            "default-scorers-naming-no-scorer",
             "model-aliases-not-a-classmethod",
             "model-aliases-a-bare-string",
         ],
@@ -221,6 +231,7 @@ class TestTheChecksCanFail:
             label = "declared_probe"
             locale_bank_check = staticmethod(lambda locale_dir: None)
             authoring_guide = "https://example.com/declared-probe/locales"
+            default_scorers = ("tool_use", "language_compliance")
 
             @classmethod
             def bank_locale(cls, locale, probe_dir):
@@ -234,7 +245,14 @@ class TestTheChecksCanFail:
             def model_aliases(cls, cfg):
                 return ("critic_model",)
 
-        declarations = ("locale_bank_check", "bank_locale", "authoring_guide", "themes", "model_aliases")
+        declarations = (
+            "locale_bank_check",
+            "bank_locale",
+            "authoring_guide",
+            "themes",
+            "model_aliases",
+            "default_scorers",
+        )
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 
     @pytest.mark.parametrize(

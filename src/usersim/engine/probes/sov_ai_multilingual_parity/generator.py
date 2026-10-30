@@ -149,6 +149,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
         "rather than condescend or deflect? Each row records its query_id, so answers "
         "to one question can be compared across locales."
     )
+    default_scorers = ("sov_ai_multilingual_parity",)
     output_columns = ("query_id",)
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.

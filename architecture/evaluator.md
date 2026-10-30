@@ -37,8 +37,12 @@ Twelve ship:
 | `response_shape` | structural expectations |
 | `refusal_basics` | refusal presence and form |
 
-Scorers are opt-in per run. A capability whose scorer was not dispatched
-renders as *untested* rather than as a failure, and
+Scorers are opt-in per run. `usersim eval --scorers auto` runs the three
+deterministic scorers, which apply to every probe, plus the `default_scorers`
+each probe in the run declares, found by the `probe_family` its rows are stored
+under; `auto` combines with scorer names. Over a run holding every built-in
+probe it runs every scorer the capability report reads. A capability whose
+scorer was not dispatched renders as *untested* rather than as a failure, and
 `capabilities_missing_scorer()` exists so a run can warn about that instead
 of silently producing an empty column.
 

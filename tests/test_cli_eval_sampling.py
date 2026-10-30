@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""How ``usersim eval`` sampled a run, and the report label that follows from it."""
+"""The rows and scorers of a ``usersim eval`` pass, and the report label that follows from its sampling."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from usersim import cli
 from usersim.cli import _pipeline
 from usersim.cli._models import bundled_models_path
 from usersim.engine.core.storage import read_partitioned_dataset, run_subroot, write_partitioned_dataset
+from usersim.engine.evaluator.scorers import GENERIC_SCORERS
 from usersim.reporting import EVAL_STORE_MANIFEST_FILENAME, read_eval_sample_manifest, record_eval_sample_pass
 
 RUN_ID = "1700000000"
@@ -28,11 +29,20 @@ class _StubDataDesigner:
         return SimpleNamespace(load_dataset=lambda: pd.DataFrame({"assistant_eval": ["{}"] * num_records}))
 
 
-def _evaluate(tmp_path, monkeypatch, trajectory_df, *flags):
-    """Run ``usersim eval`` over ``trajectory_df`` and return the evaluations root and its recorded pass."""
+def _evaluate(tmp_path, monkeypatch, trajectory_df, *flags, built=None):
+    """Run ``usersim eval`` over ``trajectory_df`` and return the evaluations root and its recorded pass.
+
+    ``built``, when given, receives the arguments the evaluator is built with.
+    """
     traj_root = tmp_path / "trajectories"
     write_partitioned_dataset(trajectory_df, run_subroot(traj_root, RUN_ID))
-    monkeypatch.setattr(_pipeline, "build_evaluator_config_builder", lambda **_: (_StubDataDesigner(), object()))
+
+    def build(**kwargs):
+        if built is not None:
+            built.update(kwargs)
+        return _StubDataDesigner(), object()
+
+    monkeypatch.setattr(_pipeline, "build_evaluator_config_builder", build)
     out = tmp_path / "evaluations"
     args = ["eval", "--trajectories", str(traj_root), "--out", str(out), "--models", str(bundled_models_path())]
 
@@ -63,6 +73,17 @@ class TestEvalRecordsItsSampling:
         # One row from each of en_US, pt_BR and ja_JP.
         assert (recorded.mode, recorded.n, recorded.n_selected, recorded.n_total) == ("per_locale", 1, 3, 6)
         assert recorded.random_seed == 42
+
+
+def test_auto_scorers_reach_the_evaluator_resolved_for_the_run(tmp_path, monkeypatch, trajectory_df, capsys):
+    """``--scorers auto`` becomes the generic scorers plus the default_scorers of the run's probes."""
+    run = trajectory_df.assign(probe_family=["tool_calling", "financial_services", *["general_open_ended"] * 4])
+    built: dict = {}
+
+    _evaluate(tmp_path, monkeypatch, run, "--scorers", "tool_use,auto", built=built)
+
+    assert built["scorers"] == ["tool_use", *GENERIC_SCORERS, "financial_services"]
+    assert f"scorers:       {', '.join(built['scorers'])}" in capsys.readouterr().out
 
 
 class TestEvalWarnsOnRepeatedIds:

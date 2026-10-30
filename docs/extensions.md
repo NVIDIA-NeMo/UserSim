@@ -127,6 +127,7 @@ def load_recipe_bank(locale: str) -> RecipeBank:
 class RecipeProbe(BankBackedProbe):
     label = "acme_recipes"
     description = "Tests cooking help: a home cook asks about a recipe from the bank."
+    default_scorers = ("acme_recipes",)
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_recipe_bank)
     locale_bank_check = staticmethod(read_recipe_bank)
@@ -149,6 +150,8 @@ class RecipeProbe(BankBackedProbe):
 
 - **`description`** is what the per-row preview and the capability report
   show about the probe.
+- **`default_scorers`** names the package's scorer, so
+  `usersim eval --scorers auto` runs it whenever a run holds the probe's rows.
 - **`assets_root`** is the absolute directory holding `acme_recipes/`, so the
   probe finds its banks wherever the package is installed.
 - **`load_recipe_bank`** reads under `RecipeProbe.assets_dir()`, the probe's

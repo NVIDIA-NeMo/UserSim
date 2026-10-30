@@ -151,7 +151,9 @@ When porting one of the templates into a new module:
 - [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`. Register it with
-      `deterministic=True` when it never calls a model.
+      `deterministic=True` when it never calls a model, and list it in
+      the class's `default_scorers` so `usersim eval --scorers auto`
+      runs it.
 - [ ] Write tests from `test_probe.py.template`. Its first test runs
       the probe end to end with `usersim.testing.run_episode` and
       scripted models. The standard tests after it control each reply:

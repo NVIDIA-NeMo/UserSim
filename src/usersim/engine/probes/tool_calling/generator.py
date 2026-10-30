@@ -245,6 +245,7 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         "requests, including argument shaping, schema validation, and recovery from "
         "tool-call failures."
     )
+    default_scorers = ("tool_use",)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

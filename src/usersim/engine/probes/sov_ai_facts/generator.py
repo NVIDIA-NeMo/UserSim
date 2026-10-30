@@ -167,6 +167,7 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
         "graded against ground-truth answers. Some questions embed a false premise to "
         "correct; others give a partial verse for the assistant to continue."
     )
+    default_scorers = ("sov_ai_facts",)
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT

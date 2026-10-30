@@ -112,7 +112,9 @@ def register(subparsers: argparse._SubParsersAction) -> None:
             "Comma-separated scorer names to run beside the judges, for "
             "example tool_use,language_compliance. Most scorers use an LLM "
             "judge; language_compliance, response_shape and refusal_basics "
-            "are rule-based. Default: none."
+            "are rule-based. 'auto' stands for those three plus the "
+            "default_scorers of each probe in the run, and combines with "
+            "names. Default: none."
         ),
     )
     p.add_argument(
@@ -177,6 +179,35 @@ def _parse_csv_or_none(spec: str | None) -> list[str] | None:
         return None
     items = [x.strip() for x in spec.split(",") if x.strip()]
     return items or None
+
+
+def _resolve_scorers(requested: list[str], families: Iterable[str]) -> list[str]:
+    """``requested`` with ``auto`` replaced by the generic scorers and the ``default_scorers`` of the run's probes.
+
+    ``families`` are the ``probe_family`` values of the rows being evaluated.
+    Each name appears once, where it first occurs. A family no installed probe
+    stores its rows under adds no scorer of its own, and a warning names it.
+    """
+    from usersim.engine.core.probes import default_scorers_by_family
+    from usersim.engine.evaluator.scorers import AUTO_SCORERS, GENERIC_SCORERS
+
+    if AUTO_SCORERS not in requested:
+        return requested
+    by_family = default_scorers_by_family()
+    present = set(families)
+    unclaimed = sorted(present - set(by_family))
+    if unclaimed:
+        logger.warning(
+            "no installed probe stores its rows under probe_family %s, so --scorers %s adds none of "
+            "its scorers for those rows.",
+            ", ".join(unclaimed),
+            AUTO_SCORERS,
+        )
+    auto = [*GENERIC_SCORERS, *(name for family, names in by_family.items() if family in present for name in names)]
+    resolved: dict[str, None] = {}
+    for name in requested:
+        resolved.update(dict.fromkeys(auto if name == AUTO_SCORERS else (name,)))
+    return list(resolved)
 
 
 def _choose_rows(args: argparse.Namespace, seed_path: Path) -> tuple[Any, Any, int, dict[str, Any]]:
@@ -349,6 +380,11 @@ def run(args: argparse.Namespace) -> int:
             tmp.close()
             temp_sample_seed = seed_source_path = Path(tmp.name)
             sampled.to_parquet(temp_sample_seed, index=False)
+
+        resolved = _resolve_scorers(scorers, seed_df["probe_family"].head(num_records).dropna().astype(str))
+        if resolved != scorers:
+            print(f"  scorers:       {', '.join(resolved)}")
+        scorers = resolved
 
         data_designer, builder = build_evaluator_config_builder(
             models=models,

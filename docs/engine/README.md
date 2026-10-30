@@ -432,7 +432,8 @@ hook), see the source-of-truth docstrings in
 new axes to `evaluator/axes.py::PROBE_SCORES` if needed; add a
 scorer under `evaluator/scorers/your_probe.py` and include it in
 `DEFAULT_SCORER_MODULES` to register it on import; name it in `--scorers` to
-run it.
+run it, or list it in the probe's `default_scorers` so `--scorers auto` runs
+it.
 
 ## Scope
 

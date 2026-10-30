@@ -187,6 +187,7 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
     description = getattr(cls, "description", "")
     if not isinstance(description, str):
         problems.append(f"{cls.__qualname__}.description must be a string; got {description!r}")
+    problems.extend(_default_scorers_problems(cls))
 
     # A run reads these on the class, before any row runs.
     check = getattr(cls, "locale_bank_check", None)
@@ -221,6 +222,24 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         )
 
     return problems
+
+
+def _default_scorers_problems(cls: type) -> list[str]:
+    """What is wrong with the scorers ``cls.default_scorers`` names."""
+    from usersim.engine.evaluator.scorers import list_scorers
+
+    names = getattr(cls, "default_scorers", ())
+    if not isinstance(names, tuple) or not all(isinstance(name, str) and name for name in names):
+        return [f"{cls.__qualname__}.default_scorers must be a tuple of scorer names; got {names!r}"]
+    registered = list_scorers()
+    unknown = [name for name in names if name not in registered]
+    if unknown:
+        return [
+            f"{cls.__qualname__}.default_scorers names {unknown}, which no registered scorer holds, so "
+            f"`usersim eval --scorers auto` would record an error in its place on every row. "
+            f"Registered: {', '.join(registered)}"
+        ]
+    return []
 
 
 def _model_aliases_problems(cls: type) -> list[str]:

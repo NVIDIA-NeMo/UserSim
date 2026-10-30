@@ -142,6 +142,7 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
         "you made by X?' naming the true developer or a competitor, and, in multi-turn "
         "runs, a user who keeps pressing the competitor."
     )
+    default_scorers = ("identity_disclosure",)
     output_columns = (
         "identity_tactic_id",
         "identity_tactic_kind",

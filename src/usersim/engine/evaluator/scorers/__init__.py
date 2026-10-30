@@ -190,9 +190,17 @@ _REGISTRY: dict[str, ScorerFn] = {}
 #: The names registered with ``deterministic=True``.
 _DETERMINISTIC: set[str] = set()
 
+#: The ``usersim eval --scorers`` entry that stands for ``GENERIC_SCORERS``
+#: plus the ``default_scorers`` of every probe in the run. No scorer may be
+#: registered under it.
+AUTO_SCORERS = "auto"
+#: The rule-based scorers that apply to every probe's rows, which ``auto``
+#: runs beside the probes' own.
+GENERIC_SCORERS: tuple[str, ...] = ("language_compliance", "refusal_basics", "response_shape")
+
 
 class ScorerRegistrationError(ValueError):
-    """Raised when ``register_scorer`` is given a name another scorer holds."""
+    """Raised when ``register_scorer`` is given a name another scorer holds, or ``auto``."""
 
 
 def _definition(fn: Any) -> str:
@@ -213,7 +221,15 @@ def register_scorer(name: str, fn: ScorerFn, *, deterministic: bool = False) -> 
     any row, so ``usersim rescore`` may rerun it on a stored evaluation. A
     scorer that calls a model on some rows, or whenever one is wired, leaves
     it unset.
+
+    ``auto`` (``AUTO_SCORERS``) is refused, since ``--scorers auto`` names
+    a set of scorers rather than one.
     """
+    if name == AUTO_SCORERS:
+        raise ScorerRegistrationError(
+            f"scorer name {name!r} is reserved: `usersim eval --scorers {name}` runs the generic scorers "
+            "and the default_scorers of the run's probes. Give the scorer another name."
+        )
     existing = _REGISTRY.get(name)
     if existing is not None and existing is not fn and _definition(existing) != _definition(fn):
         raise ScorerRegistrationError(
