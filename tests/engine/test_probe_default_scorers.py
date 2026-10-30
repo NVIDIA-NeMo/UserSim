@@ -44,6 +44,14 @@ def test_a_family_no_installed_probe_stores_is_named(caplog) -> None:
     assert "tool_calling" not in warning
 
 
+def test_a_blank_family_adds_no_scorer_and_no_warning(caplog) -> None:
+    with caplog.at_level(logging.WARNING, logger="usersim.cli.eval"):
+        resolved = _resolve_scorers(["auto"], ["", "tool_calling"])
+
+    assert resolved == [*GENERIC_SCORERS, "tool_use"]
+    assert not caplog.records
+
+
 def test_a_probe_is_found_by_the_family_its_rows_are_stored_under(register_test_probe) -> None:
     register_test_probe("ext_recipes", family="ext_cooking", default_scorers=("tool_use",))
 
