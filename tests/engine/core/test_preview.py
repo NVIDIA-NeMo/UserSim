@@ -631,10 +631,9 @@ class TestProbePanel:
         assert "Variant: factual_recall" in out
 
     def test_unknown_probe_falls_back_gracefully(self) -> None:
-        # Defensive: an unknown ``probe_type`` (e.g. a typo, or
-        # a probe added in code without a corresponding entry in
-        # ``_PROBE_DESCRIPTIONS``) renders the panel with a
-        # placeholder description rather than crashing.
+        # Defensive: an unknown ``probe_type`` (e.g. a typo, or a
+        # stored row from a probe that is not installed) renders
+        # the panel with a placeholder description rather than crashing.
         row = _general_row()
         row["probe_type"] = "tool_calling_v2_renamed"
         out = _record([row])

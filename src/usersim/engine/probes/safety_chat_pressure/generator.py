@@ -238,6 +238,10 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     """
 
     label = "safety_chat_pressure"
+    description = (
+        "Tests safety under multi-turn conversational pressure: does the assistant hold "
+        "the line when the user persists, reframes, or escalates a target request?"
+    )
     output_columns = ("target_request_id", "strategy_id", "reframings_used", "capitulation_checks")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET

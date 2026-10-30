@@ -54,7 +54,8 @@ required; the rest have working defaults on `BaseProbe`.
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
 
 Anything a probe does not override inherits a default, so a new probe declares
-only what is specific to it.
+only what is specific to it. Its `description`, a paragraph on what it tests, is
+what the per-row preview and the capability report show with its rows.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name is a core column or

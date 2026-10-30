@@ -143,6 +143,12 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_multilingual_parity"
+    description = (
+        "Tests respect and calibration on the same question asked in every locale: does "
+        "the assistant engage each user as a peer and pitch a helpful answer to them, "
+        "rather than condescend or deflect? Each row records its query_id, so answers "
+        "to one question can be compared across locales."
+    )
     output_columns = ("query_id",)
     # Routes through the module-level ``_load_bank`` alias so tests
     # that monkeypatch ``_load_bank`` propagate correctly.

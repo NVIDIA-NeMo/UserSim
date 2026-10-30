@@ -239,6 +239,11 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     """
 
     label = "tool_calling"
+    description = (
+        "Tests the assistant's ability to invoke tools correctly in response to user "
+        "requests, including argument shaping, schema validation, and recovery from "
+        "tool-call failures."
+    )
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

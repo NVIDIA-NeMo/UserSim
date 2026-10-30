@@ -49,6 +49,11 @@ class OpenEndedProbe(BaseProbe):
     """
 
     label = "general_open_ended"
+    description = (
+        "Tests information-seeking conversations across diverse personas: accurate, "
+        "coherent answers pitched to the user's apparent expertise, and a clarifying "
+        "question rather than an information dump when a request is vague."
+    )
 
     @classmethod
     def themes(cls, locale: str) -> list[dict[str, Any]]:

@@ -50,6 +50,11 @@ class EducationalProbe(BaseProbe):
     """
 
     label = "general_educational"
+    description = (
+        "Tests tutoring: a persona-grounded learner asks about a subject, and the probe "
+        "looks at whether explanations are accurate, pitched at the learner's level and "
+        "scaffolded with examples, without condescension."
+    )
 
     @classmethod
     def themes(cls, locale: str) -> list[dict[str, Any]]:

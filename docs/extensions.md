@@ -126,6 +126,7 @@ def load_recipe_bank(locale: str) -> RecipeBank:
 @register_probe(family="acme_recipes", prompt_version="v1.0", variants=("default",))
 class RecipeProbe(BankBackedProbe):
     label = "acme_recipes"
+    description = "Tests cooking help: a home cook asks about a recipe from the bank."
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_recipe_bank)
     locale_bank_check = staticmethod(read_recipe_bank)
@@ -146,6 +147,8 @@ class RecipeProbe(BankBackedProbe):
         return {**super().build_result_extras(state), "acme_recipe_id": self._task.id}
 ```
 
+- **`description`** is what the per-row preview and the capability report
+  show about the probe.
 - **`assets_root`** is the absolute directory holding `acme_recipes/`, so the
   probe finds its banks wherever the package is installed.
 - **`load_recipe_bank`** reads under `RecipeProbe.assets_dir()`, the probe's

@@ -256,6 +256,10 @@ class BaseProbe:
     prompt_version: str = ""
     variants: tuple[str, ...] = ()
 
+    # A paragraph on what the probe tests, shown with each of its rows in the
+    # per-row preview and in the capability report's evidence. Empty shows none.
+    description: str = ""
+
     # The directory that holds this probe's ``<label>/`` asset folder, for a
     # probe whose assets ship outside ``usersim``: an absolute path, such as
     # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
@@ -1551,6 +1555,17 @@ def declared_output_columns() -> tuple[str, ...]:
     for label in known_probes():
         columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
     return tuple(columns)
+
+
+def probe_description(label: str) -> str:
+    """The ``description`` of the probe registered as ``label``, or empty for a label no probe holds.
+
+    A stored row can name a probe that is not installed, so an unknown
+    label is not an error here.
+    """
+    if label not in known_probes():
+        return ""
+    return _PROBE_REGISTRY[label].description
 
 
 def declared_model_aliases(cfg: Any) -> tuple[str, ...]:

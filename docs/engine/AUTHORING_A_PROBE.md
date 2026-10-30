@@ -206,6 +206,16 @@ warnings a probe adds with `add_warning` take the same prefixed form, such as
 
 For `BaseProbe`-only subclasses, just `label` is required.
 
+Every probe also sets `description`, a paragraph on what it tests. The per-row
+preview and the capability report's evidence show it with each of the probe's
+rows:
+
+```python
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    description = "Tests whether the assistant ..."
+```
+
 A probe shipped in its own package, rather than in this repository, also
 sets `assets_root` to the directory that holds its `<label>/` asset folder,
 so it finds its banks wherever the package is installed:

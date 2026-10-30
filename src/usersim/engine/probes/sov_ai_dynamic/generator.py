@@ -180,6 +180,13 @@ class SovAiDynamicProbe(BankBackedProbe):
     """
 
     label = "sov_ai_dynamic"
+    description = (
+        "Tests locale-specific knowledge where no curated answer exists: a "
+        "persona-voiced user explores a topic from the locale's taxonomy (history, "
+        "geography, culture, public services and more), and a judge flags suspected "
+        "fabrication, self-contradiction across turns and confident guesses where "
+        "declining was better."
+    )
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY

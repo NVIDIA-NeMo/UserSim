@@ -184,6 +184,10 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
         if kind_problem:
             problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
 
+    description = getattr(cls, "description", "")
+    if not isinstance(description, str):
+        problems.append(f"{cls.__qualname__}.description must be a string; got {description!r}")
+
     # A run reads these on the class, before any row runs.
     check = getattr(cls, "locale_bank_check", None)
     if check is not None and not callable(check):

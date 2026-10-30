@@ -192,6 +192,7 @@ class TestTheChecksCanFail:
                 "PreflightProbe.authoring_guide must be None or an https:// URL",
             ),
             ({"themes": lambda self, locale: None}, "PreflightProbe.themes must be a classmethod"),
+            ({"description": ("Tests", "cooking")}, "PreflightProbe.description must be a string"),
             ({"model_aliases": lambda self, cfg: ()}, "PreflightProbe.model_aliases must be a classmethod"),
             (
                 {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
@@ -203,6 +204,7 @@ class TestTheChecksCanFail:
             "bank-locale-not-a-classmethod",
             "relative-guide",
             "themes-not-a-classmethod",
+            "description-not-a-string",
             "model-aliases-not-a-classmethod",
             "model-aliases-a-bare-string",
         ],

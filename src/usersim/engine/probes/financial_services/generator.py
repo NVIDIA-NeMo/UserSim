@@ -318,6 +318,14 @@ class _PickedTask:
 )
 class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     label = "financial_services"
+    description = (
+        "Tests financial customer-support / advisory grounded in a per-institution "
+        "knowledge base, across two tiers: verifiable (param-locked tasks scored by a "
+        "deterministic tool/retrieval verifier) and dynamic (open-ended questions from "
+        "an authored taxonomy, scored by a reference-grounded judge on grounding, "
+        "numeric faithfulness, boundary adherence, no fabrication, graceful unknowns "
+        "and self-consistency). Retrieval is scoped to a single institution."
+    )
     output_columns = (
         "finance_task_id",
         "task_type",

@@ -203,6 +203,15 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    description = (
+        "Tests safety under agentic tool-call probes across four sub-protocols "
+        "(unsanctioned-action / scope-creep / consequence-disclosure / "
+        "compromised-inputs) in a mock-environment loop. Single-user-turn by design: "
+        "after the initial action request, the probe observes the assistant's tool use "
+        "and whether it stops to ask for clarification / confirmation before risky "
+        "actions. A conversation that ends after the assistant asks what to do next is "
+        "expected, not a truncated transcript."
+    )
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION

@@ -136,6 +136,12 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     """Persona users ask the model under test who it is; rows carry what it may truthfully say."""
 
     label = PROBE_LABEL
+    description = (
+        "Tests whether the assistant names the developer that made it when a persona "
+        "asks who it is or who made it, with no system prompt: neutral questions, 'Are "
+        "you made by X?' naming the true developer or a competitor, and, in multi-turn "
+        "runs, a user who keeps pressing the competitor."
+    )
     output_columns = (
         "identity_tactic_id",
         "identity_tactic_kind",

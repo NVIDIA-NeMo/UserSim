@@ -24,6 +24,7 @@ from typing import Any, Iterable, Iterator
 
 from usersim.engine.core.missing import is_missing
 from usersim.engine.core.outcomes import WarningKind, is_placeholder_warning_kind
+from usersim.engine.core.probes import probe_description
 from usersim.engine.core.row_metadata import recorded_value
 from usersim.taxonomy.capabilities import (
     CapabilityDefinition,
@@ -1341,7 +1342,7 @@ def _evidence_snippets(
                 probe_family=_clean_str(row.get("probe_family")) or "",
                 probe_type=probe_type,
                 probe_variant=probe_variant,
-                probe_description=_PROBE_DESCRIPTIONS.get(probe_type, ""),
+                probe_description=probe_description(probe_type),
                 reasoning=_reasoning_summary(row),
                 findings=_build_findings(row, definition),
                 turns=turns,
@@ -1349,100 +1350,6 @@ def _evidence_snippets(
             )
         )
     return out
-
-
-# Mirrors usersim.engine.core.preview._PROBE_DESCRIPTIONS so the
-# dashboard can render the same per-probe explainer the Rich panel in
-# notebooks/01_simulate.ipynb shows. Inlined here (rather than imported)
-# to avoid pulling Rich + the rest of the preview module into the
-# reporting layer's import graph.
-_PROBE_DESCRIPTIONS: dict[str, str] = {
-    "tool_calling": (
-        "Tests the assistant's ability to invoke tools correctly in response to user "
-        "requests, including argument shaping, schema validation, and recovery from "
-        "tool-call failures."
-    ),
-    "general_open_ended": (
-        "Tests information-seeking conversations across diverse personas: accurate, "
-        "coherent answers pitched to the user's apparent expertise, and a clarifying "
-        "question rather than an information dump when a request is vague."
-    ),
-    "general_educational": (
-        "Tests tutoring: a persona-grounded learner asks about a subject, and the probe "
-        "looks at whether explanations are accurate, pitched at the learner's level and "
-        "scaffolded with examples, without condescension."
-    ),
-    "sov_ai_facts": (
-        "Tests recall of locale-specific (sovereign) facts drawn from a curated bank, "
-        "graded against ground-truth answers. Some questions embed a false premise to "
-        "correct; others give a partial verse for the assistant to continue."
-    ),
-    "sov_ai_dynamic": (
-        "Tests locale-specific knowledge where no curated answer exists: a persona-voiced "
-        "user explores a topic from the locale's taxonomy (history, geography, culture, "
-        "public services and more), and a judge flags suspected fabrication, "
-        "self-contradiction across turns and confident guesses where declining was "
-        "better."
-    ),
-    "sov_ai_multilingual_parity": (
-        "Tests respect and calibration on the same question asked in every locale: does "
-        "the assistant engage each user as a peer and pitch a helpful answer to them, "
-        "rather than condescend or deflect? Each row records its query_id, so answers "
-        "to one question can be compared across locales."
-    ),
-    "safety_chat_pressure": (
-        "Tests safety under multi-turn conversational pressure: does the assistant "
-        "hold the line when the user persists, reframes, or escalates a target request?"
-    ),
-    "safety_agentic": (
-        "Tests safety under agentic tool-call probes across four sub-protocols "
-        "(unsanctioned-action / scope-creep / consequence-disclosure / "
-        "compromised-inputs) in a mock-environment loop. Single-user-turn by design: "
-        "after the initial action request, the probe observes the assistant's tool use "
-        "and whether it stops to ask for clarification / confirmation before risky "
-        "actions. A conversation that ends after the assistant asks what to do next is "
-        "expected, not a truncated transcript."
-    ),
-    "financial_services": (
-        "Tests financial customer-support / advisory grounded in a per-institution "
-        "knowledge base, across two tiers: verifiable (param-locked tasks scored by a "
-        "deterministic tool/retrieval verifier) and dynamic (open-ended questions from "
-        "an authored taxonomy, scored by a reference-grounded judge on grounding, "
-        "numeric faithfulness, boundary adherence, no fabrication, graceful unknowns "
-        "and self-consistency). Retrieval is scoped to a single institution."
-    ),
-    "identity_disclosure": (
-        "Tests whether the assistant names the developer that made it when a persona "
-        "asks who it is or who made it, with no system prompt: neutral questions, 'Are "
-        "you made by X?' naming the true developer or a competitor, and, in multi-turn "
-        "runs, a user who keeps pressing the competitor."
-    ),
-    "health_therapy_disclosure": (
-        "Tests whether a therapy assistant draws out what a guarded client discloses "
-        "only gradually, including self-harm or crisis risk. In the guarded variant the "
-        "user paces disclosure by plan, and the health_disclosure_concealment scorer "
-        "measures how much the assistant drew out."
-    ),
-    "health_triage_disclosure": (
-        "Tests whether a care-navigation (triage) assistant surfaces urgent red-flag "
-        "symptoms that a patient downplays and reveals only when asked directly. In the "
-        "guarded variant the user paces disclosure by plan, and the "
-        "health_disclosure_concealment scorer measures how much the assistant drew out."
-    ),
-    "health_decision_support_disclosure": (
-        "Tests whether a clinical decision-support assistant asks the questions that "
-        "surface a key finding or red-flag danger sign a clinician leaves out when first "
-        "presenting a case. In the guarded variant the user paces disclosure by plan, "
-        "and the health_disclosure_concealment scorer measures how much the assistant "
-        "drew out."
-    ),
-    "health_general_disclosure": (
-        "Tests whether a general health assistant surfaces the red-flag symptoms and "
-        "medication lapses that a patient with an ongoing condition downplays. In the "
-        "guarded variant the user paces disclosure by plan, and the "
-        "health_disclosure_concealment scorer measures how much the assistant drew out."
-    ),
-}
 
 
 def _per_turn_judge_ratings(raw: Any) -> list[dict[str, Any]]:

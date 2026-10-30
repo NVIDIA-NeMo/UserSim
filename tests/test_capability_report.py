@@ -851,13 +851,21 @@ def test_axis_description_is_absent_for_judged_axes():
     assert axis_description("helpfulness") == ""
 
 
-def test_dashboard_probe_descriptions_match_the_preview():
-    """The dashboard keeps its own copy of the preview's probe descriptions so
-    reporting doesn't import Rich; the two copies must say the same thing."""
-    from usersim.engine.core import preview
-    from usersim.reporting import capability_report
+def test_every_built_in_probe_describes_itself():
+    """The preview and the dashboard show each row's probe description from its class."""
+    from usersim.engine.core.probes import known_probes, probe_description
 
-    assert capability_report._PROBE_DESCRIPTIONS == preview._PROBE_DESCRIPTIONS
+    assert [label for label in known_probes() if not probe_description(label)] == []
+
+
+def test_a_probe_description_comes_from_its_class(register_test_probe):
+    """A probe shipped in its own package is described where a built-in is; a label no probe holds has none."""
+    from usersim.engine.core.probes import probe_description
+
+    register_test_probe("ext_described", description="Tests cooking help from a recipe bank.")
+
+    assert probe_description("ext_described") == "Tests cooking help from a recipe bank."
+    assert probe_description("no_such_probe") == ""
 
 
 def test_dashboard_prefers_reasoning_then_description(tmp_path):

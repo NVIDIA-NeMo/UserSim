@@ -162,6 +162,11 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_facts"
+    description = (
+        "Tests recall of locale-specific (sovereign) facts drawn from a curated bank, "
+        "graded against ground-truth answers. Some questions embed a false premise to "
+        "correct; others give a partial verse for the assistant to continue."
+    )
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT

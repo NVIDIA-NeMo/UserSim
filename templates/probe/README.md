@@ -113,6 +113,8 @@ When porting one of the templates into a new module:
 - [ ] Pick a `label` for `@register_probe` that no other probe uses,
       used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
       Underscores, lowercase.
+- [ ] Set `description`, a paragraph on what the probe tests; the
+      per-row preview and the capability report show it.
 - [ ] Pick a `family` (the class attribute the decorator sets).
       The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the
