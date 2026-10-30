@@ -419,9 +419,10 @@ Quick orientation:
    discarded on the way to storage (with a warning in the log), and the
    scorer that reads it back reports nothing to score; see the
    authoring guide's step 6.
-7. Run `usersim smoke` to confirm registration; copy
-   `templates/probe/test_probe.py.template` for the per-probe
-   regression test.
+7. Run `usersim smoke` to confirm registration and, when your probe
+   checks its banks in an `asset_problems` classmethod, that they are
+   found; copy `templates/probe/test_probe.py.template` for the
+   per-probe regression test.
 
 For the substrate's API surface (every class, every mixin, every
 hook), see the source-of-truth docstrings in

@@ -50,6 +50,7 @@ from usersim.engine.core.probes import (
 )
 from usersim.engine.core.query_bank import (
     Query,
+    default_query_bank_path,
     load_query_bank_default,
     reset_query_bank_cache,
 )
@@ -156,6 +157,12 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_QUERY
     bank_version_key = None  # locale-keyed (the inclusion convention)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The query bank, which serves every locale."""
+        path = default_query_bank_path()
+        return [] if path.exists() else [f"no query bank at {path}"]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

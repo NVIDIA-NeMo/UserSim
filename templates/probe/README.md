@@ -127,6 +127,9 @@ When porting one of the templates into a new module:
       by locale also sets `locale_bank_check`, so a run refuses a locale
       whose bank is missing before any model call (step 3 of
       `docs/engine/AUTHORING_A_PROBE.md`).
+- [ ] If the probe ships banks, check them in an `asset_problems`
+      classmethod, so `usersim smoke` reports an install that is missing
+      one (step 3 of `docs/engine/AUTHORING_A_PROBE.md`).
 - [ ] If the probe's conversations vary by topic, list the topics in a
       `themes` classmethod and read the row's with `self.theme()` (step 3
       of `docs/engine/AUTHORING_A_PROBE.md`).

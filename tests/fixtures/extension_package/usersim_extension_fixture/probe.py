@@ -27,6 +27,14 @@ class FixtureProbe(BaseProbe):
         return ("fixture_critic_model",)
 
     @classmethod
+    def asset_problems(cls) -> list[str]:
+        try:
+            _check_locale_bank(cls.assets_dir() / "en_US")
+        except FileNotFoundError as error:
+            return [str(error)]
+        return []
+
+    @classmethod
     def themes(cls, locale: str) -> list[dict]:
         return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 

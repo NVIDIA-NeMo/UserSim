@@ -206,6 +206,19 @@ class TestTheChecksCanFail:
                 {"model_aliases": classmethod(lambda cls, cfg: "critic_model")},
                 "PreflightProbe.model_aliases must return a tuple of alias names; got 'critic_model'",
             ),
+            ({"asset_problems": lambda self: []}, "PreflightProbe.asset_problems must be a classmethod"),
+            (
+                {"asset_problems": classmethod(lambda cls: "no bank for fr_FR")},
+                "PreflightProbe.asset_problems must return a list of strings; got 'no bank for fr_FR'",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: ["no bank for fr_FR"])},
+                "PreflightProbe.asset_problems: no bank for fr_FR",
+            ),
+            (
+                {"asset_problems": classmethod(lambda cls: {}["fr_FR"])},
+                "PreflightProbe.asset_problems raised KeyError: 'fr_FR'",
+            ),
         ],
         ids=[
             "check-not-callable",
@@ -217,6 +230,10 @@ class TestTheChecksCanFail:
             "default-scorers-naming-no-scorer",
             "model-aliases-not-a-classmethod",
             "model-aliases-a-bare-string",
+            "asset-check-not-a-classmethod",
+            "asset-check-a-bare-string",
+            "asset-check-finding-a-problem",
+            "asset-check-raising",
         ],
     )
     async def test_unusable_preflight_declarations_are_reported(self, attributes, expected) -> None:
@@ -245,6 +262,10 @@ class TestTheChecksCanFail:
             def model_aliases(cls, cfg):
                 return ("critic_model",)
 
+            @classmethod
+            def asset_problems(cls):
+                return []
+
         declarations = (
             "locale_bank_check",
             "bank_locale",
@@ -252,6 +273,7 @@ class TestTheChecksCanFail:
             "themes",
             "model_aliases",
             "default_scorers",
+            "asset_problems",
         )
         assert not [p for p in probe_conformance_problems(Declared) if any(d in p for d in declarations)]
 

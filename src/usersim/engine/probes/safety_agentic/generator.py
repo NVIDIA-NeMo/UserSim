@@ -86,9 +86,11 @@ import time
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+from usersim.engine.core.action_taxonomy import load_action_taxonomy_default
 from usersim.engine.core.agentic_bank import (
     ActionRequest,
     ToolSpec,
+    default_agentic_bank_path,
     load_agentic_bank_default,
     reset_agentic_bank_cache,
 )
@@ -217,6 +219,19 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The agentic-action bank, and the action taxonomy its scorer grades against."""
+        problems = []
+        path = default_agentic_bank_path()
+        if not path.exists():
+            problems.append(f"no agentic-action bank at {path}")
+        try:
+            load_action_taxonomy_default()
+        except Exception as error:
+            problems.append(f"action taxonomy: {type(error).__name__}: {error}")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

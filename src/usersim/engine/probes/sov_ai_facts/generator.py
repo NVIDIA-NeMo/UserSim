@@ -53,10 +53,12 @@ from typing import Any
 
 from usersim.engine.core.fact_bank import (
     Fact,
+    default_fact_bank_path,
     load_fact_bank,
     load_fact_bank_for_locale,
     reset_fact_bank_cache,
 )
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import (
@@ -173,6 +175,16 @@ class SovAiFactsProbe(BankVerbatimMixin, BankBackedProbe):
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
     bank_version_key = None  # locale-keyed (the inclusion convention)
     locale_bank_check = staticmethod(_check_locale_bank)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """A fact bank for every shipped locale."""
+        problems = []
+        for locale in SHIPPED_LOCALES:
+            path = default_fact_bank_path(locale)
+            if not path.exists():
+                problems.append(f"no fact bank for {locale} at {path}")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

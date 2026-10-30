@@ -118,7 +118,10 @@ instance). Those probes declare a `locale_bank_check` on the class, which the
 pre-flight calls on the bank the class's `bank_locale` names. The refusal names
 the probe, the locale and the locales that can run, rather than failing from
 inside a loader mid-run. `simulate` and its `--dry-run`, `--materialize-inputs`,
-`--inputs` and notebook 01 all run the check. See [assets.md](assets.md).
+`--inputs` and notebook 01 all run the check. A probe's `asset_problems`
+classmethod checks the assets it ships without a model call: `usersim smoke`
+runs it for each registered probe, and `assert_probe_conforms` reports what it
+finds. See [assets.md](assets.md).
 
 A probe whose conversations vary by topic lists its themes in a `themes`
 classmethod, read under its asset folder. A run draws one per row into the

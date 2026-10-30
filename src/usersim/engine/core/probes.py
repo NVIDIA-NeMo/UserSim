@@ -312,6 +312,18 @@ class BaseProbe:
         return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
 
     @classmethod
+    def asset_problems(cls) -> list[str]:
+        """Each problem with the assets this probe ships, such as a locale's missing bank. Empty when none.
+
+        ``usersim smoke`` runs it for every registered probe, and
+        ``assert_probe_conforms`` reports what it finds, so a missing or broken
+        bank surfaces at install time rather than partway through a run. Check
+        what the probe's loaders read, without calling a model or the network.
+        The default checks nothing.
+        """
+        return []
+
+    @classmethod
     def themes(cls, locale: str) -> Sequence[Mapping[str, Any]] | None:
         """The themes this probe's rows in ``locale`` draw from, read under ``assets_dir()``.
 

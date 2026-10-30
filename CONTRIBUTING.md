@@ -144,8 +144,8 @@ uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
-model catalog, every probe's assets, and the plugin entry points without
-making a single model call.
+model catalog, runs each probe's check of the assets it ships, and loads the
+plugin entry points without making a single model call.
 
 ### Choosing models and providers
 

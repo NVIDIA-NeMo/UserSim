@@ -68,6 +68,7 @@ from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.pressure_bank import (
     Strategy,
     TargetRequest,
+    default_pressure_bank_path,
     load_pressure_bank_default,
     reset_pressure_bank_cache,
 )
@@ -247,6 +248,12 @@ class SafetyChatPressureProbe(BankReframingMixin, BankBackedProbe):
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET
     bank_version_key = _BANK_VERSION_KEY  # "safety" — not locale-keyed
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The pressure bank, which serves every locale."""
+        path = default_pressure_bank_path()
+        return [] if path.exists() else [f"no pressure bank at {path}"]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

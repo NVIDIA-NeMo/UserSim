@@ -24,6 +24,7 @@ from usersim.cli.smoke import (
     _check_extensions,
     _check_imports,
     _check_models_config,
+    _check_probe_assets,
     _check_probe_registry,
     _check_scorer_registry,
     _check_simulator_config,
@@ -155,6 +156,50 @@ class TestProbeRegistryCheck:
             "safety_agentic",
         ):
             assert probe in detail, f"missing {probe!r} in: {detail}"
+
+
+class TestProbeAssetsCheck:
+    def test_names_each_probe_that_checks_its_assets(self, register_test_probe):
+        register_test_probe("checked_probe", asset_problems=classmethod(lambda cls: []))
+        register_test_probe("unchecked_probe")
+
+        report = SmokeReport()
+        _check_probe_assets(report)
+
+        assert report.all_passed, report.render()
+        named = report.results[-1].detail.split(": ", 1)[1].split(", ")
+        assert "checked_probe" in named
+        assert "unchecked_probe" not in named
+
+    def test_a_problem_a_probe_finds_fails_the_check(self, register_test_probe):
+        register_test_probe("unbanked_probe", asset_problems=classmethod(lambda cls: ["no bank for fr_FR"]))
+
+        report = SmokeReport()
+        _check_probe_assets(report)
+
+        assert not report.all_passed
+        assert report.results[-1].detail == "1 problem(s): unbanked_probe: no bank for fr_FR"
+
+    def test_a_check_that_raises_is_reported(self, register_test_probe):
+        register_test_probe("broken_probe", asset_problems=classmethod(lambda cls: {}["fr_FR"]))
+
+        report = SmokeReport()
+        _check_probe_assets(report)
+
+        assert not report.all_passed
+        assert report.results[-1].detail == "1 problem(s): broken_probe: asset_problems raised KeyError: 'fr_FR'"
+
+    def test_names_the_first_three_problems_and_counts_the_rest(self, register_test_probe):
+        missing = [f"no bank for {locale}" for locale in ("de_DE", "fr_FR", "ja_JP", "ko_KR", "pt_BR")]
+        register_test_probe("unbanked_probe", asset_problems=classmethod(lambda cls: missing))
+
+        report = SmokeReport()
+        _check_probe_assets(report)
+
+        assert report.results[-1].detail == (
+            "5 problem(s): unbanked_probe: no bank for de_DE; unbanked_probe: no bank for fr_FR; "
+            "unbanked_probe: no bank for ja_JP (+2 more)"
+        )
 
 
 class TestDryRunsCheck:

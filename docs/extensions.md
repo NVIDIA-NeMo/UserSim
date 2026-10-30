@@ -134,6 +134,14 @@ class RecipeProbe(BankBackedProbe):
     placeholder_warning_kind = "acme_used_placeholder_recipe"
     output_columns = ("acme_recipe_id",)
 
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        try:
+            read_recipe_bank(cls.assets_dir() / "en_US")
+        except Exception as error:
+            return [f"en_US: {type(error).__name__}: {error}"]
+        return []
+
     def derive_task(self, persona, bank, *, cfg):
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
         return rng.choice(bank.recipes)
@@ -159,6 +167,8 @@ class RecipeProbe(BankBackedProbe):
   `USERSIM_ASSET_PATH` names reaches it too.
 - **`locale_bank_check`** reads one locale's bank, so a run in a locale with no
   bank that loads stops before any model call rather than failing every row.
+- **`asset_problems`** reads the bank the package ships, so `usersim smoke` and
+  `assert_probe_conforms` report an install that is missing it.
 - **`placeholder_warning_kind`** is the warning a row records when its recipe
   is marked `placeholder: true`. Its `<prefix>_used_placeholder_<thing>` form is
   what the capability report counts as placeholder content.

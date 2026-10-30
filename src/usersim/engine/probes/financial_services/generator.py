@@ -46,6 +46,7 @@ from usersim.engine.core.finance_bank import (
     DEFAULT_DOMAIN_ACCOUNT_LABELS,
     DEFAULT_IDENTITY_REQUIRED_FIELDS,
     FinanceBank,
+    finance_bank_dir_for,
     finance_bank_locale,
     has_finance_tasks,
     load_finance_bank,
@@ -76,6 +77,7 @@ from usersim.engine.core.probes import (
     dispatch_episode,
     register_probe,
 )
+from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, taxonomy_path_for
 from usersim.engine.core.simulation import (
     ConversationState,
     make_failed,
@@ -360,6 +362,28 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     # -> act -> confirm), capped per turn by ToolExecutionMixin.
     tool_loop_mode = "multi"
     tool_max_calls_per_turn = 8
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The en_US bank, loaded whole so a broken cross-institution reference raises, and its dynamic tier's taxonomy."""
+        problems = []
+        try:
+            if not load_finance_bank(finance_bank_dir_for("en_US")).institutions:
+                problems.append("the en_US bank has no institutions")
+        except Exception as error:
+            problems.append(f"en_US bank: {type(error).__name__}: {error}")
+        taxonomy = taxonomy_path_for(
+            "financial_services",
+            "en_US",
+            filename="dynamic.yaml",
+            env_prefix="USERSIM_FINANCIAL_SERVICES_DYNAMIC_TAXONOMY",
+        )
+        try:
+            if not load_probing_taxonomy(taxonomy).categories:
+                problems.append(f"{taxonomy} has no categories")
+        except Exception as error:
+            problems.append(f"en_US dynamic.yaml: {type(error).__name__}: {error}")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

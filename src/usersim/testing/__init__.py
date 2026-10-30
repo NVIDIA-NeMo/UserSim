@@ -196,11 +196,13 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}.locale_bank_check must be None or a function that loads one "
             f"locale's bank folder; got {check!r}"
         )
-    for hook in ("bank_locale", "themes", "model_aliases"):
+    for hook in ("bank_locale", "themes", "model_aliases", "asset_problems"):
         if not isinstance(inspect.getattr_static(cls, hook, None), classmethod):
             problems.append(f"{cls.__qualname__}.{hook} must be a classmethod; a run calls it on the class.")
     if isinstance(inspect.getattr_static(cls, "model_aliases", None), classmethod):
         problems.extend(_model_aliases_problems(cls))
+    if isinstance(inspect.getattr_static(cls, "asset_problems", None), classmethod):
+        problems.extend(_asset_check_problems(cls))
     guide = getattr(cls, "authoring_guide", None)
     if guide is not None and not (isinstance(guide, str) and guide.startswith("https://")):
         problems.append(
@@ -253,6 +255,17 @@ def _model_aliases_problems(cls: type) -> list[str]:
     if not isinstance(aliases, tuple) or not all(isinstance(alias, str) and alias for alias in aliases):
         return [f"{cls.__qualname__}.model_aliases must return a tuple of alias names; got {aliases!r}"]
     return []
+
+
+def _asset_check_problems(cls: type) -> list[str]:
+    """What ``cls.asset_problems`` finds in the probe's shipped assets, or what is wrong with the check itself."""
+    try:
+        found = cls.asset_problems()
+    except Exception as error:
+        return [f"{cls.__qualname__}.asset_problems raised {type(error).__name__}: {error}"]
+    if not isinstance(found, list) or not all(isinstance(problem, str) for problem in found):
+        return [f"{cls.__qualname__}.asset_problems must return a list of strings; got {found!r}"]
+    return [f"{cls.__qualname__}.asset_problems: {problem}" for problem in found]
 
 
 def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:

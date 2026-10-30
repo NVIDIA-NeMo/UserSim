@@ -362,6 +362,29 @@ class MyProbe(BankVerbatimMixin, BankBackedProbe):
   for another locale. The refusal links it when a run asks for a locale the
   probe has no bank for.
 
+### Check the assets you ship
+
+`usersim smoke` runs each registered probe's `asset_problems` classmethod, and
+`assert_probe_conforms` reports what it finds, so an install that is missing a
+bank fails a check rather than a run. Return one string per problem, or an
+empty list, and read what your loaders read without calling a model:
+
+```python
+class MyProbe(BankVerbatimMixin, BankBackedProbe):
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        problems = []
+        for locale in ("en_US", "fr_FR"):
+            try:
+                _check_locale_bank(cls.assets_dir() / locale)
+            except Exception as error:
+                problems.append(f"{locale}: {type(error).__name__}: {error}")
+        return problems
+```
+
+The default checks nothing. An exception the check raises is reported like a
+problem it returns.
+
 ### Give each row a theme
 
 A probe whose conversations vary by topic lists the topics in a `themes`
@@ -560,6 +583,9 @@ If your probe doesn't show up, a missing `BUILTIN_PROBE_MODULES` entry
 is the most likely cause. If it shows up but `family missing` fires, the
 `@register_probe` decorator didn't run (check for an import-time
 exception in your module).
+
+A probe that checks its assets is named on the `probe assets` line, which
+fails with the first problems its `asset_problems` finds.
 
 For a probe in its own package, the `extensions` line names the package and
 fails with the reason when an entry point contributes nothing, such as an

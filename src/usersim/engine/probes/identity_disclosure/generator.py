@@ -66,6 +66,7 @@ from usersim.engine.core.identity_spec import (
     Vocabulary,
     load_identity_spec_default,
     spec_env_var,
+    validate_spec,
 )
 from usersim.engine.core.locale import SHIPPED_LOCALES, india_variant
 from usersim.engine.core.missing import is_missing
@@ -168,6 +169,11 @@ class IdentityDisclosureProbe(BankVerbatimMixin, BankBackedProbe):
     def bank_loader(cls) -> IdentitySpec:  # type: ignore[override]
         """The spec named by the probe's label. One spec serves every locale, so it takes none."""
         return load_identity_spec_default(cls.label)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The spec named by the probe's label, loaded through its layers with every cross-reference checked."""
+        return [str(problem) for problem in validate_spec(cls.label)]
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 

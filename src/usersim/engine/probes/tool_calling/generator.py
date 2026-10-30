@@ -49,7 +49,7 @@ from usersim.engine.core.probes import (
     dispatch_episode,
     register_probe,
 )
-from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
 from usersim.engine.core.simulation import (
     ConversationState,
     make_failed,
@@ -58,6 +58,7 @@ from usersim.engine.core.simulation import (
     language_instruction as _language_instruction,
 )
 from usersim.engine.probes.tool_calling.prompts import (
+    _SCENARIO,
     assistant_system_prompt,
     tool_relevance_failure,
     tool_relevance_success,
@@ -246,6 +247,17 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
         "tool-call failures."
     )
     default_scorers = ("tool_use",)
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """The prompts file the prompt defaults would mask, and the toolset seed rows draw their tools from."""
+        problems = []
+        if not load_prompt_file(_SCENARIO):
+            problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
+        toolsets = cls.assets_dir() / "toolsets_seed.parquet"
+        if not toolsets.exists():
+            problems.append(f"no toolset seed at {toolsets}, so every row would fail at construction")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

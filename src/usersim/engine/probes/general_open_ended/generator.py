@@ -18,12 +18,14 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
+from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import BaseProbe, dispatch_episode, register_probe
-from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core.prompt_loader import load_prompt_file, render_prompt
 from usersim.engine.core.seeds import load_seeds
 from usersim.engine.core.simulation import language_instruction
 from usersim.engine.probes.general_open_ended.prompts import (
+    _SCENARIO,
     assistant_system_prompt,
     user_agent_system_prompt,
     user_judge_turn_prompt,
@@ -59,6 +61,19 @@ class OpenEndedProbe(BaseProbe):
     def themes(cls, locale: str) -> list[dict[str, Any]]:
         """The topics in ``locale``'s seed file, or in the base file when the locale has none."""
         return load_seeds(locale, cls.label, "topics")
+
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        """Topics for every shipped locale, and the prompts file the prompt defaults would mask."""
+        problems = []
+        for locale in SHIPPED_LOCALES:
+            try:
+                cls.themes(locale)
+            except FileNotFoundError as error:
+                problems.append(f"no topics for {locale}: {error}")
+        if not load_prompt_file(_SCENARIO):
+            problems.append(f"{_SCENARIO}/prompts.yaml is missing or empty")
+        return problems
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
