@@ -30,10 +30,13 @@ Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
 looked up, which is when their decorators run. Out-of-tree probes are
 imported through the `usersim.probes` entry-point group instead.
 
-## Hooks the loop calls
+## Hooks
 
-`core/simulation.py` calls these on the probe. Only the first two are
-required; the rest have working defaults on `BaseProbe`.
+The conversation loop in `core/simulation.py` calls most of these on the probe;
+the table says where the others are called from. Only the first two are
+required, plus `derive_task` on a `BankBackedProbe` and `execute_tool_call`
+with `ToolExecutionMixin`; the rest have working defaults on `BaseProbe` or the
+mixin that adds them.
 
 | Hook | When |
 |---|---|
@@ -45,6 +48,7 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_followup_user_instructions` | turns after the first |
 | `on_followup_failure` | a follow-up turn fails its gate |
 | `get_tools_for_assistant` | tool-using probes |
+| `transform_assistant_history` | every assistant call: the copy of the history the assistant sees, which may differ from the stored transcript |
 | `after_assistant_turn` | after each assistant reply; may execute tools |
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
@@ -52,13 +56,32 @@ required; the rest have working defaults on `BaseProbe`.
 | `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
 | `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
+| `should_succeed` | the end of the conversation: whether the probe completed its protocol; `False` fails the row |
+| `derive_task` | constructing a `BankBackedProbe`: the bank entry the row runs on |
+| `run_dispatch` | once per row, from the dispatcher: runs the conversation, by default through the loop |
+| `execute_tool_call` | `ToolExecutionMixin`: each tool call the assistant makes |
+| `parse_tool_call` | `ToolExecutionMixin`: reading a tool call's name and arguments |
+| `on_tool_round_complete` | `ToolExecutionMixin`: after each round of tool calls |
+| `on_tool_call_executed` | after each tool call runs: `ToolExecutionMixin` calls it, and a probe that runs tool calls itself must |
+| `set_tool_call_observer` | an external host, to watch the tool calls the probe runs |
+| `should_inline_judge_user_turn` | never (see below) |
+| `should_inline_judge_assistant_turn` | never (see below) |
+
+`should_inline_judge_user_turn` and `should_inline_judge_assistant_turn` are
+defined on `BaseProbe`, but nothing calls them: every generated user turn goes
+through the gate and every assistant turn through the judge, whatever they
+return.
+
+Two helpers are for the probe to call:
+
+| Helper | Gives |
+|---|---|
+| `theme` | the row's theme, one of those `themes` lists |
+| `assets_dir` | the probe's asset folder, `<root>/<label>/`, where its bank loaders read |
 
 Anything a probe does not override inherits a default, so a new probe declares
-only what is specific to it. Its `description`, a paragraph on what it tests, is
-what the per-row preview and the capability report show with its rows, and its
-`preview_fields` are what the preview's Probe Inputs panel shows about the bank
-entry or theme each row drew. Its `default_scorers` are the scorers
-`usersim eval --scorers auto` runs when a run holds its rows.
+only what is specific to it; [What a probe declares](#what-a-probe-declares)
+lists each declaration.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
 `build_result_extras` returns is written only if the name is a core column or
@@ -89,6 +112,36 @@ Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_
 `execute_tool_call` and `run_dispatch`. Declare an override of any of these with
 `async def`. `usersim.testing.assert_probe_conforms` reports a plain `def` override,
 which would otherwise raise partway through a conversation.
+
+## What a probe declares
+
+Everything else the core needs from a probe it reads from the class: an
+attribute, or a classmethod where the answer depends on the locale or the run's
+settings.
+
+| Declaration | Default | Read by |
+|---|---|---|
+| `label` | none: required | the registry, and every stage that names the probe |
+| `family`, `prompt_version`, `variants` | set by `@register_probe` | the row's `trajectory_id`, provenance and `probe_family` column |
+| `description` | `""` | the per-row preview and the capability report, beside the probe's rows |
+| `preview_fields` | `()` | the per-row preview's Probe Inputs panel |
+| `default_scorers` | `()` | `usersim eval --scorers auto`, for a run that holds the probe's rows |
+| `assets_root` | `None`: the packaged banks | `assets_dir()`, and through it the probe's loaders, the pre-flight and smoke |
+| `locale_bank_check` | `None`: the asset folder holds bank files | the pre-flight, for each run locale |
+| `bank_locale` | an India variant's own bank when it has one, else its base locale's | the pre-flight |
+| `authoring_guide` | `None` | the pre-flight, when a run asks for a locale the probe has no bank for |
+| `asset_problems` | no problems | `usersim smoke` and `assert_probe_conforms` |
+| `themes` | `None`: no theme | run setup, which draws one per row into the `theme` column |
+| `model_aliases` | `()` | run setup, which adds each alias the models file defines to every row's models |
+| `output_columns` | `()` | the run's `side_effect_columns`; a column left out is dropped |
+| `supports_assistant_resampling` | `True`; `False` with the tool mixins | judge-gated assistant resampling (`max_assistant_attempts > 1`) |
+| `bank_loader` | none: required on a `BankBackedProbe` | constructing a `BankBackedProbe`, for the row's locale |
+| `placeholder_warning_kind` | none: required on a `BankBackedProbe` | the warning a row records when its task is a placeholder, which the capability report counts |
+| `bank_version_key` | `None`: one bank per locale | where provenance records the bank's version |
+| `verbatim_field` | `"verbatim_text"` | `BankVerbatimMixin`: the task field turn 1 reads |
+| `turn1_instruction_template` | `""` | `CustomTurn1InstructionMixin`: the instruction turn 1 is written from |
+| `tool_loop_mode` | `"single"` | `ToolExecutionMixin`: one round of tool calls per turn, or with `"multi"` rounds until the assistant stops calling tools |
+| `tool_max_calls_per_turn` | `8` | `ToolExecutionMixin`: the most tool calls it runs in one turn |
 
 ## Mixins
 

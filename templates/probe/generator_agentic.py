@@ -22,8 +22,8 @@ the simulate loop directly.
 
 What ``AgenticMixin`` does:
 - Inherits from ``BankVerbatimMixin``.
-- Sets ``should_inline_judge_user_turn = False`` for turn 0 (the
-  user's verbatim action request is auditable as-is — no judge call).
+- Turns assistant resampling off, since the tool loop's side effects
+  cannot be replayed.
 
 What you provide:
 - ``derive_task(persona, bank, *, cfg)`` — picks the action_request.

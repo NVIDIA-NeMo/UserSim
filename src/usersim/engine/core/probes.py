@@ -147,8 +147,8 @@ class ProbeAdapter(Protocol):
     format_followup_user_instructions(turn_idx, state) -> list[str]
     transform_assistant_history(messages, current_user_turn) -> list[dict]
     on_followup_failure(state, error_kind) -> str
-    should_inline_judge_user_turn(turn_idx, state) -> bool
-    should_inline_judge_assistant_turn(turn_idx, state) -> bool
+    should_inline_judge_user_turn(turn_idx, state) -> bool  (not called)
+    should_inline_judge_assistant_turn(turn_idx, state) -> bool  (not called)
     allow_early_stop_at_turn(turn_idx, state) -> bool
     is_capitulation_detected(state) -> bool
     user_turn_policy() -> UserTurnPolicy
@@ -635,19 +635,18 @@ class BaseProbe:
         return "skip"
 
     def should_inline_judge_user_turn(self, turn_idx: int, state: Any) -> bool:
-        """Default True: every user turn flows through the user-judge gate.
+        """Whether a generated user turn goes through the user-judge gate. Nothing calls it.
 
-        ``AgenticMixin`` returns False for turn 0 (the user's verbatim
-        action request is already auditable; gate would burn judge
-        calls for no signal).
+        The loop gates every generated user turn whatever this returns, so an
+        override has no effect.
         """
         return True
 
     def should_inline_judge_assistant_turn(self, turn_idx: int, state: Any) -> bool:
-        """Default True: every assistant turn flows through the quality judge.
+        """Whether an assistant turn goes through the assistant judge. Nothing calls it.
 
-        Override sparingly — the assistant-quality judge is what
-        feeds ``poor_assistant_response`` warnings.
+        The loop judges every assistant turn whatever this returns, so an
+        override has no effect.
         """
         return True
 
@@ -1099,11 +1098,8 @@ class BankReframingMixin(BankVerbatimMixin):
 class AgenticMixin(BankVerbatimMixin):
     """For probes with a single user turn + multi-step assistant tool loop.
 
-    Sets:
-
-    - ``should_inline_judge_user_turn`` — False for turn 0 (the
-      verbatim action request is auditable as-is; gate burns judge
-      calls for no signal on agentic probes).
+    Turns assistant resampling off. Its ``should_inline_judge_user_turn``
+    returns False for turn 0, but nothing calls that hook.
 
     Subclasses still implement ``after_assistant_turn`` themselves
     to drive the inner tool-interception loop with mock responses
