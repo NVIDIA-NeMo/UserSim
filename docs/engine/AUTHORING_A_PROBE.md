@@ -1161,6 +1161,14 @@ evaluator calls each scorer it runs on every row, so return early for rows from
 other probes, for example when your probe's join key is missing, as the
 `safety_agentic` scorer does with `action_request_id`.
 
+A scorer registered under your probe's label writes that label in a module
+outside `engine/probes/`.
+[`tests/test_probe_names_in_shared_code.py`](../../tests/test_probe_names_in_shared_code.py)
+allows each such file a fixed number of probe labels, so add the new module to
+its `_ALLOWED` in the same change. Anything else the core needs from your probe
+goes on the class: see
+[What a probe declares](../../architecture/probes.md#what-a-probe-declares).
+
 The scorer is its own design exercise (axis definition, rubric
 authoring, threshold gating). See
 [`evaluator/scorers/sov_ai_facts.py`](../../src/usersim/engine/evaluator/scorers/sov_ai_facts.py)
