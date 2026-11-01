@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from usersim.engine.core.probes import BaseProbe, PreviewField, register_probe
+from usersim.extension import BaseProbe, PreviewField, register_probe
 
 
 def _check_locale_bank(locale_dir: Path) -> None:

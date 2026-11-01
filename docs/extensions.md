@@ -96,8 +96,7 @@ from pathlib import Path
 
 import yaml
 
-from usersim.engine.core.identity import persona_uuid
-from usersim.engine.core.probes import BankBackedProbe, PreviewField, register_probe
+from usersim.extension import BankBackedProbe, PreviewField, persona_uuid, register_probe
 
 
 @dataclass(frozen=True)
@@ -201,7 +200,7 @@ recipes:
 ## The scorer
 
 ```python
-from usersim.engine.evaluator.scorers import register_scorer
+from usersim.extension import register_scorer
 
 
 async def score(row, models):
@@ -235,7 +234,7 @@ import json
 
 import acme_recipes.probe  # noqa: F401  registers the probe; discovery is off under test
 import acme_recipes.scorer  # noqa: F401  registers the scorer
-from usersim.engine.config import ConversationSimulatorConfig
+from usersim.extension import ConversationSimulatorConfig
 from usersim.testing import assert_hosted_parity, assert_probe_conforms, assert_scorer_conforms, run_episode
 
 PERSONA = {"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle"}

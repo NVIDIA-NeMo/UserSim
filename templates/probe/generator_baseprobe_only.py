@@ -25,15 +25,14 @@ real example at ~50 LOC.
 
 from __future__ import annotations
 
-from usersim.engine.core.probes import BaseProbe, register_probe
-
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
-# also copy ``prompts.py`` next to it and change this import to a
-# relative one: ``from .prompts import ...``.
+# also copy ``prompts.py`` next to it and import from
+# ``usersim.engine.probes.<your_probe>.prompts``.
 from usersim.engine.templates.probe.prompts import (  # type: ignore[import-not-found]
     DEMO_GATE_PROMPT_TEMPLATE,
     DEMO_USER_AGENT_PROMPTS,
 )
+from usersim.extension import BaseProbe, register_probe
 
 
 @register_probe(

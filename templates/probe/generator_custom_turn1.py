@@ -44,8 +44,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import BankBackedProbe, register_probe
+from usersim.extension import BankBackedProbe, WarningKind, register_probe
 
 
 @dataclass

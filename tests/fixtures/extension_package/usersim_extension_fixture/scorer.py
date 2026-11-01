@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from usersim.engine.evaluator.scorers import register_scorer
+from usersim.extension import register_scorer
 
 
 async def score(row, models):

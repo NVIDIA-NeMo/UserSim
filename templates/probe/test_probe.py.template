@@ -57,12 +57,11 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — bootstraps registry
-from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core.outcomes import (
-    FailureClass, OutcomeStatus, Provenance, WarningKind,
+from usersim.extension import (
+    ConversationSimulatorConfig, ConversationState, FailureClass,
+    OutcomeBuilder, OutcomeStatus, Provenance, WarningKind,
 )
-from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
-from usersim.testing import run_episode
+from usersim.testing import assert_probe_conforms, run_episode
 
 # Replace with your probe's module + names.
 from usersim.engine.probes.YOUR_PROBE import (
@@ -188,13 +187,11 @@ class TestSimulateYourProbe:
         )
         assert run.row["conversation_status"] is True
 
-    # 1. Registry registration.
-    def test_registered_in_probe_registry(self) -> None:
-        assert PROBE_LABEL in _PROBE_REGISTRY
-        probe_cls = resolve_probe(PROBE_LABEL)
-        assert probe_cls.family == PROBE_LABEL
-        assert probe_cls.prompt_version  # non-empty
-        assert probe_cls.variants  # non-empty
+    # 1. Registered, with the family, prompt version and variants
+    #    @register_probe sets, and conforming to the probe contract.
+    def test_registered_and_conforms(self) -> None:
+        assert_probe_conforms(PROBE_LABEL)
+        assert probe_gen.YourProbe.family == PROBE_LABEL  # rename to your class
 
     # 2. Single-turn end-to-end (verbatim or generate-and-gate).
     async def test_single_turn_end_to_end(
@@ -282,15 +279,11 @@ class TestSimulateYourProbe:
 
 class TestShouldSucceed:
     def test_returns_true_when_required_metadata_set(self) -> None:
-        from usersim.engine.core.outcomes import OutcomeBuilder
-        from usersim.engine.core.simulation import ConversationState
         state = ConversationState(outcome=OutcomeBuilder())
         # Set the probe's join key.
         state.metadata["YOUR_REQUIRED_KEY"] = "id-001"
         assert probe_gen.should_succeed(state) is True
 
     def test_returns_false_when_required_metadata_missing(self) -> None:
-        from usersim.engine.core.outcomes import OutcomeBuilder
-        from usersim.engine.core.simulation import ConversationState
         state = ConversationState(outcome=OutcomeBuilder())
         assert probe_gen.should_succeed(state) is False

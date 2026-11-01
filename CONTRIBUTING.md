@@ -352,7 +352,9 @@ your package adds with its own prefix, such as `acme_recipes`; unprefixed
 names belong to the built-ins, and
 [`architecture/plugins.md`](architecture/plugins.md) lists the names this
 covers. [`docs/extensions.md`](docs/extensions.md) builds a whole extension
-package, a probe with its bank, a scorer and their tests, step by step.
+package, a probe with its bank, a scorer and their tests, step by step. Import
+from `usersim.extension` and `usersim.testing`;
+[`docs/extension_api.md`](docs/extension_api.md) lists every name they export.
 
 To check your extension satisfies the contract:
 

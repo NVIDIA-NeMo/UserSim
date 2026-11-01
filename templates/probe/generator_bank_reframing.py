@@ -61,10 +61,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
+from usersim.extension import (
     BankBackedProbe,
     BankReframingMixin,
+    WarningKind,
     register_probe,
 )
 

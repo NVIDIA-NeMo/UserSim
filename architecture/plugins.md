@@ -121,7 +121,7 @@ The scorer check is awaitable because a scorer is. The evaluator awaits every
 scorer, so `register_scorer` expects an async function:
 
 ```python
-from usersim.engine.evaluator.scorers import register_scorer
+from usersim.extension import register_scorer
 
 async def score(row, models):
     return {"my_axis": 1.0}
@@ -162,7 +162,7 @@ its package and names that `assets` directory on the probe class:
 ```python
 from pathlib import Path
 
-from usersim.engine.core.probes import BaseProbe
+from usersim.extension import BaseProbe
 
 class MyProbe(BaseProbe):
     label = "my_probe"

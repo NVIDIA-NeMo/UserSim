@@ -49,16 +49,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
+# After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
+# also copy ``prompts.py`` next to it and import from
+# ``usersim.engine.probes.<your_probe>.prompts``.
+from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # type: ignore[import-not-found]
+from usersim.extension import (
     BankBackedProbe,
     BankVerbatimMixin,
+    WarningKind,
     register_probe,
 )
-
-# After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
-# also copy ``prompts.py`` next to it and change this import to ``from .prompts``.
-from usersim.engine.templates.probe.prompts import DEMO_USER_AGENT_PROMPTS  # type: ignore[import-not-found]
 
 
 @dataclass

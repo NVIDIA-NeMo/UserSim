@@ -49,16 +49,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from usersim.engine.core.outcomes import (
-    OutcomeBuilder,
-    WarningKind,
-)
-from usersim.engine.core.probes import (
+from usersim.extension import (
     AgenticMixin,
     BankBackedProbe,
+    ConversationState,
+    OutcomeBuilder,
+    WarningKind,
+    finalize_completed,
+    make_result,
     register_probe,
 )
-from usersim.engine.core.simulation import ConversationState, finalize_completed, make_result
 
 
 @dataclass

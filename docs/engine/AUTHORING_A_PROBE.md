@@ -223,7 +223,7 @@ the probe writes to `state.metadata`, and the label it is shown with. The panel
 leaves out a field whose value is empty, and is left out when every field is:
 
 ```python
-from usersim.engine.core.probes import PreviewField
+from usersim.extension import BankBackedProbe, PreviewField
 
 class MyProbe(BankBackedProbe):
     preview_fields = (
@@ -310,7 +310,7 @@ alias (not the class attr directly):
 
 ```python
 # In your generator.py
-from .bank import load_my_bank_default
+from usersim.engine.probes.my_probe.bank import load_my_bank_default
 
 _load_bank = load_my_bank_default  # tests patch this name
 
@@ -441,8 +441,7 @@ caught at import time, not at simulate-time when the locale's first
 row trips a KeyError.
 
 ```python
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
 MY_USER_PROMPTS = LocalePromptPack(
     label="my_probe.user_system",
@@ -499,7 +498,7 @@ return prose and the gate will fail-retry until exhausted.
 ## Step 6: `@register_probe`
 
 ```python
-from usersim.engine.core.probes import register_probe
+from usersim.extension import register_probe
 
 
 @register_probe(
@@ -617,7 +616,7 @@ restriction) recipe-request templates. We'll use the
 **banked-verbatim** shape because the bank's questions are
 hand-authored and should reach the assistant unchanged.
 
-### File 1: `assets/cooking_recipes/sample.yaml`
+### File 1: `src/usersim/engine/assets/cooking_advisor/sample.yaml`
 
 ```yaml
 schema_version: "v0.1"
@@ -650,11 +649,10 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 import yaml
-
-from usersim.engine.core._assets import probe_assets_dir
 
 
 @dataclass
@@ -682,10 +680,8 @@ class CookingBank:
 _CACHE: dict[str, CookingBank] = {}
 
 
-def load_cooking_bank_default() -> CookingBank:
-    path = os.environ.get("USERSIM_COOKING_BANK") or str(
-        probe_assets_dir("cooking_recipes") / "sample.yaml"
-    )
+def load_cooking_bank(probe_dir: Path) -> CookingBank:
+    path = os.environ.get("USERSIM_COOKING_BANK") or str(probe_dir / "sample.yaml")
     if path in _CACHE:
         return _CACHE[path]
     with open(path) as f:
@@ -724,7 +720,7 @@ def reset_cooking_bank_cache() -> None:
 ### File 4: `src/usersim/engine/probes/cooking_advisor/prompts.py`
 
 ```python
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import LocalePromptPack
 
 
 COOKING_USER_PROMPTS = LocalePromptPack(
@@ -761,25 +757,28 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from usersim.engine.core.cooking_bank import (
-    CookingRecipe, load_cooking_bank_default,
+    CookingRecipe, load_cooking_bank,
 )
-from usersim.engine.core.outcomes import WarningKind
-from usersim.engine.core.probes import (
-    BankBackedProbe, BankVerbatimMixin, dispatch_episode, register_probe,
-)
+from usersim.engine.core.probes import dispatch_episode
 from usersim.engine.probes.cooking_advisor.prompts import (
     COOKING_GATE_PROMPT, COOKING_USER_PROMPTS,
+)
+from usersim.extension import (
+    BankBackedProbe, BankVerbatimMixin, OutcomeBuilder, Provenance,
+    WarningKind, register_probe,
 )
 
 PROBE_FAMILY = "cooking_advisor"
 PROBE_VARIANTS = ["default"]
 PROMPT_VERSION = "v1.0"
 
-_load_bank = load_cooking_bank_default
+_load_bank = load_cooking_bank
 
 
 def _bank_loader():
-    return _load_bank()
+    # The probe's own asset folder, <root>/cooking_advisor/, wherever
+    # the asset search path finds it.
+    return _load_bank(CookingAdvisorProbe.assets_dir())
 
 
 def should_succeed(state: Any) -> bool:
@@ -847,7 +846,6 @@ class CookingAdvisorProbe(BankVerbatimMixin, BankBackedProbe):
 async def simulate_cooking_advisor(
     models, data, persona, profile, locale, language, cfg, **kwargs,
 ):
-    from usersim.engine.core.outcomes import OutcomeBuilder, Provenance
     provenance = kwargs.get("provenance") or Provenance()
     outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
         provenance=provenance,
@@ -936,7 +934,7 @@ with a `ScriptedModel` answering for every model alias, so the test needs no
 provider and patches nothing:
 
 ```python
-from usersim.engine.config import ConversationSimulatorConfig
+from usersim.extension import ConversationSimulatorConfig
 from usersim.testing import run_episode
 
 

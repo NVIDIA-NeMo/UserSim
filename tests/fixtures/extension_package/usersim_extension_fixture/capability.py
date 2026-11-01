@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
+from usersim.extension import CapabilityDefinition, EvidenceSource
 
 CAPABILITY = CapabilityDefinition(
     id="fixture_capability",

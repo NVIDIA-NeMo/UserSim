@@ -15,8 +15,7 @@ shows the form factor when localization isn't a concern.
 
 from __future__ import annotations
 
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probes import LocalePromptPack
+from usersim.extension import SHIPPED_LOCALES, LocalePromptPack
 
 # ── Multi-locale: use LocalePromptPack ──────────────────────────────
 
