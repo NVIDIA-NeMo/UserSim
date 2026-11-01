@@ -223,14 +223,14 @@ class TestRefusesToSpendMoney:
     def test_a_scorer_registered_without_the_flag_is_refused(self, run_on_disk, monkeypatch):
         """Rescore reruns only what a scorer's registration promises calls no model."""
 
-        async def acme_judged(traj, models):
+        async def my_judged(traj, models):
             return {"scores": {}}
 
-        _register_for_this_test(monkeypatch, "acme_judged", acme_judged)
-        run_on_disk.scorers = ["acme_judged"]
+        _register_for_this_test(monkeypatch, "my_judged", my_judged)
+        run_on_disk.scorers = ["my_judged"]
         with pytest.raises(SystemExit) as excinfo:
             run(run_on_disk)
-        assert "'acme_judged' is not registered as deterministic" in str(excinfo.value)
+        assert "'my_judged' is not registered as deterministic" in str(excinfo.value)
 
     def test_unknown_scorer_is_refused(self, run_on_disk):
         run_on_disk.scorers = ["not_a_scorer"]

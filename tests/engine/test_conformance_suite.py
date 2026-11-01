@@ -62,9 +62,9 @@ class _WritesItsOwnKeys(BaseProbe):
     label = "writes_its_own_keys"
 
     def seed_state_metadata(self, state):
-        state.metadata["acme_checks"] = []
-        state.metadata.update({"acme_seen": True})
-        state.metadata.setdefault("acme_turns", 0)
+        state.metadata["my_checks"] = []
+        state.metadata.update({"my_seen": True})
+        state.metadata.setdefault("my_turns", 0)
 
 
 #: A row shaped like one the evaluator hands a scorer. Passing it makes the
@@ -172,7 +172,7 @@ class TestTheChecksCanFail:
 
         class Mislabelled(BaseProbe):
             label = "mislabelled_probe"
-            placeholder_warning_kind = "acme_slow_tool"
+            placeholder_warning_kind = "my_slow_tool"
 
         problems = probe_conformance_problems(Mislabelled)
         assert any("Mislabelled.placeholder_warning_kind must mark placeholder content" in p for p in problems), (

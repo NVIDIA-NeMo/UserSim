@@ -55,7 +55,7 @@ per-row data goes in its metadata (`state.metadata`), stored with the row as
 An extension's warnings carry its prefix too: a bank-backed probe names its
 placeholder warning `<prefix>_used_placeholder_<thing>`, which the capability
 report counts as placeholder content, and any other warning it records is a
-prefixed name such as `acme_slow_tool`.
+prefixed name such as `my_slow_tool`.
 
 ## How discovery behaves
 

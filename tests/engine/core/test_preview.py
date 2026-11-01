@@ -546,7 +546,7 @@ class TestStatusTriState:
         assert kind not in out
 
     @pytest.mark.parametrize(
-        ("kind", "status"), [("acme_used_placeholder_recipe", "SIM OK"), ("acme_slow_tool", "SIM WARN")]
+        ("kind", "status"), [("my_used_placeholder_booking", "SIM OK"), ("my_slow_tool", "SIM WARN")]
     )
     def test_a_prefixed_kind_reads_by_whether_it_marks_placeholder_content(self, kind: str, status: str) -> None:
         row = _general_row()

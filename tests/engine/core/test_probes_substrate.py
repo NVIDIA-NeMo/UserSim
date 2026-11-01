@@ -890,7 +890,7 @@ class TestRegisterProbe:
     def test_accepts_a_prefixed_placeholder_warning_kind(self) -> None:
         mod = self._make_module()
         bank_probe = self._probe_class("_Recipes", "_recipe_bank_probe", mod.__name__)
-        bank_probe.placeholder_warning_kind = "acme_used_placeholder_recipe"
+        bank_probe.placeholder_warning_kind = "my_used_placeholder_booking"
 
         registered = register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)
 
@@ -900,7 +900,7 @@ class TestRegisterProbe:
         """The report counts placeholder rows by kind, so any other kind would hide them."""
         mod = self._make_module()
         bank_probe = self._probe_class("_Mislabelled", "_mislabelled_bank_probe", mod.__name__)
-        bank_probe.placeholder_warning_kind = "acme_slow_tool"
+        bank_probe.placeholder_warning_kind = "my_slow_tool"
 
         with pytest.raises(ProbeRegistrationError, match="placeholder_warning_kind must mark placeholder content"):
             register_probe(family="general", prompt_version="v1.0", variants=("default",))(bank_probe)

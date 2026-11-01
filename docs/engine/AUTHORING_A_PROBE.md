@@ -202,7 +202,7 @@ form `<prefix>_used_placeholder_<thing>`, such as
 `"my_used_placeholder_booking"`; the report counts it like the built-in kinds.
 `@register_probe` refuses a kind that does not mark placeholder content. Other
 warnings a probe adds with `add_warning` take the same prefixed form, such as
-`"acme_slow_tool"`.
+`"my_slow_tool"`.
 
 For `BaseProbe`-only subclasses, just `label` is required.
 

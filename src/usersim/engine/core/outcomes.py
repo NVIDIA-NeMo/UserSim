@@ -174,7 +174,7 @@ PLACEHOLDER_WARNING_KINDS: frozenset[str] = frozenset(
 )
 
 #: A warning kind a probe outside this package defines: lowercase words joined
-#: by underscores, led by the package's own prefix, such as ``acme_slow_tool``.
+#: by underscores, led by the package's own prefix, such as ``my_slow_tool``.
 _EXTENSION_WARNING_KIND = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
 
 
@@ -182,13 +182,13 @@ def warning_kind_problem(kind: object) -> str | None:
     """Why ``kind`` cannot be a warning kind, or ``None`` when it can.
 
     A ``WarningKind`` member, or a string: either a built-in kind's value or a
-    prefixed lowercase name such as ``acme_slow_tool``.
+    prefixed lowercase name such as ``my_slow_tool``.
     """
     if isinstance(kind, WarningKind):
         return None
     if isinstance(kind, str) and _EXTENSION_WARNING_KIND.fullmatch(kind):
         return None
-    return f"must be a WarningKind or a prefixed lowercase name such as 'acme_slow_tool', got {kind!r}"
+    return f"must be a WarningKind or a prefixed lowercase name such as 'my_slow_tool', got {kind!r}"
 
 
 def is_placeholder_warning_kind(kind: object) -> bool:

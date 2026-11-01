@@ -156,13 +156,13 @@ class TestWarningKinds:
 
     def test_a_prefixed_string_kind_is_stored_as_given(self) -> None:
         builder = OutcomeBuilder()
-        builder.add_warning(kind="acme_slow_tool", turn_idx=2, detail="tool took 30 s")
+        builder.add_warning(kind="my_slow_tool", turn_idx=2, detail="tool took 30 s")
 
         (warning,) = builder.finalize(OutcomeStatus.OK).to_dict()["warnings"]
 
-        assert warning == {"kind": "acme_slow_tool", "turn_idx": 2, "detail": "tool took 30 s"}
+        assert warning == {"kind": "my_slow_tool", "turn_idx": 2, "detail": "tool took 30 s"}
 
-    @pytest.mark.parametrize("kind", ["slowtool", "Acme_slow_tool", "acme slow tool", "acme_", 5])
+    @pytest.mark.parametrize("kind", ["slowtool", "My_slow_tool", "my slow tool", "my_", 5])
     def test_an_unusable_kind_is_refused(self, kind) -> None:
         with pytest.raises(ValueError, match="prefixed lowercase name"):
             SimulationWarning(kind=kind)
@@ -171,8 +171,8 @@ class TestWarningKinds:
         ("kind", "placeholder"),
         [
             *[(member, member.name.startswith("USED_PLACEHOLDER_")) for member in WarningKind],
-            ("acme_used_placeholder_recipe", True),
-            ("acme_slow_tool", False),
+            ("my_used_placeholder_booking", True),
+            ("my_slow_tool", False),
             ("used_placeholder_recipe", False),
             (None, False),
         ],
@@ -186,10 +186,10 @@ class TestWarningKinds:
 
     def test_a_placeholder_warning_kind_must_mark_placeholder_content(self) -> None:
         assert placeholder_warning_kind_problem(WarningKind.USED_PLACEHOLDER_FACT) is None
-        assert placeholder_warning_kind_problem("acme_used_placeholder_recipe") is None
+        assert placeholder_warning_kind_problem("my_used_placeholder_booking") is None
         assert "must mark placeholder content" in placeholder_warning_kind_problem(WarningKind.ID_FABRICATION)
-        assert "must mark placeholder content" in placeholder_warning_kind_problem("acme_slow_tool")
-        assert "prefixed lowercase name" in placeholder_warning_kind_problem("Acme")
+        assert "must mark placeholder content" in placeholder_warning_kind_problem("my_slow_tool")
+        assert "prefixed lowercase name" in placeholder_warning_kind_problem("My")
 
 
 class TestBuilderCounters:
