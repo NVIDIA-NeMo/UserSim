@@ -36,13 +36,14 @@ my_probe = "my_package.probe:MyProbe"
 **Every name an extension adds carries its prefix.** Probe labels, scorer
 names, capability ids, asset domains, command names, output columns, warning
 kinds and metadata keys all start with the package's own prefix, such as
-`acme_recipes` or `acme_used_placeholder_recipe`. Unprefixed names belong to
+`my_bookings` or `my_used_placeholder_booking`. Unprefixed names belong to
 the built-ins. The registries refuse a name that is already taken, so the
 prefix is what keeps two packages, or a package and a later built-in, from
 claiming the same one.
 
 [`docs/extensions.md`](../docs/extensions.md) builds a whole extension
-package: a probe with its own bank, a scorer, their tests and a CI recipe.
+package: a probe with a bank in each of two languages, a scorer, their tests
+and a CI recipe.
 [`docs/extension_api.md`](../docs/extension_api.md) lists every name an
 extension imports, from `usersim.extension` and `usersim.testing`.
 

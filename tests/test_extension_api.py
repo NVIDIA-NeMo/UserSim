@@ -53,11 +53,11 @@ _EXAMPLE_DOCS = (
 #: Imports from other ``usersim`` modules that the examples keep, as (module, name).
 _KEPT_INTERNAL_IMPORTS = {
     # A new in-tree probe's own modules, under the names the examples give them.
-    ("usersim.engine.core.cooking_bank", "CookingRecipe"),
-    ("usersim.engine.core.cooking_bank", "load_cooking_bank"),
     ("usersim.engine.probes.YOUR_PROBE", "generator"),
-    ("usersim.engine.probes.cooking_advisor.prompts", "COOKING_GATE_PROMPT"),
-    ("usersim.engine.probes.cooking_advisor.prompts", "COOKING_USER_PROMPTS"),
+    ("usersim.engine.probes.bookings.bank", "LOCALES"),
+    ("usersim.engine.probes.bookings.bank", "Booking"),
+    ("usersim.engine.probes.bookings.bank", "read_booking_bank"),
+    ("usersim.engine.probes.bookings.prompts", "BOOKINGS_USER_PROMPTS"),
     ("usersim.engine.probes.my_probe.bank", "load_my_bank_default"),
     ("usersim.engine.templates.probe.prompts", "DEMO_GATE_PROMPT_TEMPLATE"),
     ("usersim.engine.templates.probe.prompts", "DEMO_USER_AGENT_PROMPTS"),

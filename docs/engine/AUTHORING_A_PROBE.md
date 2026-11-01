@@ -24,7 +24,7 @@ piece to pick and *how* to wire it.
 6. [Step 5: write the user-judge gate prompt](#step-5-write-the-user-judge-gate-prompt)
 7. [Step 6: `@register_probe`](#step-6-register_probe)
 8. [Step 7: run the smoke test](#step-7-run-the-smoke-test)
-9. [Worked example: a `cooking_advisor` probe end-to-end](#worked-example-a-cooking_advisor-probe-end-to-end)
+9. [Worked example: a `bookings` probe end-to-end](#worked-example-a-bookings-probe-end-to-end)
 10. [Common gotchas](#common-gotchas)
 11. [Test authoring](#test-authoring)
 12. [Wiring the out-of-sim scorer](#wiring-the-out-of-sim-scorer)
@@ -199,7 +199,7 @@ placeholder content, and the capability report counts those rows per cell. A
 probe in this repository uses a `WarningKind.USED_PLACEHOLDER_*` member. A
 probe shipped in its own package names a kind of its own, as a string of the
 form `<prefix>_used_placeholder_<thing>`, such as
-`"acme_used_placeholder_recipe"`; the report counts it like the built-in kinds.
+`"my_used_placeholder_booking"`; the report counts it like the built-in kinds.
 `@register_probe` refuses a kind that does not mark placeholder content. Other
 warnings a probe adds with `add_warning` take the same prefixed form, such as
 `"acme_slow_tool"`.
@@ -456,7 +456,7 @@ MY_USER_PROMPTS = LocalePromptPack(
 
 
 # At simulate time:
-prompt = MY_USER_PROMPTS.get(self._locale, persona="Sarah", topic="cooking")
+prompt = MY_USER_PROMPTS.get(self._locale, persona="Sarah", topic="train tickets")
 ```
 
 If you only ship one locale, plain string templates are fine:
@@ -608,181 +608,180 @@ import error or a name another package already uses.
 
 ---
 
-## Worked example: a `cooking_advisor` probe end-to-end
+## Worked example: a `bookings` probe end-to-end
 
-Let's build a complete probe: `cooking_advisor` asks the assistant
-for cooking help, with a curated bank of (cuisine × dietary
-restriction) recipe-request templates. We'll use the
-**banked-verbatim** shape because the bank's questions are
-hand-authored and should reach the assistant unchanged.
+Let's build a complete probe. `bookings` checks that an assistant turns what a
+user writes into the right tool call. The user asks it to book an appointment,
+giving the date and time the way people write them in the user's language, and
+the assistant has a `book_appointment` tool that takes them in one fixed form.
+The probe ships banks for `en_US` and `pt_BR`; the same probe, shipped in its
+own package, is the example in [`docs/extensions.md`](../extensions.md).
 
-### File 1: `src/usersim/engine/assets/cooking_advisor/sample.yaml`
+We'll use the **banked-verbatim** shape, so each date reaches the assistant
+exactly as the bank writes it, with `ToolExecutionMixin` to answer the
+assistant's tool call.
+
+### File 1: the banks, `src/usersim/engine/assets/bookings/<locale>/bookings.yaml`
+
+`en_US/bookings.yaml`:
 
 ```yaml
-schema_version: "v0.1"
-bank_id: "cooking_recipes_sample"
-bank_version: "v0.1.0"
-placeholder: true
-recipes:
-  - id: "REC-001"
+bank_id: bookings_en_US
+bank_version: "1.0.0"
+bookings:
+  - id: museum_tour
+    opening: Hi! Can you book the guided museum tour for 04/03/2027 at 3:30 pm?
+    date: "2027-04-03"
+    time: "15:30"
+    people: 3
     placeholder: true
-    cuisine: "italian"
-    dietary: "vegetarian"
-    persona_tags: ["interest:cooking"]
-    question: "I have eggplant, mozzarella, and tomato. Can you walk me through making eggplant parmigiana for 4 people?"
-    expected_themes: ["layering", "salting eggplant", "baking time", "cheese melt"]
-  - id: "REC-002"
-    placeholder: true
-    cuisine: "japanese"
-    dietary: "gluten_free"
-    persona_tags: ["interest:cooking"]
-    question: "My partner has celiac. What's a gluten-free version of teriyaki sauce that still tastes right?"
-    expected_themes: ["tamari substitution", "rice vinegar", "mirin alternatives"]
 ```
 
-### File 2: `src/usersim/engine/core/cooking_bank.py`
+`pt_BR/bookings.yaml`:
+
+```yaml
+bank_id: bookings_pt_BR
+bank_version: "1.0.0"
+bookings:
+  - id: museum_tour
+    opening: Oi! Você pode reservar a visita guiada ao museu para 04/03/2027 às 15h30?
+    date: "2027-03-04"
+    time: "15:30"
+    people: 3
+    placeholder: true
+```
+
+Both open with `04/03/2027`: 3 April to a user writing American English, and
+4 March to one writing Brazilian Portuguese. Neither says how many people are
+coming, so an assistant that books on its first reply has to guess.
+
+### File 2: `src/usersim/engine/probes/bookings/bank.py`
 
 ```python
-"""Cooking-recipe bank loader."""
+"""Booking banks: one per locale, under the probe's asset folder."""
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
+#: The locales the probe ships a bank for.
+LOCALES = ("en_US", "pt_BR")
 
-@dataclass
-class CookingRecipe:
+
+@dataclass(frozen=True)
+class Booking:
     id: str
+    opening: str  # turn 1, in the locale's language; leaves out how many people
+    date: str  # what the user means, as the tool takes it: YYYY-MM-DD
+    time: str  # HH:MM, 24-hour
+    people: int  # given only when the assistant asks
     placeholder: bool
-    cuisine: str
-    dietary: str
-    persona_tags: tuple[str, ...]
-    question: str
-    expected_themes: tuple[str, ...]
 
 
-@dataclass
-class CookingBank:
+@dataclass(frozen=True)
+class BookingBank:
     bank_id: str
     bank_version: str
-    placeholder: bool
-    recipes: tuple[CookingRecipe, ...]
-
-    def by_id(self, recipe_id: str) -> Optional[CookingRecipe]:
-        return next((r for r in self.recipes if r.id == recipe_id), None)
+    bookings: tuple[Booking, ...]
 
 
-_CACHE: dict[str, CookingBank] = {}
-
-
-def load_cooking_bank(probe_dir: Path) -> CookingBank:
-    path = os.environ.get("USERSIM_COOKING_BANK") or str(probe_dir / "sample.yaml")
-    if path in _CACHE:
-        return _CACHE[path]
-    with open(path) as f:
-        data = yaml.safe_load(f)
-    bank = CookingBank(
-        bank_id=data["bank_id"],
-        bank_version=data["bank_version"],
-        placeholder=data.get("placeholder", False),
-        recipes=tuple(
-            CookingRecipe(
-                id=r["id"],
-                placeholder=r.get("placeholder", False),
-                cuisine=r["cuisine"],
-                dietary=r["dietary"],
-                persona_tags=tuple(r.get("persona_tags", [])),
-                question=r["question"],
-                expected_themes=tuple(r.get("expected_themes", [])),
-            )
-            for r in data["recipes"]
-        ),
-    )
-    _CACHE[path] = bank
-    return bank
-
-
-def reset_cooking_bank_cache() -> None:
-    _CACHE.clear()
+def read_booking_bank(locale_dir: Path) -> BookingBank:
+    doc = yaml.safe_load((locale_dir / "bookings.yaml").read_text(encoding="utf-8"))
+    return BookingBank(doc["bank_id"], doc["bank_version"], tuple(Booking(**b) for b in doc["bookings"]))
 ```
 
-### File 3: `src/usersim/engine/probes/cooking_advisor/__init__.py`
+### File 3: `src/usersim/engine/probes/bookings/__init__.py`
 
 ```python
-"""cooking_advisor probe: banked-verbatim recipe questions."""
+"""bookings probe: booking arguments from dates and times as users write them."""
 ```
 
-### File 4: `src/usersim/engine/probes/cooking_advisor/prompts.py`
+### File 4: `src/usersim/engine/probes/bookings/prompts.py`
 
 ```python
+"""The simulated user's instructions, in each language the probe ships."""
+
+from usersim.engine.probes.bookings.bank import LOCALES
 from usersim.extension import LocalePromptPack
 
-
-COOKING_USER_PROMPTS = LocalePromptPack(
-    label="cooking_advisor.user_system",
+BOOKINGS_USER_PROMPTS = LocalePromptPack(
+    label="bookings.user_system",
     prompts={
         "en_US": (
-            "You are {persona}, a home cook in the US who needs help with "
-            "a recipe. Stay in your voice; do not break the fourth wall. "
-            "Ask follow-up questions naturally if the response is unclear."
+            "{persona}\n\n"
+            "You asked an assistant to book an appointment, giving the date and time. "
+            "If it asks how many people are coming, the answer is {people}; say it the way you would. "
+            "Once it confirms the booking, thank it."
         ),
-        # Add more locales as you ship them.
+        "pt_BR": (
+            "{persona}\n\n"
+            "Você pediu a um assistente para marcar um horário e já disse a data e a hora. "
+            "Se ele perguntar quantas pessoas vão, a resposta é {people}; diga isso do seu jeito. "
+            "Quando ele confirmar a reserva, agradeça."
+        ),
     },
-    shipped_locales=("en_US",),
-)
-
-
-COOKING_GATE_PROMPT = (
-    "You are evaluating whether a user message is a legitimate cooking "
-    "question (PASS) or a role-violation / off-topic (FAIL).\n\n"
-    "Conversation so far:\n{conversation_history}\n\n"
-    "User message:\n{user_turn_to_evaluate}\n\n"
-    "Respond with <rating>PASS</rating> or <rating>FAIL</rating> on the "
-    "first line, then a brief <explanation>...</explanation>."
+    shipped_locales=LOCALES,
 )
 ```
 
-### File 5: `src/usersim/engine/probes/cooking_advisor/generator.py`
+The user's instructions are written in each language the probe ships, and
+`LocalePromptPack` refuses, when the module is imported, a locale without them.
+
+### File 5: `src/usersim/engine/probes/bookings/generator.py`
 
 ```python
-"""cooking_advisor probe: banked-verbatim recipe questions."""
+"""bookings probe: booking arguments from dates and times as users write them."""
 
 from __future__ import annotations
 
-from typing import Any, Optional
+import json
+import random
+from typing import Any
 
-from usersim.engine.core.cooking_bank import (
-    CookingRecipe, load_cooking_bank,
-)
 from usersim.engine.core.probes import dispatch_episode
-from usersim.engine.probes.cooking_advisor.prompts import (
-    COOKING_GATE_PROMPT, COOKING_USER_PROMPTS,
-)
+from usersim.engine.probes.bookings.bank import LOCALES, Booking, read_booking_bank
+from usersim.engine.probes.bookings.prompts import BOOKINGS_USER_PROMPTS
 from usersim.extension import (
-    BankBackedProbe, BankVerbatimMixin, OutcomeBuilder, Provenance,
-    WarningKind, register_probe,
+    BankBackedProbe,
+    BankVerbatimMixin,
+    OutcomeBuilder,
+    Provenance,
+    ToolExecutionMixin,
+    WarningKind,
+    format_persona_for_prompt,
+    persona_uuid,
+    register_probe,
 )
 
-PROBE_FAMILY = "cooking_advisor"
+PROBE_FAMILY = "bookings"
 PROBE_VARIANTS = ["default"]
 PROMPT_VERSION = "v1.0"
 
-_load_bank = load_cooking_bank
+BOOK_APPOINTMENT = {
+    "type": "function",
+    "function": {
+        "name": "book_appointment",
+        "description": "Book an appointment.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "date": {"type": "string", "description": "YYYY-MM-DD"},
+                "time": {"type": "string", "description": "HH:MM, 24-hour"},
+                "people": {"type": "integer"},
+            },
+            "required": ["date", "time", "people"],
+        },
+    },
+}
+
+_load_bank = read_booking_bank
 
 
-def _bank_loader():
-    # The probe's own asset folder, <root>/cooking_advisor/, wherever
-    # the asset search path finds it.
-    return _load_bank(CookingAdvisorProbe.assets_dir())
-
-
-def should_succeed(state: Any) -> bool:
-    return bool(state.metadata.get("recipe_id"))
+def _bank_loader(locale: str):
+    return _load_bank(BookingsProbe.assets_dir() / locale)
 
 
 @register_probe(
@@ -790,69 +789,91 @@ def should_succeed(state: Any) -> bool:
     prompt_version=PROMPT_VERSION,
     variants=tuple(PROBE_VARIANTS),
 )
-class CookingAdvisorProbe(BankVerbatimMixin, BankBackedProbe):
-    label = "cooking_advisor"
+class BookingsProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
+    label = "bookings"
+    description = (
+        "Tests whether an assistant books what the user means: a date, a time and a number of people, "
+        "written the way people write them in the user's language."
+    )
     bank_loader = staticmethod(_bank_loader)
-    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT
-    bank_version_key = "cooking"  # locale-independent, this probe is en-only
+    locale_bank_check = staticmethod(read_booking_bank)
+    placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_BOOKING
+    verbatim_field = "opening"
+    output_columns = ("booking_id", "booking")
 
-    def derive_task(
-        self, persona: dict, bank: Any, *, cfg: Any,
-    ) -> Optional[CookingRecipe]:
-        # Narrow by persona tags as the shipped probes do; this example
-        # takes the first match.
-        if not bank.recipes:
-            return None
-        return bank.recipes[0]
+    @classmethod
+    def asset_problems(cls) -> list[str]:
+        problems = []
+        for locale in LOCALES:
+            try:
+                read_booking_bank(cls.assets_dir() / locale)
+            except Exception as error:
+                problems.append(f"{locale}: {type(error).__name__}: {error}")
+        return problems
+
+    def derive_task(self, persona: dict, bank: Any, *, cfg: Any) -> Booking:
+        rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
+        return rng.choice(bank.bookings)
 
     def get_user_system_prompt(self) -> str:
-        return COOKING_USER_PROMPTS.get(
-            self._locale, persona=self._persona.get("first_name", "the user"),
+        return BOOKINGS_USER_PROMPTS.get(
+            self._locale,
+            persona=format_persona_for_prompt(self._persona),
+            people=self._task.people,
         )
 
     def get_assistant_system_prompt(self) -> str:
         return ""  # Pure-capability-test policy.
 
-    def format_gate_prompt(
-        self, user_query: str, conversation_history: str,
-    ) -> str:
-        return COOKING_GATE_PROMPT.format(
-            user_turn_to_evaluate=user_query,
-            conversation_history=conversation_history,
-        )
+    def get_tools_for_assistant(self) -> list:
+        return [BOOK_APPOINTMENT]
 
-    async def get_verbatim_first_user_turn(self, state: Any) -> str:
-        state.metadata["recipe_id"] = self._task.id
-        state.metadata["cuisine"] = self._task.cuisine
-        state.metadata["dietary"] = self._task.dietary
-        state.metadata["bank_id"] = self._bank.bank_id
-        state.metadata["bank_version"] = self._bank.bank_version
-        return self._task.question
+    def allow_early_stop_at_turn(self, turn_idx: int, state: Any) -> bool:
+        return "booking" in state.metadata
 
-    def should_succeed(self, state: Any) -> bool:
-        return should_succeed(state)
+    async def execute_tool_call(self, name, args, tc, state, models, *, turn_idx, call_idx) -> str:
+        if "booking" not in state.metadata:
+            user_turns = sum(1 for message in state.messages if message.get("role") == "user")
+            state.metadata["booking"] = {"arguments": args, "after_user_turns": user_turns}
+        return json.dumps({"status": "booked"})
 
     def build_result_extras(self, state: Any) -> dict:
-        extras = super().build_result_extras(state)
-        if self._task is not None:
-            extras["probe_variant"] = f"{self._task.cuisine}::{self._task.dietary}"
-            extras["recipe_id"] = self._task.id
-            extras["cuisine"] = self._task.cuisine
-            extras["dietary"] = self._task.dietary
-        return extras
+        task = self._task
+        booking = {
+            "expected": {"date": task.date, "time": task.time, "people": task.people},
+            "made": state.metadata.get("booking"),
+        }
+        return {
+            **super().build_result_extras(state),
+            "booking_id": task.id,
+            "booking": json.dumps(booking, ensure_ascii=False),
+        }
 
 
-# Optional thin shim for callers that import simulate_cooking_advisor.
-async def simulate_cooking_advisor(
-    models, data, persona, profile, locale, language, cfg, **kwargs,
+# Optional thin shim for callers that import simulate_bookings.
+async def simulate_bookings(
+    models,
+    data,
+    persona,
+    profile,
+    locale,
+    language,
+    cfg,
+    **kwargs,
 ):
     provenance = kwargs.get("provenance") or Provenance()
     outcome_builder = kwargs.get("outcome_builder") or OutcomeBuilder(
         provenance=provenance,
     )
-    probe = CookingAdvisorProbe(
-        persona=persona, locale=locale, language=language, models=models,
-        cfg=cfg, provenance=provenance, profile=profile, data=data,
+    probe = BookingsProbe(
+        persona=persona,
+        locale=locale,
+        language=language,
+        models=models,
+        cfg=cfg,
+        provenance=provenance,
+        profile=profile,
+        data=data,
         outcome_builder=outcome_builder,
     )
     # dispatch_episode installs the run's per-episode settings (reasoning
@@ -860,7 +881,30 @@ async def simulate_cooking_advisor(
     return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 ```
 
-### File 6: built-in probe list
+- `execute_tool_call` records the first booking in `state.metadata` during the
+  run, with how many user turns came before it, and `build_result_extras`
+  writes it to the `booking` column beside what the user meant. A scorer
+  compares the two, as [the extension guide's scorer](../extensions.md#the-scorer)
+  does.
+- `allow_early_stop_at_turn` lets the conversation end only once the
+  assistant has booked, so a user who thanks it early does not end it first.
+- `should_succeed` keeps its default: an assistant that never books has not
+  broken the probe's protocol, so its row is scored like any other.
+- The probe keeps `BaseProbe`'s gate prompt (Step 5).
+
+### File 6: the placeholder warning
+
+In [`src/usersim/engine/core/outcomes.py`](../../src/usersim/engine/core/outcomes.py),
+add the probe's kind to `WarningKind`, beside the other `USED_PLACEHOLDER_*`
+members:
+
+```python
+    # Flagged when a bookings trajectory ran against a booking marked
+    # ``placeholder: true`` in its bank.
+    USED_PLACEHOLDER_BOOKING = "used_placeholder_booking"
+```
+
+### File 7: built-in probe list
 
 In [`src/usersim/engine/core/probes.py`](../../src/usersim/engine/core/probes.py),
 add the module to `BUILTIN_PROBE_MODULES`:
@@ -868,7 +912,7 @@ add the module to `BUILTIN_PROBE_MODULES`:
 ```python
 BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     ...
-    "usersim.engine.probes.cooking_advisor.generator",
+    "usersim.engine.probes.bookings.generator",
 )
 ```
 
@@ -889,23 +933,24 @@ names and arguments; `ProbeEpisodeRuntime` assigns the indices. Author probe
 logic against those supplied indices rather than reconstructing host
 transcript positions.
 
-### File 7: tests at `tests/engine/probes/test_cooking_advisor.py`
+### File 8: tests at `tests/engine/probes/test_bookings.py`
 
 Copy [`templates/probe/test_probe.py.template`](../../templates/probe/test_probe.py.template),
-substitute `cooking_advisor` for `YOUR_PROBE`, fill in the 8 standard
+substitute `bookings` for `YOUR_PROBE`, fill in the 8 standard
 test stubs.
 
 ### Run it
 
 ```bash
-usersim smoke                                                    # confirms registration
-pytest tests/engine/probes/test_cooking_advisor.py -v # confirms behavior
-usersim simulate --locale en_US --num-rows 5 \
-  --probe-mix 'cooking_advisor=1.0' --out output/cooking   # end-to-end
+usersim smoke                                      # confirms registration
+pytest tests/engine/probes/test_bookings.py -v     # confirms behavior
+usersim simulate --locale pt_BR --num-rows 5 \
+  --probe-mix 'bookings=1.0' --out output/bookings # end-to-end
 ```
 
-That is the whole probe: a bank loader, prompts, the probe class and the
-shim. Everything about how the conversation runs comes from the shared loop.
+That is the whole probe: two banks and their loader, the user's prompts, the
+probe class with its tool, and the shim. Everything about how the conversation
+runs comes from the shared loop.
 
 ---
 
@@ -944,7 +989,7 @@ async def test_my_probe_runs_end_to_end():
         config=ConversationSimulatorConfig(name="conversation_messages", max_turns=2),
         persona={"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle",
                  "education_level": "Bachelor", "occupation": "Software Engineer"},
-        data={"theme": {"type": "cooking", "description": "Planning weeknight dinners."}},
+        data={"theme": {"type": "travel", "description": "Planning a weekend away."}},
     )
     assert run.row["conversation_status"] is True
 ```
