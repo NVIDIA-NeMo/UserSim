@@ -1,0 +1,219 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""The public API for extending NeMo User Sim.
+
+A probe, a scorer, a capability, an asset domain or an execution backend
+imports what it needs from here, and its tests import from ``usersim.testing``.
+``docs/extension_api.md`` lists every name with what it is for. Other
+``usersim`` modules are internal, and code moves between them; the names here
+are imported from this module wherever they are defined, and can change in any
+release as well.
+
+Each name is imported from the module that defines it the first time it is
+used, so ``from usersim.extension import AssetDomain`` loads the asset-domain
+registry and not the conversation loop. ``usersim --help`` imports every
+installed asset domain and backend to list them, and stays fast.
+"""
+
+from __future__ import annotations
+
+import importlib
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from usersim.asset_gen.registry import AssetDomain
+    from usersim.engine.config import MODEL_ASSISTANT, MODEL_JUDGE, MODEL_USER, ConversationSimulatorConfig
+    from usersim.engine.core.backends import ExecutionBackend, JobHandle, JobSpec, JobStatus
+    from usersim.engine.core.behavioral import (
+        ChatRealism,
+        format_behavioral_profile_for_prompt,
+        format_disclosure_instructions,
+        format_interaction_style_instructions,
+        get_conversation_language,
+    )
+    from usersim.engine.core.identity import persona_uuid
+    from usersim.engine.core.llm import acall_llm
+    from usersim.engine.core.locale import SHIPPED_LOCALES, expected_language_display
+    from usersim.engine.core.messages import format_conversation_history_for_prompt, format_tools_for_prompt
+    from usersim.engine.core.missing import is_missing, none_for_missing
+    from usersim.engine.core.outcomes import (
+        FailureAttribution,
+        FailureClass,
+        OutcomeBuilder,
+        OutcomeStatus,
+        Provenance,
+        SimulationTrace,
+        TraceKind,
+        WarningKind,
+    )
+    from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
+    from usersim.engine.core.probes import (
+        AgenticMixin,
+        BankBackedProbe,
+        BankLoadError,
+        BankReframingMixin,
+        BankVerbatimMixin,
+        BaseProbe,
+        CustomTurn1InstructionMixin,
+        LocalePromptPack,
+        PreviewField,
+        ProbeRegistrationError,
+        ToolCallingMixin,
+        ToolExecutionMixin,
+        register_probe,
+    )
+    from usersim.engine.core.prompt_loader import render_prompt
+    from usersim.engine.core.simulation import (
+        ConversationState,
+        finalize_completed,
+        language_instruction,
+        make_failed,
+        make_result,
+    )
+    from usersim.engine.core.tool_calls import parse_tool_call, recover_tool_call
+    from usersim.engine.core.user_turn_policy import UserTurnPolicy
+    from usersim.engine.evaluator.scorers import ScorerFn, ScorerRegistrationError, register_scorer
+    from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
+
+__all__ = [
+    # Probes
+    "AgenticMixin",
+    "BankBackedProbe",
+    "BankLoadError",
+    "BankReframingMixin",
+    "BankVerbatimMixin",
+    "BaseProbe",
+    "CustomTurn1InstructionMixin",
+    "LocalePromptPack",
+    "PreviewField",
+    "ProbeRegistrationError",
+    "ToolCallingMixin",
+    "ToolExecutionMixin",
+    "UserTurnPolicy",
+    "register_probe",
+    # Conversations and outcomes
+    "ConversationState",
+    "FailureAttribution",
+    "FailureClass",
+    "OutcomeBuilder",
+    "OutcomeStatus",
+    "Provenance",
+    "SimulationTrace",
+    "TraceKind",
+    "WarningKind",
+    "finalize_completed",
+    "make_failed",
+    "make_result",
+    # Models and settings
+    "MODEL_ASSISTANT",
+    "MODEL_JUDGE",
+    "MODEL_USER",
+    "ConversationSimulatorConfig",
+    "acall_llm",
+    # Prompts
+    "ChatRealism",
+    "format_behavioral_profile_for_prompt",
+    "format_conversation_history_for_prompt",
+    "format_disclosure_instructions",
+    "format_interaction_style_instructions",
+    "format_persona_for_prompt",
+    "format_tools_for_prompt",
+    "persona_full_name",
+    "persona_uuid",
+    "render_prompt",
+    # Locales and languages
+    "SHIPPED_LOCALES",
+    "expected_language_display",
+    "get_conversation_language",
+    "language_instruction",
+    # Tool calls
+    "parse_tool_call",
+    "recover_tool_call",
+    # Scorers
+    "ScorerFn",
+    "ScorerRegistrationError",
+    "is_missing",
+    "none_for_missing",
+    "register_scorer",
+    # Capabilities, asset domains and backends
+    "AssetDomain",
+    "CapabilityDefinition",
+    "EvidenceSource",
+    "ExecutionBackend",
+    "JobHandle",
+    "JobSpec",
+    "JobStatus",
+]
+
+#: The module each public name is defined in, by module.
+_EXPORTS: dict[str, tuple[str, ...]] = {
+    "usersim.asset_gen.registry": ("AssetDomain",),
+    "usersim.engine.config": ("MODEL_ASSISTANT", "MODEL_JUDGE", "MODEL_USER", "ConversationSimulatorConfig"),
+    "usersim.engine.core.backends": ("ExecutionBackend", "JobHandle", "JobSpec", "JobStatus"),
+    "usersim.engine.core.behavioral": (
+        "ChatRealism",
+        "format_behavioral_profile_for_prompt",
+        "format_disclosure_instructions",
+        "format_interaction_style_instructions",
+        "get_conversation_language",
+    ),
+    "usersim.engine.core.identity": ("persona_uuid",),
+    "usersim.engine.core.llm": ("acall_llm",),
+    "usersim.engine.core.locale": ("SHIPPED_LOCALES", "expected_language_display"),
+    "usersim.engine.core.messages": ("format_conversation_history_for_prompt", "format_tools_for_prompt"),
+    "usersim.engine.core.missing": ("is_missing", "none_for_missing"),
+    "usersim.engine.core.outcomes": (
+        "FailureAttribution",
+        "FailureClass",
+        "OutcomeBuilder",
+        "OutcomeStatus",
+        "Provenance",
+        "SimulationTrace",
+        "TraceKind",
+        "WarningKind",
+    ),
+    "usersim.engine.core.persona": ("format_persona_for_prompt", "persona_full_name"),
+    "usersim.engine.core.probes": (
+        "AgenticMixin",
+        "BankBackedProbe",
+        "BankLoadError",
+        "BankReframingMixin",
+        "BankVerbatimMixin",
+        "BaseProbe",
+        "CustomTurn1InstructionMixin",
+        "LocalePromptPack",
+        "PreviewField",
+        "ProbeRegistrationError",
+        "ToolCallingMixin",
+        "ToolExecutionMixin",
+        "register_probe",
+    ),
+    "usersim.engine.core.prompt_loader": ("render_prompt",),
+    "usersim.engine.core.simulation": (
+        "ConversationState",
+        "finalize_completed",
+        "language_instruction",
+        "make_failed",
+        "make_result",
+    ),
+    "usersim.engine.core.tool_calls": ("parse_tool_call", "recover_tool_call"),
+    "usersim.engine.core.user_turn_policy": ("UserTurnPolicy",),
+    "usersim.engine.evaluator.scorers": ("ScorerFn", "ScorerRegistrationError", "register_scorer"),
+    "usersim.taxonomy.capabilities": ("CapabilityDefinition", "EvidenceSource"),
+}
+
+_MODULE_OF = {name: module for module, names in _EXPORTS.items() for name in names}
+
+
+def __getattr__(name: str) -> Any:
+    module = _MODULE_OF.get(name)
+    if module is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(importlib.import_module(module), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted({*globals(), *__all__})

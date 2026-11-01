@@ -43,6 +43,8 @@ claiming the same one.
 
 [`docs/extensions.md`](../docs/extensions.md) builds a whole extension
 package: a probe with its own bank, a scorer, their tests and a CI recipe.
+[`docs/extension_api.md`](../docs/extension_api.md) lists every name an
+extension imports, from `usersim.extension` and `usersim.testing`.
 
 An extension probe declares the columns it writes in its class's
 `output_columns`, and a run keeps them alongside the core columns. Other

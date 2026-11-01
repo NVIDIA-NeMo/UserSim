@@ -7,9 +7,10 @@ probe that asks a cooking assistant questions from its own bank, and a scorer
 for the rows it produces.
 
 [`architecture/plugins.md`](../architecture/plugins.md) describes the entry
-point groups and how discovery behaves, and
+point groups and how discovery behaves,
 [`docs/engine/AUTHORING_A_PROBE.md`](engine/AUTHORING_A_PROBE.md) covers every
-hook a probe can implement.
+hook a probe can implement, and [`extension_api.md`](extension_api.md) lists
+every name the package can import from `usersim`.
 
 ## Layout
 
