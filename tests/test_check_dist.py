@@ -78,8 +78,12 @@ def test_a_package_file_missing_from_the_wheel_is_reported(tmp_path: Path) -> No
     assert len(problems) == 1 and "lacks 1 package file" in problems[0] and spec in problems[0]
 
 
-def test_a_bank_schema_must_ship(tmp_path: Path) -> None:
-    schema = "usersim/engine/assets/probe/SCHEMA.md"
+@pytest.mark.parametrize(
+    "schema",
+    ["usersim/engine/assets/probe/SCHEMA.md", "usersim/engine/probes/probe/assets/probe/SCHEMA.md"],
+    ids=["shared-assets-folder", "probe-folder"],
+)
+def test_a_bank_schema_must_ship(tmp_path: Path, schema: str) -> None:
     problems = check_dist.check_archives(*_pair(tmp_path), package_files=[*_PACKAGE, schema])
     assert len(problems) == 1 and schema in problems[0]
 

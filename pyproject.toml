@@ -173,6 +173,11 @@ include = ["usersim*"]
     "assets/**/*.json",
     "assets/**/*.parquet",
     "assets/**/*.md",
+    # The banks a probe keeps in its own folder, under probes/<label>/assets/.
+    "probes/*/assets/**/*.yml",
+    "probes/*/assets/**/*.json",
+    "probes/*/assets/**/*.parquet",
+    "probes/*/assets/**/*.md",
     "**/*.yaml",
 ]
 "usersim.asset_gen" = [
