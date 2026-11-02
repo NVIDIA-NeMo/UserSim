@@ -6,7 +6,8 @@
 ``run_episode`` runs a probe offline with scripted models, and every registered
 probe reproduces that standalone run when hosted. Both go through the same
 ``usersim.testing`` entry points a probe author would use, so the published
-checks are exercised by the probes they describe.
+checks are exercised by the probes they describe. The requests a probe sends
+to the judge ask for the reply the judge parser reads.
 """
 
 from __future__ import annotations
@@ -82,6 +83,28 @@ async def test_every_registered_probe_runs_to_completion_with_scripted_models(pr
     assert json.loads(run.row["simulation_outcome"])["status"] != "failed"
     assert run.row["trajectory_id"]
     assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
+
+
+#: Probes with no simulated user, which run their own loop and send nothing to the judge.
+_NO_JUDGE_REQUESTS = frozenset({"safety_agentic"})
+
+
+@pytest.mark.parametrize("probe_type", known_probes())
+async def test_every_judge_request_asks_for_a_rating_the_parser_reads(probe_type: str) -> None:
+    """``run_inline_judge`` reads an ``<explanation>`` and a ``<rating>`` of success, warn or failure.
+
+    A prompt that asks for any other reply costs a reformat call on every turn it judges.
+    """
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    asked = [prompt["messages"][-1]["content"] for prompt in run.prompts if prompt["role"] == "judge"]
+    assert bool(asked) is (probe_type not in _NO_JUDGE_REQUESTS)
+    for text in asked:
+        assert "<explanation>" in text and "<rating>" in text, text
+        rating_format = text.rsplit("<rating>", 1)[1]
+        assert "success" in rating_format and "failure" in rating_format, text
 
 
 @pytest.mark.parametrize(("probe_type", "shares_details"), [("tool_calling", True), ("general_open_ended", False)])

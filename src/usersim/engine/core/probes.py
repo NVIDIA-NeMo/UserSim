@@ -212,17 +212,23 @@ class ProbeAdapter(Protocol):
 
 
 # Default user-judge prompt template for probes that do not override
-# ``format_gate_prompt``. Ships behind a sentinel so importers cannot
-# accidentally hard-code "what the default rubric used to say"; if a
-# probe needs the default, it overrides explicitly.
+# ``format_gate_prompt``. It asks for the ``<explanation>`` and
+# ``<rating>`` reply that ``run_inline_judge`` parses.
 _DEFAULT_GATE_PROMPT_TEMPLATE = (
     "You are evaluating whether a user message in a conversation "
     "is a legitimate user turn (vs. role-violation, fourth-wall "
     "break, or off-topic content).\n\n"
     "Conversation so far:\n{conversation_history}\n\n"
     "User message to evaluate:\n{user_turn_to_evaluate}\n\n"
-    "Respond with PASS or FAIL on the first line, then a brief "
-    "explanation."
+    "Rate a legitimate user turn success, and a role violation, "
+    "fourth-wall break or off-topic content failure.\n\n"
+    "Strictly respond in the following format:\n"
+    "<explanation>\n"
+    "[A brief explanation of the rating.]\n"
+    "</explanation>\n"
+    "<rating>\n"
+    "[Must be either 'success' or 'failure' strictly]\n"
+    "</rating>"
 )
 
 
