@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         ToolExecutionMixin,
         register_probe,
     )
-    from usersim.engine.core.prompt_loader import render_prompt
+    from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
     from usersim.engine.core.simulation import (
         ConversationState,
         finalize_completed,
@@ -119,6 +119,8 @@ __all__ = [
     "format_interaction_style_instructions",
     "format_persona_for_prompt",
     "format_tools_for_prompt",
+    "get_prompt",
+    "load_prompt_file",
     "persona_full_name",
     "persona_uuid",
     "render_prompt",
@@ -189,7 +191,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
         "ToolExecutionMixin",
         "register_probe",
     ),
-    "usersim.engine.core.prompt_loader": ("render_prompt",),
+    "usersim.engine.core.prompt_loader": ("get_prompt", "load_prompt_file", "render_prompt"),
     "usersim.engine.core.simulation": (
         "ConversationState",
         "finalize_completed",

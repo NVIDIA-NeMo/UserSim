@@ -85,6 +85,8 @@ does not load the conversation loop.
 | `format_conversation_history_for_prompt` | A conversation as a text block for a judge prompt |
 | `format_tools_for_prompt` | Tool definitions as a readable prompt block |
 | `render_prompt` | Fills a template's placeholders from given values, then from the row |
+| `load_prompt_file` | A probe's `prompts.yaml` as a mapping, read from the folder its banks resolve to; empty when there is none |
+| `get_prompt` | One prompt from a probe's `prompts.yaml`, or the default it is given when the file or the key is missing |
 
 ### Locales and languages
 
