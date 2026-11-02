@@ -158,7 +158,7 @@ def test_seeds_default_path_loads_for_every_locale(
     kind: str,
 ) -> None:
     """``load_seeds`` raises ``FileNotFoundError`` when neither the
-    locale-specific file nor the ``base/`` fallback exists. We assert
+    locale's own file nor the ``en_US`` fallback exists. We assert
     a non-empty result so a bug that ships an empty file (or points at
     one) also fails."""
     seeds = load_seeds(locale, probe, kind)

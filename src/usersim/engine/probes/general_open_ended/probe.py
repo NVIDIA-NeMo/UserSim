@@ -62,7 +62,7 @@ class OpenEndedProbe(BaseProbe):
 
     @classmethod
     def themes(cls, locale: str) -> list[dict[str, Any]]:
-        """The topics in ``locale``'s seed file, or in the base file when the locale has none."""
+        """The topics in ``locale``'s seed file, or in the ``en_US`` file when the locale has none."""
         return load_seeds(locale, cls.label, "topics")
 
     @classmethod

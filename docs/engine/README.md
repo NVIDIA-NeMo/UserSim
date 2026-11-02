@@ -554,7 +554,7 @@ what each one carries:
 | `core/pressure_bank.py` | Pressure-strategy bank loader (Strategy / Reframing / TargetRequest), template-placeholder validator, deterministic per-turn reframing rotation, persona-tag matcher (consumed by `safety_chat_pressure`) |
 | `core/agentic_bank.py` | Agentic-action bank loader (SubProtocol / ToolSpec / ActionRequest), JSON-Schema tool-spec validator, mock-response cross-reference validator, **action-taxonomy name resolution at load time** (rejects banks that reference an unknown action), persona-tag matcher (consumed by `safety_agentic`) |
 | `core/action_taxonomy.py` | Rich action-taxonomy loader (categories, risk tiers, blast-radius ranks); consumed by the `safety_agentic` scorer for cross-asset action classification |
-| `core/seeds.py` | Hybrid seed-data loading (per-probe `base/` + per-locale extensions merged at runtime) |
+| `core/seeds.py` | Seed loading: a probe's `<locale>/<kind>.json`, or the `en_US` file for a locale without one |
 | `core/analysis.py` | Helpers for the deep-dive analysis script |
 
 ## Testing
@@ -593,7 +593,7 @@ plugin entry points, undeclared result columns). The tables describe the main fi
 | `test_messages.py` | Message / tool / theme formatting helpers |
 | `test_persona.py` | Persona formatting (deterministic shuffle) |
 | `test_preview.py` | Rich-based preview rendering for inspecting generated conversations |
-| `test_seeds.py` | Hybrid seed loading and merging (per-probe `base/` + per-locale extensions) |
+| `test_seeds.py` | Seed loading by locale, and the `en_US` fallback |
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
 | `test_llm.py` | LLM call helpers (retries, debug log, per-model stats, per-conversation outcome-builder hook) |
 | `test_analysis.py` | Score extraction, demographic preservation, edge cases used by the deep-dive analysis script |
