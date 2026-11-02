@@ -445,6 +445,31 @@ To propose a probe, open the
 Triage settles where it lives: in this repository, as an extension, or as an
 extension first.
 
+### Adding a hook
+
+When a probe, scorer or other extension needs something no hook, class
+attribute or entry point offers, open the
+[Extension hook form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=extension-hook.yml).
+[`architecture/probes.md`](architecture/probes.md) lists the hooks and
+declarations a probe has, and [`docs/extension_api.md`](docs/extension_api.md)
+the names an extension imports.
+
+A new hook:
+
+- **is general:** it serves probes beyond the one that asks for it, and its
+  name and documentation describe that general use.
+- **keeps today's behaviour by default:** a probe that does not define it runs,
+  and stores its rows, as before.
+- **is `async def` if it can call a model,** so the loop awaits it.
+- **works when a host drives the probe:** `assert_hosted_parity` passes for a
+  probe that uses it.
+- **comes with its uses:** the extension fixture in
+  `tests/fixtures/extension_package/` uses it, so `make check-extensions`
+  proves it works from an installed package. The pull request that adds it
+  also updates the conformance checks, `templates/probe/`,
+  [`architecture/probes.md`](architecture/probes.md) and
+  [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md).
+
 ## Code style
 
 `ruff` owns formatting and linting; there is no separate style config to

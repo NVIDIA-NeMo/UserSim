@@ -11,7 +11,9 @@ the booking the assistant makes.
 point groups and how discovery behaves,
 [`docs/engine/AUTHORING_A_PROBE.md`](engine/AUTHORING_A_PROBE.md) covers every
 hook a probe can implement, and [`extension_api.md`](extension_api.md) lists
-every name the package can import from `usersim`.
+every name the package can import from `usersim`. When a package needs a hook
+User Sim does not have,
+[Adding a hook](../CONTRIBUTING.md#adding-a-hook) says how to ask for one.
 
 ## Layout
 
