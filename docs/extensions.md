@@ -35,6 +35,10 @@ my-bookings/
 The banks sit under `assets/<label>/<locale>/`, the layout the asset search path
 reads.
 
+[`templates/extension_package/`](../templates/extension_package/) holds a
+package with the same layout to copy, every name in it a placeholder, and
+`make check-extensions` runs its tests against an installed User Sim.
+
 ## Names
 
 Every name the package adds starts with its prefix, `my_`, because unprefixed

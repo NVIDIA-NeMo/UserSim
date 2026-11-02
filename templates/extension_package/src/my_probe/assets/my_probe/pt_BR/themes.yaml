@@ -1,0 +1,7 @@
+# The areas a run draws from, one per row. Each sets a topic and the bounds the
+# conversation stays within; the simulated user explores it in their own words.
+# Replace these with yours, written in the locale's language.
+- type: first_area
+  description: Substitua por uma área para o usuário explorar e pelos limites em que a conversa fica.
+- type: second_area
+  description: Substitua por outra área, para que as linhas explorem terrenos diferentes.

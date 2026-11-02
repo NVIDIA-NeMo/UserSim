@@ -268,7 +268,7 @@ health-check:  ## Live one-row simulate + eval + report against a provider
 		|| { echo "report produced no index.html"; exit 1; }; \
 	echo "✓ simulate, eval and report all completed"
 
-check-extensions:  ## Install an out-of-tree package and prove all six seams work
+check-extensions:  ## Install an out-of-tree package, prove all six seams work, and test the package template
 	@set -eu; \
 	WORK=$$(mktemp -d); \
 	EMPTY=$$(mktemp -d); \
@@ -280,10 +280,15 @@ check-extensions:  ## Install an out-of-tree package and prove all six seams wor
 	test -x "$$WORK/venv/bin/python" || { echo "venv was not created"; exit 1; }; \
 	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK"/*.whl; \
 	cp -R tests/fixtures/extension_package "$$WORK/ext"; \
+	cp -R templates/extension_package "$$WORK/template"; \
 	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/ext"; \
 	echo "→ asking the installed CLI what it can see, from $$EMPTY"; \
 	cp tests/fixtures/extension_package/verify_seams.py "$$EMPTY/"; \
-	cd "$$EMPTY" && "$$WORK/venv/bin/python" verify_seams.py
+	cd "$$EMPTY" && "$$WORK/venv/bin/python" verify_seams.py; \
+	echo "→ installing templates/extension_package and running its tests"; \
+	$(UV) pip install --quiet --python "$$WORK/venv/bin/python" "$$WORK/template" \
+		"pytest>=8.0" "pytest-asyncio>=1.0,<2" "pytest-env>=1.1,<2"; \
+	cd "$$WORK/template" && "$$WORK/venv/bin/python" -m pytest -q -p no:cacheprovider
 
 # --- housekeeping ----------------------------------------------------------
 

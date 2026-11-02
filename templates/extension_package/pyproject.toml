@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my-probe"
+version = "0.1.0"
+requires-python = ">=3.10"
+# Name the User Sim releases the package works with, such as "usersim>=0.2,<0.3":
+# the first release with every hook it uses, up to the next minor release.
+dependencies = ["usersim", "pyyaml"]
+
+[project.entry-points."usersim.probes"]
+my_probe = "my_probe.probe:MyProbe"
+
+[project.entry-points."usersim.scorers"]
+my_probe = "my_probe.scorer"
+
+[tool.setuptools.package-data]
+my_probe = ["assets/**/*.yaml"]
+
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio", "pytest-env"]
+
+[tool.pytest.ini_options]
+env = ["USERSIM_DISABLE_EXTENSIONS=1"]
+asyncio_mode = "auto"

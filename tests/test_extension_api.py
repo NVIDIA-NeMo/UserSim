@@ -39,6 +39,7 @@ _EXAMPLE_FILES = (
     *sorted((_REPO / "templates" / "probe").glob("*.py")),
     _REPO / "templates" / "probe" / "test_probe.py.template",
     *sorted((_REPO / "tests" / "fixtures" / "extension_package" / "usersim_extension_fixture").glob("*.py")),
+    *sorted((_REPO / "templates" / "extension_package").rglob("*.py")),
 )
 
 #: Pages whose Python examples an extension author copies.
