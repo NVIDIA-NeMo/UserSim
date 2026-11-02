@@ -25,8 +25,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from usersim.engine.core._assets import packaged_assets_dir, set_runtime_assets_dir
-from usersim.engine.core.prompt_loader import render_prompt
+from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir, set_runtime_assets_dir
+from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
 
 #: The theme-driven probes, mapped to the name each one gives the
 #: import-time constant behind ``user_agent_system_prompt()``. Spelled out
@@ -153,6 +153,24 @@ class TestAccessorsResolveAtCallTime:
         set_runtime_assets_dir(_assets_with_prompt(tmp_path, "general_open_ended", trajectory_rubric="R"))
         assert oe.user_agent_system_prompt().strip()
         assert oe.trajectory_rubric() == "R"
+
+
+class TestPromptFileIsReadWhereTheBanksAre:
+    """A probe's ``prompts.yaml`` comes from the folder its banks resolve to."""
+
+    def test_a_root_holding_other_probes_does_not_hide_the_shipped_prompts(self, tmp_path):
+        set_runtime_assets_dir(_assets_with_prompt(tmp_path, "tool_calling", user_agent_system_prompt="OTHER"))
+
+        shipped = yaml.safe_load((probe_assets_dir("general_open_ended") / "prompts.yaml").read_text())
+        assert shipped
+        assert load_prompt_file("general_open_ended") == shipped
+
+    def test_a_declared_root_supplies_its_probes_prompts(self, register_test_probe, tmp_path):
+        register_test_probe(
+            "ext_probe", assets_root=_assets_with_prompt(tmp_path, "ext_probe", user_agent_system_prompt="EXT")
+        )
+
+        assert get_prompt("ext_probe", "user_agent_system_prompt") == "EXT"
 
 
 # ---------------------------------------------------------------------------

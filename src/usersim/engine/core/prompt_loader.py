@@ -4,15 +4,17 @@
 """YAML-based prompt template loader.
 
 Loads prompt templates from per-probe YAML files at
-``assets/<probe>/prompts.yaml``, falling back to the compiled-in
+``<asset root>/<probe>/prompts.yaml``, falling back to the compiled-in
 Python defaults if YAML files are not found. This allows prompt
 iteration and A/B testing without code changes.
 
-Per-probe asset layout: each probe owns its own folder under
-``assets/`` and stores its prompt templates as ``prompts.yaml``
-inside that folder, alongside its other assets (e.g.
-``assets/tool_calling/prompts.yaml`` lives next to
-``assets/tool_calling/toolsets_seed.parquet``).
+Per-probe asset layout: each probe owns a ``<probe>/`` folder under an
+asset root and stores its prompt templates as ``prompts.yaml`` inside
+that folder, alongside its other assets (e.g.
+``tool_calling/prompts.yaml`` lives next to
+``tool_calling/toolsets_seed.parquet``). The file is read from the
+folder :func:`~usersim.engine.core._assets.probe_assets_dir` resolves,
+the one the probe's banks are read from.
 """
 
 from __future__ import annotations
@@ -46,15 +48,19 @@ def _load_prompt_file_at(probe: str, assets_root: str) -> dict[str, Any]:
 
 
 def load_prompt_file(probe: str) -> dict[str, Any]:
-    """Load a probe's ``prompts.yaml`` from the active asset root.
+    """Load a probe's ``prompts.yaml`` from the folder its banks resolve to.
+
+    That is the first root on the asset search path holding ``probe``, or
+    the ``assets_root`` its class declares, so a root that holds other
+    probes' assets does not hide this probe's prompts.
 
     Returns an empty dict if the file doesn't exist or PyYAML is not
     available — callers should always pass a sensible compiled-in
     default to :func:`get_prompt` to cover that path.
     """
-    from usersim.engine.core._assets import default_assets_dir
+    from usersim.engine.core._assets import probe_assets_dir
 
-    return _load_prompt_file_at(probe, str(default_assets_dir()))
+    return _load_prompt_file_at(probe, str(probe_assets_dir(probe).parent))
 
 
 def get_prompt(probe: str, key: str, default: str = "") -> str:

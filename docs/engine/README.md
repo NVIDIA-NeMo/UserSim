@@ -528,7 +528,7 @@ what each one carries:
 | `core/persona.py` | Persona formatting for prompts (deterministic shuffle) |
 | `core/locale.py` | Locale → language + expected-script-ranges mapping (single source of truth for shipped locales) |
 | `core/localized.py` | `LocalizedText` wrapper for asset-bank fields with per-locale renderings (`for_locale(locale)` lookup with `en_US` fallback) |
-| `core/prompt_loader.py` | Reads per-probe prompt packs from `assets/<probe>/prompts.yaml` |
+| `core/prompt_loader.py` | Reads a probe's `prompts.yaml` from the folder its banks resolve to |
 | `core/messages.py` | Message, tool, theme formatting |
 | `core/preview.py` | Rich-based preview utilities for inspecting generated conversations |
 
