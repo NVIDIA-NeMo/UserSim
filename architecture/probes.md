@@ -167,7 +167,8 @@ the turn had no side effects.
 
 ## Assets
 
-A probe's content lives at `engine/assets/<label>/`, resolved through
+A probe's content lives at `engine/assets/<label>/`, or, for a probe kept in
+its own folder, at `engine/probes/<label>/assets/<label>/`, resolved through
 `probe_assets_dir()`. A run fails pre-flight, before any model call, if a
 selected probe's bank is missing or, for the probes whose banks are split by
 locale, doesn't load for a run locale (a finance bank without tasks, for

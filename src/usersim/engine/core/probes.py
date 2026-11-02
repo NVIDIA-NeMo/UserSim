@@ -294,12 +294,12 @@ class BaseProbe:
     default_scorers: tuple[str, ...] = ()
 
     # The directory that holds this probe's ``<label>/`` asset folder, for a
-    # probe whose assets ship outside ``usersim``: an absolute path, such as
-    # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
-    # relative one). Searched after the deliberate overrides (the runtime
-    # override, ``USERSIM_ASSET_PATH`` and ``USERSIM_ASSETS_DIR``) and before
-    # the packaged banks. ``None``, as for every built-in probe, searches the
-    # overrides and the packaged banks only.
+    # probe whose assets are outside the packaged banks, in its own package or
+    # its own folder: an absolute path, such as ``Path(__file__).parent /
+    # "assets"`` (``@register_probe`` refuses a relative one). Searched after
+    # the deliberate overrides (the runtime override, ``USERSIM_ASSET_PATH``
+    # and ``USERSIM_ASSETS_DIR``) and before the packaged banks. ``None``
+    # searches the overrides and the packaged banks only.
     assets_root: Path | None = None
 
     @classmethod
@@ -1541,7 +1541,7 @@ def register_probe(
 #: this one, so this module cannot import them at load time.
 BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.financial_services.generator",
-    "usersim.engine.probes.general_educational.generator",
+    "usersim.engine.probes.general_educational.probe",
     "usersim.engine.probes.general_open_ended.generator",
     "usersim.engine.probes.health_disclosure.decision_support",
     "usersim.engine.probes.health_disclosure.general",

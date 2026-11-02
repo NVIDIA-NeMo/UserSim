@@ -19,8 +19,10 @@ shipped sample.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
+import usersim
 from usersim.engine.core._assets import (
     asset_roots_in_use,
     asset_search_path,
@@ -98,8 +100,24 @@ class TestRegistryAndLayoutInvariants:
         assert not unresolved, f"registered probes without an asset folder: {unresolved}"
 
     def test_every_built_in_probe_ships_its_folder_in_the_package(self) -> None:
-        missing = sorted(label for label in self._labels() if not (packaged_assets_dir() / label).is_dir())
-        assert not missing, f"built-in probes whose assets are not under {packaged_assets_dir()}: {missing}"
+        """In the packaged banks or in the probe's own folder, so a plain install has it."""
+        package = Path(usersim.__file__).parent
+        outside = {
+            label: probe_assets_dir(label)
+            for label in self._labels()
+            if not probe_assets_dir(label).is_relative_to(package)
+        }
+        assert not outside, f"built-in probes whose assets are outside {package}: {outside}"
+
+    def test_a_built_in_that_declares_a_root_keeps_it_in_its_own_folder(self) -> None:
+        """Its banks sit beside its code, at ``engine/probes/<label>/assets/<label>/``."""
+        from usersim.engine.core.probes import resolve_probe
+
+        declared = {label: resolve_probe(label) for label in self._labels() if resolve_probe(label).assets_root}
+        assert declared, "no built-in probe declares an assets_root"
+        for label, cls in declared.items():
+            folder = Path(sys.modules[cls.__module__].__file__).parent
+            assert folder.name == label and Path(cls.assets_root) == folder / "assets", label
 
     def test_packaged_tree_has_no_stray_top_level_entries(self) -> None:
         """Everything shipped under assets/ should be a probe folder. Catches
@@ -241,11 +259,11 @@ class TestDeclaredAssetsRoot:
         assert probe_assets_dir("tool_calling") == packaged_assets_dir() / "tool_calling"
 
     def test_roots_in_use_add_declared_roots_after_the_search_path(self, register_test_probe, tmp_path) -> None:
-        assert asset_roots_in_use() == asset_search_path()
-
         register_test_probe("ext_probe", assets_root=tmp_path)
 
-        assert asset_roots_in_use() == (*asset_search_path(), tmp_path)
+        roots, search = asset_roots_in_use(), asset_search_path()
+        assert roots[: len(search)] == search
+        assert tmp_path in roots[len(search) :]
 
 
 class TestProbeAssetsDir:

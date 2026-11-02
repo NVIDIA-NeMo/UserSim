@@ -72,7 +72,7 @@ from usersim.engine.probes.tool_calling.verifiers import ToolCallVerifier
 logger = logging.getLogger("usersim.engine")
 
 # ── Scenario metadata ────────────────────────────────────────────────
-# See general_educational/generator.py for the contract. `probe_variant` is
+# See general_educational/probe.py for the contract. `probe_variant` is
 # carried on the trajectory; the evaluator reads it for stratification.
 
 PROBE_FAMILY: str = "tool_calling"

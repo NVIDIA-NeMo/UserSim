@@ -163,7 +163,7 @@ class TestNemotronPersonasVersion:
     "module_path",
     [
         "usersim.engine.probes.general_open_ended.generator",
-        "usersim.engine.probes.general_educational.generator",
+        "usersim.engine.probes.general_educational.probe",
         "usersim.engine.probes.tool_calling.generator",
     ],
 )

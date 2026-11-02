@@ -11,6 +11,7 @@ shim that constructs the probe and runs it through ``run_dispatch``.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.behavioral import (
@@ -52,6 +53,7 @@ class EducationalProbe(BaseProbe):
     """
 
     label = "general_educational"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests tutoring: a persona-grounded learner asks about a subject, and the probe "
         "looks at whether explanations are accurate, pitched at the learner's level and "

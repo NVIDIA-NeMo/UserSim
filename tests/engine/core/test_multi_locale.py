@@ -6,13 +6,12 @@
 import pytest
 
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.behavioral import LOCALE_LANGUAGE_MAP, get_conversation_language
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.seeds import load_seeds
 
 LOCALES = SHIPPED_LOCALES
-ASSETS_DIR = packaged_assets_dir()
 
 
 class TestMultiLocaleLoop:
@@ -46,27 +45,28 @@ class TestLocaleSeeds:
 
     @pytest.fixture(autouse=True)
     def check_assets(self):
-        # Fail rather than skip: the seeds are package data, so their absence
-        # is a packaging defect, not an environment the test can excuse.
-        base = ASSETS_DIR / "general_open_ended" / "topics" / "base"
-        assert base.is_dir(), f"packaged seeds missing at {base}"
+        # Fail rather than skip: the seeds ship with the package, so their
+        # absence is a packaging defect, not an environment the test can excuse.
+        for probe, kind in [("general_open_ended", "topics"), ("general_educational", "subjects")]:
+            base = probe_assets_dir(probe) / kind / "base"
+            assert base.is_dir(), f"packaged seeds missing at {base}"
 
     def test_base_seeds_available_for_all_locales(self):
         for locale in LOCALES:
-            topics = load_seeds(locale, "general_open_ended", "topics", ASSETS_DIR)
+            topics = load_seeds(locale, "general_open_ended", "topics")
             assert len(topics) >= 15  # base has 15
 
-            subjects = load_seeds(locale, "general_educational", "subjects", ASSETS_DIR)
+            subjects = load_seeds(locale, "general_educational", "subjects")
             assert len(subjects) >= 10  # base has 10
 
     def test_locale_seed_counts_preserve_localized_replacements(self):
-        base_count = len(load_seeds("en_US", "general_open_ended", "topics", ASSETS_DIR))
-        pt_count = len(load_seeds("pt_BR", "general_open_ended", "topics", ASSETS_DIR))
+        base_count = len(load_seeds("en_US", "general_open_ended", "topics"))
+        pt_count = len(load_seeds("pt_BR", "general_open_ended", "topics"))
         assert base_count == 48
         assert pt_count == 20
 
-        base_ed = len(load_seeds("en_US", "general_educational", "subjects", ASSETS_DIR))
-        ja_ed = len(load_seeds("ja_JP", "general_educational", "subjects", ASSETS_DIR))
+        base_ed = len(load_seeds("en_US", "general_educational", "subjects"))
+        ja_ed = len(load_seeds("ja_JP", "general_educational", "subjects"))
         assert base_ed == 40
         assert ja_ed == 14
 
@@ -76,7 +76,7 @@ class TestLocaleSeeds:
                 ("general_open_ended", "topics"),
                 ("general_educational", "subjects"),
             ]:
-                seeds = load_seeds(locale, probe, kind, ASSETS_DIR)
+                seeds = load_seeds(locale, probe, kind)
                 for seed in seeds:
                     assert "type" in seed, f"Missing 'type' in {probe}/{kind} for {locale}"
                     assert "description" in seed, f"Missing 'description' in {probe}/{kind} for {locale}"

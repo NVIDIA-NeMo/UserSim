@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from usersim.engine.core._assets import packaged_assets_dir, probe_assets_dir, set_runtime_assets_dir
+from usersim.engine.core._assets import probe_assets_dir, set_runtime_assets_dir
 from usersim.engine.core.prompt_loader import get_prompt, load_prompt_file, render_prompt
 
 #: The theme-driven probes, mapped to the name each one gives the
@@ -381,7 +381,7 @@ class TestAssistantJudgePrompt:
         every other probe on the default."""
         from usersim.engine.core.behavioral import compute_behavioral_profile
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
-        from usersim.engine.probes.general_educational.generator import (
+        from usersim.engine.probes.general_educational.probe import (
             EducationalProbe,
         )
 
@@ -444,5 +444,5 @@ class TestAssistantJudgePrompt:
 
         from usersim.engine.core.prompts import ASSISTANT_JUDGE_PROMPT
 
-        shipped = yaml.safe_load((packaged_assets_dir() / probe / "prompts.yaml").read_text())
+        shipped = yaml.safe_load((probe_assets_dir(probe) / "prompts.yaml").read_text())
         assert shipped["assistant_judge_prompt"] == ASSISTANT_JUDGE_PROMPT

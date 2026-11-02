@@ -16,7 +16,8 @@ Resolution is an ordered **search path**, highest priority first:
 4. the packaged ``usersim/engine/assets/`` directory.
 
 A probe class may also declare ``assets_root``, the root that holds its
-``<label>/`` folder, as a probe shipped in its own package does. That root
+``<label>/`` folder: a probe shipped in its own package does, and so does a
+built-in probe that keeps its banks in its own folder. That root
 is searched for that probe after the first three entries and before the
 packaged directory, so a deliberate override wins over it.
 
@@ -115,8 +116,9 @@ def asset_search_path() -> tuple[Path, ...]:
 def declared_assets_roots() -> dict[str, Path]:
     """The ``assets_root`` each registered probe class declares, by label.
 
-    Probes that declare none, the built-ins among them, are left out. Reads
-    the registry as it stands, so a probe counts once its module is imported.
+    Probes that declare none, such as a built-in whose banks are in the
+    packaged directory, are left out. Reads the registry as it stands, so a
+    probe counts once its module is imported.
     """
     return {
         label: Path(cls.assets_root)
