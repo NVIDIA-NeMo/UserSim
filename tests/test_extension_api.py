@@ -56,6 +56,7 @@ _KEPT_INTERNAL_IMPORTS = {
     ("usersim.engine.probes.YOUR_PROBE", "probe"),
     ("usersim.engine.probes.bookings.bank", "LOCALES"),
     ("usersim.engine.probes.bookings.bank", "Booking"),
+    ("usersim.engine.probes.bookings.bank", "draw_booking"),
     ("usersim.engine.probes.bookings.bank", "read_booking_bank"),
     ("usersim.engine.probes.bookings.prompts", "BOOKINGS_USER_PROMPTS"),
     ("usersim.engine.probes.my_probe.bank", "load_my_bank_default"),

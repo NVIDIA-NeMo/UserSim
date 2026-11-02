@@ -23,6 +23,13 @@ do we need to surface?* Each probe owns:
   `target_request_id`, `action_request_id`, …) that the matching
   out-of-sim scorer reads.
 
+A probe sets the area a conversation explores, a topic or a task and the
+facts a scorer checks, and the simulated user explores it in the persona's own
+words. Hand the user model the area, not a message to send: a fixed opening
+starts every row in a locale the same way. Send a bank's text verbatim only
+when its exact wording is what the probe tests, such as a false premise;
+Step 0 of the authoring tutorial says which shape fits.
+
 If the new "probe" is just a different prompt for an existing probe,
 prefer a `probe_variant` over a new module.
 

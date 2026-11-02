@@ -94,6 +94,15 @@ asyncio_mode = "auto"
 
 ## The probe
 
+A probe sets the area its conversations explore and the bounds a scorer
+checks, and the simulated user explores that area in the persona's own words.
+Here the area is booking an appointment. The bank names what can be booked,
+the probe draws a date, a time and a number of people for each row, and the
+user model asks for the booking the way its persona would, so rows that draw
+the same appointment still open differently. A bank's text goes to the
+assistant verbatim only when its exact wording is what a probe tests, such as
+a false premise.
+
 ```python
 import json
 import random
@@ -104,7 +113,6 @@ from pathlib import Path
 import yaml
 from usersim.extension import (
     BankBackedProbe,
-    BankVerbatimMixin,
     PreviewField,
     ToolExecutionMixin,
     format_persona_for_prompt,
@@ -135,12 +143,9 @@ BOOK_APPOINTMENT = {
 
 
 @dataclass(frozen=True)
-class Booking:
+class Appointment:
     id: str
-    opening: str
-    date: str
-    time: str
-    people: int
+    what: str
     placeholder: bool
 
 
@@ -148,12 +153,22 @@ class Booking:
 class BookingBank:
     bank_id: str
     bank_version: str
-    bookings: tuple[Booking, ...]
+    appointments: tuple[Appointment, ...]
+
+
+@dataclass(frozen=True)
+class Booking:
+    id: str
+    what: str
+    date: str
+    time: str
+    people: int
+    placeholder: bool
 
 
 def read_booking_bank(locale_dir: Path) -> BookingBank:
     doc = yaml.safe_load((locale_dir / "bookings.yaml").read_text(encoding="utf-8"))
-    return BookingBank(doc["bank_id"], doc["bank_version"], tuple(Booking(**b) for b in doc["bookings"]))
+    return BookingBank(doc["bank_id"], doc["bank_version"], tuple(Appointment(**a) for a in doc["appointments"]))
 
 
 @cache
@@ -161,20 +176,37 @@ def load_booking_bank(locale: str) -> BookingBank:
     return read_booking_bank(BookingProbe.assets_dir() / locale)
 
 
+def draw_booking(appointment: Appointment, rng: random.Random) -> Booking:
+    """A date, a time and a number of people for ``appointment``.
+
+    The day and the month are different numbers no greater than 12, so the date
+    reads as two different dates, day first and month first.
+    """
+    month = rng.randint(1, 12)
+    day = rng.choice([d for d in range(1, 13) if d != month])
+    return Booking(
+        id=appointment.id,
+        what=appointment.what,
+        date=f"2027-{month:02d}-{day:02d}",
+        time=f"{rng.randint(9, 17):02d}:{rng.choice(('00', '30'))}",
+        people=rng.randint(2, 6),
+        placeholder=appointment.placeholder,
+    )
+
+
 @register_probe(family="my_bookings", prompt_version="v1.0", variants=("default",))
-class BookingProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
+class BookingProbe(ToolExecutionMixin, BankBackedProbe):
     label = "my_bookings"
     description = (
         "Tests whether an assistant books what the user means: a date, a time and a number of people, "
         "written the way people write them in the user's language."
     )
-    preview_fields = (PreviewField("my_booking_id", "Booking id"),)
+    preview_fields = (PreviewField("my_booking_id", "Appointment"),)
     default_scorers = ("my_bookings",)
     assets_root = Path(__file__).parent / "assets"
     bank_loader = staticmethod(load_booking_bank)
     locale_bank_check = staticmethod(read_booking_bank)
     placeholder_warning_kind = "my_used_placeholder_booking"
-    verbatim_field = "opening"
     output_columns = ("my_booking_id", "my_booking")
 
     @classmethod
@@ -189,15 +221,18 @@ class BookingProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
 
     def derive_task(self, persona, bank, *, cfg):
         rng = random.Random(f"{persona_uuid(persona)}:{bank.bank_version}:{cfg.random_seed}")
-        return rng.choice(bank.bookings)
+        return draw_booking(rng.choice(bank.appointments), rng)
 
     def get_user_system_prompt(self) -> str:
+        task = self._task
         return "\n\n".join(
             [
                 format_persona_for_prompt(self._persona),
-                "You asked an assistant to book an appointment, giving the date and time. "
-                f"If it asks how many people are coming, the answer is {self._task.people}; "
-                "say it the way you would. Once it confirms the booking, thank it.",
+                f"You want an assistant to book {task.what} on {task.date} at {task.time}. "
+                "Ask for it in your own words, and write the date and time the way you would write them "
+                "yourself, not in the form they are given here. "
+                f"Say how many people are coming only if it asks; the answer is {task.people}. "
+                "Once it confirms the booking, thank it.",
                 language_instruction(self._language, self._locale),
             ]
         )
@@ -234,13 +269,12 @@ class BookingProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
   `book_appointment` in `get_tools_for_assistant`, and `execute_tool_call`
   answers each call. It records the first booking in `state.metadata`, with
   how many user turns came before it.
-- **`BankVerbatimMixin`** sends the booking's `opening`, the field
-  `verbatim_field` names, as turn 1, so the date reaches the assistant written
-  exactly as the user wrote it.
-- **`get_user_system_prompt`** sets up the user model for the turns after the
-  first: the persona, the number of people it gives only when the assistant
-  asks, and `language_instruction`, which keeps it writing in the run's
-  language.
+- **`get_user_system_prompt`** gives the user model the persona, what to book,
+  the date and time in the tool's form, and the number of people, to give only
+  if the assistant asks. It asks for the date and time written the way the user
+  would write them, and `language_instruction` keeps the user writing in the
+  run's language. The user model writes every user turn, the first included,
+  and the gate checks each one.
 - **`allow_early_stop_at_turn`** keeps the conversation going until the
   assistant books, so a user who adds a thank-you to the number of people does
   not end it before the booking is made.
@@ -248,8 +282,8 @@ class BookingProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
   assistant under test is told, so it answers as it would for any user.
 - **`description`** is what the per-row preview and the capability report
   show about the probe.
-- **`preview_fields`** puts the row's booking id in the per-row preview's Probe
-  Inputs panel.
+- **`preview_fields`** puts the row's appointment in the per-row preview's
+  Probe Inputs panel.
 - **`default_scorers`** names the package's scorer, so
   `usersim eval --scorers auto` runs it whenever a run holds the probe's rows,
   beside `language_compliance`, which checks that the assistant replied in the
@@ -263,27 +297,32 @@ class BookingProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
   bank that loads stops before any model call rather than failing every row.
 - **`asset_problems`** reads each bank the package ships, so `usersim smoke` and
   `assert_probe_conforms` report an install that is missing one.
-- **`placeholder_warning_kind`** is the warning a row records when its booking
-  is marked `placeholder: true`. Its `<prefix>_used_placeholder_<thing>` form is
-  what the capability report counts as placeholder content.
+- **`placeholder_warning_kind`** is the warning a row records when its
+  appointment is marked `placeholder: true`. Its
+  `<prefix>_used_placeholder_<thing>` form is what the capability report counts
+  as placeholder content.
 - **`output_columns`** declares the columns `build_result_extras` adds, so a run
   keeps them. `my_booking` holds, as JSON, what the user meant and what the
   assistant booked.
-- **`derive_task`** picks the row's booking with a generator seeded from the
-  persona, the bank's version and the run's seed, never the global `random`, so
-  a row draws the same booking every time it runs.
+- **`derive_task`** picks the row's appointment, and `draw_booking` its date,
+  time and number of people, with a generator seeded from the persona, the
+  bank's version and the run's seed, never the global `random`, so a row draws
+  the same booking every time it runs.
 
 The banks, `assets/my_bookings/en_US/bookings.yaml`:
 
 ```yaml
 bank_id: my_bookings_en_US
 bank_version: "1.0.0"
-bookings:
+appointments:
   - id: museum_tour
-    opening: Hi! Can you book the guided museum tour for 04/03/2027 at 3:30 pm?
-    date: "2027-04-03"
-    time: "15:30"
-    people: 3
+    what: the guided tour of the city museum
+    placeholder: true
+  - id: restaurant
+    what: a table at a restaurant
+    placeholder: true
+  - id: pottery_class
+    what: a pottery class
     placeholder: true
 ```
 
@@ -292,21 +331,28 @@ and `assets/my_bookings/pt_BR/bookings.yaml`:
 ```yaml
 bank_id: my_bookings_pt_BR
 bank_version: "1.0.0"
-bookings:
+appointments:
   - id: museum_tour
-    opening: Oi! Você pode reservar a visita guiada ao museu para 04/03/2027 às 15h30?
-    date: "2027-03-04"
-    time: "15:30"
-    people: 3
+    what: a visita guiada ao museu da cidade
+    placeholder: true
+  - id: restaurant
+    what: uma mesa num restaurante
+    placeholder: true
+  - id: pottery_class
+    what: uma aula de cerâmica
     placeholder: true
 ```
 
-Both open with the same date, `04/03/2027`. A user writing American English
-means 3 April and a user writing Brazilian Portuguese means 4 March. An
-assistant that reads every date month first books the Brazilian user's tour a
-month late, and one that reads every date day first books the American user's
-a month early. Neither opening says how many people are coming, so an assistant
-that books on its first reply has to guess.
+Both banks name the same three appointments, each in its bank's language.
+Every date `draw_booking` picks reads as two dates. For `2027-03-06`, 6 March, a
+user who writes the day first, as people in Brazil do, writes `06/03/2027`,
+which an assistant that reads every date month first books for 3 June. A user
+who writes the month first, as people in the United States do, writes
+`03/06/2027`, which an assistant that reads every date day first gets wrong the
+other way. Whether the user writes the date in numbers or in words is the user
+model's choice, as it would be a person's. The user says how many people are
+coming only when asked, so an assistant that books on its first reply has to
+guess.
 
 `placeholder: true` marks content no subject-matter expert has reviewed, which
 for these banks means a native speaker of the bank's language; see
@@ -366,11 +412,19 @@ installed. With discovery off, the tests import the package to register it:
 
 ```python
 import json
+import random
 
 from usersim.extension import ConversationSimulatorConfig
-from usersim.testing import assert_hosted_parity, assert_probe_conforms, assert_scorer_conforms, run_episode
+from usersim.testing import (
+    ScriptedModel,
+    assert_hosted_parity,
+    assert_probe_conforms,
+    assert_scorer_conforms,
+    run_episode,
+)
 
 import my_bookings.probe  # noqa: F401  registers the probe; discovery is off under test
+from my_bookings.probe import Appointment, draw_booking
 from my_bookings.scorer import score
 
 PERSONA = {"first_name": "Ana", "last_name": "Souza", "age": 35, "city": "Recife"}
@@ -385,22 +439,31 @@ async def test_the_scorer_conforms():
     await assert_scorer_conforms("my_bookings")
 
 
-async def test_an_episode_opens_in_portuguese_and_records_the_booking():
+async def test_the_user_asks_for_the_drawn_booking_in_their_own_words():
     run = await run_episode("my_bookings", config=CONFIG, persona=PERSONA, language="Portuguese")
 
     assert run.row["conversation_status"] is True
-    opening = json.loads(run.row["conversation_messages"])[0]
-    assert opening["content"] == "Oi! Você pode reservar a visita guiada ao museu para 04/03/2027 às 15h30?"
     booking = json.loads(run.row["my_booking"])
-    assert booking["expected"] == {"date": "2027-03-04", "time": "15:30", "people": 3}
+    assert booking["expected"] == {"date": "2027-03-06", "time": "11:00", "people": 6}
+    instructions = run.prompts[0]["messages"][0]["content"]
+    assert "a visita guiada ao museu da cidade on 2027-03-06 at 11:00" in instructions
+    opening = json.loads(run.row["conversation_messages"])[0]
+    assert opening == {"role": "user", "content": ScriptedModel.CONTENT["user"]}  # the user model's own words
     assert booking["made"]["after_user_turns"] == 1  # the scripted assistant books on its first reply
     warnings = json.loads(run.row["simulation_outcome"])["warnings"]
     assert [w["kind"] for w in warnings] == ["my_used_placeholder_booking"]
 
 
+def test_every_drawn_date_reads_two_ways():
+    appointment = Appointment(id="museum_tour", what="the guided tour of the city museum", placeholder=True)
+    for seed in range(200):
+        _, month, day = draw_booking(appointment, random.Random(seed)).date.split("-")
+        assert month != day and int(month) <= 12 and int(day) <= 12
+
+
 async def test_a_month_first_reading_of_a_day_first_date_is_wrong():
-    made = {"arguments": {"date": "2027-04-03", "time": "15:30", "people": 3}, "after_user_turns": 2}
-    expected = {"date": "2027-03-04", "time": "15:30", "people": 3}
+    made = {"arguments": {"date": "2027-06-03", "time": "11:00", "people": 6}, "after_user_turns": 2}
+    expected = {"date": "2027-03-06", "time": "11:00", "people": 6}
     result = await score({"my_booking": json.dumps({"expected": expected, "made": made})}, models={})
 
     assert result == {
@@ -422,9 +485,12 @@ async def test_a_host_reproduces_a_standalone_run():
   empty fields.
 - **`run_episode`** runs a whole episode with scripted models, through the same
   generator as `usersim simulate`, with nothing patched and no provider. Here it
-  runs in `pt_BR`: the opening reaches the assistant as written, and the
-  scripted assistant, which calls a tool as soon as one is offered, books on its
-  first reply.
+  runs in `pt_BR`: the user model's instructions, the first prompt the episode
+  sends, hold the drawn booking, and the opening is what the user model
+  replied, the scripted user's stock line. The scripted assistant, which calls a
+  tool as soon as one is offered, books on its first reply.
+- **`draw_booking`** is tested on its own over many seeds, since one episode
+  draws one date.
 - **The scorer** is tested on a row built by hand, in which the assistant read
   the Brazilian date month first.
 - **`assert_hosted_parity`** checks that a host driving the probe through

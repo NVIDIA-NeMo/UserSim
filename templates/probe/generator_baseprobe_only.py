@@ -3,9 +3,12 @@
 
 """Probe template — BaseProbe only, no asset bank.
 
-Use this shape when the probe asks general questions of the assistant
-without needing reviewer-curated content (the ``general_open_ended``
-and ``general_educational`` probes use this shape).
+Use this shape when the probe sets topics for the simulated user to
+explore, without needing reviewer-curated content (the
+``general_open_ended`` and ``general_educational`` probes use this
+shape). Each row draws one topic from ``themes(locale)``, and the user
+explores it in the persona's own words: the probe sets the area, never
+the message.
 
 What the unified ``ConversationLoop`` provides for you:
 - Multi-turn back-and-forth with the user-LLM.
@@ -15,7 +18,10 @@ What the unified ``ConversationLoop`` provides for you:
 - Frustration escalation, early-stop heuristics.
 
 What you provide:
-- The user-agent system prompt (how the simulated user behaves).
+- ``themes(locale)``: the topics a run draws from, one per row, each a
+  mapping with at least a ``description``.
+- The user-agent system prompt (how the simulated user behaves, and the
+  row's topic).
 - The assistant system prompt (empty per pure-capability-test policy;
   see docs/engine/README.md "Assistant under test").
 
@@ -24,6 +30,10 @@ real example at ~50 LOC.
 """
 
 from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
 
 # After you copy this file into ``src/usersim/engine/probes/<your_probe>/``,
 # also copy ``prompts.py`` next to it and import from
@@ -44,12 +54,21 @@ class DemoGeneralProbe(BaseProbe):
     """Smallest viable probe — no asset bank, default everything else."""
 
     label = "demo_general"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_general/, beside this module
+
+    @classmethod
+    def themes(cls, locale: str) -> list[dict]:
+        # One file of topics per locale, written in its language. A run
+        # draws one per row and stores it in the row's ``theme`` column.
+        return yaml.safe_load((cls.assets_dir() / locale / "themes.yaml").read_text(encoding="utf-8"))
 
     def get_user_system_prompt(self) -> str:
-        return DEMO_USER_AGENT_PROMPTS.get(
+        prompt = DEMO_USER_AGENT_PROMPTS.get(
             self._locale,
             persona=self._persona.get("first_name", "the user"),
         )
+        # The topic bounds the conversation; the persona picks the question.
+        return f"{prompt}\n\nTopic: {self.theme()['description']}"
 
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability-test policy. Empty system prompt;
