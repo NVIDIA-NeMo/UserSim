@@ -29,7 +29,9 @@ A pinned root -- what ``--assets-dir`` becomes, passed to
 It pins resolution to exactly that directory, for every probe, including
 one whose class declares a root. A user who named a location wants to be
 told when the assets are not there, rather than to be quietly served
-another copy instead.
+another copy instead. The packaged directory stands for the assets that
+ship with User Sim, so pinning it also reaches a built-in probe whose
+banks are in its own folder.
 
 There is deliberately no CWD fallback: resolving against whatever
 directory the process happened to start in makes a broken install look
@@ -180,11 +182,13 @@ def probe_assets_dir(
             the search path. This is what ``--assets-dir`` becomes: a
             user who named a location is told when the assets are not
             there rather than quietly served the packaged copies.
+            Pinning the packaged directory reaches every bank that ships
+            with User Sim, a built-in kept in its own folder included.
             When ``None``, :func:`probe_asset_roots` is walked and the
             first root holding ``probe`` wins.
     """
     if assets_root is not None:
-        return Path(assets_root) / probe
+        return _pinned_probe_dir(probe, Path(assets_root))
 
     roots = probe_asset_roots(probe)
     for root in roots:
@@ -195,3 +199,22 @@ def probe_assets_dir(
     # been: the root the probe declares, else the highest-priority root.
     declared = declared_assets_roots().get(probe)
     return (declared if declared is not None else roots[0]) / probe
+
+
+def _pinned_probe_dir(probe: str, root: Path) -> Path:
+    """``probe``'s folder under the pinned ``root``.
+
+    The packaged directory stands for the assets that ship with User Sim, so
+    for a probe it does not hold, pinning it reaches the root the probe's class
+    declares when that root is inside this package. An extension's root is
+    outside it, so the pin stays strict for an extension.
+    """
+    folder = root / probe
+    packaged = packaged_assets_dir().resolve()
+    if folder.is_dir() or root.resolve() != packaged:
+        return folder
+    declared = declared_assets_roots().get(probe)
+    # ``packaged`` is ``usersim/engine/assets/``, so ``parents[1]`` is the package.
+    if declared is not None and declared.resolve().is_relative_to(packaged.parents[1]):
+        return declared / probe
+    return folder

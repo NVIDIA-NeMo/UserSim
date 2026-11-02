@@ -38,6 +38,10 @@ An explicit `--assets-dir` is **not** part of the search. It pins resolution
 to exactly that directory, for every probe in the run, including one that
 declares `assets_root`, because a user who named a location should be told
 when the assets are not there rather than quietly served another copy.
+Pinning the packaged directory pins the assets that ship with User Sim, so it
+also reaches a built-in probe whose banks are in its own folder.
+`simulate --inputs` pins the folder its rows were stored with: the packaged
+directory, for rows stored by a run that named no folder and set no override.
 
 There is no fallback to the working directory. Resolving against wherever the
 process happened to start makes a broken install look healthy from a source

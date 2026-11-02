@@ -270,3 +270,43 @@ class TestProbeAssetsDir:
         probe = register_test_probe("ext_probe", assets_root=declared)
 
         assert probe.assets_dir() == override / "ext_probe"
+
+
+class TestPinnedPackagedRoot:
+    """Pinning the packaged directory pins the assets that ship with User Sim."""
+
+    @staticmethod
+    def _package(monkeypatch, tmp_path: Path) -> Path:
+        """A stand-in ``usersim`` package whose packaged banks are at ``engine/assets/``."""
+        import usersim.engine.core._assets as assets
+
+        package = tmp_path / "usersim"
+        (package / "engine" / "assets").mkdir(parents=True)
+        monkeypatch.setattr(assets, "packaged_assets_dir", lambda: package / "engine" / "assets")
+        return package
+
+    def test_it_reaches_a_probe_whose_banks_are_in_its_own_folder_in_the_package(
+        self, register_test_probe, monkeypatch, tmp_path
+    ) -> None:
+        package = self._package(monkeypatch, tmp_path)
+        own = package / "engine" / "probes" / "ext_probe" / "assets"
+        (own / "ext_probe").mkdir(parents=True)
+        register_test_probe("ext_probe", assets_root=own)
+
+        assert probe_assets_dir("ext_probe", assets_root=package / "engine" / "assets") == own / "ext_probe"
+
+    def test_it_stays_strict_for_a_root_outside_the_package(self, register_test_probe, monkeypatch, tmp_path) -> None:
+        package = self._package(monkeypatch, tmp_path)
+        (tmp_path / "extension" / "ext_probe").mkdir(parents=True)
+        register_test_probe("ext_probe", assets_root=tmp_path / "extension")
+
+        pinned = package / "engine" / "assets"
+        assert probe_assets_dir("ext_probe", assets_root=pinned) == pinned / "ext_probe"
+
+    def test_any_other_pinned_root_stays_strict(self, register_test_probe, monkeypatch, tmp_path) -> None:
+        package = self._package(monkeypatch, tmp_path)
+        own = package / "engine" / "probes" / "ext_probe" / "assets"
+        (own / "ext_probe").mkdir(parents=True)
+        register_test_probe("ext_probe", assets_root=own)
+
+        assert probe_assets_dir("ext_probe", assets_root=tmp_path / "mine") == tmp_path / "mine" / "ext_probe"
