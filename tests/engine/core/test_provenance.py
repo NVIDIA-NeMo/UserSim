@@ -162,7 +162,7 @@ class TestNemotronPersonasVersion:
 @pytest.mark.parametrize(
     "module_path",
     [
-        "usersim.engine.probes.general_open_ended.generator",
+        "usersim.engine.probes.general_open_ended.probe",
         "usersim.engine.probes.general_educational.probe",
         "usersim.engine.probes.tool_calling.generator",
     ],

@@ -135,7 +135,7 @@ async def simulate_general_educational(
 ) -> dict:
     """Thin shim for callers that import ``simulate_general_educational`` directly.
 
-    See ``usersim.engine.probes.general_open_ended.generator.simulate_general_open_ended``
+    See ``usersim.engine.probes.general_open_ended.probe.simulate_general_open_ended``
     for the rationale; preserved for backward-compat with the dispatcher
     bootstrap and per-probe tests.
     """

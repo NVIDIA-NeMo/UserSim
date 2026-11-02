@@ -8,10 +8,7 @@ LLM API calls. Full end-to-end generation tests require an NVIDIA API key
 and are marked with @pytest.mark.integration.
 """
 
-import pytest
-
 from usersim.engine.config import ConversationSimulatorConfig
-from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.behavioral import compute_behavioral_profile, get_conversation_language
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.seeds import load_seeds
@@ -111,23 +108,15 @@ class TestMultiLocaleConsistency:
     """Verify multi-locale support is consistent."""
 
     def test_seed_loading_per_locale(self):
-        assets = packaged_assets_dir()
-        if not (assets / "general_open_ended" / "topics" / "base").exists():
-            pytest.skip("Assets directory not found")
-
         for locale in SHIPPED_LOCALES:
-            topics = load_seeds(locale, "general_open_ended", "topics", assets)
+            topics = load_seeds(locale, "general_open_ended", "topics")
             assert len(topics) > 0
             assert all(isinstance(t, dict) for t in topics)
             assert all("type" in t and "description" in t for t in topics)
 
     def test_pt_br_keeps_localized_topic_replacement(self):
-        assets = packaged_assets_dir()
-        if not (assets / "general_open_ended" / "topics" / "base").exists():
-            pytest.skip("Assets directory not found")
-
-        base = load_seeds("en_US", "general_open_ended", "topics", assets)
-        extended = load_seeds("pt_BR", "general_open_ended", "topics", assets)
+        base = load_seeds("en_US", "general_open_ended", "topics")
+        extended = load_seeds("pt_BR", "general_open_ended", "topics")
         assert len(base) == 48
         assert len(extended) == 20
 

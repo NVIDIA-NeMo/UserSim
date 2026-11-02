@@ -27,7 +27,7 @@ from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.episode_input import ConstructedEpisode
 from usersim.engine.core.probes import _PROBE_REGISTRY, clear_registry, load_builtin_probes, register_probe
 from usersim.engine.generator import ConversationSimulatorGenerator
-from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
+from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
 
 _PROBE = "_extra_column_probe"
 _PERSONA = {"first_name": "Sarah", "last_name": "Johnson", "age": 35, "city": "Seattle", "state": "WA"}

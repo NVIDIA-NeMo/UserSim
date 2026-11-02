@@ -198,7 +198,7 @@ class _Cfg:
 def _open_ended_probe(data: dict):
     """A real ``OpenEndedProbe`` for ``data``, with no LLM anywhere near it."""
     from usersim.engine.core.behavioral import compute_behavioral_profile
-    from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
+    from usersim.engine.probes.general_open_ended.probe import OpenEndedProbe
 
     persona = {"first_name": "A", "last_name": "B", "age": 30, "sex": "female"}
     return OpenEndedProbe(
@@ -281,7 +281,7 @@ class TestPromptIsRebuiltPerRow:
         """The dispatcher constructs a probe per row, so a row column
         referenced from prompts.yaml must reflect THAT row."""
         from usersim.engine.core.behavioral import compute_behavioral_profile
-        from usersim.engine.probes.general_open_ended.generator import (
+        from usersim.engine.probes.general_open_ended.probe import (
             OpenEndedProbe,
         )
 

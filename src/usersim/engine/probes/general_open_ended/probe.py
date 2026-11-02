@@ -11,6 +11,7 @@ shim that constructs the probe and runs it through ``run_dispatch``.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.behavioral import (
@@ -51,6 +52,7 @@ class OpenEndedProbe(BaseProbe):
     """
 
     label = "general_open_ended"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests information-seeking conversations across diverse personas: accurate, "
         "coherent answers pitched to the user's apparent expertise, and a clarifying "

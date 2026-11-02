@@ -1542,7 +1542,7 @@ def register_probe(
 BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     "usersim.engine.probes.financial_services.generator",
     "usersim.engine.probes.general_educational.probe",
-    "usersim.engine.probes.general_open_ended.generator",
+    "usersim.engine.probes.general_open_ended.probe",
     "usersim.engine.probes.health_disclosure.decision_support",
     "usersim.engine.probes.health_disclosure.general",
     "usersim.engine.probes.health_disclosure.therapy",

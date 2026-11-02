@@ -158,7 +158,7 @@ async def test_a_hosted_episode_replays_as_a_local_one_does(probe_type):
 async def test_a_probe_shortcut_replays_as_the_generator_does():
     """The public ``simulate_<probe>`` functions promise the dispatcher path's behaviour."""
     from usersim.engine.core.episode_input import construct_episode_preamble
-    from usersim.engine.probes.general_open_ended.generator import simulate_general_open_ended
+    from usersim.engine.probes.general_open_ended.probe import simulate_general_open_ended
 
     cfg = _config("general_open_ended", replay_assistant_reasoning=True)
     prompts: list[dict[str, Any]] = []
