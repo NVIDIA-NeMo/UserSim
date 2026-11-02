@@ -44,8 +44,9 @@ templates/probe/
 
 When you port the template, copy the `generator_<shape>.py` whose
 shape matches your probe into
-`src/usersim/engine/probes/<your_probe>/generator.py`,
-copy `prompts.py` into the same directory, and copy
+`src/usersim/engine/probes/<your_probe>/probe.py`,
+copy `prompts.py` into the same directory, put its banks in that
+directory's `assets/<your_probe>/`, and copy
 `test_probe.py.template` to
 `tests/engine/probes/test_<your_probe>.py`. Then follow the
 authoring tutorial.
@@ -56,9 +57,10 @@ A probe class is a `BaseProbe` subclass (plus an optional mixin)
 decorated with `@register_probe(...)`. The decorator sets three
 class attributes (`family` / `prompt_version` / `variants`); the
 smoke check verifies they're present. A probe ported from this template
-keeps its banks under `src/usersim/engine/assets/<your_probe>/` and leaves
-`assets_root` unset; a probe shipped in its own package sets it, and its
-bank loader reads under `assets_dir()`, as
+keeps its banks beside its code, under
+`src/usersim/engine/probes/<your_probe>/assets/<your_probe>/`, and sets
+`assets_root` to that `assets/` folder, as a probe shipped in its own
+package does. Its bank loader reads under `assets_dir()`, as
 `docs/engine/AUTHORING_A_PROBE.md` step 2 shows.
 
 The runtime `ProbeAdapter` contract has 8 required hooks: class-level

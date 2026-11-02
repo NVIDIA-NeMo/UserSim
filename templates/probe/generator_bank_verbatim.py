@@ -103,6 +103,7 @@ class DemoBankVerbatimProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "demo_bank_verbatim"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_bank_verbatim/, beside this module
     output_columns = ("sovereign_facts_probed",)
     bank_loader = staticmethod(_demo_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FACT

@@ -42,6 +42,7 @@ Total LOC: ~100. ``sov_ai_dynamic`` is a real example at ~280 LOC.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.extension import BankBackedProbe, WarningKind, register_probe
@@ -68,6 +69,7 @@ class DemoCustomTurn1Probe(BankBackedProbe):
     """Bank-anchored, generated-in-voice turn-1 probe."""
 
     label = "demo_custom_turn1"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_custom_turn1/, beside this module
     output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_demo_taxonomy_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY

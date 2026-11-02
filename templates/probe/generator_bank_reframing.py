@@ -59,6 +59,7 @@ format, panel-driven overrides for both strategy and target,
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.extension import (
@@ -116,6 +117,7 @@ class DemoBankReframingProbe(BankReframingMixin, BankBackedProbe):
     """Multi-turn reframing-rotation probe."""
 
     label = "demo_bank_reframing"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_bank_reframing/, beside this module
     output_columns = ("target_request_id", "strategy_id", "reframings_used")
     bank_loader = staticmethod(_demo_pressure_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TARGET

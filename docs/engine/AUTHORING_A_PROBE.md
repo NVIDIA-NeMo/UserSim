@@ -232,9 +232,9 @@ class MyProbe(BankBackedProbe):
     )
 ```
 
-A probe shipped in its own package, rather than in this repository, also
-sets `assets_root` to the directory that holds its `<label>/` asset folder,
-so it finds its banks wherever the package is installed:
+A probe keeps its banks beside its code and sets `assets_root` to the
+directory that holds its `<label>/` asset folder, so it finds them wherever
+its code is installed, in this repository or in a package of its own:
 
 ```python
 from pathlib import Path
@@ -245,8 +245,10 @@ class MyProbe(BaseProbe):
 ```
 
 It must be absolute: `@register_probe` refuses a relative path, which would
-resolve against the working directory. Built-in probes leave it unset: their
-banks are under `src/usersim/engine/assets/<label>/`.
+resolve against the working directory. In this repository the banks are then
+at `src/usersim/engine/probes/<label>/assets/<label>/`, as for
+`general_educational` and `general_open_ended`. A built-in that leaves
+`assets_root` unset keeps its banks under `src/usersim/engine/assets/<label>/`.
 
 Its bank loader reads under `MyProbe.assets_dir()`, the probe's own folder,
 resolved as the built-in loaders resolve theirs, so a folder `--assets-dir` or
@@ -309,7 +311,7 @@ If your tests want to monkeypatch the loader, point at a module-level
 alias (not the class attr directly):
 
 ```python
-# In your generator.py
+# In your probe.py
 from usersim.engine.probes.my_probe.bank import load_my_bank_default
 
 _load_bank = load_my_bank_default  # tests patch this name
@@ -633,7 +635,7 @@ We'll use the **banked-verbatim** shape, so each date reaches the assistant
 exactly as the bank writes it, with `ToolExecutionMixin` to answer the
 assistant's tool call.
 
-### File 1: the banks, `src/usersim/engine/assets/bookings/<locale>/bookings.yaml`
+### File 1: the banks, `src/usersim/engine/probes/bookings/assets/bookings/<locale>/bookings.yaml`
 
 `en_US/bookings.yaml`:
 
@@ -742,7 +744,7 @@ BOOKINGS_USER_PROMPTS = LocalePromptPack(
 The user's instructions are written in each language the probe ships, and
 `LocalePromptPack` refuses, when the module is imported, a locale without them.
 
-### File 5: `src/usersim/engine/probes/bookings/generator.py`
+### File 5: `src/usersim/engine/probes/bookings/probe.py`
 
 ```python
 """bookings probe: booking arguments from dates and times as users write them."""
@@ -751,6 +753,7 @@ from __future__ import annotations
 
 import json
 import random
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.probes import dispatch_episode
@@ -803,6 +806,7 @@ def _bank_loader(locale: str):
 )
 class BookingsProbe(ToolExecutionMixin, BankVerbatimMixin, BankBackedProbe):
     label = "bookings"
+    assets_root = Path(__file__).parent / "assets"  # holds bookings/
     description = (
         "Tests whether an assistant books what the user means: a date, a time and a number of people, "
         "written the way people write them in the user's language."
@@ -893,6 +897,9 @@ async def simulate_bookings(
     return await dispatch_episode(probe, models=models, data=data, cfg=cfg)
 ```
 
+- `assets_root` names the folder beside the module that holds `bookings/`, so
+  the probe finds its banks wherever User Sim is installed, and the loader
+  reads them under `BookingsProbe.assets_dir()`.
 - `execute_tool_call` records the first booking in `state.metadata` during the
   run, with how many user turns came before it, and `build_result_extras`
   writes it to the `booking` column beside what the user meant. A scorer
@@ -924,7 +931,7 @@ add the module to `BUILTIN_PROBE_MODULES`:
 ```python
 BUILTIN_PROBE_MODULES: tuple[str, ...] = (
     ...
-    "usersim.engine.probes.bookings.generator",
+    "usersim.engine.probes.bookings.probe",
 )
 ```
 

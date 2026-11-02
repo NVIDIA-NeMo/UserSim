@@ -47,6 +47,7 @@ pattern; the extra LOC is bank-specific class-construction handling).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from usersim.extension import (
@@ -84,6 +85,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     """Single-user-turn + multi-assistant-turn tool-interception probe."""
 
     label = "demo_agentic"
+    assets_root = Path(__file__).parent / "assets"  # holds demo_agentic/, beside this module
     output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_demo_agentic_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION

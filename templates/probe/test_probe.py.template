@@ -65,7 +65,7 @@ from usersim.testing import assert_probe_conforms, run_episode
 
 # Replace with your probe's module + names.
 from usersim.engine.probes.YOUR_PROBE import (
-    generator as probe_gen,
+    probe as probe_gen,
 )
 
 PROBE_LABEL = "YOUR_PROBE"
