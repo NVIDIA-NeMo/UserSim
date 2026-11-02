@@ -15,11 +15,7 @@ resolution-markers = [
 
 [manifest]
 constraints = [{ name = "certifi", specifier = ">=2026.10.19" }]
-overrides = [
-    { name = "data-designer", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
-    { name = "data-designer-config", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-config&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
-    { name = "data-designer-engine", git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-engine&rev=7a62d75378bfc5b5ba7205eed6554959560deed9" },
-]
+overrides = [{ name = "data-designer", specifier = ">=0.10,<0.11" }]
 
 [[package]]
 name = "annotated-doc"
@@ -580,8 +576,8 @@ wheels = [
 
 [[package]]
 name = "data-designer"
-version = "0.9.8.dev10+7a62d75"
-source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "data-designer-config" },
     { name = "data-designer-engine" },
@@ -599,11 +595,15 @@ dependencies = [
     { name = "rich" },
     { name = "typer" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/1d/eb/ffc2d2534146649d4d0d6c723e63d0afb2369171fd8b220cf5f2b5ce0949/data_designer-0.10.0.tar.gz", hash = "sha256:f53ad94db4d4ece4834aad76e004c272e3e183719880332372153bfde0640e3b", size = 259153, upload-time = "2026-11-02T15:57:54.51Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/86/ac0505cff4a40585469821afc3020181df6c55436c65b5cd9dc443027c75/data_designer-0.10.0-py3-none-any.whl", hash = "sha256:9e2a904231052926d8e172a3fb0afebf85f07af1f2a16068f107b23a024b0d99", size = 161954, upload-time = "2026-11-02T15:57:53.042Z" },
+]
 
 [[package]]
 name = "data-designer-config"
-version = "0.9.8.dev10+7a62d75"
-source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-config&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "httpx" },
@@ -619,11 +619,15 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/ae/e8/c0c70e3fc96db2eea2cdcb8870ef56d29dd0214979c109937662b5f2e4ce/data_designer_config-0.10.0.tar.gz", hash = "sha256:7cf7eed00cc4c1888b35ce4c3a54ef45d8f6cbc8fa50f561cc0e01ace939b75d", size = 166898, upload-time = "2026-11-02T15:57:46.658Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/66/70d5abe8d05f8c5edc5d073310373fe2ac4addb04d19ea5f0dc2955538ae/data_designer_config-0.10.0-py3-none-any.whl", hash = "sha256:2e3d988f63d0ea9f2201dbcfb4f7799f0af0148dd1266c99bd733321b406c6eb", size = 138264, upload-time = "2026-11-02T15:57:45.063Z" },
+]
 
 [[package]]
 name = "data-designer-engine"
-version = "0.9.8.dev10+7a62d75"
-source = { git = "https://github.com/NVIDIA-NeMo/DataDesigner.git?subdirectory=packages%2Fdata-designer-engine&rev=7a62d75378bfc5b5ba7205eed6554959560deed9#7a62d75378bfc5b5ba7205eed6554959560deed9" }
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
     { name = "asciichartpy" },
@@ -652,6 +656,10 @@ dependencies = [
     { name = "sqlfluff" },
     { name = "tiktoken" },
     { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6c/7d/3bb48e2bda520c8cd90633b932033bb719ab4bcf9223e2e4c8b3041d1d44/data_designer_engine-0.10.0.tar.gz", hash = "sha256:4b2e93f29e998401690e95ea6f08a561dd90892eb54512d613bcbda863dfba64", size = 966501, upload-time = "2026-11-02T15:57:50.668Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/ce/878721f297692707f3f8b8cc530af81ea5beac153e2dca4308f9b90a4e4d/data_designer_engine-0.10.0-py3-none-any.whl", hash = "sha256:252b58a8bc755d16041a6477aa45265be625135214ab476a0754b5022a96e107", size = 721249, upload-time = "2026-11-02T15:57:49.189Z" },
 ]
 
 [[package]]
@@ -1108,11 +1116,11 @@ wheels = [
 
 [[package]]
 name = "json-repair"
-version = "0.58.6"
+version = "0.64.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/70/484f97a744d2614218a2b162004accda3f3c4ccc8c5d688712624567ebec/json_repair-0.58.6.tar.gz", hash = "sha256:aa740113a1c9dede4ba84c29aa8f81493253aede6f0e4edde9a560ec4b1d7762", size = 44804, upload-time = "2026-03-16T13:43:34.722Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8c/8e/7c0c568efbf784ef81b1612203b2d0d209674d842036e032777ea70c5ffd/json_repair-0.64.3.tar.gz", hash = "sha256:0066a1ac03953fd802cc5f2fc7c208b5aee33def2448a9cf619f60c461440a1e", size = 54111, upload-time = "2026-11-02T04:54:49.542Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/bb/c019ac05a6923c5776fa134c65e5b19d216ef17227618d93b1f608bc2806/json_repair-0.58.6-py3-none-any.whl", hash = "sha256:e438a1e4ea03179dfe9a05dfd738e678e888f1ea5b4a40398f8f220925df1c5c", size = 43482, upload-time = "2026-03-16T13:43:33.569Z" },
+    { url = "https://files.pythonhosted.org/packages/15/08/97f03810b946321610fd3f1b82b27fb3aaa450c2f56d04c8318546639c29/json_repair-0.64.3-py3-none-any.whl", hash = "sha256:6424e8242449cd504a66137c56f774579e41b8a98c278351ded21996350fb57a", size = 52595, upload-time = "2026-11-02T04:54:48.003Z" },
 ]
 
 [[package]]
@@ -3566,7 +3574,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "data-designer", specifier = ">=0.9.7,<0.11" },
+    { name = "data-designer", specifier = ">=0.10,<0.11" },
     { name = "filelock" },
     { name = "httpx" },
     { name = "huggingface-hub" },

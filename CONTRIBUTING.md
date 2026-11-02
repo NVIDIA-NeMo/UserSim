@@ -145,10 +145,8 @@ uv sync                     # installs the dev group: pytest, ruff, jupyter
 uv run usersim smoke        # offline self-check; no API key, no network
 ```
 
-The 0.3 development branch temporarily pins Data Designer’s Python 3.11
-transition commit through uv's `override-dependencies`. Use `uv sync` to
-consume that preview. Once DD 0.10.0 is published, remove the Git overrides
-and `no-sources`, require `data-designer>=0.10,<0.11`, and regenerate `uv.lock`.
+UserSim 0.3 uses the released Data Designer 0.10 series from PyPI
+(`data-designer>=0.10,<0.11`). Run `uv sync` to install the locked dependencies.
 
 `smoke` is the fastest way to confirm an install is sound. It resolves the
 model catalog, every probe's assets, and the plugin entry points without
