@@ -69,7 +69,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--profile",
         type=str,
         default="generous",
-        help="Selection profile name (default: generous).",
+        help="Selection profile: generous or strict (default: generous).",
     )
     p.add_argument(
         "--min-turns",
@@ -82,8 +82,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         type=float,
         default=None,
         help=(
-            "Reserve this fraction of passing personas as a 'holdout' split "
-            "(deterministic by persona_uuid) for Goodhart-safe evaluation."
+            "Mark this fraction of passing personas as holdout in the "
+            "selection_split column (deterministic by persona_uuid), so they "
+            "can be kept out of training. --hf-repo uploads every row as one "
+            "split."
         ),
     )
     p.add_argument(
@@ -133,7 +135,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         default=None,
         help=(
             "If set, also upload the curated subset to this Hugging Face "
-            "dataset repo (id or URL, e.g. nvidia/usersim-...). Private by "
+            "dataset repo (id or URL, e.g. your-org/usersim-curated). Private by "
             "default; auth via HF_TOKEN or a cached huggingface-cli login."
         ),
     )

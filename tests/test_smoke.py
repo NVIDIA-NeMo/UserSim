@@ -21,6 +21,7 @@ from usersim.cli.smoke import (
     _check_capability_dashboard,
     _check_dry_runs,
     _check_evaluator_config,
+    _check_extensions,
     _check_imports,
     _check_models_config,
     _check_probe_registry,
@@ -184,6 +185,51 @@ class TestCapabilityDashboardCheck:
         assert out == tmp_path
         for name in _DASHBOARD_ARTIFACTS:
             assert (tmp_path / name).exists(), f"missing {name}"
+
+
+class TestExtensionsCheck:
+    @pytest.fixture
+    def advertise(self, monkeypatch):
+        """Turn discovery on and advertise ``(name, value, group)`` entry points."""
+        from importlib.metadata import EntryPoint
+
+        from usersim.engine.core import _extensions
+
+        def _advertise(*specs: tuple[str, str, str]) -> None:
+            eps = [EntryPoint(name=n, value=v, group=g) for n, v, g in specs]
+            monkeypatch.setattr(_extensions, "entry_points", lambda group: [e for e in eps if e.group == group])
+            monkeypatch.delenv(_extensions.DISABLE_ENV_VAR, raising=False)
+            _extensions.clear_extension_cache()
+
+        yield _advertise
+        _extensions.clear_extension_cache()
+
+    def test_says_when_discovery_is_off(self):
+        report = SmokeReport()
+        _check_extensions(report)
+        assert report.all_passed
+        assert "discovery is off" in report.results[0].detail
+
+    def test_lists_what_each_package_contributes(self, advertise):
+        from usersim.engine.core._extensions import BACKENDS
+
+        advertise(("partner", "json:dumps", BACKENDS))
+        report = SmokeReport()
+        _check_extensions(report)
+        assert report.all_passed, report.render()
+        assert report.results[0].detail == "an unknown package: 1 entry point(s)"
+
+    def test_fails_on_an_extension_that_contributes_nothing(self, advertise):
+        from usersim.engine.core._extensions import COMMANDS
+
+        advertise(("smoke", "json:dumps", COMMANDS))
+        report = SmokeReport()
+        _check_extensions(report)
+        assert not report.all_passed
+        assert (
+            "smoke from an unknown package (json:dumps): command 'smoke' is already built in"
+            in report.results[0].detail
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -524,20 +524,18 @@ class TestShippedSampleBank:
 
     def test_loads_clean(self, sample_bank: PressureBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
-        assert sample_bank.bank_version == "v0.5.4"
+        assert sample_bank.bank_version == "v0.5.5"
 
     def test_six_strategies_with_ten_reframings_each(
         self,
         sample_bank: PressureBank,
     ) -> None:
-        # Beta bank: 6 strategies × 10 reframings = 60 turn-tactics.
+        # Shipped bank: 6 strategies × 10 reframings = 60 turn-tactics.
         assert len(sample_bank.strategies) == 6
         for s in sample_bank.strategies:
-            assert len(s.reframings) == 10, (
-                f"strategy {s.id} has {len(s.reframings)} reframings, expected 10 (per the beta bank target)"
-            )
+            assert len(s.reframings) == 10, f"strategy {s.id} has {len(s.reframings)} reframings, expected 10"
 
-    def test_beta_strategy_ids(self, sample_bank: PressureBank) -> None:
+    def test_shipped_strategy_ids(self, sample_bank: PressureBank) -> None:
         assert set(sample_bank.strategy_ids()) == {
             "persistence",
             "hypothetical_framing",

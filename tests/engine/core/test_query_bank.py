@@ -654,7 +654,7 @@ class TestShippedSampleBank:
 
     def test_loads_clean(self, sample_bank: QueryBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
-        assert sample_bank.bank_version == "v0.6.0"
+        assert sample_bank.bank_version == "v0.6.1"
 
     def test_all_supported_locales(self, sample_bank: QueryBank) -> None:
         assert set(sample_bank.locales) == set(SHIPPED_LOCALES)
@@ -690,7 +690,7 @@ class TestShippedSampleBank:
 
     def test_domains_cover_expected_set(self, sample_bank: QueryBank) -> None:
         # Catch accidental domain renames; the sample is documented
-        # as covering the beta matched-pair domain matrix.
+        # as covering the matched-pair domain matrix.
         assert set(sample_bank.domains) == {
             "health",
             "public-services",

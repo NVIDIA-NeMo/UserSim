@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import json
-import sys
 from copy import deepcopy
 from dataclasses import dataclass
 from types import SimpleNamespace
@@ -315,11 +314,8 @@ _CORE_RESULT_FIELDS = {
 
 def _seeded_probe_variant(probe_type: str) -> str:
     """The variant the dispatcher seeds before the probe runs (main's rule)."""
-    module = sys.modules[resolve_probe(probe_type).__module__]
-    variants = getattr(module, "PROBE_VARIANTS", None)
-    if variants and isinstance(variants, (list, tuple)):
-        return str(variants[0])
-    return "default"
+    variants = resolve_probe(probe_type).variants
+    return variants[0] if variants else "default"
 
 
 @pytest.mark.parametrize("case", _CASES, ids=_case_id)

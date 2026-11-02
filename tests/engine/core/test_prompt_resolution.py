@@ -22,7 +22,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-#: repo root: tests/core -> tests -> conversation-plugin -> repo
 import pytest
 import yaml
 

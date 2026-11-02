@@ -7,7 +7,7 @@
 # in English, Hindi or a romanized twin. So this file holds the model and each
 # language variant overlays only what differs via `extends: en_IN`
 # (see hi_Deva_IN.yaml). Generating this locale directly yields an English-India
-# bank, which is also the base the India language-variant stop-gap falls back to.
+# bank, which is also the base the India language variants fall back to.
 #
 # The institution set is chosen by INDIAN RETAIL PREVALENCE, not carried over
 # from en_US. India's highest-frequency financial touchpoints are a bank, a

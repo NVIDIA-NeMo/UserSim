@@ -1,0 +1,1330 @@
+{
+  "generated_at": "2026-10-19T05:00:25.823549+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.6-terra",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "wrenfield_bank": {
+      "n_documents": 332,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 2,
+          "produced": 2,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Wrenfield Bank is a dependable high-street institution catering to retail customers who value transparency and stability. We compete on fair pricing, a commitment to the Consumer Duty, and a comprehensive range of essential banking and lending products.",
+        "brand_voice_guide": "Our tone is professional, welcoming, and clear, using the first person plural ('we') to build trust. We write for a general reading level and avoid opaque jargon, ensuring all regulatory disclaimers are presented prominently and simply.",
+        "service_model": "Customers are supported through our branch network, telephone banking, and digital channels during standard UK business hours. Complex issues are handled via a structured escalation path to senior management and, if unresolved, the Financial Ombudsman Service.",
+        "fee_philosophy": "We believe essential banking should be accessible, which is why the Wrenfield Current Account carries a £0 monthly account fee. Fees on credit and mortgage products are transparently priced to cover operational costs and regulatory risk.",
+        "risk_and_compliance_posture": "We operate under the strict authorisation of the PRA and regulation by the FCA, ensuring all customers are treated fairly. Eligible deposits are protected by the FSCS up to £120,000 per person, with temporary high balances protected up to £1.4 million.",
+        "security_and_verification": "We maintain a rigorous 'verify-first' stance, requiring full identity authentication before any state-changing action or disclosure of account information. This ensures the security of assets and prevents unauthorised access.",
+        "dispute_and_fraud_handling": "We aim for rapid resolution, providing final responses for payment service complaints within 15 business days and other disputes within eight weeks. We proactively support victims of APP scams and honour the Direct Debit Guarantee for immediate refunds of errors.",
+        "advice_boundaries": "We provide general financial education and product information, but we do not offer individualised tax or legal advice. All lending recommendations are subject to a strict affordability assessment to ensure a high standard of care and avoid foreseeable harm.",
+        "product_positionings": "[{'product_id': 'current_account', 'one_liner': 'A fee-free daily banking hub featuring a £175 switching incentive and a streamlined switch process.'}\n {'product_id': 'everyday_saver', 'one_liner': 'A flexible, low-barrier savings account requiring only a £1 minimum opening deposit.'}\n {'product_id': 'regular_saver', 'one_liner': 'A high-interest short-term goal account with a maximum monthly deposit of £300.'}\n {'product_id': 'cash_isa', 'one_liner': 'A tax-efficient savings tool with a current allowance of £20,000.'}\n {'product_id': 'credit_card', 'one_liner': 'A rewards-focused card offering Section 75 protection and a representative APR of 24.9%.'}\n {'product_id': 'two_year_fixed_mortgage', 'one_liner': 'A stable mortgage option with a 5.64% fixed rate and a maximum LTV of 90%.'}\n {'product_id': 'personal_loan', 'one_liner': 'A transparent borrowing solution with a representative APR of 6.9% and a 14-day right to withdraw.'}]",
+        "key_terms_glossary": "[{'term': 'AER', 'definition': 'Annual Equivalent Rate; the interest rate that would be paid if interest was paid and compounded once a year.'}\n {'term': 'Representative APR', 'definition': 'The Annual Percentage Rate that the bank must be able to offer to at least 51% of successful applicants.'}\n {'term': 'LTV', 'definition': 'Loan to Value; the ratio of the mortgage loan amount to the appraised value of the property.'}\n {'term': 'Section 75', 'definition': 'A legal protection under the Consumer Credit Act making the card provider jointly liable for purchases between £100 and £30,000.'}]"
+      }
+    },
+    "fernbridge_building_society": {
+      "n_documents": 272,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 2,
+          "produced": 2,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Fernbridge Building Society is a member-owned mutual that prioritises the financial wellbeing of its members over shareholder profit. We primarily target first-time buyers and disciplined savers, competing on accessibility, fairness, and a commitment to community-centric banking.",
+        "brand_voice_guide": "Our tone is professional, warm, and transparent, using 'we' to reflect our mutual nature. We write for a general audience using plain English and avoid unnecessary jargon; any essential technical terms must be explained clearly. Disclaimers are integrated naturally and presented with clarity to avoid misleading members.",
+        "service_model": "Support is provided via telephone and secure digital messaging during UK business hours (GMT/BST). Issues are handled by first-line agents and escalated to the Member Relations team for complex disputes or high-priority requests.",
+        "fee_philosophy": "We maintain a transparent pricing structure where fees are kept to a minimum and only applied to cover direct operational costs. For example, the `first_home_mortgage` carries a `£0` product fee to lower the barrier for those entering the property market.",
+        "risk_and_compliance_posture": "We operate under the authority of the PRA and regulation by the FCA, strictly adhering to the Consumer Duty to ensure fair outcomes. Member deposits are protected by the FSCS up to `£120,000` per person, with temporary high balances protected up to `£1.4 million` for six months.",
+        "security_and_verification": "Rigorous identity verification is mandatory before any state-changing action or the disclosure of account information. We employ multi-factor authentication to ensure that all fund movements and personal detail changes are authorised by the account holder.",
+        "dispute_and_fraud_handling": "We treat all complaints with urgency and fairness, aiming for a final response within 15 business days for payment services and eight weeks for other matters. Members are always informed of their right to escalate unresolved disputes to the Financial Ombudsman Service free of charge.",
+        "advice_boundaries": "We provide educational information and guidance on our product suite to help members make informed choices. We do not provide individualised tax, legal, or financial planning advice and always perform affordability assessments before recommending credit products.",
+        "product_positionings": "[{'product_id': 'easy_access_saver', 'one_liner': 'A flexible, low-barrier entry point for members to grow their everyday savings.'}\n {'product_id': 'members_regular_saver', 'one_liner': 'A high-interest incentive designed to reward members for consistent monthly saving.'}\n {'product_id': 'fixed_rate_bond', 'one_liner': 'A secure, higher-yield option for those who can commit their funds for a full year.'}\n {'product_id': 'cash_isa', 'one_liner': 'A tax-efficient savings vehicle that respects the annual ISA allowance.'}\n {'product_id': 'cash_lifetime_isa', 'one_liner': 'A specialist account offering a `25%` government bonus for first-time buyers or retirement.'}\n {'product_id': 'first_home_mortgage', 'one_liner': 'A high-LTV mortgage solution specifically engineered to help first-time buyers secure their first home.'}]",
+        "key_terms_glossary": "[{'term': 'Mutual', 'definition': 'A financial institution owned by its members, who hold voting rights at the AGM, rather than by external shareholders.'}\n {'term': 'AER', 'definition': 'Annual Equivalent Rate, a standardised way of showing what the interest rate would be if interest was paid and compounded each year.'}\n {'term': 'LTV', 'definition': 'Loan-to-Value, the ratio between the mortgage loan amount and the total value of the property.'}\n {'term': 'Nominated Bank Account', 'definition': 'The external current account where Fernbridge sends funds, as we do not issue our own current accounts or cards.'}]"
+      }
+    },
+    "quill": {
+      "n_documents": 249,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Quill is a modern, app-first neobank catering to digitally native consumers who value transparency, financial wellness, and agility. We compete on a frictionless user experience, a fair fee structure, and proactive security features like gambling blocks and instant card control.",
+        "brand_voice_guide": "Our tone is professional yet approachable, using the first person plural ('we') and plain English to maintain a high level of accessibility. We avoid opaque banking jargon and present all regulatory disclaimers in a clear, concise, and non-obtrusive format.",
+        "service_model": "Support is delivered primarily through in-app chat and email, operating 24/7 to support our global user base. Complex queries are escalated through a tiered specialist path to ensure compliance with regulatory response timelines.",
+        "fee_philosophy": "We believe essential banking should be accessible to all, which is why the `current_account` carries a monthly fee of \"£0\". Premium enhancements are available via `quill_plus` for a \"£7\" monthly fee to fund additional value-added services.",
+        "risk_and_compliance_posture": "We operate under the strict supervision of the FCA and PRA, adhering to the Consumer Duty to ensure fair outcomes for all customers. Eligible deposits are protected by the FSCS up to \"£120,000\" per person, per institution.",
+        "security_and_verification": "Rigorous identity verification is mandatory before any state-changing action, payment, or disclosure of account information. We employ multi-factor authentication and in-app biometric checks to ensure the highest standard of account security.",
+        "dispute_and_fraud_handling": "We prioritise the rapid resolution of disputes, providing final responses for payment services within 15 business days. We are committed to protecting customers from fraud, including the reimbursement of authorised push payment scams up to \"£85,000\".",
+        "advice_boundaries": "Quill provides financial education and general product information but does not offer individualised tax, legal, or professional investment advice. We maintain a high standard of care, ensuring all product recommendations are fair, clear, and not misleading.",
+        "product_positionings": "[{'product_id': 'current_account', 'one_liner': 'Our core, app-only entry point providing essential spending and management with a \"£0\" monthly fee.'}\n {'product_id': 'quill_plus', 'one_liner': 'A premium subscription tier for \"£7\" per month offering enhanced features beyond the standard account.'}\n {'product_id': 'instant_access_savings', 'one_liner': 'A flexible savings tool allowing users to earn \"3.75%\" AER via intuitive savings pots.'}\n {'product_id': 'debit_card', 'one_liner': 'A global payment tool featuring \"0%\" foreign transaction fees and a \"£200\" monthly fee-free ATM allowance.'}\n {'product_id': 'payments', 'one_liner': 'Fast, secure transfers with \"£0\" fees, Confirmation of Payee, and a daily limit of \"£10,000\".'}]",
+        "key_terms_glossary": "[{'term': 'AER', 'definition': 'Annual Equivalent Rate: The interest rate paid on savings, expressed as a yearly percentage.'}\n {'term': 'EAR', 'definition': 'Effective Annual Rate: The actual annual cost of an arranged overdraft, including the effect of compounding.'}\n {'term': 'Confirmation of Payee', 'definition': \"A security service that verifies the recipient's name matches the account details before a Faster Payment is sent.\"}\n {'term': 'Authorised Push Payment (APP) Scam', 'definition': 'A fraud where a customer is tricked into voluntarily transferring money to an account controlled by a fraudster.'}\n {'term': 'Current Account Switch Service', 'definition': 'A regulated process that allows customers to move their banking to Quill within seven working days with a full guarantee.'}]"
+      }
+    },
+    "copperleaf_invest": {
+      "n_documents": 241,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 2.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 1,
+          "produced": 1,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Copperleaf Invest is a transparent, mid-market brokerage serving UK residents who seek a clear and accessible path to wealth creation. We compete on the clarity of our cost structures and the breadth of our tax-efficient wrappers.",
+        "brand_voice_guide": "Our tone is professional, reassuring, and transparent, using the first-person plural ('we') to build trust. We write for a general adult reading level, avoiding unnecessary jargon and ensuring all risk warnings and disclaimers are prominent and unambiguous.",
+        "service_model": "We operate a digital-first support model via secure in-app messaging and email, available during UK business hours (GMT). Queries are handled by customer service agents with a defined escalation path to operations management for complex disputes.",
+        "fee_philosophy": "We maintain a competitive and transparent pricing model to ensure the long-term sustainability of our platform. The '0.25%' platform fee covers infrastructure and maintenance, while certain fees, such as the '£0' fund dealing fee, are waived to encourage diversified investing.",
+        "risk_and_compliance_posture": "We are strictly regulated by the FCA and adhere to all fair treatment and data privacy standards. We clearly communicate that the value of investments can fall as well as rise and capital is at risk, while highlighting FSCS protection of up to '£85,000' per person.",
+        "security_and_verification": "Security is paramount; we employ multi-factor authentication and rigorous identity checks. Full verification is mandatory before any state-changing action, such as processing withdrawals or altering account details, is performed.",
+        "dispute_and_fraud_handling": "We approach disputes with a commitment to fairness and transparency, providing a clear timeline for resolution. Fraudulent activity is escalated immediately to our compliance team and handled in accordance with FCA guidelines.",
+        "advice_boundaries": "We provide educational resources and a platform for self-directed investing, but we give no personal recommendations and no individual tax advice. We hold ourselves to a standard of care that ensures complex products are appropriate for the client's needs.",
+        "product_positionings": "[{'product_id': 'stocks_shares_isa', 'one_liner': \"The primary tax-efficient vehicle for long-term growth, utilising the '£20,000' annual ISA allowance.\"}\n {'product_id': 'lifetime_isa', 'one_liner': \"A specialised account for first homes up to '£450,000' or retirement, offering a '25%' government bonus for those opening between 18 and '39'.\"}\n {'product_id': 'junior_isa', 'one_liner': \"A dedicated tax-free starter account for children with a '£9,000' annual limit, with control passing to the child at age '18'.\"}\n {'product_id': 'general_investment_account', 'one_liner': \"A flexible investment option for those who have exhausted their ISA allowances, subject to the '£3,000' capital gains and '£500' dividend allowances.\"}\n {'product_id': 'monthly_investing', 'one_liner': \"An accessible entry point for regular savers with a minimum monthly commitment of '£25' and '£0' regular dealing fees.\"}]",
+        "key_terms_glossary": "[{'term': 'ISA Transfer', 'definition': \"The process of moving funds between providers to preserve the tax-free status of the '£20,000' annual allowance; funds must never be withdrawn and paid back in.\"}\n {'term': 'Capital at Risk', 'definition': 'The inherent risk that the value of an investment can decrease, meaning the investor may get back less than they originally invested.'}\n {'term': 'FSCS Protection', 'definition': \"Protection provided by the Financial Services Compensation Scheme for up to '£85,000' per person per firm if the brokerage fails.\"}]"
+      }
+    },
+    "oakhaven_pensions": {
+      "n_documents": 195,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 5,
+          "produced": 5,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Oakhaven Pensions is a trusted UK retirement provider targeting both corporate employers and individual savers seeking stability and clarity. We compete on transparency, regulatory excellence, and a commitment to helping members navigate the complexities of pension wealth.",
+        "brand_voice_guide": "The tone is professional, reassuring, and accessible, using British English and a reading level appropriate for a general audience. Jargon is minimised; where necessary, it is clearly defined, and all regulatory disclaimers are presented with prominence and transparency.",
+        "service_model": "Customer support is delivered via a secure online portal and telephone during UK business hours (GMT). Escalations follow a path from general customer service to senior operations specialists and compliance officers.",
+        "fee_philosophy": "We employ a transparent, low-cost pricing model, such as the '0.45%' annual management charge for workplace schemes, to ensure sustainable fund growth. Fees cover the essential costs of professional investment management and secure administration.",
+        "risk_and_compliance_posture": "Our operations are strictly aligned with FCA and The Pensions Regulator frameworks to ensure the fair treatment of customers. We prioritise scam prevention during transfers and provide clear disclosures on the '£268,275' lump sum allowance and inheritance tax changes effective from 6 April 2027.",
+        "security_and_verification": "Strict identity verification and multi-factor authentication are required before any state-changing action, including withdrawals or beneficiary updates. This rigorous approach protects member assets from unauthorised access and fraud.",
+        "dispute_and_fraud_handling": "We are committed to a fair and prompt resolution of all disputes, with clear escalation paths to the Financial Ombudsman Service or the Pensions Ombudsman. Fraudulent activity triggers immediate account suspension and a comprehensive forensic investigation.",
+        "advice_boundaries": "Oakhaven Pensions provides educational resources and guidance but never offers regulated financial advice or individual tax advice. We mandate the offer of free, impartial Pension Wise guidance to all members eligible to access their funds from age 50.",
+        "product_positionings": "[{'product_id': 'workplace_pension', 'one_liner': \"An employer-sponsored solution featuring automatic enrolment with a minimum total contribution of '8%'.\"}\n {'product_id': 'personal_pension', 'one_liner': \"A flexible, self-managed retirement account benefiting from '20%' basic-rate tax relief.\"}\n {'product_id': 'flexible_drawdown', 'one_liner': \"A versatile access method providing '25%' tax-free cash up to the '£268,275' lump sum allowance.\"}\n {'product_id': 'lifetime_annuity', 'one_liner': \"A secure retirement option providing guaranteed lifelong income, such as '£7,100' per £100k at age 65.\"}]",
+        "key_terms_glossary": "[{'term': 'Annual Allowance', 'definition': \"The maximum amount that can be contributed to pensions each year while remaining eligible for tax relief, currently '£60,000'.\"}\n {'term': 'Money Purchase Annual Allowance (MPAA)', 'definition': \"A reduced annual contribution limit of '£10,000' that applies once a member has flexibly accessed their pension.\"}\n {'term': 'Expression of Wish', 'definition': 'A non-binding statement detailing who the member would like to receive their pension benefits upon their death.'}\n {'term': 'Crystallisation', 'definition': 'The process of turning uncrystallised pension funds into a taxable income stream or a tax-free lump sum.'}]"
+      }
+    },
+    "kingsmere_insurance": {
+      "n_documents": 191,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 1,
+          "produced": 1,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Kingsmere Insurance positions itself as a trusted, premium provider of comprehensive protection for UK households, targeting segments that value transparency and long-term reliability. We compete on the fairness of our renewal pricing and the breadth of our comprehensive cover options.",
+        "brand_voice_guide": "Our voice is professional, reassuring, and transparent, utilizing the first-person plural ('we') to establish a partnership with the customer. Prose is written for a general reading level with low tolerance for dense jargon, and all disclaimers must be clearly separated and prominent.",
+        "service_model": "Support is delivered via telephone and secure web portals during UK business hours (GMT). All customer queries follow a structured escalation path from front-line agents to senior operations leads to ensure resolution.",
+        "fee_philosophy": "Premiums are risk-based to ensure the sustainable delivery of claims and fair pricing for all policyholders. Administrative fees exist to maintain operational quality and are applied transparently, though they may be waived for long-term loyalty tiers.",
+        "risk_and_compliance_posture": "We adhere strictly to FCA and PRA regulations, offering a 14-day cooling-off period (30 days for life cover) and ensuring renewal prices for home and car insurance do not exceed those offered to equivalent new customers. Protection is underpinned by the FSCS, covering 100% of life and compulsory insurance, and 90% of most general insurance claims.",
+        "security_and_verification": "Multi-factor authentication and rigorous identity verification are mandatory before any state-changing action or policy amendment. We ensure that only verified policyholders can modify coverage, add named drivers, or access sensitive personal data.",
+        "dispute_and_fraud_handling": "Complaints and claims are handled promptly and fairly, though we never promise a specific outcome for any claim. Customers are always informed of their right to take disputes to the free Financial Ombudsman Service if a resolution is not reached.",
+        "advice_boundaries": "We provide educational guidance and product recommendations based on a high standard of care, but we do not offer individualised tax or legal advice. Our role is to help customers understand coverage options and the importance of reporting claims promptly.",
+        "product_positionings": "[{'product_id': 'car_insurance', 'one_liner': 'Comprehensive motor protection focusing on fair renewal pricing, named driver flexibility, and No Claims Discount protection.'}\n {'product_id': 'home_insurance', 'one_liner': 'Robust buildings and contents cover featuring accidental damage and specific escape-of-water excess provisions.'}\n {'product_id': 'pet_insurance', 'one_liner': 'Lifetime health support for pets with a vet fee limit that renews annually to provide ongoing care.'}\n {'product_id': 'life_insurance', 'one_liner': 'Fixed-sum financial security for a set term, typically written in trust to ensure efficient beneficiary payout.'}]",
+        "key_terms_glossary": "[{'term': 'No Claims Discount (NCD)', 'definition': 'A reward for not claiming, which reduces the premium and can be protected for an additional cost.'}\n {'term': 'Excess', 'definition': 'The amount the policyholder pays toward a claim, which may be compulsory, voluntary, or specific to a risk like escape-of-water.'}\n {'term': 'Written in Trust', 'definition': 'A legal arrangement for life insurance where the policy is held by trustees to ensure the payout avoids probate and goes directly to beneficiaries.'}\n {'term': 'Cooling-off Period', 'definition': 'The statutory window—14 days for general insurance and 30 days for life insurance—during which a customer can cancel a policy.'}]"
+      }
+    }
+  }
+}

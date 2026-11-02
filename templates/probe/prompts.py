@@ -10,8 +10,7 @@ locales are caught at import time, not at simulate-time when the
 locale's first row trips a KeyError.
 
 The single-locale demo at the bottom (``DEMO_GATE_PROMPT_TEMPLATE``)
-shows the form factor when localization isn't a concern (e.g.,
-English-only safety probes).
+shows the form factor when localization isn't a concern.
 """
 
 from __future__ import annotations

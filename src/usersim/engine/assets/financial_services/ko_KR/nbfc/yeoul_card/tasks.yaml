@@ -1,0 +1,408 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for yeoul_card, a credit card company that also lends
+# through cash advances and card loans. Every state-changing tool it offers is
+# gold in at least one task. Each task ships THREE opening phrasings in Korean
+# (build_instance picks one per trajectory) so the assistant sees varied turn-1
+# wording while the gold stays fixed. Read-only tools (get_account_transactions,
+# get_loan_details, get_accounts, get_statements) carry no gold state change.
+templates:
+- id: TPL-YW-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    여울카드 이용 내역에 {{merchant}} {{amount}}원 결제가 있는데 저는 쓴 적이 없어요. 조사해 주세요.
+  - >-
+    카드 명세서에 모르는 결제가 있어요. {{merchant}}에서 {{amount}}원이요.
+  - >-
+    {{merchant}}에서 {{amount}}원이 두 번 청구됐어요. 한 번만 결제했는데 확인해 주실 수 있나요?
+  account_state:
+    account_id: card_acct_yw_0001
+    cards:
+    - {card_id: card_yw_0001, status: active}
+    transactions:
+    - {transaction_id: txn_yw_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 바람소리전자, 해오름게임즈]
+    amount: ['68,000', '159,000', '742,000']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_yw_0001.status: UNDER_REVIEW}
+  # Stopping the card and reissuing it are reasonable during a fraud dispute.
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-YW-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    끝자리 0001 신용카드를 {{event}} 것 같아요. 바로 정지해 주세요.
+  - >-
+    여울카드(끝자리 0001)를 {{event}} 모양이에요. 분실 신고하고 사용을 막아 주세요.
+  - >-
+    카드를 {{event}} 것 같은데, 끝자리가 0001이에요. 부정 사용되기 전에 정지 부탁드려요.
+  account_state:
+    account_id: card_acct_yw_0001
+    # The openings name the card ending 0001; pin last4 so the account the
+    # user is grounded to matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_yw_0001, status: active}
+  param_space:
+    event: [잃어버린, 식당에 두고 온, 도난당한]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_yw_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-YW-REVO-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이번 달 카드값이 부담돼서 리볼빙을 신청하고 싶어요. 약정결제비율은 {{ratio}}%로 해 주세요.
+  - >-
+    일부결제금액이월약정을 하려고요. 결제비율 {{ratio}}%로 신청할게요.
+  - >-
+    카드대금을 한꺼번에 내기 어려워서요. 리볼빙 {{ratio}}%로 설정해 주세요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '2480000.00'
+  param_space:
+    ratio: ['10', '30', '50']
+  gold_tool_sequence: [change_to_revolving]
+  expected_state_deltas: {revolving_status: ENROLLED}
+- id: TPL-YW-HALBU-CONVERT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    지난주에 일시불로 결제한 {{item}} {{amount}}원을 {{months}}개월 할부로 바꾸고 싶어요.
+  - >-
+    {{item}} 결제가 일시불로 됐는데, 결제일 전에 {{months}}개월 할부로 전환할 수 있나요? 금액은 {{amount}}원이에요.
+  - >-
+    결제 후 할부 전환 신청할게요. {{item}} {{amount}}원, {{months}}개월이요.
+  account_state:
+    account_id: card_acct_yw_0001
+    transactions:
+    - {transaction_id: txn_yw_0002, merchant: '{{item}}', amount: '{{amount}}', status: posted}
+  param_space:
+    item: [냉장고, 노트북, 에어컨]
+    amount: ['1,890,000', '2,350,000']
+    months: ['6', '10', '12']
+  gold_tool_sequence: [change_to_installments]
+  expected_state_deltas: {txn_yw_0002.plan: INSTALLMENT}
+- id: TPL-YW-REVO-RATIO-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    리볼빙 약정결제비율을 {{ratio}}%로 바꿔 주세요.
+  - >-
+    리볼빙 이월 금액이 자꾸 늘어서요. 결제비율을 {{ratio}}%로 올리고 싶어요.
+  - >-
+    일부결제 비율 변경 부탁드려요. {{ratio}}%로요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '3120000.00'
+    revolving_ratio: '10'
+  param_space:
+    ratio: ['30', '50', '100']
+  gold_tool_sequence: [change_revolving_payment]
+  expected_state_deltas: {revolving_ratio: '{{ratio}}'}
+- id: TPL-YW-PREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    리볼빙으로 넘어간 금액 중 {{amount}}원을 먼저 갚고 싶어요. 선결제해 주세요.
+  - >-
+    목돈이 생겨서 리볼빙 잔액 {{amount}}원을 결제일 전에 선결제하려고요.
+  - >-
+    수수료를 줄이려고요. 리볼빙 이월 잔액 {{amount}}원 즉시결제 부탁드려요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '3120000.00'
+  param_space:
+    amount: ['100만', '200만']
+  gold_tool_sequence: [prepay_revolving_balance]
+  expected_state_deltas: {prepayment_status: PAID}
+- id: TPL-YW-LIMIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    카드 이용한도를 {{limit}}원으로 바꾸고 싶어요.
+  - >-
+    {{reason}} 여울카드 한도를 {{limit}}원으로 조정해 주세요.
+  - >-
+    이용한도 변경 신청할게요. {{limit}}원으로 부탁드려요.
+  account_state:
+    account_id: card_acct_yw_0001
+    credit_limit: '5000000'
+  param_space:
+    limit: ['300만', '800만']
+    reason: [이사 비용 때문에, 씀씀이를 줄이려고]
+  gold_tool_sequence: [request_limit_change]
+  expected_state_deltas: {limit_change: REQUESTED}
+- id: TPL-YW-OBJECTION-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{shop}}에서 {{item}}를 {{months}}개월 할부로 샀는데 한 달이 넘도록 물건이 안 와요. 남은 할부금을 내지 않도록 항변 신청을 하고 싶어요.
+  - >-
+    할부로 산 {{item}}에 하자가 있는데 {{shop}}에서 교환도 환불도 안 해 줘요. 할부 항변권을 쓰고 싶어요.
+  - >-
+    {{shop}}에서 {{months}}개월 할부로 결제한 {{item}} 건으로 항변 신청할게요. 물건을 아직 못 받았어요.
+  account_state:
+    account_id: card_acct_yw_0001
+    transactions:
+    - {transaction_id: txn_yw_0003, merchant: '{{shop}}', amount: '1,280,000', status: posted, installment_months: '{{months}}'}
+  param_space:
+    shop: [별빛가구, 바람소리전자]
+    item: [소파, 안마의자, 식기세척기]
+    months: ['6', '10']
+  gold_tool_sequence: [file_installment_objection]
+  expected_state_deltas: {txn_yw_0003.status: OBJECTION_FILED}
+  # A customer may reasonably also open a dispute on the same charge.
+  allowed_tools: [file_transaction_dispute]
+- id: TPL-YW-CARDLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    카드론을 받고 싶어요. {{amount}}원 정도 필요해요.
+  - >-
+    장기카드대출 {{amount}}원 신청할 수 있을까요?
+  - >-
+    급하게 돈이 필요해서 카드론 신청하려고요. 금액은 {{amount}}원이에요.
+  account_state:
+    customer_id: cust_yw_0001
+  param_space:
+    amount: ['300만', '500만', '1,000만']
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-YW-OVERDUE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    결제일에 통장 잔액이 부족해서 카드값 48만원이 연체됐어요. 지금 바로 낼 수 있게 해 주세요.
+  - >-
+    연체된 카드대금 48만원을 {{when}} 납부하고 싶어요.
+  - >-
+    카드값이 안 빠져나갔다는 문자를 받았어요. 밀린 48만원을 {{when}} 내고 싶어요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '480000.00'
+    status: overdue
+  param_space:
+    when: [오늘, 지금 바로]
+  gold_tool_sequence: [pay_emi]
+  expected_state_deltas: {overdue_status: CLEARED}
+- id: TPL-YW-FAMILY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{family}} 쓸 가족카드를 하나 발급받고 싶어요.
+  - >-
+    여울카드 가족카드 신청할게요. {{family}} 쓸 거예요.
+  - >-
+    {{family}} 쓸 가족카드 발급 부탁드려요. 제 카드에 연결해 주세요.
+  account_state:
+    account_id: card_acct_yw_0001
+  param_space:
+    family: [배우자가, 대학생 딸이, 아버지가]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-YW-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    지갑을 잃어버렸는데 끝자리 0001 신용카드로 {{merchant}}에서 {{amount}}원이 결제됐어요. 카드 정지하고, 그 결제 조사하고, 새 카드도 보내 주세요.
+  - >-
+    끝자리 0001 카드가 없어졌고 {{merchant}} {{amount}}원 결제가 나갔어요. 정지, 부정사용 조사, 재발급 부탁드려요.
+  - >-
+    누가 제 카드(끝자리 0001)를 썼어요. 먼저 정지해 주시고 {{merchant}} {{amount}}원 조사랑 재발급도 해 주세요.
+  account_state:
+    account_id: card_acct_yw_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_yw_0001, status: active}
+    transactions:
+    - {transaction_id: txn_yw_0004, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 해오름게임즈]
+    amount: ['259,000', '890,000']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_yw_0001.status: frozen, txn_yw_0004.status: UNDER_REVIEW, card_yw_0001.replacement: ordered}
+- id: TPL-YW-REVO-EXIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    리볼빙을 그만 쓰고 싶어요. 이월된 {{amount}}원을 먼저 갚고, 결제비율을 100%로 올리고, 결제일 전에 알림이 오게 해 주세요.
+  - >-
+    리볼빙 정리하려고요. 이월 잔액 {{amount}}원 선결제, 약정결제비율 100%로 변경, 결제일 알림 설정 부탁드려요.
+  - >-
+    세 가지요. 리볼빙 잔액 {{amount}}원 즉시결제, 결제비율 100%, 결제일 알림이요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '2860000.00'
+    revolving_ratio: '10'
+  param_space:
+    amount: ['150만', '286만']
+  gold_tool_sequence: [prepay_revolving_balance, change_revolving_payment, set_alerts]
+  expected_state_deltas: {prepayment_status: PAID, revolving_ratio: '100', alerts_updated: true}
+- id: TPL-YW-LOAN-PAYOFF-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    카드론을 한꺼번에 다 갚고 싶어요. 그리고 카드대금 결제 계좌를 {{bank_account}}로 바꾸고, 결제일 알림도 설정해 주세요.
+  - >-
+    카드론 전액 중도상환, 결제 계좌 변경({{bank_account}}), 결제일 알림 설정 부탁드려요.
+  - >-
+    성과급으로 카드론을 정리하려고요. 남은 원금 전부 상환하고, 결제 계좌는 {{bank_account}}로, 알림도 켜 주세요.
+  account_state:
+    account_id: loan_yw_0001
+    account_type: 장기카드대출(카드론)
+    balance: '6400000.00'
+  param_space:
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [foreclose_loan, update_repayment_mandate, set_alerts]
+  expected_state_deltas: {loan_yw_0001.status: CLOSED, repayment_mandate_updated: true, alerts_updated: true}
+- id: TPL-YW-SALARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이직하면서 월급 통장이 바뀌었어요. 카드대금 결제 계좌를 {{bank_account}}로 바꾸고, 이사도 해서 주소를 바꾸고(새 주소는 {{address}}입니다), 결제일 알림을 받고 싶어요.
+  - >-
+    결제 계좌 변경({{bank_account}}), 주소 변경({{address}}), 결제일 알림 설정 부탁드려요.
+  - >-
+    세 가지 해 주세요. 카드값 출금 계좌를 {{bank_account}}로, 새 주소({{address}}) 등록, 결제 알림 설정이요.
+  account_state:
+    account_id: card_acct_yw_0001
+  param_space:
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+    address: ['대구광역시 수성구 동대구로 330', '경상남도 창원시 성산구 중앙대로 151']
+  gold_tool_sequence: [update_repayment_mandate, update_contact_info, set_alerts]
+  expected_state_deltas: {repayment_mandate_updated: true, contact_updated: true, alerts_updated: true}
+- id: TPL-YW-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    여울카드를 해지하려고요. 남은 결제 예정 금액 384,000원을 먼저 다 내고, 카드를 해지하고, 주소도 바꿔 주세요. 새 주소는 {{address}}입니다.
+  - >-
+    카드 해지 전에 결제 예정 금액 384,000원을 선결제하고 싶어요. 그다음 해지하고, 주소 변경({{address}})도 부탁드려요.
+  - >-
+    카드 정리할게요. 남은 384,000원 선결제, 카드 해지, 주소 변경({{address}})이요.
+  account_state:
+    account_id: card_acct_yw_0001
+    balance: '384000.00'
+  param_space:
+    address: ['대구광역시 수성구 동대구로 330', '경상남도 창원시 성산구 중앙대로 151']
+  gold_tool_sequence: [prepay_revolving_balance, close_account, update_contact_info]
+  expected_state_deltas: {prepayment_status: PAID, card_acct_yw_0001.status: CLOSED, contact_updated: true}
+- id: TPL-YW-LOAN-SETUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    카드론 {{amount}}원을 신청하고 싶어요. 대출금은 {{bank_account}}로 받고, 상환금이 빠져나갈 결제 계좌도 같은 계좌로 바꿔 주세요.
+  - >-
+    카드론 신청({{amount}}원), 대출금 입금 계좌를 {{bank_account}}로 지정, 결제 계좌도 그 계좌로 변경 부탁드려요.
+  - >-
+    세 가지요. 장기카드대출 {{amount}}원 신청, 입금 계좌 {{bank_account}} 등록, 결제 계좌 변경이요.
+  account_state:
+    customer_id: cust_yw_0001
+    account_id: card_acct_yw_0001
+  param_space:
+    amount: ['500만', '1,000만']
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [apply_loan, update_beneficiary, update_repayment_mandate]
+  expected_state_deltas: {loan_application_status: SUBMITTED, disbursement_account_updated: true, repayment_mandate_updated: true}
+- id: TPL-YW-BIGBUY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    혼수로 가전을 한꺼번에 사려고요. 이용한도를 {{limit}}원으로 올리고, 이미 일시불로 결제한 {{item}} {{amount}}원은 {{months}}개월 할부로 바꾸고, 결제일 알림도 설정해 주세요.
+  - >-
+    한도 상향({{limit}}원), {{item}} {{amount}}원 결제 후 할부 전환({{months}}개월), 결제일 알림 설정 부탁드려요.
+  - >-
+    세 가지요. 카드 한도를 {{limit}}원으로, {{item}} 결제 건({{amount}}원)을 {{months}}개월 할부로, 결제 알림 설정이요.
+  account_state:
+    account_id: card_acct_yw_0001
+    credit_limit: '5000000'
+    transactions:
+    - {transaction_id: txn_yw_0005, merchant: '{{item}}', amount: '{{amount}}', status: posted}
+  param_space:
+    limit: ['1,000만', '1,500만']
+    item: [냉장고, 세탁기]
+    amount: ['2,190,000', '1,640,000']
+    months: ['6', '12']
+  gold_tool_sequence: [request_limit_change, change_to_installments, set_alerts]
+  expected_state_deltas: {limit_change: REQUESTED, txn_yw_0005.plan: INSTALLMENT, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ko_KR/dynamic.yaml), not scripted templates.

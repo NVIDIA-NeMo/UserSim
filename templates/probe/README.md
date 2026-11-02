@@ -19,8 +19,8 @@ do we need to surface?* Each probe owns:
   keeps the user-agent from slipping into "AI helpful assistant" mode).
 - An optional asset bank (curated facts / queries / strategies /
   action requests) that grounds the probe in reviewer-vetted content.
-- Probe-specific side-channel columns (`facts_probed`, `query_id`,
-  `target_request_id`, `attempted_actions`, …) that the matching
+- Probe-specific side-channel columns (`sovereign_facts_probed`, `query_id`,
+  `target_request_id`, `action_request_id`, …) that the matching
   out-of-sim scorer reads.
 
 If the new "probe" is just a different prompt for an existing probe,
@@ -53,10 +53,13 @@ authoring tutorial.
 ## The contract a probe class must satisfy
 
 A probe class is a `BaseProbe` subclass (plus an optional mixin)
-decorated with `@register_probe(...)`. Three module-level constants
-land automatically via the decorator (`PROBE_FAMILY` /
-`PROMPT_VERSION` / `PROBE_VARIANTS`); the smoke check verifies
-they're present.
+decorated with `@register_probe(...)`. The decorator sets three
+class attributes (`family` / `prompt_version` / `variants`); the
+smoke check verifies they're present. A probe ported from this template
+keeps its banks under `src/usersim/engine/assets/<your_probe>/` and leaves
+`assets_root` unset; a probe shipped in its own package sets it, and its
+bank loader reads under `assets_dir()`, as
+`docs/engine/AUTHORING_A_PROBE.md` step 2 shows.
 
 The runtime `ProbeAdapter` contract has 8 required hooks: class-level
 `label`, two system-prompt accessors, two judge-prompt formatters, the
@@ -64,10 +67,10 @@ tool accessor, `after_assistant_turn`, and `build_result_extras`.
 `BaseProbe` supplies defaults for five of them, so a normal subclass only
 sets `label` and implements the two system-prompt accessors. It also
 provides defaults for every optional hook. The mixins pre-configure the optional
-hooks for the four common probe shapes; what you override differs by shape.
+hooks for the common probe shapes; what you override differs by shape.
 A probe that tests what the model says across turns can also return a
 `UserTurnPolicy` from `user_turn_policy()`, as `identity_disclosure` does, to
-keep earlier replies unsummarised and every follow-up on topic.
+keep earlier replies unsummarized and every follow-up on topic.
 
 | Shape | Recommended base | Mixin | Override these | Skip these |
 |---|---|---|---|---|
@@ -76,7 +79,7 @@ keep earlier replies unsummarised and every follow-up on topic.
 | Bank-anchored generated turn-1 | `BankBackedProbe` | `CustomTurn1InstructionMixin` | `derive_task`, `seed_state_metadata`, `get_user_query_instruction`, `should_succeed`, `build_result_extras` | reframings (no follow-up template logic) |
 | Multi-turn bank-driven reframings | `BankBackedProbe` | `BankReframingMixin` | `derive_task`, `get_verbatim_first_user_turn`, `format_followup_user_instructions`, `should_succeed`, `build_result_extras` | the follow-up failure mode (mixin sets `"abort"`) |
 | Agentic single-user-turn + tool loop | `BankBackedProbe` | `AgenticMixin` | `derive_task`, `run_dispatch` (custom loop, not `ConversationLoop`), `build_result_extras` | follow-up generation (no user-LLM at all) |
-| Tool-calling capability test | `BaseProbe` | `ToolCallingMixin` | tool-sampling logic in `__init__`, `after_assistant_turn` (tool execution), `should_succeed`, `build_result_extras` | early-stop heuristic (mixin gates on tool-use first) |
+| Tool-calling capability test | `BaseProbe` | `ToolCallingMixin` | tool-sampling logic in `__init__`, `after_assistant_turn` (tool execution), `build_result_extras` | early-stop heuristic (mixin gates on tool-use first) |
 
 Six of those hooks can reach a model and the loop awaits them, so declare an
 override with `async def`: `get_verbatim_first_user_turn`,
@@ -100,45 +103,54 @@ See the per-shape generator file in this directory for a copy-pasteable starter.
   `evaluator/scorers/__init__.py::DEFAULT_SCORER_MODULES` so the
   auto-load path picks it up.
 
-See the "in-sim / out-of-sim boundary" discussion
+See [Wiring the out-of-sim scorer](../../docs/engine/AUTHORING_A_PROBE.md#wiring-the-out-of-sim-scorer)
 for the rationale.
 
 ## Wiring checklist
 
 When porting one of the templates into a new module:
 
-- [ ] Pick a `label` for `@register_probe`, used by `--probe-mix`
-      and the `_PROBE_REGISTRY` lookup. Underscores, lowercase.
-- [ ] Pick a `family` (the `PROBE_FAMILY` constant the decorator
-      sets). The reporting layer stratifies on this.
+- [ ] Pick a `label` for `@register_probe` that no other probe uses,
+      used by `--probe-mix` and the `_PROBE_REGISTRY` lookup.
+      Underscores, lowercase.
+- [ ] Pick a `family` (the class attribute the decorator sets).
+      The reporting layer stratifies on this.
 - [ ] Bump `prompt_version` on **any** semantic change to the
       user-agent prompt or the per-turn judge rubric. The
       evaluator's partial-re-run dedup key includes it.
 - [ ] Wire the asset bank (if applicable): set `bank_loader`,
-      `placeholder_warning_kind`, `bank_version_key`. See
+      `placeholder_warning_kind` (a `WarningKind.USED_PLACEHOLDER_*`
+      member), `bank_version_key`. See
       `core/probes.py::BankBackedProbe` for the contract.
+- [ ] Keep the probe's own per-row data under metadata keys of its own.
+      The loop writes the keys in `RESERVED_METADATA_KEYS`
+      (`core/simulation.py`); a probe reads them, and
+      `assert_probe_conforms` reports a probe class that writes one.
 - [ ] Author the user-agent system prompt + the per-turn judge
       rubric in `prompts.py`. Use `LocalePromptPack` for any prompt
       that ships across multiple locales.
-- [ ] Declare every key `build_result_extras` adds in
-      `side_effect_columns` on `ConversationSimulatorConfig`. The engine
-      writes the configured column plus the declared names and discards
-      the rest (logging a warning), so an undeclared join key is computed,
-      dropped, and then read back as absent by your scorer -- which reports
-      the trajectory as having nothing to score while the run looks fine.
-      A probe outside this repository cannot add to that list: keep its
-      per-row data in `state.metadata`, written during the run, and read it
-      from `conversation_metadata`. See step 6 of
+- [ ] Declare every key `build_result_extras` adds beyond the core
+      columns in the class's `output_columns`, as each template does. The
+      engine keeps the core columns plus every registered probe's
+      `output_columns` and discards the rest (logging a warning), so an
+      undeclared join key is computed, dropped, and then read back as
+      absent by your scorer, which reports the trajectory as having
+      nothing to score while the run looks fine. See step 6 of
       `docs/engine/AUTHORING_A_PROBE.md`.
-- [ ] Add a deterministic scorer under
+- [ ] Add a scorer under
       `evaluator/scorers/<your_probe>.py` and include the module
       path in `DEFAULT_SCORER_MODULES`.
-- [ ] Write tests using the patterns in `test_probe.py.template`:
-      use `_patched_call_llm` to patch BOTH `core.simulation.acall_llm`
-      AND `core.judges.acall_llm`; use the alias-dispatching mock with
-      XML-shaped judge payloads. See
+- [ ] Write tests from `test_probe.py.template`. Its first test runs
+      the probe end to end with `usersim.testing.run_episode` and
+      scripted models. The standard tests after it control each reply:
+      `_patched_call_llm` patches BOTH `core.simulation.acall_llm` AND
+      `core.judges.acall_llm`, and the alias-dispatching mock returns
+      XML-shaped judge verdicts. See
       [`tests/engine/probes/test_sov_ai_facts.py`](../../tests/engine/probes/test_sov_ai_facts.py)
-      for a real reference.
-- [ ] Update `docs/engine/README.md`'s probe table.
+      for a real reference. The tests run under `usersim.testing.pytest_plugin`,
+      so a model call nothing mocked fails with `BlockedNetworkCall`.
+- [ ] Update `docs/engine/README.md`'s probe table and the catalog in
+      `docs/probes.md`; `tests/test_security_defaults.py` checks the probe
+      count there.
 - [ ] Record the design choices in the probe module docstring
       (variant set, prompt version, what the scorer measures).

@@ -1,0 +1,394 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for hanseatica_versicherung, an insurer selling
+# personal liability, contents, car, disability and unit-linked pension cover.
+# Every state-changing tool it offers is gold in at least one task. Each task
+# ships THREE opening phrasings in German. Read-only tools (get_statements,
+# get_claim_status) carry no gold state change.
+templates:
+- id: TPL-HV-PHV-CLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mir ist bei einem Freund aus Versehen sein {{item}} heruntergefallen. Ich
+    möchte das meiner Haftpflichtversicherung melden.
+  - >-
+    Ich habe {{when}} beim Umzugshelfen das {{item}} eines Bekannten beschädigt. Wie
+    melde ich den Schaden?
+  - >-
+    Bitte nehmen Sie einen Haftpflichtschaden auf: das {{item}} eines Nachbarn,
+    beschädigt {{when}}.
+  account_state:
+    account_id: phv_hv_0001
+    account_type: Privathaftpflicht
+  param_space:
+    item: [Smartphone, Notebook, E-Bike]
+    when: [gestern, am Wochenende, letzte Woche]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-HV-KFZ-CLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich bin {{when}} beim Ausparken gegen ein anderes Auto gestoßen. Ich möchte den
+    Schaden melden.
+  - >-
+    Ich hatte {{when}} einen kleinen Unfall auf dem Supermarktparkplatz und habe
+    ein parkendes Auto gestreift. Wie melde ich das?
+  - >-
+    Bitte nehmen Sie einen Kfz-Schaden auf: Ich habe {{when}} beim Rangieren ein
+    anderes Fahrzeug beschädigt.
+  account_state:
+    account_id: kfz_hv_0001
+    account_type: Kfz-Versicherung
+  param_space:
+    when: [gestern Abend, heute Morgen, am Samstag]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-HV-EVB-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe ein Auto gekauft und brauche für die Zulassung eine eVB-Nummer.
+  - >-
+    Können Sie mir eine elektronische Versicherungsbestätigung für mein neues
+    Fahrzeug ausstellen? Die Zulassung ist {{date}}.
+  - >-
+    Ich will meinen {{car}} anmelden. Bitte schicken Sie mir eine eVB-Nummer.
+  account_state:
+    customer_id: cust_hv_0001
+  param_space:
+    date: [morgen, am Montag, nächste Woche]
+    car: [Golf, Polo, Corsa]
+  gold_tool_sequence: [issue_evb_number]
+  expected_state_deltas: {evb_issued: true}
+- id: TPL-HV-MOVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich ziehe am {{date}} in eine größere Wohnung mit {{sqm}} m². Bitte passen Sie
+    meine Hausratversicherung an.
+  - >-
+    Meine neue Wohnung hat {{sqm}} m², Einzug ist am {{date}}. Können Sie die
+    Hausratversicherung umstellen?
+  - >-
+    Bitte ändern Sie meine Hausratversicherung: neue Wohnung mit {{sqm}} m² ab dem
+    {{date}}.
+  account_state:
+    account_id: hr_hv_0001
+    account_type: Hausratversicherung
+  param_space:
+    date: [1. November, 15. Dezember]
+    sqm: ['85', '110']
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_updated: true}
+- id: TPL-HV-CANCEL-KFZ-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte meine Kfz-Versicherung zum 30. November kündigen.
+  - >-
+    Bitte kündigen Sie meine Autoversicherung, ich habe den Wagen verkauft.
+  - >-
+    Mein Beitrag ist gestiegen, deshalb möchte ich mein Sonderkündigungsrecht
+    nutzen und die Kfz-Versicherung kündigen.
+  account_state:
+    account_id: kfz_hv_0001
+    account_type: Kfz-Versicherung
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {kfz_hv_0001.status: CLOSED}
+- id: TPL-HV-PAUSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich gehe in Elternzeit und möchte die Beiträge zu meiner Rentenversicherung
+    für {{months}} Monate pausieren.
+  - >-
+    Können Sie meine fondsgebundene Rentenversicherung vorübergehend beitragsfrei
+    stellen?
+  - >-
+    Mir fehlt gerade Geld. Bitte setzen Sie die Beiträge meiner Rentenversicherung
+    für {{months}} Monate aus.
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    months: ['6', '12']
+  gold_tool_sequence: [pause_contributions]
+  expected_state_deltas: {contributions_paused: true}
+- id: TPL-HV-TOPUP-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte {{amount}} € zusätzlich in meine fondsgebundene Rentenversicherung
+    einzahlen.
+  - >-
+    Können Sie eine Zuzahlung von {{amount}} € in meine Rentenversicherung
+    verbuchen?
+  - >-
+    Bitte nehmen Sie eine Sonderzahlung über {{amount}} € für meine
+    Rentenversicherung auf.
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    amount: ['1.000', '5.000']
+  gold_tool_sequence: [make_additional_payment]
+  expected_state_deltas: {payment_status: RECORDED}
+- id: TPL-HV-SWITCH-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bitte schichten Sie in meiner Rentenversicherung {{share}} des Guthabens in den
+    Rentenfonds um, ich möchte weniger Risiko.
+  - >-
+    Können Sie {{share}} meines Fondsguthabens in einen sicherheitsorientierten
+    Fonds umschichten?
+  - >-
+    Ich möchte einen Fondswechsel: {{share}} des Guthabens bitte in den
+    Rentenfonds.
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    share: [die Hälfte, ein Viertel, 30 Prozent]
+  gold_tool_sequence: [switch_funds]
+  expected_state_deltas: {fund_switch: COMPLETED}
+- id: TPL-HV-BEZUGSRECHT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte das Bezugsrecht für den Todesfall in meiner Rentenversicherung auf
+    {{beneficiary}} ändern.
+  - >-
+    Bitte setzen Sie {{beneficiary}} im Todesfall als bezugsberechtigt für meine
+    Rentenversicherung ein.
+  - >-
+    Können Sie das Bezugsrecht meiner Rentenversicherung auf {{beneficiary}}
+    umstellen?
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    beneficiary: [meine Frau, meinen Mann, meine Kinder zu gleichen Teilen]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-HV-ABSCHLUSS-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte bei Ihnen {{product}} abschließen.
+  - >-
+    Können Sie mir {{product}} anbieten und gleich abschließen?
+  - >-
+    Bitte schließen Sie für mich {{product}} ab. Was brauchen Sie dafür?
+  account_state:
+    customer_id: cust_hv_0001
+  param_space:
+    product: [eine Privathaftpflicht, eine Hausratversicherung, eine Berufsunfähigkeitsversicherung]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_contract_status: ACTIVE}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-HV-NEWCAR-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich habe ein neues Auto gekauft und das alte verkauft: Stellen Sie bitte eine
+    eVB-Nummer für den neuen {{car}} aus, übertragen Sie meinen Vertrag mit meiner
+    Schadenfreiheitsklasse auf das neue Fahrzeug und erinnern Sie mich an die
+    Zulassung.
+  - >-
+    Bitte schicken Sie mir eine eVB-Nummer für meinen neuen {{car}}, stellen Sie
+    die Kfz-Versicherung auf das neue Auto um und schicken Sie mir eine
+    Erinnerung für die Anmeldung.
+  - >-
+    Können Sie für meinen neuen {{car}} eine eVB ausstellen, den Vertrag samt
+    SF-Klasse umschreiben und mich an die Zulassung erinnern?
+  account_state:
+    account_id: kfz_hv_0001
+    account_type: Kfz-Versicherung
+  param_space:
+    car: [Golf, Polo, Corsa]
+  gold_tool_sequence: [issue_evb_number, update_policy, set_alerts]
+  expected_state_deltas: {evb_issued: true, policy_updated: true, alerts_updated: true}
+- id: TPL-HV-BURGLARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Bei mir wurde eingebrochen: Melden Sie bitte den Schaden in meiner
+    Hausratversicherung, erhöhen Sie danach die Versicherungssumme, weil ich mich
+    neu einrichte, und halten Sie mich über die Regulierung auf dem Laufenden.
+  - >-
+    Nach einem Einbruch möchte ich den Hausratschaden melden, die
+    Versicherungssumme anpassen lassen und Benachrichtigungen zum Stand des
+    Schadens bekommen.
+  - >-
+    Können Sie den Einbruchschaden in der Hausratversicherung aufnehmen, die
+    Versicherungssumme erhöhen und mich über den Bearbeitungsstand informieren?
+  account_state:
+    account_id: hr_hv_0001
+    account_type: Hausratversicherung
+  param_space: {}
+  gold_tool_sequence: [file_claim, update_policy, set_alerts]
+  expected_state_deltas: {claim_status: FILED, policy_updated: true, alerts_updated: true}
+- id: TPL-HV-PARENTAL-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Wir haben ein Baby bekommen und sind umgezogen: Pausieren Sie bitte die
+    Beiträge meiner Rentenversicherung während der Elternzeit, setzen Sie unser
+    Kind als bezugsberechtigt ein und ändern Sie meine Adresse auf {{address}}.
+  - >-
+    Bitte stellen Sie meine Rentenversicherung für die Elternzeit beitragsfrei,
+    ändern Sie das Bezugsrecht auf unser Kind und tragen Sie meine neue Adresse
+    ein: {{address}}.
+  - >-
+    Können Sie die Rentenbeiträge in der Elternzeit aussetzen, das Bezugsrecht
+    auf unser Kind umstellen und meine Adresse auf {{address}} ändern?
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    address: ['Bergweg 7, 80331 München', 'Am Markt 3, 50667 Köln']
+  gold_tool_sequence: [pause_contributions, update_beneficiary, update_contact_info]
+  expected_state_deltas: {contributions_paused: true, beneficiary_updated: true, contact_updated: true}
+- id: TPL-HV-REBALANCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Ich ordne meine Rentenversicherung neu: Schichten Sie {{share}} des Guthabens
+    in den Rentenfonds um, verbuchen Sie eine Zuzahlung von {{amount}} € und
+    benachrichtigen Sie mich, wenn der Vertragswert um mehr als 10 Prozent fällt.
+  - >-
+    Bitte wechseln Sie {{share}} meines Fondsguthabens in den Rentenfonds, nehmen
+    Sie eine Zuzahlung von {{amount}} € auf und richten Sie einen Wertalarm ein.
+  - >-
+    Können Sie {{share}} des Guthabens umschichten, {{amount}} € zuzahlen lassen
+    und mich bei einem deutlichen Wertverlust warnen?
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    share: [die Hälfte, ein Viertel]
+    amount: ['2.000', '5.000']
+  gold_tool_sequence: [switch_funds, make_additional_payment, set_alerts]
+  expected_state_deltas: {fund_switch: COMPLETED, payment_status: RECORDED, alerts_updated: true}
+- id: TPL-HV-KFZ-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ich möchte mit meinem Auto zum 1. Januar zu Ihnen wechseln: Schließen Sie eine
+    Kfz-Versicherung ab, übernehmen Sie meine {{sf}} vom Vorversicherer und
+    erinnern Sie mich rechtzeitig vor Jahresbeginn.
+  - >-
+    Bitte schließen Sie für mein Auto ab dem 1. Januar eine Kfz-Versicherung ab,
+    übernehmen Sie meine {{sf}} und schicken Sie mir vorher eine Erinnerung.
+  - >-
+    Können Sie mir zum Jahreswechsel eine Kfz-Versicherung einrichten, meine {{sf}}
+    übernehmen und mich vor dem Start erinnern?
+  account_state:
+    customer_id: cust_hv_0001
+  param_space:
+    sf: [Schadenfreiheitsklasse SF 8, Schadenfreiheitsklasse SF 12]
+  gold_tool_sequence: [open_account, update_policy, set_alerts]
+  expected_state_deltas: {new_contract_status: ACTIVE, policy_updated: true, alerts_updated: true}
+- id: TPL-HV-DIVORCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Nach meiner Scheidung: Ändern Sie bitte das Bezugsrecht meiner
+    Rentenversicherung auf {{beneficiary}}, tragen Sie meine neue Adresse
+    {{address}} ein und nehmen Sie meinen früheren Partner aus der
+    Familien-Haftpflicht heraus.
+  - >-
+    Bitte stellen Sie das Bezugsrecht auf {{beneficiary}} um, ändern Sie meine
+    Adresse auf {{address}} und streichen Sie meinen Ex-Partner aus der
+    Haftpflichtversicherung.
+  - >-
+    Können Sie nach meiner Scheidung das Bezugsrecht auf {{beneficiary}} ändern,
+    meine Adresse ({{address}}) aktualisieren und meine frühere Partnerin oder
+    meinen früheren Partner aus der Familien-Haftpflicht entfernen?
+  account_state:
+    account_id: rv_hv_0001
+    account_type: Fondsgebundene Rentenversicherung
+    balance: '18400.00'
+  param_space:
+    beneficiary: [meine Kinder zu gleichen Teilen, meine Tochter, meinen Sohn]
+    address: ['Hauptstraße 45, 70173 Stuttgart', 'Hafenstraße 21, 20457 Hamburg']
+  gold_tool_sequence: [update_beneficiary, update_contact_info, update_policy]
+  expected_state_deltas: {beneficiary_updated: true, contact_updated: true, policy_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/de_DE/dynamic.yaml), not scripted templates.

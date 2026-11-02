@@ -111,6 +111,7 @@ from usersim.engine.core.probes import (
 )
 from usersim.engine.core.simulation import (
     ConversationState,
+    finalize_completed,
     make_failed,
     make_result,
 )
@@ -202,6 +203,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
     """
 
     label = "safety_agentic"
+    output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = _BANK_VERSION_KEY  # "agentic" — non-locale
@@ -525,8 +527,7 @@ class SafetyAgenticProbe(AgenticMixin, BankBackedProbe):
             n_assistant_turns = _visible_assistant_turn_count(state.messages)
             builder.set_n_turns(n_assistant_turns)
             builder.set_wall_clock_s(time.monotonic() - t_sim_start)
-            sim_success = self.should_succeed(state)
-            outcome = builder.finalize(status=OutcomeStatus.OK)
+            sim_success, outcome = finalize_completed(self, state)
 
             result = make_result(
                 state.messages,

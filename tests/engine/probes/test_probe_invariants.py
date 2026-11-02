@@ -15,11 +15,10 @@ What is asserted here (vs in per-probe test files):
   with the canonical labels. Catches the regression where a rename
   drops one or where the bootstrap silently fails to import a
   module.
-- **Module constants** — every registered probe's metadata module
-  exposes ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``
-  with the right shapes. Mirrors the smoke-check #8 surface as a
-  fast unit test, so a CI-time regression doesn't require a full
-  smoke run to surface.
+- **Probe metadata** — every registered probe class carries
+  ``family`` / ``prompt_version`` / ``variants`` with the right shapes.
+  Mirrors the smoke-check #7 surface as a fast unit test, so a CI-time
+  regression doesn't require a full smoke run to surface.
 - **ProbeAdapter conformance** — every registered probe class
   satisfies the ``ProbeAdapter`` Protocol's required surface.
   Catches the regression where a method is renamed on the Protocol
@@ -94,12 +93,13 @@ EXPECTED_PROBES: tuple[str, ...] = (
 # Per-probe should_succeed contract. Each entry maps the probe label
 # to the (metadata_key, value) pair that makes the sim-side guardrail
 # pass. Probes whose ``should_succeed`` defers to ``BaseProbe`` (the
-# always-True default — currently the two general probes) carry None
-# for both, and the test asserts True regardless of metadata.
+# always-True default) carry None for both, and the test asserts True
+# regardless of metadata. tool_calling is one of them: a conversation
+# with no tool calls completed its protocol, and the evaluator scores it.
 SHOULD_SUCCEED_CONTRACT: dict[str, tuple[str | None, Any]] = {
     "general_open_ended": (None, None),
     "general_educational": (None, None),
-    "tool_calling": ("tools_called", [{"name": "x"}]),
+    "tool_calling": (None, None),
     "sov_ai_facts": ("facts_probed", ["F-001"]),
     "sov_ai_dynamic": ("probing_categories_explored", ["category-1"]),
     "sov_ai_multilingual_parity": ("query_id", "Q-001"),
@@ -143,18 +143,14 @@ def _resolve_should_succeed(probe_label: str) -> Callable[[ConversationState], b
     that the class method delegates to (preserved so existing test
     surfaces can call this directly without an instance).
 
-    For the other probes (general probes inheriting BaseProbe's
-    default, plus tool_calling), we cannot cheaply construct an
-    instance — the constructors validate ``cfg.tools_column`` /
-    ``profile["tech_literacy"]`` etc. and would require a richer
-    fixture than this invariant test should carry. Instead we
-    invoke the unbound class method with ``self=None``: every
-    probe's ``should_succeed`` only reads from ``state`` (the
-    BaseProbe default returns True unconditionally; tool_calling
-    reads ``state.metadata.get("tools_called", [])``), so the
-    `self` argument is effectively unused. This keeps the
-    invariant test free of probe-specific construction-fixture
-    leakage.
+    For the other probes, which inherit BaseProbe's default, we
+    cannot cheaply construct an instance: the constructors validate
+    ``cfg.tools_column`` / ``profile["tech_literacy"]`` etc. and would
+    require a richer fixture than this invariant test should carry.
+    Instead we invoke the unbound class method with ``self=None``:
+    the BaseProbe default returns True without reading ``self``. This
+    keeps the invariant test free of probe-specific
+    construction-fixture leakage.
     """
     target_cls = _resolve_target_class(probe_label)
     module = sys.modules[target_cls.__module__]
@@ -197,31 +193,25 @@ class TestRegistryCompleteness:
 # ---------------------------------------------------------------------------
 
 
-class TestModuleConstants:
-    """Each registered probe's module exposes well-formed metadata constants."""
+class TestProbeMetadata:
+    """Each registered probe class carries well-formed metadata."""
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
-    def test_probe_family_is_non_empty_string(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        family = getattr(module, "PROBE_FAMILY", None)
-        assert isinstance(family, str) and family, f"{label}: PROBE_FAMILY missing or non-string"
+    def test_family_is_non_empty_string(self, label: str) -> None:
+        family = resolve_probe(label).family
+        assert isinstance(family, str) and family, f"{label}: family missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
     def test_prompt_version_is_non_empty_string(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        prompt_version = getattr(module, "PROMPT_VERSION", None)
-        assert isinstance(prompt_version, str) and prompt_version, f"{label}: PROMPT_VERSION missing or non-string"
+        prompt_version = resolve_probe(label).prompt_version
+        assert isinstance(prompt_version, str) and prompt_version, f"{label}: prompt_version missing or non-string"
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)
-    def test_probe_variants_is_non_empty_sequence(self, label: str) -> None:
-        cls = resolve_probe(label)
-        module = sys.modules[cls.__module__]
-        variants = getattr(module, "PROBE_VARIANTS", None)
-        assert isinstance(variants, (list, tuple)) and variants, f"{label}: PROBE_VARIANTS missing or empty"
+    def test_variants_is_non_empty_tuple(self, label: str) -> None:
+        variants = resolve_probe(label).variants
+        assert isinstance(variants, tuple) and variants, f"{label}: variants missing or empty"
         assert all(isinstance(v, str) and v for v in variants), (
-            f"{label}: PROBE_VARIANTS contains non-string or empty entries: {variants!r}"
+            f"{label}: variants contains non-string or empty entries: {variants!r}"
         )
 
 
@@ -281,18 +271,16 @@ class TestProbeAdapterConformance:
 
 
 # ---------------------------------------------------------------------------
-# 4. should_succeed invariant — five overridden probes + three defaults
+# 4. should_succeed invariant
 # ---------------------------------------------------------------------------
 
 
 class TestShouldSucceedInvariant:
     """Every probe's sim-side guardrail honours a minimal contract.
 
-    For probes whose ``should_succeed`` is overridden (5 of 8), the
-    probe-specific side-channel key is required for True. For the
-    three probes that inherit ``BaseProbe.should_succeed`` (open_ended,
-    educational — and historically tool_calling, but tool_calling
-    overrides), the default returns True regardless of metadata.
+    A probe that overrides ``should_succeed`` requires its side-channel
+    key for True. A probe that inherits ``BaseProbe.should_succeed``
+    returns True regardless of metadata.
     """
 
     @pytest.mark.parametrize("label", EXPECTED_PROBES)

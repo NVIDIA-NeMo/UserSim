@@ -332,8 +332,9 @@ def _build_fact_bank(doc: dict[str, Any], *, src_path: str) -> FactBank:
     n_placeholder = sum(1 for f in facts if f.placeholder)
     if n_placeholder:
         logger.info(
-            "fact_bank: loaded %s (v%s) with %d/%d placeholder entries — "
-            "downstream scorecards will be marked preview-only",
+            "fact_bank: loaded %s (v%s) with %d/%d placeholder entries; "
+            "rows that use them record used_placeholder_fact "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

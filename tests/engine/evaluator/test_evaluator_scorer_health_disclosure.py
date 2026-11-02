@@ -84,7 +84,7 @@ class TestSkip:
         row = {"probe_variant": "guarded"}
         if absent is not _MISSING_KEY:
             row["moves_enabled"] = absent
-        with pytest.raises(ValueError, match="side_effect_columns"):
+        with pytest.raises(ValueError, match="output_columns"):
             await score(row, {})
 
 

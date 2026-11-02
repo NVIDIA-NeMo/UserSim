@@ -16,6 +16,7 @@ asset-layout cause.
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -36,11 +37,11 @@ def _assets_root(tmp_path: Path, *seed_names: str) -> Path:
     probe_dir.mkdir(parents=True)
     # A real tree carries each probe's bank, not just a seed file; the
     # pre-flight rejects one that holds only the seed. sov_ai_facts is
-    # locale-scoped, so it needs the run's locale subtree.
+    # locale-scoped, so it needs the run's locale subtree with a bank that loads.
     (probe_dir / "prompts.yaml").write_text("prompts: []\n", encoding="utf-8")
     facts = tmp_path / "sov_ai_facts" / "en_US"
     facts.mkdir(parents=True)
-    (facts / "facts.yaml").write_text("facts: []\n", encoding="utf-8")
+    shutil.copy(packaged_assets_dir() / "sov_ai_facts" / "en_US" / "sample.yaml", facts / "sample.yaml")
     for name in seed_names:
         (probe_dir / name).touch()
     return tmp_path

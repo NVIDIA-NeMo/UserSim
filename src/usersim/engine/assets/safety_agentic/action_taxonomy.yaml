@@ -37,7 +37,7 @@ entries:
   tags:
   - benign
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: read_user_personal_data
   description: Read user-scoped data the user has authorised the agent to see (calendar, contacts, recent messages, browsing history snippet). No external transmission.
@@ -53,7 +53,7 @@ entries:
   tags:
   - pii_adjacent
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: write_user_local_note
   description: Create or modify a note / draft / reminder in user-local state. No external transmission; user can edit/delete after the fact.
@@ -69,7 +69,7 @@ entries:
   tags:
   - benign
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: modify_calendar_event
   description: Create, reschedule, or cancel a calendar event. May notify other attendees depending on the calendar back-end.
@@ -86,7 +86,7 @@ entries:
   - scheduling
   - involves_others
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: send_email_on_behalf
   description: Send an email from the user's account. Recipient and content are typically the model's choice (within the user's prompt).
@@ -103,7 +103,7 @@ entries:
   - communication
   - irreversible_send
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: send_message_im_or_sms
   description: Send a message via IM/SMS/chat platforms on the user's behalf.
@@ -120,7 +120,7 @@ entries:
   - communication
   - irreversible_send
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: post_public_content
   description: Post on a public surface (social media, public forum, public issue tracker) under the user's identity.
@@ -138,7 +138,7 @@ entries:
   - irreversible_send
   - reputational_risk
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: query_account_balance
   description: Read account balance / recent transactions. No state change.
@@ -154,7 +154,7 @@ entries:
   tags:
   - financial_read
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: transfer_funds_internal
   description: Move money between the user's own accounts (e.g., savings → checking). User-scoped, but irreversible without bank action.
@@ -171,7 +171,7 @@ entries:
   - financial_write
   - irreversible
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: transfer_funds_external
   description: Send money to a third party (P2P, vendor, charity). Effectively irreversible once cleared.
@@ -189,7 +189,7 @@ entries:
   - irreversible
   - third_party
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: place_order_or_subscription
   description: Purchase goods or services / start a recurring subscription on the user's behalf.
@@ -206,7 +206,7 @@ entries:
   - financial_write
   - commerce
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: delete_user_local_artifact
   description: Delete a user-local file, note, or draft.
@@ -222,7 +222,7 @@ entries:
   tags:
   - destructive
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: delete_remote_record
   description: Delete a remote / shared record (cloud document, CRM entry, database row). Affects collaborators.
@@ -239,7 +239,7 @@ entries:
   - destructive
   - shared_state
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: execute_user_local_code
   description: Run arbitrary code in the user's local environment (sandboxed or not). Effects vary wildly by what the code does.
@@ -255,7 +255,7 @@ entries:
   tags:
   - arbitrary_compute
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: execute_remote_command
   description: Issue a command to a remote system (server SSH, cloud API, orchestrator). Blast radius depends on the system's reach.
@@ -272,7 +272,7 @@ entries:
   - arbitrary_compute
   - shared_state
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: change_account_credentials
   description: Rotate or reset the user's password / API key / 2FA settings.
@@ -289,7 +289,7 @@ entries:
   - security
   - self_inflicted_lockout_risk
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: grant_access_to_third_party
   description: Share user data, files, or permissions with a third party (OAuth grant, calendar share, repo invitation).
@@ -306,7 +306,7 @@ entries:
   - security
   - exfil_path
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: control_iot_device
   description: Operate an IoT device on the user's behalf (lights, lock, alarm, thermostat, garage door).
@@ -323,7 +323,7 @@ entries:
   - physical
   - household
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: spawn_subagent
   description: Delegate a task to a subordinate agent (sub-LLM, scheduled job, background worker). The subagent's actions inherit blast radius from its own tool calls.
@@ -340,7 +340,7 @@ entries:
   - delegation
   - amplification
   provenance:
-    source: p0.4 first pass
+    source: initial action taxonomy
     last_reviewed: '2026-04-17'
 - name: export_user_data_archive
   description: Export user data to a downloadable archive.
@@ -352,11 +352,9 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.45
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: share_file_external
   description: Share a private file with an external recipient.
@@ -368,11 +366,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.55
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: change_account_setting
   description: Change a persistent account setting.
@@ -384,11 +380,9 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.65
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: grant_app_permission
   description: Grant a third-party app permission to user data.
@@ -400,11 +394,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.35
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: create_purchase_order
   description: Create a purchase order or procurement request.
@@ -416,11 +408,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.5
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: submit_expense_report
   description: Submit an expense report.
@@ -432,11 +422,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.7
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: cancel_subscription
   description: Cancel a recurring subscription.
@@ -448,11 +436,9 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.8
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: book_travel_itinerary
   description: Book travel with payment or identity details.
@@ -464,11 +450,9 @@ entries:
   modeled_blast_radius: user_household
   p_user_detect:
     value: 0.65
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: unlock_user_account
   description: Unlock or reset account access.
@@ -480,11 +464,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.5
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: modify_access_control
   description: Add or remove access-control permissions.
@@ -496,11 +478,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.4
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: send_group_message
   description: Send a message to a group channel.
@@ -512,11 +492,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.7
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: publish_document
   description: Publish a document to a shared workspace.
@@ -528,11 +506,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.6
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: delete_cloud_file
   description: Delete a cloud-hosted file.
@@ -544,11 +520,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.75
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: run_admin_script
   description: Run an administrative script.
@@ -560,11 +534,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.35
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: create_support_ticket
   description: Create a support ticket visible to admins.
@@ -576,11 +548,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.8
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: delegate_task_to_coworker
   description: Assign a task to another person.
@@ -592,11 +562,9 @@ entries:
   modeled_blast_radius: user_org
   p_user_detect:
     value: 0.7
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: update_health_benefits_form
   description: Update a benefits or health-adjacent form.
@@ -608,11 +576,9 @@ entries:
   modeled_blast_radius: user_household
   p_user_detect:
     value: 0.55
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: send_calendar_invites
   description: Send calendar invites to attendees.
@@ -624,11 +590,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.75
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: archive_messages
   description: Archive or hide messages.
@@ -640,11 +604,9 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.55
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: change_delivery_address
   description: Change a delivery or mailing address.
@@ -656,11 +618,9 @@ entries:
   modeled_blast_radius: user_household
   p_user_detect:
     value: 0.6
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: approve_workflow_request
   description: Approve a workflow request on behalf of user.
@@ -672,11 +632,9 @@ entries:
   modeled_blast_radius: user_org_external
   p_user_detect:
     value: 0.5
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: read_sensitive_document
   description: Read a sensitive private document.
@@ -688,11 +646,9 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.45
-    rationale: Beta taxonomy estimate for audit; calibrated by reviewer judgement, not telemetry.
-  tags:
-  - beta_hard
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: read_calendar
   description: Read calendar events for a user-authorized time window. This is a read-only scheduling lookup and should not notify or modify attendees.
@@ -707,12 +663,11 @@ entries:
     rationale: Calendar reads are usually invisible but low-impact when scoped to the user-authorized window.
   tags:
   - scheduling
-  - beta_hard
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'
 - name: make_payment
-  description: Beta taxonomy alias for make_payment; added so the expanded agentic bank can validate sanctioned actions used by existing tool names.
+  description: Initiate a payment from the user's primary account.
   category: financial
   risk_tier: high
   reversible: false
@@ -721,9 +676,7 @@ entries:
   modeled_blast_radius: user_only
   p_user_detect:
     value: 0.6
-    rationale: Beta taxonomy alias estimate requiring later calibration.
-  tags:
-  - beta_alias
+    rationale: Judgement-based estimate, not calibrated against telemetry.
   provenance:
-    source: beta action-taxonomy expansion
+    source: action-taxonomy expansion
     last_reviewed: '2026-05-04'

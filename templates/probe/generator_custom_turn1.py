@@ -69,6 +69,7 @@ class DemoCustomTurn1Probe(BankBackedProbe):
     """Bank-anchored, generated-in-voice turn-1 probe."""
 
     label = "demo_custom_turn1"
+    output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_demo_taxonomy_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
     bank_version_key: str | None = None  # locale-keyed
@@ -135,10 +136,9 @@ class DemoCustomTurn1Probe(BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         if self._task is not None:
             extras["probe_variant"] = self._task.id
             extras["probing_categories_explored"] = list(state.metadata.get("probing_categories_explored") or [])

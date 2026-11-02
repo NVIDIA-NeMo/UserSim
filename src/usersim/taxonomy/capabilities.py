@@ -66,28 +66,40 @@ def _extension_capabilities() -> tuple[CapabilityDefinition, ...]:
     iterable of them, since a package adding a probe usually adds the two or
     three capabilities that probe provides evidence for.
 
-    Definitions whose id collides with a built-in are dropped: the report
-    addresses cells by capability id, so a duplicate would make which cell
-    got rendered depend on load order.
+    A definition whose id is already defined, by a built-in or by an entry
+    point loaded before it, is dropped with a warning naming both: the
+    report addresses cells by capability id, so a duplicate would make which
+    cell got rendered depend on load order.
     """
     import logging
 
-    from usersim.engine.core._extensions import CAPABILITIES, load_extensions
+    from usersim.engine.core._extensions import (
+        CAPABILITIES,
+        extension_source,
+        load_extensions,
+        note_extension_problem,
+    )
 
-    known = {d.id for d in _CAPABILITIES}
+    owners = {d.id: "the built-ins" for d in _CAPABILITIES}
     found: list[CapabilityDefinition] = []
     for name, obj in load_extensions(CAPABILITIES):
+        source = extension_source(CAPABILITIES, name)
         candidates = (obj,) if isinstance(obj, CapabilityDefinition) else tuple(obj)
         for definition in candidates:
-            if definition.id in known:
+            if definition.id in owners:
                 logging.getLogger("usersim.engine").warning(
-                    "  |-- extensions: capability %r (advertised as %r) collides "
-                    "with an existing definition; ignoring it.",
+                    "  |-- extensions: capability %r from %s is already defined by %s; ignoring it.",
                     definition.id,
+                    source,
+                    owners[definition.id],
+                )
+                note_extension_problem(
+                    CAPABILITIES,
                     name,
+                    f"capability {definition.id!r} is already defined by {owners[definition.id]}",
                 )
                 continue
-            known.add(definition.id)
+            owners[definition.id] = source
             found.append(definition)
     return tuple(found)
 

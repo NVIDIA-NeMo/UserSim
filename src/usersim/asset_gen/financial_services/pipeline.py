@@ -44,6 +44,7 @@ from usersim.asset_gen.financial_services.prompts import (
     DOCSET_PROMPT,
     DOCSET_QC_PROMPT,
     concept_guidance_for,
+    language_guidance_for,
 )
 from usersim.asset_gen.financial_services.spec import (
     DocTitleVocabulary,
@@ -52,6 +53,7 @@ from usersim.asset_gen.financial_services.spec import (
     RegionSpec,
     Tool,
 )
+from usersim.asset_gen.financial_services.validate import plain_symbols
 
 logger = logging.getLogger("usersim.asset_gen.financial_services.pipeline")
 
@@ -60,8 +62,9 @@ DOC_GEN_MODEL_ALIAS = "doc_gen_model"
 DOCSET_JUDGE_MODEL_ALIAS = "asset_judge_model"
 EMBEDDING_MODEL_ALIAS = "embedding_model"
 
-#: Minimum DocSet QC faithfulness score (0-4); below this a cluster is kept but
-#: flagged + logged (it is already ``placeholder: true``), never silently dropped.
+#: Minimum DocSet QC faithfulness score (0-4); below this a cluster is regenerated,
+#: and if no attempt reaches it the best is kept but flagged + logged (it is already
+#: ``placeholder: true``), never silently dropped.
 MIN_FAITHFULNESS_SCORE = 3
 
 #: Default document-count knobs (overridable via CLI / generate_corpus params).
@@ -78,7 +81,7 @@ DEFAULT_DOCS_PER_PRODUCT = 40  # ~220 docs/institution, so retrieval is a real
 DEFAULT_MAX_DOCS_PER_CLUSTER = 10  # per-call cap; larger targets fan into batches.
 # 10, not 12: each doc_set call returns that many
 # documents as ONE structured object, and larger
-# clusters made the hub 5xx / time out, dropping
+# clusters made the endpoint 5xx / time out, dropping
 # whole clusters. Coherence does not need big
 # clusters -- the shared brief, the deterministic
 # angle plan and the whole-institution sibling
@@ -91,6 +94,14 @@ DEFAULT_MAX_DOCS_PER_CLUSTER = 10  # per-call cap; larger targets fan into batch
 #: narrative genres get more room to read like real, fleshed-out documents (realism).
 TARGET_DOC_TOKENS_TIGHT = 250  # ~150-210 words (Latin): fee tables, matrices, FAQs, tool docs
 TARGET_DOC_TOKENS_RICH = 520  # ~300-450 words (Latin): sheets, disclosures, policies, reg notes
+
+#: Latin-script words per budget token, as a (low, high) band.
+_LATIN_WORDS_PER_TOKEN = (0.6, 0.85)
+#: Tokens the document model spends per Latin-script word and per Japanese or Korean
+#: character, measured on its tokenizer: English 1.25-1.32 per word, Japanese
+#: 0.52-0.57 and Korean 0.53-0.63 per character, spaces included.
+TOKENS_PER_LATIN_WORD = 1.3
+TOKENS_PER_JA_KO_CHAR = 0.6
 
 #: Genres that warrant longer, narrative bodies. Everything else defaults to tight.
 _RICH_GENRES = frozenset(
@@ -510,10 +521,16 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
     # latin"), which would otherwise match the Indic branch below on "hindi" and
     # hand a romanized doc the much tighter Indic word budget.
     if "latn" in tag or "latin" in tag:
-        lo, hi = _band(0.6, 0.85)
+        lo, hi = _band(*_LATIN_WORDS_PER_TOKEN)
         return f"roughly {lo}-{hi} words"
-    # CJK: instruct in CHARACTERS (~1 token/char; "words" undefined).
-    if any(k in tag for k in ("ja_", "japanese", "ko_", "korean", "zh_", "chinese", "hant", "hans")):
+    # Japanese and Korean: instruct in CHARACTERS ("words" are undefined), at the token
+    # count of the Latin word band.
+    if any(k in tag for k in ("ja_", "japanese", "ko_", "korean")):
+        scale = TOKENS_PER_LATIN_WORD / TOKENS_PER_JA_KO_CHAR
+        lo, hi = _band(*(ratio * scale for ratio in _LATIN_WORDS_PER_TOKEN))
+        return f"roughly {lo}-{hi} characters"
+    # Chinese: characters, at about one token per character.
+    if any(k in tag for k in ("zh_", "chinese", "hant", "hans")):
         lo, hi = _band(0.6, 0.9)
         return f"roughly {lo}-{hi} characters"
     # Indic scripts (Devanagari etc.): heavy subword tokenization -> ~0.4 words/token.
@@ -537,7 +554,7 @@ def doc_length_hint(locale: str, language: str = "", genre: str = "") -> str:
         lo, hi = _band(0.3, 0.45)
         return f"roughly {lo}-{hi} words"
     # Latin scripts (English, Portuguese, French, ...): ~0.75 words/token.
-    lo, hi = _band(0.6, 0.85)
+    lo, hi = _band(*_LATIN_WORDS_PER_TOKEN)
     return f"roughly {lo}-{hi} words"
 
 
@@ -550,13 +567,64 @@ def _batches(items: list[Any], cap: int) -> Iterator[list[Any]]:
 # ── Phase 1: institution seed + brief config ────────────────────────────
 
 
+def products_for_prompt(products: list[Product], spec: RegionSpec) -> list[dict[str, Any]]:
+    """Each product with a ``display`` rendering of every typed value in the
+    locale's own notation (``7,90 €``, ``15,9 %``), which the prompts ask the
+    model to write instead of the raw ``value``, and the value's ``label`` where the
+    region spec gives one.
+
+    Without the label the model reads a meaning off the key's English words, so a
+    tax-credit base named ``combined_credit_base_limit`` reads as a credit line.
+    """
+    from usersim.engine.core.finance_bank import format_amount, format_percent
+
+    number_format = spec.number_format or spec.locale
+    labels = spec.doc_titles.variable_labels
+    out: list[dict[str, Any]] = []
+    for product in products:
+        dumped = product.model_dump()
+        for name, var in dumped["variables"].items():
+            if labels.get(name):
+                var["label"] = labels[name]
+            if var["type"] == "money":
+                var["display"] = format_amount(
+                    var["value"],
+                    currency_symbol=spec.currency_symbol,
+                    number_format=number_format,
+                    drop_zero_cents=True,
+                )
+            elif var["type"] == "percent":
+                var["display"] = format_percent(var["value"], number_format=number_format)
+            else:
+                var["display"] = str(var["value"])
+        out.append(dumped)
+    return out
+
+
+def identity_fields_for(spec: RegionSpec) -> str:
+    """What ``verify_identity`` takes in this region, in words ("full name and date of
+    birth"): the required set the simulator gates on and advertises to the assistant.
+
+    The prompts name it because a model told only to verify identity invents the rest:
+    one-time codes, card numbers and ID numbers that no tool in the conversation can
+    check, so a procedure that requires them can never be completed.
+    """
+    words = [field.replace("_", " ") for field in spec.identity_verification.required_fields]
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
+def regulators_json(spec: RegionSpec, domains: list[Any]) -> str:
+    """The region spec's regulators and regulator text for ``domains``, as both prompts read them."""
+    regulators = {d: spec.domain_regulators[d].model_dump() for d in domains if d in spec.domain_regulators}
+    return json.dumps(regulators, ensure_ascii=False)
+
+
 def build_institution_seed(spec: RegionSpec):
     """One seed row per institution for the Phase-1 brief (pure)."""
     import pandas as pd
 
     rows: list[dict[str, Any]] = []
     for inst in spec.institutions:
-        regulators = {d: spec.domain_regulators[d].model_dump() for d in inst.domains if d in spec.domain_regulators}
         rows.append(
             {
                 "institution_id": inst.id,
@@ -567,9 +635,13 @@ def build_institution_seed(spec: RegionSpec):
                 "institution_type": inst.type,
                 "brand_voice": inst.brand_voice,
                 "language": spec.language,
+                "language_guidance": language_guidance_for(
+                    spec.language_conventions.guidance, spec.language_conventions.respell
+                ),
                 "currency_symbol": spec.currency_symbol,
-                "products_json": json.dumps([p.model_dump() for p in inst.products], ensure_ascii=False),
-                "regulators_json": json.dumps(regulators, ensure_ascii=False),
+                "identity_fields": identity_fields_for(spec),
+                "products_json": json.dumps(products_for_prompt(inst.products, spec), ensure_ascii=False),
+                "regulators_json": regulators_json(spec, inst.domains),
                 # Market-specific emphasis: region override else region-neutral
                 # default, resolved here so the prompt stays free of any one
                 # market's instruments.
@@ -622,6 +694,13 @@ def explode_to_cluster_rows(
     Each emitted row carries the generated ``institution_brief`` plus its own
     ``cluster_kind`` / ``focus_json`` / ``doc_plan_json`` / ``sibling_doc_index`` /
     ``target_doc_count`` so Phase 2 can generate the cluster conditioned on the brief.
+
+    It also carries the region spec's own rules: the regulator text for every domain
+    the institution operates in, and the institution type's concept guidance. The
+    brief summarizes each in a sentence, which drops a rule's scope: a debt-service
+    rule that covers only the card loan reads as covering every card product. Every
+    domain, not just the product's own, because a rule can scope a sibling: a lending
+    rule can name the payment products it leaves out.
     """
     import pandas as pd
 
@@ -662,13 +741,19 @@ def explode_to_cluster_rows(
             "institution_type": inst.type,
             "brand_voice": inst.brand_voice,
             "language": spec.language,
+            "language_guidance": language_guidance_for(
+                spec.language_conventions.guidance, spec.language_conventions.respell
+            ),
             "currency_symbol": spec.currency_symbol,
+            "identity_fields": identity_fields_for(spec),
+            "concept_guidance": concept_guidance_for(inst.type, spec.concept_guidance),
+            "regulators_json": regulators_json(spec, inst.domains),
             "institution_brief": brief_json,
             "sibling_doc_index": json.dumps(sibling_index, ensure_ascii=False),
         }
 
-        for product in inst.products:
-            focus = json.dumps(product.model_dump(), ensure_ascii=False)
+        for product, prompt_product in zip(inst.products, products_for_prompt(inst.products, spec)):
+            focus = json.dumps(prompt_product, ensure_ascii=False)
             for batch in _batches(product_plans[product.id], max_docs_per_cluster):
                 rows.append(
                     {
@@ -933,10 +1018,9 @@ _TOOLS_YAML_HEADER = (
     "# parameters here. Their real schema (signature + args) lives in each tool's\n"
     "# discoverable_tool_doc in corpus.yaml -- the assistant learns a tool + its\n"
     "# arguments by RETRIEVING that doc via kb_search, then calls it through the\n"
-    "# call_tool gate (the tau-Banking discoverable-tool mechanic). Putting schemas\n"
-    "# here would defeat that discovery challenge. Only the always-offered\n"
-    "# primitives (kb_search / verify_identity) carry a schema; side_effect_class\n"
-    "# is always set (the scorer uses it).\n"
+    "# call_tool gate. Putting schemas here would defeat that discovery challenge.\n"
+    "# Only the always-offered primitives (kb_search / verify_identity) carry a\n"
+    "# schema; side_effect_class is always set (the scorer uses it).\n"
 )
 
 
@@ -970,7 +1054,7 @@ def doc_uuid(locale: str, institution_id: str, doc_key: str) -> str:
 def _cluster_id(institution_id: str, cluster_kind: str, batch: list[dict[str, Any]]) -> str:
     """Stable id for one generation cluster, minted from its batch's deterministic
     doc uuids. Used to match a seed row to its generated output so dropped clusters
-    (transient hub failures) can be detected and regenerated on their own -- and, being
+    (transient endpoint failures) can be detected and regenerated on their own -- and, being
     deterministic, it is identical across regenerations."""
     keys = "|".join(sorted(str(s.get("uuid") or s.get("doc_key")) for s in batch))
     return str(uuid.uuid5(_DOC_UUID_NAMESPACE, f"cluster:{institution_id}:{cluster_kind}:{keys}"))
@@ -1077,9 +1161,11 @@ def _institution_meta(inst: Institution) -> dict[str, Any]:
 
 
 def _tool_dict(tool: Tool) -> dict[str, Any]:
+    # A discoverable tool is learned from its retrieved doc, so tools.yaml keeps
+    # its description empty even when the spec supplies one to steer that doc.
     return {
         "name": tool.name,
-        "description": tool.description,
+        "description": "" if tool.discoverable else tool.description,
         "discoverable": tool.discoverable,
         "side_effect_class": tool.side_effect_class,
         "parameters": tool.parameters,
@@ -1188,7 +1274,12 @@ def _as_docset(val: Any) -> dict[str, Any]:
 
 
 def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
-    """Group cluster rows by institution, QC-gate, explode, and de-dupe doc ids.
+    """Group cluster rows by institution, QC-gate, explode, respell, and de-dupe doc ids.
+
+    Respelling applies the region spec's ``language_conventions`` to each body, and
+    writes each LaTeX symbol the model typesets as its character: the prompt asks for
+    plain text, but the model still typesets some symbols, and a single backslash in
+    its JSON arrives here already read as an escape.
 
     QC-drop policy: an unparseable/empty cluster is dropped (with a warning);
     a low-faithfulness cluster is KEPT (already ``placeholder: true``) and logged,
@@ -1196,6 +1287,9 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     """
     spec_by_id = {i.id: i for i in spec.institutions}
     docs_by_inst: dict[str, dict[str, dict[str, Any]]] = {}
+    conventions = spec.language_conventions
+    respelled = 0
+    symbols = 0
 
     for _, row in result_df.iterrows():
         iid = str(row["institution_id"])
@@ -1223,8 +1317,17 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
         )
         bucket = docs_by_inst.setdefault(iid, {})
         for d in docs:
+            # The body only: the PLAN owns the title, so a title using an avoided
+            # form is a doc_titles gap, which validate-assets reports.
+            respelled += len(conventions.find(d["body"]))
+            d["body"], replaced = plain_symbols(conventions.apply(d["body"]))
+            symbols += replaced
             bucket.setdefault(d["id"], d)  # de-dupe ids across the institution's rows
 
+    if respelled:
+        logger.info("respelled %d form(s) the region spec's language conventions avoid", respelled)
+    if symbols:
+        logger.info("wrote %d LaTeX symbol(s) as characters", symbols)
     institutions: list[InstitutionBank] = []
     for inst in spec.institutions:
         institutions.append(
@@ -1238,11 +1341,12 @@ def collect_institutions(result_df, spec: RegionSpec) -> list[InstitutionBank]:
     return institutions
 
 
-#: Doc-set (Phase 2) backfill policy. The doc-gen hub can transiently 5xx an
+#: Doc-set (Phase 2) backfill policy. The doc-gen endpoint can transiently 5xx an
 #: individual cluster; DD drops that record instead of retrying, so we re-run
-#: generation for ONLY the dropped clusters (matched by ``cluster_id``) up to a few
-#: attempts. This makes an unattended, many-region run robust to flaky per-record
-#: failures without regenerating the whole (expensive) corpus.
+#: generation for ONLY the dropped clusters (matched by ``cluster_id``), and those the
+#: judge scored below the faithfulness floor, up to a few attempts. This makes an
+#: unattended, many-region run robust to flaky per-record failures without
+#: regenerating the whole (expensive) corpus.
 DOCSET_MAX_ATTEMPTS = 3
 DOCSET_RETRY_BASE_DELAY_S = 10.0
 
@@ -1255,9 +1359,10 @@ def _usable_docset_rows(df):
     response still carries its ``cluster_id``, so a presence test counts it as a
     success and retries nothing.
 
-    Deliberately does NOT filter on faithfulness. A low-faithfulness cluster is
-    kept and flagged by ``collect_institutions``; that is a judgement about
-    quality, not about whether the call produced anything to judge.
+    Deliberately does NOT filter on faithfulness: that is a judgement about
+    quality, not about whether the call produced anything to judge. The backfill
+    loop regenerates a low-faithfulness cluster separately, and
+    ``collect_institutions`` flags one that no attempt lifts to the floor.
     """
     if "doc_set" not in df.columns:
         # Nothing to inspect (a shape we do not produce, but the loop must not
@@ -1279,7 +1384,7 @@ def _generate_docsets_with_backfill(
     Two things can go wrong, and both are equally recoverable:
 
     - **The record is dropped.** DD omits a record on a generation error (a
-      transient hub 5xx), so the result frame is short of the seed.
+      transient endpoint 5xx), so the result frame is short of the seed.
     - **The record arrives unusable.** A response can be truncated mid-body,
       schema-valid but empty, or refused, and still carry its ``cluster_id``.
 
@@ -1289,6 +1394,11 @@ def _generate_docsets_with_backfill(
     than row presence matters: on a presence test the second failure marked the
     cluster done, and the only thing that noticed was ``collect_institutions``
     dropping it with a warning and no path back to regeneration.
+
+    A cluster the judge scores below ``MIN_FAITHFULNESS_SCORE`` (a limit written with
+    three extra zeros, say) is regenerated the same way, since a fresh attempt usually
+    gets the numbers right. Its best-scoring version is kept, flagged, if no attempt
+    reaches the floor.
 
     Returns the combined result frame (usable clusters only); logs a clear
     warning if any clusters remain missing after the final attempt (the corpus
@@ -1304,12 +1414,22 @@ def _generate_docsets_with_backfill(
     total = len(cluster_seed)
     frames: list[Any] = []
     done: set = set()
+    #: cluster_id -> its best-scoring row so far, for clusters still below the floor.
+    below_floor: dict[Any, Any] = {}
     remaining = cluster_seed
     for attempt in range(1, max_attempts + 1):
         batch_seed = remaining.reset_index(drop=True)
         engine, builder = build_docset_config(models, batch_seed)
         df = engine.create(builder, num_records=len(batch_seed)).load_dataset().reset_index(drop=True)
         usable = _usable_docset_rows(df)
+        if "numeric_faithfulness_score" in usable.columns:
+            scores = pd.to_numeric(usable["numeric_faithfulness_score"], errors="coerce").fillna(0)
+            low = scores < MIN_FAITHFULNESS_SCORE
+            for (_, row), score in zip(usable[low].iterrows(), scores[low]):
+                best = below_floor.get(row["cluster_id"])
+                if best is None or score > pd.to_numeric(best["numeric_faithfulness_score"], errors="coerce"):
+                    below_floor[row["cluster_id"]] = row
+            usable = usable[~low]
         frames.append(usable)
         if "cluster_id" in usable.columns:
             done |= set(usable["cluster_id"].dropna())
@@ -1319,28 +1439,44 @@ def _generate_docsets_with_backfill(
             if attempt > 1:
                 logger.info("doc_set backfill: all %d clusters generated after %d attempt(s)", total, attempt)
             break
+        n_low = sum(1 for cid in remaining["cluster_id"] if cid in below_floor)
         if attempt < max_attempts:
             delay = base_delay * attempt
             logger.warning(
                 "doc_set backfill: %d/%d clusters dropped or came back unusable "
-                "(transient hub error, or a truncated/empty response); "
-                "regenerating just those in %.0fs (attempt %d/%d)",
-                n_missing,
+                "(a transient endpoint error, or a truncated or empty response), "
+                "and %d scored below the faithfulness floor %d; regenerating just "
+                "those in %.0fs (attempt %d/%d)",
+                n_missing - n_low,
                 total,
+                n_low,
+                MIN_FAITHFULNESS_SCORE,
                 delay,
                 attempt + 1,
                 max_attempts,
             )
             time.sleep(delay)
         else:
-            logger.warning(
-                "doc_set backfill exhausted: %d/%d clusters still missing after %d "
-                "attempts; writing the corpus WITHOUT them -- re-run gen-assets to "
-                "fill the gap (doc ids are deterministic)",
-                n_missing,
-                total,
-                max_attempts,
-            )
+            kept = [row for cid, row in below_floor.items() if cid not in done]
+            if kept:
+                frames.append(pd.DataFrame(kept))
+                logger.warning(
+                    "doc_set backfill: %d/%d clusters stayed below the faithfulness floor "
+                    "%d after %d attempts; keeping each one's best version, flagged",
+                    len(kept),
+                    total,
+                    MIN_FAITHFULNESS_SCORE,
+                    max_attempts,
+                )
+            if n_missing > len(kept):
+                logger.warning(
+                    "doc_set backfill exhausted: %d/%d clusters still missing after %d "
+                    "attempts; writing the corpus WITHOUT them -- re-run gen-assets to "
+                    "fill the gap (doc ids are deterministic)",
+                    n_missing - len(kept),
+                    total,
+                    max_attempts,
+                )
     result_df = pd.concat(frames, ignore_index=True)
     # We only retry missing clusters, so duplicates shouldn't occur -- guard anyway.
     if "cluster_id" in result_df.columns:
@@ -1348,7 +1484,7 @@ def _generate_docsets_with_backfill(
     return result_df
 
 
-#: Embedding-pass retry policy. The hub's /embeddings route can throw transient
+#: Embedding-pass retry policy. The endpoint's /embeddings route can throw transient
 #: 5xx / timeouts on the health-check probe; embeddings are idempotent + cheap, so
 #: retry with linear backoff before giving up (the caller keeps the corpus either way).
 EMBED_MAX_ATTEMPTS = 4
@@ -1441,7 +1577,7 @@ def generate_corpus(
     )
 
     # Phase 2: generate each cluster conditioned on the brief. Auto-backfills any
-    # clusters the hub transiently drops so a full corpus doesn't need a manual re-run.
+    # clusters the endpoint transiently drops so a full corpus doesn't need a manual re-run.
     result_df = _generate_docsets_with_backfill(models, cluster_seed)
 
     institutions = collect_institutions(result_df, spec)

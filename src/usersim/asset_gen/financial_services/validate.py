@@ -14,8 +14,8 @@ structural ``load_finance_bank`` round-trip is reported as skipped (not failed)
 for a corpus-only bank. Reference-agent solvability is deferred to task-gen.
 
 Checks: structural_load, numeric_faithfulness (the key one -- spec typed values
-appear in the prose), language_script, near_duplicate, coverage,
-placeholder_discipline, scope, qc_scores.
+appear in the prose), plain_text, language_script, language_conventions,
+near_duplicate, coverage, placeholder_discipline, scope, qc_scores.
 """
 
 from __future__ import annotations
@@ -189,30 +189,105 @@ def _scale_word_forms(iv: int) -> set:
     return out
 
 
-def _value_candidates(val: Any) -> list[str]:
+def _myriad_forms(iv: int) -> set:
+    """Japanese and Korean renderings of a value (``10000000`` -> ``'1,000万'``, ``'1천만'``).
+
+    Both languages count large amounts in units of 10^4 (万, 만) and 10^8 (億, 억),
+    so ten million yen is ``1,000万円`` and 150 million won ``1억 5,000만 원``: the
+    exact value is present without its digit string. A value that isn't a multiple
+    of 10^4 has none.
+    """
+    out: set = set()
+    if iv < 10_000 or iv % 10_000:
+        return out
+    oku, man = divmod(iv // 10_000, 10_000)
+    for man_unit, oku_unit, thousand in (("万", "億", "千"), ("만", "억", "천")):
+        lows = {f"{man:,}{man_unit}", f"{man}{man_unit}"}
+        if man % 1000 == 0:
+            lows.add(f"{man // 1000}{thousand}{man_unit}")
+        highs = {f"{oku:,}{oku_unit}", f"{oku}{oku_unit}"}
+        if not oku:
+            out |= lows
+        elif not man:
+            out |= highs
+        else:
+            out |= {f"{high}{space}{low}" for high in highs for low in lows for space in ("", " ")}
+    return out
+
+
+#: Digit-group separators of the number formats that write a decimal comma, keyed
+#: by language: French writes ``1 234,56`` (the space is often a no-break or narrow
+#: no-break one), German and Brazilian Portuguese ``1.234,56``.
+_DECIMAL_COMMA_GROUP_SEPARATORS: dict[str, tuple[str, ...]] = {
+    "fr": (" ", "\u00a0", "\u202f"),
+    "de": (".",),
+    "pt": (".",),
+}
+
+
+def _decimal_comma_group_separators(number_format: str | None) -> tuple[str, ...] | None:
+    """The group separators of a decimal-comma ``number_format``; ``None`` for others."""
+    if not number_format:
+        return None
+    return _DECIMAL_COMMA_GROUP_SEPARATORS.get(number_format.split("_")[0].lower())
+
+
+def _decimal_comma_candidates(val: Any, group_separators: tuple[str, ...]) -> list[str]:
+    """Renderings in a format that writes ``1.234,56`` or ``1 234,56``.
+
+    Only the format's own forms count: there ``1,234`` reads as a decimal, so
+    accepting the English rendering could pass a wrong value.
+    """
+    if isinstance(val, bool):
+        return [str(val)]
+    cands: set[str] = set()
+    if isinstance(val, int) or (isinstance(val, float) and float(val).is_integer()):
+        iv = int(val)
+        cands.add(str(iv))
+        cands.update(f"{iv:,}".replace(",", sep) for sep in group_separators)
+    if isinstance(val, float):
+        for english in (f"{val}", f"{val:.2f}", f"{val:,.2f}"):
+            for sep in group_separators:
+                cands.add(english.replace(",", "\0").replace(".", ",").replace("\0", sep))
+    return [c for c in cands if c]
+
+
+def _value_candidates(val: Any, number_format: str | None = None) -> list[str]:
+    group_separators = _decimal_comma_group_separators(number_format)
+    if group_separators is not None:
+        return _decimal_comma_candidates(val, group_separators)
     cands = {str(val)}
     if isinstance(val, bool):
         return list(cands)
     if isinstance(val, int) or (isinstance(val, float) and float(val).is_integer()):
         iv = int(val)
-        # Plain digits, Western grouping, and Indian grouping / scale words, so a
-        # locale-natural rendering counts as faithful (a US corpus will never
-        # contain "lakh", so this cannot mask a wrong number).
+        # Plain digits, Western grouping, Indian grouping and scale words, and
+        # Japanese and Korean units of 10^4, so a locale-natural rendering counts
+        # as faithful (a US corpus will never contain "lakh" or "万", so none of
+        # these can mask a wrong number).
         cands.update({str(iv), f"{iv:,}", _indian_grouped(iv)})
         cands.update(_scale_word_forms(iv))
+        cands.update(_myriad_forms(iv))
     if isinstance(val, float):
         cands.update({f"{val}", f"{val:.2f}", f"{val:,.2f}"})
     return [c for c in cands if c]
 
 
-def _value_present(val: Any, text: str) -> bool:
-    return any(c in text for c in _value_candidates(val))
+def _value_present(val: Any, text: str, number_format: str | None = None) -> bool:
+    """Whether ``text`` states ``val`` as a whole number in one of its renderings. A
+    rendering inside a longer number doesn't count: 5,000,000,000원 doesn't state a
+    5,000,000원 limit."""
+    return any(
+        re.search(rf"(?<![0-9])(?<![0-9][.,]){re.escape(c)}(?![0-9]|[.,][0-9])", text)
+        for c in _value_candidates(val, number_format)
+    )
 
 
 def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
     if spec is None:
         rep.add("numeric_faithfulness", "bank", WARN, "skipped: no region_spec provided (cannot ground values)")
         return
+    number_format = spec.number_format or spec.locale
     for inst in spec.institutions:
         idata = insts.get(inst.id)
         if idata is None:
@@ -224,7 +299,7 @@ def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstD
             missing = [
                 f"{name}={var.value}"
                 for name, var in product.variables.items()
-                if isinstance(var.value, (int, float)) and not _value_present(var.value, text)
+                if isinstance(var.value, (int, float)) and not _value_present(var.value, text, number_format)
             ]
             if not prod_docs:
                 rep.add("numeric_faithfulness", inst.id, FAIL, f"{product.id}: no documents produced for product")
@@ -234,6 +309,33 @@ def _check_numeric_faithfulness(spec: RegionSpec | None, insts: dict[str, _InstD
                 )
             else:
                 rep.add("numeric_faithfulness", inst.id, PASS, f"{product.id}: all typed values present")
+
+
+def _check_number_notation(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """A decimal-comma locale must not quote amounts or rates in English notation.
+
+    ``7.9 €`` or ``15.9 %`` in a French or German document is a visible error, and
+    the numeric check cannot see it: it only asks whether the locale's own form
+    appears somewhere in a product's documents, so a corpus can pass while most
+    of its decimals are written the English way.
+    """
+    if spec is None:
+        return
+    if _decimal_comma_group_separators(spec.number_format or spec.locale) is None:
+        return
+    units = "|".join(re.escape(u) for u in ("%", spec.currency_symbol, spec.currency) if u)
+    english = re.compile(rf"(?<![\d.,])\d{{1,3}}(?:,\d{{3}})*\.\d{{1,2}}(?=\s?(?:{units}))")
+    for iid, idata in insts.items():
+        bad = [d.get("id") for d in idata.documents if english.search(d.get("body", ""))]
+        if bad:
+            rep.add(
+                "number_notation",
+                iid,
+                FAIL,
+                f"{len(bad)}/{len(idata.documents)} doc(s) write an amount or rate with a decimal point: {bad[:3]}",
+            )
+        else:
+            rep.add("number_notation", iid, PASS, "amounts and rates use the locale's decimal comma")
 
 
 def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -252,7 +354,9 @@ def _check_variable_name_leak(spec: RegionSpec | None, insts: dict[str, _InstDat
         idata = insts.get(inst.id)
         if idata is None:
             continue
-        keys = {k for p in inst.products for k in p.variables}
+        # A one-word key such as ``excess`` is also an ordinary word, which an exact
+        # token match cannot tell apart from prose.
+        keys = {k for p in inst.products for k in p.variables if "_" in k}
         if not keys:
             continue
         pattern = re.compile(r"\b(" + "|".join(sorted((re.escape(k) for k in keys), key=len, reverse=True)) + r")\b")
@@ -377,6 +481,87 @@ def _check_doc_key_leak(insts: dict[str, _InstData], rep: ValidationReport) -> N
             rep.add("doc_key_leak", iid, PASS, "cross-references use titles, not doc_keys")
 
 
+#: LaTeX math (``$\ge$``, ``$\rightarrow$``) or a bare command, where the character
+#: itself (``≥``, ``→``) belongs.
+_LATEX_RE = re.compile(
+    r"\$\s*\\[A-Za-z]+|\\(?:rightarrow|leftarrow|Rightarrow|geq?|leq?|neq|times|approx|cdot|frac|text)\b"
+)
+#: Control characters other than tab and newline. A single backslash in the model's
+#: JSON turns ``\rightarrow`` into a carriage return followed by ``ightarrow``.
+_CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+#: One command in math mode, either as written (``$\times$``) or after the JSON parser
+#: read the model's single backslash and the letter after it as an escape: ``\times``
+#: arrives as a tab and ``imes``, ``\neq`` as a newline and ``eq``. Tab and newline are
+#: ordinary text, so only this pattern sees those two.
+_MATH_RE = re.compile(r"\$ *(?:\\([A-Za-z]+)|([\t\n\r\f\b])([A-Za-z]+)) *\$")
+_JSON_ESCAPES = {"\t": "t", "\n": "n", "\r": "r", "\f": "f", "\b": "b"}
+#: The character each LaTeX symbol command stands for.
+_LATEX_SYMBOLS = {
+    "rightarrow": "→",
+    "leftarrow": "←",
+    "Rightarrow": "⇒",
+    "ge": "≥",
+    "geq": "≥",
+    "le": "≤",
+    "leq": "≤",
+    "ne": "≠",
+    "neq": "≠",
+    "times": "×",
+    "approx": "≈",
+    "cdot": "·",
+    "pm": "±",
+}
+
+
+def plain_symbols(text: str) -> tuple[str, int]:
+    """``text`` with each LaTeX symbol in math mode written as its character, and how
+    many it replaced. A command with no character here is left as it is, for
+    ``plain_text`` to fail."""
+    replaced = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal replaced
+        command = match.group(1) or _JSON_ESCAPES[match.group(2)] + match.group(3)
+        if command not in _LATEX_SYMBOLS:
+            return match.group(0)
+        replaced += 1
+        return _LATEX_SYMBOLS[command]
+
+    return _MATH_RE.sub(replace, text), replaced
+
+
+def _check_plain_text(insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """Fail a document whose title or body carries LaTeX math or a control character.
+
+    Documents are Markdown that the customer and the assistant read as text, so a
+    typeset symbol reaches them raw (``Balance $\\ge$ $500``).
+    """
+    for iid, idata in sorted(insts.items()):
+        offenders: list[str] = []
+        seen: set = set()
+        for d in idata.documents:
+            text = f"{d.get('title', '')}\n{d.get('body', '')}"
+            found = (
+                _LATEX_RE.findall(text)
+                + [repr(m.group(0)) for m in _MATH_RE.finditer(text) if m.group(2)]
+                + [repr(c) for c in _CONTROL_RE.findall(text)]
+            )
+            if found:
+                offenders.append(str(d.get("id")))
+                seen.update(found)
+        if offenders:
+            rep.add(
+                "plain_text",
+                iid,
+                FAIL,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) carry LaTeX math or control "
+                f"characters (e.g. {sorted(seen)[:4]}); write the symbol itself (≥, ≤, →, ×): "
+                f"{offenders[:5]}",
+            )
+        else:
+            rep.add("plain_text", iid, PASS, "no LaTeX math or control characters")
+
+
 def _in_ranges(cp: int, ranges: tuple[tuple[int, int], ...]) -> bool:
     return any(lo <= cp <= hi for lo, hi in ranges)
 
@@ -387,6 +572,15 @@ def _script_fraction(text: str, ranges: tuple[tuple[int, int], ...]) -> float | 
         return None
     in_expected = sum(1 for c in letters if _in_ranges(ord(c), ranges))
     return in_expected / len(letters)
+
+
+#: Genres outside the script check. A tool reference spells the tool, its arguments and
+#: their types as English identifiers, so its script share measures the identifiers.
+_SCRIPT_EXEMPT_GENRES: frozenset = frozenset({"discoverable_tool_doc"})
+
+#: A tool or argument name (``verify_identity``, ``account_id``). An agent procedure names
+#: the tools it calls in every locale, so the script share is measured on the prose around them.
+_SNAKE_CASE_RE = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+(?![A-Za-z0-9_])")
 
 
 def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -404,7 +598,9 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
     for iid, idata in insts.items():
         bad = []
         for d in idata.documents:
-            frac = _script_fraction(f"{d.get('title', '')} {d.get('body', '')}", ranges)
+            if d.get("document_type") in _SCRIPT_EXEMPT_GENRES:
+                continue
+            frac = _script_fraction(_SNAKE_CASE_RE.sub(" ", f"{d.get('title', '')} {d.get('body', '')}"), ranges)
             if frac is not None and frac < MIN_SCRIPT_FRACTION:
                 bad.append(f"{d.get('id')}={frac:.2f}")
         if bad:
@@ -413,6 +609,36 @@ def _check_language_script(region_meta: dict[str, Any], insts: dict[str, _InstDa
             )
         else:
             rep.add("language_script", iid, PASS, "prose in expected script")
+
+
+def _check_language_conventions(spec: RegionSpec | None, insts: dict[str, _InstData], rep: ValidationReport) -> None:
+    """Fail a document title or body that uses a form the region spec's language
+    conventions respell (a US spelling in a British-English bank, say).
+
+    The script check passes either variant. Generation respells bodies, so a hit
+    means a plan title that needs ``doc_titles``, a hand edit, or a bank generated
+    without the conventions.
+    """
+    if spec is None or not spec.language_conventions.respell:
+        return
+    for iid, idata in insts.items():
+        offenders: list[str] = []
+        seen: set = set()
+        for d in idata.documents:
+            found = spec.language_conventions.find(f"{d.get('title', '')} {d.get('body', '')}")
+            if found:
+                offenders.append(str(d.get("id")))
+                seen.update(found)
+        if offenders:
+            rep.add(
+                "language_conventions",
+                iid,
+                FAIL,
+                f"{len(offenders)}/{len(idata.documents)} doc(s) use a form the region spec avoids "
+                f"(e.g. {sorted(seen)[:4]}); regenerate or hand-fix: {offenders[:5]}",
+            )
+        else:
+            rep.add("language_conventions", iid, PASS, "no avoided forms in prose")
 
 
 def _check_near_duplicate(insts: dict[str, _InstData], rep: ValidationReport) -> None:
@@ -622,7 +848,8 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     """Vet a generated financial_services bank; returns a :class:`ValidationReport`.
 
     ``region_spec`` is the source of truth for the numeric-faithfulness check; if
-    omitted that check is skipped (WARN).
+    omitted that check is skipped (WARN). Its ``language_conventions`` drive the
+    language-conventions check, which runs only when they respell any form.
     """
     bank_dir = Path(bank_dir)
     rep = ValidationReport()
@@ -634,10 +861,13 @@ def validate_bank(bank_dir: str | Path, region_spec: RegionSpec | None = None) -
     _check_structural(bank_dir, insts, rep)
     _check_coverage(insts, rep)
     _check_numeric_faithfulness(region_spec, insts, rep)
+    _check_number_notation(region_spec, insts, rep)
     _check_variable_name_leak(region_spec, insts, rep)
     _check_tool_name_leak(insts, rep)
     _check_doc_key_leak(insts, rep)
+    _check_plain_text(insts, rep)
     _check_language_script(region_meta, insts, rep)
+    _check_language_conventions(region_spec, insts, rep)
     _check_near_duplicate(insts, rep)
     _check_placeholder(insts, rep)
     _check_scope(insts, rep)

@@ -198,9 +198,9 @@ class Tool(BaseModel):
 # A region spec that explicitly declares a tool of the same name wins (no dup).
 COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
     # Read primitive that lists a VERIFIED customer's accounts (id, type, last4,
-    # balance). Analogous to tau-Banking's get_user_details: it lets the agent
-    # resolve a last-4 the customer gives into the account_id that every
-    # state-changing tool requires, instead of fabricating an id or deflecting.
+    # balance). It lets the agent resolve a last-4 the customer gives into the
+    # account_id that every state-changing tool requires, instead of fabricating
+    # an id or deflecting.
     ("get_accounts", "read_only"),
     ("open_account", "state_changing"),
     ("close_account", "irreversible"),
@@ -213,8 +213,8 @@ COMMON_UNIVERSAL_OPERATIONS: tuple[tuple[str, SideEffectClass], ...] = (
 # Deposit-taking institutions (bank / neobank / credit_union) share a servicing
 # set; brokerages / robo-advisors share a trading + cash set. Most of these are
 # never gold for a task — they exist as realistic, gold-ADJACENT tool docs so
-# retrieval must discriminate the right procedure among many similar ones (the
-# tau-Knowledge difficulty), and so the discoverable-tool gate is non-trivial.
+# retrieval must discriminate the right procedure among many similar ones, and
+# so the discoverable-tool gate is non-trivial.
 _DEPOSIT_OPS: tuple[tuple[str, SideEffectClass], ...] = (
     ("transfer_funds", "state_changing"),
     ("order_replacement_card", "state_changing"),
@@ -266,6 +266,26 @@ COMMON_TYPE_OPERATIONS: dict[str, tuple[tuple[str, SideEffectClass], ...]] = {
 }
 
 
+#: What a common operation does and takes, for those whose simulator reads specific
+#: arguments. The description steers the operation's generated doc (tools.yaml ships
+#: it empty). Without one, the operation reaches the generator as a bare name and its
+#: doc invents the arguments: get_order_status asking for an order id the customer
+#: doesn't have, where the simulator lists the account's orders when called without one.
+COMMON_OPERATION_DESCRIPTIONS: dict[str, str] = {
+    "get_accounts": (
+        "Lists the verified customer's accounts (account_id, type, last 4 digits, balance, status) "
+        "and any cards (card_id). Takes no arguments. Use it to turn the last 4 digits a customer "
+        "gives into the account_id or card_id another tool takes."
+    ),
+    "get_order_status": (
+        "Lists the orders on the customer's account, with each order's order_id, security and "
+        "status. Takes an optional order_id; called without one, it returns every order, which is "
+        "how the agent finds the order_id of an order the customer describes by what it trades."
+    ),
+    "cancel_order": "Cancels one open order. Takes its order_id, which get_order_status returns.",
+}
+
+
 def common_operations_for_type(
     institution_type: str,
 ) -> tuple[tuple[str, SideEffectClass], ...]:
@@ -309,6 +329,10 @@ class Institution(BaseModel):
     domains: list[Domain] = Field(min_length=1)
     products: list[Product] = Field(default_factory=list)
     tool_taxonomy: list[Tool] = Field(min_length=1)
+    #: Common operations of this institution's type that it does not offer, by
+    #: name: a building-savings bank issues no cards, so it omits the card
+    #: operations every ``bank`` would otherwise be given.
+    omit_common_operations: list[str] = Field(default_factory=list)
     task_templates: list[TaskTemplate] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -316,11 +340,28 @@ class Institution(BaseModel):
         """Merge the common-operations layer (account lifecycle + servicing +
         per-type ops) into the tool taxonomy. Runs FIRST so injected tools count
         as in-scope for the gold-tool check below; an explicitly-declared tool of
-        the same name is left untouched (no duplicate)."""
+        the same name is left untouched (no duplicate), and a name listed in
+        ``omit_common_operations`` is not injected."""
+        common = {name for name, _ in common_operations_for_type(self.type)}
+        omitted = set(self.omit_common_operations)
+        if unknown := sorted(omitted - common):
+            raise ValueError(
+                f"{self.id}: omit_common_operations lists {unknown}, which a {self.type!r} is not "
+                f"given; its common operations are {sorted(common)}"
+            )
         existing = {t.name for t in self.tool_taxonomy}
+        if both := sorted(omitted & existing):
+            raise ValueError(f"{self.id}: {both} both declared in tool_taxonomy and omitted")
         for name, side_effect in common_operations_for_type(self.type):
-            if name not in existing:
-                self.tool_taxonomy.append(Tool(name=name, discoverable=True, side_effect_class=side_effect))
+            if name not in existing and name not in omitted:
+                self.tool_taxonomy.append(
+                    Tool(
+                        name=name,
+                        discoverable=True,
+                        side_effect_class=side_effect,
+                        description=COMMON_OPERATION_DESCRIPTIONS.get(name, ""),
+                    )
+                )
                 existing.add(name)
         return self
 
@@ -500,6 +541,86 @@ class DocTitleVocabulary(BaseModel):
         return self
 
 
+def _whole_word_pattern(forms: list[str]) -> re.Pattern[str]:
+    """A case-insensitive regex whose group 1 is any of ``forms`` as a whole word
+    or phrase, longest first.
+
+    An edge of a form in Japanese or Korean script may meet any character. Any
+    other edge must not run into a letter or digit of a script that spaces its
+    words. The forms that need that check before them share one, which keeps the
+    regex as fast as a plain word-boundary pattern.
+    """
+    from usersim.engine.core.locale import HAN_RANGES, HANGUL_RANGES, HIRAGANA_RANGES, KATAKANA_RANGES
+
+    ranges = HAN_RANGES + HIRAGANA_RANGES + KATAKANA_RANGES + HANGUL_RANGES
+    unspaced = "".join(f"{chr(lo)}-{chr(hi)}" for lo, hi in ranges)
+    spaced = rf"[^\W{unspaced}]"
+    checked: list[str] = []
+    open_start: list[str] = []
+    for form in sorted(forms, key=len, reverse=True):
+        alternative = re.escape(form) + ("" if re.search(f"[{unspaced}]$", form) else rf"(?!{spaced})")
+        (open_start if re.match(f"[{unspaced}]", form) else checked).append(alternative)
+    branches = [rf"(?<!{spaced})(?:{'|'.join(checked)})"] if checked else []
+    if open_start:
+        branches.append(f"(?:{'|'.join(open_start)})")
+    return re.compile(f"({'|'.join(branches)})", re.IGNORECASE)
+
+
+class LanguageConventions(BaseModel):
+    """Spelling and usage the generated prose follows, such as the spelling of a
+    regional variant that shares its script with another (British and US English),
+    which the script check cannot tell apart.
+
+    ``guidance`` goes into the brief and doc-gen prompts. ``respell`` maps each form
+    the prose must not contain to the form written instead: the prompts name both,
+    generation rewrites any that still appear in a document body, and
+    ``validate-assets`` fails a document title or body that uses one. Both empty
+    adds nothing to the prompts or the corpus.
+    """
+
+    guidance: str = ""
+    #: Whole words or phrases, matched case-insensitively. In Japanese or Korean
+    #: script a form also matches inside a longer word, since Japanese runs words
+    #: together and Korean writes particles onto them (``직불카드를``). A replacement
+    #: follows the capitalisation of the form it replaces: all capitals, a leading
+    #: capital, or as written here.
+    respell: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("respell")
+    @classmethod
+    def _no_blank_forms(cls, v: dict[str, str]) -> dict[str, str]:
+        """A blank form would match at every word boundary."""
+        if any(not form.strip() or not replacement.strip() for form, replacement in v.items()):
+            raise ValueError("language_conventions.respell forms and replacements must not be blank")
+        return {form.strip(): replacement.strip() for form, replacement in v.items()}
+
+    def _pattern(self) -> re.Pattern[str] | None:
+        return _whole_word_pattern(list(self.respell)) if self.respell else None
+
+    def find(self, text: str) -> list[str]:
+        """The forms in ``respell`` that ``text`` uses, lowercased, in order."""
+        pattern = self._pattern()
+        return [form.lower() for form in pattern.findall(text)] if pattern else []
+
+    def apply(self, text: str) -> str:
+        """``text`` with every form in ``respell`` replaced."""
+        pattern = self._pattern()
+        if pattern is None:
+            return text
+        replacements = {form.lower(): replacement for form, replacement in self.respell.items()}
+
+        def replace(match: re.Match[str]) -> str:
+            found = match.group(1)
+            replacement = replacements[found.lower()]
+            if len(found) > 1 and found.isupper():
+                return replacement.upper()
+            if found[0].isupper():
+                return replacement[0].upper() + replacement[1:]
+            return replacement
+
+        return pattern.sub(replace, text)
+
+
 class RegionSpec(BaseModel):
     schema_version: str = "v0.1"
     #: Optional locale of a BASE spec in the same directory to inherit from.
@@ -520,6 +641,9 @@ class RegionSpec(BaseModel):
     #: non-English locale produces native-language docs. Region-specific data, not
     #: derived from ``locale``, so authors control script/register explicitly.
     language: str
+    #: Optional spelling and usage for ``language``; see :class:`LanguageConventions`.
+    #: A LANGUAGE surface, like ``doc_titles``.
+    language_conventions: LanguageConventions = Field(default_factory=LanguageConventions)
     number_format: str | None = None
     privacy_regime: str | None = None
     #: Optional; omitted means the region-agnostic name + DOB default.

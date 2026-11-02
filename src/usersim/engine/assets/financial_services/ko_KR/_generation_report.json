@@ -1,0 +1,1161 @@
+{
+  "generated_at": "2026-10-27T03:30:38.162792+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.6-terra",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "yunseul_bank": {
+      "n_documents": 293,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 3,
+          "produced": 3,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "윤슬은행은 전국적인 네트워크를 보유한 시중은행으로서, 일반 개인 고객과 직장인을 주요 타겟 세그먼트로 합니다. 안정적인 자산 관리와 편리한 디지털 금융 서비스를 통해 고객의 신뢰를 구축하며 시장 경쟁력을 확보합니다.",
+        "brand_voice_guide": "고객에게 신뢰와 전문성을 전달하기 위해 정중한 합쇼체(-습니다, -십시오)를 사용합니다. 읽기 쉬운 수준의 언어를 사용하며 전문 용어는 가급적 배제하고, 중요 고지 사항과 면책 문구는 명확하게 구분하여 표기하십시오.",
+        "service_model": "전국 영업점 방문, 모바일 앱, 인터넷 뱅킹 및 고객센터를 통해 서비스를 제공합니다. 평일 영업시간 내에 대면 및 유선 상담이 가능하며, 복잡한 민원은 단계별 절차에 따라 책임자에게 에스컬레이션합니다.",
+        "fee_philosophy": "디지털 금융 활성화를 위해 모바일 및 인터넷 뱅킹 이체 수수료는 0원으로 운영하여 고객 편의를 높입니다. 다만, 통장 재발급이나 영업시간 외 ATM 이용과 같이 실물 운영 비용이 발생하는 서비스에 대해서는 합리적인 수수료를 부과합니다.",
+        "risk_and_compliance_posture": "금융위원회와 금융감독원의 감독하에 금융소비자 보호에 관한 법률 및 개인정보 보호법을 엄격히 준수합니다. 예금보험공사를 통해 예금자 1인당 원금과 이자를 합해 1억원까지 보호하며, 모든 투자 상품은 보호 대상에서 제외됨을 명시합니다.",
+        "security_and_verification": "계좌 정보 조회나 변경 등 상태 변경 작업 전에는 반드시 고객의 성함과 생년월일을 확인하십시오. 그 외의 비밀번호, 카드번호, CVV, PIN, 주민등록번호 또는 추가 인증 수단은 절대로 요구하지 않습니다.",
+        "dispute_and_fraud_handling": "보이스피싱 등 금융사기 피해 발생 시 즉시 지급정지와 피해구제 신청을 지원하여 피해를 최소화합니다. 모든 고객 분쟁은 공정하게 처리하며, 해결이 어려운 경우 금융감독원 금융분쟁조정위원회를 통해 조정을 진행합니다.",
+        "advice_boundaries": "제공하는 정보는 상품 안내 및 금융 교육 목적이며, 개별적인 세무나 법률 자문은 제공하지 않습니다. 상품 추천 시에는 관련 법규를 준수하며 객관적인 기준에 따라 고객에게 가장 적합한 상품을 안내하는 성실 의무를 다합니다.",
+        "product_positionings": "[{'product_id': 'yunseul_ipchulgeum', 'one_liner': '급여 수령과 공과금 자동이체 등 일상적인 금융 거래를 위한 기본 입출금 계좌입니다.'}\n {'product_id': 'yunseul_jeonggi_yegeum', 'one_liner': '목돈을 안전하게 예치하여 확정된 금리로 자산을 증식하는 예금 상품입니다.'}\n {'product_id': 'yunseul_jeokgeum', 'one_liner': '매월 일정 금액을 꾸준히 적립하여 목돈 마련을 돕는 저축 상품입니다.'}\n {'product_id': 'yunseul_check', 'one_liner': '연결 계좌 잔액 범위 내에서 사용하며 소득공제 혜택을 누리는 실속형 체크카드입니다.'}\n {'product_id': 'yunseul_judam', 'one_liner': '주택 구입을 위해 장기간 안정적으로 자금을 조달하는 담보 대출 상품입니다.'}\n {'product_id': 'yunseul_sinyong', 'one_liner': '직장인의 신용과 소득을 바탕으로 신속하게 자금을 마련하는 신용 대출 상품입니다.'}]",
+        "key_terms_glossary": "[{'term': 'DSR (총부채원리금상환비율)', 'definition': '모든 가계대출의 연간 원리금 상환액이 연소득에서 차지하는 비율을 의미합니다.'}\n {'term': '금리인하요구권', 'definition': '취업, 승진, 소득 증가 등 신용 상태가 개선되었을 때 대출 금리를 낮춰달라고 요청할 수 있는 권리입니다.'}\n {'term': '원천징수', 'definition': '이자 소득 발생 시 소득세와 지방소득세를 합해 15.4%를 미리 징수하여 납부하는 제도입니다.'}]"
+      }
+    },
+    "mirinae_bank": {
+      "n_documents": 250,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "미리내뱅크는 지점이 없는 인터넷전문은행으로서 모바일 앱을 통한 최상의 편의성을 제공하며, 디지털 네이티브 고객층을 주요 타겟으로 합니다. 혁신적인 사용자 경험과 투명한 금융 서비스를 통해 시장 경쟁력을 확보하겠습니다.",
+        "brand_voice_guide": "고객에게 신뢰를 주는 정중하고 격식 있는 합쇼체(-습니다, -십시오)를 사용합니다. 전문 용어 사용은 지양하고 이해하기 쉬운 수준의 언어를 사용하며, 모든 안내 사항은 명확한 서식과 법적 고지 사항을 포함하여 작성합니다.",
+        "service_model": "모든 금융 서비스는 모바일 앱을 통해 제공되며, 앱 내 고객센터를 통해 24시간 상담 체계를 유지합니다. 복잡한 민원이나 고난도 요청은 내부 에스컬레이션 경로를 통해 전문 상담원이 처리합니다.",
+        "fee_philosophy": "고객의 금융 부담을 최소화하기 위해 주요 이체 및 ATM 수수료를 0원으로 제공하는 '수수료 제로' 정책을 지향합니다. 다만, 국제 브랜드 이용 수수료와 같이 외부 비용이 발생하는 경우에 한해 합리적인 수준의 수수료를 부과합니다.",
+        "risk_and_compliance_posture": "금융위원회와 금융감독원의 감독을 준수하며, 예금보험공사를 통해 예금자 1인당 원금과 이자를 합해 1억원까지 보호합니다. 개인정보 보호법 및 금융실명법을 엄격히 준수하여 고객의 소중한 정보와 자산을 안전하게 관리합니다.",
+        "security_and_verification": "계좌 정보 변경 등 상태 변경 작업 전에는 반드시 고객의 성함과 생년월일을 확인하여 본인 인증을 수행합니다. 그 외의 카드 번호, 비밀번호, CVV, 주민등록번호 등의 민감 정보는 절대 요구하지 않습니다.",
+        "dispute_and_fraud_handling": "보이스피싱 및 스미싱 등 금융사기 피해 발생 시 즉각적인 지급정지와 피해구제 신청 절차를 지원합니다. 모든 분쟁은 금융감독원 금융분쟁조정위원회의 기준에 따라 신속하고 공정하게 처리하는 것을 원칙으로 합니다.",
+        "advice_boundaries": "일반적인 금융 상품 정보와 교육적 안내는 제공하되, 개별적인 세무 또는 법률 상담과 같은 맞춤형 전문 자문은 제공하지 않습니다. 상품 추천 시에는 약관에 근거한 객관적인 정보를 바탕으로 성실하게 안내합니다.",
+        "product_positionings": "[{'product_id': 'mirinae_ipchulgeum', 'one_liner': '일상적인 입출금과 송금을 위해 가장 기본이 되는 금융 계좌입니다.'}\n {'product_id': 'mirinae_safe_box', 'one_liner': '하루만 맡겨도 2%의 금리를 제공하여 단기 자금을 효율적으로 관리하는 보관함입니다.'}\n {'product_id': 'mirinae_moim', 'one_liner': '여러 사람이 투명하게 회비를 모으고 관리할 수 있는 공동 관리 계좌입니다.'}\n {'product_id': 'mirinae_jeonggi', 'one_liner': '최소 10,000원부터 가입 가능하며 일정 기간 예치하여 안정적인 수익을 추구하는 상품입니다.'}\n {'product_id': 'mirinae_check', 'one_liner': '0원의 연회비로 이용하며 결제 시 0.5%의 캐시백 혜택을 받는 스마트한 카드입니다.'}]",
+        "key_terms_glossary": "[{'term': '비대면 실명확인', 'definition': '신분증 확인과 본인 명의 계좌 확인 등을 통해 영업점 방문 없이 모바일 앱으로 본인을 인증하는 절차입니다.'}\n {'term': '예금자보호', 'definition': '예금보험공사를 통해 금융회사별로 예금자 1인당 원금과 소정의 이자를 합해 1억원까지 보호하는 제도입니다.'}\n {'term': '지급정지', 'definition': '보이스피싱 등 금융사기 피해를 방지하기 위해 해당 계좌의 입출금 거래를 일시적으로 중단시키는 조치입니다.'}]"
+      }
+    },
+    "garam_securities": {
+      "n_documents": 285,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 3.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 5,
+          "produced": 5,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "가람증권은 디지털 중심의 온라인 증권회사로서, 절세 계좌와 글로벌 투자 서비스를 통해 개인 투자자의 자산 성장을 지원합니다. 효율적인 비용 구조와 사용자 친화적인 인터페이스를 통해 광범위한 개인 투자자 층을 공략하며 시장 경쟁력을 확보합니다.",
+        "brand_voice_guide": "신뢰감 있고 정중한 합쇼체(-습니다, -십시오)를 사용하며, 전문 용어는 명확하게 설명하여 고객의 이해도를 높입니다. 모든 금액은 '1,234원'과 같이 쉼표와 원 기호를 사용하고, 비율은 '3.4%'로 표기하며, 면책 조항은 간결하고 명확하게 제시합니다.",
+        "service_model": "모바일 앱과 온라인 고객센터를 중심으로 서비스를 제공하며, 평일 영업시간 내 실시간 상담을 지원합니다. 복잡한 요청이나 전문적인 처리가 필요한 경우 내부 절차에 따라 단계적으로 에스컬레이션하여 해결합니다.",
+        "fee_philosophy": "비대면 계좌 개설 고객에게 경쟁력 있는 낮은 수수료를 제공하여 투자 진입 장벽을 낮추는 것을 지향합니다. 수수료는 최적의 거래 환경 유지와 시스템 안정성을 위한 최소한의 비용으로 책정됩니다.",
+        "risk_and_compliance_posture": "금융위원회와 금융감독원의 감독 하에 적합성 원칙을 엄격히 준수하며, 투자자 보호를 최우선으로 합니다. 예탁금은 예금보험공사를 통해 1인당 1억원까지 보호되나, 주식 및 펀드 등 투자상품은 보호 대상이 아니며 원금이 보장되지 않음을 명시합니다.",
+        "security_and_verification": "계좌 정보 변경 등 상태 변경 작업 전, 고객의 성함과 생년월일을 확인하여 본인 인증을 수행합니다. 그 외의 카드 번호, 비밀번호, 주민등록번호 전체 등 민감한 정보는 절대 요구하지 않습니다.",
+        "dispute_and_fraud_handling": "모든 민원은 투명하고 신속하게 처리하며, 부정 거래 의심 시 즉각적인 계좌 보호 조치를 취합니다. 접수된 분쟁은 관련 법규 및 내부 규정에 따라 공정하게 처리하고 진행 상황을 고객에게 안내합니다.",
+        "advice_boundaries": "일반적인 금융 교육 및 상품 정보는 제공하나, 개별적인 세무 상담이나 법률 자문, 특정 종목의 수익 보장은 하지 않습니다. 모든 상품 추천은 고객의 투자 성향을 고려한 적합성 원칙을 바탕으로 수행하며 투자 판단의 책임은 고객에게 있음을 안내합니다.",
+        "product_positionings": "[{'product_id': 'garam_isa', 'one_liner': '비과세와 분리과세 혜택을 통해 국내 주식과 ETF 등에 효율적으로 투자할 수 있는 절세 만능 계좌입니다.'}\n {'product_id': 'garam_pension_savings', 'one_liner': '세액공제 혜택을 통해 노후 자금을 준비하는 장기 투자 전용 계좌입니다.'}\n {'product_id': 'garam_irp', 'one_liner': '퇴직금 관리와 추가 납입 세액공제가 가능하며, 예금까지 담을 수 있는 종합 은퇴 준비 계좌입니다.'}\n {'product_id': 'garam_domestic_stock', 'one_liner': '코스피와 코스닥 시장의 기업에 직접 투자할 수 있는 기본 거래 서비스입니다.'}\n {'product_id': 'garam_us_stock', 'one_liner': '환전 우대 혜택과 함께 전 세계 최대 시장인 미국 주식에 투자할 수 있는 글로벌 서비스입니다.'}\n {'product_id': 'garam_jeokrip', 'one_liner': '소액으로 꾸준히 투자하여 평균 매입 단가를 낮출 수 있는 적립식 투자 서비스입니다.'}]",
+        "key_terms_glossary": "[{'term': '비과세 한도', 'definition': '수익에 대해 세금을 부과하지 않는 최대 금액 범위입니다.'}\n {'term': '분리과세', 'definition': '특정 소득을 종합소득에 합산하지 않고 별도의 세율로 과세하는 방식입니다.'}\n {'term': '세액공제', 'definition': '산출된 세금에서 일정 금액을 직접 차감하여 세금 부담을 줄여주는 제도입니다.'}\n {'term': '적합성 원칙', 'definition': '고객의 재산 상황, 투자 경험, 목적에 적합한 상품을 권유해야 하는 원칙입니다.'}]"
+      }
+    },
+    "dodam_life": {
+      "n_documents": 233,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 3,
+          "produced": 3,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "도담생명은 모든 세대의 고객에게 생애 주기별 맞춤형 보장을 제공하며, 투명한 보험료 산정과 정직한 보장 체계를 통해 시장 내 신뢰받는 생명보험사로 자리매김합니다. 특히 사망 보장과 건강 관리, 노후 준비라는 핵심 가치를 중심으로 고객의 경제적 안정을 지원하는 데 집중합니다.",
+        "brand_voice_guide": "신뢰감 있고 정중한 합쇼체(-습니다, -하십시오)를 사용하며, 전문적인 금융 용어는 고객이 이해하기 쉽게 풀어서 설명합니다. 모든 안내는 표준 맞춤법과 띄어쓰기를 준수하며, 법적 고지 사항과 면책 문구는 문서의 하단에 명확하고 정중하게 배치합니다.",
+        "service_model": "고객센터 전화 상담과 공식 디지털 채널을 통해 지원하며, 대한민국 표준 영업시간(KST)을 기준으로 운영합니다. 단순 문의는 상담원이 처리하되, 전문적인 심사나 복잡한 보험금 지급 건은 전문 언더라이터 및 보상 심사역으로 에스컬레이션하여 처리합니다.",
+        "fee_philosophy": "보험료는 통계적 위험률과 연령에 기반하여 합리적으로 산정되며, 이는 미래의 보험금 지급을 위한 준비금 적립과 효율적인 제도 운영을 위해 사용됩니다. 정해진 보험료 체계를 준수하며, 상품별 약관에 명시된 조건에 따라 보험료 납입 유예 등의 편의를 제공합니다.",
+        "risk_and_compliance_posture": "금융위원회와 금융감독원의 감독을 받으며 보험업법을 엄격히 준수하고, 예금자보호법에 따라 예금보험공사가 1인당 해약환급금 등을 합해 1억원까지 보호함을 명시합니다. 계약 전 알릴 의무와 청약철회 권리 등 소비자의 권익 보호를 최우선으로 하며 데이터 프라이버시를 철저히 관리합니다.",
+        "security_and_verification": "모든 상태 변경 작업 전, 상담원은 고객의 성함과 생년월일만을 확인하여 본인 인증을 수행합니다. 이 외의 일회성 코드, MFA, 비밀번호, 카드 번호, 주민등록번호 전체 등 추가적인 인증 수단이나 민감 정보는 절대 요구하지 않습니다.",
+        "dispute_and_fraud_handling": "모든 고객 불만과 분쟁은 공정하고 객관적인 절차에 따라 처리하며, 신속한 조사를 통해 해결 방안을 제시합니다. 자체 해결이 어려운 민원이나 분쟁은 금융감독원을 통해 신청할 수 있도록 안내하며, 보험 사기 의심 건은 관련 법규에 따라 엄격히 대응합니다.",
+        "advice_boundaries": "상품의 특징, 제도, 일반적인 세액공제 및 비과세 요건에 대한 교육적 정보는 제공하나, 개별 고객에 대한 맞춤형 세무, 의료, 법률 조언은 하지 않습니다. 또한 상담원은 보험금 지급을 확정적으로 약속하지 않으며, 모든 추천은 객관적인 상품 설명서에 기반한 표준 가이드라인을 따릅니다.",
+        "product_positionings": "[{'product_id': 'dodam_term', 'one_liner': '정해진 기간 동안 경제적 사망 보장에 집중하여 합리적인 비용으로 가족을 보호하는 실속형 상품입니다.'}\n {'product_id': 'dodam_whole_life', 'one_liner': '평생 사망을 보장하며, 납입 기간 중 환급금을 낮춰 보험료 부담을 줄인 저해지환급형 종신보험입니다.'}\n {'product_id': 'dodam_health', 'one_liner': '실손보험과 달리 입원 및 수술 시 약정된 금액을 지급하는 정액 보장형 건강보험입니다.'}\n {'product_id': 'dodam_cancer', 'one_liner': '암 진단 시 고액의 보장금을 지급하며, 면책 및 감액 기간이 적용되는 암 특화 보장 상품입니다.'}\n {'product_id': 'dodam_annuity', 'one_liner': '노후 자금 마련을 위해 일정 요건 충족 시 비과세 혜택을 제공하는 안정적인 연금 준비 상품입니다.'}]",
+        "key_terms_glossary": "[{'term': '계약 전 알릴 의무', 'definition': '보험 가입 시 과거 병력 등 중요 사항을 사실대로 알려야 하는 의무이며, 이를 위반할 경우 계약이 해지되거나 보험금 지급이 제한될 수 있습니다.'}\n {'term': '청약철회', 'definition': '보험증권을 받은 날부터 15일 이내, 또는 청약한 날부터 30일 이내에 가입 의사를 철회하고 납입 보험료를 돌려받을 수 있는 권리입니다.'}\n {'term': '저해지환급형', 'definition': '보험료 납입 기간 중 해약환급금이 표준형보다 적은 대신, 월 보험료를 낮게 책정한 상품 구조입니다.'}\n {'term': '면책기간 및 감액기간', 'definition': '면책기간은 보험 가입 후 일정 기간 동안 보장 대상에서 제외되는 기간이며, 감액기간은 해당 기간 내 사고 시 보험금의 일부(예: 50%)만 지급하는 기간입니다.'}\n {'term': '정액 보장', 'definition': '실제 발생한 치료비와 상관없이, 약정한 사고나 질병 발생 시 미리 정해진 금액을 지급하는 방식입니다.'}]"
+      }
+    },
+    "yeoul_card": {
+      "n_documents": 248,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 8,
+          "produced": 8,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "디지털 금융 환경에 익숙한 현대 직장인을 주요 타겟으로 하며, 투명한 수수료 체계와 신속한 한도 제공을 통해 시장 경쟁력을 확보하겠습니다. 여울카드는 고객의 스마트한 소비 생활을 돕는 신뢰받는 금융 파트너를 지향합니다.",
+        "brand_voice_guide": "고객에게 신뢰와 전문성을 전달하기 위해 정중한 합쇼체(-습니다, -십시오)를 사용하며, 읽기 쉬운 수준의 명확한 문장을 구성하겠습니다. 금융 전문 용어는 가급적 쉽게 풀어서 설명하고, 표준 맞춤법과 띄어쓰기를 엄격히 준수하며 고지 사항은 명확한 서식으로 구분하여 기재하겠습니다.",
+        "service_model": "모바일 앱, 웹사이트 및 고객센터를 통해 전방위적 지원 체계를 구축하며, 운영 시간은 한국 표준시(KST) 기준입니다. 일반 상담원이 해결하기 어려운 복잡한 요청이나 민원은 단계별 에스컬레이션 절차에 따라 전문 담당자가 처리하겠습니다.",
+        "fee_philosophy": "수수료는 자금 운용 비용과 리스크 관리를 위해 필수적으로 책정되며, 모든 비용 구조를 투명하게 공개하여 고객의 선택권을 보장하겠습니다. 우수 고객 혜택이나 특정 프로모션 조건 충족 시 수수료 면제 또는 감면 혜택을 제공하겠습니다.",
+        "risk_and_compliance_posture": "금융위원회와 금융감독원의 감독하에 여신전문금융업법 및 금융소비자 보호에 관한 법률을 엄격히 준수하겠습니다. 모든 상품 안내 시 수수료와 상환액을 정확히 고지하고, 고객의 신용 상태와 상환 능력을 고려한 책임 있는 금융 서비스를 제공하겠습니다.",
+        "security_and_verification": "모든 상태 변경 작업이나 개인정보 조회 전, 고객의 성함과 생년월일을 확인하여 본인 인증을 수행하십시오. 그 외의 카드 번호, CVV, 비밀번호, 주민등록번호 등은 절대로 요청하지 않습니다.",
+        "dispute_and_fraud_handling": "분실 및 도난 신고 접수 즉시 이용 정지 조치를 취하며, 부정사용 보상은 관련 법령과 약관에 따라 신속히 처리하겠습니다. 할부 거래의 철회 및 항변권 행사는 법정 기한 내에 접수하여 7영업일 이내에 답변하는 것을 원칙으로 합니다.",
+        "advice_boundaries": "일반적인 금융 상품 정보와 기초적인 금융 교육 내용은 제공하되, 개별적인 세무 상담이나 법률 자문은 전문 자격사에게 문의하시도록 안내하겠습니다. 상품 추천 시에는 객관적인 데이터를 바탕으로 하며 특정 수익을 보장하거나 확언하지 않습니다.",
+        "product_positionings": "[{'product_id': 'yeoul_credit', 'one_liner': '포인트 적립과 일상적 결제 혜택을 통해 소비의 가치를 높이는 여울카드의 핵심 상품입니다.'}\n {'product_id': 'yeoul_revolving', 'one_liner': '결제 금액의 일부만 납부하여 월별 지불 부담을 유연하게 조절할 수 있는 서비스입니다.'}\n {'product_id': 'yeoul_halbu', 'one_liner': '고액 결제 시 기간을 나누어 납부함으로써 단기적인 경제적 부담을 낮추는 기능입니다.'}\n {'product_id': 'yeoul_cash_service', 'one_liner': '급격한 자금 수요가 발생했을 때 빠르게 현금을 확보할 수 있는 단기 대출 상품입니다.'}\n {'product_id': 'yeoul_card_loan', 'one_liner': '비교적 큰 금액을 장기로 빌려 사용할 수 있으며 중도상환수수료 부담이 없는 신용 대출 상품입니다.'}]",
+        "key_terms_glossary": "[{'term': '할부 항변권', 'definition': '할부 기간 3개월 이상, 금액 20만원 이상인 거래에서 상품 미배송이나 하자 등의 사유가 있을 때 남은 할부금 지급을 거절할 수 있는 권리입니다.'}\n {'term': '리볼빙(일부결제금액이월약정)', 'definition': '결제 금액 중 약정한 최소결제비율만 납부하고 나머지는 다음 달로 이월하는 서비스로, 이월된 금액에는 수수료가 부과됩니다.'}\n {'term': 'DSR (총부채원리금상환비율)', 'definition': '연간 원리금 상환액이 연소득에서 차지하는 비중으로, 제2금융권인 카드사의 경우 일반적으로 50% 이내로 관리되어야 합니다.'}\n {'term': '금리인하요구권', 'definition': '취업, 승진, 신용점수 상승 등 신용 상태가 개선된 고객이 금융회사에 대출 금리 인하를 요청할 수 있는 권리입니다.'}]"
+      }
+    }
+  }
+}

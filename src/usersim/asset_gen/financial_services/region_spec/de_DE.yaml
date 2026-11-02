@@ -1,0 +1,749 @@
+# Structured region_spec for de_DE, the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# this into the committed per-institution assets/financial_services/de_DE/ bank.
+#
+# The institution set follows the German retail market: a public savings bank
+# (Sparkasse), a direct bank, a neobroker, an insurer (liability, contents, car,
+# disability and unit-linked pension cover) and a building-savings bank
+# (Bausparkasse). Brands are fictional.
+#
+# Content fields are written in German, so the institution brief, the corpus and
+# the regulatory context the judge reads share the corpus language. Field names,
+# ids, variable keys and tool names are identifiers and stay in English.
+#
+# Regulated values (deposit protection, the garnishment-protection allowance, the
+# housing bonus and employee savings allowance, legal fee caps) are those in force
+# in October 2026. Entries carry `placeholder: true`, as in the other banks.
+schema_version: v0.1
+region: DE
+locale: de_DE
+currency: EUR
+currency_symbol: "€"
+language: German (Germany)
+number_format: de_DE
+privacy_regime: DSGVO
+
+# German institutions identify a customer by name and date of birth before acting
+# on an account, as in the default contract.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: Girokonto
+  cards: Karte
+  payments: Zahlungskonto
+  lending_mortgage: Darlehen
+  insurance: Versicherungsvertrag
+  brokerage_investing: Depot
+
+document_types:
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief. Both the
+# Sparkasse and the Bausparkasse are banks, so the bank entry covers each.
+concept_guidance:
+  bank: >-
+    Für eine Sparkasse hervorheben: die öffentlich-rechtliche Trägerschaft und
+    die regionale Verankerung mit Filialen und Geldautomaten, das Girokonto mit
+    Kontoführungsentgelt und Sparkassen-Card (Debitkarte), den
+    Dispositionskredit, seinen Zinssatz und das Beratungsangebot bei dauerhafter
+    Inanspruchnahme, das Basiskonto und die Kontowechselhilfe nach dem
+    Zahlungskontengesetz, das Pfändungsschutzkonto (kostenlose Umwandlung,
+    Grundfreibetrag), das Sparkassenbuch mit Kündigungsfrist, die Kreditkarte,
+    die Baufinanzierung (Sollzinsbindung, Sondertilgung, Kündigungsrecht nach
+    zehn Jahren) und den Privatkredit (effektiver Jahreszins, repräsentatives
+    Beispiel, Widerrufsrecht von 14 Tagen, Kreditwürdigkeitsprüfung mit
+    Schufa-Auskunft). Eine Bausparkasse führt keine Girokonten und gibt keine
+    Karten aus; für sie hervorheben: den
+    Bausparvertrag (Bausparsumme, Abschlussgebühr, Regelsparbeitrag,
+    Mindestsparguthaben, Bewertungszahl und eine Zuteilung ohne garantierten
+    Termin, fester Darlehenszins schon bei Abschluss), die Wohnungsbauprämie und
+    die Arbeitnehmer-Sparzulage für vermögenswirksame Leistungen mit ihren
+    Einkommensgrenzen und dem Verbot der Doppelförderung, und das
+    Bauspardarlehen mit jederzeit kostenfreien Sondertilgungen.
+  neobank: >-
+    Hervorheben: das Girokonto ohne Filialnetz, das ab einem monatlichen
+    Geldeingang kostenlos ist, die Visa-Debitkarte, das Tagesgeldkonto mit
+    befristetem Neukundenzins, Echtzeitüberweisungen mit Empfängerüberprüfung,
+    die gesetzliche Einlagensicherung bis 100.000 Euro, die digitale
+    Kontowechselhilfe und die Erledigung aller Anliegen in der App oder im Chat.
+  brokerage: >-
+    Hervorheben: das Wertpapierdepot ohne Depotgebühr mit festem Entgelt pro
+    Order, ETF-Sparpläne schon mit kleinen Beträgen, die Verzinsung des
+    Verrechnungskontos, das Kinderdepot, den Freistellungsauftrag mit dem
+    Sparer-Pauschbetrag, die Abgeltungsteuer mit Solidaritätszuschlag und
+    gegebenenfalls Kirchensteuer, die Vorabpauschale bei Fonds, den kostenlosen
+    Depotübertrag, die Geeignetheits- und Angemessenheitsprüfung sowie die
+    Kosteninformation nach MiFID II, die Verwahrung der Kundenwertpapiere als
+    Sondervermögen und den Hinweis, dass Kursverluste möglich sind und keine
+    Rendite garantiert wird.
+  insurer: >-
+    Hervorheben: die Privathaftpflicht (Deckungssumme, Selbstbeteiligung,
+    mitversicherte Personen), die Hausratversicherung (Versicherungssumme je
+    Quadratmeter, Unterversicherungsverzicht, Fahrraddiebstahl), die
+    Kfz-Versicherung (gesetzliche Haftpflicht, Teil- und Vollkasko,
+    Schadenfreiheitsklasse, Kündigung bis zum 30. November, Sonderkündigungsrecht
+    nach Beitragserhöhung, eVB-Nummer für die Zulassung), die
+    Berufsunfähigkeitsversicherung (Leistung ab 50 Prozent Berufsunfähigkeit,
+    Gesundheitsfragen und vorvertragliche Anzeigepflicht) und die
+    fondsgebundene Rentenversicherung (Beitragsfreistellung, Fondswechsel,
+    Kosten, Bezugsrecht), die unverzügliche Schadenmeldung, das Widerrufsrecht
+    von 14 Tagen, bei Lebens- und Rentenversicherungen 30 Tage, und den
+    kostenlosen Versicherungsombudsmann; niemals eine Wertentwicklung
+    garantieren oder individuelle Steuerberatung geben.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [BaFin, Deutsche Bundesbank]
+    regulator_text: >-
+      Einlagenkreditinstitute werden von der BaFin und der Deutschen Bundesbank
+      beaufsichtigt. Die gesetzliche Einlagensicherung schützt Guthaben bis
+      100.000 Euro pro Kunde und Bank, für sechs Monate nach der Gutschrift bis
+      500.000 Euro, wenn das Geld aus bestimmten Lebensereignissen stammt, etwa
+      aus dem Verkauf einer selbst genutzten Wohnimmobilie, einer Abfindung oder
+      bestimmten Versicherungsleistungen. Jeder Verbraucher mit rechtmäßigem
+      Aufenthalt in der EU hat Anspruch auf ein Basiskonto, und die
+      Kontowechselhilfe nach dem Zahlungskontengesetz überträgt Daueraufträge
+      und Lastschriften auf das neue Konto. Eine SEPA-Lastschrift kann ohne
+      Angabe von Gründen acht Wochen lang zurückgegeben werden, eine nicht
+      autorisierte Zahlung 13 Monate lang. Bei dauerhafter und erheblicher
+      Inanspruchnahme des Dispositionskredits muss die Bank eine Beratung über
+      günstigere Alternativen anbieten. Ab dem 20. November 2026 besteht für
+      eingeräumte Überziehungsmöglichkeiten ein Widerrufsrecht; einen
+      unbefristeten Dispo kann die Bank nur mit einer Frist von mindestens zwei
+      Monaten kündigen, und vor einer Zwangsvollstreckung muss sie anbieten,
+      den in Anspruch genommenen Betrag ohne zusätzliche Kosten in zwölf
+      gleichen Monatsraten zurückzuzahlen. Jedes Girokonto kann kostenlos in ein
+      Pfändungsschutzkonto umgewandelt werden, nach einer Pfändung spätestens
+      nach vier Geschäftstagen; der Grundfreibetrag wird jährlich zum 1. Juli
+      angepasst. Der Kundenservice prüft die Identität, bevor er
+      Kontoinformationen mitteilt oder ändert.
+  cards:
+    regulators: [BaFin, Deutsche Bundesbank]
+    regulator_text: >-
+      Für Debit- und Kreditkarten gelten die Vorschriften über Zahlungsdienste
+      im BGB. Nach der Sperrung einer verlorenen oder gestohlenen Karte, etwa
+      über den Sperr-Notruf 116 116, haftet der Kunde nicht mehr für spätere
+      Verfügungen; vor der Sperrung ist seine Haftung auf 50 Euro begrenzt,
+      außer bei grober Fahrlässigkeit. Online-Zahlungen erfordern eine starke
+      Kundenauthentifizierung. Der Kundenservice darf Entgelte,
+      Verfügungsrahmen und Erstattungsrechte nicht falsch darstellen.
+  payments:
+    regulators: [BaFin]
+    regulator_text: >-
+      Zahlungsdienste unterliegen dem Zahlungsdiensteaufsichtsgesetz und der
+      Aufsicht der BaFin. Echtzeitüberweisungen in Euro dürfen nicht mehr kosten
+      als Standardüberweisungen, und vor jeder Überweisung gleicht die Bank Name
+      und IBAN des Empfängers ab (Empfängerüberprüfung). Eine SEPA-Lastschrift
+      kann acht Wochen lang ohne Angabe von Gründen zurückgegeben werden. Der
+      Kundenservice prüft die Identität, bevor er eine Zahlung auslöst oder
+      Daten ändert.
+  lending_mortgage:
+    regulators: [BaFin]
+    regulator_text: >-
+      Verbraucherdarlehen regelt das BGB. Der effektive Jahreszins ist
+      anzugeben, und Werbung mit Zinsangaben muss ein repräsentatives Beispiel
+      enthalten. Bei einem Allgemein-Verbraucherdarlehen hat der Kunde ein
+      Widerrufsrecht von 14 Tagen und kann jederzeit vorzeitig zurückzahlen; die
+      Vorfälligkeitsentschädigung ist auf 1 Prozent des vorzeitig
+      zurückgezahlten Betrags begrenzt, bei einer Restlaufzeit von höchstens
+      einem Jahr auf 0,5 Prozent. Ein Kredit darf nur vergeben werden, wenn die
+      Kreditwürdigkeitsprüfung ergibt, dass der Kunde ihn voraussichtlich
+      zurückzahlen kann. Ab dem 20. November 2026 fallen auch Zahlungsaufschübe
+      wie „Buy now, pay later“ und Kredite unter 200 Euro unter das
+      Verbraucherkreditrecht. Ein Immobiliar-
+      Verbraucherdarlehen mit Sollzinsbindung kann zehn Jahre nach der
+      vollständigen Auszahlung mit einer Frist von sechs Monaten ohne
+      Vorfälligkeitsentschädigung gekündigt werden. Bauspardarlehen haben einen
+      festen Sollzins und lassen jederzeit kostenfreie Sondertilgungen zu. Der
+      Kundenservice sagt nie eine Kreditzusage zu und verschweigt keine Kosten.
+  insurance:
+    regulators: [BaFin]
+    regulator_text: >-
+      Versicherungsunternehmen werden von der BaFin beaufsichtigt; die Verträge
+      regelt das Versicherungsvertragsgesetz. Der Versicherungsnehmer kann
+      innerhalb von 14 Tagen widerrufen, bei Lebens- und Rentenversicherungen
+      innerhalb von 30 Tagen. Ein Schaden ist unverzüglich zu melden. Die
+      Kfz-Haftpflichtversicherung ist gesetzlich vorgeschrieben; Kfz-Verträge
+      mit Hauptfälligkeit zum 1. Januar können mit einer Kündigung, die bis zum
+      30. November eingeht, zum Jahresende beendet werden, und nach einer
+      Beitragserhöhung oder einem Schadenfall besteht ein Sonderkündigungsrecht.
+      Lebens- und
+      Rentenversicherer sind über den Sicherungsfonds Protektor abgesichert.
+      Beschwerden können kostenlos beim Versicherungsombudsmann eingereicht
+      werden. Der Kundenservice garantiert keine Wertentwicklung und gibt keine
+      individuelle Steuerberatung.
+  brokerage_investing:
+    regulators: [BaFin]
+    regulator_text: >-
+      Wertpapierdienstleistungen beaufsichtigt die BaFin nach dem
+      Wertpapierhandelsgesetz und MiFID II: Vor einer Empfehlung wird die
+      Geeignetheit oder Angemessenheit geprüft, Kosten werden offengelegt, und
+      es wird auf das Verlustrisiko hingewiesen. Die Wertpapiere der Kunden
+      werden als Sondervermögen verwahrt und fallen bei einer Insolvenz des
+      Instituts nicht in die Insolvenzmasse; die gesetzliche
+      Anlegerentschädigung deckt zudem 90 Prozent der Forderungen aus
+      Wertpapiergeschäften, höchstens 20.000 Euro. Kapitalerträge unterliegen
+      der Abgeltungsteuer; mit einem Freistellungsauftrag bleiben sie bis zum
+      Sparer-Pauschbetrag steuerfrei. Ein Depotübertrag ist kostenlos. Der
+      Kundenservice garantiert keine Rendite und gibt keine individuelle
+      Steuerberatung.
+
+# In-language vocabulary the deterministic doc plan builds titles from. Tool names
+# are identifiers and stay verbatim in every language.
+doc_titles:
+  product_genre_angles:
+    product_sheet:
+    - Überblick
+    - für wen und wofür geeignet
+    - Schritt für Schritt starten
+    - Grenzen, Einschränkungen und Sonderfälle
+    - Vergleich mit Alternativen und wann es nicht passt
+    fee_schedule:
+    - Preis- und Leistungsverzeichnis
+    eligibility_matrix:
+    - Voraussetzungen
+    - erforderliche Unterlagen
+    - Zugangsstufen
+    disclosure:
+    - rechtliche Hinweise
+    - Risikohinweise
+    - Datenschutz und Datenverarbeitung
+    promo_notice:
+    - aktuelles Angebot
+    - Empfehlungs- und Treueangebot
+    rate_sheet:
+    - Zinsübersicht
+    - wie Zinsen berechnet und angewendet werden
+    terms_conditions:
+    - Allgemeine Geschäftsbedingungen
+    - Änderung der Bedingungen
+    security_advisory:
+    - Schutz vor Betrug und nicht autorisierten Vorgängen
+    - Sicherheitstipps für Ihr Konto
+    - Betrugsmaschen rund um dieses Produkt erkennen
+
+  faq_intents:
+  - Kosten und Entgelte
+  - Voraussetzungen und Abschluss
+  - Schritt-für-Schritt-Anleitung
+  - ein Problem lösen
+  - Vergleich und Alternativen
+  how_to_intents:
+  - abschließen und aktivieren
+  - kündigen, schließen oder den Tarif wechseln
+  - etwas ändern
+  - Status oder Verlauf einsehen
+  - ein typisches Anliegen vollständig erledigen
+  troubleshooting_intents:
+  - fehlgeschlagener oder ausstehender Vorgang
+  - unerwartetes Entgelt oder unerwarteter Betrag
+  - Probleme mit Zugang oder Login
+  - abgelehnter oder gesperrter Vorgang
+  - Abweichung von Ihren Unterlagen
+  comparison_intents:
+  - im Vergleich zu einem ähnlichen Produkt des Hauses
+  - im Vergleich zu einem typischen Wettbewerbsangebot
+  - zwischen Tarifen wählen
+  - wann sich ein Wechsel oder Upgrade lohnt
+
+  faq_variable_template: '{v}: Erklärung'
+  how_to_variable_template: '{v}: so geht''s'
+  troubleshooting_variable_template: '{v}: häufige Probleme'
+
+  fee_overview_topic: Entgelte und Kosten im Überblick
+  general_faq_topic: Häufige Fragen
+  regulatory_note_topic: 'Aufsichtsrechtliche Hinweise: {domain}'
+  tool_policy_topic: Wann {tool} eingesetzt wird
+  tool_reference_topic: Werkzeugreferenz {tool}
+
+  domain_labels:
+    retail_banking: Privatkundengeschäft
+    cards: Karten
+    payments: Zahlungsverkehr
+    lending_mortgage: Kredite und Baufinanzierung
+    insurance: Versicherungen
+    brokerage_investing: Wertpapiere und Depot
+
+  # Every variable in this spec; an unmapped one falls back to its machine name.
+  variable_labels:
+    acquisition_cost_cap: Abschlusskosten in Prozent der Beitragssumme
+    annual_fee: Jahresentgelt
+    annual_premium_example: Jahresbeitrag für Singles (Beispiel)
+    annual_special_repayment_pct: jährliche Sondertilgung
+    atm_minimum_withdrawal: Mindestbetrag für kostenlose Bargeldabhebungen
+    bicycle_theft_cover: Versicherungssumme für Fahrraddiebstahl
+    car_annual_premium_example: Jahresbeitrag Vollkasko (Beispiel)
+    cash_interest_cap: verzinster Höchstbetrag auf dem Verrechnungskonto
+    cash_interest_rate: Zinssatz auf dem Verrechnungskonto
+    closing_fee: Abschlussgebühr in Prozent der Bausparsumme
+    comprehensive_deductible: Selbstbeteiligung Vollkasko
+    contents_annual_premium_example: Jahresbeitrag für 70 m² Wohnfläche (Beispiel)
+    coverage_sum: Deckungssumme
+    custody_fee_annual: Depotgebühr pro Jahr
+    daily_instant_limit: Tageslimit für Echtzeitüberweisungen
+    deductible: Selbstbeteiligung
+    disability_threshold_pct: Leistung ab Grad der Berufsunfähigkeit
+    effective_costs: Effektivkosten pro Jahr
+    employee_allowance_income_limit_joint: Einkommensgrenze der Arbeitnehmer-Sparzulage bei Zusammenveranlagung
+    employee_allowance_income_limit_single: Einkommensgrenze der Arbeitnehmer-Sparzulage für Alleinstehende
+    employee_allowance_max_contribution: geförderte vermögenswirksame Leistungen pro Jahr
+    employee_allowance_rate: Arbeitnehmer-Sparzulage
+    fixed_rate_10_years: Sollzins bei 10 Jahren Zinsbindung
+    fixed_rate_15_years: Sollzins bei 15 Jahren Zinsbindung
+    foreign_currency_fee: Fremdwährungsentgelt
+    free_monthly_withdrawal: kündigungsfreier Betrag pro Monat
+    housing_bonus_income_limit_joint: Einkommensgrenze der Wohnungsbauprämie bei Zusammenveranlagung
+    housing_bonus_income_limit_single: Einkommensgrenze der Wohnungsbauprämie für Alleinstehende
+    housing_bonus_max_savings_joint: prämienbegünstigte Sparleistung bei Zusammenveranlagung
+    housing_bonus_max_savings_single: prämienbegünstigte Sparleistung für Alleinstehende
+    housing_bonus_rate: Wohnungsbauprämie
+    instant_transfer_fee: Entgelt für Echtzeitüberweisungen
+    insured_sum_per_sqm: Versicherungssumme je Quadratmeter
+    interest_rate: Zinssatz
+    loan_interest_rate: Sollzins des Bauspardarlehens
+    maximum_loan_amount: maximaler Kreditbetrag
+    minimum_monthly_contribution: Mindestbeitrag pro Monat
+    minimum_monthly_inflow: monatlicher Mindestgeldeingang für das kostenlose Konto
+    minimum_plan_amount: Mindestbetrag pro Sparplanausführung
+    minimum_savings_pct: Mindestsparguthaben in Prozent der Bausparsumme
+    monthly_account_fee: monatliches Kontoführungsentgelt
+    monthly_benefit_example: monatliche Berufsunfähigkeitsrente (Beispiel)
+    monthly_limit: monatlicher Verfügungsrahmen
+    monthly_premium_example: Monatsbeitrag (Beispiel)
+    new_customer_rate: Neukundenzins
+    new_customer_rate_months: Dauer des Neukundenzinses (Monate)
+    notice_period_months: Kündigungsfrist (Monate)
+    order_fee: Entgelt pro Order
+    overdraft_rate: Dispozins
+    partial_cover_deductible: Selbstbeteiligung Teilkasko
+    plan_execution_fee: Entgelt pro Sparplanausführung
+    protected_account_allowance: monatlicher Grundfreibetrag auf dem Pfändungsschutzkonto
+    regular_monthly_savings_pct: monatlicher Regelsparbeitrag in Prozent der Bausparsumme
+    representative_amount: Nettodarlehensbetrag im repräsentativen Beispiel
+    representative_apr: effektiver Jahreszins im repräsentativen Beispiel
+    representative_duration_months: Laufzeit im repräsentativen Beispiel (Monate)
+    representative_monthly_payment: Monatsrate im repräsentativen Beispiel
+    representative_total_cost: Gesamtkosten im repräsentativen Beispiel
+    savings_interest_rate: Guthabenzins
+    standard_rate: Zinssatz nach Ablauf des Neukundenzinses
+    tax_free_allowance_joint: Sparer-Pauschbetrag bei Zusammenveranlagung
+    tax_free_allowance_single: Sparer-Pauschbetrag für Alleinstehende
+    tolerated_overdraft_rate: Zinssatz für geduldete Überziehungen
+
+institutions:
+# ── 1. Public savings bank ────────────────────────────────────────────
+- id: sparkasse_lindenhain
+  display_name: Sparkasse Lindenhain
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, lending_mortgage]
+  products:
+  - id: girokonto_komfort
+    display_name: Girokonto Komfort mit Sparkassen-Card
+    domain: retail_banking
+    variables:
+      monthly_account_fee: {type: money, value: 7.5}
+      overdraft_rate: {type: percent, value: 11.49}
+      tolerated_overdraft_rate: {type: percent, value: 14.49}
+      protected_account_allowance: {type: money, value: 1590}
+  - id: sparkassenbuch
+    display_name: Sparkassenbuch
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 0.5}
+      notice_period_months: {type: int, value: 3}
+      free_monthly_withdrawal: {type: money, value: 2000}
+  - id: kreditkarte_gold
+    display_name: Sparkassen-Kreditkarte Gold
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 84}
+      foreign_currency_fee: {type: percent, value: 1.75}
+      monthly_limit: {type: money, value: 5000}
+  - id: baufinanzierung
+    display_name: Sparkassen-Baufinanzierung
+    domain: lending_mortgage
+    variables:
+      fixed_rate_10_years: {type: percent, value: 3.68}
+      fixed_rate_15_years: {type: percent, value: 3.91}
+      annual_special_repayment_pct: {type: percent, value: 5}
+  - id: privatkredit
+    display_name: Sparkassen-Privatkredit
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 6.49}
+      representative_amount: {type: money, value: 10000}
+      representative_duration_months: {type: int, value: 60}
+      representative_monthly_payment: {type: money, value: 194.75}
+      representative_total_cost: {type: money, value: 1685}
+      maximum_loan_amount: {type: money, value: 50000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: change_overdraft_limit
+    discoverable: true
+    side_effect_class: state_changing
+    description: Den Dispositionsrahmen des Girokontos nach Prüfung erhöhen, senken oder kündigen.
+  - name: convert_to_protected_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Ein bestehendes Girokonto innerhalb von vier Geschäftstagen in ein Pfändungsschutzkonto (P-Konto) umwandeln.
+  - name: initiate_account_switch
+    discoverable: true
+    side_effect_class: state_changing
+    description: Die Kontowechselhilfe beauftragen, die Daueraufträge, Lastschriften und Zahlungspartner vom bisherigen Konto überträgt.
+  - name: request_special_repayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Sondertilgung auf die Baufinanzierung im vertraglich vereinbarten Rahmen beauftragen.
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Privatkredit beantragen (Betrag, Laufzeit, Verwendungszweck); die Kreditwürdigkeitsprüfung folgt.
+  # Common operations whose meaning differs in Germany, declared with the
+  # German procedure they carry here.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Empfänger (Name und IBAN) in der Empfängerliste des Girokontos anlegen, ändern oder löschen.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine SEPA-Lastschrift zurückgeben, einem Lastschriftmandat widersprechen oder einen Dauerauftrag löschen.
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Rechnung per Überweisung mit den Zahlungsdaten aus der Rechnung bezahlen.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Kontovollmacht erteilen oder widerrufen.
+  task_templates:
+  - {id: TPL-SK-DISPUTE-001, tier: verifiable, task_type: complaint_dispute, persona_tags: [region:any, age:any], gold_tool_sequence: [file_transaction_dispute]}
+  - {id: TPL-SK-DISPO-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Direct bank ────────────────────────────────────────────────────
+- id: kompass_direktbank
+  display_name: Kompass Direktbank
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards, payments]
+  products:
+  - id: girokonto
+    display_name: Kompass Girokonto
+    domain: retail_banking
+    variables:
+      monthly_account_fee: {type: money, value: 4.9}
+      minimum_monthly_inflow: {type: money, value: 700}
+      overdraft_rate: {type: percent, value: 9.89}
+  - id: visa_debit
+    display_name: Kompass Visa Debitkarte
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 0}
+      foreign_currency_fee: {type: percent, value: 0}
+      atm_minimum_withdrawal: {type: money, value: 50}
+  - id: tagesgeld
+    display_name: Kompass Tagesgeld
+    domain: retail_banking
+    variables:
+      new_customer_rate: {type: percent, value: 2.6}
+      new_customer_rate_months: {type: int, value: 4}
+      standard_rate: {type: percent, value: 1.75}
+  - id: echtzeitueberweisung
+    display_name: Echtzeitüberweisung
+    domain: payments
+    variables:
+      instant_transfer_fee: {type: money, value: 0}
+      daily_instant_limit: {type: money, value: 5000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: send_instant_transfer
+    discoverable: true
+    side_effect_class: irreversible
+    description: Eine Echtzeitüberweisung an eine IBAN nach der Empfängerüberprüfung ausführen.
+  - name: set_card_limits
+    discoverable: true
+    side_effect_class: state_changing
+    description: Den Verfügungsrahmen der Debitkarte für Zahlungen und Bargeldabhebungen ändern.
+  - name: initiate_account_switch
+    discoverable: true
+    side_effect_class: state_changing
+    description: Die digitale Kontowechselhilfe starten, die Daueraufträge, Lastschriften und Zahlungspartner vom bisherigen Konto überträgt.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Empfänger (Name und IBAN) in der Empfängerliste anlegen, ändern oder löschen.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine SEPA-Lastschrift zurückgeben, einem Lastschriftmandat widersprechen oder einen Dauerauftrag löschen.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Kontovollmacht erteilen oder widerrufen.
+  task_templates:
+  - {id: TPL-KD-INSTANT-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [send_instant_transfer]}
+  - {id: TPL-KD-TAGESGELD-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 3. Neobroker ──────────────────────────────────────────────────────
+- id: kranich_invest
+  display_name: Kranich Invest
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: wertpapierdepot
+    display_name: Kranich Depot
+    domain: brokerage_investing
+    variables:
+      order_fee: {type: money, value: 1}
+      custody_fee_annual: {type: money, value: 0}
+      cash_interest_rate: {type: percent, value: 2.25}
+      cash_interest_cap: {type: money, value: 50000}
+      tax_free_allowance_single: {type: money, value: 1000}
+      tax_free_allowance_joint: {type: money, value: 2000}
+  - id: etf_sparplan
+    display_name: ETF-Sparplan
+    domain: brokerage_investing
+    variables:
+      minimum_plan_amount: {type: money, value: 10}
+      plan_execution_fee: {type: money, value: 0}
+  - id: kinderdepot
+    display_name: Kranich Kinderdepot
+    domain: brokerage_investing
+    variables:
+      order_fee: {type: money, value: 1}
+      custody_fee_annual: {type: money, value: 0}
+      minimum_plan_amount: {type: money, value: 10}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - name: initiate_securities_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen kostenlosen Depotübertrag von einem anderen Institut beauftragen.
+  - name: set_up_savings_plan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen ETF-Sparplan anlegen, ändern oder aussetzen (Betrag, Ausführungstag, Wertpapier).
+  - name: set_tax_exemption_order
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Freistellungsauftrag erteilen, ändern oder löschen.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Das Referenzkonto (IBAN) ändern, auf das Auszahlungen überwiesen werden.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Depotvollmacht erteilen oder widerrufen.
+  task_templates:
+  - {id: TPL-KI-SPARPLAN-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [set_up_savings_plan]}
+  - {id: TPL-KI-STEUER-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Insurer ────────────────────────────────────────────────────────
+- id: hanseatica_versicherung
+  display_name: Hanseatica Versicherung
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: privathaftpflicht
+    display_name: Privathaftpflicht Komfort
+    domain: insurance
+    variables:
+      annual_premium_example: {type: money, value: 59}
+      coverage_sum: {type: money, value: 20000000}
+      deductible: {type: money, value: 150}
+  - id: hausrat
+    display_name: Hausratversicherung
+    domain: insurance
+    variables:
+      contents_annual_premium_example: {type: money, value: 96}
+      insured_sum_per_sqm: {type: money, value: 650}
+      bicycle_theft_cover: {type: money, value: 1000}
+  - id: kfz
+    display_name: Kfz-Versicherung
+    domain: insurance
+    variables:
+      car_annual_premium_example: {type: money, value: 780}
+      comprehensive_deductible: {type: money, value: 300}
+      partial_cover_deductible: {type: money, value: 150}
+  - id: berufsunfaehigkeit
+    display_name: Berufsunfähigkeitsversicherung
+    domain: insurance
+    variables:
+      monthly_premium_example: {type: money, value: 68}
+      monthly_benefit_example: {type: money, value: 1500}
+      disability_threshold_pct: {type: percent, value: 50}
+  - id: fondsrente
+    display_name: Fondsgebundene Rentenversicherung
+    domain: insurance
+    variables:
+      minimum_monthly_contribution: {type: money, value: 25}
+      effective_costs: {type: percent, value: 1.1}
+      acquisition_cost_cap: {type: percent, value: 2.5}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: issue_evb_number
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine eVB-Nummer (elektronische Versicherungsbestätigung) für die Zulassung eines Fahrzeugs ausstellen.
+  - name: pause_contributions
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Rentenversicherung beitragsfrei stellen oder die Beiträge befristet pausieren.
+  - name: make_additional_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Zuzahlung in die fondsgebundene Rentenversicherung leisten.
+  - name: switch_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: Fonds in der fondsgebundenen Rentenversicherung wechseln oder die Aufteilung künftiger Beiträge ändern.
+  - name: file_claim
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Schaden melden (Privathaftpflicht, Hausrat oder Kfz) und die Schadennummer vergeben.
+  - name: update_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen Vertrag ändern, etwa nach einem Umzug, einem Fahrzeugwechsel oder einer geänderten Wohnfläche oder Fahrleistung.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Das Bezugsrecht für den Todesfall in einer Renten- oder Berufsunfähigkeitsversicherung ändern.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen neuen Versicherungsvertrag abschließen.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Einen Versicherungsvertrag kündigen, etwa die Kfz-Versicherung bis zum 30. November zum Jahresende, nach einer Beitragserhöhung oder nach dem Verkauf des Fahrzeugs.
+  task_templates:
+  - {id: TPL-HV-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-HV-KFZ-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 5. Building-savings bank ──────────────────────────────────────────
+- id: bausparkasse_heimstatt
+  display_name: Bausparkasse Heimstatt
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, lending_mortgage]
+  # A Bausparkasse keeps no current account and issues no cards.
+  omit_common_operations: [transfer_funds, order_replacement_card, stop_payment, pay_bill, activate_card, dispute_status]
+  products:
+  - id: bausparen_classic
+    display_name: Bausparvertrag Heimstatt Classic
+    domain: retail_banking
+    variables:
+      closing_fee: {type: percent, value: 1.6}
+      savings_interest_rate: {type: percent, value: 0.5}
+      loan_interest_rate: {type: percent, value: 2.45}
+      minimum_savings_pct: {type: percent, value: 40}
+      regular_monthly_savings_pct: {type: percent, value: 0.4}
+  - id: bausparen_rendite
+    display_name: Bausparvertrag Heimstatt Rendite
+    domain: retail_banking
+    variables:
+      closing_fee: {type: percent, value: 1}
+      savings_interest_rate: {type: percent, value: 1.5}
+      loan_interest_rate: {type: percent, value: 3.95}
+      minimum_savings_pct: {type: percent, value: 50}
+      regular_monthly_savings_pct: {type: percent, value: 0.5}
+  - id: modernisierungsdarlehen
+    display_name: Modernisierungsdarlehen ohne Grundschuld
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 4.9}
+      representative_amount: {type: money, value: 20000}
+      representative_duration_months: {type: int, value: 120}
+      representative_monthly_payment: {type: money, value: 210.12}
+      representative_total_cost: {type: money, value: 5214.4}
+      maximum_loan_amount: {type: money, value: 50000}
+  - id: staatliche_foerderung
+    display_name: Wohnungsbauprämie und Arbeitnehmer-Sparzulage
+    domain: retail_banking
+    variables:
+      housing_bonus_rate: {type: percent, value: 10}
+      housing_bonus_max_savings_single: {type: money, value: 700}
+      housing_bonus_max_savings_joint: {type: money, value: 1400}
+      housing_bonus_income_limit_single: {type: money, value: 35000}
+      housing_bonus_income_limit_joint: {type: money, value: 70000}
+      employee_allowance_rate: {type: percent, value: 9}
+      employee_allowance_max_contribution: {type: money, value: 470}
+      employee_allowance_income_limit_single: {type: money, value: 40000}
+      employee_allowance_income_limit_joint: {type: money, value: 80000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: change_contract_sum
+    discoverable: true
+    side_effect_class: state_changing
+    description: Die Bausparsumme eines Bausparvertrags erhöhen, ermäßigen oder den Vertrag teilen.
+  - name: change_savings_rate
+    discoverable: true
+    side_effect_class: state_changing
+    description: Den monatlichen Sparbeitrag ändern oder eine Sonderzahlung auf den Bausparvertrag leisten.
+  - name: accept_allocation
+    discoverable: true
+    side_effect_class: irreversible
+    description: Die Zuteilung eines Bausparvertrags annehmen und die Auszahlung von Bausparguthaben und Bauspardarlehen für ein Wohnvorhaben beantragen.
+  - name: apply_housing_bonus
+    discoverable: true
+    side_effect_class: state_changing
+    description: Den jährlichen Antrag auf Wohnungsbauprämie für einen Bausparvertrag einreichen.
+  - name: set_up_employee_savings
+    discoverable: true
+    side_effect_class: state_changing
+    description: Vermögenswirksame Leistungen auf einen Bausparvertrag einrichten und die Bescheinigung für den Arbeitgeber ausstellen.
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Ein Modernisierungsdarlehen beantragen (Betrag, Laufzeit, Vorhaben); die Kreditwürdigkeitsprüfung folgt.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Eine Begünstigung für den Todesfall in einem Bausparvertrag festlegen oder ändern.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Einen neuen Bausparvertrag abschließen.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Einen Bausparvertrag mit einer Frist von drei Monaten kündigen und das Guthaben auszahlen lassen.
+  task_templates:
+  - {id: TPL-BH-ALLOCATION-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [accept_allocation]}
+  - {id: TPL-BH-FOERDERUNG-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

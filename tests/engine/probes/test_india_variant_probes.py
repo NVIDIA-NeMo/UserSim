@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Per-probe wiring tests for the India language-variant stop-gap.
+"""Per-probe wiring tests for the India language variants.
 
-Complements ``tests/core/test_india_variants.py`` (which covers the substrate
+Complements ``tests/engine/core/test_india_variants.py`` (which covers the substrate
 ``_load_bank_for_locale`` fallback + ``_localize_verbatim`` helper in
 isolation) by exercising each verbatim probe's ACTUAL ``get_verbatim_first_
 user_turn`` call site for a variant locale (``ta_Taml_IN``) against the real
@@ -12,7 +12,7 @@ shipped en_IN / shared banks:
 - asset resolution falls back to en_IN (``self._asset_locale``),
 - the verbatim turn-1 is machine-translated into the conversation language,
 - side-channel metadata is still seeded (so ``should_succeed`` + scorers work),
-- a ``USED_MACHINE_TRANSLATION`` warning is recorded (preview-only discipline).
+- a ``USED_MACHINE_TRANSLATION`` warning is recorded.
 
 Translation is mocked at ``core.translation.acall_llm`` (its own binding — the
 loop's ``_patched_call_llm`` helper does not cover it) so no network is hit.
@@ -115,7 +115,7 @@ async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> Non
 
     assert turn1 == _MARKER  # translated
     assert state.metadata.get("facts_probed")  # metadata still seeded
-    assert _mt_warned(ob)  # preview-only flag
+    assert _mt_warned(ob)  # machine-translation warning
 
 
 # ---------------------------------------------------------------------------

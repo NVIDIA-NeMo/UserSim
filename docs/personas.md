@@ -10,7 +10,7 @@ other than one model's idea of a generic user.
 NeMo User Sim samples an **extended version of these datasets distributed through
 NGC**, which adds the OCEAN personality traits, names and a number of further
 fields beyond those in the Hugging Face collection. Those extra fields are
-what drive interaction style, so the NGC version is what the behavioural
+what drive interaction style, so the NGC version is what the behavioral
 features described below depend on.
 
 ## What a persona carries
@@ -71,7 +71,7 @@ all.
 
 ## Licensing
 
-The datasets carry their own licence, separate from this project's Apache-2.0.
+The datasets carry their own license, separate from this project's Apache-2.0.
 
 The extended datasets on [NGC](https://catalog.ngc.nvidia.com/resources?query=nemotron-personas)
 are open, under the

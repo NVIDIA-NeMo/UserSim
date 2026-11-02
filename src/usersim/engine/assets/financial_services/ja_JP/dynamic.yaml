@@ -1,0 +1,267 @@
+schema_version: v0.1
+locale: ja_JP
+taxonomy_id: ja_JP_financial_services_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+# Dynamic-tier taxonomy: authored open-ended topic neighborhoods for the
+# `dynamic` tier, written for the Japanese institution set (bank | neobank |
+# insurer | nbfc | brokerage). At runtime the probe scopes categories to the
+# single institution the conversation is grounded in. Invitations set a topic
+# boundary in the persona's voice (NOT a question); subtopic_hints are
+# neighborhoods (NOT questions). >=2 hints each. Some hints are deliberately
+# COMPARATIVE / MULTI-DOCUMENT so a grounded answer requires synthesizing
+# across several knowledge-base documents (multiple kb_search calls) rather
+# than one lookup. Optional persona_affinities SOFT-WEIGHT selection toward
+# ecologically-valid personas; a soft prior only (never a hard filter).
+# Invitations and hints are in Japanese; ids stay English.
+categories:
+# ── Regional bank ──────────────────────────────────────────────────────
+- id: banking-account-fit
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: 普段のお金の出し入れや貯め方に合った口座や預金を、自分の言葉で整理したいと思っています。
+  subtopic_hints:
+  - 普通預金と定期預金の使い分けと、引き出しやすさの違い
+  - 給与や年金の受取口座にしたときの特典と、その条件
+  - スーパー定期の預入期間ごとの金利と、満期前に解約した場合の扱い
+  - 預金の利息にかかる税金と、手取りの利息の考え方
+  - ATM手数料や他行あての振込手数料が無料になる回数
+  - 生活費とは別に、急な出費に備えるお金を分けておく方法
+  - 普通預金、スーパー定期、給与受取特典を、金利、引き出しやすさ、手数料の面で並べた違い
+  - 口座にかかるお金の全体像を、利息、税金、ATM手数料、振込手数料まで合わせて見たときの負担
+- id: banking-fees-and-disputes
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: 口座の手数料や引落し、キャッシュカードやデビットカードのトラブルについて、自分にできることを知りたいと思っています。
+  subtopic_hints:
+  - 時間外のATM手数料や振込手数料を抑える方法
+  - 身に覚えのないカードの利用に気づいたときの連絡先と流れ
+  - 口座振替を止めたいときの手続きと、間に合う時期
+  - ペイジーで税金や公共料金を払うときの注意点
+  - キャッシュカードの紛失や盗難のときの利用停止と、再発行の手数料
+  - 不正に引き出された預金が補償される条件
+  - 利用停止、不正利用の調査、再発行をそれぞれ頼んだときに起きることと、そのつながり
+  - 手数料、引落し、カードの不正利用それぞれのトラブルについて、相談先と期限を並べた比較
+- id: home-loan
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: 住宅ローンのしくみと、借りたあとで見直せることを理解したいと思っています。
+  subtopic_hints:
+  - 変動金利と固定金利の違いと、金利が上がったときの返済額の動き
+  - 5年ルールと125%ルールで返済額がどう抑えられ、未払利息がどう生じるか
+  - 繰上返済の期間短縮型と返済額軽減型の違い
+  - 団体信用生命保険で保障される範囲
+  - 住宅ローン控除の控除率と、対象になる期間
+  - 事務手数料など、借入れのときにかかる費用
+  - 期間短縮型と返済額軽減型の繰上返済を、総返済額と月々の負担で比べた違い
+  - 金利、事務手数料、団信、繰上返済、住宅ローン控除まで含めた住宅ローンの費用の全体像
+# ── Internet-only bank ─────────────────────────────────────────────────
+- id: neobank-account-basics
+  applies_to_types: [neobank]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: スマホだけで使える銀行口座で毎日何ができて、どこに限界があるのかを知りたいと思っています。
+  subtopic_hints:
+  - アプリでの口座開設と、マイナンバーカードを使った本人確認
+  - 会員ランクで変わる振込手数料とATM手数料の無料回数
+  - 給与の受取口座に指定したときに変わること
+  - 通帳や窓口がないことで困る場面と、その代わりになる手段
+  - 預金が預金保険でどこまで守られるか
+  - 機種変更したときのスマートフォン認証の引き継ぎ
+  - ネット銀行の口座と地方銀行の口座を、手数料、使えるサービス、預金の保護の面で比べた違い
+  - 1年間使ったときにかかるお金の全体像を、振込手数料、ATM手数料、無料回数を超えた分まで合わせて見たもの
+- id: neobank-everyday-tools
+  applies_to_types: [neobank]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: 目的別口座やスマホ送金、デビットカードを使って、日々のお金の管理を楽にしたいと思っています。
+  subtopic_hints:
+  - 目的別口座の作り方と、作れる数の上限
+  - 毎月決まった額を目的別口座に自動で移す設定
+  - 電話番号だけで送金できるしくみと、1回あたりの上限
+  - デビットカードのキャッシュバックの率と、対象にならない利用
+  - 海外でデビットカードを使ったときの手数料
+  - 1日の利用限度額を自分で変える方法
+  - スマホ送金、通常の振込、デビットカード払いを、上限、手数料、相手への届き方で比べた違い
+  - 目的別口座を作って、自動入金を設定し、定期預金に移すまでの貯め方の流れ全体
+# ── Life insurer ───────────────────────────────────────────────────────
+- id: life-cover-choice
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: 家族のために、どんな死亡保障をどのくらい備えればいいのかを、自分の言葉で考えたいと思っています。
+  subtopic_hints:
+  - 定期保険と終身保険の違いと、保険料の水準
+  - 低解約返戻金型の終身保険のしくみと、払込期間中に解約したときの扱い
+  - 子どもの成長に合わせて保険金額を見直す考え方
+  - 個人年金保険で老後資金を準備するときの受け取り方
+  - 生命保険料控除の上限と、2026年と2027年の特例
+  - 加入できる年齢と、告知が必要な理由
+  - 定期保険、終身保険、個人年金保険を、保障の期間、保険料、解約返戻金で比べた違い
+  - 保障が必要な期間、保険金額、保険料、払込方法を合わせて死亡保障を決める流れ全体
+- id: medical-and-cancer-cover
+  applies_to_types: [insurer]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: 医療保険やがん保険で、入院や治療のときに実際に何が受け取れるのかを理解したいと思っています。
+  subtopic_hints:
+  - 入院給付金の日額と、1回の入院で受け取れる日数の上限
+  - 手術給付金の、入院中の手術と外来の手術での違い
+  - 先進医療の技術料が保障される範囲
+  - がん保険の待機期間と、その間に診断された場合の扱い
+  - 高額療養費制度と医療保険の関係と、2026年8月からの年間上限
+  - 給付金の請求に必要な書類と、受け取るまでの期間
+  - 医療保険とがん保険を、保障される場面、給付金の種類、保険料で比べた違い
+  - 入院や手術から、診断書の用意、請求、給付金の受取りまでの流れ全体
+- id: claims-and-keeping-cover
+  applies_to_types: [insurer]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: 保険料の支払いが苦しくなったときや契約を見直したいときに、契約を続けるための選択肢を知りたいと思っています。
+  subtopic_hints:
+  - 保険料の払込方法や引落口座の変更
+  - 引落しができずに失効したときの復活の条件
+  - 契約者貸付のしくみと、利息の扱い
+  - 保険金額を減らして保険料を下げる方法
+  - 申込みから8日以内のクーリング・オフ
+  - 告知義務違反があった場合に起こること
+  - 契約者貸付、減額、解約を、手元に残るお金と保障への影響で比べた違い
+  - 保険料が払えなくなってから、猶予期間、失効、復活に至るまでの流れ全体
+# ── Card company ───────────────────────────────────────────────────────
+- id: card-payment-options
+  applies_to_types: [nbfc]
+  persona_affinities: [age:18-24, financial-literacy:low]
+  invitation: クレジットカードの支払い方法の違いと、それぞれでいくらかかるのかを理解したいと思っています。
+  subtopic_hints:
+  - 1回払い、2回払い、ボーナス一括払いに手数料がかからないこと
+  - 分割払いの回数ごとの手数料
+  - リボ払いのしくみと、残高がなかなか減らない理由
+  - あとからリボやあとから分割に変更できる期限
+  - 年会費とポイントの還元率
+  - 利用枠の決まり方と、一時的に増やす方法
+  - 1回払い、分割払い、リボ払いを、同じ金額の買い物での支払総額と月々の負担で比べた違い
+  - 手数料率、毎月の支払額、残高の減り方、繰上返済まで含めたリボ払いの費用の全体像
+- id: card-borrowing-and-repayment
+  applies_to_types: [nbfc]
+  persona_affinities: [financial-literacy:low]
+  invitation: キャッシングやカードローンで借りるときのルールと、返済が苦しくなる前にできることを知りたいと思っています。
+  subtopic_hints:
+  - キャッシングとカードローンの金利と上限額の違い
+  - 貸金業者からの借入れが年収の3分の1までに限られる総量規制
+  - 利息制限法の上限金利と、遅延損害金の上限
+  - 返済日に引落しができなかったときの支払い方法
+  - 一括返済や臨時の返済で利息を減らす方法
+  - 返済の遅れが信用情報機関に記録されること
+  - キャッシング、カードローン、リボ払いを、金利、上限額、返済方法で比べた違い
+  - 最初の返済の遅れから、遅延損害金、信用情報への記録、相談先までの流れ全体
+# ── Online broker ──────────────────────────────────────────────────────
+- id: nisa-and-account-choice
+  applies_to_types: [brokerage]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: NISAや特定口座など、自分に合った投資の口座の使い方を整理したいと思っています。
+  subtopic_hints:
+  - つみたて投資枠と成長投資枠の違いと、年間の投資枠
+  - 生涯の非課税保有限度額と、売ったときに枠が復活するしくみ
+  - 特定口座の源泉徴収ありとなしの違い
+  - 2027年から始まる未成年者向けのつみたて投資枠
+  - NISAの金融機関を変更するときの手続きと時期
+  - 毎月少しずつ積み立てる場合と、まとめて投資する場合
+  - つみたて投資枠、成長投資枠、特定口座を、非課税の扱い、上限、損失の扱いで比べた違い
+  - 年齢、投資の期間、目的を合わせて、どの口座をどう使うかを決める流れ
+- id: ideco-retirement
+  applies_to_types: [brokerage]
+  persona_affinities: [age:35-44, age:45-54, age:55-64]
+  invitation: iDeCoで老後資金を準備するしくみと、自分の場合にいくら出せるのかを知りたいと思っています。
+  subtopic_hints:
+  - 会社員と自営業者の掛金の上限と、2026年12月分からの変更
+  - 掛金の最低額と、掛金を変更できる回数
+  - 加入時と毎月かかる手数料
+  - 掛金が全額所得控除になることと、年末調整や確定申告
+  - 原則60歳まで引き出せないことと、受け取り方
+  - 転職や退職のときの手続き
+  - iDeCoとNISAを、税の優遇、引き出せる時期、掛金の上限で比べた違い
+  - 加入時の手数料、毎月の手数料、運用商品の信託報酬まで含めたiDeCoの費用の全体像
+- id: brokerage-costs-and-mechanics
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: 証券会社の手数料や税金、注文のしくみが自分の取引にどう関わるのかを理解したいと思っています。
+  subtopic_hints:
+  - 国内株式と米国株式の取引手数料の違い
+  - 米国株を買うときの為替手数料
+  - 成行注文と指値注文の違いと、約定のタイミング
+  - 売買代金の受渡しが2営業日後になること
+  - 特定口座で利益にかかる20.315%の税金と、損失の繰越し
+  - 他社から株式を移管するときの手続きと日数
+  - 国内株式と米国株式を、手数料、為替のコスト、税金で比べた違い
+  - 米国株を買ってから売るまでにかかる取引手数料、為替手数料、税金の全体像
+# ── Cross-cutting servicing neighborhoods (span several institution types) ──
+- id: account-lifecycle
+  applies_to_types: [bank, neobank, insurer, nbfc, brokerage]
+  invitation: ここで新しく口座や契約を始めること、または使わなくなった口座や契約をやめることについて、何が必要なのかを考えたいと思っています。
+  subtopic_hints:
+  - 口座の開設や契約の申込みに必要な本人確認書類とマイナンバー
+  - 申込みから使えるようになるまでの日数
+  - 解約したときに口座振替や自動入金がどうなるか
+  - 保険の解約返戻金や、カードを解約したあとも残る支払い
+  - 住所や氏名が変わったときの届出
+  - ほかの金融機関に乗り換えるときに途切れないようにする方法
+  - 解約と、プランや契約内容の変更を、残るお金、手続き、影響で比べた違い
+  - 必要書類、日数、手数料、税金の書類まで含めた、申込みから解約までの流れ全体
+- id: beneficiaries-and-inheritance
+  applies_to_types: [bank, insurer, brokerage]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: 自分にもしものことがあったときにこのお金がどうなるのかを知って、きちんと備えておきたいと思っています。
+  subtopic_hints:
+  - 死亡保険金の受取人の指定と変更
+  - 預金や証券口座の名義人が亡くなったときの相続の手続き
+  - 死亡保険金と、ほかの相続財産との扱いの違い
+  - 結婚、出産、離婚のあとに受取人を見直すこと
+  - 指定代理請求人の役割
+  - 相続人が手続きに必要な書類
+  - 預金、証券口座、生命保険を、亡くなったあとの手続きと受け取る人の決まり方で比べた違い
+  - 受取人の指定、相続の手続き、必要書類を合わせて見たときの備え方の全体像
+- id: authorized-access
+  applies_to_types: [bank, nbfc, brokerage]
+  invitation: 家族などほかの人に、この口座やカードの手続きを手伝ってもらったり使ってもらったりする方法と、その範囲を知りたいと思っています。
+  subtopic_hints:
+  - 代理人カードでできることと、できないこと
+  - 家族カードの発行と、利用の責任
+  - 未成年口座の法定代理人の役割
+  - 本人が手続きできなくなったときの代理人による手続き
+  - 代理人の登録を取り消す方法
+  - 成年後見制度を使うときに変わること
+  - 代理人カード、家族カード、法定代理人を、できることと責任の所在で比べた違い
+  - 登録の手続き、できる範囲、やめ方まで含めた、家族に手伝ってもらう方法の全体像
+- id: money-movement
+  applies_to_types: [bank, neobank, brokerage]
+  invitation: この口座への入金や出金、口座どうしのお金の移動について、日数や上限を知りたいと思っています。
+  subtopic_hints:
+  - 同じ銀行あてと他行あての振込の手数料と、着金の時間
+  - 振込先の登録と、受取人名の確認
+  - 振込やATMの1日あたりの上限
+  - 証券口座への即時入金と、出金にかかる日数
+  - 毎月決まった日に振り込む定額自動振込の設定
+  - 振込が組戻しになる場合と、口座振替ができなかった場合
+  - 他行あての振込、スマホ送金、証券口座への即時入金を、上限、手数料、着金の速さで比べた違い
+  - 受付時間、着金、上限、振込先の確認まで含めた、お金が実際に使えるようになるまでの時間の全体像
+- id: account-security
+  applies_to_types: [bank, neobank, nbfc, brokerage]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: 口座が守られているかを確かめて、詐欺に気づいたときにどう動けばいいかを知っておきたいと思っています。
+  subtopic_hints:
+  - 銀行やカード会社を名乗るSMSやメールによるフィッシング
+  - だまされたかもしれないときに、すぐにやるべきこと
+  - 不正利用を早く見つけるための通知の設定
+  - 二要素認証やワンタイムパスワードのしくみ
+  - 不正利用の補償を受けられる条件
+  - 自分の名義で勝手に申し込まれた借入れやカード
+  - 通知の設定、本人確認、不正利用の補償が、それぞれどの段階で被害を防ぐかの違い
+  - 被害に気づいてから、利用停止、連絡、調査を経て補償を受けるまでの流れ全体
+- id: complaints-and-adr
+  applies_to_types: [bank, neobank, insurer, nbfc, brokerage]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: この会社の対応に納得できないことがあり、どこまで相談できるのかを知りたいと思っています。
+  subtopic_hints:
+  - お客さま相談窓口への苦情の伝え方と、回答までの期間
+  - 担当者で解決しないときに相談できる上の窓口
+  - 業界団体の相談窓口やADR（裁判外紛争解決手続）の使い方
+  - 苦情を裏づける記録や書類
+  - ADRで決まることと、決まらないこと
+  - 金融庁の金融サービス利用者相談室の役割
+  - 会社の窓口、業界団体のADR、裁判を、日数、費用、得られる結果で比べた違い
+  - 苦情を伝えてからADRの結論が出るまでの流れ全体

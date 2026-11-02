@@ -7,8 +7,8 @@ The assistant is offered the PERMANENT tools up front (``kb_search``,
 ``verify_identity``, ...) plus a single ``call_tool(tool_name, arguments)`` gate
 for DISCOVERABLE tools. A discoverable tool is only usable once its
 documentation has been retrieved (its name appears in a retrieved document's
-``mentions_tools``) — the tau-Banking discoverable-tool mechanic. This module is
-pure helpers; the probe's ``after_assistant_turn`` tool loop owns state.
+``mentions_tools``). This module is pure helpers; the probe's
+``after_assistant_turn`` tool loop owns state.
 """
 
 from __future__ import annotations

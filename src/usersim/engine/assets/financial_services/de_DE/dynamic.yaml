@@ -1,0 +1,252 @@
+schema_version: v0.1
+locale: de_DE
+taxonomy_id: de_DE_financial_services_dynamic
+taxonomy_version: v0.1.0
+placeholder: true
+# Dynamic-tier taxonomy: authored open-ended topic neighborhoods for the
+# `dynamic` tier, written for the German institution set (bank | neobank |
+# brokerage | insurer). The Sparkasse and the Bausparkasse are both banks, so
+# the bank categories favor topics both serve (home financing, saving, loans).
+# At runtime the probe scopes categories to the single institution the
+# conversation is grounded in. Invitations set a topic boundary in the
+# persona's voice (NOT a question); subtopic_hints are neighborhoods (NOT
+# questions). >=2 hints each. Some hints are deliberately COMPARATIVE /
+# MULTI-DOCUMENT so a grounded answer requires synthesizing across several
+# knowledge-base documents. Optional persona_affinities SOFT-WEIGHT selection
+# toward ecologically-valid personas; a soft prior only (never a hard filter).
+categories:
+# ── Banks (Sparkasse and Bausparkasse) ─────────────────────────────────
+- id: everyday-account-and-overdraft
+  applies_to_types: [bank]
+  persona_affinities: [financial-literacy:low]
+  invitation: Sie möchten in eigenen Worten klären, wie Ihr Girokonto, der Dispo und die Kosten dafür in Ihren Alltag passen.
+  subtopic_hints:
+  - das Kontomodell und welche Leistungen das monatliche Entgelt abdeckt
+  - der Dispositionskredit, sein Zinssatz und was eine geduldete Überziehung kostet
+  - das Beratungsangebot, wenn man dauerhaft im Dispo steckt
+  - das Basiskonto und wer Anspruch darauf hat
+  - das Pfändungsschutzkonto und der geschützte Betrag
+  - der Kontowechsel mit der Kontowechselhilfe
+  - Dispo, Privatkredit und Umschuldung im direkten Vergleich der Kosten
+  - die Gesamtkosten des Kontos im Jahr, von der Kontoführung über die Karten bis zu den Zinsen für Überziehungen
+- id: home-financing
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: Sie möchten verstehen, wie Sie den Kauf oder die Modernisierung Ihres Zuhauses finanzieren können und was Sie unterwegs noch ändern können.
+  subtopic_hints:
+  - Zinsbindung, Tilgung und monatliche Rate bei einer Baufinanzierung
+  - Sondertilgungen und was sie an Laufzeit und Zinsen sparen
+  - das Kündigungsrecht nach zehn Jahren und was danach kommt
+  - Bausparen als Weg zum festen Darlehenszins
+  - Zuteilung, Mindestsparguthaben und Bewertungszahl beim Bausparvertrag
+  - Modernisierungsdarlehen ohne Grundschuld
+  - Baufinanzierung und Bauspardarlehen im Vergleich von Zinssicherheit, Kosten und Flexibilität
+  - der Weg von der Finanzierungsidee bis zur Auszahlung, mit allen Unterlagen und Fristen
+- id: saving-and-state-support
+  applies_to_types: [bank]
+  persona_affinities: [age:18-24, financial-literacy:low]
+  invitation: Sie möchten herausfinden, wie Sie sinnvoll sparen und welche staatliche Förderung Sie dabei mitnehmen können.
+  subtopic_hints:
+  - Sparbuch, Tagesgeld oder Bausparvertrag für Ihr Sparziel
+  - die Kündigungsfrist beim Sparbuch und der freie Betrag pro Monat
+  - die Wohnungsbauprämie und ihre Einkommensgrenzen
+  - vermögenswirksame Leistungen vom Arbeitgeber und die Arbeitnehmer-Sparzulage
+  - warum dieselbe Einzahlung nicht doppelt gefördert wird
+  - die gesetzliche Einlagensicherung für Ersparnisse
+  - Sparbuch, Bausparvertrag und Tagesgeld im Vergleich von Zinsen, Verfügbarkeit und Förderung
+  - die gesamte Förderung eines Bausparvertrags, von VL über Arbeitnehmer-Sparzulage bis zur Wohnungsbauprämie
+- id: loans-and-credit
+  applies_to_types: [bank]
+  persona_affinities: [age:25-34, financial-literacy:low]
+  invitation: Sie möchten verstehen, welcher Kredit zu Ihrem Vorhaben passt und was er Sie wirklich kostet.
+  subtopic_hints:
+  - effektiver Jahreszins, Monatsrate und Gesamtkosten im repräsentativen Beispiel
+  - die Kreditwürdigkeitsprüfung und die Rolle der Schufa
+  - das Widerrufsrecht nach Vertragsschluss
+  - vorzeitig zurückzahlen und die Vorfälligkeitsentschädigung
+  - was sich im November 2026 für Ratenzahlungen und Kleinkredite ändert
+  - Privatkredit oder Modernisierungsdarlehen für Arbeiten am Haus
+  - Dispo und Privatkredit im Vergleich der Kosten für denselben Betrag
+  - die Gesamtkosten eines Kredits, von Zins und Laufzeit bis zu einer vorzeitigen Rückzahlung
+# ── Direct bank ────────────────────────────────────────────────────────
+- id: direct-bank-account
+  applies_to_types: [neobank]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: Sie möchten wissen, wie ein Konto ohne Filiale im Alltag funktioniert und unter welchen Bedingungen es kostenlos bleibt.
+  subtopic_hints:
+  - der monatliche Geldeingang, ab dem das Konto kostenlos ist
+  - Bargeld abheben und einzahlen ohne eigene Filialen
+  - die Debitkarte im Inland und im Ausland
+  - alle Anliegen in der App oder im Chat erledigen
+  - der Umzug des Kontos mit der digitalen Kontowechselhilfe
+  - der Dispo einer Direktbank
+  - das Direktbankkonto und ein Filialkonto im Vergleich von Kosten, Service und Bargeld
+  - die Kosten eines Jahres, je nachdem ob die Bedingung für das kostenlose Konto erfüllt ist
+- id: overnight-savings
+  applies_to_types: [neobank]
+  persona_affinities: [financial-literacy:high]
+  invitation: Sie möchten verstehen, was Ihr Geld auf dem Tagesgeldkonto bringt und wie sicher es dort ist.
+  subtopic_hints:
+  - der Neukundenzins, wie lange er gilt und was danach kommt
+  - wie oft Zinsen gutgeschrieben werden und wie sie sich berechnen
+  - die gesetzliche Einlagensicherung bis 100.000 Euro
+  - der höhere Schutz für sechs Monate nach besonderen Lebensereignissen
+  - Geld zwischen Girokonto und Tagesgeld umbuchen
+  - Zinsen und der Sparer-Pauschbetrag
+  - Neukundenzins und Bestandszins im Vergleich über ein Jahr
+  - Tagesgeld, Festgeld und ETF-Sparplan im Vergleich von Rendite, Risiko und Verfügbarkeit
+# ── Neobroker ──────────────────────────────────────────────────────────
+- id: investing-and-savings-plans
+  applies_to_types: [brokerage]
+  persona_affinities: [age:18-24, age:25-34]
+  invitation: Sie möchten mit dem Investieren anfangen oder Ihren Sparplan überdenken und das in eigenen Worten durchsprechen.
+  subtopic_hints:
+  - ein ETF-Sparplan für den Vermögensaufbau
+  - Einzelaktien oder ETF und das Risiko dahinter
+  - das Kinderdepot und wem das Geld gehört
+  - Sparrate, Ausführungstag und Pausen im Sparplan
+  - Kursschwankungen aushalten und langfristig denken
+  - ein bestehendes Depot zu Kranich übertragen
+  - ETF-Sparplan, Einzelaktien und Tagesgeld im Vergleich von Chance, Risiko und Kosten
+  - der Weg vom ersten Depot bis zum laufenden Sparplan, mit Freistellungsauftrag und Referenzkonto
+- id: taxes-and-costs
+  applies_to_types: [brokerage]
+  persona_affinities: [financial-literacy:high]
+  invitation: Sie möchten verstehen, welche Kosten und Steuern beim Investieren anfallen und wie Sie sie im Griff behalten.
+  subtopic_hints:
+  - der Freistellungsauftrag und der Sparer-Pauschbetrag
+  - die Abgeltungsteuer mit Solidaritätszuschlag und Kirchensteuer
+  - die Vorabpauschale bei Fonds und ETF
+  - das Entgelt pro Order und die Kosten eines Sparplans
+  - der kostenlose Depotübertrag
+  - die Verzinsung des Guthabens auf dem Verrechnungskonto
+  - die Kosten von Einmalanlage und Sparplan über zehn Jahre im Vergleich
+  - die Steuern auf einen Verkauf mit Gewinn, vom Freistellungsauftrag bis zur Abrechnung
+# ── Insurer ────────────────────────────────────────────────────────────
+- id: liability-and-contents
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:35-44]
+  invitation: Sie möchten klären, wofür Haftpflicht und Hausrat einspringen und was im Schadenfall passiert.
+  subtopic_hints:
+  - was die Privathaftpflicht abdeckt und wer mitversichert ist
+  - Deckungssumme und Selbstbeteiligung
+  - die richtige Versicherungssumme für den Hausrat und der Unterversicherungsverzicht
+  - Fahrraddiebstahl und Einbruch
+  - einen Schaden melden und welche Belege nötig sind
+  - die Versicherung beim Umzug anpassen
+  - Haftpflicht und Hausrat im Vergleich, wer bei welchem Schaden zahlt
+  - der Ablauf eines Hausratschadens nach einem Einbruch, von der Meldung bis zur Erstattung
+- id: car-insurance
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:45-54]
+  invitation: Sie möchten Ihre Kfz-Versicherung verstehen, vom Tarif über die Schadenfreiheitsklasse bis zum Wechsel.
+  subtopic_hints:
+  - Haftpflicht, Teilkasko und Vollkasko
+  - die Schadenfreiheitsklasse und was ein Schaden für den Beitrag bedeutet
+  - der Wechsel zum Jahresende mit Kündigung bis zum 30. November und das Sonderkündigungsrecht
+  - die eVB-Nummer für die Zulassung
+  - einen Unfall melden
+  - Fahranfänger und weitere Fahrer im Vertrag
+  - Teilkasko und Vollkasko im Vergleich von Beitrag, Selbstbeteiligung und Leistung
+  - der komplette Ablauf beim Autokauf, von der eVB-Nummer bis zur Übernahme der Schadenfreiheitsklasse
+- id: income-protection-and-retirement
+  applies_to_types: [insurer]
+  persona_affinities: [age:25-34, age:35-44, financial-literacy:high]
+  invitation: Sie möchten Ihr Einkommen und Ihre Altersvorsorge absichern und dabei die Kosten verstehen.
+  subtopic_hints:
+  - die Berufsunfähigkeitsversicherung und ab wann sie leistet
+  - Gesundheitsfragen und die vorvertragliche Anzeigepflicht
+  - die fondsgebundene Rentenversicherung und ihre Kosten
+  - Beiträge pausieren oder den Vertrag beitragsfrei stellen
+  - Fondswechsel und Zuzahlungen
+  - das Bezugsrecht im Todesfall
+  - fondsgebundene Rentenversicherung und ETF-Sparplan im Vergleich von Kosten und Flexibilität
+  - was mit dem Vertrag passiert, wenn das Einkommen für eine Weile wegfällt
+# ── Cross-cutting servicing neighborhoods (span several institution types) ──
+- id: account-lifecycle
+  applies_to_types: [bank, neobank, insurer, brokerage]
+  invitation: Sie möchten überlegen, ob Sie hier ein neues Konto oder einen neuen Vertrag abschließen oder einen alten auflösen, und was das mit sich bringt.
+  subtopic_hints:
+  - welche Unterlagen Sie für einen Abschluss brauchen und wie lange es dauert
+  - einen neuen Vertrag abschließen oder den bestehenden anpassen
+  - Kündigungsfristen und was mit dem Guthaben passiert
+  - was mit Daueraufträgen und Lastschriften geschieht, wenn ein Konto schließt
+  - Kosten, Steuerbescheinigungen und Fristen beim Abschluss oder bei der Kündigung
+  - den Anbieter wechseln, ohne dass etwas verloren geht
+  - eine vollständige Auflösung im Vergleich zu einem Tarifwechsel
+  - Abschluss und Kündigung im Vergleich von Voraussetzungen, Fristen, Kosten und Formalitäten
+- id: beneficiaries-and-estate
+  applies_to_types: [bank, insurer, brokerage]
+  persona_affinities: [age:55-64, age:65+]
+  invitation: Sie möchten verstehen, was mit Ihrem Geld nach Ihrem Tod geschieht und wie Sie das richtig regeln.
+  subtopic_hints:
+  - die Begünstigung im Todesfall beim Bausparvertrag
+  - das Bezugsrecht in einer Renten- oder Lebensversicherung
+  - was mit Konto und Depot im Erbfall passiert
+  - eine Vollmacht über den Tod hinaus
+  - die Regelung nach einer Heirat, Geburt oder Scheidung aktualisieren
+  - was zusätzlich ein Testament oder ein Notar regeln muss
+  - Begünstigung, Bezugsrecht und Erbschaft im Vergleich, wer wann an das Geld kommt
+  - die Abwicklung für Angehörige, vom Sterbefall bis zur Auszahlung
+- id: authorized-access
+  applies_to_types: [bank, neobank, brokerage]
+  invitation: Sie möchten wissen, wie jemand anderes Ihnen bei diesem Konto helfen oder darauf zugreifen kann, und wo die Grenzen liegen.
+  subtopic_hints:
+  - Kontovollmacht oder Gemeinschaftskonto
+  - was eine bevollmächtigte Person darf und was nicht
+  - eine Vollmacht widerrufen, wenn sich die Lage ändert
+  - die Vorsorgevollmacht und die rechtliche Betreuung
+  - Zugriff für Angehörige im Pflegefall
+  - wer haftet, wenn eine bevollmächtigte Person Fehler macht
+  - Vollmacht, Gemeinschaftskonto und Betreuung im Vergleich von Rechten und Pflichten
+  - der Zugriff insgesamt, von der Einrichtung über die Grenzen bis zum Widerruf
+- id: money-movement
+  applies_to_types: [bank, neobank, brokerage]
+  invitation: Sie möchten über Überweisungen, Daueraufträge und Lastschriften sprechen und wissen, mit welchen Fristen und Limits Sie rechnen müssen.
+  subtopic_hints:
+  - Standardüberweisung und Echtzeitüberweisung
+  - die Empfängerüberprüfung vor einer Überweisung
+  - Daueraufträge einrichten und löschen
+  - eine Lastschrift zurückgeben und die Frist dafür
+  - Limits für Überweisungen und Abhebungen
+  - eine Fehlüberweisung zurückholen
+  - Standard- und Echtzeitüberweisung im Vergleich von Dauer, Kosten und Rückholbarkeit
+  - der Weg einer Zahlung vom Auftrag bis zur Gutschrift, mit Empfängerüberprüfung und Limits
+- id: cards-and-payments
+  applies_to_types: [bank, neobank]
+  invitation: Sie möchten ein Problem mit Ihrer Karte oder einer Kartenzahlung lösen.
+  subtopic_hints:
+  - eine verlorene oder gestohlene Karte sperren und ersetzen
+  - den Sperr-Notruf 116 116 und die Haftung vor der Sperrung
+  - eine neue Karte aktivieren und die PIN festlegen
+  - den Verfügungsrahmen der Karte ändern
+  - Zahlungen und Abhebungen im Ausland
+  - eine Kartenzahlung reklamieren
+  - Debitkarte und Kreditkarte im Vergleich von Kosten, Akzeptanz und Schutz
+  - der Ablauf von der Sperrung bis zur aktivierten Ersatzkarte
+- id: security-and-fraud
+  applies_to_types: [bank, neobank, brokerage]
+  persona_affinities: [age:65+, financial-literacy:low]
+  invitation: Sie möchten sicher sein, dass Ihr Konto geschützt ist, und wissen, wie Sie Betrug erkennen und darauf reagieren.
+  subtopic_hints:
+  - Betrugsmaschen vom falschen Bankmitarbeiter bis zur gefälschten SMS
+  - was Sie sofort tun, wenn Sie betrogen wurden
+  - Benachrichtigungen und Limits, die das Risiko senken
+  - die starke Kundenauthentifizierung
+  - der Schutz bei nicht autorisierten Zahlungen
+  - Zugangsdaten und Kontaktdaten sicher halten
+  - die vollständige Reaktion auf einen Betrugsfall, von den ersten Schritten bis zur Erstattung
+  - wie Benachrichtigungen, Identitätsprüfung und Haftungsregeln zusammenwirken
+- id: complaints-and-arbitration
+  applies_to_types: [bank, neobank, insurer, brokerage]
+  persona_affinities: [age:45-54, age:55-64]
+  invitation: Sie möchten mit dem Institut einen Streit klären und wissen, welche Wege Ihnen offenstehen.
+  subtopic_hints:
+  - eine schriftliche Beschwerde und die Antwortfristen
+  - wann sich der Gang zur Schlichtungsstelle oder zum Ombudsmann lohnt
+  - was das Schlichtungsverfahren kostet und wie lange es dauert
+  - welche Unterlagen eine Beschwerde stärken
+  - eine Beschwerde bei der BaFin
+  - der Weg vor Gericht als letzter Schritt
+  - Beschwerde, Schlichtung und Klage im Vergleich von Dauer, Kosten und Ergebnis
+  - der Ablauf eines Streits, von der ersten Beschwerde bis zum Schlichtungsspruch

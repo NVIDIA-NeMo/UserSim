@@ -42,10 +42,10 @@ axis                                           interpretation
 ``sovereign.graceful_unknown``                 5 = gracefully declined when it should
 ============================================== ==========================
 
-Note ``sovereign.suspected_fabrication`` and
-``sovereign.graceful_unknown`` share names with axes in
-:mod:`evaluator.scorers.sov_ai_facts` for cross-probe
-joinability in the combined sovereign-AI scorecard. The semantics are
+Note ``sovereign.graceful_unknown`` shares its name with the
+:mod:`evaluator.scorers.sov_ai_facts` axis, and
+``sovereign.suspected_fabrication`` parallels its
+``sovereign.fabrication``. The semantics are
 deliberately compatible (lower fabrication is better in both;
 higher graceful-unknown is better in both) but the *evidence* differs:
 the ``sov_ai_facts`` scorer has ground truth to compare against,
@@ -53,9 +53,7 @@ this one doesn't. ``self_consistency`` is unique to ``sov_ai_dynamic``
 because the single-turn factual probes in ``sov_ai_facts`` don't
 surface multi-turn drift.
 
-Single LLM judge per trajectory today; multi-family ensemble + inter-
-judge κ graduate into the human-calibration loop. See the roadmap for
-sequencing.
+Scoring uses one LLM judge per trajectory.
 """
 
 from __future__ import annotations
@@ -88,8 +86,7 @@ logger = logging.getLogger("usersim.engine")
 
 # Reversed scale on purpose: higher score = less suspected fabrication.
 # Mirrors the orientation of ``sovereign.fabrication`` in the
-# ``sov_ai_facts`` scorer so the combined scorecard can aggregate them
-# on a shared higher-is-better axis.
+# ``sov_ai_facts`` scorer, so both read higher-is-better.
 _SUSPECTED_FABRICATION = Score(
     name="sovereign.suspected_fabrication",
     description=(

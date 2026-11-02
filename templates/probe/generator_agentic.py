@@ -51,7 +51,6 @@ from typing import Any
 
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
-    OutcomeStatus,
     WarningKind,
 )
 from usersim.engine.core.probes import (
@@ -59,7 +58,7 @@ from usersim.engine.core.probes import (
     BankBackedProbe,
     register_probe,
 )
-from usersim.engine.core.simulation import ConversationState, make_result
+from usersim.engine.core.simulation import ConversationState, finalize_completed, make_result
 
 
 @dataclass
@@ -85,6 +84,7 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
     """Single-user-turn + multi-assistant-turn tool-interception probe."""
 
     label = "demo_agentic"
+    output_columns = ("action_request_id", "sub_protocol")
     bank_loader = staticmethod(_demo_agentic_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_AGENTIC_ACTION
     bank_version_key = "agentic"  # non-locale
@@ -133,10 +133,9 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
 
     def build_result_extras(self, state: Any) -> dict:
         extras = super().build_result_extras(state)
-        # Every key added here must also be listed in
-        # ConversationSimulatorConfig.side_effect_columns, or the engine
-        # discards it on the way to storage and the scorer reads it back
-        # as absent.
+        # Every key added here, beyond the core columns, must also be listed
+        # in the class's output_columns, or the engine discards it on the way
+        # to storage and the scorer reads it back as absent.
         if self._task is not None:
             extras["probe_variant"] = f"{self._task.sub_protocol}::demo"
             extras["action_request_id"] = self._task.id
@@ -185,11 +184,11 @@ class DemoAgenticProbe(AgenticMixin, BankBackedProbe):
         # See safety_agentic.SafetyAgenticProbe.run_dispatch for the
         # real implementation (acall_llm wrapping, tool-call extraction,
         # mock-response injection, infrastructure-failure handling).
-        outcome = builder.finalize(status=OutcomeStatus.OK)
+        sim_success, outcome = finalize_completed(self, state)
         result = make_result(
             state.messages,
             state.metadata,
-            self.should_succeed(state),
+            sim_success,
             outcome=outcome,
             traces=builder.traces(),
         )

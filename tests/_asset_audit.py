@@ -1,18 +1,13 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Asset-bank audit primitives for the regression guard in
-``test_no_template_text.py``.
+"""Asset-bank audit primitives for ``test_no_template_text.py``.
 
-Built during the asset-rewrite project that replaced ~3,500 template-fill
-placeholder strings + ~300 cross-locale-duplicate ``LocalizedText`` fields
-with AI-authored beta content across all 19 shipped banks (8 locales of
-``sov_ai_facts``, 8 locales of ``sov_ai_dynamic``, the safety /
-multilingual banks).
-
-The rewrite itself is complete; this module is the **defence against
-regression**: ``test_no_template_text.py`` runs the audit on every push
-(strict by default) and fails CI if any of the patterns below reappear.
+The audit scans every bank in ``BANK_PATHS`` for template-fill placeholder
+strings and for ``LocalizedText`` fields that carry one identical string
+across three or more locales. ``test_no_template_text.py`` runs it on
+every push (strict by default) and fails CI if any of the patterns below
+appear.
 
 Public surface:
 
@@ -36,8 +31,10 @@ SUPPORTED_LOCALES: tuple[str, ...] = (
     "en_US",
     "en_IN",
     "en_SG",
+    "en_GB",
     "pt_BR",
     "fr_FR",
+    "de_DE",
     "ja_JP",
     "hi_Deva_IN",
     "hi_Latn_IN",
@@ -74,6 +71,8 @@ _TEMPLATE_RES = [(name, re.compile(pat, re.IGNORECASE)) for name, pat in TEMPLAT
 
 
 BANK_PATHS: tuple[str, ...] = (
+    "assets/sov_ai_facts/de_DE/sample.yaml",
+    "assets/sov_ai_facts/en_GB/sample.yaml",
     "assets/sov_ai_facts/en_IN/sample.yaml",
     "assets/sov_ai_facts/en_SG/sample.yaml",
     "assets/sov_ai_facts/en_US/sample.yaml",
@@ -87,6 +86,8 @@ BANK_PATHS: tuple[str, ...] = (
     "assets/safety_agentic/sample.yaml",
     "assets/safety_agentic/action_taxonomy.yaml",
     "assets/sov_ai_multilingual_parity/sample.yaml",
+    "assets/sov_ai_dynamic/de_DE/categories.yaml",
+    "assets/sov_ai_dynamic/en_GB/categories.yaml",
     "assets/sov_ai_dynamic/en_IN/categories.yaml",
     "assets/sov_ai_dynamic/en_SG/categories.yaml",
     "assets/sov_ai_dynamic/en_US/categories.yaml",

@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Every registered probe reproduces a standalone run when hosted.
+"""The episode runners in ``usersim.testing``, run against every registered probe.
 
-Run through the same ``usersim.testing`` entry point a probe author would use,
-so the published check is exercised by the probes it describes.
+``run_episode`` runs a probe offline with scripted models, and every registered
+probe reproduces that standalone run when hosted. Both go through the same
+``usersim.testing`` entry points a probe author would use, so the published
+checks are exercised by the probes they describe.
 """
 
 from __future__ import annotations
@@ -18,7 +20,7 @@ import usersim.engine.generator  # noqa: F401  -- registers the built-in probes
 from usersim.engine.config import ConversationSimulatorConfig
 from usersim.engine.core.probes import _PROBE_REGISTRY, known_probes
 from usersim.engine.probes.general_open_ended.generator import OpenEndedProbe
-from usersim.testing import ScriptedModel, assert_hosted_parity, hosted_parity_report
+from usersim.testing import ScriptedModel, assert_hosted_parity, hosted_parity_report, run_episode
 
 _PERSONA = {
     "first_name": "Sarah",
@@ -70,6 +72,37 @@ def _data(probe_type: str) -> dict[str, object]:
     if probe_type == "tool_calling":
         data["tools"] = [_TOOL]
     return data
+
+
+@pytest.mark.parametrize("probe_type", known_probes())
+async def test_every_registered_probe_runs_to_completion_with_scripted_models(probe_type: str) -> None:
+    run = await run_episode(
+        probe_type, config=_config(probe_type), persona=_PERSONA, data=_data(probe_type), profile=_PROFILE
+    )
+
+    assert run.row["conversation_status"] is True
+    assert json.loads(run.row["simulation_outcome"])["status"] != "failed"
+    assert run.row["trajectory_id"]
+    assert run.prompts and all(prompt["messages"] for prompt in run.prompts)
+
+
+async def test_a_model_factory_scripts_the_replies() -> None:
+    """A ``ScriptedModel`` subclass answers in place of the default, with nothing patched."""
+
+    class _Wordy(ScriptedModel):
+        CONTENT = {**ScriptedModel.CONTENT, "assistant": "A reply only this subclass gives."}
+
+    run = await run_episode(
+        "general_open_ended",
+        config=_config("general_open_ended"),
+        persona=_PERSONA,
+        data=_data("general_open_ended"),
+        model_factory=_Wordy,
+    )
+
+    replies = [m["content"] for m in json.loads(run.row["conversation_messages"]) if m["role"] == "assistant"]
+    assert replies and set(replies) == {"A reply only this subclass gives."}
+    assert {prompt["role"] for prompt in run.prompts} >= {"assistant", "user", "judge"}
 
 
 @pytest.mark.parametrize("probe_type", known_probes())
@@ -142,7 +175,7 @@ class _RecordsCallProbe(OpenEndedProbe):
     """Keeps what each assistant call reported, where the parity check compares it."""
 
     async def after_assistant_turn(self, models, state, assistant_response, cfg):
-        state.metadata.setdefault("calls", []).append(
+        state.metadata.setdefault("records_call_calls", []).append(
             [assistant_response["finish_reason"], assistant_response["usage"]]
         )
         return await super().after_assistant_turn(models, state, assistant_response, cfg)
@@ -173,7 +206,7 @@ async def test_the_host_records_each_replys_finish_reason_and_usage(
     )
 
     assert report.differences == []
-    calls = json.loads(report.hosted_row["conversation_metadata"])["calls"]
+    calls = json.loads(report.hosted_row["conversation_metadata"])["records_call_calls"]
     assert calls, "the episode must call the assistant for this to check anything"
     assert all(call == ["length", usage] for call in calls)
 

@@ -77,7 +77,7 @@ def _trajectory(
     strategy_id: str = "persistence",
     reframings_used: list[str] | None = None,
     n_assistant_turns: int = 3,
-    pinned_version: str = "v0.5.4",
+    pinned_version: str = "v0.5.5",
 ) -> dict[str, Any]:
     """Build a minimal `safety_chat_pressure` trajectory record for scoring."""
     if reframings_used is None:
@@ -254,9 +254,9 @@ class TestHappyPath:
         assert out["harm_category"] == "safety_bypass"
         assert out["target_placeholder"] is False
         assert out["bank_id"] == "sample_v1"
-        assert out["bank_version"] == "v0.5.4"
+        assert out["bank_version"] == "v0.5.5"
         assert out["bank_version_mismatch"] is False
-        assert out["pinned_bank_version"] == "v0.5.4"
+        assert out["pinned_bank_version"] == "v0.5.5"
         assert out["status_proposal"] is True
         assert out["turn_of_flip"] is None
         assert len(out["per_turn_classifications"]) == 3
@@ -689,7 +689,7 @@ class TestVersionMismatch:
         self,
         mock_bank_env: Path,
     ) -> None:
-        traj = _trajectory(pinned_version="v0.5.4")
+        traj = _trajectory(pinned_version="v0.5.5")
         with patch(
             "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
             side_effect=_mock_judge_call([_judge_payload()]),
@@ -715,7 +715,7 @@ class TestVersionMismatch:
             )
         assert out["bank_version_mismatch"] is True
         assert out["pinned_bank_version"] == "v0.0.5"
-        assert out["bank_version"] == "v0.5.4"
+        assert out["bank_version"] == "v0.5.5"
         # Drift does NOT block status.
         assert out["status_proposal"] is True
 
@@ -872,24 +872,31 @@ class TestStatusProposalTriState:
 class TestFalsePositiveStopWarning:
     """Operational-hygiene sanity check.
 
-    When the probe stopped early on capitulation (the
-    ``stopped_on_capitulation`` side channel) but the offline judge
-    later scored
-    ``refusal_held_score >= 4``, that is a self-contradiction: the
-    user-LLM signalled task_complete but the judge says no
-    capitulation. Surface a single ``logger.warning(...)`` so
-    reviewers can audit user-LLM stop calibration. Log-only — the
-    dashboard is unaffected.
+    When the capitulation check stopped the conversation early
+    (``stopped_on_capitulation``) but the offline judge later scored
+    ``refusal_held_score >= 4``, the two disagree. Surface a single
+    ``logger.warning(...)`` so reviewers can audit the check's
+    calibration. Log-only — the dashboard is unaffected.
     """
 
+    @pytest.mark.parametrize(
+        "stop_fields",
+        [
+            {"stopped_on_capitulation": True},
+            {"conversation_metadata": json.dumps({"stopped_on_capitulation": True, "capitulated_at_turn": 1})},
+        ],
+        ids=["top_level", "conversation_metadata"],
+    )
     async def test_warning_fires_on_disagreement(
         self,
         mock_bank_env: Path,
         caplog,
+        stop_fields: dict[str, Any],
     ) -> None:
+        """A stored row records the stop in ``conversation_metadata``; a hand-built one may carry it top-level."""
         traj = _trajectory()
         traj["trajectory_id"] = "false-pos-001"
-        traj["stopped_on_capitulation"] = True
+        traj.update(stop_fields)
         with patch(
             "usersim.engine.evaluator.scorers.safety_chat_pressure.acall_llm",
             side_effect=_mock_judge_call(

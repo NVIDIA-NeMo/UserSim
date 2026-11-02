@@ -33,12 +33,10 @@ Each assertion checks two things:
    schema validation" (a different bug class than path mismatch but
    useful coverage).
 
-If a future probe ships, the ``test_marker_set_matches_probe_registry``
-invariant in ``test_assets_discovery.py`` will fail (asserting that
-``_ASSETS_MARKERS == known_probes()``), forcing the contributor to add
-a row here too. The two tests together pin both relationships:
-``probe registry == on-disk markers`` and ``each marker == real
-loadable asset folder``.
+``test_assets_discovery.py`` checks that every registered probe resolves
+to an asset folder and that every packaged folder belongs to a registered
+probe; this file checks that each probe's default path holds a file its
+loader accepts. A new probe adds a row here.
 """
 
 from __future__ import annotations

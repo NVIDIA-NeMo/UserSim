@@ -1,0 +1,993 @@
+# Structured region_spec for ko_KR, the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. gen-assets expands this
+# into the committed per-institution assets/financial_services/ko_KR/ bank.
+#
+# The institution set follows the Korean retail market: a commercial bank, an
+# internet-only bank, an online securities firm (ISA, pension savings and IRP), a
+# life insurer with health and cancer cover, and a credit card company that also
+# lends through cash advances and card loans. Brands are fictional.
+#
+# Content fields are written in Korean, so the institution brief, the corpus and
+# the regulatory context the judge reads share the corpus language. Field names,
+# ids, variable keys and tool names are identifiers and stay in English. Brands
+# and products keep a Latin `display_name` as the canonical label, and the Korean
+# `display_name_local` is the name the corpus and conversations use.
+#
+# Multi-line Korean values are folded block scalars, broken only where Korean
+# writes a space, since YAML folds a line break into one.
+#
+# Regulated values (deposit protection, ISA and pension account limits and tax
+# credits, securities transaction tax and other tax rates, the lending rate cap,
+# DSR limits and withdrawal periods) are those in force in October 2026. Entries
+# carry `placeholder: true`, as in the other banks.
+schema_version: v0.1
+region: KR
+locale: ko_KR
+currency: KRW
+currency_symbol: "원"
+language: Korean (Korea)
+number_format: ko_KR
+privacy_regime: 개인정보 보호법
+
+# Korean institutions identify a customer by name and date of birth before acting
+# on an account, as in the default contract.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# The numeric check reads half-width digits, and reads 만 and 억 only for whole
+# multiples of 10,000, so the guidance asks for exactly those forms.
+language_conventions:
+  guidance: >-
+    Write natural Korean in the formal 합쇼체 (-습니다, -십시오) that Korean financial
+    institutions use with customers, with standard word spacing. Write amounts and
+    rates in half-width Arabic digits with comma grouping and 원 directly after the
+    number with no space (1,234원, 3.4%), never ₩, KRW, Hangul numerals or hanja
+    numerals. Round amounts may use 만 and 억 (5,000만원, 1억원, 1억 5,000만원);
+    write every other amount in full digits (2,500원, not 0.25만원), and never put a
+    decimal before 만 or 억 (write 1억 5,000만원, not 1.5억원). Write years in the
+    Western calendar (2026년).
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: 입출금통장
+  cards: 체크카드
+  payments: 신용카드
+  lending_mortgage: 대출
+  insurance: 보험계약
+  brokerage_investing: 종합매매계좌
+
+document_types:
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief.
+concept_guidance:
+  bank: >-
+    전국에 지점을 둔 시중은행으로서 다음을 다룬다. 입출금통장(급여와 연금 수령, 공과금과 카드대금
+    자동이체, 모바일·인터넷뱅킹 이체 수수료, 영업시간 외 ATM 출금 수수료, 통장과 카드의 재발급).
+    정기예금과 정기적금(가입 기간별 금리, 만기 전에 해지하면 중도해지이율이 적용된다는 점, 이자에는
+    소득세와 지방소득세를 합해 15.4%가 원천징수되고 이자와 배당을 합한 금융소득이 연 2,000만원을
+    넘으면 다른 소득과 합산해 종합과세된다는 점). 체크카드(사용하는 즉시 계좌에서 출금되어 잔액을
+    넘어 쓸 수 없다는 점, 분실·도난 신고와 재발급, 해외 이용 수수료, 연말정산 때 총급여의 25%를 넘는
+    사용액에 30%의 소득공제율이 적용된다는 점). 주택담보대출(변동금리와 5년 혼합형 금리의 차이,
+    총부채원리금상환비율(DSR) 규제와 스트레스 금리를 반영한 한도 산정, 중도상환수수료는 실제 비용
+    범위에서만 받고 대출일부터 3년이 지나면 받지 않는다는 점, 계약서류를 받은 날부터 14일 이내에
+    청약을 철회할 수 있다는 점). 직장인 신용대출(금리가 신용점수와 소득에 따라 정해진다는 점과
+    금리인하요구권). 예금자보호(예금자 1인당 원금과 이자를 합해 1억원), 보이스피싱 피해를 입었을 때의
+    피해구제 신청과 지급정지, 계좌 개설 때의 실명확인도 다룬다.
+  neobank: >-
+    지점이 없는 인터넷전문은행으로서 다음을 다룬다. 모바일 앱으로 끝나는 계좌 개설(신분증 확인과
+    본인 명의 계좌 확인 등 비대면 실명확인), 입출금통장, 하루만 맡겨도 이자가 붙는 세이프박스, 여러
+    사람이 회비를 함께 모으고 쓰는 모임통장(모임주와 멤버의 권한 차이, 멤버 초대), 정기예금, 체크카드
+    (캐시백, 해외 이용 수수료, 앱에서 하는 사용 정지와 이용한도 변경). 이체와 ATM 수수료, 로그인과
+    이체 때의 추가 인증, 휴대폰을 바꿀 때 기기 등록과 인증을 다시 하는 절차, 보이스피싱과 스미싱 같은
+    전기통신금융사기에 대한 주의와 피해구제 신청 및 지급정지. 예금은 예금자보호 대상으로, 예금자 1인당
+    원금과 이자를 합해 1억원까지 보호된다는 점도 다룬다.
+  insurer: >-
+    생명보험회사로서 다음을 다룬다. 정기보험, 저해지환급형 종신보험, 입원과 수술을 정액으로 보장하는
+    건강보험, 암보험, 연금보험의 차이(저해지환급형 상품은 종신보험 하나이고, 사망 보장을 위한 상품이지
+    저축 수단이 아니라는 점). 보험금 청구 절차(필요 서류와 서류가 접수된 뒤의 지급 시기).
+    계약 전 알릴 의무(사실과 다르게 알리면 계약이 해지되고 보험금이 지급되지 않을 수 있다는 점).
+    청약철회(보험증권을 받은 날부터 15일 이내, 다만 청약한 날부터 30일 이내). 암보험의 면책기간과
+    감액기간. 보험료 납입유예, 실효와 부활, 보험계약대출, 해약환급금과 저해지환급형의 해약환급금이
+    적다는 점. 수익자 변경. 보장성보험료 세액공제(근로소득자가 연 100만원 한도로 12%)와 연금보험의
+    보험차익 비과세 요건(10년 이상 유지하고 월 150만원 이하를 5년 이상 균등하게 납입하는 등).
+    실손의료보험은 실제 치료비를 보장하는 별도의 상품이고, 이 회사의 건강보험은 정해진 금액을 지급하는
+    정액형이라는 차이도 설명한다. 예금자보호(해약환급금 등을 합해 1인당 1억원)에도 닿되, 보험금 지급을
+    약속하는 표현이나 개인별 세무·의료 조언은 피한다.
+  nbfc: >-
+    신용카드 회사로서 다음을 다룬다. 일시불과 할부의 차이(할부는 할부수수료가 붙고, 가맹점 행사에 따른
+    무이자할부가 있다는 점, 결제한 뒤 할부로 바꾸는 결제 후 할부 전환). 일부결제금액이월약정(리볼빙)의
+    구조(약정한 비율만 결제하고 나머지를 이월하면 이월된 금액에 수수료가 계속 붙어 총부담이 커질 수
+    있다는 점, 최소결제비율, 선결제로 수수료를 줄일 수 있다는 점). 단기카드대출(현금서비스)과
+    장기카드대출(카드론)의 금리와 한도, 법정 최고금리 연 20%와 연체이자(약정금리에 최대 3%p를 더하되
+    연 20%를 넘지 않음), 카드론 중도상환. 할부 거래의 철회권과 항변권(할부 기간 3개월 이상, 금액 20만원
+    이상인 거래는 7일 이내에 철회할 수 있고, 물건이 오지 않거나 하자가 있으면 남은 할부금의 지급을 거절할
+    수 있다는 점). 연회비와 포인트 적립, 이용한도와 한도 조정, 분실·도난 신고와 부정사용, 연말정산 때
+    총급여의 25%를 넘는 신용카드 사용액에 15%의 소득공제율이 적용된다는 점, 결제가 어려울 때의 이른 상담.
+  brokerage: >-
+    온라인 증권회사로서 다음을 다룬다. 중개형 ISA(연 2,000만원, 총 1억원까지 납입할 수 있고 쓰지 않은
+    납입 한도는 이월된다는 점, 순이익 200만원(서민형은 400만원)까지 비과세이고 넘는 부분은 9.9%로
+    분리과세된다는 점, 의무가입기간 3년, 직전 3년 중 한 번이라도 금융소득종합과세 대상이었으면 가입할 수
+    없다는 점, 만기 자금을 60일 이내에 연금계좌로 옮기면 옮긴 금액의 10%, 최대 300만원을 추가로 세액공제
+    받을 수 있다는 점). 연금저축계좌와 개인형 퇴직연금(IRP)(세액공제 대상 납입액은 연금저축 연 600만원,
+    IRP를 합해 연 900만원까지이고, 세액공제율은 총급여 5,500만원 이하이면 16.5%, 넘으면 13.2%이며,
+    연금계좌 납입 한도는 합산해 연 1,800만원. 55세 이후 연금으로 받으면 나이에 따라 5.5%, 4.4%, 3.3%의
+    연금소득세가 붙고, 사적연금 소득이 연 1,500만원을 넘으면 종합과세와 16.5% 분리과세 중에서 고를 수
+    있으며, 연금이 아닌 형태로 인출하면 16.5%의 기타소득세가 붙는다는 점). 국내주식과 미국주식의 거래
+    수수료, 환전 수수료와 우대, 증권거래세(2026년부터 코스피 0.20%, 코스닥 0.20%), 해외주식 양도소득세
+    (연 250만원을 공제한 뒤 22%, 다음 해 5월에 신고), 배당소득 원천징수 15.4%, 적립식 투자, 예탁금은
+    예금자보호로 1인당 1억원까지 보호되지만 주식과 펀드는 보호되지 않는다는 점, 적합성 원칙, 원금이
+    보장되지 않는다는 점.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [금융위원회, 금융감독원, 예금보험공사]
+    regulator_text: >-
+      은행은 은행법에 따라 금융위원회와 금융감독원의 감독을 받는다. 예금자보호법에 따라 예금보험공사는
+      보통예금, 정기예금, 적금, 외화예금 등을 금융회사별로 예금자 1인당 원금과 소정의 이자를 합해
+      1억원까지 보호하고, 연금저축(신탁·보험), 확정기여형과 개인형 퇴직연금의 예금보호 대상 상품,
+      사고보험금은 각각 별도로 1억원까지 보호한다. 펀드처럼 실적에 따라 수익이 달라지는 투자상품은 보호
+      대상이 아니다. 예금 이자에는 소득세와 지방소득세를 합해 15.4%가 원천징수되고, 이자와 배당을 합한
+      금융소득이 연 2,000만원을 넘으면 다른 소득과 합산해 종합과세된다. 계좌를 개설할 때는 금융실명법에
+      따른 실명확인이 필요하고, 실명이 확인된 계좌로 하는 계속거래에는 다시 하지 않는다. 보이스피싱 등 전기통신금융사기 피해를 입은 고객은 돈을 보낸 은행이나 받은
+      은행에 피해구제를 신청해 사기에 이용된 계좌의 지급정지를 요청할 수 있다. 개인정보는 개인정보 보호법에
+      따라 처리하며, 주민등록번호는 법령이 허용하는 경우에만 처리한다. 금융 분쟁은 금융감독원
+      금융분쟁조정위원회에 조정을 신청할 수 있다. 상담원은 계좌 정보를 알려주거나 바꾸기 전에 본인 확인을
+      한다.
+  cards:
+    regulators: [금융위원회, 금융감독원]
+    regulator_text: >-
+      체크카드는 사용하는 즉시 연결된 예금계좌에서 대금이 출금되므로 계좌 잔액을 넘어 사용할 수 없다.
+      카드를 잃어버리거나 도난당한 것을 알게 되면 즉시 카드를 발급한 은행이나 카드사에 신고해 사용을
+      정지해야 한다. 신고 전후의 부정사용 보상은 관련 법령과 카드 약관에 따르며, 비밀번호를 다른 사람에게
+      알려 주는 등 고객에게 고의나 중대한 과실이 있으면 보상이 제한될 수 있다. 체크카드 사용액은 연말정산 때
+      총급여의 25%를 넘는 부분에 대해 30%의 소득공제율이 적용되고, 신용카드는 15%다. 상담원은 수수료,
+      이용한도, 보상 조건을 잘못 안내하지 않는다.
+  lending_mortgage:
+    regulators: [금융위원회, 금융감독원]
+    regulator_text: >-
+      은행과 카드사의 대출은 금융소비자 보호에 관한 법률의 적용을 받는다. 대출 계약은 계약서류를 받은 날과
+      대출이 실행된 날 중 늦은 날부터 14일 이내에 청약을 철회할 수 있으며, 이때는 원금과 이용한 기간의
+      이자, 인지세 등 제3자에게 낸 비용만 돌려주고 중도상환수수료는 내지 않는다. 2025년 1월 13일 이후 맺은
+      계약의 중도상환수수료는 자금 운용 손실과 대출 관련 행정·모집 비용 같은 실제 비용 범위에서만 받을 수
+      있고, 대출일부터 3년이 지나면 받을 수 없다. 대출 총액이 1억원을 넘는 차주에게는 총부채원리금상환비율
+      (DSR) 규제가 적용되어 연간 원리금 상환액이 은행은 연소득의 40%, 카드사 등 제2금융권은 50%를 넘지
+      않아야 하고, 한도를 계산할 때는 앞으로의 금리 상승 위험을 반영한 스트레스 금리를 더한다. 카드사 상품
+      가운데 DSR에 들어가는 것은 장기카드대출(카드론)이며, 신용카드 할부 구매는 대출이 아니어서 DSR 대상이
+      아니다. 법정 최고금리는 연 20%이고, 연체이자는 약정금리에 최대 3%p를 더한 수준을 넘을 수 없으며 연 20%도 넘을 수 없다.
+      대출을 받은 뒤 소득이 늘거나 신용점수가 오르는 등 신용 상태가 나아진 고객은 금리인하요구권을 행사할 수
+      있다. 상담원은 대출 승인을 약속하지 않고, 총상환액을 줄여 말하지 않으며, 상환이 어려운 고객에게는
+      이른 상담과 채무조정 제도를 안내한다.
+  payments:
+    regulators: [금융위원회, 금융감독원, 여신금융협회]
+    regulator_text: >-
+      신용카드회사는 여신전문금융업법에 따라 금융위원회의 감독을 받는다. 일부결제금액이월약정(리볼빙)은 결제할
+      금액 중 약정한 비율만 결제하고 나머지를 다음 달로 넘기는 서비스로, 넘긴 금액에는 수수료가 계속 붙어
+      총부담이 커질 수 있으므로 카드사는 수수료율과 결제 구조를 충분히 설명해야 한다. 할부 기간 3개월 이상,
+      금액 20만원 이상인 신용카드 할부 거래는 계약서를 받은 날(물건을 더 늦게 받았다면 받은 날)부터 7일 이내에
+      철회할 수 있고, 물건이 오지 않거나 하자가 있는 등의 사유가 있으면 남은 할부금의 지급을 거절하는 항변권을
+      행사할 수 있으며, 카드사는 항변 신청에 7영업일 이내에 답해야 한다. 신용카드 사용액은 연말정산 때 총급여의
+      25%를 넘는 부분에 대해 15%의 소득공제율이 적용된다. 카드를 잃어버리거나 도난당했을 때는 즉시 신고해야 하며,
+      신고 전후의 부정사용 보상은 관련 법령과 약관에 따른다. 상담원은 수수료와 총상환액을 잘못 안내하지 않고,
+      리볼빙이나 할부를 안내할 때는 수수료가 붙는다는 점을 분명히 알린다.
+  insurance:
+    regulators: [금융위원회, 금융감독원, 예금보험공사]
+    regulator_text: >-
+      보험회사는 보험업법에 따라 금융위원회와 금융감독원의 감독을 받는다. 보험회사가 파산하면 예금자보호법에 따라
+      예금보험공사가 보험계약자 1인당 해약환급금(또는 만기보험금, 사고보험금)과 그 밖의 지급금을 합해 1억원까지
+      보호하고, 연금저축보험과 사고보험금은 각각 별도로 1억원까지 보호한다. 변액보험은 최저보증 부분을 빼고는
+      보호하지 않는다. 계약자는 보험증권을 받은 날부터 15일 이내, 다만 청약한 날부터 30일 이내에 청약을 철회할
+      수 있고, 진단계약 등 일부 계약은 철회할 수 없다. 계약 전 알릴 의무를 위반하면 계약이 해지되고 보험금이
+      지급되지 않을 수 있다. 근로소득자는 보장성보험료에 대해 연 100만원 한도로 12%의 세액공제를 받을 수 있다.
+      저축성보험과 연금보험의 보험차익은 10년 이상 유지하고 월 150만원 이하를 5년 이상 균등하게 납입하는 등의
+      요건을 갖추면 비과세된다. 민원과 분쟁은 금융감독원에 신청할 수 있다. 상담원은 보험금 지급을 약속하지
+      않고, 개인별 세무나 의료 조언은 하지 않는다.
+  brokerage_investing:
+    regulators: [금융위원회, 금융감독원, 예금보험공사]
+    regulator_text: >-
+      증권회사는 자본시장과 금융투자업에 관한 법률에 따라 금융위원회의 인가를 받고 금융감독원의 감독을 받는다.
+      투자자가 맡긴 예탁금은 증권회사의 재산과 분리해 한국증권금융에 예치되고, 증권회사가 파산하면 예금자보호법에
+      따라 예금보험공사가 1인당 1억원까지 보호한다. 주식, 펀드, ELS, 증권사 CMA 같은 투자상품은 예금자보호
+      대상이 아니며, 증권은 한국예탁결제원에 따로 보관된다. 증권회사는 투자자의 재산 상황, 투자 경험과 목적에
+      맞지 않는 상품을 권유해서는 안 되고(적합성 원칙), 상품의 중요한 내용을 설명해야 한다. 2026년 1월 1일부터
+      상장주식을 팔 때는 코스피 종목에 증권거래세 0.05%와 농어촌특별세 0.15%를 합한 0.20%, 코스닥 종목에
+      0.20%가 붙는다. 국내 상장주식의 매매차익은 대주주가 아니면 과세되지 않고, 해외주식의 매매차익은 연 250만원을
+      공제한 뒤 지방소득세를 포함해 22%의 양도소득세가 붙으며 다음 해 5월에 신고한다. 배당소득에는 15.4%가
+      원천징수된다. ISA와 연금저축, 개인형 퇴직연금(IRP)은 조세특례제한법과 소득세법에 따른 세제 혜택이 있다.
+      연금저축계좌와 IRP에서는 펀드와 국내 상장 ETF(레버리지·인버스 ETF 제외) 등에 투자할 수 있고, 개별
+      주식은 국내외 모두 직접 살 수 없으며, IRP는 예금도 담을 수 있다. 중개형 ISA에서는 국내 상장주식과
+      ETF, 펀드, ELS, 예금 등에 투자할 수 있다.
+      상담원은 수익을 보장하지 않고, 개인별 세무 조언은 하지 않는다.
+
+# In-language vocabulary the deterministic doc plan builds titles from. Tool names
+# are identifiers and stay verbatim in every language.
+doc_titles:
+  topic_separator: ': '
+
+  product_genre_angles:
+    product_sheet:
+    - 상품 개요
+    - 이런 분께 알맞습니다
+    - 가입부터 이용까지
+    - 한도·제한과 유의사항
+    - 다른 상품과의 비교와 맞지 않는 경우
+    fee_schedule:
+    - 수수료 안내
+    eligibility_matrix:
+    - 가입 대상
+    - 필요 서류
+    - 이용 조건별 차이
+    disclosure:
+    - 상품설명서 주요 내용
+    - 위험 안내
+    - 개인정보 처리 안내
+    promo_notice:
+    - 진행 중인 이벤트
+    - 추천·장기 이용 혜택
+    rate_sheet:
+    - 금리·요율 안내
+    - 금리·요율이 정해지는 방식과 적용
+    terms_conditions:
+    - 약관
+    - 약관 변경 안내
+    security_advisory:
+    - 부정사용으로부터 고객을 보호하기 위해
+    - 안전한 이용을 위한 수칙
+    - 이 상품을 사칭한 사기 주의
+
+  faq_intents:
+  - 수수료와 비용
+  - 가입과 이용 조건
+  - 이용 방법과 절차
+  - 문제 해결
+  - 다른 상품과의 비교
+  how_to_intents:
+  - 가입과 이용 시작
+  - 해지·변경·상품 전환
+  - 등록 정보 변경
+  - 진행 상황과 내역 확인
+  - 자주 하는 업무의 처리 절차
+  troubleshooting_intents:
+  - 처리가 끝나지 않거나 보류 중일 때
+  - 예상과 다른 수수료나 금액
+  - 로그인하거나 접속할 수 없을 때
+  - 거래가 거절되거나 제한되었을 때
+  - 명세서나 내역과 맞지 않을 때
+  comparison_intents:
+  - 당사의 비슷한 상품과의 비교
+  - 다른 회사의 일반적인 상품과의 비교
+  - 상품 고르는 방법
+  - 전환이나 상위 상품을 고려할 때
+
+  faq_variable_template: '{v} 안내'
+  how_to_variable_template: '{v} 확인과 변경 방법'
+  troubleshooting_variable_template: '{v} 관련 자주 있는 문제'
+
+  fee_overview_topic: 수수료·요금 안내
+  general_faq_topic: 자주 묻는 질문
+  regulatory_note_topic: '법령·제도 안내: {domain}'
+  tool_policy_topic: '{tool} 사용 기준'
+  tool_reference_topic: '{tool} 도구 설명서'
+
+  domain_labels:
+    retail_banking: 예금·일상 거래
+    cards: 체크카드
+    payments: 신용카드 이용
+    lending_mortgage: 대출
+    insurance: 생명보험·건강보험
+    brokerage_investing: 주식·ISA·연금계좌
+
+  # Every variable in this spec; an unmapped one falls back to its machine name.
+  variable_labels:
+    account_fee: 계좌 수수료(비대면 개설)
+    annual_contribution_cap: 연금계좌 연간 납입 한도
+    annual_fee: 연회비
+    annual_limit: 연간 납입 한도
+    annuity_premium_example: 월 보험료 예시(30세 가입, 20년 납입)
+    annuity_start_age: 연금 개시 나이
+    atm_fee_after_hours: 영업시간 외 ATM 출금 수수료
+    atm_withdrawal_fee: ATM 출금 수수료
+    cancer_diagnosis_benefit: 일반암 진단비
+    cancer_premium_example: 월 보험료 예시(40세 남성, 20년 납입)
+    cash_advance_apr: 현금서비스 금리(연)
+    cash_advance_limit_max: 현금서비스 이용한도 최고액
+    cashback_rate: 캐시백 비율
+    combined_credit_base_limit: 연금저축과 IRP를 합한 세액공제 대상 납입 한도
+    credit_base_limit: 연금저축 세액공제 대상 납입 한도
+    credit_limit_max: 이용한도 최고액
+    credit_rate_higher_income: 세액공제율(총급여 5,500만원 초과)
+    credit_rate_lower_income: 세액공제율(총급여 5,500만원 이하)
+    daily_hospital_benefit: 입원일당
+    daily_spending_limit: 하루 이용한도(기본 설정)
+    domestic_trade_fee_rate: 국내주식 거래 수수료율(모바일)
+    fx_spread_discount: 환전 수수료 우대율
+    group_max_members: 모임통장 최대 멤버 수
+    installment_apr_max: 할부수수료율(연, 상한)
+    installment_apr_min: 할부수수료율(연, 하한)
+    international_brand_fee_rate: 해외 이용 시 국제브랜드 수수료율
+    loan_rate_max: 대출 금리(연, 상한)
+    loan_rate_min: 대출 금리(연, 하한)
+    low_surrender_ratio: 납입기간 중 해약환급금 수준(표준형 대비)
+    max_days_per_stay: 1회 입원 최대 지급 일수
+    max_entry_age: 가입 가능한 최고 나이
+    max_installments: 최대 할부 개월 수
+    max_term_years: 최장 대출 기간(년)
+    medical_premium_example: 월 보험료 예시(35세 여성, 20년 납입)
+    minimum_contribution: 적립 최소 금액
+    minimum_deposit: 최소 가입 금액
+    minimum_holding_years: 의무가입기간(년)
+    minimum_payment_ratio: 리볼빙 최소결제비율
+    minor_cancer_benefit: 유사암 진단비
+    mixed_rate_5_years: 5년 혼합형 금리
+    monthly_deposit_max: 월 최대 납입액
+    monthly_deposit_min: 월 최소 납입액
+    ordinary_deposit_rate: 입출금통장 금리
+    overseas_capital_gains_tax_rate: 해외주식 양도소득세율(지방소득세 포함)
+    overseas_basic_deduction: 해외주식 양도소득 기본공제(연)
+    overseas_service_fee_rate: 해외 이용 시 해외서비스 수수료율
+    pension_tax_rate_55_69: 연금소득세율(55세 이상 70세 미만)
+    pension_tax_rate_70_79: 연금소득세율(70세 이상 80세 미만)
+    pension_tax_rate_80_plus: 연금소득세율(80세 이상)
+    policy_term_years: 보험기간(년)
+    premium_payment_years: 보험료 납입기간(년)
+    prepayment_fee_period_years: 중도상환수수료를 받는 기간(대출일부터, 년)
+    prepayment_fee_rate: 중도상환수수료율
+    rate_12_months: 12개월 적금 금리
+    rate_1_year: 1년 정기예금 금리
+    rate_2_years: 2년 정기예금 금리
+    rate_3_years: 3년 정기예금 금리
+    rate_6_months: 6개월 정기예금 금리
+    reduction_period_years: 암 진단비 감액기간(계약일부터, 년)
+    reduction_rate: 감액기간 중 지급 비율
+    reissue_fee: 통장·카드 재발급 수수료
+    reward_rate: 포인트 적립률
+    revolving_apr: 리볼빙 수수료율(연)
+    safe_box_max_balance: 세이프박스 최대 보관 금액
+    safe_box_rate: 세이프박스 금리
+    securities_tax_kosdaq: 증권거래세율(코스닥)
+    securities_tax_kospi: 증권거래세율(코스피, 농어촌특별세 포함)
+    separate_tax_rate: 비과세 한도를 넘는 순이익의 분리과세율(지방소득세 포함)
+    separate_tax_threshold: 사적연금 분리과세 기준 금액(연)
+    sum_insured_example: 보험가입금액 예시
+    surgery_benefit: 질병·상해 수술비(1회)
+    tax_free_general: 비과세 한도(일반형)
+    tax_free_low_income: 비과세 한도(서민형)
+    tax_free_min_holding_years: 보험차익 비과세 최소 유지 기간(년)
+    tax_free_min_payment_years: 보험차익 비과세 최소 납입 기간(년)
+    tax_free_monthly_cap: 보험차익 비과세 월 납입 한도
+    term_premium_example: 월 보험료 예시(30세 남성, 20년 만기)
+    total_limit: 총 납입 한도
+    transfer_fee_other_bank_online: 다른 은행으로 이체 수수료(모바일·인터넷뱅킹)
+    us_trade_fee_rate: 미국주식 거래 수수료율
+    variable_rate: 변동금리
+    waiting_period_days: 암 보장 면책기간(일)
+    whole_life_premium_example: 월 보험료 예시(40세 여성, 20년 납입)
+
+institutions:
+# ── 1. Commercial bank ────────────────────────────────────────────────
+- id: yunseul_bank
+  display_name: Yunseul Bank
+  display_name_local: 윤슬은행
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, lending_mortgage]
+  products:
+  - id: yunseul_ipchulgeum
+    display_name: Yunseul Everyday Account
+    display_name_local: 윤슬 입출금통장
+    domain: retail_banking
+    variables:
+      ordinary_deposit_rate: {type: percent, value: 0.1}
+      transfer_fee_other_bank_online: {type: money, value: 0}
+      atm_fee_after_hours: {type: money, value: 500}
+      reissue_fee: {type: money, value: 2000}
+  - id: yunseul_jeonggi_yegeum
+    display_name: Yunseul Time Deposit
+    display_name_local: 윤슬 정기예금
+    domain: retail_banking
+    variables:
+      rate_1_year: {type: percent, value: 3.4}
+      rate_2_years: {type: percent, value: 3.3}
+      rate_3_years: {type: percent, value: 3.25}
+      minimum_deposit: {type: money, value: 100000}
+  - id: yunseul_jeokgeum
+    display_name: Yunseul Installment Savings
+    display_name_local: 윤슬 정기적금
+    domain: retail_banking
+    variables:
+      rate_12_months: {type: percent, value: 3.6}
+      monthly_deposit_min: {type: money, value: 10000}
+      monthly_deposit_max: {type: money, value: 1000000}
+  - id: yunseul_check
+    display_name: Yunseul Check Card
+    display_name_local: 윤슬 체크카드
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 0}
+      international_brand_fee_rate: {type: percent, value: 1.0}
+      overseas_service_fee_rate: {type: percent, value: 0.2}
+      daily_spending_limit: {type: money, value: 6000000}
+      cashback_rate: {type: percent, value: 0.3}
+  - id: yunseul_judam
+    display_name: Yunseul Home Mortgage Loan
+    display_name_local: 윤슬 주택담보대출
+    domain: lending_mortgage
+    variables:
+      variable_rate: {type: percent, value: 4.45}
+      mixed_rate_5_years: {type: percent, value: 4.65}
+      max_term_years: {type: int, value: 40}
+      prepayment_fee_rate: {type: percent, value: 0.6}
+      prepayment_fee_period_years: {type: int, value: 3}
+  - id: yunseul_sinyong
+    display_name: Yunseul Salaried Worker Credit Loan
+    display_name_local: 윤슬 직장인 신용대출
+    domain: lending_mortgage
+    variables:
+      loan_rate_min: {type: percent, value: 4.7}
+      loan_rate_max: {type: percent, value: 6.5}
+      credit_limit_max: {type: money, value: 100000000}
+      prepayment_fee_rate: {type: percent, value: 0.1}
+  omit_common_operations: [manage_authorized_users]
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: 체크카드의 본인이 사용하지 않은 거래나 이중 출금에 대해 이의 제기와 조사를 접수한다.
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 현금카드나 체크카드의 분실·도난 신고를 접수하고 즉시 사용을 정지한다.
+  - name: report_voice_phishing
+    discoverable: true
+    side_effect_class: state_changing
+    description: 보이스피싱 등 전기통신금융사기 피해 신고를 받아 피해구제 신청을 접수하고, 돈을 보낸 상대 계좌의 지급정지를 요청한다.
+  - name: open_time_deposit
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입출금통장에서 금액과 기간을 정해 정기예금에 가입한다.
+  - name: open_installment_savings
+    discoverable: true
+    side_effect_class: state_changing
+    description: 월 납입액과 기간을 정해 정기적금에 가입하고, 입출금통장에서 자동이체를 설정한다.
+  - name: cancel_time_deposit
+    discoverable: true
+    side_effect_class: irreversible
+    description: 정기예금이나 정기적금을 만기 전에 해지하고, 원금과 중도해지이율로 계산한 이자를 입출금통장에 입금한다.
+  - name: request_loan_prepayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 주택담보대출이나 신용대출의 일부 또는 전액 중도상환을 신청한다.
+  - name: change_loan_rate_type
+    discoverable: true
+    side_effect_class: state_changing
+    description: 주택담보대출의 금리를 변동금리에서 5년 혼합형 금리로 바꾸거나, 혼합형의 고정 기간이 끝날 때의 금리 유형 선택을 접수한다.
+  - name: apply_credit_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 직장인 신용대출 신청을 접수한다. 심사가 있으며 한도와 금리는 심사 결과에 따라 정해진다.
+  - name: request_rate_reduction
+    discoverable: true
+    side_effect_class: state_changing
+    description: 대출을 받은 뒤 소득 증가나 신용점수 상승 등으로 신용 상태가 나아진 고객의 금리인하요구를 접수한다.
+  # Common operations whose meaning differs in Korea, declared with the Korean
+  # procedure they carry here.
+  - name: transfer_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입출금통장에서 윤슬은행이나 다른 은행의 계좌로 이체한다.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 모바일·인터넷뱅킹의 자주 쓰는 계좌(받는 분의 은행, 계좌번호, 이름)를 등록, 변경, 삭제한다.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 공과금, 보험료, 카드대금 같은 자동이체의 해지를 접수한다.
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: 국세, 지방세, 공과금을 입출금통장에서 납부한다.
+  - name: activate_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 받은 체크카드의 사용 등록을 한다.
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 현금카드나 체크카드를 재발급한다. 재발급 수수료가 붙을 수 있다.
+  task_templates:
+  - {id: TPL-YS-FREEZE-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_card]}
+  - {id: TPL-YS-YEGEUM-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Internet-only bank ─────────────────────────────────────────────
+- id: mirinae_bank
+  display_name: Mirinae Bank
+  display_name_local: 미리내뱅크
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards]
+  products:
+  - id: mirinae_ipchulgeum
+    display_name: Mirinae Everyday Account
+    display_name_local: 미리내 입출금통장
+    domain: retail_banking
+    variables:
+      ordinary_deposit_rate: {type: percent, value: 0.1}
+      transfer_fee_other_bank_online: {type: money, value: 0}
+      atm_withdrawal_fee: {type: money, value: 0}
+  - id: mirinae_safe_box
+    display_name: Safe Box
+    display_name_local: 세이프박스
+    domain: retail_banking
+    variables:
+      safe_box_rate: {type: percent, value: 2.0}
+      safe_box_max_balance: {type: money, value: 100000000}
+  - id: mirinae_moim
+    display_name: Group Account
+    display_name_local: 모임통장
+    domain: retail_banking
+    variables:
+      group_max_members: {type: int, value: 100}
+      ordinary_deposit_rate: {type: percent, value: 0.1}
+  - id: mirinae_jeonggi
+    display_name: Mirinae Time Deposit
+    display_name_local: 미리내 정기예금
+    domain: retail_banking
+    variables:
+      rate_6_months: {type: percent, value: 3.2}
+      rate_1_year: {type: percent, value: 3.5}
+      minimum_deposit: {type: money, value: 10000}
+  - id: mirinae_check
+    display_name: Mirinae Check Card
+    display_name_local: 미리내 체크카드
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 0}
+      cashback_rate: {type: percent, value: 0.5}
+      international_brand_fee_rate: {type: percent, value: 1.0}
+      daily_spending_limit: {type: money, value: 6000000}
+  omit_common_operations: [manage_authorized_users]
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: 체크카드의 본인이 사용하지 않은 거래에 대해 이의 제기와 조사를 접수한다.
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 체크카드 사용을 일시 정지한다. 앱에서 하는 정지와 같고, 분실이나 도난이면 재발급도 안내한다.
+  - name: set_card_limits
+    discoverable: true
+    side_effect_class: state_changing
+    description: 체크카드의 하루 이용한도를 정해진 범위 안에서 바꾼다.
+  - name: create_safe_box
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입출금통장에 세이프박스를 만들고, 보관할 금액을 옮긴다.
+  - name: create_group_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 모임통장을 만들고 모임 이름과 회비 규칙을 정한다. 만든 사람이 모임주가 된다.
+  - name: invite_group_member
+    discoverable: true
+    side_effect_class: state_changing
+    description: 모임통장에 멤버를 초대한다. 초대받은 멤버는 내역을 볼 수 있고, 모임주만 출금할 수 있다.
+  - name: open_time_deposit
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입출금통장에서 금액과 기간을 정해 정기예금에 가입한다.
+  - name: reregister_device
+    discoverable: true
+    side_effect_class: state_changing
+    description: 휴대폰을 바꾸거나 앱을 다시 설치해 인증을 쓸 수 없을 때, 새 기기 등록과 인증 재등록을 접수한다.
+  - name: report_voice_phishing
+    discoverable: true
+    side_effect_class: state_changing
+    description: 보이스피싱 등 전기통신금융사기 피해 신고를 받아 피해구제 신청을 접수하고, 돈을 보낸 상대 계좌의 지급정지를 요청한다.
+  # Common operations whose meaning differs in Korea, declared with the Korean
+  # procedure they carry here.
+  - name: transfer_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입출금통장, 세이프박스, 모임통장, 다른 은행 계좌 사이에서 돈을 옮긴다.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 자주 쓰는 계좌(받는 분의 은행, 계좌번호, 이름)를 등록, 변경, 삭제한다.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 자동이체의 해지를 접수한다. 미리내뱅크는 수표와 어음을 다루지 않는다.
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: 국세, 지방세, 공과금을 입출금통장에서 납부한다.
+  - name: activate_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 앱에서 체크카드 사용을 시작한다.
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 체크카드를 재발급한다.
+  task_templates:
+  - {id: TPL-MR-FREEZE-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_card]}
+  - {id: TPL-MR-MOIM-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 3. Online securities firm ─────────────────────────────────────────
+- id: garam_securities
+  display_name: Garam Securities
+  display_name_local: 가람증권
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: garam_isa
+    display_name: Brokerage ISA
+    display_name_local: 중개형 ISA
+    domain: brokerage_investing
+    variables:
+      annual_limit: {type: money, value: 20000000}
+      total_limit: {type: money, value: 100000000}
+      tax_free_general: {type: money, value: 2000000}
+      tax_free_low_income: {type: money, value: 4000000}
+      separate_tax_rate: {type: percent, value: 9.9}
+      minimum_holding_years: {type: int, value: 3}
+  - id: garam_pension_savings
+    display_name: Pension Savings Account
+    display_name_local: 연금저축계좌
+    domain: brokerage_investing
+    variables:
+      credit_base_limit: {type: money, value: 6000000}
+      combined_credit_base_limit: {type: money, value: 9000000}
+      credit_rate_lower_income: {type: percent, value: 16.5}
+      credit_rate_higher_income: {type: percent, value: 13.2}
+      annual_contribution_cap: {type: money, value: 18000000}
+      pension_tax_rate_55_69: {type: percent, value: 5.5}
+      pension_tax_rate_70_79: {type: percent, value: 4.4}
+      pension_tax_rate_80_plus: {type: percent, value: 3.3}
+      separate_tax_threshold: {type: money, value: 15000000}
+  - id: garam_irp
+    display_name: Individual Retirement Pension (IRP)
+    display_name_local: 개인형 퇴직연금(IRP)
+    domain: brokerage_investing
+    variables:
+      account_fee: {type: money, value: 0}
+      combined_credit_base_limit: {type: money, value: 9000000}
+      annual_contribution_cap: {type: money, value: 18000000}
+  - id: garam_domestic_stock
+    display_name: Domestic Stock Trading
+    display_name_local: 국내주식 거래
+    domain: brokerage_investing
+    variables:
+      domestic_trade_fee_rate: {type: percent, value: 0.015}
+      securities_tax_kospi: {type: percent, value: 0.2}
+      securities_tax_kosdaq: {type: percent, value: 0.2}
+  - id: garam_us_stock
+    display_name: US Stock Trading
+    display_name_local: 미국주식 거래
+    domain: brokerage_investing
+    variables:
+      us_trade_fee_rate: {type: percent, value: 0.25}
+      fx_spread_discount: {type: percent, value: 95}
+      overseas_capital_gains_tax_rate: {type: percent, value: 22}
+      overseas_basic_deduction: {type: money, value: 2500000}
+  - id: garam_jeokrip
+    display_name: Recurring Investment
+    display_name_local: 적립식 투자
+    domain: brokerage_investing
+    variables:
+      minimum_contribution: {type: money, value: 1000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - name: open_isa_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 중개형 ISA 개설을 신청한다. ISA는 모든 금융회사를 합해 1인 1계좌이고, 직전 3년 중 한 번이라도 금융소득종합과세 대상이었으면 개설할 수 없다.
+  - name: transfer_isa_provider
+    discoverable: true
+    side_effect_class: state_changing
+    description: 다른 금융회사의 ISA를 가람증권으로 옮기는 계좌 이전을 신청한다. 가입 기간과 납입 한도는 그대로 이어진다.
+  - name: open_pension_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 연금저축계좌 개설을 신청하고, 납입 방식(자유 납입 또는 정기 자동이체)을 정한다.
+  - name: apply_irp
+    discoverable: true
+    side_effect_class: state_changing
+    description: 개인형 퇴직연금(IRP) 개설을 신청한다. 퇴직금을 받을 계좌로 쓰거나 개인 부담금을 납입할 수 있다.
+  - name: set_up_investment_plan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 국내외 주식이나 펀드의 적립식 투자(금액, 주기, 종목)를 설정하거나 바꾼다.
+  - name: initiate_securities_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: 다른 증권회사 계좌의 주식이나 펀드를 가람증권으로 옮기는 대체입고를 신청한다.
+  # Common operations whose meaning differs in Korea, declared with the Korean
+  # procedure they carry here.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 국내외 주식을 거래하는 종합매매계좌의 비대면 개설을 신청한다. 신분증 확인 등 실명확인이 필요하다.
+  - name: deposit_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 연결한 은행 계좌에서 종합매매계좌로 예탁금을 입금한다.
+  - name: withdraw_funds
+    discoverable: true
+    side_effect_class: irreversible
+    description: 종합매매계좌의 예탁금을 등록한 은행 계좌로 출금한다.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 출금 계좌로 등록한 은행 계좌를 바꾼다.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: 미성년 자녀 계좌의 법정대리인(부모)을 등록하거나 바꾼다.
+  task_templates:
+  - {id: TPL-GR-ISA-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [open_isa_account]}
+  - {id: TPL-GR-YEONGEUM-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Life insurer with health and cancer cover ──────────────────────
+- id: dodam_life
+  display_name: Dodam Life
+  display_name_local: 도담생명
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: dodam_term
+    display_name: Dodam Term Life
+    display_name_local: 도담 정기보험
+    domain: insurance
+    variables:
+      sum_insured_example: {type: money, value: 100000000}
+      term_premium_example: {type: money, value: 24000}
+      policy_term_years: {type: int, value: 20}
+      max_entry_age: {type: int, value: 60}
+  - id: dodam_whole_life
+    display_name: Dodam Whole Life with Low Surrender Value
+    display_name_local: 도담 종신보험(저해지환급형)
+    domain: insurance
+    variables:
+      sum_insured_example: {type: money, value: 100000000}
+      whole_life_premium_example: {type: money, value: 186000}
+      premium_payment_years: {type: int, value: 20}
+      low_surrender_ratio: {type: percent, value: 50}
+  - id: dodam_health
+    display_name: Dodam Health Insurance
+    display_name_local: 도담 건강보험
+    domain: insurance
+    variables:
+      daily_hospital_benefit: {type: money, value: 30000}
+      max_days_per_stay: {type: int, value: 180}
+      surgery_benefit: {type: money, value: 1000000}
+      medical_premium_example: {type: money, value: 38000}
+  - id: dodam_cancer
+    display_name: Dodam Cancer Insurance
+    display_name_local: 도담 암보험
+    domain: insurance
+    variables:
+      cancer_diagnosis_benefit: {type: money, value: 30000000}
+      minor_cancer_benefit: {type: money, value: 6000000}
+      waiting_period_days: {type: int, value: 90}
+      reduction_period_years: {type: int, value: 1}
+      reduction_rate: {type: percent, value: 50}
+      cancer_premium_example: {type: money, value: 29000}
+  - id: dodam_annuity
+    display_name: Dodam Annuity Insurance
+    display_name_local: 도담 연금보험
+    domain: insurance
+    variables:
+      annuity_start_age: {type: int, value: 65}
+      annuity_premium_example: {type: money, value: 300000}
+      tax_free_monthly_cap: {type: money, value: 1500000}
+      tax_free_min_holding_years: {type: int, value: 10}
+      tax_free_min_payment_years: {type: int, value: 5}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: request_policy_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 해약환급금의 일정 범위 안에서 보험계약대출을 신청한다.
+  - name: reinstate_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: 보험료를 내지 않아 효력을 잃은 계약의 부활을 신청한다. 부활하려면 계약 전 알릴 의무를 다시 이행해야 하고, 정해진 기간 안에만 할 수 있다.
+  - name: send_deduction_certificate
+    discoverable: true
+    side_effect_class: read_only
+    description: 연말정산용 보험료 납입증명서를 발급해 보낸다.
+  - name: change_payment_method
+    discoverable: true
+    side_effect_class: state_changing
+    description: 보험료 납입 방법(자동이체 또는 신용카드)이나 출금 계좌를 바꾼다.
+  - name: withdraw_application
+    discoverable: true
+    side_effect_class: irreversible
+    description: 청약철회를 접수한다.
+  # Common operations whose meaning differs in Korea, declared with the Korean
+  # procedure they carry here.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 새 보험계약의 청약을 접수한다. 청약할 때 계약 전 알릴 의무를 이행해야 한다.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 사망보험금 수익자나 지정대리청구인을 바꾼다.
+  - name: file_claim
+    discoverable: true
+    side_effect_class: state_changing
+    description: 입원, 수술, 암 진단의 보험금이나 사망보험금 청구를 접수하고 필요 서류를 안내한다.
+  - name: get_claim_status
+    discoverable: true
+    side_effect_class: read_only
+    description: 보험금 청구의 처리 상황(서류 접수, 심사, 지급)을 확인한다.
+  - name: update_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: 보험가입금액 감액, 특약 추가와 해지 같은 계약 내용 변경을 접수한다.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: 보험계약을 해지한다. 해약환급금이 있으면 지정한 계좌로 지급한다.
+  task_templates:
+  - {id: TPL-DD-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-DD-BOJANG-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 5. Credit card company ────────────────────────────────────────────
+- id: yeoul_card
+  display_name: Yeoul Card
+  display_name_local: 여울카드
+  type: nbfc
+  brand_voice: traditional
+  domains: [payments, lending_mortgage]
+  products:
+  - id: yeoul_credit
+    display_name: Yeoul Credit Card
+    display_name_local: 여울 신용카드
+    domain: payments
+    variables:
+      annual_fee: {type: money, value: 15000}
+      reward_rate: {type: percent, value: 0.7}
+      credit_limit_max: {type: money, value: 20000000}
+  - id: yeoul_revolving
+    display_name: Revolving Payment
+    display_name_local: 리볼빙(일부결제금액이월약정)
+    domain: payments
+    variables:
+      revolving_apr: {type: percent, value: 16.5}
+      minimum_payment_ratio: {type: percent, value: 10}
+  - id: yeoul_halbu
+    display_name: Installment Payment
+    display_name_local: 할부
+    domain: payments
+    variables:
+      installment_apr_min: {type: percent, value: 9.9}
+      installment_apr_max: {type: percent, value: 19.9}
+      max_installments: {type: int, value: 24}
+  - id: yeoul_cash_service
+    display_name: Cash Advance
+    display_name_local: 단기카드대출(현금서비스)
+    domain: lending_mortgage
+    variables:
+      cash_advance_apr: {type: percent, value: 18.2}
+      cash_advance_limit_max: {type: money, value: 5000000}
+  - id: yeoul_card_loan
+    display_name: Card Loan
+    display_name_local: 장기카드대출(카드론)
+    domain: lending_mortgage
+    variables:
+      loan_rate_min: {type: percent, value: 5.9}
+      loan_rate_max: {type: percent, value: 19.9}
+      credit_limit_max: {type: money, value: 50000000}
+      prepayment_fee_rate: {type: percent, value: 0}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: get_account_transactions
+    discoverable: true
+    side_effect_class: read_only
+    description: 신용카드 이용과 현금서비스의 이용 내역을 확인한다.
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: 본인이 사용하지 않은 거래나 이중 청구의 조사를 접수하고, 부정사용 보상 절차를 시작한다.
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 카드의 분실·도난 신고를 접수하고 즉시 사용을 정지한다.
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 새 카드 번호로 카드를 재발급한다.
+  - name: change_to_revolving
+    discoverable: true
+    side_effect_class: state_changing
+    description: 일부결제금액이월약정(리볼빙)을 신청하고 약정결제비율을 정한다.
+  - name: change_to_installments
+    discoverable: true
+    side_effect_class: state_changing
+    description: 일시불로 결제한 이용 건을 결제일 전에 할부 개월 수를 정해 할부로 바꾼다(결제 후 할부 전환).
+  - name: change_revolving_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 리볼빙의 약정결제비율을 바꾼다.
+  - name: prepay_revolving_balance
+    discoverable: true
+    side_effect_class: state_changing
+    description: 리볼빙 이월 잔액이나 결제 예정 금액의 일부 또는 전부를 결제일 전에 선결제한다.
+  - name: request_limit_change
+    discoverable: true
+    side_effect_class: state_changing
+    description: 카드 이용한도나 현금서비스 한도의 상향·하향을 신청한다. 상향하려면 심사가 있다.
+  - name: file_installment_objection
+    discoverable: true
+    side_effect_class: state_changing
+    description: 물건이 오지 않거나 하자가 있는 할부 거래에 대해 남은 할부금의 지급을 거절하는 항변 신청을 접수한다.
+  # Common operations whose identifiers come from other markets, declared with
+  # the Korean procedure they carry here.
+  - name: get_loan_details
+    discoverable: true
+    side_effect_class: read_only
+    description: 현금서비스와 카드론의 이용 잔액, 금리, 다음 결제일과 결제 금액을 확인한다.
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 장기카드대출(카드론) 신청을 접수한다. 심사가 있으며, 대출 총액이 1억원을 넘으면 DSR 규제가 적용된다.
+  - name: pay_emi
+    discoverable: true
+    side_effect_class: state_changing
+    description: 결제일에 출금되지 못한 카드대금이나 현금서비스·카드론 상환금을 가상계좌 이체로 납부한다.
+  - name: foreclose_loan
+    discoverable: true
+    side_effect_class: irreversible
+    description: 카드론의 남은 원금을 한꺼번에 중도상환한다.
+  - name: update_repayment_mandate
+    discoverable: true
+    side_effect_class: state_changing
+    description: 카드대금을 출금할 결제 계좌를 바꾼다.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 카드론 대출금을 받을 입금 계좌를 바꾼다.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 가족카드나 후불교통카드 기능 추가 발급을 신청한다.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: 카드를 해지한다. 리볼빙, 할부, 카드론 잔액은 해지한 뒤에도 계속 갚아야 한다.
+  task_templates:
+  - {id: TPL-YW-REVO-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [change_to_revolving]}
+  - {id: TPL-YW-HALBU-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

@@ -609,9 +609,9 @@ class TestRuntime:
 
 
 # ---------------------------------------------------------------------------
-# Module metadata (the three registered modules)
+# Registered metadata (the four client probes)
 # ---------------------------------------------------------------------------
-class TestModuleMetadata:
+class TestRegisteredMetadata:
     @pytest.mark.parametrize(
         "mod,label,family",
         [
@@ -621,16 +621,15 @@ class TestModuleMetadata:
             (general, "health_general_disclosure", "health_general_disclosure"),
         ],
     )
-    def test_module_constants(self, mod, label, family):
-        assert mod.PROBE_FAMILY == family
-        assert isinstance(mod.PROMPT_VERSION, str) and mod.PROMPT_VERSION
-        assert mod.PROBE_VARIANTS
-        # Both variants are declared; "default" is first so it's the fallback
-        # (move-space OFF) and "guarded" is the opt-in move-space.
-        assert list(mod.PROBE_VARIANTS)[:2] == ["default", "guarded"]
+    def test_registered_metadata(self, mod, label, family):
         # The registered class binds the right label + config.
         cls = [c for c in vars(mod).values() if isinstance(c, type) and getattr(c, "label", None) == label][0]
         assert cls.CLIENT["family"] == family
+        assert cls.family == family
+        assert isinstance(cls.prompt_version, str) and cls.prompt_version
+        # Both variants are declared; "default" is first so it's the fallback
+        # (move-space OFF) and "guarded" is the opt-in move-space.
+        assert cls.variants[:2] == ("default", "guarded")
 
 
 # ---------------------------------------------------------------------------

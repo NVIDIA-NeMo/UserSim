@@ -1,0 +1,8 @@
+institution_id: kranich_invest
+display_name: Kranich Invest
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+schema_version: v0.1

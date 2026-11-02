@@ -149,6 +149,166 @@ class TestPersonaToTags:
         tags = task_derivation.persona_to_tags(persona, "pt_BR")
         assert expected_region in tags
 
+    @pytest.mark.parametrize(
+        "region, expected_nation",
+        [
+            ("London", "region:england"),
+            ("Yorkshire and The Humber", "region:england"),
+            ("South West", "region:england"),
+            ("Scotland", "region:scotland"),
+            ("Wales", "region:wales"),
+            ("Northern Ireland", "region:northern-ireland"),
+        ],
+    )
+    def test_uk_regions_map_to_their_nation(self, region: str, expected_nation: str) -> None:
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("region:")] == sorted(["region:any", expected_nation])
+
+    def test_an_unrecognised_uk_region_adds_no_nation(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Atlantis", "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("region:")] == ["region:any"]
+
+    def test_uk_nations_are_only_derived_for_en_gb(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Scotland", "age": 30}, "en_US")
+        assert "region:scotland" not in tags
+
+    @pytest.mark.parametrize(
+        "region, nation",
+        [("London", "england"), ("Scotland", "scotland"), ("Wales", "wales"), ("Northern Ireland", "northern-ireland")],
+    )
+    def test_the_uk_bank_serves_each_nation_its_own_facts(self, region: str, nation: str) -> None:
+        bank = load_fact_bank(packaged_assets_dir() / "sov_ai_facts/en_GB/sample.yaml")
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "en_GB")
+        own = {f.id for f in bank.by_tag(f"region:{nation}")}
+        assert len(own) >= 8
+        assert own <= {f.id for f in bank.matching_persona_tags(tags)}
+
+    @pytest.mark.parametrize(
+        "region, expected_land",
+        [
+            ("Bayern", "region:bayern"),
+            ("Baden-Württemberg", "region:baden-wuerttemberg"),
+            ("Thüringen", "region:thueringen"),
+            ("Nordrhein-Westfalen", "region:nordrhein-westfalen"),
+            ("Sachsen-Anhalt", "region:sachsen-anhalt"),
+            ("Berlin", "region:berlin"),
+        ],
+    )
+    def test_german_laender_map_to_their_land(self, region: str, expected_land: str) -> None:
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "de_DE")
+        assert [t for t in tags if t.startswith("region:")] == sorted(["region:any", expected_land])
+
+    def test_an_unrecognised_german_region_adds_no_land(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Atlantis", "age": 30}, "de_DE")
+        assert [t for t in tags if t.startswith("region:")] == ["region:any"]
+
+    def test_laender_are_only_derived_for_de_de(self) -> None:
+        tags = task_derivation.persona_to_tags({"region": "Bayern", "age": 30}, "en_US")
+        assert "region:bayern" not in tags
+
+    @pytest.mark.parametrize(
+        "region",
+        [
+            "Baden-Württemberg",
+            "Bayern",
+            "Berlin",
+            "Brandenburg",
+            "Bremen",
+            "Hamburg",
+            "Hessen",
+            "Mecklenburg-Vorpommern",
+            "Niedersachsen",
+            "Nordrhein-Westfalen",
+            "Rheinland-Pfalz",
+            "Saarland",
+            "Sachsen",
+            "Sachsen-Anhalt",
+            "Schleswig-Holstein",
+            "Thüringen",
+        ],
+    )
+    def test_the_german_bank_serves_each_land_its_own_facts(self, region: str) -> None:
+        bank = load_fact_bank(packaged_assets_dir() / "sov_ai_facts/de_DE/sample.yaml")
+        tags = task_derivation.persona_to_tags({"region": region, "age": 30}, "de_DE")
+        (land,) = [t for t in tags if t.startswith("region:") and t != "region:any"]
+        own = {f.id for f in bank.by_tag(land)}
+        assert len(own) >= 2
+        assert own <= {f.id for f in bank.matching_persona_tags(tags)}
+
+    @pytest.mark.parametrize(
+        "education_level, expected",
+        [
+            ("No qualifications", "education:primary"),
+            ("GCSE level or below", "education:secondary"),
+            ("Apprenticeship", "education:secondary"),
+            ("A level or equivalent", "education:secondary"),
+            ("Degree or other higher education", "education:tertiary"),
+        ],
+    )
+    def test_uk_education_levels_map_to_a_level(self, education_level: str, expected: str) -> None:
+        tags = task_derivation.persona_to_tags({"education_level": education_level, "age": 30}, "en_GB")
+        assert [t for t in tags if t.startswith("education:")] == [expected]
+
+    @pytest.mark.parametrize(
+        "education_level, locale",
+        [
+            ("Technical diploma or certificate not equal to degree", "en_IN"),
+            ("9th_12th_no_diploma", "en_US"),
+            ("Other Diploma", "en_SG"),
+        ],
+    )
+    def test_one_locales_education_keys_leave_anothers_levels_alone(self, education_level: str, locale: str) -> None:
+        """Values a UK "degree" or German "diplom" key would read as tertiary."""
+        tags = task_derivation.persona_to_tags({"education_level": education_level, "age": 30}, locale)
+        assert "education:tertiary" not in tags
+
+    @pytest.mark.parametrize(
+        "education_level, expected",
+        [
+            ("Ohne beruflichen Bildungsabschluss", "education:secondary"),
+            ("Lehre, Berufsausbildung im dualen System", "education:secondary"),
+            ("Fachschulabschluss", "education:tertiary"),
+            ("Bachelor, Master, Diplom, Promotion", "education:tertiary"),
+        ],
+    )
+    def test_german_education_levels_map_to_a_level(self, education_level: str, expected: str) -> None:
+        tags = task_derivation.persona_to_tags({"education_level": education_level, "age": 30}, "de_DE")
+        assert [t for t in tags if t.startswith("education:")] == [expected]
+
+    @pytest.mark.parametrize(
+        "occupation, family",
+        [
+            ("Sozialpädagogische Assistentin/Kinderpflegerin", "teacher"),
+            ("Altenpflegerin", "healthcare"),
+            ("Gesundheits- und Krankenpflegerin", "healthcare"),
+            ("Kinderkrankenschwester", "healthcare"),
+            ("Ambulante Pflegerin", "healthcare"),
+            ("Arzthelferin", "healthcare"),
+            ("Ingenieur für Architektur", "engineering"),
+            ("Ingenieur für Landespflege/Landschaftsplanung/-architektur", "engineering"),
+            ("Helfer in der Landwirtschaft", "agriculture"),
+            ("Bildende Künstlerin", "arts"),
+        ],
+    )
+    def test_german_occupations_map_to_a_family(self, occupation: str, family: str) -> None:
+        tags = task_derivation.persona_to_tags({"occupation": occupation, "age": 30}, "de_DE")
+        assert f"occupation-family:{family}" in tags
+
+    @pytest.mark.parametrize(
+        "occupation",
+        [
+            "Raumpflegerin",
+            "Baumpfleger",
+            "Tierpflegerin Fachrichtung Zoo",
+            "Fachverkäuferin für Kosmetik und Körperpflege",
+            "Rechtspflegerin",
+            "Pflegemutter im Kinderdorf",
+        ],
+    )
+    def test_german_care_words_outside_nursing_add_no_family(self, occupation: str) -> None:
+        tags = task_derivation.persona_to_tags({"occupation": occupation, "age": 30}, "de_DE")
+        assert not [t for t in tags if t.startswith("occupation-family:")]
+
     def test_unknown_locale_still_returns_fallback_tags(self) -> None:
         persona = {"age": 40, "occupation": "Teacher"}
         tags = task_derivation.persona_to_tags(persona, "xx_YY")
@@ -438,7 +598,7 @@ class TestSimulateSovAiFacts:
         # honest placeholders for generated rows; either warning state
         # is valid depending on which fact the persona-derived picker chose.
         # Bank version must be pinned on the provenance block.
-        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.2"
+        assert outcome["provenance"]["bank_version"].get("pt_BR") == "v0.5.3"
 
     async def test_verbatim_question_is_first_user_turn(
         self,

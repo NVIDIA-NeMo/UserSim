@@ -226,7 +226,7 @@ async def verify_realized_transcript(
     # raise below is a bug in this module and should be loud.
     # NO tools. The audit asks for plain JSON in the message body, and this is a
     # measured choice, not a stylistic one. Across the models available on an
-    # OpenAI-compatible hub, asking for a tool call was the WORST of four output
+    # OpenAI-compatible gateway, asking for a tool call was the WORST of four output
     # formats — two open models returned nothing usable for any of 7 turns, one of
     # them the same model that emits the probe's own flat commit_move calls all
     # day. Requesting a tool call actively suppressed the answer: the model would

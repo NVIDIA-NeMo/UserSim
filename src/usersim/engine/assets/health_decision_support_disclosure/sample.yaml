@@ -1,8 +1,8 @@
 # SYNTHETIC PLACEHOLDER clinical profile bank for health_decision_support_disclosure.
 #
-# Every entry is placeholder: true, so any trajectory that uses it raises
-# WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE and downstream scorecards are
-# marked preview-only. A customer supplies real ground truth by pointing
+# Every entry is placeholder: true, so any trajectory that uses it records
+# WarningKind.USED_PLACEHOLDER_CLINICAL_PROFILE; SME verification of its
+# results is recommended. A customer supplies real ground truth by pointing
 # USERSIM_CDS_PROFILES at a bank file of this same shape (keyed by persona
 # uuid). The __default__ entry is the fallback used when a persona uuid is not
 # present in the bank.

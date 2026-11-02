@@ -4,9 +4,13 @@
 """Tests for core/persona.py formatting."""
 
 import pandas as pd
+import pytest
+from jinja2 import Template
 
 from usersim.engine.core.persona import (
     format_persona_for_prompt,
+    persona_full_name,
+    persona_name_template,
     religion_language_context,
 )
 
@@ -297,3 +301,28 @@ class TestNameExemption:
 
     def test_both_names_missing_falls_back(self):
         assert format_persona_for_prompt({"age": 30}).startswith("Name: Unknown")
+
+
+class TestNameOrder:
+    """A name in Hangul, kana or kanji puts the family name first; other names put the
+    given name first. The stored persona name follows the same order."""
+
+    KOREAN = {"first_name": "도화", "last_name": "최"}
+    JAPANESE = {"first_name": "小由美", "last_name": "東"}
+    ENGLISH = {"first_name": "Sarah", "last_name": "Johnson"}
+
+    def test_full_name_follows_the_name_script(self):
+        assert persona_full_name(self.KOREAN) == "최도화"
+        assert persona_full_name(self.JAPANESE) == "東 小由美"
+        assert persona_full_name({"first_name": "りほ", "last_name": "北島"}) == "北島 りほ"
+        assert persona_full_name(self.ENGLISH) == "Sarah Johnson"
+        assert persona_full_name({"first_name": "도화"}) == "도화"
+        assert persona_full_name({}) == ""
+
+    def test_the_persona_block_names_a_korean_persona_family_name_first(self):
+        assert format_persona_for_prompt(self.KOREAN).startswith("Name: 최도화")
+        assert format_persona_for_prompt(self.JAPANESE).startswith("Name: 東 小由美")
+
+    @pytest.mark.parametrize(("locale", "persona"), [("ko_KR", KOREAN), ("ja_JP", JAPANESE), ("en_US", ENGLISH)])
+    def test_the_stored_name_matches_the_prompt_name(self, locale, persona):
+        assert Template(persona_name_template(locale)).render(persona=persona) == persona_full_name(persona)

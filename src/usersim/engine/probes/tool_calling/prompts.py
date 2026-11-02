@@ -171,7 +171,7 @@ USER_AGENT_SYSTEM_PROMPT = get_prompt(_SCENARIO, "user_agent_system_prompt", _DE
 # The OpenAI ``tools=`` parameter exposes the tool schemas — the model
 # knows what tools exist and what they do (each tool's own description
 # is part of its schema), but no behavioral instruction is added. See
-# conversation-plugin/README.md "Assistant under test:
+# docs/engine/README.md "Assistant under test:
 # pure-capability policy".
 #
 # A YAML override is still honored (``assistant_system_prompt`` key in

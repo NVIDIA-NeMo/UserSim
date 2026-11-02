@@ -12,11 +12,12 @@ from __future__ import annotations
 import logging
 
 import pytest
-from data_designer.config.utils.constants import LOCALES_WITH_MANAGED_DATASETS
+from data_designer.config.utils.constants import AVAILABLE_LOCALES, LOCALES_WITH_MANAGED_DATASETS
 
 from usersim import cli
 from usersim.cli._models import bundled_models_path
 from usersim.cli._persona_language import persona_dataset_report, persona_datasets_dir
+from usersim.engine.core.locale import SHIPPED_LOCALES
 
 
 def _cli(*args: str) -> list[str]:
@@ -44,10 +45,15 @@ def test_india_language_variants_share_one_en_IN_download():
     assert report.count("--locale en_IN") == 1
 
 
-def test_a_locale_without_a_data_designer_dataset_lists_the_ones_with_one():
-    report = persona_dataset_report(["en_GB"])
+def test_data_designer_provides_a_persona_dataset_for_every_shipped_locale():
+    assert sorted(set(SHIPPED_LOCALES) - set(LOCALES_WITH_MANAGED_DATASETS)) == []
 
-    assert "  - en_GB: Data Designer provides no persona dataset for this locale" in report
+
+def test_a_locale_without_a_data_designer_dataset_lists_the_ones_with_one():
+    locale = next(loc for loc in AVAILABLE_LOCALES if loc not in LOCALES_WITH_MANAGED_DATASETS)
+    report = persona_dataset_report([locale])
+
+    assert f"  - {locale}: Data Designer provides no persona dataset for this locale" in report
     assert "download personas" not in report
     assert f"Data Designer provides persona datasets for: {', '.join(LOCALES_WITH_MANAGED_DATASETS)}." in report
 

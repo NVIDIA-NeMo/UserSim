@@ -162,6 +162,47 @@ assistant request's earlier assistant messages carry their
 `reasoning_content`. Forward them to the model as they are. No other role's
 messages ever carry the assistant's reasoning. Replay only helps where the endpoint passes `reasoning_content` on earlier assistant messages through to the model; a server or chat template that drops earlier thinking makes it a no-op.
 
+### Running on the configured models
+
+An extension that runs its own episodes, rather than handing rows to
+`usersim simulate`, can still run them on the models a models file
+configures: `model_facades` builds one facade per alias, with providers, keys
+and inference settings resolved as a run resolves them. Building them calls no
+model.
+
+```python
+from pathlib import Path
+
+from usersim.engine.config import ConversationSimulatorConfig
+from usersim.engine.external import model_facades, replays_assistant_reasoning
+from usersim.engine.generator import ConversationSimulatorGenerator
+
+config = ConversationSimulatorConfig(
+    name="conversation",
+    replay_assistant_reasoning=replays_assistant_reasoning(Path("my_models.toml")),
+)
+generator = ConversationSimulatorGenerator.with_models(config, model_facades(Path("my_models.toml")))
+row = await generator.agenerate(stored_row)
+```
+
+`model_facades(models_path=None, *, aliases=None)`:
+
+- `models_path`: the models file; `None` reads the default one, as a run does.
+- `aliases` (keyword-only): the aliases to build, for example
+  `aliases=("user_model", "assistant_model")`. By default every alias in the
+  file is built. An alias the file doesn't declare raises `ConfigError`.
+- The facades use async clients, as a run's pipeline does.
+- An unset key's environment variable is logged as a warning, for the whole
+  file, as a run checks it.
+- Nothing is written under the working directory, and the caller's logging is
+  left as it is. Data Designer seeds its own defaults under
+  `DATA_DESIGNER_HOME` the first time, as for any run.
+
+`replays_assistant_reasoning(models_path=None, *, store_reasoning=True)` reads
+the same file's `replay_reasoning` with the same check a run applies, so the
+episode replays as a run would. It raises `ConfigError` for a setup that cannot
+replay. The facades go to `ProbeEpisodeRuntime` the same way.
+
 ## Driving the episode
 
 `advance()` is the whole loop. The first call takes no result; every later call

@@ -135,6 +135,39 @@ _USER_FOLLOWUP_INSTRUCTION_FR_FR = """Écrivez maintenant votre prochain message
 
 
 # ---------------------------------------------------------------------------
+# de_DE prompts
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_OPENING_PROMPT_DE_DE = """Sie spielen die unten beschriebene Person in einem Gespräch mit einem KI-Assistenten. Ziel dieses Gesprächs ist, dass SIE (die Person unten) im Plauderton eine offene Frage zu einem Thema stellen, das Sie interessiert, und sehen, wie der Assistent darauf eingeht.
+
+<IHRE_PERSONA>
+{persona}
+</IHRE_PERSONA>
+
+Das Thema dieses Gesprächs:
+{invitation}
+
+Ein konkreter Unterpunkt als Ausgangspunkt für Ihre erste Frage (als Anregung gedacht, nicht als wörtlicher Fragetext):
+- {subtopic_hint}
+
+Schreiben Sie Ihre ERSTE Nachricht in diesem Gespräch. Regeln:
+- Bleiben Sie in der Stimme der Persona: Wortwahl, Sprachebene und Bezüge passend zu Alter, Bildungsweg, Bundesland und Beruf oben.
+- Stellen Sie EINE klare, natürliche Frage oder teilen Sie EINE Beobachtung, auf die man ausführlich antworten muss. Vermeiden Sie Ja-Nein-Fragen.
+- Erwähnen Sie NICHT, dass es sich um eine Simulation handelt. Sprechen Sie NICHT über „das Modell“, „die KI“ oder darüber, wie das Gespräch aufgebaut ist. Bleiben Sie in der Rolle.
+- Treten Sie NICHT als Fachperson oder Lehrkraft auf. Sie sind die neugierige Person, die fragt, nicht diejenige, die es besser weiß.
+- Angemessene Länge, höchstens ein kurzer Absatz. Sie sollen klingen wie ein echter Mensch, der in einen Chat tippt.
+- Schreiben Sie natürliches Deutsch."""
+
+_USER_FOLLOWUP_INSTRUCTION_DE_DE = """Schreiben Sie jetzt Ihre nächste Nachricht in diesem Gespräch und bleiben Sie dabei in der Stimme der Persona. Regeln:
+
+- Reagieren Sie auf die Antwort des Assistenten. Wenn sie Ihnen zutreffend oder hilfreich erschien, genügt ein kurzer Dank („ah, verstehe“, „danke“); wenn sie Ihnen vage, falsch oder seltsam selbstsicher erschien, äußern Sie diesen Zweifel in der Rolle und stellen Sie eine kurze Nachfrage, ohne zu verraten, welche Antwort Sie für richtig halten (und Sie kennen sie nicht unbedingt).
+- EINE einzige Nachricht. Kurz. Fassen Sie nicht alles zusammen, was bisher gesagt wurde.
+- Natürliches Deutsch.
+- Erwähnen Sie NICHT die Simulation oder das Modell, und durchbrechen Sie nicht die vierte Wand.
+- Treten Sie NICHT als Fachperson auf und bieten Sie dem Assistenten keine Hilfe an."""
+
+
+# ---------------------------------------------------------------------------
 # ja_JP prompts
 # ---------------------------------------------------------------------------
 
@@ -308,6 +341,40 @@ _USER_FOLLOWUP_INSTRUCTION_EN_SG = """Now write your next message in this conver
 - DO NOT take on the role of expert or teacher; you remain the curious user."""
 
 
+# ---------------------------------------------------------------------------
+# en_GB prompts (British English)
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_OPENING_PROMPT_EN_GB = """You are roleplaying the following person in a conversation with an AI assistant. The point of this conversation is for YOU (the person below) to start a casual, exploratory question about a topic you are curious about — and see how the assistant responds.
+
+<YOUR_PERSONA>
+{persona}
+</YOUR_PERSONA>
+
+The topic neighbourhood for this conversation:
+{invitation}
+
+A specific sub-area to anchor your opening question (use it as a starting hook, not as the literal question text):
+- {subtopic_hint}
+
+Write your FIRST message in this conversation. Rules:
+- Stay in the persona's voice: vocabulary, register, references that match the age, education, part of the UK, and occupation above. British idioms and phrasing are appropriate when they fit the persona.
+- Ask ONE clear, natural-sounding question or share ONE observation that invites a substantive answer. Avoid yes/no questions.
+- DO NOT mention this is a simulation. DO NOT refer to "the model", "the AI", or how the conversation was set up. Stay in character.
+- DO NOT play the role of expert or teacher. You are the curious user, not the source of truth.
+- Reasonable length — one short paragraph at most. Sound like a real person typing in a chat.
+- Write in natural British English."""
+
+
+_USER_FOLLOWUP_INSTRUCTION_EN_GB = """Now write your next message in this conversation, staying in persona. Rules:
+
+- React to the assistant's answer. If it sounded right or useful, a brief acknowledgement is fine ("ah, that makes sense", "cheers"); if it sounded vague, off, or oddly confident, express that doubt in character and ask a short follow-up — without revealing what you think the right answer is (you don't necessarily know it).
+- ONE message. Short. Don't recap everything that was said.
+- Natural British English, idioms and phrasing consistent with your persona.
+- DO NOT mention the simulation, the model, the conversation as an artefact, or break the fourth wall.
+- DO NOT take on the role of expert or teacher; you remain the curious user."""
+
+
 _USER_AGENT_OPENING_PROMPT_KO_KR = """당신은 AI 어시스턴트와의 대화에서 아래 인물을 연기하고 있습니다. 이 대화의 목적은 당신(아래 인물)이 궁금한 주제에 대해 자연스럽고 탐색적인 질문으로 대화를 시작하고, 어시스턴트가 어떻게 답하는지 보는 것입니다.
 
 <당신의_페르소나>
@@ -342,11 +409,13 @@ _OPENING_PROMPTS: dict[str, str] = {
     "en_US": _USER_AGENT_OPENING_PROMPT_EN_US,
     "pt_BR": _USER_AGENT_OPENING_PROMPT_PT_BR,
     "fr_FR": _USER_AGENT_OPENING_PROMPT_FR_FR,
+    "de_DE": _USER_AGENT_OPENING_PROMPT_DE_DE,
     "ja_JP": _USER_AGENT_OPENING_PROMPT_JA_JP,
     "hi_Deva_IN": _USER_AGENT_OPENING_PROMPT_HI_DEVA_IN,
     "hi_Latn_IN": _USER_AGENT_OPENING_PROMPT_HI_LATN_IN,
     "en_IN": _USER_AGENT_OPENING_PROMPT_EN_IN,
     "en_SG": _USER_AGENT_OPENING_PROMPT_EN_SG,
+    "en_GB": _USER_AGENT_OPENING_PROMPT_EN_GB,
     "ko_KR": _USER_AGENT_OPENING_PROMPT_KO_KR,
 }
 
@@ -354,11 +423,13 @@ _FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "pt_BR": _USER_FOLLOWUP_INSTRUCTION_PT_BR,
     "fr_FR": _USER_FOLLOWUP_INSTRUCTION_FR_FR,
+    "de_DE": _USER_FOLLOWUP_INSTRUCTION_DE_DE,
     "ja_JP": _USER_FOLLOWUP_INSTRUCTION_JA_JP,
     "hi_Deva_IN": _USER_FOLLOWUP_INSTRUCTION_HI_DEVA_IN,
     "hi_Latn_IN": _USER_FOLLOWUP_INSTRUCTION_HI_LATN_IN,
     "en_IN": _USER_FOLLOWUP_INSTRUCTION_EN_IN,
     "en_SG": _USER_FOLLOWUP_INSTRUCTION_EN_SG,
+    "en_GB": _USER_FOLLOWUP_INSTRUCTION_EN_GB,
     "ko_KR": _USER_FOLLOWUP_INSTRUCTION_KO_KR,
 }
 

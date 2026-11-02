@@ -1,0 +1,128 @@
+locale: en_GB
+region: GB
+currency: GBP
+currency_symbol: £
+bank_id: en_GB_financial_services
+bank_version: v0.1.0
+task_contract_version: v0.1.0
+domain_regulators:
+  retail_banking:
+    regulators:
+    - FCA
+    - PRA
+    regulator_text: Banks and building societies are authorised by the Prudential
+      Regulation Authority and regulated by the Financial Conduct Authority. The Financial
+      Services Compensation Scheme (FSCS) protects eligible deposits up to £120,000
+      per person per institution, and temporary high balances from life events such
+      as a house sale or an inheritance up to £1.4 million for six months. The Consumer
+      Duty requires firms to deliver good outcomes, avoid foreseeable harm and support
+      customers in vulnerable circumstances. The largest banks must offer a fee-free
+      basic bank account. The Current Account Switch Service completes a switch in
+      seven working days and redirects payments, with a guarantee that refunds any
+      interest or charges caused by a problem with the switch. Arranged overdrafts
+      are charged at a single interest rate with no fixed fees, and an unarranged
+      overdraft cannot cost more. Complaints about payment services get a final response
+      within 15 business days and other complaints within eight weeks, after which
+      the customer can go to the Financial Ombudsman Service free of charge. Customer
+      service verifies identity before sharing or changing account information.
+  cards:
+    regulators:
+    - FCA
+    regulator_text: Card payments follow the Payment Services Regulations and, for
+      credit cards, the Consumer Credit Act. Under section 75 the card provider is
+      jointly liable with the retailer for a credit card purchase between £100 and
+      £30,000; a debit card purchase can be disputed through the card scheme's chargeback
+      process. A customer is liable for at most £35 of unauthorised payments made
+      before a lost or stolen card is reported, unless they acted fraudulently or
+      with gross negligence, and an unauthorised payment is refunded by the end of
+      the next business day. Credit card providers must step in when a customer is
+      in persistent debt, having paid more in interest, fees and charges than in capital
+      over 18 months. Customer service must not misstate rates, fees or refund rights.
+  payments:
+    regulators:
+    - FCA
+    - Payment Systems Regulator
+    regulator_text: Faster Payments usually arrive within seconds, and Confirmation
+      of Payee checks the payee's name against the account before a first payment.
+      Victims of an authorised push payment scam over Faster Payments or CHAPS must
+      be reimbursed up to £85,000 within five business days, with an optional excess
+      of up to £100 that cannot be applied to vulnerable customers, for claims made
+      within 13 months of the last payment. The Direct Debit Guarantee gives an immediate
+      refund of a payment taken in error. Customer service verifies identity before
+      making a payment or changing payment details.
+  lending_mortgage:
+    regulators:
+    - FCA
+    - PRA
+    regulator_text: 'Consumer credit follows the Consumer Credit Act and the FCA''s
+      rules: lenders must check affordability, advertise a representative APR with
+      a representative example, and give a 14-day right to withdraw from a credit
+      agreement. A loan can be repaid early at any time, with any compensation capped
+      at 1% of the amount repaid early, or 0.5% when less than a year remains. Since
+      15 July 2026, new buy now, pay later agreements from third-party lenders are
+      regulated, with affordability checks and access to the Financial Ombudsman Service.
+      Mortgages follow the FCA''s mortgage rules: an affordability assessment, disclosure
+      of the APRC and of any early repayment charges, and fair treatment of customers
+      in payment difficulty, with repossession only as a last resort. Customer service
+      never promises that credit will be approved and never hides costs.'
+  insurance:
+    regulators:
+    - FCA
+    - PRA
+    regulator_text: Insurers are authorised by the PRA and regulated by the FCA. A
+      customer can cancel within 14 days of buying a policy or receiving its documents,
+      or 30 days for life insurance. At renewal, a home or car insurance price cannot
+      be higher than the price the insurer would offer an equivalent new customer
+      through the same channel, and automatic renewal must be easy to turn off. Claims
+      must be handled promptly and fairly. If an insurer fails, the FSCS protects
+      90% of most general insurance claims, and 100% of compulsory insurance such
+      as third-party motor cover and of life insurance. Complaints can be taken to
+      the Financial Ombudsman Service free of charge. Customer service does not promise
+      the outcome of a claim.
+  brokerage_investing:
+    regulators:
+    - FCA
+    regulator_text: Investment platforms are regulated by the FCA. Client money and
+      assets are held separately from the firm's own, and the FSCS protects up to
+      £85,000 per person per firm if a firm fails and cannot return them, but not
+      against falls in the value of investments. ISA rules set a £20,000 allowance
+      per tax year across all ISAs. The Lifetime ISA counts towards it with up to
+      £4,000 a year and carries a 25% charge on withdrawals that are not for a first
+      home, taken at 60 or over, or in terminal illness; the government has consulted
+      on a First Time Buyer ISA to replace it, and until then it can still be opened.
+      The Junior ISA allowance is £9,000. An ISA moved between providers must be transferred,
+      not withdrawn, to keep its tax-free status. Firms must disclose costs and charges,
+      warn that capital is at risk, and check that a complex product is appropriate.
+      Customer service gives no personal recommendation and no individual tax advice.
+  retirement:
+    regulators:
+    - FCA
+    - The Pensions Regulator
+    regulator_text: Personal pensions are regulated by the FCA, and workplace pension
+      schemes are overseen by The Pensions Regulator, which enforces employers' automatic
+      enrolment duties. Before a customer accesses their pension, the provider must
+      offer to book free, impartial Pension Wise guidance. Pension transfers go through
+      checks designed to stop pension scams. Tax rules set the £60,000 annual allowance,
+      the £10,000 money purchase annual allowance after flexible access, and the £268,275
+      lump sum allowance for tax-free cash. The normal minimum pension age is 55 and
+      rises to 57 on 6 April 2028; the State Pension age is rising from 66 to 67 between
+      2026 and 2028. Unused pension funds count towards an estate for inheritance
+      tax for deaths on or after 6 April 2027. Complaints can go to the Financial
+      Ombudsman Service or, for workplace schemes, the Pensions Ombudsman. Customer
+      service gives no regulated advice and no individual tax advice.
+identity_verification:
+  required_fields:
+  - full_name
+  - date_of_birth
+placeholder: true
+account_labels:
+  retail_banking: current account
+  cards: card
+  payments: current account
+  lending_mortgage: loan account
+  insurance: policy
+  brokerage_investing: investment account
+  retirement: pension
+number_format: en_GB
+privacy_regime: UK GDPR
+schema_version: v0.1

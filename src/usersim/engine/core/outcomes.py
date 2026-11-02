@@ -33,6 +33,7 @@ separation.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -104,7 +105,7 @@ class TraceKind(str, Enum):
     # classifier's signal at every turn for audit purposes.
     CAPITULATION_CHECK = "capitulation_check"
     # A retrieval query was machine-translated into the borrowed corpus's
-    # language before searching (stop-gap locales, where the conversation
+    # language before searching (India variants, where the conversation
     # language and the asset language differ). Carries both strings so a
     # retrieval miss can be attributed to the translator rather than the
     # assistant — the query the assistant wrote is not the query that ranked.
@@ -112,67 +113,110 @@ class TraceKind(str, Enum):
 
 
 class WarningKind(str, Enum):
-    """Structured warning kinds for ``SimulationOutcome.warnings``."""
+    """Structured warning kinds for ``SimulationOutcome.warnings``.
+
+    The kinds this package emits. A probe shipped in its own package may emit
+    a kind of its own as a string instead (see ``warning_kind_problem``).
+    """
 
     ID_FABRICATION = "id_fabrication"
     COMPRESSION_FALLBACK = "compression_fallback"
     POOR_ASSISTANT_RESPONSE = "poor_assistant_response"
     # Flagged when a trajectory probed a fact that was marked
-    # ``placeholder: true`` in its bank. Downstream scorecards refuse to
-    # render a "ready for sovereign-AI claim" headline whenever any
-    # trajectory carries this warning.
+    # ``placeholder: true`` in its bank. Like every ``USED_PLACEHOLDER_*``
+    # kind below, it is recorded on the outcome so a reader can tell which
+    # findings rest on placeholder content.
     USED_PLACEHOLDER_FACT = "used_placeholder_fact"
     # Flagged when a trajectory probed against a sov_ai_dynamic
     # taxonomy that was marked ``placeholder: true`` at the file level.
-    # Same epistemic discipline as ``USED_PLACEHOLDER_FACT`` but for the
-    # `sov_ai_dynamic` probe, where the gate is at taxonomy
-    # granularity (the invitation + sub-topic hints share one reviewer
-    # audit, not per-hint).
+    # The flag is per taxonomy rather than per category, because the
+    # invitations and sub-topic hints share one reviewer audit.
     USED_PLACEHOLDER_TAXONOMY = "used_placeholder_taxonomy"
     # Flagged when a trajectory probed against a query that was marked
-    # ``placeholder: true`` in its query bank. Same epistemic discipline
-    # as ``USED_PLACEHOLDER_FACT`` and ``USED_PLACEHOLDER_TAXONOMY``, but
-    # for the cross-locale ``sov_ai_multilingual_parity`` probe. The
-    # gate is at single-query granularity (each entry holds N locale
-    # renderings, all sharing one reviewer audit).
+    # ``placeholder: true`` in its query bank, for the cross-locale
+    # ``sov_ai_multilingual_parity`` probe. The flag is per query, because
+    # an entry's N locale renderings share one reviewer audit.
     USED_PLACEHOLDER_QUERY = "used_placeholder_query"
     # Flagged when a safety_chat_pressure trajectory probed against a
     # target_request marked ``placeholder: true`` in its
-    # pressure-strategy bank. Downstream readers (capability dashboard,
-    # scorers) treat placeholder-tainted safety trajectories as
-    # preview-only — same epistemic discipline as the sovereign-AI
-    # placeholder warnings.
+    # pressure-strategy bank.
     USED_PLACEHOLDER_TARGET = "used_placeholder_target"
     # Flagged when a safety_agentic trajectory probed against an
     # action_request marked ``placeholder: true`` in its agentic-action
-    # bank. Downstream readers treat placeholder-tainted agentic-safety
-    # trajectories as preview-only.
+    # bank.
     USED_PLACEHOLDER_AGENTIC_ACTION = "used_placeholder_agentic_action"
     # Flagged when a financial_services trajectory ran against a task
-    # template or document corpus marked ``placeholder: true`` (AI-authored
-    # beta content). Downstream scorecards treat placeholder-tainted
-    # financial-services trajectories as preview-only — same epistemic
-    # discipline as the sovereign-AI / safety placeholder warnings.
+    # template (verifiable tier), or an institution or taxonomy (dynamic
+    # tier), marked ``placeholder: true`` (no domain expert has verified it).
     USED_PLACEHOLDER_FINANCE = "used_placeholder_finance"
     # Flagged when a health_disclosure trajectory used a clinical profile
     # marked ``placeholder: true`` in its clinical-profile bank (the bundled
     # synthetic banks are all placeholders until a customer ships real ground
-    # truth). Same epistemic discipline: scorecards stay preview-only for any
-    # trajectory whose concealment ground truth was synthetic.
+    # truth).
     USED_PLACEHOLDER_CLINICAL_PROFILE = "used_placeholder_clinical_profile"
     # Flagged when an identity_disclosure trajectory drew on a spec, tactic
     # or strategy marked ``placeholder: true`` (phrasings, vocabulary and
-    # expected identities awaiting native review). Same epistemic discipline:
-    # scorecards stay preview-only for such trajectories.
+    # expected identities no domain expert has verified).
     USED_PLACEHOLDER_IDENTITY = "used_placeholder_identity"
     # Flagged when a trajectory's verbatim turn-1 was machine-translated
     # from an India base-locale (en_IN) bank into the conversation
-    # language because no native per-language bank exists yet (India
-    # language-variant stop-gap). Downstream scorecards treat these cells
-    # as preview-only, same discipline as the placeholder warnings above.
-    # Automatically stops appearing once a native asset lands (the probe
-    # resolves the variant's own asset -> no translation).
+    # language, because that language has no native bank of its own;
+    # financial_services also flags it when kb_search queries are
+    # translated to search the base-locale corpus. Recorded on the outcome
+    # so a reader can tell which findings rest on machine-translated
+    # content. A locale with its own native asset never translates, so its
+    # rows never carry this warning.
     USED_MACHINE_TRANSLATION = "used_machine_translation"
+
+
+PLACEHOLDER_WARNING_KINDS: frozenset[str] = frozenset(
+    kind.value for kind in WarningKind if kind.name.startswith("USED_PLACEHOLDER_")
+)
+
+#: A warning kind a probe outside this package defines: lowercase words joined
+#: by underscores, led by the package's own prefix, such as ``acme_slow_tool``.
+_EXTENSION_WARNING_KIND = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
+
+
+def warning_kind_problem(kind: object) -> str | None:
+    """Why ``kind`` cannot be a warning kind, or ``None`` when it can.
+
+    A ``WarningKind`` member, or a string: either a built-in kind's value or a
+    prefixed lowercase name such as ``acme_slow_tool``.
+    """
+    if isinstance(kind, WarningKind):
+        return None
+    if isinstance(kind, str) and _EXTENSION_WARNING_KIND.fullmatch(kind):
+        return None
+    return f"must be a WarningKind or a prefixed lowercase name such as 'acme_slow_tool', got {kind!r}"
+
+
+def is_placeholder_warning_kind(kind: object) -> bool:
+    """Whether a warning kind marks placeholder content.
+
+    A built-in ``used_placeholder_*`` kind, or a kind of the form
+    ``<prefix>_used_placeholder_<thing>`` from a probe outside this package.
+    Stored rows hold the kind as a string; either form is read.
+    """
+    value = kind.value if isinstance(kind, WarningKind) else kind
+    return isinstance(value, str) and (value in PLACEHOLDER_WARNING_KINDS or "_used_placeholder_" in value)
+
+
+def placeholder_warning_kind_problem(kind: object) -> str | None:
+    """Why ``kind`` cannot be a probe's ``placeholder_warning_kind``, or ``None`` when it can.
+
+    It must be a valid warning kind that marks placeholder content, so the
+    report counts the rows that carry it as resting on placeholder content.
+    """
+    problem = warning_kind_problem(kind)
+    if problem:
+        return problem
+    if not is_placeholder_warning_kind(kind):
+        return (
+            "must mark placeholder content: a WarningKind.USED_PLACEHOLDER_* member, or a name of "
+            f"the form '<prefix>_used_placeholder_<thing>', got {kind!r}"
+        )
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -184,10 +228,8 @@ class WarningKind(str, Enum):
 class Provenance:
     """Everything needed to audit what a trajectory was built against.
 
-    A panel / cohort / canary parquet built against v1 that is replayed
-    against a v2 persona dataset must be a schema-mismatch error at
-    load time, not a silent drift — this record is what makes that
-    possible.
+    Recorded on every row, so rows built against different persona
+    dataset, prompt, code or bank versions can be told apart.
     """
 
     nemotron_personas_version: str | None = None
@@ -206,15 +248,31 @@ class Provenance:
 
 @dataclass
 class SimulationWarning:
-    """Structured warning entry. Stored in ``SimulationOutcome.warnings``."""
+    """Structured warning entry. Stored in ``SimulationOutcome.warnings``.
 
-    kind: WarningKind
+    A string equal to a built-in kind's value becomes that ``WarningKind``;
+    any other string must pass ``warning_kind_problem``.
+    """
+
+    kind: WarningKind | str
     turn_idx: int | None = None
     detail: str = ""
 
+    def __post_init__(self) -> None:
+        if isinstance(self.kind, WarningKind):
+            return
+        try:
+            self.kind = WarningKind(self.kind)
+            return
+        except ValueError:
+            pass
+        problem = warning_kind_problem(self.kind)
+        if problem:
+            raise ValueError(f"warning kind {problem}")
+
     def to_dict(self) -> dict[str, Any]:
         return {
-            "kind": self.kind.value,
+            "kind": self.kind.value if isinstance(self.kind, WarningKind) else self.kind,
             "turn_idx": self.turn_idx,
             "detail": self.detail,
         }
@@ -374,7 +432,7 @@ class OutcomeBuilder:
 
     def add_warning(
         self,
-        kind: WarningKind,
+        kind: WarningKind | str,
         turn_idx: int | None = None,
         detail: str = "",
     ) -> None:

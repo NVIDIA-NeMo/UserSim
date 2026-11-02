@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -184,16 +185,64 @@ def resolve_toolset_seed_path(
     return present[0] if present else None
 
 
-#: Probe asset trees that are partitioned by locale rather than flat. For
-#: these, having the probe directory is not enough -- the run's locale must
-#: have its own subtree, or the loader fails once the run is already going.
-_LOCALE_SCOPED_PROBES: frozenset[str] = frozenset(
-    {
-        "financial_services",
-        "sov_ai_dynamic",
-        "sov_ai_facts",
-    }
-)
+def _load_finance_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.finance_bank import load_finance_bank
+
+    load_finance_bank(locale_dir)
+
+
+def _load_facts_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.fact_bank import load_fact_bank
+
+    load_fact_bank(locale_dir / "sample.yaml")
+
+
+def _load_dynamic_locale(locale_dir: Path) -> None:
+    from usersim.engine.core.probing_taxonomy import load_probing_taxonomy
+
+    load_probing_taxonomy(locale_dir / "categories.yaml")
+
+
+#: Probe asset trees that are partitioned by locale rather than flat, with the
+#: loader for one locale's subtree. The subtree existing is not enough: a finance
+#: bank without tasks aborts every row once the run is already going, so the
+#: pre-flight loads it.
+_LOCALE_SCOPED_PROBES: dict[str, Callable[[Path], None]] = {
+    "financial_services": _load_finance_locale,
+    "sov_ai_dynamic": _load_dynamic_locale,
+    "sov_ai_facts": _load_facts_locale,
+}
+
+
+def _finance_bank_locale(probe_dir: Path, locale: str) -> str:
+    from usersim.engine.core.finance_bank import finance_bank_locale, has_finance_tasks
+
+    return finance_bank_locale(locale, has_tasks=lambda loc: has_finance_tasks(probe_dir / loc))
+
+
+def _own_or_base_bank_locale(probe_dir: Path, locale: str) -> str:
+    from usersim.engine.core.locale import asset_locale
+
+    return asset_locale(locale, exists=lambda loc: (probe_dir / loc).is_dir())
+
+
+#: Which locale's bank a row in a locale runs on, resolved as the probe and its
+#: scorer resolve it. A probe not listed uses an India variant's own bank when
+#: it has one, and its base locale's otherwise.
+_BANK_LOCALE: dict[str, Callable[[Path, str], str]] = {
+    "financial_services": _finance_bank_locale,
+}
+
+#: Where to ask for a probe in a locale it has no bank for.
+_FEATURE_REQUEST_URL = "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml"
+
+#: How to build a probe's bank for another locale, for the probes that document it.
+_BANK_AUTHORING_GUIDES: dict[str, str] = {
+    "financial_services": (
+        "https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
+        "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale"
+    ),
+}
 
 
 def verify_probe_assets(
@@ -201,23 +250,35 @@ def verify_probe_assets(
     locales: "list[str] | tuple[str, ...]",
     assets_dir: Path | str | None = None,
 ) -> None:
-    """Fail before any model call if a selected probe's assets are absent.
+    """Fail before any model call if a selected probe can't run in a run locale.
 
-    Without this, a missing bank surfaces from deep inside a loader partway
-    through a run -- after the other probes in the mix have already been
-    billed for. ``--dry-run`` reports the plan and exits 0, which is worse
-    than an unclear error: it says the run is fine.
+    Without this, a missing or unusable bank surfaces from deep inside a loader
+    partway through a run -- after the other probes in the mix have already been
+    billed for. ``--dry-run`` reports the plan and exits 0, which is worse than
+    an unclear error: it says the run is fine.
 
-    Raises ``ConfigError`` naming every missing path at once, so a caller
-    fixes one thing rather than rediscovering the next on each attempt.
+    Raises ``ConfigError`` naming every problem at once, so a caller fixes one
+    thing rather than rediscovering the next on each attempt.
+    """
+    verify_probe_locales({probe: tuple(locales) for probe in probe_mix}, assets_dir)
+
+
+def verify_probe_locales(
+    probe_locales: Mapping[str, Sequence[str]],
+    assets_dir: Path | str | None = None,
+) -> None:
+    """:func:`verify_probe_assets` for runs whose probes each have their own locales.
+
+    Stored rows pair each probe with the locales it runs in; checking every probe
+    against every locale would refuse pairs the rows never ask for.
     """
     from usersim.engine.core._assets import probe_assets_dir
-    from usersim.engine.core.locale import asset_locale
 
     root = Path(assets_dir) if assets_dir is not None else None
     problems: list[str] = []
+    probes_missing_a_locale: list[str] = []
 
-    for probe in sorted(probe_mix):
+    for probe in sorted(probe_locales):
         probe_dir = probe_assets_dir(probe, assets_root=root)
         if not probe_dir.is_dir():
             problems.append(f"{probe}: no asset directory at {probe_dir}")
@@ -225,29 +286,91 @@ def verify_probe_assets(
         if not any(probe_dir.rglob("*.yaml")) and not any(probe_dir.rglob("*.json")):
             problems.append(f"{probe}: {probe_dir} contains no bank files")
             continue
-        if probe in _LOCALE_SCOPED_PROBES:
-
-            def has_bank(loc: str) -> bool:
-                return (probe_dir / loc).is_dir()
-
-            # A variant without its own bank runs on its base locale's, as the
-            # probe and its scorer resolve it.
-            missing = [loc for loc in locales if not has_bank(asset_locale(loc, exists=has_bank))]
-            if missing:
-                available = sorted(p.name for p in probe_dir.iterdir() if p.is_dir())
-                problems.append(
-                    f"{probe}: no assets for locale(s) {', '.join(missing)} "
-                    f"(available: {', '.join(available) or 'none'})"
-                )
+        load = _LOCALE_SCOPED_PROBES.get(probe)
+        if load is None:
+            continue
+        locale_problems = _locale_bank_problems(probe, probe_dir, probe_locales[probe], load)
+        problems.extend(locale_problems)
+        if locale_problems:
+            probes_missing_a_locale.append(probe)
 
     if problems:
         raise ConfigError(
-            "probe assets are missing for this run:\n  - "
+            "probe assets are missing or unusable for this run:\n  - "
             + "\n  - ".join(problems)
-            + "\n\nEither point --assets-dir at a tree that has them, "
-            "generate the bank (`usersim gen-assets --domain <d>`), "
-            "or drop the probe from --probe-mix."
+            + "\n\n"
+            + "\n".join(_remedies(probes_missing_a_locale))
         )
+
+
+def _remedies(probes_missing_a_locale: Sequence[str]) -> list[str]:
+    """What to do about a refusal, with links when a probe can't run one of the run's locales."""
+    remedies = [
+        "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them."
+    ]
+    if probes_missing_a_locale:
+        remedies.append(f"To ask for a locale, open a feature request: {_FEATURE_REQUEST_URL}")
+    remedies.extend(
+        f"To build a {probe} bank yourself, see {_BANK_AUTHORING_GUIDES[probe]}"
+        for probe in probes_missing_a_locale
+        if probe in _BANK_AUTHORING_GUIDES
+    )
+    return remedies
+
+
+def _locale_bank_problems(
+    probe: str,
+    probe_dir: Path,
+    locales: Sequence[str],
+    load: Callable[[Path], None],
+) -> list[str]:
+    """The locales ``probe`` can't run in, as one line naming those that can."""
+    resolve = _BANK_LOCALE.get(probe, _own_or_base_bank_locale)
+    errors: dict[Path, str | None] = {}
+
+    def load_error(locale_dir: Path) -> str | None:
+        if locale_dir not in errors:
+            try:
+                load(locale_dir)
+                errors[locale_dir] = None
+            except Exception as exc:  # whatever stops the loader stops every row
+                errors[locale_dir] = f"{type(exc).__name__}: {exc}"
+        return errors[locale_dir]
+
+    def has_bank(loc: str) -> bool:
+        return (probe_dir / loc).is_dir()
+
+    failures: list[str] = []
+    for loc in dict.fromkeys(locales):
+        # A locale without a bank of its own may run on its base locale's.
+        bank_locale = resolve(probe_dir, loc)
+        via = "" if bank_locale == loc else f" (through {bank_locale})"
+        if not has_bank(bank_locale):
+            failures.append(f"{loc}{via}: no bank")
+        elif (error := load_error(probe_dir / bank_locale)) is not None:
+            failures.append(f"{loc}{via}: its bank does not load ({error})")
+    if not failures:
+        return []
+    runnable = sorted(d.name for d in probe_dir.iterdir() if d.is_dir() and load_error(d) is None)
+    can_run = _runnable_locales(runnable, lambda loc: resolve(probe_dir, loc))
+    return [f"{probe} can't run {'; '.join(failures)}. Locales that can run: {can_run}"]
+
+
+def _runnable_locales(runnable: Sequence[str], bank_locale: Callable[[str], str]) -> str:
+    """``runnable``, plus the shipped locales and India variants that run on one of their banks."""
+    from usersim.engine.core.locale import INDIA_VARIANT_LOCALES, SHIPPED_LOCALES
+
+    if not runnable:
+        return "none"
+    described = ", ".join(runnable)
+    for base in runnable:
+        borrowers = sorted(loc for loc in SHIPPED_LOCALES if loc not in runnable and bank_locale(loc) == base)
+        if any(loc not in runnable and bank_locale(loc) == base for loc in INDIA_VARIANT_LOCALES):
+            borrowers.append("the India language variants")
+        if borrowers:
+            names = borrowers[0] if len(borrowers) == 1 else f"{', '.join(borrowers[:-1])} and {borrowers[-1]}"
+            described += f", plus {names} through {base}"
+    return described
 
 
 def resolve_toolset_seed_for_mix(
@@ -476,7 +599,7 @@ def _add_episode_input_columns(
             ),
         )
     )
-    _add_persona_expressions(config_builder, dd)
+    _add_persona_expressions(config_builder, dd, persona_locale)
     config_builder.add_column(
         dd.SamplerColumnConfig(
             name="probe_type",
@@ -639,14 +762,14 @@ def build_evaluator_config_builder(
 
     ``judges`` is a list of dicts shaped like::
 
-        [{"alias": "evaluator_model"}, {"alias": "evaluator_model_secondary", "family": "OPENAI"}]
+        [{"alias": "evaluator_model"}, {"alias": "evaluator_secondary", "family": "anthropic"}]
 
     matching ``JudgeSpecConfig``. Defaults to a single-judge ensemble
     keyed on the ``evaluator_model`` alias — which is what
     ``REQUIRED_EVALUATOR_ALIASES`` guarantees is present in the
-    ``ModelsConfig``. Multi-judge ensembles for inter-judge κ work
-    pass an explicit list. ``axes`` defaults to the universal set;
-    ``scorers`` defaults to the empty list (opt in per probe).
+    ``ModelsConfig``. Pass an explicit list for a multi-judge ensemble;
+    it must span at least two model families. ``axes`` defaults to the
+    universal set; ``scorers`` defaults to the empty list (opt in per probe).
     """
     if judges is None:
         judges = [{"alias": "evaluator_model"}]
@@ -791,9 +914,8 @@ def evaluate_dataframe(
     Encapsulates the temp-parquet seed-source dance that DataDesigner's
     ``LocalFileSeedSource`` requires (it reads from a path, not a
     DataFrame). ``judges`` defaults to a single-judge ensemble keyed on
-    the ``evaluator_model`` alias; pass an explicit list only for
-    multi-judge inter-κ work. Three quirks preserved from the prior
-    notebook flow:
+    the ``evaluator_model`` alias; pass an explicit list for a
+    multi-judge ensemble. Three details callers rely on:
 
     - Temp-parquet prefix ``usersim_eval_seed_`` (so log filtering and
       cleanup hooks that key on this prefix keep working).
@@ -841,10 +963,15 @@ def evaluate_dataframe(
     return eval_df
 
 
-def _add_persona_expressions(config_builder, dd) -> None:
-    """Add the seven persona-* expression columns shared by the notebook."""
+def _add_persona_expressions(config_builder, dd, persona_locale: str) -> None:
+    """Add the seven persona-* expression columns shared by the notebook.
+
+    ``persona_locale`` is the persona dataset's locale; it sets the name order.
+    """
+    from usersim.engine.core.persona import persona_name_template
+
     config_builder.add_column(
-        dd.ExpressionColumnConfig(name="persona_name", expr="{{ persona.first_name }} {{ persona.last_name }}")
+        dd.ExpressionColumnConfig(name="persona_name", expr=persona_name_template(persona_locale))
     )
     config_builder.add_column(dd.ExpressionColumnConfig(name="persona_age", expr="{{ persona.age }}"))
     # ``persona_sex`` was added after the original 7-column projection
@@ -895,6 +1022,10 @@ def _add_persona_expressions(config_builder, dd) -> None:
     #   - ``fr_FR``, ``ja_JP``, ``pt_BR``, ``en_IN``,
     #     ``hi_Deva_IN``: district (city-equivalent) + region
     #     (state-equivalent) + country — city always null
+    #   - ``en_GB``: district (local authority) + region (English
+    #     region, or Scotland / Wales / Northern Ireland) + country
+    #   - ``de_DE``: district (Kreis or kreisfreie Stadt) + region
+    #     (Land) + country
     #
     # ``persona_location`` projects the four fields in small→large
     # order, deduped + truthy-filtered, producing strings like:
@@ -904,6 +1035,8 @@ def _add_persona_expressions(config_builder, dd) -> None:
     #   - fr_FR:      "Iffendic, Ille-et-Vilaine, France"
     #   - ja_JP:      "関東地方, 東京都, 日本"
     #   - en_IN:      "Raipur, Chhattisgarh, India"
+    #   - en_GB:      "Wandsworth, London, United Kingdom"
+    #   - de_DE:      "Minden-Lübbecke, Nordrhein-Westfalen, Deutschland"
     #
     # ``persona_country`` is a separate single-field projection for
     # downstream stratification (analysis.py / cohort reports) where

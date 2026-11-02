@@ -1,11 +1,15 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Supported model-free episode materialization and hosted-runtime API."""
+"""Supported model-free episode materialization, hosted-runtime and configured-model API."""
 
 from __future__ import annotations
 
+import logging
+import tempfile
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 from usersim.engine.core.episode_input import (
     ConstructedEpisode,
@@ -25,6 +29,8 @@ from usersim.engine.core.episode_runtime import (
     ProbeRuntimeDescriptor,
 )
 
+logger = logging.getLogger("usersim.engine")
+
 __all__ = [
     "ActivationRequest",
     "ActivationResult",
@@ -40,6 +46,8 @@ __all__ = [
     "construct_episode_preamble",
     "construct_probe_episode",
     "materialize_episode_inputs",
+    "model_facades",
+    "replays_assistant_reasoning",
     "simulate_episode_inputs",
 ]
 
@@ -131,3 +139,80 @@ def simulate_episode_inputs(
         models_path=path,
         skip_existing=skip_existing,
     )
+
+
+def model_facades(models_path: Path | None = None, *, aliases: Sequence[str] | None = None) -> dict[str, Any]:
+    """The models a models file configures, as facades a probe can run on outside a Data Designer pipeline.
+
+    For running episodes yourself: pass the result to
+    ``ConversationSimulatorGenerator.with_models`` or ``ProbeEpisodeRuntime``.
+    Providers, keys and each alias's inference settings (``max_tokens``,
+    ``extra_body``, the catalog defaults) are resolved as ``usersim simulate``
+    resolves them, so a request matches the one a run would send. An unset key's
+    environment variable is logged as a warning for the whole file, as a run
+    checks it, whichever ``aliases`` are built.
+    The facades use async clients, as a run's pipeline does. Building them
+    calls no model, checks no endpoint and writes nothing under the working
+    directory, and the caller's logging configuration is left as it is. Data
+    Designer itself seeds its default settings under ``DATA_DESIGNER_HOME``
+    (``~/.data-designer``) the first time, as for any Data Designer run.
+
+    ``aliases`` limits the result to those aliases; by default every alias in
+    the file is included. Raises ``ConfigError`` for an alias the file does not
+    declare.
+    """
+    import data_designer.config as dd
+    from data_designer.engine.models.clients.adapters.http_model_client import ClientConcurrencyMode
+    from data_designer.interface import DataDesigner
+
+    from usersim.cli._errors import ConfigError
+    from usersim.cli._models import (
+        default_models_path,
+        load_models_config,
+        to_data_designer_kwargs,
+        to_model_configs,
+        warn_if_missing_api_key,
+    )
+
+    models = load_models_config(models_path or default_models_path())
+    declared = list(models.aliases())
+    wanted = list(aliases) if aliases is not None else declared
+    unknown = sorted(set(wanted) - set(declared))
+    if unknown:
+        raise ConfigError(f"models config declares no {unknown}; declared aliases: {sorted(declared)}")
+    if (msg := warn_if_missing_api_key(models)) is not None:
+        logger.warning(msg)
+    builder = dd.DataDesignerConfigBuilder(model_configs=to_model_configs(models))
+    # Data Designer's public ``get_models`` builds only its default models, with
+    # sync clients; the resource provider is how a pipeline builds a configured
+    # set. tests/engine/test_model_facades.py calls it on every build and checks
+    # the clients are async, so a Data Designer change to either fails there.
+    # The provider's artifact root and managed-assets path go to a temporary
+    # folder: the models use neither, the first would otherwise be created as
+    # ./artifacts, and the person reader built from the second raises when that
+    # path does not exist. Data Designer is told to leave logging alone, so the
+    # caller's handlers survive.
+    with tempfile.TemporaryDirectory(prefix="usersim-facades-") as scratch:
+        designer = DataDesigner(
+            scratch, managed_assets_path=scratch, auto_configure_logging=False, **to_data_designer_kwargs(models)
+        )
+        provider = designer._create_resource_provider(
+            "usersim-facades", builder, client_concurrency_mode=ClientConcurrencyMode.ASYNC
+        )
+        registry = provider.model_registry
+        return {alias: registry.get_model(model_alias=alias) for alias in wanted}
+
+
+def replays_assistant_reasoning(models_path: Path | None = None, *, store_reasoning: bool = True) -> bool:
+    """Whether a models file turns on replay of the assistant's own reasoning.
+
+    Set ``ConversationSimulatorConfig.replay_assistant_reasoning`` to this when
+    running on :func:`model_facades` from the same file, so a run outside a
+    pipeline replays as ``usersim simulate`` would. Raises ``ConfigError`` for
+    a setup that cannot replay (the switch on another alias, reasoning not
+    stored, or a provider that drops reasoning).
+    """
+    from usersim.cli._models import assistant_replays_reasoning, default_models_path, load_models_config
+
+    models = load_models_config(models_path or default_models_path())
+    return assistant_replays_reasoning(models, store_reasoning=store_reasoning)

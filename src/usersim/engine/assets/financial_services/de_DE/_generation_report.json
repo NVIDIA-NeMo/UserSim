@@ -1,0 +1,945 @@
+{
+  "generated_at": "2026-10-19T04:55:45.257981+00:00",
+  "models": {
+    "doc_gen": "nvidia/google/gemma-4-31b-it",
+    "judge": "openai/openai/gpt-5.6-terra",
+    "embedding": "nvidia/qwen/qwen3-embedding-0.6b"
+  },
+  "docs_per_product": 40,
+  "max_docs_per_cluster": 10,
+  "institutions": {
+    "sparkasse_lindenhain": {
+      "n_documents": 249,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Die Sparkasse Lindenhain ist als öffentlich-rechtliches Institut tief in der Region verwurzelt und bietet allen Bürgern einen sicheren Zugang zu Finanzdienstleistungen über ein dichtes Filial- und Automatennetz. Wir konkurrieren primär über Vertrauen, regionale Präsenz und die soziale Verantwortung, jedem Kunden ein Basiskonto sowie faire Konditionen zu ermöglichen.",
+        "brand_voice_guide": "Der Ton ist professionell, verbindlich und vertrauenswürdig, wobei stets die förmliche Anrede ('Sie') verwendet wird. Die Sprache ist klar und für Laien verständlich, Fachbegriffe werden präzise erläutert und rechtliche Disclaimer werden sachlich sowie transparent platziert.",
+        "service_model": "Unterstützung erfolgt omnikanal über unsere regionalen Filialen, den telefonischen Kundenservice und Online-Banking während der Standard-Geschäftszeiten. Eskalationen werden stufenweise vom Filialmitarbeiter über die Filialleitung bis zur regionalen Geschäftsführung geleitet.",
+        "fee_philosophy": "Unsere Entgelte, wie beispielsweise die `7,50 €` für das `girokonto_komfort`, dienen der Aufrechterhaltung einer flächendeckenden regionalen Infrastruktur und eines persönlichen Services. Gebühren werden transparent kommuniziert, wobei soziale Härten und gesetzliche Anforderungen (z. B. Basiskonto) prioritär behandelt werden.",
+        "risk_and_compliance_posture": "Wir agieren unter der Aufsicht der BaFin und der Deutschen Bundesbank, wobei die gesetzliche Einlagensicherung Guthaben bis 100.000 € schützt. Alle Prozesse folgen strikt dem BGB, dem Zahlungskontengesetz und den Datenschutzrichtlinien zur Gewährleistung einer fairen und gesetzeskonformen Kundenbehandlung.",
+        "security_and_verification": "Vor jeder zustandsändernden Aktion oder der Auskunft über Kontodaten erfolgt eine strikte Identitätsprüfung des Kunden. Die starke Kundenauthentifizierung ist insbesondere bei Online-Zahlungen und sensiblen Vertragsänderungen zwingend erforderlich.",
+        "dispute_and_fraud_handling": "Beschwerden und Betrugsfälle werden fair und zeitnah gemäß den gesetzlichen Fristen des BGB bearbeitet. Bei Kartenverlust steht die sofortige Sperrung über den Notruf 116 116 im Vordergrund, um die Haftung des Kunden auf maximal 50 € zu begrenzen.",
+        "advice_boundaries": "Wir bieten eine professionelle Produktberatung und allgemeine finanzielle Aufklärung, erbringen jedoch keine individuelle Steuer- oder Rechtsberatung. Unsere Empfehlungen stützen sich auf eine sorgfältige Kreditwürdigkeitsprüfung, wobei wir niemals eine Kreditzusage ohne finale Prüfung garantieren.",
+        "product_positionings": "[{'product_id': 'girokonto_komfort', 'one_liner': 'Das zentrale Alltagskonto für die täglichen Zahlungen mit integrierter Sparkassen-Card.'}\n {'product_id': 'sparkassenbuch', 'one_liner': 'Die klassische, sichere Sparform für langfristigen Vermögensaufbau mit festen Kündigungsfristen.'}\n {'product_id': 'kreditkarte_gold', 'one_liner': 'Die exklusive Lösung für weltweite Zahlungen mit erweiterter Verfügbarkeit und Premium-Service.'}\n {'product_id': 'baufinanzierung', 'one_liner': 'Die langfristige Finanzierung für den eigenen Traum vom Eigenheim mit flexiblen Sollzinsbindungen.'}\n {'product_id': 'privatkredit', 'one_liner': 'Die flexible Finanzierung für individuelle Anschaffungen mit transparentem effektivem Jahreszins.'}]",
+        "key_terms_glossary": "[{'term': 'Dispositionskredit', 'definition': 'Eine mit einem Girokonto verbundene Überziehungsmöglichkeit bis zu einem vereinbarten Rahmen.'}\n {'term': 'Effektiver Jahreszins', 'definition': 'Die Gesamtkosten eines Kredits pro Jahr, ausgedrückt als Prozentsatz der Kreditsumme.'}\n {'term': 'Pfändungsschutzkonto', 'definition': 'Ein Girokonto, das durch die Umwandlung den Grundfreibetrag vor Pfändungen schützt.'}\n {'term': 'Sollzinsbindung', 'definition': 'Der Zeitraum, für den der Zinssatz eines Immobiliendarlehens festgeschrieben ist.'}]"
+      }
+    },
+    "kompass_direktbank": {
+      "n_documents": 205,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 1.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 5,
+          "produced": 5,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Kompass Direktbank ist eine moderne, rein digitale Neobank, die sich an preisbewusste und technikaffine Kunden richtet. Wir konkurrieren durch maximale Transparenz, eine intuitive App-Experience und faire Konditionen ohne physisches Filialnetz.",
+        "brand_voice_guide": "Der Ton ist professionell, klar und unterstützend, mit einer einfachen Sprache und geringer Jargon-Toleranz. Wir kommunizieren direkt und transparent; rechtliche Hinweise und Disclaimer sind präzise und leicht auffindbar integriert.",
+        "service_model": "Der Support erfolgt primär über die In-App-Funktionen und den digitalen Chat, wodurch alle Anliegen effizient digital erledigt werden. Bei komplexen Themen erfolgt eine nahtlose Eskalation an spezialisierte menschliche Experten.",
+        "fee_philosophy": "Wir setzen auf ein transparentes Preismodell, bei dem Gebühren die Wartung der digitalen Infrastruktur absichern. Die monatliche Kontoführungsgebühr für das `girokonto` in Höhe von \"4,90 €\" wird bei einem monatlichen Geldeingang von \"700 €\" erlassen, um aktive Nutzer zu belohnen.",
+        "risk_and_compliance_posture": "Wir agieren strikt nach den Vorgaben der BaFin und der Deutschen Bundesbank, wobei die gesetzliche Einlagensicherung bis 100.000 € als zentrales Sicherheitsversprechen dient. Datenschutz und faire Behandlung werden durch die strikte Einhaltung europäischer und nationaler Finanzmarktrichtlinien gewährleistet.",
+        "security_and_verification": "Vor jeder zustandsändernden Aktion oder der Herausgabe von Kontodaten wird die Identität des Nutzers zwingend verifiziert. Wir setzen konsequent auf starke Kundenauthentifizierung (SCA) für alle Online-Zahlungen und sensiblen Vorgänge.",
+        "dispute_and_fraud_handling": "Reklamationen und Betrugsmeldungen werden prioritär über die App bearbeitet, wobei wir uns strikt an gesetzliche Fristen halten. Beispielsweise wird die acht-wöchige Rückgabefrist für SEPA-Lastschriften sowie die Haftungsbegrenzung bei Kartenverlust gemäß BGB konsequent angewandt.",
+        "advice_boundaries": "Wir bieten allgemeine finanzielle Bildung und Produktinformationen an, jedoch keine individualisierte Steuer- oder Rechtsberatung. Produktempfehlungen erfolgen auf Basis objektiver Kriterien und eines hohen Sorgfaltsstandards ohne persönliche Anlageberatung.",
+        "product_positionings": "[{'product_id': 'girokonto', 'one_liner': 'Das zentrale, filiallose Konto für den Alltag, das ab einem monatlichen Geldeingang von \"700 €\" kostenlos ist.'}\n {'product_id': 'visa_debit', 'one_liner': 'Die weltweit einsetzbare, kostenlose Karte für einfache Zahlungen ohne Jahresgebühr von \"0 €\".'}\n {'product_id': 'tagesgeld', 'one_liner': 'Die flexible Sparoption mit einem attraktiven Neukundenzins von \"2,6 %\" für die ersten \"4\" Monate.'}\n {'product_id': 'echtzeitueberweisung', 'one_liner': 'Schnelle Geldtransfers bis \"5.000 €\" täglich, inklusive sicherer Empfängerüberprüfung und \"0 €\" Gebühr.'}]",
+        "key_terms_glossary": "[{'term': 'Einlagensicherung', 'definition': 'Der gesetzliche Schutz von Guthaben bis zu einem Betrag von 100.000 € pro Kunde und Bank.'}\n {'term': 'Empfängerüberprüfung', 'definition': 'Der automatische Abgleich von Name und IBAN des Empfängers vor der Ausführung einer Echtzeitüberweisung.'}\n {'term': 'Kontowechselhilfe', 'definition': 'Ein digitaler Service gemäß Zahlungskontengesetz, der Daueraufträge und Lastschriften auf das neue Konto überträgt.'}]"
+      }
+    },
+    "kranich_invest": {
+      "n_documents": 159,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 9,
+          "produced": 9,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Kranich Invest positioniert sich als transparenter, kosteneffizienter Broker für private Anleger, die Wert auf faire Konditionen und Sicherheit legen. Wir konkurrieren primär über die Kombination aus niedrigen Ordergebühren, dem Verzicht auf Depotgebühren und einer attraktiven Verzinsung des Verrechnungskontos.",
+        "brand_voice_guide": "Der Ton ist professionell, seriös und vertrauenswürdig, bleibt jedoch zugänglich und verzichtet auf unnötiges Finanz-Jargon. Wir kommunizieren in der Sie-Form, nutzen eine klare Struktur mit prägnanten Aufzählungspunkten und platzieren regulatorische Disclaimer sachlich und unaufdringlich am Ende der Dokumente.",
+        "service_model": "Der Support erfolgt über digitale Kanäle (E-Mail, Chat) sowie telefonisch während der Geschäftszeiten (MEZ). Komplexe Anfragen werden über ein definiertes Eskalationsmanagement an die Fachabteilungen für Compliance oder Depotführung weitergeleitet.",
+        "fee_philosophy": "Wir verfolgen eine Philosophie der Transparenz: Fixe Kosten pro Order von \"1 €\" statt prozentualer Gebühren machen die Kosten planbar. Die Depotführung ist mit \"0 €\" kostenfrei, da wir den langfristigen Vermögensaufbau unserer Kunden ohne unnötige Hürden fördern wollen.",
+        "risk_and_compliance_posture": "Wir agieren streng nach den Vorgaben der BaFin sowie MiFID II, wobei wir insbesondere die Geeignetheits- und Angemessenheitsprüfung sowie die Kostenoffenlegung priorisieren. Kunden werden explizit auf das Verlustrisiko hingewiesen; die Sicherheit wird durch die Verwahrung der Wertpapiere als Sondervermögen und die gesetzliche Anlegerentschädigung (90 % bis maximal \"20.000 €\") gewährleistet.",
+        "security_and_verification": "Sicherheit hat oberste Priorität; jede zustandsändernde Aktion erfordert eine starke Authentifizierung und eine verifizierte Identität. Vor der Ausführung von Transaktionen oder Änderungen an Stammdaten erfolgt eine mehrstufige Sicherheitsprüfung.",
+        "dispute_and_fraud_handling": "Beschwerden und Betrugsverdacht werden systematisch erfasst und innerhalb eines fest definierten Zeitrahmens transparent bearbeitet. Unser Ziel ist eine faire Lösung unter Einhaltung der regulatorischen Meldefristen und im Einklang mit den BaFin-Richtlinien.",
+        "advice_boundaries": "Wir bieten edukative Informationen und allgemeine Markteinblicke, leisten jedoch keine individuelle Steuer- oder Rechtsberatung. Bei Produktempfehlungen halten wir uns an den Standard der MiFID II, wobei wir stets darauf hinweisen, dass keine Rendite garantiert wird.",
+        "product_positionings": "[{'product_id': 'wertpapierdepot', 'one_liner': 'Das zentrale Investment-Hub mit \"0 €\" Depotgebühr und Verzinsung des Verrechnungskontos bis \"50.000 €\".'}\n {'product_id': 'etf_sparplan', 'one_liner': 'Der automatisierte Vermögensaufbau für jedermann, bereits ab einem Betrag von \"10 €\" pro Monat.'}\n {'product_id': 'kinderdepot', 'one_liner': 'Sicherer und kostengünstiger Vermögensaufbau für die nächste Generation mit niedrigen Einstiegshürden.'}]",
+        "key_terms_glossary": "[{'term': 'Sondervermögen', 'definition': 'Die rechtliche Trennung von Kundenwertpapieren vom Institutsvermögen, sodass diese im Insolvenzfall nicht in die Insolvenzmasse fallen.'}\n {'term': 'Sparer-Pauschbetrag', 'definition': 'Der steuerfreie Betrag für Kapitalerträge, der über einen Freistellungsauftrag (Einzel: \"1.000 €\", Gemeinschaft: \"2.000 €\") geltend gemacht wird.'}\n {'term': 'Abgeltungsteuer', 'definition': 'Die anfallende Kapitalertragsteuer, die inklusive Solidaritätszuschlag und ggf. Kirchensteuer direkt vom Institut abgeführt wird.'}\n {'term': 'Depotübertrag', 'definition': 'Der kostenlose Wechsel von Wertpapierpositionen von einem anderen Institut zu Kranich Invest.'}]"
+      }
+    },
+    "hanseatica_versicherung": {
+      "n_documents": 231,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 1.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 1,
+          "produced": 1,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Hanseatica Versicherung positioniert sich als vertrauenswürdiger, transparenter Partner für die private und berufliche Absicherung des deutschen Mittelstands. Wir konkurrieren durch eine Kombination aus hanseatischer Zuverlässigkeit, fairer Preisgestaltung und modernen, digitalen Prozessen.",
+        "brand_voice_guide": "Der Ton ist professionell, seriös und vertrauenerweckend, wobei eine klare Sprache auf mittlerem Leseniveau verwendet wird. Wir verwenden konsequent die formelle Anrede 'Sie' und setzen rechtliche Disclaimer deutlich und präzise ab.",
+        "service_model": "Die Unterstützung erfolgt über ein Kundenportal, E-Mail und Telefon während der regulären Geschäftszeiten (MEZ). Eskalationen werden strukturiert über die jeweilige Fachabteilung an das Beschwerdemanagement geleitet.",
+        "fee_philosophy": "Unsere Prämien sind risikobasiert und transparent kalkuliert, um eine dauerhafte Solvenz und höchste Leistungsqualität zu gewährleisten. Gebühren dienen der Deckung administrativer Kosten und der Einhaltung regulatorischer Sicherheitsmargen.",
+        "risk_and_compliance_posture": "Wir agieren unter strikter Aufsicht der BaFin und halten das Versicherungsvertragsgesetz ein, wobei der Schutz durch den Sicherungsfonds Protektor bei Rentenprodukten ergänzt wird. Wir kommunizieren Widerrufsrechte (14 Tage allgemein, 30 Tage bei Lebens-/Rentenversicherungen) und Datenschutzrichtlinien proaktiv und transparent.",
+        "security_and_verification": "Vor jeder zustandsändernden Aktion oder dem Zugriff auf vertrauliche Daten ist eine eindeutige Identitätsprüfung mittels Multi-Faktor-Authentifizierung oder eines validierten KYC-Prozesses zwingend erforderlich.",
+        "dispute_and_fraud_handling": "Beschwerden werden fair und zeitnah bearbeitet, wobei bei ausbleibendem Konsens aktiv auf den kostenlosen Versicherungsombudsmann verwiesen wird. Betrugsversuche werden konsequent dokumentiert und den zuständigen Behörden gemeldet.",
+        "advice_boundaries": "Wir bieten edukative Erläuterungen zur Produktwahl, leisten jedoch keine individuelle Steuer- oder Rechtsberatung und garantieren niemals eine spezifische Wertentwicklung. Wir halten uns an einen Standard der Sorgfalt, der die Eignung des Produkts für die allgemeine Zielgruppe priorisiert.",
+        "product_positionings": "[{'product_id': 'privathaftpflicht', 'one_liner': \"Umfassender Schutz des Privatvermögens durch hohe Deckungssummen von '20.000.000 €' und klare Regelungen zur Selbstbeteiligung.\"}\n {'product_id': 'hausrat', 'one_liner': \"Sicherung des Hausrats mit einem Unterversicherungsverzicht und spezialisiertem Schutz gegen Fahrraddiebstahl bis '1.000 €'.\"}\n {'product_id': 'kfz', 'one_liner': 'Gesetzlich vorgeschriebene Haftpflicht mit optionaler Kaskodeckung und flexiblen Kündigungsoptionen bis zum 30. November.'}\n {'product_id': 'berufsunfaehigkeit', 'one_liner': \"Existenzsicherung bei einer Berufsunfähigkeit ab '50 %', basierend auf einer sorgfältigen vorvertraglichen Anzeigepflicht.\"}\n {'product_id': 'fondsrente', 'one_liner': 'Flexibler, fondsgebundener Vermögensaufbau für die Altersvorsorge mit transparenten Kosten und anpassbaren Bezugsrechten.'}]",
+        "key_terms_glossary": "[{'term': 'Widerrufsrecht', 'definition': 'Das Recht, einen Versicherungsvertrag innerhalb von 14 Tagen (bzw. 30 Tagen bei Lebens- und Rentenversicherungen) ohne Angabe von Gründen zu stornieren.'}\n {'term': 'Sonderkündigungsrecht', 'definition': 'Die Möglichkeit zur außerordentlichen Beendigung eines Vertrages, beispielsweise nach einer Beitragserhöhung oder einem eingetretenen Schadenfall.'}\n {'term': 'Unverzügliche Schadenmeldung', 'definition': 'Die vertragliche Pflicht des Versicherungsnehmers, ein Schadensereignis ohne schuldhaftes Zögern an das Unternehmen zu melden.'}\n {'term': 'eVB-Nummer', 'definition': 'Die elektronische Versicherungsbestätigung, die für die Zulassung eines Fahrzeugs bei der Kfz-Zulassungsstelle zwingend erforderlich ist.'}]"
+      }
+    },
+    "bausparkasse_heimstatt": {
+      "n_documents": 192,
+      "clusters": [
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 3.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 1.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 2.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "product",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 2.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 10,
+          "produced": 10,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 4.0,
+          "distinctness": 4.0
+        },
+        {
+          "cluster_kind": "shared",
+          "target": 2,
+          "produced": 2,
+          "numeric_faithfulness": 4.0,
+          "cohesion": 3.0,
+          "distinctness": 4.0
+        }
+      ],
+      "brief": {
+        "positioning": "Die Bausparkasse Heimstatt positioniert sich als regional verwurzelter, vertrauenswürdiger Partner für den sicheren Wohnungsbau und die private Vorsorge. Wir richten uns primär an Familien und zukünftige Eigenheimbesitzer, wobei wir durch Planungssicherheit mittels fester Zinsen und die optimale Nutzung staatlicher Förderungen konkurrieren.",
+        "brand_voice_guide": "Die Tonalität ist professionell, beratend und seriös, wobei stets die Höflichkeitsform ('Sie') verwendet wird. Wir setzen auf eine klare, gut verständliche Sprache ohne unnötigen Jargon und verwenden für Konditionen eine strukturierte Darstellung mit präzisen Werten.",
+        "service_model": "Kunden erhalten Unterstützung über regionale Filialen, eine zentrale Telefon-Hotline sowie ein digitales Kundenportal während der regulären Geschäftszeiten. Eskalationen werden hierarchisch über die Filialleitung an die zuständigen Fachabteilungen oder das Beschwerdemanagement weitergeleitet.",
+        "fee_philosophy": "Wir verfolgen eine transparente Preispolitik; Abschlussgebühren dienen der Deckung des administrativen Aufwands zur langfristigen Zinssicherung. Gebühren können im Rahmen spezieller Aktionsangebote oder bei besonders hohen Vertragsvolumina reduziert oder erlassen werden.",
+        "risk_and_compliance_posture": "Wir agieren strikt nach den regulatorischen Vorgaben der BaFin und der Deutschen Bundesbank sowie den Bestimmungen des BGB für Verbraucherdarlehen. Alle Produkte werden mit transparenten Offenlegungen, einschließlich des effektiven Jahreszinses und Hinweisen zur gesetzlichen Einlagensicherung, kommuniziert.",
+        "security_and_verification": "Vor jeder statusändernden Aktion oder der Herausgabe von Kontoinformationen ist eine eindeutige Identitätsprüfung (z. B. durch Ausweisdokumente oder Zwei-Faktor-Authentifizierung) zwingend erforderlich. Wir wenden strikte Verifikationsprotokolle an, um die Sicherheit der Kundendaten zu gewährleisten.",
+        "dispute_and_fraud_handling": "Beschwerden und Betrugsfälle werden fair, transparent und unter Einhaltung gesetzlicher Fristen (z. B. acht Wochen bei SEPA-Rückgaben) bearbeitet. Bei Verdacht auf Betrug erfolgt eine sofortige Sperrung der betroffenen Konten sowie eine Meldung an die zuständigen Aufsichtsbehörden.",
+        "advice_boundaries": "Wir bieten umfassende Produktberatung und allgemeine finanzielle Bildung, erbringen jedoch keine individualisierte Steuer- oder Rechtsberatung. Wir halten uns an einen hohen Sorgfaltsstandard bei Produktempfehlungen, verweisen für spezifische rechtliche oder steuerliche Details jedoch an zertifizierte Fachleute.",
+        "product_positionings": "[{'product_id': 'bausparen_classic', 'one_liner': 'Die ausgewogene Basisoption für eine sichere Kombination aus Sparen und späterem Bauen.'}\n {'product_id': 'bausparen_rendite', 'one_liner': 'Fokus auf attraktive Guthabenzinsen für Sparer bei gleichzeitig höheren Darlehenskosten.'}\n {'product_id': 'modernisierungsdarlehen', 'one_liner': 'Die schnelle, unbürokratische Finanzierungslösung für kleinere Renovierungen ohne Grundschuld.'}\n {'product_id': 'staatliche_foerderung', 'one_liner': 'Maximierung des Eigenkapitals durch die optimale Nutzung von staatlichen Prämien und Zulagen.'}]",
+        "key_terms_glossary": "[{'term': 'Bausparsumme', 'definition': 'Der vertraglich vereinbarte Gesamtwert des Bausparvertrags, der sich aus dem Sparanteil und dem späteren Darlehensanteil zusammensetzt.'}\n {'term': 'Zuteilung', 'definition': 'Der Zeitpunkt, an dem ein Vertrag die nötige Bewertung erreicht hat und der Kunde das Darlehen zu den festgesetzten Zinsen beanspruchen kann.'}\n {'term': 'Bewertungszahl', 'definition': 'Ein Punktwert, der basierend auf der Bausparsumme und den geleisteten Einzahlungen berechnet wird, um den Rang in der Zuteilungsliste zu bestimmen.'}\n {'term': 'Sondertilgung', 'definition': 'Die Möglichkeit, zusätzlich zu den regelmäßigen Raten außerplanmäßige Rückzahlungen des Darlehens zu leisten, was bei unseren Bauspardarlehen jederzeit kostenfrei möglich ist.'}]"
+      }
+    }
+  }
+}

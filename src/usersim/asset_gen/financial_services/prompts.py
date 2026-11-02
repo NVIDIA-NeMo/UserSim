@@ -24,15 +24,18 @@ default), so a non-US locale does not inherit US instruments or statutes.
 from __future__ import annotations
 
 # Phase 1 seed columns: institution_id, display_name, institution_type,
-# brand_voice, language, currency_symbol, products_json, regulators_json,
-# concept_guidance.
+# brand_voice, language, language_guidance, currency_symbol, identity_fields,
+# products_json, regulators_json, concept_guidance.
 BRIEF_PROMPT = """\
 You are the brand and operations lead for a FICTIONAL {{ institution_type }} called
 "{{ display_name }}"{% if display_name_local %} (written "{{ display_name_local }}" in {{ language }} — use that
 form in {{ language }} prose, and keep it identical everywhere){% endif %} (id: {{ institution_id }}). Author a concise internal BRIEF that
 every downstream document will follow, so the institution's voice and policies stay
 consistent. Write ALL prose in {{ language }}; keep product ids and tool/function
-names verbatim. Use the {{ currency_symbol }} symbol for money.
+names verbatim. Use the {{ currency_symbol }} symbol for money, and write every number
+the way {{ language }} writes it: each typed value carries a `display` form, so quote
+that form rather than the raw `value`.{% if language_guidance %}
+Spelling and usage: {{ language_guidance }}{% endif %}
 
 Products offered (authoritative typed values -- reference exactly, never invent):
 {{ products_json }}
@@ -46,7 +49,7 @@ Write each field as 1-3 sentences, generic enough to guide many documents:
 - service_model: support channels, hours/timezone, escalation path.
 - fee_philosophy: pricing stance and WHY fees exist / how they are waived.
 - risk_and_compliance_posture: how risk, disclosures, fair treatment and data privacy are framed; reference the applicable framework + any deposit/investor-protection scheme.
-- security_and_verification: identity/authentication stance BEFORE any state-changing action.
+- security_and_verification: how the agent confirms who it is talking to BEFORE any state-changing action. In the conversation that is ONE check, on the customer's {{ identity_fields }}; name no other step (no one-time code, MFA, app or push approval, callback, or security question), and never ask for a full card or account number, CVV, PIN, password, or an ID number the check does not take.
 - dispute_and_fraud_handling: complaint/dispute/fraud philosophy and general timeline posture.
 - advice_boundaries: what the institution advises vs defers (e.g. education, not individualized tax/legal advice); the standard of care it holds itself to when recommending products.
 - product_positionings: for EACH product id above, a one-line positioning relative to the others.
@@ -104,8 +107,22 @@ def concept_guidance_for(institution_type: str, overrides: dict[str, str] | None
     return DEFAULT_TYPE_CONCEPT_GUIDANCE.get(institution_type, "")
 
 
+def language_guidance_for(guidance: str, respell: dict[str, str] | None = None) -> str:
+    """The spelling-and-usage line for both prompts, pairing each form to avoid with
+    the form to write instead.
+
+    Returns ``""`` when the region spec sets no conventions, so the prompts render
+    exactly as they do without them.
+    """
+    parts = [guidance.strip()] if guidance.strip() else []
+    if respell:
+        parts.append("Write " + ", ".join(f'"{new}" for "{old}"' for old, new in respell.items()) + ".")
+    return " ".join(parts)
+
+
 # Phase 2 seed columns: institution_id, display_name, institution_type, brand_voice,
-# language, currency_symbol, institution_brief, cluster_kind, focus_json, doc_plan_json
+# language, language_guidance, currency_symbol, identity_fields, concept_guidance, institution_brief,
+# regulators_json (every domain of the institution), cluster_kind, focus_json, doc_plan_json
 # (each entry carries doc_key/document_type/topic/angle/audience/length), sibling_doc_index,
 # target_doc_count.
 DOCSET_PROMPT = """\
@@ -114,8 +131,20 @@ You are authoring part of the internal knowledge base for the FICTIONAL institut
 Follow this institution BRIEF exactly (voice, positioning, fee/dispute/advice posture):
 {{ institution_brief }}
 
+The rules that govern these documents, from the market's regulators. They are
+AUTHORITATIVE: where the brief or your own knowledge of the market says otherwise, these
+win. Apply each rule only to the products and cases it names -- a rule written for one
+product (a loan, an account type) does not extend to its siblings:
+{{ regulators_json }}
+{% if concept_guidance %}
+What this kind of institution's documents cover in this market, and the facts they rest on:
+{{ concept_guidance }}
+{% endif %}
 Write ALL body prose in {{ language }}. Keep tool/function identifiers, product ids, and
-doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money.
+doc_keys VERBATIM. Use the {{ currency_symbol }} symbol for money, and write every number
+the way {{ language }} writes it (its decimal mark and digit grouping), never another
+language's notation.{% if language_guidance %}
+Spelling and usage: {{ language_guidance }}{% endif %}
 TITLES ARE GIVEN, NOT AUTHORED: copy each entry's `topic` into its `title` EXACTLY as
 provided -- already in {{ language }} -- and do not translate, shorten, re-word, or
 re-punctuate it. The same string is what every sibling document is told to cite when it
@@ -124,13 +153,16 @@ NAMING CONSISTENCY: when a product carries a `display_name_local`, use exactly t
 {{ language }} prose -- never re-translate it and never vary it between documents, because
 readers (and retrieval) rely on one product having one name across the knowledge base.
 NUMERIC FIDELITY IS THE #1 REQUIREMENT: reproduce every fee, rate, yield, balance, limit,
-threshold, duration, date, and percentage from the focus values EXACTLY as given (same digits,
-symbol, %, and units) -- never round, approximate, paraphrase, bucket, omit, or invent a number.
+threshold, duration, date, and percentage from the focus values EXACTLY, written as its
+`display` form (the same digits, with {{ language }}'s decimal mark, digit grouping, symbol,
+%, and units) -- never round, approximate, paraphrase, bucket, omit, or invent a number.
 The VALUE is verbatim; its NAME is not. The focus keys are machine field names, so write what
 each one means in ordinary prose and NEVER print the key itself: say "an annual interest rate
 of 0%", not "an interest_rate_annual of 0%"; "a one-time processing fee of {{ currency_symbol }}499",
 not "a processing_fee of {{ currency_symbol }}499". A document that shows a snake_case field name
-reads like an unfilled template and is a failure even if the number is right.
+reads like an unfilled template and is a failure even if the number is right. When a value
+carries a `label`, the label says what the value IS: describe it as the label does, and never
+read a different meaning off the key's English words.
 
 {% if cluster_kind == 'shared' %}
 This is the institution's SHARED, cross-cutting document set (applies across all products).
@@ -153,7 +185,7 @@ Sibling documents you may cross-reference by their exact title (doc_key -> title
 
 Requirements:
 - Faithfulness (HIGHEST PRIORITY -- overrides brevity): every numeric value present in the
-  focus values MUST appear VERBATIM in the document(s) where it belongs. If stating all exact
+  focus values MUST appear, in its `display` form, in the document(s) where it belongs. If stating all exact
   values conflicts with the length target, keep the exact values and cut prose instead -- a
   document that rounds, buckets, or omits a value is a failure even if it reads well.
 - Length: aim for each body's per-entry `length` target -- a SOFT target that yields to
@@ -163,6 +195,10 @@ Requirements:
   eligibility_matrix, promo_notice, faq, rate_sheet, comparison) stay tight. Value-bearing docs
   MAY exceed their target if needed to state every applicable value exactly.
 - Consistency: names, numbers, and fees must match the focus values and the brief exactly.
+- Plain text: write every body as Markdown with no LaTeX or other math markup. Write a
+  symbol as the character itself (≥, ≤, →, ×) or in words, including in the places math
+  markup slips in: a line that maps a condition to its outcome, a sequence of steps, and
+  a formula.
 - Distinctness: every document must be materially different in scope, framing, and detail --
   driven by its `angle` and `audience`. Two documents of the same document_type MUST NOT
   restate the same content; if two angles feel close, deepen one and keep the other high-level.
@@ -179,9 +215,18 @@ Requirements:
       IN THE CONVERSATION after identity is verified -- the final step is calling the
       tool, NOT redirecting the customer to an external portal, app, branch, website,
       or form. (Use get_accounts to resolve the customer's account_id from a last-4.)
+      Identity is verified ONCE, by calling `verify_identity` with the customer's
+      {{ identity_fields }} (optionally the last 4 digits of an account or card), as the
+      customer states them. Add no other verification step -- no one-time code, MFA,
+      app or push approval, callback, or security question: the agent can neither send
+      nor check one, so a procedure that requires it can never be completed. Never ask
+      for a full card or account number, CVV, PIN, password, or an ID number
+      `verify_identity` does not take.
     discoverable_tool_doc: the tool's exact signature, args, and effect. State plainly
       that the agent performs this action by calling the tool directly (never by
-      telling the customer to self-serve it elsewhere).
+      telling the customer to self-serve it elsewhere). Identity is already verified
+      by `verify_identity` before the tool is called, so the signature takes no PIN,
+      one-time code, or other verification argument of its own.
       EVERY argument must be something the agent can actually obtain in the
       conversation: a value the customer states, or one another tool returns. Never
       invent an internal identifier with no source -- no `customer_id` for the person
@@ -225,6 +270,9 @@ Requirements:
       is the first thing that actually moves the task forward (what they tell us, what
       they hand over, what we confirm back). A contact step costs the document its whole
       first move and makes every guide read from the same template.
+      When the customer has to identify themselves in the conversation, they give their
+      {{ identity_fields }}; never ask them to show an ID card there, or to give a full
+      card or account number, a PIN, a password, or a one-time code.
     troubleshooting: the symptom as the customer would describe it, the likely causes,
       what to check in what order, the fix, and when to escalate -- with any timeline
       or reference the customer should expect. Written from the CUSTOMER's side: it is
@@ -240,7 +288,7 @@ Requirements:
       product whose values you were given; for an outside offering compare on structure
       and trade-offs rather than inventing its numbers. Then say who each suits. Never
       disparage the alternative; state where it is the better choice.
-    eligibility_matrix: conditions -> outcome rows, with exact thresholds/limits.
+    eligibility_matrix: one row per condition, stating its outcome and its exact threshold or limit.
     terms_conditions: the binding terms in formal register -- obligations on each side,
       what triggers a change, notice periods, and how the agreement ends. Anchor every
       clause in THIS product's actual fees, limits and thresholds rather than generic
@@ -265,6 +313,9 @@ Authoritative product values -- the ONLY numbers to check for NumericFaithfulnes
 other numbers in the documents (dates, illustrative examples, regulatory citations) are
 EXPECTED and must NOT lower the faithfulness score. If this context lists no product
 values (e.g. an institution-wide shared set), there is nothing to contradict -> score 4.
+Each value carries a `display` form, its notation in the documents' language: a value
+written that way is faithful, while the right digits in another language's notation (a
+decimal point where the language uses a decimal comma) are a notation error.
 {{ focus_json }}
 
 Generated document set:

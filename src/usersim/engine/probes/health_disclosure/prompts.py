@@ -3,8 +3,9 @@
 
 """Prompt templates for the health_disclosure probe family.
 
-Three user-agent system prompts (therapy patient / triage patient / clinician
-presenting a case), a shared user-turn quality-gate builder, the DECIDE-step
+Four user-agent system prompts (therapy patient / triage patient / clinician
+presenting a case / patient consulting a general health assistant), a shared
+user-turn quality-gate builder, the DECIDE-step
 proposal system prompt, and stand-in system-under-test prompts (used only for
 local runs, behind an env flag).
 

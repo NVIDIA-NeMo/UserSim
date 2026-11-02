@@ -1,15 +1,19 @@
 # Probe substrate
 
 A probe owns *what* a simulated user does. This page is the substrate: the
-base class, the hooks, the mixins. For the catalogue of what ships, see
+base class, the hooks, the mixins. For the catalog of what ships, see
 [`docs/probes.md`](../docs/probes.md); for a worked example,
 [`docs/engine/AUTHORING_A_PROBE.md`](../docs/engine/AUTHORING_A_PROBE.md).
 
 ## Registration
 
 `@register_probe` on a `BaseProbe` subclass does everything: it sets the
-module constants the dispatcher reads (`PROBE_FAMILY`, `PROMPT_VERSION`,
-`PROBE_VARIANTS`) and adds the class to the registry under its `label`.
+class attributes the dispatcher reads (`family`, `prompt_version`,
+`variants`) and adds the class to the registry under its `label`. Each
+probe carries its own, so two probes defined in one module record their own
+prompt versions. The decorator also sets the same values on the module as
+`PROBE_FAMILY`, `PROMPT_VERSION` and `PROBE_VARIANTS`; with two probes in one
+module those hold whichever was registered last.
 
 ```python
 @register_probe(family="general", prompt_version="v1.0", variants=("default",))
@@ -18,7 +22,8 @@ class OpenEndedProbe(BaseProbe):
 ```
 
 The class *is* the registration; there is no separate label table to edit. A
-duplicate label is rejected rather than silently overwriting.
+second class registered under a taken label raises `ProbeRegistrationError`,
+naming both classes, so give each probe a label of its own.
 
 Shipped probes are listed by module in `BUILTIN_PROBE_MODULES`
 (`core/probes.py`); the registry imports them the first time a probe is
@@ -44,24 +49,36 @@ required; the rest have working defaults on `BaseProbe`.
 | `format_assistant_judge_prompt` | in-sim assessment of the assistant turn |
 | `is_capitulation_detected` | pressure probes checking for a flip |
 | `allow_early_stop_at_turn` | deciding whether the conversation may end |
-| `user_turn_policy` | once per trajectory: whether earlier replies may be summarised, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
+| `user_turn_policy` | once per trajectory: whether earlier replies may be summarized for context management, whether the last follow-ups may wrap up, which filter phrases the user may write, which names the script check skips, and a check each generated opening must pass before the gate |
 | `seed_state_metadata` | recording bank/seed provenance on the row |
-| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in `side_effect_columns` (an extension probe keeps per-row data in `state.metadata`) |
+| `build_result_extras` | adding probe-specific columns to the trajectory, each declared in the class's `output_columns` |
 
-Anything a probe does not override inherits a default, which is what keeps a
-new probe to roughly fifty lines.
+Anything a probe does not override inherits a default, so a new probe declares
+only what is specific to it.
 
 A probe's own columns are the one part of this that is declared twice. Whatever
-`build_result_extras` returns is written only if the name appears in
-`ConversationSimulatorConfig.side_effect_columns`; anything else is discarded,
-and the scorer that reads it back finds nothing to score. The generator logs a
-warning naming the probe and the column the first time it happens.
+`build_result_extras` returns is written only if the name is a core column or
+appears in some registered probe's `output_columns`; anything else is
+discarded, and the scorer that reads it back finds nothing to score. The
+generator logs a warning naming the probe and the column the first time it
+happens. A run declares the core columns plus the union of every registered
+probe's `output_columns` as `ConversationSimulatorConfig.side_effect_columns`,
+because Data Designer reads the declaration once, before any row says which
+probe produced it.
 
-An extension probe cannot add to that list without editing this repository, so
-it keeps per-row data in `state.metadata` instead, which is stored with the row
-as `conversation_metadata` and read from there by its scorer. Write it during
-the run, for example in `after_assistant_turn`: the metadata is serialized
-before `build_result_extras` runs, so anything added there is lost.
+Per-row data that is not a column of its own goes in `state.metadata`, which is
+stored with the row as `conversation_metadata` and read from there by the
+probe's scorer. Write it during the run, for example in `after_assistant_turn`:
+the metadata is serialized before `build_result_extras` runs, so anything added
+there is lost.
+
+The conversation loop writes eight keys of its own there, listed with what each
+holds in `RESERVED_METADATA_KEYS` (`core/simulation.py`): `user_judge_ratings`,
+`assistant_judge_ratings`, `frustration_events`, `capitulation_checks`,
+`stopped_on_capitulation`, `capitulated_at_turn`, `user_followup_retries` and
+`early_stop`. A probe reads them and writes keys of its own;
+`assert_probe_conforms` reads a probe's classes and reports any that write a
+reserved key.
 
 Six hooks can reach a model, and the loop awaits them: `get_verbatim_first_user_turn`,
 `format_followup_user_instructions`, `after_assistant_turn`, `is_capitulation_detected`,
@@ -77,8 +94,8 @@ Six mixins cover the shapes that recur, all in `core/probes.py`:
 - **`BankReframingMixin`**: turn 1 from a bank, then reframed under pressure.
 - **`CustomTurn1InstructionMixin`**: turn 1 generated from an instruction
   rather than a bank.
-- **`ToolCallingMixin`**: the assistant is offered tools; the probe checks
-  call/clarify/refuse behaviour.
+- **`ToolCallingMixin`**: the assistant is offered tools, and the conversation
+  cannot stop early until it has used one.
 - **`ToolExecutionMixin`**: tool calls are actually executed against a mock
   environment.
 - **`AgenticMixin`**: bank-seeded, tool-executing, multi-step.
@@ -91,6 +108,10 @@ the turn had no side effects.
 ## Assets
 
 A probe's content lives at `engine/assets/<label>/`, resolved through
-`probe_assets_dir()`. A run fails pre-flight if a selected probe's bank is
-missing, naming the probe and the path rather than failing from inside a
-loader mid-run. See [assets.md](assets.md).
+`probe_assets_dir()`. A run fails pre-flight, before any model call, if a
+selected probe's bank is missing or, for the probes whose banks are split by
+locale, doesn't load for a run locale (a finance bank without tasks, for
+instance). The refusal names the probe, the locale and the locales that can
+run, rather than failing from inside a loader mid-run. `simulate` and its
+`--dry-run`, `--materialize-inputs`, `--inputs` and notebook 01 all run the
+check. See [assets.md](assets.md).

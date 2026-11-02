@@ -39,6 +39,11 @@ def _asset_gen_dir() -> Path:
 
 _REGION_SPEC = _asset_gen_dir() / "financial_services" / "region_spec" / "en_US.yaml"
 
+#: Region specs that author their own title vocabulary.
+_LABELLED_SPECS = sorted(
+    p.stem for p in _REGION_SPEC.parent.glob("*.yaml") if "variable_labels:" in p.read_text(encoding="utf-8")
+)
+
 
 def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     """Region specs list kb_search / verify_identity by name only; serialization
@@ -76,6 +81,127 @@ def test_backfill_primitive_tools_fills_empty_primitive_schemas():
     # retrieved KB doc via the call_tool gate, not a typed schema.
     assert out["file_transaction_dispute"]["parameters"] == {}
     assert out["file_transaction_dispute"]["description"] == ""
+
+
+def test_prompt_values_carry_the_locale_notation():
+    """The prompts hand the model each typed value with its rendering in the
+    locale's notation, so a decimal-comma corpus does not copy ``7.9`` from JSON."""
+    import copy
+
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    product = raw["institutions"][0]["products"][0]
+    product["variables"] = {
+        "monthly_fee": {"type": "money", "value": 7.9},
+        "ceiling": {"type": "money", "value": 22950},
+        "rate": {"type": "percent", "value": 15.9},
+        "term_months": {"type": "int", "value": 48},
+    }
+    us = validate_region_spec(copy.deepcopy(raw))
+    raw.update(locale="fr_FR", region="FR", currency="EUR", currency_symbol="€", number_format="fr_FR")
+    france = validate_region_spec(raw)
+
+    def displays(spec):
+        variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+        return {name: var["display"] for name, var in variables.items()}
+
+    assert displays(france) == {"monthly_fee": "7,90 €", "ceiling": "22 950 €", "rate": "15,9 %", "term_months": "48"}
+    assert displays(us) == {"monthly_fee": "$7.90", "ceiling": "$22,950", "rate": "15.9%", "term_months": "48"}
+    seed = build_institution_seed(france)
+    assert '"display": "7,90 €"' in seed.iloc[0]["products_json"]
+
+
+def test_common_operations_the_simulator_reads_arguments_from_are_described():
+    """get_order_status called without an order_id lists the account's orders, which is
+    how the agent finds the id cancel_order needs. The operations whose arguments the
+    simulator reads carry a description, and it reaches the cluster that writes their
+    tool docs."""
+    import json
+
+    import pandas as pd
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict, explode_to_cluster_rows
+    from usersim.asset_gen.financial_services.spec import (
+        COMMON_OPERATION_DESCRIPTIONS,
+        COMMON_TYPE_OPERATIONS,
+        COMMON_UNIVERSAL_OPERATIONS,
+    )
+
+    common = {name for name, _ in COMMON_UNIVERSAL_OPERATIONS}
+    common |= {name for ops in COMMON_TYPE_OPERATIONS.values() for name, _ in ops}
+    assert set(COMMON_OPERATION_DESCRIPTIONS) <= common
+    assert "without one, it returns every order" in COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+    spec = load_region_spec(_REGION_SPEC)
+    brokerage = next(i for i in spec.institutions if i.type == "brokerage")
+    tool = next(t for t in brokerage.tool_taxonomy if t.name == "get_order_status")
+    assert tool.description == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+    assert _tool_dict(tool)["description"] == ""  # tools.yaml ships it empty
+
+    brief_df = pd.DataFrame([{"institution_id": brokerage.id, "institution_brief": {"positioning": "p"}}])
+    clusters = explode_to_cluster_rows(brief_df, spec, docs_per_product=4, max_docs_per_cluster=4)
+    shared = clusters[(clusters["institution_id"] == brokerage.id) & (clusters["cluster_kind"] == "shared")]
+    tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert tools["get_order_status"]["description"] == COMMON_OPERATION_DESCRIPTIONS["get_order_status"]
+
+
+def test_prompt_values_carry_the_spec_label():
+    """A value's key is a machine name and its label says what the value means, so
+    each value the region spec labels carries its label into the prompt."""
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import products_for_prompt
+    from usersim.asset_gen.financial_services.prompts import DOCSET_PROMPT
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    raw["institutions"][0]["products"][0]["variables"] = {
+        "credit_base_limit": {"type": "money", "value": 9000000},
+        "term_months": {"type": "int", "value": 48},
+    }
+    raw.setdefault("doc_titles", {})["variable_labels"] = {"credit_base_limit": "tax-credit base for contributions"}
+    spec = validate_region_spec(raw)
+
+    variables = products_for_prompt(spec.institutions[0].products, spec)[0]["variables"]
+    assert variables["credit_base_limit"]["label"] == "tax-credit base for contributions"
+    assert "label" not in variables["term_months"]
+    assert "When a value carries a `label`, the label says what the value IS" in " ".join(DOCSET_PROMPT.split())
+
+
+def test_a_discoverable_tool_description_steers_its_doc_but_stays_out_of_tools_yaml():
+    """A spec description reaches the shared clusters that write a discoverable
+    tool's doc, while tools.yaml ships it empty: the assistant learns the tool
+    only by retrieving that doc."""
+    import json
+
+    import pandas as pd
+    import yaml
+
+    from usersim.asset_gen.financial_services.pipeline import _tool_dict
+    from usersim.asset_gen.financial_services.spec import validate_region_spec
+
+    raw = yaml.safe_load(_REGION_SPEC.read_text(encoding="utf-8"))
+    bank = raw["institutions"][0]
+    described = "Block the card until the customer asks to unblock it."
+    bank["tool_taxonomy"] = [
+        {**t, "description": described} if t["name"] == "freeze_card" else t for t in bank["tool_taxonomy"]
+    ]
+    spec = validate_region_spec(raw)
+    tool = next(t for t in spec.institutions[0].tool_taxonomy if t.name == "freeze_card")
+    assert tool.discoverable and tool.description == described
+
+    brief_df = pd.DataFrame(
+        [{"institution_id": i.id, "institution_brief": {"positioning": "p"}} for i in spec.institutions]
+    )
+    rows = explode_to_cluster_rows(brief_df, spec, docs_per_product=10, max_docs_per_cluster=10)
+    shared = rows[(rows.institution_id == spec.institutions[0].id) & (rows.cluster_kind == "shared")]
+    focus_tools = {t["name"]: t for t in json.loads(shared.iloc[0]["focus_json"])["tools"]}
+    assert focus_tools["freeze_card"]["description"] == described
+    assert _tool_dict(tool)["description"] == ""
 
 
 def test_build_institution_seed_one_row_per_institution():
@@ -138,14 +264,16 @@ def test_explode_to_cluster_rows_assigns_unique_cluster_ids():
 _GOOD_DOCSET = {"documents": [{"doc_key": "faq_1", "title": "t", "body": "b"}]}
 
 
-def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
+def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None, score_by_attempt=None):
     """Stub Phase-2 generation. ``drop_by_attempt[i]`` are the cluster_ids DD omits
     entirely on attempt i; ``bad_by_attempt[i]`` are the ones that come BACK but
-    with an unusable payload (the truncated-response shape)."""
+    with an unusable payload (the truncated-response shape); ``score_by_attempt[i]``
+    maps a cluster_id to the faithfulness score the judge gives it (default 4)."""
     from usersim.asset_gen.financial_services import pipeline as P
 
     calls: list = []
     bad_by_attempt = bad_by_attempt or {}
+    score_by_attempt = score_by_attempt or {}
 
     class _Res:
         def __init__(self, df):
@@ -155,10 +283,11 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
             return self._df
 
     class _Eng:
-        def __init__(self, seed_df, drop, bad):
+        def __init__(self, seed_df, drop, bad, scores):
             self._seed = seed_df
             self._drop = drop
             self._bad = bad
+            self._scores = scores
 
         def create(self, builder, num_records=None):
             df = self._seed[~self._seed["cluster_id"].isin(self._drop)].copy()
@@ -168,13 +297,19 @@ def _fake_docset_engine(monkeypatch, *, drop_by_attempt, bad_by_attempt=None):
                 '{"documents": [{"doc_key": "faq_1", "title": "t", "body": "trunc' if cid in self._bad else _GOOD_DOCSET
                 for cid in df["cluster_id"]
             ]
+            df["numeric_faithfulness_score"] = [self._scores.get(cid, 4.0) for cid in df["cluster_id"]]
             return _Res(df.reset_index(drop=True))
 
     def fake_build(models, cluster_seed):
         attempt = len(calls)
         calls.append(list(cluster_seed["cluster_id"]))
         return (
-            _Eng(cluster_seed, drop_by_attempt.get(attempt, set()), bad_by_attempt.get(attempt, set())),
+            _Eng(
+                cluster_seed,
+                drop_by_attempt.get(attempt, set()),
+                bad_by_attempt.get(attempt, set()),
+                score_by_attempt.get(attempt, {}),
+            ),
             object(),
         )
 
@@ -241,6 +376,33 @@ def test_generate_docsets_with_backfill_drops_a_persistently_unusable_cluster(mo
     assert len(calls) == P.DOCSET_MAX_ATTEMPTS
 
 
+def test_generate_docsets_with_backfill_regenerates_a_cluster_below_the_faithfulness_floor(monkeypatch):
+    """A cluster the judge scores below the floor is regenerated, and a better attempt
+    replaces it."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt={0: {"c2": 1.0}, 1: {"c2": 4.0}})
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert calls[1] == ["c2"]
+    scores = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert scores == {"c1": 4.0, "c2": 4.0, "c3": 4.0}
+
+
+def test_generate_docsets_with_backfill_keeps_the_best_attempt_below_the_floor(monkeypatch):
+    """When no attempt reaches the floor, the cluster is still written, flagged, from
+    its best-scoring attempt: dropping it would leave gaps in the corpus."""
+    from usersim.asset_gen.financial_services import pipeline as P
+
+    scores = {0: {"c2": 1.0}, 1: {"c2": 2.0}, 2: {"c2": 1.0}}
+    calls = _fake_docset_engine(monkeypatch, drop_by_attempt={}, score_by_attempt=scores)
+    result = P._generate_docsets_with_backfill(models=None, cluster_seed=_seed("c1", "c2", "c3"))
+
+    assert len(calls) == P.DOCSET_MAX_ATTEMPTS
+    kept = dict(zip(result["cluster_id"], result["numeric_faithfulness_score"]))
+    assert kept == {"c1": 4.0, "c2": 2.0, "c3": 4.0}
+
+
 def test_usable_docset_rows_keeps_low_faithfulness_clusters():
     """Faithfulness is a quality judgement made downstream, not a signal that the
     call failed. ``collect_institutions`` keeps those clusters and flags them, so
@@ -302,6 +464,16 @@ def test_doc_length_hint_gives_romanized_locales_the_latin_budget():
     assert _low(doc_length_hint("hi_Deva_IN", "Hindi Devanagari")) < latin
     assert _low(doc_length_hint("ta_Taml_IN", "Tamil")) < latin
     assert "words" in doc_length_hint("hi_Latn_IN", "Hindi Latin")
+
+
+def test_japanese_and_korean_documents_match_the_latin_token_size():
+    """Japanese and Korean cost the document model about 0.6 tokens per character, so
+    their character band is the Latin word band scaled to the same token count."""
+    for locale, language in (("ja_JP", "Japanese"), ("ko_KR", "Korean")):
+        assert doc_length_hint(locale, language, "faq") == "roughly 320-460 characters"
+        assert doc_length_hint(locale, language, "product_sheet") == "roughly 680-960 characters"
+    assert doc_length_hint("en_US", "English", "faq") == "roughly 150-210 words"
+    assert doc_length_hint("zh_CN", "Chinese", "faq") == "roughly 150-220 characters"
 
 
 def test_doc_length_hint_is_genre_aware():
@@ -533,7 +705,7 @@ class TestPlanOwnedTitles:
         )
         assert docs[0]["title"] == "Something The Model Made Up"
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "en_GB"])
     def test_shipped_english_titles_are_unchanged(self, locale: str):
         """LOCK: localizing the plan vocabulary must not touch the shipped banks.
 
@@ -541,6 +713,8 @@ class TestPlanOwnedTitles:
         ``display_name_local``, so every committed title must still be reproducible
         from the plan. This is what makes the change a provable no-op for en_US /
         en_IN rather than a silent corpus rewrite on their next regeneration.
+        en_GB authors ``doc_titles`` for its labels and British-spelled angles, and
+        its committed titles must match its plan the same way.
         """
         import yaml
 
@@ -551,6 +725,20 @@ class TestPlanOwnedTitles:
         ]
         assert titles, f"no committed corpus for {locale}"
         assert [t for t in titles if t not in planned] == []
+
+    def test_uk_titles_use_uk_terms_and_spelling(self):
+        titles = self._plan_titles("en_GB")
+        assert [t for t in titles if any(us in t for us in ("APY", "unauthorized", "recognizing"))] == []
+
+    def test_uk_corpus_follows_its_language_conventions(self):
+        from usersim.asset_gen.financial_services.validate import FAIL, validate_bank
+
+        spec = load_region_spec(self._SPEC_DIR / "en_GB.yaml")
+        assert spec.language_conventions.respell
+        report = validate_bank(packaged_assets_dir() / "financial_services" / "en_GB", spec)
+        results = [r for r in report.results if r.check == "language_conventions"]
+        assert len(results) == len(spec.institutions)
+        assert [r.detail for r in results if r.status == FAIL] == []
 
     def test_language_overlay_localizes_the_planned_titles(self):
         """The whole point: a language overlay's vocabulary reaches the title."""
@@ -575,11 +763,12 @@ class TestPlanOwnedTitles:
         latin = {t for t in titles if devanagari_fraction(t) < 0.25}
         assert all("टूल संदर्भ" in t or "का उपयोग कब करें" in t for t in latin)
 
-    def test_hindi_labels_cover_every_variable_and_domain(self):
+    @pytest.mark.parametrize("locale", _LABELLED_SPECS)
+    def test_localized_labels_cover_every_variable_and_domain(self, locale: str):
         """An unmapped name falls back to the machine field name, which lands a raw
         ``below_mab_charge`` / ``retail_banking`` in reader-facing prose. Adding a
         product to the region model must not silently reintroduce that."""
-        spec = load_region_spec(self._SPEC_DIR / "hi_Deva_IN.yaml")
+        spec = load_region_spec(self._SPEC_DIR / f"{locale}.yaml")
         variables = {v for inst in spec.institutions for p in inst.products for v in p.variables}
         domains = {str(d) for inst in spec.institutions for d in inst.domains}
         assert variables - set(spec.doc_titles.variable_labels) == set()

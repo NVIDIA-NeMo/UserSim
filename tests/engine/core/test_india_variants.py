@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for the India multi-language stop-gap layer.
+"""Tests for the India language-variant layer.
 
 Covers three buckets:
 
@@ -56,7 +56,7 @@ class TestVariantRegistry:
         assert all(v.base_locale == "en_IN" for v in L.INDIA_VARIANT_LOCALES.values())
 
     def test_variants_excluded_from_shipped_locales(self) -> None:
-        # The stop-gap must NOT touch the asset-complete set.
+        # The variants must NOT touch the asset-complete set.
         assert set(L.INDIA_VARIANT_LOCALES).isdisjoint(set(L.SHIPPED_LOCALES))
 
     def test_native_and_romanized_twins(self) -> None:

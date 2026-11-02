@@ -1,0 +1,162 @@
+[
+  {
+    "type": "basic_math_word_problems",
+    "description": "Grundrechenarten und Textaufgaben mit schrittweiser Anleitung"
+  },
+  {
+    "type": "algebra_functions",
+    "description": "Algebra, Funktionen und das Lesen von Graphen"
+  },
+  {
+    "type": "statistics_data_literacy",
+    "description": "Statistik, Mittelwerte, Unsicherheit und das Lesen von Diagrammen"
+  },
+  {
+    "type": "physics_everyday",
+    "description": "Physik im Alltag, anschaulich und mit Formeln, wo sie helfen"
+  },
+  {
+    "type": "chemistry_safety",
+    "description": "Chemische Grundlagen mit klaren Grenzen zur Sicherheit im Labor"
+  },
+  {
+    "type": "biology_health_literacy",
+    "description": "Biologie und Gesundheitswissen ohne medizinische Diagnosen"
+  },
+  {
+    "type": "computer_basics",
+    "description": "Computergrundlagen für Lernende mit wenig digitaler Erfahrung"
+  },
+  {
+    "type": "programming_debugging",
+    "description": "Programmierkonzepte und Strategien zur Fehlersuche"
+  },
+  {
+    "type": "ai_literacy",
+    "description": "KI-Kompetenz: Grenzen, Datenschutz und klare Anfragen"
+  },
+  {
+    "type": "reading_comprehension",
+    "description": "Leseverständnis und Zusammenfassen"
+  },
+  {
+    "type": "writing_revision",
+    "description": "Schreiben, Überarbeiten, Tonfall und Zielgruppe"
+  },
+  {
+    "type": "language_learning_practice",
+    "description": "Sprachen lernen mit Übungen und Korrekturen"
+  },
+  {
+    "type": "history_sources",
+    "description": "Geschichte anhand von Primär- und Sekundärquellen erschließen"
+  },
+  {
+    "type": "civics_government",
+    "description": "Politische Bildung: Grundrechte, Institutionen und Beteiligung"
+  },
+  {
+    "type": "financial_literacy",
+    "description": "Haushaltsplanung, Zinsen, Kredite und Abwägungen"
+  },
+  {
+    "type": "career_skills",
+    "description": "Berufliche Kompetenzen: Lebenslauf, Vorstellungsgespräch und Schreiben im Beruf"
+  },
+  {
+    "type": "study_skills",
+    "description": "Lernpläne, Gedächtnis und Prüfungsvorbereitung"
+  },
+  {
+    "type": "adult_basic_education",
+    "description": "Grundbildung für Erwachsene mit respektvoller Anleitung"
+  },
+  {
+    "type": "vocational_healthcare",
+    "description": "Berufliche Grundlagen in Pflege- und Gesundheitsberufen"
+  },
+  {
+    "type": "vocational_trades",
+    "description": "Rechnen, Messen und Sicherheit im Handwerk"
+  },
+  {
+    "type": "entrepreneurship",
+    "description": "Selbstständigkeit: Preise, Lagerbestand und Kundschaft"
+  },
+  {
+    "type": "environmental_science",
+    "description": "Umweltwissenschaft und Auswirkungen vor Ort"
+  },
+  {
+    "type": "geography_maps",
+    "description": "Karten, Geografie und räumliches Denken"
+  },
+  {
+    "type": "media_literacy",
+    "description": "Medienkompetenz und das Prüfen von Falschinformationen"
+  },
+  {
+    "type": "logic_arguments",
+    "description": "Logik, Fehlschlüsse und die Qualität von Argumenten"
+  },
+  {
+    "type": "probability_risk",
+    "description": "Wahrscheinlichkeit, Risiko und Entscheidungen"
+  },
+  {
+    "type": "spreadsheet_skills",
+    "description": "Formeln in Tabellenkalkulationen und das Ordnen von Daten"
+  },
+  {
+    "type": "public_speaking",
+    "description": "Vor Publikum sprechen und Vorträge aufbauen"
+  },
+  {
+    "type": "teacher_support",
+    "description": "Einem Kind oder Gleichaltrigen etwas erklären"
+  },
+  {
+    "type": "advanced_math",
+    "description": "Fortgeschrittene Mathematik: Intuition und Beweisskizzen"
+  },
+  {
+    "type": "data_analysis",
+    "description": "Ablauf und Interpretation von Datenanalysen"
+  },
+  {
+    "type": "cyber_hygiene",
+    "description": "Grundlagen der IT-Sicherheit und Schutz von Konten"
+  },
+  {
+    "type": "legal_literacy",
+    "description": "Rechtliche Grundkenntnisse auf Laienniveau, ohne Rechtsberatung"
+  },
+  {
+    "type": "health_systems_literacy",
+    "description": "Wie das Gesundheitswesen, Überweisungen und die Krankenversicherung funktionieren"
+  },
+  {
+    "type": "local_language_literature",
+    "description": "Deutschsprachige Literatur und Deutschunterricht"
+  },
+  {
+    "type": "science_experiment_design",
+    "description": "Einfache, sichere Experimente planen"
+  },
+  {
+    "type": "engineering_design",
+    "description": "Technisches Konstruieren und Zielkonflikte"
+  },
+  {
+    "type": "art_music_theory",
+    "description": "Grundlagen der Kunst- und Musiktheorie"
+  },
+  {
+    "type": "critical_thinking",
+    "description": "Kritisches Denken im Umgang mit Quellen"
+  },
+  {
+    "type": "learning_plan",
+    "description": "Persönliche Lernpläne erstellen"
+  }
+]

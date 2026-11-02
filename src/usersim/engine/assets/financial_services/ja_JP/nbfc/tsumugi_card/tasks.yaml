@@ -1,0 +1,415 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for tsumugi_card, a card company that also lends
+# through cash advances and a card loan. Every state-changing tool it offers is
+# gold in at least one task. Each task ships THREE opening phrasings in
+# Japanese (build_instance picks one per trajectory) so the assistant sees
+# varied turn-1 wording while the gold stays fixed. Read-only tools
+# (get_account_transactions, get_loan_details, get_accounts, get_statements)
+# carry no gold state change.
+#
+# Each opening stays on one line: YAML folds a line break into a space, which
+# Japanese does not write.
+templates:
+- id: TPL-TC-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    カードの利用明細に{{merchant}}の{{amount}}円が載っているのですが、使った覚えがありません。調べてもらえますか。
+  - >-
+    つむぎカードの明細に、心当たりのない{{merchant}}の請求が{{amount}}円あります。不正利用の調査をお願いします。
+  - >-
+    {{merchant}}で{{amount}}円使ったことになっていますが、私ではありません。補償の手続きをしたいです。
+  account_state:
+    account_id: acct_tc_0001
+    cards:
+    - {card_id: card_tc_0001, status: active}
+    transactions:
+    - {transaction_id: txn_tc_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, ゲーム課金ストア・ピクセル, ファッション通販・リヴォリ]
+    amount: ['8,800', '24,800', '56,000']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_tc_0001.status: UNDER_REVIEW}
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-TC-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    末尾0001のつむぎカードを{{event}}かもしれません。すぐに利用を止めてください。
+  - >-
+    クレジットカード（末尾0001）を{{event}}ようです。悪用される前に止めてもらえますか。
+  - >-
+    末尾0001のカードを{{event}}みたいなので、一時的に使えないようにしてほしいです。
+  account_state:
+    account_id: acct_tc_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_tc_0001, status: active}
+  param_space:
+    event: [なくした, 落とした, 盗まれた]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_tc_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-TC-ATORIBO-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{merchant}}で1回払いにした{{amount}}円を、あとからリボ払いに変更したいです。
+  - >-
+    今月の支払いが厳しいので、{{merchant}}の{{amount}}円の利用をリボ払いに変えられますか。
+  - >-
+    {{merchant}}の{{amount}}円をあとからリボにする手続きをお願いします。手数料の率も教えてください。
+  account_state:
+    account_id: acct_tc_0001
+    transactions:
+    - {transaction_id: txn_tc_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted, payment_plan: LUMP_SUM}
+  param_space:
+    merchant: [家電量販店エレクトロ・ノヴァ, 家具店アルベロ]
+    amount: ['68,000', '124,800']
+  gold_tool_sequence: [change_to_revolving]
+  expected_state_deltas: {txn_tc_0002.payment_plan: REVOLVING}
+- id: TPL-TC-ATOBUNKATSU-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{merchant}}で1回払いにした{{amount}}円を、{{count}}回払いに変更したいです。
+  - >-
+    {{merchant}}の{{amount}}円の買い物を、あとから{{count}}回の分割払いにできますか。
+  - >-
+    {{amount}}円の{{merchant}}の利用を{{count}}回払いにしてください。分割の手数料はいくらになりますか。
+  account_state:
+    account_id: acct_tc_0001
+    transactions:
+    - {transaction_id: txn_tc_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted, payment_plan: LUMP_SUM}
+  param_space:
+    merchant: [家電量販店エレクトロ・ノヴァ, 家具店アルベロ]
+    amount: ['98,000', '186,000']
+    count: ['3', '6', '12']
+  gold_tool_sequence: [change_to_installments]
+  expected_state_deltas: {txn_tc_0003.payment_plan: INSTALLMENTS}
+- id: TPL-TC-RIBOAMOUNT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    リボ払いの毎月の支払額を{{amount}}円に変更したいです。
+  - >-
+    リボの残高を早く減らしたいので、毎月の支払額を{{amount}}円にしてもらえますか。
+  - >-
+    リボ払いの月々の支払金額を{{amount}}円に変える手続きをお願いします。
+  account_state:
+    account_id: acct_tc_0001
+    balance: '284000.00'
+  param_space:
+    amount: ['10,000', '20,000', '30,000']
+  gold_tool_sequence: [change_revolving_payment]
+  expected_state_deltas: {revolving_payment_updated: true}
+- id: TPL-TC-RIBOPREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    ボーナスが出たので、リボ払いの残高を{{amount}}円だけ繰り上げて返したいです。
+  - >-
+    リボの残高のうち{{amount}}円を一括で返済したいです。手続きをお願いします。
+  - >-
+    リボ払いの残高を{{amount}}円、臨時で返済できますか。
+  account_state:
+    account_id: acct_tc_0001
+    balance: '284000.00'
+  param_space:
+    amount: ['50,000', '100,000', '150,000']
+  gold_tool_sequence: [prepay_revolving_balance]
+  expected_state_deltas: {revolving_prepayment_status: REQUESTED}
+- id: TPL-TC-LIMIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    ショッピング枠を{{limit}}円に変更したいです。
+  - >-
+    来月大きな買い物の予定があるので、利用枠を{{limit}}円に増やしてもらえますか。
+  - >-
+    つむぎカードのショッピング利用枠を{{limit}}円にする手続きをお願いします。
+  account_state:
+    account_id: acct_tc_0001
+    credit_limit: '300000.00'
+  param_space:
+    limit: ['500,000', '800,000']
+  gold_tool_sequence: [request_limit_change]
+  expected_state_deltas: {limit_change_status: REQUESTED}
+- id: TPL-TC-CARDLOAN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    つむぎカードローンに{{amount}}円で申し込みたいです。
+  - >-
+    {{reason}}のために{{amount}}円借りたいので、カードローンの申込みをお願いします。
+  - >-
+    カードローンを申し込みたいです。希望の金額は{{amount}}円で、使い道は{{reason}}です。
+  account_state:
+    customer_id: cust_tc_0001
+  param_space:
+    amount: ['300,000', '500,000']
+    reason: [引っ越し費用, 車の修理代, 資格取得の費用]
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-TC-MISSED-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    口座の残高が足りず、カードローンの今月の返済が引き落とされませんでした。今から{{amount}}円を払いたいです。
+  - >-
+    カードローンの返済日に引落しができなかったので、今月分の{{amount}}円を支払いたいです。
+  - >-
+    今月のカードローンの返済が遅れてしまいました。{{amount}}円をすぐに払う方法を教えてください。
+  account_state:
+    account_id: loan_tc_0001
+    account_type: つむぎカードローン
+    balance: '186000.00'
+    installment_status: OVERDUE
+  param_space:
+    amount: ['4,000', '8,000']
+  gold_tool_sequence: [pay_emi]
+  expected_state_deltas: {installment_status: PAID}
+- id: TPL-TC-PAYOFF-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{loan}}の残りを一括で返して、完済したいです。
+  - >-
+    {{loan}}を全額返済したいのですが、今いくら払えば完済になりますか。
+  - >-
+    臨時収入があったので、{{loan}}を一括返済して終わりにしたいです。
+  account_state:
+    account_id: loan_tc_0001
+    account_type: '{{loan}}'
+    balance: '86500.00'
+  param_space:
+    loan: [つむぎカードローン, キャッシング]
+  gold_tool_sequence: [foreclose_loan]
+  expected_state_deltas: {loan_tc_0001.status: REPAID}
+- id: TPL-TC-BANKCHANGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    カードの引落口座を{{bank_account}}に変更したいです。
+  - >-
+    給与口座を変えたので、つむぎカードの支払口座を{{bank_account}}にしてください。
+  - >-
+    支払いの引落口座の変更をお願いします。新しい口座は{{bank_account}}です。
+  account_state:
+    account_id: acct_tc_0001
+  param_space:
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [update_repayment_mandate]
+  expected_state_deltas: {mandate_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-TC-STOLEN-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    財布ごと末尾0001のつむぎカードを盗まれて、{{merchant}}で{{amount}}円使われていました。カードを止めて、この利用を調べて、新しいカードを送ってください。
+  - >-
+    クレジットカード（末尾0001）を盗まれ、{{merchant}}の{{amount}}円の利用に覚えがありません。利用停止と調査、それに再発行をお願いします。
+  - >-
+    末尾0001のカードが盗まれました。止めてもらって、{{merchant}}の{{amount}}円を調べて、カードも作り直してほしいです。
+  account_state:
+    account_id: acct_tc_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_tc_0001, status: active}
+    transactions:
+    - {transaction_id: txn_tc_0004, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, ファッション通販・リヴォリ]
+    amount: ['38,000', '79,800']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_tc_0001.status: frozen, txn_tc_0004.status: UNDER_REVIEW, card_tc_0001.replacement: ordered}
+- id: TPL-TC-RIBOESCAPE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    リボ払いの残高がなかなか減らないので、早く終わらせたいです。{{amount}}円を繰り上げて返済して、毎月の支払額を{{monthly}}円に上げ、残高のお知らせが毎月届くようにしてください。
+  - >-
+    リボをやめたいです。残高の一部{{amount}}円の繰上げ返済、月々の支払額を{{monthly}}円に変更、残高の通知の設定をお願いします。
+  - >-
+    リボ払いを早く完済したいので、{{amount}}円を臨時で返して、毎月の支払いを{{monthly}}円にし、残高が毎月わかるように通知を設定してもらえますか。
+  account_state:
+    account_id: acct_tc_0001
+    balance: '284000.00'
+  param_space:
+    amount: ['50,000', '100,000']
+    monthly: ['20,000', '30,000']
+  gold_tool_sequence: [prepay_revolving_balance, change_revolving_payment, set_alerts]
+  expected_state_deltas: {revolving_prepayment_status: REQUESTED, revolving_payment_updated: true, alerts_updated: true}
+- id: TPL-TC-BIGPURCHASE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{merchant}}で買った{{amount}}円を{{count}}回払いに変えて、ショッピング枠も{{limit}}円に増やし、利用があったら通知が来るようにしたいです。
+  - >-
+    大きな買い物をしたので、{{merchant}}の{{amount}}円を{{count}}回の分割払いにして、利用枠を{{limit}}円に上げて、利用通知も設定してください。
+  - >-
+    三つお願いします。{{merchant}}の{{amount}}円の{{count}}回払いへの変更、ショッピング枠を{{limit}}円に増額、カード利用の通知の設定です。
+  account_state:
+    account_id: acct_tc_0001
+    credit_limit: '300000.00'
+    transactions:
+    - {transaction_id: txn_tc_0005, merchant: '{{merchant}}', amount: '{{amount}}', status: posted, payment_plan: LUMP_SUM}
+  param_space:
+    merchant: [家電量販店エレクトロ・ノヴァ, 家具店アルベロ]
+    amount: ['198,000', '248,000']
+    count: ['6', '12']
+    limit: ['500,000', '800,000']
+  gold_tool_sequence: [change_to_installments, request_limit_change, set_alerts]
+  expected_state_deltas: {txn_tc_0005.payment_plan: INSTALLMENTS, limit_change_status: REQUESTED, alerts_updated: true}
+- id: TPL-TC-FAMILYCARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    結婚して{{address}}に引っ越しました。住所を変更して、{{person}}の家族カードを作り、ショッピング枠を{{limit}}円に増やして、家族カードの利用も通知が来るようにしてください。
+  - >-
+    結婚に合わせて、住所の変更（{{address}}）、{{person}}用の家族カードの発行、利用枠を{{limit}}円に増額、利用通知の設定をお願いします。
+  - >-
+    住所を{{address}}に変えて、{{person}}の家族カードを申し込み、ショッピング枠を{{limit}}円にして、利用のお知らせが届くようにしたいです。
+  account_state:
+    account_id: acct_tc_0001
+    customer_id: cust_tc_0001
+    credit_limit: '300000.00'
+  param_space:
+    address: ['静岡県沼津市大手町2-14-8', '香川県高松市番町4-2-11']
+    person: [妻, 夫]
+    limit: ['500,000', '800,000']
+  gold_tool_sequence: [update_contact_info, open_account, request_limit_change, set_alerts]
+  expected_state_deltas: {contact_updated: true, new_account_status: OPEN, limit_change_status: REQUESTED, alerts_updated: true}
+- id: TPL-TC-LOANSETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    カードローンに{{amount}}円で申し込みたいです。借りたお金は{{bank_account}}に振り込んでもらい、返済も同じ口座からの引落しにしてください。
+  - >-
+    つむぎカードローンの申込み（{{amount}}円）と、融資金の振込先を{{bank_account}}にすること、返済の引落口座も同じ口座にすることをお願いします。
+  - >-
+    {{amount}}円のカードローンを申し込んで、振込先と返済口座の両方を{{bank_account}}に設定してもらえますか。
+  account_state:
+    customer_id: cust_tc_0001
+  param_space:
+    amount: ['300,000', '500,000']
+    bank_account: ['朝凪銀行 本店営業部 普通 1029384', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [apply_loan, update_beneficiary, update_repayment_mandate]
+  expected_state_deltas: {loan_application_status: SUBMITTED, payout_account_updated: true, mandate_updated: true}
+- id: TPL-TC-HARDSHIP-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    収入が減って、カードローンの返済が一度遅れてしまいました。遅れた{{amount}}円を今払って、リボの毎月の支払額を{{monthly}}円に下げ、返済日の前に通知が来るようにしてください。
+  - >-
+    家計が苦しくて返済が遅れました。カードローンの{{amount}}円の支払い、リボの月々の支払額を{{monthly}}円に変更、返済日前の通知の設定をお願いします。
+  - >-
+    遅れているカードローンの{{amount}}円を払って、リボ払いの毎月の額を{{monthly}}円にして、返済を忘れないように通知も設定してもらえますか。
+  account_state:
+    account_id: loan_tc_0001
+    account_type: つむぎカードローン
+    balance: '186000.00'
+    installment_status: OVERDUE
+    revolving_account_id: acct_tc_0001
+    revolving_balance: '284000.00'
+  param_space:
+    amount: ['4,000', '8,000']
+    monthly: ['5,000', '10,000']
+  gold_tool_sequence: [pay_emi, change_revolving_payment, set_alerts]
+  expected_state_deltas: {installment_status: PAID, revolving_payment_updated: true, alerts_updated: true}
+- id: TPL-TC-CLOSEOUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    つむぎカードをやめたいです。カードローンを一括で返して、リボの残高も全部返済してから、カードを解約してください。
+  - >-
+    カードの解約を考えています。先にカードローンの完済とリボ残高の一括返済をして、そのあと解約の手続きをお願いします。
+  - >-
+    カードローンとリボの残りを全部返して、つむぎカードを解約したいです。
+  account_state:
+    account_id: loan_tc_0001
+    account_type: つむぎカードローン
+    balance: '86500.00'
+    revolving_account_id: acct_tc_0001
+    revolving_balance: '42000.00'
+  param_space: {}
+  gold_tool_sequence: [foreclose_loan, prepay_revolving_balance, close_account]
+  expected_state_deltas: {loan_tc_0001.status: REPAID, revolving_prepayment_status: REQUESTED, acct_tc_0001.status: CLOSED}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ja_JP/dynamic.yaml), not scripted templates.

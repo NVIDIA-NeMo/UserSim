@@ -45,6 +45,7 @@ from usersim.engine.core.finance_bank import (
     DEFAULT_DOMAIN_ACCOUNT_LABELS,
     DEFAULT_IDENTITY_REQUIRED_FIELDS,
     FinanceBank,
+    finance_bank_locale,
     load_finance_bank_for_locale,
     reset_finance_bank_cache,
 )
@@ -64,9 +65,10 @@ from usersim.engine.core.outcomes import (
     TraceKind,
     WarningKind,
 )
-from usersim.engine.core.persona import format_persona_for_prompt
+from usersim.engine.core.persona import format_persona_for_prompt, persona_full_name
 from usersim.engine.core.probes import (
     BankBackedProbe,
+    BankLoadError,
     ToolExecutionMixin,
     dispatch_episode,
     register_probe,
@@ -95,7 +97,7 @@ logger = logging.getLogger("usersim.engine")
 
 PROBE_FAMILY: str = "financial_services"
 PROBE_VARIANTS: list[str] = ["default"]
-PROMPT_VERSION: str = "v1.1"
+PROMPT_VERSION: str = "v1.2"
 
 _KB_BODY_RETENTION_USER_TURNS = 8
 
@@ -313,6 +315,26 @@ class _PickedTask:
 )
 class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     label = "financial_services"
+    output_columns = (
+        "finance_task_id",
+        "task_type",
+        "task_tier",
+        "task_contract_version",
+        "taxonomy_version",
+        "domain",
+        "region",
+        "institution_id",
+        "institution_type",
+        "dynamic_category_id",
+        "dynamic_subtopic_hint",
+        "expected_state_deltas",
+        "gold_document_ids",
+        "gold_tool_sequence",
+        "retrieved_document_ids",
+        "kb_search_queries",
+        "num_kb_searches",
+        "attempted_tool_names",
+    )
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_FINANCE
     bank_version_key = None  # per-locale
@@ -361,6 +383,25 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
     # ── BankBackedProbe API ─────────────────────────────────────────
 
+    def _load_bank_for_locale(self, locale: str) -> FinanceBank:
+        """Load the bank :func:`finance_bank_locale` picks for ``locale``, which the scorer reads too.
+
+        ``hi_Deva_IN``, ``hi_Latn_IN`` and the India variants run on the ``en_IN``
+        bank until they have tasks of their own. ``self._asset_locale`` records
+        which bank loaded, and a borrowed bank turns on translation of the
+        opening and of ``kb_search`` queries.
+        """
+        bank_locale = finance_bank_locale(locale)
+        loader = type(self).bank_loader
+        try:
+            bank = loader(bank_locale)
+        except Exception as e:
+            raise BankLoadError(
+                f"{type(self).__name__}: bank loader {loader.__qualname__!r} raised {type(e).__name__}: {e}"
+            ) from e
+        self._asset_locale = bank_locale
+        return bank
+
     def _persona_locale(self) -> str:
         """Locale whose PERSONA-ATTRIBUTE vocabulary this run's personas use.
 
@@ -369,7 +410,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         - ``self._locale`` — the CONVERSATION locale (language / script /
           partitioning). Drives the language instruction.
         - ``self._asset_locale`` — the locale whose BANK / taxonomy / renderings
-          loaded (an India language-variant falls back to its base).
+          loaded (an India language-variant, or a Hindi locale without tasks
+          of its own, falls back to en_IN).
         - this — the locale whose persona parquet the personas were sampled
           from, which is what ``_education_ordinal`` is keyed on. A variant like
           ``ta_Taml_IN`` samples ``en_IN`` personas, so deriving literacy against
@@ -535,9 +577,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
 
         The opening is authored in the bank's language, so it is routed through
         ``_localize_verbatim``: a pure pass-through whenever the bank we loaded
-        matches the conversation locale (every locale with its own bank,
-        including native Hindi), and a machine translation only when we fell
-        back to a base-locale bank for a language variant.
+        matches the conversation locale (every locale with its own bank), and a
+        machine translation only when we fell back to the en_IN bank for a
+        language variant or a Hindi locale.
         """
         return await self._localize_verbatim(self._instance.opening_user_message) or None
 
@@ -630,10 +672,11 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         """Language the loaded corpus is written in, or "" if it is already the
         conversation language.
 
-        Non-empty only when this row borrowed someone else's bank — a stop-gap
-        locale on the en_IN corpus. Computed on demand rather than cached in
-        ``__init__`` for the same reason as ``_persona_locale``, and because a
-        cached copy would go stale against ``_asset_locale``.
+        Non-empty only when this row borrowed someone else's bank: an India
+        variant or a Hindi locale on the en_IN corpus. Computed on demand
+        rather than cached in ``__init__`` for the same reason as
+        ``_persona_locale``, and because a cached copy would go stale against
+        ``_asset_locale``.
         """
         if self._asset_locale == self._locale:
             return ""
@@ -650,14 +693,13 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
     ) -> str:
         """The string retrieval actually ranks on, translated when it has to be.
 
-        A stop-gap locale borrows the en_IN corpus, so the assistant is talking
+        An India variant borrows the en_IN corpus, so the assistant is talking
         to (say) a Tamil user about English documents and tends to search in
-        Tamil. Lexical ranking tokenizes on ``[a-z0-9]+``: a native-script query
-        produces zero tokens, which makes the lexical fallback return the
-        corpus's first k documents irrespective of the query and reduces
-        ``hybrid`` to pure dense — the mode this corpus measures at 4%
-        precision@8 against hybrid's 88%. Translating the query into the
-        corpus's language restores both halves of the ranking.
+        Tamil. A Tamil query shares no word with an English document, so every
+        lexical score ties and the ranking ignores the query, and ``hybrid``
+        loses its lexical half, leaving dense alone: the mode this corpus
+        measures at 4% precision@8 against hybrid's 88%. Translating the query
+        into the corpus's language restores both halves of the ranking.
 
         No-op whenever the corpus is already in the conversation language, so
         en_US / en_IN runs are untouched and a graduated native bank turns this
@@ -686,7 +728,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
         )
         # The dynamic tier has no verbatim turn-1, so without this a dynamic row
-        # on a stop-gap locale would involve machine translation and carry no
+        # on an India variant would involve machine translation and carry no
         # warning at all. Emitted once per row; the kind is a set member.
         if not self._query_translation_warned and self._outcome_builder is not None:
             self._query_translation_warned = True
@@ -696,8 +738,8 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                     f"kb_search queries machine-translated into "
                     f"{corpus_language} to search the "
                     f"{self._asset_locale} corpus for conversation "
-                    f"locale={self._locale}; retrieval metrics are "
-                    "preview-only until a native bank lands"
+                    f"locale={self._locale}; retrieval metrics depend on "
+                    "the translation (native-speaker verification recommended)"
                 ),
             )
         return translated
@@ -737,7 +779,9 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
                 call_idx=call_idx,
             )
             query_embedding = None
-            if self._retrieval_mode in ("hybrid", "dense"):
+            # A query vector is only compared with the bank's document vectors;
+            # without them it would be an embedding call whose result goes unused.
+            if self._retrieval_mode in ("hybrid", "dense") and getattr(self._institution, "embeddings", None):
                 from usersim.engine.core.embeddings import aembed_query
 
                 query_embedding = await aembed_query(
@@ -848,10 +892,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             )
         else:
             behavioral = ""
-        persona_name = (
-            " ".join(str(self._persona.get(k, "")).strip() for k in ("first_name", "last_name")).strip()
-            or "the customer"
-        )
+        persona_name = persona_full_name(self._persona) or "the customer"
         inst = self._instance
         literacy = derive_financial_literacy(self._persona, self._persona_locale())
         common = dict(
@@ -896,9 +937,10 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         )
 
     def _synth_dob(self) -> str:
-        """A stable date of birth (MM/DD/YYYY) for the persona. Derived from the
-        persona's age when present; the verifier only checks that a DOB is
-        provided, so this just needs to be consistent within the conversation."""
+        """A stable date of birth for the persona, written as the region writes
+        dates. Derived from the persona's age when present; the verifier only
+        checks that a DOB is provided, so this just needs to be consistent within
+        the conversation."""
         import datetime
 
         p = self._persona
@@ -911,7 +953,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
             age = 40
         year = datetime.date.today().year - max(18, min(age, 95))
         h = int(hashlib.sha1(f"{p.get('first_name', '')}{p.get('last_name', '')}".encode()).hexdigest(), 16)
-        return f"{h % 12 + 1:02d}/{h // 12 % 28 + 1:02d}/{year}"
+        return self._bank.format_date(datetime.date(year, h % 12 + 1, h // 12 % 28 + 1))
 
     def _synth_pan(self) -> str:
         """A stable, well-formed but fictional Indian PAN (``AAAAA9999A``).
@@ -1050,7 +1092,7 @@ class FinancialServicesProbe(ToolExecutionMixin, BankBackedProbe):
         return (
             "For reference, your account on file with this institution is your "
             f"{a['account_type']} ending {a['last4']} (current balance "
-            f"${a['balance']}). If the agent needs specific account details, use "
+            f"{self._bank.format_money(a['balance'])}). If the agent needs specific account details, use "
             "THESE exact ones — never invent a different account number or last-4."
         )
 
@@ -1223,6 +1265,45 @@ def _resolve_card(account_state: dict[str, Any], args: dict[str, Any]):
     return cards[0] if cards else None
 
 
+def _named_order(account_state: dict[str, Any], args: dict[str, Any]) -> tuple[str, dict[str, Any] | None]:
+    """The ``order_id`` a call names, and the account's order with that id, if any."""
+    order_id = str(args.get("order_id") or "").strip()
+    for order in account_state.get("orders") or []:
+        if order.get("order_id") == order_id:
+            return order_id, order
+    return order_id, None
+
+
+def _unknown_order(tool_name: str, order_id: str) -> dict[str, Any]:
+    """Refuse an order id the account doesn't hold, as an order system would, and
+    say where the account's order ids are listed."""
+    named = f"No order {order_id!r} on this account." if order_id else f"{tool_name} needs an order_id."
+    return {
+        "error": f"{named} get_order_status without an order_id lists the account's orders.",
+        "tool_name": tool_name,
+    }
+
+
+def _order_status(account_state: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """The account's orders from ``account_state['orders']``, or the one ``order_id``
+    names. A customer describes an order by what it buys, not by its id, so the
+    listing is how the assistant finds the id ``cancel_order`` needs."""
+    order_id, order = _named_order(account_state, args)
+    if order_id and order is None:
+        return _unknown_order("get_order_status", order_id)
+    orders = [order] if order is not None else list(account_state.get("orders") or [])
+    return {"accounts": _accounts_view(account_state), "orders": orders}
+
+
+def _cancel_order(account_state: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Cancel the account's order that ``order_id`` names; any other id is refused."""
+    order_id, order = _named_order(account_state, args)
+    if order is None:
+        return _unknown_order("cancel_order", order_id)
+    order["status"] = "CANCELLED"
+    return {"order_id": order_id, "status": "CANCELLED"}
+
+
 def _apply_tool(
     tool_name: str,
     args: dict[str, Any],
@@ -1269,6 +1350,10 @@ def _apply_tool(
         return {"accounts": _accounts_view(account_state), "holdings": account_state.get("holdings", [])}
     if tool_name == "get_account_transactions":
         return {"transactions": account_state.get("transactions", [])}
+    if tool_name == "get_order_status":
+        return _order_status(account_state, args)
+    if tool_name == "cancel_order":
+        return _cancel_order(account_state, args)
     if tool_name == "close_account":
         return {"account_id": args.get("account_id"), "status": "CLOSED"}
     if tool_name == "transfer_funds":
@@ -1284,7 +1369,7 @@ def _apply_tool(
             "eta_business_days": 7,
         }
     if tool_name == "open_account":
-        account_state["evergreen_account"] = "acct_new_0001"
+        account_state["opened_account_id"] = "acct_new_0001"
         return {"account_id": "acct_new_0001", "status": "OPEN", "account_type": args.get("account_type")}
     if tool_name == "initiate_rollover":
         account_state["rollover_status"] = "IN_PROGRESS"
@@ -1295,8 +1380,8 @@ def _apply_tool(
 
     # ── Fallbacks keyed on the tool's SIDE-EFFECT CLASS ──────────────────
     # Enumerating tools does not scale across locales (and already left
-    # get_statements / dispute_status / get_order_status on the generic path),
-    # so anything not special-cased above is answered by class.
+    # get_statements / dispute_status on the generic path), so anything not
+    # special-cased above is answered by class.
     if tool_name in read_only_tools:
         # A read must come back DEFINITIVE. A bare {"status": "ok"} tells the
         # assistant nothing, so it re-queries and burns the turn budget without

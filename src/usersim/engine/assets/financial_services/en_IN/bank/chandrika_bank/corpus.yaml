@@ -1036,7 +1036,7 @@ documents:
 
     | :--- | :--- |
 
-    | Maintains Monthly Average Balance (MAB) $\ge$ ₹10,000 | Fee-free utility; no
+    | Maintains Monthly Average Balance (MAB) ≥ ₹10,000 | Fee-free utility; no
     below MAB charges applied. |
 
     | Maintains Monthly Average Balance (MAB) $<$ ₹10,000 | Subject to a below MAB
@@ -1048,7 +1048,7 @@ documents:
     | No valid PAN provided | Account cannot be opened; ineligible for Regular Savings
     Account. |
 
-    | Balance maintained $\ge$ ₹0 | Eligible for savings interest rate of 3.5% on
+    | Balance maintained ≥ ₹0 | Eligible for savings interest rate of 3.5% on
     daily balance. |'
   domain: retail_banking
   product_category: savings_regular
@@ -4163,7 +4163,7 @@ documents:
     | **Account Status** | Active Chandrika Bank Savings Account | Eligible to proceed
     |
 
-    | **Minimum Monthly Commitment** | $\geq$ ₹500 | Account can be opened |
+    | **Minimum Monthly Commitment** | ≥ ₹500 | Account can be opened |
 
     | **Minimum Monthly Commitment** | $<$ ₹500 | Ineligible (Below minimum threshold)
     |
@@ -5994,9 +5994,9 @@ documents:
     \ requires a specialized card for high-value travel or luxury spends where a 1%\
     \ reward rate is insufficient.\n- The customer prefers a liquid account for daily\
     \ transactions without credit risk; in this case, suggest the Regular Savings\
-    \ Account — overview.\n\nDecision Matrix:\n- Spend > ₹1,50,000 $\rightarrow$ Keep\
-    \ Card (Fee waived).\n- Spend < ₹1,50,000 $\rightarrow$ Evaluate against low-cost\
-    \ alternatives.\n- Need for liquid funds $\rightarrow$ Shift focus to savings\
+    \ Account — overview.\n\nDecision Matrix:\n- Spend > ₹1,50,000 → Keep\
+    \ Card (Fee waived).\n- Spend < ₹1,50,000 → Evaluate against low-cost\
+    \ alternatives.\n- Need for liquid funds → Shift focus to savings\
     \ products."
   domain: cards
   product_category: chandrika_credit_card

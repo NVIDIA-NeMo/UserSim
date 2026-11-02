@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import ast
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -126,8 +125,7 @@ async def test_the_assistants_history_is_compressed_only_without_replay(replay, 
 def _probe_variant_pairs() -> list[tuple[str, str]]:
     pairs = []
     for probe in sorted(known_probes()):
-        module = sys.modules[resolve_probe(probe).__module__]
-        pairs.extend((probe, str(v)) for v in module.PROBE_VARIANTS)
+        pairs.extend((probe, v) for v in resolve_probe(probe).variants)
     return pairs
 
 

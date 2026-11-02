@@ -1,0 +1,407 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for asanagi_bank, a regional bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in Japanese (build_instance picks one per
+# trajectory) so the assistant sees varied turn-1 wording while the gold stays
+# fixed. Read-only tools (get_account_transactions, get_accounts,
+# get_statements, dispute_status) carry no gold state change.
+#
+# Each opening stays on one line: YAML folds a line break into a space, which
+# Japanese does not write.
+templates:
+- id: TPL-AN-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    朝凪Visaデビットの利用明細に、{{merchant}}での{{amount}}円の支払いがあるのですが、まったく身に覚えがありません。調べていただけますか。
+  - >-
+    デビットカードで{{merchant}}に{{amount}}円が引き落とされています。使った覚えがないので、取り消してもらうにはどうすればいいでしょうか。
+  - >-
+    口座の明細を見たら、{{merchant}}で{{amount}}円の利用がありました。私の利用ではないので、調査をお願いできますか。
+  account_state:
+    account_id: acct_an_0001
+    cards:
+    - {card_id: card_an_0001, status: active}
+    transactions:
+    - {transaction_id: txn_an_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, スポーツクラブ・アズール, ストリーミング・ルミナ, ファッション通販・リヴォリ]
+    amount: ['3,980', '12,800', '49,800']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_an_0001.status: UNDER_REVIEW}
+  # Stopping the card and reissuing it are reasonable during a fraud dispute.
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-AN-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    末尾0001のキャッシュカードを{{event}}かもしれません。誰かに使われないよう、すぐに止めていただけますか。
+  - >-
+    デビット機能付きのキャッシュカード（末尾0001）を{{event}}ようです。不正に使われるのが心配なので、利用を停止してください。
+  - >-
+    困っています。末尾0001のカードを{{event}}みたいなんです。見つかるまで、ひとまず使えないようにしてもらえますか。
+  account_state:
+    account_id: acct_an_0001
+    # The openings name the card ending 0001; pin last4 so the account the
+    # user is grounded to matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_an_0001, status: active}
+  param_space:
+    event: [なくした, 落とした, 盗まれた]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_an_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-AN-STOPPAYMENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{creditor}}を退会したので、口座振替を止めていただけますか。来月の引落しから止めたいです。
+  - >-
+    毎月{{creditor}}の代金が口座から引き落とされていますが、もう契約していません。自動引落しを停止してください。
+  - >-
+    {{creditor}}の口座振替を解除したいです。手続きをお願いできますか。
+  account_state:
+    account_id: acct_an_0001
+    mandates:
+    - {mandate_id: mdt_an_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [スポーツクラブ・アズール, 英会話スクール・リンクス, 学習塾ブライト]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_an_0001.status: REVOKED}
+- id: TPL-AN-ACTIVATECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    新しいデビットカードが郵送で届きました。使えるようにしていただけますか。
+  - >-
+    再発行したカードが届いたのですが、利用開始の手続きはそちらでお願いできますか。
+  - >-
+    朝凪Visaデビットが届いたので、すぐ使えるように利用開始の手続きをお願いします。
+  account_state:
+    account_id: acct_an_0001
+    cards:
+    - {card_id: card_an_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_an_0002.status: active}
+- id: TPL-AN-OPENACCT-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    朝凪Visaデビットを申し込みたいのですが、手続きをお願いできますか。普通預金の口座はすでに持っています。
+  - >-
+    今の普通預金口座でデビットカードを作りたいです。申込みをお願いします。
+  - >-
+    ネットショッピング用にデビットカードがほしいので、申し込ませてください。
+  account_state:
+    customer_id: cust_an_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-AN-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    引っ越したので、届出の住所を{{address}}に変更してください。
+  - >-
+    携帯電話の番号が変わりました。新しい番号は{{phone}}です。登録を変えていただけますか。
+  - >-
+    登録しているメールアドレスを{{email}}に変更したいです。
+  account_state:
+    customer_id: cust_an_0001
+  param_space:
+    address: ['静岡県沼津市大手町2-14-8', '香川県高松市番町4-2-11']
+    phone: ['090-3998-4217', '080-3998-1563']
+    email: [k.tanaka@example.com, m.sato@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+- id: TPL-AN-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    インターネットバンキングの振込先に{{payee}}の口座を登録したいです。{{bank_account}}です。
+  - >-
+    毎月{{payee}}に振り込むので、振込先として登録しておいてもらえますか。口座は{{bank_account}}です。
+  - >-
+    新しい振込先を登録してください。{{payee}}の口座で、{{bank_account}}です。
+  account_state:
+    account_id: acct_an_0001
+  param_space:
+    payee: [娘, 大家さん, 子どもが通うスイミングスクール]
+    bank_account: ['そらいろ銀行 ことり支店 普通 4217035', '朝凪銀行 港町支店 普通 7781204']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-AN-TEIKI-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    普通預金から{{amount}}円を、スーパー定期の{{term}}ものに預け入れたいです。
+  - >-
+    ボーナスが入ったので、{{amount}}円を{{term}}の定期預金にしたいです。手続きをお願いします。
+  - >-
+    {{amount}}円をスーパー定期{{term}}で預けてください。
+  account_state:
+    account_id: acct_an_0001
+    balance: '3500000.00'
+  param_space:
+    amount: ['500,000', '1,000,000', '3,000,000']
+    term: [1年, 3年, 5年]
+  gold_tool_sequence: [open_time_deposit]
+  expected_state_deltas: {time_deposit_status: OPEN}
+- id: TPL-AN-PREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    住宅ローンを{{amount}}円、一部繰上返済したいです。期間短縮型でお願いします。
+  - >-
+    まとまったお金ができたので、住宅ローンの繰上返済を{{amount}}円申し込みたいです。
+  - >-
+    毎月の返済を軽くしたいので、{{amount}}円を返済額軽減型で繰上返済してもらえますか。
+  account_state:
+    account_id: loan_an_0001
+    account_type: 住宅ローン
+    balance: '28500000.00'
+  param_space:
+    amount: ['1,000,000', '3,000,000', '5,000,000']
+  gold_tool_sequence: [request_loan_prepayment]
+  expected_state_deltas: {prepayment_status: REQUESTED}
+- id: TPL-AN-RATETYPE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    変動金利で住宅ローンを借りていますが、金利が上がってきたので、固定金利期間選択型の10年に切り替えたいです。
+  - >-
+    住宅ローンの金利タイプを変動から固定に変えたいのですが、手続きをお願いできますか。
+  - >-
+    これからの金利上昇が心配なので、住宅ローンを固定金利に変更してください。
+  account_state:
+    account_id: loan_an_0001
+    account_type: 住宅ローン
+    balance: '28500000.00'
+  param_space: {}
+  gold_tool_sequence: [change_loan_rate_type]
+  expected_state_deltas: {rate_type_change: REQUESTED}
+- id: TPL-AN-CARDLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    朝凪カードローンを申し込みたいです。利用限度額は{{amount}}円くらいを希望しています。
+  - >-
+    急な出費に備えてカードローンを作っておきたいのですが、{{amount}}円ほどの枠で申し込めますか。
+  - >-
+    カードローンの申込みをお願いします。希望額は{{amount}}円です。
+  account_state:
+    customer_id: cust_an_0001
+  param_space:
+    amount: ['300,000', '500,000', '1,000,000']
+  gold_tool_sequence: [apply_card_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-AN-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    財布ごと末尾0001のカードをなくしてしまい、さっき{{merchant}}で{{amount}}円の身に覚えのない支払いが出ていました。カードを止めて、その支払いを調べて、新しいカードを送っていただけますか。
+  - >-
+    末尾0001のカードが見当たらず、{{merchant}}で{{amount}}円の不正な利用がありました。利用停止と、この支払いの調査、カードの再発行をお願いします。
+  - >-
+    カード（末尾0001）を誰かに使われたかもしれません。まず止めてください。それから{{merchant}}の{{amount}}円の支払いを調べて、新しいカードも手配してください。
+  account_state:
+    account_id: acct_an_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_an_0001, status: active}
+    transactions:
+    - {transaction_id: txn_an_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, ストリーミング・ルミナ, ファッション通販・リヴォリ]
+    amount: ['8,980', '54,800']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_an_0001.status: frozen, txn_an_0002.status: UNDER_REVIEW, card_an_0001.replacement: ordered}
+- id: TPL-AN-BILLS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    引っ越しに合わせて整理したいです。{{creditor}}の口座振替を止めて、手元にある{{bill}}をペイジーで払って、引落しがあったら通知が来るように設定してください。
+  - >-
+    {{creditor}}の自動引落しを停止して、{{bill}}の支払いをペイジーでお願いします。あと、入出金のお知らせメールも設定したいです。
+  - >-
+    三つお願いがあります。{{creditor}}の口座振替の解除、{{bill}}のペイジーでの支払い、それと引落しの通知の設定です。
+  account_state:
+    account_id: acct_an_0001
+    balance: '420000.00'
+    mandates:
+    - {mandate_id: mdt_an_0002, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [スポーツクラブ・アズール, 英会話スクール・リンクス]
+    bill: [自動車税の納付書, 固定資産税の納付書, 国民健康保険料の納付書]
+  gold_tool_sequence: [stop_payment, pay_bill, set_alerts]
+  expected_state_deltas: {mdt_an_0002.status: REVOKED, bill_paid: true, alerts_updated: true}
+- id: TPL-AN-MOVE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    県外に引っ越すことになりました。住所を{{address}}に変更して、普通預金の残高を{{bank_account}}に振り込んでから、口座を解約したいです。
+  - >-
+    転居先の{{address}}に住所を変えてください。そのうえで残高を全部{{bank_account}}へ移して、こちらの口座は解約をお願いします。
+  - >-
+    引っ越しで朝凪銀行の口座を閉じたいです。住所変更（{{address}}）、{{bank_account}}への残高の振込、口座の解約をお願いできますか。
+  account_state:
+    account_id: acct_an_0001
+    balance: '186400.00'
+  param_space:
+    address: ['静岡県沼津市大手町2-14-8', '香川県高松市番町4-2-11']
+    bank_account: ['そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_updated: true, transfer_status: COMPLETED, acct_an_0001.status: CLOSED}
+  # Closing an account invites stopping the debits that still draw on it.
+  allowed_tools: [stop_payment]
+- id: TPL-AN-DIVORCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    離婚したので、{{ex}}に渡していた代理人カードを止めて、振込先から{{ex}}の口座を削除し、住所を{{address}}に変更してください。
+  - >-
+    {{ex}}の代理人カードの利用停止と、登録振込先からの{{ex}}の口座の削除をお願いします。住所も{{address}}に変わりました。
+  - >-
+    家族の状況が変わりました。{{ex}}の代理人カードを使えないようにして、{{ex}}あての振込先を消して、住所を{{address}}に更新してもらえますか。
+  account_state:
+    account_id: acct_an_0001
+  param_space:
+    ex: [元妻, 元夫]
+    address: ['静岡県沼津市大手町2-14-8', '香川県高松市番町4-2-11']
+  gold_tool_sequence: [manage_authorized_users, update_beneficiary, update_contact_info]
+  expected_state_deltas: {authorized_users_updated: true, payee_removed: true, contact_updated: true}
+- id: TPL-AN-MATURITY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    スーパー定期を満期前に解約して、そのお金で住宅ローンを{{amount}}円繰上返済したいです。返済日の前にお知らせが届くようにもしてください。
+  - >-
+    定期預金を中途解約して、住宅ローンの一部繰上返済に{{amount}}円あてたいです。あと、引落し日の前に通知がほしいです。
+  - >-
+    住宅ローンの利息を減らしたいので、スーパー定期を解約して{{amount}}円を繰上返済に回してください。返済日の通知も設定をお願いします。
+  account_state:
+    account_id: loan_an_0001
+    account_type: 住宅ローン
+    balance: '28500000.00'
+    time_deposit_id: td_an_0001
+    time_deposit_balance: '2000000.00'
+  param_space:
+    amount: ['1,000,000', '2,000,000']
+  gold_tool_sequence: [cancel_time_deposit, request_loan_prepayment, set_alerts]
+  expected_state_deltas: {td_an_0001.status: CLOSED, prepayment_status: REQUESTED, alerts_updated: true}
+- id: TPL-AN-HOMELOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    住宅ローンを見直したいです。変動金利から固定金利期間選択型の10年に切り替えて、{{amount}}円を期間短縮型で繰上返済し、返済日の前に通知が届くようにしてください。
+  - >-
+    金利上昇に備えて、住宅ローンを固定10年に変更したいです。あわせて{{amount}}円の一部繰上返済と、返済日のお知らせの設定もお願いします。
+  - >-
+    住宅ローンについて三つお願いします。固定金利への切替え、{{amount}}円の繰上返済、それから返済日の通知の設定です。
+  account_state:
+    account_id: loan_an_0001
+    account_type: 住宅ローン
+    balance: '28500000.00'
+  param_space:
+    amount: ['1,000,000', '3,000,000']
+  gold_tool_sequence: [change_loan_rate_type, request_loan_prepayment, set_alerts]
+  expected_state_deltas: {rate_type_change: REQUESTED, prepayment_status: REQUESTED, alerts_updated: true}
+- id: TPL-AN-HOMECOMING-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    転勤で{{address}}に戻ってきました。住所を変更して、朝凪Visaデビットを申し込み、家賃の振込先として{{payee}}の口座（{{bank_account}}）を登録して、入出金の通知も設定したいです。
+  - >-
+    引っ越しに伴って、住所変更（{{address}}）、デビットカードの申込み、{{payee}}の口座（{{bank_account}}）の振込先登録、それに入出金のお知らせの設定をお願いします。
+  - >-
+    新生活の準備でお願いが四つあります。住所を{{address}}に変更、デビットカードの申込み、{{payee}}あての振込先（{{bank_account}}）の登録、入出金通知の設定です。
+  account_state:
+    account_id: acct_an_0001
+    customer_id: cust_an_0001
+  param_space:
+    address: ['静岡県沼津市大手町2-14-8', '香川県高松市番町4-2-11']
+    payee: [大家さん, 管理会社]
+    bank_account: ['朝凪銀行 港町支店 普通 7781204', 'そらいろ銀行 ことり支店 普通 4217035']
+  gold_tool_sequence: [update_contact_info, open_account, update_beneficiary, set_alerts]
+  expected_state_deltas: {contact_updated: true, new_account_status: OPEN, payee_added: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ja_JP/dynamic.yaml), not scripted templates.

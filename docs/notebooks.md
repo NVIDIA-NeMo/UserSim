@@ -21,7 +21,7 @@ Outputs are stripped from the committed notebooks, so you will see source
 only until you run them. That keeps machine-specific paths and endpoint URLs
 out of the repository, and keeps the repository small.
 
-## The three notebooks
+## The notebooks
 
 **[`01_simulate.ipynb`](../notebooks/01_simulate.ipynb)** drives the simulator
 and writes the trajectory dataset. It is resumable across re-runs, skipping
@@ -45,6 +45,12 @@ to shape training records. `tests/test_extraction_example.py` pins the schema co
 pairwise shapes, confirming the trajectory and evaluation columns are
 sufficient to drive them.
 
+**[`finance_assets.ipynb`](../src/usersim/asset_gen/notebooks/finance_assets.ipynb)**
+generates and vets a `financial_services` asset bank: it drives
+`usersim gen-assets`, `validate-assets` and `evaluate-assets`, then previews
+the result. Its generate and evaluate cells make live, billable model calls;
+the shipped banks don't need them.
+
 ## Notebook or CLI?
 
 The two paths call the same factories, so a notebook run and a CLI run of the
@@ -56,5 +62,5 @@ conversation previews. Prefer the CLI for unattended and reproducible runs:
 usersim simulate --locale en_US --num-rows 20 --out output/trajectories
 ```
 
-Every LLM-driven subcommand accepts `--dry-run`, which prints the resolved
-plan and exits without touching the network.
+`simulate`, `eval` and `gen-assets` accept `--dry-run`, which prints the
+resolved plan and exits before any model call.

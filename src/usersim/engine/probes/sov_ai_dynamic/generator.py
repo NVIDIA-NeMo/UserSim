@@ -174,6 +174,7 @@ class SovAiDynamicProbe(BankBackedProbe):
     """
 
     label = "sov_ai_dynamic"
+    output_columns = ("probing_categories_explored", "probing_subtopic_hints_used")
     bank_loader = staticmethod(_bank_loader)
     placeholder_warning_kind = WarningKind.USED_PLACEHOLDER_TAXONOMY
     bank_version_key = None  # locale-keyed (the inclusion convention)

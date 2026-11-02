@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: en_US
 bank_id: en_US_sample
-bank_version: v0.5.3
+bank_version: v0.5.4
 categories:
 - usa-geography
 - usa-history
@@ -49,10 +49,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-GEO-002
   category: usa-geography
   question_type: factual_recall
@@ -68,10 +67,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-GEO-003
   category: usa-geography
   question_type: factual_recall
@@ -88,10 +86,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-GEO-004
   category: usa-geography
   question_type: factual_recall
@@ -108,10 +105,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-GEO-005
   category: usa-geography
   question_type: factual_recall
@@ -127,10 +123,9 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-HIS-001
   category: usa-history
   question_type: factual_recall
@@ -146,10 +141,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-HIS-002
   category: usa-history
   question_type: factual_recall
@@ -165,10 +159,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-HIS-003
   category: usa-history
   question_type: factual_recall
@@ -184,10 +177,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-HIS-004
   category: usa-history
   question_type: factual_recall
@@ -203,10 +195,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-HIS-005
   category: usa-history
   question_type: factual_recall
@@ -222,10 +213,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-CUL-001
   category: usa-culture
   question_type: factual_recall
@@ -240,10 +230,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-CUL-002
   category: usa-culture
   question_type: factual_recall
@@ -260,10 +249,9 @@ entries:
   - region:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-CUL-003
   category: usa-culture
   question_type: factual_recall
@@ -279,10 +267,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-CUL-004
   category: usa-culture
   question_type: factual_recall
@@ -297,10 +284,9 @@ entries:
   - education:tertiary
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-CUL-005
   category: usa-culture
   question_type: factual_recall
@@ -316,10 +302,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-POE-001
   category: usa-poetry-and-music
   question_type: completion
@@ -343,10 +328,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-POE-002
   category: usa-poetry-and-music
   question_type: completion
@@ -365,10 +349,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-POE-003
   category: usa-poetry-and-music
   question_type: completion
@@ -387,10 +370,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-POE-004
   category: usa-poetry-and-music
   question_type: completion
@@ -409,10 +391,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-POE-005
   category: usa-poetry-and-music
   question_type: completion
@@ -431,10 +412,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-SVC-001
   category: usa-public-services
   question_type: factual_recall
@@ -450,10 +430,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-SVC-002
   category: usa-public-services
   question_type: factual_recall
@@ -468,10 +447,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-SVC-003
   category: usa-public-services
   question_type: factual_recall
@@ -487,10 +465,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-SVC-004
   category: usa-public-services
   question_type: factual_recall
@@ -505,10 +482,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: US-SVC-005
   category: usa-public-services
   question_type: factual_recall
@@ -524,10 +500,9 @@ entries:
   - interest:geography
   difficulty: hard
   provenance:
-    source: United States beta review of original sample entry
+    source: Original UserSim sample entry (United States)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: USA-GEOG-B006
   category: usa-geography
   question_type: factual_recall
@@ -545,10 +520,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Niagara Parks (Ontario), USGS, US National Park Service.
+    - Synthetic factual entry (AI-authored). Standard reference points — Niagara Parks (Ontario), USGS, US National Park Service.
 - id: USA-HIST-B006
   category: usa-history
   question_type: factual_recall
@@ -566,10 +541,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — NASA Apollo 11 mission archive.
+    - Synthetic factual entry (AI-authored). Standard reference points — NASA Apollo 11 mission archive.
 - id: USA-CULT-B006
   category: usa-culture
   question_type: factual_recall
@@ -587,10 +562,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Pulitzer.org awards archive, NobelPrize.org.
+    - Synthetic factual entry (AI-authored). Standard reference points — Pulitzer.org awards archive, NobelPrize.org.
 - id: USA-POET-B006
   category: usa-poetry-and-music
   question_type: completion
@@ -629,10 +604,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Langston Hughes, "Harlem", in "Montage of a Dream Deferred" (1951).
+    - Synthetic factual entry (AI-authored). Reference text — Langston Hughes, "Harlem", in "Montage of a Dream Deferred" (1951).
 - id: USA-PUBL-B006
   category: usa-public-services
   question_type: factual_recall
@@ -651,10 +626,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — travel.state.gov passport pages (DS-82 / DS-11 forms, fees, processing times), CBP entry-requirements pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — travel.state.gov passport pages (DS-82 / DS-11 forms, fees, processing times), CBP entry-requirements pages.
 - id: USA-HEAL-B001
   category: usa-health-systems
   question_type: factual_recall
@@ -672,10 +647,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov coverage and enrollment pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — medicare.gov coverage and enrollment pages.
 - id: USA-HEAL-B002
   category: usa-health-systems
   question_type: factual_recall
@@ -693,10 +668,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 969, healthcare.gov.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRS Publication 969, healthcare.gov.
 - id: USA-HEAL-B003
   category: usa-health-systems
   question_type: factual_recall
@@ -714,10 +689,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Department of Labor COBRA Compliance pages, IRS § 4980B.
+    - Synthetic factual entry (AI-authored). Standard reference points — U.S. Department of Labor COBRA Compliance pages, IRS § 4980B.
 - id: USA-HEAL-B004
   category: usa-health-systems
   question_type: factual_recall
@@ -735,10 +710,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov "Working past 65" guidance, CMS Medicare Secondary Payer rules.
+    - Synthetic factual entry (AI-authored). Standard reference points — medicare.gov "Working past 65" guidance, CMS Medicare Secondary Payer rules.
 - id: USA-HEAL-B005
   category: usa-health-systems
   question_type: factual_recall
@@ -756,10 +731,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CMS No Surprises Act consumer guidance (cms.gov/nosurprises), HHS final rules.
+    - Synthetic factual entry (AI-authored). Standard reference points — CMS No Surprises Act consumer guidance (cms.gov/nosurprises), HHS final rules.
 - id: USA-HEAL-B006
   category: usa-health-systems
   question_type: factual_recall
@@ -777,10 +752,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicaid.gov, KFF Medicaid expansion tracker, NFIB v. Sebelius 567 U.S. 519 (2012).
+    - Synthetic factual entry (AI-authored). Standard reference points — medicaid.gov, KFF Medicaid expansion tracker, NFIB v. Sebelius 567 U.S. 519 (2012).
 - id: USA-EDUC-B001
   category: usa-education
   question_type: factual_recall
@@ -798,10 +773,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov FAFSA pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — studentaid.gov FAFSA pages.
 - id: USA-EDUC-B002
   category: usa-education
   question_type: factual_recall
@@ -819,10 +794,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov Direct Loans pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — studentaid.gov Direct Loans pages.
 - id: USA-EDUC-B003
   category: usa-education
   question_type: factual_recall
@@ -840,10 +815,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov PSLF pages, PSLF Help Tool.
+    - Synthetic factual entry (AI-authored). Standard reference points — studentaid.gov PSLF pages, PSLF Help Tool.
 - id: USA-EDUC-B004
   category: usa-education
   question_type: factual_recall
@@ -861,10 +836,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 970, SEC Investor Bulletin on 529 plans, state plan pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRS Publication 970, SEC Investor Bulletin on 529 plans, state plan pages.
 - id: USA-EDUC-B005
   category: usa-education
   question_type: factual_recall
@@ -883,10 +858,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — studentaid.gov IDR pages, Loan Simulator tool.
+    - Synthetic factual entry (AI-authored). Standard reference points — studentaid.gov IDR pages, Loan Simulator tool.
 - id: USA-EDUC-B006
   category: usa-education
   question_type: factual_recall
@@ -905,10 +880,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Department of Education ed.gov, NCES Digest of Education Statistics, ESSA (Pub. L. 114-95), IDEA (Pub. L. 108-446).
+    - Synthetic factual entry (AI-authored). Standard reference points — U.S. Department of Education ed.gov, NCES Digest of Education Statistics, ESSA (Pub. L. 114-95), IDEA (Pub. L. 108-446).
 - id: USA-LABO-B001
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -926,10 +901,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. Dept. of Labor Wage and Hour Division, FLSA, State Minimum Wage Laws table.
+    - Synthetic factual entry (AI-authored). Standard reference points — U.S. Dept. of Labor Wage and Hour Division, FLSA, State Minimum Wage Laws table.
 - id: USA-LABO-B002
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -947,10 +922,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Title VII (42 U.S.C. § 2000e), ADEA, ADA, WARN Act, EEOC and Dept. of Labor guidance.
+    - Synthetic factual entry (AI-authored). Standard reference points — Title VII (42 U.S.C. § 2000e), ADEA, ADA, WARN Act, EEOC and Dept. of Labor guidance.
 - id: USA-LABO-B003
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -969,10 +944,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 29 U.S.C. § 2601 et seq. (FMLA), 29 C.F.R. Part 825, U.S. DOL FMLA pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — 29 U.S.C. § 2601 et seq. (FMLA), 29 C.F.R. Part 825, U.S. DOL FMLA pages.
 - id: USA-LABO-B004
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -991,10 +966,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — U.S. DOL Employment & Training Administration UI pages, FUTA (26 U.S.C. § 3301), state UI agencies.
+    - Synthetic factual entry (AI-authored). Standard reference points — U.S. DOL Employment & Training Administration UI pages, FUTA (26 U.S.C. § 3301), state UI agencies.
 - id: USA-LABO-B005
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -1012,10 +987,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — state workers'' comp agencies, FECA, LHWCA, FELA, NAIC workers'' comp summaries.
+    - Synthetic factual entry (AI-authored). Standard reference points — state workers'' comp agencies, FECA, LHWCA, FELA, NAIC workers'' comp summaries.
 - id: USA-LABO-B006
   category: usa-labor-and-benefits
   question_type: factual_recall
@@ -1033,10 +1008,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Labor Relations Act (29 U.S.C. § 151 et seq.), Taft-Hartley §14(b), Janus v. AFSCME, 585 U.S. ___ (2018), NLRB.gov.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Labor Relations Act (29 U.S.C. § 151 et seq.), Taft-Hartley §14(b), Janus v. AFSCME, 585 U.S. ___ (2018), NLRB.gov.
 - id: USA-FINA-B001
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1055,10 +1030,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Fair Credit Reporting Act (15 U.S.C. § 1681), CFPB consumer credit pages, annualcreditreport.com.
+    - Synthetic factual entry (AI-authored). Standard reference points — Fair Credit Reporting Act (15 U.S.C. § 1681), CFPB consumer credit pages, annualcreditreport.com.
 - id: USA-FINA-B002
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1075,10 +1050,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CFPB credit card guidance, Credit CARD Act of 2009 (Pub. L. 111-24), Truth in Lending Act / Regulation Z.
+    - Synthetic factual entry (AI-authored). Standard reference points — CFPB credit card guidance, Credit CARD Act of 2009 (Pub. L. 111-24), Truth in Lending Act / Regulation Z.
 - id: USA-FINA-B003
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1097,10 +1072,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 590-A (Contributions to IRAs), IRS Publication 590-B (Distributions from IRAs), SECURE Act 2.0 (Pub. L. 117-328 Division T).
+    - Synthetic factual entry (AI-authored). Standard reference points — IRS Publication 590-A (Contributions to IRAs), IRS Publication 590-B (Distributions from IRAs), SECURE Act 2.0 (Pub. L. 117-328 Division T).
 - id: USA-FINA-B004
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1118,10 +1093,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Publication 590-B, SECURE Act 2.0 sections on RMD age and excise tax.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRS Publication 590-B, SECURE Act 2.0 sections on RMD age and excise tax.
 - id: USA-FINA-B005
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1140,10 +1115,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — FDIC.gov consumer pages, SIPC.org, NCUA.gov.
+    - Synthetic factual entry (AI-authored). Standard reference points — FDIC.gov consumer pages, SIPC.org, NCUA.gov.
 - id: USA-FINA-B006
   category: usa-finance-and-consumer
   question_type: factual_recall
@@ -1160,10 +1135,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IRS Revenue Procedure annual inflation adjustments, IRS.gov tax brackets pages.
+    - Synthetic factual entry (AI-authored). Standard reference points — IRS Revenue Procedure annual inflation adjustments, IRS.gov tax brackets pages.
 - id: USA-DIGI-B001
   category: usa-digital-services
   question_type: factual_recall
@@ -1182,10 +1157,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — login.gov, id.me, agency-specific sign-in pages (irs.gov, va.gov, ssa.gov).
+    - Synthetic factual entry (AI-authored). Standard reference points — login.gov, id.me, agency-specific sign-in pages (irs.gov, va.gov, ssa.gov).
 - id: USA-DIGI-B002
   category: usa-digital-services
   question_type: factual_recall
@@ -1204,10 +1179,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — directfile.irs.gov, irs.gov/freefile, IRS Strategic Operating Plan.
+    - Synthetic factual entry (AI-authored). Standard reference points — directfile.irs.gov, irs.gov/freefile, IRS Strategic Operating Plan.
 - id: USA-DIGI-B003
   category: usa-digital-services
   question_type: factual_recall
@@ -1226,10 +1201,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — SSA Office of the Inspector General scam alerts (oig.ssa.gov), FTC consumer alerts on government-impersonation scams, AARP fraud watch.
+    - Synthetic factual entry (AI-authored). Standard reference points — SSA Office of the Inspector General scam alerts (oig.ssa.gov), FTC consumer alerts on government-impersonation scams, AARP fraud watch.
 - id: USA-DIGI-B004
   category: usa-digital-services
   question_type: factual_recall
@@ -1247,10 +1222,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — medicare.gov, CMS Medicare Communications and Marketing Guidelines, shiphelp.org.
+    - Synthetic factual entry (AI-authored). Standard reference points — medicare.gov, CMS Medicare Communications and Marketing Guidelines, shiphelp.org.
 - id: USA-DIGI-B005
   category: usa-digital-services
   question_type: factual_recall
@@ -1268,10 +1243,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — VA.gov, 38 U.S.C. § 5904, VA Office of General Counsel accreditation search.
+    - Synthetic factual entry (AI-authored). Standard reference points — VA.gov, 38 U.S.C. § 5904, VA Office of General Counsel accreditation search.
 - id: USA-DIGI-B006
   category: usa-digital-services
   question_type: factual_recall
@@ -1289,7 +1264,7 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_US, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_US, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — IAPP US State Privacy Legislation Tracker, state attorneys-general privacy pages, FTC privacy and security guidance.
+    - Synthetic factual entry (AI-authored). Standard reference points — IAPP US State Privacy Legislation Tracker, state attorneys-general privacy pages, FTC privacy and security guidance.

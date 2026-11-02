@@ -24,7 +24,6 @@ import importlib
 import json
 import logging
 import shutil
-import sys
 from contextlib import ExitStack, contextmanager
 from dataclasses import replace
 from pathlib import Path
@@ -78,8 +77,7 @@ def _probe_variant_pairs() -> list[tuple[str, str]]:
 
     pairs = []
     for probe in sorted(known_probes()):
-        module = sys.modules[resolve_probe(probe).__module__]
-        pairs.extend((probe, str(v)) for v in module.PROBE_VARIANTS)
+        pairs.extend((probe, v) for v in resolve_probe(probe).variants)
     return pairs
 
 
@@ -329,6 +327,18 @@ def test_a_change_in_a_lower_priority_asset_root_is_a_new_setup(monkeypatch, tmp
     assert _inputs._asset_roots_digest(top) != before
 
 
+def test_a_change_under_a_probe_declared_assets_root_is_a_new_setup(register_test_probe, tmp_path):
+    """A probe shipped in its own package reads its banks from the root its class declares."""
+    bank = tmp_path / "pkg" / "ext_probe" / "sample.yaml"
+    bank.parent.mkdir(parents=True)
+    bank.write_text("items: []\n")
+    register_test_probe("ext_probe", assets_root=tmp_path / "pkg")
+    before = _inputs._asset_roots_digest(packaged_assets_dir())
+    bank.write_text("items: [edited]\n")
+
+    assert _inputs._asset_roots_digest(packaged_assets_dir()) != before
+
+
 def test_a_data_designer_release_is_part_of_the_setup(rows, monkeypatch):
     before = _fingerprint(rows)
     monkeypatch.setattr(_inputs, "_data_designer_version", lambda: "999.0")
@@ -353,8 +363,7 @@ def test_a_prompt_version_is_part_of_the_setup(rows, monkeypatch):
     from usersim.engine.core.probes import resolve_probe
 
     before = _fingerprint(rows)
-    module = sys.modules[resolve_probe("general_open_ended").__module__]
-    monkeypatch.setattr(module, "PROMPT_VERSION", "v999", raising=False)
+    monkeypatch.setattr(resolve_probe("general_open_ended"), "prompt_version", "v999")
 
     assert _fingerprint(rows) != before
 
@@ -845,6 +854,32 @@ def test_a_flag_the_stored_rows_settle_is_refused(rows, tmp_path, flag, value):
     argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
     with pytest.raises(SystemExit, match=flag):
         cli.main([*argv, flag, *([value] if value else []), "--dry-run"])
+
+
+def test_stored_rows_get_the_asset_pre_flight_against_the_root_they_run_on(rows, tmp_path, caplog):
+    empty = tmp_path / "assets"
+    empty.mkdir()
+    rows_path = _write(rows, tmp_path / "rows.jsonl")
+    argv = ["simulate", "--inputs", str(rows_path), "--assets-dir", str(empty), "--out", str(tmp_path / "o")]
+    with caplog.at_level(logging.ERROR):
+        assert cli.main([*argv, "--dry-run"]) == 2
+    assert "no asset directory" in caplog.text
+
+
+def test_stored_rows_are_checked_probe_by_probe(rows, tmp_path):
+    """Each probe is checked in the locales its own rows use, not every locale of the run."""
+    checked: dict[str, list[str]] = {}
+
+    def record(probe_locales, assets_dir):
+        checked.update({probe: sorted(set(locales)) for probe, locales in probe_locales.items()})
+
+    argv = ["simulate", "--inputs", str(_write(rows, tmp_path / "rows.jsonl")), "--out", str(tmp_path / "o")]
+    with patch("usersim.cli.simulate.verify_probe_locales", record):
+        assert cli.main([*argv, "--dry-run"]) == 0
+    expected: dict[str, set[str]] = {}
+    for row in rows:
+        expected.setdefault(row["probe_type"], set()).add(row["usersim_config"]["locale"])
+    assert checked == {probe: sorted(locales) for probe, locales in expected.items()}
 
 
 def test_a_dry_run_shows_the_plan_without_running(rows, tmp_path, capsys):

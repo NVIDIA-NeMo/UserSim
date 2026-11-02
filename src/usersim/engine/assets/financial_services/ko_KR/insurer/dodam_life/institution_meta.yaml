@@ -1,0 +1,9 @@
+institution_id: dodam_life
+display_name: Dodam Life
+type: insurer
+brand_voice: traditional
+domains:
+- insurance
+placeholder: true
+display_name_local: 도담생명
+schema_version: v0.1

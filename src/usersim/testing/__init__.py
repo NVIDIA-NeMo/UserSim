@@ -23,17 +23,37 @@ Usage from an extension's own tests::
 These checks are also run against the built-in probes and scorers, so the
 suite cannot drift into describing a contract this project does not itself
 keep.
+
+``run_episode`` runs one episode of a probe offline with ``ScriptedModel``
+answering for every model alias, and returns the generator's row and the
+prompts sent, so a probe's tests patch nothing.
+
+``usersim.testing.pytest_plugin`` is the hermetic harness the built-in tests
+run under, for a suite to load with
+``pytest_plugins = ["usersim.testing.pytest_plugin"]`` in its top-level
+``conftest.py``. This module does not import it, so ``usersim.testing``
+works without pytest installed.
 """
 
 from __future__ import annotations
 
+import ast
 import copy
+import inspect
 import json
+import textwrap
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Mapping, Sequence
 
+# Engine imports stay inside the functions that use them: loading
+# ``usersim.testing.pytest_plugin`` imports this package first, and a suite
+# that opts in to the plugin does not load the probe registry or the
+# conversation loop just to start.
+
 __all__ = [
+    "EpisodeRun",
     "HostedParityReport",
     "ScriptedModel",
     "assert_hosted_parity",
@@ -41,6 +61,7 @@ __all__ = [
     "assert_scorer_conforms",
     "hosted_parity_report",
     "probe_conformance_problems",
+    "run_episode",
     "scorer_conformance_problems",
 ]
 
@@ -68,6 +89,8 @@ _AWAITED_PROBE_HOOKS = (
 def probe_conformance_problems(probe: str | type) -> list[str]:
     """Findings for one probe, by label or by class. Empty means conforming."""
     from usersim.engine.core._assets import probe_assets_dir
+    from usersim.engine.core.columns import output_columns_problem
+    from usersim.engine.core.outcomes import placeholder_warning_kind_problem
     from usersim.engine.core.probes import (
         _PROBE_REGISTRY,
         BaseProbe,
@@ -101,18 +124,12 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
             f"{cls.__qualname__}. Two probes cannot share a label."
         )
 
-    # @register_probe sets these on the defining module; the dispatcher
-    # reads them from there rather than from the class.
-    module = getattr(cls, "__module__", None)
-    if module:
-        import sys
-
-        mod = sys.modules.get(module)
-        for const in ("PROBE_FAMILY", "PROMPT_VERSION", "PROBE_VARIANTS"):
-            if getattr(mod, const, None) in (None, "", ()):
-                problems.append(
-                    f"{module}.{const} is unset. Use @register_probe rather than assigning to the registry directly."
-                )
+    # @register_probe sets these on the class, where the dispatcher reads them.
+    for attr in ("family", "prompt_version", "variants"):
+        if getattr(cls, attr, None) in (None, "", ()):
+            problems.append(
+                f"{cls.__qualname__}.{attr} is unset. Use @register_probe rather than assigning to the registry directly."
+            )
 
     for method in _REQUIRED_PROBE_METHODS:
         impl = getattr(cls, method, None)
@@ -123,8 +140,6 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                 f"{cls.__qualname__}.{method} is not overridden; the loop "
                 f"calls it on every turn and the base version raises."
             )
-
-    import inspect
 
     for hook in _AWAITED_PROBE_HOOKS:
         impl = getattr(cls, hook, None)
@@ -152,13 +167,100 @@ def probe_conformance_problems(probe: str | type) -> list[str]:
                     f"docs/engine/EXTERNAL_PROBE_RUNTIME.md."
                 )
 
+    declared = getattr(cls, "assets_root", None)
+    if declared is not None and not Path(declared).is_absolute():
+        problems.append(
+            f"{cls.__qualname__}.assets_root is the relative path {str(declared)!r}, which resolves against "
+            "the working directory. Build it from the module's location, such as "
+            'Path(__file__).parent / "assets".'
+        )
+
+    columns_problem = output_columns_problem(getattr(cls, "output_columns", ()))
+    if columns_problem:
+        problems.append(f"{cls.__qualname__}.output_columns {columns_problem}")
+
+    if hasattr(cls, "placeholder_warning_kind"):
+        kind_problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
+        if kind_problem:
+            problems.append(f"{cls.__qualname__}.placeholder_warning_kind {kind_problem}")
+
+    for klass, key in _reserved_metadata_writes(cls):
+        problems.append(
+            f"{klass} writes state.metadata[{key!r}], which the conversation loop owns. "
+            f"Read it there, and give the probe's own metadata keys its prefix."
+        )
+
     assets = probe_assets_dir(label)
     if not assets.is_dir():
         problems.append(
-            f"no assets for {label!r} at {assets}. Ship them in the package, or add their root to USERSIM_ASSET_PATH."
+            f"no assets for {label!r} at {assets}. Ship them in the package and point the class's "
+            f"assets_root at the directory that holds {label}/, or add that directory to USERSIM_ASSET_PATH."
         )
 
     return problems
+
+
+def _reserved_metadata_writes(cls: type) -> list[tuple[str, str]]:
+    """``(class, key)`` for each reserved metadata key the probe's own classes write.
+
+    Reads the source of every class the probe inherits from outside the engine
+    core. A class defined without source, such as with ``type()``, has nothing
+    to read.
+    """
+    from usersim.engine.core.simulation import RESERVED_METADATA_KEYS
+
+    found: set[tuple[str, str]] = set()
+    for klass in cls.__mro__:
+        if klass is object or klass.__module__.startswith("usersim.engine.core"):
+            continue
+        try:
+            source = textwrap.dedent(inspect.getsource(klass))
+        except (OSError, TypeError):
+            continue
+        for key in _metadata_keys_written(source):
+            if key in RESERVED_METADATA_KEYS:
+                found.add((klass.__qualname__, key))
+    return sorted(found)
+
+
+def _metadata_keys_written(source: str) -> set[str]:
+    """The constant ``state.metadata`` keys a piece of source writes.
+
+    Counts ``x.metadata[key] = ...`` (also augmented and annotated),
+    ``del x.metadata[key]``, and ``x.metadata.setdefault / pop / update``
+    with a literal key, on any object's ``metadata``.
+    """
+
+    def subscript_key(node: ast.AST) -> str | None:
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Attribute)
+            and node.value.attr == "metadata"
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+        ):
+            return node.slice.value
+        return None
+
+    keys: set[str] = set()
+    for node in ast.walk(ast.parse(source)):
+        targets: list[ast.AST] = []
+        if isinstance(node, (ast.Assign, ast.Delete)):
+            targets = list(node.targets)
+        elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+            targets = [node.target]
+        keys.update(key for key in map(subscript_key, targets) if key)
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Attribute)
+            and node.func.value.attr == "metadata"
+        ):
+            if node.func.attr in ("setdefault", "pop") and node.args and isinstance(node.args[0], ast.Constant):
+                keys.add(node.args[0].value)
+            elif node.func.attr == "update" and node.args and isinstance(node.args[0], ast.Dict):
+                keys.update(k.value for k in node.args[0].keys if isinstance(k, ast.Constant))
+    return {key for key in keys if isinstance(key, str)}
 
 
 def assert_probe_conforms(probe: str | type) -> None:
@@ -189,8 +291,6 @@ async def scorer_conformance_problems(
     Awaitable, because a scorer is: the evaluator awaits it, so checking it
     means awaiting it here too.
     """
-    import inspect
-
     from usersim.engine.evaluator.generator import SCORER_FILLED_KEYS
     from usersim.engine.evaluator.scorers import _REGISTRY, list_scorers
 
@@ -327,6 +427,87 @@ class ScriptedModel:
         )
 
 
+#: The model alias each ``ScriptedModel`` role answers for.
+_SCRIPTED_ROLES = {
+    "api_response_model": "api",
+    "assistant_model": "assistant",
+    "judge_model": "judge",
+    "summary_model": "summary",
+    "user_model": "user",
+}
+
+
+def _scripted_models(model_factory: Callable[[str], Any], prompts: list[dict[str, Any]]) -> dict[str, Any]:
+    """One model per alias from ``model_factory``, all recording into ``prompts``."""
+    models = {}
+    for alias, role in _SCRIPTED_ROLES.items():
+        model = model_factory(role)
+        model.prompts = prompts
+        models[alias] = model
+    return models
+
+
+def _episode_runtime(
+    probe: str,
+    models: Mapping[str, Any],
+    *,
+    config: Any,
+    persona: Mapping[str, Any],
+    data: Mapping[str, Any] | None,
+    profile: Mapping[str, Any] | None,
+    language: str,
+) -> Any:
+    from usersim.engine.core.episode_runtime import ProbeEpisodeRuntime
+
+    return ProbeEpisodeRuntime(
+        probe_type=probe,
+        persona=dict(persona),
+        locale=config.locale,
+        language=language,
+        models=dict(models),
+        config=config,
+        data=dict(data or {}),
+        profile=dict(profile) if profile is not None else None,
+    )
+
+
+@dataclass(frozen=True)
+class EpisodeRun:
+    """One episode run offline: the generator's row, and every prompt sent."""
+
+    row: dict[str, Any]
+    prompts: list[dict[str, Any]]
+
+
+async def run_episode(
+    probe: str,
+    *,
+    config: Any,
+    persona: Mapping[str, Any],
+    data: Mapping[str, Any] | None = None,
+    profile: Mapping[str, Any] | None = None,
+    language: str = "English",
+    model_factory: Callable[[str], Any] = ScriptedModel,
+) -> EpisodeRun:
+    """Run one episode of ``probe`` with scripted models, as ``usersim simulate`` runs it.
+
+    Every model alias gets ``model_factory(role)``, a ``ScriptedModel`` by
+    default, so the episode needs no provider and nothing is patched. The row
+    comes from the same generator a run uses; ``prompts`` holds each request
+    the models received, in order. Subclass ``ScriptedModel`` to script other
+    replies.
+    """
+    from usersim.engine.generator import ConversationSimulatorGenerator
+
+    prompts: list[dict[str, Any]] = []
+    models = _scripted_models(model_factory, prompts)
+    runtime = _episode_runtime(
+        probe, models, config=config, persona=persona, data=data, profile=profile, language=language
+    )
+    row = await ConversationSimulatorGenerator.with_models(config, models).agenerate(runtime.preamble.to_row())
+    return EpisodeRun(row=row, prompts=prompts)
+
+
 @dataclass(frozen=True)
 class HostedParityReport:
     """Outcome of running one episode standalone and through a host."""
@@ -359,48 +540,15 @@ async def hosted_parity_report(
     from usersim.engine.core.episode_runtime import (
         ActivationRequest,
         EpisodeLifecycleComplete,
-        ProbeEpisodeRuntime,
     )
-    from usersim.engine.generator import ConversationSimulatorGenerator
 
-    aliases = ("api_response_model", "assistant_model", "judge_model", "summary_model", "user_model")
-    role_of = {
-        "api_response_model": "api",
-        "assistant_model": "assistant",
-        "judge_model": "judge",
-        "summary_model": "summary",
-        "user_model": "user",
-    }
-
-    def _build(prompts: list[dict[str, Any]]) -> dict[str, Any]:
-        models = {}
-        for alias in aliases:
-            model = model_factory(role_of[alias])
-            model.prompts = prompts
-            models[alias] = model
-        return models
-
-    def _runtime(models: Mapping[str, Any]) -> Any:
-        return ProbeEpisodeRuntime(
-            probe_type=probe,
-            persona=dict(persona),
-            locale=config.locale,
-            language=language,
-            models=dict(models),
-            config=config,
-            data=dict(data or {}),
-            profile=dict(profile) if profile is not None else None,
-        )
-
-    direct_prompts: list[dict[str, Any]] = []
-    direct_models = _build(direct_prompts)
-    direct_runtime = _runtime(direct_models)
-    generator = ConversationSimulatorGenerator.with_models(config, direct_models)
-    direct_row = await generator.agenerate(direct_runtime.preamble.to_row())
+    inputs = {"config": config, "persona": persona, "data": data, "profile": profile, "language": language}
+    direct = await run_episode(probe, model_factory=model_factory, **inputs)
+    direct_row, direct_prompts = direct.row, direct.prompts
 
     hosted_prompts: list[dict[str, Any]] = []
-    hosted_models = _build(hosted_prompts)
-    hosted_runtime = _runtime(hosted_models)
+    hosted_models = _scripted_models(model_factory, hosted_prompts)
+    hosted_runtime = _episode_runtime(probe, hosted_models, **inputs)
     event = await hosted_runtime.advance()
     while isinstance(event, ActivationRequest):
         kwargs = dict(event.parameters)

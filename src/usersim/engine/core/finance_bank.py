@@ -38,12 +38,17 @@ import os
 import re
 import threading
 from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Iterable,
     Sequence,
 )
+
+from usersim.engine.core.locale import india_variant
 
 logger = logging.getLogger("usersim.engine")
 
@@ -128,6 +133,88 @@ DEFAULT_DOMAIN_ACCOUNT_LABELS: dict[str, str] = {
     "crypto": "crypto account",
 }
 
+#: Digit-group separator, decimal mark, and whether the currency symbol follows
+#: the amount, for number formats that differ from English, keyed by language.
+_MONEY_STYLES: dict[str, tuple[str, str, bool]] = {
+    "fr": (" ", ",", True),
+    "de": (".", ",", True),
+}
+
+#: Languages whose currency has no minor unit and is written straight after the
+#: number: ``1,234円`` in Japanese and ``1,234원`` in Korean.
+_WHOLE_UNIT_AFTER: frozenset[str] = frozenset({"ja", "ko"})
+
+#: Date patterns by locale, then by language. Anything else writes day/month/year,
+#: the most common convention.
+_DATE_FORMATS: dict[str, str] = {
+    "en_US": "%m/%d/%Y",
+    "de": "%d.%m.%Y",
+    "ja": "%Y-%m-%d",
+    "ko": "%Y-%m-%d",
+    "zh": "%Y-%m-%d",
+}
+_DEFAULT_DATE_FORMAT = "%d/%m/%Y"
+
+
+def format_amount(amount: Any, *, currency_symbol: str, number_format: str, drop_zero_cents: bool = False) -> str:
+    """``amount`` in a region's currency and number format.
+
+    ``$1,234.50`` in the US, ``₹1,23,456.00`` in India, ``1 234,50 €`` in France
+    and ``1.234,50 €`` in Germany. Japan and Korea write a whole amount without
+    decimals, since yen and won have no minor unit (``1,234円``, ``1,234원``);
+    elsewhere ``drop_zero_cents`` does that (``22 950 €``). A value that isn't a
+    number comes back as given, after the symbol.
+    """
+    try:
+        value = Decimal(str(amount))
+    except InvalidOperation:
+        return f"{currency_symbol}{amount}"
+    if not value.is_finite():
+        return f"{currency_symbol}{amount}"
+    sign = "-" if value < 0 else ""
+    whole, cents = f"{abs(value):.2f}".split(".")
+    if number_format.split("_")[0].lower() in _WHOLE_UNIT_AFTER:
+        number = f"{int(whole):,}" if cents == "00" else f"{int(whole):,}.{cents}"
+        return f"{sign}{number}{currency_symbol}"
+    if number_format.endswith("_IN"):
+        grouped, decimal_mark, symbol_after = _indian_grouped(whole), ".", False
+    else:
+        group, decimal_mark, symbol_after = _MONEY_STYLES.get(number_format.split("_")[0].lower(), (",", ".", False))
+        grouped = f"{int(whole):,}".replace(",", group)
+    number = grouped if drop_zero_cents and cents == "00" else f"{grouped}{decimal_mark}{cents}"
+    if symbol_after:
+        return f"{sign}{number} {currency_symbol}".rstrip()
+    return f"{sign}{currency_symbol}{number}"
+
+
+def format_percent(value: Any, *, number_format: str) -> str:
+    """``value`` as a percentage in a region's number format, without trailing
+    zeros: ``15.9%`` in English, ``15,9 %`` in French and German."""
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation:
+        return f"{value}%"
+    if not number.is_finite():
+        return f"{value}%"
+    text = format(number.normalize(), "f")
+    style = _MONEY_STYLES.get(number_format.split("_")[0].lower())
+    if style is None:
+        return f"{text}%"
+    return f"{text.replace('.', style[1])} %"
+
+
+def _indian_grouped(digits: str) -> str:
+    """``"123456"`` -> ``"1,23,456"``: the last three digits, then pairs."""
+    head, tail = digits[:-3], digits[-3:]
+    pairs: list[str] = []
+    while len(head) > 2:
+        pairs.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        pairs.insert(0, head)
+    return ",".join([*pairs, tail])
+
+
 # Every institution offers these two primitives, and the PROBE services them in
 # its ``execute_tool_call`` (they are not per-institution DB tools). Their schema
 # is therefore fixed HERE — the single source of truth shared by the generator
@@ -154,7 +241,7 @@ FRAMEWORK_PRIMITIVE_TOOLS: dict[str, dict[str, Any]] = {
                     "description": (
                         "Natural-language description of what to find, e.g. "
                         "'dispute an unauthorized debit card transaction' or "
-                        "'roll over a 401(k) to an IRA'."
+                        "'update the address on my account'."
                     ),
                 },
             },
@@ -410,6 +497,27 @@ class FinanceBank:
                 return label
         return DEFAULT_DOMAIN_ACCOUNT_LABELS.get(domain, "account")
 
+    def format_money(self, amount: Any) -> str:
+        """``amount`` in this region's currency and number format, from
+        ``region_meta``'s ``currency_symbol`` and ``number_format`` (else the
+        locale); see :func:`format_amount`."""
+        return format_amount(
+            amount,
+            currency_symbol=str(self.region_meta.get("currency_symbol") or ""),
+            number_format=str(self.region_meta.get("number_format") or self.locale),
+        )
+
+    def format_date(self, value: date) -> str:
+        """``value`` as this region writes dates.
+
+        ``03/27/1980`` in the US, ``27.03.1980`` in Germany, and day/month/year
+        (``27/03/1980``) in most other places.
+        """
+        pattern = _DATE_FORMATS.get(self.locale) or _DATE_FORMATS.get(
+            self.locale.split("_")[0].lower(), _DEFAULT_DATE_FORMAT
+        )
+        return value.strftime(pattern)
+
     def all_domains(self) -> tuple[str, ...]:
         out: list[str] = []
         for inst in self.institutions:
@@ -506,7 +614,8 @@ def load_finance_bank(locale_dir: str | Path) -> FinanceBank:
     if n_ph:
         logger.info(
             "finance_bank: loaded %s v%s (%d institutions, %d docs, "
-            "%d placeholder) — downstream scorecards preview-only",
+            "%d placeholder); rows built on placeholder content record "
+            "used_placeholder_finance (SME verification recommended)",
             bank_id,
             bank_version,
             len(institutions),
@@ -609,6 +718,40 @@ def finance_bank_dir_for(locale: str) -> Path:
     if override:
         return Path(override)
     return default_finance_bank_dir(locale)
+
+
+#: Shipped locales that run on another locale's bank until they have tasks of
+#: their own. The India language variants name their base in ``locale.py``.
+_FINANCE_BASE_LOCALE: dict[str, str] = {"hi_Deva_IN": "en_IN", "hi_Latn_IN": "en_IN"}
+
+
+def has_finance_tasks(locale_dir: str | Path) -> bool:
+    """Whether a locale bank has scenarios to run: a ``tasks.yaml`` in one of its institutions.
+
+    A corpus alone is not a bank the probe can run, so it does not stop a locale
+    from running on its base locale's bank.
+    """
+    return any(Path(locale_dir).rglob("tasks.yaml"))
+
+
+def finance_bank_locale(locale: str, *, has_tasks: Callable[[str], bool] | None = None) -> str:
+    """The locale whose bank a ``financial_services`` row in ``locale`` runs on.
+
+    The locale's own bank once it has tasks; otherwise ``en_IN``'s for an India
+    language variant, ``hi_Deva_IN`` or ``hi_Latn_IN``; otherwise ``locale``
+    itself, which then has no bank to run on. The probe, its scorer and the
+    pre-flight all resolve through here, so they read the same bank.
+    ``has_tasks`` defaults to checking the directory rows load from.
+    """
+
+    def has_tasks_where_rows_load(loc: str) -> bool:
+        return has_finance_tasks(finance_bank_dir_for(loc))
+
+    if (has_tasks or has_tasks_where_rows_load)(locale):
+        return locale
+    variant = india_variant(locale)
+    base = variant.base_locale if variant is not None else _FINANCE_BASE_LOCALE.get(locale)
+    return base if base is not None else locale
 
 
 def load_finance_bank_for_locale(locale: str) -> FinanceBank:

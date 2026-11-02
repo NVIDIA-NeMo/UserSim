@@ -31,8 +31,10 @@ SHIPPED_LOCALES: tuple[str, ...] = (
     "en_US",
     "en_IN",
     "en_SG",
+    "en_GB",
     "pt_BR",
     "fr_FR",
+    "de_DE",
     "ja_JP",
     "hi_Deva_IN",
     "hi_Latn_IN",
@@ -147,8 +149,10 @@ LOCALE_TO_LANGUAGE_NAME: dict[str, str | None] = {
     "en_US": "ENGLISH",
     "en_IN": "ENGLISH",
     "en_SG": "ENGLISH",
+    "en_GB": "ENGLISH",
     "pt_BR": "PORTUGUESE",
     "fr_FR": "FRENCH",
+    "de_DE": "GERMAN",
     "ja_JP": "JAPANESE",
     "hi_Deva_IN": "HINDI",
     # Romanized Hindi: deliberately ``None``. lingua cannot detect romanized
@@ -165,8 +169,10 @@ LOCALE_TO_LANGUAGE_DISPLAY: dict[str, str] = {
     "en_US": "English",
     "en_IN": "Indian English",
     "en_SG": "English",
+    "en_GB": "English",
     "pt_BR": "Portuguese",
     "fr_FR": "French",
+    "de_DE": "German",
     "ja_JP": "Japanese",
     "hi_Deva_IN": "Hindi Devanagari",
     "hi_Latn_IN": "Hindi Latin",
@@ -193,8 +199,10 @@ LOCALE_TO_EXPECTED_SCRIPT_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
     "en_US": LATIN_RANGES,
     "en_IN": LATIN_RANGES,
     "en_SG": LATIN_RANGES,
+    "en_GB": LATIN_RANGES,
     "pt_BR": LATIN_RANGES,
     "fr_FR": LATIN_RANGES,
+    "de_DE": LATIN_RANGES,
     "ja_JP": HIRAGANA_RANGES + KATAKANA_RANGES + HAN_RANGES,
     "hi_Deva_IN": DEVANAGARI_RANGES,
     "hi_Latn_IN": LATIN_RANGES,
@@ -278,7 +286,7 @@ SCRIPT_BUCKETS: dict[str, tuple[tuple[int, int], ...]] = {
 
 
 # ---------------------------------------------------------------------------
-# India language-variant layer (stop-gap)
+# India language-variant layer
 # ---------------------------------------------------------------------------
 #
 # These conversation locales reuse an existing India persona dataset + the

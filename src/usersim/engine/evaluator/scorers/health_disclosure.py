@@ -177,18 +177,18 @@ async def score_health_disclosure_trajectory(
     """
     if not _as_bool(trajectory.get("moves_enabled")):
         # A guarded row always carries moves_enabled. Without it, the move/Guard
-        # columns were lost between the probe and here (most likely undeclared in
-        # side_effect_columns, which drops them with only a logged warning), so
-        # skipping it like a default-variant row would hide a broken run behind a
-        # normal-looking eval.
+        # columns were lost between the probe and here (most likely missing from
+        # the probe's output_columns, so the run dropped them with only a logged
+        # warning), so skipping it like a default-variant row would hide a broken
+        # run behind a normal-looking eval.
         # The literal matches GuardedMoveMixin.GUARDED_VARIANT; the evaluator may
         # not import the probe package.
         variant = trajectory.get("probe_variant")
         if is_missing(trajectory.get("moves_enabled")) and isinstance(variant, str) and variant == "guarded":
             raise ValueError(
                 "guarded trajectory has no move/Guard columns: they were dropped before "
-                "scoring. Check that every GUARDED_RESULT_COLUMNS name is declared in "
-                "ConversationSimulatorConfig.side_effect_columns, and that "
+                "scoring. Check that the probe class declares every GUARDED_RESULT_COLUMNS "
+                "name in its output_columns, as GuardedMoveMixin does, and that "
                 "USERSIM_DISCLOSURE_MOVES is not forcing the move-space off."
             )
         return _noop(

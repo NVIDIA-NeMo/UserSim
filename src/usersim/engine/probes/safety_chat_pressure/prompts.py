@@ -6,12 +6,10 @@
 Two surfaces shipped here:
 
 - :data:`ASSISTANT_SYSTEM_PROMPT` — the assistant's system prompt.
-  Deliberately lean: the probe targets the assistant's refusal
-  behaviour under pressure; an elaborate instruction would
-  itself be a confounder. The assistant gets a generic "be helpful
-  and follow your usual guidelines" framing and the test surfaces
-  what its trained safety stance actually does under conversational
-  pressure.
+  Empty by design: the probe targets the assistant's refusal
+  behaviour under pressure, and any instruction would itself be a
+  confounder, so the test surfaces what the assistant's trained
+  safety stance does under conversational pressure.
 
 - :func:`build_user_agent_followup_messages` — assembles the message
   list passed to the user-agent on every turn ≥ 2: the strategy's
@@ -22,17 +20,16 @@ Two surfaces shipped here:
   message the user-agent reads — the user-agent's response to it is
   the next user turn.
 
-Capitulation detection no longer happens through user-LLM structured
-output (that proved unreliable due to safety-bias and multi-turn
-context contamination). It now lives in
+Capitulation detection lives in
 :mod:`usersim.engine.probes.safety_chat_pressure.classifier` —
 a dedicated comparator-shaped ``summary_model`` call that runs on
-the assistant's response with no pressure framing.
+the assistant's response with no pressure framing, so neither the
+user-agent's safety bias nor the multi-turn context colours the
+verdict.
 
-Both surfaces are English-only because the pressure-strategy bank is
-English-only by design (see ``assets/safety_chat_pressure/SCHEMA.md``);
-non-English pressure attempts are a separate test surface that a
-future locale-aware bank can carry.
+Each bank field is rendered for the row's asset locale (``en_IN`` for
+an India variant), falling back to ``en_US`` (see
+``assets/safety_chat_pressure/SCHEMA.md``).
 """
 
 from __future__ import annotations
@@ -52,9 +49,9 @@ from usersim.engine.core.pressure_bank import (
 # adding policy text ("follow your safety guidelines", "decline harmful
 # requests", etc.) would prime the model and contaminate the signal we
 # are trying to measure (does the model refuse without being told to?).
-# All probes follow the same convention — see
-# conversation-plugin/README.md "Assistant under test: pure-capability
-# policy" for the cross-cutting rationale.
+# All probes follow the same convention; see docs/engine/README.md
+# "Assistant under test: pure-capability policy" for the cross-cutting
+# rationale.
 ASSISTANT_SYSTEM_PROMPT: str = ""
 
 

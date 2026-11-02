@@ -41,6 +41,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from usersim.engine.core.outcomes import is_placeholder_warning_kind
+
 # Flags + country names cover only the LOCALES we actually ship
 # today (the keys of
 # ``usersim.engine.core.behavioral.LOCALE_LANGUAGE_MAP``).
@@ -53,10 +55,12 @@ _LOCALE_FLAGS = {
     "pt_BR": "🇧🇷",
     "ja_JP": "🇯🇵",
     "fr_FR": "🇫🇷",
+    "de_DE": "🇩🇪",
     "en_IN": "🇮🇳",
     "hi_Deva_IN": "🇮🇳",
     "hi_Latn_IN": "🇮🇳",
     "en_SG": "🇸🇬",
+    "en_GB": "🇬🇧",
     "ko_KR": "🇰🇷",
 }
 
@@ -100,10 +104,12 @@ _LOCALE_COUNTRIES = {
     "pt_BR": "Brazil",
     "ja_JP": "Japan",
     "fr_FR": "France",
+    "de_DE": "Germany",
     "en_IN": "India",
     "hi_Deva_IN": "India",
     "hi_Latn_IN": "India",
     "en_SG": "Singapore",
+    "en_GB": "United Kingdom",
     "ko_KR": "South Korea",
 }
 
@@ -151,33 +157,40 @@ _PROBE_DESCRIPTIONS = {
         "schema validation, and recovery from tool-call failures."
     ),
     "general_open_ended": (
-        "Tests open-ended conversational quality across diverse "
-        "personas — coherence, follow-through, calibration to the "
-        "user's apparent expertise."
+        "Tests information-seeking conversations across diverse "
+        "personas: accurate, coherent answers pitched to the user's "
+        "apparent expertise, and a clarifying question rather than an "
+        "information dump when a request is vague."
     ),
     "general_educational": (
-        "Tests general_educational / explanatory response quality — "
-        "structure, accuracy, calibration to the user's stated "
-        "background."
+        "Tests tutoring: a persona-grounded learner asks about a "
+        "subject, and the probe looks at whether explanations are "
+        "accurate, pitched at the learner's level and scaffolded "
+        "with examples, without condescension."
     ),
     "sov_ai_facts": (
-        "Tests recall and reasoning over locale-specific (sovereign) "
-        "facts drawn from a curated bank — ground-truth answers + "
-        "false-premise probes."
+        "Tests recall of locale-specific (sovereign) facts drawn from "
+        "a curated bank, graded against ground-truth answers. Some "
+        "questions embed a false premise to correct; others give a "
+        "partial verse for the assistant to continue."
     ),
     "sov_ai_dynamic": (
-        "Tests for biased framing, condescension, or stereotyped "
-        "assumptions when a persona-driven user explores topics "
-        "tied to their demographic profile."
+        "Tests locale-specific knowledge where no curated answer "
+        "exists: a persona-voiced user explores a topic from the "
+        "locale's taxonomy (history, geography, culture, public "
+        "services and more), and a judge flags suspected fabrication, "
+        "self-contradiction across turns and confident guesses where "
+        "declining was better."
     ),
     "sov_ai_multilingual_parity": (
-        "Tests response consistency across languages for the same "
-        "matched-pair query — does the assistant treat speakers of "
-        "low-resource languages with the same respect / depth as "
-        "English speakers?"
+        "Tests respect and calibration on the same question asked in "
+        "every locale: does the assistant engage each user as a peer "
+        "and pitch a helpful answer to them, rather than condescend or "
+        "deflect? Each row records its query_id, so answers to one "
+        "question can be compared across locales."
     ),
     "safety_chat_pressure": (
-        "Tests safety under multi-turn conversational pressure — "
+        "Tests safety under multi-turn conversational pressure: "
         "does the assistant hold the line when the user persists, "
         "reframes, or escalates a target request?"
     ),
@@ -198,21 +211,54 @@ _PROBE_DESCRIPTIONS = {
         "(param-locked tasks scored by a deterministic tool/retrieval "
         "verifier) and dynamic (open-ended questions from an authored "
         "taxonomy, scored by a reference-grounded judge on grounding, "
-        "numeric faithfulness, boundary adherence, and no-fabrication). "
+        "numeric faithfulness, boundary adherence, no fabrication, "
+        "graceful unknowns and self-consistency). "
         "Retrieval is scoped to a single institution."
     ),
     "identity_disclosure": (
         "Tests whether the assistant names the developer that made it "
         "when a persona asks who it is or who made it, with no system "
-        "prompt: neutral questions, and 'Are you made by X?' naming the "
-        "true developer or a competitor."
+        "prompt: neutral questions, 'Are you made by X?' naming the "
+        "true developer or a competitor, and, in multi-turn runs, a "
+        "user who keeps pressing the competitor."
+    ),
+    "health_therapy_disclosure": (
+        "Tests whether a therapy assistant draws out what a guarded "
+        "client discloses only gradually, including self-harm or "
+        "crisis risk. In the guarded variant the user paces disclosure "
+        "by plan, and the health_disclosure_concealment scorer "
+        "measures how much the assistant drew out."
+    ),
+    "health_triage_disclosure": (
+        "Tests whether a care-navigation (triage) assistant surfaces "
+        "urgent red-flag symptoms that a patient downplays and reveals "
+        "only when asked directly. In the guarded variant the user "
+        "paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
+    ),
+    "health_decision_support_disclosure": (
+        "Tests whether a clinical decision-support assistant asks the "
+        "questions that surface a key finding or red-flag danger sign "
+        "a clinician leaves out when first presenting a case. In the "
+        "guarded variant the user paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
+    ),
+    "health_general_disclosure": (
+        "Tests whether a general health assistant surfaces the "
+        "red-flag symptoms and medication lapses that a patient with "
+        "an ongoing condition downplays. In the guarded variant the "
+        "user paces disclosure by plan, and the "
+        "health_disclosure_concealment scorer measures how much the "
+        "assistant drew out."
     ),
 }
 
 
 # Warning kinds that indicate the trajectory probed against an asset
-# the bank itself flagged as ``placeholder: true`` (i.e. the asset is
-# not yet reviewer-blessed for production claims). These are an
+# the bank itself flagged as ``placeholder: true`` (i.e. no
+# subject-matter expert has reviewed it). These are an
 # asset-bank concern, not a simulation-quality concern — the
 # *simulation* still ran cleanly, the *content* is what's tainted.
 # Filtered out of:
@@ -222,9 +268,7 @@ _PROBE_DESCRIPTIONS = {
 #     placeholder-kind reads as SIM OK in the preview, not WARN —
 #     the upstream ``simulation_outcome.status`` is unchanged on
 #     the parquet, this is a UI-layer override only).
-# Downstream reporting still treats placeholder-tainted trajectories
-# as preview-only via the ``placeholder_*`` counters surfaced on the
-# capability dashboard, which is the correct surface for that signal.
+# The warnings themselves stay in the row's ``simulation_outcome.warnings``.
 # Panel box style. Side borders (vertical pipes) jitter for CJK /
 # Devanagari content because Rich measures glyphs in fixed
 # character cells but the glyphs render at variable pixel widths
@@ -234,18 +278,6 @@ _PROBE_DESCRIPTIONS = {
 # drops the side pipes entirely, eliminating the alignment
 # problem at the cost of slightly less visual containment.
 _PANEL_BOX = box.HORIZONTALS
-
-
-_PLACEHOLDER_WARNING_KINDS = frozenset(
-    {
-        "used_placeholder_fact",
-        "used_placeholder_taxonomy",
-        "used_placeholder_query",
-        "used_placeholder_target",
-        "used_placeholder_agentic_action",
-        "used_placeholder_identity",
-    }
-)
 
 
 # Tri-state status. A ``completed_with_warnings`` row is functionally
@@ -475,11 +507,9 @@ def _extract_warnings(outcome: dict | None) -> list[str]:
     Placeholder-asset warnings (``used_placeholder_query`` / etc.)
     are filtered out: they're an asset-bank concern, not a
     simulation-quality concern. The simulation ran cleanly; the
-    *content* it ran against is what's not yet reviewer-blessed for
-    production claims. Downstream reporting bundles still gate
-    production-readiness on these via dedicated counters
-    (``placeholder_*_trajectories`` etc.) — that's the correct
-    surface, not the per-row preview header.
+    *content* it ran against is flagged for SME verification. The
+    capability report counts those rows per cell (``n_placeholder``);
+    that's the correct surface, not the per-row preview header.
     """
     if not outcome:
         return []
@@ -493,7 +523,7 @@ def _extract_warnings(outcome: dict | None) -> list[str]:
         kind = entry.get("kind")
         if not isinstance(kind, str) or not kind:
             continue
-        if kind in _PLACEHOLDER_WARNING_KINDS:
+        if is_placeholder_warning_kind(kind):
             continue
         counts[kind] = counts.get(kind, 0) + 1
     chips: list[str] = []
@@ -509,9 +539,8 @@ def _has_non_placeholder_warning(outcome: dict | None) -> bool:
     Used by :func:`_status_kind` to decide whether to honour an
     upstream ``completed_with_warnings`` status. A row whose only
     warnings are placeholder kinds reads as SIM OK in the preview —
-    the simulation itself was clean, the asset bank just isn't
-    reviewer-blessed yet (an orthogonal track tracked by the
-    reporting bundles' placeholder counters).
+    the simulation itself was clean, and the capability report counts
+    the flagged content per cell (``n_placeholder``).
     """
     if not outcome:
         return False
@@ -521,7 +550,7 @@ def _has_non_placeholder_warning(outcome: dict | None) -> bool:
     for entry in raw:
         if isinstance(entry, dict):
             kind = entry.get("kind")
-            if isinstance(kind, str) and kind not in _PLACEHOLDER_WARNING_KINDS:
+            if isinstance(kind, str) and not is_placeholder_warning_kind(kind):
                 return True
     return False
 
@@ -536,7 +565,7 @@ def _status_kind(row: pd.Series, outcome: dict | None) -> str:
 
     A ``completed_with_warnings`` outcome demotes to ``ok`` when its
     *only* warnings are placeholder-asset kinds (see
-    ``_PLACEHOLDER_WARNING_KINDS``) — those are content-track issues,
+    ``is_placeholder_warning_kind``): those are content-track issues,
     not simulation-track issues, and showing them as WARN in the
     preview drowns out actually-concerning simulation-quality
     warnings (``poor_assistant_response``, ``id_fabrication``,
@@ -1411,7 +1440,7 @@ def preview_row(
                     persona_text.append(label, style=pill_style or "")
                 persona_text.append(f" ({score_str})")
                 if desc:
-                    persona_text.append(f" — {desc}", style="dim")
+                    persona_text.append(f": {desc}", style="dim")
                 persona_text.append("\n")
 
     console.print(
@@ -1745,8 +1774,8 @@ def preview_summary(df: pd.DataFrame, console: Console | None = None) -> None:
 
     The status badge is tri-state (``SIM OK`` / ``SIM WARN`` / ``SIM FAIL``) so
     a ``completed_with_warnings`` row reads visually distinct from a
-    clean ``ok`` — placeholder-tainted rows surface rather than
-    hiding under a green pill.
+    clean ``ok``. A row whose only warnings are placeholder-asset kinds
+    reads as ``SIM OK`` (see :func:`_status_kind`).
 
     Use :func:`filter_preview_locale` before sampling rows when you
     want to restrict only the detailed record previews by locale while

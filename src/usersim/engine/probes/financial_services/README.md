@@ -21,14 +21,34 @@ single institution.
 
 At a glance:
 
-<img src="financial_services_probe.jpg" width="800">
+<img src="../../../../../docs/images/financial_services_probe.jpg" width="800" alt="How the financial_services probe works: describe a country in its own language, generate its fictional institutions and their documents, simulate customers who ask in their own language, then measure and train. The assistant earns tool access by retrieving the tool's document first.">
 
-The diagram describes the approach, not current coverage. Two markets are built
-today: `en_US` (4 institutions, 851 documents, 70 verifiable tasks) and `en_IN`
-(5 institutions, 1066 documents, 60 tasks). `hi_Deva_IN` has a generated corpus
-but no task set yet, so it cannot be simulated; the remaining shipped locales
-have the persona substrate in place but no region spec. See
-[Authoring a new locale](#authoring-a-new-locale).
+These markets ship:
+
+- `en_US`: 4 institutions, 851 documents, 70 verifiable tasks.
+- `en_IN`: 5 institutions, 1066 documents, 60 tasks.
+- `fr_FR`: 5 institutions, 1156 documents, 92 tasks, generated in French from
+  a French-market institution set (a cooperative bank, a payment-account
+  neobank, an insurer, a consumer lender and an online broker).
+- `de_DE`: 5 institutions, 1036 documents, 85 tasks, generated in German (a
+  savings bank, a direct bank, a neobroker, an insurer and a building-savings
+  bank).
+- `en_GB`: 6 institutions, 1480 documents, 109 tasks (a high-street bank, a
+  building society, a digital bank, an investment platform, a pension provider
+  and an insurer).
+- `ja_JP`: 5 institutions, 1299 documents, 90 tasks, generated in Japanese (a
+  regional bank, an internet-only bank, an online broker, a life insurer and a
+  card company).
+- `ko_KR`: 5 institutions, 1309 documents, 89 tasks, generated in Korean (a
+  commercial bank, an internet-only bank, an online securities firm, a life
+  insurer and a card company).
+
+`hi_Deva_IN` has a generated corpus but no task set. It and `hi_Latn_IN` run on
+the `en_IN` bank, as the India language variants do: the opening and the
+assistant's `kb_search` queries are machine-translated, and those rows record
+`used_machine_translation`. A locale's own bank takes over once it has a task
+set. The remaining shipped locales have the persona substrate in place but no
+region spec. See [Authoring a new locale](#authoring-a-new-locale).
 
 > For the asset-bank contract see
 > [SCHEMA.md](../../assets/financial_services/SCHEMA.md). A file-by-file
@@ -94,8 +114,8 @@ flowchart TD
 
 - **Knowledge-base search** (`kb_search`) returns whole documents scoped to the
   institution.
-- **Discoverable tools** follow the tau-Banking mechanic: a tool is only callable
-  once a document describing it has been retrieved.
+- **Discoverable tools**: a tool is only callable once a document describing it
+  has been retrieved.
 - **Account state** is a lightweight in-memory record mutated by tool calls, so
   within-conversation responses stay consistent.
 - A `verifiable` conversation is only considered complete once the assistant has
@@ -112,7 +132,7 @@ categories. Each category carries:
 
 - `invitation`: a topic boundary phrased in the persona's voice (not a
   question),
-- `subtopic_hints`: neighbourhoods to rotate through, so topics don't collapse
+- `subtopic_hints`: neighborhoods to rotate through, so topics don't collapse
   across conversations (the loader requires two; author eight: see
   [Authoring a new locale](#authoring-a-new-locale)),
 - optional `persona_affinities`: persona tags (e.g. `age:65+`,
@@ -137,11 +157,11 @@ realistic population mix rather than a uniform topic average.
 Whole documents only (no chunking), always scoped to the conversation's
 institution. Three interchangeable backends:
 
-- **`hybrid`** (default): normalised cosine similarity over per-document
+- **`hybrid`** (default): normalized cosine similarity over per-document
   embeddings, read from an `embeddings.parquet` sidecar, blended evenly with
-  normalised lexical overlap. **Both** tiers retrieve from the KB like a
-  production support agent. Falls back to pure lexical ranking when embeddings
-  or an endpoint are unavailable, so offline runs still work.
+  normalized lexical overlap. **Both** tiers retrieve from the KB. Falls back
+  to pure lexical ranking when embeddings or an endpoint are unavailable, so
+  offline runs still work.
 
   **No locale ships that sidecar.** Vectors are only comparable within the
   embedding space that produced them, so shipping ours would silently pin every
@@ -156,6 +176,16 @@ institution. Three interchangeable backends:
   variable so you can measure the reasoning/utilization ceiling; needs no
   embedding endpoint. Only the verifiable tier has gold documents; the dynamic
   tier has none, so `golden` degrades to lexical there.
+
+**Lexical matching works in any script.** A word is a run of letters, combining
+marks and digits, compared after case folding and Unicode normalization, so
+accented French and German words and `ß` match as written. Japanese and Korean
+text is compared in overlapping pairs of characters instead, because Japanese
+doesn't put spaces between words and Korean attaches particles to them: `계좌를`
+and `계좌가` match on `계좌`. Full-width letters and digits match their ASCII
+forms. Words still have to be in the corpus's language: when a locale borrows
+another locale's corpus, the probe translates the assistant's query into that
+language before ranking.
 
 **Why the default is hybrid rather than pure dense.** An institution's corpus is
 deliberately narrow (a few hundred documents about a handful of products at one
@@ -172,7 +202,8 @@ ever seeing the product documents. Blending in the lexical signal restores
 topical discrimination while cosine still supplies paraphrase matching.
 
 The mode is selected at run time with `--finance-retrieval-mode` (`usersim
-simulate`) or `FINANCE_RETRIEVAL_MODE` (`notebooks/01_simulate.ipynb`).
+simulate`, default `hybrid`) or `FINANCE_RETRIEVAL_MODE`
+(`notebooks/01_simulate.ipynb`).
 
 **Disentangling retrieval from reasoning.** Success is scored on the verifiable
 state/action outcome, *not* on retrieval. Retrieval is reported separately, on two
@@ -246,9 +277,8 @@ Capability rows feed the dashboard:
   with recall: recall high and quality low means the retriever found the tool docs
   and nothing else, so no grounding score above it can be trusted.
 - **Grounded open-ended advice** (`dynamic_grounding`): a **cross-domain**
-  capability keyed on the `dynamic.*` axes. Financial services is its first
-  contributor; future grounded-advisory domains report on the same axes and roll
-  up together.
+  capability keyed on the `dynamic.*` axes, so any grounded-advisory probe that
+  reports on them rolls up with financial services.
 
 ## Training data
 
@@ -263,9 +293,9 @@ the dataset export. The two tiers map to different record types:
 - **`dynamic`** → grounded supervised examples and preference pairs (grounded and
   faithful vs. ungrounded or fabricated, labeled by the judge).
 
-Retrieval-augmented training assembles context from the gold documents plus
-distractors drawn from the *same* institution. Record shaping itself lives in
-the training-data extraction notebook.
+For retrieval-augmented training, `gold_document_ids` and `institution_id` let
+you pair the gold documents with distractors drawn from the *same*
+institution. Record shaping lives in the training-data extraction notebook.
 
 ## Realistic user behavior
 
@@ -281,8 +311,8 @@ limits, and trade-offs and notices vague answers.
 The probe is opt-in: it is not part of the default probe mix. Run it with:
 
 ```bash
-usersim simulate --locale en_US --probe-mix 'financial_services=1.0' \
-  --finance-tier-mix 0.5   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
+usersim simulate --locale en_US --num-rows 20 --probe-mix 'financial_services=1.0' \
+  --finance-tier-mix 0.5 --out output/trajectories   # 0.0 = verifiable-only (default); 1.0 = dynamic-only
 ```
 
 Configuration (all optional):
@@ -299,7 +329,7 @@ Assets are authored offline and committed; the runtime never generates them. A
 two-phase Data Designer pipeline produces each institution's brief, then its
 document clusters (with the institution's authoritative numbers), plus
 embeddings. `validate-assets` runs a deterministic quality gate (numeric
-faithfulness, language/script, near-duplicates, coverage, scope) and
+faithfulness, language/script, plain text, near-duplicates, coverage, scope) and
 `evaluate-assets` runs an LLM-judge scorecard. Document ids are stable across
 regenerations, and a task's gold documents are derived from its tool sequence at
 load time. The authoring workflow lives in
@@ -313,20 +343,27 @@ Generation batches documents into clusters: one model call emits a whole
 cluster as a single structured object, which is why `doc_gen_model` needs a
 large `max_tokens` and a generous `timeout`. `--docs-per-product` and
 `--max-docs-per-cluster` set how much each call produces, so raising either
-means raising `max_tokens` with it. Non-Latin locales tokenize two to three
-times denser than English, so a cluster size that fits for `en_US` may not for
-`ja_JP` or `hi_Deva_IN`.
+means raising `max_tokens` with it. Each document's length is set per script so
+that it costs about the same number of tokens in every locale (the Japanese and
+Korean bands use the document model's measured tokens per character), so one
+cluster size suits every locale on that model. Another document model's
+tokenizer can count differently, so check `max_tokens` again when you change it.
+`max_tokens` also comes out of the model's context window, which the prompt
+shares: Gemma 4 31B has 32,768 tokens, and the largest Korean and Japanese
+prompts run past 16,000, so the default reserves 12,288 for the cluster and its
+reasoning rather than half the window.
 
 If the endpoint starts returning timeouts or 5xx, lower
 `--max-parallel doc_gen_model=N` before raising the timeout: the usual cause is
 too many heavy structured generations in flight, and a dropped call loses the
 whole cluster.
 
-`asset_judge_model` grades the output, so it is deliberately a different model
-family from `doc_gen_model` and runs at `temperature = 0.0`. That reduces
-run-to-run drift but does not remove it, since a reasoning model samples its
-own thinking whatever the output temperature says. Read corpus-wide means
-rather than any single document's score.
+`asset_judge_model` grades the output, so it shares `doc_gen_model`'s
+`timeout`, is deliberately a different model family, and runs at
+`temperature = 0.0`. That reduces run-to-run drift but does not remove it,
+since a reasoning model samples its own thinking whatever the output
+temperature says. Read corpus-wide means rather than any single document's
+score.
 
 The embedding model used here must be the same one the simulator queries with,
 or retrieval compares vectors from two different embedding spaces and silently
@@ -373,6 +410,17 @@ enough to cover the tool surface with depth left over.
 - **Pin the parameters the opening names.** If the user says "card ending 0001",
   the seeded `account_state` must contain that card, or the agent resolves
   against something the user never mentioned.
+- **Hold the account's money under `balance`.** It is the one amount the account
+  view reports and the simulated customer is told, so money under another key
+  (`cash_balance`, `checking_balance`) reads as 0.00 while the opening asks to
+  move it. Write it as a plain number like `12000.00`: a localized `3.000` reads
+  as 3. Amounts beside it, such as a second account's balance, a limit or a
+  contribution, can stay.
+- **Hold open orders under `orders`.** `get_order_status` lists them and
+  `cancel_order` acts on one by its `order_id`, so an order under another key
+  can't be found or cancelled. Give each order an `order_id`, a `status`, and
+  what the customer would call it (a `ticker`, or an `instrument` and `side`),
+  and expect its cancellation as `<order_id>.status: CANCELLED`.
 - **Only use persona tags a persona can actually carry.** See the table in
   SCHEMA.md. An unreachable tag doesn't error: the task just never gets
   selected.
@@ -397,7 +445,7 @@ enough to cover the tool surface with depth left over.
 
 ### Sanity checks before freezing
 
-Measure rather than eyeball: every one of these caught a real defect:
+Measure rather than eyeball:
 
 1. Depth histogram and the share at >= 3.
 2. State-changing tools with no gold task, per institution.
@@ -449,16 +497,7 @@ in-memory account record rather than a full mutable database; conversations are
 multilingual across many institutions and domains rather than English-only
 against a single bank; the open-ended `dynamic` tier is generated from an
 authored taxonomy; and every institution is a distinct fictional brand authored
-per locale (no reuse of tau-Banking's names or products).
-
-## Deferred
-
-- The other shipped locales (region overlays + per-locale `dynamic.yaml`).
-- Healthcare / insurance as separate grounded-advisory probes.
-- A cross-institution advisory tier; more finance domains as institutions
-  (lending/mortgage, payments, crypto, tax).
-- A live stateful environment (verifiable rewards for emergent open-ended goals);
-  long-document chunking; corpus scale-up.
+per locale.
 
 ## Code layout
 
@@ -468,7 +507,7 @@ Files in this package:
 | --- | --- |
 | `generator.py` | The probe class + its hooks, the trajectory-column contract, and the entry-point shim. |
 | `tools.py` | Offered-tool schemas and the discoverable-tool gate helpers. |
-| `retrieval.py` | Institution-scoped whole-document retrieval (`golden` + `dense`). |
+| `retrieval.py` | Institution-scoped whole-document retrieval: `hybrid` (default), `dense` and `golden`, with a lexical fallback. |
 | `task_derivation.py` | Persona → tags + financial-literacy, tier choice, and institution/category selection with population weighting. |
 | `prompts.py` | User-simulator prompts and behavior instruction blocks. |
 | `__init__.py` | Package marker. |
@@ -482,7 +521,7 @@ Related code elsewhere:
 | Inner tool-loop scaffold (shared) | `core/probes.py` (`ToolExecutionMixin`) |
 | Query embedding (dense retrieval) | `core/embeddings.py` |
 | Scorer | `evaluator/scorers/financial_services.py` |
-| Capabilities | `reporting/capabilities.py` |
+| Capabilities | `taxonomy/capabilities.py` |
 | Training-export columns | `selection/schemas.py` (`finance` group) |
 | Assets + schema | `assets/financial_services/<locale>/` + `assets/financial_services/SCHEMA.md` |
 | Offline generation | `asset_gen/financial_services/` + `asset_gen/notebooks/finance_assets.ipynb` |

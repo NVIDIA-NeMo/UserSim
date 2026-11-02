@@ -1,0 +1,9 @@
+institution_id: fernbridge_building_society
+display_name: Fernbridge Building Society
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- lending_mortgage
+placeholder: true
+schema_version: v0.1

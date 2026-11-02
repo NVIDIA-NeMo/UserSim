@@ -1,0 +1,114 @@
+locale: fr_FR
+region: FR
+currency: EUR
+currency_symbol: €
+bank_id: fr_FR_financial_services
+bank_version: v0.1.0
+task_contract_version: v0.1.0
+domain_regulators:
+  retail_banking:
+    regulators:
+    - ACPR
+    - Banque de France
+    regulator_text: La banque de détail est supervisée par l'ACPR et relève du Code
+      monétaire et financier. Les dépôts sont garantis par le FGDR jusqu'à 100 000
+      euros par client et par banque, et les sommes placées sur le Livret A, le LDDS
+      et le LEP bénéficient d'une garantie distincte de l'État de 100 000 euros, mise
+      en œuvre par le FGDR ; l'indemnisation intervient sous sept jours ouvrables.
+      Un client peut contester une opération non autorisée ou mal exécutée pendant
+      13 mois, et la banque rembourse une opération non autorisée au plus tard à la
+      fin du premier jour ouvré suivant, sauf soupçon de fraude. Les commissions d'intervention
+      sont plafonnées à 8 euros par opération et 80 euros par mois. Une banque qui
+      détecte un client en situation de fragilité financière plafonne ses frais d'incidents
+      à 25 euros par mois et lui propose une offre spécifique facturée 3 euros par
+      mois au plus, avec laquelle les commissions d'intervention sont limitées à 4
+      euros par opération et 20 euros par mois. Toute personne domiciliée en France
+      a droit à un compte de dépôt par la procédure de droit au compte de la Banque
+      de France, et le service de mobilité bancaire transfère les prélèvements et
+      virements récurrents vers la nouvelle banque. L'agent vérifie l'identité du
+      client avant de communiquer ou de modifier une information sur le compte.
+  cards:
+    regulators:
+    - ACPR
+    - Banque de France
+    regulator_text: Les cartes de paiement relèvent des règles sur les services de
+      paiement du Code monétaire et financier. Après la mise en opposition d'une carte
+      perdue ou volée, le client ne supporte aucune perte pour les opérations ultérieures
+      ; avant l'opposition, sa responsabilité est limitée à 50 euros, sauf négligence
+      grave. Les paiements en ligne sont soumis à l'authentification forte du client.
+      L'agent ne doit pas déformer les frais, les plafonds ni les droits de contestation.
+  payments:
+    regulators:
+    - ACPR
+    regulator_text: Les établissements de paiement et de monnaie électronique sont
+      agréés et supervisés par l'ACPR. Les fonds des clients sont cantonnés auprès
+      d'un établissement de crédit, ce qui les protège en cas de défaillance de l'établissement,
+      mais ils ne relèvent pas de la garantie du FGDR. Un prélèvement SEPA autorisé
+      peut être contesté sans justification pendant huit semaines, et une opération
+      non autorisée pendant 13 mois. L'agent vérifie l'identité du client avant toute
+      opération ou modification.
+  lending_mortgage:
+    regulators:
+    - ACPR
+    - Banque de France
+    regulator_text: Le crédit aux particuliers relève du Code de la consommation.
+      Le TAEG ne peut pas dépasser le taux d'usure fixé chaque trimestre par la Banque
+      de France. Pour un crédit à la consommation, l'emprunteur dispose d'un délai
+      de rétractation de 14 jours et peut rembourser par anticipation à tout moment,
+      l'indemnité éventuelle étant plafonnée par la loi. À compter du 20 novembre
+      2026, le paiement fractionné, les mini-crédits et la location avec option d'achat
+      entrent dans le régime du crédit à la consommation (information précontractuelle,
+      vérification de la solvabilité, droit de rétractation). Pour un crédit immobilier,
+      l'offre ne peut pas être acceptée avant un délai de réflexion de dix jours,
+      les indemnités de remboursement anticipé sont plafonnées à six mois d'intérêts
+      et à 3 % du capital restant dû, et l'emprunteur peut changer d'assurance emprunteur
+      à tout moment. Un incident de remboursement caractérisé entraîne une inscription
+      au FICP. L'agent ne promet jamais l'octroi d'un crédit, ne minimise pas son
+      coût total, et oriente un client en difficulté vers les solutions d'accompagnement
+      et, si besoin, vers la commission de surendettement.
+  insurance:
+    regulators:
+    - ACPR
+    regulator_text: Les entreprises d'assurance sont supervisées par l'ACPR et relèvent
+      du Code des assurances. En assurance-vie, le souscripteur dispose d'un délai
+      de renonciation de 30 jours, le fonds en euros garantit le capital net de frais
+      alors que les unités de compte ne le garantissent pas, et le Fonds de garantie
+      des assurances de personnes protège chaque assuré jusqu'à 70 000 euros par assureur.
+      Les versements volontaires effectués sur un PER avant 70 ans sont déductibles
+      du revenu imposable dans la limite d'un plafond, et l'épargne reste bloquée
+      jusqu'à la retraite sauf dans les cas de déblocage anticipé prévus par la loi.
+      En assurance de dommages, l'assuré déclare un sinistre dans le délai prévu au
+      contrat, qui ne peut pas être inférieur à 5 jours ouvrés (2 jours ouvrés en
+      cas de vol), et peut résilier son assurance auto ou habitation à tout moment
+      après un an. Une complémentaire santé responsable prend en charge le forfait
+      journalier hospitalier sans limite de durée et les paniers 100 % Santé sans
+      reste à charge, et peut elle aussi être résiliée à tout moment après un an.
+      L'agent ne garantit aucune performance, ne donne pas de conseil fiscal personnalisé
+      et oriente les réclamations non résolues vers la Médiation de l'assurance.
+  brokerage_investing:
+    regulators:
+    - AMF
+    - ACPR
+    regulator_text: 'Les services d''investissement sont encadrés par l''AMF et l''ACPR
+      en application de MiFID II : le prestataire évalue l''adéquation ou le caractère
+      approprié avant de recommander un produit, communique les coûts et frais, et
+      avertit du risque de perte en capital. Les titres des clients sont protégés
+      par le FGDR jusqu''à 70 000 euros. Les frais de transfert d''un PEA sont plafonnés
+      à 15 euros par ligne et 150 euros au total, et les frais de courtage d''un ordre
+      passé en ligne sur un PEA ne peuvent pas dépasser 0,5 % de son montant. L''agent
+      ne garantit aucun rendement et ne donne pas de conseil fiscal personnalisé.'
+identity_verification:
+  required_fields:
+  - full_name
+  - date_of_birth
+placeholder: true
+account_labels:
+  retail_banking: compte courant
+  cards: carte bancaire
+  payments: compte de paiement
+  lending_mortgage: prêt
+  insurance: contrat d'assurance
+  brokerage_investing: compte-titres
+number_format: fr_FR
+privacy_regime: RGPD
+schema_version: v0.1

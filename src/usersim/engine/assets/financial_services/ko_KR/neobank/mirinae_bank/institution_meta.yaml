@@ -1,0 +1,10 @@
+institution_id: mirinae_bank
+display_name: Mirinae Bank
+type: neobank
+brand_voice: neobank
+domains:
+- retail_banking
+- cards
+placeholder: true
+display_name_local: 미리내뱅크
+schema_version: v0.1

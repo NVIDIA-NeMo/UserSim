@@ -304,6 +304,7 @@ def _state_counts(report: CapabilityReport) -> dict[str, int]:
 
 def _language_count_from_locales(locales: list[str]) -> int:
     language_by_prefix = {
+        "de": "German",
         "en": "English",
         "fr": "French",
         "hi": "Hindi",
@@ -320,6 +321,8 @@ def _language_count_from_locales(locales: list[str]) -> int:
 
 def _locale_label(locale: str) -> str:
     flags = {
+        "de_DE": "🇩🇪",
+        "en_GB": "🇬🇧",
         "en_IN": "🇮🇳",
         "en_SG": "🇸🇬",
         "en_US": "🇺🇸",
@@ -566,7 +569,7 @@ const formatTokens = (n) => {{
   return n.toLocaleString();
 }};
 const localeLabel = (locale) => {{
-  const flags = {{en_IN:"🇮🇳", en_SG:"🇸🇬", en_US:"🇺🇸", fr_FR:"🇫🇷", hi_Deva_IN:"🇮🇳", ja_JP:"🇯🇵", ko_KR:"🇰🇷", pt_BR:"🇧🇷"}};
+  const flags = {{de_DE:"🇩🇪", en_GB:"🇬🇧", en_IN:"🇮🇳", en_SG:"🇸🇬", en_US:"🇺🇸", fr_FR:"🇫🇷", hi_Deva_IN:"🇮🇳", ja_JP:"🇯🇵", ko_KR:"🇰🇷", pt_BR:"🇧🇷"}};
   return `${{flags[locale] ?? (locale.endsWith("_IN") ? "🇮🇳" : "🌐")}}  ${{locale}}`;
 }};
 const ageLabel = (summary) => {{
@@ -663,7 +666,7 @@ function FindingCard({{finding, dim}}) {{
             h("span", {{className:"finding-why-label"}}, "Measures: "),
             h("span", {{className:"finding-why-text"}}, finding.description)
           )
-        : h("p", {{className:"muted finding-reasoning-empty"}}, "Computed by a deterministic scorer, which records no per-conversation reasoning.")
+        : h("p", {{className:"muted finding-reasoning-empty"}}, "This scorer records no per-conversation reasoning for this axis.")
   );
 }}
 function ConversationPanel({{snippet, exampleNumber}}) {{
@@ -1431,7 +1434,7 @@ function App() {{
     : [...new Set(report.capability_cells.map(c => c.locale).filter(Boolean))].sort();
   const reportLanguages = (report.languages && report.languages.length)
     ? report.languages
-    : [...new Set(reportLocales.map(l => ({{en:"English", fr:"French", hi:"Hindi", ja:"Japanese", ko:"Korean", pt:"Portuguese"}})[String(l).split("_")[0]] || String(l).split("_")[0]))];
+    : [...new Set(reportLocales.map(l => ({{de:"German", en:"English", fr:"French", hi:"Hindi", ja:"Japanese", ko:"Korean", pt:"Portuguese"}})[String(l).split("_")[0]] || String(l).split("_")[0]))];
   const reportProbes = [...new Set((report.coverage_cells ?? []).map(c => c.probe_family).filter(Boolean))].sort();
   const summary = useMemo(() => {{
     const blocked = report.capability_cells.filter(c => c.state === "blocked").length;

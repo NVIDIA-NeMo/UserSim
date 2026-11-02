@@ -93,6 +93,28 @@ class TestEducationOrdinal:
         assert _education_ordinal("Illiterate", "en_IN") == 0.0
         assert _education_ordinal("Primary", "en_IN") == 0.2
 
+    def test_en_gb_exact_values(self):
+        assert _education_ordinal("No qualifications", "en_GB") == 0.0
+        assert _education_ordinal("GCSE level or below", "en_GB") == 0.25
+        assert _education_ordinal("Apprenticeship", "en_GB") == 0.4
+        assert _education_ordinal("A level or equivalent", "en_GB") == 0.5
+        assert _education_ordinal("Degree or other higher education", "en_GB") == 0.8
+
+    def test_de_de_exact_values(self):
+        assert _education_ordinal("Ohne beruflichen Bildungsabschluss", "de_DE") == 0.2
+        assert _education_ordinal("Lehre, Berufsausbildung im dualen System", "de_DE") == 0.4
+        assert _education_ordinal("Fachschulabschluss", "de_DE") == 0.6
+        assert _education_ordinal("Bachelor, Master, Diplom, Promotion", "de_DE") == 0.85
+
+    def test_ko_kr_exact_values(self):
+        assert _education_ordinal("무학", "ko_KR") == 0.0
+        assert _education_ordinal("초등학교", "ko_KR") == 0.1
+        assert _education_ordinal("중학교", "ko_KR") == 0.15
+        assert _education_ordinal("고등학교", "ko_KR") == 0.3
+        assert _education_ordinal("2~3년제 전문대학", "ko_KR") == 0.5
+        assert _education_ordinal("4년제 대학교", "ko_KR") == 0.7
+        assert _education_ordinal("대학원", "ko_KR") == 1.0
+
     def test_keyword_fallback(self):
         assert _education_ordinal("Bachelor's degree", "xx_UNKNOWN") >= 0.7
         assert _education_ordinal("PhD", "xx_UNKNOWN") >= 0.7

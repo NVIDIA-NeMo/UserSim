@@ -95,6 +95,11 @@ class TestDeclaredDependencies:
     #: Undeclared on purpose: a guarded notebook probe, not a dependency.
     _OPTIONAL = {"IPython"}
 
+    #: Imported only by a module that the importing tool itself loads, so the
+    #: tool is present whenever the module is. Undeclared on purpose: a user
+    #: who never runs pytest should not install it.
+    _HOST_PROVIDED = {"pytest": {"usersim/testing/pytest_plugin.py"}}
+
     #: Distribution names differ from import names for a few packages.
     _IMPORT_TO_DISTRIBUTION = {
         "yaml": "pyyaml",
@@ -103,15 +108,21 @@ class TestDeclaredDependencies:
     }
 
     @staticmethod
-    def _imports(src_root: Path, own_package: str) -> set[str]:
+    def _imports_of(path: Path) -> set[str]:
+        """Top-level names of the absolute imports in one file."""
+        found: set[str] = set()
+        for node in ast.walk(ast.parse(path.read_text(), filename=str(path))):
+            if isinstance(node, ast.Import):
+                found.update(a.name.split(".")[0] for a in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                found.add(node.module.split(".")[0])
+        return found
+
+    @classmethod
+    def _imports(cls, src_root: Path, own_package: str) -> set[str]:
         found: set[str] = set()
         for path in src_root.rglob("*.py"):
-            tree = ast.parse(path.read_text(), filename=str(path))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    found.update(a.name.split(".")[0] for a in node.names)
-                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
-                    found.add(node.module.split(".")[0])
+            found |= cls._imports_of(path)
         return {m for m in found if m not in _STDLIB and m != own_package}
 
     @staticmethod
@@ -135,10 +146,19 @@ class TestDeclaredDependencies:
         first_party = {"usersim"}
         missing = {
             mod
-            for mod in imported - self._OPTIONAL - first_party
+            for mod in imported - self._OPTIONAL - set(self._HOST_PROVIDED) - first_party
             if self._IMPORT_TO_DISTRIBUTION.get(mod, mod).lower().replace("-", "_") not in declared
         }
         assert not missing, f"the distribution imports but does not declare: {sorted(missing)}"
+
+    def test_host_provided_imports_stay_in_their_modules(self) -> None:
+        """pytest is importable only where pytest is the one loading the module."""
+        src = _REPO_ROOT / "src"
+        for mod, allowed in self._HOST_PROVIDED.items():
+            importers = {
+                path.relative_to(src).as_posix() for path in src.rglob("*.py") if mod in self._imports_of(path)
+            }
+            assert importers == allowed, f"{mod} is imported by {sorted(importers)}, expected only {sorted(allowed)}"
 
     def test_plugin_imports_everything_it_declares(self) -> None:
         imported = {
@@ -273,18 +293,32 @@ class TestProbeAssetPreflight:
         assert "financial_services" in message
         assert "no asset directory" in message
         # The error must say what to do, not just what is wrong.
-        assert "--assets-dir" in message and "gen-assets" in message
+        assert "--probe-mix" in message and "--assets-dir" in message
+        # A missing probe directory is a wrong assets tree, not a locale to ask for.
+        assert "feature request" not in message
 
     def test_missing_locale_subtree_is_rejected(self) -> None:
         from usersim.cli._errors import ConfigError
         from usersim.cli._pipeline import verify_probe_assets
 
         with pytest.raises(ConfigError) as exc:
-            verify_probe_assets({"financial_services": 1.0}, ["ja_JP"], None)
+            verify_probe_assets({"financial_services": 1.0}, ["en_SG"], None)
         message = str(exc.value)
-        assert "ja_JP" in message
-        # Naming what *is* available turns a dead end into a next step.
-        assert "available:" in message and "en_US" in message
+        assert "en_SG: no bank" in message
+        # Naming the locales that can run turns a dead end into a next step.
+        assert "en_US" in message.split("Locales that can run: ")[1].splitlines()[0]
+
+    def test_a_locale_whose_bank_does_not_load_is_rejected(self, finance_assets_without_fr_tasks: Path) -> None:
+        """A locale folder that exists is not enough: without tasks, every row aborts."""
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["fr_FR"], finance_assets_without_fr_tasks)
+        message = str(exc.value)
+        assert "fr_FR: its bank does not load" in message and "tasks.yaml" in message
+        assert message.split("Locales that can run: ")[1].splitlines()[0] == "en_US"
+        verify_probe_assets({"financial_services": 1.0}, ["en_US"], finance_assets_without_fr_tasks)
 
     def test_india_variant_without_its_own_bank_uses_en_in(self) -> None:
         """A registered variant runs on its base locale's bank, as its probe and scorer resolve it."""
@@ -302,6 +336,59 @@ class TestProbeAssetPreflight:
         with pytest.raises(ConfigError) as exc:
             verify_probe_assets({"financial_services": 1.0}, ["bn_Beng_IN"], tmp_path)
         assert "bn_Beng_IN" in str(exc.value)
+
+    def test_the_hindi_locales_run_finance_on_the_en_in_bank(self) -> None:
+        """hi_Deva_IN ships a corpus without tasks and hi_Latn_IN no bank; both run on en_IN's."""
+        from usersim.cli._pipeline import verify_probe_assets
+
+        mix = {"financial_services": 1.0, "sov_ai_facts": 1.0, "sov_ai_dynamic": 1.0}
+        verify_probe_assets(mix, ["hi_Deva_IN", "hi_Latn_IN"], None)
+
+    def test_the_hindi_locales_are_rejected_when_the_en_in_bank_is_absent(self, tmp_path: Path) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        (tmp_path / "financial_services" / "en_US").mkdir(parents=True)
+        (tmp_path / "financial_services" / "en_US" / "bank.yaml").write_text("{}")
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["hi_Deva_IN", "hi_Latn_IN"], tmp_path)
+        assert "hi_Deva_IN (through en_IN): no bank; hi_Latn_IN (through en_IN): no bank" in str(exc.value)
+
+    def test_a_refusal_names_the_locales_that_run_on_another_bank(self) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
+        can_run = str(exc.value).split("Locales that can run: ")[1].splitlines()[0]
+        assert "en_US" in can_run
+        assert can_run.endswith(", plus hi_Deva_IN, hi_Latn_IN and the India language variants through en_IN")
+
+    def test_a_locale_without_a_bank_says_how_to_ask_for_one(self) -> None:
+        from usersim.cli._errors import ConfigError
+        from usersim.cli._pipeline import verify_probe_assets
+
+        with pytest.raises(ConfigError) as exc:
+            verify_probe_assets({"financial_services": 1.0}, ["pt_BR"], None)
+        assert str(exc.value).split("\n\n", 1)[1].splitlines() == [
+            "Drop the probe from --probe-mix or the locale from the run, or point --assets-dir at a tree that has them.",
+            "To ask for a locale, open a feature request: "
+            "https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=feature-request.yml",
+            "To build a financial_services bank yourself, see https://github.com/NVIDIA-NeMo/UserSim/blob/main/"
+            "src/usersim/engine/probes/financial_services/README.md#authoring-a-new-locale",
+        ]
+
+    def test_the_refusal_links_point_at_files_in_this_repository(self) -> None:
+        """The links are absolute, to work from an installed package; moving a file must not break them quietly."""
+        from usersim.cli._pipeline import _BANK_AUTHORING_GUIDES, _FEATURE_REQUEST_URL
+
+        template = _FEATURE_REQUEST_URL.split("?template=", 1)[1]
+        assert (_REPO_ROOT / ".github" / "ISSUE_TEMPLATE" / template).is_file()
+        for url in _BANK_AUTHORING_GUIDES.values():
+            path, anchor = url.removeprefix("https://github.com/NVIDIA-NeMo/UserSim/blob/main/").split("#")
+            lines = (_REPO_ROOT / path).read_text(encoding="utf-8").splitlines()
+            headings = {line.lstrip("#").strip().lower().replace(" ", "-") for line in lines if line.startswith("#")}
+            assert anchor in headings, f"{path} has no heading for #{anchor}"
 
     def test_every_missing_probe_reported_at_once(self, tmp_path: Path) -> None:
         from usersim.cli._errors import ConfigError

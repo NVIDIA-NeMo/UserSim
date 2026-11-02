@@ -1,0 +1,9 @@
+institution_id: hoshimi_securities
+display_name: Hoshimi Securities
+type: brokerage
+brand_voice: neobank
+domains:
+- brokerage_investing
+placeholder: true
+display_name_local: 星見証券
+schema_version: v0.1

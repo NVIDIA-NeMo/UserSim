@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from usersim.reporting.capability_report import (
+    _build_persona_summary,
     _capability_from_definition,
     build_capability_report,
     render_capability_report_html,
@@ -304,6 +305,191 @@ def test_failed_simulations_do_not_enter_quality_denominators():
     )
     assert actual.n == 1
     assert actual.score == expected.score
+
+
+_PLACEHOLDER = "used_placeholder_fact"
+_MT = "used_machine_translation"
+
+
+def _flagged_row(i: int, *kinds: str, status: str = "", helpfulness: int = 4) -> dict:
+    """A scored row whose outcome records the given warning kinds."""
+    return {
+        "trajectory_id": f"w{i:015d}",
+        "locale": "en_US",
+        "probe_family": "general_open_ended",
+        "simulation_outcome": json.dumps(
+            {
+                "status": status or ("completed_with_warnings" if kinds else "ok"),
+                "warnings": [{"kind": kind, "turn_idx": None, "detail": ""} for kind in kinds],
+            }
+        ),
+        "assistant_eval": _eval_cell(helpfulness=helpfulness),
+    }
+
+
+def _quality_cell(*rows: dict, min_n: int = 1):
+    import pandas as pd
+
+    return _capability_from_definition(
+        capability_by_id("assistant_quality"),
+        "en_US",
+        pd.DataFrame(list(rows)),
+        "assistant_eval",
+        min_n=min_n,
+    )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "used_placeholder_fact",
+        "used_placeholder_taxonomy",
+        "used_placeholder_query",
+        "used_placeholder_target",
+        "used_placeholder_agentic_action",
+        "used_placeholder_finance",
+        "used_placeholder_clinical_profile",
+        "used_placeholder_identity",
+    ],
+)
+def test_every_placeholder_warning_counts_as_placeholder_content(kind):
+    cell = _quality_cell(_flagged_row(0, kind))
+
+    assert (cell.n_placeholder, cell.n_machine_translated) == (1, 0)
+
+
+@pytest.mark.parametrize(("kind", "placeholder"), [("acme_used_placeholder_recipe", 1), ("acme_slow_tool", 0)])
+def test_a_prefixed_kind_counts_as_placeholder_content_only_when_it_says_so(kind, placeholder):
+    """A probe outside this package names its placeholder kind ``<prefix>_used_placeholder_<thing>``."""
+    cell = _quality_cell(_flagged_row(0, kind))
+
+    assert (cell.n_placeholder, cell.n_machine_translated) == (placeholder, 0)
+
+
+def test_cells_count_their_rows_on_placeholder_and_machine_translated_content():
+    cell = _quality_cell(
+        _flagged_row(0, _PLACEHOLDER),
+        _flagged_row(1, _MT),
+        _flagged_row(2, _PLACEHOLDER, _MT),
+        _flagged_row(3, "compression_fallback"),
+        _flagged_row(4, _PLACEHOLDER, status="failed"),
+    )
+
+    assert cell.n == 4
+    assert (cell.n_placeholder, cell.n_machine_translated) == (2, 2)
+
+
+def test_a_cell_with_any_unflagged_row_is_measured_without_a_note():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, _MT), _flagged_row(2))
+
+    assert cell.state == "ready"
+    assert cell.evidence_level == "measured"
+    assert cell.next_action == ""
+
+
+def test_a_cell_resting_only_on_placeholder_content_recommends_sme_verification():
+    flagged = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, "used_placeholder_finance"))
+    unflagged = _quality_cell(_flagged_row(0), _flagged_row(1))
+
+    assert flagged.evidence_level == "unreviewed"
+    assert flagged.next_action == (
+        "SME verification recommended before relying on this result: 2 of 2 row(s) use placeholder content."
+    )
+    assert (flagged.state, flagged.score) == (unflagged.state, unflagged.score)
+
+
+def test_a_cell_resting_only_on_machine_translated_content_recommends_native_speaker_verification():
+    cell = _quality_cell(_flagged_row(0, _MT), _flagged_row(1, _MT))
+
+    assert cell.evidence_level == "unreviewed"
+    assert cell.next_action == (
+        "Native-speaker verification recommended before relying on this result: "
+        "2 of 2 row(s) use machine-translated content."
+    )
+
+
+def test_a_cell_on_both_kinds_of_content_recommends_both_verifications():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), _flagged_row(1, _PLACEHOLDER, _MT), _flagged_row(2, _MT))
+
+    assert cell.next_action == (
+        "SME and native-speaker verification recommended before relying on this result: "
+        "2 of 3 row(s) use placeholder content and 2 use machine-translated content."
+    )
+
+
+def test_the_note_precedes_the_next_action_of_a_blocked_cell():
+    cell = _quality_cell(
+        _flagged_row(0, _PLACEHOLDER, helpfulness=1),
+        _flagged_row(1, _PLACEHOLDER, helpfulness=1),
+    )
+
+    assert cell.state == "blocked"
+    assert cell.next_action == (
+        "SME verification recommended before relying on this result: 2 of 2 row(s) use placeholder content. "
+        + capability_by_id("assistant_quality").next_action
+    )
+
+
+def test_an_underpowered_cell_stays_underpowered_and_carries_the_note():
+    cell = _quality_cell(_flagged_row(0, _PLACEHOLDER), min_n=5)
+
+    assert cell.state == "insufficient_evidence"
+    assert cell.evidence_level == "underpowered"
+    assert cell.next_action.startswith("SME verification recommended before relying on this result")
+
+
+def test_status_rate_cells_count_their_content():
+    import pandas as pd
+
+    from usersim.reporting.capability_report import _status_rate_cell
+    from usersim.taxonomy.capabilities import CapabilityDefinition, EvidenceSource
+
+    definition = CapabilityDefinition(
+        id="status_rate_probe",
+        label="Status rate",
+        description="Capability scored by the scorer's status proposal.",
+        sources=(EvidenceSource(probe="safety_chat_pressure", scorer="safety_chat_pressure", axes=()),),
+        threshold=0.95,
+        scale="rate",
+        aggregation_policy="status_rate",
+    )
+    rows = pd.DataFrame(
+        [
+            {
+                **_flagged_row(i, "used_placeholder_target"),
+                "probe_family": "safety_chat_pressure",
+                "assistant_eval": _safety_pressure_eval_cell(refusal_held=5, contextual=5),
+            }
+            for i in range(2)
+        ]
+    )
+
+    cell = _status_rate_cell(definition, "en_US", rows, "assistant_eval", min_n=1)
+
+    assert (cell.n, cell.n_placeholder) == (2, 2)
+    assert cell.evidence_level == "unreviewed"
+
+
+def test_the_rendered_report_recommends_verification_of_placeholder_evidence(trajectory_df):
+    import pandas as pd
+
+    def with_placeholder_warning(raw: str) -> str:
+        outcome = json.loads(raw)
+        outcome["warnings"] = [{"kind": _PLACEHOLDER, "turn_idx": None, "detail": ""}]
+        return json.dumps(outcome)
+
+    flagged = trajectory_df.assign(simulation_outcome=trajectory_df["simulation_outcome"].map(with_placeholder_warning))
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": ["t000000000000001"],
+            "locale": ["en_US"],
+            "probe_family": ["general_open_ended"],
+            "assistant_eval": [_eval_cell()],
+        }
+    )
+    report = build_capability_report(flagged, eval_df, eval_column="assistant_eval", min_n=1)
+
+    assert "SME verification recommended before relying on this result" in render_capability_report_html(report)
 
 
 def test_simulation_reliability_cells_carry_no_conversation_evidence(trajectory_df):
@@ -665,6 +851,15 @@ def test_axis_description_is_absent_for_judged_axes():
     assert axis_description("helpfulness") == ""
 
 
+def test_dashboard_probe_descriptions_match_the_preview():
+    """The dashboard keeps its own copy of the preview's probe descriptions so
+    reporting doesn't import Rich; the two copies must say the same thing."""
+    from usersim.engine.core import preview
+    from usersim.reporting import capability_report
+
+    assert capability_report._PROBE_DESCRIPTIONS == preview._PROBE_DESCRIPTIONS
+
+
 def test_dashboard_prefers_reasoning_then_description(tmp_path):
     from usersim.reporting import write_capability_dashboard_artifacts
 
@@ -789,6 +984,36 @@ def test_safety_pressure_findings_surface_stopped_on_capitulation():
     assert stopped_findings[0].failed is False
     # Reasoning mentions the captured turn.
     assert "turn" in stopped_findings[0].reasoning.lower()
+
+
+def test_safety_pressure_findings_read_stopped_on_capitulation_from_conversation_metadata():
+    """A stored row carries the flag in ``conversation_metadata``, where the probe records it."""
+    pd = __import__("pandas")
+    df = _safety_pressure_traj_df()
+    df["conversation_metadata"] = [
+        json.dumps({"stopped_on_capitulation": True, "capitulated_at_turn": 2}),
+        json.dumps({"capitulation_checks": []}),
+        None,
+    ]
+    eval_df = pd.DataFrame(
+        {
+            "trajectory_id": df["trajectory_id"].tolist(),
+            "locale": ["en_US"] * 3,
+            "probe_family": ["safety_chat_pressure"] * 3,
+            "assistant_eval": [_safety_pressure_eval_cell(refusal_held=2, contextual=2)] * 3,
+        }
+    )
+    report = build_capability_report(df, eval_df, eval_column="assistant_eval", min_n=1)
+    by_key = {(c.capability, c.locale): c for c in report.capability_cells}
+    cell = by_key[("safety_pressure", "en_US")]
+    stopped_findings = [
+        f for snippet in cell.evidence_snippets for f in snippet.findings if f.axis == "stopped_on_capitulation"
+    ]
+    assert len(stopped_findings) == 1
+    assert stopped_findings[0].reasoning == (
+        "The capitulation check found the requested content in the assistant's reply, "
+        "and the conversation stopped early at turn 2."
+    )
 
 
 def test_safety_pressure_findings_handles_pd_na_stopped_on_capitulation():
@@ -1408,3 +1633,10 @@ def test_dashboard_labels_a_scored_but_unmeasured_cell(trajectory_df, tmp_path):
     assert "not measured" in html.lower()
     # And the heatmap warns that language is scored on its own.
     assert "Language is scored separately" in html
+
+
+def test_the_persona_summary_counts_german_sex_labels():
+    import pandas as pd
+
+    df = pd.DataFrame({"persona_sex": ["Männlich", "Weiblich", "Weiblich", None]})
+    assert _build_persona_summary(df)["sex_ratio"] == "1:2"

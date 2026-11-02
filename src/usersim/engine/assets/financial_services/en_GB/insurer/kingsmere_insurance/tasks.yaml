@@ -1,0 +1,345 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for kingsmere_insurance, a car, home, pet and life
+# insurer. Every state-changing tool it offers is gold in at least one task.
+# Each task ships THREE opening phrasings in British English. Read-only tools
+# (get_claim_status, send_no_claims_proof, get_statements) carry no gold state
+# change.
+templates:
+- id: TPL-KM-CARCLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Someone {{incident}} and drove off. I need to make a claim on my car insurance.
+  - >-
+    My car was damaged yesterday; someone {{incident}}. Can I claim?
+  - >-
+    I'd like to report a claim: another driver {{incident}} and didn't leave their
+    details.
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    incident: [reversed into my car in a supermarket car park, scraped the side of my car while it was parked on the street, clipped my wing mirror on a narrow lane]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-KM-HOMECLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    A pipe has burst under my {{room}} and soaked the floor. I need to claim on my
+    home insurance.
+  - >-
+    We've had a leak from a burst pipe in the {{room}}; the flooring and a cabinet
+    are ruined. How do I make a claim?
+  - >-
+    Water's been leaking from a pipe in my {{room}} for days and caused damage.
+    Please start a claim.
+  account_state:
+    account_id: home_km_0001
+    account_type: Kingsmere Home Insurance
+  param_space:
+    room: [kitchen, bathroom, utility room]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-KM-PETCLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My {{pet}} needed treatment for {{condition}} and the vet bill came to
+    £{{amount}}. I'd like to claim.
+  - >-
+    Can I claim for my {{pet}}'s vet bill? It was £{{amount}} for {{condition}}.
+  - >-
+    Please start a claim for £{{amount}} in vet fees; my {{pet}} was treated for
+    {{condition}}.
+  account_state:
+    account_id: pet_km_0001
+    account_type: Kingsmere Lifetime Pet Insurance
+  param_space:
+    pet: [dog, cat]
+    condition: [an ear infection, a torn ligament, swallowing a sock]
+    amount: ['286.00', '1,940.00', '3,450.00']
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-KM-NAMEDDRIVER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:45-54, age:55-64]
+  opening_user_messages:
+  - >-
+    My {{driver}} has just passed their driving test. Can you add them as a named
+    driver on my car insurance?
+  - >-
+    I'd like to add my {{driver}} to my car policy as a named driver.
+  - >-
+    Please put my {{driver}} on my car insurance; they'll be driving it at weekends.
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    driver: [son, daughter, partner]
+  gold_tool_sequence: [add_named_driver]
+  expected_state_deltas: {named_drivers_updated: true}
+- id: TPL-KM-NCD-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've built up {{years}} years' no-claims discount. Can you add protection for it
+    to my policy?
+  - >-
+    Please protect my no-claims discount; I've got {{years}} years.
+  - >-
+    I'd like no-claims discount protection on my car insurance. I have {{years}}
+    years' no claims.
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    years: ['5', '9', '12']
+  gold_tool_sequence: [protect_no_claims_discount]
+  expected_state_deltas: {ncd_protection: ADDED}
+- id: TPL-KM-AUTORENEW-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please turn off automatic renewal on my {{policy}}. I want to shop around.
+  - >-
+    I don't want my {{policy}} to renew automatically. Can you switch that off?
+  - >-
+    Can you stop my {{policy}} from auto-renewing next time?
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    policy: [car insurance, home insurance]
+  gold_tool_sequence: [set_auto_renewal]
+  expected_state_deltas: {auto_renewal: 'OFF'}
+- id: TPL-KM-NEWCAR-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've changed my car to a {{car}}. Can you update my insurance?
+  - >-
+    Please swap the car on my policy to my new {{car}} from Saturday.
+  - >-
+    I'm picking up a {{car}} this week and need my policy changed over to it.
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    car: [2021 Ford Puma, 2019 Toyota Yaris Hybrid, 2023 Kia Niro EV]
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_updated: true}
+- id: TPL-KM-TRUST-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    I'd like to put my life insurance policy in trust for {{beneficiary}}.
+  - >-
+    Can you help me write my Kingsmere life cover in trust so it goes to
+    {{beneficiary}}?
+  - >-
+    Please set up a trust on my life insurance with {{beneficiary}} as the
+    beneficiaries.
+  account_state:
+    account_id: life_km_0001
+    account_type: Kingsmere Level Term Life Insurance
+  param_space:
+    beneficiary: [my children, my two daughters, my partner and children]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-KM-BUY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    We've just got a {{pet}}. I'd like to take out lifetime pet insurance.
+  - >-
+    Can you set up a lifetime pet insurance policy for my new {{pet}}?
+  - >-
+    Please insure my {{pet}} with your lifetime pet cover.
+  account_state:
+    customer_id: cust_km_0001
+  param_space:
+    pet: [puppy, kitten, rescue dog]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-KM-COOLINGOFF-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I bought home insurance with you {{days}} days ago and found a better deal.
+    Please cancel it.
+  - >-
+    Can I cancel my new home insurance? I only took it out {{days}} days ago.
+  - >-
+    I'd like to cancel the home policy I bought {{days}} days ago and get my money
+    back.
+  account_state:
+    account_id: home_km_0001
+    account_type: Kingsmere Home Insurance
+  param_space:
+    days: ['3', '6', '11']
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {home_km_0001.status: CLOSED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-KM-MOVEHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    We're moving house: please update my address to {{address}}, move my home
+    insurance to the new property, and turn off automatic renewal so I can review
+    it.
+  - >-
+    Can you change my address to {{address}}, transfer my home cover to the new
+    house, and stop the policy renewing automatically?
+  - >-
+    I've moved to {{address}}. Update my details, switch my home insurance to the
+    new address, and switch off auto-renewal.
+  account_state:
+    account_id: home_km_0001
+    account_type: Kingsmere Home Insurance
+  param_space:
+    address: ['8 Hawthorn Way, Milton Keynes MK10 9PQ', '31 Southgate, Chichester PO19 1ES']
+  gold_tool_sequence: [update_contact_info, update_policy, set_auto_renewal]
+  expected_state_deltas: {contact_updated: true, policy_updated: true, auto_renewal: 'OFF'}
+- id: TPL-KM-NEWBABY-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    We've just had our first child: please take out level term life cover for me,
+    put it in trust for the baby, and send me a reminder before each premium.
+  - >-
+    Can you set up a life insurance policy for me, write it in trust for our new
+    baby, and remind me of each payment?
+  - >-
+    I need life cover now we're parents: start a level term policy, place it in
+    trust for our child, and set up payment reminders.
+  account_state:
+    customer_id: cust_km_0001
+  param_space: {}
+  gold_tool_sequence: [open_account, update_beneficiary, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, beneficiary_updated: true, alerts_updated: true}
+- id: TPL-KM-CARCHANGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've bought a {{car}} that my {{driver}} will drive too: change the car on my
+    policy, add my {{driver}} as a named driver, and protect my no-claims discount.
+  - >-
+    Please update my insurance to my new {{car}}, put my {{driver}} on as a named
+    driver, and add no-claims protection.
+  - >-
+    Can you switch my policy to the {{car}}, add my {{driver}} as a driver, and
+    protect my no-claims discount?
+  account_state:
+    account_id: car_km_0001
+    account_type: Kingsmere Comprehensive Car Insurance
+  param_space:
+    car: [2022 Skoda Octavia Estate, 2020 Vauxhall Corsa]
+    driver: [wife, husband, partner]
+  gold_tool_sequence: [update_policy, add_named_driver, protect_no_claims_discount]
+  expected_state_deltas: {policy_updated: true, named_drivers_updated: true, ncd_protection: ADDED}
+- id: TPL-KM-SWITCHIN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My car insurance with another firm is up for renewal, so I'm moving to you:
+    start a comprehensive policy for my {{car}}, add my {{driver}} as a named
+    driver, and protect my no-claims discount.
+  - >-
+    I'd like to switch my car insurance to Kingsmere: insure my {{car}}
+    comprehensively, put my {{driver}} on as a named driver, and add no-claims
+    protection.
+  - >-
+    Can you take out comprehensive cover on my {{car}}, add my {{driver}} as a
+    driver, and protect my no-claims discount? I'm leaving my old insurer.
+  account_state:
+    customer_id: cust_km_0001
+  param_space:
+    car: [2020 Volkswagen Golf, 2022 Nissan Qashqai]
+    driver: [wife, husband, partner]
+  gold_tool_sequence: [open_account, add_named_driver, protect_no_claims_discount]
+  expected_state_deltas: {new_account_status: OPEN, named_drivers_updated: true, ncd_protection: ADDED}
+- id: TPL-KM-BURGLARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    We were burgled last night and they took {{items}}: please start a claim, add
+    the new alarm we're fitting to my home policy, and text me as the claim
+    progresses.
+  - >-
+    Our house was broken into and {{items}} were stolen. Can you open a claim,
+    record the burglar alarm we're installing on the policy, and keep me updated?
+  - >-
+    I need to claim for a burglary ({{items}} gone), update my policy with our new
+    alarm, and get alerts on the claim.
+  account_state:
+    account_id: home_km_0001
+    account_type: Kingsmere Home Insurance
+  param_space:
+    items: [a laptop and some jewellery, our TV and two bikes, cash and a games console]
+  gold_tool_sequence: [file_claim, update_policy, set_alerts]
+  expected_state_deltas: {claim_status: FILED, policy_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_GB/dynamic.yaml), not scripted templates.

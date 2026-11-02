@@ -26,16 +26,33 @@ which system they are looking at.
 | `usersim.backends` | an `ExecutionBackend` implementation | `--backend` choices |
 | `usersim.capabilities` | a `CapabilityDefinition` or an iterable | the capability matrix |
 | `usersim.commands` | a `register(subparsers)` callable | `usersim --help` |
-| `usersim.toolset_sources` | *(declared; consumed by future work)* | n/a |
+| `usersim.toolset_sources` | *(reserved)* | n/a |
 
 ```toml
 [project.entry-points."usersim.probes"]
 my_probe = "my_package.probe:MyProbe"
 ```
 
-An extension probe's per-row data goes in its metadata (`state.metadata`),
-stored with the row as `conversation_metadata`: the list of extra columns a
-run keeps is part of the core config. See [Probes](probes.md).
+**Every name an extension adds carries its prefix.** Probe labels, scorer
+names, capability ids, asset domains, command names, output columns, warning
+kinds and metadata keys all start with the package's own prefix, such as
+`acme_recipes` or `acme_used_placeholder_recipe`. Unprefixed names belong to
+the built-ins. The registries refuse a name that is already taken, so the
+prefix is what keeps two packages, or a package and a later built-in, from
+claiming the same one.
+
+[`docs/extensions.md`](../docs/extensions.md) builds a whole extension
+package: a probe with its own bank, a scorer, their tests and a CI recipe.
+
+An extension probe declares the columns it writes in its class's
+`output_columns`, and a run keeps them alongside the core columns. Other
+per-row data goes in its metadata (`state.metadata`), stored with the row as
+`conversation_metadata`. See [Probes](probes.md).
+
+An extension's warnings carry its prefix too: a bank-backed probe names its
+placeholder warning `<prefix>_used_placeholder_<thing>`, which the capability
+report counts as placeholder content, and any other warning it records is a
+prefixed name such as `acme_slow_tool`.
 
 ## How discovery behaves
 
@@ -44,19 +61,29 @@ run keeps is part of the core config. See [Probes](probes.md).
 identical code path as a built-in and inherits its validation. There is no
 parallel registration path to drift.
 
-**A built-in always wins a name collision.** An extension that silently
-shadowed a shipped probe would change what a run means while every config
-file and report still named the original. The collision is reported and the
-extension dropped.
+**Collisions.** Commands, backends, asset domains and capabilities keep the
+built-in: an extension under a taken name is reported and dropped. A probe
+label or scorer name belongs to the first class or function registered under
+it. Registering a different one under a taken name raises
+`ProbeRegistrationError` or `ScorerRegistrationError`, naming both
+definitions; for an extension, that is a load failure, so the extension is
+skipped with a warning and the shipped probe or scorer stays. Registering the
+same definition again, as a reloaded module does, updates the entry. Give an
+extension probe or scorer a name of its own.
 
-**A broken extension is skipped, not fatal.** An entry point that fails to
-import is logged with the exception and omitted, so one bad package cannot
-make `--help` unusable. The log is a warning rather than a debug line,
-because a probe that silently fails to appear is far harder to diagnose than
-a noisy startup.
+**An extension that fails to load is skipped, not fatal.** An entry point
+that fails to import is logged with the exception and omitted, so one bad
+package cannot make `--help` unusable. The log is a warning rather than a
+debug line, because a probe that silently fails to appear is far harder to
+diagnose than a noisy startup.
 
 **Ordering is by entry-point name**, not install order, so registry contents
 do not depend on the sequence of `pip install` commands.
+
+**A name two packages advertise in a group is loaded from neither.** Choosing
+one would make what a run uses depend on which package sorts first, so both
+are skipped with a warning naming each package. Every discovery warning names
+the package an entry point comes from.
 
 **`USERSIM_DISABLE_EXTENSIONS` suppresses all of it.** The test suite sets
 this, because an extension installed in a developer's virtualenv would
@@ -115,31 +142,96 @@ every other field set to `None`.
 Each check has a `*_problems` form that returns every finding at once, so you
 fix one thing rather than rediscovering the next on each run.
 
+`usersim smoke` reports what discovery found. Its `extensions` line lists each
+installed package with the number of entry points it contributes, and fails
+when an entry point contributes nothing: it failed to load, another package
+advertises the same name, or a built-in holds it.
+
+```
+[OK]   extensions            my-probes 0.3.0: 3 entry point(s)
+```
+
 ## Asset paths
 
-An extension that ships its own banks adds them to `$USERSIM_ASSET_PATH`
-rather than replacing the tree. The packaged directory stays last in the
-search order, so the shipped banks remain reachable. See
+An extension that ships its own banks keeps them under `assets/<label>/` in
+its package and names that `assets` directory on the probe class:
+
+```python
+from pathlib import Path
+
+from usersim.engine.core.probes import BaseProbe
+
+class MyProbe(BaseProbe):
+    label = "my_probe"
+    assets_root = Path(__file__).parent / "assets"
+```
+
+The probe then finds its banks wherever the package is installed. That root
+is searched after `$USERSIM_ASSET_PATH` and before the packaged banks, so a
+deployment can override it and the shipped banks remain reachable.
+`@register_probe` refuses a relative `assets_root`, which would resolve against
+the working directory. The probe's bank loader reads under `MyProbe.assets_dir()`,
+its folder on that search, so an override reaches the loader too.
+`$USERSIM_ASSET_PATH` stays the way to layer content over a probe you don't
+ship, such as a patch to the shipped `identity_disclosure` spec. See
 [assets.md](assets.md).
+
+## Testing an extension
+
+`usersim.testing.pytest_plugin` is the harness the built-in tests run under.
+An extension's suite loads it from its top-level `conftest.py`:
+
+```python
+pytest_plugins = ["usersim.testing.pytest_plugin"]
+```
+
+With the plugin loaded, a test run:
+
+- fails any outbound connection with `BlockedNetworkCall`. It is a
+  `BaseException`, so the retry and fallback paths that catch `Exception`
+  cannot absorb it and pass the test down a fallback;
+- stops before collecting unless `USERSIM_DISABLE_EXTENSIONS` is set, so other
+  packages installed in the environment cannot register themselves and change
+  what the tests see;
+- stops unless `pytest-asyncio` is installed, because the awaited probe hooks
+  and `assert_scorer_conforms` are async;
+- stubs the tokenizer behind the reasoning-token estimate, which otherwise
+  downloads its vocabulary on first use;
+- points Data Designer's persona sampler at four synthetic `en_US` personas.
+  The `synthetic_persona_dataset` fixture yields the directory they are in.
+
+Set the variable for the run with `pytest-env`:
+`env = ["USERSIM_DISABLE_EXTENSIONS=1"]` under `[tool.pytest.ini_options]`.
+With discovery off, the tests import the extension's own package to register
+its probes and scorers.
+
+`run_episode` runs one episode of a probe offline, through the same generator
+as `usersim simulate`, with a `ScriptedModel` answering for every model alias.
+It returns the row the generator produces and every prompt the models
+received, so a probe's tests need neither a provider nor a patch of the
+engine's internals.
+
+Installing `usersim` does not load the plugin. It has no `pytest11` entry
+point, because it blocks outbound connections, and a project that installs
+`usersim` for another reason keeps its tests as they are.
 
 ## What the community can bring
 
 Beyond the mechanics above, four contributions the design is specifically
 built to absorb:
 
-- **New persona datasets and locales.** Any census-grounded or
-  domain-specific persona dataset can slot in as a population source. A
-  sovereign-AI team contributing a national dataset (grounded in local
-  census data, written in the local language) gains the whole simulation,
-  evaluation and reporting pipeline with it. See
-  [`docs/locales.md`](../docs/locales.md) for how a preview locale graduates
-  to a shipped one.
+- **New persona datasets and locales.** A national persona dataset, grounded
+  in local census data and written in the local language, is the foundation
+  of a new locale: once Data Designer serves it, the locale gains the whole
+  simulation, evaluation and reporting pipeline, and probe content follows
+  bank by bank. See [`docs/locales.md`](../docs/locales.md) for how a preview
+  locale graduates to a shipped one.
 - **Agent benchmark integrations.** Task suites define the *task*; this
-  defines the *user*. Wrapping one adds behavioural diversity and demographic
+  defines the *user*. Wrapping one adds behavioral diversity and demographic
   grounding that task-only benchmarks lack.
 - **Custom evaluation axes.** The multi-axis schema is extensible, so a
   domain-specific quality dimension does not require touching the core.
-- **Behavioural-realism mitigations.** The realism layer (incremental
+- **Behavioral-realism mitigations.** The realism layer (incremental
   disclosure, OCEAN-derived interaction style, reactive frustration) is
   modular. Typo injection, device switching, session abandonment and
   non-native language patterns are all additive.

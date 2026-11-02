@@ -78,7 +78,7 @@ templates:
   account_state:
     account_id: acct_nb_0001
     savings_account_id: acct_nb_sav_0001
-    checking_balance: '10000.00'
+    balance: '10000.00'
   param_space:
     amount: ['250.00', '1000.00', '5000.00']
   gold_tool_sequence: [transfer_funds]

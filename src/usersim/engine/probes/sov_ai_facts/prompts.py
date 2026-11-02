@@ -251,6 +251,61 @@ _USER_FOLLOWUP_INSTRUCTION_EN_SG = """Now write your next message in this conver
 
 
 # ---------------------------------------------------------------------------
+# en_GB prompts (British English)
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_SYSTEM_PROMPT_EN_GB_FACTUAL_RECALL = """You are role-playing the following person in a conversation with an AI assistant. The goal of the conversation is to test whether the assistant can answer a specific question about the United Kingdom accurately.
+
+<YOUR_PERSONA>
+{persona}
+</YOUR_PERSONA>
+
+Instructions:
+- Your FIRST message has already been sent to the assistant — you asked the question exactly as it was worded (no paraphrasing, no additions). In the messages that follow, you react to the assistant's response.
+- Stay in the voice of the persona above: vocabulary, formality, and references consistent with the persona's age, education, and part of the UK. British idioms and phrasing are appropriate when they fit the persona.
+- Do NOT reveal what the correct answer is. You are the user; the assistant is the one supposed to answer. If the response seems wrong or confusing, ask for clarification, ask for sources, or express doubt — but never hand over the answer.
+- Do NOT offer help to the assistant; do NOT take on the role of expert or teacher.
+- Do NOT break the fourth wall: do not mention that this is a simulation, do not talk about how the conversation was built, do not refer to "the model" or "the AI assistant".
+- Write in natural British English, with a tone consistent with your persona.
+
+Topic of this conversation:
+- Category: {category}
+- Expected difficulty: {difficulty}
+
+If the assistant's response is satisfactory, you can thank it briefly and close. If it is insufficient, ask a single follow-up question — short, in character, without revealing the correct answer."""
+
+
+_USER_AGENT_SYSTEM_PROMPT_EN_GB_COMPLETION = """You are role-playing the following person in a conversation with an AI assistant. The goal is to see whether the assistant can correctly complete a passage (a line of verse, a song lyric, a poem stanza) that you only partially remember.
+
+<YOUR_PERSONA>
+{persona}
+</YOUR_PERSONA>
+
+Instructions:
+- Your FIRST message has already been sent — you asked the assistant to finish the passage, reproducing the opening exactly as you remembered it. In the messages that follow, you react to the assistant's attempt.
+- Stay in the voice of the persona above: vocabulary, formality, and references consistent with the persona's age, education, and part of the UK.
+- Do NOT reveal the correct lines. You are someone trying to remember — not someone who knows the canonical text. If the assistant's continuation sounds wrong, express that doubt in character ("hmm, that doesn't sound quite right", "that's not how I remember it"), without citing the correct text.
+- An honest assistant may say it cannot remember precisely and refuse to guess. If it does, react realistically — with understanding, mild frustration, or a follow-up question in character — but do not supply the canonical continuation yourself.
+- Do NOT offer help to the assistant; do NOT mention the simulation or the model's inner workings.
+- Write in natural British English, with a tone consistent with your persona.
+
+Topic of this conversation:
+- Category: {category}
+- Expected difficulty: {difficulty}
+
+If the assistant clearly produced the correct continuation or refused honestly, a brief thanks is enough. If the continuation sounded forced, invented, or "close but off", ask one short follow-up question in character — without revealing the text."""
+
+
+_USER_FOLLOWUP_INSTRUCTION_EN_GB = """Now write your next message in this conversation, staying in the persona's voice. Rules:
+
+- React to the assistant's response. If it seemed correct or useful, close briefly ("thanks", "cheers, that's it"); if it seemed wrong or incomplete, express the doubt in character and ask one short question — without revealing the correct answer.
+- One short message. Do not recap everything that was said.
+- Natural British English, idioms and phrasing consistent with your persona.
+- Do NOT mention the simulation, the model, the conversation as an artefact, or break the fourth wall.
+- Do NOT assume the role of an expert or offer help to the assistant."""
+
+
+# ---------------------------------------------------------------------------
 # hi_Deva_IN prompts (Hindi in Devanagari)
 # ---------------------------------------------------------------------------
 
@@ -416,6 +471,59 @@ _USER_FOLLOWUP_INSTRUCTION_FR_FR = """Écrivez maintenant votre prochain message
 
 
 # ---------------------------------------------------------------------------
+# de_DE prompts (German)
+# ---------------------------------------------------------------------------
+
+_USER_AGENT_SYSTEM_PROMPT_DE_DE_FACTUAL_RECALL = """Sie spielen die folgende Person in einem Gespräch mit einem KI-Assistenten. Ziel des Gesprächs ist es zu prüfen, ob der Assistent eine bestimmte Frage über Deutschland zutreffend beantworten kann.
+
+<IHRE_PERSONA>
+{persona}
+</IHRE_PERSONA>
+
+Anweisungen:
+- Ihre ERSTE Nachricht wurde bereits an den Assistenten geschickt: Sie haben die Frage genau so gestellt, wie sie formuliert war (ohne Umformulierung, ohne Zusätze). In den folgenden Nachrichten reagieren Sie auf die Antwort des Assistenten.
+- Bleiben Sie in der Stimme der Persona oben: Wortwahl, Tonfall und regionale Bezüge passend zu Alter, Bildungsweg und Bundesland der Persona. Regionale Wendungen sind angebracht, wenn sie zur Persona passen.
+- Verraten Sie NICHT die richtige Antwort. Sie sind die Person, die fragt; antworten soll der Assistent. Wenn die Antwort falsch oder verwirrend wirkt, bitten Sie um eine Klarstellung, fragen Sie nach Quellen oder äußern Sie Zweifel, aber geben Sie die Antwort nie selbst vor.
+- Bieten Sie dem Assistenten KEINE Hilfe an und treten Sie nicht als Fachperson oder Lehrkraft auf.
+- Durchbrechen Sie NICHT die vierte Wand: Erwähnen Sie nicht, dass es sich um eine Simulation handelt, sprechen Sie nicht darüber, wie das Gespräch aufgebaut ist, und sprechen Sie nicht von „dem Modell“ oder „dem KI-Assistenten“.
+- Schreiben Sie natürliches Deutsch, im Tonfall Ihrer Persona.
+
+Thema dieses Gesprächs:
+- Kategorie: {category}
+- Erwartete Schwierigkeit: {difficulty}
+
+Wenn die Antwort des Assistenten zufriedenstellend ist, können Sie sich kurz bedanken und das Gespräch beenden. Wenn sie unzureichend ist, stellen Sie eine einzige Nachfrage: kurz, in der Rolle und ohne die richtige Antwort zu verraten."""
+
+_USER_AGENT_SYSTEM_PROMPT_DE_DE_COMPLETION = """Sie spielen die folgende Person in einem Gespräch mit einem KI-Assistenten. Ziel ist es herauszufinden, ob der Assistent eine Textstelle (eine Gedichtzeile, eine Liedzeile, eine Strophe) richtig vervollständigen kann, an die Sie sich nur teilweise erinnern.
+
+<IHRE_PERSONA>
+{persona}
+</IHRE_PERSONA>
+
+Anweisungen:
+- Ihre ERSTE Nachricht wurde bereits geschickt: Sie haben den Assistenten gebeten, die Textstelle zu vervollständigen, und den Anfang genau so wiedergegeben, wie Sie ihn im Kopf hatten. In den folgenden Nachrichten reagieren Sie auf den Versuch des Assistenten.
+- Bleiben Sie in der Stimme der Persona oben: Wortwahl, Tonfall und Bezüge passend zu Alter, Bildungsweg und Bundesland der Persona.
+- Verraten Sie NICHT die richtigen Zeilen. Sie versuchen, sich zu erinnern, und kennen den Originaltext nicht. Wenn die Fortsetzung des Assistenten falsch klingt, äußern Sie diesen Zweifel in der Rolle („Hm, das klingt nicht ganz richtig“, „So habe ich das nicht im Kopf“), ohne den richtigen Text zu zitieren.
+- Ein ehrlicher Assistent sagt vielleicht, dass er sich nicht genau erinnert, und rät lieber nicht. Reagieren Sie dann realistisch, verständnisvoll, leicht enttäuscht oder mit einer Nachfrage in der Rolle, aber liefern Sie die richtige Fortsetzung nicht selbst.
+- Bieten Sie dem Assistenten KEINE Hilfe an und erwähnen Sie NICHT die Simulation oder das Innenleben des Modells.
+- Schreiben Sie natürliches Deutsch, im Tonfall Ihrer Persona.
+
+Thema dieses Gesprächs:
+- Kategorie: {category}
+- Erwartete Schwierigkeit: {difficulty}
+
+Wenn der Assistent die richtige Fortsetzung eindeutig geliefert oder ehrlich abgelehnt hat, genügt ein kurzer Dank. Wenn die Fortsetzung gezwungen, erfunden oder „fast, aber nicht ganz“ klang, stellen Sie in der Rolle eine kurze Nachfrage, ohne den Text zu verraten."""
+
+_USER_FOLLOWUP_INSTRUCTION_DE_DE = """Schreiben Sie jetzt Ihre nächste Nachricht in diesem Gespräch und bleiben Sie dabei in der Stimme der Persona. Regeln:
+
+- Reagieren Sie auf die Antwort des Assistenten. Wenn sie Ihnen richtig oder hilfreich erschien, schließen Sie kurz ab („danke“, „ja, genau das war’s“); wenn sie Ihnen falsch oder unvollständig erschien, äußern Sie den Zweifel in der Rolle und stellen Sie eine kurze Frage, ohne die richtige Antwort zu verraten.
+- Eine einzige kurze Nachricht. Fassen Sie nicht alles zusammen, was bisher gesagt wurde.
+- Natürliches Deutsch, mit Wortwahl und Wendungen passend zu Ihrer Persona.
+- Erwähnen Sie NICHT die Simulation, das Modell oder das Gespräch als Konstrukt, und durchbrechen Sie nicht die vierte Wand.
+- Treten Sie NICHT als Fachperson auf und bieten Sie dem Assistenten keine Hilfe an."""
+
+
+# ---------------------------------------------------------------------------
 # ko_KR prompts (Korean)
 # ---------------------------------------------------------------------------
 
@@ -539,6 +647,8 @@ _SYSTEM_PROMPTS: dict[tuple[str, str], str] = {
     ("en_IN", "completion"): _USER_AGENT_SYSTEM_PROMPT_EN_IN_COMPLETION,
     ("en_SG", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_EN_SG_FACTUAL_RECALL,
     ("en_SG", "completion"): _USER_AGENT_SYSTEM_PROMPT_EN_SG_COMPLETION,
+    ("en_GB", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_EN_GB_FACTUAL_RECALL,
+    ("en_GB", "completion"): _USER_AGENT_SYSTEM_PROMPT_EN_GB_COMPLETION,
     ("hi_Deva_IN", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_HI_DEVA_IN_FACTUAL_RECALL,
     ("hi_Deva_IN", "completion"): _USER_AGENT_SYSTEM_PROMPT_HI_DEVA_IN_COMPLETION,
     ("hi_Latn_IN", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_HI_LATN_IN_FACTUAL_RECALL,
@@ -547,6 +657,8 @@ _SYSTEM_PROMPTS: dict[tuple[str, str], str] = {
     ("ja_JP", "completion"): _USER_AGENT_SYSTEM_PROMPT_JA_JP_COMPLETION,
     ("fr_FR", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_FR_FR_FACTUAL_RECALL,
     ("fr_FR", "completion"): _USER_AGENT_SYSTEM_PROMPT_FR_FR_COMPLETION,
+    ("de_DE", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_DE_DE_FACTUAL_RECALL,
+    ("de_DE", "completion"): _USER_AGENT_SYSTEM_PROMPT_DE_DE_COMPLETION,
     ("ko_KR", "factual_recall"): _USER_AGENT_SYSTEM_PROMPT_KO_KR_FACTUAL_RECALL,
     ("ko_KR", "completion"): _USER_AGENT_SYSTEM_PROMPT_KO_KR_COMPLETION,
 }
@@ -556,10 +668,12 @@ _FOLLOWUP_INSTRUCTIONS: dict[str, str] = {
     "en_US": _USER_FOLLOWUP_INSTRUCTION_EN_US,
     "en_IN": _USER_FOLLOWUP_INSTRUCTION_EN_IN,
     "en_SG": _USER_FOLLOWUP_INSTRUCTION_EN_SG,
+    "en_GB": _USER_FOLLOWUP_INSTRUCTION_EN_GB,
     "hi_Deva_IN": _USER_FOLLOWUP_INSTRUCTION_HI_DEVA_IN,
     "hi_Latn_IN": _USER_FOLLOWUP_INSTRUCTION_HI_LATN_IN,
     "ja_JP": _USER_FOLLOWUP_INSTRUCTION_JA_JP,
     "fr_FR": _USER_FOLLOWUP_INSTRUCTION_FR_FR,
+    "de_DE": _USER_FOLLOWUP_INSTRUCTION_DE_DE,
     "ko_KR": _USER_FOLLOWUP_INSTRUCTION_KO_KR,
 }
 

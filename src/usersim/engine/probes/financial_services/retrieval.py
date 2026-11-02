@@ -37,39 +37,100 @@ products at one institution in one register span a cosine range of roughly
 margin systematically because they are short (104 median words vs 219 for a
 product sheet, so less diluted) and their bodies are dense with the
 account-action vocabulary every query contains. Query/passage ``input_type`` was
-ruled out — the hub ignores the parameter (cosine 0.9999 between modes).
+ruled out: the endpoint ignores the parameter (cosine 0.9999 between modes).
 
 Both return whole ``Document`` objects and never mutate the bank.
 
-The lexical term is ASCII-only
-------------------------------
-``_WORD_RE`` matches ``[a-z0-9]+``, so a native-script query (Tamil, Devanagari)
-tokenizes to the EMPTY SET. That is not merely a weak signal: an empty query set
-makes ``_lexical_rank`` return the institution's first k documents irrespective
-of the query, and in ``hybrid`` it zeroes the lexical term and leaves pure dense
-— the 4%-precision mode above. A romanized query tokenizes but its tokens do not
-overlap English prose, so it ranks on accidental collisions.
+Lexical tokens are Unicode words, and character pairs in CJK text
+-----------------------------------------------------------------
+A token is a run of letters, combining marks and decimal digits, after case
+folding and NFC normalisation. Accented French and German words, ``ß`` (folded
+to ``ss``) and Indic scripts therefore tokenize whole, and composed and
+decomposed accents compare equal. Other number characters, such as ``½``,
+separate words, so ``59½`` still matches a search for ``59``.
 
-Making the regex Unicode-aware would fix the tokenizing but not the MATCHING: a
-Tamil token still cannot overlap an English document. So the probe translates the
-query into the corpus's language before calling in (``_search_query`` in
-``generator.py``), which is a no-op whenever the corpus is already in the
-conversation language. Keep that in mind before "fixing" the regex here.
+Japanese runs words together and Korean attaches particles to them, so a run of
+Han, kana or Hangul becomes its overlapping character pairs instead, as Lucene's
+CJK analyzer does: ``定期預金`` gives ``定期``, ``期預`` and ``預金``, and
+``계좌를`` and ``계좌가`` share ``계좌``. A run of one character stays as it is.
+Full-width letters and digits are folded to ASCII first, so ``ＡＴＭ`` matches
+``atm``, and half-width katakana to full-width. Folding covers only the
+Halfwidth and Fullwidth Forms block, so ``½`` still separates words.
+
+Tokenizing is not matching: a Tamil query still shares no word with an English
+document, so every document's lexical score ties and the ranking ignores the
+query. The probe therefore translates the query into the corpus's language
+before calling in (``_search_query`` in ``generator.py``), which is a no-op
+whenever the corpus is already in the conversation language.
 """
 
 from __future__ import annotations
 
+import functools
 import math
 import re
+import unicodedata
 from typing import Sequence
 
 from usersim.engine.core.finance_bank import Document, Institution
+from usersim.engine.core.locale import HAN_RANGES, HANGUL_RANGES, HIRAGANA_RANGES, KATAKANA_RANGES
 
-_WORD_RE = re.compile(r"[a-z0-9]+")
+#: Han, kana and Hangul, plus the iteration mark 々, which repeats the Han
+#: character before it and so belongs to the same run.
+_CJK_RANGES: tuple[tuple[int, int], ...] = (
+    HAN_RANGES + HIRAGANA_RANGES + KATAKANA_RANGES + HANGUL_RANGES + ((0x3005, 0x3005),)
+)
+
+#: The Halfwidth and Fullwidth Forms block.
+_WIDTH_FORMS = re.compile("[\uff00-\uffef]+")
 
 
-def _tokens(text: str) -> set:
-    return set(_WORD_RE.findall(text.lower()))
+def _is_word_char(ch: str) -> bool:
+    """Letters, combining marks and decimal digits, in any script."""
+    category = unicodedata.category(ch)
+    return category[0] in "LM" or category == "Nd"
+
+
+def _is_cjk(ch: str) -> bool:
+    cp = ord(ch)
+    return cp >= 0x1100 and any(lo <= cp <= hi for lo, hi in _CJK_RANGES)
+
+
+def _fold_width(text: str) -> str:
+    """Full-width letters and digits as ASCII, and half-width katakana as full-width."""
+    return _WIDTH_FORMS.sub(lambda m: unicodedata.normalize("NFKC", m.group()), text)
+
+
+def _add_run(words: set[str], run: list[str], cjk: bool) -> None:
+    if cjk and len(run) > 1:
+        words.update(a + b for a, b in zip(run, run[1:]))
+    elif run:
+        words.add("".join(run))
+
+
+@functools.lru_cache(maxsize=16384)
+def _tokens(text: str) -> frozenset[str]:
+    """The case-folded words in ``text``, with runs of Han, kana and Hangul as character pairs.
+
+    Cached because every query re-scores the institution's whole corpus, and a
+    document's words never change.
+    """
+    words: set[str] = set()
+    current: list[str] = []
+    current_cjk = False
+    for ch in unicodedata.normalize("NFC", _fold_width(text).casefold()):
+        if not _is_word_char(ch):
+            _add_run(words, current, current_cjk)
+            current = []
+            continue
+        cjk = _is_cjk(ch)
+        if current and cjk != current_cjk:
+            _add_run(words, current, current_cjk)
+            current = []
+        current.append(ch)
+        current_cjk = cjk
+    _add_run(words, current, current_cjk)
+    return frozenset(words)
 
 
 def _lexical_rank(institution: Institution, query: str, k: int) -> list[Document]:

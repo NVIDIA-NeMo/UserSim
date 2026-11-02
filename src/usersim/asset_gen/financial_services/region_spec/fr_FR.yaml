@@ -1,0 +1,787 @@
+# Structured region_spec for fr_FR, the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. The DD pipeline expands
+# this into the committed per-institution assets/financial_services/fr_FR/ bank.
+#
+# The institution set follows the French retail market: a cooperative regional
+# bank, a payment-account neobank sold through tobacconists and newsagents, a
+# mutual insurer (assurance-vie, PER, home, car and health cover), a
+# consumer-credit lender and an online broker. Brands are fictional.
+#
+# Content fields are written in French, so the institution brief, the corpus and
+# the regulatory context the judge reads share the corpus language. Field names,
+# ids, variable keys and tool names are identifiers and stay in English.
+#
+# Regulated values (savings rates and ceilings, usury ceilings, PER deduction
+# limits, legal fee caps) are those in force in October 2026. Entries carry
+# `placeholder: true`, as in the other banks.
+schema_version: v0.1
+region: FR
+locale: fr_FR
+currency: EUR
+currency_symbol: "€"
+language: French (France)
+number_format: fr_FR
+privacy_regime: RGPD
+
+# French institutions identify a customer by name and date of birth before acting
+# on an account, as in the default contract.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: compte courant
+  cards: carte bancaire
+  payments: compte de paiement
+  lending_mortgage: prêt
+  insurance: contrat d'assurance
+  brokerage_investing: compte-titres
+
+document_types:
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief.
+concept_guidance:
+  bank: >-
+    Mettre en avant le modèle coopératif (les clients sociétaires détiennent des
+    parts sociales, les caisses locales élisent leurs administrateurs, un
+    sociétaire égale une voix en assemblée générale), le compte courant et son
+    offre groupée de services, l'offre spécifique pour la clientèle en situation
+    de fragilité financière (3 euros par mois au plus, frais d'incidents
+    plafonnés), l'épargne réglementée (Livret A et LEP : taux fixés par l'État,
+    intérêts exonérés d'impôt, plafonds légaux, LEP réservé aux foyers dont le
+    revenu fiscal de référence ne dépasse pas un plafond), le coût du découvert
+    autorisé, le plafonnement légal des commissions d'intervention, le droit de
+    contester une opération non autorisée pendant 13 mois, et le crédit
+    immobilier : délai de réflexion de dix jours avant d'accepter l'offre, durée
+    et taux d'endettement encadrés, indemnités de remboursement anticipé
+    plafonnées, et libre changement d'assurance emprunteur à tout moment.
+  neobank: >-
+    Mettre en avant le compte de paiement ouvert en quelques minutes dans un point
+    de vente agréé (bureau de tabac, marchand de journaux) avec une pièce
+    d'identité, sans condition de revenus ni de patrimoine, y compris pour les
+    personnes inscrites au fichier central des chèques, sans découvert possible
+    (carte à autorisation systématique) et sans chéquier, la cotisation annuelle
+    forfaitaire, les frais de dépôt d'espèces en point de vente, le RIB français,
+    le virement instantané avec vérification du nom du bénéficiaire, le compte des
+    12-17 ans ouvert avec l'accord d'un représentant légal, et le cantonnement des
+    fonds des clients auprès d'une banque partenaire, qui les protège en cas de
+    défaillance sans relever de la garantie du FGDR.
+  insurer: >-
+    Mettre en avant le statut de société d'assurance mutuelle (les assurés sont
+    sociétaires), l'assurance-vie multisupport (le fonds en euros garantit le
+    capital net de frais, les unités de compte exposent à un risque de perte en
+    capital ; frais sur versements et frais de gestion ; fiscalité allégée après
+    huit ans ; clause bénéficiaire ; délai de renonciation de 30 jours), le PER
+    individuel (versements déductibles jusqu'à 70 ans dans la limite d'un
+    plafond, épargne bloquée jusqu'à la retraite sauf cas de déblocage anticipé
+    prévus par la loi, sortie en capital ou en rente), l'assurance habitation et
+    l'assurance auto (déclaration de sinistre dans les 5 jours ouvrés, 2 jours
+    ouvrés en cas de vol ; dégât des eaux ; constat amiable ; franchises ;
+    résiliation à tout moment après un an, en ligne en trois clics), et la
+    complémentaire santé responsable (remboursement en complément de
+    l'Assurance Maladie, tiers payant, paniers 100 % Santé sans reste à charge,
+    forfait journalier hospitalier pris en charge sans limite de durée), sans
+    jamais garantir de performance ni donner de conseil fiscal ou médical
+    personnalisé.
+  nbfc: >-
+    Mettre en avant le crédit à la consommation : un TAEG toujours inférieur au
+    taux d'usure publié chaque trimestre par la Banque de France, la fiche
+    d'information précontractuelle, la vérification de la solvabilité, le délai de
+    rétractation de 14 jours, le remboursement anticipé possible à tout moment
+    avec une indemnité plafonnée, le crédit renouvelable et l'obligation de
+    proposer une alternative amortissable, le paiement en 3 ou 4 fois qui entre
+    dans le régime du crédit à la consommation à compter du 20 novembre 2026,
+    l'inscription au FICP après un incident de remboursement caractérisé, et
+    l'orientation vers la commission de surendettement de la Banque de France en
+    cas de difficultés durables.
+  brokerage: >-
+    Mettre en avant le PEA et le PEA-PME (plafonds de versement communs, avantage
+    fiscal après cinq ans, retrait avant cinq ans qui entraîne en principe la
+    clôture du plan, frais de transfert plafonnés à 15 euros par ligne et
+    150 euros au total), le PEA Jeune réservé aux 18-25 ans rattachés au foyer
+    fiscal de leurs parents, le compte-titres ordinaire, l'investissement
+    programmé en ETF, les obligations d'information de MiFID II (évaluation de
+    l'adéquation et du caractère approprié, coûts et frais), le délai de
+    règlement-livraison, et le fait que le capital investi n'est jamais garanti.
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [ACPR, Banque de France]
+    regulator_text: >-
+      La banque de détail est supervisée par l'ACPR et relève du Code monétaire
+      et financier. Les dépôts sont garantis par le FGDR jusqu'à 100 000 euros par
+      client et par banque, et les sommes placées sur le Livret A, le LDDS et le
+      LEP bénéficient d'une garantie distincte de l'État de 100 000 euros, mise en
+      œuvre par le FGDR ; l'indemnisation intervient sous sept jours ouvrables.
+      Un client peut contester une opération non autorisée ou mal exécutée
+      pendant 13 mois, et la banque rembourse une opération non autorisée au plus
+      tard à la fin du premier jour ouvré suivant, sauf soupçon de fraude. Les
+      commissions d'intervention sont plafonnées à 8 euros par opération et
+      80 euros par mois. Une banque qui détecte un client en situation de
+      fragilité financière plafonne ses frais d'incidents à 25 euros par mois et
+      lui propose une offre spécifique facturée 3 euros par mois au plus, avec
+      laquelle les commissions d'intervention sont limitées à 4 euros par
+      opération et 20 euros par mois. Toute personne domiciliée en
+      France a droit à un compte de dépôt par la procédure de droit au compte de
+      la Banque de France, et le service de mobilité bancaire transfère les
+      prélèvements et virements récurrents vers la nouvelle banque. L'agent
+      vérifie l'identité du client avant de communiquer ou de modifier une
+      information sur le compte.
+  cards:
+    regulators: [ACPR, Banque de France]
+    regulator_text: >-
+      Les cartes de paiement relèvent des règles sur les services de paiement du
+      Code monétaire et financier. Après la mise en opposition d'une carte perdue
+      ou volée, le client ne supporte aucune perte pour les opérations
+      ultérieures ; avant l'opposition, sa responsabilité est limitée à 50 euros,
+      sauf négligence grave. Les paiements en ligne sont soumis à
+      l'authentification forte du client. L'agent ne doit pas déformer les frais,
+      les plafonds ni les droits de contestation.
+  payments:
+    regulators: [ACPR]
+    regulator_text: >-
+      Les établissements de paiement et de monnaie électronique sont agréés et
+      supervisés par l'ACPR. Les fonds des clients sont cantonnés auprès d'un
+      établissement de crédit, ce qui les protège en cas de défaillance de
+      l'établissement, mais ils ne relèvent pas de la garantie du FGDR. Un
+      prélèvement SEPA autorisé peut être contesté sans justification pendant
+      huit semaines, et une opération non autorisée pendant 13 mois. L'agent
+      vérifie l'identité du client avant toute opération ou modification.
+  lending_mortgage:
+    regulators: [ACPR, Banque de France]
+    regulator_text: >-
+      Le crédit aux particuliers relève du Code de la consommation. Le TAEG ne
+      peut pas dépasser le taux d'usure fixé chaque trimestre par la Banque de
+      France. Pour un crédit à la consommation, l'emprunteur dispose d'un délai de
+      rétractation de 14 jours et peut rembourser par anticipation à tout moment,
+      l'indemnité éventuelle étant plafonnée par la loi. À compter du 20 novembre
+      2026, le paiement fractionné, les mini-crédits et la location avec option
+      d'achat entrent dans le régime du crédit à la consommation (information
+      précontractuelle, vérification de la solvabilité, droit de rétractation).
+      Pour un crédit immobilier, l'offre ne peut pas être acceptée avant un délai
+      de réflexion de dix jours, les indemnités de remboursement anticipé sont
+      plafonnées à six mois d'intérêts et à 3 % du capital restant dû, et
+      l'emprunteur peut changer d'assurance emprunteur à tout moment. Un incident
+      de remboursement caractérisé entraîne une inscription au FICP. L'agent ne
+      promet jamais l'octroi d'un crédit, ne minimise pas son coût total, et
+      oriente un client en difficulté vers les solutions d'accompagnement et, si
+      besoin, vers la commission de surendettement.
+  insurance:
+    regulators: [ACPR]
+    regulator_text: >-
+      Les entreprises d'assurance sont supervisées par l'ACPR et relèvent du Code
+      des assurances. En assurance-vie, le souscripteur dispose d'un délai de
+      renonciation de 30 jours, le fonds en euros garantit le capital net de frais
+      alors que les unités de compte ne le garantissent pas, et le Fonds de
+      garantie des assurances de personnes protège chaque assuré jusqu'à
+      70 000 euros par assureur. Les versements volontaires effectués sur un PER
+      avant 70 ans sont déductibles du revenu imposable dans la limite d'un
+      plafond, et l'épargne reste bloquée jusqu'à la retraite sauf dans les cas
+      de déblocage anticipé prévus par la loi. En assurance de dommages, l'assuré
+      déclare un sinistre dans le délai prévu au contrat, qui ne peut pas être
+      inférieur à 5 jours ouvrés (2 jours ouvrés en cas de vol), et peut résilier
+      son assurance auto ou habitation à tout moment après un an. Une
+      complémentaire santé responsable prend en charge le forfait journalier
+      hospitalier sans limite de durée et les paniers 100 % Santé sans reste à
+      charge, et peut elle aussi être résiliée à tout moment après un an. L'agent
+      ne garantit aucune
+      performance, ne donne pas de conseil fiscal personnalisé et oriente les
+      réclamations non résolues vers la Médiation de l'assurance.
+  brokerage_investing:
+    regulators: [AMF, ACPR]
+    regulator_text: >-
+      Les services d'investissement sont encadrés par l'AMF et l'ACPR en
+      application de MiFID II : le prestataire évalue l'adéquation ou le caractère
+      approprié avant de recommander un produit, communique les coûts et frais, et
+      avertit du risque de perte en capital. Les titres des clients sont protégés
+      par le FGDR jusqu'à 70 000 euros. Les frais de transfert d'un PEA sont
+      plafonnés à 15 euros par ligne et 150 euros au total, et les frais de
+      courtage d'un ordre passé en ligne sur un PEA ne peuvent pas dépasser 0,5 %
+      de son montant. L'agent ne garantit aucun rendement et ne donne pas de
+      conseil fiscal personnalisé.
+
+# In-language vocabulary the deterministic doc plan builds titles from. Tool names
+# are identifiers and stay verbatim in every language. The variable templates use
+# a colon rather than an article, so they read correctly for any label's gender.
+doc_titles:
+  product_genre_angles:
+    product_sheet:
+    - présentation
+    - pour qui et pour quels usages
+    - prise en main pas à pas
+    - plafonds, restrictions et cas particuliers
+    - comparaison avec les alternatives et quand ne pas le choisir
+    fee_schedule:
+    - grille tarifaire
+    eligibility_matrix:
+    - conditions d'éligibilité
+    - justificatifs à fournir
+    - niveaux d'accès
+    disclosure:
+    - informations réglementaires
+    - informations sur les risques
+    - confidentialité et protection des données
+    promo_notice:
+    - offre en cours
+    - offre de parrainage et de fidélité
+    rate_sheet:
+    - grille des taux
+    - calcul et application des taux
+    terms_conditions:
+    - conditions générales
+    - modification des conditions
+    security_advisory:
+    - protection contre la fraude et les opérations non autorisées
+    - bonnes pratiques de sécurité du compte
+    - reconnaître les arnaques visant ce produit
+
+  faq_intents:
+  - coûts et frais
+  - éligibilité et souscription
+  - mode d'emploi pas à pas
+  - résoudre un problème
+  - comparaison et alternatives
+  how_to_intents:
+  - souscrire et activer
+  - résilier, clôturer ou changer de formule
+  - effectuer une modification
+  - consulter le suivi ou l'historique
+  - traiter une demande courante de bout en bout
+  troubleshooting_intents:
+  - opération échouée ou en attente
+  - frais ou montant inattendu
+  - problèmes d'accès ou de connexion
+  - opération refusée ou bloquée
+  - écart avec vos relevés
+  comparison_intents:
+  - face à un produit similaire de l'établissement
+  - face à une offre concurrente type
+  - choisir entre les formules
+  - quand changer ou monter en gamme
+
+  faq_variable_template: '{v} : explications'
+  how_to_variable_template: '{v} : mode d''emploi'
+  troubleshooting_variable_template: '{v} : problèmes fréquents'
+
+  fee_overview_topic: Frais et tarifs de l'établissement
+  general_faq_topic: Questions fréquentes
+  regulatory_note_topic: 'Notes réglementaires : {domain}'
+  tool_policy_topic: Quand utiliser {tool}
+  tool_reference_topic: Référence de l'outil {tool}
+
+  domain_labels:
+    retail_banking: banque au quotidien
+    cards: cartes bancaires
+    payments: paiements
+    lending_mortgage: crédits et prêts immobiliers
+    insurance: assurance
+    brokerage_investing: bourse et placements
+
+  # Every variable in this spec; an unmapped one falls back to its machine name.
+  variable_labels:
+    account_opening_minutes: durée d'ouverture du compte (minutes)
+    annual_fee: cotisation annuelle
+    annual_management_fee: frais de gestion annuels
+    application_fee: frais de dossier
+    atm_withdrawal_fee: frais de retrait au distributeur en zone euro
+    authorized_overdraft_rate: taux du découvert autorisé
+    brokerage_fee_per_order: frais de courtage par ordre
+    brokerage_fee_rate: frais de courtage en pourcentage de l'ordre
+    car_annual_premium_example: cotisation annuelle indicative en tous risques
+    cash_deposit_fee: frais de dépôt d'espèces en point de vente
+    claim_reporting_days: délai de déclaration de sinistre (jours ouvrés)
+    comprehensive_deductible: franchise tous risques
+    custody_fee_annual: droits de garde annuels
+    daily_transfer_limit: plafond quotidien de virement
+    deduction_ceiling_max: plafond maximal de déduction des versements
+    deduction_ceiling_min: plafond minimal de déduction des versements
+    deposit_ceiling: plafond des versements
+    early_repayment_fee_cap: plafond de l'indemnité de remboursement anticipé
+    entry_fee: frais sur versements
+    euro_fund_management_fee: frais de gestion annuels du fonds en euros
+    euro_fund_rate: taux servi en 2025 sur le fonds en euros
+    fee_rate: frais du paiement en plusieurs fois
+    fixed_rate_20_years: taux fixe sur 20 ans
+    fixed_rate_25_years: taux fixe sur 25 ans
+    foreign_payment_fee: frais de paiement hors zone euro
+    foreign_withdrawal_fee: frais de retrait hors zone euro
+    health_monthly_premium_example: cotisation mensuelle indicative pour un adulte de 40 ans
+    home_annual_premium_example: cotisation annuelle indicative pour un locataire de deux pièces
+    hospital_daily_fee: forfait journalier hospitalier pris en charge
+    income_ceiling_single_share: plafond de revenu fiscal de référence pour une part
+    instant_transfer_fee: frais du virement instantané
+    intervention_fee: commission d'intervention
+    intervention_fee_monthly_cap: plafond mensuel des commissions d'intervention
+    interest_rate: taux de rémunération
+    max_debt_ratio: taux d'endettement maximal
+    max_duration_years: durée maximale (années)
+    maximum_age: âge maximal
+    maximum_bonus: bonus maximal
+    maximum_credit_line: réserve maximale
+    maximum_duration_months: durée maximale (mois)
+    maximum_loan_amount: montant maximal emprunté
+    maximum_purchase: montant d'achat maximal
+    maximum_repayment_months: durée maximale de remboursement (mois)
+    minimum_age: âge minimal
+    minimum_initial_payment: versement initial minimum
+    minimum_loan_amount: montant minimal emprunté
+    minimum_opening_deposit: versement minimum à l'ouverture
+    minimum_plan_amount: montant minimal par échéance programmée
+    minimum_purchase: montant d'achat minimal
+    monthly_package_fee: cotisation mensuelle de l'offre groupée
+    natural_disaster_deductible: franchise légale catastrophe naturelle
+    optical_allowance_2_years: forfait optique tous les deux ans hors 100 % Santé
+    payment_ceiling_30_days: plafond de paiement sur 30 jours
+    plan_execution_fee: frais par exécution de l'investissement programmé
+    representative_amount: montant de l'exemple représentatif
+    representative_apr: TAEG de l'exemple représentatif
+    representative_duration_months: durée de l'exemple représentatif (mois)
+    representative_monthly_payment: mensualité de l'exemple représentatif
+    representative_total_cost: coût total du crédit dans l'exemple représentatif
+    share_remuneration_rate: rémunération des parts sociales au titre de 2025
+    share_unit_price: valeur d'une part sociale
+    standard_deductible: franchise générale
+    transfer_fee_before_5_years: frais de transfert avant 5 ans
+    transfer_out_fee_cap: plafond des frais de transfert sortant
+    transfer_out_fee_per_line: frais de transfert sortant par ligne
+    unit_linked_management_fee: frais de gestion annuels des unités de compte
+    weekly_payment_ceiling: plafond de paiement hebdomadaire
+    withdrawal_ceiling_7_days: plafond de retrait sur 7 jours
+    withdrawal_period_days: délai de rétractation (jours)
+
+institutions:
+# ── 1. Cooperative regional bank ──────────────────────────────────────
+- id: credit_mirabelle
+  display_name: Crédit Mirabelle
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, lending_mortgage]
+  products:
+  - id: compte_courant_essentiel
+    display_name: Compte courant et Formule Essentielle (carte à débit immédiat incluse)
+    domain: retail_banking
+    variables:
+      monthly_package_fee: {type: money, value: 7.9}
+      authorized_overdraft_rate: {type: percent, value: 15.9}
+      intervention_fee: {type: money, value: 8}
+      intervention_fee_monthly_cap: {type: money, value: 80}
+  - id: livret_a
+    display_name: Livret A
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 1.7}
+      deposit_ceiling: {type: money, value: 22950}
+      minimum_opening_deposit: {type: money, value: 10}
+  - id: lep
+    display_name: Livret d'épargne populaire (LEP)
+    domain: retail_banking
+    variables:
+      interest_rate: {type: percent, value: 2.5}
+      deposit_ceiling: {type: money, value: 10000}
+      minimum_opening_deposit: {type: money, value: 30}
+      income_ceiling_single_share: {type: money, value: 23028}
+  - id: carte_premier
+    display_name: Carte Mirabelle Premier
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 132}
+      foreign_payment_fee: {type: percent, value: 1.5}
+      payment_ceiling_30_days: {type: money, value: 8000}
+      withdrawal_ceiling_7_days: {type: money, value: 1500}
+  - id: pret_immobilier
+    display_name: Prêt immobilier à taux fixe Mirabelle
+    domain: lending_mortgage
+    variables:
+      fixed_rate_20_years: {type: percent, value: 3.35}
+      fixed_rate_25_years: {type: percent, value: 3.55}
+      application_fee: {type: money, value: 1000}
+      max_debt_ratio: {type: percent, value: 35}
+      max_duration_years: {type: int, value: 25}
+  - id: parts_sociales
+    display_name: Parts sociales Mirabelle
+    domain: retail_banking
+    variables:
+      share_unit_price: {type: money, value: 15}
+      share_remuneration_rate: {type: percent, value: 2.1}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: request_early_repayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Enregistrer une demande de remboursement anticipé, partiel ou total, d'un prêt immobilier.
+  - name: change_borrower_insurance
+    discoverable: true
+    side_effect_class: state_changing
+    description: Enregistrer une demande de substitution de l'assurance emprunteur d'un prêt immobilier par un contrat externe offrant des garanties équivalentes.
+  - name: modulate_loan_payments
+    discoverable: true
+    side_effect_class: state_changing
+    description: Augmenter ou réduire les mensualités d'un prêt immobilier dans les limites prévues au contrat.
+  # Common operations whose meaning differs in France, declared with the
+  # French procedure they carry here.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Ajouter, modifier ou supprimer un bénéficiaire de virement (nom et IBAN) enregistré sur le compte.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Faire opposition à un chèque perdu ou volé, ou à un prélèvement SEPA à venir.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Donner ou retirer une procuration sur le compte à un tiers (mandataire).
+  task_templates:
+  - {id: TPL-CM-DISPUTE-001, tier: verifiable, task_type: complaint_dispute, persona_tags: [region:any, age:any], gold_tool_sequence: [file_transaction_dispute]}
+  - {id: TPL-CM-EPARGNE-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Payment-account neobank ────────────────────────────────────────
+- id: kiosque
+  display_name: Kiosque
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards, payments]
+  products:
+  - id: compte_kiosque
+    display_name: Compte Kiosque
+    domain: retail_banking
+    variables:
+      annual_fee: {type: money, value: 24}
+      cash_deposit_fee: {type: percent, value: 2}
+      atm_withdrawal_fee: {type: money, value: 1}
+      account_opening_minutes: {type: int, value: 5}
+  - id: carte_kiosque_voyage
+    display_name: Carte Kiosque Voyage
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 30}
+      foreign_payment_fee: {type: percent, value: 0}
+      foreign_withdrawal_fee: {type: money, value: 2}
+  - id: compte_kiosque_ado
+    display_name: Compte Kiosque 12-17 ans
+    domain: retail_banking
+    variables:
+      annual_fee: {type: money, value: 20}
+      minimum_age: {type: int, value: 12}
+      weekly_payment_ceiling: {type: money, value: 150}
+  - id: virement_instantane
+    display_name: Virement instantané Kiosque
+    domain: payments
+    variables:
+      instant_transfer_fee: {type: money, value: 0}
+      daily_transfer_limit: {type: money, value: 3000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - {name: file_transaction_dispute, discoverable: true, side_effect_class: state_changing}
+  - {name: freeze_card, discoverable: true, side_effect_class: state_changing}
+  - name: send_instant_transfer
+    discoverable: true
+    side_effect_class: irreversible
+    description: Émettre un virement instantané SEPA vers un IBAN, après vérification de la concordance entre le nom et l'IBAN du bénéficiaire.
+  - name: set_card_limits
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier les plafonds de paiement et de retrait de la carte dans les limites de l'offre.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Ajouter, modifier ou supprimer un bénéficiaire de virement (nom et IBAN) enregistré sur le compte.
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Faire opposition à un prélèvement SEPA à venir ou révoquer un mandat de prélèvement. Le compte n'émet pas de chèques.
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: Gérer l'accès du représentant légal au compte d'un mineur de 12 à 17 ans.
+  task_templates:
+  - {id: TPL-KI-FREEZE-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_card]}
+  - {id: TPL-KI-COMPTE-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 3. Mutual insurer ─────────────────────────────────────────────────
+- id: egide_assurances
+  display_name: Égide Assurances
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: assurance_vie_multisupport
+    display_name: Contrat d'assurance-vie Égide Multisupport
+    domain: insurance
+    variables:
+      euro_fund_rate: {type: percent, value: 2.6}
+      entry_fee: {type: percent, value: 1}
+      euro_fund_management_fee: {type: percent, value: 0.6}
+      unit_linked_management_fee: {type: percent, value: 0.85}
+      minimum_initial_payment: {type: money, value: 500}
+  - id: per_individuel
+    display_name: PER individuel Égide
+    domain: insurance
+    variables:
+      entry_fee: {type: percent, value: 1.5}
+      annual_management_fee: {type: percent, value: 0.8}
+      deduction_ceiling_max: {type: money, value: 37680}
+      deduction_ceiling_min: {type: money, value: 4710}
+      transfer_fee_before_5_years: {type: percent, value: 1}
+  - id: assurance_habitation
+    display_name: Assurance habitation Égide
+    domain: insurance
+    variables:
+      home_annual_premium_example: {type: money, value: 168}
+      standard_deductible: {type: money, value: 150}
+      natural_disaster_deductible: {type: money, value: 380}
+      claim_reporting_days: {type: int, value: 5}
+  - id: assurance_auto
+    display_name: Assurance auto Égide
+    domain: insurance
+    variables:
+      car_annual_premium_example: {type: money, value: 640}
+      comprehensive_deductible: {type: money, value: 300}
+      maximum_bonus: {type: percent, value: 50}
+      claim_reporting_days: {type: int, value: 5}
+  - id: complementaire_sante
+    display_name: Complémentaire santé Égide
+    domain: insurance
+    variables:
+      health_monthly_premium_example: {type: money, value: 58}
+      optical_allowance_2_years: {type: money, value: 200}
+      hospital_daily_fee: {type: money, value: 23}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: make_additional_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: Effectuer un versement libre ou mettre en place des versements programmés sur un contrat d'assurance-vie ou un PER.
+  - name: request_partial_surrender
+    discoverable: true
+    side_effect_class: irreversible
+    description: Demander un rachat partiel sur un contrat d'assurance-vie ; l'assureur verse les sommes dans un délai maximal de deux mois.
+  - name: switch_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: Réaliser un arbitrage entre le fonds en euros et les unités de compte d'un contrat d'assurance-vie ou d'un PER.
+  - name: initiate_plan_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Lancer le transfert vers le PER individuel Égide d'un PER, d'un ancien PERP ou d'un contrat Madelin détenu dans un autre établissement.
+  - name: request_early_release
+    discoverable: true
+    side_effect_class: irreversible
+    description: Demander le déblocage anticipé d'un PER dans un cas prévu par la loi, comme l'achat de la résidence principale ou un accident de la vie.
+  - name: request_retirement_payout
+    discoverable: true
+    side_effect_class: irreversible
+    description: Demander la liquidation d'un PER à partir du départ à la retraite, en capital versé en une ou plusieurs fois, ou en rente viagère.
+  - name: send_insurance_certificate
+    discoverable: true
+    side_effect_class: read_only
+    description: Envoyer au client une attestation d'assurance habitation ou auto, par exemple pour un bailleur.
+  - name: request_health_reimbursement
+    discoverable: true
+    side_effect_class: state_changing
+    description: Transmettre une demande de remboursement de frais de santé (facture d'opticien, de dentiste ou d'audioprothésiste) lorsque le tiers payant n'a pas été appliqué.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Souscrire un nouveau contrat (assurance-vie, PER, habitation, auto ou complémentaire santé).
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier la clause bénéficiaire d'un contrat d'assurance-vie ou d'un PER.
+  - name: file_claim
+    discoverable: true
+    side_effect_class: state_changing
+    description: Déclarer un sinistre (dégât des eaux, vol, bris de glace, accident de la circulation) sur un contrat habitation ou auto.
+  - name: update_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier un contrat par avenant, par exemple après un déménagement, un changement de véhicule, l'ajout d'un conducteur ou un changement de formule de complémentaire santé.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Résilier un contrat d'assurance habitation, auto ou de complémentaire santé, ou demander le rachat total d'un contrat d'assurance-vie.
+  task_templates:
+  - {id: TPL-EG-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-EG-AV-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Consumer-credit lender ─────────────────────────────────────────
+- id: ondine_credit
+  display_name: Ondine Crédit
+  type: nbfc
+  brand_voice: neobank
+  domains: [lending_mortgage, payments]
+  products:
+  - id: pret_personnel
+    display_name: Prêt personnel Ondine
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 5.9}
+      representative_amount: {type: money, value: 10000}
+      representative_duration_months: {type: int, value: 48}
+      representative_monthly_payment: {type: money, value: 233.69}
+      representative_total_cost: {type: money, value: 1217.12}
+      minimum_loan_amount: {type: money, value: 1000}
+      maximum_loan_amount: {type: money, value: 75000}
+      early_repayment_fee_cap: {type: percent, value: 1}
+      withdrawal_period_days: {type: int, value: 14}
+  - id: credit_renouvelable
+    display_name: Crédit renouvelable Ondine
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 19.9}
+      representative_amount: {type: money, value: 1000}
+      representative_duration_months: {type: int, value: 12}
+      representative_monthly_payment: {type: money, value: 91.82}
+      representative_total_cost: {type: money, value: 101.84}
+      maximum_credit_line: {type: money, value: 3000}
+      maximum_repayment_months: {type: int, value: 36}
+  - id: credit_auto
+    display_name: Crédit auto Ondine
+    domain: lending_mortgage
+    variables:
+      representative_apr: {type: percent, value: 4.9}
+      representative_amount: {type: money, value: 20000}
+      representative_duration_months: {type: int, value: 60}
+      representative_monthly_payment: {type: money, value: 375.53}
+      representative_total_cost: {type: money, value: 2531.8}
+      minimum_loan_amount: {type: money, value: 3000}
+      maximum_duration_months: {type: int, value: 84}
+  - id: paiement_fractionne
+    display_name: Paiement en 3 ou 4 fois Ondine
+    domain: payments
+    variables:
+      fee_rate: {type: percent, value: 2.2}
+      minimum_purchase: {type: money, value: 100}
+      maximum_purchase: {type: money, value: 3000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: withdraw_from_credit
+    discoverable: true
+    side_effect_class: irreversible
+    description: Exercer le droit de rétractation sur un contrat de crédit dans le délai de 14 jours suivant son acceptation.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: Ouvrir un crédit renouvelable après acceptation de l'offre de crédit.
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: Résilier un crédit renouvelable ou clôturer un compte de crédit entièrement remboursé.
+  - name: request_payment_deferral
+    discoverable: true
+    side_effect_class: state_changing
+    description: Demander le report d'une échéance ou la baisse temporaire des mensualités en cas de difficulté passagère.
+  # Common operations whose identifiers come from other markets, declared with
+  # the French procedure they carry here.
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Déposer une demande de crédit (montant, durée, objet) soumise à l'étude de solvabilité.
+  - name: pay_emi
+    discoverable: true
+    side_effect_class: state_changing
+    description: Régler une mensualité de crédit, y compris une échéance impayée, par carte ou par virement.
+  - name: foreclose_loan
+    discoverable: true
+    side_effect_class: irreversible
+    description: Rembourser par anticipation la totalité du capital restant dû d'un crédit (remboursement anticipé total).
+  - name: update_repayment_mandate
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier le mandat de prélèvement SEPA (IBAN) ou la date de prélèvement des mensualités.
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier le compte bancaire (IBAN) sur lequel les fonds d'un crédit accordé sont versés.
+  task_templates:
+  - {id: TPL-OC-RETRACT-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [withdraw_from_credit]}
+  - {id: TPL-OC-COUT-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 5. Online broker ──────────────────────────────────────────────────
+- id: valbreuil_bourse
+  display_name: Valbreuil Bourse
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: pea
+    display_name: Plan d'épargne en actions (PEA)
+    domain: brokerage_investing
+    variables:
+      deposit_ceiling: {type: money, value: 150000}
+      brokerage_fee_rate: {type: percent, value: 0.2}
+      transfer_out_fee_per_line: {type: money, value: 15}
+      transfer_out_fee_cap: {type: money, value: 150}
+  - id: pea_pme
+    display_name: PEA-PME
+    domain: brokerage_investing
+    variables:
+      deposit_ceiling: {type: money, value: 225000}
+      brokerage_fee_rate: {type: percent, value: 0.2}
+      transfer_out_fee_cap: {type: money, value: 150}
+  - id: pea_jeune
+    display_name: PEA Jeune
+    domain: brokerage_investing
+    variables:
+      deposit_ceiling: {type: money, value: 20000}
+      brokerage_fee_rate: {type: percent, value: 0.2}
+      minimum_age: {type: int, value: 18}
+      maximum_age: {type: int, value: 25}
+  - id: investissement_programme
+    display_name: Investissement programmé en ETF
+    domain: brokerage_investing
+    variables:
+      minimum_plan_amount: {type: money, value: 25}
+      plan_execution_fee: {type: money, value: 0}
+  - id: compte_titres
+    display_name: Compte-titres ordinaire
+    domain: brokerage_investing
+    variables:
+      brokerage_fee_per_order: {type: money, value: 1.99}
+      custody_fee_annual: {type: money, value: 0}
+      transfer_out_fee_per_line: {type: money, value: 15}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - name: initiate_securities_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: Lancer le transfert entrant d'un PEA ou d'un compte-titres détenu dans un autre établissement.
+  - name: set_up_investment_plan
+    discoverable: true
+    side_effect_class: state_changing
+    description: Mettre en place un investissement programmé (achat périodique d'un ETF pour un montant fixe).
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: Modifier le compte bancaire de référence (IBAN) vers lequel les retraits d'espèces sont virés.
+  task_templates:
+  - {id: TPL-VB-TRANSFER-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, financial-literacy:high], gold_tool_sequence: [initiate_securities_transfer]}
+  - {id: TPL-VB-PEA-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

@@ -1,0 +1,9 @@
+institution_id: bausparkasse_heimstatt
+display_name: Bausparkasse Heimstatt
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- lending_mortgage
+placeholder: true
+schema_version: v0.1

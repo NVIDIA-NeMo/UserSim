@@ -13,8 +13,8 @@ persona-grounded, realistic user requests. Key design choices:
 
 The 8-axis trajectory judge lives in ``evaluator/scorers/tool_use.py``
 and is invoked by the ``trajectory-evaluator`` plugin. This module only
-emits trajectories; sim-side guardrails (e.g. zero-tool-calls) live on
-``ToolCallingProbe.should_succeed()``.
+emits trajectories. A conversation in which the assistant made no tool
+calls is a completed trajectory, and the judge scores it like any other.
 """
 
 from __future__ import annotations
@@ -225,9 +225,10 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
     persona-grounded, realistic user requests. The 8-axis trajectory
     judge lives in ``evaluator/scorers/tool_use.py`` and is invoked
     by the out-of-sim trajectory evaluator. The simulator only emits
-    trajectories; sim-side guardrails (e.g., zero-tool-calls) live on
-    ``should_succeed()``. ``ToolCallingMixin`` blocks early-stop until
-    at least one tool call has happened.
+    trajectories. ``ToolCallingMixin`` blocks early-stop until at least
+    one tool call has happened, so a conversation with no tool calls ran
+    every turn; it stays scoreable, because not calling a tool is the
+    assistant's behaviour, not a failure of the probe's protocol.
 
     ``ToolExecutionMixin`` (``tool_loop_mode="single"``, the default)
     supplies ``after_assistant_turn``: one round of tool calls then a single
@@ -384,17 +385,6 @@ class ToolCallingProbe(ToolExecutionMixin, ToolCallingMixin, BaseProbe):
 
     def on_tool_round_complete(self, state: ConversationState, n_calls: int) -> None:
         state.metadata.setdefault("tool_call_count_per_turn", []).append(n_calls)
-
-    def should_succeed(self, state: ConversationState) -> bool:
-        """Sim-side guardrail: a tool-calling trajectory with zero tool calls
-        is a sim-quality failure (the assistant never engaged the probe's
-        defining behavior). The 8-axis assistant-quality scoring lives in
-        the trajectory-evaluator's ``tool_use`` scorer."""
-        num_tool_calls = len(state.metadata.get("tools_called", []))
-        if num_tool_calls == 0:
-            logger.info("  |-- tool_calling: sim_status=False — zero successful tool calls")
-            return False
-        return True
 
     def build_result_extras(self, state: ConversationState) -> dict:
         return {

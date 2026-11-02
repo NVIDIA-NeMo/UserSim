@@ -33,7 +33,7 @@ class TestScorerRegistry:
         with pytest.raises(KeyError, match="not registered"):
             scorers_module.get_scorer("nope")
 
-    def test_idempotent_re_registration(self) -> None:
+    def test_a_second_scorer_under_a_taken_name_is_refused(self) -> None:
         def a(traj, models):
             return {"v": 1}
 
@@ -41,9 +41,26 @@ class TestScorerRegistry:
             return {"v": 2}
 
         scorers_module.register_scorer("x", a)
-        scorers_module.register_scorer("x", b)
-        # Last write wins; no error.
-        assert scorers_module.get_scorer("x") is b
+        with pytest.raises(
+            scorers_module.ScorerRegistrationError,
+            match=r"'x' is already registered by .*\.a, so .*\.b cannot take it",
+        ):
+            scorers_module.register_scorer("x", b)
+        assert scorers_module.get_scorer("x") is a
+
+    def test_registering_the_same_scorer_again_keeps_it(self) -> None:
+        def a(traj, models):
+            return {"v": 1}
+
+        scorers_module.register_scorer("x", a)
+        scorers_module.register_scorer("x", a)
+        assert scorers_module.get_scorer("x") is a
+
+    def test_reloading_a_scorer_module_updates_its_scorer(self) -> None:
+        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
+        first = scorers_module.get_scorer("tool_use")
+        scorers_module.reload_scorers(["usersim.engine.evaluator.scorers.tool_use"])
+        assert scorers_module.get_scorer("tool_use") is not first
 
     def test_clear_registry(self) -> None:
         scorers_module.register_scorer("a", lambda t, m: {})

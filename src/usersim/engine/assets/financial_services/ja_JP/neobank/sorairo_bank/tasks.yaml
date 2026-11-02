@@ -1,0 +1,419 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for sorairo_bank, an internet-only bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in Japanese (build_instance picks one per
+# trajectory) so the assistant sees varied turn-1 wording while the gold stays
+# fixed. Read-only tools (get_account_transactions, get_accounts,
+# get_statements, dispute_status) carry no gold state change.
+#
+# Each opening stays on one line: YAML folds a line break into a space, which
+# Japanese does not write.
+templates:
+- id: TPL-SR-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    そらいろVisaデビット（末尾0001）を{{event}}みたいです。すぐに利用を止めてください。
+  - >-
+    末尾0001のデビットカードを{{event}}かもしれません。アプリでの止め方がわからないので、一時停止をお願いできますか。
+  - >-
+    末尾0001のデビットカードを{{event}}ようなので、不正に使われる前にロックしてほしいです。
+  account_state:
+    account_id: acct_sr_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_sr_0001, status: active}
+  param_space:
+    event: [なくした, 落とした, 盗まれた]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_sr_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-SR-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    デビットカードの利用履歴に{{merchant}}で{{amount}}円の支払いがあるのですが、まったく覚えがありません。調べてもらえますか。
+  - >-
+    {{merchant}}から{{amount}}円が引き落とされています。使った覚えがないので、補償の申請をしたいです。
+  - >-
+    アプリを見たら、知らない{{merchant}}の{{amount}}円の決済がありました。不正利用だと思うので対応をお願いします。
+  account_state:
+    account_id: acct_sr_0001
+    cards:
+    - {card_id: card_sr_0001, status: active}
+    transactions:
+    - {transaction_id: txn_sr_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [ストリーミング・ルミナ, ゲーム課金ストア・ピクセル, エレクトロ・ノヴァ通販]
+    amount: ['1,490', '9,800', '32,000']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_sr_0001.status: UNDER_REVIEW}
+  allowed_tools: [freeze_card]
+- id: TPL-SR-LIMITS-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    デビットカードの1日あたりの利用限度額を{{limit}}円に変更したいです。手続きをお願いできますか。
+  - >-
+    そらいろVisaデビットの1日の利用限度額を{{limit}}円に設定し直してください。
+  - >-
+    使いすぎと不正利用が心配なので、デビットカードの1日の限度額を{{limit}}円まで下げてほしいです。
+  account_state:
+    account_id: acct_sr_0001
+    cards:
+    - {card_id: card_sr_0001, status: active}
+  param_space:
+    limit: ['50,000', '100,000']
+  gold_tool_sequence: [set_card_limits]
+  expected_state_deltas: {card_limits_updated: true}
+- id: TPL-SR-POCKET-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{goal}}のためのお金を分けておきたいので、目的別口座を作って、毎月{{amount}}円ずつ自動で入金されるようにしてください。
+  - >-
+    目的別口座を新しく作りたいです。名前は「{{goal}}」で、毎月{{amount}}円の自動入金を設定してほしいです。
+  - >-
+    {{goal}}用の目的別口座を作成して、毎月{{amount}}円を積み立てたいです。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '420000.00'
+  param_space:
+    goal: [旅行, 引っ越し費用, 車の購入]
+    amount: ['10,000', '30,000']
+  gold_tool_sequence: [create_goal_pocket]
+  expected_state_deltas: {goal_pocket_created: true}
+- id: TPL-SR-PHONESEND-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{payee}}に、携帯電話番号あてで{{amount}}円を送りたいです。番号は{{phone}}です。
+  - >-
+    スマホ送金で{{payee}}に{{amount}}円を送金してください。相手の電話番号は{{phone}}です。
+  - >-
+    {{payee}}に立て替えてもらった{{amount}}円を返したいので、{{phone}}あてに送金をお願いします。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '86000.00'
+  param_space:
+    payee: [友人, 同僚, 妹]
+    amount: ['3,000', '8,500', '25,000']
+    phone: ['090-3998-4217', '080-3998-1563']
+  gold_tool_sequence: [send_phone_transfer]
+  expected_state_deltas: {phone_transfer_status: SENT}
+- id: TPL-SR-TEIKI-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    普通預金から{{amount}}円を、{{term}}の定期預金に預けたいです。
+  - >-
+    {{amount}}円を定期預金（{{term}}）にしてください。金利も教えてもらえますか。
+  - >-
+    しばらく使う予定のない{{amount}}円があるので、{{term}}の定期預金を作りたいです。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '1500000.00'
+  param_space:
+    amount: ['100,000', '500,000', '1,000,000']
+    term: [6か月, 1年]
+  gold_tool_sequence: [open_time_deposit]
+  expected_state_deltas: {time_deposit_status: OPEN}
+- id: TPL-SR-DEVICE-001
+  tier: verifiable
+  task_type: troubleshooting
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    スマホを機種変更したら、アプリのスマートフォン認証が使えなくなってログインできません。再登録をお願いできますか。
+  - >-
+    新しいスマートフォンにしたら認証ができなくなりました。認証の再登録の手続きをしたいです。
+  - >-
+    古いスマホを{{event}}しまって、そらいろ銀行のアプリで認証ができません。どうすればいいですか。
+  account_state:
+    account_id: acct_sr_0001
+  param_space:
+    event: [壊して, なくして]
+  gold_tool_sequence: [reregister_device]
+  expected_state_deltas: {device_reregistration: REQUESTED}
+- id: TPL-SR-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    振込先に{{payee}}の口座を登録したいです。{{bank_account}}です。
+  - >-
+    {{payee}}への振込をよくするので、{{bank_account}}を登録振込先に追加してください。
+  - >-
+    新しい振込先の登録をお願いします。{{payee}}の口座で、{{bank_account}}です。
+  account_state:
+    account_id: acct_sr_0001
+  param_space:
+    payee: [実家の母, 大家さん, シェアハウスの管理会社]
+    bank_account: ['朝凪銀行 港町支店 普通 7781204', '朝凪銀行 本店営業部 普通 1029384']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {payee_added: true}
+- id: TPL-SR-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    解約した{{creditor}}の口座振替がまだ残っているので、止めてもらえますか。
+  - >-
+    {{creditor}}の自動引落しを停止したいです。
+  - >-
+    {{creditor}}との契約をやめたので、そらいろ銀行の口座からの引落しを解除してください。
+  account_state:
+    account_id: acct_sr_0001
+    mandates:
+    - {mandate_id: mdt_sr_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [ストリーミング・ルミナ, オンライン英会話リンクス, スポーツクラブ・アズール]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_sr_0001.status: REVOKED}
+- id: TPL-SR-UPDATECONTACT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    引っ越したので、登録の住所を{{address}}に変えてください。
+  - >-
+    電話番号が{{phone}}に変わったので、登録を更新してもらえますか。
+  - >-
+    通知を受け取るメールアドレスを{{email}}に変更したいです。
+  account_state:
+    customer_id: cust_sr_0001
+  param_space:
+    address: ['神奈川県川崎市中原区小杉町3-9-14', '福岡県福岡市早良区西新5-12-7']
+    phone: ['090-3998-4217', '080-3998-1563']
+    email: [y.suzuki@example.com, a.ito@example.com]
+  gold_tool_sequence: [update_contact_info]
+  expected_state_deltas: {contact_updated: true}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-SR-STOLEN-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    バッグごと末尾0001のデビットカードを盗まれて、{{merchant}}で{{amount}}円使われていました。カードを止めて、この利用を調べて、新しいカードを発行してください。
+  - >-
+    末尾0001のデビットカードが盗まれたようで、{{merchant}}の{{amount}}円の利用に覚えがありません。利用停止と調査、再発行をお願いします。
+  - >-
+    デビットカード（末尾0001）を盗まれました。止めてもらって、{{merchant}}の{{amount}}円を調べてもらって、カードも作り直してほしいです。
+  account_state:
+    account_id: acct_sr_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_sr_0001, status: active}
+    transactions:
+    - {transaction_id: txn_sr_0002, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, ゲーム課金ストア・ピクセル]
+    amount: ['19,800', '45,000']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_sr_0001.status: frozen, txn_sr_0002.status: UNDER_REVIEW, card_sr_0001.replacement: ordered}
+- id: TPL-SR-NEWCARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    新しいデビットカードが届きました。利用を開始して、1日の限度額を{{limit}}円にして、{{bill}}もペイジーで払ってしまいたいです。
+  - >-
+    届いたデビットカードを使えるようにして、1日の利用限度額を{{limit}}円に変更し、{{bill}}の支払いもペイジーでお願いします。
+  - >-
+    三つお願いします。新しいデビットカードの利用開始、1日の限度額を{{limit}}円に変更、それから{{bill}}のペイジーでの支払いです。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '380000.00'
+    cards:
+    - {card_id: card_sr_0002, status: inactive}
+  param_space:
+    limit: ['100,000', '200,000']
+    bill: [住民税の納付書, 国民年金保険料の納付書]
+  gold_tool_sequence: [activate_card, set_card_limits, pay_bill]
+  expected_state_deltas: {card_sr_0002.status: active, card_limits_updated: true, bill_paid: true}
+- id: TPL-SR-SAVINGS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{goal}}のために目的別口座を作って、普通預金から{{amount}}円を移し、入出金があったら通知が来るようにしたいです。
+  - >-
+    「{{goal}}」という目的別口座を作成して、今ある{{amount}}円をそこに移してください。入出金の通知も設定したいです。
+  - >-
+    {{goal}}の資金を分けて管理したいです。目的別口座の作成、普通預金から{{amount}}円の振替、通知の設定をお願いします。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '650000.00'
+  param_space:
+    goal: [結婚式, 海外旅行, 資格の勉強]
+    amount: ['100,000', '300,000']
+  gold_tool_sequence: [create_goal_pocket, transfer_funds, set_alerts]
+  expected_state_deltas: {goal_pocket_created: true, transfer_status: COMPLETED, alerts_updated: true}
+- id: TPL-SR-RENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    新しい部屋の家賃を払うので、{{payee}}の口座（{{bank_account}}）を振込先に登録して、今月分の{{amount}}円を振り込み、残高が少なくなったら通知が来るようにしてください。
+  - >-
+    {{payee}}の口座（{{bank_account}}）を振込先に追加して、家賃の{{amount}}円を振り込んでください。残高が減ったときの通知もお願いします。
+  - >-
+    家賃の支払いのために、振込先の登録（{{payee}}、{{bank_account}}）、{{amount}}円の振込、残高の通知の設定をお願いできますか。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '240000.00'
+  param_space:
+    payee: [大家さん, 管理会社]
+    bank_account: ['朝凪銀行 港町支店 普通 7781204', '朝凪銀行 本店営業部 普通 1029384']
+    amount: ['68,000', '85,000']
+  gold_tool_sequence: [update_beneficiary, transfer_funds, set_alerts]
+  expected_state_deltas: {payee_added: true, transfer_status: COMPLETED, alerts_updated: true}
+- id: TPL-SR-SUBSCRIPTION-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    困っていることが二つあります。解約した{{creditor}}の口座振替を止めてほしいのと、{{merchant}}でデビットカードの{{amount}}円が二重に引き落とされているので調べてほしいです。今後は引落しのたびに通知が来るようにもしてください。
+  - >-
+    {{creditor}}の口座振替の停止と、{{merchant}}で二重に請求された{{amount}}円の調査をお願いします。引落しの通知も設定したいです。
+  - >-
+    {{creditor}}はもう解約したので口座振替を解除してください。それから{{merchant}}の{{amount}}円が2回引き落とされているので調べて、引落しがあったら通知が来るようにしてください。
+  account_state:
+    account_id: acct_sr_0001
+    cards:
+    - {card_id: card_sr_0001, status: active}
+    mandates:
+    - {mandate_id: mdt_sr_0002, creditor: '{{creditor}}', status: active}
+    transactions:
+    - {transaction_id: txn_sr_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    creditor: [オンライン英会話リンクス, スポーツクラブ・アズール]
+    merchant: [エレクトロ・ノヴァ通販, ファッション通販・リヴォリ]
+    amount: ['4,980', '12,800']
+  gold_tool_sequence: [stop_payment, file_transaction_dispute, set_alerts]
+  expected_state_deltas: {mdt_sr_0002.status: REVOKED, txn_sr_0003.status: UNDER_REVIEW, alerts_updated: true}
+- id: TPL-SR-LEAVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    海外赴任が決まったので、そらいろ銀行の口座を解約したいです。{{creditor}}の口座振替を止めて、残高を{{bank_account}}に移してから解約してください。
+  - >-
+    口座を閉じる前に、{{creditor}}の口座振替を停止して、残高を全部{{bank_account}}に振り込んでください。そのあと解約をお願いします。
+  - >-
+    しばらく日本を離れるので口座を解約します。{{creditor}}の引落しの解除、{{bank_account}}への残高の振込、口座の解約をお願いできますか。
+  account_state:
+    account_id: acct_sr_0001
+    balance: '93500.00'
+    mandates:
+    - {mandate_id: mdt_sr_0003, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [携帯電話の料金, スポーツクラブ・アズール]
+    bank_account: ['朝凪銀行 港町支店 普通 7781204']
+  gold_tool_sequence: [stop_payment, transfer_funds, close_account]
+  expected_state_deltas: {mdt_sr_0003.status: REVOKED, transfer_status: COMPLETED, acct_sr_0001.status: CLOSED}
+- id: TPL-SR-FREELANCE-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    個人事業を始めたので、屋号付きの口座を開設したいです。あわせて{{payee}}の口座（{{bank_account}}）を振込先に登録して、入金があったら通知が来るようにしてください。
+  - >-
+    フリーランスになったので、仕事用に屋号付き口座を作りたいです。{{payee}}（{{bank_account}}）の振込先登録と、入金の通知もお願いします。
+  - >-
+    屋号付き口座の開設、{{payee}}の口座（{{bank_account}}）の振込先登録、入金通知の設定をまとめてお願いできますか。
+  account_state:
+    account_id: acct_sr_0001
+    customer_id: cust_sr_0001
+  param_space:
+    payee: [外注先のデザイン事務所, 取引先の印刷会社]
+    bank_account: ['朝凪銀行 港町支店 普通 7781204', '朝凪銀行 本店営業部 普通 1029384']
+  gold_tool_sequence: [open_account, update_beneficiary, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, payee_added: true, alerts_updated: true}
+- id: TPL-SR-PHISHING-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    そらいろ銀行を名乗るSMSのリンクから情報を入力してしまい、その後スマホの認証が使えなくなりました。デビットカード（末尾0001）にも{{merchant}}で{{amount}}円の知らない利用があります。カードの停止、この利用の調査、認証の再登録、それに今後の利用通知の設定をお願いします。
+  - >-
+    フィッシングにあったかもしれません。末尾0001のデビットカードで{{merchant}}の{{amount}}円が使われていて、アプリの認証もできなくなりました。カードを止めて、利用を調べて、認証を再登録し、利用通知も設定してください。
+  - >-
+    偽のメールに引っかかってしまったようです。デビットカード（末尾0001）の停止、{{merchant}}の{{amount}}円の調査、スマートフォン認証の再登録、利用のお知らせの設定をお願いします。
+  account_state:
+    account_id: acct_sr_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_sr_0001, status: active}
+    transactions:
+    - {transaction_id: txn_sr_0004, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [エレクトロ・ノヴァ通販, ゲーム課金ストア・ピクセル]
+    amount: ['29,800', '59,800']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, reregister_device, set_alerts]
+  expected_state_deltas: {card_sr_0001.status: frozen, txn_sr_0004.status: UNDER_REVIEW, device_reregistration: REQUESTED, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ja_JP/dynamic.yaml), not scripted templates.

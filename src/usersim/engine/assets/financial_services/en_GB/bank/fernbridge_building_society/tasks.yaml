@@ -1,0 +1,401 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for fernbridge_building_society, a savings-and-mortgage
+# mutual with no current accounts or cards. Every state-changing tool it offers
+# is gold in at least one task. Each task ships THREE opening phrasings in
+# British English. Each task names its account type, so the read tools never
+# report a current account the society does not offer. Read-only tools
+# (get_statements) carry no gold state change.
+templates:
+- id: TPL-FB-OPEN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open {{product}} with you.
+  - >-
+    Can I open {{product}}? I'm already a member.
+  - >-
+    Please open {{product}} for me, I want to start putting money aside.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '2400.00'
+  param_space:
+    product: [a Members' Regular Saver, an Easy Access ISA, a One-Year Fixed Rate Bond]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-FB-ISATRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've got a cash ISA with {{old_provider}} worth about £{{amount}}. Can I move it
+    to my Fernbridge ISA?
+  - >-
+    Please transfer my old ISA from {{old_provider}} into my Easy Access ISA here,
+    it's around £{{amount}}.
+  - >-
+    I want to bring my £{{amount}} cash ISA over from {{old_provider}} without
+    losing the tax-free status. How do I do that?
+  account_state:
+    account_id: isa_fb_0001
+    account_type: Fernbridge Easy Access ISA
+    balance: '5200.00'
+  param_space:
+    old_provider: [Castlegate Bank, Northern Union Bank]
+    amount: ['8,500', '14,000', '31,000']
+  gold_tool_sequence: [transfer_isa_in]
+  expected_state_deltas: {isa_transfer_status: REQUESTED}
+- id: TPL-FB-LISAHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:25-34]
+  opening_user_messages:
+  - >-
+    I'm buying my first flat for £{{price}} and we complete next month. My solicitor
+    needs the money from my Lifetime ISA.
+  - >-
+    Can you release my Lifetime ISA to my conveyancer? I'm buying my first home for
+    £{{price}}.
+  - >-
+    My first home purchase is going through at £{{price}}. Please send my Lifetime
+    ISA savings and bonus to my solicitor.
+  account_state:
+    account_id: lisa_fb_0001
+    account_type: Fernbridge Cash Lifetime ISA
+    balance: '17850.00'
+  param_space:
+    price: ['185,000', '240,000', '325,000']
+  gold_tool_sequence: [claim_lisa_home_purchase]
+  expected_state_deltas: {lisa_home_purchase_claim: SUBMITTED}
+- id: TPL-FB-OVERPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to make an overpayment of £{{amount}} on my mortgage.
+  - >-
+    Can I pay £{{amount}} extra off my mortgage without an early repayment charge?
+  - >-
+    Please take a one-off overpayment of £{{amount}} on my Fernbridge mortgage.
+  account_state:
+    account_id: mtg_fb_0001
+    account_type: Fernbridge First Home Five-Year Fixed Mortgage
+    balance: '214000.00'
+  param_space:
+    amount: ['1,500', '6,000', '15,000']
+  gold_tool_sequence: [make_mortgage_overpayment]
+  expected_state_deltas: {overpayment_status: SCHEDULED}
+- id: TPL-FB-PRODUCTTRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My five-year fixed rate ends in three months. Can I move onto a new {{deal}}
+    with you?
+  - >-
+    Please switch my mortgage to a {{deal}} when my current deal ends.
+  - >-
+    I'd like to stay with Fernbridge and pick a new {{deal}} before my fix runs out.
+  account_state:
+    account_id: mtg_fb_0001
+    account_type: Fernbridge First Home Five-Year Fixed Mortgage
+    balance: '214000.00'
+  param_space:
+    deal: [two-year fix, five-year fix, tracker]
+  gold_tool_sequence: [request_product_transfer]
+  expected_state_deltas: {product_transfer_status: REQUESTED}
+- id: TPL-FB-AIP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    We're looking at homes around £{{price}} with a £{{deposit}} deposit. Can we get
+    an agreement in principle?
+  - >-
+    I'd like to start a mortgage application: the house is £{{price}} and I've got
+    £{{deposit}} saved.
+  - >-
+    Can you tell me if you'd lend to us? We want to buy at £{{price}} and can put
+    down £{{deposit}}.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '24000.00'
+  param_space:
+    price: ['210,000', '275,000', '340,000']
+    deposit: ['20,000', '30,000', '45,000']
+  gold_tool_sequence: [apply_mortgage]
+  expected_state_deltas: {mortgage_application_status: SUBMITTED}
+- id: TPL-FB-WITHDRAW-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please withdraw £{{amount}} from my Easy Access Saver to my nominated account.
+  - >-
+    Can I take £{{amount}} out of my savings? It should go to my usual bank account.
+  - >-
+    I need £{{amount}} from my Easy Access Saver paid into my current account at my
+    bank.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '9600.00'
+  param_space:
+    amount: ['500', '2,000', '4,500']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-FB-NOMINATED-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've changed banks. Can you update my nominated account to sort code
+    {{sort_code}}, account number {{account_number}}?
+  - >-
+    Please change the account my withdrawals go to; the new details are
+    {{sort_code}} and {{account_number}}.
+  - >-
+    My nominated bank account has changed to sort code {{sort_code}}, account
+    {{account_number}}. Can you update it?
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '9600.00'
+  param_space:
+    sort_code: ['00-11-22', '00-33-44']
+    account_number: ['12345678', '87654321']
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-FB-POA-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    My {{relative}} now has a lasting power of attorney for me. Can you register it
+    on my savings accounts?
+  - >-
+    I'd like my {{relative}} to be able to deal with my accounts here. They hold my
+    lasting power of attorney.
+  - >-
+    Please add my {{relative}} as my attorney on my Fernbridge accounts; the power
+    of attorney has been registered.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '38500.00'
+  param_space:
+    relative: [daughter, son, nephew]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-FB-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please close my Easy Access Saver and send the balance to my nominated account.
+  - >-
+    I don't need my Easy Access Saver any more. Can you close it?
+  - >-
+    I'd like to close my savings account with you and have the money paid out.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '1840.00'
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {sav_fb_0001.status: CLOSED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-FB-FIRSTHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:25-34]
+  opening_user_messages:
+  - >-
+    I've had an offer accepted on my first home at £{{price}}: please start my
+    mortgage application, release my Lifetime ISA to my solicitor, and text me at
+    each stage.
+  - >-
+    We're buying our first place for £{{price}}. Can you begin the mortgage
+    application, send my Lifetime ISA money to the conveyancer, and keep me updated
+    by text?
+  - >-
+    My first home purchase at £{{price}} is going ahead. I need a mortgage
+    application started, my Lifetime ISA paid to my solicitor, and alerts as things
+    progress.
+  account_state:
+    account_id: lisa_fb_0001
+    account_type: Fernbridge Cash Lifetime ISA
+    balance: '17850.00'
+  param_space:
+    price: ['215,000', '298,000']
+  gold_tool_sequence: [apply_mortgage, claim_lisa_home_purchase, set_alerts]
+  expected_state_deltas: {mortgage_application_status: SUBMITTED, lisa_home_purchase_claim: SUBMITTED, alerts_updated: true}
+- id: TPL-FB-MOVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've moved and changed banks: please update my address to {{address}}, change
+    my nominated account to sort code {{sort_code}}, account 12345678, and email me
+    whenever interest is paid.
+  - >-
+    New address is {{address}} and I've a new bank account, sort code {{sort_code}},
+    number 12345678. Can you update both and send me an email when interest goes
+    in?
+  - >-
+    Can you change my address to {{address}}, switch my nominated account to
+    {{sort_code}} 12345678, and set up an alert each time interest is added?
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '9600.00'
+  param_space:
+    address: ['27 Abbey Road, Bath BA2 3QW', '9 Castle Street, Shrewsbury SY1 2BH']
+    sort_code: ['00-11-22', '00-33-44']
+  gold_tool_sequence: [update_contact_info, update_beneficiary, set_alerts]
+  expected_state_deltas: {contact_updated: true, beneficiary_updated: true, alerts_updated: true}
+- id: TPL-FB-CONSOLIDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    I want all my savings with you: transfer my cash ISA in from {{old_provider}},
+    open a Members' Regular Saver, and remind me to pay into it each month.
+  - >-
+    Please move my ISA over from {{old_provider}}, start a Members' Regular Saver
+    for me, and send a monthly reminder to pay in.
+  - >-
+    Can you bring my {{old_provider}} cash ISA across, open a Regular Saver, and set
+    a reminder for my monthly payment?
+  account_state:
+    account_id: isa_fb_0001
+    account_type: Fernbridge Easy Access ISA
+    balance: '5200.00'
+  param_space:
+    old_provider: [Castlegate Bank, Northern Union Bank]
+  gold_tool_sequence: [transfer_isa_in, open_account, set_alerts]
+  expected_state_deltas: {isa_transfer_status: REQUESTED, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-FB-CARER-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    My {{relative}} is looking after my affairs now: please register the power of
+    attorney, send my post to {{address}}, and set up an alert for every withdrawal
+    so we can keep an eye on things.
+  - >-
+    Can you add my {{relative}} as my attorney, change my correspondence address to
+    {{address}}, and set up alerts so we see every withdrawal?
+  - >-
+    I'd like my {{relative}}'s lasting power of attorney registered, my letters sent
+    to {{address}}, and a notification for each withdrawal.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '38500.00'
+  param_space:
+    relative: [daughter, son]
+    address: ['5 Rectory Gardens, Norwich NR2 4DX', '41 Park Avenue, Leeds LS8 2JH']
+  gold_tool_sequence: [manage_authorized_users, update_contact_info, set_alerts]
+  expected_state_deltas: {authorized_users_updated: true, contact_updated: true, alerts_updated: true}
+- id: TPL-FB-OVERPAY-ALERT-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've inherited some money: please take £{{amount}} from my Easy Access Saver,
+    pay it off my mortgage as an overpayment, and tell me when it's been applied.
+  - >-
+    Can you withdraw £{{amount}} from my savings, use it as a mortgage overpayment,
+    and let me know once it's gone through?
+  - >-
+    I want £{{amount}} moved out of my Easy Access Saver, put towards my mortgage,
+    and an alert when the overpayment is done.
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '24000.00'
+  param_space:
+    amount: ['8,000', '15,000']
+  gold_tool_sequence: [transfer_funds, make_mortgage_overpayment, set_alerts]
+  expected_state_deltas: {transfer_status: COMPLETED, overpayment_status: SCHEDULED, alerts_updated: true}
+- id: TPL-FB-RETIRED-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:65+]
+  opening_user_messages:
+  - >-
+    I've just retired: open a One-Year Fixed Rate Bond with £{{amount}} from my Easy
+    Access Saver, change my nominated account to sort code {{sort_code}}, account
+    12345678, register my {{relative}}'s power of attorney, and remind me before the
+    bond matures.
+  - >-
+    Now I've retired, please put £{{amount}} into a new One-Year Fixed Rate Bond,
+    update my nominated account to {{sort_code}} 12345678, add my {{relative}} as my
+    attorney, and send me a reminder when the bond is due to end.
+  - >-
+    Can you open a fixed rate bond for £{{amount}} from my savings, switch my
+    nominated account to sort code {{sort_code}}, account 12345678, register my
+    {{relative}}'s lasting power of attorney, and alert me ahead of maturity?
+  account_state:
+    account_id: sav_fb_0001
+    account_type: Fernbridge Easy Access Saver
+    balance: '62000.00'
+  param_space:
+    amount: ['20,000', '40,000']
+    sort_code: ['00-11-22', '00-33-44']
+    relative: [daughter, son]
+  gold_tool_sequence: [open_account, update_beneficiary, manage_authorized_users, set_alerts]
+  expected_state_deltas: {new_account_status: OPEN, beneficiary_updated: true, authorized_users_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_GB/dynamic.yaml), not scripted templates.

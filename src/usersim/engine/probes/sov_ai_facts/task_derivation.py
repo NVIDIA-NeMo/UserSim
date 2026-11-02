@@ -123,6 +123,79 @@ def _br_region_from_persona(persona: dict[str, Any]) -> str | None:
 
 
 # ---------------------------------------------------------------------------
+# UK nation classifier
+# ---------------------------------------------------------------------------
+
+# A UK persona's ``region`` is one of the nine English regions or the name of
+# one of the other three nations. Health, education and much of the law are
+# devolved, so a fact that holds in one nation only carries that nation's tag.
+_UK_ENGLISH_REGIONS = frozenset(
+    {
+        "north east",
+        "north west",
+        "yorkshire and the humber",
+        "east midlands",
+        "west midlands",
+        "east of england",
+        "london",
+        "south east",
+        "south west",
+    }
+)
+_UK_OTHER_NATIONS: dict[str, str] = {
+    "scotland": "scotland",
+    "wales": "wales",
+    "northern ireland": "northern-ireland",
+}
+
+
+def _uk_nation_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a UK nation tag (england, scotland, wales, northern-ireland) from the persona's region."""
+    raw = persona.get("region")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    region = raw.strip().lower()
+    if region in _UK_ENGLISH_REGIONS:
+        return "england"
+    return _UK_OTHER_NATIONS.get(region)
+
+
+# ---------------------------------------------------------------------------
+# German Land classifier
+# ---------------------------------------------------------------------------
+
+# A German persona's ``region`` is its Land, by its German name. Schools,
+# policing, public holidays and several taxes are set by the Land, so a fact
+# that holds in one Land only carries that Land's tag. Tags are ASCII.
+_DE_LAENDER: dict[str, str] = {
+    "baden-württemberg": "baden-wuerttemberg",
+    "bayern": "bayern",
+    "berlin": "berlin",
+    "brandenburg": "brandenburg",
+    "bremen": "bremen",
+    "hamburg": "hamburg",
+    "hessen": "hessen",
+    "mecklenburg-vorpommern": "mecklenburg-vorpommern",
+    "niedersachsen": "niedersachsen",
+    "nordrhein-westfalen": "nordrhein-westfalen",
+    "rheinland-pfalz": "rheinland-pfalz",
+    "saarland": "saarland",
+    "sachsen": "sachsen",
+    "sachsen-anhalt": "sachsen-anhalt",
+    "schleswig-holstein": "schleswig-holstein",
+    "thüringen": "thueringen",
+}
+
+
+def _de_land_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a German Land tag (``bayern``, ``thueringen``, ...) from the persona's region."""
+    raw = persona.get("region")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    return _DE_LAENDER.get(raw.strip().lower())
+
+
+# ---------------------------------------------------------------------------
 # Age bin → tag
 # ---------------------------------------------------------------------------
 
@@ -175,6 +248,19 @@ _EDUCATION_MAP: dict[str, str] = {
     "postgraduate": "tertiary",
     "pós-graduação": "tertiary",
     "pos-graduacao": "tertiary",
+    # en_GB. Not "degree", which en_IN's "diploma ... not equal to degree" contains.
+    "no qualifications": "primary",
+    "gcse": "secondary",
+    "apprenticeship": "secondary",
+    "a level": "secondary",
+    "higher education": "tertiary",
+    # de_DE records the vocational qualification: none (after general schooling)
+    # and a dual apprenticeship are secondary, and a Fachschule (Meister,
+    # Techniker) is tertiary. "Bachelor, Master, Diplom, Promotion" matches
+    # "bachelor"; "diplom" would also match en_US "9th_12th_no_diploma".
+    "ohne beruflichen bildungsabschluss": "secondary",
+    "berufsausbildung": "secondary",
+    "fachschul": "tertiary",
 }
 
 
@@ -232,6 +318,33 @@ _OCCUPATION_MAP: list[tuple] = [
     ("homemaker", "homemaker", ()),
     ("housewife", "homemaker", ()),
     ("dona de casa", "homemaker", ()),
+    # de_DE (the English keys above already cover Professor and Journalist).
+    # Nursing is matched by its compounds, and " pflege" only where a word starts
+    # with it: a bare "pflege" would also catch cleaners, arborists, animal
+    # keepers and cosmetics.
+    ("kinderpfleger", "teacher", ("interest:education",)),
+    ("erzieher", "teacher", ("interest:education",)),
+    ("lehrer", "teacher", ("interest:literature", "interest:history")),
+    ("krankenpfleg", "healthcare", ("interest:health",)),
+    ("altenpfleg", "healthcare", ("interest:health",)),
+    ("gesundheitspfleg", "healthcare", ("interest:health",)),
+    ("heilerziehungspfleg", "healthcare", ("interest:health",)),
+    ("behindertenpfleg", "healthcare", ("interest:health",)),
+    ("pflegefach", "healthcare", ("interest:health",)),
+    ("pflegeassist", "healthcare", ("interest:health",)),
+    ("pflegehelf", "healthcare", ("interest:health",)),
+    ("pflegedienst", "healthcare", ("interest:health",)),
+    (" pflege", "healthcare", ("interest:health",)),
+    ("schwester", "healthcare", ("interest:health",)),
+    ("nachtwache", "healthcare", ("interest:health",)),
+    ("ärzt", "healthcare", ("interest:health",)),
+    ("arzt", "healthcare", ("interest:health",)),
+    ("unternehmer", "small-business", ()),
+    ("ingenieur", "engineering", ("interest:geography",)),
+    ("landwirt", "agriculture", ("interest:geography",)),
+    ("musiker", "arts", ("interest:music",)),
+    ("künstler", "arts", ("interest:music",)),
+    ("schriftsteller", "arts", ("interest:literature",)),
 ]
 
 
@@ -281,6 +394,14 @@ def persona_to_tags(persona: dict[str, Any], locale: str) -> list[str]:
         region = _br_region_from_persona(persona)
         if region is not None:
             tags.add(f"region:{region}")
+    elif locale == "en_GB":
+        nation = _uk_nation_from_persona(persona)
+        if nation is not None:
+            tags.add(f"region:{nation}")
+    elif locale == "de_DE":
+        land = _de_land_from_persona(persona)
+        if land is not None:
+            tags.add(f"region:{land}")
 
     # Age bin.
     age_tag = _age_tag(persona)

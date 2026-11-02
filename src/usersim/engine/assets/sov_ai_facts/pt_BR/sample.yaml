@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: pt_BR
 bank_id: pt_BR_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - brazil-geography
 - brazil-history
@@ -49,10 +49,9 @@ entries:
   - region:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-GEO-002
   category: brazil-geography
   question_type: factual_recall
@@ -67,10 +66,9 @@ entries:
   - region:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-GEO-003
   category: brazil-geography
   question_type: factual_recall
@@ -84,10 +82,9 @@ entries:
   - region:southeast
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-GEO-004
   category: brazil-geography
   question_type: factual_recall
@@ -102,10 +99,9 @@ entries:
   - region:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-GEO-005
   category: brazil-geography
   question_type: factual_recall
@@ -120,10 +116,9 @@ entries:
   - region:northeast
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-HIS-001
   category: brazil-history
   question_type: factual_recall
@@ -138,10 +133,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-HIS-002
   category: brazil-history
   question_type: factual_recall
@@ -156,10 +150,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-HIS-003
   category: brazil-history
   question_type: factual_recall
@@ -174,10 +167,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-HIS-004
   category: brazil-history
   question_type: factual_recall
@@ -192,10 +184,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-HIS-005
   category: brazil-history
   question_type: factual_recall
@@ -210,10 +201,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-CUL-001
   category: brazil-culture
   question_type: factual_recall
@@ -228,10 +218,9 @@ entries:
   - region:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-CUL-002
   category: brazil-culture
   question_type: factual_recall
@@ -246,10 +235,9 @@ entries:
   - region:northeast
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-CUL-003
   category: brazil-culture
   question_type: factual_recall
@@ -264,10 +252,9 @@ entries:
   - region:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-CUL-004
   category: brazil-culture
   question_type: factual_recall
@@ -282,10 +269,9 @@ entries:
   - region:southeast
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-CUL-005
   category: brazil-culture
   question_type: factual_recall
@@ -301,10 +287,9 @@ entries:
   - region:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-POE-001
   category: brazil-poetry-and-music
   question_type: completion
@@ -331,10 +316,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-POE-002
   category: brazil-poetry-and-music
   question_type: completion
@@ -358,10 +342,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-POE-003
   category: brazil-poetry-and-music
   question_type: completion
@@ -385,10 +368,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-POE-004
   category: brazil-poetry-and-music
   question_type: completion
@@ -413,10 +395,9 @@ entries:
   - region:any
   difficulty: hard
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-POE-005
   category: brazil-poetry-and-music
   question_type: completion
@@ -435,10 +416,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-SVC-001
   category: brazil-public-services
   question_type: factual_recall
@@ -483,10 +463,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-SVC-003
   category: brazil-public-services
   question_type: factual_recall
@@ -506,10 +485,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-SVC-004
   category: brazil-public-services
   question_type: factual_recall
@@ -530,10 +508,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Brazil beta review of original sample entry
+    source: Original UserSim sample entry (Brazil)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: BR-SVC-005
   category: brazil-public-services
   question_type: factual_recall
@@ -574,10 +551,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — ICMBio Parque Nacional do Iguaçu; UNESCO World Heritage; IBGE.
+    - Synthetic factual entry (AI-authored). Standard reference points — ICMBio Parque Nacional do Iguaçu; UNESCO World Heritage; IBGE.
 - id: BRAZIL-HIST-B006
   category: brazil-history
   question_type: factual_recall
@@ -595,10 +572,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br); IPEA; Memórias do Plano Real.
+    - Synthetic factual entry (AI-authored). Standard reference points — Banco Central do Brasil (bcb.gov.br); IPEA; Memórias do Plano Real.
 - id: BRAZIL-CULT-B006
   category: brazil-culture
   question_type: completion
@@ -644,10 +621,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Hino Nacional Brasileiro (letra de Joaquim Osório Duque-Estrada, 1909; música de Francisco Manuel da Silva; oficializado pelo Decreto 15.671 de 1922).
+    - Synthetic factual entry (AI-authored). Reference text — Hino Nacional Brasileiro (letra de Joaquim Osório Duque-Estrada, 1909; música de Francisco Manuel da Silva; oficializado pelo Decreto 15.671 de 1922).
 - id: BRAZIL-POET-B006
   category: brazil-poetry-and-music
   question_type: completion
@@ -681,10 +658,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Carlos Drummond de Andrade, "No meio do caminho", Revista de Antropofagia (1928); "Alguma Poesia" (1930).
+    - Synthetic factual entry (AI-authored). Reference text — Carlos Drummond de Andrade, "No meio do caminho", Revista de Antropofagia (1928); "Alguma Poesia" (1930).
 - id: BRAZIL-PUBL-B006
   category: brazil-public-services
   question_type: completion
@@ -708,10 +685,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Preâmbulo, Constituição da República Federativa do Brasil de 1988 (promulgada 5 de outubro de 1988).
+    - Synthetic factual entry (AI-authored). Reference text — Preâmbulo, Constituição da República Federativa do Brasil de 1988 (promulgada 5 de outubro de 1988).
 - id: BRAZIL-HEAL-B001
   category: brazil-health-systems
   question_type: factual_recall
@@ -729,10 +706,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Constituição Federal 1988 arts. 196-200; Lei 8.080/1990; Lei 8.142/1990; Ministério da Saúde (gov.br/saude).
+    - Synthetic factual entry (AI-authored). Standard reference points — Constituição Federal 1988 arts. 196-200; Lei 8.080/1990; Lei 8.142/1990; Ministério da Saúde (gov.br/saude).
 - id: BRAZIL-HEAL-B002
   category: brazil-health-systems
   question_type: factual_recall
@@ -751,10 +728,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.656/1998; Lei 9.961/2000; Lei 14.454/2022; ANS (gov.br/ans).
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 9.656/1998; Lei 9.961/2000; Lei 14.454/2022; ANS (gov.br/ans).
 - id: BRAZIL-HEAL-B003
   category: brazil-health-systems
   question_type: factual_recall
@@ -773,10 +750,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.782/1999; Lei 6.360/1976; ANVISA (gov.br/anvisa).
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 9.782/1999; Lei 6.360/1976; ANVISA (gov.br/anvisa).
 - id: BRAZIL-HEAL-B004
   category: brazil-health-systems
   question_type: factual_recall
@@ -793,10 +770,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Programa Nacional de Imunizações; Lei 6.259/1975; Ministério da Saúde (gov.br/saude).
+    - Synthetic factual entry (AI-authored). Standard reference points — Programa Nacional de Imunizações; Lei 6.259/1975; Ministério da Saúde (gov.br/saude).
 - id: BRAZIL-HEAL-B005
   category: brazil-health-systems
   question_type: factual_recall
@@ -815,10 +792,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Política Nacional de Atenção Básica (PNAB), Portaria MS 2.436/2017; Estratégia Saúde da Família; gov.br/saude.
+    - Synthetic factual entry (AI-authored). Standard reference points — Política Nacional de Atenção Básica (PNAB), Portaria MS 2.436/2017; Estratégia Saúde da Família; gov.br/saude.
 - id: BRAZIL-HEAL-B006
   category: brazil-health-systems
   question_type: factual_recall
@@ -835,10 +812,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — STF Tema 793 e Tema 1.234; STJ Tema 106; CNJ NatJus; Conitec.
+    - Synthetic factual entry (AI-authored). Standard reference points — STF Tema 793 e Tema 1.234; STJ Tema 106; CNJ NatJus; Conitec.
 - id: BRAZIL-EDUC-B001
   category: brazil-education
   question_type: factual_recall
@@ -856,10 +833,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — INEP (inep.gov.br); MEC; SiSU; ProUni; FIES.
+    - Synthetic factual entry (AI-authored). Standard reference points — INEP (inep.gov.br); MEC; SiSU; ProUni; FIES.
 - id: BRAZIL-EDUC-B002
   category: brazil-education
   question_type: factual_recall
@@ -877,10 +854,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 11.096/2005 (ProUni); Lei 13.530/2017 (Novo FIES); MEC; Caixa Econômica Federal; Banco do Brasil.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 11.096/2005 (ProUni); Lei 13.530/2017 (Novo FIES); MEC; Caixa Econômica Federal; Banco do Brasil.
 - id: BRAZIL-EDUC-B003
   category: brazil-education
   question_type: factual_recall
@@ -898,10 +875,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.394/1996 (LDB); EC 59/2009; ECA Lei 8.069/90; CF/88 art. 7º XXXIII; gov.br/mec.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 9.394/1996 (LDB); EC 59/2009; ECA Lei 8.069/90; CF/88 art. 7º XXXIII; gov.br/mec.
 - id: BRAZIL-EDUC-B004
   category: brazil-education
   question_type: factual_recall
@@ -919,10 +896,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CF/88 arts. 206-207; LDB Lei 9.394/96; SINAES Lei 10.861/2004; MEC; CAPES.
+    - Synthetic factual entry (AI-authored). Standard reference points — CF/88 arts. 206-207; LDB Lei 9.394/96; SINAES Lei 10.861/2004; MEC; CAPES.
 - id: BRAZIL-EDUC-B005
   category: brazil-education
   question_type: factual_recall
@@ -940,10 +917,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — EC 108/2020; Lei 14.113/2020 (Novo FUNDEB); FNDE; MEC.
+    - Synthetic factual entry (AI-authored). Standard reference points — EC 108/2020; Lei 14.113/2020 (Novo FUNDEB); FNDE; MEC.
 - id: BRAZIL-EDUC-B006
   category: brazil-education
   question_type: factual_recall
@@ -961,10 +938,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CAPES (gov.br/capes); CNPq; CNE; LDB.
+    - Synthetic factual entry (AI-authored). Standard reference points — CAPES (gov.br/capes); CNPq; CNE; LDB.
 - id: BRAZIL-LABO-B001
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -982,10 +959,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — CLT DL 5.452/1943; Lei 13.467/2017 (Reforma Trabalhista); EC 72/2013 e LC 150/2015 (Domésticas).
+    - Synthetic factual entry (AI-authored). Standard reference points — CLT DL 5.452/1943; Lei 13.467/2017 (Reforma Trabalhista); EC 72/2013 e LC 150/2015 (Domésticas).
 - id: BRAZIL-LABO-B002
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -1003,10 +980,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 8.036/1990; Caixa Econômica Federal; gov.br/trabalho-e-emprego.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 8.036/1990; Caixa Econômica Federal; gov.br/trabalho-e-emprego.
 - id: BRAZIL-LABO-B003
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -1024,10 +1001,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — EC 103/2019 (Reforma da Previdência); Lei 8.213/1991 (Plano de Benefícios da Previdência Social); gov.br/inss.
+    - Synthetic factual entry (AI-authored). Standard reference points — EC 103/2019 (Reforma da Previdência); Lei 8.213/1991 (Plano de Benefícios da Previdência Social); gov.br/inss.
 - id: BRAZIL-LABO-B004
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -1045,10 +1022,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 4.090/1962; Decreto 57.155/1965; CF/88 art. 7º VIII; gov.br/trabalho-e-emprego.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 4.090/1962; Decreto 57.155/1965; CF/88 art. 7º VIII; gov.br/trabalho-e-emprego.
 - id: BRAZIL-LABO-B005
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -1066,10 +1043,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 14.601/2023 (Novo Bolsa Família); CadÚnico; Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome (gov.br/mds); Caixa.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 14.601/2023 (Novo Bolsa Família); CadÚnico; Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome (gov.br/mds); Caixa.
 - id: BRAZIL-LABO-B006
   category: brazil-labor-and-benefits
   question_type: factual_recall
@@ -1088,10 +1065,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 7.998/1990; Reforma Trabalhista (Lei 13.467/2017); Caixa Econômica Federal; gov.br/trabalho-e-emprego.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 7.998/1990; Reforma Trabalhista (Lei 13.467/2017); Caixa Econômica Federal; gov.br/trabalho-e-emprego.
 - id: BRAZIL-FINA-B001
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1109,10 +1086,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br/pix); Resoluções BCB sobre Pix.
+    - Synthetic factual entry (AI-authored). Standard reference points — Banco Central do Brasil (bcb.gov.br/pix); Resoluções BCB sobre Pix.
 - id: BRAZIL-FINA-B002
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1130,10 +1107,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 9.250/1995; Receita Federal (gov.br/receitafederal); Decreto 9.580/2018 (Regulamento do IR).
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 9.250/1995; Receita Federal (gov.br/receitafederal); Decreto 9.580/2018 (Regulamento do IR).
 - id: BRAZIL-FINA-B003
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1151,10 +1128,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — FGC (fgc.org.br); Banco Central do Brasil; CMN.
+    - Synthetic factual entry (AI-authored). Standard reference points — FGC (fgc.org.br); Banco Central do Brasil; CMN.
 - id: BRAZIL-FINA-B004
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1172,10 +1149,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Tesouro Direto (tesourodireto.com.br); Tesouro Nacional; B3.
+    - Synthetic factual entry (AI-authored). Standard reference points — Tesouro Direto (tesourodireto.com.br); Tesouro Nacional; B3.
 - id: BRAZIL-FINA-B005
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1193,10 +1170,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Banco Central do Brasil (bcb.gov.br); LC 179/2021 (autonomia do BCB); regime de metas de inflação.
+    - Synthetic factual entry (AI-authored). Standard reference points — Banco Central do Brasil (bcb.gov.br); LC 179/2021 (autonomia do BCB); regime de metas de inflação.
 - id: BRAZIL-FINA-B006
   category: brazil-finance-and-consumer
   question_type: factual_recall
@@ -1214,10 +1191,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 8.078/1990 (CDC); Decreto 7.962/2013 (E-commerce); CF/88 art. 5º XXXII e 170 V; consumidor.gov.br.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 8.078/1990 (CDC); Decreto 7.962/2013 (E-commerce); CF/88 art. 5º XXXII e 170 V; consumidor.gov.br.
 - id: BRAZIL-DIGI-B001
   category: brazil-digital-services
   question_type: factual_recall
@@ -1235,10 +1212,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — gov.br; Secretaria de Governo Digital; Decreto 10.332/2020.
+    - Synthetic factual entry (AI-authored). Standard reference points — gov.br; Secretaria de Governo Digital; Decreto 10.332/2020.
 - id: BRAZIL-DIGI-B002
   category: brazil-digital-services
   question_type: factual_recall
@@ -1256,10 +1233,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 13.709/2018 (LGPD); Lei 13.853/2019 (ANPD); ANPD; Decreto 10.474/2020.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 13.709/2018 (LGPD); Lei 13.853/2019 (ANPD); ANPD; Decreto 10.474/2020.
 - id: BRAZIL-DIGI-B003
   category: brazil-digital-services
   question_type: factual_recall
@@ -1276,10 +1253,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 12.965/2014 (Marco Civil da Internet); Decreto 8.771/2016 (regulamento); STF (em análise da constitucionalidade do art. 19); PL 2630/2020 (em tramitação).
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 12.965/2014 (Marco Civil da Internet); Decreto 8.771/2016 (regulamento); STF (em análise da constitucionalidade do art. 19); PL 2630/2020 (em tramitação).
 - id: BRAZIL-DIGI-B004
   category: brazil-digital-services
   question_type: factual_recall
@@ -1297,10 +1274,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — TSE (tse.jus.br); Lei 6.996/82 (voto no exterior); Resoluções TSE.
+    - Synthetic factual entry (AI-authored). Standard reference points — TSE (tse.jus.br); Lei 6.996/82 (voto no exterior); Resoluções TSE.
 - id: BRAZIL-DIGI-B005
   category: brazil-digital-services
   question_type: factual_recall
@@ -1318,10 +1295,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Lei 13.874/2019 (Liberdade Econômica); Portaria SEPRT 1.065/2019; eSocial; gov.br.
+    - Synthetic factual entry (AI-authored). Standard reference points — Lei 13.874/2019 (Liberdade Econômica); Portaria SEPRT 1.065/2019; eSocial; gov.br.
 - id: BRAZIL-DIGI-B006
   category: brazil-digital-services
   question_type: factual_recall
@@ -1338,7 +1315,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts pt_BR, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts pt_BR, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Resolução Conjunta BCB/CMN nº 1/2020 (Open Banking/Finance); LGPD; bcb.gov.br/openfinance; openfinancebrasil.org.br.
+    - Synthetic factual entry (AI-authored). Standard reference points — Resolução Conjunta BCB/CMN nº 1/2020 (Open Banking/Finance); LGPD; bcb.gov.br/openfinance; openfinancebrasil.org.br.

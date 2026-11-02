@@ -1,0 +1,11 @@
+institution_id: asanagi_bank
+display_name: Asanagi Bank
+type: bank
+brand_voice: traditional
+domains:
+- retail_banking
+- cards
+- lending_mortgage
+placeholder: true
+display_name_local: 朝凪銀行
+schema_version: v0.1

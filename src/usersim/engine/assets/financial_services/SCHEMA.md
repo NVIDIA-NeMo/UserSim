@@ -18,9 +18,11 @@ Institutions are grouped under an **institution-type** directory (`bank/`,
 stable when a brand is renamed and multiple brands can share a vertical. The loader
 discovers institutions by finding each `institution_meta.yaml` (layout-agnostic).
 
-All files share `schema_version: v0.1`. All AI-authored beta content carries
-`placeholder: true`; any trajectory that touches a placeholder document or
-template emits `WarningKind.USED_PLACEHOLDER_FINANCE` (scorecards stay preview-only).
+All files share `schema_version: v0.1`. All AI-authored content carries
+`placeholder: true`. A trajectory built on a placeholder task template (verifiable
+tier), or on a placeholder institution or taxonomy (dynamic tier), records
+`WarningKind.USED_PLACEHOLDER_FINANCE`, and subject-matter expert (SME)
+verification is recommended before relying on its results.
 
 Every document / tool / template is scoped to its institution (`institution_id`
 comes from `institution_meta.yaml`; the leaf directory is named for it) and carries a
@@ -164,7 +166,7 @@ Resolution order for the reported label, most specific first: a task's authored
 `account_state.account_type`, then this block, then a region-NEUTRAL per-domain
 default (`deposit account`, `payment account`, `loan account`, `policy`, ...). A
 locale that omits the block is therefore generic rather than silently
-US-flavoured. Keys must be known domains.
+US-flavored. Keys must be known domains.
 
 ## <institution_id>/institution_meta.yaml
 
@@ -242,7 +244,11 @@ institution offers (`open_account`, `close_account`, `update_contact_info`,
 `update_policy`), injected by `asset_gen/financial_services/spec.py`. Most are
 never gold: they are realistic, gold-ADJACENT tool docs that make retrieval
 (and the discoverable-tool gate) non-trivial, and they stay consistent across
-locales.
+locales. An institution that does not offer one of them lists it in its region
+spec's `omit_common_operations` (a building-savings bank issues no cards), and
+one whose local procedure differs declares the tool with a `description` that
+steers its generated documentation; `tools.yaml` still ships that description
+empty.
 
 ## tasks.yaml
 
@@ -251,8 +257,12 @@ A task is a **parameterized generator**, not a fixed string. `tasks.yaml` holds
 (see `dynamic.yaml` below), not scripted here. `templates`: each `id`, `tier`
 (verifiable), `task_type`, `domain`, `placeholder`, `persona_tags` (see below),
 `opening_user_messages` (a LIST of `{{slot}}` templates; author >=3),
-`account_state` (seed state the tools mutate), `param_space` (per-instance
-slot values), `gold_tool_sequence`, `ordered` (OPTIONAL, default `false`),
+`account_state` (seed state the tools mutate; hold the account's money under
+`balance`, the one amount the account view and the simulated customer see, as a
+plain number like `12000.00`, and its open orders under `orders`, a list of
+entries with an `order_id` and a `status` that `get_order_status` lists and
+`cancel_order` acts on), `param_space` (per-instance slot values),
+`gold_tool_sequence`, `ordered` (OPTIONAL, default `false`),
 `gold_document_ids` (OPTIONAL -- see below), `expected_state_deltas`,
 `allowed_tools` (OPTIONAL). Verifiable templates carry a
 derivable gold spec whose docs/tools MUST live within the SAME institution (scope

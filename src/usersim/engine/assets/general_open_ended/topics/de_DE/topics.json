@@ -1,0 +1,194 @@
+[
+  {
+    "type": "health_navigation",
+    "description": "Sich im Gesundheitswesen zurechtfinden: Symptome, Unsicherheit und wann man ärztliche Hilfe braucht"
+  },
+  {
+    "type": "benefits_forms",
+    "description": "Anträge auf Sozialleistungen mit fehlenden Unterlagen und unklaren Voraussetzungen"
+  },
+  {
+    "type": "consumer_dispute",
+    "description": "Streit als Verbraucher mit Belegen, Gewährleistung und Wegen zur Eskalation"
+  },
+  {
+    "type": "local_transport",
+    "description": "Wege im Nahverkehr planen und dabei Barrierefreiheit, Zeiten und Kosten abwägen"
+  },
+  {
+    "type": "elder_care",
+    "description": "Pflege und Betreuung älterer Angehöriger zwischen Gefühlen und Organisation"
+  },
+  {
+    "type": "small_business_ops",
+    "description": "Ein kleines Unternehmen führen: Genehmigungen, Steuern, Personal und Kundschaft"
+  },
+  {
+    "type": "housing_repair",
+    "description": "Reparaturen in der Wohnung, Vermieter, Versicherung und Instandhaltung"
+  },
+  {
+    "type": "digital_security",
+    "description": "Digitale Sicherheit im Alltag, Konten wiederherstellen und Betrug vermeiden"
+  },
+  {
+    "type": "career_transition",
+    "description": "Beruflicher Wechsel: Lebenslauf, Vorstellungsgespräche und Weiterbildung"
+  },
+  {
+    "type": "school_family",
+    "description": "Austausch zwischen Schule und Familie, Nachhilfe und sonderpädagogische Förderung"
+  },
+  {
+    "type": "climate_weather",
+    "description": "Wetter, Klimarisiken, Hitze, Hochwasser und Vorsorge im Haushalt"
+  },
+  {
+    "type": "legal_process",
+    "description": "Sich in rechtlichen Verfahren zurechtfinden, mit sicherer Orientierung ohne Rechtsberatung"
+  },
+  {
+    "type": "community_conflict",
+    "description": "Konflikte in der Nachbarschaft oder am Arbeitsplatz, die Fingerspitzengefühl verlangen"
+  },
+  {
+    "type": "travel_constraints",
+    "description": "Reiseplanung mit Visum, eingeschränkter Mobilität, knappem Budget oder Familie"
+  },
+  {
+    "type": "civic_participation",
+    "description": "Wählen, Bürgerversammlungen, Beschwerden und Nachhaken bei Behörden"
+  },
+  {
+    "type": "financial_tradeoffs",
+    "description": "Haushaltsplanung, Schulden, Sparen, Versicherungen und Risiken abwägen"
+  },
+  {
+    "type": "tech_troubleshooting",
+    "description": "Probleme mit Geräten und Apps lösen, bei wenig digitaler Erfahrung"
+  },
+  {
+    "type": "food_culture",
+    "description": "Essen, Kochen, Esskultur, Ernährungseinschränkungen und Vorlieben in der Familie"
+  },
+  {
+    "type": "agriculture_rural",
+    "description": "Fragen zu Landleben, Landwirtschaft, Anbau, Maschinen und Vermarktung"
+  },
+  {
+    "type": "creative_planning",
+    "description": "Kreative Projekte mit unklaren Zielen und Ansprüchen des Publikums"
+  },
+  {
+    "type": "medical_admin",
+    "description": "Arzttermine, Rezepte, Überweisungen, Rechnungen und Unterlagen"
+  },
+  {
+    "type": "immigration_documents",
+    "description": "Aufenthalts- und Ausweisdokumente beantragen, im Überblick"
+  },
+  {
+    "type": "tax_records",
+    "description": "Steuerunterlagen, Fristen und das Ordnen von Belegen"
+  },
+  {
+    "type": "public_safety",
+    "description": "Vorsorge für Notfälle und sicheres Melden von Gefahren"
+  },
+  {
+    "type": "energy_utilities",
+    "description": "Strom- und Gasrechnungen, Ausfälle, Energiesparen und Streit mit Versorgern"
+  },
+  {
+    "type": "childcare_parenting",
+    "description": "Kinderbetreuung, Familienalltag und Absprachen mit der Schule"
+  },
+  {
+    "type": "mental_wellbeing",
+    "description": "Stress, Erschöpfung und nichtklinische Unterstützung für das Wohlbefinden"
+  },
+  {
+    "type": "accessibility",
+    "description": "Barrierefreiheit, Nachteilsausgleiche und inklusive Planung"
+  },
+  {
+    "type": "language_translation",
+    "description": "Übersetzen, Sprachwechsel und Formulierungen im passenden Register"
+  },
+  {
+    "type": "shopping_decisions",
+    "description": "Produkte vergleichen und Kaufentscheidungen abwägen"
+  },
+  {
+    "type": "home_projects",
+    "description": "Projekte rund ums Haus mit Sicherheits- und Budgetgrenzen"
+  },
+  {
+    "type": "event_planning",
+    "description": "Feiern planen mit Gästen, Ort, Ernährungswünschen und Zeitplan"
+  },
+  {
+    "type": "data_privacy",
+    "description": "Entscheidungen zum Datenschutz bei Apps, Formularen und geteilten Dokumenten"
+  },
+  {
+    "type": "workplace_policy",
+    "description": "Regeln im Betrieb, Abläufe in der Personalabteilung und Gespräche mit Vorgesetzten"
+  },
+  {
+    "type": "education_pathways",
+    "description": "Kurse, Studium, Zertifikate und Stipendien planen"
+  },
+  {
+    "type": "retirement_planning",
+    "description": "Unterlagen für die Rente, Leistungen und Planung im Haushalt"
+  },
+  {
+    "type": "public_health",
+    "description": "Gesundheitsempfehlungen für die Bevölkerung, ohne Diagnosen und ohne Panikmache"
+  },
+  {
+    "type": "local_history",
+    "description": "Fragen zur Geschichte und Kultur vor Ort"
+  },
+  {
+    "type": "transport_disruption",
+    "description": "Planen trotz Streiks, Sperrungen, Unwetter und Verspätungen"
+  },
+  {
+    "type": "community_services",
+    "description": "Unterstützungsangebote vor Ort finden und dabei die eigene Würde wahren"
+  },
+  {
+    "type": "insurance_claims",
+    "description": "Schadensmeldungen bei Versicherungen, Nachweise und Eskalation"
+  },
+  {
+    "type": "environmental_choices",
+    "description": "Mülltrennung, Ressourcenschonung und Umweltabwägungen vor Ort"
+  },
+  {
+    "type": "sports_recreation",
+    "description": "Sport, Freizeit und Hobbys planen"
+  },
+  {
+    "type": "pets_animals",
+    "description": "Organisatorisches rund um Haustiere und Dienste für Tiere"
+  },
+  {
+    "type": "religious_cultural_events",
+    "description": "Religiöse und kulturelle Feste und respektvolle Umgangsformen"
+  },
+  {
+    "type": "news_literacy",
+    "description": "Behauptungen, Falschinformationen und die Qualität von Quellen verstehen"
+  },
+  {
+    "type": "personal_admin",
+    "description": "Persönliche Unterlagen, Termine und Aufgaben organisieren"
+  },
+  {
+    "type": "relationship_communication",
+    "description": "Schwierige Gespräche im persönlichen Umfeld und Grenzen setzen"
+  }
+]

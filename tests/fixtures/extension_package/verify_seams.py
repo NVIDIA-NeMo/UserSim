@@ -80,22 +80,25 @@ choices = cli._build_parser()._subparsers._group_actions[0].choices
 check("usersim.commands", "fixture-cmd" in choices, f"saw {sorted(choices)}")
 check("commands: built-ins survive", "simulate" in choices)
 
-# The seams must compose: a contributed probe's assets resolve through the
-# search path, which is what makes the probe actually runnable.
-from usersim.engine.core._assets import probe_assets_dir  # noqa: E402
+# The seams must compose: a contributed probe's assets resolve from the
+# assets_root its class declares, with no USERSIM_ASSET_PATH set, which is
+# what makes the probe runnable as installed. Its bank loader reads under
+# assets_dir(), the public way to find them.
+from usersim.engine.core.probes import resolve_probe  # noqa: E402
 
-fixture_assets = (
-    os.path.dirname(sys.modules["usersim_extension_fixture"].__file__)
-    if "usersim_extension_fixture" in sys.modules
-    else None
-)
-if fixture_assets:
-    os.environ["USERSIM_ASSET_PATH"] = os.path.join(fixture_assets, "assets")
+check("no asset path set", "USERSIM_ASSET_PATH" not in os.environ, os.environ.get("USERSIM_ASSET_PATH", ""))
+fixture_dir = resolve_probe("fixture_probe").assets_dir()
 check(
-    "USERSIM_ASSET_PATH resolves a contributed bank",
-    probe_assets_dir("fixture_probe").is_dir(),
-    f"looked at {probe_assets_dir('fixture_probe')}",
+    "assets_root resolves a contributed bank",
+    (fixture_dir / "en_US" / "sample.yaml").is_file() and "site-packages" in fixture_dir.parts,
+    f"looked at {fixture_dir}",
 )
+
+# A contributed probe's output_columns join the columns every run keeps.
+from usersim.engine.config import ConversationSimulatorConfig  # noqa: E402
+
+kept = ConversationSimulatorConfig(name="conversation_messages").side_effect_columns
+check("output_columns joins the run's columns", "fixture_probe_marker" in kept, f"saw {len(kept)} columns")
 
 # The published conformance suite must pass for a real external probe.
 from usersim.testing import probe_conformance_problems  # noqa: E402
@@ -128,6 +131,18 @@ if not spec_problems:
     )
 identity_problems = probe_conformance_problems("fixture_identity")
 check("identity probe conformance", not identity_problems, str(identity_problems))
+
+# `usersim smoke` names the installed package and finds nothing wrong with it.
+from usersim.cli.smoke import SmokeReport, _check_extensions  # noqa: E402
+
+smoke = SmokeReport()
+_check_extensions(smoke)
+(extensions,) = smoke.results
+check(
+    "usersim smoke reports the package",
+    extensions.ok and extensions.detail == "usersim-extension-fixture 0.1.0: 7 entry point(s)",
+    extensions.detail,
+)
 
 if failures:
     print(f"\n{len(failures)} seam(s) failed: {', '.join(failures)}")

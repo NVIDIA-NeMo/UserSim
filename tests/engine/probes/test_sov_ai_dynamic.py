@@ -459,7 +459,7 @@ class TestSimulateSovAiDynamic:
         # Provenance + warnings.
         outcome = json.loads(result["simulation_outcome"])
         assert outcome["status"] in {"ok", "completed_with_warnings"}
-        # The shipped pt_BR taxonomy has been promoted to beta, so no
+        # The shipped pt_BR taxonomy is not marked placeholder, so no
         # placeholder warning should be attached.
         assert not any(w["kind"] == WarningKind.USED_PLACEHOLDER_TAXONOMY.value for w in outcome["warnings"]), (
             f"unexpected USED_PLACEHOLDER_TAXONOMY warning: {outcome['warnings']}"

@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: en_IN
 bank_id: en_IN_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - india-geography
 - india-history
@@ -48,10 +48,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-GEO-002
   category: india-geography
   question_type: factual_recall
@@ -68,10 +67,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-GEO-003
   category: india-geography
   question_type: factual_recall
@@ -88,10 +86,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-GEO-004
   category: india-geography
   question_type: factual_recall
@@ -107,10 +104,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-GEO-005
   category: india-geography
   question_type: factual_recall
@@ -126,10 +122,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-HIS-001
   category: india-history
   question_type: factual_recall
@@ -145,10 +140,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-HIS-002
   category: india-history
   question_type: factual_recall
@@ -164,10 +158,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-HIS-003
   category: india-history
   question_type: factual_recall
@@ -184,10 +177,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-HIS-004
   category: india-history
   question_type: factual_recall
@@ -203,10 +195,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-HIS-005
   category: india-history
   question_type: factual_recall
@@ -222,10 +213,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-CUL-001
   category: india-culture
   question_type: factual_recall
@@ -241,10 +231,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-CUL-002
   category: india-culture
   question_type: factual_recall
@@ -260,10 +249,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-CUL-003
   category: india-culture
   question_type: factual_recall
@@ -280,10 +268,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-CUL-004
   category: india-culture
   question_type: factual_recall
@@ -299,10 +286,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-CUL-005
   category: india-culture
   question_type: factual_recall
@@ -318,10 +304,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-POE-001
   category: india-poetry-and-music
   question_type: completion
@@ -340,10 +325,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-POE-002
   category: india-poetry-and-music
   question_type: completion
@@ -362,10 +346,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-POE-003
   category: india-poetry-and-music
   question_type: completion
@@ -384,10 +367,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-POE-004
   category: india-poetry-and-music
   question_type: completion
@@ -406,10 +388,9 @@ entries:
   - education:tertiary
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-POE-005
   category: india-poetry-and-music
   question_type: completion
@@ -444,10 +425,9 @@ entries:
   - occupation-family:small-business
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-SVC-002
   category: india-public-services
   question_type: factual_recall
@@ -463,10 +443,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-SVC-003
   category: india-public-services
   question_type: factual_recall
@@ -482,10 +461,9 @@ entries:
   - interest:history
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-SVC-004
   category: india-public-services
   question_type: factual_recall
@@ -501,10 +479,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: IN-EN-SVC-005
   category: india-public-services
   question_type: factual_recall
@@ -521,10 +498,9 @@ entries:
   - occupation-family:small-business
   difficulty: medium
   provenance:
-    source: India beta review of original sample entry
+    source: Original UserSim sample entry (India)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: INDIA-GEOG-B006
   category: india-geography
   question_type: factual_recall
@@ -542,10 +518,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UNESCO Western Ghats inscription, Survey of India, Geological Survey of India.
+    - Synthetic factual entry (AI-authored). Standard reference points — UNESCO Western Ghats inscription, Survey of India, Geological Survey of India.
 - id: INDIA-HIST-B006
   category: india-history
   question_type: completion
@@ -569,10 +545,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Jawaharlal Nehru, "Tryst with Destiny", address to the Constituent Assembly of India, 14-15 August 1947.
+    - Synthetic factual entry (AI-authored). Reference text — Jawaharlal Nehru, "Tryst with Destiny", address to the Constituent Assembly of India, 14-15 August 1947.
 - id: INDIA-CULT-B006
   category: india-culture
   question_type: completion
@@ -599,10 +575,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Muhammad Iqbal, "Tarana-e-Hindi" / "Saare Jahan Se Achha", Ittehad (1904); collected in Bang-e-Dara (1924).
+    - Synthetic factual entry (AI-authored). Reference text — Muhammad Iqbal, "Tarana-e-Hindi" / "Saare Jahan Se Achha", Ittehad (1904); collected in Bang-e-Dara (1924).
 - id: INDIA-POET-B006
   category: india-poetry-and-music
   question_type: completion
@@ -627,10 +603,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Kabir, traditional doha, widely anthologised in Hindi Bhakti collections; appears in the Guru Granth Sahib and the Bijak.
+    - Synthetic factual entry (AI-authored). Reference text — Kabir, traditional doha, widely anthologised in Hindi Bhakti collections; appears in the Guru Granth Sahib and the Bijak.
 - id: INDIA-PUBL-B006
   category: india-public-services
   question_type: completion
@@ -662,10 +638,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Reference text — Preamble, Constitution of India (adopted 26 November 1949; commenced 26 January 1950; modified by Constitution (Forty-second Amendment) Act, 1976).
+    - Synthetic factual entry (AI-authored). Reference text — Preamble, Constitution of India (adopted 26 November 1949; commenced 26 January 1950; modified by Constitution (Forty-second Amendment) Act, 1976).
 - id: INDIA-HEAL-B001
   category: india-health-systems
   question_type: factual_recall
@@ -683,10 +659,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmjay.gov.in, National Health Authority (nha.gov.in), Ministry of Health & Family Welfare.
+    - Synthetic factual entry (AI-authored). Standard reference points — pmjay.gov.in, National Health Authority (nha.gov.in), Ministry of Health & Family Welfare.
 - id: INDIA-HEAL-B002
   category: india-health-systems
   question_type: factual_recall
@@ -704,10 +680,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — cghs.gov.in, Ministry of Health & Family Welfare CGHS Office Memorandums.
+    - Synthetic factual entry (AI-authored). Standard reference points — cghs.gov.in, Ministry of Health & Family Welfare CGHS Office Memorandums.
 - id: INDIA-HEAL-B003
   category: india-health-systems
   question_type: factual_recall
@@ -725,10 +701,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' State Insurance Act, 1948; esic.gov.in; Ministry of Labour & Employment notifications.
+    - Synthetic factual entry (AI-authored). Standard reference points — Employees' State Insurance Act, 1948; esic.gov.in; Ministry of Labour & Employment notifications.
 - id: INDIA-HEAL-B004
   category: india-health-systems
   question_type: factual_recall
@@ -746,10 +722,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — nsap.nic.in (NSAP/IGNOAPS), pmjay.gov.in (Ayushman Vay Vandana), Ministry of Social Justice & Empowerment (RVY).
+    - Synthetic factual entry (AI-authored). Standard reference points — nsap.nic.in (NSAP/IGNOAPS), pmjay.gov.in (Ayushman Vay Vandana), Ministry of Social Justice & Empowerment (RVY).
 - id: INDIA-HEAL-B005
   category: india-health-systems
   question_type: factual_recall
@@ -767,10 +743,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Mental Healthcare Act, 2017 (Bare Act); Ministry of Health & Family Welfare; IRDAI Mental Health Insurance circular (2018).
+    - Synthetic factual entry (AI-authored). Standard reference points — Mental Healthcare Act, 2017 (Bare Act); Ministry of Health & Family Welfare; IRDAI Mental Health Insurance circular (2018).
 - id: INDIA-HEAL-B006
   category: india-health-systems
   question_type: factual_recall
@@ -788,10 +764,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Drugs (Prices Control) Order 2013, NLEM 2022, nppaindia.nic.in, Department of Pharmaceuticals.
+    - Synthetic factual entry (AI-authored). Standard reference points — Drugs (Prices Control) Order 2013, NLEM 2022, nppaindia.nic.in, Department of Pharmaceuticals.
 - id: INDIA-EDUC-B001
   category: india-education
   question_type: factual_recall
@@ -809,10 +785,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Right of Children to Free and Compulsory Education Act, 2009; Constitution (Eighty-sixth Amendment) Act, 2002; Ministry of Education.
+    - Synthetic factual entry (AI-authored). Standard reference points — Right of Children to Free and Compulsory Education Act, 2009; Constitution (Eighty-sixth Amendment) Act, 2002; Ministry of Education.
 - id: INDIA-EDUC-B002
   category: india-education
   question_type: factual_recall
@@ -830,10 +806,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Testing Agency (nta.ac.in), AICTE (aicte-india.org), JEE Apex Board, NMC, MCC.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Testing Agency (nta.ac.in), AICTE (aicte-india.org), JEE Apex Board, NMC, MCC.
 - id: INDIA-EDUC-B003
   category: india-education
   question_type: factual_recall
@@ -852,10 +828,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — National Education Policy 2020 (Ministry of Education); NEP 1986/92 archive; PIB releases on NEP implementation.
+    - Synthetic factual entry (AI-authored). Standard reference points — National Education Policy 2020 (Ministry of Education); NEP 1986/92 archive; PIB releases on NEP implementation.
 - id: INDIA-EDUC-B004
   category: india-education
   question_type: factual_recall
@@ -873,10 +849,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — vidyalakshmi.co.in, Department of Financial Services, IBA Model Education Loan Scheme, Central Sector Interest Subsidy Scheme guidelines.
+    - Synthetic factual entry (AI-authored). Standard reference points — vidyalakshmi.co.in, Department of Financial Services, IBA Model Education Loan Scheme, Central Sector Interest Subsidy Scheme guidelines.
 - id: INDIA-EDUC-B005
   category: india-education
   question_type: factual_recall
@@ -893,10 +869,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Samagra Shiksha framework (Department of School Education and Literacy); PM POSHAN guidelines; National Food Security Act, 2013; PUCL v. Union of India (Mid-Day Meals).
+    - Synthetic factual entry (AI-authored). Standard reference points — Samagra Shiksha framework (Department of School Education and Literacy); PM POSHAN guidelines; National Food Security Act, 2013; PUCL v. Union of India (Mid-Day Meals).
 - id: INDIA-EDUC-B006
   category: india-education
   question_type: factual_recall
@@ -914,10 +890,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — UGC Act 1956, AICTE Act 1987, National Medical Commission Act 2019, Advocates Act 1961.
+    - Synthetic factual entry (AI-authored). Standard reference points — UGC Act 1956, AICTE Act 1987, National Medical Commission Act 2019, Advocates Act 1961.
 - id: INDIA-LABO-B001
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -935,10 +911,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Employees' Provident Funds & MP Act, 1952; EPF Scheme 1952; epfindia.gov.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — Employees' Provident Funds & MP Act, 1952; EPF Scheme 1952; epfindia.gov.in.
 - id: INDIA-LABO-B002
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -956,10 +932,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment of Gratuity Act, 1972 (and Amendment Act 2018); Section 10(10) Income-tax Act; labour.gov.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — Payment of Gratuity Act, 1972 (and Amendment Act 2018); Section 10(10) Income-tax Act; labour.gov.in.
 - id: INDIA-LABO-B003
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -977,10 +953,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Code on Wages 2019; Industrial Relations Code 2020; Code on Social Security 2020; Occupational Safety, Health and Working Conditions Code 2020; labour.gov.in; PRS Legislative Research.
+    - Synthetic factual entry (AI-authored). Standard reference points — Code on Wages 2019; Industrial Relations Code 2020; Code on Social Security 2020; Occupational Safety, Health and Working Conditions Code 2020; labour.gov.in; PRS Legislative Research.
 - id: INDIA-LABO-B004
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -998,10 +974,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; pfrda.org.in; npscra.nsdl.co.in; Department of Pension & Pensioners' Welfare (UPS notification, 2024).
+    - Synthetic factual entry (AI-authored). Standard reference points — PFRDA Act 2013; pfrda.org.in; npscra.nsdl.co.in; Department of Pension & Pensioners' Welfare (UPS notification, 2024).
 - id: INDIA-LABO-B005
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -1019,10 +995,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Maternity Benefit Act, 1961; Maternity Benefit (Amendment) Act, 2017; Code on Social Security, 2020.
+    - Synthetic factual entry (AI-authored). Standard reference points — Maternity Benefit Act, 1961; Maternity Benefit (Amendment) Act, 2017; Code on Social Security, 2020.
 - id: INDIA-LABO-B006
   category: india-labor-and-benefits
   question_type: factual_recall
@@ -1040,10 +1016,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Industrial Disputes Act, 1947 (Sections 2, 25F, 25G, 25K-25S); Industrial Relations Code, 2020.
+    - Synthetic factual entry (AI-authored). Standard reference points — Industrial Disputes Act, 1947 (Sections 2, 25F, 25G, 25K-25S); Industrial Relations Code, 2020.
 - id: INDIA-FINA-B001
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1061,10 +1037,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Government Savings Promotion Act, 2018; Public Provident Fund Scheme; Department of Economic Affairs notifications.
+    - Synthetic factual entry (AI-authored). Standard reference points — Government Savings Promotion Act, 2018; Public Provident Fund Scheme; Department of Economic Affairs notifications.
 - id: INDIA-FINA-B002
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1082,10 +1058,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 80C, 80CCD, 115BAC); incometax.gov.in; annual Finance Acts.
+    - Synthetic factual entry (AI-authored). Standard reference points — Income-tax Act, 1961 (Sections 80C, 80CCD, 115BAC); incometax.gov.in; annual Finance Acts.
 - id: INDIA-FINA-B003
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1104,10 +1080,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — PFRDA Act 2013; PFRDA (Tax Benefits) circulars; Income-tax Act 1961 Sections 80CCD and 10(12A); npscra.nsdl.co.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — PFRDA Act 2013; PFRDA (Tax Benefits) circulars; Income-tax Act 1961 Sections 80CCD and 10(12A); npscra.nsdl.co.in.
 - id: INDIA-FINA-B004
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1125,10 +1101,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Senior Citizens' Savings Scheme Rules; Government Savings Promotion Act 2018; Budget 2023 announcements; Income-tax Act Section 194A.
+    - Synthetic factual entry (AI-authored). Standard reference points — Senior Citizens' Savings Scheme Rules; Government Savings Promotion Act 2018; Budget 2023 announcements; Income-tax Act Section 194A.
 - id: INDIA-FINA-B005
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1146,10 +1122,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — DICGC Act, 1961; DICGC (Amendment) Act, 2021; dicgc.org.in; RBI press releases on coverage.
+    - Synthetic factual entry (AI-authored). Standard reference points — DICGC Act, 1961; DICGC (Amendment) Act, 2021; dicgc.org.in; RBI press releases on coverage.
 - id: INDIA-FINA-B006
   category: india-finance-and-consumer
   question_type: factual_recall
@@ -1167,10 +1143,10 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Income-tax Act, 1961 (Sections 2(42A), 50AA, 111A, 112, 112A); Finance (No. 2) Act, 2024; incometax.gov.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — Income-tax Act, 1961 (Sections 2(42A), 50AA, 111A, 112, 112A); Finance (No. 2) Act, 2024; incometax.gov.in.
 - id: INDIA-DIGI-B001
   category: india-digital-services
   question_type: factual_recall
@@ -1189,10 +1165,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Aadhaar Act 2016; K.S. Puttaswamy v. Union of India, 2017 (privacy) and 2018 (Aadhaar); uidai.gov.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — Aadhaar Act 2016; K.S. Puttaswamy v. Union of India, 2017 (privacy) and 2018 (Aadhaar); uidai.gov.in.
 - id: INDIA-DIGI-B002
   category: india-digital-services
   question_type: factual_recall
@@ -1210,10 +1186,10 @@ entries:
   - age:18-44
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — digilocker.gov.in; National e-Governance Division (NeGD) under MeitY; IT Act 2000 Section 9; Rule 9A IT Rules 2011.
+    - Synthetic factual entry (AI-authored). Standard reference points — digilocker.gov.in; National e-Governance Division (NeGD) under MeitY; IT Act 2000 Section 9; Rule 9A IT Rules 2011.
 - id: INDIA-DIGI-B003
   category: india-digital-services
   question_type: factual_recall
@@ -1231,10 +1207,10 @@ entries:
   - age:45-64
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Payment and Settlement Systems Act 2007; npci.org.in; Section 269SU Income-tax Act; NPCI UPI circulars on transaction limits and interchange.
+    - Synthetic factual entry (AI-authored). Standard reference points — Payment and Settlement Systems Act 2007; npci.org.in; Section 269SU Income-tax Act; NPCI UPI circulars on transaction limits and interchange.
 - id: INDIA-DIGI-B004
   category: india-digital-services
   question_type: factual_recall
@@ -1252,10 +1228,10 @@ entries:
   - age:65+
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — pmkisan.gov.in; Department of Agriculture & Farmers Welfare; PFMS portal.
+    - Synthetic factual entry (AI-authored). Standard reference points — pmkisan.gov.in; Department of Agriculture & Farmers Welfare; PFMS portal.
 - id: INDIA-DIGI-B005
   category: india-digital-services
   question_type: factual_recall
@@ -1273,10 +1249,10 @@ entries:
   - education:secondary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Digital Personal Data Protection Act, 2023; Information Technology Act 2000 Section 43A and SPDI Rules 2011; meity.gov.in.
+    - Synthetic factual entry (AI-authored). Standard reference points — Digital Personal Data Protection Act, 2023; Information Technology Act 2000 Section 43A and SPDI Rules 2011; meity.gov.in.
 - id: INDIA-DIGI-B006
   category: india-digital-services
   question_type: factual_recall
@@ -1293,7 +1269,7 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts en_IN, 2026-05-05)
+    source: UserSim AI-authored entry (sov_ai_facts en_IN, 2026-05-05)
     last_reviewed: '2026-05-05'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — Shreya Singhal v. Union of India (2015) 5 SCC 1; Information Technology Act, 2000 Sections 66A (struck down), 69A, 79; subsequent SC directions on continued misregistration.
+    - Synthetic factual entry (AI-authored). Standard reference points — Shreya Singhal v. Union of India (2015) 5 SCC 1; Information Technology Act, 2000 Sections 66A (struck down), 69A, 79; subsequent SC directions on continued misregistration.

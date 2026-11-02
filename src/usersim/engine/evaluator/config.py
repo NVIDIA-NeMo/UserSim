@@ -4,14 +4,14 @@
 """Config for the TrajectoryEvaluator DD column generator.
 
 The evaluator is a separate DD plugin (not the simulator). It reads
-trajectories from the trajectory store and applies a judge ensemble +
-deterministic scorers to score the *assistant under test*. Configured
+trajectories from the trajectory store and applies one or more LLM
+judges plus probe-specific scorers to score the *assistant under test*. Configured
 via ``TrajectoryEvaluatorConfig`` and dispatched as the column type
 ``"trajectory-evaluator"``.
 
 See ``src/usersim/engine/evaluator/__init__.py``
-for the rationale (in-sim / out-of-sim boundary, plugin entry-point
-pattern, SLURM compatibility).
+for the rationale (judging outside the simulation, the plugin
+entry-point pattern, one wide cell per row).
 """
 
 from __future__ import annotations
@@ -66,10 +66,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
 
     Reads a trajectory row (conversation messages + persona + probe
     metadata + simulation outcome) and writes a single wide JSON cell
-    containing the per-axis × per-judge scores plus any deterministic
-    scorer outputs. The reporting layer (``reporting/``)
-    handles wide -> long via ``pd.melt`` for inter-judge agreement
-    and intersectional aggregation.
+    containing the per-axis × per-judge scores plus the outputs of any
+    scorers. The reporting layer averages the judges' scores per axis.
 
     Partial-re-run discipline: if ``skip_if_existing`` is True and the
     row already carries a non-null value in this column whose envelope
@@ -102,9 +100,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
         ...,
         min_length=1,
         description=(
-            "Judge ensemble. ≥2 distinct families enforced for "
-            "ensembles of size ≥2 (single-judge mode is allowed but "
-            "explicitly opts out of inter-judge agreement reporting)."
+            "Judge ensemble. An ensemble of two or more judges must span "
+            "at least two model families; a single judge is allowed."
         ),
     )
 
@@ -119,8 +116,8 @@ class TrajectoryEvaluatorConfig(SingleColumnConfig):
     scorers: list[str] = Field(
         default_factory=list,
         description=(
-            "Names of deterministic scorers to dispatch (registered in "
-            "evaluator/scorers/). Empty by default; opt in per probe."
+            "Names of registered scorers to run (see "
+            "``usersim.engine.evaluator.scorers``). Empty by default; opt in per probe."
         ),
     )
 

@@ -28,11 +28,11 @@ fields in [`SCHEMA.md`](../../assets/identity_disclosure/SCHEMA.md)):
 - **A comparison**, "How are you different from X?", names a competitor
   without claiming the model is it.
 
-The phrasings cover all nine shipped locales, with the English locales sharing
+The phrasings cover all eleven shipped locales, with the English locales sharing
 one rendering. India language variants open with the base locale's phrasing,
 machine-translated. Each wording is translated once, in the polite form of
-"you", and the name is filled in afterwards, so the paired premises differ
-only in the name they ask about.
+"you" (German uses the "du" people use with a chatbot), and the name is filled
+in afterwards, so the paired premises differ only in the name they ask about.
 
 A tactic can also leave the wording to the simulated user, who writes the
 opening from the tactic's instruction, in the row's language and the persona's
@@ -125,7 +125,7 @@ came from.
 
 With more than one turn, the probe changes how the loop runs through its
 `user_turn_policy()`. The model under test sees each of its earlier replies as
-written, never a summary, even when the run compresses context. No follow-up
+written, never a summary, even when the run manages context with summaries. No follow-up
 is told to thank the assistant and wrap up; a pressed row's follow-ups carry
 their own instruction instead of the loop's "you are asking for help". And
 what these users naturally write passes the loop's filters: "language model"
@@ -140,7 +140,7 @@ competitor.
 capability rows need. From the command line, name it:
 
 ```bash
-usersim evaluate --scorers identity_disclosure
+usersim eval --trajectories output/trajectories --out output/evaluations --scorers identity_disclosure
 ```
 
 The scorer makes one extraction call per trajectory with the first judge
@@ -152,7 +152,7 @@ spec's vocabulary and grades every turn against `expected_identity`. Whole
 reasoning traces never reach the extractor: the vocabulary finds the developers
 a trace names that the model may not name and the user never mentioned, and
 only the passages around those names go into the same call, where each is
-labelled like a turn. A claim counts; a passing mention ("LLaMA-style
+labeled like a turn. A claim counts; a passing mention ("LLaMA-style
 architectures") does not. A passage that comes back unlabelled is counted by
 the text match and flagged for review.
 
@@ -271,6 +271,8 @@ A probe that asks about identity its own way, with its own tactics,
 strategies or models, can subclass this one under a label of its own:
 
 ```python
+from pathlib import Path
+
 from usersim.engine.core.probes import register_probe
 from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosureProbe
 
@@ -278,9 +280,11 @@ from usersim.engine.probes.identity_disclosure.generator import IdentityDisclosu
 @register_probe(family="my_identity", prompt_version="v1.0", variants=("default",))
 class MyIdentityProbe(IdentityDisclosureProbe):
     label = "my_identity"
+    assets_root = Path(__file__).parent / "assets"  # holds my_identity/spec.yaml
 ```
 
-Its spec is `my_identity/spec.yaml` on the asset search path, or the file
+Its spec is `my_identity/spec.yaml` under the class's `assets_root` or on the
+asset search path, or the file
 `USERSIM_MY_IDENTITY_SPEC` names, and is usually a layer with
 `extends: identity_disclosure`. Its rows record that spec's version under
 their own label and carry an `expected_identity`, so the `identity_disclosure`

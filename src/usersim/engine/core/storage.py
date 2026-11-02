@@ -39,7 +39,7 @@ always use the run-partitioned layout.
 
 Schema unification: different probes write different side-channel
 columns (``query_id`` for sov_ai_multilingual_parity,
-``attempted_actions`` for safety_agentic, etc.) and historical-drift
+``action_request_id`` for safety_agentic, etc.) and historical-drift
 recovery ensures that cross-fragment ``string`` vs ``double`` (from
 all-NaN columns in older fragments) promotes cleanly to ``string``.
 See ``_unify_fragment_schemas_robust`` for the recovery logic.

@@ -363,6 +363,10 @@ class TestPlaceholderField:
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
+# Taxonomies not yet audited by a native-speaker reviewer, which therefore
+# carry ``placeholder: true``.
+_AWAITING_NATIVE_REVIEW = frozenset({"en_GB", "de_DE"})
+
 # Locales that share a country topic universe (en_IN + hi_Deva_IN both
 # cover India) get the same category prefix.
 _CATEGORY_PREFIX_BY_LOCALE = {
@@ -370,10 +374,12 @@ _CATEGORY_PREFIX_BY_LOCALE = {
     "pt_BR": "brazil",
     "ja_JP": "japan",
     "fr_FR": "france",
+    "de_DE": "germany",
     "hi_Deva_IN": "india",
     "hi_Latn_IN": "india",
     "en_IN": "india",
     "en_SG": "singapore",
+    "en_GB": "uk",
     "ko_KR": "korea",
 }
 
@@ -389,9 +395,11 @@ _LANGUAGE_MARKERS = {
     "pt_BR": ("você", "sua", "seu", "para"),
     "ja_JP": ("について", "です", "ます", "あなた"),
     "fr_FR": ("vous", "votre", "votre"),
+    "de_DE": ("sie", "ihre", "ihnen"),
     "hi_Deva_IN": ("आप", "के", "में", "है"),
     "hi_Latn_IN": ("aap", "mein", "ke", "hai"),
     "en_SG": ("you", "your", "singapore"),
+    "en_GB": ("the", "you", "your"),
     "ko_KR": ("당신", "한국", "대해", "하세요"),
 }
 
@@ -418,10 +426,8 @@ class TestEveryShippedLocaleTaxonomy:
         assert tax.taxonomy_id.startswith(locale)
 
     def test_placeholder_flag_matches_review_status(self, locale: str, prefix: str) -> None:
-        # The shipped taxonomies have been promoted to beta and should
-        # no longer carry placeholder-readiness blockers.
         tax = self._load(locale)
-        assert tax.placeholder is False
+        assert tax.placeholder is (locale in _AWAITING_NATIVE_REVIEW)
 
     def test_10_categories_with_country_prefix(self, locale: str, prefix: str) -> None:
         tax = self._load(locale)
@@ -432,7 +438,7 @@ class TestEveryShippedLocaleTaxonomy:
             )
 
     def test_canonical_10_topic_set(self, locale: str, prefix: str) -> None:
-        # Every shipped locale uses the canonical beta topic set so per-
+        # Every shipped locale uses the canonical topic set so per-
         # category comparison across locales is direct.
         tax = self._load(locale)
         topics = {cat.id.removeprefix(f"{prefix}-") for cat in tax.categories}

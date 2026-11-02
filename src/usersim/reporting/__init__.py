@@ -21,9 +21,8 @@ Two layers ship from this package:
   capability dashboard as the "Sim Health" panel; also re-exported here
   for ad-hoc analysis use.
 
-Wide → long for inter-judge agreement and intersectional aggregation
-is done in the builder via :mod:`pandas` rather than persisted in long
-form at rest.
+The builders read the wide evaluator cells directly; nothing is stored
+in long form.
 """
 
 from usersim.reporting.capability_report import (

@@ -11,12 +11,16 @@ deterministic verifier scorer (good / unauthorized / skip / Tier-2).
 
 from __future__ import annotations
 
+import copy
 import dataclasses
+import datetime
 import json
 import re
 import textwrap
 import types
+import unicodedata
 from contextlib import contextmanager
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from unittest.mock import patch
 
@@ -25,6 +29,8 @@ import pytest
 from usersim.engine.core._assets import packaged_assets_dir
 from usersim.engine.core.finance_bank import (
     FinanceBankError,
+    finance_bank_locale,
+    has_finance_tasks,
     load_finance_bank,
     load_finance_bank_for_locale,
 )
@@ -138,9 +144,10 @@ def test_kb_search_offered_with_query_parameter():
 
 
 # Locales that ship a searchable corpus but no ``tasks.yaml`` and no
-# locale-level ``dynamic.yaml``, so the probe cannot instantiate a scenario on
-# them and aborts at runtime. Authoring those assets must move the locale out of
-# here and into the runnable set -- and delete this tuple's test once it empties.
+# locale-level ``dynamic.yaml``. Their own bank cannot instantiate a scenario, so
+# their rows run on their base locale's bank (see ``finance_bank_locale``).
+# Authoring those assets must move the locale out of here and into the runnable
+# set -- and delete this tuple's test once it empties.
 _CORPUS_ONLY_LOCALES: tuple[str, ...] = ("hi_Deva_IN",)
 
 
@@ -175,6 +182,81 @@ def test_all_committed_banks_load():
         load_finance_bank(locale_dir)  # raises FinanceBankError on any gold/scope break
 
 
+def _decimal_places(value: object) -> int:
+    """Digits after the decimal point when ``value`` reads as a number, else 0."""
+    try:
+        exponent = Decimal(str(value)).as_tuple().exponent
+    except InvalidOperation:
+        return 0
+    return -exponent if isinstance(exponent, int) else 0
+
+
+def test_every_task_holds_the_account_money_under_balance():
+    """The account view and the customer's grounding read only ``account_state.balance``,
+    so money held under another key such as ``cash_balance`` shows as 0.00 and the
+    customer is told their account is empty while asking to move money out of it.
+    Amounts beside a ``balance`` (a second account, a limit, a contribution) stay
+    allowed. A ``balance`` that reads as a number carries at most two decimals, so a
+    localized ``3.000`` cannot pass for 3; one filled from a slot is checked for every
+    value the slot can take.
+    """
+    runnable, _ = _partition_committed_banks()
+    assert runnable, "no runnable committed banks found"
+    templates = [
+        (f"{locale_dir.name} {tpl.id}", tpl)
+        for locale_dir in runnable
+        for inst in load_finance_bank(locale_dir).institutions
+        for tpl in inst.templates
+    ]
+    hidden, misread = [], []
+    for where, tpl in templates:
+        state = tpl.account_state
+        if "balance" not in state:
+            if any(key.endswith("_balance") for key in state):
+                hidden.append(where)
+            continue
+        raw = state["balance"]
+        slot = re.fullmatch(r"\{\{\s*(\w+)\s*\}\}", str(raw))
+        values = tpl.param_space.get(slot.group(1), ()) if slot else (raw,)
+        misread += [f"{where}: {value!r}" for value in values if _decimal_places(value) > 2]
+    assert not hidden, f"tasks hold the account's money outside balance: {hidden}"
+    assert not misread, f"balances with more than two decimals: {misread}"
+
+
+def test_every_cancel_task_lists_the_order_it_cancels():
+    """``get_order_status`` lists ``account_state.orders`` and ``cancel_order`` acts on an
+    order there, so an order held under another key such as ``open_orders`` can be
+    neither found nor cancelled. Every task whose gold cancels an order lists the
+    orders its ``expected_state_deltas`` cancel, and cancelling each listed id leaves
+    it ``CANCELLED``.
+    """
+    runnable, _ = _partition_committed_banks()
+    assert runnable, "no runnable committed banks found"
+    templates = [
+        (f"{locale_dir.name} {tpl.id}", tpl)
+        for locale_dir in runnable
+        for inst in load_finance_bank(locale_dir).institutions
+        for tpl in inst.templates
+    ]
+    hidden = [
+        where for where, tpl in templates if any(k != "orders" and k.endswith("orders") for k in tpl.account_state)
+    ]
+    cancel_tasks = [(where, tpl) for where, tpl in templates if "cancel_order" in tpl.gold_tool_sequence]
+    assert cancel_tasks, "no committed task cancels an order"
+    unsolvable = []
+    for where, tpl in cancel_tasks:
+        state = copy.deepcopy(dict(tpl.account_state))
+        expected = {key.split(".")[0] for key, value in tpl.expected_state_deltas.items() if value == "CANCELLED"}
+        listed = {o["order_id"] for o in G._apply_tool("get_order_status", {}, state).get("orders", [])}
+        for order_id in sorted(expected & listed):
+            G._apply_tool("cancel_order", {"order_id": order_id}, state)
+        statuses = {o["order_id"]: o["status"] for o in state.get("orders", [])}
+        if not expected or any(statuses.get(order_id) != "CANCELLED" for order_id in expected):
+            unsolvable.append(where)
+    assert not hidden, f"tasks hold orders outside orders: {hidden}"
+    assert not unsolvable, f"cancel tasks whose order the tools can't list and cancel: {unsolvable}"
+
+
 def test_corpus_only_banks_are_declared_and_still_unrunnable():
     """Pin the corpus-only locales so the exemption cannot rot.
 
@@ -192,6 +274,36 @@ def test_corpus_only_banks_are_declared_and_still_unrunnable():
     for locale_dir in corpus_only:
         with pytest.raises(FinanceBankError, match=r"tasks\.yaml"):
             load_finance_bank(locale_dir)
+
+
+class TestFinanceBankLocale:
+    """A row runs on its locale's own bank once it has tasks, and India's on en_IN's until then."""
+
+    def test_a_locale_with_tasks_runs_on_its_own_bank(self):
+        assert finance_bank_locale("en_US") == "en_US"
+
+    def test_the_hindi_locales_run_on_en_IN_until_they_have_tasks(self):
+        # hi_Deva_IN ships a corpus without tasks; hi_Latn_IN ships no bank at all.
+        for loc in ("hi_Deva_IN", "hi_Latn_IN"):
+            assert finance_bank_locale(loc) == "en_IN"
+            assert finance_bank_locale(loc, has_tasks=lambda _: True) == loc
+
+    def test_a_variant_runs_on_en_IN_until_it_has_tasks(self):
+        assert finance_bank_locale("ta_Latn_IN") == "en_IN"
+        assert finance_bank_locale("ta_Latn_IN", has_tasks=lambda _: True) == "ta_Latn_IN"
+
+    def test_a_locale_with_no_base_keeps_its_own_name(self):
+        assert finance_bank_locale("ja_JP", has_tasks=lambda _: False) == "ja_JP"
+
+    def test_a_task_set_in_the_bank_rows_load_takes_over(self, tmp_path, monkeypatch):
+        (tmp_path / "bank" / "acme").mkdir(parents=True)
+        (tmp_path / "bank" / "acme" / "corpus.yaml").write_text("{}\n")
+        monkeypatch.setenv("USERSIM_FINANCIAL_SERVICES_BANK_HI_DEVA_IN", str(tmp_path))
+        assert not has_finance_tasks(tmp_path)
+        assert finance_bank_locale("hi_Deva_IN") == "en_IN"
+        (tmp_path / "bank" / "acme" / "tasks.yaml").write_text("{}\n")
+        assert has_finance_tasks(tmp_path)
+        assert finance_bank_locale("hi_Deva_IN") == "hi_Deva_IN"
 
 
 def test_bank_loads_four_institutions():
@@ -1241,6 +1353,34 @@ def test_financial_literacy_derivation_and_tag():
     assert any(t.startswith("financial-literacy:") for t in persona_to_tags(high))
 
 
+def test_korean_personas_span_every_literacy_level():
+    """ko_KR's education values map onto the shared scale, so Korean personas reach the
+    low, medium and high literacy tags that tasks and dynamic categories select on."""
+    from usersim.engine.probes.financial_services.task_derivation import derive_financial_literacy
+
+    def level(education: str) -> str:
+        return derive_financial_literacy({"education_level": education, "occupation": "회사원"}, "ko_KR")
+
+    assert [level(e) for e in ("고등학교", "2~3년제 전문대학", "4년제 대학교", "대학원")] == [
+        "low",
+        "medium",
+        "high",
+        "high",
+    ]
+
+
+def test_the_customer_prompt_names_a_korean_persona_family_name_first():
+    """The customer's own name, the persona block and the full name they verify with
+    all read 최도화, the order a Korean name is written in."""
+    probe, _ = _probe_on("en_US", _northwind_dispute_instance())
+    probe._persona = {**_PERSONA, "first_name": "도화", "last_name": "최"}
+    prompt = probe._build_user_system_prompt()
+    assert "You are 최도화," in prompt
+    assert "Name: 최도화" in prompt
+    assert "full name 최도화" in prompt
+    assert "도화 최" not in prompt
+
+
 async def test_dynamic_tier_generates_turn_1_and_emits_columns():
     """The dynamic tier has no scripted opening: the loop GENERATES turn-1 via
     the user-LLM (persona + invitation + subtopic hint), then the assistant
@@ -1707,23 +1847,70 @@ class TestVerbatimOpeningLocalization:
         translate.assert_called_once()
         assert WarningKind.USED_MACHINE_TRANSLATION in _warning_kinds(ob)
 
+    @pytest.mark.parametrize(("locale", "romanized"), [("hi_Deva_IN", False), ("hi_Latn_IN", True)])
+    async def test_a_hindi_opening_is_translated_from_the_en_IN_bank(self, locale, romanized):
+        probe, ob = _probe_on(locale, _chandrika_instance())
+        assert probe._asset_locale == "en_IN"
+        state = G.ConversationState(messages=[], metadata={})
+        with patch(
+            "usersim.engine.core.translation.translate_user_turn",
+            return_value="Hindi opening",
+        ) as translate:
+            got = await probe.get_verbatim_first_user_turn(state)
+        assert got == "Hindi opening"
+        assert translate.call_args.kwargs["romanize"] is romanized
+        assert WarningKind.USED_MACHINE_TRANSLATION in _warning_kinds(ob)
+
     async def test_dynamic_tier_still_has_no_scripted_opening(self):
         probe, _ = _probe_on("en_US", _dynamic_instance())
         state = G.ConversationState(messages=[], metadata={})
         assert await probe.get_verbatim_first_user_turn(state) is None
 
 
+def _with_vectors(institution):
+    return dataclasses.replace(institution, embeddings={d.id: (0.1, 0.2) for d in institution.documents})
+
+
+class TestQueryEmbedding:
+    """A query is embedded only when the bank has document vectors to compare it with.
+
+    Packaged banks ship none, so embedding every query would be a model call per
+    search whose result is never used.
+    """
+
+    @staticmethod
+    async def _search(probe):
+        state = G.ConversationState(messages=[], metadata={})
+        probe.seed_state_metadata(state)
+        with patch("usersim.engine.core.embeddings.aembed_query", return_value=[0.1, 0.2]) as embed:
+            await probe.execute_tool_call(
+                "kb_search", {"query": "dispute a card charge"}, {}, state, {}, turn_idx=0, call_idx=0
+            )
+        return embed
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_without_vectors_is_searched_without_embedding_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = dataclasses.replace(probe._institution, embeddings={})
+        (await self._search(probe)).assert_not_called()
+
+    @pytest.mark.parametrize("mode", ["hybrid", "dense"])
+    async def test_a_bank_with_vectors_embeds_the_query(self, mode):
+        probe, _ = _probe_on("en_US", _northwind_dispute_instance(), finance_retrieval_mode=mode)
+        probe._institution = _with_vectors(probe._institution)
+        (await self._search(probe)).assert_called_once()
+
+
 class TestSearchQueryTranslation:
     """A borrowed corpus is in another language, so the QUERY has to cross too.
 
     ``_localize_verbatim`` carries bank text out to the conversation language.
-    Retrieval needs the mirror image: a stop-gap locale searches an English
-    corpus, and lexical ranking tokenizes on ``[a-z0-9]+``, so a native-script
-    query yields ZERO tokens. An empty token set makes ``_lexical_rank`` return
-    the corpus's first k documents regardless of the query, and zeroes the
-    lexical half of ``hybrid`` — leaving pure dense, measured on this corpus at
-    4% precision@8 against hybrid's 88%. Nothing failed; retrieval just went
-    blind and the scorer computed a recall from it.
+    Retrieval needs the mirror image: an India variant searches an English
+    corpus, and a native-script query shares no word with it, so every lexical
+    score ties and the ranking ignores the query, and ``hybrid`` loses its
+    lexical half, leaving dense alone, measured on this corpus at 4%
+    precision@8 against hybrid's 88%. Nothing fails; retrieval just goes blind
+    and the scorer computes a recall from it.
     """
 
     def _variant_probe(self, **cfg_kw):
@@ -1776,8 +1963,9 @@ class TestSearchQueryTranslation:
         its output has to reach both halves of retrieval. Passing the original to
         ``retrieve`` would leave the lexical collapse exactly as it was while
         looking, from the trace, as though the query had been translated."""
-        # hybrid, so the embedding half is exercised too (golden skips it).
+        # hybrid, with document vectors, so the embedding half is exercised too.
         probe, _ = self._variant_probe(finance_retrieval_mode="hybrid")
+        probe._institution = _with_vectors(probe._institution)
         state = G.ConversationState(messages=[], metadata={})
         probe.seed_state_metadata(state)
         with (
@@ -1855,9 +2043,9 @@ class TestSearchQueryTranslation:
         assert traces[0].extra["query"] == "அட்டை கட்டணம்"
         assert traces[0].extra["translated_query"] == "dispute a card charge"
 
-    async def test_a_translated_query_flags_the_row_preview_only(self):
+    async def test_a_translated_query_flags_the_row_as_machine_translated(self):
         """The dynamic tier has no verbatim turn-1, so without this a dynamic row
-        on a stop-gap locale would use machine translation and carry no warning
+        on an India variant would use machine translation and carry no warning
         at all — and the scorecard would read its retrieval metrics as native."""
         probe, ob = _probe_on("en_US", _dynamic_instance())
         probe._locale = "ta_Taml_IN"
@@ -1916,33 +2104,134 @@ class TestSearchQueryTranslation:
         assert state.metadata["kb_search_queries"] == [""]
 
 
-class TestNativeScriptQueryCollapsesLexicalRanking:
+class TestNativeScriptQueryCannotMatchAnEnglishCorpus:
     """The measurement that motivated query translation, pinned.
 
-    If ``_tokens`` ever becomes Unicode-aware, the zero-token collapse changes
-    shape and this test should be revisited — but query translation is still
-    what makes a Tamil query MATCH an English document, which tokenizing alone
-    would not.
+    Native-script words tokenize whole, but a Tamil or Hindi query shares no word
+    with an English corpus, so every document ties and the ranking ignores the
+    query. Translating the query is what lets it match.
     """
 
-    def test_a_native_script_query_yields_no_lexical_tokens(self):
-        assert R._tokens("சேமிப்பு கணக்கு கட்டணம்") == set()
-        assert R._tokens("बचत खाते पर शुल्क") == set()
-        assert R._tokens("savings account charge")
+    TAMIL = "சேமிப்பு கணக்கு கட்டணம்"
+    HINDI = "बचत खाते पर शुल्क"
 
-    def test_a_zero_token_query_returns_corpus_order_not_relevance(self):
+    def test_native_script_words_tokenize_whole(self):
+        assert R._tokens(self.TAMIL) == {"சேமிப்பு", "கணக்கு", "கட்டணம்"}
+        assert R._tokens(self.HINDI) == {"बचत", "खाते", "पर", "शुल्क"}
+
+    def test_a_native_script_query_ranks_the_same_whatever_it_asks(self):
         from usersim.engine.core.finance_bank import load_finance_bank_for_locale
 
-        bank = load_finance_bank_for_locale("en_IN")
-        inst = bank.institution("chandrika_bank")
-        tamil = R._lexical_rank(inst, "சேமிப்பு கணக்கு கட்டணம்", 4)
-        hindi = R._lexical_rank(inst, "बचत खाते पर शुल्क", 4)
+        inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+        corpus = set().union(*(R._tokens(f"{d.title} {d.body}") for d in inst.documents))
+        assert not (R._tokens(self.TAMIL) | R._tokens(self.HINDI)) & corpus
+
+        tamil = R._lexical_rank(inst, self.TAMIL, 4)
+        hindi = R._lexical_rank(inst, self.HINDI, 4)
         english = R._lexical_rank(inst, "minimum average balance charge", 4)
         # Two unrelated queries in different languages returning the identical
         # list is the tell: neither influenced the ranking at all.
         assert [d.id for d in tamil] == [d.id for d in hindi]
-        assert [d.id for d in tamil] == [d.id for d in inst.documents[:4]]
         assert [d.id for d in english] != [d.id for d in tamil]
+
+
+def _institution_with(*docs):
+    """An institution holding only the given ``(id, title, body)`` documents."""
+    from usersim.engine.core.finance_bank import Document, Institution
+
+    return Institution(
+        institution_id="acme",
+        display_name="Acme",
+        type="bank",
+        brand_voice="traditional",
+        domains=("retail_banking",),
+        documents=tuple(
+            Document(
+                id=doc_id,
+                title=title,
+                body=body,
+                product_category="p",
+                document_type="faq",
+                source_authority="official",
+                placeholder=True,
+            )
+            for doc_id, title, body in docs
+        ),
+        tools=(),
+        templates=(),
+    )
+
+
+class TestLexicalTokensAreUnicodeWords:
+    """French and German banks retrieve on whole words, not ASCII fragments."""
+
+    @staticmethod
+    def _inst():
+        return _institution_with(
+            ("D_a", "Horaires des agences", "Les agences ouvrent à neuf heures."),
+            ("D_b", "Relevé de compte", "Le relevé mensuel détaille chaque opération."),
+            ("D_c", "Überweisung ins Ausland", "Eine Überweisung dauert zwei Tage."),
+            ("D_d", "Adresse ändern", "Geben Sie die neue Straße und Hausnummer an."),
+        )
+
+    def test_accented_words_and_eszett_tokenize_whole(self):
+        assert R._tokens("Épargne réglementée") == {"épargne", "réglementée"}
+        assert R._tokens("Überweisung an die Straße") == {"überweisung", "an", "die", "strasse"}
+
+    def test_composed_and_decomposed_accents_compare_equal(self):
+        composed = "relevé de compte"
+        decomposed = unicodedata.normalize("NFD", composed)
+        assert decomposed != composed
+        assert R._tokens(decomposed) == R._tokens(composed)
+
+    def test_punctuation_apostrophes_and_underscores_separate_words(self):
+        assert R._tokens("l'épargne, open_account (401k)") == {"l", "épargne", "open", "account", "401k"}
+
+    def test_an_accented_query_ranks_the_document_that_uses_those_words_first(self):
+        inst = self._inst()
+        assert R._lexical_rank(inst, "relevé mensuel", 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "Überweisung", 1)[0].id == "D_c"
+        assert R._lexical_rank(inst, unicodedata.normalize("NFD", "relevé"), 1)[0].id == "D_b"
+        assert R._lexical_rank(inst, "neue Strasse", 1)[0].id == "D_d"
+
+
+class TestCjkTextTokenizesInCharacterPairs:
+    """Japanese and Korean banks retrieve on character pairs, not whole clauses."""
+
+    def test_a_run_of_han_or_kana_becomes_overlapping_pairs(self):
+        assert R._tokens("定期預金") == {"定期", "期預", "預金"}
+        assert R._tokens("ATMの利用") == {"atm", "の利", "利用"}
+
+    def test_korean_words_share_their_stem_across_particles(self):
+        assert R._tokens("계좌를 해지") == {"계좌", "좌를", "해지"}
+        assert "계좌" in R._tokens("계좌를") & R._tokens("계좌가")
+
+    def test_a_run_of_one_character_stays_whole(self):
+        assert R._tokens("円") == {"円"}
+        assert R._tokens("2026年") == {"2026", "年"}
+        assert R._tokens("人々") == {"人々"}
+
+    def test_full_width_forms_fold_and_nothing_else_does(self):
+        assert R._tokens("ＡＴＭ ３") == {"atm", "3"}
+        assert R._tokens("ｶｰﾄﾞ") == R._tokens("カード")
+        assert R._tokens("ｶﾞｲﾄﾞ") == R._tokens("ガイド")
+        assert R._tokens("59½") == {"59"}
+
+    def test_a_japanese_query_ranks_the_document_that_uses_those_words_first(self):
+        inst = _institution_with(
+            ("D_a", "住所変更の手続き", "お届けの住所を変更するには、本人確認書類が必要です。"),
+            ("D_b", "カードの紛失", "カードを紛失した場合は、すぐにご連絡ください。"),
+            ("D_c", "定期預金の解約", "定期預金を満期前に解約すると、所定の利率が適用されます。"),
+        )
+        assert R._lexical_rank(inst, "定期預金を解約したい", 1)[0].id == "D_c"
+
+    def test_a_korean_query_matches_a_document_with_other_particles(self):
+        inst = _institution_with(
+            ("D_a", "대출 금리 안내", "대출 금리는 매월 변동될 수 있습니다."),
+            ("D_b", "카드 분실 신고", "카드를 분실하면 즉시 신고해 주세요."),
+            ("D_c", "계좌 해지 안내", "계좌가 해지되면 잔액은 지정 계좌로 이체됩니다."),
+        )
+        assert R._lexical_rank(inst, "계좌를 해지하고 싶어요", 1)[0].id == "D_c"
 
 
 class TestDynamicTierCarriesLanguageDirective:
@@ -1968,12 +2257,17 @@ class TestScorerResolvesTheSameBankAsTheSim:
     def test_non_variant_locale_unchanged(self):
         assert FS._bank_locale("en_US") == "en_US"
 
-    def test_hindi_unchanged(self):
-        # Hindi is first-class; it must not be redirected to en_IN.
-        assert FS._bank_locale("hi_Deva_IN") == "hi_Deva_IN"
+    def test_hindi_without_tasks_of_its_own_scores_against_en_IN(self):
+        for loc in ("hi_Deva_IN", "hi_Latn_IN"):
+            assert FS._bank_locale(loc) == "en_IN"
 
     def test_variant_without_its_own_bank_scores_against_the_base(self):
         assert FS._bank_locale("ta_Taml_IN") == "en_IN"
+
+    @pytest.mark.parametrize("locale", ["en_IN", "hi_Deva_IN", "hi_Latn_IN", "ta_Latn_IN"])
+    def test_the_probe_runs_on_the_bank_the_scorer_reads(self, locale):
+        probe, _ = _probe_on(locale, _chandrika_instance())
+        assert probe._asset_locale == FS._bank_locale(locale) == "en_IN"
 
 
 # ---------------------------------------------------------------------------
@@ -2106,6 +2400,138 @@ class TestRegionAwareKyc:
         assert probe._synth_pan() == pan  # deterministic within a persona
 
 
+def _chandrika_instance():
+    inst = load_finance_bank_for_locale("en_IN").institution("chandrika_bank")
+    tpl = next(t for t in inst.templates if t.account_state.get("balance"))
+    return build_instance(tpl, inst, persona_uuid="u1", locale="en_IN", seed=1)
+
+
+def _regional(bank, locale: str, **region_meta):
+    return dataclasses.replace(bank, locale=locale, region_meta={**bank.region_meta, **region_meta})
+
+
+class TestRegionalConventions:
+    """Prompts and tools use the region's currency and date format, not the US's."""
+
+    def test_money_follows_the_region(self):
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_money("123456.5") == "$123,456.50"
+        assert load_finance_bank_for_locale("en_IN").format_money("123456.5") == "₹1,23,456.50"
+        assert load_finance_bank_for_locale("fr_FR").format_money("123456.5") == "123 456,50 €"
+        assert load_finance_bank_for_locale("ja_JP").format_money("123456") == "123,456円"
+        germany = _regional(us, "de_DE", currency_symbol="€", number_format="de_DE")
+        britain = _regional(us, "en_GB", currency_symbol="£", number_format="en_GB")
+        assert germany.format_money("123456.5") == "123.456,50 €"
+        assert britain.format_money("123456.5") == "£123,456.50"
+        assert us.format_money("-12") == "-$12.00"
+        assert us.format_money("n/a") == "$n/a"
+
+    def test_percentages_and_whole_amounts_follow_the_region(self):
+        from usersim.engine.core.finance_bank import format_amount, format_percent
+
+        assert format_percent(15.9, number_format="fr_FR") == "15,9 %"
+        assert format_percent(1.70, number_format="de_DE") == "1,7 %"
+        assert format_percent(50, number_format="en_GB") == "50%"
+        assert format_amount(22950, currency_symbol="€", number_format="fr_FR", drop_zero_cents=True) == "22 950 €"
+        assert format_amount(7.9, currency_symbol="€", number_format="de_DE", drop_zero_cents=True) == "7,90 €"
+        assert format_amount(7.9, currency_symbol="£", number_format="en_GB") == "£7.90"
+
+    def test_yen_and_won_are_whole_amounts_with_the_unit_after(self):
+        from usersim.engine.core.finance_bank import format_percent
+
+        japan = load_finance_bank_for_locale("ja_JP")
+        korea = load_finance_bank_for_locale("ko_KR")
+        assert japan.format_money("1234567") == "1,234,567円"
+        assert korea.format_money("-50000") == "-50,000원"
+        assert japan.format_money("1234.5") == "1,234.50円"
+        assert format_percent(0.25, number_format="ja_JP") == "0.25%"
+        assert format_percent(3.5, number_format="ko_KR") == "3.5%"
+
+    def test_dates_follow_the_region(self):
+        day = datetime.date(1980, 3, 27)
+        us = load_finance_bank_for_locale("en_US")
+        assert us.format_date(day) == "03/27/1980"
+        assert load_finance_bank_for_locale("en_IN").format_date(day) == "27/03/1980"
+        assert load_finance_bank_for_locale("fr_FR").format_date(day) == "27/03/1980"
+        assert load_finance_bank_for_locale("ja_JP").format_date(day) == "1980-03-27"
+        assert load_finance_bank_for_locale("ko_KR").format_date(day) == "1980-03-27"
+        for locale, expected in (
+            ("en_GB", "27/03/1980"),
+            ("de_DE", "27.03.1980"),
+        ):
+            assert _regional(us, locale).format_date(day) == expected
+
+    def test_an_india_customer_hears_their_balance_in_rupees(self):
+        inst = _chandrika_instance()
+        probe, _ = _probe_on("en_IN", inst)
+        ctx = probe._account_context(inst)
+        balance = probe._grounding_accounts(inst)[0]["balance"]
+        assert probe._bank.format_money(balance) in ctx
+        assert "₹" in ctx and "$" not in ctx
+
+    def test_a_uk_customer_hears_their_balance_in_pounds(self):
+        inst = load_finance_bank_for_locale("en_GB").institution("wrenfield_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-WB-BONUS-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="en_GB", seed=1)
+        probe, _ = _probe_on("en_GB", instance)
+        ctx = probe._account_context(instance)
+        assert "Wrenfield Current Account" in ctx
+        assert "£9,800.00" in ctx and "$" not in ctx and "€" not in ctx
+
+    def test_a_france_customer_hears_their_balance_in_euros(self):
+        inst = load_finance_bank_for_locale("fr_FR").institution("credit_mirabelle")
+        tpl = next(t for t in inst.templates if t.id == "TPL-CM-REORG-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="fr_FR", seed=1)
+        probe, _ = _probe_on("fr_FR", instance)
+        ctx = probe._account_context(instance)
+        assert "LEP ending 0001" in ctx
+        assert "2 500,00 €" in ctx and "$" not in ctx
+
+    def test_a_germany_customer_hears_their_balance_in_euros(self):
+        inst = load_finance_bank_for_locale("de_DE").institution("bausparkasse_heimstatt")
+        tpl = next(t for t in inst.templates if t.id == "TPL-BH-ALLOCATION-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="de_DE", seed=1)
+        probe, _ = _probe_on("de_DE", instance)
+        ctx = probe._account_context(instance)
+        assert "Bausparvertrag" in ctx
+        assert "24.000,00 €" in ctx and "$" not in ctx
+
+    def test_a_japan_customer_hears_their_balance_in_yen(self):
+        inst = load_finance_bank_for_locale("ja_JP").institution("asanagi_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-AN-TEIKI-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="ja_JP", seed=1)
+        probe, _ = _probe_on("ja_JP", instance)
+        ctx = probe._account_context(instance)
+        assert "普通預金" in ctx
+        assert "3,500,000円" in ctx and "$" not in ctx and "¥" not in ctx
+
+    def test_a_korea_customer_hears_their_balance_in_won(self):
+        inst = load_finance_bank_for_locale("ko_KR").institution("yunseul_bank")
+        tpl = next(t for t in inst.templates if t.id == "TPL-YS-YEGEUM-001")
+        instance = build_instance(tpl, inst, persona_uuid="u1", locale="ko_KR", seed=1)
+        probe, _ = _probe_on("ko_KR", instance)
+        ctx = probe._account_context(instance)
+        assert "입출금통장" in ctx
+        assert "6,500,000원" in ctx and "$" not in ctx and "₩" not in ctx
+
+    def test_a_date_of_birth_is_written_the_way_the_region_writes_dates(self):
+        us_dob = _probe_on("en_US", _northwind_dispute_instance())[0]._synth_dob()
+        india_dob = _probe_on("en_IN", _chandrika_instance())[0]._synth_dob()
+        month, day, year = us_dob.split("/")
+        assert india_dob == f"{day}/{month}/{year}"
+
+    def test_opening_an_account_records_no_brand_name(self):
+        state: dict = {}
+        G._apply_tool("open_account", {"account_type": "savings"}, state)
+        assert state == {"opened_account_id": "acct_new_0001"}
+
+    def test_the_kb_search_example_names_no_country_specific_product(self):
+        from usersim.engine.core.finance_bank import FRAMEWORK_PRIMITIVE_TOOLS
+
+        description = FRAMEWORK_PRIMITIVE_TOOLS["kb_search"]["parameters"]["properties"]["query"]["description"]
+        assert "401(k)" not in description and "IRA" not in description
+
+
 # ---------------------------------------------------------------------------
 # Mock tool execution: fallbacks keyed on side-effect class
 # ---------------------------------------------------------------------------
@@ -2121,8 +2547,6 @@ class TestApplyToolFallbacks:
     }
 
     def _state(self):
-        import copy
-
         return copy.deepcopy(self._STATE)
 
     def test_read_tools_return_a_definitive_view_not_a_bare_ack(self):
@@ -2189,6 +2613,55 @@ class TestApplyToolFallbacks:
         assert "get_statements" in probe._read_only_tools
         # State-changing tools must NOT be treated as reads.
         assert "file_transaction_dispute" not in probe._read_only_tools
+
+
+class TestOrderTools:
+    """``get_order_status`` lists the account's orders, which is where the assistant finds
+    the id ``cancel_order`` needs, and ``cancel_order`` acts only on an order the account
+    holds."""
+
+    _READ_ONLY = frozenset({"get_order_status"})
+
+    @staticmethod
+    def _state() -> dict:
+        return {
+            "account_id": "acct_si_0001",
+            "orders": [
+                {"order_id": "ord_si_0001", "ticker": "VTI", "status": "open"},
+                {"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"},
+            ],
+        }
+
+    def test_order_status_lists_the_account_orders(self):
+        state = self._state()
+        payload = G._apply_tool("get_order_status", {"account_id": "acct_si_0001"}, state, self._READ_ONLY)
+        assert payload["orders"] == self._state()["orders"]
+        assert [a["account_id"] for a in payload["accounts"]] == ["acct_si_0001"]
+
+    def test_order_status_narrows_to_the_named_order(self):
+        payload = G._apply_tool("get_order_status", {"order_id": "ord_si_0002"}, self._state(), self._READ_ONLY)
+        assert payload["orders"] == [{"order_id": "ord_si_0002", "ticker": "AAPL", "status": "pending"}]
+
+    def test_cancel_order_cancels_only_the_named_order(self):
+        state = self._state()
+        payload = G._apply_tool("cancel_order", {"order_id": "ord_si_0001"}, state, self._READ_ONLY)
+        assert payload == {"order_id": "ord_si_0001", "status": "CANCELLED"}
+        assert [o["status"] for o in state["orders"]] == ["CANCELLED", "pending"]
+
+    @pytest.mark.parametrize(
+        ("tool", "args"),
+        [
+            ("cancel_order", {"order_id": "VTI"}),
+            ("cancel_order", {}),
+            ("get_order_status", {"order_id": "VTI"}),
+        ],
+    )
+    def test_an_order_the_account_does_not_hold_is_refused(self, tool, args):
+        state = self._state()
+        payload = G._apply_tool(tool, args, state, self._READ_ONLY)
+        assert set(payload) == {"error", "tool_name"}
+        assert payload["tool_name"] == tool
+        assert state == self._state()
 
 
 class TestLocalBrandNameReachesTheRuntime:
@@ -2299,7 +2772,7 @@ class TestAuthoredPersonaTagsAreReachable:
         )
         assert {t.split(":")[0] for t in tags} <= ({"age", "financial-literacy"} | _FREEFORM_PREFIXES)
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP", "ko_KR"])
     def test_task_persona_tags_are_reachable(self, locale):
         bank = load_finance_bank_for_locale(locale)
         dead = {
@@ -2311,7 +2784,7 @@ class TestAuthoredPersonaTagsAreReachable:
         }
         assert not dead, f"{locale} tasks carry tags no persona can have: {sorted(dead)}"
 
-    @pytest.mark.parametrize("locale", ["en_US", "en_IN"])
+    @pytest.mark.parametrize("locale", ["en_US", "en_IN", "ja_JP", "ko_KR"])
     def test_dynamic_persona_affinities_are_reachable(self, locale):
         import yaml
 

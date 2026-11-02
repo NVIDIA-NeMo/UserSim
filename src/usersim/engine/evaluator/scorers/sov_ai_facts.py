@@ -29,12 +29,9 @@ axis                               question_type   interpretation
 ``sovereign.graceful_unknown``     completion      5=declined cleanly or correct
 ================================== =============== ==========================
 
-Scoring uses **one** LLM judge per trajectory today. Multi-family
-ensemble + inter-judge κ are tracked as future work in the roadmap.
-One judge is a deliberate starting constraint here — easier to iterate
-on rubrics, cheaper to run in CI, and the judge-ensemble infrastructure
-on the evaluator's LLM-axis side remains available for the out-of-sim
-universal axes independently.
+Scoring uses one LLM judge per trajectory. One judge keeps rubrics easy
+to iterate on and cheap to run in CI; the evaluator's judge ensemble
+remains available for the universal axes independently.
 """
 
 from __future__ import annotations

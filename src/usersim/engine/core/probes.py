@@ -28,10 +28,8 @@ Public surface for new probe authors:
   or-fail validation at construction time. Replaces the per-probe
   ``_SYSTEM_PROMPTS: dict`` + ``PromptsUnavailableError`` boilerplate.
 - ``@register_probe`` — single-annotation registration. Sets the
-  per-module constants (``PROBE_FAMILY`` / ``PROMPT_VERSION`` /
-  ``PROBE_VARIANTS``) AND registers the class in ``_PROBE_REGISTRY``
-  in one call. Replaces the 6-files-to-touch friction of adding a new
-  probe.
+  class's ``family`` / ``prompt_version`` / ``variants`` AND registers
+  the class in ``_PROBE_REGISTRY`` in one call.
 - ``known_probes()`` / ``resolve_probe()`` — the public read surface
   on the registry.
 
@@ -40,7 +38,7 @@ a base class + mixin, set 2-3 class attributes, override 2-4 hooks.
 The substrate handles the rest — bank loading, placeholder warnings,
 turn-1 injection, conversation-loop dispatch.
 
-See ``conversation-plugin/docs/AUTHORING_A_PROBE.md`` for the
+See ``docs/engine/AUTHORING_A_PROBE.md`` for the
 end-to-end tutorial.
 """
 
@@ -49,6 +47,7 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -57,11 +56,13 @@ from typing import (
     runtime_checkable,
 )
 
+from usersim.engine.core.columns import output_columns_problem
 from usersim.engine.core.locale import india_variant
 from usersim.engine.core.outcomes import (
     OutcomeBuilder,
     Provenance,
     WarningKind,
+    placeholder_warning_kind_problem,
 )
 from usersim.engine.core.user_turn_policy import UserTurnPolicy
 
@@ -246,6 +247,43 @@ class BaseProbe:
     """
 
     label: str = "<unset>"
+    # Set by ``@register_probe``. The family, the first variant and the
+    # prompt version go into ``trajectory_id``; the prompt version is also
+    # recorded in provenance.
+    family: str = ""
+    prompt_version: str = ""
+    variants: tuple[str, ...] = ()
+
+    # The directory that holds this probe's ``<label>/`` asset folder, for a
+    # probe whose assets ship outside ``usersim``: an absolute path, such as
+    # ``Path(__file__).parent / "assets"`` (``@register_probe`` refuses a
+    # relative one). Searched after the deliberate overrides (the runtime
+    # override, ``USERSIM_ASSET_PATH`` and ``USERSIM_ASSETS_DIR``) and before
+    # the packaged banks. ``None``, as for every built-in probe, searches the
+    # overrides and the packaged banks only.
+    assets_root: Path | None = None
+
+    @classmethod
+    def assets_dir(cls) -> Path:
+        """This probe's asset folder, ``<root>/<label>/``, where its bank loader reads.
+
+        Resolved as every bank loader in this package resolves its folder: the
+        deliberate overrides first, then the class's ``assets_root``, then the
+        packaged banks. A probe shipped in its own package calls this from its
+        loader, so an override reaches its banks too.
+        """
+        # _assets imports this module at its top, so importing it here at the
+        # top would be circular.
+        from usersim.engine.core._assets import probe_assets_dir
+
+        return probe_assets_dir(cls.label)
+
+    # The top-level columns ``build_result_extras`` adds beyond the core ones
+    # (``CORE_RESULT_COLUMNS``). A run keeps the core columns plus the union of
+    # every registered probe's ``output_columns`` and drops any other key, so
+    # a column left out here never reaches the scorer that reads it. Two
+    # probes may declare the same name; ``@register_probe`` refuses a core one.
+    output_columns: tuple[str, ...] = ()
 
     # Whether the simulator may discard a judge-rejected assistant
     # candidate and regenerate it (``max_assistant_attempts > 1``).
@@ -388,7 +426,7 @@ class BaseProbe:
         """Default: counters from ``state.messages`` / ``state.metadata``.
 
         Override to add probe-specific top-level columns (e.g.
-        ``query_id``, ``sovereign_facts_probed``, ``attempted_actions``)
+        ``query_id``, ``sovereign_facts_probed``, ``action_request_id``)
         — those columns are what the matching scorer reads off the
         trajectory dict.
         """
@@ -439,11 +477,12 @@ class BaseProbe:
     def should_succeed(self, state: Any) -> bool:
         """Sim-side guardrail: did the probe complete its protocol?
 
-        Default True (the trajectory ran to completion without an
-        explicit failure). Override to assert a probe-specific
-        invariant — e.g. tool_calling returns False on zero tool
-        calls; sov_ai_facts returns False if no fact id is on the
-        trajectory.
+        Default True. Override to assert a probe-specific invariant,
+        e.g. sov_ai_facts returns False if no fact id is on the
+        trajectory. A False, or an exception, finalizes the row as
+        failed (``scenario_aborted``), and the evaluator doesn't score
+        it. Check the probe's protocol here, not the assistant's
+        behaviour: judging that is the evaluator's job.
         """
         return True
 
@@ -634,8 +673,11 @@ class BankBackedProbe(BaseProbe):
       a locale and returns the bank. ``Bank`` is duck-typed: the
       substrate only requires ``bank.bank_id``, ``bank.bank_version``,
       and whatever ``derive_task`` consumes.
-    - ``placeholder_warning_kind: WarningKind`` — emitted when the
-      derived task has ``placeholder=True``.
+    - ``placeholder_warning_kind: WarningKind | str`` — emitted when the
+      derived task has ``placeholder=True``: a
+      ``WarningKind.USED_PLACEHOLDER_*`` member, or, for a probe shipped
+      in its own package, a name of the form
+      ``<prefix>_used_placeholder_<thing>``.
     - ``bank_version_key: str | None`` — key under which to record
       ``provenance.bank_version[KEY] = bank.bank_version``. ``None``
       (the default) means locale-keyed (the inclusion convention);
@@ -665,7 +707,7 @@ class BankBackedProbe(BaseProbe):
     """
 
     bank_loader: Callable[[str], Any]
-    placeholder_warning_kind: WarningKind
+    placeholder_warning_kind: WarningKind | str
     bank_version_key: str | None = None  # None = locale-keyed
 
     def __init__(
@@ -755,34 +797,34 @@ class BankBackedProbe(BaseProbe):
     async def _localize_verbatim(self, text: str, *, rules: tuple[str, ...] = (), warn: bool = True) -> str:
         """Translate a verbatim bank turn into the conversation language.
 
-        No-op unless this probe fell back to a base-locale (en_IN) asset for
-        an India language-variant (``self._asset_locale != self._locale``) —
-        i.e. only when the bank text is in English but the conversation must
-        be in another Indian language. Shipped locales and variants with a
-        native asset (``asset_locale == locale``) return ``text`` unchanged,
-        so this is a pure graduation-aware pass-through by default.
-        ``rules`` are extra instructions for the translator. ``warn=False``
-        skips the warning, for a second translation of a turn already flagged.
+        No-op unless this probe fell back to a base-locale (en_IN) asset
+        (``self._asset_locale != self._locale``): an India language-variant,
+        or a Hindi locale in a probe with no Hindi bank of its own. That is,
+        only when the bank text is in English but the conversation must be in
+        another Indian language. Locales with a native asset
+        (``asset_locale == locale``) return ``text`` unchanged, so this is a
+        pure graduation-aware pass-through by default. A romanized locale
+        (``hi_Latn_IN`` and the ``*_Latn_IN`` variants) gets the translation in
+        Latin letters. ``rules`` are extra instructions for the translator.
+        ``warn=False`` skips the warning, for a second translation of a turn
+        already flagged.
 
-        Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder
-        so downstream scorecards treat the row as preview-only. Never raises
-        (the translation helper falls back to the input text on failure).
+        Emits ``WarningKind.USED_MACHINE_TRANSLATION`` on the outcome builder,
+        so the row records that its opening turn was machine-translated. Never
+        raises (the translation helper falls back to the input text on failure).
         """
         if not text or self._asset_locale == self._locale:
             return text
-        from usersim.engine.core.locale import (
-            expected_language_display,
-            india_variant,
-        )
+        from usersim.engine.core.locale import expected_language_display
+        from usersim.engine.core.simulation import ROMANIZED_LOCALES
         from usersim.engine.core.translation import translate_user_turn
 
-        variant = india_variant(self._locale)
         language = expected_language_display(self._locale) or self._language
         translated = await translate_user_turn(
             self._models,
             text,
             target_language=language,
-            romanize=bool(variant and variant.romanized),
+            romanize=self._locale in ROMANIZED_LOCALES,
             rules=rules,
         )
         if warn and translated != text and self._outcome_builder is not None:
@@ -791,8 +833,8 @@ class BankBackedProbe(BaseProbe):
                 detail=(
                     f"turn-1 machine-translated from asset_locale="
                     f"{self._asset_locale} into {language} for conversation "
-                    f"locale={self._locale}; downstream scorecard preview-only "
-                    "until a native bank lands"
+                    f"locale={self._locale}; native-speaker verification "
+                    "recommended"
                 ),
             )
         return translated
@@ -820,9 +862,8 @@ class BankBackedProbe(BaseProbe):
         self._outcome_builder.add_warning(
             kind=kind,
             detail=(
-                f"task {task_id} from {bank_id} v{bank_version} is "
-                "placeholder; downstream scorecard should refuse to "
-                "claim production readiness for this trajectory's locale"
+                f"task {task_id} from {bank_id} {bank_version} is placeholder content; "
+                "SME verification recommended before relying on this result"
             ),
         )
 
@@ -853,7 +894,7 @@ class BankBackedProbe(BaseProbe):
 # win over BankBackedProbe / BaseProbe defaults.)
 #
 # Cross-cutting test
-# (``conversation-plugin/tests/test_probes_substrate.py``) pins this
+# (``tests/engine/core/test_probes_substrate.py``) pins this
 # behaviour for every shipped mixin to catch drift.
 
 
@@ -864,7 +905,7 @@ class BankVerbatimMixin:
     task. Subclasses store the verbatim text on ``self._task`` via a
     field whose name is configured by the subclass:
 
-        class MyProbe(BankBackedProbe, BankVerbatimMixin):
+        class MyProbe(BankVerbatimMixin, BankBackedProbe):
             verbatim_field = "user_question"  # or "rendering" / "request_text" / ...
 
     By default reads ``self._task.verbatim_text``. ``on_followup_failure``
@@ -1305,6 +1346,11 @@ class ProbeRegistrationError(ValueError):
     """Raised when ``@register_probe`` cannot register a class."""
 
 
+def _definition(cls: type) -> str:
+    """Where a class is defined. A module imported or reloaded again redefines the same one."""
+    return f"{cls.__module__}.{cls.__qualname__}"
+
+
 def register_probe(
     *,
     family: str,
@@ -1313,16 +1359,27 @@ def register_probe(
 ) -> Callable[[type[BaseProbe]], type[BaseProbe]]:
     """Single-annotation registration of a ``BaseProbe`` subclass.
 
-    Sets ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``
-    on the class's module (the constants the dispatcher reads via
-    ``getattr(module, "PROBE_FAMILY", ...)``) AND adds the class
-    to ``_PROBE_REGISTRY`` keyed by ``cls.label``.
+    Sets ``family`` / ``prompt_version`` / ``variants`` on the class (the
+    attributes the dispatcher reads) AND adds the class to
+    ``_PROBE_REGISTRY`` keyed by ``cls.label``.
 
-    Replaces the 6-files-to-touch friction of adding a new probe
-    today: register in the central registry, define
-    PROBE_FAMILY/PROMPT_VERSION/PROBE_VARIANTS module
-    constants, expose a ``simulate_*`` function, etc. After this
-    decorator, the class itself IS the registration.
+    The same values are also set on the class's module as
+    ``PROBE_FAMILY`` / ``PROMPT_VERSION`` / ``PROBE_VARIANTS``. Two probes
+    defined in one module overwrite each other's module constants, so
+    read the class.
+
+    A label belongs to one probe. Registering the same class again, or the
+    class a reloaded module redefines, updates the entry; a different class
+    under a taken label raises ``ProbeRegistrationError`` naming both, so
+    an installed package cannot replace a probe a run asks for by name.
+    A class whose ``assets_root`` is a relative path is refused as well: it
+    would resolve against whatever directory a run starts in. So is a class
+    whose ``output_columns`` names a column the engine writes for every probe,
+    and one whose ``placeholder_warning_kind`` does not mark placeholder
+    content, since the report would not count its rows as placeholder.
+
+    The class itself IS the registration: there is no central registry
+    entry or ``simulate_*`` function to add alongside it.
 
     Example::
 
@@ -1344,6 +1401,29 @@ def register_probe(
             raise ProbeRegistrationError(
                 f"@register_probe: {cls.__name__} must set a class-level `label` string before decoration"
             )
+        existing = _PROBE_REGISTRY.get(label)
+        if existing is not None and existing is not cls and _definition(existing) != _definition(cls):
+            raise ProbeRegistrationError(
+                f"@register_probe: label {label!r} is already registered by {_definition(existing)}, "
+                f"so {_definition(cls)} cannot take it. Give the probe a label no other probe uses."
+            )
+        if cls.assets_root is not None and not Path(cls.assets_root).is_absolute():
+            raise ProbeRegistrationError(
+                f"@register_probe: {_definition(cls)} declares the relative assets_root "
+                f"{str(cls.assets_root)!r}, which would resolve against the working directory. Build it "
+                'from the module\'s location, such as Path(__file__).parent / "assets".'
+            )
+        problem = output_columns_problem(cls.output_columns)
+        if problem:
+            raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.output_columns {problem}")
+        if hasattr(cls, "placeholder_warning_kind"):
+            problem = placeholder_warning_kind_problem(cls.placeholder_warning_kind)
+            if problem:
+                raise ProbeRegistrationError(f"@register_probe: {_definition(cls)}.placeholder_warning_kind {problem}")
+
+        cls.family = family
+        cls.prompt_version = prompt_version
+        cls.variants = tuple(variants)
 
         module = sys.modules.get(cls.__module__)
         if module is not None:
@@ -1351,13 +1431,6 @@ def register_probe(
             module.PROMPT_VERSION = prompt_version
             module.PROBE_VARIANTS = tuple(variants)
 
-        if label in _PROBE_REGISTRY and _PROBE_REGISTRY[label] is not cls:
-            logger.debug(
-                "  |-- @register_probe: replacing existing probe %r (was %s, now %s)",
-                label,
-                _PROBE_REGISTRY[label].__qualname__,
-                cls.__qualname__,
-            )
         _PROBE_REGISTRY[label] = cls
         return cls
 
@@ -1410,6 +1483,20 @@ def known_probes() -> tuple[str, ...]:
     load_builtin_probes()
     load_extension_probes()
     return tuple(sorted(_PROBE_REGISTRY))
+
+
+def declared_output_columns() -> tuple[str, ...]:
+    """The union of every registered probe's ``output_columns``, each name once.
+
+    In label order, then each probe's own order. A run declares all of them,
+    not just those of the probes in its mix: Data Designer reads the
+    declaration once, before any row says which probe produced it, and rows
+    from other probes leave the columns empty.
+    """
+    columns: dict[str, None] = {}
+    for label in known_probes():
+        columns.update(dict.fromkeys(_PROBE_REGISTRY[label].output_columns))
+    return tuple(columns)
 
 
 def resolve_probe(label: str) -> type[BaseProbe]:

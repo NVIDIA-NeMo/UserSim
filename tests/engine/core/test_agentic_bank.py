@@ -537,7 +537,7 @@ class TestShippedSampleBank:
 
     def test_loads_clean(self, sample_bank: AgenticBank) -> None:
         assert sample_bank.bank_id == "sample_v1"
-        assert sample_bank.bank_version == "v0.5.4"
+        assert sample_bank.bank_version == "v0.5.5"
 
     def test_four_canonical_sub_protocols(self, sample_bank: AgenticBank) -> None:
         # Roadmap default: 4 sub-protocols.

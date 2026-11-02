@@ -8,6 +8,9 @@ written by ``src/usersim/engine/`` so the
 reporting layer (``reporting/``) can be exercised without a live
 simulator run. Real end-to-end fixtures arrive with the smoke-test
 deliverable.
+
+The session-wide stubs for the tokenizer and the persona dataset come from
+``usersim.testing.pytest_plugin``, which the root ``conftest.py`` loads.
 """
 
 from __future__ import annotations
@@ -22,102 +25,27 @@ from typing import Any
 import pytest
 
 
-class _WordSplitEncoder:
-    """Deterministic stand-in for a ``tiktoken`` encoding."""
+@pytest.fixture
+def finance_assets_without_fr_tasks(tmp_path: Path) -> Path:
+    """An asset root whose financial_services bank runs in en_US but not in fr_FR.
 
-    @staticmethod
-    def encode(text: str) -> list[int]:
-        return [0] * len(text.split())
-
-
-@pytest.fixture(autouse=True, scope="session")
-def deterministic_token_encoder():
-    """Stub the reasoning estimator's tokenizer for the whole session.
-
-    ``tiktoken.get_encoding`` fetches its vocabulary over HTTPS on first
-    use -- tiktoken ships the tokenizer, not the vocabulary -- so leaving
-    it live makes every reasoning-token assertion depend on network
-    egress. That is what took out 40+ tests across five files behind a
-    proxy.
-
-    Stubbing is the right level of mocking here because these tests
-    exercise the *aggregation* logic (noise-floor clamp, negative-diff
-    clamp, source promotion), not tiktoken's correctness, and every
-    assertion is tolerance-based rather than an exact token count. A word
-    splitter clears or misses the 5% floor in exactly the same cases.
-
-    Autouse rather than opt-in so a new test cannot silently reintroduce
-    the network dependency.
+    The fr_FR folder is a copy of the en_US bank without its tasks, the shape of a
+    bank whose corpus has been generated but whose tasks are not written yet:
+    present on disk, yet every row would abort.
     """
-    import usersim.reporting._reasoning as reasoning
+    import shutil
 
-    original = reasoning._encoder
-    reasoning._encoder = lambda name: _WordSplitEncoder()
-    try:
-        yield
-    finally:
-        reasoning._encoder = original
+    from usersim.engine.core._assets import packaged_assets_dir
 
-
-# First name, last name, sex, age, education level, occupation, city. Values
-# use the en_US dataset's own vocabulary; every row is in Texas, like the
-# persona tests/test_simulator_pipeline_e2e.py uses for every shipped probe.
-_SYNTHETIC_PERSONAS = (
-    ("Sarah", "Johnson", "Female", 42, "bachelors", "elementary_or_middle_school_teacher", "Austin"),
-    ("Daniel", "Reyes", "Male", 29, "some_college", "electrician", "San Antonio"),
-    ("Grace", "Liu", "Female", 67, "graduate", "pharmacist", "Houston"),
-    ("Marcus", "Hill", "Male", 51, "high_school", "driver_sales_worker_or_truck_driver", "Dallas"),
-)
-_OCEAN_TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
-
-
-def _synthetic_persona_rows() -> list[dict[str, Any]]:
-    return [
-        {
-            "uuid": f"synthetic-persona-{index}",
-            "first_name": first_name,
-            "last_name": last_name,
-            "sex": sex,
-            "age": age,
-            "education_level": education_level,
-            "occupation": occupation,
-            "city": city,
-            "region": "TX",
-            "country": "USA",
-            "persona": f"{first_name} {last_name} works as a {occupation.replace('_', ' ')} in {city}, Texas.",
-            **{
-                trait: {"description": "Synthetic trait.", "label": "average", "t_score": 50} for trait in _OCEAN_TRAITS
-            },
-        }
-        for index, (first_name, last_name, sex, age, education_level, occupation, city) in enumerate(
-            _SYNTHETIC_PERSONAS, start=1
-        )
-    ]
-
-
-@pytest.fixture(autouse=True, scope="session")
-def synthetic_persona_dataset(tmp_path_factory):
-    """Point Data Designer's persona sampler at a small synthetic dataset.
-
-    The sampler reads the Nemotron-Personas datasets, a separate download
-    that a fresh checkout does not have, so leaving it live makes every test
-    that samples personas depend on what happens to be installed. Those tests
-    exercise UserSim's sampler graph, not the dataset's contents, so a few
-    rows serve as well as millions. Every shipped probe accepts every row.
-
-    Autouse rather than opt-in so a new test cannot silently depend on the
-    downloaded datasets.
-    """
-    import pandas as pd
-
-    root = tmp_path_factory.mktemp("managed-assets")
-    (root / "datasets").mkdir()
-    pd.DataFrame(_synthetic_persona_rows()).to_parquet(root / "datasets" / "en_US.parquet", index=False)
-    with pytest.MonkeyPatch.context() as patcher:
-        # UserSim constructs DataDesigner without managed_assets_path, so the
-        # sampler reads this module default.
-        patcher.setattr("data_designer.interface.data_designer.MANAGED_ASSETS_PATH", root)
-        yield root
+    source = packaged_assets_dir() / "financial_services" / "en_US"
+    root = tmp_path / "assets"
+    for locale in ("en_US", "fr_FR"):
+        dest = root / "financial_services" / locale
+        (dest / "bank").mkdir(parents=True)
+        shutil.copy(source / "region_meta.yaml", dest / "region_meta.yaml")
+        shutil.copytree(source / "bank" / "northwind_bank", dest / "bank" / "northwind_bank")
+    (root / "financial_services" / "fr_FR" / "bank" / "northwind_bank" / "tasks.yaml").unlink()
+    return root
 
 
 def _outcome(
@@ -475,6 +403,25 @@ def evaluator_df(trajectory_df):
 
     df["assistant_eval"] = eval_cells
     return df
+
+
+@pytest.fixture
+def register_test_probe(monkeypatch) -> Callable[..., type]:
+    """Register throwaway ``BaseProbe`` subclasses in a copy of the probe registry.
+
+    ``register_test_probe("ext_probe", assets_root=root)`` registers a class
+    labelled ``ext_probe`` with the given class attributes. The registry is
+    restored after the test, so nothing registered here reaches another test.
+    """
+    from usersim.engine.core import probes
+
+    monkeypatch.setattr(probes, "_PROBE_REGISTRY", dict(probes._PROBE_REGISTRY))
+
+    def register(label: str, **attributes: Any) -> type:
+        cls = type(label, (probes.BaseProbe,), {"label": label, **attributes})
+        return probes.register_probe(family=label, prompt_version="v1.0", variants=("default",))(cls)
+
+    return register
 
 
 @pytest.fixture

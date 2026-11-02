@@ -4,11 +4,12 @@
 """A probe's extra result columns reach the stored row only when they are declared.
 
 A Data Designer run keeps a row's input columns plus
-``ConversationSimulatorConfig.side_effect_columns`` and drops everything else. A
-column a probe returns without declaring it would vanish with no error, and the
-scorer that reads it would find nothing, so the generator warns about it. Per-row
-data a probe cannot declare (an extension cannot edit the core config) belongs in
-the probe's metadata, which is stored with the row as ``conversation_metadata``.
+``ConversationSimulatorConfig.side_effect_columns`` (the core columns and every
+registered probe's ``output_columns``) and drops everything else. A column a
+probe returns without declaring it would vanish with no error, and the scorer
+that reads it would find nothing, so the generator warns about it. Per-row data
+that is not a column of its own belongs in the probe's metadata, which is stored
+with the row as ``conversation_metadata``.
 """
 
 from __future__ import annotations
@@ -63,6 +64,16 @@ class _ExtraColumnProbe(OpenEndedProbe):
         return {**super().build_result_extras(state), "extra_score": 0.5}
 
 
+class _DeclaredColumnProbe(OpenEndedProbe):
+    """Returns a column it declares in ``output_columns``."""
+
+    label = "_declared_column_probe"
+    output_columns = ("declared_score",)
+
+    def build_result_extras(self, state: Any) -> dict:
+        return {**super().build_result_extras(state), "declared_score": 0.5}
+
+
 class _InPlaceInputProbe(OpenEndedProbe):
     """Changes an input column in place in its own dispatch."""
 
@@ -110,6 +121,7 @@ def extra_column_probe():
     snapshot = dict(_PROBE_REGISTRY)
     for probe in (
         _ExtraColumnProbe,
+        _DeclaredColumnProbe,
         _InPlaceInputProbe,
         _ConstructorColumnProbe,
         _FailingConstructorProbe,
@@ -210,6 +222,15 @@ async def test_returning_unchanged_inputs_reports_nothing(extra_column_probe, un
     """An input handed back as it came is kept by the run, so nothing is lost (NaN included)."""
     await _simulate(_EchoingProbe.label, input_score=input_score)
 
+    assert undeclared_warnings == []
+
+
+async def test_a_column_the_probe_declares_is_kept(extra_column_probe, undeclared_warnings):
+    """A key the class lists in ``output_columns`` joins the run's columns, so nothing is reported."""
+    (row,) = await _simulate(_DeclaredColumnProbe.label)
+
+    assert row["declared_score"] == 0.5
+    assert "declared_score" in _config().side_effect_columns
     assert undeclared_warnings == []
 
 

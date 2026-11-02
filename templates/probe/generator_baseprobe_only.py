@@ -16,8 +16,8 @@ What the unified ``ConversationLoop`` provides for you:
 
 What you provide:
 - The user-agent system prompt (how the simulated user behaves).
-- The assistant system prompt (empty per pure-capability-test policy
-  — see conversation-plugin/README.md "Assistant under test").
+- The assistant system prompt (empty per pure-capability-test policy;
+  see docs/engine/README.md "Assistant under test").
 
 Total LOC: ~30 (this file). The ``general_open_ended`` probe is a
 real example at ~50 LOC.
@@ -55,7 +55,7 @@ class DemoGeneralProbe(BaseProbe):
     def get_assistant_system_prompt(self) -> str:
         # Pure-capability-test policy. Empty system prompt;
         # the assistant under test gets only conversation history.
-        # See conversation-plugin/README.md "Assistant under test".
+        # See docs/engine/README.md "Assistant under test".
         return ""
 
     def format_gate_prompt(

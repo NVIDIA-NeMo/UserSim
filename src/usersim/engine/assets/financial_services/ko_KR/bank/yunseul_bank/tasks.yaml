@@ -1,0 +1,415 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for yunseul_bank, a commercial bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in Korean (build_instance picks one per trajectory) so
+# the assistant sees varied turn-1 wording while the gold stays fixed. Read-only
+# tools (get_account_transactions, get_accounts, get_statements, dispute_status)
+# carry no gold state change.
+templates:
+- id: TPL-YS-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    윤슬 체크카드 이용 내역에 {{merchant}}에서 {{amount}}원이 결제된 게 있는데, 저는 쓴 적이 없어요. 확인해 주실 수 있나요?
+  - >-
+    체크카드로 {{merchant}}에서 {{amount}}원이 빠져나갔어요. 제가 결제한 게 아닌데 어떻게 하면 되나요?
+  - >-
+    통장 내역을 보니 {{merchant}} {{amount}}원 결제가 있어요. 제 결제가 아니라서 조사를 부탁드려요.
+  account_state:
+    account_id: acct_ys_0001
+    cards:
+    - {card_id: card_ys_0001, status: active}
+    transactions:
+    - {transaction_id: txn_ys_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 바람소리전자, 도토리TV, 하늘숲피트니스]
+    amount: ['39,800', '128,000', '497,000']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_ys_0001.status: UNDER_REVIEW}
+  # Stopping the card and reissuing it are reasonable during a fraud dispute.
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-YS-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    끝자리가 0001인 체크카드를 {{event}} 것 같아요. 누가 쓰기 전에 바로 정지해 주세요.
+  - >-
+    체크카드(끝자리 0001)를 {{event}} 것 같은데, 부정 사용될까 봐 걱정돼요. 사용을 막아 주실 수 있나요?
+  - >-
+    큰일 났어요. 끝자리 0001 카드를 {{event}} 모양이에요. 찾을 때까지 일단 못 쓰게 해 주세요.
+  account_state:
+    account_id: acct_ys_0001
+    # The openings name the card ending 0001; pin last4 so the account the
+    # user is grounded to matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_ys_0001, status: active}
+  param_space:
+    event: [잃어버린, 떨어뜨린, 도난당한]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_ys_0001.status: frozen}
+  allowed_tools: [order_replacement_card]
+- id: TPL-YS-PHISHING-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    방금 {{caller}}이라는 전화를 받고 {{amount}}원을 보냈는데, 아무래도 보이스피싱 같아요. 어떻게 해야 하나요?
+  - >-
+    {{caller}}이라고 해서 시키는 대로 {{amount}}원을 이체했어요. 사기인 것 같은데 돈을 받은 계좌를 막을 수 있나요?
+  - >-
+    보이스피싱을 당한 것 같아요. {{caller}}의 말을 믿고 {{amount}}원을 보냈어요. 피해 신고를 하고 싶어요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '2400000.00'
+    transactions:
+    - {transaction_id: txn_ys_0002, merchant: 계좌이체, amount: '{{amount}}', status: posted}
+  param_space:
+    caller: [검찰청 수사관, 금융감독원 직원, 택배회사 직원]
+    amount: ['300만', '850만', '1,200만']
+  gold_tool_sequence: [report_voice_phishing]
+  expected_state_deltas: {phishing_report_status: SUBMITTED}
+  # Stopping the card is a reasonable precaution after a scam call.
+  allowed_tools: [freeze_card, set_alerts]
+- id: TPL-YS-STOPPAYMENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{creditor}} 이용을 그만두게 돼서 자동이체를 해지하고 싶어요. 다음 달 출금부터 멈춰 주세요.
+  - >-
+    매달 {{creditor}} 회비가 통장에서 빠져나가는데, 이제 이용하지 않아요. 자동이체를 해지해 주세요.
+  - >-
+    {{creditor}} 자동이체를 끊고 싶은데 처리해 주실 수 있나요?
+  account_state:
+    account_id: acct_ys_0001
+    mandates:
+    - {mandate_id: mdt_ys_0001, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [하늘숲피트니스, 새봄영어학원, 바른수학교습소]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {mdt_ys_0001.status: REVOKED}
+- id: TPL-YS-ACTIVATECARD-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    새 체크카드가 우편으로 왔어요. 쓸 수 있게 등록해 주시겠어요?
+  - >-
+    재발급한 카드를 받았는데, 사용 등록을 거기서 해 주실 수 있나요?
+  - >-
+    윤슬 체크카드를 받았어요. 바로 쓸 수 있도록 사용 등록 부탁드려요.
+  account_state:
+    account_id: acct_ys_0001
+    cards:
+    - {card_id: card_ys_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_ys_0002.status: active}
+- id: TPL-YS-OPENACCT-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    윤슬 체크카드를 신청하고 싶어요. 입출금통장은 이미 있어요.
+  - >-
+    지금 쓰는 입출금통장에 연결해서 체크카드를 하나 만들고 싶어요.
+  - >-
+    인터넷 쇼핑할 때 쓰려고 체크카드가 필요해요. 신청해 주세요.
+  account_state:
+    customer_id: cust_ys_0001
+  param_space: {}
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-YS-YEGEUM-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    입출금통장에서 {{amount}}원을 {{term}}짜리 정기예금에 넣고 싶어요.
+  - >-
+    상여금이 들어와서 {{amount}}원을 정기예금 {{term}}으로 묶어 두려고요. 가입 부탁드려요.
+  - >-
+    {{amount}}원으로 {{term}} 정기예금에 가입해 주세요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '6500000.00'
+  param_space:
+    amount: ['100만', '300만', '500만']
+    term: [1년, 2년, 3년]
+  gold_tool_sequence: [open_time_deposit]
+  expected_state_deltas: {time_deposit_status: OPEN}
+- id: TPL-YS-JEOKGEUM-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    매달 {{amount}}원씩 1년 동안 모으는 정기적금에 들고 싶어요. 월급 통장에서 자동이체되게 해 주세요.
+  - >-
+    정기적금을 하나 시작하려고요. 월 {{amount}}원, 12개월로 가입할 수 있을까요?
+  - >-
+    돈을 좀 모아 보고 싶어서요. 매달 {{amount}}원씩 넣는 적금 가입 부탁드려요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '1800000.00'
+  param_space:
+    amount: ['20만', '30만', '50만']
+  gold_tool_sequence: [open_installment_savings]
+  expected_state_deltas: {installment_savings_status: OPEN}
+- id: TPL-YS-PREPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    주택담보대출을 {{amount}}원 중도상환하고 싶어요.
+  - >-
+    목돈이 생겨서 주택담보대출 일부를 갚으려고요. {{amount}}원 중도상환 신청할게요.
+  - >-
+    이자를 줄이고 싶어서요. 주택담보대출 {{amount}}원을 먼저 갚을 수 있을까요?
+  account_state:
+    account_id: loan_ys_0001
+    account_type: 주택담보대출
+    balance: '284000000.00'
+  param_space:
+    amount: ['1,000만', '2,000만', '5,000만']
+  gold_tool_sequence: [request_loan_prepayment]
+  expected_state_deltas: {prepayment_status: REQUESTED}
+- id: TPL-YS-CREDITLOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    직장인 신용대출을 받고 싶어요. {{amount}}원 정도 필요해요.
+  - >-
+    이사 비용 때문에 신용대출을 알아보고 있어요. {{amount}}원으로 신청할 수 있을까요?
+  - >-
+    신용대출 신청하려고요. 희망 금액은 {{amount}}원이에요.
+  account_state:
+    customer_id: cust_ys_0001
+  param_space:
+    amount: ['1,000만', '2,000만', '3,000만']
+  gold_tool_sequence: [apply_credit_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-YS-RATECUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    작년에 신용대출을 받았는데, 그 뒤에 {{change}}. 금리인하요구를 신청하고 싶어요.
+  - >-
+    {{change}}. 이런 경우 신용대출 금리를 낮춰 달라고 요청할 수 있다고 들었는데, 신청해 주세요.
+  - >-
+    신용대출 금리 좀 내릴 수 있을까요? {{change}}.
+  account_state:
+    account_id: loan_ys_0002
+    account_type: 직장인 신용대출
+    balance: '18000000.00'
+  param_space:
+    change: [승진해서 연봉이 올랐어요, 신용점수가 많이 올랐어요, 다른 대출을 다 갚았어요]
+  gold_tool_sequence: [request_rate_reduction]
+  expected_state_deltas: {rate_reduction_request: SUBMITTED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3-4: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12) so the
+# multi-step flow can complete.
+- id: TPL-YS-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    지갑째로 끝자리 0001 체크카드를 잃어버렸는데, 방금 {{merchant}}에서 {{amount}}원이 결제됐어요. 카드 정지하고, 그 결제 조사하고, 새 카드도 보내 주세요.
+  - >-
+    끝자리 0001 카드가 안 보이는데 {{merchant}}에서 {{amount}}원이 몰래 결제됐어요. 사용 정지, 결제 조사, 재발급을 부탁드려요.
+  - >-
+    누가 제 카드(끝자리 0001)를 쓴 것 같아요. 먼저 정지해 주시고, {{merchant}} {{amount}}원 결제 조사랑 새 카드 발급도 해 주세요.
+  account_state:
+    account_id: acct_ys_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_ys_0001, status: active}
+    transactions:
+    - {transaction_id: txn_ys_0003, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [별빛몰, 도토리TV, 바람소리전자]
+    amount: ['89,000', '548,000']
+  gold_tool_sequence: [freeze_card, file_transaction_dispute, order_replacement_card]
+  expected_state_deltas: {card_ys_0001.status: frozen, txn_ys_0003.status: UNDER_REVIEW, card_ys_0001.replacement: ordered}
+- id: TPL-YS-PHISHING-002
+  tier: verifiable
+  task_type: fraud_triage
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    {{caller}}이라는 전화에 속아서 {{amount}}원을 보냈어요. 피해 신고하고, 혹시 모르니 체크카드도 정지하고, 앞으로 출금되면 바로 알림이 오게 해 주세요.
+  - >-
+    보이스피싱을 당했어요. {{caller}}의 말에 {{amount}}원을 이체했어요. 피해구제 신청, 체크카드 정지, 입출금 알림 설정까지 부탁드려요.
+  - >-
+    세 가지 부탁드려요. {{amount}}원 보이스피싱 피해 신고({{caller}} 사칭이었어요), 체크카드 정지, 출금 알림 설정이요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '1650000.00'
+    cards:
+    - {card_id: card_ys_0001, status: active}
+    transactions:
+    - {transaction_id: txn_ys_0004, merchant: 계좌이체, amount: '{{amount}}', status: posted}
+  param_space:
+    caller: [검찰청 수사관, 은행 대출 상담원]
+    amount: ['500만', '1,000만']
+  gold_tool_sequence: [report_voice_phishing, freeze_card, set_alerts]
+  expected_state_deltas: {phishing_report_status: SUBMITTED, card_ys_0001.status: frozen, alerts_updated: true}
+- id: TPL-YS-BILLS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이사하면서 정리하고 싶어요. {{creditor}} 자동이체는 해지하고, 받은 {{bill}}는 통장에서 납부하고, 출금될 때 알림이 오게 해 주세요.
+  - >-
+    {{creditor}} 자동이체 해지, {{bill}} 납부, 그리고 입출금 알림 설정을 부탁드려요.
+  - >-
+    부탁이 세 가지 있어요. {{creditor}} 자동이체 끊기, {{bill}} 내기, 출금 알림 받기요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '920000.00'
+    mandates:
+    - {mandate_id: mdt_ys_0002, creditor: '{{creditor}}', status: active}
+  param_space:
+    creditor: [하늘숲피트니스, 새봄영어학원]
+    bill: [자동차세 고지서, 재산세 고지서, 주민세 고지서]
+  gold_tool_sequence: [stop_payment, pay_bill, set_alerts]
+  expected_state_deltas: {mdt_ys_0002.status: REVOKED, bill_paid: true, alerts_updated: true}
+- id: TPL-YS-MOVE-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    다른 지역으로 이사하게 됐어요. 새 주소는 {{address}}입니다. 주소를 바꾸고, 통장 잔액을 {{bank_account}}로 보낸 다음에 계좌를 해지하고 싶어요.
+  - >-
+    주소 변경 부탁드려요. 새 주소는 {{address}}입니다. 그리고 잔액은 전부 {{bank_account}}로 옮기고 이 통장은 해지해 주세요.
+  - >-
+    이사 때문에 윤슬은행 통장을 정리하려고요. 주소 변경({{address}}), {{bank_account}}로 잔액 이체, 계좌 해지를 부탁드려요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '1864000.00'
+  param_space:
+    address: ['대전광역시 서구 둔산로 117번길 23', '광주광역시 북구 첨단과기로 208']
+    bank_account: ['미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [update_contact_info, transfer_funds, close_account]
+  expected_state_deltas: {contact_updated: true, transfer_status: COMPLETED, acct_ys_0001.status: CLOSED}
+  # Closing an account invites stopping the debits that still draw on it.
+  allowed_tools: [stop_payment]
+- id: TPL-YS-MATURITY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    정기예금을 만기 전에 해지해서 그 돈으로 주택담보대출 {{amount}}원을 중도상환하고 싶어요. 상환일 전에 알림도 오게 해 주세요.
+  - >-
+    정기예금을 중도해지하고 {{amount}}원을 주택담보대출 상환에 쓰고 싶어요. 그리고 출금일 전에 알림을 받고 싶어요.
+  - >-
+    대출 이자를 줄이려고요. 정기예금을 깨서 {{amount}}원을 대출 상환에 넣어 주시고, 상환일 알림도 설정해 주세요.
+  account_state:
+    account_id: loan_ys_0001
+    account_type: 주택담보대출
+    balance: '284000000.00'
+    time_deposit_id: td_ys_0001
+    time_deposit_balance: '20000000.00'
+  param_space:
+    amount: ['1,000만', '2,000만']
+  gold_tool_sequence: [cancel_time_deposit, request_loan_prepayment, set_alerts]
+  expected_state_deltas: {td_ys_0001.status: CLOSED, prepayment_status: REQUESTED, alerts_updated: true}
+- id: TPL-YS-HOMELOAN-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    주택담보대출을 손보고 싶어요. 변동금리를 5년 혼합형으로 바꾸고, {{amount}}원을 중도상환하고, 상환일 전에 알림이 오게 해 주세요.
+  - >-
+    금리가 더 오를 것 같아서 주택담보대출을 5년 혼합형으로 바꾸려고요. {{amount}}원 일부 상환과 상환일 알림 설정도 같이 부탁드려요.
+  - >-
+    주택담보대출 건으로 세 가지요. 혼합형 금리로 전환, {{amount}}원 중도상환, 상환일 알림 설정이에요.
+  account_state:
+    account_id: loan_ys_0001
+    account_type: 주택담보대출
+    balance: '284000000.00'
+  param_space:
+    amount: ['1,000만', '3,000만']
+  gold_tool_sequence: [change_loan_rate_type, request_loan_prepayment, set_alerts]
+  expected_state_deltas: {rate_type_change: REQUESTED, prepayment_status: REQUESTED, alerts_updated: true}
+- id: TPL-YS-NEWJOB-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    이직하면서 이사했어요(새 주소는 {{address}}입니다). 주소를 바꾸고, 월 {{amount}}원짜리 정기적금에 들고, 월세 보낼 {{payee}} 계좌({{bank_account}})를 등록하고, 입출금 알림도 설정하고 싶어요.
+  - >-
+    새 직장 때문에 할 일이 많네요. 주소 변경({{address}}), 월 {{amount}}원 적금 가입, {{payee}} 계좌({{bank_account}}) 등록, 입출금 알림 설정을 부탁드려요.
+  - >-
+    네 가지 부탁드려요. 주소 변경({{address}}), 매달 {{amount}}원 정기적금 가입, 자주 쓰는 계좌에 {{payee}}({{bank_account}}) 추가, 입출금 알림 설정이요.
+  account_state:
+    account_id: acct_ys_0001
+    balance: '2300000.00'
+  param_space:
+    address: ['대전광역시 서구 둔산로 117번길 23', '부산광역시 해운대구 센텀중앙로 48']
+    amount: ['30만', '50만']
+    payee: [집주인, 관리사무소]
+    bank_account: ['윤슬은행 412-08-772104', '미리내뱅크 1004-21-4217035']
+  gold_tool_sequence: [update_contact_info, open_installment_savings, update_beneficiary, set_alerts]
+  expected_state_deltas: {contact_updated: true, installment_savings_status: OPEN, payee_added: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/ko_KR/dynamic.yaml), not scripted templates.

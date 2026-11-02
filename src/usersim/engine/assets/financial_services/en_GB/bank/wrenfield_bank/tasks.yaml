@@ -1,0 +1,597 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for wrenfield_bank, a high-street bank. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in British English (build_instance picks one per
+# trajectory). Read-only tools (get_account_transactions, get_statements,
+# dispute_status) carry no gold state change.
+templates:
+- id: TPL-WB-DISPUTE-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Hi, there's a card payment of £{{amount}} to {{merchant}} on my statement that
+    I don't recognise. I've never shopped there. Can you help?
+  - >-
+    I've been charged £{{amount}} by {{merchant}} and it wasn't me. How do I get
+    my money back?
+  - >-
+    There's a debit card payment of £{{amount}} to {{merchant}} that I didn't
+    make. Can you dispute it for me?
+  account_state:
+    account_id: acct_wb_0001
+    cards:
+    - {card_id: card_wb_0001, status: active}
+    transactions:
+    - {transaction_id: txn_wb_0001, merchant: '{{merchant}}', amount: '{{amount}}', status: posted}
+  param_space:
+    merchant: [Brightside Electrics, StreamHub Premium, Northgate Fitness, Larch & Co Online]
+    amount: ['49.99', '219.00', '1,149.00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_wb_0001.status: UNDER_REVIEW}
+  # blocking the compromised card and ordering a replacement are legitimate
+  # actions a customer often requests during a fraud dispute — permitted (not
+  # required).
+  allowed_tools: [freeze_card, order_replacement_card]
+- id: TPL-WB-SECTION75-001
+  tier: verifiable
+  task_type: complaint_dispute
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I paid £{{amount}} on my Wrenfield credit card for {{item}} and the company has
+    gone bust before delivering. Can I claim the money back from you?
+  - >-
+    The firm I bought {{item}} from has gone into administration and I never got
+    it. I paid £{{amount}} on my credit card. Can you raise a section 75 claim?
+  - >-
+    I bought {{item}} for £{{amount}} with my credit card, but the retailer has
+    stopped trading and won't answer. How do I get a refund through you?
+  account_state:
+    account_id: cc_wb_0001
+    account_type: Wrenfield Rewards Credit Card
+    transactions:
+    - {transaction_id: txn_wb_0002, merchant: Hartley Home Furnishings, amount: '{{amount}}', status: posted}
+  param_space:
+    item: [a sofa, a fitted wardrobe, a bed and mattress]
+    amount: ['640.00', '1,280.00', '2,450.00']
+  gold_tool_sequence: [file_transaction_dispute]
+  expected_state_deltas: {txn_wb_0002.status: UNDER_REVIEW}
+- id: TPL-WB-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I think my debit card has been {{event}}. Can you freeze it straight away so
+    nobody can use it?
+  - >-
+    Please freeze my card ending 0001, it's been {{event}}.
+  - >-
+    My card ending 0001 has been {{event}}. Can you put a temporary block on it
+    while I work out what's happened?
+  account_state:
+    account_id: acct_wb_0001
+    # openings reference "ending 0001"; pin last4 so the account grounding the
+    # user is given matches.
+    last4: '0001'
+    cards:
+    - {card_id: card_wb_0001, status: active}
+  param_space:
+    event: [lost, stolen]
+  gold_tool_sequence: [freeze_card]
+  expected_state_deltas: {card_wb_0001.status: frozen}
+- id: TPL-WB-SCAM-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I think I've been scammed. Someone pretending to be {{impersonated}} told me to
+    send £{{amount}} by bank transfer, and now they've stopped answering.
+  - >-
+    I transferred £{{amount}} to a person who said they were {{impersonated}}, and
+    I've just realised it was a scam. Can I get the money back?
+  - >-
+    Yesterday I sent £{{amount}} to someone claiming to be {{impersonated}}. It was
+    fraud. I need to report it and claim a refund.
+  account_state:
+    account_id: acct_wb_0001
+    transactions:
+    - {transaction_id: txn_wb_0003, merchant: Faster Payment to J SMITH, amount: '{{amount}}', status: posted}
+  param_space:
+    impersonated: [HMRC, my energy supplier, a delivery company, my landlord]
+    amount: ['380.00', '1,250.00', '4,800.00']
+  gold_tool_sequence: [report_scam_payment]
+  expected_state_deltas: {scam_claim_status: OPEN}
+- id: TPL-WB-SWITCH-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to switch my current account from {{old_bank}} to you, with all my
+    Direct Debits and my salary.
+  - >-
+    Can you move my account over from {{old_bank}} using the Current Account Switch
+    Service?
+  - >-
+    I want to leave {{old_bank}} and bring everything to Wrenfield. How do I start
+    the switch?
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    old_bank: [Castlegate Bank, Northern Union Bank, my old bank]
+  gold_tool_sequence: [initiate_account_switch]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS}
+- id: TPL-WB-OVERDRAFT-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Could you change my arranged overdraft to £{{limit}}?
+  - >-
+    I'd like my overdraft limit set to £{{limit}}, please.
+  - >-
+    Please change my overdraft to £{{limit}}. I want to keep it under control.
+  account_state:
+    account_id: acct_wb_0001
+    overdraft_limit: '1000'
+  param_space:
+    limit: ['250', '500', '1,500']
+  gold_tool_sequence: [change_overdraft_limit]
+  expected_state_deltas: {overdraft_limit_updated: true}
+- id: TPL-WB-OVERPAY-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to make a one-off overpayment of £{{amount}} on my mortgage.
+  - >-
+    Can I pay an extra £{{amount}} off my mortgage this month without a charge?
+  - >-
+    I've had a bonus at work and want to put £{{amount}} towards my mortgage.
+  account_state:
+    account_id: mtg_wb_0001
+    account_type: Wrenfield Two-Year Fixed Mortgage
+    balance: '186000.00'
+  param_space:
+    amount: ['2,000', '5,000', '12,000']
+  gold_tool_sequence: [make_mortgage_overpayment]
+  expected_state_deltas: {overpayment_status: SCHEDULED}
+- id: TPL-WB-PRODUCTTRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My two-year fixed rate ends next month. Can you move me onto a new {{deal}}
+    so I don't go onto the standard variable rate?
+  - >-
+    I'd like to switch my mortgage to a new {{deal}} with you when my current deal
+    finishes.
+  - >-
+    My fix is about to run out. Please put me on a {{deal}} without a new
+    application.
+  account_state:
+    account_id: mtg_wb_0001
+    account_type: Wrenfield Two-Year Fixed Mortgage
+    balance: '186000.00'
+  param_space:
+    deal: [two-year fix, five-year fix, tracker]
+  gold_tool_sequence: [request_product_transfer]
+  expected_state_deltas: {product_transfer_status: REQUESTED}
+- id: TPL-WB-LOAN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to apply for a personal loan of £{{amount}} for {{purpose}}.
+  - >-
+    Can I borrow £{{amount}} from you? It's for {{purpose}}.
+  - >-
+    Please start an application for a £{{amount}} loan; I need it for {{purpose}}.
+  account_state:
+    account_id: acct_wb_0001
+    account_type: Wrenfield Current Account
+  param_space:
+    amount: ['5,000', '12,000', '20,000']
+    purpose: [a used car, a new kitchen, our wedding]
+  gold_tool_sequence: [apply_loan]
+  expected_state_deltas: {loan_application_status: SUBMITTED}
+- id: TPL-WB-PAYEE-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to add {{payee}} as a new payee on my account.
+  - >-
+    Can you set up {{payee}} as a payee? I've got the sort code and account number.
+  - >-
+    Please add a payee for {{payee}}, I'll be paying them every month.
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    payee: [my landlord, my childminder, my window cleaner]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-WB-DIRECTDEBIT-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Please cancel my Direct Debit to {{creditor}}, I've ended the contract.
+  - >-
+    I want to stop the monthly Direct Debit to {{creditor}}. Can you cancel it?
+  - >-
+    Can you cancel the Direct Debit that {{creditor}} takes from my account?
+  account_state:
+    account_id: acct_wb_0001
+    payments:
+    - {payment_id: pay_wb_0001, payee: '{{creditor}}', type: direct_debit, status: active}
+  param_space:
+    creditor: [Northgate Fitness, StreamHub Premium, Brightside Mobile]
+  gold_tool_sequence: [stop_payment]
+  expected_state_deltas: {pay_wb_0001.status: STOPPED}
+- id: TPL-WB-MANDATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:55-64, age:65+]
+  opening_user_messages:
+  - >-
+    I'm going into hospital for a while. Can you add my {{relative}} as a
+    third-party mandate so they can manage my account?
+  - >-
+    I'd like my {{relative}} to be able to look after my bank account for me. How
+    do I give them access?
+  - >-
+    Please set up a third-party mandate for my {{relative}} on my current account.
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    relative: [daughter, son, niece]
+  gold_tool_sequence: [manage_authorized_users]
+  expected_state_deltas: {authorized_users_updated: true}
+- id: TPL-WB-ACTIVATE-001
+  tier: verifiable
+  task_type: transactional
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    My new debit card has just arrived. Can you activate it for me?
+  - >-
+    I've received my replacement card ending 0002. How do I start using it?
+  - >-
+    Please activate the new card you sent me, the one ending 0002.
+  account_state:
+    account_id: acct_wb_0001
+    cards:
+    - {card_id: card_wb_0002, status: inactive}
+  param_space: {}
+  gold_tool_sequence: [activate_card]
+  expected_state_deltas: {card_wb_0002.status: active}
+- id: TPL-WB-OPEN-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I'd like to open {{product}} alongside my current account.
+  - >-
+    Can I open {{product}} with you today?
+  - >-
+    I want to start saving properly. Please open {{product}} for me.
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    product: [a Regular Saver, an Easy Access Cash ISA, an Everyday Saver]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_account_status: OPEN}
+- id: TPL-WB-PAYBILL-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I need to pay my {{bill}} of £{{amount}}. I've got the bank details on the
+    bill.
+  - >-
+    Can you help me pay a {{bill}} for £{{amount}} from my current account?
+  - >-
+    Please pay my {{bill}}, it's £{{amount}}, using the reference on the letter.
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    bill: [council tax bill, water bill, parking fine]
+    amount: ['70.00', '186.50', '1,640.00']
+  gold_tool_sequence: [pay_bill]
+  expected_state_deltas: {payment_status: SCHEDULED}
+- id: TPL-WB-SAVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Can you move £{{amount}} from my current account into my Everyday Saver?
+  - >-
+    Please transfer £{{amount}} to my Everyday Saver.
+  - >-
+    I'd like to put £{{amount}} from my current account into savings.
+  account_state:
+    account_id: acct_wb_0001
+    balance: '4200.00'
+  param_space:
+    amount: ['250', '800', '1,500']
+  gold_tool_sequence: [transfer_funds]
+  expected_state_deltas: {transfer_status: COMPLETED}
+- id: TPL-WB-CLOSE-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I don't use my Everyday Saver any more. Please close it and move the balance
+    to my current account.
+  - >-
+    Can you close my Everyday Saver for me?
+  - >-
+    I'd like to close my savings account with you; the money can go into my current
+    account.
+  account_state:
+    account_id: sav_wb_0001
+    account_type: Wrenfield Everyday Saver
+    balance: '312.40'
+  param_space: {}
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {sav_wb_0001.status: CLOSED}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered (its tool-doc
+# retrieved) and called. The verifier requires the full sequence with no
+# unauthorized state changes. Run these with a higher max_turns (~10-12).
+- id: TPL-WB-LOSTWALLET-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: cards
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    I've lost my purse with my card ending 0001 in it: freeze the card, send me a
+    replacement, and text me whenever there's a payment on the account.
+  - >-
+    My wallet's gone missing with my debit card in it. Please freeze the card, order
+    a new one, and set up alerts for any payments.
+  - >-
+    Can you freeze my card ending 0001, post me a replacement, and turn on payment
+    alerts? I've lost it somewhere in town.
+  account_state:
+    account_id: acct_wb_0001
+    last4: '0001'
+    cards:
+    - {card_id: card_wb_0001, status: active}
+  param_space: {}
+  gold_tool_sequence: [freeze_card, order_replacement_card, set_alerts]
+  expected_state_deltas: {card_wb_0001.status: frozen, card_wb_0001.replacement: ordered, alerts_updated: true}
+- id: TPL-WB-MOVINGHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    We've moved house: please update my address to {{address}}, cancel the Direct
+    Debit to {{creditor}}, and pay their final bill of £{{amount}}.
+  - >-
+    I've just moved to {{address}}. Can you change my address, stop the Direct Debit
+    to {{creditor}}, and pay the £{{amount}} final bill they've sent?
+  - >-
+    New address is {{address}}. Please update it, cancel my {{creditor}} Direct
+    Debit, and settle their last bill of £{{amount}}.
+  account_state:
+    account_id: acct_wb_0001
+    payments:
+    - {payment_id: pay_wb_0001, payee: '{{creditor}}', type: direct_debit, status: active}
+  param_space:
+    address: ['14 Mill Lane, Harrogate HG1 2AB', '3 Victoria Terrace, Cardiff CF10 4TN']
+    creditor: [Ridgeway Energy, Calder Water]
+    amount: ['84.20', '212.75']
+  gold_tool_sequence: [update_contact_info, stop_payment, pay_bill]
+  expected_state_deltas: {contact_updated: true, pay_wb_0001.status: STOPPED, payment_status: SCHEDULED}
+- id: TPL-WB-SCAM-FREEZE-001
+  tier: verifiable
+  task_type: fraud_triage
+  domain: payments
+  placeholder: true
+  persona_tags: [region:any, age:65+, financial-literacy:low]
+  opening_user_messages:
+  - >-
+    A man saying he was from {{impersonated}} got me to send him £{{amount}} and I
+    read him my card number too. Please report the scam, freeze my card, and warn
+    me about every payment from now on.
+  - >-
+    I've been tricked by someone pretending to be {{impersonated}}: I transferred
+    £{{amount}} and gave them my card details. Can you report it, freeze the card,
+    and set up alerts?
+  - >-
+    I sent £{{amount}} to a fake {{impersonated}} and told them my card number.
+    Please open a scam claim, block my card, and turn on payment alerts.
+  account_state:
+    account_id: acct_wb_0001
+    cards:
+    - {card_id: card_wb_0001, status: active}
+    transactions:
+    - {transaction_id: txn_wb_0003, merchant: Faster Payment to R JONES, amount: '{{amount}}', status: posted}
+  param_space:
+    impersonated: [HMRC, Wrenfield's fraud team, the police]
+    amount: ['950.00', '2,600.00']
+  gold_tool_sequence: [report_scam_payment, freeze_card, set_alerts]
+  expected_state_deltas: {scam_claim_status: OPEN, card_wb_0001.status: frozen, alerts_updated: true}
+- id: TPL-WB-DEBT-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:25-34, age:35-44]
+  opening_user_messages:
+  - >-
+    I've been living in my overdraft for months. Please apply for a £{{amount}}
+    loan to clear it, then lower my overdraft limit to £{{limit}}, and send me a
+    warning when my balance gets low.
+  - >-
+    Can I take out a £{{amount}} personal loan to pay off my overdraft? After that,
+    cut my overdraft to £{{limit}} and set up a low-balance alert.
+  - >-
+    I want to get out of my overdraft: start a loan application for £{{amount}},
+    reduce my overdraft to £{{limit}}, and alert me if I'm running low.
+  account_state:
+    account_id: acct_wb_0001
+    account_type: Wrenfield Current Account
+    balance: '-1850.00'
+    overdraft_limit: '2000'
+  param_space:
+    amount: ['2,000', '3,000']
+    limit: ['250', '500']
+  gold_tool_sequence: [apply_loan, change_overdraft_limit, set_alerts]
+  expected_state_deltas: {loan_application_status: SUBMITTED, overdraft_limit_updated: true, alerts_updated: true}
+- id: TPL-WB-REMORTGAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: lending_mortgage
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    My fixed rate ends soon: please move me onto a new {{deal}}, take a £{{amount}}
+    overpayment off the balance, and remind me before each monthly payment.
+  - >-
+    Can you switch my mortgage to a {{deal}} when my deal ends, put £{{amount}}
+    towards it as an overpayment, and set up payment reminders?
+  - >-
+    I'd like a {{deal}} for my mortgage, a one-off overpayment of £{{amount}}, and a
+    reminder before every payment goes out.
+  account_state:
+    account_id: mtg_wb_0001
+    account_type: Wrenfield Two-Year Fixed Mortgage
+    balance: '186000.00'
+  param_space:
+    deal: [two-year fix, five-year fix]
+    amount: ['5,000', '10,000']
+  gold_tool_sequence: [request_product_transfer, make_mortgage_overpayment, set_alerts]
+  expected_state_deltas: {product_transfer_status: REQUESTED, overpayment_status: SCHEDULED, alerts_updated: true}
+- id: TPL-WB-SEPARATION-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    We've separated: please remove {{ex}} as a payee, cancel the third-party
+    mandate that lets {{ex}} use my account, and close my Everyday Saver.
+  - >-
+    We've split up, so I need {{ex}} deleted from my payees, the mandate for {{ex}}
+    on my account removed, and my Everyday Saver closed.
+  - >-
+    After our separation, can you delete {{ex}} as a payee, cancel the mandate that
+    lets {{ex}} use my account, and close my Everyday Saver?
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    ex: [my ex-husband, my ex-wife, my ex-partner]
+  gold_tool_sequence: [update_beneficiary, manage_authorized_users, close_account]
+  expected_state_deltas: {beneficiary_updated: true, authorized_users_updated: true, sav_wb_0001.status: CLOSED}
+- id: TPL-WB-NEWCUSTOMER-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:25-34]
+  opening_user_messages:
+  - >-
+    I've just opened my Wrenfield account: please start the switch from
+    {{old_bank}}, open a Regular Saver, and set up a text whenever my salary
+    arrives.
+  - >-
+    Can you bring my account over from {{old_bank}}, open a Regular Saver for me,
+    and alert me when my wages come in?
+  - >-
+    I want to switch from {{old_bank}} with the switching service, start a Regular
+    Saver, and get an alert each payday.
+  account_state:
+    account_id: acct_wb_0001
+  param_space:
+    old_bank: [Castlegate Bank, Northern Union Bank]
+  gold_tool_sequence: [initiate_account_switch, open_account, set_alerts]
+  expected_state_deltas: {account_switch_status: IN_PROGRESS, new_account_status: OPEN, alerts_updated: true}
+- id: TPL-WB-BONUS-001
+  tier: verifiable
+  task_type: transactional
+  domain: retail_banking
+  placeholder: true
+  persona_tags: [region:any, age:35-44, age:45-54]
+  opening_user_messages:
+  - >-
+    My work bonus has just landed: please move £{{saving}} into my Everyday Saver,
+    make a £{{overpayment}} overpayment on my mortgage, pay my council tax bill of
+    £{{bill}}, and text me once it's all done.
+  - >-
+    Can you put £{{saving}} of my bonus into my Everyday Saver, overpay my mortgage
+    by £{{overpayment}}, settle my £{{bill}} council tax, and send me a confirmation
+    alert?
+  - >-
+    I'd like to split my bonus: £{{saving}} to my Everyday Saver, £{{overpayment}} off
+    my mortgage, £{{bill}} for the council tax, and a text when everything's gone
+    through.
+  account_state:
+    account_id: acct_wb_0001
+    account_type: Wrenfield Current Account
+    balance: '9800.00'
+  param_space:
+    saving: ['2,000', '3,000']
+    overpayment: ['4,000', '5,000']
+    bill: ['1,640.00', '1,912.00']
+  gold_tool_sequence: [transfer_funds, make_mortgage_overpayment, pay_bill, set_alerts]
+  expected_state_deltas: {transfer_status: COMPLETED, overpayment_status: SCHEDULED, payment_status: SCHEDULED, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/en_GB/dynamic.yaml), not scripted templates.

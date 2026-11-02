@@ -1,0 +1,505 @@
+schema_version: v0.1
+# Verifiable Tier-1 tasks for egide_assurances, a mutual insurer selling
+# assurance-vie, the PER, home, car and complementary health cover. Every
+# state-changing tool it offers is gold in at least one task. Each task ships
+# THREE opening phrasings in French. Read-only tools (get_statements,
+# get_claim_status) carry no gold state change; send_insurance_certificate
+# changes no state but is gold where the customer asks for the certificate.
+templates:
+- id: TPL-EG-WATERDAMAGE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mon voisin du dessus a eu une fuite et {{damage}}. Je voudrais déclarer un
+    dégât des eaux sur mon assurance habitation.
+  - >-
+    J'ai un dégât des eaux depuis {{when}} : l'eau est venue du logement du
+    dessus et {{damage}}. Comment je déclare le sinistre ?
+  - >-
+    Merci d'enregistrer un sinistre dégât des eaux sur mon contrat habitation,
+    survenu {{when}} : {{damage}}.
+  account_state:
+    account_id: mrh_eg_0001
+    account_type: assurance habitation
+  param_space:
+    when: [hier, ce matin, avant-hier]
+    damage: [le plafond de la salle de bains est taché et gonflé, le parquet du salon a gondolé, une partie de la cuisine a été inondée]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-EG-CARCLAIM-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai eu un accrochage {{when}} sur un parking et on a rempli un constat
+    amiable avec l'autre conducteur. Je voudrais déclarer le sinistre.
+  - >-
+    Quelqu'un a embouti l'arrière de ma voiture à un feu rouge {{when}}. J'ai le
+    constat amiable signé : comment je déclare ?
+  - >-
+    Merci d'enregistrer un sinistre sur mon assurance auto : un accrochage
+    {{when}}, avec un constat amiable rempli sur place.
+  account_state:
+    account_id: auto_eg_0001
+    account_type: assurance auto
+  param_space:
+    when: [hier soir, ce matin, samedi dernier]
+  gold_tool_sequence: [file_claim]
+  expected_state_deltas: {claim_status: FILED}
+- id: TPL-EG-AVPAYMENT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'aimerais faire un versement libre de {{amount}} € sur mon assurance-vie.
+  - >-
+    Pouvez-vous mettre en place des versements programmés de {{monthly}} € par
+    mois sur mon contrat d'assurance-vie ?
+  - >-
+    Merci d'ajouter {{amount}} € sur mon contrat d'assurance-vie Égide, sur le
+    fonds en euros.
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    amount: ['1 000', '3 000', '10 000']
+    monthly: ['50', '100', '200']
+  gold_tool_sequence: [make_additional_payment]
+  expected_state_deltas: {payment_status: RECORDED}
+- id: TPL-EG-SURRENDER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai des travaux à financer et j'aimerais retirer {{amount}} € de mon
+    assurance-vie, sans clôturer le contrat.
+  - >-
+    Pouvez-vous faire un rachat partiel de {{amount}} € sur mon contrat
+    d'assurance-vie ?
+  - >-
+    Merci de lancer un rachat partiel de {{amount}} € sur mon assurance-vie et de
+    verser l'argent sur mon compte courant.
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    amount: ['5 000', '12 000']
+  gold_tool_sequence: [request_partial_surrender]
+  expected_state_deltas: {surrender_status: REQUESTED}
+- id: TPL-EG-SWITCH-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Les marchés m'inquiètent : j'aimerais transférer {{share}} de mes unités de
+    compte vers le fonds en euros.
+  - >-
+    Pouvez-vous faire un arbitrage sur mon assurance-vie : {{share}} de mes unités
+    de compte vers le fonds en euros ?
+  - >-
+    Merci de sécuriser une partie de mon contrat en passant {{share}} des unités
+    de compte sur le fonds en euros.
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    share: [la moitié, un quart, 30 %]
+  gold_tool_sequence: [switch_funds]
+  expected_state_deltas: {fund_switch: COMPLETED}
+- id: TPL-EG-BENEFICIARY-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai revu l'organisation de ma succession et je dois modifier la clause
+    bénéficiaire de mon contrat d'assurance-vie au profit de {{beneficiary}}. Vous
+    pouvez vous en occuper ?
+  - >-
+    Merci d'inscrire {{beneficiary}} dans la clause bénéficiaire de mon contrat
+    chez Égide.
+  - >-
+    Pouvez-vous mettre à jour la clause bénéficiaire de mon assurance-vie en
+    faveur de {{beneficiary}} ?
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    beneficiary: [mon conjoint, 'mes enfants, nés ou à naître, par parts égales', ma fille]
+  gold_tool_sequence: [update_beneficiary]
+  expected_state_deltas: {beneficiary_updated: true}
+- id: TPL-EG-PERTRANSFER-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai un ancien PERP chez {{insurer}} et je voudrais le transférer sur mon PER
+    individuel Égide.
+  - >-
+    Pouvez-vous lancer le transfert de mon PER détenu chez {{insurer}} vers mon PER
+    Égide ?
+  - >-
+    Merci de rapatrier mon ancien contrat Madelin de {{insurer}} sur mon PER
+    individuel chez vous.
+  account_state:
+    account_id: per_eg_0001
+    account_type: PER individuel
+    balance: '12400.00'
+  param_space:
+    insurer: [Prévoyance Atlantique, Mutuelle des Cèdres, Assurances Cassiopée]
+  gold_tool_sequence: [initiate_plan_transfer]
+  expected_state_deltas: {plan_transfer_status: IN_PROGRESS}
+- id: TPL-EG-EARLYRELEASE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'achète ma résidence principale et j'aimerais débloquer {{amount}} € de mon
+    PER pour l'apport. Vous pouvez lancer la demande ?
+  - >-
+    Pouvez-vous traiter un déblocage anticipé de {{amount}} € sur mon PER ? C'est
+    pour l'achat de ma résidence principale.
+  - >-
+    Je voudrais retirer {{amount}} € de mon PER pour acheter ma résidence
+    principale. De quoi avez-vous besoin pour mettre ça en place ?
+  account_state:
+    account_id: per_eg_0001
+    account_type: PER individuel
+    balance: '64000.00'
+  param_space:
+    amount: ['20 000', '35 000', '50 000']
+  gold_tool_sequence: [request_early_release]
+  expected_state_deltas: {release_status: PROCESSING}
+- id: TPL-EG-PAYOUT-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je pars à la retraite le mois prochain et je voudrais récupérer {{amount}} €
+    de mon PER en capital. Vous pouvez lancer la demande ?
+  - >-
+    Je viens de liquider ma retraite et j'aimerais une sortie en capital de
+    {{amount}} € sur mon PER. Qu'est-ce qu'il vous faut ?
+  - >-
+    Maintenant que je suis à la retraite, pouvez-vous débloquer {{amount}} € de
+    mon PER en capital ?
+  account_state:
+    account_id: per_eg_0001
+    account_type: PER individuel
+    balance: '120000.00'
+  param_space:
+    amount: ['15 000', '40 000']
+  gold_tool_sequence: [request_retirement_payout]
+  expected_state_deltas: {payout_status: PROCESSING}
+- id: TPL-EG-HEALTHREIMB-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Mon opticien n'a pas appliqué le tiers payant pour {{care}} ({{amount}} €).
+    Comment je me fais rembourser ?
+  - >-
+    Je voudrais vous envoyer ma facture pour {{care}} afin d'obtenir le
+    remboursement : j'ai avancé {{amount}} €.
+  - >-
+    Merci d'enregistrer ma demande de remboursement : {{care}}, {{amount}} € payés
+    sans tiers payant.
+  account_state:
+    account_id: sante_eg_0001
+    account_type: complémentaire santé
+  param_space:
+    care: [mes nouvelles lunettes, mes lentilles de contact, des verres progressifs]
+    amount: ['160', '240', '480']
+  gold_tool_sequence: [request_health_reimbursement]
+  expected_state_deltas: {health_claim_status: SUBMITTED}
+- id: TPL-EG-MOVE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je déménage le {{date}} dans un {{home}} : il faut mettre mon assurance
+    habitation à jour.
+  - >-
+    Pouvez-vous transférer mon contrat habitation sur mon nouveau logement, un
+    {{home}}, à partir du {{date}} ?
+  - >-
+    Merci de modifier mon assurance habitation : nouveau logement ({{home}}) à
+    compter du {{date}}.
+  account_state:
+    account_id: mrh_eg_0001
+    account_type: assurance habitation
+  param_space:
+    home: [trois-pièces à Rennes, maison avec jardin près d'Angers, studio à Grenoble]
+    date: [1er novembre, 15 novembre, 1er décembre]
+  gold_tool_sequence: [update_policy]
+  expected_state_deltas: {policy_updated: true}
+- id: TPL-EG-CANCEL-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'ai vendu ma voiture la semaine dernière et je voudrais résilier mon
+    assurance auto.
+  - >-
+    Merci de résilier mon contrat d'assurance auto : je n'ai plus de véhicule
+    depuis la vente de ma {{car}}.
+  - >-
+    Pouvez-vous mettre fin à mon assurance auto ? J'ai vendu ma {{car}}.
+  account_state:
+    account_id: auto_eg_0001
+    account_type: assurance auto
+  param_space:
+    car: [Clio, 208, Zoé]
+  gold_tool_sequence: [close_account]
+  expected_state_deltas: {auto_eg_0001.status: CLOSED}
+- id: TPL-EG-SUBSCRIBE-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    J'emménage dans mon premier appartement et le propriétaire me demande une
+    assurance. Je voudrais souscrire {{product}} chez vous.
+  - >-
+    Pouvez-vous me faire souscrire {{product}} ?
+  - >-
+    J'aimerais ouvrir {{product}} chez Égide. Qu'est-ce qu'il vous faut ?
+  account_state:
+    customer_id: cust_eg_0001
+  param_space:
+    product: [une assurance habitation, une complémentaire santé, un contrat d'assurance-vie]
+  gold_tool_sequence: [open_account]
+  expected_state_deltas: {new_contract_status: ACTIVE}
+# ── Multi-step (Tier-1) tasks ──────────────────────────────────────────
+# Gold sequences of depth 3: each gold tool must be discovered and called; the
+# verifier requires the full sequence with no unauthorized state changes. Run
+# with a higher max_turns (~10-12).
+- id: TPL-EG-NEWHOME-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je déménage au {{address}} : mettez mon assurance habitation à jour pour ce
+    logement, changez mon adresse dans mon dossier et envoyez-moi l'attestation
+    pour mon nouveau propriétaire.
+  - >-
+    Merci de transférer mon contrat habitation sur mon nouvel appartement
+    ({{address}}), de mettre à jour mes coordonnées et de m'envoyer une attestation
+    d'assurance pour le bail.
+  - >-
+    Pouvez-vous adapter mon assurance habitation à mon nouveau logement au
+    {{address}}, changer mon adresse et me faire parvenir l'attestation que
+    demande le propriétaire ?
+  account_state:
+    account_id: mrh_eg_0001
+    account_type: assurance habitation
+  param_space:
+    address: ['9 rue Pasteur, 35000 Rennes', '42 avenue de la Libération, 38000 Grenoble']
+  gold_tool_sequence: [update_policy, update_contact_info, send_insurance_certificate]
+  expected_state_deltas: {policy_updated: true, contact_updated: true, certificate_sent: true}
+- id: TPL-EG-NEWBORN-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Notre bébé est né le mois dernier : ajoutez-le à ma complémentaire santé,
+    mettez la clause bénéficiaire de mon assurance-vie au profit de mes enfants,
+    nés ou à naître, par parts égales, et faites un versement de {{amount}} € sur
+    le contrat.
+  - >-
+    Avec la naissance de notre enfant, merci de l'inscrire sur ma complémentaire
+    santé, de modifier la clause bénéficiaire de mon assurance-vie en faveur de
+    mes enfants et de verser {{amount}} € dessus.
+  - >-
+    Pouvez-vous ajouter notre nouveau-né à ma mutuelle, mettre à jour la clause
+    bénéficiaire de mon assurance-vie pour mes enfants et faire un versement
+    libre de {{amount}} € ?
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    amount: ['500', '2 000']
+  gold_tool_sequence: [update_policy, update_beneficiary, make_additional_payment]
+  expected_state_deltas: {policy_updated: true, beneficiary_updated: true, payment_status: RECORDED}
+- id: TPL-EG-RETIRE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Je pars à la retraite ce trimestre. Merci de mettre à jour mon adresse :
+    {{address}}, de lancer la sortie de mon PER en capital fractionné et d'activer
+    une alerte à chaque versement.
+  - >-
+    Pouvez-vous changer mon adresse pour {{address}}, demander la liquidation de
+    mon PER en capital fractionné et me prévenir à chaque versement ?
+  - >-
+    Mettez à jour mon adresse ({{address}}), lancez la sortie en capital
+    fractionné de mon PER et prévenez-moi à chaque versement.
+  account_state:
+    account_id: per_eg_0001
+    account_type: PER individuel
+    balance: '120000.00'
+  param_space:
+    address: ['15 avenue Jean-Jaurès, 13005 Marseille', '3 rue de la République, 67000 Strasbourg']
+  gold_tool_sequence: [update_contact_info, request_retirement_payout, set_alerts]
+  expected_state_deltas: {contact_updated: true, payout_status: PROCESSING, alerts_updated: true}
+- id: TPL-EG-REBALANCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Je réorganise mon assurance-vie : arbitrez {{share}} de mes unités de compte
+    vers le fonds en euros, faites un versement de {{amount}} € et prévenez-moi si
+    la valeur du contrat baisse de plus de 10 %.
+  - >-
+    Merci de passer {{share}} de mes unités de compte sur le fonds en euros,
+    d'ajouter {{amount}} € sur le contrat et d'activer une alerte en cas de baisse
+    marquée.
+  - >-
+    Pouvez-vous sécuriser {{share}} de mes unités de compte sur le fonds en euros,
+    verser {{amount}} € de plus et m'alerter si le contrat recule nettement ?
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    share: [la moitié, un quart]
+    amount: ['2 000', '5 000']
+  gold_tool_sequence: [switch_funds, make_additional_payment, set_alerts]
+  expected_state_deltas: {fund_switch: COMPLETED, payment_status: RECORDED, alerts_updated: true}
+- id: TPL-EG-PER-SETUP-001
+  tier: verifiable
+  task_type: onboarding_kyc
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, financial-literacy:high]
+  opening_user_messages:
+  - >-
+    Je veux ouvrir un PER individuel chez Égide, y transférer mon ancien contrat
+    Madelin détenu chez {{insurer}}, et mettre en place des versements programmés
+    de {{monthly}} € par mois.
+  - >-
+    Merci d'ouvrir un PER individuel, de lancer le transfert de mon ancien PERP de
+    {{insurer}} et de programmer un versement mensuel de {{monthly}} €.
+  - >-
+    Pouvez-vous m'ouvrir un PER, y rapatrier mon ancienne épargne retraite de
+    {{insurer}} et mettre en place {{monthly}} € de versements par mois ?
+  account_state:
+    customer_id: cust_eg_0001
+  param_space:
+    insurer: [Prévoyance Atlantique, Assurances Cassiopée]
+    monthly: ['100', '250']
+  gold_tool_sequence: [open_account, initiate_plan_transfer, make_additional_payment]
+  expected_state_deltas: {new_contract_status: ACTIVE, plan_transfer_status: IN_PROGRESS, payment_status: RECORDED}
+- id: TPL-EG-DIVORCE-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Après mon divorce : modifiez la clause bénéficiaire de mon assurance-vie au
+    profit de {{person}}, mettez à jour mon adresse ({{address}}) et retirez mon
+    ex-conjoint de ma complémentaire santé.
+  - >-
+    Merci de changer la clause bénéficiaire de mon assurance-vie pour {{person}},
+    de mettre à jour mon adresse : {{address}}, et de sortir mon ancien conjoint
+    de ma mutuelle.
+  - >-
+    Suite à mon divorce, pouvez-vous désigner {{person}} comme bénéficiaire de mon
+    assurance-vie, changer mon adresse pour {{address}} et retirer mon ex de ma
+    complémentaire santé ?
+  account_state:
+    account_id: av_eg_0001
+    account_type: contrat d'assurance-vie
+    balance: '48500.00'
+  param_space:
+    person: [mes enfants par parts égales, ma fille, mon fils]
+    address: ['8 place du Marché, 44000 Nantes', '27 boulevard Carnot, 31000 Toulouse']
+  gold_tool_sequence: [update_beneficiary, update_contact_info, update_policy]
+  expected_state_deltas: {beneficiary_updated: true, contact_updated: true, policy_updated: true}
+- id: TPL-EG-FLOOD-001
+  tier: verifiable
+  task_type: transactional
+  domain: insurance
+  placeholder: true
+  persona_tags: [region:any, age:any]
+  opening_user_messages:
+  - >-
+    Ma maison a été inondée pendant les intempéries et l'état de catastrophe
+    naturelle vient d'être reconnu. Déclarez le sinistre, mettez mon adresse à
+    jour chez {{relative}} le temps des travaux, et prévenez-moi de chaque étape
+    du dossier.
+  - >-
+    Après l'inondation, mon logement est inhabitable : merci d'enregistrer le
+    sinistre catastrophe naturelle, de noter mon adresse provisoire chez
+    {{relative}} et d'activer des alertes sur l'avancement de l'indemnisation.
+  - >-
+    Pouvez-vous déclarer l'inondation de ma maison en catastrophe naturelle,
+    remplacer mon adresse par celle de {{relative}} pendant les réparations et
+    m'envoyer des alertes sur le suivi du dossier ?
+  account_state:
+    account_id: mrh_eg_0001
+    account_type: assurance habitation
+  param_space:
+    relative: [ma sœur, mes parents, un ami]
+  gold_tool_sequence: [file_claim, update_contact_info, set_alerts]
+  expected_state_deltas: {claim_status: FILED, contact_updated: true, alerts_updated: true}
+# Open-ended advisory topics are the taxonomy-driven `dynamic` tier
+# (assets/financial_services/fr_FR/dynamic.yaml), not scripted templates.

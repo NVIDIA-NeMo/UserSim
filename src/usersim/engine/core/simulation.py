@@ -327,6 +327,22 @@ def make_failed(
 # ---------------------------------------------------------------------------
 
 
+#: The ``ConversationState.metadata`` keys the conversation loop writes, and
+#: what each holds. A probe reads them but writes keys of its own, led by its
+#: prefix; ``usersim.testing.assert_probe_conforms`` reads a probe's classes
+#: and reports any that write one of these.
+RESERVED_METADATA_KEYS: dict[str, str] = {
+    "user_judge_ratings": "the user judge's verdict on each simulated user turn",
+    "assistant_judge_ratings": "the in-simulation judge's rating of each assistant turn",
+    "frustration_events": "the turns at which the simulated user grew frustrated, with the level",
+    "capitulation_checks": "each capitulation check, its turn and whether it stopped the run",
+    "stopped_on_capitulation": "whether the run stopped on a capitulation",
+    "capitulated_at_turn": "the turn the assistant capitulated at",
+    "user_followup_retries": "how many follow-up user turn attempts failed the gate",
+    "early_stop": "whether the conversation ended before its last turn",
+}
+
+
 @dataclass
 class ConversationState:
     """First-class representation of simulation state during a conversation.
@@ -336,6 +352,8 @@ class ConversationState:
     ``SimulationOutcome`` when ``make_result`` / ``make_failed`` is called.
     The ``metadata`` dict is the loose per-turn judge / event log
     surfaced to interactive previews and the deep-dive analysis script.
+    The loop writes the keys in ``RESERVED_METADATA_KEYS``; a probe writes
+    keys of its own.
     """
 
     messages: list[dict[str, Any]] = field(default_factory=list)
@@ -358,22 +376,41 @@ class ConversationState:
 from usersim.engine.core.probes import ProbeAdapter  # noqa: E402
 
 
-def _probe_should_succeed(probe: ProbeAdapter, state: ConversationState) -> bool:
-    """Honour the optional ``should_succeed(state)`` adapter hook (default True).
+def _protocol_failure(probe: ProbeAdapter, state: ConversationState) -> str:
+    """Say why the probe's optional ``should_succeed(state)`` check failed, or return "".
 
-    This is the sim-side guardrail mechanism that replaced the
-    in-sim trajectory-judge override of ``conversation_status``.
-    Tool_calling uses it to flag sim-quality issues like "no tools
-    were called by the assistant despite a tool-required probe."
+    A probe without the hook passes. A hook that raises fails: a protocol
+    that can't be checked doesn't count as completed.
     """
     fn = getattr(probe, "should_succeed", None)
     if fn is None:
-        return True
+        return ""
     try:
-        return bool(fn(state))
+        if fn(state):
+            return ""
     except Exception as e:
-        logger.debug(f"  |-- probe.should_succeed raised {type(e).__name__}: {e}; defaulting to True")
-        return True
+        logger.warning(f"  |-- probe.should_succeed raised {type(e).__name__}: {e}")
+        return f"should_succeed raised {type(e).__name__}: {e}"
+    return "should_succeed returned False"
+
+
+def finalize_completed(probe: ProbeAdapter, state: ConversationState) -> tuple[bool, SimulationOutcome]:
+    """Finalize a conversation that ran to its end.
+
+    Returns the probe's verdict on its own protocol, which becomes the row's
+    ``conversation_status``, and the finalized outcome. A conversation whose
+    probe didn't complete its protocol is failed, so the evaluator never
+    scores it as assistant-quality evidence.
+    """
+    failure = _protocol_failure(probe, state)
+    if not failure:
+        return True, state.outcome.finalize(status=OutcomeStatus.OK)
+    return False, state.outcome.finalize(
+        status=OutcomeStatus.FAILED,
+        failure_class=FailureClass.SCENARIO_ABORTED,
+        failure_attribution=FailureAttribution.SCENARIO_LOGIC,
+        failure_detail=failure,
+    )
 
 
 def _failure_attribution_for_alias(alias: str) -> FailureAttribution:
@@ -433,14 +470,15 @@ def _model_failure_result(
 # the user-judge gate downstream catches the residue.
 #
 # Substring matching on lowercased text works for every shipped script:
-# Latin scripts (English / French / Portuguese) need lowercasing for case
-# robustness; Japanese (hiragana / katakana / kanji) and Hindi (Devanagari)
-# have no case so `.lower()` is a no-op for the script-native phrases. We
-# include both English-meta-talk phrases and the 4 non-English locales
-# (ja_JP / hi_Deva_IN / fr_FR / pt_BR) the framework currently ships.
+# Latin scripts (English / French / German / Portuguese) need lowercasing for
+# case robustness; Japanese (hiragana / katakana / kanji), Hindi (Devanagari)
+# and Korean (Hangul) have no case so `.lower()` is a no-op for the
+# script-native phrases. The set covers English meta-talk and every shipped
+# non-English language. A phrase must not be the start of an ordinary word:
+# German "als ki " keeps its trailing space so "als Kind" never matches.
 
 _FOURTH_WALL_PHRASES = (
-    # ── English (en_US / en_IN / en_SG) ─────────────────────────────
+    # ── English (en_US / en_IN / en_SG / en_GB) ─────────────────────
     "opening line",
     "opening message",
     "start the chat",
@@ -458,6 +496,21 @@ _FOURTH_WALL_PHRASES = (
     "démarrer la conversation",
     "premier message",
     "ouvrir la conversation",
+    # ── German (de_DE) ──────────────────────────────────────────────
+    "als ki ",
+    "als ki,",
+    "als ki-assistent",
+    "als ki-modell",
+    "als ki-sprachmodell",
+    "als sprachmodell",
+    "als künstliche intelligenz",
+    "ich bin eine ki ",
+    "in dieser simulation",
+    "das gespräch beginnen",
+    "das gespräch starten",
+    "die unterhaltung beginnen",
+    "erste nachricht",
+    "eröffnungsnachricht",
     # ── Portuguese (pt_BR) ──────────────────────────────────────────
     "como uma ia",
     "como ia",
@@ -520,11 +573,11 @@ _ASSISTANT_REFUSAL_ECHO_PHRASES = (
 def _is_fourth_wall_break(text: str, allowed: frozenset[str] = frozenset()) -> bool:
     """Deterministic check for common fourth-wall patterns in user messages.
 
-    Substring match against the (English + 4-locale) phrase set in
+    Substring match against the multi-language phrase set in
     ``_FOURTH_WALL_PHRASES``, less the probe's ``allowed`` phrases.
-    Lowercases the input first; `.lower()` is a no-op for Japanese /
-    Devanagari scripts that have no case, so the same matching path
-    works across all five shipped languages.
+    Lowercases the input first; `.lower()` is a no-op for the scripts
+    that have no case, so the same matching path works for every
+    shipped language.
     """
     lower = text.lower()
     return any(phrase in lower for phrase in _FOURTH_WALL_PHRASES if phrase not in allowed)
@@ -1846,13 +1899,10 @@ class ConversationLoop:
         state.outcome.set_n_tool_calls(len(state.metadata.get("tools_called", [])))
         state.outcome.set_wall_clock_s(time.monotonic() - _t_loop_start)
 
-        sim_success = _probe_should_succeed(probe, state)
-
-        # Turn-limit-reached is not a failure — the conversation
-        # naturally ran to max_turns. Keep status=OK (possibly
-        # promoted to COMPLETED_WITH_WARNINGS by finalize if warnings
-        # accumulated).
-        outcome = state.outcome.finalize(status=OutcomeStatus.OK)
+        # Reaching max_turns is not a failure: the row stays OK, or
+        # COMPLETED_WITH_WARNINGS if warnings accumulated, unless the
+        # probe's own protocol check fails.
+        sim_success, outcome = finalize_completed(probe, state)
 
         result = make_result(
             state.messages,

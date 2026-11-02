@@ -24,10 +24,12 @@ LOCALE_LANGUAGE_MAP = {
     "pt_BR": "Portuguese",
     "ja_JP": "Japanese",
     "fr_FR": "French",
+    "de_DE": "German",
     "en_IN": "Indian English",
     "hi_Deva_IN": "Hindi Devanagari",
     "hi_Latn_IN": "Hindi Latin",
     "en_SG": "English",
+    "en_GB": "English",
     "ko_KR": "Korean",
 }
 
@@ -85,6 +87,29 @@ _EDUCATION_ORDINAL: dict[str, dict[str, float]] = {
         "Licence": 0.7,
         "Master": 0.85,
         "Doctorat": 1.0,
+    },
+    "en_GB": {
+        "No qualifications": 0.0,
+        "GCSE level or below": 0.25,
+        "Apprenticeship": 0.4,
+        "A level or equivalent": 0.5,
+        "Degree or other higher education": 0.8,
+        "Other or unknown": 0.5,
+    },
+    "de_DE": {
+        "Ohne beruflichen Bildungsabschluss": 0.2,
+        "Lehre, Berufsausbildung im dualen System": 0.4,
+        "Fachschulabschluss": 0.6,
+        "Bachelor, Master, Diplom, Promotion": 0.85,
+    },
+    "ko_KR": {
+        "무학": 0.0,
+        "초등학교": 0.1,
+        "중학교": 0.15,
+        "고등학교": 0.3,
+        "2~3년제 전문대학": 0.5,
+        "4년제 대학교": 0.7,
+        "대학원": 1.0,
     },
 }
 _EDUCATION_ORDINAL["hi_Deva_IN"] = _EDUCATION_ORDINAL["en_IN"]

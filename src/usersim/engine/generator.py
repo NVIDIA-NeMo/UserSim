@@ -41,6 +41,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import Provenance
+from usersim.engine.core.persona import persona_full_name
 from usersim.engine.core.probes import BankLoadError, dispatch_episode, load_builtin_probes
 from usersim.engine.core.provenance import get_code_sha
 
@@ -186,7 +187,7 @@ class ConversationSimulatorGenerator(
             set_up_row = dict(data)
         persona = preamble.persona
         probe_type = preamble.probe_type
-        persona_name = f"{persona.get('first_name', '?')} {persona.get('last_name', '?')}"
+        persona_name = persona_full_name(persona) or "?"
         logger.info(
             f"  |-- Starting {probe_type} sim for {persona_name} "
             f"[{preamble.user_interaction_style}, {preamble.disclosure_style}] (max_turns={cfg.max_turns})"
@@ -300,7 +301,8 @@ def _warn_on_undeclared_columns(
 ) -> None:
     """Report columns a probe added or changed that a Data Designer run will not keep.
 
-    A run writes back only the configured column and ``side_effect_columns``,
+    A run writes back only the configured column and ``side_effect_columns``
+    (the core columns plus every registered probe's ``output_columns``),
     without an error, so a probe's undeclared ``build_result_extras`` key would
     never reach the scorer that reads it. ``already_reported`` belongs to one
     generator, which a run builds once, so each pair is reported once per run
@@ -313,8 +315,9 @@ def _warn_on_undeclared_columns(
     logger.warning(
         "probe %r returned or changed column(s) %s that are not in ConversationSimulatorConfig.side_effect_columns, "
         "so the run drops them from the stored row (an input column keeps its original value). "
-        "Keep per-row data in the probe's metadata "
-        "(state.metadata), which is stored as conversation_metadata; see docs/engine/AUTHORING_A_PROBE.md.",
+        "Declare each column the probe writes in its class's output_columns, or keep per-row data in the "
+        "probe's metadata (state.metadata), which is stored as conversation_metadata; "
+        "see docs/engine/AUTHORING_A_PROBE.md.",
         probe_type,
         new,
     )

@@ -1,0 +1,960 @@
+# Structured region_spec for ja_JP, the generation INPUT (data, not code).
+# Validated against asset_gen/financial_services/spec.py. gen-assets expands this
+# into the committed per-institution assets/financial_services/ja_JP/ bank.
+#
+# The institution set follows the Japanese retail market: a regional bank, an
+# internet-only bank, an online broker (NISA, specified accounts, iDeCo), a life
+# insurer with medical and cancer cover, and a credit card company that also
+# lends through cash advances and card loans. Brands are fictional.
+#
+# Content fields are written in Japanese, so the institution brief, the corpus and
+# the regulatory context the judge reads share the corpus language. Field names,
+# ids, variable keys and tool names are identifiers and stay in English. Brands
+# and products keep a Latin `display_name` as the canonical label, and the
+# Japanese `display_name_local` is the name the corpus and conversations use.
+#
+# Multi-line Japanese values are double-quoted with escaped line breaks: YAML
+# folds a plain line break into a space, which Japanese does not write.
+#
+# Regulated values (NISA allowances, deposit insurance, lending rate caps, tax
+# rates and deduction limits) are those in force in October 2026. The iDeCo
+# contribution caps and fees are those that apply from December 2026
+# contributions, and their labels say so. Entries carry `placeholder: true`, as
+# in the other banks.
+schema_version: v0.1
+region: JP
+locale: ja_JP
+currency: JPY
+currency_symbol: "円"
+language: Japanese (Japan)
+number_format: ja_JP
+privacy_regime: 個人情報保護法
+
+# Japanese institutions identify a customer by name and date of birth before
+# acting on an account, as in the default contract.
+identity_verification:
+  required_fields: [full_name, date_of_birth]
+
+# The numeric check reads half-width digits, and reads 万 and 億 only for whole
+# multiples of 10,000, so the guidance asks for exactly those forms.
+language_conventions:
+  guidance: >-
+    Write natural Japanese in the polite です・ます style that Japanese financial
+    institutions use with customers. Write amounts and rates in half-width Arabic
+    digits with comma grouping and 円 directly after the number (1,234円, 0.4%),
+    never in full-width digits, kanji numerals, ¥ or ￥. Round amounts may use
+    万 and 億 (1,000万円, 1億円); write every other amount in full digits
+    (62,000円, not 6.2万円). Write years in the Western calendar (2026年). Use
+    the current NISA terms つみたて投資枠 and 成長投資枠, and mention つみたてNISA
+    or 一般NISA only for holdings bought under the system that ended in 2023.
+
+# The account type the simulator's read tools report back to the customer.
+account_labels:
+  retail_banking: 普通預金
+  cards: デビットカード
+  payments: クレジットカード
+  lending_mortgage: ローン
+  insurance: 保険契約
+  brokerage_investing: 証券総合口座
+
+document_types:
+- product_sheet
+- fee_schedule
+- rate_sheet
+- faq
+- how_to_guide
+- troubleshooting
+- comparison
+- eligibility_matrix
+- terms_conditions
+- disclosure
+- promo_notice
+- security_advisory
+- policy_procedure
+- discoverable_tool_doc
+- regulatory_note
+
+# Per-institution-TYPE emphasis for the generated institution brief.
+concept_guidance:
+  bank: "地域に根ざした地方銀行として、次の点を取り上げる。普通預金（給与・年金の受取口座、\
+    公共料金などの口座振替、ATMの時間外手数料、他行あて振込手数料と、給与・年金の受取による優遇）。\
+    スーパー定期（預入期間ごとの金利、満期時の自動継続、満期前に解約すると中途解約利率が適用されること、\
+    利息には20.315%の税金がかかること）。キャッシュカードとデビットカード（紛失・盗難時の利用停止と再発行、\
+    デビットカードは利用と同時に口座残高から引き落とされること、偽造・盗難カードによる被害の補償）。\
+    住宅ローン（変動金利と固定金利期間選択型の違い、変動金利の返済額は5年ごとに見直され、\
+    見直し後の返済額は見直し前の125%が上限だが、未払利息が生じることがあること、\
+    繰上返済の期間短縮型と返済額軽減型、団体信用生命保険への加入、住宅ローン控除）。\
+    銀行のカードローン（貸金業法の総量規制の対象外だが、返済能力を審査して利用限度額を決めること）。\
+    預金保険制度による保護と、口座開設時の本人確認にも触れる。"
+  neobank: "店舗を持たないインターネット専業銀行として、次の点を取り上げる。\
+    スマートフォンのアプリで完結する口座開設（マイナンバーカードのICチップを読み取るオンラインの本人確認）、\
+    普通預金の金利、目的別口座、会員ランクに応じた他行あて振込手数料とATM手数料の無料回数、\
+    Visaデビットカード（キャッシュバック、海外利用時の事務手数料、アプリでの利用停止と利用限度額の変更）、\
+    携帯電話番号を使った少額の送金、ログイン時と振込時の二段階認証、機種変更時の認証の再登録、\
+    不正送金やフィッシング詐欺への注意と被害の補償。預金は預金保険制度の対象で、\
+    利息のつく預金は1金融機関につき預金者1人当たり元本1,000万円までとその利息等が保護される。"
+  insurer: "生命保険会社として、次の点を取り上げる。定期保険、終身保険（低解約返戻金型）、医療保険、\
+    がん保険、個人年金保険の違い。保険金・給付金の請求手続き（必要書類と、書類がそろってからの支払時期）。\
+    告知義務（事実と違う告知をすると契約が解除され、保険金や給付金が支払われないことがある）。\
+    クーリング・オフ（申込日または契約内容を記載した書面を受け取った日のいずれか遅い日から8日以内）。\
+    がん保険の待ち期間。払込猶予期間、失効と復活、契約者貸付、解約返戻金。受取人の変更。\
+    生命保険料控除（新制度の契約は、一般生命保険料、介護医療保険料、個人年金保険料の区分ごとに\
+    所得税で最高4万円、合計で最高12万円。2026年分と2027年分は、23歳未満の扶養親族がいる人の\
+    一般生命保険料控除が最高6万円になるが、合計の上限は12万円のまま）。\
+    公的医療保険の高額療養費制度（自己負担には所得に応じた月ごとの上限があり、\
+    2026年8月の診療分からは年間の上限も設けられた）と、民間の医療保険が補う部分。\
+    生命保険契約者保護機構にも触れ、保険金の支払いを約束する表現や、個別の税務・医療の助言は避ける。"
+  nbfc: "クレジットカード会社として、次の点を取り上げる。ショッピングの支払方法（1回払い、2回払い、\
+    ボーナス一括払いは手数料がかからず、分割払いとリボ払いは手数料がかかること、あとからリボとあとから分割）。\
+    リボ払いの仕組み（毎月の支払額はほぼ一定でも、残高に手数料がかかり続けるため支払総額が増えやすいこと、\
+    繰上返済で手数料を減らせること）。キャッシングとカードローン（貸金業法の総量規制により、\
+    貸金業者からの借入れは原則として年収の3分の1まで。上限金利は元本10万円未満が年20%、\
+    10万円以上100万円未満が年18%、100万円以上が年15%）。年会費とポイント、利用可能枠と支払可能見込額の調査、\
+    不正利用の補償、紛失・盗難時の利用停止と再発行、本人認証サービス（EMV 3-Dセキュア）、\
+    指定信用情報機関への登録、支払いが難しくなったときの早めの相談。"
+  brokerage: "ネット証券として、次の点を取り上げる。NISA（日本に住む18歳以上が1人1口座。\
+    つみたて投資枠は年間120万円、成長投資枠は年間240万円で、年間投資枠は合計360万円。\
+    非課税保有限度額は1,800万円で、うち成長投資枠は1,200万円。売却した商品の取得価額の分だけ、\
+    翌年以降に非課税保有限度額の枠を再び使える。NISA口座を開く金融機関は年単位で変更できる。\
+    2027年1月からは0歳から17歳もつみたて投資枠を利用でき、年間投資枠は60万円、非課税保有限度額は600万円）。\
+    特定口座（源泉徴収ありを選ぶと原則として確定申告が不要。上場株式等の譲渡益と配当には20.315%の税金がかかる。\
+    損益通算と、確定申告による3年間の損失の繰越控除）。iDeCo（掛金は全額が所得控除の対象で、\
+    原則として60歳まで引き出せない。2026年12月分の掛金から拠出限度額が引き上げられ、\
+    会社員は企業年金の掛金と合わせて月額62,000円まで、自営業者は国民年金基金の掛金などと合わせて\
+    月額75,000円まで。一定の要件を満たせば70歳になるまで加入できる）。国内株式と米国株式の取引手数料、\
+    為替手数料、投資信託の積立とクレジットカード積立、国内株式の受渡しは約定日の2営業日後であること、\
+    顧客資産の分別管理と日本投資者保護基金、適合性の原則、元本が保証されないこと。"
+
+# Per-DOMAIN regulator context -> serialized into region_meta; the scorer's
+# finance.regulatory_compliance rubric keys on the row's domain.
+domain_regulators:
+  retail_banking:
+    regulators: [金融庁, 預金保険機構]
+    regulator_text: "銀行は銀行法に基づき金融庁の監督を受ける。預金保険制度により、利息のつく普通預金や定期預金などは、\
+      1金融機関につき預金者1人当たり元本1,000万円までと破綻日までの利息等が保護され、\
+      無利息、要求払い、決済サービスを提供できるという3つの条件を満たす決済用預金は全額が保護される。\
+      外貨預金は預金保険の対象外である。偽造・盗難キャッシュカードによる不正な払戻しは、預金者保護法に基づき、\
+      預金者に故意や重大な過失がない限り原則として銀行が補償する（盗難カードで預金者に過失がある場合は、\
+      補償が減額されることがある）。口座の開設などでは、犯罪収益移転防止法に基づく取引時確認（本人確認）が必要になる。\
+      個人情報は個人情報保護法に従って取り扱う。苦情や紛争は全国銀行協会相談室で受け付けている。\
+      エージェントは、口座の情報を伝えたり変更したりする前に本人確認を行う。"
+  cards:
+    regulators: [金融庁]
+    regulator_text: "デビットカードは利用と同時に預金口座から代金が引き落とされ、口座残高を超えて利用することはできない。\
+      紛失や盗難に気づいたら、ただちに銀行に届け出てカードの利用を止める必要がある。\
+      インターネットでの利用には本人認証サービス（EMV 3-Dセキュア）が使われる。\
+      不正利用による被害は、銀行の規定に基づき、届出日からさかのぼった一定期間の分が補償の対象となる。\
+      キャッシュカードの偽造・盗難による不正な払戻しは預金者保護法の対象となる。\
+      エージェントは、手数料、利用限度額、補償の条件を誤って伝えてはならない。"
+  lending_mortgage:
+    regulators: [金融庁]
+    regulator_text: "銀行の住宅ローンやカードローンは銀行法に基づき金融庁の監督を受け、貸金業法の総量規制の対象外だが、\
+      銀行は返済能力を審査したうえで利用限度額を決める。クレジットカードのキャッシングやカードローンなど、\
+      貸金業者による個人向けの貸付けは貸金業法の対象で、総量規制により、貸金業者からの借入れの合計は\
+      原則として年収の3分の1までとなる。利息制限法により、上限金利は元本10万円未満が年20%、\
+      10万円以上100万円未満が年18%、100万円以上が年15%で、貸金業者の遅延損害金の上限は年20%である。\
+      借入れの状況は指定信用情報機関に登録される。住宅ローン控除は、2030年末までに入居した場合に、\
+      年末のローン残高の0.7%を所得税などから控除する制度で、住宅の省エネ性能などによって\
+      借入限度額と控除期間が異なる。エージェントは融資の承認を約束せず、総返済額を小さく見せず、\
+      返済が難しい顧客には早めの相談と返済条件の見直しを案内する。"
+  payments:
+    regulators: [経済産業省]
+    regulator_text: "クレジットカードのショッピングは割賦販売法の対象で、カード会社は経済産業省に登録した\
+      包括信用購入あっせん業者として、カードの発行時と利用可能枠を増やすときに支払可能見込額を調査し、\
+      それを超える利用可能枠を設定しない。リボ払いや分割払いでは、販売店とのトラブルを理由に\
+      カード会社への支払いを拒める場合がある（支払停止の抗弁）。カード会社はカード番号などの情報を適切に管理し、\
+      インターネットでの利用には本人認証サービス（EMV 3-Dセキュア）を導入している。\
+      ショッピングの利用は貸金業法の総量規制の対象外である。苦情は日本クレジット協会の消費者相談室でも受け付けている。\
+      エージェントは手数料や支払総額を誤って伝えず、リボ払いや分割払いを案内するときは手数料がかかることを明確に伝える。"
+  insurance:
+    regulators: [金融庁, 生命保険契約者保護機構]
+    regulator_text: "生命保険会社は保険業法に基づき金融庁の監督を受ける。生命保険会社が破綻した場合、\
+      生命保険契約者保護機構により、補償対象契約の責任準備金等の90%まで（高予定利率契約を除く）が補償されるが、\
+      保険金額などが削減されることがある。契約者は、申込日または契約内容を記載した書面を受け取った日の\
+      いずれか遅い日から8日以内であれば、書面または電磁的記録によりクーリング・オフ（申込みの撤回）ができる。\
+      告知義務に違反すると契約が解除され、保険金や給付金が支払われないことがある。生命保険料控除は、\
+      新制度の契約では一般生命保険料、介護医療保険料、個人年金保険料の区分ごとに所得税で最高4万円、\
+      合計で最高12万円である。苦情や紛争は生命保険協会の生命保険相談所で受け付けている。\
+      エージェントは保険金や給付金の支払いを約束せず、個別の税務や医療の助言は行わない。"
+  brokerage_investing:
+    regulators: [金融庁, 日本証券業協会]
+    regulator_text: "証券会社は金融商品取引法に基づき金融庁に登録し、その監督を受ける。顧客から預かった金銭や\
+      有価証券は証券会社の財産と分けて管理され（分別管理）、証券会社が破綻して返還されない場合は、\
+      日本投資者保護基金が1人当たり1,000万円まで補償する。相場の変動による損失は補償の対象外である。\
+      証券会社は、顧客の知識、経験、財産の状況、投資の目的に照らして不適当な勧誘をしてはならず\
+      （適合性の原則）、顧客の最善の利益を考えて業務を行う。上場株式等の譲渡益と配当には20.315%の税金がかかり、\
+      NISA口座で得た利益は非課税になる。iDeCoは確定拠出年金法に基づく制度で、国民年金基金連合会が実施し、\
+      証券会社は運営管理機関として運用商品の提示や情報提供を行う。証券口座の開設にはマイナンバーの届出が必要である。\
+      苦情や紛争は証券・金融商品あっせん相談センター（FINMAC）で受け付けている。\
+      エージェントは利益を保証せず、個別の税務の助言は行わない。"
+
+# In-language vocabulary the deterministic doc plan builds titles from. Tool names
+# are identifiers and stay verbatim in every language.
+doc_titles:
+  topic_separator: '：'
+
+  product_genre_angles:
+    product_sheet:
+    - 商品概要
+    - おすすめの方と主な使い方
+    - ご利用開始までの手順
+    - 限度額・制限と注意事項
+    - ほかの選択肢との比較と向かない場合
+    fee_schedule:
+    - 手数料一覧
+    eligibility_matrix:
+    - お申込みいただける方
+    - 必要書類
+    - ご利用条件による違い
+    disclosure:
+    - 重要事項のご説明
+    - リスクについてのご説明
+    - 個人情報の取扱い
+    promo_notice:
+    - 実施中のキャンペーン
+    - ご紹介・継続利用の特典
+    rate_sheet:
+    - 金利・料率一覧
+    - 金利・料率の決まり方と適用
+    terms_conditions:
+    - 規定・約款
+    - 規定・約款の変更
+    security_advisory:
+    - 不正利用からお客さまを守るために
+    - 安全にご利用いただくためのポイント
+    - この商品をかたる詐欺にご注意ください
+
+  faq_intents:
+  - 手数料と費用
+  - お申込みとご利用条件
+  - ご利用方法の手順
+  - お困りごとの解決
+  - ほかの商品との比較
+  how_to_intents:
+  - お申込みとご利用開始
+  - 解約・変更・プランの切替え
+  - 登録内容の変更
+  - 状況・履歴の確認
+  - よくあるお手続きの流れ
+  troubleshooting_intents:
+  - お手続きが完了しない・保留中のまま
+  - 想定外の手数料・金額
+  - ログインできない・アクセスできない
+  - お取引が拒否された・制限された
+  - 明細や記録と合わない
+  comparison_intents:
+  - 当社の似た商品との比較
+  - 他社の一般的な商品との比較
+  - プランの選び方
+  - 切替えや上位プランを検討するとき
+
+  faq_variable_template: '{v}について'
+  how_to_variable_template: '{v}の確認と手続き'
+  troubleshooting_variable_template: '{v}に関するよくあるトラブル'
+
+  fee_overview_topic: 手数料・料金のご案内
+  general_faq_topic: よくあるご質問
+  regulatory_note_topic: '法令・制度に関するご案内：{domain}'
+  tool_policy_topic: '{tool} を使う場面'
+  tool_reference_topic: '{tool} ツールリファレンス'
+
+  domain_labels:
+    retail_banking: 預金・日常のお取引
+    cards: デビットカード
+    payments: クレジットカードのショッピング
+    lending_mortgage: ローン
+    insurance: 生命保険・医療保険
+    brokerage_investing: 株式・投資信託・NISA・iDeCo
+
+  # Every variable in this spec; an unmapped one falls back to its machine name.
+  variable_labels:
+    administrator_fee: 運営管理機関手数料（星見証券）
+    advanced_medical_cap: 先進医療給付金の通算限度額
+    annual_fee: 年会費
+    annual_limit: 年間投資枠
+    annuity_period_years: 年金の受取期間（年）
+    annuity_premium_example: 月払保険料の例（30歳加入、65歳払込満了）
+    annuity_start_age: 年金の受取開始年齢
+    atm_fee_after_hours: 時間外のATM利用手数料
+    atm_fee_beyond_free: 無料回数を超えたATM手数料
+    atm_fee_over_10000: ATM利用手数料（1万円超）
+    atm_fee_up_to_10000: ATM利用手数料（1万円以下）
+    auto_deposit_minimum: 自動入金の最低金額
+    cancer_diagnosis_benefit: がん診断一時金
+    cancer_premium_example: 月払保険料の例（40歳男性、終身払）
+    cancer_treatment_monthly_benefit: がん治療給付金（月額）
+    capital_gains_tax_rate: 上場株式等の譲渡益・配当にかかる税率
+    card_monthly_cap: クレジットカード積立の上限（月額）
+    card_reward_rate: クレジットカード積立のポイント還元率
+    cashback_rate: キャッシュバック率
+    cashing_apr: キャッシングの金利（実質年率）
+    cashing_limit_max: キャッシング利用可能枠の上限
+    credit_limit_max: 利用限度額の上限
+    daily_hospital_benefit: 入院給付金日額
+    daily_spending_limit: 1日あたりの利用限度額（初期設定）
+    domestic_stock_fee: 国内株式の売買手数料
+    employee_monthly_cap: 会社員の掛金の上限（月額、2026年12月分から）
+    enrollment_fee: 加入時の手数料（国民年金基金連合会）
+    etc_card_fee: ETCカードの年会費
+    fee_per_100_yen_3_payments: 3回払いの手数料（利用金額100円あたり）
+    fixed_rate_10_years: 固定金利期間選択型10年の金利（優遇後）
+    free_atm_uses_per_month: 時間外ATM手数料の無料回数（月）
+    free_atm_withdrawals_base: 提携ATMの出金手数料の無料回数（月、基本）
+    free_transfers_base: 他行あて振込手数料の無料回数（月、基本）
+    free_transfers_per_month: 他行あて振込手数料の無料回数（月）
+    fx_fee_sen: 為替手数料（1米ドルあたり、銭）
+    inpatient_surgery_benefit: 入院中の手術給付金
+    installment_apr_max: 分割払いの手数料率（実質年率、上限）
+    installment_apr_min: 分割払いの手数料率（実質年率、下限）
+    lifetime_limit: 非課税保有限度額
+    lifetime_max_days: 入院給付金の通算支払限度日数
+    loan_fee_rate: 融資手数料（借入金額に対する割合）
+    loan_rate_max: 貸付金利（上限）
+    loan_rate_min: 貸付金利（下限）
+    loss_carryforward_years: 損失の繰越控除ができる期間（年）
+    low_surrender_ratio: 低解約返戻金期間中の解約返戻金の水準
+    max_days_per_stay: 1回の入院の支払限度日数
+    max_entry_age: 契約できる年齢の上限
+    max_installments: 分割払いの最大支払回数
+    max_loan_amount: 借入限度額
+    max_pockets: 作成できる目的別口座の数
+    max_term_years: 最長借入期間（年）
+    medical_premium_example: 月払保険料の例（35歳女性、終身払）
+    minimum_contribution: 積立の最低金額
+    minimum_deposit: 最低預入金額
+    minimum_monthly_contribution: 掛金の最低額（月額）
+    minimum_monthly_payment: 毎月の最低返済額
+    minimum_revolving_payment: リボ払いの毎月の最低支払額
+    minor_annual_limit_2027: 未成年者の年間投資枠（2027年1月から）
+    minor_lifetime_limit_2027: 未成年者の非課税保有限度額（2027年1月から）
+    monthly_fee_from_dec_2026: 毎月の手数料（2026年12月分から）
+    monthly_transfer_limit: 1か月あたりの送金上限額
+    online_prepayment_fee: インターネットでの一部繰上返済手数料
+    ordinary_deposit_rate: 普通預金の金利
+    outpatient_surgery_benefit: 外来の手術給付金
+    overseas_fee_rate: 海外利用時の事務手数料
+    paid_up_age: 保険料の払込みが終わる年齢
+    payment_increase_cap: 見直し後の返済額の上限（見直し前の返済額に対する割合）
+    payment_review_years: 変動金利の返済額の見直し間隔（年）
+    pension_deposit_bonus_rate: 年金受取の方の定期預金金利の上乗せ幅
+    per_transfer_limit: 1回あたりの送金上限額
+    phone_transfer_fee: 送金手数料
+    policy_term_years: 保険期間（年）
+    rate_1_year: 1年ものの金利
+    rate_3_years: 3年ものの金利
+    rate_5_years: 5年ものの金利
+    rate_6_months: 6か月ものの金利
+    reissue_fee: キャッシュカード・通帳の再発行手数料
+    return_rate_example: 返戻率の例
+    revolving_apr: リボ払いの手数料率（実質年率）
+    reward_rate: ポイント還元率
+    self_employed_monthly_cap: 自営業者の掛金の上限（月額、2026年12月分から）
+    shopping_limit_max: ショッピング利用可能枠の上限
+    sum_insured_example: 保険金額の例
+    term_premium_example: 月払保険料の例（30歳男性、保険期間10年）
+    transfer_fee_beyond_free: 無料回数を超えた他行あて振込手数料
+    transfer_fee_other_bank_online: 他行あて振込手数料（インターネットバンキング）
+    us_trade_fee_cap_usd: 取引手数料の上限（米ドル）
+    us_trade_fee_rate: 取引手数料（約定代金に対する割合）
+    variable_rate: 変動金利（優遇後）
+    waiting_period_days: 待ち期間（日）
+    whole_life_premium_example: 月払保険料の例（40歳女性、60歳払済）
+
+institutions:
+# ── 1. Regional bank ──────────────────────────────────────────────────
+- id: asanagi_bank
+  display_name: Asanagi Bank
+  display_name_local: 朝凪銀行
+  type: bank
+  brand_voice: traditional
+  domains: [retail_banking, cards, lending_mortgage]
+  products:
+  - id: futsu_yokin
+    display_name: Ordinary Deposit
+    display_name_local: 普通預金
+    domain: retail_banking
+    variables:
+      ordinary_deposit_rate: {type: percent, value: 0.4}
+      transfer_fee_other_bank_online: {type: money, value: 220}
+      atm_fee_after_hours: {type: money, value: 110}
+      reissue_fee: {type: money, value: 1100}
+  - id: super_teiki
+    display_name: Super Time Deposit
+    display_name_local: スーパー定期
+    domain: retail_banking
+    variables:
+      rate_1_year: {type: percent, value: 0.55}
+      rate_3_years: {type: percent, value: 0.85}
+      rate_5_years: {type: percent, value: 1.05}
+      minimum_deposit: {type: money, value: 1000}
+  - id: kyuyo_nenkin_tokuten
+    display_name: Salary and Pension Deposit Benefits
+    display_name_local: 給与・年金受取特典
+    domain: retail_banking
+    variables:
+      free_transfers_per_month: {type: int, value: 3}
+      free_atm_uses_per_month: {type: int, value: 5}
+      pension_deposit_bonus_rate: {type: percent, value: 0.1}
+  - id: asanagi_debit
+    display_name: Asanagi Visa Debit
+    display_name_local: 朝凪Visaデビット
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 0}
+      overseas_fee_rate: {type: percent, value: 3.0}
+      daily_spending_limit: {type: money, value: 500000}
+      cashback_rate: {type: percent, value: 0.2}
+  - id: jutaku_loan
+    display_name: Home Loan
+    display_name_local: 住宅ローン
+    domain: lending_mortgage
+    variables:
+      variable_rate: {type: percent, value: 1.375}
+      fixed_rate_10_years: {type: percent, value: 3.7}
+      loan_fee_rate: {type: percent, value: 2.2}
+      max_loan_amount: {type: money, value: 100000000}
+      max_term_years: {type: int, value: 35}
+      payment_review_years: {type: int, value: 5}
+      payment_increase_cap: {type: percent, value: 125}
+      online_prepayment_fee: {type: money, value: 0}
+  - id: asanagi_card_loan
+    display_name: Asanagi Card Loan
+    display_name_local: 朝凪カードローン
+    domain: lending_mortgage
+    variables:
+      loan_rate_min: {type: percent, value: 2.0}
+      loan_rate_max: {type: percent, value: 14.5}
+      credit_limit_max: {type: money, value: 8000000}
+      minimum_monthly_payment: {type: money, value: 2000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: デビットカードの身に覚えのない利用や二重の引落しについて、調査と補償の申出を受け付ける。
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: キャッシュカードまたはデビットカードの紛失・盗難の届出を受け付け、すぐに利用を停止する。
+  - name: open_time_deposit
+    discoverable: true
+    side_effect_class: state_changing
+    description: 普通預金から、金額と預入期間を指定してスーパー定期を預け入れる。
+  - name: cancel_time_deposit
+    discoverable: true
+    side_effect_class: irreversible
+    description: スーパー定期を満期前に解約し、元金と中途解約利率で計算した利息を普通預金に入金する。
+  - name: request_loan_prepayment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 住宅ローンの一部繰上返済（期間短縮型または返済額軽減型）または全額繰上返済を申し込む。
+  - name: change_loan_rate_type
+    discoverable: true
+    side_effect_class: state_changing
+    description: 住宅ローンの金利タイプを変動金利から固定金利期間選択型に変更する。固定金利期間が終わるときの金利タイプの選び直しも受け付ける。
+  - name: apply_card_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 朝凪カードローンの申込みを受け付ける。審査があり、利用限度額は審査で決まる。
+  # Common operations whose meaning differs in Japan, declared with the Japanese
+  # procedure they carry here.
+  - name: transfer_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 普通預金から当行または他行の口座へ振込を行う。
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: インターネットバンキングの登録振込先（金融機関、支店、口座番号、受取人名）を追加、変更、削除する。
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 公共料金やクレジットカード代金などの口座振替（自動引落し）の停止を受け付ける。
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: 税金や公共料金などの払込みを、ペイジーで口座から行う。
+  - name: activate_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 届いたデビットカードの利用開始の手続きを行う。
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: キャッシュカードやデビットカードを再発行する。再発行手数料がかかる。
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: 同居の家族が使う代理人カードの発行や利用停止を受け付ける。
+  task_templates:
+  - {id: TPL-AN-FREEZE-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_card]}
+  - {id: TPL-AN-TEIKI-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 2. Internet-only bank ─────────────────────────────────────────────
+- id: sorairo_bank
+  display_name: Sorairo Bank
+  display_name_local: そらいろ銀行
+  type: neobank
+  brand_voice: neobank
+  domains: [retail_banking, cards]
+  products:
+  - id: sorairo_futsu
+    display_name: Ordinary Deposit
+    display_name_local: 普通預金
+    domain: retail_banking
+    variables:
+      ordinary_deposit_rate: {type: percent, value: 0.45}
+      free_transfers_base: {type: int, value: 2}
+      free_atm_withdrawals_base: {type: int, value: 2}
+      transfer_fee_beyond_free: {type: money, value: 145}
+      atm_fee_beyond_free: {type: money, value: 110}
+  - id: mokutekibetsu_koza
+    display_name: Goal Pockets
+    display_name_local: 目的別口座
+    domain: retail_banking
+    variables:
+      max_pockets: {type: int, value: 10}
+      ordinary_deposit_rate: {type: percent, value: 0.45}
+      auto_deposit_minimum: {type: money, value: 1000}
+  - id: sorairo_teiki
+    display_name: Time Deposit
+    display_name_local: 定期預金
+    domain: retail_banking
+    variables:
+      rate_6_months: {type: percent, value: 0.7}
+      rate_1_year: {type: percent, value: 0.9}
+      minimum_deposit: {type: money, value: 1000}
+  - id: sorairo_debit
+    display_name: Sorairo Visa Debit
+    display_name_local: そらいろVisaデビット
+    domain: cards
+    variables:
+      annual_fee: {type: money, value: 0}
+      cashback_rate: {type: percent, value: 0.8}
+      overseas_fee_rate: {type: percent, value: 2.0}
+      daily_spending_limit: {type: money, value: 300000}
+  - id: sumaho_sokin
+    display_name: Phone Number Transfer
+    display_name_local: スマホ送金
+    domain: retail_banking
+    variables:
+      per_transfer_limit: {type: money, value: 100000}
+      phone_transfer_fee: {type: money, value: 0}
+      monthly_transfer_limit: {type: money, value: 500000}
+  omit_common_operations: [manage_authorized_users]
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_account_transactions, discoverable: true, side_effect_class: read_only}
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: デビットカードの身に覚えのない利用について、調査と補償の申出を受け付ける。
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: デビットカードの利用を一時停止する。アプリでの操作と同じで、紛失・盗難のときは再発行も案内する。
+  - name: set_card_limits
+    discoverable: true
+    side_effect_class: state_changing
+    description: デビットカードの1日あたりの利用限度額を、所定の範囲内で変更する。
+  - name: create_goal_pocket
+    discoverable: true
+    side_effect_class: state_changing
+    description: 目的別口座を作成し、名前、目標金額、毎月の自動入金額を設定する。
+  - name: send_phone_transfer
+    discoverable: true
+    side_effect_class: irreversible
+    description: 相手の携帯電話番号を指定して、1回10万円までの送金を行う。送金後は取り消せない。
+  - name: open_time_deposit
+    discoverable: true
+    side_effect_class: state_changing
+    description: 普通預金から、金額と預入期間を指定して定期預金を預け入れる。
+  - name: reregister_device
+    discoverable: true
+    side_effect_class: state_changing
+    description: 機種変更などでスマートフォン認証が使えなくなったときに、認証の再登録を受け付ける。
+  # Common operations whose meaning differs in Japan, declared with the Japanese
+  # procedure they carry here.
+  - name: transfer_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 普通預金、目的別口座、他行の口座の間で資金を移す。
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 登録振込先（金融機関、支店、口座番号、受取人名）を追加、変更、削除する。
+  - name: stop_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: 口座振替（自動引落し）の停止を受け付ける。そらいろ銀行は小切手と手形を取り扱っていない。
+  - name: pay_bill
+    discoverable: true
+    side_effect_class: state_changing
+    description: 税金や公共料金などの払込みを、ペイジーで口座から行う。
+  - name: activate_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: アプリでデビットカードの利用を開始する。
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: デビットカードを再発行する。
+  task_templates:
+  - {id: TPL-SR-FREEZE-001, tier: verifiable, task_type: fraud_triage, persona_tags: [region:any, age:any], gold_tool_sequence: [freeze_card]}
+  - {id: TPL-SR-KOZA-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 3. Online broker ──────────────────────────────────────────────────
+- id: hoshimi_securities
+  display_name: Hoshimi Securities
+  display_name_local: 星見証券
+  type: brokerage
+  brand_voice: neobank
+  domains: [brokerage_investing]
+  products:
+  - id: nisa_tsumitate
+    display_name: NISA Tsumitate Allowance
+    display_name_local: NISA（つみたて投資枠）
+    domain: brokerage_investing
+    variables:
+      annual_limit: {type: money, value: 1200000}
+      lifetime_limit: {type: money, value: 18000000}
+      minimum_contribution: {type: money, value: 100}
+      minor_annual_limit_2027: {type: money, value: 600000}
+      minor_lifetime_limit_2027: {type: money, value: 6000000}
+  - id: nisa_seicho
+    display_name: NISA Growth Allowance
+    display_name_local: NISA（成長投資枠）
+    domain: brokerage_investing
+    variables:
+      annual_limit: {type: money, value: 2400000}
+      lifetime_limit: {type: money, value: 12000000}
+      domestic_stock_fee: {type: money, value: 0}
+  - id: tokutei_koza
+    display_name: Specified Account with Tax Withholding
+    display_name_local: 特定口座（源泉徴収あり）
+    domain: brokerage_investing
+    variables:
+      capital_gains_tax_rate: {type: percent, value: 20.315}
+      loss_carryforward_years: {type: int, value: 3}
+      domestic_stock_fee: {type: money, value: 0}
+  - id: ideco
+    display_name: iDeCo Individual Defined Contribution Pension
+    display_name_local: iDeCo（個人型確定拠出年金）
+    domain: brokerage_investing
+    variables:
+      employee_monthly_cap: {type: money, value: 62000}
+      self_employed_monthly_cap: {type: money, value: 75000}
+      minimum_monthly_contribution: {type: money, value: 5000}
+      enrollment_fee: {type: money, value: 2829}
+      monthly_fee_from_dec_2026: {type: money, value: 186}
+      administrator_fee: {type: money, value: 0}
+  - id: beikoku_kabu
+    display_name: US Stock Trading
+    display_name_local: 米国株式の取引
+    domain: brokerage_investing
+    variables:
+      us_trade_fee_rate: {type: percent, value: 0.495}
+      us_trade_fee_cap_usd: {type: int, value: 22}
+      fx_fee_sen: {type: int, value: 25}
+  - id: toshin_tsumitate
+    display_name: Mutual Fund Auto-Invest
+    display_name_local: 投資信託の積立
+    domain: brokerage_investing
+    variables:
+      minimum_contribution: {type: money, value: 100}
+      card_monthly_cap: {type: money, value: 100000}
+      card_reward_rate: {type: percent, value: 0.5}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - {name: get_positions, discoverable: true, side_effect_class: read_only}
+  - {name: place_trade, discoverable: true, side_effect_class: state_changing}
+  - name: open_nisa_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: NISA口座の開設を申し込む。税務署での確認が済むと利用を開始できる。
+  - name: change_nisa_provider
+    discoverable: true
+    side_effect_class: state_changing
+    description: 他の金融機関から星見証券へNISA口座を移す手続き（金融機関変更）を開始する。その年にすでにNISA口座で買付けをしている場合は、翌年分からの変更になる。
+  - name: set_up_investment_plan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 投資信託の積立（金額、頻度、決済方法として証券口座またはクレジットカード）を設定・変更する。
+  - name: apply_ideco
+    discoverable: true
+    side_effect_class: state_changing
+    description: iDeCoへの加入、または企業型確定拠出年金などからの資産の移換を申し込む。
+  - name: change_ideco_contribution
+    discoverable: true
+    side_effect_class: state_changing
+    description: iDeCoの掛金額を変更する。変更は原則として年1回まで。
+  - name: initiate_securities_transfer
+    discoverable: true
+    side_effect_class: state_changing
+    description: 他社の特定口座から株式や投資信託を移管（入庫）する手続きを開始する。
+  # Common operations whose meaning differs in Japan, declared with the Japanese
+  # procedure they carry here.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 証券総合口座（特定口座を含む）の開設を申し込む。マイナンバーの届出が必要。
+  - name: deposit_funds
+    discoverable: true
+    side_effect_class: state_changing
+    description: 提携金融機関の口座から証券総合口座へ即時入金する。
+  - name: withdraw_funds
+    discoverable: true
+    side_effect_class: irreversible
+    description: 証券総合口座の預り金を、登録した銀行口座へ出金する。
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 出金先として登録している銀行口座を変更する。
+  - name: manage_authorized_users
+    discoverable: true
+    side_effect_class: state_changing
+    description: 未成年口座の法定代理人（親権者）を登録・変更する。
+  task_templates:
+  - {id: TPL-HS-NISA-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [open_nisa_account]}
+  - {id: TPL-HS-SHISAN-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 4. Life insurer with medical cover ────────────────────────────────
+- id: komorebi_life
+  display_name: Komorebi Life
+  display_name_local: こもれび生命
+  type: insurer
+  brand_voice: traditional
+  domains: [insurance]
+  products:
+  - id: teiki_hoken
+    display_name: Komorebi Term Life
+    display_name_local: こもれび定期保険
+    domain: insurance
+    variables:
+      sum_insured_example: {type: money, value: 30000000}
+      term_premium_example: {type: money, value: 3150}
+      policy_term_years: {type: int, value: 10}
+      max_entry_age: {type: int, value: 70}
+  - id: shushin_hoken
+    display_name: Komorebi Whole Life with Low Surrender Value
+    display_name_local: こもれび終身保険（低解約返戻金型）
+    domain: insurance
+    variables:
+      sum_insured_example: {type: money, value: 5000000}
+      whole_life_premium_example: {type: money, value: 12400}
+      paid_up_age: {type: int, value: 60}
+      low_surrender_ratio: {type: percent, value: 70}
+  - id: iryo_hoken
+    display_name: Komorebi Medical Insurance
+    display_name_local: こもれび医療保険
+    domain: insurance
+    variables:
+      daily_hospital_benefit: {type: money, value: 10000}
+      max_days_per_stay: {type: int, value: 60}
+      lifetime_max_days: {type: int, value: 1095}
+      inpatient_surgery_benefit: {type: money, value: 100000}
+      outpatient_surgery_benefit: {type: money, value: 50000}
+      advanced_medical_cap: {type: money, value: 20000000}
+      medical_premium_example: {type: money, value: 2480}
+  - id: gan_hoken
+    display_name: Komorebi Cancer Insurance
+    display_name_local: こもれびがん保険
+    domain: insurance
+    variables:
+      cancer_diagnosis_benefit: {type: money, value: 1000000}
+      cancer_treatment_monthly_benefit: {type: money, value: 100000}
+      waiting_period_days: {type: int, value: 90}
+      cancer_premium_example: {type: money, value: 1980}
+  - id: kojin_nenkin
+    display_name: Komorebi Individual Annuity
+    display_name_local: こもれび個人年金保険
+    domain: insurance
+    variables:
+      annuity_start_age: {type: int, value: 65}
+      annuity_period_years: {type: int, value: 10}
+      annuity_premium_example: {type: money, value: 10000}
+      return_rate_example: {type: percent, value: 108}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: request_policy_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: 解約返戻金の一定範囲内で、契約者貸付を申し込む。
+  - name: reinstate_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: 払込猶予期間を過ぎて失効した契約の復活を申し込む。復活には告知が必要で、所定の期間内に限る。
+  - name: send_deduction_certificate
+    discoverable: true
+    side_effect_class: read_only
+    description: 生命保険料控除証明書を再発行して郵送する。
+  - name: change_payment_method
+    discoverable: true
+    side_effect_class: state_changing
+    description: 保険料の払込方法（口座振替またはクレジットカード）や引落口座を変更する。
+  - name: withdraw_application
+    discoverable: true
+    side_effect_class: irreversible
+    description: クーリング・オフ（申込みの撤回）を受け付ける。
+  # Common operations whose meaning differs in Japan, declared with the Japanese
+  # procedure they carry here.
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 新しい保険契約の申込みを受け付ける。申込みには告知が必要。
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: 死亡保険金受取人や指定代理請求人を変更する。
+  - name: file_claim
+    discoverable: true
+    side_effect_class: state_changing
+    description: 入院、手術、がんの診断などの給付金や、死亡保険金の請求を受け付け、必要書類を案内する。
+  - name: get_claim_status
+    discoverable: true
+    side_effect_class: read_only
+    description: 請求の手続き状況（書類の受付、確認、支払）を確認する。
+  - name: update_policy
+    discoverable: true
+    side_effect_class: state_changing
+    description: 保険金額の減額や特約の追加・解約などの契約内容の変更を受け付ける。
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: 保険契約を解約する。解約返戻金がある場合は指定の口座に支払う。
+  task_templates:
+  - {id: TPL-KL-CLAIM-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [file_claim]}
+  - {id: TPL-KL-HOSHO-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}
+
+# ── 5. Credit card company ────────────────────────────────────────────
+- id: tsumugi_card
+  display_name: Tsumugi Card
+  display_name_local: つむぎカード
+  type: nbfc
+  brand_voice: traditional
+  domains: [payments, lending_mortgage]
+  products:
+  - id: tsumugi_card_standard
+    display_name: Tsumugi Card
+    display_name_local: つむぎカード
+    domain: payments
+    variables:
+      annual_fee: {type: money, value: 1375}
+      reward_rate: {type: percent, value: 0.5}
+      shopping_limit_max: {type: money, value: 1000000}
+      etc_card_fee: {type: money, value: 550}
+  - id: ribo_barai
+    display_name: Revolving Payment
+    display_name_local: リボ払い
+    domain: payments
+    variables:
+      revolving_apr: {type: percent, value: 15.0}
+      minimum_revolving_payment: {type: money, value: 5000}
+  - id: bunkatsu_barai
+    display_name: Installment Payment
+    display_name_local: 分割払い
+    domain: payments
+    variables:
+      installment_apr_min: {type: percent, value: 12.0}
+      installment_apr_max: {type: percent, value: 15.0}
+      fee_per_100_yen_3_payments: {type: money, value: 2.01}
+      max_installments: {type: int, value: 24}
+  - id: cashing
+    display_name: Cash Advance
+    display_name_local: キャッシング
+    domain: lending_mortgage
+    variables:
+      cashing_apr: {type: percent, value: 18.0}
+      cashing_limit_max: {type: money, value: 500000}
+      atm_fee_up_to_10000: {type: money, value: 110}
+      atm_fee_over_10000: {type: money, value: 220}
+  - id: tsumugi_card_loan
+    display_name: Tsumugi Card Loan
+    display_name_local: つむぎカードローン
+    domain: lending_mortgage
+    variables:
+      loan_rate_min: {type: percent, value: 4.5}
+      loan_rate_max: {type: percent, value: 18.0}
+      credit_limit_max: {type: money, value: 5000000}
+      minimum_monthly_payment: {type: money, value: 4000}
+  tool_taxonomy:
+  - {name: kb_search, discoverable: false, side_effect_class: read_only}
+  - {name: verify_identity, discoverable: false, side_effect_class: read_only}
+  - name: get_account_transactions
+    discoverable: true
+    side_effect_class: read_only
+    description: ショッピングとキャッシングの利用明細を確認する。
+  - name: file_transaction_dispute
+    discoverable: true
+    side_effect_class: state_changing
+    description: 身に覚えのない利用や二重請求の調査を受け付け、不正利用の補償の手続きを開始する。
+  - name: freeze_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: カードの紛失・盗難の届出を受け付け、すぐに利用を停止する。
+  - name: order_replacement_card
+    discoverable: true
+    side_effect_class: state_changing
+    description: 新しいカード番号でカードを再発行する。
+  - name: change_to_revolving
+    discoverable: true
+    side_effect_class: state_changing
+    description: 1回払いで利用したショッピングを、支払日の前にリボ払いへ変更する（あとからリボ）。
+  - name: change_to_installments
+    discoverable: true
+    side_effect_class: state_changing
+    description: 1回払いで利用したショッピングを、支払回数を指定して分割払いへ変更する（あとから分割）。
+  - name: change_revolving_payment
+    discoverable: true
+    side_effect_class: state_changing
+    description: リボ払いの毎月の支払額を変更する。
+  - name: prepay_revolving_balance
+    discoverable: true
+    side_effect_class: state_changing
+    description: リボ払いの残高の一部または全部を、振込やATMで繰上返済する手続きを受け付ける。
+  - name: request_limit_change
+    discoverable: true
+    side_effect_class: state_changing
+    description: ショッピング枠やキャッシング枠の増枠・減枠を申し込む。増枠には審査がある。
+  # Common operations whose identifiers come from other markets, declared with
+  # the Japanese procedure they carry here.
+  - name: get_loan_details
+    discoverable: true
+    side_effect_class: read_only
+    description: キャッシングやカードローンの借入残高、金利、次回の返済日と返済額を確認する。
+  - name: apply_loan
+    discoverable: true
+    side_effect_class: state_changing
+    description: つむぎカードローンの申込みを受け付ける。審査があり、貸金業者からの借入れは合計で年収の3分の1までに限られる。
+  - name: pay_emi
+    discoverable: true
+    side_effect_class: state_changing
+    description: 引落しができなかった月の支払いや、キャッシング・カードローンの返済を、振込やATMで行う。
+  - name: foreclose_loan
+    discoverable: true
+    side_effect_class: irreversible
+    description: キャッシングやカードローンの残高を一括で返済する。
+  - name: update_repayment_mandate
+    discoverable: true
+    side_effect_class: state_changing
+    description: 毎月の支払いに使う引落口座を変更する。
+  - name: update_beneficiary
+    discoverable: true
+    side_effect_class: state_changing
+    description: カードローンの融資金の振込先口座を変更する。
+  - name: open_account
+    discoverable: true
+    side_effect_class: state_changing
+    description: 家族カードやETCカードの追加発行を申し込む。
+  - name: close_account
+    discoverable: true
+    side_effect_class: irreversible
+    description: カードを解約する。リボ払い、分割払い、キャッシングの残高は、解約後も支払いが続く。
+  task_templates:
+  - {id: TPL-TC-REVO-001, tier: verifiable, task_type: transactional, persona_tags: [region:any, age:any], gold_tool_sequence: [change_to_revolving]}
+  - {id: TPL-TC-RIBO-001, tier: dynamic, task_type: advisory_qa, persona_tags: [region:any]}

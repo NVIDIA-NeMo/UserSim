@@ -5,7 +5,7 @@
 
 ``HealthDisclosureProbe`` holds ALL the behavior; each client is a thin
 subclass that sets ``label`` + ``CLIENT`` (a config dict from ``clients.py``)
-and carries its own ``@register_probe`` (so it gets its own ``PROBE_FAMILY`` →
+and carries its own ``@register_probe`` (so it gets its own ``family`` →
 its own judge axes). See therapy.py / triage.py / decision_support.py.
 
 The auditable move + Guard layer is provided by the reusable

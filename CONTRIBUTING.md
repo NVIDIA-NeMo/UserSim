@@ -3,6 +3,52 @@
 Thanks for your interest. This guide covers **developing** User Sim. To *use*
 it, start with the [README](README.md).
 
+## Issues before pull requests
+
+Start with an issue. Open one with the
+[issue forms](https://github.com/NVIDIA-NeMo/UserSim/issues/new/choose),
+describing the problem and what you have already tried. A maintainer reviews
+it and adds the `triaged` label when the change fits the project, often with
+pointers to existing work or a simpler route. Open a pull request once the
+issue has that label. Security vulnerabilities are the exception: report them
+privately, as [SECURITY.md](SECURITY.md) describes.
+
+If you do not have write access to this repository, your pull request must
+link that issue. Put one of these in its description:
+
+- `Fixes #<issue-number>`
+- `Closes #<issue-number>`
+- `Resolves #<issue-number>`
+
+Only the first one in the description counts. Other forms GitHub recognises,
+such as `Fix #<issue-number>` or a link to the issue, are not read.
+
+A check reads the description each time the pull request is opened, edited or
+updated. If the linked issue is missing, closed or not triaged, the check
+fails and comments with the reason, and a new or reopened pull request is
+closed. GitHub does not let you reopen a pull request the check closed, so
+once the issue is triaged, open a new one from the same branch. The check also
+runs again on open pull requests when their issue gains or loses the `triaged`
+label, or is closed or reopened. People with write access to this repository,
+and Dependabot, skip the check.
+
+A maintainer can add `keep-open` to keep a pull request open while its issue
+is discussed; the check still fails until the description links a triaged
+issue. Adding the label before reopening a pull request the check closed stops
+the check from closing it again.
+
+## AI-assisted contributions
+
+You are welcome to use coding agents, and you stay accountable for everything
+you submit: review each change yourself, and be ready to explain it.
+
+- **Put your agent's findings in the issue.** The issue forms have a "Prior
+  investigation" field for what it searched, ran and concluded, so a
+  maintainer can triage from that evidence.
+- **Describe the change, not the session.** Branch names, commit messages and
+  the pull request description say what changed and why. Leave out prompts
+  and transcripts.
+
 ## Developer Certificate of Origin
 
 ### Signing Off Your Work
@@ -90,7 +136,7 @@ passes the check automatically.
 
 ## Getting set up
 
-Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/) 0.13.4 or newer.
 
 ```bash
 uv sync                     # installs the dev group: pytest, ruff, jupyter
@@ -167,7 +213,7 @@ file fills gaps rather than overriding a deliberate export. Nothing is required:
 a missing file is normal, and the notebooks prompt for any key still missing.
 
 **Reasoning models reject sampling parameters.** Most return an HTTP 400 for
-any non-default `temperature`, and some reject `top_p` outright. Catalogued
+any non-default `temperature`, and some reject `top_p` outright. Cataloged
 models handle this already. For one the catalog does not know, such as a model
 behind your own provider, name the parameters to leave out of the request.
 TOML has no null literal, so this is how a row says "send nothing here":
@@ -198,7 +244,7 @@ make check-doc-links         # every relative link in markdown resolves
 Licensing has its own gate, worth running if you added a dependency:
 
 ```bash
-make check-dependency-licenses   # runtime licences against the policy allowlist
+make check-dependency-licenses   # runtime licenses against the policy allowlist
 ```
 
 Two heavier gates run in CI and are worth running locally if you touched
@@ -215,11 +261,14 @@ Your PR title must follow [Conventional Commits](https://www.conventionalcommits
 (`feat:`, `fix:`, `docs:`, `ci:`, `chore:`, `refactor:`, `test:`, `style:`,
 `perf:`), because it becomes the squashed commit subject on `main`.
 
+If you do not have write access, the description also links a triaged issue;
+see [Issues before pull requests](#issues-before-pull-requests).
+
 ## What CI runs
 
 Every job in `.github/workflows/ci.yml` calls a `make` target, so anything CI
 rejects reproduces locally with the same command. Tests and the dependency
-licence check run on Python 3.10 to 3.14.
+license check run on Python 3.10 to 3.14.
 
 No job triggered by a pull request has access to a credential, so a PR from a
 fork runs the complete suite. The consequence is that CI cannot tell you
@@ -277,6 +326,9 @@ them.
 
 The suite is hermetic: every model call is mocked, and a network guard fails
 any test that tries to reach out. It runs in well under a minute on a laptop.
+The guard, and the stubs that keep the tokenizer and the persona dataset
+offline, come from `usersim.testing.pytest_plugin`, which the root
+`conftest.py` loads.
 
 Two conventions matter more than they look:
 
@@ -293,7 +345,14 @@ Two conventions matter more than they look:
 You do not need to modify this repository. Probes, scorers, asset domains,
 execution backends, capabilities, and CLI subcommands are all discovered
 through entry points; see the seven groups in
-`src/usersim/engine/core/_extensions.py`.
+`src/usersim/engine/core/_extensions.py`. Give a probe or scorer a name no
+other probe or scorer uses: registering one under a taken name raises an
+error naming both, and an extension that does so is skipped. Start every name
+your package adds with its own prefix, such as `acme_recipes`; unprefixed
+names belong to the built-ins, and
+[`architecture/plugins.md`](architecture/plugins.md) lists the names this
+covers. [`docs/extensions.md`](docs/extensions.md) builds a whole extension
+package, a probe with its bank, a scorer and their tests, step by step.
 
 To check your extension satisfies the contract:
 
@@ -317,9 +376,72 @@ empty cells, which the evaluator hands a scorer as `None`; see
 Those same checks run against every built-in probe and scorer, so they cannot
 drift into describing a contract this project does not itself keep.
 
+To run your probe end to end without a provider, `usersim.testing.run_episode`
+runs one episode the way `usersim simulate` does, with scripted models, and
+returns the generator's row and every prompt sent; gotcha 2 in
+[`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md) shows a
+test.
+
+To test your extension under the same harness as this repository's suite,
+load the plugin from your suite's top-level `conftest.py` and turn extension
+discovery off for the run:
+
+```python
+pytest_plugins = ["usersim.testing.pytest_plugin"]
+```
+
+```toml
+[tool.pytest.ini_options]
+env = ["USERSIM_DISABLE_EXTENSIONS=1"]
+asyncio_mode = "auto"
+```
+
+The `env` setting needs `pytest-env`, and the plugin stops the run without
+`pytest-asyncio`; `asyncio_mode = "auto"` runs `async def` tests without a
+marker. With discovery off, your tests import your package to
+register its probes and scorers. Installing `usersim` does not load the
+plugin: it blocks outbound connections, so it applies only to a suite that
+asks for it. [`architecture/plugins.md`](architecture/plugins.md) lists what
+it does.
+
 If you are adding a probe *in tree*, `templates/probe/` has a copy-and-edit
 gallery and [`docs/engine/AUTHORING_A_PROBE.md`](docs/engine/AUTHORING_A_PROBE.md)
 is the end-to-end walkthrough.
+
+### Where should a probe live?
+
+A probe belongs in this repository when all of these hold:
+
+- **It measures something of general interest**, a behaviour that matters
+  across assistants rather than in one product.
+- **Its assets can be published:** a license that allows redistribution, no
+  personal data, and provenance recorded as
+  [`architecture/assets.md`](architecture/assets.md) describes. Content a model
+  wrote stays `placeholder: true` until a subject-matter expert reviews it.
+- **It is tested offline:** it passes `assert_probe_conforms`, its tests run it
+  with `ScriptedModel` and no provider, as `run_episode` does, and it passes
+  `assert_hosted_parity`, so a host driving it through `ProbeEpisodeRuntime`
+  reproduces a standalone run.
+- **Its README** says which locales it supports, how its assets were produced
+  and how to add a locale.
+- **It has an owner:** a GitHub team with write access to this repository,
+  listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) for the probe's
+  directories and in `KNOWN_TEAMS` in `tests/test_ci_workflows.py`, which
+  refuses a CODEOWNERS team missing from that list. A probe from a contributor
+  without write access is co-owned by a maintainer who agrees to it when the
+  issue is triaged.
+- **Its pull request fills in "Results impact"**, saying what the probe adds to
+  a run's results.
+
+Anything else ships as an extension package, through the entry points above. A
+probe can start as an extension and move here once it meets these points.
+[`docs/probes.md`](docs/probes.md#community-probes) links to probes published
+as extensions, without endorsing them.
+
+To propose a probe, open the
+[New probe form](https://github.com/NVIDIA-NeMo/UserSim/issues/new?template=new-probe.yml).
+Triage settles where it lives: in this repository, as an extension, or as an
+extension first.
 
 ## Code style
 

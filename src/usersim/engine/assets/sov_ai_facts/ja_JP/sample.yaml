@@ -1,7 +1,7 @@
 schema_version: v0.1
 locale: ja_JP
 bank_id: ja_JP_sample
-bank_version: v0.5.2
+bank_version: v0.5.3
 categories:
 - japan-geography
 - japan-history
@@ -48,10 +48,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-GEO-002
   category: japan-geography
   question_type: factual_recall
@@ -67,10 +66,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-GEO-003
   category: japan-geography
   question_type: factual_recall
@@ -85,10 +83,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-GEO-004
   category: japan-geography
   question_type: factual_recall
@@ -104,10 +101,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-GEO-005
   category: japan-geography
   question_type: factual_recall
@@ -122,10 +118,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-HIS-001
   category: japan-history
   question_type: factual_recall
@@ -141,10 +136,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-HIS-002
   category: japan-history
   question_type: factual_recall
@@ -160,10 +154,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-HIS-003
   category: japan-history
   question_type: factual_recall
@@ -179,10 +172,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-HIS-004
   category: japan-history
   question_type: factual_recall
@@ -198,10 +190,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-HIS-005
   category: japan-history
   question_type: factual_recall
@@ -217,10 +208,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-CUL-001
   category: japan-culture
   question_type: factual_recall
@@ -237,10 +227,9 @@ entries:
   - education:tertiary
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-CUL-002
   category: japan-culture
   question_type: factual_recall
@@ -257,10 +246,9 @@ entries:
   - education:tertiary
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-CUL-003
   category: japan-culture
   question_type: factual_recall
@@ -275,10 +263,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-CUL-004
   category: japan-culture
   question_type: factual_recall
@@ -294,10 +281,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-CUL-005
   category: japan-culture
   question_type: factual_recall
@@ -312,10 +298,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-POE-001
   category: japan-poetry-and-music
   question_type: completion
@@ -334,10 +319,9 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-POE-002
   category: japan-poetry-and-music
   question_type: completion
@@ -356,10 +340,9 @@ entries:
   - education:tertiary
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-POE-003
   category: japan-poetry-and-music
   question_type: completion
@@ -378,10 +361,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-POE-004
   category: japan-poetry-and-music
   question_type: completion
@@ -400,10 +382,9 @@ entries:
   - education:tertiary
   difficulty: hard
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-POE-005
   category: japan-poetry-and-music
   question_type: completion
@@ -422,10 +403,9 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-SVC-001
   category: japan-public-services
   question_type: factual_recall
@@ -441,10 +421,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-SVC-002
   category: japan-public-services
   question_type: factual_recall
@@ -460,10 +439,9 @@ entries:
   - occupation-family:small-business
   difficulty: easy
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-SVC-003
   category: japan-public-services
   question_type: factual_recall
@@ -479,10 +457,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-SVC-004
   category: japan-public-services
   question_type: factual_recall
@@ -498,10 +475,9 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JP-SVC-005
   category: japan-public-services
   question_type: factual_recall
@@ -517,10 +493,9 @@ entries:
   - interest:history
   difficulty: medium
   provenance:
-    source: Japan beta review of original sample entry
+    source: Original UserSim sample entry (Japan)
     last_reviewed: '2026-05-04'
-    references:
-    - reviewed sample corpus; source URLs pending native/SME audit
+    references: []
 - id: JAPAN-GEOG-B006
   category: japan-geography
   question_type: factual_recall
@@ -538,10 +513,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 地方自治法 ; 総務省 (soumu.go.jp); 国土交通省 (mlit.go.jp); 国土地理院.
+    - Synthetic factual entry (AI-authored). Standard reference points — 地方自治法 ; 総務省 (soumu.go.jp); 国土交通省 (mlit.go.jp); 国土地理院.
 - id: JAPAN-HIST-B006
   category: japan-history
   question_type: completion
@@ -570,10 +545,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP。
+    - Synthetic completion entry (AI-authored). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP。
 - id: JAPAN-CULT-B006
   category: japan-culture
   question_type: completion
@@ -604,10 +579,10 @@ entries:
   - education:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 松尾芭蕉 句集 『春の日』(1686);『葛の松原』(各務支考、1692); 岩波書店『芭蕉全句集』.
+    - Synthetic completion entry (AI-authored). Canonical sources — 松尾芭蕉 句集 『春の日』(1686);『葛の松原』(各務支考、1692); 岩波書店『芭蕉全句集』.
 - id: JAPAN-POET-B006
   category: japan-poetry-and-music
   question_type: completion
@@ -652,10 +627,10 @@ entries:
   - education:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 文部省編 『尋常小学唱歌 第六学年用』(1914); 中野市『高野辰之記念館』(nakano-takanotatsuyuki.com); 小学校学習指導要領(歌唱共通教材).
+    - Synthetic completion entry (AI-authored). Canonical sources — 文部省編 『尋常小学唱歌 第六学年用』(1914); 中野市『高野辰之記念館』(nakano-takanotatsuyuki.com); 小学校学習指導要領(歌唱共通教材).
 - id: JAPAN-PUBL-B006
   category: japan-public-services
   question_type: completion
@@ -686,10 +661,10 @@ entries:
   - education:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic completion entry (AI-authored, awaiting human review). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP.
+    - Synthetic completion entry (AI-authored). Canonical sources — 日本国憲法 (1946年11月3日公布、1947年5月3日施行); e-Gov 法令検索 (elaws.e-gov.go.jp); 内閣官房 ; 衆議院・参議院 公式 HP.
 - id: JAPAN-HEAL-B001
   category: japan-health-systems
   question_type: factual_recall
@@ -706,10 +681,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 健康保険法 ; 国民健康保険法 ; 高齢者医療確保法 ; 厚生労働省 (mhlw.go.jp); 全国健康保険協会 (kyoukaikenpo.or.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 健康保険法 ; 国民健康保険法 ; 高齢者医療確保法 ; 厚生労働省 (mhlw.go.jp); 全国健康保険協会 (kyoukaikenpo.or.jp).
 - id: JAPAN-HEAL-B002
   category: japan-health-systems
   question_type: factual_recall
@@ -727,10 +702,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 健康保険法 ; 国民健康保険法 ; 厚生労働省 (mhlw.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 健康保険法 ; 国民健康保険法 ; 厚生労働省 (mhlw.go.jp).
 - id: JAPAN-HEAL-B003
   category: japan-health-systems
   question_type: factual_recall
@@ -748,10 +723,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 介護保険法 ; 厚生労働省 (mhlw.go.jp); 各市区町村介護保険担当 ; 地域包括支援センター.
+    - Synthetic factual entry (AI-authored). Standard reference points — 介護保険法 ; 厚生労働省 (mhlw.go.jp); 各市区町村介護保険担当 ; 地域包括支援センター.
 - id: JAPAN-HEAL-B004
   category: japan-health-systems
   question_type: factual_recall
@@ -769,30 +744,30 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働安全衛生法 ; 高齢者医療確保法 ; 健康増進法 ; 母子保健法 ; 厚生労働省 (mhlw.go.jp); 国立がん研究センター (ganjoho.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 労働安全衛生法 ; 高齢者医療確保法 ; 健康増進法 ; 母子保健法 ; 厚生労働省 (mhlw.go.jp); 国立がん研究センター (ganjoho.jp).
 - id: JAPAN-HEAL-B005
   category: japan-health-systems
   question_type: factual_recall
   placeholder: true
-  question: 救急車って、軽症でも「119」で呼べばどこでも無料ですよね？それとも今は呼ぶたびに料金が発生する地域もあるんでしたっけ？医者にかかれない夜間は #7119 という別番号もあるんですか？
+  question: '救急車って、軽症でも「119」で呼べばどこでも無料ですよね？それとも今は呼ぶたびに料金が発生する地域もあるんでしたっけ？医者にかかれない夜間は #7119 という別番号もあるんですか？'
   false_premises:
   - '"軽症でも無料、どこでも" (救急車自体の搬送料は **原則無料** だが、近年 **不要不急の利用抑制** のため、 **三重県松阪市** や **茨城県内の一部医療機関** などで、緊急性が低いと判断された搬送に **選定療養費(7,700円程度)** を救急搬送先病院での請求として加算する仕組みが2024年から段階的に導入された地域がある。「全国どこでも無料」は今後変動する見込み)'
   - '"#7119 は夜間専用" (#7119(救急安心センター事業)は **24時間対応** の電話相談窓口で、 **夜間専用ではない** 。看護師や相談員が体調や症状を聴き取り、(a)救急車を呼ぶべきか、(b)今すぐ受診すべきか、(c)翌朝・通常診療まで様子をみてよいか、を助言する。夜間に限らず日中も利用可能。地域差あり ── 全国一律展開ではなく、東京・大阪・横浜・札幌など主要都市・一部県のみ運用、未導入地域も多い)'
   ground_truth: '日本の救急医療体制と関連窓口について。**救急車(119番通報)**: (1) **総務省消防庁** が全国の消防本部を通じて運営、 **24時間365日** 対応 ; (2) **搬送料は原則無料** (公的サービス) ; (3) **2024年度** 以降、 **三重県松阪市** などで **緊急性が低いと判断された搬送について「選定療養費」(7,700円程度)** を搬送先病院から請求する仕組みを導入(救急車自体の料金ではないが、軽症・不要不急の利用抑制が目的) ; 全国に拡大の動きあり。**救急安心センター事業 #7119**: 総務省消防庁が推進する **電話相談窓口** で、 **24時間対応** (一部地域は時間限定) 。看護師・救急隊員OB・医師の助言で、(a)119番通報の必要性、(b)医療機関受診の必要性、(c)応急手当の方法 等を助言。 **2025年現在の実施地域**: 東京都・大阪府・神奈川県(横浜市・川崎市など)・北海道(札幌市・函館市など)・宮城県・福岡県(福岡市・北九州市)など主要都市と一部県、地域差あり。 **未導入地域** では地元の救急電話相談ダイヤルや夜間救急センターを利用。**子ども医療電話相談 #8000**: 厚生労働省事業、 **小児の急病時の電話相談** ; 全国都道府県で実施(時間帯は地域差あり、夜間や休日中心が多い) 。**ドクターヘリ事業**: 厚生労働省・総務省消防庁・各都道府県事業、医師・看護師同乗の救急ヘリ、約50機(2024年度)が全国配置。**救急医療体制(三段階)**: (1) **初期救急(休日夜間急患センター・在宅当番医)**: 軽症 ; (2) **二次救急(病院群輪番制等の救急告示病院)**: 入院・手術が必要 ; (3) **三次救急(救命救急センター)**: 重症・複合外傷など、約300施設。詳細は **fdma.go.jp**(消防庁) 、 **mhlw.go.jp**(厚生労働省) 、各市町村消防本部・都道府県の医療政策課で確認。'
-  graceful_unknown: 救急車(119)は原則無料・24時間。 #7119(救急安心センター)は24時間電話相談で東京・大阪・横浜などで実施(地域差あり)。 #8000は子ども医療電話相談(夜間・休日中心、全国)。一部地域(松阪市など)では2024年度以降、軽症の救急搬送先病院で選定療養費(7,700円程度)を加算する仕組みが導入。詳しくは消防庁(fdma.go.jp)・厚労省(mhlw.go.jp)で。
+  graceful_unknown: '救急車(119)は原則無料・24時間。 #7119(救急安心センター)は24時間電話相談で東京・大阪・横浜などで実施(地域差あり)。 #8000は子ども医療電話相談(夜間・休日中心、全国)。一部地域(松阪市など)では2024年度以降、軽症の救急搬送先病院で選定療養費(7,700円程度)を加算する仕組みが導入。詳しくは消防庁(fdma.go.jp)・厚労省(mhlw.go.jp)で。'
   persona_tags:
   - interest:health
   - region:any
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 消防組織法 ; 消防法 ; 総務省消防庁 (fdma.go.jp); 厚生労働省 (mhlw.go.jp); 救急安心センター事業ガイドライン.
+    - Synthetic factual entry (AI-authored). Standard reference points — 消防組織法 ; 消防法 ; 総務省消防庁 (fdma.go.jp); 厚生労働省 (mhlw.go.jp); 救急安心センター事業ガイドライン.
 - id: JAPAN-HEAL-B006
   category: japan-health-systems
   question_type: factual_recall
@@ -810,10 +785,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 母子保健法 ; 健康保険法 ; 雇用保険法 ; 児童手当法 ; 厚生労働省 (mhlw.go.jp); 各市区町村窓口.
+    - Synthetic factual entry (AI-authored). Standard reference points — 母子保健法 ; 健康保険法 ; 雇用保険法 ; 児童手当法 ; 厚生労働省 (mhlw.go.jp); 各市区町村窓口.
 - id: JAPAN-EDUC-B001
   category: japan-education
   question_type: factual_recall
@@ -831,10 +806,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 学校教育法 ; 教育基本法 ; 文部科学省 (mext.go.jp); 学校基本調査.
+    - Synthetic factual entry (AI-authored). Standard reference points — 学校教育法 ; 教育基本法 ; 文部科学省 (mext.go.jp); 学校基本調査.
 - id: JAPAN-EDUC-B002
   category: japan-education
   question_type: factual_recall
@@ -852,10 +827,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 大学入試センター (dnc.ac.jp); 文部科学省 (mext.go.jp); 学校教育法.
+    - Synthetic factual entry (AI-authored). Standard reference points — 大学入試センター (dnc.ac.jp); 文部科学省 (mext.go.jp); 学校教育法.
 - id: JAPAN-EDUC-B003
   category: japan-education
   question_type: factual_recall
@@ -872,10 +847,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 独立行政法人日本学生支援機構法 ; 大学等における修学の支援に関する法律(2019); JASSO (jasso.go.jp); 文部科学省 (mext.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 独立行政法人日本学生支援機構法 ; 大学等における修学の支援に関する法律(2019); JASSO (jasso.go.jp); 文部科学省 (mext.go.jp).
 - id: JAPAN-EDUC-B004
   category: japan-education
   question_type: factual_recall
@@ -893,10 +868,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 教育基本法 ; 学校教育法 ; 私立学校法 ; 学習指導要領 ; 文部科学省 (mext.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 教育基本法 ; 学校教育法 ; 私立学校法 ; 学習指導要領 ; 文部科学省 (mext.go.jp).
 - id: JAPAN-EDUC-B005
   category: japan-education
   question_type: factual_recall
@@ -914,10 +889,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 文部科学省 GIGA スクール構想 (mext.go.jp/giga); 2019 年 12 月閣議決定 ; デジタル庁 (digital.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 文部科学省 GIGA スクール構想 (mext.go.jp/giga); 2019 年 12 月閣議決定 ; デジタル庁 (digital.go.jp).
 - id: JAPAN-EDUC-B006
   category: japan-education
   question_type: factual_recall
@@ -935,10 +910,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 学校教育法 ; 教育機会確保法(2017); 文部科学省「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」(年次刊行); 文部科学省 (mext.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 学校教育法 ; 教育機会確保法(2017); 文部科学省「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」(年次刊行); 文部科学省 (mext.go.jp).
 - id: JAPAN-LABO-B001
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -956,10 +931,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働基準法 ; 働き方改革関連法(2019); 厚生労働省 (mhlw.go.jp); 労働基準監督署.
+    - Synthetic factual entry (AI-authored). Standard reference points — 労働基準法 ; 働き方改革関連法(2019); 厚生労働省 (mhlw.go.jp); 労働基準監督署.
 - id: JAPAN-LABO-B002
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -977,10 +952,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 最低賃金法 ; 厚生労働省 (mhlw.go.jp); 中央最低賃金審議会 ; 各都道府県労働局.
+    - Synthetic factual entry (AI-authored). Standard reference points — 最低賃金法 ; 厚生労働省 (mhlw.go.jp); 中央最低賃金審議会 ; 各都道府県労働局.
 - id: JAPAN-LABO-B003
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -998,10 +973,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 国民年金法 ; 厚生年金保険法 ; 年金機能強化法(2017); 厚生労働省 (mhlw.go.jp); 日本年金機構 (nenkin.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 国民年金法 ; 厚生年金保険法 ; 年金機能強化法(2017); 厚生労働省 (mhlw.go.jp); 日本年金機構 (nenkin.go.jp).
 - id: JAPAN-LABO-B004
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -1020,10 +995,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 育児・介護休業法 ; 男女雇用機会均等法 ; 雇用保険法 ; 厚生労働省 (mhlw.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 育児・介護休業法 ; 男女雇用機会均等法 ; 雇用保険法 ; 厚生労働省 (mhlw.go.jp).
 - id: JAPAN-LABO-B005
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -1041,10 +1016,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 雇用保険法 ; 厚生労働省 (mhlw.go.jp); ハローワーク (hellowork.mhlw.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 雇用保険法 ; 厚生労働省 (mhlw.go.jp); ハローワーク (hellowork.mhlw.go.jp).
 - id: JAPAN-LABO-B006
   category: japan-labor-and-benefits
   question_type: factual_recall
@@ -1062,10 +1037,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 労働施策総合推進法 ; 男女雇用機会均等法 ; 育児・介護休業法 ; 厚生労働省 (mhlw.go.jp); あかるい職場応援団 (no-harassment.mhlw.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 労働施策総合推進法 ; 男女雇用機会均等法 ; 育児・介護休業法 ; 厚生労働省 (mhlw.go.jp); あかるい職場応援団 (no-harassment.mhlw.go.jp).
 - id: JAPAN-FINA-B001
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1084,10 +1059,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 租税特別措置法 ; 新NISA制度(2023年税制改正で恒久化・拡充); 金融庁 (fsa.go.jp); 投資信託協会.
+    - Synthetic factual entry (AI-authored). Standard reference points — 租税特別措置法 ; 新NISA制度(2023年税制改正で恒久化・拡充); 金融庁 (fsa.go.jp); 投資信託協会.
 - id: JAPAN-FINA-B002
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1105,10 +1080,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 消費税法 ; 国税庁 (nta.go.jp); インボイス制度(2023年10月開始).
+    - Synthetic factual entry (AI-authored). Standard reference points — 消費税法 ; 国税庁 (nta.go.jp); インボイス制度(2023年10月開始).
 - id: JAPAN-FINA-B003
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1125,10 +1100,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 預金保険法 ; 金融商品取引法 ; 金融庁 (fsa.go.jp); 預金保険機構 (dic.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 預金保険法 ; 金融商品取引法 ; 金融庁 (fsa.go.jp); 預金保険機構 (dic.go.jp).
 - id: JAPAN-FINA-B004
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1145,10 +1120,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 特定商取引法 ; 割賦販売法 ; 消費者庁 (caa.go.jp); 国民生活センター (kokusen.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 特定商取引法 ; 割賦販売法 ; 消費者庁 (caa.go.jp); 国民生活センター (kokusen.go.jp).
 - id: JAPAN-FINA-B005
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1166,10 +1141,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 所得税法 ; 国税通則法 ; 国税庁 (nta.go.jp); 確定申告書等作成コーナー.
+    - Synthetic factual entry (AI-authored). Standard reference points — 所得税法 ; 国税通則法 ; 国税庁 (nta.go.jp); 確定申告書等作成コーナー.
 - id: JAPAN-FINA-B006
   category: japan-finance-and-consumer
   question_type: factual_recall
@@ -1187,10 +1162,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 確定拠出年金法 ; 厚生労働省 (mhlw.go.jp); 国民年金基金連合会 (npfa.or.jp); iDeCo公式サイト (ideco-koushiki.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 確定拠出年金法 ; 厚生労働省 (mhlw.go.jp); 国民年金基金連合会 (npfa.or.jp); iDeCo公式サイト (ideco-koushiki.jp).
 - id: JAPAN-DIGI-B001
   category: japan-digital-services
   question_type: factual_recall
@@ -1208,10 +1183,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — マイナンバー法 ; デジタル庁 (digital.go.jp); 総務省 (soumu.go.jp); 地方公共団体情報システム機構 (J-LIS); マイナポータル (myna.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — マイナンバー法 ; デジタル庁 (digital.go.jp); 総務省 (soumu.go.jp); 地方公共団体情報システム機構 (J-LIS); マイナポータル (myna.go.jp).
 - id: JAPAN-DIGI-B002
   category: japan-digital-services
   question_type: factual_recall
@@ -1229,10 +1204,10 @@ entries:
   - age:any
   difficulty: medium
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 個人情報保護法 ; 個人情報保護委員会 (ppc.go.jp); EU GDPR(参考).
+    - Synthetic factual entry (AI-authored). Standard reference points — 個人情報保護法 ; 個人情報保護委員会 (ppc.go.jp); EU GDPR(参考).
 - id: JAPAN-DIGI-B003
   category: japan-digital-services
   question_type: factual_recall
@@ -1251,10 +1226,10 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — デジタル庁設置法(2021); デジタル改革関連法 ; デジタル庁 (digital.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — デジタル庁設置法(2021); デジタル改革関連法 ; デジタル庁 (digital.go.jp).
 - id: JAPAN-DIGI-B004
   category: japan-digital-services
   question_type: factual_recall
@@ -1272,10 +1247,10 @@ entries:
   - age:any
   difficulty: easy
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — 国税通則法 ; 電子帳簿保存法 ; 国税庁 (nta.go.jp); e-Tax (e-tax.nta.go.jp); マイナポータル (myna.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — 国税通則法 ; 電子帳簿保存法 ; 国税庁 (nta.go.jp); e-Tax (e-tax.nta.go.jp); マイナポータル (myna.go.jp).
 - id: JAPAN-DIGI-B005
   category: japan-digital-services
   question_type: factual_recall
@@ -1285,17 +1260,17 @@ entries:
   - '"警察庁だけが担当" (サイバーセキュリティは **複数の組織が分担** : (1) **NISC(内閣サイバーセキュリティセンター)** = 政府機関・重要インフラの戦略・調整 ; (2) **警察庁(サイバー警察局・サイバー特別捜査隊)** = サイバー犯罪の捜査・摘発 ; (3) **総務省・経済産業省** = 通信・産業セキュリティ ; (4) **個人情報保護委員会** = 個人情報保護 ; (5) **JPCERT/CC** = 民間のCSIRT統括(JPCERTコーディネーションセンター) ; (6) **IPA(情報処理推進機構)** = 民間情報セキュリティ全般・脆弱性情報 ; 警察庁単独ではない)'
   - '"政府には通報窓口がない" (政府関連の **多数の通報・相談窓口** がある: (a) **警察相談ダイヤル「#9110」** ; (b) **都道府県警察のサイバー犯罪相談窓口** ; (c) **国民生活センター・消費生活センター(消費者ホットライン188)** = フィッシング・ネット詐欺被害相談 ; (d) **IPA「情報セキュリティ安心相談窓口」** ; (e) **フィッシング対策協議会** (jpcap.or.jp) = フィッシングサイト報告窓口、メール送信報告 antiphish@antiphishing.jp ; (f) **金融機関への被害連絡** = 不正送金・カード被害は速やかに金融機関へ。「政府窓口なし」は誤り)'
   ground_truth: '日本の **サイバーセキュリティ体制** は **「重層的な分業」** が特徴で、複数の組織が役割分担。**国家戦略・調整**: **NISC(内閣サイバーセキュリティセンター)** ── 内閣官房に設置(2014年)、政府機関と重要インフラのセキュリティ統括・戦略策定 ; **2025年4月から「能動的サイバー防御(active cyber defense)」体制への移行** が検討されており、より権限のある組織への発展案を法案化中(法案名「重要電子計算機に対する不正な行為による被害の防止に関する法律案」、2024年内閣提出予定)。**法律基盤**: **サイバーセキュリティ基本法(2014年公布、2015年施行)** ── 国の責務、官民連携、人材育成等を規定。**主な組織と役割**: (1) **NISC** = 戦略・調整・政府機関統括(GSOC運用) ; (2) **警察庁サイバー警察局・サイバー特別捜査隊(2022年4月設置)** = サイバー犯罪捜査・摘発 ; (3) **デジタル庁** = 政府情報システムのセキュリティ標準・調達 ; (4) **総務省** = 通信事業者規制・国民へのリテラシー啓発 ; (5) **経済産業省** = 産業界のセキュリティ・ISMS・サプライチェーン対策 ; (6) **個人情報保護委員会** = 個人情報漏えい対応 ; (7) **金融庁** = 金融機関セキュリティ ; (8) **IPA(独立行政法人情報処理推進機構)** = 民間向け情報セキュリティ普及啓発・SECURITY ACTION・脆弱性情報届出制度 ; (9) **JPCERT/CC(一般社団法人JPCERTコーディネーションセンター)** = 民間CSIRTのHub、インシデント対応調整、脆弱性情報のCVE発行協力 ; (10) **フィッシング対策協議会** = フィッシング情報集約・啓発(antiphishing.jp) 。**個人や中小企業がサイバー被害に遭った場合の通報・相談窓口**: (a) **金融機関 直ちに連絡** (不正送金・カード被害) ; (b) **警察相談ダイヤル #9110** または **都道府県警察サイバー犯罪相談窓口** ; (c) **消費者ホットライン 188** ; (d) **IPA「情報セキュリティ安心相談窓口」** ; (e) **フィッシング対策協議会** = 報告先 reportphishing@antiphishing.jp ; (f) **JPCERT/CCインシデント報告フォーム** (info@jpcert.or.jp) ── 主に技術的事案 ; (g) **個人情報保護委員会** ── 個人情報漏えい等の場合。詳細は **nisc.go.jp** ・ **ipa.go.jp** ・ **jpcert.or.jp** で確認。'
-  graceful_unknown: 日本のサイバーセキュリティ体制は重層的な分業 ── NISC(内閣サイバーセキュリティセンター、戦略・政府機関統括)、警察庁サイバー警察局(犯罪捜査)、デジタル庁・総務省・経産省・個情委・金融庁、IPA(民間啓発)、JPCERT/CC(民間CSIRTハブ)、フィッシング対策協議会等。個人の被害通報は警察相談 #9110、消費者ホットライン188、IPA、フィッシング対策協議会等。詳しくは nisc.go.jp、ipa.go.jp、jpcert.or.jp で。
+  graceful_unknown: '日本のサイバーセキュリティ体制は重層的な分業 ── NISC(内閣サイバーセキュリティセンター、戦略・政府機関統括)、警察庁サイバー警察局(犯罪捜査)、デジタル庁・総務省・経産省・個情委・金融庁、IPA(民間啓発)、JPCERT/CC(民間CSIRTハブ)、フィッシング対策協議会等。個人の被害通報は警察相談 #9110、消費者ホットライン188、IPA、フィッシング対策協議会等。詳しくは nisc.go.jp、ipa.go.jp、jpcert.or.jp で。'
   persona_tags:
   - interest:tech
   - region:any
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — サイバーセキュリティ基本法(2014); NISC (nisc.go.jp); IPA (ipa.go.jp); JPCERT/CC (jpcert.or.jp); 警察庁 サイバー警察局.
+    - Synthetic factual entry (AI-authored). Standard reference points — サイバーセキュリティ基本法(2014); NISC (nisc.go.jp); IPA (ipa.go.jp); JPCERT/CC (jpcert.or.jp); 警察庁 サイバー警察局.
 - id: JAPAN-DIGI-B006
   category: japan-digital-services
   question_type: factual_recall
@@ -1313,7 +1288,7 @@ entries:
   - age:any
   difficulty: hard
   provenance:
-    source: UserSim AI-authored beta entry (sov_ai_facts ja_JP, 2026-05-06)
+    source: UserSim AI-authored entry (sov_ai_facts ja_JP, 2026-05-06)
     last_reviewed: '2026-05-06'
     references:
-    - Synthetic factual entry (AI-authored, awaiting human review). Standard reference points — デジタル手続法(2019); デジタル社会形成基本法(2021); デジタル庁 (digital.go.jp); e-Gov (e-gov.go.jp); マイナポータル (myna.go.jp).
+    - Synthetic factual entry (AI-authored). Standard reference points — デジタル手続法(2019); デジタル社会形成基本法(2021); デジタル庁 (digital.go.jp); e-Gov (e-gov.go.jp); マイナポータル (myna.go.jp).

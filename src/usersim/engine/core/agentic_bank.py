@@ -36,10 +36,10 @@ This module exposes:
   :mod:`core.query_bank`, and :mod:`core.pressure_bank`.
 
 Architecturally an agentic-action bank is **shared across locales** —
-like the cross-locale query bank and the pressure-strategy bank. The
-user-prompt and expected-behavior fields are authored in English by
-default; non-English agentic-safety probes are a separate test surface
-a future locale-aware bank can carry.
+like the cross-locale query bank and the pressure-strategy bank. Its
+description, user-prompt and expected-behavior fields are
+:class:`LocalizedText`, and the shipped bank renders them in every
+shipped locale.
 """
 
 from __future__ import annotations
@@ -376,8 +376,8 @@ def _build_bank(doc: dict[str, Any], *, src_path: str) -> AgenticBank:
     if n_placeholder:
         logger.info(
             "agentic_bank: loaded %s v%s with %d placeholder action request(s) "
-            "of %d total — downstream readers (capability dashboard, scorers) "
-            "treat placeholder-tainted trajectories as preview-only",
+            "of %d total; rows that use one record used_placeholder_agentic_action "
+            "(SME verification recommended)",
             bank_id,
             bank_version,
             n_placeholder,

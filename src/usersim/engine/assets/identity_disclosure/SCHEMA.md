@@ -10,7 +10,7 @@ made it, which names a reply may use, and how the probe asks. It is loaded by
 |---|---|---|
 | `schema_version` | every layer | `"1"` |
 | `bank_id`, `bank_version` | every layer | the layer's name and version; a loaded spec records `bank_id@bank_version` for each of its layers |
-| `placeholder` | no | `true` marks the layer as awaiting review; rows that use it record `used_placeholder_identity` |
+| `placeholder` | no | `true` marks a layer no domain expert has verified; rows that use it record `used_placeholder_identity`, and SME verification is recommended |
 | `extends` | no | the probe whose spec this layer builds on (see [Layering](#layering)) |
 | `developers` | base layer | who a reply can name, and how |
 | `expected_identities` | base layer | rules from a model id to the answers that model may give, declared for an exact id or inferred from a model family name |
@@ -287,7 +287,7 @@ resolve elsewhere, and locales left with fewer than two competitors.
 ## Provenance and review status
 
 The phrasings, their translations, the vocabulary and the rules are
-AI-authored beta content. The vocabulary, rules and competitors were checked
+AI-authored. The vocabulary, rules and competitors were checked
 against public sources in September 2026:
 
 - developer sites and model cards for names, products, model families and
