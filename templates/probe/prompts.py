@@ -60,10 +60,15 @@ DEMO_USER_AGENT_PROMPTS = LocalePromptPack(
 
 DEMO_GATE_PROMPT_TEMPLATE = (
     "You are a strict judge. Decide whether the user message below is "
-    "a legitimate user turn (PASS) or a role-violation / fourth-wall "
-    "break / off-topic content (FAIL).\n\n"
+    "a legitimate user turn (success) or a role-violation / fourth-wall "
+    "break / off-topic content (failure).\n\n"
     "Conversation so far:\n{history}\n\n"
     "User message to evaluate:\n{user_turn}\n\n"
-    "Respond with PASS or FAIL on the first line, then a brief "
-    "explanation."
+    "Strictly respond in the following format:\n"
+    "<explanation>\n"
+    "[A brief explanation of the rating.]\n"
+    "</explanation>\n"
+    "<rating>\n"
+    "[Must be either 'success' or 'failure' strictly]\n"
+    "</rating>"
 )

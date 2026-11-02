@@ -469,8 +469,8 @@ failure mode.
 
 The gate prompt asks an LLM judge whether each user turn is a
 legitimate user message vs a role-violation / fourth-wall break /
-off-topic content. The judge's PASS/FAIL determines whether the turn
-is accepted or the loop retries.
+off-topic content. The judge's rating decides whether the turn is
+accepted or the loop generates it again.
 
 `BaseProbe.format_gate_prompt` ships a generic role-violation rubric.
 Override when the gate should be probe-grounded: every inclusion /
@@ -488,10 +488,22 @@ def format_gate_prompt(self, user_query: str, conversation_history: str) -> str:
     )
 ```
 
-The judge response must include `<rating>PASS</rating>` or
-`<rating>FAIL</rating>`: `run_inline_judge` parses XML, not plain
-text. If your prompt doesn't request that format, the judge will
-return prose and the gate will fail-retry until exhausted.
+The prompt must ask for the reply `run_inline_judge` parses: an
+`<explanation>` tag, and a `<rating>` tag holding `success`, `warn`
+or `failure`. `success` and `warn` accept the turn. A reply without a
+valid rating gets one follow-up asking the judge to reformat it, and
+if that reply has none either, the turn counts as failed. End the
+prompt with the format the default rubric asks for:
+
+```text
+Strictly respond in the following format:
+<explanation>
+[A brief explanation of the rating.]
+</explanation>
+<rating>
+[Must be either 'success' or 'failure' strictly]
+</rating>
+```
 
 ---
 
