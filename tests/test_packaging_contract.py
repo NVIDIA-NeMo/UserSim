@@ -251,9 +251,9 @@ class TestProbeTemplate:
         import re
 
         src = self.TEMPLATE.read_text()
-        cited = set(re.findall(r"``(test_\w+)\.py``", src))
+        cited = set(re.findall(r"``(tests/[\w/]+\.py)``", src))
         assert cited, "template should cite worked examples"
-        missing = [name for name in cited if not (_REPO_ROOT / "tests" / "engine" / "probes" / f"{name}.py").is_file()]
+        missing = [path for path in cited if not (_REPO_ROOT / path).is_file()]
         assert not missing, f"template cites tests that do not exist: {sorted(missing)}"
 
 

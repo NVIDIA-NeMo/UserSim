@@ -12,9 +12,9 @@ after it. For real working examples, see:
 - ``tests/probes/sov_ai_facts/test_probe.py`` — banked-verbatim probe (the canonical
   reference for the alias-dispatching mock + dual-module patching
   pattern).
-- ``test_safety_chat_pressure.py`` — bank-reframing probe
+- ``tests/engine/probes/test_safety_chat_pressure.py`` — bank-reframing probe
   (``on_followup_failure="abort"`` test case).
-- ``test_safety_agentic.py`` — agentic probe (custom ``run_dispatch``,
+- ``tests/engine/probes/test_safety_agentic.py`` — agentic probe (custom ``run_dispatch``,
   no user-LLM, simpler mock pattern — FIFO-only since there's only
   one acall_llm caller).
 
