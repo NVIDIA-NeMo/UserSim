@@ -64,13 +64,7 @@ from usersim.engine.core.probes import (
     dispatch_episode,
     register_probe,
 )
-from usersim.engine.core.probing_taxonomy import (
-    Category,
-    default_probing_taxonomy_path,
-    load_probing_taxonomy,
-    load_probing_taxonomy_for_locale,
-    reset_probing_taxonomy_cache,
-)
+from usersim.engine.core.probing_taxonomy import Category, load_probing_taxonomy, reset_probing_taxonomy_cache
 from usersim.engine.core.simulation import (
     ConversationState,
     language_instruction,
@@ -83,6 +77,10 @@ from usersim.engine.probes.sov_ai_dynamic.prompts import (
 )
 from usersim.engine.probes.sov_ai_dynamic.task_derivation import (
     derive_probe,
+)
+from usersim.engine.probes.sov_ai_dynamic.taxonomy import (
+    default_probing_taxonomy_path,
+    load_probing_taxonomy_for_locale,
 )
 
 logger = logging.getLogger("usersim.engine")
@@ -183,6 +181,7 @@ class SovAiDynamicProbe(BankBackedProbe):
     """
 
     label = "sov_ai_dynamic"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests locale-specific knowledge where no curated answer exists: a "
         "persona-voiced user explores a topic from the locale's taxonomy (history, "

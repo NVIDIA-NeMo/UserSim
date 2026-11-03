@@ -70,11 +70,9 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.core.probing_taxonomy import (
-    Category,
-    load_probing_taxonomy_for_locale,
-)
+from usersim.engine.core.probing_taxonomy import Category
 from usersim.engine.evaluator.scorers import register_scorer
+from usersim.engine.probes.sov_ai_dynamic.taxonomy import load_probing_taxonomy_for_locale
 
 logger = logging.getLogger("usersim.engine")
 
@@ -276,9 +274,7 @@ async def score_sov_ai_dynamic_trajectory(
     # India language-variants reuse the en_IN taxonomy (presence-aware:
     # a native per-variant taxonomy is used if it has been authored).
     from usersim.engine.core.locale import asset_locale
-    from usersim.engine.core.probing_taxonomy import (
-        default_probing_taxonomy_path,
-    )
+    from usersim.engine.probes.sov_ai_dynamic.taxonomy import default_probing_taxonomy_path
 
     taxonomy_locale = asset_locale(locale, exists=lambda l: default_probing_taxonomy_path(l).exists())
 
@@ -286,7 +282,7 @@ async def score_sov_ai_dynamic_trajectory(
         taxonomy = load_probing_taxonomy_for_locale(taxonomy_locale)
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to load taxonomy for locale=%s (taxonomy_locale=%s): %s",
+            "  |-- sov_ai_dynamic scorer: failed to load taxonomy for locale=%s (taxonomy_locale=%s): %s",
             locale,
             taxonomy_locale,
             e,
@@ -306,7 +302,7 @@ async def score_sov_ai_dynamic_trajectory(
     taxonomy_version_mismatch = pinned_version is not None and pinned_version != taxonomy.taxonomy_version
     if taxonomy_version_mismatch:
         logger.info(
-            "  |-- evaluator/scorers.sov_ai_dynamic: trajectory pinned "
+            "  |-- sov_ai_dynamic scorer: trajectory pinned "
             "taxonomy_version=%s but current loaded taxonomy is %s for "
             "locale=%s — reporting drift flag on this row",
             pinned_version,
@@ -402,7 +398,7 @@ async def _score_one_category(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: judge %r raised on category %s: %s: %s",
+            "  |-- sov_ai_dynamic scorer: judge %r raised on category %s: %s: %s",
             judge_alias,
             category.id,
             type(e).__name__,
@@ -419,7 +415,7 @@ async def _score_one_category(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_dynamic: failed to parse structured output for category %s",
+            "  |-- sov_ai_dynamic scorer: failed to parse structured output for category %s",
             category.id,
         )
         return _error_result(

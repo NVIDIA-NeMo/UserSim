@@ -4,7 +4,7 @@
 """Tests for the ``sov_ai_multilingual_parity`` probe.
 
 Layered the same way as ``sov_ai_facts/test_probe.py`` and
-``test_sov_ai_dynamic.py``:
+``sov_ai_dynamic/test_probe.py``:
 
 1. **Task-derivation primitives** — ``persona_to_tags`` (re-exported
    from sovereign-knowledge) + ``derive_task`` (the new picker that

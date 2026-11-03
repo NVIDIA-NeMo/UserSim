@@ -992,7 +992,7 @@ _CAPABILITIES: tuple[CapabilityDefinition, ...] = (
 _PROBE_IMPL_REFS = {
     "tool_calling": "src/usersim/engine/probes/tool_calling/generator.py",
     "sov_ai_facts": "src/usersim/engine/probes/sov_ai_facts/probe.py",
-    "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/generator.py",
+    "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/probe.py",
     "sov_ai_multilingual_parity": "src/usersim/engine/probes/sov_ai_multilingual_parity/generator.py",
     "safety_chat_pressure": "src/usersim/engine/probes/safety_chat_pressure/generator.py",
     "safety_agentic": "src/usersim/engine/probes/safety_agentic/generator.py",
@@ -1005,7 +1005,7 @@ _SCORER_IMPL_REFS = {
     "response_shape": "src/usersim/engine/evaluator/scorers/response_shape.py",
     "refusal_basics": "src/usersim/engine/evaluator/scorers/refusal_basics.py",
     "sov_ai_facts": "src/usersim/engine/probes/sov_ai_facts/scorer.py",
-    "sov_ai_dynamic": "src/usersim/engine/evaluator/scorers/sov_ai_dynamic.py",
+    "sov_ai_dynamic": "src/usersim/engine/probes/sov_ai_dynamic/scorer.py",
     "sov_ai_multilingual_parity": "src/usersim/engine/evaluator/scorers/sov_ai_multilingual_parity.py",
     "safety_chat_pressure": "src/usersim/engine/evaluator/scorers/safety_chat_pressure.py",
     "safety_agentic": "src/usersim/engine/evaluator/scorers/safety_agentic.py",

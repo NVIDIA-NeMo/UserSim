@@ -29,7 +29,7 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
@@ -43,7 +43,7 @@ from usersim.engine.core.probing_taxonomy import (
     load_probing_taxonomy,
 )
 from usersim.engine.probes.sov_ai_dynamic import (
-    generator as probe_gen,
+    probe as probe_gen,
 )
 from usersim.engine.probes.sov_ai_dynamic import (
     prompts,
@@ -84,7 +84,7 @@ def pt_br_persona_northeast_retiree() -> dict[str, Any]:
 
 @pytest.fixture
 def pt_br_taxonomy() -> ProbingTaxonomy:
-    return load_probing_taxonomy((packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"))
+    return load_probing_taxonomy((probe_assets_dir("sov_ai_dynamic") / "pt_BR/categories.yaml"))
 
 
 @pytest.fixture(autouse=True)
@@ -390,7 +390,7 @@ class TestPrompts:
 # ---------------------------------------------------------------------------
 
 
-_PT_BR_TAXONOMY_PATH = packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"
+_PT_BR_TAXONOMY_PATH = probe_assets_dir("sov_ai_dynamic") / "pt_BR/categories.yaml"
 
 
 class TestSimulateSovAiDynamic:

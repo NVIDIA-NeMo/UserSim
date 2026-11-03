@@ -23,7 +23,7 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.probing_taxonomy import reset_probing_taxonomy_cache
 from usersim.engine.evaluator.scorers import (
     clear_registry,
@@ -31,7 +31,7 @@ from usersim.engine.evaluator.scorers import (
     list_scorers,
     load_default_scorers,
 )
-from usersim.engine.evaluator.scorers.sov_ai_dynamic import (
+from usersim.engine.probes.sov_ai_dynamic.scorer import (
     _AXES,
     _GRACEFUL_UNKNOWN,
     _SELF_CONSISTENCY,
@@ -63,7 +63,7 @@ def _reset_state_between_tests():
 
 @pytest.fixture
 def sample_taxonomy_path() -> Path:
-    return packaged_assets_dir() / "sov_ai_dynamic/pt_BR/categories.yaml"
+    return probe_assets_dir("sov_ai_dynamic") / "pt_BR/categories.yaml"
 
 
 @pytest.fixture
@@ -275,7 +275,7 @@ class TestHappyPath:
             graceful_unknown=4,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -310,7 +310,7 @@ class TestHappyPath:
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -338,7 +338,7 @@ class TestHappyPath:
             return {"role": "assistant", "content": json.dumps(payload)}
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_capturing_side_effect,
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -369,7 +369,7 @@ class TestMultiCategoryAggregation:
             _axis_payload(suspected_fabrication=2, self_consistency=3, graceful_unknown=4),
         ]
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_mock_judge_call(payloads),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -416,7 +416,7 @@ class TestErrorPaths:
         traj = _trajectory(category_id="brazil-nonexistent")
         # No LLM call should fire — category lookup fails before the call.
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=AssertionError("scorer should not call LLM for unknown category"),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -434,7 +434,7 @@ class TestErrorPaths:
         mock_taxonomy_env: Path,
     ) -> None:
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=RuntimeError("rate-limited"),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -453,7 +453,7 @@ class TestErrorPaths:
             return {"role": "assistant", "content": "not-json-{garbage"}
 
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_bad_content,
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -484,7 +484,7 @@ class TestVersionMismatch:
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_dynamic_trajectory(
@@ -510,7 +510,7 @@ class TestVersionMismatch:
             graceful_unknown=5,
         )
         with patch(
-            "usersim.engine.evaluator.scorers.sov_ai_dynamic.acall_llm",
+            "usersim.engine.probes.sov_ai_dynamic.scorer.acall_llm",
             side_effect=_mock_judge_call([payload]),
         ):
             result = await score_sov_ai_dynamic_trajectory(

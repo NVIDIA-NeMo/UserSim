@@ -24,5 +24,5 @@ through the same in-sim infrastructure (``ConversationState``,
 ``OutcomeBuilder``, ``acall_llm``), and their outputs converge in the
 combined sovereign-AI scorecard.
 
-Public entry point: :func:`generator.simulate_sov_ai_dynamic`.
+Public entry point: :func:`probe.simulate_sov_ai_dynamic`.
 """
