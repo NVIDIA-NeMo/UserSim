@@ -559,6 +559,13 @@ After this, add your module's import path to `BUILTIN_PROBE_MODULES` in
 The registry imports every listed module the first time a probe is looked
 up, and that import is what runs the `@register_probe` decorator.
 
+A built-in imports what it can from `usersim.extension`, as an extension does:
+each name it takes from another `usersim` module is an import to change if it
+ever leaves this repository.
+`tests/test_probe_private_imports.py` counts the names each built-in package
+imports from other `usersim` modules and fails when the count grows; a new
+package adds its count to that test's `_ALLOWED`.
+
 ### Declare every column your probe writes
 
 If `build_result_extras` adds a key beyond the core columns
