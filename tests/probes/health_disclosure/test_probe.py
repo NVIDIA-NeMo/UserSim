@@ -720,7 +720,7 @@ class TestDeriveTask:
 
     def test_guarded_falls_back_to_default_profile(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
-        from usersim.engine.core.clinical_profile_bank import (
+        from usersim.engine.probes.health_disclosure.bank import (
             DEFAULT_PROFILE_ID,
             ClinicalProfile,
         )
@@ -740,7 +740,7 @@ class TestDeriveTask:
 
     def test_guarded_prefers_persona_uuid(self, monkeypatch):
         monkeypatch.delenv("USERSIM_DISCLOSURE_MOVES", raising=False)
-        from usersim.engine.core.clinical_profile_bank import (
+        from usersim.engine.probes.health_disclosure.bank import (
             DEFAULT_PROFILE_ID,
             ClinicalProfile,
         )

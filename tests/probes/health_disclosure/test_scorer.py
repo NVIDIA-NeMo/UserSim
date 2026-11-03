@@ -15,10 +15,10 @@ import json
 import pandas as pd
 import pytest
 
-from usersim.engine.core import realized_audit as ra
 from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
-from usersim.engine.evaluator.scorers import health_disclosure as hd  # noqa: F401
-from usersim.engine.evaluator.scorers.health_disclosure import (
+from usersim.engine.probes.health_disclosure import realized_audit as ra
+from usersim.engine.probes.health_disclosure import scorer as hd  # noqa: F401
+from usersim.engine.probes.health_disclosure.scorer import (
     score_health_disclosure_trajectory as score,
 )
 from usersim.taxonomy.eval_cell import scorer_state

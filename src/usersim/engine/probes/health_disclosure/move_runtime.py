@@ -21,7 +21,7 @@ What is client-specific (topic vocabulary, what "risk" means, proposal framing)
 comes from the client config in ``clients.py``. The full hidden clinical profile
 (concealment ground-truth + gated topics, keyed by persona uuid) is supplied by
 the host probe from the versioned clinical-profile bank (``BankBackedProbe`` →
-``self._task``; see ``core/clinical_profile_bank.py``), passed into ``build_env``.
+``self._task``; see ``probes/health_disclosure/bank.py``), passed into ``build_env``.
 Absent a profile, we fall back to generic topics so the probe still runs.
 """
 

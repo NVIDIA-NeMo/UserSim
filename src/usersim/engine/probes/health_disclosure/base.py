@@ -19,6 +19,7 @@ local-dev override only.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Mapping
 
 from usersim.engine.core.behavioral import (
@@ -26,14 +27,14 @@ from usersim.engine.core.behavioral import (
     format_disclosure_instructions,
     format_interaction_style_instructions,
 )
-from usersim.engine.core.clinical_profile_bank import (
-    DEFAULT_PROFILE_ID,
-    ClinicalProfile,
-)
 from usersim.engine.core.outcomes import WarningKind
 from usersim.engine.core.persona import format_persona_for_prompt
 from usersim.engine.core.probes import BankBackedProbe
 from usersim.engine.core.simulation import language_instruction
+from usersim.engine.probes.health_disclosure.bank import (
+    DEFAULT_PROFILE_ID,
+    ClinicalProfile,
+)
 from usersim.engine.probes.health_disclosure.mixin import (
     GuardedMoveMixin,
     env_override,
@@ -58,6 +59,8 @@ class HealthDisclosureProbe(GuardedMoveMixin, BankBackedProbe):
     (one bank per client; see therapy.py / triage.py / decision_support.py).
     """
 
+    #: The four clients' banks, each in its own ``<label>/`` folder.
+    assets_root = Path(__file__).parent / "assets"
     #: Set by each client subclass to a config dict from ``clients.py``.
     CLIENT: dict = {}
     #: Local-dev override honoured by ``GuardedMoveMixin.guarded_moves_enabled``.

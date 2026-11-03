@@ -168,11 +168,13 @@ the turn had no side effects.
 ## Assets
 
 A probe's content lives at `engine/assets/<label>/`, or, for a probe kept in
-its own folder, at `engine/probes/<label>/assets/<label>/`, resolved through
-`probe_assets_dir()`. A run fails pre-flight, before any model call, if a
-selected probe's bank is missing or, for the probes whose banks are split by
-locale, doesn't load for a run locale (a finance bank without tasks, for
-instance). Those probes declare a `locale_bank_check` on the class, which the
+its own folder, at `engine/probes/<folder>/assets/<label>/`, where the folder
+is named after the probe or, as `health_disclosure` is, shared by several. It
+is resolved through `probe_assets_dir()`. A run fails pre-flight, before any
+model call, if a selected probe's bank is missing or, for the probes whose banks
+are split by locale, doesn't load for a run locale (a finance bank without
+tasks, for instance). Those probes declare a `locale_bank_check` on the class,
+which the
 pre-flight calls on the bank the class's `bank_locale` names. The refusal names
 the probe, the locale and the locales that can run, rather than failing from
 inside a loader mid-run. `simulate` and its `--dry-run`, `--materialize-inputs`,

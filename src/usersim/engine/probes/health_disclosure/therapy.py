@@ -10,10 +10,10 @@ binds the label + client config and registers the probe with its own family
 
 from __future__ import annotations
 
-from usersim.engine.core.clinical_profile_bank import (
+from usersim.engine.core.probes import register_probe
+from usersim.engine.probes.health_disclosure.bank import (
     load_clinical_profile_bank_for_client,
 )
-from usersim.engine.core.probes import register_probe
 from usersim.engine.probes.health_disclosure.base import HealthDisclosureProbe
 from usersim.engine.probes.health_disclosure.clients import CLIENTS
 

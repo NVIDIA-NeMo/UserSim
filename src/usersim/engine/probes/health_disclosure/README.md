@@ -19,7 +19,7 @@ content once the assistant (the system under test) earns it.
 | `moves.py` | Generic **move-space + Guard** (deterministic, no LLM). Shared verbatim by all clients. |
 | `move_runtime.py` | Glue: profile → env, and the `commit_move` tool call + Guard veto loop. Client-agnostic. |
 | `mixin.py` | `GuardedMoveMixin`: the **reusable, domain-agnostic capability** that wires the move-space into `BaseProbe`'s hooks. Composed like the repo's other capability mixins; config supplied via `guarded_move_config()`. |
-| `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `core/realized_audit.py`, since the audit runs in the evaluator. |
+| `prompts.py` | The four user-agent prompts, a shared gate-prompt builder, the DECIDE scaffold, and stand-in assistant prompts. Every shippable scaffold is a `LocalePromptPack` (all-locales-or-fail); see **Locale** below. The realized-turn-audit scaffold is **not** here: it sits with the auditor in `probes/health_disclosure/realized_audit.py`, since the audit runs in the evaluator. |
 | `clients.py` | **Per-client config** (topics, risk meaning, roles, proposal framing). Single source of truth for client *shape* (judge axes live in `evaluator/axes.py`). |
 | `base.py` | `HealthDisclosureProbe(GuardedMoveMixin, BaseProbe)`: binds the client config + prompts; the move-space behavior comes from the mixin. |
 | `therapy.py` / `triage.py` / `decision_support.py` / `general.py` | Thin modules: bind `label` + `CLIENT` and `@register_probe` (each its own `family`); declare the `default` / `guarded` variants. |
@@ -27,7 +27,7 @@ content once the assistant (the system under test) earns it.
 Adding a client = one entry in `CLIENTS` + one thin module (copy `triage.py`)
 + its judge axes in `evaluator/axes.py::PROBE_SCORES` + a bundled bank under
 `assets/<label>/sample.yaml` (with its label in
-`clinical_profile_bank.CLIENT_PROBE_LABELS`) + its module path in
+`bank.CLIENT_PROBE_LABELS`) + its module path in
 `core/probes.py::BUILTIN_PROBE_MODULES`.
 
 > **Reusing the move-space elsewhere.** `GuardedMoveMixin` hardcodes nothing
@@ -56,9 +56,8 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
    while its hardest step happened upstream in a model. Running it at scoring time
    also lets a stored trajectory be re-audited without re-simulating.
 
-   The shared machinery lives in `core/realized_audit.py`: core, because the
-   evaluator and the probe family both need it and neither layer may import the
-   other. It audits all realized turns in **one batched call**
+   The shared machinery lives in `realized_audit.py`, beside the probes and the
+   scorer, which both use it. It audits all realized turns in **one batched call**
    (`verify_realized_transcript`) using an **independent auditor** (`judge_model` if
    wired, else `evaluator_model`, else `user_model`: see `resolve_audit_model`;
    overridable via `USERSIM_AUDIT_MODEL`), grading each topic three ways: `full` / `partial` /
@@ -111,7 +110,7 @@ Provided by `GuardedMoveMixin`. When enabled, each follow-up turn runs
 - Heavy cognitions (`hopelessness`/`worthlessness`) are paced like risk for non-`open` users.
 
 The Guard is a pure veto layer (no LLM call) and is fully unit-tested in
-`tests/engine/probes/test_health_disclosure.py`.
+`tests/probes/health_disclosure/test_probe.py`.
 
 ## Enabling the move-space (per trajectory)
 The move-space is a **`probe_variant`**, not a process-global flag, so a single
@@ -174,7 +173,7 @@ user, so the family is safe to register and run by default.
 ## Clinical-profile bank (concealment ground truth)
 The hidden clinical profile (gated topics + concealment/risk ground truth, keyed
 by persona uuid) is a **versioned asset bank**, loaded through `BankBackedProbe`
-exactly like `fact_bank` / `agentic_bank` (`core/clinical_profile_bank.py`). This
+exactly like the `sov_ai_facts` and `safety_agentic` banks (`bank.py` here). This
 buys the family `provenance.bank_version` pinning (per client: no replay/drift
 hole), placeholder-entry discipline, and asset-audit test coverage.
 
@@ -208,7 +207,7 @@ What the free-form utterances actually did (realized **behavior**) is not a
 trajectory column: the concealment scorer audits it at eval time, below.
 
 ### Concealment scorer (opt-in)
-`evaluator/scorers/health_disclosure.py` scores in two stages:
+`probes/health_disclosure/scorer.py` scores in two stages:
 
 1. The realized-behavior audit described under **VERIFY** above, rebuilt from the
    stored `conversation_messages`, `moves_detail` and `concealment_topics`.
@@ -247,7 +246,7 @@ for comparable-strata rollups. Enable it at eval time with
 ## Locale
 The conversational **output** language is driven by the interpolated
 `{language_instruction}`; the *scaffold* (role framing, gate rubric, the DECIDE
-prompt here and the VERIFY prompt in `core/realized_audit.py`) is intentionally
+prompt here and the VERIFY prompt in `realized_audit.py`) is intentionally
 English. Every shippable scaffold is
 registered through `LocalePromptPack` (`core/probes.py`) under every shipped
 locale, so it flows through the same **all-locales-or-fail** validation as the

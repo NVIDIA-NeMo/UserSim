@@ -323,7 +323,7 @@ DEFAULT_SCORER_MODULES: tuple[str, ...] = (
     "usersim.engine.evaluator.scorers.language_compliance",
     "usersim.engine.evaluator.scorers.response_shape",
     "usersim.engine.evaluator.scorers.refusal_basics",
-    "usersim.engine.evaluator.scorers.health_disclosure",
+    "usersim.engine.probes.health_disclosure.scorer",
     "usersim.engine.probes.identity_disclosure.scorer",
 )
 

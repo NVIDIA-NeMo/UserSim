@@ -33,7 +33,7 @@ from usersim.engine.evaluator.generator import (
     _decode_json_field,
     judge_verdict,
 )
-from usersim.engine.evaluator.scorers.health_disclosure import score_health_disclosure_trajectory
+from usersim.engine.probes.health_disclosure.scorer import score_health_disclosure_trajectory
 
 # ── Pure helpers ────────────────────────────────────────────────────
 

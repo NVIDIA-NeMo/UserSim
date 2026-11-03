@@ -43,16 +43,16 @@ from __future__ import annotations
 
 import pytest
 
-from usersim.engine.core.clinical_profile_bank import (
+from usersim.engine.core.locale import SHIPPED_LOCALES
+from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
+from usersim.engine.core.prompt_loader import load_prompt_file
+from usersim.engine.core.seeds import load_seeds
+from usersim.engine.probes.health_disclosure.bank import (
     CLIENT_PROBE_LABELS,
     default_clinical_profile_bank_path,
     load_clinical_profile_bank,
     reset_clinical_profile_bank_cache,
 )
-from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
-from usersim.engine.core.prompt_loader import load_prompt_file
-from usersim.engine.core.seeds import load_seeds
 from usersim.engine.probes.identity_disclosure.spec import (
     default_identity_spec_path,
     load_identity_spec,

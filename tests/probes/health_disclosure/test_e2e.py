@@ -32,9 +32,9 @@ import pyarrow as pa
 import pytest
 from test_simulator_pipeline_e2e import _cli_built_simulator_config
 
-from usersim.engine.core import realized_audit as ra
 from usersim.engine.evaluator.scorers import get_scorer, load_default_scorers
 from usersim.engine.probes.health_disclosure import move_runtime as mr
+from usersim.engine.probes.health_disclosure import realized_audit as ra
 from usersim.engine.probes.health_disclosure import therapy
 
 MAX_TURNS = 8

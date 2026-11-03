@@ -62,7 +62,7 @@ _LLM_MODULES = (
     "usersim.engine.core.judges",
     "usersim.engine.core.context",
     "usersim.engine.core.translation",
-    "usersim.engine.core.realized_audit",
+    "usersim.engine.probes.health_disclosure.realized_audit",
     "usersim.engine.probes.health_disclosure.move_runtime",
     "usersim.engine.probes.safety_agentic.probe",
     "usersim.engine.probes.safety_chat_pressure.classifier",

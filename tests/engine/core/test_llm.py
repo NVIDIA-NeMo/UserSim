@@ -29,7 +29,7 @@ from data_designer.engine.models.factory import create_model_registry
 from data_designer.engine.secret_resolver import PlaintextResolver
 
 import usersim
-from usersim.engine.core import llm, realized_audit
+from usersim.engine.core import llm
 from usersim.engine.core.llm import (
     ContextWindowError,
     _dicts_to_chat_messages,
@@ -38,7 +38,7 @@ from usersim.engine.core.llm import (
     set_current_outcome_builder,
 )
 from usersim.engine.core.outcomes import OutcomeBuilder, OutcomeStatus
-from usersim.engine.probes.health_disclosure import move_runtime
+from usersim.engine.probes.health_disclosure import move_runtime, realized_audit
 
 
 async def _noop_sleep(_delay):

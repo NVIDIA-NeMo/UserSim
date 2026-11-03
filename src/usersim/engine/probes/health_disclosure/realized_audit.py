@@ -9,10 +9,9 @@ nothing at all). This module audits realized turns after the fact and reconciles
 them against the committed moves, producing the "realized" ground truth that
 concealment scoring rests on.
 
-It lives in ``core`` because both layers need it and neither may import the
-other: the probe family owns the move vocabulary at simulation time, while the
-evaluator runs the audit at scoring time. One definition here is what keeps the
-disclosure-credit weights from being carried separately by each layer.
+The probes and their scorer both use it: the probes own the move vocabulary at
+simulation time, while the scorer runs the audit at scoring time. One definition
+here keeps the disclosure-credit weights from being carried separately by each.
 
 Design points this section encodes, from review:
 

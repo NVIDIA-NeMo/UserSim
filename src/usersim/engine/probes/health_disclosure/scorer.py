@@ -6,7 +6,7 @@
 The scorer has two stages:
 
 1. **An LLM-backed audit** of what the realized user turns actually disclosed
-   (``core.realized_audit``), rebuilt from stored columns —
+   (``realized_audit`` beside this module), rebuilt from stored columns:
    ``conversation_messages`` + ``moves_detail`` + ``concealment_topics``.
 2. **Deterministic arithmetic** over the result, producing the axes below.
 
@@ -89,13 +89,13 @@ import logging
 from typing import Any
 
 from usersim.engine.core.missing import is_missing
-from usersim.engine.core.realized_audit import (
+from usersim.engine.evaluator.scorers import register_scorer
+from usersim.engine.probes.health_disclosure.realized_audit import (
     DISCLOSURE_CREDIT,
     pair_realized_turns,
     reconcile_realized,
     verify_realized_transcript,
 )
-from usersim.engine.evaluator.scorers import register_scorer
 
 logger = logging.getLogger("usersim.engine")
 

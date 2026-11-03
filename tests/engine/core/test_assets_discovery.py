@@ -21,6 +21,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 import usersim
@@ -111,14 +112,22 @@ class TestRegistryAndLayoutInvariants:
         assert not outside, f"built-in probes whose assets are outside {package}: {outside}"
 
     def test_a_built_in_that_declares_a_root_keeps_it_in_its_own_folder(self) -> None:
-        """Its banks sit beside its code, at ``engine/probes/<label>/assets/<label>/``."""
+        """Its banks sit beside its code, at ``engine/probes/<folder>/assets/<label>/``.
+
+        The folder is named after the probe, or holds several probes that share it.
+        """
         from usersim.engine.core.probes import resolve_probe
 
         declared = {label: resolve_probe(label) for label in self._labels() if resolve_probe(label).assets_root}
         assert declared, "no built-in probe declares an assets_root"
+        folders = {label: Path(sys.modules[cls.__module__].__file__).parent for label, cls in declared.items()}
+        shared = Counter(folders.values())
         for label, cls in declared.items():
-            folder = Path(sys.modules[cls.__module__].__file__).parent
-            assert folder.name == label and Path(cls.assets_root) == folder / "assets", label
+            folder = folders[label]
+            assert folder.parent.name == "probes", label
+            assert folder.name == label or shared[folder] > 1, label
+            assert Path(cls.assets_root) == folder / "assets", label
+            assert (folder / "assets" / label).is_dir(), label
 
     def test_packaged_tree_has_no_stray_top_level_entries(self) -> None:
         """Everything shipped under assets/ should be a probe folder. Catches
@@ -273,9 +282,7 @@ class TestProbeAssetsDir:
     def test_a_built_in_probe_reads_its_packaged_folder(self) -> None:
         from usersim.engine.core.probes import resolve_probe
 
-        assert (
-            resolve_probe("health_triage_disclosure").assets_dir() == packaged_assets_dir() / "health_triage_disclosure"
-        )
+        assert resolve_probe("tool_calling").assets_dir() == packaged_assets_dir() / "tool_calling"
 
     def test_a_probe_reads_the_folder_under_its_declared_root(self, register_test_probe, tmp_path) -> None:
         (tmp_path / "ext_probe").mkdir()
@@ -346,13 +353,16 @@ class TestBeforeTheProbeIsImported:
             "assert not probes._PROBE_REGISTRY, 'a probe was registered before the lookup'\n"
             "print(len(load_seeds('en_US', 'general_educational', 'subjects')))\n"
             "print(sorted(load_prompt_file('general_open_ended')))\n"
+            "from usersim.engine.core._assets import probe_assets_dir\n"
+            "print(probe_assets_dir('health_triage_disclosure').parent.parent.name)\n"
         )
         result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
 
         assert result.returncode == 0, result.stderr
-        count, keys = result.stdout.splitlines()
+        count, keys, health_folder = result.stdout.splitlines()
         assert int(count) > 0
         assert "user_agent_system_prompt" in keys
+        assert health_folder == "health_disclosure"
 
     def test_a_package_holding_several_probes_is_found_under_each_label(self, monkeypatch, tmp_path):
         import usersim.engine.core._assets as assets

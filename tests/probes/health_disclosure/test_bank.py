@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for the clinical-profile bank loader (``core.clinical_profile_bank``)."""
+"""Tests for the clinical-profile bank loader (``probes.health_disclosure.bank``)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from usersim.engine.core.clinical_profile_bank import (
+from usersim.engine.probes.health_disclosure.bank import (
     DEFAULT_PROFILE_ID,
     ClinicalProfileBankError,
     clinical_profile_bank_path_for,

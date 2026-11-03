@@ -31,7 +31,6 @@ _PROBE_PACKAGES = _SRC / "engine" / "probes"
 _ALLOWED: dict[str, int] = {
     "cli/_pipeline.py": 7,
     "cli/smoke.py": 2,
-    "engine/core/clinical_profile_bank.py": 4,
     "engine/core/preview.py": 3,
     "engine/evaluator/axes.py": 6,
     "reporting/capability_report.py": 1,

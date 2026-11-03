@@ -1,18 +1,13 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``core.realized_audit`` — reconciling realized behavior vs intent.
-
-These live in ``tests/core`` because the audit moved out of the probe: it is
-consumed by the evaluator, and the two layers may not import each other, so the
-shared definition sits in core.
-"""
+"""Tests for ``probes.health_disclosure.realized_audit``: reconciling realized behavior with intent."""
 
 from __future__ import annotations
 
 import json
 
-from usersim.engine.core import realized_audit as ra
+from usersim.engine.probes.health_disclosure import realized_audit as ra
 
 
 def _v(full=None, partial=None, risk=False):

@@ -132,7 +132,7 @@ different questions of the model.
 | Probing / dynamic-tier taxonomy | `core/probing_taxonomy.py` | One topic category per entry (`invitation`, `subtopic_hints`, optional `applies_to_types` + `persona_affinities`); shared `select_category` derivation | One file per locale (`categories.yaml` for sov_ai_dynamic; `dynamic.yaml` for financial_services) | `sov_ai_dynamic`, `financial_services` |
 | Financial-services bank | `probes/financial_services/bank.py` (+ `tasks.py`, `embeddings.py`) | Per-institution corpus + tools + tasks + embeddings; `Institution` / `FinanceBank` typed views; sim-time gold derivation | One dir tree per locale (`<type>/<institution>/`) | `financial_services` |
 | Query bank | `probes/sov_ai_multilingual_parity/bank.py` | One **conceptual question** per entry (with N locale `renderings` + `concern`) | **One file shared across locales; N renderings per entry joined by `query_id`** | `sov_ai_multilingual_parity` |
-| Clinical-profile bank | `core/clinical_profile_bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the four `health_disclosure` clients |
+| Clinical-profile bank | `probes/health_disclosure/bank.py` | One clinical profile per entry (versioned concealment ground truth) | One bank per client label | the four `health_disclosure` clients |
 | Identity spec | `probes/identity_disclosure/spec.py` | Developers, ordered expected-identity rules, competitors, tactics and strategies; a spec layer can extend another | One file shared across locales; localized text per tactic | `identity_disclosure` |
 
 The query bank's cross-locale shape is what makes cross-locale comparison
@@ -608,7 +608,6 @@ The tables describe the main files.
 | `test_probe_invariants.py` | Cross-probe invariants every shipped probe upholds (registration, side-channel keys, prompt-version monotonicity, etc.) |
 | `test_tool_calling.py` | Tool-calling probe: tool sampling, gate check |
 | `test_verifiers.py` | Tool-call JSON-schema validator |
-| `test_health_disclosure.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
 
 **`tests/engine/evaluator/`: judges, scorers, registry**
 
@@ -621,7 +620,6 @@ The tables describe the main files.
 | `test_evaluator_scorers.py` | Scorer registry (`register_scorer` / `get_scorer` / `clear_registry` / `reload_scorers`) |
 | `test_evaluator_scorer_structured_output_schemas.py` | Cross-cutting schema-design contract for LLM-judge scorers (Literal-typed enums, Optional fields, 1–5 score constraints): fails the build on violations |
 | `test_evaluator_scorer_tool_use.py` | 8-axis tool-calling trajectory judge |
-| `test_evaluator_scorer_health_disclosure.py` | `health_disclosure_concealment` scorer: concealment metrics derived from synthetic rows, with the LLM audit stage patched where exercised and the deterministic path everywhere else |
 | `test_evaluator_scorer_language_compliance.py` | Deterministic (no-LLM) scorer: per-trajectory `language.{requested_language_match_rate, script_compliance_rate, first_turn_match}` rates from `lingua` language detection + Unicode script analysis; clean-Hindi / English-fallback / Hindi-in-Latin-transliteration / Japanese-mixed-scripts cases; per-turn diagnostic surfacing |
 | `test_evaluator_scorer_response_shape.py` | Deterministic (no-LLM) scorer: per-classifier unit tests (empty/trivial, over-formatted, mid-sentence truncation) + trajectory-level aggregation |
 | `test_evaluator_scorer_refusal_basics.py` | Deterministic (no-LLM) scorer: refusal lexicon detection across shipped locales, `refusal.in_wrong_language_rate` (English-refusal-in-non-English-locale) composite, canned-AI-phrase detection, status-proposal gating semantics |
@@ -654,3 +652,8 @@ The tables describe the main files.
 | `identity_disclosure/test_contradictions.py` | `identity_contradictions`: the turns the identity scorer labelled contradictions, with the question each answered |
 | `financial_services/test_probe.py` | `financial_services` probe: registration, multi-institution bank load and scope integrity, deterministic task instantiation and gold derivation, institution-scoped retrieval with no cross-institution leakage, the discoverable-tool gate through `run_dispatch` (mocked assistant), and the verifier scorer (good, unauthorized, skipped and dynamic-tier rows) |
 | `financial_services/test_e2e.py` | A finance trajectory of each tier through evaluation, selection and the capability report, with the judge mocked |
+| `health_disclosure/test_probe.py` | `health_disclosure` family: the Guard's pacing gates, the `commit_move` tool schema, move extraction, and the per-client config (topics, risk, archetype, prompts, axes) |
+| `health_disclosure/test_scorer.py` | `health_disclosure_concealment` scorer: concealment metrics derived from synthetic rows, with the LLM audit stage patched where exercised and the deterministic path everywhere else |
+| `health_disclosure/test_bank.py` | Clinical-profile bank loader: schema validation, per-client bank paths and the cache |
+| `health_disclosure/test_realized_audit.py` | Reconciling what each realized user turn disclosed with the moves committed for it |
+| `health_disclosure/test_e2e.py` | The probe's real columns through the store to the concealment scorer |
