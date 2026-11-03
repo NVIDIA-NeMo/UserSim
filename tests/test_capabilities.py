@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from usersim.taxonomy.capabilities import (
     ALL_PROBES,
     capabilities_missing_scorer,
@@ -177,6 +179,14 @@ def test_capabilities_expose_implementation_refs() -> None:
         ref.endswith("probes/safety_agentic/probe.py")
         for ref in implementation_refs_for_capability(capability_by_id("agentic_disclosure"))
     )
+
+
+def test_every_implementation_ref_names_a_file_in_the_repo() -> None:
+    """A ref is a path from the repo root; a probe's module, scorer or bank that moves takes its refs along."""
+    root = Path(__file__).resolve().parents[1]
+    refs = {ref for definition in capability_definitions() for ref in implementation_refs_for_capability(definition)}
+    assert refs
+    assert sorted(ref for ref in refs if not (root / ref).is_file()) == []
 
 
 def test_safety_pressure_uses_axis_aggregation() -> None:
