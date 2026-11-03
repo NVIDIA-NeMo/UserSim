@@ -265,15 +265,13 @@ def _make_bank(
 
 
 class TestPersonaToTagsReExport:
-    """The module re-exports the canonical ``persona_to_tags`` from the
-    sovereign-knowledge module so cross-probe joins on persona-feature
+    """The module re-exports the shared ``persona_to_tags`` from
+    ``core.persona_tags`` so cross-probe joins on persona-feature
     axes use the same vocabulary. These tests assert the re-export is
     in place and behaves as expected for the multi-locale probe."""
 
     def test_re_exports_canonical_persona_to_tags(self) -> None:
-        from usersim.engine.probes.sov_ai_facts.task_derivation import (
-            persona_to_tags as canonical,
-        )
+        from usersim.engine.core.persona_tags import persona_to_tags as canonical
 
         assert task_derivation.persona_to_tags is canonical
 

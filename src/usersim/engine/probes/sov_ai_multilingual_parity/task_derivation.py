@@ -6,9 +6,8 @@
 Two helpers, structurally parallel to
 :mod:`usersim.engine.probes.sov_ai_facts.task_derivation`:
 
-- :func:`persona_to_tags` — re-exported from the sov_ai_facts probe
-  module since the structured-tag vocabulary is the same across all
-  sovereign-AI probes. Keeping a single source of truth means
+- :func:`persona_to_tags`: re-exported from ``core.persona_tags``,
+  the tag vocabulary every sovereign-AI and safety probe shares, so
   cross-probe joins on persona-feature axes work directly.
 - :func:`derive_task` — picks one :class:`Query` from a loaded bank
   for this persona, **filtered to queries that have a rendering for
@@ -35,9 +34,7 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.probes.sov_ai_facts.task_derivation import (
-    persona_to_tags,
-)
+from usersim.engine.core.persona_tags import persona_to_tags
 from usersim.engine.probes.sov_ai_multilingual_parity.bank import Query, QueryBank
 
 __all__ = ["persona_to_tags", "derive_task"]

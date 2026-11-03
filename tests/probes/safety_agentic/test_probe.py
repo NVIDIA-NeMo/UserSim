@@ -214,9 +214,7 @@ def _synthetic_bank(
 
 class TestPersonaToTagsReExport:
     def test_re_exports_canonical(self) -> None:
-        from usersim.engine.probes.sov_ai_facts.task_derivation import (
-            persona_to_tags as canonical,
-        )
+        from usersim.engine.core.persona_tags import persona_to_tags as canonical
 
         assert task_derivation.persona_to_tags is canonical
 

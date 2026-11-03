@@ -1,0 +1,411 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""The persona tags bank-backed probes match bank entries against.
+
+:func:`persona_to_tags` maps a Nemotron-Personas persona (region, age,
+occupation, education, and topical interests inferred from occupation) to the
+``<prefix>:<value>`` tags a bank entry lists in its ``persona_tags``. The
+sovereign-AI and safety probes pick entries whose tags intersect the persona's,
+so a persona matches entries the same way in every one of them.
+
+``pt_BR``, ``en_GB`` and ``de_DE`` personas also get a region tag (Brazilian
+macro-region, UK nation, German Land); every locale gets the age, education,
+occupation and interest tags.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+# ---------------------------------------------------------------------------
+# Brazilian region classifier
+# ---------------------------------------------------------------------------
+
+# Map each Brazilian state (uppercase 2-letter code OR full name, both
+# lowercased for matching) to the IBGE macro-region. Reference:
+# https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial.html
+_BR_STATE_TO_REGION: dict[str, str] = {
+    # Norte
+    "am": "north",
+    "amazonas": "north",
+    "pa": "north",
+    "pará": "north",
+    "para": "north",
+    "ac": "north",
+    "acre": "north",
+    "ro": "north",
+    "rondônia": "north",
+    "rondonia": "north",
+    "rr": "north",
+    "roraima": "north",
+    "ap": "north",
+    "amapá": "north",
+    "amapa": "north",
+    "to": "north",
+    "tocantins": "north",
+    # Nordeste
+    "ba": "northeast",
+    "bahia": "northeast",
+    "pe": "northeast",
+    "pernambuco": "northeast",
+    "ce": "northeast",
+    "ceará": "northeast",
+    "ceara": "northeast",
+    "ma": "northeast",
+    "maranhão": "northeast",
+    "maranhao": "northeast",
+    "pb": "northeast",
+    "paraíba": "northeast",
+    "paraiba": "northeast",
+    "rn": "northeast",
+    "rio grande do norte": "northeast",
+    "al": "northeast",
+    "alagoas": "northeast",
+    "se": "northeast",
+    "sergipe": "northeast",
+    "pi": "northeast",
+    "piauí": "northeast",
+    "piaui": "northeast",
+    # Centro-Oeste
+    "go": "central-west",
+    "goiás": "central-west",
+    "goias": "central-west",
+    "mt": "central-west",
+    "mato grosso": "central-west",
+    "ms": "central-west",
+    "mato grosso do sul": "central-west",
+    "df": "central-west",
+    "distrito federal": "central-west",
+    # Sudeste
+    "sp": "southeast",
+    "são paulo": "southeast",
+    "sao paulo": "southeast",
+    "rj": "southeast",
+    "rio de janeiro": "southeast",
+    "mg": "southeast",
+    "minas gerais": "southeast",
+    "es": "southeast",
+    "espírito santo": "southeast",
+    "espirito santo": "southeast",
+    # Sul
+    "rs": "south",
+    "rio grande do sul": "south",
+    "sc": "south",
+    "santa catarina": "south",
+    "pr": "south",
+    "paraná": "south",
+    "parana": "south",
+}
+
+
+def _br_region_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a Brazilian macro-region tag from persona state fields."""
+    # Nemotron-Personas-Brazil carries a ``state`` or ``state_abbrev``
+    # field. Fall back to ``region`` if present.
+    for key in ("state_abbrev", "state", "region"):
+        raw = persona.get(key)
+        if isinstance(raw, str) and raw.strip():
+            code = raw.strip().lower()
+            mapped = _BR_STATE_TO_REGION.get(code)
+            if mapped:
+                return mapped
+    return None
+
+
+# ---------------------------------------------------------------------------
+# UK nation classifier
+# ---------------------------------------------------------------------------
+
+# A UK persona's ``region`` is one of the nine English regions or the name of
+# one of the other three nations. Health, education and much of the law are
+# devolved, so a fact that holds in one nation only carries that nation's tag.
+_UK_ENGLISH_REGIONS = frozenset(
+    {
+        "north east",
+        "north west",
+        "yorkshire and the humber",
+        "east midlands",
+        "west midlands",
+        "east of england",
+        "london",
+        "south east",
+        "south west",
+    }
+)
+_UK_OTHER_NATIONS: dict[str, str] = {
+    "scotland": "scotland",
+    "wales": "wales",
+    "northern ireland": "northern-ireland",
+}
+
+
+def _uk_nation_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a UK nation tag (england, scotland, wales, northern-ireland) from the persona's region."""
+    raw = persona.get("region")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    region = raw.strip().lower()
+    if region in _UK_ENGLISH_REGIONS:
+        return "england"
+    return _UK_OTHER_NATIONS.get(region)
+
+
+# ---------------------------------------------------------------------------
+# German Land classifier
+# ---------------------------------------------------------------------------
+
+# A German persona's ``region`` is its Land, by its German name. Schools,
+# policing, public holidays and several taxes are set by the Land, so a fact
+# that holds in one Land only carries that Land's tag. Tags are ASCII.
+_DE_LAENDER: dict[str, str] = {
+    "baden-württemberg": "baden-wuerttemberg",
+    "bayern": "bayern",
+    "berlin": "berlin",
+    "brandenburg": "brandenburg",
+    "bremen": "bremen",
+    "hamburg": "hamburg",
+    "hessen": "hessen",
+    "mecklenburg-vorpommern": "mecklenburg-vorpommern",
+    "niedersachsen": "niedersachsen",
+    "nordrhein-westfalen": "nordrhein-westfalen",
+    "rheinland-pfalz": "rheinland-pfalz",
+    "saarland": "saarland",
+    "sachsen": "sachsen",
+    "sachsen-anhalt": "sachsen-anhalt",
+    "schleswig-holstein": "schleswig-holstein",
+    "thüringen": "thueringen",
+}
+
+
+def _de_land_from_persona(persona: dict[str, Any]) -> str | None:
+    """Resolve a German Land tag (``bayern``, ``thueringen``, ...) from the persona's region."""
+    raw = persona.get("region")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    return _DE_LAENDER.get(raw.strip().lower())
+
+
+# ---------------------------------------------------------------------------
+# Age bin → tag
+# ---------------------------------------------------------------------------
+
+_AGE_BINS: list[tuple] = [
+    (0, 17, "age:under-18"),
+    (18, 24, "age:18-24"),
+    (25, 44, "age:25-44"),
+    (45, 64, "age:45-64"),
+    (65, 200, "age:65+"),
+]
+
+
+def _age_tag(persona: dict[str, Any]) -> str | None:
+    """Extract an age-bin tag from a persona's numeric age if possible."""
+    raw = persona.get("age")
+    try:
+        age = int(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    for lo, hi, tag in _AGE_BINS:
+        if lo <= age <= hi:
+            return tag
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Education level → tag
+# ---------------------------------------------------------------------------
+
+_EDUCATION_MAP: dict[str, str] = {
+    # Map common Nemotron-Personas education_level values to our coarse
+    # tag vocabulary. Keys are lowercased substring matches.
+    "no schooling": "primary",
+    "primary": "primary",
+    "elementary": "primary",
+    "ensino fundamental": "primary",
+    "middle": "secondary",
+    "high school": "secondary",
+    "ensino médio": "secondary",
+    "ensino medio": "secondary",
+    "associate": "secondary",
+    "bachelor": "tertiary",
+    "bachelors": "tertiary",
+    "ensino superior": "tertiary",
+    "graduação": "tertiary",
+    "graduacao": "tertiary",
+    "master": "tertiary",
+    "doctor": "tertiary",
+    "phd": "tertiary",
+    "postgraduate": "tertiary",
+    "pós-graduação": "tertiary",
+    "pos-graduacao": "tertiary",
+    # en_GB. Not "degree", which en_IN's "diploma ... not equal to degree" contains.
+    "no qualifications": "primary",
+    "gcse": "secondary",
+    "apprenticeship": "secondary",
+    "a level": "secondary",
+    "higher education": "tertiary",
+    # de_DE records the vocational qualification: none (after general schooling)
+    # and a dual apprenticeship are secondary, and a Fachschule (Meister,
+    # Techniker) is tertiary. "Bachelor, Master, Diplom, Promotion" matches
+    # "bachelor"; "diplom" would also match en_US "9th_12th_no_diploma".
+    "ohne beruflichen bildungsabschluss": "secondary",
+    "berufsausbildung": "secondary",
+    "fachschul": "tertiary",
+}
+
+
+def _education_tag(persona: dict[str, Any]) -> str | None:
+    raw = persona.get("education_level")
+    if not isinstance(raw, str):
+        return None
+    needle = raw.strip().lower()
+    # Longest-match first so "masters degree" maps to tertiary via "master".
+    for key in sorted(_EDUCATION_MAP, key=len, reverse=True):
+        if key in needle:
+            return f"education:{_EDUCATION_MAP[key]}"
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Occupation → occupation-family + interest inference
+# ---------------------------------------------------------------------------
+
+# Occupation phrases (lowercased substring match) → (family, interests).
+# Very coarse on purpose: the point is to seed interest tags, not to build a
+# complete occupation taxonomy. Reviewers can extend this block per locale.
+_OCCUPATION_MAP: list[tuple] = [
+    # (substring, occupation-family, extra interests)
+    ("teacher", "teacher", ("interest:literature", "interest:history")),
+    ("professor", "teacher", ("interest:literature",)),
+    ("docente", "teacher", ("interest:literature",)),
+    ("student", "student", ("interest:literature",)),
+    ("estudante", "student", ("interest:literature",)),
+    ("nurse", "healthcare", ("interest:health",)),
+    ("enfermeir", "healthcare", ("interest:health",)),
+    ("doctor", "healthcare", ("interest:health",)),
+    ("médico", "healthcare", ("interest:health",)),
+    ("medico", "healthcare", ("interest:health",)),
+    ("entrepreneur", "small-business", ()),
+    ("empresári", "small-business", ()),
+    ("empreendedor", "small-business", ()),
+    ("self-employed", "small-business", ()),
+    ("shopkeeper", "small-business", ()),
+    ("comerciante", "small-business", ()),
+    ("engineer", "engineering", ("interest:geography",)),
+    ("engenheir", "engineering", ("interest:geography",)),
+    ("farmer", "agriculture", ("interest:geography",)),
+    ("agricultor", "agriculture", ("interest:geography",)),
+    ("journalist", "media", ("interest:history", "interest:literature")),
+    ("jornalista", "media", ("interest:history", "interest:literature")),
+    ("musician", "arts", ("interest:music",)),
+    ("músic", "arts", ("interest:music",)),
+    ("artist", "arts", ("interest:music",)),
+    ("artista", "arts", ("interest:music",)),
+    ("writer", "arts", ("interest:literature",)),
+    ("escritor", "arts", ("interest:literature",)),
+    ("retired", "retired", ()),
+    ("aposentad", "retired", ()),
+    ("homemaker", "homemaker", ()),
+    ("housewife", "homemaker", ()),
+    ("dona de casa", "homemaker", ()),
+    # de_DE (the English keys above already cover Professor and Journalist).
+    # Nursing is matched by its compounds, and " pflege" only where a word starts
+    # with it: a bare "pflege" would also catch cleaners, arborists, animal
+    # keepers and cosmetics.
+    ("kinderpfleger", "teacher", ("interest:education",)),
+    ("erzieher", "teacher", ("interest:education",)),
+    ("lehrer", "teacher", ("interest:literature", "interest:history")),
+    ("krankenpfleg", "healthcare", ("interest:health",)),
+    ("altenpfleg", "healthcare", ("interest:health",)),
+    ("gesundheitspfleg", "healthcare", ("interest:health",)),
+    ("heilerziehungspfleg", "healthcare", ("interest:health",)),
+    ("behindertenpfleg", "healthcare", ("interest:health",)),
+    ("pflegefach", "healthcare", ("interest:health",)),
+    ("pflegeassist", "healthcare", ("interest:health",)),
+    ("pflegehelf", "healthcare", ("interest:health",)),
+    ("pflegedienst", "healthcare", ("interest:health",)),
+    (" pflege", "healthcare", ("interest:health",)),
+    ("schwester", "healthcare", ("interest:health",)),
+    ("nachtwache", "healthcare", ("interest:health",)),
+    ("ärzt", "healthcare", ("interest:health",)),
+    ("arzt", "healthcare", ("interest:health",)),
+    ("unternehmer", "small-business", ()),
+    ("ingenieur", "engineering", ("interest:geography",)),
+    ("landwirt", "agriculture", ("interest:geography",)),
+    ("musiker", "arts", ("interest:music",)),
+    ("künstler", "arts", ("interest:music",)),
+    ("schriftsteller", "arts", ("interest:literature",)),
+]
+
+
+def _occupation_tags(persona: dict[str, Any]) -> list[str]:
+    """Best-effort occupation-family + derived-interest tags."""
+    raw = persona.get("occupation")
+    if not isinstance(raw, str):
+        return []
+    needle = raw.strip().lower()
+    if not needle:
+        return []
+    # First-match wins (list is ordered roughly most-specific-first).
+    for key, family, interests in _OCCUPATION_MAP:
+        if key in needle:
+            tags: list[str] = [f"occupation-family:{family}"]
+            tags.extend(interests)
+            return tags
+    return []
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def persona_to_tags(persona: dict[str, Any], locale: str) -> list[str]:
+    """Build the persona-tag set the matcher intersects with fact tags.
+
+    Always includes ``region:any``, ``age:any``, and ``interest:geography``
+    / ``interest:history`` as broad fallbacks so every persona has *some*
+    matching surface even when demographic fields are missing. The
+    locale-specific block (e.g., Brazilian macro-regions for ``pt_BR``)
+    adds precise tags on top.
+    """
+    tags: set[str] = {
+        "region:any",
+        "age:any",
+        # Broad interests everyone shares to some degree — ensures the
+        # matcher never returns an empty set against a well-populated
+        # bank just because the persona had no occupation.
+        "interest:geography",
+        "interest:history",
+    }
+
+    # Locale-specific region resolution.
+    if locale == "pt_BR":
+        region = _br_region_from_persona(persona)
+        if region is not None:
+            tags.add(f"region:{region}")
+    elif locale == "en_GB":
+        nation = _uk_nation_from_persona(persona)
+        if nation is not None:
+            tags.add(f"region:{nation}")
+    elif locale == "de_DE":
+        land = _de_land_from_persona(persona)
+        if land is not None:
+            tags.add(f"region:{land}")
+
+    # Age bin.
+    age_tag = _age_tag(persona)
+    if age_tag is not None:
+        tags.add(age_tag)
+
+    # Education level.
+    edu_tag = _education_tag(persona)
+    if edu_tag is not None:
+        tags.add(edu_tag)
+
+    # Occupation-family + derived interests.
+    for t in _occupation_tags(persona):
+        tags.add(t)
+
+    return sorted(tags)

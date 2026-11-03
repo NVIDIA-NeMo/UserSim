@@ -174,7 +174,7 @@ fields each scorer reads: `ground_truth` / `false_premises` for
 `safety_chat_pressure`, and `expected_behavior` plus the action
 taxonomy for `safety_agentic`.
 
-The three sovereign-AI probes and the two safety probes share one persona-tag vocabulary: `sov_ai_facts.task_derivation.persona_to_tags(...)` is the source of truth and is re-exported by `sov_ai_dynamic.task_derivation` (as `persona_to_interest_tags(...)` for clarity), `sov_ai_multilingual_parity.task_derivation`, `safety_chat_pressure.task_derivation`, and `safety_agentic.task_derivation`. A persona feature such as `age:25-44` or `education:tertiary` therefore matches bank entries the same way in all five probes.
+The three sovereign-AI probes and the two safety probes share one persona-tag vocabulary: `core/persona_tags.py`'s `persona_to_tags(...)` is the source of truth, and `sov_ai_facts.task_derivation`, `sov_ai_dynamic.task_derivation` (as `persona_to_interest_tags(...)` for clarity), `sov_ai_multilingual_parity.task_derivation`, `safety_chat_pressure.task_derivation` and `safety_agentic.task_derivation` all use it. A persona feature such as `age:25-44` or `education:tertiary` therefore matches bank entries the same way in all five probes.
 
 ### India language-variant resolution
 
@@ -526,6 +526,7 @@ what each one carries:
 |--------|---------|
 | `core/behavioral.py` | OCEAN → BehavioralProfile (patience, verbosity, cooperativeness, tech_literacy, error_proneness); disclosure style, interaction style, reactive-frustration computation |
 | `core/persona.py` | Persona formatting for prompts (deterministic shuffle) |
+| `core/persona_tags.py` | The persona tags (region, age, education, occupation, interests) the sov_ai and safety probes match bank entries by |
 | `core/locale.py` | Locale → language + expected-script-ranges mapping (single source of truth for shipped locales) |
 | `core/localized.py` | `LocalizedText` wrapper for asset-bank fields with per-locale renderings (`for_locale(locale)` lookup with `en_US` fallback) |
 | `core/prompt_loader.py` | Reads a probe's `prompts.yaml` from the folder its banks resolve to |
@@ -594,6 +595,7 @@ The tables describe the main files.
 | `test_generator.py` | Dispatcher failed-result structure, probe-variant resolution, structured `SCENARIO_ABORTED` outcomes |
 | `test_messages.py` | Message / tool / theme formatting helpers |
 | `test_persona.py` | Persona formatting (deterministic shuffle) |
+| `test_persona_tags.py` | The tags `persona_to_tags` gives a persona: regions for `pt_BR`, `en_GB` and `de_DE`, education levels, occupations, and the fallbacks for missing fields and other locales |
 | `test_preview.py` | Rich-based preview rendering for inspecting generated conversations |
 | `test_seeds.py` | Seed loading by locale, and the `en_US` fallback |
 | `test_multi_locale.py` | Multi-locale config, seed loading, language mapping |
@@ -628,7 +630,7 @@ The tables describe the main files.
 
 | Test File | Coverage |
 |-----------|----------|
-| `sov_ai_facts/test_probe.py` | `sov_ai_facts` probe: persona→tag, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
+| `sov_ai_facts/test_probe.py` | `sov_ai_facts` probe: each region's facts, deterministic `derive_task` (bank-version salted), prompts, e2e with mocked LLM |
 | `sov_ai_facts/test_scorer.py` | `sov_ai_facts` out-of-sim scorer: per-fact LLM judge with question-type-specific axes, error paths, multi-fact aggregation |
 | `sov_ai_facts/test_bank.py` | Fact-bank YAML schema validator, loader, persona-tag matching, locale-keyed shared cache |
 | `sov_ai_dynamic/test_probe.py` | `sov_ai_dynamic` probe: persona→tag, deterministic `derive_probe` + hint rotation (taxonomy-version salted), all-locale prompt availability, e2e with mocked LLM |

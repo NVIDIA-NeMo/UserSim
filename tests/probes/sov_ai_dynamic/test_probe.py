@@ -116,10 +116,8 @@ class TestPersonaToInterestTags:
     sovereign-knowledge so cross-probe joins on persona-feature axes
     are direct. These tests guard the alias contract."""
 
-    def test_delegates_to_sov_ai_facts_tagger(self, pt_br_persona_southeast_teacher: dict[str, Any]) -> None:
-        from usersim.engine.probes.sov_ai_facts.task_derivation import (
-            persona_to_tags as upstream,
-        )
+    def test_delegates_to_the_shared_tagger(self, pt_br_persona_southeast_teacher: dict[str, Any]) -> None:
+        from usersim.engine.core.persona_tags import persona_to_tags as upstream
 
         ours = task_derivation.persona_to_interest_tags(pt_br_persona_southeast_teacher, "pt_BR")
         theirs = upstream(pt_br_persona_southeast_teacher, "pt_BR")
