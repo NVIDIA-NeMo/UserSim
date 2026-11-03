@@ -35,7 +35,7 @@ from unittest.mock import patch
 import pytest
 
 import usersim.engine.generator  # noqa: F401 — triggers probe registration
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
 from usersim.engine.core.outcomes import (
     FailureClass,
@@ -44,18 +44,18 @@ from usersim.engine.core.outcomes import (
     WarningKind,
 )
 from usersim.engine.core.probes import _PROBE_REGISTRY, resolve_probe
-from usersim.engine.core.query_bank import (
-    Query,
-    QueryBank,
-    QueryProvenance,
-    load_query_bank,
-)
 from usersim.engine.probes.sov_ai_multilingual_parity import (
-    generator as probe_gen,
+    probe as probe_gen,
 )
 from usersim.engine.probes.sov_ai_multilingual_parity import (
     prompts,
     task_derivation,
+)
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
+    Query,
+    QueryBank,
+    QueryProvenance,
+    load_query_bank,
 )
 
 # ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ from usersim.engine.probes.sov_ai_multilingual_parity import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_BANK_PATH = packaged_assets_dir() / "sov_ai_multilingual_parity/sample.yaml"
+SAMPLE_BANK_PATH = probe_assets_dir("sov_ai_multilingual_parity") / "sample.yaml"
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ Applied by the ``TrajectoryEvaluator`` when a config carries
 trajectory produced by the
 :mod:`usersim.engine.probes.sov_ai_multilingual_parity` probe,
 re-loads the corresponding :class:`Query` from the query bank (via
-the shared cache in :mod:`core.query_bank`), and scores the assistant's
+the shared cache in :mod:`probes.sov_ai_multilingual_parity.bank`), and scores the assistant's
 response on three respect-parity axes — grounded in the query's
 reviewer-authored ``concern`` field.
 
@@ -63,8 +63,8 @@ from data_designer.engine.column_generators.utils.judge_score_factory import (
 from usersim.engine.core.llm import acall_llm
 from usersim.engine.core.locale import expected_language_display
 from usersim.engine.core.messages import format_conversation_history_for_prompt
-from usersim.engine.core.query_bank import Query, load_query_bank_default
 from usersim.engine.evaluator.scorers import register_scorer
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import Query, load_query_bank_default
 
 logger = logging.getLogger("usersim.engine")
 
@@ -262,7 +262,7 @@ async def score_sov_ai_multilingual_parity_trajectory(
       scores envelope so running this scorer against a different
       probe's trajectory does not explode).
     - Loads the query bank via the shared cache in
-      :mod:`core.query_bank`. If the probed ``query_id`` is missing
+      :mod:`probes.sov_ai_multilingual_parity.bank`. If the probed ``query_id`` is missing
       from the bank (e.g., the bank was edited after the simulator ran),
       the scorer records a structured ``query_not_in_bank`` error and
       proposes ``status_proposal=False`` rather than crashing.
@@ -294,7 +294,7 @@ async def score_sov_ai_multilingual_parity_trajectory(
         bank = load_query_bank_default()
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to load query bank: %s",
+            "  |-- sov_ai_multilingual_parity scorer: failed to load query bank: %s",
             e,
         )
         return {
@@ -312,7 +312,7 @@ async def score_sov_ai_multilingual_parity_trajectory(
     bank_version_mismatch = pinned_version is not None and pinned_version != bank.bank_version
     if bank_version_mismatch:
         logger.info(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: trajectory "
+            "  |-- sov_ai_multilingual_parity scorer: trajectory "
             "pinned bank_version=%s but current loaded bank is %s for "
             "locale=%s — reporting drift flag on this row",
             pinned_version,
@@ -426,7 +426,7 @@ async def _score_one_query(
         )
     except Exception as e:
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: judge %r raised on query %s: %s: %s",
+            "  |-- sov_ai_multilingual_parity scorer: judge %r raised on query %s: %s: %s",
             judge_alias,
             query.id,
             type(e).__name__,
@@ -439,7 +439,7 @@ async def _score_one_query(
         parsed = json.loads(content)
     except (json.JSONDecodeError, TypeError):
         logger.warning(
-            "  |-- evaluator/scorers.sov_ai_multilingual_parity: failed to parse structured output for query %s",
+            "  |-- sov_ai_multilingual_parity scorer: failed to parse structured output for query %s",
             query.id,
         )
         return _error_scores("parse_failure")

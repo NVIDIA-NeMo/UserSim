@@ -38,6 +38,7 @@ Side channels emitted on the trajectory:
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 from usersim.engine.core.outcomes import WarningKind
@@ -49,13 +50,13 @@ from usersim.engine.core.probes import (
     dispatch_episode,
     register_probe,
 )
-from usersim.engine.core.query_bank import (
+from usersim.engine.core.simulation import ConversationState, make_failed
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
     Query,
     default_query_bank_path,
     load_query_bank_default,
     reset_query_bank_cache,
 )
-from usersim.engine.core.simulation import ConversationState, make_failed
 from usersim.engine.probes.sov_ai_multilingual_parity.prompts import (
     PromptsUnavailableError,
     get_followup_instruction,
@@ -84,8 +85,8 @@ PROMPT_VERSION: str = "v1.0"
 # ---------------------------------------------------------------------------
 #
 # Thin re-exports so tests can patch on the probe module's surface
-# while the cache still lives in ``core.query_bank`` (where the
-# scorer also reads it from). Single shared cache prevents the
+# while the cache lives in ``bank.py`` beside this module, where the
+# scorer also reads it from. Single shared cache prevents the
 # simulator and the scorer from disagreeing on what bank version was
 # used.
 
@@ -113,7 +114,7 @@ def should_succeed(state: ConversationState) -> bool:
     record without picking a query. Structural-invariant check, not
     assistant-quality scoring (the latter lives in the evaluator's
     respect-parity scorer at
-    ``evaluator/scorers/sov_ai_multilingual_parity.py``). Module-level
+    ``scorer.py`` beside this module). Module-level
     mirror of the probe method so existing test surfaces
     (``module.should_succeed``) can call this directly without an
     instance.
@@ -145,6 +146,7 @@ class SovAiMultilingualParityProbe(BankVerbatimMixin, BankBackedProbe):
     """
 
     label = "sov_ai_multilingual_parity"
+    assets_root = Path(__file__).parent / "assets"
     description = (
         "Tests respect and calibration on the same question asked in every locale: does "
         "the assistant engage each user as a peer and pitch a helpful answer to them, "

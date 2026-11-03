@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for ``core/query_bank.py`` — cross-locale query bank loader.
+"""Tests for ``sov_ai_multilingual_parity/bank.py`` — cross-locale query bank loader.
 
 Three layers, mirroring the test patterns in ``sov_ai_facts/test_bank.py`` and
 ``test_probing_taxonomy.py``:
@@ -25,9 +25,9 @@ from unittest.mock import patch
 
 import pytest
 
-from usersim.engine.core._assets import packaged_assets_dir
+from usersim.engine.core._assets import probe_assets_dir
 from usersim.engine.core.locale import SHIPPED_LOCALES
-from usersim.engine.core.query_bank import (
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
     QueryBank,
     QueryBankError,
     default_query_bank_path,
@@ -650,7 +650,7 @@ class TestCacheAndDefault:
 class TestShippedSampleBank:
     @pytest.fixture
     def sample_bank(self) -> QueryBank:
-        return load_query_bank((packaged_assets_dir() / "sov_ai_multilingual_parity/sample.yaml"))
+        return load_query_bank((probe_assets_dir("sov_ai_multilingual_parity") / "sample.yaml"))
 
     def test_loads_clean(self, sample_bank: QueryBank) -> None:
         assert sample_bank.bank_id == "sample_v1"

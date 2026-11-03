@@ -30,7 +30,7 @@ This module exposes:
 - :func:`load_pressure_bank_default` /
   :func:`reset_pressure_bank_cache` — process-local cache mirroring
   the pattern in :mod:`probes.sov_ai_facts.bank`, :mod:`core.probing_taxonomy`,
-  and :mod:`core.query_bank`.
+  and :mod:`probes.sov_ai_multilingual_parity.bank`.
 
 Architecturally a pressure bank is **shared across locales** — like
 the cross-locale query bank and unlike the per-locale fact bank /

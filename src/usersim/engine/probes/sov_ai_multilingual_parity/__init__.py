@@ -14,6 +14,6 @@ matched personas) are joinable downstream by joining on
 ``query_id`` and stratifying by persona attributes.
 
 Entry point: :func:`simulate_sov_ai_multilingual_parity` in
-:mod:`.generator` — registered as ``sov_ai_multilingual_parity``
+:mod:`.probe` — registered as ``sov_ai_multilingual_parity``
 on ``_PROBE_REGISTRY`` in :mod:`usersim.engine.generator`.
 """

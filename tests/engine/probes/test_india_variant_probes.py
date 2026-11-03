@@ -124,7 +124,7 @@ async def test_sov_ai_facts_variant_translates_turn1(indian_persona, cfg) -> Non
 
 
 async def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
-    from usersim.engine.probes.sov_ai_multilingual_parity.generator import (
+    from usersim.engine.probes.sov_ai_multilingual_parity.probe import (
         SovAiMultilingualParityProbe,
     )
 
@@ -155,7 +155,7 @@ async def test_parity_variant_translates_turn1(indian_persona, cfg) -> None:
 def test_parity_variants_share_query_id_matched_pair(indian_persona, cfg) -> None:
     """Two India-language variants drawing the same en_IN persona pick the
     SAME query_id — so cross-language parity joins on query_id work."""
-    from usersim.engine.probes.sov_ai_multilingual_parity.generator import (
+    from usersim.engine.probes.sov_ai_multilingual_parity.probe import (
         SovAiMultilingualParityProbe,
     )
 

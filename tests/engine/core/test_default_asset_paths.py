@@ -70,17 +70,17 @@ from usersim.engine.core.pressure_bank import (
 )
 from usersim.engine.core.probing_taxonomy import load_probing_taxonomy, reset_probing_taxonomy_cache
 from usersim.engine.core.prompt_loader import load_prompt_file
-from usersim.engine.core.query_bank import (
-    default_query_bank_path,
-    load_query_bank,
-    reset_query_bank_cache,
-)
 from usersim.engine.core.seeds import load_seeds
 from usersim.engine.probes.sov_ai_dynamic.taxonomy import default_probing_taxonomy_path
 from usersim.engine.probes.sov_ai_facts.bank import (
     default_fact_bank_path,
     load_fact_bank,
     reset_fact_bank_cache,
+)
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import (
+    default_query_bank_path,
+    load_query_bank,
+    reset_query_bank_cache,
 )
 
 # ---------------------------------------------------------------------------

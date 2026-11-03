@@ -115,7 +115,7 @@ plumbing, not signal.
 
 ## Loader contract
 
-The loader (`usersim/engine/core/query_bank.py`) enforces:
+The loader (`usersim/engine/probes/sov_ai_multilingual_parity/bank.py`) enforces:
 
 - `schema_version` is in the supported set.
 - `bank_id`, `bank_version`, `locales` (non-empty), `domains`

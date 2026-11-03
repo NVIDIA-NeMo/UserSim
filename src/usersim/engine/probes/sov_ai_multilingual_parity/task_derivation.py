@@ -35,10 +35,10 @@ import json
 import random
 from typing import Any, Iterable
 
-from usersim.engine.core.query_bank import Query, QueryBank
 from usersim.engine.probes.sov_ai_facts.task_derivation import (
     persona_to_tags,
 )
+from usersim.engine.probes.sov_ai_multilingual_parity.bank import Query, QueryBank
 
 __all__ = ["persona_to_tags", "derive_task"]
 
